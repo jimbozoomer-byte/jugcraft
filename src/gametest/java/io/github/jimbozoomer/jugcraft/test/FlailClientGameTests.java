@@ -1,0 +1,140 @@
+package io.github.jimbozoomer.jugcraft.test;
+
+import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.client.arms.FlailHeads;
+import java.util.List;
+import java.util.Locale;
+import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
+import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
+import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
+import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.HumanoidArm;
+
+/**
+ * Client game test for the flail's swinging head (docs/features/arms-restyle.md, "The flail's head swings"; 5 October
+ * 2026, the owner: "flails should have an animated ball that actually flails around"): the heads load; held on guard,
+ * the ball hangs below the handle's eye; through a strike (from the front, at 1, 3, 5 and 8 ticks) it stays on its chain
+ * and swings; a quick turn swings it out; armor stands hold flails in either hand; the inventory's paper doll draws it
+ * without flinging it; and on screen, in first person, the guard and the strike (CI job {@code client}).
+ */
+public class FlailClientGameTests implements FabricClientGameTest {
+	@Override
+	public void runTest(ClientGameTestContext context) {
+		int loaded = context.computeOnClient(client -> FlailHeads.loadedItems());
+		Jugcraft.LOGGER.info("[flail] {} flail heads loaded", loaded);
+		check(loaded >= 2, "Only " + loaded + " flail heads loaded (the bronze and steel flails' at least)");
+		try (TestSingleplayerContext singleplayer = context.worldBuilder()
+				.adjustSettings(creator -> creator.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE)).create()) {
+			singleplayer.getConnection().waitForChunksRender();
+			BlockPos origin = context.computeOnClient(client -> BlockPos.containing(client.player.position()));
+			int x = origin.getX();
+			int y = origin.getY();
+			int z = origin.getZ();
+			TestServerContext server = singleplayer.getServer();
+			server.runCommand("time set noon");
+			server.runCommand("weather clear");
+			server.runCommand("gamerule minecraft:send_command_feedback false");
+			server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(x - 8, y - 1, z - 8, x + 8, y - 1, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 8, y, z - 8, x + 8, y + 6, z + 8));
+			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 0", x + 0.5, y, z + 0.5));
+			context.waitTicks(20);
+
+			// Third person, from the front: the guard, the ball hanging below the eye.
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			for (String metal : List.of("bronze", "steel")) {
+				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:" + metal + "_flail");
+				context.waitTicks(30);
+				context.takeScreenshot("jugcraft_flail_" + metal + "_guard");
+				float hang = context.computeOnClient(client -> FlailHeads.hang(client.player));
+				String chain = context.computeOnClient(client -> FlailHeads.describe(client.player));
+				Jugcraft.LOGGER.info("[flail] {} guard: hang {} ({})", metal, hang, chain);
+				check(hang > 0.7F, "On guard the " + metal + " flail's ball does not hang below its eye: " + chain);
+				check(context.computeOnClient(client -> FlailHeads.withinReach(client.player)), "The " + metal + " flail's chain parted: " + chain);
+			}
+
+			// A strike, caught 1, 3, 5 and 8 ticks after the attack key: the ball trails, whips round and swings on.
+			int last = 0;
+			for (int tick : new int[] {1, 3, 5, 8}) {
+				if (last == 0) {
+					context.getInput().pressKey(options -> options.keyAttack);
+				}
+				context.waitTicks(tick - last);
+				last = tick;
+				context.takeScreenshot("jugcraft_flail_strike_" + tick);
+				String chain = context.computeOnClient(client -> FlailHeads.describe(client.player));
+				Jugcraft.LOGGER.info("[flail] strike +{} ticks: {}", tick, chain);
+				check(context.computeOnClient(client -> FlailHeads.withinReach(client.player)), "The flail's chain parted mid-strike: " + chain);
+			}
+			context.waitTicks(40);
+
+			// A quick turn of the whole body: the ball swings out behind it.
+			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 120 0", x + 0.5, y, z + 0.5));
+			context.waitTicks(2);
+			context.takeScreenshot("jugcraft_flail_turn");
+			context.waitTicks(40);
+
+			// Armor stands: a bronze flail in the main hand (the right), a steel one in the off hand (the left).
+			server.runCommand(String.format(Locale.ROOT, "summon minecraft:armor_stand %.1f %d %.1f {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],"
+					+ "equipment:{mainhand:{id:\"jugcraft:bronze_flail\",count:1}}}", x - 1.0, y, z - 2.5));
+			server.runCommand(String.format(Locale.ROOT, "summon minecraft:armor_stand %.1f %d %.1f {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],"
+					+ "equipment:{offhand:{id:\"jugcraft:steel_flail\",count:1}}}", x + 2.0, y, z - 2.5));
+			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
+			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 10", x + 0.5, y, z + 2.5));
+			server.runCommand("item replace entity @p weapon.mainhand with minecraft:air");
+			// The HUD as an earlier test left it, put back at the end; hidden for the scenery shot.
+			boolean hudWasHidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+			setHudHidden(context, true);
+			context.waitTicks(30);
+			context.takeScreenshot("jugcraft_flail_stands");
+			server.runCommand("kill @e[type=minecraft:armor_stand]");
+
+			// The inventory's paper doll holding a flail: drawn as the world left the chain, never flung.
+			server.runCommand("gamemode survival @p");
+			server.runCommand("item replace entity @p weapon.mainhand with jugcraft:steel_flail");
+			context.waitTicks(20);
+			context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_flail_inventory");
+			context.setScreen(() -> null);
+			server.runCommand("gamemode creative @p");
+
+			// First person: the guard (the handle held up across the view, the ball hanging in sight) and a strike, with the
+			// HUD shown (hiding it also hides the hand).
+			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 0", x + 0.5, y, z + 0.5));
+			server.runCommand("item replace entity @p weapon.mainhand with jugcraft:bronze_flail");
+			setHudHidden(context, false);
+			context.waitTicks(40);
+			context.takeScreenshot("jugcraft_flail_first_person_guard");
+			float hang = context.computeOnClient(client -> FlailHeads.hangFirstPerson(client.player.getMainArm() == HumanoidArm.RIGHT ? 0 : 1));
+			Jugcraft.LOGGER.info("[flail] first person guard: hang {}", hang);
+			check(hang > 0.7F, "On screen the flail's ball does not hang below its eye: " + hang);
+			context.getInput().pressKey(options -> options.keyAttack);
+			context.waitTicks(3);
+			context.takeScreenshot("jugcraft_flail_first_person_strike");
+			context.waitTicks(3);
+			context.takeScreenshot("jugcraft_flail_first_person_whip");
+			Jugcraft.LOGGER.info("[flail] first person strike: {}", context.computeOnClient(client -> FlailHeads.describeFirstPerson(0)));
+			setHudHidden(context, hudWasHidden);
+		}
+	}
+
+	/** Hides or shows the HUD, hand and chat (F1) whatever state an earlier test left it in (as DroneClientGameTests). */
+	private static void setHudHidden(ClientGameTestContext context, boolean hidden) {
+		context.runOnClient(client -> {
+			if (client.gui.hud.isHidden() != hidden) {
+				client.gui.hud.toggle();
+			}
+		});
+	}
+
+	private static void check(boolean condition, String message) {
+		if (!condition) {
+			throw new AssertionError(message);
+		}
+	}
+}

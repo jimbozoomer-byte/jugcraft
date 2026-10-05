@@ -291,7 +291,24 @@ def battle_axe(st):
     return d
 
 
+def flail_handle(d, st):
+    """The flail's handle: pommel, haft, grip, collar and the eye its chain hangs from (FLAIL_EYE). In the hand this is
+    all the model is; the chain and ball are drawn live, swinging, by client/arms/FlailHeads.java (tools/arms_heads.py)."""
+    d.disc(1.0, 0.0, 1.2, st.fitting, depth=2.4)
+    haft(d, 1.0, 14.0, 0.85, st)
+    grip(d, 1.8, 9.8, 1.0, st)
+    d.strip(13.5, 15.5, 1.1, material=st.fitting, depth=2.6)
+    d.ring(FLAIL_EYE, 0.0, 1.1, 0.45, st.fitting, depth=1.2, part="eye")
+    return d
+
+
+# Where the flail's chain hangs from its handle: the eye, along the haft (design units).
+FLAIL_EYE = 16.0
+
+
 def flail(st):
+    """The flail as it was drawn whole, chain slung out and ball beside: the layout (icon fit, grip, the hand's size)
+    is still worked out from it, so the handle is held exactly where it always was."""
     d = Design(34, grip=5.5)
     d.disc(1.0, 0.0, 1.2, st.fitting, depth=2.4)
     haft(d, 1.0, 14.0, 0.85, st)
@@ -620,6 +637,9 @@ WEAPONS = {"longsword": longsword, "greatsword": greatsword, "rapier": rapier, "
            "moonblade": moonblade, "kusarigama": kusarigama, "katana": katana, "brazier_mace": brazier_mace}
 # Kinds whose sprite flickers (an animated texture, its frames top to bottom in one strip): frames, ticks each.
 ANIMATED = {"brazier_mace": (4, 3)}
+# Kinds whose head swings free in the hand (tools/arms_heads.py HEADS): their 3D model is the handle alone, the design
+# function here, and the head is drawn live by client/arms/FlailHeads.java.
+HANDLES = {"flail": lambda st: flail_handle(Design(34, grip=5.5), st)}
 # A kind's icon is 32 pixels if it is held smaller than LARGE, 48 if larger (the great arms and polearms).
 LARGE = 1.55
 # The 3D models' textures: the upright design at the top left of a square this size.
@@ -629,6 +649,12 @@ MODEL_TEXTURE = 64
 def design(kind, metal, frame=0):
     style = STYLES[metal]
     return WEAPONS[kind](style, frame) if kind in ANIMATED else WEAPONS[kind](style)
+
+
+def model_design(kind, metal, frame=0):
+    """The design a kind's 3D model is built from: the handle alone for a kind whose head swings free (HANDLES), else
+    the whole design."""
+    return HANDLES[kind](STYLES[metal]) if kind in HANDLES else design(kind, metal, frame)
 
 
 def icon_size(held):
@@ -666,11 +692,24 @@ def model(kind, metal, held, frame=0, mirrored=False):
         grip_px = (size - grip_px[0], grip_px[1])
     unit = scale * math.sqrt(2.0) * 16.0 / size
     grip_model = (grip_px[0] * 16.0 / size, 16.0 - grip_px[1] * 16.0 / size)
-    # An animated arm's model is shaped to fit every frame, and each frame's texture laid out alike.
-    frames = [design(kind, metal, f) for f in range(ANIMATED.get(kind, (1, 0))[0])]
+    # An animated arm's model is shaped to fit every frame, and each frame's texture laid out alike. A kind whose head
+    # swings free is built from its handle alone, laid out as the whole was, so the hand holds it where it always did.
+    frames = [model_design(kind, metal, f) for f in range(ANIMATED.get(kind, (1, 0))[0])]
     geometry = px.merged(frames)
-    upright, elements = px.model_elements(design(kind, metal, frame), MODEL_TEXTURE, (0, 0), grip_model, unit,
+    upright, elements = px.model_elements(model_design(kind, metal, frame), MODEL_TEXTURE, (0, 0), grip_model, unit,
                                           mirrored=mirrored, geometry=geometry, width=px.upright_width(geometry))
     texture = Image.new("RGBA", (MODEL_TEXTURE, MODEL_TEXTURE), (0, 0, 0, 0))
     texture.paste(upright, (0, 0))
+    if kind in HANDLES:
+        import arms_heads   # (here: arms_heads draws on this module's layout)
+        arms_heads.paint_swatches(texture, STYLES[metal])
     return texture, elements
+
+
+def head_layout(kind, held):
+    """For a kind whose head swings free: (the hand's point in model pixels, model pixels a design unit, the grip and
+    the eye along the haft in design units), from the same layout as its model (tools/arms_heads.py entry)."""
+    size, grip_px, scale, _factor = layout(kind, held)
+    unit = scale * math.sqrt(2.0) * 16.0 / size
+    grip_model = (grip_px[0] * 16.0 / size, 16.0 - grip_px[1] * 16.0 / size)
+    return grip_model, unit, design(kind, "bronze").grip, FLAIL_EYE

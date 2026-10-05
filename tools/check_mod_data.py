@@ -1354,6 +1354,73 @@ def check_arms_motion():
             err(f"{MOD}.client.mixins.json does not list {mixin}")
 
 
+def check_flail_heads():
+    """The flail's swinging head (tools/arms_heads.py, client/arms/FlailHeads.java): arms_heads.json is what the generator
+    writes; each head kind's link and ball models exist, have no parent (they are placed exactly, by Java) and no two
+    faces facing one way in one plane; each flail's in-hand model is its handle alone, its item definition picks the
+    head parts by FlailHeads' custom_model_data strings, and its _model texture stays one frame; and the Java and the
+    mixins name the same strings and hooks."""
+    import arms_art
+    import arms_heads
+    table = load(ASSETS / "arms_heads.json")
+    if table != json.loads(json.dumps(arms.heads_table())):
+        err("arms_heads.json is not what tools/arms.py writes (run tools/generate_material_data.py)")
+        table = table or {}
+    for kind in arms_heads.HEADS:
+        for part in ("link", "ball"):
+            model = load(ASSETS / "models" / "item" / f"arms_{kind}_{part}.json") or {}
+            if "parent" in model or "display" in model or not model.get("elements"):
+                err(f"models/item/arms_{kind}_{part}.json must be elements with no parent and no display transforms")
+                continue
+            bad = arms_heads.coplanar(model["elements"])
+            if bad:
+                err(f"models/item/arms_{kind}_{part}.json: faces sharing a plane (they would flicker): {bad[:4]}")
+        # The handle alone: no box of the in-hand model reaches past the eye the chain hangs from.
+        held = load(ASSETS / "models" / "item" / f"arms_{kind}.json") or {}
+        grip_model, unit, grip, eye = arms_art.head_layout(kind, arms.KINDS[kind]["held"])
+        reach = (eye - grip + 1.5) * unit
+        for element in held.get("elements", []):
+            if element["to"][1] - grip_model[1] > reach + 1e-3:
+                err(f"models/item/arms_{kind}.json reaches past the eye: its head should be drawn live, not modelled")
+                break
+    for item in arms.items():
+        metal, kind = arms.split(item)
+        if kind not in arms_heads.HEADS:
+            continue
+        if f"{MOD}:{item}" not in table:
+            err(f"arms_heads.json has no entry for {item}")
+        definition = (load(ASSETS / "items" / f"{item}.json") or {}).get("model", {})
+        cases = {case.get("when"): case["model"].get("model") for case in definition.get("cases", [])}
+        if (definition.get("property") != "minecraft:custom_model_data"
+                or cases.get(arms_heads.LINK_CASE) != f"{MOD}:item/{item}_link"
+                or cases.get(arms_heads.BALL_CASE) != f"{MOD}:item/{item}_ball"):
+            err(f"items/{item}.json must pick {item}_link and {item}_ball by custom_model_data")
+        for part in ("link", "ball"):
+            model = load(ASSETS / "models" / "item" / f"{item}_{part}.json") or {}
+            if model.get("parent") != f"{MOD}:item/arms_{kind}_{part}" or model.get("textures", {}).get("tex") != f"{MOD}:item/{item}_model":
+                err(f"models/item/{item}_{part}.json must be arms_{kind}_{part} on {item}_model")
+        tex = ASSETS / "textures" / "item"
+        if (tex / f"{item}_model.png.mcmeta").is_file():
+            err(f"textures/item/{item}_model.png must stay one frame (the head swings live, not in the texture)")
+    java = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "arms"
+            / "FlailHeads.java").read_text(encoding="utf-8")
+    for name, value in (("LINK", arms_heads.LINK_CASE), ("BALL", arms_heads.BALL_CASE)):
+        if f'{name} = "{value}";' not in java:
+            err(f"FlailHeads.{name} differs from tools/arms_heads.py ({value})")
+    mixins = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin" / "client"
+    for mixin, calls in (("ArmsRenderStateMixin", ("FlailHeads.extract",)),
+                         ("ArmsItemInHandLayerMixin", ("FlailHeads.root", "FlailHeads.submitThirdPerson")),
+                         ("ArmsFirstPersonMixin", ("FlailHeads.beginFirstPerson", "FlailHeads.firstPersonFrame",
+                                                   "FlailHeads.endFirstPerson"))):
+        text = (mixins / f"{mixin}.java").read_text(encoding="utf-8")
+        for call in calls:
+            if call not in text:
+                err(f"{mixin} does not call {call} (the flail's head would not be drawn)")
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "FlailHeads.load()" not in client or "FlailHeads.register()" not in client:
+        err("JugcraftClient does not load and register FlailHeads")
+
+
 def check_end_shares():
     """End biomes give shares, which tools/end_noise.py turns into Fabric weights: highlands shares leave vanilla's End
     Highlands some, and one barrens biome at most, keyed by vanilla's End Highlands (the only case the weight maths
@@ -5999,6 +6066,7 @@ def main():
     check_arms()
     check_arms_variants()
     check_arms_motion()
+    check_flail_heads()
     check_exosuit()
     check_grapple()
     check_field_chemistry()

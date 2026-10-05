@@ -1,0 +1,176 @@
+{
+  "jugcraft:bronze_flail": {
+    "anchor": [
+      7.0812,
+      8.7098,
+      8.0
+    ],
+    "grip": [
+      3.1476,
+      4.7762,
+      8.0
+    ],
+    "links": 4,
+    "pitch": 1.2715,
+    "lug": 2.9256,
+    "reach": 3.1258,
+    "haft": 0.4503,
+    "display": {
+      "firstperson_lefthand": {
+        "rotation": [
+          0,
+          90,
+          -25
+        ],
+        "translation": [
+          1.13,
+          3.75,
+          2.47
+        ],
+        "scale": [
+          0.929,
+          0.929,
+          0.929
+        ]
+      },
+      "firstperson_righthand": {
+        "rotation": [
+          0,
+          -90,
+          25
+        ],
+        "translation": [
+          1.13,
+          3.75,
+          2.47
+        ],
+        "scale": [
+          0.929,
+          0.929,
+          0.929
+        ]
+      },
+      "thirdperson_lefthand": {
+        "rotation": [
+          0,
+          90,
+          -55
+        ],
+        "translation": [
+          0.0,
+          5.43,
+          1.6
+        ],
+        "scale": [
+          1.161,
+          1.161,
+          1.161
+        ]
+      },
+      "thirdperson_righthand": {
+        "rotation": [
+          0,
+          -90,
+          55
+        ],
+        "translation": [
+          0.0,
+          5.43,
+          1.6
+        ],
+        "scale": [
+          1.161,
+          1.161,
+          1.161
+        ]
+      }
+    }
+  },
+  "jugcraft:steel_flail": {
+    "anchor": [
+      7.0812,
+      8.7098,
+      8.0
+    ],
+    "grip": [
+      3.1476,
+      4.7762,
+      8.0
+    ],
+    "links": 4,
+    "pitch": 1.2715,
+    "lug": 2.9256,
+    "reach": 3.1258,
+    "haft": 0.4503,
+    "display": {
+      "firstperson_lefthand": {
+        "rotation": [
+          0,
+          90,
+          -25
+        ],
+        "translation": [
+          1.13,
+          3.75,
+          2.47
+        ],
+        "scale": [
+          0.929,
+          0.929,
+          0.929
+        ]
+      },
+      "firstperson_righthand": {
+        "rotation": [
+          0,
+          -90,
+          25
+        ],
+        "translation": [
+          1.13,
+          3.75,
+          2.47
+        ],
+        "scale": [
+          0.929,
+          0.929,
+          0.929
+        ]
+      },
+      "thirdperson_lefthand": {
+        "rotation": [
+          0,
+          90,
+          -55
+        ],
+        "translation": [
+          0.0,
+          5.43,
+          1.6
+        ],
+        "scale": [
+          1.161,
+          1.161,
+          1.161
+        ]
+      },
+      "thirdperson_righthand": {
+        "rotation": [
+          0,
+          -90,
+          55
+        ],
+        "translation": [
+          0.0,
+          5.43,
+          1.6
+        ],
+        "scale": [
+          1.161,
+          1.161,
+          1.161
+        ]
+      }
+    }
+  }
+}
