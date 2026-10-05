@@ -17,7 +17,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
@@ -37,7 +36,6 @@ public final class TownDecor {
 	/** How long decorators have before the rest is changed directly (5 minutes). */
 	public static final int GRACE = 6000;
 	public static final int DIRECT_PER_TICK = 4;
-	private static final int FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
 	private static final Map<String, BlockState> PARSED = new HashMap<>();
 	/** Sites a decorator is walking to: site -> decorator. */
 	private static final Map<Integer, UUID> CLAIMS = new HashMap<>();
@@ -195,7 +193,7 @@ public final class TownDecor {
 			BlockState wanted = stateFor(data, site, theme, b[3]);
 			BlockPos pos = origin.offset(b[0], b[1], b[2]);
 			if (level.getBlockState(pos) != wanted) {
-				level.setBlock(pos, wanted, FLAGS);
+				TownBuilder.set(level, pos, wanted);
 			}
 		}
 		state.setSiteTheme(index, theme);

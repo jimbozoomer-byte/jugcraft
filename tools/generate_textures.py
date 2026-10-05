@@ -1351,6 +1351,8 @@ def machines():
     grapple.draw_all(save)
     import arms
     arms.draw_all(save)
+    import arms_variants
+    arms_variants.draw_all(save)
     import field_chemistry
     field_chemistry.draw_all(save, save_armor)
     import construction

@@ -469,7 +469,7 @@ public class FestivityGameTests {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), "Recipe " + id + " loads");
 		}
 		TradeSet set = level.registryAccess().lookupOrThrow(Registries.TRADE_SET).getOptional(HalloweenPeddler.TRADES).orElse(null);
-		helper.assertTrue(set != null && set.trades().size() == 13, "All thirteen Peddler trades load");
+		helper.assertTrue(set != null && set.trades().size() == 15, "All fifteen Peddler trades load");
 		helper.succeed();
 	}
 }

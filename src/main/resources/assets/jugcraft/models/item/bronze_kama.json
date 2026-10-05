@@ -1,5 +1,5 @@
 {
-  "parent": "jugcraft:item/arms_kama",
+  "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "jugcraft:item/bronze_kama"
   }

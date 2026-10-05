@@ -104,6 +104,21 @@ public class TeslaCoilBlockEntity extends BlockEntity {
 		level.playSound(null, worldPosition.above(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.BLOCKS, 0.25F, 1.6F + random.nextFloat() * 0.4F);
 	}
 
+	/** The running coils within {@code range} blocks of {@code pos}, from the per-level set (no blocks are searched). */
+	public static List<TeslaCoilBlockEntity> runningNear(Level level, BlockPos pos, int range) {
+		Set<BlockPos> coils = RUNNING.get(level);
+		List<TeslaCoilBlockEntity> near = new ArrayList<>();
+		if (coils == null) {
+			return near;
+		}
+		for (BlockPos coil : coils) {
+			if (coil.distSqr(pos) <= (double) range * range && level.isLoaded(coil) && level.getBlockEntity(coil) instanceof TeslaCoilBlockEntity running) {
+				near.add(running);
+			}
+		}
+		return near;
+	}
+
 	/** Another running coil within range, picked at random; forgets coils that are gone. */
 	private @Nullable BlockPos partner(ServerLevel level, Set<BlockPos> coils, RandomSource random) {
 		List<BlockPos> near = new ArrayList<>();

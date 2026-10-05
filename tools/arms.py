@@ -133,12 +133,12 @@ KINDS = {
                  "trait": "brace",
                  "tooltip": "A barbed fork set against a charge: half again as much damage to a foe coming at you."},
     "kama": {"display": "Kama", "damage": 1.5, "speed": -2.0, "swing": ("whack", 5), "reach": (0.0, 2.75),
-               "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 0.95,
+               "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.15,
                "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["## ", "  #", " S "],
                "trait": "clear",
                "tooltip": "Quick hooking cuts. Use on grass, ferns, vines or leaves to cut all of them about it, 3 by 3 by 3."},
     "war_pick": {"display": "War Pick", "damage": 3.0, "speed": -2.6, "swing": ("whack", 7), "reach": (0.0, 3.0),
-                 "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.1,
+                 "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.25,
                  "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["## ", " S#", " S "],
                  "trait": "delve", "tooltip": "A beaked war pick that mines stone and ore as its metal's pickaxe does."},
     # Arms V (batch 48): each has a weapon art (ARTS), a special move of its own, used with the use key.
@@ -155,7 +155,7 @@ KINDS = {
                      "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["###", "#S#", " SS"],
                      "art": "leap_slam", "tooltip": "A siege hammer. Knocks foes back and breaks a shield's guard for 5 seconds."},
     "katar": {"display": "Katar", "damage": 1.5, "speed": -2.0, "swing": ("stab", 5), "reach": (0.0, 2.75),
-              "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 0.85,
+              "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 0.95,
               "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["# #", "#L#"], "art": "flurry",
               "tooltip": "A punching blade, gripped across its frame: quick straight jabs at a short reach."},
     "moonblade": {"display": "Moonblade", "damage": 6.0, "speed": -3.1, "swing": ("whack", 18), "reach": (0.0, 3.75),
@@ -163,9 +163,20 @@ KINDS = {
                   "tags": ["swords"], "pattern": ["## ", "  #", "L# "], "art": "crescent",
                   "tooltip": "A crescent-bladed greatsword: broad, sweeping cuts."},
     "kusarigama": {"display": "Kusarigama", "damage": 2.0, "speed": -2.3, "swing": ("whack", 6), "reach": (0.0, 3.25),
-                   "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.0,
+                   "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.15,
                    "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["## ", "  #", "NN "],
                    "art": "chain_lash", "tooltip": "A sickle on a weighted chain: quick hooking cuts."},
+    # Arms VI (batch 55): after the owner's reference sheets of a twin-katana set and an iron-and-wood war kit (studied
+    # for their look; nothing is copied). The bows, crossbows and shields of the batch are in RANGED and SHIELDS.
+    "katana": {"display": "Katana", "damage": 3.0, "speed": -2.5, "swing": ("whack", 7), "reach": (0.0, 3.25),
+               "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.3,
+               "tags": ["swords"], "pattern": ["  #", " #N", "L  "], "art": "seven_cuts",
+               "tooltip": "A curved single-edged blade, drawn and cut in one motion: quick, clean cuts."},
+    "brazier_mace": {"display": "Brazier Mace", "damage": 5.0, "speed": -3.0, "swing": ("whack", 10), "reach": (0.0, 3.0),
+                     "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.25,
+                     "tags": ["enchantable/melee_weapon", "enchantable/durability", "enchantable/fire_aspect"],
+                     "pattern": ["#C#", " # ", " S "], "trait": "ignite",
+                     "tooltip": "A mace whose head is a burning brazier: sets foes alight. Use it to light a campfire, a candle or the ground."},
 }
 # Arms II traits (weapons/ArmItem.java; JugcraftArms.TRAITS). backstab: a blow landing within BACKSTAB_ANGLE degrees of
 # straight behind the target's body deals BACKSTAB more (a share of the blow). saddle: SADDLE more damage while riding.
@@ -206,6 +217,10 @@ BRACE = 0.5
 BRACE_SPEED = 0.1
 CLEAR_RADIUS = 1
 CLEAR_WEAR = 1
+# Arms VI traits. ignite: a hit sets the foe alight for IGNITE_SECONDS; use on a block lights it as flint and steel does
+# (a campfire or candle, or fire on the face used), at IGNITE_WEAR durability.
+IGNITE_SECONDS = 4
+IGNITE_WEAR = 1
 # What a kama cuts (data/jugcraft/tags/block/kama_cuts.json): leaves and the plants that grow wild, never crops.
 KAMA_CUTS = ["#minecraft:leaves", "minecraft:short_grass", "minecraft:tall_grass", "minecraft:fern", "minecraft:large_fern",
                "minecraft:vine", "minecraft:dead_bush", "minecraft:glow_lichen", "minecraft:hanging_roots",
@@ -266,6 +281,9 @@ ARTS = {
                   "name": "Crescent", "text": "loose a crescent wave that runs ahead, through every foe in its way, until it meets a wall."},
     "kusarigama": {"move": "chain_lash", "cooldown": 120, "ticks": 16, "slow": 0.5,
                    "name": "Chain Lash", "text": "throw the weighted chain at the first foe in line, up to 9 blocks off, haul it in and reap it."},
+    # Arms VI (batch 55).
+    "katana": {"move": "seven_cuts", "cooldown": 120, "ticks": 18, "slow": 0.4,
+               "name": "Seven Cuts", "text": "seven cuts in a breath, each across every foe ahead, leaving arcs in the air."},
 }
 # cyclone: hits at CYCLONE_FIRST, then every CYCLONE_EVERY ticks, CYCLONE_HITS in all; each strikes every foe within
 # CYCLONE_RADIUS (all round, up to CYCLONE_TARGETS) for CYCLONE_SHARE, without knockback, and draws it CYCLONE_PULL
@@ -340,14 +358,73 @@ LASH_REAP = 11
 LASH_REAP_SHARE = 0.8
 LASH_REAP_REACH = 3.5
 
+# seven_cuts: CUTS_COUNT cuts from CUTS_FIRST, every CUTS_EVERY ticks; each strikes every foe within the katana's reach
+# and CUTS_ARC degrees of the view (up to CUTS_TARGETS) for CUTS_SHARE, holding it in reach (no knockback) but the last; each
+# leaves an arc of colour in the air (the metal's: crimson for bronze, pale gold for steel).
+CUTS_FIRST = 3
+CUTS_EVERY = 2
+CUTS_COUNT = 7
+CUTS_SHARE = 0.22
+CUTS_ARC = 110.0
+CUTS_TARGETS = 4
+
 
 def art_share(kind):
     """What an art deals one foe, in blows of the arm (on level ground, for the leap)."""
     move = ARTS[kind]["move"]
     return {"cyclone": CYCLONE_HITS * CYCLONE_SHARE, "iaido": IAIDO_SHARE, "leap_slam": LEAP_SHARE,
             "flurry": FLURRY_JABS * FLURRY_SHARE + FLURRY_FINISH, "crescent": CRESCENT_SHARE,
-            "chain_lash": LASH_SHARE + LASH_REAP_SHARE}[move]
+            "chain_lash": LASH_SHARE + LASH_REAP_SHARE, "seven_cuts": CUTS_COUNT * CUTS_SHARE}[move]
 
+
+# Arms VI (batch 55): bows and crossbows in the arms' metals (weapons/ArmBowItem.java, ArmCrossbowItem.java), after the
+# owner's reference sheets. A longbow draws fully in `draw` ticks (vanilla's bow: 20) on vanilla's curve, and looses its
+# arrow at `speed` blocks a tick (vanilla's bow: 3.0); an arbalest loads as vanilla's crossbow does and shoots its bolt
+# at `speed` (vanilla's: 3.15). An arrow's `damage` is its base damage (vanilla's: 2.0), which the game multiplies by its
+# speed when it hits: the longbow's arrows and the arbalest's bolts hit harder for flying faster. Balance: each shot hits
+# harder and flies flatter than vanilla's, but a second (speed x damage over the draw, or vanilla's 1.25 s load) stays
+# below vanilla's bow (3.0 x 2.0 over its 1 s draw: 6), as the melee arms stay below the sword (tools/check_mod_data.py).
+RANGED_KINDS = {
+    "longbow": {"display": "Longbow", "type": "bow", "pattern": ["#ST", "S T", "#ST"], "tags": ["enchantable/bow", "enchantable/durability"],
+                "tooltip": "A tall bow: slower to draw than a bow, but its arrows fly faster and hit harder."},
+    "arbalest": {"display": "Arbalest", "type": "crossbow", "pattern": ["###", "T$T", " S "],
+                 "tags": ["enchantable/crossbow", "enchantable/durability"],
+                 "tooltip": "A crossbow with a metal prod: its bolts fly faster and hit harder."},
+}
+RANGED = {
+    ("longbow", "bronze"): {"draw": 26, "speed": 3.4, "damage": 2.0},
+    ("longbow", "steel"): {"draw": 26, "speed": 3.7, "damage": 2.0},
+    ("arbalest", "bronze"): {"speed": 3.4, "damage": 2.1},
+    ("arbalest", "steel"): {"speed": 3.55, "damage": 2.1},
+}
+# Shields in the arms' metals (Arms VI): blocking as vanilla's shield does (the blocks-attacks component, on the use key),
+# with their own numbers: `delay`, seconds to raise (vanilla's: 0.25); `angle`, degrees either side of straight ahead
+# covered (vanilla's: 90); `disable`, how long an axe's blow stops it, as a share of vanilla's; `wear`, the share of a
+# blocked blow's damage it takes in wear (vanilla's: 1); and, held in either hand, `brace` knockback resistance and
+# `weight`, a share of speed lost. 3D models, tools/arms_kit.py.
+SHIELD_KINDS = {
+    "heater_shield": {"display": "Heater Shield", "pattern": ["#W#", "WWW", " W "], "tags": ["enchantable/durability"],
+                      "tooltip": "A light shield, quick to raise."},
+    "tower_shield": {"display": "Tower Shield", "pattern": ["#W#", "#W#", "#W#"], "tags": ["enchantable/durability"],
+                     "tooltip": "A great shield that covers your flanks and braces you against blows; heavy to carry and slow to raise."},
+}
+SHIELDS = {
+    ("heater_shield", "bronze"): {"delay": 0.15, "angle": 90.0, "disable": 1.0, "durability": 400, "wear": 1.0, "brace": 0.0, "weight": 0.0},
+    ("heater_shield", "steel"): {"delay": 0.1, "angle": 90.0, "disable": 0.8, "durability": 900, "wear": 1.0, "brace": 0.0, "weight": 0.0},
+    ("tower_shield", "bronze"): {"delay": 0.4, "angle": 130.0, "disable": 0.6, "durability": 600, "wear": 0.75, "brace": 0.4, "weight": 0.08},
+    ("tower_shield", "steel"): {"delay": 0.35, "angle": 130.0, "disable": 0.5, "durability": 1350, "wear": 0.75, "brace": 0.5, "weight": 0.08},
+}
+VANILLA_SHIELD = {"delay": 0.25, "angle": 90.0, "disable": 1.0, "durability": 336}
+VANILLA_BOW = {"draw": 20, "speed": 3.0, "damage": 2.0}
+VANILLA_CROSSBOW = {"load": 25, "speed": 3.15, "damage": 2.0}
+# The sprites a bow and a crossbow are drawn in: as vanilla's, at rest and drawn in three steps; a crossbow also loaded
+# with an arrow or a firework. A bow is held `held` times a bow's size (vanilla's item/bow poses, scaled about its grip
+# at the sprite's centre), a crossbow as vanilla's crossbow.
+RANGED_SPRITES = {"bow": ["", "_pulling_0", "_pulling_1", "_pulling_2"],
+                  "crossbow": ["_standby", "_pulling_0", "_pulling_1", "_pulling_2", "_arrow", "_firework"]}
+RANGED_HELD = {"longbow": 1.3, "arbalest": 1.15}
+# A shield's sprites: its painted face, its bare back (and grip strap), and its metal trim (rim and boss).
+SHIELD_SPRITES = ["_face", "_back", "_trim"]
 
 TWO_HANDED_SLOW = 0.6
 FINISHER = 1.25
@@ -374,7 +451,8 @@ PARRY_ANGLE = 60.0
 PARRY_DELAY = 0.1
 PARRY_WEAR = (3.0, 1.0, 0.5)
 # Crafting keys besides "#", the metal's ingot.
-KEYS = {"S": "minecraft:stick", "L": "minecraft:leather", "N": "minecraft:iron_nugget"}
+KEYS = {"S": "minecraft:stick", "L": "minecraft:leather", "N": "minecraft:iron_nugget", "C": "#minecraft:coals",
+        "T": "minecraft:string", "$": "minecraft:tripwire_hook", "W": "#minecraft:planks"}
 
 # Vanilla's item/handheld hand poses (rotation, translation, scale) and where a vanilla sword sprite is held, in
 # pixels from its centre (x right, y up).
@@ -393,8 +471,13 @@ SPEAR_GRIP = (3.0, -3.0)
 
 
 def items():
-    """Every arm, in registration order: each kind in bronze, then in steel."""
-    return [f"{metal}_{kind}" for metal in METALS for kind in KINDS]
+    """Every arm, in registration order: each kind in bronze, then in steel; then the Arms VI kit (kit())."""
+    return [f"{metal}_{kind}" for metal in METALS for kind in KINDS] + kit()
+
+
+def kit():
+    """The Arms VI kit (JugcraftArms.KIT), in registration order: each metal's bows and crossbows, then its shields."""
+    return [f"{metal}_{kind}" for metal in METALS for table in (RANGED, SHIELDS) for kind, at in table if at == metal]
 
 
 def split(item):
@@ -402,9 +485,14 @@ def split(item):
     return metal, kind
 
 
+def info(kind):
+    """A kind's entry: in KINDS, RANGED_KINDS or SHIELD_KINDS."""
+    return KINDS.get(kind) or RANGED_KINDS.get(kind) or SHIELD_KINDS[kind]
+
+
 def display(item):
     metal, kind = split(item)
-    return f"{gear.GEAR_TIERS[metal]['display']} {KINDS[kind]['display']}"
+    return f"{gear.GEAR_TIERS[metal]['display']} {info(kind)['display']}"
 
 
 def feature(item):
@@ -414,16 +502,21 @@ def feature(item):
 def metal_content(item):
     """Nuggets of its metal an arm is made of (9 an ingot), for the recipe audit."""
     metal, kind = split(item)
-    return {metal: 9 * "".join(KINDS[kind]["pattern"]).count("#")}
+    return {metal: 9 * "".join(info(kind)["pattern"]).count("#")}
 
 
 def textures():
-    """Every arm's sprite (64x64, drawn by tools/arms_art.py): one each, and an in-hand one for a spear or lance."""
+    """Every arm's textures (tools/arms_art.py): its inventory icon and its 3D model's texture; a bow's or crossbow's
+    drawn and loaded sprites, and a shield's face, back and trim (tools/arms_kit_art.py)."""
     names = []
     for item in items():
-        names.append(item)
-        if split(item)[1] in CHARGING:
-            names.append(f"{item}_in_hand")
+        kind = split(item)[1]
+        if kind in RANGED_KINDS:
+            names += [f"{item}{suffix}" for suffix in RANGED_SPRITES[RANGED_KINDS[kind]["type"]]]
+        elif kind in SHIELD_KINDS:
+            names += [f"{item}{suffix}" for suffix in SHIELD_SPRITES]
+        else:
+            names += [item, f"{item}_model"]
     return names
 
 
@@ -431,7 +524,7 @@ def item_tags():
     """Vanilla item tag -> arms, merged into tools/gear.py's tag files (they share swords)."""
     tags = {}
     for item in items():
-        for tag in KINDS[split(item)[1]]["tags"]:
+        for tag in info(split(item)[1])["tags"]:
             tags.setdefault(tag, []).append(f"{MOD}:{item}")
     return tags
 
@@ -464,32 +557,33 @@ def _pose(rotation, translation, scale, grip, base_scale, base_grip, factor):
 
 
 def _grip(kind, mirrored=False):
-    """Where a kind's sprite is held, in pixels from the centre of a 16-pixel model (x right, y up)."""
-    x, y = arms_art.held_at(kind)
-    x = 64 - x if mirrored else x
-    return (x / 4 - 8, 8 - y / 4)
+    """Where a kind's icon is held, in pixels from the centre of a 16-pixel model (x right, y up), and its hand factor
+    (tools/arms_art.py layout: how much larger than `held` it is held, for an icon a wide head makes smaller)."""
+    (x, y), size, factor = arms_art.held_at(kind, KINDS[kind]["held"], mirrored=mirrored)
+    return (x * 16.0 / size - 8.0, 8.0 - y * 16.0 / size), factor
 
 
 def held_model(kind):
-    """The shared model a kind's arms are held with: vanilla's sword (or, for the lance, spear) poses, larger by the
-    kind's `held` and moved so the hand stays on the grip."""
+    """The 3D model a kind's arms are held as (tools/arms_art.py model: the same in both metals, textured #tex), posed
+    as vanilla's sword (or, for the spear and lance, the spear) is held, larger by the kind's `held` and moved so the hand
+    stays on the grip. It lies over the kind's icon exactly, so these poses hold it as they would the icon."""
     charging = kind in CHARGING
     base, base_grip = (SPEAR_IN_HAND, SPEAR_GRIP) if charging else (HANDHELD, SWORD_GRIP)
-    grip = _grip(kind, mirrored=charging)
+    grip, factor = _grip(kind, mirrored=charging)
     display = {}
     for context, (rotation, translation, scale) in base.items():
-        right, left = _pose(rotation, translation, scale, grip, scale, base_grip, KINDS[kind]["held"])
+        right, left = _pose(rotation, translation, scale, grip, scale, base_grip, round(KINDS[kind]["held"] * factor, 4))
         display[context] = right
         display[context.replace("righthand", "lefthand")] = left
-    return {"parent": "minecraft:item/spear_in_hand" if charging else "minecraft:item/handheld", "display": display}
+    _texture, elements = arms_art.model(kind, "bronze", KINDS[kind]["held"], mirrored=charging)
+    return {"textures": {"particle": "#tex"}, "elements": elements, "display": display}
 
 
 def write_all(write, assets, data, lang, condition):
     """Shared in-hand models, each arm's model and definition, names and tooltips, recipes and repair tags."""
     models = assets / "models" / "item"
     for kind in KINDS:
-        if kind != "spear":
-            write(models / f"arms_{kind}.json", held_model(kind))
+        write(models / f"arms_{kind}.json", held_model(kind))
         lang[f"tooltip.{MOD}.arms.{kind}"] = KINDS[kind]["tooltip"]
     lang[f"tooltip.{MOD}.arms.two_handed"] = "Two-handed: the blow lands as the swing comes round, on every foe in its arc."
     lang[f"message.{MOD}.two_handed.off_hand"] = "Two hands for this one: put away what is in your off hand."
@@ -501,44 +595,61 @@ def write_all(write, assets, data, lang, condition):
     lang[f"message.{MOD}.arms.art.riding"] = "Not from the saddle."
     write(data / "tags" / "block" / "kama_cuts.json", {"values": KAMA_CUTS})
     for item in items():
-        metal, kind = split(item)
         lang[f"item.{MOD}.{item}"] = display(item)
+        _recipe(write, data, condition, item)
+    import arms_kit
+    arms_kit.write_all(write, assets, lang)
+    for item in items():
+        metal, kind = split(item)
+        if kind not in KINDS:
+            continue
         info = KINDS[kind]
-        if kind in CHARGING:
-            # As vanilla's spears: the plain sprite in inventories, frames and on the ground, and in the hand one
-            # drawn point to the top left, which the spear's hand poses hold couched.
-            write(models / f"{item}.json", {"parent": "minecraft:item/handheld",
-                                            "textures": {"layer0": f"{MOD}:item/{item}"}})
-            parent = "minecraft:item/spear_in_hand" if kind == "spear" else f"{MOD}:item/arms_{kind}"
-            write(models / f"{item}_in_hand.json", {"parent": parent, "textures": {"layer0": f"{MOD}:item/{item}_in_hand"}})
-            model = {"type": "minecraft:select", "property": "minecraft:display_context",
-                     "cases": [{"when": ["gui", "ground", "fixed", "on_shelf"],
-                                "model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}}],
-                     "fallback": {"type": "minecraft:model", "model": f"{MOD}:item/{item}_in_hand"}}
-            swap = 1.95 * info["held"]
-        else:
-            write(models / f"{item}.json", {"parent": f"{MOD}:item/arms_{kind}",
-                                            "textures": {"layer0": f"{MOD}:item/{item}"}})
-            model = {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}
-            swap = info["held"]
+        # The icon in inventories, frames, on the ground and on shelves; in the hand (and on a head), the 3D model.
+        write(models / f"{item}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": f"{MOD}:item/{item}"}})
+        write(models / f"{item}_in_hand.json", {"parent": f"{MOD}:item/arms_{kind}",
+                                                "textures": {"tex": f"{MOD}:item/{item}_model"}})
+        model = {"type": "minecraft:select", "property": "minecraft:display_context",
+                 "cases": [{"when": ["gui", "ground", "fixed", "on_shelf"],
+                            "model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}}],
+                 "fallback": {"type": "minecraft:model", "model": f"{MOD}:item/{item}_in_hand"}}
+        swap = 1.95 * info["held"] if kind in CHARGING else info["held"]
         # A longer arm comes up into the hand faster, as vanilla's spear does, so it never hangs half-raised.
         write(assets / "items" / f"{item}.json", {"model": model, "swap_animation_scale": round(swap, 2)})
 
-        key = {"#": gear.GEAR_TIERS[metal]["ingot"]}
-        for row in info["pattern"]:
-            for ch in row:
-                if ch in KEYS:
-                    key[ch] = KEYS[ch]
-        write(data / "recipe" / f"{item}.json", {
-            "fabric:load_conditions": condition(feature(item)), "type": "minecraft:crafting_shaped",
-            "category": "equipment", "pattern": info["pattern"], "key": key, "result": {"id": f"{MOD}:{item}", "count": 1}})
+
+def _recipe(write, data, condition, item):
+    """An arm's shaped recipe: its kind's pattern, "#" its metal's ingot and the other keys from KEYS."""
+    metal, kind = split(item)
+    pattern = info(kind)["pattern"]
+    key = {"#": gear.GEAR_TIERS[metal]["ingot"]}
+    for row in pattern:
+        for ch in row:
+            if ch in KEYS:
+                key[ch] = KEYS[ch]
+    write(data / "recipe" / f"{item}.json", {
+        "fabric:load_conditions": condition(feature(item)), "type": "minecraft:crafting_shaped",
+        "category": "equipment", "pattern": pattern, "key": key, "result": {"id": f"{MOD}:{item}", "count": 1}})
 
 
 def draw_all(save):
-    """Each arm's 64x64 sprite; a spear's or lance's is also drawn mirrored, point to the top left, for the hand."""
+    """Each arm's icon and 3D model texture (a strip of frames for a flickering one), and the kit's sprites
+    (tools/arms_kit_art.py)."""
     for item in items():
         metal, kind = split(item)
-        img = arms_art.draw(kind, metal)
-        save(img, "item", item)
-        if kind in CHARGING:
-            save(img.transpose(Image.Transpose.FLIP_LEFT_RIGHT), "item", f"{item}_in_hand")
+        if kind not in KINDS:
+            continue
+        held, mirrored = KINDS[kind]["held"], kind in CHARGING
+        frames, ticks = arms_art.ANIMATED.get(kind, (1, 0))
+        icons = [arms_art.draw(kind, metal, held, frame) for frame in range(frames)]
+        textures = [arms_art.model(kind, metal, held, frame, mirrored=mirrored)[0] for frame in range(frames)]
+        for name, images in ((item, icons), (f"{item}_model", textures)):
+            if frames == 1:
+                save(images[0], "item", name)
+                continue
+            size = images[0].width
+            strip = Image.new("RGBA", (size, size * frames), (0, 0, 0, 0))
+            for frame, img in enumerate(images):
+                strip.paste(img, (0, size * frame))
+            save(strip, "item", name, animation={"frametime": ticks})
+    import arms_kit_art
+    arms_kit_art.draw_all(save)

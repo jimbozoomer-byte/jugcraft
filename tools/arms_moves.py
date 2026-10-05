@@ -1026,3 +1026,83 @@ MOVES["kusarigama"] = {
     "arts": [fp_art(KG_LASH, KG_FP, KG_FP, F(10, -20, -40, 4, 6), (F(-82, 10, 0, -2, 2, -8), 0.3), F(-20, -20, -30, 6, -4, 4),
                     F(6, 30, 50, -10, 5), (F(-22, 32, 62, -8, 4, -3), 0.2), fsettle(F(-22, 32, 62, -8, 4, -3), KG_FP))],
 }
+
+# ================================================================ Arms VI (batch 55)
+
+LENGTH.update({"katana": 18, "brazier_mace": 16})
+
+# ---------------------------------------------------------------- katana: drawn cuts; the seven cuts
+
+KT6_HOLD = P(body=(0, 14, 0), head=(0, -12, 0), right_arm=(-34, 8, 6), left_arm=(-20, 10, -8), item=(40, 0, 10),
+             **step(0.6, 4))
+KT6 = {
+    "draw": P(body=(4, 34, 0, 0, 0.4, 0), head=(-2, -28, 0), right_arm=(-20, 34, 24), left_arm=(-30, 24, -14), item=(-10, 0, 70),
+              **step(0.4, 8)),
+    "cut": P(body=(8, -30, 0), head=(-2, 24, 0), right_arm=(-86, -36, -6), left_arm=(10, -12, -16), item=(-4, 0, -50),
+             **step(1.6, -6)),
+    "follow": P(body=(10, -40, 0), head=(-2, 32, 0), right_arm=(-56, -46, -12), left_arm=(16, -16, -18), item=(-20, 0, -58),
+                **step(1.7, -8)),
+    "raise": P(body=(-6, 10, 0), head=(-6, -8, 0), right_arm=(-160, 10, 10), left_arm=(-30, 10, -12), item=(80, 0, 0),
+               **step(0.2, 4)),
+    "fall": P(body=(14, 0, 0, 0, 0.5, -1.0), head=(6, 0, 0), right_arm=(-70, 0, 0), left_arm=(-10, 6, -14), item=(-30, 0, 0),
+              **step(1.8)),
+    # The seven cuts: alternating diagonal cuts, right high to left low and back, then the wide level cut.
+    "high_r": P(body=(-2, 34, 0), head=(0, -28, 0), right_arm=(-150, 36, 26), left_arm=(-30, 20, -12), item=(66, 0, 40),
+                **step(0.6, 6)),
+    "low_l": P(body=(10, -32, 0, 0, 0.3, -0.4), head=(-4, 26, 0), right_arm=(-62, -42, -12), left_arm=(14, -14, -16),
+               item=(-26, 0, -52), **step(1.4, -6)),
+    "high_l": P(body=(-2, -30, 0), head=(0, 24, 0), right_arm=(-140, -40, -26), left_arm=(-10, -10, -10), item=(60, 0, -50),
+                **step(0.8, -6)),
+    "low_r": P(body=(10, 34, 0, 0, 0.3, -0.4), head=(-4, -28, 0), right_arm=(-64, 44, 26), left_arm=(-34, 20, -14),
+               item=(-24, 0, 56), **step(1.4, 6)),
+    "wide_r": P(body=(0, 56, 0, 0, 0.4, 0), head=(0, -46, 0), right_arm=(-90, 70, 30), left_arm=(-30, 30, -14), item=(10, 0, 70),
+                **step(0.2, 10)),
+    "wide_l": P(body=(10, -56, 0, 0, 0.4, -0.6), head=(-4, 44, 0), right_arm=(-84, -60, -10), left_arm=(16, -20, -18),
+                item=(-10, 0, -70), **step(2.0, -10)),
+}
+KT6_FP = F(-6, 10, 18, -2, 0)
+FP_CUT_A, FP_CUT_B = F(-24, 34, 70, -9, 3, -3), F(-24, -20, -40, 4, 3, -3)
+KT6_CUTS = art("seven_cuts", 18, KT6_HOLD, (0.08, KT6["draw"]), (0.1667, KT6["low_l"], 0.1), (0.2222, KT6["high_l"]),
+               (0.2778, KT6["low_r"], 0.1), (0.3333, KT6["high_r"]), (0.3889, KT6["low_l"], 0.1), (0.4444, KT6["high_l"]),
+               (0.5, KT6["low_r"], 0.1), (0.5556, KT6["high_r"]), (0.6111, KT6["low_l"], 0.1), (0.6667, KT6["high_l"]),
+               (0.7222, KT6["low_r"], 0.1), (0.7778, KT6["wide_r"]), (0.8333, KT6["wide_l"], 0.2),
+               (0.92, settle(KT6["wide_l"], KT6_HOLD, 0.5)))
+MOVES["katana"] = {
+    "hold": KT6_HOLD, "fp_hold": KT6_FP,
+    "attacks": [
+        fp(clip("draw_cut", KT6_HOLD, (0.12, KT6["draw"]), (0.28, KT6["cut"], 0.15), (0.46, KT6["follow"]),
+                (0.74, settle(KT6["follow"], KT6_HOLD))), KT6_FP, *fp_forehand(KT6_FP, 0.9)),
+        fp(clip("fall", KT6_HOLD, (0.12, KT6["raise"]), (0.3, KT6["fall"], 0.3), (0.64, settle(KT6["fall"], KT6_HOLD))),
+           KT6_FP, *fp_overhead(KT6_FP, 0.8)[:2], fsettle(fp_overhead(KT6_FP, 0.8)[1], KT6_FP)),
+    ],
+    "arts": [fp_art(KT6_CUTS, KT6_FP, KT6_FP, F(-30, -10, -30, 4, -3, 2),
+                    (FP_CUT_A, 0.1), FP_CUT_B, (FP_CUT_B, 0.1), FP_CUT_A, (FP_CUT_A, 0.1), FP_CUT_B, (FP_CUT_B, 0.1), FP_CUT_A,
+                    (FP_CUT_A, 0.1), FP_CUT_B, (FP_CUT_B, 0.1), F(4, -30, -60, 6, 4), (F(-26, 44, 96, -14, 2, -3), 0.2),
+                    fsettle(F(-26, 44, 96, -14, 2, -3), KT6_FP, 0.5))],
+}
+
+# ---------------------------------------------------------------- brazier mace: a heavy clubbing swing and an overhead blow
+
+BZ_HOLD = P(body=(0, 12, 0), head=(0, -10, 0), right_arm=(-30, 6, 6), left_arm=(-12, 2, -8), item=(54, 0, 4))
+BZ = {
+    "wind": P(body=(-4, 40, 0), head=(0, -34, 0), right_arm=(-110, 60, 30), left_arm=(-24, 20, -14), item=(40, 0, 50),
+              **step(-0.5, 8)),
+    "swing": P(body=(8, -30, 0), head=(-2, 24, 0), right_arm=(-84, -34, -6), left_arm=(10, -12, -16), item=(4, 0, -44),
+               **step(1.4, -6)),
+    "follow": P(body=(10, -38, 0), head=(-2, 30, 0), right_arm=(-58, -44, -10), left_arm=(14, -14, -18), item=(-14, 0, -52),
+                **step(1.6, -8)),
+    "raise": P(body=(-8, 20, 0), head=(-6, -16, 0), right_arm=(-170, 16, 18), left_arm=(-40, 10, -20), item=(80, 0, 8),
+               **step(-0.5, 6)),
+    "smash": P(body=(18, -4, 0, 0, 0.6, -1.0), head=(8, 4, 0), right_arm=(-64, -4, 0), left_arm=(10, -10, -18), item=(-34, 0, 0),
+               **step(1.8)),
+}
+BZ_FP = F(0, 0, 10, 0, 0)
+MOVES["brazier_mace"] = {
+    "hold": BZ_HOLD, "fp_hold": BZ_FP,
+    "attacks": [
+        fp(clip("swing", BZ_HOLD, (0.16, BZ["wind"]), (0.32, BZ["swing"], 0.15), (0.5, BZ["follow"]),
+                (0.76, settle(BZ["follow"], BZ_HOLD))), BZ_FP, *fp_forehand(BZ_FP, 1.0)),
+        fp(clip("smash", BZ_HOLD, (0.16, BZ["raise"]), (0.32, BZ["smash"], 0.35), (0.7, settle(BZ["smash"], BZ_HOLD))),
+           BZ_FP, *fp_overhead(BZ_FP, 0.9)[:2], fsettle(fp_overhead(BZ_FP, 0.9)[1], BZ_FP)),
+    ],
+}
