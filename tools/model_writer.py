@@ -323,8 +323,12 @@ def write_classic(root, machines, parts, fluid_blocks):
                 out.enlarged_states(machine, len(FOOTPRINTS[machine]), info["lit"])
             else:
                 out.large_states(machine, len(FOOTPRINTS[machine]), info["lit"])
-            out.item_model(machine, {"parent": "minecraft:block/block", "textures": textures,
-                                     "elements": scaled_elements(MODELS[machine])})
+            # Parts a renderer draws (giant_models.ITEM_EXTRAS: the sawmill's blade) stand in the item icon too.
+            from steampunk_models import ITEM_EXTRAS
+            extras = ITEM_EXTRAS.get(machine, [])
+            out.item_model(machine, {"parent": "minecraft:block/block",
+                                     "textures": {**textures, **{name: rid(f"block/{name}") for name in texture_names(extras)}},
+                                     "elements": scaled_elements(MODELS[machine] + extras)})
             out.item(machine, rid(f"item/{machine}"))
             continue
         for suffix, front in (("", "front"), ("_on", "front_on")):
@@ -390,8 +394,11 @@ def write_steampunk(root, machines, parts, fluid_blocks):
                 out.enlarged_states(machine, len(FOOTPRINTS[machine]), lit)
             else:
                 out.large_states(machine, len(FOOTPRINTS[machine]), lit)
-            out.item_model(machine, {"parent": "minecraft:block/block", "textures": textures,
-                                     "elements": scaled_elements(elements)})
+            # Parts a renderer draws (giant_models.ITEM_EXTRAS: the sawmill's blade) stand in the item icon too.
+            from steampunk_models import ITEM_EXTRAS
+            item_elements = elements + ITEM_EXTRAS.get(machine, [])
+            out.item_model(machine, {"parent": "minecraft:block/block", "textures": textures_for(item_elements),
+                                     "elements": scaled_elements(item_elements)})
             out.item(machine, rid(f"item/{machine}"))
             continue
         out.model(machine, {"parent": "minecraft:block/block", "textures": textures,

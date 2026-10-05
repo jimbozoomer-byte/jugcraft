@@ -38,15 +38,15 @@
       "from": [
         3,
         2,
-        2
+        0
       ],
       "to": [
-        16,
+        13.25,
         16,
         16
       ],
       "faces": {
-        "north": {
+        "east": {
           "texture": "#fluid_tank_side"
         },
         "west": {
