@@ -157,6 +157,7 @@
 			"io.github.jimbozoomer.jugcraft.test.FerrisWheelClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PinataClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BalloonClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BigGunsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.LeafBlowerClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.GraveyardFloraClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ChurchyardOrnamentsClientGameTests",
