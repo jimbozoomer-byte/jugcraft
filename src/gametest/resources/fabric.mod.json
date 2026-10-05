@@ -161,7 +161,8 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmsMotionClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.TwoHandedClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.WeaponArtsClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.ArmsVIClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.ArmsVIClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.WoodClientGameTests"
 		]
 	},
 	"depends": {

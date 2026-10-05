@@ -67,7 +67,11 @@ Every texture name, block ID, item ID and model is the same, so worlds, placed b
 - **`python3 scripts/check_repository.py`:** PASS (local).
 - **Texture diff against `main` (local):** exactly the 89 wood and leaf textures changed. The other 2,589 textures, saplings included, are byte-identical, and no texture was added or removed.
 - **Offline previews:** each wood's textures, and log and leaf blocks drawn as cubes, were rendered and looked over before committing (the sheet above).
-- **CI:** compiles, and the existing biome and tree client tests take their screenshots with the new textures; this record will say what CI shows.
+- **Client game test (`WoodClientGameTests`)**, written for CI:
+  - every tree grown side by side in summer, three or so to a shot, with each tree's logs and leaves logged;
+  - a sample wall of each wood: log, stripped log and planks up the face, log and stripped ends and a slab on top, and stairs, a fence and a gate before it;
+  - the larch, maple, aspen and willow grown again in autumn.
+- **CI:** the existing biome and tree client tests also take their screenshots with the new textures. This record will say what CI shows.
 - **Not run:** play, and a look at the trees in-game beyond CI's screenshots.
 
 ## World and event applicability
