@@ -55,6 +55,8 @@ import decor15_data
 import decor16_data
 import decor17_data
 import decor18_data
+import decor19_data
+import decor20_data
 import ofrenda_data
 import graveyard_data
 import regatta_data
@@ -263,6 +265,8 @@ def assets(root, write, lang):
     decor16_data.assets(root, write, lang)
     decor17_data.assets(root, write, lang)
     decor18_data.assets(root, write, lang)
+    decor19_data.assets(root, write, lang)
+    decor20_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
 
@@ -393,6 +397,8 @@ def loot(data, write):
     decor16_data.loot(out, write)
     decor17_data.loot(out, write)
     decor18_data.loot(out, write)
+    decor19_data.loot(out, write)
+    decor20_data.loot(out, write)
     ferris_wheel_data.loot(out, write)
     hot_air_balloon_data.loot(out, write)
     theremin_data.loot(out, write)
@@ -494,6 +500,8 @@ def tags(tags):
     decor16_data.tags(tags)
     decor17_data.tags(tags)
     decor18_data.tags(tags)
+    decor19_data.tags(tags)
+    decor20_data.tags(tags)
     ferris_wheel_data.tags(tags)
     hot_air_balloon_data.tags(tags)
     regatta_data.tags(tags)

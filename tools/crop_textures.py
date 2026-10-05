@@ -942,4 +942,8 @@ def crop_textures():
     out.update(witchs_workshop_textures())
     from decor18_data import textures as crypt_textures  # and the crypt and the ossuary
     out.update(crypt_textures())
+    from decor19_data import textures as laboratory_textures  # and the laboratory, the larder and the dining room
+    out.update(laboratory_textures())
+    from decor20_data import textures as pumpkin_night_textures  # and Pumpkin Night
+    out.update(pumpkin_night_textures())
     return out

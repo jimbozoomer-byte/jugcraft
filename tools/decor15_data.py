@@ -7,6 +7,7 @@ Everything is drawn here by code from fixed seeds; no Mojang texture is read, tr
 import math
 import random
 
+import cute_art as ca
 import decor15 as d15
 import flora_art as fa
 from flora_art import SIDES4, Px, Sculpt, column, cube, pal, plane_xy, plane_zy, rgb, rotation, shade, solid, strip
@@ -123,12 +124,20 @@ def ring():
     return paint
 
 
+def cute_jaw():
+    """A skull's jaw: soft cream with a neat row of little teeth along its top."""
+    def paint(p):
+        ca.soft(ca.BONE, 2)(p)
+        ca.teeth(p, 0, p.w, 0, 1, ca.BONE[4], ca.SOCKET[1], tooth=1)
+    return paint
+
+
 # ---------------------------------------------------------------- shared parts
 
 def bone(sc, centre, length, yaw=0, y=0.0, width=0.9, along_z=False):
     """A long bone lying on its side: a shaft with a knobbed end each side, turned `yaw` about its middle."""
-    side = sc.piece("shaft", 12, 2, strip(BONE, 3, light=True, horizontal=True))
-    knob = sc.piece("knob", 3, 3, solid(BONE[2:], 4))
+    side = sc.piece("shaft", 12, 2, ca.bevel(ca.BONE, 3, sides="tb"))
+    knob = sc.piece("knob", 3, 3, ca.soft(ca.BONE, 3))
     cx, cz = centre
     rot = rotation((cx, y, cz), "y", yaw) if yaw else None
     h = width / 2
@@ -148,10 +157,10 @@ def bone(sc, centre, length, yaw=0, y=0.0, width=0.9, along_z=False):
 
 def skull(sc, centre, y=0.0, yaw=0, size=1.0, facing="north"):
     """A skull: the cranium with its face toward `facing` (north or south) and the lower jaw under its front."""
-    face = sc.piece("skull_face", 10, 9, skull_face(3))
-    side = sc.piece("skull_side", 9, 8, solid(BONE[1:], 5, spots=[SOCKET[1]], spot_count=2))
-    top = sc.piece("skull_top", 9, 9, solid(BONE[2:], 6))
-    jaw = sc.piece("jaw", 7, 2, jaw_front())
+    face = sc.piece("skull_face", 10, 9, ca.skull_face(sockets=0.3, socket_y=0.45, tall=0.2, mouth=False))
+    side = sc.piece("skull_side", 9, 8, ca.soft(ca.BONE, 2))
+    top = sc.piece("skull_top", 9, 9, ca.soft(ca.BONE, 3))
+    jaw = sc.piece("jaw", 7, 2, cute_jaw())
     cx, cz = centre
     s = size
     rot = rotation((cx, y, cz), "y", yaw) if yaw else None
@@ -170,7 +179,7 @@ def skull(sc, centre, y=0.0, yaw=0, size=1.0, facing="north"):
 def bone_pile():
     """Four heaps, each the one before and a layer more: bones crossing every way and skulls staring out."""
     sc = Sculpt(d15.BONE_PILE["block"], 61)
-    fill = sc.piece("dust", 12, 12, bone_dust(2))
+    fill = sc.piece("dust", 12, 12, ca.scatter(DUST, 2, 4, 2))
     rng = random.Random(9)
     yaws = (0, 22.5, 45, -22.5, -45)
     previous = []
@@ -197,10 +206,10 @@ def bone_pile():
 def ossuary_wall():
     """A catacomb wall: rows of skulls between courses of long bones laid crosswise, all set into a core of bone ends."""
     sc = Sculpt(d15.OSSUARY_WALL["block"], 62)
-    ends = sc.piece("ends", 32, 32, bone_ends(4))
-    back = sc.piece("back", 16, 16, bone_ends(5))
-    shaft = sc.piece("shaft", 12, 2, strip(BONE, 3, light=True, horizontal=True))
-    knob = sc.piece("knob", 3, 3, solid(BONE[2:], 4))
+    ends = sc.piece("ends", 32, 32, ca.bone_ends(4))
+    back = sc.piece("back", 16, 16, ca.bone_ends(5))
+    shaft = sc.piece("shaft", 12, 2, ca.bevel(ca.BONE, 3, sides="tb"))
+    knob = sc.piece("knob", 3, 3, ca.soft(ca.BONE, 3))
     els = [fa._el((0, 0, 2.0), (16, 16, 16), {"north": {"uv": list(back), "texture": "#p"},
                                               **{s: {"uv": list(ends), "texture": "#p", "cullface": s} for s in ("south", "east", "west", "up", "down")}})]
     for y0 in (0.0, 5.6, 11.2):
@@ -221,10 +230,10 @@ def _hand_elements(clenched):
     bones, the palm's long bones, four fingers of three joints each and a thumb, spread and clawing, or curled into a
     fist."""
     sc = HAND
-    earth = sc.piece("earth", 12, 4, solid(EARTH, 3, spots=[BONE[2]], spot_count=2))
-    earth_top = sc.piece("earth_top", 12, 12, solid(EARTH, 4, spots=[DUST[1], BONE[1]], spot_count=6))
-    long_bone = sc.piece("long", 3, 16, strip(BONE, 7, light=True))
-    knuckle = sc.piece("knuckle", 3, 3, solid(BONE[2:], 8))
+    earth = sc.piece("earth", 12, 4, ca.bevel(EARTH, 2))
+    earth_top = sc.piece("earth_top", 12, 12, ca.scatter(EARTH, 2, 3, 4))
+    long_bone = sc.piece("long", 3, 16, ca.bevel(ca.BONE, 3, sides="lr"))
+    knuckle = sc.piece("knuckle", 3, 3, ca.soft(ca.BONE, 3))
     els = [cube((2.5, 0, 2.5), (13.5, 1.4, 13.5), {**{s: earth for s in SIDES4}, "up": earth_top}),
            cube((4.0, 1.4, 4.0), (12.0, 2.6, 12.0), {**{s: earth for s in SIDES4}, "up": earth_top})]
     # Radius and ulna rising from the earth, a little apart, to the wrist.

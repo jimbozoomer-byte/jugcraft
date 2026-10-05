@@ -17,6 +17,8 @@ import decor15
 import decor16
 import decor17
 import decor18
+import decor19
+import decor20
 
 FEATURE = "agriculture"
 
@@ -175,7 +177,8 @@ WILD_COMPOST = "medium"
 GRASS_SEEDS = ["corn_kernels", "sunflower_seeds", "beans", "sweet_potato", "flax_seeds",
                "tomato_seeds", "pepper_seeds", "onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds",
                "butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
-               "giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "bottle_gourd_seeds",
+               "giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "red_kuri_pumpkin_seeds",
+               "kabocha_pumpkin_seeds", "bottle_gourd_seeds",
                "ornamental_corn_kernels", "mandrake_root"]
 GRASS_SEED_CHANCE = 0.125
 
@@ -276,6 +279,13 @@ ITEMS = {
                                  "tags": ["c:seeds/jarrahdale_pumpkin", "minecraft:chicken_food", "minecraft:parrot_food"]},
     "cinderella_pumpkin_seeds": {"display": "Cinderella Pumpkin Seeds", "plants": "cinderella_pumpkin_stem", "compost": "low",
                                  "tags": ["c:seeds/cinderella_pumpkin", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    # Pumpkin Night (tools/decor20.py): the Red Kuri and the Kabocha, and their dishes.
+    "red_kuri_pumpkin_seeds": {"display": "Red Kuri Pumpkin Seeds", "plants": "red_kuri_pumpkin_stem", "compost": "low",
+                               "tags": ["c:seeds/red_kuri_pumpkin", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "kabocha_pumpkin_seeds": {"display": "Kabocha Pumpkin Seeds", "plants": "kabocha_pumpkin_stem", "compost": "low",
+                              "tags": ["c:seeds/kabocha_pumpkin", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "red_kuri_soup": {"display": "Red Kuri Soup", "food": [9, 0.7], "stew": True, "tags": ["c:foods/soup"]},
+    "kabocha_tempura": {"display": "Kabocha Tempura", "food": [6, 0.8], "compost": "medium_high", "tags": ["c:foods"]},
     "bottle_gourd_seeds": {"display": "Bottle Gourd Seeds", "plants": "bottle_gourd_stem", "compost": "low",
                            "tags": ["c:seeds/bottle_gourd", "minecraft:chicken_food", "minecraft:parrot_food"]},
     "dried_bottle_gourd": {"display": "Dried Bottle Gourd", "compost": "medium", "tags": []},
@@ -350,6 +360,11 @@ GOURDS = {
                            "compost": "medium", "tags": ["c:crops/pumpkin", "c:crops/jarrahdale_pumpkin", "jugcraft:heirloom_pumpkins"]},
     "cinderella_pumpkin": {"display": "Cinderella Pumpkin", "seed": "cinderella_pumpkin_seeds", "growth_time": 1.0, "cube": True,
                            "compost": "medium", "tags": ["c:crops/pumpkin", "c:crops/cinderella_pumpkin", "jugcraft:heirloom_pumpkins"]},
+    # Pumpkin Night (tools/decor20.py): a teardrop red-orange Red Kuri and a squat, flecked dark green Kabocha.
+    "red_kuri_pumpkin": {"display": "Red Kuri Pumpkin", "seed": "red_kuri_pumpkin_seeds", "growth_time": 1.0, "cube": True,
+                         "compost": "medium", "tags": ["c:crops/pumpkin", "c:crops/red_kuri_pumpkin", "jugcraft:heirloom_pumpkins"]},
+    "kabocha_pumpkin": {"display": "Kabocha Pumpkin", "seed": "kabocha_pumpkin_seeds", "growth_time": 1.0, "cube": True,
+                        "compost": "medium", "tags": ["c:crops/pumpkin", "c:crops/kabocha_pumpkin", "jugcraft:heirloom_pumpkins"]},
     "bottle_gourd": {"display": "Bottle Gourd", "seed": "bottle_gourd_seeds", "growth_time": 1.0,
                      "compost": "medium", "tags": ["c:crops/gourd", "c:crops/bottle_gourd"]},
 }
@@ -487,6 +502,8 @@ FOUND_WILD = {
     "white_pumpkin": {"biomes": ["IS_BIRCH_FOREST", "IS_SNOWY"], "on": "grass"},
     "jarrahdale_pumpkin": {"biomes": ["IS_SAVANNA", "IS_WINDSWEPT"], "on": "grass"},
     "cinderella_pumpkin": {"biomes": ["IS_PLAINS", "IS_FLORAL"], "on": "grass"},
+    "red_kuri_pumpkin": {"biomes": ["IS_TAIGA", "IS_SPOOKY"], "on": "grass"},
+    "kabocha_pumpkin": {"biomes": ["IS_FOREST", "IS_JUNGLE"], "on": "grass"},
     "bottle_gourd": {"biomes": ["IS_JUNGLE", "IS_SAVANNA"], "on": "grass"},
 }
 GOURD_PATCH = {"rarity": 32, "tries": 8, "spread_xz": 4, "spread_y": 2}
@@ -509,7 +526,8 @@ CARVING_TEXTURES = ["carving_knife", "hand_carved_pumpkin", "hand_carved_pumpkin
 # Heirloom pumpkins the knife carves: each becomes its own hand-carved block (same rules, its own skin),
 # and its first cut drops 4 of its seeds (loot table carve/<pumpkin>), like vanilla's carve/pumpkin.
 CARVED_VARIETIES = {"white_pumpkin": "hand_carved_white_pumpkin", "jarrahdale_pumpkin": "hand_carved_jarrahdale_pumpkin",
-                    "cinderella_pumpkin": "hand_carved_cinderella_pumpkin"}
+                    "cinderella_pumpkin": "hand_carved_cinderella_pumpkin", "red_kuri_pumpkin": "hand_carved_red_kuri_pumpkin",
+                    "kabocha_pumpkin": "hand_carved_kabocha_pumpkin"}
 CARVE_SEEDS = 4
 # Item tag of the heirloom pumpkins, which bake into vanilla pumpkin pie like a pumpkin does.
 HEIRLOOM_TAG = "jugcraft:heirloom_pumpkins"
@@ -754,6 +772,8 @@ PEDDLER = {"display": "Halloween Peddler", "trade_set": "halloween_peddler", "am
     "emerald_white_pumpkin_seeds": {"wants": 1, "gives": ("jugcraft:white_pumpkin_seeds", 2), "max_uses": 8},
     "emerald_jarrahdale_pumpkin_seeds": {"wants": 1, "gives": ("jugcraft:jarrahdale_pumpkin_seeds", 2), "max_uses": 8},
     "emerald_cinderella_pumpkin_seeds": {"wants": 1, "gives": ("jugcraft:cinderella_pumpkin_seeds", 2), "max_uses": 8},
+    "emerald_red_kuri_pumpkin_seeds": {"wants": 1, "gives": ("jugcraft:red_kuri_pumpkin_seeds", 2), "max_uses": 8},
+    "emerald_kabocha_pumpkin_seeds": {"wants": 1, "gives": ("jugcraft:kabocha_pumpkin_seeds", 2), "max_uses": 8},
     "emerald_witch_hat": {"wants": 3, "gives": ("jugcraft:witch_hat", 1), "max_uses": 2},
     "emerald_ghost_sheet": {"wants": 3, "gives": ("jugcraft:ghost_sheet", 1), "max_uses": 2},
     "emerald_scarecrow_hat": {"wants": 3, "gives": ("jugcraft:scarecrow_hat", 1), "max_uses": 2},
@@ -808,7 +828,9 @@ TREBUCHET = {"block": "trebuchet", "display": "Pumpkin Chunkin' Trebuchet", "amm
              "factors": {"minecraft:pumpkin": 1.0, "minecraft:carved_pumpkin": 1.06, "minecraft:jack_o_lantern": 1.03,
                          "jugcraft:white_pumpkin": 1.02, "jugcraft:jarrahdale_pumpkin": 0.97, "jugcraft:cinderella_pumpkin": 0.95,
                          "jugcraft:hand_carved_pumpkin": 1.06, "jugcraft:hand_carved_white_pumpkin": 1.08,
-                         "jugcraft:hand_carved_jarrahdale_pumpkin": 1.03, "jugcraft:hand_carved_cinderella_pumpkin": 1.01}}
+                         "jugcraft:hand_carved_jarrahdale_pumpkin": 1.03, "jugcraft:hand_carved_cinderella_pumpkin": 1.01,
+                         "jugcraft:red_kuri_pumpkin": 0.99, "jugcraft:kabocha_pumpkin": 0.96,
+                         "jugcraft:hand_carved_red_kuri_pumpkin": 1.05, "jugcraft:hand_carved_kabocha_pumpkin": 1.02}}
 # The Candy Bag holds treats (item tag treat_tag) like a bundle.
 CANDY_BAG = {"treat_tag": "jugcraft:candy_bag_treats", "treats": ["#c:foods/candy", "minecraft:cookie", "jugcraft:soul_cake"]}
 # The Headless Horseman (agriculture/HeadlessHorseman.java, HorsemanSummoning.java, FlamingPumpkin.java): summoned
@@ -1730,7 +1752,8 @@ HAY_GOLEM = {"entity": "hay_golem", "display": "Hay Golem", "health": 20, "speed
              "reach": 1.8, "lead_range": 8.0, "heads_tag": "jugcraft:hay_golem_heads",
              "heads": ["minecraft:carved_pumpkin", "minecraft:jack_o_lantern", "jugcraft:hand_carved_pumpkin",
                        "jugcraft:hand_carved_white_pumpkin", "jugcraft:hand_carved_jarrahdale_pumpkin",
-                       "jugcraft:hand_carved_cinderella_pumpkin"],
+                       "jugcraft:hand_carved_cinderella_pumpkin", "jugcraft:hand_carved_red_kuri_pumpkin",
+                       "jugcraft:hand_carved_kabocha_pumpkin"],
              "wheat": [2, 5], "table": "entities/hay_golem"}
 
 
@@ -2029,6 +2052,10 @@ POT_RECIPES = {
     "cranberry_sauce": {"inputs": {"minecraft:bowl": 1, "jugcraft:cranberries": 2, "minecraft:sugar": 1}, "time": 200},
     # Halloween harvest: the guts scooped from carved pumpkins make soup.
     "pumpkin_soup": {"inputs": {"minecraft:bowl": 1, "jugcraft:pumpkin_guts": 2, "jugcraft:onion": 1}, "time": 200},
+    # Pumpkin Night (tools/decor20.py DISHES).
+    "red_kuri_soup": {"inputs": {"minecraft:bowl": 1, "jugcraft:red_kuri_pumpkin": 1, "jugcraft:onion": 1, "jugcraft:garlic": 1},
+                      "time": 200},
+    "kabocha_tempura": {"inputs": {"jugcraft:kabocha_pumpkin": 1, "minecraft:wheat": 1, "minecraft:egg": 1}, "count": 2, "time": 200},
     # Spooky sweets: sugar boiled with a pinch of something odd, four pieces a batch.
     "glow_gum": {"inputs": {"minecraft:sugar": 2, "minecraft:glow_berries": 1, "minecraft:slime_ball": 1}, "count": 4, "time": 200},
     "ghost_taffy": {"inputs": {"minecraft:sugar": 2, "minecraft:phantom_membrane": 1}, "count": 4, "time": 200},
@@ -2128,6 +2155,8 @@ SHAPELESS = [
     {"id": "white_pumpkin_seeds", "inputs": ["jugcraft:white_pumpkin"], "result": "white_pumpkin_seeds", "count": 4},
     {"id": "jarrahdale_pumpkin_seeds", "inputs": ["jugcraft:jarrahdale_pumpkin"], "result": "jarrahdale_pumpkin_seeds", "count": 4},
     {"id": "cinderella_pumpkin_seeds", "inputs": ["jugcraft:cinderella_pumpkin"], "result": "cinderella_pumpkin_seeds", "count": 4},
+    {"id": "red_kuri_pumpkin_seeds", "inputs": ["jugcraft:red_kuri_pumpkin"], "result": "red_kuri_pumpkin_seeds", "count": 4},
+    {"id": "kabocha_pumpkin_seeds", "inputs": ["jugcraft:kabocha_pumpkin"], "result": "kabocha_pumpkin_seeds", "count": 4},
     {"id": "bottle_gourd_seeds", "inputs": ["jugcraft:bottle_gourd"], "result": "bottle_gourd_seeds", "count": 4},
     {"id": "pumpkin_pie_from_heirloom_pumpkins", "inputs": ["#jugcraft:heirloom_pumpkins", "minecraft:sugar", "#minecraft:eggs"],
      "result": "minecraft:pumpkin_pie", "count": 1},
@@ -2563,7 +2592,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks())
 
 
 def all_items():
@@ -2574,7 +2603,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items())
 
 
 def owns(entry_id):
@@ -2669,3 +2698,9 @@ SHAPELESS += decor17.SHAPELESS
 # Halloween decorations batch 18, the Crypt and the Ossuary (tools/decor18.py).
 SHAPED += decor18.SHAPED
 SHAPELESS += decor18.SHAPELESS
+# Halloween decorations batch 19, the Laboratory, the Larder and the Dining Room (tools/decor19.py).
+SHAPED += decor19.SHAPED
+SHAPELESS += decor19.SHAPELESS
+# Halloween decorations batch 20, Pumpkin Night (tools/decor20.py); the heirlooms are with the others above.
+SHAPED += decor20.SHAPED
+SHAPELESS += decor20.SHAPELESS

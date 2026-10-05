@@ -27,6 +27,7 @@ import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -51,6 +52,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.random.WeightedList;
@@ -137,7 +139,8 @@ public final class JugcraftAgriculture {
 	private static final List<String> GRASS_SEEDS = List.of("corn_kernels", "sunflower_seeds", "beans", "sweet_potato", "flax_seeds",
 			"tomato_seeds", "pepper_seeds", "onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds",
 			"butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
-			"giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "bottle_gourd_seeds",
+			"giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "red_kuri_pumpkin_seeds",
+			"kabocha_pumpkin_seeds", "bottle_gourd_seeds",
 			"ornamental_corn_kernels", "mandrake_root");
 	/** The chestnut tree's feature (data/jugcraft/worldgen/feature/chestnut.json), grown by its sapling. */
 	public static final ResourceKey<Feature> CHESTNUT_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("chestnut"));
@@ -272,6 +275,24 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<ColossalSkullBlockEntity> COLOSSAL_SKULL_ENTITY;
 	public static BlockEntityType<GargoyleSentinelBlockEntity> GARGOYLE_SENTINEL_ENTITY;
 	public static BlockEntityType<GargoyleRainspoutBlockEntity> GARGOYLE_RAINSPOUT_ENTITY;
+	public static BlockEntityType<LightningHarnessBlockEntity> LIGHTNING_HARNESS_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> CRAWLING_HAND_ENTITY;
+	public static BlockEntityType<SilkCocoonBlockEntity> SILK_COCOON_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> EGG_SAC_ENTITY;
+	public static BlockEntityType<SilkSpoolStackBlockEntity> SILK_SPOOL_ENTITY;
+	public static BlockEntityType<HauntedDiningChairBlockEntity> DINING_CHAIR_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> TABLE_SETTING_ENTITY;
+	public static BlockEntityType<GrandfatherClockBlockEntity> GRANDFATHER_CLOCK_ENTITY;
+	public static BlockEntityType<WitchlightBlockEntity> WITCHLIGHT_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> SILHOUETTE_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> MOON_LAMP_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> SINGING_PUMPKIN_ENTITY;
+	public static BlockEntityType<HarvestEffigyBlockEntity> HARVEST_EFFIGY_ENTITY;
+	public static BlockEntityType<FarmStandBlockEntity> FARM_STAND_ENTITY;
+	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
+	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
+	public static SoundEvent EFFIGY_BURN;
+	private static final Map<SingingPumpkinBlock.Voice, SoundEvent> SINGING_VOICES = new EnumMap<>(SingingPumpkinBlock.Voice.class);
 	/** A Skeleton Key's wards ({@link SkeletonKeyItem}). */
 	public static DataComponentType<Integer> KEY_WARDS;
 	public static RecipeSerializer<KeyCopyingRecipe> KEY_COPYING_SERIALIZER;
@@ -423,6 +444,9 @@ public final class JugcraftAgriculture {
 		gourd("white_pumpkin", "white_pumpkin_seeds", 1.0F, MapColor.SNOW);
 		gourd("jarrahdale_pumpkin", "jarrahdale_pumpkin_seeds", 1.0F, MapColor.TERRACOTTA_CYAN);
 		gourd("cinderella_pumpkin", "cinderella_pumpkin_seeds", 1.0F, MapColor.COLOR_RED);
+		// Pumpkin Night (tools/decor20.py): the Red Kuri and the Kabocha.
+		gourd("red_kuri_pumpkin", "red_kuri_pumpkin_seeds", 1.0F, MapColor.COLOR_ORANGE);
+		gourd("kabocha_pumpkin", "kabocha_pumpkin_seeds", 1.0F, MapColor.COLOR_GREEN);
 		gourd("bottle_gourd", "bottle_gourd_seeds", 1.0F, MapColor.COLOR_LIGHT_GREEN);
 		registerGiantPumpkin();
 		registerBlock("cranberry_bush", CranberryBushBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SWEET_BERRY_BUSH)
@@ -515,6 +539,10 @@ public final class JugcraftAgriculture {
 		seeds("white_pumpkin_seeds", "white_pumpkin_stem", COMPOST_LOW);
 		seeds("jarrahdale_pumpkin_seeds", "jarrahdale_pumpkin_stem", COMPOST_LOW);
 		seeds("cinderella_pumpkin_seeds", "cinderella_pumpkin_stem", COMPOST_LOW);
+		seeds("red_kuri_pumpkin_seeds", "red_kuri_pumpkin_stem", COMPOST_LOW);
+		seeds("kabocha_pumpkin_seeds", "kabocha_pumpkin_stem", COMPOST_LOW);
+		stew("red_kuri_soup", 9, 0.7F);
+		food("kabocha_tempura", 6, 0.8F, COMPOST_MEDIUM_HIGH);
 		seeds("bottle_gourd_seeds", "bottle_gourd_stem", COMPOST_LOW);
 		plain("dried_bottle_gourd", COMPOST_MEDIUM);
 		plain("ornamental_corn", COMPOST_MEDIUM);
@@ -653,7 +681,7 @@ public final class JugcraftAgriculture {
 				DataComponentType.<PumpkinCarving>builder().persistent(PumpkinCarving.CODEC).networkSynchronized(PumpkinCarving.STREAM_CODEC).build());
 		List<Block> carved = new ArrayList<>();
 		carved.add(carvedPumpkin("hand_carved_pumpkin", Blocks.PUMPKIN, BuiltInLootTables.CARVE_PUMPKIN, MapColor.COLOR_ORANGE));
-		for (String variety : List.of("white_pumpkin", "jarrahdale_pumpkin", "cinderella_pumpkin")) {
+		for (String variety : List.of("white_pumpkin", "jarrahdale_pumpkin", "cinderella_pumpkin", "red_kuri_pumpkin", "kabocha_pumpkin")) {
 			carved.add(carvedPumpkin("hand_carved_" + variety, block(variety),
 					ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id("carve/" + variety)), block(variety).defaultMapColor()));
 		}
@@ -1764,6 +1792,8 @@ public final class JugcraftAgriculture {
 		registerHauntedHouseProps();
 		registerWitchsWorkshop();
 		registerCryptAndOssuary();
+		registerLaboratoryLarderDining();
+		registerPumpkinNight();
 	}
 
 	/**
@@ -1969,6 +1999,173 @@ public final class JugcraftAgriculture {
 		return BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(2.0F, 4.0F).requiresCorrectToolForDrops().sound(SoundType.BONE_BLOCK)
 				.noOcclusion().pushReaction(PushReaction.IMMOVEABLE);
 	}
+
+	/**
+	 * Halloween decorations batch 19, the Laboratory, the Larder and the Dining Room (tools/decor19.py): the Lightning
+	 * Harness, Brain-Vat Console and Crawling Hand; the Silk Cocoon, Egg Sac Cluster, Web Drape and Silk Spool Stack; the
+	 * Haunted Dining Chair, Floating Table Setting and Grandfather Clock; the three witchlights; the Yard Silhouette and
+	 * the Harvest Moon Lamp.
+	 */
+	private static void registerLaboratoryLarderDining() {
+		List<Block> blocks = new ArrayList<>();
+		Block harness = registerBlock(LIGHTNING_HARNESS, LightningHarnessBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.COPPER).noOcclusion().pushReaction(PushReaction.POPPED));
+		LIGHTNING_HARNESS_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(LIGHTNING_HARNESS),
+				FabricBlockEntityTypeBuilder.create(LightningHarnessBlockEntity::new, harness).build());
+		Block console = registerBlock(BRAIN_VAT_CONSOLE, BrainVatConsoleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.GOLD)
+				.strength(2.0F, 6.0F).sound(SoundType.METAL).noOcclusion().lightLevel(BrainVatConsoleBlock::light));
+		Block hand = registerBlock(CRAWLING_HAND, CrawlingHandBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
+				.strength(0.3F).sound(SoundType.SLIME_BLOCK).noOcclusion().pushReaction(PushReaction.POPPED));
+		CRAWLING_HAND_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(CRAWLING_HAND),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(CRAWLING_HAND_ENTITY, pos, state), hand)
+						.build());
+		blocks.addAll(List.of(harness, console, hand));
+
+		Block cocoon = registerBlock(SILK_COCOON, SilkCocoonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(0.8F)
+				.sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+		SILK_COCOON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(SILK_COCOON),
+				FabricBlockEntityTypeBuilder.create(SilkCocoonBlockEntity::new, cocoon).build());
+		Block sacs = registerBlock(EGG_SAC_CLUSTER, EggSacClusterBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).noCollision()
+				.strength(0.2F).sound(SoundType.FROGSPAWN).noOcclusion().pushReaction(PushReaction.POPPED));
+		EGG_SAC_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(EGG_SAC_CLUSTER),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(EGG_SAC_ENTITY, pos, state), sacs)
+						.build());
+		Block drape = registerBlock(WEB_DRAPE, WebDrapeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).noCollision().strength(0.6F)
+				.sound(SoundType.COBWEB).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		Block spools = registerBlock(SILK_SPOOL_STACK, SilkSpoolStackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		SILK_SPOOL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(SILK_SPOOL_STACK),
+				FabricBlockEntityTypeBuilder.create(SilkSpoolStackBlockEntity::new, spools).build());
+		blocks.addAll(List.of(cocoon, sacs, drape, spools));
+
+		Block chair = registerBlock(DINING_CHAIR, HauntedDiningChairBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		DINING_CHAIR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(DINING_CHAIR),
+				FabricBlockEntityTypeBuilder.create(HauntedDiningChairBlockEntity::new, chair).build());
+		Block setting = registerBlock(TABLE_SETTING, FloatingTableSettingBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
+				.strength(0.3F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED).lightLevel(FloatingTableSettingBlock::light));
+		TABLE_SETTING_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(TABLE_SETTING),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(TABLE_SETTING_ENTITY, pos, state), setting)
+						.build());
+		Block clock = registerBlock(GRANDFATHER_CLOCK, GrandfatherClockBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		GRANDFATHER_CLOCK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(GRANDFATHER_CLOCK),
+				FabricBlockEntityTypeBuilder.create(GrandfatherClockBlockEntity::new, clock).build());
+		registerItem(GRANDFATHER_CLOCK, props -> new DoubleHighBlockItem(clock, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		blocks.addAll(List.of(chair, setting));
+
+		Block post = registerBlock(WITCHLIGHT_POST, WitchlightLampPostBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.5F)
+				.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).lightLevel(WitchlightLampPostBlock::light));
+		registerItem(WITCHLIGHT_POST, props -> new DoubleHighBlockItem(post, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block stake = registerBlock(WITCHLIGHT_STAKE, props -> new WitchlightBlock(props, WitchlightBlock.Mount.STAKE), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.METAL).strength(1.0F).sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED).lightLevel(Witchlights::light));
+		Block hanging = registerBlock(HANGING_WITCHLIGHT, props -> new WitchlightBlock(props, WitchlightBlock.Mount.HANGING), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.METAL).strength(1.0F).sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED).lightLevel(Witchlights::light));
+		WITCHLIGHT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("witchlight"),
+				FabricBlockEntityTypeBuilder.create(WitchlightBlockEntity::new, post, stake, hanging).build());
+		blocks.addAll(List.of(stake, hanging));
+
+		Block silhouette = registerBlock(YARD_SILHOUETTE, YardSilhouetteBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		SILHOUETTE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(YARD_SILHOUETTE),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(SILHOUETTE_ENTITY, pos, state), silhouette)
+						.build());
+		Block moon = registerBlock(MOON_LAMP, HarvestMoonLampBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(1.5F)
+				.sound(SoundType.GLASS).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).lightLevel(HarvestMoonLampBlock::light));
+		MOON_LAMP_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(MOON_LAMP),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(MOON_LAMP_ENTITY, pos, state), moon)
+						.build());
+		blocks.addAll(List.of(silhouette, moon));
+		for (Block block : blocks) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	public static final String LIGHTNING_HARNESS = "lightning_harness";
+	public static final String BRAIN_VAT_CONSOLE = "brain_vat_console";
+	public static final String CRAWLING_HAND = "crawling_hand";
+	public static final String SILK_COCOON = "silk_cocoon";
+	public static final String EGG_SAC_CLUSTER = "egg_sac_cluster";
+	public static final String WEB_DRAPE = "web_drape";
+	public static final String SILK_SPOOL_STACK = "silk_spool_stack";
+	public static final String DINING_CHAIR = "haunted_dining_chair";
+	public static final String TABLE_SETTING = "floating_table_setting";
+	public static final String GRANDFATHER_CLOCK = "grandfather_clock";
+	public static final String WITCHLIGHT_POST = "witchlight_lamp_post";
+	public static final String WITCHLIGHT_STAKE = "witchlight_path_stake";
+	public static final String HANGING_WITCHLIGHT = "hanging_witchlight";
+	public static final String YARD_SILHOUETTE = "yard_silhouette";
+	public static final String MOON_LAMP = "harvest_moon_lamp";
+
+	/** A Singing Pumpkin voice's sound (assets/jugcraft/sounds/choir, made by tools/choir_sounds.py). */
+	public static SoundEvent singingVoice(SingingPumpkinBlock.Voice voice) {
+		return SINGING_VOICES.get(voice);
+	}
+
+	private static SoundEvent sound(String id) {
+		Identifier key = Jugcraft.id(id);
+		return Registry.register(BuiltInRegistries.SOUND_EVENT, key, SoundEvent.createVariableRangeEvent(key));
+	}
+
+	/**
+	 * Halloween decorations batch 20, Pumpkin Night (tools/decor20.py): the Farm Stand, the Pumpkin Vine and Autumn Leaf
+	 * Garlands, the Harvest Effigy with its Effigy Ashes and Hearth Ash, and the four Singing Pumpkins. (The Red Kuri and
+	 * Kabocha pumpkins are registered with the other heirlooms.)
+	 */
+	private static void registerPumpkinNight() {
+		Block stand = registerBlock(FARM_STAND, FarmStandBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5F, 1200.0F)
+				.sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		FARM_STAND_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(FARM_STAND),
+				FabricBlockEntityTypeBuilder.create(FarmStandBlockEntity::new, stand).build());
+		FARM_STAND_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id(FARM_STAND),
+				new ExtendedMenuType<>(FarmStandMenu::new, FarmStandMenu.Opening.STREAM_CODEC));
+		registerItem(FARM_STAND, props -> new BlockItem(stand, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		FarmStandBlock.register();
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> FarmStandMenu.clear());
+
+		registerItem(PUMPKIN_VINE_GARLAND, props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.PUMPKIN_VINE), new Item.Properties(),
+				BUILDING_TAB);
+		registerItem(AUTUMN_LEAF_GARLAND, props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.AUTUMN_LEAVES), new Item.Properties(),
+				BUILDING_TAB);
+
+		EFFIGY_BURN = sound("effigy.burn");
+		Block effigy = registerBlock(HARVEST_EFFIGY, HarvestEffigyBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
+				.strength(0.8F).sound(SoundType.GRASS).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).lightLevel(HarvestEffigyBlock::light));
+		HARVEST_EFFIGY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(HARVEST_EFFIGY),
+				FabricBlockEntityTypeBuilder.create(HarvestEffigyBlockEntity::new, effigy).build());
+		registerItem(HARVEST_EFFIGY, props -> new BlockItem(effigy, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block ashes = registerBlock(EFFIGY_ASHES, EffigyAshesBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY)
+				.strength(0.3F).sound(SoundType.SAND).noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem(EFFIGY_ASHES, props -> new BlockItem(ashes, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem(HEARTH_ASH, props -> new FertilizerItem(props, HEARTH_ASH_RADIUS, HEARTH_ASH_DOSES), new Item.Properties(), INGREDIENT_TAB);
+
+		List<Block> pumpkins = new ArrayList<>();
+		for (SingingPumpkinBlock.Voice voice : SingingPumpkinBlock.Voice.values()) {
+			SINGING_VOICES.put(voice, sound("singing_pumpkin." + voice.id()));
+			String id = SINGING_PUMPKIN + voice.id();
+			Block pumpkin = registerBlock(id, props -> new SingingPumpkinBlock(props, voice), BlockBehaviour.Properties.of()
+					.mapColor(MapColor.COLOR_ORANGE).strength(1.0F).sound(SoundType.WOOD).lightLevel(state -> SingingPumpkinBlock.LIGHT)
+					.pushReaction(PushReaction.POPPED));
+			registerItem(id, props -> new BlockItem(pumpkin, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+			pumpkins.add(pumpkin);
+		}
+		SINGING_PUMPKIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("singing_pumpkin"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(SINGING_PUMPKIN_ENTITY, pos, state),
+						pumpkins.toArray(Block[]::new)).build());
+	}
+
+	public static final String FARM_STAND = "farm_stand";
+	public static final String PUMPKIN_VINE_GARLAND = "pumpkin_vine_garland";
+	public static final String AUTUMN_LEAF_GARLAND = "autumn_leaf_garland";
+	public static final String HARVEST_EFFIGY = "harvest_effigy";
+	public static final String EFFIGY_ASHES = "effigy_ashes";
+	public static final String HEARTH_ASH = "hearth_ash";
+	/** Hearth Ash fertilizes this far round where it is used (a 3x3 patch), one dose of bone meal each: weaker than bone meal. */
+	public static final int HEARTH_ASH_RADIUS = 1;
+	public static final int HEARTH_ASH_DOSES = 1;
+	/** Each Singing Pumpkin's ID is this and its voice: singing_pumpkin_bass and so on. */
+	public static final String SINGING_PUMPKIN = "singing_pumpkin_";
 
 	private static BlockBehaviour.Properties gargoyle() {
 		return BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.STONE)
@@ -2344,6 +2541,8 @@ public final class JugcraftAgriculture {
 		wildPatch("white_pumpkin", ConventionalBiomeTags.IS_BIRCH_FOREST, ConventionalBiomeTags.IS_SNOWY);
 		wildPatch("jarrahdale_pumpkin", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_WINDSWEPT);
 		wildPatch("cinderella_pumpkin", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
+		wildPatch("red_kuri_pumpkin", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_SPOOKY);
+		wildPatch("kabocha_pumpkin", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_JUNGLE);
 		wildPatch("bottle_gourd", ConventionalBiomeTags.IS_JUNGLE, ConventionalBiomeTags.IS_SAVANNA);
 		wildPatch("mums", ConventionalBiomeTags.IS_FLORAL, ConventionalBiomeTags.IS_FOREST);
 		// Autumn foraging: wild mushrooms on forest floors.
@@ -2393,6 +2592,8 @@ public final class JugcraftAgriculture {
 			"white_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
 			"jarrahdale_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
 			"cinderella_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
+			"red_kuri_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
+			"kabocha_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
 			"bottle_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 15.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 15.0, 12.0)});
 
 	/** A squash or gourd block (with its item), its stem and its attached stem. The seeds are registered with the other items. */
