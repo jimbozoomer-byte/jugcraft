@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 
 /**
  * Client game test for the arms (batch 42): every arm held by an armor stand (each kind's in-hand pose; a rack of
- * bronze, then one of steel), every arm in an item frame (the inventory sprite, also shot close up, six kinds a shot),
+ * bronze, then one of steel), every arm in an item frame (the inventory sprite, also shot close up, four kinds a shot),
  * and the player holding a greatsword, a halberd and a lance in first person, a greatsword from the front, and parrying
  * with a longsword and charging with a lance while holding use (CI job {@code client}).
  */
@@ -52,8 +52,13 @@ public class ArmsClientGameTests implements FabricClientGameTest {
 				frame(server, x + 3 + i, y + 4, z - 12, steel.get(i));
 			}
 			context.waitTicks(20);
-			// Hide the HUD, hand and chat for the scenery shots.
-			context.getInput().pressKey(options -> options.keyToggleGui);
+			// Hide the HUD, hand and chat for the scenery shots, whatever an earlier test in this client left (as
+			// OfrendaClientGameTests does).
+			context.runOnClient(client -> {
+				if (!client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
 			// Each rack in parts of seven stands, from far enough back to see each part whole.
 			String[] parts = {"", "_ii", "_iii", "_iv", "_v"};
 			for (int part = 0; part * 7 < count; part++) {
@@ -62,16 +67,20 @@ public class ArmsClientGameTests implements FabricClientGameTest {
 				shoot(context, singleplayer, at, y + 1, z + 2, 180, 12, "jugcraft_arms_steel_rack" + parts[part]);
 			}
 			shoot(context, singleplayer, x + 3 + count / 2, y + 3, z - 1, 180, -5, "jugcraft_arms_frames");
-			// The frames close up, six kinds (bronze below, steel above) a shot, so each 16x16 icon shows large enough to
+			// The frames close up, four kinds (bronze below, steel above) a shot, so each 16x16 icon shows large enough to
 			// judge (docs/features/arms-icons-16.md). The bronze rack stands where the camera goes, so the racks go first
 			// (with anything they drop).
 			server.runCommand("kill @e[type=minecraft:armor_stand]");
 			server.runCommand("kill @e[type=minecraft:item]");
-			for (int group = 0; group * 6 < count; group++) {
-				double centre = x + 3 + group * 6 + Math.min(6, count - group * 6) / 2.0;
+			for (int group = 0; group * 4 < count; group++) {
+				double centre = x + 3 + group * 4 + Math.min(4, count - group * 4) / 2.0;
 				closeUp(context, singleplayer, centre, y + 2, z - 10.5, "jugcraft_arms_frames_close_" + (group + 1));
 			}
-			context.getInput().pressKey(options -> options.keyToggleGui);
+			context.runOnClient(client -> {
+				if (client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
 
 			// In the hand, first person (the hotbar shows), then the greatsword from the front.
 			server.runCommand("tp @p %d %d %d 180 0".formatted(x + 7, y, z + 5));
