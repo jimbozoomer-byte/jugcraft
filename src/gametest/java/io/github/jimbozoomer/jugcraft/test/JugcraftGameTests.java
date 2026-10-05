@@ -1506,6 +1506,31 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Batch 57: raiders hunt players on their own. A test player only becomes a fair target once their client counts as
+	 * loaded (since 1.21.4 nobody attacks a player whose client is still loading in; a mock player's never does by itself),
+	 * so the test marks it loaded. A grunt then finds and hits them, and a grenadier lobs grenades at them.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 400, skyAccess = true)
+	public void raidersHuntPlayers(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		player.setClientLoaded(true);
+		player.setPos(helper.absoluteVec(new Vec3(20.5, 1, 20.5)));
+		var grunt = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(16.5, 1, 20.5));
+		var grenadier = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, new Vec3(20.5, 1, 8.5));
+		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 26, 44);
+		boolean[] threw = {false};
+		helper.onEachTick(() -> threw[0] |= !helper.getLevel().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderBomb.class, area).isEmpty());
+		helper.succeedWhen(() -> {
+			helper.assertTrue(grunt.getTarget() == player && grenadier.getTarget() == player,
+					"Both raiders should hunt the player: the grunt hunts " + grunt.getTarget() + ", the grenadier " + grenadier.getTarget());
+			helper.assertTrue(player.getHealth() < player.getMaxHealth(), "The grunt should have hit the player");
+			helper.assertTrue(threw[0], "The grenadier should have thrown at the player");
+		});
+	}
+
 	/** Batch 57: a blimp climbs to cruise well above what it hunts. */
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
 	public void blimpCruisesOverItsQuarry(GameTestHelper helper) {
