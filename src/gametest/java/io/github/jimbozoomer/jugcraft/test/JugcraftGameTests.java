@@ -1596,100 +1596,6 @@ public class JugcraftGameTests {
 		});
 	}
 
-	/**
-	 * Raider extras: grunts marching on an objective behind a wall they cannot path round prop siege ladders up it, which
-	 * are climbable and drop nothing.
-	 */
-	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 600, skyAccess = true)
-	public void siegeLaddersGoUpWalls(GameTestHelper helper) {
-		raiderFloor(helper);
-		for (int x = 0; x < 44; x++) {
-			for (int y = 1; y <= 5; y++) {
-				helper.setBlock(new BlockPos(x, y, 14), Blocks.STONE_BRICKS);
-			}
-		}
-		ServerLevel level = helper.getLevel();
-		var raid = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.start(level, helper.absolutePos(new BlockPos(20, 1, 30)),
-				helper.absolutePos(new BlockPos(20, 1, 6)), 1, level.getRandom());
-		helper.succeedWhen(() -> {
-			boolean ladder = false;
-			for (int x = 0; x < 44 && !ladder; x++) {
-				for (int y = 1; y <= 5 && !ladder; y++) {
-					ladder = io.github.jimbozoomer.jugcraft.raiders.SiegeLadderBlock.is(helper.getBlockState(new BlockPos(x, y, 13)));
-				}
-			}
-			helper.assertTrue(ladder, "A grunt stuck at the wall should have propped a siege ladder against it");
-			helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.SIEGE_LADDER.defaultBlockState()
-					.is(net.minecraft.tags.BlockTags.CLIMBABLE), "A siege ladder should be climbable");
-			io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
-		});
-	}
-
-	/**
-	 * Raider extras: the Raider War Horn calls a raid at the world's raid level on the blower's base, or refuses (and is
-	 * kept) while another raid is under way.
-	 */
-	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 100, skyAccess = true)
-	public void raidHornCallsARaid(GameTestHelper helper) {
-		raiderFloor(helper);
-		ServerLevel level = helper.getLevel();
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		player.setPos(helper.absoluteVec(new Vec3(20.5, 1, 20.5)));
-		player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.RAID_HORN));
-		int before = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raids(level).size();
-		var result = io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.RAID_HORN.use(level, player, net.minecraft.world.InteractionHand.MAIN_HAND);
-		var raids = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raids(level);
-		if (before > 0) {
-			// Another test's raid is under way: the horn must refuse and start nothing.
-			helper.assertTrue(result == net.minecraft.world.InteractionResult.FAIL && raids.size() == before, "The horn should refuse while a raid is under way");
-		} else if (result == net.minecraft.world.InteractionResult.SUCCESS) {
-			helper.assertTrue(raids.size() == 1, "Blowing the horn should start one raid");
-			var raid = raids.get(0);
-			helper.assertTrue(raid.objective().equals(player.blockPosition()) && raid.level() == io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raidLevel(level),
-					"It should come for the blower's base at the world's raid level");
-			io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
-		} else {
-			// Nowhere loaded and open for the party to gather (the test area's surroundings): refused, nothing started.
-			helper.assertTrue(raids.isEmpty(), "A refused horn should start nothing");
-		}
-		helper.succeed();
-	}
-
-	/**
-	 * Raider extras: a raider camp on flat ground has its sandbag ring, campfire, tents and a supply barrel with its loot
-	 * table, held by a garrison of four raiders who never despawn; on uneven ground none is built.
-	 */
-	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
-	public void raiderCampHoldsItsGround(GameTestHelper helper) {
-		raiderFloor(helper);
-		ServerLevel level = helper.getLevel();
-		BlockPos origin = helper.absolutePos(new BlockPos(14, 1, 14));
-		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.build(level, origin, level.getRandom()),
-				"A camp should be built on flat ground");
-		helper.assertBlockPresent(Blocks.CAMPFIRE, new BlockPos(14, 1, 14));
-		helper.assertBlockPresent(Blocks.BARREL, new BlockPos(17, 1, 16));
-		var barrel = helper.getBlockEntity(new BlockPos(17, 1, 16), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
-		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.LOOT.equals(barrel.getLootTable()), "The barrel should hold the camp's loot");
-		var raiders = level.getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry.class,
-				new net.minecraft.world.phys.AABB(origin).inflate(8));
-		helper.assertTrue(raiders.size() == 4 && raiders.stream().allMatch(net.minecraft.world.entity.Mob::isPersistenceRequired),
-				"Four raiders should hold the camp, for good, not " + raiders.size());
-		// A tall step in the ground: no camp.
-		for (int x = 32; x < 44; x++) {
-			for (int z = 30; z < 44; z++) {
-				for (int y = 1; y <= 4; y++) {
-					helper.setBlock(new BlockPos(x, y, z), Blocks.STONE);
-				}
-			}
-		}
-		helper.assertFalse(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.build(level, helper.absolutePos(new BlockPos(32, 1, 32)),
-				level.getRandom()), "No camp on uneven ground");
-		for (var raider : raiders) {
-			raider.discard();
-		}
-		helper.succeed();
-	}
-
 	/** Batch 57: a blimp climbs to cruise well above what it hunts. */
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
 	public void blimpCruisesOverItsQuarry(GameTestHelper helper) {
@@ -3481,6 +3387,100 @@ public class JugcraftGameTests {
 			helper.assertTrue(planks == 10, "Accepted " + planks + " planks into the pattern slot");
 			helper.assertTrue(cobble == 0, "Accepted cobblestone into an empty grid slot");
 			transaction.abort();
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * Raider extras: grunts marching on an objective behind a wall they cannot path round prop siege ladders up it, which
+	 * are climbable and drop nothing.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 600, skyAccess = true)
+	public void siegeLaddersGoUpWalls(GameTestHelper helper) {
+		raiderFloor(helper);
+		for (int x = 0; x < 44; x++) {
+			for (int y = 1; y <= 5; y++) {
+				helper.setBlock(new BlockPos(x, y, 14), Blocks.STONE_BRICKS);
+			}
+		}
+		ServerLevel level = helper.getLevel();
+		var raid = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.start(level, helper.absolutePos(new BlockPos(20, 1, 30)),
+				helper.absolutePos(new BlockPos(20, 1, 6)), 1, level.getRandom());
+		helper.succeedWhen(() -> {
+			boolean ladder = false;
+			for (int x = 0; x < 44 && !ladder; x++) {
+				for (int y = 1; y <= 5 && !ladder; y++) {
+					ladder = io.github.jimbozoomer.jugcraft.raiders.SiegeLadderBlock.is(helper.getBlockState(new BlockPos(x, y, 13)));
+				}
+			}
+			helper.assertTrue(ladder, "A grunt stuck at the wall should have propped a siege ladder against it");
+			helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.SIEGE_LADDER.defaultBlockState()
+					.is(net.minecraft.tags.BlockTags.CLIMBABLE), "A siege ladder should be climbable");
+			io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
+		});
+	}
+
+	/**
+	 * Raider extras: the Raider War Horn calls a raid at the world's raid level on the blower's base, or refuses (and is
+	 * kept) while another raid is under way.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 100, skyAccess = true)
+	public void raidHornCallsARaid(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setPos(helper.absoluteVec(new Vec3(20.5, 1, 20.5)));
+		player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.RAID_HORN));
+		int before = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raids(level).size();
+		var result = io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.RAID_HORN.use(level, player, net.minecraft.world.InteractionHand.MAIN_HAND);
+		var raids = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raids(level);
+		if (before > 0) {
+			// Another test's raid is under way: the horn must refuse and start nothing.
+			helper.assertTrue(result == net.minecraft.world.InteractionResult.FAIL && raids.size() == before, "The horn should refuse while a raid is under way");
+		} else if (result == net.minecraft.world.InteractionResult.SUCCESS) {
+			helper.assertTrue(raids.size() == 1, "Blowing the horn should start one raid");
+			var raid = raids.get(0);
+			helper.assertTrue(raid.objective().equals(player.blockPosition()) && raid.level() == io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raidLevel(level),
+					"It should come for the blower's base at the world's raid level");
+			io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
+		} else {
+			// Nowhere loaded and open for the party to gather (the test area's surroundings): refused, nothing started.
+			helper.assertTrue(raids.isEmpty(), "A refused horn should start nothing");
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * Raider extras: a raider camp on flat ground has its sandbag ring, campfire, tents and a supply barrel with its loot
+	 * table, held by a garrison of four raiders who never despawn; on uneven ground none is built.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void raiderCampHoldsItsGround(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = helper.absolutePos(new BlockPos(14, 1, 14));
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.build(level, origin, level.getRandom()),
+				"A camp should be built on flat ground");
+		helper.assertBlockPresent(Blocks.CAMPFIRE, new BlockPos(14, 1, 14));
+		helper.assertBlockPresent(Blocks.BARREL, new BlockPos(17, 1, 16));
+		var barrel = helper.getBlockEntity(new BlockPos(17, 1, 16), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.LOOT.equals(barrel.getLootTable()), "The barrel should hold the camp's loot");
+		var raiders = level.getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry.class,
+				new net.minecraft.world.phys.AABB(origin).inflate(8));
+		helper.assertTrue(raiders.size() == 4 && raiders.stream().allMatch(net.minecraft.world.entity.Mob::isPersistenceRequired),
+				"Four raiders should hold the camp, for good, not " + raiders.size());
+		// A tall step in the ground: no camp.
+		for (int x = 32; x < 44; x++) {
+			for (int z = 30; z < 44; z++) {
+				for (int y = 1; y <= 4; y++) {
+					helper.setBlock(new BlockPos(x, y, z), Blocks.STONE);
+				}
+			}
+		}
+		helper.assertFalse(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.build(level, helper.absolutePos(new BlockPos(32, 1, 32)),
+				level.getRandom()), "No camp on uneven ground");
+		for (var raider : raiders) {
+			raider.discard();
 		}
 		helper.succeed();
 	}
