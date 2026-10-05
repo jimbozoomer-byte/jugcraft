@@ -68,8 +68,11 @@ public final class Dieselworks {
 	}
 
 	private static void entry(String id, String kind, float hardness, float blast) {
+		// The steel set (both steel plates, the pillar, the band and the grating) is cool blue-grey steel, so it maps as
+		// metal; the skid iron, I-beam, porthole and lamp keep the giants' warm brown.
 		MapColor color = id.contains("patina") || id.contains("dome") ? MapColor.WARPED_NYLIUM
-				: id.contains("red") ? MapColor.COLOR_RED : MapColor.TERRACOTTA_BROWN;
+				: id.contains("red") ? MapColor.COLOR_RED
+				: id.contains("rust") || id.equals("riveted_band_block") ? MapColor.METAL : MapColor.TERRACOTTA_BROWN;
 		BlockBehaviour.Properties metal = BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).mapColor(color)
 				.strength(hardness, blast).requiresCorrectToolForDrops();
 		switch (kind) {

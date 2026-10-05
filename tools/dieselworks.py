@@ -1,8 +1,10 @@
 """Dieselworks (batch 45, docs/features/dieselworks.md): building blocks in the look of the dieselpunk giants.
 
 Weathered riveted steel plate, green patina panels, chipped red iron, banded copper dome plate, ribbed pillars, skid iron,
-see-through steel grating for catwalks, steel I-beams, porthole windows and amber cage lamps. The plates reuse the
-giants' textures (tools/dieselrust_textures.py, "dr_*"); the grating, porthole and lamp textures are drawn here.
+see-through steel grating for catwalks, steel I-beams, porthole windows and amber cage lamps. The patina, red iron, dome
+and skid blocks reuse the giants' textures (tools/dieselrust_textures.py, "dr_*"). The steel set (both steel plates, the
+Ribbed Steel Pillar, the Riveted Band and the grating) has its own "dw_*" textures, drawn here in one cool steel palette
+as tiling building blocks (docs/ART_DIRECTION.md, "Tiling building blocks"); the giants keep their "dr_*" steel.
 
 Java: building/Dieselworks.java registers the blocks; tools/check_mod_data.py keeps the list and strengths the same.
 Every recipe turns metal plate (or ingots, nuggets and glass) into blocks; nothing turns a block back into metal.
@@ -11,6 +13,8 @@ import math
 import sys
 
 from PIL import Image
+
+import clean_metal
 
 MOD = "jugcraft"
 
@@ -35,16 +39,16 @@ BLOCKS = {
 }
 # Textures of the cubes: one name for all faces, or (side, end) for pillars.
 TEXTURES = {
-    "rust_plate": "dr_rust_bare",
-    "riveted_rust_plate": "dr_rust",
+    "rust_plate": "dw_steel_plate",
+    "riveted_rust_plate": "dw_steel_plate_riveted",
     "patina_plate": "dr_patina",
     "perforated_patina_plate": "dr_perforated",
     "red_iron_plate": "dr_red",
     "copper_dome_plate": "dr_dome",
-    "riveted_band_block": "dr_band",
+    "riveted_band_block": "dw_steel_band",
     "skid_iron_block": "dr_skid",
     "ribbed_patina_pillar": ("dr_ribbed_patina", "dr_patina"),
-    "ribbed_rust_pillar": ("dr_ribbed_rust", "dr_rust"),
+    "ribbed_rust_pillar": ("dw_ribbed_steel", "dw_steel_plate"),
     "rust_grating": "dw_grating",
     "porthole_window": "dw_porthole",
 }
@@ -215,24 +219,87 @@ def shaped(condition, pattern, key, result, count):
 
 # ------------------------------------------------------------------ art
 
-# The giants' weathered steel (tools/dieselrust_textures.PLATE), drawn in the clean style (tools/clean_metal.py).
+# The giants' weathered steel (tools/dieselrust_textures.PLATE), drawn in the clean style (tools/clean_metal.py). Only
+# the porthole ring still uses it: dw_porthole is shared with the zeppelin and the raiders' quads.
 PLATE = [(44, 42, 44), (66, 63, 63), (86, 82, 80), (106, 101, 97), (128, 122, 116), (152, 146, 138)]
+
+# The Dieselworks steel: cool blue-grey, one palette for every steel block of the set, dark to light. 0 deep shadow,
+# 1 seam and shade, 2 fill, 3 sheen, 4 lit edge, 5 glint. The owner called the old warm-brown plates (the giants' dr_*
+# textures, each framed in near-black) horrific on 5 October 2026; these follow bastion concrete, which they liked.
+STEEL = [(58, 63, 71), (82, 88, 97), (104, 110, 119), (118, 124, 133), (138, 144, 152), (172, 178, 184)]
+# Rivet heads lit at the top left, glinting no brighter than a lit edge, so a riveted wall does not sparkle.
+RIVET = STEEL[:5]
+
+
+def steel_plate():
+    """Weathered Steel Plate: one brushed sheet per block. The seam is split across the edge (lit top row and left
+    column, seam on the bottom row and right column), so a wall or floor shows one seam between blocks. Brushed streaks
+    one shade up, staggered at five heights; no glint, rust or stain stamped into every block."""
+    img = clean_metal.canvas(STEEL[2])
+    clean_metal.sheet(img, STEEL[4], STEEL[2], STEEL[1])
+    for x0, x1, y in ((2, 8, 3), (7, 13, 6), (1, 4, 9), (9, 13, 10), (3, 8, 12)):
+        clean_metal.rect(img, x0, y, x1, y, STEEL[3])
+    return img
+
+
+def riveted_steel_plate():
+    """Riveted Steel Plate: the same sheet framed by twelve rivets at x and y 1, 5, 9 and 13, with a one-row sheen
+    across its upper part. The rivets' period of four carries on across the seam into the next block, so a wall shows
+    one even rivet lattice along every joint; no rivet crosses the slab cut (rows 7|8), so slabs and stair steps never
+    show half a head."""
+    img = clean_metal.canvas(STEEL[2])
+    clean_metal.sheet(img, STEEL[4], STEEL[2], STEEL[1])
+    clean_metal.rect(img, 3, 3, 12, 3, STEEL[3])
+    for x in (1, 5, 9, 13):
+        clean_metal.bolt(img, x, 1, RIVET)
+        clean_metal.bolt(img, x, 13, RIVET)
+    for y in (5, 9):
+        clean_metal.bolt(img, 1, y, RIVET)
+        clean_metal.bolt(img, 13, y, RIVET)
+    return img
+
+
+def ribbed_steel():
+    """The Ribbed Steel Pillar's side: a rib every four rows (lit top, sheen, fill, dark gap), shaded across its width
+    like a round column, lit on the left and darker on the right."""
+    img = clean_metal.canvas(STEEL[2])
+    rows = (4, 3, 2, 0)
+    across = (1,) + (0,) * 12 + (-1, -1, -1)
+    for y in range(16):
+        for x in range(16):
+            clean_metal.put(img, x, y, STEEL[max(0, min(5, rows[y % 4] + across[x]))])
+    return img
+
+
+def steel_band():
+    """The Riveted Band: a dark steel strap across the sheet, lit along its top and casting a shadow under it, with a
+    rivet every four pixels. The strap and its rivets carry on unbroken across the block edge, so a course of bands
+    reads as one long strap; the sheet above and below keeps the split seam."""
+    img = clean_metal.canvas(STEEL[2])
+    clean_metal.sheet(img, STEEL[4], STEEL[2], STEEL[1])
+    clean_metal.rect(img, 0, 4, 15, 4, STEEL[3])
+    clean_metal.rect(img, 0, 5, 15, 10, STEEL[1])
+    clean_metal.rect(img, 0, 11, 15, 11, STEEL[0])
+    clean_metal.rect(img, 0, 12, 15, 12, STEEL[1])
+    for x in (1, 5, 9, 13):
+        clean_metal.bolt(img, x, 7, RIVET)
+    return img
 
 
 def grating():
-    """Steel grating with see-through square holes, so catwalks show what is below: each bar lit on its top edge."""
+    """Steel grating in the Dieselworks steel, with see-through square holes so catwalks show what is below: a frame
+    lit on its top and left edges and shaded on the others, and two bars each way, leaving nine even 4 x 4 holes."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    bars = (0, 5, 10, 15)
     for y in range(16):
         for x in range(16):
-            if y % 4 == 0 or y == 15:
-                c = PLATE[3] if y != 15 else PLATE[1]
-            elif x % 4 == 0 or x == 15:
-                c = PLATE[2] if x != 15 else PLATE[1]
+            if y in bars:
+                c = STEEL[4] if y == 0 else STEEL[1] if y == 15 else STEEL[3]
+            elif x in bars:
+                c = STEEL[3] if x == 0 else STEEL[1] if x == 15 else STEEL[2]
             else:
                 continue
-            img.putpixel((x, y), c + (255,))
-    for x, y in ((0, 0), (12, 0), (0, 12), (12, 12)):
-        img.putpixel((x, y), PLATE[4] + (255,))
+            clean_metal.put(img, x, y, c)
     return img
 
 
@@ -264,3 +331,7 @@ def porthole():
 def draw_all(save):
     save(grating(), "block", "dw_grating")
     save(porthole(), "block", "dw_porthole")
+    save(steel_plate(), "block", "dw_steel_plate")
+    save(riveted_steel_plate(), "block", "dw_steel_plate_riveted")
+    save(ribbed_steel(), "block", "dw_ribbed_steel")
+    save(steel_band(), "block", "dw_steel_band")

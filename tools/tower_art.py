@@ -5,6 +5,10 @@ details a real material shows: formwork seams and tie holes in concrete, brushed
 cladding, a twill weave under resin on composite, weld seams and wear on armour, crystal facets on silicon
 carbide, a hexagonal lattice on graphene. Lighting is baked from the top-left like vanilla's textures, but kept
 soft so a wall of blocks reads as one surface rather than a grid of tiles.
+
+Steel Armor Plate is the exception: the owner rejected its noisy look on 5 October 2026, so it is drawn flat at 32x32
+in the clean style (steel_armor_plate below; docs/ART_DIRECTION.md, "Tiling building blocks"). The rest of the set
+still awaits that clean pass.
 """
 import math
 
@@ -269,8 +273,64 @@ def armor_plate(base, seed, rivet_color, weld=True, stripe=None):
     return to_image(img)
 
 
+# Steel Armor Plate in gunmetal, dark to light: 0 deep shadow and seam, 1 shade and recess, 2 fill, 3 sheen, 4 lit
+# edge, 5 glint. Drawn flat in the clean style (docs/ART_DIRECTION.md, "Tiling building blocks"), not from noise: the
+# owner called the old noisy, banded plate horrific on 5 October 2026.
+ARMOR = [(40, 44, 51), (56, 61, 69), (72, 78, 87), (86, 92, 102), (104, 110, 120), (140, 146, 156)]
+
+
 def steel_armor_plate():
-    return armor_plate((78, 84, 94), 50, (150, 156, 164))
+    """Steel Armor Plate, 32x32: one thick plate a block with its corners chamfered, so where four blocks meet the
+    chamfers make a recessed diamond, and a quarter of a round bolt boss in each corner completes one whole boss in it.
+    A two-pixel bevel is split across the edge (lit top and left, shaded and seamed bottom and right), so a wall shows
+    one seam between plates and no top-to-bottom banding; a sheen band high on the plate and three brushed streaks one
+    shade up. No detail crosses the slab cut (rows 15|16)."""
+    n, chamfer, boss = 32, 7, 3.6
+    img = Image.new("RGBA", (n, n), ARMOR[2] + (255,))
+    px = img.load()
+
+    def put(x, y, k):
+        px[x, y] = ARMOR[k] + (255,)
+
+    for i in range(n):
+        put(i, 0, 4)
+        put(0, i, 4)
+        put(i, n - 1, 0)
+        put(n - 1, i, 0)
+    for i in range(1, n - 1):
+        put(i, 1, 3)
+        put(1, i, 3)
+        put(i, n - 2, 1)
+        put(n - 2, i, 1)
+    for y in range(3, 8):
+        for x in range(2, n - 2):
+            put(x, y, 3)
+    for x0, x1, y in ((8, 17, 12), (13, 24, 19), (6, 11, 24)):
+        for x in range(x0, x1 + 1):
+            put(x, y, 3)
+    # The chamfered corners. Each corner is a quarter of the junction where four blocks meet; sx, sy run from that
+    # junction's centre, so the boss is lit on its upper left whichever block draws the quarter.
+    edge = {(0, 0): 4, (n, 0): 3, (0, n): 1, (n, n): 0}
+    for y in range(n):
+        for x in range(n):
+            for (cx, cy), lit in edge.items():
+                sx, sy = x + 0.5 - cx, y + 0.5 - cy
+                d = abs(sx) + abs(sy)
+                if d >= chamfer + 1:
+                    continue
+                if d >= chamfer:
+                    put(x, y, lit)
+                    continue
+                r = math.hypot(sx, sy)
+                if r < boss - 0.8:
+                    put(x, y, 5 if sx + sy < -2.0 else 4 if sx + sy < -0.4 else 3 if sx + sy < 1.2 else 2)
+                elif r < boss:
+                    put(x, y, 3 if sx + sy < 0 else 1)
+                elif r < boss + 0.9 and sx + sy > 0:
+                    put(x, y, 0)
+                else:
+                    put(x, y, 1)
+    return img
 
 
 def depleted_uranium_armor():

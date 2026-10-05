@@ -157,18 +157,28 @@ def concrete():
     return _speckle((148, 150, 150), 5, 3202, dots)
 
 
+# Blast-proof concrete, dark to light: 0 the depth of a tie hole, 1 a lift joint, 2 the fill, 3 a lift's lit top edge.
+# Cooler and darker than bastion concrete (the fortifications batch, tools/fortifications.py), which the owner liked
+# on 5 October 2026 when they called the old speckled, framed blast-proof block horrific.
+BLAST = [(78, 81, 84), (96, 99, 102), (110, 113, 115), (124, 127, 129)]
+
+
 def blastproof_concrete():
-    """Cast panel: darker concrete with formwork seams and the four tie-holes of the shuttering."""
-    img = _speckle((122, 126, 128), 4, 3203)
-    for i in range(16):
-        img.putpixel((i, 0), (96, 100, 102, 255))
-        img.putpixel((0, i), (96, 100, 102, 255))
-        img.putpixel((i, 15), (150, 154, 156, 255))
-        img.putpixel((15, i), (150, 154, 156, 255))
-    for x, y in ((3, 3), (12, 3), (3, 12), (12, 12)):
-        img.putpixel((x, y), (54, 56, 58, 255))
-        img.putpixel((x + 1, y), (84, 86, 88, 255))
-        img.putpixel((x, y + 1), (84, 86, 88, 255))
+    """Heavy cast concrete in two smooth lifts a block: each lift lit along its top row with its joint on its bottom
+    row, so the block edge is drawn exactly like the joint inside it and a wall reads as continuous lifts, with no
+    vertical joints. Recessed 2 x 2 tie-cone holes (dark at the top left, lit at the bottom right) sit on a lattice
+    eight pixels apart, staggered half a step between the lifts, and nothing else marks the smooth face. Each lift
+    holds its own holes, so slabs and stair steps show whole ones. Four colours and no per-pixel noise."""
+    img = Image.new("RGBA", (16, 16), BLAST[2] + (255,))
+    for y0 in (0, 8):
+        for x in range(16):
+            _px(img, x, y0, BLAST[3])
+            _px(img, x, y0 + 7, BLAST[1])
+    for x, y in ((2, 3), (10, 3), (6, 11), (14, 11)):
+        _px(img, x, y, BLAST[0])
+        _px(img, x + 1, y, BLAST[1])
+        _px(img, x, y + 1, BLAST[1])
+        _px(img, x + 1, y + 1, BLAST[3])
     return img
 
 

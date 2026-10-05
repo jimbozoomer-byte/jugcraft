@@ -254,14 +254,17 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 				for (BlockPos pos : FoamSprayerItem.fill(level, player, base.offset(3, -1, 0), ConstructionChemistry.SPRAY_BLOCKS)) {
 					level.setBlockAndUpdate(pos, ConstructionChemistry.CONSTRUCTION_FOAM.defaultBlockState());
 				}
+				// The drone tower's Steel Armor Plate ends the row, so its clean 32 px plate shows beside the blast-proof concrete.
 				String[] row = {"concrete", "concrete_slab", "concrete_stairs", "blastproof_concrete", "blastproof_concrete_slab",
-						"blastproof_concrete_stairs"};
+						"blastproof_concrete_stairs", "steel_armor_plate", "steel_armor_plate_slab", "steel_armor_plate_stairs"};
 				for (int i = 0; i < row.length; i++) {
 					Block block = BuiltInRegistries.BLOCK.getValue(Jugcraft.id(row[i]));
 					level.setBlockAndUpdate(base.offset(6 + i, 0, -1), block.defaultBlockState());
 				}
 				level.setBlockAndUpdate(base.offset(6, 1, -1), ConstructionChemistry.BLASTPROOF_CONCRETE.defaultBlockState());
 				level.setBlockAndUpdate(base.offset(9, 1, -1), ConstructionChemistry.CONSTRUCTION_FOAM.defaultBlockState());
+				level.setBlockAndUpdate(base.offset(12, 1, -1),
+						BuiltInRegistries.BLOCK.getValue(Jugcraft.id("steel_armor_plate")).defaultBlockState());
 			});
 			// Back from the scene and a little to the left, looking slightly down; wait for the advancement toasts to go.
 			server.runCommand("tp @p %d %d %d 190 22".formatted(x - 17, y + 1, z + 12));
@@ -1052,9 +1055,13 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			level.setBlock(base.offset(dx, 3, 2), block.apply("amber_cage_lamp"), 3);
 		}
 		level.setBlock(base.offset(4, 0, 4), block.apply("amber_cage_lamp"), 3);
-		for (int dx = 6; dx <= 9; dx++) {
-			level.setBlock(base.offset(dx, 0, 4), block.apply("red_iron_plate_stairs"), 3);
+		// In the front row: the steel plates' slabs and stairs, between two red iron stairs.
+		String[] front = {"red_iron_plate_stairs", "rust_plate_slab", "rust_plate_stairs", "riveted_rust_plate_stairs"};
+		for (int i = 0; i < front.length; i++) {
+			level.setBlock(base.offset(6 + i, 0, 4), block.apply(front[i]), 3);
 		}
+		level.setBlock(base.offset(10, 0, 4), block.apply("red_iron_plate_stairs"), 3);
+		level.setBlock(base.offset(3, 0, 4), block.apply("riveted_rust_plate_slab"), 3);
 		level.setBlock(base.offset(1, 0, 4), block.apply("rust_grating"), 3);
 		level.setBlock(base.offset(2, 0, 4), block.apply("copper_dome_plate_stairs"), 3);
 	}
