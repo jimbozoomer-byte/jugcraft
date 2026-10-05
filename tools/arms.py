@@ -133,12 +133,12 @@ KINDS = {
                  "trait": "brace",
                  "tooltip": "A barbed fork set against a charge: half again as much damage to a foe coming at you."},
     "kama": {"display": "Kama", "damage": 1.5, "speed": -2.0, "swing": ("whack", 5), "reach": (0.0, 2.75),
-               "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 0.95,
+               "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.15,
                "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["## ", "  #", " S "],
                "trait": "clear",
                "tooltip": "Quick hooking cuts. Use on grass, ferns, vines or leaves to cut all of them about it, 3 by 3 by 3."},
     "war_pick": {"display": "War Pick", "damage": 3.0, "speed": -2.6, "swing": ("whack", 7), "reach": (0.0, 3.0),
-                 "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.1,
+                 "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.25,
                  "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["## ", " S#", " S "],
                  "trait": "delve", "tooltip": "A beaked war pick that mines stone and ore as its metal's pickaxe does."},
     # Arms V (batch 48): each has a weapon art (ARTS), a special move of its own, used with the use key.
@@ -155,7 +155,7 @@ KINDS = {
                      "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["###", "#S#", " SS"],
                      "art": "leap_slam", "tooltip": "A siege hammer. Knocks foes back and breaks a shield's guard for 5 seconds."},
     "katar": {"display": "Katar", "damage": 1.5, "speed": -2.0, "swing": ("stab", 5), "reach": (0.0, 2.75),
-              "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 0.85,
+              "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 0.95,
               "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["# #", "#L#"], "art": "flurry",
               "tooltip": "A punching blade, gripped across its frame: quick straight jabs at a short reach."},
     "moonblade": {"display": "Moonblade", "damage": 6.0, "speed": -3.1, "swing": ("whack", 18), "reach": (0.0, 3.75),
@@ -163,7 +163,7 @@ KINDS = {
                   "tags": ["swords"], "pattern": ["## ", "  #", "L# "], "art": "crescent",
                   "tooltip": "A crescent-bladed greatsword: broad, sweeping cuts."},
     "kusarigama": {"display": "Kusarigama", "damage": 2.0, "speed": -2.3, "swing": ("whack", 6), "reach": (0.0, 3.25),
-                   "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.0,
+                   "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.15,
                    "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["## ", "  #", "NN "],
                    "art": "chain_lash", "tooltip": "A sickle on a weighted chain: quick hooking cuts."},
     # Arms VI (batch 55): after the owner's reference sheets of a twin-katana set and an iron-and-wood war kit (studied
@@ -506,8 +506,8 @@ def metal_content(item):
 
 
 def textures():
-    """Every arm's sprite (64x64, drawn by tools/arms_art.py): one each, an in-hand one for a spear or lance, a bow's or
-    crossbow's drawn and loaded ones, and a shield's face, back and trim (tools/arms_kit_art.py)."""
+    """Every arm's textures (tools/arms_art.py): its inventory icon and its 3D model's texture; a bow's or crossbow's
+    drawn and loaded sprites, and a shield's face, back and trim (tools/arms_kit_art.py)."""
     names = []
     for item in items():
         kind = split(item)[1]
@@ -516,9 +516,7 @@ def textures():
         elif kind in SHIELD_KINDS:
             names += [f"{item}{suffix}" for suffix in SHIELD_SPRITES]
         else:
-            names.append(item)
-            if kind in CHARGING:
-                names.append(f"{item}_in_hand")
+            names += [item, f"{item}_model"]
     return names
 
 
@@ -559,32 +557,33 @@ def _pose(rotation, translation, scale, grip, base_scale, base_grip, factor):
 
 
 def _grip(kind, mirrored=False):
-    """Where a kind's sprite is held, in pixels from the centre of a 16-pixel model (x right, y up)."""
-    x, y = arms_art.held_at(kind)
-    x = 64 - x if mirrored else x
-    return (x / 4 - 8, 8 - y / 4)
+    """Where a kind's icon is held, in pixels from the centre of a 16-pixel model (x right, y up), and its hand factor
+    (tools/arms_art.py layout: how much larger than `held` it is held, for an icon a wide head makes smaller)."""
+    (x, y), size, factor = arms_art.held_at(kind, KINDS[kind]["held"], mirrored=mirrored)
+    return (x * 16.0 / size - 8.0, 8.0 - y * 16.0 / size), factor
 
 
 def held_model(kind):
-    """The shared model a kind's arms are held with: vanilla's sword (or, for the lance, spear) poses, larger by the
-    kind's `held` and moved so the hand stays on the grip."""
+    """The 3D model a kind's arms are held as (tools/arms_art.py model: the same in both metals, textured #tex), posed
+    as vanilla's sword (or, for the spear and lance, the spear) is held, larger by the kind's `held` and moved so the hand
+    stays on the grip. It lies over the kind's icon exactly, so these poses hold it as they would the icon."""
     charging = kind in CHARGING
     base, base_grip = (SPEAR_IN_HAND, SPEAR_GRIP) if charging else (HANDHELD, SWORD_GRIP)
-    grip = _grip(kind, mirrored=charging)
+    grip, factor = _grip(kind, mirrored=charging)
     display = {}
     for context, (rotation, translation, scale) in base.items():
-        right, left = _pose(rotation, translation, scale, grip, scale, base_grip, KINDS[kind]["held"])
+        right, left = _pose(rotation, translation, scale, grip, scale, base_grip, round(KINDS[kind]["held"] * factor, 4))
         display[context] = right
         display[context.replace("righthand", "lefthand")] = left
-    return {"parent": "minecraft:item/spear_in_hand" if charging else "minecraft:item/handheld", "display": display}
+    _texture, elements = arms_art.model(kind, "bronze", KINDS[kind]["held"], mirrored=charging)
+    return {"textures": {"particle": "#tex"}, "elements": elements, "display": display}
 
 
 def write_all(write, assets, data, lang, condition):
     """Shared in-hand models, each arm's model and definition, names and tooltips, recipes and repair tags."""
     models = assets / "models" / "item"
     for kind in KINDS:
-        if kind != "spear":
-            write(models / f"arms_{kind}.json", held_model(kind))
+        write(models / f"arms_{kind}.json", held_model(kind))
         lang[f"tooltip.{MOD}.arms.{kind}"] = KINDS[kind]["tooltip"]
     lang[f"tooltip.{MOD}.arms.two_handed"] = "Two-handed: the blow lands as the swing comes round, on every foe in its arc."
     lang[f"message.{MOD}.two_handed.off_hand"] = "Two hands for this one: put away what is in your off hand."
@@ -605,23 +604,15 @@ def write_all(write, assets, data, lang, condition):
         if kind not in KINDS:
             continue
         info = KINDS[kind]
-        if kind in CHARGING:
-            # As vanilla's spears: the plain sprite in inventories, frames and on the ground, and in the hand one
-            # drawn point to the top left, which the spear's hand poses hold couched.
-            write(models / f"{item}.json", {"parent": "minecraft:item/handheld",
-                                            "textures": {"layer0": f"{MOD}:item/{item}"}})
-            parent = "minecraft:item/spear_in_hand" if kind == "spear" else f"{MOD}:item/arms_{kind}"
-            write(models / f"{item}_in_hand.json", {"parent": parent, "textures": {"layer0": f"{MOD}:item/{item}_in_hand"}})
-            model = {"type": "minecraft:select", "property": "minecraft:display_context",
-                     "cases": [{"when": ["gui", "ground", "fixed", "on_shelf"],
-                                "model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}}],
-                     "fallback": {"type": "minecraft:model", "model": f"{MOD}:item/{item}_in_hand"}}
-            swap = 1.95 * info["held"]
-        else:
-            write(models / f"{item}.json", {"parent": f"{MOD}:item/arms_{kind}",
-                                            "textures": {"layer0": f"{MOD}:item/{item}"}})
-            model = {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}
-            swap = info["held"]
+        # The icon in inventories, frames, on the ground and on shelves; in the hand (and on a head), the 3D model.
+        write(models / f"{item}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": f"{MOD}:item/{item}"}})
+        write(models / f"{item}_in_hand.json", {"parent": f"{MOD}:item/arms_{kind}",
+                                                "textures": {"tex": f"{MOD}:item/{item}_model"}})
+        model = {"type": "minecraft:select", "property": "minecraft:display_context",
+                 "cases": [{"when": ["gui", "ground", "fixed", "on_shelf"],
+                            "model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}}],
+                 "fallback": {"type": "minecraft:model", "model": f"{MOD}:item/{item}_in_hand"}}
+        swap = 1.95 * info["held"] if kind in CHARGING else info["held"]
         # A longer arm comes up into the hand faster, as vanilla's spear does, so it never hangs half-raised.
         write(assets / "items" / f"{item}.json", {"model": model, "swap_animation_scale": round(swap, 2)})
 
@@ -641,22 +632,24 @@ def _recipe(write, data, condition, item):
 
 
 def draw_all(save):
-    """Each arm's 64x64 sprite (a strip of them for a flickering one); a spear's or lance's is also drawn mirrored, point
-    to the top left, for the hand; and the kit's sprites (tools/arms_kit_art.py)."""
+    """Each arm's icon and 3D model texture (a strip of frames for a flickering one), and the kit's sprites
+    (tools/arms_kit_art.py)."""
     for item in items():
         metal, kind = split(item)
         if kind not in KINDS:
             continue
-        if kind in arms_art.ANIMATED:
-            frames, ticks = arms_art.ANIMATED[kind]
-            strip = Image.new("RGBA", (64, 64 * frames), (0, 0, 0, 0))
-            for frame in range(frames):
-                strip.paste(arms_art.draw(kind, metal, frame), (0, 64 * frame))
-            save(strip, "item", item, animation={"frametime": ticks})
-            continue
-        img = arms_art.draw(kind, metal)
-        save(img, "item", item)
-        if kind in CHARGING:
-            save(img.transpose(Image.Transpose.FLIP_LEFT_RIGHT), "item", f"{item}_in_hand")
+        held, mirrored = KINDS[kind]["held"], kind in CHARGING
+        frames, ticks = arms_art.ANIMATED.get(kind, (1, 0))
+        icons = [arms_art.draw(kind, metal, held, frame) for frame in range(frames)]
+        textures = [arms_art.model(kind, metal, held, frame, mirrored=mirrored)[0] for frame in range(frames)]
+        for name, images in ((item, icons), (f"{item}_model", textures)):
+            if frames == 1:
+                save(images[0], "item", name)
+                continue
+            size = images[0].width
+            strip = Image.new("RGBA", (size, size * frames), (0, 0, 0, 0))
+            for frame, img in enumerate(images):
+                strip.paste(img, (0, size * frame))
+            save(strip, "item", name, animation={"frametime": ticks})
     import arms_kit_art
     arms_kit_art.draw_all(save)
