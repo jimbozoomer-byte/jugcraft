@@ -78,7 +78,7 @@ public class DieselWalker extends Entity {
 	private int drill;
 	private int punch;
 	private int inputTick = -INPUT_TIMEOUT - 1;
-	private int lastPunch = -PUNCH_COOLDOWN;
+	private int lastPunch = -1000;
 	private boolean punchHeld;
 	private BlockPos drillTarget;
 	private int drillProgress;

@@ -80,8 +80,8 @@ public class ArmouredWalker extends DieselWalker {
 	/** Attack: the piston ram, into everything in a box just in front. */
 	@Override
 	protected void attack(ServerLevel level, ServerPlayer pilot, Vec3 heading) {
-		Vec3 centre = position().add(heading.scale(RAM_REACH)).add(0, 2.2, 0);
-		AABB reach = new AABB(centre, centre).inflate(1.4);
+		Vec3 centre = position().add(heading.scale(RAM_REACH)).add(0, 1.6, 0);
+		AABB reach = new AABB(centre, centre).inflate(1.5);
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, reach, e -> e != pilot && e.isAlive())) {
 			if (target.hurtServer(level, level.damageSources().playerAttack(pilot), RAM_DAMAGE)) {
 				target.setDeltaMovement(target.getDeltaMovement().add(heading.x * RAM_KNOCKBACK, 0.5, heading.z * RAM_KNOCKBACK));
