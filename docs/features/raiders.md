@@ -166,7 +166,7 @@ Their weapons never drop.
   - `raidersHuntOnTheirOwn`: a grunt hunts a townsperson down to striking distance, and a grenadier throws at them.
     - It stands in for a player. The test server's mock player always reports creative mode (found with a diagnostic run: `creative=true`, with `canAttack`, enemy and line of sight all true), and no hostile mob targets a creative player.
     - That is why the first player-targeting tests never saw an attack. It was the test, not the raiders.
-  - `siegeLaddersGoUpWalls`: a raid party marching on an objective behind a five-high wall props siege ladders against it.
+  - `siegeLaddersGoUpWalls`: a raid party marching on an objective inside a walled yard (five high, closed on every side) props siege ladders against it.
   - `raidHornCallsARaid`: the horn starts a raid at the world's level on the blower's base, or refuses while another is under way.
   - `raiderCampHoldsItsGround`:
     - On flat ground a camp gets its campfire, its barrel with the camp's loot table, and four raiders who never despawn.

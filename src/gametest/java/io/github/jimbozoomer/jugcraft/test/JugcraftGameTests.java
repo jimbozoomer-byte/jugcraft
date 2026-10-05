@@ -3398,23 +3398,40 @@ public class JugcraftGameTests {
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 600, skyAccess = true)
 	public void siegeLaddersGoUpWalls(GameTestHelper helper) {
 		raiderFloor(helper);
-		for (int x = 0; x < 44; x++) {
+		// A walled yard round the objective: closed on every side, since the test world's ground runs on past the
+		// floor and an open-ended wall is simply walked round.
+		for (int i = 12; i <= 28; i++) {
 			for (int y = 1; y <= 5; y++) {
-				helper.setBlock(new BlockPos(x, y, 14), Blocks.STONE_BRICKS);
+				helper.setBlock(new BlockPos(i, y, 2), Blocks.STONE_BRICKS);
+				helper.setBlock(new BlockPos(i, y, 18), Blocks.STONE_BRICKS);
+				helper.setBlock(new BlockPos(12, y, i - 10), Blocks.STONE_BRICKS);
+				helper.setBlock(new BlockPos(28, y, i - 10), Blocks.STONE_BRICKS);
 			}
 		}
 		ServerLevel level = helper.getLevel();
-		var raid = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.start(level, helper.absolutePos(new BlockPos(20, 1, 30)),
-				helper.absolutePos(new BlockPos(20, 1, 6)), 1, level.getRandom());
+		var raid = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.start(level, helper.absolutePos(new BlockPos(20, 1, 10)),
+				helper.absolutePos(new BlockPos(20, 1, 34)), 1, level.getRandom());
 		helper.succeedWhen(() -> {
 			boolean ladder = false;
-			for (int x = 0; x < 44 && !ladder; x++) {
-				for (int y = 1; y <= 5 && !ladder; y++) {
-					// The raiders come from the south, so their ladders go up the wall's south face.
-					ladder = io.github.jimbozoomer.jugcraft.raiders.SiegeLadderBlock.is(helper.getBlockState(new BlockPos(x, y, 15)));
+			for (int x = 10; x <= 30 && !ladder; x++) {
+				for (int z = 0; z <= 20 && !ladder; z++) {
+					for (int y = 1; y <= 5 && !ladder; y++) {
+						ladder = io.github.jimbozoomer.jugcraft.raiders.SiegeLadderBlock.is(helper.getBlockState(new BlockPos(x, y, z)));
+					}
 				}
 			}
-			helper.assertTrue(ladder, "A grunt stuck at the wall should have propped a siege ladder against it");
+			if (!ladder) {
+				// Say where the raid's infantry are and what they are doing, so a failure shows why.
+				StringBuilder seen = new StringBuilder();
+				for (var raider : level.getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry.class,
+						new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).inflate(64))) {
+					BlockPos rel = raider.blockPosition().subtract(helper.absolutePos(BlockPos.ZERO));
+					seen.append(' ').append(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(raider.getType()).getPath()).append('@').append(rel.getX()).append(',').append(rel.getY()).append(',')
+							.append(rel.getZ()).append(raider.getTarget() != null ? " target=" + net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(raider.getTarget().getType()).getPath() : "")
+							.append(raider.getNavigation().isDone() ? " idle" : " moving").append(';');
+				}
+				helper.assertTrue(false, "A grunt stuck at the wall should have propped a siege ladder against it; raiders:" + seen);
+			}
 			helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.SIEGE_LADDER.defaultBlockState()
 					.is(net.minecraft.tags.BlockTags.CLIMBABLE), "A siege ladder should be climbable");
 			io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
