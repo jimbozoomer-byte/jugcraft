@@ -530,6 +530,21 @@ Against one foe an art does no better than plain blows over its cooldown; its wo
 
 **Code:** `weapons/` (`WeaponArts`, `WeaponArtPayload`, `JugcraftArms.ARTS`, `ArmItem.use`), client `client/arms/ArmsMotion`; data from `tools/arms.py`, art from `tools/arms_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-v.md)).
 
+### Arms VI (batch 55): katana, brazier mace, longbows, arbalests and shields
+
+Two more arms and a war kit in bronze and steel. Shot for shot the longbow and arbalest hit harder and fly flatter than a bow and crossbow, but not a second for a second. A shield covering more than vanilla's is slower to raise.
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Katana | Hits 6 (steel 6.5) at 1.5 a second; **Seven Cuts** (6 s): seven cuts in a breath, each of 0.22 blows across every foe within reach and 110° ahead, leaving arcs of crimson (bronze) or pale gold (steel) in the air | 2 ingots, iron nugget, leather |
+| Brazier Mace | Hits 8 (8.5) at 1 a second; sets foes alight for 4 s; use to light campfires, candles or the ground | 3 ingots, coal, stick |
+| Longbow | Full draw in 1.3 s; arrows fly at 3.4 (3.7), against a bow's 3.0 | 2 ingots, 3 sticks, 3 string |
+| Arbalest | Loads as a crossbow; bolts fly at 3.4 (3.55) with base damage 2.1, against a crossbow's 3.15 and 2.0 | 3 ingots, 2 string, tripwire hook, stick |
+| Heater Shield | Blocks as a shield; raised in 0.15 s (0.1) | 2 ingots, 5 planks |
+| Tower Shield | Covers 130° either side of ahead; braces against knockback (+0.4, +0.5); 8% slower while held; raised in 0.4 s (0.35) | 6 ingots, 3 planks |
+
+**Code:** `weapons/` (`ArmBowItem`, `ArmCrossbowItem`, `JugcraftArms.RANGED`, `SHIELDS` and `KIT`, `WeaponArts` for the cuts, `ArmItem` for the fire); data from `tools/arms.py` and `tools/arms_kit.py`, art from `tools/arms_art.py` and `tools/arms_kit_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-vi.md)).
+
 ### Construction chemistry (batch 32)
 
 | Item | What it does | Built from |
