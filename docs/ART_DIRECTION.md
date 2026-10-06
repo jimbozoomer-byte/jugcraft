@@ -1,6 +1,12 @@
 # Art direction
 
-Jugcraft's look changes with its tiers, the way real technology did: the early game is brass-and-steam, the later tiers move towards dieselpunk, and electrical power gear and the high-tech tiers to come are graphite and glowing light. Every texture and model is original, drawn by the generators in `tools/`.
+Jugcraft's look changes with its tiers, the way real technology did: the early game is brass-and-steam, the later tiers move towards dieselpunk, and electrical power gear and the high-tech tiers to come are graphite and glowing light. Production art uses the generators in `tools/` and suitable assets from the [shared owner library](../art/owner-library/README.md).
+
+## Shared assets for every content branch
+
+The owner supplied a [reusable asset collection](../art/owner-library/README.md) on 6 October 2026 and explicitly permits direct use, recoloring/adaptation, or reference when an asset fits the feature. Browse the [complete catalog](../art/owner-library/catalog/README.md) before making new assets. It includes blocks, ores, metals, machinery, guns, planes, sounds, animations, weapons, armor, trees, biomes, farming and food. Its supplied stone sheets are useful for the building and ceramics branch as well as industrial settings.
+
+Keep the originals in the library intact, preserve required sidecars and frame layouts, and record the source path and changes in the feature's provenance. Adapt material palettes to the appropriate branch and tier. A suitable owner-supplied asset may be reused directly; other external references retain their documented source and license rules.
 
 ## Rules for everything
 - Detailed models built from boxes (see `tools/steampunk_models.py`): round prisms, gears, gauges, rivets, pipes. No flat cubes where a real machine would have shape.
@@ -83,4 +89,4 @@ The owner asked on 3 October 2026 that new art not be held to Minecraft's 16×16
 - **Weapons are pixel art, with 3D in the hand** ([arms-restyle.md](features/arms-restyle.md)):
   - icons are 32×32 or 48×48, on the 45-degree pixel diagonal, in flat tones lit from the top left, with a one-pixel outline: no dithering, noise or glints;
   - in the hand each weapon is a box model with thickness, built from the same design (`tools/arms_pixel.py`).
-- **Art stays original.** References guide the look; nothing is traced or copied from them.
+- **Record asset provenance.** Original work remains the priority. Suitable owner-supplied library assets may be reused directly or adapted under the owner's authorization; follow [the library guide](../art/owner-library/README.md) and [LICENSE_POLICY.md](../LICENSE_POLICY.md). Other style references do not authorize copying their assets.
