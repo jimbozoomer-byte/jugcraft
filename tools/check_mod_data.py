@@ -4,6 +4,7 @@ Verifies that every material ID has its blockstate/model/item definition/loot
 table/texture/name, that every reference resolves, that Java registration matches
 tools/materials.py, and that no recipe creates metal from nothing.
 """
+import hashlib
 import json
 import re
 import sys
@@ -340,7 +341,12 @@ def item_units(ref):
         return {}
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
-        # hold nothing the audit tracks, like the vanilla tools they are made from.
+        # hold nothing the audit tracks, like the vanilla tools they are made from. A styled armor piece counts as its
+        # plain piece only (its smithing addition is lost metal), and its template holds none.
+        if path in gear.style_items():
+            return item_units(f"{MOD}:{gear.base_piece(path)}")
+        if path in gear.style_templates():
+            return {}
         tier, piece = path.rsplit("_", 1)
         if tier not in gear.GEAR_TIERS:
             return {}
@@ -1002,6 +1008,98 @@ def check_gear():
         for frame in frames:
             if not (ASSETS / "textures" / "item" / f"{frame}.png").exists():
                 err(f"Missing item texture {frame}.png")
+    check_armor_styles(java)
+    check_armor_looks()
+
+
+def check_armor_styles(java):
+    """Steampunk and Kaiser Armor (docs/features/steampunk-and-kaiser-armor.md) against tools/gear.py ARMOR_STYLES:
+    Java lists the styles and templates and derives each material from its metal's; every set has its equipment asset
+    and 64x32 worn layers; each styled piece has its smithing recipes both ways, its slot tag and its lore; each
+    template its recipe and tooltip."""
+    for name, expected in (("ARMOR_STYLES", list(gear.ARMOR_STYLES)), ("STYLE_TEMPLATES", gear.style_templates())):
+        match = re.search(name + r" = List\.of\(([^)]*)\)", java)
+        found = re.findall(r'"([a-z_]+)"', match.group(1)) if match else None
+        if found != expected:
+            err(f"JugcraftGear.{name} {found} != tools/gear.py {expected}")
+    for style, info in gear.ARMOR_STYLES.items():
+        line = f'{style.upper()}_ARMOR = restyle({info["metal"].upper()}_ARMOR, "{style}");'
+        if line not in java:
+            err(f"JugcraftGear must derive the {style} armor material from its metal's: {line}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for asset in list(gear.GEAR_TIERS) + list(gear.ARMOR_STYLES):
+        for layer in ("humanoid", "humanoid_leggings"):
+            png = ASSETS / "textures" / "entity" / "equipment" / layer / f"{asset}.png"
+            if png.is_file():
+                with Image.open(png) as img:
+                    if img.size != (64, 32):
+                        err(f"Worn armor texture {layer}/{asset}.png is {img.size}, expected 64x32")
+            else:
+                err(f"Missing worn armor texture {layer}/{asset}.png")
+        equipment = load(ASSETS / "equipment" / f"{asset}.json") or {}
+        for layer in ("humanoid", "humanoid_leggings"):
+            if equipment.get("layers", {}).get(layer) != [{"texture": f"{MOD}:{asset}"}]:
+                err(f"equipment/{asset}.json must draw {MOD}:{asset} on its {layer} layer")
+    recipes = DATA / MOD / "recipe"
+    for style, info in gear.ARMOR_STYLES.items():
+        metal, template = info["metal"], f"{MOD}:{info['template']}"
+        for piece in gear.ARMOR:
+            styled, plain = f"{style}_{piece}", f"{metal}_{piece}"
+            routes = [(styled, plain, info["addition"], styled)]
+            if info["reversible"]:
+                routes.append((f"{plain}_from_{styled}", styled, gear.GEAR_TIERS[metal]["ingot"], plain))
+            for name, base, addition, result in routes:
+                recipe = load(recipes / f"{name}.json") if (recipes / f"{name}.json").is_file() else None
+                if not recipe or recipe.get("type") != "minecraft:smithing_transform" \
+                        or recipe.get("template") != template or recipe.get("base") != f"{MOD}:{base}" \
+                        or recipe.get("addition") != addition or recipe.get("result", {}).get("id") != f"{MOD}:{result}":
+                    err(f"recipe/{name}.json must smith {MOD}:{base} with {template} and {addition} into "
+                        f"{MOD}:{result}")
+            tag = load(DATA / "minecraft" / "tags" / "item" / f"{gear.ITEM_TAGS[piece]}.json") or {}
+            if f"{MOD}:{styled}" not in tag.get("values", []):
+                err(f"{styled} is missing from minecraft:{gear.ITEM_TAGS[piece]}")
+            if f"tooltip.{MOD}.{styled}" not in lang:
+                err(f"Missing tooltip for {styled}")
+        recipe = load(recipes / f"{info['template']}.json") if (recipes / f"{info['template']}.json").is_file() else None
+        if not recipe or recipe.get("result", {}).get("count") != info["template_count"]:
+            err(f"recipe/{info['template']}.json must make {info['template_count']} {template}")
+        if f"tooltip.{MOD}.{info['template']}" not in lang:
+            err(f"Missing tooltip for {info['template']}")
+
+
+# The stylized armor looks the owner kept (5 October 2026) as Steampunk and Kaiser Armor: the SHA-256 of
+# f"{w}x{h}" + the RGBA pixels of each PNG, from efd85edc (#94), the last commit that changed the first bronze and steel
+# armor art. Pixels, not file bytes, so another PNG encoder does not trip it.
+OLD_ARMOR_LOOKS = {
+    "item/steampunk_helmet": "7e9cd2f8152bd1aad1338c5df2781bd5f422f224e15ad8e44491b0f3886d5e41",
+    "item/steampunk_chestplate": "e2b0b6174c816b6a46a347c1b4135a58f54a3561771d097a4300f04ee838d5b8",
+    "item/steampunk_leggings": "165ba5565e635230aa78f74392c7ee25356330f7975b41b918bcc561d973f8da",
+    "item/steampunk_boots": "13ea7f66a1b57b71819c317a964c00f6a7a6e843d00e99a9cbe774978f038dd5",
+    "item/kaiser_helmet": "b57d95b7f99af00163934fe34b355d50b7446dfd93422e14e0de7dc5d7035025",
+    "item/kaiser_chestplate": "2ba556aaac60b5bee50755bc7f6b67fe446b1ad87fa58c61ad9f6ba65779556d",
+    "item/kaiser_leggings": "4b10f5f095766bedeb49c3eb7f7de0dfdee69eae5c944943b5dc6512abb5bd1e",
+    "item/kaiser_boots": "f76f12f13130958584385e19ba0a643d5a75624af66f2ac0bab6a78bf144be53",
+    "entity/equipment/humanoid/steampunk": "ba01b2d8c61954c71eefdf23945a1555828db11e33985fce18e15d60e97ed4fa",
+    "entity/equipment/humanoid_leggings/steampunk": "ccee284ba4d0369cc0463b07dab2df64b7a9325595450e2841ec50f5d8042bd8",
+    "entity/equipment/humanoid/kaiser": "0d05602d98d8cc01cdacb666186dcc7c9fdcbbbcd8240074d236e85ed06e4817",
+    "entity/equipment/humanoid_leggings/kaiser": "e4528cbb4af9f2917f3d664dc60a6efaead6cad4caf673f946afb410d9188956",
+}
+
+
+def check_armor_looks():
+    """Steampunk and Kaiser Armor keep the stylized looks pixel for pixel (OLD_ARMOR_LOOKS). Bronze and steel armor
+    are not pinned: they get their own design later."""
+    for path, expected in OLD_ARMOR_LOOKS.items():
+        png = ASSETS / "textures" / f"{path}.png"
+        if not png.is_file():
+            err(f"Missing {path}.png, the stylized look the owner kept (5 October 2026)")
+            continue
+        with Image.open(png) as img:
+            rgba = img.convert("RGBA")
+            digest = hashlib.sha256(f"{rgba.width}x{rgba.height}".encode() + rgba.tobytes()).hexdigest()
+        if digest != expected:
+            err(f"{path}.png no longer matches the stylized look the owner kept (5 October 2026); a deliberate redraw "
+                "needs the owner's OK and new hashes.")
 
 
 def check_arms():
