@@ -149,6 +149,31 @@ def tones(five):
     return dict(zip("ODMLH", five))
 
 
+# The owner's ingot (tools/material_icons/ingot.txt) is drawn in eight greens, 1 the darkest to 8 the lightest. Each
+# metal recolours it, never redraws it: a green's place between the darkest and lightest green, by luma, is the same
+# place on the metal's own ramp from its outline O to its highlight H, blended between the two ramp tones around it.
+OWNER_INGOT_GREENS = {"1": "017b12", "2": "01831e", "3": "009424", "4": "01aa28",
+                      "5": "3ff084", "6": "82f4ad", "7": "affacc", "8": "dafcea"}
+
+
+def ingot_palette(five):
+    """The owner's ingot's eight symbols coloured from a metal's five-tone ramp (outline to highlight), by luma."""
+    greens = {k: luma(hx(v)) for k, v in OWNER_INGOT_GREENS.items()}
+    low, high = min(greens.values()), max(greens.values())
+    ramp = [tuple(c) for c in five]
+    places = [(luma(c) - luma(ramp[0])) / (luma(ramp[-1]) - luma(ramp[0])) for c in ramp]
+    palette = {}
+    for symbol, value in greens.items():
+        t = (value - low) / (high - low)
+        for i in range(len(ramp) - 1):
+            if places[i] <= t <= places[i + 1] or i == len(ramp) - 2:
+                span = places[i + 1] - places[i]
+                f = 0.0 if span <= 0 else min(1.0, max(0.0, (t - places[i]) / span))
+                palette[symbol] = tuple(round(a + (b - a) * f) for a, b in zip(ramp[i], ramp[i + 1]))
+                break
+    return palette
+
+
 def mined():
     return [metal for metal, info in METALS.items() if info["mined"]]
 
@@ -164,7 +189,7 @@ def material_textures():
     out = {}
     for metal in METALS:
         palette = tones(METAL_RAMPS[metal])
-        out[("item", f"{metal}_ingot")] = draw("ingot", palette)
+        out[("item", f"{metal}_ingot")] = draw("ingot", ingot_palette(METAL_RAMPS[metal]))
         out[("item", f"{metal}_nugget")] = draw("nugget", palette)
         out[("block", f"{metal}_block")] = draw("storage_block", palette)
     for block, ore, rock in ore_blocks():

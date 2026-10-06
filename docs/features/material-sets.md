@@ -17,12 +17,13 @@ Every metal, ore and the bronze and steel tools are redrawn in the owner's mater
 darkest, light from the top left, flat tones and no noise.
 
 - **Ingots and nuggets, all fourteen metals** (tin, zinc, lead, silver, nickel, tungsten, uranium, titanium, bronze,
-  aluminum, brass, invar, solder, steel): one shared ingot and one shared nugget in **vanilla's form**, drawn fresh in our
-  own symbols so they sit with vanilla's in an inventory. The ingot is a bar lying on the diagonal with a lit top face, a
-  front face and a squared near end, filling the slot's width; the nugget a small shard on the diagonal. The form is drawn from
-  memory of vanilla's (no vanilla ingot, nugget, stone or deepslate texture is on the machine that drew it, and none was
-  downloaded or read); the client test sets vanilla's iron, gold and copper beside ours for the owner to judge it in
-  game.
+  aluminum, brass, invar, solder, steel): one shared ingot and one shared nugget, so they sit with vanilla's in an
+  inventory.
+  - **The ingot is the owner's,** recoloured for each metal and never redrawn. The owner sent it on 6 October 2026: "TAKE THIS AND RECOLOR IT LEAVE THE OUTLINE EXACTLY THE SAME JUST CHANGE THE COLORS and ALWAYS DO THAT FOR ALL INGOTS THAT ARE SUPPOSED TO BE SHAPED LIKE THAT".
+    Its pixels are kept exactly; only its eight greens change, each to the same place on the metal's own ramp.
+  - **The nugget** is a small shard on the diagonal in vanilla's form, drawn fresh from memory and resized from CI's
+    in-game shots. No vanilla ingot, nugget, stone or deepslate texture was downloaded or read.
+  - The client test sets vanilla's iron, gold and copper beside ours.
 - **Storage blocks, all fourteen:** the owner's four-panel inlay: a light frame round a cross dividing four inset panels,
   each lit top-left.
 - **Every ore and deepslate ore** (tin, zinc, lead, silver, nickel, tungsten, uranium, titanium, rock salt, phosphorite,
@@ -191,7 +192,11 @@ has run on the branch.
 Not applicable: art only.
 
 ## Rollout and open questions
-- **The ingot and nugget form is drawn from memory** of vanilla's, then corrected once from CI's in-game shots.
+- **The ingot is the owner's, recoloured** (6 October 2026), after two drafts of ours. Our ingot was first drawn from
+  memory of vanilla's, then resized from CI's shots. The owner judged it still unlike vanilla's, sent their own ingot, and
+  set the rule: every ingot of that shape is theirs, recoloured. `check_mod_data` pins the map. The record of the earlier
+  drafts follows.
+- **The nugget form is drawn from memory** of vanilla's, then corrected once from CI's in-game shots.
   - **The first run** (f554b439) set vanilla's gold and copper ingots and nuggets beside ours.
   - **What it showed:**
     - our nugget, a flat lump 8 by 6 with a knob, did not look like vanilla's, which are small shards on the diagonal;

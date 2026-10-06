@@ -26,7 +26,7 @@ vanilla's own stone or deepslate.*
 
 A set looks as if vanilla had one more material:
 - **Size:** 16×16, everything.
-- **Shapes:** vanilla's forms. A pickaxe is a pickaxe, an ingot is vanilla's ingot and a nugget vanilla's nugget, so ours
+- **Shapes:** vanilla's forms. A pickaxe is a pickaxe, an ingot is the owner's ingot (below) and a nugget vanilla's nugget, so ours
   sit beside vanilla's in an inventory as one set.
 - **Colour:** the whole set in **one clear hue**, told apart from vanilla's copper, iron and gold, stepped into four tones and
   an outline.
@@ -125,7 +125,7 @@ approved them. Thallite's are the sheet's sage, `4a5a2e 6e8048 98a86a c0cc8e e4e
 | **Raw ore** (`raw_<ore>`) | **One lumpy, rounded chunk** filling most of the slot, in the lighter tones, lit top-left, outlined. |
 | **Raw block** | **Rounded lumps packed like cobblestone,** each lit top-left, with dark joints between them. |
 | **Nugget** | **Vanilla's nugget form, drawn fresh:** a small shard on the diagonal in the middle of the slot (about 7 by 8 pixels with its outline), leaning to the upper right, lit along its upper-left edge with a dark lower right, outlined. |
-| **Ingot** | **Vanilla's ingot form, drawn fresh:** one bar lying on the diagonal, rising from the lower left to the upper right, seen from above and in front. A light top face with the highlight along its back edge, a front face in mid and dark, small end faces, outlined. It fills the slot's width (columns 0 to 15, rows 3 to 14), with a squared near end. |
+| **Ingot** | **The owner's ingot, recoloured, never redrawn.** On 6 October 2026 the owner sent a green ingot and said: "TAKE THIS AND RECOLOR IT LEAVE THE OUTLINE EXACTLY THE SAME JUST CHANGE THE COLORS and ALWAYS DO THAT FOR ALL INGOTS THAT ARE SUPPOSED TO BE SHAPED LIKE THAT". Its 16×12 pixels are `tools/material_icons/ingot.txt`, kept exactly and centred in the slot (rows 2 to 13). Its eight greens are recoloured for each material by `material_icons.ingot_palette`: each green's place between the darkest and lightest green, by luma, becomes the same place on the material's own ramp from outline to highlight. `check_mod_data` pins the map, so a redraw fails CI. **Every ingot of this shape, in every tier, is this map recoloured.** |
 | **Storage block** | **A bevelled square:** a light frame, inside it a field divided by a cross into **four rounded inset panels** (a four-panel inlay), each lit top-left. The block a player stacks is the material's emblem, so it is the most decorated piece. |
 | **Tools** (sword, pickaxe, axe, shovel, hoe, paxel) | **Vanilla's silhouettes on the diagonal,** the head in the material and the handle a two-tone stick. **The head:** a highlight along its lit edge, dark along the other, outlined. **No extra parts.** |
 | **Armor icons** (helmet, chestplate, leggings, boots) | **Rounded vanilla shapes in the material,** lit along their upper parts. **A gem** (two tones of a contrasting colour) may sit at the knees or ankles, as the owner's leggings and boots carry emeralds. |
@@ -133,9 +133,9 @@ approved them. Thallite's are the sheet's sage, `4a5a2e 6e8048 98a86a c0cc8e e4e
 | **Horse armor** | **Vanilla's blanket shape in the material,** with one coloured band (the owner's is red). |
 | **Weapons** | **The arms' 16×16 maps** (`tools/arms_icons/`, PR #201), coloured in the material: swords, daggers, sabres, spears, hammers, maces, bows and crossbows, as in the owner's sheet. |
 
-The ingot and nugget forms are drawn from memory of vanilla's modern ingots and nuggets; no vanilla texture was read. The
-client test (`MaterialSetsClientGameTests`) shows vanilla's iron, gold and copper ingots and nuggets beside ours, close up
-and in the inventory, and that is where the form is judged.
+The ingot is the owner's own (above). The nugget's form is drawn fresh from memory of vanilla's, then resized from CI's
+in-game shots; no vanilla texture was read. The client test (`MaterialSetsClientGameTests`) shows vanilla's iron, gold
+and copper ingots and nuggets beside ours, close up and in the inventory.
 
 ## How a set is made
 

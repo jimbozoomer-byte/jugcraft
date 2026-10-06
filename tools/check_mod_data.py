@@ -5767,6 +5767,29 @@ def check_material_sets():
             mi.load(map_path.stem)
         except ValueError as exc:
             err(f"Material sets: {exc}")
+    # The owner's ingot (6 October 2026): its pixels are kept exactly and only recoloured, for every metal. Its 16x12
+    # rows sit in rows 2-13 of the map; edit its colours in material_icons.ingot_palette, never the map.
+    owner_ingot = [
+                    "..........33....",
+                    ".......333553...",
+                    "....3335666653..",
+                    ".33356666666653.",
+                    "3866666666668873",
+                    "3586666668886351",
+                    "3558668886433451",
+                    "3555886433335551",
+                    "345564333355411.",
+                    ".345643344111...",
+                    "..34542111......",
+                    "...3311.........",
+    ]
+    try:
+        ingot = mi.load("ingot")
+        if ingot[2:14] != owner_ingot or any(set(row) != {"."} for row in ingot[:2] + ingot[14:]):
+            err("Material sets: tools/material_icons/ingot.txt must be the owner's ingot exactly; recolour it in "
+                "material_icons.ingot_palette, never redraw it")
+    except ValueError:
+        pass
     for (kind, name), image in mi.textures().items():
         path = ASSETS / "textures" / kind / f"{name}.png"
         if not path.is_file():
