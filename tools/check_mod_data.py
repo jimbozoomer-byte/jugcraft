@@ -49,6 +49,7 @@ import mech
 import landship
 import artillery
 import tower_guns
+import fortifications
 import gear
 import arms
 import arms_variants
@@ -168,7 +169,7 @@ def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
-                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks()):
+                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -189,7 +190,7 @@ def check_assets(registered):
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
-                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -326,7 +327,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -530,7 +531,7 @@ def check_fluid_recipes(registered):
 
 
 # The diagonal walls (tools/diagonal_connections.py), which join #minecraft:walls.
-DIAGONAL_WALLS = {dg.DIAGONAL_WALL.format(name) for name in dg.VANILLA_WALLS}
+DIAGONAL_WALLS = {dg.DIAGONAL_WALL.format(name) for _, name in dg.all_walls()}
 
 
 def check_tags():
@@ -541,7 +542,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -783,6 +784,22 @@ def check_tower_guns():
             err(f"{gun} fires an unknown shell {g['shell']}")
     if not (ASSETS / "tower_gun_quads.json").is_file():
         err("assets/jugcraft/tower_gun_quads.json is missing: run tools/generate_material_data.py")
+
+
+def check_fortifications():
+    """building/Fortifications.java against tools/fortifications.py: the list, kinds and strengths, the hoist's and the
+    rack's numbers, and that the ready rack's shell tag lists every shell a gun fires."""
+    java = (JAVA_ROOT / "building" / "Fortifications.java").read_text(encoding="utf-8")
+    for block, (_, kind, hardness, blast) in fortifications.BLOCKS.items():
+        if f'entry("{block}", "{kind}", {hardness}F, {blast}F);' not in java:
+            err(f"Fortifications.java does not register {block} as tools/fortifications.py does ({kind}, {hardness}, {blast})")
+    for const in ("HOIST_INTERVAL", "HOIST_BATCH", "HOIST_BUFFER", "RACK_SLOTS", "RACK_REACH"):
+        if f" {const} = {getattr(fortifications, const)};" not in java:
+            err(f"Fortifications.{const} differs from tools/fortifications.py ({getattr(fortifications, const)})")
+    tag = set((load(DATA / MOD / "tags" / "item" / "artillery_shells.json") or {}).get("values", []))
+    for shell in ("heavy_shell", "flak_shell", "great_shell"):
+        if f"{MOD}:{shell}" not in tag:
+            err(f"#{MOD}:artillery_shells lacks {shell}, so ready racks would not hold it")
 
 
 def check_landship():
@@ -5944,12 +5961,12 @@ def check_diagonal_connections():
         if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != own:
             err(f"minecraft:{name}: the rebuilt blockstate lost vanilla's own parts")
     walls = set((load(RES / "data" / "minecraft" / "tags" / "block" / "walls.json") or {}).get("values", []))
-    for name in dg.VANILLA_WALLS:
+    for namespace, name in dg.all_walls():
         diagonal = dg.DIAGONAL_WALL.format(name)
         if (RES / "assets" / "minecraft" / "blockstates" / f"{name}.json").exists():
             err(f"minecraft:{name}: its blockstate is overridden; vanilla's walls are left as they are")
         parts = (load(ASSETS / "blockstates" / f"{diagonal}.json") or {}).get("multipart", [])
-        if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != dg.diagonal_wall(name):
+        if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != dg.diagonal_wall(name, namespace):
             err(f"{MOD}:{diagonal}: needs the wall's post and low sides, as tools/diagonal_connections.py writes them")
         if f"{MOD}:{diagonal}" not in walls:
             err(f"{MOD}:{diagonal} is not in #minecraft:walls, so walls, gates and bars would not join it")
@@ -5982,7 +5999,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
@@ -6016,6 +6033,7 @@ def main():
     check_landship()
     check_artillery()
     check_tower_guns()
+    check_fortifications()
     check_plastic()
     check_seasons()
     check_alpine()

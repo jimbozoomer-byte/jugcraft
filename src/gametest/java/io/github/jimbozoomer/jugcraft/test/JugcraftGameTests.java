@@ -1099,8 +1099,9 @@ public class JugcraftGameTests {
 		gunner.getInventory().add(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 5));
 		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
 		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
-		gunner.setYRot(0.0F);
-		gunner.setXRot(-20.0F);
+		// The gunner's own mark straight ahead, in range: other tests' marks (which outlive their players) could
+		// otherwise draw the gun's aim away, as a gun follows the nearest spotter's mark when its gunner has none.
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.mark(gunner, helper.absolutePos(new BlockPos(2, 0, 30)));
 		// One press, held for a moment: the gun fires once it has turned onto the gunner's line.
 		for (int tick = 1; tick <= 40; tick++) {
 			int pressed = tick <= 30 ? 1 : 0;
@@ -1110,6 +1111,159 @@ public class JugcraftGameTests {
 			int left = gunner.getInventory().countItem(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM);
 			helper.assertTrue(left == 2, "A salvo should use three Heavy Shells, leaving 2, but left " + left);
 			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 55: every fortification block places; the parapet has its crenel (a gap you can stand in), the wall joins
+	 * walls, the ladder is climbable and the hoist and rack have their block entities.
+	 */
+	@GameTest
+	public void fortificationBlocksPlace(GameTestHelper helper) {
+		int x = 0;
+		for (var entry : io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.entrySet()) {
+			if (entry.getKey().equals("blast_door") || entry.getKey().equals("steel_ladder")) {
+				continue;
+			}
+			BlockPos pos = new BlockPos(x++ % 8, 1, x / 8 * 2);
+			helper.setBlock(pos, entry.getValue());
+			helper.assertBlockPresent(entry.getValue(), pos);
+		}
+		ServerLevel level = helper.getLevel();
+		BlockPos parapet = new BlockPos(0, 3, 4);
+		helper.setBlock(parapet, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("bastion_parapet"));
+		var shape = helper.getBlockState(parapet).getShape(level, helper.absolutePos(parapet));
+		helper.assertTrue(shape.max(Direction.Axis.Y) == 1.0 && !Block.isShapeFullBlock(shape), "A parapet is full height but not a full cube");
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("bastion_concrete_wall").defaultBlockState().is(net.minecraft.tags.BlockTags.WALLS),
+				"The bastion wall should be in #minecraft:walls");
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("steel_ladder").defaultBlockState().is(net.minecraft.tags.BlockTags.CLIMBABLE),
+				"The steel ladder should be climbable");
+		BlockPos hoist = new BlockPos(2, 3, 4);
+		helper.setBlock(hoist, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ammo_hoist"));
+		helper.getBlockEntity(hoist, io.github.jimbozoomer.jugcraft.building.AmmoHoistBlock.Entity.class);
+		BlockPos rack = new BlockPos(4, 3, 4);
+		helper.setBlock(rack, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		helper.getBlockEntity(rack, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		helper.succeed();
+	}
+
+	/** Batch 55: a blast door will not open by hand (its set is iron's) but opens on a redstone signal. */
+	@GameTest
+	public void blastDoorOpensOnlyByRedstone(GameTestHelper helper) {
+		var door = (net.minecraft.world.level.block.DoorBlock) io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("blast_door");
+		helper.assertFalse(door.type().canOpenByHand(), "A blast door must not open by hand");
+		BlockPos lower = new BlockPos(2, 1, 2);
+		helper.setBlock(lower, door.defaultBlockState().setValue(net.minecraft.world.level.block.DoorBlock.HALF,
+				net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER));
+		helper.setBlock(lower.above(), door.defaultBlockState().setValue(net.minecraft.world.level.block.DoorBlock.HALF,
+				net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER));
+		helper.assertBlockProperty(lower, net.minecraft.world.level.block.DoorBlock.OPEN, false);
+		helper.setBlock(lower.east(), Blocks.REDSTONE_BLOCK);
+		helper.succeedWhen(() -> helper.assertBlockProperty(lower, net.minecraft.world.level.block.DoorBlock.OPEN, true));
+	}
+
+	/**
+	 * Batch 55: shells loaded into the bottom of a four-high ammo hoist climb the shaft into the ready rack on top, and a
+	 * hopper cannot take them back out of the shaft.
+	 */
+	@GameTest(maxTicks = 300)
+	public void ammoHoistLiftsShellsToTheRack(GameTestHelper helper) {
+		for (int y = 1; y <= 4; y++) {
+			helper.setBlock(new BlockPos(2, y, 2), io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ammo_hoist"));
+		}
+		BlockPos rackPos = new BlockPos(2, 5, 2);
+		helper.setBlock(rackPos, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		helper.assertBlockProperty(new BlockPos(2, 4, 2), io.github.jimbozoomer.jugcraft.building.AmmoHoistBlock.TOP, true);
+		helper.assertBlockProperty(new BlockPos(2, 1, 2), io.github.jimbozoomer.jugcraft.building.AmmoHoistBlock.TOP, false);
+		ServerLevel level = helper.getLevel();
+		var bottom = ItemStorage.SIDED.find(level, helper.absolutePos(new BlockPos(2, 1, 2)), Direction.DOWN);
+		helper.assertTrue(bottom != null && bottom.supportsInsertion() && !bottom.supportsExtraction(),
+				"A hoist should take items in but never give them up to a hopper");
+		ItemVariant shell = ItemVariant.of(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM);
+		try (Transaction transaction = Transaction.openOuter()) {
+			helper.assertTrue(bottom.insert(shell, 8, transaction) == 8, "The bottom hoist should take 8 shells");
+			transaction.commit();
+		}
+		var rack = helper.getBlockEntity(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(rack.count() == 8, "The rack on top should hold all 8 shells, but holds " + rack.count());
+			helper.assertBlockProperty(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.FILL, 1);
+		});
+	}
+
+	/**
+	 * Batch 55: a gunner with no shells on them fires a Triple Battery's salvo from the ready rack beside it, and the
+	 * rack loses three shells.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void gunsDrawShellsFromReadyRacks(GameTestHelper helper) {
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		BlockPos rackPos = new BlockPos(5, 1, 2);
+		helper.setBlock(rackPos, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		var rack = helper.getBlockEntity(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		rack.shells.addItem(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 5));
+		var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("triple_battery");
+		io.github.jimbozoomer.jugcraft.artillery.TowerGun battery = helper.spawn(type, new Vec3(2.5, 1, 2.5));
+		battery.face(0.0F);
+		ServerPlayer gunner = helper.makeMockServerPlayerInLevel();
+		gunner.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
+		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
+		// The gunner's own mark straight ahead, in range: other tests' marks (which outlive their players) could
+		// otherwise draw the gun's aim away, as a gun follows the nearest spotter's mark when its gunner has none.
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.mark(gunner, helper.absolutePos(new BlockPos(2, 0, 30)));
+		for (int tick = 1; tick <= 40; tick++) {
+			int pressed = tick <= 30 ? 1 : 0;
+			helper.runAfterDelay(tick, () -> battery.steer(gunner, 0, 0, pressed));
+		}
+		helper.runAfterDelay(80, () -> {
+			helper.assertTrue(rack.count() == 2, "The salvo should take three shells from the rack, leaving 2, but left " + rack.count());
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Fortification extras: the bunker door opens by hand; two sliding gates side by side open together on one signal and
+	 * leave only a post to bump into; the embrasure has a slit through it; the parapet corner's merlon turns with it.
+	 */
+	@GameTest(maxTicks = 60)
+	public void fortificationExtras(GameTestHelper helper) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS;
+		var door = (net.minecraft.world.level.block.DoorBlock) blocks.get("bunker_door");
+		helper.assertTrue(door.type().canOpenByHand(), "A bunker door should open by hand");
+		ServerLevel level = helper.getLevel();
+		BlockPos embrasure = new BlockPos(5, 1, 5);
+		helper.setBlock(embrasure, blocks.get("bastion_embrasure"));
+		var shape = helper.getBlockState(embrasure).getShape(level, helper.absolutePos(embrasure));
+		helper.assertTrue(!net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(shape,
+				net.minecraft.world.phys.shapes.Shapes.box(0.4, 0.6, 0.0, 0.6, 0.65, 1.0), net.minecraft.world.phys.shapes.BooleanOp.AND),
+				"An embrasure should have a slit right through it");
+		var corner = blocks.get("bastion_parapet_corner").defaultBlockState();
+		var north = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.NORTH);
+		var south = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.SOUTH);
+		helper.setBlock(new BlockPos(1, 1, 5), north);
+		helper.setBlock(new BlockPos(3, 1, 5), south);
+		var corner_nw = net.minecraft.world.phys.shapes.Shapes.box(0.1, 0.7, 0.1, 0.3, 0.9, 0.3);
+		helper.assertTrue(net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(1, 1, 5))
+				.getShape(level, helper.absolutePos(new BlockPos(1, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND)
+				&& !net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(3, 1, 5))
+						.getShape(level, helper.absolutePos(new BlockPos(3, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND),
+				"The corner's merlon should stand at the north-west facing north, and turn with it");
+		BlockPos left = new BlockPos(2, 1, 2);
+		BlockPos right = new BlockPos(3, 1, 2);
+		helper.setBlock(left, blocks.get("sliding_gate"));
+		helper.setBlock(right, blocks.get("sliding_gate"));
+		helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, false);
+		helper.setBlock(new BlockPos(1, 1, 2), Blocks.REDSTONE_BLOCK);
+		helper.succeedWhen(() -> {
+			helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
+			helper.assertBlockProperty(right, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
+			var open = helper.getBlockState(right).getCollisionShape(level, helper.absolutePos(right));
+			helper.assertTrue(open.bounds().getXsize() < 0.2, "An open gate should leave only its post");
 		});
 	}
 

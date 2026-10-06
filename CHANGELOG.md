@@ -93,6 +93,17 @@ No numbered release yet. Everything below is on `main`.
 
 ### Arms IV, batch 47 (#170)
 
+### Unmerged: Fortifications, batch 55
+- **Bastion Concrete** (block, slab, stairs and Jugcraft's first **wall**, which joins diagonally like vanilla's), the crenellated **Bastion Parapet**, the **Steel Ladder** and a redstone-only **Blast Door**.
+- **Ammo Hoist:** stack hoists into a shaft. What goes in climbs to the top and into the container on or beside it. Nothing can pull items back out.
+- **Ready Rack:** holds shells beside a gun. A gunner with no shells draws from any rack within 2 blocks of the gun. It shows how full it is.
+- **Extras:**
+  - a strapped timber **Bunker Door** that opens by hand
+  - a redstone **Sliding Gate**: panels side by side or stacked open together
+  - a **Bastion Parapet Corner**
+  - a **Bastion Embrasure** with a gun slit
+- Five game tests and a screenshot scene. Record: [fortifications.md](docs/features/fortifications.md).
+
 ### Unmerged: Tower guns, batch 54
 - Five heavy emplacements for the top of a tower, after the owner's reference picture of a heavy mortar on a turntable mount: a concrete plinth, a railed turntable, a yellow cradle and a fat black barrel.
   - For a 3x3 top: the **Bastion Mortar** and the twin-barrelled **Bastion Autocannon**.

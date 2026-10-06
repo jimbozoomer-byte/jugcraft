@@ -41,8 +41,8 @@ import org.jspecify.annotations.Nullable;
  * looks at.</li>
  * </ul>
  * It traverses and elevates at a limited rate, and fires when the gunner presses attack (or, for an automatic gun,
- * holds it) once it is on target and reloaded, using a shell from the gunner's inventory (none in creative). Players
- * knock it down into its item.
+ * holds it) once it is on target and reloaded, using a shell from the gunner's inventory or a ready rack beside the gun
+ * (none in creative). Players knock it down into its item.
  */
 public abstract class CrewedGun extends Entity {
 	private static final int INPUT_TIMEOUT = 10;
@@ -267,7 +267,7 @@ public abstract class CrewedGun extends Entity {
 		int fired = 0;
 		for (double offset : barrelOffsets()) {
 			// Each barrel uses a shell; a salvo fires as many barrels as there are shells for.
-			if (!gunner.getAbilities().instabuild && !takeAmmo(gunner.getInventory())) {
+			if (!gunner.getAbilities().instabuild && !takeAmmo(level, gunner.getInventory())) {
 				break;
 			}
 			Vec3 muzzle = pivot.add(across.scale(offset)).add(dir.scale(barrelLength()));
@@ -290,7 +290,11 @@ public abstract class CrewedGun extends Entity {
 				automatic() ? 0.6F : 3.0F, automatic() ? 1.9F : 0.7F);
 	}
 
-	private boolean takeAmmo(Inventory inventory) {
+	/**
+	 * Takes one shell: from the gunner's own inventory, or else from a ready rack (batch 55) within
+	 * {@value io.github.jimbozoomer.jugcraft.building.Fortifications#RACK_REACH} blocks of the gun.
+	 */
+	private boolean takeAmmo(ServerLevel level, Inventory inventory) {
 		for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
 			ItemStack stack = inventory.getItem(slot);
 			if (stack.is(ammo())) {
@@ -298,7 +302,8 @@ public abstract class CrewedGun extends Entity {
 				return true;
 			}
 		}
-		return false;
+		int reach = io.github.jimbozoomer.jugcraft.building.Fortifications.RACK_REACH;
+		return io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.take(level, getBoundingBox().inflate(reach, 1, reach), ammo());
 	}
 
 	@Override
