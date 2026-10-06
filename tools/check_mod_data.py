@@ -14,7 +14,7 @@ from PIL import Image
 from party import PARTY_LANG
 import drones
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
-                       all_blocks, all_items, feature_of)
+                       all_blocks, all_items, feature_of, ore_gens, ore_gen_owners)
 import agriculture as ag
 import werewolf_model
 import midway
@@ -1610,10 +1610,16 @@ def check_java():
     source = JAVA.read_text(encoding="utf-8")
     declared = {}
     for name, chain in re.findall(r'MetalFamily\.builder\("([a-z_]+)"\)([^;]*)\.build\(\)', source):
-        declared[name] = {"mined": ".mined()" in chain, "extras": re.findall(r'extraItem\("([a-z_]+)"\)', chain)}
-    expected = {name: {"mined": info["mined"], "extras": info.get("extras", [])} for name, info in METALS.items()}
+        declared[name] = {"mined": ".mined()" in chain, "extras": re.findall(r'extraItem\("([a-z_]+)"\)', chain),
+                          "lore": ".lore()" in chain}
+    expected = {name: {"mined": info["mined"], "extras": info.get("extras", []), "lore": "lore" in info}
+                for name, info in METALS.items()}
     if declared != expected:
         err(f"JugcraftMaterials.java metals {declared} != tools/materials.py {expected}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for metal, info in METALS.items():
+        if "lore" in info and lang.get(f"tooltip.{MOD}.{metal}_ingot") != info["lore"]:
+            err(f"No lore line tooltip.{MOD}.{metal}_ingot (run tools/generate_material_data.py)")
 
     minerals = re.findall(r'MineralFamily\.register\("([a-z_]+)"\)', source)
     if minerals != list(MINERALS):
@@ -1649,10 +1655,29 @@ def check_java():
     in_java = sorted(set(re.findall(r'\{"([a-z_]+)", "[a-z_]+"\}', worldgen)) | set(re.findall(r'add\("([a-z_]+)"', worldgen)))
     if placed != in_java:
         err(f"JugcraftWorldgen adds {in_java}, data defines {placed}")
+    owners = {placed: feature for placed, (_, feature) in ore_gen_owners().items()}
+    owners.update({rock: info["feature"] for rock, info in ROCKS.items()})
     for name, feature in re.findall(r'\{"([a-z_]+)", "([a-z_]+)"\}', worldgen) + re.findall(r'add\("([a-z_]+)", "([a-z_]+)"', worldgen):
-        owner = feature_of(name if name in ROCKS else f"{name}_ore")
+        owner = owners.get(name)
         if feature != owner:
             err(f"JugcraftWorldgen gates {name} by {feature}, expected {owner}")
+    # Veins with "biomes" on their worldgen entry go in the biomeOres list, placed by the biome tag has_ore/<name>; every
+    # other metal or mineral vein in the ores list, everywhere in the Overworld.
+    def java_list(name):
+        match = re.search(name + r" = \{([^;]*)\};", worldgen)
+        return re.findall(r'\{"([a-z_]+)", "[a-z_]+"\}', match.group(1)) if match else []
+    gens = {placed: gen for name, info in list(METALS.items()) + list(MINERALS.items()) for placed, gen in ore_gens(name, info)}
+    limited = sorted(placed for placed, gen in gens.items() if gen.get("biomes"))
+    if sorted(java_list("biomeOres")) != limited:
+        err(f"JugcraftWorldgen.biomeOres {sorted(java_list('biomeOres'))} != the veins with biomes in tools/materials.py {limited}")
+    if sorted(java_list("ores")) != sorted(set(gens) - set(limited)):
+        err(f"JugcraftWorldgen.ores {sorted(java_list('ores'))} != the Overworld-wide veins in tools/materials.py")
+    if limited and 'Jugcraft.id("has_ore/" + ore[0])' not in worldgen:
+        err("JugcraftWorldgen does not place biomeOres by their biome tag jugcraft:has_ore/<name>")
+    for placed in limited:
+        tag = load(DATA / MOD / "tags" / "worldgen" / "biome" / "has_ore" / f"{placed}.json") or {}
+        if tag.get("values") != gens[placed]["biomes"]:
+            err(f"#{MOD}:has_ore/{placed} {tag.get('values')} != tools/materials.py {gens[placed]['biomes']}")
 
 
 def check_machines(registered):

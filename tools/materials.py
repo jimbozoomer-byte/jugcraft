@@ -11,13 +11,18 @@ blast furnace as a clearly marked stand-in, and liquid crude oil is not added.
 MOD = "jugcraft"
 
 # Feature switches (config/jugcraft.properties). Order is the config file order.
-FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
+FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "thallite", "aluminum",
             "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "deposits",
             "explosives", "agriculture", "parties", "drones",
             "pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections"]
 
 # Metals use the vanilla form set. "mined" adds ore, deepslate ore, raw item and raw block.
 # cook: which vanilla cookers can smelt the ore/raw form. tool: minimum pickaxe tier.
+# gen: the ore's veins in every Overworld biome (placed feature ore_<metal>). rich_gen: optional further veins, placed
+# feature ore_<metal>_rich. Either may name "biomes" (biome ids or #biome tags): it is then placed only there, through
+# the biome tag jugcraft:has_ore/<placed feature name> written from that list (ore_gens() below).
+# lore: an optional grey italic line under the ingot's name (tooltip.jugcraft.<metal>_ingot; MetalFamily.Builder.lore).
+# hand_plate: optional ingots that make one plate at a crafting table, a dearer route than the Metal Press's one.
 METALS = {
     "tin": {"mined": True, "display": "Tin", "feature": "tin", "cook": ["smelting", "blasting"], "xp": 0.7,
             "tool": "stone", "gen": {"size": 9, "count": 8, "min_y": -32, "max_y": 96}},
@@ -36,6 +41,13 @@ METALS = {
     # Rutile-bearing titanium ore: no furnace smelts it; only the Kroll process (chlorine, chemistry batch 6) does.
     "titanium": {"mined": True, "display": "Titanium", "feature": "titanium", "cook": [], "xp": 1.0,
                  "tool": "iron", "gen": {"size": 5, "count": 2, "min_y": -64, "max_y": -8}},
+    # Thallite, the Earth school's green metal (docs/features/thallite.md): everywhere between lead and silver, and rich
+    # pockets where roots and water work through old rock, in Lush Caves and the Glowcap Grotto. No alloy, on purpose.
+    "thallite": {"mined": True, "display": "Thallite", "feature": "thallite", "cook": ["smelting", "blasting"], "xp": 0.7,
+                 "tool": "stone", "gen": {"size": 7, "count": 4, "min_y": -32, "max_y": 48},
+                 "rich_gen": {"size": 9, "count": 6, "min_y": -32, "max_y": 48,
+                              "biomes": ["minecraft:lush_caves", "jugcraft:glowcap_grotto"]},
+                 "lore": "Green as a new shoot.", "hand_plate": 2},
     "bronze": {"mined": False, "display": "Bronze", "feature": "tin", "extras": ["bronze_blend"]},
     "aluminum": {"mined": False, "display": "Aluminum", "feature": "aluminum"},
     # Alloys made only in the alloy smelter (tools/machines.py ALLOY_SMELTER).
@@ -98,11 +110,11 @@ EXTRA_NAMES = {"bronze_blend": "Bronze Blend"}
 PART_UNITS = {"plate": 9, "gear": 36, "wire": 3, "dust": 9}
 COMPONENTS = {
     "plate": ["copper", "iron", "tin", "bronze", "brass", "invar", "aluminum", "nickel", "lead", "tungsten", "steel",
-              "titanium"],
+              "titanium", "thallite"],
     "gear": ["iron", "bronze", "brass", "invar", "steel"],
     "wire": ["copper", "silver", "aluminum"],
     # Pulverizer output (see tools/machines.py); one dust smelts back into one ingot.
-    "dust": ["copper", "iron", "gold", "tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium"],
+    "dust": ["copper", "iron", "gold", "tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "thallite"],
 }
 # Ore washer output: washed_<metal>_ore, one ingot's worth each; the pulverizer grinds it into dust.
 WASHED_ORES = list(COMPONENTS["dust"])
@@ -135,6 +147,23 @@ def nugget_id(metal):
 
 def ingot_id(metal):
     return f"minecraft:{metal}_ingot" if metal in VANILLA_METALS else f"{MOD}:{metal}_ingot"
+
+
+def ore_gens(name, info):
+    """(placed feature name, worldgen entry) for a metal's or mineral's veins: "gen" as ore_<name>, then "rich_gen" as
+    ore_<name>_rich. An entry with "biomes" is placed only in the biome tag jugcraft:has_ore/<placed feature name>."""
+    out = []
+    if "gen" in info:
+        out.append((name, info["gen"]))
+    if "rich_gen" in info:
+        out.append((f"{name}_rich", info["rich_gen"]))
+    return out
+
+
+def ore_gen_owners():
+    """{placed feature name: (ore, feature switch)} for every metal's and mineral's veins."""
+    return {placed: (name, info["feature"]) for name, info in list(METALS.items()) + list(MINERALS.items())
+            for placed, _ in ore_gens(name, info)}
 
 # Extra c: item tags for mineral items.
 MINERAL_TAGS = {"salt": "dusts/salt", "phosphate": "dusts/phosphate"}

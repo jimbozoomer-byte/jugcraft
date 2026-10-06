@@ -9,8 +9,8 @@ chestplate, leggings and boots (each plain and gold-trimmed), daggers, a sabre, 
 mace, a bow, a crossbow, an arrow and horse armor. They asked: "maybe we can use this for a basis on how new ores that
 turn into tools are styled?". It is the same style as their weapon sheet, which the arms' 16×16 icons follow (PR #201).
 This page is that basis. Jugcraft's existing metals and ores were redrawn on it first
-([features/material-sets.md](features/material-sets.md)); thallite, the owner's chartreuse ore, is designed on it (its
-record is on the `claude/thallite` branch).
+([features/material-sets.md](features/material-sets.md)); thallite, the owner's chartreuse ore, is the first new ore
+drawn on it ([features/thallite.md](features/thallite.md)).
 
 The owner's pictures are references for the style. Every texture in the repository is drawn fresh by code, and nothing
 is recoloured from Mojang's files ([CLAUDE.md](../CLAUDE.md)). Where a set takes vanilla's form (an ingot, a nugget), the
@@ -91,6 +91,7 @@ aluminum and invar palest.
 | tungsten | dark neutral grey | 220, 0, .06, −28 | `1a1c1e` | `3d4045` | `5f646c` | `898d94` | `bfc1c6` |
 | uranium | pale olive | 78, .16, .18, +36 | `303426` | `6e7a55` | `a0ab86` | `cbd0be` | `f4f5f1` |
 | titanium | light periwinkle grey | its old hues, .24, .30, +36 | `2a3144` | `5e73a4` | `95a4c5` | `c5cddd` | `f3f5f7` |
+| **thallite** | the owner's chartreuse sheet, its outline darkened (below) | | `303f12` | `4e611d` | `7c8a37` | `aab053` | `dbdd85` |
 | aluminum | very pale blue-white | its old hues, .24, .30, +60 | `2e3d4b` | `6c8cab` | `afbdd3` | `dfe5ec` | `f5f6f9` |
 | **bronze** | the owner's choice | | `3e2410` | `7e5222` | `b4803c` | `dcaa5c` | `f6d696` |
 | brass | deep yellow, darker and more ochre than gold | 46, 0, none, +32 | `3c310c` | `8d7116` | `cca21a` | `eecb5a` | `faf2d5` |
@@ -101,6 +102,10 @@ aluminum and invar palest.
 Every metal's ramp steps up in luma with D at least 30 above O, and no two metals are closer than 8, vanilla's iron, gold
 and copper included (`tools/check_mod_data.py` checks both).
 
+**Thallite** is not on the ladder: it is the owner's own chartreuse sheet, as drawn. Only its outline moved: the sheet's
+`354514` is 25 luma under its dark tone, so it is darkened to `303f12`. That is the same hue and saturation,
+CIEDE2000 2.0 away, and now 30 under. Its nearest metal is uranium, 15.9 away.
+
 The same choice gave each a second material for fittings and trim (outline, dark, mid, light): **brass** on bronze,
 `3e2a06 8c6814 c8a02a f2da6a`, and **gunmetal** on steel, `16181e 363a44 565c68 868e9c`. None of the tool, ingot,
 nugget, block or ore maps has fittings, so no texture uses them yet; they wait for bronze's and steel's weapons and armor
@@ -110,7 +115,7 @@ in this style.
 
 An ore's overlay, raw ore and raw block use **the ore's own five tones**, from its mineral (cassiterite's brown-black,
 galena's grey, rutile's red-brown and so on), not the metal's: `ORE_RAMPS` in `tools/material_icons.py`, as the owner
-approved them.
+approved them. Thallite's are the sheet's sage, `4a5a2e 6e8048 98a86a c0cc8e e4ecb8`.
 
 ## Each item
 

@@ -20,7 +20,7 @@ import net.fabricmc.loader.api.FabricLoader;
 public final class JugcraftConfig {
 	/** Every feature switch. Keep in sync with FEATURES in tools/materials.py. */
 	public static final List<String> FEATURES = List.of(
-			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
+			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "thallite", "aluminum",
 			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
 			"deposits", "explosives", "agriculture", "parties", "drones",
 			"pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections");

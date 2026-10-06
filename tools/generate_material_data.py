@@ -8,7 +8,7 @@ import shutil
 from pathlib import Path
 
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, EXTRA_NAMES, MINERAL_TAGS, PROCESSING, COMPONENTS, CIRCUITS,
-                       metal_blocks, metal_items, mineral_blocks, all_blocks, all_items, feature_of, ingot_id)
+                       metal_blocks, metal_items, mineral_blocks, all_blocks, all_items, feature_of, ingot_id, ore_gens)
 
 from machines import CROPS, ELECTRONICS_BLOCKS, FARMING_BLOCKS, MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, ALT_CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
 import model_writer
@@ -137,6 +137,9 @@ def assets():
               {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
         write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
         lang[f"item.{MOD}.{item}"] = item_name(item)
+    for metal, info in METALS.items():
+        if "lore" in info:
+            lang[f"tooltip.{MOD}.{metal}_ingot"] = info["lore"]
     machine_assets(lang)
     agriculture_data.assets(ASSETS, write, lang)
     pixel_hollows_assets(lang)
@@ -1194,6 +1197,14 @@ def recipes():
         recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
         write(out / f"{result}.json", recipe)
 
+    # Plates by hand, for the metals that have that route ("hand_plate" ingots for one plate, a dearer route than the
+    # Metal Press's one ingot): the ingots stacked in a column. A plate is a machines part, so both switches.
+    for metal, info in METALS.items():
+        if "hand_plate" in info:
+            recipe = shaped(MACHINE_FEATURE, ["#"] * info["hand_plate"], {"#": f"#c:ingots/{metal}"}, f"{metal}_plate")
+            recipe["fabric:load_conditions"] = [c for f in sorted({MACHINE_FEATURE, info["feature"]}) for c in condition(f)]
+            write(out / f"{metal}_plate_by_hand.json", recipe)
+
     # Gears: four plates of one metal (36 nugget units in, 36 out).
     for metal in COMPONENTS["gear"]:
         write(out / f"{metal}_gear.json", shaped(MACHINE_FEATURE, [" P ", "P P", " P "],
@@ -1308,6 +1319,12 @@ def tags():
 
     for rock, info in ROCKS.items():
         tags.add("block", f"minecraft:mineable/{info['tool']}", rid(rock))
+    # Veins placed only in some biomes (a "biomes" key on a metal's or mineral's worldgen entry): the biome tag that
+    # JugcraftWorldgen places them in.
+    for name, info in list(METALS.items()) + list(MINERALS.items()):
+        for placed, gen in ore_gens(name, info):
+            for biome in gen.get("biomes", []):
+                tags.add("worldgen/biome", f"{MOD}:has_ore/{placed}", biome)
 
     for block in machine_blocks():
         if block not in CROPS:
@@ -1426,10 +1443,9 @@ def layered_targets(ore, deep):
 
 def worldgen():
     for name, info in list(METALS.items()) + list(MINERALS.items()):
-        if "gen" not in info:
-            continue
-        ore_feature(name, info["gen"]["size"], layered_targets(f"{name}_ore", f"deepslate_{name}_ore"))
-        placed_feature(name, info["gen"])
+        for placed, gen in ore_gens(name, info):
+            ore_feature(placed, gen["size"], layered_targets(f"{name}_ore", f"deepslate_{name}_ore"))
+            placed_feature(placed, gen)
     for rock, info in ROCKS.items():
         gen = info["gen"]
         ore_feature(rock, gen["size"], [{"target": {"predicate_type": "minecraft:tag_match", "tag": gen["target"]},

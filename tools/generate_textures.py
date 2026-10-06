@@ -1047,7 +1047,12 @@ def part_palette(metal):
         return fixed[metal]
     if metal in METAL_COLORS:
         return METAL_COLORS[metal][2]
-    return ALLOY_COLORS[metal][2]
+    if metal in ALLOY_COLORS:
+        return ALLOY_COLORS[metal][2]
+    # Metals added since the material sets (thallite) draw their plates, dusts and washed ores in their set's own ramp
+    # (tools/material_icons.py), outline to highlight.
+    import material_icons
+    return list(material_icons.METAL_RAMPS[metal])
 
 
 def dust(palette):

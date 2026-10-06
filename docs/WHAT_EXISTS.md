@@ -45,6 +45,7 @@ CI runs all of these and fails if generated files are out of date.
 | Metal | Forms | Source | Feature switch |
 | --- | --- | --- | --- |
 | tin, zinc, lead, silver, nickel, tungsten, uranium | ore, deepslate ore, raw, raw block, ingot, nugget, block | worldgen ores | own name (`tin`, `zinc`, …) |
+| thallite | ore, deepslate ore, raw, raw block, ingot (with a lore line), nugget, block; plate, dust, washed ore | worldgen ores everywhere, and rich pockets (`ore_thallite_rich`) in Lush Caves and the Glowcap Grotto; no alloy | `thallite` |
 | aluminum | ingot, nugget, block | bauxite (arc furnace; blast-furnace stand-in gives a nugget) | `aluminum` |
 | bronze | ingot, nugget, block, `bronze_blend` | 3 copper + 1 tin (hand blend or alloy smelter) | `tin` |
 | brass, invar, solder | ingot, nugget, block | alloy smelter only | `zinc`, `nickel`, `lead` |
@@ -55,8 +56,8 @@ CI runs all of these and fails if generated files are out of date.
 | Minerals | `salt`, `phosphate`, `lepidolite`, `monazite` (+ `_ore`, `deepslate_…_ore`, `…_block`) | ores drop several items |
 | Rocks | `bauxite` (block), `oil_sand` (block, drops `bitumen`) | biome-limited surface worldgen |
 | Items | `bitumen`, `sulfur_dust`, `silicon`, `lithium_carbonate`, `rare_earth_oxide`, `coke` (`c:coal_coke`) | several are chemistry stand-ins; coke is fuel and steel's carbon |
-| Components | `<metal>_plate` ×11, `<metal>_gear` ×5, `<metal>_wire` ×3, `basic_circuit`, `advanced_circuit` | `JugcraftComponents`; tags `c:plates/…`, `c:gears/…`, `c:wires/…` |
-| Ore processing | `<metal>_dust` ×10 (copper, iron, gold, tin, zinc, lead, silver, nickel, tungsten, uranium), `washed_<metal>_ore` ×10, `sawdust` | tags `c:dusts/<metal>` |
+| Components | `<metal>_plate` ×13, `<metal>_gear` ×5, `<metal>_wire` ×3, `basic_circuit`, `advanced_circuit` | `JugcraftComponents`; tags `c:plates/…`, `c:gears/…`, `c:wires/…` |
+| Ore processing | `<metal>_dust` ×11 (copper, iron, gold, tin, zinc, lead, silver, nickel, tungsten, uranium, thallite), `washed_<metal>_ore` ×11, `sawdust` | tags `c:dusts/<metal>` |
 
 Every Jugcraft metal and part carries `c:` convention tags (`c:ingots/tin`, `c:ores/tin`, `c:raw_materials/tin`, `c:storage_blocks/tin`, `c:nuggets/tin`, `c:dusts/tin`, …). **Use tags in recipes** so other mods' equivalents work.
 
@@ -568,6 +569,13 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 **A new recipe for an existing machine:** add it to the list in `tools/machines.py` (Jugcraft's own recipes), or ship a JSON file in any data pack.
 
 **A new metal:** add it to `METALS` in `tools/materials.py` (with `gen` for worldgen) and add the matching `MetalFamily.builder(...)` in `JugcraftMaterials`. The checker compares the two.
+
+- **Placing it:** add its placed feature to the `ores` list in `JugcraftWorldgen`, and its switch to `FEATURES` and `JugcraftConfig`. For dusts, washed ores and plates, add it to `COMPONENTS` (and `JugcraftComponents`), and to `BYPRODUCTS` in `tools/machines.py` for the Pulverizer.
+- **Optional keys** (thallite uses them all):
+  - `rich_gen`: more veins, placed as `ore_<metal>_rich`.
+  - `biomes`, on either worldgen entry: biome ids or `#` tags. The vein is placed only there, through the biome tag `jugcraft:has_ore/<placed feature>`, and goes in `JugcraftWorldgen.biomeOres` instead of `ores`.
+  - `lore`: a line under the ingot's name; `.lore()` on the builder.
+  - `hand_plate`: ingots for one plate at a crafting table.
 
 **A block that uses power, fluid or items:** register a provider on `EnergyStorage.SIDED`, `FluidStorage.SIDED` or `ItemStorage.SIDED`. Implement the matching `*Connectable` marker if transmitters should visibly connect.
 
