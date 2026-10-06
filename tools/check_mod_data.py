@@ -6254,6 +6254,8 @@ def check_concordance(registered):
             err(f"dynamiclights/item/kindled_lantern.json: component {component} is not registered in JugcraftConcordance")
     check_composition(co, root, lang, registered, research)
     check_invocations(co, root, lang, research)
+    check_baselines(root)
+    check_game_test_entrypoints()
 
 
 def check_composition(co, root, lang, registered, research):
@@ -6503,6 +6505,38 @@ def check_invocations(co, root, lang, research):
         for key in re.findall(r'"(tooltip\.jugcraft\.concordance\.[a-z_.]+[a-z_])"', java(name)):
             if key not in lang:
                 err(f"concordance/{name}: missing lang {key}")
+
+
+def check_game_test_entrypoints():
+    """Every game test class is registered, or its tests silently never run (Fabric finds them only through the
+    gametest source set's fabric.mod.json entrypoints)."""
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    listed = {cls for classes in mod.get("entrypoints", {}).values() for cls in classes}
+    for path in sorted((ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test").glob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        if ("@GameTest" in text or "ClientGameTest" in text) and f"io.github.jimbozoomer.jugcraft.test.{path.stem}" not in listed:
+            err(f"src/gametest/{path.name}: has game tests but is not a fabric-gametest or fabric-client-gametest entrypoint")
+
+
+def check_baselines(root):
+    """Roadmap step 11: the benchmark and the rules it runs are pure Java (the harness and the game test run the same
+    code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
+    and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
+    for package in ("balance", "compose", "effect", "rules", "resource"):
+        for path in sorted((root / package).glob("*.java")):
+            if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
+                err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        if "ConcordanceClientOptions" in text:
+            err(f"{path.relative_to(JAVA_ROOT)}: shared code must not read the client's display settings (ConcordanceClientOptions)")
+        method = ""
+        for line in text.splitlines():
+            signature = re.match(r"^\t(?:public|protected|private|static)[^=;]*\(", line)
+            if signature:
+                method = line
+            if "reducedMotion" in line and "boolean reducedMotion" not in line and "animateTick" not in method:
+                err(f"{path.relative_to(JAVA_ROOT)}: reducedMotion is a display setting; read it only in animateTick")
 
 
 def KINDLE_MOTE_STEPS_FIT(co):

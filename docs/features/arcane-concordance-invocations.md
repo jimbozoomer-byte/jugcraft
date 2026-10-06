@@ -9,7 +9,8 @@ damage, defense, movement, support, investigation and utility answer each, so a 
 and support a party without composing anything.
 
 Builds on [composed spells and the shared effect system](arcane-concordance-composition.md). Contract and checklist:
-[ARCANE_CONCORDANCE.md](../ARCANE_CONCORDANCE.md). Step 11 measures their combat numbers.
+[ARCANE_CONCORDANCE.md](../ARCANE_CONCORDANCE.md). Their combat numbers are measured in [the
+baselines](arcane-concordance-baselines.md) (step 11).
 
 ## Player experience
 
@@ -118,8 +119,9 @@ Numbers as compiled for the Initiate's Wand (Focus is 20 at most and returns one
 | Flashstep | 4 | 1 | 0 | 30 | Intensify: 6 (1.8 blocks a tick) |
 | Lanternward | 7 | 8 | 200 | 45 | Widen: 9 (6 blocks); Prolong: 8 (ward 20 s) |
 
-Every invocation costs at least its composition, and its Spell Engine cooldown is at least the composition's. Step 11
-measures what these do against benchmark encounters and records the results; no conversion or resource is produced.
+Every invocation costs at least its composition, and its Spell Engine cooldown is at least the composition's. What
+they do against benchmark encounters is recorded in [the baselines](arcane-concordance-baselines.md); no conversion or
+resource is produced.
 
 ## Multiplayer and persistence
 

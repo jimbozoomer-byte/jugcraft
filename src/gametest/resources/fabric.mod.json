@@ -15,6 +15,7 @@
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceEffectGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceComposeGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceInvocationGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ConcordanceBaselineGameTests",
 			"io.github.jimbozoomer.jugcraft.test.JugcraftGameTests",
 			"io.github.jimbozoomer.jugcraft.test.AgricultureGameTests",
 			"io.github.jimbozoomer.jugcraft.test.KitchenGardenGameTests",

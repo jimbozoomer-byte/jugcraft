@@ -285,7 +285,8 @@ Magic, milestones 1 to 3. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCAN
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),
 [arcane-concordance-composition.md](features/arcane-concordance-composition.md),
-[arcane-concordance-invocations.md](features/arcane-concordance-invocations.md).
+[arcane-concordance-invocations.md](features/arcane-concordance-invocations.md),
+[arcane-concordance-baselines.md](features/arcane-concordance-baselines.md).
 
 | ID / part | Class / data | What |
 | --- | --- | --- |
@@ -296,6 +297,7 @@ Magic, milestones 1 to 3. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCAN
 | `jugcraft:initiate_wand` | `InitiateWandItem`; `data/jugcraft/spell_assignments/initiate_wand.json` | the first instrument (`#jugcraft:concordance_instruments`) |
 | invocations | `data/jugcraft/concordance/invocation/`, `data/jugcraft/spell/{kindle,aegis,revelation,lance,flashstep,lanternward}.json`; `Invocations` (impact `jugcraft:invocation`), `ConcordanceSpells` (Spell Engine bridge, settlement) | Kindle (utility), Dawn Aegis (defense), Revelation (investigation), Lance of Dawn (damage), Flashstep (movement), Lanternward (support); compositions compiled under the wand's limits |
 | tunings | item component `jugcraft:tunings` (`Tunings`); `ConcordanceCommand` (`tune`) | one modifier per invocation, from its list, charged by the server's rules |
+| baselines | `concordance/balance/` (pure Java: `Benchmark`, `Baselines`) | a deterministic combat benchmark over the compiled plans; its acceptance checks run as a game test |
 | `jugcraft:lumen_mote` | `LumenMoteBlock`, `Illumination` | the Kindled light and a lantern's trail light; open air only |
 | `jugcraft:kindled_lantern` | `KindledLanternItem`, components `jugcraft:radiance` (`LanternCharge`), `jugcraft:lantern_lit` | 64 Radiance, 1 per 400 ticks while lit |
 | codex | `data/jugcraft/modonomicon/` | Modonomicon book `jugcraft:arcane_concordance`; research nodes from advancements `jugcraft:concordance_*` |
