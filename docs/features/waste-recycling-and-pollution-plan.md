@@ -1,6 +1,6 @@
 # Waste recovery, equipment recycling and pollution
 
-Status: planning step 6, recorded 6 October 2026. The owner choices below are endorsed directions. Equipment, pollution accounting, encounter rules and interface examples are proposals to discuss; no gameplay is implemented by this document. The remaining decisions are listed explicitly at the end.
+Status: owner-endorsed planning step 6, recorded and updated 6 October 2026. The owner choices below include the follow-up encounter and pollution-behavior decisions. Detailed equipment, quantities, scheduling and interface examples remain proposals; no gameplay is implemented by this document. Remaining implementation design and the next planning step are listed at the end.
 
 Primary specialties: materials recovery, industrial chemistry, factory operations and base defence.
 Related documentation: [machine roadmap](../MACHINE_ROADMAP.md), [chemistry](../branches/CHEMISTRY.md), [current technology](../TECH_TREE.md) and [testing guidance](../TESTING.md).
@@ -10,6 +10,9 @@ Related documentation: [machine roadmap](../MACHINE_ROADMAP.md), [chemistry](../
 - **Optional recovery at first:** useful byproducts and extra processing can recover materials and reduce costs. Do not turn the first version into a compulsory waste-handling chain for every machine.
 - **Equipment disassembly is in scope:** gradually include machines, tools and manufactured goods, alongside material scraps and spent fluids.
 - **Pollution thresholds attract the existing marauders:** pollution must have thresholds that spawn that faction.
+- **Pollution replaces the random automatic-raid trigger:** areas below the first pollution threshold do not receive automatic raids through the old random trigger. Scheduling gates and cooldowns still apply above the threshold.
+- **Higher pollution thresholds unlock stronger raid parties:** use stronger encounter bands, eventually including blimps and walkers. Higher pollution does not additionally shorten raid cooldowns as a second escalation axis under this choice.
+- **Local pollution with modest nearby spread and natural decline:** concentrate pollution around industry, spread some into nearby areas, and let it gradually decline when emissions fall.
 - **Pollution output is visible on a pollution map device.**
 - **Pollution should not really affect how the world looks:** do not add terrain discoloration, visible smog, biome replacement or other landscape appearance changes as pollution consequences.
 
@@ -50,7 +53,7 @@ These are product families, not permission to convert every residue into fertili
 
 Use the earlier shared item, fluid, kinetic and electrical systems. Filters and linings are installed capabilities under the existing planning direction, rather than a new requirement to replace parts after every few operations. Treatment reagents may be recipe inputs, with their cost balanced against recovered products and emission reduction.
 
-## Proposed pollution accounting
+## Pollution behavior and proposed accounting
 
 Start with a readable local industrial pollution value. Individual recipes/fuels can declare contributions so players can understand the sources. Air, water and solid-residue contributions can remain distinguishable in the data or device, but a mandatory simulation of three separate environmental systems is not yet chosen.
 
@@ -58,10 +61,12 @@ Start with a readable local industrial pollution value. Individual recipes/fuels
 - Account for fuel at its consuming generator/engine, and process emissions at the process producing them. Do not charge the same electricity-related emission again at every machine that uses that power.
 - Approved treatment reduces the appropriate outgoing contribution or processes a defined spent stream. Recovery and pollution reduction need not be identical: a useful recycling operation can still consume fuel or produce a residual emission.
 - Keep records for areas rather than attaching pollution solely to a player or machine. Removing a chimney or dismantling a machine must not erase pollution already recorded there.
-- Spatial extent, spread, natural decline, units, thresholds and rates remain decisions to settle. Avoid an elaborate weather or fluid-world simulation unless separately requested.
+- Local concentration, modest nearby spread and natural decline are approved. Exact area size, spread/decline rates, units and thresholds still need balancing. Avoid an elaborate weather or fluid-world simulation unless separately requested.
 - The device must explain the current level and threshold meaning. Proposed extra readings are recent emission rate, rising/falling trend, major nearby sources and whether an encounter is eligible or held by a cooldown.
 
-Do not implicitly load chunks or scan the world to update pollution. A future implementation needs bounded active-source bookkeeping and persisted area records. Unloaded machines must not manufacture emissions or recovery products unless an independently approved simulation already performs those operations. A catch-up calculation for natural decline must be deterministic and bounded if that decline model is selected.
+Spread should redistribute a defined share of recorded pollution rather than create extra pollution, while natural decline removes some recorded pollution. With emissions stopped, total pollution should trend downward even if nearby areas briefly receive redistributed pollution. These are proposed accounting requirements for the chosen behavior; exact formulas need a focused design and balance pass.
+
+Do not implicitly load chunks or scan the world to update pollution. A future implementation needs bounded active-source bookkeeping and persisted area records. Unloaded machines must not manufacture emissions or recovery products unless an independently approved simulation already performs those operations. Catch-up calculations for the approved natural decline must be deterministic and bounded; offline/unload timing must not erase or duplicate pollution through repeated loading.
 
 The system should support modest pre-electric activity without immediate large raids. Exact source assignments and threshold balance are not approved yet; neither a blanket exemption for all mechanical industry nor severe emissions on every early kiln is implied.
 
@@ -71,7 +76,7 @@ The owner's existing faction is called **Raiders** in the inspected source. Its 
 
 The inspected system already has directional horn warnings, a grace period, a world cooldown, capped encounter levels, an active-raid guard, and withdrawal rules. It respects its feature switches, peaceful difficulty and mob-spawning rules. Its explosives do not break, move or burn blocks; existing temporary siege ladders are an independent faction behavior rather than pollution changing the landscape.
 
-Currently, automatic raids are timed/chance-based and raid difficulty rises with past victories. Pollution-based eligibility is a proposed integration, not existing behavior. Settle how pollution interacts with that trigger and escalation before implementation.
+In the inspected source, automatic raids are timed/chance-based and raid difficulty rises with past victories. The owner now chooses pollution to replace the random automatic trigger and higher pollution bands to unlock stronger parties. This is approved planning direction, not existing behavior. Below the first pollution threshold, automatic pollution raids are ineligible; above it, grace periods, cooldowns and other scheduler gates still apply. Higher pollution changes the available party strength, not the cooldown as an additional escalation.
 
 Proposed integration rules:
 
@@ -79,8 +84,8 @@ Proposed integration rules:
 2. Preserve clear warning, safety/configuration gates, encounter caps and a meaningful recovery window between encounters. Exact timings can be reviewed with the pollution balance.
 3. Tie a pollution-driven encounter to the relevant producing area and nearby eligible players, rather than moving its threat to an unrelated village merely because the factory owner travels there.
 4. Distinguish being above a threshold from a guaranteed immediate raid. The device can show eligibility and cooldown; exact scheduling after eligibility remains to be designed.
-5. Decide whether higher bands change encounter strength, encounter frequency or both. Do not accidentally stack pollution escalation and the current victory-based escalation into uncapped difficulty.
-6. Lower pollution must provide a visible benefit on the device and reduce future encounter pressure according to the chosen model. Cooling down does not automatically remove a raid already under way.
+5. Map higher pollution bands to stronger capped encounter parties. Resolve compatibility with the current victory-based level so past wins cannot negate the benefit of lowering pollution or stack into uncapped difficulty. The precise band-to-party mapping is still to design.
+6. Lower pollution must provide a visible benefit on the device: weaker eligible party bands, and no automatic raids below the first threshold. Cooling down does not automatically remove a raid already under way.
 7. Existing camps and the voluntary war horn remain separate proposed behaviors; the pollution requirement should apply to automatic pollution-driven encounters. Any changes to those independent activities need their own decision.
 
 Further balance work must address shared factories, overlapping polluted areas, nearby players who did not produce the emissions, migration from existing raid saves and exploit farming of raid loot. A multiplayer player-targeting policy is not finalized by this document.
@@ -111,17 +116,13 @@ The existing [petrochemistry data](../../tools/petro.py) has a flowback-treatmen
 
 The separately published [industrial agriculture plan](https://github.com/jimbozoomer-byte/jugcraft/blob/docs/industrial-agriculture-plan/docs/features/industrial-agriculture-plan.md) and [mineral-sands/refining plan](https://github.com/jimbozoomer-byte/jugcraft/blob/docs/mineral-sands-refining-plan/docs/features/mineral-sands-and-refining-plan.md) supply proposed filters, coatings, construction outlets and recovery streams. This step adds no code or recipes to those branches.
 
-## Remaining owner decisions and next planning step
+## Remaining implementation design and next planning step
 
-Three immediate questions:
+The three core follow-up choices are settled: pollution replaces random automatic raids, stronger pollution bands unlock stronger parties, and local pollution spreads modestly nearby while naturally declining. Do not reopen these as undecided alternatives.
 
-1. Should pollution replace the current random automatic-raid trigger, add another trigger, or modify the existing trigger while requiring a pollution threshold?
-2. Should higher pollution thresholds produce stronger encounters, more frequent encounters, or both within explicit caps?
-3. Should pollution stay local and naturally decline, spread modestly into nearby areas and naturally decline, or persist regionally until active cleanup?
+Detailed design still needs numeric thresholds, emission weights, area size, spread/decline rates, band-to-party mapping, scheduling above the threshold, treatment efficiency and costs, nearby-player/shared-factory rules, and compatibility with saved victory-based raid levels. The handheld map and later control-room display remain proposed forms; range, discovery, ingredients and interface need refinement.
 
-Device form and exact numbers can be refined after these core choices. Recommended proposals are to connect the automatic trigger to pollution, use a small number of readable capped encounter bands, and allow local pollution to decline with limited nearby spread. These are recommendations, not recorded approvals.
-
-After settling step 6, step 7 is progression and balance: build representative solo/trade production routes, identify bootstrap cycles, select the first implementation slice and plan relevant playtests. Do not interpret these planning steps as authorization to merge or implement gameplay automatically.
+Step 7 is progression and balance: map the minimum required route from a new world through ceramics and mechanical workshops to first electricity, with steel as a parallel capability, then selected later chemical/precision routes. Put the wider construction, agricultural, mineral and recovery products beside that route as meaningful sideways options. Build representative solo/trade examples, identify bootstrap cycles and plan relevant playtests before setting recipe quantities. Desired pacing and in-game guidance can be clarified during that pass. Do not interpret these planning steps as authorization to merge or implement gameplay automatically.
 
 Future implementation validation includes accounting audits, threshold/cooldown behavior, bounded server work, restart/unload persistence, disassembly with inventory/fluid/energy contents, durability handling and a two-player server test. This documentation change requires repository/link and whitespace checks; it provides no new build or gameplay evidence.
 

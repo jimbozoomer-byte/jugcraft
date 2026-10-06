@@ -149,7 +149,7 @@ The first batch from the owner's saved idea backlog ([MACHINE_ROADMAP.md](../MAC
 
 ## Waste recovery and pollution planning
 
-The owner's [step 6 plan](../features/waste-recycling-and-pollution-plan.md) chooses optional initial recovery and equipment disassembly. Pollution thresholds attract the existing marauders, and a pollution map device shows the output without changing the landscape's appearance. Proposed shared equipment includes filtration/settling, selected neutralization, reagent recovery and compatible emissions scrubbing. Encounter rules, accumulation/decline, recipes and quantities still need decisions; this is not implemented gameplay or a blanket mandatory waste-treatment requirement.
+The owner's [step 6 plan](../features/waste-recycling-and-pollution-plan.md) chooses optional initial recovery and equipment disassembly. Pollution replaces random automatic raids; higher thresholds unlock stronger marauder parties. It concentrates locally, spreads modestly nearby and naturally declines, with readings on a map device and no landscape appearance changes. Proposed shared equipment includes filtration/settling, selected neutralization, reagent recovery and compatible emissions scrubbing. Numeric balance, scheduler details, equipment and recipes remain to be developed; this is not implemented gameplay or a blanket mandatory waste-treatment requirement.
 
 ## Boundaries
 
