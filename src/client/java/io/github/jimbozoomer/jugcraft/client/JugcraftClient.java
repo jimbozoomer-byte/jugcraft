@@ -259,6 +259,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		// The walled town: townsfolk, the shop and ATM screens.
 		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(TownsfolkModel.LAYER, TownsfolkModel::createLayer);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.TOWNSFOLK, TownsfolkRenderer::new);
+		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(StyxModel.LAYER, StyxModel::createLayer);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.styx.JugcraftStyx.WIZARD, StyxRenderer::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.SHOP_MENU, ShopScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.ATM_MENU, AtmScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.control.JugcraftControl.CONTROLLER_MENU, LogicControllerScreen::new);

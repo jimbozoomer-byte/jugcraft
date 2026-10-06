@@ -1513,6 +1513,8 @@ def main():
 
     import pixel_hollows_textures
     pixel_hollows_textures.draw_all()
+    import styx
+    styx.textures()
 
 
 if __name__ == "__main__":

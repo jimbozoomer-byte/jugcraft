@@ -1,10 +1,26 @@
 # Styxhexenhammer and the Nightglass Conservatory
 
-Status: **design proposal; no gameplay implementation in this PR**.
+Status: **playable operator-placed prototype; owner visual review pending**.
 Proposal: owner request of 5 October 2026, with the character image below.
 Owner: @jimbozoomer-byte.
 Tier: Discovery, with later optional connections to magical and technological agriculture.
 Role: a resident dark wizard, herbalist, and keeper of an unusual living flower collection.
+
+## Try this prototype
+
+Use Minecraft 26.3, Fabric Loader 0.19.3 and Fabric API 0.161.0+26.3, with this branch's built Jugcraft JAR. No added runtime dependency. Start with a backed-up test world.
+
+1. With operator permissions, stand at the center of a clear, level **27 x 21** grass/dirt area with **28 blocks** of headroom. The building faces south. Only the Overworld is supported.
+2. Run `/jugcraft styx preview`. This prints the footprint corners and checks the loaded area for obstacles, block entities and the protected town. It does not clear terrain.
+3. Within 60 seconds run `/jugcraft styx place`. It rechecks the site, places at most 128 blueprint entries per tick, and creates Styxhexenhammer when complete. `/jugcraft styx` reports the saved location and progress.
+4. Speak to him with **eight empty main-inventory slots** to receive one of each flower. Each player can claim once per world. A full inventory leaves the claim available.
+5. Plant the cuttings on ordinary plantable soil. Seven small flowers have three growth stages; sufficient light allows random growth, and bone meal advances a stage or propagates a mature plant. Ravenquill Lupine uses vanilla tall-flower placement and bone-meal propagation. Seven small cultivars can be potted. All eight are also in the Natural Blocks Creative tab.
+
+The prototype includes a dedicated cuboid character model, original palette texture, eight vanilla-style flower sprites, a furnished connected tower/greenhouse, original dialogue, and a four-phase daily pathfinding routine with restrained evening particles. The building blueprint is **27 x 28 x 21 (width, height, depth)**, with an 11-block tower footprint. The actual furnished prototype is simpler than the long-term room specification below.
+
+Placement is limited to one conservatory per world and only works in loaded chunks. A saved cursor resumes interrupted construction. A new obstruction pauses construction rather than replacing it; remove that obstruction and keep the home loaded to continue. There is no automatic terrain clearing, rotation, relocation, reset, or natural discovery yet. The building and flower beds use normal breakable blocks, without new land-claim protection. Routine destinations derive from the saved home and world time, and can stall if players obstruct routes. The persistent resident is protected from ordinary damage; operator `/kill` can still remove him, and there is intentionally no automatic replacement from a missing/unloaded entity lookup.
+
+**Future work:** natural woodland discovery, more elaborate furnishings and gardening gestures, feature-disable controls, replacement/recovery tools, flower recipes and magic. Stolas and all 72 Ars Goetia spirits' summoning and pacts are tracked in the [roadmap TODO](../ROADMAP.md#owner-requested-todo-ars-goetia-summoning-and-pacts); they are not active mechanics in this prototype.
 
 ## The concept
 
@@ -25,7 +41,7 @@ The owner's direction is **"Make sure he looks JUST LIKE THIS IMAGE."** Preserve
 | Part | Required appearance |
 | --- | --- |
 | Hat | Oversized, uneven broad brim; tall tapering crown bent over at the tip; nearly black aubergine with several stepped purple bands and lighter violet patches. Preserve the asymmetry. |
-| Face | Warm light skin, pale eyes, thick rectangular charcoal glasses, brown eyebrows, a modest projecting nose, brown moustache and short beard around mouth and chin. Keep the glasses readable without covering the eyes. |
+| Face | Standard player-sized head with a flat pixel-art face texture. Short eyes at the usual Minecraft proportions; brown brows, moustache and beard painted into the skin. Thin charcoal glasses project slightly from the face with open lenses and side arms. No projecting eyes, nose or mouth. The hat brim sits directly into the hairline. This follows the owner's latest reference correction. |
 | Hair | Long medium/dark brown hair, with layered side and back volume and two uneven locks hanging down the chest. Model the visible stepped outline. |
 | Upper robe | Deep blue-charcoal shoulders and sleeves; raised shoulder pieces; muted violet cuffs and edging; purple center panel with sparse antique-gold accents. |
 | Lower robe | Ankle-length dark layered robe, with a long violet-trimmed opening and small gold patches; dark brown boots visible beneath it. Split the model for walking while preserving the standing silhouette. |
@@ -33,11 +49,23 @@ The owner's direction is **"Make sure he looks JUST LIKE THIS IMAGE."** Preserve
 | Staff | Long dark brown/black shaft, irregular violet bindings, and an open angular dark-purple frame enclosing a faceted violet crystal. Held on the image's right, in the character's left hand. Preserve the open gap around the crystal. |
 | Finish | Crisp Minecraft-scale steps and deliberate color patches. Subtle violet crystal emission; enough daylight contrast to see the navy robe and brown hair. |
 
-Model the hat, glasses, locks, beard relief, shoulder pieces, belt vials, and staff with real depth. A custom humanoid model should retain head tracking and restrained walking/arm animation. Keep the reference outfit throughout his routine and across seasons. Do not equip automatic town Halloween headgear on this NPC.
+Model the hat, hair locks, shoulder pieces, belt vials, and staff with real depth. Keep eyes, nose, mouth and beard on the flat player-style skin; the thin glasses are separate geometry. A custom humanoid model should retain head tracking and restrained walking/arm animation. Keep the reference outfit throughout his routine and across seasons. Do not equip automatic town Halloween headgear on this NPC.
 
 The image shows one three-quarter view. Match that view first; unseen rear details are an extension of the visible design and must be labeled as interpretation during review. In-game lighting will vary. **Do not claim an exact match without rendered comparison images.**
 
 Visual acceptance requires a matching three-quarter screenshot beside the reference, plus front, profile, back, daylight, nighttime, and walking views. Inspect glasses, hair separation, robe clipping, vial placement, and staff grip at both conversation distance and normal gameplay distance. The owner's visual review remains an explicit release criterion.
+
+### In-game prototype, 5 October 2026
+
+![Styxhexenhammer, three-quarter view](../images/styxhexenhammer-ingame.png)
+
+The cuboid model follows the reference's bent purple hat, glasses, long brown hair, dark robe, belt vials and left-hand crystal staff. These are real screenshots from the isolated client test. They are review evidence, not a claim of exact likeness. The face was revised to a flat player-style skin with short eyes, thin separate glasses and a properly seated hat after owner feedback; the flowers were revised to vanilla crossed pixel sprites. Exact likeness still requires the owner's review.
+
+[Face and glasses close-up](../images/styxhexenhammer-face-closeup.png) · [Front](../images/styxhexenhammer-front.png) · [Profile](../images/styxhexenhammer-profile.png) · [Back, interpreted from the reference](../images/styxhexenhammer-back.png) · [Night](../images/styxhexenhammer-night.png)
+
+![Nightglass Conservatory, exterior](../images/styx-conservatory-ingame.png)
+
+![Four beds inside the greenhouse](../images/styx-greenhouse-ingame.png)
 
 ## His home
 
@@ -70,13 +98,13 @@ These are new fantasy cultivars. The initial scope is living decoration: placeme
 | Inkvein Helleborine / `inkvein_helleborine` | Cream-green cup flowers streaked with ink-purple veins and broad pointed leaves. | Small |
 | Violet Lanternbloom / `violet_lanternbloom` | Hanging plum-colored husks surrounding warm violet centers; fine stems and small heart-shaped leaves. | Small |
 
-Use existing sculpted-flora tooling for the plants. Keep silhouettes recognizable in a mixed bed; do not recolor one mesh eight times. Any luminous detail is initially an appearance choice, not a gameplay effect or ingredient promise.
+Use Minecraft-style 16 x 16 pixel-art flower textures on vanilla crossed planes, flat inventory sprites and vanilla flower-pot cross models. The tall lupine has a separate 16 x 16 sprite for each half. Keep all eight silhouettes recognizable; do not sculpt miniature 3D petals, stems and leaves. This follows the owner's art correction. Any luminous detail is initially an appearance choice, not a gameplay effect or ingredient promise.
 
 Proposed cultivation uses one block/item identity per cultivar with a small growth state, preserving that identity for future uses. A planted cutting matures under ordinary gardening conditions; harvesting returns the plant for replanting. Controlled propagation can produce one extra cutting from a mature plant using existing bone meal behavior. No extra seed, essence, or currency registry is needed for this first collection.
 
-The greenhouse keeps a permanent display of each cultivar. The visitor obtains a starter collection through a server-recorded, once-per-player interaction with Styxhexenhammer. Player gardens supply later cuttings, allowing solo propagation and player-to-player trade without repeatedly stripping the landmark. No shop buys these flowers for Jugs in the first slice, so free cuttings cannot create a credit loop.
+The greenhouse starts with a display of each cultivar; this prototype does not protect beds from harvesting. The visitor obtains a starter collection through a server-recorded, once-per-player interaction with Styxhexenhammer. Player gardens supply later cuttings, allowing solo propagation and player-to-player trade without repeatedly stripping the landmark. No shop buys these flowers for Jugs in the first slice, so free cuttings cannot create a credit loop.
 
-## Character routine and interaction
+## Character routine and interaction (design target)
 
 - **Morning:** visits greenhouse work spots, checks the beds, and performs a short tending animation.
 - **Afternoon:** alternates between his potting bench and library; occasionally inspects a vial or notebook.
@@ -94,7 +122,7 @@ Example lines:
 
 His first magic is atmospheric: staff glow, a brief ritual, and a small hovering mote over a specimen. Do not introduce a new spell resource system for these effects. Gardening animations do not create valuable drops or harvest nearby player farms. He is a persistent, friendly landmark resident using the town's established NPC survivability policy; a future combat/quest design can expand his abilities separately.
 
-## Placement and persistence
+## Placement and persistence (long-term target)
 
 Propose **one named resident and one conservatory per Overworld**, identified by saved home position and resident UUID. Avoid random duplicate Styxhexenhammers in repeated structures.
 
@@ -131,11 +159,25 @@ Use the Minecraft/Fabric/Java versions actually pinned on main at implementation
 - The owner supplied [the character reference](../images/styxhexenhammer-reference.jpg) in this request and explicitly asked for the model to match it. The unmodified uploaded JPEG is included as a design reference, not an in-game texture. See [its provenance note](../images/styxhexenhammer-reference.md).
 - Implementation creates original editable geometry and generated textures according to this approved reference direction. Record generators, palettes, and any artist-created source files alongside the final assets.
 - The Stolas background reference is the public-domain grimoire linked above. The proposed building, flower designs, names, dialogue, animations, and gameplay behavior are Jugcraft design work.
-- Actual assistance for this proposal: Codex. No claim that Claude Opus produced or reviewed it.
+- Actual assistance for the design, implementation and testing: Codex. No claim that Claude Opus produced or reviewed it.
 
 ## Verification and acceptance
 
-This PR has **no playable NPC, model, flowers, or structure yet**. The checklist below describes tests required for implementation, not completed results.
+Validation on Windows with Java 25.0.4.1, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3 and resolved Loom 1.17.21:
+
+- `python scripts/check_repository.py`: passed.
+- `python tools/check_mod_data.py`: passed (1,452 material IDs and data/recipe audit).
+- Generator comparison: all 87 Styx JSON files and all character/flower texture pixels match their editable sources. The full JSON generator was also run during development; unrelated Windows floating-point/PNG serialization differences were excluded from this PR.
+- `gradlew runClientGameTest jar --offline --no-daemon -PclientTestShard=80 -PclientTestShards=81`: isolated Styx client test, covering real operator preview/place commands, complete building placement, entity rendering and all four daily destinations, including both stair flights. Eight actual screenshots are linked above. The shard indices select this class in this commit's 81-entry test list.
+- Full server suite after adding the sixth Styx test: **824 of 825 passed**, including all six Styx tests. The failing test was `jugcraft_game_tests_triple_battery_fires_asalvo` (expected two Heavy Shells remaining, observed five), repeated in two fresh automated test worlds. This PR does not alter artillery code or suppress that test. Consequently `gradlew build` is **not green**. An earlier five-Styx-test run had all 824 tests pass; that is not the final suite result.
+- Styx server coverage: distance and atomic per-player gifts, full inventory/no duplicate grants, growth and harvested identity, tall-flower half loot and pot contents, SavedData codec round-trip, complete blueprint contents, and rejection of unloaded footprints without loading them.
+
+The remaining acceptance checklist includes broader release checks; unlisted tests must not be assumed to have passed.
+
+- Source assets: `tools/styx.py` (character and flower geometry, player-face pixels, flower sprites and data), `tools/styx_structure.py` (building). `python tools/generate_material_data.py` regenerates the JSON; `python tools/styx.py` regenerates these textures, and the general texture entry point includes them too.
+- Server test class: `StyxGameTests`; client test class: `StyxClientGameTests`. The client creates its own disposable world and never modifies a player save.
+- Actual two-client dedicated-server play, crash/reconnect during a claim, full chunk unload/reload and long-term performance measurements remain unverified. The SavedData codec round-trip is not a substitute for those tests.
+- Exact likeness has not been signed off by the owner. The supplied image remains the acceptance reference; the unseen rear is an original interpretation.
 
 - **Visual:** compare the model to the supplied image at the same angle; capture front/side/back, day/night, walking, talking, and staff-raising views; fix clipping and z-fighting. Obtain owner review of likeness.
 - **Data/build:** repository links, generated-resource reproducibility, registry/data audit, pinned-platform build, and dedicated-server startup with no client-only class loading.
@@ -146,4 +188,4 @@ This PR has **no playable NPC, model, flowers, or structure yet**. The checklist
 - **Performance:** measured tick and render behavior with a loaded greenhouse, bounded particle counts, and no work while unloaded. Report actual numbers only after measurement.
 - **Season/upgrade:** year-round plants and resident; no lost items/builds after season change, config disable, or restart; stable IDs and saved-data schema.
 
-Open design choices for later review: exact flower growth timings, final structure measurements, dialogue presentation, discovery hints, and any future flower recipes. Those do not block the appearance prototype. Visual fidelity to the attached character remains the highest-priority art requirement.
+Open design choices for later review: growth balancing, further building detail, dialogue presentation, discovery hints, and future flower recipes. Those do not block the appearance prototype. Visual fidelity to the attached character remains the highest-priority art requirement.
