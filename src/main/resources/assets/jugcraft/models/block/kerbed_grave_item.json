@@ -204,7 +204,7 @@
     {
       "from": [
         4.2884,
-        -0.02,
+        -0.1,
         0.0502
       ],
       "to": [
@@ -214,16 +214,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            10.3072,
+            13.9937,
+            11.7116,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            4.2884,
+            13.9937,
+            5.6928,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            14.5455,
+            13.9937,
+            15.9498,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            0.0502,
+            13.9937,
+            1.4545,
+            16.0
+          ]
         },
         "up": {
           "texture": "#relief_top"
@@ -300,7 +324,7 @@
     {
       "from": [
         4.2884,
-        -0.02,
+        -0.1,
         14.5956
       ],
       "to": [
@@ -310,16 +334,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            10.3072,
+            13.9937,
+            11.7116,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            4.2884,
+            13.9937,
+            5.6928,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            0.0,
+            13.9937,
+            1.4044,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            14.5956,
+            13.9937,
+            16.0,
+            16.0
+          ]
         },
         "up": {
           "texture": "#relief_top"
@@ -396,7 +444,7 @@
     {
       "from": [
         10.3072,
-        -0.02,
+        -0.1,
         0.0502
       ],
       "to": [
@@ -406,16 +454,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            4.2884,
+            13.9937,
+            5.6928,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            10.3072,
+            13.9937,
+            11.7116,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            14.5455,
+            13.9937,
+            15.9498,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            0.0502,
+            13.9937,
+            1.4545,
+            16.0
+          ]
         },
         "up": {
           "texture": "#relief_top"
@@ -492,7 +564,7 @@
     {
       "from": [
         10.3072,
-        -0.02,
+        -0.1,
         14.5956
       ],
       "to": [
@@ -502,16 +574,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            4.2884,
+            13.9937,
+            5.6928,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            10.3072,
+            13.9937,
+            11.7116,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            0.0,
+            13.9937,
+            1.4044,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            14.5956,
+            13.9937,
+            16.0,
+            16.0
+          ]
         },
         "up": {
           "texture": "#relief_top"

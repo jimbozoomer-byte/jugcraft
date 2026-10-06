@@ -16,7 +16,7 @@ import net.minecraft.core.BlockPos;
 /**
  * Client game test for the arms motion (batch 43): the motion files load; the player, seen from the front, holds each
  * kind's guard and is caught two ticks into a swing (a two-handed kind's at its blow); three blows in a row with a longsword move through its combo; and
- * the guard and a stroke on screen in first person (CI job {@code client}). The four mixins are applied as the game
+ * the guard and a stroke on screen in first person, the flail's among them with its ball swinging (CI job {@code client}). The four mixins are applied as the game
  * starts, so a target 26.3 no longer has stops the game here.
  */
 public class ArmsMotionClientGameTests implements FabricClientGameTest {
@@ -67,7 +67,7 @@ public class ArmsMotionClientGameTests implements FabricClientGameTest {
 			context.getInput().pressKey(options -> options.keyToggleGui);
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			for (String kind : List.of("longsword", "war_hammer", "glaive", "dagger", "scythe", "pike", "zweihander", "maul", "labrys",
-					"kama")) {
+					"kama", "flail")) {
 				hold(context, server, kind);
 				// Vanilla lowers the arm on screen until the attack cooldown, reset by the swap, recovers (28 ticks for a
 				// war hammer).
