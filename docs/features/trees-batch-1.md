@@ -1,6 +1,6 @@
 # Trees batch 1: northern, wet and cool-forest trees
 
-Status: implemented on branch `claude/trees-batch-1`, awaiting review. **Not yet played**, and not yet built or tested in CI. See Verification for exactly what has run.
+Status: implemented on branch `claude/trees-batch-1`, awaiting review. Built and tested in CI (PR #206); **not yet played**. See Verification for exactly what has run.
 Proposal issue: none. The owner, 5 October 2026: "start batch 1 of the new trees", from the tree roster ([branches/TREES.md](../branches/TREES.md)). After the roster was written they added: "We are ok for making new wood and logs for a bunch as well, if we need them just alter the ones we have but make sure they are made the same way so they fit the world!!! Unless they are supposed to be the same wood."
 Owner: @jimbozoomer-byte
 Target milestone and tier: world generation and building (Discovery), as the rest of the biomes branch ([seasonal-forests.md](seasonal-forests.md)).
@@ -316,9 +316,9 @@ Shares are of each biome's tree tries, turned into in-order chances (TREES.md, "
 - Not applicable: caves, dungeons, pets, bosses, loot and events. No seasonal content gates anything here.
 
 ## Rollout and open questions
-- **The owner approves the cedar's colours** beside the vanilla woods (rule 3), from the CI screenshots, each one line in `tools/wood_style.py`:
+- **The cedar's colours are approved.** On 6 October 2026 the owner saw them beside their painting and beside vanilla spruce, in the CI screenshots, and said: "Cedar looks sooo good!!". Each is one line in `tools/wood_style.py`:
   - the darkened wood `#725543` against the painting's `#84654d`;
-  - the bark darkened with it (`#3e2b24`-`#5d4437` against the painted `#483229`-`#6b4f40`). To keep the bark exactly as painted, restore its line, at the cost of a log that looks almost like its stripped log (ΔE 9.7);
+  - the bark darkened with it (`#3e2b24`-`#5d4437` against the painted `#483229`-`#6b4f40`);
   - the sage leaves.
 - **Shapes to check in the screenshots:**
   - the tamarack's tuft (height 3);
