@@ -17,7 +17,9 @@ import math
 
 from PIL import Image
 
+import gun_icons
 from steampunk_models import box, cyl
+from tower_guns import TUBE, bore
 from zeppelin import tiled_quads
 
 MOD = "jugcraft"
@@ -67,6 +69,12 @@ LINK_PITCH = 6
 # The turret turns about TURRET; the barrel pitches about BARREL (from the turret).
 TURRET = (0, 36, -2)
 BARREL = (0, 6, 9)
+# The barrel's pitch limits, in degrees of the driver's view (up is negative; landship/Landship BARREL_UP and BARREL_DOWN),
+# and how far it kicks back when it fires, in pixels (client/LandshipRenderer RECOIL). tools/gun_poses.py poses it over these.
+BARREL_PITCH = (-25, 10)
+RECOIL = 4
+# The smokestacks' tops, in pixels (landship/Landship puffs its smoke just above them).
+STACK_TOP = 35.75
 
 
 def _polygon_span(y, inset):
@@ -104,8 +112,9 @@ def side_frame(sign):
     m.append(box((s0, 9, 4), (s1, 21, 16), {"*": RIVETED}))
     m.append(box((s0 - 0.25 * sign, 20, 3.5), (s1 + 0.25 * sign, 21.5, 16.5), {"*": GILT}))
     gx = outer + 3 * sign
-    m += cyl("z", gx, 15, 1.2, 16, 25, SKID)
+    m += cyl("z", gx, 15, 1.2, 16, 25, TUBE)
     m += cyl("z", gx, 15, 1.8, 16, 18.5, BRASS)
+    m.append(bore(25, 0.5, 1.2, gx, 15))
     return m
 
 
@@ -121,35 +130,43 @@ def body():
     for x in (-10, 6):
         m.append(box((x, 29, 22.5), (x + 4, 30, 23), NUT))
     # The sloped glacis down to the nose.
-    m.append(box((-16, 10, 28), (16, 24, 34), {"*": RIVETED}, rotation=("x", -30, (0, 17, 31))))
+    # The sloped front plate, in two halves a tile wide each, so every face's texture fits inside its sprite (a 32-pixel
+    # face of a turned box would read past it).
+    for x0 in (-16, 0):
+        m.append(box((x0, 10, 28), (x0 + 16, 24, 34), {"*": RIVETED}, rotation=("x", -30, (0, 17, 31))))
     # Twin amber headlamps.
     for x in (-12, 10):
         m.append(box((x, 18, 33), (x + 2, 21, 34.5), {"*": BAND, "south": f"{AMBER}!"}))
-    # The engine deck at the back: a perforated grille, two smokestacks with gilt bands.
+    # The engine deck at the back: a perforated grille, two smokestacks with gilt bands. The stacks stop below the cannon,
+    # which sweeps over them when the turret turns to the rear (down to 36.3 pixels at full depression and recoil).
     m.append(box((-14, 24, -31), (14, 27, -22), {"*": PERFORATED}))
     for x in (-8, 8):
-        m += cyl("y", x, -27, 2.5, 27, 46, EXHAUST, SOOT)
-        m += cyl("y", x, -27, 3.1, 40, 41.5, GILT)
+        m += cyl("y", x, -27, 2.5, 27, STACK_TOP, EXHAUST, SOOT)
+        m += cyl("y", x, -27, 3.1, STACK_TOP - 3.5, STACK_TOP - 2, GILT)
     m.append(box((-17.5, 5, -33), (17.5, 9, -31), {"*": SKID}))
     return m + side_frame(1) + side_frame(-1)
 
 
 def turret():
-    """The turret, about its own pivot: a lacquered drum with a brass ring, a copper-dome cupola and the mantlet."""
+    """The turret, about its own pivot: a lacquered drum with a brass ring, a copper-dome cupola and the mantlet. The
+    ring reaches down a pixel to sit on the casemate's gilt band, so no slit shows under the turret."""
     m = []
     m += cyl("y", 0, 0, 11, 0, 8, RIVETED, LACQUER)
-    m += cyl("y", 0, 0, 11.6, 0, 1.5, BRASS)
+    m += cyl("y", 0, 0, 11.6, -1, 1.5, BRASS)
     m += cyl("y", 0, -4, 4.5, 8, 11, DOME)
     m.append(box((-5, 2, 8), (5, 10, 13), {"*": BRASS}))
     return m
 
 
 def barrel():
-    """The cannon, about the barrel's pivot, pointing along +z."""
+    """The cannon, about the barrel's pivot, pointing along +z: a steel tube in a lacquered sleeve, ending in a brass
+    muzzle band whose steel face holds the bore. The tube ends inside the band, so no faces share a plane; the sleeve
+    starts a quarter pixel further back, so at full recoil its end stays clear of the mantlet's face."""
     m = []
-    m += cyl("z", 0, 0, 2.2, 3, 36, SKID)
-    m += cyl("z", 0, 0, 3.0, 3, 9, LACQUER)
-    m += cyl("z", 0, 0, 3.0, 32, 36, BRASS)
+    m += cyl("z", 0, 0, 2.2, 3, 34, TUBE)
+    m += cyl("z", 0, 0, 3.0, 2.75, 9, LACQUER)
+    m += cyl("z", 0, 0, 3.0, 32, 36, BRASS, TUBE)
+    m.append(bore(36, 1.6, 3.0))
     return m
 
 
@@ -216,52 +233,7 @@ def tread():
     return img
 
 
-def _rect(img, x0, y0, x1, y1, c):
-    for y in range(y0, y1 + 1):
-        for x in range(x0, x1 + 1):
-            img.putpixel((x, y), c + (255,))
-
-
-def icon():
-    """The item: the landship side-on, black casemate and turret, steel track frame, gold hub."""
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    black, rust, tread_c, gold, steel = (30, 30, 38), (106, 101, 97), (52, 50, 46), (220, 176, 70), (150, 150, 146)
-    _rect(img, 5, 3, 9, 5, black)       # turret
-    _rect(img, 9, 4, 14, 4, steel)      # barrel
-    _rect(img, 6, 2, 7, 2, (128, 122, 116))
-    _rect(img, 3, 5, 12, 7, black)      # casemate
-    _rect(img, 3, 7, 12, 7, gold)
-    for x in range(1, 15):              # track outline
-        img.putpixel((x, 14), tread_c + (255,))
-    _rect(img, 2, 8, 13, 13, rust)
-    for y, (x0, x1) in zip(range(8, 14), ((3, 13), (2, 14), (1, 14), (1, 14), (2, 13), (3, 12))):
-        img.putpixel((x0 - 1, y), tread_c + (255,))
-        img.putpixel((min(15, x1 + 1), y), tread_c + (255,))
-    _rect(img, 4, 9, 6, 11, gold)       # hub
-    img.putpixel((5, 10), (150, 28, 32, 255))
-    _rect(img, 10, 9, 12, 11, black)    # sponson
-    _rect(img, 13, 10, 14, 10, steel)
-    _rect(img, 4, 1, 4, 3, (60, 58, 56))  # stack
-    return img
-
-
-def shell_icon():
-    """The cannon shell: a brass case with a steel nose."""
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    for i in range(9):
-        x, y = 3 + i, 12 - i
-        for d in (-1, 0, 1):
-            c = (196, 160, 80) if i < 5 else (150, 150, 146)
-            if d == -1:
-                c = (230, 200, 120) if i < 5 else (190, 190, 186)
-            img.putpixel((x + d, y), c + (255,))
-            img.putpixel((x, y + d), c + (255,))
-    img.putpixel((12, 3), (110, 110, 106, 255))
-    _rect(img, 2, 12, 3, 13, (120, 92, 40))
-    return img
-
-
 def draw_all(save):
     save(tread(), "block", TREAD)
-    save(icon(), "item", "landship")
-    save(shell_icon(), "item", "cannon_shell")
+    save(gun_icons.draw("landship"), "item", "landship")
+    save(gun_icons.draw("cannon_shell"), "item", "cannon_shell")

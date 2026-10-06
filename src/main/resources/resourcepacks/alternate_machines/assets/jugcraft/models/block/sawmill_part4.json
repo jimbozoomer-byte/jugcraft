@@ -36,9 +36,9 @@
     },
     {
       "from": [
-        0,
+        2.75,
         2,
-        2
+        0
       ],
       "to": [
         13,
@@ -46,10 +46,10 @@
         16
       ],
       "faces": {
-        "north": {
+        "east": {
           "texture": "#fluid_tank_side"
         },
-        "east": {
+        "west": {
           "texture": "#fluid_tank_side"
         },
         "down": {
