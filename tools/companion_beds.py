@@ -37,8 +37,14 @@ for color in COLORS:
     bunk = copy.deepcopy(base)
     def timber(lo, hi):
         return {"from": lo, "to": hi, "faces": {face: {"uv": [0,13,3,16], "texture": "#head_west"} for face in ["up","down","north","south","east","west"]}}
+    # Start above the mattress: posts through its sides caused coplanar faces.
     for x in [2, 13]:
-        for z in [0, 15]: bunk["elements"].append(timber([x,2,z],[x+1,16,z+1]))
+        for z in [0, 15]:
+            post = timber([x,6,z],[x+1,16,z+1])
+            # These ends meet the mattress below and the upper bed legs.
+            post["faces"].pop("down")
+            post["faces"].pop("up")
+            bunk["elements"].append(post)
     for y in [7, 10, 13, 15]: bunk["elements"].append(timber([3,y,15],[13,y+1,16]))
     write(f"src/main/resources/assets/peepo_companion/models/block/{name}_bunk.json", bunk)
     variants = {f"facing={face},stacked={str(stacked).lower()}": {"model": f"peepo_companion:block/{name}" + ("_bunk" if stacked else ""), "y": rot} for face,rot in [("north",0),("east",90),("south",180),("west",270)] for stacked in [False,True]}

@@ -24,7 +24,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
     @Override protected void setupRotations(PeepoState state, PoseStack pose, float bodyRot, float scale) {
         super.setupRotations(state, pose, bodyRot, scale);
         if (state.sleeping && state.deathTime <= 0) {
-            pose.translate(0, state.pumpkin ? .26 : .17, state.jughead && !state.pumpkin ? -.46 : -.30);
+            pose.translate(0, state.pumpkin ? .26 : .17, state.jughead && !state.pumpkin ? -.30 : -.25);
             pose.rotateDegrees(com.mojang.math.Axis.XP, 90);
         }
     }
