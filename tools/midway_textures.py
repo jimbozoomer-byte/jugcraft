@@ -9,7 +9,7 @@ painter); no other texture is read, traced or recoloured.
 """
 import math
 
-from fur_paint import Painter, mix, ramp
+from fur_paint import mix, clean_painter as Painter, clean_ramp as ramp
 from crop_textures import rgb
 from midway import HIGH_STRIKER, RING_TOSS, PLUSHES
 
@@ -221,7 +221,7 @@ def felt(paint, colours, level=0.55, seams=()):
     """Soft felt: a fine fuzz over gentle patches, and seams of stitches (each (x0, y0, x1, y1)) where pieces meet."""
     for y in range(N):
         for x in range(N):
-            f = level + 0.1 * (paint.noise(x, y, 12.0) - 0.5) + paint.rng.uniform(-0.05, 0.05)
+            f = level + 0.1 * (paint.noise(x, y, 12.0) - 0.5)
             paint.put(x, y, ramp(colours, f))
     for x0, y0, x1, y1 in seams:
         paint.line(x0, y0, x1, y1, ramp(colours, level - 0.35), width=2.2, alpha=0.7)
@@ -353,7 +353,12 @@ def plush_textures():
     p = Painter(N, N, 26262)
     p.shade((0, 0, N, N), FELT["squirrel"], 0.5, spread=0.3, light="centre")
     p.locks((0, 0, N, N), FELT["squirrel"], 0.6, flow=(0.0, -1.0), density=1.2, length=(10, 18), width=(4.0, 7.0))
-    p.locks((0, 0, N, N), FELT["cream"], 0.7, flow=(0.0, -1.0), density=0.15, length=(6, 10), width=(2.0, 4.0))
+    for x in range(5, N, 11):
+        for k in range(10):
+            # The pale tip of the tail: a cream band along the top edge, its fur hanging down in points.
+            half = (9 - k) * 0.6
+            for dx in range(-int(half), int(half) + 1):
+                p.put(x + dx, k, ramp(FELT["cream"], 0.75 if dx <= 0 else 0.55))
     out["squirrel_plush_tail"] = p.img
     p = Painter(N, N, 26263)
     felt(p, FELT["acorn"], level=0.6)
