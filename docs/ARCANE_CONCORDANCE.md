@@ -4,10 +4,12 @@ Jugcraft's magic: a practice learned by observing the world, studied at workstat
 is not a mana bar. This document is the contract every Concordance feature builds on: who owns which state, how
 content loads, the vocabulary, which library does what, and where each of the 32 roadmap steps stands.
 
-Status: milestone 1 (First Light) and milestone 2 (shared records and typed resources, roadmap steps 6 and 7) are
-implemented on branch `claude/awesome-davinci-iwv3b9`; their records are
-[features/arcane-concordance-first-light.md](features/arcane-concordance-first-light.md) and
-[features/arcane-concordance-sharing.md](features/arcane-concordance-sharing.md). The names below (Principles,
+Status: milestone 1 (First Light), milestone 2 (shared records and typed resources, roadmap steps 6 and 7) and
+milestone 3 (composed spells and the shared effect system, steps 8 and 9) are implemented on branch
+`claude/awesome-davinci-iwv3b9`; their records are
+[features/arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
+[features/arcane-concordance-sharing.md](features/arcane-concordance-sharing.md) and
+[features/arcane-concordance-composition.md](features/arcane-concordance-composition.md). The names below (Principles,
 resources, stages, traditions) are **new proposals**: no earlier Jugcraft document defined a magic taxonomy. Only the
 ids milestone 1 uses are persisted so far (see "Stable identifiers").
 
@@ -139,6 +141,15 @@ Specialties a player can follow without mastering the rest ([CONTENT_BRANCHES.md
 - **Container, transfer, conversion**: a container holds one resource type with a capacity and a stated overflow; a
   transfer moves one type between containers under ownership and rate rules and never converts; a conversion is an
   explicit, data-defined recipe that always loses.
+- **Composition, component, instrument capacity**: a spell written as words in order (delivery, selection,
+  operations, optional ending; modifiers joined with `+`; `then` for a branch). Each word is a data-defined component
+  learnt from research and taking some of the instrument's capacity.
+- **Plan, ledger, work**: what a composition compiles to (a bounded tree with its Focus, cooldown and limits); the
+  per-event account every application is admitted to (no repeats, no more distinct targets or work than compiled);
+  work is the unit applications are counted in.
+- **Effect, cause, stacking, tolerance**: one of ten common operations with its numbers; who and what it came from
+  (kept through triggered effects); how a lasting effect combines with one already there; how a creature bears harmful
+  control (normal, resistant, immune).
 - **Attunement, resonance, instability, Discord, identity, mastery**: reserved for later steps with the meanings in the
   resource table; *mastery* is the Mastered research state, earned by practice (milestone 1: Kindle cast in 8 chunks).
 
@@ -147,9 +158,9 @@ Specialties a player can follow without mastering the rest ([CONTENT_BRANCHES.md
 | Library | Concordance use | Status |
 |---|---|---|
 | Fabric API | Attachments (knowledge, Focus), data components (lantern charge, notes), reload listener, menus, commands, events, HUD element, key mapping. The Transfer API is not used yet: no pipe carries essences (see the sharing record) | Used (milestones 1 and 2) |
-| Spell Engine | Cast timeline, targeting, cooldown, HUD and casting sound for invocations; Jugcraft hooks: a container source (learned spells only while an instrument is held), the casting gate, a `CUSTOM` impact, cost-consume event; `spell_assignments` for the wand (TAG resolver) and to opt Jugcraft weapons out of the weapon fallback | Used (milestone 1) |
-| Spell Power | Existing schools for Principle scaling (Radiance on `arcane`) | Used: schools only |
-| Modonomicon | The *Arcane Concordance* codex; research facts granted through advancements; Kindle and lantern pages unlock at Understood | Used (milestone 1) |
+| Spell Engine | Cast timeline, targeting, cooldown, HUD and casting sound for invocations and the carrier spell `jugcraft:composed` that casts inscribed spells; Jugcraft hooks: a container source (learned spells, and the carrier while the held instrument carries an inscription), the casting gate, `CUSTOM` impacts, cost-consume event, the cooldown manager (a composed spell's own cooldown); `spell_assignments` for the wand (TAG resolver) and to opt Jugcraft weapons out of the weapon fallback. Composed deliveries are Jugcraft's own bounded traces, not Spell Engine projectiles (see the composition record) | Used (milestones 1 and 3) |
+| Spell Power | Schools name each Principle's damage type: the effect boundary deals damage through the school's damage type (Radiance: `arcane`), so its resistances apply once. Spell-power scaling is not applied yet (step 11) | Used: schools and damage types |
+| Modonomicon | The *Arcane Concordance* codex; research facts granted through advancements; Kindle, lantern and Composition pages unlock at Understood; the component pages are generated from the component data | Used (milestones 1 and 3) |
 | Player Animation Library | Original cast and release gestures for Kindle (`kindle_cast`, `kindle_release`) | Used (milestone 1) |
 | Cloth Config | Client settings screen (Focus line, reduced motion) | Used (milestone 1) |
 | Jade (optional) | Bench study progress, waiting notes, lantern Radiance; Lumen Sconce charge | Used (milestones 1 and 2) |
@@ -159,7 +170,7 @@ Specialties a player can follow without mastering the rest ([CONTENT_BRANCHES.md
 | GeckoLib | Animated magical blocks and creatures | Planned (steps 14, 17, 20) |
 | SmartBrainLib | Spirit, familiar and construct behaviour | Planned (step 17) |
 | Trinkets Updated | Foci, charms and relic slots | Planned (steps 19, 20) |
-| GuiLib, Fabric Language Kotlin | Richer optional composer and research screens with vanilla fallbacks | Planned (steps 8, 26) |
+| GuiLib, Fabric Language Kotlin | Richer optional composer and research screens with vanilla fallbacks. Not built: the `compose` command is the composer every player has, and explains every problem | Planned (step 26) |
 | Fusion | Authored connected textures for ritual floors | Planned (step 12) |
 | Iris, Sodium | Compatibility only; nothing depends on them | Not used |
 
@@ -174,12 +185,18 @@ For every Concordance invocation:
 - **Gate:** `ConcordanceSpells.attempt` on Spell Engine's `CASTING_ATTEMPT.PRE`, on both sides: feature on, an
   instrument in the main hand, the invocation learned, enough Focus. It only ever refuses; it never returns success, so
   Spell Engine's own cooldown check still runs.
-- **Impact commitment:** the `CUSTOM` impact (server only) re-checks the gate and does the world change through
-  `Illumination`. It reports failure if nothing changed.
+- **Impact commitment:** the `CUSTOM` impact (server only) re-checks the gate and does the world change through the
+  shared effect boundary (`ConcordanceEffects`). It reports failure if nothing changed.
 - **Cooldown:** Spell Engine's, from the spell's `cost.cooldown`, applied only on a successful delivery.
 - **Payment:** Focus is taken once, in `COST_CONSUME`, which Spell Engine calls only after a successful delivery.
 - **Refund policy:** none is needed. A refused or failed cast takes no Focus and starts no cooldown.
 - **Presentation:** animations, sounds and particles never decide an outcome.
+
+Inscribed spells (step 8) follow the same policy through the carrier spell `jugcraft:composed`: the gate checks the
+instrument and the inscription's stated Focus (all the client can know); the `CUSTOM` impact compiles the inscription
+again on the server and runs the plan under its ledger, failing if nothing took effect; `COST_CONSUME` takes the plan's
+Focus once and sets the plan's own cooldown. Once a composed spell has taken effect its later pulses are not refunded.
+Every Concordance effect, invoked or composed, is applied by `ConcordanceEffects` (step 9).
 
 ## 5. Persistent definitions (step 3)
 
@@ -190,8 +207,11 @@ For every Concordance invocation:
 | Working | `concordance/working/*.json`: type, station, research, state, work item, specimens, result, Radiance, Focus | none | `schema: 1` |
 | Spell | `spell/*.json` (Spell Engine format) | Spell Engine cooldown | Spell Engine |
 | Lantern charge | item definition: capacity 64, burn 400 ticks | `jugcraft:radiance` component | record fields |
+| Conversion | `concordance/conversion/*.json`: from and to resource types and amounts | none | `schema: 1` |
+| Component | `concordance/component/*.json`: slot, research state, capacity, Focus, and its delivery, selection, operation, modifier or ending | none | `schema: 1` |
+| Instrument | `concordance/instrument/*.json`: item, capacity, targets, work, branches, duration | `jugcraft:inscription` component (text, Focus, cooldown) | `schema: 1` |
 
-Later definitions (spell components, ingredient properties, rituals, structures, enhancements, spirit agreements,
+Later definitions (ingredient properties, rituals, structures, enhancements, spirit agreements,
 construct tasks, organisms, celestial patterns, transmutation eligibility) follow the same pattern when their step
 starts: stable id, `schema`, display, tags, dependencies, and a parser that names what is wrong.
 
@@ -207,6 +227,9 @@ starts: stable id, `schema`, display, tags, dependencies, and a parser that name
 | CONC-2.1 | Research Notes | Share instructions between players | paper + knowledge > notes; notes > evidence for the reader | none to write; reader must observe | `ResearchNotesItem`, `ResearchEngine` | Modonomicon (display) | item use, tooltip, codex | command explains | `notesShareInstructionsNotExperience` |
 | CONC-2.2 | Typed resources | One set of rules for all seven resources | containers, transfers, conversions, allocation | n/a (infrastructure) | `concordance/resource` | none | n/a | n/a | `ConcordanceResourceGameTests`, harness |
 | CONC-2.3 | Lumen Sconce | Lasting light; a Radiance sink and service | Radiance from lanterns > light 15 | none (fuel needs Radiance) | `LumenSconceBlockEntity`, `Transfers` | Jade (optional) | block use, Jade | works without Jade | `sconceTakesRadianceByTheRules` |
+| CONC-3.1 | Composition | Players write their own spells | words > a plan (Focus, cooldown, limits) or named problems | First Light understood (more words at mastered) | `concordance/compose`, `ConcordanceCommand` | Modonomicon (pages) | `compose` command, codex | the command is the composer | `grammarLoadsAndNamesProblems`, harness |
+| CONC-3.2 | Inscribed spells | Cast a composition | inscription + Focus > its effects | its words' research | `ComposedSpells`, `ConcordanceSpells` | Spell Engine | spell bar, wand tooltip | none (required libraries) | `inscribeAndCastThroughSpellEngine`, `compiledLimitsHoldAtRuntime`, `branchesKeepTheirCause` |
+| CONC-3.3 | Shared effects | One boundary for every effect | effect + cause > world change, attributed | n/a (infrastructure) | `ConcordanceEffects`, `concordance/effect` | Spell Power (damage types) | particles | n/a | `ConcordanceEffectGameTests`, harness |
 | CONC-1.6 | First Light mastery | Practice | Kindle in 8 distinct chunks > Mastered, cheaper Kindle | Understood | `ConcordanceSpells.consume` | Spell Engine | codex | command | partly (`kindleCastsThroughSpellEngine` records the evidence) |
 
 Planned features get a row when their step starts.
@@ -225,8 +248,8 @@ grows with later content), **planned**.
 | 5 | Smallest complete experience | in milestone 1: [First Light](features/arcane-concordance-first-light.md) |
 | 6 | Research model | done: four states, alternatives, duplicates, explanations, shared notes that never carry observation or mastery ([sharing](features/arcane-concordance-sharing.md)); a GuiLib comparison screen is not built (the status command and codex are the fallback) |
 | 7 | Resource containers and transfers | done: typed containers for all seven, one transfer path, data conversions that must lose, deterministic allocation, ledgers; in use for Focus and Radiance (lantern, bench, Lumen Sconce) |
-| 8 | Spell compiler | planned |
-| 9 | Shared effect system | illumination only (`Illumination`); planned |
+| 8 | Spell compiler | done: restricted grammar, data components and instruments, a compiler that names every problem, bounded plans run under a ledger, explanations, the `compose` command and generated codex pages ([composition](features/arcane-concordance-composition.md)); a GuiLib composer is not built |
+| 9 | Shared effect system | done: ten operations at one server boundary with friendly fire, tolerance, protection, stacking, expiry, causes kept through triggers and one-time accounting; used by Kindle and inscribed spells; potions, weapons, creatures and shrines join it with their steps |
 | 10 | Authored invocations | Kindle only; planned |
 | 11 | Combat and progression baselines | planned |
 | 12 | Ritual structures | planned |
@@ -264,3 +287,10 @@ Introduced by milestone 1 and stable from now on: items `jugcraft:initiate_wand`
 Introduced by milestone 2: item and component `jugcraft:research_notes`; block, item and block entity
 `jugcraft:lumen_sconce`; conversion `jugcraft:focus_to_radiance`; resource type ids `focus`, `ley_charge`,
 `essence/<principle>`, `vitae`, `astral_resonance`, `bound_will`, `prima_materia`.
+
+Introduced by milestone 3: data component `jugcraft:inscription`; spell `jugcraft:composed`; components
+`jugcraft:here`, `touch`, `ray`, `struck`, `creatures`, `spread`, `light`, `reveal`, `ward`, `sear`, `dazzle`,
+`intensify`, `prolong`, `widen`, `extend`, `pulse`; instrument `jugcraft:initiate_wand`; tags
+`jugcraft:concordance/immune`, `jugcraft:concordance/resistant`, `jugcraft:concordance/interactable`,
+`jugcraft:concordance/harvestable`; effect kind ids (`damage` ... `alteration`) and stacking ids (`strongest`,
+`accumulate`, `exclusive`).

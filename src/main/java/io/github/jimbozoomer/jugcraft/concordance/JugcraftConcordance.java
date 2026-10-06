@@ -59,6 +59,8 @@ public final class JugcraftConcordance {
 	public static DataComponentType<Unit> LANTERN_LIT;
 	/** What a sheet of Research Notes records (absent on a blank sheet). */
 	public static DataComponentType<ResearchNotes> RESEARCH_NOTES;
+	/** The spell inscribed on an instrument (absent when none is). */
+	public static DataComponentType<Inscription> INSCRIPTION;
 
 	public static Block LUMEN_MOTE;
 	public static Block LAMPWRIGHT_BENCH;
@@ -92,6 +94,8 @@ public final class JugcraftConcordance {
 				DataComponentType.<Unit>builder().persistent(MapCodec.unitCodec(Unit.INSTANCE)).networkSynchronized(Unit.STREAM_CODEC).build());
 		RESEARCH_NOTES = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("research_notes"),
 				DataComponentType.<ResearchNotes>builder().persistent(ResearchNotes.CODEC).networkSynchronized(ResearchNotes.STREAM_CODEC).build());
+		INSCRIPTION = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("inscription"),
+				DataComponentType.<Inscription>builder().persistent(Inscription.CODEC).networkSynchronized(Inscription.STREAM_CODEC).build());
 
 		KNOWLEDGE = AttachmentRegistry.<Knowledge>builder().persistent(ConcordanceCodecs.KNOWLEDGE).copyOnDeath()
 				.syncWith(ConcordanceCodecs.KNOWLEDGE_STREAM, AttachmentSyncPredicate.targetOnly())
@@ -142,6 +146,7 @@ public final class JugcraftConcordance {
 		Examination.register();
 		RateGate.register();
 		ConcordanceSpells.register();
+		ComposedSpells.register();
 		ConcordanceCommand.register();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {

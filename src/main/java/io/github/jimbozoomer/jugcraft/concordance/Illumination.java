@@ -8,12 +8,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The Concordance's one way to change world light: every invocation, item and (later) ritual that lights the world
  * places its light through here, so each obeys the same permission rules, the same "open air only" rule and the same
- * self-ending light block. The light is placed on behalf of a player and only where that player could place a block
- * themselves: inside the world, not in spawn protection or a protected town, and not where they may not build.
+ * self-ending light block. Effects reach it through the shared effect boundary ({@link ConcordanceEffects}, the
+ * illumination operation); a carried lantern's trail light calls {@link #trail} directly. Light placed on behalf of a
+ * player goes only where that player could place a block themselves: inside the world, not in spawn protection or a
+ * protected town, and not where they may not build. Light with no player behind it (a shrine) goes only inside the
+ * world and outside protected towns.
  */
 public final class Illumination {
 	private Illumination() {
@@ -27,13 +31,20 @@ public final class Illumination {
 		}
 	}
 
-	/** Whether {@code player} may change the block at {@code pos} (the checks a placed block would face). */
-	public static boolean mayChange(ServerLevel level, Player player, BlockPos pos) {
+	/**
+	 * Whether {@code player} may change the block at {@code pos} (the checks a placed block would face); with no player,
+	 * whether anything may (inside the world and outside a protected town).
+	 */
+	public static boolean mayChange(ServerLevel level, @Nullable Player player, BlockPos pos) {
+		if (player == null) {
+			return level.isInWorldBounds(pos) && !TownProtection.shieldsBlock(level, pos);
+		}
 		return level.isInWorldBounds(pos) && level.mayInteract(player, pos) && player.mayUseItemAt(pos, Direction.UP, ItemStack.EMPTY)
 				&& !TownProtection.denies(player, level, pos);
 	}
 
-	private static boolean open(BlockState state) {
+	/** Whether Kindled light can go at {@code pos}: open air, or a Kindled mote already there. */
+	public static boolean open(BlockState state) {
 		return state.isAir() || state.is(JugcraftConcordance.LUMEN_MOTE);
 	}
 
@@ -41,7 +52,7 @@ public final class Illumination {
 	 * Sets a Kindled mote at {@code pos} lasting {@code steps} steps, or lengthens one already there. Only open air is
 	 * lit: nothing is ever replaced.
 	 */
-	public static Result kindle(ServerLevel level, Player source, BlockPos pos, int steps) {
+	public static Result kindle(ServerLevel level, @Nullable Player source, BlockPos pos, int steps) {
 		BlockState state = level.getBlockState(pos);
 		if (!open(state)) {
 			return Result.NO_SPACE;

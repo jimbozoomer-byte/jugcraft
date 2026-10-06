@@ -388,6 +388,37 @@ def kindle_icon():
     return img
 
 
+def composed_icon():
+    """An inscribed spell: three gold nodes joined by a line (delivery, selection, operation) with a short branch off
+    the last, the way a composition reads, on the same round violet ground as Kindle. Flat bands only."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    _disc(img, 16, 16, 15.6, SPELL_BG[0])
+    _disc(img, 16, 16, 14.6, SPELL_BG[1])
+    _disc(img, 15.4, 15.4, 13.4, SPELL_BG[2])
+    nodes = [(8, 22), (14, 15), (21, 10)]
+    branch = (24, 20)
+    sizes = (2.4, 2.4, 3.0, 1.8)
+
+    def line(a, b, colour):
+        steps = max(abs(b[0] - a[0]), abs(b[1] - a[1]))
+        for i in range(steps + 1):
+            x = round(a[0] + (b[0] - a[0]) * i / steps)
+            y = round(a[1] + (b[1] - a[1]) * i / steps)
+            cm.put(img, x, y, colour)
+            cm.put(img, x + 1, y, colour)
+    for (x, y), r in zip(nodes + [branch], sizes):
+        _disc(img, x, y, r + 1.4, SPELL_BG[3])
+    line(nodes[0], nodes[1], MOTE[0])
+    line(nodes[1], nodes[2], MOTE[0])
+    line(nodes[2], branch, MOTE[0])
+    for (x, y), r in zip(nodes + [branch], sizes):
+        _disc(img, x, y, r, MOTE[1])
+        _disc(img, x, y, r - 1.0, MOTE[3])
+    for x, y in ((7, 6), (6, 7), (8, 5)):
+        cm.put(img, x, y, SPELL_BG[3])
+    return img
+
+
 # ------------------------------------------------------------------------------------------------- the bench
 
 def bench_top():
@@ -554,7 +585,7 @@ BLOCKS = {
     "lampwright_bench_brass": bench_brass,
     "lampwright_bench_lens": bench_lens,
 }
-SPELLS = {"kindle": kindle_icon}
+SPELLS = {"kindle": kindle_icon, "composed": composed_icon}
 
 
 def textures():

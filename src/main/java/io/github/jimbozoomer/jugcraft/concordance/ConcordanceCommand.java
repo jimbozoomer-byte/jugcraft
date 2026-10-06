@@ -5,14 +5,24 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Compiler;
+import io.github.jimbozoomer.jugcraft.concordance.compose.CompositionParser;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Instrument;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Plan;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Slot;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -20,13 +30,20 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 
 /**
- * {@code /jugcraft concordance}: anyone can see their own research ({@code status}). Operators (permission level 2)
- * can see anyone's, list the problems found in the loaded rules ({@code diagnose}), and for testing and support set a
- * research state ({@code grant}), forget a player's research ({@code reset}) or set their Focus ({@code focus}).
+ * {@code /jugcraft concordance}: anyone can see their own research ({@code status}) and compose spells for the
+ * instrument in their main hand ({@code compose check|inscribe <spell>}, {@code compose show}, {@code compose clear}):
+ * the composer every player has, which explains what a spell does and costs or exactly why it cannot work. Operators
+ * (permission level 2) can see anyone's research, list the problems found in the loaded rules ({@code diagnose}), and
+ * for testing and support set a research state ({@code grant}), forget a player's research ({@code reset}) or set their
+ * Focus ({@code focus}).
  */
 public final class ConcordanceCommand {
+	/** The most often a player may check or inscribe a composition. Keep equal to COMPOSE_RATE_TICKS in tools/concordance.py. */
+	public static final int COMPOSE_RATE_TICKS = 20;
+
 	private ConcordanceCommand() {
 	}
 
@@ -40,6 +57,15 @@ public final class ConcordanceCommand {
 						.executes(context -> status(context.getSource(), context.getSource().getPlayerOrException()))
 						.then(Commands.argument("player", EntityArgument.player()).requires(ConcordanceCommand::isOperator)
 								.executes(context -> status(context.getSource(), EntityArgument.getPlayer(context, "player")))))
+				.then(Commands.literal("compose")
+						.then(Commands.literal("check").then(Commands.argument("spell", StringArgumentType.greedyString())
+								.suggests(ConcordanceCommand::suggestComponents)
+								.executes(context -> compose(context.getSource(), StringArgumentType.getString(context, "spell"), false))))
+						.then(Commands.literal("inscribe").then(Commands.argument("spell", StringArgumentType.greedyString())
+								.suggests(ConcordanceCommand::suggestComponents)
+								.executes(context -> compose(context.getSource(), StringArgumentType.getString(context, "spell"), true))))
+						.then(Commands.literal("show").executes(context -> show(context.getSource())))
+						.then(Commands.literal("clear").executes(context -> clear(context.getSource()))))
 				.then(Commands.literal("diagnose").requires(ConcordanceCommand::isOperator)
 						.executes(context -> diagnose(context.getSource())))
 				.then(Commands.literal("grant").requires(ConcordanceCommand::isOperator)
@@ -103,6 +129,102 @@ public final class ConcordanceCommand {
 				yield text.toString();
 			}
 		};
+	}
+
+	/**
+	 * Compiles a composition for the player and the instrument in their main hand, and either explains it or names
+	 * every problem; with {@code inscribe}, a valid one is written on the instrument (replacing what was there).
+	 */
+	private static int compose(CommandSourceStack source, String text, boolean inscribe) throws CommandSyntaxException {
+		ServerPlayer player = source.getPlayerOrException();
+		if (!JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
+			source.sendFailure(Component.translatable("message.jugcraft.concordance.disabled"));
+			return 0;
+		}
+		Instrument instrument = ComposedSpells.instrument(player);
+		if (instrument == null) {
+			source.sendFailure(Component.translatable("compose.jugcraft.problem.no_instrument"));
+			return 0;
+		}
+		if (!RateGate.allow(player, "compose", COMPOSE_RATE_TICKS)) {
+			source.sendFailure(Component.translatable("compose.jugcraft.problem.too_fast"));
+			return 0;
+		}
+		Compiler.Compilation compiled = ComposedSpells.compile(player, instrument, text);
+		Plan plan = compiled.plan();
+		if (plan == null) {
+			source.sendFailure(Component.translatable("compose.jugcraft.invalid", text.trim()));
+			for (Text problem : compiled.problems()) {
+				source.sendFailure(Component.literal("- ").append(ComposeText.show(problem)));
+			}
+			return 0;
+		}
+		explain(source, plan, instrument);
+		if (inscribe) {
+			ItemStack held = player.getMainHandItem();
+			held.set(JugcraftConcordance.INSCRIPTION, new Inscription(plan.text(), plan.focus(), plan.cooldown()));
+			source.sendSuccess(() -> Component.translatable("compose.jugcraft.inscribed", held.getHoverName(), plan.text()), false);
+		}
+		return plan.focus();
+	}
+
+	private static void explain(CommandSourceStack source, Plan plan, Instrument instrument) {
+		source.sendSuccess(() -> Component.translatable("compose.jugcraft.valid", plan.text()), false);
+		for (Text line : plan.explain(instrument)) {
+			source.sendSuccess(() -> Component.literal("- ").append(ComposeText.show(line)), false);
+		}
+	}
+
+	/** Explains the spell inscribed on the held instrument, compiled as it would be cast now. */
+	private static int show(CommandSourceStack source) throws CommandSyntaxException {
+		ServerPlayer player = source.getPlayerOrException();
+		Instrument instrument = ComposedSpells.instrument(player);
+		Inscription inscription = ComposedSpells.inscription(player.getMainHandItem());
+		if (instrument == null || inscription == null) {
+			source.sendFailure(Component.translatable(instrument == null ? "compose.jugcraft.problem.no_instrument"
+					: "compose.jugcraft.nothing_inscribed"));
+			return 0;
+		}
+		Compiler.Compilation compiled = ComposedSpells.compile(player, instrument, inscription.text());
+		if (compiled.plan() == null) {
+			source.sendFailure(Component.translatable("compose.jugcraft.invalid", inscription.text()));
+			for (Text problem : compiled.problems()) {
+				source.sendFailure(Component.literal("- ").append(ComposeText.show(problem)));
+			}
+			return 0;
+		}
+		explain(source, compiled.plan(), instrument);
+		return compiled.plan().focus();
+	}
+
+	private static int clear(CommandSourceStack source) throws CommandSyntaxException {
+		ServerPlayer player = source.getPlayerOrException();
+		ItemStack held = player.getMainHandItem();
+		if (ComposedSpells.inscription(held) == null) {
+			source.sendFailure(Component.translatable("compose.jugcraft.nothing_inscribed"));
+			return 0;
+		}
+		held.remove(JugcraftConcordance.INSCRIPTION);
+		source.sendSuccess(() -> Component.translatable("compose.jugcraft.cleared"), false);
+		return 1;
+	}
+
+	/** Suggests component names (and {@code then}) for the word being typed, after a space or a {@code +}. */
+	private static CompletableFuture<Suggestions> suggestComponents(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
+		String typed = builder.getRemaining().toLowerCase(Locale.ROOT);
+		int start = Math.max(typed.lastIndexOf(' '), typed.lastIndexOf('+')) + 1;
+		String partial = typed.substring(start);
+		SuggestionsBuilder word = builder.createOffset(builder.getStart() + start);
+		boolean joined = start > 0 && typed.charAt(start - 1) == '+';
+		ConcordanceData.rules().catalog().names().forEach((slot, names) -> {
+			if (joined == (slot == Slot.MODIFIER)) {
+				names.stream().filter(name -> name.startsWith(partial)).forEach(word::suggest);
+			}
+		});
+		if (!joined && start > 0 && CompositionParser.THEN.startsWith(partial)) {
+			word.suggest(CompositionParser.THEN);
+		}
+		return word.buildFuture();
 	}
 
 	private static int diagnose(CommandSourceStack source) {

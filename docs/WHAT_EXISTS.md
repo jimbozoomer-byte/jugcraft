@@ -281,9 +281,10 @@ Record: [walled-town.md](features/walled-town.md).
 
 ### The Arcane Concordance (`concordance/`, `tools/concordance.py`)
 
-Magic, milestones 1 and 2. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records:
+Magic, milestones 1 to 3. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
-[arcane-concordance-sharing.md](features/arcane-concordance-sharing.md).
+[arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),
+[arcane-concordance-composition.md](features/arcane-concordance-composition.md).
 
 | ID / part | Class / data | What |
 | --- | --- | --- |
@@ -296,12 +297,15 @@ Magic, milestones 1 and 2. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCA
 | `jugcraft:lumen_mote` | `LumenMoteBlock`, `Illumination` | the Kindled light and a lantern's trail light; open air only |
 | `jugcraft:kindled_lantern` | `KindledLanternItem`, components `jugcraft:radiance` (`LanternCharge`), `jugcraft:lantern_lit` | 64 Radiance, 1 per 400 ticks while lit |
 | codex | `data/jugcraft/modonomicon/` | Modonomicon book `jugcraft:arcane_concordance`; research nodes from advancements `jugcraft:concordance_*` |
-| commands | `ConcordanceCommand` | `/jugcraft concordance status [player]`, `diagnose`, `grant`, `reset`, `focus` |
+| commands | `ConcordanceCommand` | `/jugcraft concordance status [player]`, `compose`, `diagnose`, `grant`, `reset`, `focus` |
 | client | `ConcordanceClient`, `ConcordanceClientOptions`, `ConcordanceSettingsScreen` (Cloth Config), `compat/ConcordanceModMenu` | Focus line, tooltips, settings (`config/jugcraft-client.properties`) |
 | optional | `compat/jade/ConcordanceDataProvider`, JEI bench category, `assets/jugcraft/dynamiclights/item/kindled_lantern.json` | Jade, JEI and LambDynamicLights display |
 | `jugcraft:research_notes` | `ResearchNotesItem`, component `ResearchNotes`, `RateGate` | write what you know; others read it as evidence (never mastery) |
 | `jugcraft:lumen_sconce` | `LumenSconceBlock`, `LumenSconceBlockEntity` | burns Radiance for light 15; anyone pours, the owner draws |
 | typed resources | `concordance/resource/` (pure Java); `data/jugcraft/concordance/conversion/` | containers, transfers, conversions, allocation, Bound Will and Astral ledgers, Prima values |
+| composition | `concordance/compose/` (pure Java: grammar, parser, compiler, plans, explanations); `data/jugcraft/concordance/{component,instrument}/`; `ConcordanceCommand` (`compose check\|inscribe\|show\|clear`) | players write spells from 16 data components; every problem is named; plans carry their limits |
+| `jugcraft:composed` spell | `data/jugcraft/spell/composed.json`; `ComposedSpells`, component `jugcraft:inscription` (`Inscription`) | casts the spell inscribed on the held instrument; recompiled on the server every cast, run under a ledger |
+| effects | `concordance/effect/` (pure Java: kinds, causes, stacking, tolerance, ledger); `ConcordanceEffects`; tags `#jugcraft:concordance/{immune,resistant,interactable,harvestable}` | the one boundary every Concordance effect goes through: friendly fire, tolerance, protection, attribution, one-time accounting |
 
 ## Shared systems and how to plug in
 

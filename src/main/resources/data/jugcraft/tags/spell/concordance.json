@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:kindle"
+    "jugcraft:kindle",
+    "jugcraft:composed"
   ]
 }

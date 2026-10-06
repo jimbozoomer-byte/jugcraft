@@ -45,6 +45,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An arm (batches 42 and 45 to 47, {@link JugcraftArms}): its numbers and most traits are item components, with a grey line
@@ -444,8 +445,11 @@ public class ArmItem extends Item {
 		}
 	}
 
-	/** Harvests one ripe crop: its drops, less one seed, which replants it (or, with no seed, the crop is gone). */
-	static void reap(ServerLevel level, BlockPos pos, Entity reaper, ItemStack tool) {
+	/**
+	 * Harvests one ripe crop: its drops, less one seed, which replants it (or, with no seed, the crop is gone). The
+	 * Concordance's harvesting effect gathers crops the same way (ConcordanceEffects).
+	 */
+	public static void reap(ServerLevel level, BlockPos pos, @Nullable Entity reaper, ItemStack tool) {
 		BlockState state = level.getBlockState(pos);
 		if (!(state.getBlock() instanceof CropBlock crop)) {
 			return;

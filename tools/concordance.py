@@ -4,9 +4,11 @@ its vocabulary, numbers and first content (docs/features/arcane-concordance-firs
 Everything the game and the codex say about the Concordance is generated from the tables here, so a number cannot
 differ between the research rules, the spell, the bench, the codex pages, the recipe viewer and the tests:
 
-- data/jugcraft/concordance/{research,invocation,working}/*.json: the server-owned rules, read by
-  concordance/ConcordanceData.java (a data pack can override them; the server validates them on every reload);
-- data/jugcraft/spell/*.json: the Spell Engine spells the invocations cast (tools/check_mod_data.py lints them);
+- data/jugcraft/concordance/{research,invocation,working,conversion,component,instrument}/*.json: the server-owned
+  rules, read by concordance/ConcordanceData.java (a data pack can override them; the server validates them on every
+  reload); components and instruments are the composition grammar (roadmap step 8, concordance/compose);
+- data/jugcraft/spell/*.json: the Spell Engine spells the invocations cast, and the carrier for inscribed spells
+  (tools/check_mod_data.py lints them);
 - data/jugcraft/modonomicon/...: the codex (a Modonomicon book) and the research bridge that shows its pages
   (Jugcraft awards an advancement on the server; Modonomicon turns it into a research fact; the fact unlocks pages);
 - data/jugcraft/spell_assignments/*.json: Spell Engine opt-outs for Jugcraft arms that have their own weapon arts;
@@ -262,6 +264,157 @@ CONVERSIONS = {
     "focus_to_radiance": {"from": {"resource": "focus", "amount": CHANNEL_FOCUS},
                           "to": {"resource": "essence/radiance", "amount": CHANNEL_RADIANCE}},
 }
+# ------------------------------------------------------------------------- composition and effects (roadmap 8 and 9)
+
+# The ten common effect operations (Java: concordance/effect/EffectKind.java): what each acts on and the work units
+# one application costs, the unit composed spells are capped in.
+EFFECT_KINDS = {
+    "damage": {"on": "creature", "work": 1, "name": "Damage"},
+    "restoration": {"on": "creature", "work": 1, "name": "Restoration"},
+    "movement": {"on": "creature", "work": 1, "name": "Movement"},
+    "illumination": {"on": "block", "work": 2, "name": "Illumination"},
+    "status": {"on": "creature", "work": 1, "name": "Status"},
+    "interaction": {"on": "block", "work": 2, "name": "Interaction"},
+    "harvesting": {"on": "block", "work": 3, "name": "Harvesting"},
+    "protection": {"on": "creature", "work": 1, "name": "Protection"},
+    "detection": {"on": "creature", "work": 1, "name": "Detection"},
+    "alteration": {"on": "block", "work": 3, "name": "Alteration"},
+}
+# Creatures that harmful control (pushes and statuses) does not move or slow, and those it reaches at half strength.
+EFFECT_IMMUNE = ["minecraft:ender_dragon", "minecraft:wither", "minecraft:warden", "minecraft:elder_guardian"]
+EFFECT_RESISTANT = ["minecraft:iron_golem", "minecraft:ravager", "minecraft:piglin_brute"]
+# Blocks an interaction effect may use as a player would, and plants a harvesting effect may gather (besides ripe
+# crops, which are always gathered and replanted).
+# Vanilla tags are optional entries, so a renamed tag in a later version empties the entry instead of breaking the list.
+INTERACTABLE = ["minecraft:lever", {"id": "#minecraft:buttons", "required": False},
+                {"id": "#minecraft:wooden_doors", "required": False}, {"id": "#minecraft:wooden_trapdoors", "required": False},
+                {"id": "#minecraft:fence_gates", "required": False}]
+HARVESTABLE = [{"id": "#minecraft:small_flowers", "required": False}, "minecraft:short_grass", "minecraft:fern",
+               "minecraft:pumpkin", "minecraft:melon"]
+# Absolute limits of the grammar (Java: concordance/compose/Grammar.java): data can only set lower ones.
+COMPOSE_LIMITS = {"MAX_TEXT": 256, "MAX_NAMES": 24, "MAX_OPERATIONS": 3, "MAX_MODIFIERS": 2, "MAX_DEPTH": 2,
+                  "MAX_BRANCHES": 2, "MAX_RANGE": 32, "MAX_RADIUS": 6, "MAX_TARGETS": 16, "MAX_WORK": 256,
+                  "MAX_CAPACITY": 64, "MAX_PULSES": 5, "MIN_INTERVAL": 10, "MAX_INTERVAL": 200,
+                  "MAX_COMPONENT_COST": 16, "MAX_MODIFIER_AMOUNT": 200, "MIN_COOLDOWN": 10, "MAX_COOLDOWN": 200}
+EFFECT_LIMITS = {"MAX_MAGNITUDE": 40, "MAX_DURATION": 2400, "MAX_AMPLIFIER": 4, "MAX_PUSH": 20}
+
+# What each composing instrument can hold (data/jugcraft/concordance/instrument).
+INSTRUMENT_LIMITS = {
+    "initiate_wand": {"item": f"{MOD}:initiate_wand", "capacity": 8, "targets": 6, "work": 48, "branches": 1,
+                      "duration": 1200},
+}
+
+_UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
+_MASTERED = {"research": f"{MOD}:first_light", "state": "mastered"}
+
+# The first components: the Radiance grammar, learnt from First Light. "name" and "text" are for the codex and the
+# lang file; the rest is written to data/jugcraft/concordance/component/<key>.json. Operations of the other effect
+# kinds arrive with the research of their Principles; the effect system already carries them (step 9).
+COMPONENTS = {
+    "here": {"slot": "delivery", "requires": _UNDERSTOOD, "capacity": 1, "focus": 0,
+             "delivery": {"form": "here", "range": 0}, "name": "Here",
+             "text": "The spell lands where you stand; after then, where the spell before it landed."},
+    "touch": {"slot": "delivery", "requires": _UNDERSTOOD, "capacity": 1, "focus": 0,
+              "delivery": {"form": "touch", "range": 4}, "name": "Touch",
+              "text": "The spell lands on the first creature or surface within reach."},
+    "ray": {"slot": "delivery", "requires": _MASTERED, "capacity": 2, "focus": 1,
+            "delivery": {"form": "ray", "range": 16}, "name": "Ray",
+            "text": "A straight line of light: the spell lands on the first creature or surface it meets."},
+    "struck": {"slot": "selection", "requires": _UNDERSTOOD, "capacity": 0, "focus": 0,
+               "selection": {"pick": "struck", "radius": 0, "targets": 1}, "name": "Struck",
+               "text": "Acts on the one thing the delivery reached: the creature, or else the block."},
+    "creatures": {"slot": "selection", "requires": _MASTERED, "capacity": 2, "focus": 2,
+                  "selection": {"pick": "creatures", "radius": 3, "targets": 4}, "name": "Creatures",
+                  "text": "Acts on the creatures nearest to where the spell lands. A harmful operation never "
+                          "touches you."},
+    "spread": {"slot": "selection", "requires": _MASTERED, "capacity": 2, "focus": 2,
+               "selection": {"pick": "blocks", "radius": 3, "targets": 4}, "name": "Spread",
+               "text": "Acts on the blocks nearest to where the spell lands that the operation can work on "
+                       "(lights keep two blocks apart)."},
+    "light": {"slot": "operation", "requires": _UNDERSTOOD, "capacity": 1, "focus": 2,
+              "operation": {"effect": "illumination", "intent": "helpful", "principle": "radiance", "duration": 640},
+              "name": "Light", "text": "Sets a Kindled mote in open air you may build in."},
+    "reveal": {"slot": "operation", "requires": _UNDERSTOOD, "capacity": 1, "focus": 1,
+               "operation": {"effect": "detection", "intent": "harmful", "principle": "radiance", "duration": 200},
+               "name": "Reveal", "text": "Makes a creature glow, seen through walls. Revealing another player "
+                                         "counts as harming them."},
+    "ward": {"slot": "operation", "requires": _UNDERSTOOD, "capacity": 2, "focus": 3,
+             "operation": {"effect": "protection", "intent": "helpful", "principle": "radiance", "magnitude": 4,
+                           "duration": 200},
+             "name": "Ward", "text": "A shell of light that absorbs harm (Absorption)."},
+    "sear": {"slot": "operation", "requires": _MASTERED, "capacity": 2, "focus": 3,
+             "operation": {"effect": "damage", "intent": "harmful", "principle": "radiance", "magnitude": 4,
+                           "school": "spell_power:arcane"},
+             "name": "Sear", "text": "Light that burns: arcane damage, credited to you."},
+    "dazzle": {"slot": "operation", "requires": _MASTERED, "capacity": 1, "focus": 2,
+               "operation": {"effect": "status", "intent": "harmful", "principle": "radiance", "magnitude": 0,
+                             "duration": 60, "status": "minecraft:slowness"},
+               "name": "Dazzle", "text": "Dazzled creatures stumble (Slowness)."},
+    "intensify": {"slot": "modifier", "requires": _MASTERED, "capacity": 1, "focus": 2,
+                  "modifier": {"aspect": "magnitude", "amount": 50}, "name": "Intensify",
+                  "text": "Half as strong again (at least one more): joined to an operation."},
+    "prolong": {"slot": "modifier", "requires": _UNDERSTOOD, "capacity": 1, "focus": 1,
+                "modifier": {"aspect": "duration", "amount": 100}, "name": "Prolong",
+                "text": "Twice as long: joined to an operation that lasts."},
+    "widen": {"slot": "modifier", "requires": _MASTERED, "capacity": 1, "focus": 2,
+              "modifier": {"aspect": "radius", "amount": 2}, "name": "Widen",
+              "text": "Two blocks wider: joined to creatures or spread."},
+    "extend": {"slot": "modifier", "requires": _MASTERED, "capacity": 1, "focus": 1,
+               "modifier": {"aspect": "range", "amount": 8}, "name": "Extend",
+               "text": "Eight blocks further: joined to touch or ray."},
+    "pulse": {"slot": "termination", "requires": _MASTERED, "capacity": 2, "focus": 0,
+              "termination": {"pulses": 3, "interval": 20}, "name": "Pulse",
+              "text": "Acts three times, a second apart, where it first landed. Its operations cost Focus for "
+                      "each time."},
+}
+COMPONENT_DATA_KEYS = ("slot", "requires", "capacity", "focus", "delivery", "selection", "operation", "modifier",
+                       "termination")
+for _component in COMPONENTS.values():
+    _operation = _component.get("operation")
+    if _operation and _operation["effect"] == "damage":
+        assert _operation["school"] == PRINCIPLES[_operation["principle"]]["school"]
+
+# The carrier spell an inscribed instrument casts (Java: ComposedSpells). Spell Engine owns its cast time and
+# gestures; the composition decides everything else.
+COMPOSED_CAST_SECONDS = 0.5
+COMPOSED_BASE_COOLDOWN_SECONDS = 0.5
+COMPOSE_RATE_TICKS = 20  # the most often a player may check or inscribe a composition
+# Example compositions for the codex; the game tests compile the same texts.
+COMPOSE_EXAMPLES = {
+    "touch struck light": "Light where you touch",
+    "here struck ward": "Ward yourself",
+    "ray struck sear then here creatures dazzle": "Sear what you aim at, then dazzle what stands round it",
+}
+
+
+def composition_cost(text):
+    """The Focus, capacity, targets, work and cooldown of a valid composition, as Java's Compiler works them out
+    (used for the codex examples; tools/check_mod_data.py compares it with the Java constants)."""
+    focus = capacity = targets = work = linger = 0
+    for level in text.split(" then "):
+        words = level.split()
+        delivery, selection = COMPONENTS[words[0].split("+")[0]], COMPONENTS[words[1].split("+")[0]]
+        ending = COMPONENTS[words[-1]] if COMPONENTS.get(words[-1], {}).get("slot") == "termination" else None
+        pulses = ending["termination"]["pulses"] if ending else 1
+        for word in words:
+            names = word.split("+")
+            part = COMPONENTS[names[0]]
+            mods = [COMPONENTS[n] for n in names[1:]]
+            capacity += part["capacity"] + sum(m["capacity"] for m in mods)
+            if part["slot"] == "operation":
+                focus += (part["focus"] + sum(m["focus"] for m in mods)) * pulses
+                work += pulses * EFFECT_KINDS[part["operation"]["effect"]]["work"] * selection["selection"]["targets"]
+            else:
+                focus += part["focus"] + sum(m["focus"] for m in mods)
+        targets += selection["selection"]["targets"]
+        work += 0 if delivery["delivery"]["form"] == "here" else 1
+        linger = max(linger, (pulses - 1) * (ending["termination"]["interval"] if ending else 0))
+    focus = max(1, focus)
+    cooldown = max(min(COMPOSE_LIMITS["MIN_COOLDOWN"] + 5 * focus, COMPOSE_LIMITS["MAX_COOLDOWN"]),
+                   linger + COMPOSE_LIMITS["MIN_COOLDOWN"])
+    return {"focus": focus, "capacity": capacity, "targets": targets, "work": work, "cooldown": cooldown}
+
+
 for _working in WORKINGS.values():
     _working.update({"station": f"{MOD}:lampwright_bench", "research": f"{MOD}:first_light", "stage": "understood"})
 
@@ -464,7 +617,89 @@ def codex():
                  f"First Light can recharge it."),
             ],
         },
+        **composition_codex(),
     }
+
+
+def component_numbers(info):
+    """One component's numbers, as the codex states them (the same data the server loads)."""
+    if "delivery" in info:
+        reach = info["delivery"]["range"]
+        return f"Reach: {reach} blocks." if reach else "No reach: it lands at once."
+    if "selection" in info:
+        sel = info["selection"]
+        if sel["pick"] == "struck":
+            return "One target."
+        what = "creatures" if sel["pick"] == "creatures" else "blocks"
+        return f"Up to {sel['targets']} {what} within {sel['radius']} blocks."
+    if "operation" in info:
+        op = info["operation"]
+        effect = op["effect"]
+        if effect == "damage":
+            return f"{op['magnitude']} damage."
+        if effect == "protection":
+            amplifier = max(0, (op["magnitude"] + 3) // 4 - 1)
+            return f"Absorbs up to {4 * (amplifier + 1)} damage for {seconds(op['duration'])} seconds."
+        if effect == "status":
+            return f"Level {op['magnitude'] + 1} for {seconds(op['duration'])} seconds."
+        return f"Lasts {seconds(op['duration'])} seconds."
+    if "modifier" in info:
+        mod = info["modifier"]
+        unit = "%" if mod["aspect"] in ("magnitude", "duration") else " blocks"
+        return f"+{mod['amount']}{unit} {ASPECT_NAMES[mod['aspect']]}."
+    term = info["termination"]
+    return f"{term['pulses']} times, every {seconds(term['interval'])} seconds."
+
+
+ASPECT_NAMES = {"magnitude": "strength", "duration": "time", "radius": "radius", "range": "range"}
+SLOT_ENTRIES = {"delivery": ("deliveries", "Deliveries", "How a spell leaves you", 2, 0, "minecraft:spectral_arrow"),
+                "selection": ("selections", "Selections", "What a spell chooses", 2, 2, "minecraft:spyglass"),
+                "operation": ("operations", "Operations", "What a spell does", 0, 2, "minecraft:glowstone_dust"),
+                "modifier": ("modifiers", "Modifiers", "Changing a word", 0, 4, "minecraft:redstone"),
+                "termination": ("endings", "Endings", "How a spell ends", 2, 4, "minecraft:clock")}
+
+
+def composition_codex():
+    """The Composition category: how to write a spell, and one page per component, generated from COMPONENTS."""
+    wand = INSTRUMENT_LIMITS["initiate_wand"]
+    examples = "\\\n".join(f"- `{text}`: {note} ({composition_cost(text)['focus']} Focus)"
+                             for text, note in COMPOSE_EXAMPLES.items())
+    entries = {
+        ("composition", "composing"): {
+            "name": "Composing Spells", "x": 0, "y": 0, "icon": "minecraft:writable_book", "condition": "understood",
+            "description": "Writing spells of your own",
+            "pages": [
+                ("text", "Composing Spells",
+                 f"Once First Light is understood you can write spells of your own. A spell is a few words in "
+                 f"order: a **delivery** (how it leaves you), a **selection** (what it chooses where it lands), one "
+                 f"to {COMPOSE_LIMITS['MAX_OPERATIONS']} **operations** (what it does) and an optional **ending**. "
+                 f"Join a **modifier** to the word it changes with **+**, and write **then** before a second spell "
+                 f"that starts where the first landed."),
+                ("text", "Writing and Inscribing",
+                 "Hold an instrument and type `/jugcraft concordance compose check` and the spell to see what it "
+                 "does and costs, or exactly why it cannot work. `compose inscribe` writes it on the instrument and "
+                 "it appears on your spell bar; `compose show` reads it back and `compose clear` wipes it."),
+                ("text", "Examples", examples),
+                ("text", "Limits",
+                 f"The Initiate's Wand holds {wand['capacity']} capacity of words. A spell on it reaches at most "
+                 f"{wand['targets']} different targets, does at most {wand['work']} work, branches at most "
+                 f"{wand['branches']} time and lasts at most {seconds(wand['duration'])} seconds.\\\n\\\n"
+                 f"A spell costs the Focus of its words (an operation's for every pulse), taken once when it takes "
+                 f"effect: a spell that does nothing costs nothing. Its cooldown is half a second and a quarter second "
+                 f"for each Focus, and lasts at least as long as it pulses."),
+            ],
+        },
+    }
+    for slot, (key, name, description, x, y, icon) in SLOT_ENTRIES.items():
+        pages = []
+        for component, info in COMPONENTS.items():
+            if info["slot"] != slot:
+                continue
+            needs = f"Needs First Light {info['requires']['state']}. Capacity {info['capacity']}, Focus {info['focus']}."
+            pages.append(("text", info["name"], f"`{component}`: {info['text']}\\\n\\\n{component_numbers(info)} {needs}"))
+        entries[("composition", key)] = {"name": name, "x": x, "y": y, "icon": icon, "condition": "understood",
+                                         "description": description, "pages": pages}
+    return entries
 
 
 CATEGORIES = {
@@ -472,6 +707,8 @@ CATEGORIES = {
                     "description": "The Concordance, its Principles and its resources"},
     "radiance": {"name": "Radiance", "icon": "minecraft:glowstone_dust", "sort": 1,
                  "description": "The Lampwrights' practice"},
+    "composition": {"name": "Composition", "icon": "minecraft:writable_book", "sort": 2,
+                    "description": "Writing spells of your own"},
 }
 
 ENTRY_BACKGROUNDS = {None: "square_gray", "understood": "hexagon_purple"}
@@ -514,6 +751,31 @@ def spell_json(key):
         "cost": {"exhaust": 0.0, "durability": 0,
                  "cooldown": {"duration": KINDLE_COOLDOWN_SECONDS, "hosting_item": False}},
     }
+
+
+def composed_spell_json():
+    """The carrier for inscribed spells (Java: ComposedSpells). Spell Engine owns its cast time, gestures and HUD; the
+    CUSTOM impact compiles the instrument's inscription again on the server and runs the plan; Focus and the plan's
+    own cooldown are settled once in COST_CONSUME. Its base cooldown only covers the moment before that."""
+    return {
+        "school": "spell_power:arcane",
+        "range": float(COMPOSE_LIMITS["MAX_RANGE"]),
+        "tier": 1,
+        "group": "concordance",
+        "type": "ACTIVE",
+        "active": {"cast": {"duration": COMPOSED_CAST_SECONDS, "animation": {"id": rid("kindle_cast")},
+                            "start_sound": {"id": rid("concordance.kindle_gather")}}},
+        "release": {"animation": {"id": rid("kindle_release")}, "sound": {"id": rid("concordance.kindle")}},
+        "target": {"type": "CASTER"},
+        "deliver": {"type": "DIRECT"},
+        "impacts": [{"action": {"type": "CUSTOM", "custom": {"handler": rid("composed"), "intent": "HELPFUL"}}}],
+        "cost": {"exhaust": 0.0, "durability": 0,
+                 "cooldown": {"duration": COMPOSED_BASE_COOLDOWN_SECONDS, "hosting_item": False}},
+    }
+
+
+def component_json(info):
+    return {"schema": SCHEMA, **{key: info[key] for key in COMPONENT_DATA_KEYS if key in info}}
 
 
 def player_animations():
@@ -764,6 +1026,84 @@ TOOLTIPS = {
 }
 
 
+# The compiler's problems and explanations (Java: concordance/compose, Text keys under compose.jugcraft.) and the
+# compose command's replies. Every key the Java names must be here (tools/check_mod_data.py checks).
+COMPOSE_TEXT = {
+    "problem.empty": "Write a spell: a delivery, a selection and an operation, such as: touch struck light",
+    "problem.too_long": "A spell is at most %s characters",
+    "problem.character": "\"%s\" cannot appear in a spell: write component names, + and then",
+    "problem.then_empty": "\"then\" needs a spell on both sides",
+    "problem.empty_name": "\"%s\" has an empty name: put + only between names",
+    "problem.bad_name": "\"%s\" is not a component name",
+    "problem.too_many_names": "A spell names at most %s components",
+    "problem.too_deep": "Branches nest at most %s deep",
+    "problem.unknown": "There is no component called \"%s\"",
+    "problem.loose_modifier": "%s is a modifier: join it with + to the word it changes",
+    "problem.not_modifier": "%s is not a modifier, so it cannot be joined to %s",
+    "problem.modifier": "%s changes %s, and %s has none to change",
+    "problem.duplicate": "%s appears twice",
+    "problem.too_many_modifiers": "%s has more than %s modifiers",
+    "problem.research": "Using %s needs %s to be %s",
+    "problem.expected": "%s is %s, but %s belongs here",
+    "problem.after_termination": "%s comes after the ending %s: nothing follows an ending",
+    "problem.missing": "The spell needs %s",
+    "problem.too_many_operations": "A spell, or a branch, has at most %s operations",
+    "problem.range": "%s would reach %s blocks; no spell reaches beyond %s",
+    "problem.radius": "%s would spread %s blocks; no spell spreads beyond %s",
+    "problem.selection": "%s acts on %s, which %s does not choose",
+    "problem.harms_caster": "%s would harm you: here and struck reach only yourself",
+    "problem.magnitude": "%s would be %s strong; the most is %s",
+    "problem.duration": "%s would last %s seconds; the %s allows %s",
+    "problem.capacity": "This spell needs %s capacity; the %s holds %s",
+    "problem.branches": "This spell branches %s times; the %s allows %s",
+    "problem.targets": "This spell could reach %s targets; the %s allows %s",
+    "problem.work": "This spell could do %s work; the %s allows %s",
+    "problem.focus": "This spell would cost %s Focus; you can hold at most %s",
+    "problem.branch_delivery": "A branch starts where the spell before it landed: begin it with here, not %s",
+    "problem.no_instrument": "Hold a composing instrument in your main hand",
+    "problem.too_fast": "Wait a moment before composing again",
+    "explain.delivery.here": "%s: lands where you stand",
+    "explain.delivery.here_then": "%s: lands where the spell before it landed",
+    "explain.delivery.touch": "%s: lands on the first creature or surface within %s blocks",
+    "explain.delivery.ray": "%s: flies to the first creature or surface within %s blocks",
+    "explain.selection.struck": "%s: acts on the one thing it reached",
+    "explain.selection.creatures": "%s: acts on up to %s creatures within %s blocks (never you, if harmful)",
+    "explain.selection.blocks": "%s: acts on up to %s blocks within %s blocks",
+    "explain.operation.damage": "%s: deals %s damage",
+    "explain.operation.restoration": "%s: restores %s health",
+    "explain.operation.movement": "%s: pushes away at %s blocks a tick",
+    "explain.operation.illumination": "%s: sets light for %s seconds",
+    "explain.operation.status": "%s: %s, level %s, for %s seconds",
+    "explain.operation.interaction": "%s: uses the block as you would",
+    "explain.operation.harvesting": "%s: gathers a ripe crop or plant",
+    "explain.operation.protection": "%s: absorbs up to %s damage for %s seconds",
+    "explain.operation.detection": "%s: makes creatures glow for %s seconds",
+    "explain.operation.alteration": "%s: puts out fire",
+    "explain.termination.pulse": "%s: acts %s times, every %s seconds, where it first landed",
+    "explain.then": "Then, where it landed:",
+    "explain.cost": "Costs %s Focus once it takes effect; cooldown %s seconds",
+    "explain.limits": "At most %s targets and %s work; takes %s of the %s's %s capacity",
+    "slot.delivery": "a delivery",
+    "slot.selection": "a selection",
+    "slot.operation": "an operation",
+    "slot.modifier": "a modifier",
+    "slot.termination": "an ending",
+    "aspect.magnitude": "strength",
+    "aspect.duration": "time",
+    "aspect.radius": "a radius",
+    "aspect.range": "a range",
+    "on.creature": "creatures",
+    "on.block": "blocks",
+    "valid": "%s works:",
+    "invalid": "%s cannot be cast:",
+    "inscribed": "Inscribed on your %s: %s",
+    "cleared": "The inscription is wiped",
+    "nothing_inscribed": "Nothing is inscribed on this instrument",
+    "inscription": "Inscribed: %s",
+    "inscription_cost": "%s Focus, cooldown %s seconds",
+}
+
+
 RESEARCH_STATE_NAMES = {"none": "Not begun", "encountered": "Encountered", "observed": "Observed",
                         "understood": "Understood", "mastered": "Mastered"}
 
@@ -795,6 +1135,14 @@ def lang_entries(lang):
         lang[f"screen.{MOD}.concordance.{key}"] = text
     for key, text in TOOLTIPS.items():
         lang[f"tooltip.{MOD}.concordance.{key}"] = text
+    for key, text in COMPOSE_TEXT.items():
+        lang[f"compose.{MOD}.{key}"] = text
+    for key, info in COMPONENTS.items():
+        lang[f"component.{MOD}.{key}"] = info["name"]
+        lang[f"component.{MOD}.{key}.description"] = info["text"]
+    lang[f"spell.{MOD}.composed.name"] = "Inscribed Spell"
+    lang[f"spell.{MOD}.composed.description"] = ("The spell inscribed on this instrument (see the codex, "
+                                                 "Composition). Its cost and cooldown are its own.")
     for event, subtitle in SOUND_EVENTS.items():
         lang[f"subtitles.{MOD}.{event}"] = subtitle
     # Spell Engine names a missing "item" through its tag's translation key; Jugcraft's casting gate uses these two
@@ -952,6 +1300,11 @@ def write_data(write, res):
         write(data / "concordance" / "working" / f"{key}.json", dict({"schema": SCHEMA}, **info))
     for key, info in CONVERSIONS.items():
         write(data / "concordance" / "conversion" / f"{key}.json", dict({"schema": SCHEMA}, **info))
+    for key, info in COMPONENTS.items():
+        write(data / "concordance" / "component" / f"{key}.json", component_json(info))
+    for key, info in INSTRUMENT_LIMITS.items():
+        write(data / "concordance" / "instrument" / f"{key}.json", dict({"schema": SCHEMA}, **info))
+    write(data / "spell" / "composed.json", composed_spell_json())
     for item in spell_opt_outs():
         write(data / "spell_assignments" / f"{item}.json", {"access": "NONE", "access_param": ""})
     # Instruments resolve casts for the Concordance spell tag only; which of its spells a player has is the
@@ -979,6 +1332,16 @@ def tags(tags):
     tags.add("block", "minecraft:mineable/pickaxe", rid("lumen_sconce"))
     for key in INVOCATIONS:
         tags.add("spell", SPELL_TAG, rid(key))
+    tags.add("spell", SPELL_TAG, rid("composed"))
+    # The shared effect system's tolerances and block lists (Java: ConcordanceEffects).
+    for entity in EFFECT_IMMUNE:
+        tags.add("entity_type", f"{MOD}:concordance/immune", entity)
+    for entity in EFFECT_RESISTANT:
+        tags.add("entity_type", f"{MOD}:concordance/resistant", entity)
+    for block in INTERACTABLE:
+        tags.add("block", f"{MOD}:concordance/interactable", block)
+    for block in HARVESTABLE:
+        tags.add("block", f"{MOD}:concordance/harvestable", block)
 
 
 def recipe_view():

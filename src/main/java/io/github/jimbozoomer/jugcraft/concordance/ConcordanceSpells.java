@@ -54,6 +54,7 @@ public final class ConcordanceSpells {
 
 	static void register() {
 		SpellHandlers.registerCustomImpact(Jugcraft.id("kindle_light"), KindleInvocation::impact);
+		// The carrier for inscribed spells registers its own impact (ComposedSpells.register).
 		SpellContainerSource.addSource(new SpellContainerSource.Entry(SOURCE, ConcordanceSpells::containers, ConcordanceSpells::sourceState));
 		SpellEvents.CASTING_ATTEMPT.PRE.register(ConcordanceSpells::attempt);
 		SpellEvents.COST_CONSUME.register(ConcordanceSpells::consume);
@@ -64,18 +65,21 @@ public final class ConcordanceSpells {
 	}
 
 	/** What the container source depends on; Spell Engine compares it each tick and rebuilds the source when it changes. */
-	private record SourceState(boolean instrument, Map<String, Integer> invocations) {
+	private record SourceState(boolean instrument, Map<String, Integer> invocations, @Nullable String inscription) {
 	}
 
 	private static Object sourceState(Player player) {
-		return new SourceState(holdsInstrument(player), ConcordanceProgress.knowledge(player).invocations());
+		Inscription inscription = ComposedSpells.inscription(player.getMainHandItem());
+		return new SourceState(holdsInstrument(player), ConcordanceProgress.knowledge(player).invocations(),
+				inscription == null ? null : inscription.text());
 	}
 
 	/**
 	 * The player's learned invocations as one spell container, offered only while an instrument is in the main hand:
 	 * Spell Engine accepts a cast request for any spell in any of a player's containers, so a container that exists only
-	 * with an instrument in hand is what keeps invocations to instruments. Runs on both sides; the client reads its synced
-	 * copy of the player's knowledge.
+	 * with an instrument in hand is what keeps invocations to instruments. An instrument with a spell inscribed on it adds
+	 * the carrier {@value ComposedSpells#SPELL}. Runs on both sides; the client reads its synced copy of the player's
+	 * knowledge and the item's inscription.
 	 */
 	private static List<SpellContainerSource.SourcedContainer> containers(Player player, String name) {
 		try {
@@ -83,6 +87,9 @@ public final class ConcordanceSpells {
 				return List.of();
 			}
 			List<String> spells = new ArrayList<>(ConcordanceProgress.knowledge(player).invocations().keySet());
+			if (ComposedSpells.inscription(player.getMainHandItem()) != null) {
+				spells.add(ComposedSpells.SPELL);
+			}
 			if (spells.isEmpty()) {
 				return List.of();
 			}
@@ -113,7 +120,14 @@ public final class ConcordanceSpells {
 			return SpellCast.Attempt.failMissingItem(new SpellCast.Attempt.MissingItemInfo(new Ammo.Searched(MISSING_INSTRUMENT, null)));
 		}
 		String id = spellId(spell);
-		int cost = id == null ? -1 : ConcordanceProgress.knowledge(player).invocationCost(id);
+		int cost;
+		if (ComposedSpells.SPELL.equals(id)) {
+			// The inscription's own Focus (the client's view); the server compiles it again in the impact.
+			Inscription inscription = ComposedSpells.inscription(player.getMainHandItem());
+			cost = inscription == null ? -1 : inscription.focus();
+		} else {
+			cost = id == null ? -1 : ConcordanceProgress.knowledge(player).invocationCost(id);
+		}
 		if (cost < 0) {
 			return SpellCast.Attempt.none();
 		}
@@ -149,6 +163,12 @@ public final class ConcordanceSpells {
 			Knowledge knowledge = ConcordanceProgress.knowledge(player);
 			String id = spellId(args.spell());
 			if (id == null || !isConcordance(args.spell(), knowledge)) {
+				return;
+			}
+			if (ComposedSpells.SPELL.equals(id)) {
+				if (!ComposedSpells.settle(player, args.spell())) {
+					Jugcraft.LOGGER.warn("Arcane Concordance: {} completed an inscribed spell with nothing to settle", player.getName().getString());
+				}
 				return;
 			}
 			int cost = knowledge.invocationCost(id);

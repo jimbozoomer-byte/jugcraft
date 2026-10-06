@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### The Arcane Concordance: composed spells and shared effects
+- **Compose your own spells**: once First Light is understood, write a spell in a few words (how it leaves you, what it chooses, what it does, how it ends) with `/jugcraft concordance compose check`, and inscribe it on the Initiate's Wand with `compose inscribe`. The game explains what a spell does and costs, or names every problem with it. Sixteen words to start, more at First Light mastered; the codex has a page for each.
+- An inscribed spell is cast from the spell bar like Kindle. The server works it out again on every cast and holds it to the limits it was written with: it never reaches more targets or does more than it said.
+- Behind the scenes, every Concordance effect (Kindle's light included) now goes through one place, with the same friendly-fire, protection, stacking and credit rules whatever delivers it. Record: [arcane-concordance-composition.md](docs/features/arcane-concordance-composition.md).
+
 ### The Arcane Concordance: shared notes and typed resources
 - **Research Notes**: write down what you know on paper; another player who reads your notes can understand First Light after observing it once in the dark themselves. Notes never teach mastery, and your own notes teach you nothing.
 - **Lumen Sconce**: a brass lamp-stand that burns Radiance for a steady light 15. Anyone may pour Radiance in from a Kindled Lantern; only its owner can draw it back out. It keeps its Radiance when broken.

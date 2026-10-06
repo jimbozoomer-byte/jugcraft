@@ -1,6 +1,9 @@
 package io.github.jimbozoomer.jugcraft.concordance.rules;
 
 import com.google.gson.JsonElement;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Catalog;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Component;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Instrument;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ConversionTable;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceType;
@@ -22,21 +25,24 @@ import org.jspecify.annotations.Nullable;
  * swaps it whole and a definition never changes under a running operation.
  */
 public final class ConcordanceRules {
-	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, List.of());
+	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
+			List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
 	private final Map<String, Definitions.Working> workings;
 	private final ConversionTable conversions;
+	private final Catalog catalog;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
 	private ConcordanceRules(Map<String, Definitions.Research> research, Map<String, Definitions.Invocation> invocations,
-			Map<String, Definitions.Working> workings, ConversionTable conversions, List<String> problems) {
+			Map<String, Definitions.Working> workings, ConversionTable conversions, Catalog catalog, List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
 		this.conversions = conversions;
+		this.catalog = catalog;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -58,6 +64,11 @@ public final class ConcordanceRules {
 	/** The explicit conversions between resource types; nothing converts without one. */
 	public ConversionTable conversions() {
 		return conversions;
+	}
+
+	/** The composition grammar: components and instruments. */
+	public Catalog catalog() {
+		return catalog;
 	}
 
 	public List<String> problems() {
@@ -92,7 +103,10 @@ public final class ConcordanceRules {
 		return out;
 	}
 
-	/** The files under {@code data/<ns>/concordance/}: kind (research, invocation, working or conversion), id, content. */
+	/**
+	 * The files under {@code data/<ns>/concordance/}: kind (research, invocation, working, conversion, component or
+	 * instrument), id, content.
+	 */
 	public record Source(String kind, String id, JsonElement json) {
 	}
 
@@ -102,6 +116,8 @@ public final class ConcordanceRules {
 		Map<String, Definitions.Invocation> invocations = new TreeMap<>();
 		Map<String, Definitions.Working> workings = new TreeMap<>();
 		List<Conversion> conversionList = new ArrayList<>();
+		Map<String, Component> components = new TreeMap<>();
+		Map<String, Instrument> instruments = new TreeMap<>();
 		List<String> problems = new ArrayList<>();
 		for (Source source : sources) {
 			switch (source.kind()) {
@@ -129,8 +145,20 @@ public final class ConcordanceRules {
 						conversionList.add(conversion);
 					}
 				}
+				case "component" -> {
+					Component component = parser.component(source.id(), source.json());
+					if (component != null) {
+						components.put(component.id(), component);
+					}
+				}
+				case "instrument" -> {
+					Instrument instrument = parser.instrument(source.id(), source.json());
+					if (instrument != null) {
+						instruments.put(instrument.id(), instrument);
+					}
+				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
-						+ "\" (expected research, invocation, working or conversion)");
+						+ "\" (expected research, invocation, working, conversion, component or instrument)");
 			}
 		}
 		problems.addAll(0, parser.problems());
@@ -214,12 +242,22 @@ public final class ConcordanceRules {
 				}
 			}
 		}
+		// A component is learnt from a research state like an invocation; one naming none could never be used.
+		for (Component component : List.copyOf(components.values())) {
+			Definitions.Research entry = research.get(component.requires().research());
+			if (entry == null || !entry.states().containsKey(component.requires().state())) {
+				problems.add("component " + component.id() + ": needs " + component.requires().research() + " "
+						+ component.requires().state().id() + ", which does not exist");
+				components.remove(component.id());
+			}
+		}
 		if (!research.isEmpty() && research.values().stream().noneMatch(entry -> entry.requires().isEmpty())) {
 			problems.add("no research entry can be started without another: the Concordance has no way in");
 		}
 		return new ConcordanceRules(Collections.unmodifiableMap(new LinkedHashMap<>(research)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(invocations)),
-				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, List.copyOf(problems));
+				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, new Catalog(components, instruments),
+				List.copyOf(problems));
 	}
 
 	/** Entries that are part of, or depend on, a prerequisite cycle. */

@@ -90,6 +90,8 @@ EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_repla
                   # The town's usable blocks (tools/town_assets.py USABLE): vanilla 26.3's own block tags.
                   "minecraft:wooden_doors", "minecraft:fence_gates", "minecraft:buttons", "minecraft:beds",
                   "minecraft:is_forest", "minecraft:is_taiga",
+                  # The Concordance's interaction and harvesting lists (tools/concordance.py), as optional entries.
+                  "minecraft:wooden_trapdoors", "minecraft:small_flowers",
                   # Fabric's conventional biome tag (ConventionalBiomeTags.IS_SNOWY): the snow werewolf's haunts.
                   "c:is_snowy"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
@@ -446,7 +448,7 @@ def check_machine_recipe_files(registered):
 # Jugcraft entries of registries other than blocks and items that tags may name.
 OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE} | set(bm.BIOMES), "point_of_interest_type": {"arcade_cabinet"},
                  "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES},
-                 "spell": set(concordance.INVOCATIONS)}
+                 "spell": set(concordance.INVOCATIONS) | {"composed"}}
 
 
 def check_fluid_recipes(registered):
@@ -6251,6 +6253,122 @@ def check_concordance(registered):
     for component in lights.get("match", {}).get("components", {}):
         if f'"{split(component)[1]}"' not in components:
             err(f"dynamiclights/item/kindled_lantern.json: component {component} is not registered in JugcraftConcordance")
+    check_composition(co, root, lang, registered, research)
+
+
+def check_composition(co, root, lang, registered, research):
+    """Roadmap steps 8 and 9: the grammar's limits and effect kinds match the Java; every component and instrument is
+    within those limits and learnt from research that exists; the codex examples fit the instrument; every text the
+    compiler can show exists; and Concordance spells deliver their effects only through Jugcraft's own CUSTOM impacts
+    (the one effect boundary), never Spell Engine's damage or healing (which would apply effects twice)."""
+    def java(name):
+        path = root / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    for name, values in (("compose/Grammar.java", co.COMPOSE_LIMITS), ("effect/EffectSpec.java", co.EFFECT_LIMITS),
+                         ("ConcordanceCommand.java", {"COMPOSE_RATE_TICKS": co.COMPOSE_RATE_TICKS})):
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance.py ({value})")
+    kinds = {m[1]: (m[2].lower(), int(m[3])) for m in
+             re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", On\.([A-Z]+), (\d+)\)', java("effect/EffectKind.java"), re.M)}
+    if kinds != {k: (v["on"], v["work"]) for k, v in co.EFFECT_KINDS.items()}:
+        err("concordance/effect/EffectKind.java: kinds, targets or work differ from EFFECT_KINDS in tools/concordance.py")
+    limits = co.COMPOSE_LIMITS
+    states = set(co.RESEARCH_STAGES)
+    for key, info in co.COMPONENTS.items():
+        where = f"component {key}"
+        data = load(DATA / MOD / "concordance" / "component" / f"{key}.json")
+        if data != co.component_json(info):
+            err(f"{where}: data file differs from tools/concordance.py (regenerate)")
+        requires = info.get("requires", {})
+        if split(requires.get("research", ":"))[1] not in research or requires.get("state") not in states:
+            err(f"{where}: learnt from unknown research {requires}")
+        if not (0 <= info["capacity"] <= limits["MAX_COMPONENT_COST"] and 0 <= info["focus"] <= limits["MAX_COMPONENT_COST"]):
+            err(f"{where}: capacity and Focus must be 0..{limits['MAX_COMPONENT_COST']}")
+        slot = info["slot"]
+        body = info.get(slot)
+        if slot not in ("delivery", "selection", "operation", "modifier", "termination") or not isinstance(body, dict):
+            err(f"{where}: slot {slot} needs its own object")
+            continue
+        if slot == "delivery" and not (body["form"] in ("here", "touch", "ray")
+                                       and (body["range"] == 0) == (body["form"] == "here") and body["range"] <= limits["MAX_RANGE"]):
+            err(f"{where}: delivery form or range out of the grammar")
+        if slot == "selection" and not (body["pick"] in ("struck", "creatures", "blocks")
+                                        and ((body["radius"], body["targets"]) == (0, 1) if body["pick"] == "struck"
+                                             else 1 <= body["radius"] <= limits["MAX_RADIUS"] and 1 <= body["targets"] <= limits["MAX_TARGETS"])):
+            err(f"{where}: selection out of the grammar")
+        if slot == "operation":
+            effect = body.get("effect")
+            if effect not in co.EFFECT_KINDS or body.get("intent") not in ("helpful", "harmful") or body.get("principle") not in co.PRINCIPLES:
+                err(f"{where}: unknown effect, intent or Principle")
+            if effect == "damage" and body.get("school") != co.PRINCIPLES[body["principle"]]["school"]:
+                err(f"{where}: damage must use its Principle's Spell Power school")
+            if (effect == "status") != ("status" in body):
+                err(f"{where}: a status effect (and only a status effect) names a status")
+            if body.get("magnitude", 0) > co.EFFECT_LIMITS["MAX_MAGNITUDE"] or body.get("duration", 0) > co.EFFECT_LIMITS["MAX_DURATION"]:
+                err(f"{where}: beyond the effect limits")
+            if effect == "illumination" and body.get("duration", 0) > co.MOTE_STEP_TICKS * 15:
+                err(f"{where}: light cannot last longer than a mote's 15 steps")
+        if slot == "modifier" and not (body["aspect"] in ("magnitude", "duration", "radius", "range")
+                                       and 1 <= body["amount"] <= limits["MAX_MODIFIER_AMOUNT"]):
+            err(f"{where}: modifier out of the grammar")
+        if slot == "termination" and not (1 <= body["pulses"] <= limits["MAX_PULSES"] and (
+                body["interval"] == 0 if body["pulses"] == 1 else limits["MIN_INTERVAL"] <= body["interval"] <= limits["MAX_INTERVAL"])):
+            err(f"{where}: termination out of the grammar")
+        for lang_key in (f"component.{MOD}.{key}", f"component.{MOD}.{key}.description"):
+            if lang_key not in lang:
+                err(f"{where}: missing lang {lang_key}")
+    for path in sorted((DATA / MOD / "concordance" / "component").glob("*.json")):
+        if path.stem not in co.COMPONENTS:
+            err(f"concordance/component/{path.name}: not in tools/concordance.py (stale file)")
+    for key, info in co.INSTRUMENT_LIMITS.items():
+        if split(info["item"])[1] not in registered or split(info["item"])[1] not in co.INSTRUMENTS:
+            err(f"instrument {key}: {info['item']} is not a Jugcraft instrument")
+        for field, cap in (("capacity", "MAX_CAPACITY"), ("targets", "MAX_TARGETS"), ("work", "MAX_WORK"), ("branches", "MAX_BRANCHES")):
+            if not 0 <= info[field] <= limits[cap]:
+                err(f"instrument {key}: {field} beyond the grammar's {cap}")
+        if not 0 <= info["duration"] <= co.EFFECT_LIMITS["MAX_DURATION"]:
+            err(f"instrument {key}: duration beyond the effect limit")
+    wand = co.INSTRUMENT_LIMITS["initiate_wand"]
+    for text in co.COMPOSE_EXAMPLES:
+        cost = co.composition_cost(text)
+        if cost["capacity"] > wand["capacity"] or cost["targets"] > wand["targets"] or cost["work"] > wand["work"] \
+                or cost["focus"] > co.FOCUS_MAX or text.count(" then ") > wand["branches"]:
+            err(f"codex example '{text}' does not fit the Initiate's Wand: {cost}")
+    # Every text the compiler can produce, and every name it refers to, exists.
+    keys = set()
+    for path in sorted((root / "compose").glob("*.java")):
+        keys |= set(re.findall(r'Text\.of\("([a-z_.]+)"', path.read_text(encoding="utf-8")))
+    keys |= {f"explain.operation.{kind}" for kind in co.EFFECT_KINDS}
+    keys |= {f"slot.{slot}" for slot in ("delivery", "selection", "operation", "modifier", "termination")}
+    keys |= {f"aspect.{aspect}" for aspect in ("magnitude", "duration", "radius", "range")} | {"on.creature", "on.block"}
+    for key in sorted(keys):
+        if f"compose.{MOD}.{key}" not in lang:
+            err(f"concordance/compose: missing lang compose.{MOD}.{key}")
+    sources = sorted(root.rglob("*.java")) + sorted(CLIENT_JAVA_ROOT.glob("Concordance*.java"))
+    for path in sources:
+        for key in re.findall(r'"(compose\.jugcraft\.[a-z_.]+[a-z_])"', path.read_text(encoding="utf-8")):
+            if key not in lang:
+                err(f"{path.name}: missing lang {key}")
+    # One effect boundary: Concordance spells use only Jugcraft's registered CUSTOM impacts.
+    handlers = set()
+    for path in sorted(root.glob("*.java")):
+        handlers |= set(re.findall(r'registerCustomImpact\(Jugcraft\.id\("([a-z_]+)"\)', path.read_text(encoding="utf-8")))
+    tagged = (load(DATA / MOD / "tags" / "spell" / "concordance.json") or {}).get("values", [])
+    for spell_id in tagged:
+        spell = load(DATA / MOD / "spell" / f"{split(spell_id)[1]}.json")
+        if spell is None:
+            err(f"spell tag {co.SPELL_TAG}: {spell_id} has no spell file")
+            continue
+        for impact in spell.get("impacts", []):
+            action = impact.get("action", {})
+            handler = action.get("custom", {}).get("handler", "")
+            if action.get("type") != "CUSTOM" or split(handler)[0] != MOD or split(handler)[1] not in handlers:
+                err(f"spell {spell_id}: Concordance spells act only through Jugcraft's registered CUSTOM impacts "
+                    f"(found {action.get('type')} {handler})")
+        if not (ASSETS / "textures" / "spell" / f"{split(spell_id)[1]}.png").is_file():
+            err(f"spell {spell_id}: no icon textures/spell/{split(spell_id)[1]}.png")
 
 
 def KINDLE_MOTE_STEPS_FIT(co):

@@ -1,6 +1,11 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
+import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
+import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
@@ -25,14 +30,18 @@ import org.jspecify.annotations.Nullable;
  * The spell targets its caster and delivers directly, so Spell Engine never trusts a client's aim: this handler (the
  * spell's {@code CUSTOM} impact, server only) traces the caster's own view on the server. It re-checks the cast with
  * {@link ConcordanceSpells#refusal}, since a cast request may reach the impact by a path the gate did not see, and
- * lights through {@link Illumination}, the one way the Concordance changes world light. A cast that lights nothing
- * reports failure, so Spell Engine applies no cooldown and Jugcraft takes no Focus. Keep RANGE and MOTE_STEPS equal to
- * KINDLE_RANGE and KINDLE_MOTE_STEPS in tools/concordance.py.
+ * lights through the shared effect boundary ({@link ConcordanceEffects}, the illumination operation), as an
+ * invocation of its caster, under a ledger of one target. A cast that lights nothing reports failure, so Spell Engine
+ * applies no cooldown and Jugcraft takes no Focus. Keep RANGE and MOTE_STEPS equal to KINDLE_RANGE and
+ * KINDLE_MOTE_STEPS in tools/concordance.py.
  */
 public final class KindleInvocation {
 	public static final int RANGE = 16;
 	public static final int MOTE_STEPS = 15;
 	private static final SpellHandlers.ImpactResult FAILED = new SpellHandlers.ImpactResult(false, false);
+	/** Kindle's effect: light lasting {@value #MOTE_STEPS} steps, in one block. */
+	public static final EffectSpec LIGHT = EffectSpec.of(EffectKind.ILLUMINATION, Intent.HELPFUL, 0, MOTE_STEPS * LumenMoteBlock.STEP_TICKS);
+	private static final Ledger.Limits LIMITS = new Ledger.Limits(1, EffectKind.ILLUMINATION.work, 0);
 
 	private KindleInvocation() {
 	}
@@ -48,14 +57,19 @@ public final class KindleInvocation {
 			if (ConcordanceSpells.refusal(player, spell) != null) {
 				return FAILED;
 			}
-			Illumination.Result result = Illumination.kindle(level, player, aim(level, player), MOTE_STEPS);
+			String source = ConcordanceSpells.spellId(spell);
+			Cause cause = Cause.of(player.getUUID(), Cause.Origin.INVOCATION, source == null ? Jugcraft.id("kindle").toString() : source,
+					ConcordanceEffects.nextSerial());
+			ConcordanceEffects.Context effect = new ConcordanceEffects.Context(level, cause, player, new Ledger(LIMITS), "0/0/0",
+					player.getEyePosition());
+			ConcordanceEffects.Result result = ConcordanceEffects.apply(effect, LIGHT, aim(level, player));
 			switch (result) {
-				case NO_SPACE -> player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.kindle.no_space", RANGE));
+				case NOTHING -> player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.kindle.no_space", RANGE));
 				case NOT_ALLOWED -> player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.kindle.not_allowed"));
 				default -> {
 				}
 			}
-			return new SpellHandlers.ImpactResult(result.lit(), false);
+			return new SpellHandlers.ImpactResult(result.applied(), false);
 		} catch (RuntimeException problem) {
 			Jugcraft.LOGGER.error("Arcane Concordance: Kindle failed", problem);
 			return FAILED;

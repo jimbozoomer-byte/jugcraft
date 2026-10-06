@@ -16,7 +16,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
  * Loads the Concordance's rules from every data pack's {@code data/<ns>/concordance/<kind>/<name>.json} (kind is
- * research, invocation or working) on server start and on {@code /reload}. A file that does not parse, or whose
+ * research, invocation, working, conversion, component or instrument) on server start and on {@code /reload}. A file that does not parse, or whose
  * references do not resolve, is left out with a logged reason that {@code /jugcraft concordance diagnose} also lists;
  * the rest load. The new rules replace the old in one step, after which every online player's invocations are worked
  * out again ({@link ConcordanceProgress#relearnAll}).
@@ -60,8 +60,9 @@ public final class ConcordanceData extends SimpleJsonResourceReloadListener<Json
 		for (String problem : loaded.problems()) {
 			Jugcraft.LOGGER.error("Arcane Concordance data: {}", problem);
 		}
-		Jugcraft.LOGGER.info("Arcane Concordance: {} research entries, {} invocations, {} workings ({} problems)",
-				loaded.research().size(), loaded.invocations().size(), loaded.workings().size(), loaded.problems().size());
+		Jugcraft.LOGGER.info("Arcane Concordance: {} research entries, {} invocations, {} workings, {} components ({} problems)",
+				loaded.research().size(), loaded.invocations().size(), loaded.workings().size(), loaded.catalog().components().size(),
+				loaded.problems().size());
 		rules = loaded;
 	}
 }

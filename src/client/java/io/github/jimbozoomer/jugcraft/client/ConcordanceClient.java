@@ -4,8 +4,10 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceSpells;
+import io.github.jimbozoomer.jugcraft.concordance.Inscription;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -86,6 +88,13 @@ final class ConcordanceClient {
 					KindledLanternItem.CAPACITY).withStyle(ChatFormatting.GOLD));
 			lines.add(Component.translatable(KindledLanternItem.lit(stack) ? "tooltip.jugcraft.concordance.lantern.lit"
 					: "tooltip.jugcraft.concordance.lantern.unlit").withStyle(ChatFormatting.GRAY));
+		}
+		Inscription inscription = stack.get(JugcraftConcordance.INSCRIPTION);
+		if (inscription != null) {
+			// What was inscribed and what it cost then; the server compiles it again whenever it is cast.
+			lines.add(Component.translatable("compose.jugcraft.inscription", inscription.text()).withStyle(ChatFormatting.LIGHT_PURPLE));
+			lines.add(Component.translatable("compose.jugcraft.inscription_cost", inscription.focus(), Text.seconds(inscription.cooldown()))
+					.withStyle(ChatFormatting.GRAY));
 		}
 	}
 }

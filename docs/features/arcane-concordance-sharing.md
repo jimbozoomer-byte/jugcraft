@@ -129,8 +129,9 @@ model reuses the bench's brass and lens textures. Everything is original.
   passed"** (the 6 new tests included; the rules loaded with 0 problems and the codex with no errors), and
   `optional integrations absent` passed. The client test shards fail before any test starts, with the same OpenGL
   startup crash as on the framework foundation branch (see [First Light](arcane-concordance-first-light.md#verification)).
-- After that run, the sconce's scheduled check was capped at one burn period (see Rollout); the CI result for that
-  change is in the delivery report.
+- After that run, the sconce's scheduled check was capped at one burn period (see Rollout). CI run 37506284755 on that
+  commit (`4d04cb0e`): `mod` passed (build and server game tests) and `optional integrations absent` passed; the client
+  shards failed with the same OpenGL startup crash.
 
 Not yet run: any client (sconce model, notes textures and tooltips in game), a two-client dedicated server, a GuiLib
 research comparison screen (not built: `/jugcraft concordance status` and the codex are the fallback).

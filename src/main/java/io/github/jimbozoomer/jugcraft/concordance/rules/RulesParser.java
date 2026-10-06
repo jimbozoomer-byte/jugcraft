@@ -4,6 +4,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Component;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Grammar;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Instrument;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Slot;
+import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
+import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Stacking;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceType;
 import java.util.ArrayList;
@@ -207,6 +215,139 @@ public final class RulesParser {
 					range(to, "amount", 1, 1_000_000));
 		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
 			problems.add("conversion " + id + ": " + problem.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * A composition component: {@code {"schema": 1, "slot": "operation", "requires": {"research": ..., "state": ...},
+	 * "capacity": 2, "focus": 3, "operation": {...}}}, with one object named after its slot (see
+	 * {@link Component} for each). Numbers outside the grammar's limits ({@link Grammar}) are refused.
+	 */
+	public @Nullable Component component(String id, JsonElement json) {
+		try {
+			JsonObject object = object(json, "component");
+			String slotName = string(object, "slot");
+			Slot slot = Slot.fromId(slotName);
+			if (slot == null) {
+				throw new Invalid("unknown slot \"" + slotName + "\" (delivery, selection, operation, modifier, termination)");
+			}
+			only(object, "schema", "slot", "requires", "capacity", "focus", slot.id());
+			schema(object);
+			JsonObject requires = object(member(object, "requires"), "requires");
+			only(requires, "research", "state");
+			Definitions.Requirement requirement = new Definitions.Requirement(id(requires, "research"), state(requires, "state"));
+			int capacity = range(object, "capacity", 0, Grammar.MAX_COMPONENT_COST);
+			int focus = range(object, "focus", 0, Grammar.MAX_COMPONENT_COST);
+			JsonObject body = object(member(object, slot.id()), slot.id());
+			Component.Part part = switch (slot) {
+				case DELIVERY -> delivery(body);
+				case SELECTION -> selection(body);
+				case OPERATION -> operation(body);
+				case MODIFIER -> {
+					only(body, "aspect", "amount");
+					String aspectName = string(body, "aspect");
+					Component.Aspect aspect = Component.Aspect.fromId(aspectName);
+					if (aspect == null) {
+						throw new Invalid("modifier: unknown aspect \"" + aspectName + "\" (magnitude, duration, radius, range)");
+					}
+					yield new Component.Modifier(aspect, range(body, "amount", 1, Grammar.MAX_MODIFIER_AMOUNT));
+				}
+				case TERMINATION -> {
+					only(body, "pulses", "interval");
+					int pulses = range(body, "pulses", 1, Grammar.MAX_PULSES);
+					int interval = pulses == 1 ? range(body, "interval", 0, 0) : range(body, "interval", Grammar.MIN_INTERVAL, Grammar.MAX_INTERVAL);
+					yield new Component.Termination(pulses, interval);
+				}
+			};
+			return new Component(id, slot, requirement, capacity, focus, part);
+		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
+			problems.add("component " + id + ": " + problem.getMessage());
+			return null;
+		}
+	}
+
+	private static Component.Delivery delivery(JsonObject body) {
+		only(body, "form", "range");
+		String formName = string(body, "form");
+		Component.Form form = Component.Form.fromId(formName);
+		if (form == null) {
+			throw new Invalid("delivery: unknown form \"" + formName + "\" (here, touch, ray)");
+		}
+		return new Component.Delivery(form, form == Component.Form.HERE ? range(body, "range", 0, 0) : range(body, "range", 1, Grammar.MAX_RANGE));
+	}
+
+	private static Component.Selection selection(JsonObject body) {
+		only(body, "pick", "radius", "targets");
+		String pickName = string(body, "pick");
+		Component.Pick pick = Component.Pick.fromId(pickName);
+		if (pick == null) {
+			throw new Invalid("selection: unknown pick \"" + pickName + "\" (struck, creatures, blocks)");
+		}
+		if (pick == Component.Pick.STRUCK) {
+			return new Component.Selection(pick, range(body, "radius", 0, 0), range(body, "targets", 1, 1));
+		}
+		return new Component.Selection(pick, range(body, "radius", 1, Grammar.MAX_RADIUS), range(body, "targets", 1, Grammar.MAX_TARGETS));
+	}
+
+	private static Component.Operation operation(JsonObject body) {
+		only(body, "effect", "intent", "principle", "magnitude", "duration", "status", "stacking", "school");
+		String kindName = string(body, "effect");
+		EffectKind kind = EffectKind.fromId(kindName);
+		if (kind == null) {
+			throw new Invalid("operation: unknown effect \"" + kindName + "\"");
+		}
+		String intentName = string(body, "intent");
+		Intent intent = Intent.fromId(intentName);
+		if (intent == null) {
+			throw new Invalid("operation: intent must be helpful or harmful, not \"" + intentName + "\"");
+		}
+		String principle = name(body, "principle");
+		if (!ResourceType.PRINCIPLES.contains(principle)) {
+			throw new Invalid("operation: \"" + principle + "\" is not a Principle");
+		}
+		int strongest = switch (kind) {
+			case STATUS -> EffectSpec.MAX_AMPLIFIER;
+			case MOVEMENT -> EffectSpec.MAX_PUSH;
+			case DAMAGE, RESTORATION, PROTECTION -> EffectSpec.MAX_MAGNITUDE;
+			default -> 0;
+		};
+		int weakest = kind == EffectKind.DAMAGE || kind == EffectKind.RESTORATION || kind == EffectKind.PROTECTION
+				|| kind == EffectKind.MOVEMENT ? 1 : 0;
+		int magnitude = body.has("magnitude") || weakest > 0 ? range(body, "magnitude", weakest, strongest) : 0;
+		boolean lasting = kind == EffectKind.STATUS || kind == EffectKind.PROTECTION || kind == EffectKind.DETECTION
+				|| kind == EffectKind.ILLUMINATION;
+		int duration = lasting ? range(body, "duration", 1, EffectSpec.MAX_DURATION) : body.has("duration") ? range(body, "duration", 0, 0) : 0;
+		String status = kind == EffectKind.STATUS ? id(body, "status") : null;
+		if (kind != EffectKind.STATUS && body.has("status")) {
+			throw new Invalid("operation: only a status effect names a status");
+		}
+		Stacking stacking = Stacking.STRONGEST;
+		if (body.has("stacking")) {
+			String stackingName = string(body, "stacking");
+			stacking = Stacking.fromId(stackingName);
+			if (stacking == null) {
+				throw new Invalid("operation: unknown stacking \"" + stackingName + "\" (strongest, accumulate, exclusive)");
+			}
+		}
+		String school = body.has("school") ? id(body, "school") : null;
+		return new Component.Operation(new EffectSpec(kind, intent, magnitude, duration, status, stacking, school), principle);
+	}
+
+	/**
+	 * What an instrument can hold: {@code {"schema": 1, "item": ..., "capacity": 8, "targets": 6, "work": 48,
+	 * "branches": 1, "duration": 1200}}, each at most the grammar's limit.
+	 */
+	public @Nullable Instrument instrument(String id, JsonElement json) {
+		try {
+			JsonObject object = object(json, "instrument");
+			only(object, "schema", "item", "capacity", "targets", "work", "branches", "duration");
+			schema(object);
+			return new Instrument(id, id(object, "item"), range(object, "capacity", 1, Grammar.MAX_CAPACITY),
+					range(object, "targets", 1, Grammar.MAX_TARGETS), range(object, "work", 1, Grammar.MAX_WORK),
+					range(object, "branches", 0, Grammar.MAX_BRANCHES), range(object, "duration", 0, Grammar.MAX_DURATION));
+		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
+			problems.add("instrument " + id + ": " + problem.getMessage());
 			return null;
 		}
 	}
