@@ -11,6 +11,7 @@ import armor_styles
 import arms_variants_art
 import gear
 import hitech
+import thallite_armor
 
 # Mask characters: digits are the head's palette shade; h/H the handle (dark/light); . is empty.
 HANDLE = [(58, 40, 22), (98, 70, 40)]
@@ -218,6 +219,8 @@ def draw_all(save, save_armor, part_palette):
         save_armor(armor_styles.layer(style, armor, False), "humanoid", style)
         save_armor(armor_styles.layer(style, armor, True), "humanoid_leggings", style)
         save(arms_variants_art.pattern16(style), "item", gear.ARMOR_STYLES[style]["template"])
+    # Thallite armor, plain and Earthbound, and the Earthbinding Template: hand-drawn maps (tools/thallite_armor.py).
+    thallite_armor.draw(save, save_armor)
     steel = part_palette("steel")
     save(icon(BOW_BASE, steel), "item", "power_bow")
     for step in range(3):

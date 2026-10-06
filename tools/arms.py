@@ -445,7 +445,8 @@ TWO_HANDED_SLOW = 0.6
 FINISHER = 1.25
 QUEUE_TICKS = 4
 COMBO_WINDOW = 30
-METALS = list(gear.GEAR_TIERS)
+# Every gear metal makes every kind, except a metal marked "arms": False (thallite, whose drawn kinds come later).
+METALS = [metal for metal, info in gear.GEAR_TIERS.items() if info.get("arms", True)]
 # The charging kinds, as Item.Properties.spear takes them, by metal: jab duration (s), charge damage multiplier,
 # charge delay (s), then for unhorsing, knockback and damage the longest a charge counts (s) and the speed it needs.
 # Vanilla's iron spear is (0.95, 0.95, 0.6, 2.5, 11.0, 6.75, 5.1, 11.25, 4.6) and diamond (1.05, 1.075, 0.5, 3.0,

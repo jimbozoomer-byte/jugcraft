@@ -775,8 +775,10 @@ PATTERN16_EMBLEMS = {
 }
 
 
-def pattern16(style):
-    """A 16-pixel smithing pattern: a rolled sheet of parchment, its ends curled, the style's emblem (PATTERN16_EMBLEMS)."""
+def parchment16(emblem, colours):
+    """A 16-pixel smithing pattern: a rolled sheet of parchment, its ends curled, with a 10x8 emblem laid on the sheet at
+    (3, 4). emblem is 8 rows of 10 symbols; colours maps each symbol to an RGB colour, and "." leaves the parchment.
+    pattern16 below and the Earthbinding Template (tools/thallite_armor.py) draw on it."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     g = ImageDraw.Draw(img)
     outline, face, light, shade = (92, 70, 40), (226, 206, 160), (242, 228, 190), (200, 176, 128)
@@ -787,14 +789,20 @@ def pattern16(style):
         g.rectangle((x, 2, x + 1, 13), fill=shade, outline=outline)
     g.line((1, 3, 1, 12), fill=shade)
     g.line((14, 3, 14, 12), fill=light)
-    ink, second = PATTERN_INK[style]
-    colours = {"O": ink.outline_dark, "D": ink.dark, "M": ink.mid, "H": ink.highlight,
-               "o": second.dark, "m": second.mid, "l": second.light, "h": second.highlight, "k": (70, 44, 24)}
-    for y, row in enumerate(PATTERN16_EMBLEMS[style]):
+    assert len(emblem) == 8 and all(len(row) == 10 for row in emblem), emblem
+    for y, row in enumerate(emblem):
         for x, ch in enumerate(row):
             if ch != ".":
                 img.putpixel((3 + x, 4 + y), tuple(colours[ch]) + (255,))
     return img
+
+
+def pattern16(style):
+    """A 16-pixel smithing pattern: a rolled sheet of parchment, its ends curled, the style's emblem (PATTERN16_EMBLEMS)."""
+    ink, second = PATTERN_INK[style]
+    colours = {"O": ink.outline_dark, "D": ink.dark, "M": ink.mid, "H": ink.highlight,
+               "o": second.dark, "m": second.mid, "l": second.light, "h": second.highlight, "k": (70, 44, 24)}
+    return parchment16(PATTERN16_EMBLEMS[style], colours)
 
 
 def pattern(style):

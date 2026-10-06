@@ -2637,6 +2637,52 @@
           }
         },
         {
+          "title": "Thallite Gear",
+          "icon": "jugcraft:thallite_pickaxe",
+          "text": [
+            "Thallite makes swords, pickaxes, axes, shovels, hoes and armor, shaped like iron ones. They mine and protect as iron does, wear out a little sooner, and take enchantments best of all.",
+            "Regrowth: thallite gear you wear or hold mends while you stand on living soil (grass, dirt, moss, mud or farmland): one use every 5 seconds, up to 75% of full. It never brings back a broken piece, so mending and anvils still matter."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:thallite_ingot",
+              "jugcraft:thallite_ingot",
+              "jugcraft:thallite_ingot",
+              null,
+              "minecraft:stick",
+              null,
+              null,
+              "minecraft:stick",
+              null
+            ],
+            "result": "jugcraft:thallite_pickaxe",
+            "count": 1
+          }
+        },
+        {
+          "title": "Earthbound Armor",
+          "icon": "jugcraft:earthbound_thallite_chestplate",
+          "text": [
+            "At a smithing table, an Earthbinding Template, a piece of thallite armor and a gold ingot bind the piece into Earthbound armor, trimmed in gold, for good. It keeps its enchantments and wear.",
+            "Rooted: on natural ground (soil, stone, sand or gravel), each Earthbound piece takes 7.5% off knockback, 30% for a full set. With 2 or more worn, Regrowth works on stone, sand and gravel too."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:gold_nugget",
+              "jugcraft:thallite_nugget",
+              "minecraft:gold_nugget",
+              "jugcraft:thallite_nugget",
+              "minecraft:rooted_dirt",
+              "jugcraft:thallite_nugget",
+              "minecraft:gold_nugget",
+              "jugcraft:thallite_nugget",
+              "minecraft:gold_nugget"
+            ],
+            "result": "jugcraft:earthbinding_template",
+            "count": 1
+          }
+        },
+        {
           "title": "Arms: Swords",
           "icon": "jugcraft:steel_longsword",
           "text": [

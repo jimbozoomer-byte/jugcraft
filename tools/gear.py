@@ -16,6 +16,12 @@ GEAR_TIERS = {
     "steel": {"display": "Steel", "ingot": "#c:ingots/steel", "feature": "machines",
               "tool": (900, 7.0, 2.5, 12), "drops": "diamond",
               "armor": (25, (3, 6, 7, 3), 10, 1.5, 0.05)},
+    # Thallite (docs/features/thallite.md): iron's drops, speed and defense, fewer uses, and the best enchantability.
+    # Its gear regrows on living soil (REGROWTH). "arms": False keeps it out of tools/arms.py METALS: its arms are only
+    # the kinds the owner drew, in a later slice.
+    "thallite": {"display": "Thallite", "ingot": "#c:ingots/thallite", "feature": "thallite",
+                 "tool": (200, 6.0, 2.0, 18), "drops": "iron",
+                 "armor": (13, (2, 5, 6, 2), 18, 0.0, 0.0), "arms": False},
 }
 TOOLS = ["sword", "pickaxe", "axe", "shovel", "hoe"]
 ARMOR = ["helmet", "chestplate", "leggings", "boots"]
@@ -43,8 +49,8 @@ ITEM_TAGS = {"sword": "swords", "pickaxe": "pickaxes", "axe": "axes", "shovel": 
 # The key is the styled items' prefix (<key>_<piece>) and their equipment asset. Armor only (not in GEAR_TIERS:
 # no tools, paxels or arms). Every number is the metal's: Java derives the material with restyle(...). A smithing
 # template plus the addition dresses a plain piece; if "reversible", the template plus the metal's ingot undresses
-# it. "perk" names behaviour a style adds outside the material (None here; thallite's planned Earthbound would add
-# Rooted). Java: JugcraftGear.ARMOR_STYLES and STYLE_TEMPLATES.
+# it. "perk" names behaviour a style adds outside the material (Earthbound's Rooted, gear/ThalliteGear.java). Java:
+# JugcraftGear.ARMOR_STYLES and STYLE_TEMPLATES.
 ARMOR_STYLES = {
     "steampunk": {"display": "Steampunk", "metal": "bronze", "template": "steampunk_pattern",
                   "template_name": "Steampunk Pattern", "template_count": 4, "addition": "minecraft:copper_ingot",
@@ -66,7 +72,53 @@ ARMOR_STYLES = {
                "template_tooltip": "A smithing template, made with an Imperial Crest. With a gold ingot it turns a "
                                    "steel helmet, chestplate, leggings or boots into Kaiser armor; with a steel "
                                    "ingot it turns Kaiser armor back. Keeps enchantments and wear."},
+    # Earthbound thallite (docs/features/thallite.md): one-way, with the Rooted perk. One template a piece: a full set
+    # costs 4 gold ingots and 16 gold nuggets, about 5.8 ingots.
+    "earthbound_thallite": {"display": "Earthbound Thallite", "metal": "thallite", "template": "earthbinding_template",
+                            "template_name": "Earthbinding Template", "template_count": 1,
+                            "addition": "minecraft:gold_ingot", "reversible": False, "perk": "rooted",
+                            "template_recipe": (["GTG", "TRT", "GTG"], {"G": "minecraft:gold_nugget",
+                                                                        "T": "#c:nuggets/thallite",
+                                                                        "R": "minecraft:rooted_dirt"}),
+                            "lore": "Earthbound: thallite bound with gold. Protects as thallite armor does.",
+                            "template_tooltip": "A smithing template. With a gold ingot it binds a thallite helmet, "
+                                                "chestplate, leggings or boots into Earthbound armor, for good. Keeps "
+                                                "enchantments and wear."},
 }
+
+# Thallite's traits (gear/ThalliteGear.java, docs/features/thallite.md). Regrowth: every REGROWTH_SECONDS, each item
+# in jugcraft:thallite_gear worn or held gets back one use while its holder stands on jugcraft:living_ground, up to
+# REGROWTH_CAP_PERCENT of full; with EARTHBOUND_FOR_STONE or more Earthbound pieces worn, on any jugcraft:earthen_ground.
+# Rooted: each Earthbound piece worn (jugcraft:earthbound_armor) adds ROOTED_PER_PIECE knockback resistance while its
+# wearer stands on jugcraft:earthen_ground, refreshed every ROOTED_TICKS.
+REGROWTH_SECONDS = 5
+REGROWTH_CAP_PERCENT = 75
+EARTHBOUND_FOR_STONE = 2
+ROOTED_PER_PIECE = 0.075
+ROOTED_TICKS = 10
+# Living soil: vanilla's dirt tag (grass, dirt, coarse dirt, podzol, mycelium, rooted dirt, moss, mud) and farmland.
+LIVING_GROUND = ["#minecraft:dirt", "minecraft:farmland"]
+# Natural ground: living soil, the Overworld's base stone (stone, granite, diorite, andesite, tuff, deepslate), sand
+# and gravel.
+EARTHEN_GROUND = [f"#{MOD}:living_ground", "#minecraft:base_stone_overworld", "#minecraft:sand", "minecraft:gravel"]
+TRAITS = {
+    "regrowth": ("Regrowth", "While you stand on living soil, it mends one use every 5 s, up to 75% of full."),
+    "rooted": ("Rooted", "On natural ground, each Earthbound piece takes 7.5% off knockback (30% for a full set). "
+                         "With two or more worn, Regrowth works on stone, sand and gravel too."),
+}
+
+
+def thallite_gear():
+    """Every item with Regrowth (jugcraft:thallite_gear): thallite's tools and armor, plain and Earthbound."""
+    return ([f"{MOD}:thallite_{piece}" for piece in PIECES]
+            + [f"{MOD}:{style}_{piece}" for style, info in ARMOR_STYLES.items() if info["metal"] == "thallite"
+               for piece in ARMOR])
+
+
+def earthbound_armor():
+    """Every armor piece with Rooted (jugcraft:earthbound_armor)."""
+    return [f"{MOD}:{style}_{piece}" for style, info in ARMOR_STYLES.items() if info["perk"] == "rooted"
+            for piece in ARMOR]
 
 
 # Batch 27 gear (docs/features/gear-and-plastic.md), after Mekanism's scuba gear, free runners, Meka-Tana and
@@ -187,6 +239,9 @@ def write_all(write, assets, data, lang, condition):
         for piece in ARMOR:
             lang[f"tooltip.{MOD}.{style}_{piece}"] = info["lore"]
         lang[f"tooltip.{MOD}.{info['template']}"] = info["template_tooltip"]
+    for trait, (name, text) in TRAITS.items():
+        lang[f"tooltip.{MOD}.thallite.{trait}.trait"] = name
+        lang[f"tooltip.{MOD}.thallite.{trait}"] = text
 
     recipes = data / "recipe"
     for tier, info in GEAR_TIERS.items():
@@ -270,3 +325,7 @@ def write_all(write, assets, data, lang, condition):
     write(data / "tags" / "item" / "repairs_rubber_gear.json", {"values": [f"{MOD}:rubber"]})
     write(data / "tags" / "block" / "mineable" / "paxel.json", {"values": [
         "#minecraft:mineable/pickaxe", "#minecraft:mineable/axe", "#minecraft:mineable/shovel"]})
+    write(data / "tags" / "item" / "thallite_gear.json", {"values": thallite_gear()})
+    write(data / "tags" / "item" / "earthbound_armor.json", {"values": earthbound_armor()})
+    write(data / "tags" / "block" / "living_ground.json", {"values": LIVING_GROUND})
+    write(data / "tags" / "block" / "earthen_ground.json", {"values": EARTHEN_GROUND})

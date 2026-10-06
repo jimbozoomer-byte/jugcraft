@@ -1,6 +1,6 @@
 """The material sets in the owner's style (docs/MATERIAL_SETS.md, docs/features/material-sets.md): every metal's ingot,
-nugget and storage block, every ore and deepslate ore, the mined metals' raw ores and raw blocks, and the bronze and
-steel tools.
+nugget and storage block, every ore and deepslate ore, the mined metals' raw ores and raw blocks, and the bronze, steel
+and thallite tools.
 
 The owner asked to redraw the bronze and steel tools and the ores in the style of their chartreuse material-set sheet,
 chose the alternate bronze and steel palettes, and asked for ingots and nuggets in vanilla's shape. Each thing is one
@@ -104,7 +104,9 @@ ROCK = {"stone": {"r": hx("6a7076"), "s": hx("7c8288"), "t": hx("8c9298"), "u": 
         "deepslate": {"r": hx("36383e"), "s": hx("42444b"), "t": hx("4e5058"), "u": hx("5c5e66")}}
 
 TOOLS = ("sword", "pickaxe", "axe", "shovel", "hoe", "paxel")
-TOOL_METALS = ("bronze", "steel")
+TOOL_METALS = ("bronze", "steel", "thallite")
+# The metals with a paxel (tools/gear.py PAXEL_TIERS); thallite has none (docs/features/thallite.md).
+PAXEL_METALS = ("bronze", "steel")
 
 # True: ores are vanilla's stone or deepslate with our overlay on top. False: the fallback, full textures on our host.
 OVERLAY = True
@@ -203,9 +205,9 @@ def material_textures():
 
 
 def tool_textures():
-    """{(kind, name): image} for the bronze and steel tools."""
+    """{(kind, name): image} for the bronze, steel and thallite tools (and the bronze and steel paxels)."""
     return {("item", f"{metal}_{tool}"): draw(tool, dict(WOOD, **tones(METAL_RAMPS[metal])))
-            for metal in TOOL_METALS for tool in TOOLS}
+            for metal in TOOL_METALS for tool in TOOLS if tool != "paxel" or metal in PAXEL_METALS}
 
 
 def textures():
@@ -220,7 +222,7 @@ def draw_materials(save):
 
 
 def draw_tools(save):
-    """save(image, kind, name) as in generate_textures.py, for the bronze and steel tools."""
+    """save(image, kind, name) as in generate_textures.py, for the bronze, steel and thallite tools."""
     for (kind, name), image in tool_textures().items():
         save(image, kind, name)
 
