@@ -7,7 +7,7 @@ Owner/contributor: speedygroyper. Specialty: hunting/exploration, workshop throu
 
 Four hostile fan-inspired mobs: Space Kook (bulky space suit, flashing red chase helmet), Captain Cutler (player-sized glowing diving suit), Phantom Shadow (legless, chained floating ghost with orange emissive face), and Black Knight Ghost (larger armored enemy with green seams and a right-hand greatsword). Creative/spectator players are ignored. Entities, spawn eggs and resource IDs use `jugcraft:` and are registered unconditionally. No separate mod or dependency is needed.
 
-Space Kook laughs less often while idle than during pursuit. All audio in this contribution is original procedural audio, not the sampled television/game voices from the local prototype. Editable Blockbench models are in `art/scary-creatures/`. The public Kook face is an original pixel design rather than a recolored vanilla texture.
+Space Kook laughs less often while idle than during pursuit. Audio is restored from the local prototype, including sourced character recordings; see the asset provenance record. Editable Blockbench models are in `art/scary-creatures/`. Kook uses the restored recolored vanilla skeleton skull.
 
 ## Connections
 
@@ -49,7 +49,7 @@ AI, spawn checks and rewards are server-owned. Rendering is in the client source
 
 ## Dependencies and assets
 
-No platform changes or new runtime dependencies. Original generated cuboid models/textures, user-edited Kook geometry, and procedural audio are submitted under the repository MIT license. See [asset provenance](scary-creatures-assets.md). Character names/reference inspiration are from Scooby-Doo; this is an unofficial fan prototype, not an assertion of rights in the underlying characters. Maintainers must review suitability before acceptance. No reference images, third-party recordings, vanilla copied/recolored textures or local machine paths are intentionally shipped.
+No platform changes or new runtime dependencies. Original generated cuboid models/textures and user-edited Kook geometry are contributed under MIT; restored third-party audio and skeleton pixels are separately identified. See [asset provenance](scary-creatures-assets.md). Character names/reference inspiration are from Scooby-Doo; this is an unofficial fan prototype, not an assertion of rights in the underlying characters. Maintainers must review suitability before acceptance. No source archives, reference images or local machine paths are shipped. Runtime character recordings and recolored skeleton pixels are included as documented.
 
 ## Verification
 
