@@ -1384,6 +1384,8 @@ def machines():
     import fire_control
     fire_control.draw_all(save)
     import raiders
+    import armoured_walker
+    armoured_walker.draw_all(save)
     raiders.draw_all(save)
     import plastic
     plastic.draw_all(save)

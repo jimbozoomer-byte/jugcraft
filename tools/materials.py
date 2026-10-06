@@ -287,5 +287,8 @@ def feature_of(entry_id):
     import raiders
     if entry_id in raiders.ITEMS or entry_id in raiders.BLOCKS:
         return "raiders"
+    import armoured_walker
+    if entry_id in armoured_walker.ITEMS:
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

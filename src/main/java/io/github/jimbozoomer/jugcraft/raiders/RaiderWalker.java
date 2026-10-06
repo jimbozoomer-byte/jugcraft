@@ -33,11 +33,11 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The Raider Walker (batch 57): a raider-built Diesel Walker in raider paint, with nobody visible at its controls. It
- * wades in and punches (a heavy blow that throws what it hits), and fires a grenade launcher from its shoulder at
+ * The Raider Walker (batch 57): the Armoured Walker (batch 58, the owner's model) in raider paint, its hatch shut. It
+ * wades in and rams with its piston arm (a heavy blow that throws what it hits), and lobs grenades from its hull gun at
  * anything {@value JugcraftRaiders#WALKER_LAUNCH_MIN} to {@value JugcraftRaiders#WALKER_LAUNCH_MAX} blocks off, every
- * {@value JugcraftRaiders#WALKER_LAUNCH_COOLDOWN} ticks. It shrugs off knockback and climbs a block and a half. Unlike
- * the player's walker it has no drill: raiders never break blocks.
+ * {@value JugcraftRaiders#WALKER_LAUNCH_COOLDOWN} ticks. It shrugs off knockback and climbs a block and a half. Raiders
+ * never break blocks.
  */
 public class RaiderWalker extends Monster implements Raider {
 	private static final EntityDataAccessor<Integer> PUNCHED_AT = SynchedEntityData.defineId(RaiderWalker.class, EntityDataSerializers.INT);
@@ -82,8 +82,8 @@ public class RaiderWalker extends Monster implements Raider {
 			stride += (float) Math.sqrt((getX() - xo) * (getX() - xo) + (getZ() - zo) * (getZ() - zo));
 			if (tickCount % 4 == 0) {
 				// Exhaust from the stacks on its back.
-				Vec3 back = Vec3.directionFromRotation(0, yBodyRot).scale(-0.9);
-				level().addParticle(ParticleTypes.SMOKE, getX() + back.x, getY() + 4.2, getZ() + back.z, 0, 0.05, 0);
+				Vec3 back = Vec3.directionFromRotation(0, yBodyRot).scale(-1.1);
+				level().addParticle(ParticleTypes.SMOKE, getX() + back.x, getY() + 4.5, getZ() + back.z, 0, 0.05, 0);
 			}
 		}
 	}
@@ -98,8 +98,10 @@ public class RaiderWalker extends Monster implements Raider {
 		if (--launch <= 0 && target != null && target.isAlive()) {
 			double distance = distanceTo(target);
 			if (distance >= JugcraftRaiders.WALKER_LAUNCH_MIN && distance <= JugcraftRaiders.WALKER_LAUNCH_MAX && hasLineOfSight(target)) {
-				RaiderInfantry.throwAt(level, this, target, false);
-				level.playSound(null, getX(), getY() + 3, getZ(), SoundEvents.DISPENSER_LAUNCH, SoundSource.HOSTILE, 1.5F, 0.6F);
+				Vec3 muzzle = position().add(io.github.jimbozoomer.jugcraft.walker.ArmouredWalker.MUZZLE.yRot(-yBodyRot * net.minecraft.util.Mth.DEG_TO_RAD));
+				RaiderInfantry.throwAt(level, this, target, false, muzzle);
+				level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 6, 0.2, 0.2, 0.2, 0.02);
+				level.playSound(null, muzzle.x, muzzle.y, muzzle.z, SoundEvents.DISPENSER_LAUNCH, SoundSource.HOSTILE, 1.5F, 0.6F);
 				launch = JugcraftRaiders.WALKER_LAUNCH_COOLDOWN;
 			}
 		}

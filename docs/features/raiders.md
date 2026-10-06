@@ -14,7 +14,7 @@ Five kinds of raider. All are hostile mobs: sentry guns (batch 56) and town guar
 | **Raider Grunt** | 24 / 5 / 4 | Charges in with a cleaver (an iron axe). Olive greatcoat, steel helmet, goggles and a respirator. |
 | **Raider Grenadier** | 20 / 3 / 2 | Lobs small grenades from up to 18 blocks, every 3.5 seconds. Closer than 6 blocks it clubs instead. Brown coat, leather helmet, a bandolier of grenades. |
 | **Raider Officer** | 32 / 6 / 6 | **Rallies** every raider within 12 blocks every 2 seconds (Speed and Strength). **When an officer falls, the raiders round them lose heart**: Weakness II and Slowness for 10 seconds, and the rally's Strength is gone. Black coat, red-banded peaked cap, red armband. |
-| **Raider Walker** | 120 / 14 / 14 | A raider-built Diesel Walker in olive and black plate. It wades in and punches, throwing what it hits. Its shoulder launcher fires grenades at anything 8 to 24 blocks off, every 5 seconds. It ignores knockback and climbs a block and a half. It has no working drill: **raiders never break blocks**. |
+| **Raider Walker** | 120 / 14 / 14 | The Armoured Walker (batch 58, the owner's model) in raider olive and black plate. It wades in and rams with its piston, throwing what it hits. Its hull gun lobs grenades at anything 8 to 24 blocks off, every 5 seconds. It ignores knockback and climbs a block and a half. It has no working drill: **raiders never break blocks**. |
 | **Raider Blimp** | 50 / – / 2 | A small airship, the zeppelin's shape at 55% in charcoal canvas with a red band. It cruises 16 blocks over whoever it hunts (never lower than 8 over the ground under it). When within 3 blocks of overhead it drops a bomb every 2.5 seconds. Flak (batch 51) and arrows bring it down. Dying, it noses over. |
 
 ![Raider uniforms, front and back: grunt, grenadier, officer](../images/raider_skins.png)
@@ -153,7 +153,7 @@ Their weapons never drop.
 - No dependencies. All art is original, made by `tools/raiders.py`:
   - **Uniforms:** three 64 × 64 skins in the player layout, drawn with the townsfolk's skin helpers.
   - **Paint:** raider olive paint, dark plate, charcoal canvas (plain, red-banded and red nose) and the insignia, in the clean style.
-  - **Walker and blimp models:** the Diesel Walker's and the Zeppelin's shapes repainted, the blimp scaled to 55%, exported to `assets/jugcraft/raider_quads.json`.
+  - **Walker and blimp models:** the Armoured Walker's (batch 58) and the Zeppelin's shapes repainted, the blimp scaled to 55%, exported to `assets/jugcraft/raider_quads.json`.
 - Sounds are vanilla: the pillager's voice, the raid horn, the iron golem's steps.
 - Code:
   - `raiders/JugcraftRaiders`, `RaiderInfantry`, `RaiderWalker`, `RaiderBlimp`, `RaiderBomb`, `RaiderRaids`, `MarchGoal`, `RaidMember` and `Raider`.

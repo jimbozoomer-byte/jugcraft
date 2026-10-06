@@ -52,6 +52,7 @@ import tower_guns
 import fortifications
 import fire_control
 import raiders
+import armoured_walker
 import gear
 import arms
 import arms_variants
@@ -329,7 +330,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -544,7 +545,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -722,6 +723,34 @@ def check_walker():
         err("assets/jugcraft/walker_quads.json is missing: run tools/generate_material_data.py")
 
 
+def check_armoured_walker():
+    """walker/ArmouredWalker.java against tools/armoured_walker.py: the cannon, ram, toughness and size, the muzzle, and the
+    joints its renderers draw the parts at."""
+    java = (JAVA_ROOT / "walker" / "ArmouredWalker.java").read_text(encoding="utf-8")
+    for const in ("CANNON_COOLDOWN", "CANNON_SPEED", "RAM_DAMAGE", "RAM_KNOCKBACK", "RAM_REACH", "RAM_COOLDOWN", "HEALTH",
+                  "WIDTH", "HEIGHT"):
+        value = getattr(armoured_walker, const)
+        literal = f"{value}F" if const in ("WIDTH", "HEIGHT") else str(value)
+        if f" {const} = {literal};" not in java:
+            err(f"ArmouredWalker.{const} differs from tools/armoured_walker.py ({literal})")
+    mx, my, mz = (v / 16 for v in armoured_walker.MUZZLE)
+    if f"MUZZLE = new Vec3({mx:g}, {my:g}, {mz:g});" not in java.replace(".0,", ",").replace(".0)", ")"):
+        err(f"ArmouredWalker.MUZZLE differs from tools/armoured_walker.py ({mx}, {my}, {mz})")
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    joints = [*armoured_walker.HIPS.values(), armoured_walker.SHOULDER, armoured_walker.PISTON]
+    for name in ("ArmouredWalkerParts.java",):
+        text = (client / name).read_text(encoding="utf-8") if (client / name).is_file() else ""
+        for joint in joints:
+            if "{" + ", ".join(str(v) for v in joint) + "}" not in text:
+                err(f"{name} lacks the joint {joint} from tools/armoured_walker.py")
+        if f"PISTON_STROKE = {armoured_walker.PISTON_STROKE}" not in text:
+            err(f"{name} lacks PISTON_STROKE = {armoured_walker.PISTON_STROKE} from tools/armoured_walker.py")
+    quads = load(ASSETS / "armoured_walker_quads.json") or {}
+    for part in armoured_walker.parts():
+        if not quads.get(part):
+            err(f"armoured_walker_quads.json lacks {part}: run tools/generate_material_data.py")
+
+
 def check_artillery():
     """artillery/JugcraftArtillery.java against tools/artillery.py: the shells, guns, balloon and range finder, and the
     renderers' pivots and the howitzer's track."""
@@ -831,8 +860,8 @@ def check_raiders():
         if not (ASSETS / "textures" / "entity" / "raider" / f"{skin}.png").is_file():
             err(f"textures/entity/raider/{skin}.png is missing: run tools/generate_textures.py")
     quads = load(ASSETS / "raider_quads.json") or {}
-    for part in ("raider_walker_body", "raider_walker_core", "raider_walker_leg", "raider_walker_fist_arm",
-                 "raider_walker_drill_arm", "raider_walker_drill_bit", "raider_blimp_body", "raider_blimp_propeller"):
+    for part in ("raider_walker_hull", "raider_walker_lamps", "raider_walker_leg", "raider_walker_tool_arm",
+                 "raider_walker_piston_base", "raider_walker_piston_head", "raider_blimp_body", "raider_blimp_propeller"):
         if not quads.get(part):
             err(f"raider_quads.json lacks {part}: run tools/generate_material_data.py")
     for quad_list in quads.values():
@@ -6078,7 +6107,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
@@ -6109,6 +6138,7 @@ def main():
     check_trenchworks()
     check_zeppelin()
     check_walker()
+    check_armoured_walker()
     check_landship()
     check_artillery()
     check_tower_guns()
