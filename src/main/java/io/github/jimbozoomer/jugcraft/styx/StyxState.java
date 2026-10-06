@@ -20,16 +20,18 @@ public final class StyxState extends SavedData {
 			BlockPos.CODEC.optionalFieldOf("origin").forGetter(s -> s.origin),
 			UUIDUtil.STRING_CODEC.optionalFieldOf("resident").forGetter(s -> s.resident),
 			Codec.INT.optionalFieldOf("placed", 0).forGetter(s -> s.placed),
+			Codec.intRange(1,2).optionalFieldOf("layout", 1).forGetter(s -> s.layout),
 			UUIDUtil.STRING_CODEC.listOf().optionalFieldOf("claimed", List.of()).forGetter(s -> List.copyOf(s.claimed))
 			).apply(i, StyxState::new));
 	private static final SavedDataType<StyxState> TYPE = new SavedDataType<>(Jugcraft.id("styx_conservatory_v1"), StyxState::new, CODEC, null);
 	public Optional<BlockPos> origin;
 	public Optional<UUID> resident;
 	public int placed;
+	public int layout;
 	private final Set<UUID> claimed = new HashSet<>();
-	public StyxState() { this(Optional.empty(), Optional.empty(), 0, List.of()); }
-	private StyxState(Optional<BlockPos> origin, Optional<UUID> resident, int placed, List<UUID> claimed) {
-		this.origin = origin; this.resident = resident; this.placed = Math.max(0, placed); this.claimed.addAll(claimed);
+	public StyxState() { this(Optional.empty(), Optional.empty(), 0, 1, List.of()); }
+	private StyxState(Optional<BlockPos> origin, Optional<UUID> resident, int placed, int layout, List<UUID> claimed) {
+		this.layout=layout; this.origin = origin; this.resident = resident; this.placed = Math.max(0, placed); this.claimed.addAll(claimed);
 	}
 	public static StyxState get(ServerLevel level) { return level.getServer().overworld().getDataStorage().computeIfAbsent(TYPE); }
 	public boolean claimed(UUID player) { return claimed.contains(player); }

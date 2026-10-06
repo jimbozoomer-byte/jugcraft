@@ -28,11 +28,16 @@ import net.minecraft.world.level.storage.ValueOutput;
 public final class Styxhexenhammer extends PathfinderMob {
 	private BlockPos home = BlockPos.ZERO;
 	private boolean hasHome;
+	private int homeLayout=2;
 	private int nextTalk;
 	public Styxhexenhammer(EntityType<? extends Styxhexenhammer> type, Level level) {
 		super(type, level); setPersistenceRequired();
 		setCustomName(Component.literal("Styxhexenhammer"));
 		if (getNavigation() instanceof GroundPathNavigation ground) ground.setCanOpenDoors(true);
+		// The greenhouse-to-library route goes around the beds and up the west staircase.
+		// Its walking distance exceeds the direct 48-block follow radius. One resident,
+		// a fixed 96-block path budget and at most one recalculation every 40 ticks.
+		getNavigation().setRequiredPathLength(96);
 	}
 	public static AttributeSupplier.Builder createAttributes() {
 		return PathfinderMob.createMobAttributes().add(Attributes.MAX_HEALTH, 30).add(Attributes.MOVEMENT_SPEED, 0.25).add(Attributes.FOLLOW_RANGE, 48);
@@ -42,7 +47,8 @@ public final class Styxhexenhammer extends PathfinderMob {
 		goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6));
 		goalSelector.addGoal(6, new RandomLookAroundGoal(this));
 	}
-	public void setHome(BlockPos origin) { home = origin.immutable(); hasHome = true; }
+	public void setHome(BlockPos origin) { setHome(origin,2); }
+	public void setHome(BlockPos origin,int layout) { home = origin.immutable(); homeLayout=layout; hasHome = true; }
 	public BlockPos home() { return home; }
 	@Override public boolean removeWhenFarAway(double distance) { return false; }
 	@Override public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
@@ -53,14 +59,9 @@ public final class Styxhexenhammer extends PathfinderMob {
 		super.customServerAiStep(level);
 		if (!hasHome) return;
 		int phase = phase(level.getOverworldClockTime());
-		BlockPos target = switch (phase) {
-			case 0 -> home.offset(18, 1, 11);
-			case 1 -> home.offset(8, 8, 10);
-			case 2 -> home.offset(8, 15, 9);
-			default -> home.offset(8, 1, 10);
-		};
+		BlockPos target=StyxConservatory.routineTarget(home,homeLayout,phase);
 		// Every two seconds at most; do not path through partially unloaded home chunks.
-		if (tickCount % 40 == 0 && StyxConservatory.loaded(level, home) && distanceToSqr(target.getX()+.5,target.getY(),target.getZ()+.5)>2) {
+		if (tickCount % 40 == 0 && StyxConservatory.loaded(level, home,homeLayout) && distanceToSqr(target.getX()+.5,target.getY(),target.getZ()+.5)>2) {
 			getNavigation().moveTo(target.getX()+.5,target.getY(),target.getZ()+.5,0.65);
 		}
 		if (phase == 2 && tickCount % 20 == 0 && distanceToSqr(target.getX()+.5,target.getY(),target.getZ()+.5)<9) {
@@ -89,9 +90,9 @@ public final class Styxhexenhammer extends PathfinderMob {
 		return InteractionResult.SUCCESS;
 	}
 	@Override protected void addAdditionalSaveData(ValueOutput out) {
-		super.addAdditionalSaveData(out); out.store("home",BlockPos.CODEC,home); out.putBoolean("has_home",hasHome);
+		super.addAdditionalSaveData(out); out.store("home",BlockPos.CODEC,home); out.putBoolean("has_home",hasHome); out.putInt("home_layout",homeLayout);
 	}
 	@Override protected void readAdditionalSaveData(ValueInput in) {
-		super.readAdditionalSaveData(in); home=in.read("home",BlockPos.CODEC).orElse(blockPosition()); hasHome=in.getBooleanOr("has_home",false);
+		super.readAdditionalSaveData(in); home=in.read("home",BlockPos.CODEC).orElse(blockPosition()); hasHome=in.getBooleanOr("has_home",false); homeLayout=in.getIntOr("home_layout",1);
 	}
 }

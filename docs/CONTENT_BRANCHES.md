@@ -10,7 +10,7 @@ Idle machines should do negligible work. Cache networks and invalidate on topolo
 
 ## Magical workshops and schools
 
-The proposed [Styxhexenhammer and Nightglass Conservatory](features/styxhexenhammer.md) adds a reference-led dark wizard/herbalist, a tower-greenhouse home, and eight decorative flower cultivars. It is a design draft; flower uses and deeper magic integration remain future work.
+The [Styxhexenhammer and Nightglass Observatory](features/styxhexenhammer.md) prototype adds a reference-led dark wizard/herbalist, an intricate domed observatory connected to a greenhouse, and eight decorative flower cultivars. Placement is operator-controlled; natural discovery, flower uses and deeper magic integration remain future work.
 
 Magic supports transport, crafting and combat. Every school needs a distinct identity, an accessible starting spell or craft, deeper specialties, and useful cross-system interactions. Effects below are proposal seeds; exact mechanics and numbers need review.
 

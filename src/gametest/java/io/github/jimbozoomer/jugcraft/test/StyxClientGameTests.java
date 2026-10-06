@@ -18,13 +18,13 @@ public final class StyxClientGameTests implements FabricClientGameTest {
 			server.runCommand("time set noon");server.runCommand("weather clear");
 			BlockPos base=server.computeOnServer(s -> {
 				var p=s.getPlayerList().getPlayers().getFirst();int y=s.overworld().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,p.blockPosition().getX(),p.blockPosition().getZ())-1;
-				return new BlockPos(p.blockPosition().getX()-13,y,p.blockPosition().getZ()-10);
+				return new BlockPos(p.blockPosition().getX()-StyxConservatory.WIDTH/2,y,p.blockPosition().getZ()-StyxConservatory.DEPTH/2);
 			});
 			// Prepare only this disposable test world's site; the player command never clears terrain.
 			server.runOnServer(s -> {
-				for(int x=-2;x<29;x++) for(int z=-2;z<34;z++) {
+				for(int x=-2;x<StyxConservatory.WIDTH+2;x++) for(int z=-2;z<StyxConservatory.DEPTH+15;z++) {
 					s.overworld().setBlock(base.offset(x,0,z),net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState(),3);
-					for(int y=1;y<28;y++) s.overworld().setBlock(base.offset(x,y,z),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
+					for(int y=1;y<StyxConservatory.HEIGHT;y++) s.overworld().setBlock(base.offset(x,y,z),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
 				}
 			});
 			server.runCommand("execute as @p at @s run jugcraft styx preview");
@@ -35,31 +35,31 @@ public final class StyxClientGameTests implements FabricClientGameTest {
 				if(server.computeOnServer(s -> StyxState.get(s.overworld()).resident.isPresent()))break;
 			}
 			server.runOnServer(s -> {
-				var state=StyxState.get(s.overworld());if(state.resident.isEmpty())throw new AssertionError("Conservatory did not complete");
+				var state=StyxState.get(s.overworld());if(state.resident.isEmpty())throw new AssertionError("Observatory did not complete; cursor "+state.placed);
+				if(state.layout!=2)throw new AssertionError("New placement must use the observatory layout");
 				var npc=(Styxhexenhammer)s.overworld().getEntity(state.resident.get());
-				if(npc==null)throw new AssertionError("Resident missing");
-				npc.setNoAi(true);npc.snapTo(base.getX()+13.5,base.getY()+1,base.getZ()+24.5,0,0);npc.setYHeadRot(0);npc.yBodyRot=0;
+				if(npc==null)throw new AssertionError("Resident missing");npc.setNoAi(true);
 			});
 			context.getInput().pressKey(options -> options.keyToggleGui);
-			context.runOnClient(c -> {c.options.fov().set(42);});
-			view(context,server,base,10.5,1.6,29.5,-149,8);world.getConnection().waitForChunksRender();context.takeScreenshot("jugcraft_styx_reference_angle");
-			view(context,server,base,13.5,1.6,30,180,8);context.takeScreenshot("jugcraft_styx_front");
-			view(context,server,base,8,1.6,24.5,-90,8);context.takeScreenshot("jugcraft_styx_profile");
-			view(context,server,base,13.5,1.6,19,0,8);context.takeScreenshot("jugcraft_styx_back");
-			context.runOnClient(c -> c.options.fov().set(70));
-			view(context,server,base,38,21,43,143,8);world.getConnection().waitForChunksRender();context.takeScreenshot("jugcraft_styx_conservatory");
-			view(context,server,base,19,2.2,12,180,14);world.getConnection().waitForChunksRender();context.takeScreenshot("jugcraft_styx_greenhouse");
-			server.runCommand("time set midnight");context.runOnClient(c -> c.options.fov().set(42));view(context,server,base,10.5,1.6,29.5,-149,8);context.takeScreenshot("jugcraft_styx_night");
-			server.runCommand("time set noon");context.runOnClient(c -> c.options.fov().set(30));
-			view(context,server,base,11.2,1.8,28.5,-150,8);context.takeScreenshot("jugcraft_styx_face_closeup");
-			context.runOnClient(c -> {c.options.fov().set(70);});
+			context.runOnClient(c -> c.options.fov().set(55));
+			view(context,server,base,65,31,65,138,16);world.getConnection().waitForChunksRender();context.takeScreenshot("jugcraft_styx_observatory_overview");
+			view(context,server,base,34,26,36,129,10);context.takeScreenshot("jugcraft_styx_observatory_dome");
+			context.runOnClient(c -> c.options.fov().set(75));
+			view(context,server,base,16,18.2,24,150,-15);context.takeScreenshot("jugcraft_styx_telescope");
+			view(context,server,base,12,10,25,180,12);context.takeScreenshot("jugcraft_styx_library");
+			view(context,server,base,37,3,30,180,-6);context.takeScreenshot("jugcraft_styx_greenhouse_interior");
+			view(context,server,base,36,1.6,10.5,90,10);context.takeScreenshot("jugcraft_styx_flower_bed");
+			context.runOnClient(c -> c.options.fov().set(55));
+			view(context,server,base,45,10,42,157,12);context.takeScreenshot("jugcraft_styx_greenhouse_facade");
+			server.runCommand("time set midnight");view(context,server,base,65,31,65,138,16);context.takeScreenshot("jugcraft_styx_observatory_night");
 			context.getInput().pressKey(options -> options.keyToggleGui);
-			server.runOnServer(s -> {var npc=(Styxhexenhammer)s.overworld().getEntity(StyxState.get(s.overworld()).resident.orElseThrow());npc.snapTo(base.getX()+8.5,base.getY()+1,base.getZ()+10.5,0,0);npc.setNoAi(false);});
+			context.runOnClient(c -> c.options.fov().set(70));
+			server.runOnServer(s -> {var npc=(Styxhexenhammer)s.overworld().getEntity(StyxState.get(s.overworld()).resident.orElseThrow());npc.setNoAi(false);});
 			for(int phase=0;phase<4;phase++) {
 				server.runCommand("time set "+(phase*6000+100));
-				BlockPos destination=base.offset(phase==0 ? 18 : 8,phase==1 ? 8 : phase==2 ? 15 : 1,phase==0 ? 11 : phase==2 ? 9 : 10);
+				BlockPos destination=StyxConservatory.routineTarget(base,2,phase);
 				boolean arrived=false;
-				for(int i=0;i<80;i++) {
+				for(int i=0;i<140;i++) {
 					context.waitTicks(10);
 					arrived=server.computeOnServer(s -> {
 						var npc=s.overworld().getEntity(StyxState.get(s.overworld()).resident.orElseThrow());
@@ -72,6 +72,8 @@ public final class StyxClientGameTests implements FabricClientGameTest {
 		}
 	}
 	private static void view(ClientGameTestContext context,TestServerContext server,BlockPos base,double x,double y,double z,float yaw,float pitch) {
+		server.runOnServer(s -> {var p=s.getPlayerList().getPlayers().getFirst();p.getAbilities().flying=true;p.onUpdateAbilities();});
+		context.runOnClient(c -> {c.player.getAbilities().flying=true;c.player.onUpdateAbilities();});context.waitTicks(2);
 		server.runCommand(String.format(Locale.ROOT,"tp @p %.2f %.2f %.2f %.1f %.1f",base.getX()+x,base.getY()+y,base.getZ()+z,yaw,pitch));
 		context.runOnClient(c -> {c.player.getAbilities().flying=true;c.player.onUpdateAbilities();});context.waitTicks(20);
 	}
