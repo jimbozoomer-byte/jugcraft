@@ -1907,8 +1907,8 @@ public final class JugcraftAgriculture {
 						eyeballs, heart, bat, snake, hand).build());
 		blocks.addAll(List.of(eyeballs, heart, bat, snake, hand));
 
-		// The bigger jars, placed and broken as one: the Giant's Beating Heart (3 x 3 x 3), the Tall Specimen Jar (1 x 2 x 1)
-		// and the Specimen Tank (2 x 2 x 2).
+		// The bigger jars, each its small jar made bigger, placed and broken as one: the Giant's Beating Heart (3 x 3 x 3), the
+		// Tall Specimen Jar (1 x 2 x 1) and the Specimen Tank (3 x 3 x 3).
 		Block giantHeart = registerBlock(GIANT_HEART, GiantBeatingHeartBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
 				.strength(1.5F).sound(SoundType.GLASS).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		GIANT_HEART_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(GIANT_HEART),

@@ -21,16 +21,17 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Client game test for the Witch's Workshop's bigger jars: a mad scientist's laboratory floor before a stone wall, with
- * the Giant's Beating Heart (its heart beating in its vat), a Specimen Tank holding a brain, two Tall Specimen Jars (an
- * eye and a tentacle) and, for scale, a Specimen Jar and a Beating Heart Jar, with their items framed on the wall (each
- * specimen should tell apart). By day, close up, and at night (the jars glowing; the heart's vat lit like the room). CI
- * job {@code client}.
+ * Client game test for the Witch's Workshop's bigger jars, each its small jar made bigger: a mad scientist's laboratory
+ * floor before a stone wall, with the Giant's Beating Heart (the Beating Heart Jar three times over, its heart beating),
+ * a Specimen Tank (the Specimen Jar three times over) holding a brain, two Tall Specimen Jars (twice over: an eye and a
+ * tentacle) and, for scale, the Specimen Jar and Beating Heart Jar they grew from, which each should look just like, with
+ * their items framed on the wall (each specimen should tell apart). By day, close up, and at night (the jars glowing; the
+ * giant heart's jar lit like the room). CI job {@code client}.
  */
 public class BiggerJarsClientGameTests implements FabricClientGameTest {
-	/** The items framed on the wall: {item, specimen}. */
+	/** The items framed on the wall: {item, specimen} (none for the Giant's Beating Heart). */
 	private static final String[][] FRAMED = {{"specimen_tank", "eye"}, {"specimen_tank", "brain"}, {"specimen_tank", "tentacle"},
-			{"specimen_tank", "pumpkin"}, {"tall_specimen_jar", "eye"}};
+			{"specimen_tank", "pumpkin"}, {"tall_specimen_jar", "eye"}, {"giant_beating_heart", ""}};
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -56,10 +57,12 @@ public class BiggerJarsClientGameTests implements FabricClientGameTest {
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 12, y, z - 14, x + 12, y + 10, z + 8));
 			context.waitTicks(10);
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
-			// Their items in frames on the wall: the Specimen Tank with each specimen, and a Tall Specimen Jar with an eye.
+			// Their items in frames on the wall: the Specimen Tank with each specimen, a Tall Specimen Jar with an eye and the
+			// Giant's Beating Heart.
 			for (int i = 0; i < FRAMED.length; i++) {
-				server.runCommand(("summon minecraft:item_frame %d %d %d {Facing:3b,Fixed:1b,Item:{id:\"jugcraft:%s\",count:1,"
-						+ "components:{\"minecraft:block_state\":{specimen:\"%s\"}}}}").formatted(x + 4 + i, y + 2, z - 10, FRAMED[i][0], FRAMED[i][1]));
+				String components = FRAMED[i][1].isEmpty() ? "" : ",components:{\"minecraft:block_state\":{specimen:\"%s\"}}".formatted(FRAMED[i][1]);
+				server.runCommand("summon minecraft:item_frame %d %d %d {Facing:3b,Fixed:1b,Item:{id:\"jugcraft:%s\",count:1%s}}"
+						.formatted(x + 4 + i, y + 2, z - 10, FRAMED[i][0], components));
 			}
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
@@ -142,7 +145,7 @@ public class BiggerJarsClientGameTests implements FabricClientGameTest {
 		// The Giant's Beating Heart, facing out (south), on the west.
 		whole(level, origin.offset(-6, 0, -4), Direction.SOUTH, block(JugcraftAgriculture.GIANT_HEART).defaultBlockState()
 				.setValue(GiantBeatingHeartBlock.TEMPO, 2));
-		// A Specimen Tank with a brain, and two Tall Specimen Jars with an eye and a tentacle.
+		// A Specimen Tank (three blocks across, to x + 1) with a brain, and two Tall Specimen Jars with an eye and a tentacle.
 		whole(level, origin.offset(-1, 0, -4), Direction.SOUTH, block(JugcraftAgriculture.SPECIMEN_TANK).defaultBlockState()
 				.setValue(SpecimenVesselBlock.SPECIMEN, SpecimenJarBlock.Specimen.BRAIN));
 		whole(level, origin.offset(2, 0, -4), Direction.SOUTH, block(JugcraftAgriculture.TALL_SPECIMEN_JAR).defaultBlockState());

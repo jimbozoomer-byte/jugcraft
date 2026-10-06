@@ -3533,9 +3533,10 @@ def coplanar_pairs(quads, gap=0.1):
 
 
 def check_bigger_jars(java, quads, client):
-    """The Witch's Workshop's bigger jars: Java's numbers match tools/decor17.py; their renderers are wired up; what they
-    draw stays inside them (the giant heart in its murk at its fullest swell, every specimen in its fluid at the top and
-    bottom of its bob); and every block of each has its model."""
+    """The Witch's Workshop's bigger jars, each its small jar made bigger: Java's numbers match tools/decor17.py; each is
+    its small jar's model `scale` times over on the small jar's textures (its parts, put back together, fill the small
+    jar's box made as much bigger), and its shapes and renderer scale the small jar's; the heart stays inside its glass at
+    its fullest swell; and every block of each has its model."""
     import math
 
     def number(text, name):
@@ -3546,69 +3547,74 @@ def check_bigger_jars(java, quads, client):
         match = re.search(rf"\b{name} = \{{([^}}]*)\}};", text)
         return [float(v.strip().rstrip("FLD")) for v in match.group(1).split(",")] if match else None
 
+    def source(name):
+        path = client / f"{name}.java"
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
     g = decor17.GIANT_HEART
     block = java.get("GiantBeatingHeartBlock", "")
     if floats(block, "TEMPOS") != [float(t) for t in g["tempos"]] or number(block, "PULSE_TICKS") != g["pulse_ticks"] or number(block, "SIZE") != g["size"]:
         err("GiantBeatingHeartBlock's TEMPOS, PULSE_TICKS and SIZE differ from tools/decor17.py GIANT_HEART")
-    renderer = (client / "GiantBeatingHeartRenderer.java").read_text(encoding="utf-8") if (client / "GiantBeatingHeartRenderer.java").is_file() else ""
-    for name, value in (("LUB_DUB_TICKS", g["lub_dub_ticks"]), ("DECAY_TICKS", g["decay_ticks"]), ("ATRIA", g["atria"]),
-                        ("VENTRICLES", g["ventricles"])):
-        found = number(renderer, name)
-        if found is None or abs(found - value) > 1e-9:
-            err(f"GiantBeatingHeartRenderer.{name} differs from tools/decor17.py GIANT_HEART")
-    for name, key in (("ATRIA_ANCHOR", "atria_anchor"), ("VENTRICLE_ANCHOR", "ventricle_anchor")):
-        if floats(renderer, name) != list(g[key]):
-            err(f"GiantBeatingHeartRenderer.{name} differs from tools/decor17.py GIANT_HEART {key}")
-    # The heart at its fullest stays inside the murk (2.5 to 45.5 across and deep, above the plinth at 5).
-    for part, anchor, swell in (("giant_heart_ventricles", g["ventricle_anchor"], g["ventricles"]), ("giant_heart_atria", g["atria_anchor"], g["atria"]),
-                                ("giant_heart_cradle", (0, 0, 0), 0.0)):
-        if not quads.get(part):
-            err(f"decor17_quads.json has no {part}")
-            continue
-        k = 1 + swell
-        for quad in quads[part]:
-            for v in quad["vertices"]:
-                p = [anchor[i] + (v[i] - anchor[i]) * k for i in range(3)]
-                if not (2.5 < p[0] < 45.5 and 2.5 < p[2] < 45.5 and 5.0 - 1e-6 <= p[1] < 43.0):
-                    err(f"The giant heart's {part} leaves its murk at its fullest swell: {[round(c, 2) for c in p]}")
-                    break
-            else:
-                continue
-            break
-    # Each part of the heart and every big specimen is drawn whole: no two of its faces share a plane (closer than 0.1
-    # pixel, they flicker), and its UVs stay inside its sprite.
-    whole_parts = ["giant_heart_ventricles", "giant_heart_atria", "giant_heart_cradle"]
-    for part in whole_parts + [f"big_specimen_{specimen}" for specimen in ag.SPECIMEN_JAR["specimens"]]:
-        model = quads.get(part, [])
-        pairs = coplanar_pairs(model)
-        if pairs:
-            err(f"decor17_quads.json {part} has {pairs} pairs of faces on one plane (closer than 0.1 pixel), which flicker")
-        if any(not (-1e-6 <= v[3] <= 1 + 1e-6 and -1e-6 <= v[4] <= 1 + 1e-6) for q in model for v in q["vertices"]):
-            err(f"decor17_quads.json {part} samples outside its texture")
-    vessel_renderer = (client / "SpecimenVesselRenderer.java").read_text(encoding="utf-8") if (client / "SpecimenVesselRenderer.java").is_file() else ""
-    if number(vessel_renderer, "BOB_TICKS") != decor17.VESSEL_BOB_TICKS:
-        err("SpecimenVesselRenderer.BOB_TICKS differs from tools/decor17.py VESSEL_BOB_TICKS")
+    if "grown(OddityJarBlock.BOX, SIZE, SIZE, SIZE)" not in block:
+        err("GiantBeatingHeartBlock's shapes must be the Beating Heart Jar's box made SIZE times bigger")
+    renderer = source("GiantBeatingHeartRenderer")
+    if ("pose.scale(GiantBeatingHeartBlock.SIZE, GiantBeatingHeartBlock.SIZE, GiantBeatingHeartBlock.SIZE)" not in renderer
+            or "OddityJarRenderer.heart(pose" not in renderer):
+        err("GiantBeatingHeartRenderer must draw the Beating Heart Jar's heart (OddityJarRenderer.heart), SIZE times bigger")
+    # The jar's heart, at its fullest swell and turned any way, stays inside the glass (and so does the giant's, the same
+    # made bigger).
+    jar = decor17.JARS["beating_heart_jar"]
+    oddity = source("OddityJarRenderer")
+    if floats(oddity, "HEART") != list(jar["heart"]) or number(oddity, "HEART_SWELL") != jar["swell"]:
+        err("OddityJarRenderer.HEART and HEART_SWELL differ from tools/decor17.py JARS beating_heart_jar heart and swell")
+    heart = quads.get("oddity_heart", [])
+    if not heart:
+        err("decor17_quads.json has no oddity_heart")
+    else:
+        k = 1 + jar["swell"]
+        reach = max(math.hypot(v[0], v[2]) for q in heart for v in q["vertices"]) * k
+        top = jar["heart"][1] + max(v[1] for q in heart for v in q["vertices"]) * (k * 0.96 + 0.04)
+        shape = {**decor17.ODDITY_JAR, **jar.get("jar", {})}
+        glass = 8 - shape["glass"]
+        if reach > glass or top > shape["glass_top"]:
+            err(f"The Beating Heart Jar's heart leaves its glass at its fullest: it reaches {reach:.2f} across (the glass is at {glass:.2f}) and up to {top:.2f}")
+    vessel_renderer = source("SpecimenVesselRenderer")
+    if "pose.scale(state.scale, state.scale, state.scale)" not in vessel_renderer or "SpecimenJarRenderer.draw(pose" not in vessel_renderer:
+        err("SpecimenVesselRenderer must draw the Specimen Jar's specimen (SpecimenJarRenderer.draw), as many times bigger as the jar")
+    if "grown(SpecimenJarBlock.BOX, scale, across, deep)" not in java.get("SpecimenVesselBlock", ""):
+        err("SpecimenVesselBlock's shapes must be the Specimen Jar's box made `scale` times bigger")
     for vessel, info in decor17.SPECIMEN_VESSELS.items():
-        prefix = {"tall_specimen_jar": "TALL", "specimen_tank": "TANK"}[vessel]
-        light = number(java.get({"tall_specimen_jar": "TallSpecimenJarBlock", "specimen_tank": "SpecimenTankBlock"}[vessel], ""), "LIGHT")
-        if light != info["light"]:
-            err(f"{vessel}'s LIGHT differs from tools/decor17.py SPECIMEN_VESSELS")
-        if (number(vessel_renderer, f"{prefix}_ACROSS") != info["size"][0] or floats(vessel_renderer, f"{prefix}_MIDDLE") != list(info["middle"])
-                or number(vessel_renderer, f"{prefix}_SCALE") != info["scale"] or number(vessel_renderer, f"{prefix}_BOB") != info["bob"]
-                or number(vessel_renderer, f"{prefix}_BUBBLES") != info["bubbles"]):
-            err(f"SpecimenVesselRenderer's {prefix}_ numbers differ from tools/decor17.py SPECIMEN_VESSELS {vessel}")
-        fluid = floats(vessel_renderer, f"{prefix}_FLUID")
-        for specimen in ag.SPECIMEN_JAR["specimens"]:
-            model = quads.get(f"big_specimen_{specimen}")
-            if not model or not fluid:
-                err(f"decor17_quads.json has no big_specimen_{specimen}")
+        source_ = java.get({"tall_specimen_jar": "TallSpecimenJarBlock", "specimen_tank": "SpecimenTankBlock"}[vessel], "")
+        cells = re.search(r"CELLS = box\((\d+), (\d+), (\d+)\);", source_)
+        if (number(source_, "LIGHT") != info["light"] or number(source_, "SCALE") != info["scale"]
+                or not cells or tuple(int(c) for c in cells.groups()) != tuple(info["size"])):
+            err(f"{vessel}'s LIGHT, SCALE and CELLS differ from tools/decor17.py SPECIMEN_VESSELS")
+    # Each is its small jar's model made bigger: put back together, its parts fill the small jar's box `scale` times
+    # over, and draw on the small jar's textures.
+    for big, small, scale, size in [(g["block"], "beating_heart_jar", g["size"], (g["size"],) * 3)] + [
+            (v, ag.SPECIMEN_JAR["block"], info["scale"], info["size"]) for v, info in decor17.SPECIMEN_VESSELS.items()]:
+        whole = load(ASSETS / "models" / "block" / f"{small}.json") or {}
+        lo = [min(e["from"][k] for e in whole.get("elements", [])) for k in range(3)] if whole.get("elements") else None
+        hi = [max(e["to"][k] for e in whole.get("elements", [])) for k in range(3)] if whole.get("elements") else None
+        cells = [(r, u, a) for a in range(size[2]) for u in range(size[1]) for r in range(size[0])]
+        found_lo, found_hi, textures = [1e9] * 3, [-1e9] * 3, set()
+        for part, (r, u, a) in enumerate(cells):
+            model = load(ASSETS / "models" / "block" / f"{big}_{part}.json")
+            if not model:
                 continue
-            reach = max(math.hypot(v[0], v[2]) for q in model for v in q["vertices"]) * info["scale"]
-            low = min(v[1] for q in model for v in q["vertices"]) * info["scale"] + info["middle"][1] - info["bob"]
-            high = max(v[1] for q in model for v in q["vertices"]) * info["scale"] + info["middle"][1] + info["bob"]
-            half = (fluid[2] - fluid[0]) / 2
-            if reach > half - 0.25 or low < fluid[1] or high > fluid[3]:
-                err(f"The {specimen} leaves the {vessel}'s fluid: it reaches {reach:.2f} of {half:.2f} across and {low:.2f} to {high:.2f} up")
+            origin = (16 * (size[0] - 1 - r), 16 * u, 16 * a)
+            textures |= {t for key, t in model.get("textures", {}).items() if key != "particle"}
+            for e in model.get("elements", []):
+                for k in range(3):
+                    found_lo[k] = min(found_lo[k], e["from"][k] + origin[k])
+                    found_hi[k] = max(found_hi[k], e["to"][k] + origin[k])
+        middle = (8 * size[0], 0, 8 * size[2])
+        if lo is None or any(abs(found_lo[k] - (middle[k] + (lo[k] - (0 if k == 1 else 8)) * scale)) > 0.2
+                             or abs(found_hi[k] - (middle[k] + (hi[k] - (0 if k == 1 else 8)) * scale)) > 0.2 for k in range(3)):
+            err(f"{big}'s parts don't make up the {small}'s model {scale} times bigger: {found_lo} to {found_hi}")
+        small_textures = {t for key, t in whole.get("textures", {}).items() if key != "particle"}
+        if not textures or not textures <= small_textures:
+            err(f"{big}'s models draw on {sorted(textures)}, not the {small}'s textures {sorted(small_textures)}")
     for big in decor17.big_jars():
         states = load(ASSETS / "blockstates" / f"{big}.json") or {}
         for entry in states.get("multipart", []):
@@ -3677,6 +3683,8 @@ def check_witchs_workshop(java, lang):
             err(f"{block} has no name")
         if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
             err(f"{block} has no loot table")
+        if block in decor17.big_jars():
+            continue  # drawn on its small jar's textures (check_bigger_jars)
         texture = "candelabra" if block in decor17.CANDELABRA else block
         with Image.open(ASSETS / "textures" / "block" / f"{texture}.png") as img:
             if img.size not in ((64, 64), (128, 128)):

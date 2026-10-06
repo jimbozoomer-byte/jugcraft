@@ -1,6 +1,5 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
-import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,27 +23,35 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A bigger Specimen Jar (Halloween decorations batch 17, the bigger jars): the Specimen Jar's glowing green fluid, clear
- * glass and iron fittings made big, several blocks placed and broken as one ({@link MultiDecorationBlock}), holding one
- * of the jar's specimens ({@link #SPECIMEN}, on every block). Sneak-use any block of it to put in the next; broken, it
- * keeps its specimen. The specimen bobs and turns slowly among rising bubbles, drawn by the client from the block entity
- * on its first block.
+ * A bigger Specimen Jar (Halloween decorations batch 17, the bigger jars): the Specimen Jar made {@link #scale()} times
+ * bigger, its glowing green fluid, glass, iron fittings and specimen and all, several blocks placed and broken as one
+ * ({@link MultiDecorationBlock}); each block's shape is its piece of the jar's box made as much bigger. It holds one of
+ * the jar's specimens ({@link #SPECIMEN}, on every block). Sneak-use any block of it to put in the next; broken, it keeps
+ * its specimen. The specimen bobs and turns slowly among rising bubbles as in the Specimen Jar, drawn by the client from
+ * the block entity on its first block.
  */
 public abstract class SpecimenVesselBlock extends MultiDecorationBlock implements EntityBlock {
 	public static final EnumProperty<SpecimenJarBlock.Specimen> SPECIMEN = SpecimenJarBlock.SPECIMEN;
-	private final Map<Direction, VoxelShape[]> shapes = new EnumMap<>(Direction.class);
+	private final int scale;
+	private final Map<Direction, VoxelShape[]> shapes;
 
-	/** {@code boxes}: each part's box {x0, y0, z0, x1, y1, z1} in pixels, in its own block, for a vessel facing north. */
-	protected SpecimenVesselBlock(Properties properties, double[][] boxes) {
+	/** {@code scale}: how many times bigger than the Specimen Jar it is; {@code cells}: its blocks, as {@link #cells} gives them. */
+	protected SpecimenVesselBlock(Properties properties, int scale, int[][] cells) {
 		super(properties);
 		registerDefaultState(defaultBlockState().setValue(SPECIMEN, SpecimenJarBlock.Specimen.EYE));
-		for (Direction facing : Direction.Plane.HORIZONTAL) {
-			VoxelShape[] turned = new VoxelShape[boxes.length];
-			for (int part = 0; part < boxes.length; part++) {
-				turned[part] = LongDecorationBlock.shape(new double[][] {boxes[part]}, facing);
-			}
-			shapes.put(facing, turned);
+		this.scale = scale;
+		int across = 1;
+		int deep = 1;
+		for (int[] cell : cells) {
+			across = Math.max(across, cell[0] + 1);
+			deep = Math.max(deep, cell[2] + 1);
 		}
+		shapes = partShapes(grown(SpecimenJarBlock.BOX, scale, across, deep), cells);
+	}
+
+	/** How many times bigger than the Specimen Jar it is. */
+	public int scale() {
+		return scale;
 	}
 
 	@Override

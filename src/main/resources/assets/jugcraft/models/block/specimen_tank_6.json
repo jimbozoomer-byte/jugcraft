@@ -1,266 +1,94 @@
 {
   "parent": "minecraft:block/block",
-  "ambientocclusion": false,
   "textures": {
-    "p": "jugcraft:block/specimen_tank",
-    "particle": "jugcraft:block/specimen_tank"
+    "particle": "jugcraft:block/specimen_jar_glass",
+    "iron": "jugcraft:block/specimen_jar_iron",
+    "glass": "jugcraft:block/specimen_jar_glass",
+    "fluid": "jugcraft:block/specimen_jar_fluid"
   },
   "elements": [
     {
       "from": [
         0,
         0,
-        0
+        13.5
       ],
       "to": [
-        14,
-        11,
-        14
-      ],
-      "faces": {
-        "south": {
-          "uv": [
-            5.875,
-            6.875,
-            7.625,
-            8.25
-          ],
-          "texture": "#p"
-        },
-        "east": {
-          "uv": [
-            4.125,
-            6.875,
-            5.875,
-            8.25
-          ],
-          "texture": "#p"
-        },
-        "up": {
-          "uv": [
-            9.125,
-            1.75,
-            10.875,
-            3.5
-          ],
-          "texture": "#p"
-        }
-      },
-      "light_emission": 15
-    },
-    {
-      "from": [
-        0,
-        0,
-        0
-      ],
-      "to": [
-        14.5,
-        13.5,
-        14.5
-      ],
-      "faces": {
-        "south": {
-          "uv": [
-            3.625,
-            0.0,
-            7.25,
-            3.4387
-          ],
-          "texture": "#p"
-        },
-        "east": {
-          "uv": [
-            0.0,
-            0.0,
-            3.625,
-            3.4387
-          ],
-          "texture": "#p"
-        }
-      }
-    },
-    {
-      "from": [
-        0,
-        13.5,
-        0
-      ],
-      "to": [
-        16,
-        15,
-        16
-      ],
-      "faces": {
-        "south": {
-          "uv": [
-            4.0,
-            11.875,
-            8.0,
-            12.25
-          ],
-          "texture": "#p"
-        },
-        "east": {
-          "uv": [
-            0.0,
-            11.875,
-            4.0,
-            12.25
-          ],
-          "texture": "#p"
-        },
-        "up": {
-          "uv": [
-            2.0,
-            8.875,
-            4.0,
-            10.875
-          ],
-          "texture": "#p"
-        },
-        "down": {
-          "uv": [
-            2.0,
-            6.875,
-            4.0,
-            8.875
-          ],
-          "texture": "#p"
-        }
-      }
-    },
-    {
-      "from": [
-        0,
-        15,
-        0
-      ],
-      "to": [
-        5,
-        15.6,
-        5
-      ],
-      "faces": {
-        "south": {
-          "uv": [
-            9.375,
-            11.0,
-            10.625,
-            11.25
-          ],
-          "texture": "#p"
-        },
-        "east": {
-          "uv": [
-            8.125,
-            11.0,
-            9.375,
-            11.25
-          ],
-          "texture": "#p"
-        },
-        "up": {
-          "uv": [
-            12.625,
-            8.125,
-            13.875,
-            9.375
-          ],
-          "texture": "#p"
-        }
-      }
-    },
-    {
-      "from": [
-        0,
-        15.6,
-        0
-      ],
-      "to": [
-        1.5,
-        16,
-        1.5
-      ],
-      "faces": {
-        "south": {
-          "uv": [
-            11.125,
-            11.0,
-            11.5,
-            11.25
-          ],
-          "texture": "#p"
-        },
-        "east": {
-          "uv": [
-            10.75,
-            11.0,
-            11.125,
-            11.25
-          ],
-          "texture": "#p"
-        },
-        "up": {
-          "uv": [
-            12.0,
-            11.375,
-            12.375,
-            11.75
-          ],
-          "texture": "#p"
-        }
-      }
-    },
-    {
-      "from": [
-        14,
-        0,
-        14
-      ],
-      "to": [
-        16,
-        13.5,
+        2.5,
+        4,
         16
       ],
       "faces": {
         "north": {
+          "texture": "#glass",
           "uv": [
-            14.625,
-            0.0,
-            15.125,
-            1.7193
-          ],
-          "texture": "#p"
-        },
-        "south": {
-          "uv": [
-            14.625,
-            0.0,
-            15.125,
-            1.7193
-          ],
-          "texture": "#p"
+            4.5,
+            4.0,
+            5.3333,
+            5.3333
+          ]
         },
         "east": {
+          "texture": "#glass",
           "uv": [
-            14.625,
-            0.0,
-            15.125,
-            1.7193
-          ],
-          "texture": "#p"
+            10.6667,
+            4.0,
+            11.5,
+            5.3333
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        4,
+        12.75
+      ],
+      "to": [
+        3.25,
+        7,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron",
+          "uv": [
+            4.25,
+            3.0,
+            5.3333,
+            4.0
+          ]
         },
-        "west": {
+        "east": {
+          "texture": "#iron",
           "uv": [
-            14.625,
-            0.0,
-            15.125,
-            1.7193
-          ],
-          "texture": "#p"
+            10.6667,
+            3.0,
+            11.75,
+            4.0
+          ]
+        },
+        "up": {
+          "texture": "#iron",
+          "uv": [
+            10.6667,
+            4.25,
+            11.75,
+            5.3333
+          ]
+        },
+        "down": {
+          "texture": "#iron",
+          "uv": [
+            10.6667,
+            10.6667,
+            11.75,
+            11.75
+          ]
         }
       }
     }
-  ]
+  ],
+  "ambientocclusion": false
 }

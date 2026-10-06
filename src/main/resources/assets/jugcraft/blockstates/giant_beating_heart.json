@@ -513,7 +513,7 @@
         "part": "13"
       },
       "apply": {
-        "model": "jugcraft:block/giant_beating_heart_part"
+        "model": "jugcraft:block/giant_beating_heart_13"
       }
     },
     {
@@ -522,7 +522,7 @@
         "part": "13"
       },
       "apply": {
-        "model": "jugcraft:block/giant_beating_heart_part",
+        "model": "jugcraft:block/giant_beating_heart_13",
         "y": 90
       }
     },
@@ -532,7 +532,7 @@
         "part": "13"
       },
       "apply": {
-        "model": "jugcraft:block/giant_beating_heart_part",
+        "model": "jugcraft:block/giant_beating_heart_13",
         "y": 180
       }
     },
@@ -542,7 +542,7 @@
         "part": "13"
       },
       "apply": {
-        "model": "jugcraft:block/giant_beating_heart_part",
+        "model": "jugcraft:block/giant_beating_heart_13",
         "y": 270
       }
     },

@@ -33,7 +33,9 @@ public class SpecimenJarBlock extends BaseEntityBlock {
 	public static final float BOB = 0.75F;
 	public static final int BOB_TICKS = 90;
 	public static final EnumProperty<Specimen> SPECIMEN = EnumProperty.create("specimen", Specimen.class);
-	private static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 13.0, 12.0);
+	/** The jar's box {x0, y0, z0, x1, y1, z1} in pixels (each bigger specimen jar's is this, made bigger). */
+	public static final double[] BOX = {4.0, 0.0, 4.0, 12.0, 13.0, 12.0};
+	private static final VoxelShape SHAPE = Block.box(BOX[0], BOX[1], BOX[2], BOX[3], BOX[4], BOX[5]);
 
 	public enum Specimen implements StringRepresentable {
 		EYE, TENTACLE, PUMPKIN, BRAIN;

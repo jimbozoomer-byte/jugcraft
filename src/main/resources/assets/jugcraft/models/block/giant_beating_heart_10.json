@@ -2,37 +2,37 @@
   "parent": "minecraft:block/block",
   "ambientocclusion": false,
   "textures": {
-    "p": "jugcraft:block/giant_beating_heart",
-    "particle": "jugcraft:block/giant_beating_heart"
+    "p": "jugcraft:block/beating_heart_jar",
+    "particle": "jugcraft:block/beating_heart_jar"
   },
   "elements": [
     {
       "from": [
         0,
-        0,
+        0.0,
         0
       ],
       "to": [
         16,
-        5,
+        3.0,
         16
       ],
       "faces": {
-        "up": {
+        "down": {
           "uv": [
-            11.375,
-            1.0,
-            12.375,
-            2.0
+            9.1667,
+            0.6667,
+            11.8333,
+            3.3333
           ],
           "texture": "#p"
         },
-        "down": {
+        "up": {
           "uv": [
-            11.375,
-            1.0,
-            12.375,
-            2.0
+            9.1667,
+            0.6667,
+            11.8333,
+            3.3333
           ],
           "texture": "#p"
         }

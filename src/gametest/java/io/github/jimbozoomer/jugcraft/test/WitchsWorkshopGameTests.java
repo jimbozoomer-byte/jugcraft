@@ -447,8 +447,9 @@ public class WitchsWorkshopGameTests {
 
 	/**
 	 * The Giant's Beating Heart stands 3 x 3 x 3, every block part of it and its block entity on the first; with a block in
-	 * the way it is not placed. Its first block beats (15 to the sides, none below, then off after its pulse), use changes
-	 * its tempo, and a signal from below any of its bottom blocks stops it. Broken anywhere, it goes whole and drops once.
+	 * the way it is not placed. Each block's shape is its piece of the Beating Heart Jar's box made three times bigger. Its
+	 * first block beats (15 to the sides, none below, then off after its pulse), use changes its tempo, and a signal from
+	 * below any of its bottom blocks stops it. Broken anywhere, it goes whole and drops once.
 	 */
 	@GameTest(maxTicks = 40)
 	public void giantHeartStandsAndBeats(GameTestHelper helper) {
@@ -468,11 +469,23 @@ public class WitchsWorkshopGameTests {
 		for (int part = 0; part < heart.cells().length; part++) {
 			BlockState state = level.getBlockState(heart.partPos(absolute, Direction.NORTH, part));
 			helper.assertTrue(state.is(heart) && heart.part(state) == part && state.getValue(GiantBeatingHeartBlock.FACING) == Direction.NORTH,
-					"Part " + part + " of the vat is in place");
+					"Part " + part + " of the jar is in place");
 		}
 		helper.assertTrue(level.getBlockEntity(absolute) instanceof DecorationBlockEntity
 				&& level.getBlockEntity(heart.partPos(absolute, Direction.NORTH, GiantBeatingHeartBlock.MIDDLE)) == null,
 				"Its block entity is on its first block only");
+		// The jar's box, three times the Beating Heart Jar's (3.9 to 12.1 across and deep, 13.6 tall): 11.7 to 36.3 and
+		// 40.8 pixels. Its first block, the front corner on the placer's left, holds 4.3 of it across and deep; the
+		// bottom middle block is full; the top middle block 8.8 pixels of it.
+		AABB first = level.getBlockState(absolute).getShape(level, absolute).bounds();
+		// Parts count right, then up, then away: part 10 is one right and one away, part 16 the same two blocks up.
+		BlockPos bottomMiddle = heart.partPos(absolute, Direction.NORTH, 10);
+		BlockPos topMiddle = heart.partPos(absolute, Direction.NORTH, 16);
+		AABB top = level.getBlockState(topMiddle).getShape(level, topMiddle).bounds();
+		helper.assertTrue(Math.abs(first.maxX - 4.3 / 16) < 1e-6 && Math.abs(first.minZ - 11.7 / 16) < 1e-6 && first.minX == 0.0 && first.maxZ == 1.0
+				&& level.getBlockState(bottomMiddle).getShape(level, bottomMiddle).bounds().equals(new AABB(0, 0, 0, 1, 1, 1))
+				&& Math.abs(top.maxY - 8.8 / 16) < 1e-6 && top.minX == 0.0 && top.maxX == 1.0,
+				"Its shape is the Beating Heart Jar's made three times bigger: first block " + first + ", top middle " + top);
 
 		BlockState resting = level.getBlockState(absolute);
 		helper.assertTrue(GiantBeatingHeartBlock.period(resting) == 30, "At 40 a minute it beats every 30 ticks");
@@ -549,8 +562,9 @@ public class WitchsWorkshopGameTests {
 	}
 
 	/**
-	 * The Tall Specimen Jar stands two blocks tall and the Specimen Tank 2 x 2 x 2, glowing; sneak-use on any block of one
-	 * puts in the next specimen on all its blocks; broken anywhere, each goes whole and drops once, keeping its specimen.
+	 * The Tall Specimen Jar stands two blocks tall and the Specimen Tank 3 x 3 x 3, glowing, each shaped as the Specimen
+	 * Jar made two or three times bigger; sneak-use on any block of one puts in the next specimen on all its blocks; broken
+	 * anywhere, each goes whole and drops once, keeping its specimen.
 	 */
 	@GameTest(maxTicks = 40)
 	public void biggerSpecimenJarsKeepTheirSpecimens(GameTestHelper helper) {
@@ -563,11 +577,22 @@ public class WitchsWorkshopGameTests {
 		helper.assertTrue(helper.getBlockState(jar).is(tall) && helper.getBlockState(jar.above()).is(tall) && tall.part(helper.getBlockState(jar.above())) == 1
 				&& helper.getBlockState(jar).getLightEmission() == TallSpecimenJarBlock.LIGHT
 				&& helper.getBlockState(jar).getValue(SpecimenVesselBlock.SPECIMEN) == SpecimenJarBlock.Specimen.EYE, "The tall jar stands two tall, glowing, with an eye");
+		// The Specimen Jar's box (4 to 12 across and deep, 13 tall) twice over: a full block under one 10 pixels tall.
+		BlockPos lowerJar = helper.absolutePos(jar);
+		AABB upperJar = level.getBlockState(lowerJar.above()).getShape(level, lowerJar.above()).bounds();
+		helper.assertTrue(level.getBlockState(lowerJar).getShape(level, lowerJar).bounds().equals(new AABB(0, 0, 0, 1, 1, 1))
+				&& Math.abs(upperJar.maxY - 10.0 / 16) < 1e-6 && upperJar.minX == 0.0 && upperJar.maxX == 1.0,
+				"The tall jar's shape is the Specimen Jar's twice over: " + upperJar);
 
 		SpecimenVesselBlock tank = (SpecimenVesselBlock) block("specimen_tank");
 		BlockPos master = new BlockPos(6, 2, 4);
 		BlockPos absolute = helper.absolutePos(master);
 		place(helper, keeper, "specimen_tank", master, 0.0F);
+		helper.assertTrue(tank.cells().length == 27, "The tank is 27 blocks");
+		// Three times the Specimen Jar's box: 12 to 36 across and deep, 39 tall; its first block holds 4 of it each way.
+		AABB tankFirst = level.getBlockState(absolute).getShape(level, absolute).bounds();
+		helper.assertTrue(Math.abs(tankFirst.maxX - 4.0 / 16) < 1e-6 && Math.abs(tankFirst.minZ - 12.0 / 16) < 1e-6,
+				"The tank's shape is the Specimen Jar's three times over: " + tankFirst);
 		for (int part = 0; part < tank.cells().length; part++) {
 			BlockState state = level.getBlockState(tank.partPos(absolute, Direction.NORTH, part));
 			helper.assertTrue(state.is(tank) && tank.part(state) == part && state.getLightEmission() == SpecimenTankBlock.LIGHT,

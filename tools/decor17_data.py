@@ -13,11 +13,13 @@ from PIL import Image
 
 import cute_art as ca
 import decor16_data as d16d
+import decor8_data as d8d
 import agriculture as ag
 import decor17 as d17
 import flora_art as fa
 from flora_art import SIDES4, Px, Sculpt, column, cube, pal, plane_xy, plane_xz, plane_zy, rotation, shade, solid, strip
 from decor6_data import quads
+from decor_data import block_model
 
 MOD = "jugcraft"
 FACINGS = {"north": 0, "east": 90, "south": 180, "west": 270}
@@ -1080,11 +1082,8 @@ MOTHS = [(8.0, 8.6, 15.3, 1.0), (4.2, 5.4, 15.3, 0.55), (11.8, 5.4, 15.3, 0.55)]
 
 # ---------------------------------------------------------------- 5. the oddity jars
 
-# The oddity jars' shape, in pixels: each part's inset from the block's side (base, glass, lid), the glass's and lid's
-# tops, the knob's half-width and top, and the label's box (x0, y0, x1, y1) on the front. The bat's jar is bigger
-# (tools/decor17.py JARS bat_in_a_jar "jar").
-JAR = {"base": 4.0, "glass": 4.3, "lid": 3.9, "glass_top": 11.6, "lid_top": 12.8, "knob": 1.0, "knob_top": 13.6,
-       "label": (5.2, 2.6, 10.8, 6.0)}
+# The oddity jars' shape (tools/decor17.py ODDITY_JAR).
+JAR = d17.ODDITY_JAR
 
 
 def lid_top_clean():
@@ -1286,8 +1285,6 @@ KNUCKLES = [(-1.5, 1.6, 0.0), (-0.5, 1.6, 0.0), (0.5, 1.6, 0.0), (1.5, 1.6, 0.0)
 
 # ---------------------------------------------------------------- 6. the bigger jars
 
-VEIN = pal("1c1a3e", "2c2a5e", "403c80", "5a56a0")
-CAVA = pal("142640", "1e3a5e", "2c507e", "3e6a9c")
 FACE_AXIS = {"west": (0, -1), "east": (0, 1), "down": (1, -1), "up": (1, 1), "north": (2, -1), "south": (2, 1)}
 
 
@@ -1370,432 +1367,33 @@ def murk_clean(palette, alpha, top=False):
     return paint
 
 
-def pane(alpha=50):
-    """A big pane of clear glass, clean: faint, a pale line along its top and bottom edges, and one straight highlight
-    near its left side, a bright line beside a fainter one, down the middle of the pane."""
-    def paint(p):
-        for y in range(p.h):
-            for x in range(p.w):
-                p.put(x, y, GLASS, alpha)
-        for x in range(p.w):
-            p.put(x, 0, (236, 246, 248), 150)
-            p.put(x, p.h - 1, (236, 246, 248), 150)
-        x = max(2, int(p.w * 0.16))
-        for y in range(int(p.h * 0.12), int(p.h * 0.78)):
-            p.put(x, y, (250, 254, 255), 160)
-            p.put(x + 2, y, (250, 254, 255), 90)
-    return paint
+def pinned(elements):
+    """`elements` with each face's uv written out where a block model works it out from the box's place, so a face keeps
+    its picture when its box is moved or scaled."""
+    return [dict(e, faces={side: dict(spec, uv=list(spec.get("uv") or _default_uv(side, e["from"], e["to"])))
+                           for side, spec in e["faces"].items()}) for e in elements]
 
 
-def gauge():
-    """A round brass gauge: a bezel, a cream face with twelve ticks and a red needle at about two o'clock."""
-    def paint(p):
-        cx, cy = (p.w - 1) / 2, (p.h - 1) / 2
-        r = p.w / 2
-        for y in range(p.h):
-            for x in range(p.w):
-                d = math.hypot(x - cx, y - cy)
-                if d > r:
-                    p.put(x, y, BRASS[1])
-                elif d > r - 1.5:
-                    p.put(x, y, BRASS[4] if (x - cx) + (y - cy) < 0 else BRASS[2])
-                else:
-                    p.put(x, y, PAPER[4])
-        for i in range(12):
-            a = i / 12 * math.tau
-            p.put(cx + math.cos(a) * (r - 2.6), cy + math.sin(a) * (r - 2.6), INK[0])
-        for t in range(int(r - 2.5)):
-            a = -math.pi / 4.5
-            p.put(cx + math.cos(a) * t, cy + math.sin(a) * t, (176, 30, 30))
-        p.put(cx, cy, INK[0])
-    return paint
-
-
-def giant_muscle(seed=1, vessels=True, highlight=True):
-    """A giant heart's muscle, clean: smooth deep red, lighter over its top and darker under it, a soft highlight high on
-    its left and two coronary vessels curving down it."""
-    def paint(p):
-        ca.soft(HEART, 3, edge=1, top=0.22, bottom=0.3)(p)
-        if highlight:
-            ca.ellipse(p, p.w * 0.27, p.h * 0.3, max(1.0, p.w * 0.1), max(1.0, p.h * 0.08), HEART[5])
-            ca.ellipse(p, p.w * 0.36, p.h * 0.36, max(0.8, p.w * 0.04), max(0.8, p.h * 0.04), HEART[5])
-        if vessels:
-            for x0, bend in ((0.56, 0.12), (0.8, -0.05)):
-                for y in range(int(p.h * 0.06), int(p.h * 0.88)):
-                    t = y / p.h
-                    x = p.w * (x0 - bend * t * t)
-                    p.put(x, y, HEART[1])
-                    p.put(x + 1, y, HEART[2])
-    return paint
+def grown(elements, scale, size):
+    """`elements`, modelled in one block, `scale` times bigger in the frame of a prop `size` blocks (across, up, deep)
+    (tools/decor17.py): every box about the block's bottom middle (8, 0, 8), set at the middle of the frame's floor, each
+    face keeping its picture, so it looks just the same, only bigger."""
+    return fa.transformed(pinned(elements), scale, (8 * size[0] - 8, 0, 8 * size[2] - 8))
 
 
 def giant_beating_heart():
-    """The Giant's Beating Heart, modelled whole in its frame (48 pixels a side; x across to the placer's left, z away
-    from them): an iron plinth with a brass gauge on its front, a vat of clear glass between slim brass corner posts,
-    filled with red murk to near the top, an iron lid with a stepped cap and a brass hatch, and three brass pipes from the
-    lid down into the murk to the heart's great vessels. The heart, its brass cradle and its beat are the client's
-    (`giant_heart_ventricles` and `giant_heart_atria`, in the same frame, on texture giant_beating_heart_muscle). Every
-    box is closed where it can be seen, and no two faces share a plane."""
+    """The Giant's Beating Heart, modelled whole in its frame: the Beating Heart Jar's boxes, three times bigger, on the
+    jar's own texture. Its heart and brass stand are the jar's too, drawn as much bigger by the client."""
     g = d17.GIANT_HEART
-    sc = Sculpt(g["block"], 186, 128)
-    glass_side = sc.piece("glass", 44, 38, pane(50))
-    post = sc.piece("post", 5, 38, ca.bevel(BRASS, 3, sides="lr"))
-    pipe = sc.piece("pipe", 6, 14, ca.bands(BRASS, 3, period=5, width=1))
-    lid_top = sc.piece("lid_top", 24, 24, ca.bevel(IRON, 3))
-    floor_ = sc.piece("floor", 24, 24, ca.bevel(IRON, 2))
-    murk_top = sc.piece("murk_top", 22, 22, murk_clean(MURK["beating_heart_jar"], 135, top=True))
-    murk_side = sc.piece("murk_side", 22, 16, murk_clean(MURK["beating_heart_jar"], 135))
-    cap_top = sc.piece("cap_top", 16, 16, ca.bevel(IRON, 4))
-    dial = sc.piece("gauge", 16, 16, gauge())
-    plinth = sc.piece("plinth", 96, 10, ca.riveted(IRON, 3, 16))
-    lid = sc.piece("lid", 96, 6, ca.riveted(IRON, 4, 16))
-    cap = sc.piece("cap", 64, 3, ca.bevel(IRON, 4))
-    knob = sc.piece("knob", 16, 2, ca.bevel(BRASS, 3))
-    knob_top = sc.piece("knob_top", 16, 16, ca.bevel(BRASS, 3))
-    collar = sc.piece("collar", 8, 2, ca.bevel(BRASS, 4))
-    pipe_end = sc.piece("pipe_end", 6, 6, ca.bevel(BRASS, 2))
-    plate = sc.piece("plate", 20, 6, ca.bevel(BRASS, 3))
-    els = [cube((0, 0, 0), (48, 5, 48), {**{s: plinth for s in SIDES4}, "up": floor_, "down": floor_}),
-           cube((2, 5, 2), (46, 43, 46), {s: glass_side for s in SIDES4}),
-           cube((2.5, 5, 2.5), (45.5, 37, 45.5), {**{s: murk_side for s in SIDES4}, "up": murk_top}),
-           cube((0, 43, 0), (48, 46, 48), {**{s: lid for s in SIDES4}, "up": lid_top, "down": lid_top}),
-           cube((8, 46, 8), (40, 47.5, 40), {**{s: cap for s in SIDES4}, "up": cap_top}),
-           cube((20, 47.5, 20), (28, 48, 28), {**{s: knob for s in SIDES4}, "up": knob_top}),
-           # The gauge and a brass plate on the plinth's front.
-           cube((20.5, 0.6, -0.3), (27.5, 4.4, 0), {"north": dial, "east": collar, "west": collar, "up": collar, "down": collar}),
-           cube((8, 1.5, -0.2), (17, 3.5, 0), {"north": plate, "east": collar, "west": collar, "up": collar, "down": collar}),
-           cube((31, 1.5, -0.2), (40, 3.5, 0), {"north": plate, "east": collar, "west": collar, "up": collar, "down": collar})]
-    for x in (0, 45.5):
-        for z in (0, 45.5):
-            els.append(cube((x, 5, z), (x + 2.5, 43, z + 2.5), {s: post for s in SIDES4}))
-    # The pipes, each wider than the vessel it takes, so the vessel slides up into it as the heart beats.
-    for (x0, z0, x1, z1), bottom in zip(GIANT_HEART_PIPES, GIANT_HEART_PIPE_ENDS):
-        els.append(cube((x0, bottom, z0), (x1, 43, z1), {**{s: pipe for s in SIDES4}, "down": pipe_end}))
-        els.append(cube((x0 - 0.15, 41.6, z0 - 0.15), (x1 + 0.15, 43, z1 + 0.15), {**{s: collar for s in SIDES4}, "down": pipe_end}))
-    sc.models[g["block"]] = els
-
-    # The heart, on its own texture: ventricles (swelling about their apex) and atria with the great vessels (about the
-    # top of the ventricles).
-    hs = Sculpt(g["block"] + "_muscle", 187, 128)
-    # Packed row by row, the tallest pieces first.
-    front = hs.piece("front", 44, 32, giant_muscle(1))
-    side = hs.piece("side", 28, 32, giant_muscle(2, vessels=False))
-    fat_top_side = hs.piece("fat_top_side", 5, 30, ca.bevel(FAT, 2))
-    aorta = hs.piece("aorta", 10, 22, ca.bevel(HEART, 4, sides="lr"))
-    cava = hs.piece("cava", 8, 18, ca.bevel(CAVA, 2, sides="lr"))
-    pulmonary = hs.piece("pulmonary", 10, 16, ca.bevel(VEIN, 2, sides="lr"))
-    strip_z = hs.piece("strip_z", 2, 24, ca.bevel(HEART, 3, edge=0))
-    stem = hs.piece("stem", 8, 6, ca.bevel(BRASS, 3, sides="lr"))
-    under = hs.piece("under", 44, 28, ca.bevel(HEART, 2, light=0))
-    top = hs.piece("top", 44, 28, ca.bevel(HEART, 3))
-    side2 = hs.piece("side2", 24, 24, giant_muscle(4, vessels=False, highlight=False))
-    auricle = hs.piece("auricle", 8, 7, ca.bevel(HEART, 2))
-    front2 = hs.piece("front2", 40, 22, giant_muscle(3, highlight=False))
-    lower_under = hs.piece("lower_under", 32, 20, ca.bevel(HEART, 1, light=0))
-    atrium_top = hs.piece("atrium_top", 20, 18, ca.bevel(HEART, 3))
-    cradle_top = hs.piece("cradle_top", 20, 16, ca.bevel(BRASS, 3))
-    atrium = hs.piece("atrium", 20, 12, ca.soft(HEART, 2, top=0.3, bottom=0.2))
-    lower = hs.piece("lower", 32, 6, ca.bevel(HEART, 2))
-    lower_side = hs.piece("lower_side", 20, 6, ca.bevel(HEART, 2))
-    fat = hs.piece("fat", 46, 5, ca.bands(FAT, 1, period=4, horizontal=False))
-    fat_top = hs.piece("fat_top", 46, 5, ca.bevel(FAT, 2))
-    fat_end = hs.piece("fat_end", 5, 5, ca.bevel(FAT, 1))
-    strip_x = hs.piece("strip_x", 40, 2, ca.bevel(HEART, 3, edge=0))
-    cradle = hs.piece("cradle", 20, 4, ca.bevel(BRASS, 3))
-    ventricles = [
-        cube((13, 13, 17), (35, 29, 31), {"north": front, "south": front, "east": side, "west": side, "down": under, "up": top}),
-        # Two crossed boxes round its sides off, each closed at its ends too (they stand out of the body there).
-        cube((12, 15, 18), (36, 27, 30), {"east": side2, "west": side2, "north": front2, "south": front2, "up": strip_z, "down": strip_z}),
-        cube((14, 15.5, 16), (34, 26.5, 32), {"north": front2, "south": front2, "east": side2, "west": side2, "up": strip_x, "down": strip_x}),
-        cube((15, 10, 19), (31, 13, 29), {"north": lower, "south": lower, "east": lower_side, "west": lower_side, "down": lower_under}),
-        cube((17, 8, 21), (25, 10, 27), {"north": lower, "south": lower, "east": lower_side, "west": lower_side, "down": lower_under}),
-        *fa.box_ring(12.5, 16.5, 35.5, 31.5, 2.5, 27.5, 30, fat, in_uv=fat, top=(fat_top, fat_top_side), bottom=(fat_top, fat_top_side), ends=fat_end)]
-    atria = [cube((25, 29, 23), (35, 34.5, 31), {**{s: atrium for s in SIDES4}, "up": atrium_top}),
-             cube((33, 30.5, 18), (36.5, 33.5, 23), {**{s: auricle for s in SIDES4}, "up": auricle, "down": auricle}),
-             cube((13, 29, 22), (22, 34, 31), {**{s: atrium for s in SIDES4}, "up": atrium_top}),
-             cube((11.5, 30.5, 18.5), (15, 33, 22.5), {**{s: auricle for s in SIDES4}, "up": auricle, "down": auricle}),
-             cube((22.5, 29, 21.5), (27.5, 40, 26.5), {s: aorta for s in SIDES4}),
-             cube((16, 29, 18), (21, 37, 23), {s: pulmonary for s in SIDES4}),
-             # The vena cava stands 0.4 inside the right atrium's back (z 31), so their faces never share that plane.
-             cube((29, 29, 27), (33, 38, 30.6), {s: cava for s in SIDES4})]
-    cradle_ = [cube((22, 5, 22), (26, 7, 26), {s: stem for s in SIDES4}),
-               cube((18, 7, 20), (28, 7.9, 28), {**{s: cradle for s in SIDES4}, "up": cradle_top, "down": cradle_top})]
-    hs.models["giant_heart_ventricles"] = ventricles
-    hs.models["giant_heart_atria"] = atria
-    hs.models["giant_heart_cradle"] = cradle_
-    sc.heart = hs
-    return sc
+    return grown(build("beating_heart_jar").models["beating_heart_jar"], g["size"], (g["size"],) * 3)
 
 
-# The heart's pipes ({x0, z0, x1, z1} in the frame) and how far down each reaches: just into the top of the vessel it
-# takes (the aorta, the pulmonary trunk and the vena cava), which rise into them as the heart beats.
-GIANT_HEART_PIPES = [(22.0, 21.0, 28.0, 27.0), (15.0, 17.0, 21.6, 23.5), (28.4, 26.5, 34.0, 32.0)]
-GIANT_HEART_PIPE_ENDS = [38.5, 35.5, 36.5]
-
-
-# The bigger specimen jars keep the Specimen Jar's look (tools/decor8_data.py): glowing green fluid, glass you see only
-# by a thin highlight, dark iron fittings a little wider than the glass. Their colours are the jar's (its iron 46464e
-# speckled darker 38383e, its fluid mostly 44b84a, a quarter of it darker 2e9a3a), painted clean: the fittings one flat
-# dark shade with one bevel, the fluid its mid green with a darker ripple line every four rows.
-JAR_FLUID = [(46, 154, 58), (68, 184, 74), (98, 212, 94)]
-JAR_FLUID_ALPHA = 165
-ITEM_FLUID_ALPHA = 90
-# Each item shows its specimen this much bigger than the placed jar does, as big as still fits inside its fluid.
-ITEM_SPECIMEN_SCALE = {"tall_specimen_jar": 1.3, "specimen_tank": 1.15}
-JAR_IRON = pal("2c2c32", "38383e", "46464e", "5a5a64", "6a6a74", "84848f")
-JAR_SHINE = [(208, 238, 232), (168, 208, 200)]
-# The bigger jars' iron fill (38383e), lit a shade along its top and left edges and shaded one along the others.
-JAR_IRON_BASE = 1
-
-
-def jar_fluid_clean(top=False, alpha=JAR_FLUID_ALPHA):
-    """The Specimen Jar's glowing green fluid, clean: its mid green with a ripple line of its darker green every four
-    rows, a pale line where it meets the glass at the top (from above, one shade inside a pale rim), see-through (the
-    item's fluid fainter, so the specimen shows in an inventory slot)."""
-    def paint(p):
-        for y in range(p.h):
-            for x in range(p.w):
-                if top:
-                    c = JAR_FLUID[2] if x in (0, p.w - 1) or y in (0, p.h - 1) else JAR_FLUID[1]
-                else:
-                    c = JAR_FLUID[2] if y == 0 else (JAR_FLUID[0] if y % 4 == 3 else JAR_FLUID[1])
-                p.put(x, y, c, alpha)
-    return paint
-
-
-def jar_glass_clean():
-    """Glass you see only by one thin straight highlight near its left side (a texel of a piece painted two texels a
-    pixel, so half a pixel wide), with a shorter paler one beside it; the rest is clear (cut out), as on the Specimen
-    Jar."""
-    def paint(p):
-        x = max(2, int(p.w * 0.18))
-        for y in range(int(p.h * 0.1), int(p.h * 0.75)):
-            p.put(x, y, JAR_SHINE[0])
-        for y in range(int(p.h * 0.25), int(p.h * 0.5)):
-            p.put(x + 2, y, JAR_SHINE[1])
-    return paint
-
-
-def jar_iron_clean(sides="tlbr"):
-    """A bigger jar's dark iron, clean: one flat shade, lit along its top and left edges and shaded along the others."""
-    return ca.bevel(JAR_IRON, JAR_IRON_BASE, sides=sides)
-
-
-def vessel(name):
-    """A bigger specimen jar, modelled whole in its frame. The Tall Specimen Jar: the jar drawn out two blocks tall on a
-    wider foot, its lid with a knob. The Specimen Tank: a glass tank two blocks every way between iron corner posts, on
-    a riveted plinth under a riveted lid with a hatch and its knob. Glass is painted two texels a pixel so its highlight
-    stays thin."""
+def specimen_vessel(name):
+    """A bigger Specimen Jar, modelled whole in its frame: the Specimen Jar's boxes (tools/decor8_data.py jar_elements),
+    `scale` times bigger, on its own textures. What floats in it is the jar's specimen, drawn as much bigger by the
+    client."""
     v = d17.SPECIMEN_VESSELS[name]
-    w, h, d = (16 * n for n in v["size"])
-    sc = Sculpt(name, 188 + list(d17.SPECIMEN_VESSELS).index(name), 64 if name == "tall_specimen_jar" else 128)
-    if name == "tall_specimen_jar":
-        glass_ = sc.piece("glass", 20, 52, jar_glass_clean())
-        fluid_side = sc.piece("fluid", 9, 24, jar_fluid_clean())
-        fluid_top = sc.piece("fluid_top", 9, 9, jar_fluid_clean(top=True))
-        item_fluid = (sc.piece("item_fluid", 9, 24, jar_fluid_clean(alpha=ITEM_FLUID_ALPHA)),
-                      sc.piece("item_fluid_top", 9, 9, jar_fluid_clean(top=True, alpha=ITEM_FLUID_ALPHA)))
-        iron = sc.piece("iron", 22, 3, jar_iron_clean())
-        iron_top = sc.piece("iron_top", 11, 11, lid_top_iron())
-        knob = sc.piece("knob", 6, 2, ca.bevel(JAR_IRON, JAR_IRON_BASE + 1))
-        knob_top = sc.piece("knob_top", 6, 6, ca.bevel(JAR_IRON, JAR_IRON_BASE + 1))
-        els = [cube((2.5, 0, 2.5), (13.5, 1.5, 13.5), {**{s: iron for s in SIDES4}, "up": iron_top, "down": iron_top}),
-               cube((3.5, 1.5, 3.5), (12.5, 26, 12.5), {**{s: fluid_side for s in SIDES4}, "up": fluid_top}, light=15),
-               cube((3, 1.5, 3), (13, 28, 13), {s: glass_ for s in SIDES4}),
-               cube((2.75, 28, 2.75), (13.25, 29.5, 13.25), {**{s: iron for s in SIDES4}, "up": iron_top, "down": iron_top}),
-               cube((6.5, 29.5, 6.5), (9.5, 30.5, 9.5), {**{s: knob for s in SIDES4}, "up": knob_top})]
-    else:
-        # Packed row by row, the tallest pieces first.
-        glass_ = sc.piece("glass", 58, 54, jar_glass_clean())
-        fluid_top = sc.piece("fluid_top", 28, 28, jar_fluid_clean(top=True))
-        item_fluid_top = sc.piece("item_fluid_top", 28, 28, jar_fluid_clean(top=True, alpha=ITEM_FLUID_ALPHA))
-        post = sc.piece("post", 4, 27, jar_iron_clean(sides="lr"))
-        iron_top = sc.piece("iron_top", 32, 32, lid_top_iron())
-        fluid_side = sc.piece("fluid", 28, 24, jar_fluid_clean())
-        item_fluid = (sc.piece("item_fluid", 28, 24, jar_fluid_clean(alpha=ITEM_FLUID_ALPHA)), item_fluid_top)
-        hatch_top = sc.piece("hatch_top", 20, 20, lid_top_iron())
-        plinth = sc.piece("plinth", 64, 6, ca.riveted(JAR_IRON, JAR_IRON_BASE, 12))
-        hatch = sc.piece("hatch", 20, 2, jar_iron_clean())
-        knob = sc.piece("knob", 6, 2, ca.bevel(JAR_IRON, JAR_IRON_BASE + 1))
-        knob_top = sc.piece("knob_top", 6, 6, ca.bevel(JAR_IRON, JAR_IRON_BASE + 1))
-        lid = sc.piece("lid", 64, 3, ca.riveted(JAR_IRON, JAR_IRON_BASE, 12))
-        els = [cube((0, 0, 0), (32, 3, 32), {**{s: plinth for s in SIDES4}, "up": iron_top, "down": iron_top}),
-               cube((2, 3, 2), (30, 27, 30), {**{s: fluid_side for s in SIDES4}, "up": fluid_top}, light=15),
-               cube((1.5, 3, 1.5), (30.5, 29.5, 30.5), {s: glass_ for s in SIDES4}),
-               cube((0, 29.5, 0), (32, 31, 32), {**{s: lid for s in SIDES4}, "up": iron_top, "down": iron_top}),
-               cube((11, 31, 11), (21, 31.6, 21), {**{s: hatch for s in SIDES4}, "up": hatch_top}),
-               cube((14.5, 31.6, 14.5), (17.5, 32, 17.5), {**{s: knob for s in SIDES4}, "up": knob_top})]
-        for x in (0, 30):
-            for z in (0, 30):
-                els.append(cube((x, 3, z), (x + 2, 29.5, z + 2), {s: post for s in SIDES4}))
-    assert max(e["to"][1] for e in els) <= h and max(e["to"][0] for e in els) <= w and max(e["to"][2] for e in els) <= d
-    sc.models[name] = els
-    sc.fluid = next((e["from"], e["to"]) for e in els if e.get("light_emission"))
-    # The item: no glass (its highlight would cross the specimen at slot size) and fainter fluid.
-    def drawn_with(e, uv):
-        sides = [f for side, f in e["faces"].items() if side != "up"]
-        return bool(sides) and all(f["uv"] == fa._uv(uv) for f in sides)
-    item = []
-    for e in els:
-        if drawn_with(e, glass_):
-            continue
-        if drawn_with(e, fluid_side):
-            e = dict(e, faces={side: dict(f, uv=fa._uv(item_fluid[1] if side == "up" else item_fluid[0])) for side, f in e["faces"].items()})
-        item.append(e)
-    sc.models[name + "_item"] = item
-    return sc
-
-
-def lid_top_iron():
-    """A specimen jar's iron lid from above, clean: one flat shade with a single bevel, lit along its top and left edges
-    and shaded along the others."""
-    return jar_iron_clean()
-
-
-SCLERA_WARM = pal("b8a598", "d6c6b8", "e8dcd0", "efe5dc")
-VEIN_RED = (176, 52, 56)
-IRIS_BLUE = pal("1e2a5a", "2c4a8e", "3e6cb8", "62a0dc", "a8d4f4")
-BRAIN = pal("8a4a58", "b06878", "cc8a98", "e2aab4", "f2c8cc")
-TENTACLE = pal("3a1848", "56265e", "72367a", "8e4c94")
-SUCKER = pal("b88cb8", "dcb4d8")
-PICKLED = pal("8a4a1a", "b0662a", "cc8240", "e2a05a", "f0bc7c")
-STEM_GREEN = pal("3e4a1e", "5a6a2a", "7a8a3a")
-NERVE = pal("a86a6a", "c88a84", "e0aaa2")
-
-
-def eye_sclera(veins=True):
-    """A specimen eye's white, clean: a warm off-white lit along its top, three placed veins running in toward the
-    front."""
-    def paint(p):
-        ca.soft(SCLERA_WARM, 2, top=0.3, bottom=0.3)(p)
-        if veins:
-            for x0, bend in ((0.2, 0.15), (0.55, -0.1), (0.8, 0.05)):
-                for y in range(int(p.h * 0.55), p.h):
-                    t = (y - p.h * 0.55) / (p.h * 0.45)
-                    p.put(p.w * (x0 + bend * t), y, VEIN_RED)
-    return paint
-
-
-def eye_iris():
-    """A specimen eye's front: a round blue iris with a dark ring round it, a round black pupil and a small pale-blue
-    glint; warm white outside the iris (opaque, so it needs no cut-out)."""
-    def paint(p):
-        ca.soft(SCLERA_WARM, 2, top=0.3, bottom=0.3)(p)
-        cx, cy = (p.w - 1) / 2, (p.h - 1) / 2
-        r = p.w * 0.42
-        for y in range(p.h):
-            for x in range(p.w):
-                d = math.hypot(x - cx, y - cy)
-                if d <= r:
-                    c = IRIS_BLUE[0] if d > r - 1.2 else (IRIS_BLUE[2] if y < cy else IRIS_BLUE[3])
-                    if d < r * 0.42:
-                        c = (14, 12, 18)
-                    p.put(x, y, c)
-        p.put(cx - r * 0.35, cy - r * 0.35, IRIS_BLUE[4])
-        p.put(cx - r * 0.35 + 1, cy - r * 0.35, IRIS_BLUE[4])
-    return paint
-
-
-def gyri():
-    """A brain's folds as a regular pattern: soft pink ridges between wavy furrows every four rows, each furrow a dark line
-    with a lit line above it."""
-    def paint(p):
-        for y in range(p.h):
-            for x in range(p.w):
-                p.put(x, y, BRAIN[3])
-        for band in range(p.h // 4 + 1):
-            for x in range(p.w):
-                y = band * 4 + 2 + round(math.sin(x * 0.55 + band * 1.9))
-                p.put(x, y, BRAIN[1])
-                p.put(x, y - 1, BRAIN[2])
-                p.put(x, y + 1, BRAIN[4])
-    return paint
-
-
-def tentacle_skin(suckers=True):
-    """A tentacle's skin: smooth purple lit down one side, with a row of pale round suckers down the other."""
-    def paint(p):
-        ca.bevel(TENTACLE, 2, sides="lr")(p)
-        if suckers:
-            for y in range(1, p.h - 1, 3):
-                cx = p.w * 0.68
-                ca.ellipse(p, cx, y + 1, max(0.9, p.w * 0.16), 0.9, SUCKER[1])
-                p.put(cx, y + 1, SUCKER[0])
-    return paint
-
-
-def specimens():
-    """The bigger jars' specimens, each centred on the origin at the Specimen Tank's size (the Tall Specimen Jar draws
-    them at half that): an eye with its nerve, a brain, a curling tentacle and a little pickled pumpkin, all clean, every
-    face pinned to a piece sized for it (about two texels a pixel). Every box is closed (the client draws them cut out,
-    and an open side showed the box hollow or the fluid through it), and no two boxes put faces on one plane."""
-    sc = Sculpt("big_specimens", 189, 128)
-    sclera = sc.piece("sclera", 16, 16, eye_sclera())
-    sclera_plain = sc.piece("sclera_plain", 16, 16, eye_sclera(veins=False))
-    bulge = sc.piece("bulge", 12, 12, eye_sclera(veins=False))
-    bulge_side = sc.piece("bulge_side", 18, 6, ca.bevel(SCLERA_WARM, 2, light=0))
-    iris = sc.piece("iris", 16, 16, eye_iris())
-    nerve = sc.piece("nerve", 4, 10, ca.bevel(NERVE, 1, sides="lr"))
-    brain_side = sc.piece("brain_side", 20, 14, gyri())
-    brain_top = sc.piece("brain_top", 20, 20, gyri())
-    brain_end = sc.piece("brain_end", 20, 14, gyri())
-    brain_cap = sc.piece("brain_cap", 10, 8, gyri())
-    fissure = sc.piece("fissure", 16, 6, ca.bevel(BRAIN, 1, light=0))
-    cerebellum = sc.piece("cerebellum", 12, 6, ca.bands(BRAIN, 2, period=2, width=1))
-    stem = sc.piece("brain_stem", 4, 10, ca.bevel(BRAIN, 1, sides="lr"))
-    tent = sc.piece("tentacle", 10, 12, tentacle_skin())
-    tent_plain = sc.piece("tentacle_plain", 10, 10, ca.bevel(TENTACLE, 2))
-    pumpkin_side = sc.piece("pumpkin", 20, 14, ca.bands(PICKLED, 3, period=4, width=1, horizontal=False))
-    pumpkin_top = sc.piece("pumpkin_top", 20, 20, ca.bevel(PICKLED, 3))
-    pumpkin_stem = sc.piece("pumpkin_stem", 4, 6, ca.bevel(STEM_GREEN, 1, sides="lr"))
-    leaf = sc.piece("leaf", 8, 6, ca.bevel(STEM_GREEN, 2))
-
-    def bulge_box(axis, half, reach, end, front=None):
-        """A box across the eye's ball along `axis`, `half` thick each way and reaching `reach` each way: its ends are
-        the ball's bulges, its sides (seen only where it stands out of the ball) plain white."""
-        lo, hi = [-half] * 3, [half] * 3
-        lo[axis], hi[axis] = -reach, reach
-        ends = {0: ("west", "east"), 1: ("down", "up"), 2: ("north", "south")}[axis]
-        faces_ = {s: bulge_side for s in SIDES4 + ("up", "down")}
-        faces_.update({ends[0]: front or end, ends[1]: end})
-        return cube(tuple(lo), tuple(hi), faces_)
-    # The eye: a ball of crossed boxes looking north, its iris on the front bulge, its nerve hanging straight down. The
-    # crossing boxes differ a little in thickness (2.6, 2.7, 2.8) and reach (4.4, 4.3, 4.5), so none shares a plane.
-    sc.models["big_specimen_eye"] = [
-        cube((-3.6, -3.6, -3.6), (3.6, 3.6, 3.6), {"north": sclera_plain, "south": sclera, "east": sclera, "west": sclera,
-                                                   "up": sclera_plain, "down": sclera}),
-        bulge_box(0, 2.6, 4.4, bulge),
-        bulge_box(1, 2.7, 4.3, bulge),
-        bulge_box(2, 2.8, 4.5, bulge, front=iris),
-        cube((-1, -7.6, -1), (1, -4.2, 1), {**{s: nerve for s in SIDES4}, "down": nerve})]
-    # The brain: two hemispheres, each rounded front and back by a narrower end box, a fold along its top, a dark floor
-    # filling the fissure between them to just under their tops (so the slit is a groove, never a window), the cerebellum
-    # tucked under the back and the stem below.
-    brain = []
-    for x0, x1 in ((-5.6, -0.3), (0.3, 5.6)):
-        brain += [cube((x0, -2, -4.5), (x1, 3.5, 4.5), {"east": brain_side, "west": brain_side, "north": brain_end, "south": brain_end,
-                                                        "up": brain_top, "down": brain_side}),
-                  cube((x0 + 0.5, -1.4, -5.3), (x1 - 0.5, 3.0, 5.3), {"north": brain_end, "south": brain_end, "east": brain_cap,
-                                                                     "west": brain_cap, "up": brain_top, "down": brain_side}),
-                  cube((x0 + 0.6, 3.5, -3.8), (x1 - 0.6, 4.4, 3.8), {**{s: brain_side for s in SIDES4}, "up": brain_top})]
-    brain += [cube((-0.3, -2, -4.2), (0.3, 3.0, 4.2), {"north": fissure, "south": fissure, "up": fissure, "down": fissure}),
-              cube((-4.5, -3.4, 0.8), (4.5, -1.9, 4.6), {**{s: cerebellum for s in SIDES4}, "up": cerebellum, "down": cerebellum}),
-              cube((-1, -7, 0), (1, -2, 2), {**{s: stem for s in SIDES4}, "down": stem})]
-    sc.models["big_specimen_brain"] = brain
-    # The tentacle: segments narrowing as they rise, bending away and curling back over at the tip like a question mark,
-    # its suckers along the inside of the curl.
-    segs = [((-2.6, -8.5, -2.6), (2.6, -5.5, 2.6)), ((-2.3, -6, -1.7), (2.3, -3, 2.9)), ((-2.0, -3.5, -0.4), (2.0, -0.5, 3.6)),
-            ((-1.8, -1.0, 0.4), (1.8, 2.0, 4.0)), ((-1.5, 1.5, 0.5), (1.5, 4.2, 3.5)), ((-1.3, 3.3, -0.5), (1.3, 5.4, 2.1)),
-            ((-1.0, 3.8, -1.8), (1.0, 5.25, 0.2)), ((-0.7, 3.0, -2.4), (0.7, 4.4, -1.2))]
-    sc.models["big_specimen_tentacle"] = [cube(lo, hi, {"south": tent, "north": tent_plain, "east": tent_plain, "west": tent_plain,
-                                                         "up": tent_plain, "down": tent_plain}) for lo, hi in segs]
-    # The pumpkin: a ribbed round of crossed boxes, its stem and a curled leaf.
-    sc.models["big_specimen_pumpkin"] = [
-        cube((-5, -4, -4), (5, 3, 4), {**{s: pumpkin_side for s in SIDES4}, "up": pumpkin_top, "down": pumpkin_top}),
-        cube((-4, -4.6, -5), (4, 3.6, 5), {**{s: pumpkin_side for s in SIDES4}, "up": pumpkin_top, "down": pumpkin_top}),
-        cube((-0.8, 3.6, -0.8), (0.8, 6.2, 0.8), {**{s: pumpkin_stem for s in SIDES4}, "up": pumpkin_stem}),
-        cube((0.8, 4.2, -0.4), (3.8, 4.6, 1.6), {s: leaf for s in SIDES4 + ("up", "down")})]
-    return sc
+    return grown(d8d.jar_elements(), v["scale"], v["size"])
 
 
 # ---------------------------------------------------------------- the client's greyscale textures
@@ -1863,15 +1461,15 @@ def build(name):
         builders = {d17.CAULDRON["block"]: horned_skull_cauldron, d17.EMBER_BED["block"]: ember_bed, "candelabra": candelabra,
                     d17.BROOM["block"]: enchanted_broom, d17.DUSTPAN["block"]: dustpan, d17.BROOM_RACK["block"]: broom_rack,
                     d17.CABINET["block"]: curiosity_cabinet, d17.BELL_JAR["block"]: bell_jar, d17.MOTH_CASE["block"]: moth_case,
-                    **JAR_BUILDERS, d17.GIANT_HEART["block"]: giant_beating_heart, "big_specimens": specimens,
-                    **{v: (lambda v=v: vessel(v)) for v in d17.SPECIMEN_VESSELS}}
+                    **JAR_BUILDERS}
         _built[name] = builders[name]()
     return _built[name]
 
 
 def texture_of(block):
-    """The texture (and Sculpt) block `block` is drawn from: the candelabra share one."""
-    return "candelabra" if block in d17.CANDELABRA else block
+    """The texture (and Sculpt) block `block` is drawn from: the candelabra share one, and the Giant's Beating Heart is
+    drawn on the Beating Heart Jar's."""
+    return "candelabra" if block in d17.CANDELABRA else "beating_heart_jar" if block == d17.GIANT_HEART["block"] else block
 
 
 TALL_ITEM = {"gui": {"rotation": [25, 225, 0], "translation": [0, -3.5, 0], "scale": [0.5, 0.5, 0.5]},
@@ -1931,10 +1529,6 @@ def decor17_quads():
             qs = quads(single_sheets(sc.models[name]), {"p": block})
             # Glass is drawn see-through from both sides; everything else cut out.
             out[name] = [dict(q, nocull=True) if name.endswith("_pane") else dict(q, cutout=True) for q in qs]
-    # The bigger jars: the giant heart (in its vat's frame) and the big specimens (centred on the origin).
-    for sc in (build(d17.GIANT_HEART["block"]).heart, build("big_specimens")):
-        for name, elements in sc.models.items():
-            out[name] = [dict(q, cutout=True) for q in quads(single_sheets(elements), {"p": sc.name})]
     return out
 
 
@@ -2038,60 +1632,57 @@ def assets(root, write, lang):
     write(root.parent.parent / MOD / "candelabra.json", d17.layout())
 
 
-def retextured(elements, key):
-    """`elements` drawing on texture `#key` instead of `#p`."""
-    return [dict(e, faces={side: dict(face, texture=f"#{key}") for side, face in e["faces"].items()}) for e in elements]
-
-
-def multi_part_models(models, states, write, block, sc, size):
-    """A prop of several blocks: one model per block, cut from its whole model (a particle-only model for a block with
-    nothing of it to draw), and a blockstate choosing each block's model by its part and turning it by its facing."""
-    write(models / f"{block}_part.json", {"textures": {"particle": rid(f"block/{block}")}})
+def multi_part_models(models, states, write, block, elements, size, model):
+    """A prop of several blocks: one model per block, cut from its whole model `elements` (model(elements) makes a block
+    model of them, and of nothing, for a block with nothing of it to draw, the particles only), and a blockstate choosing
+    each block's model by its part and turning it by its facing."""
+    write(models / f"{block}_part.json", {"textures": {"particle": model([])["textures"]["particle"]}})
     parts = []
     for part in range(len(cells(size))):
-        elements = cell_part(sc.models[block], frame_cell(size, part), size)
-        name = f"{block}_{part}" if elements else f"{block}_part"
-        if elements:
-            write(models / f"{name}.json", fa.model(sc.name, elements))
+        cut = cell_part(elements, frame_cell(size, part), size)
+        name = f"{block}_{part}" if cut else f"{block}_part"
+        if cut:
+            write(models / f"{name}.json", model(cut))
         for facing, y in FACINGS.items():
             parts.append({"when": {"facing": facing, "part": str(part)}, "apply": {"model": rid(f"block/{name}"), **({"y": y} if y else {})}})
     write(states / f"{block}.json", {"multipart": parts})
 
 
+def bigger(display, k, elements):
+    """Item `display` with the item (`elements`) drawn `k` times bigger in an inventory slot and moved up or down to its
+    middle, so it stays inside the slot (a bigger jar's item is its small jar's)."""
+    gui = display["gui"]
+    scale = gui["scale"][0] * k
+    ax, ay = (math.radians(a) for a in gui["rotation"][:2])
+    # Each corner turned as the slot turns it (about y, then x), and how high it lands.
+    ys = [((p[1] - 8) * math.cos(ax) - (-(p[0] - 8) * math.sin(ay) + (p[2] - 8) * math.cos(ay)) * math.sin(ax)) * scale
+          for e in elements for p in ((x, y, z) for x in (e["from"][0], e["to"][0]) for y in (e["from"][1], e["to"][1])
+                                      for z in (e["from"][2], e["to"][2]))]
+    return dict(display, gui=dict(gui, translation=[0, round(-(min(ys) + max(ys)) / 2, 2), 0], scale=[round(scale, 4)] * 3))
+
+
+# Vanilla's block display (minecraft:block/block), which the Specimen Jar's item keeps.
+BLOCK_DISPLAY = {"gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [0.625, 0.625, 0.625]}}
+
+
 def big_jar_assets(root, write):
-    """The bigger jars' block models (one a block), blockstates and items: the Giant's Beating Heart's item shows its vat
-    and resting heart a third the size; each specimen jar's item shows it half the size with the specimen it holds."""
+    """The bigger jars' block models (one a block, cut from the whole), blockstates and items. Each item is its small
+    jar's, a little bigger in a slot: the Giant's Beating Heart's the Beating Heart Jar with its heart resting on its
+    stand, each specimen jar's the Specimen Jar's own item with the specimen it holds."""
     models, states, items = root / "models" / "block", root / "blockstates", root / "models" / "item"
     g = d17.GIANT_HEART
-    sc = build(g["block"])
-    size = (g["size"],) * 3
-    multi_part_models(models, states, write, g["block"], sc, size)
-    heart = sc.heart
-    beating = heart.models["giant_heart_cradle"] + heart.models["giant_heart_ventricles"] + heart.models["giant_heart_atria"]
-    item = fa.model(sc.name, fa.transformed(sc.models[g["block"]], 1 / g["size"], (0, 0, 0), (0, 0, 0))
-                    + retextured(fa.transformed(beating, 1 / g["size"], (0, 0, 0), (0, 0, 0)), "h"))
-    item["textures"]["h"] = rid(f"block/{heart.name}")
-    write(items / f"{g['block']}.json", item)
-
-    specimens_ = build("big_specimens")
+    heart = build("beating_heart_jar")
+    multi_part_models(models, states, write, g["block"], giant_beating_heart(), (g["size"],) * 3, lambda els: fa.model(heart.name, els))
+    resting = fa.transformed(heart.models["oddity_heart"], 1.0, d17.JARS["beating_heart_jar"]["heart"], (0, 0, 0))
+    write(items / f"{g['block']}.json", fa.model(heart.name, heart.models["beating_heart_jar"] + heart.models["oddity_heart_stand"] + resting,
+                                                bigger(fa.PLANT_DISPLAY, g["icon"], heart.models["beating_heart_jar"])))
+    jar = ag.SPECIMEN_JAR["block"]
     for name, v in d17.SPECIMEN_VESSELS.items():
-        sc = build(name)
-        multi_part_models(models, states, write, name, sc, v["size"])
-        k = 1 / max(v["size"])
-        w, h, d = (16 * n * k for n in v["size"])
-        offset = ((16 - w) / 2, 0, (16 - d) / 2)
-        whole = fa.transformed(sc.models[name + "_item"], k, offset, (0, 0, 0))
-        middle = [v["middle"][i] * k + offset[i] for i in range(3)]
+        multi_part_models(models, states, write, name, specimen_vessel(name), v["size"],
+                          lambda els: dict(block_model(d8d.JAR_TEXTURES, els, d8d.JAR_TEXTURES["glass"]), ambientocclusion=False))
         for specimen in ag.SPECIMEN_JAR["specimens"]:
-            grown = v["scale"] * ITEM_SPECIMEN_SCALE[name]
-            corners = [c for e in specimens_.models[f"big_specimen_{specimen}"] for c in (e["from"], e["to"])]
-            lo, hi = sc.fluid
-            assert all(lo[i] <= v["middle"][i] + c[i] * grown <= hi[i] for c in corners for i in range(3)), \
-                f"the {specimen} leaves the {name} item's fluid"
-            inside = retextured(fa.transformed(specimens_.models[f"big_specimen_{specimen}"], grown * k, middle, (0, 0, 0)), "s")
-            item = fa.model(sc.name, whole + inside, fa.PLANT_DISPLAY if v["size"][1] > v["size"][0] else None)
-            item["textures"]["s"] = rid("block/big_specimens")
-            write(items / f"{name}_{specimen}.json", item)
+            write(items / f"{name}_{specimen}.json", {"parent": rid(f"block/{jar}_{specimen}_item"),
+                                                      "display": bigger(BLOCK_DISPLAY, v["icon"], d8d.jar_elements())})
         first = ag.SPECIMEN_JAR["specimens"][0]
         write(root / "items" / f"{name}.json", {"model": {
             "type": "minecraft:select", "property": "minecraft:block_state", "block_state_property": "specimen",
@@ -2140,10 +1731,8 @@ def tags(tags):
 
 def textures():
     """(kind, name) -> image for each block's texture, the ladle's item picture and the client's tinted textures."""
-    out = {("block", texture_of(block)): build(texture_of(block)).atlas.img for block in d17.blocks()}
-    heart = build(d17.GIANT_HEART["block"]).heart
-    out[("block", heart.name)] = heart.atlas.img
-    out[("block", "big_specimens")] = build("big_specimens").atlas.img
+    # The bigger specimen jars draw on the Specimen Jar's textures (tools/decor8_textures.py).
+    out = {("block", texture_of(block)): build(texture_of(block)).atlas.img for block in d17.blocks() if block not in d17.SPECIMEN_VESSELS}
     out[("item", d17.LADLE["item"])] = brew_ladle()
     for name, img in tint_textures().items():
         out[("entity", name)] = img

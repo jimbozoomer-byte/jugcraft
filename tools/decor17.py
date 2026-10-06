@@ -17,9 +17,10 @@ textures: tools/decor17_data.py, sculpted on the toolkit in tools/flora_art.py.
 5. Oddity Jars (agriculture/OddityJarBlock): eyeballs that watch, a heart that beats as a redstone clock, a bat that
    wakes (in a wider, taller jar, so its wings stay inside the glass), a two-headed snake and a drumming hand.
 6. The bigger jars, several blocks placed and broken as one (agriculture/MultiDecorationBlock with a third, "away",
-   axis): the Giant's Beating Heart (GIANT_HEART, 3 x 3 x 3, GiantBeatingHeartBlock), a slow redstone clock whose heart
-   swells with each beat, and the Tall Specimen Jar (1 x 2 x 1) and Specimen Tank (2 x 2 x 2) (SPECIMEN_VESSELS,
-   SpecimenVesselBlock), the Specimen Jar's specimens floating big in glowing fluid.
+   axis), each a small jar made bigger and nothing else: the Giant's Beating Heart (GIANT_HEART, the Beating Heart Jar
+   three times over, 3 x 3 x 3, GiantBeatingHeartBlock), a slow redstone clock whose heart swells with each beat, and
+   the Tall Specimen Jar (the Specimen Jar twice over, 1 x 2 x 1) and Specimen Tank (three times over, 3 x 3 x 3)
+   (SPECIMEN_VESSELS, SpecimenVesselBlock), each specimen floating as big in its glowing fluid.
 Every recipe follows the agriculture feature switch.
 """
 
@@ -89,9 +90,17 @@ CABINET = {"block": "curiosity_cabinet", "display": "Curiosity Cabinet", "slots"
 BELL_JAR = {"block": "bell_jar", "display": "Bell Jar", "turn_ticks": 240}
 MOTH_CASE = {"block": "moth_display_case", "display": "Moth Display Case", "moths": ["luna", "deaths_head", "atlas"]}
 
+# The oddity jars' shape, in pixels: each part's inset from the block's side (base, glass, lid), the glass's and lid's
+# tops, the knob's half-width and top, and the label's box (x0, y0, x1, y1) on the front. The bat's jar is bigger
+# (JARS bat_in_a_jar "jar").
+ODDITY_JAR = {"base": 4.0, "glass": 4.3, "lid": 3.9, "glass_top": 11.6, "lid_top": 12.8, "knob": 1.0, "knob_top": 13.6,
+              "label": (5.2, 2.6, 10.8, 6.0)}
 JARS = {
     "jar_of_eyeballs": {"display": "Jar of Eyeballs", "range": 8},
-    "beating_heart_jar": {"display": "Beating Heart Jar", "tempos": [60, 80, 100, 120], "pulse_ticks": 2},
+    # The heart: where the client draws its middle (`heart`, pixels in the jar) and how much more it swells at the peak
+    # of a beat (`swell`); the audit checks that at its fullest, turned any way, it stays inside the glass.
+    "beating_heart_jar": {"display": "Beating Heart Jar", "tempos": [60, 80, 100, 120], "pulse_ticks": 2, "heart": (8.0, 6.4, 8.0),
+                          "swell": 0.14},
     # The bat's jar is wider and taller than the others (5 October 2026: its wings poked through the glass), and the bat
     # is drawn at `scale`: awake it circles `orbit` pixels round the middle at `fly_y` (bobbing `bob` up and down), asleep
     # it hangs at `hang_y`. The audit checks that its wings stay `margin` inside the glass at every beat.
@@ -105,28 +114,27 @@ JARS = {
 
 # The bigger jars (5 October 2026, after the owner's "the beating heart is awesome, make a version that is like a giant's
 # beating heart, 3x3x3" and "make bigger versions of the specimen jar"): props of several blocks, placed and broken as one
-# (agriculture/MultiDecorationBlock: from the block aimed at, to the placer's right, up and away). Each is modelled whole
-# in its own frame (x across to the placer's left, y up, z away from the placer, in pixels) and cut into one model per
-# block; what moves in it is drawn by the client from its first block.
-# The Giant's Beating Heart: a giant's heart in a glass vat of red murk on an iron plinth, tethered to the lid by three
-# tubes. It is a slow redstone clock: it beats at one of `tempos` beats a minute (use it to change), each beat a
-# `pulse_ticks` signal of 15 from its first block to every side but below, and a signal into any of its bottom blocks
-# from below stops it. The client swells the atria with the beat and the ventricles `lub_dub_ticks` later (`atria` and
-# `ventricles` more at the peak), each settling over `decay_ticks`, about their `anchor`s (pixels, in its frame).
+# (agriculture/MultiDecorationBlock: from the block aimed at, to the placer's right, up and away). Each is a small jar
+# made bigger and nothing else (6 October 2026: the owner found a vat of the giant's own design "so so ugly", and wanted
+# "the heart in the jar but just a bigger version in the exact same style of jar"): every box of the small jar's model,
+# and what floats in it, `scale` times bigger about the middle of the frame's floor, drawing on the small jar's own
+# textures. Each is modelled whole in its own frame (x across to the placer's left, y up, z away from the placer, in
+# pixels) and cut into one model per block; what moves in it is drawn by the client from its first block, just as the
+# small jar's renderer draws it, scaled. `size` is in blocks (across, up, deep).
+# The Giant's Beating Heart: the Beating Heart Jar three times over. It is a slow redstone clock like the jar: it beats
+# at one of `tempos` beats a minute (use it to change), each beat a `pulse_ticks` signal of 15 from its first block to
+# every side but below, and a signal into any of its bottom blocks from below stops it. Its `size` is its scale. In a slot
+# it shows the Beating Heart Jar with its heart, `icon` times as big as the jar's item.
 GIANT_HEART = {"block": "giant_beating_heart", "display": "Giant's Beating Heart", "size": 3, "tempos": [40, 50, 60, 72],
-               "pulse_ticks": 2, "lub_dub_ticks": 4, "decay_ticks": 8, "atria": 0.10, "ventricles": 0.12,
-               "atria_anchor": (24.0, 29.0, 24.0), "ventricle_anchor": (21.0, 8.0, 24.0)}
-# The Tall Specimen Jar (one block across, two tall) and the Specimen Tank (two by two by two): the Specimen Jar's look
-# made big, glowing green fluid in clear glass between iron fittings, holding one of the jar's specimens (sneak-use for
-# the next, kept when broken), bobbing and turning slowly among rising bubbles. `size` in blocks (across, up, deep),
-# `light` on every block, and the client's specimen: its middle (`middle`, pixels in the frame), `scale` and `bubbles`.
+               "pulse_ticks": 2, "icon": 1.05}
+# The Tall Specimen Jar (the Specimen Jar twice over, one block across and two tall) and the Specimen Tank (three times
+# over, three blocks every way), each holding one of the jar's specimens (sneak-use for the next, kept when broken),
+# bobbing and turning slowly among rising bubbles; `light` on every block. In a slot each shows the Specimen Jar's own
+# item (with the specimen in it) `icon` times as big as the Specimen Jar's.
 SPECIMEN_VESSELS = {
-    "tall_specimen_jar": {"display": "Tall Specimen Jar", "size": (1, 2, 1), "light": 8, "middle": (8.0, 13.5, 8.0), "scale": 0.55,
-                          "bubbles": 4, "bob": 1.2},
-    "specimen_tank": {"display": "Specimen Tank", "size": (2, 2, 2), "light": 10, "middle": (16.0, 16.5, 16.0), "scale": 1.35,
-                      "bubbles": 7, "bob": 1.5},
+    "tall_specimen_jar": {"display": "Tall Specimen Jar", "size": (1, 2, 1), "scale": 2, "light": 8, "icon": 1.25},
+    "specimen_tank": {"display": "Specimen Tank", "size": (3, 3, 3), "scale": 3, "light": 10, "icon": 1.45},
 }
-VESSEL_BOB_TICKS = 120
 
 SHAPED = [
     {"id": CAULDRON["block"], "pattern": ["HBH", "ICI"], "key": {"H": "minecraft:goat_horn", "B": "minecraft:bone_block",

@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import java.util.EnumMap;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -23,6 +25,8 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -71,6 +75,68 @@ public abstract class MultiDecorationBlock extends Block {
 
 	public int part(BlockState state) {
 		return state.getValue(partProperty());
+	}
+
+	/** How many blocks across the prop is. */
+	public int across() {
+		int across = 1;
+		for (int[] cell : cells()) {
+			across = Math.max(across, cell[0] + 1);
+		}
+		return across;
+	}
+
+	/** How many blocks deep (away from the player who placed it) the prop is. */
+	public int deep() {
+		int deep = 1;
+		for (int[] cell : cells()) {
+			deep = Math.max(deep, cell.length > 2 ? cell[2] + 1 : 1);
+		}
+		return deep;
+	}
+
+	/**
+	 * A small prop's box {x0, y0, z0, x1, y1, z1} (pixels in its one block) {@code scale} times bigger in the frame of a prop
+	 * {@code across} blocks across and {@code deep} deep, about the small prop's bottom middle (8, 0, 8) set at the middle
+	 * of the frame's floor, as tools/decor17_data.py grown() makes its model.
+	 */
+	protected static double[] grown(double[] box, int scale, int across, int deep) {
+		double[] middle = {8.0 * across, 0.0, 8.0 * deep};
+		double[] out = new double[6];
+		for (int k = 0; k < 6; k++) {
+			out[k] = middle[k % 3] + (box[k] - (k % 3 == 1 ? 0.0 : 8.0)) * scale;
+		}
+		return out;
+	}
+
+	/**
+	 * Each part's shape, for each facing, of a prop of {@code cells} (as {@link #cells} gives them) whose whole box is
+	 * {@code whole} ({x0, y0, z0, x1, y1, z1} in pixels in its frame, facing north: x across to the placer's left from
+	 * its far block, y up, z away), cut at the block boundaries: empty for a part the box misses.
+	 */
+	protected static Map<Direction, VoxelShape[]> partShapes(double[] whole, int[][] cells) {
+		int across = 1;
+		for (int[] cell : cells) {
+			across = Math.max(across, cell[0] + 1);
+		}
+		Map<Direction, VoxelShape[]> out = new EnumMap<>(Direction.class);
+		for (Direction facing : Direction.Plane.HORIZONTAL) {
+			VoxelShape[] shapes = new VoxelShape[cells.length];
+			for (int part = 0; part < cells.length; part++) {
+				int[] cell = cells[part];
+				double[] origin = {16.0 * (across - 1 - cell[0]), 16.0 * cell[1], cell.length > 2 ? 16.0 * cell[2] : 0.0};
+				double[] box = new double[6];
+				boolean empty = false;
+				for (int k = 0; k < 3; k++) {
+					box[k] = Math.max(0.0, whole[k] - origin[k]);
+					box[k + 3] = Math.min(16.0, whole[k + 3] - origin[k]);
+					empty |= box[k + 3] <= box[k];
+				}
+				shapes[part] = empty ? Shapes.empty() : LongDecorationBlock.shape(new double[][] {box}, facing);
+			}
+			out.put(facing, shapes);
+		}
+		return out;
 	}
 
 	/** Where part {@code part} of the prop with its master at {@code master}, facing {@code facing}, is. */

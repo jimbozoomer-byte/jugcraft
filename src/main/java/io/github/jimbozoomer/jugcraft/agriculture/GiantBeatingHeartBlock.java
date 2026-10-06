@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -22,14 +23,14 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The Giant's Beating Heart (Halloween decorations batch 17, the bigger jars): a giant's heart in a glass vat of red
- * murk, three blocks wide, tall and deep, placed and broken as one ({@link MultiDecorationBlock}, from the block aimed at
- * to the placer's right, up and away). It is a slow redstone clock like the Beating Heart Jar: it beats at one of
+ * The Giant's Beating Heart (Halloween decorations batch 17, the bigger jars): the Beating Heart Jar made {@value #SIZE}
+ * times bigger, its jar, murk, heart and brass stand and all, three blocks wide, tall and deep, placed and broken as one
+ * ({@link MultiDecorationBlock}, from the block aimed at to the placer's right, up and away); each block's shape is its
+ * piece of the jar's box made as much bigger. It is a slow redstone clock like the Beating Heart Jar: it beats at one of
  * {@link #TEMPOS} beats a minute (use it to change), and each beat ({@link #BEAT}, on its first block) gives a
  * {@value #PULSE_TICKS}-tick signal of 15 from its first block to every side but the one below, with a deep heartbeat. A
  * redstone signal into any of its bottom blocks from below stops it. The beat is a scheduled tick on the first block,
@@ -37,10 +38,12 @@ import org.jspecify.annotations.Nullable;
  * on its first block.
  */
 public class GiantBeatingHeartBlock extends MultiDecorationBlock implements EntityBlock {
+	/** How many blocks wide, tall and deep it is, and how many times bigger than the Beating Heart Jar. */
 	public static final int SIZE = 3;
 	private static final int[][] CELLS = box(SIZE, SIZE, SIZE);
 	public static final IntegerProperty PART = IntegerProperty.create("part", 0, CELLS.length - 1);
-	/** The part in the middle of the vat. */
+	private static final Map<Direction, VoxelShape[]> SHAPES = partShapes(grown(OddityJarBlock.BOX, SIZE, SIZE, SIZE), CELLS);
+	/** The part in the middle of the jar. */
 	public static final int MIDDLE = 13;
 	public static final int[] TEMPOS = {40, 50, 60, 72};
 	public static final int PULSE_TICKS = 2;
@@ -158,7 +161,7 @@ public class GiantBeatingHeartBlock extends MultiDecorationBlock implements Enti
 
 	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-		return Shapes.block();
+		return SHAPES.get(state.getValue(FACING))[part(state)];
 	}
 
 	/** Its glass lets the light through, so the murk and the heart in its middle are lit like the room round it. */

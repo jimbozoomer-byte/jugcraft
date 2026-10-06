@@ -1,16 +1,17 @@
 {
   "parent": "minecraft:block/block",
-  "ambientocclusion": false,
   "textures": {
-    "p": "jugcraft:block/specimen_tank",
-    "particle": "jugcraft:block/specimen_tank"
+    "particle": "jugcraft:block/specimen_jar_glass",
+    "iron": "jugcraft:block/specimen_jar_iron",
+    "glass": "jugcraft:block/specimen_jar_glass",
+    "fluid": "jugcraft:block/specimen_jar_fluid"
   },
   "elements": [
     {
       "from": [
         0,
         0,
-        0
+        12
       ],
       "to": [
         16,
@@ -19,105 +20,31 @@
       ],
       "faces": {
         "north": {
+          "texture": "#iron",
           "uv": [
-            4.0,
-            11.0,
-            8.0,
-            11.75
-          ],
-          "texture": "#p"
-        },
-        "west": {
-          "uv": [
-            0.0,
-            11.0,
-            4.0,
-            11.75
-          ],
-          "texture": "#p"
+            5.3333,
+            15.0,
+            10.6667,
+            16.0
+          ]
         },
         "up": {
+          "texture": "#iron",
           "uv": [
-            0.0,
-            6.875,
-            2.0,
-            8.875
-          ],
-          "texture": "#p"
+            5.3333,
+            4.0,
+            10.6667,
+            5.3333
+          ]
         },
         "down": {
+          "texture": "#iron",
           "uv": [
-            0.0,
-            8.875,
-            2.0,
-            10.875
-          ],
-          "texture": "#p"
-        }
-      }
-    },
-    {
-      "from": [
-        2,
-        3,
-        2
-      ],
-      "to": [
-        16,
-        16,
-        16
-      ],
-      "faces": {
-        "north": {
-          "uv": [
-            5.875,
-            8.25,
-            7.625,
-            9.875
-          ],
-          "texture": "#p"
-        },
-        "west": {
-          "uv": [
-            4.125,
-            8.25,
-            5.875,
-            9.875
-          ],
-          "texture": "#p"
-        }
-      },
-      "light_emission": 15
-    },
-    {
-      "from": [
-        1.5,
-        3,
-        1.5
-      ],
-      "to": [
-        16,
-        16,
-        16
-      ],
-      "faces": {
-        "north": {
-          "uv": [
-            3.625,
-            3.4387,
-            7.25,
-            6.75
-          ],
-          "texture": "#p"
-        },
-        "west": {
-          "uv": [
-            0.0,
-            3.4387,
-            3.625,
-            6.75
-          ],
-          "texture": "#p"
+            5.3333,
+            10.6667,
+            10.6667,
+            12.0
+          ]
         }
       }
     },
@@ -125,51 +52,58 @@
       "from": [
         0,
         3,
-        0
+        15
       ],
       "to": [
-        2,
         16,
-        2
+        16,
+        16
       ],
       "faces": {
         "north": {
+          "texture": "#fluid",
           "uv": [
-            14.625,
-            1.7193,
-            15.125,
-            3.375
-          ],
-          "texture": "#p"
+            5.3333,
+            10.6667,
+            10.6667,
+            15.0
+          ]
         },
-        "south": {
+        "down": {
+          "texture": "#fluid",
           "uv": [
-            14.625,
-            1.7193,
-            15.125,
-            3.375
-          ],
-          "texture": "#p"
-        },
-        "east": {
+            5.3333,
+            10.6667,
+            10.6667,
+            11.0
+          ]
+        }
+      },
+      "light_emission": 15
+    },
+    {
+      "from": [
+        0,
+        3,
+        13.5
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#glass",
           "uv": [
-            14.625,
-            1.7193,
-            15.125,
-            3.375
-          ],
-          "texture": "#p"
-        },
-        "west": {
-          "uv": [
-            14.625,
-            1.7193,
-            15.125,
-            3.375
-          ],
-          "texture": "#p"
+            5.3333,
+            10.6667,
+            10.6667,
+            15.0
+          ]
         }
       }
     }
-  ]
+  ],
+  "ambientocclusion": false
 }
