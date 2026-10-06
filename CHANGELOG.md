@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### The Arcane Concordance: shared notes and typed resources
+- **Research Notes**: write down what you know on paper; another player who reads your notes can understand First Light after observing it once in the dark themselves. Notes never teach mastery, and your own notes teach you nothing.
+- **Lumen Sconce**: a brass lamp-stand that burns Radiance for a steady light 15. Anyone may pour Radiance in from a Kindled Lantern; only its owner can draw it back out. It keeps its Radiance when broken.
+- Behind the scenes, every magical resource now follows one set of rules: typed containers, transfers that never convert, recipes that always lose, and a fixed, fair way to share a short supply. Record: [arcane-concordance-sharing.md](docs/features/arcane-concordance-sharing.md).
+
 ### The Arcane Concordance: First Light
 - Jugcraft's magic begins. Sneak-use a luminous specimen (amethyst first) to examine it; in the dark it shows its own glow. Understand **First Light** in the field (three specimens in the dark) or by study at the new **Lampwright's Bench**.
 - With an **Initiate's Wand**, cast **Kindle** through Spell Engine: a steady light where you look, for a minute, paid with **Focus** (20, regenerating), Jugcraft's first magical resource. Practising it in eight places masters it.

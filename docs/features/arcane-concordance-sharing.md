@@ -125,7 +125,12 @@ model reuses the bench's brass and lens textures. Everything is original.
   duplicates, own notes, mastery not written, the use path and its rate limit; sconce pour, refused second pour, a
   stranger's draw refused, the owner's partial draw, the rate budget, burning, conservation, Jade, and keeping its
   Radiance when broken) and `ConcordanceResourceGameTests` (the step 7 rules above, run on the test server).
-- CI: recorded in the delivery report and below once run.
+- CI, run 37505487232 (Build workflow, run manually on this branch): `mod` passed with **"All 837 required tests
+  passed"** (the 6 new tests included; the rules loaded with 0 problems and the codex with no errors), and
+  `optional integrations absent` passed. The client test shards fail before any test starts, with the same OpenGL
+  startup crash as on the framework foundation branch (see [First Light](arcane-concordance-first-light.md#verification)).
+- After that run, the sconce's scheduled check was capped at one burn period (see Rollout); the CI result for that
+  change is in the delivery report.
 
 Not yet run: any client (sconce model, notes textures and tooltips in game), a two-client dedicated server, a GuiLib
 research comparison screen (not built: `/jugcraft concordance status` and the codex are the fallback).
@@ -141,5 +146,7 @@ No worldgen, creatures, loot or seasons. Notes are paper; sconces are placed blo
 - The channel working's data changed shape (it names a conversion). Nothing has been released, so there is no old
   data to migrate.
 - Sconce ownership is the placer only; party members cannot draw yet.
+- A sconce checks its charge at least once a minute (one burnt measure), so after a partial draw its light can stay on
+  for up to a minute after the Radiance runs out (the level keeps one pending tick per block).
 - The allocator, Bound Will, Astral and Prima rules have no in-game user yet; they are fixed and tested now so the
   steps that use them start from settled rules.

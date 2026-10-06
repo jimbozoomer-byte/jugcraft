@@ -16,7 +16,8 @@ Architecture, vocabulary and the 32-step checklist: [ARCANE_CONCORDANCE.md](../A
    lichen, glow berries, Jugcraft's glowcap, glimmerbloom and jack-o'-lantern mushroom. Their tooltip says so. Sneak and
    use one to examine it: First Light is **Encountered**.
 2. **Observe.** Examined somewhere dark (light 4 or less at eye level), the specimen glows by itself: **Observed**.
-3. **Understand**, by either route:
+3. **Understand**, by any of three routes (the third, reading another player's Research Notes, is in
+   [arcane-concordance-sharing.md](arcane-concordance-sharing.md)):
    - the field: observe three different specimens in the dark; or
    - the laboratory: craft a **Lampwright's Bench** (copper, amethyst, planks, sticks), put a specimen in its dish and
      press Study; after 5 seconds the bench uses the specimen and hands over the notes.

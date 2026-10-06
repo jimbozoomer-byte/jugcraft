@@ -136,8 +136,11 @@ public class LumenSconceBlockEntity extends BlockEntity {
 			level.setBlock(worldPosition, state.setValue(LumenSconceBlock.LIT, lit), Block.UPDATE_ALL);
 		}
 		if (lit) {
+			// The level keeps one pending tick per block and ignores a second, so a draw that brings the end forward
+			// cannot move an earlier-scheduled tick: checking at least once per burnt measure keeps the light at most
+			// one measure late going out.
 			long untilOut = since + stored * BURN_TICKS - now;
-			level.scheduleTick(worldPosition, state.getBlock(), (int) Math.clamp(untilOut, 1L, 24000L));
+			level.scheduleTick(worldPosition, state.getBlock(), (int) Math.clamp(untilOut, 1L, (long) BURN_TICKS));
 		}
 	}
 

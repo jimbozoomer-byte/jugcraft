@@ -281,8 +281,9 @@ Record: [walled-town.md](features/walled-town.md).
 
 ### The Arcane Concordance (`concordance/`, `tools/concordance.py`)
 
-Magic, milestone 1 (First Light). Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); record:
-[arcane-concordance-first-light.md](features/arcane-concordance-first-light.md).
+Magic, milestones 1 and 2. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records:
+[arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
+[arcane-concordance-sharing.md](features/arcane-concordance-sharing.md).
 
 | ID / part | Class / data | What |
 | --- | --- | --- |
@@ -298,6 +299,9 @@ Magic, milestone 1 (First Light). Contract and vocabulary: [ARCANE_CONCORDANCE.m
 | commands | `ConcordanceCommand` | `/jugcraft concordance status [player]`, `diagnose`, `grant`, `reset`, `focus` |
 | client | `ConcordanceClient`, `ConcordanceClientOptions`, `ConcordanceSettingsScreen` (Cloth Config), `compat/ConcordanceModMenu` | Focus line, tooltips, settings (`config/jugcraft-client.properties`) |
 | optional | `compat/jade/ConcordanceDataProvider`, JEI bench category, `assets/jugcraft/dynamiclights/item/kindled_lantern.json` | Jade, JEI and LambDynamicLights display |
+| `jugcraft:research_notes` | `ResearchNotesItem`, component `ResearchNotes`, `RateGate` | write what you know; others read it as evidence (never mastery) |
+| `jugcraft:lumen_sconce` | `LumenSconceBlock`, `LumenSconceBlockEntity` | burns Radiance for light 15; anyone pours, the owner draws |
+| typed resources | `concordance/resource/` (pure Java); `data/jugcraft/concordance/conversion/` | containers, transfers, conversions, allocation, Bound Will and Astral ledgers, Prima values |
 
 ## Shared systems and how to plug in
 
@@ -670,7 +674,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Electronics beyond processors: uses for processors in the tiers above. Rule-based machine control exists (batch 36).
 - EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
-- Magic beyond the Arcane Concordance's first milestone (First Light); its 32-step plan is in [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md).
+- Magic beyond the Arcane Concordance's first two milestones (First Light; shared notes and typed resources); its 32-step plan is in [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md).
 - Any creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from the seasons (colours, the Harvest Feast and December windows, and winter snow) and the agriculture branch's Halloween. Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its slices so far; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)). (The Pixel Hollows is the first cave biome; it has no creatures, structures or bosses yet.)
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
 - Handbook translations (English only).
