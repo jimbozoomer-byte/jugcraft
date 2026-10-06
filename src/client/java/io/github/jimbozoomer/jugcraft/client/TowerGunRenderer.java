@@ -13,7 +13,8 @@ import net.minecraft.world.phys.AABB;
 
 /**
  * Draws a tower gun (batch 54) from the parts tools/tower_guns.py exports (assets/jugcraft/tower_gun_quads.json): its
- * fixed plinth, its turntable turned to the aim, and its barrel raised on the trunnions and kicking back when it fires.
+ * fixed plinth, its turntable turned to the aim, and its cradle raised on the trunnions with the barrel recoiling back
+ * through it when it fires.
  * Pivots in pixels from the gun's feet: keep in sync with tools/tower_guns.py (tools/check_mod_data.py checks them).
  */
 public class TowerGunRenderer extends EntityRenderer<TowerGun, TowerGunRenderer.State> {
@@ -63,8 +64,8 @@ public class TowerGunRenderer extends EntityRenderer<TowerGun, TowerGunRenderer.
 
 	@Override
 	protected AABB getBoundingBoxForCulling(TowerGun gun, float partialTick) {
-		// The barrel reaches well past the footprint.
-		return gun.getBoundingBox().inflate(7.0, 4.0, 7.0);
+		// The barrel reaches well past the footprint: the Grand Mortar's muzzle stands 8.6 blocks up at full elevation.
+		return gun.getBoundingBox().inflate(7.0, 5.0, 7.0);
 	}
 
 	@Override
@@ -93,6 +94,8 @@ public class TowerGunRenderer extends EntityRenderer<TowerGun, TowerGunRenderer.
 		draw(state.id + "_turntable", pose, collector, state.lightCoords);
 		pose.translate((trunnion[0] - table[0]) / 16.0F, (trunnion[1] - table[1]) / 16.0F, (trunnion[2] - table[2]) / 16.0F);
 		pose.rotateDegrees(Axis.XP, -state.aimPitch);
+		// The cradle (breech or housing) stays put when the gun fires; the barrel recoils back through it.
+		draw(state.id + "_cradle", pose, collector, state.lightCoords);
 		pose.translate(0, 0, -state.recoil / 16.0F);
 		draw(state.id + "_barrel", pose, collector, state.lightCoords);
 		pose.popPose();
