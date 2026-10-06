@@ -1,6 +1,6 @@
 # Industrial starter workshop and first electricity
 
-Status: owner-endorsed planning direction, recorded and updated 6 October 2026. This is the starter-route portion of planning step 7. The early alloy station and manual tool arrangement are selected below; exact recipes, structures, yields and costs remain to design. No gameplay is implemented by this document.
+Status: owner-endorsed planning direction, recorded and updated 6 October 2026. This is the starter-route portion of planning step 7. The alloy station, manual tools, mechanical production arrangement and first-electricity checkpoint are selected below; exact recipes, structures, yields and costs remain to design. No gameplay is implemented by this document.
 Proposal issue: direct owner choices during industrial planning.
 Owner: jimbozoomer-byte.
 Target capability: a useful mechanical workshop and first electricity before mod steel, with steel developing in parallel.
@@ -13,6 +13,8 @@ Related documentation: [machine roadmap](../MACHINE_ROADMAP.md), [current techno
 - **Both starter electricity routes are available:** a shaft-driven dynamo and a small fuel-burning generator. Players choose a route rather than having to build both.
 - **Early alloys use a small fuel-fired crucible furnace with ceramic crucibles.** This is the selected starter route for suitable alloys such as bronze, brass and solder.
 - **Manual components use one shared workshop bench with interchangeable hand tools:** a hammer makes plates and wire cutters make wires. The owner delegated the circuit tool to a sensible gameplay design.
+- **Mechanization uses separate shaft-powered machines:** presses, wire drawers and circuit assemblers. The shared bench remains useful for manual jobs rather than being the required powered production station.
+- **First electricity means a generator powering any useful working machine.** An electric motor driving a working shaft machine qualifies. A particular electric furnace, battery bank or fully automated factory is not required.
 - **First-electricity pacing target:** approximately 2–4 active hours from a fresh world following known recipes, excluding optional building detours. This is a balancing/playtest target, not measured current behavior or a timed unlock.
 
 Earlier choices remain constraints: a semi-substantial mechanical era with many pre-electric products; a manageable essential route into the next capability; first electricity and basic circuits in the Workshop stage; electricity and steel as parallel capabilities; ceramics supplying suitable insulators and alloy-equipment materials; motors reusing earlier workshops; and selected cross-industry dependencies instead of completing every specialty.
@@ -34,13 +36,27 @@ The following is a dependency sketch to develop into recipes, not a claim that t
 
 Recipes should require the relevant subset of these supplies. Hand-made circuitry is available at its ingredient/capability stage; do not force a basic circuit into a generator or consumer that has no design reason to need one. Likewise, a fuel-generator player need not build a dynamo's entire shaft line, and a dynamo player need not build a fuel-electric generator first.
 
-For balancing, a proposed first-electricity checkpoint is a generator supplying a useful consumer reliably enough to process repeatable work. A brief hand-crank demonstration is useful teaching but need not define completion of the whole workshop capability. The precise checkpoint still needs agreement before timing playtests.
+The first-electricity checkpoint is now selected: a generator supplies a useful working machine. Examples are an electric furnace producing output, a crusher processing material, or a motor driving a shaft machine that does useful work. Lighting an energy indicator, charging an empty network or spinning an unloaded motor alone does not satisfy the working-machine meaning. A hand-crank/dynamo setup can qualify if it actually powers useful work; automatically sustained power is a later convenience rather than an added milestone requirement.
+
+### Proposed starter kits for the recipe pass
+
+These are guided self-production examples, not a requirement that every player personally crafts every prerequisite. Trading for parts can satisfy relevant material needs. Final counts depend on the chosen consumer and approved recipes.
+
+| Kit portion | Equipment or supply to budget | Dependency boundary |
+| --- | --- | --- |
+| Shared preparation | Obtainable basic metals/fuel, fired ceramic parts, small crucible furnace and shared bench/tools as needed | No steel, rare-earth refining or advanced electric tools; only the hand tools actually used by the selected recipes belong in the minimum bill |
+| Dynamo route | Hand crank or another approved shaft source, short shaft connection, starter dynamo, cable and a useful consumer | Does not require building the fuel-electric generator; gearboxes/belts are needed only where the layout uses them |
+| Fuel-generator route | Small generator, obtainable fuel, cable and a useful consumer | Does not require building a shaft source or dynamo first |
+| Mechanical production expansion | Separate press, wire drawer or circuit assembler, selected according to demand | Do not require all three before first electricity; construction uses reachable earlier/manual parts |
+| Later conveniences | Storage, sustained source upgrades, additional distribution, larger machines and broader automation | Budget separately from the first-electricity checkpoint |
+
+The fuel-heated circuit tool enters a bill of materials only if the selected construction/process recipes need a circuit. A motor demonstration includes the shaft machine doing work, rather than counting the unloaded motor as the entire consumer.
 
 ## Two starter electricity routes
 
 ### Shaft power to dynamo
 
-Candidate sequence: reachable iron shaft and startup hand crank, followed by a suitable sustained shaft-power source, starter dynamo, cable and an electrical consumer. The existing small steam engine is a source to review; the hand crank remains useful for initial tests and small operations. A renewable mechanical source can be considered separately if desired, without claiming that an existing electric-output block already supplies shafts.
+Candidate sequence: reachable iron shaft and a startup hand crank or chosen shaft source, then a starter dynamo, cable and an electrical consumer. A suitable sustained source improves operation after or during startup, but is not an additional requirement for the selected first-electricity checkpoint. The existing small steam engine is a source to review. A shaft-driven renewable source is another design option; do not claim that an existing electric-output block already supplies shafts.
 
 The dynamo needs earlier metals, conductors and reachable field/control parts. It must not require rare-earth magnets, steel, aluminum or the electricity it is meant to provide. Later magnet dynamos remain useful upgrades. Exact generator construction and shaft-source selection are still proposals.
 
@@ -61,6 +77,20 @@ Both routes feed the shared electrical interface. Preserve losses in motor/dynam
 | Basic circuits | Fuel-heated soldering tool at the same bench, using reachable prepared silicon, copper wire and solder | Assembly throughput and later justified electronics capability |
 | Early alloys | Selected small fuel-fired furnace with a ceramic crucible | Bulk handling, controlled processing and suitable additional alloy recipes |
 | Shaft workshop processing | Starter press/drawer and other useful mechanical operations | Motors reuse the shaft equipment; larger versions improve output/efficiency |
+
+### Selected mechanical production arrangement
+
+The owner chose separate shaft-powered stations as the normal expansion beyond the hand bench. Keep each station understandable and useful on its own:
+
+| Station | Upstream supplies | Useful output / downstream roles |
+| --- | --- | --- |
+| Metal Press | Appropriate early metal stock and shaft power | Plates for machinery, construction fittings, suitable pipes/tanks and further component craft |
+| Wire Drawer | Appropriate conductor metal and shaft power | Wire for electrical construction and circuit production |
+| Circuit Assembler | Defined prepared circuit ingredients and shaft power | Basic circuits at the reachable Workshop capability; later recipes require their actual electronics capability |
+
+Construction can use earlier ingots and selected manually made parts. It cannot require an output available only from the very station being constructed. Motor drive can electrify an existing line later; any direct electrical input should reuse the existing shared interface. Larger throughput/efficiency versions remain optional unless a process genuinely requires their new capability.
+
+The shared manual bench remains useful for starter quantities, small jobs and appropriate fallback recipes. Powered bench attachments are not the selected primary mechanization route. Exact station structures and manual-versus-machine work rates/yields remain to balance.
 
 The shared bench, hammer and wire cutters are selected. Treat the wire cutters as the gameplay tool for producing starter wires from approved metal stock; a separate wire-drawing tool is not an additional compulsory manual station. The later Wire Drawer still provides industrial production.
 
@@ -123,7 +153,7 @@ Preserve stable registrations and working entry paths during any later implement
 
 The [independent Jugcraft Encyclopedia brief and TODO record](https://github.com/jimbozoomer-byte/jugcraft/pull/211) should explain both starter routes and distinguish essential capabilities from optional products and quest-order suggestions. No quest completion or carried guide item becomes a new industrial unlock requirement.
 
-Early alloy preparation and the shared bench/tool arrangement are settled. Remaining detail includes exact construction and processing recipes, tool reuse/durability policy, throughput/fuel costs, reachable silicon preparation and the first-electricity checkpoint. Next, define the smallest useful startup equipment set and calculate the two generator routes' material requirements.
+Early alloy preparation, the shared bench/tools, separate mechanical production stations and the first-electricity checkpoint are settled. Remaining detail includes shaft-source options, manual-versus-machine material yields, exact construction/processing recipes, tool reuse/durability, throughput/fuel costs and reachable silicon preparation. Next, settle the early sustained-power options and production-yield policy, then put quantities against the starter kits above.
 
 Documentation validation: repository/link and whitespace checks apply. Future gameplay work needs relevant recipe audits, survival-route tests, restart/unload behavior and two-client evidence. This plan contains no new build, timing or game-test results.
 
