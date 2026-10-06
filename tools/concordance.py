@@ -305,7 +305,7 @@ def codex():
     stages = " > ".join(s["name"] for s in STAGES.values())
     return {
         ("foundations", "concordance"): {
-            "name": "The Arcane Concordance", "x": 0, "y": 0, "icon": f"{MOD}:{BOOK}", "condition": None,
+            "name": "The Arcane Concordance", "x": 0, "y": 0, "icon": "minecraft:writable_book", "condition": None,
             "description": "What this codex records, and how to begin",
             "pages": [
                 ("text", "The Arcane Concordance",
@@ -726,7 +726,12 @@ def lang_entries(lang):
     # pseudo-tags so its HUD says what is missing (Java: ConcordanceSpells.MISSING_*).
     lang[f"tag.item.{MOD}.concordance.focus"] = "Focus"
     lang[f"tag.item.{MOD}.concordance.instrument"] = "Concordance instrument"
+    lang[f"tag.item.{MOD}.luminous_specimens"] = "Luminous Specimens"
+    lang[f"tag.item.{MOD}.concordance_instruments"] = "Concordance Instruments"
     lang[f"config.jade.plugin_{MOD}.lampwright_bench"] = "Lampwright's Bench"
+    # JEI's bench category (client/compat/JugcraftJeiPlugin): what a working leaves in the lantern.
+    lang[f"jei.{MOD}.concordance.craft"] = "Kindled with %s Radiance; needs First Light"
+    lang[f"jei.{MOD}.concordance.infuse"] = "+%s Radiance; needs First Light"
     lang[f"key.{MOD}.concordance_config"] = "Concordance settings"
 
 

@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import com.google.gson.JsonParser;
+import com.klikli_dev.modonomicon.book.error.BookErrorManager;
 import com.mojang.serialization.JsonOps;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
@@ -122,6 +123,15 @@ public class ConcordanceGameTests {
 								+ " \"examine\", \"specimens\": \"minecraft:glowstone_dust\"}]}}}"))));
 		helper.assertTrue(mixed.research("test:broken") == null && mixed.research("test:fine") != null && !mixed.problems().isEmpty(),
 				"A malformed entry is reported and dropped, the rest load: " + mixed.problems());
+		helper.succeed();
+	}
+
+	/** The codex loads whole: Modonomicon will not open a book with a broken entry (an empty icon, say). */
+	@GameTest(maxTicks = 20)
+	public void codexLoadsWithoutErrors(GameTestHelper helper) {
+		Identifier book = Jugcraft.id("arcane_concordance");
+		helper.assertFalse(BookErrorManager.get().hasErrors(book), "The Arcane Concordance codex has no load errors: "
+				+ (BookErrorManager.get().hasErrors(book) ? BookErrorManager.get().getErrors(book).getErrors() : ""));
 		helper.succeed();
 	}
 

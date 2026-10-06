@@ -45,6 +45,8 @@ Use Spell Engine's data and APIs for supported casting, targeting, delivery, and
 
 Spell Engine includes its own content, HUD, casting controls, and defaults that may assign abilities to eligible equipment. Review those interactions when integrating Jugcraft items. Installing it does not implement Jugcraft research, rituals, alchemy, spirit agreements, or resource economics. Keep stable Jugcraft IDs and authoritative resource/progression state. Spell Power's school attributes should be reused where appropriate instead of creating duplicate statistics.
 
+The [Arcane Concordance](ARCANE_CONCORDANCE.md) is the reference integration: an instrument resolves a Jugcraft spell tag, a container source offers only learned spells, the casting gate refuses (never approves), a `CUSTOM` impact does the server-side work, and Jugcraft's own resource is paid once in `COST_CONSUME`. Jugcraft weapons opt out of Spell Engine's weapon fallback through `data/jugcraft/spell_assignments/`. Spell Engine runs event listeners without a try/finally, so every Jugcraft listener catches its own exceptions.
+
 Modonomicon presents the codex; it must not become the only owner of unlock state. SmartBrainLib organizes decisions; Jugcraft remains responsible for ownership, inventories, permissions, work limits, and unloaded chunks. Ordinary goals are still suitable for simple mobs.
 
 ### Interfaces

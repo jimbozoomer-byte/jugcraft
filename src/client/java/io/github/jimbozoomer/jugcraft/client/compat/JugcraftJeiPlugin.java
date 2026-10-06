@@ -34,6 +34,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
+import org.jspecify.annotations.Nullable;
 
 /**
  * JEI integration (optional: loaded by JEI through the "jei_mod_plugin" entrypoint, never otherwise).
@@ -63,8 +64,16 @@ public class JugcraftJeiPlugin implements IModPlugin {
 	private record FluidMachine(Item block, IRecipeType<FluidViewRecipe> type, List<FluidViewRecipe> recipes) {
 	}
 
+	/** A Lampwright's Bench working (tools/concordance.py recipe_view): the work and a specimen in, the lantern out. */
+	public record BenchRecipe(String kind, List<ItemStack> inputs, ItemStack output, int radiance) {
+	}
+
+	private record Bench(Item block, IRecipeType<BenchRecipe> type, List<BenchRecipe> recipes) {
+	}
+
 	private List<Machine> machines;
 	private List<FluidMachine> fluidMachines = new ArrayList<>();
+	private @Nullable Bench bench;
 	/** JEI's fluid amount for one bucket on this platform (81,000 droplets on Fabric). */
 	private static long bucketVolume = 1000;
 
@@ -92,6 +101,10 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		for (FluidMachine machine : fluidMachines) {
 			registration.addRecipeCategories(new FluidMachineCategory(gui, machine));
 		}
+		bench = loadBench();
+		if (bench != null) {
+			registration.addRecipeCategories(new BenchCategory(gui, bench));
+		}
 	}
 
 	@Override
@@ -102,6 +115,9 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		for (FluidMachine machine : fluidMachines) {
 			registration.addRecipes(machine.type(), machine.recipes());
 		}
+		if (bench != null) {
+			registration.addRecipes(bench.type(), bench.recipes());
+		}
 	}
 
 	@Override
@@ -111,6 +127,9 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		}
 		for (FluidMachine machine : fluidMachines) {
 			registration.addCraftingStation(machine.type(), machine.block());
+		}
+		if (bench != null) {
+			registration.addCraftingStation(bench.type(), bench.block());
 		}
 	}
 
@@ -174,6 +193,38 @@ public class JugcraftJeiPlugin implements IModPlugin {
 			Jugcraft.LOGGER.warn("Could not read Jugcraft's fluid recipe list for JEI", e);
 		}
 		return result;
+	}
+
+	/** The Lampwright's Bench workings that use items (channelling Focus has no item to show). */
+	private static @Nullable Bench loadBench() {
+		Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(DATA);
+		if (resource.isEmpty()) {
+			return null;
+		}
+		try (Reader reader = resource.get().openAsReader()) {
+			JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+			if (!root.has("concordance")) {
+				return null;
+			}
+			JsonObject section = root.getAsJsonObject("concordance");
+			List<BenchRecipe> recipes = new ArrayList<>();
+			for (JsonElement element : section.getAsJsonArray("recipes")) {
+				JsonObject row = element.getAsJsonObject();
+				List<ItemStack> inputs = new ArrayList<>();
+				for (JsonElement input : row.getAsJsonArray("in")) {
+					JsonArray pair = input.getAsJsonArray();
+					inputs.add(new ItemStack(item(pair.get(0).getAsString()), pair.get(1).getAsInt()));
+				}
+				JsonArray out = row.getAsJsonArray("out");
+				recipes.add(new BenchRecipe(row.get("kind").getAsString(), inputs,
+						new ItemStack(item(out.get(0).getAsString()), out.get(1).getAsInt()), row.get("radiance").getAsInt()));
+			}
+			return new Bench(item(section.get("block").getAsString()),
+					IRecipeType.create(Jugcraft.id("lampwright_bench"), BenchRecipe.class), recipes);
+		} catch (Exception e) {
+			Jugcraft.LOGGER.warn("Could not read the Lampwright's Bench workings for JEI", e);
+			return null;
+		}
 	}
 
 	private static List<FluidAmount> fluids(JsonArray array) {
@@ -284,6 +335,63 @@ public class JugcraftJeiPlugin implements IModPlugin {
 				String chance = Math.round(recipe.chances().get(i) * 100) + "%";
 				graphics.text(font, chance, 118 + i * 24 + 9 - font.width(chance) / 2, 28, TEXT, false);
 			}
+		}
+	}
+
+	/** The Lampwright's Bench: work and specimen in, the Kindled Lantern out, and the Radiance it gains. */
+	private static final class BenchCategory implements IRecipeCategory<BenchRecipe> {
+		private static final int SLOT_Y = 6;
+		private final Bench bench;
+		private final IDrawable icon;
+
+		BenchCategory(IGuiHelper gui, Bench bench) {
+			this.bench = bench;
+			this.icon = gui.createDrawableItemLike(bench.block());
+		}
+
+		@Override
+		public IRecipeType<BenchRecipe> getRecipeType() {
+			return bench.type();
+		}
+
+		@Override
+		public Component getTitle() {
+			return new ItemStack(bench.block()).getHoverName();
+		}
+
+		@Override
+		public int getWidth() {
+			return 164;
+		}
+
+		@Override
+		public int getHeight() {
+			return 38;
+		}
+
+		@Override
+		public IDrawable getIcon() {
+			return icon;
+		}
+
+		@Override
+		public void setRecipe(IRecipeLayoutBuilder builder, BenchRecipe recipe, IFocusGroup focuses) {
+			for (int i = 0; i < recipe.inputs().size(); i++) {
+				builder.addInputSlot(i * 18, SLOT_Y).setStandardSlotBackground().add(recipe.inputs().get(i));
+			}
+			builder.addOutputSlot(92, SLOT_Y).setOutputSlotBackground().add(recipe.output());
+		}
+
+		@Override
+		public void createRecipeExtras(IRecipeExtrasBuilder builder, BenchRecipe recipe, IFocusGroup focuses) {
+			builder.addAnimatedRecipeArrow(20).setPosition(60, SLOT_Y + 1);
+		}
+
+		@Override
+		public void draw(BenchRecipe recipe, IRecipeSlotsView slots, GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
+			var font = Minecraft.getInstance().font;
+			String text = Component.translatable("jei.jugcraft.concordance." + recipe.kind(), recipe.radiance()).getString();
+			graphics.text(font, text, 0, 28, TEXT, false);
 		}
 	}
 

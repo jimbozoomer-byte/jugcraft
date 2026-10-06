@@ -279,6 +279,26 @@ Record: [walled-town.md](features/walled-town.md).
 | Jugs | `town/Jugs` (data/jugcraft_jugs.dat), `ShopMenu`; client `ShopScreen` | per-player credit; buying and selling through menu buttons, checked on the server |
 | commands | `town/TownCommand` | `/jugcraft town [place|theme]`, `/jugcraft jugs [give|take]` |
 
+### The Arcane Concordance (`concordance/`, `tools/concordance.py`)
+
+Magic, milestone 1 (First Light). Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); record:
+[arcane-concordance-first-light.md](features/arcane-concordance-first-light.md).
+
+| ID / part | Class / data | What |
+| --- | --- | --- |
+| rules | `concordance/rules/` (pure Java), `ConcordanceData` (reload listener); `data/jugcraft/concordance/{research,invocation,working}/` | research states and evidence, invocations, bench workings; malformed data is reported and left out |
+| player state | attachments `jugcraft:concordance_knowledge`, `jugcraft:concordance_focus` (`ConcordanceProgress`) | knowledge and Focus, saved, kept through death, synced to their owner only |
+| examining | `concordance/Examination` | sneak-use a `#jugcraft:luminous_specimens` item |
+| `jugcraft:lampwright_bench` | `LampwrightBenchBlock`, `...BlockEntity`, `...Menu`, `BenchStatus`; client `LampwrightBenchScreen` | study (100 ticks), kindle, infuse and channel workings, all checked on the server |
+| `jugcraft:initiate_wand` | `InitiateWandItem`; `data/jugcraft/spell_assignments/initiate_wand.json` | the first instrument (`#jugcraft:concordance_instruments`) |
+| `jugcraft:kindle` spell | `data/jugcraft/spell/kindle.json`; `ConcordanceSpells` (Spell Engine bridge), `KindleInvocation` | 4 Focus (3 mastered), light 14 for 60 s, 16 blocks |
+| `jugcraft:lumen_mote` | `LumenMoteBlock`, `Illumination` | the Kindled light and a lantern's trail light; open air only |
+| `jugcraft:kindled_lantern` | `KindledLanternItem`, components `jugcraft:radiance` (`LanternCharge`), `jugcraft:lantern_lit` | 64 Radiance, 1 per 400 ticks while lit |
+| codex | `data/jugcraft/modonomicon/` | Modonomicon book `jugcraft:arcane_concordance`; research nodes from advancements `jugcraft:concordance_*` |
+| commands | `ConcordanceCommand` | `/jugcraft concordance status [player]`, `diagnose`, `grant`, `reset`, `focus` |
+| client | `ConcordanceClient`, `ConcordanceClientOptions`, `ConcordanceSettingsScreen` (Cloth Config), `compat/ConcordanceModMenu` | Focus line, tooltips, settings (`config/jugcraft-client.properties`) |
+| optional | `compat/jade/ConcordanceDataProvider`, JEI bench category, `assets/jugcraft/dynamiclights/item/kindled_lantern.json` | Jade, JEI and LambDynamicLights display |
+
 ## Shared systems and how to plug in
 
 ### Diagonal connections (`diagonal/`, `tools/diagonal_connections.py`)
@@ -650,7 +670,8 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Electronics beyond processors: uses for processors in the tiers above. Rule-based machine control exists (batch 36).
 - EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
-- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from the seasons (colours, the Harvest Feast and December windows, and winter snow) and the agriculture branch's Halloween. Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its slices so far; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)). (The Pixel Hollows is the first cave biome; it has no creatures, structures or bosses yet.)
+- Magic beyond the Arcane Concordance's first milestone (First Light); its 32-step plan is in [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md).
+- Any creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from the seasons (colours, the Harvest Feast and December windows, and winter snow) and the agriculture branch's Halloween. Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its slices so far; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)). (The Pixel Hollows is the first cave biome; it has no creatures, structures or bosses yet.)
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
 - Handbook translations (English only).
 

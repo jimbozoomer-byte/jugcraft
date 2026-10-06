@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### The Arcane Concordance: First Light
+- Jugcraft's magic begins. Sneak-use a luminous specimen (amethyst first) to examine it; in the dark it shows its own glow. Understand **First Light** in the field (three specimens in the dark) or by study at the new **Lampwright's Bench**.
+- With an **Initiate's Wand**, cast **Kindle** through Spell Engine: a steady light where you look, for a minute, paid with **Focus** (20, regenerating), Jugcraft's first magical resource. Practising it in eight places masters it.
+- At the bench, kindle a plain lantern with amethyst into a rechargeable **Kindled Lantern**, then infuse specimens or channel Focus into it. Lit in hand, it lights the way.
+- The *Arcane Concordance* codex (Modonomicon) unlocks its pages with your research. Jade, JEI and LambDynamicLights show the bench, its workings and the lantern's glow when installed. Jugcraft's weapons no longer receive Spell Engine's automatic weapon skills.
+- Record: [arcane-concordance-first-light.md](docs/features/arcane-concordance-first-light.md); the whole plan: [ARCANE_CONCORDANCE.md](docs/ARCANE_CONCORDANCE.md).
+
 ### Framework foundation and Jugcraft Complete
 - One pinned dependency manifest makes animation, spellcasting, UI, texture, and creature frameworks available to contributors and AI agents; see [FRAMEWORKS.md](docs/FRAMEWORKS.md).
 - The Build workflow produces an importable Modrinth `.mrpack` with the original Jugcraft JAR and hashed upstream library downloads, plus standalone release dependency metadata. No startup downloader or third-party JARs are added to Jugcraft.

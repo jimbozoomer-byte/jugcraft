@@ -6157,6 +6157,10 @@ def check_concordance(registered):
     book = DATA / MOD / "modonomicon" / "books" / co.BOOK
     for path in sorted(book.rglob("*.json")):
         text = path.read_text(encoding="utf-8")
+        # An entry or category icon must be a real item: Modonomicon refuses to open a book with an empty icon.
+        for icon in re.findall(r'"icon": "([^"]+)"', text):
+            if split(icon)[0] == MOD and split(icon)[1] not in registered:
+                err(f"codex {path.relative_to(book)}: icon {icon} is not a Jugcraft item")
         for node in re.findall(r'"node_id": "([^"]+)"', text):
             if node not in nodes:
                 err(f"codex {path.relative_to(book)}: unknown research node {node}")
