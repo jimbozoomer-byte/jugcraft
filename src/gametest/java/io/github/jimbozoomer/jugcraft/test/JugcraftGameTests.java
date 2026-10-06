@@ -3599,6 +3599,15 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/** Batch 59: a stone floor at y = 0 from (0, 0) to (x1, z1), for blocks that stand only on a solid top. */
+	private static void bunkerFloor(GameTestHelper helper, int x1, int z1) {
+		for (int x = 0; x <= x1; x++) {
+			for (int z = 0; z <= z1; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+	}
+
 	/**
 	 * Bunker interiors (batch 59): every block places; the periscope, curtain and bunk stand two blocks tall (placing the
 	 * lower half puts up the upper one), the lamp hangs from a ceiling, the shoring is a pillar and the field kitchen has
@@ -3608,6 +3617,7 @@ public class JugcraftGameTests {
 	public void bunkerBlocksPlace(GameTestHelper helper) {
 		var blocks = io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS;
 		ServerLevel level = helper.getLevel();
+		bunkerFloor(helper, 7, 7);
 		int x = 0;
 		for (String id : List.of("map_table", "field_kitchen", "corrugated_iron", "corrugated_iron_slab", "corrugated_iron_stairs",
 				"timber_shoring", "bunker_lamp")) {
@@ -3650,6 +3660,7 @@ public class JugcraftGameTests {
 		BlockState state = periscope.defaultBlockState()
 				.setValue(io.github.jimbozoomer.jugcraft.agriculture.TallDecorationBlock.FACING, Direction.SOUTH);
 		BlockPos lower = new BlockPos(1, 1, 1);
+		bunkerFloor(helper, 7, 7);
 		helper.setBlock(lower, state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.LOWER));
 		helper.setBlock(lower.above(), state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.UPPER));
 		net.minecraft.world.entity.Mob nearest = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(1, 1, 5));
@@ -3684,19 +3695,27 @@ public class JugcraftGameTests {
 		BlockState state = curtain.defaultBlockState()
 				.setValue(io.github.jimbozoomer.jugcraft.agriculture.TallDecorationBlock.FACING, Direction.EAST);
 		BlockPos lower = new BlockPos(4, 1, 3);
+		bunkerFloor(helper, 7, 7);
 		helper.setBlock(lower, state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.LOWER));
 		helper.setBlock(lower.above(), state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.UPPER));
 		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(5, 1, 3));
 		io.github.jimbozoomer.jugcraft.weapons.ChemicalCloud.spawn(helper.getLevel(), helper.absoluteVec(new Vec3(3.0, 1.5, 3.5)),
 				io.github.jimbozoomer.jugcraft.weapons.ChemicalCloud.Kind.CHLORINE, null);
-		helper.assertTrue(pig.getHealth() == pig.getMaxHealth(), "The curtain should keep the chlorine off the pig: " + pig.getHealth());
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		helper.useBlock(lower, player);
-		player.discard();
-		helper.assertBlockProperty(lower, io.github.jimbozoomer.jugcraft.building.GasCurtainBlock.ROLLED, true);
-		helper.assertBlockProperty(lower.above(), io.github.jimbozoomer.jugcraft.building.GasCurtainBlock.ROLLED, true);
-		helper.succeedWhen(() -> helper.assertTrue(pig.getHealth() < pig.getMaxHealth(),
-				"With the curtain rolled up the chlorine should reach the pig"));
+		// After the cloud's first two pulses the pig behind the hanging curtain is unhurt; then the curtain is rolled up.
+		int pulse = io.github.jimbozoomer.jugcraft.weapons.ChemicalCloud.PULSE;
+		helper.runAfterDelay(pulse * 2 + 5, () -> {
+			helper.assertTrue(pig.getHealth() == pig.getMaxHealth(), "The curtain should keep the chlorine off the pig: " + pig.getHealth());
+			ServerPlayer player = helper.makeMockServerPlayerInLevel();
+			helper.useBlock(lower, player);
+			player.discard();
+			helper.assertBlockProperty(lower, io.github.jimbozoomer.jugcraft.building.GasCurtainBlock.ROLLED, true);
+			helper.assertBlockProperty(lower.above(), io.github.jimbozoomer.jugcraft.building.GasCurtainBlock.ROLLED, true);
+		});
+		// Two pulses later, with the curtain rolled up, the chlorine has reached it.
+		helper.runAfterDelay(pulse * 4 + 5, () -> {
+			helper.assertTrue(pig.getHealth() < pig.getMaxHealth(), "With the curtain rolled up the chlorine should reach the pig");
+			helper.succeed();
+		});
 	}
 
 	/**
