@@ -39,7 +39,10 @@ BOOKCASE = {"block": "ribcage_bookcase", "display": "Ribcage Bookcase"}
 FOOTSTOOL = {"block": "skull_footstool", "display": "Skull Footstool", "seat": 0.4}
 LAMP = {"block": "vertebra_floor_lamp", "display": "Vertebra Floor Lamp", "light": 13}
 
-SKULL = {"block": "colossal_skull", "display": "Colossal Skull", "jaw_degrees": 28.0, "jaw_speed": 2.0}
+# The Colossal Skull's sockets ({x0, y0, x1, y1}, pixels from its first block), for the client's night glow: a sheet facing
+# north at `glow_z`, 0.1 in front of the dark hollow closing the back of the sockets (its face at `hollow_z`).
+SKULL = {"block": "colossal_skull", "display": "Colossal Skull", "jaw_degrees": 28.0, "jaw_speed": 2.0,
+         "sockets": [(-10.0, 11.6, -2.6, 19.4), (2.6, 11.6, 10.0, 19.4)], "hollow_z": 8.0, "glow_z": 7.9}
 RIB = {"block": "colossal_rib", "display": "Colossal Rib", "span": 2}
 VERTEBRA = {"block": "colossal_vertebra", "display": "Colossal Vertebra"}
 FEMUR = {"block": "colossal_femur", "display": "Colossal Femur"}

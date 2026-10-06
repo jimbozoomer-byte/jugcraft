@@ -27,8 +27,8 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 /**
  * Client game test for the mad scientist and monsters: a stone-brick lab open at the front with two running Tesla
  * Coils, a powered Lab Table whose patient sits up, four Specimen Jars on a counter, a Mummy Sarcophagus, a Raven on a
- * Perch and two Black Cat Figures (one hissing); photographed by day and at night, the coils as they arc (CI job
- * {@code client}).
+ * Perch and two Black Cat Figures (one hissing); photographed by day and at night, the coils as they arc and the eye's jar
+ * close up (CI job {@code client}).
  */
 public class Decor8ClientGameTests implements FabricClientGameTest {
 	@Override
@@ -63,6 +63,8 @@ public class Decor8ClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_tesla_coils");
 			shoot(context, singleplayer, x + 7, y + 1, z - 5, 270, 10, "jugcraft_lab_table");
 			shoot(context, singleplayer, x + 2, y + 1, z - 8, 180, 15, "jugcraft_specimen_jars");
+			// The eye's jar close up: a round eye mapped on every side, whichever way it has turned.
+			shoot(context, singleplayer, x + 1, y + 1, z - 9, 180, 30, "jugcraft_specimen_eye_close");
 			BlockPos sarcophagus = new BlockPos(x + 13, y, z - 9);
 			server.runOnServer(minecraft -> {
 				ServerLevel level = minecraft.overworld();

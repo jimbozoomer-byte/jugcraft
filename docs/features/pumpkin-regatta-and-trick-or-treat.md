@@ -96,7 +96,7 @@ The 14 new game tests (`RegattaGameTests`):
 The client game test (`RegattaClientGameTests`) builds a pond with a carved, lit barge with two villagers aboard, a racer, four numbered buoys and the flag, and a door with a jack o'lantern porch light beside armor stands in a carved pumpkin, the three hats and a hand-carved pumpkin. It photographs them by day and at midnight. Screenshots are taken with the HUD hidden, so the ghost sheet's view (a camera overlay) is not photographed; test 13 checks the sheet has it.
 
 Found by CI and fixed before this record:
-- 26.3 has no `PushReaction.DESTROY` (`POPPED`), its `PoseStack` turns with `rotateDegrees`, and vanilla entity types are looked up by ID in tests (compile errors).
+- 26.3 has no `PushReaction.POPPED` (`POPPED`), its `PoseStack` turns with `rotateDegrees`, and vanilla entity types are looked up by ID in tests (compile errors).
 - Test 10 first checked the saved record by the clock time instead of the night number it is kept by; the test was wrong, not the game.
 
 **The Ghost Sheet after the owner's first look (1 October 2026).** It didn't fit over the character: as a head-slot item the game drew its small block model on the head only. A render layer now drapes the whole sheet over the wearer (every humanoid: players, costumed mobs, armor stands), fixed to the head, body, arms and thighs so it moves with them. Its equipment asset has no layers, which keeps the armor layer from drawing anything and the item from being drawn on the head, and is what puts it in the render state the layer reads. Results on `449f61b` (with the Halloween harvest's giant pumpkin and scarecrow fixes merged in):

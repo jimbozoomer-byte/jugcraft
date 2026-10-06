@@ -156,7 +156,7 @@ CI's Build workflow passed on 77595bcd (run 37236981086):
 - all three client shards passed and took the screenshots in [the gallery](../branches/AGRICULTURE.md#pumpkin-night).
 
 Runs before it found, and the commits after them fixed:
-- 37235152438: the main sources didn't compile against 26.3 (`BlockPos.getCenter`, `MusicBoxBlock.pitch`, `SimpleContainer.addListener` and `PushReaction.DESTROY` don't exist, and `SHOVEL_FLATTEN` is a holder);
+- 37235152438: the main sources didn't compile against 26.3 (`BlockPos.getCenter`, `MusicBoxBlock.pitch`, `SimpleContainer.addListener` and `PushReaction.POPPED` don't exist, and `SHOVEL_FLATTEN` is a holder);
 - 37235331453: every new test passed, but the Halloween Peddler's data test still counted thirteen trades where the new seeds made fifteen; the audit now holds that count to `tools/agriculture.py`. Its screenshots also showed the effigy's blaze hidden by his body and the stand's board hiding a price tag, both fixed for the passing run.
 
 - `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`: pass locally (1389 IDs). The audit's new check covers:
@@ -201,3 +201,4 @@ Placed by players only, apart from the heirlooms' wild patches. They work all ye
 - Open: whether the Farm Stand should take items as payment too (barter), or stay Jugs-only.
 - Open: whether Harvest Cheer should need a minimum number of players near.
 - Open: whether the choir should offer a choice of vowel per pumpkin rather than picking one at random each note.
+- **Fixed 5 October 2026 (shared render fixes):** the Farm Stand and the Harvest Effigy are separated whole before they are shared out among their blocks, so no face of one block's part fights one of the next (the effigy's shoulders flickered), and the stall's counter, apron and crate shelf are closed at their ends and undersides; the effigy's blaze and the garlands' leaves are drawn as two lifted sides, never one plane twice. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

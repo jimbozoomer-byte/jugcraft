@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:bastion_concrete_wall",
     "jugcraft:diagonal_andesite_wall",
     "jugcraft:diagonal_blackstone_wall",
     "jugcraft:diagonal_brick_wall",
@@ -32,6 +33,7 @@
     "jugcraft:diagonal_sulfur_brick_wall",
     "jugcraft:diagonal_sulfur_wall",
     "jugcraft:diagonal_tuff_brick_wall",
-    "jugcraft:diagonal_tuff_wall"
+    "jugcraft:diagonal_tuff_wall",
+    "jugcraft:diagonal_bastion_concrete_wall"
   ]
 }
