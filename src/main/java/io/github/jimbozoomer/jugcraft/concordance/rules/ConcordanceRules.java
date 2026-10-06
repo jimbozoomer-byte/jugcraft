@@ -1,6 +1,9 @@
 package io.github.jimbozoomer.jugcraft.concordance.rules;
 
 import com.google.gson.JsonElement;
+import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
+import io.github.jimbozoomer.jugcraft.concordance.resource.ConversionTable;
+import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,19 +22,21 @@ import org.jspecify.annotations.Nullable;
  * swaps it whole and a definition never changes under a running operation.
  */
 public final class ConcordanceRules {
-	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), List.of());
+	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
 	private final Map<String, Definitions.Working> workings;
+	private final ConversionTable conversions;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
 	private ConcordanceRules(Map<String, Definitions.Research> research, Map<String, Definitions.Invocation> invocations,
-			Map<String, Definitions.Working> workings, List<String> problems) {
+			Map<String, Definitions.Working> workings, ConversionTable conversions, List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
+		this.conversions = conversions;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -48,6 +53,11 @@ public final class ConcordanceRules {
 
 	public Map<String, Definitions.Working> workings() {
 		return workings;
+	}
+
+	/** The explicit conversions between resource types; nothing converts without one. */
+	public ConversionTable conversions() {
+		return conversions;
 	}
 
 	public List<String> problems() {
@@ -82,7 +92,7 @@ public final class ConcordanceRules {
 		return out;
 	}
 
-	/** The files under {@code data/<ns>/concordance/}: kind ("research", "invocation" or "working"), id, content. */
+	/** The files under {@code data/<ns>/concordance/}: kind (research, invocation, working or conversion), id, content. */
 	public record Source(String kind, String id, JsonElement json) {
 	}
 
@@ -91,6 +101,7 @@ public final class ConcordanceRules {
 		Map<String, Definitions.Research> research = new TreeMap<>();
 		Map<String, Definitions.Invocation> invocations = new TreeMap<>();
 		Map<String, Definitions.Working> workings = new TreeMap<>();
+		List<Conversion> conversionList = new ArrayList<>();
 		List<String> problems = new ArrayList<>();
 		for (Source source : sources) {
 			switch (source.kind()) {
@@ -112,8 +123,14 @@ public final class ConcordanceRules {
 						workings.put(entry.id(), entry);
 					}
 				}
+				case "conversion" -> {
+					Conversion conversion = parser.conversion(source.id(), source.json());
+					if (conversion != null) {
+						conversionList.add(conversion);
+					}
+				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
-						+ "\" (expected research, invocation or working)");
+						+ "\" (expected research, invocation, working or conversion)");
 			}
 		}
 		problems.addAll(0, parser.problems());
@@ -145,6 +162,26 @@ public final class ConcordanceRules {
 				problems.add("invocation " + invocation.id() + ": learnt from " + invocation.research() + " "
 						+ invocation.state().id() + ", which does not exist");
 				invocations.remove(invocation.id());
+			}
+		}
+		ConversionTable conversions = ConversionTable.build(conversionList);
+		problems.addAll(conversions.problems());
+		// A channel runs its conversion recipe: Focus into the Radiance a lantern holds, always losing.
+		for (Definitions.Working working : List.copyOf(workings.values())) {
+			if (working.type() != Definitions.WorkingType.CHANNEL) {
+				continue;
+			}
+			Conversion conversion = working.conversion() == null ? null : conversions.get(working.conversion());
+			if (conversion == null || !conversion.from().equals(ResourceType.FOCUS) || !conversion.to().equals(ResourceType.RADIANCE)) {
+				problems.add("working " + working.id() + ": channels by conversion " + working.conversion()
+						+ ", which does not exist or does not turn focus into essence/radiance");
+				workings.remove(working.id());
+			} else if (conversion.toAmount() >= conversion.fromAmount() || conversion.fromAmount() > 1000) {
+				// Focus returns with time; a channel that gave back as much as it took would be a free conversion.
+				problems.add("working " + working.id() + ": conversion " + conversion.id() + " must give less than it takes");
+				workings.remove(working.id());
+			} else {
+				workings.put(working.id(), working.withChannel((int) conversion.fromAmount(), (int) conversion.toAmount()));
 			}
 		}
 		for (Definitions.Working working : List.copyOf(workings.values())) {
@@ -182,7 +219,7 @@ public final class ConcordanceRules {
 		}
 		return new ConcordanceRules(Collections.unmodifiableMap(new LinkedHashMap<>(research)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(invocations)),
-				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), List.copyOf(problems));
+				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, List.copyOf(problems));
 	}
 
 	/** Entries that are part of, or depend on, a prerequisite cycle. */

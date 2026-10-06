@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -11,24 +12,34 @@ import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IServerDataProvider;
 
 /**
- * The Lampwright's Bench for Jade: how far its study has come, whether notes wait for someone, and the Radiance in the
- * lantern on it. A bounded snapshot of the one bench looked at; it names no player and changes nothing.
+ * The Concordance's blocks for Jade: the Lampwright's Bench (how far its study has come, whether notes wait for
+ * someone, the Radiance in the lantern on it) and the Lumen Sconce (its Radiance). Bounded snapshots of the one block
+ * looked at; they name no player, reveal no one's research and change nothing.
  */
 public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor> {
-	INSTANCE;
+	BENCH("lampwright_bench"),
+	SCONCE("lumen_sconce");
 
-	public static final Identifier ID = Jugcraft.id("lampwright_bench");
-	public static final String DATA_KEY = "jugcraft:lampwright_bench";
+	public final Identifier id;
+	public final String dataKey;
+
+	ConcordanceDataProvider(String path) {
+		this.id = Jugcraft.id(path);
+		this.dataKey = Jugcraft.MOD_ID + ":" + path;
+	}
 
 	@Override
 	public Identifier getUid() {
-		return ID;
+		return id;
 	}
 
 	@Override
 	public void appendServerData(CompoundTag data, BlockAccessor accessor) {
-		if (accessor.getBlockEntity() instanceof LampwrightBenchBlockEntity bench) {
-			data.put(DATA_KEY, snapshot(bench, accessor.getLevel().getGameTime()));
+		long now = accessor.getLevel().getGameTime();
+		if (this == BENCH && accessor.getBlockEntity() instanceof LampwrightBenchBlockEntity bench) {
+			data.put(dataKey, snapshot(bench, now));
+		} else if (this == SCONCE && accessor.getBlockEntity() instanceof LumenSconceBlockEntity sconce) {
+			data.put(dataKey, snapshot(sconce, now));
 		}
 	}
 
@@ -44,6 +55,12 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 		if (work.is(JugcraftConcordance.KINDLED_LANTERN)) {
 			snapshot.putInt("radiance", KindledLanternItem.remaining(work, now));
 		}
+		return snapshot;
+	}
+
+	public static CompoundTag snapshot(LumenSconceBlockEntity sconce, long now) {
+		CompoundTag snapshot = new CompoundTag();
+		snapshot.putInt("radiance", (int) sconce.remaining(now));
 		return snapshot;
 	}
 }

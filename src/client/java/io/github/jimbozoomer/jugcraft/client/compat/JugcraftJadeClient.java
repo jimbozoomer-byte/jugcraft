@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.compat.jade.JugcraftJadePlugin;
 import io.github.jimbozoomer.jugcraft.compat.jade.MachineDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlock;
+import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlock;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -19,7 +20,8 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 	@Override
 	public void register(IWailaClientRegistration registration) {
 		registration.registerBlockComponent(MachineTooltip.INSTANCE, MachineBlock.class);
-		registration.registerBlockComponent(BenchTooltip.INSTANCE, LampwrightBenchBlock.class);
+		registration.registerBlockComponent(ConcordanceTooltip.BENCH, LampwrightBenchBlock.class);
+		registration.registerBlockComponent(ConcordanceTooltip.SCONCE, LumenSconceBlock.class);
 	}
 
 	private enum MachineTooltip implements IBlockComponentProvider {
@@ -48,18 +50,25 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		}
 	}
 
-	/** The Lampwright's Bench: its study, notes waiting and the lantern's Radiance (ConcordanceDataProvider). */
-	private enum BenchTooltip implements IBlockComponentProvider {
-		INSTANCE;
+	/** The Concordance's blocks: a study, notes waiting and Radiance held (ConcordanceDataProvider). */
+	private enum ConcordanceTooltip implements IBlockComponentProvider {
+		BENCH(ConcordanceDataProvider.BENCH),
+		SCONCE(ConcordanceDataProvider.SCONCE);
+
+		private final ConcordanceDataProvider provider;
+
+		ConcordanceTooltip(ConcordanceDataProvider provider) {
+			this.provider = provider;
+		}
 
 		@Override
 		public Identifier getUid() {
-			return ConcordanceDataProvider.ID;
+			return provider.id;
 		}
 
 		@Override
 		public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-			accessor.getServerData().getCompound(ConcordanceDataProvider.DATA_KEY).ifPresent(data -> {
+			accessor.getServerData().getCompound(provider.dataKey).ifPresent(data -> {
 				int study = data.getIntOr("study", -1);
 				if (study >= 0) {
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.study", study));

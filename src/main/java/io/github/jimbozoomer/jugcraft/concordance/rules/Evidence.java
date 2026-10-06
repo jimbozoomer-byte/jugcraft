@@ -16,4 +16,13 @@ public sealed interface Evidence {
 	/** An invocation that took effect in a chunk ({@code chunk} is the packed chunk position). */
 	record Invoked(String invocation, long chunk) implements Evidence {
 	}
+
+	/**
+	 * Another player's written notes on one research entry, read: who wrote them ({@code author}, a player UUID) and
+	 * the state they had reached when writing ({@code state}, never beyond understood). Notes are a shared record: they
+	 * can count towards the states an entry allows them for, but they never stand in for a reader's own observation
+	 * or practice.
+	 */
+	record ReadNotes(String research, String author, ResearchState state) implements Evidence {
+	}
 }

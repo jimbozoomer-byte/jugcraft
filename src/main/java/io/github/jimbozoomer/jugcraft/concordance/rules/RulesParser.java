@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
+import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -116,6 +118,15 @@ public final class RulesParser {
 				return new EvidenceRule(EvidenceRule.Kind.INVOKE, EvidenceRule.Specimens.NONE, null,
 						positive(object, "distinct_chunks", 1), null, id(object, "invocation"));
 			}
+			case "notes" -> {
+				only(object, "type", "distinct");
+				if (state == ResearchState.MASTERED) {
+					// Mastery is practical competency: it is earned by doing, never read from someone else's notes.
+					throw new Invalid("state mastered: notes cannot stand for mastery");
+				}
+				return new EvidenceRule(EvidenceRule.Kind.NOTES, EvidenceRule.Specimens.NONE, null, positive(object, "distinct", 1),
+						null, null);
+			}
 			default -> throw new Invalid("state " + state.id() + ": unknown evidence type \"" + type + "\"");
 		}
 	}
@@ -151,7 +162,7 @@ public final class RulesParser {
 				case CRAFT -> {
 					only(object, "schema", "type", "station", "research", "stage", "work", "specimen", "result", "radiance");
 					yield new Definitions.Working(id, schema, type, station, research, state, work, id(object, "specimen"),
-							id(object, "result"), range(object, "radiance", 0, 1_000_000), Map.of(), 0);
+							id(object, "result"), range(object, "radiance", 0, 1_000_000), Map.of(), 0, null);
 				}
 				case INFUSE -> {
 					only(object, "schema", "type", "station", "research", "stage", "work", "specimens");
@@ -164,24 +175,50 @@ public final class RulesParser {
 						throw new Invalid("specimens is empty");
 					}
 					yield new Definitions.Working(id, schema, type, station, research, state, work, null, null, 0,
-							Collections.unmodifiableMap(specimens), 0);
+							Collections.unmodifiableMap(specimens), 0, null);
 				}
 				case CHANNEL -> {
-					only(object, "schema", "type", "station", "research", "stage", "work", "focus", "radiance");
-					int focus = range(object, "focus", 1, 1000);
-					int radiance = range(object, "radiance", 1, 1_000_000);
-					if (radiance >= focus) {
-						// Focus returns with time; a channel that gave back as much as it took would be a free conversion.
-						throw new Invalid("radiance (" + radiance + ") must be less than focus (" + focus + ")");
-					}
-					yield new Definitions.Working(id, schema, type, station, research, state, work, null, null, radiance,
-							Map.of(), focus);
+					only(object, "schema", "type", "station", "research", "stage", "work", "conversion");
+					// The amounts come from the conversion recipe (ConcordanceRules.build checks it exists and loses).
+					yield new Definitions.Working(id, schema, type, station, research, state, work, null, null, 0, Map.of(), 0,
+							id(object, "conversion"));
 				}
 			};
 		} catch (Invalid | IllegalStateException | UnsupportedOperationException | NumberFormatException problem) {
 			problems.add("working " + id + ": " + problem.getMessage());
 			return null;
 		}
+	}
+
+	/**
+	 * A conversion recipe: {@code {"schema": 1, "from": {"resource": "focus", "amount": 6}, "to": {"resource":
+	 * "essence/radiance", "amount": 2}}}. Resources are named by {@link ResourceType#id()}.
+	 */
+	public @Nullable Conversion conversion(String id, JsonElement json) {
+		try {
+			JsonObject object = object(json, "conversion");
+			only(object, "schema", "from", "to");
+			schema(object);
+			JsonObject from = object(member(object, "from"), "from");
+			JsonObject to = object(member(object, "to"), "to");
+			only(from, "resource", "amount");
+			only(to, "resource", "amount");
+			return new Conversion(id, resource(from), range(from, "amount", 1, 1_000_000), resource(to),
+					range(to, "amount", 1, 1_000_000));
+		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
+			problems.add("conversion " + id + ": " + problem.getMessage());
+			return null;
+		}
+	}
+
+	private static ResourceType resource(JsonObject object) {
+		String value = string(object, "resource");
+		ResourceType type = ResourceType.parse(value);
+		if (type == null) {
+			throw new Invalid("\"" + value + "\" is not a resource (focus, ley_charge, essence/<principle>, vitae, "
+					+ "astral_resonance, prima_materia)");
+		}
+		return type;
 	}
 
 	// ------------------------------------------------------------------------------------------------- field helpers

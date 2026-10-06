@@ -72,10 +72,16 @@ public final class Definitions {
 	/**
 	 * A process at a station. {@code CRAFT} turns {@code work} plus one {@code specimen} into {@code result} holding
 	 * {@code radiance}; {@code INFUSE} adds one specimen's value from {@code specimens} to the work; {@code CHANNEL}
-	 * turns {@code focus} of the player's Focus into {@code radiance} in the work.
+	 * runs one batch of its {@code conversion} (a {@code data/<ns>/concordance/conversion} recipe), turning
+	 * {@code focus} of the player's Focus into {@code radiance} in the work. For a channel, {@code focus} and
+	 * {@code radiance} are copied from the conversion when the rules are built, so the recipe is the one source.
 	 */
 	public record Working(String id, int schema, WorkingType type, String station, String research, ResearchState state,
 			String work, @Nullable String specimen, @Nullable String result, int radiance, Map<String, Integer> specimens,
-			int focus) {
+			int focus, @Nullable String conversion) {
+		Working withChannel(int focusCost, int radianceGain) {
+			return new Working(id, schema, type, station, research, state, work, specimen, result, radianceGain, specimens,
+					focusCost, conversion);
+		}
 	}
 }

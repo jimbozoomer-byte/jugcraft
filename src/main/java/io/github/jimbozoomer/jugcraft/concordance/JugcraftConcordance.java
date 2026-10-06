@@ -57,12 +57,17 @@ public final class JugcraftConcordance {
 	public static DataComponentType<LanternCharge> RADIANCE;
 	/** Present while a Kindled Lantern is lit: the lit model and LambDynamicLights both look for it. */
 	public static DataComponentType<Unit> LANTERN_LIT;
+	/** What a sheet of Research Notes records (absent on a blank sheet). */
+	public static DataComponentType<ResearchNotes> RESEARCH_NOTES;
 
 	public static Block LUMEN_MOTE;
 	public static Block LAMPWRIGHT_BENCH;
 	public static Item INITIATE_WAND;
 	public static Item KINDLED_LANTERN;
+	public static Item RESEARCH_NOTES_ITEM;
+	public static Block LUMEN_SCONCE;
 	public static BlockEntityType<LampwrightBenchBlockEntity> BENCH_ENTITY;
+	public static BlockEntityType<LumenSconceBlockEntity> SCONCE_ENTITY;
 	public static ExtendedMenuType<LampwrightBenchMenu, BlockPos> BENCH_MENU;
 
 	/** What a player has learned (saved with them, kept through death, sent only to them). */
@@ -85,6 +90,8 @@ public final class JugcraftConcordance {
 				DataComponentType.<LanternCharge>builder().persistent(LanternCharge.CODEC).networkSynchronized(LanternCharge.STREAM_CODEC).build());
 		LANTERN_LIT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("lantern_lit"),
 				DataComponentType.<Unit>builder().persistent(MapCodec.unitCodec(Unit.INSTANCE)).networkSynchronized(Unit.STREAM_CODEC).build());
+		RESEARCH_NOTES = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("research_notes"),
+				DataComponentType.<ResearchNotes>builder().persistent(ResearchNotes.CODEC).networkSynchronized(ResearchNotes.STREAM_CODEC).build());
 
 		KNOWLEDGE = AttachmentRegistry.<Knowledge>builder().persistent(ConcordanceCodecs.KNOWLEDGE).copyOnDeath()
 				.syncWith(ConcordanceCodecs.KNOWLEDGE_STREAM, AttachmentSyncPredicate.targetOnly())
@@ -113,8 +120,17 @@ public final class JugcraftConcordance {
 		KINDLED_LANTERN = item("kindled_lantern", KindledLanternItem::new, new Item.Properties().stacksTo(1)
 				.rarity(Rarity.UNCOMMON).component(RADIANCE, LanternCharge.EMPTY));
 
+		RESEARCH_NOTES_ITEM = item("research_notes", ResearchNotesItem::new, new Item.Properties().stacksTo(16));
+		LUMEN_SCONCE = block("lumen_sconce", LumenSconceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.GOLD)
+				.strength(1.5F).sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED)
+				.lightLevel(state -> state.getValue(LumenSconceBlock.LIT) ? 15 : 0));
+		Item sconce = item("lumen_sconce", properties -> new BlockItem(LUMEN_SCONCE, properties),
+				new Item.Properties().useBlockDescriptionPrefix());
+
 		BENCH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("lampwright_bench"),
 				FabricBlockEntityTypeBuilder.create(LampwrightBenchBlockEntity::new, LAMPWRIGHT_BENCH).build());
+		SCONCE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("lumen_sconce"),
+				FabricBlockEntityTypeBuilder.create(LumenSconceBlockEntity::new, LUMEN_SCONCE).build());
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 
@@ -124,6 +140,7 @@ public final class JugcraftConcordance {
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ConcordanceProgress.relearn(handler.player));
 
 		Examination.register();
+		RateGate.register();
 		ConcordanceSpells.register();
 		ConcordanceCommand.register();
 
@@ -133,8 +150,12 @@ public final class JugcraftConcordance {
 			ItemStack full = new ItemStack(KINDLED_LANTERN);
 			KindledLanternItem.set(full, KindledLanternItem.CAPACITY, 0L, false);
 			output.accept(full);
+			output.accept(RESEARCH_NOTES_ITEM);
 		});
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(bench));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
+			output.accept(bench);
+			output.accept(sconce);
+		});
 	}
 
 	private static SoundEvent sound(String id) {

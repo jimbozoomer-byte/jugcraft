@@ -108,8 +108,9 @@ public final class ConcordanceCommand {
 	private static int diagnose(CommandSourceStack source) {
 		ConcordanceRules rules = ConcordanceData.rules();
 		source.sendSuccess(() -> Component.literal(String.format(Locale.ROOT,
-				"Concordance rules: %d research, %d invocations, %d workings; entry points %s",
-				rules.research().size(), rules.invocations().size(), rules.workings().size(), rules.entryPoints())), false);
+				"Concordance rules: %d research, %d invocations, %d workings, %d conversions; entry points %s",
+				rules.research().size(), rules.invocations().size(), rules.workings().size(),
+				rules.conversions().conversions().size(), rules.entryPoints())), false);
 		List<String> problems = rules.problems();
 		if (problems.isEmpty()) {
 			source.sendSuccess(() -> Component.literal("No problems"), false);

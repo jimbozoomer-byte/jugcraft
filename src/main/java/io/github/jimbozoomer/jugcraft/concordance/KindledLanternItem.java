@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
@@ -85,6 +86,17 @@ public class KindledLanternItem extends Item {
 		player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.lantern.lit", left));
 		server.playSound(null, player.blockPosition(), JugcraftConcordance.LANTERN_IGNITE_SOUND, SoundSource.PLAYERS, 0.7F, 1.0F);
 		return InteractionResult.SUCCESS;
+	}
+
+	/** Sneak-used on a Lumen Sconce, the lantern draws Radiance back out of it (its owner only). */
+	@Override
+	public InteractionResult useOn(UseOnContext context) {
+		Player player = context.getPlayer();
+		if (player != null && player.isShiftKeyDown()
+				&& context.getLevel().getBlockState(context.getClickedPos()).is(JugcraftConcordance.LUMEN_SCONCE)) {
+			return LumenSconceBlock.exchange(context.getLevel(), context.getClickedPos(), player, context.getItemInHand(), true);
+		}
+		return InteractionResult.PASS;
 	}
 
 	@Override

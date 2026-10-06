@@ -402,6 +402,7 @@
     "jugcraft:copper_deposit",
     "jugcraft:tin_deposit",
     "jugcraft:glass_tank",
-    "jugcraft:tank_gauge"
+    "jugcraft:tank_gauge",
+    "jugcraft:lumen_sconce"
   ]
 }

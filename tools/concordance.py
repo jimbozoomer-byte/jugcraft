@@ -159,6 +159,16 @@ STUDY_TICKS = 100
 CHANNEL_FOCUS = 6
 CHANNEL_RADIANCE = 2
 
+# Research Notes (Java: ResearchNotesItem.java, ResearchNotes.java).
+NOTES_COOLDOWN_TICKS = 10
+NOTES_MAX_ENTRIES = 32
+
+# The Lumen Sconce (Java: LumenSconceBlockEntity.java): holds a lantern's worth of Radiance and burns it for light 15.
+SCONCE_BURN_TICKS = 1200  # one measure a minute: a full sconce burns for 64 minutes
+SCONCE_POUR = 16  # the most one pour or draw moves
+SCONCE_RATE_LIMIT = 32  # the most that moves through one sconce per window
+SCONCE_RATE_WINDOW = 20
+
 # Luminous specimens: what can be examined and studied, and the Radiance each yields when infused into a lantern.
 # Amethyst is the first: geodes are common, early and already Jugcraft's magic crystal.
 SPECIMENS = {
@@ -181,6 +191,8 @@ ITEMS = {
     "initiate_wand": {"name": "Initiate's Wand",
                       "tooltip": "A first instrument. Hold it to cast the invocations you have understood; a "
                                  "Concordance invocation needs a Concordance instrument in the main hand."},
+    "research_notes": {"name": "Research Notes",
+                       "tooltip": "Use blank to write down what you know; others read what you wrote"},
     "kindled_lantern": {"name": "Kindled Lantern",
                         "tooltip": "Holds Radiance. Use it to light or put it out; lit and in either hand it lights "
                                    "the way round you, and it burns its Radiance whether carried or not. Recharge it "
@@ -188,6 +200,7 @@ ITEMS = {
 }
 BLOCKS = {
     "lampwright_bench": {"name": "Lampwright's Bench"},
+    "lumen_sconce": {"name": "Lumen Sconce"},
 }
 # Items that cast Concordance invocations from the main hand (#jugcraft:concordance_instruments).
 INSTRUMENTS = ["initiate_wand"]
@@ -210,6 +223,9 @@ RESEARCH = {
                 {"type": "study", "station": f"{MOD}:lampwright_bench", "specimens": f"#{SPECIMEN_TAG}"},
                 {"type": "examine", "specimens": f"#{SPECIMEN_TAG}", "max_light": DARK_LIGHT,
                  "distinct": FIELD_SPECIMENS},
+                # Shared records: another player's notes from someone who understood it. The reader must still
+                # encounter and observe it themselves, and notes never stand for mastery.
+                {"type": "notes"},
             ],
             "mastered": [{"type": "invoke", "invocation": f"{MOD}:kindle", "distinct_chunks": MASTERY_CHUNKS}],
         },
@@ -237,8 +253,14 @@ WORKINGS = {
     "kindle_lantern": {"type": "craft", "work": "minecraft:lantern", "specimen": "minecraft:amethyst_shard",
                        "result": f"{MOD}:kindled_lantern", "radiance": LANTERN_START},
     "infuse_lantern": {"type": "infuse", "work": f"{MOD}:kindled_lantern", "specimens": SPECIMENS},
-    "channel_lantern": {"type": "channel", "work": f"{MOD}:kindled_lantern", "focus": CHANNEL_FOCUS,
-                        "radiance": CHANNEL_RADIANCE},
+    "channel_lantern": {"type": "channel", "work": f"{MOD}:kindled_lantern", "conversion": f"{MOD}:focus_to_radiance"},
+}
+
+# Explicit conversions between resource types (Java: resource/Conversion, ConversionTable). Nothing converts without
+# one, and the loader refuses any set that would let a loop of conversions lose nothing.
+CONVERSIONS = {
+    "focus_to_radiance": {"from": {"resource": "focus", "amount": CHANNEL_FOCUS},
+                          "to": {"resource": "essence/radiance", "amount": CHANNEL_RADIANCE}},
 }
 for _working in WORKINGS.values():
     _working.update({"station": f"{MOD}:lampwright_bench", "research": f"{MOD}:first_light", "stage": "understood"})
@@ -339,8 +361,8 @@ def codex():
                 ("text", "Focus",
                  f"Every invocation spends **Focus**. You hold at most {FOCUS_MAX} points; one returns every "
                  f"{seconds(FOCUS_REGEN_TICKS)} seconds, whatever you are doing. Focus is yours alone: no item, "
-                 f"device or trade can store it.\\\n\\\nWhile you hold an instrument, your Focus shows above the "
-                 f"hotbar as a number and a bar."),
+                 f"device or trade can store it.\\\n\\\nWhile you hold an instrument, your Focus shows at the "
+                 f"bottom right of the screen."),
             ],
         },
         ("foundations", "initiate_wand"): {
@@ -350,6 +372,21 @@ def codex():
                 ("crafting_recipe", "Initiate's Wand",
                  "An instrument channels invocations. Hold it in your **main hand**; the invocations you have "
                  "understood appear on the spell bar, and the first is cast with the use key.", f"{MOD}:initiate_wand"),
+            ],
+        },
+        ("foundations", "research_notes"): {
+            "name": "Research Notes", "x": 0, "y": 4, "icon": f"{MOD}:research_notes", "condition": None,
+            "description": "Sharing what you know",
+            "pages": [
+                ("crafting_recipe", "Research Notes",
+                 "**Use** a blank sheet to write down every research entry you have begun, as far as you have come "
+                 "(up to understood). Anyone else can **use** your notes to read them; reading does not use them "
+                 "up.", f"{MOD}:research_notes"),
+                ("text", "What Notes Can Teach",
+                 "Notes are a shared record, not experience. Where an entry accepts notes, reading them can stand in "
+                 "for one way of understanding it, but you must still encounter and observe it **yourself**, and "
+                 "mastery comes only from your own practice. Notes from the same writer count once, and your own "
+                 "notes teach you nothing new."),
             ],
         },
         ("radiance", "first_light"): {
@@ -363,8 +400,8 @@ def codex():
                                         "where there is no other light.", "encountered"),
                 ("text", "Observed",
                  f"In darkness (light {DARK_LIGHT} or less) the glow is the specimen's own. To **understand** it, "
-                 f"either study a specimen at a **Lampwright's Bench**, or examine {FIELD_SPECIMENS} different "
-                 f"specimens in darkness.", "observed"),
+                 f"study a specimen at a **Lampwright's Bench**, examine {FIELD_SPECIMENS} different specimens in "
+                 f"darkness, or read **Research Notes** from someone who has understood it.", "observed"),
                 ("text", "Understood",
                  f"Radiance can be gathered and set loose. You can now cast **Kindle** with an instrument, and kindle, "
                  f"infuse and channel lanterns at a Lampwright's Bench.\\\n\\\nTo **master** First Light, Kindle "
@@ -399,6 +436,20 @@ def codex():
                 ("text", "Kindle",
                  f"{INVOCATIONS['kindle']['description']}\\\n\\\nThe mote lights only open air you may build in. "
                  f"It cannot be picked up and it goes out on its own; a block placed in its space replaces it."),
+            ],
+        },
+        ("radiance", "lumen_sconce"): {
+            "name": "Lumen Sconce", "x": 0, "y": 4, "icon": f"{MOD}:lumen_sconce", "condition": "understood",
+            "description": "Light that stays",
+            "pages": [
+                ("crafting_recipe", "Lumen Sconce",
+                 f"A brass stand that burns Radiance for a steady light 15: one measure every "
+                 f"{seconds(SCONCE_BURN_TICKS)} seconds, up to {LANTERN_CAPACITY} measures.", f"{MOD}:lumen_sconce"),
+                ("text", "Pouring and Drawing",
+                 f"Use it with a **Kindled Lantern** to pour up to {SCONCE_POUR} Radiance in; what does not fit "
+                 f"stays in the lantern. Anyone may pour, so a Lampwright can keep a town's lamps lit. **Sneak** to "
+                 f"draw Radiance back into your lantern: only the sconce's owner may. Only Radiance burns in a "
+                 f"sconce, and broken, it keeps what it held."),
             ],
         },
         ("radiance", "kindled_lantern"): {
@@ -663,6 +714,21 @@ MESSAGES = {
     "bench.cancelled": "Study cancelled; nothing was used",
     "bench.disabled": "The Concordance is switched off on this server",
     "instrument.needed": "Hold a Concordance instrument in your main hand",
+    "notes.nothing_to_write": "You have nothing to write down yet: examine a luminous specimen first",
+    "notes.written": "Notes written on %s research entries",
+    "notes.own": "These are your own notes",
+    "notes.pending": "You read %s's notes; observe it for yourself and they will make sense",
+    "notes.nothing_new": "%s's notes hold nothing new for you",
+    "sconce.poured": "Poured %s Radiance: the sconce holds %s / %s",
+    "sconce.drawn": "Drew %s Radiance: the sconce holds %s / %s",
+    "sconce.full": "The sconce is full (%2$s / %3$s)",
+    "sconce.lantern_full": "The lantern is full",
+    "sconce.sconce_empty": "The sconce has no Radiance to draw",
+    "sconce.lantern_empty": "The lantern has no Radiance to pour",
+    "sconce.not_owner": "Only the sconce's owner may draw from it",
+    "sconce.settling": "Let the light settle a moment",
+    "sconce.wrong_type": "Only Radiance burns in a sconce",
+    "sconce.status": "Lumen Sconce: %s / %s Radiance",
     "no_invocations": "You understand no invocation yet: examine luminous specimens in the dark, or study one at a "
                       "Lampwright's Bench",
     "disabled": "The Concordance is switched off on this server",
@@ -698,10 +764,19 @@ TOOLTIPS = {
 }
 
 
+RESEARCH_STATE_NAMES = {"none": "Not begun", "encountered": "Encountered", "observed": "Observed",
+                        "understood": "Understood", "mastered": "Mastered"}
+
+
 def lang_entries(lang):
     for item, info in ITEMS.items():
         lang[f"item.{MOD}.{item}"] = info["name"]
         lang[f"tooltip.{MOD}.{item}"] = info["tooltip"]
+    lang[f"tooltip.{MOD}.research_notes.blank"] = "Blank: use it to write down what you know"
+    lang[f"tooltip.{MOD}.research_notes.author"] = "Notes by %s"
+    lang[f"tooltip.{MOD}.research_notes.entry"] = "%s: %s"
+    for state, name in RESEARCH_STATE_NAMES.items():
+        lang[f"research_state.{MOD}.{state}"] = name
     for block, info in {**BLOCKS, **ITEMLESS_BLOCKS}.items():
         lang[f"block.{MOD}.{block}"] = info["name"]
     lang[f"container.{MOD}.lampwright_bench"] = BLOCKS["lampwright_bench"]["name"]
@@ -729,6 +804,7 @@ def lang_entries(lang):
     lang[f"tag.item.{MOD}.luminous_specimens"] = "Luminous Specimens"
     lang[f"tag.item.{MOD}.concordance_instruments"] = "Concordance Instruments"
     lang[f"config.jade.plugin_{MOD}.lampwright_bench"] = "Lampwright's Bench"
+    lang[f"config.jade.plugin_{MOD}.lumen_sconce"] = "Lumen Sconce"
     # JEI's bench category (client/compat/JugcraftJeiPlugin): what a working leaves in the lantern.
     lang[f"jei.{MOD}.concordance.craft"] = "Kindled with %s Radiance; needs First Light"
     lang[f"jei.{MOD}.concordance.infuse"] = "+%s Radiance; needs First Light"
@@ -798,6 +874,39 @@ def write_all(write, assets, data, lang, condition, self_drop):
     write(assets / "items" / "lampwright_bench.json",
           {"model": {"type": "minecraft:model", "model": rid("block/lampwright_bench")}})
     write(data / "loot_table" / "blocks" / "lampwright_bench.json", self_drop("lampwright_bench"))
+    # Research Notes: a blank and a written sheet.
+    for model in ("research_notes", "research_notes_written"):
+        write(assets / "models" / "item" / f"{model}.json",
+              {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{model}")}})
+    write(assets / "items" / "research_notes.json", {"model": {
+        "type": "minecraft:condition", "property": "minecraft:has_component", "component": rid("research_notes"),
+        "on_true": {"type": "minecraft:model", "model": rid("item/research_notes_written")},
+        "on_false": {"type": "minecraft:model", "model": rid("item/research_notes")}}})
+    # The Lumen Sconce: a brass foot, stem and cup holding a lens that glows while it burns.
+    sconce_textures = {"particle": rid("block/lampwright_bench_brass"), "brass": rid("block/lampwright_bench_brass"),
+                       "lens": rid("block/lampwright_bench_lens")}
+
+    def part(f, t, tex, emissive=False):
+        element = {"from": f, "to": t, "faces": {d: {"texture": f"#{tex}"} for d in
+                                                ("north", "east", "south", "west", "up", "down")}}
+        if emissive:
+            element["light_emission"] = 15
+        return element
+    for lit in (False, True):
+        elements = [part([4, 0, 4], [12, 1, 12], "brass"), part([7, 1, 7], [9, 7, 9], "brass"),
+                    part([5, 7, 5], [11, 8, 11], "brass"), part([6, 8, 6], [10, 12, 10], "lens", emissive=lit),
+                    part([7.5, 12, 7.5], [8.5, 13, 8.5], "brass")]
+        name = "lumen_sconce_lit" if lit else "lumen_sconce"
+        write(assets / "models" / "block" / f"{name}.json",
+              {"parent": "minecraft:block/block", "textures": sconce_textures, "elements": elements})
+    write(assets / "blockstates" / "lumen_sconce.json",
+          {"variants": {"lit=false": {"model": rid("block/lumen_sconce")}, "lit=true": {"model": rid("block/lumen_sconce_lit")}}})
+    write(assets / "items" / "lumen_sconce.json", {"model": {"type": "minecraft:model", "model": rid("block/lumen_sconce")}})
+    # Broken, the sconce keeps its Radiance on the item (LumenSconceBlockEntity.collectImplicitComponents).
+    sconce_loot = self_drop("lumen_sconce")
+    sconce_loot["pools"][0]["entries"][0]["modifier"] = [
+        {"type": "minecraft:copy_components", "source": "block_entity", "include": [rid("radiance")]}]
+    write(data / "loot_table" / "blocks" / "lumen_sconce.json", sconce_loot)
     # The Kindled mote: no model is drawn (it renders nothing); particles show it.
     write(assets / "models" / "block" / "lumen_mote.json", {"textures": {"particle": rid("block/lampwright_bench_lens")}})
     write(assets / "blockstates" / "lumen_mote.json",
@@ -814,6 +923,15 @@ def write_all(write, assets, data, lang, condition, self_drop):
         "key": {"C": "minecraft:copper_ingot", "A": "minecraft:amethyst_shard", "P": "#minecraft:planks",
                 "S": "minecraft:stick"},
         "result": {"id": rid("lampwright_bench"), "count": 1}})
+    write(data / "recipe" / "research_notes.json", {
+        "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shapeless", "category": "misc",
+        "ingredients": ["minecraft:paper", "minecraft:ink_sac", "minecraft:feather"],
+        "result": {"id": rid("research_notes"), "count": 2}})
+    write(data / "recipe" / "lumen_sconce.json", {
+        "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shaped", "category": "building",
+        "pattern": [" A ", " C ", "CCC"],
+        "key": {"A": "minecraft:amethyst_shard", "C": "minecraft:copper_ingot"},
+        "result": {"id": rid("lumen_sconce"), "count": 1}})
     write(data / "recipe" / f"{BOOK}.json", {
         "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shapeless", "category": "misc",
         "ingredients": ["minecraft:book", "minecraft:amethyst_shard"],
@@ -832,6 +950,8 @@ def write_data(write, res):
         write(data / "spell" / f"{key}.json", spell_json(key))
     for key, info in WORKINGS.items():
         write(data / "concordance" / "working" / f"{key}.json", dict({"schema": SCHEMA}, **info))
+    for key, info in CONVERSIONS.items():
+        write(data / "concordance" / "conversion" / f"{key}.json", dict({"schema": SCHEMA}, **info))
     for item in spell_opt_outs():
         write(data / "spell_assignments" / f"{item}.json", {"access": "NONE", "access_param": ""})
     # Instruments resolve casts for the Concordance spell tag only; which of its spells a player has is the
@@ -856,6 +976,7 @@ def tags(tags):
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     tags.add("block", "minecraft:mineable/axe", rid("lampwright_bench"))
+    tags.add("block", "minecraft:mineable/pickaxe", rid("lumen_sconce"))
     for key in INVOCATIONS:
         tags.add("spell", SPELL_TAG, rid(key))
 

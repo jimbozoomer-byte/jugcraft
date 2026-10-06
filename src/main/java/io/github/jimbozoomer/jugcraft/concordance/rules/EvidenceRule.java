@@ -12,15 +12,19 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>{@code examine:<item>} holds the lowest light the specimen was examined at;</li>
  * <li>{@code study:<station>:<item>} records a finished study;</li>
- * <li>{@code invoke:<invocation>:<chunk>} records an invocation that took effect in a chunk.</li>
+ * <li>{@code invoke:<invocation>:<chunk>} records an invocation that took effect in a chunk;</li>
+ * <li>{@code notes:<author>} records another player's notes read (one key per author, whatever they wrote).</li>
  * </ul>
+ * Notes may stand for states up to understood only ({@link RulesParser} refuses them for mastered): reading can teach
+ * what to do, but a player masters an entry only by their own practice.
  */
 public record EvidenceRule(Kind kind, Specimens specimens, @Nullable Integer maxLight, int distinct, @Nullable String station,
 		@Nullable String invocation) {
 	public enum Kind {
 		EXAMINE("examine"),
 		STUDY("study"),
-		INVOKE("invoke");
+		INVOKE("invoke"),
+		NOTES("notes");
 
 		public final String id;
 
@@ -52,8 +56,12 @@ public record EvidenceRule(Kind kind, Specimens specimens, @Nullable Integer max
 		boolean isIn(String item, String tag);
 	}
 
-	/** The key this evidence adds under this rule and the value to keep (the lowest), or null if it does not apply. */
-	public Map.@Nullable Entry<String, Long> keyFor(Evidence evidence, TagLookup tags) {
+	/**
+	 * The key this evidence adds under this rule and the value to keep (the lowest), or null if it does not apply.
+	 * {@code research} is the entry the rule belongs to and {@code ruleState} the state it is a way into: notes count
+	 * only for the entry they were written about, and only for states their author had reached.
+	 */
+	public Map.@Nullable Entry<String, Long> keyFor(Evidence evidence, TagLookup tags, String research, ResearchState ruleState) {
 		return switch (evidence) {
 			case Evidence.Examined examined when kind == Kind.EXAMINE && specimens.matches(examined.item(), tags) ->
 					Map.entry("examine:" + examined.item(), (long) examined.light());
@@ -61,6 +69,9 @@ public record EvidenceRule(Kind kind, Specimens specimens, @Nullable Integer max
 					&& specimens.matches(studied.item(), tags) -> Map.entry("study:" + studied.station() + ":" + studied.item(), 0L);
 			case Evidence.Invoked invoked when kind == Kind.INVOKE && invoked.invocation().equals(invocation) ->
 					Map.entry("invoke:" + invoked.invocation() + ":" + invoked.chunk(), 0L);
+			case Evidence.ReadNotes notes when kind == Kind.NOTES && notes.research().equals(research)
+					&& notes.state().atLeast(ruleState) && ruleState != ResearchState.MASTERED ->
+					Map.entry("notes:" + notes.author(), 0L);
 			default -> null;
 		};
 	}
@@ -92,6 +103,7 @@ public record EvidenceRule(Kind kind, Specimens specimens, @Nullable Integer max
 				yield key.startsWith(prefix) && specimens.matches(key.substring(prefix.length()), tags);
 			}
 			case INVOKE -> key.startsWith("invoke:" + invocation + ":");
+			case NOTES -> key.startsWith("notes:");
 		};
 	}
 }

@@ -5998,6 +5998,10 @@ def check_concordance(registered):
         "KindleInvocation.java": {"RANGE": co.KINDLE_RANGE, "MOTE_STEPS": co.KINDLE_MOTE_STEPS},
         "KindledLanternItem.java": {"CAPACITY": co.LANTERN_CAPACITY, "BURN_TICKS": co.LANTERN_BURN_TICKS},
         "LampwrightBenchBlockEntity.java": {"STUDY_TICKS": co.STUDY_TICKS},
+        "LumenSconceBlockEntity.java": {"BURN_TICKS": co.SCONCE_BURN_TICKS, "POUR": co.SCONCE_POUR,
+                                        "RATE_LIMIT": co.SCONCE_RATE_LIMIT, "RATE_WINDOW": co.SCONCE_RATE_WINDOW},
+        "ResearchNotesItem.java": {"COOLDOWN_TICKS": co.NOTES_COOLDOWN_TICKS},
+        "ResearchNotes.java": {"MAX_ENTRIES": co.NOTES_MAX_ENTRIES},
     }
     for name, values in constants.items():
         path = root / name
@@ -6005,6 +6009,15 @@ def check_concordance(registered):
         for const, value in values.items():
             if not re.search(rf"\bint {const} = {value};", java):
                 err(f"concordance/{name}: {const} differs from tools/concordance.py ({value})")
+    resource_java = (root / "resource" / "ResourceType.java").read_text(encoding="utf-8") \
+        if (root / "resource" / "ResourceType.java").exists() else ""
+    match = re.search(r"PRINCIPLES = Set\.of\(([^;]*)\);", resource_java)
+    if not match or set(re.findall(r'"([a-z_]+)"', match.group(1))) != set(co.PRINCIPLES):
+        err("concordance/resource/ResourceType.java: PRINCIPLES differs from tools/concordance.py")
+    kinds_java = (root / "resource" / "ResourceKind.java").read_text(encoding="utf-8") \
+        if (root / "resource" / "ResourceKind.java").exists() else ""
+    if set(re.findall(r'^\t[A-Z_]+\("([a-z_]+)"', kinds_java, re.M)) != set(co.RESOURCES):
+        err("concordance/resource/ResourceKind.java: resource ids differ from RESOURCES in tools/concordance.py")
     if not KINDLE_MOTE_STEPS_FIT(co):
         err("concordance: a Kindled mote's steps do not fit its age property (0..15)")
 
@@ -6068,6 +6081,31 @@ def check_concordance(registered):
 
     # Research, invocations and workings.
     research = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "research").glob("*.json")}
+    conversions = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "conversion").glob("*.json")}
+    resource_ids = {f"essence/{p}" for p in co.PRINCIPLES} | {r for r in co.RESOURCES if r not in ("essence", "bound_will")}
+    ratios = {}
+    for key, entry in conversions.items():
+        source, result = entry.get("from", {}), entry.get("to", {})
+        if entry.get("schema") != co.SCHEMA or source.get("resource") not in resource_ids \
+                or result.get("resource") not in resource_ids or source.get("resource") == result.get("resource"):
+            err(f"conversion {key}: needs schema {co.SCHEMA} and two different amount resources ({sorted(resource_ids)})")
+            continue
+        if not (isinstance(source.get("amount"), int) and isinstance(result.get("amount"), int)
+                and source["amount"] >= 1 and result["amount"] >= 1):
+            err(f"conversion {key}: amounts must be whole numbers of at least 1")
+            continue
+        edge = (source["resource"], result["resource"])
+        ratios[edge] = max(ratios.get(edge, 0), result["amount"] / source["amount"])
+    # No loop of conversions may come back with as much as it started with (Java: ConversionTable).
+    nodes = sorted({n for edge in ratios for n in edge})
+    best = {(a, b): ratios.get((a, b), 0.0) for a in nodes for b in nodes}
+    for k in nodes:
+        for a in nodes:
+            for b in nodes:
+                best[a, b] = max(best[a, b], best[a, k] * best[k, b])
+    for n in nodes:
+        if best[n, n] >= 1 - 1e-9:
+            err(f"conversions: {n} converts round without loss")
     invocations = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "invocation").glob("*.json")}
     workings = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "working").glob("*.json")}
     def known_item(ref):
@@ -6093,6 +6131,9 @@ def check_concordance(registered):
                 elif kind == "invoke":
                     if split(rule.get("invocation", ":"))[1] not in invocations:
                         err(f"research {key}/{state}: unknown invocation {rule.get('invocation')}")
+                elif kind == "notes":
+                    if state == "mastered":
+                        err(f"research {key}: notes cannot stand for mastery")
                 else:
                     err(f"research {key}/{state}: unknown evidence {kind}")
         for requirement in entry.get("requires", []):
@@ -6135,8 +6176,13 @@ def check_concordance(registered):
         for ref in refs:
             if not known_item(ref):
                 err(f"working {key}: unknown item {ref}")
-        if entry.get("type") == "channel" and entry.get("focus", 0) <= entry.get("radiance", 0):
-            err(f"working {key}: channelling must lose Focus (no free conversion)")
+        if entry.get("type") == "channel":
+            conversion = conversions.get(split(entry.get("conversion", ":"))[1], {})
+            source, result = conversion.get("from", {}), conversion.get("to", {})
+            if source.get("resource") != "focus" or result.get("resource") != "essence/radiance":
+                err(f"working {key}: channels by {entry.get('conversion')}, which must turn focus into essence/radiance")
+            elif result.get("amount", 0) >= source.get("amount", 0):
+                err(f"working {key}: channelling must lose Focus (no free conversion)")
         if entry.get("type") not in ("craft", "infuse", "channel"):
             err(f"working {key}: unknown type {entry.get('type')}")
 
@@ -6191,6 +6237,12 @@ def check_concordance(registered):
         for key in re.findall(r'"((?:message|screen|tooltip|container|key)\.jugcraft\.[a-z_.]+[a-z_])"', path.read_text(encoding="utf-8")):
             if key not in lang:
                 err(f"{path.name}: missing lang {key}")
+    sconce = (root / "LumenSconceBlock.java").read_text(encoding="utf-8") if (root / "LumenSconceBlock.java").exists() else ""
+    body = sconce[sconce.find("private static Component message("):]
+    body = body[:body.find("\n\t}\n")]
+    for key in re.findall(r'"([a-z_]+)"', body):
+        if f"message.{MOD}.concordance.sconce.{key}" not in lang:
+            err(f"LumenSconceBlock.java: missing lang message.{MOD}.concordance.sconce.{key}")
     status = (root / "BenchStatus.java").read_text(encoding="utf-8") if (root / "BenchStatus.java").exists() else ""
     for key in re.findall(r'[A-Z_]+\("([a-z_]+)"\)', status):
         if f"message.{MOD}.concordance.bench.{key}" not in lang:

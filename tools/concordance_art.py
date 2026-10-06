@@ -500,7 +500,49 @@ def bench_lens():
 
 # --------------------------------------------------------------------------------------------------------- all
 
+# ------------------------------------------------------------------------------------------- research notes (32)
+
+def research_notes(written):
+    """A sheet of notes: cream paper with faint rules and a folded top corner. Written, its lines are filled in violet
+    ink, a small sketch of a rayed light sits at the head of the page, and a violet wax seal closes the foot."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    cm.rect(img, 6, 3, 25, 28, PAGE[2])
+    cm.rect(img, 25, 4, 25, 28, PAGE[1])  # shaded right edge and foot
+    cm.rect(img, 7, 28, 25, 28, PAGE[1])
+    # The folded corner: cut away the top right and lay the fold over it.
+    for i in range(5):
+        for j in range(5 - i):
+            img.putpixel((25 - j, 3 + i), (0, 0, 0, 0))
+    for i in range(5):
+        for j in range(i + 1):
+            cm.put(img, 21 + j, 3 + i, PAGE[1] if j < i else PAGE[0])
+    # Faint rules.
+    for y in range(9, 27, 3):
+        for x in range(9, 23):
+            cm.put(img, x, y, PAGE[1])
+    if written:
+        # Lines of writing: strokes of fixed lengths with word gaps, so every sheet looks the same.
+        lengths = [(9, 13), (15, 22), (9, 11), (13, 20), (9, 16), (18, 22)]
+        for row, (x0, x1) in enumerate(lengths):
+            y = 11 + row * 3 - 1
+            if y > 25:
+                break
+            for x in range(x0, x1 + 1):
+                if (x - x0) % 5 != 4:
+                    cm.put(img, x, y, VIOLET[2])
+        # A sketch of a rayed light at the head of the page.
+        for dx, dy in ((0, 0), (-2, 0), (2, 0), (0, -2), (0, 2), (-1, -1), (1, 1), (1, -1), (-1, 1)):
+            cm.put(img, 11 + dx, 6 + dy, VIOLET[3] if (dx, dy) == (0, 0) else VIOLET[2])
+        # The seal.
+        _disc(img, 21.5, 25.5, 2.6, GEM[1])
+        cm.put(img, 21, 24, GEM[2])
+        cm.put(img, 20, 25, GEM[2])
+    return _outline(img)
+
+
 ITEMS = {
+    "research_notes": lambda: research_notes(False),
+    "research_notes_written": lambda: research_notes(True),
     "initiate_wand": initiate_wand,
     "kindled_lantern": lambda: kindled_lantern(False),
     "kindled_lantern_lit": lambda: kindled_lantern(True),

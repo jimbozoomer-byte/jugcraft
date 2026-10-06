@@ -1,6 +1,10 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
+import io.github.jimbozoomer.jugcraft.concordance.resource.Overflow;
+import io.github.jimbozoomer.jugcraft.concordance.resource.Reservoir;
+import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceType;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
@@ -240,15 +244,19 @@ public class LampwrightBenchBlockEntity extends BaseContainerBlockEntity impleme
 				if (value == null) {
 					return BenchStatus.NOT_SPECIMEN;
 				}
-				if (charge(work) + value > KindledLanternItem.CAPACITY) {
+				if (lantern(work).insert(ResourceType.RADIANCE, value, Overflow.REJECT).outcome() != Reservoir.Outcome.DONE) {
 					return BenchStatus.OVERFULL;
 				}
 			}
 			case CHANNEL -> {
-				if (charge(work) + working.radiance() > KindledLanternItem.CAPACITY) {
+				Conversion conversion = conversion(working);
+				if (conversion == null) {
+					return BenchStatus.UNKNOWN_RESEARCH;
+				}
+				if (lantern(work).space() < conversion.toAmount()) {
 					return BenchStatus.OVERFULL;
 				}
-				if (ConcordanceProgress.currentFocus(player) < working.focus()) {
+				if (conversion.batches(ConcordanceProgress.currentFocus(player), lantern(work).space(), 1) < 1) {
 					return BenchStatus.NO_FOCUS;
 				}
 			}
@@ -332,19 +340,21 @@ public class LampwrightBenchBlockEntity extends BaseContainerBlockEntity impleme
 			case BUTTON_INFUSE -> {
 				Definitions.Working working = workingFor(player, Definitions.WorkingType.INFUSE);
 				Integer value = working == null ? null : working.specimens().get(ConcordanceProgress.itemId(items.get(SPECIMEN)));
-				if (value == null) {
+				if (value == null || !addRadiance(value)) {
 					return false;
 				}
 				items.get(SPECIMEN).shrink(1);
-				addRadiance(value);
 				server.playSound(null, worldPosition, JugcraftConcordance.LANTERN_IGNITE_SOUND, SoundSource.BLOCKS, 0.6F, 1.3F);
 			}
 			case BUTTON_CHANNEL -> {
+				// One batch of the working's conversion recipe (data: concordance/conversion): Focus spent, Radiance made.
 				Definitions.Working working = workingFor(player, Definitions.WorkingType.CHANNEL);
-				if (working == null || !ConcordanceProgress.spendFocus(player, working.focus())) {
+				Conversion conversion = working == null ? null : conversion(working);
+				if (conversion == null || conversion.batches(ConcordanceProgress.currentFocus(player), lantern(items.get(WORK)).space(), 1) < 1
+						|| !ConcordanceProgress.spendFocus(player, (int) conversion.fromAmount())) {
 					return false;
 				}
-				addRadiance(working.radiance());
+				addRadiance((int) conversion.toAmount());
 				server.playSound(null, worldPosition, JugcraftConcordance.KINDLE_SOUND, SoundSource.BLOCKS, 0.6F, 1.2F);
 			}
 			default -> {
@@ -355,16 +365,33 @@ public class LampwrightBenchBlockEntity extends BaseContainerBlockEntity impleme
 		return true;
 	}
 
-	/** Adds Radiance to the lantern in the work slot, settling its burn first and keeping it lit or unlit. */
-	private void addRadiance(int amount) {
+	/** The lantern in the work slot as a typed container: its Radiance now, out of its capacity. */
+	private Reservoir lantern(ItemStack work) {
+		return new Reservoir(ResourceType.RADIANCE, charge(work), KindledLanternItem.CAPACITY);
+	}
+
+	/**
+	 * Adds Radiance to the lantern in the work slot, all or nothing (it never overfills), settling its burn first and
+	 * keeping it lit or unlit. Returns whether it was added.
+	 */
+	private boolean addRadiance(int amount) {
 		ItemStack work = items.get(WORK);
-		long now = now();
-		KindledLanternItem.set(work, KindledLanternItem.remaining(work, now) + amount, now, KindledLanternItem.lit(work));
+		Reservoir.Insertion insertion = lantern(work).insert(ResourceType.RADIANCE, amount, Overflow.REJECT);
+		if (insertion.outcome() != Reservoir.Outcome.DONE) {
+			return false;
+		}
+		KindledLanternItem.set(work, (int) insertion.reservoir().amount(), now(), KindledLanternItem.lit(work));
+		return true;
+	}
+
+	private static @Nullable Conversion conversion(Definitions.Working working) {
+		return working.conversion() == null ? null : ConcordanceData.rules().conversions().get(working.conversion());
 	}
 
 	private int channelFocus(ServerPlayer player) {
 		Definitions.Working working = workingFor(player, Definitions.WorkingType.CHANNEL);
-		return working == null ? 0 : working.focus();
+		Conversion conversion = working == null ? null : conversion(working);
+		return conversion == null ? 0 : (int) conversion.fromAmount();
 	}
 
 	/** The menu data for one viewer: their own statuses, worked out at most once a tick. */

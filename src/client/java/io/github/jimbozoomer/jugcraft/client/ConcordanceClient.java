@@ -74,6 +74,11 @@ final class ConcordanceClient {
 		if (stack.is(JugcraftConcordance.SPECIMENS)) {
 			lines.add(Component.translatable("tooltip.jugcraft.concordance.specimen").withStyle(ChatFormatting.DARK_AQUA));
 		}
+		if (stack.is(JugcraftConcordance.LUMEN_SCONCE.asItem()) && stack.has(JugcraftConcordance.RADIANCE)) {
+			// A sconce item keeps the Radiance it held when it was broken (unlit, so none burns).
+			lines.add(Component.translatable("tooltip.jugcraft.concordance.lantern.charge",
+					KindledLanternItem.charge(stack).stored(), KindledLanternItem.CAPACITY).withStyle(ChatFormatting.GOLD));
+		}
 		if (stack.is(JugcraftConcordance.KINDLED_LANTERN)) {
 			Level level = Minecraft.getInstance().level;
 			long now = level == null ? 0L : ConcordanceProgress.now(level);

@@ -17,6 +17,8 @@ import org.jspecify.annotations.Nullable;
  * improves the stored light level, which is the only way a repeat changes anything).</li>
  * <li>States are reached in order; one piece of evidence can carry an entry through several states at once (examining a
  * specimen in darkness first time both encounters and observes it).</li>
+ * <li>Evidence for a later state is kept even when an earlier one is missing, and counts once the earlier states are
+ * reached: notes read before observing an entry complete it as soon as the reader observes it themselves.</li>
  * </ul>
  */
 public final class ResearchEngine {
@@ -47,7 +49,7 @@ public final class ResearchEngine {
 						continue;
 					}
 					for (EvidenceRule rule : state.getValue()) {
-						Map.Entry<String, Long> key = rule.keyFor(evidence, tags);
+						Map.Entry<String, Long> key = rule.keyFor(evidence, tags, entry.id(), state.getKey());
 						if (key == null) {
 							continue;
 						}
