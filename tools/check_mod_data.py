@@ -50,6 +50,7 @@ import landship
 import artillery
 import tower_guns
 import fortifications
+import bunkerworks
 import fire_control
 import raiders
 import armoured_walker
@@ -172,7 +173,7 @@ def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
-                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + fire_control.blocks()):
+                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -193,7 +194,7 @@ def check_assets(registered):
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
-                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + fire_control.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -330,7 +331,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -545,7 +546,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -1062,6 +1063,41 @@ def check_raiders():
     for entity in raiders.ENTITIES:
         if f'"{entity}"' not in java:
             err(f"JugcraftRaiders.java does not register {entity}")
+
+
+def check_bunkerworks():
+    """building/Bunkerworks.java against tools/bunkerworks.py: the list, kinds and strengths, the periscope's and the map
+    table's numbers, the lights, Trench Stew's food, effect and pot recipe, and the field kitchen as a heat source."""
+    java = (JAVA_ROOT / "building" / "Bunkerworks.java").read_text(encoding="utf-8")
+    for block, (_, kind, hardness, blast) in bunkerworks.BLOCKS.items():
+        if f'entry("{block}", "{kind}", {hardness}F, {blast}F);' not in java:
+            err(f"Bunkerworks.java does not register {block} as tools/bunkerworks.py does ({kind}, {hardness}, {blast})")
+    for const in ("PERISCOPE_INTERVAL", "PERISCOPE_RANGE", "PERISCOPE_CONE", "MAP_RANGE", "MAP_LINK", "MAP_LINES",
+                  "KITCHEN_LIGHT", "LAMP_LIGHT"):
+        if f" {const} = {getattr(bunkerworks, const)};" not in java:
+            err(f"Bunkerworks.{const} differs from tools/bunkerworks.py ({getattr(bunkerworks, const)})")
+    stew = bunkerworks.TRENCH_STEW
+    food = ag.ITEMS.get("trench_stew", {})
+    if food.get("food") != stew["food"] or food.get("stew_effect") != stew["effect"] or not food.get("stew"):
+        err("tools/agriculture.py ITEMS trench_stew differs from tools/bunkerworks.py TRENCH_STEW")
+    if ag.POT_RECIPES.get("trench_stew") != {"inputs": stew["inputs"], "time": stew["time"]}:
+        err("tools/agriculture.py POT_RECIPES trench_stew differs from tools/bunkerworks.py TRENCH_STEW")
+    main = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8")
+    n, sat = stew["food"]
+    effect, seconds = stew["effect"]
+    if f'stew("trench_stew", {n}, {sat}F, MobEffects.{effect}, {seconds});' not in main:
+        err("JugcraftAgriculture.java does not register trench_stew as tools/bunkerworks.py TRENCH_STEW says")
+    heat = (load(DATA / MOD / "tags" / "block" / "heat_sources.json") or {}).get("values", [])
+    if f"{MOD}:field_kitchen" not in heat:
+        err("The Field Kitchen must be in the block tag jugcraft:heat_sources")
+    for block in bunkerworks.TALL:
+        table = load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}
+        if '"half": "lower"' not in json.dumps(table):
+            err(f"{block} is two blocks tall: its loot table must drop it from the lower half only")
+    # The gas curtain's line of sight is walked in steps no longer than a quarter block.
+    curtain = (JAVA_ROOT / "building" / "GasCurtainBlock.java").read_text(encoding="utf-8")
+    if "STEP = 0.25;" not in curtain:
+        err("GasCurtainBlock.STEP must be 0.25 (blocks between the points it looks at)")
 
 
 def check_fire_control():
@@ -2539,6 +2575,12 @@ def check_agriculture():
         items[name] = ("plain", None, None, compost.lower(), None)
     for name, n, sat in re.findall(r'\bstew\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
         items[name] = ("stew", int(n), float(sat), None, None)
+        if ag.ITEMS.get(name, {}).get("stew_effect"):
+            err(f"JugcraftAgriculture.java stew {name} gives no effect, but tools/agriculture.py gives it {ag.ITEMS[name]['stew_effect']}")
+    for name, n, sat, effect, seconds in re.findall(r'\bstew\("([a-z_]+)", (\d+), ([\d.]+)F, MobEffects\.(\w+), (\d+)\)', main):
+        items[name] = ("stew", int(n), float(sat), None, None)
+        if ag.ITEMS.get(name, {}).get("stew_effect") != [effect, int(seconds)]:
+            err(f"JugcraftAgriculture.java stew {name} gives {effect} for {seconds} s, not as tools/agriculture.py says")
     for name, n, sat in re.findall(r'\btreat\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
         items[name] = ("treat", int(n), float(sat), None, None)
     for name, n, sat, effect, seconds in re.findall(r'\bsweet\("([a-z_]+)", (\d+), ([\d.]+)F, MobEffects\.(\w+), (\d+)\)', main):
@@ -6755,7 +6797,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
@@ -6795,6 +6837,7 @@ def main():
     check_gun_art()
     check_quad_names()
     check_fortifications()
+    check_bunkerworks()
     check_fire_control()
     check_raiders()
     check_plastic()

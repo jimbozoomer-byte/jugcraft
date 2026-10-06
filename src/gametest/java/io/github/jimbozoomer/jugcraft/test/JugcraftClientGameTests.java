@@ -528,6 +528,17 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_fortifications");
 
+			// Bunker and trench interiors (batch 59), where fire control stands next: a dugout under a corrugated iron roof on
+			// timber shoring, lit by hanging bunker lamps, with a map table, a lit field kitchen with a cooking pot on it, a
+			// bunk, a gas curtain let down in the back doorway and one rolled up in the side doorway; outside to the west, a
+			// trench periscope looking over a sandbag parapet. Fire control's fill clears it all again.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 144, y, z - 14, x - 114, y + 10, z + 10));
+			server.runOnServer(minecraft -> buildBunker(minecraft.overworld(), new BlockPos(x - 136, y, z - 8)));
+			server.runCommand("tp @p %d %d %d 180 12".formatted(x - 132, y + 1, z + 2));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_bunker");
+
 			// Fire control (batch 56), west of the fortifications: a fire control table on converge directing three Bastion
 			// Mortars on stone-brick plinths, each with a stocked ready rack, all laid on the table's target to the north.
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 144, y, z - 14, x - 114, y + 10, z + 10));
@@ -1167,6 +1178,82 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 		level.setBlock(base.offset(7, 3, 3), block.apply("searchlight")
 				.setValue(io.github.jimbozoomer.jugcraft.building.SearchlightBlock.YAW, 5)
 				.setValue(io.github.jimbozoomer.jugcraft.building.SearchlightBlock.TILT, 1), 3);
+	}
+
+	/**
+	 * Batch 59: the bunker scene (base: the dugout's back west corner, at floor level). The dugout runs eight blocks east
+	 * and four south, open at the south for the camera.
+	 */
+	private static void buildBunker(ServerLevel level, BlockPos base) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS;
+		java.util.function.Function<String, BlockState> block = id -> blocks.get(id).defaultBlockState();
+		var facing = net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING;
+		var half = net.minecraft.world.level.block.DoublePlantBlock.HALF;
+		var lower = net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER;
+		var upper = net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER;
+		var sandbags = io.github.jimbozoomer.jugcraft.building.Trenchworks.BLOCKS;
+		for (int dx = 0; dx <= 8; dx++) {
+			for (int dz = 0; dz <= 4; dz++) {
+				// Back wall of corrugated iron with a doorway in its middle, sandbag side walls and the roof.
+				for (int dy = 0; dy <= 1; dy++) {
+					if (dz == 0 && dx != 4) {
+						level.setBlock(base.offset(dx, dy, dz), block.apply("corrugated_iron"), 3);
+					} else if ((dx == 0 || dx == 8) && !(dx == 8 && dz == 2)) {
+						level.setBlock(base.offset(dx, dy, dz), sandbags.get("sandbags").defaultBlockState(), 3);
+					}
+				}
+				level.setBlock(base.offset(dx, 2, dz), dz == 4
+						? block.apply("timber_shoring").setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, net.minecraft.core.Direction.Axis.X)
+						: block.apply("corrugated_iron"), 3);
+				level.setBlock(base.offset(dx, 3, dz), block.apply("corrugated_iron_slab"), 3);
+				if (dx > 0 && dx < 8 && dz > 0) {
+					level.setBlock(base.offset(dx, 0, dz), sandbags.get("duckboard").defaultBlockState(), 3);
+				}
+			}
+		}
+		for (int dx : new int[] {1, 7}) {
+			for (int dy = 0; dy <= 1; dy++) {
+				level.setBlock(base.offset(dx, dy, 4), block.apply("timber_shoring"), 3);
+			}
+		}
+		for (int dx : new int[] {3, 6}) {
+			level.setBlock(base.offset(dx, 1, 2), block.apply("bunker_lamp").setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true), 3);
+		}
+		level.setBlock(base.offset(3, 0, 2), block.apply("map_table").setValue(facing, net.minecraft.core.Direction.SOUTH), 3);
+		BlockPos stove = base.offset(6, 0, 1);
+		level.setBlock(stove, block.apply("field_kitchen").setValue(facing, net.minecraft.core.Direction.SOUTH), 3);
+		level.setBlock(stove.above(), io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.block("cooking_pot").defaultBlockState(), 3);
+		if (level.getBlockEntity(stove) instanceof io.github.jimbozoomer.jugcraft.building.FieldKitchenBlock.Entity kitchen) {
+			try (net.fabricmc.fabric.api.transfer.v1.transaction.Transaction transaction =
+					net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()) {
+				kitchen.fuel.insert(net.fabricmc.fabric.api.transfer.v1.item.ItemVariant.of(net.minecraft.world.item.Items.COAL), 1, transaction);
+				transaction.commit();
+			}
+		}
+		if (level.getBlockEntity(stove.above()) instanceof io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity pot) {
+			pot.setItem(0, new ItemStack(net.minecraft.world.item.Items.BOWL));
+			pot.setItem(1, new ItemStack(net.minecraft.world.item.Items.BEEF));
+			pot.setItem(2, new ItemStack(net.minecraft.world.item.Items.POTATO));
+			pot.setItem(3, new ItemStack(net.minecraft.world.item.Items.CARROT));
+		}
+		BlockState bunk = block.apply("bunker_bunk").setValue(facing, net.minecraft.core.Direction.SOUTH);
+		level.setBlock(base.offset(1, 0, 1), bunk.setValue(half, lower), 3);
+		level.setBlock(base.offset(1, 1, 1), bunk.setValue(half, upper), 3);
+		BlockState hanging = block.apply("gas_curtain").setValue(facing, net.minecraft.core.Direction.SOUTH);
+		level.setBlock(base.offset(4, 0, 0), hanging.setValue(half, lower), 3);
+		level.setBlock(base.offset(4, 1, 0), hanging.setValue(half, upper), 3);
+		BlockState rolled = block.apply("gas_curtain").setValue(facing, net.minecraft.core.Direction.WEST)
+				.setValue(io.github.jimbozoomer.jugcraft.building.GasCurtainBlock.ROLLED, true);
+		level.setBlock(base.offset(8, 0, 2), rolled.setValue(half, lower), 3);
+		level.setBlock(base.offset(8, 1, 2), rolled.setValue(half, upper), 3);
+		// The trench periscope west of the dugout, behind a sandbag parapet one and a half blocks high.
+		for (int dx = -3; dx <= -1; dx++) {
+			level.setBlock(base.offset(dx, 0, 1), sandbags.get("sandbags").defaultBlockState(), 3);
+			level.setBlock(base.offset(dx, 1, 1), sandbags.get("sandbags_slab").defaultBlockState(), 3);
+		}
+		BlockState periscope = block.apply("trench_periscope").setValue(facing, net.minecraft.core.Direction.NORTH);
+		level.setBlock(base.offset(-2, 0, 2), periscope.setValue(half, lower), 3);
+		level.setBlock(base.offset(-2, 1, 2), periscope.setValue(half, upper), 3);
 	}
 
 	private static void buildKaiserworks(ServerLevel level, BlockPos base) {

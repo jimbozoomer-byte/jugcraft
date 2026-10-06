@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Bunker and trench interiors, batch 59
+- **Trench Periscope:** two blocks tall, its mirror head looking over the parapet. A comparator reads how many hostile mobs it sees (within 64 blocks, 45 degrees either side, in clear view, every second). Look through it to mark the nearest one as a Range Finder would, for your guns and fire control; sneak to clear the mark.
+- **Map Table:** a campaign map on a table. Use it to list the target marks plotted within 256 blocks (who, how far, which way, how long ago); sneak-use it to lay a Fire Control Table within 4 blocks on the next one.
+- **Gas Curtain:** a wet blanket across a doorway, two blocks tall, that you walk through. Let down, it keeps chlorine and smoke out of everything behind it; use it to roll it up or let it down.
+- **Field Kitchen:** an iron stove that heats a Cooking Pot on top. It burns logs, coal, charcoal and coke, glows and smokes while lit, and only starts a new piece of fuel while a pot stands on it. Hoppers can fuel it.
+- **Trench Stew:** beef, a potato and a carrot from the Cooking Pot: 10 food and five seconds of Regeneration.
+- **Corrugated Iron** (with slab and stairs), **Timber Shoring**, the caged **Bunker Lamp** (hangs or stands) and the **Bunker Bunk** (sit on the lower bunk; no spawn point).
+- New `Spotting.near` lists marks for the map table. Record: [bunker-interiors.md](docs/features/bunker-interiors.md).
+
 ### Faster CI: pull requests run only the client tests they need
 - The Build workflow's new `choose client tests` job (`tools/select_client_tests.py`) picks the client game test classes that show what a pull request changed. Docs- or data-only changes run none. Build files, mixins and the test harness still run them all. Rules: [TESTING.md](docs/TESTING.md#current-foundation).
 - `main` and manual runs still run every class, shared between the three client jobs by rough running time instead of every third class.
