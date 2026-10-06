@@ -32,6 +32,8 @@ public final class PeepoEntity extends PathfinderMob {
     private static final EntityDataAccessor<Boolean> WHEEL_RUNNING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> RECOVERING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
     private CompanionRoutine routine;
+    public final CompanionOrders orders=new CompanionOrders(this);
+    public void resetCompanionRoutine(){if(routine!=null)routine.resetOrders();}
     private net.minecraft.core.BlockPos bedExit;
     public void setBedExit(net.minecraft.core.BlockPos pos) { bedExit = pos; }
     /** Also used after reload, so a companion never becomes stranded in an upper bunk. */
@@ -138,14 +140,14 @@ public final class PeepoEntity extends PathfinderMob {
     public boolean isJughead() { return getType()==PeepoMod.JUGHEAD || getType()==PeepoMod.LEGACY_JUGHEAD; }
     public boolean isWearingPumpkin() { return entityData.get(PUMPKIN); }
     @Override protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
+        super.addAdditionalSaveData(output); orders.save(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
         output.putBoolean("NaturallySpawned", naturallySpawned);
         output.putInt("Energy",getEnergy());output.putInt("FoodRegenBonus",getFoodRegenBonus());output.putInt("FoodRegenTicks",getFoodRegenTicks());
         output.putBoolean("Recovering",isRecovering());
         if (bedExit != null) output.store("CompanionBedExit", net.minecraft.core.BlockPos.CODEC, bedExit);
     }
     @Override protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input); entityData.set(PUMPKIN,input.getBooleanOr("PumpkinCostume",false));
+        super.readAdditionalSaveData(input); orders.load(input); entityData.set(PUMPKIN,input.getBooleanOr("PumpkinCostume",false));
         naturallySpawned = input.getBooleanOr("NaturallySpawned", false);
         setStoredEnergy(input.getIntOr("Energy",CompanionEnergy.CAPACITY));
         entityData.set(RECOVERING,input.getBooleanOr("Recovering",false));updateRecoveryState();
@@ -206,6 +208,7 @@ public final class PeepoEntity extends PathfinderMob {
         goalSelector.addGoal(1, new EatInPlaceGoal());
         goalSelector.addGoal(1, new RestGoal());
         goalSelector.addGoal(2, new FindFoodGoal());
+        goalSelector.addGoal(3,new CompanionOrders.CommandGoal(this));
         routine=new CompanionRoutine(this);
         goalSelector.addGoal(3,routine);
         goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, .8));
@@ -220,16 +223,28 @@ public final class PeepoEntity extends PathfinderMob {
     }
     @Override public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!isAlive() || player.isSpectator()) return InteractionResult.PASS;
+        if(player.isShiftKeyDown()) {
+            if(!level().isClientSide()) {
+                if(orders.allowed(player))player.openMenu(new net.minecraft.world.SimpleMenuProvider((id,inventory,p)->new CompanionMenu(id,inventory,this),getDisplayName()));
+                else player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(orders.tamed()?"Only the owner or an allowed party member can give commands.":"Feed this companion once to tame it."));
+            }
+            return InteractionResult.SUCCESS;
+        }
         var stack=player.getItemInHand(hand);
         if (isEdible(stack)) {
-            if (!needsFood() || isEating()) return InteractionResult.CONSUME;
+            if ((orders.tamed() && !needsFood()) || isEating()) return InteractionResult.CONSUME;
             if (!level().isClientSide()) {
+                if(!orders.tamed()) {
+                    orders.tame(player);
+                    ((ServerLevel)level()).sendParticles(ParticleTypes.HEART,getX(),getY()+.65,getZ(),7,.18,.1,.18,0);
+                }
                 beginEating(stack.copyWithCount(1));
                 stack.consume(1,player);
             }
             return InteractionResult.SUCCESS;
         }
         if (stack.is(Items.JACK_O_LANTERN)) {
+            if(!level().isClientSide() && orders.tamed() && !orders.allowed(player))return InteractionResult.CONSUME;
             if (!level().isClientSide() && !isWearingPumpkin()) {
                 entityData.set(PUMPKIN,true);
                 stack.consume(1,player);
@@ -237,12 +252,6 @@ public final class PeepoEntity extends PathfinderMob {
             return InteractionResult.SUCCESS;
         }
         if (!stack.isEmpty()) return super.mobInteract(player,hand);
-        if(player.isShiftKeyDown()) {
-            if(!level().isClientSide())player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
-                "message.peepo.energy",getEnergy(),CompanionEnergy.CAPACITY,getEnergyRegenPerTick(),(getFoodRegenTicks()+19)/20,
-                net.minecraft.network.chat.Component.translatable("message.peepo.activity."+(isEating()?"eating":isRecovering()?"recovering":isWheelRunning()?"working":getRestMode()!=CompanionEnergy.Rest.NONE?"resting":"idle"))));
-            return InteractionResult.SUCCESS;
-        }
         if (level() instanceof ServerLevel server) {
             blushTicks = BLUSH_DURATION;
             entityData.set(BLUSHING, true);
@@ -285,7 +294,7 @@ public final class PeepoEntity extends PathfinderMob {
         FindFoodGoal() { setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK)); }
         private boolean valid(ItemEntity item) {
             return item!=null && item.isAlive() && !item.hasPickUpDelay() && isEdible(item.getItem())
-                && distanceToSqr(item)<64;
+                && distanceToSqr(item)<64 && orders.food(item.position());
         }
         @Override public boolean canUse() {
             if (!needsAutomaticFood() || isEating() || level().getGameTime()<nextSearch) return false;

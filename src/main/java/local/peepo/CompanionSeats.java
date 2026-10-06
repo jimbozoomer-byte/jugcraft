@@ -86,7 +86,7 @@ public final class CompanionSeats {
         int checks=0,paths=0;
         for(var seat:candidates) {
             if(++checks>8 || paths>=2)break;
-            if(!seat.availableTo(npc))continue;
+            if(!npc.orders.station(seat) || !seat.availableTo(npc))continue;
             paths++;
             var path=npc.getNavigation().createPath(BlockPos.containing(seat.approachPosition()),0);
             if(path!=null && path.canReach())return seat;

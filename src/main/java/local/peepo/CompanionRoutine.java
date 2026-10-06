@@ -16,11 +16,12 @@ final class CompanionRoutine extends Goal {
     private int repath;
     private final Map<BlockPos,Long> unreachable=new HashMap<>();
     CompanionRoutine(PeepoEntity npc) { this.npc=npc;nextSearch=npc.level().getGameTime()+Math.floorMod(npc.getId(),80);setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK)); }
+    void resetOrders(){release();active=false;nextSearch=0;}
     boolean isActive() { return active; }
     @Override public boolean requiresUpdateEveryTick() { return true; }
     private boolean needsRest() { return npc.isRecovering() || npc.getEnergy()<npc.getEnergyCapacity()*95/100; }
     private boolean useful(CompanionStation s) {
-        if(!s.availableTo(npc))return false;
+        if(!npc.orders.station(s) || !s.availableTo(npc))return false;
         return switch(s.kind()) {
             case WHEEL -> !npc.isRecovering() && npc.getEnergy()>0 && s.energySpace()>0;
             case CHAIR -> needsRest() || npc.level().getGameTime() >= nextLeisure;
@@ -67,10 +68,11 @@ final class CompanionRoutine extends Goal {
         }
     }
     @Override public boolean canUse() {
+        if(!npc.orders.routineAllowed())return false;
         if(npc.isEating() || npc.isWheelRunning() || npc.getRestMode()!=CompanionEnergy.Rest.NONE)return false;
         search();return station!=null || npc.isRecovering();
     }
-    @Override public boolean canContinueToUse() { return !npc.isEating() && (station!=null || npc.isRecovering()); }
+    @Override public boolean canContinueToUse() { return npc.orders.routineAllowed() && !npc.isEating() && (station!=null || npc.isRecovering()); }
     @Override public void start() { active=true; }
     private void release() {
         if(station!=null)station.release(npc);

@@ -31,7 +31,7 @@ Quality = nutrition + rounded half of saturation restored, clamped to 1–16. Sa
 - Equal or better food refreshes/replaces the bonus. Weaker food still heals but cannot extend a stronger bonus. Buffs never add together.
 - Custom food components work automatically, with bounded strength and duration.
 
-Sneak-right-click with an empty hand shows current energy, current regeneration and food-buff seconds in the action bar. Ordinary empty-hand clicking still triggers blush.
+Shift-right-click opens the owner/authorized-party command GUI with energy and health percentages. Ordinary empty-hand clicking still triggers blush.
 
 ## Furniture hooks and wheel integration
 

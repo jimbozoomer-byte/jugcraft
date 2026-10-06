@@ -1,0 +1,39 @@
+package local.peepo;
+
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.player.*;
+import net.minecraft.world.inventory.*;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.flag.FeatureFlags;
+
+public final class CompanionMenu extends AbstractContainerMenu {
+    public static MenuType<CompanionMenu> TYPE;
+    private final PeepoEntity npc;
+    private final ContainerData data;
+    public static void initialize(){TYPE=Registry.register(BuiltInRegistries.MENU,PeepoMod.id("companion_commands"),new MenuType<>(CompanionMenu::new,FeatureFlags.VANILLA_SET));}
+    public CompanionMenu(int id,Inventory inventory){this(id,inventory,null);}
+    public CompanionMenu(int id,Inventory inventory,PeepoEntity npc){
+        super(TYPE,id);this.npc=npc;
+        data=npc==null?new SimpleContainerData(9):new ContainerData(){
+            public int get(int i){return switch(i){case 0->npc.orders.mode();case 1->npc.getEnergy()*100/npc.getEnergyCapacity();case 2->Math.round(npc.getHealth()*100/npc.getMaxHealth());case 3->npc.orders.radius();case 4->npc.orders.party()?1:0;case 5->npc.orders.owner(inventory.player)?1:0;case 6->npc.orders.homeHere()?1:0;case 7->npc.orders.workHere()?1:0;case 8->npc.orders.targetAvailable()?1:0;default->0;};}
+            public void set(int i,int value){}public int getCount(){return 9;}
+        };
+        addDataSlots(data);
+        for(int row=0;row<3;row++)for(int col=0;col<9;col++)addSlot(new Slot(inventory,col+row*9+9,36+col*18,150+row*18));
+        for(int col=0;col<9;col++)addSlot(new Slot(inventory,col,36+col*18,208));
+    }
+    public int value(int i){return data.get(i);}
+    @Override public boolean stillValid(Player player){return npc==null || npc.isAlive() && npc.level()==player.level() && npc.distanceToSqr(player)<=64 && !player.isSpectator() && npc.orders.allowed(player);}
+    @Override public boolean clickMenuButton(Player player,int id){
+        if(npc==null || !stillValid(player))return false;
+        boolean changed=npc.orders.command(player,id);if(changed)broadcastChanges();return changed;
+    }
+    @Override public ItemStack quickMoveStack(Player player,int index){
+        if(index<0 || index>=slots.size())return ItemStack.EMPTY;
+        var slot=slots.get(index);if(!slot.hasItem())return ItemStack.EMPTY;
+        var stack=slot.getItem();var copy=stack.copy();
+        if(!(index<27?moveItemStackTo(stack,27,36,false):moveItemStackTo(stack,0,27,false)))return ItemStack.EMPTY;
+        if(stack.isEmpty())slot.setByPlayer(ItemStack.EMPTY);else slot.setChanged();slot.onTake(player,stack);return copy;
+    }
+}
