@@ -17,4 +17,4 @@ This jar replaces the regular Jugcraft jar and includes Peepo/Jughead. Remove th
 6. Sneak-right-click the companion with an empty hand to inspect energy. Off the wheel it gains 2 JE/t while walking or standing; food adds the existing bonus. Exhaustion blocks work until 80% energy. Dropped food and hand feeding remain supported.
 7. Try both companion variants, each wheel orientation, both side ports, breaking an occupied wheel, and saving/reloading when convenient.
 
-No in-game verification or automated test run was performed for this integration. Chair/bed blocks and workstation assignment are not included yet.
+No in-game verification or automated test run was performed for this integration. Companion beds are now available; see BEDS.md. Chair blocks and workstation assignment are not included yet.

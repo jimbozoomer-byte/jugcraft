@@ -13,6 +13,15 @@ public final class PeepoModel extends EntityModel<PeepoState> {
     }
     @Override public void setupAnim(PeepoState s) {
         super.setupAnim(s);
+        head.getChild("sleeping_eyes").visible=s.sleeping;
+        for (String side : new String[]{"left", "right"}) {
+            for (int i=0;i<4;i++) {
+                head.getChild(side+"_eye"+i).visible=!s.sleeping;
+                head.getChild(side+"_eye_rim"+i).visible=!s.sleeping;
+            }
+            for (String part : new String[]{"pupil", "shine", "upper_eyelid", "lower_eyelid"})
+                head.getChild(side+"_"+part).visible=!s.sleeping;
+        }
         boolean jugheadClothes=s.jughead && !s.pumpkin;
         shorts.visible=jugheadClothes;jug.visible=jugheadClothes;
         leftLeg.getChild("left_shorts_cuff").visible=jugheadClothes;
@@ -48,6 +57,12 @@ public final class PeepoModel extends EntityModel<PeepoState> {
             leftArm.zRot=rightArm.zRot=0;
             leftArm.z=rightArm.z=s.pumpkin ? -2.2F : -1.5F;
             head.yRot=0;head.xRot=.08F+bite*.5F;
+        }
+        if(s.sleeping) {
+            head.xRot=head.yRot=0;
+            leftLeg.xRot=rightLeg.xRot=0;
+            leftArm.xRot=rightArm.xRot=0;
+            leftArm.zRot=-.08F;rightArm.zRot=.08F;
         }
     }
 }

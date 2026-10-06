@@ -69,7 +69,7 @@ final class CompanionRoutine extends Goal {
     }
     @Override public void stop() { release();active=false; }
     @Override public void tick() {
-        if(station!=null && station.kind()!=CompanionStation.Kind.WHEEL && !npc.isRecovering()
+        if(station!=null && station.kind()==CompanionStation.Kind.CHAIR && !npc.isRecovering()
                 && npc.level().getGameTime()>=nextSearch)release();
         if(station!=null && (block.isRemoved() || !npc.level().hasChunkAt(block.getBlockPos())
                 || npc.level().getBlockEntity(block.getBlockPos())!=block || !useful(station)))release();

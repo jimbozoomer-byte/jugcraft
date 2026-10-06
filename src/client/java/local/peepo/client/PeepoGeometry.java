@@ -196,6 +196,21 @@ jughead_jug.addOrReplaceChild("jug_neck_rim",CubeListBuilder.create().texOffs(13
 jughead_jug.addOrReplaceChild("jug_rib0",CubeListBuilder.create().texOffs(136,200).addBox(-1.9020F,-8.6400F,-1.9350F,3.8040F,0.0960F,3.8700F),PartPose.ZERO);
 jughead_jug.addOrReplaceChild("jug_rib1",CubeListBuilder.create().texOffs(136,200).addBox(-1.9020F,-7.4400F,-1.9350F,3.8040F,0.0960F,3.8700F),PartPose.ZERO);
 jughead_jug.addOrReplaceChild("jug_rib2",CubeListBuilder.create().texOffs(136,200).addBox(-1.9020F,-6.2400F,-1.9350F,3.8040F,0.0960F,3.8700F),PartPose.ZERO);
+var sleepingEyes=head.addOrReplaceChild("sleeping_eyes",CubeListBuilder.create(),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("left_lid0",CubeListBuilder.create().texOffs(8,8).addBox(0.5800F,-3.7020F,-2.805F,1.5400F,0.3860F,.40F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("left_lid1",CubeListBuilder.create().texOffs(8,8).addBox(0.2225F,-3.3210F,-2.805F,2.2550F,0.3860F,.40F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("left_lid2",CubeListBuilder.create().texOffs(8,8).addBox(0.2225F,-2.9400F,-2.805F,2.2550F,0.3860F,.40F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("left_lid3",CubeListBuilder.create().texOffs(8,8).addBox(0.5800F,-2.5590F,-2.805F,1.5400F,0.3860F,.40F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("left_crease0",CubeListBuilder.create().texOffs(200,200).addBox(0.5100F,-2.9700F,-2.817F,.56F,.055F,.025F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("left_crease1",CubeListBuilder.create().texOffs(200,200).addBox(1.0700F,-2.8900F,-2.817F,.56F,.055F,.025F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("left_crease2",CubeListBuilder.create().texOffs(200,200).addBox(1.6300F,-2.9700F,-2.817F,.56F,.055F,.025F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("right_lid0",CubeListBuilder.create().texOffs(8,8).addBox(-2.1200F,-3.7020F,-2.805F,1.5400F,0.3860F,.40F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("right_lid1",CubeListBuilder.create().texOffs(8,8).addBox(-2.4775F,-3.3210F,-2.805F,2.2550F,0.3860F,.40F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("right_lid2",CubeListBuilder.create().texOffs(8,8).addBox(-2.4775F,-2.9400F,-2.805F,2.2550F,0.3860F,.40F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("right_lid3",CubeListBuilder.create().texOffs(8,8).addBox(-2.1200F,-2.5590F,-2.805F,1.5400F,0.3860F,.40F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("right_crease0",CubeListBuilder.create().texOffs(200,200).addBox(-2.1900F,-2.9700F,-2.817F,.56F,.055F,.025F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("right_crease1",CubeListBuilder.create().texOffs(200,200).addBox(-1.6300F,-2.8900F,-2.817F,.56F,.055F,.025F),PartPose.ZERO);
+sleepingEyes.addOrReplaceChild("right_crease2",CubeListBuilder.create().texOffs(200,200).addBox(-1.0700F,-2.9700F,-2.817F,.56F,.055F,.025F),PartPose.ZERO);
 return LayerDefinition.create(mesh,256,256);
 }
 }

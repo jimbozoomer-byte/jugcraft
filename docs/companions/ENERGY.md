@@ -15,7 +15,7 @@ The wheel budget is 64 JE/t per NPC (1,280 JE/second): a full reserve lasts 100 
 |---|---:|---:|
 | Standing or moving off the wheel | 2 JE/t | 53 min 20 sec |
 | Resting on a future chair | 8 JE/t | 13 min 20 sec |
-| Sleeping in a future bed, at night | 16 JE/t | 6 min 40 sec |
+| Sleeping in a companion bed, at night | 16 JE/t | 6 min 40 sec |
 | Powering a wheel | 0 JE/t | — |
 
 Times assume 20 ticks/second and loaded, ticking entities. Food adds its bonus even while moving/working. Rest and generation are mutually exclusive. Night is Overworld clock ticks 13,000–22,999; dawn ends sleep. Food buffs count down even at full energy, but pause while unloaded; no offline regeneration occurs.
@@ -35,7 +35,7 @@ Sneak-right-click with an empty hand shows current energy, current regeneration 
 
 ## Furniture hooks and wheel integration
 
-`PeepoEntity.setRestMode(CompanionEnergy.Rest.SITTING/SLEEPING/NONE)` is a server-only hook. Furniture must validate occupancy and clear the state on dismount/removal. Rest blocks wandering; direct feeding ends rest. Furniture must re-establish occupancy after load: rest itself resets to NONE to avoid immobilizing an NPC at a missing chair/bed. Chair and bed blocks are still future additions; station discovery already supports their rest hooks.
+`PeepoEntity.setRestMode(CompanionEnergy.Rest.SITTING/SLEEPING/NONE)` is a server-only hook. Furniture must validate occupancy and clear the state on dismount/removal. Rest blocks wandering; direct feeding ends rest. Furniture must re-establish occupancy after load: rest itself resets to NONE to avoid immobilizing an NPC at a missing chair/bed. Colored, stackable companion beds implement the sleeping hook. Chairs remain a future addition.
 
 `extractEnergy(requested, TransactionContext)` returns actual JE extracted, at most 64 total per game tick across all callers. Dead, eating or resting NPCs cannot supply energy. Aborted transactions restore reserve and tick budget. A wheel must insert into the receiving storage and extract the matching amount in the same Fabric transaction; do not commit unmatched extraction. There is deliberately no direct cable registration on the entity or electrical charging API. Passive recovery is suppressed during work and the following tick to avoid tick-order double recovery.
 

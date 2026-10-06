@@ -34,6 +34,7 @@ public final class PeepoMod implements ModInitializer {
         new PeepoSummoner(new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id("peepo_summoner"))).stacksTo(16)));
     @Override public void onInitialize() {
         GeneratorWheel.initialize();
+        CompanionBeds.initialize();
         PeepoSpawns.initialize();
         FabricDefaultAttributeRegistry.register(PEEPO, PeepoEntity.attributes());
         FabricDefaultAttributeRegistry.register(JUGHEAD, PeepoEntity.attributes());

@@ -21,6 +21,13 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         });
     }
     @Override public PeepoState createRenderState() { return new PeepoState(); }
+    @Override protected void setupRotations(PeepoState state, PoseStack pose, float bodyRot, float scale) {
+        super.setupRotations(state, pose, bodyRot, scale);
+        if (state.sleeping && state.deathTime <= 0) {
+            pose.translate(0, state.pumpkin ? .26 : .17, state.jughead && !state.pumpkin ? -.46 : -.30);
+            pose.rotateDegrees(com.mojang.math.Axis.XP, 90);
+        }
+    }
     @Override public Identifier getTextureLocation(PeepoState state) { if(state.jughead) return PeepoMod.id(state.blushing ? "textures/entity/jughead_blush.png" : "textures/entity/jughead.png"); return PeepoMod.id(state.blushing ? "textures/entity/peepo_blush.png" : "textures/entity/peepo.png"); }
     @Override protected RenderType getRenderType(PeepoState state, boolean visible, boolean forceTransparent, boolean glowing) {
         if(state.jughead && visible && !forceTransparent) return RenderTypes.entityTranslucent(getTextureLocation(state));
@@ -33,6 +40,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.jughead = entity.isJughead();
         state.eating=entity.isEating();
         state.wheelRunning=entity.isWheelRunning();
+        state.sleeping=entity.getRestMode()==CompanionEnergy.Rest.SLEEPING;
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;
         items.updateForLiving(state.food,state.eating ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.FIXED,entity);
     }
