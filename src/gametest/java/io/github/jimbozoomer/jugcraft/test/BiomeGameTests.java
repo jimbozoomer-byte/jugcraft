@@ -27,11 +27,13 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -510,7 +512,9 @@ public class BiomeGameTests {
 		BlockState stripped = helper.getBlockState(pos);
 		helper.assertTrue(stripped.is(block("stripped_cedar_log")) && stripped.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Z,
 				"An axe should strip the cedar log along its axis, found " + stripped);
-		helper.assertTrue(block("cedar_log").defaultBlockState().is(BlockTags.LOGS_THAT_BURN), "Cedar logs do not burn");
+		// Vanilla's #minecraft:logs_that_burn by name (26.3's BlockTags has no constant of that name).
+		TagKey<Block> logsThatBurn = TagKey.create(Registries.BLOCK, Identifier.withDefaultNamespace("logs_that_burn"));
+		helper.assertTrue(block("cedar_log").defaultBlockState().is(logsThatBurn), "Cedar logs do not burn");
 		helper.assertTrue(new ItemStack(JugcraftAgriculture.item("cedar_planks")).is(ItemTags.PLANKS), "Cedar planks are not planks");
 		helper.assertTrue(block("cedar_sapling").defaultBlockState().is(BlockTags.SAPLINGS), "The cedar sapling is not a sapling");
 		BlockState leaves = block("cedar_leaves").defaultBlockState();
