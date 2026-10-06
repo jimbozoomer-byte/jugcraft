@@ -39,7 +39,7 @@
     },
     {
       "from": [
-        0,
+        2.75,
         2,
         0
       ],
@@ -53,6 +53,9 @@
           "texture": "#fluid_tank_side"
         },
         "east": {
+          "texture": "#fluid_tank_side"
+        },
+        "west": {
           "texture": "#fluid_tank_side"
         },
         "down": {

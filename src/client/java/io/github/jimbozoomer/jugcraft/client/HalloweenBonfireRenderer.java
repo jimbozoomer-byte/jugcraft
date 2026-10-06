@@ -100,7 +100,10 @@ public class HalloweenBonfireRenderer implements BlockEntityRenderer<HalloweenBo
 		});
 	}
 
-	/** Two crossed sheets of flame turned {@code turn} degrees, each drawn from both sides, tips leaning by {@code sway} pixels. */
+	/**
+	 * Two crossed sheets of flame turned {@code turn} degrees, each drawn from both sides (each side lifted off the middle,
+	 * never one plane twice), tips leaning by {@code sway} pixels.
+	 */
 	private static void sheets(VertexConsumer buffer, PoseStack.Pose matrix, float width, float height, float sway, float turn) {
 		float y0 = BASE_Y / 16;
 		float y1 = (BASE_Y + height) / 16;
@@ -111,11 +114,9 @@ public class HalloweenBonfireRenderer implements BlockEntityRenderer<HalloweenBo
 			float dz = (float) (Math.sin(angle) * width / 2 / 16);
 			float[][] front = {{0.5F - dx, y0, 0.5F - dz, 0, 1}, {0.5F - dx + s, y1, 0.5F - dz, 0, 0}, {0.5F + dx + s, y1, 0.5F + dz, 1, 0},
 					{0.5F + dx, y0, 0.5F + dz, 1, 1}};
-			float[][] back = {front[3], front[2], front[1], front[0]};
 			float nx = (float) -Math.sin(angle);
 			float nz = (float) Math.cos(angle);
-			DecorDraw.quad(buffer, matrix, front, nx, 0, nz, 0xFFFFFFFF, FULL_BRIGHT);
-			DecorDraw.quad(buffer, matrix, back, -nx, 0, -nz, 0xFFFFFFFF, FULL_BRIGHT);
+			DecorDraw.twoSided(buffer, matrix, front, nx, 0, nz, 0xFFFFFFFF, FULL_BRIGHT, DecorDraw.TWO_SIDED_LIFT);
 		}
 	}
 }

@@ -86,7 +86,7 @@
       "to": [
         15.5,
         9.0,
-        14.52
+        14.6
       ],
       "faces": {
         "north": {
@@ -96,16 +96,40 @@
           "texture": "#dp_gunmetal"
         },
         "east": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            1.5,
+            7.0,
+            14.5,
+            8.0
+          ]
         },
         "west": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            1.5,
+            7.0,
+            14.5,
+            8.0
+          ]
         },
         "up": {
-          "texture": "#dp_grille"
+          "texture": "#dp_grille",
+          "uv": [
+            0.5,
+            1.5,
+            15.5,
+            14.5
+          ]
         },
         "down": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            1.5,
+            15.5,
+            14.5
+          ]
         }
       }
     },
@@ -278,7 +302,7 @@
       "to": [
         8.0,
         14.5,
-        10.52
+        10.6
       ],
       "faces": {
         "north": {
@@ -288,16 +312,40 @@
           "texture": "#dp_hazard"
         },
         "east": {
-          "texture": "#dp_hazard"
+          "texture": "#dp_hazard",
+          "uv": [
+            5.5,
+            1.5,
+            10.5,
+            6.5
+          ]
         },
         "west": {
-          "texture": "#dp_hazard"
+          "texture": "#dp_hazard",
+          "uv": [
+            5.5,
+            1.5,
+            10.5,
+            6.5
+          ]
         },
         "up": {
-          "texture": "#dp_hazard"
+          "texture": "#dp_hazard",
+          "uv": [
+            6.0,
+            5.5,
+            8.0,
+            10.5
+          ]
         },
         "down": {
-          "texture": "#dp_hazard"
+          "texture": "#dp_hazard",
+          "uv": [
+            6.0,
+            5.5,
+            8.0,
+            10.5
+          ]
         }
       }
     },
@@ -308,16 +356,28 @@
         10.5
       ],
       "to": [
-        14.52,
+        14.6,
         9.5,
         13.5
       ],
       "faces": {
         "north": {
-          "texture": "#dp_chrome"
+          "texture": "#dp_chrome",
+          "uv": [
+            1.5,
+            6.5,
+            4.0,
+            9.5
+          ]
         },
         "south": {
-          "texture": "#dp_chrome"
+          "texture": "#dp_chrome",
+          "uv": [
+            12.0,
+            6.5,
+            14.5,
+            9.5
+          ]
         },
         "east": {
           "texture": "#dp_chrome"
@@ -326,16 +386,28 @@
           "texture": "#dp_chrome"
         },
         "up": {
-          "texture": "#dp_chrome"
+          "texture": "#dp_chrome",
+          "uv": [
+            12.0,
+            10.5,
+            14.5,
+            13.5
+          ]
         },
         "down": {
-          "texture": "#dp_chrome"
+          "texture": "#dp_chrome",
+          "uv": [
+            12.0,
+            2.5,
+            14.5,
+            5.5
+          ]
         }
       }
     },
     {
       "from": [
-        0.5,
+        0.4,
         6.25,
         11.0
       ],
@@ -346,10 +418,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            14.0,
+            6.25,
+            15.5,
+            9.75
+          ]
         },
         "south": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            6.25,
+            2.0,
+            9.75
+          ]
         },
         "east": {
           "texture": "#dp_gunmetal"
@@ -358,16 +442,28 @@
           "texture": "#dp_gunmetal"
         },
         "up": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            11.0,
+            2.0,
+            13.0
+          ]
         },
         "down": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            3.0,
+            2.0,
+            5.0
+          ]
         }
       }
     },
     {
       "from": [
-        0.5,
+        0.4,
         6.5,
         13.0
       ],
@@ -378,10 +474,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            14.0,
+            6.5,
+            15.5,
+            9.5
+          ]
         },
         "south": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            6.5,
+            2.0,
+            9.5
+          ]
         },
         "east": {
           "texture": "#dp_gunmetal"
@@ -390,16 +498,28 @@
           "texture": "#dp_gunmetal"
         },
         "up": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            13.0,
+            2.0,
+            13.75
+          ]
         },
         "down": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            2.25,
+            2.0,
+            3.0
+          ]
         }
       }
     },
     {
       "from": [
-        0.5,
+        0.4,
         6.5,
         10.25
       ],
@@ -410,10 +530,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            14.0,
+            6.5,
+            15.5,
+            9.5
+          ]
         },
         "south": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            6.5,
+            2.0,
+            9.5
+          ]
         },
         "east": {
           "texture": "#dp_gunmetal"
@@ -422,10 +554,22 @@
           "texture": "#dp_gunmetal"
         },
         "up": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            10.25,
+            2.0,
+            11.0
+          ]
         },
         "down": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            5.0,
+            2.0,
+            5.75
+          ]
         }
       }
     },
