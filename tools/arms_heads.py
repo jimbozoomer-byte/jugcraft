@@ -13,8 +13,9 @@ What this writes:
 - the flail's item definition picks them by the custom_model_data string FlailHeads puts on its render-only copies of
   the stack (LINK_CASE, BALL_CASE), and otherwise shows the flail as before (definition());
 - arms_heads.json, per item: where the chain hangs from the handle and where the hand holds it (model pixels), the
-  links and the ball, the haft's radius (the ball swings clear of it), and the hand poses the handle is drawn with, so
-  FlailHeads can put the chain where the handle's eye is drawn.
+  links and the ball, the haft's radius (the ball swings clear of it), a link's half width and the ball's reach (they
+  keep clear of the holder's body), and the hand poses the handle is drawn with, so FlailHeads can put the chain where
+  the handle's eye is drawn.
 
 The measures are in the arms' design units (tools/arms_art.py) and scaled by the handle's own layout, so the head is
 always in proportion to the handle it hangs from. All original.
@@ -32,10 +33,11 @@ BALL_CASE = "flail_ball"
 # The kinds whose head swings free, and its measures in design units: its style ("spiked": oval chain links and a
 # spiked ball; "skull": vertebrae and a horned skull), how many links and their pitch (centre to centre), how far each
 # link is turned about its length from the last (degrees: a chain's interlock), each link's outer width and the
-# thickness of its bars, and the ball's core radius and spike lengths.
+# thickness of its bars, and the ball's core radius, how far its spikes stand out of it and how thick they are (a share
+# of the core's radius).
 HEADS = {
-    "flail": {"style": "spiked", "links": 4, "pitch": 2.4, "twist": 90, "link_width": 1.9, "link_bar": 0.62, "ball": 3.6,
-              "base": 1.2, "tip": 1.2, "diagonal": 2.3},
+    "flail": {"style": "spiked", "links": 4, "pitch": 2.4, "twist": 90, "link_width": 1.9, "link_bar": 0.62, "ball": 3.4,
+              "spike": 3.0, "spike_width": 0.3},
 }
 # Arms VII variants (tools/arms_variants.py) whose head swings free, by name: the Bonecarved Flail's spine of vertebrae
 # and horned skull ("ball": the skull's half width; "horn": its horns' length).
@@ -51,9 +53,14 @@ JAW = (48, 43, 10, 5)
 ROWS = ("chain", "blade", "fitting")
 TONES = (HIGHLIGHT, LIGHT, MID, DARK)
 # Which tone each face of a box takes, lit from above and the front left as the icons are (an index into TONES), for
-# a part's body and for its points, which are a step brighter so the spikes read against the ball.
+# a part's body and for its points, which are a step brighter so they read against it (a horn's tip, a vertebra's
+# processes). A ball is in two tones only (BALL_TONE: the game shades its faces too, and a third, dark tone striped its
+# rounded core's steps), its spikes the same with the end that points out in the light tone (SPIKE_TIP): no highlight,
+# no stepped cap.
 FACE_TONE = {"up": 1, "north": 1, "west": 1, "south": 2, "east": 2, "down": 3}
 POINT_TONE = {"up": 0, "north": 0, "west": 0, "south": 1, "east": 1, "down": 2}
+BALL_TONE = {"up": 1, "north": 1, "west": 1, "south": 2, "east": 2, "down": 2}
+SPIKE_TIP = 1
 
 
 def paint_swatches(texture, materials, skull=False):
@@ -79,12 +86,12 @@ def _uv(row, tone):
     return [u + 0.25, v + 0.25, u + 0.75, v + 0.75]
 
 
-def _box(frm, to, row, point=False, rotation=None):
-    """A box from frm to to (model pixels), its faces in `row`'s tones by which way they face (a point: a step
-    brighter)."""
+def _box(frm, to, row, point=False, rotation=None, tip=None, tones=None):
+    """A box from frm to to (model pixels), its faces in `row`'s tones by which way they face (`tones`, FACE_TONE if
+    not given; a point: a step brighter; `tip`: the face that points out, in SPIKE_TIP's tone)."""
     faces = {}
-    for face, tone in (POINT_TONE if point else FACE_TONE).items():
-        faces[face] = {"uv": _uv(row, TONES[tone]), "texture": "#tex"}
+    for face, tone in (tones or (POINT_TONE if point else FACE_TONE)).items():
+        faces[face] = {"uv": _uv(row, TONES[SPIKE_TIP if face == tip else tone]), "texture": "#tex"}
     element = {"from": [round(v, 4) for v in frm], "to": [round(v, 4) for v in to], "faces": faces}
     if rotation is not None:
         element["rotation"] = rotation
@@ -114,40 +121,36 @@ def link_elements(head, unit):
 
 def ball_elements(head, unit):
     """The spiked ball, centred on the model with its lug up (+y, towards the chain): a core of three crossing slabs
-    of different sizes (so no two faces share a plane), five two-tier spikes along the axes (the sixth place is the
-    lug's), and twelve on the diagonals, each two boxes turned 45 degrees about one axis."""
+    of different sizes (so no two faces share a plane) rounding a cube, a crown of eight spikes round its middle (four
+    along x and z, four between them turned 45 degrees about y: every spike turns about one axis only) and one below,
+    each a single box standing out of the core, its sides in the ball's tones and its end in the light one. Few spikes
+    in two tones read as a spiked ball from every side, not as speckle."""
     r = head["ball"] * unit
-    base, tip = head["base"] * unit, head["tip"] * unit
+    out_by = head["spike"] * unit
     out = []
     # The core, rounded: a cube, and through it one slab long in x, one in y and one in z, each a different size across
     # (so no two faces share a plane), stepping the outline in towards the poles.
     half = ((r, 0.52 * r, 0.52 * r), (0.46 * r, r + 0.12, 0.46 * r), (0.4 * r, 0.4 * r, r + 0.24))
-    out.append(_box((C - 0.72 * r,) * 3, (C + 0.72 * r,) * 3, "blade"))
+    out.append(_box((C - 0.72 * r,) * 3, (C + 0.72 * r,) * 3, "blade", tones=BALL_TONE))
     for hx, hy, hz in half:
-        out.append(_box((C - hx, C - hy, C - hz), (C + hx, C + hy, C + hz), "blade"))
-    reach = [h[i] for i, h in enumerate(half)]   # how far the core reaches along x, y and z
-    # Axial spikes: a broad base sunk 0.1 px into the core and a narrow tip on it.
-    wide, narrow = 0.26 * r, 0.12 * r
-    for axis in range(3):
-        for sign in (-1, 1):
-            if axis == 1 and sign > 0:
-                continue   # the lug's place
-            for w, a, b in ((wide, reach[axis] - 0.1, reach[axis] + base), (narrow, reach[axis] + base - 0.1, reach[axis] + base + tip)):
-                lo, hi = [C - w] * 3, [C + w] * 3
-                lo[axis], hi[axis] = (C + a, C + b) if sign > 0 else (C - b, C - a)
-                out.append(_box(lo, hi, "blade", True))
-    # Diagonal spikes: in each axis plane, a bar along one axis turned +-45 degrees about the third, from inside the
-    # core out past it, in two tiers as the axial ones (widths of their own, so no face shares a plane with theirs).
-    out_to = r + head["diagonal"] * unit
-    for turn, along in (("z", 0), ("x", 2), ("y", 0)):
-        for sign in (-1, 1):
-            for angle in (45.0, -45.0):
-                for w, a, b in ((0.21 * r, 0.55 * r, out_to - tip * 0.8), (0.1 * r, out_to - tip * 0.8 - 0.1, out_to)):
-                    lo, hi = [C - w] * 3, [C + w] * 3
-                    lo[along], hi[along] = (C + a, C + b) if sign > 0 else (C - b, C - a)
-                    out.append(_box(lo, hi, "blade", True, {"angle": angle, "axis": turn, "origin": [C, C, C]}))
+        out.append(_box((C - hx, C - hy, C - hz), (C + hx, C + hy, C + hz), "blade", tones=BALL_TONE))
+    # The spikes: from inside the core out past it. The turned ones a little thinner, so no face of theirs shares a
+    # plane with an upright one's.
+    w = head["spike_width"] * r / 2.0
+    for axis, sign, tip in ((0, 1, "east"), (0, -1, "west"), (2, 1, "south"), (2, -1, "north"), (1, -1, "down")):
+        reach = half[axis][axis]
+        lo, hi = [C - w] * 3, [C + w] * 3
+        lo[axis], hi[axis] = (C + 0.6 * r, C + reach + out_by) if sign > 0 else (C - reach - out_by, C - 0.6 * r)
+        out.append(_box(lo, hi, "blade", tip=tip, tones=BALL_TONE))
+    turned = 0.82 * w
+    for sign, tip in ((1, "east"), (-1, "west")):
+        for angle in (45.0, -45.0):
+            lo, hi = [C - turned] * 3, [C + turned] * 3
+            lo[0], hi[0] = (C + 0.6 * r, C + 0.86 * r + out_by) if sign > 0 else (C - 0.86 * r - out_by, C - 0.6 * r)
+            out.append(_box(lo, hi, "blade", rotation={"angle": angle, "axis": "y", "origin": [C, C, C]}, tip=tip,
+                            tones=BALL_TONE))
     # The lug the chain's last link hangs from: a fitting collar on the core's top and an eye above it.
-    top = reach[1]
+    top = half[1][1]
     collar, eye = 0.34 * r, 0.16 * r
     out.append(_box((C - collar, C + top - 0.1, C - collar), (C + collar, C + top + 0.3 * r, C + collar), "fitting"))
     out.append(_box((C - eye, C + top + 0.3 * r - 0.1, C - eye * 1.6), (C + eye, C + top + 0.62 * r, C + eye * 1.6), "fitting"))
@@ -233,7 +236,12 @@ def ball_reach(head, unit):
     haft it swings clear of."""
     if head["style"] == "skull":
         return (head["ball"] + head["horn"] * 0.8) * unit
-    return (head["ball"] + head["diagonal"]) * unit
+    return (head["ball"] + head["spike"]) * unit
+
+
+def chain_radius(head, unit):
+    """A link's half width (model pixels): how far a link keeps clear of the holder's body."""
+    return (head["vertebra"] if head["style"] == "skull" else head["link_width"]) * unit / 2.0
 
 
 def lug(head, unit):
@@ -272,6 +280,7 @@ def entry(head, layout, display):
     return {"anchor": anchor, "grip": [round(gx, 4), round(gy, 4), 8.0], "links": head["links"],
             "pitch": round(head["pitch"] * unit, 4), "twist": head["twist"], "lug": round(lug(head, unit), 4),
             "reach": round(ball_reach(head, unit), 4), "haft": round(0.85 * unit, 4),
+            "chain_radius": round(chain_radius(head, unit), 4),
             "display": {context: display[context] for context in sorted(display)}}
 
 

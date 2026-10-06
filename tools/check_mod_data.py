@@ -1427,13 +1427,14 @@ def check_flail_heads():
             err(f"FlailHeads.{name} differs from tools/arms_heads.py ({value})")
     mixins = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin" / "client"
     for mixin, calls in (("ArmsRenderStateMixin", ("FlailHeads.extract",)),
+                         ("ArmsHumanoidModelMixin", ("FlailHeads.pose",)),
                          ("ArmsItemInHandLayerMixin", ("FlailHeads.root", "FlailHeads.submitThirdPerson")),
                          ("ArmsFirstPersonMixin", ("FlailHeads.beginFirstPerson", "FlailHeads.firstPersonFrame",
                                                    "FlailHeads.endFirstPerson"))):
         text = (mixins / f"{mixin}.java").read_text(encoding="utf-8")
         for call in calls:
             if call not in text:
-                err(f"{mixin} does not call {call} (the flail's head would not be drawn)")
+                err(f"{mixin} does not call {call} (the flail's head would not be drawn, or not kept clear of the body)")
     client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8")
     if "FlailHeads.load()" not in client or "FlailHeads.register()" not in client:
         err("JugcraftClient does not load and register FlailHeads")

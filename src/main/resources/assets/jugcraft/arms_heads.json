@@ -13,9 +13,10 @@
     "links": 4,
     "pitch": 1.2715,
     "twist": 90,
-    "lug": 2.9256,
-    "reach": 3.1258,
+    "lug": 2.7539,
+    "reach": 3.3907,
     "haft": 0.4503,
+    "chain_radius": 0.5033,
     "display": {
       "firstperson_lefthand": {
         "rotation": [
@@ -101,9 +102,10 @@
     "links": 4,
     "pitch": 1.2715,
     "twist": 90,
-    "lug": 2.9256,
-    "reach": 3.1258,
+    "lug": 2.7539,
+    "reach": 3.3907,
     "haft": 0.4503,
+    "chain_radius": 0.5033,
     "display": {
       "firstperson_lefthand": {
         "rotation": [
@@ -192,6 +194,7 @@
     "lug": 3.3595,
     "reach": 3.2118,
     "haft": 0.4565,
+    "chain_radius": 0.4028,
     "display": {
       "firstperson_lefthand": {
         "rotation": [

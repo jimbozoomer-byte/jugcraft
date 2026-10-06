@@ -16,8 +16,11 @@ import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -51,16 +54,20 @@ import org.joml.Vector3f;
  * <p>Frames: in third person (mixin/client/ArmsItemInHandLayerMixin) the model root is kept as the arm starts
  * ({@link #root}), and the head is drawn where the held item is ({@link #submitThirdPerson}); the chain is simulated in
  * the body's upright root frame, with the body's turns and moves taken out of it as it steps, so the ball keeps its
- * swing as the body turns and the entity moves (and the camera, wherever it is, plays no part). On screen (mixin/client/ArmsFirstPersonMixin) it is simulated in the world's axes about the eye, from
- * the camera's pitch and yaw. Anything further than 32 blocks gets the ball hanging still, and a chain is never stepped
- * twice in a frame (the inventory's paper doll draws the chain as the world last left it, turned with the body).
+ * swing as the body turns and the entity moves (and the camera, wherever it is, plays no part). There the ball and links
+ * keep clear of the holder's own body as it is posed this frame ({@link #pose}: head, torso, arms and legs, walking or
+ * not), so the ball never sinks into a hip or an arm. On screen (mixin/client/ArmsFirstPersonMixin) it is simulated in
+ * the world's axes about the eye, from the camera's pitch and yaw. Anything further than 32 blocks gets the ball hanging
+ * still, and a chain is never stepped twice in a frame (the inventory's paper doll draws the chain as the world last left
+ * it, turned with the body). Each render state of an entity keeps its own view of the heads ({@link View}): a frame
+ * fills the world's state and the doll's before it draws either.
  */
 public final class FlailHeads {
 	/** The custom_model_data strings that pick a flail's head parts (tools/arms_heads.py LINK_CASE and BALL_CASE). */
 	public static final String LINK = "flail_link";
 	public static final String BALL = "flail_ball";
-	/** An armed entity's flail heads, on its render state for this frame. */
-	public static final RenderStateDataKey<Heads> HEADS = RenderStateDataKey.create(() -> "jugcraft:flail_heads");
+	/** An armed entity's flail heads, as one of its render states for this frame sees them. */
+	public static final RenderStateDataKey<View> HEADS = RenderStateDataKey.create(() -> "jugcraft:flail_heads");
 	/** The hand poses of arms_heads.json, by context: 0 and 1 third person (right, left), 2 and 3 first person. */
 	private static final List<String> CONTEXTS = List.of("thirdperson_righthand", "thirdperson_lefthand", "firstperson_righthand",
 			"firstperson_lefthand");
@@ -72,8 +79,8 @@ public final class FlailHeads {
 	/** The longest sub-step and the longest frame stepped, in ticks; longer gaps are clamped. */
 	static final float SUBSTEP = 0.25F;
 	static final float MAX_STEP = 2.0F;
-	/** Constraint passes a sub-step. */
-	static final int PASSES = 4;
+	/** Constraint passes a sub-step (enough for the links, the haft and the holder's body to agree). */
+	static final int PASSES = 8;
 	/** How far the ball moves when a link pulls on it, against the link's own share: the ball is heavy. */
 	static final float BALL_SHARE = 0.25F;
 	/** Unseen this many ticks, or moved this many blocks (squared) at once, the chain starts again hanging. */
@@ -85,6 +92,28 @@ public final class FlailHeads {
 	static final float CLEAR = 0.75F;
 	/** On screen, the ball's middle keeps this far (blocks) from the eye, so a swing back never fills the view. */
 	static final float NEAR = 0.45F;
+	/** In third person the ball's middle keeps this share of its reach (the spikes' tips) clear of the holder's body, and
+	 * each link this much of a link's half width. */
+	static final float BODY_CLEAR = 1.0F;
+	/** The holder's body parts, as a humanoid model poses them: each a box about its pivot, in model pixels before the
+	 * part's turns (head, torso, right arm, left arm, right leg, left leg), and how much the outer layer (a jacket, a
+	 * sleeve, trousers) stands out of them. */
+	static final int HEAD = 0;
+	static final int TORSO = 1;
+	static final int RIGHT_ARM = 2;
+	static final int LEFT_ARM = 3;
+	static final int RIGHT_LEG = 4;
+	static final int LEFT_LEG = 5;
+	static final int PARTS = 6;
+	static final float[][] BOXES = {
+		{-4.0F, -8.0F, -4.0F, 4.0F, 0.0F, 4.0F},
+		{-4.0F, 0.0F, -2.0F, 4.0F, 12.0F, 2.0F},
+		{-3.0F, -2.0F, -2.0F, 1.0F, 10.0F, 2.0F},
+		{-1.0F, -2.0F, -2.0F, 3.0F, 10.0F, 2.0F},
+		{-2.0F, 0.0F, -2.0F, 2.0F, 12.0F, 2.0F},
+		{-2.0F, 0.0F, -2.0F, 2.0F, 12.0F, 2.0F},
+	};
+	static final float LAYER = 0.25F;
 	private static final float DEG = (float) (Math.PI / 180.0);
 	private static final Matrix4f IDENTITY = new Matrix4f();
 
@@ -114,6 +143,8 @@ public final class FlailHeads {
 		final float[] lug = new float[4];
 		final float[] reach = new float[4];
 		final float[] haft = new float[4];
+		/** Per hand pose: a link's half width (it keeps that clear of the holder's body), blocks. */
+		final float[] chainRadius = new float[4];
 	}
 
 	/** Reads assets/jugcraft/arms_heads.json from the mod's resources (once, at client start). */
@@ -163,6 +194,7 @@ public final class FlailHeads {
 			spec.lug[c] = json.get("lug").getAsFloat() * s / 16.0F;
 			spec.reach[c] = json.get("reach").getAsFloat() * s / 16.0F;
 			spec.haft[c] = json.get("haft").getAsFloat() * s / 16.0F;
+			spec.chainRadius[c] = json.get("chain_radius").getAsFloat() * s / 16.0F;
 		}
 		return spec;
 	}
@@ -209,6 +241,14 @@ public final class FlailHeads {
 		boolean ready;
 		/** How far from its sim frame's origin the ball must stay (0: anywhere); the eye, on screen. */
 		float near;
+		/** In third person, the holder's body as posed this frame (View.body), which the ball and links keep clear of, or
+		 * null; and how far the ball's middle and a link keep from it (blocks). */
+		float[] body;
+		float ballClear;
+		float linkClear;
+		/** For the client game tests: the nearest the ball has come to the holder's body since the last reset, beyond
+		 * ballClear (blocks; infinite until a body was measured). */
+		float nearest = Float.POSITIVE_INFINITY;
 		Spec spec;
 		int context = -1;
 		float now;
@@ -290,6 +330,7 @@ public final class FlailHeads {
 				}
 				clearHaft(grip, ax, ay, az, clear);
 				clearOrigin();
+				clearBody();
 			}
 			// Then inextensible: each point drawn back to its link's length from the one before it (follow the leader), so
 			// however fast the arm moves the links never part.
@@ -306,6 +347,9 @@ public final class FlailHeads {
 					x[b + 1] = x[a + 1] + dy * k;
 					x[b + 2] = x[a + 2] + dz * k;
 				}
+			}
+			if (body != null) {
+				nearest = Math.min(nearest, bodyGap(points - 1, ballClear, true));
 			}
 		}
 
@@ -374,6 +418,103 @@ public final class FlailHeads {
 			}
 		}
 
+		/** Keeps the ball and the links clear of the holder's body (third person): the ball of every part, a link of the
+		 * torso, the legs and the head (not the arms: the chain hangs from the hand). */
+		private void clearBody() {
+			if (body == null) {
+				return;
+			}
+			for (int i = 1; i < points; i++) {
+				boolean ball = i == points - 1;
+				for (int part = 0; part < PARTS; part++) {
+					if (ball || part != RIGHT_ARM && part != LEFT_ARM) {
+						push(i, part, ball ? ballClear : linkClear, true);
+					}
+				}
+			}
+		}
+
+		/** How far point i is beyond `clear` from the nearest body part (blocks; negative: inside). */
+		private float bodyGap(int i, float clear, boolean arms) {
+			float gap = Float.POSITIVE_INFINITY;
+			for (int part = 0; part < PARTS; part++) {
+				if (arms || part != RIGHT_ARM && part != LEFT_ARM) {
+					gap = Math.min(gap, push(i, part, clear, false));
+				}
+			}
+			return gap;
+		}
+
+		/**
+		 * Point i against one body part: its box about the part's pivot, turned as the part is (z, then y, then x, as a
+		 * model part turns) and grown by the outer layer. If `move` and the point is nearer than `clear` but still outside
+		 * the part, it is pushed straight out to `clear` from it. A point already inside the part (a fast strike's arm or
+		 * head swept over it within a frame) is left to pass through, rather than thrown out through its nearest face,
+		 * which may be the far one. Returns how far beyond `clear` the point was (blocks; negative: too near or inside).
+		 */
+		private float push(int i, int part, float clear, boolean move) {
+			int o = i * 3;
+			int b = part * 6;
+			float[] box = BOXES[part];
+			// The sim frame is the model's root turned upright: x and y the other way, blocks rather than pixels.
+			float px = -x[o] * 16.0F - body[b];
+			float py = -x[o + 1] * 16.0F - body[b + 1];
+			float pz = x[o + 2] * 16.0F - body[b + 2];
+			float cx = (float) Math.cos(body[b + 3]);
+			float sx = (float) Math.sin(body[b + 3]);
+			float cy = (float) Math.cos(body[b + 4]);
+			float sy = (float) Math.sin(body[b + 4]);
+			float cz = (float) Math.cos(body[b + 5]);
+			float sz = (float) Math.sin(body[b + 5]);
+			// Into the part's own frame: its turns undone (z, then y, then x).
+			float ax = px * cz + py * sz;
+			float ay = -px * sz + py * cz;
+			float bx = ax * cy - pz * sy;
+			float bz = ax * sy + pz * cy;
+			float lx = bx;
+			float ly = ay * cx + bz * sx;
+			float lz = -ay * sx + bz * cx;
+			float r = clear * 16.0F;
+			float x0 = box[0] - LAYER;
+			float y0 = box[1] - LAYER;
+			float z0 = box[2] - LAYER;
+			float x1 = box[3] + LAYER;
+			float y1 = box[4] + LAYER;
+			float z1 = box[5] + LAYER;
+			float nx = Math.max(x0, Math.min(x1, lx));
+			float ny = Math.max(y0, Math.min(y1, ly));
+			float nz = Math.max(z0, Math.min(z1, lz));
+			float dx = lx - nx;
+			float dy = ly - ny;
+			float dz = lz - nz;
+			float d = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+			if (d <= 1.0E-5F) {
+				// Inside: how deep (to the nearest face), and left where it is.
+				float depth = Math.min(Math.min(lx - x0, x1 - lx), Math.min(Math.min(ly - y0, y1 - ly), Math.min(lz - z0, z1 - lz)));
+				return (-depth - r) / 16.0F;
+			}
+			float gap = d - r;
+			if (!move || gap >= 0.0F) {
+				return gap / 16.0F;
+			}
+			float k = r / d;
+			lx = nx + dx * k;
+			ly = ny + dy * k;
+			lz = nz + dz * k;
+			// Back out: the part's turns (x, then y, then z), its pivot, the sim frame.
+			float ry = ly * cx - lz * sx;
+			float rz = ly * sx + lz * cx;
+			float qx = lx * cy + rz * sy;
+			float qz = -lx * sy + rz * cy;
+			float mx = qx * cz - ry * sz + body[b];
+			float my = qx * sz + ry * cz + body[b + 1];
+			float mz = qz + body[b + 2];
+			x[o] = -mx / 16.0F;
+			x[o + 1] = -my / 16.0F;
+			x[o + 2] = mz / 16.0F;
+			return gap / 16.0F;
+		}
+
 		/** Turns every point by `radians` about the frame's vertical axis: the frame turned the other way. */
 		void turn(float radians) {
 			if (radians == 0.0F) {
@@ -421,11 +562,9 @@ public final class FlailHeads {
 	}
 
 	/**
-	 * An entity's flail heads: its render copies, resolved part states and chains, per arm (0 right, 1 left); and this
-	 * frame's model root (kept as the arm starts), the body's yaw as the entity was read, whether the body is tilted
-	 * (swimming, gliding, lying, spinning, dying: the ball then hangs towards the feet, unstepped), and whether this is
-	 * another view of the entity than the world's (the inventory's paper doll, read a whole tick ahead: it draws the chain
-	 * as the world left it, on the doll's body, and never steps it).
+	 * An entity's flail heads: its render copies, resolved part states and chains, per arm (0 right, 1 left), its two
+	 * views this frame (the world's and another's, see {@link View}), and its body as last posed (for a view drawn before
+	 * its own pose is known: a frame old at most).
 	 */
 	public static final class Heads {
 		final Spec[] spec = new Spec[2];
@@ -436,10 +575,31 @@ public final class FlailHeads {
 		final ItemStackRenderState[] ball = {new ItemStackRenderState(), new ItemStackRenderState()};
 		final Chain[] chain = {new Chain(), new Chain()};
 		final Chain[] still = {new Chain(), new Chain()};
+		final View[] views = {new View(this), new View(this)};
+		final float[] lastBody = new float[PARTS * 6];
+		boolean posedOnce;
+	}
+
+	/**
+	 * One render state's view of an entity's flail heads, filled as that state is: a frame fills the world's state and
+	 * the inventory's paper doll's (read a whole tick ahead) before it draws either, so each keeps its own. The body's
+	 * yaw as the entity was read; whether the body is tilted (swimming, gliding, lying, spinning, dying: the ball then
+	 * hangs towards the feet, unstepped); whether this is another view than the world's (the doll: it draws the chain as
+	 * the world left it, on the doll's body, and never steps it); the model's root as the arm starts; and the body as
+	 * posed for this state, if it is a humanoid's ({@link #pose}): each part's pivot (model pixels) and turns (radians).
+	 */
+	public static final class View {
+		final Heads heads;
 		final Matrix4f root = new Matrix4f();
 		float yaw;
 		boolean tilted;
 		boolean other;
+		boolean posed;
+		final float[] body = new float[PARTS * 6];
+
+		View(Heads heads) {
+			this.heads = heads;
+		}
 	}
 
 	/** A render copy of a held flail asking for one of its head parts (keeps its enchantments, so the glint shows). */
@@ -487,18 +647,54 @@ public final class FlailHeads {
 		if (specLeft != null) {
 			resolve(heads, 1, left, models, entity);
 		}
-		heads.yaw = state.bodyRot;
-		heads.other = partialTick >= 1.0F;
-		heads.tilted = entity.isVisuallySwimming() || entity.isFallFlying() || entity.isSleeping() || entity.isAutoSpinAttack()
+		boolean other = partialTick >= 1.0F;
+		View view = heads.views[other ? 1 : 0];
+		view.yaw = state.bodyRot;
+		view.other = other;
+		view.tilted = entity.isVisuallySwimming() || entity.isFallFlying() || entity.isSleeping() || entity.isAutoSpinAttack()
 				|| !entity.isAlive();
-		state.setData(HEADS, heads);
+		view.posed = false;
+		state.setData(HEADS, view);
+	}
+
+	/**
+	 * As a humanoid model is posed for a state (mixin/client/ArmsHumanoidModelMixin, after vanilla's pose and the arms
+	 * motion's): the head, torso, arms and legs as that pose leaves them (a player's as they are drawn), which the ball
+	 * and links keep clear of. A model that turns its limbs again afterwards (an armor stand's set pose, a zombie's raised
+	 * arms) is measured before it does. A baby's smaller body is not measured: its ball swings free, as any other holder's
+	 * that is not a humanoid.
+	 */
+	public static void pose(HumanoidModel<?> model, HumanoidRenderState state) {
+		View view = state.getData(HEADS);
+		if (view == null || state.isBaby) {
+			return;
+		}
+		posePart(view.body, HEAD, model.head);
+		posePart(view.body, TORSO, model.body);
+		posePart(view.body, RIGHT_ARM, model.rightArm);
+		posePart(view.body, LEFT_ARM, model.leftArm);
+		posePart(view.body, RIGHT_LEG, model.rightLeg);
+		posePart(view.body, LEFT_LEG, model.leftLeg);
+		view.posed = true;
+		System.arraycopy(view.body, 0, view.heads.lastBody, 0, PARTS * 6);
+		view.heads.posedOnce = true;
+	}
+
+	private static void posePart(float[] body, int index, ModelPart part) {
+		int o = index * 6;
+		body[o] = part.x;
+		body[o + 1] = part.y;
+		body[o + 2] = part.z;
+		body[o + 3] = part.xRot;
+		body[o + 4] = part.yRot;
+		body[o + 5] = part.zRot;
 	}
 
 	/** As the item in hand starts to be drawn (mixin/client/ArmsItemInHandLayerMixin, at its head): the model's root. */
 	public static void root(ArmedEntityRenderState state, PoseStack poseStack) {
-		Heads heads = state.getData(HEADS);
-		if (heads != null) {
-			heads.root.set(poseStack.last().pose());
+		View view = state.getData(HEADS);
+		if (view != null) {
+			view.root.set(poseStack.last().pose());
 		}
 	}
 
@@ -517,32 +713,38 @@ public final class FlailHeads {
 	 */
 	public static void submitThirdPerson(ArmedEntityRenderState state, ItemStack stack, HumanoidArm arm, PoseStack poseStack,
 			SubmitNodeCollector collector, int light) {
-		Heads heads = state.getData(HEADS);
+		View view = state.getData(HEADS);
 		int side = arm == HumanoidArm.RIGHT ? 0 : 1;
-		if (heads == null || heads.spec[side] == null || !SPECS.containsKey(stack.getItem())) {
+		if (view == null || view.heads.spec[side] == null || !SPECS.containsKey(stack.getItem())) {
 			return;
 		}
 		try {
+			Heads heads = view.heads;
 			Spec spec = heads.spec[side];
 			int context = side;
 			// Item base frame -> the model root -> the root upright (the model's flip undone: y up); the body's turns are
 			// taken out of the chain as it steps (advance).
 			Matrix4f base = poseStack.last().pose();
-			K.set(heads.root).invert().mul(base, K);
+			K.set(view.root).invert().mul(base, K);
 			TO_SIM.set(IDENTITY).rotateZ((float) Math.PI).mul(K, TO_SIM);
 			FROM_SIM.set(TO_SIM).invert();
 			TO_SIM.transformPosition(ANCHOR.set(spec.anchor[context]));
 			TO_SIM.transformPosition(GRIP.set(spec.grip[context]));
 			// The root's own scale (a player is drawn at 15/16, a baby at half): gravity and moves in its units.
-			float rootScale = (float) Math.sqrt(heads.root.transformDirection(V.set(1.0F, 0.0F, 0.0F)).lengthSquared());
+			float rootScale = (float) Math.sqrt(view.root.transformDirection(V.set(1.0F, 0.0F, 0.0F)).lengthSquared());
 			rootScale = rootScale > 1.0E-4F ? rootScale : 1.0F;
-			boolean still = heads.tilted || state.distanceToCameraSq > FAR_SQ;
+			boolean still = view.tilted || state.distanceToCameraSq > FAR_SQ;
 			Chain chain = still ? heads.still[side] : heads.chain[side];
 			float clear = spec.haft[context] + spec.reach[context] * CLEAR;
+			// The holder's body as posed for this state (a humanoid's; else as last posed), for the ball and links to keep
+			// clear of.
+			chain.body = view.posed ? view.body : heads.posedOnce ? heads.lastBody : null;
+			chain.ballClear = spec.reach[context] * BODY_CLEAR;
+			chain.linkClear = spec.chainRadius[context];
 			if (still) {
 				chain.hang(spec, context, ANCHOR);
 				chain.step(0.0F, 0.0F, ANCHOR, GRIP, clear);
-			} else if (heads.other) {
+			} else if (view.other) {
 				// Another view (the doll): the chain as the world left it, unless there is none fit to show.
 				if (!chain.ready || chain.spec != spec || chain.context != context || state.ageInTicks - chain.now > RESET_TICKS) {
 					chain.hang(spec, context, ANCHOR);
@@ -550,7 +752,7 @@ public final class FlailHeads {
 				}
 			} else {
 				// Stepped once a frame: a second drawing in the same frame finds the chain already at `now`.
-				advance(chain, spec, context, state.ageInTicks, state.x, state.y, state.z, heads.yaw, GRAVITY / rootScale, 1.0F / rootScale,
+				advance(chain, spec, context, state.ageInTicks, state.x, state.y, state.z, view.yaw, GRAVITY / rootScale, 1.0F / rootScale,
 						clear);
 			}
 			draw(chain, heads.link[side], heads.ball[side], spec.scale[context], poseStack, collector, light);
@@ -804,6 +1006,23 @@ public final class FlailHeads {
 			total += chain.length[i];
 		}
 		return (chain.x[1] - chain.x[(chain.points - 1) * 3 + 1]) / total;
+	}
+
+	/**
+	 * For the client game tests: the nearest the ball of an entity's main-arm flail has come to the holder's own body since
+	 * the last call (blocks beyond the spikes' reach: 0 or more is clear of it, less is sunk into it), or NaN if it never
+	 * met a posed body (the pose hook did not run); then it starts measuring again.
+	 */
+	public static float bodyClearance(LivingEntity entity) {
+		Heads heads = ENTITIES.get(entity);
+		int side = entity.getMainArm() == HumanoidArm.RIGHT ? 0 : 1;
+		if (heads == null) {
+			return Float.NaN;
+		}
+		Chain chain = heads.chain[side];
+		float nearest = chain.nearest;
+		chain.nearest = Float.POSITIVE_INFINITY;
+		return Float.isInfinite(nearest) ? Float.NaN : nearest;
 	}
 
 	/** For the client game tests: whether no point of the chain is further from the eye than the chain is long. */
