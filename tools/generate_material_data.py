@@ -175,6 +175,8 @@ def assets():
     trenchworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import fortifications
     fortifications.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import bunkerworks
+    bunkerworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import fire_control
     fire_control.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import raiders
@@ -1286,6 +1288,8 @@ def tags():
         tags.add("block", f"minecraft:mineable/{tool}", rid(block))
     import fortifications
     fortifications.add_tags(tags)
+    import bunkerworks
+    bunkerworks.add_tags(tags)
     import fire_control
     fire_control.add_tags(tags)
     import raiders

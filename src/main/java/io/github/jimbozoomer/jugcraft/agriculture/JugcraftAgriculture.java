@@ -1634,6 +1634,8 @@ public final class JugcraftAgriculture {
 		food("fried_puffball", 4, 0.5F, COMPOST_MEDIUM_HIGH);
 		stew("foragers_stew", 10, 0.8F);
 		FairyRings.register();
+		// Bunker interiors (batch 59): Trench Stew, cooked in a Cooking Pot (on a Field Kitchen or any heat source).
+		stew("trench_stew", 10, 0.8F, MobEffects.REGENERATION, 5);
 
 		// Fall additions 13, the Bat House: a roost that lets bats out at dusk and takes them in at dawn, and the guano they
 		// leave, a fertilizer (superphosphate's rule over a 3x3 patch, one dose) and a source of phosphate.
@@ -2716,6 +2718,14 @@ public final class JugcraftAgriculture {
 	private static void stew(String id, int nutrition, float saturation) {
 		registerItem(id, Item::new, new Item.Properties().food(nourishment(nutrition, saturation)).usingConvertsTo(Items.BOWL).stacksTo(1),
 				FOOD_TAB);
+	}
+
+	/** A stew that also gives a short effect when eaten, leaving the bowl. */
+	private static void stew(String id, int nutrition, float saturation, Holder<MobEffect> effect, int seconds) {
+		Consumable eaten = Consumables.defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(effect, seconds * 20)))
+				.build();
+		registerItem(id, Item::new, new Item.Properties().food(nourishment(nutrition, saturation), eaten).usingConvertsTo(Items.BOWL)
+				.stacksTo(1), FOOD_TAB);
 	}
 
 	private static void sickle(String id, int radius, int durability) {

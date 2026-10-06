@@ -156,7 +156,7 @@ CI's Build workflow passed on 77595bcd (run 37236981086):
 - all three client shards passed and took the screenshots in [the gallery](../branches/AGRICULTURE.md#pumpkin-night).
 
 Runs before it found, and the commits after them fixed:
-- 37235152438: the main sources didn't compile against 26.3 (`BlockPos.getCenter`, `MusicBoxBlock.pitch`, `SimpleContainer.addListener` and `PushReaction.DESTROY` don't exist, and `SHOVEL_FLATTEN` is a holder);
+- 37235152438: the main sources didn't compile against 26.3 (`BlockPos.getCenter`, `MusicBoxBlock.pitch`, `SimpleContainer.addListener` and `PushReaction.POPPED` don't exist, and `SHOVEL_FLATTEN` is a holder);
 - 37235331453: every new test passed, but the Halloween Peddler's data test still counted thirteen trades where the new seeds made fifteen; the audit now holds that count to `tools/agriculture.py`. Its screenshots also showed the effigy's blaze hidden by his body and the stand's board hiding a price tag, both fixed for the passing run.
 
 - `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`: pass locally (1389 IDs). The audit's new check covers:
