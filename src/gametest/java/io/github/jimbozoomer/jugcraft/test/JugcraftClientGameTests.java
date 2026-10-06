@@ -566,6 +566,36 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_fire_control");
 
+			// The raider faction (batch 57), west of fire control: a grunt, a grenadier and an officer in front, a raider
+			// walker behind them and a blimp overhead, all standing still (no AI) facing the camera.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 176, y, z - 16, x - 148, y + 14, z + 10));
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				var types = new net.minecraft.world.entity.EntityType<?>[] {io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT,
+						io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.OFFICER, io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER,
+						io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.WALKER, io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BLIMP};
+				double[][] at = {{x - 164.5, y, z - 2.5}, {x - 162.5, y, z - 3.5}, {x - 160.5, y, z - 2.5}, {x - 162.5, y, z - 8.5},
+						{x - 158.5, y + 7, z - 12.5}};
+				float[] yaw = {-10.0F, 0.0F, 10.0F, -5.0F, 30.0F};
+				for (int i = 0; i < types.length; i++) {
+					if (types[i].create(overworld, net.minecraft.world.entity.EntitySpawnReason.COMMAND) instanceof net.minecraft.world.entity.Mob mob) {
+						mob.snapTo(at[i][0], at[i][1], at[i][2], yaw[i], 0.0F);
+						mob.setYBodyRot(yaw[i]);
+						mob.setYHeadRot(yaw[i]);
+						mob.setNoAi(true);
+						mob.setPersistenceRequired();
+						overworld.addFreshEntity(mob);
+					}
+				}
+			});
+			server.runCommand("tp @p %d %d %d 180 -6".formatted(x - 162, y + 2, z + 4));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_raiders");
+			for (String raider : new String[] {"raider_grunt", "raider_grenadier", "raider_officer", "raider_walker", "raider_blimp"}) {
+				server.runCommand("kill @e[type=jugcraft:" + raider + "]");
+			}
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;

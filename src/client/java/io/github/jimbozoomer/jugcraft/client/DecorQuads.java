@@ -35,8 +35,8 @@ import org.jspecify.annotations.Nullable;
  * sarcophagi's lids, the colossal skull's jaw and the gargoyle sentinel's head and eyes), tower_gun_quads.json
  * (tools/tower_guns.py: the tower guns' plinths, turntables and barrels) and decor19_quads.json
  * (tools/decor19_data.py: the laboratory's, larder's and dining room's moving parts, the witchlights' wisps and glows,
- * the yard silhouettes and the harvest moon's faces) and decor20_quads.json (tools/decor20_data.py: the harvest
- * effigy's cloak).
+ * the yard silhouettes and the harvest moon's faces), decor20_quads.json (tools/decor20_data.py: the harvest
+ * effigy's cloak) and raider_quads.json (tools/raiders.py: the Raider Walker's and Raider Blimp's parts in raider paint).
  */
 public final class DecorQuads {
 	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"),
@@ -46,7 +46,7 @@ public final class DecorQuads {
 			Jugcraft.id("walker_quads.json"), Jugcraft.id("landship_quads.json"), Jugcraft.id("decor16_quads.json"),
 			Jugcraft.id("decor17_quads.json"), Jugcraft.id("trench_quads.json"),
 			Jugcraft.id("artillery_quads.json"), Jugcraft.id("decor18_quads.json"), Jugcraft.id("tower_gun_quads.json"),
-			Jugcraft.id("decor19_quads.json"), Jugcraft.id("decor20_quads.json"));
+			Jugcraft.id("decor19_quads.json"), Jugcraft.id("decor20_quads.json"), Jugcraft.id("raider_quads.json"));
 	private static @Nullable Map<String, QuadModel> models;
 
 	private DecorQuads() {
