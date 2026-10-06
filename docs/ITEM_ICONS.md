@@ -70,7 +70,7 @@ drawn outside the game by a script kept with the drafts, which are not committed
    | MATERIAL_SETS says | Instead |
    |---|---|
    | Nugget: "a small lozenge about 3 by 5 pixels" | Vanilla's nugget form (rule 9). The owner asked for the nuggets to "match inshape 1:1". |
-   | Ingot: "vanilla's slanted bar" | Vanilla's ingot form, checked in the game (rule 9). The owner said the drafts "aren't the shape of vanilla's ingots". |
+   | Ingot: "vanilla's slanted bar" | The owner's ingot, recoloured and never redrawn (rule 9). The owner said the drafts "aren't the shape of vanilla's ingots", then sent their own ingot. |
    | Lightness (HSL): outline about 20–25%, dark about 40%, mid about 60%, light about 75%, highlight about 90% | The approved ramps measure: outline 14–15%, dark 31–34%, mid 47–48%, light 61–65%, highlight 78–85%. Use the luma rules of rule 6. |
    | "five tones and an outline" | Up to four tones a material plus its outline: `D M L H` and `O`. MATERIAL_SETS's own table lists five rows with the outline among them, so it is the same ramp. |
    | "one bold colour", "bolder than vanilla's iron and in the range of its gold, copper or emerald" | One clear hue, told apart from vanilla's copper, iron and gold (rule 6). The chosen steel is a low-saturation blue-grey. |
@@ -175,7 +175,7 @@ provisional; replace it with measures when a family's maps are approved.
 | Family | Form | Good today | To fix |
 |---|---|---|---|
 | **Tools** (pickaxe, axe, shovel, hoe, sword, paxel) | Vanilla's silhouettes, span 13 to 15 (`# family: tool`). The head is in the main material. The handle is vanilla's 1-line stick, alternating `b` and `B` and outlined in `w`, from (0,14) up to the head. | the material-set drafts (not in the mod yet) | the old bronze and steel tools: soft heads, no lit edge |
-| **Ingots and nuggets** | Vanilla's form, drawn fresh (rule 9). The drafts' tone shares (highlight about a fifth, light and mid about 30% each, dark a fifth) come from the shapes the owner sent back; replace them with the vanilla-form PR's measures. | (a separate PR is drawing them) | the 14 ingots are a flat capsule and the nuggets a dot |
+| **Ingots and nuggets** | Every ingot is the owner's ingot, recoloured, never redrawn (rule 9). The nugget is vanilla's form, drawn fresh. | the material-sets PR | the 14 ingots on `main` are a flat capsule and the nuggets a dot |
 | **Raw ore, dusts** | One lopsided outlined lump or heap, lit top left, with a few placed glints. The raw chunk draft covers 58% of the canvas, H 4%, D 28%. | the material-set raw chunk | speckled, unoutlined dusts and raw ores |
 | **Gems and crystals** | Compact and faceted, with flat faces. Each face is its own small ramp, lit on its upper-left edge. A set stone on another item is 2 to 4 px with one light `A` at its top left, or 1 px of a sharply different hue and value (rule 7). | the arms' set stones | |
 | **Coins, discs and medals** | Face-on, centred, about 10 px across, in the disc rows of rule 7. A raised rim may run its own ramp: its inner edge dark on the upper left and lit on the lower right. The rim makes it a coin; a plain lit disc reads as a button. | | |
@@ -422,15 +422,19 @@ provisional; replace it with measures when a family's maps are approved.
 
   | Form | What to record | Recorded |
   |---|---|---|
-  | Ingot | bounding box, position in the slot, top face and front face rows | not yet (the ingot and nugget PR) |
+  | Ingot | the owner's own map, recoloured (below) | the material-sets PR: `tools/material_icons/ingot.txt`, 16×12 in rows 2 to 13 |
   | Nugget | bounding box, position in the slot | not yet (the ingot and nugget PR) |
   | Stick | start and end pixels, width | not yet |
   | Potion bottle | bounding box, cork, neck and body widths, base row | not yet |
   | Bucket | bounding box, rim and base widths, base row | not yet |
   | Bowl | bounding box, rim width, base row | not yet |
 
-- **The ingot and nugget** in vanilla's form are being drawn in a separate PR. The current ones, a flat capsule and a
-  dot, will be replaced.
+- **Every ingot is the owner's ingot, recoloured.** On 6 October 2026 the owner sent their own ingot and said:
+  "TAKE THIS AND RECOLOR IT LEAVE THE OUTLINE EXACTLY THE SAME JUST CHANGE THE COLORS and ALWAYS DO THAT FOR ALL INGOTS THAT ARE SUPPOSED TO BE SHAPED LIKE THAT". It is `tools/material_icons/ingot.txt` in the material-sets PR, kept pixel for pixel; a material changes
+  only its colours (`material_icons.ingot_palette`), and `check_mod_data` pins the map. This is the owner's call and the
+  one exception to drawing a vanilla kind fresh.
+- **The nugget** in vanilla's form is drawn fresh in the same PR. The current ones, a flat capsule and a dot, are replaced
+  there.
 - **Tool handles are vanilla's 1-line stick.** The arms keep a 2-line haft for heft; both are approved.
 - **References are studied for manner only.** The owner's sheets and vanilla guide the look; nothing of them is used.
 
@@ -558,7 +562,7 @@ The checker is a lint, not a judge: it cannot tell whether an icon reads well. L
 | Keep secondary parts small and darker | Let a lug bar, back spike or guard match the blade | zweihander lugs; halberd spur |
 | Draw a guard as a bar, or as one lit line inside its outline | Let guard pixels stand apart with no outline between them | zweihander guard; the owner's swords |
 | Give each metal its own palette; use vanilla's ramp for vanilla's metal | Use a bronze close to copper, or a steel close to iron, for a metal of our own | the tan bronze and the blue-grey steel |
-| Take vanilla's form for a vanilla kind, drawn fresh, and check it beside vanilla's in the game | Trace, sample or recolour a Mojang texture | ingot and nugget |
+| Take vanilla's form for a vanilla kind, drawn fresh, and check it beside vanilla's in the game; recolour the owner's ingot for every ingot | Trace, sample or recolour a Mojang texture; redraw the owner's ingot | nugget; the ingot |
 | Judge at 1× and 2× on both slots, beside the siblings | Judge one icon alone at 10× | greatsword against longsword |
 
 ## Decided by these rules
