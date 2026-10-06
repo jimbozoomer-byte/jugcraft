@@ -63,6 +63,7 @@ Each lantern is a pierced iron base, four corner posts, leaded glass panes and a
 - **The Harvest Moon Lamp** stands on its own base; it does not hang on a wall.
 - **The Lightning Harness's recipe** has no chain: it takes copper, a lightning rod and brass. The Brain-Vat Console's has rotten flesh for its brain.
 - **The Floating Table Setting** can be placed anywhere, not only over a table.
+- **Art fixes, 5 and 6 October 2026**: the Egg Sac Cluster's sacs are closed boxes (its item seen from behind showed them hollow), the Grandfather Clock is closed and its corner finials no longer lie flush with its pediment, the Lab Table patient's flashing eyes show the bright middle of their glow, and the client's cut-outs are one plane each. The full list is in [witchs-workshop.md](witchs-workshop.md#changes-from-the-plan).
 
 ## Connections
 - Existing input producer:

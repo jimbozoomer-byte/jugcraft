@@ -85,30 +85,35 @@ public class GiantBeatingHeartBlock extends MultiDecorationBlock implements Enti
 		}
 	}
 
-	/** Only the first block beats: on, then off after the pulse, then on again a beat later unless stopped. */
+	/**
+	 * Only the first block beats: on, then off after the pulse, then on again a beat later unless stopped. The next tick
+	 * is scheduled before the state changes: the change updates the heart's own neighbouring parts at once, and a part
+	 * finding no tick scheduled would schedule a whole period (only one tick can wait per block), stretching the pulse.
+	 */
 	@Override
 	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		if (part(state) != MASTER) {
 			return;
 		}
 		if (state.getValue(BEAT)) {
-			level.setBlock(pos, state.setValue(BEAT, false), Block.UPDATE_ALL);
 			level.scheduleTick(pos, this, Math.max(1, period(state) - PULSE_TICKS));
+			level.setBlock(pos, state.setValue(BEAT, false), Block.UPDATE_ALL);
 			return;
 		}
 		if (stopped(level, pos, state.getValue(FACING))) {
 			return;
 		}
+		level.scheduleTick(pos, this, PULSE_TICKS);
 		level.setBlock(pos, state.setValue(BEAT, true), Block.UPDATE_ALL);
 		level.playSound(null, partPos(pos, state.getValue(FACING), MIDDLE), SoundEvents.WARDEN_HEARTBEAT, SoundSource.BLOCKS, 1.0F, 0.7F);
-		level.scheduleTick(pos, this, PULSE_TICKS);
 	}
 
 	/** A signal going from under it starts it again. */
 	@Override
 	protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighbor, @Nullable Orientation orientation, boolean moved) {
 		super.neighborChanged(state, level, pos, neighbor, orientation, moved);
-		if (level.isClientSide()) {
+		// The heart's own beat updates its parts; only something else (a signal under it) can start it again.
+		if (level.isClientSide() || neighbor == this) {
 			return;
 		}
 		BlockPos master = masterPos(pos, state);

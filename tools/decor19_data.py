@@ -369,10 +369,12 @@ def lab_table_arms():
 
 
 def lab_table_eyes():
-    """Two eyes glowing through the sheet on the patient's face (the head's top in the lying frame), each one sheet (the
-    renderer draws it from both sides)."""
-    return [{"from": [6.2, 17.08, -13.4], "to": [7.4, 17.08, -12.4], "faces": {"up": {"texture": "#eye"}}},
-            {"from": [8.6, 17.08, -13.4], "to": [9.8, 17.08, -12.4], "faces": {"up": {"texture": "#eye"}}}]
+    """Two eyes glowing through the sheet on the patient's face (the head's top in the lying frame, y 17), each one sheet
+    0.1 above it (the renderer draws it from both sides) showing the bright middle of the glow picture, its UVs pinned
+    inside the sprite."""
+    eye = {"up": {"texture": "#eye", "uv": [4, 4, 12, 12]}}
+    return [{"from": [6.2, 17.1, -13.4], "to": [7.4, 17.1, -12.4], "faces": eye},
+            {"from": [8.6, 17.1, -13.4], "to": [9.8, 17.1, -12.4], "faces": eye}]
 
 
 # ---------------------------------------------------------------- 12. the spider's larder
@@ -403,7 +405,9 @@ def silk_cocoon():
 def egg_sac_cluster(glisten=0):
     """The Egg Sac Cluster on the north face of its block (the blockstate turns it to each face): a mat of web over the
     face and a cluster of round sacs of several sizes on it. Its texture is a strip of frames, the sacs' glints
-    brightening and dimming (`glisten` 0 to 3), so they pulse."""
+    brightening and dimming (`glisten` 0 to 3), so they pulse. Each sac is a closed box, its back too (seen through the
+    web on the item from behind): 0.1 or more in front of the mat, and on a plane of its own wherever it overlaps an
+    earlier sac, so no two backs share a plane."""
     sc = Sculpt(d19.EGG_SACS["block"], 195, 32)
     mat = sc.piece("mat", 16, 16, lambda p: p.img.alpha_composite(web_sheet(16, 4, 0.4)))
     big = sc.piece("big", 6, 6, sacs(2, glisten))
@@ -411,10 +415,14 @@ def egg_sac_cluster(glisten=0):
     els = [cube((0.0, 0.0, 0.05), (16.0, 16.0, 0.1), {"south": mat, "north": mat})]
     rng = random.Random(7)
     spots = [(5.0, 6.0, 3.0), (9.5, 7.5, 2.6), (7.0, 10.5, 2.2), (11.0, 11.5, 1.8), (4.0, 10.0, 1.8), (10.5, 3.8, 2.0), (7.0, 3.0, 1.6)]
+    placed = []
     for x, y, r in spots:
         uv = big if r > 2.1 else small
         depth = r * 0.9 + rng.uniform(0, 0.3)
-        els.append(cube((x - r, y - r, 0.1), (x + r, y + r, 0.1 + depth), faces(uv, ("south", "east", "west", "up", "down"))))
+        taken = {back for px, py, pr, back in placed if abs(px - x) < pr + r and abs(py - y) < pr + r}
+        back = next(b for b in (0.2, 0.3, 0.4, 0.5, 0.6) if b not in taken)
+        placed.append((x, y, r, back))
+        els.append(cube((x - r, y - r, back), (x + r, y + r, 0.1 + depth), faces(uv, ALL6)))
     sc.models[d19.EGG_SACS["block"]] = els
     sc.models["item"] = d18d.shifted(els, dz=7.0)
     return sc
@@ -867,8 +875,9 @@ def grandfather_clock():
             cube((9.4, 30.8, 2.6), (13.4, 31.6, 3.4), faces(trim, ALL6), rotation((13.4, 30.8, 3.0), "z", -22.5)),
             cube((7.3, 30.8, 2.5), (8.7, 31.4, 3.5), faces(brass, ALL6)),
             cube((7.6, 31.4, 2.8), (8.4, 32.0, 3.2), faces(brass, ALL6)),
-            cube((2.0, 30.8, 2.4), (3.0, 31.6, 3.4), faces(brass, ALL6)),
-            cube((13.0, 30.8, 2.4), (14.0, 31.6, 3.4), faces(brass, ALL6))]
+            # The corner finials stand 0.1 proud of the turned pediment pieces' backs (z 3.4), so they never share it.
+            cube((2.0, 30.8, 2.4), (3.0, 31.6, 3.5), faces(brass, ALL6)),
+            cube((13.0, 30.8, 2.4), (14.0, 31.6, 3.5), faces(brass, ALL6))]
     sc.models[d19.CLOCK["block"]] = els
     cx, cy, cz = DIAL
     sc.models["clock_hour_hand"] = [cube((cx - 0.5, cy - 0.5, cz - 0.15), (cx + 0.5, cy + 0.5, cz + 0.1), faces(brass, ALL6)),

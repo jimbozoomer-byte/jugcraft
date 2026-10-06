@@ -23,10 +23,15 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Client game test for the Witch's Workshop's bigger jars: a mad scientist's laboratory floor before a stone wall, with
  * the Giant's Beating Heart (its heart beating in its vat), a Specimen Tank holding a brain, two Tall Specimen Jars (an
- * eye and a tentacle) and, for scale, a Specimen Jar and a Beating Heart Jar. By day, close up, and at night (the jars
- * glowing; the heart's vat lit like the room). CI job {@code client}.
+ * eye and a tentacle) and, for scale, a Specimen Jar and a Beating Heart Jar, with their items framed on the wall (each
+ * specimen should tell apart). By day, close up, and at night (the jars glowing; the heart's vat lit like the room). CI
+ * job {@code client}.
  */
 public class BiggerJarsClientGameTests implements FabricClientGameTest {
+	/** The items framed on the wall: {item, specimen}. */
+	private static final String[][] FRAMED = {{"specimen_tank", "eye"}, {"specimen_tank", "brain"}, {"specimen_tank", "tentacle"},
+			{"specimen_tank", "pumpkin"}, {"tall_specimen_jar", "eye"}};
+
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
@@ -51,6 +56,11 @@ public class BiggerJarsClientGameTests implements FabricClientGameTest {
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 12, y, z - 14, x + 12, y + 10, z + 8));
 			context.waitTicks(10);
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
+			// Their items in frames on the wall: the Specimen Tank with each specimen, and a Tall Specimen Jar with an eye.
+			for (int i = 0; i < FRAMED.length; i++) {
+				server.runCommand(("summon minecraft:item_frame %d %d %d {Facing:3b,Fixed:1b,Item:{id:\"jugcraft:%s\",count:1,"
+						+ "components:{\"minecraft:block_state\":{specimen:\"%s\"}}}}").formatted(x + 4 + i, y + 2, z - 10, FRAMED[i][0], FRAMED[i][1]));
+			}
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 
@@ -58,6 +68,7 @@ public class BiggerJarsClientGameTests implements FabricClientGameTest {
 			watchFrom(context, singleplayer, origin, new Vec3(-4.5, 2.2, 1.5), 180.0F, 10.0F, "jugcraft_bigger_jars_giant_heart");
 			watchFrom(context, singleplayer, origin, new Vec3(-3.0, 4.6, -0.8), 205.0F, 48.0F, "jugcraft_bigger_jars_giant_heart_above");
 			watchFrom(context, singleplayer, origin, new Vec3(1.5, 1.7, 0.2), 180.0F, 10.0F, "jugcraft_bigger_jars_specimens");
+			watchFrom(context, singleplayer, origin, new Vec3(6.5, 0.9, -7.2), 180.0F, 0.0F, "jugcraft_bigger_jars_items");
 			server.runCommand("time set 18000");
 			context.waitTicks(20);
 			watchFrom(context, singleplayer, origin, new Vec3(-0.5, 2.6, 4.5), 180.0F, 14.0F, "jugcraft_bigger_jars_night");

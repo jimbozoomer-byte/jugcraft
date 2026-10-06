@@ -341,16 +341,21 @@ def skull_sockets(w, h):
 
 def human_skull(palette=BONE, seed=1, glow=None):
     """A skull from the front, the Minecraft way (5 October 2026: round, glinting sockets looked goofy): a smooth dome lit
-    along its top, two square dark sockets (skull_sockets) each over a lip of shaded bone, filled flat with `glow` inside
-    a dark rim when lit, no nose holes, and a neat row of square teeth along the bottom."""
+    along its top, two square dark sockets (skull_sockets) each over a lip of shaded bone, no nose holes, and a neat row
+    of square teeth along the bottom. Lit (`glow`), each socket is filled flat with the glow: the whole socket when it is
+    small (under four texels, as on a 12-texel face, where a rim would leave one lit texel), inside a one-texel dark rim
+    when it is bigger."""
     def paint(p):
         ca.soft(palette, len(palette) // 2)(p)
         w, h = p.w, p.h
         for u0, v0, u1, v1 in skull_sockets(w, h):
+            if glow and min(u1 - u0, v1 - v0) < 4:
+                ca.square_socket(p, u0, v0, u1, v1, lip=palette[1], glow=glow)
+                continue
             ca.square_socket(p, u0, v0, u1, v1, lip=palette[1])
             if glow:
-                for y in range(v0 + 1, v1 - 1 if v1 - v0 > 2 else v1):
-                    for x in range(u0 + 1, u1 - 1 if u1 - u0 > 2 else u1):
+                for y in range(v0 + 1, v1 - 1):
+                    for x in range(u0 + 1, u1 - 1):
                         p.put(x, y, glow)
         rows = max(1, int(h * 0.14))
         ca.teeth(p, w * 0.26, w * 0.74, h - rows - 1, rows, palette[-1], ca.SOCKET[1], tooth=max(1, w // 8))
@@ -561,9 +566,11 @@ def iron_bound_coffin():
         else:
             lid.append(cube((3.6, COFFIN_BODY + COFFIN_LID, 0.0), (12.4, COFFIN_BODY + COFFIN_LID + 0.8, 9.0), faces(panel, ("up", "north", "south", "east", "west"))))
             lid.append(cube((4.6, COFFIN_BODY + COFFIN_LID, 9.0), (11.4, COFFIN_BODY + COFFIN_LID + 0.8, 13.0), faces(panel, ("up", "south", "east", "west"))))
+        # The bands stand 0.1 proud of the rim (the body's) and of the lid's underside (the lid's), so their ends never
+        # lie flush with the velvet when the coffin is open.
         for z, (x0, x1) in bands:
-            els.append(cube((x0 - 0.35, -0.01, z), (x1 + 0.35, COFFIN_BODY + 0.01, z + 1.0), faces(band, ("north", "south", "east", "west", "up"))))
-            lid.append(cube((x0 - 0.55, COFFIN_BODY - 0.01, z), (x1 + 0.55, COFFIN_BODY + COFFIN_LID + 0.35, z + 1.0),
+            els.append(cube((x0 - 0.35, -0.01, z), (x1 + 0.35, COFFIN_BODY + 0.1, z + 1.0), faces(band, ("north", "south", "east", "west", "up"))))
+            lid.append(cube((x0 - 0.55, COFFIN_BODY - 0.1, z), (x1 + 0.55, COFFIN_BODY + COFFIN_LID + 0.35, z + 1.0),
                             faces(band, ("north", "south", "east", "west", "up", "down"))))
         return els, lid
 
@@ -571,8 +578,8 @@ def iron_bound_coffin():
     foot_body, foot_lid = half(COFFIN_FOOT, [(3.0, (1.5, 14.5)), (10.0, (2.5, 13.5))], False)
     # Iron caps on the corners of the head and foot ends, and ring handles on the sides.
     for x in (3.0, 11.6):
-        head_body.append(cube((x, -0.01, 0.7), (x + 1.4, COFFIN_BODY + 0.01, 2.1), faces(corner, ("north", "east", "west", "south", "up"))))
-        foot_body.append(cube((x, -0.01, 13.9), (x + 1.4, COFFIN_BODY + 0.01, 15.3), faces(corner, ("north", "east", "west", "south", "up"))))
+        head_body.append(cube((x, -0.01, 0.7), (x + 1.4, COFFIN_BODY + 0.1, 2.1), faces(corner, ("north", "east", "west", "south", "up"))))
+        foot_body.append(cube((x, -0.01, 13.9), (x + 1.4, COFFIN_BODY + 0.1, 15.3), faces(corner, ("north", "east", "west", "south", "up"))))
     for x in (0.5, 15.0):
         head_body.append(cube((x, 3.5, 8.5), (x + 0.5, 6.5, 11.5), faces(ring_, ("east", "west"))))
         foot_body.append(cube((x + (0.5 if x < 8 else -0.5), 3.5, 1.0), (x + (1.0 if x < 8 else 0.0), 6.5, 4.0), faces(ring_, ("east", "west"))))
@@ -1095,7 +1102,9 @@ def colossal_skull():
            cube((10.0, 11.0, 4.0), (12.0, 19.6, 8.0), faces(face, ("north", "east", "west"))),
            cube((-12.0, 8.0, 4.0), (-2.0, 11.6, 8.0), faces(cheek, ("north", "east", "west", "down"), up=hollow)),
            cube((2.0, 8.0, 4.0), (12.0, 11.6, 8.0), faces(cheek, ("north", "east", "west", "down"), up=hollow)),
-           cube((-11.0, 9.0, 8.0), (11.0, 20.0, 9.0), faces(hollow, ("north",))),
+           # The hollow closing the back of the sockets; ColossalSkullRenderer draws their night glow just in front of
+           # its face (decor18.SKULL glow_z and hollow_z).
+           cube((-11.0, 9.0, d18.SKULL["hollow_z"]), (11.0, 20.0, d18.SKULL["hollow_z"] + 1.0), faces(hollow, ("north",))),
            cube((-2.0, 8.0, 4.0), (2.0, 13.4, 8.0), faces(face, ("north", "east", "west"))),
            # The skull's front corners beside the brow and cheeks, closed.
            cube((-14.0, 8.0, 6.0), (-12.0, 28.0, 6.0), faces(side, ("north",))),
@@ -1118,8 +1127,9 @@ def colossal_skull():
     return sc
 
 
-# Where the skull's sockets are, for the client's glow: {x0, y0, x1, y1} on a sheet at z = 8.9 facing north.
-SKULL_SOCKETS = [(-10.0, 11.6, -2.6, 19.4), (2.6, 11.6, 10.0, 19.4)]
+# Where the skull's sockets are, for the client's glow: {x0, y0, x1, y1} on a sheet facing north just in front of the hollow
+# behind them (decor18.SKULL).
+SKULL_SOCKETS = d18.SKULL["sockets"]
 
 
 def colossal_rib():

@@ -21,6 +21,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.SpecimenJarBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.SpecimenTankBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.SpecimenVesselBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.TallSpecimenJarBlock;
+import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -499,6 +500,52 @@ public class WitchsWorkshopGameTests {
 		}
 		helper.succeedWhen(() -> helper.assertTrue(drops(helper, item("giant_beating_heart")).stream().mapToInt(e -> e.getItem().getCount()).sum() == 1,
 				"It drops once"));
+	}
+
+	/**
+	 * The Giant's Beating Heart on the real tick scheduler, left alone after it is placed: it beats once a period (30 ticks
+	 * at 40 a minute), and each beat's signal lasts {@value GiantBeatingHeartBlock#PULSE_TICKS} ticks. (Its own beat
+	 * updates its parts, which must not push its next tick back to a whole period.)
+	 */
+	@GameTest(maxTicks = 160)
+	public void giantHeartPulsesOnTheScheduler(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		GiantBeatingHeartBlock heart = (GiantBeatingHeartBlock) block("giant_beating_heart");
+		BlockPos master = new BlockPos(6, 2, 2);
+		BlockPos absolute = helper.absolutePos(master);
+		ServerPlayer builder = player(helper, new BlockPos(1, 2, 8), ItemStack.EMPTY);
+		place(helper, builder, "giant_beating_heart", master, 0.0F);
+		helper.assertTrue(level.getBlockState(absolute).is(heart), "The heart stands");
+		int period = GiantBeatingHeartBlock.period(level.getBlockState(absolute));
+		// Each beat's first tick (game time) and how many ticks its signal stayed on, sampled once a tick.
+		List<Long> onsets = new ArrayList<>();
+		List<Integer> lengths = new ArrayList<>();
+		helper.onEachTick(() -> {
+			BlockState state = level.getBlockState(absolute);
+			boolean on = state.is(heart) && state.getValue(GiantBeatingHeartBlock.BEAT)
+					&& state.getSignal(level, absolute, Direction.NORTH) == 15;
+			if (on && (lengths.isEmpty() || lengths.get(lengths.size() - 1) < 0)) {
+				onsets.add(level.getGameTime());
+				lengths.add(1);
+			} else if (on) {
+				lengths.set(lengths.size() - 1, lengths.get(lengths.size() - 1) + 1);
+			} else if (!lengths.isEmpty() && lengths.get(lengths.size() - 1) > 0) {
+				// A negative length marks the last pulse as over.
+				lengths.set(lengths.size() - 1, -lengths.get(lengths.size() - 1));
+			}
+		});
+		helper.runAfterDelay(period * 4 + GiantBeatingHeartBlock.PULSE_TICKS + 3, () -> {
+			helper.assertTrue(onsets.size() >= 4, "It beats by itself once a period: beats at " + onsets);
+			for (int i = 1; i < onsets.size(); i++) {
+				helper.assertTrue(onsets.get(i) - onsets.get(i - 1) == period, "A beat every " + period + " ticks: beats at " + onsets);
+			}
+			for (int length : lengths) {
+				helper.assertTrue(Math.abs(length) == GiantBeatingHeartBlock.PULSE_TICKS,
+						"Each beat's signal lasts " + GiantBeatingHeartBlock.PULSE_TICKS + " ticks: " + lengths);
+			}
+			helper.succeed();
+		});
 	}
 
 	/**

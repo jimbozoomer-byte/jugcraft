@@ -3151,6 +3151,29 @@ def bat_reach(quads, bat):
     return reach, low, high
 
 
+def coplanar_pairs(quads, gap=0.1):
+    """How many pairs of a model's quads face the same way on planes closer than `gap` pixels and overlap: they would
+    flicker against each other (z-fighting)."""
+    faces = []
+    for quad in quads:
+        normal = quad["normal"]
+        axis = max(range(3), key=lambda k: abs(normal[k]))
+        if abs(abs(normal[axis]) - 1) > 1e-3:
+            continue
+        others = [k for k in range(3) if k != axis]
+        points = quad["vertices"]
+        faces.append((axis, normal[axis] > 0, sum(p[axis] for p in points) / len(points),
+                      [min(p[k] for p in points) for k in others], [max(p[k] for p in points) for k in others]))
+    pairs = 0
+    for a in range(len(faces)):
+        for b in range(a + 1, len(faces)):
+            (axis, sign, plane, lo, hi), (axis2, sign2, plane2, lo2, hi2) = faces[a], faces[b]
+            if axis == axis2 and sign == sign2 and abs(plane - plane2) < gap - 1e-6 \
+                    and all(min(hi[k], hi2[k]) - max(lo[k], lo2[k]) > 1e-4 for k in range(2)):
+                pairs += 1
+    return pairs
+
+
 def check_bigger_jars(java, quads, client):
     """The Witch's Workshop's bigger jars: Java's numbers match tools/decor17.py; their renderers are wired up; what they
     draw stays inside them (the giant heart in its murk at its fullest swell, every specimen in its fluid at the top and
@@ -3194,6 +3217,16 @@ def check_bigger_jars(java, quads, client):
             else:
                 continue
             break
+    # Each part of the heart and every big specimen is drawn whole: no two of its faces share a plane (closer than 0.1
+    # pixel, they flicker), and its UVs stay inside its sprite.
+    whole_parts = ["giant_heart_ventricles", "giant_heart_atria", "giant_heart_cradle"]
+    for part in whole_parts + [f"big_specimen_{specimen}" for specimen in ag.SPECIMEN_JAR["specimens"]]:
+        model = quads.get(part, [])
+        pairs = coplanar_pairs(model)
+        if pairs:
+            err(f"decor17_quads.json {part} has {pairs} pairs of faces on one plane (closer than 0.1 pixel), which flicker")
+        if any(not (-1e-6 <= v[3] <= 1 + 1e-6 and -1e-6 <= v[4] <= 1 + 1e-6) for q in model for v in q["vertices"]):
+            err(f"decor17_quads.json {part} samples outside its texture")
     vessel_renderer = (client / "SpecimenVesselRenderer.java").read_text(encoding="utf-8") if (client / "SpecimenVesselRenderer.java").is_file() else ""
     if number(vessel_renderer, "BOB_TICKS") != decor17.VESSEL_BOB_TICKS:
         err("SpecimenVesselRenderer.BOB_TICKS differs from tools/decor17.py VESSEL_BOB_TICKS")
@@ -3341,6 +3374,16 @@ def check_witchs_workshop(java, lang):
     eye_z = re.search(r"\bEYE_Z = (-?[\d.]+)F;", cauldron_renderer)
     if not eye_z or abs(float(eye_z.group(1)) - cauldron["eye_z"]) > 1e-9 or cauldron["eye_z"] > cauldron["skull_face_z"] - 0.1 + 1e-9:
         err("HornedSkullCauldronRenderer.EYE_Z must be tools/decor17.py CAULDRON eye_z, at least 0.1 in front of the skull's face")
+    # The Colossal Skull's night glow lies on its sockets, in front of the hollow behind them (behind it, it never shows).
+    skull = decor18.SKULL
+    skull_renderer = (client / "ColossalSkullRenderer.java").read_text(encoding="utf-8")
+    sockets = re.search(r"\bSOCKETS = (\{.*?\});", skull_renderer, re.S)
+    found = [float(v.rstrip("F")) for v in re.findall(r"-?[\d.]+F?", sockets.group(1))] if sockets else None
+    socket_z = re.search(r"\bSOCKET_Z = (-?[\d.]+)F;", skull_renderer)
+    if found != [v for socket in skull["sockets"] for v in socket]:
+        err("ColossalSkullRenderer.SOCKETS differs from tools/decor18.py SKULL sockets")
+    if not socket_z or abs(float(socket_z.group(1)) - skull["glow_z"]) > 1e-9 or skull["glow_z"] > skull["hollow_z"] - 0.1 + 1e-9:
+        err("ColossalSkullRenderer.SOCKET_Z must be tools/decor18.py SKULL glow_z, at least 0.1 in front of the hollow behind the sockets")
 
 
 def check_graveyard_flora(java, number, lang):
