@@ -69,6 +69,9 @@ public class ConcordanceComposeGameTests {
 		player.setGameMode(GameType.SURVIVAL);
 		BlockPos absolute = helper.absolutePos(standAt);
 		player.snapTo(absolute.getX() + 0.5, absolute.getY(), absolute.getZ() + 0.5, 0.0F, 0.0F);
+		// A living entity looks where its head turns; a mock player's head is not turned by snapTo.
+		player.setYHeadRot(0.0F);
+		player.setYBodyRot(0.0F);
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.INITIATE_WAND));
 		RateGate.forget(player.getUUID());
 		return player;
@@ -260,16 +263,19 @@ public class ConcordanceComposeGameTests {
 		floor(helper);
 		ServerPlayer player = player(helper, new BlockPos(1, 2, 0));
 		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.MASTERED);
-		Mob target = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(1, 2, 6));
-		Mob beside = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(2, 2, 7));
-		Compiler.Compilation compiled = ComposedSpells.compile(player, wand(), "touch+extend struck sear then here creatures dazzle");
+		// Close in front, as in the inscription test: a villager is tall enough to meet the line from the eyes.
+		Mob target = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(1, 2, 2));
+		Mob beside = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(2, 2, 3));
+		Compiler.Compilation compiled = ComposedSpells.compile(player, wand(), "touch struck sear then here creatures dazzle");
 		Plan plan = compiled.plan();
 		helper.assertTrue(plan != null && plan.limits().branches() == 1 && plan.limits().targets() == 5, "Compiled: one branch, five targets: "
 				+ (plan == null ? compiled.problems() : plan.limits()));
 		helper.runAfterDelay(SETTLE_TICKS, () -> {
+			ComposedSpells.Impact landing = ComposedSpells.deliver(level, player, plan.root(), null);
 			Ledger ledger = new Ledger(plan.limits());
 			helper.assertTrue(ComposedSpells.cast(level, player, plan, Cause.of(player.getUUID(), Cause.Origin.SPELL, ComposedSpells.SPELL,
-					ConcordanceEffects.nextSerial()), ledger), "It takes effect");
+					ConcordanceEffects.nextSerial()), ledger), "It takes effect: the touch struck " + landing.struck() + " (the villager is "
+					+ target.getUUID() + ") at " + landing.point() + "; looking " + player.getViewVector(1.0F));
 			helper.assertTrue(target.getLastHurtByMob() == player && target.getHealth() == target.getMaxHealth() - 4.0F,
 					"Sear strikes the villager touched, credited to the caster");
 			helper.assertTrue(target.hasEffect(MobEffects.SLOWNESS) && beside.hasEffect(MobEffects.SLOWNESS) && !player.hasEffect(MobEffects.SLOWNESS),
