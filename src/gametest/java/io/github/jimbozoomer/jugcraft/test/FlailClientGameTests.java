@@ -139,7 +139,8 @@ public class FlailClientGameTests implements FabricClientGameTest {
 			context.getInput().pressKey(options -> options.keyAttack);
 			context.waitTicks(3);
 			context.takeScreenshot("jugcraft_flail_first_person_strike");
-			Jugcraft.LOGGER.info("[flail] first person strike: {}", context.computeOnClient(client -> FlailHeads.describeFirstPerson(0)));
+			String strike = context.computeOnClient(client -> FlailHeads.describeFirstPerson(0));
+			Jugcraft.LOGGER.info("[flail] first person strike: {}", strike);
 			setHudHidden(context, hudWasHidden);
 		}
 	}
