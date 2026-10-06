@@ -1046,20 +1046,32 @@
     {
       "from": [
         7.2,
-        14.98,
+        14.9,
         -12.336
       ],
       "to": [
         8.8,
-        16.02,
+        16.1,
         -11.664
       ],
       "faces": {
         "north": {
-          "texture": "#bronze"
+          "texture": "#bronze",
+          "uv": [
+            7.2,
+            0.0,
+            8.8,
+            1.0
+          ]
         },
         "south": {
-          "texture": "#bronze"
+          "texture": "#bronze",
+          "uv": [
+            7.2,
+            0.0,
+            8.8,
+            1.0
+          ]
         },
         "east": {
           "texture": "#bronze",

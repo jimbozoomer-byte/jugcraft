@@ -65,7 +65,8 @@ LAMP_DESIGNS = ("bat", "cat", "witch")
 
 
 def lamp():
-    """A turned wooden base with a brass collar and a candle; the paper shade and its frame top are drawn turning."""
+    """A turned wooden base with a brass collar and a candle; the client draws the paper shade turning over them
+    (client/ShadowPuppetLampRenderer.java), each panel framed in wood in its own texture."""
     return [box((3.5, 0, 3.5), (12.5, 1.5, 12.5), "#wood"), box((4.5, 1.5, 4.5), (11.5, 2.5, 11.5), "#brass"),
             box((7, 2.5, 7), (9, 6, 9), "#candle"), box((7.75, 6, 7.75), (8.25, 6.75, 8.25), "#wood")]
 

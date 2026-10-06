@@ -98,26 +98,50 @@
     {
       "from": [
         1.2,
-        2.18,
+        2.1,
         1.2
       ],
       "to": [
         2.8,
-        11.02,
+        11.1,
         2.8
       ],
       "faces": {
         "north": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            13.2,
+            5.0,
+            14.8,
+            13.8
+          ]
         },
         "south": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            1.2,
+            5.0,
+            2.8,
+            13.8
+          ]
         },
         "east": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            13.2,
+            5.0,
+            14.8,
+            13.8
+          ]
         },
         "west": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            1.2,
+            5.0,
+            2.8,
+            13.8
+          ]
         },
         "up": {
           "texture": "#relief_top"
@@ -162,26 +186,50 @@
     {
       "from": [
         13.2,
-        2.18,
+        2.1,
         1.2
       ],
       "to": [
         14.8,
-        11.02,
+        11.1,
         2.8
       ],
       "faces": {
         "north": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            1.2,
+            5.0,
+            2.8,
+            13.8
+          ]
         },
         "south": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            13.2,
+            5.0,
+            14.8,
+            13.8
+          ]
         },
         "east": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            13.2,
+            5.0,
+            14.8,
+            13.8
+          ]
         },
         "west": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            1.2,
+            5.0,
+            2.8,
+            13.8
+          ]
         },
         "up": {
           "texture": "#relief_top"

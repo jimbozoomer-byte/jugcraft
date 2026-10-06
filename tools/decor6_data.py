@@ -10,11 +10,13 @@ The chair and the spider are drawn by block entity renderers so they can move; t
 quads (vertices in model pixels, UVs as vanilla maps a block model's faces, element rotations applied, at any angle).
 The chair's boxes also make the model its item shows (whose rotations keep to vanilla's 22.5-degree steps).
 """
+import copy
 import math
 
 from agriculture import ROCKING_CHAIR, LURKING_EYES, SILHOUETTE_WINDOW, MUSIC_BOX, GIANT_FAKE_SPIDER
 from decor_data import MOD, HORIZONTAL, SIDES, rid, turned, box, block_model, flat_item, self_drop
 from decor3_data import fitted
+from model_writer import separate_coplanar
 
 
 # ---------------------------------------------------------------- quads for the block entity renderers
@@ -48,8 +50,25 @@ def turn(point, rotation):
     return [out[k] + origin[k] for k in range(3)]
 
 
+# A zero-thickness plane drawn from both sides (two opposite faces on one plane) has each face lifted this far (pixels)
+# along its own normal: the cutout and translucent entity types do not cull, so twins on one plane would fight.
+TWO_SIDED_LIFT = 0.05
+OPPOSITE = {"north": "south", "south": "north", "west": "east", "east": "west", "up": "down", "down": "up"}
+
+
+def _turned(element, point):
+    """A point of an element turned the way quads() turns it (each rotation in order, no rescale)."""
+    for rotation in element.get("rotations") or ([element["rotation"]] if "rotation" in element else []):
+        point = turn(point, rotation)
+    return point
+
+
 def quads(elements, textures):
-    """The textured quads of block model `elements` whose "#key" textures `textures` names (block texture names)."""
+    """The textured quads of block model `elements` whose "#key" textures `textures` names (block texture names).
+    Differently drawn faces that share a plane are first pulled apart (model_writer.separate_coplanar on a copy:
+    whole boxes, never single quads), so nothing flickers."""
+    elements = copy.deepcopy(elements)
+    separate_coplanar(elements, world=_turned)
     out = []
     for element in elements:
         frm, to = element["from"], element["to"]
@@ -57,6 +76,9 @@ def quads(elements, textures):
         for face, spec in element["faces"].items():
             corners, normal = FACE_CORNERS[face]
             points = [[to[k] if corner[k] else frm[k] for k in range(3)] for corner in corners]
+            axis = [abs(c) for c in normal].index(1)
+            if abs(to[axis] - frm[axis]) < 1e-9 and OPPOSITE[face] in element["faces"]:
+                points = [[p[k] + normal[k] * TWO_SIDED_LIFT for k in range(3)] for p in points]
             uvs = [vanilla_uv(face, *p) for p in points]
             if "uv" in spec:
                 us, vs = [u for u, _ in uvs], [v for _, v in uvs]
