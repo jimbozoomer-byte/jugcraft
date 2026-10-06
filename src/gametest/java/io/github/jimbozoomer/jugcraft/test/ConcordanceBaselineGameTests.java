@@ -203,9 +203,12 @@ public class ConcordanceBaselineGameTests {
 		helper.succeed();
 	}
 
-	/** A push carries a creature at least as far as the model assumes: Flashstep's 1.2 blocks a tick, on flat ground. */
+	/**
+	 * A push carries a creature as far as the model says: Flashstep's 1.2 blocks a tick, on flat ground, carries a pig
+	 * at least the model's reach and not more than 30% beyond it.
+	 */
 	@GameTest(maxTicks = 40)
-	public void aPushCarriesAtLeastTheModelsReach(GameTestHelper helper) {
+	public void aPushCarriesAsFarAsTheModelSays(GameTestHelper helper) {
 		floor(helper);
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = master(helper, new BlockPos(6, 2, 6));
@@ -224,7 +227,8 @@ public class ConcordanceBaselineGameTests {
 			double model = flash.magnitude() / 10.0 * Benchmark.PUSH_REACH;
 			Jugcraft.LOGGER.info("Arcane Concordance calibration: a push of {} blocks a tick carried a pig {} blocks (model {})",
 					flash.magnitude() / 10.0, carried, model);
-			helper.assertTrue(carried >= model, "The push carried the pig " + carried + " blocks; the model assumes " + model);
+			helper.assertTrue(carried >= model && carried <= model * Benchmark.PUSH_TOLERANCE, "The push carried the pig " + carried
+					+ " blocks; the model says " + model + " (up to " + model * Benchmark.PUSH_TOLERANCE + ")");
 			helper.succeed();
 		});
 	}

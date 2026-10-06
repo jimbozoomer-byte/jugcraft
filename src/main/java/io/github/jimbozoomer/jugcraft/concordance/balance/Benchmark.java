@@ -34,10 +34,13 @@ public final class Benchmark {
 	/** A player's walking speed, blocks a tick (vanilla: 4.317 blocks a second). */
 	public static final double WALK = 0.215;
 	/**
-	 * Blocks a push carries a creature for each block a tick of push speed, on flat ground. Conservative: the
-	 * calibration test checks a real push carries at least this far (ConcordanceBaselineGameTests).
+	 * Blocks a push carries a creature for each block a tick of push speed, on flat ground. Measured: Flashstep's push
+	 * of 1.2 blocks a tick carried a pig 7.05 blocks in CI; the calibration test keeps the model between that and 30%
+	 * below it (ConcordanceBaselineGameTests.aPushCarriesAsFarAsTheModelSays).
 	 */
-	public static final double PUSH_REACH = 3.0;
+	public static final double PUSH_REACH = 5.5;
+	/** How much further than the model a real push may carry before the model counts as wrong. */
+	public static final double PUSH_TOLERANCE = 1.3;
 	/** How far a melee hit knocks a foe back, blocks (vanilla's knockback of 0.4, on the ground). */
 	public static final double KNOCKBACK = 0.8;
 	/**

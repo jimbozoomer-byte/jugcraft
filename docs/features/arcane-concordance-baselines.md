@@ -33,7 +33,7 @@ against the server:
 | Focus cost | the invocation's cost for the research state, plus a tuning's | `castsCostWhatTheModelSays` |
 | Armour reduces blows (vanilla's formula), not spells (Spell Power's damage bypasses armour) | Minecraft, Spell Power's damage types | `armourReducesBlowsButNotTheLance`: a husk in an iron chestplate |
 | Absorption takes damage first; a hit within 10 ticks of another counts only for what it exceeds it by | Minecraft | `absorptionAndHurtImmunityMatchTheModel`: hits of 6, 4 and 9 on a shielded villager |
-| A push of 1 block a tick carries a creature at least 3 blocks on flat ground | Minecraft's movement physics | `aPushCarriesAtLeastTheModelsReach`: Flashstep's push on a pig (the model is conservative) |
+| A push of 1 block a tick carries a creature 5.5 blocks on flat ground | Minecraft's movement physics, measured | `aPushCarriesAsFarAsTheModelSays`: Flashstep's push of 1.2 carried a pig 7.05 blocks in CI; the test keeps the model's 6.6 within 30% of what the server does |
 | A sword strike knocks a foe back 0.8 blocks and sweeps 1 damage to others in reach | Minecraft (approximation) | not calibrated |
 
 **Encounters** (each at most a minute): an **isolated target** (a brute: 20 health, 2 armour, 2.3 blocks a second, 3
@@ -69,10 +69,10 @@ server's loaded rules and spells.
 |---|---|---|---|---|---|
 | Fighter (no magic) | won 3.4 s, 19 HP | won 7.0 s, 13 HP | won 9.9 s, 18 HP | won 7.8 s, 13 HP | won 11.2 s, 20 HP |
 | Initiate (utility) | won 5.2 s, 20 HP | won 9.4 s, 9 HP | won 11.5 s, 17 HP | won 10.9 s, 8 HP | lost 9.1 s |
-| Striker | won 6.9 s, 20 HP | won 12.6 s, 13 HP | won 6.8 s, 16 HP | won 15.3 s, 8 HP | lost 11.1 s |
-| Geared striker (+4 arcane, iron) | won 5.6 s, 20 HP | won 11.2 s, 20 HP | won 5.8 s, 18 HP | won 13.6 s, 17 HP | won 11.3 s, 20 HP |
+| Striker | won 6.7 s, 20 HP | won 14.4 s, 10 HP | won 6.5 s, 16 HP | won 16.0 s, 8 HP | lost 11.1 s |
+| Geared striker (+4 arcane, iron) | won 5.6 s, 20 HP | won 13.1 s, 20 HP | won 5.8 s, 18 HP | won 13.6 s, 17 HP | won 11.3 s, 20 HP |
 | Warden | won 6.9 s, 20 HP | won 11.4 s, 14 HP | won 7.0 s, 20 HP | won 15.6 s, 13 HP | lost 11.7 s |
-| Skirmisher | won 4.7 s, 20 HP | won 10.6 s, 11 HP | won 3.1 s, 17 HP | won 13.5 s, 6 HP | won 10.6 s, 20 HP |
+| Skirmisher | won 4.7 s, 20 HP | won 12.4 s, 11 HP | won 3.1 s, 17 HP | won 13.5 s, 6 HP | won 10.6 s, 20 HP |
 | Composer | won 6.1 s, 20 HP | won 10.9 s, 20 HP | won 4.3 s, 20 HP | won 12.9 s, 8 HP | lost 10.1 s |
 | Only jugcraft:aegis | lost 11.8 s | lost 6.7 s | won 49.8 s, 12 HP | lost 10.0 s | lost 8.8 s |
 | Only jugcraft:flashstep | lost 9.3 s | lost 8.4 s | won 40.4 s, 4 HP | lost 6.6 s | lost 8.8 s |
@@ -86,13 +86,13 @@ server's loaded rules and spells.
 |---|---|---|---|---|---|---|---|
 | Fighter (no magic) | 9.15 | 47.2 | 19.3 | 0.0 | 0.0 | 0.00 | 0.0 |
 | Initiate (utility) | 6.10 | 31.5 | 20.4 | 0.0 | 0.0 | 0.00 | 0.0 |
-| Striker | 5.90 | 25.7 | 15.6 | 57.6 | 0.0 | 1.25 | 0.0 |
-| Geared striker (+4 arcane, iron) | 6.27 | 29.7 | 32.1 | 57.6 | 0.0 | 1.75 | 0.0 |
+| Striker | 5.90 | 25.7 | 19.2 | 105.6 | 0.0 | 1.25 | 0.0 |
+| Geared striker (+4 arcane, iron) | 6.27 | 29.7 | 32.5 | 105.6 | 0.0 | 1.75 | 0.0 |
 | Warden | 5.95 | 25.7 | 16.4 | 0.0 | 0.0 | 1.25 | 21.1 |
-| Skirmisher | 8.57 | 35.5 | 13.9 | 57.6 | 0.0 | 1.00 | 0.0 |
+| Skirmisher | 8.57 | 35.5 | 17.4 | 105.6 | 0.0 | 1.00 | 0.0 |
 | Composer | 5.91 | 27.7 | 19.1 | 0.0 | 2.3 | 0.50 | 0.0 |
 | Only jugcraft:aegis | 1.88 | 9.4 | 9.9 | 0.0 | 0.0 | 0.00 | 0.0 |
-| Only jugcraft:flashstep | 1.88 | 9.4 | 7.5 | 57.6 | 0.0 | 0.00 | 0.0 |
+| Only jugcraft:flashstep | 1.88 | 9.4 | 7.5 | 105.6 | 0.0 | 0.00 | 0.0 |
 | Only jugcraft:kindle | 1.88 | 9.4 | 7.5 | 0.0 | 0.0 | 0.00 | 0.0 |
 | Only jugcraft:lance | 2.50 | 15.6 | 6.5 | 0.0 | 0.0 | 1.25 | 0.0 |
 | Only jugcraft:lanternward | 1.88 | 9.4 | 8.5 | 0.0 | 0.0 | 0.00 | 14.0 |
@@ -124,9 +124,12 @@ The game test fails the build unless all of these hold (`Baselines.report`):
   No invocation provides control yet; the composed `dazzle` is the only control (2.3 foe-seconds a minute), so area
   control is the gap later traditions should fill.
 - **Gear matters as it should.** +4 arcane Spell Power raises the Lance's damage per Focus from 1.25 to 1.75; with
-  iron armour the geared striker lasts twice as long beside the brute (32.1 s against 15.6). It wins every encounter
+  iron armour the geared striker lasts far longer beside the brute (32.5 s against 19.2). It wins every encounter
   and comes closest to trivializing them (17 health left in the protected encounter, a point above the line): a watch
   item for later equipment.
+- **Flashstep is real mobility.** Each dash carries about 6.6 blocks (the server measured 7.05), about 106 blocks a
+  minute if cast whenever it is ready; it buys the Striker survival time (19.2 s beside the unkillable brute, against
+  16.4 for the Warden, who has no dash).
 - **Support is measurable.** The Warden gives each ally 21.1 health and absorption a minute under fire.
 
 ## Integration actually exercised
@@ -177,6 +180,9 @@ compare changes against, not predictions of every fight.
   Lanternward, the composed dazzle and damage spells.
 - Game tests added: `ConcordanceBaselineGameTests` (six: the benchmark over the loaded rules and spells, and the five
   calibrations above).
+- An earlier version of the model assumed a push carried a creature 3 blocks for each block a tick and the test only
+  checked the server did at least that; CI measured 7.05 blocks for Flashstep's 1.2 (5.9 for each), so the model now
+  uses 5.5 and the test bounds it from both sides.
 - CI: not run yet for this change; the result will be recorded here.
 
 Not yet run: any client, a two-client dedicated server, a fight in a real world against these encounters, a trinket.
