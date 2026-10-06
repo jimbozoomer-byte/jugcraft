@@ -127,7 +127,8 @@ public final class ConcordanceEffects {
 		}
 		EffectSpec effect = spec;
 		if (spec.intent() == Intent.HARMFUL) {
-			if (target instanceof Player player && (player.isCreative() || player.isSpectator())) {
+			// Creative mode's own protection (its invulnerable ability, which game mode changes keep), or a spectator.
+			if (target instanceof Player player && (player.getAbilities().invulnerable || player.isSpectator())) {
 				return Result.IMMUNE;
 			}
 			if (!mayHarm(context.actor(), target)) {

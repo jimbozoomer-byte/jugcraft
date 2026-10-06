@@ -124,14 +124,16 @@ public class ConcordanceEffectGameTests {
 		ServerPlayer a = player(helper, new BlockPos(1, 2, 1));
 		ServerPlayer b = player(helper, new BlockPos(4, 2, 1));
 		Cause spell = cause(a, Cause.Origin.SPELL);
-		helper.assertTrue(ConcordanceEffects.apply(context(helper, spell, a, open(), "0/0/0"), SEAR, a) == ConcordanceEffects.Result.FRIENDLY,
-				"A harmful effect never reaches its own caster");
+		ConcordanceEffects.Result self = ConcordanceEffects.apply(context(helper, spell, a, open(), "0/0/0"), SEAR, a);
+		helper.assertTrue(self == ConcordanceEffects.Result.FRIENDLY, "A harmful effect never reaches its own caster: " + self);
 		ConcordanceEffects.Result other = ConcordanceEffects.apply(context(helper, spell, a, open(), "0/0/0"), SEAR, b);
-		helper.assertTrue((other == ConcordanceEffects.Result.APPLIED) == a.canHarmPlayer(b) && (other == ConcordanceEffects.Result.FRIENDLY) != a.canHarmPlayer(b),
-				"Another player is harmed only where the server's PvP rules allow: " + other);
+		// Refused as friendly fire exactly where the server's PvP rules forbid it (where allowed, a newly joined player's
+		// spawn invulnerability may still turn the hit away, which is vanilla's rule, not this one).
+		helper.assertTrue((other == ConcordanceEffects.Result.FRIENDLY) != a.canHarmPlayer(b) && other != ConcordanceEffects.Result.IMMUNE,
+				"Another player is refused only where the server's PvP rules forbid: " + other + ", PvP " + a.canHarmPlayer(b));
 		b.setGameMode(GameType.CREATIVE);
-		helper.assertTrue(ConcordanceEffects.apply(context(helper, spell, a, open(), "0/0/1"), DAZZLE, b) == ConcordanceEffects.Result.IMMUNE,
-				"Creative players are immune to harm");
+		ConcordanceEffects.Result creative = ConcordanceEffects.apply(context(helper, spell, a, open(), "0/0/1"), DAZZLE, b);
+		helper.assertTrue(creative == ConcordanceEffects.Result.IMMUNE, "Creative players are immune to harm: " + creative);
 		helper.assertTrue(ConcordanceEffects.apply(context(helper, spell, a, open(), "0/0/2"), WARD, b).applied(), "Help reaches them still");
 		b.setGameMode(GameType.SURVIVAL);
 		helper.assertTrue(ConcordanceEffects.mayHarm(null, b), "A sourceless effect (a shrine) obeys no friendly-fire rule but its own");
