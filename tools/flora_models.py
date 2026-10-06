@@ -10,14 +10,13 @@ import random
 
 from PIL import Image
 
-import flora_art as fa
-
 from flora_art import (ANTHER, ASPHODEL, ASPHODEL_VEIN, BERRY, CALYX, CAPSULE, DRY, DUSK_LEAF, FERN, FERN_RIB, FINGER,
                        FINGER_TIP, FOX, FOX_SPOT, GHOST, GHOST_FLECK, HEART_PINK, HEART_WHITE, IVY, LEAF, LILY,
                        LILY_THROAT, MANDRAKE_FLOWER, MANDRAKE_LEAF, MOSS, NIGHT_PURPLE, ROOT, ROOT_DARK, ROSE, SHROUD,
                        SIDES4, SNOW_GREEN, SNOW_WHITE, SOIL, SPIDER_RED, SPORE, STEM, Px, Sculpt, TEXELS, blades, column,
                        cube, frond, ivy_leaf, ivy_sheet, leaf, leaf_flat, leaf_out, pal, plane_xy, plane_xz, plane_zy,
                        rgb, root_face, rotation, segment, shade, solid, star, strip, upright, wisps)
+import flora_art as fa
 
 
 # ---------------------------------------------------------------- painters only these plants use
