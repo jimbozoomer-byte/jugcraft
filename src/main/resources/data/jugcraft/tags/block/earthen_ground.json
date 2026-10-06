@@ -2,7 +2,10 @@
   "values": [
     "#jugcraft:living_ground",
     "#minecraft:base_stone_overworld",
+    "minecraft:stone",
+    "minecraft:deepslate",
     "#minecraft:sand",
+    "minecraft:sand",
     "minecraft:gravel"
   ]
 }

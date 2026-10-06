@@ -96,11 +96,15 @@ REGROWTH_CAP_PERCENT = 75
 EARTHBOUND_FOR_STONE = 2
 ROOTED_PER_PIECE = 0.075
 ROOTED_TICKS = 10
-# Living soil: vanilla's dirt tag (grass, dirt, coarse dirt, podzol, mycelium, rooted dirt, moss, mud) and farmland.
-LIVING_GROUND = ["#minecraft:dirt", "minecraft:farmland"]
+# Living soil: vanilla 26.3's dirt, grass and mud tags (grass is not in #minecraft:dirt; tools/agriculture.py BOG_SOIL
+# names the three apart too), and by name each soil the record lists, so none depends on what a vanilla tag holds.
+LIVING_GROUND = ["#minecraft:dirt", "#minecraft:grass_blocks", "#minecraft:mud", "minecraft:grass_block", "minecraft:dirt",
+                 "minecraft:coarse_dirt", "minecraft:podzol", "minecraft:mud", "minecraft:moss_block", "minecraft:rooted_dirt",
+                 "minecraft:farmland"]
 # Natural ground: living soil, the Overworld's base stone (stone, granite, diorite, andesite, tuff, deepslate), sand
-# and gravel.
-EARTHEN_GROUND = [f"#{MOD}:living_ground", "#minecraft:base_stone_overworld", "#minecraft:sand", "minecraft:gravel"]
+# and gravel; stone, deepslate and sand by name too.
+EARTHEN_GROUND = [f"#{MOD}:living_ground", "#minecraft:base_stone_overworld", "minecraft:stone", "minecraft:deepslate",
+                  "#minecraft:sand", "minecraft:sand", "minecraft:gravel"]
 TRAITS = {
     "regrowth": ("Regrowth", "While you stand on living soil, it mends one use every 5 s, up to 75% of full."),
     "rooted": ("Rooted", "On natural ground, each Earthbound piece takes 7.5% off knockback (30% for a full set). "

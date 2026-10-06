@@ -80,8 +80,8 @@ Two bounded traits; neither adds damage, defense or speed.
 
 - **Regrowth (all thallite gear):**
   - Every 5 seconds, each thallite item worn or held gets back one use while its holder stands on living soil
-    (`#jugcraft:living_ground`: vanilla's `#minecraft:dirt`, which holds grass, dirt, coarse dirt, podzol, mycelium,
-    rooted dirt, moss, pale moss, mud and muddy mangrove roots, plus farmland).
+    (`#jugcraft:living_ground`: grass, dirt, coarse dirt, podzol, mud, moss, rooted dirt and farmland by name, and
+    whatever else vanilla's `#minecraft:dirt`, `#minecraft:grass_blocks` and `#minecraft:mud` tags hold).
   - It stops at 75% of full and never brings back a broken item.
   - A tool goes from empty to 75% in about 12 minutes outdoors.
   - It shows as a faint green sparkle (vanilla's happy-villager particle) and as the trait "Regrowth" in the tooltip,
@@ -315,7 +315,10 @@ Until those merge, its diff against `claude/thallite-ore` shows their changes to
   stands on `#jugcraft:earthen_ground`, it is added back at 0.075 for each piece in `#jugcraft:earthbound_armor` worn.
   It is never saved.
 - **Natural ground,** `#jugcraft:earthen_ground`: `#jugcraft:living_ground`, `#minecraft:base_stone_overworld` (stone,
-  granite, diorite, andesite, tuff and deepslate), `#minecraft:sand` and gravel.
+  granite, diorite, andesite, tuff and deepslate), `#minecraft:sand` and gravel, with stone, deepslate and sand by name
+  too.
+- **Why soils are named:** the first CI run (job 112483970162) showed grass outside `#minecraft:dirt` in 26.3, so
+  Regrowth and Rooted did nothing on grass. Each ground tag now names its blocks as well as vanilla's tags.
 - **The tooltip** (`gear/ThalliteGearItem`):
   - every piece names **Regrowth** (green), and an Earthbound piece also its lore line first and **Rooted** (gold);
   - while Shift is held, each is described, through #216's `TraitTooltips`;
@@ -448,8 +451,8 @@ its parts, not end to end), the client, play, and a dedicated server with two cl
   - **The armor art** follows the sheet's design but is drawn fresh, so it is boxier and a little darker than the sheet.
     If the owner wants their own armor icons used exactly, as with the ingot, each is a 16-row map in
     `tools/thallite_armor.py`.
-  - **Living soil** is vanilla's dirt tag plus farmland, so it also counts coarse dirt, mycelium, pale moss and muddy
-    mangrove roots, beyond the record's list.
+  - **Living soil** is the record's list by name plus vanilla's dirt, grass and mud tags, so it may also count a few
+    soils beyond the list, such as mycelium or pale moss.
   - **The particle** is vanilla's green happy-villager sparkle, not a leaf: a leaf particle needs an API this mod has
     not compiled against yet.
   - **Players only:** mobs that pick up thallite gear get neither trait.
