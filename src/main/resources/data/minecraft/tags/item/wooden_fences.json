@@ -13,6 +13,7 @@
     "jugcraft:cypress_fence",
     "jugcraft:redwood_fence",
     "jugcraft:eucalyptus_fence",
-    "jugcraft:mahogany_fence"
+    "jugcraft:mahogany_fence",
+    "jugcraft:cedar_fence"
   ]
 }

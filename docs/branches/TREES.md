@@ -8,8 +8,10 @@ proposes the trees that would fit, with how each should look and the order to bu
 It builds on the biome roster ([BIOMES.md](BIOMES.md)) and follows the look in
 [NATURAL_TEXTURES.md](../NATURAL_TEXTURES.md), from the wood repaint ([features/wood-repaint.md](../features/wood-repaint.md)).
 
-**Nothing here is built yet.** This is a plan. Every tree still needs its own PR, its own feature record in
-`docs/features/`, in-game screenshots and the owner's approval of its colours.
+**Batch 1 is built** on branch `claude/trees-batch-1` ([features/trees-batch-1.md](../features/trees-batch-1.md)), awaiting
+review and CI, and not yet played; "Batch 1 as built" under Decisions says where it differs from this plan. The rest is
+a plan. Every later tree still needs its own PR, its own feature record in `docs/features/`, in-game screenshots and the
+owner's approval of its colours.
 
 How it was made: survey groups proposed trees biome by biome, and their proposals were merged into one roster. Three
 reviewers then checked the roster: one for whether it can be built and keeps the project's rules, one for art and fit
@@ -63,7 +65,9 @@ These come from `docs/NATURAL_TEXTURES.md` and `CLAUDE.md`, and from the reviews
 4. **Feature switches.** A wood's planks, wood and sawmill recipes are on when *any* feature that grows its logs is
    on, and so are a tree's leaves and sapling. `WOOD_SWITCHES` becomes a list, and `check_mod_data` checks that every
    shape's log wood and leaves cover every feature that places the shape. This lands in batch 1, before any borrowed
-   larch ships.
+   larch ships. Built: `jugcraft:feature_enabled` takes an `"or"` list; larch is alpine_spawn or biomes, and the
+   chestnut agriculture or biomes (the Orchard places it). The check covers the biomes, Alpine Spawn and agriculture's
+   wild patches, and each wood's hand and sawmill recipes.
 5. **Placement.**
    - Picks are shares (above).
    - A pick that fails its survival check places nothing, so a tree is never picked where its sapling cannot stand.
@@ -98,7 +102,7 @@ These come from `docs/NATURAL_TEXTURES.md` and `CLAUDE.md`, and from the reviews
 | dead_snag | standing dead snag | dead | none | high | 1 |
 | willow_bush | shrub willow | willow | none | medium | 1 |
 | young_aspen | aspen suckers, bog birch | aspen | none | low | 1 |
-| swamp_cedar | Atlantic and northern white cedar | cypress | none | medium | 1 |
+| cedar (the swamp cedar) | Atlantic and northern white cedar | cedar (new wood) | cedar wood set, leaves, sapling | medium | 1 |
 | mossy_maple | bigleaf maple | maple | none | high | 1 |
 | cottonwood | plains cottonwood, white poplar | aspen, then willow | none | high | 2 |
 | japanese_maple | Japanese maple | maple | none | medium | 2 |
@@ -151,6 +155,8 @@ These come from `docs/NATURAL_TEXTURES.md` and `CLAUDE.md`, and from the reviews
 
 ### Batch 1: northern, wet and cool-forest shapes
 
+Built on `claude/trees-batch-1` ([features/trees-batch-1.md](../features/trees-batch-1.md)), awaiting review and CI; not yet played.
+
 #### stunted_fir and bog_fir
 Young or suppressed balsam fir, and black spruce drawn on fir. **High.** It makes the Muskeg and the Fen match their
 own records, and gives the conifer forests an understory. Two shapes cost nothing in textures.
@@ -190,12 +196,13 @@ Tamarack (*Larix laricina*). **High.** The defining tree of muskegs and fens: go
 autumn, at the cost of one shape.
 - **Grows in:** Muskeg 35%, from the dead tree's share; Bog 30%, over its red-orange grass; Fen 35%, replacing
   vanilla dark oak.
-- **Shape:** straight trunk 6 (+3) under pine foliage (radius 1, offset 1, height 4). A thin pole 7-10 blocks tall
+- **Shape:** straight trunk 6 (+3) under pine foliage (radius 1, offset 1, height 3; built with 3, not 4, see
+  Decisions). A thin pole 7-10 blocks tall
   with a narrow, sparse tuft in its top third, taller and thinner than Alpine Spawn's larch cone.
 - **Bark, wood and leaves:** larch's red-brown plated bark and amber wood #c98634. The larch needles' three looks are
   already drawn: green; gold from about day 268; bare from about day 318.
 - **Wood:** reuses larch, shape only.
-  - Larch joins `FALLEN` (length 5-8), so tamaracks lie fallen too.
+  - Larch joins `FALLEN` (length 5-8), so tamaracks lie fallen too: fallen larch is 2% of the Muskeg's trees.
   - The larch sapling still grows the alpine cone.
   - Larch's switch list becomes alpine_spawn and biomes (rule 4).
 
@@ -215,13 +222,15 @@ Ghost Forest its colonnade.
   | Burnt Forest | 45% | |
   | Wasteland | 40% | |
   | Cinder Barrens | 1-2 tries a chunk | on its coarse-dirt patches, about one chunk in eight |
-  | Gloomweald | 10% | |
+  | Gloomweald | 10% | with its new canopy, in batch 3 |
   | Rotted Expanse | 30% | |
 
   The existing fallen dead log also joins the Dead Swamp, Burnt Forest and Rotted Expanse.
 - **Shape:** two forms, both on the dead tree's no-foliage path (air foliage).
   - dead_snag: straight trunk 3 (+4, +3). A straight grey spar 3-10 blocks tall, broken off at the top.
-  - dead_snag_bent, about a quarter of snags: bending trunk 4 (+3), bend_length 1, giving one crooked top.
+  - dead_snag_bent, about a quarter of snags: bending trunk 4 (+3), bend_length 1, giving one crooked top. As built,
+    `min_height_for_leaves` 8 (above the trunk), so only the bend carries the air crown and no trunk log's crown can
+    open a hole in 2-deep swamp water.
   - The forking trunk is not used, because with no leaves it reads as a bare acacia.
 - **Bark and wood:** dead wood's grey furrowed bark (#33302d-#908a81) and grey wood #7a7a7a.
 - **Wood:** reuses dead wood, shape only. It survives as an oak sapling would, as the dead tree does, so it keeps to
@@ -250,7 +259,7 @@ and white trunks make the Hallowed Bog pale.
 - **Leaves:** aspen's, with its seasons.
 - **Wood:** reuses aspen, shape only.
 
-#### swamp_cedar
+#### swamp_cedar (built as `cedar`)
 Atlantic and northern white cedar (*Chamaecyparis thyoides*, *Thuja occidentalis*). **Medium.** The real conifer of
 cedar swamps, replacing vanilla spruce and dark oak and keeping the wetland green beside its bare winter willows.
 - **Grows in:** Wetland 50%, as its default, replacing vanilla spruce; Ghost Forest 15%, replacing vanilla dark oak as
@@ -258,9 +267,16 @@ cedar swamps, replacing vanilla spruce and dark oak and keeping the wetland gree
 - **Shape:** straight trunk 7 (+3) under spruce foliage (radius [1, 2], offset [0, 1], trunk_height [3, 5]). A clear
   stringy red-brown bole shows under a dense, narrow cone 7-10 blocks tall, so it reads as a cedar, not another small
   fir.
-- **Bark, wood and leaves:** cypress's stringy bark (#3e2620-#996752), wood #916558 and dark scale-leaves
-  (#0f2a1a-#41754e). Evergreen.
-- **Wood:** reuses cypress, shape only.
+- **Bark, wood and leaves (as built):** its own wood, **cedar**, after the owner's 5 October update ("We are ok for
+  making new wood and logs for a bunch as well ... Unless they are supposed to be the same wood"): the swamp cedar is
+  not a cypress.
+  - Bark: the owner's painted western red cedar (their second set, row 0, moved from `OWNER_BANK` into `WOOD` as
+    "2:0" and `BARK`), #483229 #513a2f #563d31 #65493a #6b4f40, darkened by the wood's lightness ratio (0.866) to
+    #3e2b24 #463229 #4a352a #573f32 #5d4437, so the log keeps the painting's contrast with its stripped side. Stringy.
+  - Wood: the painting's #84654d, darkened to #725543 so it stands off vanilla spruce and the cypress (ΔE 10.0 and 10.6).
+  - Leaves: `cedar_leaves`, sage-green scale-leaves #27301a #343f22 #43522c #536539 #657a46 #7d9657, ΔE 14.8 from the
+    cypress's and 16.1 from the fir's. Evergreen.
+- **Wood:** the cedar wood set, leaves and sapling. The shape is named `cedar`, which the cedar sapling grows.
 
 #### mossy_maple
 Bigleaf maple (*Acer macrophyllum*). **High.** The temperate rainforest's own moss-draped broadleaf giant in place of
@@ -390,7 +406,8 @@ first.
 - **Wood:** the owner's yew, #654135, a dark red-brown.
   - It shares the cypress's and redwood's hue (about 15) but is much darker: lightness 0.30 against 0.46.
   - It is far less saturated than the mahogany.
-  - Check it beside the cypress, mahogany and redwood, and vanilla's mangrove and dark oak, before it ships.
+  - Check it beside the cedar (batch 1, #725543: ΔE 8.8, the nearest wood), the cypress, mahogany and redwood, and
+    vanilla's mangrove and dark oak, before it ships.
 - **Leaves:** `yew_needles`, the darkest and densest needles in the mod (about 1.5% gaps):
   #111a12 #182419 #1f3021 #2b3d2d #354c38 #425f45. Its one trait is a few red arils (#901a29 #b22e3e #d04859, each
   with a dark #3a1418 centre pixel), which ripen on random ticks as the chestnut's burs do. Evergreen.
@@ -596,8 +613,8 @@ woodland edges and fen carr, with flowers and then dark berries.
   old world, and its point is plain vanilla oaks.
 - **Shape:** straight trunk 2 (+1) under a broad, flat-topped bush crown (radius 2, offset 1, height 2), wider than it
   is tall.
-- **Bark and wood:** chestnut's grey-brown furrowed bark, which suits elder's corky bark. Chestnut's switch list gains
-  biomes (rule 4).
+- **Bark and wood:** chestnut's grey-brown furrowed bark, which suits elder's corky bark. Chestnut's switch list already
+  has biomes (batch 1, for the Orchard; rule 4).
 - **Leaves:** `elder_leaves`, on about the willow's schedule.
 
   | Look | Colours | Trait |
@@ -1286,9 +1303,9 @@ table says otherwise. Batches 1, 2, 3 and 7 need no shared change and can run si
 
 | # | Batch | Trees | Shared work in it | Depends on |
 |---|---|---|---|---|
-| 1 | Northern, wet and cool-forest shapes | stunted_fir and bog_fir, subalpine_fir, fir_bush, tamarack, dead_snag, willow_bush, young_aspen, swamp_cedar, mossy_maple | the any-of feature switches and their check; larch in `FALLEN`; the free swaps below | none |
+| 1 | Northern, wet and cool-forest shapes | stunted_fir and bog_fir, subalpine_fir, fir_bush, tamarack, dead_snag, willow_bush, young_aspen, swamp cedar (built as `cedar`), mossy_maple | the any-of feature switches and their check; larch in `FALLEN`; the free swaps below; the cedar wood set (owner's row 0) | none |
 | 2 | Warm and mountain shapes | cottonwood, japanese_maple, live_oak, windswept_pine, big_jacaranda, mallee, giant_eucalyptus | the Lush Desert fix; `apple_tree_checked`; the eucalyptus `"giant"` entry; a cherry-placer bounds check | none |
-| 3 | The yew | yew | the yew wood set (owner's row 7); the Gloomweald canopy fix | 1 (for the dead snag) |
+| 3 | The yew | yew | the yew wood set (owner's row 7) and its check against the cedar's wood; the Gloomweald canopy fix | 1 (for the dead snag and the cedar) |
 | 4 | Own leaves on borrowed logs | bald_cypress, snowpetal_cherry, shimmer_birch, magnolia | `TREES` `wood`/`display` and `SHAPES` `tree` fields; the Java split of `registerTree`; tree-farm and giant checks by log; the root placer; the new leaf drawing options; the naming rule. Cottonwood moves to willow logs. Design note first. | 1 |
 | 5 | Fruit on seasonal leaves | hawthorn, rowan, persimmon, elder | `SeasonalFruitLeavesBlock`; twig ramps; the lone-tree extra. Design note first. | 4 |
 | 6 | Evergreen scrub | juniper, gorse, sagebrush, holly | the Holly Wreath; the Steppe's trees slot | 4, 5 (holly's berries) |
@@ -1323,7 +1340,7 @@ table says otherwise. Batches 1, 2, 3 and 7 need no shared change and can run si
 
 ## Biomes by biome
 
-Every biome in `tools/biomes.py`, plus Alpine Spawn and Pixel Hollows. **Now** shows today's shares, worked out from
+Every biome in `tools/biomes.py`, plus Alpine Spawn and Pixel Hollows. **Now** shows the shares before batch 1, worked out from
 the in-order chances in `biomes.py`. **After** shows the target shares once every batch has landed. "Stays" means no
 change, with the reason. Expected frequencies of rare trees are estimates, to be tuned in the client survey.
 
@@ -1339,7 +1356,7 @@ change, with the reason. Expected frequencies of rare trees are estimates, to be
 | Dead Forest | dead tree 73, spruce (v) 15, oak (v) 8, fallen dead 4 | dead tree 40, dead snag 35, spruce (v) 10, juniper 10 (for the oak), fallen dead 5 | 1, 6 |
 | Tundra | maple bush 100 | maple bush 40, willow bush 30, fir bush 20, juniper bush 10 | 1, 6 |
 | Snowy Forest | oak (v) 56, fir 30, maple 14 | rowan 36 (for the oak), fir 30, aspen 20, maple 14 | 1, 5 |
-| Muskeg | dead tree 71, fir 25, fallen dead 4 | tamarack 35, bog fir 30, dead snag 20, dead tree 10, fallen dead 5 | 1 |
+| Muskeg | dead tree 71, fir 25, fallen dead 4 | tamarack 35, bog fir 30, dead snag 20, dead tree 10, fallen dead 3, fallen larch 2 | 1 |
 
 ### Fields and meadows (`docs/features/fields-and-meadows.md`)
 
@@ -1489,7 +1506,7 @@ change, with the reason. Expected frequencies of rare trees are estimates, to be
 | A fire-proof Nether "blight" wood set | Dead-wood stems under a new wart cap serve three biomes, none of which spreads fire. A Nether set would need crimson-style registrations and IDs that become permanent. Revisit it with painting 18 (#383838) if the owner wants a third Nether building wood; the Ashfall Wastes would wait for that. |
 | Dragonblood and baobab wood sets | No owner painting fits either: a lilac-grey End wood, or a smooth copper-grey baobab bark. Both read by silhouette and leaves, so palm logs serve them. Revisit either if the owner paints one. |
 | Ebony or wenge | A near-black exotic for a rainforest that already gains four trees. The owner's wenge (row 3) stays banked; check it against vanilla dark oak first. |
-| Western red cedar, elm, shagbark hickory, London plane (owner's banked rows 0, 4, 5 and 1) | No surveyed biome needs them now. Rows 0, 4 and 5 sit close to each other and near vanilla spruce; London plane's wood is close to oak planks. They stay banked. |
+| Elm, shagbark hickory, London plane (owner's banked rows 4, 5 and 1) | No surveyed biome needs them now. Rows 4 and 5 sit close to each other and near vanilla spruce; London plane's wood is close to oak planks. They stay banked. Row 0, western red cedar, became the swamp cedar's own wood in batch 1, at the owner's word. |
 | Osage orange | Serves essentially one biome, and its golden wood needs a painting the owner has not given. |
 | Persimmon on black wood (painting 18) | The persimmon reads by its fruit, so dark oak logs serve it. Painting 18 stays free for a possible charred or Nether wood. |
 | Bay laurel | A dense, glossy oval evergreen on oak logs, too close to the osmanthus and the orange tree. |
@@ -1512,6 +1529,17 @@ change, with the reason. Expected frequencies of rare trees are estimates, to be
 
 The three reviews raised 98 points between them. Where two reviews raised the same point, it is answered once, in review order. "Accepted" means the roster above already
 includes the change.
+
+### Batch 1 as built
+
+| Point | Decision |
+|---|---|
+| The swamp cedar was a cypress shape | **Changed by the owner.** It is its own wood, cedar, from their painted western red cedar, nudged off vanilla spruce and the cypress by the least change that separates it, with its bark darkened alike (see its record). The shape is `cedar`, which its sapling grows. |
+| The tamarack's pine height 4 would crown half the tamaracks 7 wide | Built with height 3: 5 wide or less, by our reading of vanilla's pine placer. To check in the CI screenshots. |
+| "Tamaracks lie fallen too", but no biome placed a fallen larch | The Muskeg's fallen 5 becomes fallen dead 3 and fallen larch 2. |
+| The Orchard places chestnut trees under the biomes switch | The chestnut's switch list is agriculture or biomes, so rule 4's check passes for every placed tree, not only the shapes. |
+| The Gloomweald's 10% snag | Left to batch 3, as its "Biomes by biome" row says: today's 2-3 tries mostly fail on vanilla's canopy. |
+| A later batch's share before its batch | It stays with the tree it will replace: oak in the Seasonal Forest, Snowy Forest, Lake District, Dead Forest and Floodplain; the vine-hung oak in the Lush Swamp; the willow in the Swamp Woods; the oak bush in the Lush River and Dense Forest; the fancy oak in the Dense Forest; the maple bush in the Tundra; the spruce in the Wetland; the pine in the Shield; the fir in the Temperate Rainforest; the dead tree in the Wasteland; the cherry in the Snowpetal Grove. |
 
 ### Buildability and rules
 
@@ -1624,5 +1652,5 @@ includes the change.
 ---
 
 Prepared on 5 October 2026 with Claude Opus 5.5. Colour ramps and distances were computed by script from
-`tools/wood_style.py`, and current shares from `tools/biomes.py`. Nothing in this plan has been built, run in game
-or play-tested.
+`tools/wood_style.py`, and current shares from `tools/biomes.py`. Batch 1 has since been built (not played); nothing
+else in this plan has been built, run in game or play-tested.
