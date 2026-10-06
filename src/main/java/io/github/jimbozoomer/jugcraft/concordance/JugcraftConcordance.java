@@ -1,6 +1,6 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
@@ -19,7 +19,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.PackType;
@@ -85,7 +84,7 @@ public final class JugcraftConcordance {
 		RADIANCE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("radiance"),
 				DataComponentType.<LanternCharge>builder().persistent(LanternCharge.CODEC).networkSynchronized(LanternCharge.STREAM_CODEC).build());
 		LANTERN_LIT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("lantern_lit"),
-				DataComponentType.<Unit>builder().persistent(Codec.unit(Unit.INSTANCE)).networkSynchronized(StreamCodec.unit(Unit.INSTANCE)).build());
+				DataComponentType.<Unit>builder().persistent(MapCodec.unitCodec(Unit.INSTANCE)).networkSynchronized(Unit.STREAM_CODEC).build());
 
 		KNOWLEDGE = AttachmentRegistry.<Knowledge>builder().persistent(ConcordanceCodecs.KNOWLEDGE).copyOnDeath()
 				.syncWith(ConcordanceCodecs.KNOWLEDGE_STREAM, AttachmentSyncPredicate.targetOnly())
@@ -103,7 +102,7 @@ public final class JugcraftConcordance {
 
 		// The Kindled mote is light in the air: nothing to see, hit, break or hold.
 		LUMEN_MOTE = block("lumen_mote", LumenMoteBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
-				.replaceable().noCollision().noOcclusion().instabreak().noLootTable().pushReaction(PushReaction.DESTROY)
+				.replaceable().noCollision().noOcclusion().instabreak().noLootTable().pushReaction(PushReaction.POPPED)
 				.lightLevel(LumenMoteBlock::light));
 		LAMPWRIGHT_BENCH = block("lampwright_bench", LampwrightBenchBlock::new, BlockBehaviour.Properties.of()
 				.mapColor(MapColor.WOOD).strength(2.0F).sound(SoundType.WOOD).noOcclusion()
