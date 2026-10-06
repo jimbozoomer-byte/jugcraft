@@ -1,6 +1,6 @@
 # Knight armor: 3D armor for bronze and steel
 
-Status: implemented on `claude/knight-armor` (from `main` at ca938b54), awaiting review. The Python generators and checks pass locally. **Not yet compiled, game-tested or played:** the Java compiles only in CI, which has not run on this branch yet.
+Status: implemented on `claude/knight-armor` (from `main` at ca938b54, stacked on `claude/armor-styles`), awaiting review. The Python generators and checks pass locally. **Not yet compiled, game-tested or played:** the Java compiles only in CI, which has not run on this branch yet.
 Proposal issue: none. The owner asked in chat, in this order:
 1. "The steel and bronze look HORRIFIC. Heres some armor I just designed, please make it so that the models can be different than vanilla armor so that you can capture all the parts of this, then make a bronze variant of it for the bronze."
 2. "Make it so the models are more intricate and that the armor can be much bigger than just the default vanilla armor and can have many different parts coming off of it".
@@ -219,13 +219,19 @@ Not applicable: art and client rendering only. Defense, toughness, durability, e
 
 **Not run:** the game client by hand; babies and small armor stands wearing it; a player with a cape; two players on a dedicated server; any play. Until CI runs the client test above, nothing has shown the armor stands, the zombie, the sneaking player or the glint in game.
 
-### Merging with `claude/armor-styles`
-The two branches were built in parallel; whichever merges second needs these, found by a trial merge (not yet done for real):
-- **`tools/check_mod_data.py` merges with no conflict but fails.** Armor-styles' `check_armor_styles()` requires `equipment/bronze.json` and `steel.json` to draw `jugcraft:<asset>` on the `humanoid` and `humanoid_leggings` layers, and this branch removes those files. Limit that assertion to `gear.ARMOR_STYLES` (and any `GEAR_TIERS` entry whose pieces have no 3D set in `armor_models.sets()`). Keep its 64 × 32 worn-texture check for bronze and steel: `gear_textures.py` still writes those textures.
-- **`tools/gear.py`:** one conflict, the loop header. Resolve as `for tier in list(GEAR_TIERS) + list(ARMOR_STYLES):`, keeping this branch's `worn` rule and its `if layers:` write.
-- **`tools/handbook.py`:** a conflict on the Bronze and Steel Gear page. Keep this branch's armor sentences, drop armor-styles' "For now bronze and steel armor wear those looks too.", and fix "and for now the same look" on its Steampunk and Kaiser Armor page. Then rerun `generate_material_data.py`.
-- **Stale lines to fix:** line 2 of `tools/gear_textures.py`'s docstring (the bronze and steel icons now come from `armor_icons.py`, not `armor_styles.py`), and armor-styles' `ArmorSetsClientGameTests` javadoc ("bronze and steel armor still draw the same stylized art").
-- `docs/features/tools-and-armor.md` (three conflicts) and `CHANGELOG.md` (one) are text.
+### Stacked on `claude/armor-styles`
+This branch merges `claude/armor-styles` ([#215](https://github.com/jimbozoomer-byte/jugcraft/pull/215), Steampunk and Kaiser Armor), whose PR it is stacked on. The merge, done on 6 October 2026:
+- **`tools/check_mod_data.py` `check_armor_styles()`:**
+  - It now asks for an equipment asset drawing the flat layers only of a set that has some piece with no 3D model. Steampunk and Kaiser do; bronze and steel do not, and having one would be an error.
+  - The 64 × 32 worn-texture check still covers bronze and steel, since `gear_textures.py` still writes those layers.
+- **`tools/gear.py`:** the equipment loop runs over `GEAR_TIERS` and `ARMOR_STYLES` with this branch's `worn` rule, so bronze and steel get no asset file.
+- **`tools/gear_textures.py`:** bronze and steel's icons are this branch's (`armor_icons.py`). Their unused flat layers are drawn by armor-styles' `METAL_ARMOR_LOOK` and match the base branch's pixels exactly.
+- **`tools/handbook.py`:** this branch's armor sentences, plus a line on Steampunk and Kaiser armor. The Steampunk and Kaiser page no longer says bronze and steel share their look.
+- **Docs and tests:** the stale "for now bronze and steel wear these looks" lines are updated, in:
+  - `ART_DIRECTION.md`, `TECH_TREE.md` and `WHAT_EXISTS.md`;
+  - `steampunk-and-kaiser-armor.md` and `tools-and-armor.md`;
+  - the `ArmorSetsClientGameTests` javadoc.
+- **After the merge:** `generate_material_data.py` and `generate_textures.py` ran clean, `check_mod_data.py` passed (1447 IDs) and `armor_smoke.py` passed.
 
 ## World and event applicability
 Not applicable: looks only. Mobs that wear bronze or steel armor (given it, or picking it up) show the knight armor too.

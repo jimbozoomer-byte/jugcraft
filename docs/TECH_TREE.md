@@ -411,6 +411,19 @@ Empty tools mine like a bare hand and get no drops.
 
 **Code:** `gear/JugcraftGear`; data and art from `tools/gear.py` and `tools/gear_textures.py` ([feature record](features/tools-and-armor.md)).
 
+### Steampunk and Kaiser Armor (batch 60)
+
+The stylized looks bronze and steel armor were first drawn in, as sets of their own. Each piece protects exactly as its plain piece does (same defense, toughness, durability, enchantability and repair), and smithing keeps its enchantments and wear. Bronze and steel armor wear their own 3D look, the owner's knight design ([knight-armor.md](features/knight-armor.md)).
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Steampunk helmet, chestplate, leggings, boots | Bronze armor's protection, in the steampunk look: aviator cap and goggles, pressure gauge, copper boiler | smithing: Steampunk Pattern + bronze piece + copper ingot |
+| Kaiser helmet, chestplate, leggings, boots | Steel armor's protection, in the kaiserpunk parade dress of the Winged Cog: spiked helmet, field-grey tunic, jackboots | smithing: Kaiser Pattern + steel piece + gold ingot |
+| Steampunk Pattern | Smithing template: bronze armor to Steampunk and, with a bronze ingot, back | 4 copper ingots, 2 leather, 2 glass panes, paper (4) |
+| Kaiser Pattern | Smithing template: steel armor to Kaiser and, with a steel ingot, back | Imperial Crest, 4 gold nuggets, 2 black dye, red dye, paper (4) |
+
+**Code:** `gear/JugcraftGear` (`ARMOR_STYLES`, `STYLE_TEMPLATES`, `restyle`, `TEMPLATES`); data from `tools/gear.py` (`ARMOR_STYLES`), armor art from `tools/armor_styles.py`, pattern art from `tools/arms_variants_art.py` ([feature record](features/steampunk-and-kaiser-armor.md)).
+
 ### Scuba gear, free runners and power weapons (batch 27)
 
 | Item | What it does | Built from |

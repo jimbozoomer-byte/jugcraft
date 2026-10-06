@@ -17,7 +17,20 @@ No numbered release yet. Everything below is on `main`.
 - **New 16×16 inventory icons** for all eight pieces, drawn to match, and the handbook's Bronze and Steel Gear page describes the new look.
 - **Any armor piece can now have a 3D model:** boxes of any size, at any angle, on any body part, drawn on players, mobs and armor stands, with vanilla's glint when enchanted. The exosuit's 3D parts use the same layer and look as before.
 - **Nothing else changes:** same items, IDs, stats and recipes, so armor you already have just looks new. Trims stay on the item but do not show on the 3D models, and babies wear none.
-- The old steampunk and kaiserpunk looks are no longer worn by bronze and steel armor; a separate PR keeps them as Steampunk Armor and Kaiser Armor. Record: [knight-armor.md](docs/features/knight-armor.md).
+- The old steampunk and kaiserpunk looks are no longer worn by bronze and steel armor; Steampunk Armor and Kaiser Armor (below) keep them. Record: [knight-armor.md](docs/features/knight-armor.md).
+
+### Unmerged: Steampunk Armor and Kaiser Armor
+- **The stylized armor looks return as two sets of their own:**
+  - **Steampunk Armor:** an aviator cap with teal goggles, a pressure gauge and a copper boiler on the back.
+  - **Kaiser Armor:** a black spiked helmet, a field-grey tunic over a steel cuirass, and jackboots: the parade dress of the Winged Cog.
+  - Each protects exactly as bronze or steel armor does: the same defense, toughness, durability, enchantability and repair.
+- **Made at a smithing table:**
+  - a **Steampunk Pattern**, a bronze piece and a copper ingot make the Steampunk piece;
+  - a **Kaiser Pattern** (made with an Imperial Crest), a steel piece and a gold ingot make the Kaiser piece;
+  - the same pattern and an ingot of the metal turn it back.
+  - Enchantments, wear, name, trims and plating carry over. Each pattern craft makes 4, one for each piece of a set.
+- **Bronze and steel armor keep their current look in this PR,** so for now each looks exactly like its Steampunk or Kaiser twin. Their IDs, stats and recipes are unchanged, and nothing needs converting. Their new 3D look comes in a following PR.
+- The **Goggles On** and **On Parade** advancements (a Kaiser piece also counts for Suited Up), and two handbook pages. Record: [steampunk-and-kaiser-armor.md](docs/features/steampunk-and-kaiser-armor.md).
 
 ### Cute, clean creature decorations: batches 15 to 20 repainted (#191)
 - **Smooth fire**: the Ember Bed's hearth now burns in smooth bands of colour on a glow of coals, and the Horned Skull Cauldron's ram skull has big round sockets and no nostrils.

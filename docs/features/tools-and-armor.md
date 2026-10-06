@@ -19,13 +19,16 @@ Design inspiration: Mekanism: Tools by aidancbrady and team (MIT). Only the idea
     - a leather belt and a skirt of plate bands.
 
     Steel wears it as drawn, in light steel grey. Bronze is its steam-age make, in copper-bronze with brass trim and rivets. See [knight-armor.md](knight-armor.md).
-  - **The first looks are retired from bronze and steel.** They were bronze steampunk and steel kaiserpunk, drawn on 2 October 2026 in `tools/armor_styles.py`. The owner asked to keep them as sets of their own, Steampunk Armor and Kaiser Armor, in a separate PR.
+  - **The first looks** were bronze steampunk and steel kaiserpunk, drawn on 2 October 2026 in `tools/armor_styles.py`.
+    - The owner asked for these on 2 October 2026: "make sure the armor looks really cool and the copper and bronze armor is steampunk and the other one is kaiserpunk".
+    - On 5 October 2026 the owner kept them as sets of their own: "Wait no also I want the old armors for those 2 back those were stylized, so maybe make those be "Kaiser Armor" and "Steampunk Armor" instead and then make the new ones just be bronze and steel". They are now [Steampunk Armor and Kaiser Armor](steampunk-and-kaiser-armor.md).
+  - **Restyling:** at a smithing table, a Steampunk Pattern and a copper ingot turn a bronze piece into Steampunk Armor, and a Kaiser Pattern and a gold ingot turn a steel piece into Kaiser Armor. The same pattern and the metal's ingot turn it back. The protection is the same either way.
 - **Paxels for every tier** (wood, stone, iron, gold, diamond, netherite, bronze, steel).
   - One tool that mines like a pickaxe, an axe and a shovel.
   - Crafted from the tier's pickaxe, axe and shovel; lasts as long as all three together.
   - The netherite paxel does not burn.
 - Enchantable and repairable like vanilla gear (bronze or steel ingots repair their own gear), through the vanilla `pickaxes`, `swords`, `head_armor`… tags.
-- Two advancements (Suited Up, Jack of All Trades) and two handbook pages in the Steel chapter.
+- Two advancements (Suited Up, Jack of All Trades) and two handbook pages in the Steel chapter. Suited Up also counts the Kaiser pieces, which are steel armor in another look.
 
 ## Connections
 - Existing input producer: bronze (alloy smelter or crafting) and steel (steel foundry).
@@ -41,12 +44,14 @@ Design inspiration: Mekanism: Tools by aidancbrady and team (MIT). Only the idea
 | **Steel** | 900 | 7.0 | 2.5 | 12 | diamond |
 | Diamond (vanilla) | 1,561 | 8.0 | 3.0 | 10 | diamond |
 
-| Armor | Durability multiplier | Boots/legs/chest/helmet | Toughness | Knockback resistance |
-| --- | --- | --- | --- | --- |
-| Iron (vanilla) | 15 | 2/5/6/2 | 0 | 0 |
-| **Bronze** | 15 | 2/5/6/2 | 0.5 | 0 |
-| **Steel** | 25 | 3/6/7/3 | 1.5 | 0.05 |
-| Diamond (vanilla) | 33 | 3/6/8/3 | 2 | 0 |
+| Armor | Durability multiplier | Boots/legs/chest/helmet | Enchantability | Toughness | Knockback resistance |
+| --- | --- | --- | --- | --- | --- |
+| Iron (vanilla) | 15 | 2/5/6/2 | 9 | 0 | 0 |
+| **Bronze** (and Steampunk) | 15 | 2/5/6/2 | 12 | 0.5 | 0 |
+| **Steel** (and Kaiser) | 25 | 3/6/7/3 | 10 | 1.5 | 0.05 |
+| Diamond (vanilla) | 33 | 3/6/8/3 | 10 | 2 | 0 |
+
+Steampunk and Kaiser Armor take every number from bronze and steel armor (`JugcraftGear.restyle`): see [their record](steampunk-and-kaiser-armor.md).
 
 - A paxel saves inventory space, not resources: it costs the three tools and lasts exactly as long as them together.
 - The metal audit counts the ingots in each piece. Nothing recycles gear back into metal, so there is no loop.
@@ -58,7 +63,7 @@ Plain items; nothing new is saved. Recipes follow the `tin` (bronze) and `machin
 No new dependencies. Tool icons are drawn by `tools/gear_textures.py` from hand-made masks and the mod's own metal palettes. No vanilla or Mekanism texture is traced or recoloured.
 - **Armor icons** are hand-drawn 16×16 maps, `tools/armor_icons/<piece>.txt`, coloured by `tools/armor_icons.py`.
 - **The worn armor** is the 3D knight armor: `tools/knight_armor.py`, on the toolkit described in [knight-armor.md](knight-armor.md).
-- **The old flat worn layers** from `tools/armor_styles.py` are still generated, but nothing names them: bronze and steel have no equipment asset files now ([knight-armor.md](knight-armor.md)).
+- **The old flat worn layers** are still generated for bronze and steel (`tools/gear_textures.py` `METAL_ARMOR_LOOK`, in the looks Steampunk and Kaiser Armor keep), but nothing names them: bronze and steel have no equipment asset files now ([knight-armor.md](knight-armor.md)). Steampunk and Kaiser Armor's icons and worn layers are the hand-drawn pixel maps in `tools/armor_styles.py`.
 
 ## Verification
 - `tools/check_mod_data.py`:
@@ -72,6 +77,8 @@ No new dependencies. Tool icons are drawn by `tools/gear_textures.py` from hand-
   - the netherite paxel resists fire;
   - every armor piece equips to its slot.
 - Client screenshots: `jugcraft_steel_armor_worn` (front), `jugcraft_bronze_armor_worn` (front) and `jugcraft_bronze_armor_back`. They now show the 3D knight armor, though CI has not run them on it yet ([knight-armor.md](knight-armor.md#verification)).
+  - The Steampunk and Kaiser Armor record has the `jugcraft_armor_sets_*` shots, with bronze, steel, both styled sets and vanilla copper and iron armor side by side.
+- `check_mod_data` checks that Steampunk and Kaiser Armor have 64x32 worn layers and equipment assets naming their own textures, and that bronze and steel's flat layers are still 64x32.
 - Not run: client play, two players.
 
 ## World and event applicability
