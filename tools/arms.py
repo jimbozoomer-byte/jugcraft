@@ -40,7 +40,7 @@ KINDS = {
     "greatsword": {"display": "Greatsword", "damage": 7.0, "speed": -3.2, "swing": ("whack", 20), "reach": (0.0, 3.75),
                    "margin": 0.0, "disable": 2.0, "wear": 1, "knockback": 0.5, "parry": 0.0, "held": 1.7,
                    "tags": ["swords"], "pattern": [" # ", "###", "#L#"],
-                   "tooltip": "Two-handed: slow, heavy sweeps with a long reach. Staggers shields."},
+                   "tooltip": "Slow, heavy sweeps with a long reach. Staggers shields."},
     "rapier": {"display": "Rapier", "damage": 1.5, "speed": -2.0, "swing": ("stab", 5), "reach": (0.0, 3.5),
                "margin": 0.125, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.35, "held": 1.2,
                "tags": ["swords"], "pattern": ["  #", " # ", "L  "],
@@ -82,7 +82,7 @@ KINDS = {
     "battle_axe": {"display": "Battle Axe", "damage": 8.0, "speed": -3.3, "swing": ("whack", 22), "reach": (0.0, 3.25),
                    "margin": 0.0, "disable": 5.0, "wear": 2, "knockback": 0.5, "parry": 0.0, "held": 1.5,
                    "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["###", "#S ", " S "],
-                   "trait": "chop", "tooltip": "Two-handed. Chops wood like an axe and breaks a shield's guard for 5 seconds."},
+                   "trait": "chop", "tooltip": "Chops wood like an axe and breaks a shield's guard for 5 seconds."},
     "flail": {"display": "Flail", "damage": 5.0, "speed": -3.0, "swing": ("whack", 10), "reach": (0.0, 3.25),
               "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.2,
               "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["  #", " # ", "S  "],
@@ -94,7 +94,7 @@ KINDS = {
     "quarterstaff": {"display": "Quarterstaff", "damage": 2.0, "speed": -2.4, "swing": ("whack", 12), "reach": (0.0, 3.5),
                      "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 1.0, "parry": 0.5, "held": 1.8,
                      "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["  #", " S ", "#  "],
-                     "tooltip": "Two-handed. Knocks foes back. Use to parry: blocks 50% of the damage from in front."},
+                     "tooltip": "Knocks foes back. Use to parry: blocks 50% of the damage from in front."},
     "pike": {"display": "Pike", "damage": 5.0, "speed": -3.2, "swing": ("stab", 16), "reach": (2.0, 5.0),
              "margin": 0.125, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 2.3,
              "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["  #", " S ", "SS "],
@@ -423,6 +423,21 @@ VANILLA_CROSSBOW = {"load": 25, "speed": 3.15, "damage": 2.0}
 RANGED_SPRITES = {"bow": ["", "_pulling_0", "_pulling_1", "_pulling_2"],
                   "crossbow": ["_standby", "_pulling_0", "_pulling_1", "_pulling_2", "_arrow", "_firework"]}
 RANGED_HELD = {"longbow": 1.3, "arbalest": 1.15}
+
+# Each kind's trait as it is named in its tooltip (weapons/ArmItem.java, gear/TraitTooltips.java): the name always, and
+# the kind's "tooltip" sentence under it while Shift is held (docs/features/trait-details.md). Short, so a tooltip stays
+# narrow; tools/check_mod_data.py checks that every kind, bow, crossbow and shield has one.
+TRAIT_NAMES = {
+    "longsword": "Parry", "greatsword": "Heavy Sweeps", "rapier": "Quick Parry", "flanged_mace": "Guard Break",
+    "war_hammer": "Guard Break", "glaive": "Long Reach", "halberd": "Line Thrust", "spear": "Charge",
+    "lance": "Mounted Charge", "dagger": "Backstab", "sabre": "Saddle Blade", "estoc": "Armor Pierce", "battle_axe": "Chop",
+    "flail": "Daze", "scythe": "Reap", "quarterstaff": "Parry", "pike": "Longest Reach", "zweihander": "Wide Cleave",
+    "maul": "Quake", "executioner": "Execute", "bill": "Hook", "labrys": "Whirl", "battleblade": "Sunder",
+    "war_fork": "Brace", "kama": "Clear Brush", "war_pick": "Delve", "twinblade": "Twin Blades", "nodachi": "Long Reach",
+    "earthbreaker": "Guard Break", "katar": "Quick Jabs", "moonblade": "Broad Sweeps", "kusarigama": "Hooking Cuts",
+    "katana": "Clean Cuts", "brazier_mace": "Ignite",
+    "longbow": "Heavy Draw", "arbalest": "Metal Prod", "heater_shield": "Quick Raise", "tower_shield": "Bulwark",
+}
 # A shield's sprites: its painted face, its bare back (and grip strap), and its metal trim (rim and boss).
 SHIELD_SPRITES = ["_face", "_back", "_trim"]
 
@@ -585,12 +600,16 @@ def write_all(write, assets, data, lang, condition):
     for kind in KINDS:
         write(models / f"arms_{kind}.json", held_model(kind))
         lang[f"tooltip.{MOD}.arms.{kind}"] = KINDS[kind]["tooltip"]
-    lang[f"tooltip.{MOD}.arms.two_handed"] = "Two-handed: the blow lands as the swing comes round, on every foe in its arc."
+    for kind, name in TRAIT_NAMES.items():
+        lang[f"tooltip.{MOD}.arms.{kind}.trait"] = name
+    lang[f"tooltip.{MOD}.arms.two_handed.trait"] = "Two-Handed"
+    lang[f"tooltip.{MOD}.arms.two_handed"] = "The blow lands as the swing comes round, on every foe in its arc."
+    lang[f"tooltip.{MOD}.hold_shift"] = "Hold %s for details"
     lang[f"message.{MOD}.two_handed.off_hand"] = "Two hands for this one: put away what is in your off hand."
     for kind, art in ARTS.items():
         seconds = art["cooldown"] / 20
-        lang[f"tooltip.{MOD}.arms.art.{art['move']}"] = (f"Use: {art['name']}. {art['text'][0].upper()}{art['text'][1:]} "
-                                                          f"Ready again after {seconds:g} s.")
+        lang[f"tooltip.{MOD}.arms.art.{art['move']}.trait"] = f"Weapon Art: {art['name']}"
+        lang[f"tooltip.{MOD}.arms.art.{art['move']}"] = f"Use: {art['text']} Ready again after {seconds:g} s."
     lang[f"message.{MOD}.arms.art.ground"] = "Your feet must be on the ground to leap."
     lang[f"message.{MOD}.arms.art.riding"] = "Not from the saddle."
     write(data / "tags" / "block" / "kama_cuts.json", {"values": KAMA_CUTS})

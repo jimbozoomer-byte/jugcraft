@@ -1014,6 +1014,20 @@ def check_arms():
     metals = re.findall(r'"([a-z_]+)"', re.search(r"METALS = List\.of\(([^)]*)\)", java).group(1))
     if metals != arms.METALS:
         err(f"JugcraftArms.METALS {metals} != tools/arms.py {arms.METALS}")
+    # Every kind, bow, crossbow and shield is a named trait with its description (docs/features/trait-details.md), and
+    # every weapon art too; their tooltips also need the two-handed trait and the "hold Shift" line.
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for kind in [*arms.KINDS, *arms.RANGED_KINDS, *arms.SHIELD_KINDS]:
+        if kind not in arms.TRAIT_NAMES:
+            err(f"tools/arms.py: {kind} has no TRAIT_NAMES entry, the name its tooltip shows")
+        if not {f"tooltip.{MOD}.arms.{kind}", f"tooltip.{MOD}.arms.{kind}.trait"} <= lang.keys():
+            err(f"lang: {kind} needs tooltip.{MOD}.arms.{kind} and its .trait name")
+    for art in arms.ARTS.values():
+        if not {f"tooltip.{MOD}.arms.art.{art['move']}", f"tooltip.{MOD}.arms.art.{art['move']}.trait"} <= lang.keys():
+            err(f"lang: the {art['move']} art needs its description and its .trait name")
+    for key in (f"tooltip.{MOD}.arms.two_handed", f"tooltip.{MOD}.arms.two_handed.trait", f"tooltip.{MOD}.hold_shift"):
+        if key not in lang:
+            err(f"lang: no {key}")
     swung = [kind for kind in arms.KINDS if kind not in arms.CHARGING]
     found = re.findall(r'new Kind\("([a-z_]+)"', java)
     if found != swung:
@@ -1264,10 +1278,14 @@ def check_arms_variants():
             err(f"tools/arms_variants.py: {name} is of {kind}, not a swung kind of tools/arms.py")
         if line not in av.LINES:
             err(f"tools/arms_variants.py: {name}'s line {line} is neither a style nor a boss")
-        if boon is not None and f"tooltip.{MOD}.arms.boon.{boon}" not in lang:
-            err(f"lang: no tooltip for the {boon} boon")
-        if f"tooltip.{MOD}.arms.line.{line}" not in lang:
-            err(f"lang: no tooltip for the {line} line")
+        # Each trait has a name, and a description to show with Shift (docs/features/trait-details.md); a boss's line
+        # is a name only.
+        if boon is not None and not {f"tooltip.{MOD}.arms.boon.{boon}", f"tooltip.{MOD}.arms.boon.{boon}.trait"} <= lang.keys():
+            err(f"lang: no trait name and description for the {boon} boon")
+        if f"tooltip.{MOD}.arms.line.{line}.trait" not in lang:
+            err(f"lang: no trait name for the {line} line")
+        if line in av.STYLES and f"tooltip.{MOD}.arms.line.{line}" not in lang:
+            err(f"lang: no description for the {line} line")
         recipe = load(DATA / MOD / "recipe" / f"{name}.json") if line in av.STYLES else None
         if line in av.STYLES and (not recipe or recipe.get("type") != "minecraft:smithing_transform"
                                   or recipe.get("base") != f"{MOD}:steel_{kind}"
