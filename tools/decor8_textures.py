@@ -15,6 +15,7 @@ import math
 import random
 
 from crop_textures import Canvas, rgb
+from decor_textures import noise
 import block_style as bs
 
 IRON = [rgb("2a2a2e"), rgb("38383e"), rgb("46464e"), rgb("6a6a74")]
@@ -185,7 +186,7 @@ def bubble():
 def eye():
     """An eyeball: veined white, with a pale blue iris and a black pupil in the middle (on its front)."""
     c = Canvas()
-    bs.fill(c, 0, 0, 15, 15, [rgb("e8e4dc"), rgb("f2eee6")], 18321, [1, 2])
+    noise(c, 0, 0, 15, 15, [rgb("e8e4dc"), rgb("f2eee6")], 18321, [1, 2])
     rng = random.Random(18322)
     for _ in range(5):
         x, y = rng.randrange(16), rng.randrange(16)
