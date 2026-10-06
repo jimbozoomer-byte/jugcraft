@@ -2,7 +2,7 @@
 
 Status: **proposals for discussion, not approved or implemented** unless marked ✅. How implemented things connect is documented in [TECH_TREE.md](TECH_TREE.md). Machines are grouped into branches: **Mechanical** (shape and mix of materials), **Fluids** (moving liquids) and the planned **Chemistry** branch ([branches/CHEMISTRY.md](branches/CHEMISTRY.md)).
 
-The owner's [industrial starter workshop plan](features/industrial-starter-workshop-plan.md) allows small hand-tool batches of plates, wires and basic circuits, with machines improving throughput and efficiency. Both a shaft-driven dynamo and a small fuel generator are first-electricity choices. It records the 2–4 active-hour pacing target, parallel steel progression and the dependency work needed before assigning recipe quantities.
+The owner's [industrial starter workshop plan](features/industrial-starter-workshop-plan.md) selects a small fuel-fired furnace with ceramic crucibles and one manual workshop bench: hammer for plates, wire cutters for wires, and a fuel-heated soldering tool for basic circuits under the owner's delegated design choice. Machines improve throughput and efficiency; both a shaft-driven dynamo and a small fuel generator are first-electricity options. The plan records the 2–4 active-hour target, parallel steel progression and the dependency work needed before assigning recipe quantities.
 
 ## What exists now
 

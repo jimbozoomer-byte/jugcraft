@@ -1,6 +1,6 @@
 # Industrial starter workshop and first electricity
 
-Status: owner-endorsed planning direction, recorded 6 October 2026. This is the starter-route portion of planning step 7. Exact recipes, tools, stations, structures, yields and costs remain to design; no gameplay is implemented by this document.
+Status: owner-endorsed planning direction, recorded and updated 6 October 2026. This is the starter-route portion of planning step 7. The early alloy station and manual tool arrangement are selected below; exact recipes, structures, yields and costs remain to design. No gameplay is implemented by this document.
 Proposal issue: direct owner choices during industrial planning.
 Owner: jimbozoomer-byte.
 Target capability: a useful mechanical workshop and first electricity before mod steel, with steel developing in parallel.
@@ -11,6 +11,8 @@ Related documentation: [machine roadmap](../MACHINE_ROADMAP.md), [current techno
 
 - **Hand tools can make small starter batches of plates, wires and basic circuits.** Mechanical machines provide better throughput and efficiency. Manual basic-circuit assembly still requires reachable ingredients; it is not permission to omit the circuit's materials.
 - **Both starter electricity routes are available:** a shaft-driven dynamo and a small fuel-burning generator. Players choose a route rather than having to build both.
+- **Early alloys use a small fuel-fired crucible furnace with ceramic crucibles.** This is the selected starter route for suitable alloys such as bronze, brass and solder.
+- **Manual components use one shared workshop bench with interchangeable hand tools:** a hammer makes plates and wire cutters make wires. The owner delegated the circuit tool to a sensible gameplay design.
 - **First-electricity pacing target:** approximately 2–4 active hours from a fresh world following known recipes, excluding optional building detours. This is a balancing/playtest target, not measured current behavior or a timed unlock.
 
 Earlier choices remain constraints: a semi-substantial mechanical era with many pre-electric products; a manageable essential route into the next capability; first electricity and basic circuits in the Workshop stage; electricity and steel as parallel capabilities; ceramics supplying suitable insulators and alloy-equipment materials; motors reusing earlier workshops; and selected cross-industry dependencies instead of completing every specialty.
@@ -24,8 +26,8 @@ The following is a dependency sketch to develop into recipes, not a claim that t
 | Stage | Proposed player activity | Capability supplied | What stays optional |
 | --- | --- | --- | --- |
 | Obtainable materials | Gather clay, building material, fuel and reachable basic metals | Inputs for ordinary workshop construction and tools | Industrial extraction, rare mineral sands and advanced chemistry |
-| Fuel-fired ceramics and metal preparation | Fire ordinary ceramic parts and prepare basic metals/alloys through a reachable fuel route | Suitable starter insulators, basic crucibles/linings and early workshop metals | Decorative palettes, advanced refractory grades and bulk production |
-| Manual components | Use reachable hand tools to make the small amounts of plate, wire and basic circuitry actually needed | Construction of selected starter equipment without needing that equipment to make its own components | Mechanized processing, broad component stockpiles and advanced electronics |
+| Fuel-fired ceramics and metal preparation | Fire ordinary ceramic parts, then use a small fuel-fired crucible furnace for suitable early alloys | Suitable starter insulators, basic crucibles/linings and early workshop metals | Decorative palettes, advanced refractory grades and bulk production |
+| Manual components | Use the shared bench's hammer, wire cutters or selected manual circuit tool for the small amounts actually needed | Construction of selected starter equipment without needing that equipment to make its own components | Mechanized processing, broad component stockpiles and advanced electronics |
 | Choose first power route | Drive a dynamo from shafts, or operate a small fuel generator | Reachable electrical generation | Building both generators, large engines, improved magnets and advanced fuels |
 | Connect a useful consumer | Feed an appropriate machine through a small cable run | A repeatably useful electrical workshop capability | A battery bank, a full automated factory and upgrading every old station |
 | Expand by need | Motor-drive existing shaft equipment or add suitable larger stations | Throughput, efficiency and new justified process capabilities | Finishing every industrial/agricultural specialty before progressing |
@@ -54,13 +56,29 @@ Both routes feed the shared electrical interface. Preserve losses in motor/dynam
 
 | Output or operation | Reachable small-batch proposal | Why mechanize or electrify later |
 | --- | --- | --- |
-| Selected early plates | Hand forming with tools made from earlier ingots and simple workshop materials | Faster production and practical bulk quantities |
-| Selected early wires | Hand drawing/forming using a reachable tool or die | Faster production and approved yield/efficiency benefits without material duplication |
-| Basic circuits | Manual assembly when suitable conductors, solder/substrate and accessible silicon or the approved component feed are available | Assembly throughput and later justified electronics capability |
-| Early alloys | Reachable fuel-fired preparation, with a crucible/forge route as a candidate | Bulk handling, controlled processing and suitable additional alloy recipes |
+| Selected early plates | Hammer attachment at the shared workshop bench | Faster production and practical bulk quantities |
+| Selected early wires | Wire-cutter attachment at the same bench, converting approved metal stock into small wire batches | Faster production and approved yield/efficiency benefits without material duplication |
+| Basic circuits | Fuel-heated soldering tool at the same bench, using reachable prepared silicon, copper wire and solder | Assembly throughput and later justified electronics capability |
+| Early alloys | Selected small fuel-fired furnace with a ceramic crucible | Bulk handling, controlled processing and suitable additional alloy recipes |
 | Shaft workshop processing | Starter press/drawer and other useful mechanical operations | Motors reuse the shaft equipment; larger versions improve output/efficiency |
 
-Exact hand tools and the workbench/station arrangement are not selected yet. Their recipes must use inputs obtainable before the component they enable. A plate-making tool cannot require the only plate it makes; a soldering/assembly tool for first circuits cannot require a circuit or electric heater available only afterward.
+The shared bench, hammer and wire cutters are selected. Treat the wire cutters as the gameplay tool for producing starter wires from approved metal stock; a separate wire-drawing tool is not an additional compulsory manual station. The later Wire Drawer still provides industrial production.
+
+Tool and bench recipes must use inputs obtainable before the component they enable: for example, an ingot-based iron tool head and ordinary handle/bench materials. A plate-making hammer cannot require the only plate it makes; the first bench cannot require its own plate or circuit output. Exact construction recipes remain to balance.
+
+### Circuit tool chosen under the owner's delegation
+
+Use a **fuel-heated soldering tool** as the planning baseline for basic circuit assembly at the shared bench. A copper-tipped iron and simple handle/holder is a candidate construction using earlier materials. The tool is heated through a small ordinary-fuel supply at the bench; it does not require electrical power, an electric soldering station or a completed circuit to construct.
+
+The player selects circuit assembly, inserts the defined silicon, wire and solder inputs, supplies the tool's ordinary heating fuel and performs a short manual operation. Keep this a readable recipe interaction, without a solder-placement minigame or simulation of heating individual pads. Hammer and wire-cutter work does not need the soldering heat input. Fuel quantities and operation time are not set by this document.
+
+The tool is reusable, rather than an ingredient consumed to produce each circuit. Any eventual hand-tool durability needs explicit balance; no new routine machine-part maintenance is introduced. This is the assistant's selected gameplay design within the owner's delegation, not a further approval question. It applies to basic circuits and does not bypass advanced electronics capabilities.
+
+### Selected starter alloy station
+
+Make the small crucible furnace from reachable building materials and suitable basic refractory/ceramic parts, then install the ceramic crucible. Feed the appropriate early metals and ordinary fuel to produce an approved alloy batch. Keep the crucible/lining a durable installed capability under earlier planning, rather than consuming a new vessel for every ingot.
+
+Start with reviewed bronze, brass and solder routes. Exact alloy ratios, furnace size, heating time, fuel use and input/output handling still need recipes. Later bellows, larger alloy equipment and electric operation can improve handling or processing where justified; no shaft-driven blower is newly required for this first station. Preserve the existing bronze fallback until the replacement route is reachable.
 
 Use shared component identities and material tags. Define why a manual route remains useful for small jobs while machines pay off at volume. Differences can involve batch size, work rate, handling and audited material/fuel efficiency. Do not invent a new inferior item for every hand-made component merely to force replacement later.
 
@@ -96,7 +114,7 @@ Preserve stable registrations and working entry paths during any later implement
 
 ## Next recipe and balance pass
 
-1. Choose the early alloy-preparation process and manual-tool/station arrangement.
+1. Develop the selected small crucible furnace and shared manual bench into concrete component/station recipes, using the hammer, wire cutters and fuel-heated circuit tool described above.
 2. Define the smallest useful set of hand tools, ceramic outputs, component recipes and starter machines, with their input producers and output consumers.
 3. Calculate two separate minimum bills of materials: shaft source/dynamo/cable/consumer, and fuel generator/cable/consumer. Track optional storage and bulk-processing purchases separately.
 4. Include required gathering, fuel, heating, crafting and setup work in the 2–4 hour target. Exclude optional cosmetic builds and specialty detours, rather than hiding necessary resource acquisition from the timing.
@@ -105,7 +123,7 @@ Preserve stable registrations and working entry paths during any later implement
 
 The [independent Jugcraft Encyclopedia brief and TODO record](https://github.com/jimbozoomer-byte/jugcraft/pull/211) should explain both starter routes and distinguish essential capabilities from optional products and quest-order suggestions. No quest completion or carried guide item becomes a new industrial unlock requirement.
 
-Remaining immediate choices: early alloy preparation and whether manual component work uses one shared bench, loose tools at the crafting table, or separate small stations. Exact quantities and first-electricity checkpoint follow after the dependencies are settled.
+Early alloy preparation and the shared bench/tool arrangement are settled. Remaining detail includes exact construction and processing recipes, tool reuse/durability policy, throughput/fuel costs, reachable silicon preparation and the first-electricity checkpoint. Next, define the smallest useful startup equipment set and calculate the two generator routes' material requirements.
 
 Documentation validation: repository/link and whitespace checks apply. Future gameplay work needs relevant recipe audits, survival-route tests, restart/unload behavior and two-client evidence. This plan contains no new build, timing or game-test results.
 
