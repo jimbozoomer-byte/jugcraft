@@ -66,8 +66,17 @@ public final class JugcraftClient implements ClientModInitializer {
 		BroomstickClient.register();
 		BalloonClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN, ZeppelinRenderer::new);
+		// The raider faction (batch 57): infantry in uniform, the walker and blimp in raider paint, and their bombs.
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, RaiderRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, RaiderRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.OFFICER, RaiderRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.WALKER, RaiderWalkerRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BLIMP, RaiderBlimpRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BOMB, ThrownItemRenderer::new);
+		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(RaiderModel.LAYER, TownsfolkModel::createLayer);
 		ZeppelinClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER, DieselWalkerRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.ARMOURED_WALKER, ArmouredWalkerRenderer::new);
 		WalkerClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP, LandshipRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.SHELL, ThrownItemRenderer::new);
