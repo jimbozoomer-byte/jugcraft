@@ -11,12 +11,13 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -43,7 +44,6 @@ import net.minecraft.world.phys.Vec3;
 import net.spell_engine.api.spell.Spell;
 import net.spell_engine.api.spell.event.SpellHandlers;
 import net.spell_engine.internals.SpellExecution;
-import net.spell_engine.internals.casting.SpellCaster;
 import net.spell_power.api.SpellPower;
 import org.jspecify.annotations.Nullable;
 
@@ -59,10 +59,11 @@ import org.jspecify.annotations.Nullable;
  * limits, shared by its pulses and its branch. A plan therefore cannot reach more targets, do more work or take more
  * branches than it compiled to.</li>
  * <li>If nothing took effect the impact fails: Spell Engine applies no cooldown, no Focus is taken and nothing
- * lingers. Otherwise the Focus the plan costs is taken once and the plan's own cooldown set, in {@link #settle}
- * (Spell Engine's {@code COST_CONSUME}). A spell that has started is not refunded if its later pulses find
+ * lingers. Otherwise the Focus the plan costs is taken once and the plan's own cooldown set, when Spell Engine consumes
+ * the cast's cost ({@link ConcordanceSpells#owe}). A spell that has started is not refunded if its later pulses find
  * nothing.</li>
  * </ul>
+ * Authored invocations ({@link Invocations}) run their compiled plans through the same {@link #perform}.
  * Pulses after the first are kept here (at most {@value #MAX_LINGERING} at once on the server, {@value #MAX_PER_PLAYER}
  * per player) and end early if the caster leaves, dies, changes dimension or the place is no longer loaded; they never
  * load chunks and are not saved.
@@ -72,14 +73,16 @@ public final class ComposedSpells {
 	public static final int MAX_LINGERING = 64;
 	public static final int MAX_PER_PLAYER = 2;
 	private static final SpellHandlers.ImpactResult FAILED = new SpellHandlers.ImpactResult(false, false);
-	private static final Map<UUID, Settlement> PENDING = new HashMap<>();
 	private static final List<Lingering> LINGERING = new ArrayList<>();
 
 	private ComposedSpells() {
 	}
 
-	/** What a cast that took effect owes: settled once, when Spell Engine consumes its cost. */
-	private record Settlement(int focus, int cooldown) {
+	/**
+	 * What running a plan did: whether anything took effect, and whether something was refused because the caster may
+	 * not change a block there (so the caster can be told why).
+	 */
+	public record Outcome(boolean applied, boolean notAllowed) {
 	}
 
 	/**
@@ -97,10 +100,7 @@ public final class ComposedSpells {
 		SpellHandlers.registerCustomImpact(Jugcraft.id("composed"), ComposedSpells::impact);
 		ServerTickEvents.END_SERVER_TICK.register(ComposedSpells::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.getPlayer().getUUID()));
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			PENDING.clear();
-			LINGERING.clear();
-		});
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LINGERING.clear());
 	}
 
 	public static @Nullable Inscription inscription(ItemStack stack) {
@@ -146,11 +146,13 @@ public final class ComposedSpells {
 				return FAILED;
 			}
 			Cause cause = Cause.of(player.getUUID(), Cause.Origin.SPELL, SPELL, ConcordanceEffects.nextSerial());
-			boolean applied = cast(player.level(), player, plan, cause);
-			if (applied) {
-				PENDING.put(player.getUUID(), new Settlement(plan.focus(), plan.cooldown()));
+			Outcome outcome = perform(player.level(), player, plan, cause, new Ledger(plan.limits()));
+			if (outcome.applied()) {
+				ConcordanceSpells.owe(player, SPELL, plan.focus(), plan.cooldown(), true);
+			} else if (outcome.notAllowed()) {
+				player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jugcraft.concordance.invocation.not_allowed"));
 			}
-			return new SpellHandlers.ImpactResult(applied, false);
+			return new SpellHandlers.ImpactResult(outcome.applied(), false);
 		} catch (RuntimeException problem) {
 			Jugcraft.LOGGER.error("Arcane Concordance: an inscribed spell failed", problem);
 			return FAILED;
@@ -168,12 +170,20 @@ public final class ComposedSpells {
 
 	/** As {@link #cast(ServerLevel, ServerPlayer, Plan, Cause)}, with the caller's ledger (to inspect afterwards). */
 	public static boolean cast(ServerLevel level, ServerPlayer caster, Plan plan, Cause cause, Ledger ledger) {
-		return run(level, caster, plan.root(), null, cause, ledger);
+		return perform(level, caster, plan, cause, ledger).applied();
 	}
 
-	private static boolean run(ServerLevel level, ServerPlayer caster, Plan.Node node, @Nullable Impact parent, Cause cause, Ledger ledger) {
+	/** As {@link #cast(ServerLevel, ServerPlayer, Plan, Cause, Ledger)}, reporting why nothing took effect. */
+	public static Outcome perform(ServerLevel level, ServerPlayer caster, Plan plan, Cause cause, Ledger ledger) {
+		Set<ConcordanceEffects.Result> seen = EnumSet.noneOf(ConcordanceEffects.Result.class);
+		boolean applied = run(level, caster, plan.root(), null, cause, ledger, seen);
+		return new Outcome(applied, seen.contains(ConcordanceEffects.Result.NOT_ALLOWED));
+	}
+
+	private static boolean run(ServerLevel level, ServerPlayer caster, Plan.Node node, @Nullable Impact parent, Cause cause, Ledger ledger,
+			Set<ConcordanceEffects.Result> seen) {
 		Impact impact = deliver(level, caster, node, parent);
-		boolean applied = pulse(level, caster, node, impact, cause, ledger, 0);
+		boolean applied = pulse(level, caster, node, impact, cause, ledger, 0, seen);
 		if (!applied) {
 			return false;
 		}
@@ -182,7 +192,7 @@ public final class ComposedSpells {
 		}
 		Cause triggered = cause.triggered();
 		if (node.then() != null && triggered != null && ledger.branch()) {
-			run(level, caster, node.then(), impact, triggered, ledger);
+			run(level, caster, node.then(), impact, triggered, ledger, seen);
 		}
 		return true;
 	}
@@ -216,38 +226,59 @@ public final class ComposedSpells {
 		return new Impact(end, null, at, at, eye);
 	}
 
-	/** One pulse of a node: each operation on what its selection chooses. Returns whether anything took effect. */
-	private static boolean pulse(ServerLevel level, ServerPlayer caster, Plan.Node node, Impact impact, Cause cause, Ledger ledger, int pulse) {
+	/**
+	 * One pulse of a node: each operation on what its selection chooses. Returns whether anything took effect, and adds
+	 * each application's result to {@code seen}.
+	 */
+	private static boolean pulse(ServerLevel level, ServerPlayer caster, Plan.Node node, Impact impact, Cause cause, Ledger ledger, int pulse,
+			Set<ConcordanceEffects.Result> seen) {
 		boolean applied = false;
 		for (Plan.Step step : node.steps()) {
 			ConcordanceEffects.Context context = new ConcordanceEffects.Context(level, cause, caster, ledger,
 					node.depth() + "/" + pulse + "/" + step.index(), impact.origin());
 			if (step.effect().kind().on == EffectKind.On.CREATURE) {
 				for (LivingEntity target : creatures(level, caster, node, impact, step.effect().intent())) {
-					applied |= ConcordanceEffects.apply(context, step.effect(), target).applied();
+					ConcordanceEffects.Result result = ConcordanceEffects.apply(context, step.effect(), target);
+					seen.add(result);
+					applied |= result.applied();
 				}
 			} else {
 				for (BlockPos pos : blocks(level, node, impact, step.effect().kind())) {
-					applied |= ConcordanceEffects.apply(context, step.effect(), pos).applied();
+					ConcordanceEffects.Result result = ConcordanceEffects.apply(context, step.effect(), pos);
+					seen.add(result);
+					applied |= result.applied();
 				}
 			}
 		}
 		return applied;
 	}
 
-	/** The creatures a node's selection chooses, nearest first (ties by UUID); never the caster for a harmful effect. */
+	/**
+	 * The creatures a node's selection chooses, nearest first (ties by UUID): never the caster for a harmful effect,
+	 * and for allies only the caster and the players in the caster's party.
+	 */
 	static List<LivingEntity> creatures(ServerLevel level, ServerPlayer caster, Plan.Node node, Impact impact, Intent intent) {
 		if (node.pick() == Component.Pick.STRUCK) {
 			Entity struck = impact.struck() == null ? null : level.getEntity(impact.struck());
 			return struck instanceof LivingEntity living && living.isAlive() ? List.of(living) : List.of();
 		}
-		if (node.pick() != Component.Pick.CREATURES) {
+		double radius = node.radius();
+		List<LivingEntity> found = new ArrayList<>();
+		if (node.pick() == Component.Pick.ALLIES) {
+			// Players only (a bounded list): the caster and their party, never a stranger or a creature.
+			for (ServerPlayer other : level.players()) {
+				if (other.isAlive() && !other.isSpectator() && other.distanceToSqr(impact.point()) <= radius * radius
+						&& (other == caster || JugcraftParties.sameParty(caster.getUUID(), other.getUUID()))) {
+					found.add(other);
+				}
+			}
+		} else if (node.pick() == Component.Pick.CREATURES) {
+			found.addAll(level.getEntitiesOfClass(LivingEntity.class, new AABB(impact.point(), impact.point()).inflate(radius),
+					entity -> entity.isAlive() && !entity.isSpectator() && entity.distanceToSqr(impact.point()) <= radius * radius
+							&& (intent == Intent.HELPFUL || entity != caster)));
+		} else {
 			return List.of();
 		}
-		double radius = node.radius();
-		List<LivingEntity> found = new ArrayList<>(level.getEntitiesOfClass(LivingEntity.class, new AABB(impact.point(), impact.point()).inflate(radius),
-				entity -> entity.isAlive() && !entity.isSpectator() && entity.distanceToSqr(impact.point()) <= radius * radius
-						&& (intent == Intent.HELPFUL || entity != caster)));
 		found.sort(Comparator.<LivingEntity>comparingDouble(entity -> entity.distanceToSqr(impact.point())).thenComparing(Entity::getUUID));
 		return found.size() > node.targets() ? found.subList(0, node.targets()) : found;
 	}
@@ -312,7 +343,8 @@ public final class ComposedSpells {
 				continue;
 			}
 			try {
-				pulse(level, caster, entry.node(), entry.impact(), entry.cause(), entry.ledger(), entry.pulse());
+				pulse(level, caster, entry.node(), entry.impact(), entry.cause(), entry.ledger(), entry.pulse(),
+						EnumSet.noneOf(ConcordanceEffects.Result.class));
 			} catch (RuntimeException problem) {
 				Jugcraft.LOGGER.error("Arcane Concordance: a pulse of an inscribed spell failed", problem);
 				continue;
@@ -330,24 +362,7 @@ public final class ComposedSpells {
 		return (int) LINGERING.stream().filter(entry -> entry.caster().equals(player)).count();
 	}
 
-	/**
-	 * After an inscribed spell took effect (Spell Engine's {@code COST_CONSUME}, once per cast): takes the Focus the
-	 * plan cost and sets its own cooldown. Returns false if there was nothing to settle.
-	 */
-	static boolean settle(ServerPlayer player, Holder<Spell> spell) {
-		Settlement settlement = PENDING.remove(player.getUUID());
-		if (settlement == null) {
-			return false;
-		}
-		if (!ConcordanceProgress.spendFocus(player, settlement.focus())) {
-			Jugcraft.LOGGER.warn("Arcane Concordance: {} completed an inscribed spell without the Focus for it", player.getName().getString());
-		}
-		((SpellCaster.Player) player).getCooldownManager().set(spell, settlement.cooldown());
-		return true;
-	}
-
 	private static void forget(UUID player) {
-		PENDING.remove(player);
 		LINGERING.removeIf(entry -> entry.caster().equals(player));
 	}
 }

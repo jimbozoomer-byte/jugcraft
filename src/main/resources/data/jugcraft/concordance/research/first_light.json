@@ -54,12 +54,21 @@
   "unlocks": {
     "understood": {
       "invocations": [
-        "jugcraft:kindle"
+        "jugcraft:kindle",
+        "jugcraft:aegis",
+        "jugcraft:revelation"
       ],
       "workings": [
         "jugcraft:kindle_lantern",
         "jugcraft:infuse_lantern",
         "jugcraft:channel_lantern"
+      ]
+    },
+    "mastered": {
+      "invocations": [
+        "jugcraft:lance",
+        "jugcraft:flashstep",
+        "jugcraft:lanternward"
       ]
     }
   }

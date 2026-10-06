@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Authored;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Compiler;
 import io.github.jimbozoomer.jugcraft.concordance.compose.CompositionParser;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Instrument;
@@ -14,6 +15,7 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Plan;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Slot;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
@@ -31,11 +33,13 @@ import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 /**
- * {@code /jugcraft concordance}: anyone can see their own research ({@code status}) and compose spells for the
+ * {@code /jugcraft concordance}: anyone can see their own research ({@code status}), compose spells for the
  * instrument in their main hand ({@code compose check|inscribe <spell>}, {@code compose show}, {@code compose clear}):
- * the composer every player has, which explains what a spell does and costs or exactly why it cannot work. Operators
+ * the composer every player has, which explains what a spell does and costs or exactly why it cannot work, and tune
+ * the invocations they know on that instrument ({@code tune}, {@code tune <invocation> <modifier>|clear}). Operators
  * (permission level 2) can see anyone's research, list the problems found in the loaded rules ({@code diagnose}), and
  * for testing and support set a research state ({@code grant}), forget a player's research ({@code reset}) or set their
  * Focus ({@code focus}).
@@ -66,6 +70,16 @@ public final class ConcordanceCommand {
 								.executes(context -> compose(context.getSource(), StringArgumentType.getString(context, "spell"), true))))
 						.then(Commands.literal("show").executes(context -> show(context.getSource())))
 						.then(Commands.literal("clear").executes(context -> clear(context.getSource()))))
+				.then(Commands.literal("tune")
+						.executes(context -> tunings(context.getSource()))
+						.then(Commands.argument("invocation", IdentifierArgument.id())
+								.suggests(ConcordanceCommand::suggestInvocations)
+								.then(Commands.literal("clear")
+										.executes(context -> tune(context.getSource(), IdentifierArgument.getId(context, "invocation").toString(), null)))
+								.then(Commands.argument("modifier", IdentifierArgument.id())
+										.suggests(ConcordanceCommand::suggestTunings)
+										.executes(context -> tune(context.getSource(), IdentifierArgument.getId(context, "invocation").toString(),
+												IdentifierArgument.getId(context, "modifier").toString())))))
 				.then(Commands.literal("diagnose").requires(ConcordanceCommand::isOperator)
 						.executes(context -> diagnose(context.getSource())))
 				.then(Commands.literal("grant").requires(ConcordanceCommand::isOperator)
@@ -207,6 +221,142 @@ public final class ConcordanceCommand {
 		held.remove(JugcraftConcordance.INSCRIPTION);
 		source.sendSuccess(() -> Component.translatable("compose.jugcraft.cleared"), false);
 		return 1;
+	}
+
+	/** Lists, for the instrument in hand, each invocation the player knows, its Focus and its tuning. */
+	private static int tunings(CommandSourceStack source) throws CommandSyntaxException {
+		ServerPlayer player = source.getPlayerOrException();
+		Instrument instrument = ComposedSpells.instrument(player);
+		if (instrument == null) {
+			source.sendFailure(Component.translatable("compose.jugcraft.problem.no_instrument"));
+			return 0;
+		}
+		ConcordanceRules rules = ConcordanceData.rules();
+		Knowledge knowledge = ConcordanceProgress.knowledge(player);
+		if (knowledge.invocations().isEmpty()) {
+			source.sendFailure(Component.translatable("message.jugcraft.concordance.no_invocations"));
+			return 0;
+		}
+		Tunings tunings = Invocations.tunings(player.getMainHandItem());
+		int shown = 0;
+		for (Map.Entry<String, Integer> known : knowledge.invocations().entrySet()) {
+			Definitions.Invocation invocation = rules.invocationForSpell(known.getKey());
+			Authored form = invocation == null ? null : rules.authored(invocation.id(), instrument.id());
+			if (form == null) {
+				continue;
+			}
+			Component name = Component.translatable(Invocations.nameKey(known.getKey()));
+			Tunings.Tuning tuning = tunings.get(known.getKey());
+			if (tuning != null && form.tunings().containsKey(tuning.modifier())) {
+				int cost = known.getValue() + form.tuningFocus(tuning.modifier());
+				source.sendSuccess(() -> Component.translatable("message.jugcraft.concordance.tune.list", name, cost,
+						ComposeText.name(Text.component(tuning.modifier()))), false);
+			} else {
+				source.sendSuccess(() -> Component.translatable("message.jugcraft.concordance.tune.list_untuned", name, known.getValue(),
+						names(invocation.tunings())), false);
+			}
+			shown++;
+		}
+		return shown;
+	}
+
+	/**
+	 * Tunes an invocation on the instrument in hand with one of the modifiers it offers ({@code modifier} null clears
+	 * it). The modifier must be one the invocation offers, one the player could use in a composition of their own, and
+	 * the tuned invocation must fit the instrument. The cast checks all of this again on the server, from its own rules.
+	 */
+	private static int tune(CommandSourceStack source, String invocationId, @Nullable String modifier) throws CommandSyntaxException {
+		ServerPlayer player = source.getPlayerOrException();
+		if (!JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
+			source.sendFailure(Component.translatable("message.jugcraft.concordance.disabled"));
+			return 0;
+		}
+		Instrument instrument = ComposedSpells.instrument(player);
+		if (instrument == null) {
+			source.sendFailure(Component.translatable("compose.jugcraft.problem.no_instrument"));
+			return 0;
+		}
+		if (!RateGate.allow(player, "compose", COMPOSE_RATE_TICKS)) {
+			source.sendFailure(Component.translatable("compose.jugcraft.problem.too_fast"));
+			return 0;
+		}
+		ConcordanceRules rules = ConcordanceData.rules();
+		Knowledge knowledge = ConcordanceProgress.knowledge(player);
+		Definitions.Invocation invocation = rules.invocation(invocationId);
+		int cost = invocation == null ? -1 : knowledge.invocationCost(invocation.spell());
+		if (invocation == null || cost < 0) {
+			source.sendFailure(Component.translatable("message.jugcraft.concordance.tune.unknown", invocationId));
+			return 0;
+		}
+		Component name = Component.translatable(Invocations.nameKey(invocation.spell()));
+		Authored form = rules.authored(invocation.id(), instrument.id());
+		if (form == null) {
+			source.sendFailure(Component.translatable("message.jugcraft.concordance.invocation.no_instrument", name));
+			return 0;
+		}
+		ItemStack held = player.getMainHandItem();
+		Tunings tunings = Invocations.tunings(held);
+		if (modifier == null) {
+			held.set(JugcraftConcordance.TUNINGS, tunings.with(invocation.spell(), null));
+			source.sendSuccess(() -> Component.translatable("message.jugcraft.concordance.tune.cleared", name, cost), false);
+			return cost;
+		}
+		Component modifierName = ComposeText.name(Text.component(modifier));
+		if (!invocation.tunings().contains(modifier)) {
+			source.sendFailure(Component.translatable("message.jugcraft.concordance.tune.not_offered", name, modifierName,
+					names(invocation.tunings())));
+			return 0;
+		}
+		if (!Invocations.mayUse(knowledge, rules, modifier)) {
+			source.sendFailure(Component.translatable("message.jugcraft.concordance.tune.unlearned", modifierName));
+			return 0;
+		}
+		Plan tuned = form.plan(modifier);
+		if (tuned == null) {
+			source.sendFailure(Component.translatable("message.jugcraft.concordance.tune.does_not_fit", name, modifierName));
+			return 0;
+		}
+		int extra = form.tuningFocus(modifier);
+		held.set(JugcraftConcordance.TUNINGS, tunings.with(invocation.spell(), new Tunings.Tuning(modifier, extra)));
+		source.sendSuccess(() -> Component.translatable("message.jugcraft.concordance.tune.set", name, modifierName, cost + extra), false);
+		for (Text line : tuned.explain(instrument)) {
+			source.sendSuccess(() -> Component.literal("- ").append(ComposeText.show(line)), false);
+		}
+		return cost + extra;
+	}
+
+	private static Component names(List<String> components) {
+		net.minecraft.network.chat.MutableComponent out = Component.empty();
+		for (int i = 0; i < components.size(); i++) {
+			if (i > 0) {
+				out.append(", ");
+			}
+			out.append(ComposeText.name(Text.component(components.get(i))));
+		}
+		return out;
+	}
+
+	/** Suggests the invocations this player knows, by id. */
+	private static CompletableFuture<Suggestions> suggestInvocations(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
+		if (context.getSource().getPlayer() instanceof ServerPlayer player) {
+			ConcordanceRules rules = ConcordanceData.rules();
+			for (String spell : ConcordanceProgress.knowledge(player).invocations().keySet()) {
+				Definitions.Invocation invocation = rules.invocationForSpell(spell);
+				if (invocation != null && !invocation.tunings().isEmpty()) {
+					builder.suggest(invocation.id());
+				}
+			}
+		}
+		return builder.buildFuture();
+	}
+
+	/** Suggests the modifiers the named invocation offers. */
+	private static CompletableFuture<Suggestions> suggestTunings(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
+		Definitions.Invocation invocation = ConcordanceData.rules().invocation(IdentifierArgument.getId(context, "invocation").toString());
+		if (invocation != null) {
+			invocation.tunings().forEach(builder::suggest);
+		}
+		return builder.buildFuture();
 	}
 
 	/** Suggests component names (and {@code then}) for the word being typed, after a space or a {@code +}. */

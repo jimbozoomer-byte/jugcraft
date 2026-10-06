@@ -231,25 +231,100 @@ RESEARCH = {
             ],
             "mastered": [{"type": "invoke", "invocation": f"{MOD}:kindle", "distinct_chunks": MASTERY_CHUNKS}],
         },
-        "unlocks": {"understood": {"invocations": [f"{MOD}:kindle"],
+        "unlocks": {"understood": {"invocations": [f"{MOD}:kindle", f"{MOD}:aegis", f"{MOD}:revelation"],
                                    "workings": [f"{MOD}:kindle_lantern", f"{MOD}:infuse_lantern",
-                                                f"{MOD}:channel_lantern"]}},
+                                                f"{MOD}:channel_lantern"]},
+                    "mastered": {"invocations": [f"{MOD}:lance", f"{MOD}:flashstep", f"{MOD}:lanternward"]}},
     },
 }
 
+# Authored invocations (roadmap step 10; Java: Definitions.Invocation, ConcordanceRules.compile, Invocations.java).
+# Each is a composition in the shared grammar, compiled by the same compiler under the same instrument limits as a
+# player's; its authored words (COMPONENTS with "authored") cannot be composed by players. "work" and "persists" are the
+# most work one cast spends and the most ticks anything it makes lasts, over every tuning (checked by the loader and
+# by tools/check_mod_data.py). "tunings" are the modifiers a player may join to it, one at a time. "cast" and
+# "cooldown" are seconds (Spell Engine's; Jugcraft raises the cooldown to the composition's own if that is longer).
+# "counter" is how an opponent or the world answers it, for the codex.
+INVOCATION_MAX_TUNINGS = 3  # Java: RulesParser.MAX_TUNINGS
+INVOCATION_SCALING_MAX = 2.0  # Java: RulesParser.MAX_SCALING (damage per point of Spell Power)
+# The vanilla particles invocations show on release (Spell Engine skips an unknown id, so a typo would show nothing).
+INVOCATION_PARTICLES = ("minecraft:end_rod", "minecraft:wax_on", "minecraft:glow", "minecraft:electric_spark",
+                        "minecraft:cloud")
+INVOCATION_ROLES = {
+    "damage": "Damage", "defense": "Defense", "movement": "Movement", "support": "Support",
+    "investigation": "Investigation", "utility": "Utility",
+}
 INVOCATIONS = {
     "kindle": {
-        "name": "Kindle",
-        "principle": "radiance",
-        "research": f"{MOD}:first_light",
-        "stage": "understood",
-        "focus": KINDLE_FOCUS,
-        "mastered_focus": KINDLE_MASTERED_FOCUS,
+        "name": "Kindle", "role": "utility", "composition": "ray struck kindle_light", "stage": "understood",
+        "focus": KINDLE_FOCUS, "mastered_focus": KINDLE_MASTERED_FOCUS, "tunings": ["extend"], "work": 3,
+        "persists": KINDLE_MOTE_STEPS * MOTE_STEP_TICKS, "cast": KINDLE_CAST_SECONDS, "cooldown": KINDLE_COOLDOWN_SECONDS,
+        "animation": ("kindle_cast", "kindle_release"), "sounds": ("concordance.kindle_gather", "concordance.kindle"),
+        "particle": "minecraft:end_rod", "icon": "minecraft:glowstone_dust",
         "description": f"Sets a mote of steady light in the open block where you look, up to {KINDLE_RANGE} blocks "
-                       f"away, for {KINDLE_MOTE_STEPS * MOTE_STEP_TICKS // 20} seconds. Costs {KINDLE_FOCUS} Focus "
-                       f"({KINDLE_MASTERED_FOCUS} once First Light is mastered).",
+                       f"away, for {KINDLE_MOTE_STEPS * MOTE_STEP_TICKS // 20} seconds.",
+        "counter": "The mote lights only open air you may build in, goes out on its own, and a block placed in its "
+                   "space replaces it.",
+        "fizzle": f"Nothing there to light: Kindle needs open air within %s blocks",
+    },
+    "aegis": {
+        "name": "Dawn Aegis", "role": "defense", "composition": "here struck dawn_aegis", "stage": "understood",
+        "focus": 5, "mastered_focus": 4, "tunings": ["prolong", "intensify"], "work": 1, "persists": 400,
+        "cast": 0.4, "cooldown": 12.0,
+        "animation": ("aegis_cast", "aegis_release"), "sounds": ("concordance.kindle_gather", "concordance.aegis"),
+        "particle": "minecraft:wax_on", "icon": "minecraft:shield",
+        "description": "Wraps you in a shell of dawn light that absorbs the next blows.",
+        "counter": "A burst of damage breaks the shell, it fades after 10 seconds, and the cooldown leaves two "
+                   "seconds bare; it does not stack with itself.",
+        "fizzle": "The light finds nothing to shield",
+    },
+    "revelation": {
+        "name": "Revelation", "role": "investigation", "composition": "here survey reveal", "stage": "understood",
+        "focus": 3, "mastered_focus": 2, "tunings": ["prolong"], "work": 6, "persists": 400,
+        "cast": 0.8, "cooldown": 8.0,
+        "animation": ("reveal_cast", "reveal_release"), "sounds": ("concordance.kindle_gather", "concordance.revelation"),
+        "particle": "minecraft:glow", "icon": "minecraft:spyglass",
+        "description": "Makes the creatures round you glow, seen through walls.",
+        "counter": "Milk clears the glow, it reaches only 6 blocks, and it never reveals your party or players you "
+                   "may not harm.",
+        "fizzle": "Nothing hides nearby",
+    },
+    "lance": {
+        "name": "Lance of Dawn", "role": "damage", "composition": "ray struck lance_beam", "stage": "mastered",
+        "focus": 5, "mastered_focus": 4, "tunings": ["extend", "intensify"], "work": 2, "persists": 0,
+        "cast": 0.5, "cooldown": 2.0,
+        "animation": ("lance_cast", "lance_release"), "sounds": ("concordance.kindle_gather", "concordance.lance"),
+        "particle": "minecraft:electric_spark", "icon": "minecraft:spectral_arrow",
+        "description": "A narrow beam of light: arcane damage to the first creature it meets, stronger with arcane "
+                       "Spell Power.",
+        "counter": "It needs a clear line, strikes one target and telegraphs a half-second cast; magic resistance "
+                   "reduces it, though armour and shields do not.",
+        "fizzle": "The beam meets nothing to strike",
+    },
+    "flashstep": {
+        "name": "Flashstep", "role": "movement", "composition": "here struck flash", "stage": "mastered",
+        "focus": 4, "mastered_focus": 3, "tunings": ["intensify"], "work": 1, "persists": 0,
+        "cast": 0.0, "cooldown": 4.0,
+        "animation": (None, "flash_release"), "sounds": (None, "concordance.flash"),
+        "particle": "minecraft:cloud", "icon": "minecraft:feather",
+        "description": "Carries you a few blocks the way you face, in a flash.",
+        "counter": "Walls stop it, knockback resistance shortens it, and it cannot be used again for 4 seconds.",
+        "fizzle": "Something holds you in place",
+    },
+    "lanternward": {
+        "name": "Lanternward", "role": "support", "composition": "here allies mend ward", "stage": "mastered",
+        "focus": 7, "mastered_focus": 6, "tunings": ["widen", "prolong"], "work": 8, "persists": 400,
+        "cast": 1.0, "cooldown": 15.0,
+        "animation": ("ward_cast", "ward_release"), "sounds": ("concordance.kindle_gather", "concordance.lanternward"),
+        "particle": "minecraft:end_rod", "icon": f"{MOD}:kindled_lantern",
+        "description": "Mends you and the members of your party round you, and wards them with light.",
+        "counter": "Allies must stand within 4 blocks, only your party is reached, and the one-second cast can be "
+                   "interrupted.",
+        "fizzle": "No one nearby needs the light",
     },
 }
+for _key, _invocation in INVOCATIONS.items():
+    _invocation.update({"principle": "radiance", "research": f"{MOD}:first_light"})
 
 WORKINGS = {
     "kindle_lantern": {"type": "craft", "work": "minecraft:lantern", "specimen": "minecraft:amethyst_shard",
@@ -366,9 +441,35 @@ COMPONENTS = {
               "termination": {"pulses": 3, "interval": 20}, "name": "Pulse",
               "text": "Acts three times, a second apart, where it first landed. Its operations cost Focus for "
                       "each time."},
+    "allies": {"slot": "selection", "requires": _MASTERED, "capacity": 2, "focus": 2,
+               "selection": {"pick": "allies", "radius": 4, "targets": 4}, "name": "Allies",
+               "text": "Acts on you and the members of your party nearest to where the spell lands. Only helpful "
+                       "operations may choose allies."},
+    # Authored words: invocations are written with these, and players cannot compose with them (roadmap step 10).
+    "kindle_light": {"slot": "operation", "requires": _UNDERSTOOD, "authored": True, "capacity": 1, "focus": 3,
+                     "operation": {"effect": "illumination", "intent": "helpful", "principle": "radiance",
+                                   "duration": KINDLE_MOTE_STEPS * MOTE_STEP_TICKS},
+                     "name": "Kindled Light", "text": "Kindle's mote: steady light for a minute."},
+    "dawn_aegis": {"slot": "operation", "requires": _UNDERSTOOD, "authored": True, "capacity": 2, "focus": 5,
+                   "operation": {"effect": "protection", "intent": "helpful", "principle": "radiance", "magnitude": 8,
+                                 "duration": 200},
+                   "name": "Dawn Aegis", "text": "Dawn Aegis's shell of light (Absorption)."},
+    "survey": {"slot": "selection", "requires": _UNDERSTOOD, "authored": True, "capacity": 2, "focus": 2,
+               "selection": {"pick": "creatures", "radius": 6, "targets": 6}, "name": "Survey",
+               "text": "Revelation's sweep: the creatures nearest to you."},
+    "lance_beam": {"slot": "operation", "requires": _MASTERED, "authored": True, "capacity": 2, "focus": 4,
+                   "operation": {"effect": "damage", "intent": "harmful", "principle": "radiance", "magnitude": 5,
+                                 "school": "spell_power:arcane", "scaling": 0.5},
+                   "name": "Lance", "text": "The Lance's beam: arcane damage that grows with arcane Spell Power."},
+    "flash": {"slot": "operation", "requires": _MASTERED, "authored": True, "capacity": 2, "focus": 4,
+              "operation": {"effect": "movement", "intent": "helpful", "principle": "radiance", "magnitude": 12},
+              "name": "Flash", "text": "Flashstep's push: forward, the way you face."},
+    "mend": {"slot": "operation", "requires": _MASTERED, "authored": True, "capacity": 2, "focus": 2,
+             "operation": {"effect": "restoration", "intent": "helpful", "principle": "radiance", "magnitude": 4},
+             "name": "Mend", "text": "Lanternward's healing light."},
 }
-COMPONENT_DATA_KEYS = ("slot", "requires", "capacity", "focus", "delivery", "selection", "operation", "modifier",
-                       "termination")
+COMPONENT_DATA_KEYS = ("slot", "requires", "authored", "capacity", "focus", "delivery", "selection", "operation",
+                       "modifier", "termination")
 for _component in COMPONENTS.values():
     _operation = _component.get("operation")
     if _operation and _operation["effect"] == "damage":
@@ -413,6 +514,160 @@ def composition_cost(text):
     cooldown = max(min(COMPOSE_LIMITS["MIN_COOLDOWN"] + 5 * focus, COMPOSE_LIMITS["MAX_COOLDOWN"]),
                    linger + COMPOSE_LIMITS["MIN_COOLDOWN"])
     return {"focus": focus, "capacity": capacity, "targets": targets, "work": work, "cooldown": cooldown}
+
+
+ASPECT_SLOTS = {"magnitude": "operation", "duration": "operation", "radius": "selection", "range": "delivery"}
+MAGNITUDE_EFFECTS = ("damage", "restoration", "movement", "status", "protection")
+
+
+def _changes(aspect, part):
+    """Whether a modifier of this aspect changes this component (Java: Compiler.changes)."""
+    if part["slot"] != ASPECT_SLOTS[aspect]:
+        return False
+    if aspect == "magnitude":
+        return part["operation"]["effect"] in MAGNITUDE_EFFECTS
+    if aspect == "duration":
+        return part["operation"].get("duration", 0) > 0
+    if aspect == "radius":
+        return part["selection"]["radius"] > 0
+    return part["delivery"]["range"] > 0
+
+
+def tuned_text(text, modifier):
+    """The composition with a tuning's modifier joined to the first word it changes (Java: Compiler.tune)."""
+    aspect = COMPONENTS[modifier]["modifier"]["aspect"]
+    levels = [level.split() for level in text.split(" then ")]
+    for words in levels:
+        for i, word in enumerate(words):
+            names = word.split("+")
+            room = len(names) - 1 < COMPOSE_LIMITS["MAX_MODIFIERS"]
+            if _changes(aspect, COMPONENTS[names[0]]) and modifier not in names[1:] and room:
+                words[i] = word + "+" + modifier
+                return " then ".join(" ".join(w) for w in levels)
+    return None
+
+
+def form_numbers(text):
+    """What a (single-level) composition does, with its modifiers applied: reach, radius, and each operation's
+    strength and time, as Java's Compiler works them out."""
+    out = {"range": 0, "radius": 0, "targets": 1, "operations": []}
+    for word in text.split():
+        names = word.split("+")
+        part, mods = COMPONENTS[names[0]], [COMPONENTS[n]["modifier"] for n in names[1:]]
+        if part["slot"] == "delivery":
+            out["range"] = part["delivery"]["range"] + sum(m["amount"] for m in mods if m["aspect"] == "range")
+        elif part["slot"] == "selection":
+            out["radius"] = part["selection"]["radius"] + sum(m["amount"] for m in mods if m["aspect"] == "radius")
+            out["targets"] = part["selection"]["targets"]
+        elif part["slot"] == "operation":
+            op = part["operation"]
+            magnitude, duration = op.get("magnitude", 0), op.get("duration", 0)
+            for m in mods:
+                if m["aspect"] == "magnitude":
+                    magnitude += max(1, op.get("magnitude", 0) * m["amount"] // 100)
+                elif m["aspect"] == "duration":
+                    duration += op.get("duration", 0) * m["amount"] // 100
+            out["operations"].append({"name": names[0], "effect": op["effect"], "magnitude": magnitude,
+                                      "duration": duration, "scaling": op.get("scaling", 0)})
+    return out
+
+
+def invocation_forms(key):
+    """An invocation untuned (None) and with each tuning: {tuning: (text, cost, numbers)}."""
+    info = INVOCATIONS[key]
+    forms = {None: (info["composition"], composition_cost(info["composition"]), form_numbers(info["composition"]))}
+    for tuning in info["tunings"]:
+        is_modifier = COMPONENTS.get(tuning, {}).get("slot") == "modifier"
+        text = tuned_text(info["composition"], tuning) if is_modifier else None
+        # A tuning that is not a modifier or changes nothing has no form (tools/check_mod_data.py reports it).
+        forms[tuning] = (text, composition_cost(text), form_numbers(text)) if text else (None, None, None)
+    return forms
+
+
+def persistence(numbers):
+    """The most ticks anything a single-level form makes lasts (Java: Plan.persists)."""
+    return max([op["duration"] for op in numbers["operations"]] + [0])
+
+
+def operation_summary(op):
+    """One operation's effect in the codex's words."""
+    effect = op["effect"]
+    if effect == "damage":
+        scaled = f" (+{op['scaling']} per point of arcane Spell Power)" if op["scaling"] else ""
+        return f"{op['magnitude']} arcane damage{scaled}"
+    if effect == "restoration":
+        return f"restores {op['magnitude']} health"
+    if effect == "protection":
+        return f"absorbs up to {4 * max(1, (op['magnitude'] + 3) // 4)} damage for {seconds(op['duration'])} seconds"
+    if effect == "movement":
+        return f"a push of {op['magnitude'] / 10} blocks a tick"
+    if effect == "detection":
+        return f"glowing for {seconds(op['duration'])} seconds"
+    if effect == "illumination":
+        return f"light for {seconds(op['duration'])} seconds"
+    return effect
+
+
+def invocation_codex():
+    """The Invocations category: an overview and one entry per invocation, from INVOCATIONS and the same compiled
+    numbers the server runs."""
+    entries = {
+        ("invocations", "overview"): {
+            "name": "Invocations", "x": 0, "y": 0, "icon": f"{MOD}:initiate_wand", "condition": "understood",
+            "description": "Spells the Lampwrights wrote down",
+            "pages": [
+                ("text", "Invocations",
+                 "An invocation is a spell someone wrote before you, in the same words you compose with and under "
+                 "the same limits. You learn it from research, not from an item: an instrument only lets you cast "
+                 "what you have learned. Each has one **role**: damage, defense, movement, support, investigation "
+                 "or utility."),
+                ("text", "Tuning",
+                 "An invocation can be **tuned** with one modifier from the short list it allows, if you could use "
+                 "that modifier yourself. Tuning changes its numbers, never what it does, and costs that modifier's "
+                 "Focus with every cast. Type `/jugcraft concordance tune` with an instrument in hand to see your "
+                 "tunings, `tune <invocation> <modifier>` to set one and `tune <invocation> clear` to remove it."),
+            ],
+        },
+    }
+    positions = {"understood": [(2, 0), (2, 2), (0, 2)], "mastered": [(4, 0), (4, 2), (4, 4)]}
+    for key, info in INVOCATIONS.items():
+        x, y = positions[info["stage"]].pop(0)
+        forms = invocation_forms(key)
+        text, cost, numbers = forms[None]
+        reach = f"Reach {numbers['range']} blocks. " if numbers["range"] else ""
+        if numbers["radius"]:
+            reach += f"Up to {numbers['targets']} within {numbers['radius']} blocks. "
+        effects = "; ".join(operation_summary(op) for op in numbers["operations"])
+        cast = f"cast {info['cast']:g} seconds" if info["cast"] else "instant"
+        stats = (f"**{INVOCATION_ROLES[info['role']]}.** {reach}{effects[0].upper() + effects[1:]}.\\\n\\\n"
+                 f"{info['focus']} Focus ({info['mastered_focus']} once First Light is mastered), {cast}, cooldown "
+                 f"{info['cooldown']:g} seconds.")
+        tunings = []
+        for tuning in info["tunings"]:
+            t_text, t_cost, t_numbers = forms[tuning]
+            if t_text is None:
+                continue
+            extra = t_cost["focus"] - cost["focus"]
+            aspect = COMPONENTS[tuning]["modifier"]["aspect"]
+            if aspect == "range":
+                what = f"reach {t_numbers['range']} blocks"
+            elif aspect == "radius":
+                what = f"{t_numbers['radius']} blocks round"
+            else:
+                what = "; ".join(operation_summary(op) for op in t_numbers["operations"])
+            tunings.append(f"- **{COMPONENTS[tuning]['name']}**: {what} (+{extra} Focus)")
+        learned = ("Learned when First Light is understood." if info["stage"] == "understood"
+                   else "Learned when First Light is mastered.")
+        entries[("invocations", key)] = {
+            "name": info["name"], "x": x, "y": y, "icon": info["icon"], "condition": info["stage"],
+            "description": f"{INVOCATION_ROLES[info['role']]}: {info['description']}",
+            "pages": [
+                ("text", info["name"], f"{info['description']}\\\n\\\n{stats} {learned}"),
+                ("text", "Tuning and Counters",
+                 "Tunings:\\\n" + "\\\n".join(tunings) + f"\\\n\\\n**Counter.** {info['counter']}"),
+            ],
+        }
+    return entries
 
 
 for _working in WORKINGS.values():
@@ -556,10 +811,12 @@ def codex():
                  f"study a specimen at a **Lampwright's Bench**, examine {FIELD_SPECIMENS} different specimens in "
                  f"darkness, or read **Research Notes** from someone who has understood it.", "observed"),
                 ("text", "Understood",
-                 f"Radiance can be gathered and set loose. You can now cast **Kindle** with an instrument, and kindle, "
-                 f"infuse and channel lanterns at a Lampwright's Bench.\\\n\\\nTo **master** First Light, Kindle "
-                 f"light in {MASTERY_CHUNKS} different chunks.", "understood"),
-                ("text", "Mastered", f"Kindle now costs {KINDLE_MASTERED_FOCUS} Focus instead of {KINDLE_FOCUS}.",
+                 f"Radiance can be gathered and set loose. You can now cast **Kindle**, **Dawn Aegis** and "
+                 f"**Revelation** with an instrument, and kindle, infuse and channel lanterns at a Lampwright's "
+                 f"Bench.\\\n\\\nTo **master** First Light, Kindle light in {MASTERY_CHUNKS} different chunks.",
+                 "understood"),
+                ("text", "Mastered", "You can now cast **Lance of Dawn**, **Flashstep** and **Lanternward**, and "
+                                     "every First Light invocation costs less Focus (see Invocations).",
                  "mastered"),
             ],
         },
@@ -580,15 +837,6 @@ def codex():
                  f"Lantern with {LANTERN_START} Radiance. **Infuse** adds a specimen's Radiance to a Kindled "
                  f"Lantern, up to {LANTERN_CAPACITY}; a specimen that would overfill it is refused. **Channel** "
                  f"spends {CHANNEL_FOCUS} Focus for {CHANNEL_RADIANCE} Radiance.\\\n\\\n" + specimen_table()),
-            ],
-        },
-        ("radiance", "kindle"): {
-            "name": "Kindle", "x": 0, "y": 2, "icon": "minecraft:glowstone_dust", "condition": "understood",
-            "description": "The illumination invocation",
-            "pages": [
-                ("text", "Kindle",
-                 f"{INVOCATIONS['kindle']['description']}\\\n\\\nThe mote lights only open air you may build in. "
-                 f"It cannot be picked up and it goes out on its own; a block placed in its space replaces it."),
             ],
         },
         ("radiance", "lumen_sconce"): {
@@ -618,6 +866,7 @@ def codex():
             ],
         },
         **composition_codex(),
+        **invocation_codex(),
     }
 
 
@@ -630,13 +879,18 @@ def component_numbers(info):
         sel = info["selection"]
         if sel["pick"] == "struck":
             return "One target."
-        what = "creatures" if sel["pick"] == "creatures" else "blocks"
+        what = {"creatures": "creatures", "blocks": "blocks", "allies": "of you and your party"}[sel["pick"]]
         return f"Up to {sel['targets']} {what} within {sel['radius']} blocks."
     if "operation" in info:
         op = info["operation"]
         effect = op["effect"]
         if effect == "damage":
-            return f"{op['magnitude']} damage."
+            scaling = f", and {op['scaling']} more per point of Spell Power" if op.get("scaling") else ""
+            return f"{op['magnitude']} damage{scaling}."
+        if effect == "restoration":
+            return f"Restores {op['magnitude']} health."
+        if effect == "movement":
+            return f"A push of {op['magnitude'] / 10} blocks a tick."
         if effect == "protection":
             amplifier = max(0, (op["magnitude"] + 3) // 4 - 1)
             return f"Absorbs up to {4 * (amplifier + 1)} damage for {seconds(op['duration'])} seconds."
@@ -693,7 +947,7 @@ def composition_codex():
     for slot, (key, name, description, x, y, icon) in SLOT_ENTRIES.items():
         pages = []
         for component, info in COMPONENTS.items():
-            if info["slot"] != slot:
+            if info["slot"] != slot or info.get("authored"):
                 continue
             needs = f"Needs First Light {info['requires']['state']}. Capacity {info['capacity']}, Focus {info['focus']}."
             pages.append(("text", info["name"], f"`{component}`: {info['text']}\\\n\\\n{component_numbers(info)} {needs}"))
@@ -709,9 +963,11 @@ CATEGORIES = {
                  "description": "The Lampwrights' practice"},
     "composition": {"name": "Composition", "icon": "minecraft:writable_book", "sort": 2,
                     "description": "Writing spells of your own"},
+    "invocations": {"name": "Invocations", "icon": f"{MOD}:initiate_wand", "sort": 3,
+                    "description": "Spells the Lampwrights wrote down, and how to answer them"},
 }
 
-ENTRY_BACKGROUNDS = {None: "square_gray", "understood": "hexagon_purple"}
+ENTRY_BACKGROUNDS = {None: "square_gray", "understood": "hexagon_purple", "mastered": "hexagon_gold"}
 
 # ------------------------------------------------------------------------------------------------- data generation
 
@@ -729,27 +985,46 @@ def research_json(key, info):
 
 def invocation_json(key, info):
     return {"schema": SCHEMA, "spell": rid(key), "principle": info["principle"], "research": info["research"],
-            "stage": info["stage"], "focus": info["focus"], "mastered_focus": info["mastered_focus"]}
+            "stage": info["stage"], "focus": info["focus"], "mastered_focus": info["mastered_focus"],
+            "role": info["role"], "composition": info["composition"], "tunings": [rid(t) for t in info["tunings"]],
+            "work": info["work"], "persists": info["persists"]}
+
+
+def invocation_range(info):
+    """The reach of an invocation's delivery, before tunings (0 for one that lands where you stand)."""
+    return COMPONENTS[info["composition"].split()[0]]["delivery"]["range"]
 
 
 def spell_json(key):
-    """Kindle as a Spell Engine spell. Spell Engine owns the cast timeline, the cooldown and the animations; Jugcraft's
-    CASTING_ATTEMPT listener gates it (instrument, research, Focus), its CUSTOM impact places the light, and Focus is
-    spent once, in COST_CONSUME, after a successful cast (docs/ARCANE_CONCORDANCE.md, "One authority per cast")."""
+    """An invocation as a Spell Engine spell. Spell Engine owns the cast timeline, the gestures, the release sound and
+    particles and its cooldown; Jugcraft's CASTING_ATTEMPT listener gates it (instrument, research, Focus), the CUSTOM
+    impact jugcraft:invocation runs the invocation's compiled composition on the server, and Focus is spent once, in
+    COST_CONSUME, after a cast that took effect (docs/ARCANE_CONCORDANCE.md, "One authority per cast")."""
+    info = INVOCATIONS[key]
+    cast_animation, release_animation = info["animation"]
+    start_sound, release_sound = info["sounds"]
+    cast = {"duration": info["cast"]}
+    if cast_animation:
+        cast["animation"] = {"id": rid(cast_animation)}
+    if start_sound:
+        cast["start_sound"] = {"id": rid(start_sound)}
+    particles = [{"id": info["particle"], "appearance": {},
+                  "batch": {"count": 12.0, "shape": "SPHERE", "anchor": "ENTITY", "vertical_origin": 0.6,
+                            "min_speed": 0.05, "max_speed": 0.15}}]
     return {
         "school": "spell_power:arcane",
-        "range": float(KINDLE_RANGE),
+        "range": float(invocation_range(info)),
         "tier": 1,
         "group": "concordance",
         "type": "ACTIVE",
-        "active": {"cast": {"duration": KINDLE_CAST_SECONDS, "animation": {"id": rid("kindle_cast")},
-                            "start_sound": {"id": rid("concordance.kindle_gather")}}},
-        "release": {"animation": {"id": rid("kindle_release")}, "sound": {"id": rid("concordance.kindle")}},
+        "active": {"cast": cast},
+        "release": {"animation": {"id": rid(release_animation)}, "visuals": {"particles": particles},
+                    "sound": {"id": rid(release_sound)}},
         "target": {"type": "CASTER"},
         "deliver": {"type": "DIRECT"},
-        "impacts": [{"action": {"type": "CUSTOM", "custom": {"handler": rid("kindle_light"), "intent": "HELPFUL"}}}],
+        "impacts": [{"action": {"type": "CUSTOM", "custom": {"handler": rid("invocation"), "intent": "HELPFUL"}}}],
         "cost": {"exhaust": 0.0, "durability": 0,
-                 "cooldown": {"duration": KINDLE_COOLDOWN_SECONDS, "hosting_item": False}},
+                 "cooldown": {"duration": info["cooldown"], "hosting_item": False}},
     }
 
 
@@ -800,8 +1075,56 @@ def player_animations():
                (0, "rightArm", "roll", 0.10), (3, "rightArm", "roll", 0.28), (8, "rightArm", "roll", 0.10),
                (0, "leftArm", "pitch", -1.10), (3, "leftArm", "pitch", -0.55), (8, "leftArm", "pitch", -0.30),
                (0, "head", "pitch", 0.0), (3, "head", "pitch", -0.12), (8, "head", "pitch", 0.0)]
-    return {"kindle_cast": clip("kindle_cast", True, 0, 20, 24, cast),
-            "kindle_release": clip("kindle_release", False, 0, 8, 12, release)}
+    clips = {"kindle_cast": clip("kindle_cast", True, 0, 20, 24, cast),
+             "kindle_release": clip("kindle_release", False, 0, 8, 12, release)}
+
+    def both(tick, pitch, yaw, roll):
+        """Both arms, mirrored."""
+        return [(tick, "rightArm", "pitch", pitch), (tick, "rightArm", "yaw", -yaw), (tick, "rightArm", "roll", roll),
+                (tick, "leftArm", "pitch", pitch), (tick, "leftArm", "yaw", yaw), (tick, "leftArm", "roll", -roll)]
+    # Lance, drawing: the casting arm cocked back at the shoulder, the other hand forward to sight along.
+    lance_cast = []
+    for tick, draw in ((0, -0.40), (10, -0.15), (20, -0.40)):
+        lance_cast += [(tick, "rightArm", "pitch", draw), (tick, "rightArm", "yaw", 0.35), (tick, "rightArm", "roll", 0.20),
+                       (tick, "leftArm", "pitch", -1.45), (tick, "leftArm", "yaw", 0.10)]
+    # Lance, release: the arm thrusts straight out along the line of the beam and holds a moment.
+    lance_release = [(0, "rightArm", "pitch", -0.40), (2, "rightArm", "pitch", -1.62), (9, "rightArm", "pitch", -1.40),
+                     (0, "rightArm", "yaw", 0.35), (2, "rightArm", "yaw", -0.05), (9, "rightArm", "yaw", 0.0),
+                     (0, "leftArm", "pitch", -1.45), (2, "leftArm", "pitch", -0.20), (9, "leftArm", "pitch", -0.10)]
+    # Dawn Aegis, gathering: forearms crossed before the chest.
+    aegis_cast = []
+    for tick, pitch in ((0, -1.30), (10, -1.45), (20, -1.30)):
+        aegis_cast += both(tick, pitch, -0.55, 0.0)
+    # Dawn Aegis, release: the crossed arms fling wide and down, opening the shell.
+    aegis_release = both(0, -1.30, -0.55, 0.0) + both(3, -1.10, 0.55, 0.70) + both(9, -0.30, 0.20, 0.25)
+    # Revelation, gathering: a hand shading the eyes, the head turning slowly.
+    reveal_cast = []
+    for tick, turn in ((0, -0.35), (10, 0.35), (20, -0.35)):
+        reveal_cast += [(tick, "rightArm", "pitch", -2.45), (tick, "rightArm", "yaw", -0.55), (tick, "head", "yaw", turn)]
+    # Revelation, release: the hand sweeps out flat across the view.
+    reveal_release = [(0, "rightArm", "pitch", -2.45), (4, "rightArm", "pitch", -1.55), (10, "rightArm", "pitch", -1.40),
+                      (0, "rightArm", "yaw", -0.55), (4, "rightArm", "yaw", 0.20), (10, "rightArm", "yaw", 0.75),
+                      (0, "head", "yaw", 0.0)]
+    # Flashstep, release (no cast): both arms swept back as the body is carried forward.
+    flash_release = both(0, 0.0, 0.0, 0.0) + both(2, 0.95, 0.15, 0.25) + both(8, 0.15, 0.0, 0.05)
+    # Lanternward, gathering: both hands raised high, as if lifting a lantern for others to see by.
+    ward_cast = []
+    for tick, lift in ((0, -2.55), (10, -2.75), (20, -2.55)):
+        ward_cast += both(tick, lift, 0.10, 0.15)
+    # Lanternward, release: the arms open and lower outward, spreading the light.
+    ward_release = both(0, -2.55, 0.10, 0.15) + both(4, -1.60, 0.40, 0.85) + both(10, -0.40, 0.15, 0.30)
+    clips.update({
+        "lance_cast": clip("lance_cast", True, 0, 20, 24, lance_cast),
+        "lance_release": clip("lance_release", False, 0, 9, 13, lance_release),
+        "aegis_cast": clip("aegis_cast", True, 0, 20, 24, aegis_cast),
+        "aegis_release": clip("aegis_release", False, 0, 9, 13, aegis_release),
+        "reveal_cast": clip("reveal_cast", True, 0, 20, 24, reveal_cast),
+        "reveal_release": clip("reveal_release", False, 0, 10, 14, reveal_release),
+        "flash_release": clip("flash_release", False, 0, 8, 12, flash_release),
+        "ward_cast": clip("ward_cast", True, 0, 20, 24, ward_cast),
+        "ward_release": clip("ward_release", False, 0, 10, 14, ward_release),
+    })
+    return clips
 
 
 def book_json():
@@ -938,6 +1261,11 @@ SOUND_EVENTS = {
     "concordance.study_complete": "Study completes",
     "concordance.lantern_ignite": "Lantern kindles",
     "concordance.lantern_snuff": "Lantern goes out",
+    "concordance.aegis": "Shell of light forms",
+    "concordance.revelation": "Hidden things shine",
+    "concordance.lance": "Beam of light strikes",
+    "concordance.flash": "Flash of movement",
+    "concordance.lanternward": "Warding light spreads",
 }
 
 
@@ -955,8 +1283,16 @@ MESSAGES = {
     "research.observed": "Research: %s observed",
     "research.understood": "Research: %s understood",
     "research.mastered": "Research: %s mastered",
-    "kindle.no_space": "Nothing there to light: Kindle needs open air within %s blocks",
-    "kindle.not_allowed": "You may not change that block",
+    "invocation.not_allowed": "You may not change that block",
+    "invocation.no_instrument": "%s does not fit this instrument",
+    "tune.set": "%s is tuned with %s: %s Focus a cast",
+    "tune.cleared": "%s is no longer tuned: %s Focus a cast",
+    "tune.unknown": "You know no invocation called %s",
+    "tune.not_offered": "%s cannot be tuned with %s; it takes %s",
+    "tune.unlearned": "You have not learned %s yet",
+    "tune.does_not_fit": "%s with %s does not fit this instrument",
+    "tune.list": "%s: %s Focus, tuned with %s",
+    "tune.list_untuned": "%s: %s Focus, untuned (takes %s)",
     "focus": "Focus %s / %s",
     "lantern.empty": "The lantern has no Radiance left",
     "lantern.lit": "Lantern lit: %s Radiance",
@@ -1052,6 +1388,8 @@ COMPOSE_TEXT = {
     "problem.radius": "%s would spread %s blocks; no spell spreads beyond %s",
     "problem.selection": "%s acts on %s, which %s does not choose",
     "problem.harms_caster": "%s would harm you: here and struck reach only yourself",
+    "problem.harms_allies": "%s would harm your allies: %s chooses only you and your party",
+    "problem.authored": "%s belongs to an invocation and cannot be composed",
     "problem.magnitude": "%s would be %s strong; the most is %s",
     "problem.duration": "%s would last %s seconds; the %s allows %s",
     "problem.capacity": "This spell needs %s capacity; the %s holds %s",
@@ -1069,9 +1407,12 @@ COMPOSE_TEXT = {
     "explain.selection.struck": "%s: acts on the one thing it reached",
     "explain.selection.creatures": "%s: acts on up to %s creatures within %s blocks (never you, if harmful)",
     "explain.selection.blocks": "%s: acts on up to %s blocks within %s blocks",
+    "explain.selection.allies": "%s: acts on you and up to %s of your party within %s blocks",
+    "explain.scaling": "%s: %s more damage for each point of its school's Spell Power",
     "explain.operation.damage": "%s: deals %s damage",
     "explain.operation.restoration": "%s: restores %s health",
-    "explain.operation.movement": "%s: pushes away at %s blocks a tick",
+    "explain.operation.movement": "%s: pushes at %s blocks a tick, away from where the spell came (forward, if it "
+                                  "came from where its target stands)",
     "explain.operation.illumination": "%s: sets light for %s seconds",
     "explain.operation.status": "%s: %s, level %s, for %s seconds",
     "explain.operation.interaction": "%s: uses the block as you would",
@@ -1122,7 +1463,13 @@ def lang_entries(lang):
     lang[f"container.{MOD}.lampwright_bench"] = BLOCKS["lampwright_bench"]["name"]
     for key, info in INVOCATIONS.items():
         lang[f"spell.{MOD}.{key}.name"] = info["name"]
-        lang[f"spell.{MOD}.{key}.description"] = info["description"]
+        lang[f"spell.{MOD}.{key}.description"] = (f"{INVOCATION_ROLES[info['role']]}. {info['description']} "
+                                                  f"Costs {info['focus']} Focus ({info['mastered_focus']} once First "
+                                                  f"Light is mastered).")
+        lang[f"message.{MOD}.concordance.fizzle.{key}"] = info["fizzle"]
+    for key, name in INVOCATION_ROLES.items():
+        lang[f"role.{MOD}.{key}"] = name
+    lang[f"tooltip.{MOD}.concordance.tuning"] = "%s: tuned with %s"
     for key, info in RESEARCH.items():
         lang[f"research.{MOD}.{key}"] = info["name"]
     for key, info in PRINCIPLES.items():

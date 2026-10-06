@@ -7,8 +7,10 @@ traced or copied from another game or mod. The style follows docs/ART_DIRECTION.
   other high-detail items. The wand lies on the held-item diagonal (grip bottom left, crystal top right) and is early
   tier: turned dark wood, copper and brass, not dieselpunk. The two lanterns share every shape, so they read as one
   item; only the glass, the crystal wick and the light on the cage change;
-- the codex (the Arcane Concordance book) and the Kindle spell icon are 32x32 pixel art: flat fills from four or five
-  shades a material, lit from the top left, a dark outline;
+- the codex (the Arcane Concordance book) and the spell icons (Kindle, the inscribed spell, and the step 10
+  invocations: Dawn Aegis, Revelation, Lance of Dawn, Flashstep and Lanternward) are 32x32 pixel art: flat fills from
+  four or five shades a material, lit from the top left, a dark outline. The spell icons share one round violet
+  ground and each shows its role at a glance (a shell, an eye, a beam, chevrons, a lantern in a ring);
 - the Lampwright's Bench faces are opaque block textures: an oak desk top in planks with a brass inlay (32x32), darker
   oak for its legs and apron (32x32), polished brass with a bevel (16x16) and the lens, violet glass in a brass rim
   (16x16), which is also the Kindled mote's particle.
@@ -419,6 +421,146 @@ def composed_icon():
     return img
 
 
+def _spell_ground(img):
+    """The round dark violet ground every Concordance spell icon shares, with its rim glint top left."""
+    _disc(img, 16, 16, 15.6, SPELL_BG[0])
+    _disc(img, 16, 16, 14.6, SPELL_BG[1])
+    _disc(img, 15.4, 15.4, 13.4, SPELL_BG[2])
+    for x, y in ((7, 6), (6, 7), (8, 5)):
+        cm.put(img, x, y, SPELL_BG[3])
+
+
+def _line(img, a, b, colour, width=1):
+    """A straight line of square pixels from a to b, width pixels thick across x."""
+    steps = max(abs(b[0] - a[0]), abs(b[1] - a[1]), 1)
+    for i in range(steps + 1):
+        x = round(a[0] + (b[0] - a[0]) * i / steps)
+        y = round(a[1] + (b[1] - a[1]) * i / steps)
+        for w in range(width):
+            cm.put(img, x + w, y, colour)
+
+
+def _ring(img, cx, cy, r, thickness, colour, start=0.0, end=360.0):
+    """An arc of a ring (angles in degrees, 0 to the right, clockwise on screen)."""
+    for y in range(img.height):
+        for x in range(img.width):
+            d = math.hypot(x + 0.5 - cx, y + 0.5 - cy)
+            if r - thickness <= d <= r:
+                angle = math.degrees(math.atan2(y + 0.5 - cy, x + 0.5 - cx)) % 360
+                if start <= angle <= end:
+                    cm.put(img, x, y, colour)
+
+
+def aegis_icon():
+    """Dawn Aegis: a gold shell of light arched over a small violet figure, brighter along its crown. Defense."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    _spell_ground(img)
+    # The figure: a head and rounded shoulders in the hand's lilac, inside the shell, lit from the top left.
+    for y in range(18, 26):
+        for x in range(32):
+            if math.hypot(x + 0.5 - 16, y + 0.5 - 26) <= 7.2:
+                cm.put(img, x, y, HAND[2] if x < 16 and y < 22 else HAND[1])
+    _disc(img, 16, 15, 3.2, HAND[1])
+    _disc(img, 15.4, 14.4, 2.4, HAND[2])
+    cm.put(img, 14, 13, HAND[3])
+    # The shell: three bands of a dome over it, open at the bottom, its crown brightest.
+    _ring(img, 16, 21, 12.5, 2.2, MOTE[0], 180, 360)
+    _ring(img, 16, 21, 11.0, 1.2, MOTE[2], 195, 345)
+    _ring(img, 16, 21, 11.0, 1.2, MOTE[4], 240, 300)
+    # Its two feet resting on the ground line.
+    for x in (4, 27):
+        cm.put(img, x, 21, MOTE[1])
+        cm.put(img, x, 22, MOTE[0])
+    return img
+
+
+def _flat_rect_img(img, x0, y0, x1, y1, colour):
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            cm.put(img, x, y, colour)
+
+
+def revelation_icon():
+    """Revelation: an open eye of gold light with a violet iris, and short rays all round it. Investigation."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    _spell_ground(img)
+    # Rays: eight short strokes round the eye.
+    for angle in range(0, 360, 45):
+        rad = math.radians(angle)
+        inner = (round(16 + math.cos(rad) * 9.5), round(16 + math.sin(rad) * 7.0))
+        outer = (round(16 + math.cos(rad) * 12.0), round(16 + math.sin(rad) * 10.0))
+        _line(img, inner, outer, MOTE[1])
+    # The eye: an almond of light (two arcs), white within.
+    for y in range(32):
+        for x in range(32):
+            dx, dy = (x + 0.5 - 16) / 9.0, (y + 0.5 - 16) / 5.0
+            if dx * dx + dy * dy <= 1.0:
+                inner = (x + 0.5 - 16) ** 2 / 64.0 + (y + 0.5 - 16) ** 2 / 16.0 <= 1.0
+                cm.put(img, x, y, MOTE[3] if inner else MOTE[0])
+    # The iris and pupil, with a catchlight.
+    _disc(img, 16, 16, 3.6, LENS[3])
+    _disc(img, 16, 16, 2.6, LENS[1])
+    _disc(img, 16, 16, 1.4, SPELL_BG[0])
+    cm.put(img, 14, 14, MOTE[4])
+    return img
+
+
+def lance_icon():
+    """Lance of Dawn: a narrow beam of light crossing the ground from bottom left to top right, a bright spear point
+    at its head and sparks where it strikes. Damage."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    _spell_ground(img)
+    # The beam: a wide dim band under a narrow bright core.
+    _line(img, (6, 25), (22, 9), MOTE[0], 3)
+    _line(img, (7, 25), (23, 9), MOTE[2], 1)
+    # The point: a gold diamond at the head.
+    _mask(img, ["..a..", ".aba.", "abcba", ".aba.", "..a.."], {"a": MOTE[1], "b": MOTE[3], "c": MOTE[4]}, 21, 5)
+    # Sparks where it strikes.
+    for x, y in ((27, 6), (26, 11), (20, 4), (28, 9)):
+        cm.put(img, x, y, MOTE[2])
+    return img
+
+
+def flashstep_icon():
+    """Flashstep: a stride of light, three chevrons swept to the right with fading trails behind them. Movement."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    _spell_ground(img)
+    for offset, colour, trail in ((-7, MOTE[0], SPELL_BG[3]), (0, MOTE[1], MOTE[0]), (7, MOTE[3], MOTE[1])):
+        tip = 16 + offset + 3
+        _line(img, (tip - 5, 10), (tip, 16), colour, 2)
+        _line(img, (tip - 5, 22), (tip, 16), colour, 2)
+        for y in (13, 19):
+            cm.put(img, tip - 9, y, trail)
+            cm.put(img, tip - 10, y, trail)
+    return img
+
+
+def lanternward_icon():
+    """Lanternward: a small brass lantern with a gold flame, inside a ring of light that shelters three small allies'
+    marks. Support."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    _spell_ground(img)
+    _ring(img, 16, 16, 12.5, 1.6, MOTE[0])
+    _ring(img, 16, 16, 12.5, 0.8, MOTE[2], 200, 340)
+    # Three allies' marks on the ring: small lilac discs.
+    for angle in (150, 270, 30):
+        rad = math.radians(angle)
+        _disc(img, 16 + math.cos(rad) * 11.7, 16 + math.sin(rad) * 11.7, 1.8, HAND[2])
+    # The lantern: a brass cap, ring and base round a gold glass with a white flame.
+    _flat_rect_img(img, 14, 8, 17, 9, BRASS[3])
+    cm.put(img, 15, 7, BRASS[4])
+    cm.put(img, 16, 7, BRASS[4])
+    _flat_rect_img(img, 12, 10, 19, 11, BRASS[2])
+    _flat_rect_img(img, 12, 12, 19, 20, MOTE[1])
+    _flat_rect_img(img, 13, 13, 18, 19, MOTE[2])
+    _flat_rect_img(img, 15, 14, 16, 18, MOTE[4])
+    for y in range(12, 21):
+        cm.put(img, 12, y, BRASS[2])
+        cm.put(img, 19, y, BRASS[1])
+    _flat_rect_img(img, 11, 21, 20, 22, BRASS[3])
+    return img
+
+
 # ------------------------------------------------------------------------------------------------- the bench
 
 def bench_top():
@@ -585,7 +727,8 @@ BLOCKS = {
     "lampwright_bench_brass": bench_brass,
     "lampwright_bench_lens": bench_lens,
 }
-SPELLS = {"kindle": kindle_icon, "composed": composed_icon}
+SPELLS = {"kindle": kindle_icon, "composed": composed_icon, "aegis": aegis_icon, "revelation": revelation_icon,
+          "lance": lance_icon, "flashstep": flashstep_icon, "lanternward": lanternward_icon}
 
 
 def textures():

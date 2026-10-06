@@ -67,9 +67,10 @@ import org.jspecify.annotations.Nullable;
  * </ol>
  * Lasting effects (status, protection, detection) stack by the effect's {@link Stacking} rule and expire by their own
  * time, as vanilla status effects. Damage goes through the damage type of the effect's Spell Power school (generic
- * magic if it names none), so armour, enchantments and Spell Power's school resistances apply as for any spell; this
- * boundary does not scale or reduce damage itself, and the magnitudes it receives are final (no Spell Power scaling is
- * applied to Concordance effects yet).
+ * magic if it names none), so Spell Power's rules apply as for any spell: it bypasses armour and shields, and Spell
+ * Power's magic resistance reduces it. This boundary does not scale or reduce damage itself: the magnitudes it receives
+ * are final (Spell Power scaling, where an operation declares it, is applied to the plan before it runs:
+ * {@code Plan.scaled}).
  */
 public final class ConcordanceEffects {
 	public static final TagKey<EntityType<?>> IMMUNE = TagKey.create(Registries.ENTITY_TYPE, Jugcraft.id("concordance/immune"));
@@ -293,10 +294,18 @@ public final class ConcordanceEffects {
 		return target.addEffect(instance, actor) ? Result.APPLIED : Result.KEPT;
 	}
 
-	/** A push away from {@code origin}, level, slowed by the target's knockback resistance. */
+	/**
+	 * A push away from {@code origin}, level, slowed by the target's knockback resistance. From where the target itself
+	 * stands (a spell cast on oneself, such as Flashstep) there is no "away": it goes the way the target faces, level,
+	 * or straight up if it looks straight up or down.
+	 */
 	private static Result push(LivingEntity target, Vec3 origin, EffectSpec effect) {
 		Vec3 away = target.position().subtract(origin);
 		Vec3 flat = new Vec3(away.x, 0.0, away.z);
+		if (flat.lengthSqr() < 1.0E-4) {
+			Vec3 look = target.getLookAngle();
+			flat = new Vec3(look.x, 0.0, look.z);
+		}
 		Vec3 direction = flat.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 1.0, 0.0) : flat.normalize();
 		double speed = Math.min(effect.magnitude(), EffectSpec.MAX_PUSH) / 10.0
 				* Math.max(0.0, 1.0 - target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));

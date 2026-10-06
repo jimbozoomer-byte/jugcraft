@@ -5997,7 +5997,6 @@ def check_concordance(registered):
         "Examination.java": {"DARK_LIGHT": co.DARK_LIGHT},
         "LumenMoteBlock.java": {"LIGHT": co.MOTE_LIGHT, "TRAIL_LIGHT": co.TRAIL_LIGHT, "STEP_TICKS": co.MOTE_STEP_TICKS,
                                 "TRAIL_CHECK_TICKS": co.TRAIL_CHECK_TICKS},
-        "KindleInvocation.java": {"RANGE": co.KINDLE_RANGE, "MOTE_STEPS": co.KINDLE_MOTE_STEPS},
         "KindledLanternItem.java": {"CAPACITY": co.LANTERN_CAPACITY, "BURN_TICKS": co.LANTERN_BURN_TICKS},
         "LampwrightBenchBlockEntity.java": {"STUDY_TICKS": co.STUDY_TICKS},
         "LumenSconceBlockEntity.java": {"BURN_TICKS": co.SCONCE_BURN_TICKS, "POUR": co.SCONCE_POUR,
@@ -6254,6 +6253,7 @@ def check_concordance(registered):
         if f'"{split(component)[1]}"' not in components:
             err(f"dynamiclights/item/kindled_lantern.json: component {component} is not registered in JugcraftConcordance")
     check_composition(co, root, lang, registered, research)
+    check_invocations(co, root, lang, research)
 
 
 def check_composition(co, root, lang, registered, research):
@@ -6294,7 +6294,7 @@ def check_composition(co, root, lang, registered, research):
         if slot == "delivery" and not (body["form"] in ("here", "touch", "ray")
                                        and (body["range"] == 0) == (body["form"] == "here") and body["range"] <= limits["MAX_RANGE"]):
             err(f"{where}: delivery form or range out of the grammar")
-        if slot == "selection" and not (body["pick"] in ("struck", "creatures", "blocks")
+        if slot == "selection" and not (body["pick"] in ("struck", "creatures", "blocks", "allies")
                                         and ((body["radius"], body["targets"]) == (0, 1) if body["pick"] == "struck"
                                              else 1 <= body["radius"] <= limits["MAX_RADIUS"] and 1 <= body["targets"] <= limits["MAX_TARGETS"])):
             err(f"{where}: selection out of the grammar")
@@ -6310,6 +6310,11 @@ def check_composition(co, root, lang, registered, research):
                 err(f"{where}: beyond the effect limits")
             if effect == "illumination" and body.get("duration", 0) > co.MOTE_STEP_TICKS * 15:
                 err(f"{where}: light cannot last longer than a mote's 15 steps")
+            if "scaling" in body and not (effect == "damage" and body.get("school")
+                                          and 0 <= body["scaling"] <= co.INVOCATION_SCALING_MAX):
+                err(f"{where}: only damage naming its school scales with Spell Power, by 0..{co.INVOCATION_SCALING_MAX}")
+        if info.get("authored") and slot == "modifier":
+            err(f"{where}: a modifier cannot be authored (tunings are how players change invocations)")
         if slot == "modifier" and not (body["aspect"] in ("magnitude", "duration", "radius", "range")
                                        and 1 <= body["amount"] <= limits["MAX_MODIFIER_AMOUNT"]):
             err(f"{where}: modifier out of the grammar")
@@ -6369,6 +6374,135 @@ def check_composition(co, root, lang, registered, research):
                     f"(found {action.get('type')} {handler})")
         if not (ASSETS / "textures" / "spell" / f"{split(spell_id)[1]}.png").is_file():
             err(f"spell {spell_id}: no icon textures/spell/{split(spell_id)[1]}.png")
+
+
+def invocation_signature(text):
+    """What a composition is regardless of its numbers (Java: Plan.signature): per level, the delivery form, the pick
+    and the sorted effect/intent pairs."""
+    co = concordance
+    levels = []
+    for level in text.split(" then "):
+        words = [w.split("+")[0] for w in level.split()]
+        form = co.COMPONENTS[words[0]]["delivery"]["form"]
+        pick = co.COMPONENTS[words[1]]["selection"]["pick"]
+        kinds = sorted(f"{co.COMPONENTS[w]['operation']['effect']}/{co.COMPONENTS[w]['operation']['intent']}"
+                       for w in words if co.COMPONENTS[w]["slot"] == "operation")
+        levels.append(f"{form}/{pick}:{','.join(kinds)}")
+    return " then ".join(levels)
+
+
+def check_invocations(co, root, lang, research):
+    """Roadmap step 10: every invocation is a composition in the shared grammar that fits the Initiate's Wand with
+    each of its tunings; it costs at least what its composition would (mastery taking off at most a quarter) and its
+    cooldown is at least the composition's; its declared work and persistence cover every form; no two do the same
+    thing; the six roles are covered; authored words are used only by invocations and every one is used; and each has
+    its spell, handler, gestures, sounds, particles, icon, codex entry and texts."""
+    def java(name):
+        path = root / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    wand = co.INSTRUMENT_LIMITS["initiate_wand"]
+    role_enum = re.search(r"public enum Role \{(.*?)\n\t\t[a-z]", java("rules/Definitions.java"), re.S)
+    roles_java = set(re.findall(r'^\t\t[A-Z_]+\("([a-z_]+)"\)', role_enum.group(1) if role_enum else "", re.M))
+    if roles_java != set(co.INVOCATION_ROLES):
+        err(f"concordance/rules/Definitions.java: Role ids {sorted(roles_java)} differ from INVOCATION_ROLES")
+    for name, const, value in (("rules/RulesParser.java", "MAX_TUNINGS", co.INVOCATION_MAX_TUNINGS),
+                               ("Tunings.java", "MAX", 16)):
+        if not re.search(rf"\bint {const} = {value};", java(name)):
+            err(f"concordance/{name}: {const} differs from {value}")
+    if not re.search(rf"double MAX_SCALING = {co.INVOCATION_SCALING_MAX};", java("rules/RulesParser.java")):
+        err("concordance/rules/RulesParser.java: MAX_SCALING differs from INVOCATION_SCALING_MAX")
+    if len(co.INVOCATIONS) > 16:
+        err("invocations: more than an instrument's Tunings.MAX can tune")
+    if 'registerCustomImpact(Jugcraft.id("invocation")' not in java("Invocations.java"):
+        err("concordance/Invocations.java: must register the CUSTOM impact jugcraft:invocation")
+    if set(info["role"] for info in co.INVOCATIONS.values()) != set(co.INVOCATION_ROLES):
+        err(f"invocations: roles {sorted(set(i['role'] for i in co.INVOCATIONS.values()))} do not cover all six")
+    used = set()
+    signatures = {}
+    codex_entries = {entry for (category, entry) in co.codex() if category == "invocations"}
+    for key, info in co.INVOCATIONS.items():
+        where = f"invocation {key}"
+        data = load(DATA / MOD / "concordance" / "invocation" / f"{key}.json")
+        if data != co.invocation_json(key, info):
+            err(f"{where}: data file differs from tools/concordance.py (regenerate)")
+        words = [w.split("+")[0] for w in info["composition"].replace(" then ", " ").split()]
+        if any(w not in co.COMPONENTS for w in words):
+            err(f"{where}: unknown words in {info['composition']}")
+            continue
+        used |= set(words)
+        if len(info["tunings"]) > co.INVOCATION_MAX_TUNINGS:
+            err(f"{where}: at most {co.INVOCATION_MAX_TUNINGS} tunings")
+        for tuning in info["tunings"]:
+            component = co.COMPONENTS.get(tuning, {})
+            if component.get("slot") != "modifier" or component.get("authored"):
+                err(f"{where}: tuning {tuning} is not a players' modifier")
+        forms = co.invocation_forms(key)
+        base_text, base, base_numbers = forms[None]
+        least = base["focus"]
+        if not (info["focus"] >= least and info["mastered_focus"] >= least - (least + 3) // 4):
+            err(f"{where}: costs less than its composition ({least} Focus; mastery may take off {(least + 3) // 4})")
+        if round(info["cooldown"] * 20) < base["cooldown"]:
+            err(f"{where}: cooldown {info['cooldown']} s is shorter than its composition's {base['cooldown']} ticks")
+        for tuning, (text, cost, numbers) in forms.items():
+            label = f"{where}{'' if tuning is None else ' + ' + tuning}"
+            if text is None:
+                err(f"{label}: the tuning changes nothing in it")
+                continue
+            if cost["capacity"] > wand["capacity"] or cost["targets"] > wand["targets"] or cost["work"] > wand["work"]:
+                err(f"{label}: does not fit the Initiate's Wand: {cost}")
+            if cost["work"] > info["work"] or co.persistence(numbers) > info["persists"]:
+                err(f"{label}: spends {cost['work']} work and lasts {co.persistence(numbers)} ticks; it declares "
+                    f"{info['work']} and {info['persists']}")
+            if co.persistence(numbers) > wand["duration"]:
+                err(f"{label}: lasts longer than the wand allows")
+            if invocation_signature(text) != invocation_signature(base_text):
+                err(f"{label}: a tuning changed what it does")
+        signature = invocation_signature(base_text)
+        if signature in signatures:
+            err(f"{where}: does what {signatures[signature]} does ({signature})")
+        signatures[signature] = key
+        harmful = [w for w in words if co.COMPONENTS[w]["slot"] == "operation"
+                   and co.COMPONENTS[w]["operation"]["intent"] == "harmful"]
+        if harmful and any(co.COMPONENTS[w].get("selection", {}).get("pick") == "allies" for w in words):
+            err(f"{where}: harms allies")
+        spell = load(DATA / MOD / "spell" / f"{key}.json") or {}
+        if spell != co.spell_json(key):
+            err(f"{where}: spell file differs from tools/concordance.py (regenerate)")
+        handlers = [i.get("action", {}).get("custom", {}).get("handler") for i in spell.get("impacts", [])]
+        if handlers != [f"{MOD}:invocation"]:
+            err(f"{where}: its spell must have the one CUSTOM impact {MOD}:invocation (found {handlers})")
+        if spell.get("range") != float(co.invocation_range(info)):
+            err(f"{where}: spell range differs from its delivery")
+        if info["particle"] not in co.INVOCATION_PARTICLES:
+            err(f"{where}: particle {info['particle']} is not in INVOCATION_PARTICLES")
+        if not spell.get("release", {}).get("animation") or not spell.get("release", {}).get("sound"):
+            err(f"{where}: needs a release gesture and sound")
+        if split(info["research"])[1] not in research or info["stage"] not in ("understood", "mastered"):
+            err(f"{where}: learnt from unknown research or stage")
+        unlocks = (research.get(split(info["research"])[1], {}).get("unlocks", {}).get(info["stage"], {})
+                   .get("invocations", []))
+        if f"{MOD}:{key}" not in unlocks:
+            err(f"{where}: {info['research']} {info['stage']} does not unlock it")
+        if key not in codex_entries:
+            err(f"{where}: no codex entry")
+        for lang_key in (f"message.{MOD}.concordance.fizzle.{key}", f"role.{MOD}.{info['role']}"):
+            if lang_key not in lang:
+                err(f"{where}: missing lang {lang_key}")
+    for key, info in co.COMPONENTS.items():
+        if info.get("authored") and key not in used:
+            err(f"component {key}: authored but no invocation uses it")
+    # Kindle's numbers in the generator come from its data.
+    kindle = co.form_numbers(co.INVOCATIONS["kindle"]["composition"])
+    if kindle["range"] != co.KINDLE_RANGE or kindle["operations"][0]["duration"] != co.KINDLE_MOTE_STEPS * co.MOTE_STEP_TICKS:
+        err("invocation kindle: KINDLE_RANGE or KINDLE_MOTE_STEPS differ from its composition")
+    # Every message key the invocation code names exists.
+    for name in ("Invocations.java", "ConcordanceCommand.java", "ConcordanceSpells.java", "ComposedSpells.java"):
+        for key in re.findall(r'"(message\.jugcraft\.concordance\.[a-z_.]+[a-z_])"', java(name)):
+            if key not in lang:
+                err(f"concordance/{name}: missing lang {key}")
+        for key in re.findall(r'"(tooltip\.jugcraft\.concordance\.[a-z_.]+[a-z_])"', java(name)):
+            if key not in lang:
+                err(f"concordance/{name}: missing lang {key}")
 
 
 def KINDLE_MOTE_STEPS_FIT(co):

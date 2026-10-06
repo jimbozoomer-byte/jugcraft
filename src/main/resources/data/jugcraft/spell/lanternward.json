@@ -1,14 +1,14 @@
 {
   "school": "spell_power:arcane",
-  "range": 16.0,
+  "range": 0.0,
   "tier": 1,
   "group": "concordance",
   "type": "ACTIVE",
   "active": {
     "cast": {
-      "duration": 0.6,
+      "duration": 1.0,
       "animation": {
-        "id": "jugcraft:kindle_cast"
+        "id": "jugcraft:ward_cast"
       },
       "start_sound": {
         "id": "jugcraft:concordance.kindle_gather"
@@ -17,7 +17,7 @@
   },
   "release": {
     "animation": {
-      "id": "jugcraft:kindle_release"
+      "id": "jugcraft:ward_release"
     },
     "visuals": {
       "particles": [
@@ -36,7 +36,7 @@
       ]
     },
     "sound": {
-      "id": "jugcraft:concordance.kindle"
+      "id": "jugcraft:concordance.lanternward"
     }
   },
   "target": {
@@ -60,7 +60,7 @@
     "exhaust": 0.0,
     "durability": 0,
     "cooldown": {
-      "duration": 1.5,
+      "duration": 15.0,
       "hosting_item": false
     }
   }

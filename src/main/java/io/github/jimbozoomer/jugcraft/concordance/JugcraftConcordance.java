@@ -61,6 +61,8 @@ public final class JugcraftConcordance {
 	public static DataComponentType<ResearchNotes> RESEARCH_NOTES;
 	/** The spell inscribed on an instrument (absent when none is). */
 	public static DataComponentType<Inscription> INSCRIPTION;
+	/** The invocations tuned on an instrument and the modifier each carries (roadmap step 10). */
+	public static DataComponentType<Tunings> TUNINGS;
 
 	public static Block LUMEN_MOTE;
 	public static Block LAMPWRIGHT_BENCH;
@@ -96,6 +98,8 @@ public final class JugcraftConcordance {
 				DataComponentType.<ResearchNotes>builder().persistent(ResearchNotes.CODEC).networkSynchronized(ResearchNotes.STREAM_CODEC).build());
 		INSCRIPTION = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("inscription"),
 				DataComponentType.<Inscription>builder().persistent(Inscription.CODEC).networkSynchronized(Inscription.STREAM_CODEC).build());
+		TUNINGS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("tunings"),
+				DataComponentType.<Tunings>builder().persistent(Tunings.CODEC).networkSynchronized(Tunings.STREAM_CODEC).build());
 
 		KNOWLEDGE = AttachmentRegistry.<Knowledge>builder().persistent(ConcordanceCodecs.KNOWLEDGE).copyOnDeath()
 				.syncWith(ConcordanceCodecs.KNOWLEDGE_STREAM, AttachmentSyncPredicate.targetOnly())
@@ -146,6 +150,7 @@ public final class JugcraftConcordance {
 		Examination.register();
 		RateGate.register();
 		ConcordanceSpells.register();
+		Invocations.register();
 		ComposedSpells.register();
 		ConcordanceCommand.register();
 

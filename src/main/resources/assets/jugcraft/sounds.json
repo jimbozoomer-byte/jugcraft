@@ -190,5 +190,50 @@
         "attenuation_distance": 16
       }
     ]
+  },
+  "concordance.aegis": {
+    "subtitle": "subtitles.jugcraft.concordance.aegis",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/aegis",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.revelation": {
+    "subtitle": "subtitles.jugcraft.concordance.revelation",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/revelation",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lance": {
+    "subtitle": "subtitles.jugcraft.concordance.lance",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lance",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.flash": {
+    "subtitle": "subtitles.jugcraft.concordance.flash",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/flash",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lanternward": {
+    "subtitle": "subtitles.jugcraft.concordance.lanternward",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lanternward",
+        "attenuation_distance": 16
+      }
+    ]
   }
 }

@@ -1,28 +1,22 @@
 {
   "school": "spell_power:arcane",
-  "range": 16.0,
+  "range": 0.0,
   "tier": 1,
   "group": "concordance",
   "type": "ACTIVE",
   "active": {
     "cast": {
-      "duration": 0.6,
-      "animation": {
-        "id": "jugcraft:kindle_cast"
-      },
-      "start_sound": {
-        "id": "jugcraft:concordance.kindle_gather"
-      }
+      "duration": 0.0
     }
   },
   "release": {
     "animation": {
-      "id": "jugcraft:kindle_release"
+      "id": "jugcraft:flash_release"
     },
     "visuals": {
       "particles": [
         {
-          "id": "minecraft:end_rod",
+          "id": "minecraft:cloud",
           "appearance": {},
           "batch": {
             "count": 12.0,
@@ -36,7 +30,7 @@
       ]
     },
     "sound": {
-      "id": "jugcraft:concordance.kindle"
+      "id": "jugcraft:concordance.flash"
     }
   },
   "target": {
@@ -60,7 +54,7 @@
     "exhaust": 0.0,
     "durability": 0,
     "cooldown": {
-      "duration": 1.5,
+      "duration": 4.0,
       "hosting_item": false
     }
   }

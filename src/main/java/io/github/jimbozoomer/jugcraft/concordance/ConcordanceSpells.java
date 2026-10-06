@@ -6,8 +6,12 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -19,9 +23,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.spell_engine.api.spell.Spell;
 import net.spell_engine.api.spell.container.SpellContainer;
 import net.spell_engine.api.spell.event.SpellEvents;
-import net.spell_engine.api.spell.event.SpellHandlers;
 import net.spell_engine.api.spell.registry.SpellRegistry;
 import net.spell_engine.internals.casting.SpellCast;
+import net.spell_engine.internals.casting.SpellCaster;
 import net.spell_engine.internals.container.SpellContainerSource;
 import net.spell_engine.internals.cost.Ammo;
 import org.jspecify.annotations.Nullable;
@@ -34,9 +38,11 @@ import org.jspecify.annotations.Nullable;
  * animations and the casting HUD.</li>
  * <li><b>Jugcraft</b> owns who may cast (an instrument in the main hand, the invocation understood, enough Focus), the
  * Focus spent and the effect. {@link #attempt} refuses a cast before it starts, on the client for the HUD and on the
- * server for real; the {@code CUSTOM} impact re-checks on the server and does the work ({@link KindleInvocation}); and
- * Focus is taken once, in {@link #consume}, which Spell Engine calls only after the impact succeeded. A refused or
- * failed cast costs nothing and starts no cooldown.</li>
+ * server for real; the {@code CUSTOM} impact re-checks on the server and does the work ({@link Invocations},
+ * {@link ComposedSpells}) and says what the cast owes ({@link #owe}); and that is settled once, in {@link #consume},
+ * which Spell Engine calls only after the impact succeeded: the Focus is taken and the cooldown made at least the
+ * composition's own, whatever shortened Spell Engine's. A refused or failed cast costs nothing and starts no
+ * cooldown.</li>
  * </ul>
  * Spell Engine runs its event listeners without a try/finally: a listener that threw would switch the event off for
  * the rest of the session. Every listener here therefore catches what it throws.
@@ -49,15 +55,30 @@ public final class ConcordanceSpells {
 	public static final TagKey<Item> MISSING_FOCUS = TagKey.create(Registries.ITEM, Jugcraft.id("concordance/focus"));
 	public static final TagKey<Item> MISSING_INSTRUMENT = TagKey.create(Registries.ITEM, Jugcraft.id("concordance/instrument"));
 
+	private static final Map<UUID, Settlement> PENDING = new HashMap<>();
+
 	private ConcordanceSpells() {
 	}
 
+	/**
+	 * What a cast that took effect owes, settled once when Spell Engine consumes its cost: the Focus, and the cooldown
+	 * ({@code exact}: replaces Spell Engine's, for the inscribed-spell carrier; otherwise the least it may be).
+	 */
+	private record Settlement(String spell, int focus, int cooldown, boolean exact) {
+	}
+
 	static void register() {
-		SpellHandlers.registerCustomImpact(Jugcraft.id("kindle_light"), KindleInvocation::impact);
-		// The carrier for inscribed spells registers its own impact (ComposedSpells.register).
+		// Each impact registers itself: Invocations (jugcraft:invocation) and ComposedSpells (jugcraft:composed).
 		SpellContainerSource.addSource(new SpellContainerSource.Entry(SOURCE, ConcordanceSpells::containers, ConcordanceSpells::sourceState));
 		SpellEvents.CASTING_ATTEMPT.PRE.register(ConcordanceSpells::attempt);
 		SpellEvents.COST_CONSUME.register(ConcordanceSpells::consume);
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> PENDING.remove(handler.getPlayer().getUUID()));
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> PENDING.clear());
+	}
+
+	/** Records what a cast that took effect owes (server only), for {@link #consume} to settle. */
+	static void owe(ServerPlayer player, String spell, int focus, int cooldown, boolean exact) {
+		PENDING.put(player.getUUID(), new Settlement(spell, focus, cooldown, exact));
 	}
 
 	public static boolean holdsInstrument(Player player) {
@@ -127,6 +148,11 @@ public final class ConcordanceSpells {
 			cost = inscription == null ? -1 : inscription.focus();
 		} else {
 			cost = id == null ? -1 : ConcordanceProgress.knowledge(player).invocationCost(id);
+			// A tuning's Focus as the instrument records it (the client's view); the impact charges the server's.
+			Tunings.Tuning tuning = cost < 0 ? null : Invocations.tunings(player.getMainHandItem()).get(id);
+			if (tuning != null) {
+				cost += tuning.focus();
+			}
 		}
 		if (cost < 0) {
 			return SpellCast.Attempt.none();
@@ -152,8 +178,9 @@ public final class ConcordanceSpells {
 	}
 
 	/**
-	 * After a Concordance cast took effect (server only, once per cast): takes its Focus and records the cast as
-	 * evidence, in the chunk the caster stood in.
+	 * After a Concordance cast took effect (server only, once per cast): takes the Focus its impact said it owes, makes
+	 * its cooldown at least the composition's own, and records an invocation as evidence, in the chunk the caster stood
+	 * in.
 	 */
 	private static void consume(SpellEvents.SpellCostConsumeEvent.Args args) {
 		try {
@@ -165,16 +192,19 @@ public final class ConcordanceSpells {
 			if (id == null || !isConcordance(args.spell(), knowledge)) {
 				return;
 			}
-			if (ComposedSpells.SPELL.equals(id)) {
-				if (!ComposedSpells.settle(player, args.spell())) {
-					Jugcraft.LOGGER.warn("Arcane Concordance: {} completed an inscribed spell with nothing to settle", player.getName().getString());
-				}
+			Settlement settlement = PENDING.remove(player.getUUID());
+			if (settlement == null || !settlement.spell().equals(id)) {
+				Jugcraft.LOGGER.warn("Arcane Concordance: {} completed {} with nothing to settle", player.getName().getString(), id);
 				return;
 			}
-			int cost = knowledge.invocationCost(id);
-			if (cost < 0 || !ConcordanceProgress.spendFocus(player, cost)) {
+			if (!ConcordanceProgress.spendFocus(player, settlement.focus())) {
 				// The gate and the impact both checked; reaching here means the state changed in between.
 				Jugcraft.LOGGER.warn("Arcane Concordance: {} completed {} without the Focus for it", player.getName().getString(), id);
+			}
+			// Spell Engine has already set its own cooldown, which haste or equipment may have shortened: never below
+			// the composition's.
+			((SpellCaster.Player) player).getCooldownManager().set(args.spell(), settlement.cooldown(), settlement.exact());
+			if (ComposedSpells.SPELL.equals(id)) {
 				return;
 			}
 			Definitions.Invocation invocation = ConcordanceData.rules().invocationForSpell(id);

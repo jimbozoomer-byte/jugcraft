@@ -1,6 +1,6 @@
 """Original sounds for the Arcane Concordance (tools/concordance.py), synthesised here (no recorded or third-party audio).
 
-Six short mono cues, one per entry in concordance.SOUND_EVENTS (tools/generate_material_data.py writes their
+Eleven short mono cues, one per entry in concordance.SOUND_EVENTS (tools/generate_material_data.py writes their
 sounds.json entries, "jugcraft:concordance/<name>"; this script only draws the .ogg files):
 
 - kindle_gather (0.6 s, Kindle's cast, KINDLE_CAST_SECONDS long): light gathering, a few detuned sine partials that
@@ -9,7 +9,14 @@ sounds.json entries, "jugcraft:concordance/<name>"; this script only draws the .
 - examine (0.35 s): a small, high, quiet crystal ping on E7;
 - study_complete (0.8 s): two soft ascending chimes, A5 then E6, the same rising fifth;
 - lantern_ignite (0.6 s): a breath of band-passed noise that swells and brightens, settling into a warm low D3;
-- lantern_snuff (0.4 s): a soft puff of noise whose band falls away as the flame goes out.
+- lantern_snuff (0.4 s): a soft puff of noise whose band falls away as the flame goes out;
+- aegis (0.9 s, Dawn Aegis): a low D3 and A3 swelling up into a held, softly beating D4, A4, E5 chord, the shell
+  closing round you;
+- revelation (0.8 s): a shimmer of detuned voices gliding up from A4 to E6, ending in a quiet E6 ping;
+- lance (0.45 s, Lance of Dawn): a bright crack of high band-passed noise and a tone falling fast from E7 to A5 over
+  a short A5 bell, sharp enough to read as an attack;
+- flash (0.35 s, Flashstep): an airy whoosh, noise swept up from 600 Hz to 3 kHz and gone;
+- lanternward (1.0 s): a warm low D3 under three bell strikes rising D4, A4, D5, the light spreading to allies.
 
 The Concordance's cues share one key (D, A, E: stacked fifths), so the gather leads into the kindle and the study chime
 answers it. Every cue starts and ends at silence (no clicks), is normalised to a set peak (0.8 like the choir and drone
@@ -183,6 +190,73 @@ def lantern_snuff(seed):
     return puff * strike(n, 0.012, 0.13) * fade(n, 0.0, 0.06)
 
 
+A3, E5, D5 = 220.0, 659.26, 587.33
+
+
+def aegis():
+    """The shell forms: a low fifth swelling up into a held, softly beating chord a fifth apart."""
+    n = samples(0.9)
+    t = times(n)
+    low = sum(amp * np.sin(2 * np.pi * hz * t) for hz, amp in ((D3, 1.0), (A3, 0.6)))
+    low *= np.clip(t / 0.18, 0, 1) ** 2 * np.exp(-np.maximum(t - 0.18, 0) / 0.25)
+    chord = np.zeros(n)
+    for hz, amp in ((D4, 1.0), (A4, 0.75), (E5, 0.45)):
+        for cents, level in ((0.0, 1.0), (-6.0, 0.3), (5.0, 0.3)):
+            chord += amp * level * np.sin(2 * np.pi * hz * 2 ** (cents / 1200) * t)
+    chord *= np.clip((t - 0.1) / 0.2, 0, 1) ** 1.5 * np.exp(-np.maximum(t - 0.3, 0) / 0.35)
+    return (0.6 * low / rms(low) + chord / rms(chord)) * fade(n, 0.005, 0.12)
+
+
+def revelation():
+    """Hidden things shine: detuned voices gliding up from A4 to E6, ending in a quiet ping."""
+    n = samples(0.8)
+    t = times(n)
+    base = glide(t, A4, E6, 0.5)
+    out = np.zeros(n)
+    for j, (cents, level) in enumerate(((0.0, 1.0), (-9.0, 0.4), (8.0, 0.4), (1200.0, 0.18))):
+        phase = np.cumsum(base * 2 ** (cents / 1200)) / RATE
+        out += level * np.sin(2 * np.pi * phase + 0.6 * j)
+    out *= np.clip(t / 0.3, 0, 1) * np.exp(-np.maximum(t - 0.45, 0) / 0.12)
+    ping = chime(n, E6, [(1.0, 1.0, 0.16), (2.76, 0.12, 0.05)], attack=0.002, at=0.48, beat=3.0)
+    return (out / rms(out) * 0.5 + ping / np.max(np.abs(ping))) * fade(n, 0.01, 0.08)
+
+
+def lance(seed):
+    """The beam strikes: a bright crack of high noise and a tone falling fast from E7 to A5 over a short bell."""
+    n = samples(0.45)
+    t = times(n)
+    rng = np.random.default_rng(seed)
+    bp, _ = band(rng.normal(size=n), np.full(n, 4200.0), q=1.6)
+    crack = bp / rms(bp) * strike(n, 0.002, 0.03)
+    fall = np.sin(2 * np.pi * np.cumsum(glide(t, E7, A5, 0.09)) / RATE) * strike(n, 0.002, 0.07)
+    bell = chime(n, A5, [(1.0, 1.0, 0.12), (2.0, 0.4, 0.07), (3.0, 0.15, 0.04)], attack=0.003, at=0.01, beat=4.0)
+    return (0.45 * crack + 0.8 * fall + bell) * fade(n, 0.0005, 0.06)
+
+
+def flash(seed):
+    """A flash of movement: airy noise swept up from 600 Hz to 3 kHz, swelling and gone."""
+    n = samples(0.35)
+    t = times(n)
+    rng = np.random.default_rng(seed)
+    centre = 600 * (3000 / 600) ** np.clip(t / 0.25, 0, 1)
+    bp, lp = band(rng.normal(size=n), centre, q=0.9)
+    air = bp / rms(bp) + 0.3 * lp / rms(lp)
+    return air * np.sin(np.pi * np.clip(t / 0.3, 0, 1)) ** 2 * fade(n, 0.002, 0.04)
+
+
+def lanternward():
+    """Warding light spreads: a warm low D3 under three bell strikes rising D4, A4, D5."""
+    n = samples(1.0)
+    t = times(n)
+    hum = sum(amp * np.sin(2 * np.pi * D3 * k * t) for k, amp in ((1, 1.0), (2, 0.35), (3, 0.12)))
+    hum *= np.clip(t / 0.25, 0, 1) ** 2 * np.exp(-np.maximum(t - 0.4, 0) / 0.3)
+    bells = np.zeros(n)
+    soft = [(1.0, 1.0, 0.28), (2.0, 0.3, 0.15), (3.0, 0.1, 0.09)]
+    for at, hz in ((0.08, D4), (0.22, A4), (0.36, D5)):
+        bells += chime(n, hz, soft, attack=0.004, at=at, beat=1.8)
+    return (0.45 * hum / rms(hum) + bells / np.max(np.abs(bells))) * fade(n, 0.005, 0.12)
+
+
 # name -> (signal, peak). Names follow concordance.SOUND_EVENTS ("concordance.<name>").
 def cues():
     return {
@@ -192,6 +266,11 @@ def cues():
         "study_complete": (study_complete(), PEAK * 0.8),
         "lantern_ignite": (lantern_ignite(seed=41), PEAK),
         "lantern_snuff": (lantern_snuff(seed=43), PEAK * 0.9),
+        "aegis": (aegis(), PEAK * 0.85),
+        "revelation": (revelation(), PEAK * 0.75),
+        "lance": (lance(seed=47), PEAK),
+        "flash": (flash(seed=53), PEAK * 0.8),
+        "lanternward": (lanternward(), PEAK * 0.85),
     }
 
 

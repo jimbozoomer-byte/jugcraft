@@ -2,14 +2,18 @@ package io.github.jimbozoomer.jugcraft.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceSpells;
 import io.github.jimbozoomer.jugcraft.concordance.Inscription;
+import io.github.jimbozoomer.jugcraft.concordance.Invocations;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
+import io.github.jimbozoomer.jugcraft.concordance.Tunings;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import java.util.List;
+import java.util.Map;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -95,6 +99,14 @@ final class ConcordanceClient {
 			lines.add(Component.translatable("compose.jugcraft.inscription", inscription.text()).withStyle(ChatFormatting.LIGHT_PURPLE));
 			lines.add(Component.translatable("compose.jugcraft.inscription_cost", inscription.focus(), Text.seconds(inscription.cooldown()))
 					.withStyle(ChatFormatting.GRAY));
+		}
+		Tunings tunings = stack.get(JugcraftConcordance.TUNINGS);
+		if (tunings != null) {
+			// The tunings as recorded; the server checks each again whenever the invocation is cast.
+			for (Map.Entry<String, Tunings.Tuning> tuning : tunings.entries().entrySet()) {
+				lines.add(Component.translatable("tooltip.jugcraft.concordance.tuning", Component.translatable(Invocations.nameKey(tuning.getKey())),
+						ComposeText.name(Text.component(tuning.getValue().modifier()))).withStyle(ChatFormatting.GRAY));
+			}
 		}
 	}
 }

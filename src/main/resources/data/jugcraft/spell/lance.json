@@ -6,9 +6,9 @@
   "type": "ACTIVE",
   "active": {
     "cast": {
-      "duration": 0.6,
+      "duration": 0.5,
       "animation": {
-        "id": "jugcraft:kindle_cast"
+        "id": "jugcraft:lance_cast"
       },
       "start_sound": {
         "id": "jugcraft:concordance.kindle_gather"
@@ -17,12 +17,12 @@
   },
   "release": {
     "animation": {
-      "id": "jugcraft:kindle_release"
+      "id": "jugcraft:lance_release"
     },
     "visuals": {
       "particles": [
         {
-          "id": "minecraft:end_rod",
+          "id": "minecraft:electric_spark",
           "appearance": {},
           "batch": {
             "count": 12.0,
@@ -36,7 +36,7 @@
       ]
     },
     "sound": {
-      "id": "jugcraft:concordance.kindle"
+      "id": "jugcraft:concordance.lance"
     }
   },
   "target": {
@@ -60,7 +60,7 @@
     "exhaust": 0.0,
     "durability": 0,
     "cooldown": {
-      "duration": 1.5,
+      "duration": 2.0,
       "hosting_item": false
     }
   }
