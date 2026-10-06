@@ -147,6 +147,10 @@ The first batch from the owner's saved idea backlog ([MACHINE_ROADMAP.md](../MAC
 - **Reachable everywhere.** A player with no reservoir can still get crude from oil sand (commit 5), and shale (fracking) is common where conventional oil is not.
 - **Volume is conserved** through refining: the fractions of one bucket of crude add up to one bucket or less.
 
+## Waste recovery and pollution planning
+
+The owner's [step 6 plan](../features/waste-recycling-and-pollution-plan.md) chooses optional initial recovery and equipment disassembly. Pollution thresholds attract the existing marauders, and a pollution map device shows the output without changing the landscape's appearance. Proposed shared equipment includes filtration/settling, selected neutralization, reagent recovery and compatible emissions scrubbing. Encounter rules, accumulation/decline, recipes and quantities still need decisions; this is not implemented gameplay or a blanket mandatory waste-treatment requirement.
+
 ## Boundaries
 
 - **Fluids** (pipes, tanks, pumps) belong to the fluid system; chemistry only uses them.

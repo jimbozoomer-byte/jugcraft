@@ -2,6 +2,8 @@
 
 Status: **proposals for discussion, not approved or implemented** unless marked ✅. How implemented things connect is documented in [TECH_TREE.md](TECH_TREE.md). Machines are grouped into branches: **Mechanical** (shape and mix of materials), **Fluids** (moving liquids) and the planned **Chemistry** branch ([branches/CHEMISTRY.md](branches/CHEMISTRY.md)).
 
+The owner's [waste recovery, equipment recycling and pollution plan](features/waste-recycling-and-pollution-plan.md) records optional initial recovery, equipment disassembly and pollution thresholds that attract the existing marauders. Pollution is shown on a map device without changing the landscape's appearance. Encounter integration, accumulation/decline and equipment details remain proposals to settle.
+
 ## What exists now
 
 | Role | Implemented |
@@ -77,7 +79,7 @@ Ideas Claude suggested after batch 10 (advanced power and tanks). The owner aske
 | **Polymer tiers** ✅ batch 14 (butadiene, synthetic rubber, gaskets; hoses with the turbocharger) | Synthetic rubber from butadiene (off the cracker) → hoses, gaskets, tires | Catalytic cracker | Rubber could gate high-pressure pipes and an engine turbocharger |
 | **Glass chemistry** ✅ batch 16 (tincal, borax, borosilicate glass, optical fibre, ferroboron; glass tanks with the tank gauges) | Borosilicate glass from borax → lab glassware and glass tanks; optical fibre for a data network | New mineral (borax) | Fits the owner's earlier glass stasis-tank reference |
 | **Pharmaceuticals** | A chemistry bench making status potions industrially (antidote, haste, night-vision tonic) | Chemistry outputs, magic bridge | Needs hazard and balance limits |
-| **Waste and pollution loop** | Acid waste and slag must be neutralized (lime, flowback treatment) | Flowback treatment unit | Gives a chemical plant a clean-up cost rather than free disposal |
+| **Waste recovery and pollution** | Optional initial material/reagent recovery and equipment disassembly; pollution thresholds attract marauders, with readings on a map device | Flowback treatment, shared chemistry equipment and existing raider encounters | [Owner planning direction](features/waste-recycling-and-pollution-plan.md); no landscape appearance changes, exact treatment and encounter rules remain open |
 | **Flow batteries** ✅ batch 17 (vanadium electrolyte from asphalt binder; 64,000,000 JE) | Two big tanks of vanadium electrolyte as grid storage | Tanks that keep their fluid (batch 10), vanadium | Ties fluid storage directly into the power grid |
 
 ### Power, tanks and engines
