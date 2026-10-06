@@ -838,10 +838,12 @@ def powered_tools(lang):
     # rocket_pack.png), and the pack itself in 3D on the back (client/RocketPackLayer draws these quads).
     write(ASSETS / "equipment" / "rocket_pack.json", {"layers": {"humanoid": [{"texture": rid("rocket_pack")}]}})
     import kinetic_rotors
-    # The exosuit's 3D parts (shoulder plates, skirt plates, the Ronin's hat) too: client/ExosuitLayer.
+    # The exosuit's 3D parts (shoulder plates, skirt plates, the Ronin's hat) too: client/WornModelLayer.
     import exosuit
-    write(ASSETS / "worn_models.json", {"rocket_pack": kinetic_rotors.quads(tool_models.ITEMS["rocket_pack"]),
-                                        **exosuit.worn_models(kinetic_rotors.quads)})
+    worn = {"rocket_pack": kinetic_rotors.quads(tool_models.ITEMS["rocket_pack"]), **exosuit.worn_models(kinetic_rotors.quads)}
+    # ...and the 3D armor sets (tools/armor_models.py), keyed "<item>_<bone>".
+    import armor_models
+    write(ASSETS / "worn_models.json", {**worn, **armor_models.entries(taken=worn)})
     for module, (display, short, about) in UPGRADE_MODULES.items():
         lang[f"item.{MOD}.{module}"] = display
         lang[f"item.{MOD}.{module}.short"] = short

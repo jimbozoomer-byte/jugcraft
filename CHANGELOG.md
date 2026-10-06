@@ -8,6 +8,17 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Knight armor for bronze and steel
+- **Bronze and steel armor wear the owner's own knight design,** as real 3D models much bigger than vanilla armor, with many parts sticking out:
+  - a helm wider than the head, with a big tilted crest plate in chevrons, horn and cheek fins, a nasal bar, eye slits and a gold collar;
+  - a forward-angled chevron plate over the chest, layered pauldrons, and vambraces with flared cuffs;
+  - a leather belt over a dark under-layer, and a skirt of plate bands to the ground, hung from the legs so it moves with them.
+- **Steel** is the design as drawn, in light steel grey with mid and dark greys in hammered strips. **Bronze** is its steam-age make: warm copper-bronze with brass trim, rows of brass rivets, a brass knob on the crest and a brass belt buckle.
+- **New 16×16 inventory icons** for all eight pieces, drawn to match, and the handbook's Bronze and Steel Gear page describes the new look.
+- **Any armor piece can now have a 3D model:** boxes of any size, at any angle, on any body part, drawn on players, mobs and armor stands, with vanilla's glint when enchanted. The exosuit's 3D parts use the same layer and look as before.
+- **Nothing else changes:** same items, IDs, stats and recipes, so armor you already have just looks new. Trims stay on the item but do not show on the 3D models, and babies wear none.
+- The old steampunk and kaiserpunk looks are no longer worn by bronze and steel armor; a separate PR keeps them as Steampunk Armor and Kaiser Armor. Record: [knight-armor.md](docs/features/knight-armor.md).
+
 ### Cute, clean creature decorations: batches 15 to 20 repainted (#191)
 - **Smooth fire**: the Ember Bed's hearth now burns in smooth bands of colour on a glow of coals, and the Horned Skull Cauldron's ram skull has big round sockets and no nostrils.
 - **Every creature prop of batches 15 to 20 repainted** in a clean, cute style after the owner's reference pictures: flat colour in two or three tones with lit and shaded edges and no speckle. The **Monster Head** is a bright green Frankenstein head with a blunt black fringe and sleepy closed eyes that open glowing when it wakes; the **Flying Eyeball**, plushes, moths and jar oddities are clean and glossy; skulls (the **Colossal Skull** too) have big round sockets with a glint and no nose holes; bones are smooth cream; the gargoyles have round eyes and little fangs; the **Crawling Hand** is the monster's green; the cocoon sleeps, the clock's ghost says "oo" and the **Harvest Moon** has a sleeping smile.

@@ -6,6 +6,7 @@ handles are oak brown.
 """
 from PIL import Image
 
+import armor_icons
 import armor_styles
 import hitech
 
@@ -197,10 +198,11 @@ def draw_all(save, save_armor, part_palette):
         palette = part_palette(metal)
         for tool, mask in TOOLS.items():
             save(icon(mask, palette), "item", f"{metal}_{tool}")
-        # Armor: steampunk bronze and kaiserpunk steel, drawn in tools/armor_styles.py.
+        # Armor: the icons are the knight armor's (tools/armor_icons.py, a hand-drawn map a piece); the worn layers are
+        # drawn in tools/armor_styles.py.
         armor = armor_styles.palette(metal, palette)
-        for piece in ("helmet", "chestplate", "leggings", "boots"):
-            save(armor_styles.icon(metal, piece, armor), "item", f"{metal}_{piece}")
+        for piece in armor_icons.PIECES:
+            save(armor_icons.icon(metal, piece), "item", f"{metal}_{piece}")
         save_armor(armor_styles.layer(metal, armor, False), "humanoid", metal)
         save_armor(armor_styles.layer(metal, armor, True), "humanoid_leggings", metal)
     steel = part_palette("steel")

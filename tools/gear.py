@@ -105,9 +105,17 @@ def write_all(write, assets, data, lang, condition):
                                                                              "model": f"{MOD}:item/{item}_pulling_{n}"}}
                                                   for n, t in ((1, 0.65), (2, 0.9))]}}
         write(assets / "items" / f"{item}.json", {"model": definition})
+    # A flat layer is left out when every piece drawn with it has a 3D model (tools/armor_models.py, drawn by
+    # client/WornModelLayer): helmet, chestplate and boots use "humanoid", leggings "humanoid_leggings". With no layer
+    # left there is no asset file at all: 26.3 cannot read an empty layer map, and a missing asset draws nothing.
+    import armor_models
+    worn = {item for armor_set in armor_models.sets() for item in armor_set.pieces}
     for tier in GEAR_TIERS:
-        write(assets / "equipment" / f"{tier}.json", {"layers": {
-            "humanoid": [{"texture": f"{MOD}:{tier}"}], "humanoid_leggings": [{"texture": f"{MOD}:{tier}"}]}})
+        layers = {layer: [{"texture": f"{MOD}:{tier}"}]
+                  for layer, pieces in (("humanoid", ("helmet", "chestplate", "boots")), ("humanoid_leggings", ("leggings",)))
+                  if not all(f"{tier}_{piece}" in worn for piece in pieces)}
+        if layers:
+            write(assets / "equipment" / f"{tier}.json", {"layers": layers})
     for asset in ("scuba", "free_runners"):
         write(assets / "equipment" / f"{asset}.json", {"layers": {"humanoid": [{"texture": f"{MOD}:{asset}"}]}})
     lang[f"tooltip.{MOD}.oxygen"] = "Oxygen: %s / %s mB"

@@ -84,3 +84,34 @@ The owner asked on 3 October 2026 that new art not be held to Minecraft's 16×16
   - icons are 32×32 or 48×48, on the 45-degree pixel diagonal, in flat tones lit from the top left, with a one-pixel outline: no dithering, noise or glints;
   - in the hand each weapon is a box model with thickness, built from the same design (`tools/arms_pixel.py`).
 - **Art stays original.** References guide the look; nothing is traced or copied from them.
+
+## 3D armor: bigger than vanilla, built from parts
+The owner asked for armor that is not held to vanilla's shape: "make it so that the models can be different than vanilla armor so that you can capture all the parts of this", then "the armor can be much bigger than just the default vanilla armor and can have many different parts coming off of it". Their steel knight design was the first ([knight-armor.md](features/knight-armor.md)). Worn armor may now be built like this:
+- **Big, and sticking out.** A worn piece may be much bigger than the body and stick out at any angle:
+  - a helm wider than the head with a crest, horns and fins;
+  - layered pauldrons and flared cuffs;
+  - a skirt of plates to the ground.
+
+  Keep within about 12 pixels of the centre line to each side, 6 above the head and 1 below the feet: parts further out may pop out at the screen edge or sink into the floor (`armor_models.warnings`).
+- **Drawn by code, from parts.** Every piece is boxes on the body's six parts, sized, turned and hinged in `tools/armor_models.py` and painted in `tools/armor_paint.py`.
+  - A set is one module (`tools/knight_armor.py`), not a model made in another program, and nothing is traced from a reference.
+  - Shape that shows in silhouette is a box: crests, fins, lames, straps. Patterns on a surface are paint: chevrons, eye slits and strips.
+- **In the owner's chunky manner:**
+  - one texel per model pixel, so a plate's pattern is as coarse as the body's own skin;
+  - a short named palette sampled from the owner's design: six steps of metal, leather, a dark under-layer and one trim colour;
+  - nested L's and chevrons broken into hammered strips, long runs of one tone with two or three texels a tone lighter or darker;
+  - flat tones and no noise, as in [Texturing: keep it clean](#texturing-keep-it-clean).
+- **Intricate in the design's own words.** More detail means more of the design's own parts (another lame, a flange, a comb, a strap), not new motifs.
+- **Every side is drawn.** The back and the faces seen only when a limb swings get metal, mail or leather to match the front, never a black hole.
+- **A variant is a palette, plus a few fittings.**
+  - The bronze knight is the steel one in a hue-shifted copper-bronze, golden in the light and coppery red in shadow, with brass for the trim.
+  - Its fittings follow the tier styles above: rows of small rivets for the steam age, where the steel has a few heavy bolts.
+  - The owner's design itself outranks the tier styles: the steel knight is plate armor as they drew it, not dieselpunk.
+- **No flicker or clipping.** `armor_models.problems` refuses:
+  - coplanar faces closer than 0.1 pixel (five times the block models' 0.02, for entity depth);
+  - faces within 0.15 pixel of the skin layers;
+  - faces where another slot's vanilla armor draws.
+
+  Skirts hang from the legs, never the body, or they swing out when sneaking.
+- **Within the quad budget:** a full set should be about 600 quads, with caps of 900 per set and 200 per piece on one body part.
+- **Icons match.** Inventory icons stay vanilla's 16×16: a hand-drawn map per piece in the same palette (`tools/armor_icons/`), with a one-pixel outline darker than the armor's darkest tone.

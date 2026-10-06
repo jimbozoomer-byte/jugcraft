@@ -1381,6 +1381,8 @@ def machines():
     tower_guns.draw_all(save)
     import plastic
     plastic.draw_all(save)
+    import armor_paint   # the atlases of the 3D armor sets (tools/armor_models.py)
+    armor_paint.draw_all(TEX)
     save(conveyor_frame(0), "block", "conveyor_belt")
     save_animation([conveyor_frame(2 * i) for i in range(4)], "conveyor_belt_moving", frametime=1)
     save(shaft_frame(0), "block", "iron_shaft")

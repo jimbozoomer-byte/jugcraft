@@ -14,9 +14,12 @@ Design inspiration: Mekanism: Tools by aidancbrady and team (MIT). Only the idea
 - **Bronze and steel armor:** helmet, chestplate, leggings and boots.
   - Bronze matches iron's defense with a little toughness.
   - Steel sits between iron and diamond.
-  - **Bronze is steampunk:** a brass-crowned aviator cap with teal goggles on the brow, a breastplate with a pressure gauge, a copper boiler on the back, brass pauldrons, leather straps and buckled boots.
-  - **Steel is kaiserpunk:** a black Pickelhaube with a gold star plate and spike base, a field-grey tunic over a steel cuirass with gold buttons, a medal and red piping, gold-fringed epaulettes, red-striped breeches and tall polished jackboots.
-  - The owner asked for this (2 October 2026): "make sure the armor looks really cool and the copper and bronze armor is steampunk and the other one is kaiserpunk". The art is drawn pixel by pixel in `tools/armor_styles.py`.
+  - **The look is the owner's knight design,** worn as 3D models bigger than vanilla armor:
+    - a crested helm with fins, a chevron breastplate, layered pauldrons and flared vambraces;
+    - a leather belt and a skirt of plate bands.
+
+    Steel wears it as drawn, in light steel grey. Bronze is its steam-age make, in copper-bronze with brass trim and rivets. See [knight-armor.md](knight-armor.md).
+  - **The first looks are retired from bronze and steel.** They were bronze steampunk and steel kaiserpunk, drawn on 2 October 2026 in `tools/armor_styles.py`. The owner asked to keep them as sets of their own, Steampunk Armor and Kaiser Armor, in a separate PR.
 - **Paxels for every tier** (wood, stone, iron, gold, diamond, netherite, bronze, steel).
   - One tool that mines like a pickaxe, an axe and a shovel.
   - Crafted from the tier's pickaxe, axe and shovel; lasts as long as all three together.
@@ -52,7 +55,10 @@ Design inspiration: Mekanism: Tools by aidancbrady and team (MIT). Only the idea
 Plain items; nothing new is saved. Recipes follow the `tin` (bronze) and `machines` (steel, paxels) feature switches.
 
 ## Dependencies and assets
-No new dependencies. Tool icons are drawn by `tools/gear_textures.py` from hand-made masks and the mod's own metal palettes. Armor icons and worn layers are hand-drawn pixel maps in `tools/armor_styles.py`. No vanilla or Mekanism texture is traced or recoloured.
+No new dependencies. Tool icons are drawn by `tools/gear_textures.py` from hand-made masks and the mod's own metal palettes. No vanilla or Mekanism texture is traced or recoloured.
+- **Armor icons** are hand-drawn 16×16 maps, `tools/armor_icons/<piece>.txt`, coloured by `tools/armor_icons.py`.
+- **The worn armor** is the 3D knight armor: `tools/knight_armor.py`, on the toolkit described in [knight-armor.md](knight-armor.md).
+- **The old flat worn layers** from `tools/armor_styles.py` are still generated, but nothing names them: bronze and steel have no equipment asset files now ([knight-armor.md](knight-armor.md)).
 
 ## Verification
 - `tools/check_mod_data.py`:
@@ -65,7 +71,7 @@ No new dependencies. Tool icons are drawn by `tools/gear_textures.py` from hand-
   - paxels last three times their tier's pickaxe;
   - the netherite paxel resists fire;
   - every armor piece equips to its slot.
-- Client screenshots: `jugcraft_steel_armor_worn` (front), `jugcraft_bronze_armor_worn` (front) and `jugcraft_bronze_armor_back`.
+- Client screenshots: `jugcraft_steel_armor_worn` (front), `jugcraft_bronze_armor_worn` (front) and `jugcraft_bronze_armor_back`. They now show the 3D knight armor, though CI has not run them on it yet ([knight-armor.md](knight-armor.md#verification)).
 - Not run: client play, two players.
 
 ## World and event applicability

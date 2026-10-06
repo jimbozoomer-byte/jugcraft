@@ -435,7 +435,7 @@ Empty tools mine like a bare hand and get no drops.
 | Ronin Exosuit pieces, Ronin Katana | The same, in the crimson Ronin livery | smithing: Ronin Livery + piece (or power katana) + red dye |
 | Ronin / Vanguard Livery | Smithing templates that repaint the suit and katana, keeping charge | dyes around a steel plate (2) |
 
-**Code:** `gear/` (`JugcraftExosuit`, `ExosuitItem`, `Exosuit`), `tools/Jetpack`, client `ExosuitLayer`; data and art from `tools/exosuit.py` and `tools/exosuit_art.py` ([feature record](features/exosuit.md)).
+**Code:** `gear/` (`JugcraftExosuit`, `ExosuitItem`, `Exosuit`), `tools/Jetpack`, client `WornModelLayer`; data and art from `tools/exosuit.py` and `tools/exosuit_art.py` ([feature record](features/exosuit.md)).
 
 ### Pneumatic grapple (batch 30)
 

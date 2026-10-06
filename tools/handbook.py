@@ -556,9 +556,9 @@ def gear_pages():
         {"title": "Bronze and Steel Gear", "icon": f"{MOD}:steel_pickaxe", "text": [
             "Bronze and steel make swords, pickaxes, axes, shovels, hoes and armor, shaped like iron ones.",
             "Bronze tools get the same drops as iron and last a little longer. Bronze armor matches iron's and is "
-            "slightly tougher: steampunk brass, with goggles, a pressure gauge and a boiler on the back.",
+            "slightly tougher: knight's plate in copper-bronze, riveted in brass, with a brass collar.",
             "Steel tools mine obsidian and ancient debris, and last over three times as long as iron. Steel armor sits "
-            "between iron and diamond: a spiked helmet, a field-grey tunic over a steel cuirass, and jackboots."],
+            "between iron and diamond: knight's plate with a crested helm, layered pauldrons and a skirt of plates."],
          "craft": {"grid": grid, "result": f"{MOD}:steel_pickaxe", "count": 1}},
     ] + arms_pages() + [
         {"title": "Paxels", "icon": f"{MOD}:steel_paxel", "text": [
