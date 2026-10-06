@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.jimbozoomer.jugcraft.client.arms.ArmsMotion;
+import io.github.jimbozoomer.jugcraft.client.arms.FlailHeads;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -20,7 +21,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Arms motion (batch 43), on screen: while the main hand holding an arm is drawn, the arm takes its guard and its
  * attacks' keyed strokes where vanilla places the hand ({@link ArmsMotion#firstPersonPose}), in place of vanilla's
- * swing for that hand (its whack and its spear thrust). Other items and the off hand are left alone.
+ * swing for that hand (its whack and its spear thrust). Other items and the off hand are left alone. A flail's chain and
+ * ball are drawn on screen too ({@link FlailHeads}): the view's frame is kept as the hand pass begins, the item's once the
+ * hand is placed (and again after its swing), and the head is drawn as the pass returns.
  */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
 public abstract class ArmsFirstPersonMixin {
@@ -34,6 +37,7 @@ public abstract class ArmsFirstPersonMixin {
 			InteractionHand hand, float swingProgress, ItemStack stack, float equip, PoseStack poseStack, SubmitNodeCollector collector,
 			int light, CallbackInfo info) {
 		ArmsMotion.beginFirstPerson(Minecraft.getInstance().player, stack, hand, swingProgress, partialTick);
+		FlailHeads.beginFirstPerson(stack, poseStack, collector, light, partialTick);
 	}
 
 	@Inject(method = SUBMIT_ARM, at = @At("RETURN"))
@@ -41,11 +45,13 @@ public abstract class ArmsFirstPersonMixin {
 			InteractionHand hand, float swingProgress, ItemStack stack, float equip, PoseStack poseStack, SubmitNodeCollector collector,
 			int light, CallbackInfo info) {
 		ArmsMotion.endFirstPerson();
+		FlailHeads.endFirstPerson(poseStack);
 	}
 
 	@Inject(method = "applyItemArmTransform(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V", at = @At("TAIL"))
 	private void jugcraft$armPose(PoseStack poseStack, HumanoidArm arm, float equip, CallbackInfo info) {
 		ArmsMotion.firstPersonPose(poseStack, arm, equip);
+		FlailHeads.firstPersonFrame(poseStack, arm);
 	}
 
 	@WrapOperation(method = SUBMIT_ARM, at = @At(value = "INVOKE",
@@ -55,6 +61,7 @@ public abstract class ArmsFirstPersonMixin {
 		if (!ArmsMotion.firstPersonActive()) {
 			original.call(self, progress, poseStack, side, arm);
 		}
+		FlailHeads.firstPersonFrame(poseStack, arm);
 	}
 
 	@WrapOperation(method = SUBMIT_ARM, at = @At(value = "INVOKE",

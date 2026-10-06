@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.artillery;
 
+import io.github.jimbozoomer.jugcraft.SmoothFlight;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -8,6 +9,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LinearInterpolationHandler;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -52,10 +54,17 @@ public class ObservationBalloon extends Entity {
 		return player.startRiding(this) ? InteractionResult.SUCCESS : InteractionResult.PASS;
 	}
 
+	/** The client eases to each height the server sends instead of jumping to it (see {@link SmoothFlight}). */
+	@Override
+	public LinearInterpolationHandler createInterpolationHandler() {
+		return SmoothFlight.handler(this);
+	}
+
 	@Override
 	public void tick() {
 		super.tick();
 		if (!(level() instanceof ServerLevel)) {
+			SmoothFlight.step(this);
 			return;
 		}
 		if (Double.isNaN(anchorY)) {

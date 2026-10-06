@@ -29,7 +29,9 @@ public class OddityJarBlock extends Block implements EntityBlock {
 	public static final int WATCH_RANGE = 8;
 	/** How long the snake's tongues flick for after the jar is used, in ticks. */
 	public static final int FLICK_TICKS = 20;
-	private static final VoxelShape SHAPE = Block.box(3.9, 0.0, 3.9, 12.1, 13.6, 12.1);
+	/** The jar's box {x0, y0, z0, x1, y1, z1} in pixels (the Giant's Beating Heart's is three times this). */
+	public static final double[] BOX = {3.9, 0.0, 3.9, 12.1, 13.6, 12.1};
+	private static final VoxelShape SHAPE = Block.box(BOX[0], BOX[1], BOX[2], BOX[3], BOX[4], BOX[5]);
 	private final Kind kind;
 
 	/** What is in the jar. */

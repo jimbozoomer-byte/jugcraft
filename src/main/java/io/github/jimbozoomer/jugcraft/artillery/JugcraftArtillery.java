@@ -94,7 +94,7 @@ public final class JugcraftArtillery {
 		FLAK_GUN = entity("flak_gun", EntityType.Builder.<FlakGun>of(FlakGun::new, MobCategory.MISC).sized(2.0F, 1.8F)
 				.noLootTable().clientTrackingRange(10).updateInterval(1));
 		BALLOON = entity("observation_balloon", EntityType.Builder.<ObservationBalloon>of(ObservationBalloon::new, MobCategory.MISC)
-				.sized(1.4F, 1.0F).noLootTable().clientTrackingRange(16).updateInterval(2));
+				.sized(1.4F, 1.0F).noLootTable().clientTrackingRange(16).updateInterval(1));
 		HEAVY_SHELL = entity("heavy_shell", EntityType.Builder.<ArtilleryShell>of(ArtilleryShell::new, MobCategory.MISC)
 				.sized(0.4F, 0.4F).clientTrackingRange(16).updateInterval(1));
 		FLAK_SHELL = entity("flak_shell", EntityType.Builder.<ArtilleryShell>of(ArtilleryShell::new, MobCategory.MISC)
@@ -116,6 +116,8 @@ public final class JugcraftArtillery {
 			}
 		});
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> crewing(player) ? InteractionResult.FAIL
+				: entity instanceof CrewedGun wired && player.getItemInHand(hand).is(io.github.jimbozoomer.jugcraft.building.FireControl.WIRE)
+						? io.github.jimbozoomer.jugcraft.building.FireControl.link(player, wired)
 				: entity instanceof CrewedGun gun ? gun.use(player, hand)
 				: entity instanceof ObservationBalloon balloon ? balloon.use(player, hand) : InteractionResult.PASS);
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> crewing(player) ? InteractionResult.FAIL : InteractionResult.PASS);
