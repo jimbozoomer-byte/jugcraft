@@ -130,7 +130,10 @@ def body():
     for x in (-10, 6):
         m.append(box((x, 29, 22.5), (x + 4, 30, 23), NUT))
     # The sloped glacis down to the nose.
-    m.append(box((-16, 10, 28), (16, 24, 34), {"*": RIVETED}, rotation=("x", -30, (0, 17, 31))))
+    # The sloped front plate, in two halves a tile wide each, so every face's texture fits inside its sprite (a 32-pixel
+    # face of a turned box would read past it).
+    for x0 in (-16, 0):
+        m.append(box((x0, 10, 28), (x0 + 16, 24, 34), {"*": RIVETED}, rotation=("x", -30, (0, 17, 31))))
     # Twin amber headlamps.
     for x in (-12, 10):
         m.append(box((x, 18, 33), (x + 2, 21, 34.5), {"*": BAND, "south": f"{AMBER}!"}))
