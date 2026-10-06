@@ -12,7 +12,7 @@ painter); no other texture is read, traced or recoloured.
 """
 import math
 
-from fur_paint import mix, clean_painter as Painter, clean_ramp as ramp
+from fur_paint import Painter, mix, ramp
 from crop_textures import rgb
 from ferris_wheel import CAR_COLOURS
 
