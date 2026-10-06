@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenEpitaphPayload;
 import io.github.jimbozoomer.jugcraft.agriculture.SpookyBurstPayload;
 import io.github.jimbozoomer.jugcraft.client.arms.ArmsMotion;
+import io.github.jimbozoomer.jugcraft.client.arms.FlailHeads;
 import io.github.jimbozoomer.jugcraft.client.arms.TwoHandedInput;
 import io.github.jimbozoomer.jugcraft.drone.DroneTerminalBlock;
 import io.github.jimbozoomer.jugcraft.drone.JugcraftDrones;
@@ -84,6 +85,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		ArtilleryClient.register();
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.building.Trenchworks.SEARCHLIGHT_ENTITY, SearchlightRenderer::new);
 		ArmsMotion.load();
+		FlailHeads.load();
+		FlailHeads.register();
 		TwoHandedInput.register();
 		ClientPlayNetworking.registerGlobalReceiver(WeaponArtPayload.TYPE, (payload, context) -> ArmsMotion.receive(payload));
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);

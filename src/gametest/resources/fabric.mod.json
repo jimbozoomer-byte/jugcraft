@@ -176,7 +176,8 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIIClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MachineMotionClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.RuneboundClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.RuneboundClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FlailClientGameTests"
 		]
 	},
 	"depends": {

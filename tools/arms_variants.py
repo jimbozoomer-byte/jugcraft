@@ -14,6 +14,7 @@ tools/arms_variants_art.py; the Runebound arms are smooth meshes in the hand, wi
 (tools/arms_mesh.py).
 """
 import arms
+import arms_heads
 import arms_mesh
 import arms_variants_art
 
@@ -219,6 +220,13 @@ def write_all(write, assets, data, lang, condition):
                  "cases": [{"when": ["gui", "ground", "fixed", "on_shelf"],
                             "model": {"type": "minecraft:model", "model": f"{MOD}:item/{name}"}}],
                  "fallback": {"type": "minecraft:model", "model": f"{MOD}:item/{name}_in_hand"}}
+        if name in arms_heads.VARIANT_HEADS:
+            # Its swinging head (tools/arms_heads.py): the spine and skull models, picked by FlailHeads' render copies.
+            _grip, unit, _g, _e = arms_variants_art.head_layout(name, arms.KINDS[kind_]["held"])
+            for part, head_model in arms_heads.models(arms_heads.VARIANT_HEADS[name], unit).items():
+                head_model["textures"] = {"particle": f"{MOD}:item/{name}_model", "tex": f"{MOD}:item/{name}_model"}
+                write(models / f"{name}_{part}.json", head_model)
+            model = arms_heads.definition(name, model)
         write(assets / "items" / f"{name}.json", {"model": model, "swap_animation_scale": arms.KINDS[kind_]["held"]})
         if at in STYLES:
             style = STYLES[at]
