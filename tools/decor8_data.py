@@ -115,8 +115,9 @@ def jar_elements():
 def specimen_elements(specimen):
     """What floats in the jar, round its middle (8, 6, 8)."""
     if specimen == "eye":
-        return [box((6.5, 4.5, 6.5), (9.5, 7.5, 9.5), "#eye", uvs={"north": (0, 0, 16, 16)}),
-                box((7.75, 3, 8.5), (8.25, 4.5, 9), "#nerve")]
+        # The Flying Eyeball's clean eye, rounder and mapped on every side (tools/decor16_data.py specimen_eye).
+        import decor16_data
+        return decor16_data.specimen_eye_elements("#eye")
     if specimen == "tentacle":
         return [box((7, 2.5, 7), (9, 5, 9), "#tentacle"), box((7.25, 5, 7.5), (8.75, 7.5, 9), "#tentacle"),
                 box((7.5, 7.5, 8), (8.5, 9.5, 9), "#tentacle"), box((7.75, 9.5, 8.75), (8.25, 10, 9.75), "#tentacle")]

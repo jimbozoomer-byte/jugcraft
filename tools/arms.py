@@ -20,6 +20,7 @@ import math
 from PIL import Image
 
 import arms_art
+import arms_heads
 import arms_icons
 import gear
 
@@ -600,6 +601,7 @@ def write_all(write, assets, data, lang, condition):
         _recipe(write, data, condition, item)
     import arms_kit
     arms_kit.write_all(write, assets, lang)
+    write_heads(write, models)
     for item in items():
         metal, kind = split(item)
         if kind not in KINDS:
@@ -613,9 +615,42 @@ def write_all(write, assets, data, lang, condition):
                  "cases": [{"when": ["gui", "ground", "fixed", "on_shelf"],
                             "model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}}],
                  "fallback": {"type": "minecraft:model", "model": f"{MOD}:item/{item}_in_hand"}}
+        if kind in arms_heads.HEADS:
+            # The flail's swinging head: its link and ball models, picked by FlailHeads' render copies of the stack.
+            for part in ("link", "ball"):
+                write(models / f"{item}_{part}.json", {"parent": f"{MOD}:item/arms_{kind}_{part}",
+                                                       "textures": {"tex": f"{MOD}:item/{item}_model"}})
+            model = arms_heads.definition(item, model)
         swap = 1.95 * info["held"] if kind in CHARGING else info["held"]
         # A longer arm comes up into the hand faster, as vanilla's spear does, so it never hangs half-raised.
         write(assets / "items" / f"{item}.json", {"model": model, "swap_animation_scale": round(swap, 2)})
+    write(assets / "arms_heads.json", heads_table())
+
+
+def write_heads(write, models):
+    """The shared head models of the kinds whose head swings free (tools/arms_heads.py), sized by each kind's layout."""
+    for kind, head in arms_heads.HEADS.items():
+        _grip_model, unit, _grip, _eye = arms_art.head_layout(kind, KINDS[kind]["held"])
+        for part, model in arms_heads.models(head, unit).items():
+            write(models / f"arms_{kind}_{part}.json", model)
+
+
+def heads_table():
+    """arms_heads.json as tools/arms.py writes it (for tools/check_mod_data.py): the arms' flails and the Arms VII
+    variants' (tools/arms_variants.py) whose head swings free."""
+    import arms_variants   # (here: it imports this module)
+    import arms_variants_art
+    table = {}
+    for item in items():
+        metal, kind = split(item)
+        if kind in arms_heads.HEADS:
+            table[f"{MOD}:{item}"] = arms_heads.entry(arms_heads.HEADS[kind], arms_art.head_layout(kind, KINDS[kind]["held"]),
+                                                      held_model(kind)["display"])
+    for name, head in arms_heads.VARIANT_HEADS.items():
+        held = KINDS[arms_variants.kind(name)]["held"]
+        table[f"{MOD}:{name}"] = arms_heads.entry(head, arms_variants_art.head_layout(name, held),
+                                                  arms_variants.held_model(name)["display"])
+    return table
 
 
 def _recipe(write, data, condition, item):

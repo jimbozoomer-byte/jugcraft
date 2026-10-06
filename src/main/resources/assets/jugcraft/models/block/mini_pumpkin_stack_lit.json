@@ -51,7 +51,7 @@
     {
       "from": [
         4.25,
-        5.18,
+        5.1,
         6.75
       ],
       "to": [
@@ -61,16 +61,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#stem"
+          "texture": "#stem",
+          "uv": [
+            10.75,
+            9.3,
+            11.75,
+            10.8
+          ]
         },
         "south": {
-          "texture": "#stem"
+          "texture": "#stem",
+          "uv": [
+            4.25,
+            9.3,
+            5.25,
+            10.8
+          ]
         },
         "east": {
-          "texture": "#stem"
+          "texture": "#stem",
+          "uv": [
+            8.25,
+            9.3,
+            9.25,
+            10.8
+          ]
         },
         "west": {
-          "texture": "#stem"
+          "texture": "#stem",
+          "uv": [
+            6.75,
+            9.3,
+            7.75,
+            10.8
+          ]
         },
         "up": {
           "texture": "#stem"

@@ -439,3 +439,27 @@ def classic_giant(footprint):
 for _machine in ENLARGED:
     MODELS[_machine] = classic_giant(FOOTPRINTS[_machine])
     FRONTS[_machine] = f"{_machine}_front"
+
+
+def classic_sawmill():
+    """The classic sawmill keeps clear of the parts client/MachineRotors draws in either style (giant_models.ROTORS):
+    a shorter body at the front and two tanks either side of a slot the blade turns in (x -2.75..2.75; the blade, its
+    flanges and arbor nut run in it, the arbor and pulleys are hidden in the tanks)."""
+    return [((-16, 0, 0), (16, 2, 80), "heavy_plinth"),
+            ((-15, 2, 1), (15, 28, 29.5), {"*": STEEL, "north": "#front", "up": TOP}),
+            ((-13, 2, 31), (-2.75, 28, 78), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+            ((2.75, 2, 31), (13, 28, 78), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+            ((9, 12, -0.5), (13, 16, 0), PIPE)]
+
+
+def classic_sieve():
+    """The classic sieve's body is two pixels taller than the other giants', so it hides the vibrator weights that
+    client/MachineRotors draws in either style (they turn up to y 29.5)."""
+    m = classic_giant(FOOTPRINTS["sieve"])
+    (x0, y0, z0), (x1, _, z1), texture = m[1]
+    m[1] = ((x0, y0, z0), (x1, 30, z1), texture)
+    return m
+
+
+MODELS["sawmill"] = classic_sawmill()
+MODELS["sieve"] = classic_sieve()
