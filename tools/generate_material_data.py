@@ -177,6 +177,10 @@ def assets():
     fortifications.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import fire_control
     fire_control.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import raiders
+    import armoured_walker
+    armoured_walker.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    raiders.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import zeppelin
     zeppelin.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import mech
@@ -1281,6 +1285,8 @@ def tags():
     fortifications.add_tags(tags)
     import fire_control
     fire_control.add_tags(tags)
+    import raiders
+    raiders.add_tags(tags)
     tags.add("block", "minecraft:rails", rid("booster_rail"))
     tags.add("item", "minecraft:rails", rid("booster_rail"))
     import construction
