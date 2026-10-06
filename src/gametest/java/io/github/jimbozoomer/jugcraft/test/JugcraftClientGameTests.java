@@ -534,7 +534,8 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			// trench periscope looking over a sandbag parapet. Fire control's fill clears it all again.
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 144, y, z - 14, x - 114, y + 10, z + 10));
 			server.runOnServer(minecraft -> buildBunker(minecraft.overworld(), new BlockPos(x - 136, y, z - 8)));
-			server.runCommand("tp @p %d %d %d 180 12".formatted(x - 132, y + 1, z + 2));
+			// Three blocks in front of the open south side, looking in and a little down, so the interior fills the picture.
+			server.runCommand("tp @p %d %d %d 180 14".formatted(x - 132, y, z - 1));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_bunker");
