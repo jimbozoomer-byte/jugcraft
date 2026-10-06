@@ -52,6 +52,7 @@ import tower_guns
 import gear
 import arms
 import arms_variants
+import check_icon_maps
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
@@ -128,7 +129,9 @@ def texture(ref):
     animated = png.with_name(png.name + ".mcmeta").is_file()
     with Image.open(png) as img:
         # Square: 16x16, or 32x32, 48x48 or 64x64 for high-resolution art, or 128x128 for a sculpted prop's packed texture
-        # (docs/ART_DIRECTION.md, "High resolution"; 48 for the icons of the long arms, which the arms' texel size wants).
+        # (docs/ART_DIRECTION.md, "High resolution"). New item icons are 16x16 (docs/ITEM_ICONS.md): 32, 48 and 64 remain
+        # for the 122 older icons not yet redrawn (tools/legacy_item_icons.txt, which tools/check_icon_maps.py holds to),
+        # and for block and model textures.
         # Animated textures are a vertical strip of square frames of 16x16, 32x32, 48x48 or 64x64 with an .mcmeta beside
         # them.
         width, height = img.size
@@ -1218,6 +1221,13 @@ def check_arms():
         definition = load(ASSETS / "items" / f"{item}.json") or {}
         if not definition.get("swap_animation_scale"):
             err(f"items/{item}.json has no swap_animation_scale")
+
+
+def check_item_icons():
+    """The 16x16 item icon maps, the materials they are coloured in and the item icons' sizes (tools/check_icon_maps.py,
+    docs/ITEM_ICONS.md); and the checker's own self-test, so a later edit cannot quietly weaken it."""
+    for message in check_icon_maps.errors() + check_icon_maps.self_test():
+        err(f"Item icon maps: {message}")
 
 
 def check_arms_variants():
@@ -5997,6 +6007,7 @@ def main():
     check_deposits()
     check_gear()
     check_arms()
+    check_item_icons()
     check_arms_variants()
     check_arms_motion()
     check_exosuit()

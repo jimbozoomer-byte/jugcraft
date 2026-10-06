@@ -30,14 +30,14 @@ Every arm's inventory icon is redrawn at vanilla's own size, 16×16, in the owne
   - the pike has langets and a ring, where the javelin has a thin shaft.
 - **The 3D models in the hand stay,** as the owner asked. Their palettes change with the icons', in the colours the owner
   chose from two options on 5 October 2026 ("I like the alternate versions for steel and bronze"):
-  - bronze is a tan gold (#7e5222 to #f6d696), apart from vanilla's copper and matching the mod's bronze ingots;
+  - bronze is a tan bronze (#7e5222 to #f6d696), apart from vanilla's copper and matching the mod's bronze ingots;
   - steel is a dark blue-grey (#4a5262 to #d0d8e4), apart from vanilla's iron and matching the mod's steel.
 - **The big arms show the whole weapon.** The first 16×16 drafts of nine kinds were cropped, so their guards and grips
   filled half the icon. The owner said: "redo Sabre, Zweihander, Moonblade, Greatsword, Battleblade, Executioner,
   Halberd, Longsword, Nodachi. I get that those are big but just cutting them off doesn't really work well".
-  - They are redrawn to fit the full diagonal at their true proportions: a blade two thirds of the length (nine or ten
-    steps of fifteen), a slim guard, a short grip and a small pommel. The halberd has a full-length haft and a compact
-    head.
+  - They are redrawn whole, every part present, to fit the full diagonal in proportions that read at 16: a blade two
+    thirds of the length (nine or ten steps of fifteen), a slim guard, a short grip and a small pommel. The halberd has
+    a full-length haft and a compact head.
   - Two designs were made for each and judged against the old 32 and 48-pixel icons' proportions and the owner's sheet,
     then critiqued and checked as a family. Small to large at 2×, they read: dagger, katana, rapier and estoc, longsword
     and sabre, zweihander, greatsword and the broad blades.
@@ -80,6 +80,11 @@ Every map was drawn fresh.
   - no fill pixel touching transparency;
   - no stray outline pixels;
   - no enclosed pinholes.
+- **The rules for every item icon,** measured from these maps, are in [ITEM_ICONS.md](../ITEM_ICONS.md).
+  `tools/check_icon_maps.py` checks the maps, the materials they are coloured in and every item icon's size against
+  them, and `tools/check_mod_data.py` runs it and its self-test in CI. The five maps with a deliberate hole declare it
+  in a comment: the chakram's ring, the harpoon's rope (whose inner edge is also left unoutlined), the katar's hand gap,
+  the rapier's knuckle bow and the war fork's tines.
 
 ## Connections
 None changed: no recipes, numbers, IDs, tags, components or Java. Every arm keeps its tooltips, motion and weapon art.
@@ -108,11 +113,12 @@ Not applicable: no gameplay change.
 |---|---|
 | `python3 tools/generate_textures.py` | Run. 209 textures differ from main, all under `textures/item/`: 34 kinds' icons and models in bronze and steel, plus the bows, arbalests, shields, 20 variants and one smithing pattern re-tinted by the new palettes. Running it again changes nothing. |
 | Each map's 16 rows of 16 known symbols | Run: all 38 pass. |
-| Generator output against the preview renderer | Compared pixel by pixel: bronze is identical. Steel differs only in the haft and grip, which the generator draws in steel's dark wood and rubber (the 3D models' materials). |
+| `python3 tools/check_icon_maps.py` ([ITEM_ICONS.md](../ITEM_ICONS.md)) | Run: PASS. 38 maps with no warning; the materials of the 2 arms styles and the 12 Arms VII lines; 669 item icons' sizes, 122 of them legacy. 5 warnings, all on Arms VII lines' palettes that no variant map uses yet (ITEM_ICONS.md, rule 6). Before the five maps declared their holes, it failed exactly those five. `--self-test`: PASS, every planted break caught. |
+| Generator output against the preview renderer | Compared pixel by pixel before the palettes changed: bronze was identical, and steel differed only in the haft and grip, which the generator draws in steel's dark wood and rubber (the 3D models' materials). Since the owner's palettes, the generator's colours are the only ones that ship. |
 | `python3 tools/check_mod_data.py` | PASS: 1437 material IDs, data files and recipe audit. |
 | `python3 scripts/check_repository.py` | PASS. |
-| `./gradlew build` and the game tests | Not run locally; CI runs them on the PR. |
-| `ArmsClientGameTests` (every arm in an item frame, as an inventory sprite, and held) | CI shoots these; results to be recorded below. |
+| `./gradlew build` and the server game tests (CI job `mod`) | Not run locally. PR #201 CI on 1254ba18: passed. |
+| `ArmsClientGameTests` (every arm in an item frame, as an inventory sprite, and held), CI jobs `client (shard 0, 1 and 2 of 3)` | PR #201 CI on 1254ba18: all three shards and the `client` result passed. The close-up shots `jugcraft_arms_frames_close_1` to `_9` show all 34 kinds on main in both metals in item frames, read at a glance; the four thrown arms are not on main yet. |
 | Played in a client | Not done. |
 
 ## World and event applicability
