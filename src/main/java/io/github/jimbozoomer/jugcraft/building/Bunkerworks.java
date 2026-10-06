@@ -81,12 +81,12 @@ public final class Bunkerworks {
 		switch (kind) {
 			case "periscope" -> block(id, new TrenchPeriscopeBlock(properties(id, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
 					.sound(SoundType.METAL).requiresCorrectToolForDrops().strength(hardness, blast).noOcclusion()
-					.pushReaction(PushReaction.DESTROY))));
+					.pushReaction(PushReaction.POPPED))));
 			case "map_table" -> block(id, new MapTableBlock(properties(id, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 					.sound(SoundType.WOOD).strength(hardness, blast).noOcclusion().ignitedByLava())));
 			case "curtain" -> block(id, new GasCurtainBlock(properties(id, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
 					.sound(SoundType.WOOL).strength(hardness, blast).noCollision().noOcclusion().ignitedByLava()
-					.pushReaction(PushReaction.DESTROY))));
+					.pushReaction(PushReaction.POPPED))));
 			case "kitchen" -> block(id, new FieldKitchenBlock(properties(id, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
 					.sound(SoundType.METAL).requiresCorrectToolForDrops().strength(hardness, blast).noOcclusion()
 					.lightLevel(state -> state.getValue(FieldKitchenBlock.LIT) ? KITCHEN_LIGHT : 0))));
@@ -103,7 +103,7 @@ public final class Bunkerworks {
 					.mapColor(MapColor.METAL).strength(hardness, blast).lightLevel(state -> LAMP_LIGHT))));
 			case "bunk" -> block(id, new BunkerBunkBlock(properties(id, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 					.sound(SoundType.WOOD).strength(hardness, blast).noOcclusion().ignitedByLava()
-					.pushReaction(PushReaction.DESTROY))));
+					.pushReaction(PushReaction.POPPED))));
 			default -> throw new IllegalArgumentException(kind);
 		}
 	}

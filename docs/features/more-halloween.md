@@ -338,7 +338,7 @@ The 9 new game tests (`Decor7GameTests`):
 The client game test (`Decor7ClientGameTests`) builds a dark-oak room open at the front: a lit Haunted Chandelier under the ceiling, the Phantom Pipe Organ playing against the back wall, Tattered Curtains at two windows (one drape drawn open), a Suit of Armor by the left wall, Dust Sheets over a rocking chair, a chest and a stair, a Spirit Mirror on the right wall and the Creepy Doll on a bookshelf. It photographs them by day and at midnight, then waits in front of the mirror until its face shows: the sheets drape over their furniture, the organ's keys and a note show as it plays, the chandelier's flames burn, the suit's visor glows red, and the face looks out of the mirror. The doll had looked away from the camera when it was photographed.
 
 Found by CI and fixed before this record:
-- 26.3 names `PushReaction.DESTROY` and `BLOCK` `POPPED` and `IMMOVEABLE` (a compile error).
+- 26.3 names `PushReaction.POPPED` and `BLOCK` `POPPED` and `IMMOVEABLE` (a compile error).
 
 **Not run (batch 7):**
 - a person playing it in a client;
