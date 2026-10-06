@@ -1227,43 +1227,205 @@ public class JugcraftGameTests {
 	}
 
 	/**
-	 * Fortification extras: the bunker door opens by hand; two sliding gates side by side open together on one signal and
-	 * leave only a post to bump into; the embrasure has a slit through it; the parapet corner's merlon turns with it.
+	 * Batch 56 helper: a Triple Battery on a stone pad, a ready rack of five Heavy Shells beside it and a fire control
+	 * table facing south (down the range) with the battery linked to it through the wire, in {@code mode}. Returns the
+	 * battery; the rack is at (5, 1, 2) and the table at (8, 1, 2).
 	 */
-	@GameTest(maxTicks = 60)
-	public void fortificationExtras(GameTestHelper helper) {
-		var blocks = io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS;
-		var door = (net.minecraft.world.level.block.DoorBlock) blocks.get("bunker_door");
-		helper.assertTrue(door.type().canOpenByHand(), "A bunker door should open by hand");
-		ServerLevel level = helper.getLevel();
-		BlockPos embrasure = new BlockPos(5, 1, 5);
-		helper.setBlock(embrasure, blocks.get("bastion_embrasure"));
-		var shape = helper.getBlockState(embrasure).getShape(level, helper.absolutePos(embrasure));
-		helper.assertTrue(!net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(shape,
-				net.minecraft.world.phys.shapes.Shapes.box(0.4, 0.6, 0.0, 0.6, 0.65, 1.0), net.minecraft.world.phys.shapes.BooleanOp.AND),
-				"An embrasure should have a slit right through it");
-		var corner = blocks.get("bastion_parapet_corner").defaultBlockState();
-		var north = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.NORTH);
-		var south = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.SOUTH);
-		helper.setBlock(new BlockPos(1, 1, 5), north);
-		helper.setBlock(new BlockPos(3, 1, 5), south);
-		var corner_nw = net.minecraft.world.phys.shapes.Shapes.box(0.1, 0.7, 0.1, 0.3, 0.9, 0.3);
-		helper.assertTrue(net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(1, 1, 5))
-				.getShape(level, helper.absolutePos(new BlockPos(1, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND)
-				&& !net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(3, 1, 5))
-						.getShape(level, helper.absolutePos(new BlockPos(3, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND),
-				"The corner's merlon should stand at the north-west facing north, and turn with it");
-		BlockPos left = new BlockPos(2, 1, 2);
-		BlockPos right = new BlockPos(3, 1, 2);
-		helper.setBlock(left, blocks.get("sliding_gate"));
-		helper.setBlock(right, blocks.get("sliding_gate"));
-		helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, false);
-		helper.setBlock(new BlockPos(1, 1, 2), Blocks.REDSTONE_BLOCK);
+	private static io.github.jimbozoomer.jugcraft.artillery.TowerGun linkedBattery(GameTestHelper helper,
+			io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode mode) {
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		BlockPos rackPos = new BlockPos(5, 1, 2);
+		helper.setBlock(rackPos, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		helper.getBlockEntity(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class).shells
+				.addItem(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 5));
+		BlockPos tablePos = new BlockPos(8, 1, 2);
+		helper.setBlock(tablePos, io.github.jimbozoomer.jugcraft.building.FireControl.TABLE.defaultBlockState()
+				.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.SOUTH)
+				.setValue(io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.MODE, mode));
+		var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("triple_battery");
+		io.github.jimbozoomer.jugcraft.artillery.TowerGun battery = helper.spawn(type, new Vec3(2.5, 1, 2.5));
+		battery.face(0.0F);
+		ServerPlayer layer = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.building.FireControl.startLink(layer, helper.getLevel(), helper.absolutePos(tablePos));
+		io.github.jimbozoomer.jugcraft.building.FireControl.link(layer, battery);
+		layer.discard();
+		return battery;
+	}
+
+	/**
+	 * Batch 56: linking through the wire, the link limit, a parallel sheaf's spacing, and that the wire on a linked gun
+	 * unlinks it.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void fireControlTableLinksGuns(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.PARALLEL);
+		BlockPos tablePos = new BlockPos(8, 1, 2);
+		var table = helper.getBlockEntity(tablePos, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		helper.assertTrue(table.linked(battery.getUUID()), "The wire should have linked the battery to the table");
+		helper.assertTrue(helper.absolutePos(tablePos).equals(battery.director()), "The battery should know its table");
+		for (int i = 1; i < io.github.jimbozoomer.jugcraft.building.FireControl.MAX_GUNS; i++) {
+			helper.assertTrue(table.link(java.util.UUID.randomUUID()), "A table should take " + io.github.jimbozoomer.jugcraft.building.FireControl.MAX_GUNS + " guns");
+		}
+		helper.assertFalse(table.link(java.util.UUID.randomUUID()), "A table should refuse a gun past its limit");
+		// Three guns on a parallel sheaf straight down the range lay on points six blocks apart across it.
+		while (table.links().size() > 3) {
+			table.unlink(table.links().get(table.links().size() - 1));
+		}
+		BlockPos target = helper.absolutePos(new BlockPos(8, 0, 30));
+		table.setTarget(target);
+		Vec3 first = table.aimPoint(table.links().get(0));
+		Vec3 middle = table.aimPoint(table.links().get(1));
+		Vec3 last = table.aimPoint(table.links().get(2));
+		helper.assertTrue(middle.distanceTo(Vec3.atCenterOf(target).add(0, 0.5, 0)) < 1.0E-6, "The middle gun should lay on the target");
+		helper.assertTrue(Math.abs(first.distanceTo(middle) - io.github.jimbozoomer.jugcraft.building.FireControl.SHEAF_SPACING) < 1.0E-6
+				&& Math.abs(last.distanceTo(middle) - io.github.jimbozoomer.jugcraft.building.FireControl.SHEAF_SPACING) < 1.0E-6
+				&& Math.abs(first.z - last.z) < 1.0E-6, "A parallel sheaf should spread across the line of fire, six blocks apart");
+		ServerPlayer layer = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.building.FireControl.startLink(layer, helper.getLevel(), helper.absolutePos(tablePos));
+		io.github.jimbozoomer.jugcraft.building.FireControl.link(layer, battery);
+		helper.assertFalse(table.linked(battery.getUUID()), "The wire on a linked gun should unlink it");
+		helper.assertTrue(battery.director() == null, "An unlinked gun should forget its table");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 56: an uncrewed battery linked to a table on converge lays on the table's target but holds fire until a
+	 * redstone pulse into the table, then fires exactly one salvo from the ready rack; the table's comparator reads it as
+	 * ready while it waits.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 260, skyAccess = true)
+	public void fireControlSalvoOnPulse(GameTestHelper helper) {
+		linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CONVERGE);
+		BlockPos tablePos = new BlockPos(8, 1, 2);
+		var table = helper.getBlockEntity(tablePos, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		table.setTarget(helper.absolutePos(new BlockPos(2, 0, 30)));
+		var rack = helper.getBlockEntity(new BlockPos(5, 1, 2), io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		helper.runAfterDelay(70, () -> {
+			helper.assertTrue(rack.count() == 5, "A laid gun must not fire before the table orders it, but the rack holds " + rack.count());
+			helper.assertTrue(table.readyCount(helper.getLevel().getGameTime()) == 1, "The laid, loaded battery should report ready");
+			ServerLevel level = helper.getLevel();
+			BlockState state = level.getBlockState(helper.absolutePos(tablePos));
+			helper.assertTrue(state.getAnalogOutputSignal(level, helper.absolutePos(tablePos), Direction.NORTH) == 1,
+					"The table's comparator should read one ready gun");
+			helper.setBlock(new BlockPos(9, 1, 2), Blocks.REDSTONE_BLOCK);
+		});
+		helper.runAfterDelay(160, () -> helper.assertTrue(rack.count() == 2,
+				"One pulse should fire one salvo of three shells, leaving 2, but left " + rack.count()));
+		helper.runAfterDelay(240, () -> {
+			helper.assertTrue(rack.count() == 2, "A held signal must not fire again, but the rack holds " + rack.count());
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 56: on sentry an uncrewed battery ignores a hostile mob outside the table's 90 degree sector and one with a
+	 * player beside it, and lays on and fires at one inside the sector.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
+	public void fireControlSentryKeepsToItsSector(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.SENTRY);
+		var table = helper.getBlockEntity(new BlockPos(8, 1, 2), io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		table.setSectorWidth(90);
+		var rack = helper.getBlockEntity(new BlockPos(5, 1, 2), io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		for (int x = 30; x <= 32; x++) {
+			for (int z = 1; z <= 3; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		// East of the table: outside a sector facing south.
+		var outside = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new Vec3(31.5, 1, 2.5));
+		// South, in the sector, but with a player standing beside it.
+		for (int x = 1; x <= 3; x++) {
+			for (int z = 27; z <= 29; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		var guarded = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new Vec3(2.5, 1, 28.5));
+		ServerPlayer friend = helper.makeMockServerPlayerInLevel();
+		friend.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		friend.setPos(helper.absoluteVec(new Vec3(4.5, 1, 28.5)));
+		for (int tick = 5; tick <= 80; tick += 5) {
+			helper.runAfterDelay(tick, () -> {
+				var target = battery.sentryTarget();
+				helper.assertFalse(target == outside, "A sentry must not engage a mob outside its sector");
+				helper.assertFalse(target == guarded, "A sentry must not engage a mob with a player beside it");
+			});
+		}
+		helper.runAfterDelay(85, () -> {
+			helper.assertTrue(rack.count() == 5, "Nothing should have been fired yet, but the rack holds " + rack.count());
+			friend.discard();
+			guarded.discard();
+			outside.discard();
+			for (int x = 1; x <= 3; x++) {
+				for (int z = 31; z <= 33; z++) {
+					helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+				}
+			}
+			// The first salvo is enough to pass, whether or not it kills the husk.
+			helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new Vec3(2.5, 1, 32.5));
+		});
+		helper.runAfterDelay(280, () -> {
+			helper.assertTrue(rack.count() < 5, "A sentry should fire at a hostile mob in its sector, but the rack still holds " + rack.count());
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Fire control extras: a creeping barrage fires its first salvo on the target, then each salvo after steps the point
+	 * {@value io.github.jimbozoomer.jugcraft.building.FireControl#CREEP_STEP} blocks further down range, starting again after
+	 * {@value io.github.jimbozoomer.jugcraft.building.FireControl#CREEP_STEPS} steps; setting a new target starts it afresh.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void creepingBarrageWalksDownRange(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CREEPING);
+		var table = helper.getBlockEntity(new BlockPos(8, 1, 2), io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		var mode = io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CREEPING;
+		table.setTarget(helper.absolutePos(new BlockPos(8, 0, 20)));
+		Vec3 start = table.aimPoint(battery.getUUID());
+		int step = io.github.jimbozoomer.jugcraft.building.FireControl.CREEP_STEP;
+		int steps = io.github.jimbozoomer.jugcraft.building.FireControl.CREEP_STEPS;
+		helper.assertTrue(table.fire(mode), "A creeping barrage with a target should fire");
+		helper.assertTrue(table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6, "The first salvo lands on the target itself");
+		helper.assertTrue(table.fire(mode), "and the second fires too");
+		Vec3 next = table.aimPoint(battery.getUUID());
+		helper.assertTrue(Math.abs(next.z - start.z - step) < 1.0E-6 && Math.abs(next.x - start.x) < 1.0E-6,
+				"The second salvo should land " + step + " blocks further down range, not at " + next.subtract(start));
+		for (int i = 2; i <= steps; i++) {
+			table.fire(mode);
+		}
+		helper.assertTrue(table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6, "After " + steps + " steps it starts again");
+		table.fire(mode);
+		table.setTarget(helper.absolutePos(new BlockPos(8, 0, 20)));
+		helper.assertTrue(table.creep() == 0 && table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6,
+				"Setting the target again starts the barrage afresh");
+		helper.succeed();
+	}
+
+	/**
+	 * Fire control extras: a gunner aboard a linked gun, with no mark of their own, has the gun laid on the table's point
+	 * (whichever way they look); they still choose when it fires.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void crewedGunFollowsTheTable(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CONVERGE);
+		var table = helper.getBlockEntity(new BlockPos(8, 1, 2), io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		// Off to the side of the battery's start, so it has to turn to it.
+		BlockPos target = helper.absolutePos(new BlockPos(30, 0, 30));
+		table.setTarget(target);
+		ServerPlayer gunner = helper.makeMockServerPlayerInLevel();
+		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
+		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.clear(gunner);
+		helper.onEachTick(() -> gunner.setYRot(90.0F));
 		helper.succeedWhen(() -> {
-			helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
-			helper.assertBlockProperty(right, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
-			var open = helper.getBlockState(right).getCollisionShape(level, helper.absolutePos(right));
-			helper.assertTrue(open.bounds().getXsize() < 0.2, "An open gate should leave only its post");
+			Vec3 to = Vec3.atCenterOf(target).subtract(battery.position());
+			float wanted = (float) Math.toDegrees(Math.atan2(-to.x, to.z));
+			float off = Math.abs(net.minecraft.util.Mth.wrapDegrees(battery.aimYaw(0) - wanted));
+			helper.assertTrue(off < 4.0F, "The crewed gun should turn to the table's target (yaw " + wanted + "), not " + battery.aimYaw(0));
 		});
 	}
 
@@ -3044,5 +3206,46 @@ public class JugcraftGameTests {
 			transaction.abort();
 		}
 		helper.succeed();
+	}
+
+	/**
+	 * Fortification extras: the bunker door opens by hand; two sliding gates side by side open together on one signal and
+	 * leave only a post to bump into; the embrasure has a slit through it; the parapet corner's merlon turns with it.
+	 */
+	@GameTest(maxTicks = 60)
+	public void fortificationExtras(GameTestHelper helper) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS;
+		var door = (net.minecraft.world.level.block.DoorBlock) blocks.get("bunker_door");
+		helper.assertTrue(door.type().canOpenByHand(), "A bunker door should open by hand");
+		ServerLevel level = helper.getLevel();
+		BlockPos embrasure = new BlockPos(5, 1, 5);
+		helper.setBlock(embrasure, blocks.get("bastion_embrasure"));
+		var shape = helper.getBlockState(embrasure).getShape(level, helper.absolutePos(embrasure));
+		helper.assertTrue(!net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(shape,
+				net.minecraft.world.phys.shapes.Shapes.box(0.4, 0.6, 0.0, 0.6, 0.65, 1.0), net.minecraft.world.phys.shapes.BooleanOp.AND),
+				"An embrasure should have a slit right through it");
+		var corner = blocks.get("bastion_parapet_corner").defaultBlockState();
+		var north = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.NORTH);
+		var south = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.SOUTH);
+		helper.setBlock(new BlockPos(1, 1, 5), north);
+		helper.setBlock(new BlockPos(3, 1, 5), south);
+		var corner_nw = net.minecraft.world.phys.shapes.Shapes.box(0.1, 0.7, 0.1, 0.3, 0.9, 0.3);
+		helper.assertTrue(net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(1, 1, 5))
+				.getShape(level, helper.absolutePos(new BlockPos(1, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND)
+				&& !net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(3, 1, 5))
+						.getShape(level, helper.absolutePos(new BlockPos(3, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND),
+				"The corner's merlon should stand at the north-west facing north, and turn with it");
+		BlockPos left = new BlockPos(2, 1, 2);
+		BlockPos right = new BlockPos(3, 1, 2);
+		helper.setBlock(left, blocks.get("sliding_gate"));
+		helper.setBlock(right, blocks.get("sliding_gate"));
+		helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, false);
+		helper.setBlock(new BlockPos(1, 1, 2), Blocks.REDSTONE_BLOCK);
+		helper.succeedWhen(() -> {
+			helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
+			helper.assertBlockProperty(right, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
+			var open = helper.getBlockState(right).getCollisionShape(level, helper.absolutePos(right));
+			helper.assertTrue(open.bounds().getXsize() < 0.2, "An open gate should leave only its post");
+		});
 	}
 }

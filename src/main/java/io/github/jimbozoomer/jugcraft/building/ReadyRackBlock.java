@@ -106,6 +106,15 @@ public class ReadyRackBlock extends HorizontalDirectionalBlock implements Entity
 	 * whether it found one.
 	 */
 	public static boolean take(ServerLevel level, AABB area, Item ammo) {
+		return find(level, area, ammo, true);
+	}
+
+	/** Whether any ready rack in {@code area} holds an {@code ammo}, without taking it. */
+	public static boolean has(ServerLevel level, AABB area, Item ammo) {
+		return find(level, area, ammo, false);
+	}
+
+	private static boolean find(ServerLevel level, AABB area, Item ammo, boolean take) {
 		for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(area.minX, area.minY, area.minZ),
 				BlockPos.containing(area.maxX, area.maxY, area.maxZ))) {
 			if (!(level.getBlockEntity(pos) instanceof Entity rack)) {
@@ -114,7 +123,9 @@ public class ReadyRackBlock extends HorizontalDirectionalBlock implements Entity
 			for (int slot = 0; slot < rack.shells.getContainerSize(); slot++) {
 				ItemStack stack = rack.shells.getItem(slot);
 				if (stack.is(ammo)) {
-					rack.shells.removeItem(slot, 1);
+					if (take) {
+						rack.shells.removeItem(slot, 1);
+					}
 					return true;
 				}
 			}

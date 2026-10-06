@@ -36,6 +36,13 @@ public final class Spotting {
 		MARKS.remove(player.getUUID());
 	}
 
+	/** The player's own mark, if they have one in this dimension that has not run out. */
+	public static @Nullable BlockPos own(ServerLevel level, Player player) {
+		Mark mark = MARKS.get(player.getUUID());
+		return mark == null || mark.dimension() != level.dimension() || level.getGameTime() - mark.time() > JugcraftArtillery.MARK_TTL
+				? null : mark.target();
+	}
+
 	/** The target a gun at {@code gun} crewed by {@code gunner} should fire at, or null if there is none. */
 	public static @Nullable BlockPos target(ServerLevel level, @Nullable Entity gunner, Vec3 gun) {
 		long now = level.getGameTime();

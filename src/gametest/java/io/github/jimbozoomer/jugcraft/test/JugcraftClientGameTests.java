@@ -521,6 +521,51 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_fortifications");
 
+			// Fire control (batch 56), west of the fortifications: a fire control table on converge directing three Bastion
+			// Mortars on stone-brick plinths, each with a stocked ready rack, all laid on the table's target to the north.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 144, y, z - 14, x - 114, y + 10, z + 10));
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				BlockPos tablePos = new BlockPos(x - 129, y, z - 2);
+				overworld.setBlockAndUpdate(tablePos, io.github.jimbozoomer.jugcraft.building.FireControl.TABLE.defaultBlockState()
+						.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.NORTH)
+						.setValue(io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.MODE,
+								io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CONVERGE));
+				if (!(overworld.getBlockEntity(tablePos) instanceof io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity table)) {
+					return;
+				}
+				table.setTarget(new BlockPos(x - 129, y, z - 90));
+				var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("bastion_mortar");
+				int[][] plinths = {{x - 137, z - 8}, {x - 129, z - 10}, {x - 121, z - 8}};
+				for (int[] at : plinths) {
+					for (int dx = -1; dx <= 1; dx++) {
+						for (int dz = -1; dz <= 1; dz++) {
+							for (int dy = 0; dy < 2; dy++) {
+								overworld.setBlockAndUpdate(new BlockPos(at[0] + dx, y + dy, at[1] + dz), Blocks.STONE_BRICKS.defaultBlockState());
+							}
+						}
+					}
+					BlockPos rackPos = new BlockPos(at[0] + 2, y + 2, at[1] + 1);
+					overworld.setBlockAndUpdate(new BlockPos(at[0] + 2, y + 1, at[1] + 1), Blocks.STONE_BRICKS.defaultBlockState());
+					overworld.setBlockAndUpdate(new BlockPos(at[0] + 2, y, at[1] + 1), Blocks.STONE_BRICKS.defaultBlockState());
+					overworld.setBlockAndUpdate(rackPos, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack").defaultBlockState()
+							.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.SOUTH));
+					if (overworld.getBlockEntity(rackPos) instanceof io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity rack) {
+						rack.shells.addItem(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 12));
+					}
+					io.github.jimbozoomer.jugcraft.artillery.TowerGun gun = new io.github.jimbozoomer.jugcraft.artillery.TowerGun(type, overworld);
+					gun.snapTo(at[0] + 0.5, y + 2, at[1] + 0.5, 0.0F, 0.0F);
+					gun.face(150.0F);
+					overworld.addFreshEntity(gun);
+					table.link(gun.getUUID());
+					gun.linkDirector(overworld, tablePos, table);
+				}
+			});
+			server.runCommand("tp @p %d %d %d 180 15".formatted(x - 129, y + 4, z + 5));
+			context.waitTicks(100);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_fire_control");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
