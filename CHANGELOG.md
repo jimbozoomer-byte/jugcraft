@@ -105,6 +105,59 @@ No numbered release yet. Everything below is on `main`.
 
 ### Arms IV, batch 47 (#170)
 
+### Unmerged: The Armoured Walker, batch 58
+- **Armoured Walker:** a heavy walker made from the owner's own Blender model:
+  - an octagonal riveted blue-grey hull with a framed gun port and cannon
+  - amber lamps, a chain slung across the front and a roof pouch
+  - a jointed tool arm and a piston ram arm
+  - thigh slabs, angled shins and hinged feet
+- Piloted like the Diesel Walker:
+  - **hold use:** fires the hull cannon (Heavy Shells, damage only, every 2 seconds)
+  - **attack:** rams with the piston (16 damage, throws hard)
+  - takes 90 damage to knock down
+  - crafted by upgrading a Diesel Walker with steel and pistons
+- The **Raider Walker** now uses the same model in raider paint. It rams with its piston and lobs grenades from its hull gun.
+- Three game tests and a screenshot scene. Record: [armoured-walker.md](docs/features/armoured-walker.md).
+
+### Unmerged: The raider faction, batch 57
+- **Raiders:**
+  - the **Grunt** (cleaver)
+  - the **Grenadier** (lobs small grenades from range)
+  - the **Officer**: rallies raiders near them. Their fall routs the rest. A player's kill takes their **Raider Insignia**.
+  - the **Raider Walker**: a raider-built Diesel Walker that punches and fires a shoulder grenade launcher
+  - the **Raider Blimp**: cruises over its target and drops bombs
+- **Raids:**
+  - After a player has played three days, at most once every three days per world, a party gathers 48–64 blocks away and marches on their base (or the town if they are near it).
+  - A raid bar shows how much of the party is left. Beating a raid raises the raid level (up to 5: more raiders, blimps from level 2, a walker from level 3). Ignored raids withdraw.
+- **Never griefs:** raiders break no blocks, and every grenade and bomb is a damage-only blast that spares raiders. Sentry guns, flak and town guards fight them.
+- **Switch:** `raiders.enabled=false` or `raiders.raids=off`. `raiders.walkers`, `raiders.blimps`, `raiders.grace_days` and `raiders.interval_days` tune it.
+- **Siege Ladders:** a grunt stuck at a wall props up a ladder and climbs it. It needs mob griefing on, and the ladder crumbles after a minute, dropping nothing.
+- **Raider War Horn** (three insignia and a goat horn) calls a raid on purpose. The **Beat Them Back** advancement goes to everyone who sees a raid through.
+- **Raider camps:** rare sandbagged camps in the plains, savanna and badlands, never within 512 blocks of the world spawn. Each has tents, a campfire, a supply barrel and a garrison of four to clear.
+- Ten game tests and a screenshot scene. Record: [raiders.md](docs/features/raiders.md).
+
+### Unmerged: Fire control, batch 56
+- **Fire Control Table:** link up to 8 guns to it with **Fire Control Wire**. It lays every linked gun that has nobody at its controls. Its modes:
+  - **Hold:** the guns stand still.
+  - **Converge:** every gun lays on the table's target (your Range Finder mark), and a redstone pulse into the table fires one round from each.
+  - **Parallel:** as Converge, but the guns' shells land 6 blocks apart across the line of fire.
+  - **Creeping Barrage:** as Converge, but each salvo after the first lands 5 blocks further down range, six steps, then starts again.
+  - **Sentry:** each gun fires by itself at the nearest hostile mob in the table's sector (90°, 180°, 270° or all round). It never fires within 12 blocks of the gun, or at a mob with a player within 8 blocks of it.
+- A gunner aboard a linked gun with no mark of their own has it laid on the table's point, and fires it when they choose.
+- Guns the table fires use shells from ready racks only. A comparator reads how many linked guns are ready. A ringing field telephone can give the order to fire.
+- Five game tests and a screenshot scene. Record: [fire-control.md](docs/features/fire-control.md).
+
+### Unmerged: Fortifications, batch 55
+- **Bastion Concrete** (block, slab, stairs and Jugcraft's first **wall**, which joins diagonally like vanilla's), the crenellated **Bastion Parapet**, the **Steel Ladder** and a redstone-only **Blast Door**.
+- **Ammo Hoist:** stack hoists into a shaft. What goes in climbs to the top and into the container on or beside it. Nothing can pull items back out.
+- **Ready Rack:** holds shells beside a gun. A gunner with no shells draws from any rack within 2 blocks of the gun. It shows how full it is.
+- **Extras:**
+  - a strapped timber **Bunker Door** that opens by hand
+  - a redstone **Sliding Gate**: panels side by side or stacked open together
+  - a **Bastion Parapet Corner**
+  - a **Bastion Embrasure** with a gun slit
+- Five game tests and a screenshot scene. Record: [fortifications.md](docs/features/fortifications.md).
+
 ### Unmerged: Tower guns, batch 54
 - Five heavy emplacements for the top of a tower, after the owner's reference picture of a heavy mortar on a turntable mount: a concrete plinth, a railed turntable, a yellow cradle and a fat black barrel.
   - For a 3x3 top: the **Bastion Mortar** and the twin-barrelled **Bastion Autocannon**.

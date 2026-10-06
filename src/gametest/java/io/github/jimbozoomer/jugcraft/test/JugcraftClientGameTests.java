@@ -445,6 +445,171 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_tower_guns");
 
+			// Fortifications (batch 55), west of the tower guns: a 7x7 bastion-concrete tower carrying a Grand Mortar inside a
+			// ring of parapets, a steel ladder and a blast door on its south face, an ammo hoist up its east side feeding a
+			// stocked ready rack, and a bastion wall in front.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 112, y, z - 14, x - 84, y + 14, z + 10));
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				var blocks = io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS;
+				int cx = x - 98;
+				int cz = z - 6;
+				int h = 6;
+				for (int dx = -3; dx <= 3; dx++) {
+					for (int dz = -3; dz <= 3; dz++) {
+						for (int dy = 0; dy < h; dy++) {
+							overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + dy, cz + dz), blocks.get("bastion_concrete").defaultBlockState());
+						}
+						if (Math.abs(dx) == 3 && Math.abs(dz) == 3) {
+							// Corner merlons, turned so each stands on its outside corner.
+							net.minecraft.core.Direction corner = dz < 0 ? (dx < 0 ? net.minecraft.core.Direction.NORTH : net.minecraft.core.Direction.EAST)
+									: (dx > 0 ? net.minecraft.core.Direction.SOUTH : net.minecraft.core.Direction.WEST);
+							overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + h, cz + dz), blocks.get("bastion_parapet_corner").defaultBlockState()
+									.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, corner));
+						} else if (Math.abs(dx) == 3 || Math.abs(dz) == 3) {
+							net.minecraft.core.Direction out = Math.abs(dz) == 3 ? (dz > 0 ? net.minecraft.core.Direction.SOUTH : net.minecraft.core.Direction.NORTH)
+									: (dx > 0 ? net.minecraft.core.Direction.EAST : net.minecraft.core.Direction.WEST);
+							overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + h, cz + dz), blocks.get("bastion_parapet").defaultBlockState()
+									.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, out));
+						}
+					}
+				}
+				for (int dy = 0; dy < h; dy++) {
+					overworld.setBlockAndUpdate(new BlockPos(cx + 2, y + dy, cz + 4), blocks.get("steel_ladder").defaultBlockState()
+							.setValue(net.minecraft.world.level.block.LadderBlock.FACING, net.minecraft.core.Direction.SOUTH));
+				}
+				var door = blocks.get("blast_door").defaultBlockState().setValue(net.minecraft.world.level.block.DoorBlock.FACING,
+						net.minecraft.core.Direction.SOUTH);
+				overworld.setBlock(new BlockPos(cx - 1, y, cz + 3), door.setValue(net.minecraft.world.level.block.DoorBlock.HALF,
+						net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER), 3);
+				overworld.setBlock(new BlockPos(cx - 1, y + 1, cz + 3), door.setValue(net.minecraft.world.level.block.DoorBlock.HALF,
+						net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER), 3);
+				for (int dy = 0; dy <= h; dy++) {
+					overworld.setBlockAndUpdate(new BlockPos(cx + 4, y + dy, cz), blocks.get("ammo_hoist").defaultBlockState());
+				}
+				BlockPos rackPos = new BlockPos(cx + 4, y + h + 1, cz);
+				overworld.setBlockAndUpdate(rackPos, blocks.get("ready_rack").defaultBlockState()
+						.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.SOUTH));
+				if (overworld.getBlockEntity(rackPos) instanceof io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity rack) {
+					for (int slot = 0; slot < rack.shells.getContainerSize(); slot++) {
+						rack.shells.setItem(slot, new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.GREAT_SHELL_ITEM, 4));
+					}
+				}
+				// Gun slits in the tower's south face, and the wall in front with a sliding gate in its middle.
+				for (int dx = 1; dx <= 2; dx++) {
+					overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + 3, cz + 3), blocks.get("bastion_embrasure").defaultBlockState()
+							.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.SOUTH));
+				}
+				for (int dx = -6; dx <= 6; dx++) {
+					if (Math.abs(dx) <= 1) {
+						for (int dy = 0; dy < 2; dy++) {
+							overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + dy, cz + 7), blocks.get("sliding_gate").defaultBlockState()
+									.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.SOUTH));
+						}
+					} else {
+						overworld.setBlockAndUpdate(new BlockPos(cx + dx, y, cz + 7), blocks.get("bastion_concrete_wall").defaultBlockState());
+					}
+				}
+				var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("grand_mortar");
+				io.github.jimbozoomer.jugcraft.artillery.TowerGun gun = new io.github.jimbozoomer.jugcraft.artillery.TowerGun(type, overworld);
+				gun.snapTo(cx + 0.5, y + h, cz + 0.5, 0.0F, 0.0F);
+				gun.face(200.0F);
+				overworld.addFreshEntity(gun);
+			});
+			server.runCommand("tp @p %d %d %d 168 6".formatted(x - 95, y + 6, z + 18));
+			context.waitTicks(60);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_fortifications");
+
+			// Fire control (batch 56), west of the fortifications: a fire control table on converge directing three Bastion
+			// Mortars on stone-brick plinths, each with a stocked ready rack, all laid on the table's target to the north.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 144, y, z - 14, x - 114, y + 10, z + 10));
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				BlockPos tablePos = new BlockPos(x - 129, y, z - 2);
+				overworld.setBlockAndUpdate(tablePos, io.github.jimbozoomer.jugcraft.building.FireControl.TABLE.defaultBlockState()
+						.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.NORTH)
+						.setValue(io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.MODE,
+								io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CONVERGE));
+				if (!(overworld.getBlockEntity(tablePos) instanceof io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity table)) {
+					return;
+				}
+				table.setTarget(new BlockPos(x - 129, y, z - 90));
+				var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("bastion_mortar");
+				int[][] plinths = {{x - 137, z - 8}, {x - 129, z - 10}, {x - 121, z - 8}};
+				for (int[] at : plinths) {
+					for (int dx = -1; dx <= 1; dx++) {
+						for (int dz = -1; dz <= 1; dz++) {
+							for (int dy = 0; dy < 2; dy++) {
+								overworld.setBlockAndUpdate(new BlockPos(at[0] + dx, y + dy, at[1] + dz), Blocks.STONE_BRICKS.defaultBlockState());
+							}
+						}
+					}
+					BlockPos rackPos = new BlockPos(at[0] + 2, y + 2, at[1] + 1);
+					overworld.setBlockAndUpdate(new BlockPos(at[0] + 2, y + 1, at[1] + 1), Blocks.STONE_BRICKS.defaultBlockState());
+					overworld.setBlockAndUpdate(new BlockPos(at[0] + 2, y, at[1] + 1), Blocks.STONE_BRICKS.defaultBlockState());
+					overworld.setBlockAndUpdate(rackPos, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack").defaultBlockState()
+							.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.SOUTH));
+					if (overworld.getBlockEntity(rackPos) instanceof io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity rack) {
+						rack.shells.addItem(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 12));
+					}
+					io.github.jimbozoomer.jugcraft.artillery.TowerGun gun = new io.github.jimbozoomer.jugcraft.artillery.TowerGun(type, overworld);
+					gun.snapTo(at[0] + 0.5, y + 2, at[1] + 0.5, 0.0F, 0.0F);
+					gun.face(150.0F);
+					overworld.addFreshEntity(gun);
+					table.link(gun.getUUID());
+					gun.linkDirector(overworld, tablePos, table);
+				}
+			});
+			server.runCommand("tp @p %d %d %d 180 15".formatted(x - 129, y + 4, z + 5));
+			context.waitTicks(100);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_fire_control");
+
+			// The raider faction (batch 57), west of fire control: a grunt, a grenadier and an officer in front, a raider
+			// walker behind them and a blimp overhead, all standing still (no AI) facing the camera.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 176, y, z - 16, x - 148, y + 14, z + 10));
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				var types = new net.minecraft.world.entity.EntityType<?>[] {io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT,
+						io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.OFFICER, io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER,
+						io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.WALKER, io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BLIMP};
+				double[][] at = {{x - 164.5, y, z - 2.5}, {x - 162.5, y, z - 3.5}, {x - 160.5, y, z - 2.5}, {x - 162.5, y, z - 8.5},
+						{x - 158.5, y + 7, z - 12.5}};
+				float[] yaw = {-10.0F, 0.0F, 10.0F, -5.0F, 30.0F};
+				for (int i = 0; i < types.length; i++) {
+					if (types[i].create(overworld, net.minecraft.world.entity.EntitySpawnReason.COMMAND) instanceof net.minecraft.world.entity.Mob mob) {
+						mob.snapTo(at[i][0], at[i][1], at[i][2], yaw[i], 0.0F);
+						mob.setYBodyRot(yaw[i]);
+						mob.setYHeadRot(yaw[i]);
+						mob.setNoAi(true);
+						mob.setPersistenceRequired();
+						overworld.addFreshEntity(mob);
+					}
+				}
+			});
+			server.runCommand("tp @p %d %d %d 180 -6".formatted(x - 162, y + 2, z + 4));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_raiders");
+
+			// The Armoured Walker (batch 58, the owner's Blender model) beside the raiders' walker in their paint.
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				io.github.jimbozoomer.jugcraft.walker.ArmouredWalker walker = new io.github.jimbozoomer.jugcraft.walker.ArmouredWalker(
+						io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.ARMOURED_WALKER, overworld);
+				walker.snapTo(x - 167.5, y, z - 6.5, -20.0F, 0.0F);
+				overworld.addFreshEntity(walker);
+			});
+			server.runCommand("tp @p %d %d %d 200 2".formatted(x - 170, y + 3, z + 2));
+			context.waitTicks(30);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_armoured_walker");
+			server.runCommand("kill @e[type=jugcraft:armoured_walker]");
+			for (String raider : new String[] {"raider_grunt", "raider_grenadier", "raider_officer", "raider_walker", "raider_blimp"}) {
+				server.runCommand("kill @e[type=jugcraft:" + raider + "]");
+			}
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
