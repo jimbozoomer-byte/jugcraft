@@ -240,7 +240,7 @@ Every tree below is world generation only, except the cedar, which also grows fr
     - the chestnut's list cut to `["biomes"]` and the data regenerated: `chestnut is placed by ['agriculture'], which the chestnut wood's switches ['biomes'] lack (agriculture.WOOD_SWITCHES, TREES.md rule 4)`. Before this fix, that edit passed every check;
     - `wildPatch("chestnut_tree", ...)` moved out of `registerWorldgen`: `chestnut is placed by ['(patch_chestnut_tree, outside registerWorldgen)'] ...`; `registerWorldgen` without its agriculture gate: `JugcraftAgriculture.registerWorldgen() not found, or not gated by the agriculture switch first`.
   - A parse-only `javac` pass over the two changed test files (`WoodClientGameTests`, `BiomeGameTests`): exit 0, with a deliberate syntax error caught as a control. Syntax only: nothing was compiled and no symbol was resolved.
-- **Game tests, written for CI; not run:**
+- **Game tests** (results under CI results below):
   - `BiomeGameTests.batchOneShapesGrow`: each shape, placed through its `_checked` feature on dirt from four seeds in autumn, reaches the height its trunk gives (exact for the straight trunks, loose for the bending and fancy ones, to be narrowed from CI's logged sizes); the leafy shapes have at least 4 leaves, all in autumn colours where seasonal and none where evergreen; the snags have no leaves; four mossy maples lay moss carpet and vines.
   - `batchOneShapesNeedTheirSoil`: on stone no shape places a log; the snags grow on coarse dirt and not on calcite or tuff.
   - `fallenLarchesLie`: a larch stump and at least three lying larch logs.
@@ -254,8 +254,19 @@ Every tree below is world generation only, except the cedar, which also grows fr
     - grows the tamarack, mossy maple, young aspen and willow bush again in autumn beside the larch, maple, aspen and willow;
     - logs each tree's logs and leaves.
   - `BiomeClientGameTests` photographs the Muskeg too.
-- **CI results:** to be recorded here after the first push.
-- **Not run:** `./gradlew build` and every game test (CI only), play, the screenshots, a dedicated server, two clients. Nothing here has been seen in game.
+- **CI results (PR #206):**
+  - **4511d46c:** the game tests failed to compile. 26.3's `BlockTags` has no `LOGS_THAT_BURN` constant, so `cedarWoodWorksLikeWood` now looks up `#minecraft:logs_that_burn` by name (8b60c43f).
+  - **8b60c43f:** the client shards, `client` and `repository` passed. `mod` failed one server test, `DiagonalConnectionsGameTests.everyFenceBarsBlockAndWallHasDiagonals`. It expected exactly 86 diagonally joining blocks, and the cedar's fence makes 87. The count was updated (47c96576).
+  - **47c96576** (run 37491799326): `mod` (build and every server game test, the six above among them), `client (shard 0, 1 and 2 of 3)`, `client` and `repository` all passed.
+  - **WoodClientGameTests logged:**
+    - cedar 9-10 logs and 30-58 leaves;
+    - stunted fir 5 and 34; bog fir 7 and 26; subalpine fir 10 and 79; fir bush 1 and 29;
+    - tamarack 8 and 30;
+    - dead snag and bent snag 6 logs each, no leaves;
+    - willow bush 1 and 30; young aspen 6 and 69;
+    - mossy maple 16 and 267, against the big maple's 14 and 211.
+  - **Screenshots:** they show every shape beside its parent and the cedar's wood on the sample wall. The Muskeg biome shot framed a close-up of a snow block rather than the biome, which is a framing limit of `BiomeClientGameTests` and not of the trees.
+- **Not run:** play, a dedicated server, two clients. The owner has seen the CI screenshots in chat; the cedar's colours await their word.
 
 ## World and event applicability
 Shares are of each biome's tree tries, turned into in-order chances (TREES.md, "How to read this"). (v) is vanilla's wood; the mod's oak bush, vine-hung oak and azalea tree are vanilla's wood too. Snag shares are three straight to one bent. Where the roster's final shares include a tree from a later batch, its share stays with the tree it will replace until its batch.
