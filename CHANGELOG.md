@@ -114,6 +114,87 @@ No numbered release yet. Everything below is on `main`.
 ### Unmerged: Clean textures, set 1: the fall creatures
 - The owner asked for every texture to lose its noise and look cleaner, flatter and cuter, set by set (15 sets, after the reference pictures). Set 1 is the fall creatures: the **werewolves**, their rugs and pelts (big flat locks of fur in neat rows instead of fine hairs), the **turkeys** and the roast turkey dinner, **squirrels** and acorns, the **crow**, the **Pumpkling**, the **Hay Golem** and the **Bat House**: flat tones and regular patterns, no random speckle. The Bat House's planks and guano, the turkey's bone and skin and the silver platter are painted in the manner of the vanilla blocks (`tools/block_style.py`). IDs and models are unchanged.
 
+### Bunker and trench interiors, batch 59
+- **Trench Periscope:** two blocks tall, its mirror head looking over the parapet. A comparator reads how many hostile mobs it sees (within 64 blocks, 45 degrees either side, in clear view, every second). Look through it to mark the nearest one as a Range Finder would, for your guns and fire control; sneak to clear the mark.
+- **Map Table:** a campaign map on a table. Use it to list the target marks plotted within 256 blocks (who, how far, which way, how long ago); sneak-use it to lay a Fire Control Table within 4 blocks on the next one.
+- **Gas Curtain:** a wet blanket across a doorway, two blocks tall, that you walk through. Let down, it keeps chlorine and smoke out of everything behind it; use it to roll it up or let it down.
+- **Field Kitchen:** an iron stove that heats a Cooking Pot on top. It burns logs, coal, charcoal and coke, glows and smokes while lit, and only starts a new piece of fuel while a pot stands on it. Hoppers can fuel it.
+- **Trench Stew:** beef, a potato and a carrot from the Cooking Pot: 10 food and five seconds of Regeneration.
+- **Corrugated Iron** (with slab and stairs), **Timber Shoring**, the caged **Bunker Lamp** (hangs or stands) and the **Bunker Bunk** (sit on the lower bunk; no spawn point).
+- New `Spotting.near` lists marks for the map table. Record: [bunker-interiors.md](docs/features/bunker-interiors.md).
+
+### Faster CI: pull requests run only the client tests they need
+- The Build workflow's new `choose client tests` job (`tools/select_client_tests.py`) picks the client game test classes that show what a pull request changed. Docs- or data-only changes run none. Build files, mixins and the test harness still run them all. Rules: [TESTING.md](docs/TESTING.md#current-foundation).
+- `main` and manual runs still run every class, shared between the three client jobs by rough running time instead of every third class.
+- Gradle's downloads are cached between runs.
+
+### No more see-through or flickering models: machines, guns, vehicles, balloons and props (art fixes)
+- **Closed from every side:** the grand mortar and the other tower guns, the siege mortar, howitzer and flak gun, the landship, the Diesel Walker, the zeppelin, the observation balloon's envelope and the searchlight no longer show the world through gaps in their barrels, rings, decks and hulls. The exporter drew whole 16-pixel patches of a face away wherever a smaller part sat on part of it; it now removes only what is really covered.
+- **No more flashing textures:** collars, muzzle rings, hazard rims, caps, gear teeth, handwheels, the joins between a big machine's blocks and spinning shafts no longer flicker, close up or far away. Every exported model now keeps differently drawn faces at least 0.1 pixel apart (was 0.02, which failed beyond about 30 blocks), including turned parts.
+- **Two-sided sheets** (string lights, pennants and garland leaves, floating-candle, Aura Candle, bonfire, witch-fire and Harvest Effigy flames, grapple and zipline lines, the drone depot's doors, the blueprint placement ghost and the quad-drawn decorations) no longer fight themselves. The floating candles' flames read the same way round from behind again.
+- **No strips of other textures** on faces that reached past their own (trebuchets, the blueprint table, dead trees, the console desk, weathervanes and others); such faces keep their texture's density, so the drone depot terminal and console desk screens show their screens.
+- **Witching Season props closed:** the Coffin Wardrobe, Curiosity Cabinet, oddity jars, Iron-Bound Coffin, sarcophagi, candelabra, Bone Throne, Ribcage Bookcase, Grandfather Clock and the rest no longer show holes where a box left a face out; the Horned Skull Cauldron's hollow is lined walls; the Colossal Skull keeps its open sockets with its front closed beside them; the Farm Stand, Harvest Effigy and tall flowers no longer flicker where their blocks meet.
+- **No slits at spinning parts:** the hand crank's axle, the solar tracker's pivot and the heliostat's shaft meet their still parts with no gap.
+- A new check, `tools/art_check.py` (run by `check_mod_data.py`), keeps it that way. Rules: [ART_DIRECTION.md](docs/ART_DIRECTION.md#rules-for-everything). Record: [see-through-and-flicker-fixes.md](docs/features/see-through-and-flicker-fixes.md).
+
+### Steel plates, armour plate, hazard plating and concrete redrawn (art fixes)
+- The owner called the steel plate blocks and blast-proof concrete horrific and said bastion concrete looks good. These blocks are redrawn the way bastion is: a few flat shades, no random speckle, no rust, and a single split seam where two blocks meet instead of a doubled dark frame round every block.
+- **Dieselworks steel set** in one cool blue-grey steel: **Weathered Steel Plate** is one brushed sheet a block with a soft edge, so a wall shows quiet joints rather than a grid of framed tiles; **Riveted Steel Plate** is framed by raised rivets that line up evenly across every joint; the **Ribbed Steel Pillar** is ribbed and shaded like a round column; the **Riveted Band** is a dark strap with a rivet row; the **Steel Grating** is a bar grating whose slots carry on evenly from block to block, with a rail at the top and bottom of each half, so grating slabs no longer end in open prongs; the **Porthole Window** sits in a steel sheet with a steel ring; and the **Steel I-Beam** and the **Amber Cage Lamp**'s base and cap are the same steel, without the old brown frame and rust mark. Slabs and stairs follow, and the set shows as metal on maps. The giant machines, the zeppelin and the vehicles keep their own steel.
+- **Steel Armor Plate** (drone tower) is clean 32 px pixel art instead of noise: one thick gunmetal plate a block with chamfered corners that meet round a round bolt boss wherever four plates join, with no dark band from top to bottom. **Hazard Plating**, which the tower lays round armour pads, door bays and deck edges, is now the same plate with a flat band of yellow-and-black stripes, so rim and armour meet as one steel.
+- **Blast-Proof Concrete** is heavy cast concrete in two smooth lifts a block, darker and cooler than bastion, with tie holes on an even, staggered lattice. **Concrete** is its lighter, warmer, smooth sibling: one lift a block and two faint form marks, no speckle. Their slabs and stairs follow.
+- The rules behind this, taken from the blocks the owner liked and rejected, are in [ART_DIRECTION.md](docs/ART_DIRECTION.md#tiling-building-blocks). Block IDs, recipes and model shapes are unchanged; the models now point at the new textures, so placed blocks just look new. The `jugcraft_dieselworks` screenshot's front row now shows the steel plates' slabs and stairs, and `jugcraft_foam_sprayer` ends with the armour plate and hazard plating with their slabs and stairs.
+
+### The sawmill's blade turns and the sieve is a real vibrating screen (art fixes)
+- **Sawmill:** the giant sawmill's blade is now a toothed 24-tooth disc that **turns while the sawmill works** (and stands still when it is idle), its front teeth cutting down into the log. It spins up and runs down smoothly instead of jumping, even on weak power. The checkerboard texture is gone: the blade is plain ground steel with expansion slots and an amber maker's plate you can watch go round. It turns at a steady pace that never looks as if it runs backwards, even at low frame rates. It runs in a slot in the bed under a red hood that leaves the front teeth bare, on an arbor in two pillow-block bearings, belted from the motor, whose pulley turns too. Each bearing face and duct joint is drawn once, whole (no doubled, squashed nut where a block seam cut it). The dust duct and hood no longer stick out of the machine's blocks (no more stretched, flickering textures there), and the amber running lamp and gauge sit on a control box at the front, so the lamp lights while it runs.
+- **Sieve:** rebuilt as a vibrating screen. A red screen box on blue coil springs tilts from a feed hopper at the back down to a hazard-striped lip at the front; gravel rides over a grizzly of real steel bars onto a fine woven-wire deck with steel cross bars (the weave, the bolts and the lip's hazard stripes run on evenly, with no seam down the middle), and a vibrator motor on a full-width beam **spins its yellow eccentric weights while the sieve works**. Totes of fines, flint and nuggets stand at the front, a pan under the deck catches the fines, and the control box with the gauge and the running lamp is on the master block.
+- The turning parts are drawn by the machines' renderer (`client/MachineRotors`, from `machine_rotor_quads.json`) in both machine styles; the classic pack's sawmill leaves a slot for the blade and its sieve hides the weights. The item icons show the blade. Only machines placed whole show them; a one-block copy from before batch 44 keeps its old look. IDs, blockstates, recipes and behaviour are unchanged. Record: [dieselpunk-giants.md](docs/features/dieselpunk-giants.md#turning-parts-sawmill-and-sieve-5-october-2026).
+
+### The Flying Eyeball, the Specimen Jar's eye, the Shadow Puppet Lamp and the Ferris wheel (art fixes)
+- **Flying Eyeball:** no more glowing white square behind its iris. The iris is now a cut-out disc on the eye's own white, which is a warmer ivory, with a small white glint inside the disc. Its wings no longer flicker (each was two faces fighting in one plane) and are repainted clean, in lit and shaded panels between the fingers; the item's wings are two faces 0.1 pixel apart, so they cannot fight either.
+- **Specimen Jar:** the eye is rounder and drawn properly on every side as it turns (it used to show a black-topped blue cube most of the time), with a clean white, a few placed veins, a blue iris and a round pupil, its nerve hanging straight down. The jar itself is unchanged.
+- **Shadow Puppet Lamp:** no more flashing: each paper panel is one face (it was drawn twice in one plane, fighting its mirror image), and the corners close. Each shadow now lies flat on the walls its light actually reaches, cut to the open wall and to what the flame can see, so it never stands across a wall, hangs over a doorway or falls where no light reaches. A shadow crossing a doorway, a corner or a pillar's edge slides smoothly across it, shown on each side, instead of vanishing or jumping to the next wall in one frame, and it fades out at the end of its range. The paper, silhouettes, shadows, brass, wood and candle are repainted clean at 32 × 32 and 16 × 16.
+- **Ferris wheel:** its textures no longer flash as you move. Every part samples its texture at about four texels to a pixel (thin rims and trims used to squeeze a whole 64 × 64 picture), the textures of the wheel and cars are repainted clean in the same red, cream and brass, and no two faces share a plane any more: mitred rim lengths, a sixteen-sided hub, separate planes for the rings, spokes and ties, a closed pivot bar ending inside the rims and one face for each valance. The rims show three bands a pixel each (a warm gold edge, the red and a shaded red); the brass, cream steel and axle are banded along each member (a lit edge, the fill and, where wide enough, a shaded edge), with bevelled plates on squarer faces such as the bearings and the brass cap over the axle. The booth keeps its earlier brass and steel, now as its own textures (`ferris_wheel_booth_brass`, `ferris_wheel_booth_steel`).
+- New client screenshots for CI: the eyeballs at night and from behind, the eyeball item held in the hand and in the hotbar, the eye's jar close up, the lamp close up and in a narrow corridor with a doorway (each twice, a few ticks apart), and the stopped Ferris wheel twice from 0.05 block apart. Records: [haunted-house-props.md](docs/features/haunted-house-props.md), [more-halloween.md](docs/features/more-halloween.md), [even-more-fall-additions.md](docs/features/even-more-fall-additions.md). IDs, recipes and behaviour are unchanged.
+
+### Runebound arms as real 3D models (art fixes)
+- **The Runebound Nodachi, Moonblade, Staff and War Hammer are now smooth 3D models in the hand**, not stacks of pixel boxes, after the owner's "make like a nicer 3d model ... really be cool and special":
+  - **Moonblade:** a crescent of violet moon steel ground to a bright edge, a raised bead of glowing runes following the crescent, a crescent-moon guard with glowing horn tips round a heart crystal in a silver bezel, a spiral cord grip and a faceted crystal pommel.
+  - **Nodachi:** a continuous curve whose edge is tempered in a glowing wave with a white line along it, a short panel of glowing runes by the habaki, a gold habaki, an oval tsuba with a ring of light round its rim and a silk-wrapped tsuka with windows of ray skin.
+  - **Staff:** dark ironwood with a glowing helix winding up each half, a leather grip between iron collars, and at each end three iron claws holding a floating crystal.
+  - **War Hammer:** a flared, chamfered head with a glowing diamond cut into each side, a white diamond raised in it and a stave through both, a moon-gold band, a curved beak, a top spike, langets, an iron-banded haft and a spiral cord grip.
+- Curves shade smoothly and edges stay crisp. The details are shapes, not stretched pixels: the Moonblade's glow is a raised bead and the Nodachi's a glowing tempered edge, so each stays a steady line at a distance instead of a dark slot that flickers in and out as the arm turns, and the temper line, sigil and tsuka diamonds stay clean however close they are. The runes, temper and crystals glow at full light in the dark and pulse gently. Every part is closed: nothing to see through, nothing poking through anything else. They are held exactly where the old models were, in either hand, first and third person, and take the enchantment glint.
+- **New icons**, rendered from the same models in flat tones as bright as their steel siblings.
+- Item ids, recipes and stats are unchanged. Built on Fabric API's model loading and renderer API (already part of fabric-api, so no new dependency): `client/MeshItemModels.java` reads the meshes from `tools/arms_mesh.py`. The old box models stay in the files as a fallback. Record: [arms-vii.md](docs/features/arms-vii.md#runebound-meshes).
+
+### Witching Season props and bigger jars (art fixes)
+- **Giant's Beating Heart**: the Beating Heart Jar three times over, 3 × 3 × 3, placed and broken as one: the same jar of red murk, iron lid, label and slowly turning heart on its brass stand, just bigger. A slow redstone clock (40, 50, 60 or 72 beats a minute; use it to change), each beat a two-tick signal of 15 from its first block and a deep heartbeat, stopped by a signal from below; the heart swells with each beat as the jar's does. Glass, a Beating Heart Jar, brass ingots and a block of redstone.
+- **Tall Specimen Jar** (the Specimen Jar twice over, 1 × 2 × 1) and **Specimen Tank** (three times over, 3 × 3 × 3): the same jar, glowing fluid, iron fittings and specimen, just bigger, its eye, tentacle, pumpkin or brain bobbing among rising bubbles. Sneak-use to change the specimen; broken, they keep it. Their items are the Specimen Jar's with the specimen in it, a little bigger in a slot. Made from the smaller jar with iron and glass.
+- **Horned Skull Cauldron**: the pot is closed and lined, so looking in shows a dark iron well instead of the sky through its walls; the ram skull has square, Minecraft-like eye sockets and its brew glow is a flat square on them. **Skulls everywhere** (the Colossal Skull, Bone Throne, Skull Footstool, sarcophagi, bone piles, ossuary wall) have square sockets in place of #191's round ones with a glint; the lit Vertebra Floor Lamp's sockets glow whole, and the Colossal Skull's night glow shows at last (it was drawn behind the back of its sockets).
+- **Bat in a Jar**: a wider, taller jar and a slightly smaller bat, so its wings stay inside the glass. The oddity jars' lids, bases and knobs are clean beveled iron, their murk lies in even bands and their labels are neat lines of ink (the Beating Heart Jar keeps its first look, which the owner loves).
+- **No more see-through props**: faces closed on the Colossal Vertebra, Skull and Rib, Curiosity Cabinet, Bell Jar, the four candelabra, Coffin Wardrobe, Iron-Bound Coffin, Ribcage Bookcase, Grandfather Clock, Farm Stand and the Egg Sac Cluster's sacs (its item showed them as hollow boxes); flat cut-outs drawn by the client are one plane each instead of two that flickered; clean wrought iron on the candelabra, moth case, witchlights and Harvest Moon Lamp.
+- **No more flicker**: the Iron-Bound Coffin's bands and corner caps no longer lie flush with its velvet when open, nor the Grandfather Clock's finials with its pediment; the Lab Table patient's flashing eyes show the bright middle of their glow. Rules added to [ART_DIRECTION.md](docs/ART_DIRECTION.md#rules-for-everything); record in [witchs-workshop.md](docs/features/witchs-workshop.md#6-the-bigger-jars).
+
+### Big guns, Landship, walker and balloons (art fixes)
+- **Works with the art core's exporter:** the gaps you could see through in the guns, the Landship and the Diesel Walker, and the flicker inside each of their parts, are closed by the exact hidden-face exporter (see "No more see-through or flickering models" above). These models need it and are regenerated with it. What follows is what that exporter cannot fix: moving parts, textures, decals, the balloons and the icons.
+- **Clean gun steel with real bores**: every big gun's and tower gun's barrel is plain gun steel instead of a grid of bolted panels, each muzzle has one round dark bore, and port covers and hazard signs are drawn whole instead of in fragments. Yellow, khaki and olive housings are seamless painted armour with one weld seam a course; roofs, housings and brakes are long rolled steel plates instead of short offset blocks that read as brick.
+- **Nothing cuts through as a gun aims or fires**: the Siege Mortar's deck meets its base and its rails clear the cradle; the Triple Battery's sleeves and housing clear its drum; the Bastion Autocannon and Fortress Rifle have mantlet slots in their roofs; the Self-Propelled Howitzer has a low engine deck the gun swings over and its exhausts behind the crew; the Flak Gun's cradle clears its pedestal. When a gun fires, only its barrel recoils, back through a cradle that stays put, so breeches no longer punch into decks and roofs.
+- **Raised barrels stay drawn**: the Grand Mortar, Siege Mortar, Self-Propelled Howitzer, Flak Gun and Landship are drawn whenever any part of them is in view, so a raised barrel no longer vanishes when you look up at it from close by.
+- **Landship and Diesel Walker**: no slit under the Landship's turret and no flicker on its muzzle; its smokestacks are shorter, so the cannon no longer passes through them when the turret turns to the rear. The walker's thighs, chest walls, knees and drill no longer share faces with their neighbours, so it no longer flickers as it walks.
+- **Observation Balloon**: a smooth, closed envelope with three tail lobes and its own clean canvas texture (gore seams, red and cream bands, the stencilled serial reading level), instead of stair-stepped boxes with gaps.
+- **Hot-air balloons have their own basket back**: since batch 51 they had been drawn with the Observation Balloon's small basket and rigging (two parts shared one name); their burner frame, fuel tanks, gauge and load cables show again.
+- **Smooth rise**: the Observation Balloon, pibals and hot-air balloons now glide up on every client instead of stepping; the hot-air balloons' envelopes, rope and flame are drawn in the opaque pass so they can't show through themselves.
+- **New icons** for the eight guns, the four shells, the balloon, the Range Finder, the Landship, the Diesel Walker and the Zeppelin: 32x32 pixel art with a closed outline, shading and round bores, each gun with a silhouette of its own (the Grand Mortar on its tower, the Fortress Rifle's long barrel and range finder, the Siege Mortar's railed deck).
+- IDs, recipes and numbers are unchanged. Record: [big-guns-art-fixes.md](docs/features/big-guns-art-fixes.md); rules in [ART_DIRECTION.md](docs/ART_DIRECTION.md#big-models-drawn-as-quads-guns-vehicles-and-balloons).
+
+### No see-through rims on held sprites (art fixes)
+- The Power and Ronin Katanas' outlines and glow fringes, the Rocket Launcher's and the HE, homing and line-throwing rockets' outlines, and the scuba mask's, scuba tank's and free runners' outlines are opaque: they were drawn part-transparent, so the sprite's rim was see-through in the hand. The katanas' fringe is now the blade's own bright glow.
+
+### The flails' balls swing (art fixes)
+- **The bronze and steel flails' chain and spiked ball now swing freely** (the owner, 5 October 2026: "flails should have an animated ball that actually flails around"). The ball hangs from the handle's eye under gravity, trails as you walk, turn or look round, is flung round overhead and whips past after a blow, then swings on and settles. It works in third person, in first person (the guard is held a little higher so the ball hangs in sight), on armor stands and mobs, in either hand, and keeps the enchantment glint.
+- **A cleaner ball that keeps out of its holder:** a rounded core with a crown of eight spikes and one below, in two tones, on a chain of four oval links; it keeps clear of its holder's own hips, legs and arms as they move, and nothing in it shares a face plane, so nothing flickers.
+- **The Bonecarved Flail swings too:** its spine of vertebrae and a horned skull with square, Minecraft-style eye sockets and a row of square teeth (no nose holes).
+- Client-side drawing only (`client/arms/FlailHeads.java`, a small chain simulation on the arms motion's own hooks); no ids, recipes or numbers change, nothing is saved or sent, and the icons are unchanged (PR #201 redraws them). The ball has no collision with the world. Record: [arms-restyle.md](docs/features/arms-restyle.md#the-flails-head-swings-5-october-2026). New client test `FlailClientGameTests` (not yet run in CI), which also walks the player and fails if the ball sinks into the body.
+
 ### Cute, clean creature decorations: batches 15 to 20 repainted (#191)
 - **Smooth fire**: the Ember Bed's hearth now burns in smooth bands of colour on a glow of coals, and the Horned Skull Cauldron's ram skull has big round sockets and no nostrils.
 - **Every creature prop of batches 15 to 20 repainted** in a clean, cute style after the owner's reference pictures: flat colour in two or three tones with lit and shaded edges and no speckle. The **Monster Head** is a bright green Frankenstein head with a blunt black fringe and sleepy closed eyes that open glowing when it wakes; the **Flying Eyeball**, plushes, moths and jar oddities are clean and glossy; skulls (the **Colossal Skull** too) have big round sockets with a glint and no nose holes; bones are smooth cream; the gargoyles have round eyes and little fangs; the **Crawling Hand** is the monster's green; the cocoon sleeps, the clock's ghost says "oo" and the **Harvest Moon** has a sleeping smile.
@@ -198,6 +279,59 @@ No numbered release yet. Everything below is on `main`.
 - They grow in the haunted biomes and some of vanilla's. Grave vases take them by colour. Eight game tests, client screenshots. Record: [graveyard-flora.md](docs/features/graveyard-flora.md).
 
 ### Arms IV, batch 47 (#170)
+
+### Unmerged: The Armoured Walker, batch 58
+- **Armoured Walker:** a heavy walker made from the owner's own Blender model:
+  - an octagonal riveted blue-grey hull with a framed gun port and cannon
+  - amber lamps, a chain slung across the front and a roof pouch
+  - a jointed tool arm and a piston ram arm
+  - thigh slabs, angled shins and hinged feet
+- Piloted like the Diesel Walker:
+  - **hold use:** fires the hull cannon (Heavy Shells, damage only, every 2 seconds)
+  - **attack:** rams with the piston (16 damage, throws hard)
+  - takes 90 damage to knock down
+  - crafted by upgrading a Diesel Walker with steel and pistons
+- The **Raider Walker** now uses the same model in raider paint. It rams with its piston and lobs grenades from its hull gun.
+- Three game tests and a screenshot scene. Record: [armoured-walker.md](docs/features/armoured-walker.md).
+
+### Unmerged: The raider faction, batch 57
+- **Raiders:**
+  - the **Grunt** (cleaver)
+  - the **Grenadier** (lobs small grenades from range)
+  - the **Officer**: rallies raiders near them. Their fall routs the rest. A player's kill takes their **Raider Insignia**.
+  - the **Raider Walker**: a raider-built Diesel Walker that punches and fires a shoulder grenade launcher
+  - the **Raider Blimp**: cruises over its target and drops bombs
+- **Raids:**
+  - After a player has played three days, at most once every three days per world, a party gathers 48–64 blocks away and marches on their base (or the town if they are near it).
+  - A raid bar shows how much of the party is left. Beating a raid raises the raid level (up to 5: more raiders, blimps from level 2, a walker from level 3). Ignored raids withdraw.
+- **Never griefs:** raiders break no blocks, and every grenade and bomb is a damage-only blast that spares raiders. Sentry guns, flak and town guards fight them.
+- **Switch:** `raiders.enabled=false` or `raiders.raids=off`. `raiders.walkers`, `raiders.blimps`, `raiders.grace_days` and `raiders.interval_days` tune it.
+- **Siege Ladders:** a grunt stuck at a wall props up a ladder and climbs it. It needs mob griefing on, and the ladder crumbles after a minute, dropping nothing.
+- **Raider War Horn** (three insignia and a goat horn) calls a raid on purpose. The **Beat Them Back** advancement goes to everyone who sees a raid through.
+- **Raider camps:** rare sandbagged camps in the plains, savanna and badlands, never within 512 blocks of the world spawn. Each has tents, a campfire, a supply barrel and a garrison of four to clear.
+- Ten game tests and a screenshot scene. Record: [raiders.md](docs/features/raiders.md).
+
+### Unmerged: Fire control, batch 56
+- **Fire Control Table:** link up to 8 guns to it with **Fire Control Wire**. It lays every linked gun that has nobody at its controls. Its modes:
+  - **Hold:** the guns stand still.
+  - **Converge:** every gun lays on the table's target (your Range Finder mark), and a redstone pulse into the table fires one round from each.
+  - **Parallel:** as Converge, but the guns' shells land 6 blocks apart across the line of fire.
+  - **Creeping Barrage:** as Converge, but each salvo after the first lands 5 blocks further down range, six steps, then starts again.
+  - **Sentry:** each gun fires by itself at the nearest hostile mob in the table's sector (90°, 180°, 270° or all round). It never fires within 12 blocks of the gun, or at a mob with a player within 8 blocks of it.
+- A gunner aboard a linked gun with no mark of their own has it laid on the table's point, and fires it when they choose.
+- Guns the table fires use shells from ready racks only. A comparator reads how many linked guns are ready. A ringing field telephone can give the order to fire.
+- Five game tests and a screenshot scene. Record: [fire-control.md](docs/features/fire-control.md).
+
+### Unmerged: Fortifications, batch 55
+- **Bastion Concrete** (block, slab, stairs and Jugcraft's first **wall**, which joins diagonally like vanilla's), the crenellated **Bastion Parapet**, the **Steel Ladder** and a redstone-only **Blast Door**.
+- **Ammo Hoist:** stack hoists into a shaft. What goes in climbs to the top and into the container on or beside it. Nothing can pull items back out.
+- **Ready Rack:** holds shells beside a gun. A gunner with no shells draws from any rack within 2 blocks of the gun. It shows how full it is.
+- **Extras:**
+  - a strapped timber **Bunker Door** that opens by hand
+  - a redstone **Sliding Gate**: panels side by side or stacked open together
+  - a **Bastion Parapet Corner**
+  - a **Bastion Embrasure** with a gun slit
+- Five game tests and a screenshot scene. Record: [fortifications.md](docs/features/fortifications.md).
 
 ### Unmerged: Tower guns, batch 54
 - Five heavy emplacements for the top of a tower, after the owner's reference picture of a heavy mortar on a turntable mount: a concrete plinth, a railed turntable, a yellow cradle and a fat black barrel.

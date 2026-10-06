@@ -149,26 +149,49 @@ def _speckle(base, spread, seed, dots=()):
     return img
 
 
+# Plain concrete, dark to light: 0 the lift joint, 1 a faint form mark, 2 the fill, 3 the lift's lit top edge. Lighter,
+# warmer and plainer than blast-proof concrete (BLAST below), so the concretes read as a set: plain (light and smooth),
+# bastion (warm board marks, tools/fortifications.py) and blast-proof (cool, dark, heavy lifts and tie holes).
+CONCRETE = [(128, 127, 122), (136, 135, 130), (146, 145, 140), (158, 157, 152)]
+
+
 def concrete():
-    """Poured concrete: an even grey with fine aggregate flecks."""
-    rng = random.Random(3201)
-    dots = [((rng.randrange(16), rng.randrange(16)), rng.choice([(120, 122, 124), (176, 176, 172), (100, 102, 104)]))
-            for _ in range(18)]
-    return _speckle((148, 150, 150), 5, 3202, dots)
+    """Poured concrete: one smooth lift a block, lit along its top row with its joint on its bottom row, so a wall reads
+    as level pours with no vertical joints and the block edge looks like any other lift line. Two short form marks one
+    shade under the fill, one in each half, so slabs and stair steps show whole marks. No tie holes and no per-pixel
+    flecks: four colours."""
+    img = Image.new("RGBA", (16, 16), CONCRETE[2] + (255,))
+    for x in range(16):
+        _px(img, x, 0, CONCRETE[3])
+        _px(img, x, 15, CONCRETE[0])
+    for x0, x1, y in ((3, 7, 5), (9, 13, 10)):
+        for x in range(x0, x1 + 1):
+            _px(img, x, y, CONCRETE[1])
+    return img
+
+
+# Blast-proof concrete, dark to light: 0 the depth of a tie hole, 1 a lift joint, 2 the fill, 3 a lift's lit top edge.
+# Cooler and darker than bastion concrete (the fortifications batch, tools/fortifications.py), which the owner liked
+# on 5 October 2026 when they called the old speckled, framed blast-proof block horrific.
+BLAST = [(78, 81, 84), (96, 99, 102), (110, 113, 115), (124, 127, 129)]
 
 
 def blastproof_concrete():
-    """Cast panel: darker concrete with formwork seams and the four tie-holes of the shuttering."""
-    img = _speckle((122, 126, 128), 4, 3203)
-    for i in range(16):
-        img.putpixel((i, 0), (96, 100, 102, 255))
-        img.putpixel((0, i), (96, 100, 102, 255))
-        img.putpixel((i, 15), (150, 154, 156, 255))
-        img.putpixel((15, i), (150, 154, 156, 255))
-    for x, y in ((3, 3), (12, 3), (3, 12), (12, 12)):
-        img.putpixel((x, y), (54, 56, 58, 255))
-        img.putpixel((x + 1, y), (84, 86, 88, 255))
-        img.putpixel((x, y + 1), (84, 86, 88, 255))
+    """Heavy cast concrete in two smooth lifts a block: each lift lit along its top row with its joint on its bottom
+    row, so the block edge is drawn exactly like the joint inside it and a wall reads as continuous lifts, with no
+    vertical joints. Recessed 2 x 2 tie-cone holes (dark at the top left, lit at the bottom right) sit on a lattice
+    eight pixels apart, staggered half a step between the lifts, and nothing else marks the smooth face. Each lift
+    holds its own holes, so slabs and stair steps show whole ones. Four colours and no per-pixel noise."""
+    img = Image.new("RGBA", (16, 16), BLAST[2] + (255,))
+    for y0 in (0, 8):
+        for x in range(16):
+            _px(img, x, y0, BLAST[3])
+            _px(img, x, y0 + 7, BLAST[1])
+    for x, y in ((2, 3), (10, 3), (6, 11), (14, 11)):
+        _px(img, x, y, BLAST[0])
+        _px(img, x + 1, y, BLAST[1])
+        _px(img, x, y + 1, BLAST[1])
+        _px(img, x + 1, y + 1, BLAST[3])
     return img
 
 
