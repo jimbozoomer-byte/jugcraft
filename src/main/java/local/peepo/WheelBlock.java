@@ -57,7 +57,7 @@ public final class WheelBlock extends BaseEntityBlock {
     }
     @Override protected InteractionResult useWithoutItem(BlockState state,Level level,BlockPos pos,Player player,BlockHitResult hit) {
         if(!level.isClientSide() && level.getBlockEntity(master(pos,state)) instanceof WheelBlockEntity wheel)
-            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Wheel: "+wheel.energy.getAmount()+" / 32000 JE | "+(wheel.working()?"Running":"Waiting")+" | Outputs: left/right"));
+            player.openMenu(wheel);
         return InteractionResult.SUCCESS;
     }
 }

@@ -14,5 +14,18 @@
   "message.peepo.activity.working": "Working",
   "message.peepo.activity.resting": "Resting",
   "message.peepo.activity.idle": "Idle",
-  "block.peepo_companion.generator_wheel": "Companion Generator Wheel"
+  "block.peepo_companion.generator_wheel": "Companion Generator Wheel",
+  "container.peepo_companion.wheel": "Generator Wheel",
+  "container.peepo_companion.wheel.no_worker": "No companion",
+  "container.peepo_companion.wheel.reserve": "Reserve: %s%%",
+  "container.peepo_companion.wheel.max_rate": "Max: 64 JE/t",
+  "container.peepo_companion.wheel.terminal": "Wheel power",
+  "container.peepo_companion.wheel.full": "> Full",
+  "container.peepo_companion.wheel.running": "> Running",
+  "container.peepo_companion.wheel.waiting": "> Waiting",
+  "container.peepo_companion.wheel.stored": "Stored",
+  "container.peepo_companion.wheel.push": "Export",
+  "container.peepo_companion.wheel.outputs": "Power outputs",
+  "container.peepo_companion.wheel.sides": "Left + right",
+  "container.peepo_companion.wheel.capacity": "32,000 JE max"
 }

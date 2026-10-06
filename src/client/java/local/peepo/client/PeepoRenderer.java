@@ -42,6 +42,8 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
             if(!state.eating || state.isInvisible || state.food.isEmpty())return;
             pose.pushPose();
             pose.translate(0,1.10-Math.sin(state.eatingTime*.8)*.012,state.pumpkin ? -.28 : -.235);
+            // Entity layers use a Y-down pose; turn the item upright in both hands.
+            pose.rotateDegrees(com.mojang.math.Axis.XP,180);
             pose.scale(.17F,.17F,.17F);
             state.food.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,state.outlineColor);
             pose.popPose();

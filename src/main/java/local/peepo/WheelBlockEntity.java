@@ -12,7 +12,29 @@ import net.minecraft.world.phys.Vec3;
 import io.github.jimbozoomer.jugcraft.energy.*;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
-public final class WheelBlockEntity extends BlockEntity implements CompanionStation {
+public final class WheelBlockEntity extends BlockEntity implements CompanionStation, net.minecraft.world.MenuProvider {
+    private int outputRate;
+    private final net.minecraft.world.inventory.ContainerData menuData = new net.minecraft.world.inventory.ContainerData() {
+        public int get(int index) {
+            var p = npc();
+            return switch (index) {
+                case 0 -> (int) energy.getAmount();
+                case 1 -> working() ? 1 : 0;
+                case 2 -> p == null ? 0 : (int) (100L * p.getEnergy() / p.getEnergyCapacity());
+                case 3 -> outputRate;
+                case 4 -> p == null ? 0 : p.isJughead() ? 2 : 1;
+                default -> 0;
+            };
+        }
+        public void set(int index, int value) {}
+        public int getCount() { return WheelMenu.DATA_COUNT; }
+    };
+    @Override public net.minecraft.network.chat.Component getDisplayName() {
+        return net.minecraft.network.chat.Component.translatable("container.peepo_companion.wheel");
+    }
+    @Override public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int id, net.minecraft.world.entity.player.Inventory inventory, net.minecraft.world.entity.player.Player player) {
+        return new WheelMenu(id, inventory, menuData, net.minecraft.world.inventory.ContainerLevelAccess.create(level, worldPosition));
+    }
     public final SimpleEnergyStorage energy=new SimpleEnergyStorage(32000,64,64,this::setChanged);
     public final EnergyStorage output=new EnergyStorage() {
         public boolean supportsInsertion(){return false;}
@@ -58,7 +80,8 @@ public final class WheelBlockEntity extends BlockEntity implements CompanionStat
         wheel.expire();
         Direction right=wheel.facing().getClockWise();
         long moved=EnergyNetworks.pushToNeighbors(level,pos,wheel.output,64,List.of(right.getOpposite()));
-        EnergyNetworks.pushToNeighbors(level,pos.relative(right),wheel.output,64-moved,List.of(right));
+        moved+=EnergyNetworks.pushToNeighbors(level,pos.relative(right),wheel.output,64-moved,List.of(right));
+        wheel.outputRate=(int)moved;
         boolean running=wheel.working();
         if(state.getValue(WheelBlock.RUNNING)!=running)level.setBlock(pos,state.setValue(WheelBlock.RUNNING,running),Block.UPDATE_ALL);
     }
