@@ -1,0 +1,36 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "nickel"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "chromium"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "cobalt"
+    }
+  ],
+  "type": "jugcraft:alloying",
+  "ingredients": [
+    {
+      "ingredient": "jugcraft:nichrome_ingot",
+      "count": 2
+    },
+    {
+      "ingredient": "jugcraft:cobalt_ingot",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "jugcraft:superalloy_ingot",
+    "count": 3
+  },
+  "time": 300
+}

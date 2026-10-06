@@ -3,6 +3,7 @@
   "values": [
     "#c:dusts/salt",
     "#c:dusts/phosphate",
+    "#c:dusts/graphite",
     "#c:dusts/copper",
     "#c:dusts/iron",
     "#c:dusts/gold",
@@ -13,6 +14,8 @@
     "#c:dusts/nickel",
     "#c:dusts/tungsten",
     "#c:dusts/uranium",
+    "#c:dusts/chromium",
+    "#c:dusts/cobalt",
     "#c:dusts/sulfur",
     "#c:dusts/lithium_carbonate",
     "#c:dusts/rare_earth_oxide",

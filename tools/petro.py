@@ -310,6 +310,10 @@ FLUID_RECIPES = {
         # The Hall-Heroult process: alumina dissolved in molten salt and split with a coke anode, which burns away.
         {"name": "aluminum", "items": [("jugcraft:alumina", 2), ("jugcraft:coke", 1)],
          "results": [("jugcraft:aluminum_ingot", 2)], "ticks": 160, "features": ["aluminum"]},
+        # Batch 57: a graphite anode (what the real smelters bake their anodes from) in place of raw coke carries the
+        # current better: the same two ingots in 100 ticks instead of 160.
+        {"name": "aluminum_graphite", "items": [("jugcraft:alumina", 2), ("jugcraft:graphite", 1)],
+         "results": [("jugcraft:aluminum_ingot", 2)], "ticks": 100, "features": ["aluminum", "graphite"]},
         # Water electrolysis (batch 24): hydrogen at the cathode (middle), oxygen at the anode (top), two to one. An
         # early hydrogen source for the fuel cell, deliberately dear: 204,800 JE for 500 mB of hydrogen (410 JE/mB)
         # against the fuel cell's 128 JE/mB, so even four efficiency cards (41%) leave it a loss.

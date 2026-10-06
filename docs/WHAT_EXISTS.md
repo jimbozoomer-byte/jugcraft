@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 1389 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit`, `hay_golem`, `flying_broomstick`, `werewolf`, `squirrel`, `pumpkling`, `toss_ring`, `ferris_wheel`, `pinata`, `hot_air_balloon` and `pibal`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
+| Registered IDs | 1470 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit`, `hay_golem`, `flying_broomstick`, `werewolf`, `squirrel`, `pumpkling`, `toss_ring`, `ferris_wheel`, `pinata`, `hot_air_balloon` and `pibal`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
 
 ## Build, generate, check
 
@@ -49,14 +49,17 @@ CI runs all of these and fails if generated files are out of date.
 | bronze | ingot, nugget, block, `bronze_blend` | 3 copper + 1 tin (hand blend or alloy smelter) | `tin` |
 | brass, invar, solder | ingot, nugget, block | alloy smelter only | `zinc`, `nickel`, `lead` |
 | steel | ingot, nugget, block; plate, gear | steel foundry (iron + coke) | `machines` |
+| chromium, cobalt (batch 57) | ore, deepslate ore, raw, raw block, ingot, nugget, block, dust, washed ore | worldgen ores; blast or arc furnace | `chromium`, `cobalt` |
+| stainless steel, superalloy (batch 57) | ingot, nugget, block; plate | alloy smelter (3 steel + 1 chromium → 4; 2 nichrome + 1 cobalt → 3) | `chromium`, `cobalt` |
+| nichrome (batch 57) | ingot, nugget, block | alloy smelter (4 nickel + 1 chromium → 5) | `chromium` |
 
 | Other | IDs | Notes |
 | --- | --- | --- |
-| Minerals | `salt`, `phosphate`, `lepidolite`, `monazite` (+ `_ore`, `deepslate_…_ore`, `…_block`) | ores drop several items |
+| Minerals | `salt`, `phosphate`, `lepidolite`, `monazite`, `graphite` (+ `_ore`, `deepslate_…_ore`, `…_block`) | ores drop several items; the arc furnace also bakes coke into graphite (batch 57) |
 | Rocks | `bauxite` (block), `oil_sand` (block, drops `bitumen`) | biome-limited surface worldgen |
 | Items | `bitumen`, `sulfur_dust`, `silicon`, `lithium_carbonate`, `rare_earth_oxide`, `coke` (`c:coal_coke`) | several are chemistry stand-ins; coke is fuel and steel's carbon |
-| Components | `<metal>_plate` ×11, `<metal>_gear` ×5, `<metal>_wire` ×3, `basic_circuit`, `advanced_circuit` | `JugcraftComponents`; tags `c:plates/…`, `c:gears/…`, `c:wires/…` |
-| Ore processing | `<metal>_dust` ×10 (copper, iron, gold, tin, zinc, lead, silver, nickel, tungsten, uranium), `washed_<metal>_ore` ×10, `sawdust` | tags `c:dusts/<metal>` |
+| Components | `<metal>_plate` ×14, `<metal>_gear` ×5, `<metal>_wire` ×3, `basic_circuit`, `advanced_circuit` | `JugcraftComponents`; tags `c:plates/…`, `c:gears/…`, `c:wires/…` |
+| Ore processing | `<metal>_dust` ×12 (copper, iron, gold, tin, zinc, lead, silver, nickel, tungsten, uranium, chromium, cobalt), `washed_<metal>_ore` ×12, `sawdust` | tags `c:dusts/<metal>` |
 
 Every Jugcraft metal and part carries `c:` convention tags (`c:ingots/tin`, `c:ores/tin`, `c:raw_materials/tin`, `c:storage_blocks/tin`, `c:nuggets/tin`, `c:dusts/tin`, …). **Use tags in recipes** so other mods' equivalents work.
 
@@ -454,7 +457,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ### Feature switches (`config/`)
 
-- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `agriculture`, `parties`, `drones`, `pixel_hollows` and `retro_trader`.
+- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 19 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `agriculture`, `parties`, `drones`, `pixel_hollows` and `retro_trader`.
 - It also holds other server options, `JugcraftConfig.OPTIONS` (read with `JugcraftConfig.option(key)`): `carving.free_draw` (default `true`).
 - Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the `seasons.*`, `harvest_feast*` and `december` settings (season/SeasonCalendar), the `parties.*` limits (party/JugcraftParties), and the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads the Halloween ones; a bad value is logged and its default kept.
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
@@ -644,6 +647,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 - Chemistry branch: PVC, bleach and enrichment (the oil line, electrochemistry, advanced materials and gas storage exist). Blast-furnace stand-ins remain as the simple routes.
 - Electronics beyond processors: uses for processors in the tiers above. Rule-based machine control exists (batch 36).
+- The high-tech and space tiers planned in [branches/HIGH_TECH_AND_SPACE.md](branches/HIGH_TECH_AND_SPACE.md) (energy tiers, enrichment, the reactor, the launch pad, orbit, the Moon and beyond): only their first materials exist (batch 57, [features/space-age-materials.md](features/space-age-materials.md)).
 - EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
 - Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from the seasons (colours, the Harvest Feast and December windows, and winter snow) and the agriculture branch's Halloween. Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its slices so far; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)). (The Pixel Hollows is the first cave biome; it has no creatures, structures or bosses yet.)

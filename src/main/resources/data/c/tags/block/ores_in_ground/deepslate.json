@@ -9,9 +9,12 @@
     "jugcraft:deepslate_tungsten_ore",
     "jugcraft:deepslate_uranium_ore",
     "jugcraft:deepslate_titanium_ore",
+    "jugcraft:deepslate_chromium_ore",
+    "jugcraft:deepslate_cobalt_ore",
     "jugcraft:deepslate_salt_ore",
     "jugcraft:deepslate_phosphate_ore",
     "jugcraft:deepslate_lepidolite_ore",
-    "jugcraft:deepslate_monazite_ore"
+    "jugcraft:deepslate_monazite_ore",
+    "jugcraft:deepslate_graphite_ore"
   ]
 }

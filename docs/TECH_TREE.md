@@ -11,6 +11,7 @@ How every implemented material, machine and part works and connects. **Implement
 | **Mechanical processing** | Implemented | Physical transformation of materials: smelting, crushing, alloying, pressing, drawing, assembling. |
 | **Fluids** | Implemented | Pipes, tanks and pumps that move and store water, lava and other mods' fluids; physical only, no reactions. See [Fluids](#fluids) below. |
 | **Chemistry** | **In progress** | Reactions that change what a substance *is*: electrolysis, acids, fertilizer, refining. The dieselpunk oil line is being built first: see [branches/CHEMISTRY.md](branches/CHEMISTRY.md) and [petrochemistry.md](features/petrochemistry.md). |
+| **High tech and space** | **Planned; materials started** | The tiers after electronics: atomic power and aerospace alloys, the launch pad and orbit, the Moon and the planets, and the exotic tiers that harness what space offers. See [branches/HIGH_TECH_AND_SPACE.md](branches/HIGH_TECH_AND_SPACE.md). Its first batch, the space-age materials (chromium, cobalt, graphite, stainless steel, nichrome, superalloy), is implemented: see [space-age-materials.md](features/space-age-materials.md). |
 | **Agriculture** | Three slices implemented | Crops, seeds, food and hand farm tools; its own starting branch, needing no machines. Corn grows 3 blocks tall for fields and mazes; tomatoes climb trellises; a Cooking Pot makes meals over a campfire; squash grows from stems, cranberries in bogs and chestnuts on a fruiting tree. See [branches/AGRICULTURE.md](branches/AGRICULTURE.md). |
 
 The mechanical branch changes the **shape or mix** of materials (crush, melt, alloy, press, draw, assemble). Anything that needs a chemical reaction belongs to the Chemistry branch, even when it currently has a temporary blast-furnace or arc-furnace stand-in.
@@ -56,6 +57,7 @@ flowchart LR
    - **Wind Turbine** (9 blocks tall with a 7-block rotor, aluminum plates): free power that grows with height.
    - **Geothermal Generator** (2×2×2, needs a basic circuit): runs on lava. An electric pump on lava feeds it through pipes.
 9. **Fluids:** **Bronze Fluid Pipes** and the **Tinplate Tank** are crafted from press-made plates; the **Electric Pump** adds iron gears, a bucket and a casing. A pump on water, piped to a steam generator, keeps the boiler full without buckets.
+10. **Space-age materials** (batch 57): **chromium** and **cobalt** ores deep down (iron pickaxe; blast or arc furnace), **graphite** ore (or coke baked in the arc furnace). The alloy smelter makes **stainless steel** (3 steel + 1 chromium → 4), **nichrome** (4 nickel + 1 chromium → 5) and **superalloy** (2 nichrome + 1 cobalt → 3); the press makes stainless and superalloy plates. Chromium chrome-plates gear in the electroplating bath (×2 durability), a superalloy ingot and a stainless plate make four rocket nozzles, and graphite is the faster anode for aluminum and a cheaper lithium cell. See [space-age-materials.md](features/space-age-materials.md).
 
 ## Machines
 
@@ -70,7 +72,7 @@ All machines hold their own internal battery and accept power from cables or dir
 | Battery Box | Power | Stores 400,000 JE; outputs from its front | stores | lead, cable, redstone block, casing |
 | Electric Furnace | Mechanical | Any vanilla smelting recipe, 100 ticks | 10 JE/t | bronze, redstone, cable, furnace, casing |
 | Crusher | Mechanical | Ore → 2 raw; minerals, sulfur, oil sand, cobble → gravel → sand | 16 JE/t | flint, cable, casing, bronze, redstone |
-| Alloy Smelter (3 wide, 2 deep, 6 tall) | Mechanical | Two ingredients (any order) → bronze, brass, invar, solder. Power **only** through its copper socket | 20 JE/t | bronze, cable, 2 furnaces, casing, redstone |
+| Alloy Smelter (3 wide, 2 deep, 6 tall) | Mechanical | Two ingredients (any order) → bronze, brass, invar, solder, stainless steel, nichrome, superalloy. Power **only** through its copper socket | 20 JE/t | bronze, cable, 2 furnaces, casing, redstone |
 | Metal Press | Mechanical | Ingot → plate (1:1) | 16 JE/t | bronze, piston, cable, casing, anvil |
 | Wire Drawer | Mechanical | Ingot → 3 wires | 12 JE/t | brass, shears, cable, casing, redstone |
 | Circuit Assembler | Mechanical | Up to three ingredient stacks (any order) → circuits | 32 JE/t | tin plates, bronze gear, cable, casing, redstone |
@@ -82,7 +84,7 @@ All machines hold their own internal battery and accept power from cables or dir
 | Steel Foundry (2×2, 5 tall) | Steel | Iron ingot + coke → steel ingot, 400 ticks | none | bricks, hopper, iron plates, blast furnace |
 | Geothermal Generator (2×2×2) | Power | Lava → 64 JE/t (1 mB/t; a bucket lasts 1,000 ticks) | produces | invar plates, tinplate tank, bronze gears, casing, basic circuit |
 | Wind Turbine (9 tall, 7-block rotor) | Power | 12–72 JE/t by height above sea level; ×1.5 in rain, ×2 in thunder; the rotor turns (drawn by the client) and needs a clear 7×7 square in front of the top | produces | aluminum plates, bronze gears, casing, bronze plates, cable |
-| Arc Furnace (3×3×3 multiblock) | Mechanical (with chemistry stand-ins) | Quartz → 2 silicon; 4 silicon + 1 phosphate → 1 silicon boule (400 ticks; argon piped into the controller, 1 mB/t, doubles its speed; batch 24, from the old crystal grower); raw nickel, tungsten or uranium → ingot; titanium sponge → titanium ingot; bauxite, lepidolite and monazite stand-ins | 64 JE/t | 26 arc furnace casings (bricks + nickel) + controller |
+| Arc Furnace (3×3×3 multiblock) | Mechanical (with chemistry stand-ins) | Quartz → 2 silicon; 4 silicon + 1 phosphate → 1 silicon boule (400 ticks; argon piped into the controller, 1 mB/t, doubles its speed; batch 24, from the old crystal grower); raw nickel, tungsten, uranium, chromium or cobalt → ingot; coke → graphite; titanium sponge → titanium ingot; bauxite, lepidolite and monazite stand-ins | 64 JE/t | 26 arc furnace casings (bricks + nickel) + controller |
 
 ## Machine looks: steampunk and classic
 
@@ -687,9 +689,9 @@ Ore processing gives more metal per ore and turns everyday blocks into useful th
 | Sieve | Gravel → flint (12% iron nugget, 8% tin nugget); soul sand → soul soil (15% quartz, 8% gold nugget) | 8 JE/t, 100 ticks | iron plates, iron bars, hopper, cables, casing |
 | Sawmill | Log → 6 planks (bamboo block → 3), 50% sawdust; planks → 3 sticks | 12 JE/t, 100 ticks (sticks 60) | iron ingots, iron gear, iron plates, cables, casing |
 
-**Dusts** exist for copper, iron, gold, tin, zinc, lead, silver, nickel, tungsten and uranium, tagged `c:dusts/<metal>`. A dust smelts into one ingot wherever that metal's raw ore can be smelted. Nickel, tungsten and uranium dust melt in the Arc Furnace instead, like their raw ores. **Washed ores** (`washed_<metal>_ore`) are an intermediate: grind them, don't smelt them. Four **sawdust** make a sheet of paper.
+**Dusts** exist for copper, iron, gold, tin, zinc, lead, silver, nickel, tungsten, uranium, chromium and cobalt, tagged `c:dusts/<metal>`. A dust smelts into one ingot wherever that metal's raw ore can be smelted. Nickel, tungsten, uranium, chromium and cobalt dust melt in the Arc Furnace instead, like their raw ores. **Washed ores** (`washed_<metal>_ore`) are an intermediate: grind them, don't smelt them. Four **sawdust** make a sheet of paper.
 
-**Byproducts** (pulverizing ore or washed ore): copper → gold, iron → nickel, gold → silver, tin → tungsten (5%), zinc → lead, lead → silver, silver → lead, nickel → iron, tungsten → tin, uranium → lead, each 10% unless marked. The pairs follow ores that really occur together. A byproduct from a disabled feature switch is never made.
+**Byproducts** (pulverizing ore or washed ore): copper → gold, iron → nickel, gold → silver, tin → tungsten (5%), zinc → lead, lead → silver, silver → lead, nickel → cobalt (batch 57; it was iron), chromium → nickel, cobalt → nickel, tungsten → tin, uranium → lead, each 10% unless marked. The pairs follow ores that really occur together. A byproduct from a disabled feature switch is never made.
 
 **Byproduct slots.** The Pulverizer, Sieve and Sawmill have two byproduct slots above the output. A machine waits rather than lose a byproduct: it only finishes an operation when every byproduct it might roll has room. Hoppers, pipes and *Eject* take from the byproduct slots as well as the output.
 
@@ -746,7 +748,7 @@ The defaults keep the old behavior: ingredients in from the top and sides, resul
 
 | Component | Made by | Metals | Used for |
 | --- | --- | --- | --- |
-| Plate | Metal Press, 1 ingot → 1 plate | copper, iron, tin, bronze, brass, invar, aluminum, nickel, lead, tungsten | Gears; the Circuit Assembler (tin plates); advanced circuits (invar); pipes (bronze) and tanks (tin); future casings and rocket hulls |
+| Plate | Metal Press, 1 ingot → 1 plate | copper, iron, tin, bronze, brass, invar, aluminum, nickel, lead, tungsten, steel, titanium, stainless steel, superalloy | Gears; the Circuit Assembler (tin plates); advanced circuits (invar); pipes (bronze) and tanks (tin); future casings and rocket hulls |
 | Gear | Crafting, 4 plates of one metal | iron, bronze, brass, invar | The Circuit Assembler (bronze gear); the Electric Pump (iron); future mechanical machines |
 | Wire | Wire Drawer, 1 ingot → 3 wires | copper, silver, aluminum | Circuits (copper for basic, silver for advanced); future cable tiers |
 | Basic Circuit | Circuit Assembler | silicon, copper wire, solder | Future higher-tier machines and upgrades |

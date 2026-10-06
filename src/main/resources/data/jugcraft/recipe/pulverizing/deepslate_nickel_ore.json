@@ -19,10 +19,11 @@
   "byproducts": [
     {
       "result": {
-        "id": "jugcraft:iron_dust",
+        "id": "jugcraft:cobalt_dust",
         "count": 1
       },
-      "chance": 0.1
+      "chance": 0.1,
+      "feature": "cobalt"
     }
   ]
 }

@@ -23,6 +23,7 @@ Primary specialty and supported player role: gear upkeep for fighters and explor
   | Nickel | Maximum durability ×1.5 |
   | Silver | Swords and axes get Smite III (raised to III if lower; higher Smite is kept) |
   | Gold | Armor counts as gold for piglins, so one gold-plated piece keeps them calm |
+  | Chromium (batch 57) | Maximum durability ×2 (hard chrome; chromium is a deeper, arc-furnace metal) |
 
 - An item holds one plating. Plating it again with the **same** metal only repairs it (the bonus is not stacked). A **different** metal is refused, and nothing is used.
 - Advancement **Silver Lining** (build an electroplating bath). Handbook page in the Chemistry chapter.

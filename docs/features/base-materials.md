@@ -19,6 +19,9 @@ The world now holds the raw materials later technology needs, found where they p
 | Tungsten | Tungsten ore, rare, Y −64 to 0; iron pickaxe; **blast furnace only** | Tungsten ingots | Wolframite; too refractory for a plain furnace |
 | Uranium | Uranium ore, very rare, Y −64 to −16; iron pickaxe; **blast furnace only** | Uranium ingots | Pitch-black uraninite with yellow-green crust |
 | Titanium | Titanium ore (rutile), rare, Y −64 to −8; iron pickaxe; **no furnace smelts it** | Titanium via the Kroll process (chlorine, coke) in the chemical reactor: see [industrial-chemistry.md](industrial-chemistry.md) | Rutile (reddish-brown to black); titanium is made with chlorine, not smelted |
+| Chromium (batch 57) | Chromium ore, Y −64 to 24; iron pickaxe; **blast furnace only** (or the arc furnace) | Stainless steel, nichrome, chrome plating: see [space-age-materials.md](space-age-materials.md) | Chromite (iron-black, metallic) |
+| Cobalt (batch 57) | Cobalt ore, rare, Y −64 to 0; iron pickaxe; **blast furnace only** (or the arc furnace); also 10% of ground nickel ore | Superalloy | Cobaltite (silver-white with a pink erythrite bloom) |
+| Graphite (batch 57) | Graphite ore, Y −40 to 40; any pickaxe; drops 1–3; or coke baked in the arc furnace | Anodes for aluminum and lithium cells | Flake graphite in metamorphic rock; synthetic graphite from baked coke |
 | Bauxite / aluminum | Bauxite rock near the surface (Y 50–100) in jungle, savanna and badlands | Blast furnace: 1 bauxite → 1 aluminum nugget (**stand-in**) | Tropical weathering; real refining needs electrolysis |
 | Salt | Rock salt ore, Y 0–64; drops 2–4 salt | Salt, salt blocks | Halite beds |
 | Phosphate | Phosphorite ore, Y −16 to 48; drops 1–3 | Phosphate | Sedimentary phosphorite with apatite |
@@ -41,7 +44,7 @@ All compaction is 9 ⇄ 1 and lossless. No recipe creates metal: `tools/check_mo
 Not added on purpose: radiation or other hazards (uranium needs its own design first), lead poisoning, new tool or armor tiers, vanilla recipe changes, and a sulfur-to-gunpowder recipe (a vanilla balance decision).
 
 ## Multiplayer and persistence
-No block entities, screens, packets or tick logic. Every material has its own switch in `config/jugcraft.properties` (`tin`, `zinc`, `lead`, `silver`, `nickel`, `tungsten`, `uranium`, `aluminum`, `salt`, `phosphate`, `lithium`, `rare_earths`, `sulfur`, `silicon`, `crude_oil`). `false` stops that material's worldgen and recipes; registered blocks and items always remain. There is no retrogeneration, so existing chunks get none of the new ores.
+No block entities, screens, packets or tick logic. Every material has its own switch in `config/jugcraft.properties` (`tin`, `zinc`, `lead`, `silver`, `nickel`, `tungsten`, `uranium`, `aluminum`, `salt`, `phosphate`, `lithium`, `rare_earths`, `sulfur`, `silicon`, `crude_oil`, and since batch 57 `chromium`, `cobalt` and `graphite`). `false` stops that material's worldgen and recipes; registered blocks and items always remain. There is no retrogeneration, so existing chunks get none of the new ores.
 
 ## Dependencies and assets
 Fabric API only. All 79 textures are original, drawn by `tools/generate_textures.py` from fixed seeds (MIT).

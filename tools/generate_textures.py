@@ -237,6 +237,16 @@ METAL_COLORS = {
                  [(118, 124, 130), (166, 172, 178), (198, 202, 208), (220, 224, 228), (238, 240, 244)]),
 }
 
+# Space-age metals (batch 57). They draw from their own seed range (main_extra), so adding them changed no existing
+# texture. Chromite: iron-black grains with a steel-blue glint; the metal is bright, blue-white chrome. Cobaltite:
+# silver-white grains with a pink erythrite bloom; the metal a cool steel-blue.
+SPACE_METAL_COLORS = {
+    "chromium": ([(26, 22, 24), (48, 40, 40), (84, 72, 70)], (170, 178, 190),
+                 [(70, 78, 92), (118, 128, 144), (166, 176, 192), (206, 214, 228), (240, 244, 250)]),
+    "cobalt": ([(150, 140, 150), (190, 180, 190), (214, 150, 170)], (248, 220, 232),
+               [(52, 62, 90), (84, 98, 132), (120, 136, 172), (160, 174, 206), (204, 214, 236)]),
+}
+
 # Alloys have their own seed range so adding them never changes existing textures.
 # Brass is bright yellow-gold, invar a cool pale gray, solder a dull lead-tin gray.
 ALLOY_COLORS = {
@@ -249,6 +259,14 @@ ALLOY_COLORS = {
     # Steel: a dark blue-gray, darker and cooler than iron.
     "steel": (None, None,
               [(44, 48, 56), (72, 78, 88), (102, 108, 120), (136, 142, 154), (176, 182, 194)]),
+    # Space-age alloys (batch 57): stainless a bright, slightly warm silver; nichrome a dull warm grey; the superalloy
+    # a dark silver with a faint golden-green sheen.
+    "stainless_steel": (None, None,
+                        [(84, 90, 100), (134, 142, 152), (178, 186, 196), (212, 218, 226), (240, 244, 248)]),
+    "nichrome": (None, None,
+                 [(74, 72, 68), (118, 114, 106), (158, 154, 144), (192, 188, 178), (222, 218, 208)]),
+    "superalloy": (None, None,
+                   [(54, 58, 54), (92, 98, 90), (136, 142, 128), (178, 184, 166), (214, 220, 200)]),
 }
 
 # name: (ore specks, glint, item/block palette)
@@ -261,6 +279,9 @@ MINERAL_COLORS = {
                    [(140, 100, 160), (176, 136, 196), (206, 174, 222), (230, 210, 240)]),
     "monazite": ([(150, 90, 40), (186, 120, 56), (212, 156, 82)], (246, 214, 150),
                  [(140, 84, 36), (178, 116, 52), (206, 150, 78), (226, 180, 110)]),
+    # Batch 57: graphite, dark grey flakes with a dull silver sheen.
+    "graphite": ([(34, 36, 40), (52, 54, 60), (78, 80, 88)], (150, 154, 162),
+                 [(40, 42, 46), (58, 60, 66), (80, 82, 90), (110, 112, 120)]),
 }
 
 BAUXITE = [(126, 58, 36), (150, 72, 44), (170, 88, 54), (188, 108, 68), (112, 50, 32)]
@@ -298,6 +319,18 @@ def main_extra():
 
     for index, (metal, (_, _, palette)) in enumerate(ALLOY_COLORS.items()):
         save(metal_block(palette, 700 + index), "block", f"{metal}_block")
+        save(from_mask(INGOT, palette), "item", f"{metal}_ingot")
+        save(from_mask(NUGGET, palette), "item", f"{metal}_nugget")
+
+    # Space-age metals (batch 57) have their own seed range, so the metals and minerals above keep their textures.
+    seed = 800
+    for metal, (specks, glint, palette) in SPACE_METAL_COLORS.items():
+        seed += 10
+        save(ore(STONE, seed, specks=specks, glint=glint), "block", f"{metal}_ore")
+        save(ore(DEEPSLATE, seed + 1, streaks=True, specks=specks, glint=glint), "block", f"deepslate_{metal}_ore")
+        save(raw_block(seed + 2, specks, glint), "block", f"raw_{metal}_block")
+        save(raw_chunk(seed + 3, specks, glint), "item", f"raw_{metal}")
+        save(metal_block(palette, seed + 4), "block", f"{metal}_block")
         save(from_mask(INGOT, palette), "item", f"{metal}_ingot")
         save(from_mask(NUGGET, palette), "item", f"{metal}_nugget")
 
@@ -1060,6 +1093,8 @@ def part_palette(metal):
         return fixed[metal]
     if metal in METAL_COLORS:
         return METAL_COLORS[metal][2]
+    if metal in SPACE_METAL_COLORS:
+        return SPACE_METAL_COLORS[metal][2]
     return ALLOY_COLORS[metal][2]
 
 

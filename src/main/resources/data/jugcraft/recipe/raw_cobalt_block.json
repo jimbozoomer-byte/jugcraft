@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "cobalt"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": "#c:raw_materials/cobalt"
+  },
+  "result": {
+    "id": "jugcraft:raw_cobalt_block",
+    "count": 1
+  }
+}

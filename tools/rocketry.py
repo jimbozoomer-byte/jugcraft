@@ -137,6 +137,10 @@ def workshop_recipes():
          "features": feature},
         {"inputs": [[rid("tungsten_ingot"), 1], [rid("steel_plate"), 1]], "output": rid("rocket_nozzle"), "count": 2,
          "ticks": 160, "features": feature + ["tungsten"]},
+        # Batch 57: the nickel superalloy, the real hot-section metal, lined with stainless steel: four nozzles from the
+        # same two ingots' worth, twice what tungsten gives.
+        {"name": "rocket_nozzle_from_superalloy", "inputs": [[rid("superalloy_ingot"), 1], [rid("stainless_steel_plate"), 1]],
+         "output": rid("rocket_nozzle"), "count": 4, "ticks": 160, "features": feature + ["chromium", "cobalt"]},
         {"inputs": [[rid("processor"), 1], [rid("microchip"), 2], [rid("copper_wire"), 2]],
          "output": rid("guidance_unit"), "count": 1, "ticks": 300, "features": feature + ["silicon"]},
         {"inputs": [[rid("rocket_casing"), 1], [rid("rocket_nozzle"), 1], [rid("solid_propellant"), 2]],

@@ -8,6 +8,8 @@
     "#c:raw_materials/nickel",
     "#c:raw_materials/tungsten",
     "#c:raw_materials/uranium",
-    "#c:raw_materials/titanium"
+    "#c:raw_materials/titanium",
+    "#c:raw_materials/chromium",
+    "#c:raw_materials/cobalt"
   ]
 }

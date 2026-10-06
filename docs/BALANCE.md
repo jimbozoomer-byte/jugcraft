@@ -114,6 +114,21 @@ A processor costs about 64,000 JE of crystal growing and etching (two wafers' wo
 - **Sieve:** cobblestone → gravel → sieve gives a small trickle of iron and tin nuggets (12% and 8%). This is a deliberate renewable, marked `renewable` in the recipe data and exempt from the metal-conservation audit.
 - **Tree farm charcoal (owner-approved exception):** a tree farm uses 6,400 JE to grow 6 logs. The logs become 6 charcoal for about 6,000 JE in the electric furnace, and burn for 230,400 JE in a coal generator (460,800 in a steam generator). That is a net gain of about +545 JE/t per tree farm (it was +737 before charcoal was cut to 1,200 ticks). The owner chose to keep wood power, made slightly weaker, rather than remove it. It is the one positive loop allowed, and any change to the tree farm, charcoal or generators should keep it in mind.
 
+## Space-age materials (batch 57)
+
+| Step | Cost | Notes |
+| --- | --- | --- |
+| Stainless steel (alloy smelter) | 3 steel + 1 chromium → 4, 240 ticks, 4,800 JE | 36 nugget units in, 36 out |
+| Nichrome (alloy smelter) | 4 nickel + 1 chromium → 5, 200 ticks, 4,000 JE | 45 in, 45 out |
+| Superalloy (alloy smelter) | 2 nichrome + 1 cobalt → 3, 300 ticks, 6,000 JE | 27 in, 27 out |
+| Graphite from coke (arc furnace) | 1 coke → 1 graphite, 200 ticks, 12,800 JE | carbon, not metal; the ore drops 1–3 for nothing |
+| Superalloy rocket nozzles (rocket workshop) | 1 superalloy ingot + 1 stainless plate → 4, 160 ticks | 18 units of metal consumed for four non-metal nozzles; the tungsten route gives two |
+| Chrome plating (electroplating bath) | 1 chromium ingot + 100 mB sulfuric acid + 6,400 JE | maximum durability ×2, once per item (nickel ×1.5); never stacks |
+| Graphite anode (electrolytic cell) | 2 alumina + 1 graphite → 2 aluminum, 100 ticks | 60 ticks (15,360 JE) faster than the coke anode's 160; the same two ingots |
+| Lithium cell with graphite (crafting) | 2 graphite + 2 aluminum plates + 4 lithium carbonate + 1 copper wire → 2 cells | two aluminum plates fewer than the plain recipe, the same lithium |
+
+Byproducts: chromium ore → nickel dust 10%, cobalt ore → nickel dust 10%, nickel ore → cobalt dust 10% (it was iron). Each is under the 25% share. Nothing here makes power or turns back into its inputs: no loop.
+
 ## Rules
 
 - No new positive-gain loops (CLAUDE.md). An exception needs the owner's decision and a line in the list above.

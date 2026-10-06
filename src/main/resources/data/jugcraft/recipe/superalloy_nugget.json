@@ -1,0 +1,17 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "cobalt"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#c:ingots/superalloy"
+  ],
+  "result": {
+    "id": "jugcraft:superalloy_nugget",
+    "count": 9
+  }
+}

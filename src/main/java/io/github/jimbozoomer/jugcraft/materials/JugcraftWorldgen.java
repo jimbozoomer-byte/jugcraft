@@ -28,7 +28,9 @@ public final class JugcraftWorldgen {
 		String[][] ores = {
 				{"tin", "tin"}, {"zinc", "zinc"}, {"lead", "lead"}, {"silver", "silver"},
 				{"nickel", "nickel"}, {"tungsten", "tungsten"}, {"uranium", "uranium"}, {"titanium", "titanium"},
+				{"chromium", "chromium"}, {"cobalt", "cobalt"},
 				{"salt", "salt"}, {"phosphate", "phosphate"}, {"lepidolite", "lithium"}, {"monazite", "rare_earths"},
+				{"graphite", "graphite"},
 		};
 		for (String[] ore : ores) {
 			add(ore[0], ore[1], overworld);

@@ -15,12 +15,16 @@ TANK = 4_000
 NICKEL_DURABILITY_PERCENT = 150
 # Silver plating: the Smite level it gives a weapon (raised to this if lower).
 SILVER_SMITE = 3
+# Chrome plating (batch 57): the item's durability is multiplied by this (percent). Hard chrome is what real wear
+# parts are plated with, so it beats nickel; chromium itself is a deeper, arc-furnace metal.
+CHROMIUM_DURABILITY_PERCENT = 200
 
 # metal -> (ingot ingredient tag, display adjective, tooltip)
 METALS = {
     "nickel": ("c:ingots/nickel", "Nickel-plated", "Nickel-plated: half as durable again"),
     "silver": ("c:ingots/silver", "Silver-plated", "Silver-plated: smites the undead"),
     "gold": ("c:ingots/gold", "Gold-plated", "Gold-plated: piglins take it for gold"),
+    "chromium": ("c:ingots/chromium", "Chrome-plated", "Chrome-plated: twice as durable"),
 }
 
 

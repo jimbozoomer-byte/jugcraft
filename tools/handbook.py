@@ -716,6 +716,14 @@ PROGRESSION = [
         ("rubber", "Rubber"), ("gasket", "Gaskets"), ("borosilicate_glass", "Borosilicate glass"),
         ("glass_tank", "Glass tanks"), ("tank_gauge", "Tank gauge"), ("optical_fibre", "Optical fibre"),
         ("grenade_launcher", "Grenade launcher")]),
+    ("Space-Age Materials", "superalloy_ingot", "The metals of the atomic and space tiers.", [
+        "Mine chromite and cobaltite deep down and melt them in the arc furnace. Alloy steel with chromium into "
+        "stainless steel, nickel with chromium into nichrome, and nichrome with cobalt into superalloy.",
+        "Mine graphite, or bake coke into it, for anodes and electrodes. Chrome-plate your tools; make superalloy "
+        "rocket nozzles."], [
+        ("chromium_ingot", "Chromium"), ("cobalt_ingot", "Cobalt"), ("stainless_steel_ingot", "Stainless steel"),
+        ("nichrome_ingot", "Nichrome"), ("superalloy_ingot", "Superalloy"), ("graphite", "Graphite"),
+        ("rocket_nozzle", "Superalloy nozzles")]),
 ]
 
 
@@ -919,6 +927,26 @@ def build():
                 "Two lithium carbonate, four aluminum plates and a copper wire make two lithium cells.",
                 "The alloy smelter melts a rare earth oxide with an iron ingot into a neodymium magnet, for the "
                 "magnet dynamo and magnet motor."]},
+            {"title": "Chromium and Cobalt", "icon": f"{MOD}:chromium_ingot", "text": [
+                "Chromite lies below Y 24 and cobaltite below Y 0; both need an iron pickaxe. Like nickel's ore, "
+                "theirs melt only in the blast furnace or the arc furnace; the crusher, pulverizer and ore washer "
+                "treat them like any ore.",
+                "Grinding nickel ore turns up cobalt now and then, as the real ores do.",
+                "A chromium ingot in the electroplating bath chrome-plates a tool, weapon or piece of armor: twice "
+                "as durable, and repaired."]},
+            {"title": "Stainless Steel and Superalloy", "icon": f"{MOD}:superalloy_ingot", "text": [
+                "The alloy smelter makes the space-age alloys: three steel and a chromium give four stainless steel; "
+                "four nickel and a chromium give five nichrome; two nichrome and a cobalt give three superalloy.",
+                "The metal press makes stainless steel and superalloy plates.",
+                "Superalloy is the turbine-blade metal: a superalloy ingot and a stainless steel plate make four "
+                "rocket nozzles in the rocket workshop, twice what tungsten and steel give.",
+                "Both are the frames of the atomic and space tiers to come."]},
+            {"title": "Graphite", "icon": f"{MOD}:graphite", "text": [
+                "Graphite ore (Y -40 to 40, any pickaxe) drops one to three graphite, and the arc furnace bakes a "
+                "coal coke into one.",
+                "A graphite anode in the electrolytic cell smelts two alumina into two aluminum in 5 seconds instead "
+                "of 8. Two graphite in place of two aluminum plates make a lithium cell.",
+                "Graphite is the electrode and the moderator of the atomic tier to come."]},
             machine_page("lithium_battery_bank"),
             machine_page("flow_battery"),
             {"title": "Fertilizer", "icon": f"{MOD}:fertilizer", "text": [

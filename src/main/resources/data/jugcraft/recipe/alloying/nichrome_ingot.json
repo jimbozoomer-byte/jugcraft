@@ -1,0 +1,32 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "nickel"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "chromium"
+    }
+  ],
+  "type": "jugcraft:alloying",
+  "ingredients": [
+    {
+      "ingredient": "jugcraft:nickel_ingot",
+      "count": 4
+    },
+    {
+      "ingredient": "jugcraft:chromium_ingot",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "jugcraft:nichrome_ingot",
+    "count": 5
+  },
+  "time": 200
+}

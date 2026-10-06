@@ -1,0 +1,28 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "chromium"
+    }
+  ],
+  "type": "jugcraft:alloying",
+  "ingredients": [
+    {
+      "ingredient": "jugcraft:steel_ingot",
+      "count": 3
+    },
+    {
+      "ingredient": "jugcraft:chromium_ingot",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "jugcraft:stainless_steel_ingot",
+    "count": 4
+  },
+  "time": 240
+}

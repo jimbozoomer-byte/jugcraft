@@ -344,7 +344,10 @@ ORE_LEACHING_MULTIPLIER = 4
 # Pulverizer byproducts: grinding ore (or washed ore) of the first metal sometimes yields dust of the
 # second, as the real ores occur together. Chance per operation.
 BYPRODUCTS = {"copper": ("gold", 0.1), "iron": ("nickel", 0.1), "gold": ("silver", 0.1), "tin": ("tungsten", 0.05),
-              "zinc": ("lead", 0.1), "lead": ("silver", 0.1), "silver": ("lead", 0.1), "nickel": ("iron", 0.1),
+              "zinc": ("lead", 0.1), "lead": ("silver", 0.1), "silver": ("lead", 0.1),
+              # Batch 57: cobalt rides with nickel in the real sulfide ores (it was iron before); chromite and cobaltite
+              # sit in the same ultramafic rock as nickel.
+              "nickel": ("cobalt", 0.1), "chromium": ("nickel", 0.1), "cobalt": ("nickel", 0.1),
               "tungsten": ("tin", 0.1), "uranium": ("lead", 0.1)}
 # Byproducts may not add more than this share of the input's metal (expected value), and a
 # renewable recipe (no metal in) at most this many nugget units per operation.
@@ -358,11 +361,17 @@ WOODS = {"oak": "oak_logs", "spruce": "spruce_logs", "birch": "birch_logs", "jun
 FEATURE = "machines"
 
 # Shaped crafting recipes: id -> (pattern, key, result count). Result id equals the recipe id.
-# Second recipes for items that already have one in CRAFTING: file name -> (result, pattern, key, count).
+# Second recipes for items that already have one in CRAFTING: file name -> (result, pattern, key, count), with an
+# optional fifth element naming the feature switches it needs beside "machines" (default: the oil line's "crude_oil").
 ALT_CRAFTING = {
     # Rubber (batch 14): belts from rubber instead of leather, and steel pipes sealed with gaskets.
     "belt_from_rubber": ("belt", ["RSR"], {"R": "jugcraft:rubber", "S": "minecraft:string"}, 2),
     "steel_fluid_pipe_from_gaskets": ("steel_fluid_pipe", ["PKP"], {"P": "#c:plates/steel", "K": "jugcraft:gasket"}, 4),
+    # Space-age materials (batch 57): a graphite anode (the real lithium-ion anode) in place of two of the cell's four
+    # aluminum plates; the same lithium carbonate, the same two cells.
+    "lithium_cell_from_graphite": ("lithium_cell", ["GLG", "LWL", "PLP"],
+                                   {"G": "jugcraft:graphite", "L": "jugcraft:lithium_carbonate", "W": "#c:wires/copper",
+                                    "P": "#c:plates/aluminum"}, 2, ["lithium", "graphite", "aluminum"]),
 }
 
 CRAFTING = {
@@ -685,6 +694,14 @@ ARC_FURNACE = [
      "features": [FEATURE, "lithium"]},
     {"input": "jugcraft:monazite", "output": "jugcraft:rare_earth_oxide", "count": 2, "ticks": 200,
      "features": [FEATURE, "rare_earths"]},
+    # Space-age materials (batch 57): chromite and cobaltite are reduced like nickel's ore, and coal coke graphitizes
+    # at arc heat (synthetic graphite is made from baked coke), a second route to graphite beside its ore.
+    {"input": "jugcraft:raw_chromium", "output": "jugcraft:chromium_ingot", "count": 1, "ticks": 120,
+     "features": [FEATURE, "chromium"]},
+    {"input": "jugcraft:raw_cobalt", "output": "jugcraft:cobalt_ingot", "count": 1, "ticks": 120,
+     "features": [FEATURE, "cobalt"]},
+    {"input": "jugcraft:coke", "output": "jugcraft:graphite", "count": 1, "ticks": 200,
+     "features": [FEATURE, "graphite"]},
 ]
 
 
@@ -711,6 +728,15 @@ ALLOY_SMELTER = [
     # Borosilicate glass: sand melted with borax, tougher than plain glass and clear for optics.
     {"inputs": [["minecraft:sand", 2], ["jugcraft:borax", 1]], "output": "jugcraft:borosilicate_glass",
      "count": 2, "ticks": 160, "features": [FEATURE, "silicon"]},
+    # Space-age alloys (batch 57), at the real proportions, metal conserved exactly: stainless steel is steel with a
+    # quarter of chromium; nichrome four parts nickel to one of chromium; the nickel superalloy two nichrome to one
+    # cobalt (the real ones add molybdenum and a dozen trace metals, left out).
+    {"inputs": [["jugcraft:steel_ingot", 3], ["jugcraft:chromium_ingot", 1]], "output": "jugcraft:stainless_steel_ingot",
+     "count": 4, "ticks": 240, "features": [FEATURE, "chromium"]},
+    {"inputs": [["jugcraft:nickel_ingot", 4], ["jugcraft:chromium_ingot", 1]], "output": "jugcraft:nichrome_ingot",
+     "count": 5, "ticks": 200, "features": [FEATURE, "nickel", "chromium"]},
+    {"inputs": [["jugcraft:nichrome_ingot", 2], ["jugcraft:cobalt_ingot", 1]], "output": "jugcraft:superalloy_ingot",
+     "count": 3, "ticks": 300, "features": [FEATURE, "nickel", "chromium", "cobalt"]},
 ]
 
 

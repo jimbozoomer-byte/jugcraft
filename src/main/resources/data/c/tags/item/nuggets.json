@@ -9,11 +9,16 @@
     "#c:nuggets/tungsten",
     "#c:nuggets/uranium",
     "#c:nuggets/titanium",
+    "#c:nuggets/chromium",
+    "#c:nuggets/cobalt",
     "#c:nuggets/bronze",
     "#c:nuggets/aluminum",
     "#c:nuggets/brass",
     "#c:nuggets/invar",
     "#c:nuggets/solder",
-    "#c:nuggets/steel"
+    "#c:nuggets/steel",
+    "#c:nuggets/stainless_steel",
+    "#c:nuggets/nichrome",
+    "#c:nuggets/superalloy"
   ]
 }

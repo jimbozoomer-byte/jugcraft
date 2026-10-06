@@ -163,6 +163,10 @@ TREE = {
     "survey_rocket": ("rocket_workshop", "survey_rocket", "Eye in the Sky", "Assemble a survey rocket", "task"),
     "hydroponic_bay": ("crop_harvester", "hydroponic_bay", "Soil Optional", "Build a hydroponic bay", "task"),
     "crop_harvester": ("steel", "crop_harvester", "Reaping What You Sow", "Build a crop harvester", "goal"),
+    # Space-age materials (batch 57).
+    "stainless_steel": ("steel", "stainless_steel_ingot", "Stainless", "Alloy steel and chromium into stainless steel", "task"),
+    "superalloy": ("stainless_steel", "superalloy_ingot", "Hot Section", "Alloy nichrome and cobalt into a superalloy", "task"),
+    "graphite": ("steel", "graphite", "Pencil Lead", "Mine graphite, or bake coke into it in the arc furnace", "task"),
 }
 # Background of the tab (a block texture), shown behind the tree.
 BACKGROUND = "jugcraft:block/dp_gunmetal"

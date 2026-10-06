@@ -231,6 +231,62 @@
         {
           "in": [
             [
+              "jugcraft:chromium_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:raw_chromium",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_chromium_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:raw_chromium",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:cobalt_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:raw_cobalt",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_cobalt_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:raw_cobalt",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
               "minecraft:iron_ore",
               1
             ]
@@ -392,6 +448,34 @@
           "out": [
             "jugcraft:monazite",
             2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:graphite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:graphite",
+            4
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_graphite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:graphite",
+            4
           ],
           "extra": [],
           "ticks": 160
@@ -573,6 +657,48 @@
         {
           "in": [
             [
+              "jugcraft:raw_chromium",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:chromium_ingot",
+            1
+          ],
+          "extra": [],
+          "ticks": 120
+        },
+        {
+          "in": [
+            [
+              "jugcraft:raw_cobalt",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cobalt_ingot",
+            1
+          ],
+          "extra": [],
+          "ticks": 120
+        },
+        {
+          "in": [
+            [
+              "jugcraft:coke",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:graphite",
+            1
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
               "jugcraft:nickel_dust",
               1
             ]
@@ -607,6 +733,34 @@
           ],
           "out": [
             "jugcraft:uranium_ingot",
+            1
+          ],
+          "extra": [],
+          "ticks": 80
+        },
+        {
+          "in": [
+            [
+              "jugcraft:chromium_dust",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:chromium_ingot",
+            1
+          ],
+          "extra": [],
+          "ticks": 80
+        },
+        {
+          "in": [
+            [
+              "jugcraft:cobalt_dust",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cobalt_ingot",
             1
           ],
           "extra": [],
@@ -779,6 +933,60 @@
           ],
           "extra": [],
           "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:steel_ingot",
+              3
+            ],
+            [
+              "jugcraft:chromium_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:stainless_steel_ingot",
+            4
+          ],
+          "extra": [],
+          "ticks": 240
+        },
+        {
+          "in": [
+            [
+              "jugcraft:nickel_ingot",
+              4
+            ],
+            [
+              "jugcraft:chromium_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:nichrome_ingot",
+            5
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:nichrome_ingot",
+              2
+            ],
+            [
+              "jugcraft:cobalt_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:superalloy_ingot",
+            3
+          ],
+          "extra": [],
+          "ticks": 300
         }
       ]
     },
@@ -949,6 +1157,34 @@
           ],
           "out": [
             "jugcraft:titanium_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:stainless_steel_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:stainless_steel_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:superalloy_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:superalloy_plate",
             1
           ],
           "extra": [],
@@ -1773,7 +2009,7 @@
           ],
           "extra": [
             [
-              "jugcraft:iron_dust",
+              "jugcraft:cobalt_dust",
               1,
               0.1
             ]
@@ -1793,7 +2029,7 @@
           ],
           "extra": [
             [
-              "jugcraft:iron_dust",
+              "jugcraft:cobalt_dust",
               1,
               0.1
             ]
@@ -1813,7 +2049,7 @@
           ],
           "extra": [
             [
-              "jugcraft:iron_dust",
+              "jugcraft:cobalt_dust",
               1,
               0.1
             ]
@@ -2019,6 +2255,182 @@
           ],
           "out": [
             "jugcraft:uranium_dust",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:chromium_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:chromium_dust",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:nickel_dust",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_chromium_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:chromium_dust",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:nickel_dust",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:washed_chromium_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:chromium_dust",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:nickel_dust",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:raw_chromium",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:chromium_dust",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:chromium_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:chromium_dust",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:cobalt_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cobalt_dust",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:nickel_dust",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_cobalt_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cobalt_dust",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:nickel_dust",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:washed_cobalt_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cobalt_dust",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:nickel_dust",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:raw_cobalt",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cobalt_dust",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:cobalt_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cobalt_dust",
             1
           ],
           "extra": [],
@@ -2305,6 +2717,62 @@
           ],
           "out": [
             "jugcraft:washed_uranium_ore",
+            3
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:chromium_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:washed_chromium_ore",
+            3
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_chromium_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:washed_chromium_ore",
+            3
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:cobalt_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:washed_cobalt_ore",
+            3
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_cobalt_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:washed_cobalt_ore",
             3
           ],
           "extra": [],
@@ -4424,6 +4892,24 @@
         {
           "in": [
             [
+              "jugcraft:superalloy_ingot",
+              1
+            ],
+            [
+              "jugcraft:stainless_steel_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:rocket_nozzle",
+            4
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
               "jugcraft:processor",
               1
             ],
@@ -4940,6 +5426,27 @@
             ]
           ],
           "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:alumina",
+              2
+            ],
+            [
+              "jugcraft:graphite",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:aluminum_ingot",
+              2
+            ]
+          ],
+          "ticks": 100
         },
         {
           "items": [],
@@ -5909,6 +6416,94 @@
           "results": [
             [
               "jugcraft:washed_uranium_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:chromium_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_chromium_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:deepslate_chromium_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_chromium_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:cobalt_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_cobalt_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:deepslate_cobalt_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_cobalt_ore",
               4
             ]
           ],

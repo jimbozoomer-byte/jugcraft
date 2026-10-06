@@ -30,6 +30,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Nickel: the item's durability is {@link #NICKEL_DURABILITY_PERCENT} percent of what it was.</li>
  * <li>Silver: a sword or axe gets Smite {@link #SILVER_SMITE} (raised to it if lower).</li>
  * <li>Gold: armor counts as gold for piglins (the mixin {@code PiglinSafeArmorMixin} asks {@link #wearsGold}).</li>
+ * <li>Chromium (batch 57): hard chrome, the item's durability is {@link #CHROMIUM_DURABILITY_PERCENT} percent of what it
+ * was.</li>
  * </ul>
  */
 public final class Electroplating {
@@ -39,10 +41,12 @@ public final class Electroplating {
 	public static final int TANK = 4_000;
 	public static final int NICKEL_DURABILITY_PERCENT = 150;
 	public static final int SILVER_SMITE = 3;
+	public static final int CHROMIUM_DURABILITY_PERCENT = 200;
 
 	public static final TagKey<Item> NICKEL = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/nickel"));
 	public static final TagKey<Item> SILVER = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/silver"));
 	public static final TagKey<Item> GOLD = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/gold"));
+	public static final TagKey<Item> CHROMIUM = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/chromium"));
 
 	/** The metal an item is plated with. */
 	public static DataComponentType<String> PLATING;
@@ -62,6 +66,9 @@ public final class Electroplating {
 		}
 		if (ingot.is(SILVER)) {
 			return "silver";
+		}
+		if (ingot.is(CHROMIUM)) {
+			return "chromium";
 		}
 		return ingot.is(GOLD) || ingot.is(Items.GOLD_INGOT) ? "gold" : null;
 	}
@@ -88,6 +95,8 @@ public final class Electroplating {
 			out.set(PLATING, metal);
 			if (metal.equals("nickel")) {
 				out.set(DataComponents.MAX_DAMAGE, out.getMaxDamage() * NICKEL_DURABILITY_PERCENT / 100);
+			} else if (metal.equals("chromium")) {
+				out.set(DataComponents.MAX_DAMAGE, out.getMaxDamage() * CHROMIUM_DURABILITY_PERCENT / 100);
 			} else if (metal.equals("silver") && (out.is(ItemTags.SWORDS) || out.is(ItemTags.AXES))) {
 				var smite = registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SMITE);
 				EnchantmentHelper.updateEnchantments(out, enchantments -> enchantments.upgrade(smite, SILVER_SMITE));

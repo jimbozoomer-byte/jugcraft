@@ -1,0 +1,19 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "cobalt"
+    }
+  ],
+  "type": "jugcraft:crushing",
+  "ingredient": "jugcraft:deepslate_cobalt_ore",
+  "result": {
+    "id": "jugcraft:raw_cobalt",
+    "count": 2
+  },
+  "time": 160
+}

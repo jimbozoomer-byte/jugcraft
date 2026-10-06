@@ -1,0 +1,32 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "chromium"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "cobalt"
+    }
+  ],
+  "type": "jugcraft:rocket_assembly",
+  "ingredients": [
+    {
+      "ingredient": "jugcraft:superalloy_ingot",
+      "count": 1
+    },
+    {
+      "ingredient": "jugcraft:stainless_steel_plate",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "jugcraft:rocket_nozzle",
+    "count": 4
+  },
+  "time": 160
+}

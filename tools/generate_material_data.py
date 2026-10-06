@@ -1131,9 +1131,11 @@ def recipes():
         recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
         recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
         write(out / f"{result}.json", recipe)
-    for name, (result, pattern, key, count) in ALT_CRAFTING.items():
+    for name, entry in ALT_CRAFTING.items():
+        result, pattern, key, count = entry[:4]
+        features = list(entry[4]) if len(entry) > 4 else ["crude_oil"]
         recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
-        recipe["fabric:load_conditions"] = condition(MACHINE_FEATURE) + condition("crude_oil")
+        recipe["fabric:load_conditions"] = [c for f in [MACHINE_FEATURE] + features for c in condition(f)]
         write(out / f"{name}.json", recipe)
     machine_recipe_files(out)
     import petro

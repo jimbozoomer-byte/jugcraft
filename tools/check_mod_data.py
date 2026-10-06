@@ -639,7 +639,8 @@ def check_hydroponics():
 def check_electroplating():
     """machine/Electroplating.java against tools/electroplating.py: the numbers, metals and tooltips."""
     java = (JAVA_ROOT / "machine" / "Electroplating.java").read_text(encoding="utf-8")
-    for const in ("TICKS", "ACID_PER_PLATING", "TANK", "NICKEL_DURABILITY_PERCENT", "SILVER_SMITE"):
+    for const in ("TICKS", "ACID_PER_PLATING", "TANK", "NICKEL_DURABILITY_PERCENT", "SILVER_SMITE",
+                  "CHROMIUM_DURABILITY_PERCENT"):
         value = getattr(electroplating, const)
         if f"int {const} = {value:_};" not in java and f"int {const} = {value};" not in java:
             err(f"Electroplating.{const} differs from tools/electroplating.py ({value})")

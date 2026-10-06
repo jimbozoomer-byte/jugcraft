@@ -63,6 +63,8 @@ Rocketry covers parts, propulsion, fuel, navigation and expedition logistics. Ha
 
 Add one destination per reviewed increment. Dimension IDs and travel data must remain stable. No seasonal destination may disappear with players or bases inside it.
 
+The technology side of this, tier by tier from the atomic age to the launch pad, orbit, the Moon, the planets and the exotic tiers beyond, with the player loop, each destination's reasons, hazards and resources, and the rules that keep it runnable on a server, is planned in [branches/HIGH_TECH_AND_SPACE.md](branches/HIGH_TECH_AND_SPACE.md).
+
 ## Rare loot and special equipment
 
 Offer visually distinctive technological tools, magical instruments, weapons, armor and curios with special abilities. Proposals include concept/visual evidence, source pools, rarity weights, eligible recipients, duplicate behavior, progression stage and upgrade/attunement paths.

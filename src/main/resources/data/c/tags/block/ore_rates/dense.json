@@ -6,6 +6,8 @@
     "jugcraft:phosphate_ore",
     "jugcraft:deepslate_phosphate_ore",
     "jugcraft:lepidolite_ore",
-    "jugcraft:deepslate_lepidolite_ore"
+    "jugcraft:deepslate_lepidolite_ore",
+    "jugcraft:graphite_ore",
+    "jugcraft:deepslate_graphite_ore"
   ]
 }

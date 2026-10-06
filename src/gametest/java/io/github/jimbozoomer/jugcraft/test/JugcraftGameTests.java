@@ -1321,6 +1321,48 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Space-age materials (batch 57): raw chromium and cobalt melt in the arc furnace, which also bakes a coke into
+	 * graphite; the alloy smelter makes stainless steel, nichrome and superalloy at exact ratios; the metal press makes
+	 * superalloy plates; superalloy and a stainless plate make four rocket nozzles; cobalt is nickel ore's byproduct;
+	 * and a chromium ingot in the electroplating bath doubles a worn sword's durability and repairs it.
+	 */
+	@GameTest(maxTicks = 400)
+	public void spaceAgeMaterials(GameTestHelper helper) {
+		assertMulti(helper, MachineKind.ARC_FURNACE, List.of(new ItemStack(item("raw_chromium"))), item("chromium_ingot"), 1);
+		assertMulti(helper, MachineKind.ARC_FURNACE, List.of(new ItemStack(item("raw_cobalt"))), item("cobalt_ingot"), 1);
+		assertMulti(helper, MachineKind.ARC_FURNACE, List.of(new ItemStack(item("coke"))), item("graphite"), 1);
+		assertMulti(helper, MachineKind.ALLOY_SMELTER,
+				List.of(new ItemStack(item("steel_ingot"), 3), new ItemStack(item("chromium_ingot"))), item("stainless_steel_ingot"), 4);
+		assertMulti(helper, MachineKind.ALLOY_SMELTER,
+				List.of(new ItemStack(item("nickel_ingot"), 4), new ItemStack(item("chromium_ingot"))), item("nichrome_ingot"), 5);
+		assertMulti(helper, MachineKind.ALLOY_SMELTER,
+				List.of(new ItemStack(item("nichrome_ingot"), 2), new ItemStack(item("cobalt_ingot"))), item("superalloy_ingot"), 3);
+		assertMulti(helper, MachineKind.ROCKET_WORKSHOP,
+				List.of(new ItemStack(item("superalloy_ingot")), new ItemStack(item("stainless_steel_plate"))), item("rocket_nozzle"), 4);
+		MachineRecipe pressing = MachineRecipes.find(helper.getLevel(), MachineKind.METAL_PRESS, new ItemStack(item("superalloy_ingot")))
+				.orElseThrow(() -> helper.assertionException("No pressing recipe for superalloy"));
+		helper.assertTrue(pressing.output().create().is(item("superalloy_plate")), "Superalloy presses into " + pressing.output().create());
+		MachineRecipe nickel = MachineRecipes.find(helper.getLevel(), MachineKind.PULVERIZER, new ItemStack(item("nickel_ore")))
+				.orElseThrow(() -> helper.assertionException("No pulverizing recipe for nickel ore"));
+		helper.assertTrue(nickel.byproducts().size() == 1 && nickel.byproducts().getFirst().result().create().is(item("cobalt_dust")),
+				"Nickel ore's byproduct is " + nickel.byproducts());
+
+		ItemStack worn = new ItemStack(Items.IRON_SWORD);
+		worn.setDamageValue(100);
+		int ironMax = worn.getMaxDamage();
+		MachineBlockEntity bath = processing(helper, new BlockPos(1, 1, 1), MachineKind.ELECTROPLATING_BATH, worn);
+		bath.setItem(1, new ItemStack(item("chromium_ingot")));
+		acid(helper, new BlockPos(1, 1, 1), 1000);
+		helper.succeedWhen(() -> {
+			ItemStack out = bath.getItem(MachineKind.ELECTROPLATING_BATH.outputSlot());
+			helper.assertTrue(out.is(Items.IRON_SWORD) && out.getDamageValue() == 0
+					&& out.getMaxDamage() == ironMax * io.github.jimbozoomer.jugcraft.machine.Electroplating.CHROMIUM_DURABILITY_PERCENT / 100
+					&& "chromium".equals(out.get(io.github.jimbozoomer.jugcraft.machine.Electroplating.PLATING)),
+					"Chrome bath output is " + out + " (max damage " + out.getMaxDamage() + ")");
+		});
+	}
+
 	private static void assertMulti(GameTestHelper helper, MachineKind kind, List<ItemStack> inputs, Item result, int count) {
 		ItemStack out = MachineRecipes.findMulti(helper.getLevel(), kind, inputs)
 				.orElseThrow(() -> helper.assertionException("No " + kind.id + " recipe for " + inputs))

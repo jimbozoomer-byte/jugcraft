@@ -17,15 +17,23 @@
     "#c:storage_blocks/raw_uranium",
     "#c:storage_blocks/titanium",
     "#c:storage_blocks/raw_titanium",
+    "#c:storage_blocks/chromium",
+    "#c:storage_blocks/raw_chromium",
+    "#c:storage_blocks/cobalt",
+    "#c:storage_blocks/raw_cobalt",
     "#c:storage_blocks/bronze",
     "#c:storage_blocks/aluminum",
     "#c:storage_blocks/brass",
     "#c:storage_blocks/invar",
     "#c:storage_blocks/solder",
     "#c:storage_blocks/steel",
+    "#c:storage_blocks/stainless_steel",
+    "#c:storage_blocks/nichrome",
+    "#c:storage_blocks/superalloy",
     "#c:storage_blocks/salt",
     "#c:storage_blocks/phosphate",
     "#c:storage_blocks/lepidolite",
-    "#c:storage_blocks/monazite"
+    "#c:storage_blocks/monazite",
+    "#c:storage_blocks/graphite"
   ]
 }

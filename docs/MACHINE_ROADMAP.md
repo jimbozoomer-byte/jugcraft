@@ -63,6 +63,8 @@ These unlock whole groups of machines, so they should be designed first.
 | **Fission Reactor** (multiblock) | Uranium → very high power | Uranium, lead shielding, tungsten, circuits. **Needs its own hazard design first** | Late-game factories, space launch |
 | **Launch Pad** (multiblock) | Rocket launches | Fuel, fabricated parts | Moons and planets |
 
+The tiers from here on (energy tiers, enrichment, the fission reactor, aerospace fabrication, the launch pad, orbit, the Moon, the planets, superconductors, fusion and the exotic tiers) are planned machine by machine in [branches/HIGH_TECH_AND_SPACE.md](branches/HIGH_TECH_AND_SPACE.md). Their first batch, the space-age materials, is implemented ([features/space-age-materials.md](features/space-age-materials.md)).
+
 ## Idea backlog saved by the owner (1 October 2026)
 
 Ideas Claude suggested after batch 10 (advanced power and tanks). The owner asked to save them and to pursue the **chemistry ideas next**. They are proposals, not designs: each still needs a feature record, balance numbers and the owner's choices before it is built.

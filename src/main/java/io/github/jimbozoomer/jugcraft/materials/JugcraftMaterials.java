@@ -28,11 +28,18 @@ public final class JugcraftMaterials {
 	public static MetalFamily INVAR;
 	public static MetalFamily SOLDER;
 	public static MetalFamily STEEL;
+	/** Space-age materials (batch 57, docs/features/space-age-materials.md): two deep ores and three alloys. */
+	public static MetalFamily CHROMIUM;
+	public static MetalFamily COBALT;
+	public static MetalFamily STAINLESS_STEEL;
+	public static MetalFamily NICHROME;
+	public static MetalFamily SUPERALLOY;
 
 	public static MineralFamily SALT;
 	public static MineralFamily PHOSPHATE;
 	public static MineralFamily LEPIDOLITE;
 	public static MineralFamily MONAZITE;
+	public static MineralFamily GRAPHITE;
 
 	public static Block BAUXITE;
 	public static Block OIL_SAND;
@@ -68,11 +75,17 @@ public final class JugcraftMaterials {
 		INVAR = MetalFamily.builder("invar").build();
 		SOLDER = MetalFamily.builder("solder").build();
 		STEEL = MetalFamily.builder("steel").build();
+		CHROMIUM = MetalFamily.builder("chromium").mined().build();
+		COBALT = MetalFamily.builder("cobalt").mined().build();
+		STAINLESS_STEEL = MetalFamily.builder("stainless_steel").build();
+		NICHROME = MetalFamily.builder("nichrome").build();
+		SUPERALLOY = MetalFamily.builder("superalloy").build();
 
 		SALT = MineralFamily.register("salt");
 		PHOSPHATE = MineralFamily.register("phosphate");
 		LEPIDOLITE = MineralFamily.register("lepidolite");
 		MONAZITE = MineralFamily.register("monazite");
+		GRAPHITE = MineralFamily.register("graphite");
 
 		BAUXITE = JugcraftRegistry.block("bauxite", Blocks.GRANITE);
 		OIL_SAND = JugcraftRegistry.block("oil_sand", Blocks.SAND);
@@ -93,8 +106,9 @@ public final class JugcraftMaterials {
 	}
 
 	private static void registerCreativeTabs() {
-		MetalFamily[] metals = {TIN, ZINC, LEAD, SILVER, NICKEL, TUNGSTEN, URANIUM, TITANIUM, BRONZE, ALUMINUM, BRASS, INVAR, SOLDER, STEEL};
-		MineralFamily[] minerals = {SALT, PHOSPHATE, LEPIDOLITE, MONAZITE};
+		MetalFamily[] metals = {TIN, ZINC, LEAD, SILVER, NICKEL, TUNGSTEN, URANIUM, TITANIUM, CHROMIUM, COBALT, BRONZE, ALUMINUM,
+				BRASS, INVAR, SOLDER, STEEL, STAINLESS_STEEL, NICHROME, SUPERALLOY};
+		MineralFamily[] minerals = {SALT, PHOSPHATE, LEPIDOLITE, MONAZITE, GRAPHITE};
 
 		List<ItemLike> natural = new ArrayList<>();
 		List<ItemLike> ingredients = new ArrayList<>();

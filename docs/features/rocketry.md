@@ -18,6 +18,7 @@ Primary specialty and supported player role: exploration (prospecting), farming 
   | 2 solid propellant | 2 ammonium perchlorate, 3 aluminum nuggets, 1 rubber |
   | Rocket casing | 3 steel plates |
   | 2 rocket nozzles | 1 tungsten ingot, 1 steel plate |
+  | 4 rocket nozzles (batch 57) | 1 superalloy ingot, 1 stainless steel plate |
   | Guidance unit | 1 processor, 2 microchips, 2 copper wire |
   | Rocket motor | casing, nozzle, 2 solid propellant |
   | Survey rocket | motor, guidance unit, sensor |

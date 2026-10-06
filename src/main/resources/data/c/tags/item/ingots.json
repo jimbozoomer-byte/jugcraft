@@ -9,11 +9,16 @@
     "#c:ingots/tungsten",
     "#c:ingots/uranium",
     "#c:ingots/titanium",
+    "#c:ingots/chromium",
+    "#c:ingots/cobalt",
     "#c:ingots/bronze",
     "#c:ingots/aluminum",
     "#c:ingots/brass",
     "#c:ingots/invar",
     "#c:ingots/solder",
-    "#c:ingots/steel"
+    "#c:ingots/steel",
+    "#c:ingots/stainless_steel",
+    "#c:ingots/nichrome",
+    "#c:ingots/superalloy"
   ]
 }

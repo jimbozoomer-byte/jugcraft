@@ -9,9 +9,12 @@
     "jugcraft:tungsten_ore",
     "jugcraft:uranium_ore",
     "jugcraft:titanium_ore",
+    "jugcraft:chromium_ore",
+    "jugcraft:cobalt_ore",
     "jugcraft:salt_ore",
     "jugcraft:phosphate_ore",
     "jugcraft:lepidolite_ore",
-    "jugcraft:monazite_ore"
+    "jugcraft:monazite_ore",
+    "jugcraft:graphite_ore"
   ]
 }

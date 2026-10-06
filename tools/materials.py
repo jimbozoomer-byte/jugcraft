@@ -11,8 +11,8 @@ blast furnace as a clearly marked stand-in, and liquid crude oil is not added.
 MOD = "jugcraft"
 
 # Feature switches (config/jugcraft.properties). Order is the config file order.
-FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
-            "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "deposits",
+FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "chromium", "cobalt", "aluminum",
+            "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "graphite", "crude_oil", "machines", "deposits",
             "explosives", "agriculture", "parties", "drones",
             "pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections"]
 
@@ -36,6 +36,13 @@ METALS = {
     # Rutile-bearing titanium ore: no furnace smelts it; only the Kroll process (chlorine, chemistry batch 6) does.
     "titanium": {"mined": True, "display": "Titanium", "feature": "titanium", "cook": [], "xp": 1.0,
                  "tool": "iron", "gen": {"size": 5, "count": 2, "min_y": -64, "max_y": -8}},
+    # Space-age materials (batch 57, docs/features/space-age-materials.md). Chromite: iron-black grains with a
+    # metallic sheen in deep stone; cobaltite: silver-white with a pink erythrite bloom, deeper and rarer. Both are
+    # refractory like nickel: only the blast furnace and the arc furnace smelt them.
+    "chromium": {"mined": True, "display": "Chromium", "feature": "chromium", "cook": ["blasting"], "xp": 1.0,
+                 "tool": "iron", "gen": {"size": 6, "count": 3, "min_y": -64, "max_y": 24}},
+    "cobalt": {"mined": True, "display": "Cobalt", "feature": "cobalt", "cook": ["blasting"], "xp": 1.0,
+               "tool": "iron", "gen": {"size": 5, "count": 2, "min_y": -64, "max_y": 0}},
     "bronze": {"mined": False, "display": "Bronze", "feature": "tin", "extras": ["bronze_blend"]},
     "aluminum": {"mined": False, "display": "Aluminum", "feature": "aluminum"},
     # Alloys made only in the alloy smelter (tools/machines.py ALLOY_SMELTER).
@@ -44,6 +51,12 @@ METALS = {
     "solder": {"mined": False, "display": "Solder", "feature": "lead"},
     # Iron refined with coke in the steel foundry (tools/machines.py STEEL_FOUNDRY): the second tier.
     "steel": {"mined": False, "display": "Steel", "feature": "machines"},
+    # Space-age alloys (batch 57), alloy smelter only: stainless steel (steel + chromium) for vessels that acids and
+    # heat must not eat, nichrome (nickel + chromium) for heating elements and as the master alloy of the nickel
+    # superalloy (nichrome + cobalt), the turbine-blade and rocket-nozzle metal.
+    "stainless_steel": {"mined": False, "display": "Stainless Steel", "feature": "chromium"},
+    "nichrome": {"mined": False, "display": "Nichrome", "feature": "chromium"},
+    "superalloy": {"mined": False, "display": "Superalloy", "feature": "cobalt"},
 }
 
 # Non-metal ores: <name>_ore, deepslate_<name>_ore, item <name>, storage block <name>_block.
@@ -56,6 +69,10 @@ MINERALS = {
                    "tool": "iron", "gen": {"size": 7, "count": 3, "min_y": -48, "max_y": 32}},
     "monazite": {"display": "Monazite", "ore_display": "Monazite", "feature": "rare_earths", "drops": [1, 1],
                  "tool": "iron", "gen": {"size": 5, "count": 2, "min_y": -64, "max_y": 16}},
+    # Space-age materials (batch 57): flake graphite in metamorphic rock, 1-3 a block. The arc furnace also bakes coal
+    # coke into graphite (tools/machines.py ARC_FURNACE), so carbon for electrodes and moderators is never out of reach.
+    "graphite": {"display": "Graphite", "ore_display": "Graphite", "feature": "graphite", "drops": [1, 3],
+                 "tool": "stone", "gen": {"size": 9, "count": 4, "min_y": -40, "max_y": 40}},
 }
 
 # Surface rocks with their own blocks. copy: vanilla block whose properties are copied.
@@ -98,11 +115,12 @@ EXTRA_NAMES = {"bronze_blend": "Bronze Blend"}
 PART_UNITS = {"plate": 9, "gear": 36, "wire": 3, "dust": 9}
 COMPONENTS = {
     "plate": ["copper", "iron", "tin", "bronze", "brass", "invar", "aluminum", "nickel", "lead", "tungsten", "steel",
-              "titanium"],
+              "titanium", "stainless_steel", "superalloy"],
     "gear": ["iron", "bronze", "brass", "invar", "steel"],
     "wire": ["copper", "silver", "aluminum"],
     # Pulverizer output (see tools/machines.py); one dust smelts back into one ingot.
-    "dust": ["copper", "iron", "gold", "tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium"],
+    "dust": ["copper", "iron", "gold", "tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "chromium",
+             "cobalt"],
 }
 # Ore washer output: washed_<metal>_ore, one ingot's worth each; the pulverizer grinds it into dust.
 WASHED_ORES = list(COMPONENTS["dust"])
@@ -137,7 +155,7 @@ def ingot_id(metal):
     return f"minecraft:{metal}_ingot" if metal in VANILLA_METALS else f"{MOD}:{metal}_ingot"
 
 # Extra c: item tags for mineral items.
-MINERAL_TAGS = {"salt": "dusts/salt", "phosphate": "dusts/phosphate"}
+MINERAL_TAGS = {"salt": "dusts/salt", "phosphate": "dusts/phosphate", "graphite": "dusts/graphite"}
 
 # Processing recipes beyond the standard metal/mineral set.
 # kind: shapeless | smelting | blasting. Blast-furnace entries marked stand_in replace
