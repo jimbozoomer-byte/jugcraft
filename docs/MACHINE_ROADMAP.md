@@ -2,6 +2,12 @@
 
 Status: **proposals for discussion, not approved or implemented** unless marked ✅. How implemented things connect is documented in [TECH_TREE.md](TECH_TREE.md). Machines are grouped into branches: **Mechanical** (shape and mix of materials), **Fluids** (moving liquids) and the planned **Chemistry** branch ([branches/CHEMISTRY.md](branches/CHEMISTRY.md)).
 
+## Progression and player guidance targets
+
+On 6 October 2026 the owner selected approximately **2–4 active hours to first electricity** from a fresh world when following known recipes, excluding optional building detours. This is a playtest/balance target, not measured current behavior or a timed unlock. Keep the essential ceramics/mechanical-workshop/electrical-component route manageable, with substantial sideways industry and steel as a parallel capability.
+
+The owner also requested a full [Jugcraft Encyclopedia UI](features/jugcraft-encyclopedia.md), independently tracked in the [TODO list with ten reference images](TODO.md#jugcraft-encyclopedia). It explains both technology and magic, then their detailed pathways and quests. It opens from the inventory or a configurable keybind without being an item. Exact quest and UI details remain to design; guidance does not impose completion of every specialty.
+
 ## What exists now
 
 | Role | Implemented |
