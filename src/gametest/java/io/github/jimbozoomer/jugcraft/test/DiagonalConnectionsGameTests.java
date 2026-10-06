@@ -496,8 +496,8 @@ public class DiagonalConnectionsGameTests {
 	/**
 	 * Every fence and bars block has the four properties and starts with them false. Vanilla's walls keep their own
 	 * states, without the properties, and each has a diagonal wall that starts with none and is a wall by tag. Every
-	 * block in the tag is a fence, bars block or wall (vanilla's 14 fences, 17 panes, 9 bars and 32 walls, Jugcraft's 14
-	 * fences: 86).
+	 * block in the tag is a fence, bars block or wall (vanilla's 14 fences, 17 panes, 9 bars and 32 walls, Jugcraft's 15
+	 * fences, the cedar's since the tree roster's batch 1: 87).
 	 */
 	@GameTest
 	public void everyFenceBarsBlockAndWallHasDiagonals(GameTestHelper helper) {
@@ -525,7 +525,7 @@ public class DiagonalConnectionsGameTests {
 		}
 		LOGGER.info("{} blocks join diagonally, {} diagonal walls; problems: {}", tagged, DiagonalWalls.all().size(), problems);
 		helper.assertTrue(problems.isEmpty(), "Problems: " + problems);
-		helper.assertTrue(tagged == 86 && DiagonalWalls.all().size() == 32, "86 blocks join diagonally and 32 walls have diagonal walls, not "
+		helper.assertTrue(tagged == 87 && DiagonalWalls.all().size() == 32, "87 blocks join diagonally and 32 walls have diagonal walls, not "
 				+ tagged + " and " + DiagonalWalls.all().size());
 		helper.succeed();
 	}
