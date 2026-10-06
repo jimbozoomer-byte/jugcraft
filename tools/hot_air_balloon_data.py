@@ -6,7 +6,9 @@ Mooring Post's block model, words, loot and tags, and the quads the client draws
     its frame, and the eight load cables up to the envelope's throat;
   - balloon_flame: the burner's two flames (crossed sheets, drawn while it fires);
   - balloon_envelope_<kind>: the envelope, a surface of 24 gores turned about its axis from the throat to the crown,
-    drawn both sides so it shows from inside the basket; the Jack-o'-Lantern is ribbed and squat, with a stem, and
+    drawn both sides so it shows from inside the basket (flagged "cutout": 26.3's entityCutout draws both sides in the
+    opaque pass; "nocull" would put this opaque shell through the translucent pass, where Improved Transparency's
+    order-independent blending can let its far side show through, the owner's "tons of transparency"); the Jack-o'-Lantern is ribbed and squat, with a stem, and
     balloon_glow_pumpkin is its carved face, drawn lit while the burner fires;
   - pibal: a small latex balloon on a string with a light at its foot;
   - balloon_mooring_rope: a block's length of rope, stretched by the client from a moored basket to its post.
@@ -236,7 +238,7 @@ def flames():
         for a in (45, 135):
             c, s = math.cos(math.radians(a)) * 4.5, math.sin(math.radians(a)) * 4.5
             corners = [[x - c, y0, -s], [x + c, y0, s], [x + c, y1, s], [x - c, y1, -s]]
-            out.append(quad(corners, [(0, 1), (1, 1), (1, 0), (0, 0)], FLAME_TEXTURE, cutout=True, nocull=True))
+            out.append(quad(corners, [(0, 1), (1, 1), (1, 0), (0, 0)], FLAME_TEXTURE, cutout=True))
     return out
 
 
@@ -267,9 +269,9 @@ def pibal():
 def balloon_quads():
     out = {"balloon_basket": basket(), "balloon_flame": flames(), "pibal": pibal(),
            # The mooring rope: a block of rope up the y axis, which the client turns and stretches from basket to post.
-           "balloon_mooring_rope": prism([0, 0, 0], [0, 16, 0], 0.9, "mooring_post_rope", nocull=True)}
+           "balloon_mooring_rope": prism([0, 0, 0], [0, 16, 0], 0.9, "mooring_post_rope", cutout=True)}
     for kind in KINDS:
-        out[f"balloon_envelope_{kind}"] = envelope(kind, envelope_texture(kind), nocull=True)
+        out[f"balloon_envelope_{kind}"] = envelope(kind, envelope_texture(kind), cutout=True)
     out["balloon_envelope_pumpkin"] += stem()
     out["balloon_glow_pumpkin"] = envelope("pumpkin", GLOW_TEXTURE, ring_range=(3, 12), gore_filter=face_gores, scale=1.006, cutout=True)
     return out
