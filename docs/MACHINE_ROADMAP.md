@@ -2,6 +2,8 @@
 
 Status: **proposals for discussion, not approved or implemented** unless marked ✅. How implemented things connect is documented in [TECH_TREE.md](TECH_TREE.md). Machines are grouped into branches: **Mechanical** (shape and mix of materials), **Fluids** (moving liquids) and the planned **Chemistry** branch ([branches/CHEMISTRY.md](branches/CHEMISTRY.md)).
 
+The owner-endorsed [industrial agriculture planning brief](features/industrial-agriculture-plan.md) records product-led textile, paper, coatings, panel, linoleum and rubber workshops, shared manufacturing stations and later biorefinery applications. It adds a substantial mechanical entry with optional electrification; proposed machines and exact recipes still need focused implementation. No new routine lubricant or replacement-part upkeep is included in that scope.
+
 ## What exists now
 
 | Role | Implemented |
