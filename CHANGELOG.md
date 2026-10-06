@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### No see-through rims on held sprites (art fixes)
+- The Power and Ronin Katanas' outlines and glow fringes, the Rocket Launcher's and the HE, homing and line-throwing rockets' outlines, and the scuba mask's, scuba tank's and free runners' outlines are opaque: they were drawn part-transparent, so the sprite's rim was see-through in the hand. The katanas' fringe is now the blade's own bright glow.
+
+### The flails' balls swing (art fixes)
+- **The bronze and steel flails' chain and spiked ball now swing freely** (the owner, 5 October 2026: "flails should have an animated ball that actually flails around"). The ball hangs from the handle's eye under gravity, trails as you walk, turn or look round, is flung round overhead and whips past after a blow, then swings on and settles. It works in third person, in first person (the guard is held a little higher so the ball hangs in sight), on armor stands and mobs, in either hand, and keeps the enchantment glint.
+- **A cleaner ball that keeps out of its holder:** a rounded core with a crown of eight spikes and one below, in two tones, on a chain of four oval links; it keeps clear of its holder's own hips, legs and arms as they move, and nothing in it shares a face plane, so nothing flickers.
+- **The Bonecarved Flail swings too:** its spine of vertebrae and a horned skull with square, Minecraft-style eye sockets and a row of square teeth (no nose holes).
+- Client-side drawing only (`client/arms/FlailHeads.java`, a small chain simulation on the arms motion's own hooks); no ids, recipes or numbers change, nothing is saved or sent, and the icons are unchanged (PR #201 redraws them). The ball has no collision with the world. Record: [arms-restyle.md](docs/features/arms-restyle.md#the-flails-head-swings-5-october-2026). New client test `FlailClientGameTests` (not yet run in CI), which also walks the player and fails if the ball sinks into the body.
+
 ### Cute, clean creature decorations: batches 15 to 20 repainted (#191)
 - **Smooth fire**: the Ember Bed's hearth now burns in smooth bands of colour on a glow of coals, and the Horned Skull Cauldron's ram skull has big round sockets and no nostrils.
 - **Every creature prop of batches 15 to 20 repainted** in a clean, cute style after the owner's reference pictures: flat colour in two or three tones with lit and shaded edges and no speckle. The **Monster Head** is a bright green Frankenstein head with a blunt black fringe and sleepy closed eyes that open glowing when it wakes; the **Flying Eyeball**, plushes, moths and jar oddities are clean and glossy; skulls (the **Colossal Skull** too) have big round sockets with a glint and no nose holes; bones are smooth cream; the gargoyles have round eyes and little fangs; the **Crawling Hand** is the monster's green; the cocoon sleeps, the clock's ghost says "oo" and the **Harvest Moon** has a sleeping smile.
