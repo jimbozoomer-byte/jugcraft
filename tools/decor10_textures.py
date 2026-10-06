@@ -7,14 +7,13 @@ Called from crop_textures.crop_textures(). Every pixel is drawn here by code or 
 (some shared with tools/decor9_textures.py), from fixed seeds; no Mojang texture is read, traced or recoloured. Block
 textures are 16x16; the glow paint designs are faint and see-through round their shapes, the lamp's paper panels are
 opaque; the glowing designs, flame and shadows (entity textures) are see-through round their shapes.
-
-Surfaces are painted in the manner of the vanilla blocks with tools/block_style.py: a short palette in small clumps,
-never a random colour at every pixel; wood as planks, and straw, bark and hair as streaks.
 """
 import math
+import random
 
 from crop_textures import Canvas, rgb
 import block_style as bs
+from decor_textures import noise
 from decor9_textures import BAT, WITCH, IRON, put, grid
 
 GLOW = (190, 255, 170)
@@ -220,13 +219,13 @@ def lamp_wood():
 
 def brass():
     c = Canvas()
-    bs.fill(c, 0, 0, 15, 15, [rgb("8a6a20"), rgb("b08a30"), rgb("d0aa48")], 20311, [2, 3, 1])
+    noise(c, 0, 0, 15, 15, [rgb("8a6a20"), rgb("b08a30"), rgb("d0aa48")], 20311, [2, 3, 1])
     return c.img
 
 
 def candle():
     c = Canvas()
-    bs.fill(c, 0, 0, 15, 15, [rgb("e8e0c8"), rgb("f0eadc"), rgb("dcd2b8")], 20321, [3, 2, 1])
+    noise(c, 0, 0, 15, 15, [rgb("e8e0c8"), rgb("f0eadc"), rgb("dcd2b8")], 20321, [3, 2, 1])
     return c.img
 
 
@@ -234,11 +233,11 @@ def paper(design):
     """A panel of warm, lamp-lit paper with a silhouette in it."""
     c = Canvas()
     rows = {"bat": BAT, "cat": CAT_SHAPE, "witch": WITCH}[design]
-    paper = bs.surface([rgb("f0d8a0"), rgb("f4e0b0"), rgb("e8cc90")], 20331, spread=0.6)
+    rng = random.Random(20331)
     for y in range(16):
         for x in range(16):
             ch = rows[y][x]
-            c.px(x, y, rgb("1a1210") if ch == "X" else paper(x, y))
+            c.px(x, y, rgb("1a1210") if ch == "X" else [rgb("f0d8a0"), rgb("f4e0b0"), rgb("e8cc90")][rng.randrange(3)])
     for y in range(16):
         c.px(0, y, rgb("5a3a20"))
         c.px(15, y, rgb("5a3a20"))
