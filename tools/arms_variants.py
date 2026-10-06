@@ -16,7 +16,6 @@ tools/arms_variants_art.py; the Runebound arms are smooth meshes in the hand, wi
 import arms
 import arms_mesh
 import arms_variants_art
-import model_writer
 
 MOD = "jugcraft"
 FEATURE = "machines"   # every variant starts from a steel arm, or is a trophy of the steel age's bosses
@@ -210,10 +209,10 @@ def write_all(write, assets, data, lang, condition):
         # The icon in inventories, frames, on the ground and on shelves; in the hand, the 3D model.
         write(models / f"{name}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": f"{MOD}:item/{name}"}})
         if name in arms_mesh.NAMES:
-            # A smooth mesh (tools/arms_mesh.py), its box model kept beside it as a fallback; written a quad a line.
-            box = held_model(name)
-            model_writer.separate_coplanar(box["elements"])
-            arms_mesh.write_model(models / f"{name}_in_hand.json", arms_mesh.held_model(name, box))
+            # A smooth mesh (tools/arms_mesh.py), its box model kept beside it as a fallback. The shared writer does
+            # to the box elements what it does to every model; the file is then rewritten a quad a line.
+            write(models / f"{name}_in_hand.json", arms_mesh.held_model(name, held_model(name)))
+            arms_mesh.compact(models / f"{name}_in_hand.json")
         else:
             write(models / f"{name}_in_hand.json", held_model(name))
         model = {"type": "minecraft:select", "property": "minecraft:display_context",

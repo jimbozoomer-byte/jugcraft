@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import net.fabricmc.fabric.api.client.model.loading.v1.UnbakedModelDeserializer;
 import net.fabricmc.fabric.api.client.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.MutableMesh;
@@ -46,10 +47,15 @@ import org.jspecify.annotations.Nullable;
  * <p>Built on Fabric API's model loading and renderer API (part of fabric-api, no new dependency), written as its own
  * test mod's mesh models are. Each fallback keeps the arm visible: if this loader is not registered, the JSON loads
  * as a vanilla model from its {@code "elements"} (the arm's old box model); if its quads cannot be read or baked,
- * those boxes are used instead.
+ * those boxes are used instead. {@link #BAKED} and {@link #FALLBACKS} count what happened, so the client game test
+ * can tell meshes from boxes.
  */
 public final class MeshItemModels {
 	public static final Identifier TYPE = Jugcraft.id("mesh");
+	/** Mesh models baked as meshes since the game started (every resource reload bakes them again). */
+	public static final AtomicInteger BAKED = new AtomicInteger();
+	/** Mesh models drawn as their box models instead: unreadable quads or a failed bake. */
+	public static final AtomicInteger FALLBACKS = new AtomicInteger();
 
 	private MeshItemModels() {
 	}
@@ -82,6 +88,7 @@ public final class MeshItemModels {
 				quads = quads(GsonHelper.getAsJsonArray(json, "quads"));
 			} catch (RuntimeException e) {
 				Jugcraft.LOGGER.warn("Unreadable mesh model quads; drawing its box model instead", e);
+				FALLBACKS.incrementAndGet();
 				return context.deserialize(json, CuboidModel.class);
 			}
 			UnbakedModel.GuiLight guiLight = null;
@@ -130,8 +137,11 @@ public final class MeshItemModels {
 		@Override
 		public QuadCollection bake(TextureSlots textures, ModelBaker baker, ModelState state, ModelDebugName name) {
 			try {
-				return mesh(textures, baker, state, name);
+				QuadCollection baked = mesh(textures, baker, state, name);
+				BAKED.incrementAndGet();
+				return baked;
 			} catch (RuntimeException e) {
+				FALLBACKS.incrementAndGet();
 				if (boxes == null) {
 					throw e;
 				}

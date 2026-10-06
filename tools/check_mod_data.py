@@ -1302,14 +1302,16 @@ def check_mesh_models():
     """The Runebound arms' mesh models (tools/arms_mesh.py, read in game by client/MeshItemModels.java): each in-hand
     model is an optional "jugcraft:mesh" model keeping its box model as "elements"; every quad has four corners of
     eight numbers (unit normals, UVs within the sprite, corners within -16..32 pixels) and a texture slot the model
-    defines; only the glyph strip and the atlas's glowing regions glow; there are at most arms_mesh.MAX_QUADS; no two
-    flat, parallel quads overlap closer than 0.1 pixel (drawn without culling they could flicker); the mesh lies along the
-    diagonal from the butt to the point of the design it replaces, held at its grip, as the box model was; and its
-    textures are solid (no see-through pixel)."""
+    defines; only the glyph strip and the atlas's glowing regions glow; there are at most arms_mesh.MAX_QUADS; every
+    part is closed (no edge belongs to one quad only: a see-through hole); no two surfaces within arms_mesh.PARALLEL
+    degrees of parallel lie closer than arms_mesh.LIFT (0.1 pixel) where they overlap without crossing (at
+    arms_mesh.CROSSING_ANGLE or more), compared triangle by triangle as they are drawn (drawn without culling they
+    could flicker); the mesh lies along the diagonal from the butt to the point of the design it replaces, held at its
+    grip, as the box model was; and its textures are solid (no see-through pixel)."""
     import math
     import arms_mesh as am
     import arms_variants_art
-    glowing = [m for m in vars(am).values() if isinstance(m, am.Mat) and m.slot == "mesh" and m.glow]
+    glowing = [m for m in am.Mat.ALL if m.slot == "mesh" and m.glow]
 
     def inside(mat, u, v):
         x0, y0, x1, y1 = mat.region
@@ -1349,9 +1351,13 @@ def check_mesh_models():
                 problems.add("a glowing quad of the atlas lies outside its glowing regions")
         for problem in sorted(problems):
             err(f"{ref}: {problem}")
-        overlaps = am.coplanar_overlaps(corners)
+        overlaps = am.parallel_overlaps(corners)
         if overlaps:
-            err(f"{ref}: {len(overlaps)} pairs of parallel quads overlap closer than 0.1 px (they could flicker)")
+            err(f"{ref}: {len(overlaps)} pairs of quads run within {am.PARALLEL:g} degrees of parallel closer than "
+                f"{am.LIFT:g} px without crossing (they could flicker), e.g. quads {overlaps[0]}")
+        holes = am.open_edges(corners)
+        if holes:
+            err(f"{ref}: {len(holes)} edges belong to one quad only (a part is not closed), e.g. {holes[0]}")
         # Held as the box model was: along the diagonal from the hand, from the design's butt to its point.
         grip, (gx, gy), unit = am.placement(name)
         length = arms_variants_art.design(name).length

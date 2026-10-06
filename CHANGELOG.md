@@ -10,12 +10,12 @@ No numbered release yet. Everything below is on `main`.
 
 ### Runebound arms as real 3D models (art fixes, 5 October 2026)
 - **The Runebound Nodachi, Moonblade, Staff and War Hammer are now smooth 3D models in the hand**, not stacks of pixel boxes, after the owner's "make like a nicer 3d model ... really be cool and special":
-  - **Moonblade:** a crescent of violet moon steel ground to a bright edge, a channel of glowing glyphs following the crescent, a crescent-moon guard with glowing horn tips round a heart crystal in a silver bezel, a cord-wrapped grip and a faceted crystal pommel.
-  - **Nodachi:** a continuous curve with a frosted wave of temper along its edge and a glowing channel of glyphs by its back, a gold habaki, an oval tsuba with a ring of light round its rim and a diamond-wrapped tsuka.
+  - **Moonblade:** a crescent of violet moon steel ground to a bright edge, a raised bead of glowing runes following the crescent, a crescent-moon guard with glowing horn tips round a heart crystal in a silver bezel, a spiral cord grip and a faceted crystal pommel.
+  - **Nodachi:** a continuous curve whose edge is tempered in a glowing wave with a white line along it, a short panel of glowing runes by the habaki, a gold habaki, an oval tsuba with a ring of light round its rim and a silk-wrapped tsuka with windows of ray skin.
   - **Staff:** dark ironwood with a glowing helix winding up each half, a leather grip between iron collars, and at each end three iron claws holding a floating crystal.
-  - **War Hammer:** a flared, chamfered head with a glowing sigil sunk in each side and a moon-gold band, a curved beak, a top spike, langets and an iron-banded haft.
-- Curves shade smoothly and edges stay crisp; the runes and crystals glow at full light in the dark and pulse gently. They are held exactly where the old models were, in either hand, first and third person, and take the enchantment glint.
-- **New icons**, rendered from the same models.
+  - **War Hammer:** a flared, chamfered head with a glowing diamond cut into each side, a white diamond raised in it and a stave through both, a moon-gold band, a curved beak, a top spike, langets, an iron-banded haft and a spiral cord grip.
+- Curves shade smoothly and edges stay crisp. The details are shapes, not stretched pixels: the Moonblade's glow is a raised bead and the Nodachi's a glowing tempered edge, so each stays a steady line at a distance instead of a dark slot that flickers in and out as the arm turns, and the temper line, sigil and tsuka diamonds stay clean however close they are. The runes, temper and crystals glow at full light in the dark and pulse gently. Every part is closed: nothing to see through, nothing poking through anything else. They are held exactly where the old models were, in either hand, first and third person, and take the enchantment glint.
+- **New icons**, rendered from the same models in flat tones as bright as their steel siblings.
 - Item ids, recipes and stats are unchanged. Built on Fabric API's model loading and renderer API (already part of fabric-api, so no new dependency): `client/MeshItemModels.java` reads the meshes from `tools/arms_mesh.py`. The old box models stay in the files as a fallback. Record: [arms-vii.md](docs/features/arms-vii.md#runebound-meshes).
 
 ### Cute, clean creature decorations: batches 15 to 20 repainted (#191)

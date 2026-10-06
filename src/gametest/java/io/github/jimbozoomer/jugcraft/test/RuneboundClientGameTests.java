@@ -17,8 +17,9 @@ import net.minecraft.core.BlockPos;
  * Client game test for the Runebound arms' smooth meshes (tools/arms_mesh.py, client/MeshItemModels.java;
  * docs/features/arms-vii.md "Runebound meshes"): the four on a close rack of armor stands by day and at midnight (their
  * runes and crystals glowing), each held from the front by day, the Moonblade and Nodachi in first person by day and
- * the Staff at night, and a Moonblade with the enchantment glint on its mesh (CI job {@code client}). It also checks
- * that the mesh model loader is registered, so the meshes, not their box fallbacks, are what the shots show.
+ * the Staff at night, and a Moonblade with the enchantment glint on its mesh (CI job {@code client}). Before the shots
+ * it checks that the mesh model loader is registered, that at least the four arms were baked as meshes and that no
+ * mesh model fell back to its box model, so the meshes, not their box fallbacks, are what the shots show.
  */
 public class RuneboundClientGameTests implements FabricClientGameTest {
 	private static final List<String> ARMS = List.of("runebound_nodachi", "runebound_moonblade", "runebound_staff",
@@ -27,9 +28,18 @@ public class RuneboundClientGameTests implements FabricClientGameTest {
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		boolean registered = context.computeOnClient(client -> UnbakedModelDeserializer.get(MeshItemModels.TYPE) != null);
-		Jugcraft.LOGGER.info("[runebound client] mesh item model loader registered: {}", registered);
+		int baked = MeshItemModels.BAKED.get();
+		int fallbacks = MeshItemModels.FALLBACKS.get();
+		Jugcraft.LOGGER.info("[runebound client] mesh item model loader registered: {}, meshes baked: {}, box fallbacks: {}",
+				registered, baked, fallbacks);
 		if (!registered) {
 			throw new AssertionError("The jugcraft:mesh model loader is not registered: the Runebound arms would draw as boxes");
+		}
+		if (baked < ARMS.size()) {
+			throw new AssertionError("Only " + baked + " mesh item models were baked, expected at least " + ARMS.size());
+		}
+		if (fallbacks != 0) {
+			throw new AssertionError(fallbacks + " mesh item models fell back to their box models (see the log)");
 		}
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
 				.adjustSettings(creator -> creator.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE)).create()) {
