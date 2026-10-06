@@ -41,11 +41,15 @@ public final class DiagonalWalls {
 	private DiagonalWalls() {
 	}
 
-	/** Registers a diagonal wall for each of vanilla's walls: {@code jugcraft:diagonal_cobblestone_wall} and so on. */
+	/**
+	 * Registers a diagonal wall for each of vanilla's walls ({@code jugcraft:diagonal_cobblestone_wall} and so on) and
+	 * for each of Jugcraft's own (the bastion concrete wall, batch 55), which must be registered before this runs.
+	 */
 	public static void register() {
 		List<WallBlock> walls = new ArrayList<>();
 		for (Block block : BuiltInRegistries.BLOCK) {
-			if (block instanceof WallBlock wall && BuiltInRegistries.BLOCK.getKey(block).getNamespace().equals("minecraft")) {
+			String namespace = BuiltInRegistries.BLOCK.getKey(block).getNamespace();
+			if (block instanceof WallBlock wall && (namespace.equals("minecraft") || namespace.equals(Jugcraft.MOD_ID))) {
 				walls.add(wall);
 			}
 		}

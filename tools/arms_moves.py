@@ -436,7 +436,9 @@ FL = {
     "swing_l": P(body=(6, -32, 0), head=(-2, 26, 0), right_arm=(-82, -36, -6), left_arm=(10, -12, -16), item=(10, 0, -60),
                  **step(1.4, -6)),
 }
-FL_FP = F(0, 0, 10, 0, -1)
+# On screen the flail is held up, its handle across the view, so the ball hanging from it (drawn live,
+# client/arms/FlailHeads.java) is in sight rather than below the screen's edge.
+FL_FP = F(-10, 10, 30, -2, 7, -2)
 MOVES["flail"] = {
     "hold": FL_HOLD, "fp_hold": FL_FP,
     "attacks": [

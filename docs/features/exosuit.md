@@ -35,7 +35,7 @@ Design inspiration:
     - Chestplate: crimson pectorals over black mechanical ribs. Big crimson 3D shoulder plates with silver ports.
     - Leggings: a silver belt, and long 3D crimson skirt strips with a black tabard bearing a red sigil.
     - Boots: silver greaves with clawed feet.
-  - **Ronin Katana**: the power katana with a crimson energy blade (same stats).
+  - **Ronin Katana**: the power katana with a crimson energy blade (same stats). Its outline and crimson glow fringe are opaque since 6 October 2026 (part-transparent, they showed as a see-through rim in the hand).
 - **Repainting:** a Ronin Livery, the piece (or the power katana) and red dye at a smithing table make the Ronin version. A Vanguard Livery and cyan dye paint it back. Smithing keeps the charge, modules and enchantments.
 - Art:
   - 32x32 icons;
