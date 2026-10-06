@@ -19,7 +19,7 @@ darkest, light from the top left, flat tones and no noise.
 - **Ingots and nuggets, all fourteen metals** (tin, zinc, lead, silver, nickel, tungsten, uranium, titanium, bronze,
   aluminum, brass, invar, solder, steel): one shared ingot and one shared nugget in **vanilla's form**, drawn fresh in our
   own symbols so they sit with vanilla's in an inventory. The ingot is a bar lying on the diagonal with a lit top face, a
-  front face and small end faces; the nugget a small centred lump with a knob at its upper right. The form is drawn from
+  front face and a squared near end, filling the slot's width; the nugget a small shard on the diagonal. The form is drawn from
   memory of vanilla's (no vanilla ingot, nugget, stone or deepslate texture is on the machine that drew it, and none was
   downloaded or read); the client test sets vanilla's iron, gold and copper beside ours for the owner to judge it in
   game.
@@ -191,10 +191,19 @@ has run on the branch.
 Not applicable: art only.
 
 ## Rollout and open questions
-- **The ingot and nugget form is drawn from memory** of vanilla's; the close-ups beside vanilla's iron, gold and copper
-  are the judge. Alternates from the design round can be offered if the bar looks too flat or the nugget too small: a bar
-  with an even top and front face, a highlight on the crease instead of the back edge, and a larger nugget. Iterate
-  `tools/material_icons/ingot.txt` and `nugget.txt` on the owner's word.
+- **The ingot and nugget form is drawn from memory** of vanilla's, then corrected once from CI's in-game shots.
+  - **The first run** (f554b439) set vanilla's gold and copper ingots and nuggets beside ours.
+  - **What it showed:**
+    - our nugget, a flat lump 8 by 6 with a knob, did not look like vanilla's, which are small shards on the diagonal;
+    - our ingot, 14 by 10, read smaller and thinner than vanilla's.
+  - **Measured from the shots:** vanilla's ingot spans about 16 by 11 to 12 pixels with its outline, and its nuggets are
+    about 5 to 7 wide by 7 to 8 tall, leaning up-right.
+  - **The fix:** the maps were redrawn fresh to those sizes. The ingot is now 16 by 12 with a squared near end, and the
+    nugget a 7 by 8 shard.
+  - **Nothing was traced:** the shots are 480 by 270 JPEGs, in which an ingot is a few dozen blurred pixels, so they
+    give sizes and forms, not pixels.
+  - The next CI run's close-ups are the judge again. Iterate `tools/material_icons/ingot.txt` and `nugget.txt` on the
+    owner's word.
 - **Only bronze and steel's palettes were approved;** the other twelve follow the rule above. Most are greys told apart
   mostly by lightness, and the closest pairs sit at the floor of 8 (lead and steel, tin and invar, lead and tungsten,
   zinc and solder, silver and titanium); the owner may want some spread further, or a tint changed.
