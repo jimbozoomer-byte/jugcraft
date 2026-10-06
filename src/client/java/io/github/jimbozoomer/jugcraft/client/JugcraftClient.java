@@ -169,6 +169,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOWCASE_ENTITY, ShowcaseRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.MOTH_CASE_ENTITY, MothCaseRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.ODDITY_JAR_ENTITY, OddityJarRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.GIANT_HEART_ENTITY, GiantBeatingHeartRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPECIMEN_VESSEL_ENTITY, SpecimenVesselRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.COFFIN_WARDROBE_ENTITY, CoffinWardrobeRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SARCOPHAGUS_TOMB_ENTITY, SarcophagusRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.COLOSSAL_SKULL_ENTITY, ColossalSkullRenderer::new);

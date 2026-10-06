@@ -3275,6 +3275,162 @@ def check_pumpkin_night(java, lang):
             err(f"JugcraftClient.java must register {renderer_name}")
 
 
+def bat_reach(quads, bat):
+    """How far the Bat in a Jar's wings reach from the jar's middle, across (pixels), and their lowest and highest points,
+    over its flight awake and its sway asleep, turned and scaled as OddityJarRenderer.bat() draws them."""
+    import math
+
+    def mul(a, b):
+        return [[sum(a[i][k] * b[k][j] for k in range(4)) for j in range(4)] for i in range(4)]
+
+    def move(x, y, z):
+        return [[1, 0, 0, x], [0, 1, 0, y], [0, 0, 1, z], [0, 0, 0, 1]]
+
+    def turn(axis, degrees):
+        c, s = math.cos(math.radians(degrees)), math.sin(math.radians(degrees))
+        if axis == "y":
+            return [[c, 0, s, 0], [0, 1, 0, 0], [-s, 0, c, 0], [0, 0, 0, 1]]
+        return [[c, -s, 0, 0], [s, c, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+
+    k = bat["scale"]
+    scale = [[k, 0, 0, 0], [0, k, 0, 0], [0, 0, k, 0], [0, 0, 0, 1]]
+    reach, low, high = 0.0, 99.0, -99.0
+    for step in range(480):
+        t = step * 0.25
+        for awake in (True, False):
+            if awake:
+                a = t * 0.35
+                base = mul(mul(move(8 + bat["orbit"] * math.cos(a), bat["fly_y"] + bat["bob"] * math.sin(t * 0.5), 8 + bat["orbit"] * math.sin(a)),
+                               turn("y", math.degrees(-a) + 180)), turn("z", 180))
+                wing = 55 * math.sin(t * 1.6)
+            else:
+                base = mul(move(8, bat["hang_y"], 8), turn("y", 20 * math.sin(step * 0.37)))
+                wing = 80
+            base = mul(base, scale)
+            for part, m in (("oddity_bat_wing_left", mul(mul(base, move(-1.2, 0, 0)), turn("y", -wing))),
+                            ("oddity_bat_wing_right", mul(mul(base, move(1.2, 0, 0)), turn("y", wing)))):
+                for quad in quads.get(part, []):
+                    for v in quad["vertices"]:
+                        p = [sum(m[i][j] * (v[j] if j < 3 else 1.0) for j in range(4)) for i in range(3)]
+                        reach = max(reach, math.hypot(p[0] - 8, p[2] - 8))
+                        low, high = min(low, p[1]), max(high, p[1])
+    return reach, low, high
+
+
+def coplanar_pairs(quads, gap=0.1):
+    """How many pairs of a model's quads face the same way on planes closer than `gap` pixels and overlap: they would
+    flicker against each other (z-fighting)."""
+    faces = []
+    for quad in quads:
+        normal = quad["normal"]
+        axis = max(range(3), key=lambda k: abs(normal[k]))
+        if abs(abs(normal[axis]) - 1) > 1e-3:
+            continue
+        others = [k for k in range(3) if k != axis]
+        points = quad["vertices"]
+        faces.append((axis, normal[axis] > 0, sum(p[axis] for p in points) / len(points),
+                      [min(p[k] for p in points) for k in others], [max(p[k] for p in points) for k in others]))
+    pairs = 0
+    for a in range(len(faces)):
+        for b in range(a + 1, len(faces)):
+            (axis, sign, plane, lo, hi), (axis2, sign2, plane2, lo2, hi2) = faces[a], faces[b]
+            if axis == axis2 and sign == sign2 and abs(plane - plane2) < gap - 1e-6 \
+                    and all(min(hi[k], hi2[k]) - max(lo[k], lo2[k]) > 1e-4 for k in range(2)):
+                pairs += 1
+    return pairs
+
+
+def check_bigger_jars(java, quads, client):
+    """The Witch's Workshop's bigger jars: Java's numbers match tools/decor17.py; their renderers are wired up; what they
+    draw stays inside them (the giant heart in its murk at its fullest swell, every specimen in its fluid at the top and
+    bottom of its bob); and every block of each has its model."""
+    import math
+
+    def number(text, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", text)
+        return float(match.group(1)) if match else None
+
+    def floats(text, name):
+        match = re.search(rf"\b{name} = \{{([^}}]*)\}};", text)
+        return [float(v.strip().rstrip("FLD")) for v in match.group(1).split(",")] if match else None
+
+    g = decor17.GIANT_HEART
+    block = java.get("GiantBeatingHeartBlock", "")
+    if floats(block, "TEMPOS") != [float(t) for t in g["tempos"]] or number(block, "PULSE_TICKS") != g["pulse_ticks"] or number(block, "SIZE") != g["size"]:
+        err("GiantBeatingHeartBlock's TEMPOS, PULSE_TICKS and SIZE differ from tools/decor17.py GIANT_HEART")
+    renderer = (client / "GiantBeatingHeartRenderer.java").read_text(encoding="utf-8") if (client / "GiantBeatingHeartRenderer.java").is_file() else ""
+    for name, value in (("LUB_DUB_TICKS", g["lub_dub_ticks"]), ("DECAY_TICKS", g["decay_ticks"]), ("ATRIA", g["atria"]),
+                        ("VENTRICLES", g["ventricles"])):
+        found = number(renderer, name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"GiantBeatingHeartRenderer.{name} differs from tools/decor17.py GIANT_HEART")
+    for name, key in (("ATRIA_ANCHOR", "atria_anchor"), ("VENTRICLE_ANCHOR", "ventricle_anchor")):
+        if floats(renderer, name) != list(g[key]):
+            err(f"GiantBeatingHeartRenderer.{name} differs from tools/decor17.py GIANT_HEART {key}")
+    # The heart at its fullest stays inside the murk (2.5 to 45.5 across and deep, above the plinth at 5).
+    for part, anchor, swell in (("giant_heart_ventricles", g["ventricle_anchor"], g["ventricles"]), ("giant_heart_atria", g["atria_anchor"], g["atria"]),
+                                ("giant_heart_cradle", (0, 0, 0), 0.0)):
+        if not quads.get(part):
+            err(f"decor17_quads.json has no {part}")
+            continue
+        k = 1 + swell
+        for quad in quads[part]:
+            for v in quad["vertices"]:
+                p = [anchor[i] + (v[i] - anchor[i]) * k for i in range(3)]
+                if not (2.5 < p[0] < 45.5 and 2.5 < p[2] < 45.5 and 5.0 - 1e-6 <= p[1] < 43.0):
+                    err(f"The giant heart's {part} leaves its murk at its fullest swell: {[round(c, 2) for c in p]}")
+                    break
+            else:
+                continue
+            break
+    # Each part of the heart and every big specimen is drawn whole: no two of its faces share a plane (closer than 0.1
+    # pixel, they flicker), and its UVs stay inside its sprite.
+    whole_parts = ["giant_heart_ventricles", "giant_heart_atria", "giant_heart_cradle"]
+    for part in whole_parts + [f"big_specimen_{specimen}" for specimen in ag.SPECIMEN_JAR["specimens"]]:
+        model = quads.get(part, [])
+        pairs = coplanar_pairs(model)
+        if pairs:
+            err(f"decor17_quads.json {part} has {pairs} pairs of faces on one plane (closer than 0.1 pixel), which flicker")
+        if any(not (-1e-6 <= v[3] <= 1 + 1e-6 and -1e-6 <= v[4] <= 1 + 1e-6) for q in model for v in q["vertices"]):
+            err(f"decor17_quads.json {part} samples outside its texture")
+    vessel_renderer = (client / "SpecimenVesselRenderer.java").read_text(encoding="utf-8") if (client / "SpecimenVesselRenderer.java").is_file() else ""
+    if number(vessel_renderer, "BOB_TICKS") != decor17.VESSEL_BOB_TICKS:
+        err("SpecimenVesselRenderer.BOB_TICKS differs from tools/decor17.py VESSEL_BOB_TICKS")
+    for vessel, info in decor17.SPECIMEN_VESSELS.items():
+        prefix = {"tall_specimen_jar": "TALL", "specimen_tank": "TANK"}[vessel]
+        light = number(java.get({"tall_specimen_jar": "TallSpecimenJarBlock", "specimen_tank": "SpecimenTankBlock"}[vessel], ""), "LIGHT")
+        if light != info["light"]:
+            err(f"{vessel}'s LIGHT differs from tools/decor17.py SPECIMEN_VESSELS")
+        if (number(vessel_renderer, f"{prefix}_ACROSS") != info["size"][0] or floats(vessel_renderer, f"{prefix}_MIDDLE") != list(info["middle"])
+                or number(vessel_renderer, f"{prefix}_SCALE") != info["scale"] or number(vessel_renderer, f"{prefix}_BOB") != info["bob"]
+                or number(vessel_renderer, f"{prefix}_BUBBLES") != info["bubbles"]):
+            err(f"SpecimenVesselRenderer's {prefix}_ numbers differ from tools/decor17.py SPECIMEN_VESSELS {vessel}")
+        fluid = floats(vessel_renderer, f"{prefix}_FLUID")
+        for specimen in ag.SPECIMEN_JAR["specimens"]:
+            model = quads.get(f"big_specimen_{specimen}")
+            if not model or not fluid:
+                err(f"decor17_quads.json has no big_specimen_{specimen}")
+                continue
+            reach = max(math.hypot(v[0], v[2]) for q in model for v in q["vertices"]) * info["scale"]
+            low = min(v[1] for q in model for v in q["vertices"]) * info["scale"] + info["middle"][1] - info["bob"]
+            high = max(v[1] for q in model for v in q["vertices"]) * info["scale"] + info["middle"][1] + info["bob"]
+            half = (fluid[2] - fluid[0]) / 2
+            if reach > half - 0.25 or low < fluid[1] or high > fluid[3]:
+                err(f"The {specimen} leaves the {vessel}'s fluid: it reaches {reach:.2f} of {half:.2f} across and {low:.2f} to {high:.2f} up")
+    for big in decor17.big_jars():
+        states = load(ASSETS / "blockstates" / f"{big}.json") or {}
+        for entry in states.get("multipart", []):
+            model = entry["apply"]["model"].split(":")[1]
+            if not (ASSETS / "models" / f"{model}.json").is_file():
+                err(f"blockstates/{big}.json uses {model}, which is missing")
+        if not states.get("multipart"):
+            err(f"blockstates/{big}.json has no parts")
+    registered = (client / "JugcraftClient.java").read_text(encoding="utf-8")
+    for entity, renderer_name in (("GIANT_HEART_ENTITY", "GiantBeatingHeartRenderer"), ("SPECIMEN_VESSEL_ENTITY", "SpecimenVesselRenderer")):
+        if f"{entity}, {renderer_name}::new" not in registered:
+            err(f"JugcraftClient.java must draw {entity} with {renderer_name}")
+
+
 def check_witchs_workshop(java, lang):
     """Halloween decorations batch 17, the Witch's Workshop: Java's numbers match tools/decor17.py; each block is registered,
     named, drawn on its texture, drops and has its recipe; the candelabra's layout is generated for Java; the ember bed is a
@@ -3363,6 +3519,37 @@ def check_witchs_workshop(java, lang):
     for name in ("witchs_workshop_brew", "witchs_workshop_fume", "witchs_workshop_wax", "witchs_workshop_flame", "witchs_workshop_glow"):
         if not (ASSETS / "textures" / "entity" / f"{name}.png").is_file():
             err(f"textures/entity/{name}.png is missing")
+    # The bat stays inside its jar: the renderer's numbers are tools/decor17.py's, and its wings never reach the glass.
+    bat = decor17.JARS["bat_in_a_jar"]
+    jar_renderer = (client / "OddityJarRenderer.java").read_text(encoding="utf-8")
+    for name, key in (("BAT_SCALE", "scale"), ("BAT_ORBIT", "orbit"), ("BAT_FLY_Y", "fly_y"), ("BAT_BOB", "bob"), ("BAT_HANG_Y", "hang_y")):
+        found = re.search(rf"\b{name} = (-?[\d.]+)F;", jar_renderer)
+        if not found or abs(float(found.group(1)) - bat[key]) > 1e-9:
+            err(f"OddityJarRenderer.{name} differs from tools/decor17.py JARS bat_in_a_jar {key}")
+    reach, low, high = bat_reach(quads, bat)
+    inside = 8 - bat["jar"]["glass"] - bat["margin"]
+    if not quads.get("oddity_bat_wing_left") or reach > inside or low < 1.0 + bat["margin"] or high > bat["jar"]["glass_top"] - bat["margin"]:
+        err(f"The Bat in a Jar's wings leave its glass: they reach {reach:.2f} across (at most {inside:.2f}) and {low:.2f} to {high:.2f} up")
+    check_bigger_jars(java, quads, client)
+    # The skull's glow lies exactly on its square sockets.
+    cauldron_renderer = (client / "HornedSkullCauldronRenderer.java").read_text(encoding="utf-8")
+    eyes = re.search(r"\bEYES = (\{.*?\});", cauldron_renderer, re.S)
+    found = [float(v.rstrip("F")) for v in re.findall(r"-?[\d.]+F?", eyes.group(1))] if eyes else None
+    if found != [v for eye in cauldron["skull_eyes"] for v in eye]:
+        err("HornedSkullCauldronRenderer.EYES differs from tools/decor17.py CAULDRON skull_eyes")
+    eye_z = re.search(r"\bEYE_Z = (-?[\d.]+)F;", cauldron_renderer)
+    if not eye_z or abs(float(eye_z.group(1)) - cauldron["eye_z"]) > 1e-9 or cauldron["eye_z"] > cauldron["skull_face_z"] - 0.1 + 1e-9:
+        err("HornedSkullCauldronRenderer.EYE_Z must be tools/decor17.py CAULDRON eye_z, at least 0.1 in front of the skull's face")
+    # The Colossal Skull's night glow lies on its sockets, in front of the hollow behind them (behind it, it never shows).
+    skull = decor18.SKULL
+    skull_renderer = (client / "ColossalSkullRenderer.java").read_text(encoding="utf-8")
+    sockets = re.search(r"\bSOCKETS = (\{.*?\});", skull_renderer, re.S)
+    found = [float(v.rstrip("F")) for v in re.findall(r"-?[\d.]+F?", sockets.group(1))] if sockets else None
+    socket_z = re.search(r"\bSOCKET_Z = (-?[\d.]+)F;", skull_renderer)
+    if found != [v for socket in skull["sockets"] for v in socket]:
+        err("ColossalSkullRenderer.SOCKETS differs from tools/decor18.py SKULL sockets")
+    if not socket_z or abs(float(socket_z.group(1)) - skull["glow_z"]) > 1e-9 or skull["glow_z"] > skull["hollow_z"] - 0.1 + 1e-9:
+        err("ColossalSkullRenderer.SOCKET_Z must be tools/decor18.py SKULL glow_z, at least 0.1 in front of the hollow behind the sockets")
 
 
 def check_graveyard_flora(java, number, lang):

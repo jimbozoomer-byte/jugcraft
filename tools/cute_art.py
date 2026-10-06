@@ -1,8 +1,8 @@
 """A clean, cute art style for the creature decorations and their fires, after the owner's reference pictures (the
 Frankenstein head, the gargoyle, the skull candle, the eyeball bat): flat colour in two or three tones per material, a lit
-top-left edge and a shaded bottom-right one, crisp outlines, chunky shapes and simple faces (big round eye sockets with a
-glint, no nostrils, a neat smile). Nothing here scatters per-pixel noise: every shade is placed on purpose, so the props
-read smooth at any distance.
+top-left edge and a shaded bottom-right one, crisp outlines, chunky shapes and simple faces (big round eyes with a glint
+for living creatures; square, dark, pixel-aligned sockets for skulls, the Minecraft way; no nostrils; a neat smile).
+Nothing here scatters per-pixel noise: every shade is placed on purpose, so the props read smooth at any distance.
 
 Painters take a Px (tools/flora_art.py) and return nothing; the helpers draw onto one.
 """
@@ -242,21 +242,66 @@ def blush(p, cx, cy, r, colour=BLUSH):
 
 
 def skull_face(palette=BONE, sockets=0.24, socket_y=0.42, socket_x=0.3, mouth=True, glint=True, brow=True, tall=0.17):
-    """A cute skull from the front: a soft cream dome, two big rounded eye sockets with glints, no nose holes, and a
-    neat row of teeth along the bottom. `sockets` is each socket's width and `tall` half its height as shares of the
-    face; `socket_x` how far in from each side the sockets' middles are and `socket_y` how far down."""
+    """A skull from the front: a soft cream dome, two square dark eye sockets the Minecraft way (`square_socket`), no
+    nose holes, and a neat row of teeth along the bottom. `sockets` is each socket's width and `tall` half its height as
+    shares of the face; `socket_x` how far in from each side the sockets' middles are and `socket_y` how far down.
+    (`glint` is kept for callers: skulls have no glints since 5 October 2026.)"""
     def paint(p):
         soft(palette, 3)(p)
         w, h = p.w, p.h
-        rx = max(1.5, w * sockets / 2)
-        ry = max(1.5, h * tall)
+        sw = max(2, round(w * sockets))
+        sh = max(2, round(2 * h * tall))
         for ex in (socket_x, 1.0 - socket_x):
-            eye(p, w * ex, h * socket_y, rx, ry, glint=glint)
+            u0, v0 = round(w * ex - sw / 2), round(h * socket_y - sh / 2)
+            square_socket(p, u0, v0, u0 + sw, v0 + sh, lip=palette[1])
         if brow:
             for x in range(1, w - 1):
                 p.put(x, 0, palette[4])
         if mouth:
             teeth(p, w * 0.22, w * 0.78, h - max(2, h * 0.16) - 1, max(2, h * 0.16), palette[4], SOCKET[1], tooth=max(1, w // 10))
+    return paint
+
+
+def square_socket(p, u0, v0, u1, v1, socket=None, lip=None, glow=None):
+    """A skull's eye socket the Minecraft way (5 October 2026, after the owner found round, glinting skull eyes
+    goofy): a hard-edged rectangle of whole texels, u0..u1 by v0..v1 (exclusive), darkest along its top in the brow's
+    shadow and a step lighter along its bottom row and right column, where the far rim catches the light, over a
+    one-texel lip of shaded bone (`lip`). No glint, no rounding. With `glow`, the socket is filled flat with that
+    colour instead: a lit socket, square and exactly the socket's size."""
+    socket = socket or SOCKET
+    u0, v0, u1, v1 = int(round(u0)), int(round(v0)), int(round(u1)), int(round(v1))
+    for y in range(v0, v1):
+        for x in range(u0, u1):
+            if glow is not None:
+                p.put(x, y, glow)
+                continue
+            k = 0 if y == v0 else (1 if y == v1 - 1 or x == u1 - 1 else 0)
+            p.put(x, y, socket[k])
+    if lip is not None:
+        for x in range(u0, u1):
+            p.put(x, v1, lip)
+
+
+def block_skull_face(face, eyes, palette=BONE, side="north", brow=True):
+    """A skull's face the Minecraft way: flat cream, lit along its top and left and shaded along its bottom and right,
+    with square sockets (`square_socket`) placed from model coordinates, so a glow drawn over them by a renderer lands
+    on them exactly. `face` is the face's box (x0, y0, x1, y1) in model pixels and `eyes` each socket's box; on a north
+    face the texture runs from x1 (its left, seen from the north) to x0, on a south face from x0 to x1. No nose holes
+    and no glints."""
+    x0, y0, x1, y1 = face
+
+    def paint(p):
+        soft(palette, 3)(p)
+        if brow:
+            for x in range(1, p.w - 1):
+                p.put(x, 0, palette[4])
+        for ex0, ey0, ex1, ey1 in eyes:
+            if side == "north":
+                u0, u1 = (x1 - ex1) / (x1 - x0) * p.w, (x1 - ex0) / (x1 - x0) * p.w
+            else:
+                u0, u1 = (ex0 - x0) / (x1 - x0) * p.w, (ex1 - x0) / (x1 - x0) * p.w
+            v0, v1 = (y1 - ey1) / (y1 - y0) * p.h, (y1 - ey0) / (y1 - y0) * p.h
+            square_socket(p, u0, v0, u1, v1, lip=palette[1])
     return paint
 
 

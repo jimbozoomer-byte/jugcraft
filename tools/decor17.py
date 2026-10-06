@@ -15,14 +15,22 @@ textures: tools/decor17_data.py, sculpted on the toolkit in tools/flora_art.py.
 4. Cabinet of Curiosities (agriculture/ShowcaseBlock): the Curiosity Cabinet shows nine things, the Bell Jar one, the
    Moth Display Case pinned moths that stir at night.
 5. Oddity Jars (agriculture/OddityJarBlock): eyeballs that watch, a heart that beats as a redstone clock, a bat that
-   wakes, a two-headed snake and a drumming hand.
+   wakes (in a wider, taller jar, so its wings stay inside the glass), a two-headed snake and a drumming hand.
+6. The bigger jars, several blocks placed and broken as one (agriculture/MultiDecorationBlock with a third, "away",
+   axis): the Giant's Beating Heart (GIANT_HEART, 3 x 3 x 3, GiantBeatingHeartBlock), a slow redstone clock whose heart
+   swells with each beat, and the Tall Specimen Jar (1 x 2 x 1) and Specimen Tank (2 x 2 x 2) (SPECIMEN_VESSELS,
+   SpecimenVesselBlock), the Specimen Jar's specimens floating big in glowing fluid.
 Every recipe follows the agriculture feature switch.
 """
 
 FEATURE = "agriculture"
 
 CAULDRON = {"block": "horned_skull_cauldron", "display": "Horned Skull Cauldron", "levels": 3, "potion_light": 6, "heat_light": 2,
-            "floaters": 3, "waft_players": 4, "waft_range": 3.0, "waft_fraction": 0.25}
+            "floaters": 3, "waft_players": 4, "waft_range": 3.0, "waft_fraction": 0.25,
+            # The ram skull's face (its north side, at z 0.7) and its square eye sockets, {x0, y0, x1, y1} in pixels: Minecraft
+            # proportions, each socket a quarter of the face wide, a little over a quarter apart, an eighth in from the sides.
+            # The client's glow (HornedSkullCauldronRenderer.EYES) covers the sockets exactly, at `eye_z`, 0.1 in front.
+            "skull_face": (5.2, 7.4, 10.8, 11.8), "skull_eyes": [(5.8, 8.6, 7.2, 9.8), (8.8, 8.6, 10.2, 9.8)], "skull_face_z": 0.7, "eye_z": 0.6}
 EMBER_BED = {"block": "ember_bed", "display": "Ember Bed", "light": 9}
 LADLE = {"item": "brew_ladle", "display": "Brew Ladle"}
 
@@ -74,6 +82,7 @@ FLOATERS = ["minecraft:apple", "minecraft:bone", "minecraft:spider_eye", "minecr
 MESSAGES = {"message.jugcraft.enchanted_broom.anointed": "The broom stirs and twitches its bristles: it will sweep for three days.",
             "message.jugcraft.enchanted_broom.full": "The broom is still wide awake.",
             "message.jugcraft.beating_heart_jar.tempo": "%s beats a minute",
+            "message.jugcraft.giant_beating_heart.tempo": "The giant's heart: %s beats a minute",
             "container.jugcraft.dustpan": "Dustpan"}
 
 CABINET = {"block": "curiosity_cabinet", "display": "Curiosity Cabinet", "slots": 9, "door_ticks": 40}
@@ -83,10 +92,41 @@ MOTH_CASE = {"block": "moth_display_case", "display": "Moth Display Case", "moth
 JARS = {
     "jar_of_eyeballs": {"display": "Jar of Eyeballs", "range": 8},
     "beating_heart_jar": {"display": "Beating Heart Jar", "tempos": [60, 80, 100, 120], "pulse_ticks": 2},
-    "bat_in_a_jar": {"display": "Bat in a Jar", "range": 3, "flutter_ticks": 100},
+    # The bat's jar is wider and taller than the others (5 October 2026: its wings poked through the glass), and the bat
+    # is drawn at `scale`: awake it circles `orbit` pixels round the middle at `fly_y` (bobbing `bob` up and down), asleep
+    # it hangs at `hang_y`. The audit checks that its wings stay `margin` inside the glass at every beat.
+    "bat_in_a_jar": {"display": "Bat in a Jar", "range": 3, "flutter_ticks": 100,
+                     "jar": {"base": 1.9, "glass": 2.2, "lid": 1.8, "glass_top": 13.4, "lid_top": 14.6, "knob": 1.2, "knob_top": 15.4,
+                             "label": (4.4, 3.0, 11.6, 7.2)},
+                     "scale": 0.9, "orbit": 0.2, "fly_y": 7.2, "bob": 1.0, "hang_y": 11.2, "margin": 0.25},
     "two_headed_snake_jar": {"display": "Two-Headed Snake Jar"},
     "hand_in_a_jar": {"display": "Hand in a Jar", "range": 8},
 }
+
+# The bigger jars (5 October 2026, after the owner's "the beating heart is awesome, make a version that is like a giant's
+# beating heart, 3x3x3" and "make bigger versions of the specimen jar"): props of several blocks, placed and broken as one
+# (agriculture/MultiDecorationBlock: from the block aimed at, to the placer's right, up and away). Each is modelled whole
+# in its own frame (x across to the placer's left, y up, z away from the placer, in pixels) and cut into one model per
+# block; what moves in it is drawn by the client from its first block.
+# The Giant's Beating Heart: a giant's heart in a glass vat of red murk on an iron plinth, tethered to the lid by three
+# tubes. It is a slow redstone clock: it beats at one of `tempos` beats a minute (use it to change), each beat a
+# `pulse_ticks` signal of 15 from its first block to every side but below, and a signal into any of its bottom blocks
+# from below stops it. The client swells the atria with the beat and the ventricles `lub_dub_ticks` later (`atria` and
+# `ventricles` more at the peak), each settling over `decay_ticks`, about their `anchor`s (pixels, in its frame).
+GIANT_HEART = {"block": "giant_beating_heart", "display": "Giant's Beating Heart", "size": 3, "tempos": [40, 50, 60, 72],
+               "pulse_ticks": 2, "lub_dub_ticks": 4, "decay_ticks": 8, "atria": 0.10, "ventricles": 0.12,
+               "atria_anchor": (24.0, 29.0, 24.0), "ventricle_anchor": (21.0, 8.0, 24.0)}
+# The Tall Specimen Jar (one block across, two tall) and the Specimen Tank (two by two by two): the Specimen Jar's look
+# made big, glowing green fluid in clear glass between iron fittings, holding one of the jar's specimens (sneak-use for
+# the next, kept when broken), bobbing and turning slowly among rising bubbles. `size` in blocks (across, up, deep),
+# `light` on every block, and the client's specimen: its middle (`middle`, pixels in the frame), `scale` and `bubbles`.
+SPECIMEN_VESSELS = {
+    "tall_specimen_jar": {"display": "Tall Specimen Jar", "size": (1, 2, 1), "light": 8, "middle": (8.0, 13.5, 8.0), "scale": 0.55,
+                          "bubbles": 4, "bob": 1.2},
+    "specimen_tank": {"display": "Specimen Tank", "size": (2, 2, 2), "light": 10, "middle": (16.0, 16.5, 16.0), "scale": 1.35,
+                      "bubbles": 7, "bob": 1.5},
+}
+VESSEL_BOB_TICKS = 120
 
 SHAPED = [
     {"id": CAULDRON["block"], "pattern": ["HBH", "ICI"], "key": {"H": "minecraft:goat_horn", "B": "minecraft:bone_block",
@@ -122,6 +162,17 @@ SHAPED = [
                                                                         "G": "minecraft:glass"},
      "result": "jar_of_eyeballs", "count": 1, "category": "building"},
 ]
+SHAPED += [
+    {"id": GIANT_HEART["block"], "pattern": ["GGG", "GHG", "IRI"], "key": {"G": "minecraft:glass", "H": "jugcraft:beating_heart_jar",
+                                                                        "I": "jugcraft:brass_ingot", "R": "minecraft:redstone_block"},
+     "result": GIANT_HEART["block"], "count": 1, "category": "redstone"},
+    {"id": "tall_specimen_jar", "pattern": ["N", "J", "G"], "key": {"N": "minecraft:iron_ingot", "J": "jugcraft:specimen_jar",
+                                                                    "G": "minecraft:glass"},
+     "result": "tall_specimen_jar", "count": 1, "category": "building"},
+    {"id": "specimen_tank", "pattern": ["IGI", "GJG", "IGI"], "key": {"I": "minecraft:iron_ingot", "G": "minecraft:glass",
+                                                                      "J": "jugcraft:tall_specimen_jar"},
+     "result": "specimen_tank", "count": 1, "category": "building"},
+]
 SHAPELESS = [
     {"id": BROOM["block"], "inputs": ["jugcraft:witchs_broom", "minecraft:amethyst_shard", "minecraft:string"],
      "result": BROOM["block"], "count": 1, "category": "building"},
@@ -142,7 +193,12 @@ SHAPELESS = [
 
 def blocks():
     return ([CAULDRON["block"], EMBER_BED["block"]] + list(CANDELABRA) + [BROOM["block"], DUSTPAN["block"], BROOM_RACK["block"],
-            CABINET["block"], BELL_JAR["block"], MOTH_CASE["block"]] + list(JARS))
+            CABINET["block"], BELL_JAR["block"], MOTH_CASE["block"]] + list(JARS) + big_jars())
+
+
+def big_jars():
+    """The props of several blocks: the Giant's Beating Heart and the two bigger specimen jars."""
+    return [GIANT_HEART["block"]] + list(SPECIMEN_VESSELS)
 
 
 def items():
@@ -155,6 +211,8 @@ def names():
            BELL_JAR["block"]: BELL_JAR["display"], MOTH_CASE["block"]: MOTH_CASE["display"]}
     out.update({kind: info["display"] for kind, info in CANDELABRA.items()})
     out.update({jar: info["display"] for jar, info in JARS.items()})
+    out[GIANT_HEART["block"]] = GIANT_HEART["display"]
+    out.update({vessel: info["display"] for vessel, info in SPECIMEN_VESSELS.items()})
     return out
 
 

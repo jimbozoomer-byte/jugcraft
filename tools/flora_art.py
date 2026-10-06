@@ -479,6 +479,31 @@ def cube(lo, hi, faces, rot=None, light=None):
 SIDES4 = ("north", "south", "east", "west")
 
 
+def box_ring(x0, z0, x1, z1, t, y0, y1, out_uv, in_uv=None, top=None, bottom=None, ends=None, light=None):
+    """A hollow square frame of four boxes `t` thick, its outer edge x0..x1 by z0..z1, from y0 to y1: a pot's wall, a
+    rim, a band, a tank's lining. Its outer sides are drawn with `out_uv`, its inner sides with `in_uv` (left out if
+    None, for a band whose inside is buried), and its top and bottom where given. Unlike one solid box it leaves the
+    middle open, so it can be capped without the cap covering what is inside it. The north and south boxes run the full
+    width and show their short ends (`ends`, else `out_uv`) at the corners; the east and west ones fit between them, so
+    no two of its faces overlap. `top` and `bottom` are one uv box for all four boxes or a pair: the north and south
+    boxes' (long across x) and the east and west boxes' (long along z), so a strip's texture runs along it."""
+    def pair(uv):
+        if uv is None:
+            return None, None
+        return (uv[0], uv[1]) if len(uv) == 2 else (uv, uv)
+    top_ns, top_ew = pair(top)
+    bottom_ns, bottom_ew = pair(bottom)
+    end = ends or out_uv
+
+    def caps(up, down):
+        return {**({"up": up} if up else {}), **({"down": down} if down else {})}
+    inner = (lambda side: {side: in_uv}) if in_uv else (lambda side: {})
+    return [cube((x0, y0, z0), (x1, y1, z0 + t), {"north": out_uv, "east": end, "west": end, **inner("south"), **caps(top_ns, bottom_ns)}, light=light),
+            cube((x0, y0, z1 - t), (x1, y1, z1), {"south": out_uv, "east": end, "west": end, **inner("north"), **caps(top_ns, bottom_ns)}, light=light),
+            cube((x0, y0, z0 + t), (x0 + t, y1, z1 - t), {"west": out_uv, **inner("east"), **caps(top_ew, bottom_ew)}, light=light),
+            cube((x1 - t, y0, z0 + t), (x1, y1, z1 - t), {"east": out_uv, **inner("west"), **caps(top_ew, bottom_ew)}, light=light)]
+
+
 def column(x, z, y0, y1, width, uv_side, uv_end=None, rot=None, light=None, ends=("up",)):
     """A square column (a stem, a finger, a stalk) centred on (x, z)."""
     h = width / 2

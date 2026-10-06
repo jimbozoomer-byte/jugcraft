@@ -369,9 +369,12 @@ def lab_table_arms():
 
 
 def lab_table_eyes():
-    """Two eyes glowing through the sheet on the patient's face (the head's top in the lying frame)."""
-    return [{"from": [6.2, 17.02, -13.4], "to": [7.4, 17.08, -12.4], "faces": {"up": {"texture": "#eye"}, "down": {"texture": "#eye"}}},
-            {"from": [8.6, 17.02, -13.4], "to": [9.8, 17.08, -12.4], "faces": {"up": {"texture": "#eye"}, "down": {"texture": "#eye"}}}]
+    """Two eyes glowing through the sheet on the patient's face (the head's top in the lying frame, y 17), each one sheet
+    0.1 above it (the renderer draws it from both sides) showing the bright middle of the glow picture, its UVs pinned
+    inside the sprite."""
+    eye = {"up": {"texture": "#eye", "uv": [4, 4, 12, 12]}}
+    return [{"from": [6.2, 17.1, -13.4], "to": [7.4, 17.1, -12.4], "faces": eye},
+            {"from": [8.6, 17.1, -13.4], "to": [9.8, 17.1, -12.4], "faces": eye}]
 
 
 # ---------------------------------------------------------------- 12. the spider's larder
@@ -402,7 +405,9 @@ def silk_cocoon():
 def egg_sac_cluster(glisten=0):
     """The Egg Sac Cluster on the north face of its block (the blockstate turns it to each face): a mat of web over the
     face and a cluster of round sacs of several sizes on it. Its texture is a strip of frames, the sacs' glints
-    brightening and dimming (`glisten` 0 to 3), so they pulse."""
+    brightening and dimming (`glisten` 0 to 3), so they pulse. Each sac is a closed box, its back too (seen through the
+    web on the item from behind): 0.1 or more in front of the mat, and on a plane of its own wherever it overlaps an
+    earlier sac, so no two backs share a plane."""
     sc = Sculpt(d19.EGG_SACS["block"], 195, 32)
     mat = sc.piece("mat", 16, 16, lambda p: p.img.alpha_composite(web_sheet(16, 4, 0.4)))
     big = sc.piece("big", 6, 6, sacs(2, glisten))
@@ -410,10 +415,14 @@ def egg_sac_cluster(glisten=0):
     els = [cube((0.0, 0.0, 0.05), (16.0, 16.0, 0.1), {"south": mat, "north": mat})]
     rng = random.Random(7)
     spots = [(5.0, 6.0, 3.0), (9.5, 7.5, 2.6), (7.0, 10.5, 2.2), (11.0, 11.5, 1.8), (4.0, 10.0, 1.8), (10.5, 3.8, 2.0), (7.0, 3.0, 1.6)]
+    placed = []
     for x, y, r in spots:
         uv = big if r > 2.1 else small
         depth = r * 0.9 + rng.uniform(0, 0.3)
-        els.append(cube((x - r, y - r, 0.1), (x + r, y + r, 0.1 + depth), faces(uv, ("south", "east", "west", "up", "down"))))
+        taken = {back for px, py, pr, back in placed if abs(px - x) < pr + r and abs(py - y) < pr + r}
+        back = next(b for b in (0.2, 0.3, 0.4, 0.5, 0.6) if b not in taken)
+        placed.append((x, y, r, back))
+        els.append(cube((x - r, y - r, back), (x + r, y + r, 0.1 + depth), faces(uv, ALL6)))
     sc.models[d19.EGG_SACS["block"]] = els
     sc.models["item"] = d18d.shifted(els, dz=7.0)
     return sc
@@ -836,7 +845,7 @@ def grandfather_clock():
            cube((2.0, 1.0, 3.0), (14.0, 3.6, 13.0), faces(side, ("east", "west", "south", "down"), north=case, up=case)),
            cube((1.8, 3.6, 2.8), (14.2, 4.2, 13.2), faces(trim, ALL6)),
            # The trunk: its sides and back, open at the front behind the glazed door.
-           cube((3.0, 4.2, 11.0), (13.0, 15.2, 12.0), faces(side, ("south", "up", "down"), north=inside)),
+           cube((3.0, 4.2, 11.0), (13.0, 15.2, 12.0), faces(side, ("south", "up", "down", "east", "west"), north=inside)),
            cube((3.0, 4.2, 4.4), (4.0, 15.2, 11.0), faces(side, ("west", "up", "down"), east=inside)),
            cube((12.0, 4.2, 4.4), (13.0, 15.2, 11.0), faces(side, ("east", "up", "down"), west=inside)),
            cube((3.0, 4.2, 3.6), (5.0, 15.2, 4.4), faces(trim, ALL6)),
@@ -867,8 +876,9 @@ def grandfather_clock():
             cube((9.4, 30.8, 2.6), (13.4, 31.6, 3.4), faces(trim, ALL6), rotation((13.4, 30.8, 3.0), "z", -22.5)),
             cube((7.3, 30.8, 2.5), (8.7, 31.4, 3.5), faces(brass, ALL6)),
             cube((7.6, 31.4, 2.8), (8.4, 32.0, 3.2), faces(brass, ALL6)),
-            cube((2.0, 30.8, 2.4), (3.0, 31.6, 3.4), faces(brass, ALL6)),
-            cube((13.0, 30.8, 2.4), (14.0, 31.6, 3.4), faces(brass, ALL6))]
+            # The corner finials stand 0.1 proud of the turned pediment pieces' backs (z 3.4), so they never share it.
+            cube((2.0, 30.8, 2.4), (3.0, 31.6, 3.5), faces(brass, ALL6)),
+            cube((13.0, 30.8, 2.4), (14.0, 31.6, 3.5), faces(brass, ALL6))]
     sc.models[d19.CLOCK["block"]] = els
     cx, cy, cz = DIAL
     sc.models["clock_hour_hand"] = [cube((cx - 0.5, cy - 0.5, cz - 0.15), (cx + 0.5, cy + 0.5, cz + 0.1), faces(brass, ALL6)),
@@ -1196,8 +1206,8 @@ def harvest_moon_lamp():
     posts on a long footed base, a garland of autumn leaves over its lower arc and a pumpkin at each foot. Each block
     has its own quarter (models harvest_moon_lamp_0 to _3, by part); the moon itself is the client's."""
     sc = Sculpt(d19.MOON["block"], 208, 64)
-    bar = sc.piece("bar", 4, 12, d17d.wrought(2))
-    flat = sc.piece("flat", 12, 4, d17d.wrought(3, horizontal=True))
+    bar = sc.piece("bar", 4, 12, d17d.wrought_clean())
+    flat = sc.piece("flat", 12, 4, d17d.wrought_clean(horizontal=True))
     iron = sc.piece("iron", 8, 8, d17d.cast_iron(4))
     leaves = sc.piece("leaves", 16, 8, leaf_garland(5))
     pumpkin = sc.piece("pumpkin", 8, 8, solid(pal("8a3a08", "b04e0c", "d06a14", "e88a28"), 6, rim=True))
@@ -1335,16 +1345,20 @@ def decor19_quads():
 
     def add(name, block, model=None, **flags):
         sc = build(block)
-        out[name] = [dict(q, **flags) for q in quads(sc.models[model or name], {"p": block})]
+        elements = sc.models[model or name]
+        # Cut-out and see-through parts are drawn from both sides, so a sheet keeps one face (no reversed twin to fight).
+        if flags.get("cutout") or flags.get("nocull"):
+            elements = d17d.single_sheets(elements)
+        out[name] = [dict(q, **flags) for q in quads(elements, {"p": block})]
 
     hand = d19.HAND["block"]
     add(hand, hand, cutout=True)
     for i in range(len(KNUCKLES)):
         add(f"{hand}_finger_{i}", hand, cutout=True)
     out["lab_table_arms"] = quads(lab_table_arms(), {"sheet": "lab_table_sheet", "skin": "lab_table_skin"})
-    out["lab_table_eyes"] = [dict(q, nocull=True) for q in quads(lab_table_eyes(), {"eye": "entity/lab_eye_glow"})]
+    out["lab_table_eyes"] = [dict(q, nocull=True) for q in quads(d17d.single_sheets(lab_table_eyes()), {"eye": "entity/lab_eye_glow"})]
     add("silk_cocoon", d19.COCOON["block"], cutout=True)
-    out["spiderling"] = [dict(q, cutout=True) for q in quads(build("spiderling").models["spiderling"], {"p": "entity/spiderling"})]
+    out["spiderling"] = [dict(q, cutout=True) for q in quads(d17d.single_sheets(build("spiderling").models["spiderling"]), {"p": "entity/spiderling"})]
     for i in range(len(SPOOL_X)):
         add(f"silk_spool_silk_{i}", d19.SPOOLS["block"])
     add("haunted_dining_chair", d19.CHAIR["block"], cutout=True)
@@ -1356,7 +1370,7 @@ def decor19_quads():
         add(name, clock, cutout=True)
     add("clock_ghost_face", clock, nocull=True)
     for name, els in witchlight_glow().items():
-        out[name] = [dict(q, nocull=True) for q in quads(els, {"p": f"entity/{name}"})]
+        out[name] = [dict(q, nocull=True) for q in quads(d17d.single_sheets(els), {"p": f"entity/{name}"})]
     for figure_ in d19.FIGURES:
         add(f"silhouette_{figure_}", d19.SILHOUETTE["block"], cutout=True)
         add(f"silhouette_{figure_}_eyes", d19.SILHOUETTE["block"], cutout=True)

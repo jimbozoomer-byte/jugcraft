@@ -51,6 +51,24 @@ public abstract class MultiDecorationBlock extends Block {
 	/** The part property, 0 to the number of cells less one. */
 	public abstract IntegerProperty partProperty();
 
+	/**
+	 * The cells of a solid prop {@code across} blocks wide, {@code up} tall and {@code deep} deep, in part order: right
+	 * first, then up, then away (part = right + across * (up + up-count * away)), as tools/decor17_data.py cells() counts
+	 * them for the models.
+	 */
+	protected static int[][] box(int across, int up, int deep) {
+		int[][] cells = new int[across * up * deep][];
+		int part = 0;
+		for (int away = 0; away < deep; away++) {
+			for (int high = 0; high < up; high++) {
+				for (int right = 0; right < across; right++) {
+					cells[part++] = new int[] {right, high, away};
+				}
+			}
+		}
+		return cells;
+	}
+
 	public int part(BlockState state) {
 		return state.getValue(partProperty());
 	}

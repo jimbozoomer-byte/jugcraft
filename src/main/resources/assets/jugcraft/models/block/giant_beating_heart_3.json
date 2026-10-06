@@ -1,0 +1,124 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/giant_beating_heart",
+    "particle": "jugcraft:block/giant_beating_heart"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            1.375,
+            1.75,
+            3.375
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            3.75,
+            1.375,
+            5.5,
+            3.375
+          ],
+          "texture": "#p"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        2.5
+      ],
+      "to": [
+        13.5,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.875,
+            5.1875,
+            3.7384,
+            6.1875
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            4.7616,
+            5.1875,
+            5.625,
+            6.1875
+          ],
+          "texture": "#p"
+        }
+      }
+    },
+    {
+      "from": [
+        13.5,
+        0,
+        0
+      ],
+      "to": [
+        16.0,
+        16,
+        2.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5.625,
+            1.375,
+            6.25,
+            3.375
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            5.625,
+            1.375,
+            6.25,
+            3.375
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            5.625,
+            1.375,
+            6.25,
+            3.375
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            5.625,
+            1.375,
+            6.25,
+            3.375
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

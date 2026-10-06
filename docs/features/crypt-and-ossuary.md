@@ -70,6 +70,7 @@ Primary specialty and supported player role: building, with useful pieces for st
 - **Keys** are cut from **Key Blanks** (two from an iron ingot and an iron nugget): a blank becomes a key by cutting it to a lock, so no key exists without a lock to fit. Copying takes one to eight blanks at once.
 - **The wardrobe** also takes armour hung on it directly, so it can be dressed without wearing the armour first.
 - **The Colossal Skull's glow** is drawn by the client at night only, as a faint breathing glow; it gives no light.
+- **Art fixes, 5 and 6 October 2026**: skulls have square sockets with flat glows (the lit Vertebra Floor Lamp's sockets glow whole; the Colossal Skull's night glow now lies 0.1 pixel in front of the hollow behind its sockets, where it shows), and faces are closed on the Colossal Vertebra, Skull and Rib, the Coffin Wardrobe, the Iron-Bound Coffin (whose bands and corner caps no longer lie flush with its velvet when open) and the Ribcage Bookcase. The full list is in [witchs-workshop.md](witchs-workshop.md#changes-from-the-plan).
 
 ## Connections
 - Existing input producer:
