@@ -1,7 +1,7 @@
 # Arcane Concordance: First Light
 
-Status: implemented on branch `claude/awesome-davinci-iwv3b9`; compiled and server-tested in CI (see Verification);
-not yet played in a client or on a dedicated server.
+Status: implemented on branch `claude/awesome-davinci-iwv3b9`; compiled and server-tested in CI (831 server game tests
+pass, see Verification); not yet played in a client or on a dedicated server.
 Proposal issue: none; the owner's Arcane Concordance brief is the scope approval (this record describes the proposal).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 1, Initiate stage (Jugcraft Discovery). Roadmap step 5.
@@ -117,6 +117,9 @@ CI results (Build workflow, run manually on this branch):
   Modonomicon error: the codex's first entry used a non-existent item as its icon, which stops the book opening. Fixed
   (a vanilla book icon), with a new `check_mod_data.py` rule for codex icons and a new game test,
   `codexLoadsWithoutErrors`, which asks Modonomicon for the book's load errors.
+- Run 37497884738 (with the codex fix): `mod` passed with **"All 831 required tests passed"** (the 10 Concordance
+  tests included) and no Modonomicon load error; the rules loaded with 0 problems. `optional integrations absent`
+  passed.
 - The three client test shards fail before any test runs: the game cannot create an OpenGL context on the CI runner
   ("Couldn't find matching GLX visual"), then Iris aborts the JVM. The same three shards fail identically on the
   foundation branch this work is built on (run 37496512659 on `feature/frameworks-and-modrinth-pack`, whose server
