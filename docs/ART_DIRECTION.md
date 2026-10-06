@@ -15,10 +15,6 @@ On 4 October 2026 the owner rejected the noisy, rust-covered dieselpunk textures
 - **Wear is placed, not sprinkled.** Use a chip at a corner, a stain weeping from a bolt or a seam, or a few short streaks one shade off the fill. Rust is an accent, never a whole surface.
 - **Pattern beats noise.** Show grain, ribs, tread and ripples as regular shapes: plank lines, ribs every four rows, raised lozenges, long ripple lines.
 - **Each material looks like its vanilla counterpart.** On 5 October 2026 the owner added that flat is not the goal either: stone should look like stone, cobblestone or stone bricks, and every material should take after the vanilla textures so it does not stand out. The painters in `tools/block_style.py` work that way. `bs.fill` gives one ground tone with small clumps of the tones either side, in place of a random shade at every pixel. Stone, cobblestone and bricks are lit along their top and left, wood is drawn as planks, and straw and hair as streaks.
-- **Ores, metal blocks and ingots follow the vanilla ones.** On 6 October 2026 the owner asked for ore stone to match vanilla stone and deepslate, metal blocks to look like the vanilla metal blocks, and ingots to take the vanilla ingot's shape in each metal's colours. `tools/material_style.py` draws them that way from code; vanilla files are studied, never copied or recoloured.
-  - Ores are nodules on neutral stone or on layered deepslate.
-  - Storage blocks are one bright, bevelled plate, the same pattern for every metal.
-  - Ingots share one diagonal bar, and nuggets one cluster of lumps.
 - **Machine faces are clean plates with one clear feature.** A machine front is a frame lit along its top and left round a recessed plate of one tone, with one feature in it: a recessed window, vent or port. A running glow rises in smooth bands, brightest at the bottom. `panel()` and `window()` in `tools/generate_textures.py` draw this way.
 
 ## Creatures and faces: cute and clean
