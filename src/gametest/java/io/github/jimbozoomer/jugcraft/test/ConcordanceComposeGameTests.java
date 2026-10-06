@@ -28,7 +28,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
@@ -178,7 +178,7 @@ public class ConcordanceComposeGameTests {
 		// A forged inscription: the server compiles the text and charges what it really costs. (A villager is tall
 		// enough to meet the line from the caster's eyes.)
 		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.MASTERED);
-		Mob pig = helper.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(1, 2, 3));
+		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(1, 2, 3));
 		player.getMainHandItem().set(JugcraftConcordance.INSCRIPTION, new Inscription("touch struck sear", 1, 0));
 		refreshSpells(player);
 		cast(level, player);
@@ -213,7 +213,7 @@ public class ConcordanceComposeGameTests {
 		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.MASTERED);
 		List<Mob> pigs = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
-			pigs.add(helper.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(1 + i % 5, 2, 2 + i / 5)));
+			pigs.add(helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(1 + i % 5, 2, 2 + i / 5)));
 		}
 		Compiler.Compilation compiled = ComposedSpells.compile(player, wand(), "here creatures dazzle pulse");
 		Plan plan = compiled.plan();
@@ -247,8 +247,8 @@ public class ConcordanceComposeGameTests {
 		floor(helper);
 		ServerPlayer player = player(helper, new BlockPos(1, 2, 0));
 		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.MASTERED);
-		Mob target = helper.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(1, 2, 6));
-		Mob beside = helper.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(2, 2, 7));
+		Mob target = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(1, 2, 6));
+		Mob beside = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(2, 2, 7));
 		Compiler.Compilation compiled = ComposedSpells.compile(player, wand(), "touch+extend struck sear then here creatures dazzle");
 		Plan plan = compiled.plan();
 		helper.assertTrue(plan != null && plan.limits().branches() == 1 && plan.limits().targets() == 5, "Compiled: one branch, five targets: "

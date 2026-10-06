@@ -19,7 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
@@ -78,12 +78,12 @@ public class ConcordanceEffectGameTests {
 	public void oneEffectWhateverDeliversIt(GameTestHelper helper) {
 		floor(helper);
 		ServerPlayer caster = player(helper, new BlockPos(0, 2, 0));
-		Mob creature = helper.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(7, 2, 7));
+		Mob creature = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(7, 2, 7));
 		Cause.Origin[] origins = {Cause.Origin.SPELL, Cause.Origin.POTION, Cause.Origin.WEAPON, Cause.Origin.CREATURE, Cause.Origin.SHRINE};
 		Entity[] actors = {caster, caster, caster, creature, null};
 		List<Mob> pigs = new ArrayList<>();
 		for (int i = 0; i < origins.length; i++) {
-			Mob pig = helper.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(1 + i, 2, 4));
+			Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(1 + i, 2, 4));
 			pigs.add(pig);
 			Cause cause = cause(actors[i], origins[i]);
 			Ledger ledger = open();
@@ -136,15 +136,15 @@ public class ConcordanceEffectGameTests {
 		b.setGameMode(GameType.SURVIVAL);
 		helper.assertTrue(ConcordanceEffects.mayHarm(null, b), "A sourceless effect (a shrine) obeys no friendly-fire rule but its own");
 
-		Mob golem = helper.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new BlockPos(6, 2, 6));
-		Mob pig = helper.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(2, 2, 6));
+		Mob golem = helper.spawnWithNoFreeWill(EntityTypes.IRON_GOLEM, new BlockPos(6, 2, 6));
+		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(2, 2, 6));
 		helper.assertTrue(ConcordanceEffects.apply(context(helper, spell, a, open(), "0/0/3"), DAZZLE, golem).applied()
 				&& golem.getEffect(MobEffects.SLOWNESS).getDuration() == 30, "An iron golem resists: half the time");
 		helper.assertTrue(ConcordanceEffects.apply(context(helper, spell, a, open(), "0/0/3"), DAZZLE, pig).applied()
 				&& pig.getEffect(MobEffects.SLOWNESS).getDuration() == 60, "A pig takes it all");
 
 		Cause triggered = spell.triggered();
-		Mob struck = helper.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(5, 2, 4));
+		Mob struck = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(5, 2, 4));
 		helper.assertTrue(triggered != null && ConcordanceEffects.apply(context(helper, triggered, ConcordanceEffects.actor(level, triggered), open(),
 				"1/0/0"), SEAR, struck).applied() && struck.getLastHurtByMob() == a, "A triggered effect is still the caster's");
 		helper.succeed();
@@ -154,7 +154,7 @@ public class ConcordanceEffectGameTests {
 	@GameTest(maxTicks = 40)
 	public void lastingEffectsStackOnceAndExpire(GameTestHelper helper) {
 		floor(helper);
-		Mob pig = helper.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 2, 3));
+		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(3, 2, 3));
 		Cause shrine = cause(null, Cause.Origin.SHRINE);
 		Ledger ledger = open();
 		EffectSpec strong = new EffectSpec(EffectKind.STATUS, Intent.HARMFUL, 1, 100, "minecraft:slowness", Stacking.STRONGEST, null);
