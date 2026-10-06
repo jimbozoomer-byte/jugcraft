@@ -12,17 +12,18 @@ import net.minecraft.world.entity.LinearInterpolationHandler;
  *
  * <p>Minecraft 26.3's interpolation API is used nowhere else in this repo, so it is kept here and in the three
  * {@code createInterpolationHandler} overrides that call {@link #handler}. {@code LinearInterpolationHandler} and its
- * {@code DEFAULT_INTERPOLATION_STEPS} appear in Fabric API 0.161.0 for 26.3 (the version this builds against); the
- * {@code (Entity, int)} constructor, {@code Entity#createInterpolationHandler()} and {@code Entity#getInterpolation()} are
- * taken from 26.3 mods outside the repo. If the build stops here, this class and the three overrides are all there is to change.
+ * {@code DEFAULT_INTERPOLATION_STEPS} appear in Fabric API 0.161.0 for 26.3 (the version this builds against), and
+ * {@code Entity#createInterpolationHandler()} and {@code Entity#getInterpolation()} compile against 26.3; its
+ * {@code (Entity, int)} constructor is private there, so the handler is made with the entity alone, which eases over
+ * the default number of ticks. If the build stops here, this class and the three overrides are all there is to change.
  */
 public final class SmoothFlight {
 	private SmoothFlight() {
 	}
 
-	/** The handler an entity eases with: linear, over vanilla's default number of ticks. */
+	/** The handler an entity eases with: linear, over vanilla's default number of ticks ({@code DEFAULT_INTERPOLATION_STEPS}). */
 	public static LinearInterpolationHandler handler(Entity entity) {
-		return new LinearInterpolationHandler(entity, LinearInterpolationHandler.DEFAULT_INTERPOLATION_STEPS);
+		return new LinearInterpolationHandler(entity);
 	}
 
 	/** Whether the entity eases with a linear handler (the client game test checks the override took). */
