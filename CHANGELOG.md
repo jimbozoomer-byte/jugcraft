@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Clean textures, set 11: weapons and armour (the powders)
+- Four noisy powders are clean 16×16 heaps in the manner of the set 9 dusts, following the item icon rules (#201): ammonium perchlorate, iodine, silver iodide and cement mix.
+- Left to other work:
+  - the arms icons, which #201 redraws;
+  - the four textures #219 fixes;
+  - the bronze and steel armour, which gets the owner's new 3D knight look in #215's follow-up.
+- The exosuits, the rocketry items and the construction items are already clean pixel art and are unchanged. IDs and models are unchanged.
+
 ### Unmerged: Clean textures, set 10: machines
 - Every bronze-framed machine front loses its speckle.
   - The steel plate is one tone with a few soft clumps, recessed under the frame's lit top and left edge.

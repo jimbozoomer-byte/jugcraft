@@ -479,29 +479,26 @@ def guidance_unit():
     return c.finish()
 
 
-def _powder(colours, seed):
-    import random
-    import hd_art as hd
-    c = hd.Canvas()
-    c.capsule((14, 50), (50, 50), 7, hd.PAPER, flat_ends=True)  # a paper tray
-    for i, (x, y, r) in enumerate(((32, 40, 12), (22, 44, 8), (42, 44, 8))):
-        c.blob((x, y), r, colours[i % len(colours)], seed=seed + i, lumps=5)
-    return c.finish()
+def _powder(palette):
+    """A clean heap of powder (tools/material_style.py): lit at the upper left, outlined, a few grains a tone apart.
+    `palette` runs darkest first, five tones."""
+    import material_style as ms
+    return ms.dust(palette)
 
 
 def iodine():
-    import hd_art as hd
-    return _powder([hd.Material([(30, 20, 40), (50, 34, 64), (78, 52, 96), (110, 80, 130), (150, 120, 170)], 0.6, 20)], 3810)
+    """Iodine: a heap of dark violet-black crystals."""
+    return _powder([(30, 20, 40), (50, 34, 64), (78, 52, 96), (110, 80, 130), (150, 120, 170)])
 
 
 def ammonium_perchlorate():
-    import hd_art as hd
-    return _powder([hd.WHITE_PAINT], 3811)
+    """Ammonium perchlorate: a heap of white crystalline powder."""
+    return _powder([(150, 152, 158), (196, 198, 202), (222, 224, 226), (240, 240, 242), (252, 252, 252)])
 
 
 def silver_iodide():
-    import hd_art as hd
-    return _powder([hd.Material([(110, 100, 60), (150, 140, 90), (190, 180, 120), (220, 212, 160), (240, 236, 200)], 0.4, 14)], 3812)
+    """Silver iodide: a heap of pale yellow powder."""
+    return _powder([(110, 100, 60), (150, 140, 90), (190, 180, 120), (220, 212, 160), (240, 236, 200)])
 
 
 def solid_propellant():
