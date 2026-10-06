@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Clean textures, set 8: crops (outside the tree work)
+- Only the crop textures that open PRs #195 (wood repaint) and #206 (new trees) don't touch are changed. Trees, logs, wood, leaves, planks and saplings are left to those PRs.
+  - The squash and gourd skins vary in soft clumps with even stripes; the warty gourd keeps its warts.
+  - The cooking-pot soup is a clumped surface with a few glints.
+  - The turnip lantern's lid stalks are lit at the top.
+  - The sauerkraut's shreds run in even lines.
+- `gourd_side` now paints cleanly by default. IDs and models are unchanged.
+
 ### Unmerged: Clean textures, set 7: the fall fair
 - The fall fair's high-resolution textures (the midway games and plush prizes, the Ferris wheel, the piñatas and the hot-air balloons) lose their soft mottling and fine noise. They are painted in the clean, cartoon style of the werewolves:
   - Every tone sits in a few flat bands. Brass, glass and glowing bulbs shade in clean steps, and felt, enamel, canvas and wood are even.
