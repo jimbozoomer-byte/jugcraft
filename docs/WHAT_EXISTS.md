@@ -572,6 +572,8 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 5. Run the generators and the checker.
 6. Add a game test.
 
+**Gear with traits** (a perk, a special move, a boon): list them in the tooltip through `gear/TraitTooltips` from the item's `appendHoverText`. Call `trait(nameKey, colour, descriptions...)` for each, then `end()`. Players see the names, and the descriptions while Shift is held ([trait-details.md](features/trait-details.md)). Give each trait a short name (`<key>.trait`) and a one- or two-sentence description; don't add always-shown sentences.
+
 **A new recipe for an existing machine:** add it to the list in `tools/machines.py` (Jugcraft's own recipes), or ship a JSON file in any data pack.
 
 **A new metal:** add it to `METALS` in `tools/materials.py` (with `gen` for worldgen) and add the matching `MetalFamily.builder(...)` in `JugcraftMaterials`. The checker compares the two.
