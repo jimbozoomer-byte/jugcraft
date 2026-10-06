@@ -67,6 +67,8 @@ public class ConcordanceInvocationGameTests {
 	private static final String WAND = "jugcraft:initiate_wand";
 	/** Ticks to let newly spawned creatures settle before an area search (see ConcordanceComposeGameTests). */
 	private static final int SETTLE_TICKS = 10;
+	/** Ticks to wait out vanilla's hurt immunity (a second hit within 10 ticks counts only for what it exceeds). */
+	private static final int HURT_IMMUNITY_TICKS = 12;
 
 	private static void floor(GameTestHelper helper) {
 		for (int x = 0; x <= 7; x++) {
@@ -184,7 +186,7 @@ public class ConcordanceInvocationGameTests {
 	 * Power above the base add 2 (0.5 each). Armour does not reduce it (Spell Power's damage bypasses armour). Its Focus
 	 * is the mastered cost, taken once.
 	 */
-	@GameTest(maxTicks = 20)
+	@GameTest(maxTicks = 40)
 	public void lanceStrikesAndScalesWithSpellPower(GameTestHelper helper) {
 		floor(helper);
 		ServerPlayer player = player(helper, new BlockPos(1, 2, 1));
@@ -200,11 +202,12 @@ public class ConcordanceInvocationGameTests {
 				new AttributeModifier(Jugcraft.id("test_arcane_power"), 4.0, AttributeModifier.Operation.ADD_VALUE));
 		helper.assertTrue(Invocations.powerAboveBase(player, "spell_power:arcane") == 4.0, "4 arcane Spell Power above the base: "
 				+ Invocations.powerAboveBase(player, "spell_power:arcane"));
-		target.invulnerableTime = 0;
-		before = target.getHealth();
-		cast(player, "jugcraft:lance");
-		helper.assertTrue(before - target.getHealth() == 7.0F, "With it the Lance deals 7: " + before + " -> " + target.getHealth());
-		helper.succeed();
+		helper.runAfterDelay(HURT_IMMUNITY_TICKS, () -> {
+			float healthy = target.getHealth();
+			cast(player, "jugcraft:lance");
+			helper.assertTrue(healthy - target.getHealth() == 7.0F, "With it the Lance deals 7: " + healthy + " -> " + target.getHealth());
+			helper.succeed();
+		});
 	}
 
 	/**
@@ -246,7 +249,7 @@ public class ConcordanceInvocationGameTests {
 	 * The item's record of a tuning is never trusted: a forged tuning claiming Intensify costs nothing extra is
 	 * charged the server's +2, and one naming a modifier the Lance does not offer is ignored.
 	 */
-	@GameTest(maxTicks = 20)
+	@GameTest(maxTicks = 40)
 	public void forgedTuningsAreChargedByTheServer(GameTestHelper helper) {
 		floor(helper);
 		ServerPlayer player = player(helper, new BlockPos(1, 2, 1));
@@ -260,13 +263,15 @@ public class ConcordanceInvocationGameTests {
 				"Intensified it deals 7 and costs the real 4 + 2: " + (before - target.getHealth()) + ", "
 						+ ConcordanceProgress.currentFocus(player));
 		wand.set(JugcraftConcordance.TUNINGS, Tunings.EMPTY.with("jugcraft:lance", new Tunings.Tuning("jugcraft:widen", 0)));
-		target.invulnerableTime = 0;
-		ConcordanceProgress.setFocus(player, FocusPool.MAX);
-		before = target.getHealth();
-		cast(player, "jugcraft:lance");
-		helper.assertTrue(before - target.getHealth() == 5.0F && ConcordanceProgress.currentFocus(player) == FocusPool.MAX - 4,
-				"A modifier the Lance does not offer is ignored");
-		helper.succeed();
+		helper.runAfterDelay(HURT_IMMUNITY_TICKS, () -> {
+			ConcordanceProgress.setFocus(player, FocusPool.MAX);
+			float healthy = target.getHealth();
+			cast(player, "jugcraft:lance");
+			helper.assertTrue(healthy - target.getHealth() == 5.0F && ConcordanceProgress.currentFocus(player) == FocusPool.MAX - 4,
+					"A modifier the Lance does not offer is ignored: " + (healthy - target.getHealth()) + ", "
+							+ ConcordanceProgress.currentFocus(player));
+			helper.succeed();
+		});
 	}
 
 	/**
