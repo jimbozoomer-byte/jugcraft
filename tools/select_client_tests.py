@@ -39,9 +39,10 @@ TEST_DIR = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" 
 CODE_DIRS = (ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java")
 
 # Rough seconds each class takes on a CI runner, to share them out evenly; others are estimated from their length.
-# Estimates from the client jobs' logs of October 2026, not measurements per class.
+# Estimates from the client jobs' logs of October 2026, not measurements per class: with the biome tour at 600, its
+# job took 22 minutes and the others 15 and 14.
 WEIGHTS = {
-    "BiomeClientGameTests": 600,
+    "BiomeClientGameTests": 900,
     "AlpineClientGameTests": 180,
     "JugcraftClientGameTests": 180,
     "TownClientGameTests": 120,
