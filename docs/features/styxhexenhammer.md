@@ -10,23 +10,25 @@ Role: a resident dark wizard, herbalist, and keeper of an unusual living flower 
 
 Use Minecraft 26.3, Fabric Loader 0.19.3 and Fabric API 0.161.0+26.3, with this branch's built Jugcraft JAR. No added runtime dependency. Start with a backed-up test world.
 
-1. With operator permissions, stand at the center of a clear, level **49 x 39** grass/dirt area with **35 blocks** of headroom. The building faces south. Only the Overworld is supported.
+1. With operator permissions, stand at the center of a clear, level **67 x 49** grass/dirt area with **63 blocks** of headroom. The building faces south. Only the Overworld is supported.
 2. Run `/jugcraft styx preview`. This prints the footprint corners and checks the loaded area for obstacles, block entities and the protected town. It does not clear terrain.
 3. Within 60 seconds run `/jugcraft styx place`. It rechecks the site, places at most 128 blueprint entries per tick, and creates Styxhexenhammer when complete. `/jugcraft styx` reports the saved location and progress.
 4. Speak to him with **eight empty main-inventory slots** to receive one of each flower. Each player can claim once per world. A full inventory leaves the claim available.
 5. Plant the cuttings on ordinary plantable soil. Seven small flowers have three growth stages; sufficient light allows random growth, and bone meal advances a stage or propagates a mature plant. Ravenquill Lupine uses vanilla tall-flower placement and bone-meal propagation. Seven small cultivars can be potted. All eight are also in the Natural Blocks Creative tab.
 
-The prototype includes a dedicated cuboid character model, original palette texture, eight vanilla-style flower sprites, a furnished observatory and connected greenhouse, original dialogue, and a four-phase daily pathfinding routine with restrained evening particles. The new layout's blueprint is **49 x 35 x 39 (width, height, depth)**. Its octagonal observatory has a ground-floor study, an upstairs library, a glazed observation chamber, a large decorative telescope, an open-slit copper dome, and a wraparound viewing terrace. A glazed gallery joins it to the substantially larger greenhouse.
+The prototype includes a dedicated cuboid character model, original palette texture, eight vanilla-style flower sprites, original dialogue and a four-phase daily routine. The current **67 x 63 x 49 (width, height, depth)** layout reconstructs the two buildings supplied by the owner on 6 October: a tall brick observatory with a projecting telescope and a separate timber-and-glass greenhouse. Styx starts inside the ground-floor study, walks to the greenhouse and library, and climbs five stair flights to his evening observing spot.
+
+These are reconstructions from screenshots, not schematic imports. The visible architecture follows the owner's references; unseen rooms, rear elevations, stairs and the shared garden are adaptations. The reference images use different lighting from the unmodified client screenshots. See [building reference provenance](../images/styx-buildings-reference.md).
 
 Placement is limited to one conservatory per world and only works in loaded chunks. A saved cursor resumes interrupted construction. A new obstruction pauses construction rather than replacing it; remove that obstruction and keep the home loaded to continue. There is no automatic terrain clearing, rotation, relocation, reset, or natural discovery yet. The building and flower beds use normal breakable blocks, without new land-claim protection. Routine destinations derive from the saved home and world time, and can stall if players obstruct routes. The persistent resident is protected from ordinary damage; operator `/kill` can still remove him, and there is intentionally no automatic replacement from a missing/unloaded entity lookup.
 
-**Existing prototype worlds:** the original 27 x 28 x 21 layout is preserved as layout 1, including its exact placement order and resident destinations. Saves without a layout field load as layout 1; new placements use layout 2. Completed homes are not overwritten, and interrupted old builds finish using their original blueprint. Use a fresh test world to try the observatory; this revision does not rebuild an occupied home in place.
+**Existing prototype worlds:** original layout 1 (27 x 28 x 21) and the previous copper observatory layout 2 (49 x 35 x 39) retain their exact block states, construction order and resident destinations. Saves without a layout field load as layout 1; new placements use layout 3. Completed homes are not overwritten, and interrupted builds use their original blueprint. Use a fresh test world for the owner-reference buildings; there is no in-place rebuild command.
 
 **Future work:** natural woodland discovery, gardening gestures, interactive astronomy, feature-disable controls, replacement/recovery tools, flower recipes and magic. The telescope and dome are architectural decoration in this version. Stolas and all 72 Ars Goetia spirits' summoning and pacts are tracked in the [roadmap TODO](../ROADMAP.md#owner-requested-todo-ars-goetia-summoning-and-pacts); they are not active mechanics in this prototype.
 
 ## The concept
 
-Styxhexenhammer lives in the **Nightglass Observatory and Conservatory**, an astronomical observatory joined directly to a greenhouse. He studies the stars, cultivates unfamiliar flowers, and practices magic in devotion to **Stolas of the Ars Goetia**. He is reserved, observant, and dryly humorous, but welcoming to curious gardeners. His workbench is meticulous; the plants have gradually taken over the rest of the house.
+Styxhexenhammer lives in the **Nightglass Observatory and Conservatory**, an astronomical observatory and greenhouse connected by a garden path. He studies the stars, cultivates unfamiliar flowers, and practices magic in devotion to **Stolas of the Ars Goetia**. He is reserved, observant, and dryly humorous, but welcoming to curious gardeners. His workbench is meticulous; the plants have gradually taken over the rest of the house.
 
 The player follows a warm light through the trees, finds violet flowers under greenhouse glass, and meets their keeper. They can talk to him, learn the names of his collection, take a starter cutting, and grow a matching garden at home. Seeing him tend, study, and return to the tower makes the place feel lived in.
 
@@ -57,35 +59,45 @@ The image shows one three-quarter view. Match that view first; unseen rear detai
 
 Visual acceptance requires a matching three-quarter screenshot beside the reference, plus front, profile, back, daylight, nighttime, and walking views. Inspect glasses, hair separation, robe clipping, vial placement, and staff grip at both conversation distance and normal gameplay distance. The owner's visual review remains an explicit release criterion.
 
-### In-game prototype, 5 October 2026
+### In-game prototype, 5-6 October 2026
 
 ![Styxhexenhammer, three-quarter view](../images/styxhexenhammer-ingame.png)
 
-The cuboid model follows the reference's bent purple hat, glasses, long brown hair, dark robe, belt vials and left-hand crystal staff. These are real screenshots from the isolated client test. They are review evidence, not a claim of exact likeness. The face was revised to a flat player-style skin with short eyes, thin separate glasses and a properly seated hat after owner feedback; the flowers were revised to vanilla crossed pixel sprites. Exact likeness still requires the owner's review. The character-only views retain the former building in their background; the character model is unchanged by the observatory redesign.
+The cuboid model follows the reference's bent purple hat, glasses, long brown hair, dark robe, belt vials and left-hand crystal staff. These are real screenshots from the isolated client test. They are review evidence, not a claim of exact likeness. The face was revised to a flat player-style skin with short eyes, thin separate glasses and a properly seated hat after owner feedback; the flowers were revised to vanilla crossed pixel sprites. Exact likeness still requires the owner's review. The character comparison views retain an earlier building in their background; the character model is unchanged by the owner-reference building revision.
 
 [Face and glasses close-up](../images/styxhexenhammer-face-closeup.png) · [Front](../images/styxhexenhammer-front.png) · [Profile](../images/styxhexenhammer-profile.png) · [Back, interpreted from the reference](../images/styxhexenhammer-back.png) · [Night](../images/styxhexenhammer-night.png)
 
-![Nightglass Observatory and Conservatory, exterior](../images/styx-conservatory-ingame.png)
+![Owner-reference brick observatory and side turret](../images/styx-observatory-dome.png)
 
-![Eight flower beds, suspended baskets and raised glazing inside the greenhouse](../images/styx-greenhouse-ingame.png)
+![Owner-reference timber greenhouse](../images/styx-greenhouse-facade.png)
 
-[Dome and viewing terrace](../images/styx-observatory-dome.png) · [Telescope under the open dome](../images/styx-observatory-telescope.png) · [Library](../images/styx-observatory-library.png) · [Greenhouse facade](../images/styx-greenhouse-facade.png) · [Flower beds](../images/styx-greenhouse-flowers.png) · [Observatory at night](../images/styx-observatory-night.png)
+![Eight flower beds, hanging baskets and timber roof arches inside the greenhouse](../images/styx-greenhouse-ingame.png)
+
+[Brick observatory and turret](../images/styx-observatory-dome.png) · [Projecting telescope](../images/styx-observatory-telescope.png) · [Library](../images/styx-observatory-library.png) · [Greenhouse facade](../images/styx-greenhouse-facade.png) · [Flower beds](../images/styx-greenhouse-flowers.png) · [Observatory at night](../images/styx-observatory-night.png) · [Styx inside his study](../images/styx-at-home.png)
 
 ## His home
 
-The implemented layout is a **49 x 39 garden compound**, with **35 blocks of reserved height**. The observatory's main octagonal body occupies 19 x 19 blocks, with a broader circular terrace above. The attached greenhouse occupies **19 x 28 blocks** and rises to a clerestory ridge. Every room is accessible through the ground-floor gallery and two internal stair flights.
+The owner replaced the earlier architectural design with these two references:
 
-| Space | Contents and purpose |
+![Owner-built observatory reference](../images/styx-observatory-owner-reference.png)
+
+![Owner-built greenhouse reference](../images/styx-greenhouse-owner-reference.png)
+
+The implemented site is **67 x 49 blocks**, with **63 blocks of reserved height**. Both entrances face south. A low garden path connects the observatory and greenhouse.
+
+| Space | Implemented architecture and use |
 | --- | --- |
-| Entrance and ground-floor study | Layered copper-and-timber portico, bookshelves, writing table, specimen cabinets, carpets, suspended lamps and a glazed gallery into the greenhouse. |
-| Greenhouse | Repeated copper roof arches, raised glazed clerestory, dark timber bays, violet/amethyst front window, eight bordered flower beds, potting counter, seed barrels, water cauldrons, propagation pots and hanging baskets. Broad central and side aisles connect three entrances; the water station can be passed on either side. |
-| Library, floor +8 | Bookshelves, a lectern and writing desk, mineral specimens, sleeping alcove, carpets, suspended lamps and a small Stolas shrine. |
-| Observation chamber, floor +16 | Glazed circular drum, brass-colored star floor inlay, large mounted telescope with copper collars and a glass lens, chart table and access to the railed viewing terrace. A ribbed copper dome has a north-facing observation slit with dark rails and a lightning-rod finial. |
-| Exterior garden | Low connected stone wall, lantern posts, mossy paving, hedges, specimen pots, a sheltered pergola bench and a cluster of water cauldrons. |
+| Observatory exterior | Tall octagonal red-brick shaft on a gray foundation; pale foundation belt, narrow recessed windows, projecting dark cornices, copper downpipes and a glazed middle band. Diamond-framed windows decorate the upper brick drum. |
+| Dome and instrument | Green aged-copper dome with a south-facing opening and orange copper shutters. A large dark telescope rises diagonally through the opening, ending in a pale lens rim visible from the ground. The instrument and shutters are decorative. |
+| Tower interiors | Ground-floor receiving study; library with a small Stolas shrine; sleeping room and upper study rooms. Five alternating, two-wide stair flights reach the observing chamber at floor +40. Furniture stays clear of the routes. |
+| Side hall and turret | Brick annex with an aged-copper pitched roof, framed windows and an external staircase. A contrasting birch/calcite turret sits on corbels and carries a pointed copper cap and thin finial. |
+| Greenhouse | Warm timber columns and repeated stepped roof ribs, white bands, glass bays, circular timber gable windows and shaped entrances. Leafy stone-footed supports run along the exterior. |
+| Greenhouse interior | Eight bordered flower beds, five specimens of each cultivar, clear central and side aisles, suspended lamps and baskets, water cauldrons, seed barrels and potting supplies. |
+| Connecting grounds | Low stone paths, small hedges and lantern posts leave the two reference silhouettes visible. |
 
-The building uses dark stone, warm timber, aged copper, purple glass, and amber lamps. The greenhouse displays five specimens of each cultivar. All architectural blocks are vanilla blocks, keeping the structure independent of still-open decoration or framework PRs. Flower effects, mechanical irrigation, telescope interaction and a moving dome are future additions.
+All architectural blocks are vanilla blocks. The second reference's title and arrow are excluded. No shader, custom architecture texture or third-party building asset is required. Shared flower IDs, inventory gifts and plant behavior are unchanged.
 
-Provide the full building as a reusable, inspectable structure asset. Stage placement in bounded work units, safely handle unloaded neighboring chunks, and use the pumpkin placement fix already on main. Avoid placing decorative blocks with unintended gameplay side effects.
+Provide the full building as a reusable, inspectable structure asset. Stage placement in bounded work units and safely handle unloaded neighboring chunks. Frozen legacy assets must retain their construction order so existing saved placement cursors remain valid.
 
 ## Flowers: first collection
 
@@ -162,7 +174,7 @@ Use the Minecraft/Fabric/Java versions actually pinned on main at implementation
 
 - The owner supplied [the character reference](../images/styxhexenhammer-reference.jpg) in this request and explicitly asked for the model to match it. The unmodified uploaded JPEG is included as a design reference, not an in-game texture. See [its provenance note](../images/styxhexenhammer-reference.md).
 - Implementation creates original editable geometry and generated textures according to this approved reference direction. Record generators, palettes, and any artist-created source files alongside the final assets.
-- The Stolas background reference is the public-domain grimoire linked above. The proposed building, flower designs, names, dialogue, animations, and gameplay behavior are Jugcraft design work.
+- The Stolas background reference is the public-domain grimoire linked above. The current buildings reconstruct the owner-supplied screenshots with adapted interiors; flower designs, names, dialogue, animations and gameplay behavior are Jugcraft design work.
 - Actual assistance for the design, implementation and testing: Codex. No claim that Claude Opus produced or reviewed it.
 
 ## Verification and acceptance
@@ -171,14 +183,14 @@ Validation on Windows with Java 25.0.4.1, Minecraft 26.3, Fabric Loader 0.19.3, 
 
 - `python scripts/check_repository.py`: passed.
 - `python tools/check_mod_data.py`: passed (1,452 material IDs and data/recipe audit).
-- Generator comparison: all 88 Styx JSON files match their editable sources, including the 6,751-entry observatory and the frozen 2,270-entry legacy blueprint. The legacy blueprint matches the previous commit exactly, including every placement index. Character/flower texture pixels were checked in the earlier character revision and are unchanged by this architecture update. The full JSON generator was also run during development; unrelated Windows floating-point/PNG serialization differences were excluded from this PR.
-- `gradlew runClientGameTest jar --offline --no-daemon -PclientTestShard=80 -PclientTestShards=81`: isolated Styx client test, covering real operator preview/place commands, complete building placement, entity rendering and all four daily destinations, including both stair flights. Eight actual screenshots are linked above. The shard indices select this class in this commit's 81-entry test list.
-- Final observatory validation: `gradlew build --offline --no-daemon` passed in a fresh automated test world, with **all 825 required server tests passing**, including all six Styx tests. Earlier runs of the character revision had an intermittent failure in `jugcraft_game_tests_triple_battery_fires_asalvo` (expected two Heavy Shells remaining, observed five); the final observatory run passed that test without changing or suppressing artillery code or tests.
-- Styx server coverage: distance and atomic per-player gifts, full inventory/no duplicate grants, growth and harvested identity, tall-flower half loot and pot contents, versioned SavedData codec round-trip including an old save without a layout field, complete blueprint contents for both layouts, and rejection of unloaded footprints without loading them.
+- Generator comparison: all 89 Styx JSON files match their editable sources, including the 12,330-entry owner-reference layout and the frozen 2,270-entry and 6,751-entry legacy blueprints. Both legacy blueprints match their previous commits exactly, including every placement index. Character/flower texture pixels were checked in the earlier character revision and are unchanged by this architecture update. The full JSON generator was also run during development; unrelated Windows floating-point/PNG serialization differences were excluded from this PR.
+- `gradlew runClientGameTest jar --offline --no-daemon -PclientTestShard=80 -PclientTestShards=81`: isolated Styx client test, covering real operator preview/place commands, complete building placement, entity rendering and all four daily destinations, including all five stair flights. Nine actual screenshots are linked above. The shard indices select this class in this commit's 81-entry test list.
+- Owner-reference revision validation, 6 October 2026: `gradlew build --offline --no-daemon` ran in a fresh automated test world; **824 of 825 required server tests passed**, including all six Styx tests. `jugcraft_game_tests_triple_battery_fires_asalvo` failed (expected two Heavy Shells remaining, observed five). This failure also occurred intermittently before this revision; the preceding layout-2 run passed all 825. No artillery code or test has been changed or suppressed, and the current full build is not green. The isolated client walkthrough and JAR task passed on the final building resources.
+- Styx server coverage: distance and atomic per-player gifts, full inventory/no duplicate grants, growth and harvested identity, tall-flower half loot and pot contents, versioned SavedData codec round-trip including an old save without a layout field, complete blueprint contents for all three layouts, and rejection of unloaded footprints without loading them.
 
 The remaining acceptance checklist includes broader release checks; unlisted tests must not be assumed to have passed.
 
-- Source assets: `tools/styx.py` (character and flower geometry, player-face pixels, flower sprites and data), `tools/styx_structure.py` (observatory), and `tools/styx_structure_v1.py` (frozen legacy home). `python tools/generate_material_data.py` regenerates the JSON; `python tools/styx.py` regenerates these textures, and the general texture entry point includes them too. Keep the legacy blueprint and its ordering frozen so saved placement cursors remain valid.
+- Source assets: `tools/styx.py` (character and flower geometry, player-face pixels, flower sprites and data), `tools/styx_structure.py` / `tools/styx_structure_v3.py` (current buildings), and `tools/styx_structure_v1.py` / `tools/styx_structure_v2.py` (frozen legacy homes). `python tools/generate_material_data.py` regenerates the JSON; `python tools/styx.py` regenerates these textures, and the general texture entry point includes them too. Keep the legacy blueprint and its ordering frozen so saved placement cursors remain valid.
 - Server test class: `StyxGameTests`; client test class: `StyxClientGameTests`. The client creates its own disposable world and never modifies a player save.
 - Actual two-client dedicated-server play, crash/reconnect during a claim, full chunk unload/reload and long-term performance measurements remain unverified. The SavedData codec round-trip is not a substitute for those tests.
 - Exact likeness has not been signed off by the owner. The supplied image remains the acceptance reference; the unseen rear is an original interpretation.

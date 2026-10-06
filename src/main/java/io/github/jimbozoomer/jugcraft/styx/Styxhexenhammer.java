@@ -28,16 +28,15 @@ import net.minecraft.world.level.storage.ValueOutput;
 public final class Styxhexenhammer extends PathfinderMob {
 	private BlockPos home = BlockPos.ZERO;
 	private boolean hasHome;
-	private int homeLayout=2;
+	private int homeLayout=StyxConservatory.CURRENT_LAYOUT;
 	private int nextTalk;
 	public Styxhexenhammer(EntityType<? extends Styxhexenhammer> type, Level level) {
 		super(type, level); setPersistenceRequired();
 		setCustomName(Component.literal("Styxhexenhammer"));
 		if (getNavigation() instanceof GroundPathNavigation ground) ground.setCanOpenDoors(true);
-		// The greenhouse-to-library route goes around the beds and up the west staircase.
-		// Its walking distance exceeds the direct 48-block follow radius. One resident,
-		// a fixed 96-block path budget and at most one recalculation every 40 ticks.
-		getNavigation().setRequiredPathLength(96);
+		// The reference tower has five stair flights and a separate greenhouse.
+		// Bound path length to 128 blocks, with at most one recalculation every 40 ticks.
+		getNavigation().setRequiredPathLength(128);
 	}
 	public static AttributeSupplier.Builder createAttributes() {
 		return PathfinderMob.createMobAttributes().add(Attributes.MAX_HEALTH, 30).add(Attributes.MOVEMENT_SPEED, 0.25).add(Attributes.FOLLOW_RANGE, 48);
@@ -47,7 +46,7 @@ public final class Styxhexenhammer extends PathfinderMob {
 		goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6));
 		goalSelector.addGoal(6, new RandomLookAroundGoal(this));
 	}
-	public void setHome(BlockPos origin) { setHome(origin,2); }
+	public void setHome(BlockPos origin) { setHome(origin,StyxConservatory.CURRENT_LAYOUT); }
 	public void setHome(BlockPos origin,int layout) { home = origin.immutable(); homeLayout=layout; hasHome = true; }
 	public BlockPos home() { return home; }
 	@Override public boolean removeWhenFarAway(double distance) { return false; }

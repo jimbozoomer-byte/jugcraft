@@ -20,7 +20,7 @@ public final class StyxState extends SavedData {
 			BlockPos.CODEC.optionalFieldOf("origin").forGetter(s -> s.origin),
 			UUIDUtil.STRING_CODEC.optionalFieldOf("resident").forGetter(s -> s.resident),
 			Codec.INT.optionalFieldOf("placed", 0).forGetter(s -> s.placed),
-			Codec.intRange(1,2).optionalFieldOf("layout", 1).forGetter(s -> s.layout),
+			Codec.intRange(1,StyxConservatory.CURRENT_LAYOUT).optionalFieldOf("layout", 1).forGetter(s -> s.layout),
 			UUIDUtil.STRING_CODEC.listOf().optionalFieldOf("claimed", List.of()).forGetter(s -> List.copyOf(s.claimed))
 			).apply(i, StyxState::new));
 	private static final SavedDataType<StyxState> TYPE = new SavedDataType<>(Jugcraft.id("styx_conservatory_v1"), StyxState::new, CODEC, null);

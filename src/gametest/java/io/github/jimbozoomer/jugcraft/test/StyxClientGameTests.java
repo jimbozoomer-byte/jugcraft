@@ -13,6 +13,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 /** Real-client proof of the complete placement path and character/flower renderers, with review screenshots. */
 public final class StyxClientGameTests implements FabricClientGameTest {
 	@Override public void runTest(ClientGameTestContext context) {
+		context.runOnClient(c -> c.options.renderDistance().set(5));
 		try(TestSingleplayerContext world=context.worldBuilder().adjustSettings(c -> c.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE)).create()) {
 			world.getConnection().waitForChunksRender();TestServerContext server=world.getServer();
 			server.runCommand("time set noon");server.runCommand("weather clear");
@@ -36,30 +37,33 @@ public final class StyxClientGameTests implements FabricClientGameTest {
 			}
 			server.runOnServer(s -> {
 				var state=StyxState.get(s.overworld());if(state.resident.isEmpty())throw new AssertionError("Observatory did not complete; cursor "+state.placed);
-				if(state.layout!=2)throw new AssertionError("New placement must use the observatory layout");
+				if(state.layout!=StyxConservatory.CURRENT_LAYOUT)throw new AssertionError("New placement must use the current observatory layout");
 				var npc=(Styxhexenhammer)s.overworld().getEntity(state.resident.get());
 				if(npc==null)throw new AssertionError("Resident missing");npc.setNoAi(true);
 			});
 			context.getInput().pressKey(options -> options.keyToggleGui);
-			context.runOnClient(c -> c.options.fov().set(55));
-			view(context,server,base,65,31,65,138,16);world.getConnection().waitForChunksRender();context.takeScreenshot("jugcraft_styx_observatory_overview");
-			view(context,server,base,34,26,36,129,10);context.takeScreenshot("jugcraft_styx_observatory_dome");
+			context.runOnClient(c -> c.options.fov().set(70));
+			view(context,server,base,60,37,75,149,11);world.getConnection().waitForChunksRender();context.takeScreenshot("jugcraft_styx_observatory_overview");
+			view(context,server,base,44,36,67,146,4);context.takeScreenshot("jugcraft_styx_observatory_dome");
 			context.runOnClient(c -> c.options.fov().set(75));
-			view(context,server,base,16,18.2,24,150,-15);context.takeScreenshot("jugcraft_styx_telescope");
-			view(context,server,base,12,10,25,180,12);context.takeScreenshot("jugcraft_styx_library");
-			view(context,server,base,37,3,30,180,-6);context.takeScreenshot("jugcraft_styx_greenhouse_interior");
-			view(context,server,base,36,1.6,10.5,90,10);context.takeScreenshot("jugcraft_styx_flower_bed");
+			view(context,server,base,29,53,45,132,-8);context.takeScreenshot("jugcraft_styx_telescope");
+			view(context,server,base,15,10,26,170,8);context.takeScreenshot("jugcraft_styx_library");
+			view(context,server,base,52,3,38,180,-10);context.takeScreenshot("jugcraft_styx_greenhouse_interior");
+			view(context,server,base,51,1.6,17,90,10);context.takeScreenshot("jugcraft_styx_flower_bed");
 			context.runOnClient(c -> c.options.fov().set(55));
-			view(context,server,base,45,10,42,157,12);context.takeScreenshot("jugcraft_styx_greenhouse_facade");
-			server.runCommand("time set midnight");view(context,server,base,65,31,65,138,16);context.takeScreenshot("jugcraft_styx_observatory_night");
+			view(context,server,base,70,16,59,137,7);context.takeScreenshot("jugcraft_styx_greenhouse_facade");
+			context.runOnClient(c -> c.options.fov().set(70));
+			server.runCommand("time set midnight");view(context,server,base,60,37,75,149,11);context.takeScreenshot("jugcraft_styx_observatory_night");
+			server.runCommand("time set noon");view(context,server,base,13,1.6,26.5,180,5);context.takeScreenshot("jugcraft_styx_at_home");
+			view(context,server,base,35,4,39,180,0);
 			context.getInput().pressKey(options -> options.keyToggleGui);
 			context.runOnClient(c -> c.options.fov().set(70));
 			server.runOnServer(s -> {var npc=(Styxhexenhammer)s.overworld().getEntity(StyxState.get(s.overworld()).resident.orElseThrow());npc.setNoAi(false);});
 			for(int phase=0;phase<4;phase++) {
 				server.runCommand("time set "+(phase*6000+100));
-				BlockPos destination=StyxConservatory.routineTarget(base,2,phase);
+				BlockPos destination=StyxConservatory.routineTarget(base,StyxConservatory.CURRENT_LAYOUT,phase);
 				boolean arrived=false;
-				for(int i=0;i<140;i++) {
+				for(int i=0;i<300;i++) {
 					context.waitTicks(10);
 					arrived=server.computeOnServer(s -> {
 						var npc=s.overworld().getEntity(StyxState.get(s.overworld()).resident.orElseThrow());

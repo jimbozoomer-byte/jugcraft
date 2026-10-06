@@ -225,9 +225,10 @@ def write_all(write,assets,data,lang):
         write(data/'loot_table/blocks'/f'{name}.json',{'type':'minecraft:block','pools':[loot]})
     for registry in ('item','block'):
         write(data/f'tags/{registry}/styx_flowers.json',{'replace':False,'values':['jugcraft:'+n for n in FLOWERS]})
-    import styx_structure, styx_structure_v1
+    import styx_structure, styx_structure_v1, styx_structure_v2
     write(data/'styx/conservatory.json',styx_structure.build())
     write(data/'styx/conservatory_v1.json',styx_structure_v1.build())
+    write(data/'styx/conservatory_v2.json',styx_structure_v2.build())
 
 def pool(item):
     return {'rolls':1,'entries':[{'type':'minecraft:item','name':item}],'condition':{'type':'minecraft:survives_explosion'}}

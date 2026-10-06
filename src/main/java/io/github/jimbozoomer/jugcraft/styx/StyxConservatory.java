@@ -28,24 +28,25 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /** Explicit, previewed operator placement. Natural world generation is a later stage of this feature. */
 public final class StyxConservatory {
-	public static final int WIDTH=49, HEIGHT=35, DEPTH=39, BLOCKS_PER_TICK=128;
+	public static final int WIDTH=67, HEIGHT=63, DEPTH=49, BLOCKS_PER_TICK=128, CURRENT_LAYOUT=3;
 	public record Placement(BlockPos offset, BlockState state) { }
 	private record Preview(BlockPos origin, long expires) { }
 	private static final Map<UUID,Preview> PREVIEWS=new HashMap<>();
 	private record Blueprint(int width, int height, int depth, List<Placement> blocks) { }
 	private static final Map<Integer,Blueprint> BLUEPRINTS=new HashMap<>();
 	private StyxConservatory() { }
-	public static List<Placement> placements() { return blueprint(2).blocks(); }
+	public static List<Placement> placements() { return blueprint(CURRENT_LAYOUT).blocks(); }
 	public static List<Placement> placements(int layout) { return blueprint(layout).blocks(); }
 	private static Blueprint blueprint(int layout) {
-		if(layout!=1 && layout!=2) throw new IllegalArgumentException("Unknown Styx layout: "+layout);
+		if(layout<1 || layout>CURRENT_LAYOUT) throw new IllegalArgumentException("Unknown Styx layout: "+layout);
 		return BLUEPRINTS.computeIfAbsent(layout,version -> {
-			String path="/data/jugcraft/styx/conservatory"+(version==1 ? "_v1" : "")+".json";
+			String path="/data/jugcraft/styx/conservatory"+(version==CURRENT_LAYOUT ? "" : "_v"+version)+".json";
 			try(var stream=StyxConservatory.class.getResourceAsStream(path)) {
 				if(stream==null) throw new IllegalStateException("Missing conservatory blueprint");
 				var json=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8)).getAsJsonObject();
 				var size=json.getAsJsonArray("size");int w=size.get(0).getAsInt(),h=size.get(1).getAsInt(),d=size.get(2).getAsInt();
-				if(w!=(version==1 ? 27 : WIDTH) || h!=(version==1 ? 28 : HEIGHT) || d!=(version==1 ? 21 : DEPTH)) throw new IllegalStateException("Unexpected conservatory size");
+				int[] dimensions=switch(version) {case 1 -> new int[]{27,28,21};case 2 -> new int[]{49,35,39};default -> new int[]{WIDTH,HEIGHT,DEPTH};};
+				if(w!=dimensions[0] || h!=dimensions[1] || d!=dimensions[2]) throw new IllegalStateException("Unexpected conservatory size");
 				var palette=new ArrayList<BlockState>();
 				for(var entry:json.getAsJsonArray("palette")) {
 					String text=entry.getAsString();BlockState state=TownData.parse(text);
@@ -65,9 +66,10 @@ public final class StyxConservatory {
 	}
 	public static BlockPos routineTarget(BlockPos home,int layout,int phase) {
 		if(layout==1) return home.offset(phase==0 ? 18 : 8,phase==1 ? 8 : phase==2 ? 15 : 1,phase==0 ? 11 : phase==2 ? 9 : 10);
-		return home.offset(phase==0 ? 37 : 12,phase==1 ? 9 : phase==2 ? 17 : 1,phase==0 ? 21 : 24);
+		if(layout==2) return home.offset(phase==0 ? 37 : 12,phase==1 ? 9 : phase==2 ? 17 : 1,phase==0 ? 21 : 24);
+		return home.offset(phase==0 ? 52 : 13,phase==1 ? 9 : phase==2 ? 41 : 1,phase==0 ? 34 : phase==2 ? 25 : 24);
 	}
-	public static boolean loaded(ServerLevel level,BlockPos origin) { return loaded(level,origin,2); }
+	public static boolean loaded(ServerLevel level,BlockPos origin) { return loaded(level,origin,CURRENT_LAYOUT); }
 	public static boolean loaded(ServerLevel level,BlockPos origin,int layout) {
 		Blueprint plan=blueprint(layout);
 		for(int x=origin.getX()>>4;x<=(origin.getX()+plan.width()-1)>>4;x++)
@@ -84,13 +86,13 @@ public final class StyxConservatory {
 		for(int x=0;x<WIDTH;x++) for(int z=0;z<DEPTH;z++) for(int y=0;y<HEIGHT;y++) {
 			BlockPos p=origin.offset(x,y,z); BlockState state=level.getBlockState(p);
 			if(Town.isInside(level,p) || level.getBlockEntity(p)!=null) return "The footprint overlaps a protected town or a block entity.";
-			if(!state.isAir() && !state.canBeReplaced() && !(y==0 && (state.is(BlockTags.DIRT) || state.is(Blocks.GRASS_BLOCK)))) return "Clear a level 49 x 39 area with 35 blocks of headroom first. Obstruction: "+BuiltInRegistries.BLOCK.getKey(state.getBlock())+" at "+p.toShortString()+" (floor "+origin.getY()+").";
+			if(!state.isAir() && !state.canBeReplaced() && !(y==0 && (state.is(BlockTags.DIRT) || state.is(Blocks.GRASS_BLOCK)))) return "Clear a level "+WIDTH+" x "+DEPTH+" area with "+HEIGHT+" blocks of headroom first. Obstruction: "+BuiltInRegistries.BLOCK.getKey(state.getBlock())+" at "+p.toShortString()+" (floor "+origin.getY()+").";
 		}
 		return "";
 	}
 	public static boolean begin(ServerLevel level,BlockPos origin) {
 		if(!canPlace(level,origin).isEmpty()) return false;
-		StyxState state=StyxState.get(level);state.origin=Optional.of(origin.immutable());state.placed=0;state.layout=2;state.setDirty();return true;
+		StyxState state=StyxState.get(level);state.origin=Optional.of(origin.immutable());state.placed=0;state.layout=CURRENT_LAYOUT;state.setDirty();return true;
 	}
 	public static void tick(ServerLevel level) {
 		StyxState state=StyxState.get(level);

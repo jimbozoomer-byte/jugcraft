@@ -66,14 +66,17 @@ public final class StyxGameTests {
 		h.succeed();
 	}
 	@GameTest public void homeAndClaimsRoundTripThroughSaveCodec(GameTestHelper h) {
-		StyxState state=new StyxState();UUID id=UUID.randomUUID();state.origin=java.util.Optional.of(new BlockPos(10,80,20));state.resident=java.util.Optional.of(UUID.randomUUID());state.placed=120;state.layout=2;state.claim(id);
+		StyxState state=new StyxState();UUID id=UUID.randomUUID();state.origin=java.util.Optional.of(new BlockPos(10,80,20));state.resident=java.util.Optional.of(UUID.randomUUID());state.placed=120;state.layout=StyxConservatory.CURRENT_LAYOUT;state.claim(id);
 		var json=StyxState.CODEC.encodeStart(JsonOps.INSTANCE,state).getOrThrow();
 		var loaded=StyxState.CODEC.parse(JsonOps.INSTANCE,json).getOrThrow();
-		h.assertTrue(loaded.claimed(id) && loaded.origin.equals(state.origin) && loaded.resident.equals(state.resident) && loaded.placed==120 && loaded.layout==2,"Home identity, layout, partial build and eligibility survive restart");
+		h.assertTrue(loaded.claimed(id) && loaded.origin.equals(state.origin) && loaded.resident.equals(state.resident) && loaded.placed==120 && loaded.layout==StyxConservatory.CURRENT_LAYOUT,"Home identity, layout, partial build and eligibility survive restart");
+		json.getAsJsonObject().addProperty("layout",2);
+		h.assertTrue(StyxState.CODEC.parse(JsonOps.INSTANCE,json).getOrThrow().layout==2,"Earlier observatory save retains layout 2");
 		json.getAsJsonObject().remove("layout");
 		var legacy=StyxState.CODEC.parse(JsonOps.INSTANCE,json).getOrThrow();
 		h.assertTrue(legacy.layout==1 && legacy.placed==120 && legacy.claimed(id),"Old saves retain their original layout and progress");
 		h.assertTrue(StyxConservatory.routineTarget(BlockPos.ZERO,1,2).equals(new BlockPos(8,15,9)),"Old resident retains its original observatory destination");
+		h.assertTrue(StyxConservatory.routineTarget(BlockPos.ZERO,2,2).equals(new BlockPos(12,17,24)),"Layout 2 resident retains its original destination");
 		h.succeed();
 	}
 	@GameTest public void conservatoryDataHasEveryFlowerAndNoDuplicatePosition(GameTestHelper h) {
@@ -84,6 +87,7 @@ public final class StyxGameTests {
 		}
 		h.assertTrue(flowers.size()==8 && seen.size()>6000,"Complete observatory and greenhouse with eight flower types");
 		h.assertTrue(StyxConservatory.placements(1).size()==2270,"Frozen original construction cursor remains compatible");
+		h.assertTrue(StyxConservatory.placements(2).size()==6751,"Frozen layout 2 construction cursor remains compatible");
 		h.succeed();
 	}
 	@GameTest public void previewRejectsUnloadedChunksWithoutLoadingThem(GameTestHelper h) {
