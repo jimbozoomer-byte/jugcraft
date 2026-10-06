@@ -1162,7 +1162,7 @@ public final class JugcraftAgriculture {
 		HOT_AIR_BALLOON = entity("hot_air_balloon", EntityType.Builder.<HotAirBalloon>of(HotAirBalloon::new, MobCategory.MISC).noLootTable()
 				.noSummon().sized((float) HotAirBalloon.BASKET, (float) HotAirBalloon.BASKET_HEIGHT).clientTrackingRange(16).updateInterval(1));
 		PIBAL = entity("pibal", EntityType.Builder.<Pibal>of(Pibal::new, MobCategory.MISC).noLootTable().noSummon().sized(0.6F, 0.6F)
-				.clientTrackingRange(16).updateInterval(2));
+				.clientTrackingRange(16).updateInterval(1));
 		Balloons.register();
 		// Fall additions 30, the leaf blower: a dieselpunk electric leaf blower, charged at the Charging Station.
 		registerItem(LeafBlowerItem.ID, LeafBlowerItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)

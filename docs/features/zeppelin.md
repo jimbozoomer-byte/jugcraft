@@ -43,7 +43,7 @@ Fuel is only used up, never made. The cargo hold is an ordinary 27-slot containe
 
 ## Dependencies and assets
 - No dependencies. All art is original.
-- The canvas textures (`dz_*`) and the item icon are drawn in `tools/zeppelin.py`. The model reuses the giants' `dr_*` textures.
+- The canvas textures (`dz_*`) are drawn in `tools/zeppelin.py`, and since 5 October 2026 the 32x32 item icon in `tools/gun_icons.py`, in the big guns' icon style ([big-guns-art-fixes.md](big-guns-art-fixes.md)). The model reuses the giants' `dr_*` textures.
 - The model is exported as quads to `assets/jugcraft/zeppelin_quads.json`: about 2,150 faces, 16-pixel tiles, hidden faces culled. `client/ZeppelinRenderer` draws it.
 
 ## Verification

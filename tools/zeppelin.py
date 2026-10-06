@@ -343,34 +343,9 @@ def canvas(seed, stripe=False, nose=False):
     return img
 
 
-def icon():
-    """The item: a zeppelin in profile, envelope over a red gondola with a propeller."""
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    for x in range(1, 15):
-        half = 3.6 * math.sqrt(max(0.0, 1 - ((x - 7.5) / 7.0) ** 2))
-        for y in range(16):
-            if abs(y - 6) <= half:
-                c = CANVAS_COLORS[2] if y < 6 else CANVAS_COLORS[1]
-                if abs(y - 6) > half - 1:
-                    c = CANVAS_COLORS[0]
-                if x == 5:
-                    c = (150, 36, 28)
-                img.putpixel((x, y), c + (255,))
-    for x, y in ((1, 2), (1, 3), (2, 3), (1, 9), (1, 10), (2, 9)):
-        img.putpixel((x, y), (150, 36, 28, 255))
-    for x in range(5, 11):
-        for y in (11, 12):
-            img.putpixel((x, y), (138, 36, 26, 255) if y == 11 else (98, 52, 28, 255))
-    for x in (6, 9):
-        img.putpixel((x, 10), (70, 65, 62, 255))
-    img.putpixel((8, 11), (240, 168, 40, 255))
-    for y in (10, 11, 12, 13):
-        img.putpixel((4, y), (160, 160, 156, 255))
-    return img
-
-
 def draw_all(save):
+    import gun_icons  # the 32x32 icon, drawn with the big guns' and the other war machines' (tools/gun_icons.py)
     save(canvas(4601), "block", CANVAS)
     save(canvas(4602, stripe=True), "block", STRIPE)
     save(canvas(4603, nose=True), "block", NOSE)
-    save(icon(), "item", "zeppelin")
+    save(gun_icons.draw("zeppelin"), "item", "zeppelin")
