@@ -154,7 +154,8 @@ public class ConcordanceBaselineGameTests {
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = master(helper, new BlockPos(1, 2, 1));
 		Mob husk = helper.spawnWithNoFreeWill(EntityTypes.HUSK, new BlockPos(1, 2, 5));
-		Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(6, 2, 6));
+		// Behind the husk on the Lance's line: its blow knocks the husk along the line, not out of it.
+		Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(1, 2, 7));
 		husk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
 		helper.runAfterDelay(2, () -> {
 			int armour = husk.getArmorValue();
@@ -169,7 +170,8 @@ public class ConcordanceBaselineGameTests {
 			helper.runAfterDelay(HURT_IMMUNITY_TICKS, () -> {
 				float healthy = husk.getHealth();
 				cast(player, "jugcraft:lance");
-				helper.assertTrue(healthy - husk.getHealth() == 5.0F, "Armour does not reduce the Lance: " + (healthy - husk.getHealth()));
+				helper.assertTrue(healthy - husk.getHealth() == 5.0F, "Armour does not reduce the Lance: " + (healthy - husk.getHealth())
+						+ " (the husk is at " + husk.position() + ", the player at " + player.position() + ")");
 				helper.succeed();
 			});
 		});
