@@ -15,7 +15,7 @@ final class CompanionRoutine extends Goal {
     private long nextSearch,deadline;
     private int repath;
     private final Map<BlockPos,Long> unreachable=new HashMap<>();
-    CompanionRoutine(PeepoEntity npc) { this.npc=npc;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK)); }
+    CompanionRoutine(PeepoEntity npc) { this.npc=npc;nextSearch=npc.level().getGameTime()+Math.floorMod(npc.getId(),80);setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK)); }
     boolean isActive() { return active; }
     @Override public boolean requiresUpdateEveryTick() { return true; }
     private boolean needsRest() { return npc.isRecovering() || npc.getEnergy()<npc.getEnergyCapacity()*95/100; }
@@ -34,13 +34,14 @@ final class CompanionRoutine extends Goal {
     private void search() {
         long now=npc.level().getGameTime();
         if(now<nextSearch)return;
-        nextSearch=now+40;unreachable.entrySet().removeIf(e->e.getValue()<=now);
+        nextSearch=now+80+Math.floorMod(npc.getId(),20);unreachable.entrySet().removeIf(e->e.getValue()<=now);
         List<BlockEntity> candidates=new ArrayList<>();
         int cx=npc.blockPosition().getX()>>4,cz=npc.blockPosition().getZ()>>4;
         for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++) {
             var pos=new BlockPos((cx+dx)*16,npc.blockPosition().getY(),(cz+dz)*16);
             if(!npc.level().hasChunkAt(pos))continue;
-            for(var be:npc.level().getChunkAt(pos).getBlockEntities().values()) {
+            for(var stationPos:CompanionStationIndex.positions(npc.level(),pos)) {
+                var be=npc.level().getBlockEntity(stationPos);
                 if(be instanceof CompanionStation s && !be.isRemoved() && useful(s)
                         && npc.position().distanceToSqr(s.approachPosition())<=256
                         && !unreachable.containsKey(be.getBlockPos()))candidates.add(be);
@@ -48,7 +49,9 @@ final class CompanionRoutine extends Goal {
         }
         candidates.sort(Comparator.<BlockEntity>comparingInt(b->rank((CompanionStation)b))
             .thenComparingDouble(b->npc.position().distanceToSqr(((CompanionStation)b).approachPosition())));
+        int stationPaths=0;
         for(var candidate:candidates) {
+            if(stationPaths++>=2)break;
             var s=(CompanionStation)candidate;
             var path=npc.getNavigation().createPath(BlockPos.containing(s.approachPosition()),0);
             if(path==null || !path.canReach()) { unreachable.put(candidate.getBlockPos(),now+200);continue; }
