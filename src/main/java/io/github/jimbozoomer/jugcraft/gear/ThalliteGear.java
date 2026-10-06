@@ -76,7 +76,8 @@ public final class ThalliteGear {
 			if (root) {
 				root(player, ground);
 			}
-			if (regrow && regrow(player, ground) > 0 && player.level() instanceof ServerLevel level) {
+			if (regrow && regrow(player, ground) > 0) {
+				ServerLevel level = player.level();
 				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 0.8, player.getZ(), 2, 0.3, 0.4,
 						0.3, 0.0);
 			}
