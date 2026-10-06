@@ -1,7 +1,7 @@
 # Thallite: the Earth school's green metal
 
-Status: proposed. The owner chose this concept on 5 October 2026. **Not built.** Its numbers are starting points awaiting
-the owner's approval, and it will be built in slices, each its own PR.
+Status: approved. The owner chose this concept on 5 October 2026 and approved its numbers on 6 October 2026: "the
+Thallite numbers all look good carry on". **Not built yet;** it is built in slices, each its own PR (below).
 
 Proposal issue: none. On 5 October 2026 the owner drew a complete set for a new ore in one chartreuse palette and asked
 what it should be: "maybe something in the magic tier". The set covers:
@@ -79,7 +79,8 @@ Two bounded traits; neither adds damage, defense or speed.
     (`#jugcraft:living_ground`: grass, dirt, podzol, mud, moss, rooted dirt, farmland).
   - It stops at 75% of full and never brings back a broken item.
   - A tool goes from empty to 75% in about 12 minutes outdoors.
-  - It shows as a "Regrowing" tooltip line and a faint leaf particle.
+  - It shows as a faint leaf particle and as the trait "Regrowth" in the tooltip, described while Shift is held
+    ([trait-details.md](https://github.com/jimbozoomer-byte/jugcraft/blob/claude/trait-details/docs/features/trait-details.md)).
 - **Rooted (Earthbound armor only):**
   - Each Earthbound piece gives +0.075 knockback resistance while the wearer stands on natural ground
     (`#jugcraft:earthen_ground`: living soil plus stone, deepslate, sand, gravel).
@@ -100,12 +101,17 @@ Two bounded traits; neither adds damage, defense or speed.
 - **Only the armor has two looks,** as drawn. Earthbound ships with the plain armor and does not wait for magic.
 
 ### Weapons and the rest of the set
-- **Arms:** only the kinds drawn: dagger, sabre, longsword, spear, war hammer, flanged mace, longbow and arbalest. They
+- **Arms:** only the kinds drawn: dagger, sabre, longsword, greatsword, spear, war hammer, flanged mace, longbow and
+  arbalest. The owner named the sheet's two long blades on 6 October 2026: "The big sword should be a great sword and the
+  other one should be a longsword". They
   use bronze's numbers and thallite's durability, and are drawn from the 16×16 arm maps in thallite's colours.
 - **Thallite Arrow:** base damage 2.0, as vanilla's. Its "Rooting" stops the target jumping for 2 seconds and gives
   Slowness I for 2 seconds, through a temporary attribute modifier, so no mixin. Bosses in `#jugcraft:unrootable` are
   immune.
 - **Thallite horse armor:** 5 protection (iron's). The horse is Rooted (+0.2 knockback resistance) on natural ground.
+  - The sheet draws it twice, nearly alike; the owner left the choice to us ("whichever horse armor you think fits best").
+  - We follow the second drawing, at the bottom of the sheet. Its head and neck rise higher and clear of the blanket, so it
+    reads as a horse at 16×16, and as the later of the two it looks like the revision. Its red and gold band stays.
 
 ## Connections
 - **Existing input producer:** the world itself (ore). Ore processing gives more:
@@ -164,11 +170,17 @@ Two bounded traits; neither adds damage, defense or speed.
     drawn to the same rules.
 
 ## Building it, in slices
+Each slice builds on the open PRs whose systems it uses, so it waits for them or is stacked on them:
 1. **Ore and materials:** the ore, material forms, worldgen (with a small optional "biomes" key on a metal's worldgen
-   entry, which only rocks have today) and processing.
+   entry, which only rocks have today) and processing. Its art is drawn by the material-set maps and ore overlays of the
+   material-sets PR, so it is stacked on that branch.
 2. **Gear:** tools, both armor looks, the Earthbinding Template, Regrowth and Rooted.
-3. **Arms:** the drawn kinds, first adding a list of arm kinds per metal to `tools/arms.py`. Today every gear tier makes
-   all of its kinds.
+   - Earthbound is an entry in the one armor-style system of the Steampunk and Kaiser PR
+     ([#215](https://github.com/jimbozoomer-byte/jugcraft/pull/215)), one-way and with a perk.
+   - The traits use the Shift details of [#216](https://github.com/jimbozoomer-byte/jugcraft/pull/216).
+3. **Arms:** the drawn kinds (dagger, sabre, longsword, greatsword, spear, war hammer, flanged mace, longbow and
+   arbalest), first adding a list of arm kinds per metal to `tools/arms.py`; today every gear tier makes all of its kinds.
+   Their icons come from the 16×16 arm maps of [#201](https://github.com/jimbozoomer-byte/jugcraft/pull/201).
 4. **Arrow and horse armor:** the mod's first of each, built as shared code later ores can reuse.
 5. **The Focus and Earth's first spells:** in the first magic-system PR, coordinated before work starts.
 
@@ -188,7 +200,10 @@ Each slice will also add a client test that shows the set in game.
 - **No bosses, dimensions or seasonal content.**
 
 ## Rollout and open questions
-- **The owner to approve:** the numbers above, and which of the sheet's extra blade icons are which (it has more blades
-  than kinds, and two horse armors).
+- **Approved by the owner on 6 October 2026:** the numbers above; the two long blades (the big one a greatsword, the other a
+  longsword); and the horse armor left to us (the second drawing).
+- **Tooltips:** Regrowth, Rooted and Rooting (the arrow) are named in the tooltip and described while Shift is held, as
+  the owner asked: "make it so if the player holds shift while hovering their mouse over gear that has more complex traits
+  like Thallite it expands the hovering UI and has a brief description of the unique traits".
 - **First magic PR:** spell costs come from the shared magic resource. Until it exists, the Focus spends its own
   durability and does not regrow, so it is never a hidden mana bar.
