@@ -1,0 +1,26 @@
+[
+  {
+    "id": "jugcraft:concordance/first_light_encountered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_first_light_encountered",
+    "fact_id": "jugcraft:concordance/first_light_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/first_light_observed_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_first_light_observed",
+    "fact_id": "jugcraft:concordance/first_light_observed"
+  },
+  {
+    "id": "jugcraft:concordance/first_light_understood_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_first_light_understood",
+    "fact_id": "jugcraft:concordance/first_light_understood"
+  },
+  {
+    "id": "jugcraft:concordance/first_light_mastered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_first_light_mastered",
+    "fact_id": "jugcraft:concordance/first_light_mastered"
+  }
+]

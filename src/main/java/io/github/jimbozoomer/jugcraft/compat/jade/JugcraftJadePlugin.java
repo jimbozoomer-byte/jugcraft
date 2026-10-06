@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.compat.jade;
 
+import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlockEntity;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity;
 import net.fabricmc.loader.api.FabricLoader;
 import snownee.jade.api.IWailaClientRegistration;
@@ -11,6 +12,7 @@ public final class JugcraftJadePlugin implements IWailaPlugin {
 	@Override
 	public void register(IWailaCommonRegistration registration) {
 		registration.registerBlockDataProvider(MachineDataProvider.INSTANCE, MachineBlockEntity.class);
+		registration.registerBlockDataProvider(ConcordanceDataProvider.INSTANCE, LampwrightBenchBlockEntity.class);
 	}
 
 	@Override

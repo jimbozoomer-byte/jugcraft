@@ -136,5 +136,59 @@
         "attenuation_distance": 32
       }
     ]
+  },
+  "concordance.kindle_gather": {
+    "subtitle": "subtitles.jugcraft.concordance.kindle_gather",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/kindle_gather",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.kindle": {
+    "subtitle": "subtitles.jugcraft.concordance.kindle",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/kindle",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.examine": {
+    "subtitle": "subtitles.jugcraft.concordance.examine",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/examine",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.study_complete": {
+    "subtitle": "subtitles.jugcraft.concordance.study_complete",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/study_complete",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lantern_ignite": {
+    "subtitle": "subtitles.jugcraft.concordance.lantern_ignite",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lantern_ignite",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lantern_snuff": {
+    "subtitle": "subtitles.jugcraft.concordance.lantern_snuff",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lantern_snuff",
+        "attenuation_distance": 16
+      }
+    ]
   }
 }

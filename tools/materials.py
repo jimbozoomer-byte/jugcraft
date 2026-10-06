@@ -14,7 +14,8 @@ MOD = "jugcraft"
 FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
             "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "deposits",
             "explosives", "agriculture", "parties", "drones",
-            "pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections"]
+            "pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections",
+            "concordance"]
 
 # Metals use the vanilla form set. "mined" adds ore, deepslate ore, raw item and raw block.
 # cook: which vanilla cookers can smelt the ore/raw form. tool: minimum pickaxe tier.
@@ -278,5 +279,8 @@ def feature_of(entry_id):
     import tower_guns
     if entry_id in tower_guns.items():
         return "machines"
+    import concordance
+    if entry_id in concordance.items() or entry_id in concordance.blocks() or entry_id in concordance.itemless_blocks():
+        return concordance.FEATURE
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

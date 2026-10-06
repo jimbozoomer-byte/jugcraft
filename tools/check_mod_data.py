@@ -39,6 +39,7 @@ import construction
 import hydroponics
 import electroplating
 import gas_storage
+import concordance
 import control_electronics
 import rocketry
 import dieselworks
@@ -70,6 +71,7 @@ RES = ROOT / "src" / "main" / "resources"
 ASSETS = RES / "assets" / MOD
 DATA = RES / "data"
 JAVA_ROOT = ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft"
+CLIENT_JAVA_ROOT = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
 JAVA = JAVA_ROOT / "materials" / "JugcraftMaterials.java"
 CONFIG = JAVA_ROOT / "config" / "JugcraftConfig.java"
 SEASON_JAVA = JAVA_ROOT / "season"
@@ -168,7 +170,8 @@ def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
-                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks()):
+                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks()
+                  + concordance.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -189,7 +192,8 @@ def check_assets(registered):
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
-                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks()
+                        + concordance.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -326,7 +330,8 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
+            or path in concordance.items() or path in concordance.blocks():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -440,7 +445,8 @@ def check_machine_recipe_files(registered):
 
 # Jugcraft entries of registries other than blocks and items that tags may name.
 OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE} | set(bm.BIOMES), "point_of_interest_type": {"arcade_cabinet"},
-                 "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES}}
+                 "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES},
+                 "spell": set(concordance.INVOCATIONS)}
 
 
 def check_fluid_recipes(registered):
@@ -542,7 +548,8 @@ def check_tags():
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
-                                                    + ag.all_blocks() + ag.all_items() + town_assets.blocks())
+                                                    + ag.all_blocks() + ag.all_items() + town_assets.blocks()
+                                                    + concordance.items() + concordance.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
@@ -5976,6 +5983,224 @@ def check_diagonal_connections():
         err(f"diagonal/DiagonalWalls.java does not register the diagonal walls as {dg.DIAGONAL_WALL}")
 
 
+def check_concordance(registered):
+    """The Arcane Concordance (tools/concordance.py): Java mirrors its numbers; its spells avoid Spell Engine's
+    null-default traps; its research graph resolves, has an entry with no prerequisites and no cycles; its codex,
+    research bridge and opt-outs name things that exist."""
+    co = concordance
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    root = JAVA_ROOT / "concordance"
+    constants = {
+        "rules/FocusPool.java": {"MAX": co.FOCUS_MAX, "REGEN_TICKS": co.FOCUS_REGEN_TICKS},
+        "Examination.java": {"DARK_LIGHT": co.DARK_LIGHT},
+        "LumenMoteBlock.java": {"LIGHT": co.MOTE_LIGHT, "TRAIL_LIGHT": co.TRAIL_LIGHT, "STEP_TICKS": co.MOTE_STEP_TICKS,
+                                "TRAIL_CHECK_TICKS": co.TRAIL_CHECK_TICKS},
+        "KindleInvocation.java": {"RANGE": co.KINDLE_RANGE, "MOTE_STEPS": co.KINDLE_MOTE_STEPS},
+        "KindledLanternItem.java": {"CAPACITY": co.LANTERN_CAPACITY, "BURN_TICKS": co.LANTERN_BURN_TICKS},
+        "LampwrightBenchBlockEntity.java": {"STUDY_TICKS": co.STUDY_TICKS},
+    }
+    for name, values in constants.items():
+        path = root / name
+        java = path.read_text(encoding="utf-8") if path.exists() else ""
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", java):
+                err(f"concordance/{name}: {const} differs from tools/concordance.py ({value})")
+    if not KINDLE_MOTE_STEPS_FIT(co):
+        err("concordance: a Kindled mote's steps do not fit its age property (0..15)")
+
+    # Spells: Spell Engine parses them with plain Gson, so a typo becomes null and crashes later.
+    targets = {"NONE", "CASTER", "AIM", "BEAM", "AREA", "FROM_TRIGGER"}
+    deliveries = {"DIRECT", "PROJECTILE", "METEOR", "CLOUD", "SHOOT_ARROW", "AFFECT_ARROW", "MELEE", "STASH_EFFECT",
+                  "CUSTOM"}
+    actions = {"DAMAGE", "HEAL", "STATUS_EFFECT", "FIRE", "SPAWN", "SUMMON", "TELEPORT", "COOLDOWN", "AGGRO", "DISRUPT",
+               "IMMUNITY", "VELOCITY", "CUSTOM"}
+    schools = {f"spell_power:{s}" for s in ("generic", "arcane", "fire", "frost", "healing", "lightning", "soul")}
+    animations = set()
+    for path in (ASSETS / "player_animations").glob("*.json"):
+        clip = load(path) or {}
+        if "animations" in clip:
+            animations |= {f"{MOD}:{name}" for name in clip["animations"]}
+        elif "name" in clip:
+            animations.add(f"{MOD}:{clip['name'].lower().replace(' ', '_')}")
+    sounds = load(ASSETS / "sounds.json") or {}
+    spells = set()
+    for path in sorted((DATA / MOD / "spell").glob("*.json")):
+        spell = load(path) or {}
+        name = path.stem
+        spells.add(name)
+        if spell.get("school") not in schools:
+            err(f"spell {name}: unknown school {spell.get('school')}")
+        target = spell.get("target", {}).get("type", "CASTER")
+        if target not in targets:
+            err(f"spell {name}: unknown target {target}")
+        if target == "AIM" and "aim" not in spell["target"] or target == "AREA" and "area" not in spell["target"]:
+            err(f"spell {name}: target {target} needs its own object")
+        if spell.get("deliver", {}).get("type", "DIRECT") not in deliveries:
+            err(f"spell {name}: unknown delivery")
+        for impact in spell.get("impacts", []):
+            action = impact.get("action", {})
+            if action.get("type") not in actions:
+                err(f"spell {name}: unknown impact {action.get('type')}")
+            if action.get("type") == "CUSTOM" and not action.get("custom", {}).get("handler"):
+                err(f"spell {name}: a CUSTOM impact needs custom.handler")
+        cast = spell.get("active", {}).get("cast", {})
+        if cast.get("duration", 0) > 0 and not cast.get("animation", {}).get("id"):
+            err(f"spell {name}: a timed cast needs an animation (Spell Engine's client reads it every tick)")
+        for clip in (cast.get("animation", {}).get("id"), spell.get("release", {}).get("animation", {}).get("id")):
+            if clip and clip.startswith(f"{MOD}:") and clip not in animations:
+                err(f"spell {name}: unknown player animation {clip}")
+        for sound in (cast.get("start_sound", {}).get("id"), spell.get("release", {}).get("sound", {}).get("id")):
+            if sound and sound.startswith(f"{MOD}:") and sound.split(":", 1)[1] not in sounds:
+                err(f"spell {name}: unknown sound {sound}")
+        if "learn" in spell:
+            err(f"spell {name}: a Concordance spell must not be bindable at a Spell Binding Table")
+        cost = spell.get("cost", {})
+        if cost.get("durability", 1) != 0 or cost.get("cooldown", {}).get("hosting_item", True):
+            err(f"spell {name}: set cost.durability 0 and cost.cooldown.hosting_item false")
+        for key in ("name", "description"):
+            text = lang.get(f"spell.{MOD}.{name}.{key}")
+            if text is None:
+                err(f"spell {name}: missing lang spell.{MOD}.{name}.{key}")
+            elif re.search(r"%(?!%)", text.replace("%%", "")):
+                err(f"spell {name}: Spell Engine formats its {key}; escape % as %%")
+        if not (ASSETS / "textures" / "spell" / f"{name}.png").is_file():
+            err(f"spell {name}: missing icon textures/spell/{name}.png")
+
+    # Research, invocations and workings.
+    research = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "research").glob("*.json")}
+    invocations = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "invocation").glob("*.json")}
+    workings = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "working").glob("*.json")}
+    def known_item(ref):
+        ns, path = split(ref)
+        return ns != MOD or path in registered
+    def resolves(ref):
+        return tag_exists("item", ref[1:]) if ref.startswith("#") else known_item(ref)
+    for key, entry in research.items():
+        if entry.get("schema") != co.SCHEMA:
+            err(f"research {key}: schema {entry.get('schema')}")
+        if entry.get("principle") not in co.PRINCIPLES or entry.get("tradition") not in co.TRADITIONS \
+                or entry.get("stage") not in co.STAGES:
+            err(f"research {key}: unknown principle, tradition or stage")
+        states = list(entry.get("states", {}))
+        if states != co.RESEARCH_STAGES[:len(states)] or not states:
+            err(f"research {key}: states must run in order from encountered ({states})")
+        for state, block in entry.get("states", {}).items():
+            for rule in block.get("any", []):
+                kind = rule.get("type")
+                if kind in ("examine", "study"):
+                    if not resolves(rule.get("specimens", "")):
+                        err(f"research {key}/{state}: unknown specimens {rule.get('specimens')}")
+                elif kind == "invoke":
+                    if split(rule.get("invocation", ":"))[1] not in invocations:
+                        err(f"research {key}/{state}: unknown invocation {rule.get('invocation')}")
+                else:
+                    err(f"research {key}/{state}: unknown evidence {kind}")
+        for requirement in entry.get("requires", []):
+            if split(requirement.get("research", ":"))[1] not in research:
+                err(f"research {key}: requires unknown {requirement}")
+        for state, unlocks in entry.get("unlocks", {}).items():
+            for ref in unlocks.get("invocations", []):
+                if split(ref)[1] not in invocations:
+                    err(f"research {key}: unlocks unknown invocation {ref}")
+            for ref in unlocks.get("workings", []):
+                if split(ref)[1] not in workings:
+                    err(f"research {key}: unlocks unknown working {ref}")
+    if research and not any(not entry.get("requires") for entry in research.values()):
+        err("research: no entry can be started without another (no entry path)")
+    graph = {key: [split(r["research"])[1] for r in entry.get("requires", [])] for key, entry in research.items()}
+    state = {}
+    def visit(node):
+        if state.get(node) == 1:
+            err(f"research: prerequisite cycle through {node}")
+            return
+        if state.get(node) == 2:
+            return
+        state[node] = 1
+        for nxt in graph.get(node, []):
+            visit(nxt)
+        state[node] = 2
+    for node in graph:
+        visit(node)
+    for key, entry in invocations.items():
+        if key not in spells:
+            err(f"invocation {key}: no spell data/{MOD}/spell/{key}.json")
+        if split(entry.get("research", ":"))[1] not in research or entry.get("stage") not in co.RESEARCH_STAGES:
+            err(f"invocation {key}: unknown research or stage")
+        if not 0 < entry.get("mastered_focus", 0) <= entry.get("focus", 0) <= co.FOCUS_MAX:
+            err(f"invocation {key}: Focus costs must be 0 < mastered <= focus <= {co.FOCUS_MAX}")
+    for key, entry in workings.items():
+        if split(entry.get("research", ":"))[1] not in research:
+            err(f"working {key}: unknown research")
+        refs = [entry.get("work", "")] + list(entry.get("specimens", {})) + [entry.get(k) for k in ("specimen", "result") if entry.get(k)]
+        for ref in refs:
+            if not known_item(ref):
+                err(f"working {key}: unknown item {ref}")
+        if entry.get("type") == "channel" and entry.get("focus", 0) <= entry.get("radiance", 0):
+            err(f"working {key}: channelling must lose Focus (no free conversion)")
+        if entry.get("type") not in ("craft", "infuse", "channel"):
+            err(f"working {key}: unknown type {entry.get('type')}")
+
+    # The codex and its research bridge (Modonomicon refuses the whole reload over one bad research id).
+    research_dir = DATA / MOD / "modonomicon" / "research" / "concordance"
+    facts = {f["id"] for f in load(research_dir / "facts.json") or []}
+    nodes = {n["id"] for n in load(research_dir / "nodes.json") or []}
+    advancement_names = {path.stem for path in (DATA / MOD / "advancement").glob("*.json")}
+    for node in load(research_dir / "nodes.json") or []:
+        for fact in node.get("required_facts", []):
+            if fact not in facts:
+                err(f"codex research: node {node['id']} needs unknown fact {fact}")
+    for hook in load(research_dir / "hooks.json") or []:
+        if hook.get("fact_id") not in facts:
+            err(f"codex research: hook {hook.get('id')} grants unknown fact")
+        if split(hook["trigger_target"])[1] not in advancement_names:
+            err(f"codex research: hook {hook.get('id')} waits on unknown advancement {hook['trigger_target']}")
+    book = DATA / MOD / "modonomicon" / "books" / co.BOOK
+    for path in sorted(book.rglob("*.json")):
+        text = path.read_text(encoding="utf-8")
+        for node in re.findall(r'"node_id": "([^"]+)"', text):
+            if node not in nodes:
+                err(f"codex {path.relative_to(book)}: unknown research node {node}")
+        for recipe in re.findall(r'"recipe_id_1": "([^"]+)"', text):
+            if not (DATA / split(recipe)[0] / "recipe" / f"{split(recipe)[1]}.json").is_file():
+                err(f"codex {path.relative_to(book)}: unknown recipe {recipe}")
+        for key in re.findall(r'"(book\.[a-z_.0-9]+|research_node\.[a-z_.0-9]+)"', text):
+            if key not in lang:
+                err(f"codex {path.relative_to(book)}: missing lang {key}")
+    # Opt-outs name real items; the Kindled mote has its block state and name; LambDynamicLights names a real item.
+    for path in (DATA / MOD / "spell_assignments").glob("*.json"):
+        if path.stem not in registered:
+            err(f"spell_assignments/{path.name}: not a Jugcraft item")
+    for block in co.itemless_blocks():
+        if load(ASSETS / "blockstates" / f"{block}.json") is None or f"block.{MOD}.{block}" not in lang:
+            err(f"concordance: {block} needs a block state and a name")
+    lights = load(ASSETS / "dynamiclights" / "item" / "kindled_lantern.json") or {}
+    if split(lights.get("match", {}).get("items", ":"))[1] not in registered:
+        err("dynamiclights/item/kindled_lantern.json: unknown item")
+    for item in co.INSTRUMENTS:
+        resolver = load(DATA / MOD / "spell_assignments" / f"{item}.json") or {}
+        if resolver.get("access") != "TAG" or resolver.get("access_param") != co.SPELL_TAG:
+            err(f"spell_assignments/{item}.json: an instrument must resolve the {co.SPELL_TAG} spell tag")
+    # Every whole translation key the Concordance's Java names exists (keys built from a prefix are checked above).
+    sources = sorted(root.rglob("*.java")) + sorted(CLIENT_JAVA_ROOT.glob("Concordance*.java")) \
+        + sorted(CLIENT_JAVA_ROOT.glob("LampwrightBench*.java"))
+    for path in sources:
+        for key in re.findall(r'"((?:message|screen|tooltip|container|key)\.jugcraft\.[a-z_.]+[a-z_])"', path.read_text(encoding="utf-8")):
+            if key not in lang:
+                err(f"{path.name}: missing lang {key}")
+    status = (root / "BenchStatus.java").read_text(encoding="utf-8") if (root / "BenchStatus.java").exists() else ""
+    for key in re.findall(r'[A-Z_]+\("([a-z_]+)"\)', status):
+        if f"message.{MOD}.concordance.bench.{key}" not in lang:
+            err(f"BenchStatus.java: missing lang message.{MOD}.concordance.bench.{key}")
+    components = (root / "JugcraftConcordance.java").read_text(encoding="utf-8") if (root / "JugcraftConcordance.java").exists() else ""
+    for component in lights.get("match", {}).get("components", {}):
+        if f'"{split(component)[1]}"' not in components:
+            err(f"dynamiclights/item/kindled_lantern.json: component {component} is not registered in JugcraftConcordance")
+
+
+def KINDLE_MOTE_STEPS_FIT(co):
+    return 0 < co.KINDLE_MOTE_STEPS <= 15
+
+
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
@@ -5983,7 +6208,8 @@ def main():
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
-                  | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
+                  | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks())
+                  | set(concordance.items()) | set(concordance.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
     check_petro()
@@ -6034,6 +6260,7 @@ def main():
     check_pixel_hollows()
     check_town()
     check_diagonal_connections()
+    check_concordance(registered)
     for path in RES.rglob("*.json"):
         load(path)
     if errors:

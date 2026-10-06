@@ -17,13 +17,17 @@
 		"client": ["io.github.jimbozoomer.jugcraft.client.JugcraftClient"],
 		"jei_mod_plugin": ["io.github.jimbozoomer.jugcraft.client.compat.JugcraftJeiPlugin"],
 		"jade": ["io.github.jimbozoomer.jugcraft.compat.jade.JugcraftJadePlugin"],
-		"jugcraft:jade_client": ["io.github.jimbozoomer.jugcraft.client.compat.JugcraftJadeClient"]
+		"jugcraft:jade_client": ["io.github.jimbozoomer.jugcraft.client.compat.JugcraftJadeClient"],
+		"modmenu": ["io.github.jimbozoomer.jugcraft.client.compat.ConcordanceModMenu"]
 	},
 	"mixins": [
 		"jugcraft.mixins.json",
 		"jugcraft.seasons.mixins.json",
 		{"config": "jugcraft.client.mixins.json", "environment": "client"}
 	],
+	"custom": {
+		"modmenu": {"update_checker": false}
+	},
 	"depends": {
 		"fabricloader": ">=0.19.5",
 		"minecraft": "~26.3",

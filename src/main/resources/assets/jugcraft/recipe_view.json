@@ -6380,5 +6380,172 @@
         }
       ]
     }
-  ]
+  ],
+  "concordance": {
+    "block": "jugcraft:lampwright_bench",
+    "recipes": [
+      {
+        "kind": "craft",
+        "in": [
+          [
+            "minecraft:lantern",
+            1
+          ],
+          [
+            "minecraft:amethyst_shard",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 8
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "minecraft:amethyst_shard",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 8
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "minecraft:glowstone_dust",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 6
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "jugcraft:glowcap",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 4
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "jugcraft:glimmerbloom",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 3
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "jugcraft:jack_o_lantern_mushroom",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 3
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "minecraft:glow_ink_sac",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 3
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "minecraft:glow_lichen",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 2
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "minecraft:glow_berries",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 1
+      }
+    ]
+  }
 }

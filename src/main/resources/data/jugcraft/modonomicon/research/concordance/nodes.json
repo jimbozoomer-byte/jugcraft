@@ -1,0 +1,26 @@
+[
+  {
+    "id": "jugcraft:concordance/first_light_encountered",
+    "required_facts": [
+      "jugcraft:concordance/first_light_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/first_light_observed",
+    "required_facts": [
+      "jugcraft:concordance/first_light_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/first_light_understood",
+    "required_facts": [
+      "jugcraft:concordance/first_light_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/first_light_mastered",
+    "required_facts": [
+      "jugcraft:concordance/first_light_mastered"
+    ]
+  }
+]

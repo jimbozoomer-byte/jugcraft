@@ -1359,6 +1359,8 @@ def machines():
     construction.draw_all(save)
     import gas_storage
     gas_storage.draw_all(save)
+    import concordance_art
+    concordance_art.draw_all(save)
     import control_electronics
     control_electronics.draw_all(save)
     import rocketry
