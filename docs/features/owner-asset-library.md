@@ -10,7 +10,7 @@ Primary specialty: every content branch, including buildings, ores, metals, mach
 
 Browse [the shared library](../../art/owner-library/README.md), [paginated file catalogs](../../art/owner-library/catalog/README.md) and [searchable CSV inventory](../../art/owner-library/catalog/files.csv). The collection includes 16,449 supplied files: 15,749 PNGs, 30 JPEG reference sheets, 275 Ogg sounds, 186 animation JSON files and 209 texture metadata sidecars, plus six attached preview sheets.
 
-README.md, CONTRIBUTING.md, CLAUDE.md and ART_DIRECTION.md point contributors and AI agents to the library and record the owner's authorization for direct use, adaptation/recoloring or reference. Its scope is not limited to machinery.
+README.md, CONTRIBUTING.md, AGENTS.md, CLAUDE.md and ART_DIRECTION.md point contributors and AI agents to the library and record the owner's authorization for direct use, adaptation/recoloring or reference. Its scope is not limited to machinery.
 
 ## Connections and import contract
 
