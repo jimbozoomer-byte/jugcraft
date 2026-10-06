@@ -1,7 +1,8 @@
 """Original textures for the eighth batch of Halloween decorations, the mad scientist and monsters (requires Pillow):
 the Tesla Coil's iron, copper, winding, toroid and arc, the Lab Table's steel, straps, sheet and the patient's hand,
-the Specimen Jar's iron, glass, fluid, bubble and four specimens, the Mummy Sarcophagus's case, gold, painted lid and
-the mummy's wraps and face, the Raven's perch, feathers, wing, beak and eye, and the Black Cat's fur, faces and eyes.
+the Specimen Jar's iron, glass, fluid, bubble and three of its specimens (its eye is tools/decor16_data.py's), the
+Mummy Sarcophagus's case, gold, painted lid and the mummy's wraps and face, the Raven's perch, feathers, wing, beak and
+eye, and the Black Cat's fur, faces and eyes.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code or from the small pixel-art grids below,
 from fixed seeds; no Mojang texture is read, traced or recoloured. Block textures are 16x16 and opaque, except the
@@ -178,25 +179,6 @@ def bubble():
         for x in range(16):
             if (x - 7.5) ** 2 + (y - 7.5) ** 2 <= 56:
                 put(c.img, x, y, (210, 255, 210) if x + y < 12 else (120, 220, 130))
-    return c.img
-
-
-def eye():
-    """An eyeball: veined white, with a pale blue iris and a black pupil in the middle (on its front)."""
-    c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("e8e4dc"), rgb("f2eee6")], 18321, [1, 2])
-    rng = random.Random(18322)
-    for _ in range(5):
-        x, y = rng.randrange(16), rng.randrange(16)
-        for i in range(4):
-            c.px(x + i, y + (i % 2), rgb("c03030"))
-    for y in range(16):
-        for x in range(16):
-            d = math.hypot(x - 7.5, y - 7.5)
-            if d < 2.2:
-                c.px(x, y, rgb("0a0a0a"))
-            elif d < 4.6:
-                c.px(x, y, rgb("5a8ab8") if (x + y) % 3 else rgb("3a6a98"))
     return c.img
 
 
@@ -452,7 +434,6 @@ def decor8_textures():
         ("block", "specimen_jar_glass"): jar_glass(),
         ("block", "specimen_jar_fluid"): jar_fluid(),
         ("entity", "specimen_jar_bubble"): bubble(),
-        ("block", "specimen_eye"): eye(),
         ("block", "specimen_nerve"): nerve(),
         ("block", "specimen_tentacle"): tentacle(),
         ("block", "specimen_pumpkin"): pumpkin(),

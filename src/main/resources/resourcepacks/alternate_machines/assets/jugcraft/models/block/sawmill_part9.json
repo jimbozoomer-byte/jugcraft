@@ -44,12 +44,15 @@
         0
       ],
       "to": [
-        16,
+        13.25,
         16,
         14
       ],
       "faces": {
         "south": {
+          "texture": "#fluid_tank_side"
+        },
+        "east": {
           "texture": "#fluid_tank_side"
         },
         "west": {
