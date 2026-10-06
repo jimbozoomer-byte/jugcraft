@@ -116,6 +116,8 @@ public final class JugcraftArtillery {
 			}
 		});
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> crewing(player) ? InteractionResult.FAIL
+				: entity instanceof CrewedGun wired && player.getItemInHand(hand).is(io.github.jimbozoomer.jugcraft.building.FireControl.WIRE)
+						? io.github.jimbozoomer.jugcraft.building.FireControl.link(player, wired)
 				: entity instanceof CrewedGun gun ? gun.use(player, hand)
 				: entity instanceof ObservationBalloon balloon ? balloon.use(player, hand) : InteractionResult.PASS);
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> crewing(player) ? InteractionResult.FAIL : InteractionResult.PASS);

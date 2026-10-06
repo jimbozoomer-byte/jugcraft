@@ -173,6 +173,10 @@ def assets():
     kaiserworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import trenchworks
     trenchworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import fortifications
+    fortifications.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import fire_control
+    fire_control.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import zeppelin
     zeppelin.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import mech
@@ -1276,6 +1280,10 @@ def tags():
     for block in trenchworks.blocks():
         tool = "shovel" if block.startswith("sandbags") else "axe" if block.startswith(("timber", "duckboard")) else "pickaxe"
         tags.add("block", f"minecraft:mineable/{tool}", rid(block))
+    import fortifications
+    fortifications.add_tags(tags)
+    import fire_control
+    fire_control.add_tags(tags)
     tags.add("block", "minecraft:rails", rid("booster_rail"))
     tags.add("item", "minecraft:rails", rid("booster_rail"))
     import construction

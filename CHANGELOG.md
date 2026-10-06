@@ -160,6 +160,28 @@ No numbered release yet. Everything below is on `main`.
 
 ### Arms IV, batch 47 (#170)
 
+### Unmerged: Fire control, batch 56
+- **Fire Control Table:** link up to 8 guns to it with **Fire Control Wire**. It lays every linked gun that has nobody at its controls. Its modes:
+  - **Hold:** the guns stand still.
+  - **Converge:** every gun lays on the table's target (your Range Finder mark), and a redstone pulse into the table fires one round from each.
+  - **Parallel:** as Converge, but the guns' shells land 6 blocks apart across the line of fire.
+  - **Creeping Barrage:** as Converge, but each salvo after the first lands 5 blocks further down range, six steps, then starts again.
+  - **Sentry:** each gun fires by itself at the nearest hostile mob in the table's sector (90°, 180°, 270° or all round). It never fires within 12 blocks of the gun, or at a mob with a player within 8 blocks of it.
+- A gunner aboard a linked gun with no mark of their own has it laid on the table's point, and fires it when they choose.
+- Guns the table fires use shells from ready racks only. A comparator reads how many linked guns are ready. A ringing field telephone can give the order to fire.
+- Five game tests and a screenshot scene. Record: [fire-control.md](docs/features/fire-control.md).
+
+### Unmerged: Fortifications, batch 55
+- **Bastion Concrete** (block, slab, stairs and Jugcraft's first **wall**, which joins diagonally like vanilla's), the crenellated **Bastion Parapet**, the **Steel Ladder** and a redstone-only **Blast Door**.
+- **Ammo Hoist:** stack hoists into a shaft. What goes in climbs to the top and into the container on or beside it. Nothing can pull items back out.
+- **Ready Rack:** holds shells beside a gun. A gunner with no shells draws from any rack within 2 blocks of the gun. It shows how full it is.
+- **Extras:**
+  - a strapped timber **Bunker Door** that opens by hand
+  - a redstone **Sliding Gate**: panels side by side or stacked open together
+  - a **Bastion Parapet Corner**
+  - a **Bastion Embrasure** with a gun slit
+- Five game tests and a screenshot scene. Record: [fortifications.md](docs/features/fortifications.md).
+
 ### Unmerged: Tower guns, batch 54
 - Five heavy emplacements for the top of a tower, after the owner's reference picture of a heavy mortar on a turntable mount: a concrete plinth, a railed turntable, a yellow cradle and a fat black barrel.
   - For a 3x3 top: the **Bastion Mortar** and the twin-barrelled **Bastion Autocannon**.

@@ -1379,6 +1379,10 @@ def machines():
     artillery.draw_all(save)
     import tower_guns
     tower_guns.draw_all(save)
+    import fortifications
+    fortifications.draw_all(save)
+    import fire_control
+    fire_control.draw_all(save)
     import plastic
     plastic.draw_all(save)
     save(conveyor_frame(0), "block", "conveyor_belt")
