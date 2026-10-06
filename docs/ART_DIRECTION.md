@@ -19,6 +19,7 @@ On 4 October 2026 the owner rejected the noisy, rust-covered dieselpunk textures
   - Ores are nodules on neutral stone or on layered deepslate.
   - Storage blocks are one bright, bevelled plate, the same pattern for every metal.
   - Ingots share one diagonal bar, and nuggets one cluster of lumps.
+- **Machine faces are clean plates with one clear feature.** A machine front is a frame lit along its top and left round a recessed plate of one tone, with one feature in it: a recessed window, vent or port. A running glow rises in smooth bands, brightest at the bottom. `panel()` and `window()` in `tools/generate_textures.py` draw this way.
 
 ## Creatures and faces: cute and clean
 On 5 October 2026 the owner found the Ember Bed's fire speckly and the Horned Skull Cauldron's nostrils ugly, and asked for every creature prop to be simplified: cute, or at least smooth, but still good-looking, after their reference pictures (the Frankenstein head above all). The painters in `tools/cute_art.py` draw this way, and every skull, bone, monster, bug, ghost and other creature prop should follow it:

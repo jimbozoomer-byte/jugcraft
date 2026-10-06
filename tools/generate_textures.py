@@ -12,6 +12,7 @@ from pathlib import Path
 
 from PIL import Image
 
+import block_style as bs
 import electric_textures
 import material_style as ms
 
@@ -131,27 +132,29 @@ def from_mask(mask, palette):
 
 
 def raw_chunk(seed, palette=None, glint=GLINT):
-    palette = palette or CASSITERITE
-    rng = random.Random(seed)
-    img = new()
-    for y, row in enumerate(RAW):
-        for x, ch in enumerate(row):
-            if ch == "x":
-                shade = 2 if (x + y) < 12 else (1 if (x + y) < 20 else 0)
-                img.putpixel((x, y), palette[max(0, shade - rng.choice([0, 0, 1]))] + (255,))
-    for x, y in [(6, 5), (9, 4), (4, 7), (8, 8), (11, 6)]:
-        img.putpixel((x, y), glint + (255,))
-    return img
+    """A raw lump (bitumen, silicon, coke, borax, ferroboron): the lumpy chunk of tools/material_style.py in the
+    palette's tones, darkest first, with `glint` as its highlight. `seed` is kept for the callers."""
+    tones = sorted(palette or CASSITERITE, key=bs._luma)
+    return ms.raw_item((tones + tones[-1:] * 3)[:3] + [glint])
+
+
+def ramp5(palette):
+    """Five tones, darkest first, from a palette of three or more: its own tones sorted by lightness (the two closest
+    in lightness merged when there are more than four) under one darker tone for outlines."""
+    tones = sorted(palette, key=bs._luma)
+    while len(tones) > 4:
+        gaps = [bs._luma(tones[i + 1]) - bs._luma(tones[i]) for i in range(len(tones) - 1)]
+        i = gaps.index(min(gaps))
+        tones[i:i + 2] = [bs._lerp(tones[i], tones[i + 1], 0.5)]
+    if len(tones) == 3:
+        tones.insert(1, bs._lerp(tones[0], tones[1], 0.5))
+    return [tuple(int(v * 0.72) for v in tones[0])] + tones
 
 
 def pile(seed, palette):
-    rng = random.Random(seed)
-    img = new()
-    for y, row in enumerate(PILE):
-        for x, ch in enumerate(row):
-            if ch == "x":
-                img.putpixel((x, y), rng.choice(palette) + (255,))
-    return img
+    """A heap of powder or grains in `palette` (tools/material_style.py's clean heap). `seed` is kept for the
+    callers."""
+    return ms.dust(ramp5(palette))
 
 
 # name: (ore specks, glint, metal palette dark->light). Colors follow the real ore minerals.
@@ -225,11 +228,9 @@ BITUMEN = [(14, 12, 12), (28, 24, 22), (44, 40, 36)]
 
 
 def speckled(base, seed, specks, count=18):
-    img = rock(base, seed)
-    rng = random.Random(seed + 7)
-    for _ in range(count):
-        img.putpixel((rng.randrange(16), rng.randrange(16)), rng.choice(specks) + (255,))
-    return img
+    """Speckled rock in the manner of vanilla granite or diorite: a clumped base of `base` with about `count` small
+    specks of `specks` spread evenly, never touching."""
+    return bs.img(bs.speckled(sorted(base, key=bs._luma), specks, seed, density=count / 256))
 
 
 def main_extra():
@@ -264,16 +265,22 @@ def main_extra():
     save(ms.dust(SULFUR), "item", "sulfur_dust")
     save(raw_chunk(304, [(46, 54, 72), (70, 80, 102), (100, 112, 138)], (190, 206, 236)), "item", "silicon")
     save(pile(305, [(236, 236, 240), (248, 248, 250), (222, 224, 230)]), "item", "lithium_carbonate")
-    save(pile(306, [(232, 196, 210), (196, 224, 196), (240, 228, 196), (214, 206, 232)]), "item", "rare_earth_oxide")
+    # Rare earth oxides: a cream heap with grains of the pastel oxides through it.
+    oxide = ms.dust(ramp5([(214, 204, 186), (232, 222, 204), (244, 236, 220), (252, 248, 238)]))
+    for (x, y), c in zip(sorted(ms.GRAINS), [(232, 196, 210), (196, 224, 196), (214, 206, 232)] * 3):
+        oxide.putpixel((x, y), c + (255,))
+    save(oxide, "item", "rare_earth_oxide")
 
 
 STEEL = [(62, 66, 72), (86, 90, 97), (110, 114, 121), (134, 138, 145), (160, 164, 170)]
 
 
 def panel(seed, palette=STEEL, trim=BRONZE):
-    """A riveted machine panel: bronze frame around a steel plate."""
-    rng = random.Random(seed)
+    """A riveted machine panel: a bronze frame, lit along its top and left and shaded along its bottom and right,
+    round a recessed steel plate. The plate is one ground tone with soft clumps a tone either side, in shadow under
+    the frame's top and left lip and catching the light along its bottom and right (docs/ART_DIRECTION.md)."""
     img = new()
+    g = bs.grain(16, 16, seed, 3.0, 6.0, 0.5)
     for y in range(16):
         for x in range(16):
             if x in (0, 15) or y in (0, 15):
@@ -282,8 +289,13 @@ def panel(seed, palette=STEEL, trim=BRONZE):
                 c = trim[3]
             elif x == 14 or y == 14:
                 c = trim[0]
+            elif x == 2 or y == 2:
+                c = palette[1]
+            elif x == 13 or y == 13:
+                c = palette[3]
             else:
-                c = palette[rng.choice([1, 2, 2, 3])]
+                v = g(x, y)
+                c = palette[3] if v > 0.75 else palette[1] if v < 0.25 else palette[2]
             img.putpixel((x, y), c + (255,))
     for x, y in [(2, 2), (13, 2), (2, 13), (13, 13)]:
         img.putpixel((x, y), trim[4] + (255,))
@@ -291,17 +303,28 @@ def panel(seed, palette=STEEL, trim=BRONZE):
 
 
 def window(seed, inner, glow=None):
-    """A machine front with a recessed dark window; glow colors light it when running."""
+    """A machine front with a recessed window, its top and left inner walls in shadow and its bottom and right ones
+    catching the light. Behind it the inner colours lie in soft clumps; when running, the glow colours rise in smooth
+    bands to the brightest at the bottom, like the fire in a furnace."""
     img = panel(seed)
-    rng = random.Random(seed + 1)
     for y in range(4, 12):
         for x in range(4, 12):
-            edge = x in (4, 11) or y in (4, 11)
-            if edge:
+            if y == 4 or x == 4:
                 img.putpixel((x, y), STEEL[0] + (255,))
-            else:
-                palette = glow if glow else inner
-                img.putpixel((x, y), rng.choice(palette) + (255,))
+            elif y == 11 or x == 11:
+                img.putpixel((x, y), STEEL[3] + (255,))
+    if glow:
+        tones = sorted(glow, key=bs._luma)
+        g = bs.grain(16, 16, seed + 1, 2.0, 4.0, 0.5)
+        for y in range(5, 11):
+            for x in range(5, 11):
+                k = int(round((y - 5) / 5 * (len(tones) - 1) + (g(x, y) - 0.5) * 1.6))
+                img.putpixel((x, y), tones[max(0, min(len(tones) - 1, k))] + (255,))
+    else:
+        s = bs.surface(inner, seed + 1, spread=0.7)
+        for y in range(5, 11):
+            for x in range(5, 11):
+                img.putpixel((x, y), s(x, y) + (255,))
     return img
 
 
@@ -314,13 +337,16 @@ def grate(seed, glow=None):
 
 
 def jaws(seed, active):
+    """Crusher jaws behind the window: a row of teeth above meeting a row below, crumbs between them when running."""
     img = window(seed, [(40, 40, 44), (52, 52, 58)])
     tooth = STEEL[4] if active else STEEL[3]
     for x in range(5, 11):
-        top = 5 + (x % 2)
-        bottom = 10 - (x % 2)
-        img.putpixel((x, top), tooth + (255,))
-        img.putpixel((x, bottom), tooth + (255,))
+        img.putpixel((x, 5), tooth + (255,))
+        img.putpixel((x, 10), STEEL[2] + (255,))
+    for x in (5, 7, 9):
+        img.putpixel((x, 6), tooth + (255,))
+    for x in (6, 8, 10):
+        img.putpixel((x, 9), STEEL[2] + (255,))
     if active:
         for x, y in [(6, 7), (8, 8), (9, 7)]:
             img.putpixel((x, y), (190, 180, 160, 255))
@@ -349,14 +375,14 @@ def washer_front(seed, active):
 
 
 def sieve_front(seed, active):
-    """A fine mesh; grains fall through when running."""
+    """A fine mesh of crossing wires; grains fall through when running."""
     img = window(seed, [(34, 30, 28), (42, 38, 34)])
     for y in range(5, 11):
         for x in range(5, 11):
-            if (x + y) % 2 == 0:
-                img.putpixel((x, y), STEEL[2] + (255,))
+            if x in (6, 8, 10) or y in (6, 8, 10):
+                img.putpixel((x, y), (STEEL[3] if x + y < 15 else STEEL[2]) + (255,))
     if active:
-        for x, y in [(6, 7), (9, 9), (7, 10)]:
+        for x, y in [(7, 7), (9, 9), (7, 9)]:
             img.putpixel((x, y), (190, 170, 120, 255))
     return img
 
@@ -385,10 +411,12 @@ def battery_front(seed):
 
 
 def bricks(seed):
+    """Pale firebricks, one tone a brick, lit along each brick's top edge, with grey mortar."""
     rng = random.Random(seed)
     img = new()
     brick = [(196, 176, 150), (210, 192, 166), (182, 160, 134)]
     mortar = (120, 110, 100)
+    tones = {}
     for y in range(16):
         for x in range(16):
             row = y // 4
@@ -396,7 +424,10 @@ def bricks(seed):
             if y % 4 == 3 or (x + offset) % 8 == 7:
                 c = mortar
             else:
-                c = rng.choice(brick)
+                key = (row, (x + offset) // 8)
+                c = tones.setdefault(key, brick[rng.randrange(3)])
+                if y % 4 == 0:
+                    c = tuple(min(255, v + 12) for v in c)
             img.putpixel((x, y), c + (255,))
     return img
 
@@ -558,12 +589,13 @@ def save_animation(frames, name, frametime=2):
 
 
 def belt_texture():
-    """A dark leather belt: brown with a lighter stitch line along each edge (length runs down the texture)."""
-    rng = random.Random(970)
+    """A dark leather belt: brown in soft clumps with a lighter stitch line along each edge (length runs down the
+    texture)."""
     img = new()
+    g = bs.grain(16, 16, 970, 2.0, 5.0, 0.5)
     for y in range(16):
         for x in range(16):
-            c = (74, 46, 28) if rng.random() < 0.7 else (86, 54, 32)
+            c = (86, 54, 32) if g(x, y) > 0.66 else (74, 46, 28)
             if x in (1, 14):
                 c = (168, 136, 96) if y % 3 else (74, 46, 28)
             if x in (0, 15):
@@ -575,11 +607,10 @@ def belt_texture():
 def conveyor_frame(shift):
     """Rubberised conveyor belt, seen from above with the front (where items go) at the top: dark rubber with
     chevron ribs pointing forwards. Shifting the ribs two pixels a frame makes them run at the items' speed."""
-    rng = random.Random(975)
     img = new()
     for y in range(16):
         for x in range(16):
-            c = (38, 36, 34) if rng.random() < 0.75 else (46, 43, 40)
+            c = (38, 36, 34)
             phase = (y - int(abs(x - 7.5) / 2) + shift) % 8
             if phase == 0:
                 c = (78, 74, 68)
@@ -742,54 +773,52 @@ def pump_port(seed, intake):
 
 
 def hazard_plinth(seed):
-    """Dark steel footing with a yellow-black hazard edge."""
-    rng = random.Random(seed)
+    """Dark steel footing in soft clumps with a yellow-black hazard edge."""
     img = new()
+    s = bs.surface(STEEL[:3], seed, weights=[1, 3, 1], spread=0.7)
     for y in range(16):
         for x in range(16):
             if y in (0, 15) or x in (0, 15):
                 c = (214, 170, 40) if (x + y) // 2 % 2 else (30, 28, 26)
             else:
-                c = STEEL[rng.choice([0, 1, 1])]
+                c = s(x, y)
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def geothermal_front(seed, lit):
-    """Vented front with a glowing heat exchanger when running."""
+    """Vented front: steel slats over a heat exchanger that glows in soft clumps when running."""
     img = panel(seed)
     glow = [(255, 120, 20), (255, 170, 40), (230, 80, 10)] if lit else [(60, 30, 24), (74, 36, 28)]
-    rng = random.Random(seed + 1)
+    s = bs.surface(glow, seed + 1, spread=0.7)
     for y in range(3, 13):
         for x in range(3, 13):
-            if y % 2 == 0:
-                img.putpixel((x, y), STEEL[0] + (255,))
-            else:
-                img.putpixel((x, y), rng.choice(glow) + (255,))
+            img.putpixel((x, y), (STEEL[0] if y % 2 == 0 else s(x, y)) + (255,))
     return img
 
 
 def geothermal_tank(seed):
     """Tinted steel shell with a narrow window of lava."""
-    rng = random.Random(seed)
     img = new()
-    lava = [(230, 90, 20), (250, 140, 30), (200, 60, 10)]
+    shell = bs.surface(STEEL[:3], seed, weights=[1, 3, 1], spread=0.6)
+    lava = bs.surface([(230, 90, 20), (250, 140, 30), (200, 60, 10)], seed + 1, spread=0.8)
     for y in range(16):
         for x in range(16):
             if 6 <= x <= 9 and 2 <= y <= 13:
-                c = STEEL[0] if x in (6, 9) else rng.choice(lava)
+                c = STEEL[0] if x in (6, 9) else lava(x, y)
             else:
-                c = (STEEL[1] if (x + y) % 5 else STEEL[2])
+                c = shell(x, y)
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def stack(seed):
-    rng = random.Random(seed)
+    """Chimney stack: steel rings with a dark seam every four pixels."""
     img = new()
+    s = bs.surface([STEEL[1], STEEL[2]], seed, spread=0.6)
     for y in range(16):
         for x in range(16):
-            c = STEEL[0] if y % 4 == 0 else STEEL[rng.choice([1, 2])]
+            c = STEEL[0] if y % 4 == 0 else STEEL[3] if y % 4 == 1 else s(x, y)
             img.putpixel((x, y), c + (255,))
     return img
 
@@ -807,31 +836,33 @@ def lattice(seed):
 
 
 def nacelle(seed):
-    rng = random.Random(seed)
+    """White fibreglass housing, a shade darker along its top seam, with a few soft clumps."""
     img = new()
+    g = bs.grain(16, 16, seed, 3.0, 6.0, 0.5)
     for y in range(16):
         for x in range(16):
-            c = (224, 226, 228) if y > 1 else (180, 184, 190)
-            if rng.random() < 0.08:
-                c = (206, 208, 212)
+            c = (180, 184, 190) if y <= 1 else (206, 208, 212) if g(x, y) < 0.3 else (224, 226, 228)
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def blade(seed):
+    """White blade skin with one soft sheen running along it."""
     img = new()
     for y in range(16):
         for x in range(16):
-            c = (238, 240, 242) if (x + y) % 4 else (216, 220, 226)
+            c = (246, 247, 248) if abs(x - y) <= 1 else (238, 240, 242) if x + y < 22 else (226, 230, 234)
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def blade_tip():
+    """Red warning paint on the blade tip, lit along one sheen."""
     img = new()
     for y in range(16):
         for x in range(16):
-            img.putpixel((x, y), ((206, 56, 46) if (x + y) % 4 else (180, 44, 38)) + (255,))
+            c = (226, 74, 62) if abs(x - y) <= 1 else (206, 56, 46) if x + y < 22 else (184, 46, 38)
+            img.putpixel((x, y), c + (255,))
     return img
 
 
@@ -850,30 +881,33 @@ def turbine_front(seed):
 
 
 def firebrick(seed):
-    """Small red-brown refractory bricks."""
+    """Small red-brown refractory bricks, one tone a brick, lit along each brick's top edge."""
     rng = random.Random(seed)
     img = new()
     brick = [(142, 62, 40), (158, 72, 46), (126, 54, 36)]
+    tones = {}
     for y in range(16):
         for x in range(16):
             offset = 2 if (y // 3) % 2 else 0
             if y % 3 == 2 or (x + offset) % 4 == 3:
                 c = (84, 72, 64)
             else:
-                c = rng.choice(brick)
+                c = tones.setdefault((y // 3, (x + offset) // 4), brick[rng.randrange(3)])
+                if y % 3 == 0:
+                    c = tuple(min(255, v + 14) for v in c)
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def crucible(seed):
-    """Dark cast iron with a glowing seam, for the alloy crucible."""
-    rng = random.Random(seed)
+    """Dark cast iron in soft clumps with two glowing seams, for the alloy crucible."""
     img = new()
+    s = bs.surface([(38, 36, 38), (46, 44, 46), (56, 54, 56)], seed, spread=0.7)
     for y in range(16):
         for x in range(16):
-            c = rng.choice([(46, 44, 46), (56, 54, 56), (38, 36, 38)])
+            c = s(x, y)
             if y in (4, 11) and 2 <= x <= 13:
-                c = (240, 130, 40) if x % 3 else (255, 190, 80)
+                c = (255, 190, 80) if 5 <= x <= 10 else (240, 130, 40)
             img.putpixel((x, y), c + (255,))
     return img
 
@@ -956,9 +990,9 @@ def gui():
 
 
 def solar_top():
+    """Four blue photovoltaic cells in a bronze frame, split by silver bus bars, each lit at its top left."""
     img = new()
     cell = [(22, 34, 78), (28, 44, 96), (34, 54, 112)]
-    rng = random.Random(600)
     for y in range(16):
         for x in range(16):
             if x in (0, 15) or y in (0, 15):
@@ -966,19 +1000,21 @@ def solar_top():
             elif x in (5, 10) or y in (5, 10):
                 c = (176, 182, 190)
             else:
-                c = rng.choice(cell)
-                if rng.random() < 0.06:
-                    c = (120, 150, 220)
+                cx, cy = (x - 1) % 5, (y - 1) % 5
+                c = cell[2] if cx + cy <= 1 else cell[0] if cx + cy >= 6 else cell[1]
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def boiler(seed, lit):
+    """A round bronze boiler end, lit at its upper left, with a pressure gauge and a firebox slot below."""
     img = panel(seed)
     for y in range(3, 13):
         for x in range(3, 13):
-            if (x - 7.5) ** 2 + (y - 7.5) ** 2 <= 20:
-                img.putpixel((x, y), BRONZE[2 if (x + y) % 3 else 3] + (255,))
+            dx, dy = x - 7.5, y - 7.5
+            if dx * dx + dy * dy <= 20:
+                c = BRONZE[3] if dx + dy < -2.5 else BRONZE[1] if dx + dy > 3 else BRONZE[2]
+                img.putpixel((x, y), c + (255,))
     gauge = (238, 238, 230)
     for x, y in [(6, 5), (7, 5), (8, 5), (9, 5), (6, 6), (9, 6)]:
         img.putpixel((x, y), gauge + (255,))
@@ -998,7 +1034,7 @@ def crucibles(seed, lit):
                 if edge:
                     c = STEEL[0]
                 elif lit and y >= 7:
-                    c = [(250, 150, 40), (255, 200, 80), (230, 110, 30)][(x + y) % 3]
+                    c = (230, 110, 30) if y <= 8 else (250, 150, 40) if y == 9 else (255, 200, 80)
                 else:
                     c = (40, 36, 34)
                 img.putpixel((x, y), c + (255,))
@@ -1084,11 +1120,11 @@ def drawer_front(seed, lit):
 
 
 def assembler_front(seed, lit):
+    """A circuit board behind the window: gold traces that brighten when running."""
     img = window(seed, [(24, 60, 40), (28, 70, 46)])
-    for x in range(5, 11):
-        for y in range(5, 11):
-            if (x + y) % 3 == 0:
-                img.putpixel((x, y), ((230, 200, 90) if lit else (120, 110, 70)) + (255,))
+    trace = (230, 200, 90) if lit else (120, 110, 70)
+    for x, y in [(x, 6) for x in range(5, 11)] + [(x, 9) for x in range(5, 11)] + [(7, 7), (7, 8), (9, 7), (9, 8)]:
+        img.putpixel((x, y), trace + (255,))
     return img
 
 
@@ -1213,6 +1249,17 @@ def machines():
     save(jaws(956, False), "block", "ore_drill_front")
     save(jaws(956, True), "block", "ore_drill_front_on")
     save(window(953, [(30, 26, 26)], glow=[(255, 200, 80), (255, 236, 150), (250, 150, 40)]), "block", "steel_foundry_front_on")
+    # The refinery's later machines: their fronts were first committed as pictures in the old style; drawn here now so
+    # they match the rest.
+    fire = [(255, 170, 40), (255, 214, 110), (230, 140, 30)]
+    for index, (machine, inner, glow) in enumerate((
+            ("catalytic_reformer", [(30, 26, 26), (44, 36, 34)], fire),
+            ("chemical_mixer", [(40, 46, 50), (52, 60, 64)], fire),
+            ("crystal_grower", [(40, 46, 50), (52, 60, 64)], [(80, 210, 230), (150, 240, 250), (60, 170, 200)]),
+            ("oil_sand_extractor", [(40, 34, 26), (52, 44, 32)], fire),
+            ("vacuum_distillation_unit", [(30, 26, 26), (44, 36, 34)], fire))):
+        save(window(990 + index, inner), "block", f"{machine}_front")
+        save(window(990 + index, inner[:1], glow=glow), "block", f"{machine}_front_on")
     save(circuit(False), "item", "basic_circuit")
     save(circuit(True), "item", "advanced_circuit")
     save(processor(), "item", "processor")
