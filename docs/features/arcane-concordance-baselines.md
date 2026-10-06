@@ -183,7 +183,13 @@ compare changes against, not predictions of every fight.
 - An earlier version of the model assumed a push carried a creature 3 blocks for each block a tick and the test only
   checked the server did at least that; CI measured 7.05 blocks for Flashstep's 1.2 (5.9 for each), so the model now
   uses 5.5 and the test bounds it from both sides.
-- CI: not run yet for this change; the result will be recorded here.
+- CI, run 37528166057 (Build workflow, run manually on this branch, commit `5c4d8cf8`): `mod` passed with **"All 861
+  required tests passed"** (the six baseline tests included) and `optional integrations absent` passed. The tables the
+  game test wrote to the server log are identical to the ones above, which the harness computed from the generated
+  data. The push calibration logged 7.05 blocks against the model's 6.6. The client test shards fail before any test
+  starts, with the same OpenGL startup crash as on the framework foundation branch.
+- Earlier run 37527119459 passed 860 of 861: the armour calibration's zombie, standing diagonally behind the husk,
+  knocked it off the Lance's line (the blow itself matched the model); the zombie now stands straight behind it.
 
 Not yet run: any client, a two-client dedicated server, a fight in a real world against these encounters, a trinket.
 

@@ -164,14 +164,21 @@ original.
   persistence, a duplicate, a tuning that changes nothing, a composition too big for every instrument or that does not
   parse, an unknown role, an authored modifier, and scaling on anything but damage that names its school. The three
   earlier harnesses still pass (they now load components and instruments with the rest, since invocations need them).
-- Game tests added: `ConcordanceInvocationGameTests` (nine: six roles load and research teaches three then six at
+- Game tests added: `ConcordanceInvocationGameTests` (ten: six roles load and research teaches three then six at
   falling costs; a wand grants nothing without research; the Lance deals 5, then 7 with 4 arcane Spell Power; Dawn
   Aegis shields and is tuned by command, refusing a modifier it lacks or one not yet learned; a forged tuning is
   charged the server's Focus; Kindle tuned with Extend keeps its composition's 35-tick cooldown; Flashstep pushes
   forward at 1.2; Revelation reveals six of eight under a ledger of six targets and six work; Lanternward mends and
   wards the party only; an authored word is not composable). `kindleCastsThroughSpellEngine` now aims through the
   compiled plan; the component count in `grammarLoadsAndNamesProblems` is 23.
-- CI: not run yet for this change; the result will be recorded here.
+- CI, run 37528166057 (Build workflow, run manually on this branch, commit `5c4d8cf8`, which also carries step 11):
+  `mod` passed with **"All 861 required tests passed"** (the ten invocation tests included) and `optional
+  integrations absent` passed. The client test shards fail before any test starts, with the same OpenGL startup crash
+  as on the framework foundation branch.
+- Earlier runs on this branch found and fixed: a compile error (`Entity.invulnerableTime` is private in 26.3; the two
+  tests that strike twice now wait out hurt immunity instead), and a missing registration: the invocation test class
+  was not a `fabric-gametest` entrypoint, so run 37525962766 built it but ran none of its tests (845 ran, as before).
+  `tools/check_mod_data.py` now fails the build for any game test class that is not registered.
 
 Not yet run: any client (gestures, sounds, particles, icons and the codex pages in game), a two-client dedicated
 server (Lanternward and Revelation between two real players), a trinket item adding Spell Power.
