@@ -17,6 +17,7 @@ import math
 
 from PIL import Image
 
+import gun_icons
 from steampunk_models import box, cyl
 from zeppelin import tiled_quads
 
@@ -59,6 +60,10 @@ HIPS = {"left": (8, 26, 0), "right": (-8, 26, 0)}
 SHOULDERS = {"fist": (21, 46, 0), "drill": (-21, 46, 0)}
 # The drill bit's hub, from the drill arm's shoulder.
 BIT = (0, -16, 12)
+# How the renderer swings them, in degrees: the legs swing up to LEG_SWING either way, the arms follow them by ARM_FOLLOW,
+# the fist punches PUNCH_SWING forward and the drill arm is raised DRILL_RAISE to drill. tools/gun_poses.py poses the
+# walker over these.
+LEG_SWING, ARM_FOLLOW, PUNCH_SWING, DRILL_RAISE = 28, 0.3, 70, 20
 
 
 def body():
@@ -173,35 +178,5 @@ def write_all(write, assets, data, lang, condition):
 
 # ------------------------------------------------------------------ art
 
-def icon():
-    """The item: the walker from the front, red chest, barrel shoulders, fist and drill, amber core."""
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    red, dark, iron, band, amber = (150, 40, 28), (98, 30, 22), (70, 65, 62), (52, 48, 46), (255, 190, 60)
-    rust, steel = (106, 101, 97), (160, 160, 156)  # "rust": the giants' weathered steel plate (dr_rust)
-
-    def rect(x0, y0, x1, y1, c):
-        for y in range(y0, y1 + 1):
-            for x in range(x0, x1 + 1):
-                img.putpixel((x, y), c + (255,))
-    rect(5, 3, 10, 8, red)          # chest
-    rect(5, 3, 10, 3, band)
-    rect(7, 6, 8, 7, amber)         # core
-    rect(6, 1, 9, 2, iron)          # backrest and pilot
-    rect(7, 1, 8, 1, (200, 150, 110))
-    rect(2, 3, 4, 5, rust)          # shoulders
-    rect(11, 3, 13, 5, rust)
-    rect(11, 6, 14, 9, red)         # fist
-    rect(12, 10, 13, 10, band)
-    rect(2, 6, 3, 8, iron)          # drill arm
-    for i, y in enumerate(range(9, 13)):
-        rect(2 - 0, y, 3 - (i // 2), y, steel)
-    rect(6, 9, 9, 10, iron)         # pelvis
-    rect(5, 11, 6, 13, rust)        # legs
-    rect(9, 11, 10, 13, rust)
-    rect(4, 14, 7, 14, dark)        # feet
-    rect(8, 14, 11, 14, dark)
-    return img
-
-
 def draw_all(save):
-    save(icon(), "item", "diesel_walker")
+    save(gun_icons.draw("diesel_walker"), "item", "diesel_walker")

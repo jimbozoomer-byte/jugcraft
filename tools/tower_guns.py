@@ -85,7 +85,7 @@ SLOTS = "tg_slots"
 # on most of the big guns, lots of their textures are conflicting"). The big faces are mapped by world position in
 # 16-pixel cells, so a framed panel with corner bolts (dp_gunmetal) turned every barrel and housing into a stack of
 # crates. These tile without a visible frame: tg_tube is a near-flat steel for every barrel and muzzle (a tube shows it
-# in four orientations, so it has no direction), tg_steel seamless coursed plate for housings, roofs and brakes, tg_soot
+# in four orientations, so it has no direction), tg_steel seamless long plates for housings, roofs and brakes, tg_soot
 # a flat sooty dark for vents and exhaust mouths. Bores, port covers and hazard signs are decals ("!" faces), each drawn
 # whole on its own plate.
 TUBE, STEEL, SOOT = "tg_tube", "tg_steel", "tg_soot"
@@ -197,14 +197,18 @@ def pipe_run(points, r=1.2):
     return m
 
 
+def fat_breech(breech):
+    """A fat barrel's yellow breech housing with its band, about the trunnion: the cradle the barrel recoils through."""
+    return [box((-breech, -breech, -breech * 1.5), (breech, breech, breech * 0.3), YELLOW),
+            box((-breech - 0.5, -breech - 0.5, -breech * 0.6), (breech + 0.5, breech + 0.5, -breech * 0.6 + 2), BAND)]
+
+
 def fat_barrel(r, length, breech):
-    """A fat black barrel along +z from its trunnion: a yellow breech housing, a sleeve over the first stretch,
-    reinforcing bands and a heavy muzzle ring round a dark bore. The tube ends inside the muzzle ring, so their faces
-    never share a plane."""
-    m = [box((-breech, -breech, -breech * 1.5), (breech, breech, breech * 0.3), YELLOW)]
-    m.append(box((-breech - 0.5, -breech - 0.5, -breech * 0.6), (breech + 0.5, breech + 0.5, -breech * 0.6 + 2), BAND))
-    m += cyl("z", 0, 0, r, breech * 0.3, length - 3, TUBE)
-    m += cyl("z", 0, 0, r + 1.5, breech * 0.3, length * 0.35, TUBE)
+    """A fat black barrel along +z out of its breech (fat_breech): a sleeve over the first stretch, reinforcing bands
+    and a heavy muzzle ring round a dark bore. The tube ends inside the muzzle ring, so their faces never share a plane,
+    and the sleeve stays at least a quarter pixel inside the breech's sides, which it slides into as the barrel recoils."""
+    m = cyl("z", 0, 0, r, breech * 0.3, length - 3, TUBE)
+    m += cyl("z", 0, 0, min(r + 1.5, breech - 0.25), breech * 0.3, length * 0.35, TUBE)
     m += cyl("z", 0, 0, r + 1, length * 0.68, length * 0.68 + 3, TUBE)
     m += cyl("z", 0, 0, r + 1.5, length - 6, length, TUBE)
     m.append(bore(length, r * 0.75, r + 1.5))
@@ -229,6 +233,10 @@ def bastion_mortar_turntable():
     m += shell_rack(4, -14, 3)
     m.append(box((13, 3, -6), (16, 9, 0), {"*": YELLOW, "east": WARNING}))
     return m
+
+
+def bastion_mortar_cradle():
+    return fat_breech(8)
 
 
 def bastion_mortar_barrel():
@@ -265,9 +273,13 @@ def bastion_autocannon_turntable():
     return m
 
 
+def bastion_autocannon_cradle():
+    return [box((-8, -5, -6), (8, 5, 4), {"*": GUNMETAL, "south": YELLOW})]
+
+
 def bastion_autocannon_barrel():
     g = GUNS["bastion_autocannon"]
-    m = [box((-8, -5, -6), (8, 5, 4), {"*": GUNMETAL, "south": YELLOW})]
+    m = []
     for x in g["barrels"]:
         m += cyl("z", x, 0, 1.5, 4, g["muzzle"] - 3, TUBE)
         m += cyl("z", x, 0, 2.4, 4, 12, TUBE)
@@ -308,13 +320,16 @@ def grand_mortar_turntable():
     return m
 
 
-def grand_mortar_barrel():
-    g = GUNS["grand_mortar"]
-    m = fat_barrel(11, g["muzzle"], 14)
+def grand_mortar_cradle():
+    m = fat_breech(14)
     # Twin recuperator cylinders riding on top of the breech.
     for x in (-5, 5):
         m += cyl("z", x, 16, 3, -18, 22, TUBE, NUT)
     return m
+
+
+def grand_mortar_barrel():
+    return fat_barrel(11, GUNS["grand_mortar"]["muzzle"], 14)
 
 
 # ------------------------------------------------------------------ the Fortress Rifle (5x5)
@@ -349,11 +364,14 @@ def fortress_rifle_turntable():
     return m
 
 
+def fortress_rifle_cradle():
+    return [box((-12, -10, -12), (12, 10, 4), {"*": YELLOW, "south": GUNMETAL})]
+
+
 def fortress_rifle_barrel():
     g = GUNS["fortress_rifle"]
     length = g["muzzle"]
-    m = [box((-12, -10, -12), (12, 10, 4), {"*": YELLOW, "south": GUNMETAL})]
-    m += cyl("z", 0, 0, 4.5, 4, length - 7, TUBE)
+    m = cyl("z", 0, 0, 4.5, 4, length - 7, TUBE)
     m += cyl("z", 0, 0, 6, 4, 30, TUBE)
     m += cyl("z", 0, 0, 5.5, 54, 58, TUBE)
     # The muzzle brake: a block with vent slots and the bore in its face.
@@ -386,11 +404,16 @@ def triple_battery_turntable():
     return m
 
 
+def triple_battery_cradle():
+    # The housing's front stands half a pixel clear of the drum's front step, so they never share a plane at any
+    # elevation.
+    return [box((-17, -7, -8), (17, 7, 4.5), {"*": YELLOW, "south": GUNMETAL})]
+
+
 def triple_battery_barrel():
     g = GUNS["triple_battery"]
-    # The housing's front stands half a pixel clear of the drum's front step, and the sleeves a quarter pixel clear of
-    # its side facets, so they never share a plane at any elevation.
-    m = [box((-17, -7, -8), (17, 7, 4.5), {"*": YELLOW, "south": GUNMETAL})]
+    # The sleeves stand a quarter pixel clear of the drum's side facets.
+    m = []
     for x in g["barrels"]:
         m += cyl("z", x, 0, 3, 4, g["muzzle"] - 3, TUBE)
         m += cyl("z", x, 0, 4.25, 4, 22, TUBE)
@@ -406,6 +429,15 @@ PARTS = {
     "fortress_rifle": (fortress_rifle_base, fortress_rifle_turntable, fortress_rifle_barrel),
     "triple_battery": (triple_battery_base, triple_battery_turntable, triple_battery_barrel),
 }
+# Each gun's cradle: the breech or housing that elevates with the barrel but stays put when it fires, while the barrel
+# (PARTS) recoils back through it. client/TowerGunRenderer draws {gun}_cradle before the recoil and {gun}_barrel after.
+CRADLES = {
+    "bastion_mortar": bastion_mortar_cradle,
+    "bastion_autocannon": bastion_autocannon_cradle,
+    "grand_mortar": grand_mortar_cradle,
+    "fortress_rifle": fortress_rifle_cradle,
+    "triple_battery": triple_battery_cradle,
+}
 
 
 def export():
@@ -413,6 +445,7 @@ def export():
     for gun, (base, turntable, barrel) in PARTS.items():
         out[f"{gun}_base"] = tiled_quads(base())
         out[f"{gun}_turntable"] = tiled_quads(turntable())
+        out[f"{gun}_cradle"] = tiled_quads(CRADLES[gun]())
         out[f"{gun}_barrel"] = tiled_quads(barrel())
     return out
 
@@ -558,17 +591,15 @@ def tube():
 
 
 def steel():
-    """Plate steel that tiles without a frame: two courses of plates to a tile, set like bastion concrete's blocks, each
-    with a dark seam along its foot and its left joint, and lit along its top and left edges."""
+    """Plate steel that tiles without a frame: long plates a tile high with no joints across them, so a roof or a housing
+    reads as rolled plate rather than brick or paving (5 October 2026: the earlier offset blocks read as dark stone). Each
+    plate is lit along its top edge and shaded into a dark seam along its foot, and is flat in between."""
     img = clean_metal.canvas(TUBE_PAL[2])
-    for top, joint in ((0, 0), (8, 8)):
-        for x in range(16):
-            clean_metal.put(img, x, top, TUBE_PAL[3])
-            clean_metal.put(img, x, top + 7, TUBE_PAL[1])
-        for y in range(top, top + 8):
-            clean_metal.put(img, joint, y, TUBE_PAL[1])
-            if top < y < top + 7:
-                clean_metal.put(img, (joint + 1) % 16, y, TUBE_PAL[3])
+    for x in range(16):
+        clean_metal.put(img, x, 0, TUBE_PAL[4])
+        clean_metal.put(img, x, 1, TUBE_PAL[3])
+        clean_metal.put(img, x, 14, TUBE_PAL[1])
+        clean_metal.put(img, x, 15, TUBE_PAL[0])
     return img
 
 

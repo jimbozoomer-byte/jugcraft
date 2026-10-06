@@ -785,13 +785,119 @@ def check_tower_guns():
         err("assets/jugcraft/tower_gun_quads.json is missing: run tools/generate_material_data.py")
 
 
+def _renderer(name):
+    path = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / f"{name}.java"
+    return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+
+def check_gun_culling(reach):
+    """Each big gun's, the Landship's and the Diesel Walker's culling box (its renderer's getBoundingBoxForCulling, the
+    entity's box inflated) holds the whole model over its travel, or the game stops drawing a raised barrel whenever the
+    gun's own box is out of view (5 October 2026: the owner found barrels "invisible")."""
+    pattern = r"getBoundingBoxForCulling\(%s \w+, float partialTick\) \{[^}]*?inflate\(([\d.]+), ([\d.]+), ([\d.]+)\)"
+    sizes = {gun: (g["size"] - 0.1, g["height"], "TowerGunRenderer", "TowerGun") for gun, g in tower_guns.GUNS.items()}
+    registry = (JAVA_ROOT / "artillery" / "JugcraftArtillery.java").read_text(encoding="utf-8")
+    for gun, cls in (("siege_mortar", "SiegeMortar"), ("self_propelled_howitzer", "SelfPropelledHowitzer"),
+                     ("flak_gun", "FlakGun")):
+        found = re.search(r'entity\("%s",[^;]*?\.sized\(([\d.]+)F, ([\d.]+)F\)' % gun, registry)
+        if not found:
+            err(f"JugcraftArtillery registers no size for {gun}")
+            continue
+        sizes[gun] = (float(found.group(1)), float(found.group(2)), "ArtilleryRenderers", cls)
+    sizes["landship"] = (landship.WIDTH, landship.HEIGHT, "LandshipRenderer", "Landship")
+    sizes["diesel_walker"] = (mech.WIDTH, mech.HEIGHT, "DieselWalkerRenderer", "DieselWalker")
+    for name, (top, bottom, radius) in reach.items():
+        width, height, renderer, cls = sizes[name]
+        found = re.search(pattern % cls, _renderer(renderer))
+        if not found:
+            err(f"{renderer} has no culling box for {cls}")
+            continue
+        across, up = min(float(found.group(1)), float(found.group(3))), float(found.group(2))
+        if top / 16 > height + up or -bottom / 16 > up or radius / 16 > width / 2 + across:
+            err(f"{renderer}'s culling box for {cls} (inflate {found.group(1)}, {up}, {found.group(3)}) does not hold "
+                f"{name} over its travel: it reaches {top / 16:.2f} blocks up and {radius / 16:.2f} out")
+
+
+def check_gun_renderers():
+    """The renderers pose the guns, the Landship and the Diesel Walker as tools/gun_poses.py checks them: the recoil,
+    elevation and swing numbers match, and each cradle is drawn before the recoil and its barrel after."""
+    text = _renderer("ArtilleryRenderers")
+    for cls, recoil in (("SiegeMortar", artillery.MORTAR_RECOIL), ("SelfPropelledHowitzer", artillery.HOWITZER_RECOIL),
+                        ("FlakGun", artillery.FLAK_RECOIL)):
+        if not re.search(r"extractRenderState\(%s gun, GunState state, float partialTick\) \{[^}]*?extract\(gun, state, "
+                         r"partialTick, %s\)" % (cls, f"{float(recoil)}F"), text):
+            err(f"ArtilleryRenderers' recoil for {cls} differs from tools/artillery.py ({recoil})")
+    for cls, (low, high) in (("SiegeMortar", artillery.MORTAR_PITCH), ("SelfPropelledHowitzer", artillery.HOWITZER_PITCH),
+                             ("FlakGun", artillery.FLAK_PITCH)):
+        java = (JAVA_ROOT / "artillery" / f"{cls}.java").read_text(encoding="utf-8")
+        for limit, value in (("minPitch", low), ("maxPitch", high)):
+            if not re.search(r"float %s\(\) \{\s*return %s;" % (limit, f"{float(value)}F"), java):
+                err(f"{cls}.{limit} differs from tools/artillery.py ({value})")
+    for cradle, barrel in (("mortar_cradle", "mortar_barrel"), ("howitzer_gun", "howitzer_barrel"), ("flak_head", "flak_barrels")):
+        if not re.search(r'draw\("%s"[^;]*;\s*pose\.translate\(0, 0, -state\.recoil / 16\.0F\);\s*draw\("%s"' % (cradle, barrel), text):
+            err(f"ArtilleryRenderers must draw {cradle} before the recoil and {barrel} after it")
+    if not re.search(r'draw\(state\.id \+ "_cradle"[^;]*;\s*pose\.translate\(0, 0, -state\.recoil / 16\.0F\);\s*'
+                     r'draw\(state\.id \+ "_barrel"', _renderer("TowerGunRenderer")):
+        err("TowerGunRenderer must draw each gun's cradle before the recoil and its barrel after it")
+    ship = (JAVA_ROOT / "landship" / "Landship.java").read_text(encoding="utf-8")
+    for name, value in (("BARREL_UP", landship.BARREL_PITCH[0]), ("BARREL_DOWN", landship.BARREL_PITCH[1])):
+        if f" {name} = {float(value)}F;" not in ship:
+            err(f"Landship.{name} differs from tools/landship.py BARREL_PITCH ({value})")
+    if f"getY() + {round((landship.STACK_TOP + 1) / 16, 1)}," not in ship:
+        err(f"Landship's stack smoke should rise from getY() + {round((landship.STACK_TOP + 1) / 16, 1)} (tools/landship.py "
+            f"STACK_TOP)")
+    if f" RECOIL = {float(landship.RECOIL)}F;" not in _renderer("LandshipRenderer"):
+        err(f"LandshipRenderer.RECOIL differs from tools/landship.py ({landship.RECOIL})")
+    walker = _renderer("DieselWalkerRenderer")
+    for line in (f" LEG_SWING = {float(mech.LEG_SWING)}F;", f" PUNCH_SWING = {float(mech.PUNCH_SWING)}F;",
+                 f"legSwing * {mech.ARM_FOLLOW}F", f"state.drilling ? -{float(mech.DRILL_RAISE)}F"):
+        if line not in walker:
+            err(f"DieselWalkerRenderer lacks '{line.strip()}' from tools/mech.py")
+
+
+def check_quad_names():
+    """client/DecorQuads loads every quad file it lists into one table by part name, later files overwriting earlier
+    ones, so a part name used in two files draws the wrong model (until 5 October 2026 the Observation Balloon's basket
+    replaced the hot-air balloons'). Every listed file must exist and every part name must be unique across them."""
+    java = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "DecorQuads.java"
+    files = re.findall(r'Jugcraft\.id\("([a-z0-9_]+\.json)"\)', java.read_text(encoding="utf-8")) if java.is_file() else []
+    if not files:
+        err("client/DecorQuads.java lists no quad files")
+    owner = {}
+    for name in files:
+        parts = load(ASSETS / name)
+        if parts is None:
+            err(f"assets/{MOD}/{name}, listed in DecorQuads, is missing: run tools/generate_material_data.py")
+            continue
+        for part in parts:
+            if part in owner:
+                err(f"Quad part '{part}' is in both {owner[part]} and {name}: DecorQuads would draw the second for both")
+            owner.setdefault(part, name)
+
+
 def check_gun_art():
     """The 5 October 2026 art fixes for the big guns, the Landship, the Diesel Walker and the balloons stay fixed: no
     moving gun part flickers against or cuts through its mount over its whole travel (tools/gun_poses.py); every quad
     texture exists and block ones are opaque; each decal (port cover, hazard sign, bore) is drawn whole, UV 0 to 1; the
-    Observation Balloon's envelope is a closed, outward-facing mesh on its own opaque texture; and nothing opaque is drawn
-    through the translucent "nocull" path (opaque two-sided quads are "cutout", which 26.3 draws from both sides)."""
+    Observation Balloon's envelope is a closed, outward-facing mesh on its own opaque texture; nothing opaque is drawn
+    through the translucent "nocull" path (opaque two-sided quads are "cutout", which 26.3 draws from both sides); and every
+    icon tools/gun_icons.py draws is committed as drawn, inside its one-pixel margin (CI does not regenerate textures)."""
+    import gun_icons
     import gun_poses
+    for kind in gun_icons.KINDS:
+        path = ASSETS / "textures" / "item" / f"{kind}.png"
+        if not path.is_file():
+            err(f"textures/item/{kind}.png is missing: run tools/generate_textures.py")
+            continue
+        try:
+            drawn = gun_icons.draw(kind)
+        except ValueError as problem:
+            err(f"tools/gun_icons.py cannot draw {kind}: {problem}")
+            continue
+        with Image.open(path) as img:
+            saved = img.convert("RGBA")
+        if saved.size != drawn.size or saved.tobytes() != drawn.tobytes():
+            err(f"textures/item/{kind}.png differs from tools/gun_icons.py's drawing: run tools/generate_textures.py")
     files = ("artillery_quads.json", "tower_gun_quads.json", "landship_quads.json", "walker_quads.json", "balloon_quads.json")
     quads = {name: load(ASSETS / name) or {} for name in files}
     opacity = {}
@@ -830,14 +936,21 @@ def check_gun_art():
                         err(f"{name}'s {part} cuts the {texture} decal (UV {min(us)}..{max(us)}, {min(vs)}..{max(vs)}): "
                             f"give it a '!' face")
                         break
-    guns = dict(quads["artillery_quads.json"])
-    guns.update(quads["tower_gun_quads.json"])
-    if all(part in guns for part in ("mortar_barrel", "grand_mortar_barrel")):
-        found = gun_poses.problems(artillery, tower_guns, guns)
+    moving = {}
+    for name in ("artillery_quads.json", "tower_gun_quads.json", "landship_quads.json", "walker_quads.json"):
+        moving.update(quads[name])
+    needed = [part for part in gun_poses.sources(artillery, tower_guns, landship, mech) if part not in moving]
+    if needed:
+        err(f"Quads missing for {', '.join(needed[:6])}: run tools/generate_material_data.py")
+    else:
+        found = gun_poses.problems(artillery, tower_guns, landship, mech, moving)
         for problem in found[:12]:
             err(problem)
         if len(found) > 12:
-            err(f"... and {len(found) - 12} more big-gun poses that flicker or cut through their mounts")
+            err(f"... and {len(found) - 12} more poses where a gun, the Landship or the Diesel Walker flickers or cuts "
+                f"through itself")
+        check_gun_culling(gun_poses.reach(artillery, tower_guns, landship, mech, moving))
+    check_gun_renderers()
     envelope = quads["artillery_quads.json"].get("balloon_envelope", [])
     path = ASSETS / "textures" / f"{artillery.ENVELOPE_TEXTURE}.png"
     if not path.is_file():
@@ -6096,6 +6209,7 @@ def main():
     check_artillery()
     check_tower_guns()
     check_gun_art()
+    check_quad_names()
     check_plastic()
     check_seasons()
     check_alpine()

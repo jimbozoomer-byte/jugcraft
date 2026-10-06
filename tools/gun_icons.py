@@ -1,10 +1,17 @@
-"""The big guns' item icons (5 October 2026: the owner asked for every weapon's icon to "look way cooler, maybe not even
-accurate but cooler"): 32x32 pixel art in the arms icons' rules (docs/ART_DIRECTION.md, "Weapons are pixel art"). Each
-icon is a few flat shapes, each lit along its top and left edge and shaded along its bottom and right one, with a dark
-one-pixel outline round the whole silhouette; no dithering, noise or glints. Guns sit in a three-quarter view with the
-barrel on the 45-degree diagonal; the 5x5 tower guns fill the frame and the 3x3 ones stand smaller.
+"""The big guns' and war machines' item icons (5 October 2026: the owner asked for every weapon's icon to "look way
+cooler, maybe not even accurate but cooler"): 32x32 pixel art in the arms icons' rules (docs/ART_DIRECTION.md, "Weapons
+are pixel art"). Each icon is a few flat shapes, each lit along its top and left edge and shaded along its bottom and
+right one, with a dark one-pixel outline round the whole silhouette; no dithering, noise or glints. Every shape stays
+inside a one-pixel margin, so the outline closes all round (Icon.image refuses a shape on the edge).
 
-draw(kind) returns the icon for any of KINDS; tools/tower_guns.py and tools/artillery.py save them.
+Guns sit in a three-quarter view with the barrel raised to the upper right. Each has one cue of its own, so they tell
+apart in a hotbar: the Grand Mortar stands on a tall concrete tower, the Bastion Mortar and Autocannon on a compact 3x3
+block, the Fortress Rifle has its long, low barrel and the range finder across its roof, the Triple Battery its round
+drum and three barrels, and the Siege Mortar its round railed deck with a hazard rim. The Landship, the Diesel Walker
+and the Zeppelin follow the same rules.
+
+draw(kind) returns the icon for any of KINDS; tools/tower_guns.py, tools/artillery.py, tools/landship.py, tools/mech.py
+and tools/zeppelin.py save them.
 """
 import math
 
@@ -44,6 +51,12 @@ MATERIALS = {
     "lens": [(60, 110, 150), (110, 170, 214), (190, 230, 250)],
     "bore": [(14, 14, 16), (14, 14, 16), (14, 14, 16)],
     "amber": [(196, 120, 20), (240, 170, 40), (255, 220, 120)],
+    "lacquer": [(20, 20, 26), (42, 42, 52), (80, 80, 96)],
+    "tread": [(36, 34, 32), (56, 53, 50), (84, 80, 76)],
+    "gold": [(150, 108, 34), (212, 168, 64), (246, 214, 120)],
+    "teal": [(34, 88, 80), (56, 128, 116), (94, 172, 156)],
+    "rust": [(70, 64, 60), (100, 95, 91), (130, 124, 118)],
+    "silver": [(112, 114, 120), (164, 166, 172), (212, 214, 220)],
 }
 
 
@@ -137,9 +150,13 @@ class Icon:
                     self.region[y][x] = rid
 
     def image(self):
+        reg = self.region
+        edge = [(x, y) for y in range(SIZE) for x in range(SIZE) if reg[y][x] and (x in (0, SIZE - 1) or y in (0, SIZE - 1))]
+        if edge:
+            raise ValueError(f"an icon shape touches the edge at {edge[:4]}: keep it inside the one-pixel margin, so the "
+                             f"outline closes")
         img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
         px = img.load()
-        reg = self.region
 
         def at(x, y):
             return reg[y][x] if 0 <= x < SIZE and 0 <= y < SIZE else 0
@@ -207,97 +224,155 @@ def side_centre(x, y, w, h, d):
     return (x + w + d / 2, y + h / 2 - d / 2)
 
 
+def hazard_ticks(icon, x0, x1, y, step=4):
+    """Black hazard chevrons along a yellow lip at rows y and y + 1."""
+    for x in range(x0, x1 + 1, step):
+        icon.poly([(x, y), (x + 1, y), (x, y + 1), (x - 1, y + 1)], "hazard", flat=True)
+
+
+def slots(icon, x0, x1, y0, y1, step=3):
+    """A row of dark vertical vent slots (a plinth's slotted ring)."""
+    for x in range(x0, x1 + 1, step):
+        icon.rect(x, y0, x, y1, "dark", flat=True)
+
+
+def block(icon, x, y, w, h, d, lip=True):
+    """A concrete plinth or tower in three-quarter view: a tread deck on top and, along its front, a yellow lip with
+    hazard chevrons."""
+    icon.box3(x, y, w, h, d, "concrete")
+    icon.poly([(x + 1, y - 1), (x + d, y - d + 1), (x + w + d - 2, y - d + 1), (x + w - 1, y - 1)], "deck", flat=True)
+    if lip:
+        icon.rect(x, y, x + w - 1, y + 1, "yellow", flat=True)
+        hazard_ticks(icon, x + 1, x + w - 2, y)
+
+
+def recuperators(icon, p0, p1, r, upto=0.55, material="steel"):
+    """Twin cylinders riding on top of a barrel from p0 towards p1, up to `upto` of its length."""
+    length = math.dist(p0, p1)
+    u = ((p1[0] - p0[0]) / length, (p1[1] - p0[1]) / length)
+    v = (u[1], -u[0])
+    for off in (r + 0.9,):
+        a = (p0[0] + v[0] * off, p0[1] + v[1] * off)
+        b = _along(a, (a[0] + u[0] * length, a[1] + u[1] * length), upto)
+        icon.bar(a, b, 1.3, material)
+
+
 def grand_mortar():
+    """The biggest gun, on its own concrete tower: a fat barrel raised steeply out of yellow cheeks, with its
+    recuperators riding on top."""
     i = Icon()
-    plinth(i, 1, 30, 25, depth=4, height=5)
-    i.box3(4, 15, 16, 7, 4, "yellow")
-    port(i, 8, 18, 2)
-    barrel(i, (15, 14), (25, 4), 4.6, ring=1.4, bands=(0.45,))
-    i.box3(5, 19, 4, 3, 1, "dark")
+    block(i, 2, 19, 17, 11, 5)
+    slots(i, 4, 17, 23, 26)
+    i.box3(4, 12, 12, 6, 3, "yellow")
+    port(i, 8, 15, 2)
+    p0, p1 = (13, 16), (23.5, 7)
+    recuperators(i, p0, p1, 4.4)
+    barrel(i, p0, p1, 4.4, ring=1.4, bands=(0.5,))
     return i.image()
 
 
 def bastion_mortar():
+    """A 3x3 mortar: a compact concrete block, a short yellow breech and a stubby, fat barrel."""
     i = Icon()
-    plinth(i, 4, 27, 26, depth=3, height=4)
-    i.box3(7, 17, 13, 6, 3, "yellow")
-    port(i, 10, 20, 1.5)
-    barrel(i, (16, 16), (24, 8), 3.6, ring=1.2)
+    block(i, 6, 23, 14, 6, 4)
+    i.box3(8, 17, 10, 5, 3, "yellow")
+    port(i, 11, 19, 1.5)
+    barrel(i, (15, 18), (22, 10), 3.4, ring=1.2)
     return i.image()
 
 
 def fortress_rifle():
+    """The long gun: a low gunhouse with the range finder across its roof and a long barrel held low, ending in a
+    muzzle brake."""
     i = Icon()
-    plinth(i, 1, 30, 25, depth=4, height=5)
-    box = (2, 15, 13, 7, 5)
+    block(i, 1, 23, 20, 6, 5)
+    box = (2, 16, 14, 6, 4)
+    barrel(i, side_centre(*box), (28.5, 8.5), 1.3, ring=0.8, brake=True)
     i.box3(*box, "yellow")
-    i.poly([(4, 14), (7, 11), (16, 11), (13, 14)], "steel_top")
-    port(i, 6, 18, 2)
-    barrel(i, side_centre(*box), (30, 2), 1.3, ring=0.8, brake=True)
+    port(i, 6, 19, 1.8)
+    # The range finder: a dark tube across the roof with a lens at either end, standing out past both sides.
+    i.rect(1, 13, 21, 14, "dark")
+    i.rect(1, 13, 1, 14, "lens", flat=True)
+    i.rect(21, 13, 21, 14, "lens", flat=True)
+    i.rect(9, 11, 12, 12, "dark")
     return i.image()
 
 
 def bastion_autocannon():
+    """A 3x3 quick-firing gun: a compact block, a small gunhouse with an ammunition drum and twin long barrels with
+    slotted flash hiders."""
     i = Icon()
-    plinth(i, 4, 27, 26, depth=3, height=4)
-    box = (6, 16, 11, 7, 4)
-    i.box3(*box, "yellow")
-    port(i, 9, 19, 1.5)
+    block(i, 6, 23, 14, 6, 4)
+    box = (8, 17, 10, 5, 3)
     sx, sy = side_centre(*box)
-    for off in (-3, 0):
-        barrel(i, (sx - 2 + off, sy + 1 + off), (28 + off, 3 + off), 0.7, ring=0.6)
-    i.rect(11, 10, 12, 12, "dark")
+    for off in (-2.5, 0.5):
+        barrel(i, (sx - 3 + off, sy + 1 + off), (26.5 + off, 4.5 + off), 0.8, ring=0.6, bands=(0.82,))
+    i.box3(*box, "yellow")
+    i.ellipse(4, 17, 10, 24, "steel")
+    i.ellipse(6, 19, 8, 22, "brass", flat=True)
+    i.rect(12, 13, 13, 15, "dark")
     return i.image()
 
 
 def triple_battery():
+    """Three barrels out of a round yellow turret drum on a 5x5 plinth."""
     i = Icon()
-    plinth(i, 1, 30, 25, depth=4, height=5)
+    block(i, 1, 24, 22, 5, 5)
     for off in (-4, 0, 4):
-        barrel(i, (16 + off, 16 + off), (27 + off, 5 + off), 1.0, ring=0.6)
-    i.poly([(2, 15), (20, 15), (20, 21), (2, 21)], "yellow")
-    i.ellipse(2, 17, 20, 24, "yellow")
-    i.ellipse(2, 10, 20, 19, "yellow_top")
-    i.ellipse(6, 10, 13, 14, "steel_top")
-    port(i, 5, 19, 1.5)
+        barrel(i, (15 + off, 17 + off), (25 + off, 7 + off), 1.0, ring=0.6)
+    i.poly([(3, 15), (20, 15), (20, 21), (3, 21)], "yellow")
+    i.ellipse(3, 17, 20, 24, "yellow")
+    i.ellipse(3, 10, 20, 19, "yellow_top")
+    i.ellipse(7, 11, 13, 15, "steel_top")
+    port(i, 6, 19, 1.5)
     return i.image()
 
 
 def siege_mortar():
+    """The field mortar on its round turntable deck: a hazard rim, railing posts, yellow trunnion cheeks either side
+    of a fat barrel and the copper recuperator under it."""
     i = Icon()
-    i.ellipse(1, 21, 29, 30, "concrete_side")
-    i.ellipse(1, 19, 29, 27, "concrete")
-    i.ellipse(4, 19, 26, 25, "deck")
-    i.box3(6, 16, 14, 6, 3, "yellow")
-    port(i, 9, 19, 1.5)
-    barrel(i, (15, 15), (24, 5), 4.2, ring=1.3, bands=(0.45,))
-    i.bar((19, 21), (23, 16), 0.8, "copper")
+    i.ellipse(2, 21, 29, 30, "steel_side")
+    i.ellipse(2, 19, 29, 28, "yellow", flat=True)
+    i.ellipse(4, 20, 27, 27, "deck")
+    for x, y in ((3, 23), (7, 20), (13, 19), (19, 19), (25, 20), (28, 23), (25, 26), (19, 27), (12, 27), (6, 26)):
+        i.rect(x, y, x, y, "hazard", flat=True)
+    # Railing posts round the back of the deck, with a rail along their tops.
+    for x in (4, 27):
+        i.rect(x, 15, x + 1, 22, "steel")
+    i.rect(4, 15, 27, 16, "steel")
+    i.box3(7, 17, 4, 6, 2, "yellow")
+    i.bar((16, 24), (21, 18), 1.0, "copper")
+    barrel(i, (14, 20), (22.5, 9), 3.9, ring=1.3, bands=(0.5,))
+    i.box3(17, 18, 4, 6, 2, "yellow")
     return i.image()
 
 
 def self_propelled_howitzer():
+    """The tracked gun carriage with its armoured cab and a long barrel ending in a muzzle brake."""
     i = Icon()
-    i.poly([(1, 23), (4, 20), (26, 20), (29, 23), (26, 29), (4, 29)], "dark")
-    for x in (6, 11, 16, 21):
-        i.ellipse(x - 2, 23, x + 2, 27, "steel")
-    i.box3(2, 17, 22, 5, 3, "khaki")
-    box = (5, 10, 9, 7, 3)
-    barrel(i, side_centre(*box), (30, 4), 1.2, ring=0.9, brake=True)
+    i.poly([(1, 24), (4, 21), (27, 21), (30, 24), (27, 29), (4, 29)], "dark")
+    for x in (6, 11, 16, 21, 25):
+        i.ellipse(x - 2, 24, x + 2, 28, "steel")
+    i.box3(2, 18, 22, 5, 3, "khaki")
+    box = (5, 11, 9, 7, 3)
+    barrel(i, side_centre(*box), (28, 6.5), 1.2, ring=0.9, brake=True)
     i.box3(*box, "khaki")
-    i.rect(6, 12, 10, 12, "dark", flat=True)
-    i.rect(7, 6, 10, 7, "olive")
+    i.rect(6, 13, 10, 13, "dark", flat=True)
+    i.rect(7, 7, 10, 8, "olive")
     return i.image()
 
 
 def flak_gun():
+    """The anti-aircraft gun: a cross mount, an olive head with its ammunition drum and twin barrels pointing high."""
     i = Icon()
-    i.bar((2, 25), (28, 30), 1.0, "olive")
-    i.bar((4, 30), (27, 24), 1.0, "olive")
+    i.bar((2, 25), (28, 29), 1.0, "olive")
+    i.bar((4, 29), (27, 24), 1.0, "olive")
     i.box3(12, 22, 6, 5, 2, "olive")
     box = (7, 15, 11, 7, 3)
     sx, sy = side_centre(*box)
     for off in (-2, 1):
-        barrel(i, (sx - 3 + off, sy + 1 + off), (28 + off, 2 + off), 0.7, ring=0.7, bands=(0.85,))
+        barrel(i, (sx - 3 + off, sy + 1 + off), (25.5 + off, 4 + off), 0.7, ring=0.7, bands=(0.85,))
     i.box3(*box, "olive")
     i.ellipse(8, 16, 13, 21, "brass")
     i.rect(13, 10, 14, 13, "dark")
@@ -306,14 +381,15 @@ def flak_gun():
 
 
 def observation_balloon():
+    """The kite balloon: a long canvas envelope with its tail lobes and red bands, the basket on its rigging below."""
     i = Icon()
-    for x0, x1 in ((14, 15), (22, 21)):
+    for x0, x1 in ((14, 15), (21, 20)):
         i.bar((x0, 14), (x1, 23), 0.4, "dark", flat=True)
-    i.box3(13, 24, 9, 4, 2, "wicker")
-    i.ellipse(1, 2, 9, 6, "canvas_side")
-    i.ellipse(1, 14, 9, 18, "canvas_side")
-    i.ellipse(1, 8, 8, 12, "canvas_side")
-    i.ellipse(5, 3, 31, 17, "canvas")
+    i.box3(13, 24, 8, 4, 2, "wicker")
+    i.ellipse(1, 3, 8, 7, "canvas_side")
+    i.ellipse(1, 14, 8, 18, "canvas_side")
+    i.ellipse(1, 8, 7, 12, "canvas_side")
+    i.ellipse(5, 3, 30, 17, "canvas")
     i.stripe(13, 14, "red", "canvas")
     i.stripe(15, 15, "cream", "canvas")
     i.stripe(24, 24, "red", "canvas")
@@ -321,15 +397,16 @@ def observation_balloon():
 
 
 def range_finder():
+    """The range finder: a long tube with a lens at each end, on a tripod."""
     i = Icon()
     i.bar((14, 17), (10, 29), 0.6, "dark")
     i.bar((17, 17), (21, 29), 0.6, "dark")
     i.bar((15, 17), (15, 28), 0.6, "dark")
-    i.bar((3, 15), (28, 8), 2.3, "dark")
-    i.bar((3, 15), (6, 14), 2.9, "brass")
-    i.bar((25, 9), (28, 8), 2.9, "brass")
-    i.oval((2.5, 15.2), (-0.96, 0.27), 2.6, 1.2, "lens")
-    i.oval((28.5, 7.9), (0.96, -0.27), 2.6, 1.2, "lens")
+    i.bar((4, 15), (27, 9), 2.3, "dark")
+    i.bar((4, 15), (7, 14), 2.9, "brass")
+    i.bar((24, 10), (27, 9), 2.9, "brass")
+    i.oval((3.5, 15.2), (-0.96, 0.27), 2.6, 1.2, "lens")
+    i.oval((27.5, 8.9), (0.96, -0.27), 2.6, 1.2, "lens")
     i.box3(12, 10, 5, 3, 2, "brass")
     return i.image()
 
@@ -352,6 +429,93 @@ def shell(length, width, band, tip="steel"):
     return i.image()
 
 
+def landship():
+    """The Landship from the front left: the track loop round its side frame with the gilt crest, the black lacquered
+    hull, the turret with its copper hatch and the cannon, the sponson gun and the short stacks at the back."""
+    i = Icon()
+    # The far track's top run, showing over the hull.
+    i.poly([(9, 14), (12, 11), (27, 11), (29, 13), (27, 15), (11, 15)], "tread")
+    # The hull between the tracks, with a gilt rail round its deck.
+    i.box3(7, 15, 18, 7, 4, "lacquer")
+    i.poly([(7, 15), (11, 11), (12, 11), (8, 15)], "gold", flat=True)
+    i.rect(7, 15, 24, 15, "gold", flat=True)
+    # The stacks at the back and the turret with its hatch.
+    for x in (9, 12):
+        i.rect(x, 7, x + 1, 13, "dark")
+        i.rect(x, 9, x + 1, 9, "gold", flat=True)
+    i.ellipse(12, 7, 22, 15, "lacquer")
+    i.rect(12, 12, 22, 12, "gold", flat=True)
+    i.ellipse(12, 5, 22, 11, "lacquer_top")
+    i.ellipse(15, 6, 19, 9, "copper")
+    barrel(i, (19, 10), (29, 5.5), 1.1, ring=0.6, bands=(0.6,), material="silver")
+    # The near track loop round the side frame, the frame with its crest, and the sponson gun.
+    i.poly([(1, 20), (5, 15), (22, 15), (28, 20), (25, 29), (4, 29)], "tread")
+    for x in range(5, 25, 3):
+        i.rect(x, 28, x + 1, 28, "dark", flat=True)
+    i.poly([(4, 20), (7, 17), (21, 17), (25, 20), (22, 26), (6, 26)], "lacquer")
+    i.rect(5, 20, 23, 20, "gold", flat=True)
+    i.ellipse(8, 19, 14, 25, "gold")
+    i.ellipse(10, 21, 12, 23, "red", flat=True)
+    i.box3(16, 21, 5, 4, 2, "lacquer")
+    barrel(i, (21, 22), (28, 21), 0.6, ring=0.5)
+    return i.image()
+
+
+def diesel_walker():
+    """The Diesel Walker from the front: barrel shoulders, the red chest round its amber core, the twin stacks, the
+    big fist on one arm and the drill on the other, and the legs on their red feet."""
+    i = Icon()
+    for x in (13, 17):
+        i.rect(x, 1, x + 2, 7, "dark")
+    # Legs first, so the pelvis and the chest sit over their tops.
+    for x in (10, 18):
+        i.rect(x, 19, x + 4, 26, "rust")
+        i.rect(x, 22, x + 4, 22, "dark", flat=True)
+        i.rect(x - 1, 27, x + 5, 29, "red")
+    i.rect(10, 17, 22, 19, "dark")
+    i.box3(9, 7, 13, 10, 2, "red")
+    i.rect(14, 10, 16, 13, "amber")
+    # The shoulders: a fat drum either side.
+    i.rect(2, 6, 10, 12, "rust")
+    i.rect(22, 6, 30 - 1, 12, "rust")
+    for x in (4, 7, 24, 27):
+        i.rect(x, 6, x, 12, "dark", flat=True)
+    # The drill arm on the left, its bit pointing down.
+    i.rect(3, 13, 7, 16, "steel")
+    i.poly([(2, 17), (8, 17), (5, 26)], "silver")
+    for y in (19, 22):
+        i.rect(3, y, 7, y, "steel", flat=True)
+    # The fist arm on the right.
+    i.rect(24, 13, 27, 15, "steel")
+    i.box3(22, 16, 7, 6, 1, "red")
+    for y in (18, 20):
+        i.rect(22, y, 28, y, "red_side", flat=True)
+    return i.image()
+
+
+def zeppelin():
+    """The Zeppelin in profile, nose to the right: the long rigid envelope with its red bands, the cross of tail fins
+    with red edges, and the gondola slung close under it with its engine grille, window and propeller."""
+    i = Icon()
+    i.poly([(1, 2), (4, 2), (10, 9), (3, 9)], "canvas_side")
+    i.poly([(1, 21), (4, 21), (10, 14), (3, 14)], "canvas_side")
+    i.rect(1, 2, 2, 8, "red", flat=True)
+    i.rect(1, 15, 2, 21, "red", flat=True)
+    i.ellipse(2, 5, 30, 18, "canvas")
+    i.poly([(2, 11), (8, 10), (8, 13), (2, 12)], "canvas_side")
+    i.stripe(10, 11, "red", "canvas")
+    i.stripe(21, 21, "red", "canvas")
+    i.stripe(27, 30, "cream", "canvas")
+    for x in (13, 21):
+        i.rect(x, 18, x, 20, "dark", flat=True)
+    i.box3(11, 21, 13, 5, 2, "lacquer")
+    i.rect(13, 22, 17, 24, "teal", flat=True)
+    i.rect(19, 22, 21, 23, "amber", flat=True)
+    i.rect(8, 22, 10, 23, "steel")
+    i.rect(7, 19, 7, 26, "silver")
+    return i.image()
+
+
 KINDS = {
     "grand_mortar": grand_mortar,
     "bastion_mortar": bastion_mortar,
@@ -366,6 +530,10 @@ KINDS = {
     "heavy_shell": lambda: shell(24, 3.0, "copper"),
     "flak_shell": lambda: shell(18, 2.2, "copper", "red"),
     "great_shell": lambda: shell(29, 4.2, "red"),
+    "cannon_shell": lambda: shell(20, 2.4, "lacquer"),
+    "landship": landship,
+    "diesel_walker": diesel_walker,
+    "zeppelin": zeppelin,
 }
 
 

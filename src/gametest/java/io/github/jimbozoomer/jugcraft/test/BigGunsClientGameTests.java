@@ -22,6 +22,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -36,9 +37,15 @@ import net.minecraft.world.phys.Vec3;
  * down, their bores and mantlet slots; the siege mortar's deck and the howitzer from the front right; the Landship's
  * muzzle and turret ring; the Diesel Walker's hips; and the whole Observation Balloon envelope. Then it rides the
  * Observation Balloon up and checks the client eases after the server: the client's balloon (and so its rider) climbs
- * with it a tick at a time instead of standing still and jumping. CI job {@code client}.
+ * with it a tick at a time instead of standing still and jumping. Before the ride, the inventory with every war machine's
+ * icon (tools/gun_icons.py). CI job {@code client}.
  */
 public class BigGunsClientGameTests implements FabricClientGameTest {
+	/** The items whose icons tools/gun_icons.py draws, in the order they fill the hotbar and the inventory. */
+	private static final String[] ICONS = {"grand_mortar", "bastion_mortar", "fortress_rifle", "bastion_autocannon", "triple_battery",
+			"siege_mortar", "self_propelled_howitzer", "flak_gun", "landship", "diesel_walker", "zeppelin", "observation_balloon",
+			"range_finder", "great_shell", "heavy_shell", "flak_shell", "cannon_shell"};
+
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
@@ -58,8 +65,8 @@ public class BigGunsClientGameTests implements FabricClientGameTest {
 			server.runCommand("weather clear");
 			server.runCommand("gamerule minecraft:send_command_feedback false");
 			server.runCommand("gamerule minecraft:spawn_mobs false");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 30, y - 3, z - 40, x + 30, y - 1, z + 20));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 30, y, z - 40, x + 30, y + 30, z + 20));
+			fill(server, x - 30, y - 3, z - 40, x + 30, y - 1, z + 20, "minecraft:grass_block");
+			fill(server, x - 30, y, z - 40, x + 30, y + 30, z + 20, "minecraft:air");
 			context.waitTicks(10);
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			context.waitTicks(40);
@@ -76,7 +83,28 @@ public class BigGunsClientGameTests implements FabricClientGameTest {
 			// The Observation Balloon on its anchor, the whole envelope in frame against the sky.
 			shoot(context, singleplayer, x - 20, y + 3, z + 14, x - 20.5, y + 6.0, z + 0.5, "jugcraft_observation_balloon");
 
+			// The icons, in the hotbar and the inventory's first rows (before the ride, whose checks can fail the test).
+			for (String item : ICONS) {
+				server.runCommand("give @p jugcraft:" + item);
+			}
+			context.waitTicks(5);
+			context.setScreen(() -> new InventoryScreen(net.minecraft.client.Minecraft.getInstance().player));
+			context.waitTicks(10);
+			context.takeScreenshot("jugcraft_war_machine_icons");
+			context.setScreen(() -> null);
+
 			rise(context, singleplayer, origin);
+		}
+	}
+
+	/**
+	 * Fills a box in horizontal slabs of at most 32,768 blocks, vanilla's limit for one /fill (a bigger fill fails, and
+	 * runCommand does not report it).
+	 */
+	private static void fill(TestServerContext server, int x0, int y0, int z0, int x1, int y1, int z1, String block) {
+		int layers = Math.max(1, 32768 / ((x1 - x0 + 1) * (z1 - z0 + 1)));
+		for (int bottom = y0; bottom <= y1; bottom += layers) {
+			server.runCommand("fill %d %d %d %d %d %d %s".formatted(x0, bottom, z0, x1, Math.min(y1, bottom + layers - 1), z1, block));
 		}
 	}
 
@@ -134,11 +162,16 @@ public class BigGunsClientGameTests implements FabricClientGameTest {
 		int stalls = 0;
 		int jumps = 0;
 		double worstLag = 0.0;
+		int missing = 0;
 		for (int i = 0; i < samples.size(); i++) {
 			double[] s = samples.get(i);
 			log.append(String.format(Locale.ROOT, " %.3f/%.3f", s[0], s[1]));
+			if (Double.isNaN(s[0]) || Double.isNaN(s[1])) {
+				missing++;
+				continue;
+			}
 			worstLag = Math.max(worstLag, Math.abs(s[0] - s[1]));
-			if (i > 0) {
+			if (i > 0 && !Double.isNaN(samples.get(i - 1)[1])) {
 				double step = s[1] - samples.get(i - 1)[1];
 				if (step < 0.25 * climb) {
 					stalls++;
@@ -172,6 +205,10 @@ public class BigGunsClientGameTests implements FabricClientGameTest {
 		System.out.printf(Locale.ROOT, "[jugcraft big guns client test] pibal easing %s, hot-air balloon easing %s%n", pibalEasing, hotEasing);
 		server.runCommand("execute as @p run ride @s dismount");
 
+		if (missing > 0) {
+			throw new AssertionError("The Observation Balloon was missing on the server or the client in " + missing + " of " + samples.size()
+					+ " samples, so its rise could not be checked");
+		}
 		if (!easing || !pibalEasing || !hotEasing) {
 			throw new AssertionError("A balloon does not ease on the client: observation " + easing + ", pibal " + pibalEasing + ", hot-air " + hotEasing);
 		}

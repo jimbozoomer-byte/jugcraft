@@ -99,6 +99,10 @@ MORTAR_TURNTABLE = (0, 10, 0)
 MORTAR_TRUNNION = (0, 30, 2)
 HOWITZER_GUN = (6, 32, 4)
 FLAK_HEAD = (0, 18, 0)
+# Each gun's elevation limits in degrees (artillery/SiegeMortar, SelfPropelledHowitzer and FlakGun) and how far its
+# barrel kicks back when it fires, in pixels (client/ArtilleryRenderers): tools/gun_poses.py poses the guns over these.
+MORTAR_PITCH, HOWITZER_PITCH, FLAK_PITCH = (45, 85), (-5, 70), (-5, 85)
+MORTAR_RECOIL, HOWITZER_RECOIL, FLAK_RECOIL = 6, 8, 2
 # The howitzer's track path round each track unit, (z, y) in pixels, and the units' x span.
 HOWITZER_TRACK = [(-38, 1), (36, 1), (44, 8), (44, 16), (36, 23), (-38, 23), (-46, 16), (-46, 8)]
 HOWITZER_TRACK_X = (17, 29)
@@ -152,17 +156,23 @@ def mortar_turntable():
     return m
 
 
-def mortar_barrel():
-    """The barrel, about the trunnions, along +z: a yellow breech ring, a fat black tube with reinforcing bands and a
-    belled muzzle, and a recuperator under it."""
+def mortar_cradle():
+    """The cradle, about the trunnions, along +z: the yellow breech ring and the recuperator under the barrel. It
+    elevates with the barrel but stays put when it fires, while the barrel recoils back through it."""
     # The breech stops a pixel short of the old -16, so its lower rear corner clears the deck at the steepest elevations.
     m = [box((-9, -9, -15), (9, 9, 4), {"*": YELLOW})]
     m.append(box((-9.5, -9.5, -6), (9.5, 9.5, -4), BAND))
-    m += cyl("z", 0, 0, 8, 4, 53, TUBE)
-    m += cyl("z", 0, 0, 9.5, 4, 14, TUBE)
+    m += cyl("z", 0, -10.5, 2.5, -10, 22, COPPER)
+    return m
+
+
+def mortar_barrel():
+    """The barrel, along +z out of its breech: a fat black tube with a sleeve, which stays a quarter pixel inside the
+    breech's sides as it recoils into it, and a belled muzzle round the bore."""
+    m = cyl("z", 0, 0, 8, 4, 53, TUBE)
+    m += cyl("z", 0, 0, 8.75, 4, 14, TUBE)
     m += cyl("z", 0, 0, 9.5, 50, 56, TUBE)
     m.append(bore(56, 6, 9.5))
-    m += cyl("z", 0, -10.5, 2.5, -10, 22, COPPER)
     return m
 
 
@@ -200,13 +210,18 @@ def howitzer_body():
 
 
 def howitzer_gun():
-    """The gun, about its pivot, along +z: a cradle with recoil cylinders, an armoured shield and a long barrel with
-    a muzzle brake."""
+    """The gun's cradle, about its pivot, along +z: the cradle with its recoil cylinders and the armoured shield. It
+    turns and elevates with the barrel but stays put when it fires, while the barrel recoils back through it."""
     m = [box((-6, -5, -7), (6, 6, 12), {"*": ARMOR})]
     m.append(box((-11, -6.5, 8), (11, 10, 10), {"*": ARMOR}))
     for x in (-4, 4):
         m += cyl("z", x, 7, 2, -10, 20, COPPER)
-    m += cyl("z", 0, 0, 3.5, 10, 89, TUBE)
+    return m
+
+
+def howitzer_barrel():
+    """The howitzer's barrel, along +z out of its cradle: a long tube with a sleeve and a muzzle brake round the bore."""
+    m = cyl("z", 0, 0, 3.5, 10, 89, TUBE)
     m += cyl("z", 0, 0, 4.5, 10, 24, TUBE)
     m.append(box((-5, -4, 88), (5, 4, 96), {"*": GUNMETAL}))
     for z in (90, 93):
@@ -231,17 +246,24 @@ def flak_mount():
 
 
 def flak_head():
-    """The turning head, about its pivot: the cradle, twin barrels with flash hiders, ammunition drums and the
-    gunner's seat and sights."""
+    """The turning head, about its pivot: the cradle, ammunition drums and the gunner's sights. It stays put when the
+    gun fires, while the twin barrels (flak_barrels) recoil back into the cradle."""
     # The cradle's back stops at z -5, so at full elevation it swings clear of the pedestal.
     m = [box((-7, -4, -5), (7, 6, 8), {"*": OLIVE})]
+    for x in (-4, 4):
+        m += cyl("x", 7, -3.5, 4, x - 1.5, x + 1.5, OLIVE, BRASS)
+    m.append(box((-1, 6, 2), (1, 10, 4), SKID))
+    m.append(box((-2, 9, 1.5), (2, 12, 2.75), NUT))
+    return m
+
+
+def flak_barrels():
+    """The twin barrels, along +z out of the cradle, with flash hiders round their bores."""
+    m = []
     for x in (-4, 4):
         m += cyl("z", x, 1, 1.4, 8, 44, TUBE)
         m += cyl("z", x, 1, 2.2, 40, 46, TUBE)
         m.append(bore(46, 1.1, 2.2, x, 1))
-        m += cyl("x", 7, -3.5, 4, x - 1.5, x + 1.5, OLIVE, BRASS)
-    m.append(box((-1, 6, 2), (1, 10, 4), SKID))
-    m.append(box((-2, 9, 1.5), (2, 12, 2.75), NUT))
     return m
 
 
@@ -396,11 +418,18 @@ def balloon_cable():
 
 
 def export():
+    # Part names share one table with every other file client/DecorQuads loads (tools/check_mod_data.py checks that
+    # none repeats): the basket is "observation_basket", since balloon_quads.json's "balloon_basket" is the hot-air one.
+    # Each gun's cradle stays put when it fires and its barrel recoils back through it: client/ArtilleryRenderers
+    # draws mortar_cradle, howitzer_gun and flak_head before the recoil, and mortar_barrel, howitzer_barrel and
+    # flak_barrels after it.
     return {"mortar_base": tiled_quads(mortar_base()), "mortar_turntable": tiled_quads(mortar_turntable()),
-            "mortar_barrel": tiled_quads(mortar_barrel()), "howitzer_body": tiled_quads(howitzer_body()),
-            "howitzer_gun": tiled_quads(howitzer_gun()), "flak_mount": tiled_quads(flak_mount()),
-            "flak_head": tiled_quads(flak_head()), "balloon_envelope": envelope_quads(),
-            "balloon_basket": tiled_quads(balloon_basket()), "balloon_cable": tiled_quads(balloon_cable())}
+            "mortar_cradle": tiled_quads(mortar_cradle()), "mortar_barrel": tiled_quads(mortar_barrel()),
+            "howitzer_body": tiled_quads(howitzer_body()), "howitzer_gun": tiled_quads(howitzer_gun()),
+            "howitzer_barrel": tiled_quads(howitzer_barrel()), "flak_mount": tiled_quads(flak_mount()),
+            "flak_head": tiled_quads(flak_head()), "flak_barrels": tiled_quads(flak_barrels()),
+            "balloon_envelope": envelope_quads(),
+            "observation_basket": tiled_quads(balloon_basket()), "balloon_cable": tiled_quads(balloon_cable())}
 
 
 RECIPES = {
