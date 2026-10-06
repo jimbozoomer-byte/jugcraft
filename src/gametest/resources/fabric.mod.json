@@ -142,8 +142,8 @@
 			"io.github.jimbozoomer.jugcraft.test.GuideScreenshotGameTests",
 			"io.github.jimbozoomer.jugcraft.test.JugcraftServerClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SeasonClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.AlpineClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BiomeClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.AlpineClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.TownClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.HeadstoneClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MonumentClientGameTests",
@@ -158,13 +158,11 @@
 			"io.github.jimbozoomer.jugcraft.test.FerrisWheelClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PinataClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BalloonClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.BigGunsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.LeafBlowerClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.GraveyardFloraClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ChurchyardOrnamentsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.HauntedHousePropsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.WitchsWorkshopClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.BiggerJarsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CryptAndOssuaryClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.LaboratoryLarderDiningClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PumpkinNightClientGameTests",
@@ -176,8 +174,10 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIIClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MachineMotionClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FlailClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.RuneboundClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.FlailClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.BigGunsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BiggerJarsClientGameTests"
 		]
 	},
 	"depends": {
