@@ -181,7 +181,7 @@
     {
       "from": [
         0.75,
-        -0.02,
+        -0.1,
         0.75
       ],
       "to": [
@@ -191,16 +191,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            13.75,
+            4.75,
+            15.25,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            0.75,
+            4.75,
+            2.25,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            13.75,
+            4.75,
+            15.25,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            0.75,
+            4.75,
+            2.25,
+            16.0
+          ]
         },
         "up": {
           "texture": "#band"
@@ -213,7 +237,7 @@
     {
       "from": [
         0.75,
-        -0.02,
+        -0.1,
         13.75
       ],
       "to": [
@@ -223,16 +247,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            13.75,
+            4.75,
+            15.25,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            0.75,
+            4.75,
+            2.25,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            0.75,
+            4.75,
+            2.25,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            13.75,
+            4.75,
+            15.25,
+            16.0
+          ]
         },
         "up": {
           "texture": "#band"
@@ -245,7 +293,7 @@
     {
       "from": [
         13.75,
-        -0.02,
+        -0.1,
         0.75
       ],
       "to": [
@@ -255,16 +303,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            0.75,
+            4.75,
+            2.25,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            13.75,
+            4.75,
+            15.25,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            13.75,
+            4.75,
+            15.25,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            0.75,
+            4.75,
+            2.25,
+            16.0
+          ]
         },
         "up": {
           "texture": "#band"
@@ -277,7 +349,7 @@
     {
       "from": [
         13.75,
-        -0.02,
+        -0.1,
         13.75
       ],
       "to": [
@@ -287,16 +359,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            0.75,
+            4.75,
+            2.25,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            13.75,
+            4.75,
+            15.25,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            0.75,
+            4.75,
+            2.25,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#band"
+          "texture": "#band",
+          "uv": [
+            13.75,
+            4.75,
+            15.25,
+            16.0
+          ]
         },
         "up": {
           "texture": "#band"
