@@ -1,6 +1,6 @@
 # Industrial starter workshop and first electricity
 
-Status: owner-endorsed planning direction, recorded and updated 6 October 2026. This is the starter-route portion of planning step 7. The alloy station, manual tools, mechanical production arrangement, sustained shaft-source options, equal material-yield policy, basic-silicon route and first-electricity checkpoint are selected below. The initial starter recipes/costs are accepted as a provisional playtesting baseline. New heat-upgrade and mechanical-station quantities remain proposals; structures, work rates and operating costs remain to balance. No gameplay is implemented by this document.
+Status: owner-endorsed planning direction, recorded and updated 6 October 2026. This is the starter-route portion of planning step 7. The alloy station, manual tools, mechanical production arrangement, sustained shaft-source options, equal material-yield policy, basic-silicon route, manual-to-shaft bellows, optional reusable gear casting and first-electricity checkpoint are selected below. The initial starter recipes/costs are accepted as a provisional playtesting baseline. Heat-upgrade and mechanical-station construction quantities remain proposals; structures, work rates and operating costs remain to balance. No gameplay is implemented by this document.
 Proposal issue: direct owner choices during industrial planning.
 Owner: jimbozoomer-byte.
 Target capability: a useful mechanical workshop and first electricity before mod steel, with steel developing in parallel.
@@ -19,6 +19,8 @@ Related documentation: [machine roadmap](../MACHINE_ROADMAP.md), [current techno
 - **First electricity means a generator powering any useful working machine.** An electric motor driving a working shaft machine qualifies. A particular electric furnace, battery bank or fully automated factory is not required.
 - **Use the initial starter recipes and equipment costs as a provisional baseline, then adjust through playtesting.** This endorses the baseline below for balance work, rather than locking quantities permanently or claiming that the pacing target has been measured.
 - **Basic silicon comes from accessible Overworld quartz and charcoal in a heat-upgraded crucible furnace.** This is the selected simplified gameplay route for Workshop circuits. A separate silicon furnace, electricity, steel or a mandatory Nether trip is not required to begin this path.
+- **Bellows can be operated manually first, then connected to shafts to automate the same equipment.** Shaft power is not compulsory for the first higher-heat process; motor drive remains a later way to power the shaft arrangement.
+- **Include optional reusable ceramic gear molds for early bronze/brass casting alongside plate-based gear crafting.** Both routes use the same amount of metal. Casting adds ceramics/metallurgy depth without becoming a compulsory step or consuming a mold per gear.
 - **First-electricity pacing target:** approximately 2–4 active hours from a fresh world following known recipes, excluding optional building detours. This is a balancing/playtest target, not measured current behavior or a timed unlock.
 
 Earlier choices remain constraints: a semi-substantial mechanical era with many pre-electric products; a manageable essential route into the next capability; first electricity and basic circuits in the Workshop stage; electricity and steel as parallel capabilities; ceramics supplying suitable insulators and alloy-equipment materials; motors reusing earlier workshops; and selected cross-industry dependencies instead of completing every specialty.
@@ -155,7 +157,7 @@ Starter electrical construction must not depend on later synthetic rubber, alumi
 
 1. Obtain quartz through a reachable Overworld source. Reuse the existing quartz material identity; accessible quartz-bearing stone/veins are a feed proposal to design. Do not make quartz depend on a powered extractor, rare heavy-mineral region or completing the advanced mineral-sands branch. Ordinary beaches do not become the intended industrial feed.
 2. Make charcoal through reachable ordinary wood/fuel processing.
-3. Upgrade the existing crucible furnace's heat capability using earlier ceramic/construction inputs. Suitable lining and an attachable bellows are the candidate arrangement below; their construction and control method are new proposals.
+3. Upgrade the existing crucible furnace's heat capability using earlier ceramic/construction inputs and attachable bellows. Manual bellows operation with later shaft automation is selected; the construction quantities below remain proposals.
 4. Process quartz with charcoal to obtain the existing basic silicon material, then use prepared silicon, copper wire and solder at the shared manual bench or later Circuit Assembler.
 
 The proposed initial batch is **1 quartz + 1 charcoal -> 1 basic silicon**, plus the furnace's separate heating fuel/work. Charcoal in the recipe is a consumed process input; it is not simultaneously counted as the same heating fuel. Exact batch size, heat/work time and fuel use remain to balance. This is the owner-selected simplified game route, not a simulation of industrial silicon purity or furnace temperatures.
@@ -163,6 +165,23 @@ The proposed initial batch is **1 quartz + 1 charcoal -> 1 basic silicon**, plus
 Use the existing `jugcraft:silicon` ingredient identity. Later advanced circuits/processors still require their defined electronics ingredients and capabilities; starter silicon does not bypass boule/crystal growth, precision fabrication or other later processes. Preserve current quartz-blasting/arc routes until the new feed and upgrade are reachable, and then audit the routes together.
 
 The heat upgrade belongs to the electronics side branch. It is optional for the baseline bronze/brass/solder work and for the four first-electricity equipment examples below, none of which need a circuit. Keep the furnace body useful after the upgrade and allow later automation of the same process where appropriate. A steel furnace body, an electric blower or a rare refractory cannot be hidden construction requirements for the first basic circuit.
+
+### Selected bellows operation and proposed pause behavior
+
+The same installed bellows accepts player work or shaft drive. Manual operation keeps starter silicon reachable without a powered workshop; a hand crank, small steam engine, mechanical waterwheel or later motor can supply the shaft arrangement as appropriate. Shaft automation changes active labor and handling, not the silicon ingredients or output yield. Neither manual pumping nor rotation replaces ordinary furnace fuel or the recipe's charcoal input.
+
+A short pumping action that supplies a limited amount of airflow is the proposed manual interaction. The exact stroke/work window is a balance detail, not an approved timer or a requirement to hold a button continuously. Shaft drive supplies airflow while it is actually powered. The upgrade remains installed when the player changes how it is operated.
+
+Proposed processing defaults to carry into the implementation brief:
+
+| Condition | Proposed player-visible behavior |
+| --- | --- |
+| Required heat, airflow and ingredients available | Advance the higher-heat batch and show its progress |
+| Airflow or heating fuel runs out | Pause work with a clear reason; resume the same batch when supply returns |
+| Output has no room | Wait rather than charging another batch or ejecting/voiding the result |
+| Save/reload or chunk unload | Retain installed parts, committed inputs and partial work; do not grant offline production |
+
+These pause rules are assistant design defaults, not observed behavior of an implemented upgraded furnace. Input commitment, cooldown, partial-work retention and heating-fuel shutdown need a consistent recipe/state design so resuming does not consume the same ingredients twice or produce an extra output. Exact thermal simulation is not selected by this plan. Installed bellows/lining/crucible gain no new routine replacement requirement.
 
 ## Draft starter recipes and equipment costs
 
@@ -203,7 +222,7 @@ The recipes marked current retain construction counts observed in `tools/machine
 | Small fuel generator | 6 bronze ingots + 1 copper cable + 1 furnace + 1 casing | Current Coal Generator recipe |
 | Comparison electric furnace | 4 bronze ingots + 1 redstone + 2 copper cables + 1 furnace + 1 casing | Current recipe; no circuit |
 
-The separate press/drawer/assembler draft below addresses the pre-electric construction gap without adding those purchases to every electricity kit. Gear construction already has a four-plate recipe in the current data generator; selected manual plate production makes that reachable before a powered press exists. A ceramic-casting alternative is proposed below as optional depth.
+The separate press/drawer/assembler draft below addresses the pre-electric construction gap without adding those purchases to every electricity kit. Gear construction already has a four-plate recipe in the current data generator; selected manual plate production makes that reachable before a powered press exists. The owner also selected ceramic casting as an optional alternative below.
 
 ### Four guided equipment-purchase examples
 
@@ -224,23 +243,25 @@ No kit needs solder, prepared silicon, basic circuits, a soldering tool, a batte
 
 ### New heat-upgrade and mechanical-expansion drafts
 
-These are **new assistant proposals**, separate from the owner-accepted initial cost baseline. They are purchases made when a player wants the corresponding process, not added prerequisites for every first-electricity route.
+These construction quantities are **assistant proposals**, separate from the owner-accepted initial cost baseline. The owner selected manual-to-shaft bellows and optional reusable bronze/brass gear casting; that does not finalize every new construction recipe. These are purchases made when a player wants the corresponding process, not added prerequisites for every first-electricity route.
 
 | Equipment / component | Draft construction or process | Reachability and use |
 | --- | --- | --- |
 | Crucible-furnace heat insert | 2 ordinary brick blocks + 1 basic ceramic lining | Install on the existing furnace; earlier ceramic materials, no steel or rare refractory |
-| Attachable bellows | 4 planks + 2 leather + 1 iron shaft | Candidate partner for the heat insert; hand operation and shaft automation versus required shaft drive remain to choose |
+| Attachable bellows | 4 planks + 2 leather + 1 iron shaft | Selected hand operation with later shaft automation; construction quantity remains draft |
 | Basic silicon | 1 quartz + 1 charcoal -> 1 silicon in the heat-upgraded crucible furnace | Selected input/station direction; numerical ratio and heat/fuel cost remain draft |
 | Metal Press | 4 bronze ingots + 1 piston + 2 iron plates + 1 machine casing + 1 iron shaft | Manually made iron plates provide the working head; replaces the current full-anvil/cable construction in this proposal |
 | Wire Drawer | 4 brass ingots + 2 iron plates + 1 machine casing + 1 iron shaft | Reachable brass and hand-shaped draw-head parts; proposed construction needs no cable or circuit |
 | Circuit Assembler | 4 tin plates + 1 bronze gear + 3 copper wires + 2 ceramic insulators + 1 fuel-heated soldering tool + 1 redstone + 1 machine casing + 1 iron shaft | All components have earlier/manual routes; no completed circuit in its own construction |
 | Bronze or brass gear, existing recipe baseline | 4 plates of the same metal -> 1 gear | Manual hammer -> plates -> gear is a reachable entry; 36 nugget units in/out |
-| Optional reusable ceramic gear mold | Form/fire 4 clay balls -> 1 mold | Proposed casting sidegrade; shaping the mold does not require an existing gear |
+| Optional reusable ceramic gear mold | Form/fire 4 clay balls -> 1 mold | Selected casting sidegrade; construction quantity remains draft, and shaping the mold does not require an existing gear |
 | Optional bronze/brass gear casting | 4 suitable ingots -> 1 gear in the crucible furnace with the reusable mold installed | Same 36-unit material cost as the plate recipe; mold is not consumed per gear |
 
 Station recipes are one-time construction purchases. The assembler's installed soldering tool is not a per-circuit consumable; operation heat/work costs still need design. All stations use the existing shaft system and can accept motor drive later. Do not add a compulsory complete geartrain when a simple shaft connection works, or require a Metal Press to make the first Wire Drawer or Circuit Assembler's manually reachable components.
 
-Gear casting is optional proposed ceramic/metallurgy depth, not yet an owner-selected route. The current plate-based recipe is already the fallback. Limit early casting proposals to suitable approved materials; do not extend bronze/brass heat capability to every advanced metal. No new per-batch mold replacement or routine machine-part maintenance is introduced.
+Gear casting is selected optional ceramic/metallurgy depth alongside the current plate-based recipe. Use the same existing bronze/brass gear identities for both routes. Four same-metal ingots cast into one gear match four same-metal plates crafted into one gear: 36 nugget units in/out. A player can make the reusable mold from earlier ceramic supplies without first possessing the gear it produces. The mold stays installed or reusable after a batch rather than being a consumed ingredient.
+
+Early bronze/brass casting uses the basic alloy furnace capability; the silicon heat upgrade is not an added casting prerequisite. The kiln/lining/crucible branch now supplies insulators, alloy equipment and optional molds, giving it useful outputs beyond the shortest electricity route. Limit early casting to suitable approved materials; do not extend bronze/brass heat capability to every advanced metal. No new per-batch mold replacement or routine machine-part maintenance is introduced.
 
 The proposed press removes a large initial iron purchase rather than reducing the plate recipe's yield. The separate electrical interface remains available as appropriate; removing a cable from a proposed construction recipe does not introduce a new power system. Exact recipe shapes, footprints, source output, work rates and operating heat/fuel remain later balance tasks.
 
@@ -258,7 +279,9 @@ At the inspected main snapshot `ca938b54`, [tools/machines.py](../../tools/machi
 
 The same data currently gives the metal press, wire drawer and circuit assembler copper-cable ingredients. Their operating system accepts shaft power, but a complete pre-electric progression review must address construction ingredients, not just the power input. The press's anvil requirement also needs review against a manageable small-batch entry; it does not automatically belong on every starter route.
 
-[tools/generate_material_data.py](../../tools/generate_material_data.py) currently generates gears from four same-metal plates. The proposed manual plate route therefore also supplies early gears; the new mold-casting route is an optional alternative to review, not a claim that gears lack an existing crafting recipe.
+[tools/generate_material_data.py](../../tools/generate_material_data.py) currently generates gears from four same-metal plates. The proposed manual plate route therefore also supplies early gears; the selected mold-casting direction is an additional planned alternative, not a claim that gears lack an existing crafting recipe.
+
+The [current item-logistics overview](../TECH_TREE.md#item-logistics) documents hoppers/inventory interfaces, shaft-driven conveyors and optional pipe/routing equipment. These are the source starting points for the next workshop-handling pass; do not introduce a duplicate transport system or require a complete logistics network for the first generator.
 
 [tools/materials.py](../../tools/materials.py) provides a bronze-blend furnace route and a quartz-blasting silicon stand-in. These are starting points to audit; this document does not remove them or claim that manual plate/wire/circuit recipes already exist. The registered Water Wheel currently has electrical generation data; do not describe it as a shaft source without an explicit implementation change.
 
@@ -267,7 +290,7 @@ Preserve stable registrations and working entry paths during any later implement
 ## Next recipe and balance pass
 
 1. Retain the owner-accepted initial recipes and four equipment subtotals as the provisional cost baseline; adjust with survival-route evidence rather than assuming the timing target is already met.
-2. Resolve bellows operation and optional gear casting, then review the new heat-upgrade and separate-machine recipe drafts and their input producers/output consumers.
+2. Review the new heat-upgrade and separate-machine recipe drafts using the selected manual-to-shaft bellows and optional reusable casting. Keep their input producers/output consumers reachable.
 3. Budget optional electronics, mechanical expansion, storage and bulk processing separately from the two generator entry routes. Include reachable Overworld quartz supply and heat-upgrade construction in the circuit-path budget.
 4. Include required gathering, fuel, heating, crafting and setup work in the 2–4 hour target. Exclude optional cosmetic builds and specialty detours, rather than hiding necessary resource acquisition from the timing.
 5. Compare realistic solo and trade starts, including multiple ordinary world seeds, interrupted processing/full outputs and relevant configuration combinations.
@@ -275,7 +298,7 @@ Preserve stable registrations and working entry paths during any later implement
 
 The [independent Jugcraft Encyclopedia brief and TODO record](https://github.com/jimbozoomer-byte/jugcraft/pull/211) should explain both starter routes and distinguish essential capabilities from optional products and quest-order suggestions. No quest completion or carried guide item becomes a new industrial unlock requirement.
 
-Early alloy preparation, the shared bench/tools, separate mechanical production stations, both sustained shaft-source options, equal manual/machine material yields, the first-electricity checkpoint, the provisional initial costs and the Overworld quartz/charcoal/upgraded-furnace silicon route are settled. Remaining detail includes bellows operation, optional gear casting, review/tuning of the new expansion recipes, quartz supply, source outputs/site requirements, station structures, tool durability and processing/throughput/fuel costs. Next, choose bellows operation and whether to include ceramic gear casting as an early sidegrade; keep that electronics/production depth distinct from generator recipes that do not need it.
+The essential workshop route is mapped: early alloys, manual parts, separate mechanical stations, sustained shaft sources, equal material yields, the first-electricity checkpoint, the provisional initial costs, starter silicon, manual-to-shaft bellows and optional reusable gear casting are settled. Remaining detail includes review/tuning of new construction quantities, quartz supply, source outputs/site requirements, station structures, tool durability and processing/throughput/fuel costs. Next, settle the size of the manual-to-machine throughput improvement and the early item-handling scope, using the shared logistics systems. Optional electronics, casting, automation and broader specialties remain expansions around the reachable route.
 
 Documentation validation: repository/link and whitespace checks apply. Future gameplay work needs relevant recipe audits, survival-route tests, restart/unload behavior and two-client evidence. This plan contains no new build, timing or game-test results.
 
