@@ -12,6 +12,7 @@ No numbered release yet. Everything below is on `main`.
 - The Build workflow's new `choose client tests` job (`tools/select_client_tests.py`) picks the client game test classes that show what a pull request changed. Docs- or data-only changes run none. Build files, mixins and the test harness still run them all. Rules: [TESTING.md](docs/TESTING.md#current-foundation).
 - `main` and manual runs still run every class, shared between the three client jobs by rough running time instead of every third class.
 - Gradle's downloads are cached between runs.
+
 ### No more see-through or flickering models: machines, guns, vehicles, balloons and props (art fixes)
 - **Closed from every side:** the grand mortar and the other tower guns, the siege mortar, howitzer and flak gun, the landship, the Diesel Walker, the zeppelin, the observation balloon's envelope and the searchlight no longer show the world through gaps in their barrels, rings, decks and hulls. The exporter drew whole 16-pixel patches of a face away wherever a smaller part sat on part of it; it now removes only what is really covered.
 - **No more flashing textures:** collars, muzzle rings, hazard rims, caps, gear teeth, handwheels, the joins between a big machine's blocks and spinning shafts no longer flicker, close up or far away. Every exported model now keeps differently drawn faces at least 0.1 pixel apart (was 0.02, which failed beyond about 30 blocks), including turned parts.
