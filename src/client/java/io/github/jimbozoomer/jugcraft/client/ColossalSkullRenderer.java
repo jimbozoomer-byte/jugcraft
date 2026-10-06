@@ -23,14 +23,18 @@ import org.jspecify.annotations.Nullable;
 /**
  * Draws the Colossal Skull's lower jaw (decor18_quads.json) from its first block, turned down about its hinge as far as
  * {@link ColossalSkullBlock#JAW_DEGREES} when it is powered, and snapping when used; and at night a faint blue glow deep
- * in each eye socket (tools/decor18_data.py SKULL_SOCKETS), breathing slowly.
+ * in each eye socket (tools/decor18.py SKULL sockets), breathing slowly.
  */
 public class ColossalSkullRenderer implements BlockEntityRenderer<ColossalSkullBlockEntity, ColossalSkullRenderer.State> {
 	private static final RenderType GLOW = RenderTypes.entityTranslucent(Jugcraft.id("textures/entity/crypt_socket_glow.png"));
 	private static final int FULL_BRIGHT = 0xF000F0;
-	/** Each socket: {x0, y0, x1, y1} in pixels, on a sheet at z {@value #SOCKET_Z} facing north. */
+	/**
+	 * Each socket: {x0, y0, x1, y1} in pixels, on a sheet at z {@value #SOCKET_Z} facing north: 0.1 pixel in front of the
+	 * dark hollow that closes the back of the sockets (its face at z 8), so the hollow never hides it. tools/decor18.py
+	 * SKULL holds the same numbers (sockets, glow_z, hollow_z), which the audit compares.
+	 */
 	private static final float[][] SOCKETS = {{-10.0F, 11.6F, -2.6F, 19.4F}, {2.6F, 11.6F, 10.0F, 19.4F}};
-	private static final float SOCKET_Z = 8.9F;
+	private static final float SOCKET_Z = 7.9F;
 	private static final float HINGE_Y = 8.0F;
 	private static final float HINGE_Z = 15.0F;
 

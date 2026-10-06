@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -64,17 +63,20 @@ public class ZiplineRenderer implements BlockEntityRenderer<ZiplineAnchorBlockEn
 		});
 	}
 
-	/** A flat strip of line from {@code a} to {@code b}, {@code across} wide each side, seen from both sides. */
+	/**
+	 * A flat strip of line from {@code a} to {@code b}, {@code across} wide each side, seen from both sides: two sides
+	 * lifted off the strip's middle ({@link DecorDraw#twoSided}), never one plane drawn twice.
+	 */
 	private static void strip(VertexConsumer buffer, PoseStack.Pose matrix, int light, Vector3f a, Vector3f b, Vector3f across) {
-		Vector3f[] front = {new Vector3f(a).sub(across), new Vector3f(a).add(across), new Vector3f(b).add(across), new Vector3f(b).sub(across)};
-		Vector3f[] back = {front[3], front[2], front[1], front[0]};
-		for (Vector3f[] quad : new Vector3f[][] {front, back}) {
-			float[][] uv = {{0, 1}, {1, 1}, {1, 0}, {0, 0}};
-			for (int i = 0; i < 4; i++) {
-				buffer.addVertex(matrix, quad[i].x(), quad[i].y(), quad[i].z()).setColor(STEEL).setUv(uv[i][0], uv[i][1])
-						.setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(matrix, 0, 1, 0);
-			}
+		Vector3f[] at = {new Vector3f(a).sub(across), new Vector3f(a).add(across), new Vector3f(b).add(across), new Vector3f(b).sub(across)};
+		float[][] uv = {{0, 1}, {1, 1}, {1, 0}, {0, 0}};
+		float[][] corners = new float[4][];
+		for (int i = 0; i < 4; i++) {
+			corners[i] = new float[] {at[i].x(), at[i].y(), at[i].z(), uv[i][0], uv[i][1]};
 		}
+		Vector3f normal = new Vector3f(across).cross(new Vector3f(b).sub(a));
+		normal = normal.lengthSquared() < 1.0E-12F ? new Vector3f(0, 1, 0) : normal.normalize();
+		DecorDraw.twoSided(buffer, matrix, corners, normal.x(), normal.y(), normal.z(), STEEL, light, DecorDraw.TWO_SIDED_LIFT);
 	}
 
 	@Override

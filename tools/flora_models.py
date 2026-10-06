@@ -5,10 +5,13 @@ frame two blocks high (y 0..32) and cut into their lower and upper blocks by whe
 The look follows hand-built plants: a few bent stems of small boxes carrying flat, cut-out leaves and petals at angles,
 and the flowers themselves as little boxes (bells, trumpets, berries, cups) where a flat picture would read thin.
 """
+import copy
 import math
 import random
 
 from PIL import Image
+
+import model_writer
 
 from flora_art import (ANTHER, ASPHODEL, ASPHODEL_VEIN, BERRY, CALYX, CAPSULE, DRY, DUSK_LEAF, FERN, FERN_RIB, FINGER,
                        FINGER_TIP, FOX, FOX_SPOT, GHOST, GHOST_FLECK, HEART_PINK, HEART_WHITE, IVY, LEAF, LILY,
@@ -371,6 +374,10 @@ def split_tall(elements):
 
 
 def tall_models(sc, elements):
+    # The halves are drawn one above the other: separate the whole frame first, so no face of one half shares a plane
+    # with a face of the other (each half's own pass at writing cannot see the other's).
+    elements = copy.deepcopy(elements)
+    model_writer.separate_coplanar(elements)
     lower, upper = split_tall(elements)
     sc.models[f"{sc.name}_bottom"] = lower
     sc.models[f"{sc.name}_top"] = upper

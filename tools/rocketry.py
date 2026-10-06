@@ -550,7 +550,7 @@ def rocket_launcher():
     c.capsule((30, 38), (28, 52), 3.0, hd.RUBBER, flat_ends=True)  # the grip
     c.capsule((40, 34), (39, 46), 2.4, hd.RUBBER, flat_ends=True)  # the fore grip
     c.line((32, 42), (35, 44), (40, 40, 44), width=1.4)  # trigger
-    return c.finish()
+    return c.finish(alpha=255)   # an opaque outline: no see-through rim on the in-hand sprite
 
 
 def he_rocket():
@@ -558,7 +558,7 @@ def he_rocket():
     import hd_art as hd
     c = hd.Canvas()
     _rocket(c, hd, hd.GUNMETAL, hd.RED, hd.SAFETY_YELLOW, fins=True)
-    return c.finish()
+    return c.finish(alpha=255)   # an opaque outline: no see-through rim (5 October 2026)
 
 
 def homing_rocket():
@@ -566,7 +566,7 @@ def homing_rocket():
     import hd_art as hd
     c = hd.Canvas()
     _rocket(c, hd, hd.WHITE_PAINT, hd.RED, hd.RED, fins=True, tip=hd.GLASS)
-    return c.finish()
+    return c.finish(alpha=255)   # an opaque outline: no see-through rim (5 October 2026)
 
 
 def line_rocket():
@@ -580,7 +580,7 @@ def line_rocket():
         c.ring((48, 50), r + 1.6, r, hd.SAFETY_YELLOW)
     _rocket(c, hd, hd.RED, hd.WHITE_PAINT, hd.STEEL, fins=True, tip=hd.CHROME)
     c.line((14, 56), (12, 56), (200, 160, 30), width=1.8)
-    return c.finish()
+    return c.finish(alpha=255)   # an opaque outline: no see-through rim (5 October 2026)
 
 
 def delivery_rocket():

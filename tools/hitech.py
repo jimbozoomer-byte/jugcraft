@@ -33,7 +33,9 @@ WRAP_HI = (64, 66, 78)
 GOLD = (226, 184, 72)
 GOLD_DARK = (150, 108, 36)
 BLACK = (14, 14, 18)
-GLOW = (60, 210, 240, 110)  # translucent cyan
+# The glow fringe along the edge: opaque since 5 October 2026 (it was a translucent cyan, see-through on the blade in
+# the hand), in the blade's bright glow tone, so the white-hot edge still reads as glowing rather than dark-rimmed.
+GLOW = CYAN
 
 
 def _rgba(c, a=255):
@@ -63,7 +65,7 @@ KATANA_COLOURS = {
              "INDIGO_HI": INDIGO_HI, "VIOLET": VIOLET, "GLOW": GLOW},
     "crimson": {"WHITE": (255, 242, 238), "CYAN_CORE": (255, 176, 164), "CYAN": (244, 56, 52), "CYAN_DEEP": (160, 18, 26),
                 "INDIGO": (34, 14, 18), "INDIGO_HI": (74, 24, 30), "VIOLET": (226, 230, 236),
-                "GLOW": (244, 56, 52, 110)},
+                "GLOW": (244, 56, 52)},
 }
 
 
@@ -117,7 +119,8 @@ def katana_frame(pulse, colours=None):
             colour = _katana_pixel((x - y + 31) / 2, x + y - 31, pulse, colours or KATANA_COLOURS["cyan"])
             if colour is not None:
                 img.putpixel((x, y), colour if len(colour) == 4 else _rgba(colour))
-    return _outline(img, BLACK, alpha=170)
+    # An opaque rim (5 October 2026: a see-through rim was the transparency the owner saw on held weapons).
+    return _outline(img, BLACK)
 
 
 def katana(colours=None):
@@ -344,7 +347,7 @@ def scuba_mask_icon():
     f.hline(14, 17, 23, RUBBER)
     f.rect(14, 6, 17, 7, GUN)               # head-up display light
     f.hline(15, 16, 6, CYAN_CORE)
-    return _outline(img, BLACK, alpha=170)
+    return _outline(img, BLACK)   # opaque: no see-through rim (5 October 2026)
 
 
 def scuba_tank_icon():
@@ -375,7 +378,7 @@ def scuba_tank_icon():
     f.rect(27, 23, 30, 26, SHELL)
     f.px(29, 24, CYAN_DEEP)
     f.px(28, 25, CYAN_DEEP)
-    return _outline(img, BLACK, alpha=170)
+    return _outline(img, BLACK)   # opaque: no see-through rim (5 October 2026)
 
 
 def _runner(f, dx, dy, shade):
@@ -404,4 +407,4 @@ def free_runners_icon():
     img, f = _icon()
     _runner(f, 1, 4, 0.35)    # the far boot, in shadow
     _runner(f, 12, 14, 0.0)
-    return _outline(img, BLACK, alpha=170)
+    return _outline(img, BLACK)   # opaque: no see-through rim (5 October 2026)

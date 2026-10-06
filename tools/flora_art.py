@@ -484,6 +484,31 @@ def cube(lo, hi, faces, rot=None, light=None):
 SIDES4 = ("north", "south", "east", "west")
 
 
+def box_ring(x0, z0, x1, z1, t, y0, y1, out_uv, in_uv=None, top=None, bottom=None, ends=None, light=None):
+    """A hollow square frame of four boxes `t` thick, its outer edge x0..x1 by z0..z1, from y0 to y1: a pot's wall, a
+    rim, a band, a tank's lining. Its outer sides are drawn with `out_uv`, its inner sides with `in_uv` (left out if
+    None, for a band whose inside is buried), and its top and bottom where given. Unlike one solid box it leaves the
+    middle open, so it can be capped without the cap covering what is inside it. The north and south boxes run the full
+    width and show their short ends (`ends`, else `out_uv`) at the corners; the east and west ones fit between them, so
+    no two of its faces overlap. `top` and `bottom` are one uv box for all four boxes or a pair: the north and south
+    boxes' (long across x) and the east and west boxes' (long along z), so a strip's texture runs along it."""
+    def pair(uv):
+        if uv is None:
+            return None, None
+        return (uv[0], uv[1]) if len(uv) == 2 else (uv, uv)
+    top_ns, top_ew = pair(top)
+    bottom_ns, bottom_ew = pair(bottom)
+    end = ends or out_uv
+
+    def caps(up, down):
+        return {**({"up": up} if up else {}), **({"down": down} if down else {})}
+    inner = (lambda side: {side: in_uv}) if in_uv else (lambda side: {})
+    return [cube((x0, y0, z0), (x1, y1, z0 + t), {"north": out_uv, "east": end, "west": end, **inner("south"), **caps(top_ns, bottom_ns)}, light=light),
+            cube((x0, y0, z1 - t), (x1, y1, z1), {"south": out_uv, "east": end, "west": end, **inner("north"), **caps(top_ns, bottom_ns)}, light=light),
+            cube((x0, y0, z0 + t), (x0 + t, y1, z1 - t), {"west": out_uv, **inner("east"), **caps(top_ew, bottom_ew)}, light=light),
+            cube((x1 - t, y0, z0 + t), (x1, y1, z1 - t), {"east": out_uv, **inner("west"), **caps(top_ew, bottom_ew)}, light=light)]
+
+
 def column(x, z, y0, y1, width, uv_side, uv_end=None, rot=None, light=None, ends=("up",)):
     """A square column (a stem, a finger, a stalk) centred on (x, z)."""
     h = width / 2
@@ -610,6 +635,44 @@ def model(name, elements, display=None):
     if display:
         out["display"] = display
     return out
+
+
+def opaque_boxes(img):
+    """For model_writer.finish_closed: whether every face of an element reads only fully opaque texels of the Sculpt
+    texture `img` (its "#p"), as art_check O1 judges it. A see-through box (glass, a web) may leave faces out."""
+    alpha = img.convert("RGBA").getchannel("A")
+    w, h = img.size
+
+    def opaque(e):
+        for spec in e.get("faces", {}).values():
+            if spec.get("texture") != "#p" or "uv" not in spec:
+                return False
+            us, vs = (spec["uv"][0] / 16, spec["uv"][2] / 16), (spec["uv"][1] / 16, spec["uv"][3] / 16)
+            shift_u, shift_v = math.floor(min(us) + 1e-6), math.floor(min(vs) + 1e-6)
+            x0 = max(0, int((min(us) - shift_u) * w + 0.01))  # within 0.01 texel of a texel line: on it (art_check)
+            x1 = min(w, max(x0 + 1, int(math.ceil((max(us) - shift_u) * w - 0.01))))
+            y0 = max(0, int((min(vs) - shift_v) * h + 0.01))
+            y1 = min(h, max(y0 + 1, int(math.ceil((max(vs) - shift_v) * h - 0.01))))
+            if x1 > x0 and y1 > y0 and alpha.crop((x0, y0, x1, y1)).getextrema()[0] < 255:
+                return False
+        return True
+    return opaque
+
+
+def closing_writer(write, image_of):
+    """write(path, obj) for a Sculpt set's block and item models that draws every face its boxes leave out where
+    nothing covers it (model_writer.finish_closed; docs/ART_DIRECTION.md, Closed geometry). image_of(name) is the
+    texture a model's "#p" names (jugcraft:block/<name>), or None to write the model as it is."""
+    import model_writer
+
+    def closed(path, obj):
+        ref = obj.get("textures", {}).get("p", "") if isinstance(obj, dict) and obj.get("elements") else ""
+        img = image_of(ref.split("/", 1)[1]) if isinstance(ref, str) and ref.startswith(f"{MOD}:block/") else None
+        if img is not None:
+            obj = dict(obj, elements=list(obj["elements"]))
+            model_writer.finish_closed(obj["elements"], opaque_boxes(img))
+        return write(path, obj)
+    return closed
 
 
 def transformed(elements, scale=1.0, offset=(0, 0, 0), centre=(8, 0, 8)):
