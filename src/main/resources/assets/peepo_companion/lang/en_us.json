@@ -1,0 +1,18 @@
+{
+  "entity.peepo_companion.peepo": "Peepo",
+  "item.peepo_companion.peepo_summoner": "Peepo Summoner",
+  "message.peepo.tooltip": "Use on solid ground to meet a tiny friendly frog.",
+  "message.peepo.limit": "There are already eight Peepos nearby.",
+  "message.peepo.space": "Peepo needs clear space above solid ground.",
+  "entity.peepo_companion.jughead": "Jughead",
+  "item.peepo_companion.jughead_summoner": "Jughead Summoner",
+  "entity.peepo_companion.pink_peepo": "Jughead",
+  "item.peepo_companion.pink_peepo_summoner": "Jughead Summoner",
+  "message.peepo.energy": "%s / %s JE | +%s JE/t | Food: %ss | %s",
+  "message.peepo.activity.eating": "Eating",
+  "message.peepo.activity.recovering": "Recovering to 80%",
+  "message.peepo.activity.working": "Working",
+  "message.peepo.activity.resting": "Resting",
+  "message.peepo.activity.idle": "Idle",
+  "block.peepo_companion.generator_wheel": "Companion Generator Wheel"
+}
