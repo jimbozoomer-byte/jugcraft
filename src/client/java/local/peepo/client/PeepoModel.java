@@ -58,6 +58,14 @@ public final class PeepoModel extends EntityModel<PeepoState> {
             leftArm.z=rightArm.z=s.pumpkin ? -2.2F : -1.5F;
             head.yRot=0;head.xRot=.08F+bite*.5F;
         }
+        if(s.sitting && !s.eating) {
+            float kick=Mth.sin(s.ageInTicks*.16F)*.30F;
+            leftLeg.xRot=-1.05F+kick;rightLeg.xRot=-1.05F-kick;
+            leftArm.xRot=rightArm.xRot=-.70F;
+            leftArm.yRot=.35F;rightArm.yRot=-.35F;
+            leftArm.zRot=rightArm.zRot=0;
+            head.xRot=.04F;
+        }
         if(s.sleeping) {
             head.xRot=head.yRot=0;
             leftLeg.xRot=rightLeg.xRot=0;

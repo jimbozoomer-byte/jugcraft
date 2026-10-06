@@ -10,6 +10,7 @@ final class CompanionRoutine extends Goal {
     private final PeepoEntity npc;
     private CompanionStation station;
     private BlockEntity block;
+    private long nextLeisure, chairUntil;
     private boolean active;
     private long nextSearch,deadline;
     private int repath;
@@ -22,7 +23,7 @@ final class CompanionRoutine extends Goal {
         if(!s.availableTo(npc))return false;
         return switch(s.kind()) {
             case WHEEL -> !npc.isRecovering() && npc.getEnergy()>0 && s.energySpace()>0;
-            case CHAIR -> needsRest();
+            case CHAIR -> needsRest() || npc.level().getGameTime() >= nextLeisure;
             case BED -> needsRest() && npc.isRestNight();
         };
     }
@@ -52,7 +53,13 @@ final class CompanionRoutine extends Goal {
             var path=npc.getNavigation().createPath(BlockPos.containing(s.approachPosition()),0);
             if(path==null || !path.canReach()) { unreachable.put(candidate.getBlockPos(),now+200);continue; }
             if(s.claim(npc)) {
-                station=s;block=candidate;deadline=now+200;repath=0;return;
+                station=s;block=candidate;deadline=now+200;chairUntil=now+600;repath=0;return;
+            }
+        }
+        if (needsRest() || now >= nextLeisure) {
+            var surface = CompanionSeats.find(npc, unreachable);
+            if (surface != null && surface.claim(npc)) {
+                station=surface;block=null;deadline=now+200;chairUntil=now+600;repath=0;
             }
         }
     }
@@ -70,15 +77,17 @@ final class CompanionRoutine extends Goal {
     @Override public void stop() { release();active=false; }
     @Override public void tick() {
         if(station!=null && station.kind()==CompanionStation.Kind.CHAIR && !npc.isRecovering()
-                && npc.level().getGameTime()>=nextSearch)release();
-        if(station!=null && (block.isRemoved() || !npc.level().hasChunkAt(block.getBlockPos())
-                || npc.level().getBlockEntity(block.getBlockPos())!=block || !useful(station)))release();
+                && npc.level().getGameTime()>=chairUntil) {
+            nextLeisure=npc.level().getGameTime()+600;release();
+        }
+        if(station!=null && ((block!=null && (block.isRemoved() || !npc.level().hasChunkAt(block.getBlockPos())
+                || npc.level().getBlockEntity(block.getBlockPos())!=block)) || !useful(station)))release();
         if(station==null)search();
         if(station==null) { npc.getNavigation().stop();return; }
         var target=station.approachPosition();
         if(npc.position().distanceToSqr(target)>.64) {
             if(npc.level().getGameTime()>deadline) {
-                unreachable.put(block.getBlockPos(),npc.level().getGameTime()+200);release();return;
+                unreachable.put(block!=null ? block.getBlockPos() : ((CompanionSeats.Surface)station).pos,npc.level().getGameTime()+200);release();return;
             }
             if(--repath<=0) { repath=20;npc.getNavigation().moveTo(npc.getNavigation().createPath(BlockPos.containing(target),0),1); }
             return;

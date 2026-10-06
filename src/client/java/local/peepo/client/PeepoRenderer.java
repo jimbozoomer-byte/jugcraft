@@ -41,6 +41,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.eating=entity.isEating();
         state.wheelRunning=entity.isWheelRunning();
         state.sleeping=entity.getRestMode()==CompanionEnergy.Rest.SLEEPING;
+        state.sitting=entity.getRestMode()==CompanionEnergy.Rest.SITTING;
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;
         items.updateForLiving(state.food,state.eating ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.FIXED,entity);
     }

@@ -5,14 +5,14 @@ Applies to Peepo, pumpkin Peepo and Jughead.
 - Eating/nearby food takes priority over station work. Automatic feeding still requires missing health or less than 95% energy. A healthy NPC with an active food regeneration buff lets that meal digest instead of consuming every dropped item; hand feeding remains available below 95%.
 - Reaching zero energy starts a saved, synchronized recovery state. Work and running are blocked until the reserve reaches 80% (102,400 JE). A cancelled energy transaction cannot trigger exhaustion.
 - Station search considers only loaded block entities within 16 blocks, at most every 40 ticks. It prefers an available wheel with buffer space when work is allowed; otherwise a bed at night, then a chair. With no usable station, it can wander and regenerate. Exhausted NPCs take a stationary break until their recovery threshold is reached.
-- Beds are night-only. Dawn ends sleep. During recovery, furniture remains preferred until 80%. Chairs periodically check for available work after that; an occupied bed continues sleep until 95% or dawn.
+- Beds are night-only. Dawn ends sleep. During recovery, furniture remains preferred until 80%. Chairs finish their current break after recovery, then look for work; an occupied bed continues sleep until 95% or dawn.
 - A wheel receives at most the minimum of its remaining capacity, the NPC's reserve, and 64 JE/t. Wheel insertion and reserve extraction commit together. A full or nonaccepting wheel stops the running animation and is released without spending energy.
 - A station is reserved for one NPC before pathing. Unreachable routes are skipped for ten seconds; a trip times out after ten seconds. Station removal, chunk unload, lost availability and eating release it. No chunks are force-loaded.
 - Sneak-right-click with an empty hand shows activity, energy, regeneration and food-buff time.
 
 ## What is usable now
 
-Energy-based food seeking, digestion, passive recovery, exhaustion lockout and status reporting are available. The registered Companion Generator Wheel implements station discovery, exclusive occupancy, animated running and transactional JE generation. Colored, stackable companion beds provide sleeping stations; chair blocks remain a future addition. See LOCAL_TESTING.md for the local build and manual test steps.
+Energy-based food seeking, digestion, passive recovery, exhaustion lockout and status reporting are available. The registered Companion Generator Wheel implements station discovery, exclusive occupancy, animated running and transactional JE generation. Colored, stackable companion beds provide sleeping stations; stools and shared player chairs provide seated rest, alongside supported bed and fence perches. See LOCAL_TESTING.md for the local build and manual test steps.
 
 ## Station integration contract
 

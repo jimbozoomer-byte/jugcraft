@@ -14,7 +14,7 @@ The wheel budget is 64 JE/t per NPC (1,280 JE/second): a full reserve lasts 100 
 | Activity | Passive regeneration | Empty-to-full without food |
 |---|---:|---:|
 | Standing or moving off the wheel | 2 JE/t | 53 min 20 sec |
-| Resting on a future chair | 8 JE/t | 13 min 20 sec |
+| Resting on a stool, chair or perch | 8 JE/t | 13 min 20 sec |
 | Sleeping in a companion bed, at night | 16 JE/t | 6 min 40 sec |
 | Powering a wheel | 0 JE/t | — |
 
@@ -35,7 +35,7 @@ Sneak-right-click with an empty hand shows current energy, current regeneration 
 
 ## Furniture hooks and wheel integration
 
-`PeepoEntity.setRestMode(CompanionEnergy.Rest.SITTING/SLEEPING/NONE)` is a server-only hook. Furniture must validate occupancy and clear the state on dismount/removal. Rest blocks wandering; direct feeding ends rest. Furniture must re-establish occupancy after load: rest itself resets to NONE to avoid immobilizing an NPC at a missing chair/bed. Colored, stackable companion beds implement the sleeping hook. Chairs remain a future addition.
+`PeepoEntity.setRestMode(CompanionEnergy.Rest.SITTING/SLEEPING/NONE)` is a server-only hook. Furniture must validate occupancy and clear the state on dismount/removal. Rest blocks wandering; direct feeding ends rest. Furniture must re-establish occupancy after load: rest itself resets to NONE to avoid immobilizing an NPC at a missing chair/bed. Colored, stackable companion beds implement the sleeping hook. Stools, shared player chairs and supported block edges implement seated rest; see SEATING.md.
 
 `extractEnergy(requested, TransactionContext)` returns actual JE extracted, at most 64 total per game tick across all callers. Dead, eating or resting NPCs cannot supply energy. Aborted transactions restore reserve and tick budget. A wheel must insert into the receiving storage and extract the matching amount in the same Fabric transaction; do not commit unmatched extraction. There is deliberately no direct cable registration on the entity or electrical charging API. Passive recovery is suppressed during work and the following tick to avoid tick-order double recovery.
 

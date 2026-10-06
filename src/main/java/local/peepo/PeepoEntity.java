@@ -88,6 +88,7 @@ public final class PeepoEntity extends PathfinderMob {
     public boolean setRestMode(CompanionEnergy.Rest rest) {
         if(level().isClientSide() || !isAlive() || (rest!=CompanionEnergy.Rest.NONE && isEating())
                 || (rest==CompanionEnergy.Rest.SLEEPING && !isRestNight())) return false;
+        if (getRestMode()==CompanionEnergy.Rest.SITTING && rest!=CompanionEnergy.Rest.SITTING) setNoGravity(false);
         entityData.set(REST,rest.ordinal());
         if(rest!=CompanionEnergy.Rest.NONE)getNavigation().stop();
         return true;
@@ -154,12 +155,13 @@ public final class PeepoEntity extends PathfinderMob {
         // Furniture must re-establish a valid seat/bed after loading, never leave a phantom rest state.
         entityData.set(REST,0);
         bedExit = input.read("CompanionBedExit", net.minecraft.core.BlockPos.CODEC).orElse(null);
+        if (bedExit != null) setNoGravity(false);
         int remaining=Math.clamp(input.getIntOr("EatingTicks",0),0,EAT_DURATION);
         entityData.set(EATING,isEdible(getMainHandItem()) ? remaining : 0);
     }
     public boolean isBlushing() { return entityData.get(BLUSHING); }
     @Override public void tick() {
-        if (!level().isClientSide() && bedExit != null && getRestMode() != CompanionEnergy.Rest.SLEEPING) leaveCompanionBed();
+        if (!level().isClientSide() && bedExit != null && getRestMode() == CompanionEnergy.Rest.NONE) leaveCompanionBed();
         super.tick();
         if(!level().isClientSide()) {
             if(wheelRunningTicks>0)--wheelRunningTicks;

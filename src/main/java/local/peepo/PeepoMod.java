@@ -35,6 +35,7 @@ public final class PeepoMod implements ModInitializer {
     @Override public void onInitialize() {
         GeneratorWheel.initialize();
         CompanionBeds.initialize();
+        CompanionStool.initialize();
         PeepoSpawns.initialize();
         FabricDefaultAttributeRegistry.register(PEEPO, PeepoEntity.attributes());
         FabricDefaultAttributeRegistry.register(JUGHEAD, PeepoEntity.attributes());

@@ -17,7 +17,7 @@ public final class CompanionBedEntity extends BlockEntity implements CompanionSt
     public CompanionBedEntity(BlockPos pos, BlockState state) { super(CompanionBeds.ENTITY, pos, state); }
     private Direction facing() { return getBlockState().getValue(CompanionBedBlock.FACING); }
     private PeepoEntity npc() { return level instanceof ServerLevel s && occupant != null && s.getEntity(occupant) instanceof PeepoEntity p ? p : null; }
-    private Vec3 entrance() {
+    public Vec3 entrance() {
         BlockPos bottom = worldPosition;
         while (bottom.getY() > level.getMinY() && CompanionBedBlock.matching(level.getBlockState(bottom.below()), facing())) bottom = bottom.below();
         return Vec3.atBottomCenterOf(bottom.relative(facing().getOpposite()));
@@ -34,11 +34,12 @@ public final class CompanionBedEntity extends BlockEntity implements CompanionSt
             var p = npc(); if (p != null) release(p); else { occupant = null; mounted = false; }
         }
     }
+    public boolean hasOccupant() { expire(); return occupant != null; }
     @Override public Kind kind() { return Kind.BED; }
     @Override public Vec3 approachPosition() { return mounted ? pillow() : entrance(); }
     @Override public boolean availableTo(PeepoEntity p) {
         expire();
-        return !isRemoved() && p.isRestNight() && (occupant == null || occupant.equals(p.getUUID())) && clearEntrance();
+        return !CompanionSeats.isReserved(level, worldPosition) && !isRemoved() && p.isRestNight() && (occupant == null || occupant.equals(p.getUUID())) && clearEntrance();
     }
     @Override public boolean claim(PeepoEntity p) {
         if (!availableTo(p)) return false;
