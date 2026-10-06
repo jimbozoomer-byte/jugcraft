@@ -11,8 +11,11 @@ import org.jspecify.annotations.Nullable;
  * the research state that lets a player use it, the instrument capacity it takes, the Focus it adds to a cast, and
  * what it does ({@link #part()}). The codex pages describing components are generated from the same tables in
  * tools/concordance.py, so the page and the rule cannot disagree.
+ * <p>
+ * An {@code authored} component belongs to an authored invocation (roadmap step 10): invocations are written in the
+ * same grammar and compiled under the same limits, but a player cannot compose with these words themselves.
  */
-public record Component(String id, Slot slot, Definitions.Requirement requires, int capacity, int focus, Part part) {
+public record Component(String id, Slot slot, Definitions.Requirement requires, int capacity, int focus, boolean authored, Part part) {
 	public Text.Ref ref() {
 		return Text.component(id);
 	}
@@ -55,7 +58,9 @@ public record Component(String id, Slot slot, Definitions.Requirement requires, 
 		/** Living creatures within the radius, nearest first. */
 		CREATURES,
 		/** Blocks within the radius that the operation can act on, nearest first. */
-		BLOCKS;
+		BLOCKS,
+		/** The caster and the players in the caster's party within the radius, nearest first: for helpful operations. */
+		ALLIES;
 
 		public String id() {
 			return name().toLowerCase(Locale.ROOT);
@@ -72,7 +77,11 @@ public record Component(String id, Slot slot, Definitions.Requirement requires, 
 
 		/** Whether operations on {@code on} can use this selection. */
 		public boolean suits(EffectKind.On on) {
-			return this == STRUCK || (this == CREATURES) == (on == EffectKind.On.CREATURE);
+			return switch (this) {
+				case STRUCK -> true;
+				case CREATURES, ALLIES -> on == EffectKind.On.CREATURE;
+				case BLOCKS -> on == EffectKind.On.BLOCK;
+			};
 		}
 	}
 
@@ -83,8 +92,12 @@ public record Component(String id, Slot slot, Definitions.Requirement requires, 
 	public record Selection(Pick pick, int radius, int targets) implements Part {
 	}
 
-	/** @param principle the Principle it works with (it names the damage school, through tools/concordance.py) */
-	public record Operation(EffectSpec effect, String principle) implements Part {
+	/**
+	 * @param principle the Principle it works with (it names the damage school, through tools/concordance.py)
+	 * @param scaling damage added for each point of the caster's Spell Power in the effect's school above the base
+	 *     (damage only; 0 for none). Applied once, by the cast that runs the plan ({@link Plan#scaled}).
+	 */
+	public record Operation(EffectSpec effect, String principle, double scaling) implements Part {
 	}
 
 	/** What a modifier changes. */

@@ -48,6 +48,7 @@ public final class Compiler {
 	private final Catalog catalog;
 	private final Knows knows;
 	private final Instrument instrument;
+	private final boolean authored;
 	private final List<Text> problems = new ArrayList<>();
 	private final Set<String> checkedResearch = new HashSet<>();
 	private int capacity;
@@ -57,13 +58,14 @@ public final class Compiler {
 	private int branches;
 	private int duration;
 
-	private Compiler(Catalog catalog, Knows knows, Instrument instrument) {
+	private Compiler(Catalog catalog, Knows knows, Instrument instrument, boolean authored) {
 		this.catalog = catalog;
 		this.knows = knows;
 		this.instrument = instrument;
+		this.authored = authored;
 	}
 
-	/** Parses and compiles written text. */
+	/** Parses and compiles written text: a player's composition. */
 	public static Compilation compile(String text, Catalog catalog, Knows knows, Instrument instrument) {
 		CompositionParser.Parsed parsed = CompositionParser.parse(text);
 		if (parsed.composition() == null) {
@@ -73,9 +75,57 @@ public final class Compiler {
 	}
 
 	public static Compilation compile(Composition composition, Catalog catalog, Knows knows, Instrument instrument) {
-		Compiler compiler = new Compiler(catalog, knows, instrument);
+		Compiler compiler = new Compiler(catalog, knows, instrument, false);
 		Plan.Node root = compiler.node(composition, 0);
 		return compiler.finish(composition, root);
+	}
+
+	/**
+	 * Compiles an authored invocation's composition (roadmap step 10): the same grammar, checks and limits as a
+	 * player's, except that authored words are allowed and research is not checked word by word (the invocation is
+	 * learnt from its own research). So an invocation can never do more than a composed spell on the same instrument.
+	 */
+	public static Compilation compileAuthored(String text, Catalog catalog, Instrument instrument) {
+		CompositionParser.Parsed parsed = CompositionParser.parse(text);
+		if (parsed.composition() == null) {
+			return new Compilation(null, parsed.problems());
+		}
+		return compileAuthored(parsed.composition(), catalog, instrument);
+	}
+
+	/** As {@link #compileAuthored(String, Catalog, Instrument)}, for a composition already parsed (or tuned). */
+	public static Compilation compileAuthored(Composition composition, Catalog catalog, Instrument instrument) {
+		Compiler compiler = new Compiler(catalog, research -> ResearchState.MASTERED, instrument, true);
+		Plan.Node root = compiler.node(composition, 0);
+		return compiler.finish(composition, root);
+	}
+
+	/**
+	 * The composition with {@code modifier} joined to the first part it changes (the spell's own parts before its
+	 * branch's), or null if it changes none that has room for it. This is how a tuning applies to an invocation: the
+	 * result is still a composition and compiles under every limit a player's does, so a tuning can only change numbers
+	 * (never what the spell selects or does) and can never take it past its instrument.
+	 */
+	public static @Nullable Composition tune(Composition composition, Component modifier, Catalog catalog) {
+		if (!(modifier.part() instanceof Component.Modifier change)) {
+			return null;
+		}
+		List<Composition.Part> parts = composition.parts();
+		for (int i = 0; i < parts.size(); i++) {
+			Composition.Part written = parts.get(i);
+			Component part = catalog.component(written.component());
+			if (part == null || change.aspect().modifies != part.slot() || !changes(change.aspect(), part)
+					|| written.modifiers().contains(modifier.id()) || written.modifiers().size() >= Grammar.MAX_MODIFIERS) {
+				continue;
+			}
+			List<String> joined = new ArrayList<>(written.modifiers());
+			joined.add(modifier.id());
+			List<Composition.Part> tuned = new ArrayList<>(parts);
+			tuned.set(i, new Composition.Part(written.component(), joined));
+			return new Composition(tuned, composition.then());
+		}
+		Composition then = composition.then() == null ? null : tune(composition.then(), modifier, catalog);
+		return then == null ? null : new Composition(parts, then);
 	}
 
 	private Compilation finish(Composition composition, Plan.@Nullable Node root) {
@@ -209,6 +259,9 @@ public final class Compiler {
 					&& effect.intent() == Intent.HARMFUL) {
 				problems.add(Text.of("problem.harms_caster", operation.ref()));
 			}
+			if (selectionPart.pick() == Component.Pick.ALLIES && effect.intent() == Intent.HARMFUL) {
+				problems.add(Text.of("problem.harms_allies", operation.ref(), selection.ref()));
+			}
 			int magnitude = effect.magnitude();
 			int ticks = effect.duration();
 			for (Component modifier : operationModifiers.get(i)) {
@@ -219,7 +272,11 @@ public final class Compiler {
 					ticks += effect.duration() * change.amount() / 100;
 				}
 			}
-			int strongest = effect.kind() == EffectKind.STATUS ? EffectSpec.MAX_AMPLIFIER : EffectSpec.MAX_MAGNITUDE;
+			int strongest = switch (effect.kind()) {
+				case STATUS -> EffectSpec.MAX_AMPLIFIER;
+				case MOVEMENT -> EffectSpec.MAX_PUSH;
+				default -> EffectSpec.MAX_MAGNITUDE;
+			};
 			if (magnitude > strongest) {
 				problems.add(Text.of("problem.magnitude", operation.ref(), magnitude, strongest));
 				magnitude = strongest;
@@ -229,7 +286,7 @@ public final class Compiler {
 						Text.seconds(instrument.duration())));
 				ticks = Math.min(ticks, EffectSpec.MAX_DURATION);
 			}
-			steps.add(new Plan.Step(i, operation.id(), effect.withMagnitude(magnitude).withDuration(ticks), part.principle()));
+			steps.add(new Plan.Step(i, operation.id(), effect.withMagnitude(magnitude).withDuration(ticks), part.principle(), part.scaling()));
 			focus += (operation.focus() + cost(operationModifiers.get(i))) * ending.pulses();
 			work += ending.pulses() * effect.kind().work * selectionPart.targets();
 		}
@@ -294,6 +351,10 @@ public final class Compiler {
 	/** Counts a component's capacity and checks the caster may use it (each component's research once). */
 	private void use(Component component) {
 		capacity += component.capacity();
+		if (component.authored() && !authored) {
+			problems.add(Text.of("problem.authored", component.ref()));
+			return;
+		}
 		Definitions.Requirement needs = component.requires();
 		ResearchState has = knows.state(needs.research());
 		if (!has.atLeast(needs.state()) && checkedResearch.add(component.id())) {

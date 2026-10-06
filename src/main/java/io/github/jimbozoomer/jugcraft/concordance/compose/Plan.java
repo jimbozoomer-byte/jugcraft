@@ -1,10 +1,12 @@
 package io.github.jimbozoomer.jugcraft.concordance.compose;
 
+import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.ToDoubleFunction;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -46,8 +48,75 @@ public record Plan(String text, Node root, int focus, int cooldown, int capacity
 	 * One operation in a node, as compiled.
 	 *
 	 * @param index its place among the node's operations (part of its ledger key)
+	 * @param scaling damage added per point of Spell Power above the base ({@link Component.Operation#scaling})
 	 */
-	public record Step(int index, String component, EffectSpec effect, String principle) {
+	public record Step(int index, String component, EffectSpec effect, String principle, double scaling) {
+	}
+
+	/**
+	 * This plan with its damage scaled by the caster's Spell Power: each damage step with a scaling factor (only damage
+	 * that names its school has one) gains {@code floor(scaling * power above base)} in that school, capped at the
+	 * strongest damage allowed. This is the one place Spell Power enters a Concordance effect; the effect boundary
+	 * applies the result as it is, and the damage type's resistances apply once, in the damage itself.
+	 *
+	 * @param powerAboveBase the caster's Spell Power above the school's base value, by school id
+	 */
+	public Plan scaled(ToDoubleFunction<String> powerAboveBase) {
+		return new Plan(text, scaled(root, powerAboveBase), focus, cooldown, capacity, limits, duration);
+	}
+
+	private static Node scaled(Node node, ToDoubleFunction<String> powerAboveBase) {
+		List<Step> steps = new ArrayList<>();
+		for (Step step : node.steps()) {
+			EffectSpec effect = step.effect();
+			if (effect.kind() == EffectKind.DAMAGE && step.scaling() > 0 && effect.school() != null) {
+				double above = Math.max(0.0, powerAboveBase.applyAsDouble(effect.school()));
+				int added = (int) Math.min(EffectSpec.MAX_MAGNITUDE, Math.floor(step.scaling() * above));
+				effect = effect.withMagnitude(Math.min(EffectSpec.MAX_MAGNITUDE, effect.magnitude() + added));
+			}
+			steps.add(new Step(step.index(), step.component(), effect, step.principle(), step.scaling()));
+		}
+		Node then = node.then() == null ? null : scaled(node.then(), powerAboveBase);
+		return new Node(node.depth(), node.delivery(), node.form(), node.range(), node.selection(), node.pick(), node.radius(),
+				node.targets(), steps, node.termination(), node.pulses(), node.interval(), then);
+	}
+
+	/**
+	 * The most ticks anything this plan makes can last after it is cast: for each node, its pulses plus its
+	 * longest-lasting effect. Instant effects (damage, a push) last nothing.
+	 */
+	public int persists() {
+		int longest = 0;
+		for (Node node = root; node != null; node = node.then()) {
+			int effect = 0;
+			for (Step step : node.steps()) {
+				effect = Math.max(effect, step.effect().duration());
+			}
+			longest = Math.max(longest, node.lingers() + effect);
+		}
+		return longest;
+	}
+
+	/**
+	 * What the plan is, regardless of its numbers: for each node, its delivery form, selection and the kinds of effect
+	 * it applies. Two invocations with the same signature would be the same spell with different numbers; tunings
+	 * (modifiers) change numbers only, never the signature.
+	 */
+	public String signature() {
+		StringBuilder out = new StringBuilder();
+		for (Node node = root; node != null; node = node.then()) {
+			if (node != root) {
+				out.append(" then ");
+			}
+			out.append(node.form().id()).append('/').append(node.pick().id()).append(':');
+			List<String> kinds = new ArrayList<>();
+			for (Step step : node.steps()) {
+				kinds.add(step.effect().kind().id + "/" + step.effect().intent().id);
+			}
+			kinds.sort(null);
+			out.append(String.join(",", kinds));
+		}
+		return out.toString();
 	}
 
 	/** A readable account of what the spell does and costs, from the same numbers the server runs. */
@@ -73,10 +142,14 @@ public record Plan(String text, Node root, int focus, int cooldown, int capacity
 		switch (node.pick()) {
 			case STRUCK -> lines.add(Text.of("explain.selection.struck", selection));
 			case CREATURES -> lines.add(Text.of("explain.selection.creatures", selection, node.targets(), node.radius()));
+			case ALLIES -> lines.add(Text.of("explain.selection.allies", selection, node.targets(), node.radius()));
 			case BLOCKS -> lines.add(Text.of("explain.selection.blocks", selection, node.targets(), node.radius()));
 		}
 		for (Step step : node.steps()) {
 			lines.add(operation(step));
+			if (step.scaling() > 0 && step.effect().kind() == EffectKind.DAMAGE) {
+				lines.add(Text.of("explain.scaling", Text.component(step.component()), String.format(Locale.ROOT, "%.2f", step.scaling())));
+			}
 		}
 		if (node.pulses() > 1) {
 			lines.add(Text.of("explain.termination.pulse", Text.component(node.termination() == null ? "" : node.termination()),

@@ -39,12 +39,48 @@ public final class Definitions {
 		}
 	}
 
-	/** An invocation: the Spell Engine spell it casts, the research that teaches it and its Focus cost. */
+	/**
+	 * An authored invocation (roadmap step 10): the Spell Engine spell it casts, the research that teaches it, its
+	 * Focus cost, its tactical role, and what it does, written as a composition in the shared grammar
+	 * ({@code composition}) and compiled under the same limits as a player's. {@code tunings} are the modifiers a player
+	 * may join to it, one at a time, on their instrument; {@code work} and {@code persists} are the most work one cast
+	 * may spend and the most ticks anything it makes may last, declared by the author and checked against every
+	 * compiled form when the rules are built.
+	 */
 	public record Invocation(String id, int schema, String spell, String principle, String research, ResearchState state,
-			int focus, int masteredFocus) {
-		/** The Focus it costs a player whose research has reached {@code reached}. */
+			int focus, int masteredFocus, Role role, String composition, List<String> tunings, int work, int persists) {
+		public Invocation {
+			tunings = List.copyOf(tunings);
+		}
+
+		/** The Focus it costs a player whose research has reached {@code reached}, before any tuning. */
 		public int cost(ResearchState reached) {
 			return reached == ResearchState.MASTERED ? masteredFocus : focus;
+		}
+	}
+
+	/** What an invocation is for in a fight or an expedition. Each invocation has one. */
+	public enum Role {
+		DAMAGE("damage"),
+		DEFENSE("defense"),
+		MOVEMENT("movement"),
+		SUPPORT("support"),
+		INVESTIGATION("investigation"),
+		UTILITY("utility");
+
+		public final String id;
+
+		Role(String id) {
+			this.id = id;
+		}
+
+		public static @Nullable Role fromId(String id) {
+			for (Role role : values()) {
+				if (role.id.equals(id)) {
+					return role;
+				}
+			}
+			return null;
 		}
 	}
 

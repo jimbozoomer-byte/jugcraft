@@ -51,13 +51,15 @@ public final class Catalog {
 		return out;
 	}
 
-	/** Every component's written name ({@link Composition#text()} form), by slot: for suggestions. */
+	/** Every composable component's written name ({@link Composition#text()} form), by slot: for suggestions. */
 	public Map<Slot, List<String>> names() {
 		Map<Slot, List<String>> out = new LinkedHashMap<>();
 		for (Slot slot : Slot.values()) {
 			List<String> names = new ArrayList<>();
 			for (Component component : inSlot(slot)) {
-				names.add(Composition.shortName(component.id()));
+				if (!component.authored()) {
+					names.add(Composition.shortName(component.id()));
+				}
 			}
 			out.put(slot, names);
 		}

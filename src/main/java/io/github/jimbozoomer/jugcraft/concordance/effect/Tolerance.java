@@ -4,8 +4,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * How a creature bears harmful control (movement and status effects): the same for every source. Damage is not
- * changed here; it already passes through armour, enchantments and Spell Power's school resistances on its damage
- * type, and taking it off again here would count those twice.
+ * changed here; its Spell Power damage type already carries Spell Power's rules (it bypasses armour and shields, and
+ * Spell Power's magic resistance reduces it), and reducing it again here would count resistance twice.
  * <ul>
  * <li>{@link #NORMAL}: the effect as it is.</li>
  * <li>{@link #RESISTANT} ({@code #jugcraft:concordance/resistant}): harmful pushes at half strength, harmful statuses

@@ -33,6 +33,8 @@ public final class RulesParser {
 	public static final int SCHEMA = 1;
 	private static final Pattern ID = Pattern.compile("[a-z0-9_.-]+:[a-z0-9_./-]+");
 	private static final Pattern NAME = Pattern.compile("[a-z0-9_]+");
+	/** The most modifiers an invocation offers as tunings. */
+	public static final int MAX_TUNINGS = 3;
 
 	private final List<String> problems = new ArrayList<>();
 
@@ -142,11 +144,26 @@ public final class RulesParser {
 	public Definitions.@Nullable Invocation invocation(String id, JsonElement json) {
 		try {
 			JsonObject object = object(json, "invocation");
-			only(object, "schema", "spell", "principle", "research", "stage", "focus", "mastered_focus");
+			only(object, "schema", "spell", "principle", "research", "stage", "focus", "mastered_focus", "role", "composition",
+					"tunings", "work", "persists");
 			int focus = range(object, "focus", 1, 1000);
 			int mastered = range(object, "mastered_focus", 1, focus);
+			String roleName = string(object, "role");
+			Definitions.Role role = Definitions.Role.fromId(roleName);
+			if (role == null) {
+				throw new Invalid("unknown role \"" + roleName + "\" (damage, defense, movement, support, investigation, utility)");
+			}
+			String composition = string(object, "composition");
+			if (composition.isBlank() || composition.length() > Grammar.MAX_TEXT) {
+				throw new Invalid("\"composition\" must be 1 to " + Grammar.MAX_TEXT + " characters");
+			}
+			List<String> tunings = ids(object, "tunings");
+			if (tunings.size() > MAX_TUNINGS) {
+				throw new Invalid("at most " + MAX_TUNINGS + " tunings");
+			}
 			return new Definitions.Invocation(id, schema(object), id(object, "spell"), name(object, "principle"),
-					id(object, "research"), state(object, "stage"), focus, mastered);
+					id(object, "research"), state(object, "stage"), focus, mastered, role, composition, tunings,
+					range(object, "work", 1, Grammar.MAX_WORK), range(object, "persists", 0, Grammar.MAX_DURATION));
 		} catch (Invalid | IllegalStateException | UnsupportedOperationException | NumberFormatException problem) {
 			problems.add("invocation " + id + ": " + problem.getMessage());
 			return null;
@@ -222,7 +239,8 @@ public final class RulesParser {
 	/**
 	 * A composition component: {@code {"schema": 1, "slot": "operation", "requires": {"research": ..., "state": ...},
 	 * "capacity": 2, "focus": 3, "operation": {...}}}, with one object named after its slot (see
-	 * {@link Component} for each). Numbers outside the grammar's limits ({@link Grammar}) are refused.
+	 * {@link Component} for each) and an optional {@code "authored": true} for a word only invocations use. Numbers
+	 * outside the grammar's limits ({@link Grammar}) are refused.
 	 */
 	public @Nullable Component component(String id, JsonElement json) {
 		try {
@@ -232,8 +250,13 @@ public final class RulesParser {
 			if (slot == null) {
 				throw new Invalid("unknown slot \"" + slotName + "\" (delivery, selection, operation, modifier, termination)");
 			}
-			only(object, "schema", "slot", "requires", "capacity", "focus", slot.id());
+			only(object, "schema", "slot", "requires", "capacity", "focus", "authored", slot.id());
 			schema(object);
+			boolean authored = bool(object, "authored", false);
+			if (authored && slot == Slot.MODIFIER) {
+				// Tunings are how players change invocations; a modifier only an author could use would change nothing.
+				throw new Invalid("a modifier cannot be authored");
+			}
 			JsonObject requires = object(member(object, "requires"), "requires");
 			only(requires, "research", "state");
 			Definitions.Requirement requirement = new Definitions.Requirement(id(requires, "research"), state(requires, "state"));
@@ -260,7 +283,7 @@ public final class RulesParser {
 					yield new Component.Termination(pulses, interval);
 				}
 			};
-			return new Component(id, slot, requirement, capacity, focus, part);
+			return new Component(id, slot, requirement, capacity, focus, authored, part);
 		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
 			problems.add("component " + id + ": " + problem.getMessage());
 			return null;
@@ -282,7 +305,7 @@ public final class RulesParser {
 		String pickName = string(body, "pick");
 		Component.Pick pick = Component.Pick.fromId(pickName);
 		if (pick == null) {
-			throw new Invalid("selection: unknown pick \"" + pickName + "\" (struck, creatures, blocks)");
+			throw new Invalid("selection: unknown pick \"" + pickName + "\" (struck, creatures, blocks, allies)");
 		}
 		if (pick == Component.Pick.STRUCK) {
 			return new Component.Selection(pick, range(body, "radius", 0, 0), range(body, "targets", 1, 1));
@@ -291,7 +314,7 @@ public final class RulesParser {
 	}
 
 	private static Component.Operation operation(JsonObject body) {
-		only(body, "effect", "intent", "principle", "magnitude", "duration", "status", "stacking", "school");
+		only(body, "effect", "intent", "principle", "magnitude", "duration", "status", "stacking", "school", "scaling");
 		String kindName = string(body, "effect");
 		EffectKind kind = EffectKind.fromId(kindName);
 		if (kind == null) {
@@ -331,7 +354,15 @@ public final class RulesParser {
 			}
 		}
 		String school = body.has("school") ? id(body, "school") : null;
-		return new Component.Operation(new EffectSpec(kind, intent, magnitude, duration, status, stacking, school), principle);
+		double scaling = 0.0;
+		if (body.has("scaling")) {
+			// Spell Power is damage power in a school: it scales only damage that names its school.
+			if (kind != EffectKind.DAMAGE || school == null) {
+				throw new Invalid("operation: only damage that names a school scales with Spell Power");
+			}
+			scaling = decimal(body, "scaling", 0.0, MAX_SCALING);
+		}
+		return new Component.Operation(new EffectSpec(kind, intent, magnitude, duration, status, stacking, school), principle, scaling);
 	}
 
 	/**
@@ -495,6 +526,32 @@ public final class RulesParser {
 			throw new Invalid("\"" + where + "\" must be a whole number from " + min + " to " + max);
 		}
 		return (int) value;
+	}
+
+	/** The most damage an operation may add per point of Spell Power. */
+	public static final double MAX_SCALING = 2.0;
+
+	private static boolean bool(JsonObject object, String field, boolean fallback) {
+		if (!object.has(field)) {
+			return fallback;
+		}
+		JsonElement element = object.get(field);
+		if (!(element instanceof JsonPrimitive primitive) || !primitive.isBoolean()) {
+			throw new Invalid("\"" + field + "\" must be true or false");
+		}
+		return primitive.getAsBoolean();
+	}
+
+	private static double decimal(JsonObject object, String field, double min, double max) {
+		JsonElement element = member(object, field);
+		if (!(element instanceof JsonPrimitive primitive) || !primitive.isNumber()) {
+			throw new Invalid("\"" + field + "\" must be a number");
+		}
+		double value = primitive.getAsDouble();
+		if (!(value >= min && value <= max)) {
+			throw new Invalid("\"" + field + "\" must be from " + min + " to " + max);
+		}
+		return value;
 	}
 
 	private static int range(JsonObject object, String field, int min, int max) {

@@ -1,9 +1,16 @@
 package io.github.jimbozoomer.jugcraft.concordance.rules;
 
 import com.google.gson.JsonElement;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Authored;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Catalog;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Compiler;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Component;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Composition;
+import io.github.jimbozoomer.jugcraft.concordance.compose.CompositionParser;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Instrument;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Plan;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Slot;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ConversionTable;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceType;
@@ -26,23 +33,26 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ConcordanceRules {
 	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
-			List.of());
+			Map.of(), List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
 	private final Map<String, Definitions.Working> workings;
 	private final ConversionTable conversions;
 	private final Catalog catalog;
+	private final Map<String, Map<String, Authored>> authored;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
 	private ConcordanceRules(Map<String, Definitions.Research> research, Map<String, Definitions.Invocation> invocations,
-			Map<String, Definitions.Working> workings, ConversionTable conversions, Catalog catalog, List<String> problems) {
+			Map<String, Definitions.Working> workings, ConversionTable conversions, Catalog catalog,
+			Map<String, Map<String, Authored>> authored, List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
 		this.conversions = conversions;
 		this.catalog = catalog;
+		this.authored = authored;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -90,6 +100,20 @@ public final class ConcordanceRules {
 
 	public Definitions.@Nullable Working working(String id) {
 		return workings.get(id);
+	}
+
+	/**
+	 * An invocation as compiled for an instrument (by instrument id), or null if it does not fit that instrument. Every
+	 * loaded invocation fits at least one.
+	 */
+	public @Nullable Authored authored(String invocation, String instrument) {
+		Map<String, Authored> forms = authored.get(invocation);
+		return forms == null ? null : forms.get(instrument);
+	}
+
+	/** An invocation's compiled forms, by instrument id (empty if it is not loaded). */
+	public Map<String, Authored> authored(String invocation) {
+		return authored.getOrDefault(invocation, Map.of());
 	}
 
 	/** Entries a player can start with no other research: there must be at least one. */
@@ -183,14 +207,41 @@ public final class ConcordanceRules {
 			problems.add("research " + cycle + ": its prerequisites lead back to itself");
 			research.remove(cycle);
 		}
-		// Invocations need a research state to learn them from.
+		// A component is learnt from a research state like an invocation; one naming none could never be used.
+		for (Component component : List.copyOf(components.values())) {
+			Definitions.Research entry = research.get(component.requires().research());
+			if (entry == null || !entry.states().containsKey(component.requires().state())) {
+				problems.add("component " + component.id() + ": needs " + component.requires().research() + " "
+						+ component.requires().state().id() + ", which does not exist");
+				components.remove(component.id());
+			}
+		}
+		Catalog catalog = new Catalog(components, instruments);
+		// Invocations need a research state to learn them from, and a composition that compiles.
+		Map<String, Map<String, Authored>> authored = new TreeMap<>();
+		Map<String, String> signatures = new HashMap<>();
 		for (Definitions.Invocation invocation : List.copyOf(invocations.values())) {
 			Definitions.Research entry = research.get(invocation.research());
 			if (entry == null || !entry.states().containsKey(invocation.state())) {
 				problems.add("invocation " + invocation.id() + ": learnt from " + invocation.research() + " "
 						+ invocation.state().id() + ", which does not exist");
 				invocations.remove(invocation.id());
+				continue;
 			}
+			Map<String, Authored> forms = compile(invocation, catalog, problems);
+			if (forms == null) {
+				invocations.remove(invocation.id());
+				continue;
+			}
+			// Two invocations that select and do the same would be one spell with two prices.
+			String signature = forms.values().iterator().next().plan().signature();
+			String same = signatures.putIfAbsent(signature, invocation.id());
+			if (same != null) {
+				problems.add("invocation " + invocation.id() + ": does what " + same + " does (" + signature + ")");
+				invocations.remove(invocation.id());
+				continue;
+			}
+			authored.put(invocation.id(), Collections.unmodifiableMap(forms));
 		}
 		ConversionTable conversions = ConversionTable.build(conversionList);
 		problems.addAll(conversions.problems());
@@ -242,22 +293,102 @@ public final class ConcordanceRules {
 				}
 			}
 		}
-		// A component is learnt from a research state like an invocation; one naming none could never be used.
-		for (Component component : List.copyOf(components.values())) {
-			Definitions.Research entry = research.get(component.requires().research());
-			if (entry == null || !entry.states().containsKey(component.requires().state())) {
-				problems.add("component " + component.id() + ": needs " + component.requires().research() + " "
-						+ component.requires().state().id() + ", which does not exist");
-				components.remove(component.id());
-			}
-		}
 		if (!research.isEmpty() && research.values().stream().noneMatch(entry -> entry.requires().isEmpty())) {
 			problems.add("no research entry can be started without another: the Concordance has no way in");
 		}
 		return new ConcordanceRules(Collections.unmodifiableMap(new LinkedHashMap<>(research)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(invocations)),
-				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, new Catalog(components, instruments),
-				List.copyOf(problems));
+				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, catalog,
+				Collections.unmodifiableMap(authored), List.copyOf(problems));
+	}
+
+	/**
+	 * Compiles an invocation's composition, untuned and with each tuning, for every instrument it fits, and checks what
+	 * its author declared: that it costs at least the Focus its composition would ({@link #mayCost}), and that no form
+	 * spends more work or makes anything last longer than {@link Definitions.Invocation#work} and
+	 * {@link Definitions.Invocation#persists}. Returns null (with the reasons recorded) if it cannot be loaded; a tuning
+	 * that is not a modifier, changes nothing or fits no instrument is dropped on its own.
+	 */
+	private static @Nullable Map<String, Authored> compile(Definitions.Invocation invocation, Catalog catalog, List<String> problems) {
+		String name = "invocation " + invocation.id() + ": ";
+		CompositionParser.Parsed parsed = CompositionParser.parse(invocation.composition());
+		Composition composition = parsed.composition();
+		if (composition == null) {
+			problems.add(name + "composition \"" + invocation.composition() + "\" does not parse: " + describe(parsed.problems()));
+			return null;
+		}
+		Map<String, Composition> tunings = new LinkedHashMap<>();
+		for (String id : invocation.tunings()) {
+			Component modifier = catalog.component(id);
+			Composition tuned = modifier == null || modifier.slot() != Slot.MODIFIER ? null : Compiler.tune(composition, modifier, catalog);
+			if (tuned == null) {
+				problems.add(name + "tuning " + id + " is not a modifier that changes it");
+			} else {
+				tunings.put(id, tuned);
+			}
+		}
+		Map<String, Authored> forms = new TreeMap<>();
+		List<Text> refused = List.of();
+		for (Instrument instrument : catalog.instruments().values()) {
+			Compiler.Compilation base = Compiler.compileAuthored(composition, catalog, instrument);
+			if (base.plan() == null) {
+				refused = base.problems();
+				continue;
+			}
+			Map<String, Plan> tuned = new LinkedHashMap<>();
+			for (Map.Entry<String, Composition> tuning : tunings.entrySet()) {
+				Plan plan = Compiler.compileAuthored(tuning.getValue(), catalog, instrument).plan();
+				if (plan != null && plan.signature().equals(base.plan().signature())) {
+					tuned.put(tuning.getKey(), plan);
+				}
+			}
+			forms.put(instrument.id(), new Authored(instrument.id(), base.plan(), tuned));
+		}
+		if (forms.isEmpty()) {
+			problems.add(name + "fits no instrument: " + describe(refused));
+			return null;
+		}
+		for (String tuning : tunings.keySet()) {
+			if (forms.values().stream().noneMatch(form -> form.tunings().containsKey(tuning))) {
+				problems.add(name + "tuning " + tuning + " fits no instrument");
+			}
+		}
+		for (Authored form : forms.values()) {
+			int least = form.plan().focus();
+			if (!mayCost(invocation.focus(), invocation.masteredFocus(), least)) {
+				problems.add(name + "costs less than its composition: at least " + least + " Focus, and "
+						+ (least - (least + 3) / 4) + " once mastered, on " + form.instrument());
+				return null;
+			}
+			List<Plan> plans = new ArrayList<>(form.tunings().values());
+			plans.add(form.plan());
+			for (Plan plan : plans) {
+				if (plan.limits().work() > invocation.work() || plan.persists() > invocation.persists()) {
+					problems.add(name + "\"" + plan.text() + "\" spends up to " + plan.limits().work() + " work and lasts up to "
+							+ plan.persists() + " ticks on " + form.instrument() + "; it declares " + invocation.work() + " and "
+							+ invocation.persists());
+					return null;
+				}
+			}
+		}
+		return forms;
+	}
+
+	/**
+	 * Whether an invocation may cost {@code focus} ({@code mastered} once its research is mastered) when its composition
+	 * costs {@code composed}: never less than a player would pay to compose it, and mastery takes off at most a quarter
+	 * (rounded up). So an invocation is never a cheaper way to the same effect than the grammar.
+	 */
+	public static boolean mayCost(int focus, int mastered, int composed) {
+		return focus >= composed && mastered >= composed - (composed + 3) / 4;
+	}
+
+	private static String describe(List<Text> texts) {
+		List<String> out = new ArrayList<>();
+		for (Text text : texts) {
+			out.add(text.key() + text.args());
+		}
+		return out.isEmpty() ? "no instrument is loaded" : String.join("; ", out);
 	}
 
 	/** Entries that are part of, or depend on, a prerequisite cycle. */
