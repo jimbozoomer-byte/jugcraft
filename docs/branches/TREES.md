@@ -26,6 +26,12 @@ art and fit, and every colour figure was recomputed by script. Their points and 
 own-wood revision" in Decisions, which ends with the choices still left to the owner. The owner has since approved the
 cedar as batch 1 built it ("Cedar looks sooo good!!"), so every check here is made against that cedar, #725543.
 
+**The new woods' colours are approved.** On 6 October 2026 the owner saw the sixteen new woods as previewed (each wood's
+bark, log end, stripped side and planks, with this roster's defaults: the yew as painted and one fruitwood) and said:
+"The new wood looks so so so good". Those colours are the ones to build. The other calls at the end of Decisions (wood
+names, stand-ins, sets to cut) keep this roster's defaults unless the owner says otherwise, and each wood is still
+checked in game in its own batch.
+
 How it was made: survey groups proposed trees biome by biome, and their proposals were merged into one roster. Three
 reviewers then checked the roster: one for whether it can be built and keeps the project's rules, one for art and fit
 with vanilla, and one for biome coverage. Their findings were applied, and the last section, "Decisions", says what
@@ -2033,7 +2039,8 @@ good!!", settles the built cedar, #725543, and every figure here is measured aga
 | The pine's and larch's barks are close and share two biomes | Accepted. A check in the CI shots; their needles and silhouettes differ. |
 | Keep the pine, yew, magnolia, yucca, persimmon, juniper, holly, olive, tamarisk and baobab | Agreed, with the barks above redrawn. |
 
-**The owner's calls still open.**
+**The owner's calls still open.** The colours, as previewed, were approved on 6 October 2026 ("The new wood looks so
+so so good"), with the yew as painted and one fruitwood; the rest keep their defaults until the owner says otherwise.
 
 | Call | Before | This roster's default | The alternative |
 |---|---|---|---|
