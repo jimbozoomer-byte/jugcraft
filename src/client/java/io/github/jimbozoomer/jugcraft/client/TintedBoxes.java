@@ -7,8 +7,9 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 /**
  * Boxes and planes in a block's space, in pixels, drawn in one colour over a 16x16 texture that each face reads where a
  * block model's face would (from its position), for renderers that tint what they draw (the Aura Candle, the wax in the
- * Wax Melting Pot). The render type culls back faces, so each face is wound to face along its normal whatever the order of
- * its corners, and a flame's plane is drawn from both sides.
+ * Wax Melting Pot). Each face is wound to face along its normal whatever the order of its corners. The entity cutout and
+ * translucent render types these renderers use do not cull back faces in 26.3, so a box's faces show from inside too, and
+ * a flame's plane is drawn as two sides lifted off its middle ({@link #plane}), never as one plane drawn twice.
  */
 final class TintedBoxes {
 	private TintedBoxes() {
@@ -49,15 +50,17 @@ final class TintedBoxes {
 
 	/**
 	 * A plane standing upright through the middle of the block, turned {@code turn} about the vertical, {@code width} wide and
-	 * from {@code y0} to {@code y1}, showing the whole texture from both sides (for flames).
+	 * from {@code y0} to {@code y1}, showing the whole texture from both sides (for flames), each side lifted
+	 * {@link DecorDraw#TWO_SIDED_LIFT} pixels off the middle.
 	 */
 	static void plane(VertexConsumer buffer, PoseStack.Pose matrix, double turn, float width, float y0, float y1, int argb, int light) {
-		plane(buffer, matrix, turn, width, y0, y1, argb, light, 0.0F);
+		plane(buffer, matrix, turn, width, y0, y1, argb, light, DecorDraw.TWO_SIDED_LIFT);
 	}
 
 	/**
-	 * As {@link #plane}, with each side drawn {@code lift} pixels out from the middle on its own side, so a smaller plane
-	 * drawn this way shows in front of a bigger one through the same middle, from either side (a flame's bright core).
+	 * As {@link #plane}, with each side drawn {@code lift} pixels out from the middle on its own side (never 0: the two sides
+	 * would share one plane and flicker), so a smaller plane drawn with a bigger lift shows in front of a bigger one through
+	 * the same middle, from either side (a flame's bright core).
 	 */
 	static void plane(VertexConsumer buffer, PoseStack.Pose matrix, double turn, float width, float y0, float y1, int argb, int light,
 			float lift) {
