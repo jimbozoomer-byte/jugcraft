@@ -1041,6 +1041,13 @@ def rune_animation():
 C45 = math.sqrt(0.5)
 
 
+def stable(x, digits):
+    """`x` rounded to `digits`, the same on every machine: rounded to ten places first, so a value a hair either side of
+    a halfway point (0.65625 computed as 0.656250000000001 here and 0.65625 in CI) rounds the same way. Plain round() let
+    the committed models differ from CI's."""
+    return round(round(x, 10), digits) + 0.0
+
+
 def placer(grip, grip_model, unit_):
     """Design (t, s, w) -> model pixels: `unit_` pixels a design unit, the hand (s = grip, t = 0) at grip_model, the
     weapon turned 45 degrees about the hand to lie along the diagonal (as tools/arms_pixel.py model_elements turns
@@ -1052,7 +1059,7 @@ def placer(grip, grip_model, unit_):
         return (gx + (x + y) * C45, gy + (y - x) * C45, 8.0 + p[2] * unit_)
 
     def normal(n):
-        return (round((n[0] + n[1]) * C45, 2) + 0.0, round((n[1] - n[0]) * C45, 2) + 0.0, round(n[2], 2) + 0.0)
+        return (stable((n[0] + n[1]) * C45, 2), stable((n[1] - n[0]) * C45, 2), stable(n[2], 2))
     return point, normal
 
 
@@ -1066,8 +1073,7 @@ def export(mesh, grip, grip_model, unit_):
         v = []
         for p, (u, vv), n in zip(q.points, q.uvs, q.normals):
             x, y, z = point(p)
-            v.append([round(x, 3) + 0.0, round(y, 3) + 0.0, round(z, 3) + 0.0, round(u, 4) + 0.0, round(vv, 4) + 0.0,
-                      *normal(n)])
+            v.append([stable(x, 3), stable(y, 3), stable(z, 3), stable(u, 4), stable(vv, 4), *normal(n)])
         entry = {"t": q.mat.slot, "v": v}
         if q.mat.glow:
             entry["e"] = 1
