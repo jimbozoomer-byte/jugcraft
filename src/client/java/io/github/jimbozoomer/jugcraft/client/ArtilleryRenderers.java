@@ -18,8 +18,9 @@ import net.minecraft.world.phys.AABB;
 
 /**
  * Draws the big guns and the observation balloon (batch 51) from the parts tools/artillery.py exports
- * (assets/jugcraft/artillery_quads.json): each gun's mount turned to its aim and its barrel raised to its elevation and
- * kicking back when it fires, the howitzer's tracks running, and the balloon's winch cable stretched down to its anchor.
+ * (assets/jugcraft/artillery_quads.json): each gun's mount turned to its aim and its cradle raised to its elevation, the
+ * barrel recoiling back through the cradle when it fires, the howitzer's tracks running, and the balloon's winch cable
+ * stretched down to its anchor.
  * Pivots in pixels: keep in sync with tools/artillery.py.
  */
 public final class ArtilleryRenderers {
@@ -79,7 +80,8 @@ public final class ArtilleryRenderers {
 
 		@Override
 		protected AABB getBoundingBoxForCulling(SiegeMortar gun, float partialTick) {
-			return gun.getBoundingBox().inflate(3.0, 2.0, 3.0);
+			// The barrel stands 5.4 blocks up at full elevation (tools/check_mod_data.py checks every gun's reach).
+			return gun.getBoundingBox().inflate(3.0, 3.25, 3.0);
 		}
 
 		@Override
@@ -101,6 +103,7 @@ public final class ArtilleryRenderers {
 			pose.translate((MORTAR_TRUNNION[0] - MORTAR_TURNTABLE[0]) / 16.0F, (MORTAR_TRUNNION[1] - MORTAR_TURNTABLE[1]) / 16.0F,
 					(MORTAR_TRUNNION[2] - MORTAR_TURNTABLE[2]) / 16.0F);
 			pose.rotateDegrees(Axis.XP, -state.aimPitch);
+			draw("mortar_cradle", pose, collector, state.lightCoords);
 			pose.translate(0, 0, -state.recoil / 16.0F);
 			draw("mortar_barrel", pose, collector, state.lightCoords);
 			pose.popPose();
@@ -136,7 +139,8 @@ public final class ArtilleryRenderers {
 
 		@Override
 		protected AABB getBoundingBoxForCulling(SelfPropelledHowitzer gun, float partialTick) {
-			return gun.getBoundingBox().inflate(5.0, 2.0, 5.0);
+			// The barrel's muzzle brake stands 7.7 blocks up at full elevation.
+			return gun.getBoundingBox().inflate(5.0, 5.5, 5.0);
 		}
 
 		@Override
@@ -161,8 +165,9 @@ public final class ArtilleryRenderers {
 			at(pose, HOWITZER_GUN);
 			pose.rotateDegrees(Axis.YP, -Mth.wrapDegrees(state.aimYaw - state.yRot));
 			pose.rotateDegrees(Axis.XP, -state.aimPitch);
-			pose.translate(0, 0, -state.recoil / 16.0F);
 			draw("howitzer_gun", pose, collector, state.lightCoords);
+			pose.translate(0, 0, -state.recoil / 16.0F);
+			draw("howitzer_barrel", pose, collector, state.lightCoords);
 			pose.popPose();
 			super.submit(state, pose, collector, camera);
 		}
@@ -203,7 +208,8 @@ public final class ArtilleryRenderers {
 
 		@Override
 		protected AABB getBoundingBoxForCulling(FlakGun gun, float partialTick) {
-			return gun.getBoundingBox().inflate(2.0, 2.0, 2.0);
+			// The barrels stand 4 blocks up at full elevation.
+			return gun.getBoundingBox().inflate(2.0, 2.5, 2.0);
 		}
 
 		@Override
@@ -222,8 +228,9 @@ public final class ArtilleryRenderers {
 			at(pose, FLAK_HEAD);
 			pose.rotateDegrees(Axis.YP, -state.aimYaw);
 			pose.rotateDegrees(Axis.XP, -state.aimPitch);
-			pose.translate(0, 0, -state.recoil / 16.0F);
 			draw("flak_head", pose, collector, state.lightCoords);
+			pose.translate(0, 0, -state.recoil / 16.0F);
+			draw("flak_barrels", pose, collector, state.lightCoords);
 			pose.popPose();
 			super.submit(state, pose, collector, camera);
 		}
@@ -262,7 +269,7 @@ public final class ArtilleryRenderers {
 		public void submit(State state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
 			pose.pushPose();
 			pose.rotateDegrees(Axis.YP, -state.yRot);
-			draw("balloon_basket", pose, collector, state.lightCoords);
+			draw("observation_basket", pose, collector, state.lightCoords);
 			draw("balloon_envelope", pose, collector, state.lightCoords);
 			if (state.cable > 0.1F) {
 				pose.scale(1.0F, state.cable, 1.0F);

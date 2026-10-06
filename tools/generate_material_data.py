@@ -75,7 +75,7 @@ def core_glow(lo, hi):
 
 def write(path, obj):
     if isinstance(obj, dict) and obj.get("elements"):
-        model_writer.separate_coplanar(obj["elements"])
+        model_writer.finish_elements(obj["elements"])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
 
@@ -624,6 +624,9 @@ def machine_assets(lang):
         write(ASSETS / "blockstates" / f"{block}.json", {"variants": {k.rstrip(","): v for k, v in variants.items()}})
         write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
     write(ASSETS / "kinetic_rotors.json", kinetic_rotors.export(KINETIC_BLOCKS))
+    # Machines' turning parts (the sawmill's blade, the sieve's weights): client/MachineRotors draws them.
+    import machine_rotors
+    write(ASSETS / "machine_rotor_quads.json", machine_rotors.export())
     # Conveyor slopes: an ascending and a descending model, each with a moving-belt version, turned to face the way
     # items travel.
     for block, info in SLOPE_BLOCKS.items():
@@ -822,7 +825,7 @@ def powered_tools(lang):
         elements = tool_models.BLOCKS[block]
         textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
         textures["particle"] = rid("block/dp_olive")
-        halves = model_writer.slice_model(block, elements, [(0, 0, 0), (0, 1, 0)])
+        halves = model_writer.split_model(block, elements, [(0, 0, 0), (0, 1, 0)])
         lit_from, lit_to = tool_models.LIT[block]
         for half, part in zip(("lower", "upper"), halves):
             write(ASSETS / "models" / "block" / f"{block}_{half}.json",
@@ -907,7 +910,7 @@ def pixel_hollows_assets(lang):
     elements = retro_models.arcade_cabinet()
     textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
     textures["particle"] = rid("block/rt_side_art")
-    halves = model_writer.slice_model(ph.CABINET, elements, [(0, 0, 0), (0, 1, 0)])
+    halves = model_writer.split_model(ph.CABINET, elements, [(0, 0, 0), (0, 1, 0)])
     for half, part in zip(("lower", "upper"), halves):
         write(ASSETS / "models" / "block" / f"{ph.CABINET}_{half}.json",
               {"parent": "minecraft:block/block", "textures": textures, "elements": part})

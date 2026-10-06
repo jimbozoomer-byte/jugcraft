@@ -269,6 +269,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<ShowcaseBlockEntity> SHOWCASE_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> MOTH_CASE_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> ODDITY_JAR_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> GIANT_HEART_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> SPECIMEN_VESSEL_ENTITY;
 	public static BlockEntityType<IronBoundCoffinBlockEntity> IRON_BOUND_COFFIN_ENTITY;
 	public static BlockEntityType<CoffinWardrobeBlockEntity> COFFIN_WARDROBE_ENTITY;
 	public static BlockEntityType<SarcophagusBlockEntity> SARCOPHAGUS_TOMB_ENTITY;
@@ -1160,7 +1162,7 @@ public final class JugcraftAgriculture {
 		HOT_AIR_BALLOON = entity("hot_air_balloon", EntityType.Builder.<HotAirBalloon>of(HotAirBalloon::new, MobCategory.MISC).noLootTable()
 				.noSummon().sized((float) HotAirBalloon.BASKET, (float) HotAirBalloon.BASKET_HEIGHT).clientTrackingRange(16).updateInterval(1));
 		PIBAL = entity("pibal", EntityType.Builder.<Pibal>of(Pibal::new, MobCategory.MISC).noLootTable().noSummon().sized(0.6F, 0.6F)
-				.clientTrackingRange(16).updateInterval(2));
+				.clientTrackingRange(16).updateInterval(1));
 		Balloons.register();
 		// Fall additions 30, the leaf blower: a dieselpunk electric leaf blower, charged at the Charging Station.
 		registerItem(LeafBlowerItem.ID, LeafBlowerItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)
@@ -1842,7 +1844,8 @@ public final class JugcraftAgriculture {
 	/**
 	 * Halloween decorations batch 17, the Witch's Workshop (tools/decor17.py): the Horned Skull Cauldron with its Ember
 	 * Bed and Brew Ladle; the four wrought-iron candelabra; the Enchanted Broom, Dustpan and Broom Rack; the Curiosity
-	 * Cabinet, Bell Jar and Moth Display Case; and the five Oddity Jars.
+	 * Cabinet, Bell Jar and Moth Display Case; the five Oddity Jars; and the bigger jars: the Giant's Beating Heart, the
+	 * Tall Specimen Jar and the Specimen Tank.
 	 */
 	private static void registerWitchsWorkshop() {
 		List<Block> blocks = new ArrayList<>();
@@ -1903,6 +1906,20 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(ODDITY_JAR_ENTITY, pos, state),
 						eyeballs, heart, bat, snake, hand).build());
 		blocks.addAll(List.of(eyeballs, heart, bat, snake, hand));
+
+		// The bigger jars, each its small jar made bigger, placed and broken as one: the Giant's Beating Heart (3 x 3 x 3), the
+		// Tall Specimen Jar (1 x 2 x 1) and the Specimen Tank (3 x 3 x 3).
+		Block giantHeart = registerBlock(GIANT_HEART, GiantBeatingHeartBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(1.5F).sound(SoundType.GLASS).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		GIANT_HEART_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(GIANT_HEART),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(GIANT_HEART_ENTITY, pos, state),
+						giantHeart).build());
+		Block tallJar = registerBlock(TALL_SPECIMEN_JAR, TallSpecimenJarBlock::new, vessel().lightLevel(state -> TallSpecimenJarBlock.LIGHT));
+		Block tank = registerBlock(SPECIMEN_TANK, SpecimenTankBlock::new, vessel().lightLevel(state -> SpecimenTankBlock.LIGHT));
+		SPECIMEN_VESSEL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("specimen_vessel"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(SPECIMEN_VESSEL_ENTITY, pos, state),
+						tallJar, tank).build());
+		blocks.addAll(List.of(giantHeart, tallJar, tank));
 		for (Block block : blocks) {
 			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
 			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
@@ -1916,6 +1933,11 @@ public final class JugcraftAgriculture {
 
 	private static BlockBehaviour.Properties jar() {
 		return BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.5F).sound(SoundType.GLASS).noOcclusion().pushReaction(PushReaction.POPPED);
+	}
+
+	private static BlockBehaviour.Properties vessel() {
+		return BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GREEN).strength(1.0F).sound(SoundType.GLASS).noOcclusion()
+				.pushReaction(PushReaction.IMMOVEABLE);
 	}
 
 	/**
@@ -2202,6 +2224,9 @@ public final class JugcraftAgriculture {
 	public static final String CURIOSITY_CABINET = "curiosity_cabinet";
 	public static final String BELL_JAR = "bell_jar";
 	public static final String MOTH_CASE = "moth_display_case";
+	public static final String GIANT_HEART = "giant_beating_heart";
+	public static final String TALL_SPECIMEN_JAR = "tall_specimen_jar";
+	public static final String SPECIMEN_TANK = "specimen_tank";
 
 	public static final String FLYING_EYEBALL = "flying_eyeball";
 	public static final String IVORY_PILLAR_CANDLE = "ivory_pillar_candle";
