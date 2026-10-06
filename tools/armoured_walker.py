@@ -68,16 +68,18 @@ def hull():
             m.append(box((x0, 37, z0), (x1, 67, z1), DARK))
     m.append(box((-16, 68, -13), (16, 71, 13), {"*": PLATE, "up": DARK}))
     m.append(box((-13, 71, -10), (13, 72, 10), DARK))
-    # A belt of plate round the bottom of the hull.
-    m.append(box((-15.5, 36, -16.5), (15.5, 40, 16.5), SEAM))
-    m.append(box((-19.5, 36, -12.5), (19.5, 40, 12.5), SEAM))
+    # A belt of plate round the bottom of the hull, 0.25 px below the hull's own underside so the two never share a
+    # plane (they are drawn in different textures).
+    m.append(box((-15.5, 35.75, -16.5), (15.5, 40, 16.5), SEAM))
+    m.append(box((-19.5, 35.75, -12.5), (19.5, 40, 12.5), SEAM))
     # The gun port: a raised frame round a dark recess, the cannon's box mount and barrel.
     m.append(box((-7, 48, 16), (7, 67, 17.5), {"*": DARK, "south": PLATE}))
     m.append(box((-5, 50, 16.5), (5, 65, 17.6), {"*": BORE}))
     m.append(box((-7.5, 66, 15.5), (7.5, 68, 18.5), GUNMETAL))
     m.append(box((-4, 52, 16), (4, 60, 21), {"*": GUNMETAL, "south": DARK}))
-    m += cyl("z", 0, 56, 2.6, 21, 29, GUNMETAL, BORE)
-    m += cyl("z", 0, 56, 3.1, 27.5, 29, GUNMETAL, BORE)
+    # The bore stands 0.1 px proud of the muzzle ring, so the dark bore and the ring's gunmetal face never share a plane.
+    m += cyl("z", 0, 56, 2.6, 21, 29.1, GUNMETAL, BORE)
+    m += cyl("z", 0, 56, 3.1, 27.5, 29, GUNMETAL)
     # Lamp housings either side of the port (the glass is drawn full bright in lamps()).
     for x in (-10, 10):
         m.append(box((x - 1.5, 54, 16), (x + 1.5, 58, 17), GUNMETAL))
@@ -122,7 +124,8 @@ def leg():
     """One leg below its hip: the hip joint, a flat armour slab over the thigh, the knee, an angled shin, the ankle
     housing and a broad hinged foot."""
     m = []
-    m += cyl("x", 0, 0, 3.5, -4, 4, GUNMETAL, DARK)
+    # The hip drum stops 0.25 px short of the hull's skirt plane (x = +-14 at the hips), so its caps never flicker against it.
+    m += cyl("x", 0, 0, 3.5, -3.75, 3.75, GUNMETAL, DARK)
     m.append(box((-2.5, -15, -3), (2.5, 0, 3), GUNMETAL))
     # The thigh slab: a broad riveted plate hanging in front of the thigh from just under the hull.
     m.append(box((-6.5, -17, 3), (6.5, 6, 5.5), {"*": LEG, "south": PLATE}))
@@ -131,7 +134,7 @@ def leg():
     m.append(box((-3, -25, -6), (3, -16, 0), LEG, ("x", -22.5, [0, -16, 0])))
     m.append(box((-4, -24, -3), (4, -20, 5), {"*": LEG, "south": PLATE}))
     m.append(box((-6.5, -27, -7), (6.5, -25, 10), {"*": LEG, "up": DARK}))
-    m.append(box((-4, -25, -2), (4, -23, 7), GUNMETAL))
+    m.append(box((-4.25, -25, -2), (4.25, -23, 7), GUNMETAL))
     m += cyl("x", -24, 8, 1.2, -3.5, 3.5, GUNMETAL, DARK)
     return m
 

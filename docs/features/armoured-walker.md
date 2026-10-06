@@ -66,6 +66,7 @@ The model follows the owner's Blender render, part by part, in Jugcraft's blocky
 - No dependencies. The model is Jugcraft's own box model, made from the owner's Blender render (their own work, shared for this) by `tools/armoured_walker.py`:
   - hull, lamps, legs, tool arm, piston base and piston head, exported as quads to `assets/jugcraft/armoured_walker_quads.json`
   - textures drawn in the clean style: plate, seamed plate, dark plate, leg plate, chain, lamp, bore and canvas
+  - no two faces share a plane, including across moving parts (5 October art review): the hip drums stop 0.25 px short of the hull's skirt, the plate belts sit 0.25 px below the hull's underside, the ankle's gunmetal band is 0.25 px wider than its housing, and the bore stands 0.1 px proud of the muzzle ring
 - Code:
   - `walker/ArmouredWalker` extends `DieselWalker`. DieselWalker gains hooks for its use and attack actions, its cooldown, toughness, drop and seat.
   - `DieselWalkerItem` places either walker.
