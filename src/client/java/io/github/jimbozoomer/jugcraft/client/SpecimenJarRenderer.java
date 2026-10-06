@@ -13,13 +13,15 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
  * Draws what floats in a Specimen Jar: the specimen, bobbing ({@link SpecimenJarBlock#bob}) and turning slowly in the
- * middle of the fluid, lit by the fluid's glow, and three bubbles rising past it.
+ * middle of the fluid, lit by the fluid's glow, and three bubbles rising past it. The bigger specimen jars draw the same
+ * ({@link #draw}), scaled up with them.
  */
 public class SpecimenJarRenderer implements BlockEntityRenderer<DecorationBlockEntity, SpecimenJarRenderer.State> {
 	private static final RenderType BUBBLE = RenderTypes.entityCutout(Jugcraft.id("textures/entity/specimen_jar_bubble.png"));
@@ -54,22 +56,34 @@ public class SpecimenJarRenderer implements BlockEntityRenderer<DecorationBlockE
 		state.specimen = block.getValue(SpecimenJarBlock.SPECIMEN);
 		state.time = jar.getLevel().getGameTime() % 24000 + partialTick;
 		state.bob = SpecimenJarBlock.bob(jar.getBlockPos(), state.time);
-		state.turn = (state.time * 0.8F + (jar.getBlockPos().hashCode() & 0xFF)) % 360.0F;
+		state.turn = turn(jar.getBlockPos(), state.time);
+	}
+
+	/** Which way the specimen in the jar at {@code pos} has turned at {@code time} (ticks with the partial tick), in degrees. */
+	static float turn(BlockPos pos, float time) {
+		return (time * 0.8F + (pos.hashCode() & 0xFF)) % 360.0F;
 	}
 
 	@Override
 	public void submit(State state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
-		QuadModel specimen = DecorQuads.get("specimen_" + state.specimen.getSerializedName());
+		draw(pose, collector, state.specimen, state.bob, state.turn, state.time);
+	}
+
+	/**
+	 * The specimen and its bubbles, in a jar's block ({@code pose} at its corner): risen {@code bob} pixels and turned
+	 * {@code turn} degrees, the bubbles where they are at {@code time} (ticks).
+	 */
+	static void draw(PoseStack pose, SubmitNodeCollector collector, SpecimenJarBlock.Specimen kind, float bob, float turn, float time) {
+		QuadModel specimen = DecorQuads.get("specimen_" + kind.getSerializedName());
 		pose.pushPose();
 		if (specimen != null) {
 			pose.pushPose();
-			pose.translate(0.5F, (MIDDLE + state.bob) / 16, 0.5F);
-			pose.rotateDegrees(Axis.YP, state.turn);
+			pose.translate(0.5F, (MIDDLE + bob) / 16, 0.5F);
+			pose.rotateDegrees(Axis.YP, turn);
 			pose.translate(-0.5F, -MIDDLE / 16, -0.5F);
 			specimen.submit(pose, collector, GLOW);
 			pose.popPose();
 		}
-		float time = state.time;
 		collector.submitCustomGeometry(pose, BUBBLE, (matrix, buffer) -> {
 			for (int i = 0; i < 3; i++) {
 				float rise = ((time / 40.0F + i / 3.0F) % 1.0F);
