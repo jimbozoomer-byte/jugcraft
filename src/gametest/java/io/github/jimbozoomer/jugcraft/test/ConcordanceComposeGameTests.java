@@ -49,6 +49,11 @@ import net.spell_engine.internals.target.SpellTarget;
  */
 public class ConcordanceComposeGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
+	/**
+	 * Ticks to let newly spawned creatures settle before a spell searches for them: tests run in freshly loaded chunks,
+	 * where an area search may not see a creature in its first tick (a reference to it always does).
+	 */
+	private static final int SETTLE_TICKS = 10;
 
 	private static void floor(GameTestHelper helper) {
 		for (int x = 0; x <= 7; x++) {
@@ -139,7 +144,7 @@ public class ConcordanceComposeGameTests {
 	 * and its cooldown started. A spell that finds nothing to act on costs nothing; a forged cost on the item is ignored
 	 * (the server compiles the text again); a spell the caster's research no longer allows is refused.
 	 */
-	@GameTest(maxTicks = 20)
+	@GameTest(maxTicks = 40)
 	public void inscribeAndCastThroughSpellEngine(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		floor(helper);
@@ -178,34 +183,37 @@ public class ConcordanceComposeGameTests {
 		// A forged inscription: the server compiles the text and charges what it really costs. (A villager is tall
 		// enough to meet the line from the caster's eyes.)
 		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.MASTERED);
-		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(1, 2, 3));
-		player.getMainHandItem().set(JugcraftConcordance.INSCRIPTION, new Inscription("touch struck sear", 1, 0));
-		refreshSpells(player);
-		cast(level, player);
-		helper.assertTrue(pig.getHealth() == pig.getMaxHealth() - 4.0F && ConcordanceProgress.currentFocus(player) == FocusPool.MAX - 3,
-				"A forged Focus cost is ignored: Sear costs its 3: " + ConcordanceProgress.currentFocus(player));
+		Mob villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(1, 2, 3));
+		helper.runAfterDelay(SETTLE_TICKS, () -> {
+			ConcordanceProgress.setFocus(player, FocusPool.MAX);
+			player.getMainHandItem().set(JugcraftConcordance.INSCRIPTION, new Inscription("touch struck sear", 1, 0));
+			refreshSpells(player);
+			cast(level, player);
+			helper.assertTrue(villager.getHealth() == villager.getMaxHealth() - 4.0F && ConcordanceProgress.currentFocus(player) == FocusPool.MAX - 3,
+					"A forged Focus cost is ignored: Sear costs its 3: " + ConcordanceProgress.currentFocus(player) + ", villager " + villager.getHealth());
 
-		// Research taken away: the same inscription no longer compiles, and the cast is refused.
-		caster.getCooldownManager().reset(null);
-		ConcordanceProgress.reset(player);
-		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.UNDERSTOOD);
-		ConcordanceProgress.setFocus(player, FocusPool.MAX);
-		float before = pig.getHealth();
-		refreshSpells(player);
-		cast(level, player);
-		helper.assertTrue(pig.getHealth() == before && ConcordanceProgress.currentFocus(player) == FocusPool.MAX,
-				"Without Sear's research the inscription does nothing and costs nothing");
-		RateGate.forget(player.getUUID());
-		command(player, "jugcraft concordance compose clear");
-		helper.assertTrue(ComposedSpells.inscription(player.getMainHandItem()) == null, "compose clear wipes it");
-		helper.succeed();
+			// Research taken away: the same inscription no longer compiles, and the cast is refused.
+			caster.getCooldownManager().reset(null);
+			ConcordanceProgress.reset(player);
+			ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+			ConcordanceProgress.setFocus(player, FocusPool.MAX);
+			float before = villager.getHealth();
+			refreshSpells(player);
+			cast(level, player);
+			helper.assertTrue(villager.getHealth() == before && ConcordanceProgress.currentFocus(player) == FocusPool.MAX,
+					"Without Sear's research the inscription does nothing and costs nothing");
+			RateGate.forget(player.getUUID());
+			command(player, "jugcraft concordance compose clear");
+			helper.assertTrue(ComposedSpells.inscription(player.getMainHandItem()) == null, "compose clear wipes it");
+			helper.succeed();
+		});
 	}
 
 	/**
 	 * A spell that pulses among ten pigs reaches only as many as it compiled to (four), whatever wanders in later, and
-	 * never spends more work than compiled; its branch is taken once and is still the caster's.
+	 * never spends more work than compiled.
 	 */
-	@GameTest(maxTicks = 80)
+	@GameTest(maxTicks = 100)
 	public void compiledLimitsHoldAtRuntime(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		floor(helper);
@@ -219,12 +227,17 @@ public class ConcordanceComposeGameTests {
 		Plan plan = compiled.plan();
 		helper.assertTrue(plan != null && plan.limits().targets() == 4 && plan.limits().work() == 12, "Compiled: 4 targets, 12 work: "
 				+ (plan == null ? compiled.problems() : plan.limits()));
+		helper.runAfterDelay(SETTLE_TICKS, () -> pulseAmongPigs(helper, level, player, plan, pigs));
+	}
+
+	private static void pulseAmongPigs(GameTestHelper helper, ServerLevel level, ServerPlayer player, Plan plan, List<Mob> pigs) {
 		Ledger ledger = new Ledger(plan.limits());
 		boolean applied = ComposedSpells.cast(level, player, plan, Cause.of(player.getUUID(), Cause.Origin.SPELL, ComposedSpells.SPELL,
 				ConcordanceEffects.nextSerial()), ledger);
 		helper.assertTrue(applied && pigs.stream().filter(pig -> pig.hasEffect(MobEffects.SLOWNESS)).count() == 4
 				&& !player.hasEffect(MobEffects.SLOWNESS) && ComposedSpells.lingering(player.getUUID()) == 1,
-				"The first pulse dazzles the four nearest pigs, never the caster, and two more pulses wait");
+				"The first pulse dazzles the four nearest pigs, never the caster, and two more pulses wait: "
+						+ pigs.stream().filter(pig -> pig.hasEffect(MobEffects.SLOWNESS)).count() + " dazzled");
 		// Lift the dazzled pigs out of reach: later pulses meet new pigs, but the spell has spent its four targets.
 		List<Mob> first = pigs.stream().filter(pig -> pig.hasEffect(MobEffects.SLOWNESS)).toList();
 		for (Mob pig : first) {
@@ -241,7 +254,7 @@ public class ConcordanceComposeGameTests {
 	}
 
 	/** A branch starts where its spell landed, shares its ledger and is still the caster's. */
-	@GameTest(maxTicks = 20)
+	@GameTest(maxTicks = 40)
 	public void branchesKeepTheirCause(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		floor(helper);
@@ -253,15 +266,17 @@ public class ConcordanceComposeGameTests {
 		Plan plan = compiled.plan();
 		helper.assertTrue(plan != null && plan.limits().branches() == 1 && plan.limits().targets() == 5, "Compiled: one branch, five targets: "
 				+ (plan == null ? compiled.problems() : plan.limits()));
-		Ledger ledger = new Ledger(plan.limits());
-		helper.assertTrue(ComposedSpells.cast(level, player, plan, Cause.of(player.getUUID(), Cause.Origin.SPELL, ComposedSpells.SPELL,
-				ConcordanceEffects.nextSerial()), ledger), "It takes effect");
-		helper.assertTrue(target.getLastHurtByMob() == player && target.getHealth() == target.getMaxHealth() - 4.0F,
-				"Sear strikes the villager touched, credited to the caster");
-		helper.assertTrue(target.hasEffect(MobEffects.SLOWNESS) && beside.hasEffect(MobEffects.SLOWNESS) && !player.hasEffect(MobEffects.SLOWNESS),
-				"then the branch dazzles the creatures where it landed, never the caster");
-		helper.assertTrue(ledger.branches() == 1 && ledger.targets() <= plan.limits().targets() && ledger.work() <= plan.limits().work(),
-				"one branch taken, within the plan's limits");
-		helper.succeed();
+		helper.runAfterDelay(SETTLE_TICKS, () -> {
+			Ledger ledger = new Ledger(plan.limits());
+			helper.assertTrue(ComposedSpells.cast(level, player, plan, Cause.of(player.getUUID(), Cause.Origin.SPELL, ComposedSpells.SPELL,
+					ConcordanceEffects.nextSerial()), ledger), "It takes effect");
+			helper.assertTrue(target.getLastHurtByMob() == player && target.getHealth() == target.getMaxHealth() - 4.0F,
+					"Sear strikes the villager touched, credited to the caster");
+			helper.assertTrue(target.hasEffect(MobEffects.SLOWNESS) && beside.hasEffect(MobEffects.SLOWNESS) && !player.hasEffect(MobEffects.SLOWNESS),
+					"then the branch dazzles the creatures where it landed, never the caster");
+			helper.assertTrue(ledger.branches() == 1 && ledger.targets() <= plan.limits().targets() && ledger.work() <= plan.limits().work(),
+					"one branch taken, within the plan's limits");
+			helper.succeed();
+		});
 	}
 }
