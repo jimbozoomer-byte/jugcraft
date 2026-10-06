@@ -1,6 +1,6 @@
 # Industrial starter workshop and first electricity
 
-Status: owner-endorsed planning direction, recorded and updated 6 October 2026. This is the starter-route portion of planning step 7. The alloy station, manual tools, mechanical production arrangement and first-electricity checkpoint are selected below; exact recipes, structures, yields and costs remain to design. No gameplay is implemented by this document.
+Status: owner-endorsed planning direction, recorded and updated 6 October 2026. This is the starter-route portion of planning step 7. The alloy station, manual tools, mechanical production arrangement, sustained shaft-source options, equal material-yield policy and first-electricity checkpoint are selected below. Recipe quantities and starter costs are now drafted for review; structures, work rates and operating costs remain to balance. No gameplay is implemented by this document.
 Proposal issue: direct owner choices during industrial planning.
 Owner: jimbozoomer-byte.
 Target capability: a useful mechanical workshop and first electricity before mod steel, with steel developing in parallel.
@@ -9,11 +9,13 @@ Related documentation: [machine roadmap](../MACHINE_ROADMAP.md), [current techno
 
 ## Explicit owner choices
 
-- **Hand tools can make small starter batches of plates, wires and basic circuits.** Mechanical machines provide better throughput and efficiency. Manual basic-circuit assembly still requires reachable ingredients; it is not permission to omit the circuit's materials.
+- **Hand tools can make small starter batches of plates, wires and basic circuits.** Mechanical machines provide better throughput, batch handling and automation. Manual basic-circuit assembly still requires reachable ingredients; it is not permission to omit the circuit's materials.
 - **Both starter electricity routes are available:** a shaft-driven dynamo and a small fuel-burning generator. Players choose a route rather than having to build both.
 - **Early alloys use a small fuel-fired crucible furnace with ceramic crucibles.** This is the selected starter route for suitable alloys such as bronze, brass and solder.
 - **Manual components use one shared workshop bench with interchangeable hand tools:** a hammer makes plates and wire cutters make wires. The owner delegated the circuit tool to a sensible gameplay design.
 - **Mechanization uses separate shaft-powered machines:** presses, wire drawers and circuit assemblers. The shared bench remains useful for manual jobs rather than being the required powered production station.
+- **Both ongoing early shaft-power options are available:** a small steam engine and a waterwheel that turns shafts. The mechanical waterwheel is a proposed addition, distinct from the existing electric-output Water Wheel. Players choose a suitable source rather than building both.
+- **Manual tools and machines use equal material yields for equivalent recipes.** Machines reward speed, larger batches and automation; hand production does not incur an extra metal loss. This does not decide operating fuel/power or authorize equal access to advanced processes.
 - **First electricity means a generator powering any useful working machine.** An electric motor driving a working shaft machine qualifies. A particular electric furnace, battery bank or fully automated factory is not required.
 - **First-electricity pacing target:** approximately 2–4 active hours from a fresh world following known recipes, excluding optional building detours. This is a balancing/playtest target, not measured current behavior or a timed unlock.
 
@@ -56,9 +58,20 @@ The fuel-heated circuit tool enters a bill of materials only if the selected con
 
 ### Shaft power to dynamo
 
-Candidate sequence: reachable iron shaft and a startup hand crank or chosen shaft source, then a starter dynamo, cable and an electrical consumer. A suitable sustained source improves operation after or during startup, but is not an additional requirement for the selected first-electricity checkpoint. The existing small steam engine is a source to review. A shaft-driven renewable source is another design option; do not claim that an existing electric-output block already supplies shafts.
+Candidate sequence: reachable iron shaft and a startup hand crank or chosen shaft source, then a starter dynamo, cable and an electrical consumer. The selected ongoing sources are a small steam engine and a proposed shaft-powered waterwheel. A sustained source improves operation after or during startup, but is not an additional requirement for the selected first-electricity checkpoint. Do not claim that the existing electric-output Water Wheel already supplies shafts.
 
-The dynamo needs earlier metals, conductors and reachable field/control parts. It must not require rare-earth magnets, steel, aluminum or the electricity it is meant to provide. Later magnet dynamos remain useful upgrades. Exact generator construction and shaft-source selection are still proposals.
+The dynamo needs earlier metals, conductors and reachable field/control parts. It must not require rare-earth magnets, steel, aluminum or the electricity it is meant to provide. Later magnet dynamos remain useful upgrades. Exact generator and source construction costs remain proposals.
+
+### Selected sustained mechanical sources
+
+| Source | Construction and operating direction | Why choose it |
+| --- | --- | --- |
+| Small steam engine | Reachable Workshop metals, ordinary fuel and water; reuse the existing small engine's role | Flexible placement with manageable fuel/water handling; proposed stronger output than the small waterwheel |
+| Shaft-powered waterwheel | Reachable wood, iron and manually made parts; flowing water and clear space for the wheel | Continuous shaft power without ongoing fuel use, with site/layout requirements and proposed lower output |
+
+Both can drive useful mechanical machines directly or feed a dynamo. Keep the hand crank as a cheap startup and small-job option. The relative-output directions above are proposals; exact power, water requirements, dimensions and source checks need design and testing. Neither source requires steel, rare-earth materials, an electric pump or completion of the other source's route. Buckets or a suitable existing water source must keep steam entry reachable.
+
+The mechanical waterwheel needs an explicit implementation plan using the shared shaft system. Preserve the registered electric Water Wheel's identity and saved behavior; a conversion or migration is not authorized by this source choice. The two wheel roles and their construction differences should be clear in the Encyclopedia.
 
 ### Small fuel generator
 
@@ -73,7 +86,7 @@ Both routes feed the shared electrical interface. Preserve losses in motor/dynam
 | Output or operation | Reachable small-batch proposal | Why mechanize or electrify later |
 | --- | --- | --- |
 | Selected early plates | Hammer attachment at the shared workshop bench | Faster production and practical bulk quantities |
-| Selected early wires | Wire-cutter attachment at the same bench, converting approved metal stock into small wire batches | Faster production and approved yield/efficiency benefits without material duplication |
+| Selected early wires | Wire-cutter attachment at the same bench, converting approved metal stock into small wire batches | Faster production, batch handling and automation at the same material yield |
 | Basic circuits | Fuel-heated soldering tool at the same bench, using reachable prepared silicon, copper wire and solder | Assembly throughput and later justified electronics capability |
 | Early alloys | Selected small fuel-fired furnace with a ceramic crucible | Bulk handling, controlled processing and suitable additional alloy recipes |
 | Shaft workshop processing | Starter press/drawer and other useful mechanical operations | Motors reuse the shaft equipment; larger versions improve output/efficiency |
@@ -90,7 +103,19 @@ The owner chose separate shaft-powered stations as the normal expansion beyond t
 
 Construction can use earlier ingots and selected manually made parts. It cannot require an output available only from the very station being constructed. Motor drive can electrify an existing line later; any direct electrical input should reuse the existing shared interface. Larger throughput/efficiency versions remain optional unless a process genuinely requires their new capability.
 
-The shared manual bench remains useful for starter quantities, small jobs and appropriate fallback recipes. Powered bench attachments are not the selected primary mechanization route. Exact station structures and manual-versus-machine work rates/yields remain to balance.
+The shared manual bench remains useful for starter quantities, small jobs and appropriate fallback recipes. Powered bench attachments are not the selected primary mechanization route. Material yields are equal for equivalent approved recipes; exact station structures, batch sizes and manual-versus-machine work rates remain to balance.
+
+### Selected material-yield policy
+
+Use the current material units as the recipe baseline: an ingot and plate each contain 9 nugget units; a wire contains 3. For the same supported material and output, manual and mechanized recipes use the same inputs and give the same outputs:
+
+| Starter operation | Draft recipe, shared by manual and machine routes | Unit/accounting check |
+| --- | --- | --- |
+| Plate shaping | 1 suitable ingot -> 1 plate | 9 units -> 9 units |
+| Wire making | 1 suitable conductor ingot -> 3 wires | 9 units -> 3 x 3 units |
+| Basic circuit assembly | 1 prepared silicon + 3 copper wires + 1 solder ingot -> 1 basic circuit | Same ingredients and output as the existing basic-circuit machine recipe |
+
+The owner selected yield parity; the specific starter ratios above follow observed current machine recipes and remain the draft recipe baseline. Limit manual recipes to approved early materials and capabilities. No hand-made quality penalty, mandatory scrap loss or separate inferior component identity is introduced. Throughput, active work, fuel/power and handling can differ. Material-saving bonuses cannot be used to justify these machines over the equivalent manual recipes. Audit any later specialty, disassembly and recycling recipes against the same shared accounting so conversion routes do not multiply material.
 
 The shared bench, hammer and wire cutters are selected. Treat the wire cutters as the gameplay tool for producing starter wires from approved metal stock; a separate wire-drawing tool is not an additional compulsory manual station. The later Wire Drawer still provides industrial production.
 
@@ -108,9 +133,9 @@ The tool is reusable, rather than an ingredient consumed to produce each circuit
 
 Make the small crucible furnace from reachable building materials and suitable basic refractory/ceramic parts, then install the ceramic crucible. Feed the appropriate early metals and ordinary fuel to produce an approved alloy batch. Keep the crucible/lining a durable installed capability under earlier planning, rather than consuming a new vessel for every ingot.
 
-Start with reviewed bronze, brass and solder routes. Exact alloy ratios, furnace size, heating time, fuel use and input/output handling still need recipes. Later bellows, larger alloy equipment and electric operation can improve handling or processing where justified; no shaft-driven blower is newly required for this first station. Preserve the existing bronze fallback until the replacement route is reachable.
+Start with reviewed bronze, brass and solder routes. The draft recipes below retain current alloy ratios; quantities still need review, and furnace size, heating time, fuel use and input/output handling remain to balance. Later bellows, larger alloy equipment and electric operation can improve handling or processing where justified; no shaft-driven blower is newly required for this first station. Preserve the existing bronze fallback until the replacement route is reachable.
 
-Use shared component identities and material tags. Define why a manual route remains useful for small jobs while machines pay off at volume. Differences can involve batch size, work rate, handling and audited material/fuel efficiency. Do not invent a new inferior item for every hand-made component merely to force replacement later.
+Use shared component identities and material tags. Manual production remains useful for small jobs while machines pay off at volume through batch size, work rate, handling and automation. Equal material yield does not set equal fuel/power costs or extend a basic tool to every advanced process. Do not invent a new inferior item for every hand-made component merely to force replacement later.
 
 Installed machine parts, filters and linings do not gain a new routine replacement/lubrication program under this plan. Ordinary hand-tool durability, if used, needs a separate clear recipe/accounting design rather than an unstated upkeep assumption.
 
@@ -123,6 +148,64 @@ Early alloy supplies must exist before machinery built from those alloys. Preser
 Earlier planning places basic circuits in the Workshop stage after accessible silicon. The manual-assembly approval does not decide silicon extraction chemistry. Define a reachable pre-electric/Workshop feed and preparation path before changing current recipes; advanced arc-furnace electronics, rare regional minerals and a mandatory Nether trip must not silently become the only starter route. A particular first generator/consumer may not need circuits at all.
 
 Starter electrical construction must not depend on later synthetic rubber, aluminum cable, rare-earth refining or oil chemistry. Agricultural fibers/coatings can offer selected useful alternatives or upgrades without requiring a complete agricultural factory to make the first conductor. Exact cable/insulator integration needs recipe design.
+
+## Draft starter recipes and equipment costs
+
+All quantities in this section are **assistant proposals for review**, not additional owner-approved recipes or implemented changes. They give a concrete cost baseline to tune against the selected 2–4 active-hour target. Keep existing reachable recipes until replacements are ready. One electric furnace is used as the common comparison consumer; the milestone still permits any useful working machine.
+
+### Shared preparation and components
+
+| Proposed output | Draft construction / process inputs | Bootstrap and reuse boundary |
+| --- | --- | --- |
+| Shared workshop bench | 1 crafting table + 4 planks + 2 cobblestone | No plate, circuit or powered-tool prerequisite |
+| Hammer | 2 iron ingots + 1 stick | Reusable tool; needed only when the chosen recipes use manual plates |
+| Wire cutters | 2 iron ingots + 2 sticks | Reusable tool; no wire needed to make the first cutters |
+| Fuel-heated soldering tool | 1 copper ingot + 1 stick | Reusable; heating fuel and circuit ingredients are separate; omitted from kits without circuits |
+| Small ceramic kiln | 4 ordinary brick blocks + 1 ordinary furnace | Initial bricks can be fired in an ordinary furnace; the kiln cannot be the sole producer of its own construction bricks |
+| Basic ceramic lining | Form from 4 clay balls, then fire | Durable installed lining, not consumed per alloy batch |
+| Ceramic crucible | Form from 7 clay balls, then fire | Durable installed vessel, not consumed per alloy batch |
+| Small crucible furnace | 4 ordinary brick blocks + 1 ordinary furnace, with 1 basic lining and 1 crucible installed | Uses ordinary fuel; no steel, electricity or compulsory powered blower |
+| Ceramic insulators | Form/fire 1 clay ball -> 2 insulators | Early cable construction; advanced refractory grades remain later |
+| Starter copper cable | 6 copper wires + 1 tin ingot + 2 ceramic insulators -> 6 cables | Hand-cut wire keeps this route pre-electric; draft replacement preserves the current cable's 2-copper/1-tin metal cost and adds ceramic construction |
+| Bronze | 3 copper ingots + 1 tin ingot -> 4 bronze ingots in the crucible furnace | Preserve current blend/furnace fallback while introducing the selected alloy station |
+| Brass | 3 copper ingots + 1 zinc ingot -> 4 brass ingots in the crucible furnace | Reachable before machinery built from brass |
+| Solder | 1 tin ingot + 1 lead ingot -> 2 solder ingots in the crucible furnace | Basic-circuit supply; not required by the example generator/furnace kits |
+
+Firing, alloy heat and soldering consume fuel/work as appropriate; amounts and times remain open. These are Minecraft recipe abstractions, not a claim about real furnace temperatures or electronics manufacture. Appropriate ordinary clay/lining suitability still needs the ceramics recipe pass. The cost ledger treats an ordinary brick block as four fired clay balls; it includes the material but does not invent a fuel price.
+
+### Generator and comparison-consumer construction
+
+The recipes marked current retain construction counts observed in `tools/machines.py`; their use here is a proposed baseline, not a claim that they are balanced. Cable inputs expand using the proposed ceramic/wire recipe above.
+
+| Equipment | Draft inputs | Basis |
+| --- | --- | --- |
+| Iron shafts | 2 iron ingots -> 4 shafts | Current recipe |
+| Hand crank | 1 plank + 1 iron shaft | Current recipe |
+| Starter dynamo | 4 copper ingots + 4 redstone + 1 iron shaft | Current recipe; no circuit or rare-earth magnet |
+| Small steam engine | 4 bronze ingots + 1 bucket + 2 pistons + 1 furnace + 1 iron shaft | Current recipe; water and operating fuel additional |
+| Proposed shaft waterwheel | 8 planks + 2 iron plates + 1 iron shaft | New proposal; the hammer supplies plates before the Metal Press |
+| Machine casing | 4 bronze ingots + 4 zinc ingots | Current recipe |
+| Small fuel generator | 6 bronze ingots + 1 copper cable + 1 furnace + 1 casing | Current Coal Generator recipe |
+| Comparison electric furnace | 4 bronze ingots + 1 redstone + 2 copper cables + 1 furnace + 1 casing | Current recipe; no circuit |
+
+Separate press/drawer/assembler construction remains a later part of this recipe pass. In particular, review cable dependencies and the press's expensive anvil against a useful pre-electric workshop; do not quietly include them in every electricity kit. Gears also need a reachable pre-electric construction route before any selected recipe relies on them.
+
+### Four guided equipment-purchase examples
+
+Each example includes one small kiln, one lined crucible furnace, one workshop bench, wire cutters, one electric furnace and **two placed connection cables**. Each dynamo example adds the dynamo, its selected source and **one placed connecting shaft**. The waterwheel example also includes the hammer. The fuel-generator example needs no shaft equipment. Larger layouts, storage and bulk-processing machines are additional purchases.
+
+| Example | Copper ingots | Tin ingots | Zinc ingots | Iron ingots | Redstone | Planks | Cobblestone | Clay balls |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Hand crank -> dynamo -> electric furnace | 12 | 3 | 4 | 4 | 5 | 11 | 26 | 44 |
+| Shaft waterwheel -> dynamo -> electric furnace | 12 | 3 | 4 | 8 | 5 | 18 | 26 | 44 |
+| Small steam engine -> dynamo -> electric furnace | 15 | 4 | 4 | 9 | 7 | 16 | 42 | 44 |
+| Small fuel generator -> electric furnace | 17 | 6 | 8 | 2 | 1 | 10 | 34 | 44 |
+
+Counts expand alloys, casings, wires, insulators, furnaces and ordinary crafting ingredients. They round up recipe batches: the dynamo examples each craft 6 cables (2 spare) and 4 shafts (1 spare); the fuel-generator example crafts 6 cables (1 spare) and 20 bronze ingots (2 spare). Stick batches leave 2 spare sticks, or 1 in the waterwheel example. A bucket accounts for 3 iron, each piston for 1 iron/1 redstone/3 planks/4 cobblestone, and a furnace for 8 cobblestone. Metals are counted as ready ingots; no ore-doubling route is assumed.
+
+These are **equipment-purchase subtotals**, not complete fresh-world resource totals or measured play times. Fuel for all required firing/smelting/alloying/operation, mining tools, food and site construction remain additional. Required gathering and setup, including redstone access and waterwheel siting, still count toward the 2–4 hour target. The comparison does not require identical total cost for both generator routes: reachability, manual effort, site needs and ongoing fuel are also relevant. Trading or approved existing fallbacks can change a particular player's purchases.
+
+No kit needs solder, prepared silicon, basic circuits, a soldering tool, a battery or all three mechanical production stations just to operate this comparison furnace. The proposed ceramic/wire cable route does make the bench, cutters and insulators part of these particular kits; that dependency must be considered when judging their cost.
 
 ## Sideways industries and larger equipment
 
@@ -153,7 +236,7 @@ Preserve stable registrations and working entry paths during any later implement
 
 The [independent Jugcraft Encyclopedia brief and TODO record](https://github.com/jimbozoomer-byte/jugcraft/pull/211) should explain both starter routes and distinguish essential capabilities from optional products and quest-order suggestions. No quest completion or carried guide item becomes a new industrial unlock requirement.
 
-Early alloy preparation, the shared bench/tools, separate mechanical production stations and the first-electricity checkpoint are settled. Remaining detail includes shaft-source options, manual-versus-machine material yields, exact construction/processing recipes, tool reuse/durability, throughput/fuel costs and reachable silicon preparation. Next, settle the early sustained-power options and production-yield policy, then put quantities against the starter kits above.
+Early alloy preparation, the shared bench/tools, separate mechanical production stations, both sustained shaft-source options, equal manual/machine material yields and the first-electricity checkpoint are settled. The proposed recipes and equipment-purchase subtotals above now provide a quantity baseline for review. Remaining detail includes accepting/tuning those costs, source outputs/site requirements, station structures, tool durability, processing/throughput/fuel costs, gears and reachable silicon preparation. Next, review the candidate cost baseline and choose how the pre-electric workshop prepares basic silicon; keep that circuit side branch distinct from generator recipes that do not need it.
 
 Documentation validation: repository/link and whitespace checks apply. Future gameplay work needs relevant recipe audits, survival-route tests, restart/unload behavior and two-client evidence. This plan contains no new build, timing or game-test results.
 
