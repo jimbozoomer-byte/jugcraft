@@ -5375,8 +5375,8 @@
     },
     {
       "from": [
-        0.98,
-        -0.02,
+        0.9,
+        -0.1,
         4.0
       ],
       "to": [
@@ -5386,29 +5386,65 @@
       ],
       "faces": {
         "north": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            11.4,
+            14.2,
+            15.0,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            1.0,
+            14.2,
+            4.6,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            9.6,
+            14.2,
+            12.0,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            4.0,
+            14.2,
+            6.4,
+            16.0
+          ]
         },
         "up": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            1.0,
+            4.0,
+            4.6,
+            6.4
+          ]
         },
         "down": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            1.0,
+            9.6,
+            4.6,
+            12.0
+          ]
         }
       }
     },
     {
       "from": [
         11.6,
-        -0.02,
+        -0.1,
         9.6
       ],
       "to": [
@@ -5418,16 +5454,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            0.8,
+            14.6,
+            4.4,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            11.6,
+            14.6,
+            15.2,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            4.0,
+            14.6,
+            6.4,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            9.6,
+            14.6,
+            12.0,
+            16.0
+          ]
         },
         "up": {
           "texture": "#ivy"
@@ -5440,7 +5500,7 @@
     {
       "from": [
         5.2,
-        -0.02,
+        -0.1,
         4.4
       ],
       "to": [
@@ -5450,16 +5510,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            8.6,
+            15.0,
+            10.8,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            5.2,
+            15.0,
+            7.4,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            10.4,
+            15.0,
+            11.6,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            4.4,
+            15.0,
+            5.6,
+            16.0
+          ]
         },
         "up": {
           "texture": "#ivy"
@@ -5503,7 +5587,7 @@
     },
     {
       "from": [
-        1.98,
+        1.9,
         7.0,
         6.0
       ],
@@ -5514,10 +5598,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            12.7,
+            8.1,
+            14.0,
+            9.0
+          ]
         },
         "south": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            2.0,
+            8.1,
+            3.3,
+            9.0
+          ]
         },
         "east": {
           "texture": "#ivy"
@@ -5526,10 +5622,22 @@
           "texture": "#ivy"
         },
         "up": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            2.0,
+            6.0,
+            3.3,
+            6.9
+          ]
         },
         "down": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            2.0,
+            9.1,
+            3.3,
+            10.0
+          ]
         }
       }
     }
