@@ -244,10 +244,10 @@ public final class ConcordanceEffects {
 	}
 
 	public static Tolerance tolerance(LivingEntity target) {
-		if (target.getType().is(IMMUNE)) {
+		if (target.is(IMMUNE)) {
 			return Tolerance.IMMUNE;
 		}
-		return target.getType().is(RESISTANT) ? Tolerance.RESISTANT : Tolerance.NORMAL;
+		return target.is(RESISTANT) ? Tolerance.RESISTANT : Tolerance.NORMAL;
 	}
 
 	/** Whether the actor may use the block at {@code pos} as an interaction: towns allow their usable blocks. */
