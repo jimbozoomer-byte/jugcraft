@@ -173,11 +173,15 @@ def blastproof_concrete():
 
 
 def construction_foam():
-    """Expanded foam: pale yellow with round bubble pores."""
-    rng = random.Random(3204)
-    img = _speckle((226, 210, 150), 6, 3205)
-    for _ in range(14):
-        x, y = rng.randrange(1, 15), rng.randrange(1, 15)
+    """Expanded foam: pale yellow in soft clumps with round bubble pores spaced evenly, each lit at its upper left."""
+    import block_style as bs
+    g = bs.grain(16, 16, 3205, 3.0, 6.0, 0.5)
+    img = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            c = (234, 220, 164) if g(x, y) > 0.66 else (216, 200, 138) if g(x, y) < 0.34 else (226, 210, 150)
+            img.putpixel((x, y), c + (255,))
+    for x, y in ((3, 2), (10, 3), (6, 7), (13, 8), (2, 11), (9, 12), (14, 14)):
         img.putpixel((x, y), (186, 168, 104, 255))
         img.putpixel((x - 1, y - 1), (246, 236, 190, 255))
     return img
