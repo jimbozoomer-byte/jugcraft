@@ -1,31 +1,16 @@
-"""Ores, storage blocks and metal items in the manner of the vanilla ones (docs/ART_DIRECTION.md, "Each material looks
-like its vanilla counterpart"; the owner's 6 October 2026 note: ore stone that matches vanilla stone and deepslate,
-storage blocks like the vanilla metal blocks, ingots in the vanilla ingot's shape in each metal's own colours).
+"""Metal parts and powders in the manner of the vanilla items (docs/ART_DIRECTION.md, "Each material looks like its
+vanilla counterpart"): dusts, plates, gears, wire, washed ore and raw lumps. The ores, storage blocks, raw ores, ingots
+and nuggets are the material sets (#218, docs/MATERIAL_SETS.md), not drawn here.
 
-Every pixel comes from code here: no Mojang texture is read, traced or recoloured. What follows the vanilla textures
-is the manner only:
-- **Ore grounds** in plain, neutral stone grey (one ground tone with soft clumps a tone either side and a few short
-  cracks) and in dark deepslate (a cooler grey in horizontal layers), so an ore sits in a stone or deepslate wall
-  without a seam.
-- **Ore** as five to seven small nodules, each lit on its upper left, shaded on its lower right, with a highlight on
-  the bigger ones and darker stone under it.
-- **Storage blocks** as one bright plate with a lit top and left edge, a shaded bottom and right edge and two faint
-  seams, the same pattern for every metal and only the colours changed.
-- **Items** on the diagonal, lit from the top left, outlined in each part's own dark tone (docs/ITEM_ICONS.md): the
-  ingot a long bar with a lit top face over a darker side, the nugget three little lumps, raw ore a lumpy chunk.
+Every pixel comes from code here: no Mojang texture is read, traced or recoloured. What follows the vanilla items is
+the manner only: drawn on the diagonal or face on, lit from the top left, outlined in each part's own dark tone
+(docs/ITEM_ICONS.md), with a few flat tones and no random speckle.
 
-Palettes run darkest first. Metal palettes have five tones; ore tones have four (dark, mid, light, highlight).
+Palettes run darkest first: metal palettes have five tones, lump tones four (dark, mid, light, highlight).
 """
 import math
-import random
 
 from PIL import Image
-
-import block_style as bs
-
-# Neutral stone grey and darker, slightly cool deepslate, each with one ground tone (the middle one).
-STONE = [(96, 96, 96), (110, 110, 110), (124, 124, 124), (137, 137, 137), (151, 151, 151)]
-DEEPSLATE = [(44, 44, 50), (57, 57, 63), (71, 71, 77), (85, 85, 91), (100, 100, 106)]
 
 
 def new():
@@ -35,181 +20,6 @@ def new():
 def _put(img, x, y, c):
     if 0 <= x < 16 and 0 <= y < 16:
         img.putpixel((x, y), tuple(c[:3]) + (255,))
-
-
-# ---------------------------------------------------------------- ore grounds
-
-def stone(seed, palette=STONE):
-    """Plain stone: the ground tone with soft clumps one tone lighter and darker, a few lighter flecks and short dark
-    cracks running roughly across."""
-    img = new()
-    g = bs.grain(16, 16, seed, 2.0, 5.0, 0.6)
-    for y in range(16):
-        for x in range(16):
-            v = g(x, y)
-            _put(img, x, y, palette[2 + (1 if v > 0.63 else -1 if v < 0.37 else 0)])
-    rng = random.Random(seed + 11)
-    for _ in range(3):
-        x, y = rng.randrange(16), rng.randrange(16)
-        for i in range(rng.randint(2, 3)):
-            img.putpixel(((x + i) % 16, (y + (1 if i == 2 else 0)) % 16), palette[0] + (255,))
-    for _ in range(4):
-        img.putpixel((rng.randrange(16), rng.randrange(16)), palette[4] + (255,))
-    return img
-
-
-def deepslate(seed, palette=DEEPSLATE):
-    """Deepslate: darker and cooler, in horizontal layers: long soft bands a tone apart, with short dark seams and a
-    lighter edge above some of them."""
-    img = new()
-    bands = bs.Field(16, 16, seed, 8.0, 2.0)
-    fine = bs.Field(16, 16, seed + 5, 2.0, 1.0)
-    for y in range(16):
-        for x in range(16):
-            v = 0.7 * bands(x, y) + 0.3 * fine(x, y)
-            _put(img, x, y, palette[2 + (1 if v > 0.62 else -1 if v < 0.38 else 0)])
-    rng = random.Random(seed + 13)
-    for _ in range(5):
-        x, y, length = rng.randrange(16), rng.randrange(16), rng.randint(3, 5)
-        for i in range(length):
-            img.putpixel(((x + i) % 16, y), palette[0] + (255,))
-            if rng.random() < 0.5:
-                img.putpixel(((x + i) % 16, (y - 1) % 16), palette[3] + (255,))
-    return img
-
-
-# ---------------------------------------------------------------- ore
-
-# Nodule shapes, as rows of '#': small, chunky and irregular, never round.
-NODULES = [
-    [".##.", "####", ".##."],
-    ["##.", "###", ".##"],
-    [".##", "###", "##."],
-    ["###", "###"],
-    ["##.", "###", ".#."],
-    [".#.", "###", "##."],
-    ["##..", "####", ".##."],
-    [".##", "###", ".##"],
-]
-
-
-def _layout(seed, count):
-    """`count` nodules on a jittered three-by-three grid of cells, so they spread evenly and never touch."""
-    rng = random.Random(seed)
-    cells = [(cx, cy) for cy in range(3) for cx in range(3)]
-    rng.shuffle(cells)
-    out = []
-    for cx, cy in sorted(cells[:count]):
-        shape = NODULES[rng.randrange(len(NODULES))]
-        h, w = len(shape), len(shape[0])
-        x0 = 1 + cx * 5 + rng.randint(0, max(0, 4 - w))
-        y0 = 1 + cy * 5 + rng.randint(0, max(0, 4 - h))
-        out.append((x0, y0, shape))
-    return out
-
-
-def nodules(img, tones, seed, count=6, ground=None):
-    """Draws ore nodules over `img`: `tones` is (dark, mid, light, highlight); `ground` the stone palette, whose
-    darkest tone shades the stone just below and to the right of each nodule."""
-    dark, mid, light, high = tones
-    for x0, y0, shape in _layout(seed, count):
-        cells = {(x0 + i, y0 + j) for j, row in enumerate(shape) for i, ch in enumerate(row) if ch == "#"}
-        if ground:
-            for x, y in cells:
-                for nx, ny in ((x + 1, y), (x, y + 1), (x + 1, y + 1)):
-                    if (nx, ny) not in cells:
-                        _put(img, nx, ny, ground[0])
-        top_left = min(cells, key=lambda c: (c[0] + c[1], c[1]))
-        for x, y in cells:
-            lit = (x - 1, y) not in cells and (x, y - 1) not in cells
-            shaded = (x + 1, y) not in cells and (x, y + 1) not in cells
-            c = light if lit else dark if shaded else mid
-            if (x, y) == top_left and len(cells) >= 4:
-                c = high
-            _put(img, x, y, c)
-    return img
-
-
-def ore(tones, seed, deep=False, count=6):
-    """An ore block: nodules in `tones` over stone, or over deepslate when `deep`."""
-    ground = DEEPSLATE if deep else STONE
-    base = deepslate(seed) if deep else stone(seed)
-    return nodules(base, tones, seed + 3, count, ground)
-
-
-# ---------------------------------------------------------------- storage blocks
-
-def storage_block(palette, seed=0):
-    """A block of metal: one bright plate (the fourth tone) lit along its top and left edge and shaded along its
-    bottom and right one, with soft clumps a tone down towards the lower right and short diagonal sheens.
-    Every metal shares the pattern; `seed` only moves the clumps."""
-    dark, low, mid, face, light = palette
-    img = new()
-    g = bs.grain(16, 16, seed, 3.0, 6.0, 0.5)
-    for y in range(16):
-        for x in range(16):
-            _put(img, x, y, mid if g(x, y) < 0.34 and x + y > 12 else face)
-    for i, j in ((2, 5), (3, 4), (4, 3), (5, 2), (2, 8), (3, 7), (4, 6)):
-        _put(img, i, j, light)
-    for i, j in ((13, 10), (12, 11), (11, 12), (10, 13), (13, 7), (12, 8)):
-        _put(img, i, j, mid)
-    for i in range(16):
-        _put(img, i, 0, light)
-        _put(img, 0, i, light)
-        _put(img, i, 15, low)
-        _put(img, 15, i, low)
-        if 0 < i < 15:
-            _put(img, i, 14, mid)
-            _put(img, 14, i, mid)
-    _put(img, 15, 0, mid)
-    _put(img, 0, 15, mid)
-    _put(img, 15, 15, dark)
-    return img
-
-
-def mineral_block(palette, seed):
-    """A block of a mineral (salt, phosphate, lepidolite, monazite): a clumped crystalline surface of its tones with a
-    few bright facets, as the vanilla mineral blocks."""
-    img = new()
-    s = bs.surface(palette, seed, spread=0.7)
-    for y in range(16):
-        for x in range(16):
-            _put(img, x, y, s(x, y))
-    light = max(palette, key=bs._luma)
-    rng = random.Random(seed + 9)
-    for _ in range(6):
-        x, y = rng.randrange(15), rng.randrange(15)
-        _put(img, x, y, light)
-        _put(img, x + 1, y, light)
-    return img
-
-
-def raw_block(tones, seed):
-    """A block of raw ore: big rounded lumps of the raw ore packed together, each lit on its upper left and shaded on
-    its lower right, with dark joins between them."""
-    dark, mid, light, high = tones
-    joint = tuple(max(0, int(v * 0.7)) for v in dark)
-    img = new()
-    pts = bs._cells(16, 16, seed, 7)
-    for y in range(16):
-        for x in range(16):
-            i, d1, d2 = bs._nearest(pts, x + 0.5, y + 0.5, 16, 16)
-            if d2 - d1 < 0.9:
-                _put(img, x, y, joint)
-                continue
-            px, py = pts[i]
-            dx = ((x + 0.5 - px + 8) % 16) - 8
-            dy = ((y + 0.5 - py + 8) % 16) - 8
-            edge = d2 - d1 < 2.2
-            c = mid
-            if dx + dy < -1.5:
-                c = light
-            elif dx + dy > 1.5 and edge:
-                c = dark
-            if -2.6 < dx + dy < -1.6 and abs(dx - dy) < 1.2:
-                c = high
-            _put(img, x, y, c)
-    return img
 
 
 # ---------------------------------------------------------------- items
@@ -242,7 +52,6 @@ def lumps(circles, palette, outline=True):
 
 
 RAW_LUMPS = [(5.8, 10.2, 3.3), (10.6, 6.6, 3.1), (6.6, 5.6, 2.5), (10.6, 11.0, 2.6), (3.4, 12.2, 1.6)]
-NUGGET_LUMPS = [(6.2, 10.0, 2.6), (9.8, 9.8, 2.6), (8.0, 7.0, 2.6)]
 
 
 def raw_item(tones, outline=None):
@@ -250,47 +59,6 @@ def raw_item(tones, outline=None):
     dark, mid, light, high = tones
     edge = outline or tuple(max(0, int(v * 0.6)) for v in dark)
     return lumps(RAW_LUMPS, [edge, dark, mid, light, high])
-
-
-def nugget(palette):
-    """A nugget: three little lumps of the metal, outlined in its darkest tone."""
-    return lumps(NUGGET_LUMPS, palette)
-
-
-# The ingot, drawn for Jugcraft: a long bar lying on the diagonal from lower left to upper right, its top face (4 lit
-# edge, 3) towards the upper left over a darker side (2, 1) towards the lower right, its ends cut square, outlined (0).
-INGOT = [
-    "................",
-    "................",
-    "................",
-    "................",
-    "..........00....",
-    ".........0430...",
-    "........043330..",
-    ".......04333220.",
-    "......043332210.",
-    ".....043332210..",
-    "....043332210...",
-    "...043332210....",
-    "....0332210.....",
-    ".....02210......",
-    "......000.......",
-    "................",
-]
-
-
-def from_mask(mask, palette):
-    img = new()
-    for y, row in enumerate(mask):
-        for x, ch in enumerate(row):
-            if ch.isdigit():
-                _put(img, x, y, palette[int(ch)])
-    return img
-
-
-def ingot(palette):
-    """An ingot in the shape every metal shares, in this metal's five tones."""
-    return from_mask(INGOT, palette)
 
 
 PILE = [

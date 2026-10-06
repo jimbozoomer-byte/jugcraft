@@ -3,8 +3,8 @@
 Run from the repository root:  python3 tools/generate_textures.py
 Every pixel is generated here from fixed seeds; no Mojang texture is read, traced or
 recolored. Colors follow the real minerals: cassiterite is glossy brown-black, tin is
-pale cool silver, bronze is warm golden-brown. Ores, storage blocks, ingots, nuggets, raw
-ore and metal parts are drawn by tools/material_style.py in the manner of the vanilla ones.
+pale cool silver, bronze is warm golden-brown. Metal parts and powders (plates, gears,
+wire, dusts, washed ore) are drawn by tools/material_style.py.
 """
 import json
 import random
@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TEX = ROOT / "src" / "main" / "resources" / "assets" / "jugcraft" / "textures"
 
 STONE = [(104, 110, 116), (116, 122, 128), (128, 133, 138), (138, 142, 146), (96, 101, 107)]
+DEEPSLATE = [(58, 60, 66), (66, 68, 75), (74, 76, 83), (50, 52, 58), (82, 84, 90)]
 CASSITERITE = [(34, 22, 18), (54, 34, 24), (78, 52, 36)]
 GLINT = (214, 202, 184)
 TIN = [(92, 100, 114), (140, 148, 162), (186, 193, 204), (222, 227, 234), (246, 248, 252)]
@@ -38,6 +39,24 @@ INGOT = [
     ".022222222221100",
     ".0111111111110..",
     "..00000000000...",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+NUGGET = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "......000.......",
+    ".....04430......",
+    "....0443320.....",
+    "....0332210.....",
+    ".....01110......",
+    "......000.......",
     "................",
     "................",
     "................",
@@ -144,6 +163,40 @@ def raw_chunk(seed, palette=None, glint=GLINT):
     return img
 
 
+def raw_block(seed, palette=None, glint=GLINT):
+    palette = palette or CASSITERITE
+    rng = random.Random(seed)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            img.putpixel((x, y), rng.choice(palette + [palette[1]]) + (255,))
+    for _ in range(9):
+        img.putpixel((rng.randrange(16), rng.randrange(16)), glint + (255,))
+    return img
+
+
+def metal_block(palette, seed):
+    rng = random.Random(seed)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            edge = x in (0, 15) or y in (0, 15)
+            bevel_light = x == 1 or y == 1
+            bevel_dark = x == 14 or y == 14
+            if edge:
+                c = palette[0]
+            elif bevel_light:
+                c = palette[4]
+            elif bevel_dark:
+                c = palette[1]
+            else:
+                c = palette[rng.choice([2, 3, 3, 3])]
+            img.putpixel((x, y), c + (255,))
+    for x, y in [(3, 3), (12, 3), (3, 12), (12, 12)]:
+        img.putpixel((x, y), palette[1] + (255,))
+    return img
+
+
 def pile(seed, palette):
     rng = random.Random(seed)
     img = new()
@@ -152,6 +205,12 @@ def pile(seed, palette):
             if ch == "x":
                 img.putpixel((x, y), rng.choice(palette) + (255,))
     return img
+
+
+def blend(seed):
+    """Bronze blend: a heap of copper powder with small clumps of tin powder through it. `seed` is kept for the
+    caller."""
+    return ms.blend(COPPER_METAL, TIN)
 
 
 # name: (ore specks, glint, metal palette dark->light). Colors follow the real ore minerals.
@@ -201,22 +260,6 @@ MINERAL_COLORS = {
                  [(140, 84, 36), (178, 116, 52), (206, 150, 78), (226, 180, 110)]),
 }
 
-# The ore minerals' own colours as nodules (dark, mid, light, highlight), for the ore blocks (tools/material_style.py)
-# and for raw ore and raw ore blocks. They follow the same minerals as the specks above.
-ORE_TONES = {
-    "tin": [(46, 30, 22), (80, 52, 36), (118, 82, 56), (196, 170, 146)],           # Cassiterite, glossy brown-black.
-    "zinc": [(112, 68, 26), (164, 108, 42), (206, 154, 74), (242, 214, 148)],      # Sphalerite, amber.
-    "lead": [(54, 58, 74), (92, 98, 118), (136, 142, 162), (196, 202, 222)],       # Galena, blue lead-grey.
-    "silver": [(132, 136, 148), (182, 186, 196), (220, 222, 230), (255, 255, 255)],
-    "nickel": [(118, 98, 42), (164, 142, 70), (204, 186, 106), (240, 228, 168)],   # Pentlandite, bronze-yellow.
-    "tungsten": [(30, 24, 22), (62, 48, 40), (98, 78, 62), (176, 156, 138)],       # Wolframite, black-brown.
-    "uranium": [(76, 96, 22), (132, 164, 38), (186, 214, 62), (236, 248, 150)],    # Autunite on pitchblende.
-    "titanium": [(92, 38, 22), (134, 62, 34), (178, 96, 52), (230, 160, 104)],     # Rutile, red-brown.
-    "salt": [(178, 160, 164), (214, 200, 204), (238, 230, 232), (255, 255, 255)],  # Halite, white with pink.
-    "phosphate": [(40, 100, 92), (70, 144, 134), (116, 190, 176), (178, 226, 212)],  # Apatite, teal.
-    "lepidolite": [(110, 70, 132), (154, 110, 178), (194, 154, 214), (236, 214, 246)],
-    "monazite": [(122, 68, 28), (170, 108, 48), (212, 152, 80), (246, 214, 150)],
-}
 SULFUR = [(150, 126, 18), (200, 176, 30), (230, 208, 58), (244, 228, 104), (252, 244, 168)]
 
 BAUXITE = [(126, 58, 36), (150, 72, 44), (170, 88, 54), (188, 108, 68), (112, 50, 32)]
@@ -237,26 +280,25 @@ def main_extra():
     for metal, (specks, glint, palette) in METAL_COLORS.items():
         seed += 10
         if specks:
-            tones = ORE_TONES[metal]
-            save(ms.ore(tones, seed), "block", f"{metal}_ore")
-            save(ms.ore(tones, seed + 1, deep=True), "block", f"deepslate_{metal}_ore")
-            save(ms.raw_block(tones, seed + 2), "block", f"raw_{metal}_block")
-            save(ms.raw_item(tones), "item", f"raw_{metal}")
-        save(ms.storage_block(palette, seed + 4), "block", f"{metal}_block")
-        save(ms.ingot(palette), "item", f"{metal}_ingot")
-        save(ms.nugget(palette), "item", f"{metal}_nugget")
+            save(ore(STONE, seed, specks=specks, glint=glint), "block", f"{metal}_ore")
+            save(ore(DEEPSLATE, seed + 1, streaks=True, specks=specks, glint=glint), "block", f"deepslate_{metal}_ore")
+            save(raw_block(seed + 2, specks, glint), "block", f"raw_{metal}_block")
+            save(raw_chunk(seed + 3, specks, glint), "item", f"raw_{metal}")
+        save(metal_block(palette, seed + 4), "block", f"{metal}_block")
+        save(from_mask(INGOT, palette), "item", f"{metal}_ingot")
+        save(from_mask(NUGGET, palette), "item", f"{metal}_nugget")
 
     for mineral, (specks, glint, palette) in MINERAL_COLORS.items():
         seed += 10
-        save(ms.ore(ORE_TONES[mineral], seed), "block", f"{mineral}_ore")
-        save(ms.ore(ORE_TONES[mineral], seed + 1, deep=True), "block", f"deepslate_{mineral}_ore")
-        save(ms.mineral_block(palette, seed + 2), "block", f"{mineral}_block")
+        save(ore(STONE, seed, specks=specks, glint=glint), "block", f"{mineral}_ore")
+        save(ore(DEEPSLATE, seed + 1, streaks=True, specks=specks, glint=glint), "block", f"deepslate_{mineral}_ore")
+        save(rock(palette, seed + 2), "block", f"{mineral}_block")
         save(pile(seed + 3, palette), "item", mineral)
 
     for index, (metal, (_, _, palette)) in enumerate(ALLOY_COLORS.items()):
-        save(ms.storage_block(palette, 700 + index), "block", f"{metal}_block")
-        save(ms.ingot(palette), "item", f"{metal}_ingot")
-        save(ms.nugget(palette), "item", f"{metal}_nugget")
+        save(metal_block(palette, 700 + index), "block", f"{metal}_block")
+        save(from_mask(INGOT, palette), "item", f"{metal}_ingot")
+        save(from_mask(NUGGET, palette), "item", f"{metal}_nugget")
 
     save(speckled(BAUXITE, 300, [(214, 170, 130), (226, 190, 150)]), "block", "bauxite")
     save(speckled(OIL_SAND_BASE, 301, BITUMEN, count=40), "block", "oil_sand")
@@ -1349,17 +1391,17 @@ def glass_textures():
 
 
 def main():
-    save(ms.ore(ORE_TONES["tin"], 11), "block", "tin_ore")
-    save(ms.ore(ORE_TONES["tin"], 12, deep=True), "block", "deepslate_tin_ore")
-    save(ms.raw_block(ORE_TONES["tin"], 13), "block", "raw_tin_block")
-    save(ms.storage_block(TIN, 14), "block", "tin_block")
-    save(ms.storage_block(BRONZE, 15), "block", "bronze_block")
-    save(ms.raw_item(ORE_TONES["tin"]), "item", "raw_tin")
-    save(ms.ingot(TIN), "item", "tin_ingot")
-    save(ms.nugget(TIN), "item", "tin_nugget")
-    save(ms.ingot(BRONZE), "item", "bronze_ingot")
-    save(ms.nugget(BRONZE), "item", "bronze_nugget")
-    save(ms.blend(COPPER_METAL, TIN), "item", "bronze_blend")
+    save(ore(STONE, 11), "block", "tin_ore")
+    save(ore(DEEPSLATE, 12, streaks=True), "block", "deepslate_tin_ore")
+    save(raw_block(13), "block", "raw_tin_block")
+    save(metal_block(TIN, 14), "block", "tin_block")
+    save(metal_block(BRONZE, 15), "block", "bronze_block")
+    save(raw_chunk(16), "item", "raw_tin")
+    save(from_mask(INGOT, TIN), "item", "tin_ingot")
+    save(from_mask(NUGGET, TIN), "item", "tin_nugget")
+    save(from_mask(INGOT, BRONZE), "item", "bronze_ingot")
+    save(from_mask(NUGGET, BRONZE), "item", "bronze_nugget")
+    save(blend(17), "item", "bronze_blend")
     icon = ore(STONE, 11)
     icon.paste(from_mask(INGOT, BRONZE), (0, 3), from_mask(INGOT, BRONZE))
     icon.resize((128, 128), Image.NEAREST).save(TEX.parent / "icon.png", optimize=True)

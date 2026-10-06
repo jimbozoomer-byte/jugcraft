@@ -32,7 +32,7 @@ REPLACES = ["minecraft:stone", "minecraft:andesite", "minecraft:diorite", "minec
 # ---------------------------------------------------------------- textures
 
 # Weathered host rock: grey-brown rubble with dark cracks between the stones.
-# Rubble in plain stone grey (tools/material_style.py), joined by dark gaps, with the ore's own lumps among it.
+# Rubble in plain, neutral stone grey, joined by dark gaps, with the ore's own lumps among it.
 RUBBLE = [(100, 100, 100), (124, 124, 124), (146, 146, 146)]
 JOINT = (58, 58, 60)
 # Ore lumps per deposit: shadow, body, light, highlight.
