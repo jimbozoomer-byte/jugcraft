@@ -1,8 +1,8 @@
 {
   "textures": {
-    "side": "jugcraft:block/dr_skid",
-    "web": "jugcraft:block/dr_rust_bare",
-    "particle": "jugcraft:block/dr_skid"
+    "side": "jugcraft:block/dw_steel_plate",
+    "web": "jugcraft:block/dw_steel_plate",
+    "particle": "jugcraft:block/dw_steel_plate"
   },
   "elements": [
     {

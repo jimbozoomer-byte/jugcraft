@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Draws what is in a Horned Skull Cauldron: the brew's surface in its potion's colour, heaving gently; up to three things
  * floating in it, half-sunk, bobbing and turning; over heat, three fume ribbons twisting up out of it in the brew's colour
- * and fading; and the skull's eye sockets glowing in that colour while it holds a potion.
+ * and fading; and the skull's square eye sockets glowing flat in that colour while it holds a potion.
  */
 public class HornedSkullCauldronRenderer implements BlockEntityRenderer<HornedSkullCauldronBlockEntity, HornedSkullCauldronRenderer.State> {
 	private static final RenderType BREW = RenderTypes.entityTranslucent(Jugcraft.id("textures/entity/witchs_workshop_brew.png"));
@@ -40,9 +40,13 @@ public class HornedSkullCauldronRenderer implements BlockEntityRenderer<HornedSk
 	/** Where the floating things sit about the middle, in pixels {x, z}, and how big they are. */
 	private static final float[][] FLOAT_SPOTS = {{-2.0F, -1.4F}, {2.1F, 0.6F}, {-0.4F, 2.4F}};
 	private static final float FLOAT_SCALE = 0.42F;
-	/** The skull's eye sockets on its face, {x0, y0, x1, y1} in pixels, and the face's depth. */
-	private static final float[][] EYES = {{5.9F, 8.6F, 7.1F, 9.6F}, {8.9F, 8.6F, 10.1F, 9.6F}};
-	private static final float EYE_Z = 0.65F;
+	/**
+	 * The skull's square eye sockets on its face, {x0, y0, x1, y1} in pixels (tools/decor17.py CAULDRON skull_eyes, which
+	 * the audit compares), and where their glow is drawn: a flat square exactly over each socket, 0.1 pixel in front of
+	 * the face (at z 0.7), never a soft halo round it.
+	 */
+	private static final float[][] EYES = {{5.8F, 8.6F, 7.2F, 9.8F}, {8.8F, 8.6F, 10.2F, 9.8F}};
+	private static final float EYE_Z = 0.6F;
 	private static final float FUME_HEIGHT = 22.0F;
 
 	private final ItemModelResolver itemModels;
@@ -102,10 +106,9 @@ public class HornedSkullCauldronRenderer implements BlockEntityRenderer<HornedSk
 			int glow = 0xE0000000 | state.color;
 			collector.submitCustomGeometry(pose, GLOW, (matrix, buffer) -> {
 				for (float[] eye : EYES) {
-					float pad = 0.3F;
-					DecorDraw.quad(buffer, matrix, new float[][] {{(eye[0] - pad) / 16, (eye[1] - pad) / 16, EYE_Z / 16, 0, 1},
-							{(eye[0] - pad) / 16, (eye[3] + pad) / 16, EYE_Z / 16, 0, 0}, {(eye[2] + pad) / 16, (eye[3] + pad) / 16, EYE_Z / 16, 1, 0},
-							{(eye[2] + pad) / 16, (eye[1] - pad) / 16, EYE_Z / 16, 1, 1}}, 0, 0, -1, glow, FULL_BRIGHT);
+					DecorDraw.quad(buffer, matrix, new float[][] {{eye[0] / 16, eye[1] / 16, EYE_Z / 16, 0, 1},
+							{eye[0] / 16, eye[3] / 16, EYE_Z / 16, 0, 0}, {eye[2] / 16, eye[3] / 16, EYE_Z / 16, 1, 0},
+							{eye[2] / 16, eye[1] / 16, EYE_Z / 16, 1, 1}}, 0, 0, -1, glow, FULL_BRIGHT);
 				}
 			});
 		}

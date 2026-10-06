@@ -13,7 +13,7 @@
   "elements": [
     {
       "from": [
-        0,
+        2.75,
         0,
         0
       ],
@@ -27,6 +27,9 @@
           "texture": "#fluid_tank_side"
         },
         "east": {
+          "texture": "#fluid_tank_side"
+        },
+        "west": {
           "texture": "#fluid_tank_side"
         },
         "up": {
