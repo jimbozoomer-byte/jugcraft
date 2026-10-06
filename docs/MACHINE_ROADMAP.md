@@ -2,6 +2,8 @@
 
 Status: **proposals for discussion, not approved or implemented** unless marked ✅. How implemented things connect is documented in [TECH_TREE.md](TECH_TREE.md). Machines are grouped into branches: **Mechanical** (shape and mix of materials), **Fluids** (moving liquids) and the planned **Chemistry** branch ([branches/CHEMISTRY.md](branches/CHEMISTRY.md)).
 
+The owner-endorsed [mineral-sands and shared refining plan](features/mineral-sands-and-refining-plan.md) records regional mineral-bearing sands, hybrid extraction, reusable separation/refining equipment and an initial named rare-earth set. **Further rare-earth materials and applications are explicitly planned beyond neodymium, cerium and yttrium.** Exact recipes, equipment capabilities and additional elements remain to be developed.
+
 ## What exists now
 
 | Role | Implemented |
