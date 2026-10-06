@@ -1,6 +1,6 @@
 # Big guns, Landship, Diesel Walker and balloons: art fixes (5 October 2026)
 
-Status: implemented (pending CI and review); needs the art core's exporter (see Rollout)
+Status: implemented (pending CI and review), together with the art core's exporter in the same change (see Rollout)
 Proposal issue: none. The owner's feedback of 5 October 2026 is the scope approval.
 Owner: jimbozoomer-byte
 Target milestone and tier: no new tier. Cosmetic and client-motion fixes to existing content: the big guns (batch 51, petrochemical tier), the tower guns (batch 54), the Landship (batch 49), the Diesel Walker (batch 47), the Observation Balloon and the hot-air balloons and pibals (fall addition 29).
@@ -81,7 +81,7 @@ CI (planned; not run here): `BigGunsClientGameTests` takes close screenshots aga
 Not applicable: no world generation, mobs, loot or seasons change.
 
 ## Rollout and open questions
-- **Merge after the art core.** The see-through holes and the flicker inside each part come from the shared quad exporter (`zeppelin.tiled_quads`), which the art core replaces with exact hidden-face removal ("Fixed: see-through and flickering machines, guns, landship, walker, zeppelin, observation balloon, Witching Season props (art core)", recorded in that change's `docs/features/see-through-and-flicker-fixes.md`). This change is the per-model part: geometry that moves, decals, textures, the balloons and the icons. Its quad files were exported with the current exporter, so on its own the guns, Landship and walker still show the old gaps. Merge the art core first, then run `tools/generate_material_data.py` and commit the regenerated `artillery`, `tower_gun`, `landship`, `walker` and `balloon` quads; never hand-merge those one-line files.
+- **Ships with the art core.** The see-through holes and the flicker inside each part came from the shared quad exporter (`zeppelin.tiled_quads`), which the art core, in the same change, replaces with exact hidden-face removal ([see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md)). This record is the per-model part: geometry that moves, decals, textures, the balloons and the icons. The `artillery`, `tower_gun`, `landship`, `walker` and `balloon` quads are exported with the new exporter; on a merge, run `tools/generate_material_data.py` and commit them regenerated, never hand-merge those one-line files.
 - The **Armoured Walker** (PR #193, not on main) needs the same treatment there: its hip drum `x -3.75..3.75` (it shares the skirt core's side plane, `armoured_walker.py:125`), recommended plate belts from `y 35.75` (`:72-73`), optional gunmetal ankle `x ±4.25` (`:134`) and an optional gunmetal muzzle-ring cap; then regenerate `armoured_walker_quads.json` and `raider_quads.json`, and add the walker to `gun_poses.assemblies`.
 - The Zeppelin, Landship, Diesel Walker and the howitzer are moved by the server alone too; the owner has not reported their motion, so they keep stepping for now. `SmoothFlight` would serve them the same way.
 - Whether 26.3 already drives a plain entity's interpolation handler is unknown offline. If it does, `SmoothFlight.step` makes a second step a tick, which only shortens the lag; the client test logs every tick's heights, so CI shows it.

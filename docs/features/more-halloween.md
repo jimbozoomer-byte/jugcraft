@@ -622,7 +622,7 @@ Found by CI and fixed before this record:
 - the sounds (the CI client has no sound device).
 
 ### Look fixes, 5 October 2026: the Specimen Jar's eye and the Shadow Puppet Lamp
-The owner: "the texture of the eye in the specimen jar is weird but the rest of the jar is really cool" and "shadow puppet lamp textures and just bizzare constantly flashing and glitching". Fixed on the art/decor branch; tiers, inputs, outputs, costs, IDs, light levels and behaviour are unchanged. The jar's glass, fluid, iron and motion are untouched (the owner likes them); bigger jars are a separate change.
+The owner: "the texture of the eye in the specimen jar is weird but the rest of the jar is really cool" and "shadow puppet lamp textures and just bizzare constantly flashing and glitching". Fixed on 5 October 2026 (art fixes); tiers, inputs, outputs, costs, IDs, light levels and behaviour are unchanged. The jar's glass, fluid, iron and motion are untouched (the owner likes them); bigger jars are a separate change.
 
 **The Specimen Jar's eye.**
 - **Cause:** a 3-pixel cube with the eye picture pinned to its front only; its other five faces took position UVs, the middle 3 × 3 texels of the picture, so as it turned the jar mostly showed a black-topped blue cube. The picture itself was random speckle with a checkered iris and a square pupil.
