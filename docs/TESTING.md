@@ -4,7 +4,24 @@
 
 Run `python scripts/check_repository.py` with Python 3.11+. The Foundation / repository job checks required files, relative Markdown links, and the phase declaration. It is not a Java compiler, mod test, security audit, or gameplay approval. In the `bootstrap` phase, Java/Gradle sources are allowed. The Build workflow compiles the mod (`./gradlew build`), checks generated JSON is current and runs `tools/check_mod_data.py`, which validates material data and audits recipes offline. None of these is a game test.
 
-Game tests run in the Build workflow too: the `mod` job's `./gradlew build` runs the server game tests, and three client jobs run the client game tests (`./gradlew runClientGameTest -PclientTestShard=<n> -PclientTestShards=3`, every third test class each, so each class runs once). The `client` job passes only when all three shards pass. Locally, `./gradlew runClientGameTest` without the two properties runs every class.
+Game tests run in the Build workflow too. The `mod` job's `./gradlew build` runs every server game test on every change. The client game tests start a real game and photograph showrooms, which costs CI 15 to 25 minutes for the whole set, so:
+
+- **A pull request runs only the client test classes that show what it changed.** The `choose client tests` job runs `tools/select_client_tests.py`, which compares the pull request with its base:
+  - Docs, Markdown, `tools/` and `scripts/`, data, and the language file pick nothing. The generators' output is committed and judged as the files it writes.
+  - A model, blockstate or texture picks the classes that name its ID.
+  - A Java class picks the classes that show it, and the classes that show the Jugcraft classes using it. A class only gaining code picks by the names and IDs it gained, such as a registry registering a new feature.
+  - Build files, the workflow, mixins and the test mod's helpers run every class. So does a change picking half the classes or more.
+  - The job's log says why each file picked what it did.
+- **`main` (after each merge) and a manual run of the Build workflow run every class.** Run it on a branch from the Actions tab ("Run workflow") to test a pull request in full.
+
+Three client jobs share the chosen classes out by their rough running time (`./gradlew runClientGameTest -PclientTests=<Class,Class,...>`). A job with nothing to run passes at once. The `client` job passes only when the choice and all three jobs pass.
+
+Locally:
+- `./gradlew runClientGameTest` runs every class.
+- `python3 tools/select_client_tests.py --base origin/main` shows what a branch would run.
+- `-PclientTestShard=<n> -PclientTestShards=<count>` still keeps every count-th class.
+
+The client tests a pull request skips still run on `main` after it merges. A break they catch there is fixed in a follow-up pull request.
 
 ## Gameplay PR evidence after bootstrap
 
