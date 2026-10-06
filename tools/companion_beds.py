@@ -45,8 +45,8 @@ for color in COLORS:
     write(f"src/main/resources/assets/peepo_companion/blockstates/{name}.json", {"variants": variants})
     write(f"src/main/resources/assets/peepo_companion/items/{name}.json", {"model":{"type":"minecraft:model","model":f"peepo_companion:block/{name}"}})
     write(f"src/main/resources/data/peepo_companion/loot_table/blocks/{name}.json", {"type":"minecraft:block","pools":[{"rolls":1,"entries":[{"type":"minecraft:item","name":f"peepo_companion:{name}"}],"conditions":[{"condition":"minecraft:survives_explosion"}]}]})
-    write(f"src/main/resources/data/peepo_companion/recipe/{name}.json", {"type":"minecraft:crafting_shaped","category":"decorations","pattern":["WW","PP"],"key":{"W":f"minecraft:{color}_wool","P":"#minecraft:planks"},"result":{"id":f"peepo_companion:{name}","count":1}})
-    write(f"src/main/resources/data/peepo_companion/recipe/{name}_recolor.json", {"type":"minecraft:crafting_shapeless","category":"decorations","ingredients":["#peepo_companion:companion_beds",f"minecraft:{color}_dye"],"result":{"id":f"peepo_companion:{name}","count":1}})
+    write(f"src/main/resources/data/peepo_companion/recipe/{name}.json", {"type":"minecraft:crafting_shaped","category":"misc","pattern":["WW","PP"],"key":{"W":f"minecraft:{color}_wool","P":"#minecraft:planks"},"result":{"id":f"peepo_companion:{name}","count":1}})
+    write(f"src/main/resources/data/peepo_companion/recipe/{name}_recolor.json", {"type":"minecraft:crafting_shapeless","category":"misc","ingredients":["#peepo_companion:companion_beds",f"minecraft:{color}_dye"],"result":{"id":f"peepo_companion:{name}","count":1}})
     lang[f"block.peepo_companion.{name}"] = color.replace("_", " ").title() + " Companion Bed"
 write("src/main/resources/assets/peepo_companion/lang/en_us.json",lang)
 write("src/main/resources/data/peepo_companion/tags/item/companion_beds.json",{"values":[f"peepo_companion:{color}_companion_bed" for color in COLORS]})
