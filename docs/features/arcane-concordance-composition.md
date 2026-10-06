@@ -206,7 +206,15 @@ gestures and sounds. Everything is original.
   cast through Spell Engine, Focus taken once, cooldown started, nothing charged for a spell that affects nothing, a
   forged cost ignored, a spell refused when research is taken away; a pulsing spell among ten pigs reaching only its
   four; a branch credited to the caster within its limits).
-- CI: see the delivery report for the run on this commit.
+- CI, run 37517420293 (Build workflow, run manually on this branch, commit `576fae2f`): `mod` passed with **"All 845
+  required tests passed"** (the 8 new tests included; the rules load with 16 components and 0 problems) and
+  `optional integrations absent` passed. The client test shards fail before any test starts, with the same OpenGL
+  startup crash as on the framework foundation branch.
+- Earlier runs on this branch found and fixed: two compile errors (Minecraft 26.3 tests entity type tags with
+  `Entity.is` and keeps vanilla entity types in `EntityTypes`); the boundary treated vanilla's mock test player, which
+  always reports creative mode, as immune (creative immunity is now the invulnerable ability, which game mode changes
+  keep); and the branch test, which missed its target in three of four jobs when the target stood 5.7 blocks away (it
+  now stands as close as in the inscription test, and the mock player's head faces the way it was placed).
 
 Not yet run: any client (the composer's chat output, the wand tooltip, the spell bar entry and the icon in game), a
 two-client dedicated server, a GuiLib composer screen (not built: the command is the composer every player has).
