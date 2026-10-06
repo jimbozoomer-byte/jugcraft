@@ -62,7 +62,7 @@ Every burst is the grenades' and rockets' `Blast`. It hurts living things only, 
   - The new textures (`ar_*`) are drawn in `tools/artillery.py`, the item icons in `tools/gun_icons.py`, and the barrels use the tower guns' `tg_*` steel. The 5 October 2026 art fixes (closed barrels, whole decals, seamless paint, the smooth balloon and its smooth rise) are recorded in [big-guns-art-fixes.md](big-guns-art-fixes.md).
   - The models reuse the giants', Kaiserworks, powered-tools and zeppelin textures.
   - The howitzer's tracks reuse the landship's track link.
-- The models are exported to `assets/jugcraft/artillery_quads.json` and drawn by `client/ArtilleryRenderers`.
+- The models are exported to `assets/jugcraft/artillery_quads.json` and drawn by `client/ArtilleryRenderers`. Each gun's cradle (`mortar_cradle`, `howitzer_gun`, `flak_head`) elevates with its barrel but stays put when it fires, while the barrel (`mortar_barrel`, `howitzer_barrel`, `flak_barrels`) recoils back through it; the balloon's basket is `observation_basket`, apart from the hot-air balloons' `balloon_basket`.
 - Code is in `artillery/`: the entities, the shell, `Ballistics`, `Spotting`, the items and `JugcraftArtillery`.
 
 ## Verification
