@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### The Arcane Concordance: invocations
+- **Six invocations, one for each role**: First Light now teaches **Dawn Aegis** (a shell of light that absorbs blows) and **Revelation** (creatures round you glow through walls) alongside Kindle, and at mastery **Lance of Dawn** (a beam of arcane damage that grows with Spell Power), **Flashstep** (a dash the way you face) and **Lanternward** (mends and wards your party). Each has its own gesture, sound, particles and icon, and a counter written in the codex.
+- **Tune** an invocation with one modifier from its short list (`/jugcraft concordance tune`): more reach, strength, time or radius for more Focus, never a different spell.
+- Invocations are written in the same words as your own spells and held to the same limits: none is cheaper or cools down faster than the spell it is made of, and an instrument never grants a spell by itself. Record: [arcane-concordance-invocations.md](docs/features/arcane-concordance-invocations.md).
+
 ### The Arcane Concordance: composed spells and shared effects
 - **Compose your own spells**: once First Light is understood, write a spell in a few words (how it leaves you, what it chooses, what it does, how it ends) with `/jugcraft concordance compose check`, and inscribe it on the Initiate's Wand with `compose inscribe`. The game explains what a spell does and costs, or names every problem with it. Sixteen words to start, more at First Light mastered; the codex has a page for each.
 - An inscribed spell is cast from the spell bar like Kindle. The server works it out again on every cast and holds it to the limits it was written with: it never reaches more targets or does more than it said.

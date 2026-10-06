@@ -112,9 +112,9 @@ public class ConcordanceComposeGameTests {
 	public void grammarLoadsAndNamesProblems(GameTestHelper helper) {
 		Catalog catalog = ConcordanceData.rules().catalog();
 		Instrument wand = wand();
-		helper.assertTrue(catalog.components().size() == 16 && wand != null && wand.capacity() == 8 && wand.targets() == 6
+		helper.assertTrue(catalog.components().size() == 23 && wand != null && wand.capacity() == 8 && wand.targets() == 6
 				&& wand.work() == 48 && wand.branches() == 1 && wand.duration() == 1200,
-				"16 components and the Initiate's Wand load: " + catalog.components().keySet() + " " + wand);
+				"23 components (6 of them invocations' own) and the Initiate's Wand load: " + catalog.components().keySet() + " " + wand);
 		Object[][] examples = {
 			{"touch struck light", ResearchState.UNDERSTOOD, 2, 2, 20},
 			{"here struck ward", ResearchState.UNDERSTOOD, 3, 3, 25},

@@ -6,6 +6,7 @@ import com.mojang.serialization.JsonOps;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.BenchStatus;
+import io.github.jimbozoomer.jugcraft.concordance.ComposedSpells;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceCodecs;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -13,11 +14,11 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceSpells;
 import io.github.jimbozoomer.jugcraft.concordance.Examination;
 import io.github.jimbozoomer.jugcraft.concordance.Illumination;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
-import io.github.jimbozoomer.jugcraft.concordance.KindleInvocation;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LanternCharge;
 import io.github.jimbozoomer.jugcraft.concordance.LumenMoteBlock;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Plan;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
@@ -196,8 +197,12 @@ public class ConcordanceGameTests {
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.INITIATE_WAND));
 		Holder<Spell> kindle = kindle(level);
 		BlockPos lit = helper.absolutePos(new BlockPos(1, 3, 4));
-		helper.assertTrue(KindleInvocation.aim(level, player).equals(lit), "Kindle aims at the open side of the wall: "
-				+ KindleInvocation.aim(level, player) + " vs " + lit);
+		// Kindle is the composition "ray struck kindle_light": its ray, traced on the server, meets the wall.
+		Plan plan = ConcordanceData.rules().authored(KINDLE, "jugcraft:initiate_wand").plan();
+		int steps = plan.root().steps().getFirst().effect().duration() / LumenMoteBlock.STEP_TICKS;
+		BlockPos aim = ComposedSpells.deliver(level, player, plan.root(), null).open();
+		helper.assertTrue(aim.equals(lit) && plan.root().range() == 16 && steps == 15,
+				"Kindle reaches 16 blocks and aims at the open side of the wall: " + aim + " vs " + lit + ", " + steps + " steps");
 
 		refreshSpells(player);
 		cast(level, player, kindle);
@@ -208,7 +213,7 @@ public class ConcordanceGameTests {
 		refreshSpells(player);
 		cast(level, player, kindle);
 		BlockState mote = level.getBlockState(lit);
-		helper.assertTrue(mote.is(JugcraftConcordance.LUMEN_MOTE) && mote.getValue(LumenMoteBlock.AGE) == KindleInvocation.MOTE_STEPS
+		helper.assertTrue(mote.is(JugcraftConcordance.LUMEN_MOTE) && mote.getValue(LumenMoteBlock.AGE) == steps
 				&& mote.getLightEmission() == LumenMoteBlock.LIGHT, "Kindle sets a full-length mote of light 14: " + mote);
 		helper.assertTrue(ConcordanceProgress.currentFocus(player) == FocusPool.MAX - 4, "Kindle takes 4 Focus once: "
 				+ ConcordanceProgress.currentFocus(player));

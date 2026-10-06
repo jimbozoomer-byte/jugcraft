@@ -284,7 +284,8 @@ Record: [walled-town.md](features/walled-town.md).
 Magic, milestones 1 to 3. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),
-[arcane-concordance-composition.md](features/arcane-concordance-composition.md).
+[arcane-concordance-composition.md](features/arcane-concordance-composition.md),
+[arcane-concordance-invocations.md](features/arcane-concordance-invocations.md).
 
 | ID / part | Class / data | What |
 | --- | --- | --- |
@@ -293,17 +294,18 @@ Magic, milestones 1 to 3. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCAN
 | examining | `concordance/Examination` | sneak-use a `#jugcraft:luminous_specimens` item |
 | `jugcraft:lampwright_bench` | `LampwrightBenchBlock`, `...BlockEntity`, `...Menu`, `BenchStatus`; client `LampwrightBenchScreen` | study (100 ticks), kindle, infuse and channel workings, all checked on the server |
 | `jugcraft:initiate_wand` | `InitiateWandItem`; `data/jugcraft/spell_assignments/initiate_wand.json` | the first instrument (`#jugcraft:concordance_instruments`) |
-| `jugcraft:kindle` spell | `data/jugcraft/spell/kindle.json`; `ConcordanceSpells` (Spell Engine bridge), `KindleInvocation` | 4 Focus (3 mastered), light 14 for 60 s, 16 blocks |
+| invocations | `data/jugcraft/concordance/invocation/`, `data/jugcraft/spell/{kindle,aegis,revelation,lance,flashstep,lanternward}.json`; `Invocations` (impact `jugcraft:invocation`), `ConcordanceSpells` (Spell Engine bridge, settlement) | Kindle (utility), Dawn Aegis (defense), Revelation (investigation), Lance of Dawn (damage), Flashstep (movement), Lanternward (support); compositions compiled under the wand's limits |
+| tunings | item component `jugcraft:tunings` (`Tunings`); `ConcordanceCommand` (`tune`) | one modifier per invocation, from its list, charged by the server's rules |
 | `jugcraft:lumen_mote` | `LumenMoteBlock`, `Illumination` | the Kindled light and a lantern's trail light; open air only |
 | `jugcraft:kindled_lantern` | `KindledLanternItem`, components `jugcraft:radiance` (`LanternCharge`), `jugcraft:lantern_lit` | 64 Radiance, 1 per 400 ticks while lit |
 | codex | `data/jugcraft/modonomicon/` | Modonomicon book `jugcraft:arcane_concordance`; research nodes from advancements `jugcraft:concordance_*` |
-| commands | `ConcordanceCommand` | `/jugcraft concordance status [player]`, `compose`, `diagnose`, `grant`, `reset`, `focus` |
+| commands | `ConcordanceCommand` | `/jugcraft concordance status [player]`, `compose`, `tune`, `diagnose`, `grant`, `reset`, `focus` |
 | client | `ConcordanceClient`, `ConcordanceClientOptions`, `ConcordanceSettingsScreen` (Cloth Config), `compat/ConcordanceModMenu` | Focus line, tooltips, settings (`config/jugcraft-client.properties`) |
 | optional | `compat/jade/ConcordanceDataProvider`, JEI bench category, `assets/jugcraft/dynamiclights/item/kindled_lantern.json` | Jade, JEI and LambDynamicLights display |
 | `jugcraft:research_notes` | `ResearchNotesItem`, component `ResearchNotes`, `RateGate` | write what you know; others read it as evidence (never mastery) |
 | `jugcraft:lumen_sconce` | `LumenSconceBlock`, `LumenSconceBlockEntity` | burns Radiance for light 15; anyone pours, the owner draws |
 | typed resources | `concordance/resource/` (pure Java); `data/jugcraft/concordance/conversion/` | containers, transfers, conversions, allocation, Bound Will and Astral ledgers, Prima values |
-| composition | `concordance/compose/` (pure Java: grammar, parser, compiler, plans, explanations); `data/jugcraft/concordance/{component,instrument}/`; `ConcordanceCommand` (`compose check\|inscribe\|show\|clear`) | players write spells from 16 data components; every problem is named; plans carry their limits |
+| composition | `concordance/compose/` (pure Java: grammar, parser, compiler, plans, explanations); `data/jugcraft/concordance/{component,instrument}/`; `ConcordanceCommand` (`compose check\|inscribe\|show\|clear`) | players write spells from 17 data components (6 more belong to invocations); every problem is named; plans carry their limits |
 | `jugcraft:composed` spell | `data/jugcraft/spell/composed.json`; `ComposedSpells`, component `jugcraft:inscription` (`Inscription`) | casts the spell inscribed on the held instrument; recompiled on the server every cast, run under a ledger |
 | effects | `concordance/effect/` (pure Java: kinds, causes, stacking, tolerance, ledger); `ConcordanceEffects`; tags `#jugcraft:concordance/{immune,resistant,interactable,harvestable}` | the one boundary every Concordance effect goes through: friendly fire, tolerance, protection, attribution, one-time accounting |
 

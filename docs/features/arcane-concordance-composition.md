@@ -109,8 +109,10 @@ authoritative boundary that applies them on the server. In order, for every appl
    spectator mode are immune. A sourceless effect (a shrine with no owner) may harm anyone else.
 3. **Tolerance** (harmful pushes and statuses only): `#jugcraft:concordance/immune` (ender dragon, wither, warden,
    elder guardian) ignore them; `#jugcraft:concordance/resistant` (iron golem, ravager, piglin brute) take half the push
-   or half the time. Damage is not reduced here: armour, enchantments and Spell Power's school resistances already
-   apply to its damage type, and reducing it again would count them twice.
+   or half the time. Damage is not reduced here: its Spell Power damage type already carries Spell Power's rules (it
+   bypasses armour and shields, and Spell Power's magic resistance reduces it), and reducing it again would count
+   resistance twice. (An earlier version of this record said armour applied; Spell Power tags its damage types
+   `minecraft:bypasses_armor`, so it does not. Corrected with step 10.)
 4. **Protection** (block operations): the actor must be allowed to build there (spawn protection, protected towns,
    adventure mode); using a block needs a player actor and follows the town's usable-block rule. Without a player,
    only outside protected towns.
