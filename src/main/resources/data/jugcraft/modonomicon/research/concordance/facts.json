@@ -106,5 +106,17 @@
   },
   {
     "id": "jugcraft:concordance/relic_lore_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/assay_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/assay_observed"
+  },
+  {
+    "id": "jugcraft:concordance/assay_understood"
+  },
+  {
+    "id": "jugcraft:concordance/assay_mastered"
   }
 ]

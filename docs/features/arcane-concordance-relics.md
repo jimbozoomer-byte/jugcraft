@@ -162,7 +162,8 @@ originals are untouched and nothing is read at generation time. The art has not 
   through a save, refuses a stranger, gives the relic back to its owner and goes dark); a shrine installs only what can
   be installed (and nothing for someone without Relic Lore); relics share a budget (the third waits unspent) and never
   add up (a second Wardlight spends nothing); and a bound Hearthstone serves only its player, worn or installed.
-- CI: pending (this record is updated with the run).
+- CI: run 37628449524 (commit e2b7feb6) passes the whole Build workflow: it builds, passes the data checks and all 1003
+  required server game tests (the seven above among them), and the client test shards pass.
 
 Not yet run: any client (the shrine's model and animations, the icons, the circlet on the head, Jade, the codex pages),
 a two-client dedicated server, and an evening of play with several relics.

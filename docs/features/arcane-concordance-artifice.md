@@ -149,7 +149,10 @@ and brass were looked at and not used; the module's docstring says why. The art 
   a full socket refuses; a rune inscribed; a lead bonds; modifiers for the bond alone, one per stat; no one else can
   unbond; a dull ring gives nothing); salvage needs confirming and never gains; repair mends wear with the fewest
   ingots; and every statistic the data names is a registered attribute, Spell Power's included.
-- CI: pending (this record is updated with the run).
+- CI: run 37625123313 (commit 50b1800b) builds, passes the data checks and all 996 required server game tests (the six
+  above among them); client test shards 0 and 1 pass, and shard 2 stopped before running any test when Loom could not
+  download Minecraft's assets. The next run, 37628449524 (commit e2b7feb6, which also carries step 20), passes the whole
+  Build workflow, every client shard included.
 
 Not yet run: any client (the bench, the ring's tooltip and icon, the codex pages, JEI), a two-client dedicated server,
 and equipping a ring in a real Trinkets slot (the tests call the ring's Trinkets callback directly).

@@ -7547,6 +7547,7 @@ def check_concordance(registered):
     check_logistics(co, root, lang, registered)
     check_artifice(co, root, lang, registered, research)
     check_relics(co, root, lang, registered, research)
+    check_equivalence(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -7815,7 +7816,7 @@ def check_baselines(root):
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
     for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
-                    "worker", "logistics", "artifice", "relic"):
+                    "worker", "logistics", "artifice", "relic", "equivalence"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -8911,6 +8912,105 @@ def check_relics(co, root, lang, registered, research):
         with Image.open(texture) as img:
             if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
                 err(f"relics: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+
+
+def check_equivalence(co, root, lang, registered, research):
+    """Roadmap step 21: the Java mirrors tools/concordance_equivalence.py (the markup, limits, cap, eligibility rules and
+    the scale's numbers); the catalogue and graph on disk are the generator's; Python's own audit finds no unvalued
+    item, no recipe that gains value and no profitable cycle (sources apart), and every round trip through the scale
+    loses; nothing catalogued is excluded or scarce; every reason and message has its text; the icon is its map."""
+    eq = co.equivalence
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    assay = java("equivalence/Assay.java")
+    for const, value in (("FORM_NUMERATOR", eq.FORM_MARKUP.numerator), ("FORM_DENOMINATOR", eq.FORM_MARKUP.denominator)):
+        if not re.search(rf"\blong {const} = {value};", assay):
+            err(f"equivalence/Assay.java: {const} differs from tools/concordance_equivalence.py FORM_MARKUP")
+    if f"long MAX_BALANCE = {eq.MAX_BALANCE:_}L;" not in assay or f"int MAX_BATCH = {eq.MAX_BATCH};" not in assay:
+        err("equivalence/Assay.java: MAX_BALANCE or MAX_BATCH differs from tools/concordance_equivalence.py")
+    if f'String PRIMA = "{eq.PRIMA}";' not in assay:
+        err("equivalence/Assay.java: PRIMA differs from tools/concordance_equivalence.py")
+    parser = java("equivalence/EquivalenceParser.java")
+    for const, value in (("MAX_GRAINS", f"{eq.MAX_GRAINS:_}"), ("MAX_PER", eq.MAX_PER), ("MAX_COUNT", eq.MAX_COUNT)):
+        if not re.search(rf"\bint {const} = {value};", parser):
+            err(f"equivalence/EquivalenceParser.java: {const} differs from tools/concordance_equivalence.py")
+    audit = java("equivalence/CycleAudit.java")
+    if f"int MAX_LENGTH = {eq.MAX_LENGTH};" not in audit or f"int MAX_CYCLES = {eq.MAX_CYCLES:_};" not in audit:
+        err("equivalence/CycleAudit.java: MAX_LENGTH or MAX_CYCLES differs from tools/concordance_equivalence.py")
+    eligibility = java("equivalence/Eligibility.java")
+    if f'String EXCLUDED_TAG = "{eq.EXCLUDED_TAG}";' not in eligibility:
+        err("equivalence/Eligibility.java: EXCLUDED_TAG differs from tools/concordance_equivalence.py")
+    reasons = set(re.findall(r'return "([a-z_]+)";', eligibility)) | {"uncatalogued"}
+    scale = java("assay/Assaying.java")
+    reasons |= set(re.findall(r'refuse\(player, (?:stack|pattern), "([a-z_]+)"\)', scale))
+    for reason in sorted(reasons | set(eq.REASONS)):
+        if f"compose.{MOD}.assay.reason.{reason}" not in lang:
+            err(f"equivalence: missing lang for the reason {reason}")
+    if not reasons <= set(eq.REASONS):
+        err(f"equivalence: reasons {sorted(reasons - set(eq.REASONS))} are not in REASONS")
+    for key in re.findall(r'"message\.jugcraft\.concordance\.(assay\.[a-z_]+)"', scale):
+        if f"message.{MOD}.concordance.{key}" not in lang:
+            err(f"assay/Assaying.java: missing lang message.{MOD}.concordance.{key}")
+    if f"int CONFIRM_TICKS = {eq.CONFIRM_TICKS};" not in scale or f'String ACTIVITY = "{eq.ASSAY_PRACTICE}";' not in scale:
+        err("assay/Assaying.java: CONFIRM_TICKS or ACTIVITY differs from tools/concordance_equivalence.py")
+    if "Overflow.REJECT" not in scale or ".extract(PRIMA, cost, true)" not in scale:
+        err("assay/Assaying.java: the ledger moves all or nothing through the shared Reservoir")
+    practice = [rule for block in research.get("assay", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != eq.ASSAY_PRACTICE:
+        err("Assay must be mastered by the assay practice")
+    elif sum(1 for info in eq.MATERIALS.values() if info[2]) < practice[0].get("distinct", 1):
+        err("Assay's mastery asks for more different materials than can be dissolved")
+    # The catalogue and graph on disk are the generator's.
+    folder = DATA / MOD / "concordance"
+    materials = {p.stem: load(p) or {} for p in (folder / "material").glob("*.json")}
+    expected = {item.split(":")[1]: item for item in eq.MATERIALS}
+    if set(materials) != set(expected):
+        err(f"concordance/material: {sorted(materials)} differ from MATERIALS")
+    for stem, entry in materials.items():
+        item = expected.get(stem)
+        if item and (entry.get("item") != item or entry.get("value") != eq.value(*eq.MATERIALS[item][:2])
+                     or entry.get("dissolve") != eq.MATERIALS[item][2] or entry.get("form") != eq.MATERIALS[item][3]):
+            err(f"concordance/material/{stem}.json differs from the generator's: run tools/generate_material_data.py")
+    transmutations = {p.stem: load(p) or {} for p in (folder / "transmutation").glob("*.json")}
+    if set(transmutations) != set(eq.TRANSMUTATIONS):
+        err(f"concordance/transmutation: {sorted(transmutations)} differ from TRANSMUTATIONS")
+    # Python's own audit: no unvalued item, no gaining recipe, no profitable cycle; every round trip loses.
+    for problem in eq.audit():
+        err(f"equivalence: {problem}")
+    for item, (grains, per, dissolve, form) in eq.MATERIALS.items():
+        if not (1 <= grains <= eq.MAX_GRAINS and 1 <= per <= eq.MAX_PER):
+            err(f"material {item}: its value is out of bounds")
+        if dissolve and form:
+            for n in (1, 7, 64):
+                paid = (grains * n) // per
+                cost = -(-(grains * n * eq.FORM_MARKUP.numerator) // (per * eq.FORM_MARKUP.denominator))
+                if cost <= paid:
+                    err(f"material {item}: forming {n} must cost more than dissolving {n} pays")
+    excluded = set(eq.EXCLUDED)
+    for item in eq.MATERIALS:
+        if item in excluded or item in ("minecraft:diamond", "minecraft:emerald", "minecraft:netherite_ingot", "minecraft:ancient_debris"):
+            err(f"material {item}: it may not be catalogued (excluded or scarce)")
+    tag = load(DATA / MOD / "tags" / "item" / "equivalence" / "excluded.json") or {}
+    if sorted(tag.get("values", [])) != sorted(eq.EXCLUDED):
+        err("tags/item/equivalence/excluded.json differs from EXCLUDED")
+    for thing in eq.EXCLUDED:
+        if thing.startswith(f"{MOD}:") and split(thing)[1] not in registered:
+            err(f"equivalence: the excluded {thing} is not registered")
+    if "assayers_scale" not in registered or not (DATA / MOD / "recipe" / "assayers_scale.json").is_file():
+        err("equivalence: the Assayer's Scale needs a registration and a recipe")
+    model = load(ASSETS / "models" / "block" / "assayers_scale.json") or {}
+    if not model.get("elements") or not (ASSETS / "textures" / "block" / "assayers_scale.png").is_file():
+        err("equivalence: the Assayer's Scale needs its model and texture")
+    import item_icons
+    texture = ASSETS / "textures" / "item" / "assayers_scale.png"
+    if not item_icons.has("assayers_scale") or not texture.is_file():
+        err("equivalence: assayers_scale needs its map tools/item_icons/assayers_scale.txt and its texture")
+    else:
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw("assayers_scale").tobytes() or img.size != (16, 16):
+                err("equivalence: textures/item/assayers_scale.png differs from its map: run tools/generate_textures.py")
 
 
 def rid_value(path):

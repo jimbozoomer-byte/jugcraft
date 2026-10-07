@@ -253,6 +253,8 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.smithy.Artificery.register();
 		// Roadmap step 20: relics in their explicit contexts, and the Reliquary Shrine.
 		io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary.register();
+		// Roadmap step 21: bounded material equivalence, the Assayer's Scale and its Prima Materia ledger.
+		io.github.jimbozoomer.jugcraft.concordance.assay.Assaying.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

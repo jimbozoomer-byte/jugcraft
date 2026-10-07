@@ -214,5 +214,29 @@
     "required_facts": [
       "jugcraft:concordance/relic_lore_mastered"
     ]
+  },
+  {
+    "id": "jugcraft:concordance/assay_encountered",
+    "required_facts": [
+      "jugcraft:concordance/assay_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/assay_observed",
+    "required_facts": [
+      "jugcraft:concordance/assay_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/assay_understood",
+    "required_facts": [
+      "jugcraft:concordance/assay_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/assay_mastered",
+    "required_facts": [
+      "jugcraft:concordance/assay_mastered"
+    ]
   }
 ]
