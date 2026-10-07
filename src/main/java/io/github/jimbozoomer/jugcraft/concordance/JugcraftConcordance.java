@@ -167,15 +167,15 @@ public final class JugcraftConcordance {
 				FabricBlockEntityTypeBuilder.create(LumenSconceBlockEntity::new, LUMEN_SCONCE).build());
 		// Roadmap step 12: the anchor rituals are worked at, the pylons that feed them and the stones that contain them.
 		CIRCLE_ANCHOR = block("circle_anchor", CircleAnchorBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
-				.strength(3.0F, 6.0F).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion().pushReaction(PushReaction.BLOCK)
+				.strength(3.0F, 6.0F).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion().pushReaction(PushReaction.IMMOVEABLE)
 				.lightLevel(state -> 4));
 		Item anchor = item("circle_anchor", properties -> new BlockItem(CIRCLE_ANCHOR, properties), new Item.Properties().useBlockDescriptionPrefix());
 		LEY_PYLON = block("ley_pylon", LeyPylonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE)
-				.strength(2.5F, 6.0F).sound(SoundType.COPPER).requiresCorrectToolForDrops().noOcclusion().pushReaction(PushReaction.BLOCK)
+				.strength(2.5F, 6.0F).sound(SoundType.COPPER).requiresCorrectToolForDrops().noOcclusion().pushReaction(PushReaction.IMMOVEABLE)
 				.lightLevel(state -> state.getValue(LeyPylonBlock.CHARGED) ? 7 : 0));
 		Item pylon = item("ley_pylon", properties -> new BlockItem(LEY_PYLON, properties), new Item.Properties().useBlockDescriptionPrefix());
 		WARDING_STONE = block("warding_stone", WardingStoneBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
-				.strength(2.0F, 6.0F).sound(SoundType.STONE).requiresCorrectToolForDrops().pushReaction(PushReaction.BLOCK));
+				.strength(2.0F, 6.0F).sound(SoundType.STONE).requiresCorrectToolForDrops().pushReaction(PushReaction.IMMOVEABLE));
 		Item stone = item("warding_stone", properties -> new BlockItem(WARDING_STONE, properties), new Item.Properties().useBlockDescriptionPrefix());
 		ADEPT_WAND = item("adept_wand", InitiateWandItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 		ANCHOR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("circle_anchor"),
