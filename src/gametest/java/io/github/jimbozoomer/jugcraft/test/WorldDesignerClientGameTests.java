@@ -70,14 +70,15 @@ public class WorldDesignerClientGameTests implements FabricClientGameTest {
                 player.getAbilities().flying = true;
                 player.onUpdateAbilities();
             });
-            world.getServer().runCommand("tp @a -180 170 120 -45 35");
+            world.getServer().runCommand("setblock -40 159 40 minecraft:barrier");
+            world.getServer().runCommand("tp @a -40 160 40 -90 45");
             context.waitTicks(100);
-            context.waitFor(client -> !client.level.getBlockState(new BlockPos(-180, 76, 120)).isAir(), 400);
+            context.waitFor(client -> !client.level.getBlockState(new BlockPos(-40, 76, 40)).isAir(), 400);
             world.getConnection().waitForChunksRender();
             context.getInput().lookAt(new BlockPos(0, 100, 0));
             context.waitTicks(10);
             context.runOnClient(client -> {
-                check(!client.level.getBlockState(new BlockPos(-180, 76, 120)).isAir(), "Terrain did not reach the client");
+                check(!client.level.getBlockState(new BlockPos(-40, 76, 40)).isAir(), "Terrain did not reach the client");
                 Jugcraft.LOGGER.info("[designer-check] Client camera at {} looking {}/{}", client.player.position(), client.player.getYRot(), client.player.getXRot());
                 if (!client.gui.hud.isHidden()) client.gui.hud.toggle();
             });
