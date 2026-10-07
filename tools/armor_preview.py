@@ -12,6 +12,7 @@ flat as Minecraft lights entities (two fixed lights: top 1.0, front and back 0.7
     python3 tools/armor_preview.py --set reforged_white_diamond --compare path/to/owner_design.png
     python3 tools/armor_preview.py --set hades --compare path/to/owner_design.png
     python3 tools/armor_preview.py --set sunset_gem --compare path/to/owner_design.png
+    python3 tools/armor_preview.py --set pharaoh --compare path/to/owner_design.png
                                                            a set with a REFERENCES layout gets each of the reference's
                                                            views beside ours from the same camera and in the same pose,
                                                            lit as the reference is (Blockbench's shading, or unlit) and
@@ -26,7 +27,8 @@ three_quarter (front-right, from a little above), top, bottom, and the Bloodthor
 three-quarter from the model's left) and back_right (from behind, a little to its right). Poses: stand, walk (arms and
 legs swung), sneak, owner (the owner's knight and White Diamond renders: arms 20 degrees out, head turned 17
 degrees), hades (the owner's Hades render: arms 25 degrees out, head straight), sunset (the owner's Sunset Gem render:
-arms 12 degrees out, head straight), joined with "+" (sneak+walk).
+arms 12 degrees out, head straight), pharaoh (the owner's Pharaoh render: arms 12 degrees out, head turned 13), joined
+with "+" (sneak+walk).
 """
 import argparse
 import functools
@@ -132,8 +134,12 @@ def pose_bones(pose="stand", phase=0.0, amount=WALK):
         elif name == "sunset":
             bones["right_arm"][1][2] += math.radians(12)
             bones["left_arm"][1][2] -= math.radians(12)
+        elif name == "pharaoh":
+            bones["right_arm"][1][2] += math.radians(12)
+            bones["left_arm"][1][2] -= math.radians(12)
+            bones["head"][1][1] -= math.radians(13)
         else:
-            raise ValueError(f"unknown pose {name!r}: stand, walk, sneak, owner, hades, sunset")
+            raise ValueError(f"unknown pose {name!r}: stand, walk, sneak, owner, hades, sunset, pharaoh")
     return bones
 
 
@@ -365,6 +371,11 @@ REFERENCES = {
     # the forearms and the silhouette
     "sunset_gem": (("front", (28, 125, 425, 631), (0, 0), 60, 30, 11.7, (-2.6, 237.0),
                     {"pose": "sunset", "lighting": "unlit", "background": (176, 52, 89), "across": 18.0}),),
+    # the owner's Pharaoh render (686 x 627): one front view from a little above, unlit, the arms 12 degrees out and the
+    # head turned 13; the camera's distance and target height are White Diamond's, its elevation, scale and offset
+    # fitted to the silhouette (the skirt, the arms and the headdress), behind ours the render's mean background
+    "pharaoh": (("front", (150, 25, 540, 540), (0, 7), 60, 30, 13.1, (344.0, 116.375),
+                 {"pose": "pharaoh", "lighting": "unlit", "background": (56, 73, 64)}),),
 }
 
 

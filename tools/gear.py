@@ -147,6 +147,10 @@ ARMOR_TIERS = {
     # less defense than Bloodthorn's and netherite's toughness; mended with amethyst shards.
     "sunset_gem": {"display": "Sunset Gem", "armor": (48, (3, 7, 8, 3), 25, 3.0, 0.1),
                    "repair": "minecraft:amethyst_shard", "fire_resistant": False},
+    # Pharaoh: beside the others in other strengths: the heaviest helm and chest (but leggings like netherite's),
+    # good enchanting, netherite's toughness; fire resistant, as the desert sun asks; mended with gold.
+    "pharaoh": {"display": "Pharaoh", "armor": (41, (3, 6, 9, 4), 22, 3.0, 0.1),
+                "repair": "minecraft:gold_ingot", "fire_resistant": True},
 }
 
 

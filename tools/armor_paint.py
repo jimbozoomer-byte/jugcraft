@@ -142,6 +142,24 @@ SUNSET_GEM = {
     "under_light": (206, 176, 104), "under_mid": (188, 157, 91), "under_dark": (166, 131, 74),
     "under_darkest": (139, 106, 67),
 }
+# Pharaoh, the owner's golden design (tools/pharaoh_armor.py), sampled from their render. That render is unlit, as White
+# Diamond's is: each tone shows at one value on faces of every direction, and its ramps shift hue as they darken (the
+# gold's blue rises, 26, 40, 44, 51, as its red and green fall), which no lit, darker face of one texel colour could do,
+# so these are its texture colours as sampled, the commonest value of each tone's texel interiors. Its metal is the
+# gold, four tones from a bright yellow gold to the dark gold-brown of the skirt's lowest band, with two darker browns
+# added (unused by the armor itself) for the icons' outline. "gold" names its red gems, the bright and the dark red (its
+# middle red, the chest gem's, is left out). "leather" names its teal enamel, five tones from a light green teal to the
+# near-black of the wrist bands (the skirt's near-black blocks are a shade lighter in the render, folded into it);
+# "under" names its tan, the linen of the face plate, sleeves, skirt band and greaves, four tones.
+PHARAOH = {
+    "light": (178, 167, 26), "mid_light": (156, 138, 40), "mid": (129, 110, 44), "dark": (99, 84, 51),
+    "seam": (76, 63, 41), "void": (56, 46, 31),
+    "gold_light": (180, 34, 21), "gold_dark": (112, 29, 31),
+    "leather_light": (77, 131, 99), "leather_mid_light": (67, 102, 82), "leather_mid": (59, 80, 71),
+    "leather_dark": (51, 60, 55), "leather_darkest": (34, 33, 38),
+    "under_light": (206, 176, 104), "under_mid": (185, 154, 89), "under_dark": (166, 131, 73),
+    "under_darkest": (147, 113, 65),
+}
 # The smoke test's face colours (tools/armor_smoke.py): one hue per face, so a render shows which face is where.
 TEST = {**STEEL, "t_top": (230, 230, 90), "t_bottom": (90, 70, 40), "t_right": (220, 70, 70), "t_front": (80, 200, 90),
         "t_left": (70, 110, 230), "t_back": (200, 90, 210), "t_mark": (20, 20, 20), "t_rule": (255, 255, 255)}

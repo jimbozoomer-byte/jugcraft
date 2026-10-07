@@ -1,8 +1,8 @@
 """The 3D armor sets' 16x16 inventory icons: the bronze and steel armor's, the knight armor (tools/knight_armor.py)
-drawn small, and Bloodthorn Armor's, Reforged White Diamond's, Hades Armor's and Sunset Gem's
-(tools/bloodthorn_armor.py, tools/white_diamond_armor.py, tools/hades_armor.py and tools/sunset_gem_armor.py, below), in
-the owner's style for item icons (vanilla's own size, a one-pixel outline in each part's darkest tone, never pure black,
-light from the top left, a few flat tones, chunky parts that read at a glance).
+drawn small, and Bloodthorn Armor's, Reforged White Diamond's, Hades Armor's, Sunset Gem's and Pharaoh's
+(tools/bloodthorn_armor.py, tools/white_diamond_armor.py, tools/hades_armor.py, tools/sunset_gem_armor.py and
+tools/pharaoh_armor.py, below), in the owner's style for item icons (vanilla's own size, a one-pixel outline in each
+part's darkest tone, never pure black, light from the top left, a few flat tones, chunky parts that read at a glance).
 
 Each piece is one hand-drawn map, tools/armor_icons/<piece>.txt: 16 lines of 16 symbols, which the owner can edit
 directly (lines starting with # are comments). A map names no colours, only what each pixel is made of, so one map
@@ -109,6 +109,26 @@ Their symbols:
     w                   the olive's own outline, for olive drawn against the edge: "leather_darkest", a dark olive
                         brown (the olive's darkest tone is far lighter than an icon's outline). None of the four maps
                         needs it yet: the olive shows only inside the helm's face.
+Pharaoh (tools/pharaoh_armor.py) has pharaoh/helmet.txt and so on, coloured from armor_paint.PHARAOH and drawn after
+the owner's render (its boots, which the render hides under the skirt, after the 3D boots):
+    helmet      the nemes, its cap striped upright in gold and teal under the teal lobes, the gold brow band with the red
+                gem on the uraeus's diamond, the side panels in level stripes; the tan face narrowing between the gold
+                lappets and their dark teal ends to the chin and the short beard
+    chestplate  the gold armlets on the tan shoulders, the collar's teal round its gold ring and the red gem, the
+                breastplate's gold frame round the teal square, the dark waist
+    leggings    the gold belt over the skirt's level bands, gold, teal, gold, tan, gold, teal, dark gold, widening to
+                the dark teal hem, each band darker at the centre line, the halves parted at the foot
+    boots       two sandal-greaves: the gold-rimmed teal cuff, the tan wraps with the framed teal shin plate, the gold
+                strap and sole
+Their symbols:
+    .               transparent
+    O               the outline of the gold and the tan: the metal's "void" (a dark gold-brown) taken down to
+                    OUTLINE_LUMA
+    H L M D         the gold, light to dark: "light", "mid_light", "mid", "dark"
+    A a d e k       the teal, light to dark: "leather_light", "leather_mid_light", "leather_mid", "leather_dark", and
+                    "leather_darkest", the near-black of the bands, which is the teal's own outline
+    T t s n         the tan: "under_light", "under_mid", "under_dark", "under_darkest"
+    R r             the red gems: "gold_light", "gold_dark" (the palette's names for them, see armor_paint.PHARAOH)
 """
 import os
 
@@ -148,7 +168,12 @@ OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "
        "sunset_gem": (armor_paint.SUNSET_GEM, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
                                                "V": "void", "K": "gold_light", "Q": "gold_dark", "U": "under_light",
                                                "m": "under_mid", "u": "under_dark", "x": "under_darkest",
-                                               "w": "leather_darkest"})}
+                                               "w": "leather_darkest"}),
+       "pharaoh": (armor_paint.PHARAOH, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "A": "leather_light",
+                                         "a": "leather_mid_light", "d": "leather_mid", "e": "leather_dark",
+                                         "k": "leather_darkest", "T": "under_light", "t": "under_mid",
+                                         "s": "under_dark", "n": "under_darkest", "R": "gold_light",
+                                         "r": "gold_dark"})}
 
 
 def luma(colour):
