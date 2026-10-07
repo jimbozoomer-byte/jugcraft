@@ -156,6 +156,21 @@ def cypress_sapling():
     return c.img
 
 
+def cedar_sapling():
+    """The cedar's sapling: a short stem in its stringy bark under flat, layered sprays of scale-leaves, wider than the
+    cypress's column, in the cedar's own colours (wood_style.BARK and LEAVES)."""
+    from wood_style import BARK, LEAVES
+    stem, scales = BARK["cedar"][0][3], LEAVES["cedar_leaves"][0]
+    c = Canvas()
+    c.line(8, 15, 8, 9, stem)
+    for y, half in ((2, 1), (4, 2), (6, 3), (8, 4), (10, 3)):
+        for dx in range(-half, half + 1):
+            c.px(8 + dx, y, scales[3 + (abs(dx) + y // 2) % 3])
+            if abs(dx) < half:
+                c.px(8 + dx, y + 1, scales[2])
+    return c.img
+
+
 # ---------------------------------------------------------------- plants
 
 LAVENDER = pal("3e2a6e", "583f94", "7558b6", "947ad0", "b8a6e6")
@@ -530,6 +545,7 @@ def wild_textures():
     out[("block", "redwood_sapling")] = redwood_sapling()
     out[("block", "eucalyptus_sapling")] = eucalyptus_sapling()
     out[("block", "mahogany_sapling")] = mahogany_sapling()
+    out[("block", "cedar_sapling")] = cedar_sapling()
     out[("block", "bramble")] = bramble()
     out[("block", "glowcap")] = glowcap()
     out[("block", "glimmerbloom")] = glimmerbloom()
