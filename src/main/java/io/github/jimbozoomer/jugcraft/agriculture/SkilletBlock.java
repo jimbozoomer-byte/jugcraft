@@ -82,8 +82,12 @@ public class SkilletBlock extends BaseEntityBlock {
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 			BlockHitResult hit) {
-		if (!KitchenStoveBlock.cookable(level, stack) || !(level.getBlockEntity(pos) instanceof SkilletBlockEntity skillet)) {
+		if (stack.isEmpty()) {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
+		}
+		// Anything the pan can't fry is used as usual; it must not count as an empty hand, which takes the food out.
+		if (!KitchenStoveBlock.cookable(level, stack) || !(level.getBlockEntity(pos) instanceof SkilletBlockEntity skillet)) {
+			return InteractionResult.PASS;
 		}
 		if (level instanceof ServerLevel server) {
 			SkilletBlockEntity.Added added = skillet.add(server, stack, player);
@@ -99,7 +103,7 @@ public class SkilletBlock extends BaseEntityBlock {
 				case FULL -> {
 				}
 				case UNCOOKABLE -> {
-					return InteractionResult.TRY_WITH_EMPTY_HAND;
+					return InteractionResult.PASS;
 				}
 			}
 		}
