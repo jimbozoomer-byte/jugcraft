@@ -6581,5 +6581,51 @@
         }
       ]
     }
+  ],
+  "alchemy_ingredients": [
+    {
+      "item": "minecraft:glowstone_dust",
+      "key": "glowstone_dust"
+    },
+    {
+      "item": "minecraft:glow_berries",
+      "key": "glow_berries"
+    },
+    {
+      "item": "minecraft:sweet_berries",
+      "key": "sweet_berries"
+    },
+    {
+      "item": "minecraft:bone_meal",
+      "key": "bone_meal"
+    },
+    {
+      "item": "minecraft:sugar",
+      "key": "sugar"
+    },
+    {
+      "item": "minecraft:magma_cream",
+      "key": "magma_cream"
+    },
+    {
+      "item": "minecraft:snowball",
+      "key": "snowball"
+    },
+    {
+      "item": "minecraft:amethyst_shard",
+      "key": "amethyst_shard"
+    },
+    {
+      "item": "minecraft:dried_kelp",
+      "key": "dried_kelp"
+    },
+    {
+      "item": "minecraft:honeycomb",
+      "key": "honeycomb"
+    },
+    {
+      "item": "minecraft:spider_eye",
+      "key": "spider_eye"
+    }
   ]
 }

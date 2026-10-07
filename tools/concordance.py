@@ -387,8 +387,13 @@ BLOCKS.update(rituals.BLOCKS)
 INSTRUMENTS += rituals.INSTRUMENTS
 INSTRUMENT_LIMITS.update(rituals.INSTRUMENT_LIMITS)
 CONVERSIONS.update(rituals.CONVERSIONS)
+# Roadmap step 13 (tools/concordance_alchemy.py): the Alembic Arts, its crucible, tools and ingredients.
+import concordance_alchemy as alchemy  # noqa: E402
+RESEARCH.update(alchemy.RESEARCH)
+ITEMS.update(alchemy.ITEMS)
+BLOCKS.update(alchemy.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
-SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG]
+SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -880,6 +885,7 @@ def codex():
         **composition_codex(),
         **invocation_codex(),
         **rituals.codex(INSTRUMENT_LIMITS["initiate_wand"]),
+        **alchemy.codex(),
     }
 
 
@@ -979,6 +985,7 @@ CATEGORIES = {
     "invocations": {"name": "Invocations", "icon": f"{MOD}:initiate_wand", "sort": 3,
                     "description": "Spells the Lampwrights wrote down, and how to answer them"},
     **rituals.CATEGORY,
+    **alchemy.CATEGORY,
 }
 
 ENTRY_BACKGROUNDS = {None: "square_gray", "encountered": "square_gray", "observed": "square_gray",
@@ -1316,6 +1323,7 @@ SOUND_EVENTS = {
 
 
 SOUND_EVENTS.update(rituals.SOUND_EVENTS)
+SOUND_EVENTS.update(alchemy.SOUND_EVENTS)
 
 
 def sounds():
@@ -1380,6 +1388,7 @@ MESSAGES = {
                       "Lampwright's Bench",
     "disabled": "The Concordance is switched off on this server",
     **rituals.MESSAGES,
+    **alchemy.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1410,6 +1419,7 @@ TOOLTIPS = {
     "jade.study": "Studying: %s%%",
     "jade.notes": "Notes waiting for their owner",
     **rituals.TOOLTIPS,
+    **alchemy.TOOLTIPS,
 }
 
 
@@ -1586,6 +1596,7 @@ def bench_model():
 def write_all(write, assets, data, lang, condition, self_drop):
     lang_entries(lang)
     rituals.write_all(write, assets, data, lang, condition, self_drop, assets.parents[1] / "resourcepacks")
+    alchemy.write_all(write, assets, data, lang, condition, self_drop)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -1717,6 +1728,7 @@ def write_data(write, res):
     for name, clip in player_animations().items():
         write(assets / "player_animations" / f"{name}.json", clip)
     rituals.write_data(write, data, assets)
+    alchemy.write_data(write, data)
     # LambDynamicLights (optional, client): a lit Kindled Lantern glows in hand. Without the mod nothing reads this.
     write(assets / "dynamiclights" / "item" / "kindled_lantern.json",
           {"match": {"items": rid("kindled_lantern"), "components": {rid("lantern_lit"): {}}},
@@ -1730,6 +1742,7 @@ def tags(tags):
     for tag in SPECIMEN_TAGS:
         tags.add("item", ALL_SPECIMENS_TAG, f"#{tag}")
     rituals.tags(tags)
+    alchemy.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     tags.add("block", "minecraft:mineable/axe", rid("lampwright_bench"))

@@ -127,6 +127,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		for (Bench station : stations) {
 			registration.addRecipes(station.type(), station.recipes());
 		}
+		addAlchemyInfo(registration);
 	}
 
 	@Override
@@ -275,6 +276,31 @@ public class JugcraftJeiPlugin implements IModPlugin {
 			Jugcraft.LOGGER.warn("Could not read the Concordance stations for JEI", e);
 		}
 		return out;
+	}
+
+	/**
+	 * Alchemy (recipe_view.json "alchemy_ingredients"): each ingredient's properties as an information page. These are
+	 * public data, like a recipe's inputs; formulas and outcomes are never shown.
+	 */
+	private static void addAlchemyInfo(IRecipeRegistration registration) {
+		Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(DATA);
+		if (resource.isEmpty()) {
+			return;
+		}
+		try (Reader reader = resource.get().openAsReader()) {
+			JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+			if (!root.has("alchemy_ingredients")) {
+				return;
+			}
+			for (JsonElement element : root.getAsJsonArray("alchemy_ingredients")) {
+				JsonObject row = element.getAsJsonObject();
+				registration.addIngredientInfo(item(row.get("item").getAsString()),
+						Component.translatable("jei.jugcraft.alchemy." + row.get("key").getAsString()));
+			}
+			registration.addIngredientInfo(item("jugcraft:mortar"), Component.translatable("jei.jugcraft.alchemy.mortar"));
+		} catch (Exception e) {
+			Jugcraft.LOGGER.warn("Could not read the alchemy ingredients for JEI", e);
+		}
 	}
 
 	private static List<FluidAmount> fluids(JsonArray array) {

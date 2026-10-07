@@ -4,6 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Axis;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Ingredient;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Preparation;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Property;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Vector;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Component;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Grammar;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Instrument;
@@ -526,6 +531,98 @@ public final class RulesParser {
 			problems.add("ritual " + id + ": " + problem.getMessage());
 			return null;
 		}
+	}
+
+	/** The most of any one property an ingredient carries, in units. */
+	public static final double MAX_PROPERTY = 10.0;
+
+	/**
+	 * An alchemical ingredient: {@code {"schema": 1, "item": "minecraft:sugar", "properties": {"ember": 0.8},
+	 * "contaminant": 0.0}}. Amounts are units (up to three decimals), at most {@value #MAX_PROPERTY} each.
+	 */
+	public @Nullable Ingredient ingredient(String id, JsonElement json) {
+		try {
+			JsonObject object = object(json, "ingredient");
+			only(object, "schema", "item", "properties", "contaminant");
+			schema(object);
+			Map<Axis, Long> amounts = new EnumMap<>(Axis.class);
+			for (Map.Entry<String, JsonElement> entry : object(member(object, "properties"), "properties").entrySet()) {
+				Axis axis = Axis.fromId(entry.getKey());
+				if (axis == null) {
+					throw new Invalid("properties: \"" + entry.getKey() + "\" is not a property (radiance, verdance, ember, rime, tide, hollow)");
+				}
+				amounts.put(axis, milli(entry.getValue(), "properties." + entry.getKey(), MAX_PROPERTY));
+			}
+			if (amounts.values().stream().allMatch(value -> value == 0)) {
+				throw new Invalid("an ingredient carries at least one property");
+			}
+			long contaminant = object.has("contaminant") ? milli(object.get("contaminant"), "contaminant", MAX_PROPERTY) : 0L;
+			return new Ingredient(id, id(object, "item"), Vector.of(amounts), contaminant);
+		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
+			problems.add("ingredient " + id + ": " + problem.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * A preparation: {@code {"schema": 1, "tool": "jugcraft:mortar", "scale": 1.0, "ready": 0.5, "contaminant": 0.0}}
+	 * (no tool: an ingredient used as it comes). Scale 0 to 2, ready 0 to 1.
+	 */
+	public @Nullable Preparation preparation(String id, JsonElement json) {
+		try {
+			JsonObject object = object(json, "preparation");
+			only(object, "schema", "tool", "scale", "ready", "contaminant");
+			schema(object);
+			String tool = object.has("tool") ? id(object, "tool") : null;
+			return new Preparation(id, tool, milli(member(object, "scale"), "scale", 2.0), milli(member(object, "ready"), "ready", 1.0),
+					object.has("contaminant") ? milli(object.get("contaminant"), "contaminant", MAX_PROPERTY) : 0L);
+		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
+			problems.add("preparation " + id + ": " + problem.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * What a property does: {@code {"schema": 1, "status": "minecraft:night_vision", "intent": "helpful",
+	 * "threshold": 0.5, "per_level": 1.0, "max_level": 1, "ticks_per_unit": 1200, "max_ticks": 2400}}. The file is named
+	 * for its axis, or {@code contaminant}.
+	 */
+	public @Nullable Property property(String id, JsonElement json) {
+		try {
+			JsonObject object = object(json, "property");
+			only(object, "schema", "status", "intent", "threshold", "per_level", "max_level", "ticks_per_unit", "max_ticks");
+			schema(object);
+			String name = id.substring(id.indexOf(':') + 1);
+			if (Axis.fromId(name) == null && !name.equals(Property.CONTAMINANT)) {
+				throw new Invalid("a property file is named for a property (radiance, verdance, ember, rime, tide, hollow) or contaminant");
+			}
+			String intentName = string(object, "intent");
+			Intent intent = Intent.fromId(intentName);
+			if (intent == null) {
+				throw new Invalid("intent must be helpful or harmful, not \"" + intentName + "\"");
+			}
+			if (name.equals(Property.CONTAMINANT) && intent != Intent.HARMFUL) {
+				throw new Invalid("a contaminant is harmful");
+			}
+			return new Property(name, id(object, "status"), intent, milli(member(object, "threshold"), "threshold", MAX_PROPERTY),
+					milli(member(object, "per_level"), "per_level", MAX_PROPERTY), range(object, "max_level", 1, EffectSpec.MAX_AMPLIFIER + 1),
+					range(object, "ticks_per_unit", 1, EffectSpec.MAX_DURATION), range(object, "max_ticks", 1, EffectSpec.MAX_DURATION));
+		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
+			problems.add("property " + id + ": " + problem.getMessage());
+			return null;
+		}
+	}
+
+	/** A decimal amount of units from 0 to {@code max}, as whole milli-units (rounded to the nearest thousandth). */
+	private static long milli(JsonElement element, String where, double max) {
+		if (!(element instanceof JsonPrimitive primitive) || !primitive.isNumber()) {
+			throw new Invalid("\"" + where + "\" must be a number");
+		}
+		double value = primitive.getAsDouble();
+		if (!(value >= 0.0 && value <= max)) {
+			throw new Invalid("\"" + where + "\" must be from 0 to " + max);
+		}
+		return Math.round(value * 1000.0);
 	}
 
 	private static ResourceType resource(JsonObject object) {

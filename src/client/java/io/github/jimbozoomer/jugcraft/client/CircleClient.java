@@ -7,6 +7,7 @@ import com.zigythebird.playeranim.api.PlayerAnimationFactory;
 import com.zigythebird.playeranimcore.enums.PlayState;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.LumenMoteBlock;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
@@ -58,6 +59,9 @@ public final class CircleClient {
 	static void register() {
 		BlockEntityRenderers.register(JugcraftConcordance.ANCHOR_ENTITY,
 				context -> new GeoBlockRenderer<CircleAnchorBlockEntity, BlockEntityRenderState>(context, JugcraftConcordance.ANCHOR_ENTITY));
+		// Roadmap step 13: GeckoLib draws the Alembic Crucible too (its liquid's surface is an animated texture).
+		BlockEntityRenderers.register(JugcraftConcordance.CRUCIBLE_ENTITY,
+				context -> new GeoBlockRenderer<CrucibleBlockEntity, BlockEntityRenderState>(context, JugcraftConcordance.CRUCIBLE_ENTITY));
 		PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(LAYER, LAYER_PRIORITY,
 				avatar -> new PlayerAnimationController(avatar, (controller, state, setter) -> PlayState.STOP));
 		ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register((blockEntity, level) -> {

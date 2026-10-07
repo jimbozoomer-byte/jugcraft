@@ -1,6 +1,10 @@
 package io.github.jimbozoomer.jugcraft.concordance.rules;
 
 import com.google.gson.JsonElement;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Ingredient;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Preparation;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Property;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Authored;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Catalog;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Compiler;
@@ -35,7 +39,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ConcordanceRules {
 	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
-			Map.of(), Map.of(), Map.of(), List.of());
+			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
@@ -45,13 +49,14 @@ public final class ConcordanceRules {
 	private final Map<String, Map<String, Authored>> authored;
 	private final Map<String, StructurePattern> structures;
 	private final Map<String, RitualDefinition> rituals;
+	private final AlchemyCatalog alchemy;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
 	private ConcordanceRules(Map<String, Definitions.Research> research, Map<String, Definitions.Invocation> invocations,
 			Map<String, Definitions.Working> workings, ConversionTable conversions, Catalog catalog,
 			Map<String, Map<String, Authored>> authored, Map<String, StructurePattern> structures, Map<String, RitualDefinition> rituals,
-			List<String> problems) {
+			AlchemyCatalog alchemy, List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
@@ -60,6 +65,7 @@ public final class ConcordanceRules {
 		this.authored = authored;
 		this.structures = structures;
 		this.rituals = rituals;
+		this.alchemy = alchemy;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -118,6 +124,11 @@ public final class ConcordanceRules {
 		return out;
 	}
 
+	/** Alchemy's ingredients, preparations and properties (roadmap step 13). */
+	public AlchemyCatalog alchemy() {
+		return alchemy;
+	}
+
 	public List<String> problems() {
 		return problems;
 	}
@@ -166,7 +177,7 @@ public final class ConcordanceRules {
 
 	/**
 	 * The files under {@code data/<ns>/concordance/}: kind (research, invocation, working, conversion, component,
-	 * instrument, structure or ritual), id, content.
+	 * instrument, structure, ritual, ingredient, preparation or property), id, content.
 	 */
 	public record Source(String kind, String id, JsonElement json) {
 	}
@@ -181,6 +192,9 @@ public final class ConcordanceRules {
 		Map<String, Instrument> instruments = new TreeMap<>();
 		Map<String, StructurePattern> structures = new TreeMap<>();
 		Map<String, RitualDefinition> rituals = new TreeMap<>();
+		Map<String, Ingredient> ingredients = new TreeMap<>();
+		Map<String, Preparation> preparations = new TreeMap<>();
+		Map<String, Property> properties = new TreeMap<>();
 		List<String> problems = new ArrayList<>();
 		for (Source source : sources) {
 			switch (source.kind()) {
@@ -232,8 +246,32 @@ public final class ConcordanceRules {
 						rituals.put(ritual.id(), ritual);
 					}
 				}
+				case "ingredient" -> {
+					Ingredient ingredient = parser.ingredient(source.id(), source.json());
+					if (ingredient != null) {
+						Ingredient same = ingredients.values().stream().filter(other -> other.item().equals(ingredient.item())).findFirst().orElse(null);
+						if (same != null) {
+							problems.add("ingredient " + ingredient.id() + ": " + ingredient.item() + " is already ingredient " + same.id());
+						} else {
+							ingredients.put(ingredient.id(), ingredient);
+						}
+					}
+				}
+				case "preparation" -> {
+					Preparation preparation = parser.preparation(source.id(), source.json());
+					if (preparation != null) {
+						preparations.put(preparation.id(), preparation);
+					}
+				}
+				case "property" -> {
+					Property property = parser.property(source.id(), source.json());
+					if (property != null) {
+						properties.put(property.id(), property);
+					}
+				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
-						+ "\" (expected research, invocation, working, conversion, component, instrument, structure or ritual)");
+						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
+						+ "preparation or property)");
 			}
 		}
 		problems.addAll(0, parser.problems());
@@ -340,6 +378,26 @@ public final class ConcordanceRules {
 				rituals.remove(ritual.id());
 			}
 		}
+		// Alchemy: ingredients are found by item; one preparation is how an ingredient is used as it comes, and no two
+		// preparations share a tool (a tool makes one preparation).
+		Map<String, Ingredient> byItem = new LinkedHashMap<>();
+		for (Ingredient ingredient : ingredients.values()) {
+			byItem.put(ingredient.item(), ingredient);
+		}
+		Set<String> tools = new HashSet<>();
+		int plain = 0;
+		for (Preparation preparation : List.copyOf(preparations.values())) {
+			if (preparation.tool() == null) {
+				plain++;
+			} else if (!tools.add(preparation.tool())) {
+				problems.add("preparation " + preparation.id() + ": another preparation is already made with " + preparation.tool());
+				preparations.remove(preparation.id());
+			}
+		}
+		if (!byItem.isEmpty() && plain != 1) {
+			problems.add("alchemy: exactly one preparation must have no tool (how an ingredient goes in as it comes); found " + plain);
+		}
+		AlchemyCatalog alchemy = new AlchemyCatalog(byItem, preparations, properties);
 		// Unlock lists and invoke evidence must name things that exist (a typo would silently teach nothing).
 		for (Definitions.Research entry : research.values()) {
 			for (Map.Entry<ResearchState, Definitions.Unlocks> unlock : entry.unlocks().entrySet()) {
@@ -374,7 +432,7 @@ public final class ConcordanceRules {
 				Collections.unmodifiableMap(new LinkedHashMap<>(invocations)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, catalog,
 				Collections.unmodifiableMap(authored), Collections.unmodifiableMap(new LinkedHashMap<>(structures)),
-				Collections.unmodifiableMap(new LinkedHashMap<>(rituals)), List.copyOf(problems));
+				Collections.unmodifiableMap(new LinkedHashMap<>(rituals)), alchemy, List.copyOf(problems));
 	}
 
 	/**

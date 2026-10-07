@@ -6037,6 +6037,11 @@ def check_concordance(registered):
         elif "name" in clip:
             animations.add(f"{MOD}:{clip['name'].lower().replace(' ', '_')}")
     sounds = load(ASSETS / "sounds.json") or {}
+    concordance_java = (root / "JugcraftConcordance.java").read_text(encoding="utf-8") if (root / "JugcraftConcordance.java").exists() else ""
+    registered_sounds = set(re.findall(r'sound\("([a-z_.]+)"\)', concordance_java))
+    loop = re.search(r'for \(String release : List\.of\(([^)]*)\)\)', concordance_java)
+    if loop:
+        registered_sounds |= {f"concordance.{name}" for name in re.findall(r'"([a-z_]+)"', loop.group(1))}
     spells = set()
     for path in sorted((DATA / MOD / "spell").glob("*.json")):
         spell = load(path) or {}
@@ -6066,6 +6071,9 @@ def check_concordance(registered):
         for sound in (cast.get("start_sound", {}).get("id"), spell.get("release", {}).get("sound", {}).get("id")):
             if sound and sound.startswith(f"{MOD}:") and sound.split(":", 1)[1] not in sounds:
                 err(f"spell {name}: unknown sound {sound}")
+            # Spell Engine plays a spell's sounds on the server by looking them up in the sound registry.
+            if sound and sound.startswith(f"{MOD}:") and sound.split(":", 1)[1] not in registered_sounds:
+                err(f"spell {name}: sound {sound} is not registered as a SoundEvent in JugcraftConcordance.java")
         if "learn" in spell:
             err(f"spell {name}: a Concordance spell must not be bindable at a Spell Binding Table")
         cost = spell.get("cost", {})
@@ -6262,6 +6270,7 @@ def check_concordance(registered):
     check_invocations(co, root, lang, research)
     check_baselines(root)
     check_rituals(co, root, lang, registered, research)
+    check_alchemy(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -6529,7 +6538,7 @@ def check_baselines(root):
     """Roadmap step 11: the benchmark and the rules it runs are pure Java (the harness and the game test run the same
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
-    for package in ("balance", "compose", "effect", "rules", "resource", "ritual"):
+    for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -6718,6 +6727,137 @@ def check_rituals(co, root, lang, registered, research):
         err("textures/block/warding_stone_connected.png needs its Fusion metadata")
     if 'isModLoaded("fusion")' not in java("CircleClient.java", CLIENT_JAVA_ROOT):
         err("CircleClient.java: register the Fusion pack only when Fusion is installed (it is optional)")
+
+
+def check_alchemy(co, root, lang, registered, research):
+    """Roadmap step 13: the Java simulation mirrors tools/concordance_alchemy.py (axes, bands, heat, limits); every
+    ingredient, preparation and property is valid and reachable (vanilla items, or Jugcraft items with recipes); every
+    line the simulation can say has its words; and the crucible's GeckoLib model, animations and animated sheet agree."""
+    al = co.alchemy
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "alchemy/Mixture.java": {"MAX_PARTS": ("int", al.MAX_PARTS), "MAX_OPERATIONS": ("int", al.MAX_OPERATIONS),
+                                 "SEARING_KEEP": ("long", al.SEARING_KEEP), "SEARING_CONTAMINANT": ("long", al.SEARING_CONTAMINANT)},
+        "alchemy/Heat.java": {"AMBIENT": ("int", al.AMBIENT), "RATE": ("int", al.HEAT_RATE)},
+        "alchemy/Assay.java": {"SPOON": ("int", al.SPOON), "GLASS": ("int", al.GLASS), "MASTERED": ("int", al.MASTERED)},
+        "CrucibleBlockEntity.java": {"BUFFER_SLOTS": ("int", al.BUFFER_SLOTS), "STIR_TICKS": ("int", al.STIR_TICKS),
+                                     "AUTOMATION_TICKS": ("int", al.AUTOMATION_TICKS),
+                                     "WATER_PER_BUCKET": ("int", al.WATER_PER_BUCKET)},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, (kind, value) in values.items():
+            if not re.search(rf"\b{kind} {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_alchemy.py ({value})")
+    if not re.search(rf"double MAX_PROPERTY = {al.MAX_PROPERTY};", java("rules/RulesParser.java")):
+        err("concordance/rules/RulesParser.java: MAX_PROPERTY differs from tools/concordance_alchemy.py")
+    axes = re.findall(r'^\t[A-Z_]+\("([a-z_]+)"\)', java("alchemy/Axis.java"), re.M)
+    if axes != al.AXES:
+        err(f"concordance/alchemy/Axis.java: axes {axes} differ from AXES (same order)")
+    bands = {m[0]: (None if m[1] == "Integer.MIN_VALUE" else int(m[1]), int(m[2]))
+             for m in re.findall(r'^\t[A-Z_]+\("([a-z_]+)", ([A-Za-z_.0-9]+), (\d+)\)', java("alchemy/Band.java"), re.M)}
+    if bands != al.BANDS:
+        err(f"concordance/alchemy/Band.java: bands {bands} differ from BANDS")
+    sources = dict(re.findall(r'"(minecraft:[a-z_]+)", (\d+)', java("alchemy/Heat.java")))
+    if {k: int(v) for k, v in sources.items()} != al.HEAT_SOURCES:
+        err("concordance/alchemy/Heat.java: SOURCES differ from HEAT_SOURCES")
+    activity = re.search(r'String ACTIVITY = "([^"]+)";', java("Alchemy.java"))
+    practised = {rule.get("activity") for block in research.get("alembic_arts", {}).get("states", {}).values()
+                 for rule in block.get("any", []) if rule.get("type") == "practice"}
+    if not activity or activity.group(1) not in practised:
+        err("Alchemy.ACTIVITY is not the practice the Alembic Arts learn from")
+    # Data.
+    folder = DATA / MOD / "concordance"
+    ingredients = {p.stem: load(p) or {} for p in (folder / "ingredient").glob("*.json")}
+    preparations = {p.stem: load(p) or {} for p in (folder / "preparation").glob("*.json")}
+    properties = {p.stem: load(p) or {} for p in (folder / "property").glob("*.json")}
+    recipes = {p.stem for p in (DATA / MOD / "recipe").glob("*.json")}
+    items = [entry.get("item", "") for entry in ingredients.values()]
+    if len(items) != len(set(items)):
+        err("ingredients: an item is more than one ingredient")
+    for key, entry in ingredients.items():
+        ref = entry.get("item", ":")
+        if split(ref)[0] == MOD and (split(ref)[1] not in registered or split(ref)[1] not in recipes):
+            err(f"ingredient {key}: {ref} is not a Jugcraft item with a recipe")
+        values = entry.get("properties", {})
+        if not values or set(values) - set(al.AXES) or not all(0 <= v <= al.MAX_PROPERTY for v in values.values()):
+            err(f"ingredient {key}: properties must be axes with 0..{al.MAX_PROPERTY} units")
+        if f"jei.{MOD}.alchemy.{key}" not in lang:
+            err(f"ingredient {key}: missing lang jei.{MOD}.alchemy.{key}")
+    plain = [k for k, e in preparations.items() if "tool" not in e]
+    if len(plain) != 1:
+        err(f"preparations: exactly one must have no tool ({plain})")
+    for key, entry in preparations.items():
+        tool = entry.get("tool")
+        if tool and (split(tool)[1] not in registered or split(tool)[1] not in recipes):
+            err(f"preparation {key}: tool {tool} is not a craftable Jugcraft item")
+        if not (0 <= entry.get("scale", -1) <= 2 and 0 <= entry.get("ready", -1) <= 1):
+            err(f"preparation {key}: scale 0..2, ready 0..1")
+    if set(properties) != set(al.AXES) | {"contaminant"}:
+        err(f"properties: one for each axis and contaminant ({sorted(properties)})")
+    for key, entry in properties.items():
+        if not (1 <= entry.get("max_level", 0) <= 5 and 1 <= entry.get("max_ticks", 0) <= 2400
+                and 1 <= entry.get("ticks_per_unit", 0) <= 2400 and entry.get("threshold", 0) > 0 and entry.get("per_level", 0) > 0):
+            err(f"property {key}: numbers outside the shared effect limits")
+        if not re.fullmatch(r"minecraft:[a-z_]+", entry.get("status", "")):
+            err(f"property {key}: status must be a vanilla effect id")
+        if key == "contaminant" and entry.get("intent") != "harmful":
+            err("property contaminant: must be harmful")
+    for ref in al.ALCHEMY_SPECIMENS:
+        if ref not in items:
+            err(f"alchemy specimen {ref} is not an ingredient")
+    for item in ("crucible", "mortar", "stirring_rod", "sampling_spoon", "assay_glass", "formula"):
+        if item not in recipes:
+            err(f"alchemy: {item} has no recipe")
+    # Every line the simulation can say has its words.
+    for path in sorted((root / "alchemy").glob("*.java")):
+        for key in re.findall(r'Text\.of\("([a-z_.]+)"', path.read_text(encoding="utf-8")):
+            if f"compose.{MOD}.{key}" not in lang:
+                err(f"concordance/alchemy/{path.name}: missing lang compose.{MOD}.{key}")
+    for band in al.BANDS:
+        if f"compose.{MOD}.band.{band}" not in lang:
+            err(f"alchemy: missing lang compose.{MOD}.band.{band}")
+    for axis in al.AXES:
+        if f"principle.{MOD}.{axis}" not in lang:
+            err(f"alchemy: missing lang principle.{MOD}.{axis}")
+    # The crucible's GeckoLib assets.
+    geo = load(ASSETS / "geckolib" / "models" / "block" / "crucible.geo.json") or {}
+    animations = load(ASSETS / "geckolib" / "animations" / "block" / "crucible.animation.json") or {}
+    names = set(animations.get("animations", {}))
+    for name in re.findall(r'thenLoop\("([^"]+)"\)', java("CrucibleBlockEntity.java")):
+        if name not in names:
+            err(f"CrucibleBlockEntity.java: animation {name} is not in crucible.animation.json")
+    definition = (geo.get("minecraft:geometry") or [{}])[0]
+    width = definition.get("description", {}).get("texture_width", 0)
+    height = definition.get("description", {}).get("texture_height", 0)
+    bones = {bone["name"] for bone in definition.get("bones", [])}
+    for clip in animations.get("animations", {}).values():
+        for bone in clip.get("bones", {}):
+            if bone not in bones:
+                err(f"crucible.animation.json: animates unknown bone {bone}")
+    regions = []
+    for bone in definition.get("bones", []):
+        for cube in bone.get("cubes", []):
+            w, h, d = cube["size"]
+            u, v = cube["uv"]
+            region = (u, v, u + 2 * (w + d), v + d + h, tuple(cube["size"]))
+            if region[2] > width or region[3] > height:
+                err(f"crucible.geo.json: a cube in {bone['name']} maps outside the {width}x{height} frame")
+            regions.append(region)
+    for i, a in enumerate(regions):
+        for b in regions[i + 1:]:
+            if a[:4] != b[:4] and a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                err(f"crucible.geo.json: UV regions {a[:4]} and {b[:4]} overlap")
+    sheet = ASSETS / "textures" / "block" / "crucible.png"
+    with Image.open(sheet) as image:
+        if image.size != (width, height * al.CRUCIBLE_FRAMES):
+            err(f"textures/block/crucible.png must be {al.CRUCIBLE_FRAMES} frames of {width}x{height}")
+    if "animation" not in (load(sheet.with_name("crucible.png.mcmeta")) or {}):
+        err("textures/block/crucible.png needs its animation metadata (GeckoLib animates the liquid's surface)")
+    if "CRUCIBLE_ENTITY" not in java("CircleClient.java", CLIENT_JAVA_ROOT):
+        err("the crucible must be drawn by GeckoLib on the client")
 
 
 def KINDLE_MOTE_STEPS_FIT(co):

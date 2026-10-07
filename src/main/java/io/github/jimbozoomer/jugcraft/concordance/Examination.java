@@ -81,8 +81,11 @@ public final class Examination {
 		Component name = stack.getHoverName();
 		boolean dark = light <= DARK_LIGHT;
 		if (result.transitions().isEmpty()) {
-			if (!stack.is(JugcraftConcordance.LUMINOUS)) {
-				// Other research learns from how a thing is made, not from its light.
+			if (stack.is(JugcraftConcordance.ALCHEMY_SPECIMENS) && !stack.is(JugcraftConcordance.LUMINOUS)) {
+				// The Alembic Arts learn from what a thing is made of.
+				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.examine.substance", name));
+			} else if (!stack.is(JugcraftConcordance.LUMINOUS)) {
+				// Circle Lore learns from how a thing is made, not from its light.
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.examine.form", name));
 			} else {
 				player.sendOverlayMessage(Component.translatable(dark ? (result.recorded() ? "message.jugcraft.concordance.examine.dark"

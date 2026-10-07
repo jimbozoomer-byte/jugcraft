@@ -5,6 +5,8 @@ import io.github.jimbozoomer.jugcraft.compat.jade.JugcraftJadePlugin;
 import io.github.jimbozoomer.jugcraft.compat.jade.MachineDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlock;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlock;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
@@ -28,6 +30,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		registration.registerBlockComponent(ConcordanceTooltip.SCONCE, LumenSconceBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.ANCHOR, CircleAnchorBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.PYLON, LeyPylonBlock.class);
+		registration.registerBlockComponent(ConcordanceTooltip.CRUCIBLE, CrucibleBlock.class);
 	}
 
 	private enum MachineTooltip implements IBlockComponentProvider {
@@ -82,7 +85,8 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		BENCH(ConcordanceDataProvider.BENCH),
 		SCONCE(ConcordanceDataProvider.SCONCE),
 		ANCHOR(ConcordanceDataProvider.ANCHOR),
-		PYLON(ConcordanceDataProvider.PYLON);
+		PYLON(ConcordanceDataProvider.PYLON),
+		CRUCIBLE(ConcordanceDataProvider.CRUCIBLE);
 
 		private final ConcordanceDataProvider provider;
 
@@ -112,6 +116,20 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 				int ley = data.getIntOr("ley", -1);
 				if (ley >= 0) {
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.ley", ley, LeyPylonBlockEntity.CAPACITY));
+				}
+				String band = data.getStringOr("band", "");
+				if (!band.isEmpty()) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.temperature", data.getIntOr("temperature", 0),
+							Component.translatable("compose.jugcraft.band." + band)));
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.volume", data.getIntOr("parts", 0), Mixture.MAX_PARTS));
+					int steps = data.getIntOr("steps", 0);
+					if (steps > 0) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.step", Math.min(steps, data.getIntOr("step", 0) + 1), steps));
+						String next = data.getStringOr("next", "");
+						if (!next.isEmpty()) {
+							tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.waiting", next));
+						}
+					}
 				}
 				String phase = data.getStringOr("phase", "");
 				if (!phase.isEmpty()) {

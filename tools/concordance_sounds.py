@@ -302,6 +302,39 @@ def circle_break(seed):
     return (0.6 * noise / np.max(np.abs(noise)) + crack / np.max(np.abs(crack))) * fade(n, 0.002, 0.1)
 
 
+def crucible_stir(seed):
+    """A stir: a low liquid slosh, noise band-passed round 300 Hz swinging up and back, with a soft wooden knock."""
+    n = samples(0.7)
+    t = times(n)
+    rng = np.random.default_rng(seed)
+    centre = 220 + 260 * np.sin(np.pi * np.clip(t / 0.6, 0, 1))
+    bp, lp = band(rng.normal(size=n), centre, q=2.0)
+    slosh = (bp / rms(bp) + 0.5 * lp / rms(lp)) * np.sin(np.pi * np.clip(t / 0.65, 0, 1)) ** 1.5
+    knock = chime(n, 180.0, [(1.0, 1.0, 0.05), (2.3, 0.3, 0.03)], attack=0.002, at=0.05)
+    return (slosh / np.max(np.abs(slosh)) + 0.4 * knock / np.max(np.abs(knock))) * fade(n, 0.005, 0.08)
+
+
+def crucible_add(seed):
+    """Something drops in: a short plop (a falling tone) and a few bubbles."""
+    n = samples(0.5)
+    t = times(n)
+    plop = np.sin(2 * np.pi * glide(t, 520.0, 180.0, 0.08) * t) * np.exp(-t / 0.06)
+    rng = np.random.default_rng(seed)
+    bubbles = np.zeros(n)
+    for at in sorted(rng.uniform(0.08, 0.35, 4)):
+        hz = rng.uniform(600, 1100)
+        bubbles += chime(n, hz, [(1.0, 1.0, 0.03)], attack=0.002, at=at)
+    return (plop / np.max(np.abs(plop)) + 0.35 * bubbles / max(np.max(np.abs(bubbles)), 1e-9)) * fade(n, 0.002, 0.05)
+
+
+def crucible_bottle():
+    """A dose bottled: a glassy rising fill, two soft tones a fifth apart sliding up."""
+    n = samples(0.6)
+    t = times(n)
+    tone = np.sin(2 * np.pi * glide(t, 440.0, 880.0, 0.45) * t) + 0.5 * np.sin(2 * np.pi * glide(t, 660.0, 1320.0, 0.45) * t)
+    return tone * np.sin(np.pi * np.clip(t / 0.6, 0, 1)) ** 2 * fade(n, 0.005, 0.06)
+
+
 # name -> (signal, peak). Names follow concordance.SOUND_EVENTS ("concordance.<name>").
 def cues():
     return {
@@ -320,6 +353,9 @@ def cues():
         "circle_step": (circle_step(), PEAK * 0.5),
         "circle_complete": (circle_complete(), PEAK * 0.9),
         "circle_break": (circle_break(seed=59), PEAK * 0.85),
+        "crucible_stir": (crucible_stir(seed=61), PEAK * 0.6),
+        "crucible_add": (crucible_add(seed=67), PEAK * 0.6),
+        "crucible_bottle": (crucible_bottle(), PEAK * 0.6),
     }
 
 

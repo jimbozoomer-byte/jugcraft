@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import java.util.List;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -16,9 +17,11 @@ import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -32,6 +35,8 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -57,6 +62,8 @@ public final class JugcraftConcordance {
 	public static final TagKey<Item> LUMINOUS = TagKey.create(Registries.ITEM, Jugcraft.id("luminous_specimens"));
 	/** Circle Lore's specimens, made to hold a shape or a bearing (tools/concordance_rituals.py). */
 	public static final TagKey<Item> CIRCLE_SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("circle_specimens"));
+	/** The Alembic Arts' specimens: alchemical ingredients to examine (tools/concordance_alchemy.py). */
+	public static final TagKey<Item> ALCHEMY_SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("alchemy_specimens"));
 	/** What casts Concordance invocations from the main hand. */
 	public static final TagKey<Item> INSTRUMENTS = TagKey.create(Registries.ITEM, Jugcraft.id("concordance_instruments"));
 
@@ -72,6 +79,10 @@ public final class JugcraftConcordance {
 	public static DataComponentType<Tunings> TUNINGS;
 	/** The Ley Charge a broken Ley Pylon keeps (roadmap step 12). */
 	public static DataComponentType<Integer> LEY_CHARGE;
+	/** Roadmap step 13: a prepared ingredient, a bottled dose, and a recorded process (canonical text). */
+	public static DataComponentType<Reagent> REAGENT;
+	public static DataComponentType<Brew> BREW;
+	public static DataComponentType<String> FORMULA;
 
 	public static Block LUMEN_MOTE;
 	public static Block LAMPWRIGHT_BENCH;
@@ -88,6 +99,17 @@ public final class JugcraftConcordance {
 	public static Item ADEPT_WAND;
 	public static BlockEntityType<CircleAnchorBlockEntity> ANCHOR_ENTITY;
 	public static BlockEntityType<LeyPylonBlockEntity> PYLON_ENTITY;
+	/** Roadmap step 13: alchemy. */
+	public static Block CRUCIBLE;
+	public static Item MORTAR;
+	public static Item STIRRING_ROD;
+	public static Item SAMPLING_SPOON;
+	public static Item ASSAY_GLASS;
+	public static Item FORMULA_ITEM;
+	public static Item REAGENT_ITEM;
+	public static Item DRAUGHT;
+	public static Item SALVE;
+	public static BlockEntityType<CrucibleBlockEntity> CRUCIBLE_ENTITY;
 	public static ExtendedMenuType<LampwrightBenchMenu, BlockPos> BENCH_MENU;
 
 	/** What a player has learned (saved with them, kept through death, sent only to them). */
@@ -105,6 +127,9 @@ public final class JugcraftConcordance {
 	public static SoundEvent CIRCLE_STEP_SOUND;
 	public static SoundEvent CIRCLE_COMPLETE_SOUND;
 	public static SoundEvent CIRCLE_BREAK_SOUND;
+	public static SoundEvent CRUCIBLE_STIR_SOUND;
+	public static SoundEvent CRUCIBLE_ADD_SOUND;
+	public static SoundEvent CRUCIBLE_BOTTLE_SOUND;
 
 	private JugcraftConcordance() {
 	}
@@ -122,6 +147,12 @@ public final class JugcraftConcordance {
 				DataComponentType.<Tunings>builder().persistent(Tunings.CODEC).networkSynchronized(Tunings.STREAM_CODEC).build());
 		LEY_CHARGE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("ley_charge"),
 				DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+		REAGENT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("reagent"),
+				DataComponentType.<Reagent>builder().persistent(Reagent.CODEC).networkSynchronized(Reagent.STREAM_CODEC).build());
+		BREW = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("brew"),
+				DataComponentType.<Brew>builder().persistent(Brew.CODEC).networkSynchronized(Brew.STREAM_CODEC).build());
+		FORMULA = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("formula"),
+				DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 
 		KNOWLEDGE = AttachmentRegistry.<Knowledge>builder().persistent(ConcordanceCodecs.KNOWLEDGE).copyOnDeath()
 				.syncWith(ConcordanceCodecs.KNOWLEDGE_STREAM, AttachmentSyncPredicate.targetOnly())
@@ -136,10 +167,17 @@ public final class JugcraftConcordance {
 		STUDY_COMPLETE_SOUND = sound("concordance.study_complete");
 		LANTERN_IGNITE_SOUND = sound("concordance.lantern_ignite");
 		LANTERN_SNUFF_SOUND = sound("concordance.lantern_snuff");
+		// The invocations' release sounds: Spell Engine looks each up in the sound registry when a cast is released.
+		for (String release : List.of("aegis", "revelation", "lance", "flash", "lanternward")) {
+			sound("concordance." + release);
+		}
 		CIRCLE_START_SOUND = sound("concordance.circle_start");
 		CIRCLE_STEP_SOUND = sound("concordance.circle_step");
 		CIRCLE_COMPLETE_SOUND = sound("concordance.circle_complete");
 		CIRCLE_BREAK_SOUND = sound("concordance.circle_break");
+		CRUCIBLE_STIR_SOUND = sound("concordance.crucible_stir");
+		CRUCIBLE_ADD_SOUND = sound("concordance.crucible_add");
+		CRUCIBLE_BOTTLE_SOUND = sound("concordance.crucible_bottle");
 
 		// The Kindled mote is light in the air: nothing to see, hit, break or hold.
 		LUMEN_MOTE = block("lumen_mote", LumenMoteBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
@@ -184,6 +222,23 @@ public final class JugcraftConcordance {
 				FabricBlockEntityTypeBuilder.create(LeyPylonBlockEntity::new, LEY_PYLON).build());
 		// A pylon takes electricity through Jugcraft's one energy interface; it never gives any back.
 		EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy, PYLON_ENTITY);
+		// Roadmap step 13: the crucible, its tools, and the brews it bottles.
+		CRUCIBLE = block("crucible", CrucibleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+				.strength(2.5F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
+		Item crucible = item("crucible", properties -> new BlockItem(CRUCIBLE, properties), new Item.Properties().useBlockDescriptionPrefix());
+		MORTAR = item("mortar", MortarItem::new, new Item.Properties().stacksTo(1));
+		STIRRING_ROD = item("stirring_rod", AlchemyItem::new, new Item.Properties().stacksTo(1));
+		SAMPLING_SPOON = item("sampling_spoon", AlchemyItem::new, new Item.Properties().stacksTo(1));
+		ASSAY_GLASS = item("assay_glass", AlchemyItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+		FORMULA_ITEM = item("formula", AlchemyItem::new, new Item.Properties().stacksTo(16));
+		REAGENT_ITEM = item("reagent", AlchemyItem::new, new Item.Properties().stacksTo(64));
+		DRAUGHT = item("draught", properties -> new BrewItem(properties, false), new Item.Properties().stacksTo(16)
+				.usingConvertsTo(Items.GLASS_BOTTLE).component(DataComponents.CONSUMABLE, Consumables.defaultDrink().build()));
+		SALVE = item("salve", properties -> new BrewItem(properties, true), new Item.Properties().stacksTo(16));
+		CRUCIBLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("crucible"),
+				FabricBlockEntityTypeBuilder.create(CrucibleBlockEntity::new, CRUCIBLE).build());
+		// Water by pipe into the crucible's tank (a formula's water steps draw on it); items through its container.
+		FluidStorage.SIDED.registerForBlockEntity((entity, side) -> entity.water, CRUCIBLE_ENTITY);
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 
@@ -208,6 +263,11 @@ public final class JugcraftConcordance {
 			output.accept(full);
 			output.accept(RESEARCH_NOTES_ITEM);
 			output.accept(ADEPT_WAND);
+			output.accept(MORTAR);
+			output.accept(STIRRING_ROD);
+			output.accept(SAMPLING_SPOON);
+			output.accept(ASSAY_GLASS);
+			output.accept(FORMULA_ITEM);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(bench);
@@ -215,6 +275,7 @@ public final class JugcraftConcordance {
 			output.accept(anchor);
 			output.accept(pylon);
 			output.accept(stone);
+			output.accept(crucible);
 		});
 	}
 

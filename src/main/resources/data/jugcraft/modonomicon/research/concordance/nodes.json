@@ -46,5 +46,29 @@
     "required_facts": [
       "jugcraft:concordance/circle_lore_mastered"
     ]
+  },
+  {
+    "id": "jugcraft:concordance/alembic_arts_encountered",
+    "required_facts": [
+      "jugcraft:concordance/alembic_arts_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/alembic_arts_observed",
+    "required_facts": [
+      "jugcraft:concordance/alembic_arts_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/alembic_arts_understood",
+    "required_facts": [
+      "jugcraft:concordance/alembic_arts_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/alembic_arts_mastered",
+    "required_facts": [
+      "jugcraft:concordance/alembic_arts_mastered"
+    ]
   }
 ]

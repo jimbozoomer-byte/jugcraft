@@ -84,6 +84,9 @@ final class ConcordanceClient {
 		if (stack.is(JugcraftConcordance.CIRCLE_SPECIMENS)) {
 			lines.add(Component.translatable("tooltip.jugcraft.concordance.circle_specimen").withStyle(ChatFormatting.DARK_AQUA));
 		}
+		if (stack.is(JugcraftConcordance.ALCHEMY_SPECIMENS)) {
+			lines.add(Component.translatable("tooltip.jugcraft.concordance.alchemy_specimen").withStyle(ChatFormatting.DARK_AQUA));
+		}
 		if (stack.is(JugcraftConcordance.LUMEN_SCONCE.asItem()) && stack.has(JugcraftConcordance.RADIANCE)) {
 			// A sconce item keeps the Radiance it held when it was broken (unlit, so none burns).
 			lines.add(Component.translatable("tooltip.jugcraft.concordance.lantern.charge",

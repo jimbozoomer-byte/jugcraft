@@ -34,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.AABB;
@@ -466,10 +467,9 @@ public class ConcordanceRitualGameTests {
 		pylon.energy.setAmount(LeyPylonBlockEntity.JE_PER_LEY);
 		helper.runAfterDelay(2, () -> {
 			helper.assertTrue(pylon.ley() == 11 && pylon.energy.getAmount() == 0, "1000 JE became 1 Ley Charge: " + pylon.ley());
-			helper.destroyBlock(at);
-			List<ItemEntity> drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(at)).inflate(2.0));
-			helper.assertTrue(drops.size() == 1 && drops.get(0).getItem().getOrDefault(JugcraftConcordance.LEY_CHARGE, 0) == 11,
-					"Broken, it keeps its charge on the item");
+			List<ItemStack> drops = Block.getDrops(helper.getBlockState(at), level, helper.absolutePos(at), pylon);
+			helper.assertTrue(drops.size() == 1 && drops.get(0).getOrDefault(JugcraftConcordance.LEY_CHARGE, 0) == 11,
+					"Broken, it keeps its charge on the item: " + drops + " " + (drops.isEmpty() ? "" : drops.get(0).getComponents()));
 			helper.succeed();
 		});
 	}

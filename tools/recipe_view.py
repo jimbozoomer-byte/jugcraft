@@ -51,4 +51,5 @@ def build():
                                "recipes": rows})
     import concordance
     return {"machines": machines, "fluid_machines": fluid_machines, "concordance": concordance.recipe_view(),
-            "concordance_stations": concordance.recipe_stations()}
+            "concordance_stations": concordance.recipe_stations(),
+            "alchemy_ingredients": concordance.alchemy.recipe_ingredients()}

@@ -271,5 +271,32 @@
         "attenuation_distance": 16
       }
     ]
+  },
+  "concordance.crucible_stir": {
+    "subtitle": "subtitles.jugcraft.concordance.crucible_stir",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/crucible_stir",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.crucible_add": {
+    "subtitle": "subtitles.jugcraft.concordance.crucible_add",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/crucible_add",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.crucible_bottle": {
+    "subtitle": "subtitles.jugcraft.concordance.crucible_bottle",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/crucible_bottle",
+        "attenuation_distance": 16
+      }
+    ]
   }
 }

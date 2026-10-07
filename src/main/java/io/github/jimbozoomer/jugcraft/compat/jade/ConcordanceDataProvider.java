@@ -2,11 +2,13 @@ package io.github.jimbozoomer.jugcraft.compat.jade;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructureValidator;
 import net.minecraft.core.BlockPos;
@@ -20,14 +22,16 @@ import snownee.jade.api.IServerDataProvider;
 /**
  * The Concordance's blocks for Jade: the Lampwright's Bench (how far its study has come, whether notes wait for
  * someone, the Radiance in the lantern on it), the Lumen Sconce (its Radiance), the Circle Anchor (its ritual's phase
- * and progress and the circle's first faults) and the Ley Pylon (its Ley Charge). Bounded snapshots of the one block
+ * and progress and the circle's first faults), the Ley Pylon (its Ley Charge) and the Alembic Crucible (its heat,
+ * volume and formula step). Bounded snapshots of the one block
  * looked at; they name no player, reveal no one's research and change nothing.
  */
 public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor> {
 	BENCH("lampwright_bench"),
 	SCONCE("lumen_sconce"),
 	ANCHOR("circle_anchor"),
-	PYLON("ley_pylon");
+	PYLON("ley_pylon"),
+	CRUCIBLE("crucible");
 
 	/** The most structural faults the anchor's tooltip lists (the command lists them all). */
 	public static final int SHOWN_FAULTS = 3;
@@ -55,6 +59,8 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 		} else if (this == ANCHOR && accessor.getBlockEntity() instanceof CircleAnchorBlockEntity anchor
 				&& accessor.getLevel() instanceof ServerLevel level) {
 			data.put(dataKey, snapshot(anchor, level));
+		} else if (this == CRUCIBLE && accessor.getBlockEntity() instanceof CrucibleBlockEntity crucible) {
+			data.put(dataKey, snapshot(crucible));
 		} else if (this == PYLON && accessor.getBlockEntity() instanceof LeyPylonBlockEntity pylon) {
 			CompoundTag snapshot = new CompoundTag();
 			snapshot.putInt("ley", (int) pylon.ley());
@@ -95,6 +101,26 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 				StructurePattern.Offset offset = fault.part().offset();
 				BlockPos at = anchor.getBlockPos().offset(offset.x(), offset.y(), offset.z());
 				snapshot.putString("fault" + i, fault.part().role().id + "|" + fault.problem().id + "|" + at.getX() + "," + at.getY() + "," + at.getZ());
+			}
+		}
+		return snapshot;
+	}
+
+	/**
+	 * The crucible: temperature and band, volume, and, following a formula, its step and what it waits for (the next
+	 * operation's text). Never the mixture's makeup: that takes sampling.
+	 */
+	public static CompoundTag snapshot(CrucibleBlockEntity crucible) {
+		CompoundTag snapshot = new CompoundTag();
+		snapshot.putInt("temperature", crucible.temperature());
+		snapshot.putString("band", crucible.band().id);
+		snapshot.putInt("parts", crucible.parts());
+		Formula program = crucible.program();
+		if (program != null) {
+			snapshot.putInt("step", crucible.step());
+			snapshot.putInt("steps", program.operations().size());
+			if (crucible.step() < program.operations().size()) {
+				snapshot.putString("next", program.operations().get(crucible.step()).text());
 			}
 		}
 		return snapshot;
