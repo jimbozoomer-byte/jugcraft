@@ -14,6 +14,7 @@ import io.github.jimbozoomer.jugcraft.concordance.logistics.Request;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
@@ -211,7 +212,11 @@ public class ConcordanceSpireGameTests {
 		helper.succeed();
 	}
 
-	/** A day's upkeep is taken only when all of it is there; a day short takes nothing and the count of days starts again. */
+	/**
+	 * A day's upkeep is taken only when all of it is there; a day short takes nothing and the count of days starts again.
+	 * What shows is what happened (roadmap step 27): a day short shows a shortage at the heart and nothing travelling; a
+	 * day held shows the Ley Charge travelling to the heart from each pylon it was drawn from, and from no other.
+	 */
 	@GameTest(maxTicks = 40)
 	public void upkeepIsTakenOnlyWhenItIsAllThere(GameTestHelper helper) {
 		SpireHeartBlockEntity heart = heart(helper);
@@ -229,30 +234,51 @@ public class ConcordanceSpireGameTests {
 		}
 		record.put(kindling);
 		heart.setItem(0, new ItemStack(Items.GLOWSTONE_DUST, 2));
+		SignWatch signs = new SignWatch(helper);
 		heart.work(level, now + Spires.DAY);
 		helper.assertValueEqual(state(helper).sustained(), 0, "two glowstone dust are not a day's four");
 		helper.assertValueEqual(heart.count("minecraft:glowstone_dust"), 2, "and nothing was taken");
 		helper.assertValueEqual(ley(helper), 160L, "not even the Ley");
+		helper.assertValueEqual(signs.at(Sign.WANT, HEART), 1L, "a day short shows its shortage at the heart");
+		helper.assertTrue(signs.of(Sign.FLOW).isEmpty(), "and nothing travels: " + signs.all());
 		heart.setItem(1, new ItemStack(Items.GLOWSTONE_DUST, 4));
 		heart.work(level, now + 2 * Spires.DAY);
 		helper.assertValueEqual(state(helper).sustained(), 1, "a day with all of it is held");
 		helper.assertValueEqual(heart.count("minecraft:glowstone_dust"), 2, "and four were taken");
+		long fromPylons = 0;
+		for (StructurePattern.Part part : ConcordanceData.rules().structure("jugcraft:spire_foundation").channels()) {
+			long ley = ((LeyPylonBlockEntity) helper.getBlockEntity(at(part.offset()), LeyPylonBlockEntity.class)).ley();
+			long flows = signs.flowed(Sign.FLOW, at(part.offset()), HEART);
+			helper.assertValueEqual(flows, ley < 40 ? 1L : 0L, "Ley travels from the pylon at " + part.offset() + " only if it was drawn from");
+			fromPylons += flows;
+		}
+		helper.assertTrue(ley(helper) < 160L && fromPylons > 0 && fromPylons == signs.of(Sign.FLOW).size(),
+				"the day's Ley travels to the heart from where it was drawn, and from nowhere else: " + signs.all());
+		signs.close();
 		forget(helper);
 		helper.succeed();
 	}
 
-	/** Damage rests the field and says where; putting the part back wakes it; nothing is lost. */
+	/**
+	 * Damage rests the field and says where; putting the part back wakes it; nothing is lost. It shows (roadmap step 27):
+	 * danger at the heart when it is damaged, success when it works again, each once.
+	 */
 	@GameTest(maxTicks = 40)
 	public void aDamagedSpireRestsAndIsRepaired(GameTestHelper helper) {
 		SpireHeartBlockEntity heart = heart(helper);
 		ServerPlayer keeper = master(helper, "jugcraft:lantern_spire");
 		long day = raise(helper, keeper, heart);
+		SignWatch signs = new SignWatch(helper);
 		BlockPos shaft = HEART.above(2);
 		helper.setBlock(shaft, Blocks.AIR);
 		helper.assertValueEqual(heart.work(helper.getLevel(), day + 40), "damaged", "a missing shaft block rests the spire");
 		helper.assertTrue(state(helper).raised(spire()), "it keeps its phase");
+		heart.work(helper.getLevel(), day + 50);
+		helper.assertTrue(signs.at(Sign.PERIL, HEART) == 1 && signs.of(Sign.DONE).isEmpty(), "danger shows once, when it is damaged: " + signs.all());
 		helper.setBlock(shaft, Blocks.DEEPSLATE_BRICKS);
 		helper.assertValueEqual(heart.work(helper.getLevel(), day + 60), "active", "any spire stone put back wakes it");
+		helper.assertValueEqual(signs.at(Sign.DONE, HEART), 1L, "and its waking shows success");
+		signs.close();
 		forget(helper);
 		helper.succeed();
 	}
@@ -276,7 +302,7 @@ public class ConcordanceSpireGameTests {
 		helper.succeed();
 	}
 
-	/** A spire nobody keeps practising rests; the next practice wakes it. */
+	/** A spire nobody keeps practising rests, which shows as a shortage at its heart; the next practice wakes it. */
 	@GameTest(maxTicks = 40)
 	public void attendanceLapsesAndReturns(GameTestHelper helper) {
 		SpireHeartBlockEntity heart = heart(helper);
@@ -287,7 +313,10 @@ public class ConcordanceSpireGameTests {
 		SpireRecord.of(helper.getLevel().getServer()).put(new SpireState(state.id(), state.wonder(), state.configuration(), state.keeper(),
 				state.communal(), state.phase(), state.phaseBegan(), state.practiced(), state.rite(), state.sustained(), now + Spires.DAY,
 				now - (spire().attendanceDays() + 1) * Spires.DAY, state.supplied(), state.founded(), state.contributors()));
+		SignWatch signs = new SignWatch(helper);
 		helper.assertValueEqual(heart.work(helper.getLevel(), now), "unattended", "a week and a day without a ritual rests it");
+		helper.assertValueEqual(signs.at(Sign.WANT, HEART), 1L, "its lapse shows as a shortage at the heart");
+		signs.close();
 		ConcordanceProgress.record(keeper, new Evidence.Practiced("jugcraft:ritual", "back"));
 		helper.assertValueEqual(state(helper).lastAttended(), now, "a ritual attends it");
 		helper.assertValueEqual(heart.work(helper.getLevel(), now), "active", "and it works again");

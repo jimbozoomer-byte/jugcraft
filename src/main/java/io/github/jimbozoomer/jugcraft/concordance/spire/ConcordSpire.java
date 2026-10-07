@@ -27,6 +27,8 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import io.github.jimbozoomer.jugcraft.concordance.sky.SkyItem;
 import io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress;
 import io.github.jimbozoomer.jugcraft.concordance.wonder.SpireConfiguration;
@@ -470,8 +472,13 @@ public final class ConcordSpire {
 		Spires.Day day = Spires.day(definition, configuration, next, standing.ley(), heart.count(configuration.upkeepItem()), standing.intact(), now);
 		if (day.due()) {
 			if (day.met()) {
-				draw(level, standing.pylons(), day.ley());
+				// Roadmap step 27: the day's Ley Charge travels from each pylon it was drawn from.
+				for (BlockPos pylon : draw(level, standing.pylons(), day.ley())) {
+					Signs.flow(level, pylon, heart.getBlockPos());
+				}
 				heart.take(configuration.upkeepItem(), day.items());
+			} else {
+				Signs.show(level, heart.getBlockPos(), Sign.WANT);
 			}
 			next = day.next();
 		}
@@ -487,6 +494,7 @@ public final class ConcordSpire {
 			if (next.raised(definition)) {
 				raise(level, next);
 			}
+			Signs.show(level, heart.getBlockPos(), Sign.DONE);
 		}
 		if (!next.equals(state)) {
 			record.put(next);
@@ -527,18 +535,21 @@ public final class ConcordSpire {
 		}
 	}
 
-	/** Draws {@code ley} from {@code pylons}, first to last, each what it holds. */
-	private static void draw(ServerLevel level, List<LeyPylonBlockEntity> pylons, long ley) {
+	/** Draws {@code ley} from {@code pylons}, first to last, each what it holds; returns where it was drawn from. */
+	private static List<BlockPos> draw(ServerLevel level, List<LeyPylonBlockEntity> pylons, long ley) {
+		List<BlockPos> from = new ArrayList<>();
 		long drawn = 0;
 		for (LeyPylonBlockEntity pylon : pylons) {
 			long take = Math.min(ley - drawn, pylon.ley());
 			if (take > 0 && pylon.draw(level, take)) {
 				drawn += take;
+				from.add(pylon.getBlockPos());
 			}
 			if (drawn >= ley) {
-				return;
+				break;
 			}
 		}
+		return from;
 	}
 
 	/**
@@ -642,6 +653,7 @@ public final class ConcordSpire {
 				if (older != null && Illumination.mayChange(level, null, at)) {
 					level.setBlock(at, older, Block.UPDATE_CLIENTS);
 					grown.add(at);
+					Signs.show(level, at, Sign.WORK);
 					break;
 				}
 			}
@@ -672,6 +684,8 @@ public final class ConcordSpire {
 				if (held < FocusPool.MAX) {
 					ConcordanceProgress.setFocus(player, held + 1);
 					helped++;
+					// The Focus given, travelling from the heart to the player.
+					Signs.show(level, player.position().add(0.0, 1.0, 0.0), Sign.FLOW, center);
 				}
 			}
 		}

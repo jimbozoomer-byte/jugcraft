@@ -45,6 +45,7 @@ public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> {
 	private static final RawAnimation TRAVELLING = RawAnimation.begin().thenLoop("animation.gathering_shade.travelling");
 	private static final RawAnimation WORKING = RawAnimation.begin().thenLoop("animation.gathering_shade.working");
 	private static final RawAnimation SUSPENDED = RawAnimation.begin().thenLoop("animation.gathering_shade.suspended");
+	private static final RawAnimation WAITING = RawAnimation.begin().thenLoop("animation.gathering_shade.waiting");
 
 	private @Nullable BlockPos anchor;
 	private final List<ItemStack> carried = new ArrayList<>();
@@ -206,6 +207,7 @@ public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> {
 			case TRAVELLING, RETURNING -> TRAVELLING;
 			case WORKING -> WORKING;
 			case SUSPENDED, OUTSIDE_AGREEMENT, FINISHED, DESTINATION_UNLOADED, DISABLED -> SUSPENDED;
+			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, FULL -> WAITING;
 			default -> IDLE;
 		};
 	}

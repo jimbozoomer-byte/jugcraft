@@ -6,6 +6,8 @@ import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.util.GeckoLibUtil;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Navigation;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.List;
@@ -54,11 +56,14 @@ import org.jspecify.annotations.Nullable;
  */
 public abstract class WorkerEntity<T extends WorkerEntity<T>> extends PathfinderMob implements GeoEntity, SmartBrainOwner<T> {
 	public static final int THINK_TICKS = 20;
+	/** The least time between two signs from one worker, so one that wavers between two states cannot flood its watchers. */
+	public static final int SIGN_TICKS = 200;
 	private static final EntityDataAccessor<String> STATUS = SynchedEntityData.defineId(WorkerEntity.class, EntityDataSerializers.STRING);
 
 	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 	protected @Nullable UUID owner;
 	private Navigation navigation = Navigation.FINE;
+	private long lastSign = Long.MIN_VALUE / 2;
 
 	protected WorkerEntity(EntityType<? extends PathfinderMob> type, Level level) {
 		super(type, level);
@@ -87,10 +92,31 @@ public abstract class WorkerEntity<T extends WorkerEntity<T>> extends Pathfinder
 	protected void setStatus(Status status) {
 		if (!entityData.get(STATUS).equals(status.id)) {
 			entityData.set(STATUS, status.id);
-			if (!isRemoved() && level() instanceof ServerLevel server && owner != null) {
-				WorkerRoster.of(server.getServer()).note(owner, getUUID(), kind(), status, server.dimension().identifier().toString(), blockPosition());
+			if (!isRemoved() && level() instanceof ServerLevel server) {
+				if (owner != null) {
+					WorkerRoster.of(server.getServer()).note(owner, getUUID(), kind(), status, server.dimension().identifier().toString(), blockPosition());
+				}
+				Sign sign = sign(status);
+				long now = server.getGameTime();
+				if (sign != null && now - lastSign >= SIGN_TICKS) {
+					lastSign = now;
+					Signs.show(server, position().add(0.0, getBbHeight() + 0.3, 0.0), sign, null);
+				}
 			}
 		}
+	}
+
+	/**
+	 * What a change to {@code status} shows over the worker (roadmap step 27), once, when it happens: shortage when it
+	 * lacks something a player can give or mend (resources, access, a way there, repair, energy, room, a loaded
+	 * destination); success when it has finished. Other changes show only in its body's animation.
+	 */
+	public static @Nullable Sign sign(Status status) {
+		return switch (status) {
+			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, NEEDS_REPAIR, NO_ENERGY, FULL, DESTINATION_UNLOADED -> Sign.WANT;
+			case FINISHED -> Sign.DONE;
+			default -> null;
+		};
 	}
 
 	/** The kind of worker ("familiar", "spirit", "construct"), for the roster and messages. */
@@ -214,9 +240,19 @@ public abstract class WorkerEntity<T extends WorkerEntity<T>> extends Pathfinder
 	/** The looping clip for a status (the subclass's names, from its .animation.json). */
 	protected abstract RawAnimation animation(Status status);
 
+	/**
+	 * The clip for what the body is doing now: its status's, except that a worker on its way (or following) that is not
+	 * moving, held up on its path or already beside its owner, shows itself still. Its animation never claims progress it
+	 * is not making (roadmap step 27).
+	 */
+	public static Status shown(Status status, boolean moving) {
+		return !moving && (status == Status.TRAVELLING || status == Status.RETURNING || status == Status.FOLLOWING) ? Status.IDLE : status;
+	}
+
 	@Override
 	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-		controllers.add(new AnimationController<T>("main", 8, test -> test.setAndContinue(test.animatable().animation(test.animatable().status()))));
+		controllers.add(new AnimationController<T>("main", 8, test -> test.setAndContinue(
+				test.animatable().animation(shown(test.animatable().status(), test.isMoving())))));
 	}
 
 	@Override

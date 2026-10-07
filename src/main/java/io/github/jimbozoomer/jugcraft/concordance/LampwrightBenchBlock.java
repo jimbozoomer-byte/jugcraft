@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
+import io.github.jimbozoomer.jugcraft.concordance.sign.Presentation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -103,7 +104,7 @@ public class LampwrightBenchBlock extends BaseEntityBlock {
 	/** Motes rising from the dish while it studies (client only; fewer with reduced motion). */
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-		if (!state.getValue(WORKING) || random.nextInt(LumenMoteBlock.reducedMotion ? 6 : 2) != 0) {
+		if (!state.getValue(WORKING) || !Presentation.ambient(random, 2, 6)) {
 			return;
 		}
 		double x = pos.getX() + 0.35 + random.nextDouble() * 0.2;

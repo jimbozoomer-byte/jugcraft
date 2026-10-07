@@ -13,6 +13,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructureValidator;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import java.util.ArrayList;
 import java.util.List;
@@ -506,5 +507,64 @@ public class ConcordanceRitualGameTests {
 		use(anchor, practitioner, false);
 		helper.assertTrue(anchor.phase() == RitualMachine.Phase.IDLE, "Too far from the circle, it does not start");
 		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- what it shows (roadmap step 27)
+
+	/**
+	 * A clean working shows what happened and nothing else: one sign of preparation as it starts, the Ley Charge of each
+	 * of its five steps travelling from each of the four channels to the anchor (twenty flows, one for each draw), one
+	 * success when it completes, and no warning.
+	 */
+	@GameTest(maxTicks = 400)
+	public void aWorkingShowsWhatHappened(GameTestHelper helper) {
+		SignWatch signs = new SignWatch(helper);
+		CircleAnchorBlockEntity anchor = build(helper, 64);
+		startAttunement(helper, anchor);
+		helper.runAfterDelay(RitualMachine.STEP_TICKS * 5L + 20, () -> {
+			signs.close();
+			helper.assertTrue(anchor.phase() == RitualMachine.Phase.COMPLETE, "Complete after five steps: " + anchor.run());
+			helper.assertValueEqual(signs.at(Sign.GATHER, ANCHOR), 1L, "one sign of preparation, at the anchor");
+			for (StructurePattern.Part part : circle().channels()) {
+				helper.assertValueEqual(signs.flowed(Sign.FLOW, at(part.offset()), ANCHOR), 5L, "five draws from the channel at " + part.offset());
+			}
+			helper.assertValueEqual((long) signs.of(Sign.FLOW).size(), 20L, "no flow that was not a draw");
+			helper.assertValueEqual(signs.at(Sign.DONE, ANCHOR.above()), 1L, "one success, when it completed");
+			helper.assertTrue(signs.of(Sign.WANT).isEmpty() && signs.of(Sign.PERIL).isEmpty(), "no warning: " + signs.all());
+			helper.succeed();
+		});
+	}
+
+	/** A pylon drained mid-ritual: a shortage shows at that pylon and at the anchor, and nothing claims success. */
+	@GameTest(maxTicks = 200)
+	public void aDryPylonShowsWhereItFellShort(GameTestHelper helper) {
+		SignWatch signs = new SignWatch(helper);
+		CircleAnchorBlockEntity anchor = build(helper, 64);
+		startAttunement(helper, anchor);
+		BlockPos drained = first(StructurePattern.Role.CHANNEL);
+		helper.runAfterDelay(AFTER_FIRST_STEP, () -> pylon(helper, drained).setLey(helper.getLevel(), 0));
+		helper.succeedWhen(() -> {
+			offeringsKept(helper, anchor, RitualMachine.Interruption.POWER);
+			helper.assertTrue(signs.at(Sign.WANT, drained) == 1 && signs.at(Sign.WANT, ANCHOR) == 1,
+					"A shortage at the dry pylon and at the anchor: " + signs.all());
+			helper.assertTrue(signs.of(Sign.DONE).isEmpty() && signs.of(Sign.PERIL).isEmpty(), "No success and no danger: " + signs.all());
+			signs.close();
+		});
+	}
+
+	/** A Warding Stone lost mid-ritual: danger at the anchor (with the backlash's own marks), never a mere shortage. */
+	@GameTest(maxTicks = 240)
+	public void aLostBoundaryShowsDanger(GameTestHelper helper) {
+		SignWatch signs = new SignWatch(helper);
+		CircleAnchorBlockEntity anchor = build(helper, 64);
+		startAttunement(helper, anchor);
+		helper.runAfterDelay(PAST_SPAWN_GRACE, () -> helper.setBlock(first(StructurePattern.Role.BOUNDARY), Blocks.AIR));
+		helper.succeedWhen(() -> {
+			offeringsKept(helper, anchor, RitualMachine.Interruption.CONTAINMENT);
+			helper.assertTrue(signs.at(Sign.PERIL, ANCHOR) == 1, "Danger at the anchor: " + signs.all());
+			helper.assertTrue(!signs.of(Sign.HARM).isEmpty(), "The backlash's harm shows on the participant: " + signs.all());
+			helper.assertTrue(signs.of(Sign.DONE).isEmpty() && signs.at(Sign.WANT, ANCHOR) == 0, "No success and no shortage: " + signs.all());
+			signs.close();
+		});
 	}
 }

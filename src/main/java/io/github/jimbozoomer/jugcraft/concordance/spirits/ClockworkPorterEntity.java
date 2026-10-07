@@ -69,6 +69,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 	private static final RawAnimation WALKING = RawAnimation.begin().thenLoop("animation.clockwork_porter.walking");
 	private static final RawAnimation WORKING = RawAnimation.begin().thenLoop("animation.clockwork_porter.working");
 	private static final RawAnimation BROKEN = RawAnimation.begin().thenLoop("animation.clockwork_porter.broken");
+	private static final RawAnimation WAITING = RawAnimation.begin().thenLoop("animation.clockwork_porter.waiting");
 
 	/** A route: take from {@code source}, deliver to {@code target}, both in {@code dimension}. */
 	public record Route(BlockPos source, BlockPos target, String dimension) {
@@ -589,6 +590,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 			case TRAVELLING, RETURNING -> WALKING;
 			case WORKING -> WORKING;
 			case NEEDS_REPAIR, NO_ENERGY, DISABLED -> BROKEN;
+			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, FULL, DESTINATION_UNLOADED -> WAITING;
 			default -> IDLE;
 		};
 	}

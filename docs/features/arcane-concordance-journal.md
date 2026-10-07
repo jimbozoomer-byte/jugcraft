@@ -55,7 +55,7 @@ settings, it opens as a plain screen of vanilla buttons.
 
 **Keyboard and accessibility.**
 
-- Tab, Left and Right (or the section buttons) change section.
+- Left and Right (or the section buttons) change section; Tab moves between buttons.
 - Up, Down, Page Up and Page Down (and the mouse wheel) scroll.
 - R asks again, X shows or hides exact values, Esc closes.
 - Light text on a dark panel; a visible focus ring in the workspace.
@@ -133,10 +133,19 @@ Kotlin). Cloth Config (required) holds the two new settings. No art: the screens
   are words, and that the journal survives its encoding to the client.
 - Client game test added: `ConcordanceJournalClientGameTests` (the journal crosses from the server and opens, simple
   and GuiLib, with screenshots).
-- CI: pending (this record is updated with the run).
+- CI: Build run [37663359511](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37663359511) on `73de706`,
+  every job passed:
+  - the first compile of the journal's Java and of its Kotlin workspace;
+  - `mod` and `optional integrations absent`: "All 1047 required tests passed" (the server game tests, the five new
+    ones among them);
+  - client shard 2 ran `ConcordanceJournalClientGameTests` and took both screenshots,
+    `jugcraft_concordance_journal_simple` and `jugcraft_concordance_journal_workspace`. In the simple screen, "Section 1
+    of 4: Overview" shows Focus, stage and research with its three buttons. The workspace shows the same lines under
+    its tabs (Overview, Research, Stage, Vitae). In both, the advancement toasts of the research the test grants cover
+    the top right corner.
 
-Not yet run: a look at the screenshots by a person, the narrator reading the plain screen, the GuiLib workspace's
-keyboard navigation by hand, and a two-client server.
+Not yet run: the narrator reading the plain screen, the GuiLib workspace's keyboard navigation by hand, the screens at
+other GUI scales, and a two-client server. The screenshots above were looked at as CI's small previews only.
 
 ## World and event applicability
 

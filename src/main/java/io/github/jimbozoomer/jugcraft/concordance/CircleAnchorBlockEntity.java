@@ -18,6 +18,8 @@ import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualRun;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructureValidator;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
@@ -33,7 +35,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -362,6 +363,7 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 						started.participants() - run.joined().size()));
 			}
 			sound(level, JugcraftConcordance.CIRCLE_START_SOUND, 1.0F);
+			Signs.show(level, worldPosition, Sign.GATHER);
 		}
 	}
 
@@ -392,6 +394,7 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 			if (run.phase() == RitualMachine.Phase.CHANNELING) {
 				tell(level, run.joined(), Component.translatable("message.jugcraft.concordance.circle.started", ritualName(definition.id())));
 				sound(level, JugcraftConcordance.CIRCLE_START_SOUND, 1.0F);
+				Signs.show(level, worldPosition, Sign.GATHER);
 			}
 		}
 	}
@@ -638,7 +641,13 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 			if (reason.consequence().offerings() == RitualMachine.Release.KEPT) {
 				tell(level, before.joined(), Component.translatable("message.jugcraft.concordance.circle.kept"));
 			}
-			sound(level, JugcraftConcordance.CIRCLE_BREAK_SOUND, 1.0F);
+			// Roadmap step 27: a shortage or a danger says which; a deliberate stop is only the circle's break.
+			Sign warning = warning(reason);
+			if (warning != null) {
+				Signs.show(level, worldPosition, warning);
+			} else {
+				sound(level, JugcraftConcordance.CIRCLE_BREAK_SOUND, 1.0F);
+			}
 			ConcordanceProgress.log("ritual {} at {} interrupted: {}", before.ritual(), worldPosition, reason.id);
 		}
 		if (reasonIsRemoval()) {
@@ -646,6 +655,19 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 		}
 		sync(level);
 		return true;
+	}
+
+	/**
+	 * What an interruption shows (roadmap step 27): danger for a failed containment or tampered offerings; shortage when
+	 * something the ritual needs is missing (a part, Ley Charge, a participant, its conditions, a loaded chunk, a running
+	 * anchor); nothing more than the circle's break for a deliberate stop (cancelled, removed, switched off, forgotten).
+	 */
+	public static @Nullable Sign warning(RitualMachine.Interruption reason) {
+		return switch (reason) {
+			case CONTAINMENT, TAMPERED -> Sign.PERIL;
+			case STRUCTURE, POWER, PARTICIPANTS, CONDITIONS, UNLOADED, LAPSED -> Sign.WANT;
+			case CANCELLED, REMOVED, DISABLED, FORGOTTEN -> null;
+		};
 	}
 
 	private boolean reasonIsRemoval() {
@@ -661,14 +683,18 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 		List<LeyPylonBlockEntity> pylons = new ArrayList<>();
 		for (StructurePattern.Part part : pattern.channels()) {
 			StructurePattern.Offset offset = part.offset();
-			if (!(level.getBlockEntity(worldPosition.offset(offset.x(), offset.y(), offset.z())) instanceof LeyPylonBlockEntity pylon)
-					|| pylon.ley() < ley || !pylon.lends(participants)) {
+			BlockPos at = worldPosition.offset(offset.x(), offset.y(), offset.z());
+			if (!(level.getBlockEntity(at) instanceof LeyPylonBlockEntity pylon) || pylon.ley() < ley || !pylon.lends(participants)) {
+				// Roadmap step 27: the channel that fell short says so, where it stands.
+				Signs.show(level, at, Sign.WANT);
 				return false;
 			}
 			pylons.add(pylon);
 		}
 		for (LeyPylonBlockEntity pylon : pylons) {
 			pylon.draw(level, ley);
+			// The Ley Charge the step took, travelling from each channel to the anchor.
+			Signs.flow(level, pylon.getBlockPos(), worldPosition);
 		}
 		return true;
 	}
@@ -716,8 +742,7 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 		Rituals.completed(level, worldPosition, ritual.id(), present);
 		tell(level, commit.participants(), Component.translatable("message.jugcraft.concordance.circle.completed", ritualName(ritual.id())));
 		sound(level, JugcraftConcordance.CIRCLE_COMPLETE_SOUND, 1.0F);
-		level.sendParticles(ParticleTypes.END_ROD, worldPosition.getX() + 0.5, worldPosition.getY() + 1.5, worldPosition.getZ() + 0.5, 24,
-				0.6, 0.6, 0.6, 0.05);
+		Signs.show(level, worldPosition.above(), Sign.DONE);
 		ConcordanceProgress.log("ritual {} completed at {} by {}", ritual.id(), worldPosition, commit.participants());
 	}
 

@@ -6,7 +6,6 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceSpells;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
-import io.github.jimbozoomer.jugcraft.concordance.LumenMoteBlock;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.balance.Baselines;
 import io.github.jimbozoomer.jugcraft.concordance.balance.Benchmark;
@@ -17,6 +16,7 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Presentation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -258,8 +258,9 @@ public class ConcordanceBaselineGameTests {
 	}
 
 	/**
-	 * Presentation options change nothing the server decides: with reduced motion on and off (the one display setting
-	 * shared code can see), Kindle sets the same light and Dawn Aegis the same shell, at the same cost.
+	 * Presentation options change nothing the server decides: with reduced motion and the visual intensity at every
+	 * setting (the display settings shared code can see, roadmap steps 11 and 27), Kindle sets the same light and Dawn
+	 * Aegis the same shell, at the same cost.
 	 */
 	@GameTest(maxTicks = 20)
 	public void presentationOptionsChangeNoOutcome(GameTestHelper helper) {
@@ -269,25 +270,28 @@ public class ConcordanceBaselineGameTests {
 		ServerPlayer player = master(helper, new BlockPos(1, 2, 1));
 		BlockPos lit = new BlockPos(1, 3, 4);
 		List<String> results = new ArrayList<>();
-		boolean was = LumenMoteBlock.reducedMotion;
+		Presentation.Intensity wasIntensity = Presentation.intensity();
+		boolean wasCalm = Presentation.reducedMotion();
 		try {
-			for (boolean calm : new boolean[] {false, true}) {
-				LumenMoteBlock.reducedMotion = calm;
-				helper.setBlock(lit, Blocks.AIR);
-				player.removeEffect(MobEffects.ABSORPTION);
-				ConcordanceProgress.setFocus(player, FocusPool.MAX);
-				cast(player, "jugcraft:kindle");
-				BlockState mote = helper.getBlockState(lit);
-				cast(player, "jugcraft:aegis");
-				MobEffectInstance shell = player.getEffect(MobEffects.ABSORPTION);
-				results.add(mote + " " + (shell == null ? "none" : shell.getAmplifier() + "/" + shell.getDuration()) + " "
-						+ ConcordanceProgress.currentFocus(player));
+			for (Presentation.Intensity intensity : Presentation.Intensity.values()) {
+				for (boolean calm : new boolean[] {false, true}) {
+					Presentation.configure(intensity, calm);
+					helper.setBlock(lit, Blocks.AIR);
+					player.removeEffect(MobEffects.ABSORPTION);
+					ConcordanceProgress.setFocus(player, FocusPool.MAX);
+					cast(player, "jugcraft:kindle");
+					BlockState mote = helper.getBlockState(lit);
+					cast(player, "jugcraft:aegis");
+					MobEffectInstance shell = player.getEffect(MobEffects.ABSORPTION);
+					results.add(mote + " " + (shell == null ? "none" : shell.getAmplifier() + "/" + shell.getDuration()) + " "
+							+ ConcordanceProgress.currentFocus(player));
+				}
 			}
 		} finally {
-			LumenMoteBlock.reducedMotion = was;
+			Presentation.configure(wasIntensity, wasCalm);
 		}
-		helper.assertTrue(results.get(0).equals(results.get(1)) && results.get(0).contains("lumen_mote"),
-				"Reduced motion off and on give the same light, shell and Focus: " + results);
+		helper.assertTrue(results.stream().distinct().count() == 1 && results.get(0).contains("lumen_mote"),
+				"Every intensity, with reduced motion off and on, gives the same light, shell and Focus: " + results);
 		helper.succeed();
 	}
 }

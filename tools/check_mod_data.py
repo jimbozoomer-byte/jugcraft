@@ -7554,6 +7554,7 @@ def check_concordance(registered):
     check_progression(co, root, lang, registered, research)
     check_spire(co, root, lang, registered, research)
     check_journal(co, root, lang)
+    check_signs(co, root, lang)
     check_game_test_entrypoints()
 
 
@@ -7820,7 +7821,9 @@ def check_game_test_entrypoints():
 def check_baselines(root):
     """Roadmap step 11: the benchmark and the rules it runs are pure Java (the harness and the game test run the same
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
-    and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
+    and the settings shared code can see (reduced motion and, since step 27, the visual intensity, both held by
+    concordance/sign/Presentation.java) are read only in animateTick, which runs on the client (check_signs checks the
+    intensity's readers)."""
     for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
                     "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream", "conclave", "progression", "wonder"):
         for path in sorted((root / package).glob("*.java")):
@@ -7830,6 +7833,8 @@ def check_baselines(root):
         text = path.read_text(encoding="utf-8")
         if "ConcordanceClientOptions" in text:
             err(f"{path.relative_to(JAVA_ROOT)}: shared code must not read the client's display settings (ConcordanceClientOptions)")
+        if path == root / "sign" / "Presentation.java":
+            continue  # where the settings are held, not read
         method = ""
         for line in text.splitlines():
             signature = re.match(r"^\t(?:public|protected|private|static)[^=;]*\(", line)
@@ -9916,6 +9921,61 @@ def check_journal(co, root, lang):
     request = text(root / "journal" / "JournalRequestPayload.java")
     if "StreamCodec.unit(" not in request:
         err("journal/JournalRequestPayload.java: a request carries nothing (the server decides what a player sees)")
+
+
+def check_signs(co, root, lang):
+    """Roadmap step 27: the signs, the visual intensities and the server's limits are tools/concordance_signs.py's, in
+    its order; the warnings' sounds are registered, drawn and subtitled; every server-side Concordance particle goes
+    through a sign (no sendParticles), so each client draws it as its settings allow; the display settings are read only
+    by client code and blocks' animateTick (the server never decides from them); a crucible tells a client only its
+    heat, volume and the spoon's reading; and the setting's words exist."""
+    sg = co.signs
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    sign_java = text(root / "sign" / "Sign.java")
+    presentation = text(root / "sign" / "Presentation.java")
+    signs_java = text(root / "sign" / "Signs.java")
+    found = re.findall(r'^\t([A-Z]+)\("([a-z]+)", Kind\.([A-Z]+), (\d+)\)', sign_java, re.M)
+    expected = [(key, kind.upper(), str(count)) for key, (kind, count) in sg.SIGNS.items()]
+    if [(sid, kind, count) for _, sid, kind, count in found] != expected:
+        err(f"sign/Sign.java: signs {[(sid, kind, count) for _, sid, kind, count in found]} differ from SIGNS in tools/concordance_signs.py")
+    kinds = re.search(r"enum Kind \{([^}]*?);", sign_java, re.S)
+    if not kinds or [k.strip().lower() for k in kinds.group(1).split(",")] != list(sg.KINDS):
+        err("sign/Sign.java: Sign.Kind must list KINDS of tools/concordance_signs.py, in order")
+    intensities = re.findall(r'^\t\t([A-Z]+)\((\d+), (\d+), (\d+)\)', presentation, re.M)
+    if [(name.lower(), (int(a), int(b), int(c))) for name, a, b, c in intensities] != list(sg.INTENSITY.items()):
+        err(f"sign/Presentation.java: intensities {intensities} differ from INTENSITY in tools/concordance_signs.py")
+    for name, value, source in (("FAR", sg.FAR, presentation), ("NEAR", sg.NEAR, presentation),
+                                ("WARNING_FLOOR", sg.WARNING_FLOOR, presentation), ("AMBIENT_SHARE", sg.AMBIENT_SHARE, presentation),
+                                ("PER_TICK", sg.PER_TICK, signs_java), ("WARNING_RESERVE", sg.WARNING_RESERVE, signs_java)):
+        if not re.search(rf"\b{name} = {value}(\.0)?;", source):
+            err(f"sign: {name} must be {value}, as in tools/concordance_signs.py")
+    concordance = text(root / "JugcraftConcordance.java")
+    for event, subtitle in sg.SOUND_EVENTS.items():
+        if f'sound("{event}")' not in concordance:
+            err(f"JugcraftConcordance.java: the warning sound {event} is not registered")
+        if not (ASSETS / "sounds" / "concordance" / (event.split(".", 1)[1] + ".ogg")).is_file():
+            err(f"sign: missing sounds/concordance/{event.split('.', 1)[1]}.ogg (tools/concordance_sounds.py draws it)")
+        if lang.get(f"subtitles.{MOD}.{event}") != subtitle:
+            err(f"sign: the warning sound {event} needs its subtitle")
+    for path in sorted(root.rglob("*.java")):
+        source = text(path)
+        relative = path.relative_to(root).as_posix()
+        if "sendParticles(" in source:
+            err(f"concordance/{relative}: server particles go through a sign (Signs.show), so each client draws them as its settings allow")
+        if "Presentation." in source and not relative.startswith("sign/") and "animateTick" not in source:
+            err(f"concordance/{relative}: the display settings (Presentation) are read only by clients and blocks' animateTick")
+    crucible = text(root / "CrucibleBlockEntity.java")
+    update = re.search(r"getUpdateTag\(HolderLookup\.Provider registries\) \{(.*?)\n\t\}", crucible, re.S)
+    sent = set(re.findall(r'tag\.put\w+\("([a-z_]+)"', update.group(1))) if update else set()
+    if sent != {"temperature", "parts", "taste", "murky"}:
+        err(f"CrucibleBlockEntity.java: a client is told only the heat, the volume and the spoon's reading, not {sorted(sent)}")
+    settings = text(CLIENT_JAVA_ROOT / "ConcordanceSettingsScreen.java")
+    if '"screen.jugcraft.concordance.config.intensity." + value.id()' not in settings:
+        err("ConcordanceSettingsScreen.java: each intensity is named by screen.jugcraft.concordance.config.intensity.<id>")
+    for key in list(sg.CLIENT) + [f"screen.{MOD}.concordance.config.intensity.{name}" for name in sg.INTENSITY]:
+        if key not in lang:
+            err(f"sign: missing lang {key}")
 
 
 if __name__ == "__main__":

@@ -130,6 +130,9 @@ public final class JugcraftConcordance {
 	public static SoundEvent CRUCIBLE_STIR_SOUND;
 	public static SoundEvent CRUCIBLE_ADD_SOUND;
 	public static SoundEvent CRUCIBLE_BOTTLE_SOUND;
+	/** The two warnings' own sounds (roadmap step 27): something is lacking; something is dangerous. */
+	public static SoundEvent SIGN_SHORTAGE_SOUND;
+	public static SoundEvent SIGN_DANGER_SOUND;
 
 	private JugcraftConcordance() {
 	}
@@ -178,6 +181,8 @@ public final class JugcraftConcordance {
 		CRUCIBLE_STIR_SOUND = sound("concordance.crucible_stir");
 		CRUCIBLE_ADD_SOUND = sound("concordance.crucible_add");
 		CRUCIBLE_BOTTLE_SOUND = sound("concordance.crucible_bottle");
+		SIGN_SHORTAGE_SOUND = sound("concordance.sign_shortage");
+		SIGN_DANGER_SOUND = sound("concordance.sign_danger");
 
 		// The Kindled mote is light in the air: nothing to see, hit, break or hold.
 		LUMEN_MOTE = block("lumen_mote", LumenMoteBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
@@ -266,6 +271,7 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire.register();
 		// Roadmap step 26: the Concordance Journal, every report in one place for the screens.
 		io.github.jimbozoomer.jugcraft.concordance.journal.Journal.register();
+		io.github.jimbozoomer.jugcraft.concordance.sign.Signs.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

@@ -1,9 +1,12 @@
 package io.github.jimbozoomer.jugcraft.concordance.spire;
 
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Presentation;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -114,5 +117,43 @@ public class SpireHeartBlock extends BaseEntityBlock {
 	@Override
 	protected boolean isPathfindable(BlockState state, PathComputationType type) {
 		return false;
+	}
+
+	/**
+	 * What the heart shows of its state (roadmap step 27; client only, from the status the server sent, as the
+	 * Concordance's presentation settings allow): glyphs drawn in while it is raised; light rising while its field works;
+	 * grey ash sinking while its upkeep or attendance has lapsed; sparks and smoke thrown out while it is damaged, which
+	 * shows at any intensity. Unfounded or switched off, it shows nothing.
+	 */
+	@Override
+	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+		if (!(level.getBlockEntity(pos) instanceof SpireHeartBlockEntity heart)) {
+			return;
+		}
+		String status = heart.status();
+		boolean damaged = status.equals("damaged");
+		boolean lapsed = status.equals("unattended") || status.equals("unsupplied");
+		boolean raising = status.equals("raising");
+		boolean active = status.equals("active");
+		if (!(damaged || lapsed || raising || active) || !Presentation.ambient(random, damaged ? 3 : 4, 12, damaged)) {
+			return;
+		}
+		boolean calm = Presentation.reducedMotion();
+		double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.8;
+		double y = pos.getY() + 0.6 + random.nextDouble() * 0.6;
+		double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.8;
+		if (damaged) {
+			level.addParticle(ParticleTypes.SMOKE, x, y, z, 0.0, calm ? 0.0 : 0.03, 0.0);
+			level.addParticle(ParticleTypes.CRIT, x, y, z, (random.nextDouble() - 0.5) * 0.3, 0.15, (random.nextDouble() - 0.5) * 0.3);
+		} else if (lapsed) {
+			level.addParticle(ParticleTypes.WHITE_ASH, x, y + 0.4, z, 0.0, -0.02, 0.0);
+		} else if (raising) {
+			double cx = pos.getX() + 0.5;
+			double cz = pos.getZ() + 0.5;
+			// ENCHANT glyphs fly towards the point given as their speed's origin: here, the heart.
+			level.addParticle(ParticleTypes.ENCHANT, cx, pos.getY() + 1.0, cz, x - cx, y - pos.getY() - 1.0, z - cz);
+		} else {
+			level.addParticle(ParticleTypes.END_ROD, x, y + 0.4, z, 0.0, calm ? 0.0 : 0.02, 0.0);
+		}
 	}
 }

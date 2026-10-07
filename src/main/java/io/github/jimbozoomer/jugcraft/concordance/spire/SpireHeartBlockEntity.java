@@ -8,6 +8,8 @@ import com.geckolib.animation.RawAnimation;
 import com.geckolib.util.GeckoLibUtil;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
 import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -104,6 +106,10 @@ public class SpireHeartBlockEntity extends BlockEntity implements Container, Geo
 	public String work(ServerLevel level, long now) {
 		String next = ConcordSpire.work(level, this, now);
 		if (!next.equals(status)) {
+			Sign sign = sign(status, next);
+			if (sign != null) {
+				Signs.show(level, worldPosition, sign);
+			}
 			status = next;
 			setChanged();
 			BlockState state = getBlockState();
@@ -114,6 +120,19 @@ public class SpireHeartBlockEntity extends BlockEntity implements Container, Geo
 			sync();
 		}
 		return status;
+	}
+
+	/**
+	 * What a change of state shows (roadmap step 27), once, when it happens: danger when the spire is damaged, shortage
+	 * when its upkeep or attendance lapses, success when its field works again (its raising shows at the phase).
+	 */
+	static @Nullable Sign sign(String before, String after) {
+		return switch (after) {
+			case "damaged" -> Sign.PERIL;
+			case "unattended", "unsupplied" -> Sign.WANT;
+			case "active" -> before.equals("raising") || before.equals("unfounded") ? null : Sign.DONE;
+			default -> null;
+		};
 	}
 
 	/** Whether its field may pulse at {@code now} (every {@code pulse} ticks), noting that it does. */

@@ -64,6 +64,7 @@ final class ConcordanceClient {
 		VigilClient.register();
 		WorkerClient.register();
 		JournalClient.register();
+		SignClient.register();
 		openSettings = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.concordance_config",
 				InputConstants.UNKNOWN.getValue(), PartyClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {

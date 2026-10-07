@@ -150,7 +150,9 @@ def shade_geo():
 
 def shade_animations():
     """Idle: it floats, arms and tail drifting. Travelling: it leans into its path, arms trailing, the tail swaying.
-    Working: both arms reach forward and draw back. Suspended: arms hanging, the slowest sway."""
+    Working: both arms reach forward and draw back. Suspended: arms hanging, the slowest sway. Waiting (it lacks
+    something: resources, access, a way, room): arms folded across its body, the hood turning from side to side as if
+    looking for what it needs, the tail flicking (roadmap step 27)."""
     def float_(length, cycles, height):
         return {"position": _wave(length, cycles, (0, height / 2, 0), (0, height / 2, 0), phase=-0.25)}
 
@@ -180,6 +182,13 @@ def shade_animations():
             "arm_left": {"rotation": _still((2, 0, 0))},
             "arm_right": {"rotation": _still((2, 0, 0))},
             "tail": {"rotation": _wave(8.0, 1, (4, 0, 0), (0, 0, -3))}}),
+        "animation.gathering_shade.waiting": _clip(3.0, {
+            "root": float_(3.0, 1, 0.6),
+            "hood": {"rotation": {"0.0": [0, 0, 0], "0.6": [0, 35, 0], "1.2": [0, 35, 0], "1.8": [0, -35, 0],
+                                  "2.4": [0, -35, 0], "3.0": [0, 0, 0]}},
+            "arm_left": {"rotation": _still((-55, 0, 40))},
+            "arm_right": {"rotation": _still((-55, 0, -40))},
+            "tail": {"rotation": _wave(3.0, 3, (6, 0, 0), (0, 0, 10))}}),
     })
 
 
@@ -214,7 +223,8 @@ def porter_geo():
 def porter_animations():
     """Idle: its head turns a little to either side. Walking: the legs swing in turn and the body bobs and waddles.
     Working: it leans round to its basket and looks into it. Broken: slumped, the body pitched and tilted, the head
-    hanging; it does not move."""
+    hanging; it does not move. Waiting (it lacks something: goods, access, a way, room, a loaded destination): it taps
+    one foot and its head tips up and round, looking for what it needs (roadmap step 27)."""
     lean = {"0.0": [0, 0, 0], "0.5": [0, 25, 8], "1.5": [0, 25, 8], "2.0": [0, 0, 0]}
     look = {"0.0": [0, 0, 0], "0.5": [12, 65, 0], "1.5": [12, 65, 0], "2.0": [0, 0, 0]}
     tip = {"0.0": [0, 0, 0], "0.5": [-12, 0, -6], "1.5": [-12, 0, -6], "2.0": [0, 0, 0]}
@@ -234,6 +244,11 @@ def porter_animations():
             "basket": {"rotation": _still((-10, 0, 0))},
             "leg_left": {"rotation": _still((0, 0, -6))},
             "leg_right": {"rotation": _still((0, 0, 8))}}),
+        "animation.clockwork_porter.waiting": _clip(1.6, {
+            "leg_right": {"rotation": {"0.0": [0, 0, 0], "0.2": [-14, 0, 0], "0.4": [0, 0, 0], "0.6": [-14, 0, 0],
+                                       "0.8": [0, 0, 0], "1.6": [0, 0, 0]}},
+            "head": {"rotation": {"0.0": [-10, 0, 0], "0.8": [-10, 30, 0], "1.2": [-10, -30, 0], "1.6": [-10, 0, 0]}},
+            "body": {"rotation": _still((-4, 0, 0))}}),
     })
 
 
@@ -246,5 +261,5 @@ SIZES = {"hearthling": (HEARTHLING_UV, HEARTHLING_SIZES), "gathering_shade": (SH
          "clockwork_porter": (PORTER_UV, PORTER_SIZES)}
 # The clips the Java plays, by entity (each must exist in that entity's ANIMATIONS).
 CLIPS = {"hearthling": ("idle", "following", "supporting", "waiting"),
-         "gathering_shade": ("idle", "travelling", "working", "suspended"),
-         "clockwork_porter": ("idle", "walking", "working", "broken")}
+         "gathering_shade": ("idle", "travelling", "working", "suspended", "waiting"),
+         "clockwork_porter": ("idle", "walking", "working", "broken", "waiting")}

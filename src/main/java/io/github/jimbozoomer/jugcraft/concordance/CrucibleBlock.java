@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Presentation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -27,7 +29,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * The Alembic Crucible (roadmap step 13). Use water, ingredients, a stirring rod, a bottle or bowl, a spoon, an Assay
  * Glass or a formula on it; empty-handed it says how it stands, and sneaking empty-handed stops it repeating a formula.
- * GeckoLib draws it (client/CrucibleRenderer); everything else is {@link CrucibleBlockEntity}.
+ * GeckoLib draws it (client/CrucibleRenderer: the liquid at its level, in the colour of its strongest property);
+ * everything else is {@link CrucibleBlockEntity}.
  */
 public class CrucibleBlock extends BaseEntityBlock {
 	private static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 12.0, 15.0);
@@ -88,15 +91,27 @@ public class CrucibleBlock extends BaseEntityBlock {
 		return false;
 	}
 
-	/** Steam over a hot mixture (client only; fewer with reduced motion). */
+	/**
+	 * Steam over a hot mixture; over a searing one, which a stir would damage, smoke and spitting sparks: its danger
+	 * (roadmap step 27). Client only, as the Concordance's presentation settings allow; the danger shows at any intensity.
+	 */
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (!(level.getBlockEntity(pos) instanceof CrucibleBlockEntity crucible) || crucible.parts() == 0
-				|| crucible.band().ordinal() < io.github.jimbozoomer.jugcraft.concordance.alchemy.Band.HOT.ordinal()
-				|| random.nextInt(LumenMoteBlock.reducedMotion ? 12 : 3) != 0) {
+				|| crucible.band().ordinal() < Band.HOT.ordinal()) {
 			return;
 		}
-		level.addParticle(ParticleTypes.CLOUD, pos.getX() + 0.3 + random.nextDouble() * 0.4, pos.getY() + 0.8,
-				pos.getZ() + 0.3 + random.nextDouble() * 0.4, 0.0, 0.03, 0.0);
+		boolean searing = crucible.band() == Band.SEARING;
+		if (!Presentation.ambient(random, searing ? 2 : 3, 12, searing)) {
+			return;
+		}
+		double x = pos.getX() + 0.3 + random.nextDouble() * 0.4;
+		double z = pos.getZ() + 0.3 + random.nextDouble() * 0.4;
+		if (searing) {
+			level.addParticle(ParticleTypes.LARGE_SMOKE, x, pos.getY() + 0.8, z, 0.0, Presentation.reducedMotion() ? 0.01 : 0.04, 0.0);
+			level.addParticle(ParticleTypes.LAVA, x, pos.getY() + 0.8, z, 0.0, 0.0, 0.0);
+		} else {
+			level.addParticle(ParticleTypes.CLOUD, x, pos.getY() + 0.8, z, 0.0, Presentation.reducedMotion() ? 0.01 : 0.03, 0.0);
+		}
 	}
 }

@@ -64,8 +64,8 @@ CLIENT = {
     "screen.jugcraft.journal.refresh": "Refresh",
     "screen.jugcraft.journal.exact_on": "Exact values: shown",
     "screen.jugcraft.journal.exact_off": "Exact values: hidden",
-    "screen.jugcraft.journal.help": "Tab, arrows or buttons: sections. Up, Down, Page Up, Page Down: scroll. R: refresh. "
-                                    "X: exact values. Esc: close.",
+    "screen.jugcraft.journal.help": "Left, Right or the section buttons: sections. Up, Down, Page Up, Page Down: scroll. "
+                                    "R: refresh. X: exact values. Tab: next button. Esc: close.",
     "screen.jugcraft.journal.section": "Section %s of %s: %s",
     "screen.jugcraft.journal.missing_guilib": "The full workspace needs GuiLib; showing the simple journal",
     "screen.jugcraft.concordance.config.exact": "Show exact values",
@@ -105,8 +105,8 @@ def codex():
              "The same reports print in chat with **/jugcraft concordance status**, **stage**, **spire** and the "
              "other Concordance commands."),
             ("text", "Moving Around",
-             "**Tab**, the arrow keys or the section buttons change section; **Up**, **Down**, **Page Up** and "
-             "**Page Down** scroll; **R** asks for the journal again; **X** shows or hides exact values; **Esc** "
-             "closes it. With GuiLib installed the journal opens as a full workspace; without it, or with "
+             "**Left**, **Right** or the section buttons change section; **Up**, **Down**, **Page Up** and "
+             "**Page Down** scroll; **R** asks for the journal again; **X** shows or hides exact values; **Tab** "
+             "moves between buttons; **Esc** closes it. With GuiLib installed the journal opens as a full workspace; without it, or with "
              "**Simple journal** chosen in the settings, it opens as a plain screen showing the same."),
         ]}}

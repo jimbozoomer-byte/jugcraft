@@ -22,8 +22,10 @@ The Concordance's cues share one key (D, A, E: stacked fifths), so the gather le
 answers it. Every cue starts and ends at silence (no clicks), is normalised to a set peak (0.8 like the choir and drone
 sounds, lower for the quiet ones) and is encoded like them: 44.1 kHz mono Ogg Vorbis, libvorbis -q:a 4. The noise comes
 from a seeded generator and the encoder runs bit-exact with no metadata, so a rerun writes identical files with the same
-ffmpeg build. Writes assets/jugcraft/sounds/concordance/*.ogg (needs numpy and ffmpeg with libvorbis).
-Run from anywhere:  python3 tools/concordance_sounds.py
+ffmpeg build. Writes assets/jugcraft/sounds/concordance/*.ogg (needs numpy and ffmpeg with libvorbis). The later
+steps' cues (circles, the crucible, and step 27's two warnings, sign_shortage and sign_danger) are described where
+they are drawn.
+Run from anywhere:  python3 tools/concordance_sounds.py [cue ...]  (with names, only those cues are written)
 """
 import os
 import subprocess
@@ -327,6 +329,33 @@ def crucible_add(seed):
     return (plop / np.max(np.abs(plop)) + 0.35 * bubbles / max(np.max(np.abs(bubbles)), 1e-9)) * fade(n, 0.002, 0.05)
 
 
+def sign_shortage(seed):
+    """Something is lacking (roadmap step 27): a hollow, muted pair of tones falling a fourth, A4 to E4, each with a
+    soft breath of low noise, like a step that finds nothing beneath it. Distinct from the circle's break: no crack,
+    no dissonance, quieter."""
+    n = samples(0.8)
+    t = times(n)
+    rng = np.random.default_rng(seed)
+    hollow = [(1.0, 1.0, 0.25), (3.0, 0.2, 0.1)]
+    tones = chime(n, A4, hollow, attack=0.02) + chime(n, A4 * 0.75, hollow, attack=0.02, at=0.28)
+    bp, lp = band(rng.normal(size=n), np.full(n, 300.0), q=1.5)
+    breath = (bp / rms(bp) + 0.5 * lp / rms(lp)) * np.exp(-t / 0.25)
+    return (tones / np.max(np.abs(tones)) + 0.15 * breath / np.max(np.abs(breath))) * fade(n, 0.01, 0.15)
+
+
+def sign_danger(seed):
+    """Danger (roadmap step 27): two short bright pulses rising a tritone, E5 then A#5, over a hiss that swells, sharp
+    enough to turn a head. Distinct from the lance (no falling tone) and the circle's break (it rises)."""
+    n = samples(0.7)
+    t = times(n)
+    rng = np.random.default_rng(seed)
+    sharp = [(1.0, 1.0, 0.12), (2.0, 0.5, 0.08), (3.0, 0.25, 0.05)]
+    pulses = chime(n, A4 * 1.5, sharp, attack=0.003) + chime(n, A4 * 1.5 * 1.414, sharp, attack=0.003, at=0.18)
+    bp, lp = band(rng.normal(size=n), np.full(n, 3000.0), q=0.8)
+    hiss = bp / rms(bp) * np.clip(t / 0.3, 0, 1) * np.exp(-np.maximum(t - 0.35, 0) / 0.1)
+    return (pulses / np.max(np.abs(pulses)) + 0.25 * hiss / np.max(np.abs(hiss))) * fade(n, 0.002, 0.08)
+
+
 def crucible_bottle():
     """A dose bottled: a glassy rising fill, two soft tones a fifth apart sliding up."""
     n = samples(0.6)
@@ -356,6 +385,8 @@ def cues():
         "crucible_stir": (crucible_stir(seed=61), PEAK * 0.6),
         "crucible_add": (crucible_add(seed=67), PEAK * 0.6),
         "crucible_bottle": (crucible_bottle(), PEAK * 0.6),
+        "sign_shortage": (sign_shortage(seed=71), PEAK * 0.6),
+        "sign_danger": (sign_danger(seed=73), PEAK * 0.8),
     }
 
 
@@ -375,8 +406,11 @@ def main():
     expected = {event.split(".", 1)[1] for event in concordance.SOUND_EVENTS}
     if set(drawn) != expected:
         sys.exit(f"concordance.SOUND_EVENTS and this script disagree: {sorted(expected ^ set(drawn))}")
+    # Name cues to draw only those (an ffmpeg build other than the one that drew the rest may not encode them alike).
+    only = set(sys.argv[1:]) or set(drawn)
     for name, (signal, peak) in drawn.items():
-        write(name, signal, peak)
+        if name in only:
+            write(name, signal, peak)
 
 
 if __name__ == "__main__":

@@ -13,8 +13,10 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.logistics.JugcraftLogistics;
 import io.github.jimbozoomer.jugcraft.logistics.PneumaticExtractorBlock;
+import java.util.Set;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -330,5 +332,42 @@ public class ConcordanceAlchemyGameTests {
 		helper.assertTrue(Formula.of(copy.mixture()) != null && Formula.of(copy.mixture()).text().equals(Formula.of(before).text()),
 				"Its history still records as the same formula");
 		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- what it shows (roadmap step 27)
+
+	/**
+	 * The vessel shows what is in it and no more: what a client is sent is the volume, the heat and the spoon's reading
+	 * (the strongest property, murky or not), never the mixture's makeup. Each step shows as work, a searing stir (which
+	 * damages the mixture) as danger, and a bottle filled as success; nothing shows a shortage while nothing is lacking.
+	 */
+	@GameTest(maxTicks = 100)
+	public void theVesselShowsWhatASpoonFinds(GameTestHelper helper) {
+		SignWatch signs = new SignWatch(helper);
+		BlockPos at = new BlockPos(1, 2, 1);
+		CrucibleBlockEntity crucible = crucible(helper, at, false);
+		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
+		CompoundTag empty = crucible.getUpdateTag(helper.getLevel().registryAccess());
+		helper.assertTrue(empty.getIntOr("parts", -1) == 0 && empty.getStringOr("taste", "?").isEmpty() && !empty.getBooleanOr("murky", true),
+				"An empty crucible shows nothing in it: " + empty);
+		startNightEye(helper, crucible, player);
+		CompoundTag shown = crucible.getUpdateTag(helper.getLevel().registryAccess());
+		helper.assertTrue(shown.keySet().equals(Set.of("temperature", "parts", "taste", "murky")),
+				"A client is sent the heat, the volume and the spoon's reading, nothing of the makeup: " + shown.keySet());
+		helper.assertTrue(shown.getIntOr("parts", 0) == 1 && shown.getStringOr("taste", "").equals(Axis.RADIANCE.id),
+				"One part, tasting of Radiance, as a spoon would find: " + shown);
+		helper.assertValueEqual(signs.at(Sign.WORK, at), 3L, "water, glowstone and a stir: three steps of work");
+		helper.runAfterDelay(NEXT_STIR, () -> {
+			crucible.setTemperature(200);
+			use(crucible, player, new ItemStack(Items.STICK));
+			helper.assertTrue(crucible.band() == Band.SEARING, "Searing: " + crucible.temperature());
+			helper.assertValueEqual(signs.at(Sign.PERIL, at), 1L, "a searing stir shows danger");
+			helper.assertValueEqual(signs.at(Sign.WORK, at), 3L, "and not work");
+			use(crucible, player, new ItemStack(Items.GLASS_BOTTLE));
+			helper.assertValueEqual(signs.at(Sign.DONE, at), 1L, "a bottle filled shows success");
+			helper.assertTrue(signs.of(Sign.WANT).isEmpty(), "No shortage while nothing is lacking: " + signs.all());
+			signs.close();
+			helper.succeed();
+		});
 	}
 }

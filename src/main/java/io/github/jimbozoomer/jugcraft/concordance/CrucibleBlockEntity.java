@@ -9,6 +9,7 @@ import com.geckolib.util.GeckoLibUtil;
 import com.mojang.serialization.Codec;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Assay;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Axis;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
@@ -20,6 +21,8 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Vector;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +109,10 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	private @Nullable Formula program;
 	private int step;
 	private long lastStir = Long.MIN_VALUE / 2;
+	/** Whether its formula is waiting for something it lacks (so the shortage shows once, not every try). Not saved. */
+	private boolean waiting;
+	/** On a client: what the liquid looks like, as the server sent it (the spoon's reading, never the makeup). */
+	private Assay.Look shown = Assay.Look.PLAIN;
 
 	/** Water waiting for the formula's water steps: up to a bucket, water only, never drawn back out. */
 	public final SingleFluidStorage water = new SingleFluidStorage() {
@@ -144,6 +151,11 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 
 	public Band band() {
 		return Band.of(temperature);
+	}
+
+	/** What the liquid looks like (roadmap step 27): on the server, the spoon's reading of the mixture; on a client, what was sent. */
+	public Assay.Look look() {
+		return level != null && level.isClientSide() ? shown : Assay.Look.of(mixture, Alchemy.catalog());
 	}
 
 	public @Nullable Formula program() {
@@ -210,12 +222,14 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 			case Operation.Water pour -> {
 				water = pour.parts() * FluidConstants.BOTTLE;
 				if (this.water.amount < water) {
+					want(level);
 					return;
 				}
 			}
 			case Operation.Add add -> {
 				slot = bufferSlotFor(add);
 				if (slot < 0) {
+					want(level);
 					return;
 				}
 			}
@@ -245,9 +259,24 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		}
 		mixture = applied.mixture();
 		step++;
+		waiting = false;
 		setChanged();
 		sync(level);
 		sound(level, operation instanceof Operation.Stir ? JugcraftConcordance.CRUCIBLE_STIR_SOUND : JugcraftConcordance.CRUCIBLE_ADD_SOUND);
+		signStep(level, operation);
+	}
+
+	/** Roadmap step 27: a step taken shows as work; a searing stir, which damages the mixture, as danger. */
+	private void signStep(ServerLevel level, Operation operation) {
+		Signs.show(level, worldPosition, operation instanceof Operation.Stir stir && stir.band() == Band.SEARING ? Sign.PERIL : Sign.WORK);
+	}
+
+	/** Its formula cannot go on for want of water, an ingredient, a container or room: shown once, when it starts waiting. */
+	private void want(ServerLevel level) {
+		if (!waiting) {
+			waiting = true;
+			Signs.show(level, worldPosition, Sign.WANT);
+		}
 	}
 
 	/** The buffer slot holding what an Add step needs: the item itself as it comes, or a reagent of that preparation. */
@@ -271,6 +300,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		ItemStack container = items.get(BOTTLE_SLOT);
 		Item form = formFor(container);
 		if (form == null) {
+			want(level);
 			return;
 		}
 		Mixture.Bottled bottled = mixture.bottle();
@@ -278,6 +308,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		ItemStack made = Alchemy.brew(form, outcome);
 		ItemStack output = items.get(OUTPUT_SLOT);
 		if (!output.isEmpty() && !(ItemStack.isSameItemSameComponents(output, made) && output.getCount() < output.getMaxStackSize())) {
+			want(level);
 			return;
 		}
 		container.shrink(1);
@@ -290,9 +321,11 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		if (mixture.isEmpty()) {
 			step = 0;
 		}
+		waiting = false;
 		setChanged();
 		sync(level);
 		sound(level, JugcraftConcordance.CRUCIBLE_BOTTLE_SOUND);
+		Signs.show(level, worldPosition, Sign.DONE);
 	}
 
 	private static @Nullable Item formFor(ItemStack container) {
@@ -391,6 +424,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		mixture = ((Mixture.Applied) result).mixture();
 		setChanged();
 		sync(level);
+		signStep(level, operation);
 		return true;
 	}
 
@@ -416,6 +450,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		setChanged();
 		sync(level);
 		sound(level, JugcraftConcordance.CRUCIBLE_BOTTLE_SOUND);
+		Signs.show(level, worldPosition, Sign.DONE);
 		return InteractionResult.SUCCESS;
 	}
 
@@ -430,6 +465,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 			}
 			program = formula;
 			step = 0;
+			waiting = false;
 			setChanged();
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.formula_set", formula.operations().size()));
 			return InteractionResult.SUCCESS;
@@ -452,6 +488,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		if (sneaking && program != null) {
 			program = null;
 			step = 0;
+			waiting = false;
 			setChanged();
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.formula_cleared"));
 			return;
@@ -563,6 +600,9 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 				Vector.fromList(input.read("dissolved", Codec.LONG.listOf()).orElse(List.of())), Math.max(0L, input.getLongOr("contaminant", 0L)),
 				// A history that does not read back can no longer be recorded as a formula.
 				intact ? Math.max(0, input.getIntOr("drawn", 0)) : 1, intact ? history : List.of());
+		// Only an update to a client carries the look (the server works it out from the mixture).
+		Axis taste = Axis.fromId(input.getStringOr("taste", ""));
+		shown = new Assay.Look(taste, input.getBooleanOr("murky", false));
 		String saved = input.getStringOr("program", "");
 		program = saved.isEmpty() ? null : Formula.parse(saved);
 		step = program == null ? 0 : Math.clamp(input.getIntOr("step", 0), 0, program.operations().size());
@@ -597,12 +637,18 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
-	/** Clients get the temperature and volume (the animation and Jade's lines), not the slots or the mixture's makeup. */
+	/**
+	 * Clients get the temperature and volume (the animation and Jade's lines) and what the liquid looks like (its
+	 * strongest property and whether it is murky: what anyone's spoon would tell), not the slots or the mixture's makeup.
+	 */
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
 		CompoundTag tag = new CompoundTag();
 		tag.putInt("temperature", temperature);
 		tag.putInt("parts", mixture.parts());
+		Assay.Look look = Assay.Look.of(mixture, Alchemy.catalog());
+		tag.putString("taste", look.taste() == null ? "" : look.taste().id);
+		tag.putBoolean("murky", look.murky());
 		return tag;
 	}
 

@@ -18,6 +18,9 @@ BRASS = [(76, 50, 18), (120, 84, 32), (166, 124, 50), (206, 166, 76), (236, 206,
 STONE = [(70, 70, 74), (96, 96, 100), (122, 122, 126), (150, 150, 154), (178, 178, 182)]
 WOOD = [(60, 38, 20), (86, 56, 30), (112, 76, 42), (140, 100, 58), (166, 124, 76)]
 LIQUID = [(20, 70, 76), (28, 98, 104), (40, 128, 132), (70, 160, 160), (130, 206, 200), (200, 240, 230)]
+# The crucible's liquid is drawn pale, without hue: the client tints it with what a spoon would find (roadmap step 27,
+# client/CrucibleRenderer: plain water is the teal above; each property its own colour), so the tint shows true.
+LIQUID_PALE = [(96, 96, 96), (136, 136, 136), (176, 176, 176), (212, 212, 212), (240, 240, 240), (255, 255, 255)]
 GREEN = [(40, 76, 30), (60, 104, 42), (84, 134, 58), (116, 166, 80), (160, 200, 112)]
 PAPER = [(150, 130, 96), (206, 190, 150), (232, 220, 186), (246, 238, 214)]
 INK = [(60, 40, 104), (96, 70, 150)]
@@ -200,11 +203,12 @@ def crucible_item():
 
 def crucible_sheet():
     """The GeckoLib sheet: CRUCIBLE_FRAMES frames of 64x64 stacked downwards. Iron for the pot, copper for its band,
-    brass for the ladle, and teal liquid whose highlights drift a little each frame (the surface animation)."""
+    brass for the ladle, and pale liquid whose highlights drift a little each frame (the surface animation); the
+    renderer colours the liquid by its contents."""
     frames = alchemy.CRUCIBLE_FRAMES
     sheet = Image.new("RGBA", (64, 64 * frames), (0, 0, 0, 0))
     materials = {"floor": IRON, "wall_ns": IRON, "wall_ew": IRON, "band": COPPER, "foot": IRON, "shaft": BRASS,
-                 "scoop": BRASS, "liquid": LIQUID}
+                 "scoop": BRASS, "liquid": LIQUID_PALE}
     for frame in range(frames):
         oy = frame * 64
         for name, (u, v) in alchemy.CRUCIBLE_UV.items():

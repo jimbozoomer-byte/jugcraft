@@ -16,9 +16,9 @@ import net.minecraft.util.FormattedCharSequence;
 /**
  * The simple Concordance Journal (roadmap step 26): the journal the server sent, one section at a time, in plain
  * vanilla widgets, so it works without GuiLib, with every control on the keyboard and read out by the narrator. The
- * section buttons (or Tab, Left and Right) change section; Up, Down, Page Up, Page Down and the mouse wheel scroll; R
- * asks the server again; X shows or hides the exact figures. Light text on a dark panel; nothing here relies on colour
- * alone (the lines say what they mean). It only shows what the server sent.
+ * section buttons (or Left and Right) change section; Tab moves between buttons; Up, Down, Page Up, Page Down and the
+ * mouse wheel scroll; R asks the server again; X shows or hides the exact figures. Light text on a dark panel; nothing
+ * here relies on colour alone (the lines say what they mean). It only shows what the server sent.
  */
 public class JournalScreen extends Screen {
 	private static final int MAX_WIDTH = 420;

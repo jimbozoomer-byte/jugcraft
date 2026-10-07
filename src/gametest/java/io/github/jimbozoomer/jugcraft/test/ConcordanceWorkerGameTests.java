@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BondingCharmItem;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
@@ -12,6 +13,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HearthlingEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Body;
@@ -220,6 +222,49 @@ public class ConcordanceWorkerGameTests {
 		ClockworkPorterEntity porterCopy = Workers.CLOCKWORK_PORTER.create(level, EntitySpawnReason.LOAD);
 		porterCopy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
 		helper.assertTrue(porterCopy.body().equals(porter.body()) && porterCopy.route().equals(porter.route()), "The body and route are saved");
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- what it shows (roadmap step 27)
+
+	/**
+	 * A porter shows a shortage over itself when it comes to lack something (an empty source), once: wavering between
+	 * working and wanting within {@code WorkerEntity.SIGN_TICKS} shows no second sign, and a working porter shows none.
+	 * Its body never claims progress it is not making: on its way but not moving, it is shown standing still.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aPorterShowsOnceWhatItLacks(GameTestHelper helper) {
+		SignWatch signs = new SignWatch(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = binder(helper);
+		BlockPos source = new BlockPos(1, 1, 2);
+		BlockPos target = new BlockPos(3, 1, 2);
+		helper.setBlock(source, Blocks.CHEST);
+		helper.setBlock(target, Blocks.CHEST);
+		WorkerDefinition.Construct terms = ClockworkPorterEntity.terms();
+		ClockworkPorterEntity porter = Workers.CLOCKWORK_PORTER.create(level, EntitySpawnReason.MOB_SUMMONED);
+		porter.setOwner(keeper.getUUID());
+		porter.setBody(new Body(terms.integrity(), terms.energy()));
+		place(helper, porter, 2.5, 1.0, 2.5);
+		level.addFreshEntity(porter);
+		long game = level.getGameTime() + 300_000L;
+		porter.setRoute(new ClockworkPorterEntity.Route(helper.absolutePos(source), helper.absolutePos(target), level.dimension().identifier().toString()));
+		helper.assertTrue(porter.think(level, NIGHT, game) == Status.WAITING_FOR_RESOURCES, "An empty source: waiting for resources");
+		helper.assertValueEqual((long) signs.of(Sign.WANT).size(), 1L, "the lack shows over the porter");
+		porter.think(level, NIGHT, game + 20);
+		helper.assertValueEqual((long) signs.of(Sign.WANT).size(), 1L, "still waiting: no second sign");
+		ChestBlockEntity from = (ChestBlockEntity) level.getBlockEntity(helper.absolutePos(source));
+		from.setItem(0, new ItemStack(Items.COBBLESTONE, 5));
+		helper.assertTrue(porter.think(level, NIGHT, game + 40) == Status.WORKING, "It takes the load");
+		from.setItem(0, ItemStack.EMPTY);
+		porter.think(level, NIGHT, game + 60);
+		porter.think(level, NIGHT, game + 80);
+		helper.assertTrue(signs.of(Sign.WANT).size() == 1 && signs.of(Sign.DONE).isEmpty(),
+				"Wavering between working and wanting within the sign's interval shows no more: " + signs.all());
+		helper.assertTrue(WorkerEntity.shown(Status.TRAVELLING, false) == Status.IDLE && WorkerEntity.shown(Status.TRAVELLING, true) == Status.TRAVELLING
+				&& WorkerEntity.shown(Status.FOLLOWING, false) == Status.IDLE && WorkerEntity.shown(Status.WORKING, false) == Status.WORKING,
+				"On its way but not moving, a worker is shown still; working, it is shown working");
+		signs.close();
 		helper.succeed();
 	}
 }

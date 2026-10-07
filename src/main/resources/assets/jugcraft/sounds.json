@@ -299,6 +299,24 @@
       }
     ]
   },
+  "concordance.sign_shortage": {
+    "subtitle": "subtitles.jugcraft.concordance.sign_shortage",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/sign_shortage",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.sign_danger": {
+    "subtitle": "subtitles.jugcraft.concordance.sign_danger",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/sign_danger",
+        "attenuation_distance": 16
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

@@ -1,5 +1,8 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
+import io.github.jimbozoomer.jugcraft.concordance.sign.Presentation;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.energy.EnergyConnectable;
 import net.minecraft.core.BlockPos;
@@ -26,6 +29,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
@@ -92,9 +96,12 @@ public class LeyPylonBlock extends BaseEntityBlock implements EnergyConnectable 
 			server.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.pylon.poured", pour.radiance(), pour.ley(),
 					pylon.ley(), LeyPylonBlockEntity.CAPACITY));
 			level.playSound(null, pos, JugcraftConcordance.KINDLE_SOUND, SoundSource.BLOCKS, 0.6F, 0.7F);
+			// Roadmap step 27: the Radiance poured, travelling from the lantern into the pylon.
+			Signs.show(serverLevel, Vec3.atCenterOf(pos).add(0.0, 0.6, 0.0), Sign.FLOW, server.position().add(0.0, 1.0, 0.0));
 		} else if (pour.refusal().equals("too_little")) {
 			server.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.pylon.too_little",
 					ConcordanceData.rules().conversions().get(LeyPylonBlockEntity.CONVERSION).fromAmount()));
+			Signs.show(serverLevel, pos, Sign.WANT);
 		} else {
 			server.sendOverlayMessage(Component.translatable("message.jugcraft.concordance." + (pour.refusal().equals("disabled")
 					? "disabled" : "pylon." + pour.refusal())));
@@ -139,7 +146,7 @@ public class LeyPylonBlock extends BaseEntityBlock implements EnergyConnectable 
 	/** A faint shimmer over a charged crystal (client only; fewer with reduced motion). */
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-		if (!state.getValue(CHARGED) || random.nextInt(LumenMoteBlock.reducedMotion ? 30 : 10) != 0) {
+		if (!state.getValue(CHARGED) || !Presentation.ambient(random, 10, 30)) {
 			return;
 		}
 		level.addParticle(ParticleTypes.ENCHANT, pos.getX() + 0.5, pos.getY() + 0.9, pos.getZ() + 0.5, 0.0, 0.05, 0.0);

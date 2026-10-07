@@ -7,12 +7,11 @@ import com.zigythebird.playeranim.api.PlayerAnimationFactory;
 import com.zigythebird.playeranimcore.enums.PlayState;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlockEntity;
-import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
-import io.github.jimbozoomer.jugcraft.concordance.LumenMoteBlock;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
 import io.github.jimbozoomer.jugcraft.concordance.dreaming.Dreaming;
 import io.github.jimbozoomer.jugcraft.concordance.dreaming.OneiricCenserBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Presentation;
 import io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary;
@@ -24,6 +23,7 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity
 import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
+import io.github.jimbozoomer.jugcraft.weapons.ArmItem;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +41,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
@@ -73,9 +74,9 @@ public final class CircleClient {
 	static void register() {
 		BlockEntityRenderers.register(JugcraftConcordance.ANCHOR_ENTITY,
 				context -> new GeoBlockRenderer<CircleAnchorBlockEntity, BlockEntityRenderState>(context, JugcraftConcordance.ANCHOR_ENTITY));
-		// Roadmap step 13: GeckoLib draws the Alembic Crucible too (its liquid's surface is an animated texture).
-		BlockEntityRenderers.register(JugcraftConcordance.CRUCIBLE_ENTITY,
-				context -> new GeoBlockRenderer<CrucibleBlockEntity, BlockEntityRenderState>(context, JugcraftConcordance.CRUCIBLE_ENTITY));
+		// Roadmap step 13: GeckoLib draws the Alembic Crucible too (its liquid's surface is an animated texture); since step 27
+		// the liquid stands at its volume, in the colour of what the server says a spoon would find.
+		BlockEntityRenderers.register(JugcraftConcordance.CRUCIBLE_ENTITY, CrucibleRenderer::new);
 		// Roadmap step 14: the garden's living devices, animated from the status the server sent.
 		BlockEntityRenderers.register(Garden.HEART_ENTITY,
 				context -> new GeoBlockRenderer<VerdantHeartBlockEntity, BlockEntityRenderState>(context, Garden.HEART_ENTITY));
@@ -125,9 +126,15 @@ public final class CircleClient {
 		}
 		Set<UUID> participants = new HashSet<>();
 		long time = level.getGameTime();
-		boolean beams = time % (LumenMoteBlock.reducedMotion ? 12 : 4) == 0;
+		boolean beams = time % (Presentation.reducedMotion() ? 12 : 4) == 0 && Presentation.intensity() != Presentation.Intensity.MINIMAL;
 		for (CircleAnchorBlockEntity anchor : List.copyOf(ANCHORS)) {
-			if (anchor.isRemoved() || anchor.getLevel() != level || !anchor.phase().reserving()) {
+			if (anchor.isRemoved() || anchor.getLevel() != level) {
+				continue;
+			}
+			if (anchor.phase() == RitualMachine.Phase.COMPLETE) {
+				held(level, anchor);
+			}
+			if (!anchor.phase().reserving()) {
 				continue;
 			}
 			participants.addAll(anchor.run().joined());
@@ -140,13 +147,29 @@ public final class CircleClient {
 			if (!(PlayerAnimationAccess.getPlayerAnimationLayer(player, LAYER) instanceof PlayerAnimationController controller)) {
 				continue;
 			}
-			boolean taking = participants.contains(player.getUUID());
+			// A participant holding arms keeps ArmsMotion's pose: one owner for the arms at a time, as with the Vigil's gesture.
+			boolean armed = player.getMainHandItem().getItem() instanceof ArmItem || player.getOffhandItem().getItem() instanceof ArmItem;
+			boolean taking = participants.contains(player.getUUID()) && !armed;
 			if (taking && !controller.isPlayingTriggeredAnimation()) {
 				controller.triggerAnimation(GESTURE);
 			} else if (!taking && controller.isPlayingTriggeredAnimation()) {
 				controller.stopTriggeredAnimation();
 			}
 		}
+	}
+
+	/**
+	 * A finished working whose result waits in the anchor (roadmap step 27): light rising slowly from it until someone
+	 * takes the result, so a success is not mistaken for a circle at rest.
+	 */
+	private static void held(ClientLevel level, CircleAnchorBlockEntity anchor) {
+		if (!Presentation.ambient(level.getRandom(), 6, 18)) {
+			return;
+		}
+		BlockPos pos = anchor.getBlockPos();
+		RandomSource random = level.getRandom();
+		level.addParticle(ParticleTypes.END_ROD, pos.getX() + 0.3 + random.nextDouble() * 0.4, pos.getY() + 1.0,
+				pos.getZ() + 0.3 + random.nextDouble() * 0.4, 0.0, Presentation.reducedMotion() ? 0.005 : 0.02, 0.0);
 	}
 
 	/** A mote travelling from each linked pylon's crystal to the anchor's. */
@@ -164,6 +187,9 @@ public final class CircleClient {
 			double fx = tx + offset.x();
 			double fy = pos.getY() + offset.y() + 0.6;
 			double fz = tz + offset.z();
+			if (Presentation.take(1, false) == 0) {
+				return;
+			}
 			double t = level.getRandom().nextDouble();
 			// The mote drifts towards the anchor; END_ROD's speed is in blocks a tick.
 			level.addParticle(ParticleTypes.END_ROD, fx + (tx - fx) * t, fy + (ty - fy) * t, fz + (tz - fz) * t,

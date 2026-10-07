@@ -15,6 +15,8 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Stacking;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import io.github.jimbozoomer.jugcraft.concordance.sky.SkyItem;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
@@ -31,7 +33,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -371,7 +372,7 @@ public final class Dreaming {
 			return false;
 		}
 		player.setAttached(EXPEDITION, expedition.withCaught(Math.min(DreamRules.MAX_CAUGHT, expedition.caught() + 1)));
-		((ServerLevel) player.level()).sendParticles(ParticleTypes.END_ROD, wisp.getX(), wisp.getY(), wisp.getZ(), 8, 0.2, 0.2, 0.2, 0.02);
+		Signs.show((ServerLevel) player.level(), wisp.position(), Sign.DONE, null);
 		wisp.discard();
 		player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.dream.caught", expedition.caught() + 1, DreamRules.MAX_CAUGHT));
 		return true;

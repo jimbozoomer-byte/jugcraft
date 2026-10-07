@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
 import io.github.jimbozoomer.jugcraft.concordance.resource.Transfers;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Presentation;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -137,7 +138,7 @@ public class LumenSconceBlock extends BaseEntityBlock {
 	/** A slow glimmer over the lens while it burns (client only; fewer with reduced motion). */
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-		if (!state.getValue(LIT) || random.nextInt(LumenMoteBlock.reducedMotion ? 24 : 6) != 0) {
+		if (!state.getValue(LIT) || !Presentation.ambient(random, 6, 24)) {
 			return;
 		}
 		level.addParticle(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.9, pos.getZ() + 0.5, 0.0, 0.01, 0.0);

@@ -8,6 +8,8 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Stacking;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Tolerance;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 import io.github.jimbozoomer.jugcraft.town.TownProtection;
 import io.github.jimbozoomer.jugcraft.weapons.ArmItem;
@@ -17,8 +19,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
@@ -341,18 +341,12 @@ public final class ConcordanceEffects {
 		return Result.APPLIED;
 	}
 
-	/** Presentation only: particles (and the fire's hiss above) sent to the players nearby. */
+	/**
+	 * Presentation only: the effect's mark, a {@link Sign} each client nearby draws as its settings allow (roadmap step
+	 * 27), shown only for an effect that was applied.
+	 */
 	private static void show(ServerLevel level, EffectKind kind, double x, double y, double z) {
-		ParticleOptions particle = switch (kind) {
-			case DAMAGE -> ParticleTypes.CRIT;
-			case RESTORATION, PROTECTION -> ParticleTypes.HAPPY_VILLAGER;
-			case MOVEMENT -> ParticleTypes.CLOUD;
-			case ILLUMINATION, DETECTION -> ParticleTypes.END_ROD;
-			case STATUS -> ParticleTypes.WITCH;
-			case INTERACTION, HARVESTING -> ParticleTypes.ENCHANT;
-			case ALTERATION -> ParticleTypes.SMOKE;
-		};
-		level.sendParticles(particle, x, y, z, 6, 0.25, 0.25, 0.25, 0.02);
+		Signs.show(level, new Vec3(x, y, z), Sign.forEffect(kind), null);
 	}
 
 	/** The world's view of an actor: the entity behind a cause, if it is in this level. */

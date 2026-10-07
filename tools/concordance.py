@@ -451,6 +451,8 @@ import concordance_progression as progression  # noqa: E402
 import concordance_spire as spire  # noqa: E402
 # Roadmap step 26 (tools/concordance_journal.py): the Concordance Journal's words and codex page.
 import concordance_journal as journal  # noqa: E402
+# Roadmap step 27 (tools/concordance_signs.py): signs of what really happened, the warnings' sounds and the codex page.
+import concordance_signs as signs  # noqa: E402
 ITEMS.update(spire.ITEMS)
 BLOCKS.update(spire.BLOCKS)
 rituals.STRUCTURES.update(spire.STRUCTURES)
@@ -966,6 +968,7 @@ def codex():
         **progression.codex(),
         **spire.codex(),
         **journal.codex(),
+        **signs.codex(),
     }
 
 
@@ -1414,6 +1417,7 @@ SOUND_EVENTS = {
 
 SOUND_EVENTS.update(rituals.SOUND_EVENTS)
 SOUND_EVENTS.update(alchemy.SOUND_EVENTS)
+SOUND_EVENTS.update(signs.SOUND_EVENTS)
 
 
 def sounds():
@@ -1724,6 +1728,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     progression.write_all(write, data, lang)
     spire.write_all(write, assets, data, lang, condition, self_drop)
     journal.lang_entries(lang)
+    signs.lang_entries(lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})

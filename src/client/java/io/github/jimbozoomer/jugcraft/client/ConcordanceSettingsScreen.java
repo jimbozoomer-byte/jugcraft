@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.client;
 
+import io.github.jimbozoomer.jugcraft.concordance.sign.Presentation;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -42,7 +43,15 @@ public final class ConcordanceSettingsScreen {
 				.setTooltip(Component.translatable("screen.jugcraft.concordance.config.simple_journal.tooltip"))
 				.setSaveConsumer(value -> values[3] = value)
 				.build());
-		builder.setSavingRunnable(() -> ConcordanceClientOptions.set(values[0], values[1], values[2], values[3]));
+		Presentation.Intensity[] intensity = {ConcordanceClientOptions.intensity()};
+		display.addEntry(entries.startSelector(Component.translatable("screen.jugcraft.concordance.config.intensity"),
+						Presentation.Intensity.values(), intensity[0])
+				.setDefaultValue(Presentation.Intensity.FULL)
+				.setNameProvider(value -> Component.translatable("screen.jugcraft.concordance.config.intensity." + value.id()))
+				.setTooltip(Component.translatable("screen.jugcraft.concordance.config.intensity.tooltip"))
+				.setSaveConsumer(value -> intensity[0] = value)
+				.build());
+		builder.setSavingRunnable(() -> ConcordanceClientOptions.set(values[0], values[1], values[2], values[3], intensity[0]));
 		return builder.build();
 	}
 }

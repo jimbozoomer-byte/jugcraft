@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
+import io.github.jimbozoomer.jugcraft.concordance.sign.Presentation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -36,9 +37,6 @@ public class LumenMoteBlock extends Block {
 	public static final IntegerProperty AGE = IntegerProperty.create("age", 0, MAX_STEPS);
 	/** A lantern's following light rather than a Kindled mote. */
 	public static final BooleanProperty TRAIL = BooleanProperty.create("trail");
-	/** Set by the client's reduced-motion option: fewer, calmer sparkles. Presentation only. */
-	public static volatile boolean reducedMotion;
-
 	public LumenMoteBlock(Properties properties) {
 		super(properties);
 		registerDefaultState(stateDefinition.any().setValue(AGE, 0).setValue(TRAIL, false));
@@ -90,16 +88,13 @@ public class LumenMoteBlock extends Block {
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		int rate = state.getValue(TRAIL) ? 12 : 4;
-		if (reducedMotion) {
-			rate *= 4;
-		}
-		if (random.nextInt(rate) != 0) {
+		if (!Presentation.ambient(random, rate, rate * 4)) {
 			return;
 		}
 		double x = pos.getX() + 0.3 + random.nextDouble() * 0.4;
 		double y = pos.getY() + 0.3 + random.nextDouble() * 0.4;
 		double z = pos.getZ() + 0.3 + random.nextDouble() * 0.4;
-		level.addParticle(ParticleTypes.END_ROD, x, y, z, 0.0, reducedMotion ? 0.0 : 0.01, 0.0);
+		level.addParticle(ParticleTypes.END_ROD, x, y, z, 0.0, Presentation.reducedMotion() ? 0.0 : 0.01, 0.0);
 	}
 
 	@Override
