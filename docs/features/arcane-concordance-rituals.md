@@ -211,6 +211,12 @@ Sounds `jugcraft:concordance.circle_start`, `.circle_step`, `.circle_complete`, 
   two compile errors against 26.3 (`PushReaction.IMMOVEABLE`; `Vec3.atCenterOf` for a block's centre). The client test
   shards fail before any test starts, with the OpenGL startup crash the framework foundation branch also has.
 
+**After `main` was merged in (7 October 2026),** run 37582029152 on commit `862e2c37` passed every job: all 941 server
+game tests, the build without optional integrations, and for the first time on this branch all 91 client game test
+classes. They had crashed because the framework foundation put Iris on the development client, which CI's renderer
+cannot start; development runs now leave Iris and Sodium out unless asked for (docs/TESTING.md). The client tests load
+the Concordance's client code, but none of them looks at a Concordance block, item or screen yet.
+
 Not yet run: any client (the anchor's GeckoLib animation, the participants' gesture, the channel motes, Fusion's
 connected texture and the codex pages in game), a two-client dedicated server (Lumen Vigil between two real players, a
 participant disconnecting), and a real server restart mid-ritual (the lapse is tested by saving and loading the block

@@ -219,6 +219,12 @@ Sounds `jugcraft:concordance.crucible_add`, `.crucible_stir`, `.crucible_bottle`
 registered as SoundEvents, which Spell Engine looks up. They are registered now, and `tools/check_mod_data.py` fails the
 build for any spell sound that is not.
 
+**After `main` was merged in (7 October 2026),** run 37582029152 on commit `862e2c37` passed every job: all 941 server
+game tests, the build without optional integrations, and for the first time on this branch all 91 client game test
+classes. They had crashed because the framework foundation put Iris on the development client, which CI's renderer
+cannot start; development runs now leave Iris and Sodium out unless asked for (docs/TESTING.md). The client tests load
+the Concordance's client code, but none of them looks at a Concordance block, item or screen yet.
+
 Not yet run: any client (the crucible's GeckoLib animation and animated surface, the codex pages and JEI information in
 game), a two-client dedicated server, and a fluid pipe network filling the tank (the machinery test fills it through
 the Transfer API, the interface pipes use).
