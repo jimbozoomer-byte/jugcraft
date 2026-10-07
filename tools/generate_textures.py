@@ -1503,6 +1503,11 @@ def main():
     import pixel_hollows_textures
     pixel_hollows_textures.draw_all()
 
+    # Last: the owner's own textures, copied from the shared library as drawn (tools/owner_art.py), so nothing above
+    # draws over them.
+    import owner_art
+    owner_art.write_all()
+
 
 if __name__ == "__main__":
     main()

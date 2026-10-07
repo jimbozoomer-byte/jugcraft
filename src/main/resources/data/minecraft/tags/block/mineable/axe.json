@@ -91,6 +91,18 @@
     "jugcraft:spirit_board",
     "jugcraft:theremin",
     "jugcraft:ofrenda",
-    "jugcraft:lych_gate"
+    "jugcraft:lych_gate",
+    "jugcraft:cutting_board",
+    "jugcraft:oak_cabinet",
+    "jugcraft:spruce_cabinet",
+    "jugcraft:birch_cabinet",
+    "jugcraft:jungle_cabinet",
+    "jugcraft:acacia_cabinet",
+    "jugcraft:dark_oak_cabinet",
+    "jugcraft:mangrove_cabinet",
+    "jugcraft:cherry_cabinet",
+    "jugcraft:bamboo_cabinet",
+    "jugcraft:crimson_cabinet",
+    "jugcraft:warped_cabinet"
   ]
 }

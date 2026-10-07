@@ -229,6 +229,10 @@ public final class JugcraftClient implements ClientModInitializer {
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.RESTLESS_SPIRIT, RestlessSpiritRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FEAST_TABLE_ENTITY, FeastTableRenderer::new);
+		// The Farmhouse Kitchen: food on the stove's hob, in the skillet's pan and on the cutting board.
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.KITCHEN_STOVE_ENTITY, KitchenStoveRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SKILLET_ENTITY, SkilletRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CUTTING_BOARD_ENTITY, CuttingBoardRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDY_KETTLE_ENTITY, CandyKettleRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPINNING_WHEEL_ENTITY, SpinningWheelRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.HEARTH_OVEN_ENTITY, HearthOvenRenderer::new);

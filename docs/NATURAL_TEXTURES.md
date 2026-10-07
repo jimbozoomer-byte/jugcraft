@@ -9,6 +9,20 @@ they said: "All the wood looks so so good now ... take note of how you did that 
 for how we want any additional wood or natural textures to look ingame". This page is that note. The code that does it
 is `tools/wood_style.py`; read it beside this page.
 
+## The owner's own textures are used as drawn
+
+These rules are for textures Jugcraft draws. Textures the owner drew themselves, in the shared library
+([art/owner-library](../art/owner-library/README.md)), are the exception: they are used as the owner drew them, not
+redrawn by code. On 7 October 2026 the owner said of the library's farming and food textures: "I made all of the
+textures in there myself its all mine", and asked for them to be used.
+- Copy them byte-for-byte with `tools/owner_art.py`, which `tools/generate_textures.py` runs last so no generator draws
+  over them. `tools/check_mod_data.py` fails if a copy drifts from its source.
+- Don't "clean up" or restyle an imported owner texture. A recolouring (such as the bronze and steel knives, made from
+  the owner's iron knife) is listed in the feature's `RECOLOURED` table and recorded in its feature document.
+- Record each imported file's library path in the feature's asset provenance
+  ([features/farmhouse-kitchen.md](features/farmhouse-kitchen.md#dependencies-and-assets) is the first).
+- The Mojang rule still stands: nothing traced, copied or recoloured from Minecraft's own textures.
+
 ## The look
 
 The woods read as if they were drawn by the same hand as vanilla's oak, spruce and birch.

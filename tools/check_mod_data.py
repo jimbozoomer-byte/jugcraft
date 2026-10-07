@@ -17,6 +17,8 @@ import drones
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
                        all_blocks, all_items, feature_of, ore_gens, ore_gen_owners)
 import agriculture as ag
+import kitchen
+import owner_art
 import werewolf_model
 import midway
 import ferris_wheel
@@ -3016,6 +3018,9 @@ def check_agriculture():
             edge(ref, result)
     for result, info in ag.COOKING.items():
         edges.setdefault(info["input"], set()).add(result)
+    for info in kitchen.CUTTING.values():
+        for result, _count in info["results"]:
+            edge(info["input"], result)
 
     def reaches(start, target, seen):
         for nxt in edges.get(start, ()):
@@ -3025,6 +3030,105 @@ def check_agriculture():
     for start in edges:
         if reaches(start, start, {start}):
             err(f"Agriculture recipes form a loop through {start}")
+
+
+# Vanilla's foods that the kitchen cuts: [hunger, saturation modifier] (the cuts must not outweigh them).
+VANILLA_FOOD = {"porkchop": [3, 0.3], "cooked_porkchop": [8, 0.8], "beef": [3, 0.3], "cooked_beef": [8, 0.8],
+                "chicken": [2, 0.3], "cooked_chicken": [6, 0.6], "mutton": [2, 0.3], "cooked_mutton": [6, 0.8],
+                "cod": [2, 0.1], "cooked_cod": [5, 0.6], "salmon": [2, 0.1], "cooked_salmon": [6, 0.8],
+                "cake": [14, 0.1]}  # a cake is seven bites of 2 / 0.1
+# A whole that is not food (a pumpkin, an egg) has nothing to outweigh; a cooked cut is held to the cooked whole.
+COOKED_WHOLE = {"porkchop": "cooked_porkchop", "beef": "cooked_beef", "chicken": "cooked_chicken", "mutton": "cooked_mutton",
+                "cod": "cooked_cod", "salmon": "cooked_salmon"}
+
+
+def check_kitchen():
+    """The Farmhouse Kitchen: Java's numbers, knives and cabinet woods match tools/kitchen.py; every cutting recipe is
+    written and never a gain, raw or cooked; the knife tag holds every knife; the owner's textures are imported unchanged."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("KitchenStoveBlock", "LIGHT"): kitchen.STOVE["light"], ("KitchenStoveBlock", "BURN"): kitchen.STOVE["burn"],
+                ("KitchenStoveBlockEntity", "SLOTS"): kitchen.STOVE["slots"], ("KitchenStoveBlockEntity", "SPEED"): kitchen.STOVE["speed"],
+                ("SkilletBlockEntity", "CAPACITY"): kitchen.SKILLET["capacity"], ("SkilletBlockEntity", "SPEED"): kitchen.SKILLET["speed"],
+                ("KitchenCabinetBlockEntity", "SLOTS"): kitchen.CABINET_SLOTS, ("JugcraftAgriculture", "KNIFE_DAMAGE"): kitchen.KNIFE_DAMAGE,
+                ("JugcraftAgriculture", "KNIFE_SPEED"): kitchen.KNIFE_SPEED}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} is {number(source, name)}, tools/kitchen.py says {value}")
+    main = java.get("JugcraftAgriculture", "")
+    knives = dict(re.findall(r'\bknife\("([a-z_]+)", (?:ToolMaterial|io\.github\.jimbozoomer\.jugcraft\.gear\.JugcraftGear)\.([A-Z]+)\)', main))
+    if knives != {knife: info["tier"] for knife, info in kitchen.KNIVES.items()}:
+        err(f"JugcraftAgriculture knives {knives} differ from tools/kitchen.py KNIVES")
+    woods = re.search(r"CABINET_WOODS = List\.of\(([^)]*)\)", main)
+    if not woods or re.findall(r'"([a-z_]+)"', woods.group(1)) != list(kitchen.CABINET_WOODS):
+        err("JugcraftAgriculture.CABINET_WOODS differs from tools/kitchen.py CABINET_WOODS")
+    for block in (kitchen.STOVE["block"], kitchen.SKILLET["block"], kitchen.BOARD["block"]):
+        if f'registerBlock("{block}"' not in main:
+            err(f"{block} is not registered in JugcraftAgriculture")
+    if f'Jugcraft.id("{kitchen.CUTTING_TYPE.split(":")[1]}")' not in main or f'"{kitchen.KNIFE_TAG.split(":")[1]}"' not in main:
+        err("JugcraftAgriculture does not register the cutting recipe type or the knives tag of tools/kitchen.py")
+
+    # The knives tag: every kitchen knife and the Carving Knife.
+    tag = load(DATA / MOD / "tags" / "item" / f"{kitchen.KNIFE_TAG.split(':')[1]}.json") or {}
+    if set(tag.get("values", [])) != {f"{MOD}:{knife}" for knife in list(kitchen.KNIVES) + ["carving_knife"]}:
+        err(f"The item tag {kitchen.KNIFE_TAG} should hold every kitchen knife and the Carving Knife")
+
+    # Cutting recipes: one file each, the right type, tool and results, and never more food than the whole.
+    folder = DATA / MOD / "recipe" / "cutting"
+    if sorted(path.stem for path in folder.glob("*.json")) != sorted(kitchen.CUTTING):
+        err("recipe/cutting/ files differ from CUTTING in tools/kitchen.py")
+    foods = {name: info["food"] for name, info in ag.ITEMS.items() if "food" in info}
+
+    def food(ref):
+        namespace, name = split(ref) if ":" in ref else (MOD, ref)
+        return VANILLA_FOOD.get(name) if namespace == "minecraft" else foods.get(name)
+
+    def worth(value, count=1):
+        return count * value[0], count * value[0] * value[1] * 2
+
+    for name, info in kitchen.CUTTING.items():
+        recipe = load(folder / f"{name}.json") or {}
+        results = [{"id": result if ":" in result else f"{MOD}:{result}", **({"count": count} if count != 1 else {})}
+                   for result, count in info["results"]]
+        if (recipe.get("type") != kitchen.CUTTING_TYPE or recipe.get("ingredient") != info["input"]
+                or recipe.get("tool") != f"#{kitchen.KNIFE_TAG}" or recipe.get("results") != results):
+            err(f"cutting/{name}: the file differs from tools/kitchen.py")
+        whole = food(info["input"])
+        if whole is None:
+            continue
+        nutrition = saturation = 0.0
+        cooked_nutrition = cooked_saturation = 0.0
+        for result, count in info["results"]:
+            part = food(result)
+            if part is None:
+                continue
+            nutrition, saturation = nutrition + worth(part, count)[0], saturation + worth(part, count)[1]
+            cooked = next((out for out, cook in ag.COOKING.items() if cook["input"] == result), None)
+            if cooked:
+                cooked_nutrition += worth(food(cooked), count)[0]
+                cooked_saturation += worth(food(cooked), count)[1]
+        if nutrition > worth(whole)[0] or saturation > worth(whole)[1] + 1e-6:
+            err(f"cutting/{name}: the parts ({nutrition:g} hunger, {saturation:.2f} saturation) outweigh the whole {info['input']}")
+        cooked_whole = COOKED_WHOLE.get(split(info["input"])[1])
+        if cooked_nutrition and (not cooked_whole or cooked_nutrition > worth(VANILLA_FOOD[cooked_whole])[0]
+                                 or cooked_saturation > worth(VANILLA_FOOD[cooked_whole])[1] + 1e-6):
+            err(f"cutting/{name}: the cooked parts outweigh {cooked_whole or 'a cooked whole'}")
+
+    # The owner's textures: byte-for-byte copies of the library (and the two recoloured knives).
+    for problem in owner_art.errors():
+        err(problem)
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in kitchen.TEXT:
+        if key not in lang:
+            err(f"Missing lang key {key}")
+    used = "\n".join(java.get(source, "") for source in ("KitchenStoveBlock", "SkilletBlock", "CuttingBoardBlock", "KitchenCabinetBlockEntity"))
+    for key in kitchen.TEXT:
+        if f'"{key}"' not in used:
+            err(f"tools/kitchen.py TEXT {key} is not used by the kitchen's Java")
 
 
 def check_festival(java, main):
@@ -7202,6 +7306,7 @@ def main():
     check_guide_books()
     check_handbook(registered)
     check_agriculture()
+    check_kitchen()
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()

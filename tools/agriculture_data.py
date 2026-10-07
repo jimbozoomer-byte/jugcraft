@@ -63,6 +63,7 @@ import regatta_data
 import flora_data
 import plants_data
 import trees_data
+import kitchen_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
                          HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, STALKS, WILD_BONUS, crop_blocks)
@@ -280,6 +281,7 @@ def assets(root, write, lang):
     decor20_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
+    kitchen_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -419,6 +421,7 @@ def loot(data, write):
     firework_data.loot(out, write)
     feast_data.loot(out, write)
     maze_data.loot(out, write)
+    kitchen_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -477,6 +480,7 @@ def recipes(out, write):
     decor3_data.recipes(out, write, conditions)
     graveyard_data.recipes(out, write, conditions)
     decor18_data.recipes(out, write, conditions)
+    kitchen_data.recipes(out, write, conditions)
 
 
 # ---------------------------------------------------------------- tags
@@ -550,6 +554,7 @@ def tags(tags):
     theremin_data.tags(tags)
     ofrenda_data.tags(tags)
     graveyard_data.tags(tags)
+    kitchen_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

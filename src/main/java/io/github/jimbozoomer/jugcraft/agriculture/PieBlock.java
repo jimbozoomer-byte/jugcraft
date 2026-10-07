@@ -73,11 +73,11 @@ public class PieBlock extends Block {
 		return SHAPES[state.getValue(BITES)];
 	}
 
-	/** A Carving Knife cuts a slice to take away (not from a burnt pie). */
+	/** A knife (item tag jugcraft:knives: the Carving Knife and the kitchen knives) cuts a slice to take away (not from a burnt pie). */
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 			BlockHitResult hit) {
-		if (!(stack.getItem() instanceof CarvingKnifeItem)) {
+		if (!stack.is(JugcraftAgriculture.KNIVES)) {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
 		if (filling == null) {

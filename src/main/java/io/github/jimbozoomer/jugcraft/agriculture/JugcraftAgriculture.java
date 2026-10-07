@@ -27,6 +27,7 @@ import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -193,6 +194,22 @@ public final class JugcraftAgriculture {
 	public static RecipeType<CookingPotRecipe> POT_COOKING;
 	public static RecipeSerializer<CookingPotRecipe> POT_SERIALIZER;
 	public static BlockEntityType<CookingPotBlockEntity> COOKING_POT_ENTITY;
+	// The Farmhouse Kitchen (tools/kitchen.py): the stove, the skillet, the cutting board and its recipes, the cabinets.
+	public static BlockEntityType<KitchenStoveBlockEntity> KITCHEN_STOVE_ENTITY;
+	public static BlockEntityType<SkilletBlockEntity> SKILLET_ENTITY;
+	public static BlockEntityType<CuttingBoardBlockEntity> CUTTING_BOARD_ENTITY;
+	public static BlockEntityType<KitchenCabinetBlockEntity> KITCHEN_CABINET_ENTITY;
+	public static RecipeType<CuttingRecipe> CUTTING;
+	public static RecipeSerializer<CuttingRecipe> CUTTING_SERIALIZER;
+	/** Everything that cuts on a Cutting Board and slices pies, cakes and the roast turkey: the Carving Knife and the kitchen knives. */
+	public static final TagKey<Item> KNIVES = TagKey.create(Registries.ITEM, Jugcraft.id("knives"));
+	public static final float KNIFE_DAMAGE = 0.5F;
+	public static final float KNIFE_SPEED = -2.0F;
+	/** The use-block event phase that slices cakes: after the default phase, where the town's protection decides. */
+	private static final Identifier KNIFE_PHASE = Jugcraft.id("kitchen_knife");
+	/** The woods the owner drew kitchen cabinets in. */
+	public static final List<String> CABINET_WOODS = List.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry",
+			"bamboo", "crimson", "warped");
 	public static BlockEntityType<CarvedPumpkinBlockEntity> CARVED_PUMPKIN_ENTITY;
 	/** A hand-carved pumpkin's design, on its item (copied from and to the block entity). */
 	public static DataComponentType<PumpkinCarving> CARVING;
@@ -614,6 +631,7 @@ public final class JugcraftAgriculture {
 		registerFestivities();
 		registerNight();
 		registerHalloweenDecorations();
+		registerKitchen();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
@@ -669,6 +687,85 @@ public final class JugcraftAgriculture {
 		POT_SERIALIZER = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Jugcraft.id("pot_cooking"),
 				new RecipeSerializer<>(CookingPotRecipe.CODEC, CookingPotRecipe.STREAM_CODEC));
 		CookingPotRecipe.registerReloadListener();
+	}
+
+	/**
+	 * The Farmhouse Kitchen (agriculture slice 9, tools/kitchen.py), in the owner's own textures: the Kitchen Stove, the
+	 * Skillet, the Cutting Board with its cutting recipes, the kitchen knives, the cabinets, and the cuts and other foods
+	 * the board and the stove make.
+	 */
+	private static void registerKitchen() {
+		Block stove = registerBlock("kitchen_stove", KitchenStoveBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_RED)
+				.strength(3.5F).requiresCorrectToolForDrops().sound(SoundType.STONE).lightLevel(KitchenStoveBlock::light));
+		registerItem("kitchen_stove", props -> new BlockItem(stove, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		Block skillet = registerBlock("skillet", SkilletBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+				.strength(2.0F).requiresCorrectToolForDrops().sound(SoundType.LANTERN).noOcclusion());
+		registerItem("skillet", props -> new BlockItem(skillet, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		Block board = registerBlock("cutting_board", CuttingBoardBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(0.8F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		registerItem("cutting_board", props -> new BlockItem(board, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		List<Block> cabinets = new ArrayList<>();
+		for (String wood : CABINET_WOODS) {
+			Block planks = BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(wood + "_planks"));
+			Block cabinet = registerBlock(wood + "_cabinet", KitchenCabinetBlock::new, BlockBehaviour.Properties.ofFullCopy(planks).strength(2.5F));
+			registerItem(wood + "_cabinet", props -> new BlockItem(cabinet, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+			cabinets.add(cabinet);
+		}
+
+		KITCHEN_STOVE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("kitchen_stove"),
+				FabricBlockEntityTypeBuilder.create(KitchenStoveBlockEntity::new, stove).build());
+		SKILLET_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("skillet"),
+				FabricBlockEntityTypeBuilder.create(SkilletBlockEntity::new, skillet).build());
+		CUTTING_BOARD_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("cutting_board"),
+				FabricBlockEntityTypeBuilder.create(CuttingBoardBlockEntity::new, board).build());
+		KITCHEN_CABINET_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("kitchen_cabinet"),
+				FabricBlockEntityTypeBuilder.create(KitchenCabinetBlockEntity::new, cabinets.toArray(Block[]::new)).build());
+		CUTTING = Registry.register(BuiltInRegistries.RECIPE_TYPE, Jugcraft.id("cutting"), new RecipeType<CuttingRecipe>() {
+			@Override
+			public String toString() {
+				return Jugcraft.MOD_ID + ":cutting";
+			}
+		});
+		CUTTING_SERIALIZER = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Jugcraft.id("cutting"),
+				new RecipeSerializer<>(CuttingRecipe.CODEC, CuttingRecipe.STREAM_CODEC));
+		CuttingRecipe.registerReloadListener();
+
+		knife("flint_knife", ToolMaterial.STONE);
+		knife("iron_knife", ToolMaterial.IRON);
+		knife("bronze_knife", io.github.jimbozoomer.jugcraft.gear.JugcraftGear.BRONZE);
+		knife("golden_knife", ToolMaterial.GOLD);
+		knife("steel_knife", io.github.jimbozoomer.jugcraft.gear.JugcraftGear.STEEL);
+		knife("diamond_knife", ToolMaterial.DIAMOND);
+		knife("netherite_knife", ToolMaterial.NETHERITE);
+		// A knife cuts a cake before the cake is tried, so a hungry cook slices it rather than eating it; this runs after the
+		// default phase, where the town's protection decides, so a protected cake is not cut.
+		UseBlockCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, KNIFE_PHASE);
+		UseBlockCallback.EVENT.register(KNIFE_PHASE, (player, level, hand, hit) -> player.getItemInHand(hand).is(KNIVES)
+				? KitchenKnifeItem.sliceCake(player, level, hand, hit.getBlockPos(), hit.getDirection()) : InteractionResult.PASS);
+
+		// The cuts and their cooked forms: each whole's parts add up to no more than the whole (tools/kitchen.py ITEMS).
+		meal("bacon", 1, 0.3F);
+		meal("cooked_bacon", 4, 0.8F);
+		meal("minced_beef", 1, 0.3F);
+		meal("beef_patty", 4, 0.8F);
+		meal("chicken_cuts", 1, 0.3F);
+		meal("cooked_chicken_cuts", 3, 0.6F);
+		meal("mutton_chops", 1, 0.3F);
+		meal("cooked_mutton_chops", 3, 0.8F);
+		meal("cod_slice", 1, 0.1F);
+		meal("cooked_cod_slice", 2, 0.6F);
+		meal("salmon_slice", 1, 0.1F);
+		meal("cooked_salmon_slice", 3, 0.8F);
+		food("cabbage_leaf", 1, 0.5F, COMPOST_MEDIUM);
+		food("pumpkin_slice", 2, 0.3F, COMPOST_MEDIUM);
+		food("cake_slice", 2, 0.1F, COMPOST_MEDIUM_HIGH);
+		meal("fried_egg", 3, 0.6F);
+	}
+
+	/** A kitchen knife: a light, quick blade of {@code material} ({@link KitchenKnifeItem}); the netherite one doesn't burn. */
+	private static void knife(String id, ToolMaterial material) {
+		Item.Properties properties = new Item.Properties().sword(material, KNIFE_DAMAGE, KNIFE_SPEED);
+		registerItem(id, KitchenKnifeItem::new, material == ToolMaterial.NETHERITE ? properties.fireResistant() : properties, TOOL_TAB);
 	}
 
 	/** The Turnip Lantern: a carved turnip that gives light, the original jack-o'-lantern. */
