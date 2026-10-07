@@ -141,17 +141,14 @@ def cement():
 
 
 def cement_mix():
-    """A heap of crushed limestone, clay and sand: grey-brown with clay-red and pale flecks."""
-    c = Canvas()
-    for i, (x, y, r) in enumerate(((32, 46, 14), (22, 50, 9), (42, 50, 9), (32, 36, 8))):
-        c.blob((x, y), r, hd.PAPER if i % 2 else hd.CONCRETE, seed=3205 + i, lumps=5)
-    import random
-    rng = random.Random(3209)
-    for _ in range(40):
-        x, y = rng.uniform(12, 52), rng.uniform(30, 60)
-        if c.px[int(x), int(y)][3]:
-            c.pixel(x, y, rng.choice([(176, 104, 70), (230, 222, 196), (96, 98, 100)]))
-    return c.finish()
+    """A heap of crushed limestone, clay and sand: grey-brown, with a few clay-red and pale grains (a clean heap from
+    tools/material_style.py)."""
+    import material_style as ms
+    img = ms.dust([(96, 92, 86), (132, 126, 116), (156, 150, 140), (178, 172, 160), (204, 198, 186)])
+    for (x, y), colour in zip(((6, 9), (10, 10), (4, 12), (8, 12), (12, 12)),
+                              ((176, 104, 70), (230, 222, 196), (176, 104, 70), (230, 222, 196), (176, 104, 70))):
+        img.putpixel((x, y), colour + (255,))
+    return img
 
 
 def rebar():

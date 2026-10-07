@@ -11,6 +11,7 @@ from PIL import Image
 
 from agriculture import BROOMSTICK
 from crop_textures import rgb
+import block_style as bs
 
 WOOD = [rgb("4e3420"), rgb("6b4a2b"), rgb("86603a"), rgb("a07a4c")]
 STRAW = [rgb("8a6a2a"), rgb("b89440"), rgb("d2b060"), rgb("e8cc80")]
@@ -56,10 +57,12 @@ def grain():
     """A pale grain, streaked lengthwise, for the renderer to tint."""
     img = Image.new("RGBA", (16, 16))
     rng = random.Random(22002)
+    grain = bs.Field(16, 16, 22003, 1.5, 6.0)    # thin streaks running along the handle
     for x in range(16):
         streak = rng.choice((0, 0, 1, 2))
         for y in range(16):
-            value = 200 + streak * 18 + rng.choice((-12, -6, 0, 0, 6))
+            v = grain(x, y)
+            value = 200 + streak * 18 + (6 if v > 0.68 else -10 if v < 0.32 else 0)
             img.putpixel((x, y), (value, value, value, 255))
     return img
 

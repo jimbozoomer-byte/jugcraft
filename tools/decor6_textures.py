@@ -3,14 +3,14 @@ Rocking Chair's wood and cushion, the Lurking Eyes, the Silhouette Window's fram
 the Spooky Music Box and the Giant Fake Spider.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code or from the small pixel-art grids below,
-from fixed seeds; no Mojang texture is read, traced or recoloured. Block textures are 16x16 and opaque; the eye sprite
-and the item icons have see-through backgrounds.
+from fixed seeds; no Mojang texture is read, traced or recoloured. Surfaces are painted in the manner of the vanilla
+blocks with tools/block_style.py: a short palette in small clumps, never a random colour at every pixel, and wood as
+planks. Block textures are 16x16 and opaque; the eye sprite and the item icons have see-through backgrounds.
 """
 import math
-import random
 
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 
 WALNUT = [rgb("3a2414"), rgb("4a2e1a"), rgb("5a3a22"), rgb("6a462a")]
 VELVET = [rgb("4a0e16"), rgb("5e1420"), rgb("741c2a"), rgb("8a2a36")]
@@ -103,19 +103,14 @@ SPIDER_ICON = [
 def walnut():
     """Dark stained planks running across, with grain streaks."""
     c = Canvas()
-    rng = random.Random(16101)
-    for y in range(16):
-        base = 1 if y % 8 else 0
-        for x in range(16):
-            tone = base + (1 if rng.random() < 0.3 else 0) + (1 if (x * 3 + y * 7) % 11 == 0 else 0)
-            c.px(x, y, WALNUT[min(3, tone)])
+    bs.planks(WALNUT, 16101)(c)
     return c.img
 
 
 def velvet():
     """Faded velvet with a tufting button every eight pixels."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, VELVET[1:], 16111, [3, 2, 1])
+    bs.fill(c, 0, 0, 15, 15, VELVET[1:], 16111, [3, 2, 1], spread=0.6)
     for x, y in ((3, 3), (11, 3), (7, 11), (15, 11)):
         c.px(x, y, VELVET[0])
         c.px(x + 1, y, VELVET[0])
@@ -124,7 +119,7 @@ def velvet():
 
 def leafy():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, LEAVES, 16201, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, LEAVES, 16201, [2, 3, 2])
     return c.img
 
 
@@ -141,11 +136,11 @@ def eye_sprite():
 def eyes_item():
     """A dark bush with two glowing eyes."""
     c = Canvas()
-    rng = random.Random(16211)
+    leaves = bs.surface(LEAVES, 16211)
     for y in range(16):
         for x in range(16):
             if ((x - 7.5) / 7.5) ** 2 + ((y - 8.5) / 5.5) ** 2 <= 1.0:
-                c.px(x, y, LEAVES[rng.randrange(3)])
+                c.px(x, y, leaves(x, y))
     for x0 in (3, 9):
         for dx, dy, ch in ((0, 0, "y"), (1, 0, "Y"), (2, 0, "P"), (3, 0, "y"), (0, 1, "y"), (1, 1, "Y"), (2, 1, "P"), (3, 1, "y")):
             c.px(x0 + dx, 7 + dy, EYE[ch])
@@ -154,19 +149,19 @@ def eyes_item():
 
 def frame():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, FRAME, 16301, [2, 3, 1])
+    bs.planks(FRAME, 16301, vertical=True, joint=False)(c)
     return c.img
 
 
 def paper(design, lit):
     """Orange paper, brighter towards the middle (lit, much brighter), with the black cut-out."""
     c = Canvas()
-    rng = random.Random(16311 + list(DESIGNS).index(design) * 3 + (1 if lit else 0))
+    grain = bs.wobble(16311 + list(DESIGNS).index(design) * 3 + (1 if lit else 0), 0.4)
     palette = PAPER_LIT if lit else PAPER_DIM
     for y in range(16):
         for x in range(16):
             d = math.hypot(x - 7.5, y - 7.5) / 10.6
-            tone = int((1 - d) * (len(palette) - 1) + rng.uniform(-0.4, 0.4))
+            tone = int((1 - d) * (len(palette) - 1) + grain(x, y))
             c.px(x, y, palette[max(0, min(len(palette) - 1, tone))])
     for y, row in enumerate(DESIGNS[design]):
         for x, ch in enumerate(row):
@@ -178,7 +173,7 @@ def paper(design, lit):
 def lacquer():
     """Glossy black lacquer with a faint purple sheen and a highlight streak."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, LACQUER[:3], 16401, [3, 2, 1])
+    bs.fill(c, 0, 0, 15, 15, LACQUER[:3], 16401, [3, 2, 1])
     for i in range(16):
         c.px(i, (i // 2 + 3) % 16, LACQUER[3])
     return c.img
@@ -186,7 +181,7 @@ def lacquer():
 
 def brass():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BRASS[:3], 16411, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, BRASS[:3], 16411, [1, 3, 2])
     for i in range(0, 16, 3):
         c.px(i, i, BRASS[3])
     return c.img
@@ -194,14 +189,14 @@ def brass():
 
 def velvet_lining():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, VELVET, 16421, [1, 2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, VELVET, 16421, [1, 2, 3, 1], spread=0.6)
     return c.img
 
 
 def ghost():
     """A little sheet ghost: white with two dark eyes in the middle of each face."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, GHOST, 16431, [1, 2, 3])
+    bs.fill(c, 0, 0, 15, 15, GHOST, 16431, [1, 2, 3], spread=0.6)
     for x in (5, 10):
         c.rect(x, 5, x, 7, INK)
     c.rect(6, 10, 9, 11, rgb("3a3a44"))
@@ -209,28 +204,22 @@ def ghost():
 
 
 def hair():
-    """Coarse black-brown bristles, with a few lighter tips."""
+    """Coarse black-brown bristles in streaks, with a few lighter tips."""
     c = Canvas()
-    rng = random.Random(16501)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, HAIR[rng.choice((0, 0, 1, 1, 2))])
-    for _ in range(18):
-        x, y = rng.randrange(16), rng.randrange(16)
-        c.px(x, y, HAIR[3])
+    bs.streaks(HAIR, 16501, across=1.5, along=5.0)(c)
     return c.img
 
 
 def spider_eye():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, SPIDER_EYE[:2], 16511, [1, 2])
+    bs.fill(c, 0, 0, 15, 15, SPIDER_EYE[:2], 16511, [1, 2])
     c.rect(3, 3, 6, 6, SPIDER_EYE[2])
     return c.img
 
 
 def silk():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, SILK, 16521, [1, 2, 2])
+    bs.fill(c, 0, 0, 15, 15, SILK, 16521, [1, 2, 2])
     return c.img
 
 

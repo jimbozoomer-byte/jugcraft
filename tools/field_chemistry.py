@@ -7,6 +7,7 @@ tools/check_mod_data.py keeps the numbers here and in Java the same. The chemica
 from PIL import Image
 
 import hitech
+import material_style as ms
 from hitech import Face, _faces2x, _outline
 
 MOD = "jugcraft"
@@ -173,18 +174,10 @@ def flashbang():
 
 
 def thermite():
-    """A heap of rust-red and silver powder."""
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    import random
-    rng = random.Random(3131)
-    for y in range(7, 15):
-        half = (y - 6) * 0.9
-        for x in range(16):
-            if abs(x - 7.5) <= half:
-                c = rng.choice([(150, 60, 40), (176, 74, 48), (120, 46, 34), (196, 200, 206), (168, 92, 60)])
-                if y == 14 or abs(x - 7.5) > half - 1:
-                    c = tuple(max(0, v - 30) for v in c)
-                _px(img, x, y, c)
+    """A heap of rust-red iron oxide with grains of silver aluminium through it."""
+    img = ms.dust([(92, 34, 24), (120, 46, 34), (150, 60, 40), (176, 74, 48), (198, 98, 64)])
+    for x, y in ((6, 8), (10, 10), (4, 11), (8, 12), (12, 12)):
+        _px(img, x, y, (196, 200, 206))
     return img
 
 
