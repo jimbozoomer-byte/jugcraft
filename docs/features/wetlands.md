@@ -11,20 +11,20 @@ Fourteen wet biomes, most in the **wetland** layout of Jugcraft regions. The swa
 
 | Biome | Replaces | What grows |
 | --- | --- | --- |
-| **Bog** | cool swamps (one weirdness half) | reddish-orange grass, maple scrub, bushes and berry bushes; **cranberries** ripe in its shallow, muddy pools |
-| **Dead Swamp** | cool swamps (the other half) | dark, muddy ponds, sparse dead trees, cattails; no animals; villages |
-| **Lush Swamp** | temperate swamps (one half) | vibrant grass and blue water, tall oaks hung with vines, willows, cattails, ferns, berries |
-| **Swamp Woods** | temperate swamps (the other half) | willows and vine-hung oaks over duckweed and lily pads; animals |
+| **Bog** | cool swamps (one weirdness half) | reddish-orange grass, maple scrub, tamaracks and thin bog firs, bushes and berry bushes; **cranberries** ripe in its shallow, muddy pools |
+| **Dead Swamp** | cool swamps (the other half) | dark, muddy ponds, sparse dead trees and grey snags standing in them, fallen logs, cattails; no animals; villages |
+| **Lush Swamp** | temperate swamps (one half) | vibrant grass and blue water, tall oaks hung with vines, willows, a few maples, cattails, ferns, berries |
+| **Swamp Woods** | temperate swamps (the other half) | willows, vine-hung oaks and azalea trees over duckweed and lily pads; animals |
 | **Bayou** | warm mangrove swamps | willows standing in the water, trailing vines like moss, cattails and ferns on mud; overcast |
-| **Floodplain** | hot mangrove swamps | brushy oaks and tall grass, orange cosmos; lily pads and watergrass in the floods |
-| **Ghost Forest** | dark forests (one half; wetland layout) | grey dead trees and dark oak scrub around many lakes |
+| **Floodplain** | hot mangrove swamps | willow scrub with oaks among it, tall grass, orange cosmos; lily pads and watergrass in the floods |
+| **Ghost Forest** | dark forests (one half; wetland layout) | grey snags and dead trees, with a living fringe of cedars, around many lakes |
 | **Sludge Mire** | dark forests (the other half) | a dense canopy of dark oaks and big oaks over mud and sludgy, algae-covered pools; no animals; villages |
-| **Lush River** | temperate and warm rivers (wetland layout) | duckweed, lily pads and watergrass; oak bushes on the banks |
-| **Fen** | old-growth spruce taiga (wetland layout) | short firs and dark oaks over muddy pools, cattails and lily pads |
-| **Lake District** | temperate forests (wetland layout) | oaks and spruces broken by many lakes with muddy shores |
+| **Lush River** | temperate and warm rivers (wetland layout) | duckweed, lily pads and watergrass; willow scrub, willows and a few oak bushes on the banks |
+| **Fen** | old-growth spruce taiga (wetland layout) | thin bog firs, tamaracks and willow scrub over muddy pools, cattails and lily pads |
+| **Lake District** | temperate forests (wetland layout) | oaks, firs and larches broken by many lakes with muddy shores |
 | **Quagmire** | dry cool plains (wetland layout) | muddy flats and brown ponds, cattails; no trees, no animals |
 | **Marsh** | cool plains (wetland layout) | a wide green plain of shallow lakes full of watergrass, ringed by cattails; no trees |
-| **Wetland** | temperate plains (wetland layout) | grass and mud, ferns, spruces and willows, cattails, purple water; villages |
+| **Wetland** | temperate plains (wetland layout) | grass and mud, ferns, cedars, willows and a few spruces, cattails, purple water; villages |
 
 - Biomes O' Plenty's Deep Bayou merges into the Bayou, the Land of Lakes Marsh into the Marsh, and the Land of Lakes becomes the Lake District.
 - Seasons: all fourteen change colour with the seasons; all but the Bayou, Floodplain and Lush River take winter snow when `seasons.snow` is on ([seasons.md](seasons.md)).
@@ -54,7 +54,7 @@ Fourteen wet biomes, most in the **wetland** layout of Jugcraft regions. The swa
 ## Dependencies and assets
 - Plants are registered from `/jugcraft/plants.json` (`tools/plants.py`): cattail is vanilla's DoublePlantBlock, watergrass `agriculture/WaterPlantBlock` (seagrass-like, our own), duckweed `agriculture/FloatingPlantBlock` (rests on water like a lily pad).
 - Ponds are vanilla's lake feature filled with water and banked with mud; mud patches are vanilla's disk feature. Willows use vanilla's cherry foliage shape and vine decorator.
-- Textures drawn by code in `tools/wild_textures.py`. No Mojang file is copied.
+- Textures drawn by code in `tools/wild_textures.py`. No Mojang file is copied. Since the [wood repaint](wood-repaint.md), the willow's wood and leaves are drawn by `tools/wood_style.py`.
 
 ## Verification
 Results are recorded under "Results" below after CI runs.

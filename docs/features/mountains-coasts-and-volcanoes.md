@@ -15,7 +15,7 @@ Thirteen biomes of mountains, shores and seas. A biome in Minecraft 26.3 does no
 | **Canyon** | wild: wooded badlands | cliffs banded in terracotta with grassy ledges, pines and spruce scrub, pools of lava |
 | **Highland** | wild: windswept hills | high, treeless grassland: tall grass, coarse dirt, gravel and stone, mossy boulders; sheep, cattle and rabbits |
 | **Basin** | wild: windswept gravelly hills | a barren basin of gravel, stone and andesite with dead bushes; no animals |
-| **Shield** | wild: windswept forests | humps of bare stone and andesite with seams of coal at the surface, firs, pines, spruces and lakes |
+| **Shield** | wild: windswept forests | humps of bare stone and andesite with seams of coal at the surface, firs, pines, spruces, larches and aspens, and lakes |
 | **Karst Pinnacles** | wild: jagged peaks | steep peaks clothed in grass, pines and spruce scrub, pale limestone (calcite) showing through, a grey-green sky; pandas |
 | **Hot Springs** | wild: groves | pines over warm, turquoise pools banked with calcite, blackstone showing through; trail ruins |
 | **Ice Sheet** | wetland and wild: frozen seas | a frozen sea under ice and floes of packed ice; polar bears |
