@@ -1352,6 +1352,10 @@ The fourth slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking
 
 The fifth slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking-expansion-planned): better soil and somewhere to keep the harvest, in the owner's own textures. Details and test evidence: [features/soil-compost-and-storage.md](../features/soil-compost-and-storage.md).
 
+| **The garden:** rich farmland with wheat and corn, and the compost heap | **The storehouse:** produce crates, the kernel bag and the baskets |
+| --- | --- |
+| ![The garden](../images/ingame_soil_garden.jpg) | ![The crates and baskets](../images/ingame_soil_storage.jpg) |
+
 - **Organic Compost** (dirt, four straw, two bone meal, two rotten flesh) rots through four stages into **Rich Soil**, every random tick while water touches it, otherwise half of them.
 - **Rich Soil** counts as dirt; a hoe tills it into **Rich Soil Farmland**, which takes crops as farmland does, keeps moist by water or rain, is never trampled, and dries back into Rich Soil. Whatever grows on either gets an extra random tick for each of the soil's own, about twice the pace.
 - **Produce crates** (beetroot, cabbage, carrot, corn, onion, potato, tomato) and the **Bag of Corn Kernels** hold nine each and craft back into them. The Pumpkin Crate is unchanged, as the owner chose.

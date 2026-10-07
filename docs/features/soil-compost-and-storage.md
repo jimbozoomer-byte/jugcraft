@@ -16,7 +16,13 @@ Make better soil for the farm, and store what it grows:
 - **The Bag of Corn Kernels:** nine kernels in the owner's sack (the Bag of Rice's sides, with the owner's kernel bag top), turned to the player who sets it down.
 - **Wooden and Bamboo Baskets,** the owner's woven baskets as storage blocks of their own (the Foraging Basket is unchanged). Use one to open its nine slots (a 3 by 3 screen). It is open at the top, so items dropped into it are taken in, a stack every few ticks. Hoppers reach it as any container, a comparator reads how full it is, and broken, it spills what it holds.
 
-Screenshots: to come from CI's client game test (`SoilClientGameTests`).
+| **The garden:** Rich Soil behind, rich farmland with wheat in front and corn behind, dry on the right and moist by the water on the left; the compost heap at its four stages | **The storehouse:** the seven produce crates and the Bag of Corn Kernels, and the bamboo and wooden baskets open at the top |
+| --- | --- |
+| ![The garden](../images/ingame_soil_garden.jpg) | ![The crates and baskets](../images/ingame_soil_storage.jpg) |
+| **From above** | **The wall:** the slice's items in item frames |
+| ![The garden from above](../images/ingame_soil_overview.jpg) | ![The items](../images/ingame_soil_items.jpg) |
+
+*In-game screenshots from CI's client game test (`SoilClientGameTests`, software rendering, small previews).*
 
 ## Connections
 - Existing input producer: dirt, bone meal (skeletons, the composter), rotten flesh (zombies), straw (the rice slice: a Cutting Board cuts a panicle into two rice and a straw), planks and sticks, bamboo; the farm's crops for the crates.
@@ -58,7 +64,13 @@ The owner's `*_basket_handle` textures (a frame) are not used yet: the baskets' 
 **The models** (`tools/soil_data.py`): Rich Soil and the compost stages are full blocks; the farmland is a 15-pixel slab, its moist form with the owner's moist side; each crate shows its crop on top and sides over the shared bottom; the kernel bag is the Bag of Rice's sack. A basket is a woven floor and four walls a pixel thick, open at the top with the owner's rim on the walls, the hand holes going through. They pass the art check (`tools/art_check.py`).
 
 ## Verification
-CI: recorded by the pull request's checks.
+CI (7 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `753a4cc` | Build | **Failed to compile:** 26.3 keeps `SoundEvents.HOE_TILL` as a registry holder (`.value()` plays it) |
+| `6a87df4` | Build, data audit, game tests, optional integrations absent, client game tests, repository check | All pass, vanilla wheat planting on Rich Soil Farmland among them; but the client screenshot showed the ripe corn gone: corn two blocks tall stands solid, and the farmland, asking only whether the block on it was solid, turned back into Rich Soil and broke it |
+| `e15947a` | The same, with the farmland keeping a block in `minecraft:maintains_farmland` on it (as vanilla farmland keeps the corn) and a test for it | **All pass:** all 940 required game tests (`SoilGameTests` among them) and the chosen client classes (`SoilClientGameTests` among them). The screenshots above are from this commit. |
 
 Run locally (7 October 2026):
 
