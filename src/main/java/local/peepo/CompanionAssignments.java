@@ -39,7 +39,7 @@ public final class CompanionAssignments {
         return pos;
     }
     public static boolean bed(Level level,BlockPos pos){var b=level.getBlockState(pos).getBlock();return b instanceof CompanionBedBlock || b instanceof BedBlock;}
-    public static boolean work(Level level,BlockPos pos){var be=level.getBlockEntity(pos);return be instanceof WheelBlockEntity || be instanceof MachineBlockEntity || be instanceof CookingPotBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;}
+    public static boolean work(Level level,BlockPos pos){var be=level.getBlockEntity(pos);return be instanceof WheelBlockEntity || be instanceof MachineBlockEntity || be instanceof CookingPotBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CanningKettleBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;}
     public String assignContainer(Level level,BlockPos pos,Direction face,boolean output){
         if(!level.hasChunkAt(pos) || pos.distToCenterSqr(npc.position())>64*64)return "Keep a loaded container within 64 blocks of the companion.";
         var target=new Target(GlobalPos.of(level.dimension(),pos),BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()),face);
@@ -67,7 +67,7 @@ public final class CompanionAssignments {
         changed();
         if(lunch){npc.report.lunch(CompanionStatus.READY);return "Lunch source assigned: "+targets[slot].name();}
         npc.orders.assigned(home,at);
-        return (home?"Home assigned: ":"Work "+slot+" assigned: ")+targets[slot].name()+(home || CompanionJobs.resolve(npc,pos)!=null?"":" (work behavior not implemented yet)");
+        return (home?"Home assigned: ":"Work "+slot+" assigned: ")+targets[slot].name()+(home || CompanionJobs.resolve(npc,pos)!=null || CompanionLogistics.resolve(npc,targets[slot])!=null?"":" (work behavior not implemented yet)");
     }
     public String remove(Level level,BlockPos clicked){
         var pos=canonical(level,clicked);var at=GlobalPos.of(level.dimension(),pos);

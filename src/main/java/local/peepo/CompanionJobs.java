@@ -32,6 +32,7 @@ public final class CompanionJobs {
         if(!npc.level().hasChunkAt(target.at().pos()))return CompanionStatus.UNLOADED;
         if(!target.present(npc.level()))return CompanionStatus.MISSING;
         if(!permitted(npc,target.at().pos()))return CompanionStatus.FORBIDDEN;
-        var job=resolve(npc,target.at().pos());return job==null?CompanionStatus.UNSUPPORTED:job.workStatus(npc);
+        var job=resolve(npc,target.at().pos());if(job!=null)return job.workStatus(npc);
+        var port=CompanionLogistics.resolve(npc,target);return port==null?CompanionStatus.UNSUPPORTED:port.status();
     }
 }

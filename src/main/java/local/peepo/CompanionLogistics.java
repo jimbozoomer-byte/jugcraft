@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.CanningKettleBlockEntity;
 
 /** Explicit workstation ports. Future ovens/processors opt in without changing porter navigation. */
 public final class CompanionLogistics {
@@ -17,6 +18,8 @@ public final class CompanionLogistics {
         int needed(ItemStack stack);
         Storage<ItemVariant> inputs();
         Storage<ItemVariant> outputs();
+        /** Status for logistics-only stations that process without a resident helper. */
+        default CompanionStatus status(){return CompanionStatus.READY;}
     }
     public interface Adapter { Port resolve(PeepoEntity npc,BlockEntity block); }
     private static final List<Adapter> ADAPTERS=new ArrayList<>();
@@ -24,6 +27,13 @@ public final class CompanionLogistics {
     public static Port resolve(PeepoEntity npc,CompanionAssignments.Target target){
         if(target==null || !target.present(npc.level()) || !npc.assignments.assignedWork(target.at().pos()) || !CompanionJobs.permitted(npc,target.at().pos()))return null;
         var be=npc.level().getBlockEntity(target.at().pos());
+        if(be instanceof CanningKettleBlockEntity kettle)return new Port(){
+            public Identifier plan(){return Identifier.fromNamespaceAndPath("jugcraft","canning_kettle");}
+            public int needed(ItemStack candidate){return kettle.companionNeed(candidate);}
+            public Storage<ItemVariant> inputs(){return kettle.companionInputs();}
+            public Storage<ItemVariant> outputs(){return kettle.companionOutputs();}
+            public CompanionStatus status(){return kettle.companionStatus();}
+        };
         if(be instanceof CiderPressBlockEntity press)return new Port(){
             public Identifier plan(){return Identifier.fromNamespaceAndPath("jugcraft","sweet_cider");}
             public int needed(ItemStack candidate){return press.companionNeed(candidate);}
