@@ -16,6 +16,7 @@ import agriculture_data
 from party import party_lang
 import drones
 import town_assets
+import material_icons
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -126,10 +127,11 @@ def assets():
     lang = {}
     for block in all_blocks():
         write(ASSETS / "blockstates" / f"{block}.json", {"variants": {"": {"model": rid(f"block/{block}")}}})
-        write(ASSETS / "models" / "block" / f"{block}.json",
-              {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{block}")}})
+        write(ASSETS / "models" / "block" / f"{block}.json", material_icons.block_model(block)
+              or {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{block}")}})
         write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
         lang[f"block.{MOD}.{block}"] = block_name(block)
+    material_icons.write_templates(ASSETS)
     for item in all_items():
         write(ASSETS / "models" / "item" / f"{item}.json",
               {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})

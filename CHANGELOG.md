@@ -19,6 +19,12 @@ No numbered release yet. Everything below is on `main`.
 - **Nothing else changes:** same items, IDs, stats and recipes, so armor you already have just looks new. Trims stay on the item but do not show on the 3D models, and babies wear none.
 - The old steampunk and kaiserpunk looks are no longer worn by bronze and steel armor; Steampunk Armor and Kaiser Armor (below) keep them. Record: [knight-armor.md](docs/features/knight-armor.md).
 
+### Unmerged: Material sets: tools, ingots and ores redrawn
+- **Every metal's ingot and nugget in vanilla's form:** the ingot is the owner's own, recoloured for each metal and never redrawn, and the nugget a shard drawn fresh from memory; one shared ingot and nugget for all fourteen metals, each in its own five-tone ramp, meant to sit beside vanilla's in an inventory as one set. A client test sets them beside vanilla's iron, gold and copper for the owner to judge. Bronze and steel take the owner's chosen palettes; the other twelve stand on the same ladder, each kept clear of the others and of vanilla's iron, gold and copper.
+- **Storage blocks** in the owner's four-panel inlay; **raw ores and raw blocks** as lumpy chunks and packed lumps in each ore's own tones.
+- **Ores on vanilla's own stone and deepslate**: each ore block is now vanilla's rock, referenced by name and never copied, with our ore's chunky blobs as a cut-out layer on top, so it matches the rock round it. Three blob layouts take turns.
+- **Bronze and steel tools** (sword, pickaxe, axe, shovel, hoe, paxel) redrawn in the same style. Art only: IDs, recipes, drops and worldgen are unchanged and worlds need no migration; the maps are `tools/material_icons/`. Record: [material-sets.md](docs/features/material-sets.md).
+
 ### Unmerged: Steampunk Armor and Kaiser Armor
 - **The stylized armor looks return as two sets of their own:**
   - **Steampunk Armor:** an aviator cap with teal goggles, a pressure gauge and a copper boiler on the back.

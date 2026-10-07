@@ -44,7 +44,7 @@ Not added on purpose: radiation or other hazards (uranium needs its own design f
 No block entities, screens, packets or tick logic. Every material has its own switch in `config/jugcraft.properties` (`tin`, `zinc`, `lead`, `silver`, `nickel`, `tungsten`, `uranium`, `aluminum`, `salt`, `phosphate`, `lithium`, `rare_earths`, `sulfur`, `silicon`, `crude_oil`). `false` stops that material's worldgen and recipes; registered blocks and items always remain. There is no retrogeneration, so existing chunks get none of the new ores.
 
 ## Dependencies and assets
-Fabric API only. All 79 textures are original, drawn by `tools/generate_textures.py` from fixed seeds (MIT).
+Fabric API only. All 79 textures are original, drawn by `tools/generate_textures.py` from fixed seeds (MIT). The ingots, nuggets, storage blocks, ores, raw ores and raw blocks were since redrawn as material sets ([material-sets.md](material-sets.md)).
 
 ## Verification
 Run in a sandbox without Minecraft (30 September 2026):

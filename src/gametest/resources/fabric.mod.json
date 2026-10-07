@@ -170,6 +170,7 @@
 			"io.github.jimbozoomer.jugcraft.test.LaboratoryLarderDiningClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PumpkinNightClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DiagonalClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.MaterialSetsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.KnightArmorClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsMotionClientGameTests",
