@@ -12,7 +12,7 @@ from PIL import Image
 
 from agriculture import LANTERNS
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 from decor9_textures import put
 from decor13_textures import icon
 
@@ -67,7 +67,7 @@ def lantern_frame():
 def paper():
     """Rice paper over a frame: pale, with faint ribs (tinted by the renderer)."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("ece8e0"), rgb("f4f2ec"), rgb("fcfbf8")], 29101, [1, 2, 3])
+    bs.fill(c, 0, 0, 15, 15, [rgb("ece8e0"), rgb("f4f2ec"), rgb("fcfbf8")], 29101, [1, 2, 3], spread=0.6)
     for x in (0, 4, 8, 12):
         for y in range(16):
             c.px(x, y, rgb("d8d2c6"))
@@ -93,7 +93,7 @@ def mooncake(filling):
                 colour = CRUST[0]
             else:
                 petal = abs(math.cos(angle * 3)) * 2.6 + 0.6
-                colour = CRUST[1] if abs(d - petal) < 0.55 or d < 0.9 else CRUST[2 + (x + y) % 2]
+                colour = CRUST[1] if abs(d - petal) < 0.55 or d < 0.9 else CRUST[3] if dx + dy < -3 else CRUST[2]
             put(img, x, y, colour)
     return img
 
