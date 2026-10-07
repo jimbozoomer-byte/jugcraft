@@ -17,7 +17,7 @@ import math
 
 from PIL import Image
 
-import gun_icons
+import item_icons
 from steampunk_models import box, cyl
 from zeppelin import tiled_quads
 
@@ -179,4 +179,4 @@ def write_all(write, assets, data, lang, condition):
 # ------------------------------------------------------------------ art
 
 def draw_all(save):
-    save(gun_icons.draw("diesel_walker"), "item", "diesel_walker")
+    save(item_icons.draw("diesel_walker"), "item", "diesel_walker")
