@@ -83,15 +83,27 @@
       ],
       "to": [
         17.6,
-        4.02,
+        4.1,
         16
       ],
       "faces": {
         "east": {
-          "texture": "#stone"
+          "texture": "#stone",
+          "uv": [
+            0.0,
+            12.0,
+            16.0,
+            13.0
+          ]
         },
         "west": {
-          "texture": "#stone"
+          "texture": "#stone",
+          "uv": [
+            0.0,
+            12.0,
+            16.0,
+            13.0
+          ]
         },
         "up": {
           "texture": "#top",

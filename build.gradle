@@ -120,33 +120,60 @@ fabricApi {
 	}
 }
 
-// CI shares the client game tests out between parallel jobs: -PclientTestShard=<n> -PclientTestShards=<count> keeps
-// the test mod's client test classes at positions n, n + count, n + 2 * count ... of its list, so every class runs in
-// exactly one job. Without the two properties every class runs. Server game tests are never split.
+// CI chooses and shares out the client game tests (tools/select_client_tests.py, docs/TESTING.md):
+// Loom deletes build/run/clientGameTest before each run, so CI must write these AFTER that dependency.
+// Restrict this to CI: never overwrite a local developer's client settings.
+tasks.named("runClientGameTest") {
+	doFirst {
+		if (System.getenv("CI") == "true") {
+			workingDir.mkdirs()
+			new File(workingDir, "options.txt").text = 'preferredGraphicsBackend:"opengl"\nfullscreen:false\nlang:en_us\n'
+		}
+	}
+}
+
+// -PclientTests=<Class,Class,...> keeps only those classes of the test mod's client test list (simple names), and
+// -PclientTestShard=<n> -PclientTestShards=<count> keeps the classes at positions n, n + count, n + 2 * count ... of
+// it. Without them every class runs. Server game tests are never split.
+def clientTests = providers.gradleProperty("clientTests").getOrElse("")
 def clientTestShard = providers.gradleProperty("clientTestShard").getOrElse("")
 def clientTestShards = providers.gradleProperty("clientTestShards").getOrElse("")
 tasks.named("processGametestResources", ProcessResources) {
+	inputs.property("clientTests", clientTests)
 	inputs.property("clientTestShard", clientTestShard)
 	inputs.property("clientTestShards", clientTestShards)
 	doLast { task ->
-		if (clientTestShard.isEmpty() && clientTestShards.isEmpty()) {
+		if (clientTests.isEmpty() && clientTestShard.isEmpty() && clientTestShards.isEmpty()) {
 			return
-		}
-		if (clientTestShard.isEmpty() || clientTestShards.isEmpty()) {
-			throw new GradleException("Give both clientTestShard and clientTestShards, or neither")
-		}
-		int shard = clientTestShard as int
-		int shards = clientTestShards as int
-		if (shards < 1 || shard < 0 || shard >= shards) {
-			throw new GradleException("clientTestShard must be from 0 to clientTestShards - 1, got ${shard} of ${shards}")
 		}
 		File manifest = new File(task.destinationDir, "fabric.mod.json")
 		def json = new groovy.json.JsonSlurper().parse(manifest)
 		List<String> all = json.entrypoints["fabric-client-gametest"]
-		List<String> mine = (0..<all.size()).findAll { it % shards == shard }.collect { all[it] }
+		List<String> mine
+		if (!clientTests.isEmpty()) {
+			if (!clientTestShard.isEmpty() || !clientTestShards.isEmpty()) {
+				throw new GradleException("Give clientTests, or clientTestShard and clientTestShards, not both")
+			}
+			Set<String> wanted = clientTests.split(",").collect { it.trim() }.findAll { !it.isEmpty() } as Set
+			mine = all.findAll { wanted.contains(it.substring(it.lastIndexOf('.') + 1)) }
+			Set<String> unknown = wanted - (mine.collect { it.substring(it.lastIndexOf('.') + 1) } as Set)
+			if (!unknown.isEmpty()) {
+				throw new GradleException("clientTests names classes the test mod does not list: ${unknown}")
+			}
+		} else {
+			if (clientTestShard.isEmpty() || clientTestShards.isEmpty()) {
+				throw new GradleException("Give both clientTestShard and clientTestShards, or neither")
+			}
+			int shard = clientTestShard as int
+			int shards = clientTestShards as int
+			if (shards < 1 || shard < 0 || shard >= shards) {
+				throw new GradleException("clientTestShard must be from 0 to clientTestShards - 1, got ${shard} of ${shards}")
+			}
+			mine = (0..<all.size()).findAll { it % shards == shard }.collect { all[it] }
+		}
 		json.entrypoints["fabric-client-gametest"] = mine
 		manifest.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json))
-		task.logger.lifecycle("Client game tests, shard ${shard} of ${shards} (0-based): ${mine.size()} of ${all.size()} classes: ${mine}")
+		task.logger.lifecycle("Client game tests: ${mine.size()} of ${all.size()} classes: ${mine}")
 	}
 }
 

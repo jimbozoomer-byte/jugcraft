@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import io.github.jimbozoomer.jugcraft.SmoothFlight;
 import io.github.jimbozoomer.jugcraft.machine.GeneratorFuels;
 import java.util.List;
 import java.util.Locale;
@@ -20,6 +21,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LinearInterpolationHandler;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
@@ -344,12 +346,21 @@ public class HotAirBalloon extends Entity {
 		return Mth.clamp(lift, -MAX_SINK, MAX_CLIMB);
 	}
 
+	/** The client eases after the server's flight instead of jumping a tick at a time (see {@link SmoothFlight}). */
+	@Override
+	public LinearInterpolationHandler createInterpolationHandler() {
+		return SmoothFlight.handler(this);
+	}
+
 	@Override
 	public void tick() {
 		super.tick();
 		if (level() instanceof ServerLevel server) {
 			serverTick(server);
-		} else if (burning()) {
+			return;
+		}
+		SmoothFlight.step(this);
+		if (burning()) {
 			// The burner's roar: flame and heat shimmer at its jets.
 			double yaw = Math.toRadians(-getYRot());
 			for (int side = -1; side <= 1; side += 2) {

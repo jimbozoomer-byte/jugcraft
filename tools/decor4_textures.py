@@ -3,7 +3,9 @@ Bubbling Cauldron and its brews, the Apothecary Shelf and its jars, the Crystal 
 spreads, and the Witch's Broom.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code from fixed seeds; no Mojang texture is
-read, traced or recoloured. Block and item textures are 16x16. The jar glass and the crystal orb are partly
+read, traced or recoloured. Surfaces are painted in the manner of the vanilla blocks with tools/block_style.py: a
+short palette in small clumps, never a random colour at every pixel, wood as planks and straw in streaks. Block and
+item textures are 16x16. The jar glass and the crystal orb are partly
 see-through; every model face using them reads the whole texture.
 """
 import math
@@ -12,8 +14,8 @@ import random
 from PIL import Image
 
 from crop_textures import Canvas, rgb, outline
-from decor_textures import noise
 from halloween_textures import shade
+import block_style as bs
 
 IRON = [rgb("18181c"), rgb("222228"), rgb("2c2c34"), rgb("3c3c46")]
 WATER = [rgb("2a4a8a"), rgb("3460a8"), rgb("4a78c0")]
@@ -34,7 +36,7 @@ STRAW = [rgb("8a6a2a"), rgb("a8843a"), rgb("c8a24e"), rgb("dcc070")]
 
 def iron():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON, 9951, [2, 3, 2, 1])
+    bs.fill(c, 0, 0, 15, 15, IRON, 9951, [2, 3, 2, 1])
     return c.img
 
 
@@ -121,16 +123,13 @@ def effect_icon(kind):
 
 def shelf_wood():
     c = Canvas()
-    rng = random.Random(9961)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, WOOD[0] if y % 4 == 3 else rng.choice(WOOD[1:]))
+    bs.planks(WOOD, 9961)(c)
     return c.img
 
 
 def bracket():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[1:], 9962)
+    bs.fill(c, 0, 0, 15, 15, IRON[1:], 9962)
     return c.img
 
 
@@ -148,7 +147,7 @@ def glass():
 
 def jar_contents(colour):
     c = Canvas()
-    noise(c, 0, 0, 15, 15, JARS[colour], 9970 + list(JARS).index(colour))
+    bs.fill(c, 0, 0, 15, 15, JARS[colour], 9970 + list(JARS).index(colour))
     rng = random.Random(9980 + list(JARS).index(colour))
     for _ in range(4):
         c.px(rng.randrange(16), rng.randrange(16), shade(JARS[colour][1], 1.4))
@@ -157,19 +156,19 @@ def jar_contents(colour):
 
 def cork():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("7a5a34"), rgb("94703e"), rgb("a8844e")], 9991)
+    bs.fill(c, 0, 0, 15, 15, [rgb("7a5a34"), rgb("94703e"), rgb("a8844e")], 9991)
     return c.img
 
 
 def skull_side():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BONE, 9992, [1, 2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, BONE, 9992, [1, 2, 3, 2], spread=0.6)
     return c.img
 
 
 def skull_face():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BONE[1:], 9993)
+    bs.fill(c, 0, 0, 15, 15, BONE[1:], 9993, spread=0.6)
     for x0 in (2, 9):
         c.rect(x0, 4, x0 + 4, 8, SOCKET)
     c.rect(7, 9, 8, 11, SOCKET)
@@ -180,13 +179,13 @@ def skull_face():
 
 def wax():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("d8ccb0"), rgb("e6dcc2"), rgb("f2ead6")], 9994)
+    bs.fill(c, 0, 0, 15, 15, [rgb("d8ccb0"), rgb("e6dcc2"), rgb("f2ead6")], 9994)
     return c.img
 
 
 def flame():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("ffc23a"), rgb("ffe27a"), rgb("fff6c8")], 9995)
+    bs.fill(c, 0, 0, 15, 15, [rgb("ffc23a"), rgb("ffe27a"), rgb("fff6c8")], 9995)
     return c.img
 
 
@@ -211,7 +210,7 @@ def shelf_item():
 
 def gold():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, GOLD, 10001, [1, 2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, GOLD, 10001, [1, 2, 3, 1])
     return c.img
 
 
@@ -243,26 +242,26 @@ def mist(bright):
 
 def stand_wood():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, WOOD, 10011, [1, 3, 2, 1])
+    bs.planks(WOOD, 10011, vertical=True)(c)
     return c.img
 
 
 def cover():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("3a1018"), rgb("4a1620"), rgb("5a1e2a")], 10012)
+    bs.fill(c, 0, 0, 15, 15, [rgb("3a1018"), rgb("4a1620"), rgb("5a1e2a")], 10012, spread=0.6)
     return c.img
 
 
 def paper():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, PAPER, 10013)
+    bs.fill(c, 0, 0, 15, 15, PAPER, 10013, spread=0.6)
     return c.img
 
 
 def spread(name):
     """An open spread drawn where the model's pages read it: the left page on x 2-7, the right on x 8-14, rows 3-12."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, PAPER, 10020 + ["moons", "bats", "brew", "pumpkin"].index(name))
+    bs.fill(c, 0, 0, 15, 15, PAPER, 10020 + ["moons", "bats", "brew", "pumpkin"].index(name), spread=0.6)
     for y in range(3, 13):
         c.px(8, y, shade(PAPER[0], 0.85))
     for y in (4, 6, 8, 10, 12):
@@ -298,11 +297,7 @@ def spread(name):
 
 def bristle():
     c = Canvas()
-    rng = random.Random(10031)
-    for x in range(16):
-        tone = rng.choice(STRAW)
-        for y in range(16):
-            c.px(x, y, tone if rng.random() > 0.2 else rng.choice(STRAW))
+    bs.streaks(STRAW, 10031)(c)
     return c.img
 
 
@@ -318,7 +313,7 @@ def twine():
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            c.px(x, y, rgb("6a5a3a") if (x + y) % 3 == 0 else rgb("8a7650"))
+            c.px(x, y, rgb("6a5a3a") if (x + y) // 2 % 3 == 0 else rgb("8a7650"))  # the twist, two pixels wide
     return c.img
 
 

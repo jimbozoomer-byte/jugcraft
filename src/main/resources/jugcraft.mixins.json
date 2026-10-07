@@ -11,6 +11,7 @@
     "DiagonalStateMixin",
     "DiagonalWallMixin",
     "JigsawPlacementMixin",
+    "LinearInterpolationHandlerInvoker",
     "MultiNoiseBiomeSourceMixin",
     "NetherBiomeBootstrapMixin",
     "OverworldBiomeBuilderMixin",

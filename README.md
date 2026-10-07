@@ -26,13 +26,15 @@ Minecraft remains **26.3 + Fabric**, with **Loader 0.19.5** required by the sele
 - [Propose a feature](../../issues/new?template=feature.yml): no coding experience needed.
 - [Propose an existing mod integration](../../issues/new?template=integration.yml).
 - [Contribute code, art, or documentation](CONTRIBUTING.md).
+- [Browse the shared owner asset library](art/owner-library/README.md): reusable textures, reference sheets, sounds and animations for every content branch, including building, industry, equipment, vehicles, biomes and farming.
 - [Read the connected gameplay design](docs/DESIGN.md).
 - [See everything that exists so far](docs/WHAT_EXISTS.md) (content, APIs and file map, for contributors and AI agents) and [what changed](CHANGELOG.md).
 - [See how the technology tree works](docs/TECH_TREE.md), including the planned [Chemistry branch](docs/branches/CHEMISTRY.md).
 - [Grow crops in the Agriculture branch](docs/branches/AGRICULTURE.md): 3-block corn for fields and mazes, sunflowers, beans, sweet potatoes, flax and sickles; a kitchen garden with trellis tomatoes, peppers, onions, garlic, cabbage, oats and barley, and a Cooking Pot for soups and chili; festival crops with squash and gourds, Turnip Lanterns, cranberry bogs and a chestnut tree; a Carving Knife to carve any face into a pumpkin; plus the plan for what comes next.
 - [Explore specialties, magic schools, creatures and seasonal briefs](docs/CONTENT_BRANCHES.md).
 - [See architecture and integration rules](docs/ARCHITECTURE.md).
-- [Check the roadmap](docs/ROADMAP.md) and [platform decision](docs/PLATFORM.md).
+- [Check the roadmap](docs/ROADMAP.md), [owner-requested TODO list](docs/TODO.md) and [platform decision](docs/PLATFORM.md).
+- [Plan the Jugcraft Encyclopedia](docs/features/jugcraft-encyclopedia.md): inventory/keybind access, technology and magic pathways, integrated quests and ten UI references.
 - [Maintainer setup and review guide](docs/MAINTAINERS.md).
 
 ## How additions become part of Jugcraft

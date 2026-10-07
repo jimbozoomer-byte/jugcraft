@@ -7,14 +7,16 @@ Called from crop_textures.crop_textures(). Every pixel is drawn here by code or 
 from fixed seeds; no Mojang texture is read, traced or recoloured. The worn textures are see-through where nothing is
 painted (between a box's faces, the hem of the cape, the bat hood's face opening, the points of the ears and the
 scallops of the wings); the block textures are 16x16 and opaque; the items are see-through round their shapes.
+
+Surfaces are painted in the manner of the vanilla blocks with tools/block_style.py: a short palette in small clumps,
+never a random colour at every pixel; wood as planks, and straw, bark and hair as streaks.
 """
 import math
-import random
 
 from PIL import Image
 
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 from decor9_textures import put
 from decor14_data import layout
 from agriculture import OUTFITS
@@ -41,36 +43,37 @@ def faces(uv):
             ("east", u + d + w, v + d, d, h), ("south", u + 2 * d + w, v + d, w, h)]
 
 
-def shade(palette, rng, weights=(1, 2, 3, 2)):
-    return palette[rng.choices(range(len(palette)), weights[:len(palette)])[0]]
+def dark(g, x, y):
+    """The black cloth of a costume: its middle tone in small clumps of the one beside it (tools/block_style.py)."""
+    return BLACK[2] if g(x, y) > 0.56 else BLACK[1]
 
 
-def cape(face, x, y, w, h, rng):
+def cape(face, x, y, w, h, g):
     if y >= h - 2 and face in ("north", "south") and (x % 4 in (1, 2)) == (y == h - 1):
         return None                                     # a scalloped hem
     if face == "north":
         return RED[1 + (x % 3 == 0)] if x % 5 else RED[0]
-    return BLACK[3 if x % 4 == 0 and face == "south" else rng.choice((1, 2))]
+    return BLACK[3] if x % 4 == 0 and face == "south" else dark(g, x, y)
 
 
-def collar(face, x, y, w, h, rng):
-    return BLACK[2] if face == "south" or face == "up" else RED[2 if (x + y) % 3 else 1]
+def collar(face, x, y, w, h, g):
+    return BLACK[2] if face == "south" or face == "up" else RED[2 if y % 3 else 1]
 
 
-def wraps(face, x, y, w, h, rng):
+def wraps(face, x, y, w, h, g):
     band = (y + x // 3) // 2
-    if (y + x // 3) % 2 == 1 and rng.random() < 0.12:
+    if (y + x // 3) % 2 == 1 and g(x, y) < 0.3:
         return rgb("3a3024")                            # a gap between strips
     return LINEN[[1, 2, 3, 2][band % 4]]
 
 
-def mummy_head(face, x, y, w, h, rng):
+def mummy_head(face, x, y, w, h, g):
     if face == "north" and y == 3 and 1 <= x <= w - 2:
         return rgb("1a1410") if x not in (2, w - 3) else rgb("c8f0a0")
-    return wraps(face, x, y, w, h, rng)
+    return wraps(face, x, y, w, h, g)
 
 
-def strip(face, x, y, w, h, rng):
+def strip(face, x, y, w, h, g):
     return LINEN[2 + (y % 3 == 0)]
 
 
@@ -86,13 +89,13 @@ SKULL = [
     "........."]
 
 
-def skull(face, x, y, w, h, rng):
+def skull(face, x, y, w, h, g):
     if face == "north" and y < len(SKULL) and x < len(SKULL[y]) and SKULL[y][x] == "B":
         return BONE[2 if y < 3 else 1]
-    return BLACK[rng.choice((1, 2))]
+    return dark(g, x, y)
 
 
-def ribs(face, x, y, w, h, rng):
+def ribs(face, x, y, w, h, g):
     mid = w // 2
     if face == "north":
         if x in (mid - 1, mid) and 1 <= y <= 8:
@@ -103,10 +106,10 @@ def ribs(face, x, y, w, h, rng):
             return BONE[0]                              # the pelvis
     if face == "south" and x in (mid - 1, mid) and y % 2 == 0:
         return BONE[1]                                  # the spine
-    return BLACK[rng.choice((1, 2))]
+    return dark(g, x, y)
 
 
-def long_bone(face, x, y, w, h, rng, knee):
+def long_bone(face, x, y, w, h, g, knee):
     """Two long bones, one above the other, down the middle of the front and back: a thin shaft with a knob at each
     end, the two meeting at the elbow or knee."""
     if face in ("north", "south"):
@@ -116,32 +119,33 @@ def long_bone(face, x, y, w, h, rng, knee):
             return BONE[2] if x == mid else BONE[0]
         if x == mid and 1 <= y <= h - 2:
             return BONE[1]
-    return BLACK[rng.choice((1, 2))]
+    return dark(g, x, y)
 
 
-def arm_bones(face, x, y, w, h, rng):
-    return long_bone(face, x, y, w, h, rng, 6)
+def arm_bones(face, x, y, w, h, g):
+    return long_bone(face, x, y, w, h, g, 6)
 
 
-def leg_bones(face, x, y, w, h, rng):
-    return long_bone(face, x, y, w, h, rng, 6)
+def leg_bones(face, x, y, w, h, g):
+    return long_bone(face, x, y, w, h, g, 6)
 
 
-def fur(face, x, y, w, h, rng):
-    if rng.random() < 0.18:
+def fur(face, x, y, w, h, g):
+    v = g(x, y)
+    if v < 0.3:
         return FUR[0]                                   # a shaggy streak
-    return FUR[1 + (x * 7 + y * 3) % 3]
+    return FUR[1 if v < 0.5 else 2 if v < 0.72 else 3]
 
 
-def wolf_head(face, x, y, w, h, rng):
+def wolf_head(face, x, y, w, h, g):
     if face == "north" and y == 3 and x in (2, 6):
         return rgb("f0c020")                            # yellow eyes
     if face == "north" and y == 2 and x in (1, 2, 6, 7):
         return FUR[0]                                   # the brow
-    return fur(face, x, y, w, h, rng)
+    return fur(face, x, y, w, h, g)
 
 
-def snout(face, x, y, w, h, rng):
+def snout(face, x, y, w, h, g):
     if face == "north":
         if y == 0:
             return rgb("141010")                        # the nose
@@ -149,26 +153,26 @@ def snout(face, x, y, w, h, rng):
             return BONE[2] if x in (0, w - 1) else rgb("2a0e0e")   # fangs either side of the mouth
     if face == "up" and y < 1:
         return rgb("141010")
-    return FUR[2 + (x + y) % 2]
+    return FUR[2]
 
 
-def wolf_ear(face, x, y, w, h, rng):
+def wolf_ear(face, x, y, w, h, g):
     if face in ("north", "south") and y == 0 and x != w // 2:
         return None
     return rgb("8a5a5a") if face == "north" and y > 0 and 0 < x < w - 1 else FUR[1]
 
 
-def claw(face, x, y, w, h, rng):
+def claw(face, x, y, w, h, g):
     return BONE[0]
 
 
-def tail_fur(face, x, y, w, h, rng):
+def tail_fur(face, x, y, w, h, g):
     if face == "south":
         return FUR[3]
-    return fur(face, x, y, w, h, rng)
+    return fur(face, x, y, w, h, g)
 
 
-def band(face, x, y, w, h, rng):
+def band(face, x, y, w, h, g):
     return BLACK[2]
 
 
@@ -181,37 +185,37 @@ def pointed(face, x, y, w, h, palette, inner):
     return palette[2]
 
 
-def cat_ear(face, x, y, w, h, rng):
+def cat_ear(face, x, y, w, h, g):
     return pointed(face, x, y, w, h, BLACK, PINK)
 
 
-def catsuit(face, x, y, w, h, rng):
-    return BLACK[3] if (x + y) % 7 == 0 else BLACK[rng.choice((1, 2))]
+def catsuit(face, x, y, w, h, g):
+    return BLACK[3] if (x + y) % 7 == 0 else dark(g, x, y)
 
 
-def bell(face, x, y, w, h, rng):
+def bell(face, x, y, w, h, g):
     return GOLD[3] if (x, y) == (0, 0) else GOLD[2]
 
 
-def tail(face, x, y, w, h, rng):
-    return BLACK[2 if (x + y) % 2 else 1]
+def tail(face, x, y, w, h, g):
+    return BLACK[1 if y % 3 == 0 else 2]
 
 
-def bat_hood(face, x, y, w, h, rng):
+def bat_hood(face, x, y, w, h, g):
     if face == "north" and 2 <= x <= w - 3 and 2 <= y <= h - 2:
         return None                                     # the face shows through
-    return BAT[1 + (x * 5 + y * 3) % 3]
+    return BAT[2 if g(x, y) > 0.56 else 1]
 
 
-def bat_ear(face, x, y, w, h, rng):
+def bat_ear(face, x, y, w, h, g):
     return pointed(face, x, y, w, h, BAT, rgb("6a3a40"))
 
 
-def bat_suit(face, x, y, w, h, rng):
-    return BAT[rng.choice((1, 1, 2, 2, 3))]
+def bat_suit(face, x, y, w, h, g):
+    return BAT[3 if g(x, y) > 0.72 else 2 if g(x, y) > 0.5 else 1]
 
 
-def wing(face, x, y, w, h, rng):
+def wing(face, x, y, w, h, g):
     """Leathery membrane between four finger bones, its bottom edge scalloped between them."""
     fingers = (0, 4, 8, w - 1)
     for a, c in zip(fingers, fingers[1:]):
@@ -221,7 +225,7 @@ def wing(face, x, y, w, h, rng):
                 return None
     if face in ("north", "south") and (x in fingers or y == 0):
         return BAT[3]
-    return BAT[0 if (x + y) % 3 else 1]
+    return BAT[1 if g(x, y) > 0.6 else 0]
 
 
 PAINTERS = {"cape": cape, "collar": collar, "wraps": wraps, "mummy_head": mummy_head, "strip": strip, "skull": skull, "ribs": ribs,
@@ -235,14 +239,14 @@ def worn(name, seed):
     pieces, (width, height) = layout(name)
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     glow = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    rng = random.Random(seed)
+    g = bs.grain(16, 16, seed)
     for p in pieces:
         for bx in p["boxes"]:
             paint = PAINTERS[bx["paint"]]
             for face, left, top, fw, fh in faces(bx["uv"]):
                 for y in range(fh):
                     for x in range(fw):
-                        colour = paint(face, x, y, fw, fh, rng)
+                        colour = paint(face, x, y, fw, fh, g)
                         if colour is not None:
                             img.putpixel((left + x, top + y), colour + (255,))
                             if colour in BONE:
@@ -386,11 +390,7 @@ def items():
 
 def trunk_wood():
     c = Canvas()
-    rng = random.Random(24101)
-    for y in range(16):
-        tone = rng.randrange(1, 4)
-        for x in range(16):
-            c.px(x, y, WOOD[0] if y % 4 == 3 else WOOD[tone if rng.random() > 0.1 else 0])
+    bs.planks(WOOD, 24101)(c)
     return c.img
 
 
@@ -400,7 +400,7 @@ def trunk_lid():
     base = trunk_wood()
     for y in range(16):
         for x in range(16):
-            c.px(x, y, PURPLE[2 if (x + y) % 3 else 1] if 5 <= y <= 10 else base.getpixel((x, y))[:3])
+            c.px(x, y, (PURPLE[1] if y in (5, 10) else PURPLE[2]) if 5 <= y <= 10 else base.getpixel((x, y))[:3])
     for x, y in ((7, 6), (8, 6), (6, 7), (7, 7), (8, 7), (9, 7), (7, 8), (8, 8), (6, 9), (9, 9)):
         c.px(x, y, GOLD[3])
     return c.img
@@ -408,7 +408,7 @@ def trunk_lid():
 
 def trunk_brass():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, GOLD[:3], 24102, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, GOLD[:3], 24102, [1, 3, 2])
     for x, y in ((3, 3), (12, 3), (3, 12), (12, 12)):
         c.px(x, y, GOLD[3])
     return c.img
@@ -416,20 +416,18 @@ def trunk_brass():
 
 def trunk_inside():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, PURPLE[:3], 24103, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, PURPLE[:3], 24103, [1, 3, 2])
     return c.img
 
 
 def trunk_clothes():
-    """Costumes heaped up: patches of cape, linen, fur, orange and green cloth."""
+    """Costumes heaped up: folded bundles of cape, linen, fur, orange and green cloth, each lit along its upper left."""
     c = Canvas()
-    rng = random.Random(24104)
     colours = [BLACK[2], RED[2], LINEN[2], FUR[2], rgb("e07a1a"), rgb("3a9a3a"), PURPLE[3]]
-    patches = [(rng.randrange(16), rng.randrange(16), rng.choice(colours)) for _ in range(9)]
-    for y in range(16):
-        for x in range(16):
-            nearest = min(patches, key=lambda p: (p[0] - x) ** 2 + (p[1] - y) ** 2)
-            c.px(x, y, nearest[2])
+
+    def tones(colour):
+        return [tuple(int(v * 0.72) for v in colour), colour, tuple(min(255, int(v * 1.22) + 8) for v in colour)]
+    bs.heap([tones(colour) for colour in colours], 24104, count=8, joint=rgb("141014"))(c)
     return c.img
 
 

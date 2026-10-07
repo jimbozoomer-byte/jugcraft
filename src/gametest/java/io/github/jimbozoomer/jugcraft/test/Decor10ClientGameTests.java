@@ -24,8 +24,9 @@ import net.minecraft.world.level.block.state.BlockState;
  * Client game test for lighting and glow: a dark stone room with two Black Lights over a back wall covered in Glow
  * Paint (and paint on the floor, the ceiling and a side wall) and a Shadow Puppet Lamp on a table in the middle,
  * throwing its shadows round the walls; outside, four Witch Fire Braziers (orange, green, purple, blue), Mini Pumpkin
- * Stacks and Floating Witch Hats. Photographed by day and at night, the paint with the black lights on and off (CI job
- * {@code client}).
+ * Stacks and Floating Witch Hats. Photographed by day and at night, the paint with the black lights on and off; then the
+ * lamp close up, and a second lamp at the end of a narrow corridor with a doorway, each twice a few ticks apart as its
+ * shade turns (CI job {@code client}).
  */
 public class Decor10ClientGameTests implements FabricClientGameTest {
 	@Override
@@ -64,7 +65,39 @@ public class Decor10ClientGameTests implements FabricClientGameTest {
 				}
 			});
 			shoot(context, singleplayer, x + 5, y + 1, z - 3, 180, 5, "jugcraft_glow_paint_unlit_night");
+			// The lamp close up, twice a few ticks apart as its shade turns: one silhouette to a panel, the corners closed.
+			shoot(context, singleplayer, x + 5, y + 1, z - 4, 180, 35, "jugcraft_shadow_puppet_lamp_close_night");
+			context.waitTicks(30);
+			context.takeScreenshot("jugcraft_shadow_puppet_lamp_close_night_later");
+			// A lamp at the end of a narrow corridor with a doorway in its side: each shadow lies flat on the wall its ray
+			// meets and is cut to the open wall, never hanging over the doorway.
+			server.runOnServer(minecraft -> corridor(minecraft.overworld(), origin));
+			context.waitTicks(20);
+			shoot(context, singleplayer, x + 22, y, z - 5, 180, 8, "jugcraft_shadow_puppet_lamp_corridor_night");
+			context.waitTicks(40);
+			context.takeScreenshot("jugcraft_shadow_puppet_lamp_corridor_night_later");
 		}
+	}
+
+	/** A corridor three wide from z - 16 to z - 6 at x + 21 to x + 23, roofed, a doorway in its east wall, a lit lamp at its end. */
+	private static void corridor(ServerLevel level, BlockPos origin) {
+		int x = origin.getX();
+		int y = origin.getY();
+		int z = origin.getZ();
+		BlockState stone = Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
+		for (int dz = -16; dz <= -6; dz++) {
+			for (int dx = 20; dx <= 24; dx++) {
+				set(level, new BlockPos(x + dx, y + 3, z + dz), stone);
+				for (int dy = 0; dy <= 2; dy++) {
+					boolean wall = dx == 20 || dx == 24 || dz == -16;
+					set(level, new BlockPos(x + dx, y + dy, z + dz), wall ? stone : Blocks.AIR.defaultBlockState());
+				}
+			}
+		}
+		for (int dy = 0; dy <= 1; dy++) {
+			set(level, new BlockPos(x + 24, y + dy, z - 11), Blocks.AIR.defaultBlockState());
+		}
+		set(level, new BlockPos(x + 22, y, z - 13), state("shadow_puppet_lamp").setValue(ShadowPuppetLampBlock.LIT, true));
 	}
 
 	/** Stands the camera at (x, y, z) looking along yaw and pitch, and waits for the world to draw. */

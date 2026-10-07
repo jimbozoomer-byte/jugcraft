@@ -4,7 +4,24 @@
 
 Run `python scripts/check_repository.py` with Python 3.11+. The Foundation / repository job checks required files, relative Markdown links, and the phase declaration. It is not a Java compiler, mod test, security audit, or gameplay approval. In the `bootstrap` phase, Java/Gradle sources are allowed. The Build workflow compiles the mod (`./gradlew build`), checks generated JSON is current and runs `tools/check_mod_data.py`, which validates material data and audits recipes offline. None of these is a game test.
 
-Game tests run in the Build workflow too: the `mod` job's `./gradlew build` runs the server game tests, and three client jobs run the client game tests (`./gradlew runClientGameTest -PclientTestShard=<n> -PclientTestShards=3`, every third test class each, so each class runs once). The `client` job passes only when all three shards pass. Locally, `./gradlew runClientGameTest` without the two properties runs every class.
+Game tests run in the Build workflow too. The `mod` job's `./gradlew build` runs every server game test on every change. The client game tests start a real game and photograph showrooms, which costs CI 15 to 25 minutes for the whole set, so:
+
+- **A pull request runs only the client test classes that show what it changed.** The `choose client tests` job runs `tools/select_client_tests.py`, which compares the pull request with its base:
+  - Docs, Markdown, `tools/` and `scripts/`, data, and the language file pick nothing. The generators' output is committed and judged as the files it writes.
+  - A model, blockstate or texture picks the classes that name its ID.
+  - A Java class picks the classes that show it, and the classes that show the Jugcraft classes using it. A class only gaining code picks by the names and IDs it gained, such as a registry registering a new feature.
+  - Build files, the workflow, mixins and the test mod's helpers run every class. So does a change picking half the classes or more.
+  - The job's log says why each file picked what it did.
+- **`main` (after each merge) and a manual run of the Build workflow run every class.** Run it on a branch from the Actions tab ("Run workflow") to test a pull request in full.
+
+Three client jobs share the chosen classes out by their rough running time (`./gradlew runClientGameTest -PclientTests=<Class,Class,...>`). A job with nothing to run passes at once. The `client` job passes only when the choice and all three jobs pass.
+
+Locally:
+- `./gradlew runClientGameTest` runs every class.
+- `python3 tools/select_client_tests.py --base origin/main` shows what a branch would run.
+- `-PclientTestShard=<n> -PclientTestShards=<count>` still keeps every count-th class.
+
+The client tests a pull request skips still run on `main` after it merges. A break they catch there is fixed in a follow-up pull request.
 
 ## Gameplay PR evidence after bootstrap
 
@@ -61,8 +78,9 @@ Use the cases relevant to the feature; do not claim a scenario was run just beca
     - `AlpineClientGameTests` creates a real world (seed `jugcraft`) and checks that it starts in Alpine Spawn at an alpine village. It logs the biome's share around the start and across a 16 km square, and takes screenshots, including larches grown in spring, autumn and winter.
     - Not covered: other seeds, a dedicated server's first start, needles changing over real days.
   - Biomes branch ([features/biome-regions.md](features/biome-regions.md), [features/seasonal-forests.md](features/seasonal-forests.md), [features/fields-and-meadows.md](features/fields-and-meadows.md), [features/wetlands.md](features/wetlands.md), [features/warm-and-dry.md](features/warm-and-dry.md), [features/big-trees-and-rainforests.md](features/big-trees-and-rainforests.md), [features/mountains-coasts-and-volcanoes.md](features/mountains-coasts-and-volcanoes.md), [features/wonders-and-caves.md](features/wonders-and-caves.md), [features/nether-biomes.md](features/nether-biomes.md), [features/end-biomes.md](features/end-biomes.md)):
-    - `BiomeGameTests` covers the recorded layouts (every rule places its biome in each of its layouts) and their unreachable listings, the regions' share, layouts and seed behaviour, maple, aspen, fir, willow, jacaranda, palm, cypress, redwood, eucalyptus, mahogany and dead trees growing, giant redwoods and mahoganies from four saplings, every seasonal tree's leaves in every season mode, the new woods, and the wild plants (flowers, tall lavender, clover; watergrass, duckweed and cattails; hibiscus and hydrangea; sea oats on sand; glowcaps, glimmerblooms, frost irises and snowpetals), and the Nether and End biomes in their dimensions' biome sources, found near the origin.
+    - `BiomeGameTests` covers the recorded layouts (every rule places its biome in each of its layouts) and their unreachable listings, the regions' share, layouts and seed behaviour, maple, aspen, fir, willow, jacaranda, palm, cypress, redwood, eucalyptus, mahogany, cedar and dead trees growing, giant redwoods and mahoganies from four saplings, the tree roster's batch-1 shapes (each placed from four seeds: heights, leaves, autumn looks, the mossy maple's moss and vines, nothing on the wrong soil) and fallen larches, the cedar wood, the wood recipes that load with any of their switches, the batch-1 biomes' tree lists in their vegetation step ([features/trees-batch-1.md](features/trees-batch-1.md)), every seasonal tree's leaves in every season mode, the new woods, and the wild plants (flowers, tall lavender, clover; watergrass, duckweed and cattails; hibiscus and hydrangea; sea oats on sand; glowcaps, glimmerblooms, frost irises and snowpetals), and the Nether and End biomes in their dimensions' biome sources, found near the origin.
     - `BiomeClientGameTests` finds each Jugcraft biome, and vanilla taiga, forest and birch forest, from the start of a real world (seed `jugcraft`), logs the distances (and, for reference, how near vanilla's hot, mangrove, jungle and old-growth climates are), checks that the seasonal leaves generated around each biome are in today's look, and takes screenshots where each biome is on the surface and fills the camera's view.
+    - `WoodClientGameTests` grows every tree with its wood on a sample wall (vanilla's spruce beside the cedar's), the tree roster's batch-1 shapes beside their parents and vanilla's spruce and oak (the cedar beside the spruce), and the seasonal trees and shapes in autumn, and logs each tree's logs and leaves ([features/wood-repaint.md](features/wood-repaint.md), [features/trees-batch-1.md](features/trees-batch-1.md)).
     - Not covered: other seeds, a dedicated server, region borders in play, seasons over real days.
   - Seasons ([features/seasons.md](features/seasons.md)): `SeasonGameTests` covers the calendar, zones, overrides, palette, biome tags, events (US and Canadian Thanksgiving, December across New Year), the `/jugcraft season` command, and winter snow (lies, never on farmland, water or vanilla snow, melts in spring). `SeasonClientGameTests` switches each mode in a real client, checks the synced day and tints, then winter snow (falling on the client, snowy grass), and saves `jugcraft_season_<mode>` screenshots. Not covered: a dedicated server with two clients, a restart across midnight, a real winter and thaw.
 
