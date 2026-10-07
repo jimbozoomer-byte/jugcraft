@@ -8,6 +8,31 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Clean textures, set 8: crops (outside the tree work)
+- Only the crop textures that open PRs #195 (wood repaint) and #206 (new trees) don't touch are changed. Trees, logs, wood, leaves, planks and saplings are left to those PRs.
+  - The squash and gourd skins vary in soft clumps with even stripes; the warty gourd keeps its warts.
+  - The cooking-pot soup is a clumped surface with a few glints.
+  - The turnip lantern's lid stalks are lit at the top.
+  - The sauerkraut's shreds run in even lines.
+- `gourd_side` now paints cleanly by default. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 7: the fall fair
+- The fall fair's high-resolution textures (the midway games and plush prizes, the piñatas and the hot-air balloons) lose their soft mottling and fine noise. They are painted in the clean, cartoon style of the werewolves:
+  - Every tone sits in a few flat bands. Brass, glass and glowing bulbs shade in clean steps, and felt, enamel, canvas and wood are even.
+  - Piñata fringes hang at even lengths, and the torn holes are round.
+  - The squirrel plush's tail has a cream band of points along its tip.
+- `tools/fur_paint.py` gains `clean_painter` and `clean_ramp`, used only by the fair's modules. Faces, stitches, stripes and painted designs keep their drawn detail. IDs and models are unchanged.
+- The Ferris wheel is left to the art fixes PR (#219), which redraws it so it no longer flashes; its textures are main's here.
+
+### Unmerged: Clean textures, set 6: fall food and kitchen
+- The pies and hearth oven, the Harvest Feast Table, the candy kitchen, the cider mill, the preserves pantry and autumn foraging lose their per-pixel speckle and are painted in the manner of the vanilla blocks with `tools/block_style.py`.
+  - The oven is vanilla-style bricks, its stone is stone and its embers a heap of glowing coals.
+  - Pie tops are a woven lattice, each strip lit along one edge, over a clumped filling, and the cut side has clean crust layers.
+  - Wood is planks: the feast table, cider press, barrel staves and pantry shelves.
+  - Apple leaves are clumps with gaps, lit along their tops, as vanilla leaves. Graniteware is flecked evenly, as vanilla diorite.
+  - Raw pies, slices, dough, rock candy and burnt sugar are lit at their upper left instead of speckled.
+- IDs and models are unchanged.
+
 ### Unmerged: Clean textures, set 5: the Halloween harvest and festivities
 - The Halloween harvest and festivities lose their per-pixel speckle and are painted in the manner of the vanilla blocks with `tools/block_style.py`. That covers the giant pumpkins and the heirloom pumpkins, the Harvest Scale, scarecrow, corn shocks and ornamental corn, gourd birdhouse and mums, the regatta and trick-or-treat costumes, the Judging Stand, festivity candles and ghosts, the Headless Horseman, wisps and trebuchet, the corn maze and ghost hunting, and the knitting, chandlery, firework launcher, spirit board, theremin, ofrenda, mooncakes and broomstick.
   - Pumpkin skins vary in soft clumps; the giant pumpkin stays mirror-symmetric.
