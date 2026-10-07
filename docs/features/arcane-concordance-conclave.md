@@ -159,7 +159,8 @@ The lectern's model and icon have not been seen in the game.
 - `python3 tools/check_mod_data.py`: new step 23 checks (`check_conclave`).
 - The step 23 harness passes **55 checks** against the generated commissions and projects.
 - Game tests added: `ConcordanceConclaveGameTests` (ten).
-- CI: pending (this record is updated with the run).
+- CI: run 37646213927 (commit 9d618ffc) passes the whole Build workflow on its first run: it builds, passes the data
+  checks and all 1027 required server game tests (the ten above among them), and the client test shards pass.
 
 Not yet run: any client (the lectern's model and icon, the codex pages), a two-client dedicated server (a party of two
 players working one project with one of them offline at the end), and a week of real play.

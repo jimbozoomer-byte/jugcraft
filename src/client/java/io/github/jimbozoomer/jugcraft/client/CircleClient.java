@@ -13,6 +13,8 @@ import io.github.jimbozoomer.jugcraft.concordance.LumenMoteBlock;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
 import io.github.jimbozoomer.jugcraft.concordance.dreaming.Dreaming;
 import io.github.jimbozoomer.jugcraft.concordance.dreaming.OneiricCenserBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire;
+import io.github.jimbozoomer.jugcraft.concordance.spire.SpireHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary;
 import io.github.jimbozoomer.jugcraft.concordance.reliquary.ReliquaryShrineBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
@@ -91,6 +93,10 @@ public final class CircleClient {
 		// Roadmap step 22: the Oneiric Censer hangs still, or swings and smokes while anyone dreams by it.
 		BlockEntityRenderers.register(Dreaming.CENSER_ENTITY,
 				context -> new GeoBlockRenderer<OneiricCenserBlockEntity, BlockEntityRenderState>(context, Dreaming.CENSER_ENTITY));
+		// Roadmap step 25: the Spire Heart rests, pulses while it is raised, or turns while its field works, by the status
+		// the server sends.
+		BlockEntityRenderers.register(ConcordSpire.HEART_ENTITY,
+				context -> new GeoBlockRenderer<SpireHeartBlockEntity, BlockEntityRenderState>(context, ConcordSpire.HEART_ENTITY));
 		PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(LAYER, LAYER_PRIORITY,
 				avatar -> new PlayerAnimationController(avatar, (controller, state, setter) -> PlayState.STOP));
 		ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register((blockEntity, level) -> {

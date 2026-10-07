@@ -6,12 +6,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
 /**
@@ -27,6 +29,16 @@ import net.minecraft.world.level.Level;
  */
 public final class Rituals {
 	private static final Map<ResourceKey<Level>, Set<BlockPos>> ANCHORS = new HashMap<>();
+	private static final List<Completed> COMPLETED = new CopyOnWriteArrayList<>();
+
+	/**
+	 * Something told when a ritual completes (roadmap step 25: a Concord Spire hears its Kindling): where its anchor
+	 * stands, which ritual, and the participants present. Listeners only read: the ritual has already made its result.
+	 */
+	@FunctionalInterface
+	public interface Completed {
+		void completed(ServerLevel level, BlockPos anchor, String ritual, List<ServerPlayer> present);
+	}
 
 	private Rituals() {
 	}
@@ -66,6 +78,18 @@ public final class Rituals {
 					&& level.getBlockEntity(anchor) instanceof CircleAnchorBlockEntity found) {
 				found.invalidate();
 			}
+		}
+	}
+
+	/** Adds a listener told whenever a ritual completes (at registration). */
+	public static void listen(Completed listener) {
+		COMPLETED.add(listener);
+	}
+
+	/** A ritual completed at {@code anchor} with {@code present} taking part (the anchor calls this; tests too). */
+	public static void completed(ServerLevel level, BlockPos anchor, String ritual, List<ServerPlayer> present) {
+		for (Completed listener : COMPLETED) {
+			listener.completed(level, anchor, ritual, List.copyOf(present));
 		}
 	}
 

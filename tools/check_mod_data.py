@@ -7552,6 +7552,7 @@ def check_concordance(registered):
     check_sympathy(co, root, lang, registered, research)
     check_conclave(co, root, lang, registered, research)
     check_progression(co, root, lang, registered, research)
+    check_spire(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -7820,7 +7821,7 @@ def check_baselines(root):
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
     for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
-                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream", "conclave", "progression"):
+                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream", "conclave", "progression", "wonder"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -9373,13 +9374,16 @@ def check_progression(co, root, lang, registered, research):
     folder = DATA / MOD / "concordance"
     stages = {p.stem: load(p) or {} for p in (folder / "stage").glob("*.json")}
     practices = {p.stem: load(p) or {} for p in (folder / "practice").glob("*.json")}
-    if set(stages) != set(pg.STAGES) or set(practices) != set(pg.PRACTICES):
-        err("concordance/stage or concordance/practice differ from STAGES and PRACTICES")
+    if set(stages) != set(pg.STAGES) or set(practices) != set(pg.PRACTICES) | set(pg.MILESTONES):
+        err("concordance/stage or concordance/practice differ from STAGES, PRACTICES and MILESTONES")
     for key, info in pg.STAGES.items():
         if stages.get(key) != pg.stage_json(info):
             err(f"concordance/stage/{key}.json differs from the generator's: run tools/generate_material_data.py")
     for key in pg.PRACTICES:
         if practices.get(key) != pg.practice_json(key):
+            err(f"concordance/practice/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    for key in pg.MILESTONES:
+        if practices.get(key) != pg.milestone_json(key):
             err(f"concordance/practice/{key}.json differs from the generator's: run tools/generate_material_data.py")
     # The graph, down to things at hand.
     invocations = {p.stem: load(p) or {} for p in (folder / "invocation").glob("*.json")}
@@ -9511,6 +9515,161 @@ def check_progression(co, root, lang, registered, research):
     for key in re.findall(r'"message\.jugcraft\.concordance\.((?:stage|progression)\.[a-z_]+)"', stages_java):
         if f"message.{MOD}.concordance.{key}" not in lang:
             err(f"stages/StageProgress.java: missing lang message.{MOD}.concordance.{key}")
+
+
+def check_spire(co, root, lang, registered, research):
+    """Roadmap step 25: the Java mirrors tools/concordance_spire.py (the parser's limits, the day, the reach, the field's
+    hold, the heart's store and its look, the field kinds); the wonder and its configurations on disk are the
+    generator's; there are at least two configurations and their fields differ; each names research that exists, a
+    practice the Concordance records, a crown built round the heart and a renewable upkeep item; the Kindling is a
+    ritual whose offerings can be had; the heart is registered, made, mined and drops itself, and GeckoLib has its model
+    and the three animations the Java plays; the spire never breaks or replaces a block; the rite and the practices are
+    heard from the circles and the research engine; the Architect stage has the raised spire's route; every word has
+    its text."""
+    sp = co.spire
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    parser = java("wonder/WonderParser.java")
+    for const in ("MAX_PHASES", "MAX_PRACTICES", "MAX_SUSTAIN", "MAX_ATTENDANCE", "MIN_PULSE", "MAX_PULSE", "MAX_RITE_RANGE",
+                  "MAX_RADIUS", "MAX_COUNT", "MAX_UPKEEP", "MAX_LEY", "MAX_REQUIRES"):
+        if not re.search(rf"\bint {const} = {getattr(sp, const)};", parser):
+            err(f"wonder/WonderParser.java: {const} differs from tools/concordance_spire.py")
+    if f"long DAY = {sp.DAY:_}L;" not in java("wonder/Spires.java"):
+        err("wonder/Spires.java: DAY differs from tools/concordance_spire.py")
+    spire_java = java("spire/ConcordSpire.java")
+    heart_java = java("spire/SpireHeartBlockEntity.java")
+    for const, value in (("REACH", sp.REACH), ("HOLD_TICKS", sp.HOLD_TICKS)):
+        if not re.search(rf"\bint {const} = {value};", spire_java):
+            err(f"spire/ConcordSpire.java: {const} differs from tools/concordance_spire.py")
+    for const, value in (("SLOTS", sp.SLOTS), ("CHECK_TICKS", sp.CHECK_TICKS)):
+        if not re.search(rf"\bint {const} = {value};", heart_java):
+            err(f"spire/SpireHeartBlockEntity.java: {const} differs from tools/concordance_spire.py")
+    if f'String WONDER = "{sp.WONDER_ID}";' not in spire_java or f'String MILESTONE = "{sp.MILESTONE}";' not in spire_java:
+        err("spire/ConcordSpire.java: WONDER or MILESTONE differs from tools/concordance_spire.py")
+    kinds = re.findall(r'^\t[A-Z]+\("([a-z]+)"\)', java("wonder/FieldKind.java"), re.M)
+    if kinds != sp.FIELD_KINDS:
+        err(f"wonder/FieldKind.java: kinds {kinds} differ from FIELD_KINDS")
+    # The data on disk is the generator's.
+    folder = DATA / MOD / "concordance"
+    if (load(folder / "wonder" / "concord_spire.json") or {}) != sp.wonder_json():
+        err("concordance/wonder/concord_spire.json differs from the generator's: run tools/generate_material_data.py")
+    configurations = {p.stem: load(p) or {} for p in (folder / "wonder_configuration").glob("*.json")}
+    if set(configurations) != set(sp.CONFIGURATIONS):
+        err("concordance/wonder_configuration differs from CONFIGURATIONS")
+    for key in sp.CONFIGURATIONS:
+        if configurations.get(key) != sp.configuration_json(key):
+            err(f"concordance/wonder_configuration/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    # Multiple configurations, each meaningful and reachable.
+    if len(sp.CONFIGURATIONS) < 2 or len({info["field"]["kind"] for info in sp.CONFIGURATIONS.values()}) < 2:
+        err("spire: a wonder offers at least two configurations whose fields differ")
+    structures = {p.stem: load(p) or {} for p in (folder / "structure").glob("*.json")}
+    traditions = {info.get("tradition") for info in research.values()}
+    pg = co.progression
+    for key, info in sp.CONFIGURATIONS.items():
+        if info["tradition"] not in traditions:
+            err(f"spire configuration {key}: no research belongs to {info['tradition']}")
+        if info["practice"] not in co.conclave.ACTIVITIES:
+            err(f"spire configuration {key}: {info['practice']} is no practice the Concordance records")
+        for requirement in info["requires"]:
+            entry = research.get(split(requirement["research"])[1], {})
+            if requirement["state"] not in entry.get("states", {}):
+                err(f"spire configuration {key}: needs {requirement['research']} {requirement['state']}, which does not exist")
+        crown = structures.get(split(info["crown"])[1], {})
+        if crown.get("anchor") != rid_value("spire_heart"):
+            err(f"spire configuration {key}: its crown {info['crown']} must be built round the Spire Heart")
+        kind = pg.VANILLA_SOURCES.get(info["upkeep"]["item"], ("",))[0]
+        if kind not in ("craftable", "renewable"):
+            err(f"spire configuration {key}: a kept wonder runs on what can be renewed, not {info['upkeep']['item']} ({kind or 'unlisted'})")
+        for kind_key in ("radius", "count"):
+            if not 1 <= info["field"][kind_key] <= getattr(sp, f"MAX_{kind_key.upper()}"):
+                err(f"spire configuration {key}: field {kind_key} out of bounds")
+    for structure in ("spire_foundation", "spire_shaft"):
+        if structures.get(structure, {}).get("anchor") != rid_value("spire_heart"):
+            err(f"spire: structure {structure} must be built round the Spire Heart")
+    kindling = load(folder / "ritual" / "spire_kindling.json") or {}
+    if kindling.get("research") != rid_value("circle_lore") or kindling.get("participants") != 1:
+        err("spire: the Kindling is a ritual one player can complete, taught by Circle Lore")
+    for offering in kindling.get("offerings", []):
+        if pg.VANILLA_SOURCES.get(offering["item"], ("found",))[0] == "found":
+            err(f"spire: the Kindling's offering {offering['item']} cannot be relied on")
+    # The heart: registered, made, mined, dropping itself, drawn by GeckoLib with the animations the Java plays.
+    if "spire_heart" not in registered or not (DATA / MOD / "recipe" / "spire_heart.json").is_file():
+        err("spire: the Spire Heart needs a registration and a recipe")
+    if f'"{rid_value("spire_heart")}"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / "spire_heart.json") or {}):
+        err("spire: a broken Spire Heart drops itself")
+    pickaxe = load(DATA / "minecraft" / "tags" / "block" / "mineable" / "pickaxe.json") or {}
+    if rid_value("spire_heart") not in pickaxe.get("values", []):
+        err("spire: the Spire Heart is mined with a pickaxe")
+    animations = load(ASSETS / "geckolib" / "animations" / "block" / "spire_heart.animation.json") or {}
+    for name in re.findall(r'thenLoop\("(animation\.spire_heart\.[a-z]+)"\)', heart_java):
+        if name not in animations.get("animations", {}):
+            err(f"spire: GeckoLib has no {name}")
+    # The model, its animations and its sheet are the art modules' own; every box's UV fits the sheet.
+    import concordance_spire_art as spire_art
+    import concordance_spire_models as spire_models
+    geo = load(ASSETS / "geckolib" / "models" / "block" / "spire_heart.geo.json") or {}
+    if geo != spire_models.GEO["spire_heart"]() or animations != spire_models.ANIMATIONS["spire_heart"]():
+        err("spire: the Spire Heart's GeckoLib model or animations differ from tools/concordance_spire_models.py")
+    description = (geo.get("minecraft:geometry") or [{}])[0].get("description", {})
+    width, height = description.get("texture_width", 0), description.get("texture_height", 0)
+    uv, sizes = spire_models.SIZES["spire_heart"]
+    for cube, (u, v) in uv.items():
+        w, h, d = sizes[cube]
+        if u + 2 * (d + w) > width or v + d + h > height:
+            err(f"spire: the Spire Heart's {cube} box does not fit its {width}x{height} sheet")
+    import item_icons
+    for kind in ("block", "item"):
+        texture = ASSETS / "textures" / kind / "spire_heart.png"
+        if not texture.is_file():
+            err(f"spire: missing textures/{kind}/spire_heart.png")
+    sheet = ASSETS / "textures" / "block" / "spire_heart.png"
+    if sheet.is_file():
+        with Image.open(sheet) as img:
+            if img.size != (width, height) or img.convert("RGBA").tobytes() != spire_art.heart_sheet().tobytes():
+                err("spire: textures/block/spire_heart.png differs from tools/concordance_spire_art.py: run tools/generate_textures.py")
+    icon = ASSETS / "textures" / "item" / "spire_heart.png"
+    if not item_icons.has("spire_heart"):
+        err("spire: spire_heart needs its map tools/item_icons/spire_heart.txt")
+    elif icon.is_file():
+        with Image.open(icon) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw("spire_heart").tobytes():
+                err("spire: textures/item/spire_heart.png differs from its map: run tools/generate_textures.py")
+    # Nothing is broken or replaced; the rite and practices come from the circles and the research engine.
+    if re.search(r"destroyBlock\(|removeBlock\(", spire_java + heart_java):
+        err("spire: the spire never breaks or removes a block")
+    if "Rituals.listen(" not in spire_java or "Rituals.completed(" not in java("CircleAnchorBlockEntity.java"):
+        err("spire: the Kindling is heard from the circles (Rituals.listen, called when a ritual completes)")
+    if "ConcordanceProgress.listen(" not in spire_java:
+        err("spire: practices are heard from ConcordanceProgress")
+    # The Architect stage has the raised spire's route, through its milestone's gate.
+    routes = [route for route in pg.STAGES["architect"]["routes"] if sp.MILESTONE in route.get("milestones", [])]
+    if not routes or split(sp.MILESTONE)[1] not in pg.MILESTONES:
+        err("spire: the Architect stage needs a route through the raised spire's milestone and its gate")
+    # Every word has its text.
+    for key in re.findall(r'(?:say|tell)\(player, "([a-z_]+)"', spire_java) + re.findall(r'"message\.jugcraft\.concordance\.spire\.([a-z_]+)"', spire_java):
+        if f"message.{MOD}.concordance.spire.{key}" not in lang:
+            err(f"spire/ConcordSpire.java: missing lang message.{MOD}.concordance.spire.{key}")
+    for key in re.findall(r'refuse\(player, "([a-z_]+)"\)', spire_java) + re.findall(r'return "([a-z_]+)";', spire_java + java("wonder/Spires.java")):
+        if key not in ("active", "unfounded", "raising", "disabled", "unknown", "damaged", "unattended", "unsupplied", "structure",
+                       "practices", "rite", "sustain", "raised", "stage", "research", "founded", "no_spire") and \
+                f"compose.{MOD}.spire.reason.{key}" not in lang:
+            err(f"spire: missing lang for the reason {key}")
+    for key in sp.REASONS:
+        if f"compose.{MOD}.spire.reason.{key}" not in lang:
+            err(f"spire: missing lang for the reason {key}")
+    for key in list(sp.MISSING) + ["nothing"]:
+        if f"compose.{MOD}.spire.missing.{key}" not in lang:
+            err(f"spire: missing lang compose.{MOD}.spire.missing.{key}")
+    for key in sp.DORMANT:
+        if f"compose.{MOD}.spire.dormant.{key}" not in lang:
+            err(f"spire: missing lang compose.{MOD}.spire.dormant.{key}")
+    for key in sp.FIELD_KINDS:
+        if f"compose.{MOD}.spire.field.{key}" not in lang:
+            err(f"spire: missing lang compose.{MOD}.spire.field.{key}")
+    for key in sp.ADVANCEMENTS:
+        if not (DATA / MOD / "advancement" / f"{key}.json").is_file():
+            err(f"spire: missing the advancement {key}")
 
 
 def rid_value(path):

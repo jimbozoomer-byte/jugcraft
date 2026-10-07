@@ -19,6 +19,7 @@ import org.jspecify.annotations.Nullable;
  * stage:    {"schema": 1, "order": 3, "routes": [{"id": "specialist", "mastered": 2},
  *            {"id": "generalist", "understood": 5, "traditions": 5}, {"id": "circle", "research": ["jugcraft:circle_lore@understood"]}]}
  * practice: {"schema": 1, "tradition": "circlewrights", "requires": [{"research": "jugcraft:circle_lore", "state": "understood"}]}
+ * milestone: {"schema": 1, "requires": [{"research": "jugcraft:circle_lore", "state": "understood"}], "stage": "master"}
  * </pre>
  * Refused: unknown fields, a route asking for nothing, a research state that is not one, more than eight routes.
  */
@@ -90,7 +91,7 @@ public final class ProgressionParser {
 	public @Nullable PracticeGate practice(String id, JsonElement json) {
 		try {
 			JsonObject object = Json.object(json, "practice");
-			Json.only(object, "schema", "tradition", "requires");
+			Json.only(object, "schema", "tradition", "requires", "stage");
 			Json.schema(object);
 			List<Definitions.Requirement> requires = new ArrayList<>();
 			for (JsonElement element : Json.array(object, "requires")) {
@@ -102,7 +103,8 @@ public final class ProgressionParser {
 				}
 				requires.add(new Definitions.Requirement(Json.id(requirement, "research"), state));
 			}
-			return new PracticeGate(id, Json.name(object, "tradition"), requires);
+			return new PracticeGate(id, object.has("tradition") ? Json.name(object, "tradition") : "", requires,
+					object.has("stage") ? Json.name(object, "stage") : "");
 		} catch (Json.Invalid | IllegalStateException | UnsupportedOperationException problem) {
 			problems.add("practice " + id + ": " + problem.getMessage());
 			return null;

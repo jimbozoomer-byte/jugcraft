@@ -120,6 +120,13 @@ public final class ProgressionGraph {
 					stage = needed;
 				}
 			}
+			if (!gate.stage().isEmpty()) {
+				// A milestone that needs a stage reached first (a raised spire needs a Master to found it).
+				all.add("stage:" + gate.stage());
+				if (graph.later(gate.stage(), stage)) {
+					stage = gate.stage();
+				}
+			}
 			graph.nodes.put(id, new Node(id, stage, all, List.of(), false));
 		}
 		for (Rank rank : Rank.values()) {
@@ -251,10 +258,10 @@ public final class ProgressionGraph {
 	}
 
 	private void analyse(Map<String, Definitions.Research> research, Map<String, PracticeGate> gates) {
-		// Every node names only things that exist.
+		// Every node names only things that exist (a stage is reached by its routes, not a node).
 		for (Node node : nodes.values()) {
 			for (String need : node.all()) {
-				if (!nodes.containsKey(need)) {
+				if (!nodes.containsKey(need) && !(need.startsWith("stage:") && order.containsKey(need.substring("stage:".length())))) {
 					problems.add(node.id() + " needs " + need + ", which nothing provides");
 				}
 			}

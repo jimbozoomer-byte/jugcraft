@@ -30,6 +30,8 @@ import io.github.jimbozoomer.jugcraft.compat.jade.ShrineDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.relic.Context;
 import io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary;
 import io.github.jimbozoomer.jugcraft.concordance.reliquary.ReliquaryShrineBlock;
+import io.github.jimbozoomer.jugcraft.compat.jade.SpireDataProvider;
+import io.github.jimbozoomer.jugcraft.concordance.spire.SpireHeartBlock;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import net.minecraft.world.level.block.state.BlockState;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
@@ -63,6 +65,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		registration.registerEntityComponent(WorkerTooltip.INSTANCE, WorkerEntity.class);
 		registration.registerBlockComponent(CourierTooltip.INSTANCE, CourierPostBlock.class);
 		registration.registerBlockComponent(ShrineTooltip.INSTANCE, ReliquaryShrineBlock.class);
+		registration.registerBlockComponent(SpireTooltip.INSTANCE, SpireHeartBlock.class);
 		registration.registerBlockComponent(CropTooltip.INSTANCE, OrganismCropBlock.class);
 	}
 
@@ -169,6 +172,40 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 				tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.shrine", Component.translatable(relic), state));
 				tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.shrine_charge", data.getIntOr("charge", 0),
 						data.getIntOr("capacity", 0)));
+			});
+		}
+	}
+
+	/**
+	 * A Spire Heart (roadmap step 25): its configuration, its phase or that it is raised, whether its field works or why it
+	 * rests, and its store against a day's upkeep.
+	 */
+	private enum SpireTooltip implements IBlockComponentProvider {
+		INSTANCE;
+
+		@Override
+		public Identifier getUid() {
+			return SpireDataProvider.ID;
+		}
+
+		@Override
+		public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+			accessor.getServerData().getCompound(SpireDataProvider.KEY).ifPresent(data -> {
+				String configuration = data.getStringOr("configuration", "");
+				if (configuration.isEmpty()) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.spire_unfounded"));
+					return;
+				}
+				tooltip.add(Component.translatable("compose.jugcraft.spire.configuration." + configuration.substring(configuration.indexOf(':') + 1)));
+				String phase = data.getStringOr("phase_id", "");
+				tooltip.add(phase.isEmpty() ? Component.translatable("tooltip.jugcraft.concordance.jade.spire_raised")
+						: Component.translatable("tooltip.jugcraft.concordance.jade.spire_phase", data.getIntOr("phase", 0) + 1, data.getIntOr("phases", 0),
+								Component.translatable("compose.jugcraft.spire.phase." + phase)));
+				String status = data.getStringOr("status", "");
+				tooltip.add(status.equals("active") ? Component.translatable("tooltip.jugcraft.concordance.jade.spire_working")
+						: Component.translatable("tooltip.jugcraft.concordance.jade.spire_resting",
+								Component.translatable("compose.jugcraft.spire.dormant." + (status.equals("unfounded") ? "raising" : status))));
+				tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.spire_store", data.getIntOr("stock", 0), data.getIntOr("daily", 0)));
 			});
 		}
 	}

@@ -46,6 +46,10 @@ import io.github.jimbozoomer.jugcraft.concordance.progression.StageDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.relic.RelicCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.relic.RelicDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.relic.RelicParser;
+import io.github.jimbozoomer.jugcraft.concordance.wonder.SpireConfiguration;
+import io.github.jimbozoomer.jugcraft.concordance.wonder.SpireDefinition;
+import io.github.jimbozoomer.jugcraft.concordance.wonder.WonderCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.wonder.WonderParser;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerParser;
@@ -78,7 +82,8 @@ import org.jspecify.annotations.Nullable;
 public final class ConcordanceRules {
 	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
 			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, EcologyCatalog.EMPTY, CelestialCatalog.EMPTY, CrimsonCatalog.EMPTY, WorkerCatalog.EMPTY, ArtificeCatalog.EMPTY,
-			RelicCatalog.EMPTY, EquivalenceCatalog.EMPTY, HexCatalog.EMPTY, ConclaveCatalog.EMPTY, ProgressionCatalog.EMPTY, List.of());
+			RelicCatalog.EMPTY, EquivalenceCatalog.EMPTY, HexCatalog.EMPTY, ConclaveCatalog.EMPTY, ProgressionCatalog.EMPTY,
+			WonderCatalog.EMPTY, List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
@@ -99,6 +104,7 @@ public final class ConcordanceRules {
 	private final HexCatalog hexes;
 	private final ConclaveCatalog conclave;
 	private final ProgressionCatalog progression;
+	private final WonderCatalog wonders;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
@@ -107,7 +113,7 @@ public final class ConcordanceRules {
 			Map<String, Map<String, Authored>> authored, Map<String, StructurePattern> structures, Map<String, RitualDefinition> rituals,
 			AlchemyCatalog alchemy, EcologyCatalog ecology, CelestialCatalog celestial, CrimsonCatalog crimson, WorkerCatalog workers,
 			ArtificeCatalog artifice, RelicCatalog relics, EquivalenceCatalog equivalence, HexCatalog hexes, ConclaveCatalog conclave,
-			ProgressionCatalog progression, List<String> problems) {
+			ProgressionCatalog progression, WonderCatalog wonders, List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
@@ -127,6 +133,7 @@ public final class ConcordanceRules {
 		this.hexes = hexes;
 		this.conclave = conclave;
 		this.progression = progression;
+		this.wonders = wonders;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -240,6 +247,11 @@ public final class ConcordanceRules {
 		return progression;
 	}
 
+	/** The wonders players raise and keep, and their configurations (roadmap step 25). */
+	public WonderCatalog wonders() {
+		return wonders;
+	}
+
 	public List<String> problems() {
 		return problems;
 	}
@@ -320,6 +332,9 @@ public final class ConcordanceRules {
 		ProgressionParser progressionParser = new ProgressionParser();
 		Map<String, StageDefinition> stages = new TreeMap<>();
 		Map<String, PracticeGate> practices = new TreeMap<>();
+		WonderParser wonderParser = new WonderParser();
+		Map<String, SpireDefinition> wonderDefinitions = new TreeMap<>();
+		Map<String, SpireConfiguration> wonderConfigurations = new TreeMap<>();
 		Map<String, Organism> organisms = new TreeMap<>();
 		Map<String, Disturbance> disturbances = new TreeMap<>();
 		Map<String, Definitions.Research> research = new TreeMap<>();
@@ -509,10 +524,22 @@ public final class ConcordanceRules {
 						practices.put(gate.activity(), gate);
 					}
 				}
+				case "wonder" -> {
+					SpireDefinition wonder = wonderParser.wonder(source.id(), source.json());
+					if (wonder != null) {
+						wonderDefinitions.put(wonder.id(), wonder);
+					}
+				}
+				case "wonder_configuration" -> {
+					SpireConfiguration configuration = wonderParser.configuration(source.id(), source.json());
+					if (configuration != null) {
+						wonderConfigurations.put(configuration.id(), configuration);
+					}
+				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
 						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
 						+ "preparation, property, organism, disturbance, pattern, offering, worker, substrate, gem, rune, affix, relic, material, transmutation, "
-						+ "curse, commission, project, stage or practice)");
+						+ "curse, commission, project, stage, practice, wonder or wonder_configuration)");
 			}
 		}
 		problems.addAll(0, parser.problems());
@@ -718,6 +745,11 @@ public final class ConcordanceRules {
 				problems.add("progression: " + problem);
 			}
 		}
+		// Roadmap step 25: the wonders and their configurations name structures round their heart, a ritual for their
+		// rite, research, practices and a stage that exist.
+		problems.addAll(wonderParser.problems());
+		problems.addAll(WonderParser.check(wonderDefinitions, wonderConfigurations.values(), structures, rituals, research, practices.keySet(),
+				stages.keySet()));
 		return new ConcordanceRules(Collections.unmodifiableMap(new LinkedHashMap<>(research)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(invocations)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, catalog,
@@ -726,7 +758,7 @@ public final class ConcordanceRules {
 				new WorkerCatalog(workerDefinitions), new ArtificeCatalog(substrates, gems, runes, affixes),
 				new RelicCatalog(relicDefinitions), new EquivalenceCatalog(EquivalenceParser.byItem(materials), transmutations, equivalenceProblems),
 				new HexCatalog(curses), new ConclaveCatalog(commissions, projects), new ProgressionCatalog(stages, practices, graph),
-				List.copyOf(problems));
+				new WonderCatalog(wonderDefinitions, wonderConfigurations), List.copyOf(problems));
 	}
 
 	/**

@@ -262,6 +262,8 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.starbound.Starbound.register();
 		// Roadmap step 24: each player's stage of the Concordance, read from the progression graph's stages.
 		io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress.register();
+		// Roadmap step 25: the Concord Spire, the endgame wonder raised round a Spire Heart and kept.
+		io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

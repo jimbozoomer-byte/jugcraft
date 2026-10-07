@@ -266,6 +266,7 @@ def _seconds(ticks):
 def _item_name(ref):
     names = {"minecraft:amethyst_shard": "Amethyst Shard", "minecraft:gold_ingot": "Gold Ingot",
              "minecraft:glowstone_dust": "Glowstone Dust", "minecraft:glow_berries": "Glow Berries",
+             "minecraft:ender_pearl": "Ender Pearl",
              rid("initiate_wand"): "Initiate's Wand", rid("adept_wand"): "Adept's Wand"}
     return names[ref]
 

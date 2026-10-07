@@ -229,7 +229,7 @@ def lang_entries(lang):
 def _amount(count, item):
     """"16 glowstone dust", "2 amethyst shards", "1 diamond", "1 compass", "4 compasses" for the codex."""
     name = item.split(":")[1].replace("_", " ")
-    if count != 1 and not name.endswith(("dust", "seeds", "berries", "paper", "planks")):
+    if count != 1 and not name.endswith(("dust", "seeds", "berries", "paper", "planks", "meal")):
         name += "es" if name.endswith(("s", "x", "ch", "sh")) else "s"
     return f"{count} {name}"
 

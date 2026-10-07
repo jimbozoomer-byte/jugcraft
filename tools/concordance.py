@@ -447,6 +447,13 @@ ITEMS.update(conclave.ITEMS)
 BLOCKS.update(conclave.BLOCKS)
 # Roadmap step 24 (tools/concordance_progression.py): the five stages and the canonical progression graph.
 import concordance_progression as progression  # noqa: E402
+# Roadmap step 25 (tools/concordance_spire.py): the Concord Spire; its structures and its rite join the rituals' own.
+import concordance_spire as spire  # noqa: E402
+ITEMS.update(spire.ITEMS)
+BLOCKS.update(spire.BLOCKS)
+rituals.STRUCTURES.update(spire.STRUCTURES)
+rituals.RITUALS.update(spire.RITUALS)
+rituals.RESEARCH["circle_lore"]["unlocks"]["understood"]["rituals"].append(spire.rid("spire_kindling"))
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
@@ -955,6 +962,7 @@ def codex():
         **hexes.codex(),
         **conclave.codex(),
         **progression.codex(),
+        **spire.codex(),
     }
 
 
@@ -1064,6 +1072,7 @@ CATEGORIES = {
     **equivalence.CATEGORY,
     **hexes.CATEGORY,
     **conclave.CATEGORY,
+    **spire.CATEGORY,
 }
 
 ENTRY_BACKGROUNDS = {None: "square_gray", "encountered": "square_gray", "observed": "square_gray",
@@ -1478,6 +1487,7 @@ MESSAGES = {
     **hexes.MESSAGES,
     **conclave.MESSAGES,
     **progression.MESSAGES,
+    **spire.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1519,6 +1529,7 @@ TOOLTIPS = {
     **equivalence.TOOLTIPS,
     **hexes.TOOLTIPS,
     **conclave.TOOLTIPS,
+    **spire.TOOLTIPS,
 }
 
 
@@ -1708,6 +1719,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     hexes.write_all(write, assets, data, lang, condition, self_drop)
     conclave.write_all(write, assets, data, lang, condition, self_drop)
     progression.write_all(write, data, lang)
+    spire.write_all(write, assets, data, lang, condition, self_drop)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -1851,6 +1863,7 @@ def write_data(write, res):
     hexes.write_data(write, data)
     conclave.write_data(write, data)
     progression.write_data(write, data)
+    spire.write_data(write, data)
     # LambDynamicLights (optional, client): a lit Kindled Lantern glows in hand. Without the mod nothing reads this.
     write(assets / "dynamiclights" / "item" / "kindled_lantern.json",
           {"match": {"items": rid("kindled_lantern"), "components": {rid("lantern_lit"): {}}},
@@ -1875,6 +1888,7 @@ def tags(tags):
     equivalence.tags(tags)
     hexes.tags(tags)
     conclave.tags(tags)
+    spire.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     for item in LUMINOUS_MATTER:

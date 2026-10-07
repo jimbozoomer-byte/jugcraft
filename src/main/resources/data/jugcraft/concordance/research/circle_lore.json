@@ -54,7 +54,8 @@
     "understood": {
       "rituals": [
         "jugcraft:adept_attunement",
-        "jugcraft:lumen_vigil"
+        "jugcraft:lumen_vigil",
+        "jugcraft:spire_kindling"
       ]
     }
   }

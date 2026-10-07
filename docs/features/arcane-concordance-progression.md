@@ -30,7 +30,7 @@ The Concordance has five **stages**, each reached by any one of its **routes** o
 | Practitioner | Workshops | understanding First Light |
 | Adept | Specialization | mastering two research entries; understanding five entries in five traditions; or understanding Circle Lore and mastering First Light (the Adept's Attunement) |
 | Master | Expeditions | mastering five entries in three traditions; understanding nine entries in seven traditions and mastering First Light; or being a Luminary of the Starbound Conclave with two entries mastered |
-| Architect | Shared wonders | being Starbound, having helped finish a Conclave project, with six entries mastered |
+| Architect | Shared wonders | being Starbound, having helped finish a Conclave project, with six entries mastered; or raising a [Concord Spire](arcane-concordance-spire.md) or helping raise one (roadmap step 25) |
 
 Reaching a stage announces it and awards its advancement (and any before it skipped on the way). A stage once reached is
 kept, through death and even if research is later forgotten. `/jugcraft concordance stage` shows a player's stage and,
@@ -41,8 +41,8 @@ for the next one, every route with exactly what it still needs ("mastered 2 (0)"
 
 **The stages** (`concordance/progression`, pure Java; data `concordance/stage`). A stage has an order and up to eight
 routes; a route asks for exact research states, a number of entries mastered or understood across a number of
-traditions, a Conclave rank, a number of Conclave projects and named milestones (which later features record; none is
-used yet). `Stages` reads a player's situation (research, the traditions it belongs to, rank, finished projects,
+traditions, a Conclave rank, a number of Conclave projects and named milestones (which features record: a raised Concord
+Spire records `jugcraft:spire_raised`, whose practice gate needs Circle Lore understood and the Master stage reached). `Stages` reads a player's situation (research, the traditions it belongs to, rank, finished projects,
 milestones) against the routes: the furthest stage reached, and what each route still needs. `ProgressionParser` reads
 stages and practice gates strictly.
 
@@ -87,7 +87,7 @@ a stage needs. This table is the graph's (`tools/check_mod_data.py` fails if it 
 | Practitioner | `jugcraft:first_light` observed, `jugcraft:first_light` understood | nothing new | nothing new | nothing new | nothing new |
 | Adept | nothing new | `jugcraft:lampwright_bench`, `minecraft:copper_ingot`, `minecraft:stick`, `#jugcraft:concordance/luminous_matter`, `#minecraft:planks` | nothing new | nothing new | nothing new |
 | Master | nothing new | nothing new | nothing new | nothing new | nothing new |
-| Architect | nothing new | `minecraft:paper` | nothing new | nothing new | `project:conclave`, `rank:fellow`, `rank:starbound` |
+| Architect | nothing new | nothing new | nothing new | nothing new | nothing new |
 <!-- mandatory: end -->
 
 Everything else has an alternative: another specimen, another tradition, another route.
@@ -172,7 +172,9 @@ No new art: the stage advancements use vanilla icons.
   can teach, a practice gated on what it teaches, a middle stage with one route, a route naming no research state); and
   the parser's refusals.
 - Game tests added: `ConcordanceProgressionGameTests` (five).
-- CI: pending (this record is updated with the run).
+- CI: run 37649575481 (commit 55f4f576) builds, passes the data checks and all 1032 required server game tests (the
+  five above among them), and client shards 0 and 1 pass. Shard 2 stalled installing Mesa before any test ran; the
+  next push's run covers it (see the [spire](arcane-concordance-spire.md) record).
 
 Not yet run: any client (the codex entry, the advancements' toasts), a two-client dedicated server, and a real climb
 from a fresh world to Architect by ordinary play (the tests climb the first two stages by ordinary evidence and grant the

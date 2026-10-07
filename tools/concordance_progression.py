@@ -41,7 +41,8 @@ STAGES = {
         {"id": "generalist", "understood": 9, "traditions": 7, "research": [f"{MOD}:first_light@mastered"]},
         {"id": "fellowship", "rank": "luminary", "mastered": 2}]},
     "architect": {"order": 5, "name": "Architect", "jugcraft": "Shared wonders", "routes": [
-        {"id": "shared_wonder", "rank": "starbound", "projects": 1, "mastered": 6}]},
+        {"id": "shared_wonder", "rank": "starbound", "projects": 1, "mastered": 6},
+        {"id": "raised_spire", "milestones": [f"{MOD}:spire_raised"]}]},
 }
 
 ROUTE_TEXT = {
@@ -54,6 +55,7 @@ ROUTE_TEXT = {
     ("master", "generalist"): "understand nine entries in seven traditions and master First Light",
     ("master", "fellowship"): "be a Luminary of the Starbound Conclave and master two entries",
     ("architect", "shared_wonder"): "be Starbound, help finish a Conclave project and master six entries",
+    ("architect", "raised_spire"): "raise a Concord Spire, or help raise one",
 }
 
 # What makes each practice possible: its tradition, the research it needs understood (the Java gate: the class that
@@ -70,6 +72,13 @@ PRACTICES = {
     "ritual": ("circlewrights", "circle_lore", ["circle_anchor"], []),
     "sympathy": ("hexweavers", "sympathy", ["taglock"], ["creatures"]),
     "worker_service": ("spiritbinders", "binding_arts", ["bonding_charm", "spirit_anchor", "porter_key"], ["days"]),
+}
+
+# Milestones features record (roadmap step 25), each with what it needs (its gate: research, and a stage reached first)
+# and the wonder whose raising records it; the graph follows the wonder's configurations down to things at hand.
+MILESTONES = {
+    "spire_raised": {"stage": "master", "requires": [{"research": rid("circle_lore"), "state": "understood"}],
+                     "wonder": "concord_spire"},
 }
 
 # What the world gives by itself, and how a player who lacks it gets it anyway.
@@ -192,6 +201,13 @@ VANILLA_SOURCES = {
     "minecraft:stone_bricks": ("craftable", "stone", "", ""),
     "minecraft:polished_deepslate": ("craftable", "cobbled deepslate, plentiful below the surface", "", ""),
     "minecraft:lightning_rod": ("craftable", "copper ingots", "", ""),
+    # The Concord Spire's shaft and crowns (roadmap step 25).
+    "minecraft:deepslate_bricks": ("craftable", "polished deepslate", "", ""),
+    "minecraft:deepslate_tiles": ("craftable", "deepslate bricks", "", ""),
+    "minecraft:chiseled_deepslate": ("craftable", "cobbled deepslate slabs", "", ""),
+    "minecraft:glowstone": ("craftable", "glowstone dust", "", ""),
+    "minecraft:amethyst_block": ("craftable", "amethyst shards", "", ""),
+    "minecraft:flowering_azalea": ("renewable", "bone meal on a moss block grows them", "", ""),
     "minecraft:blaze_powder": ("renewable", "blazes, which keep spawning in nether fortresses", "", "nether"),
     "minecraft:prismarine_shard": ("renewable", "guardians, which keep spawning around ocean monuments", "", ""),
 }
@@ -232,6 +248,11 @@ def stage_json(info):
 def practice_json(key):
     tradition, research, _devices, _encounters = PRACTICES[key]
     return {"schema": 1, "tradition": tradition, "requires": [{"research": rid(research), "state": "understood"}]}
+
+
+def milestone_json(key):
+    info = MILESTONES[key]
+    return {"schema": 1, "requires": info["requires"], "stage": info["stage"]}
 
 
 # ------------------------------------------------------------------------------------------------------- the graph
@@ -282,7 +303,8 @@ def load_at_hand(data):
         return {path.stem: json.loads(path.read_text(encoding="utf-8"))
                 for path in sorted((data / MOD / "concordance" / name).glob("*.json"))}
     return {"recipes": recipes, "tags": tags, "structures": folder("structure"), "commissions": folder("commission"),
-            "projects": folder("project"), "workings": folder("working")}
+            "projects": folder("project"), "workings": folder("working"), "wonders": folder("wonder"),
+            "wonder_configurations": folder("wonder_configuration")}
 
 
 class _Items:
@@ -456,6 +478,25 @@ def graph(research, invocations, rituals, at_hand=None, problems=None):
                 nodes.setdefault(f"encounter:{encounter}", node("", kind="encounter"))
                 needs.append(f"encounter:{encounter}")
         nodes[f"practice:{rid(key)}"] = node(research.get(gate, {}).get("stage", ""), needs, alternatives, kind="practice")
+    for key, info in MILESTONES.items():
+        # A milestone: its gate (research, and its stage reached first) and, at hand, any one of its wonder's
+        # configurations raised: their research, practice, the rite, every structure, the heart, the upkeep and Ley.
+        needs = [research_node(r["research"], r["state"]) for r in info["requires"]] + [f"stage:{info['stage']}"]
+        alternatives = []
+        if items is not None:
+            wonder = at_hand["wonders"].get(info["wonder"], {})
+            for configuration in at_hand["wonder_configurations"].values():
+                if configuration.get("wonder") != rid(info["wonder"]):
+                    continue
+                group = [research_node(r["research"], r["state"]) for r in configuration["requires"]]
+                group += [f"practice:{configuration['practice']}", f"ritual:{wonder['rite']}", items.item(wonder["heart"]),
+                          items.item(configuration["upkeep"]["item"]), items.ley()]
+                for phase in wonder["phases"]:
+                    structure = phase.get("structure")
+                    if structure:
+                        group.append(items.structure(configuration["crown"] if structure == "crown" else structure))
+                alternatives.append(group)
+        nodes[f"practice:{rid(key)}"] = node(info["stage"], needs, alternatives, kind="practice")
     import concordance_conclave as conclave
     for rank in conclave.RANKS:
         nodes[f"rank:{rank[0]}"] = node("", [research_node(rid("first_light"), "understood")], kind="rank")
@@ -599,7 +640,8 @@ def audit(research, invocations, rituals, at_hand=None):
     nodes = graph(research, invocations, rituals, at_hand, problems)
     for key, info in nodes.items():
         for need in info["all"] + [n for group in info["any"] for n in group]:
-            if need not in nodes and not need.startswith(("unlisted:", "unmade:", "missing:")):
+            if need not in nodes and not need.startswith(("unlisted:", "unmade:", "missing:")) \
+                    and not (need.startswith("stage:") and need[len("stage:"):] in STAGES):
                 problems.append(f"{key} needs {need}, which nothing provides")
         if not info["stage"]:
             continue
@@ -757,3 +799,5 @@ def write_data(write, data):
         write(data / "concordance" / "stage" / f"{key}.json", stage_json(info))
     for key in PRACTICES:
         write(data / "concordance" / "practice" / f"{key}.json", practice_json(key))
+    for key in MILESTONES:
+        write(data / "concordance" / "practice" / f"{key}.json", milestone_json(key))

@@ -713,6 +713,7 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 		for (ServerPlayer player : present) {
 			ConcordanceProgress.record(player, new Evidence.Practiced(ACTIVITY, chunk));
 		}
+		Rituals.completed(level, worldPosition, ritual.id(), present);
 		tell(level, commit.participants(), Component.translatable("message.jugcraft.concordance.circle.completed", ritualName(ritual.id())));
 		sound(level, JugcraftConcordance.CIRCLE_COMPLETE_SOUND, 1.0F);
 		level.sendParticles(ParticleTypes.END_ROD, worldPosition.getX() + 0.5, worldPosition.getY() + 1.5, worldPosition.getZ() + 0.5, 24,
