@@ -252,7 +252,7 @@ Slice 6 adds no items. It makes a shot look like one, and a gun look held, using
 **Muzzle flash:**
 - Each shot shows one of the owner's four flash frames (`Big Cannons and Mounted Guns/textures/muzzleflash*.png`) at the gun's `muzzle` locator, full bright, for two ticks. It swells a little and fades.
 - Each shot picks its frame and its turn about the barrel from its time, so a burst flickers.
-- The frame faces back down the barrel: the shooter sees a star. Two copies cross along the barrel, so a player beside them sees the flash too.
+- The frame faces back down the barrel, so the shooter sees a star from the hip. Two copies cross along the barrel, so a player beside them sees the flash too.
 - **Size,** in the model's pixels, by the round: light 5, rifle 7, buckshot 8, paper cartridge 10 (black powder flares widest).
 - **Barrel attachments:** a Muzzle Brake or an Extended Barrel moves the flash to its own front (a `muzzle_<attachment>` locator, on the bore at the front of the part). A Silencer or a Baffled Silencer hides it.
 - **Black powder:** a muzzle-loader's shot also blows a white cloud in front of the muzzle.
@@ -301,6 +301,7 @@ It multiplies vanilla's own modifier (sprinting, a speed effect), and the camera
 **Server and saves:** nothing changes on the server, and nothing is saved. The flash, casings, smoke, zoom and pose are drawn by each client from what it already knows. The three casing particle types are registered on both sides, as particle types must be.
 
 **Known limits:**
+- Aimed down the sights, the gun's own body stands between the eye and the muzzle and hides most of the flash. The black powder guns' bigger flash and cloud still show around it (CI screenshots below).
 - The flash's timing comes from the shot, not from the animation, so a remote player's flash shows when their shot reaches you.
 - Cases do not bounce or roll; they stop where they land.
 - The zoom does not follow the field of view effects slider, as the spyglass's does not.
@@ -649,6 +650,20 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
   - `python3 tools/check_mod_data.py`: PASS (1572 material IDs), with `check_guns`, which now also holds `GunLooks` and `JugcraftGuns.CASING_AMMO` to `tools/guns.py` and checks the hooks are called. `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
   - Not seen yet: the flash, the casings and the pose in the game. The CI screenshots are the first look.
+- **CI on `f866b051c` (Build run 37694286546):** every job passed: the mod build and server game tests, the build without the optional integrations, and all three client shards.
+  - The client test's log, for all twelve guns:
+    - aimed, the field of view modifier went from 1.0 to the gun's zoom (0.92 down to 0.75);
+    - fired, 4 to 6 flash frames were drawn;
+    - each gun whose animations cue a casing threw one or more (the Line Musket has no cue);
+    - in third person, the player was posed holding a gun for 3,516 frames.
+  - **Screenshots read:**
+    - the view narrowed when aimed (the wall larger than in slice 5's shots);
+    - the Line Musket's and Bellmouth's flash and white cloud at the muzzle;
+    - the Longhorn's flash seen from in front;
+    - the gun raised in front of the chest seen from in front;
+    - from behind, the Longhorn held in both hands and the Warden Pistol in one, the other arm down.
+  - **Seen, and recorded above as a known limit:** aimed, the gun hides most of its flash. The Bellmouth's cloud fills the front view at the moment of the shot.
+  - **The first run failed, not on this slice's code:** an earlier test in the same shard had left the HUD hidden, which hides the hand. The test now shows the HUD first and puts back what it found.
 - **Slice 6 game tests (written; they run in CI):** `GunsClientGameTests`, for every gun:
   - aimed, the field of view modifier is narrowed (or the test says the mixin never ran);
   - fired, at least one muzzle flash frame is drawn;
