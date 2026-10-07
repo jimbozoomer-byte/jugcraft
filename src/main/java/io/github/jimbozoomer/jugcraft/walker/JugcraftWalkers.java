@@ -27,6 +27,8 @@ import net.minecraft.world.item.Item;
 public final class JugcraftWalkers {
 	public static EntityType<DieselWalker> DIESEL_WALKER;
 	public static Item DIESEL_WALKER_ITEM;
+	public static EntityType<ArmouredWalker> ARMOURED_WALKER;
+	public static Item ARMOURED_WALKER_ITEM;
 
 	private JugcraftWalkers() {
 	}
@@ -39,6 +41,15 @@ public final class JugcraftWalkers {
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("diesel_walker"));
 		DIESEL_WALKER_ITEM = Registry.register(BuiltInRegistries.ITEM, itemKey,
 				new DieselWalkerItem(new Item.Properties().setId(itemKey).stacksTo(1)));
+		// The Armoured Walker (batch 58): the Diesel Walker's controls with a hull cannon and a piston ram.
+		ResourceKey<EntityType<?>> armouredKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("armoured_walker"));
+		ARMOURED_WALKER = Registry.register(BuiltInRegistries.ENTITY_TYPE, armouredKey, EntityType.Builder
+				.<ArmouredWalker>of(ArmouredWalker::new, MobCategory.MISC).sized(ArmouredWalker.WIDTH, ArmouredWalker.HEIGHT).noLootTable()
+				.clientTrackingRange(10).updateInterval(1).build(armouredKey));
+		ResourceKey<Item> armouredItemKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("armoured_walker"));
+		ARMOURED_WALKER_ITEM = Registry.register(BuiltInRegistries.ITEM, armouredItemKey,
+				new DieselWalkerItem(new Item.Properties().setId(armouredItemKey).stacksTo(1), () -> ARMOURED_WALKER,
+						"tooltip.jugcraft.armoured_walker"));
 
 		PayloadTypeRegistry.serverboundPlay().register(WalkerInputPayload.TYPE, WalkerInputPayload.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(WalkerInputPayload.TYPE, (payload, context) -> {
@@ -52,7 +63,10 @@ public final class JugcraftWalkers {
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> piloting(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> piloting(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		UseItemCallback.EVENT.register((player, level, hand) -> piloting(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.accept(DIESEL_WALKER_ITEM));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
+			output.accept(DIESEL_WALKER_ITEM);
+			output.accept(ARMOURED_WALKER_ITEM);
+		});
 	}
 
 	/** Whether the player is at the controls of a walker (its first rider). */

@@ -345,7 +345,9 @@ ORE_LEACHING_MULTIPLIER = 4
 # second, as the real ores occur together. Chance per operation.
 BYPRODUCTS = {"copper": ("gold", 0.1), "iron": ("nickel", 0.1), "gold": ("silver", 0.1), "tin": ("tungsten", 0.05),
               "zinc": ("lead", 0.1), "lead": ("silver", 0.1), "silver": ("lead", 0.1), "nickel": ("iron", 0.1),
-              "tungsten": ("tin", 0.1), "uranium": ("lead", 0.1)}
+              "tungsten": ("tin", 0.1), "uranium": ("lead", 0.1),
+              # Thallite is named for epidote, a green iron-rich mineral (docs/features/thallite.md).
+              "thallite": ("iron", 0.1)}
 # Byproducts may not add more than this share of the input's metal (expected value), and a
 # renewable recipe (no metal in) at most this many nugget units per operation.
 BYPRODUCT_SHARE = 0.25

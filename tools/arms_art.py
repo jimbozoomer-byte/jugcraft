@@ -291,7 +291,24 @@ def battle_axe(st):
     return d
 
 
+def flail_handle(d, st):
+    """The flail's handle: pommel, haft, grip, collar and the eye its chain hangs from (FLAIL_EYE). In the hand this is
+    all the model is; the chain and ball are drawn live, swinging, by client/arms/FlailHeads.java (tools/arms_heads.py)."""
+    d.disc(1.0, 0.0, 1.2, st.fitting, depth=2.4)
+    haft(d, 1.0, 14.0, 0.85, st)
+    grip(d, 1.8, 9.8, 1.0, st)
+    d.strip(13.5, 15.5, 1.1, material=st.fitting, depth=2.6)
+    d.ring(FLAIL_EYE, 0.0, 1.1, 0.45, st.fitting, depth=1.2, part="eye")
+    return d
+
+
+# Where the flail's chain hangs from its handle: the eye, along the haft (design units).
+FLAIL_EYE = 16.0
+
+
 def flail(st):
+    """The flail as it was drawn whole, chain slung out and ball beside: the layout (icon fit, grip, the hand's size)
+    is still worked out from it, so the handle is held exactly where it always was."""
     d = Design(34, grip=5.5)
     d.disc(1.0, 0.0, 1.2, st.fitting, depth=2.4)
     haft(d, 1.0, 14.0, 0.85, st)
@@ -611,15 +628,72 @@ def brazier_mace(st, frame=0):
     return d
 
 
+# ---------------------------------------------------------------- Arms VIII (batch 59): thrown arms
+
+
+def javelin(st):
+    d = Design(45, grip=17.0)
+    d.disc(0.7, 0.0, 0.8, st.fitting, depth=1.8)
+    haft(d, 0.6, 36.0, 0.65, st)
+    grip(d, 14.0, 20.0, 0.85, st, period=1.5)   # bound at the balance, where it is thrown from
+    socket(d, 34.0, 37.5, 0.9, st)
+    d.poly([(37.0, -0.85), (38.6, -1.8), (42.4, -0.8), (45.0, 0.0), (42.4, 0.8), (38.6, 1.8), (37.0, 0.85)], st.blade,
+           depth=1.0, part="blade", bevel=0.0)
+    d.strip(37.5, 43.0, 0.3, material=st.blade, depth=1.4, z=1, part="ridge")
+    d.glint(40.0, -1.0)
+    return d
+
+
+def francisca(st):
+    d = Design(28, grip=5.0)
+    d.disc(0.9, 0.0, 1.0, st.fitting, depth=2.0)
+    haft(d, 0.8, 24.0, 0.8, st)
+    grip(d, 1.5, 9.0, 0.95, st, period=1.6)
+    socket(d, 19.5, 24.5, 1.1, st)
+    # A narrow neck flaring into an upswept bit: its toe sweeps up past the top of the haft, as a francisca's does.
+    d.poly([(21.0, 1.1), (23.8, 1.1), (24.6, 2.8), (28.4, 5.6), (27.4, 8.2), (23.4, 8.4), (19.2, 7.6), (17.0, 6.0),
+            (20.6, 2.8)], st.blade, depth=1.2, part="bit")
+    d.poly([(28.4, 5.6), (27.4, 8.2), (23.4, 8.4), (19.2, 7.6), (17.0, 6.0), (18.4, 5.8), (19.8, 6.8), (23.4, 7.4),
+            (26.8, 7.2), (27.6, 5.4)], st.blade, depth=1.2, z=1, tone=HIGHLIGHT)
+    return d
+
+
+def chakram(st):
+    d = Design(22, grip=2.0)
+    # A bladed ring, its outer edge ground bright, held by a wrapped stretch of its rim.
+    d.ring(11.0, 0.0, 10.5, 8.2, st.blade, depth=1.0, part="ring")
+    d.ring(11.0, 0.0, 10.5, 9.5, st.blade, depth=1.0, z=1, tone=HIGHLIGHT)
+    d.strip(0.3, 2.9, 3.0, material=st.grip, depth=2.0, z=2, stripes=(1.0, DARK), part="wrap")
+    return d
+
+
+def harpoon(st):
+    d = Design(45, grip=14.0)
+    d.disc(0.7, 0.0, 0.8, st.fitting, depth=1.8)
+    haft(d, 0.6, 36.0, 0.7, st, rings=(26.0,))
+    grip(d, 10.0, 18.0, 0.9, st, period=1.4)
+    socket(d, 33.0, 37.0, 0.95, st)
+    # A narrow barbed head: a point and two barbs swept back.
+    d.poly([(36.5, -0.8), (42.0, -0.8), (45.0, 0.0), (42.0, 0.8), (36.5, 0.8)], st.blade, depth=1.0, part="blade", bevel=0.0)
+    for side in (1, -1):
+        d.poly([(40.5, side * 0.8), (37.2, side * 2.8), (38.6, side * 0.8)], st.blade, depth=1.0, part=f"barb{side}")
+    d.glint(42.0, -0.4)
+    return d
+
+
 WEAPONS = {"longsword": longsword, "greatsword": greatsword, "rapier": rapier, "flanged_mace": flanged_mace,
            "war_hammer": war_hammer, "glaive": glaive, "halberd": halberd, "spear": spear, "lance": lance,
            "dagger": dagger, "sabre": sabre, "estoc": estoc, "battle_axe": battle_axe, "flail": flail, "scythe": scythe,
            "quarterstaff": quarterstaff, "pike": pike, "zweihander": zweihander, "maul": maul, "executioner": executioner,
            "bill": bill, "labrys": labrys, "battleblade": battleblade, "war_fork": war_fork, "kama": kama,
            "war_pick": war_pick, "twinblade": twinblade, "nodachi": nodachi, "earthbreaker": earthbreaker, "katar": katar,
-           "moonblade": moonblade, "kusarigama": kusarigama, "katana": katana, "brazier_mace": brazier_mace}
+           "moonblade": moonblade, "kusarigama": kusarigama, "katana": katana, "brazier_mace": brazier_mace,
+           "javelin": javelin, "francisca": francisca, "chakram": chakram, "harpoon": harpoon}
 # Kinds whose sprite flickers (an animated texture, its frames top to bottom in one strip): frames, ticks each.
 ANIMATED = {"brazier_mace": (4, 3)}
+# Kinds whose head swings free in the hand (tools/arms_heads.py HEADS): their 3D model is the handle alone, the design
+# function here, and the head is drawn live by client/arms/FlailHeads.java.
+HANDLES = {"flail": lambda st: flail_handle(Design(34, grip=5.5), st)}
 # A kind's icon is 32 pixels if it is held smaller than LARGE, 48 if larger (the great arms and polearms).
 LARGE = 1.55
 # The 3D models' textures: the upright design at the top left of a square this size.
@@ -629,6 +703,12 @@ MODEL_TEXTURE = 64
 def design(kind, metal, frame=0):
     style = STYLES[metal]
     return WEAPONS[kind](style, frame) if kind in ANIMATED else WEAPONS[kind](style)
+
+
+def model_design(kind, metal, frame=0):
+    """The design a kind's 3D model is built from: the handle alone for a kind whose head swings free (HANDLES), else
+    the whole design."""
+    return HANDLES[kind](STYLES[metal]) if kind in HANDLES else design(kind, metal, frame)
 
 
 def icon_size(held):
@@ -666,11 +746,25 @@ def model(kind, metal, held, frame=0, mirrored=False):
         grip_px = (size - grip_px[0], grip_px[1])
     unit = scale * math.sqrt(2.0) * 16.0 / size
     grip_model = (grip_px[0] * 16.0 / size, 16.0 - grip_px[1] * 16.0 / size)
-    # An animated arm's model is shaped to fit every frame, and each frame's texture laid out alike.
-    frames = [design(kind, metal, f) for f in range(ANIMATED.get(kind, (1, 0))[0])]
+    # An animated arm's model is shaped to fit every frame, and each frame's texture laid out alike. A kind whose head
+    # swings free is built from its handle alone, laid out as the whole was, so the hand holds it where it always did.
+    frames = [model_design(kind, metal, f) for f in range(ANIMATED.get(kind, (1, 0))[0])]
     geometry = px.merged(frames)
-    upright, elements = px.model_elements(design(kind, metal, frame), MODEL_TEXTURE, (0, 0), grip_model, unit,
+    upright, elements = px.model_elements(model_design(kind, metal, frame), MODEL_TEXTURE, (0, 0), grip_model, unit,
                                           mirrored=mirrored, geometry=geometry, width=px.upright_width(geometry))
     texture = Image.new("RGBA", (MODEL_TEXTURE, MODEL_TEXTURE), (0, 0, 0, 0))
     texture.paste(upright, (0, 0))
+    if kind in HANDLES:
+        import arms_heads   # (here: arms_heads draws on this module's layout)
+        style = STYLES[metal]
+        arms_heads.paint_swatches(texture, {"chain": CHAIN, "blade": style.blade, "fitting": style.fitting})
     return texture, elements
+
+
+def head_layout(kind, held):
+    """For a kind whose head swings free: (the hand's point in model pixels, model pixels a design unit, the grip and
+    the eye along the haft in design units), from the same layout as its model (tools/arms_heads.py entry)."""
+    size, grip_px, scale, _factor = layout(kind, held)
+    unit = scale * math.sqrt(2.0) * 16.0 / size
+    grip_model = (grip_px[0] * 16.0 / size, 16.0 - grip_px[1] * 16.0 / size)
+    return grip_model, unit, design(kind, "bronze").grip, FLAIL_EYE

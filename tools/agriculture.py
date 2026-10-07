@@ -335,6 +335,10 @@ ITEMS = {
     "roasted_porcini": {"display": "Roasted Porcini", "food": [6, 0.6], "compost": "medium_high", "tags": ["c:foods"]},
     "fried_puffball": {"display": "Fried Puffball", "food": [4, 0.5], "compost": "medium_high", "tags": ["c:foods"]},
     "foragers_stew": {"display": "Forager's Stew", "food": [10, 0.8], "stew": True, "tags": ["c:foods"]},
+    # Bunker interiors (batch 59, tools/bunkerworks.py TRENCH_STEW): beef, potato and carrot stewed in a Cooking Pot, best
+    # on a Field Kitchen. A stew with a short effect (`stew_effect`: [effect, seconds]).
+    "trench_stew": {"display": "Trench Stew", "food": [10, 0.8], "stew": True, "stew_effect": ["REGENERATION", 5],
+                    "tags": ["c:foods/soup"]},
     "apple_cider_donut": {"display": "Apple Cider Donut", "food": [3, 0.4], "compost": "medium_high", "tags": ["c:foods/candy"]},
 }
 
@@ -2083,6 +2087,8 @@ POT_RECIPES = {
     # Fall additions 12: the three edible wild mushrooms stewed with a potato.
     "foragers_stew": {"inputs": {"minecraft:bowl": 1, "jugcraft:chanterelle": 1, "jugcraft:porcini": 1, "jugcraft:puffball": 1,
                                  "minecraft:potato": 1}, "time": 200},
+    # Bunker interiors (batch 59, tools/bunkerworks.py TRENCH_STEW).
+    "trench_stew": {"inputs": {"minecraft:bowl": 1, "minecraft:beef": 1, "minecraft:potato": 1, "minecraft:carrot": 1}, "time": 300},
     "pickled_beets": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:beetroot": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
     "pickled_peppers": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:pepper": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
     "corn_relish": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:corn": 2, "jugcraft:pepper": 1, "jugcraft:onion": 1,

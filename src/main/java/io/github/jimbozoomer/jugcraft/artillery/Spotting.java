@@ -1,6 +1,9 @@
 package io.github.jimbozoomer.jugcraft.artillery;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -17,9 +20,16 @@ import org.jspecify.annotations.Nullable;
  * {@value JugcraftArtillery#MARK_TTL} ticks. A gun fires at its gunner's own mark, else at the nearest other player's
  * mark made within {@value JugcraftArtillery#MARK_RANGE} blocks of the gun, so a spotter in an observation balloon can
  * direct a battery below. Marks are not saved: they are fire orders, not part of the world.
+ *
+ * <p>A Trench Periscope makes marks too, and a Map Table lists them ({@link #near}) and plots them for a fire control
+ * table (batch 59, docs/features/bunker-interiors.md).
  */
 public final class Spotting {
 	private record Mark(ResourceKey<Level> dimension, BlockPos target, Vec3 spotter, long time) {
+	}
+
+	/** A mark as a Map Table lists it: who made it, the block it points at and the game time it was made. */
+	public record Plot(UUID spotter, BlockPos target, long time) {
 	}
 
 	private static final Map<UUID, Mark> MARKS = new HashMap<>();
@@ -34,6 +44,13 @@ public final class Spotting {
 
 	public static void clear(Player player) {
 		MARKS.remove(player.getUUID());
+	}
+
+	/** The player's own mark, if they have one in this dimension that has not run out. */
+	public static @Nullable BlockPos own(ServerLevel level, Player player) {
+		Mark mark = MARKS.get(player.getUUID());
+		return mark == null || mark.dimension() != level.dimension() || level.getGameTime() - mark.time() > JugcraftArtillery.MARK_TTL
+				? null : mark.target();
 	}
 
 	/** The target a gun at {@code gun} crewed by {@code gunner} should fire at, or null if there is none. */
@@ -56,5 +73,24 @@ public final class Spotting {
 			}
 		}
 		return best == null ? null : best.target();
+	}
+
+	/**
+	 * Every mark in this dimension that has not run out and points within {@code range} blocks of {@code pos}, nearest
+	 * first. A copy: changing it changes no mark.
+	 */
+	public static List<Plot> near(ServerLevel level, BlockPos pos, int range) {
+		long now = level.getGameTime();
+		MARKS.values().removeIf(mark -> now - mark.time() > JugcraftArtillery.MARK_TTL);
+		double max = (double) range * range;
+		List<Plot> out = new ArrayList<>();
+		for (Map.Entry<UUID, Mark> entry : MARKS.entrySet()) {
+			Mark mark = entry.getValue();
+			if (mark.dimension() == level.dimension() && mark.target().distSqr(pos) <= max) {
+				out.add(new Plot(entry.getKey(), mark.target(), mark.time()));
+			}
+		}
+		out.sort(Comparator.comparingDouble(plot -> plot.target().distSqr(pos)));
+		return out;
 	}
 }

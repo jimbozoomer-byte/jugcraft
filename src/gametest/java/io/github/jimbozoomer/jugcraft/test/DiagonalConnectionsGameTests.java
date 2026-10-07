@@ -494,10 +494,10 @@ public class DiagonalConnectionsGameTests {
 	}
 
 	/**
-	 * Every fence and bars block has the four properties and starts with them false. Vanilla's walls keep their own
-	 * states, without the properties, and each has a diagonal wall that starts with none and is a wall by tag. Every
-	 * block in the tag is a fence, bars block or wall (vanilla's 14 fences, 17 panes, 9 bars and 32 walls, Jugcraft's 15
-	 * fences, the cedar's since the tree roster's batch 1: 87).
+	 * Every fence and bars block has the four properties and starts with them false. Walls keep their own states, without
+	 * the properties, and each (vanilla's and Jugcraft's) has a diagonal wall that starts with none and is a wall by tag.
+	 * Every block in the tag is a fence, bars block or wall (vanilla's 14 fences, 17 panes, 9 bars and 32 walls,
+	 * Jugcraft's 15 fences, the cedar's since the tree roster's batch 1, and 1 wall: 88).
 	 */
 	@GameTest
 	public void everyFenceBarsBlockAndWallHasDiagonals(GameTestHelper helper) {
@@ -509,8 +509,8 @@ public class DiagonalConnectionsGameTests {
 			if (crossing && (!DiagonalConnections.hasDiagonals(state) || DiagonalConnections.mask(state) != 0)) {
 				problems.add(BuiltInRegistries.BLOCK.getKey(block) + " lacks diagonals or starts joined");
 			}
-			if (block instanceof WallBlock && (DiagonalConnections.hasDiagonals(state)
-					|| BuiltInRegistries.BLOCK.getKey(block).getNamespace().equals("minecraft") && DiagonalWalls.of(block) == null)) {
+			// Every wall, vanilla's and Jugcraft's own (the bastion concrete wall, batch 55), has a diagonal wall.
+			if (block instanceof WallBlock && (DiagonalConnections.hasDiagonals(state) || DiagonalWalls.of(block) == null)) {
 				problems.add(BuiltInRegistries.BLOCK.getKey(block) + " has diagonal properties or no diagonal wall");
 			}
 			if (block instanceof DiagonalWallBlock && (DiagonalConnections.mask(state) != 0 || !state.is(BlockTags.WALLS))) {
@@ -525,7 +525,7 @@ public class DiagonalConnectionsGameTests {
 		}
 		LOGGER.info("{} blocks join diagonally, {} diagonal walls; problems: {}", tagged, DiagonalWalls.all().size(), problems);
 		helper.assertTrue(problems.isEmpty(), "Problems: " + problems);
-		helper.assertTrue(tagged == 87 && DiagonalWalls.all().size() == 32, "87 blocks join diagonally and 32 walls have diagonal walls, not "
+		helper.assertTrue(tagged == 88 && DiagonalWalls.all().size() == 33, "88 blocks join diagonally and 33 walls have diagonal walls, not "
 				+ tagged + " and " + DiagonalWalls.all().size());
 		helper.succeed();
 	}

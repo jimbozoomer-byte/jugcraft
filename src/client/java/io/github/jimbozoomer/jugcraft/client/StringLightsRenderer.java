@@ -149,8 +149,9 @@ public class StringLightsRenderer implements BlockEntityRenderer<StringLightHook
 				Vector3f bottom1 = new Vector3f(top1).sub(0, drop, 0);
 				Vector3f normal = new Vector3f(b).sub(a).cross(0, 1, 0);
 				normal = normal.lengthSquared() < 1.0E-8F ? new Vector3f(1, 0, 0) : normal.normalize();
-				quad(buffer, matrix, light, 0xFFFFFFFF, normal, bottom0, bottom1, top1, top0, u0, u0 + 0.25F);
-				quad(buffer, matrix, light, 0xFFFFFFFF, new Vector3f(normal).negate(), bottom1, bottom0, top0, top1, u0 + 0.25F, u0);
+				// Seen from both sides: two sides lifted off the pennant's middle, never one plane drawn twice.
+				DecorDraw.twoSided(buffer, matrix, corners(bottom0, bottom1, top1, top0, u0, u0 + 0.25F), normal.x(), normal.y(), normal.z(),
+						0xFFFFFFFF, light, DecorDraw.TWO_SIDED_LIFT);
 			}
 		});
 	}
@@ -208,8 +209,9 @@ public class StringLightsRenderer implements BlockEntityRenderer<StringLightHook
 				normal = normal.lengthSquared() < 1.0E-8F ? new Vector3f(0, 0, 1) : normal.normalize();
 				int color = vine ? 0xFFFFFFFF : AUTUMN[i % AUTUMN.length];
 				float u0 = vine || i % 3 != 0 ? 0.25F : 0.5F;
-				quad(buffer, matrix, light, color, normal, bottom0, bottom1, top1, top0, u0, u0 + 0.25F);
-				quad(buffer, matrix, light, color, new Vector3f(normal).negate(), bottom1, bottom0, top0, top1, u0 + 0.25F, u0);
+				// Seen from both sides: two sides lifted off the leaf's middle, never one plane drawn twice.
+				DecorDraw.twoSided(buffer, matrix, corners(bottom0, bottom1, top1, top0, u0, u0 + 0.25F), normal.x(), normal.y(), normal.z(),
+						color, light, DecorDraw.TWO_SIDED_LIFT);
 			}
 			for (int i = 0; i < gourds; i++) {
 				// Pumpkins and gourds in turn, hanging just under the vine.
@@ -234,13 +236,21 @@ public class StringLightsRenderer implements BlockEntityRenderer<StringLightHook
 		return new Vector3f(side).mul((float) Math.cos(phase) * TWIST).add(0, (float) Math.sin(phase) * TWIST, 0);
 	}
 
-	/** A flat strip of wire from {@code a} to {@code b}, {@code across} wide each side, seen from both sides; textured u0 to u1. */
+	/**
+	 * A flat strip of wire from {@code a} to {@code b}, {@code across} wide each side, seen from both sides (two sides lifted
+	 * off the strip's middle, never one plane drawn twice); textured u0 to u1.
+	 */
 	private static void wire(VertexConsumer buffer, PoseStack.Pose matrix, int light, Vector3f a, Vector3f b, Vector3f across, float u0, float u1) {
-		Vector3f normal = new Vector3f(0, 1, 0);
-		quad(buffer, matrix, light, 0xFFFFFFFF, normal, new Vector3f(a).sub(across), new Vector3f(a).add(across), new Vector3f(b).add(across),
-				new Vector3f(b).sub(across), u0, u1);
-		quad(buffer, matrix, light, 0xFFFFFFFF, normal, new Vector3f(b).sub(across), new Vector3f(b).add(across), new Vector3f(a).add(across),
-				new Vector3f(a).sub(across), u0, u1);
+		Vector3f normal = new Vector3f(across).cross(new Vector3f(b).sub(a));
+		normal = normal.lengthSquared() < 1.0E-12F ? new Vector3f(0, 1, 0) : normal.normalize();
+		DecorDraw.twoSided(buffer, matrix, corners(new Vector3f(a).sub(across), new Vector3f(a).add(across), new Vector3f(b).add(across),
+				new Vector3f(b).sub(across), u0, u1), normal.x(), normal.y(), normal.z(), 0xFFFFFFFF, light, DecorDraw.TWO_SIDED_LIFT);
+	}
+
+	/** The corners {x, y, z, u, v} of a quad laid out as {@link #quad} lays them (u0 to u1 across, v 1 at the bottom to 0 at the top). */
+	private static float[][] corners(Vector3f a, Vector3f b, Vector3f c, Vector3f d, float u0, float u1) {
+		return new float[][] {{a.x(), a.y(), a.z(), u0, 1.0F}, {b.x(), b.y(), b.z(), u1, 1.0F}, {c.x(), c.y(), c.z(), u1, 0.0F},
+				{d.x(), d.y(), d.z(), u0, 0.0F}};
 	}
 
 	/** A little cube of pumpkin, {@link #BULB} across, centred on {@code at}. */
