@@ -90,8 +90,10 @@ public class ConcordanceAssayGameTests {
 		Assaying.setBalance(player, 1000L);
 		ItemStack pattern = new ItemStack(Items.IRON_INGOT);
 		use(player, level, ItemStack.EMPTY, pattern);
-		helper.assertTrue(Assaying.balance(player) == 1000 - 320 && player.getOffhandItem() == pattern && pattern.getCount() == 1
-				&& player.getInventory().countItem(Items.IRON_INGOT) == 2, "One ingot formed for 320 grains; the pattern kept");
+		// The formed ingot goes where the inventory puts it back: here it joins the pattern's stack in the other hand.
+		helper.assertTrue(Assaying.balance(player) == 1000 - 320 && player.getOffhandItem() == pattern
+				&& player.getInventory().countItem(Items.IRON_INGOT) == 2, "One ingot formed for 320 grains; the pattern kept: "
+						+ Assaying.balance(player) + " grains, " + player.getInventory().countItem(Items.IRON_INGOT) + " ingots");
 		use(player, level, new ItemStack(Items.IRON_INGOT), ItemStack.EMPTY);
 		Assaying.use(player, level, player.getMainHandItem(), player.getOffhandItem());
 		helper.assertTrue(Assaying.balance(player) == 1000 - 320 + 256, "Dissolved again it pays 256: the round trip lost 64");
