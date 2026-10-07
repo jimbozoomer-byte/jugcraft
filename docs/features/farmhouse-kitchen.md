@@ -57,7 +57,7 @@ Every block wears the owner's own textures, imported unchanged (see Dependencies
 ## Dependencies and assets
 No new dependency; Fabric API's use-block event, already used elsewhere, carries the cake slicing.
 
-**The owner's own textures.** On 7 October 2026 the owner said of their library's farming and food textures: "I have already made a ton of custom textures and food similar to Farmer's Delight but I made all of the textures in there myself its all mine." They are used as drawn. `tools/owner_art.py` copies each file byte-for-byte from `art/owner-library/originals/Blocks/farming and food textures/`, with its `.png.mcmeta` animation where it has one. `tools/generate_textures.py` runs that import last so no generator draws over them, and `tools/check_mod_data.py` fails if a runtime copy differs from its source. Imported: 75 textures and 2 animation files, plus 2 recolourings.
+**The owner's own textures.** On 7 October 2026 the owner said of their library's farming and food textures: "I have already made a ton of custom textures and food similar to Farmer's Delight but I made all of the textures in there myself its all mine." They are used as drawn. `tools/owner_art.py` copies each file byte-for-byte from `art/owner-library/originals/Blocks/farming and food textures/`, with its `.png.mcmeta` animation where it has one (the sidecar's line ends made LF, as Git stores the mod's text files). `tools/generate_textures.py` runs that import last so no generator draws over them, and `tools/check_mod_data.py` fails if a runtime copy differs from its source. Imported: 75 textures and 2 animation files, plus 2 recolourings.
 
 | Runtime texture (`assets/jugcraft/textures/`) | Library file (`farming and food textures/`) | Change |
 | --- | --- | --- |

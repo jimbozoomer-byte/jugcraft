@@ -15,7 +15,7 @@
   "key": {
     "I": "#c:ingots/iron",
     "B": "minecraft:brick",
-    "C": "#minecraft:campfires"
+    "C": "minecraft:campfire"
   },
   "result": {
     "id": "jugcraft:kitchen_stove",

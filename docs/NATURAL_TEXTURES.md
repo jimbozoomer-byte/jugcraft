@@ -15,8 +15,9 @@ These rules are for textures Jugcraft draws. Textures the owner drew themselves,
 ([art/owner-library](../art/owner-library/README.md)), are the exception: they are used as the owner drew them, not
 redrawn by code. On 7 October 2026 the owner said of the library's farming and food textures: "I made all of the
 textures in there myself its all mine", and asked for them to be used.
-- Copy them byte-for-byte with `tools/owner_art.py`, which `tools/generate_textures.py` runs last so no generator draws
-  over them. `tools/check_mod_data.py` fails if a copy drifts from its source.
+- Copy them byte-for-byte with `tools/owner_art.py` (an animation `.mcmeta` gets LF line ends, as Git stores text).
+  `tools/generate_textures.py` runs it last so no generator draws over them, and `tools/check_mod_data.py` fails if a
+  copy drifts from its source.
 - Don't "clean up" or restyle an imported owner texture. A recolouring (such as the bronze and steel knives, made from
   the owner's iron knife) is listed in the feature's `RECOLOURED` table and recorded in its feature document.
 - Record each imported file's library path in the feature's asset provenance

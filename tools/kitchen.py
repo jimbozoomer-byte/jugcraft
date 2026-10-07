@@ -121,7 +121,7 @@ CUTTING = {
 # Crafting.
 SHAPED = [
     {"id": STOVE["block"], "pattern": ["III", "BCB", "BBB"],
-     "key": {"I": "#c:ingots/iron", "B": "minecraft:brick", "C": "#minecraft:campfires"},
+     "key": {"I": "#c:ingots/iron", "B": "minecraft:brick", "C": "minecraft:campfire"},
      "result": STOVE["block"], "count": 1, "category": "misc"},
     {"id": SKILLET["block"], "pattern": ["III", " S "], "key": {"I": "#c:ingots/iron", "S": "minecraft:stick"},
      "result": SKILLET["block"], "count": 1, "category": "misc"},

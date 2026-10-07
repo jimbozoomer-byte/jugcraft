@@ -3,9 +3,9 @@ README.md) into the mod's resources, and checks the imported files still match t
 
 On 7 October 2026 the owner asked for their farming and food textures to be used ("I have already made a ton of custom
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte
-copy of its library file, with its .png.mcmeta animation sidecar when it has one; the only changes are the recolourings
-listed in a feature's RECOLOURED table (the bronze and steel knives: the owner's iron knife with its blade's tones swapped
-for the approved bronze and steel ramps). No generator draws over these files: tools/generate_textures.py runs this
+copy of its library file, with its .png.mcmeta animation sidecar when it has one (its line ends made LF, as Git stores
+the mod's text files). The only changes are the recolourings listed in a feature's RECOLOURED table (the bronze and
+steel knives: the owner's iron knife with its blade's tones swapped for the approved bronze and steel ramps). No generator draws over these files: tools/generate_textures.py runs this
 import last, and tools/check_mod_data.py fails if a runtime copy differs from what this import would write.
 
     python3 tools/owner_art.py           write every import (generate_textures.py also does)
@@ -84,8 +84,10 @@ def expected():
             files[_target(target)] = handle.read()
         meta = _source(source) + ".mcmeta"
         if os.path.isfile(meta):
+            # A sidecar is text: the library keeps the owner's CRLF line ends, and Git stores resource text with LF
+            # (.gitattributes), so the copy is written with LF to match what is committed.
             with open(meta, "rb") as handle:
-                files[_target(target) + ".mcmeta"] = handle.read()
+                files[_target(target) + ".mcmeta"] = handle.read().replace(b"\r\n", b"\n")
     for target, source, ramp in recolourings():
         files[_target(target)] = _png_bytes(recolour(Image.open(_source(source)), ramp))
     return files
