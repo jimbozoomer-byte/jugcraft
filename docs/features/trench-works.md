@@ -63,3 +63,4 @@ Not applicable: crafted and placed by players only.
 
 ## Rollout and open questions
 - The searchlight could later sweep by itself while powered, and the telephone could carry a variable signal strength.
+- **Fixed 5 October 2026 (shared render fixes):** the searchlight's drum and yoke are drawn closed (no see-through gaps). Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

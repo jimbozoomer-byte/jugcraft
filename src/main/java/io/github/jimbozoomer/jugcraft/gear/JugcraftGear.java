@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.tools.Chargeable;
 import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
+import io.github.jimbozoomer.jugcraft.weapons.DescribedItem;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,9 @@ import net.minecraft.world.level.block.Block;
  * work. Keep the lists in sync with tools/gear.py; tools/check_mod_data.py checks them.
  * <p>Batch 27 (docs/features/gear-and-plastic.md) adds the scuba mask and tank, free runners, and the JE-powered
  * katana and bow, after Mekanism's scuba gear, free runners, Meka-Tana and Meka-Bow (MIT; none of its code or art).
+ * <p>Steampunk and Kaiser Armor (docs/features/steampunk-and-kaiser-armor.md) are bronze and steel armor in another
+ * look: their materials are the metal's with only the equipment asset changed ({@link #restyle}), and a smithing
+ * template ({@link #STYLE_TEMPLATES}) turns a plain piece into a styled one and back (data-driven recipes).
  */
 public final class JugcraftGear {
 	/** Metals with a full set of tools and armor (tools/gear.py: GEAR_TIERS). */
@@ -67,6 +71,16 @@ public final class JugcraftGear {
 	/** Steel armor: between iron and diamond. */
 	public static final ArmorMaterial STEEL_ARMOR = new ArmorMaterial(25, defense(3, 6, 7, 3), 10,
 			SoundEvents.ARMOR_EQUIP_IRON, 1.5F, 0.05F, repairs("steel"), asset("steel"));
+	/** Styled armor (tools/gear.py: ARMOR_STYLES): a metal's armor in every number, in another look. */
+	public static final List<String> ARMOR_STYLES = List.of("steampunk", "kaiser");
+	/** Their smithing templates (tools/gear.py: style_templates()). */
+	public static final List<String> STYLE_TEMPLATES = List.of("steampunk_pattern", "kaiser_pattern");
+	/** Steampunk armor: bronze armor in the steampunk look (goggles, gauge, boiler). */
+	public static final ArmorMaterial STEAMPUNK_ARMOR = restyle(BRONZE_ARMOR, "steampunk");
+	/** Kaiser armor: steel armor in the kaiserpunk parade dress of the Winged Cog. */
+	public static final ArmorMaterial KAISER_ARMOR = restyle(STEEL_ARMOR, "kaiser");
+	/** The styled armor's templates, by id, for the Ingredients tab. */
+	public static final Map<String, Item> TEMPLATES = new LinkedHashMap<>();
 
 	/** Scuba gear: leather-like protection, repaired with rubber. */
 	public static final ArmorMaterial SCUBA_ARMOR = new ArmorMaterial(10, defense(1, 1, 2, 1), 10,
@@ -101,6 +115,13 @@ public final class JugcraftGear {
 	public static void register() {
 		set("bronze", BRONZE, BRONZE_ARMOR, 6.0F, -3.1F, -2.0F, -1.0F);
 		set("steel", STEEL, STEEL_ARMOR, 5.5F, -3.0F, -2.5F, 0.0F);
+		styled("steampunk", STEAMPUNK_ARMOR);
+		styled("kaiser", KAISER_ARMOR);
+		for (String id : STYLE_TEMPLATES) {
+			ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Jugcraft.id(id));
+			TEMPLATES.put(id, Registry.register(BuiltInRegistries.ITEM, key,
+					new DescribedItem(new Item.Properties().setId(key).rarity(Rarity.UNCOMMON))));
+		}
 		for (String tier : PAXEL_TIERS) {
 			ToolMaterial base = baseMaterial(tier);
 			ToolMaterial paxel = new ToolMaterial(base.incorrectBlocksForDrops(), base.durability() * PAXEL_DURABILITY,
@@ -125,6 +146,8 @@ public final class JugcraftGear {
 				output.accept(item);
 			}
 		}));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> TEMPLATES.values()
+				.forEach(output::accept));
 	}
 
 	/** Batch 27: scuba mask and tank, free runners, power katana and power bow. */
@@ -179,6 +202,23 @@ public final class JugcraftGear {
 		item(tier + "_chestplate", properties -> new Item(properties.humanoidArmor(armor, ArmorType.CHESTPLATE)));
 		item(tier + "_leggings", properties -> new Item(properties.humanoidArmor(armor, ArmorType.LEGGINGS)));
 		item(tier + "_boots", properties -> new Item(properties.humanoidArmor(armor, ArmorType.BOOTS)));
+	}
+
+	/**
+	 * A style's helmet, chestplate, leggings and boots: its metal's armor in another look, common like the plain piece,
+	 * with a grey line of lore (tooltip.jugcraft.&lt;id&gt;).
+	 */
+	private static void styled(String style, ArmorMaterial armor) {
+		item(style + "_helmet", properties -> new DescribedItem(properties.humanoidArmor(armor, ArmorType.HELMET)));
+		item(style + "_chestplate", properties -> new DescribedItem(properties.humanoidArmor(armor, ArmorType.CHESTPLATE)));
+		item(style + "_leggings", properties -> new DescribedItem(properties.humanoidArmor(armor, ArmorType.LEGGINGS)));
+		item(style + "_boots", properties -> new DescribedItem(properties.humanoidArmor(armor, ArmorType.BOOTS)));
+	}
+
+	/** The same armor material worn in another look: every number, sound and repair tag is the base's. */
+	private static ArmorMaterial restyle(ArmorMaterial base, String style) {
+		return new ArmorMaterial(base.durability(), base.defense(), base.enchantmentValue(), base.equipSound(),
+				base.toughness(), base.knockbackResistance(), base.repairIngredient(), asset(style));
 	}
 
 	private static ToolMaterial baseMaterial(String tier) {

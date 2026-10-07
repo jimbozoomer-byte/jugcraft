@@ -25,8 +25,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Client game test for the Ferris wheel (fall addition 27): the wheel standing over its booth at a fall fair, a hand
- * crank turning it, a High Striker and plushes beside it; close up at its foot; the view from a car at the top; and at
- * night, its lights on. CI job {@code client}.
+ * crank turning it, a High Striker and plushes beside it; close up at its foot; the view from a car at the top; at
+ * night, its lights on; and stopped, close by at an angle, twice from 0.05 block apart (a pair to compare for shimmer).
+ * CI job {@code client}.
  */
 public class FerrisWheelClientGameTests implements FabricClientGameTest {
 	@Override
@@ -77,6 +78,22 @@ public class FerrisWheelClientGameTests implements FabricClientGameTest {
 			context.waitTicks(10);
 			shoot(context, singleplayer, x, y + 2, z + 14, 180, -14, "jugcraft_ferris_wheel_night");
 			server.runCommand("time set noon");
+
+			// The wheel stopped (its crank taken away), from close by at an angle, then again from 0.05 block to the side:
+			// compared, the two show any texture that shimmers as the camera moves (only the outlines should shift).
+			server.runOnServer(minecraft -> {
+				ServerLevel level = minecraft.overworld();
+				level.setBlock(booth(origin).east(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+				FerrisWheel wheel = wheel(level, origin);
+				wheel.setSpeed(0.0F);
+				wheel.setAngle(0.2F);
+			});
+			context.waitTicks(30);
+			shoot(context, singleplayer, x + 9, y + 4, z + 4, 138, -16, "jugcraft_ferris_wheel_still");
+			server.runCommand(String.format(Locale.ROOT, "tp @p %.2f %d %.2f 138 -16", x + 9.55, y + 4, z + 4.5));
+			context.waitTicks(10);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_ferris_wheel_still_moved");
 		}
 	}
 
