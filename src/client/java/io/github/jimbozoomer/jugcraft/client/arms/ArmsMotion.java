@@ -66,7 +66,7 @@ public final class ArmsMotion {
 	public static final List<String> KINDS = List.of("longsword", "greatsword", "rapier", "flanged_mace", "war_hammer", "glaive",
 			"halberd", "spear", "lance", "dagger", "sabre", "estoc", "battle_axe", "flail", "scythe", "quarterstaff", "pike",
 			"zweihander", "maul", "executioner", "bill", "labrys", "battleblade", "war_fork", "kama", "war_pick", "twinblade", "nodachi",
-			"earthbreaker", "katar", "moonblade", "kusarigama", "katana", "brazier_mace");
+			"earthbreaker", "katar", "moonblade", "kusarigama", "katana", "brazier_mace", "javelin", "francisca", "chakram", "harpoon");
 	/** Ticks the guard takes to come up when an arm is taken in hand, and a parry or couch to settle. */
 	private static final float GUARD_TICKS = 5.0F;
 	private static final float USE_TICKS = 4.0F;

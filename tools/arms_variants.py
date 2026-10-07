@@ -15,6 +15,7 @@ tools/arms_variants_art.py; the Runebound arms are smooth meshes in the hand, wi
 """
 import arms
 import arms_heads
+import arms_icons
 import arms_mesh
 import arms_variants_art
 
@@ -182,12 +183,21 @@ def held_model(name):
     return {"textures": {"particle": texture, "tex": texture}, "elements": elements, "display": display}
 
 
+def trait(text):
+    """A perk or boon's text, "Name: what it does.", as its trait's name and its description (gear/TraitTooltips.java):
+    ("Name", "What it does.")."""
+    name, _, rest = text.partition(": ")
+    return name, rest[0].upper() + rest[1:]
+
+
 def write_all(write, assets, data, lang, condition):
     """Each variant's models and definition, its name and its line's and boon's tooltips; the patterns, their recipes
     and the styles' smithing recipes; and each boss's trophy loot table."""
     models = assets / "models" / "item"
     for style, info in STYLES.items():
-        lang[f"tooltip.{MOD}.arms.line.{style}"] = info["perk"]
+        name, text = trait(info["perk"])
+        lang[f"tooltip.{MOD}.arms.line.{style}.trait"] = name
+        lang[f"tooltip.{MOD}.arms.line.{style}"] = text
         lang[f"item.{MOD}.{info['pattern']}"] = info["pattern_name"]
         lang[f"tooltip.{MOD}.{info['pattern']}"] = info["pattern_tooltip"]
         write(models / f"{info['pattern']}.json", {"parent": "minecraft:item/generated",
@@ -199,11 +209,13 @@ def write_all(write, assets, data, lang, condition):
             "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shaped", "category": "misc",
             "pattern": rows, "key": key, "result": {"id": f"{MOD}:{info['pattern']}", "count": 1}})
     for boss, info in BOSSES.items():
-        lang[f"tooltip.{MOD}.arms.line.{boss}"] = f"A trophy of {info['display']}."
+        lang[f"tooltip.{MOD}.arms.line.{boss}.trait"] = f"Trophy of {info['display']}"
         write(data / "loot_table" / "bosses" / f"{boss}.json", {
             "type": "minecraft:entity", "random_sequence": f"{MOD}:bosses/{boss}",
             "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{MOD}:{name}"} for name in trophies(boss)]}]})
     for boon, text in BOONS.items():
+        name, text = trait(text)
+        lang[f"tooltip.{MOD}.arms.boon.{boon}.trait"] = name
         lang[f"tooltip.{MOD}.arms.boon.{boon}"] = text
     for name, kind_, at, _boon, display in VARIANTS:
         lang[f"item.{MOD}.{name}"] = display
@@ -237,11 +249,17 @@ def write_all(write, assets, data, lang, condition):
 
 
 def draw_all(save):
-    """Each variant's icon and model texture (tools/arms_variants_art.py; the Runebound arms' icons rendered from their
-    meshes, tools/arms_mesh.py), the patterns' sprites, and the meshes' painted atlas and glowing rune strip."""
-    for name, kind_, *_ in VARIANTS:
+    """Each variant's icon and model texture (tools/arms_variants_art.py), the patterns' sprites, and the Runebound meshes'
+    painted atlas and glowing rune strip. The inventory icon: the Runebound arms' rendered from their meshes
+    (tools/arms_mesh.py), else the variant's 16x16 map in its line's materials (tools/arms_icons.py), else its drawing."""
+    for name, kind_, line, *_ in VARIANTS:
         held = arms.KINDS[kind_]["held"]
-        save(arms_mesh.draw(name) if name in arms_mesh.NAMES else arms_variants_art.draw(name, held), "item", name)
+        if name in arms_mesh.NAMES:
+            save(arms_mesh.draw(name), "item", name)
+        elif arms_icons.has(name):
+            save(arms_icons.draw(name, arms_variants_art.LINE_STYLES[line]), "item", name)
+        else:
+            save(arms_variants_art.draw(name, held), "item", name)
         save(arms_variants_art.model(name, held)[0], "item", f"{name}_model")
     save(arms_mesh.atlas(), "item", arms_mesh.ATLAS)
     save(arms_mesh.rune_strip(), "item", arms_mesh.RUNE, animation=arms_mesh.rune_animation())
