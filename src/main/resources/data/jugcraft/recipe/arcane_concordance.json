@@ -9,7 +9,7 @@
   "category": "misc",
   "ingredients": [
     "minecraft:book",
-    "minecraft:amethyst_shard"
+    "#jugcraft:concordance/luminous_matter"
   ],
   "result": {
     "id": "modonomicon:modonomicon",

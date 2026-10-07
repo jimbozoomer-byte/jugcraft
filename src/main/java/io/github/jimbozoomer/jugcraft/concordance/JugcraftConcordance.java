@@ -260,6 +260,8 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.dreaming.Dreaming.register();
 		// Roadmap step 23: the Starbound Conclave: renown, ranks, commissions, shared projects and the Conclave Lectern.
 		io.github.jimbozoomer.jugcraft.concordance.starbound.Starbound.register();
+		// Roadmap step 24: each player's stage of the Concordance, read from the progression graph's stages.
+		io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

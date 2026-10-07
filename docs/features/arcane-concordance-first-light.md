@@ -19,13 +19,14 @@ Architecture, vocabulary and the 32-step checklist: [ARCANE_CONCORDANCE.md](../A
 3. **Understand**, by any of three routes (the third, reading another player's Research Notes, is in
    [arcane-concordance-sharing.md](arcane-concordance-sharing.md)):
    - the field: observe three different specimens in the dark; or
-   - the laboratory: craft a **Lampwright's Bench** (copper, amethyst, planks, sticks), put a specimen in its dish and
-     press Study; after 5 seconds the bench uses the specimen and hands over the notes.
+   - the laboratory: craft a **Lampwright's Bench** (copper, amethyst or glowstone dust, planks, sticks), put a
+     specimen in its dish and press Study; after 5 seconds the bench uses the specimen and hands over the notes.
    The codex's Kindle and Kindled Lantern pages unlock, and **Kindle** is learned.
-4. **Cast.** Craft an **Initiate's Wand** (amethyst, stick, copper ingot) and hold it. Kindle appears on Spell Engine's
-   spell bar; casting it (0.6 s, with an original gesture) sets a mote of steady light (level 14) in the open block
-   you look at, up to 16 blocks away, for 60 seconds. It costs 4 Focus of 20 (one returns every 2 seconds) and has a
-   1.5 s cooldown. Casting in 8 different chunks **masters** First Light, and Kindle then costs 3.
+4. **Cast.** Craft an **Initiate's Wand** (amethyst or glowstone dust, stick, copper ingot) and hold it. Kindle
+   appears on Spell Engine's spell bar; casting it (0.6 s, with an original gesture) sets a mote of steady light
+   (level 14) in the open block you look at, up to 16 blocks away, for 60 seconds. It costs 4 Focus of 20 (one returns
+   every 2 seconds) and has a 1.5 s cooldown. Casting in 8 different chunks **masters** First Light, and Kindle then
+   costs 3.
 5. **Make a lantern.** At the bench, put a plain lantern in the work slot and an amethyst shard in the dish, press
    Kindle: a **Kindled Lantern** holding 8 Radiance. Infuse more specimens (amethyst 8, glowstone 6, glowcap 4,
    glimmerbloom 3, jack-o'-lantern mushroom 3, glow ink 3, glow lichen 2, glow berries 1) or channel 6 Focus for 2.
@@ -33,8 +34,9 @@ Architecture, vocabulary and the 32-step checklist: [ARCANE_CONCORDANCE.md](../A
    it burns 1 Radiance every 20 seconds while lit, carried or not, and holds up to 64 (21 minutes). Out, it keeps its
    charge. LambDynamicLights, when installed, also makes it glow in hand.
 
-The *Arcane Concordance* codex (crafted from a book and an amethyst shard) explains each step. A new player can do all
-of this without commands.
+The *Arcane Concordance* codex (crafted from a book and an amethyst shard or glowstone dust) explains each step. A new
+player can do all of this without commands. (The bench, the wand, the sconce and the codex take glowstone dust as well
+as amethyst since roadmap step 24, so that a world whose geodes are gone or out of reach still has a way in.)
 
 ## Connections
 

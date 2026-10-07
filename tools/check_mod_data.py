@@ -302,8 +302,9 @@ def item_units(ref):
         return {}  # vanilla tags used here (logs, planks), Jugcraft logs and heirloom pumpkins hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
-        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path in ("fermentable", "grave_flowers"):
-            return {}
+        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path in ("fermentable", "grave_flowers") \
+                or ns == MOD and form == "concordance":
+            return {}  # ... and the Concordance's own item tags (luminous matter) hold no metal
         if form not in UNITS or not metal:
             err(f"Recipe uses unsupported tag {ref}")
             return {}
@@ -7550,6 +7551,7 @@ def check_concordance(registered):
     check_equivalence(co, root, lang, registered, research)
     check_sympathy(co, root, lang, registered, research)
     check_conclave(co, root, lang, registered, research)
+    check_progression(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -7818,7 +7820,7 @@ def check_baselines(root):
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
     for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
-                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream", "conclave"):
+                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream", "conclave", "progression"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -9341,6 +9343,174 @@ def check_conclave(co, root, lang, registered, research):
         with Image.open(icon) as img:
             if img.convert("RGBA").tobytes() != item_icons.draw("conclave_lectern").tobytes() or img.size != (16, 16):
                 err("conclave: textures/item/conclave_lectern.png differs from its map: run tools/generate_textures.py")
+
+
+def check_progression(co, root, lang, registered, research):
+    """Roadmap step 24: the Java mirrors tools/concordance_progression.py (the parser's limits, the graph's node names);
+    the stages and practice gates on disk are the generator's; the progression graph, followed down to things at hand
+    (specimens, stations, instruments, structures, offerings, devices, encounters and what the world gives), lets one
+    player alone reach every research state, practice, commission, project and stage from a fresh world, without
+    structure loot, without the Nether and without the End, with nothing circular and nothing needing what only a later
+    stage makes, two routes through each middle stage and a recovery route for every finite world material; the
+    record's table of mandatory steps is the graph's; and the graph is what the codex, the spell gates, the equipment
+    gates and recipe visibility are checked against: every codex condition is a reachable research state, each entry
+    opens before the research it introduces begins, every invocation's entry opens exactly when it is learnt, every
+    component and Java gate names a research state the graph has, every recipe-made thing a step needs has a codex
+    recipe page readable before it is needed, and no required step depends on an optional library."""
+    pg = co.progression
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    parser = java("progression/ProgressionParser.java")
+    for const in ("MAX_ROUTES", "MAX_COUNT"):
+        if not re.search(rf"\bint {const} = {getattr(pg, const)};", parser):
+            err(f"progression/ProgressionParser.java: {const} differs from tools/concordance_progression.py")
+    graph_java = java("progression/ProgressionGraph.java")
+    for const, value in (("NOTES", "social:notes"), ("PROJECT", "project:conclave"), ("OATH_RESEARCH", f"{MOD}:first_light")):
+        if f'String {const} = "{value}";' not in graph_java:
+            err(f"progression/ProgressionGraph.java: {const} must be {value} (tools/concordance_progression.py)")
+    # The data on disk is the generator's.
+    folder = DATA / MOD / "concordance"
+    stages = {p.stem: load(p) or {} for p in (folder / "stage").glob("*.json")}
+    practices = {p.stem: load(p) or {} for p in (folder / "practice").glob("*.json")}
+    if set(stages) != set(pg.STAGES) or set(practices) != set(pg.PRACTICES):
+        err("concordance/stage or concordance/practice differ from STAGES and PRACTICES")
+    for key, info in pg.STAGES.items():
+        if stages.get(key) != pg.stage_json(info):
+            err(f"concordance/stage/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    for key in pg.PRACTICES:
+        if practices.get(key) != pg.practice_json(key):
+            err(f"concordance/practice/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    # The graph, down to things at hand.
+    invocations = {p.stem: load(p) or {} for p in (folder / "invocation").glob("*.json")}
+    rituals = {p.stem: load(p) or {} for p in (folder / "ritual").glob("*.json")}
+    at_hand = pg.load_at_hand(DATA)
+    for problem in pg.audit(research, invocations, rituals, at_hand):
+        err(f"progression: {problem}")
+    for dimension in ("nether", "end"):
+        reached = pg.without_dimension(research, invocations, rituals, at_hand, dimension)
+        if reached != sorted(pg.STAGES, key=pg._order):
+            err(f"progression: without the {dimension.title()}, one player reaches only {reached}")
+    # The record shows the graph's mandatory steps, not a copy that could drift.
+    record = (ROOT / "docs" / "features" / "arcane-concordance-progression.md").read_text(encoding="utf-8") \
+        if (ROOT / "docs" / "features" / "arcane-concordance-progression.md").exists() else ""
+    table = re.search(r"<!-- mandatory: generated -->\n(.*?)\n<!-- mandatory: end -->", record, re.S)
+    expected = "\n".join(pg.mandatory_table(pg.mandatory(research, invocations, rituals, at_hand)))
+    if not table or table.group(1).strip() != expected:
+        err("docs/features/arcane-concordance-progression.md: its table of mandatory steps differs from the graph's:\n" + expected)
+    nodes = pg.graph(research, invocations, rituals, at_hand)
+    alone = pg.reachable(nodes, research)
+    def state_of(node_id):
+        # A codex fact's id (jugcraft:concordance/<research>_<state>) as the graph's research node.
+        path = node_id.split(":", 1)[1].removeprefix("concordance/")
+        entry, _, state = path.rpartition("_")
+        return pg.research_node(f"{MOD}:{entry}", state)
+    # Codex navigation: every condition is a reachable research state; each research entry's page opens before it begins.
+    entries = {}
+    base = DATA / MOD / "modonomicon" / "books" / co.BOOK / "entries"
+    for path in sorted(base.rglob("*.json")):
+        entry = load(path) or {}
+        entries[path.relative_to(base).with_suffix("").as_posix()] = entry
+        for condition in [entry.get("condition", {})] + [page.get("condition", {}) for page in entry.get("pages", [])]:
+            if condition.get("type") == "modonomicon:research_node_unlocked":
+                node = state_of(condition.get("node_id", ""))
+                if node not in nodes or node not in alone:
+                    err(f"codex {path.relative_to(base)}: its condition {condition.get('node_id')} is no state one player can reach")
+    def opens(entry, before):
+        """Whether a codex entry is open before {before} is reached (its condition reachable without it)."""
+        condition = entry.get("condition", {})
+        if condition.get("type") != "modonomicon:research_node_unlocked":
+            return True
+        return state_of(condition["node_id"]) in pg.reachable(nodes, research, without={before})
+    for key, info in research.items():
+        first = next((state for state in pg.RESEARCH_STATES if state in info.get("states", {})), None)
+        pages = [entry for name, entry in entries.items() if name.endswith(f"/{key}")]
+        if not pages:
+            err(f"research {key}: no codex entry introduces it")
+        elif first and not any(opens(entry, pg.research_node(f"{MOD}:{key}", first)) for entry in pages):
+            err(f"research {key}: its codex entry opens only after the research has begun")
+    for key, info in invocations.items():
+        entry = entries.get(f"invocations/{key}", {})
+        condition = entry.get("condition", {}).get("node_id", "")
+        if not entry or state_of(condition) != pg.research_node(info.get("research", ""), info.get("stage", "")):
+            err(f"codex invocations/{key}: its entry must open when the invocation is learnt ({info.get('research')} {info.get('stage')})")
+    # Spell gates and equipment gates name states the graph has.
+    for path in sorted((folder / "component").glob("*.json")):
+        requires = (load(path) or {}).get("requires")
+        if requires and pg.research_node(requires.get("research", ""), requires.get("state", "")) not in alone:
+            err(f"component {path.stem}: its gate {requires} is no research state one player can reach")
+    gates = {}
+    for path in sorted(root.rglob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        activity = re.search(r'String ACTIVITY = "([a-z_:]+)";', text)
+        gate = re.search(r'String RESEARCH = "([a-z_]+:[a-z_]+)";', text)
+        if gate and split(gate.group(1))[1] not in research:
+            err(f"{path.relative_to(JAVA_ROOT)}: its gate {gate.group(1)} names no research entry")
+        if activity:
+            gates[split(activity.group(1))[1]] = (path, gate.group(1) if gate else None)
+    for key, (_tradition, gate, _devices, _encounters) in pg.PRACTICES.items():
+        path, java_gate = gates.get(key, (None, None))
+        if path is None:
+            err(f"progression: no Java ACTIVITY records the practice {key}")
+        elif key == "ritual":
+            if any(info.get("research") != rid_value(gate) for info in rituals.values()):
+                err(f"progression: every ritual is taught by {gate}, the ritual practice's gate")
+        elif java_gate != rid_value(gate):
+            err(f"progression: the practice {key} is gated by {java_gate} in {path.name}, not {gate} as PRACTICES says")
+    # Recipe visibility: the codex (Modonomicon, required) shows how to make every recipe-made thing a step needs.
+    shown = {}
+    for name, entry in entries.items():
+        for page in entry.get("pages", []):
+            recipe = page.get("recipe_id_1")
+            if recipe:
+                made = load(DATA / MOD / "recipe" / f"{split(recipe)[1]}.json") or {}
+                result = made.get("result", {})
+                shown.setdefault(result.get("id") if isinstance(result, dict) else result, []).append((entry, page))
+    for key in sorted(alone):
+        item = key[len("item:"):] if key.startswith(f"item:{MOD}:") else None
+        if item is None or item in pg.JUGCRAFT_SOURCES:
+            continue
+        if item not in at_hand["recipes"]:
+            # Made by a ritual, a bench working or a practice: the codex has an entry for it.
+            if not any(name.endswith("/" + split(item)[1]) for name in entries) and item not in pg.PRODUCERS:
+                err(f"progression: {item} is made by no recipe and no codex entry says how")
+            continue
+        without = pg.reachable(nodes, research, without={key})
+        def readable(entry, page):
+            return all(state_of(c["node_id"]) in without for c in (entry.get("condition", {}), page.get("condition", {}))
+                       if c.get("type") == "modonomicon:research_node_unlocked")
+        if not any(readable(entry, page) for entry, page in shown.get(item, [])):
+            err(f"progression: the codex shows no recipe for {item} that can be read before it is needed")
+    # A station or device a step needs is never lost by breaking it: it drops itself.
+    for key in sorted(alone):
+        item = split(key[len("item:"):])[1] if key.startswith(f"item:{MOD}:") else None
+        if item and (ASSETS / "blockstates" / f"{item}.json").is_file():
+            loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{item}.json") or {})
+            if f'"{MOD}:{item}"' not in loot:
+                err(f"progression: {MOD}:{item} is needed by a step, so breaking it must drop it")
+    # No required step depends on an optional library: nothing in an optional adapter records progress.
+    for base_dir in (JAVA_ROOT / "compat", CLIENT_JAVA_ROOT / "compat"):
+        for path in sorted(base_dir.rglob("*.java")) if base_dir.exists() else []:
+            if re.search(r"ConcordanceProgress\.record\(|StageProgress\.milestone\(|Starbound\.(contribute|fulfil|swear)\(",
+                         path.read_text(encoding="utf-8")):
+                err(f"{path.relative_to(ROOT)}: an optional adapter must not be the only way a step is done")
+    stages_java = java("stages/StageProgress.java")
+    if '.then(Commands.literal("stage")' not in stages_java or "copyOnDeath()" not in stages_java:
+        err("stages/StageProgress.java: the stage command (the fallback to the codex) and stages kept through death")
+    if "held.order() >= reached.order()" not in stages_java:
+        err("stages/StageProgress.java: a stage once reached is never lost")
+    # Every word has its text.
+    for key, info in pg.STAGES.items():
+        if f"compose.{MOD}.stage.{key}" not in lang:
+            err(f"progression: missing the name of the stage {key}")
+        for route in info["routes"]:
+            if f"compose.{MOD}.stage.{key}.{route['id']}" not in lang:
+                err(f"progression: missing the text of the route {key}/{route['id']}")
+        if not (DATA / MOD / "advancement" / f"concordance_stage_{key}.json").is_file():
+            err(f"progression: missing the advancement concordance_stage_{key}")
+    for key in re.findall(r'"message\.jugcraft\.concordance\.((?:stage|progression)\.[a-z_]+)"', stages_java):
+        if f"message.{MOD}.concordance.{key}" not in lang:
+            err(f"stages/StageProgress.java: missing lang message.{MOD}.concordance.{key}")
 
 
 def rid_value(path):

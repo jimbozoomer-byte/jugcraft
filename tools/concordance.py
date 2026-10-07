@@ -185,6 +185,10 @@ SPECIMENS = {
 }
 SPECIMEN_TAG = f"{MOD}:luminous_specimens"
 INSTRUMENT_TAG = f"{MOD}:concordance_instruments"
+# What the first Concordance pieces (the bench, the wand, the sconce, the codex) take for their light: an amethyst shard,
+# or glowstone dust where amethyst cannot be had (roadmap step 24's recovery route: amethyst grows only in geodes).
+LUMINOUS_MATTER_TAG = f"{MOD}:concordance/luminous_matter"
+LUMINOUS_MATTER = ["minecraft:amethyst_shard", "minecraft:glowstone_dust"]
 SPELL_TAG = f"{MOD}:concordance"
 
 # --------------------------------------------------------------------------------------------- milestone 1 content
@@ -441,6 +445,8 @@ import concordance_conclave as conclave  # noqa: E402
 RESEARCH.update(conclave.RESEARCH)
 ITEMS.update(conclave.ITEMS)
 BLOCKS.update(conclave.BLOCKS)
+# Roadmap step 24 (tools/concordance_progression.py): the five stages and the canonical progression graph.
+import concordance_progression as progression  # noqa: E402
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
@@ -948,6 +954,7 @@ def codex():
         **equivalence.codex(),
         **hexes.codex(),
         **conclave.codex(),
+        **progression.codex(),
     }
 
 
@@ -1470,6 +1477,7 @@ MESSAGES = {
     **equivalence.MESSAGES,
     **hexes.MESSAGES,
     **conclave.MESSAGES,
+    **progression.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1651,6 +1659,7 @@ def lang_entries(lang):
     lang[f"tag.item.{MOD}.luminous_specimens"] = "Luminous Specimens"
     lang[f"tag.item.{MOD}.concordance_specimens"] = "Concordance Specimens"
     lang[f"tag.item.{MOD}.concordance_instruments"] = "Concordance Instruments"
+    lang[f"tag.item.{MOD}.concordance.luminous_matter"] = "Luminous Matter"
     lang[f"config.jade.plugin_{MOD}.lampwright_bench"] = "Lampwright's Bench"
     lang[f"config.jade.plugin_{MOD}.lumen_sconce"] = "Lumen Sconce"
     # JEI's bench category (client/compat/JugcraftJeiPlugin): what a working leaves in the lantern.
@@ -1698,6 +1707,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     equivalence.write_all(write, assets, data, lang, condition, self_drop)
     hexes.write_all(write, assets, data, lang, condition, self_drop)
     conclave.write_all(write, assets, data, lang, condition, self_drop)
+    progression.write_all(write, data, lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -1775,12 +1785,12 @@ def write_all(write, assets, data, lang, condition, self_drop):
     write(data / "recipe" / "initiate_wand.json", {
         "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shaped", "category": "equipment",
         "pattern": ["  A", " S ", "C  "],
-        "key": {"A": "minecraft:amethyst_shard", "S": "minecraft:stick", "C": "minecraft:copper_ingot"},
+        "key": {"A": f"#{LUMINOUS_MATTER_TAG}", "S": "minecraft:stick", "C": "minecraft:copper_ingot"},
         "result": {"id": rid("initiate_wand"), "count": 1}})
     write(data / "recipe" / "lampwright_bench.json", {
         "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shaped", "category": "misc",
         "pattern": ["CAC", "PPP", "S S"],
-        "key": {"C": "minecraft:copper_ingot", "A": "minecraft:amethyst_shard", "P": "#minecraft:planks",
+        "key": {"C": "minecraft:copper_ingot", "A": f"#{LUMINOUS_MATTER_TAG}", "P": "#minecraft:planks",
                 "S": "minecraft:stick"},
         "result": {"id": rid("lampwright_bench"), "count": 1}})
     write(data / "recipe" / "research_notes.json", {
@@ -1790,11 +1800,11 @@ def write_all(write, assets, data, lang, condition, self_drop):
     write(data / "recipe" / "lumen_sconce.json", {
         "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shaped", "category": "building",
         "pattern": [" A ", " C ", "CCC"],
-        "key": {"A": "minecraft:amethyst_shard", "C": "minecraft:copper_ingot"},
+        "key": {"A": f"#{LUMINOUS_MATTER_TAG}", "C": "minecraft:copper_ingot"},
         "result": {"id": rid("lumen_sconce"), "count": 1}})
     write(data / "recipe" / f"{BOOK}.json", {
         "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shapeless", "category": "misc",
-        "ingredients": ["minecraft:book", "minecraft:amethyst_shard"],
+        "ingredients": ["minecraft:book", f"#{LUMINOUS_MATTER_TAG}"],
         "result": {"id": "modonomicon:modonomicon", "count": 1, "components": {"modonomicon:book_id": rid(BOOK)}}})
 
 
@@ -1840,6 +1850,7 @@ def write_data(write, res):
     equivalence.write_data(write, data)
     hexes.write_data(write, data)
     conclave.write_data(write, data)
+    progression.write_data(write, data)
     # LambDynamicLights (optional, client): a lit Kindled Lantern glows in hand. Without the mod nothing reads this.
     write(assets / "dynamiclights" / "item" / "kindled_lantern.json",
           {"match": {"items": rid("kindled_lantern"), "components": {rid("lantern_lit"): {}}},
@@ -1866,6 +1877,8 @@ def tags(tags):
     conclave.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
+    for item in LUMINOUS_MATTER:
+        tags.add("item", LUMINOUS_MATTER_TAG, item)
     tags.add("block", "minecraft:mineable/axe", rid("lampwright_bench"))
     tags.add("block", "minecraft:mineable/pickaxe", rid("lumen_sconce"))
     for key in INVOCATIONS:

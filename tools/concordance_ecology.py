@@ -366,7 +366,9 @@ def codex():
                  f"A ripe crop (step {STAGES}) is harvested with an empty hand, or by a Gleaner: its produce and "
                  f"Verdant Chaff, and it falls back to step 1 to grow again. A Mendvetch next to other crops also "
                  f"speeds them, as legumes do."),
-            ],
+            ] + [("crafting_recipe", ORGANISMS[key]["name"],
+                  f"Your first {ORGANISMS[key]['name']} comes from the crafting grid; after that, its harvests give "
+                  f"more.", rid(key)) for key in CROPS],
         },
         ("garden", "devices"): {
             "name": "Living Devices", "x": 2, "y": 2, "icon": rid("verdant_heart"), "condition": (art, "understood"),

@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "order": 5,
+  "routes": [
+    {
+      "id": "shared_wonder",
+      "rank": "starbound",
+      "projects": 1,
+      "mastered": 6
+    }
+  ]
+}

@@ -14,7 +14,7 @@
   ],
   "key": {
     "C": "minecraft:copper_ingot",
-    "A": "minecraft:amethyst_shard",
+    "A": "#jugcraft:concordance/luminous_matter",
     "P": "#minecraft:planks",
     "S": "minecraft:stick"
   },
