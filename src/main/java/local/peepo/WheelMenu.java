@@ -7,7 +7,7 @@ import net.minecraft.world.item.ItemStack;
 
 /** Server-authoritative wheel readouts; the wheel has no fuel or item inventory. */
 public final class WheelMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT = 5;
+    public static final int DATA_COUNT = 7;
     private final ContainerData data;
     private final ContainerLevelAccess access;
 
@@ -31,6 +31,7 @@ public final class WheelMenu extends AbstractContainerMenu {
     public boolean running() { return data.get(1) != 0; }
     public int reservePercent() { return data.get(2); }
     public int outputRate() { return data.get(3); }
+    public int occupantId() { return (data.get(5) & 0xffff) | ((data.get(6) & 0xffff) << 16); }
     public int occupantKind() { return data.get(4); }
 
     @Override public boolean stillValid(Player player) {

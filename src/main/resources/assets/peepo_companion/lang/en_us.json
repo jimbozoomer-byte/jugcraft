@@ -22,7 +22,7 @@
   "container.peepo_companion.wheel.terminal": "Wheel power",
   "container.peepo_companion.wheel.full": "> Full",
   "container.peepo_companion.wheel.running": "> Running",
-  "container.peepo_companion.wheel.waiting": "> Waiting",
+  "container.peepo_companion.wheel.waiting": "IDLE",
   "container.peepo_companion.wheel.stored": "Stored",
   "container.peepo_companion.wheel.push": "Export",
   "container.peepo_companion.wheel.outputs": "Power outputs",

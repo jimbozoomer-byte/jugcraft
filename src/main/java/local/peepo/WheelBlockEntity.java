@@ -23,6 +23,8 @@ public final class WheelBlockEntity extends BlockEntity implements CompanionStat
                 case 2 -> p == null ? 0 : (int) (100L * p.getEnergy() / p.getEnergyCapacity());
                 case 3 -> outputRate;
                 case 4 -> p == null ? 0 : p.isJughead() ? 2 : 1;
+                case 5 -> p == null ? 0 : p.getId() & 0xffff;
+                case 6 -> p == null ? 0 : (p.getId() >>> 16) & 0xffff;
                 default -> 0;
             };
         }
