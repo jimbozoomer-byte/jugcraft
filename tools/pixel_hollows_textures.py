@@ -15,6 +15,8 @@ from pathlib import Path
 
 from PIL import Image
 
+import block_style as bs
+
 TEX = Path(__file__).resolve().parents[1] / "src" / "main" / "resources" / "assets" / "jugcraft" / "textures"
 
 SLATE = [(28, 26, 36), (36, 34, 46), (44, 42, 56), (52, 50, 66), (62, 60, 78)]
@@ -47,12 +49,8 @@ def shade(color, amount):
 # ---------------------------------------------------------------- circuitstone
 
 def slate(seed):
-    rng = random.Random(seed)
-    img = new()
-    for y in range(16):
-        for x in range(16):
-            put(img, x, y, SLATE[rng.choice([1, 2, 2, 2, 3, 3, 1, 0, 4])])
-    return img
+    """Dark slate in the manner of vanilla deepslate: its tones in thin streaks running across the block."""
+    return bs.img(bs.streaks(SLATE, seed, vertical=False, spread=0.7))
 
 
 def trace(img, rng, start, steps):
@@ -86,11 +84,11 @@ def circuitstone(seed=900):
 
 def polished_circuitstone(seed=901):
     """Smooth slate with a bevel and a little chip on two traces."""
-    rng = random.Random(seed)
+    smooth = bs.surface(SLATE[1:4], seed, weights=[1, 5, 2], spread=0.5)
     img = new()
     for y in range(16):
         for x in range(16):
-            c = SLATE[3] if rng.random() < 0.15 else SLATE[2]
+            c = smooth(x, y)
             if x == 0 or y == 0:
                 c = SLATE[4]
             elif x == 15 or y == 15:
@@ -115,18 +113,9 @@ def polished_circuitstone(seed=901):
 
 
 def circuitstone_bricks(seed=902):
-    """Slate bricks with dark joints; a few bricks carry a trace and a via."""
+    """Slate bricks with dark joints, in the manner of vanilla deepslate bricks; a few bricks carry a trace and a via."""
     rng = random.Random(seed)
-    img = new()
-    for y in range(16):
-        row = y // 4
-        offset = 4 if row % 2 else 0
-        for x in range(16):
-            joint = y % 4 == 3 or (x + offset) % 8 == 7
-            c = SLATE[0] if joint else SLATE[rng.choice([2, 2, 3, 3, 4])]
-            if not joint and y % 4 == 0:
-                c = shade(c, 8)
-            put(img, x, y, c)
+    img = bs.img(bs.bricks(SLATE, seed, rows=4, cols=2))
     for row in range(4):
         if rng.random() < 0.6:
             y = row * 4 + 1
@@ -213,12 +202,11 @@ def pixel_shard():
 
 def pixel_hollows_map(seed=906):
     """An unmarked parchment map, folded in three, stamped with a teal crystal."""
-    rng = random.Random(seed)
     img = new(fill=(0, 0, 0, 0))
-    paper = [(196, 170, 120), (214, 190, 140), (228, 206, 160)]
+    paper = bs.surface([(196, 170, 120), (214, 190, 140), (228, 206, 160)], seed, weights=[1, 4, 1], spread=0.5)
     for y in range(2, 14):
         for x in range(1, 15):
-            c = paper[rng.choice([0, 1, 1, 2])]
+            c = paper(x, y)
             if x in (5, 10):
                 c = shade(c, -26)  # the folds
             put(img, x, y, c)
@@ -387,6 +375,11 @@ DENIM = [(42, 54, 96), (28, 34, 62), (74, 90, 136)]
 SHOE, SOLE = (34, 34, 38), (228, 228, 228)
 
 
+def strand(tones, x, y, period=5):
+    """Hair or beard in neat strands: the first tone, the second on a regular slant."""
+    return tones[1] if (x + 2 * y) % period == 0 else tones[0]
+
+
 def flannel(x, y):
     """Buffalo check: red, black where the dark bands cross, dark red where they do not."""
     a, b = (x // 2) % 2, (y // 2) % 2
@@ -395,8 +388,10 @@ def flannel(x, y):
 
 def denim(x, y):
     """Navy plaid trousers."""
+    if x % 4 == 3 and y % 4 == 3:
+        return DENIM[2]
     if x % 4 == 3 or y % 4 == 3:
-        return DENIM[2] if (x + y) % 2 else DENIM[1]
+        return DENIM[1]
     return DENIM[0]
 
 
@@ -421,8 +416,8 @@ def retro_trader():
 
     # Head (texture offset 0,0; 8x10x8): hair on top and the back, brows, glasses with green eyes, beard.
     head = box_faces(0, 0, 8, 10, 8)
-    fill(img, head["top"], lambda x, y: HAIR[(x + y) % 2 + 1])
-    fill(img, head["bottom"], lambda x, y: BEARD[(x + y) % 2])
+    fill(img, head["top"], lambda x, y: strand(HAIR[1:], x, y))
+    fill(img, head["bottom"], lambda x, y: strand(BEARD, x, y, 4))
     fill(img, head["back"], lambda x, y: HAIR[1 + (x % 3 == 0)] if y < 7 else None)
 
     def face(x, y):
@@ -436,7 +431,7 @@ def retro_trader():
             return {0: GLASSES, 1: EYE_WHITE, 2: EYE_GREEN, 3: GLASSES, 4: GLASSES, 5: EYE_WHITE, 6: EYE_GREEN,
                     7: GLASSES}[x]
         if y >= 7 or (y == 6 and x in (0, 7)):
-            return BEARD[(x + y) % 2]
+            return strand(BEARD, x, y, 4)
         return None
     fill(img, head["front"], face)
 
@@ -444,11 +439,11 @@ def retro_trader():
         def paint(x, y):
             toward_front = x if front_at_high_u else 7 - x
             if y < 3 or (toward_front < 3 and y < 7):
-                return HAIR[1 + (x + y) % 2]
+                return strand(HAIR[1:], x, y)
             if y == 4 and toward_front >= 3:
                 return GLASSES  # the arm of the glasses
             if y >= 5 and toward_front >= 4:
-                return BEARD[(x + y) % 2]  # sideburns into the beard
+                return strand(BEARD, x, y, 4)  # sideburns into the beard
             return None
         return paint
     fill(img, head["right"], side(True))
@@ -457,10 +452,10 @@ def retro_trader():
     # Hat layer (32,0): fuller hair on top, a fringe at the front, longer at the back.
     hat = box_faces(32, 0, 8, 10, 8)
     fill(img, hat["top"], lambda x, y: HAIR[2] if (x + 2 * y) % 5 == 0 else HAIR[1])
-    fill(img, hat["front"], lambda x, y: HAIR[1 + (x % 2)] if y == 0 or (y == 1 and x not in (3, 4)) else None)
+    fill(img, hat["front"], lambda x, y: strand(HAIR[1:], x, y) if y == 0 or (y == 1 and x not in (3, 4)) else None)
     fill(img, hat["right"], lambda x, y: HAIR[1] if y < 2 else None)
     fill(img, hat["left"], lambda x, y: HAIR[1] if y < 2 else None)
-    fill(img, hat["back"], lambda x, y: HAIR[1 + (x % 2)] if y < 6 else None)
+    fill(img, hat["back"], lambda x, y: HAIR[1 + (x % 3 == 0)] if y < 6 else None)
 
     # Nose (24,0; 2x4x2): a moustache along its bottom.
     nose = box_faces(24, 0, 2, 4, 2)
@@ -531,7 +526,7 @@ def retro_trader():
                 return SOLE
             if toe and y == 10:
                 return SOLE
-            return SHOE if (x + y) % 3 else shade(SHOE, 18)
+            return shade(SHOE, 18) if y == 8 else SHOE
         return paint
     fill(img, leg["front"], leg_side(True))
     for name in ("right", "left", "back"):
