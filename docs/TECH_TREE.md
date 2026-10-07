@@ -560,7 +560,7 @@ Two more arms and a war kit in bronze and steel. Shot for shot the longbow and a
 
 ### Arms VII (batch 56): variant arms, crafted styles and boss trophies
 
-32 named arms, each a variant of a kind above that fights as its kind does, in steel. Sixteen are crafted at a smithing table: a style's pattern, a steel arm of the kind and the style's material, keeping its enchantments and wear. Sixteen are trophies of eight bosses still to be made ([branches/BOSSES.md](branches/BOSSES.md)): no recipe, each boss's loot table ready; creative only until then. No variant deals as much a second as a netherite sword.
+33 named arms, each a variant of a kind above that fights as its kind does, in steel. Sixteen are crafted at a smithing table: a style's pattern, a steel arm of the kind and the style's material, keeping its enchantments and wear. Sixteen are trophies of eight bosses still to be made ([branches/BOSSES.md](branches/BOSSES.md)): no recipe, each boss's loot table ready; creative only until then. One, the Hades Scythe, is the Hades Armor set's arm: no recipe and no loot table yet, creative only until the owner settles how the sets are won. No variant deals as much a second as a netherite sword.
 
 | Line | Arms | Perk or boon | Made from |
 | --- | --- | --- | --- |
@@ -576,8 +576,9 @@ Two more arms and a war kit in bronze and steel. Shot for shot the longbow and a
 | The Alpha Werewolf | Moonfang, Howler | Howl: Weakness, 3 s | trophy |
 | The Storm Roc | Stormcaller, Galefeather | Gale: throws the foe up and back | trophy |
 | The Abyssal Leviathan | Tidebreaker, Leviathan's Hook | Tide: 25% harder against a foe in water or rain | trophy |
+| Hades Armor (an armor set) | Hades Scythe | Wither: Wither, 3 s | the set's arm (creative only for now) |
 
-Trophies last twice as long as steel. Glowing parts (runes, magma, venom, soul fire, sparks) are lit in the dark.
+Trophies and the set's arm last twice as long as steel. Glowing parts (runes, magma, venom, soul fire, sparks) are lit in the dark.
 
 **Code:** `weapons/ArmVariants` (the variants, boons and numbers), `ArmItem` (`boon`, `boonBonus`, `shock`); data from `tools/arms_variants.py`, art from `tools/arms_variants_art.py` ([feature record](features/arms-vii.md)).
 

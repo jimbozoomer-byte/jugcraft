@@ -11,7 +11,7 @@ Target milestone and tier: steel age (the machines feature), on [arms.md](arms.m
 Primary specialty and supported player role: fighting; smithing for crafters; trophies for a future boss branch ([branches/BOSSES.md](../branches/BOSSES.md)).
 
 ## Player experience
-32 named arms, each a variant of an existing kind with its own look and a perk or boon. All are in the creative Combat tab. Every one fights as its kind does: the same swing, reach, trait, two-handed blow, weapon art and motion.
+33 named arms, each a variant of an existing kind with its own look and a perk or boon, in three kinds of line: crafted styles, boss trophies and, since 7 October 2026, an armor set's arm. All are in the creative Combat tab. Every one fights as its kind does: the same swing, reach, trait, two-handed blow, weapon art and motion.
 
 **Crafted styles: 16 arms in four styles.** Each is made at a smithing table from:
 - the style's pattern (a smithing template, crafted);
@@ -41,11 +41,17 @@ The arm keeps its enchantments and wear.
 | the Storm Roc | Stormcaller (glaive), Galefeather (estoc) | **Gale:** throws the foe up and back |
 | the Abyssal Leviathan | Tidebreaker (war fork), Leviathan's Hook (bill) | **Tide:** 25% harder against a foe in water or rain |
 
+**An armor set's arm: the Hades Scythe.** The owner, 7 October 2026: "I also want the scythe from my Hades Armor set." The owner's armor sets are a third kind of line beside the styles and the bosses (`SETS` in `tools/arms_variants.py`, `ArmVariants.SETS`). Like a trophy, a set's arm has no recipe, carries epic rarity, lasts twice as long as steel and has a boon. Unlike a trophy, nothing drops it yet. The owner will settle how the sets are won ("They might get dropped by bosses or be craftable for now just make the armor we can figure that out later"), so until then it is creative only. See [The Hades Scythe](#the-hades-scythe) below.
+
+| Armor set | Arm | Boon |
+|---|---|---|
+| Hades Armor | Hades Scythe (scythe), `jugcraft:hades_scythe` | **Wither:** Wither, 3 s (the Gravewarden's boon) |
+
 **Looks:**
 - Each arm is drawn with the restyle's toolkit: a pixel-art icon on the diagonal and a 3D model in the hand.
 - Glowing parts are lit at full brightness in the hand, so they show in the dark: runes, magma, venom, soul fire, charged coils and lightning.
-- Tooltips name the kind's trait or art, the boon (in aqua) and the line (in purple: the style's perk, or "A trophy of …").
-- **The Runebound arms are smooth 3D models in the hand** (see [Runebound meshes](#runebound-meshes) below); the other 28 keep the restyle's pixel look.
+- Tooltips name the kind's trait or art, the boon (in aqua) and the line (in purple: the style's perk, "Trophy of …" for a boss's arm, or "Of the Hades Armor set" for a set's).
+- **The Runebound arms are smooth 3D models in the hand** (see [Runebound meshes](#runebound-meshes) below); the other 29 keep the restyle's pixel look.
 - **Second pass (the owner: "dont overcomplicate them"):** each design was checked against the studied mods at 8× and kept to one or two accents.
   - **Gilded:** the rapier and sabre use the base arms' plainer hilts in gold. The halberd uses the larger halberd head, with a gold hook and one sapphire, and no chasing or tassels.
   - **Ironclad:** no bolt grids.
@@ -78,6 +84,55 @@ The owner, 5 October 2026: "the runebound weapons need to look much better if po
 - **Client game test** (`RuneboundClientGameTests`, CI): asserts the `jugcraft:mesh` loader is registered, at least four mesh models were baked as meshes (`MeshItemModels.BAKED`) and none fell back to its box model (`FALLBACKS`), then shoots the four on a close rack of armor stands by day and at midnight, each held from the front by day, a Moonblade with the enchantment glint, the Moonblade and Nodachi in first person by day and the Staff at night. **Not yet run in CI** at the time of writing.
 - **Not verified yet:** how the smooth per-corner lighting looks in game (expected, since Fabric's renderer passes each corner's normal to the item shader, but unseen until the CI screenshots); how bright the glow reads by day (glowing quads ignore the light level but, like vanilla's glowing elements, are still shaded by the item shader's direction lighting, so by day they read cyan to teal and at night bright: the offline renders model this); third-party renderers such as Sodium/Iris drawing Fabric item meshes; whether the `enchantment_glint_override` component syntax in the test's command is right for 26.3 (if not, that one shot shows no glint).
 
+## The Hades Scythe
+
+The owner, 7 October 2026, with the design of their Hades Armor set: "I also want the scythe from my Hades Armor set." The design is a render of the armored figure, the scythe and the pieces. It is a reference only and is not committed. The armor has its own record; this section covers its arm.
+
+- **Tier, inputs, outputs, costs, unlocks:**
+  - `jugcraft:hades_scythe` is an arm of the scythe kind in steel. It has the steel scythe's blow (8.5 damage, speed −3.0), reach, Reap trait, two-handed blow and motion.
+  - Its boon is the existing Wither (Wither, 3 s), the Gravewarden's. Its best second is 10.06, under netherite's 12.8.
+  - It is epic and lasts twice as long as steel (1,800), as a trophy does.
+  - It has no recipe and no loot table. It is creative only, in the Combat tab, until the owner settles how the armor sets are won.
+  - It costs nothing and unlocks nothing, and nothing needs it.
+- **The armor sets' line, where it differs from a boss's:**
+  - **Tables:** `SETS = {"hades": {"display": "Hades Armor"}}` sits beside `STYLES` and `BOSSES`, and is part of `LINES`. Java has `ArmVariants.SETS`, held to Python by `check_arms_variants`. Java needed nothing else: every line that is not a style is epic and lasts as a trophy does (`ArmVariants.register`), and its tooltip line is a name only (`ArmItem.traits`).
+  - **Loot tables:** each boss has a table, `loot_table/bosses/<boss>.json`; a set has none. `check_arms_variants` fails if a set has a table under `bosses/`, or if any loot table names a set's arm.
+  - **Recipe:** none, as for a trophy. The check's message names the set instead of calling the arm a trophy.
+  - **Tooltip:** "Of the Hades Armor set", where a trophy says "Trophy of the Mire Hag". The check now also confirms that each boss's line names its boss and each set's line names its set.
+  - **Handbook:** a page, "Arms: Armor Sets", after "Arms: Trophies". It names the set, its arm and the boon, and says that how they are won is still to be settled.
+  - **Tests:** see Verification below. The trophy-table test would have looked for `bosses/hades` and failed; it now counts as bosses only the lines that are neither styles nor sets.
+- **The look, drawn fresh by code from the owner's design:**
+  - **The 3D model in the hand** (`hades_scythe` in `tools/arms_variants_art.py`) is in the arms' box style.
+    - It is 53 design units long, as the scythe is, and held at 13, the middle of its red wraps (the scythe's hand is at 10).
+    - It uses the scythe's hand poses, scaled 1.92 instead of 1.79, so the broader design is held at the scythe's length.
+    - **Pommel:** a slate diamond 7 texels across. Its two lower edges are trimmed light, three rows deep, as the armor's plates are edged, round a bluish core.
+    - **Snath:** blue-black, 4 texels wide, with two soot-black rings a texel wider each side. Near the top it bends out to the head at about 40°, with a soot collar just past the bend.
+    - **Grip:** two blood-red wraps between three dark-red bands, two texels each.
+    - **Head:** a slate diamond 12 texels across, trimmed light along its lower edges, round a bluish core. A short spike points out of its back corner.
+    - **Blade:** its back is a cubic Bézier from the head's upper face, falling away to the left and turning down to the point, fitted to the design's proportions. It is 7 units broad, narrowing over the last third: slate along the back, lighter towards the edge, and a bright edge.
+    - **Depths:** the blade is 1.6 deep, the snath 4, the pommel 4.2 and the head 4.6.
+  - **The palette** is the `HADES` style: `SLATE`, `ASHEN` for the light trim, `NIGHT` for the snath, `SOOT` for the rings and `BLOOD` for the wraps. It was matched by eye and by the tone ratios measured from the design's render; no texture was copied.
+  - **The 16×16 icon** is the map `tools/arms_icons/hades_scythe.txt` (`# family: polearm`), the first Arms VII variant drawn as a map:
+    - span 14; blade 7 steps (0.50); 118 opaque pixels, against the scythe's 111;
+    - a pale head with a slate core, a short spike below it, a broad slate blade, the dark snath with red wraps and a pale pommel.
+    - Because a variant of the line is now a map, `check_icon_maps` checks all six of the Hades line's materials strictly. All pass; the slate is 18.4 from iron and 29.5 from copper.
+- **Where it differs from the owner's design:**
+  - **Proportions:** for its length, the snath and the pommel are about 0.8 of the design's breadth, and the head and the blade about 0.9. The arms' texels are finer than the design's voxels, and the slimmer snath keeps it close to its siblings.
+  - **Head and pommel:** they are flat diamonds in the blade's plane, stepped a texel at a time, not cubes turned on a corner as drawn. The light trim and the bluish core stand in for the cube's faces.
+  - **The back spike** is our reading of the head's back corner.
+  - **The bend** is about 40°, against roughly 45° in the design.
+  - **The icon:** the bend does not show at 16 pixels, where the neck runs straight into the head. The blade's light edge is on its back, because the icon rules light the upper-left edge; in the model it is on the cutting edge, as drawn.
+  - **The palette is ours,** measured from the design. The armor is drawn separately, so the two should be compared side by side in game and matched if they differ.
+- **Failure behaviour:** an ordinary item. Nothing ticks, and no saved state is added beyond the item.
+- **Offline evidence** (not a game test): previews drawn by a scratch renderer from the generated files, not committed:
+  - the model upright, from the front and three angles, beside the design's scythe;
+  - the model on the diagonal, beside the steel scythe's and the Hagthorn's;
+  - the icon at 1×, 2× and 8× on light and dark slots, beside the steel and bronze scythes, the steel halberd and glaive, and the Hagthorn.
+- **Not verified yet:**
+  - nothing has been run in game or in CI;
+  - the owner has not seen it;
+  - how it matches the Hades Armor in game.
+
 ## Connections
 - **Existing input producer:**
   - steel arms (the steel foundry and the arms' own recipes);
@@ -91,6 +146,7 @@ The owner, 5 October 2026: "the runebound weapons need to look much better if po
 - **Required vs optional:** all optional.
   - The styles can be crafted solo or traded.
   - The trophies wait for their bosses. Until then they are creative-only, and that is on purpose: [branches/BOSSES.md](../branches/BOSSES.md) is a proposal, and no core progression needs a trophy.
+  - The Hades Scythe waits for the owner to settle how the armor sets are won (a boss's drop or a recipe). Until then it is creative-only on purpose, and nothing needs it.
 - **How the specialty stays useful:** a style is a look and a small perk, not a stronger tier. The arms of batches 42 to 55 stay as good.
 
 ## Balance and automation
@@ -105,7 +161,7 @@ The owner, 5 October 2026: "the runebound weapons need to look much better if po
 ## Multiplayer and persistence
 - **Server authority:** every boon is worked on the server, in `ArmItem.hurtEnemy` and `getAttackDamageBonus`, when the arm strikes. Clients only see the effects and particles.
 - **Saved state:** none beyond ordinary items with stable ids:
-  - the 32 variants: `jugcraft:gilded_longsword` … `jugcraft:leviathans_hook`, as in `tools/arms_variants.py`;
+  - the 33 variants: `jugcraft:gilded_longsword` … `jugcraft:leviathans_hook`, then `jugcraft:hades_scythe`, as in `tools/arms_variants.py`;
   - the four patterns: `jugcraft:gilders_pattern`, `ironclad_pattern`, `bonecarvers_pattern`, `runecarvers_pattern`.
 - **Disabling the `machines` feature** removes the recipes, not the items.
 
@@ -136,13 +192,23 @@ The owner, 5 October 2026: "the runebound weapons need to look much better if po
   - every variant and pattern in frames, and the variants on armor-stand racks;
   - trophies held from the front by day, glowing ones at midnight, and one in first person;
   - a Glacier Maul's blow with the real attack key, its frost read back from the server.
+- **The Hades Scythe (7 October 2026), run locally:**
+  - **`python3 tools/check_mod_data.py`:** PASS. `check_arms_variants` now also holds `ArmVariants.SETS` to `SETS`. It fails a line that is in two groups, a boss's or set's line whose name does not name it, and a set's arm with a recipe, with a `bosses/` table of its own, or named in any loot table. Each of these breaks was tried once and caught.
+  - **The art check** (run by `check_mod_data`): PASS with the new model.
+  - **`python3 tools/check_icon_maps.py`:** PASS, with no warnings on the new map. The Hades line's materials are checked strictly.
+  - **`python3 scripts/check_repository.py`:** PASS.
+  - **The generators:** a second run of `generate_material_data.py` and of `generate_textures.py` changes nothing. Every other arm's files are byte-identical; only the lang file, the swords tag and the handbook gained entries.
+- **The Hades Scythe's game tests, changed and not yet run in CI:**
+  - `ArmsVIIGameTests`: every set has an arm; the Hades Scythe's Wither takes on a pig; a set's arm has no recipe and its set no `bosses/` table; the trophy-table test passes over the set line.
+  - `TraitDetailsGameTests`: the Hades Scythe's expanded tooltip ends with its set's line, a name only.
+  - `ArmsVIIClientGameTests`: the racks hold every variant (a third rack for the 33rd; before, they stopped at 32), and the Hades Scythe is held from the front by day.
 - **Not run:**
   - play;
   - two players;
   - how the boons feel against real mobs.
 
 ## World and event applicability
-- **Loot rarity and abilities:** trophies are epic and styles uncommon. Abilities are bounded, as above.
+- **Loot rarity and abilities:** trophies and the armor set's arm are epic, styles uncommon. Abilities are bounded, as above.
 - **Boss containment:** the bosses themselves are not built. [branches/BOSSES.md](../branches/BOSSES.md) lists the rules each must meet (arena, readable attacks, recovery, scaling, no griefing, no farming loop).
 - **No seasonal content:** the Pumpkin King idea there would have to keep its drops after the season.
 
