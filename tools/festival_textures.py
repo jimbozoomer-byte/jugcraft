@@ -10,6 +10,7 @@ import random
 
 from crop_textures import Canvas, rgb, outline, seeds_item, heart, KERNEL
 from kitchen_textures import bowl_item, round_fruit, ONION, CABBAGE
+import block_style as bs
 
 TURNIP_LEAF = [rgb("24481c"), rgb("2f5d22"), rgb("3d7429"), rgb("4f8c33"), rgb("6aa645"), rgb("8cc062")]
 TURNIP_PURPLE = [rgb("4a1f4e"), rgb("6c2f70"), rgb("8e4592"), rgb("b067b0"), rgb("cf92cc")]
@@ -108,22 +109,29 @@ def turnip_item():
 
 # ---------------------------------------------------------------- gourds and stems
 
-def gourd_side(palette, ribs, seed, warts=0, stripes=None, spot=None):
-    """A gourd skin: shading from light (top) to dark (bottom), ribs, warts and stripes."""
+def gourd_side(palette, ribs, seed, warts=0, stripes=None, spot=None, clean=True):
+    """A gourd skin: shading from light (top) to dark (bottom), ribs, warts and stripes. `clean` (the default) varies
+    the skin in small clumps (tools/block_style.py) and draws the stripes evenly, instead of at random pixels."""
     rng = random.Random(seed)
+    grain = bs.grain(16, 16, seed) if clean else None
     c = Canvas()
     for y in range(16):
         for x in range(16):
             shade = 3 if y < 5 else 2 if y < 11 else 1
             if ribs and x % ribs == 0:
                 shade -= 1
-            if rng.random() < 0.08:
+            if clean:
+                v = grain(x, y)
+                shade = max(0, min(len(palette) - 1, shade + (1 if v > 0.7 else -1 if v < 0.3 else 0)))
+            elif rng.random() < 0.08:
                 shade = max(0, min(len(palette) - 1, shade + rng.choice((-1, 1))))
             c.px(x, y, palette[shade])
     if stripes:
         for x in range(1, 16, 4):
             for y in range(16):
-                if rng.random() < 0.7:
+                if clean:
+                    c.px(x, y, stripes[(y // 4) % len(stripes)])
+                elif rng.random() < 0.7:
                     c.px(x, y, stripes[rng.randrange(len(stripes))])
     if spot:
         for y in range(11, 16):
@@ -345,7 +353,7 @@ def lantern_top():
             c.px(x, y, TURNIP_PURPLE[3 if ring > 3 else 2 if ring > 2 else 1])
     for y in range(5, 10):
         for x in range(6, 10):
-            c.px(x, y, TURNIP_LEAF[3 if (x + y) % 2 else 2])
+            c.px(x, y, TURNIP_LEAF[4] if y == 5 else TURNIP_LEAF[2] if x == 9 or y == 9 else TURNIP_LEAF[3])  # lit at the top
     return c.img
 
 

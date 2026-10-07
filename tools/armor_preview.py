@@ -10,6 +10,7 @@ flat as Minecraft lights entities (two fixed lights: top 1.0, front and back 0.7
     python3 tools/armor_preview.py --set steel_knight --compare path/to/owner_design.png
     python3 tools/armor_preview.py --set bloodthorn --compare path/to/owner_design.png
     python3 tools/armor_preview.py --set reforged_white_diamond --compare path/to/owner_design.png
+    python3 tools/armor_preview.py --set hades --compare path/to/owner_design.png
     python3 tools/armor_preview.py --set sunset_gem --compare path/to/owner_design.png
                                                            a set with a REFERENCES layout gets each of the reference's
                                                            views beside ours from the same camera and in the same pose,
@@ -24,7 +25,8 @@ Images go to build/armor_preview/ (git-ignored). Views: front, back, right (the 
 three_quarter (front-right, from a little above), top, bottom, and the Bloodthorn render's two: front_left (front
 three-quarter from the model's left) and back_right (from behind, a little to its right). Poses: stand, walk (arms and
 legs swung), sneak, owner (the owner's knight and White Diamond renders: arms 20 degrees out, head turned 17
-degrees), sunset (the owner's Sunset Gem render: arms 12 degrees out, head straight), joined with "+" (sneak+walk).
+degrees), hades (the owner's Hades render: arms 25 degrees out, head straight), sunset (the owner's Sunset Gem render:
+arms 12 degrees out, head straight), joined with "+" (sneak+walk).
 """
 import argparse
 import functools
@@ -124,11 +126,14 @@ def pose_bones(pose="stand", phase=0.0, amount=WALK):
             bones["right_arm"][1][2] += math.radians(20)
             bones["left_arm"][1][2] -= math.radians(20)
             bones["head"][1][1] -= math.radians(17)
+        elif name == "hades":
+            bones["right_arm"][1][2] += math.radians(25)
+            bones["left_arm"][1][2] -= math.radians(25)
         elif name == "sunset":
             bones["right_arm"][1][2] += math.radians(12)
             bones["left_arm"][1][2] -= math.radians(12)
         else:
-            raise ValueError(f"unknown pose {name!r}: stand, walk, sneak, owner, sunset")
+            raise ValueError(f"unknown pose {name!r}: stand, walk, sneak, owner, hades, sunset")
     return bones
 
 
@@ -348,6 +353,11 @@ REFERENCES = {
     # offset to its silhouette
     "reforged_white_diamond": (("front", (30, 85, 420, 649), (0, 0), 60, 30, 12.645, (222.94, 219.94),
                                 {"pose": "owner", "lighting": "unlit", "background": (117, 130, 188)}),),
+    # the owner's Hades render (680 x 637): the figure seen from a little to its right and above, unlit, the arms 25
+    # degrees out and the head straight; the camera fitted to its silhouette (the horns, the helm, the pauldrons, the
+    # arms and the skirt), behind ours the render's mean background
+    "hades": (("front", (0, 160, 306, 630), (15.5, 14.75), 60, 24, 10.0, (153.0, 370.0),
+               {"pose": "hades", "lighting": "unlit", "background": (37, 40, 49)}),),
     # the owner's Sunset Gem render (676 x 631): one front view, unlit, the figure with its arms 12 degrees out and its
     # head straight; the viewport was cropped off-centre, so the camera looks at a point 18 px to the model's right (the
     # breastplate, face and skirt sit 14 image px right of the arms' and wings' centre, and the right sides show); the

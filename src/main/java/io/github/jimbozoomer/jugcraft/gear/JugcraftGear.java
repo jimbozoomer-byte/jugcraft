@@ -85,7 +85,7 @@ public final class JugcraftGear {
 	/** The styled armor's templates, by id, for the Ingredients tab. */
 	public static final Map<String, Item> TEMPLATES = new LinkedHashMap<>();
 	/** Armor-only tiers with numbers of their own, each worn as a 3D model (tools/gear.py: ARMOR_TIERS). */
-	public static final List<String> ARMOR_TIERS = List.of("bloodthorn", "reforged_white_diamond", "sunset_gem");
+	public static final List<String> ARMOR_TIERS = List.of("bloodthorn", "reforged_white_diamond", "hades", "sunset_gem");
 	/** Bloodthorn: a step above netherite (37, 3/6/8/3, 15, 3.0, 0.1) in durability, defense, toughness and knockback. */
 	public static final ArmorMaterial BLOODTHORN_ARMOR = new ArmorMaterial(40, defense(3, 7, 9, 3), 15,
 			SoundEvents.ARMOR_EQUIP_NETHERITE, 3.5F, 0.15F, repairs("bloodthorn"), asset("bloodthorn"));
@@ -93,6 +93,10 @@ public final class JugcraftGear {
 	 * enchanting; netherite's toughness and knockback resistance, and no fire resistance. */
 	public static final ArmorMaterial REFORGED_WHITE_DIAMOND_ARMOR = new ArmorMaterial(45, defense(3, 7, 8, 4), 20,
 			SoundEvents.ARMOR_EQUIP_DIAMOND, 3.0F, 0.1F, repairs("reforged_white_diamond"), asset("reforged_white_diamond"));
+	/** Hades: beside the other two, in other strengths: the toughest and steadiest, a point less defense, the poorest
+	 * enchanting; fire resistant. */
+	public static final ArmorMaterial HADES_ARMOR = new ArmorMaterial(42, defense(3, 7, 8, 3), 12,
+			SoundEvents.ARMOR_EQUIP_NETHERITE, 4.0F, 0.2F, repairs("hades"), asset("hades"));
 	/** Sunset Gem: beside the others, in other strengths: the longest wear and the best enchanting of all; a point less
 	 * defense than Bloodthorn, netherite's toughness, no fire resistance. */
 	public static final ArmorMaterial SUNSET_GEM_ARMOR = new ArmorMaterial(48, defense(3, 7, 8, 3), 25,
@@ -135,6 +139,7 @@ public final class JugcraftGear {
 		styled("kaiser", KAISER_ARMOR);
 		armorTier("bloodthorn", BLOODTHORN_ARMOR, true);
 		armorTier("reforged_white_diamond", REFORGED_WHITE_DIAMOND_ARMOR, false);
+		armorTier("hades", HADES_ARMOR, true);
 		armorTier("sunset_gem", SUNSET_GEM_ARMOR, false);
 		for (String id : STYLE_TEMPLATES) {
 			ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Jugcraft.id(id));

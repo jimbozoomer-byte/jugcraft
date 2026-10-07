@@ -1824,9 +1824,11 @@ def check_item_icons():
 
 def check_arms_variants():
     """weapons/ArmVariants.java against tools/arms_variants.py (Arms VII, batch 56): the variants in order with their kind,
-    line and boon; the styles and patterns; every number; each style variant's smithing recipe and each boss's trophy loot
-    table; the boons' and lines' tooltips; that every boon is bounded; and that no variant deals as much a second as a
-    netherite sword, whatever its boon adds."""
+    line and boon; the styles, the armor sets and the patterns; every number; each style variant's smithing recipe and
+    each boss's trophy loot table, and that an armor set's arm has neither a recipe nor any loot table yet (how a set is
+    won is the owner's to decide); the boons' and lines' tooltips, a boss's line naming its boss and a set's its set;
+    that every boon is bounded; and that no variant deals as much a second as a netherite sword, whatever its boon
+    adds."""
     import arms_variants as av
     java = (JAVA_ROOT / "weapons" / "ArmVariants.java").read_text(encoding="utf-8")
     found = [(name, kind, line, None if boon == "null" else boon.split(".")[1].lower())
@@ -1839,6 +1841,11 @@ def check_arms_variants():
         err(f"ArmVariants.Boon differs from tools/arms_variants.py BOONS {list(av.BOONS)}")
     if re.findall(r'"([a-z_]+)"', re.search(r"STYLES = List\.of\(([^)]*)\)", java).group(1)) != list(av.STYLES):
         err(f"ArmVariants.STYLES differs from tools/arms_variants.py {list(av.STYLES)}")
+    sets = re.search(r"\bSETS = List\.of\(([^)]*)\)", java)
+    if not sets or re.findall(r'"([a-z_]+)"', sets.group(1)) != list(av.SETS):
+        err(f"ArmVariants.SETS differs from tools/arms_variants.py {list(av.SETS)}")
+    if len(set(av.LINES)) != len(av.STYLES) + len(av.BOSSES) + len(av.SETS):
+        err("tools/arms_variants.py: a line is in more than one of STYLES, BOSSES and SETS")
     if re.findall(r'"([a-z_]+)"', re.search(r"PATTERN_NAMES = List\.of\(([^)]*)\)", java, re.S).group(1)) != av.patterns():
         err(f"ArmVariants.PATTERN_NAMES differs from tools/arms_variants.py {av.patterns()}")
     ints = {"FROST_TICKS": av.FROST[0], "FROST_AMPLIFIER": av.FROST[1], "EMBER_SECONDS": av.EMBER_SECONDS,
@@ -1865,9 +1872,9 @@ def check_arms_variants():
         if kind not in arms.KINDS or kind in arms.CHARGING:
             err(f"tools/arms_variants.py: {name} is of {kind}, not a swung kind of tools/arms.py")
         if line not in av.LINES:
-            err(f"tools/arms_variants.py: {name}'s line {line} is neither a style nor a boss")
-        # Each trait has a name, and a description to show with Shift (docs/features/trait-details.md); a boss's line
-        # is a name only.
+            err(f"tools/arms_variants.py: {name}'s line {line} is neither a style, a boss nor an armor set")
+        # Each trait has a name, and a description to show with Shift (docs/features/trait-details.md); a boss's or an
+        # armor set's line is a name only.
         if boon is not None and not {f"tooltip.{MOD}.arms.boon.{boon}", f"tooltip.{MOD}.arms.boon.{boon}.trait"} <= lang.keys():
             err(f"lang: no trait name and description for the {boon} boon")
         if f"tooltip.{MOD}.arms.line.{line}.trait" not in lang:
@@ -1880,7 +1887,8 @@ def check_arms_variants():
                                   or recipe.get("template") != f"{MOD}:{av.STYLES[line]['pattern']}"):
             err(f"recipe/{name}.json must smith the steel {kind} with the {line} pattern")
         if line not in av.STYLES and (DATA / MOD / "recipe" / f"{name}.json").is_file():
-            err(f"{name} is a trophy of {line}: it has no recipe")
+            what = f"the {av.SETS[line]['display']} set's arm" if line in av.SETS else f"a trophy of {line}"
+            err(f"{name} is {what}: it has no recipe")
         # A second at most: the steel arm's (its two-handed finisher too), with its boon at its best, below netherite's sword.
         info = arms.KINDS[kind]
         combo = arms.TWO_HANDED.get(kind, {}).get("combo", 1)
@@ -1899,6 +1907,23 @@ def check_arms_variants():
         dropped = re.findall(r'"name": "jugcraft:([a-z_]+)"', json.dumps(table, indent=0))
         if sorted(dropped) != sorted(av.trophies(boss)):
             err(f"loot_table/bosses/{boss}.json drops {dropped}, not its trophies {av.trophies(boss)}")
+    # A boss's line names its boss ("Trophy of the Yeti King"), an armor set's its set ("Of the Hades Armor set").
+    for line, info in list(av.BOSSES.items()) + list(av.SETS.items()):
+        if info["display"] not in lang.get(f"tooltip.{MOD}.arms.line.{line}.trait", info["display"]):
+            err(f"lang: the {line} line's name does not name {info['display']}")
+    # An armor set's arm is creative only for now: no recipe (above), no boss table of its own, and nothing drops it.
+    tables = {path: path.read_text(encoding="utf-8")
+              for folder in DATA.glob("*/loot_table") for path in folder.rglob("*.json")}
+    for armor_set, info in av.SETS.items():
+        if not av.set_arms(armor_set):
+            err(f"tools/arms_variants.py: the {info['display']} set has no arm")
+        if (DATA / MOD / "loot_table" / "bosses" / f"{armor_set}.json").is_file():
+            err(f"loot_table/bosses/{armor_set}.json: the {info['display']} set is no boss, and has no loot table yet")
+        for path, text in sorted(tables.items()):
+            for name in av.set_arms(armor_set):
+                if f'"{MOD}:{name}"' in text:
+                    err(f"{path.relative_to(DATA)} drops {name}, the {info['display']} set's arm, which nothing drops "
+                        "until the owner settles how the set is won")
     for style, info in av.STYLES.items():
         if not (DATA / MOD / "recipe" / f"{info['pattern']}.json").is_file():
             err(f"recipe/{info['pattern']}.json is missing: the {style} pattern must be craftable")

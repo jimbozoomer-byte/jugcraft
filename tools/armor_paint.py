@@ -108,6 +108,23 @@ WHITE_DIAMOND = {
     "leather_dark": (63, 64, 86), "leather_darkest": (50, 50, 68),
     "under_light": (82, 92, 102), "under_mid": (68, 74, 86), "under_dark": (58, 61, 70), "under_darkest": (48, 49, 55),
 }
+# Hades, the owner's underworld design (tools/hades_armor.py), sampled from their render. That render is unlit, as
+# White Diamond's is: each tone shows at one value on faces of every direction (the light band round a horn is the same
+# grey on its front and its sides, and the helm's front above the visor is darker than the faces beside it, where a lit
+# render would light it). So these are its texture colours as sampled, the commonest value of each tone's texel
+# interiors. Its metal is a cool ramp of six greys, slightly purple, from the light grey edges to the darkest slate:
+# light grey, grey, pinkish grey, slate, dark slate and the darkest slate. "gold" names its blue slate, the accent of
+# the chest V, the horns and the skirt's strips, over the grey of the same value; "leather" names its blood-red cloth
+# (the owner's three reds, and two darker steps for the cloth's shaded side and back, which the render does not show);
+# the under-layer is its near-black slate, from a blue black to the darkest of the visor's slits.
+HADES = {
+    "light": (147, 145, 148), "mid_light": (127, 127, 129), "mid": (111, 108, 115), "dark": (86, 85, 101),
+    "seam": (74, 73, 87), "void": (61, 59, 72),
+    "gold_light": (95, 97, 120), "gold_dark": (96, 95, 103),
+    "leather_light": (140, 49, 58), "leather_mid_light": (111, 45, 55), "leather_mid": (95, 39, 52),
+    "leather_dark": (74, 31, 43), "leather_darkest": (54, 23, 33),
+    "under_light": (41, 44, 59), "under_mid": (37, 37, 49), "under_dark": (31, 28, 36), "under_darkest": (26, 24, 29),
+}
 # Sunset Gem, the owner's sunset design (tools/sunset_gem_armor.py), sampled from their render. That render is unlit, as
 # White Diamond's is: each tone shows at one value on faces of every direction, and five of its eight warm tones keep a
 # red of 255, which no lit side, bottom or front face could (Blockbench would draw them at 0.5 to 0.8 of it), so these

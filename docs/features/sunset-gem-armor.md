@@ -1,6 +1,6 @@
 # Sunset Gem Armor: the fourth of the owner's armor tiers
 
-Status: implemented on `claude/sunset-gem-armor`, awaiting review. It uses the armor-only tier code that came with Bloodthorn ([bloodthorn-armor.md](bloodthorn-armor.md)) on the knight armor's 3D engine ([knight-armor.md](knight-armor.md)). **Not yet compiled, game-tested or played:** the Java compiles only in CI.
+Status: implemented on `claude/sunset-gem-armor`, awaiting review. It is stacked on `claude/hades-armor` ([hades-armor.md](hades-armor.md)), since the sets share the lists they are added to. It uses the armor-only tier code that came with Bloodthorn ([bloodthorn-armor.md](bloodthorn-armor.md)) on the knight armor's 3D engine ([knight-armor.md](knight-armor.md)). **Not yet compiled, game-tested or played:** the Java compiles only in CI.
 Proposal issue: none. This is the fourth of the five armor designs the owner sent on 6 October 2026 ("Can we start implementing the next 5 that I created. Again want you to use the the complex armor for each one to capture the shape of each piece like I have... Lets do these 1 by 1"). Its picture is titled "SUNSET GEM". The owner's answers for all five ([bloodthorn-armor.md](bloodthorn-armor.md)):
 - what kind of armor: "New stronger armor tiers";
 - how players get it: "They might get dropped by bosses or be craftable for now just make the armor we can figure that out later".
@@ -28,18 +28,18 @@ Primary specialty and supported player role: combat (defense). Everyone who wear
 
 **The numbers** (`tools/gear.py` `ARMOR_TIERS`, `JugcraftGear.SUNSET_GEM_ARMOR`): beside the others, in other strengths:
 
-| | Sunset Gem | Reforged White Diamond | Bloodthorn | Netherite |
-|---|---|---|---|---|
-| Defense (helmet, chestplate, leggings, boots) | 3, 8, 7, 3 (21) | 4, 8, 7, 3 (22) | 3, 9, 7, 3 (22) | 3, 8, 6, 3 (20) |
-| Toughness (each piece) | 3.0 | 3.0 | 3.5 | 3.0 |
-| Knockback resistance (each piece) | 0.1 | 0.1 | 0.15 | 0.1 |
-| Durability (multiplier) | 528, 768, 720, 624 (48) | 495, 720, 675, 585 (45) | 440, 640, 600, 520 (40) | 407, 592, 555, 481 (37) |
-| Enchantability | 25 | 20 | 15 | 15 |
-| Fire resistant | no | no | yes | yes |
-| Repaired with | amethyst shards | diamonds | netherite ingots | netherite ingots |
-| Equip sound | gold's | diamond's | netherite's | netherite's |
+| | Sunset Gem | Hades | Reforged White Diamond | Bloodthorn | Netherite |
+|---|---|---|---|---|---|
+| Defense (helmet, chestplate, leggings, boots) | 3, 8, 7, 3 (21) | 3, 8, 7, 3 (21) | 4, 8, 7, 3 (22) | 3, 9, 7, 3 (22) | 3, 8, 6, 3 (20) |
+| Toughness (each piece) | 3.0 | 4.0 | 3.0 | 3.5 | 3.0 |
+| Knockback resistance (each piece) | 0.1 | 0.2 | 0.1 | 0.15 | 0.1 |
+| Durability (multiplier) | 528, 768, 720, 624 (48) | 462, 672, 630, 546 (42) | 495, 720, 675, 585 (45) | 440, 640, 600, 520 (40) | 407, 592, 555, 481 (37) |
+| Enchantability | 25 | 12 | 20 | 15 | 15 |
+| Fire resistant | no | yes | no | yes | yes |
+| Repaired with | amethyst shards | netherite ingots | diamonds | netherite ingots | netherite ingots |
+| Equip sound | gold's | netherite's | diamond's | netherite's | netherite's |
 
-Sunset Gem lasts longest and enchants best of all, at a point less defense than Bloodthorn and netherite's toughness. These are starting numbers for the owner to set.
+Sunset Gem lasts longest and enchants best of all, at Hades' defense, a point less than Bloodthorn's, and netherite's toughness. These are starting numbers for the owner to set.
 
 **Getting it:** for now only from the creative tab (Combat). No recipe, drop or trade exists yet, as the owner asked.
 
@@ -69,7 +69,7 @@ One `ARMOR_TIERS` entry, one Java material and one `armorTier(...)` call, and a 
 - The design is the owner's (the reference picture is not committed). The model, its paint and the icons are drawn by code, in `tools/sunset_gem_armor.py`, `tools/armor_paint.py` (`SUNSET_GEM`) and `tools/armor_icons/sunset_gem/`. No Mojang or third-party texture is used.
 
 ## Verification
-**Run locally on 7 October 2026,** on this branch:
+**Run locally on 7 October 2026,** on this branch before Hades was merged in:
 - **Generators:** data, textures, data again, all exit 0; the second run changed nothing. The earlier sets' `worn_models.json` entries, atlases and icons are byte-identical.
 - **`check_mod_data.py`:** PASS, with `check_armor_tiers` and main's art check (`tools/art_check.py`). Every Sunset Gem entry is 0.00% see-through (H1, limit 0.5%), with no flicker findings.
 - **`check_repository.py`:** PASS. **`check_icon_maps.py`:** PASS.
@@ -78,6 +78,13 @@ One `ARMOR_TIERS` entry, one Java material and one `armorTier(...)` call, and a 
 - **Wearer audit** (`armor_preview.py`'s wearer mannequin, totalled by a scratch script): 0.00 model px² of skin or outer layer shows, over 8 poses × 9 views (the owner's pose among them) and a 32-pose walk and sneak-walk cycle. With a sleeve, a bracer and the under-skirt removed it reports 23–39, so it does see the wearer.
 - **Icons,** checked by a scratch script: outlines in the set's darkest tone (luma 40), never pure black; lit from the top left.
 - **Renders** with `armor_preview.py` (not committed): the owner's front view beside ours from a fitted camera, unlit as their render and lit as in game; each piece beside the owner's render of it; stand, walk and sneak from six views.
+
+**After merging `claude/hades-armor`** (Hades Armor, the Hades Scythe, and Bloodthorn and White Diamond as #235 merged them):
+- **Generators:** data, textures, data again, all exit 0; the last run changed nothing.
+- **Both sets kept their output:** the 9 `worn_models.json` entries of each are identical to its own branch's, as are the knight, Bloodthorn and White Diamond entries, and every Sunset Gem file. Only the files that list every set changed (the names, the 3D model list and the four slot tags).
+- **`check_mod_data.py`:** PASS (1525 material IDs), with the art check: no armor finding, and none is allow-listed.
+- **`check_repository.py`:** PASS. **`check_icon_maps.py`:** PASS. **`armor_models.py`:** no problems (the reach warnings above). **`armor_smoke.py --no-render`:** all pass.
+- **Java:** the 2 merged files parse (syntax only).
 
 **In CI:** not run yet. It will compile the material and its registration, run `ArmorTiersGameTests` on the server, and run `ArmorTiersClientGameTests`, which writes the `jugcraft_armor_tier_sunset_gem_*` shots.
 

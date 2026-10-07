@@ -1,8 +1,8 @@
 """The 3D armor sets' 16x16 inventory icons: the bronze and steel armor's, the knight armor (tools/knight_armor.py)
-drawn small, and Bloodthorn Armor's, Reforged White Diamond's and Sunset Gem's (tools/bloodthorn_armor.py,
-tools/white_diamond_armor.py and tools/sunset_gem_armor.py, below), in the owner's style for item icons (vanilla's own
-size, a one-pixel outline in each part's darkest tone, never pure black, light from the top left, a few flat tones,
-chunky parts that read at a glance).
+drawn small, and Bloodthorn Armor's, Reforged White Diamond's, Hades Armor's and Sunset Gem's
+(tools/bloodthorn_armor.py, tools/white_diamond_armor.py, tools/hades_armor.py and tools/sunset_gem_armor.py, below), in
+the owner's style for item icons (vanilla's own size, a one-pixel outline in each part's darkest tone, never pure black,
+light from the top left, a few flat tones, chunky parts that read at a glance).
 
 Each piece is one hand-drawn map, tools/armor_icons/<piece>.txt: 16 lines of 16 symbols, which the owner can edit
 directly (lines starting with # are comments). A map names no colours, only what each pixel is made of, so one map
@@ -67,6 +67,27 @@ Their symbols:
     H L M D S V     the metal, light to dark: "light" (icy white), "mid_light" (pale cyan), "mid" (light cyan), "dark"
                     (light blue), "seam" (blue), "void" (lavender)
     U m u x         the charcoal under-layer: "under_light", "under_mid", "under_dark", "under_darkest" (the face)
+Hades Armor (tools/hades_armor.py) has hades/helmet.txt and so on, coloured from armor_paint.HADES and drawn after the
+owner's renders of each piece on its own (the boots, which the owner's sheet cuts off, after the 3D boots):
+    helmet      the two horns rising from the helm's top corners, lit at their bends; the narrow crown's lit top band
+                over the beak: the blue slate V of the brow falling from its outer corners to the ridge, dark above it,
+                the slits on either side, the ridge below the V's point; at its foot the two cheeks and the chin, the
+                dark collar between them
+    chestplate  two plates a side, the mantle and the fin under it, rising toward the outside; the blue slate V at the
+                collar; the breastplate flaring at the hem round the dark waist, with the blood-red cloth hanging from
+                it
+    leggings    the dark belt between the tops of the tassets, whose inner edges meet in a V; the lower plates flaring
+                down the sides; the blood-red cloth hanging from the V over the dark under-layer, almost to the hem
+    boots       two boots under a lit cuff that overhangs outward, a small blue slate V under it, the toes turned out
+Their symbols:
+    .               transparent
+    O               the outline: the metal's "void" taken down to OUTLINE_LUMA, a dark blue grey
+    H L M D S V     the metal, light to dark (cool greys): "light", "mid_light", "mid", "dark", "seam", "void"
+    B               the blue slate: "gold_light" (the palette's name for it, see armor_paint.HADES)
+    U m u x         the under-layer: "under_light", "under_mid", "under_dark", and "under_darkest", which is both the
+                    eye slits and the under-layer's own outline
+    R k r w         the blood-red cloth: "leather_light", "leather_mid_light", "leather_mid", and "leather_darkest", its
+                    own outline
 Sunset Gem (tools/sunset_gem_armor.py) has sunset_gem/helmet.txt and so on, coloured from armor_paint.SUNSET_GEM and
 drawn after the owner's renders of each piece on its own:
     helmet      the crown of gem shards, the broad cream spike over the band, a smaller one at each corner and a shard
@@ -120,6 +141,10 @@ OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "
                                                               "S": "seam", "V": "void", "U": "under_light",
                                                               "m": "under_mid", "u": "under_dark",
                                                               "x": "under_darkest"}),
+       "hades": (armor_paint.HADES, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam", "V": "void",
+                                     "B": "gold_light", "U": "under_light", "m": "under_mid", "u": "under_dark",
+                                     "x": "under_darkest", "R": "leather_light", "k": "leather_mid_light",
+                                     "r": "leather_mid", "w": "leather_darkest"}),
        "sunset_gem": (armor_paint.SUNSET_GEM, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
                                                "V": "void", "K": "gold_light", "Q": "gold_dark", "U": "under_light",
                                                "m": "under_mid", "u": "under_dark", "x": "under_darkest",

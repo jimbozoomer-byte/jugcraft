@@ -88,6 +88,7 @@ REACH_X, REACH_UP, FLOOR = 12.0, -14.0, 25.0   # FLOOR: 1 px into the ground, as
 SET_MODULES = ("knight_armor",         # the knight armor: the owner's steel design and its bronze variant
                "bloodthorn_armor",     # Bloodthorn Armor: the owner's crimson design
                "white_diamond_armor",  # Reforged White Diamond: the owner's icy design
+               "hades_armor",          # Hades Armor: the owner's underworld design
                "sunset_gem_armor")     # Sunset Gem: the owner's sunset design
 
 
