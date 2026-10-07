@@ -7,6 +7,10 @@ Owner: jimbozoomer-byte
 Target milestone and tier: the high-tech tier after oil and chemistry
 Primary specialty and supported player role: technology; the player who builds factories and automates them
 
+## Owner-requested advanced expansion (7 October 2026)
+
+The [industrial chemical catalog](industrial-chemical-catalog-and-routes.md#a-manageable-advanced-chip-line) records later photoresist patterning/development, selective oxide etching, cleaning and silane deposition with a small distinct reagent set. Exact core selection and station layout remain to confirm; the existing lithography route and basic-circuit entry remain available until a reachable transition is designed. These are planning additions, not new test evidence or implemented recipes.
+
 ## Plan
 
 | # | Commit | What it adds |

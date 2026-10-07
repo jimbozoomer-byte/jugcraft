@@ -36,7 +36,7 @@ Related owner planning records: [industrial agriculture, PR #208](https://github
 
 ## Industrial chemistry, gas fuels and advanced materials
 
-Owner-requested 7 October 2026. Independent planning brief: [industrial chemistry and fuels](features/industrial-chemistry-and-fuels-plan.md). These follow-ups are planning work, not implemented recipes or tested balance.
+Owner-requested 7 October 2026. Independent briefs: [industrial chemistry and fuels](features/industrial-chemistry-and-fuels-plan.md) and the [complete chemical, machine and consumer catalog](features/industrial-chemical-catalog-and-routes.md). These follow-ups are planning work, not implemented recipes or tested balance.
 
 - [ ] Map a reachable **steel-built electrical chemistry entry**, preserving the earlier workshop/first-electricity route and prioritizing gas processing, aluminum and titanium.
 - [ ] Build the selected shared hydrogen/methane gas-burning generator role and separate lower-output **Bio-Generator for cleaned biogas and bioethanol**; methane improves electricity per tank and upgraded gas-generator output. Audit complete processing/generation energy to prevent closed positive-power loops.
@@ -48,15 +48,28 @@ Owner-requested 7 October 2026. Independent planning brief: [industrial chemistr
 - [ ] Add optional CO2 capture/release to industrial carbonate cement processing and optional Coke Oven gas/condensate recovery. Full CO2 capture storage defaults to continued production/excess venting, with optional stop-instead; account for material, energy and recovered/released amounts once.
 - [ ] Use earlier copper conductors in entry aluminum-processing equipment, with aluminum improvements later; verify construction and reagent producers without self-output gates.
 - [ ] Verify filled gas tanks retain exact content through break, pickup and placement and reconnect through shared pipes; cover joined-tank partitioning, simultaneous transfers and multiplayer pickup.
-- [ ] Detail H2/chlorine -> HCl and the selected existing-refinery-feed plastics entry with named intermediates and appropriate HCl connections, while retaining existing PVC, butadiene rubber and natural-rubber routes.
+- [ ] Detail H2/chlorine -> HCl and selected refinery-derived ethylene -> ethylene dichloride -> vinyl chloride -> PVC, with appropriate HCl recovery/reuse; retain existing PVC, butadiene rubber and natural-rubber routes.
 - [ ] Expand process-specific reagents, useful rigid/flexible/protective/heat-resistant polymers and advanced ceramic linings/insulators/cutting/precision parts. Limit purity grades to meaningful consumers; prioritize refining/electronics over broad new everyday finishes.
-- [ ] Develop the selected distinct titanium treatment, purification, reduction and melting stages using shared equipment where suitable; verify independent reagent/reductant supplies and preserve existing source routes until replacements work.
-- [ ] Add aluminum electrical parts, structural stock, building panels and vehicle components, plus titanium process-equipment, tool/armor, vehicle and precision-component destinations with useful consumer-specific balance.
-- [ ] Build the selected shared **Polymer Molding Press with reusable molds** for compatible housings, fittings and flexible parts; use earlier supplies for the first station/tooling.
-- [ ] Implement prepared ceramic powders -> shaped blanks -> firing -> consumer-specific precision finishing where needed, reusing shared forming/kiln roles and preserving the accessible clay-based first steel-casting route.
-- [ ] Define a small useful new-alloy set with distinct consumers on compatible upgraded alloy equipment; exact compositions/material identities remain to select and audit.
+- [ ] Develop titanium mineral treatment -> crude titanium chloride -> purification -> magnesium reduction -> titanium sponge -> melting using compatible shared equipment; verify an independent first magnesium supply and preserve existing routes until replacements work.
+- [ ] Add aluminum's affordable bulk electrical/lightweight structural/panel/vehicle roles; titanium advanced process/precision equipment and vehicle components; and stronger titanium tools/armor above steel with balanced statistics.
+- [ ] Build the selected shared **Polymer Molding Press with reusable molds** for housings, fittings, insulation, gaskets, flexible hoses and vehicle panels; use earlier supplies for the first station/tooling.
+- [ ] Implement ceramic powders -> blanks -> firing -> shared grinding/polishing where needed: clay foundation, porcelain-style insulators and alumina, then specialist zirconia; shared finishing also serves metals/optics and clay-based first steel casting remains reachable.
+- [ ] Define initial chemical-equipment steel and aluminum structural alloys on compatible upgraded equipment, with titanium alloys later; select independently obtainable alloying inputs, exact identities/compositions and useful consumers.
 - [ ] Begin refining with compact functional stations and optional larger bulk plants; retain the separately selected substantial first Anaerobic Digester.
-- [ ] Develop mainly larger/better general-purpose batteries with a limited set of useful specialty choices.
+- [ ] Develop general storage first, including requested lead-acid, later LiPF6 lithium-ion and major vanadium redox-flow chemistry; defer portable packs and specialty high-output banks.
+- [ ] Map the requested Electrolytic Separator, Chemical Infuser, Chemical Oxidizer, Chemical Dissolution Chamber and Rotary Condensator roles onto existing shared systems; preserve current IDs and automatic gas-pipe pressure.
+- [ ] Make sulfuric acid a central industrial supply with reachable sulfur oxidation/conversion/absorption, concentration where needed and useful fertilizer/battery/mineral/petroleum consumers. Avoid first-acid catalyst dependency cycles.
+- [ ] Add independently reachable fluorite CaF2 -> heated concentrated-sulfuric processing -> HF plus accounted calcium sulfate; define gas/aqueous recovery and compatible starter hardware before HF/PTFE exists.
+- [ ] Add phosphate-rock wet/hydrometallurgical dissolution, slurry filtration and phosphoric-acid recovery, with triple-superphosphate fertilizer and advanced technology consumers.
+- [ ] Extend nitric/ammonia chemistry for ammonium-nitrate fertilizer and compatible finished game ammunition/rocketry products; review owner-requested aged pine/maple finishes separately.
+- [ ] Connect HCl-assisted corn-starch hydrolysis to finished glucose syrup; acetic acid/vinegar to acetate monomers and PVAc adhesives/appropriate fibre applications; citrus/citric acid to preservation, sour candy and drinks; food-grade phosphoric acid to cola.
+- [ ] Plan acetylsalicylic-acid medicine with independently reachable precursors and defined game effects; keep pharmacy optional to industrial progression.
+- [ ] Choose a small distinct advanced-chip reagent set: proposed sulfuric/peroxide cleaner, TMAH developer, selective HF oxide etchant and later silane deposition. Provide earlier peroxide/photoresist/silane sources and map wafer stages onto current lithography.
+- [ ] Add ethylene -> HDPE/LDPE polymerization -> pellets and suitable film forming, plus named fluorochemical intermediates/monomers -> PTFE with actual specialty consumers.
+- [ ] Develop coal/biomass/gas -> cleaned/conditioned CO/H2 syngas -> reusable cobalt-catalyzed Fischer-Tropsch capability -> synthetic hydrocarbon feed -> shared refining/upgrading into gasoline and other fuels; audit complete material/energy allocations.
+- [ ] Connect existing RP-1/LOX and requested methane/LOX, LH2/LOX and hydrazine/MMH/N2O4 families to compatible game rocket/station roles; preserve old routes and design powered cryogenic conversion without gas/liquid duplication.
+- [ ] Extend existing vanadium electrolyte/Flow Battery for VOSO4-based formulated electrolyte and major grid storage, with paired functional sides, capacity/output limits and losses; no routine cycle aging, no free energy from electrolyte.
+- [ ] Add boric-acid/boron connections for suitable nuclear control and advanced solar manufacturing, plus later sulfamic/sulfamate terminal plating with reviewed nickel/zinc compatibility.
 - [ ] Document actual machine roles, recipes, consumer links and optional paths in the Encyclopedia; audit reachability, gas/element units, energy loops, pollution, bounded factory work and persistence before gameplay delivery.
 
 ## Reference gallery

@@ -28,6 +28,10 @@ The owner's [industrial chemistry and fuel plan](features/industrial-chemistry-a
 
 The owner's [material production follow-up](features/industrial-chemistry-and-fuels-plan.md#material-production-decisions-third-batch) selects distinct titanium treatment, purification, reduction and melting stages; broad aluminum electrical/structural/panel/vehicle products; and titanium process-equipment/tool/armor/vehicle/precision products. Existing refinery feeds connect to named monomer intermediates and appropriate HCl uses. One shared Polymer Molding Press uses reusable molds. Advanced ceramics follow powder preparation -> shaped blanks -> firing -> precision finishing where needed, and a limited useful alloy set uses compatible upgraded equipment. Compact first refining stations support small-batch entry, with optional larger plants; the substantial first digester remains selected. Exact material identities, recipes, equipment assignments and product benefits are future design work.
 
+The [latest material/product choices](features/industrial-chemistry-and-fuels-plan.md#products-and-capabilities-fourth-batch) select magnesium reduction for titanium, stronger titanium equipment above steel, aluminum bulk/lightweight roles, two initial alloy families, six molded product families, named PVC stages, ceramic families and shared grinding/polishing. General storage develops first; portable/specialty banks come later.
+
+The owner's [expanded chemical catalog](features/industrial-chemical-catalog-and-routes.md) maps Electrolytic Separator, Chemical Infuser, Chemical Oxidizer, Chemical Dissolution Chamber and Rotary Condensator roles onto shared systems. It connects the sulfuric-acid backbone to fluoride/phosphate refining, fertilizers, food/pharmacy, distinct wafer operations, named polymers, cobalt-catalyzed synthetic fuels, rocket families, LiPF6 and major vanadium flow storage. Existing cells, reactors, lithography, refinery/cryogenic stations and Flow Battery are foundations; exact new capabilities, recipes and footprints remain to design.
+
 ## What exists now
 
 | Role | Implemented |

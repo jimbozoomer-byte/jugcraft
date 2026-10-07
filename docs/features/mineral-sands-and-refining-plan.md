@@ -90,9 +90,9 @@ This gives the refinery a useful oxide output as well as a metal consumer. Prese
 
 ### Titanium materials
 
-Separated titanium-bearing minerals can branch into pigment products or a metal-refining route. The owner now selected **distinct chemical treatment, purification, reduction and melting stages**, using shared equipment where suitable. Chlorination, purification, reduction into titanium sponge and appropriate melting remain a candidate specific route within that structure; exact intermediates/reagents/reductants are not finalized. Selected titanium destinations include advanced process equipment, tools/armor, vehicle and precision components.
+Separated titanium-bearing minerals can branch into pigment products or a metal-refining route. The owner selected **mineral treatment -> crude titanium chloride -> purification -> magnesium reduction -> titanium sponge -> melting**, using compatible shared equipment. Exact quantities and the first magnesium producer remain to design. Destinations include advanced process/precision equipment, vehicle components and a stronger titanium tool/armor tier above steel.
 
-The current titanium recipe compresses chemical recovery into one conversion. If the expanded route uses magnesium reduction, magnesium must have an independently obtainable feedstock and equipment built before titanium. A recovery loop can later return some magnesium/chlorine from spent salts, with explicit energy and losses; it cannot be the source of the very first batch of magnesium.
+The current titanium recipe compresses chemical recovery into one conversion. The selected magnesium reduction needs an independently obtainable feedstock and equipment built before titanium. A recovery loop can later return some magnesium/chlorine from spent salts, with explicit energy and losses; it cannot supply the very first magnesium batch.
 
 Maintain existing titanium/sponge consumers and define the purpose of any introduced intermediate. The retort, purifier and melting equipment cannot require their own titanium output to be constructed. Exact chemistry simplifications and coexistence with current recipes need a focused implementation design.
 
@@ -112,7 +112,9 @@ Form, purity, grade and actual recipes remain to be designed. Not every named ma
 
 Zircon and garnet retain suitable direct preparation routes for ceramic materials and abrasives. New advanced zirconium or other metal products should be introduced with real consumers, rather than adding every possible element simply because a mineral contains it.
 
-The later material batch selects advanced ceramic manufacturing as powder preparation -> shaping blanks -> firing -> precision finishing where a consumer needs it. Use shared preparation/forming/kiln roles and appropriate earlier tooling. Compact first refining stations and optional larger plants do not erase the substantial first digester or accessible clay-based first steel-casting route. A small new alloy set with distinct applications uses compatible upgraded alloy equipment; compositions and consumer recipes remain to design.
+The later material batches select powder preparation -> shaping blanks -> firing -> shared grinding/polishing where needed, with clay foundation, porcelain-style insulators and alumina components, then specialist zirconia. Shared finishing also serves metal and optical consumers. Compact refining entry does not erase the substantial first digester or clay-based first steel casting. Initial chemical-equipment steel and aluminum structural alloys use compatible upgraded equipment; titanium alloys come later and exact compositions remain to design.
+
+The [expanded chemical catalog](industrial-chemical-catalog-and-routes.md#fluorite-hydrofluoric-acid-and-phosphate-wet-processing) requests fluorite/concentrated-sulfuric HF production and phosphate-rock wet/hydrometallurgical processing into phosphoric acid. Use shared dissolution/filtration/recovery roles, independently obtainable feedstocks and explicit residues. The catalog links these minerals to advanced wafers, polymers, fertilizers and later LiPF6 storage; it does not approve new worldgen or claim every mineral sand supplies fluorite/phosphate.
 
 ## Rare-earth expansion is a planned follow-up
 

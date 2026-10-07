@@ -16,6 +16,10 @@ Selected fuel branches include water electrolysis and a **shared hydrogen/methan
 
 The [material batch](../features/industrial-chemistry-and-fuels-plan.md#material-production-decisions-third-batch) selects distinct titanium treatment/purification/reduction/melting, aluminum electrical/structural/panel/vehicle products, and titanium process-equipment/tool/armor/vehicle/precision products. Plastics extend existing refinery feeds through named intermediates and appropriate HCl connections; one shared Polymer Molding Press uses reusable molds. Ceramic powders become shaped blanks, fired parts and precision-finished products where needed. A small useful alloy set uses compatible upgraded equipment. Compact first refining stations lead to optional larger plants; the separately selected first digester remains substantial. Exact compositions, intermediates, machines, recipes and product statistics still need design.
 
+The [fourth batch](../features/industrial-chemistry-and-fuels-plan.md#products-and-capabilities-fourth-batch) selects magnesium-based titanium refining, stronger titanium tools/armor above steel, aluminum's useful bulk/lightweight roles, initial chemical-equipment steel/aluminum structural alloys, six molding-product families, named ethylene/EDC/vinyl-chloride PVC stages, ceramic families and shared grinding/polishing. General storage develops before portable/specialty banks.
+
+The owner's [complete chemical catalog and routes](../features/industrial-chemical-catalog-and-routes.md) adds the five shared machine roles, sulfuric-acid backbone, fluorite/HF and phosphate wet processing, distinct advanced wafer reagents, food/pharmacy/woodworking connections, HDPE/LDPE/PVAc/PTFE, cobalt-catalyzed synthetic refinery feed, rocket fuel families, LiPF6 and major vanadium flow storage, plus boric and sulfamic applications. Scientific formula/phase corrections and pending detailed recipes are recorded there. Reuse existing machinery and identities; these are planning additions.
+
 ## What belongs here
 
 Anything that changes what a substance *is* through a reaction, as opposed to its shape or mix (mechanical) or where it is (fluids):

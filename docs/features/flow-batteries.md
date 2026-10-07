@@ -6,6 +6,10 @@ Owner: jimbozoomer-byte
 Target milestone and tier: late power storage, after the lithium battery bank
 Primary specialty and supported player role: power and chemistry
 
+## Owner-requested major grid-storage expansion (7 October 2026)
+
+The [industrial chemical catalog](industrial-chemical-catalog-and-routes.md#battery-progression-major-grid-storage-and-other-advanced-uses) selects vanadyl-sulfate/formulated vanadium electrolyte chemistry for major grid storage, building on this existing battery. General storage develops before portable/specialty banks. No routine cycle-degradation upkeep is selected; energy losses, finite capacity and charging requirements still apply. Exact electrolyte processing and tank/stack expansion remain to design; existing IDs and saved storage behavior are preserved during review.
+
 ## Player experience
 - **Vanadium electrolyte:** two asphalt binder leached in a bucket of sulfuric acid in the chemical reactor make a bucket of deep-blue **vanadium electrolyte**. Heavy oil residue is rich in vanadium. The electrolyte is a liquid with a bucket.
 - **Flow battery** (3 wide, 3 tall, 2 deep, the electric look): two tall electrolyte tanks with blue sight glasses either side of a cell stack.
