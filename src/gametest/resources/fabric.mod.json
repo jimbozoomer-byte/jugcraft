@@ -90,7 +90,8 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmsVGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIIGameTests",
-			"io.github.jimbozoomer.jugcraft.test.MachineMotionGameTests"
+			"io.github.jimbozoomer.jugcraft.test.MachineMotionGameTests",
+			"io.github.jimbozoomer.jugcraft.test.TraitDetailsGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
@@ -177,7 +178,8 @@
 			"io.github.jimbozoomer.jugcraft.test.FlailClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.RuneboundClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BigGunsClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.BiggerJarsClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.BiggerJarsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.TraitDetailsClientGameTests"
 		]
 	},
 	"depends": {
