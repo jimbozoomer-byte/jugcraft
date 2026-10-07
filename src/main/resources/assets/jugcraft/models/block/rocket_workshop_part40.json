@@ -29,12 +29,12 @@
       "from": [
         13.0,
         0,
-        11.98
+        11.9
       ],
       "to": [
         16.0,
-        14.02,
-        15.02
+        14.1,
+        15.1
       ],
       "faces": {
         "north": {
@@ -61,25 +61,49 @@
         12.0
       ],
       "to": [
-        16.02,
+        16.1,
         14.0,
         15.0
       ],
       "faces": {
         "north": {
-          "texture": "#dr_rust"
+          "texture": "#dr_rust",
+          "uv": [
+            0.0,
+            2.0,
+            16.0,
+            6.0
+          ]
         },
         "south": {
-          "texture": "#dr_rust"
+          "texture": "#dr_rust",
+          "uv": [
+            0.0,
+            2.0,
+            16.0,
+            6.0
+          ]
         },
         "east": {
           "texture": "#dr_rust"
         },
         "up": {
-          "texture": "#dr_rust"
+          "texture": "#dr_rust",
+          "uv": [
+            0.0,
+            12.0,
+            16.0,
+            15.0
+          ]
         },
         "down": {
-          "texture": "#dr_rust"
+          "texture": "#dr_rust",
+          "uv": [
+            0.0,
+            1.0,
+            16.0,
+            4.0
+          ]
         }
       }
     }

@@ -58,10 +58,13 @@ public class LandshipRenderer extends EntityRenderer<Landship, LandshipRenderer.
 		shadowRadius = 2.0F;
 	}
 
-	/** The hull and barrel are longer than the hitbox. */
+	/**
+	 * The hull and barrel are longer than the hitbox, and the raised barrel's muzzle stands 3.75 blocks up (tools/check_mod_data.py
+	 * checks the box holds it).
+	 */
 	@Override
 	protected AABB getBoundingBoxForCulling(Landship landship, float partialTick) {
-		return landship.getBoundingBox().inflate(2.0, 0.5, 2.0);
+		return landship.getBoundingBox().inflate(2.0, 1.25, 2.0);
 	}
 
 	@Override

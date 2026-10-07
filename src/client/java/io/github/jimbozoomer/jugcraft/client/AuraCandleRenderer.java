@@ -83,8 +83,10 @@ public class AuraCandleRenderer implements BlockEntityRenderer<AuraCandleBlockEn
 		float base = top + 0.4F;
 		collector.submitCustomGeometry(pose, FLAME, (matrix, buffer) -> {
 			for (double turn : TURNS) {
-				TintedBoxes.plane(buffer, matrix, turn, width, base, base + height, flame, FULL_BRIGHT);
-				TintedBoxes.plane(buffer, matrix, turn, width * 0.5F, base, base + height * 0.6F, CORE, FULL_BRIGHT, 0.05F);
+				// Each side of a flame stands off its middle (never one plane drawn twice), the bright core further out so it
+				// shows in front of the flame from either side.
+				TintedBoxes.plane(buffer, matrix, turn, width, base, base + height, flame, FULL_BRIGHT, DecorDraw.TWO_SIDED_LIFT);
+				TintedBoxes.plane(buffer, matrix, turn, width * 0.5F, base, base + height * 0.6F, CORE, FULL_BRIGHT, 3 * DecorDraw.TWO_SIDED_LIFT);
 			}
 		});
 	}

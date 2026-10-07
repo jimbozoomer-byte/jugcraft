@@ -90,6 +90,9 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmsVGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIIGameTests",
+			"io.github.jimbozoomer.jugcraft.test.MachineMotionGameTests",
+			"io.github.jimbozoomer.jugcraft.test.TraitDetailsGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmsVIIIGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests"
 		],
 		"fabric-client-gametest": [
@@ -142,8 +145,8 @@
 			"io.github.jimbozoomer.jugcraft.test.GuideScreenshotGameTests",
 			"io.github.jimbozoomer.jugcraft.test.JugcraftServerClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SeasonClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.AlpineClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BiomeClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.AlpineClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.TownClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.HeadstoneClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MonumentClientGameTests",
@@ -173,6 +176,13 @@
 			"io.github.jimbozoomer.jugcraft.test.WeaponArtsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIIClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.MachineMotionClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FlailClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.RuneboundClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BigGunsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BiggerJarsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.TraitDetailsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmsVIIIClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmorSetsClientGameTests"
 		]
 	},

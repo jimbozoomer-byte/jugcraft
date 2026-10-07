@@ -2,6 +2,12 @@
 
 Status: **in progress.** The petrochemistry (oil) line below is being built in batches; the rest of the branch is still planned. This document reserves the branch's scope so mechanical and fluid work stays out of it. See [../TECH_TREE.md](../TECH_TREE.md) for how it fits with the rest of Jugcraft.
 
+## Owner planning: mineral sands and shared refining
+
+The [mineral-sands and refining plan](../features/mineral-sands-and-refining-plan.md) records dedicated plentiful regional sands as a major industrial supply, hybrid finite-deposit extraction, moderate physical separation and shared chemical machines with distinct roles. Proposed recipes and equipment remain planning work.
+
+Rare-earth development starts with named neodymium, cerium and yttrium products. **Expansion beyond this initial set is explicitly planned at the owner's request; three materials are not the final roster.** Add further named materials alongside useful consumers and reachable recovery routes, following the plan's expansion criteria.
+
 ## What belongs here
 
 Anything that changes what a substance *is* through a reaction, as opposed to its shape or mix (mechanical) or where it is (fluids):

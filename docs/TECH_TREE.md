@@ -581,6 +581,19 @@ Trophies last twice as long as steel. Glowing parts (runes, magma, venom, soul f
 
 **Code:** `weapons/ArmVariants` (the variants, boons and numbers), `ArmItem` (`boon`, `boonBonus`, `shock`); data from `tools/arms_variants.py`, art from `tools/arms_variants_art.py` ([feature record](features/arms-vii.md)).
 
+### Arms VIII (batch 59): thrown arms
+
+Four arms in bronze and steel that fight in the hand and are thrown with the use key: hold to wind back, let go to throw, as a trident is thrown. What a throw strikes takes its damage, more for the arm's damage enchantments; then the arm comes down where it struck, as itself, to be picked up (the chakram flies back). No throw hits harder than the trident's 8, and throwing one after another deals less a second than a netherite sword.
+
+| Item | In the hand | Thrown (bronze, steel) | Built from |
+| --- | --- | --- | --- |
+| Javelin | Hits 5.5 (steel 6) at 1.4 a second | 7, 8; wind 0.5 s; flies far and straight | ingot, 2 sticks, iron nugget |
+| Francisca | Hits 7 (7.5) at 1.1 a second; chops wood | 6, 7; wind 0.3 s; tumbles; knocks a raised shield down for 3 s | 2 ingots, stick |
+| Chakram | Hits 5 (5.5) at 1.8 a second | 4, 5 to each foe it passes, out and back; flies flat 12 blocks and returns to you | 3 ingots, leather |
+| Harpoon | Hits 6 (6.5) at 1.3 a second | 5, 6; keeps its speed underwater; hauls its catch towards you and out of the saddle | 2 ingots, stick, string |
+
+**Code:** `weapons/ThrownArmItem` (the wind and throw), `weapons/ThrownArm` (the flight and strike), `JugcraftArms.THROWN`; client `arms/ThrownArmRenderer` (each drawn as its 3D model, turned to its flight); data from `tools/arms.py`, art from `tools/arms_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-viii.md)).
+
 ### Construction chemistry (batch 32)
 
 | Item | What it does | Built from |

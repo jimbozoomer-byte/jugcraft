@@ -5,8 +5,8 @@
     "side": "jugcraft:block/ferris_wheel_booth_side",
     "front": "jugcraft:block/ferris_wheel_booth_front",
     "deck": "jugcraft:block/ferris_wheel_booth_deck",
-    "brass": "jugcraft:block/ferris_wheel_brass",
-    "steel": "jugcraft:block/ferris_wheel_steel",
+    "brass": "jugcraft:block/ferris_wheel_booth_brass",
+    "steel": "jugcraft:block/ferris_wheel_booth_steel",
     "gauge": "jugcraft:block/ferris_wheel_gauge"
   },
   "elements": [
@@ -55,22 +55,58 @@
       ],
       "faces": {
         "north": {
-          "texture": "#deck"
+          "texture": "#deck",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            3.0
+          ]
         },
         "south": {
-          "texture": "#deck"
+          "texture": "#deck",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            3.0
+          ]
         },
         "east": {
-          "texture": "#deck"
+          "texture": "#deck",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            3.0
+          ]
         },
         "west": {
-          "texture": "#deck"
+          "texture": "#deck",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            3.0
+          ]
         },
         "up": {
-          "texture": "#deck"
+          "texture": "#deck",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         },
         "down": {
-          "texture": "#steel"
+          "texture": "#steel",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         }
       }
     },
@@ -93,16 +129,40 @@
           "texture": "#steel"
         },
         "east": {
-          "texture": "#steel"
+          "texture": "#steel",
+          "uv": [
+            0.0,
+            9.0,
+            0.5,
+            10.0
+          ]
         },
         "west": {
-          "texture": "#steel"
+          "texture": "#steel",
+          "uv": [
+            15.5,
+            9.0,
+            16.0,
+            10.0
+          ]
         },
         "up": {
-          "texture": "#steel"
+          "texture": "#steel",
+          "uv": [
+            2.5,
+            15.5,
+            5.5,
+            16.0
+          ]
         },
         "down": {
-          "texture": "#steel"
+          "texture": "#steel",
+          "uv": [
+            2.5,
+            0.0,
+            5.5,
+            0.5
+          ]
         }
       }
     },
@@ -125,16 +185,40 @@
           "texture": "#brass"
         },
         "east": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            0.5,
+            4.5,
+            1.5,
+            9.5
+          ]
         },
         "west": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            14.5,
+            4.5,
+            15.5,
+            9.5
+          ]
         },
         "up": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            3.5,
+            14.5,
+            4.5,
+            15.5
+          ]
         },
         "down": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            3.5,
+            0.5,
+            4.5,
+            1.5
+          ]
         }
       },
       "rotation": {
@@ -166,16 +250,40 @@
           "texture": "#brass"
         },
         "east": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            0.5,
+            3.0,
+            2.5,
+            5.0
+          ]
         },
         "west": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            13.5,
+            3.0,
+            15.5,
+            5.0
+          ]
         },
         "up": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            3.0,
+            13.5,
+            5.0,
+            15.5
+          ]
         },
         "down": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            3.0,
+            0.5,
+            5.0,
+            2.5
+          ]
         }
       },
       "rotation": {
@@ -213,16 +321,40 @@
           "texture": "#steel"
         },
         "east": {
-          "texture": "#steel"
+          "texture": "#steel",
+          "uv": [
+            0.0,
+            4.0,
+            0.75,
+            9.0
+          ]
         },
         "west": {
-          "texture": "#steel"
+          "texture": "#steel",
+          "uv": [
+            15.25,
+            4.0,
+            16.0,
+            9.0
+          ]
         },
         "up": {
-          "texture": "#steel"
+          "texture": "#steel",
+          "uv": [
+            9.0,
+            15.25,
+            14.0,
+            16.0
+          ]
         },
         "down": {
-          "texture": "#steel"
+          "texture": "#steel",
+          "uv": [
+            9.0,
+            0.0,
+            14.0,
+            0.75
+          ]
         }
       }
     },
@@ -245,16 +377,40 @@
           "texture": "#brass"
         },
         "east": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            0.0,
+            10.5,
+            0.75,
+            12.0
+          ]
         },
         "west": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            15.25,
+            10.5,
+            16.0,
+            12.0
+          ]
         },
         "up": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            9.5,
+            15.25,
+            11.0,
+            16.0
+          ]
         },
         "down": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            9.5,
+            0.0,
+            11.0,
+            0.75
+          ]
         }
       }
     },
@@ -277,16 +433,40 @@
           "texture": "#brass"
         },
         "east": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            0.0,
+            10.5,
+            0.75,
+            12.0
+          ]
         },
         "west": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            15.25,
+            10.5,
+            16.0,
+            12.0
+          ]
         },
         "up": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            12.0,
+            15.25,
+            13.5,
+            16.0
+          ]
         },
         "down": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            12.0,
+            0.0,
+            13.5,
+            0.75
+          ]
         }
       }
     }
