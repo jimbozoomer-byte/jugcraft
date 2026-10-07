@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.PlayerModelType;
+import java.util.List;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -51,13 +52,19 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 		}
 	}
 
+	/** The props the animations move on bones of their own (tools/guns.py PROPS). */
+	private static final List<String> PROPS = List.of("shell", "ball", "ram", "flash");
+
 	/**
-	 * The Thunderpipe's shell rests out of place: the reload loop's offsets bring it into the breech, and every other
-	 * animation hides it, except the inspect, which leaves it alone. So it shows only while an animation moves it.
+	 * A prop (a shell, a ball, a ramrod, a priming flash) rests out of place: an animation's offsets bring it where it
+	 * belongs, and an animation that leaves it alone (an inspect, the idle) would show it at its rest. So it shows only
+	 * while an animation moves it.
 	 */
 	@Override
 	public void adjustModelBonesForRender(RenderPassInfo<GeoRenderState> info, BoneSnapshots snapshots) {
-		snapshots.ifPresent("shell", shell -> shell.skipRender(!shell.hasTranslation()));
+		for (String prop : PROPS) {
+			snapshots.ifPresent(prop, bone -> bone.skipRender(!bone.hasTranslation()));
+		}
 	}
 
 	@Override

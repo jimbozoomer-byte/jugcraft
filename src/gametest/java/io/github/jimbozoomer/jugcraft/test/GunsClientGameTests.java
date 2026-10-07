@@ -48,8 +48,8 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			// The player looks north at a still husk seven blocks away, in front of a brick wall.
 			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
 			server.runCommand(String.format(Locale.ROOT, "summon minecraft:husk %.1f %d %.1f {NoAI:1b,PersistenceRequired:1b,"
-					+ "Rotation:[0f,0f],attributes:[{id:\"minecraft:armor\",base:0.0d},{id:\"minecraft:max_health\",base:200.0d}],"
-					+ "Health:200.0f}", x + 0.5, y, z - 6.5));
+					+ "Rotation:[0f,0f],attributes:[{id:\"minecraft:armor\",base:0.0d},{id:\"minecraft:max_health\",base:1000.0d}],"
+					+ "Health:1000.0f}", x + 0.5, y, z - 6.5));
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 
 			for (String gun : JugcraftGuns.SPECS.keySet()) {

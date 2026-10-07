@@ -233,6 +233,30 @@
       }
     ]
   },
+  "guns.insert": {
+    "subtitle": "subtitles.jugcraft.guns.insert",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_sounds_insert"
+      }
+    ]
+  },
+  "guns.metal": {
+    "subtitle": "subtitles.jugcraft.guns.metal",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_sounds_metal"
+      }
+    ]
+  },
+  "guns.jam": {
+    "subtitle": "subtitles.jugcraft.guns.jam",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_sounds_metal"
+      }
+    ]
+  },
   "guns.rust_midge.fire": {
     "subtitle": "subtitles.jugcraft.guns.fire",
     "sounds": [
@@ -310,6 +334,33 @@
     "sounds": [
       {
         "name": "jugcraft:guns/brass_shotgun_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.duelling_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/blackpowder_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.line_musket.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/blackpowder_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.bellmouth.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/blackpowder_fire",
         "attenuation_distance": 64
       }
     ]

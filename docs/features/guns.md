@@ -1,9 +1,10 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2) and the lever set (slice 3)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3) and the black powder guns (slice 4)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
 - **Slice 2** (the iron set: the Warden Pistol, Riveter SMG and Haymaker; [below](#slice-2-the-iron-set)): implemented on `claude/guns-iron` (#252), stacked on slice 1, awaiting review.
-- **Slice 3** (the lever set: the Longhorn Rifle, Drover Rifle and Coach Gun; [below](#slice-3-the-lever-set)): implemented on `claude/guns-lever`, stacked on slice 2, awaiting review.
+- **Slice 3** (the lever set: the Longhorn Rifle, Drover Rifle and Coach Gun; [below](#slice-3-the-lever-set)): implemented on `claude/guns-lever` (#253), stacked on slice 2, awaiting review.
+- **Slice 4** (the black powder guns: the Duelling Pistol, Line Musket and Bellmouth, and the Paper Cartridge; [below](#slice-4-the-black-powder-guns)): implemented on `claude/guns-powder`, stacked on slice 3, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -149,6 +150,41 @@ The owner's two lever rifles and the Callwell, offered as the "lever rifles". Th
 - **Hands:** the right hand on each wrist, low on it, (8, 1.7 to 1.9, 16.4). Placed at the wrist's middle, the fist reached up to the sight line when aiming and hid the target in a first-person preview. The left hands are on the fore-ends.
 - **Sounds:** the rifles' lever cue plays the library's lever sound (a new shared event, `guns.lever`); each loop's insert cue plays the shell insert. Shots: the Longhorn the library's heavy rifle shot, the Drover the cowboy rifle's, the Coach Gun the brass shotgun's.
 
+## Slice 4: the black powder guns
+Muzzle-loaders: one heavy shot, then a long reload (bite the cartridge, pour, drop the ball, ram it home). They are the cheapest guns, iron, wood and a flint, so they also make an early way in.
+
+| | Duelling Pistol | Line Musket | Bellmouth |
+|---|---|---|---|
+| The owner's gun | Flintlock Pistol | Musket | Blunderbuss |
+| What it is | a flintlock pistol, held in one hand | a long flintlock musket | a flintlock blunderbuss with a flared muzzle |
+| Fires | one shot | one shot | one shot, 10 balls |
+| Damage | 9 | 14 | 2.5 a ball (25 if all land) |
+| Holds | 1 | 1 | 1 |
+| Reload | 3.7 s | 3.9 s | 3.9 s |
+| Spread, hip / aimed | 4° / 2° | 2.5° / 0.75° | 12° / 9° |
+| Range | 32 blocks | 64 | 20 |
+| Round | Paper Cartridge | Paper Cartridge | Paper Cartridge |
+
+**The round:** the **Paper Cartridge**, a lead ball and its powder in paper: paper, a lead nugget and gunpowder in a column make 4. A new round, since none of the others suits a muzzle-loader; its icon is a map (`tools/item_icons/paper_cartridge.txt`, canvas and iron).
+
+**Crafting** (a crafting table): the Duelling Pistol, two iron ingots and a flint over planks; the Line Musket, three iron ingots over a flint and two planks; the Bellmouth, a copper ingot and two iron ingots over a flint and two planks.
+
+**What you see:** the owner's animations: the hammer falls and a flash of priming fire jumps from the pan; on the reload the gun tips up, the ball goes down the muzzle and the ramrod drives it home in strokes. The Duelling Pistol is held in one hand; the left comes in to load.
+
+**How the models were built:**
+- **Hammer:** the owner's part, a flat cock on the lock's right side, on the `hammer` bone, turning about its foot.
+- **Ball, ramrod and flash:** the animations move them on bones that had no parts. They are drawn here, each one box in an empty corner of the gun's atlas copy (the Musket's flash is the owner's own part):
+  - a 1 px lead ball, resting where the reload's first hold puts it at the muzzle;
+  - a half-pixel iron ramrod with a brass tip (6, 12 and 10 px long), resting where the reload's farthest reach puts its back end at the muzzle, in line with the bore, so its strokes drive it in;
+  - a 1 px priming flash at the pan.
+- **Shown only while moved:** the renderer now hides every such prop (shell, ball, ramrod, flash) unless an animation is moving it, as it already did the Thunderpipe's shell. The idle, which leaves them alone, would otherwise show them at rest.
+- **The Duelling Pistol's left hand** (hidden by its idle) is placed at the muzzle, holding the ball, 0.71 s into the reload.
+- **The Bellmouth's left arm** hangs from a `left_arm2` bone, which its reload slides back 5.75 px.
+- **Sounds:** each gun fires the library's black powder shot. The reload cues `insert`, `metal` and `jam` play the library's insert and metal sounds (new shared events: `guns.insert`, `guns.metal`, `guns.jam`).
+- **Known limit:** at about half a second into the Duelling Pistol's reload, its left hand comes close to the view with the pistol tipped up, and the arm covers much of the screen (first-person preview) for under half a second. Play will tell whether it wants a different anchor for that hand.
+
+**Balance:** starting numbers. The Line Musket hits hardest of any gun so far (14) but needs 3.9 s to reload; the Bellmouth's 25 at point blank falls off fast.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -189,7 +225,7 @@ The owner's two lever rifles and the Callwell, offered as the "lever rifles". Th
 - **Others' animations:** the server tells the clients that see the shooter (not the shooter's own) with `GunActionPayload`, and they play the shot or reload on that gun.
 - **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
 - **Disconnect:** clears that player's trigger credit and reload.
-- **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns' and rounds' recipes (twelve with slice 3). Items stay registered, so saved guns and rounds survive with it off.
+- **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns' and rounds' recipes (sixteen with slice 4). Items stay registered, so saved guns and rounds survive with it off.
 
 ## The shared parts it uses
 - **Items:** `JugcraftRegistry.item` for every gun and round; the Combat tab.
@@ -308,6 +344,25 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | coach_gun | `Guns/item/callwell.animation.json` | `ab04e81b8490abec` |
 | coach_gun | `Guns/models/special/callwell/main.json` | `1c1681b7bdadd76f` |
 | coach_gun | `Guns/sounds/item/brass_shotgun/fire.ogg` | `95eee6d27b87d35a` |
+| duelling_pistol | `Guns/models/item/flintlock_pistol.json` | `2d67c5d0470be932` |
+| duelling_pistol | `Guns/item/flintlock_pistol.png` | `3217c9593149ede6` |
+| duelling_pistol | `Guns/item/flintlock_pistol.animation.json` | `61b3660ac8829525` |
+| duelling_pistol | `Guns/models/special/flintlock_pistol/main.json` | `1d94ca1c4f73eae0` |
+| duelling_pistol | `Guns/models/special/flintlock_pistol/hammer.json` | `8bf431167c8b7557` |
+| duelling_pistol | `Guns/sounds/item/blackpowder/fire.ogg` | `a3d3d49a332d034f` |
+| line_musket | `Guns/models/item/musket.json` | `e6231ba72c95949a` |
+| line_musket | `Guns/item/musket.png` | `2e80294309d87927` |
+| line_musket | `Guns/item/musket.animation.json` | `3de10c7807e5940c` |
+| line_musket | `Guns/models/special/musket/main.json` | `2e24d5f0620e9051` |
+| line_musket | `Guns/models/special/musket/hammer.json` | `059525f269d8120c` |
+| line_musket | `Guns/models/special/musket/flash.json` | `7a6ab5acaca6669f` |
+| line_musket | `Guns/sounds/item/blackpowder/fire.ogg` | `a3d3d49a332d034f` |
+| bellmouth | `Guns/models/item/blunderbuss.json` | `7d99e9a7cedc85b3` |
+| bellmouth | `Guns/item/blunderbuss.png` | `4e90eca70ba48802` |
+| bellmouth | `Guns/item/blunderbuss.animation.json` | `82acaf92b7654690` |
+| bellmouth | `Guns/models/special/blunderbuss/main.json` | `611befd4a9d8e37d` |
+| bellmouth | `Guns/models/special/blunderbuss/hammer.json` | `9365a5b0b9c90007` |
+| bellmouth | `Guns/sounds/item/blackpowder/fire.ogg` | `a3d3d49a332d034f` |
 | shared | `Guns/sounds/item/bolt/bolt.ogg` | `1cf1102f6ba52725` |
 | shared | `Guns/sounds/item/bolt_pull/bolt_pull.ogg` | `dbbda8b00abcab8c` |
 | shared | `Guns/sounds/item/bolt_release/bolt_release.ogg` | `7c1096f545d72ec3` |
@@ -316,6 +371,7 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | shared | `Guns/sounds/item/lever/lever.ogg` | `0b6c3fb22142e42e` |
 | shared | `Guns/sounds/item/mag_in/mag_in.ogg` | `9595cc14d1209f85` |
 | shared | `Guns/sounds/item/mag_out/mag_out.ogg` | `5f805eaadc8fd476` |
+| shared | `Guns/sounds/item/gun_sounds/metal.ogg` | `3c48586e2406bdea` |
 | shared | `Guns/sounds/item/rack/rack.ogg` | `aa98a804ed7809ab` |
 | shared | `Guns/sounds/item/reload_end/reload_end.ogg` | `c1db5357e55ed953` |
 | shared | `Guns/sounds/item/rusty_gnat/copper_jam.ogg` | `d1b93136045c83cc` |
@@ -323,7 +379,7 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
-- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`), and the shell's pixels in the Thunderpipe's atlas copy.
+- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's shell, the Longhorn's cartridge, the muzzle-loaders' balls, ramrods and flashes).
 
 ## Verification
 - **Run locally (7 October 2026):**
@@ -358,15 +414,22 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
   - **Java:** a syntax parse only: 0 errors in the changed files.
   - **Previews:** side and top views of the levers swinging and the Coach Gun breaking open; first-person views held, aimed and reloading, which led to the lowered right hands. The preview now clips what crosses the near plane, as the game does, instead of dropping it.
 - **Slice 3 game tests (written; they run in CI):** `GunsGameTests` adds: the Longhorn and the Drover each land one shot's damage and spend a round, and the Drover loads three rounds one at a time; the Coach Gun's pellets land together and spend one barrel. "Every gun registered" expects nine guns. The client test runs every gun.
+- **Slice 4, run locally (7 October 2026):**
+  - `python3 tools/guns.py`: PASS for all twelve guns (the hammers re-bake to the owner's parts; the drawn props are skipped by the face check and drawn into empty corners only).
+  - `python3 tools/generate_material_data.py` twice (the second run changed nothing) and `python3 tools/generate_textures.py` for the cartridge's icon. That generator also rewrote 24 unrelated flower textures; those were left out of the change.
+  - `python3 tools/check_mod_data.py`: PASS (1561 material IDs), with `check_guns`; `python3 scripts/check_repository.py` and `python3 tools/check_icon_maps.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews:** side and top views of the shots (hammer, flash) and the reloads (ball, ramrod); first-person views held, aimed and through the Duelling Pistol's reload, which found the known limit above and shrank the flash from 2 px to 1.
+- **Slice 4 game tests (written; they run in CI):** `GunsGameTests` adds: the Line Musket lands its 14, will not fire again empty, and loads one cartridge after its reload and not before; the Bellmouth's balls land together at close range. "Every gun registered" expects twelve guns and four rounds. The client test runs every gun; its husk now has 1000 health, enough for all twelve.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Light Round, Rifle Round, Buckshot Shell). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
-- **Next slices,** each its own pull request: the black powder guns and the attachments (the owner's parts include silencers, stocks, grips, scopes, extended magazines and bayonets).
+- **Next slice,** its own pull request: the attachments (the owner's parts include silencers, stocks, grips, scopes, extended magazines and bayonets).
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - casings and muzzle flash (the `eject_casing` cue);

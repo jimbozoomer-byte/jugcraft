@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 4 (the black powder guns)
+- **Three of the owner's muzzle-loaders:** the **Duelling Pistol**, the **Line Musket** and the **Bellmouth** (a blunderbuss, ten balls a shot). One heavy shot, then a long reload: the ball goes down the muzzle and the ramrod drives it home, with the owner's animations.
+- **A new round, the Paper Cartridge** (paper, a lead nugget and gunpowder). The guns are the cheapest yet: iron, wood and a flint. Record: [guns.md, slice 4](docs/features/guns.md#slice-4-the-black-powder-guns).
+
 ### Unmerged: Guns, slice 3 (the lever set)
 - **Three more of the owner's guns:** the **Longhorn Rifle** and the **Drover Rifle**, lever-action rifles worked between shots and loaded a round at a time, and the **Coach Gun**, an over-and-under shotgun that breaks open to load. The levers swing and the barrels tip open with the owner's animations.
 - They fire the existing Rifle Rounds and Buckshot Shells. Record: [guns.md, slice 3](docs/features/guns.md#slice-3-the-lever-set).

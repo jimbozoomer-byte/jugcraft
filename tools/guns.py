@@ -1,5 +1,6 @@
 """Guns (docs/features/guns.md): slice 1, the owner's Rust Midge, Patchwork Carbine and Thunderpipe; slice 2, the
-iron set: the Warden Pistol, Riveter SMG and Haymaker; slice 3, the Longhorn Rifle, Drover Rifle and Coach Gun.
+iron set: the Warden Pistol, Riveter SMG and Haymaker; slice 3, the Longhorn Rifle, Drover Rifle and Coach Gun;
+slice 4, the black powder guns: the Duelling Pistol, Line Musket and Bellmouth.
 
 The owner made these guns (inspired by Scorched Guns 2) and supplied, in the owner asset library:
   - a Blockbench Java model of every part (art/owner-library/originals/Blocks/Guns/models/special/<gun>/<part>.json),
@@ -113,6 +114,31 @@ GUNS = {
         "damage": 3.0, "pellets": 8, "interval": 8, "auto": False, "capacity": 2,
         "reload": (12, 13, 13), "spread": (6.0, 4.0), "range": 32, "ammo": "buckshot_shell",
     },
+    # Slice 4: muzzle-loaders, one shot and then a long reload (powder, ball and ramrod), the earliest guns.
+    "duelling_pistol": {
+        "display": "Duelling Pistol",
+        "source": "flintlock_pistol",
+        "tooltip": "A flintlock pistol, loaded down the muzzle with powder and ball. One heavy shot, then a long reload. "
+                   "Fires paper cartridges.",
+        "damage": 9.0, "pellets": 1, "interval": 20, "auto": False, "capacity": 1,
+        "reload": 74, "spread": (4.0, 2.0), "range": 32, "ammo": "paper_cartridge",
+    },
+    "line_musket": {
+        "display": "Line Musket",
+        "source": "musket",
+        "tooltip": "A long flintlock musket, loaded down the muzzle and rammed home. One heavy shot, then a long reload. "
+                   "Fires paper cartridges.",
+        "damage": 14.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 1,
+        "reload": 78, "spread": (2.5, 0.75), "range": 64, "ammo": "paper_cartridge",
+    },
+    "bellmouth": {
+        "display": "Bellmouth",
+        "source": "blunderbuss",
+        "tooltip": "A flintlock blunderbuss with a flared muzzle. Ten balls a shot at close range, then a long reload. "
+                   "Fires paper cartridges.",
+        "damage": 2.5, "pellets": 10, "interval": 10, "auto": False, "capacity": 1,
+        "reload": 78, "spread": (12.0, 9.0), "range": 20, "ammo": "paper_cartridge",
+    },
 }
 
 # The rounds: display name, tooltip, recipe (pattern, key, count). Cheap and early: copper or brass, lead and gunpowder.
@@ -124,6 +150,8 @@ AMMO = {
     "buckshot_shell": ("Buckshot Shell", "A paper shell of lead shot over a brass head.",
                        (["PLP", "PGP", " B "], {"P": "minecraft:paper", "L": "#c:nuggets/lead", "G": "minecraft:gunpowder",
                                                 "B": "#c:nuggets/brass"}, 4)),
+    "paper_cartridge": ("Paper Cartridge", "A lead ball and its powder, wrapped in paper for a muzzle-loader.",
+                        (["P", "L", "G"], {"P": "minecraft:paper", "L": "#c:nuggets/lead", "G": "minecraft:gunpowder"}, 4)),
 }
 
 # Gun recipes: crafted at a crafting table from early metal (the iron set adds brass); the owner's art carries the look.
@@ -142,6 +170,11 @@ RECIPES = {
                                       "P": "#minecraft:planks"}),
     "coach_gun": (["II ", "BLP"], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "B": "#c:ingots/brass",
                                    "P": "#minecraft:planks"}),
+    # The muzzle-loaders: iron, wood and a flint for the lock; no lever, no brass.
+    "duelling_pistol": (["IIF", " P "], {"I": "minecraft:iron_ingot", "F": "minecraft:flint", "P": "#minecraft:planks"}),
+    "line_musket": (["III", "FPP"], {"I": "minecraft:iron_ingot", "F": "minecraft:flint", "P": "#minecraft:planks"}),
+    "bellmouth": (["CII", "FPP"], {"C": "minecraft:copper_ingot", "I": "minecraft:iron_ingot", "F": "minecraft:flint",
+                                  "P": "#minecraft:planks"}),
 }
 
 # How each gun is built from the owner's parts, in the owner's model space (Java item-model pixels: x east, y up,
@@ -239,7 +272,7 @@ BUILDS = {
     },
     # Slice 3. The owner's lever rifles keep the lever loop in their main part, as one flat element (the Marlin's 8th,
     # the Winnie's 11th): it rides the lever bone, which turns about the loop's front where it meets the receiver.
-    # The Marlin's reload carries a cartridge in on the shell bone (SHELLS); the Winnie's and the Callwell's keep it
+    # The Marlin's reload carries a cartridge in on the shell bone (PROPS); the Winnie's and the Callwell's keep it
     # at scale 0, so their shell bones are empty.
     "longhorn_rifle": {
         "bones": [
@@ -279,17 +312,89 @@ BUILDS = {
         "muzzle": (8.0, 3.4, -1.95),
         "sight": (8.0, 5.25, 14.8),
     },
+    # Slice 4. The muzzle-loaders' animations move a hammer (the owner's part, a flat cock on the lock's right side,
+    # turning about its foot), and a ball, a ramrod and a priming flash that had no parts (PROPS; the Musket's flash is
+    # the owner's part). Their bolt bones are empty. The Duelling Pistol's idle hides the left arm; its hand point is at
+    # the muzzle, holding the ball, 0.71 s into the reload. The Bellmouth's left arm hangs from a "left_arm2" bone its
+    # reload slides back.
+    "duelling_pistol": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.7, 15.6)),
+            ("gun_body", "gun_body2", ["main"], (8.0, 1.7, 15.6)),
+            ("hammer", "gun_body", ["hammer"], (8.96, 3.6, 13.0)),
+            ("bolt", "gun_body", [], (8.0, 3.77, 12.0)),
+            ("ball", "gun_body", ["@ball"], (8.0, 3.47, 8.81)),
+            ("ram", "gun_body", ["@ram"], (7.88, 1.9, 8.31)),
+            ("flash", "gun_body", ["@flash"], (9.4, 4.5, 11.3)),
+        ],
+        "hands": {"right": (8.0, 1.7, 15.6), "left": (8.0, 4.6, 3.3)},
+        "hand_pose": {"left": ("reload", "0.7083")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.28, -0.9592, 0.0384)},
+        "muzzle": (8.0, 3.77, 3.0),
+        "sight": (8.0, 4.95, 12.73),
+    },
+    "line_musket": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.9, 16.4)),
+            ("gun_body", "gun_body2", ["main"], (8.0, 1.9, 16.4)),
+            ("hammer", "gun_body", ["hammer"], (8.96, 3.5, 14.9)),
+            ("bolt", "gun_body", [], (8.0, 3.92, 14.0)),
+            ("ball", "gun_body", ["@ball"], (8.0, 2.92, 14.3)),
+            ("ram", "gun_body", ["@ram"], (8.0, 2.92, 8.05)),
+            ("flash", "gun_body", ["flash"], (9.0, 4.79, 13.04)),
+        ],
+        "hands": {"right": (8.0, 1.9, 16.4), "left": (8.0, 2.0, 8.0)},
+        "arms": {"right": (-0.2762, -0.2276, 0.9338), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 3.92, 0.55),
+        "sight": (8.0, 5.0, 14.74),
+    },
+    "bellmouth": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.9, 16.4)),
+            ("gun_body", "gun_body2", ["main"], (8.0, 1.9, 16.4)),
+            ("hammer", "gun_body", ["hammer"], (8.96, 3.6, 15.0)),
+            ("bolt", "gun_body", [], (8.0, 3.66, 13.0)),
+            ("ball", "gun_body", ["@ball"], (7.36, 3.07, 7.77)),
+            ("ram", "gun_body", ["@ram"], (8.0, 2.66, 10.3)),
+            ("flash", "gun_body", ["@flash"], (9.0, 4.9, 13.2)),
+            ("left_arm2", "gun_body", [], (8.0, 1.4, 8.0)),
+        ],
+        "hands": {"right": (8.0, 1.9, 16.4), "left": (8.0, 1.4, 8.0)},
+        "arm_parents": {"left": "left_arm2"},
+        "arms": {"right": (-0.2762, -0.2276, 0.9338), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 3.66, 1.8),
+        "sight": (8.0, 5.45, 12.41),
+    },
 }
 
-# The rounds the reload loops carry in ("@shell" in a bone's parts: the owner's animations move a "shell" bone that had
-# no part), each drawn into a free corner of the gun's atlas copy (the corner must be empty). In the idle pose they are
-# scaled to 0.
-#   kind "buckshot": a red paper hull with crimp lines and a brass head; "cartridge": a brass case with a lead tip.
+# Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
+# a muzzle-loader's ball and ramrod and its priming flash. Each is one box drawn here into a free corner of the gun's
+# atlas copy (the corner must be empty); the renderer shows it only while an animation moves it (GunRenderer).
+#   kind "buckshot": a red paper hull with crimp lines and a brass head; "cartridge": a brass case with a lead tip;
+#   "ball": a lead ball; "rod": an iron ramrod with a brass tip; "flash": a burst of priming fire.
 # The Thunderpipe's 2 x 2 x 5 px shell rests at the breech it ends in (x 9, y 4.17, z 12.4..17.4) less the loop's last
-# offset (render -0.278, -0.25, -7.515), so the loop slides it home.
-SHELLS = {
-    "thunderpipe": {"kind": "buckshot", "from": (8.278, 3.42, 19.9), "size": (2.0, 2.0, 5.0), "texture_at": (112, 119)},
-    "longhorn_rifle": {"kind": "cartridge", "from": (8.8, 2.7, 12.0), "size": (1.0, 1.0, 3.0), "texture_at": (119, 122)},
+# offset (render -0.278, -0.25, -7.515), so the loop slides it home. A muzzle-loader's ball rests where the reload's
+# first hold puts it at the muzzle; its ramrod where the reload's farthest reach puts the rod's back end at the muzzle,
+# in line with the bore (its strokes then drive it in); its flash at the pan beside the hammer.
+PROPS = {
+    "thunderpipe": {"shell": {"kind": "buckshot", "from": (8.278, 3.42, 19.9), "size": (2.0, 2.0, 5.0),
+                              "texture_at": (112, 119)}},
+    "longhorn_rifle": {"shell": {"kind": "cartridge", "from": (8.8, 2.7, 12.0), "size": (1.0, 1.0, 3.0),
+                                 "texture_at": (119, 122)}},
+    "duelling_pistol": {
+        "ball": {"kind": "ball", "from": (7.5, 2.97, 8.31), "size": (1.0, 1.0, 1.0), "texture_at": (34, 61)},
+        "ram": {"kind": "rod", "from": (7.63, 1.65, 5.31), "size": (0.5, 0.5, 6.0), "texture_at": (52, 50)},
+        "flash": {"kind": "flash", "from": (8.9, 4.0, 10.8), "size": (1.0, 1.0, 1.0), "texture_at": (43, 58)},
+    },
+    "line_musket": {
+        "ball": {"kind": "ball", "from": (7.5, 2.42, 13.8), "size": (1.0, 1.0, 1.0), "texture_at": (34, 61)},
+        "ram": {"kind": "rod", "from": (7.75, 2.67, 2.05), "size": (0.5, 0.5, 12.0), "texture_at": (52, 50)},
+    },
+    "bellmouth": {
+        "ball": {"kind": "ball", "from": (6.86, 2.57, 7.27), "size": (1.0, 1.0, 1.0), "texture_at": (34, 61)},
+        "ram": {"kind": "rod", "from": (7.75, 2.41, 5.3), "size": (0.5, 0.5, 10.0), "texture_at": (52, 50)},
+        "flash": {"kind": "flash", "from": (8.5, 4.4, 12.7), "size": (1.0, 1.0, 1.0), "texture_at": (43, 58)},
+    },
 }
 
 # The sounds the animations name (sound_effects keys), per gun where they differ, and the gun's own shots.
@@ -308,6 +413,9 @@ EVENT_SOUNDS = {
     "shell_in": "item/gun_sounds/insert.ogg",
     "dry_fire": "item/rusty_gnat/copper_jam.ogg",
     "lever": "item/lever/lever.ogg",
+    "insert": "item/gun_sounds/insert.ogg",
+    "metal": "item/gun_sounds/metal.ogg",
+    "jam": "item/gun_sounds/metal.ogg",
 }
 # The shell-at-a-time guns' reload_loop names "reload_mag_in"; they push a shell or a round, so they play the insert.
 EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"reload_mag_in": "shell_in"},
@@ -323,6 +431,9 @@ SHOT_SOUNDS = {
     "longhorn_rifle": "item/heavy_rifle/fire.ogg",
     "drover_rifle": "item/cowboy/fire.ogg",
     "coach_gun": "item/brass_shotgun/fire.ogg",
+    "duelling_pistol": "item/blackpowder/fire.ogg",
+    "line_musket": "item/blackpowder/fire.ogg",
+    "bellmouth": "item/blackpowder/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -338,6 +449,9 @@ SUBTITLES = {
     "reload_end": "Gun snaps shut",
     "shell_in": "Shell goes in",
     "lever": "Lever works",
+    "insert": "Charge goes in",
+    "metal": "Ramrod rings",
+    "jam": "Ramrod rams home",
 }
 
 
@@ -567,22 +681,27 @@ def element_cube(element, size_px):
     return cube
 
 
-def shell_cube(gun):
-    shell = SHELLS[gun]
-    x, y, z = shell["from"]
-    sx, sy, sz = shell["size"]
-    w, h, d = int(sx), int(sy), int(sz)
-    tu, tv = shell["texture_at"]
-    # One texture block per face (shell_block): the ends side by side, the sides below them, the top and bottom below.
+def prop_dims(prop):
+    """A prop's faces in whole texture pixels (a half-pixel rod still takes one)."""
+    return tuple(max(1, int(round(v))) for v in prop["size"])
+
+
+def prop_cube(gun, name):
+    prop = PROPS[gun][name]
+    x, y, z = prop["from"]
+    sx, sy, sz = prop["size"]
+    w, h, d = prop_dims(prop)
+    tu, tv = prop["texture_at"]
+    # One texture block per face (prop_block): the ends side by side, the sides below them, the top and bottom below.
     return {"origin": [rnd(8.0 - (x + sx)), rnd(y), rnd(z - 8.0)], "size": [sx, sy, sz], "uv": {
         "north": {"uv": [tu, tv], "uv_size": [w, h]}, "south": {"uv": [tu + w, tv], "uv_size": [w, h]},
         "east": {"uv": [tu, tv + h], "uv_size": [d, h]}, "west": {"uv": [tu, tv + h], "uv_size": [d, h]},
         "up": {"uv": [tu, tv + 2 * h], "uv_size": [w, d]}, "down": {"uv": [tu + w, tv + 2 * h], "uv_size": [w, d]}}}
 
 
-def shell_block(gun):
-    """The atlas block (width, height) a shell's faces take."""
-    w, h, d = (int(v) for v in SHELLS[gun]["size"])
+def prop_block(prop):
+    """The atlas block (width, height) a prop's faces take."""
+    w, h, d = prop_dims(prop)
     return max(2 * w, d), 2 * h + d
 
 
@@ -633,8 +752,8 @@ def build_geo(gun):
             bone["parent"] = parent
         cubes = []
         for part in parts:
-            if part == "@shell":
-                cubes.append(shell_cube(gun))
+            if part.startswith("@"):
+                cubes.append(prop_cube(gun, part[1:]))
                 continue
             for element in part_elements(gun, part):
                 cubes.append(element_cube(element, size_px))
@@ -646,7 +765,8 @@ def build_geo(gun):
             bone["locators"] = {**bone.get("locators", {}), "muzzle": geo_point(build["muzzle"])}
         bones.append(bone)
     for side in ("right", "left"):
-        bones.append({"name": f"{side}_arm", "parent": "gun_body", "pivot": geo_point(arm_pivot(gun, side)),
+        parent = build.get("arm_parents", {}).get(side, "gun_body")
+        bones.append({"name": f"{side}_arm", "parent": parent, "pivot": geo_point(arm_pivot(gun, side)),
                       "locators": {f"{side}_shoulder": geo_point(shoulder(gun, side))}})
     return {"format_version": "1.12.0", "minecraft:geometry": [{
         "description": {"identifier": f"geometry.{MOD}.{gun}", "texture_width": size_px[0],
@@ -731,13 +851,18 @@ def check():
         size_px = atlas_size(gun)
         bones = {b["name"]: b for b in geo["minecraft:geometry"][0]["bones"]}
         for name, parent, parts, pivot in BUILDS[gun]["bones"]:
-            cubes = list(bones.get(name, {}).get("cubes", []))
+            cubes = []
             want = []
+            found = list(bones.get(name, {}).get("cubes", []))
             for part in parts:
-                if part == "@shell":
-                    cubes.pop()  # drawn here, not the owner's
+                if part.startswith("@"):
+                    found = found[1:]  # a prop, drawn here, not the owner's
                     continue
-                want += part_elements(gun, part)
+                elements = part_elements(gun, part)
+                cubes += found[:len(elements)]
+                found = found[len(elements):]
+                want += elements
+            cubes += found  # any left over are reported as a count mismatch
             if len(cubes) != len(want):
                 problems.append(f"{gun}/{name}: {len(cubes)} cubes for {len(want)} owner elements")
                 continue
@@ -800,18 +925,20 @@ def dump(path, data):
     path.write_text(json.dumps(data, indent=1) + "\n")
 
 
-def draw_shell(atlas, gun):
-    """A shell's block of the atlas copy, in a corner the owner's atlas leaves empty."""
-    tu, tv = SHELLS[gun]["texture_at"]
-    bw, bh = shell_block(gun)
-    if any(atlas.getpixel((tu + x, tv + y))[3] for x in range(max(bw, 8)) for y in range(bh)):
-        raise ValueError(f"{gun}: the atlas is not empty at {tu},{tv}")
-    return (draw_buckshot if SHELLS[gun]["kind"] == "buckshot" else draw_cartridge)(atlas, gun)
+def draw_props(atlas, gun):
+    """Each prop's block of the atlas copy, in a corner the owner's atlas leaves empty."""
+    for name, prop in PROPS[gun].items():
+        tu, tv = prop["texture_at"]
+        bw, bh = prop_block(prop)
+        if any(atlas.getpixel((tu + x, tv + y))[3] for x in range(max(bw, 8)) for y in range(bh)):
+            raise ValueError(f"{gun}: the atlas is not empty at {tu},{tv} for its {name}")
+        {"buckshot": draw_buckshot, "cartridge": draw_cartridge}.get(prop["kind"], draw_plain)(atlas, prop)
+    return atlas
 
 
-def draw_buckshot(atlas, gun):
+def draw_buckshot(atlas, prop):
     """A 2 x 2 x 5 red paper hull with darker crimp lines and a brass head."""
-    tu, tv = SHELLS[gun]["texture_at"]
+    tu, tv = prop["texture_at"]
     red, red_dark, brass, brass_dark = (178, 44, 36, 255), (122, 28, 26, 255), (214, 170, 72, 255), (150, 112, 44, 255)
     for x in range(2):
         for y in range(2):
@@ -828,10 +955,10 @@ def draw_buckshot(atlas, gun):
     return atlas
 
 
-def draw_cartridge(atlas, gun):
+def draw_cartridge(atlas, prop):
     """A brass case with a lead tip at the front (north) end, the case's head at the back a darker ring."""
-    tu, tv = SHELLS[gun]["texture_at"]
-    w, h, d = (int(v) for v in SHELLS[gun]["size"])
+    tu, tv = prop["texture_at"]
+    w, h, d = prop_dims(prop)
     lead, brass, brass_dark = (120, 124, 132, 255), (214, 170, 72, 255), (150, 112, 44, 255)
     for x in range(w):
         for y in range(h):
@@ -846,6 +973,36 @@ def draw_cartridge(atlas, gun):
     return atlas
 
 
+PLAIN = {
+    # kind: (front end, body, back end), each a light and a dark tone checkered
+    "ball": (((132, 136, 146, 255), (98, 102, 112, 255)),) * 3,
+    "rod": (((214, 170, 72, 255), (150, 112, 44, 255)), ((122, 124, 132, 255), (86, 88, 96, 255)),
+            ((122, 124, 132, 255), (86, 88, 96, 255))),
+    "flash": (((255, 226, 110, 255), (246, 150, 52, 255)),) * 3,
+}
+
+
+def draw_plain(atlas, prop):
+    """A ball, rod or flash: the front end's tone at the north face and the first pixel of the length, the back end's
+    at the south face and the last, the body's between; light and dark checkered."""
+    tu, tv = prop["texture_at"]
+    w, h, d = prop_dims(prop)
+    front, body, back = PLAIN[prop["kind"]]
+    def tone(part, a, b):
+        return part[(a + b) % 2]
+    for x in range(w):
+        for y in range(h):
+            atlas.putpixel((tu + x, tv + y), tone(front, x, y))
+            atlas.putpixel((tu + w + x, tv + y), tone(back, x, y))
+    for z in range(d):
+        part = front if z == 0 else back if z == d - 1 else body
+        for y in range(h):
+            atlas.putpixel((tu + z, tv + h + y), tone(part, z, y))
+        for x in range(2 * w):
+            atlas.putpixel((tu + x, tv + 2 * h + z), tone(part, x, z))
+    return atlas
+
+
 def write_files():
     from PIL import Image
     for gun, spec in GUNS.items():
@@ -855,9 +1012,9 @@ def write_files():
         shutil.copyfile(LIBRARY / "item" / f"{spec['source']}.animation.json", target)
         texture = ASSETS / "textures" / "item" / "guns" / f"{gun}.png"
         texture.parent.mkdir(parents=True, exist_ok=True)
-        if any(part == "@shell" for _, _, parts, _ in BUILDS[gun]["bones"] for part in parts):
+        if gun in PROPS:
             with Image.open(LIBRARY / "item" / f"{spec['source']}.png") as image:
-                draw_shell(image.convert("RGBA"), gun).save(texture)
+                draw_props(image.convert("RGBA"), gun).save(texture)
         else:
             shutil.copyfile(LIBRARY / "item" / f"{spec['source']}.png", texture)
     for path in sorted({*EVENT_SOUNDS.values(), *SHOT_SOUNDS.values()}):
