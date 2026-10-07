@@ -43,7 +43,7 @@ Fuel is only used up, never made. The cargo hold is an ordinary 27-slot containe
 
 ## Dependencies and assets
 - No dependencies. All art is original.
-- The canvas textures (`dz_*`) and the item icon are drawn in `tools/zeppelin.py`. The model reuses the giants' `dr_*` textures.
+- The canvas textures (`dz_*`) are drawn in `tools/zeppelin.py`, and the item icon is a 16×16 map, `tools/item_icons/zeppelin.txt`, with the big guns' (32x32 from 5 October 2026, redrawn at 16×16 on 7 October 2026, [ITEM_ICONS.md](../ITEM_ICONS.md)). The model reuses the giants' `dr_*` textures.
 - The model is exported as quads to `assets/jugcraft/zeppelin_quads.json`: about 2,150 faces, 16-pixel tiles, hidden faces culled. `client/ZeppelinRenderer` draws it.
 
 ## Verification
@@ -61,3 +61,4 @@ Not applicable: it is crafted and placed by players only.
 - The hitbox (5 wide, 7.5 tall) covers the gondola and the middle of the envelope. The envelope's nose and tail can pass through blocks.
 - Movement is server-driven, so with high ping the pilot's keys answer a little late.
 - Ideas for later: a mooring mast block, cargo winch drops and a bigger airship.
+- **Fixed 5 October 2026 (shared render fixes):** the envelope and gondola are drawn closed (no see-through gaps), and the wheel no longer flickers. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

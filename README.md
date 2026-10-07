@@ -23,7 +23,8 @@ Jugcraft's original gameplay ships as one mod, organized into internal feature p
 - [Grow crops in the Agriculture branch](docs/branches/AGRICULTURE.md): 3-block corn for fields and mazes, sunflowers, beans, sweet potatoes, flax and sickles; a kitchen garden with trellis tomatoes, peppers, onions, garlic, cabbage, oats and barley, and a Cooking Pot for soups and chili; festival crops with squash and gourds, Turnip Lanterns, cranberry bogs and a chestnut tree; a Carving Knife to carve any face into a pumpkin; plus the plan for what comes next.
 - [Explore specialties, magic schools, creatures and seasonal briefs](docs/CONTENT_BRANCHES.md).
 - [See architecture and integration rules](docs/ARCHITECTURE.md).
-- [Check the roadmap](docs/ROADMAP.md) and [platform decision](docs/PLATFORM.md).
+- [Check the roadmap](docs/ROADMAP.md), [owner-requested TODO list](docs/TODO.md) and [platform decision](docs/PLATFORM.md).
+- [Plan the Jugcraft Encyclopedia](docs/features/jugcraft-encyclopedia.md): inventory/keybind access, technology and magic pathways, integrated quests and ten UI references.
 - [Maintainer setup and review guide](docs/MAINTAINERS.md).
 
 ## How additions become part of Jugcraft

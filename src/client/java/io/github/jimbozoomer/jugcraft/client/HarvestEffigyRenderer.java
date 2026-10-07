@@ -149,7 +149,10 @@ public class HarvestEffigyRenderer implements BlockEntityRenderer<HarvestEffigyB
 		pose.popPose();
 	}
 
-	/** One sheet of flame standing at ({@code x}, {@code y}, {@code z}), across {@code turn} degrees, seen from both sides. */
+	/**
+	 * One sheet of flame standing at ({@code x}, {@code y}, {@code z}), across {@code turn} degrees, seen from both sides:
+	 * entityTranslucent does not cull in 26.3, so it is one quad.
+	 */
 	private static void sheet(VertexConsumer buffer, PoseStack.Pose matrix, float x, float y, float z, float width, float height, float sway,
 			float turn) {
 		double angle = Math.toRadians(turn);
@@ -157,16 +160,15 @@ public class HarvestEffigyRenderer implements BlockEntityRenderer<HarvestEffigyB
 		float dz = (float) (Math.sin(angle) * width / 2);
 		float[][] front = {{x - dx, y, z - dz, 0, 1}, {x - dx + sway, y + height, z - dz, 0, 0}, {x + dx + sway, y + height, z + dz, 1, 0},
 				{x + dx, y, z + dz, 1, 1}};
-		float[][] back = {front[3], front[2], front[1], front[0]};
 		float nx = (float) -Math.sin(angle);
 		float nz = (float) Math.cos(angle);
+		// One quad: the translucent type draws it from both sides, and a reversed twin on the same plane would flicker.
 		DecorDraw.quad(buffer, matrix, front, nx, 0, nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT);
-		DecorDraw.quad(buffer, matrix, back, -nx, 0, -nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT);
 	}
 
 	/**
 	 * Two crossed sheets of flame standing at ({@code x}, {@code y}, {@code z}) (blocks, about his middle), turned
-	 * {@code turn} degrees, each drawn from both sides, the tips leaning {@code sway} blocks.
+	 * {@code turn} degrees, each one quad seen from both sides, the tips leaning {@code sway} blocks.
 	 */
 	private static void crossed(VertexConsumer buffer, PoseStack.Pose matrix, float x, float y, float z, float width, float height, float sway,
 			float turn) {
@@ -176,11 +178,9 @@ public class HarvestEffigyRenderer implements BlockEntityRenderer<HarvestEffigyB
 			float dz = (float) (Math.sin(angle) * width / 2);
 			float[][] front = {{x - dx, y, z - dz, 0, 1}, {x - dx + sway, y + height, z - dz, 0, 0}, {x + dx + sway, y + height, z + dz, 1, 0},
 					{x + dx, y, z + dz, 1, 1}};
-			float[][] back = {front[3], front[2], front[1], front[0]};
 			float nx = (float) -Math.sin(angle);
 			float nz = (float) Math.cos(angle);
 			DecorDraw.quad(buffer, matrix, front, nx, 0, nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT);
-			DecorDraw.quad(buffer, matrix, back, -nx, 0, -nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT);
 		}
 	}
 

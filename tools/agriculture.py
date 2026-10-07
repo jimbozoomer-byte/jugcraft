@@ -335,6 +335,10 @@ ITEMS = {
     "roasted_porcini": {"display": "Roasted Porcini", "food": [6, 0.6], "compost": "medium_high", "tags": ["c:foods"]},
     "fried_puffball": {"display": "Fried Puffball", "food": [4, 0.5], "compost": "medium_high", "tags": ["c:foods"]},
     "foragers_stew": {"display": "Forager's Stew", "food": [10, 0.8], "stew": True, "tags": ["c:foods"]},
+    # Bunker interiors (batch 59, tools/bunkerworks.py TRENCH_STEW): beef, potato and carrot stewed in a Cooking Pot, best
+    # on a Field Kitchen. A stew with a short effect (`stew_effect`: [effect, seconds]).
+    "trench_stew": {"display": "Trench Stew", "food": [10, 0.8], "stew": True, "stew_effect": ["REGENERATION", 5],
+                    "tags": ["c:foods/soup"]},
     "apple_cider_donut": {"display": "Apple Cider Donut", "food": [3, 0.4], "compost": "medium_high", "tags": ["c:foods/candy"]},
 }
 
@@ -402,15 +406,20 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 # alike (festival_data.wood_assets) and registered alike (JugcraftAgriculture.registerWoodSet). Logs and wood strip
 # with an axe; logs saw into planks (sawmill). The chestnut is the Festival Crops' fruit tree; the larch is Alpine
 # Spawn's seasonal conifer; maple, aspen, fir and dead wood come from the biomes branch's seasonal forests, the
-# jacaranda from its fields and meadows, the willow from its wetlands, palm and cypress from its warm, dry lands, and
-# redwood, eucalyptus and mahogany from its big forests and rainforests.
+# jacaranda from its fields and meadows, the willow from its wetlands, palm and cypress from its warm, dry lands,
+# redwood, eucalyptus and mahogany from its big forests and rainforests, and the cedar from the tree roster's batch 1
+# (docs/branches/TREES.md), the swamp cedar of its wetlands.
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
              "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
-             "eucalyptus": "Eucalyptus", "mahogany": "Mahogany"}
-# The feature switch each wood's hand recipes follow: the switch of whatever grows the tree.
-WOOD_SWITCHES = {"chestnut": FEATURE, "larch": "alpine_spawn", "maple": "biomes", "aspen": "biomes", "fir": "biomes",
-                 "dead": "biomes", "jacaranda": "biomes", "willow": "biomes", "palm": "biomes", "cypress": "biomes",
-                 "redwood": "biomes", "eucalyptus": "biomes", "mahogany": "biomes"}
+             "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar"}
+# The feature switches each wood's hand and sawmill recipes, and its tree's leaves and sapling, follow: every switch
+# that grows its logs, any one of which turns them on (TREES.md rule 4). The chestnut grows wild (agriculture) and in
+# the Orchard (biomes); the larch in Alpine Spawn and, as the larch and the tamarack, in Jugcraft's biomes.
+# check_mod_data checks that every switch placing a shape, fallen log or placed tree of a wood is in its list.
+WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "biomes"], "maple": ["biomes"],
+                 "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
+                 "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
+                 "mahogany": ["biomes"], "cedar": ["biomes"]}
 
 
 def wood_blocks(wood, display):
@@ -458,6 +467,8 @@ TREES = {
     "eucalyptus": {"leaves": "eucalyptus_leaves", "leaves_display": "Eucalyptus Leaves", "season": None, "base": "jungle"},
     "mahogany": {"leaves": "mahogany_leaves", "leaves_display": "Mahogany Leaves", "season": None, "base": "jungle",
                  "giant": "giant_mahogany"},
+    # The tree roster's batch 1: the swamp cedar, an evergreen conifer of flat sprays of scale-leaves.
+    "cedar": {"leaves": "cedar_leaves", "leaves_display": "Cedar Leaves", "season": None, "base": "spruce"},
 }
 SEASON_STATES = ["green", "gold", "bare"]
 JITTER = 7
@@ -2076,6 +2087,8 @@ POT_RECIPES = {
     # Fall additions 12: the three edible wild mushrooms stewed with a potato.
     "foragers_stew": {"inputs": {"minecraft:bowl": 1, "jugcraft:chanterelle": 1, "jugcraft:porcini": 1, "jugcraft:puffball": 1,
                                  "minecraft:potato": 1}, "time": 200},
+    # Bunker interiors (batch 59, tools/bunkerworks.py TRENCH_STEW).
+    "trench_stew": {"inputs": {"minecraft:bowl": 1, "minecraft:beef": 1, "minecraft:potato": 1, "minecraft:carrot": 1}, "time": 300},
     "pickled_beets": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:beetroot": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
     "pickled_peppers": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:pepper": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
     "corn_relish": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:corn": 2, "jugcraft:pepper": 1, "jugcraft:onion": 1,
@@ -2611,8 +2624,8 @@ def owns(entry_id):
 
 
 def switch_of(entry_id):
-    """The feature switch that owns one of this branch's IDs: its tree's switch for a wood set and for a tree's sapling
-    and leaves, otherwise FEATURE."""
+    """The feature switch that owns one of this branch's IDs: for a wood set and for a tree's sapling and leaves, its
+    wood's WOOD_SWITCHES list (any of which turns it on), otherwise FEATURE."""
     for wood, switch in WOOD_SWITCHES.items():
         if entry_id in wood_blocks(wood, WOOD_SETS[wood]):
             return switch
