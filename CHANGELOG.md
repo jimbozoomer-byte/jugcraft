@@ -46,6 +46,10 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: The Arcane Concordance: couriers
+- Build a **Courier Post** among your chests and bind Clockwork Porters to it with a Porter Key. Use the post with an item in hand and a porter fetches a stack of exactly that item (a named or enchanted one is never mistaken for a plain one) from the chests round it into the post's slots, for you or a hopper.
+- Every item on the way is accounted for: two porters never reach for the same items, a full post keeps the rest in transit, a porter broken or unloaded (or a server restart) leaves its cargo waiting at the post for another porter or for you to recover, and cancelling or breaking the post takes it back to its chest. Use the post with an empty hand for its history, or `/jugcraft concordance logistics` for your requests. Record: [arcane-concordance-logistics.md](docs/features/arcane-concordance-logistics.md).
+
 ### Unmerged: The Arcane Concordance: familiars, spirits and constructs
 - Once you understand the **Binding Arts**, three helpers answer you, each by its own rules. A **Bonding Charm** binds a **Hearthling** familiar: the longer you spend near it the stronger your bond, and once it is strong enough it mends you when you are badly hurt.
 - A **Spirit Anchor** seals an agreement with a **Gathering Shade**: it gathers dropped items near the anchor through the night, up to its daily quota, and brings them to the anchor for a hopper. Sneak-use the anchor to suspend it; break it to release the spirit.

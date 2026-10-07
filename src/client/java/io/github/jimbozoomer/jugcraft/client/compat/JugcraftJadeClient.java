@@ -22,6 +22,10 @@ import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlock;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
 import io.github.jimbozoomer.jugcraft.compat.jade.WorkerDataProvider;
+import io.github.jimbozoomer.jugcraft.compat.jade.CourierDataProvider;
+import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlock;
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
+import io.github.jimbozoomer.jugcraft.concordance.logistics.Event;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import net.minecraft.world.level.block.state.BlockState;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
@@ -53,6 +57,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		registration.registerBlockComponent(ConcordanceTooltip.GLEANER, GleanerBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.OBSERVATORY, ObservatoryBlock.class);
 		registration.registerEntityComponent(WorkerTooltip.INSTANCE, WorkerEntity.class);
+		registration.registerBlockComponent(CourierTooltip.INSTANCE, CourierPostBlock.class);
 		registration.registerBlockComponent(CropTooltip.INSTANCE, OrganismCropBlock.class);
 	}
 
@@ -90,6 +95,28 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 				int carried = data.getIntOr("carried", 0);
 				if (carried > 0) {
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.carried", carried));
+				}
+			});
+		}
+	}
+
+	/** A Courier Post (roadmap step 18): its open and in-transit requests and its latest step. */
+	private enum CourierTooltip implements IBlockComponentProvider {
+		INSTANCE;
+
+		@Override
+		public Identifier getUid() {
+			return CourierDataProvider.ID;
+		}
+
+		@Override
+		public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+			accessor.getServerData().getCompound(CourierDataProvider.KEY).ifPresent(data -> {
+				tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.courier", data.getIntOr("open", 0), data.getIntOr("moving", 0)));
+				String kind = data.getStringOr("kind", "");
+				if (!kind.isEmpty()) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.courier_last", Couriers.event(new Event(0L,
+							data.getLongOr("request", 0L), kind, data.getIntOr("amount", 0), data.getStringOr("note", "")))));
 				}
 			});
 		}

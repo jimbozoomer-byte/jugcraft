@@ -247,6 +247,8 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.vigil.Vigil.register();
 		// Roadmap step 17: familiars, spirits and constructs.
 		io.github.jimbozoomer.jugcraft.concordance.spirits.Workers.register();
+		// Roadmap step 18: Courier Posts, the logistics ledger and porters as couriers.
+		io.github.jimbozoomer.jugcraft.concordance.courier.Couriers.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

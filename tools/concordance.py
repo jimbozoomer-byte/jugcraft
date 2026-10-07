@@ -413,6 +413,9 @@ import concordance_workers as workers  # noqa: E402
 RESEARCH.update(workers.RESEARCH)
 ITEMS.update(workers.ITEMS)
 BLOCKS.update(workers.BLOCKS)
+# Roadmap step 18 (tools/concordance_logistics.py): Courier Posts, requests, reservations and accountable transit.
+import concordance_logistics as logistics  # noqa: E402
+BLOCKS.update(logistics.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG]
@@ -912,6 +915,7 @@ def codex():
         **celestial.codex(),
         **crimson.codex(),
         **workers.codex(),
+        **logistics.codex(),
     }
 
 
@@ -1423,6 +1427,7 @@ MESSAGES = {
     **celestial.MESSAGES,
     **crimson.MESSAGES,
     **workers.MESSAGES,
+    **logistics.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1458,6 +1463,7 @@ TOOLTIPS = {
     **celestial.TOOLTIPS,
     **crimson.TOOLTIPS,
     **workers.TOOLTIPS,
+    **logistics.TOOLTIPS,
 }
 
 
@@ -1639,6 +1645,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     celestial.write_all(write, assets, data, lang, condition, self_drop)
     crimson.write_all(write, assets, data, lang, condition, self_drop)
     workers.write_all(write, assets, data, lang, condition, self_drop)
+    logistics.write_all(write, assets, data, lang, condition, self_drop)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -1775,6 +1782,7 @@ def write_data(write, res):
     celestial.write_data(write, data)
     crimson.write_data(write, data)
     workers.write_data(write, data)
+    logistics.write_data(write, data)
     # LambDynamicLights (optional, client): a lit Kindled Lantern glows in hand. Without the mod nothing reads this.
     write(assets / "dynamiclights" / "item" / "kindled_lantern.json",
           {"match": {"items": rid("kindled_lantern"), "components": {rid("lantern_lit"): {}}},
@@ -1793,6 +1801,7 @@ def tags(tags):
     celestial.tags(tags)
     crimson.tags(tags)
     workers.tags(tags)
+    logistics.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     tags.add("block", "minecraft:mineable/axe", rid("lampwright_bench"))

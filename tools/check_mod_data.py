@@ -7544,6 +7544,7 @@ def check_concordance(registered):
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
     check_workers(co, root, lang, registered, research)
+    check_logistics(co, root, lang, registered)
     check_game_test_entrypoints()
 
 
@@ -7812,7 +7813,7 @@ def check_baselines(root):
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
     for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
-                    "worker"):
+                    "worker", "logistics"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -8544,6 +8545,80 @@ def check_workers(co, root, lang, registered, research):
         with Image.open(texture) as img:
             if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
                 err(f"workers: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+
+
+def check_logistics(co, root, lang, registered):
+    """Roadmap step 18: the Java ledger and post numbers equal tools/concordance_logistics.py; the request states are
+    the generator's, in order; every event kind, note and refusal the Java can name has its text; the post has its
+    registration, recipe, assets and icon; and a courier's work moves items only through CourierLedger, whose moves are
+    Transfer API transactions committed with their ledger step."""
+    lg = co.logistics
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    ledger = java("logistics/Logistics.java")
+    for const, value in (("MAX_WANTED", lg.MAX_WANTED), ("MAX_OPEN_PER_PLAYER", lg.MAX_OPEN_PER_PLAYER), ("MAX_OPEN", lg.MAX_OPEN),
+                         ("HISTORY", lg.HISTORY)):
+        if not re.search(rf"\bint {const} = {value};", ledger):
+            err(f"concordance/logistics/Logistics.java: {const} differs from tools/concordance_logistics.py ({value})")
+    for const, value in (("LEASE_TICKS", lg.LEASE_TICKS), ("RETRY_TICKS", lg.RETRY_TICKS)):
+        if f"long {const} = {value}L;" not in ledger:
+            err(f"concordance/logistics/Logistics.java: {const} differs from tools/concordance_logistics.py ({value})")
+    couriers = java("courier/Couriers.java")
+    for const, value in (("SOURCE_RADIUS", lg.SOURCE_RADIUS), ("SHOWN_HISTORY", lg.SHOWN_HISTORY)):
+        if not re.search(rf"\bint {const} = {value};", couriers):
+            err(f"concordance/courier/Couriers.java: {const} differs from tools/concordance_logistics.py ({value})")
+    if not re.search(rf"\bint SLOTS = {lg.POST_SLOTS};", java("courier/CourierPostBlockEntity.java")):
+        err("concordance/courier/CourierPostBlockEntity.java: SLOTS differs from tools/concordance_logistics.py POST_SLOTS")
+    states = re.findall(r'^\t[A-Z_]+\("([a-z_]+)"\)', java("logistics/RequestState.java"), re.M)
+    if states != list(lg.STATES):
+        err(f"concordance/logistics/RequestState.java: states {states} differ from STATES (same order)")
+    for state in states:
+        if f"compose.{MOD}.courier.state.{state}" not in lang:
+            err(f"logistics: missing lang for the state {state}")
+    # Event kinds and notes: every word the ledger and the courier write into a request or its history.
+    for word in set(re.findall(r'"([a-z_]+)"', ledger)):
+        if word not in lg.EVENTS and word not in lg.NOTES:
+            err(f"concordance/logistics/Logistics.java: '{word}' is neither an event in EVENTS nor a note in NOTES")
+    porter = java("spirits/ClockworkPorterEntity.java")
+    for word in set(re.findall(r'release\([^;]*?"([a-z_]+)"', porter + java("courier/CourierLedger.java"))):
+        if word not in lg.NOTES:
+            err(f"logistics: the release note '{word}' has no text in NOTES")
+    for key in lg.EVENTS:
+        if f"message.{MOD}.concordance.courier.event.{key}" not in lang:
+            err(f"logistics: missing lang for the event {key}")
+    for key in lg.NOTES:
+        if f"compose.{MOD}.courier.note.{key}" not in lang:
+            err(f"logistics: missing lang for the note {key}")
+    outcomes = re.search(r"enum Outcome \{([^}]*)\}", ledger)
+    for outcome in (re.findall(r"[A-Z_]+", outcomes.group(1)) if outcomes else []):
+        if outcome != "DONE" and f"message.{MOD}.concordance.courier.refused.{outcome.lower()}" not in lang:
+            err(f"logistics: missing lang for the refusal {outcome.lower()}")
+    for path in sorted((root / "courier").glob("*.java")) + [root / "spirits" / "ClockworkPorterEntity.java", root / "spirits" / "PorterKeyItem.java"]:
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(courier\.[a-z_.]+)"', path.read_text(encoding="utf-8")):
+            if not key.endswith(".") and f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+    # A courier's work moves items only through CourierLedger; CourierLedger moves them only in committed transactions.
+    work = porter.split("courier work (roadmap step 18)", 1)[-1].split("Draws Ley Charge", 1)[0]
+    for move in (".insert(", ".extract(", "removeItem(", "setItem(", "insert(container"):
+        if move in work:
+            err(f"spirits/ClockworkPorterEntity.java: courier work moves items itself ({move}); use CourierLedger")
+    if java("courier/CourierLedger.java").count("transaction.commit()") < 2:
+        err("concordance/courier/CourierLedger.java: pickups and deliveries must commit their transactions with the ledger step")
+    # The post.
+    if "courier_post" not in registered or not (DATA / MOD / "recipe" / "courier_post.json").is_file():
+        err("logistics: courier_post needs a registration and a recipe")
+    for face in ("side", "top", "bottom"):
+        if not (ASSETS / "textures" / "block" / f"courier_post_{face}.png").is_file():
+            err(f"logistics: missing textures/block/courier_post_{face}.png")
+    import item_icons
+    texture = ASSETS / "textures" / "item" / "courier_post.png"
+    if not item_icons.has("courier_post") or not texture.is_file():
+        err("logistics: courier_post needs its map tools/item_icons/courier_post.txt and its texture")
+    else:
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw("courier_post").tobytes() or img.size != (16, 16):
+                err("logistics: textures/item/courier_post.png differs from its map: run tools/generate_textures.py")
 
 
 # The most Vitae an hour of offering can give, whatever heals the giver (docs/features/arcane-concordance-vitae.md).
