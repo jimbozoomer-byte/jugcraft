@@ -23,7 +23,7 @@ import net.minecraft.world.phys.AABB;
 
 /**
  * Client game test for the guns (slice 1), end to end through the real input: each gun drawn in first person, aimed down
- * its sights, fired at a husk with the attack key (the server lands the shot and spends a round), reloaded with the
+ * its sights and fired so at a husk with the attack key (the server lands the shot and spends a round), reloaded with the
  * reload key (part way through and done: the rounds come out of the inventory), and inspected; the Thunderpipe's
  * shell-at-a-time reload part way; each gun held in third person and shown in the inventory. Screenshots
  * jugcraft_guns_* (CI job {@code client}).
@@ -61,17 +61,17 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				context.waitTicks(30);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_held");
 
+				// Aimed (the aimed spread keeps the shot on the husk), then fired down the sights.
 				context.getInput().holdKey(options -> options.keyUse);
 				context.waitTicks(10);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_aimed");
-				context.getInput().releaseKey(options -> options.keyUse);
-				context.waitTicks(10);
-
 				float before = health(server, x, y, z);
 				context.getInput().pressKey(options -> options.keyAttack);
 				context.waitTicks(1);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_fired");
 				context.waitTicks(10);
+				context.getInput().releaseKey(options -> options.keyUse);
+				context.waitTicks(5);
 				float after = health(server, x, y, z);
 				int loaded = server.computeOnServer(minecraft -> GunItem.loaded(player(minecraft).getMainHandItem()));
 				Jugcraft.LOGGER.info("[guns] {} fired at a husk: health {} -> {}, rounds {} -> {}", gun, before, after, capacity, loaded);

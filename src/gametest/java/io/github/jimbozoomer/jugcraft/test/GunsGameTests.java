@@ -82,7 +82,8 @@ public class GunsGameTests {
 	@GameTest(structure = ARENA, maxTicks = 40)
 	public void triggerKeepsTheRate(GameTestHelper helper) {
 		floor(helper);
-		Mob pig = pig(helper, new BlockPos(1, 2, 12));
+		// Three blocks off, so even the Midge's hip spread (4 degrees) keeps every bullet on the pig.
+		Mob pig = pig(helper, new BlockPos(1, 2, 4));
 		pig.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0);
 		pig.setHealth(200.0F);
 		ServerPlayer shooter = shooter(helper, "rust_midge", 20, pig, GameType.SURVIVAL);
