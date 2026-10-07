@@ -4,6 +4,7 @@ import com.geckolib.cache.model.GeoLocator;
 import com.geckolib.constant.dataticket.DataTicket;
 import com.geckolib.model.DefaultedItemGeoModel;
 import com.geckolib.renderer.GeoItemRenderer;
+import com.geckolib.renderer.base.BoneSnapshots;
 import com.geckolib.renderer.base.GeoRenderState;
 import com.geckolib.renderer.base.RenderPassInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -48,6 +49,15 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 			boolean slim = player.getSkin().model() == PlayerModelType.SLIM;
 			state.addGeckolibData(VIEW, new View(player.getSkin().body().texturePath(), slim, GunView.aim(partialTick)));
 		}
+	}
+
+	/**
+	 * The Thunderpipe's shell rests out of place: the reload loop's offsets bring it into the breech, and every other
+	 * animation hides it, except the inspect, which leaves it alone. So it shows only while an animation moves it.
+	 */
+	@Override
+	public void adjustModelBonesForRender(RenderPassInfo<GeoRenderState> info, BoneSnapshots snapshots) {
+		snapshots.ifPresent("shell", shell -> shell.skipRender(!shell.hasTranslation()));
 	}
 
 	@Override

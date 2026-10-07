@@ -136,7 +136,9 @@ public final class GunsClient {
 		ClientPlayNetworking.send(GunShotPayload.INSTANCE);
 		nextShot = now + spec.interval();
 		lastShot = now;
-		inFlight++;
+		if (!player.hasInfiniteMaterials()) {
+			inFlight++; // creative spends nothing, so the server never settles it
+		}
 		reloadingUntil = 0;
 		boolean aiming = GunItem.aiming(player, stack);
 		GunAnimations.trigger(player, aiming ? "aim_shoot" : "shoot");
@@ -253,7 +255,8 @@ public final class GunsClient {
 		}
 		ItemStack stack = player.getMainHandItem();
 		GunSpec spec = gun.spec();
-		int loaded = Math.max(0, GunItem.loaded(stack) - inFlight);
+		// The rounds loaded less the shots the server has not answered yet (each answer settles one).
+		int loaded = Math.max(0, predicted(stack));
 		Component count = Component.translatable("hud.jugcraft.guns.ammo", loaded, spec.capacity());
 		Component below = client.level.getGameTime() < reloadingUntil ? Component.translatable("hud.jugcraft.guns.reloading")
 				: Component.literal(GunShots.count(player.getInventory(), JugcraftGuns.ammo(spec)) + " ")

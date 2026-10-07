@@ -128,7 +128,7 @@ The owner supplied each gun's parts as Blockbench Java item models (`Guns/models
    | Carbine | `gun_body` (main and standard barrel); `bolt`, `magazine`, and an empty `magazine_2` (its animations keep it at scale 0) |
    | Thunderpipe | `gun_body` (main and standard grip); `barrels`; an empty `bolt`; and `shell` |
 
-   The Thunderpipe's reload moves a `shell` bone that had no part. It gets a 2 × 2 × 5 px shell, red paper on a brass head, drawn into an empty corner of the atlas copy. Its rest place is the breech less the loop's last offset, so the loop slides it home.
+   The Thunderpipe's reload moves a `shell` bone that had no part. It gets a 2 × 2 × 5 px shell, red paper on a brass head, drawn into an empty corner of the atlas copy. Its rest place is the breech less the loop's last offset, so the loop slides it home. Every other animation hides it except the inspect, which leaves it at that rest place, so the renderer draws it only while an animation moves it.
 2. **Places the arm bones.** The animations move `right_arm` and `left_arm`, whose models were not supplied:
    - **Hierarchy:** each is a child of `gun_body`, so the hands follow the gun. This fit the Thunderpipe's shell-carrying left hand best of the arrangements tried (1.1 px, against 1.2 to 2.1).
    - **Pivot:** each pivot is the hand, placed so the idle pose's offsets bring it to the grip (right) and the fore-end or magazine (left).
@@ -207,7 +207,10 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
     - draw, aim, fire at a husk (the server lands it and spends a round), reload part way and done (one round from the inventory), inspect;
     - the Thunderpipe's shell reload part way; each gun in third person; the inventory.
     - Screenshots `jugcraft_guns_*`.
-- **CI results:** in the pull request.
+- **CI on `33823d0c0` (Build run 37651397033):** every job passed: the mod build with the server game tests, the build without the optional integrations, and the client test.
+  - The client test's log: the Midge took the husk from 200 to 198 health and spent a round; the Carbine took it from 198 to 192; the Thunderpipe from 192 to 174.5 (7 of its 8 pellets). Each reload then loaded one round and left 31 in the inventory.
+  - **Screenshots read:** the guns in the owner's textures; your arms rising from the bottom of the screen to the grip and fore-end; the sight on the crosshair when aiming; the reloads and inspects; each gun in the right hand in third person; the guns and rounds in the inventory.
+  - **Fixed after reading them:** the Thunderpipe's spare shell showed, out of place, during its inspect; and the counter read one round low until the next shot settled it (it now settles each answer as it comes). Their run is in the pull request.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
