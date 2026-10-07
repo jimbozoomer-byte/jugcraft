@@ -8,8 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Clean textures, set 2: the graveyard
+- The memorial stones (marble, slate, granite and sandstone in all four weathering stages, their carved, rough and knotwork faces), the chippings and flower beds, bronze and iron, oak and roof slates, the crypt set, the grave mound, the Mourning Angel, the Pop-Up Skeleton (its skull now cute, with no nose hole) and the graveyard flora, painted in the manner of the vanilla blocks so they sit beside them: stone as stone (granite speckled like vanilla granite, rough granite like cobblestone), oak as planks, chippings as gravel, beds as dirt, and moss and lichen in clumps as on mossy cobblestone; no salt-and-pepper speckle and no flat fills. Every pattern tiles, so blocks still join up. IDs and models are unchanged.
+
 ### Unmerged: Clean textures, set 1: the fall creatures
-- The owner asked for every texture to lose its noise and look cleaner, flatter and cuter, set by set (15 sets, after the reference pictures). Set 1 is the fall creatures: the **werewolves**, their rugs and pelts (big flat locks of fur in neat rows instead of fine hairs), the **turkeys** and the roast turkey dinner, **squirrels** and acorns, the **crow**, the **Pumpkling**, the **Hay Golem** and the **Bat House**: flat tones and regular patterns, no random speckle. IDs and models are unchanged.
+- The owner asked for every texture to lose its noise and look cleaner, flatter and cuter, set by set (15 sets, after the reference pictures). Set 1 is the fall creatures: the **werewolves**, their rugs and pelts (big flat locks of fur in neat rows instead of fine hairs), the **turkeys** and the roast turkey dinner, **squirrels** and acorns, the **crow**, the **Pumpkling**, the **Hay Golem** and the **Bat House**: flat tones and regular patterns, no random speckle. The Bat House's planks and guano, the turkey's bone and skin and the silver platter are painted in the manner of the vanilla blocks (`tools/block_style.py`). IDs and models are unchanged.
 
 ### Unmerged: Arms icons in the owner's 16×16 style
 - **Every arm's inventory icon is redrawn at 16×16** in the owner's manner: on the diagonal, a one-pixel outline in each part's own dark tone, flat tones lit from the top left, chunky parts that read at a glance. Each kind is one map of letters in `tools/arms_icons/` that the owner can edit.

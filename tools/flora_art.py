@@ -156,6 +156,11 @@ def profile(shape, t):
     raise ValueError(shape)
 
 
+# While True, the painters below leave out their per-pixel random tones, knots, speckles and spots: the clean style
+# (docs/ART_DIRECTION.md, "Creatures and faces: cute and clean"). Set by a builder for what it paints (tools/flora_models.py).
+QUIET = False
+
+
 def leaf(palette, shape="oval", seed=1, vein=True, wavy=0.0, curl=0.0, light_side=True, rib=None, tip_colour=None):
     """A leaf, petal or tepal standing on its base (bottom row) with its tip at the top: shaded lighter on its left half,
     a midrib down the middle, an optional wavy edge (`wavy`, in texels) and a sideways curl of its tip (`curl`)."""
@@ -178,7 +183,7 @@ def leaf(palette, shape="oval", seed=1, vein=True, wavy=0.0, curl=0.0, light_sid
                     k -= 1
                 if t > 0.82:
                     k += 1
-                k += rng.choice((0, 0, 0, 1, -1)) if n > 4 else 0
+                k += rng.choice((0, 0, 0, 1, -1)) if n > 4 and not QUIET else 0
                 c = shade(palette, k)
                 if tip_colour and t > 0.86:
                     c = tip_colour
@@ -198,11 +203,11 @@ def strip(palette, seed=1, knots=0, speckle=None, light=False, horizontal=False)
             for x in range(p.w):
                 across = (y / max(1, p.h - 1)) if horizontal else (x / max(1, p.w - 1))
                 k = n - 1 - int(across * (n - 1) * 0.9) if light else n - 2 - int(across * (n - 2))
-                k += rng.choice((0, 0, 0, -1, 1))
+                k += 0 if QUIET else rng.choice((0, 0, 0, -1, 1))
                 p.put(x, y, shade(palette, k))
-        for _ in range(knots):
+        for _ in range(0 if QUIET else knots):
             p.put(rng.randrange(p.w), rng.randrange(p.h), palette[0])
-        if speckle:
+        if speckle and not QUIET:
             for _ in range(max(1, p.w * p.h // 10)):
                 p.put(rng.randrange(p.w), rng.randrange(p.h), rng.choice(speckle))
     return paint
@@ -215,11 +220,11 @@ def solid(palette, seed=1, rim=None, spots=None, spot_count=0, glossy=None):
         n = len(palette)
         for y in range(p.h):
             for x in range(p.w):
-                k = n // 2 + rng.choice((0, 0, -1, 1))
+                k = n // 2 + (0 if QUIET else rng.choice((0, 0, -1, 1)))
                 if rim and (x in (0, p.w - 1) or y in (0, p.h - 1)):
                     k = 0
                 p.put(x, y, shade(palette, k))
-        for _ in range(spot_count):
+        for _ in range(0 if QUIET else spot_count):
             p.put(rng.randrange(1, max(2, p.w - 1)), rng.randrange(1, max(2, p.h - 1)), rng.choice(spots))
         if glossy:
             p.put(max(0, p.w // 3), max(0, p.h // 3), glossy)
@@ -248,13 +253,13 @@ def star(n, palette, centre=None, inner=0.18, width=0.5, wavy=0.0, seed=1, twist
                     k = min(m - 1, int(1 + r * (m - 1)))
                     if abs(off) > petal_half * 0.6:
                         k -= 1
-                    k += rng.choice((0, 0, 0, 1, -1))
+                    k += 0 if QUIET else rng.choice((0, 0, 0, 1, -1))
                     p.put(x, y, shade(palette, k))
         if centre:
             for y in range(p.h):
                 for x in range(p.w):
                     if math.hypot(x - cx, y - cy) / r_max < centre_r:
-                        p.put(x, y, rng.choice(centre))
+                        p.put(x, y, centre[len(centre) // 2] if QUIET else rng.choice(centre))
         p.outline(palette[0])
     return paint
 
@@ -321,7 +326,7 @@ def frond(palette, rib, seed=1, curve=0.0, pinnae=9, droop=0.0):
                     p.put(x, y, shade(palette, k))
                     if f < 0.75:
                         p.put(x, y + 1, shade(palette, k - 1))
-                    if f < 0.4 and rng.random() < 0.6:
+                    if f < 0.4 and (QUIET or rng.random() < 0.6):
                         p.put(x, y - 1, shade(palette, k))
     return paint
 
@@ -388,7 +393,7 @@ def ivy_leaf(p, cx, cy, r, rng):
                 k = 3 if dx < 0 else 2
                 if d > max(reach, r * 0.45) - 1:
                     k -= 1
-                p.put(x, y, IVY[k + rng.choice((0, 0, 1)) if k < 4 else 4])
+                p.put(x, y, IVY[k + (0 if QUIET else rng.choice((0, 0, 1))) if k < 4 else 4])
     for ang, l in lobes[:3]:
         for j in range(1, int(r * l)):
             p.put(cx + math.cos(math.radians(ang)) * j, cy + math.sin(math.radians(ang)) * j, IVY_VEIN[j % 2])
