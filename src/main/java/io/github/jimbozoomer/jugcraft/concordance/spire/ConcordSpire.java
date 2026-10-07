@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.concordance.spire;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -604,11 +605,12 @@ public final class ConcordSpire {
 
 	/** One pulse of the field, bounded: at most the configuration's count of things within its radius (tests call this). */
 	public static int field(ServerLevel level, BlockPos heart, SpireState state, SpireConfiguration configuration) {
-		ServerPlayer keeper = level.getServer().getPlayerList().getPlayer(state.keeper());
+		// The keeper, if here; its light and growth change blocks only as they could by hand (Authority, step 28).
+		ServerPlayer keeper = Authority.present(level, state.keeper());
 		Cause cause = Cause.of(state.keeper(), Cause.Origin.SHRINE, WONDER, ConcordanceEffects.nextSerial());
 		return switch (configuration.field()) {
 			case ILLUMINATION -> illuminate(level, heart, configuration, cause, keeper);
-			case GROWTH -> grow(level, heart, configuration);
+			case GROWTH -> grow(level, heart, state, configuration);
 			case FOCUS -> focus(level, heart, state, configuration, cause, keeper);
 		};
 	}
@@ -637,8 +639,16 @@ public final class ConcordSpire {
 		return lit;
 	}
 
-	/** Crops in the field grow one step each (once a pulse); nothing ripe is touched and nothing is harvested or replaced. */
-	private static int grow(ServerLevel level, BlockPos heart, SpireConfiguration configuration) {
+	/**
+	 * Crops in the field grow one step each (once a pulse); nothing ripe is touched and nothing is harvested or replaced.
+	 * Only crops its keeper could tend by hand grow (roadmap step 28), and only while they are here, unless the server
+	 * lets a stand-in answer for absent owners.
+	 */
+	private static int grow(ServerLevel level, BlockPos heart, SpireState state, SpireConfiguration configuration) {
+		ServerPlayer keeper = Authority.answering(level, state.keeper());
+		if (keeper == null) {
+			return 0;
+		}
 		RandomSource random = level.getRandom();
 		Set<BlockPos> grown = new HashSet<>();
 		for (int attempt = 0; attempt < configuration.count() * 6 && grown.size() < configuration.count(); attempt++) {
@@ -648,9 +658,9 @@ public final class ConcordSpire {
 				if (grown.contains(at)) {
 					break;
 				}
-				BlockState state = level.isLoaded(at) ? level.getBlockState(at) : null;
-				BlockState older = state != null && state.getBlock() instanceof CropBlock crop && !crop.isMaxAge(state) ? older(state) : null;
-				if (older != null && Illumination.mayChange(level, null, at)) {
+				BlockState crop = level.isLoaded(at) ? level.getBlockState(at) : null;
+				BlockState older = crop != null && crop.getBlock() instanceof CropBlock growing && !growing.isMaxAge(crop) ? older(crop) : null;
+				if (older != null && Authority.mayChange(level, keeper, at)) {
 					level.setBlock(at, older, Block.UPDATE_CLIENTS);
 					grown.add(at);
 					Signs.show(level, at, Sign.WORK);

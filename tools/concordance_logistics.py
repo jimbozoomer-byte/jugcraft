@@ -100,6 +100,7 @@ MESSAGES = {
     "courier.key_post": "Courier Post at %s %s %s (now use the key on a porter)",
     "courier.assigned": "The porter now serves that Courier Post",
     "courier.still_carrying": "It still carries its route's load: let it deliver first",
+    "courier.too_fast": "Wait a moment before asking the couriers again",
 }
 TOOLTIPS = {
     "porter_key.post": "Courier Post: %s",

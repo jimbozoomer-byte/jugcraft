@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Event;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Logistics;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Place;
@@ -196,6 +197,10 @@ public final class Couriers {
 				.then(Commands.literal("request").then(Commands.argument("count", IntegerArgumentType.integer(1, Logistics.MAX_WANTED))
 						.executes(context -> {
 							ServerPlayer player = context.getSource().getPlayerOrException();
+							if (!RateGate.allow(player, "logistics", 10)) {
+								context.getSource().sendFailure(Component.translatable("message.jugcraft.concordance.courier.too_fast"));
+								return 0;
+							}
 							CourierPostBlockEntity post = nearestPost(player);
 							if (post == null) {
 								context.getSource().sendFailure(Component.translatable("message.jugcraft.concordance.courier.no_post", SOURCE_RADIUS));
@@ -206,6 +211,10 @@ public final class Couriers {
 						})))
 				.then(Commands.literal("cancel").then(Commands.argument("id", LongArgumentType.longArg(1L)).executes(context -> {
 					ServerPlayer player = context.getSource().getPlayerOrException();
+					if (!RateGate.allow(player, "logistics", 10)) {
+						context.getSource().sendFailure(Component.translatable("message.jugcraft.concordance.courier.too_fast"));
+						return 0;
+					}
 					long id = LongArgumentType.getLong(context, "id");
 					CourierLedger ledger = CourierLedger.of(player.level().getServer());
 					Logistics.Outcome outcome = ledger.cancel(id, player.getUUID(), player.level().getGameTime());
@@ -214,6 +223,10 @@ public final class Couriers {
 				})))
 				.then(Commands.literal("recover").then(Commands.argument("id", LongArgumentType.longArg(1L)).executes(context -> {
 					ServerPlayer player = context.getSource().getPlayerOrException();
+					if (!RateGate.allow(player, "logistics", 10)) {
+						context.getSource().sendFailure(Component.translatable("message.jugcraft.concordance.courier.too_fast"));
+						return 0;
+					}
 					long id = LongArgumentType.getLong(context, "id");
 					Logistics.Outcome outcome = CourierLedger.of(player.level().getServer()).recover(id, player, player.level().getGameTime());
 					report(context.getSource(), outcome, "recovered", id);

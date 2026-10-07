@@ -244,6 +244,7 @@ TEXT = {
     "ecology.status.beds_full": "every bed round it is full",
     "ecology.status.hungry": "nothing to eat",
     "ecology.status.waiting": "waiting for a reading",
+    "ecology.status.keeper_away": "waiting for its keeper (it harvests only while they are here)",
     "ecology.gauge.suitability": "suitability",
 }
 for _factor in FACTORS:

@@ -3,8 +3,8 @@ package io.github.jimbozoomer.jugcraft.concordance.spirits;
 import com.geckolib.animation.RawAnimation;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
-import io.github.jimbozoomer.jugcraft.concordance.Illumination;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
@@ -184,8 +184,15 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 			stop();
 			return Status.NEEDS_REPAIR;
 		}
+		// Roadmap step 28: it works as its owner, only where they could reach by hand, and only while they are here
+		// (unless the server lets a stand-in answer for absent owners). Only the owner present is credited.
+		if (Authority.answering(level, owner) == null) {
+			stop();
+			return Status.OWNER_OFFLINE;
+		}
+		ServerPlayer keeper = Authority.present(level, owner);
 		if (post != null) {
-			return courier(level, terms, owner == null ? null : level.getServer().getPlayerList().getPlayer(owner), gameTime);
+			return courier(level, terms, keeper, gameTime);
 		}
 		if (route == null) {
 			stop();
@@ -195,7 +202,6 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 			stop();
 			return Status.OTHER_DIMENSION;
 		}
-		ServerPlayer keeper = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
 		if (carried.isEmpty()) {
 			return fetch(level, terms, keeper, gameTime);
 		}
@@ -220,7 +226,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 		if (container == null) {
 			return Status.WAITING_FOR_RESOURCES;
 		}
-		if (!Illumination.mayChange(level, keeper, source)) {
+		if (!Authority.mayChangeFor(level, owner, source)) {
 			return Status.BLOCKED_BY_ACCESS;
 		}
 		int room = terms.carry();
@@ -251,7 +257,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 		if (container == null) {
 			return Status.FULL;
 		}
-		if (!Illumination.mayChange(level, keeper, target)) {
+		if (!Authority.mayChangeFor(level, owner, target)) {
 			return Status.BLOCKED_BY_ACCESS;
 		}
 		List<ItemStack> left = new ArrayList<>();
@@ -316,6 +322,10 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 				return homeward(home, now, ready);
 			}
 			Request next = ledger.ledger().next(Couriers.place(level, at), now);
+			// A request is served only while its requester could reach the sources themselves (step 28): it waits for them.
+			if (next != null && Authority.answering(level, next.ticket().requester()) == null) {
+				return homeward(home, now, Status.OWNER_OFFLINE);
+			}
 			if (next == null || ledger.claim(next.id(), getUUID(), now) != Logistics.Outcome.DONE) {
 				return homeward(home, now, Status.IDLE);
 			}
@@ -344,15 +354,15 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 			return Status.WORKING;
 		}
 		if (progress.returning()) {
-			return takeBack(level, ledger, request, postEntity, keeper, now);
+			return takeBack(level, ledger, request, postEntity, now);
 		}
 		if (progress.carried() > 0) {
 			return deliver(level, ledger, request, terms, keeper, now);
 		}
 		if (progress.reserved() > 0 && progress.source() != null) {
-			return pickUp(level, ledger, request, keeper, now);
+			return pickUp(level, ledger, request, now);
 		}
-		return reserve(level, ledger, request, postEntity.getBlockPos(), keeper, now);
+		return reserve(level, ledger, request, postEntity.getBlockPos(), now);
 	}
 
 	private Status homeward(Vec3 home, long now, Status status) {
@@ -403,7 +413,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 		return Status.WORKING;
 	}
 
-	private Status pickUp(ServerLevel level, CourierLedger ledger, Request request, @Nullable ServerPlayer keeper, long now) {
+	private Status pickUp(ServerLevel level, CourierLedger ledger, Request request, long now) {
 		BlockPos from = Couriers.pos(request.progress().source());
 		if (!level.isLoaded(from)) {
 			ledger.release(task, getUUID(), "source_unloaded", true, now);
@@ -411,7 +421,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 			return Status.DESTINATION_UNLOADED;
 		}
 		Storage<ItemVariant> source = store(level, from);
-		if (source == null || !Illumination.mayChange(level, keeper, from)) {
+		if (source == null || !mayTake(level, request, from)) {
 			ledger.release(task, getUUID(), source == null ? "source_gone" : "blocked", true, now);
 			task = 0L;
 			return source == null ? Status.WAITING_FOR_RESOURCES : Status.BLOCKED_BY_ACCESS;
@@ -424,7 +434,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 	}
 
 	/** Finds the nearest plain container round the post holding the item asked for, and reserves there. */
-	private Status reserve(ServerLevel level, CourierLedger ledger, Request request, BlockPos at, @Nullable ServerPlayer keeper, long now) {
+	private Status reserve(ServerLevel level, CourierLedger ledger, Request request, BlockPos at, long now) {
 		BlockPos destination = Couriers.pos(request.ticket().destination());
 		List<BlockPos> found = new ArrayList<>();
 		int radius = Couriers.SOURCE_RADIUS;
@@ -446,7 +456,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 				.thenComparingInt(BlockPos::getX).thenComparingInt(BlockPos::getZ));
 		for (BlockPos pos : found) {
 			Storage<ItemVariant> source = store(level, pos);
-			if (source != null && Illumination.mayChange(level, keeper, pos) && ledger.available(task, source) > 0
+			if (source != null && mayTake(level, request, pos) && ledger.available(task, source) > 0
 					&& ledger.reserve(task, getUUID(), Couriers.place(level, pos), source, now) == Logistics.Outcome.DONE) {
 				return Status.TRAVELLING;
 			}
@@ -457,8 +467,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 	}
 
 	/** Takes cancelled cargo back: to its source if it has room, otherwise into the post; with room in neither, it leaves it stranded for its requester. */
-	private Status takeBack(ServerLevel level, CourierLedger ledger, Request request, CourierPostBlockEntity postEntity,
-			@Nullable ServerPlayer keeper, long now) {
+	private Status takeBack(ServerLevel level, CourierLedger ledger, Request request, CourierPostBlockEntity postEntity, long now) {
 		ItemVariant item = ledger.item(task);
 		int carried = request.progress().carried();
 		Place source = request.progress().source();
@@ -467,7 +476,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 		if (source != null && item != null) {
 			BlockPos from = Couriers.pos(source);
 			Storage<ItemVariant> back = level.isLoaded(from) ? store(level, from) : null;
-			if (back != null && Illumination.mayChange(level, keeper, from) && CourierLedger.room(back, item, carried) > 0) {
+			if (back != null && Authority.mayChangeFor(level, owner, from) && CourierLedger.room(back, item, carried) > 0) {
 				into = from;
 				storage = back;
 			}
@@ -490,6 +499,14 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 		arrived();
 		ledger.giveBack(task, getUUID(), storage, now);
 		return Status.RETURNING;
+	}
+
+	/**
+	 * Whether a courier may take from {@code pos} for {@code request}: both its keeper (who works it) and the request's
+	 * requester (who gets the items) could reach it by hand, now (roadmap step 28).
+	 */
+	private boolean mayTake(ServerLevel level, Request request, BlockPos pos) {
+		return Authority.mayChangeFor(level, owner, pos) && Authority.mayChangeFor(level, request.ticket().requester(), pos);
 	}
 
 	/** A plain container's items through the Transfer API, as Jugcraft's item pipes reach them (null for anything else). */
@@ -590,7 +607,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 			case TRAVELLING, RETURNING -> WALKING;
 			case WORKING -> WORKING;
 			case NEEDS_REPAIR, NO_ENERGY, DISABLED -> BROKEN;
-			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, FULL, DESTINATION_UNLOADED -> WAITING;
+			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, FULL, DESTINATION_UNLOADED, OWNER_OFFLINE -> WAITING;
 			default -> IDLE;
 		};
 	}

@@ -7555,6 +7555,7 @@ def check_concordance(registered):
     check_spire(co, root, lang, registered, research)
     check_journal(co, root, lang)
     check_signs(co, root, lang)
+    check_authority(root, lang)
     check_game_test_entrypoints()
 
 
@@ -9976,6 +9977,74 @@ def check_signs(co, root, lang):
     for key in list(sg.CLIENT) + [f"screen.{MOD}.concordance.config.intensity.{name}" for name in sg.INTENSITY]:
         if key not in lang:
             err(f"sign: missing lang {key}")
+
+
+# Where Fabric's permission events are asked as questions rather than raised by vanilla: the Concordance's Authority,
+# and the arms and walkers that asked them first (relative to JAVA_ROOT).
+PERMISSION_QUERIES = {
+    "PlayerBlockBreakEvents.BEFORE": {"concordance/Authority.java", "walker/DieselWalker.java"},
+    "AttackEntityCallback.EVENT": {"weapons/TwoHanded.java"},
+}
+# What each indirect route asks Authority (relative to the concordance package): roadmap step 28's audit.
+AUTHORITY_ROUTES = {
+    "ConcordanceEffects.java": ["Authority.answering(level, behind(context))", "Authority.mayStrike(context.level(), context.actor(), behind(context), target)"],
+    "Illumination.java": ["return Authority.mayChange(level, player, pos);"],
+    "garden/GleanerBlockEntity.java": ["Authority.answering(level, keeper)", "Authority.mayChange(level, answering, pos)"],
+    "spirits/ClockworkPorterEntity.java": ["Authority.answering(level, owner) == null", "Authority.mayChangeFor(level, owner, source)",
+                                           "Authority.mayChangeFor(level, owner, target)",
+                                           "Authority.mayChangeFor(level, request.ticket().requester(), pos)"],
+    "spirits/GatheringShadeEntity.java": ["Authority.answering(level, agreement.holder()) == null"],
+    "spirits/PorterKeyItem.java": ["Authority.mayChange(level, player, pos)"],
+    "spire/ConcordSpire.java": ["Authority.answering(level, state.keeper())", "Authority.mayChange(level, keeper, at)"],
+    "sympathy/Sympathy.java": ["Authority.mayStrike(caster, target)", 'return "not_yours";'],
+    "sympathy/ScryingGlassItem.java": ["Sympathy.allowed(player, target)", "Hexes.MAX_RANGE"],
+    "CircleAnchorBlockEntity.java": ["Authority.present(level, disturber)"],
+    "Alchemy.java": ["harmful(dose) ? Intent.HARMFUL"],
+}
+
+
+def check_authority(root, lang):
+    """Roadmap step 28: an indirect magical action never does what its player could not do by hand. Every route the
+    audit found asks concordance/Authority at the moment of the change; nothing asks with nobody behind it; the stand-in
+    that may answer for an absent owner (Fabric's FakePlayer) is made only in Authority; Fabric's permission events are
+    asked as questions only where Jugcraft already asks them; absent owners' devices wait unless the server says
+    otherwise (the option defaults to false); the Spire Heart gives nothing out through a face; and the new words
+    exist."""
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    authority = text(root / "Authority.java")
+    if 'ABSENT_OPTION = "concordance.absent_owner_authority"' not in authority:
+        err("concordance/Authority.java: the absent-owner option is concordance.absent_owner_authority")
+    if "FakePlayer.get(level, new GameProfile(owner, STAND_IN))" not in authority or "!absentOwnersAct()" not in authority:
+        err("concordance/Authority.java: a stand-in answers for an absent owner only when the server's option allows it")
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        source = text(path)
+        relative = path.relative_to(JAVA_ROOT).as_posix()
+        if "FakePlayer" in source and relative != "concordance/Authority.java":
+            err(f"{relative}: only concordance/Authority makes the stand-in that answers for an absent owner")
+        for event, allowed in PERMISSION_QUERIES.items():
+            if f"{event}.invoker()" in source and relative not in allowed:
+                err(f"{relative}: {event} is asked as a question only in {sorted(allowed)} (add the site there, reviewed)")
+    for path in sorted(root.rglob("*.java")):
+        source = text(path)
+        relative = path.relative_to(root).as_posix()
+        if re.search(r"mayChange\(\s*\w+\s*,\s*null\s*,", source):
+            err(f"concordance/{relative}: a change is asked as the person behind it, never as nobody (Authority)")
+    for relative, needles in AUTHORITY_ROUTES.items():
+        source = text(root / relative)
+        for needle in needles:
+            if needle not in source:
+                err(f"concordance/{relative}: its route must ask Authority as audited ({needle})")
+    config = text(JAVA_ROOT / "config" / "JugcraftConfig.java")
+    if '"concordance.absent_owner_authority", false' not in config:
+        err("JugcraftConfig.java: concordance.absent_owner_authority defaults to false (absent owners' devices wait)")
+    heart = text(root / "spire" / "SpireHeartBlockEntity.java")
+    if "implements WorldlyContainer" not in heart or not re.search(r"canTakeItemThroughFace\([^)]*\) \{\s*return false;", heart):
+        err("spire/SpireHeartBlockEntity.java: the upkeep store takes in through its faces and gives out through none")
+    for key in (f"compose.{MOD}.ecology.status.keeper_away", f"compose.{MOD}.hex.reason.not_yours",
+                f"message.{MOD}.concordance.courier.too_fast", f"message.{MOD}.concordance.workers.key_refused"):
+        if key not in lang:
+            err(f"authority: missing lang {key}")
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -15,6 +16,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The loaded Circle Anchors, so a change to a block can void the cached report of the circles it might belong to
@@ -59,7 +61,7 @@ public final class Rituals {
 		});
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
 			if (level instanceof ServerLevel server) {
-				changed(server, pos);
+				changed(server, pos, player.getUUID());
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> ANCHORS.clear());
@@ -67,6 +69,14 @@ public final class Rituals {
 
 	/** A block that could be part of a circle changed at {@code pos}: anchors in reach check again when next asked. */
 	public static void changed(ServerLevel level, BlockPos pos) {
+		changed(level, pos, null);
+	}
+
+	/**
+	 * As {@link #changed(ServerLevel, BlockPos)}, by {@code player} if a player broke it: an anchor in reach remembers
+	 * them, so a containment that fails because of it is their doing (roadmap step 28).
+	 */
+	public static void changed(ServerLevel level, BlockPos pos, @Nullable UUID player) {
 		Set<BlockPos> anchors = ANCHORS.get(level.dimension());
 		if (anchors == null || anchors.isEmpty()) {
 			return;
@@ -77,6 +87,7 @@ public final class Rituals {
 					&& Math.abs(anchor.getZ() - pos.getZ()) <= reach
 					&& level.getBlockEntity(anchor) instanceof CircleAnchorBlockEntity found) {
 				found.invalidate();
+				found.disturbedBy(player, level.getGameTime());
 			}
 		}
 	}

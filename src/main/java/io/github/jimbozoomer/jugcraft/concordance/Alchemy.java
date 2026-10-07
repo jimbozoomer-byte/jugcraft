@@ -13,9 +13,13 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Stacking;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -72,7 +76,7 @@ public final class Alchemy {
 		int applied = 0;
 		for (int i = 0; i < brew.effects().size(); i++) {
 			Brew.Dose dose = brew.effects().get(i);
-			EffectSpec spec = new EffectSpec(EffectKind.STATUS, dose.harmful() ? Intent.HARMFUL : Intent.HELPFUL,
+			EffectSpec spec = new EffectSpec(EffectKind.STATUS, harmful(dose) ? Intent.HARMFUL : Intent.HELPFUL,
 					Math.clamp(dose.amplifier(), 0, EffectSpec.MAX_AMPLIFIER), Math.clamp(dose.ticks(), 1, EffectSpec.MAX_DURATION),
 					dose.status(), Stacking.STRONGEST, null);
 			ConcordanceEffects.Context context = new ConcordanceEffects.Context(level, cause, actor, ledger, "dose" + i, target.position());
@@ -81,6 +85,17 @@ public final class Alchemy {
 			}
 		}
 		return applied;
+	}
+
+	/**
+	 * Whether a dose harms (roadmap step 28): the server decides from the status itself (its category, or unknown), so an
+	 * edited item cannot pass a harmful status off as helpful and slip past the friendly-fire rules; the item's own word
+	 * can only make it stricter.
+	 */
+	public static boolean harmful(Brew.Dose dose) {
+		Identifier id = Identifier.tryParse(dose.status());
+		MobEffect effect = id == null ? null : BuiltInRegistries.MOB_EFFECT.getValue(id);
+		return dose.harmful() || effect == null || effect.getCategory() == MobEffectCategory.HARMFUL;
 	}
 
 	/** Sends a list of the simulation's lines (an assay, an outcome's reasons) to a player. */

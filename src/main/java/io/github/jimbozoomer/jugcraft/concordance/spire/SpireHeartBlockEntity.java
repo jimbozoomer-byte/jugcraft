@@ -12,6 +12,7 @@ import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.UUIDUtil;
@@ -22,9 +23,9 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -40,9 +41,12 @@ import org.jspecify.annotations.Nullable;
  * who placed it, the configuration chosen before founding, the courier request it filed for its upkeep, and what it last
  * showed. Every {@value #CHECK_TICKS} ticks it looks at its spire ({@link ConcordSpire#work}). Broken, its store drops
  * and the requests bound for it are cancelled; the spire keeps its phase and answers again when a heart is put back.
+ * Its store is the keeper's upkeep: anything may put into it through any face, but nothing takes out through one, so no
+ * hopper, pipe, porter or courier can drain another player's spire (roadmap step 28); only its upkeep spends it.
  */
-public class SpireHeartBlockEntity extends BlockEntity implements Container, GeoBlockEntity {
+public class SpireHeartBlockEntity extends BlockEntity implements WorldlyContainer, GeoBlockEntity {
 	public static final int SLOTS = 9;
+	private static final int[] ALL_SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 	/** How often the heart looks at its spire (ticks). */
 	public static final int CHECK_TICKS = 20;
 	private static final RawAnimation DORMANT = RawAnimation.begin().thenLoop("animation.spire_heart.dormant");
@@ -215,6 +219,21 @@ public class SpireHeartBlockEntity extends BlockEntity implements Container, Geo
 			CourierLedger.of(server.getServer()).destinationGone(Couriers.place(server, pos), server.getGameTime());
 			Containers.dropContents(server, pos, this);
 		}
+	}
+
+	@Override
+	public int[] getSlotsForFace(Direction side) {
+		return ALL_SLOTS;
+	}
+
+	@Override
+	public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction side) {
+		return canPlaceItem(slot, stack);
+	}
+
+	@Override
+	public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
+		return false;
 	}
 
 	@Override

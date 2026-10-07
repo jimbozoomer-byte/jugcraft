@@ -370,4 +370,20 @@ public class ConcordanceAlchemyGameTests {
 			helper.succeed();
 		});
 	}
+
+	/** Roadmap step 28: only an alembist may stop a crucible's formula, as only one may set it. */
+	@GameTest(maxTicks = 20)
+	public void onlyAnAlembistStopsAFormula(GameTestHelper helper) {
+		CrucibleBlockEntity crucible = crucible(helper, new BlockPos(2, 2, 2), true);
+		ServerPlayer alembist = alembist(helper, ResearchState.UNDERSTOOD);
+		ItemStack written = new ItemStack(JugcraftConcordance.FORMULA_ITEM);
+		written.set(JugcraftConcordance.FORMULA, "water 1; add minecraft:glowstone_dust jugcraft:raw; stir hot; stir hot");
+		helper.assertTrue(use(crucible, alembist, written).consumesAction() && crucible.program() != null, "The formula is set");
+		ServerPlayer stranger = alembist(helper, ResearchState.NONE);
+		crucible.useEmpty(stranger, true);
+		helper.assertTrue(crucible.program() != null, "Someone who knows no alchemy cannot stop it");
+		crucible.useEmpty(alembist, true);
+		helper.assertTrue(crucible.program() == null, "An alembist can");
+		helper.succeed();
+	}
 }

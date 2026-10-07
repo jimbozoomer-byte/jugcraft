@@ -1,11 +1,8 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
-import io.github.jimbozoomer.jugcraft.town.TownProtection;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
@@ -15,9 +12,10 @@ import org.jspecify.annotations.Nullable;
  * places its light through here, so each obeys the same permission rules, the same "open air only" rule and the same
  * self-ending light block. Effects reach it through the shared effect boundary ({@link ConcordanceEffects}, the
  * illumination operation); a carried lantern's trail light calls {@link #trail} directly. Light placed on behalf of a
- * player goes only where that player could place a block themselves: inside the world, not in spawn protection or a
- * protected town, and not where they may not build. Light with no player behind it (a shrine) goes only inside the
- * world and outside protected towns.
+ * player goes only where that player could change a block themselves ({@link Authority}): inside the world and its
+ * border, not in spawn protection or a protected town, not where they may not build, and not where a protection mod
+ * refuses them. Light with no player behind it (a shrine or spire whose owner is away) goes only where a server that
+ * lets absent owners' devices act allows it.
  */
 public final class Illumination {
 	private Illumination() {
@@ -32,15 +30,11 @@ public final class Illumination {
 	}
 
 	/**
-	 * Whether {@code player} may change the block at {@code pos} (the checks a placed block would face); with no player,
-	 * whether anything may (inside the world and outside a protected town).
+	 * Whether {@code player} may change the block at {@code pos}: what breaking it by hand would face ({@link Authority},
+	 * roadmap step 28). Nobody (null) may change nothing: a device asks as whoever answers for its owner.
 	 */
 	public static boolean mayChange(ServerLevel level, @Nullable Player player, BlockPos pos) {
-		if (player == null) {
-			return level.isInWorldBounds(pos) && !TownProtection.shieldsBlock(level, pos);
-		}
-		return level.isInWorldBounds(pos) && level.mayInteract(player, pos) && player.mayUseItemAt(pos, Direction.UP, ItemStack.EMPTY)
-				&& !TownProtection.denies(player, level, pos);
+		return Authority.mayChange(level, player, pos);
 	}
 
 	/** Whether Kindled light can go at {@code pos}: open air, or a Kindled mote already there. */

@@ -84,6 +84,7 @@ HEX_REASONS = {
     "too_many": f"no more than {MAX_CURSES} curses can lie on one creature",
     "no_focus": "not enough Focus",
     "self": "a link to yourself would be no link at all",
+    "not_yours": "only whoever took this link can use it",
     "disabled": "the Arcane Concordance is disabled on this server",
     "unknown": "you have not understood Sympathy (the codex says how)",
     "no_reagent": "hold a curse's reagent in your other hand",

@@ -91,7 +91,8 @@ public class LampwrightBenchMenu extends AbstractContainerMenu {
 		if (id < 0 || id >= LampwrightBenchBlockEntity.BUTTONS) {
 			return false;
 		}
-		if (bench != null && player instanceof ServerPlayer server) {
+		// A button at most every 4 ticks a player (roadmap step 28): a held key or a modified client does no more.
+		if (bench != null && player instanceof ServerPlayer server && RateGate.allow(server, "bench", 4)) {
 			bench.press(server, id);
 		}
 		return true;

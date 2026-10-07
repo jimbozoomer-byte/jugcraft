@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -189,7 +190,8 @@ public final class Sympathy {
 		if (target instanceof Player) {
 			return caster != null && ConcordanceEffects.mayHarm(caster, target);
 		}
-		return caster == null || caster != target;
+		// Other creatures: only those the caster could strike by hand (claims and protected creatures refuse, step 28).
+		return caster == null || caster != target && Authority.mayStrike(caster, target);
 	}
 
 	// ---------------------------------------------------------------- curses
@@ -222,6 +224,10 @@ public final class Sympathy {
 	public static String cast(ServerPlayer caster, ServerLevel level, @Nullable Link link, CurseDefinition curse) {
 		if (link == null) {
 			return "no_link";
+		}
+		// Roadmap step 28: a link is its maker's; a taglock handed to someone else carries nothing they may use.
+		if (!link.linker().equals(caster.getUUID())) {
+			return "not_yours";
 		}
 		long now = level.getGameTime();
 		boolean sameDimension = link.dimension().equals(level.dimension().identifier().toString());

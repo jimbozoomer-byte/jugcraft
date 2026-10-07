@@ -107,6 +107,9 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 	/** Loaded from a save while a ritual held its offerings: it lapses on its next tick. */
 	private boolean resumed;
 	private StructureValidator.@Nullable Report report;
+	/** Who last broke a block in reach, and when (not saved): a containment failing soon after is their doing (step 28). */
+	private @Nullable UUID disturber;
+	private long disturbedAt = Long.MIN_VALUE / 2;
 	private long reportAt;
 	private boolean reportStale = true;
 	/** The channels linked at the last check (bit per channel), and the running ritual's steps: what clients draw. */
@@ -786,13 +789,29 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 		return found.size() > grant.targets() ? found.subList(0, grant.targets()) : found;
 	}
 
-	/** Containment failed: the working lashes each participant present (sourceless magic damage). */
+	/** A player broke a block in reach (Rituals): remembered for a step, so a failed containment is theirs. */
+	void disturbedBy(@Nullable UUID player, long now) {
+		if (player != null) {
+			disturber = player;
+			disturbedAt = now;
+		}
+	}
+
+	/**
+	 * Containment failed: the working lashes each participant present. If a player broke the circle within the last
+	 * step, the lash is theirs (roadmap step 28): it reaches only those they could harm (PvP, parties), so breaking a
+	 * stranger's boundary stone is no way round the multiplayer rules. Otherwise (an explosion, a piston, time) it is
+	 * sourceless magic damage.
+	 */
 	private void backlash(ServerLevel level, RitualRun.Backlash backlash) {
-		Cause cause = Cause.of(null, Cause.Origin.RITUAL, run.ritual() == null ? ANCHOR : run.ritual(), ConcordanceEffects.nextSerial());
+		long now = level.getGameTime();
+		ServerPlayer breaker = now - disturbedAt <= RitualMachine.STEP_TICKS + 20L ? Authority.present(level, disturber) : null;
+		Cause cause = Cause.of(breaker == null ? null : breaker.getUUID(), Cause.Origin.RITUAL, run.ritual() == null ? ANCHOR : run.ritual(),
+				ConcordanceEffects.nextSerial());
 		Ledger ledger = new Ledger(new Ledger.Limits(backlash.participants().size(), backlash.participants().size(), 0));
 		EffectSpec damage = EffectSpec.of(EffectKind.DAMAGE, Intent.HARMFUL, backlash.damage(), 0);
 		Vec3 origin = Vec3.atCenterOf(worldPosition.above());
-		ConcordanceEffects.Context context = new ConcordanceEffects.Context(level, cause, null, ledger, "backlash", origin);
+		ConcordanceEffects.Context context = new ConcordanceEffects.Context(level, cause, breaker, ledger, "backlash", origin);
 		for (ServerPlayer player : present(level, backlash.participants())) {
 			ConcordanceEffects.apply(context, damage, player);
 		}

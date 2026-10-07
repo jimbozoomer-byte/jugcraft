@@ -1,8 +1,8 @@
 package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
 import com.geckolib.animation.RawAnimation;
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
-import io.github.jimbozoomer.jugcraft.concordance.Illumination;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
@@ -143,6 +143,16 @@ public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> {
 			}
 			return refused;
 		}
+		// Roadmap step 28: it takes only what its holder could pick up there, and only while they are here (unless the
+		// server lets a stand-in answer for absent owners).
+		if (Authority.answering(level, agreement.holder()) == null) {
+			if (!near(home3, REACH + 1.0)) {
+				walkTo(home3, 1.0F, 1, gameTime);
+			} else {
+				arrived();
+			}
+			return Status.OWNER_OFFLINE;
+		}
 		ItemEntity item = nearestItem(level, agreement, terms);
 		if (item == null) {
 			if (!near(home3, REACH + 1.0)) {
@@ -169,9 +179,9 @@ public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> {
 	private @Nullable ItemEntity nearestItem(ServerLevel level, Agreement agreement, WorkerDefinition.Spirit terms) {
 		AABB area = new AABB(agreement.x() - agreement.radius(), agreement.y() - agreement.radius(), agreement.z() - agreement.radius(),
 				agreement.x() + agreement.radius() + 1, agreement.y() + agreement.radius() + 1, agreement.z() + agreement.radius() + 1);
-		ServerPlayer holder = level.getServer().getPlayerList().getPlayer(agreement.holder());
+		ServerPlayer holder = Authority.answering(level, agreement.holder());
 		return level.getEntitiesOfClass(ItemEntity.class, area, item -> item.isAlive() && !item.hasPickUpDelay()
-						&& Illumination.mayChange(level, holder, item.blockPosition()))
+						&& Authority.mayChange(level, holder, item.blockPosition()))
 				.stream().min(Comparator.comparingDouble(this::distanceToSqr)).orElse(null);
 	}
 
@@ -179,9 +189,9 @@ public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> {
 	private boolean blocked(ServerLevel level, Agreement agreement) {
 		AABB area = new AABB(agreement.x() - agreement.radius(), agreement.y() - agreement.radius(), agreement.z() - agreement.radius(),
 				agreement.x() + agreement.radius() + 1, agreement.y() + agreement.radius() + 1, agreement.z() + agreement.radius() + 1);
-		ServerPlayer holder = level.getServer().getPlayerList().getPlayer(agreement.holder());
+		ServerPlayer holder = Authority.answering(level, agreement.holder());
 		return !level.getEntitiesOfClass(ItemEntity.class, area, item -> item.isAlive() && !item.hasPickUpDelay()
-				&& !Illumination.mayChange(level, holder, item.blockPosition())).isEmpty();
+				&& !Authority.mayChange(level, holder, item.blockPosition())).isEmpty();
 	}
 
 	/** Released: it leaves what it carried at its anchor's place and departs. */
@@ -207,7 +217,7 @@ public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> {
 			case TRAVELLING, RETURNING -> TRAVELLING;
 			case WORKING -> WORKING;
 			case SUSPENDED, OUTSIDE_AGREEMENT, FINISHED, DESTINATION_UNLOADED, DISABLED -> SUSPENDED;
-			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, FULL -> WAITING;
+			case WAITING_FOR_RESOURCES, BLOCKED_BY_ACCESS, CANNOT_NAVIGATE, FULL, OWNER_OFFLINE -> WAITING;
 			default -> IDLE;
 		};
 	}

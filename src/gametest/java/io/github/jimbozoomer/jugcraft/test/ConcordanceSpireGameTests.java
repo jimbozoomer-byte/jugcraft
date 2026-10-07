@@ -25,6 +25,7 @@ import io.github.jimbozoomer.jugcraft.concordance.wonder.SpireDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.wonder.SpireState;
 import io.github.jimbozoomer.jugcraft.concordance.wonder.Spires;
 import java.util.List;
+import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
@@ -355,6 +356,9 @@ public class ConcordanceSpireGameTests {
 		SpireConfiguration lantern = configuration("jugcraft:lantern_spire");
 		SpireConfiguration small = new SpireConfiguration(lantern.id(), lantern.wonder(), lantern.tradition(), lantern.requires(), lantern.practice(),
 				lantern.crown(), lantern.upkeepItem(), lantern.upkeepCount(), lantern.upkeepLey(), FieldKind.ILLUMINATION, 3, 4);
+		// Roadmap step 28: a spire whose keeper is away changes no block (unless the server lets a stand-in answer).
+		SpireState away = Spires.found(ConcordSpire.id(level, heart), spire(), configuration("jugcraft:star_spire"), new UUID(28L, 9L), false, 0L);
+		helper.assertValueEqual(ConcordSpire.field(level, heart, away, small), 0, "its keeper away, it lights nothing");
 		int lit = ConcordSpire.field(level, heart, state, small);
 		helper.assertTrue(lit > 0 && lit <= 4, "light in the dark, at most four: " + lit);
 		int motes = 0;
@@ -367,6 +371,10 @@ public class ConcordanceSpireGameTests {
 		SpireConfiguration verdant = configuration("jugcraft:verdant_spire");
 		SpireConfiguration garden = new SpireConfiguration(verdant.id(), verdant.wonder(), verdant.tradition(), verdant.requires(), verdant.practice(),
 				verdant.crown(), verdant.upkeepItem(), verdant.upkeepCount(), verdant.upkeepLey(), FieldKind.GROWTH, 2, 6);
+		for (int pulse = 0; pulse < 8; pulse++) {
+			helper.assertValueEqual(ConcordSpire.field(level, heart, away, garden), 0, "its keeper away, it grows nothing");
+		}
+		helper.assertTrue(helper.getBlockState(new BlockPos(5, 2, 3)).equals(Blocks.WHEAT.defaultBlockState()), "the wheat is as planted");
 		for (int pulse = 0; pulse < 8; pulse++) {
 			ConcordSpire.field(level, heart, state, garden);
 		}

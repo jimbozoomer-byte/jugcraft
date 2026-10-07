@@ -486,6 +486,11 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	/** Empty-handed: the state of the pot; sneaking, stop repeating a formula. */
 	public void useEmpty(ServerPlayer player, boolean sneaking) {
 		if (sneaking && program != null) {
+			// Only an alembist may stop a formula (roadmap step 28), as only one may set it.
+			if (!Alchemy.knows(player)) {
+				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.unknown"));
+				return;
+			}
 			program = null;
 			step = 0;
 			waiting = false;

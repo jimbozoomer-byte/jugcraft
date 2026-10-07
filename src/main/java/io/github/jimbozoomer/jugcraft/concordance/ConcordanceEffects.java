@@ -14,6 +14,7 @@ import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 import io.github.jimbozoomer.jugcraft.town.TownProtection;
 import io.github.jimbozoomer.jugcraft.weapons.ArmItem;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import net.minecraft.core.BlockPos;
@@ -144,13 +145,27 @@ public final class ConcordanceEffects {
 			return Result.NOTHING;
 		}
 		EffectSpec effect = spec;
+		// The multiplayer rules judge the person behind it (roadmap step 28): its actor, or whoever its cause names.
+		ServerPlayer person = person(context);
+		Entity harmer = context.actor() instanceof Player || person == null ? context.actor() : person;
+		boolean unanswered = target instanceof Player && absent(context);
+		// A push moves another player whatever it is meant for, so it faces the rule a harmful effect would (step 28).
+		if (spec.intent() != Intent.HARMFUL && spec.kind() == EffectKind.MOVEMENT && target instanceof Player && harmer != target
+				&& (unanswered || !mayHarm(harmer, target))) {
+			return Result.FRIENDLY;
+		}
 		if (spec.intent() == Intent.HARMFUL) {
 			// Creative mode's own protection (its invulnerable ability, which game mode changes keep), or a spectator.
 			if (target instanceof Player player && (player.getAbilities().invulnerable || player.isSpectator())) {
 				return Result.IMMUNE;
 			}
-			if (!mayHarm(context.actor(), target)) {
+			// A player is harmed only by someone here to answer to the PvP rules and parties.
+			if (unanswered || !mayHarm(harmer, target)) {
 				return Result.FRIENDLY;
+			}
+			// Roadmap step 28: only what that person could strike by hand (claims and protected creatures refuse it).
+			if (!Authority.mayStrike(context.level(), context.actor(), behind(context), target)) {
+				return Result.NOT_ALLOWED;
 			}
 			EffectSpec.Adjusted adjusted = tolerance(target).adjust(spec);
 			if (adjusted == null) {
@@ -196,10 +211,13 @@ public final class ConcordanceEffects {
 			return Result.WRONG_TARGET;
 		}
 		ServerLevel level = context.level();
-		Player player = context.actor() instanceof Player actor ? actor : null;
+		// A block changes only as the person behind the effect could change it by hand, asked of whoever answers for them
+		// (Authority, roadmap step 28); a block is used only by a player's own effect.
+		ServerPlayer person = person(context);
+		ServerPlayer answering = person != null ? person : Authority.answering(level, behind(context));
 		BlockState state = level.getBlockState(pos);
-		boolean allowed = spec.kind() == EffectKind.INTERACTION ? player != null && mayUse(level, player, pos, state)
-				: Illumination.mayChange(level, player, pos);
+		boolean allowed = spec.kind() == EffectKind.INTERACTION ? context.actor() instanceof Player actor && mayUse(level, actor, pos, state)
+				: Authority.mayChange(level, answering, pos);
 		if (!accepts(level, spec.kind(), pos)) {
 			return Result.NOTHING;
 		}
@@ -212,9 +230,9 @@ public final class ConcordanceEffects {
 		Result result = switch (spec.kind()) {
 			case ILLUMINATION -> {
 				int steps = Math.clamp((spec.duration() + LumenMoteBlock.STEP_TICKS - 1) / LumenMoteBlock.STEP_TICKS, 1, LumenMoteBlock.MAX_STEPS);
-				yield Illumination.kindle(level, player, pos, steps).lit() ? Result.APPLIED : Result.NOTHING;
+				yield Illumination.kindle(level, answering, pos, steps).lit() ? Result.APPLIED : Result.NOTHING;
 			}
-			case INTERACTION -> state.useWithoutItem(level, player, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false))
+			case INTERACTION -> state.useWithoutItem(level, (Player) context.actor(), new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false))
 					.consumesAction() ? Result.APPLIED : Result.NOTHING;
 			case HARVESTING -> {
 				if (state.getBlock() instanceof CropBlock) {
@@ -250,6 +268,33 @@ public final class ConcordanceEffects {
 			case ALTERATION -> state.is(BlockTags.FIRE);
 			default -> false;
 		};
+	}
+
+	/**
+	 * The player an effect acts for (roadmap step 28): its actor when that is a player, otherwise the player its cause
+	 * names (a familiar's owner, a ritual's leader, a device's keeper) if they are here; null when nobody is behind it
+	 * or they are away.
+	 */
+	public static @Nullable ServerPlayer person(Context context) {
+		return context.actor() instanceof ServerPlayer player ? player : Authority.present(context.level(), behind(context));
+	}
+
+	/**
+	 * Who the cause names as behind an effect, when that is someone other than the creature acting (a familiar's owner,
+	 * a ritual's leader, a device's keeper): a creature acting for itself, or one still in the level, is nobody's.
+	 */
+	static @Nullable UUID behind(Context context) {
+		UUID named = context.cause().actor();
+		if (named == null || context.actor() != null && context.actor().getUUID().equals(named)) {
+			return null;
+		}
+		Entity there = context.level().getEntity(named);
+		return there == null || there instanceof Player ? named : null;
+	}
+
+	/** Whether the player behind an effect is away (offline or elsewhere): nobody is here to answer for it. */
+	static boolean absent(Context context) {
+		return !(context.actor() instanceof Player) && behind(context) != null && person(context) == null;
 	}
 
 	/**

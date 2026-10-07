@@ -6,7 +6,7 @@ import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.util.GeckoLibUtil;
-import io.github.jimbozoomer.jugcraft.concordance.Illumination;
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Reservoir;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Transfers;
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
@@ -79,6 +80,13 @@ public class GleanerBlockEntity extends LivingDeviceBlockEntity implements GeoBl
 			status("dormant");
 			return status;
 		}
+		// Roadmap step 28: it harvests as its keeper, only where they could harvest by hand, and only while they are here
+		// (unless the server lets a stand-in answer for absent owners); while it waits it draws nothing.
+		ServerPlayer answering = Authority.answering(level, keeper);
+		if (answering == null) {
+			status("keeper_away");
+			return status;
+		}
 		if (verdance < COST) {
 			draw(level);
 		}
@@ -92,7 +100,7 @@ public class GleanerBlockEntity extends LivingDeviceBlockEntity implements GeoBl
 			}
 			BlockState state = level.getBlockState(pos);
 			if (!(state.getBlock() instanceof OrganismCropBlock crop) || !crop.isMaxAge(state)
-					|| !Illumination.mayChange(level, null, pos)) {
+					|| !Authority.mayChange(level, answering, pos)) {
 				continue;
 			}
 			List<ItemStack> harvest = crop.harvestYield(state);

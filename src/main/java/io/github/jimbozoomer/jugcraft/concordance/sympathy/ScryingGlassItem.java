@@ -94,12 +94,20 @@ public class ScryingGlassItem extends Item {
 		Component where;
 		boolean sameDimension = link.dimension().equals(level.dimension().identifier().toString());
 		LivingEntity target = sameDimension ? Sympathy.find(level, link) : null;
-		if (link.expired(now)) {
+		// Roadmap step 28: scrying finds no more than a curse could reach: the link's maker, within range, by the
+		// multiplayer rules.
+		if (!link.linker().equals(player.getUUID())) {
+			where = Component.translatable("compose.jugcraft.hex.reason.not_yours");
+		} else if (link.expired(now)) {
 			where = Component.translatable("compose.jugcraft.hex.reason.expired");
 		} else if (!sameDimension) {
 			where = Component.translatable("compose.jugcraft.hex.reason.elsewhere");
 		} else if (target == null) {
 			where = Component.translatable("compose.jugcraft.hex.reason.not_found");
+		} else if (player.distanceToSqr(target) > (double) Hexes.MAX_RANGE * Hexes.MAX_RANGE) {
+			where = Component.translatable("compose.jugcraft.hex.reason.too_far");
+		} else if (!Sympathy.allowed(player, target)) {
+			where = Component.translatable("compose.jugcraft.hex.reason.not_allowed");
 		} else if (Sympathy.warded(target, WardCategory.SCRYING)) {
 			where = Component.translatable("compose.jugcraft.hex.reason.hidden");
 		} else {

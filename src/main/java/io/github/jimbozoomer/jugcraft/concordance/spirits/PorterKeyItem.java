@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import java.util.function.Consumer;
@@ -52,6 +53,11 @@ public class PorterKeyItem extends Item {
 		}
 		if (!(level.getBlockEntity(pos) instanceof Container)) {
 			return InteractionResult.PASS;
+		}
+		// Roadmap step 28: a route only between containers its maker could use by hand (the porter asks again each trip).
+		if (!Authority.mayChange(level, player, pos)) {
+			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.workers.key_refused"));
+			return InteractionResult.FAIL;
 		}
 		key.remove(Couriers.KEY_POST);
 		ClockworkPorterEntity.Route route = key.get(Workers.PORTER_ROUTE);

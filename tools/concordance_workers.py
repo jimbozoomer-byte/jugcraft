@@ -157,6 +157,7 @@ MESSAGES = {
     "workers.key_source": "Source: %s %s %s (now use it on the target)",
     "workers.key_target": "Target: %s %s %s (now use it on a porter)",
     "workers.key_unset": "The key has no route yet (use it on two containers)",
+    "workers.key_refused": "You may not use that container yourself, so no porter may take or bring for you there",
     "workers.not_yours": "Only its keeper (or their party) may command it",
     "workers.routed": "The porter takes the route",
     "workers.none": "You have no workers",

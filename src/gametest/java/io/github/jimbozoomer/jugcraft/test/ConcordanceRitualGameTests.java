@@ -303,6 +303,31 @@ public class ConcordanceRitualGameTests {
 		});
 	}
 
+	/**
+	 * Roadmap step 28: a Warding Stone broken mid-ritual by another player is their doing. The backlash is theirs: it
+	 * reaches the participant only where the PvP rules let that player harm them, and is credited to them, so breaking a
+	 * stranger's boundary is no way round the multiplayer rules.
+	 */
+	@GameTest(maxTicks = 240)
+	public void aBreakerAnswersForTheBacklash(GameTestHelper helper) {
+		CircleAnchorBlockEntity anchor = build(helper, 64);
+		ServerPlayer player = startAttunement(helper, anchor);
+		ServerPlayer vandal = helper.makeMockServerPlayerInLevel();
+		vandal.setGameMode(GameType.SURVIVAL);
+		boolean mayHarm = vandal.canHarmPlayer(player);
+		helper.runAfterDelay(PAST_SPAWN_GRACE, () -> vandal.gameMode.destroyBlock(helper.absolutePos(first(StructurePattern.Role.BOUNDARY))));
+		helper.succeedWhen(() -> {
+			offeringsKept(helper, anchor, RitualMachine.Interruption.CONTAINMENT);
+			if (mayHarm) {
+				helper.assertTrue(player.getHealth() < player.getMaxHealth() && player.getLastHurtByMob() == vandal,
+						"Where PvP allows it, the backlash hurt the participant as the vandal's doing: " + player.getHealth());
+			} else {
+				helper.assertTrue(player.getHealth() == player.getMaxHealth(),
+						"Where PvP forbids it, the vandal's backlash spares the participant: " + player.getHealth());
+			}
+		});
+	}
+
 	/** A pylon drained mid-ritual: POWER, and the step draws from no pylon. */
 	@GameTest(maxTicks = 200)
 	public void aDryPylonStopsTheRitual(GameTestHelper helper) {

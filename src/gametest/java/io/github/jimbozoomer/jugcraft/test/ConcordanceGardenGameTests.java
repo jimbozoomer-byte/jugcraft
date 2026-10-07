@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
@@ -16,6 +17,7 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -320,11 +322,13 @@ public class ConcordanceGardenGameTests {
 
 	/**
 	 * A Gleaner harvests a ripe sunpetal within reach for one Verdance, drawn from a Verdant Heart its keeper shares;
-	 * the crop falls back to step 1 to grow again. A Gleaner kept by someone else cannot draw from that Heart.
+	 * the crop falls back to step 1 to grow again. A Gleaner kept by someone else cannot draw from that Heart. It
+	 * harvests as its keeper, who is here (roadmap step 28).
 	 */
 	@GameTest(maxTicks = 40)
 	public void theGleanerHarvestsForVerdance(GameTestHelper helper) {
 		ServerLevel level = level(helper);
+		ServerPlayer keeper = helper.makeMockServerPlayerInLevel();
 		BlockPos crop = new BlockPos(2, 2, 2);
 		bed(helper, crop.below(), 10);
 		helper.setBlock(crop, ((OrganismCropBlock) Garden.SUNPETAL_CROP).getStateForAge(OrganismCropBlock.MAX_AGE));
@@ -332,18 +336,18 @@ public class ConcordanceGardenGameTests {
 		bed(helper, heartBed, 10);
 		helper.setBlock(heartBed.above(), Garden.VERDANT_HEART);
 		VerdantHeartBlockEntity heart = entity(helper, heartBed.above());
-		heart.awaken(KEEPER);
+		heart.awaken(keeper.getUUID());
 		heart.setVerdance(5);
 		BlockPos stranger = new BlockPos(7, 2, 5);
 		helper.setBlock(stranger, Garden.GLEANER);
 		GleanerBlockEntity theirs = entity(helper, stranger);
-		theirs.awaken(new UUID(14L, 2L));
+		theirs.awaken(helper.makeMockServerPlayerInLevel().getUUID());
 		helper.assertTrue(theirs.glean(level).equals("no_verdance") && heart.verdance() == 5,
 				"A stranger's Gleaner may not draw on the Heart");
 		BlockPos at = new BlockPos(3, 2, 3);
 		helper.setBlock(at, Garden.GLEANER);
 		GleanerBlockEntity gleaner = entity(helper, at);
-		gleaner.awaken(KEEPER);
+		gleaner.awaken(keeper.getUUID());
 		helper.assertTrue(gleaner.glean(level).equals("working"), "It gleans: " + gleaner.status());
 		helper.assertTrue(heart.verdance() == 0 && gleaner.verdance() == 4, "It drew the Heart's 5 and spent one: " + gleaner.verdance());
 		List<ItemStack> held = new ArrayList<>();
@@ -356,6 +360,43 @@ public class ConcordanceGardenGameTests {
 				&& held.get(1).is(Garden.VERDANT_CHAFF), "Two sunpetals and a chaff: " + held);
 		helper.assertTrue(age(helper, crop) == 1, "The crop falls back to step 1");
 		helper.assertTrue(gleaner.glean(level).equals("idle"), "Nothing else is ripe");
+		helper.succeed();
+	}
+
+	/**
+	 * Roadmap step 28: a Gleaner whose keeper is away waits and draws nothing; with the server's option a stand-in
+	 * answers for them, and harvests only a crop they could harvest by hand (a neighbour's claim refuses it).
+	 */
+	@GameTest(maxTicks = 40)
+	public void theGleanerWaitsForItsKeeper(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		BlockPos crop = new BlockPos(2, 2, 2);
+		bed(helper, crop.below(), 10);
+		helper.setBlock(crop, ((OrganismCropBlock) Garden.SUNPETAL_CROP).getStateForAge(OrganismCropBlock.MAX_AGE));
+		BlockPos heartBed = new BlockPos(5, 1, 2);
+		bed(helper, heartBed, 10);
+		helper.setBlock(heartBed.above(), Garden.VERDANT_HEART);
+		VerdantHeartBlockEntity heart = entity(helper, heartBed.above());
+		heart.awaken(KEEPER);
+		heart.setVerdance(5);
+		BlockPos at = new BlockPos(3, 2, 3);
+		helper.setBlock(at, Garden.GLEANER);
+		GleanerBlockEntity gleaner = entity(helper, at);
+		gleaner.awaken(KEEPER);
+		helper.assertValueEqual(gleaner.glean(level), "keeper_away", "its keeper away, it waits");
+		helper.assertTrue(heart.verdance() == 5 && gleaner.verdance() == 0 && age(helper, crop) == OrganismCropBlock.MAX_AGE,
+				"and draws and harvests nothing");
+		JugcraftConfig.setOption(Authority.ABSENT_OPTION, true);
+		try (TestClaims claims = TestClaims.open()) {
+			claims.block(helper.absolutePos(crop), new UUID(14L, 3L));
+			helper.assertValueEqual(gleaner.glean(level), "idle", "a stand-in answers for its keeper: a neighbour's claimed crop is refused");
+			helper.assertTrue(age(helper, crop) == OrganismCropBlock.MAX_AGE, "and left ripe");
+			claims.close();
+			helper.assertValueEqual(gleaner.glean(level), "working", "unclaimed, it is harvested for its keeper");
+		} finally {
+			JugcraftConfig.setOption(Authority.ABSENT_OPTION, false);
+		}
+		helper.assertTrue(age(helper, crop) == 1, "the crop falls back to step 1");
 		helper.succeed();
 	}
 

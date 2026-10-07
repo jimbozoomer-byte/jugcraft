@@ -225,7 +225,13 @@ The owner library ([catalog](../../art/owner-library/catalog/README.md)) was sea
   - `jugcraft_concordance_crucibles`: four crucibles of different volume and contents, one searing;
   - `jugcraft_concordance_signs_full` and `jugcraft_concordance_signs_minimal`: the same signs drawn at each
     intensity.
-- CI: pending (this record is updated with the run).
+- CI: Build run [37670918838](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37670918838) on 8d583c6 passed
+  every job.
+  - `mod` and `optional integrations absent`: "All 1056 required tests passed". The first run, on 4976e8a, failed one
+    test (a dry pylon's shortage was looked for only at the anchor); 8d583c6 shows a stopped ritual's warning at its
+    faulty parts as well.
+  - Client shard 1 ran `ConcordancePresentationClientGameTests` and its job passed. It saved
+    `jugcraft_concordance_crucibles`, `jugcraft_concordance_signs_full` and `jugcraft_concordance_signs_minimal`.
 
 Not yet run: a person looking at the screenshots and at the signs in play; the sounds heard in game; Iris with a shader
 pack; a large installation profiled for frame time; a two-client server (whether another player sees the same signs).
