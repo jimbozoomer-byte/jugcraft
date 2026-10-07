@@ -1,6 +1,6 @@
 # Industrial chemistry, gas fuels and advanced materials
 
-Status: owner-selected planning direction, recorded and updated 7 October 2026. This independent brief records six planning batches and the owner's detailed fuel, machine and chemical-catalog requests. Steel-built electrical equipment is the main chemistry entry; gas processing, aluminum and titanium remain the first development priorities. The latest batch selects chromium/nickel stainless steel, aluminum-magnesium structural alloy, brine-based magnesium, resin/additive photoresist, one advanced chip assembled into specialized upgrades, PTFE processing parts, distinct nitrogen/phosphate fertilizers, shared reagent purification, efficient larger machines and underground snow-biome fluorite with surface clues. Earlier selections include installed upgrades plus larger advanced versions, three sulfuric-acid grades, connected wafer stations, shared extrusion, separate cryogenic processing and modular vanadium storage. Industrial fertilizers, refining and polymers precede new optional chemical consumer goods. Exact recipes, quantities, construction, upgrade effects and performance statistics remain to design and balance. This document implements no gameplay.
+Status: owner-selected planning direction, recorded and updated 7 October 2026. This independent brief records seven planning batches and the owner's detailed fuel, machine and chemical-catalog requests. Steel-built electrical equipment is the main chemistry entry. The first delivery milestone is a complete starter gas/acid factory; magnesium, aluminum and titanium follow. Latest choices select coastal seawater for magnesium brine, regional chromium ore, water purification accounted inside recipes, PTFE parts in advanced-machine construction, distinct speed/power and efficiency/energy effects, local automation before remote controls, and broad fertilizer crop groups. Earlier selections retain the two alloys, resin/additive photoresist, chip upgrade products, reagent purification, efficient larger machines, snow-biome fluorite, modular storage and later chemical consumer branches. Exact recipes, quantities, construction, upgrade effects and performance statistics remain to design and balance. This document implements no gameplay.
 
 Proposal issue: direct owner instructions during industrial planning; no separate issue.
 Owner: jimbozoomer-byte.
@@ -115,6 +115,45 @@ The owner selected A for all ten questions on 7 October. These answers select ma
 | 10 | A | Large underground snow-biome fluorite deposits with occasional surface outcrops for discovery |
 
 The [catalog](industrial-chemical-catalog-and-routes.md#selected-alloys-and-independent-magnesium) connects the two alloys to shared forming, magnesium to both aluminum alloying and titanium reduction, and the selected products to their earlier producers. Fertilizer effects, upgrade statistics and exact deposit settings remain to balance. The selected brine contains magnesium; ordinary sodium-chloride brine does not create magnesium without an accounted source.
+
+## Starter resources, operation and delivery: seventh batch
+
+The owner selected A for questions 1, 2, 5, 6, 7 and 8, and B for 3 and 4 on 7 October. Question 3 qualifies the earlier purification-station choice: recipe water is conditioned internally, while the named reagent grades and shared reagent purifier remain selected.
+
+| # | Owner answer | Selected direction |
+| --- | --- | --- |
+| 1 | A | Pump coastal seawater and concentrate/process it into magnesium-bearing brine for the independent chloride/electrolysis route |
+| 2 | A | Regional chromium-bearing ore deposits feed shared refining and then the stainless-steel alloy route; exact mineral/regions remain to design |
+| 3 | B | Account for water purification within demanding recipes, with input/energy/loss costs; this expansion does not require a separately produced, stored purified-water fluid |
+| 4 | B | PTFE seals/fittings/liners are construction ingredients for advanced machines, rather than retrofit lining components installed into existing machines |
+| 5 | A | Speed upgrades increase throughput and power draw; efficiency upgrades reduce energy per completed batch |
+| 6 | A | Automation first adds recipe priorities and target stock levels; remote/coordinated factory controls come later |
+| 7 | A | Fertilizer applications use broad crop groups, with optional blends convenient for mixed farms |
+| 8 | A | First deliver a complete starter gas/acid factory with electrolysis, tanks, synthesis and usable generator fuels; magnesium/aluminum/titanium and alloy expansion follows |
+
+Purification costs do not create a free water/reagent conversion, and advanced PTFE construction cannot gate the first equipment making PTFE. Exact coastal extraction representation, ore generation, upgrade limits, crop tags and starter-machine recipes remain future design work.
+
+## First delivery milestone: starter gas and acid factory
+
+The owner-selected first slice is a functioning **steel-era gas/acid factory**, entered from ordinary steel and the independently reachable earlier electrical supply. It does not move first electricity behind hydrogen chemistry. The following is a functional production map; exact block IDs, working names, construction recipes, quantities and rates still need a focused recipe specification against existing systems.
+
+| Factory role | Input and process | Useful output and reachable consumer |
+| --- | --- | --- |
+| Electrolysis | Water on the existing cell/shared Electrolytic Separator capability | H2 for the gas-burning generator/synthesis; O2 for compatible oxidation/processing. Electrical input is required before hydrogen production |
+| Chlor-alkali supply | Reachable ordinary salt brine -> aqueous electrolysis | H2, chlorine and sodium hydroxide. Keep this source distinct from later magnesium-bearing coastal brine |
+| Starter gas feed preparation | Earlier steel-era coal gasification -> CO/H2 mixture -> compatible cleanup/separation | Usable CO/H2 for synthesis; explicit residues and substantial numeric pollution. The advanced digester is not required to make first methane |
+| Hydrogen chloride supply | H2/chlorine -> gas reaction -> suitable water absorption/recovery | HCl gas/aqueous supply for appropriate chemical consumers; absorption consumes accounted water and is not a free phase swap |
+| Sulfuric-acid supply | Reachable sulfur and oxygen -> compatible oxidation/conversion/absorption roles | Ordinary sulfuric acid for refining, fertilizer and other consumers. Initial catalyst/hardware must be independently reachable; preserve the current starter acid route until a replacement works |
+| Methanation and recovery | CO or independently supplied CO2 + H2 -> heated synthesis with the reusable nickel/ceramic bed -> separation | Methane for the shared gas-burning generator and accounted water; CO/CO2 recipe ratios and all electrical/heat inputs are included in the budget |
+| Storage, transfers and generation | Placeable filled tanks/shared pipes -> H2 or methane -> compatible gas-burning generator | Actual usable fuel handling and electrical output. Tanks retain exact contents; pressure is automatic. Generation does not repay more than all external feed/processing energy supplies |
+
+Complete the first slice with normal recipe repetition, useful missing-input/output/capability states and Encyclopedia route entries. The later automation upgrade adds recipe priorities and stock targets; it is not required to connect ordinary pipes or operate the starter line. Speed/efficiency/scale improvements require complete conversion-loop audits as they are introduced.
+
+After this slice, develop coastal magnesium extraction, aluminum, titanium and the selected two alloys. Then expand reachable fertilizer/polymer/reagent and wafer capabilities, larger installations, general storage and later fuel/space consumers. The already selected industrial-before-new-chemical-consumer priority still applies. This ordering preserves existing recipes, basic circuits and useful mechanical/biological industries while successors are reviewed.
+
+This is feature delivery order, not a mandatory player quest/research ladder. Independent producer routes and trading let players obtain inputs without building every preceding specialty locally.
+
+Before gameplay delivery, specify the starter reactor's construction against the current titanium-dependent Synthesis Converter, first acid catalyst/supply, gas reference units and liquid conversions, generation values, blocked-output behavior, portable tank transactions and bounded multiplayer factory work. No implementation or gameplay validation is claimed by this map.
 
 ## Design from products and reactions
 
@@ -263,7 +302,7 @@ Process-specific reagents and meaningful intermediate preparation are selected. 
 
 ## Aluminum, titanium, ceramics and battery development
 
-Gas processing, aluminum and titanium are the first chains to detail together:
+Gas/acid processing is the first delivery milestone. The following metal and material chains form the next expansion:
 
 - **Aluminum:** reachable bauxite/alkaline processing, filtration/recovery and alumina. Alumina branches into useful ceramics or electrical metal recovery. The owner selected **earlier copper conductors for entry equipment**, with aluminum improvements later, and broad **electrical, structural, panel and vehicle products**. Affordable bulk electrical components and lightweight structures are the selected game roles; exact network/vehicle/portable-equipment effects need consumer-specific design. Copper/steel remain useful; keep the first cell reachable without its own aluminum output.
 - **Titanium:** the owner selected **mineral treatment -> crude titanium chloride -> purification -> magnesium reduction -> titanium sponge -> melting**, using compatible shared equipment. Regional feeds retain pigment/material side branches. Process components enable selected advanced chemical/precision capabilities and improve larger equipment; ordinary machines remain steel. Tools/armor form a **stronger conventional tier above steel**, alongside vehicle/precision applications. Magnesium needs an independent producer; partial recovery cannot create the first reductant.
@@ -290,7 +329,7 @@ The broad metal product ranges are independently useful destinations and trade g
 
 For ceramics, use common preparation/shaping and kiln roles where suitable. Ordinary building/lining pieces can be finished products straight from firing; add cutting/grinding/polishing only where the specific precision part needs it. Exact shaping/finishing machine assignments are proposals. The selected Polymer Molding Press does not automatically become universal equipment for every ceramic or metal. Fired/unfired forms must not be interchangeable for free, and reusable tooling must not introduce routine maintenance.
 
-**New alloys:** the selected initial families are **chromium/nickel stainless steel** for chemical equipment and **aluminum-magnesium alloy** for structural frames/panels/vehicles. Titanium alloys follow later precision applications. Exact grades/compositions and independent chromium/magnesium producer details remain to design. Use compatible upgraded equipment; a dedicated station needs a genuinely different capability. Add each alloy with useful consumers, preserve material accounting and avoid requiring the complete alloy catalog in every ordinary machine.
+**New alloys:** the selected initial families are **chromium/nickel stainless steel** for chemical equipment and **aluminum-magnesium alloy** for structural frames/panels/vehicles. Regional chromium ore and coastal-seawater magnesium-brine processing supply independent feeds. Titanium alloys follow later precision applications. Exact grades/compositions, source regions and producer recipes remain to design. Use compatible upgraded equipment; a dedicated station needs a genuinely different capability. Add each alloy with useful consumers, preserve material accounting and avoid requiring the complete alloy catalog in every ordinary machine.
 
 **Refinery scale:** begin with compact functional refining stations, keeping initial construction and small-batch work practical. The owner selects higher throughput and lower energy per unit for larger chemical machines; upgraded small machines remain useful for smaller production lines. Exact rates, efficiency gains and physical footprints remain to design under the industrial art direction. This does not override the substantial first digester, earlier larger foundry/press choices or any genuine process-hardware requirement.
 
@@ -360,19 +399,21 @@ Use authoritative server state, existing access rules and stable IDs. Preserve c
 
 ## Delivery and remaining decisions
 
-1. Develop hydrogen/methane gas generation and the separate biogas/bioethanol Bio-Generator, with complete energy budgets and the selected copper-conductor aluminum entry.
-2. Specify methanation heat capability, the selected existing-nickel/ceramic reusable bed, water separation and optional catalyst improvements. Keep gas-pipe pressurization automatic.
-3. Detail the earlier coal gasifier and optional cement/Coke Oven gas capture without making capture a starter-steel prerequisite.
-4. Detail the selected substantial first digester and earlier milling/mashing -> fermentation -> distillation crop-power route, with later dehydration and concentrated CO2 collection.
-5. Develop the selected staged titanium route, broad aluminum/titanium destinations, shared Polymer Molding Press and Extruder, ceramic blank/firing/finishing stages and limited useful alloy set. First refining stations stay compact and support useful installed upgrades, alongside optional larger advanced versions.
-6. Deliver industrial fertilizers, refining and polymers before the new optional chemical consumer goods. Define the selected sulfuric-acid supplies, snow-biome fluorite, connected chip stations, ordinary/cryogenic conversion capabilities and modular flow storage through independently reachable recipes.
-7. Balance construction, work rates, gas units and electricity/fuel values; implement the selected excess-CO2 vent default and optional stop-instead setting. Additional planning questions should arrive in batches of **8–12 inline questions**, not two at a time.
+1. Specify and deliver the selected first gas/acid factory: water/brine gases, CO/H2 preparation, HCl/sulfuric supply, tanks/pipes and shared hydrogen/methane generation, with independently reachable steel-era hardware and first acid/catalyst supply.
+2. Detail methanation heat, the existing-nickel/ceramic reusable bed, water separation and complete energy budgets; gas pressure remains automatic.
+3. Follow with coastal magnesium acquisition/chloride/electrolysis, aluminum's copper-conductor entry, staged titanium and regional-chromium stainless/aluminum-magnesium alloys; audit every first producer and forming route.
+4. Develop shared polymer molding/extrusion, PTFE advanced-machine construction, ceramic blank/firing/finishing, broad fertilizer groups/blends and demanding reagents. Keep compact upgraded stations useful alongside larger efficient machines; account for water conditioning within recipes.
+5. Detail the substantial first digester, separate biogas/bioethanol Bio-Generator, milling/mashing -> fermentation -> distillation, later dehydration and optional cement/brewery/Coke Oven capture. Capture is not a starter-steel prerequisite; retain the selected excess-CO2 vent default and optional stop-instead setting.
+6. Expand sulfuric grades, snow-biome fluorite, wafer stations and chip upgrades, ordinary/cryogenic conversion and modular general storage through reachable recipes. Industrial fertilizers/refining/polymers precede new optional chemical consumer goods; other later applications retain their documented scope.
+7. Balance construction, work rates, gas units, upgrade curves/caps and electricity/fuel values; verify local stock-target automation without requiring it for starter operation. Additional planning questions should arrive in batches of **8–12 inline questions**, not two at a time.
 
 The generator fuel split, methane benefit, reusable nickel entry, automatic pressure handling, CO/hydrogen mixture separation, earlier ethanol stages, CO2 capture default, first-digester scale and copper-conductor entry are selected. Remaining decisions include exact station IDs/footprints/recipes, reagent production, heat levels, catalyst quantities/upgrades, distillation/drying architecture, gas units/rates, generator fuel/output values, control UI and battery sidegrades. Owner-selected directions are distinct from assistant equipment/recipe proposals.
 
 The third and fourth batches settle material routes and product roles, including named PVC intermediates, magnesium reduction, stronger titanium equipment and deferred portable/specialty batteries. The full catalog adds requested advanced branches. The fifth batch settles installed upgrades plus larger versions, sulfuric-acid grades, snow-biome fluorite, the first chip chemicals/stations/photoresist, shared extrusion, ordinary versus cryogenic conversion, modular grid expansion and industrial-before-new-consumer priorities.
 
-The sixth batch selects alloy identities, the independent magnesium route, photoresist preparation, chip-upgrade products, PTFE consumers, fertilizer differentiation, shared purification, larger-machine benefits and underground fluorite discovery. Remaining decisions include exact alloy grades/ratios and chromium source, magnesium-bearing brine acquisition/preparation, purification recipes, snow-biome eligibility/deposit sizes, chip/additive identities and upgrade effects, crop applications/blends, machine footprints, per-fluid cryogenic tiers, rocket/station compatibility, synthetic-fuel upgrading, and flow-storage module sizes/limits. Develop these through reachable production chains and useful factory outputs; record them as future work rather than claims of implemented gameplay.
+The sixth batch selects alloy identities, the independent magnesium route, photoresist preparation, chip-upgrade products, PTFE consumers, fertilizer differentiation, shared purification, larger-machine benefits and underground fluorite discovery. The seventh batch settles coastal seawater/regional ore sources, internal water conditioning, PTFE advanced construction, upgrade effects, local-first automation, broad crop groups and the first gas/acid milestone.
+
+Remaining decisions include exact starter construction and acid/catalyst supply, gas/generation budgets, alloy grades/ratios, chromium mineral/regions and refining, coastal magnesium acquisition/preparation, purification recipes, snow-biome eligibility/deposit sizes, chip/additive identities and upgrade limits, crop-group tags/blend effects, machine footprints, per-fluid cryogenic tiers, rocket/station compatibility, synthetic-fuel upgrading, and flow-storage module sizes/limits. Develop these through reachable production chains and useful factory outputs; record them as future work rather than claims of implemented gameplay.
 
 ## Verification, dependencies and provenance
 
