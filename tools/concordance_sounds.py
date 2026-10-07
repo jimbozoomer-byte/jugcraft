@@ -257,6 +257,51 @@ def lanternward():
     return (0.45 * hum / rms(hum) + bells / np.max(np.abs(bells))) * fade(n, 0.005, 0.12)
 
 
+def circle_start():
+    """A circle awakens: a low D3 drone swelling under a slow upward sweep of soft bells, D4, F#4, A4 (roadmap 12)."""
+    n = samples(1.4)
+    t = times(n)
+    drone = sum(amp * np.sin(2 * np.pi * D3 * k * t) for k, amp in ((1, 1.0), (2, 0.4), (3, 0.15)))
+    drone *= np.clip(t / 0.5, 0, 1) ** 2 * np.exp(-np.maximum(t - 0.9, 0) / 0.25)
+    bells = np.zeros(n)
+    soft = [(1.0, 1.0, 0.4), (2.0, 0.25, 0.2), (3.0, 0.08, 0.1)]
+    for at, hz in ((0.25, D4), (0.5, D4 * 1.26), (0.75, A4)):
+        bells += chime(n, hz, soft, attack=0.01, at=at, beat=1.2)
+    return (0.5 * drone / rms(drone) + bells / np.max(np.abs(bells))) * fade(n, 0.01, 0.2)
+
+
+def circle_step():
+    """A ritual step: one soft low hum pulse on A3 with a faint fifth, like a held breath."""
+    n = samples(0.6)
+    t = times(n)
+    hum = np.sin(2 * np.pi * A4 / 2 * t) + 0.3 * np.sin(2 * np.pi * A4 * 0.75 * t)
+    return hum * np.sin(np.pi * np.clip(t / 0.6, 0, 1)) ** 2 * fade(n, 0.005, 0.05)
+
+
+def circle_complete():
+    """A ritual completes: a bright chord struck together, D5 A5 D6, ringing out over the drone's last breath."""
+    n = samples(1.6)
+    t = times(n)
+    bright = [(1.0, 1.0, 0.7), (2.0, 0.35, 0.3), (3.0, 0.12, 0.15), (4.2, 0.05, 0.08)]
+    chord = chime(n, D5, bright, attack=0.004) + 0.8 * chime(n, D5 * 1.5, bright, attack=0.004) \
+        + 0.6 * chime(n, D5 * 2, bright, attack=0.004)
+    low = np.sin(2 * np.pi * D3 * t) * np.exp(-t / 0.5)
+    return (chord / np.max(np.abs(chord)) + 0.35 * low) * fade(n, 0.003, 0.25)
+
+
+def circle_break(seed):
+    """A ritual breaks: a dissonant crack (a tritone struck together) and a burst of noise falling away."""
+    n = samples(0.9)
+    t = times(n)
+    rng = np.random.default_rng(seed)
+    centre = 2400 * (300 / 2400) ** np.clip(t / 0.6, 0, 1)
+    bp, lp = band(rng.normal(size=n), centre, q=1.2)
+    noise = (bp / rms(bp) + 0.4 * lp / rms(lp)) * np.exp(-t / 0.18)
+    harsh = [(1.0, 1.0, 0.35), (2.7, 0.4, 0.12)]
+    crack = chime(n, A4, harsh, attack=0.002) + chime(n, A4 * 1.414, harsh, attack=0.002)
+    return (0.6 * noise / np.max(np.abs(noise)) + crack / np.max(np.abs(crack))) * fade(n, 0.002, 0.1)
+
+
 # name -> (signal, peak). Names follow concordance.SOUND_EVENTS ("concordance.<name>").
 def cues():
     return {
@@ -271,6 +316,10 @@ def cues():
         "lance": (lance(seed=47), PEAK),
         "flash": (flash(seed=53), PEAK * 0.8),
         "lanternward": (lanternward(), PEAK * 0.85),
+        "circle_start": (circle_start(), PEAK * 0.85),
+        "circle_step": (circle_step(), PEAK * 0.5),
+        "circle_complete": (circle_complete(), PEAK * 0.9),
+        "circle_break": (circle_break(seed=59), PEAK * 0.85),
     }
 
 

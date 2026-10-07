@@ -22,9 +22,10 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Examining a luminous specimen: sneak and use one ({@code #jugcraft:luminous_specimens}). The server reads the light
- * where the player's eyes are and records an {@link Evidence.Examined}; in darkness (light {@value #DARK_LIGHT} or less,
- * as in a cave or the open air at night) the glow is the specimen's own. Sneaking keeps eating and other uses of these
+ * Examining a specimen: sneak and use one ({@code #jugcraft:concordance_specimens}: the luminous specimens First Light
+ * learns from, and each later entry's own). The server reads the light where the player's eyes are and records an
+ * {@link Evidence.Examined}; for a luminous specimen ({@code #jugcraft:luminous_specimens}), in darkness (light
+ * {@value #DARK_LIGHT} or less, as in a cave or the open air at night) the glow is the specimen's own. Sneaking keeps eating and other uses of these
  * items (glow berries are food) on the plain use key.
  * <p>
  * One examination per player per {@value #COOLDOWN_TICKS} ticks; extra requests in between are ignored, so holding the
@@ -80,8 +81,13 @@ public final class Examination {
 		Component name = stack.getHoverName();
 		boolean dark = light <= DARK_LIGHT;
 		if (result.transitions().isEmpty()) {
-			player.sendOverlayMessage(Component.translatable(dark ? (result.recorded() ? "message.jugcraft.concordance.examine.dark"
-					: "message.jugcraft.concordance.examine.known") : "message.jugcraft.concordance.examine.bright", name));
+			if (!stack.is(JugcraftConcordance.LUMINOUS)) {
+				// Other research learns from how a thing is made, not from its light.
+				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.examine.form", name));
+			} else {
+				player.sendOverlayMessage(Component.translatable(dark ? (result.recorded() ? "message.jugcraft.concordance.examine.dark"
+						: "message.jugcraft.concordance.examine.known") : "message.jugcraft.concordance.examine.bright", name));
+			}
 		}
 		level.playSound(null, player.blockPosition(), JugcraftConcordance.EXAMINE_SOUND, SoundSource.PLAYERS, 0.6F,
 				dark ? 1.0F : 0.8F);

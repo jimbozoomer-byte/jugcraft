@@ -6547,5 +6547,39 @@
         "radiance": 1
       }
     ]
-  }
+  },
+  "concordance_stations": [
+    {
+      "block": "jugcraft:circle_anchor",
+      "type": "jugcraft:circle_anchor",
+      "recipes": [
+        {
+          "kind": "ritual",
+          "in": [
+            [
+              "jugcraft:initiate_wand",
+              1
+            ],
+            [
+              "minecraft:amethyst_shard",
+              4
+            ],
+            [
+              "minecraft:gold_ingot",
+              2
+            ],
+            [
+              "minecraft:glowstone_dust",
+              4
+            ]
+          ],
+          "out": [
+            "jugcraft:adept_wand",
+            1
+          ],
+          "value": 5
+        }
+      ]
+    }
+  ]
 }

@@ -379,6 +379,18 @@ INSTRUMENT_LIMITS = {
                       "duration": 1200},
 }
 
+# Roadmap step 12 (tools/concordance_rituals.py): Circle Lore, its rituals, structures and blocks join the tables above.
+import concordance_rituals as rituals  # noqa: E402
+RESEARCH.update(rituals.RESEARCH)
+ITEMS.update(rituals.ITEMS)
+BLOCKS.update(rituals.BLOCKS)
+INSTRUMENTS += rituals.INSTRUMENTS
+INSTRUMENT_LIMITS.update(rituals.INSTRUMENT_LIMITS)
+CONVERSIONS.update(rituals.CONVERSIONS)
+# Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
+SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG]
+ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
+
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
 _MASTERED = {"research": f"{MOD}:first_light", "state": "mastered"}
 
@@ -867,6 +879,7 @@ def codex():
         },
         **composition_codex(),
         **invocation_codex(),
+        **rituals.codex(INSTRUMENT_LIMITS["initiate_wand"]),
     }
 
 
@@ -965,9 +978,11 @@ CATEGORIES = {
                     "description": "Writing spells of your own"},
     "invocations": {"name": "Invocations", "icon": f"{MOD}:initiate_wand", "sort": 3,
                     "description": "Spells the Lampwrights wrote down, and how to answer them"},
+    **rituals.CATEGORY,
 }
 
-ENTRY_BACKGROUNDS = {None: "square_gray", "understood": "hexagon_purple", "mastered": "hexagon_gold"}
+ENTRY_BACKGROUNDS = {None: "square_gray", "encountered": "square_gray", "observed": "square_gray",
+                     "understood": "hexagon_purple", "mastered": "hexagon_gold"}
 
 # ------------------------------------------------------------------------------------------------- data generation
 
@@ -1134,15 +1149,22 @@ def book_json():
             "show_recently_unlocked": True}
 
 
-def node_id(state):
-    return rid(f"concordance/first_light_{state}")
+def node_id(state, research="first_light"):
+    return rid(f"concordance/{research}_{state}")
 
 
-def condition_json(state):
-    if state is None:
+def condition_json(condition):
+    """A codex condition: None (always open), a state of First Light, or (research, state) for another entry."""
+    if condition is None:
         return {"type": "modonomicon:none"}
-    return {"type": "modonomicon:research_node_unlocked", "node_id": node_id(state),
-            "tooltip": {"translate": f"book.{MOD}.{BOOK}.locked.{state}"}}
+    research, state = condition if isinstance(condition, tuple) else ("first_light", condition)
+    key = state if research == "first_light" else f"{research}.{state}"
+    return {"type": "modonomicon:research_node_unlocked", "node_id": node_id(state, research),
+            "tooltip": {"translate": f"book.{MOD}.{BOOK}.locked.{key}"}}
+
+
+def condition_state(condition):
+    return condition[1] if isinstance(condition, tuple) else condition
 
 
 def codex_files(lang):
@@ -1186,20 +1208,25 @@ def codex_files(lang):
             "x": info["x"], "y": info["y"], "name": f"{prefix}.name", "description": f"{prefix}.description",
             "icon": info["icon"],
             "background": {"sprite": "modonomicon:modonomicon/themes/default/node/entry_backgrounds/"
-                                     + ENTRY_BACKGROUNDS[info["condition"]], "width": 26, "height": 26},
+                                     + ENTRY_BACKGROUNDS[condition_state(info["condition"])], "width": 26, "height": 26},
             "condition": condition_json(info["condition"]), "pages": pages}
         lang[f"{prefix}.name"] = info["name"]
         lang[f"{prefix}.description"] = info["description"]
-    research = "modonomicon/research/concordance"
-    files[f"{research}/facts.json"] = [{"id": node_id(state)} for state in RESEARCH_STAGES]
-    files[f"{research}/hooks.json"] = [
-        {"id": rid(f"concordance/first_light_{state}_hook"), "trigger_type": "modonomicon:advancement",
-         "trigger_target": rid(research_advancement("first_light", state)), "fact_id": node_id(state)}
-        for state in RESEARCH_STAGES]
-    files[f"{research}/nodes.json"] = [{"id": node_id(state), "required_facts": [node_id(state)]}
-                                       for state in RESEARCH_STAGES]
-    for state in RESEARCH_STAGES:
-        lang[f"research_node.{MOD}.concordance.first_light_{state}"] = f"First Light: {state}"
+    # The research bridge: each state of each entry is a fact, granted by the advancement Java awards for it.
+    folder = "modonomicon/research/concordance"
+    pairs = [(key, state) for key, info in RESEARCH.items() for state in RESEARCH_STAGES if state in info["states"]]
+    files[f"{folder}/facts.json"] = [{"id": node_id(state, key)} for key, state in pairs]
+    files[f"{folder}/hooks.json"] = [
+        {"id": rid(f"concordance/{key}_{state}_hook"), "trigger_type": "modonomicon:advancement",
+         "trigger_target": rid(research_advancement(key, state)), "fact_id": node_id(state, key)}
+        for key, state in pairs]
+    files[f"{folder}/nodes.json"] = [{"id": node_id(state, key), "required_facts": [node_id(state, key)]}
+                                     for key, state in pairs]
+    for key, state in pairs:
+        lang[f"research_node.{MOD}.concordance.{key}_{state}"] = f"{RESEARCH[key]['name']}: {state}"
+    for key, info in RESEARCH.items():
+        for state, text in info.get("locked", {}).items():
+            lang[f"book.{MOD}.{BOOK}.locked.{key}.{state}"] = text
     return files
 
 
@@ -1242,6 +1269,25 @@ def advancements(data, write, lang):
         lang[f"advancements.{MOD}.{key}.title"] = title
         lang[f"advancements.{MOD}.{key}.description"] = description
         parent = key
+    for research, info in RESEARCH.items():
+        if research == "first_light":
+            continue
+        requirement = info["requires"][0]
+        parent = research_advancement(requirement["research"].split(":")[1], requirement["state"])
+        for state in RESEARCH_STAGES:
+            if state not in info["states"]:
+                continue
+            key = research_advancement(research, state)
+            title, description, frame, icon = info["advancements"][state]
+            write(folder / f"{key}.json", {
+                "parent": rid(parent),
+                "display": {"icon": {"id": icon}, "title": {"translate": f"advancements.{MOD}.{key}.title"},
+                            "description": {"translate": f"advancements.{MOD}.{key}.description"}, "frame": frame,
+                            "show_toast": True, "announce_to_chat": frame != "task"},
+                "criteria": {"done": {"trigger": "minecraft:impossible"}}})
+            lang[f"advancements.{MOD}.{key}.title"] = title
+            lang[f"advancements.{MOD}.{key}.description"] = description
+            parent = key
     write(folder / "concordance_first_kindle.json", {
         "parent": rid(research_advancement("first_light", "understood")),
         "display": {"icon": {"id": "minecraft:glowstone_dust"},
@@ -1267,6 +1313,9 @@ SOUND_EVENTS = {
     "concordance.flash": "Flash of movement",
     "concordance.lanternward": "Warding light spreads",
 }
+
+
+SOUND_EVENTS.update(rituals.SOUND_EVENTS)
 
 
 def sounds():
@@ -1298,8 +1347,8 @@ MESSAGES = {
     "lantern.lit": "Lantern lit: %s Radiance",
     "lantern.out": "Lantern put out: %s Radiance",
     "bench.busy": "The bench is already studying",
-    "bench.no_specimen": "Put a luminous specimen in the bench",
-    "bench.not_specimen": "That is not a luminous specimen",
+    "bench.no_specimen": "Put a specimen in the bench",
+    "bench.not_specimen": "The bench cannot study that",
     "bench.nothing_to_learn": "There is nothing more to learn from that specimen",
     "bench.unknown_research": "You have not learned this working yet (the codex says how)",
     "bench.no_lantern": "Put a lantern in the work slot",
@@ -1330,6 +1379,7 @@ MESSAGES = {
     "no_invocations": "You understand no invocation yet: examine luminous specimens in the dark, or study one at a "
                       "Lampwright's Bench",
     "disabled": "The Concordance is switched off on this server",
+    **rituals.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1359,6 +1409,7 @@ TOOLTIPS = {
     "lantern.unlit": "Put out",
     "jade.study": "Studying: %s%%",
     "jade.notes": "Notes waiting for their owner",
+    **rituals.TOOLTIPS,
 }
 
 
@@ -1497,6 +1548,7 @@ def lang_entries(lang):
     lang[f"tag.item.{MOD}.concordance.focus"] = "Focus"
     lang[f"tag.item.{MOD}.concordance.instrument"] = "Concordance instrument"
     lang[f"tag.item.{MOD}.luminous_specimens"] = "Luminous Specimens"
+    lang[f"tag.item.{MOD}.concordance_specimens"] = "Concordance Specimens"
     lang[f"tag.item.{MOD}.concordance_instruments"] = "Concordance Instruments"
     lang[f"config.jade.plugin_{MOD}.lampwright_bench"] = "Lampwright's Bench"
     lang[f"config.jade.plugin_{MOD}.lumen_sconce"] = "Lumen Sconce"
@@ -1533,6 +1585,7 @@ def bench_model():
 
 def write_all(write, assets, data, lang, condition, self_drop):
     lang_entries(lang)
+    rituals.write_all(write, assets, data, lang, condition, self_drop, assets.parents[1] / "resourcepacks")
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -1663,6 +1716,7 @@ def write_data(write, res):
         write(data / path, content)
     for name, clip in player_animations().items():
         write(assets / "player_animations" / f"{name}.json", clip)
+    rituals.write_data(write, data, assets)
     # LambDynamicLights (optional, client): a lit Kindled Lantern glows in hand. Without the mod nothing reads this.
     write(assets / "dynamiclights" / "item" / "kindled_lantern.json",
           {"match": {"items": rid("kindled_lantern"), "components": {rid("lantern_lit"): {}}},
@@ -1673,6 +1727,9 @@ def write_data(write, res):
 def tags(tags):
     for ref in SPECIMENS:
         tags.add("item", SPECIMEN_TAG, ref)
+    for tag in SPECIMEN_TAGS:
+        tags.add("item", ALL_SPECIMENS_TAG, f"#{tag}")
+    rituals.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     tags.add("block", "minecraft:mineable/axe", rid("lampwright_bench"))
@@ -1689,6 +1746,11 @@ def tags(tags):
         tags.add("block", f"{MOD}:concordance/interactable", block)
     for block in HARVESTABLE:
         tags.add("block", f"{MOD}:concordance/harvestable", block)
+
+
+def recipe_stations():
+    """Concordance stations after the bench, for JEI: the Circle Anchor's rituals that make an item."""
+    return [rituals.recipe_station()]
 
 
 def recipe_view():

@@ -22,5 +22,29 @@
     "required_facts": [
       "jugcraft:concordance/first_light_mastered"
     ]
+  },
+  {
+    "id": "jugcraft:concordance/circle_lore_encountered",
+    "required_facts": [
+      "jugcraft:concordance/circle_lore_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/circle_lore_observed",
+    "required_facts": [
+      "jugcraft:concordance/circle_lore_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/circle_lore_understood",
+    "required_facts": [
+      "jugcraft:concordance/circle_lore_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/circle_lore_mastered",
+    "required_facts": [
+      "jugcraft:concordance/circle_lore_mastered"
+    ]
   }
 ]

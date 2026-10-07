@@ -1,9 +1,11 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
+import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -19,6 +21,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.PackType;
@@ -48,8 +51,12 @@ import net.minecraft.world.level.material.PushReaction;
  */
 public final class JugcraftConcordance {
 	public static final String FEATURE = "concordance";
-	/** What can be examined, studied and infused (tools/concordance.py SPECIMENS). */
-	public static final TagKey<Item> SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("luminous_specimens"));
+	/** What can be examined and studied: every research entry's specimens (tools/concordance.py SPECIMEN_TAGS). */
+	public static final TagKey<Item> SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("concordance_specimens"));
+	/** First Light's specimens, which hold their own light (tools/concordance.py SPECIMENS). */
+	public static final TagKey<Item> LUMINOUS = TagKey.create(Registries.ITEM, Jugcraft.id("luminous_specimens"));
+	/** Circle Lore's specimens, made to hold a shape or a bearing (tools/concordance_rituals.py). */
+	public static final TagKey<Item> CIRCLE_SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("circle_specimens"));
 	/** What casts Concordance invocations from the main hand. */
 	public static final TagKey<Item> INSTRUMENTS = TagKey.create(Registries.ITEM, Jugcraft.id("concordance_instruments"));
 
@@ -63,6 +70,8 @@ public final class JugcraftConcordance {
 	public static DataComponentType<Inscription> INSCRIPTION;
 	/** The invocations tuned on an instrument and the modifier each carries (roadmap step 10). */
 	public static DataComponentType<Tunings> TUNINGS;
+	/** The Ley Charge a broken Ley Pylon keeps (roadmap step 12). */
+	public static DataComponentType<Integer> LEY_CHARGE;
 
 	public static Block LUMEN_MOTE;
 	public static Block LAMPWRIGHT_BENCH;
@@ -72,6 +81,13 @@ public final class JugcraftConcordance {
 	public static Block LUMEN_SCONCE;
 	public static BlockEntityType<LampwrightBenchBlockEntity> BENCH_ENTITY;
 	public static BlockEntityType<LumenSconceBlockEntity> SCONCE_ENTITY;
+	/** Roadmap step 12: rituals. */
+	public static Block CIRCLE_ANCHOR;
+	public static Block LEY_PYLON;
+	public static Block WARDING_STONE;
+	public static Item ADEPT_WAND;
+	public static BlockEntityType<CircleAnchorBlockEntity> ANCHOR_ENTITY;
+	public static BlockEntityType<LeyPylonBlockEntity> PYLON_ENTITY;
 	public static ExtendedMenuType<LampwrightBenchMenu, BlockPos> BENCH_MENU;
 
 	/** What a player has learned (saved with them, kept through death, sent only to them). */
@@ -85,6 +101,10 @@ public final class JugcraftConcordance {
 	public static SoundEvent STUDY_COMPLETE_SOUND;
 	public static SoundEvent LANTERN_IGNITE_SOUND;
 	public static SoundEvent LANTERN_SNUFF_SOUND;
+	public static SoundEvent CIRCLE_START_SOUND;
+	public static SoundEvent CIRCLE_STEP_SOUND;
+	public static SoundEvent CIRCLE_COMPLETE_SOUND;
+	public static SoundEvent CIRCLE_BREAK_SOUND;
 
 	private JugcraftConcordance() {
 	}
@@ -100,6 +120,8 @@ public final class JugcraftConcordance {
 				DataComponentType.<Inscription>builder().persistent(Inscription.CODEC).networkSynchronized(Inscription.STREAM_CODEC).build());
 		TUNINGS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("tunings"),
 				DataComponentType.<Tunings>builder().persistent(Tunings.CODEC).networkSynchronized(Tunings.STREAM_CODEC).build());
+		LEY_CHARGE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("ley_charge"),
+				DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 
 		KNOWLEDGE = AttachmentRegistry.<Knowledge>builder().persistent(ConcordanceCodecs.KNOWLEDGE).copyOnDeath()
 				.syncWith(ConcordanceCodecs.KNOWLEDGE_STREAM, AttachmentSyncPredicate.targetOnly())
@@ -114,6 +136,10 @@ public final class JugcraftConcordance {
 		STUDY_COMPLETE_SOUND = sound("concordance.study_complete");
 		LANTERN_IGNITE_SOUND = sound("concordance.lantern_ignite");
 		LANTERN_SNUFF_SOUND = sound("concordance.lantern_snuff");
+		CIRCLE_START_SOUND = sound("concordance.circle_start");
+		CIRCLE_STEP_SOUND = sound("concordance.circle_step");
+		CIRCLE_COMPLETE_SOUND = sound("concordance.circle_complete");
+		CIRCLE_BREAK_SOUND = sound("concordance.circle_break");
 
 		// The Kindled mote is light in the air: nothing to see, hit, break or hold.
 		LUMEN_MOTE = block("lumen_mote", LumenMoteBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
@@ -139,6 +165,25 @@ public final class JugcraftConcordance {
 				FabricBlockEntityTypeBuilder.create(LampwrightBenchBlockEntity::new, LAMPWRIGHT_BENCH).build());
 		SCONCE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("lumen_sconce"),
 				FabricBlockEntityTypeBuilder.create(LumenSconceBlockEntity::new, LUMEN_SCONCE).build());
+		// Roadmap step 12: the anchor rituals are worked at, the pylons that feed them and the stones that contain them.
+		CIRCLE_ANCHOR = block("circle_anchor", CircleAnchorBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+				.strength(3.0F, 6.0F).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion().pushReaction(PushReaction.BLOCK)
+				.lightLevel(state -> 4));
+		Item anchor = item("circle_anchor", properties -> new BlockItem(CIRCLE_ANCHOR, properties), new Item.Properties().useBlockDescriptionPrefix());
+		LEY_PYLON = block("ley_pylon", LeyPylonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE)
+				.strength(2.5F, 6.0F).sound(SoundType.COPPER).requiresCorrectToolForDrops().noOcclusion().pushReaction(PushReaction.BLOCK)
+				.lightLevel(state -> state.getValue(LeyPylonBlock.CHARGED) ? 7 : 0));
+		Item pylon = item("ley_pylon", properties -> new BlockItem(LEY_PYLON, properties), new Item.Properties().useBlockDescriptionPrefix());
+		WARDING_STONE = block("warding_stone", WardingStoneBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+				.strength(2.0F, 6.0F).sound(SoundType.STONE).requiresCorrectToolForDrops().pushReaction(PushReaction.BLOCK));
+		Item stone = item("warding_stone", properties -> new BlockItem(WARDING_STONE, properties), new Item.Properties().useBlockDescriptionPrefix());
+		ADEPT_WAND = item("adept_wand", InitiateWandItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+		ANCHOR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("circle_anchor"),
+				FabricBlockEntityTypeBuilder.create(CircleAnchorBlockEntity::new, CIRCLE_ANCHOR).build());
+		PYLON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ley_pylon"),
+				FabricBlockEntityTypeBuilder.create(LeyPylonBlockEntity::new, LEY_PYLON).build());
+		// A pylon takes electricity through Jugcraft's one energy interface; it never gives any back.
+		EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy, PYLON_ENTITY);
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 
@@ -152,6 +197,7 @@ public final class JugcraftConcordance {
 		ConcordanceSpells.register();
 		Invocations.register();
 		ComposedSpells.register();
+		Rituals.register();
 		ConcordanceCommand.register();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
@@ -161,10 +207,14 @@ public final class JugcraftConcordance {
 			KindledLanternItem.set(full, KindledLanternItem.CAPACITY, 0L, false);
 			output.accept(full);
 			output.accept(RESEARCH_NOTES_ITEM);
+			output.accept(ADEPT_WAND);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(bench);
 			output.accept(sconce);
+			output.accept(anchor);
+			output.accept(pylon);
+			output.accept(stone);
 		});
 	}
 

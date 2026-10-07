@@ -13,18 +13,20 @@ import org.jspecify.annotations.Nullable;
  * <li>{@code examine:<item>} holds the lowest light the specimen was examined at;</li>
  * <li>{@code study:<station>:<item>} records a finished study;</li>
  * <li>{@code invoke:<invocation>:<chunk>} records an invocation that took effect in a chunk;</li>
- * <li>{@code notes:<author>} records another player's notes read (one key per author, whatever they wrote).</li>
+ * <li>{@code notes:<author>} records another player's notes read (one key per author, whatever they wrote);</li>
+ * <li>{@code practice:<activity>:<key>} records a practice completed (a ritual in a chunk, a distinct mixture).</li>
  * </ul>
  * Notes may stand for states up to understood only ({@link RulesParser} refuses them for mastered): reading can teach
  * what to do, but a player masters an entry only by their own practice.
  */
 public record EvidenceRule(Kind kind, Specimens specimens, @Nullable Integer maxLight, int distinct, @Nullable String station,
-		@Nullable String invocation) {
+		@Nullable String invocation, @Nullable String activity) {
 	public enum Kind {
 		EXAMINE("examine"),
 		STUDY("study"),
 		INVOKE("invoke"),
-		NOTES("notes");
+		NOTES("notes"),
+		PRACTICE("practice");
 
 		public final String id;
 
@@ -72,6 +74,8 @@ public record EvidenceRule(Kind kind, Specimens specimens, @Nullable Integer max
 			case Evidence.ReadNotes notes when kind == Kind.NOTES && notes.research().equals(research)
 					&& notes.state().atLeast(ruleState) && ruleState != ResearchState.MASTERED ->
 					Map.entry("notes:" + notes.author(), 0L);
+			case Evidence.Practiced practiced when kind == Kind.PRACTICE && practiced.activity().equals(activity) ->
+					Map.entry("practice:" + practiced.activity() + ":" + practiced.key(), 0L);
 			default -> null;
 		};
 	}
@@ -104,6 +108,7 @@ public record EvidenceRule(Kind kind, Specimens specimens, @Nullable Integer max
 			}
 			case INVOKE -> key.startsWith("invoke:" + invocation + ":");
 			case NOTES -> key.startsWith("notes:");
+			case PRACTICE -> key.startsWith("practice:" + activity + ":");
 		};
 	}
 }

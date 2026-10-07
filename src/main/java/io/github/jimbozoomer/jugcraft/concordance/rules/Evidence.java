@@ -25,4 +25,12 @@ public sealed interface Evidence {
 	 */
 	record ReadNotes(String research, String author, ResearchState state) implements Evidence {
 	}
+
+	/**
+	 * A practice carried through to its end: a ritual completed ({@code activity} {@code jugcraft:ritual}, {@code key}
+	 * the packed chunk it stood in) or a mixture bottled ({@code jugcraft:alchemy}, {@code key} the effects it carried).
+	 * Distinct keys count once each, so mastery comes from varied practice, not repetition.
+	 */
+	record Practiced(String activity, String key) implements Evidence {
+	}
 }

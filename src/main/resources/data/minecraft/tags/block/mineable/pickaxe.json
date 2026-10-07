@@ -403,6 +403,9 @@
     "jugcraft:tin_deposit",
     "jugcraft:glass_tank",
     "jugcraft:tank_gauge",
+    "jugcraft:circle_anchor",
+    "jugcraft:ley_pylon",
+    "jugcraft:warding_stone",
     "jugcraft:lumen_sconce"
   ]
 }

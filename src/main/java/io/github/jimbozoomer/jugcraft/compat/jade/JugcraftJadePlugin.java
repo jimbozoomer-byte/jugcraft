@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.compat.jade;
 
+import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlockEntity;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity;
 import net.fabricmc.loader.api.FabricLoader;
@@ -15,6 +17,8 @@ public final class JugcraftJadePlugin implements IWailaPlugin {
 		registration.registerBlockDataProvider(MachineDataProvider.INSTANCE, MachineBlockEntity.class);
 		registration.registerBlockDataProvider(ConcordanceDataProvider.BENCH, LampwrightBenchBlockEntity.class);
 		registration.registerBlockDataProvider(ConcordanceDataProvider.SCONCE, LumenSconceBlockEntity.class);
+		registration.registerBlockDataProvider(ConcordanceDataProvider.ANCHOR, CircleAnchorBlockEntity.class);
+		registration.registerBlockDataProvider(ConcordanceDataProvider.PYLON, LeyPylonBlockEntity.class);
 	}
 
 	@Override

@@ -14,6 +14,8 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Stacking;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceType;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualDefinition;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -97,8 +99,8 @@ public final class RulesParser {
 						throw new Invalid("unlocks names state \"" + entry.getKey() + "\", which this entry does not have");
 					}
 					JsonObject block = object(entry.getValue(), "unlocks." + entry.getKey());
-					only(block, "invocations", "workings");
-					unlocks.put(state, new Definitions.Unlocks(ids(block, "invocations"), ids(block, "workings")));
+					only(block, "invocations", "workings", "rituals");
+					unlocks.put(state, new Definitions.Unlocks(ids(block, "invocations"), ids(block, "workings"), ids(block, "rituals")));
 				}
 			}
 			return new Definitions.Research(id, schema, name(object, "principle"), name(object, "tradition"),
@@ -116,17 +118,17 @@ public final class RulesParser {
 			case "examine" -> {
 				only(object, "type", "specimens", "max_light", "distinct");
 				return new EvidenceRule(EvidenceRule.Kind.EXAMINE, specimens(object), optionalInt(object, "max_light", 0, 15),
-						positive(object, "distinct", 1), null, null);
+						positive(object, "distinct", 1), null, null, null);
 			}
 			case "study" -> {
 				only(object, "type", "specimens", "station", "distinct");
 				return new EvidenceRule(EvidenceRule.Kind.STUDY, specimens(object), null, positive(object, "distinct", 1),
-						id(object, "station"), null);
+						id(object, "station"), null, null);
 			}
 			case "invoke" -> {
 				only(object, "type", "invocation", "distinct_chunks");
 				return new EvidenceRule(EvidenceRule.Kind.INVOKE, EvidenceRule.Specimens.NONE, null,
-						positive(object, "distinct_chunks", 1), null, id(object, "invocation"));
+						positive(object, "distinct_chunks", 1), null, id(object, "invocation"), null);
 			}
 			case "notes" -> {
 				only(object, "type", "distinct");
@@ -135,7 +137,12 @@ public final class RulesParser {
 					throw new Invalid("state mastered: notes cannot stand for mastery");
 				}
 				return new EvidenceRule(EvidenceRule.Kind.NOTES, EvidenceRule.Specimens.NONE, null, positive(object, "distinct", 1),
-						null, null);
+						null, null, null);
+			}
+			case "practice" -> {
+				only(object, "type", "activity", "distinct");
+				return new EvidenceRule(EvidenceRule.Kind.PRACTICE, EvidenceRule.Specimens.NONE, null, positive(object, "distinct", 1),
+						null, null, id(object, "activity"));
 			}
 			default -> throw new Invalid("state " + state.id() + ": unknown evidence type \"" + type + "\"");
 		}
@@ -379,6 +386,144 @@ public final class RulesParser {
 					range(object, "branches", 0, Grammar.MAX_BRANCHES), range(object, "duration", 0, Grammar.MAX_DURATION));
 		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
 			problems.add("instrument " + id + ": " + problem.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * A ritual structure: {@code {"schema": 1, "anchor": "jugcraft:circle_anchor", "parts": [{"role": "channel",
+	 * "block": "jugcraft:ley_pylon", "at": [[2, 0, 0], ...]}, {"role": "clearance", "at": [[0, 1, 0]]}]}}. A part's
+	 * block is an id or a {@code #tag}; a clearance names none.
+	 */
+	public @Nullable StructurePattern structure(String id, JsonElement json) {
+		try {
+			JsonObject object = object(json, "structure");
+			only(object, "schema", "anchor", "parts");
+			schema(object);
+			List<StructurePattern.Part> parts = new ArrayList<>();
+			for (JsonElement element : array(object, "parts")) {
+				JsonObject group = object(element, "parts[]");
+				String roleName = string(group, "role");
+				StructurePattern.Role role = StructurePattern.Role.fromId(roleName);
+				if (role == null) {
+					throw new Invalid("unknown role \"" + roleName + "\" (channel, boundary, clearance)");
+				}
+				String block = null;
+				if (role == StructurePattern.Role.CLEARANCE) {
+					only(group, "role", "at");
+				} else {
+					only(group, "role", "block", "at");
+					block = string(group, "block");
+					checkId(block.startsWith("#") ? block.substring(1) : block, "block");
+				}
+				JsonArray at = array(group, "at");
+				if (at.isEmpty()) {
+					throw new Invalid("a " + role.id + " group lists no positions");
+				}
+				for (JsonElement position : at) {
+					if (!position.isJsonArray() || position.getAsJsonArray().size() != 3) {
+						throw new Invalid("\"at\" must list [x, y, z] offsets");
+					}
+					JsonArray xyz = position.getAsJsonArray();
+					int reach = StructurePattern.MAX_REACH;
+					parts.add(new StructurePattern.Part(role, new StructurePattern.Offset(intValue(xyz.get(0), "at", -reach, reach),
+							intValue(xyz.get(1), "at", -reach, reach), intValue(xyz.get(2), "at", -reach, reach)), block));
+				}
+			}
+			return new StructurePattern(id, id(object, "anchor"), parts);
+		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
+			problems.add("structure " + id + ": " + problem.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * A ritual: {@code {"schema": 1, "structure": ..., "research": ..., "stage": "understood", "participants": 1,
+	 * "focus": 6, "steps": 5, "ley": 2, "conditions": {"max_light": 7}, "offerings": [{"item": ..., "count": 1}],
+	 * "result": {...}, "backlash": 4}}. The result is {@code {"transform": {"from": <an offered item>, "into": <item>}}}
+	 * or {@code {"effects": [{"target": "participants", "radius": 8, "targets": 4, "operation": {...}}]}}, where the
+	 * operation is written as in a component and may not scale with Spell Power (a ritual has no caster's power).
+	 */
+	public @Nullable RitualDefinition ritual(String id, JsonElement json) {
+		try {
+			JsonObject object = object(json, "ritual");
+			only(object, "schema", "structure", "research", "stage", "participants", "focus", "steps", "ley", "conditions",
+					"offerings", "result", "backlash");
+			int schema = schema(object);
+			Integer maxLight = null;
+			if (object.has("conditions")) {
+				JsonObject conditions = object(member(object, "conditions"), "conditions");
+				only(conditions, "max_light");
+				maxLight = optionalInt(conditions, "max_light", 0, 15);
+			}
+			List<RitualDefinition.Offering> offerings = new ArrayList<>();
+			for (JsonElement element : array(object, "offerings")) {
+				JsonObject offering = object(element, "offerings[]");
+				only(offering, "item", "count");
+				String item = string(offering, "item");
+				boolean tag = item.startsWith("#");
+				String bare = tag ? item.substring(1) : item;
+				checkId(bare, "item");
+				for (RitualDefinition.Offering other : offerings) {
+					if (other.item().equals(bare) && other.tag() == tag) {
+						throw new Invalid("offers " + item + " twice");
+					}
+				}
+				offerings.add(new RitualDefinition.Offering(bare, tag, range(offering, "count", 1, RitualDefinition.MAX_COUNT)));
+			}
+			if (offerings.isEmpty() || offerings.size() > RitualDefinition.MAX_OFFERINGS) {
+				throw new Invalid("\"offerings\" must list 1 to " + RitualDefinition.MAX_OFFERINGS + " items");
+			}
+			JsonObject result = object(member(object, "result"), "result");
+			RitualDefinition.Result outcome;
+			if (result.has("transform")) {
+				only(result, "transform");
+				JsonObject transform = object(member(result, "transform"), "result.transform");
+				only(transform, "from", "into");
+				String from = id(transform, "from");
+				if (offerings.stream().noneMatch(offering -> !offering.tag() && offering.item().equals(from) && offering.count() == 1)) {
+					throw new Invalid("result.transform: \"from\" must be an item offered once");
+				}
+				outcome = new RitualDefinition.Transform(from, id(transform, "into"));
+			} else {
+				only(result, "effects");
+				List<RitualDefinition.Grant> grants = new ArrayList<>();
+				for (JsonElement element : array(result, "effects")) {
+					JsonObject grant = object(element, "result.effects[]");
+					String targetName = string(grant, "target");
+					RitualDefinition.Target target = RitualDefinition.Target.fromId(targetName);
+					if (target == null) {
+						throw new Invalid("result.effects: unknown target \"" + targetName + "\" (participants, creatures)");
+					}
+					boolean creatures = target == RitualDefinition.Target.CREATURES;
+					if (creatures) {
+						only(grant, "target", "radius", "targets", "operation");
+					} else {
+						// Participants are whoever took part, wherever they stand in range: no radius or count to give.
+						only(grant, "target", "operation");
+					}
+					Component.Operation operation = operation(object(member(grant, "operation"), "operation"));
+					if (operation.scaling() > 0.0) {
+						throw new Invalid("result.effects: a ritual has no caster, so nothing it does scales with Spell Power");
+					}
+					if (operation.effect().kind().on != EffectKind.On.CREATURE) {
+						throw new Invalid("result.effects: a ritual's effects act on creatures, not " + operation.effect().kind().id);
+					}
+					grants.add(new RitualDefinition.Grant(target, creatures ? range(grant, "radius", 1, RitualDefinition.MAX_RADIUS) : 0,
+							creatures ? range(grant, "targets", 1, RitualDefinition.MAX_TARGETS) : RitualDefinition.MAX_PARTICIPANTS,
+							operation.effect(), operation.principle()));
+				}
+				if (grants.isEmpty() || grants.size() > RitualDefinition.MAX_GRANTS) {
+					throw new Invalid("result.effects must list 1 to " + RitualDefinition.MAX_GRANTS + " effects");
+				}
+				outcome = new RitualDefinition.Effects(grants);
+			}
+			return new RitualDefinition(id, schema, id(object, "structure"), id(object, "research"), state(object, "stage"),
+					range(object, "participants", 1, RitualDefinition.MAX_PARTICIPANTS), range(object, "focus", 0, RitualDefinition.MAX_FOCUS),
+					range(object, "steps", 1, RitualDefinition.MAX_STEPS), range(object, "ley", 0, RitualDefinition.MAX_LEY), maxLight,
+					offerings, outcome, range(object, "backlash", 0, RitualDefinition.MAX_BACKLASH));
+		} catch (Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
+			problems.add("ritual " + id + ": " + problem.getMessage());
 			return null;
 		}
 	}

@@ -10,5 +10,17 @@
   },
   {
     "id": "jugcraft:concordance/first_light_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/circle_lore_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/circle_lore_observed"
+  },
+  {
+    "id": "jugcraft:concordance/circle_lore_understood"
+  },
+  {
+    "id": "jugcraft:concordance/circle_lore_mastered"
   }
 ]

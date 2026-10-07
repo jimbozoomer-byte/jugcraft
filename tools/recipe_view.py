@@ -50,4 +50,5 @@ def build():
         fluid_machines.append({"block": f"{MOD}:{block}", "type": petro.FLUID_MACHINES[block]["recipe_type"],
                                "recipes": rows})
     import concordance
-    return {"machines": machines, "fluid_machines": fluid_machines, "concordance": concordance.recipe_view()}
+    return {"machines": machines, "fluid_machines": fluid_machines, "concordance": concordance.recipe_view(),
+            "concordance_stations": concordance.recipe_stations()}

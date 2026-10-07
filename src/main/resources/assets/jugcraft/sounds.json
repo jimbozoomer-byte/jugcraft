@@ -235,5 +235,41 @@
         "attenuation_distance": 16
       }
     ]
+  },
+  "concordance.circle_start": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_start",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_start",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.circle_step": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_step",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_step",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.circle_complete": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_complete",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_complete",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.circle_break": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_break",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_break",
+        "attenuation_distance": 16
+      }
+    ]
   }
 }

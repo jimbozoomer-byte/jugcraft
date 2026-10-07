@@ -30,16 +30,21 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.IdentifierArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
  * {@code /jugcraft concordance}: anyone can see their own research ({@code status}), compose spells for the
  * instrument in their main hand ({@code compose check|inscribe <spell>}, {@code compose show}, {@code compose clear}):
  * the composer every player has, which explains what a spell does and costs or exactly why it cannot work, and tune
- * the invocations they know on that instrument ({@code tune}, {@code tune <invocation> <modifier>|clear}). Operators
+ * the invocations they know on that instrument ({@code tune}, {@code tune <invocation> <modifier>|clear}), and read
+ * the circle round a Circle Anchor ({@code circle <pos>}). Operators
  * (permission level 2) can see anyone's research, list the problems found in the loaded rules ({@code diagnose}), and
  * for testing and support set a research state ({@code grant}), forget a player's research ({@code reset}) or set their
  * Focus ({@code focus}).
@@ -47,6 +52,8 @@ import org.jspecify.annotations.Nullable;
 public final class ConcordanceCommand {
 	/** The most often a player may check or inscribe a composition. Keep equal to COMPOSE_RATE_TICKS in tools/concordance.py. */
 	public static final int COMPOSE_RATE_TICKS = 20;
+	/** How near an anchor a player must be to read its circle with {@code circle}. */
+	public static final int CIRCLE_READ_RANGE = 16;
 
 	private ConcordanceCommand() {
 	}
@@ -80,6 +87,8 @@ public final class ConcordanceCommand {
 										.suggests(ConcordanceCommand::suggestTunings)
 										.executes(context -> tune(context.getSource(), IdentifierArgument.getId(context, "invocation").toString(),
 												IdentifierArgument.getId(context, "modifier").toString())))))
+				.then(Commands.literal("circle").then(Commands.argument("pos", BlockPosArgument.blockPos())
+						.executes(context -> circle(context.getSource(), BlockPosArgument.getLoadedBlockPos(context, "pos")))))
 				.then(Commands.literal("diagnose").requires(ConcordanceCommand::isOperator)
 						.executes(context -> diagnose(context.getSource())))
 				.then(Commands.literal("grant").requires(ConcordanceCommand::isOperator)
@@ -377,12 +386,31 @@ public final class ConcordanceCommand {
 		return word.buildFuture();
 	}
 
+	/**
+	 * The whole report on the circle round an anchor: its phase and every fault, with positions. Anyone may read a
+	 * circle within {@value #CIRCLE_READ_RANGE} blocks; operators, any loaded one.
+	 */
+	private static int circle(CommandSourceStack source, BlockPos pos) throws CommandSyntaxException {
+		ServerPlayer player = source.getPlayerOrException();
+		ServerLevel level = source.getLevel();
+		if (!(level.getBlockEntity(pos) instanceof CircleAnchorBlockEntity anchor)) {
+			source.sendFailure(Component.translatable("message.jugcraft.concordance.circle.not_anchor"));
+			return 0;
+		}
+		if (!isOperator(source) && player.distanceToSqr(Vec3.atCenterOf(pos)) > (double) CIRCLE_READ_RANGE * CIRCLE_READ_RANGE) {
+			source.sendFailure(Component.translatable("message.jugcraft.concordance.circle.too_far"));
+			return 0;
+		}
+		anchor.status(player, level);
+		return 1;
+	}
+
 	private static int diagnose(CommandSourceStack source) {
 		ConcordanceRules rules = ConcordanceData.rules();
 		source.sendSuccess(() -> Component.literal(String.format(Locale.ROOT,
-				"Concordance rules: %d research, %d invocations, %d workings, %d conversions; entry points %s",
+				"Concordance rules: %d research, %d invocations, %d workings, %d conversions, %d structures, %d rituals; entry points %s",
 				rules.research().size(), rules.invocations().size(), rules.workings().size(),
-				rules.conversions().conversions().size(), rules.entryPoints())), false);
+				rules.conversions().conversions().size(), rules.structures().size(), rules.rituals().size(), rules.entryPoints())), false);
 		List<String> problems = rules.problems();
 		if (problems.isEmpty()) {
 			source.sendSuccess(() -> Component.literal("No problems"), false);

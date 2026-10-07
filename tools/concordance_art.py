@@ -732,11 +732,13 @@ SPELLS = {"kindle": kindle_icon, "composed": composed_icon, "aegis": aegis_icon,
 
 
 def textures():
-    """Every texture as {(kind, name): image}, in a fixed order."""
+    """Every texture as {(kind, name): image}, in a fixed order (roadmap step 12's from concordance_ritual_art)."""
+    import concordance_ritual_art
     out = {}
     for kind, table in (("item", ITEMS), ("block", BLOCKS), ("spell", SPELLS)):
         for name, draw in table.items():
             out[(kind, name)] = draw()
+    out.update(concordance_ritual_art.textures())
     return out
 
 

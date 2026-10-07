@@ -74,6 +74,8 @@ public class JugcraftJeiPlugin implements IModPlugin {
 	private List<Machine> machines;
 	private List<FluidMachine> fluidMachines = new ArrayList<>();
 	private @Nullable Bench bench;
+	/** Other Concordance stations shown like the bench (recipe_view.json "concordance_stations": the Circle Anchor). */
+	private List<Bench> stations = new ArrayList<>();
 	/** JEI's fluid amount for one bucket on this platform (81,000 droplets on Fabric). */
 	private static long bucketVolume = 1000;
 
@@ -105,6 +107,10 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		if (bench != null) {
 			registration.addRecipeCategories(new BenchCategory(gui, bench));
 		}
+		stations = loadStations();
+		for (Bench station : stations) {
+			registration.addRecipeCategories(new BenchCategory(gui, station));
+		}
 	}
 
 	@Override
@@ -118,6 +124,9 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		if (bench != null) {
 			registration.addRecipes(bench.type(), bench.recipes());
 		}
+		for (Bench station : stations) {
+			registration.addRecipes(station.type(), station.recipes());
+		}
 	}
 
 	@Override
@@ -130,6 +139,9 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		}
 		if (bench != null) {
 			registration.addCraftingStation(bench.type(), bench.block());
+		}
+		for (Bench station : stations) {
+			registration.addCraftingStation(station.type(), station.block());
 		}
 	}
 
@@ -225,6 +237,44 @@ public class JugcraftJeiPlugin implements IModPlugin {
 			Jugcraft.LOGGER.warn("Could not read the Lampwright's Bench workings for JEI", e);
 			return null;
 		}
+	}
+
+	/**
+	 * Further Concordance stations in the bench's format: {"block", "type", "recipes": [{"kind", "in", "out", "value"}]}.
+	 * Rituals that make an item appear here (what to offer and what it makes); research and secrets never do.
+	 */
+	private static List<Bench> loadStations() {
+		Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(DATA);
+		List<Bench> out = new ArrayList<>();
+		if (resource.isEmpty()) {
+			return out;
+		}
+		try (Reader reader = resource.get().openAsReader()) {
+			JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+			if (!root.has("concordance_stations")) {
+				return out;
+			}
+			for (JsonElement stationElement : root.getAsJsonArray("concordance_stations")) {
+				JsonObject station = stationElement.getAsJsonObject();
+				List<BenchRecipe> recipes = new ArrayList<>();
+				for (JsonElement element : station.getAsJsonArray("recipes")) {
+					JsonObject row = element.getAsJsonObject();
+					List<ItemStack> inputs = new ArrayList<>();
+					for (JsonElement input : row.getAsJsonArray("in")) {
+						JsonArray pair = input.getAsJsonArray();
+						inputs.add(new ItemStack(item(pair.get(0).getAsString()), pair.get(1).getAsInt()));
+					}
+					JsonArray result = row.getAsJsonArray("out");
+					recipes.add(new BenchRecipe(row.get("kind").getAsString(), inputs,
+							new ItemStack(item(result.get(0).getAsString()), result.get(1).getAsInt()), row.get("value").getAsInt()));
+				}
+				out.add(new Bench(item(station.get("block").getAsString()),
+						IRecipeType.create(Identifier.parse(station.get("type").getAsString()), BenchRecipe.class), recipes));
+			}
+		} catch (Exception e) {
+			Jugcraft.LOGGER.warn("Could not read the Concordance stations for JEI", e);
+		}
+		return out;
 	}
 
 	private static List<FluidAmount> fluids(JsonArray array) {
@@ -379,12 +429,17 @@ public class JugcraftJeiPlugin implements IModPlugin {
 			for (int i = 0; i < recipe.inputs().size(); i++) {
 				builder.addInputSlot(i * 18, SLOT_Y).setStandardSlotBackground().add(recipe.inputs().get(i));
 			}
-			builder.addOutputSlot(92, SLOT_Y).setOutputSlotBackground().add(recipe.output());
+			builder.addOutputSlot(arrowX(recipe) + 32, SLOT_Y).setOutputSlotBackground().add(recipe.output());
+		}
+
+		/** The arrow follows the inputs: a bench working has two, a ritual up to six offerings. */
+		private static int arrowX(BenchRecipe recipe) {
+			return Math.max(60, recipe.inputs().size() * 18 + 4);
 		}
 
 		@Override
 		public void createRecipeExtras(IRecipeExtrasBuilder builder, BenchRecipe recipe, IFocusGroup focuses) {
-			builder.addAnimatedRecipeArrow(20).setPosition(60, SLOT_Y + 1);
+			builder.addAnimatedRecipeArrow(20).setPosition(arrowX(recipe), SLOT_Y + 1);
 		}
 
 		@Override

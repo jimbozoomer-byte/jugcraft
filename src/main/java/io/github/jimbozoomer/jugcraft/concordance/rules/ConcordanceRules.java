@@ -14,6 +14,8 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ConversionTable;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceType;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualDefinition;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,7 +35,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ConcordanceRules {
 	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
-			Map.of(), List.of());
+			Map.of(), Map.of(), Map.of(), List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
@@ -41,18 +43,23 @@ public final class ConcordanceRules {
 	private final ConversionTable conversions;
 	private final Catalog catalog;
 	private final Map<String, Map<String, Authored>> authored;
+	private final Map<String, StructurePattern> structures;
+	private final Map<String, RitualDefinition> rituals;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
 	private ConcordanceRules(Map<String, Definitions.Research> research, Map<String, Definitions.Invocation> invocations,
 			Map<String, Definitions.Working> workings, ConversionTable conversions, Catalog catalog,
-			Map<String, Map<String, Authored>> authored, List<String> problems) {
+			Map<String, Map<String, Authored>> authored, Map<String, StructurePattern> structures, Map<String, RitualDefinition> rituals,
+			List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
 		this.conversions = conversions;
 		this.catalog = catalog;
 		this.authored = authored;
+		this.structures = structures;
+		this.rituals = rituals;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -79,6 +86,36 @@ public final class ConcordanceRules {
 	/** The composition grammar: components and instruments. */
 	public Catalog catalog() {
 		return catalog;
+	}
+
+	/** Ritual structures, by id. */
+	public Map<String, StructurePattern> structures() {
+		return structures;
+	}
+
+	/** Rituals, by id; each names a loaded structure and research state. */
+	public Map<String, RitualDefinition> rituals() {
+		return rituals;
+	}
+
+	public @Nullable StructurePattern structure(String id) {
+		return structures.get(id);
+	}
+
+	public @Nullable RitualDefinition ritual(String id) {
+		return rituals.get(id);
+	}
+
+	/** The rituals performed at an anchor block (by block id), in id order. */
+	public List<RitualDefinition> ritualsAt(String anchor) {
+		List<RitualDefinition> out = new ArrayList<>();
+		for (RitualDefinition ritual : rituals.values()) {
+			StructurePattern pattern = structures.get(ritual.structure());
+			if (pattern != null && pattern.anchor().equals(anchor)) {
+				out.add(ritual);
+			}
+		}
+		return out;
 	}
 
 	public List<String> problems() {
@@ -128,8 +165,8 @@ public final class ConcordanceRules {
 	}
 
 	/**
-	 * The files under {@code data/<ns>/concordance/}: kind (research, invocation, working, conversion, component or
-	 * instrument), id, content.
+	 * The files under {@code data/<ns>/concordance/}: kind (research, invocation, working, conversion, component,
+	 * instrument, structure or ritual), id, content.
 	 */
 	public record Source(String kind, String id, JsonElement json) {
 	}
@@ -142,6 +179,8 @@ public final class ConcordanceRules {
 		List<Conversion> conversionList = new ArrayList<>();
 		Map<String, Component> components = new TreeMap<>();
 		Map<String, Instrument> instruments = new TreeMap<>();
+		Map<String, StructurePattern> structures = new TreeMap<>();
+		Map<String, RitualDefinition> rituals = new TreeMap<>();
 		List<String> problems = new ArrayList<>();
 		for (Source source : sources) {
 			switch (source.kind()) {
@@ -181,8 +220,20 @@ public final class ConcordanceRules {
 						instruments.put(instrument.id(), instrument);
 					}
 				}
+				case "structure" -> {
+					StructurePattern structure = parser.structure(source.id(), source.json());
+					if (structure != null) {
+						structures.put(structure.id(), structure);
+					}
+				}
+				case "ritual" -> {
+					RitualDefinition ritual = parser.ritual(source.id(), source.json());
+					if (ritual != null) {
+						rituals.put(ritual.id(), ritual);
+					}
+				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
-						+ "\" (expected research, invocation, working, conversion, component or instrument)");
+						+ "\" (expected research, invocation, working, conversion, component, instrument, structure or ritual)");
 			}
 		}
 		problems.addAll(0, parser.problems());
@@ -271,6 +322,24 @@ public final class ConcordanceRules {
 				workings.remove(working.id());
 			}
 		}
+		// A ritual is built around a loaded structure and learnt from a research state like an invocation. One that
+		// draws Ley Charge needs channels to draw it from.
+		for (RitualDefinition ritual : List.copyOf(rituals.values())) {
+			StructurePattern structure = structures.get(ritual.structure());
+			Definitions.Research entry = research.get(ritual.research());
+			String problem = null;
+			if (structure == null) {
+				problem = "is built around structure " + ritual.structure() + ", which does not exist";
+			} else if (entry == null || !entry.states().containsKey(ritual.state())) {
+				problem = "is learnt from " + ritual.research() + " " + ritual.state().id() + ", which does not exist";
+			} else if (ritual.ley() > 0 && structure.channels().isEmpty()) {
+				problem = "draws Ley Charge, but structure " + structure.id() + " has no channels";
+			}
+			if (problem != null) {
+				problems.add("ritual " + ritual.id() + ": " + problem);
+				rituals.remove(ritual.id());
+			}
+		}
 		// Unlock lists and invoke evidence must name things that exist (a typo would silently teach nothing).
 		for (Definitions.Research entry : research.values()) {
 			for (Map.Entry<ResearchState, Definitions.Unlocks> unlock : entry.unlocks().entrySet()) {
@@ -282,6 +351,11 @@ public final class ConcordanceRules {
 				for (String id : unlock.getValue().workings()) {
 					if (!workings.containsKey(id)) {
 						problems.add("research " + entry.id() + ": unlocks unknown working " + id);
+					}
+				}
+				for (String id : unlock.getValue().rituals()) {
+					if (!rituals.containsKey(id)) {
+						problems.add("research " + entry.id() + ": unlocks unknown ritual " + id);
 					}
 				}
 			}
@@ -299,7 +373,8 @@ public final class ConcordanceRules {
 		return new ConcordanceRules(Collections.unmodifiableMap(new LinkedHashMap<>(research)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(invocations)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, catalog,
-				Collections.unmodifiableMap(authored), List.copyOf(problems));
+				Collections.unmodifiableMap(authored), Collections.unmodifiableMap(new LinkedHashMap<>(structures)),
+				Collections.unmodifiableMap(new LinkedHashMap<>(rituals)), List.copyOf(problems));
 	}
 
 	/**

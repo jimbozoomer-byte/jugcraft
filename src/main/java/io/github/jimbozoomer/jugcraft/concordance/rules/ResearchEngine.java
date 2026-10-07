@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.concordance.rules;
 
+import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualDefinition;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -131,6 +132,11 @@ public final class ResearchEngine {
 	public static Knowledge grant(Knowledge knowledge, ConcordanceRules rules, String research, ResearchState state) {
 		Knowledge.Progress progress = knowledge.progress(research);
 		return relearn(knowledge.withProgress(research, new Knowledge.Progress(state, progress.evidence())), rules);
+	}
+
+	/** Whether a player's research lets them take part in a ritual. */
+	public static boolean knowsRitual(Knowledge knowledge, RitualDefinition ritual) {
+		return knowledge.state(ritual.research()).atLeast(ritual.state());
 	}
 
 	/** Whether a player's research lets them run a working. */

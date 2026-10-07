@@ -31,7 +31,7 @@ GENERATED_DIRS = [
     RES / "assets" / "minecraft",
     # The Arcane Concordance (tools/concordance.py): its rules, spells, Spell Engine opt-outs, codex and client clips.
     DATA / MOD / "concordance", DATA / MOD / "spell", DATA / MOD / "spell_assignments", DATA / MOD / "modonomicon",
-    ASSETS / "player_animations", ASSETS / "dynamiclights",
+    ASSETS / "player_animations", ASSETS / "dynamiclights", ASSETS / "geckolib",
 ]
 
 CABLE_ROTATION = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {"y": 270},

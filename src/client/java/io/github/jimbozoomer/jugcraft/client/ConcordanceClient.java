@@ -51,6 +51,7 @@ final class ConcordanceClient {
 		MenuScreens.register(JugcraftConcordance.BENCH_MENU, LampwrightBenchScreen::new);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, Jugcraft.id("concordance_focus"), ConcordanceClient::focusLine);
 		ItemTooltipCallback.EVENT.register(ConcordanceClient::tooltip);
+		CircleClient.register();
 		openSettings = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.concordance_config",
 				InputConstants.UNKNOWN.getValue(), PartyClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -77,8 +78,11 @@ final class ConcordanceClient {
 	}
 
 	private static void tooltip(ItemStack stack, Item.TooltipContext context, TooltipFlag flag, List<Component> lines) {
-		if (stack.is(JugcraftConcordance.SPECIMENS)) {
+		if (stack.is(JugcraftConcordance.LUMINOUS)) {
 			lines.add(Component.translatable("tooltip.jugcraft.concordance.specimen").withStyle(ChatFormatting.DARK_AQUA));
+		}
+		if (stack.is(JugcraftConcordance.CIRCLE_SPECIMENS)) {
+			lines.add(Component.translatable("tooltip.jugcraft.concordance.circle_specimen").withStyle(ChatFormatting.DARK_AQUA));
 		}
 		if (stack.is(JugcraftConcordance.LUMEN_SCONCE.asItem()) && stack.has(JugcraftConcordance.RADIANCE)) {
 			// A sconce item keeps the Radiance it held when it was broken (unlit, so none burns).

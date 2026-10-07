@@ -18,8 +18,8 @@ public final class Definitions {
 	}
 
 	/** What reaching a state makes available. */
-	public record Unlocks(List<String> invocations, List<String> workings) {
-		public static final Unlocks NONE = new Unlocks(List.of(), List.of());
+	public record Unlocks(List<String> invocations, List<String> workings, List<String> rituals) {
+		public static final Unlocks NONE = new Unlocks(List.of(), List.of(), List.of());
 	}
 
 	/**

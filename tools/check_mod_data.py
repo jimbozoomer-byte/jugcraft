@@ -6135,6 +6135,9 @@ def check_concordance(registered):
                 elif kind == "notes":
                     if state == "mastered":
                         err(f"research {key}: notes cannot stand for mastery")
+                elif kind == "practice":
+                    if not re.fullmatch(r"[a-z0-9_.-]+:[a-z0-9_./-]+", rule.get("activity", "")):
+                        err(f"research {key}/{state}: practice needs an activity id")
                 else:
                     err(f"research {key}/{state}: unknown evidence {kind}")
         for requirement in entry.get("requires", []):
@@ -6147,6 +6150,9 @@ def check_concordance(registered):
             for ref in unlocks.get("workings", []):
                 if split(ref)[1] not in workings:
                     err(f"research {key}: unlocks unknown working {ref}")
+            for ref in unlocks.get("rituals", []):
+                if not (DATA / MOD / "concordance" / "ritual" / f"{split(ref)[1]}.json").is_file():
+                    err(f"research {key}: unlocks unknown ritual {ref}")
     if research and not any(not entry.get("requires") for entry in research.values()):
         err("research: no entry can be started without another (no entry path)")
     graph = {key: [split(r["research"])[1] for r in entry.get("requires", [])] for key, entry in research.items()}
@@ -6255,6 +6261,7 @@ def check_concordance(registered):
     check_composition(co, root, lang, registered, research)
     check_invocations(co, root, lang, research)
     check_baselines(root)
+    check_rituals(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -6522,7 +6529,7 @@ def check_baselines(root):
     """Roadmap step 11: the benchmark and the rules it runs are pure Java (the harness and the game test run the same
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
-    for package in ("balance", "compose", "effect", "rules", "resource"):
+    for package in ("balance", "compose", "effect", "rules", "resource", "ritual"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -6537,6 +6544,180 @@ def check_baselines(root):
                 method = line
             if "reducedMotion" in line and "boolean reducedMotion" not in line and "animateTick" not in method:
                 err(f"{path.relative_to(JAVA_ROOT)}: reducedMotion is a display setting; read it only in animateTick")
+
+
+def check_rituals(co, root, lang, registered, research):
+    """Roadmap step 12: the Java lifecycle and limits mirror tools/concordance_rituals.py; every structure and ritual
+    names things that exist, stays within its limits and is reachable (each offering can be crafted or found, each
+    ritual is unlocked by the research that teaches it); every interruption, fault, role and phase has its words; and
+    the anchor's GeckoLib assets, the participants' gesture and the Fusion built-in pack are all there."""
+    ri = co.rituals
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "ritual/RitualMachine.java": {"STEP_TICKS": ri.STEP_TICKS, "GATHER_TICKS": ri.GATHER_TICKS,
+                                      "PARTICIPANT_MARGIN": ri.PARTICIPANT_MARGIN, "PARTICIPANT_HEIGHT": ri.PARTICIPANT_HEIGHT},
+        "CircleAnchorBlockEntity.java": {"SLOTS": ri.ANCHOR_SLOTS, "CACHE_TICKS": ri.REPORT_CACHE_TICKS},
+        "LeyPylonBlockEntity.java": {"CAPACITY": ri.PYLON_CAPACITY, "POUR": ri.PYLON_POUR, "JE_PER_LEY": ri.JE_PER_LEY,
+                                     "JE_RATE": ri.PYLON_JE_RATE},
+        "ritual/StructurePattern.java": ri.STRUCTURE_LIMITS,
+        "ritual/RitualDefinition.java": {k: v for k, v in ri.RITUAL_LIMITS.items() if k != "MAX_OFFERINGS"},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_rituals.py ({value})")
+    if ri.RITUAL_LIMITS["MAX_OFFERINGS"] != ri.ANCHOR_SLOTS:
+        err("concordance_rituals: a ritual offers at most one item per anchor slot")
+    activity = re.search(r'String ACTIVITY = "([^"]+)";', java("CircleAnchorBlockEntity.java"))
+    practised = {rule.get("activity") for entry in research.values() for block in entry.get("states", {}).values()
+                 for rule in block.get("any", []) if rule.get("type") == "practice"}
+    if not activity or activity.group(1) not in practised:
+        err("CircleAnchorBlockEntity.ACTIVITY is not the practice any research learns from")
+    # Words for every interruption, fault, role and phase the Java names.
+    for enum, prefix in (("Interruption", "interrupted"), ("Problem", "fault"), ("Role", "role"), ("Phase", "phase")):
+        source = java("ritual/RitualMachine.java") + java("ritual/StructureValidator.java") + java("ritual/StructurePattern.java")
+        body = re.search(rf"public enum {enum} \{{(.*?)\n\t\}}", source, re.S)
+        ids = re.findall(r'^\t\t[A-Z_]+\("([a-z_]+)"\)', body.group(1) if body else "", re.M)
+        if not ids:
+            err(f"concordance/ritual: no ids found for {enum}")
+        for value in ids:
+            if f"message.{MOD}.concordance.circle.{prefix}.{value}" not in lang:
+                err(f"ritual: missing lang message.{MOD}.concordance.circle.{prefix}.{value}")
+    # Structures.
+    structures = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "structure").glob("*.json")}
+    limits = ri.STRUCTURE_LIMITS
+    for key, entry in structures.items():
+        if split(entry.get("anchor", ":"))[1] not in registered:
+            err(f"structure {key}: anchor {entry.get('anchor')} is not a Jugcraft block")
+        seen, channels = set(), 0
+        for group in entry.get("parts", []):
+            role = group.get("role")
+            if role not in ("channel", "boundary", "clearance"):
+                err(f"structure {key}: unknown role {role}")
+            block = group.get("block")
+            if (role == "clearance") != (block is None):
+                err(f"structure {key}: a clearance names no block, every other part one")
+            if block and (not tag_exists("block", block[1:]) if block.startswith("#") else
+                          split(block)[0] == MOD and split(block)[1] not in registered):
+                err(f"structure {key}: unknown block {block}")
+            for offset in group.get("at", []):
+                reach = max(abs(v) for v in offset)
+                if not 0 < reach <= limits["MAX_REACH"] or tuple(offset) in seen:
+                    err(f"structure {key}: part at {offset} is outside 1..{limits['MAX_REACH']} or repeated")
+                seen.add(tuple(offset))
+                channels += role == "channel"
+        if not 0 < len(seen) <= limits["MAX_PARTS"] or channels > limits["MAX_CHANNELS"]:
+            err(f"structure {key}: {len(seen)} parts and {channels} channels exceed its limits")
+        if f"structure.{MOD}.{key}" not in lang:
+            err(f"structure {key}: missing lang structure.{MOD}.{key}")
+    # Rituals: references, limits, reachability and the research that unlocks them.
+    rituals = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "ritual").glob("*.json")}
+    recipes = {path.stem for path in (DATA / MOD / "recipe").glob("*.json")}
+    made = {split(r["result"]["transform"]["into"])[1] for r in rituals.values() if "transform" in r.get("result", {})}
+    unlocked = {split(ref)[1] for entry in research.values() for block in entry.get("unlocks", {}).values()
+                for ref in block.get("rituals", [])}
+    lim = ri.RITUAL_LIMITS
+    for key, entry in rituals.items():
+        structure = structures.get(split(entry.get("structure", ":"))[1])
+        if structure is None:
+            err(f"ritual {key}: unknown structure {entry.get('structure')}")
+        study = research.get(split(entry.get("research", ":"))[1])
+        if study is None or entry.get("stage") not in study.get("states", {}):
+            err(f"ritual {key}: unknown research or stage")
+        elif key not in {split(r)[1] for r in study.get("unlocks", {}).get(entry["stage"], {}).get("rituals", [])}:
+            err(f"ritual {key}: its research does not list it among what {entry.get('stage')} unlocks")
+        if key not in unlocked:
+            err(f"ritual {key}: no research unlocks it")
+        for field, low, high in (("participants", 1, lim["MAX_PARTICIPANTS"]), ("focus", 0, lim["MAX_FOCUS"]),
+                                 ("steps", 1, lim["MAX_STEPS"]), ("ley", 0, lim["MAX_LEY"]),
+                                 ("backlash", 0, lim["MAX_BACKLASH"])):
+            if not (isinstance(entry.get(field), int) and low <= entry[field] <= high):
+                err(f"ritual {key}: {field} must be {low}..{high}")
+        if entry.get("focus", 0) > co.FOCUS_MAX:
+            err(f"ritual {key}: costs more Focus than a player can hold")
+        if entry.get("ley", 0) > 0 and structure is not None \
+                and not any(g.get("role") == "channel" for g in structure.get("parts", [])):
+            err(f"ritual {key}: draws Ley Charge from a structure with no channels")
+        offerings = entry.get("offerings", [])
+        if not 0 < len(offerings) <= lim["MAX_OFFERINGS"]:
+            err(f"ritual {key}: 1 to {lim['MAX_OFFERINGS']} offerings")
+        for offering in offerings:
+            ref = offering.get("item", "")
+            if ref.startswith("#"):
+                if not tag_exists("item", ref[1:]):
+                    err(f"ritual {key}: unknown item tag {ref}")
+            elif split(ref)[0] == MOD and (split(ref)[1] not in registered
+                                           or split(ref)[1] not in recipes and split(ref)[1] not in made):
+                err(f"ritual {key}: offering {ref} is not a Jugcraft item with a way to make it")
+        result = entry.get("result", {})
+        if "transform" in result:
+            into = result["transform"].get("into", ":")
+            if split(into)[0] == MOD and split(into)[1] not in registered:
+                err(f"ritual {key}: makes unknown item {into}")
+            if not any(o.get("item") == result["transform"].get("from") and o.get("count") == 1 for o in offerings):
+                err(f"ritual {key}: transforms an item that is not offered once")
+        elif not 0 < len(result.get("effects", [])) <= lim["MAX_GRANTS"]:
+            err(f"ritual {key}: needs a transform or 1 to {lim['MAX_GRANTS']} effects")
+        for grant in result.get("effects", []):
+            operation = grant.get("operation", {})
+            if "scaling" in operation:
+                err(f"ritual {key}: a ritual's effects never scale with Spell Power")
+            if co.EFFECT_KINDS.get(operation.get("effect"), {}).get("on") != "creature":
+                err(f"ritual {key}: effect {operation.get('effect')} does not act on creatures")
+        if f"ritual.{MOD}.{key}" not in lang:
+            err(f"ritual {key}: missing lang ritual.{MOD}.{key}")
+    # Ley Charge comes in only through a losing conversion, and nothing turns it back.
+    conversion = load(DATA / MOD / "concordance" / "conversion" / "radiance_to_ley.json") or {}
+    if conversion.get("from", {}).get("resource") != "essence/radiance" or conversion.get("to", {}).get("resource") != "ley_charge" \
+            or conversion.get("to", {}).get("amount", 0) >= conversion.get("from", {}).get("amount", 0):
+        err("conversion radiance_to_ley must turn Radiance into less Ley Charge")
+    if '"jugcraft:radiance_to_ley"' not in java("LeyPylonBlockEntity.java"):
+        err("LeyPylonBlockEntity.java: must pour through the conversion jugcraft:radiance_to_ley")
+    if "EnergyStorage.SIDED.registerForBlockEntity" not in java("JugcraftConcordance.java") \
+            or "LeyPylonBlock extends BaseEntityBlock implements EnergyConnectable" not in java("LeyPylonBlock.java"):
+        err("ley_pylon: must take electricity through the shared energy interface and connect to cables")
+    # The anchor's GeckoLib assets: model, animations named by the Java, UVs inside the sheet.
+    geo = load(ASSETS / "geckolib" / "models" / "block" / "circle_anchor.geo.json") or {}
+    animations = load(ASSETS / "geckolib" / "animations" / "block" / "circle_anchor.animation.json") or {}
+    names = set(animations.get("animations", {}))
+    for name in re.findall(r'thenLoop\("([^"]+)"\)', java("CircleAnchorBlockEntity.java")):
+        if name not in names:
+            err(f"CircleAnchorBlockEntity.java: animation {name} is not in circle_anchor.animation.json")
+    definition = (geo.get("minecraft:geometry") or [{}])[0]
+    width = definition.get("description", {}).get("texture_width", 0)
+    height = definition.get("description", {}).get("texture_height", 0)
+    bones = {bone["name"] for bone in definition.get("bones", [])}
+    for clip in animations.get("animations", {}).values():
+        for bone in clip.get("bones", {}):
+            if bone not in bones:
+                err(f"circle_anchor.animation.json: animates unknown bone {bone}")
+    for bone in definition.get("bones", []):
+        for cube in bone.get("cubes", []):
+            w, h, d = cube["size"]
+            u, v = cube["uv"]
+            if u + 2 * (w + d) > width or v + d + h > height:
+                err(f"circle_anchor.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+    with Image.open(ASSETS / "textures" / "block" / "circle_anchor.png") as sheet:
+        if sheet.size != (width, height):
+            err("textures/block/circle_anchor.png must be the size the geo model declares")
+    if "GeoBlockRenderer" not in java("CircleClient.java", CLIENT_JAVA_ROOT):
+        err("CircleClient.java: the anchor must be drawn by GeckoLib")
+    # The participants' gesture, and the Fusion pack (loaded only with Fusion).
+    if not (ASSETS / "player_animations" / "circle_channel.json").is_file() \
+            or 'Jugcraft.id("circle_channel")' not in java("CircleClient.java", CLIENT_JAVA_ROOT):
+        err("rituals: the circle_channel gesture must exist and be the one CircleClient plays")
+    pack = RES / "resourcepacks" / "fusion_textures"
+    model = load(pack / "assets" / MOD / "models" / "block" / "warding_stone.json") or {}
+    if load(pack / "pack.mcmeta") is None or model.get("loader") != "fusion:model":
+        err("resourcepacks/fusion_textures: needs pack.mcmeta and the Warding Stone's Fusion model")
+    connected = ASSETS / "textures" / "block" / "warding_stone_connected.png"
+    if not connected.is_file() or (load(connected.with_name(connected.name + ".mcmeta")) or {}).get("fusion", {}).get("layout") != "simple":
+        err("textures/block/warding_stone_connected.png needs its Fusion metadata")
+    if 'isModLoaded("fusion")' not in java("CircleClient.java", CLIENT_JAVA_ROOT):
+        err("CircleClient.java: register the Fusion pack only when Fusion is installed (it is optional)")
 
 
 def KINDLE_MOTE_STEPS_FIT(co):
