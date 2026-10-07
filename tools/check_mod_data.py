@@ -6689,6 +6689,84 @@ def check_model_uvs():
                     err(f"{path.relative_to(ROOT)}: the {side} face reads {list(uv)} outside its see-through texture {texture}; pin its uv")
 
 
+def check_material_sets():
+    """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
+    committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
+    layers its overlay on vanilla's own stone or deepslate through the template, every metal's ramp steps from dark
+    to light, and no two metals (vanilla's iron, gold and copper included) look alike."""
+    import material_icons as mi
+    from generate_textures import COPPER_METAL, GOLD_METAL, IRON_METAL
+    for map_path in sorted(Path(mi.FOLDER).glob("*.txt")):
+        try:
+            mi.load(map_path.stem)
+        except ValueError as exc:
+            err(f"Material sets: {exc}")
+    # The owner's ingot (6 October 2026): its pixels are kept exactly and only recoloured, for every metal. Its 16x12
+    # rows sit in rows 2-13 of the map; edit its colours in material_icons.ingot_palette, never the map.
+    owner_ingot = [
+                    "..........33....",
+                    ".......333553...",
+                    "....3335666653..",
+                    ".33356666666653.",
+                    "3866666666668873",
+                    "3586666668886351",
+                    "3558668886433451",
+                    "3555886433335551",
+                    "345564333355411.",
+                    ".345643344111...",
+                    "..34542111......",
+                    "...3311.........",
+    ]
+    try:
+        ingot = mi.load("ingot")
+        if ingot[2:14] != owner_ingot or any(set(row) != {"."} for row in ingot[:2] + ingot[14:]):
+            err("Material sets: tools/material_icons/ingot.txt must be the owner's ingot exactly; recolour it in "
+                "material_icons.ingot_palette, never redraw it")
+    except ValueError:
+        pass
+    for (kind, name), image in mi.textures().items():
+        path = ASSETS / "textures" / kind / f"{name}.png"
+        if not path.is_file():
+            err(f"Material sets: missing {kind}/{name}.png")
+            continue
+        with Image.open(path) as committed:
+            if committed.convert("RGBA").tobytes() != image.tobytes():
+                err(f"Material sets: {kind}/{name}.png differs from its map; run tools/generate_textures.py")
+    if mi.OVERLAY:
+        template = load(ASSETS / "models" / "block" / f"{mi.TEMPLATE}.json") or {}
+        if template != mi.template():
+            err(f"Material sets: models/block/{mi.TEMPLATE}.json is not the template; run tools/generate_material_data.py")
+        elements = template.get("elements", [])
+        if [(e.get("from"), e.get("to")) for e in elements] != [([0, 0, 0], [16, 16, 16])] * 2:
+            err(f"Material sets: {mi.TEMPLATE} must be the stone cube then the overlay cube, both exactly 0..16 (as vanilla's grass_block)")
+        for element in elements:
+            for face, info in element.get("faces", {}).items():
+                if info.get("uv") != [0, 0, 16, 16] or info.get("cullface") != face:
+                    err(f"Material sets: {mi.TEMPLATE}'s {face} face needs uv [0, 0, 16, 16] and cullface {face}")
+    for block, _ore, rock in mi.ore_blocks():
+        model = load(ASSETS / "models" / "block" / f"{block}.json") or {}
+        expected = mi.block_model(block) or {"parent": "minecraft:block/cube_all", "textures": {"all": f"{MOD}:block/{block}"}}
+        if model != expected:
+            err(f"Material sets: models/block/{block}.json is not the {rock} ore model; run tools/generate_material_data.py")
+        if mi.OVERLAY:
+            with Image.open(ASSETS / "textures" / "block" / f"{block}.png") as overlay:
+                alphas = set(overlay.convert("RGBA").getchannel("A").tobytes())
+            if alphas != {0, 255}:
+                err(f"Material sets: block/{block}.png must be cut out (alpha 0 or 255 only, some of each), not {sorted(alphas)[:4]}")
+    for metal, tones in mi.METAL_RAMPS.items():
+        lumas = [mi.luma(tone) for tone in tones]
+        if any(b <= a for a, b in zip(lumas, lumas[1:])) or lumas[1] - lumas[0] < 30:
+            err(f"Material sets: {metal}'s ramp must step from dark to light, D at least 30 luma above O")
+    vanilla = {"vanilla iron": IRON_METAL, "vanilla gold": GOLD_METAL, "vanilla copper": COPPER_METAL}
+    names = list(mi.METAL_RAMPS)
+    for i, first in enumerate(names):
+        for second, tones in [(n, mi.METAL_RAMPS[n]) for n in names[i + 1:]] + list(vanilla.items()):
+            distance = mi.ramp_distance(mi.METAL_RAMPS[first], tones)
+            if distance < mi.PAIR_FLOOR:
+                err(f"Material sets: {first} and {second} look alike (CIEDE2000 {distance:.1f} over D, M and L, under "
+                    f"{mi.PAIR_FLOOR:g}); move one ramp in tools/material_icons.py")
+
+
 def check_art():
     """The art's geometry and texture rules for every block/item model and quad part (tools/art_check.py; the rules are
     in docs/ART_DIRECTION.md, Rules for everything): no shared or nearly shared face planes, UVs inside their sprites,
@@ -7011,6 +7089,7 @@ def main():
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()
+    check_material_sets()
     check_art()
     check_pixel_hollows()
     check_town()

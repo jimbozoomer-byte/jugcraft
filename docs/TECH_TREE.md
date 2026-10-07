@@ -880,4 +880,5 @@ Full numbers, conversion losses and the loops that were checked: [BALANCE.md](BA
 | Textures | `tools/generate_textures.py` | `python3 tools/generate_textures.py` |
 | Crops, seeds, foods, sickles, wild plants, trellis, Cooking Pot recipes, gourds, cranberries, the chestnut tree and its wood (Agriculture) | `tools/agriculture.py` (plus the matching Java in `agriculture/`) | `python3 tools/generate_material_data.py` |
 | Crop and farm-item textures | `tools/crop_textures.py` and `tools/kitchen_textures.py` (previews: `tools/render_agriculture.py`) | `python3 tools/generate_textures.py` |
+| Material sets: the metals' ingots, nuggets and storage blocks, the ores, raw ores and raw blocks, the bronze and steel tools ([MATERIAL_SETS.md](MATERIAL_SETS.md)) | the maps in `tools/material_icons/*.txt`; ramps and ore models in `tools/material_icons.py` | `python3 tools/generate_textures.py` and `python3 tools/generate_material_data.py` |
 | Verify | — | `python3 tools/check_mod_data.py` and `./gradlew build` |
