@@ -53,6 +53,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -154,6 +155,22 @@ public final class Assaying {
 		return ids;
 	}
 
+	/**
+	 * The components an item has by its nature: those whose default value differs from a plain stick's. Every item carries
+	 * the common defaults (vanilla gives each an empty enchantment list, for one), and those say nothing about it.
+	 */
+	public static Set<String> distinctive(Item item) {
+		DataComponentMap own = item.components();
+		DataComponentMap plain = Items.STICK.components();
+		Set<String> ids = new TreeSet<>();
+		for (DataComponentType<?> type : BuiltInRegistries.DATA_COMPONENT_TYPE) {
+			if (!Objects.equals(own.get(type), plain.get(type))) {
+				ids.add(componentId(type));
+			}
+		}
+		return ids;
+	}
+
 	private static String componentId(DataComponentType<?> type) {
 		Identifier id = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type);
 		return id == null ? "unknown:unknown" : id.toString();
@@ -186,11 +203,7 @@ public final class Assaying {
 					continue;
 				}
 				ItemStack plain = new ItemStack(item.get());
-				Set<String> defaults = new TreeSet<>();
-				for (DataComponentType<?> type : plain.getComponents().keySet()) {
-					defaults.add(componentId(type));
-				}
-				String nature = Eligibility.nature(defaults);
+				String nature = Eligibility.nature(distinctive(item.get()));
 				if (nature != null || plain.is(EXCLUDED)) {
 					found.add("material " + material.item() + ": it may never be catalogued (" + (nature == null ? "excluded" : nature) + ")");
 				}
