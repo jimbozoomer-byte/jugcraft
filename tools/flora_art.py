@@ -161,6 +161,19 @@ def profile(shape, t):
 QUIET = False
 
 
+def quietly(builder):
+    """`builder`, run with QUIET set, so everything it paints is in the clean style (a decorator)."""
+    def run(*args, **kwargs):
+        global QUIET
+        quiet, QUIET = QUIET, True
+        try:
+            return builder(*args, **kwargs)
+        finally:
+            QUIET = quiet
+    run.__name__, run.__doc__ = builder.__name__, builder.__doc__
+    return run
+
+
 def leaf(palette, shape="oval", seed=1, vein=True, wavy=0.0, curl=0.0, light_side=True, rib=None, tip_colour=None):
     """A leaf, petal or tepal standing on its base (bottom row) with its tip at the top: shaded lighter on its left half,
     a midrib down the middle, an optional wavy edge (`wavy`, in texels) and a sideways curl of its tip (`curl`)."""

@@ -1,18 +1,19 @@
-"""Original textures for the piñata party (fall addition 28), painted at 64 by 64 (docs/ART_DIRECTION.md, "High
-resolution"): crepe-paper fringe in tiers, each tier's strips overlapping the one below, in orange, green, black, pink,
-yellow and turquoise, and torn (the fringe ripped away in patches to the papier-mâché beneath); the pumpkin's black-paper
-face and the bat's; a fringe skirt and tassel streamers, cut out between their strips; the bat's scalloped wings, whole
-and torn; the rope; the items; the Blindfold's view (misc/blindfold, 256 by 128, as vanilla's pumpkin blur is drawn) and
-its band as worn (four times the 64 by 32 armour layout).
+"""Original textures for the piñata party (fall addition 28): crepe-paper fringe in tiers in orange, green, black, pink,
+yellow and turquoise, and torn to the papier-mâché beneath; the pumpkin's black-paper face and the bat's; a fringe skirt
+and tassel streamers, cut out between their strips; the bat's scalloped wings, whole and torn; the rope; the items; the
+Blindfold's view (misc/blindfold, 256 by 128, as vanilla's pumpkin blur is drawn) and its band as worn (four times the 64
+by 32 armour layout).
 
-Called from crop_textures.crop_textures(). Every pixel is drawn here by code from a fixed seed (tools/fur_paint.py's
-painter); no other texture is read, traced or recoloured.
+Drawn in vanilla's manner (tools/fair_pixels.py, after the owner's note of 6 October 2026): 16 texels a block, scaled
+up to the 64 by 64 the models were made for, so every file keeps its UVs; the items are 16 by 16 pixel art.
+
+Called from crop_textures.crop_textures(). Every pixel is drawn here by code; no other texture is read, traced or
+recoloured.
 """
-import math
-
 from PIL import Image
 
-from fur_paint import mix, clean_painter as Painter, clean_ramp as ramp
+from fair_pixels import box, px16, sprite
+from fur_paint import mix
 from crop_textures import rgb
 
 N = 64
@@ -33,291 +34,274 @@ WOOD = [rgb("4a2e14"), rgb("7a5028"), rgb("a8743c"), rgb("c89a5c")]
 TIERS = 8
 
 
+# Patches ripped off a torn fringe, (x0, y0, x1, y1), their corners left on.
+TEARS = [(2, 3, 6, 6), (9, 8, 13, 12), (3, 11, 6, 13)]
+# How far each strip of a skirt or tassel hangs, strip by strip.
+SKIRT = [14, 12, 15, 13]
+TASSEL = [15, 13, 16, 14, 12, 15]
+
+
 def fringe(paper, seed, torn=False):
-    """Crepe paper in tiers: each tier a row of strips cut every two or three texels, crinkled across, lit at the top
-    and shaded under the tier above, their ends ragged over the next tier. Torn, patches are ripped off to the tan
-    papier-mâché beneath, with newsprint lines and a few strips hanging loose."""
-    p = Painter(N, N, seed)
-    tier_h = N // TIERS
-    for y in range(N):
-        tier, row = divmod(y, tier_h)
-        for x in range(N):
-            strip = (x + tier * 3) // 3
-            crinkle = 0.05 * math.sin(y * 2.3 + strip * 1.7) + 0.06 * (p.noise(x, y * 3, 3.0) - 0.5)
-            # Lit at a tier's top, shaded at its foot where it tucks under, darker in the cut between strips.
-            f = 0.72 - 0.32 * (row / tier_h) ** 1.4 + crinkle
-            if (x + tier * 3) % 3 == 0:
-                f -= 0.16
-            p.put(x, y, ramp(paper, f))
-        # The ragged ends of the tier above hang over this tier's top.
-    for tier in range(1, TIERS):
-        y0 = tier * tier_h
-        for x in range(N):
-            hang = 1 + int(2.5 * p.noise(x * 2, tier * 11, 2.0))
-            for k in range(hang):
-                p.put(x, y0 + k, ramp(paper, 0.5 - 0.1 * k + 0.05 * math.sin(x)), 0.85)
-            p.put(x, y0 + hang, ramp(paper, 0.12), 0.6)
-    if torn:
-        rng = p.rng
-        for _ in range(5):
-            cx, cy = rng.randint(6, N - 7), rng.randint(6, N - 7)
-            rx, ry = rng.uniform(5, 10), rng.uniform(4, 8)
-            for y in range(int(cy - ry) - 1, int(cy + ry) + 2):
-                for x in range(int(cx - rx) - 1, int(cx + rx) + 2):
-                    d = ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 + 0.35 * (p.noise(x * 3, y * 3, 3.0) - 0.5)
-                    if d <= 1.0:
-                        line = (y % 4 == 0) and (x % 9 not in (0, 1))
-                        p.put(x, y, ramp(NEWSPRINT, (0.35 if line else 0.62) + 0.08 * (p.noise(x, y, 4.0) - 0.5)))
-                    elif d <= 1.25:
-                        p.put(x, y, ramp(paper, 0.95))
-            # A strip or two hanging loose from the tear.
-            for s in range(rng.randint(1, 2)):
-                sx = int(cx + rng.uniform(-rx, rx) * 0.6)
-                for k in range(int(ry + 6)):
-                    p.put(sx, int(cy - ry) + k, ramp(paper, 0.8 - 0.02 * k))
-                    p.put(sx + 1, int(cy - ry) + k, ramp(paper, 0.55 - 0.02 * k))
-    return p.img
+    """Crepe paper in tiers in vanilla's manner (fair_pixels): eight tiers two pixels deep, each lit along its top row,
+    its lower row cut into strips (a darker cut every third pixel, staggered tier by tier). Torn, a few patches are
+    ripped off to the tan papier-mâché beneath, its newsprint lines showing, edged in the paper's pale torn edge."""
+    def paint(p):
+        for y in range(16):
+            tier, row = divmod(y, 2)
+            for x in range(16):
+                cut = row == 1 and (x + tier) % 3 == 0
+                p.put(x, y, paper[1] if cut else paper[3] if row == 0 else paper[2])
+        if torn:
+            for x0, y0, x1, y1 in TEARS:
+                for y in range(y0, y1 + 1):
+                    for x in range(x0, x1 + 1):
+                        if x in (x0, x1) and y in (y0, y1):
+                            continue
+                        edge = x in (x0, x1) or y in (y0, y1)
+                        p.put(x, y, paper[4] if edge else NEWSPRINT[1] if y % 2 == 0 else NEWSPRINT[3])
+    return px16(paint)
 
 
 def edge(paper, seed):
-    """A fringe skirt: a band at the top, then strips hanging down to ragged ends, cut out between them."""
-    p = Painter(N, N, seed)
-    for x in range(N):
-        strip = x // 4
-        gap = x % 4 == 3
-        length = 40 + int(18 * p.noise(strip * 7, 3, 1.5))
-        for y in range(N):
-            if y < 14:
-                p.put(x, y, ramp(paper, 0.7 - 0.2 * y / 14 + 0.04 * math.sin(x * 1.3)))
-            elif not gap and y < length:
-                p.put(x, y, ramp(paper, 0.62 - 0.2 * (y - 14) / 50 + 0.05 * math.sin(y * 0.9 + strip)))
-    return p.img
+    """A fringe skirt: a band along the top, then strips three pixels wide hanging to their ends, cut out between."""
+    def paint(p):
+        for x in range(16):
+            for y in range(4):
+                p.put(x, y, paper[3] if y == 0 else paper[2])
+            if x % 4 == 3:
+                continue
+            length = SKIRT[x // 4]
+            for y in range(4, length):
+                p.put(x, y, paper[3] if x % 4 == 0 else paper[1] if y == length - 1 else paper[2])
+    return px16(paint)
 
 
 def tassel():
-    """Tassel streamers: narrow strips of every colour, rippling down, cut out between them."""
-    p = Painter(N, N, 28010)
+    """Tassel streamers: strips of every colour two pixels wide, hanging to their ends, cut out between them."""
     colours = ["pink", "yellow", "turquoise", "orange", "green", "purple"]
-    for x in range(N):
-        strip = x // 5
-        if x % 5 == 4:
-            continue
-        paper = PAPER[colours[strip % len(colours)]]
-        length = 50 + int(14 * p.noise(strip * 5, 1, 1.5))
-        for y in range(length):
-            wobble = 0.12 * math.sin(y * 0.45 + strip)
-            p.put(x, y, ramp(paper, 0.6 + wobble - 0.15 * (x % 5) / 4))
-    return p.img
+
+    def paint(p):
+        for x in range(16):
+            if x % 3 == 2:
+                continue
+            paper = PAPER[colours[(x // 3) % len(colours)]]
+            for y in range(TASSEL[x // 3]):
+                p.put(x, y, paper[3] if x % 3 == 0 else paper[2])
+    return px16(paint)
+
+
+FACE_PUMPKIN = [
+    "................",
+    "................",
+    "...#........#...",
+    "..###......###..",
+    ".#####....#####.",
+    "................",
+    ".......##.......",
+    "......####......",
+    "................",
+    "................",
+    "..##...##...##..",
+    "..############..",
+    "...##########...",
+    "....###..###....",
+    "................",
+    "................",
+]
 
 
 def face_pumpkin():
-    """The pumpkin's face cut from black paper: triangle eyes, a nose and a jagged grin, each with a lighter cut edge."""
-    p = Painter(N, N, 28011)
-    ink = PAPER["black"]
-
-    def tri(ax, ay, bx, by, cx, cy):
-        for y in range(N):
-            for x in range(N):
-                d1 = (x - bx) * (ay - by) - (ax - bx) * (y - by)
-                d2 = (x - cx) * (by - cy) - (bx - cx) * (y - cy)
-                d3 = (x - ax) * (cy - ay) - (cx - ax) * (y - ay)
-                if (d1 >= 0 and d2 >= 0 and d3 >= 0) or (d1 <= 0 and d2 <= 0 and d3 <= 0):
-                    p.put(x, y, ramp(ink, 0.3 + 0.1 * (p.noise(x, y, 3.0) - 0.5)))
-    tri(8, 22, 24, 22, 16, 8)
-    tri(40, 22, 56, 22, 48, 8)
-    tri(28, 32, 36, 32, 32, 25)
-    for y in range(40, 56):
-        for x in range(8, 57):
-            top = 40 + 4 * abs(math.sin(x * 0.4))
-            bottom = 54 - 4 * abs(math.sin(x * 0.4 + 1.2)) - 3 * ((x - 32) / 24) ** 2 * -1
-            if top <= y <= min(bottom, 56) and abs(x - 32) <= 24 - (y - 40) * 0.6:
-                p.put(x, y, ramp(ink, 0.3))
-    return p.img
+    """The pumpkin's face cut from black paper, in the manner of a carved pumpkin: triangle eyes, a nose and a grin
+    with square teeth, left clear round it so the fringe shows."""
+    return sprite(FACE_PUMPKIN, {"#": PAPER["black"][1]})
 
 
 def face_bat():
-    """The bat's face on black fringe: round yellow eyes with black pupils, a pink nose and two white fangs."""
-    p = Painter(N, N, 28012)
-    img = fringe(PAPER["black"], 28013)
-    p.img.paste(img)
-    p.px = p.img.load()
-    for cx in (20, 44):
-        p.blob(cx, 26, 9, 9, rgb("c89a10"), rgb("fff080"))
-        p.blob(cx + 1, 27, 4, 5, rgb("000000"), rgb("2a2a2a"))
-        p.glint(cx - 2, 23)
-    p.blob(32, 38, 4, 3, rgb("a0305a"), rgb("ff90b8"))
-    for fx in (26, 38):
-        for k in range(8):
-            for w in range(-2 + k // 3, 3 - k // 3):
-                p.put(fx + w, 44 + k, rgb("f4f0e8"))
-    return p.img
+    """The bat's face on black fringe: round yellow eyes with black pupils and a glint, a pink nose, two white fangs."""
+    def paint(p):
+        p.img.paste(fringe(PAPER["black"], 28013).resize((16, 16), Image.NEAREST))
+        for x0 in (3, 10):
+            box(p, x0, 4, x0 + 2, 6, rgb("e8c020"))
+            p.put(x0 + 1, 3, rgb("e8c020"))
+            p.put(x0 + 1, 7, rgb("c89a10"))
+            box(p, x0 + 1, 5, x0 + 1, 6, (0, 0, 0))
+            p.put(x0, 4, (255, 255, 255))
+        box(p, 7, 9, 8, 9, rgb("ff90b8"))
+        for x in (6, 9):
+            box(p, x, 11, x, 12, rgb("f4f0e8"))
+    return px16(paint)
 
 
 def wing(torn=False):
-    """A bat wing of black-purple paper: finger bones fanning from the shoulder (top inner corner), the membrane
-    scalloped between them at its foot, cut out below. Torn, it has rips through it."""
-    p = Painter(N, N, 28014 + (1 if torn else 0))
-    fingers = [(64, 60), (40, 64), (18, 60), (2, 46)]
-    for y in range(N):
-        for x in range(N):
-            # Scalloped bottom edge between the finger tips.
-            u = x / N
-            scallop = 46 + 14 * abs(math.sin(u * math.pi * 3.0))
-            if y > scallop:
-                continue
-            f = 0.45 + 0.12 * (p.noise(x, y, 6.0) - 0.5) + 0.05 * math.sin(y * 1.5 + x * 0.2)
-            p.put(x, y, ramp(PAPER["purple"] if (x + y) % 23 < 2 else PAPER["black"], f + 0.15))
-    for fx, fy in fingers:
-        p.line(N - 2, 2, fx - 1 if fx == 64 else fx, fy - 6, ramp(PAPER["black"], 0.05), width=2.5)
-        p.line(N - 2, 2, fx - 1 if fx == 64 else fx, fy - 6, ramp(PAPER["purple"], 0.75), width=0.8)
-    if torn:
-        rng = p.rng
-        for _ in range(4):
-            cx, cy, r = rng.randint(10, 54), rng.randint(10, 40), rng.uniform(3, 6)
-            for y in range(int(cy - r), int(cy + r) + 1):
-                for x in range(int(cx - r), int(cx + r) + 1):
-                    if (x - cx) ** 2 + (y - cy) ** 2 + 6 * (p.noise(x * 3, y * 3, 2.0) - 0.5) <= r * r and 0 <= x < N and 0 <= y < N:
-                        p.px[x, y] = (0, 0, 0, 0)
-    return p.img
+    """A bat wing of black paper: finger bones in purple fanning from the shoulder (top inner corner), the membrane
+    scalloped between them at its foot, cut out below. Torn, it has holes through it."""
+    fingers = [(15, 0, 0, 10), (15, 0, 5, 13), (15, 0, 11, 14)]
+
+    def paint(p):
+        for y in range(16):
+            for x in range(16):
+                scallop = 12 + (0, 1, 2, 2, 1)[x % 5]
+                if y <= scallop:
+                    p.put(x, y, PAPER["black"][2] if y > 0 else PAPER["black"][3])
+        for x0, y0, x1, y1 in fingers:
+            steps = max(abs(x1 - x0), abs(y1 - y0))
+            for k in range(steps + 1):
+                p.put(round(x0 + (x1 - x0) * k / steps), round(y0 + (y1 - y0) * k / steps), PAPER["purple"][3])
+        if torn:
+            for x0, y0 in ((3, 3), (9, 6), (5, 9)):
+                for x, y in ((x0, y0), (x0 + 1, y0), (x0, y0 + 1), (x0 + 1, y0 + 1), (x0 + 2, y0 + 1)):
+                    p.clear(x, y)
+    return px16(paint)
 
 
 def rope():
-    p = Painter(N, N, 28016)
-    for y in range(N):
-        for x in range(N):
-            twist = math.sin((x + y * 0.8) * 0.4)
-            p.put(x, y, ramp(JUTE, 0.55 + 0.25 * twist + 0.08 * (p.noise(x, y, 3.0) - 0.5)))
-    return p.img
+    """Jute rope: its strands twisting on a slant, three tones."""
+    def paint(p):
+        for y in range(16):
+            for x in range(16):
+                p.put(x, y, JUTE[(3, 2, 1)[((x + y) // 2) % 3]])
+    return px16(paint)
 
 
 # ---------------------------------------------------------------- items
 
 def item_pumpkin():
-    p = Painter(N, N, 28020)
-    p.line(32, 0, 32, 10, ramp(JUTE, 0.6), width=2)
-    for y in range(12, 58):
-        for x in range(6, 58):
-            d = ((x - 32) / 26) ** 2 + ((y - 36) / 22) ** 2
-            if d <= 1:
-                tier = (y // 6) % 2
-                f = 0.65 - 0.2 * d + (0.06 if tier else -0.04) + 0.05 * math.sin(x * 1.1)
-                if abs(x - 32) in (9, 18):
-                    f -= 0.15
-                p.put(x, y, ramp(PAPER["orange"], f))
-    for (ax, ay, bx, by, cx, cy) in ((18, 32, 28, 32, 23, 24), (36, 32, 46, 32, 41, 24)):
-        for y in range(N):
-            for x in range(N):
-                d1 = (x - bx) * (ay - by) - (ax - bx) * (y - by)
-                d2 = (x - cx) * (by - cy) - (bx - cx) * (y - cy)
-                d3 = (x - ax) * (cy - ay) - (cx - ax) * (y - ay)
-                if (d1 >= 0 and d2 >= 0 and d3 >= 0) or (d1 <= 0 and d2 <= 0 and d3 <= 0):
-                    p.put(x, y, PAPER["black"][1])
-    for x in range(20, 45):
-        for y in range(41, 46 - abs(x - 32) // 6):
+    """The Pumpkin Piñata: an orange paper pumpkin in tiers on its rope, its face cut in black."""
+    orange = PAPER["orange"]
+
+    def paint(p):
+        for y in range(3):
+            p.put(7, y, JUTE[2])
+        p.put(7, 3, PAPER["green"][2])
+        p.put(8, 3, PAPER["green"][3])
+        for y in range(4, 15):
+            for x in range(1, 15):
+                dx, dy = (x + 0.5 - 8) / 6.6, (y + 0.5 - 9.5) / 5.6
+                if dx * dx + dy * dy <= 1:
+                    k = 3 if y % 2 == 0 else 2
+                    p.put(x, y, orange[k - 1] if x in (4, 11) else orange[k])
+        for y in range(4, 15):
+            for x in range(1, 15):
+                inside = ((x + 0.5 - 8) / 6.6) ** 2 + ((y + 0.5 - 9.5) / 5.6) ** 2 <= 1
+                near = any(((x + dx + 0.5 - 8) / 6.6) ** 2 + ((y + dy + 0.5 - 9.5) / 5.6) ** 2 > 1
+                           for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+                if inside and near:
+                    p.put(x, y, orange[0])
+        for x, y in ((5, 7), (4, 8), (5, 8), (6, 8), (10, 7), (9, 8), (10, 8), (11, 8),
+                     (4, 11), (5, 11), (6, 11), (7, 11), (8, 11), (9, 11), (10, 11), (11, 11), (5, 12), (7, 12), (8, 12), (10, 12)):
             p.put(x, y, PAPER["black"][1])
-    p.blob(32, 12, 3, 4, PAPER["green"][1], PAPER["green"][3])
-    return p.img
+    return px16(paint)
+
+
+STAR_PINATA = [
+    ".......jj.......",
+    "........j.......",
+    ".......Yy.......",
+    ".......Yy.......",
+    "....dd.YyYy.dd..",
+    "....dD.YYyy.Dd..",
+    "..TT..CCcc..GG..",
+    "..TtTtCccc.gGgG.",
+    "..ttTtcccc.gGgG.",
+    "..tt..cccc..gg..",
+    "....dd.OOoo.dd..",
+    "....dd.OOoo.dd..",
+    ".......Oo.......",
+    ".......Oo.......",
+    ".....T....Y.....",
+    ".....T....Y.....",
+]
 
 
 def item_star():
-    p = Painter(N, N, 28021)
-    p.line(32, 0, 32, 8, ramp(JUTE, 0.6), width=2)
-    colours = ["pink", "yellow", "turquoise", "orange", "pink", "yellow"]
-    c = (32, 32)
-    for i, angle in enumerate((90, 30, -30, -90, -150, 150)):
-        rad = math.radians(angle)
-        for t in range(9, 26):
-            w = 6.5 * (1 - (t - 9) / 17)
-            x, y = c[0] + t * math.cos(rad), c[1] - t * math.sin(rad)
-            p.ellipse(x, y, max(0.8, w), max(0.8, w), ramp(PAPER[colours[i]], 0.75 - 0.2 * (t - 9) / 17))
-    p.blob(32, 32, 10, 10, PAPER["pink"][1], PAPER["pink"][4])
-    for tx in (14, 32, 50):
-        for k in range(10):
-            p.put(tx + (k % 3) - 1, 52 + k // 1 if 52 + k < N else N - 1, ramp(PAPER["turquoise" if tx != 32 else "yellow"], 0.7))
-    return p.img
+    """The Star Piñata: a pink centre with points of yellow, orange, turquoise and green round it and four little
+    purple ones between, streamers hanging below, on its rope."""
+    return sprite(STAR_PINATA, {"j": JUTE[2], "Y": PAPER["yellow"][4], "y": PAPER["yellow"][3], "O": PAPER["orange"][4],
+                                "o": PAPER["orange"][3], "T": PAPER["turquoise"][4], "t": PAPER["turquoise"][3],
+                                "G": PAPER["green"][4], "g": PAPER["green"][3], "C": PAPER["pink"][4], "c": PAPER["pink"][3],
+                                "D": PAPER["purple"][4], "d": PAPER["purple"][3]})
+
+
+BAT_PINATA = [
+    "................",
+    ".......j........",
+    ".......j........",
+    ".....k....k.....",
+    ".....kkkkkk.....",
+    ".....kYkkYk.....",
+    "..w..kkkkkk..w..",
+    ".www.kkkkkk.www.",
+    "wwwwwkkkkkkwwwww",
+    "wwwwwwkkkkwwwwww",
+    "w.w.wwkkkkww.w.w",
+    "......kkkk......",
+    ".......kk.......",
+    "................",
+    "................",
+    "................",
+]
 
 
 def item_bat():
-    p = Painter(N, N, 28022)
-    p.line(32, 0, 32, 12, ramp(JUTE, 0.6), width=2)
-    for y in range(18, 44):
-        for x in range(2, 62):
-            u = abs(x - 32)
-            if u < 9:
-                continue
-            top = 18 + (u - 9) * 0.25
-            bottom = 40 - 6 * abs(math.sin(u * 0.33))
-            if top <= y <= bottom:
-                p.put(x, y, ramp(PAPER["black"], 0.55 + 0.1 * math.sin(x * 0.7)))
-    p.blob(32, 36, 10, 14, PAPER["black"][1], PAPER["black"][4])
-    p.blob(32, 22, 9, 8, PAPER["black"][1], PAPER["black"][4])
-    for ex in (26, 38):
-        p.blob(ex, 12, 3, 5, PAPER["black"][1], PAPER["black"][3])
-        p.blob(ex, 21, 3, 3, rgb("c89a10"), rgb("fff080"))
-    return p.img
+    """The Bat Piñata: a black paper bat, wings spread and scalloped, ears up, yellow eyes, on its rope."""
+    return sprite(BAT_PINATA, {"j": JUTE[2], "k": PAPER["black"][1], "w": PAPER["black"][3], "Y": rgb("f0c428")})
 
 
 def item_stick():
-    """The Piñata Stick: a stick painted in red and white spirals, with a tassel at its grip."""
-    p = Painter(N, N, 28023)
-    for t in range(4, 60):
-        x, y = t, N - t
-        red = (t // 6) % 2 == 0
-        for w in (-2, -1, 0, 1, 2):
-            colour = rgb("c41e1e") if red else rgb("f4f0e8")
-            p.put(x + w, y, mix(colour, (0, 0, 0), 0.25 if w == 2 else 0.0))
-    for k in range(10):
-        p.put(6 + k // 2, 52 + k, ramp(PAPER["yellow"], 0.7))
-        p.put(9 + k // 2, 52 + k, ramp(PAPER["turquoise"], 0.7))
-    return p.img
+    """The Piñata Stick: a stick in red and white bands on a slant, a tassel at its grip."""
+    def paint(p):
+        for k in range(12):
+            colour = rgb("c41e1e") if (k // 2) % 2 == 0 else rgb("f4f0e8")
+            p.put(2 + k, 13 - k, colour)
+            p.put(3 + k, 13 - k, mix(colour, (0, 0, 0), 0.3))
+        for y in range(13, 16):
+            p.put(1, y, PAPER["yellow"][3])
+            p.put(2, y + (1 if y < 15 else 0), PAPER["turquoise"][3])
+    return px16(paint)
 
 
 def item_blindfold():
-    p = Painter(N, N, 28024)
-    for y in range(24, 40):
-        for x in range(4, 60):
-            sag = 3 * math.sin((x - 4) / 56 * math.pi)
-            if 24 + sag <= y <= 36 + sag:
-                p.put(x, y, ramp(CLOTH, 0.55 + 0.15 * ((x + y) % 3 == 0) + 0.05 * math.sin(x)))
-    for k in range(14):
-        p.put(58 - k // 3, 34 + k, ramp(CLOTH, 0.6))
-        p.put(60 - k // 2, 34 + k, ramp(CLOTH, 0.5))
-    return p.img
+    """The Blindfold: a band of black cloth sagging a little, knotted at one end with its two tails hanging."""
+    def paint(p):
+        for x in range(1, 13):
+            sag = 1 if 3 <= x <= 9 else 0
+            p.put(x, 6 + sag, CLOTH[4])
+            p.put(x, 7 + sag, CLOTH[3])
+            p.put(x, 8 + sag, CLOTH[2])
+        box(p, 12, 5, 14, 8, CLOTH[2])
+        p.put(12, 5, CLOTH[4])
+        for k in range(4):
+            p.put(13 - k // 2, 9 + k, CLOTH[3])
+            p.put(14, 9 + k, CLOTH[2])
+    return px16(paint)
 
 
 # ---------------------------------------------------------------- the blindfold, seen and worn
 
 def blindfold_view():
-    """Looking out from under the Blindfold, 256x128: dark woven cloth over everything but a sliver at the bottom."""
-    img = Image.new("RGBA", (256, 128), (0, 0, 0, 0))
-    px = img.load()
-    for y in range(128):
-        for x in range(256):
-            weave = ((x // 2 + y // 2) % 2) * 6
-            alpha = 252 if y < 108 else int(252 - (y - 108) / 20 * 140)
-            px[x, y] = (14 + weave, 14 + weave, 18 + weave, alpha)
-    return img
+    """Looking out from under the Blindfold, 256x128 (drawn at 64 by 32, four texels to a pixel): dark woven cloth, a
+    faint row of weave every fourth pixel, over everything but a sliver at the bottom, which fades in steps."""
+    def paint(p):
+        for y in range(32):
+            alpha = 252 if y < 27 else 252 - (y - 26) * 30
+            for x in range(64):
+                p.put(x, y, (22, 22, 28) if y % 4 == 0 else (14, 14, 18), alpha)
+    return px16(paint, 64, 32, 4)
 
 
 def blindfold_worn():
-    """The Blindfold as worn, at four times vanilla's 64 by 32 armour layout: a band of black cloth round the head at
+    """The Blindfold as worn, on vanilla's 64 by 32 armour layout four times over: a band of black cloth round the head at
     the eyes, knotted at the back with its two ends hanging."""
-    s = 4
-    img = Image.new("RGBA", (64 * s, 32 * s), (0, 0, 0, 0))
-    px = img.load()
-    for y in range(11 * s, 13 * s + s // 2):
-        for x in range(0, 32 * s):
-            shade = 0.5 + 0.2 * (((x // 2 + y // 2) % 3) == 0) - 0.15 * abs(y - 12 * s) / (2 * s)
-            px[x, y] = ramp(CLOTH, shade) + (255,)
-    # The knot on the back of the head and its ends.
-    cx = 28 * s
-    for y in range(10 * s, 16 * s):
-        for x in range(cx - 2 * s, cx + 2 * s):
-            if abs(x - cx) + abs(y - 12.5 * s) * 0.8 <= 2.2 * s:
-                px[x, y] = ramp(CLOTH, 0.7 - 0.2 * abs(x - cx) / (2 * s)) + (255,)
-            elif y > 13 * s and abs(x - cx - (y - 13 * s) * 0.3) < s * 0.6:
-                px[x, y] = ramp(CLOTH, 0.55) + (255,)
-    return img
+    def paint(p):
+        for x in range(32):
+            p.put(x, 11, CLOTH[3])
+            p.put(x, 12, CLOTH[2])
+        box(p, 27, 10, 29, 13, CLOTH[3])
+        p.put(28, 10, CLOTH[4])
+        for k in range(3):
+            p.put(27, 14 + k, CLOTH[2])
+            p.put(29, 14 + k, CLOTH[2])
+    return px16(paint, 64, 32, 4)
 
 
 def pinata_textures():

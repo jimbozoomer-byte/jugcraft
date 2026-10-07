@@ -12,6 +12,7 @@ import random
 
 from PIL import Image
 
+import block_style as bs
 import cute_art as ca
 import decor17_data as d17d
 import decor18_data as d18d
@@ -258,35 +259,29 @@ def cloth(seed=1, tatters=True):
 
 
 def ashes(seed=1, embers=0.0):
-    """Grey wood ash, fine and drifted, with charred flecks and a few embers still glowing."""
+    """Grey wood ash, fine and drifted in soft clumps, with charred flecks on a staggered lattice and (if `embers`) a few
+    embers still glowing among them."""
     def paint(p):
-        rng = random.Random(seed)
+        ground = bs.surface(ASH[2:5], seed, weights=[1, 4, 2], spread=0.7, size=(p.w, p.h))
         for y in range(p.h):
             for x in range(p.w):
-                k = 3 + rng.choice((0, 0, 1, -1, -1))
-                c = shade(ASH, k)
-                r = rng.random()
-                if r < 0.06:
-                    c = shade(CHAR, rng.randrange(4))
-                elif r < 0.06 + embers:
-                    c = shade(EMBER, rng.choice((2, 3, 4)))
+                c = ground(x, y)
+                if x % 7 == 3 and (y + 2 * (x // 7)) % 6 == 1:
+                    c = CHAR[2]
+                elif embers and x % 9 == 5 and (y + 3 * (x // 9)) % 8 == 4:
+                    c = EMBER[3]
                 p.put(x, y, c)
     return paint
 
 
 def charred(seed=1):
-    """A charred stick: black with silver-grey crazing and a red heart where it split."""
+    """A charred stick: black, lit along its top, with grey crazing on a slant and a red heart where it split."""
     def paint(p):
-        rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
-                k = rng.choice((0, 1, 1, 2, 3))
-                c = shade(CHAR, k)
-                if (x * 3 + y) % 5 == 0:
-                    c = shade(ASH, 4)
+                c = CHAR[3] if y == 0 else ASH[2] if (x * 3 + y) % 7 == 0 else CHAR[1]
                 p.put(x, y, c)
-        for _ in range(max(1, p.w * p.h // 30)):
-            p.put(rng.randrange(p.w), rng.randrange(p.h), EMBER[3])
+        p.put(p.w // 3, p.h // 2, EMBER[3])
     return paint
 
 
@@ -537,6 +532,7 @@ def effigy_cloak():
     return sc
 
 
+@fa.quietly
 def effigy_ashes():
     """Effigy Ashes: a low drift of grey ash where he burnt, charred sticks of his frame crossed in it, the stump of his
     post and embers still glowing (they give off a little light of their own)."""
@@ -716,16 +712,14 @@ def hearth_ash_item():
     """Hearth Ash: a soft rounded heap of grey ash, paler on top where it catches the light, with a few dark flecks."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     p = Px(img)
-    rng = random.Random(2024)
     for y in range(6, 15):
         half = 7.2 * math.sqrt((y - 5.5) / 9.0)
         for x in range(16):
             dx = x + 0.5 - 8.0
             if abs(dx) <= half:
                 light = (1.0 - (y - 6) / 9.0) * 2.4 - dx / 7.0
-                k = 2 + int(round(light)) + rng.choice((0, 0, 0, -1))
-                c = shade(ASH, k)
-                if rng.random() < 0.06:
+                c = shade(ASH, 2 + int(round(light)))
+                if (x, y) in ((6, 10), (10, 9), (8, 12), (4, 13), (11, 13)):
                     c = CHAR[1]
                 p.put(x, y, c)
     p.outline(ASH[0])
