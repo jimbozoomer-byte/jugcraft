@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Farmhouse Kitchen (the stove, skillet, cutting board, knives and cabinets)
+- The first slice of the kitchen and cooking expansion, in the owner's own farming and food textures, copied unchanged from their library.
+- **Kitchen Stove:** lit with flint and steel and put out with a shovel. It heats whatever stands on it (a Cooking Pot, a kettle or a Skillet). With nothing on top, its hob cooks six foods at twice a campfire's pace.
+- **Skillet:** fries up to 16 of one food on any heat source.
+- **Cutting Board** and seven **kitchen knives** (flint to netherite): cut meat, fish, cabbage, pumpkins and cakes into parts that are never worth more than the whole. Every knife, the Carving Knife too, also slices pies, cakes and the roast turkey.
+- **Kitchen cabinets** in eleven woods, and sixteen new foods.
+- The ten-slice plan for the expansion is in [docs/branches/AGRICULTURE.md](docs/branches/AGRICULTURE.md#the-kitchen-and-cooking-expansion-planned). Details: [docs/features/farmhouse-kitchen.md](docs/features/farmhouse-kitchen.md).
+
 ### Unmerged: The fall fair in Minecraft's own look
 - The owner found that nothing in the fall fair looked like Minecraft (its eyes, mouths, brass and bulbs). Every fair texture is now drawn at vanilla's density, 16 texels to a block, and scaled up to its file's size, so models and UVs are unchanged.
 - **High Striker:** painted planks, a brass rail and bell lit like a gold block, flat glass lamps, a plain scale with ticks and a pixel-star sign. **Ring Toss:** a plank crate banded in red and white, bottles lit like vanilla glass and a striped ring.

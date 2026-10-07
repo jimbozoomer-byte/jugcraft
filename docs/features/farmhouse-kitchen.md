@@ -78,8 +78,9 @@ Run locally (7 October 2026):
 | Check | Result |
 | --- | --- |
 | `python3 scripts/check_repository.py` | Pass |
-| `python3 tools/check_mod_data.py`: also checks the kitchen's Java numbers, knives and cabinet woods against `tools/kitchen.py`, every cutting recipe file, that no cut outweighs its whole raw or cooked, the knives tag, the kitchen's messages, and that every imported owner texture still matches its source | see the PR |
+| `python3 tools/check_mod_data.py`: also checks the kitchen's Java numbers, knives and cabinet woods against `tools/kitchen.py`, every cutting recipe file, that no cut outweighs its whole raw or cooked, the knives tag, the kitchen's messages, and that every imported owner texture still matches its source | Pass, 1545 IDs |
 | `python3 tools/owner_art.py --check` | Pass: every imported owner texture matches its source |
+| `python3 tools/generate_textures.py`, then `git status` | No drift: the generator rewrites every texture as committed |
 | `./gradlew build`, game tests and client game tests | Not run locally (no Minecraft jar here); run by CI |
 
 The 10 new game tests (`FarmhouseKitchenGameTests`):
@@ -93,6 +94,8 @@ The 10 new game tests (`FarmhouseKitchenGameTests`):
 8. every knife cuts on the board; a hungry cook with a flint knife slices a cake rather than eating it, the Carving Knife slices too, and seven slices take the cake; a golden knife cuts a slice of apple pie;
 9. no meat, fish or cabbage cut outweighs its whole, raw or cooked; those cutting recipes and their furnace, smoker and campfire recipes load, as do the stove's, skillet's, board's, oak cabinet's, knives' and fried egg's; every knife is in `jugcraft:knives`;
 10. every wood's cabinet holds 27, opens as a chest with its doors open and shuts after, and broken drops itself and what is inside.
+
+The client game test (`FarmhouseKitchenClientGameTests`, CI job `client`) builds a kitchen: a counter of cabinets in every wood with cutting boards on it, four stoves (a full hob, a skillet of beef, a Cooking Pot, and one out) and a wall of the knives and foods in item frames. It takes four screenshots.
 
 Not done: play in a real client, a two-client dedicated-server session (two cooks at one stove, board and cabinet), and in-game screenshots.
 
