@@ -99,6 +99,9 @@ jobs:
     env:
       CLASSES: ${{ needs.plan.outputs[format('shard{0}', matrix.shard)] }}
       LIBGL_ALWAYS_SOFTWARE: 'true'
+      # SDL 3 uses EGL for the software OpenGL context; Xvfb's GLX visual selection fails here.
+      # https://wiki.libsdl.org/SDL3/SDL_HINT_VIDEO_FORCE_EGL
+      SDL_VIDEO_FORCE_EGL: '1'
     steps:
       - name: Classes for this job
         run: |
@@ -115,15 +118,13 @@ jobs:
           cache: gradle
       - name: Install Mesa (software rendering)
         if: env.CLASSES != ''
-        run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers libgl1-mesa-dri libglx-mesa0 mesa-utils xvfb
+        run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers libgl1-mesa-dri libglx-mesa0 libegl1 libegl-mesa0 mesa-utils xvfb
       - name: Prepare run directory
         if: env.CLASSES != ''
         run: |
-          # Fabric's client test run directory differs from the ordinary development client.
-          # Sodium/Iris need OpenGL, including for CI's software-rendered test window.
-          mkdir -p run build/run/clientGameTest
+          # Test options are written by runClientGameTest after Loom cleans its run directory.
+          mkdir -p run
           echo "eula=true" > run/eula.txt
-          printf 'preferredGraphicsBackend:"opengl"\nfullscreen:false\nlang:en_us\n' > build/run/clientGameTest/options.txt
       - name: Run client game tests (shard ${{ matrix.shard }} of 3)
         if: env.CLASSES != ''
         run: ./gradlew runClientGameTest --no-daemon "-PclientTests=$CLASSES"

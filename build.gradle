@@ -117,6 +117,17 @@ fabricApi {
 }
 
 // CI chooses and shares out the client game tests (tools/select_client_tests.py, docs/TESTING.md):
+// Loom deletes build/run/clientGameTest before each run, so CI must write these AFTER that dependency.
+// Restrict this to CI: never overwrite a local developer's client settings.
+tasks.named("runClientGameTest") {
+	doFirst {
+		if (System.getenv("CI") == "true") {
+			workingDir.mkdirs()
+			new File(workingDir, "options.txt").text = 'preferredGraphicsBackend:"opengl"\nfullscreen:false\nlang:en_us\n'
+		}
+	}
+}
+
 // -PclientTests=<Class,Class,...> keeps only those classes of the test mod's client test list (simple names), and
 // -PclientTestShard=<n> -PclientTestShards=<count> keeps the classes at positions n, n + count, n + 2 * count ... of
 // it. Without them every class runs. Server game tests are never split.
