@@ -258,6 +258,8 @@ public final class JugcraftConcordance {
 		// Roadmap step 22: sympathetic links, curses and wards; dream expeditions at the Oneiric Censer.
 		io.github.jimbozoomer.jugcraft.concordance.sympathy.Sympathy.register();
 		io.github.jimbozoomer.jugcraft.concordance.dreaming.Dreaming.register();
+		// Roadmap step 23: the Starbound Conclave: renown, ranks, commissions, shared projects and the Conclave Lectern.
+		io.github.jimbozoomer.jugcraft.concordance.starbound.Starbound.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

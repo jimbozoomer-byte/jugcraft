@@ -7549,6 +7549,7 @@ def check_concordance(registered):
     check_relics(co, root, lang, registered, research)
     check_equivalence(co, root, lang, registered, research)
     check_sympathy(co, root, lang, registered, research)
+    check_conclave(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -7817,7 +7818,7 @@ def check_baselines(root):
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
     for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
-                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream"):
+                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream", "conclave"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -9182,6 +9183,164 @@ def check_sympathy(co, root, lang, registered, research):
         with Image.open(texture) as img:
             if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
                 err(f"hexes: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+
+
+def check_conclave(co, root, lang, registered, research):
+    """Roadmap step 23: the Java mirrors tools/concordance_conclave.py (renown, ranks, diminishing returns, obligations and
+    the parser's limits); the commissions and projects on disk are the generator's, each within bounds, asking for
+    practices the Concordance records and traditions the research has; no commission pays in what it asks for; every
+    research requirement names an entry and is met once; every cooperation rule has a solo alternative within a week; a
+    solo player can reach every rank without teaching (the acceptance condition); the Conclave reuses Jugcraft's parties
+    and UseMode and adds no currency; every reason and message has its text; the lectern's model, texture and icon
+    agree."""
+    cc = co.conclave
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    conclave = java("conclave/Conclave.java")
+    if f"long WEEK = {cc.WEEK:_}L;" not in conclave or "long OBLIGATION_TICKS = WEEK;" not in conclave:
+        err("conclave/Conclave.java: WEEK or OBLIGATION_TICKS differs from tools/concordance_conclave.py")
+    for const in ("TEACHING_RENOWN", "TEACHING_PER_LEARNER", "TRADITION_RENOWN"):
+        if not re.search(rf"\bint {const} = {getattr(cc, const)};", conclave):
+            err(f"conclave/Conclave.java: {const} differs from tools/concordance_conclave.py")
+    renown = re.search(r"RESEARCH_RENOWN = Map\.of\(([^)]*)\)", conclave)
+    found = {key: int(value) for key, value in re.findall(r'"([a-z]+)", (\d+)', renown.group(1))} if renown else {}
+    if found != cc.RESEARCH_RENOWN:
+        err("conclave/Conclave.java: RESEARCH_RENOWN differs from tools/concordance_conclave.py")
+    diminishing = re.search(r"DIMINISHING = List\.of\(([^)]*)\)", conclave)
+    if not diminishing or [int(n) for n in re.findall(r"\d+", diminishing.group(1))] != cc.DIMINISHING:
+        err("conclave/Conclave.java: DIMINISHING differs from tools/concordance_conclave.py")
+    ranks = re.findall(r'^\t[A-Z]+\("([a-z]+)", (\d+), (\d+), (\d+), (\d+), (true|false)\)', java("conclave/Rank.java"), re.M)
+    if [(r[0], int(r[1]), int(r[2]), int(r[3]), int(r[4]), r[5] == "true") for r in ranks] != cc.RANKS:
+        err("conclave/Rank.java: the ranks differ from tools/concordance_conclave.py RANKS (same order)")
+    parser = java("conclave/ConclaveParser.java")
+    for const in ("MAX_TIER", "MAX_COUNT", "MAX_RENOWN", "MAX_REWARD", "MAX_STAGES", "MAX_REQUIREMENTS", "MAX_CONTRIBUTORS", "MAX_DAYS",
+                  "MAX_PRACTICE", "MAX_PROJECT_RENOWN"):
+        if not re.search(rf"\bint {const} = {getattr(cc, const)};", parser):
+            err(f"conclave/ConclaveParser.java: {const} differs from tools/concordance_conclave.py")
+    kinds = re.findall(r'^\t[A-Z]+\("([a-z]+)"\)', java("conclave/Kind.java"), re.M)
+    if kinds != cc.KINDS:
+        err(f"conclave/Kind.java: kinds {kinds} differ from KINDS")
+    # The data on disk is the generator's, and each piece keeps to the rules.
+    folder = DATA / MOD / "concordance"
+    commissions = {p.stem: load(p) or {} for p in (folder / "commission").glob("*.json")}
+    projects = {p.stem: load(p) or {} for p in (folder / "project").glob("*.json")}
+    if set(commissions) != set(cc.COMMISSIONS) or set(projects) != set(cc.PROJECTS):
+        err("concordance/commission or concordance/project differ from COMMISSIONS and PROJECTS")
+    for key, info in cc.COMMISSIONS.items():
+        if commissions.get(key) != cc.commission_json(info):
+            err(f"concordance/commission/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    for key, info in cc.PROJECTS.items():
+        if projects.get(key) != cc.project_json(info):
+            err(f"concordance/project/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    traditions = {info.get("tradition") for info in research.values()} - {None}
+    if set(cc.TRADITIONS) != traditions:
+        err(f"conclave: TRADITIONS {sorted(cc.TRADITIONS)} differ from the research entries' traditions {sorted(traditions)}")
+    activities = set()
+    for path in sorted(root.rglob("*.java")):
+        activities |= set(re.findall(r'String ACTIVITY = "([a-z_:]+)";', path.read_text(encoding="utf-8")))
+    for activity in cc.ACTIVITIES:
+        if activity not in activities:
+            err(f"conclave: no Java ACTIVITY records the practice {activity}")
+        if f"compose.{MOD}.conclave.activity.{split(activity)[1]}" not in lang:
+            err(f"conclave: missing lang for the practice {activity}")
+    tiers = set()
+    for key, (name, tradition, tier, ask, renown, reward, count) in cc.COMMISSIONS.items():
+        tiers.add(tier)
+        if tradition not in cc.TRADITIONS or not 1 <= tier <= cc.MAX_TIER or not 1 <= renown <= cc.MAX_RENOWN \
+                or not 1 <= count <= cc.MAX_REWARD:
+            err(f"commission {key}: its tradition, tier, renown or reward is out of bounds")
+        if ask[0] == "deliver" and (ask[1] == reward or not 1 <= ask[2] <= cc.MAX_COUNT):
+            err(f"commission {key}: it may not pay in what it asks for, and asks 1 to {cc.MAX_COUNT}")
+        if ask[0] == "practice" and ask[1] not in cc.ACTIVITIES:
+            err(f"commission {key}: {ask[1]} is not a practice the Conclave knows")
+        if f"compose.{MOD}.conclave.commission.{key}" not in lang:
+            err(f"commission {key}: missing its name")
+    if tiers != set(range(1, cc.MAX_TIER + 1)):
+        err("conclave: every commission tier needs at least one commission")
+    for key, info in cc.PROJECTS.items():
+        if info["tradition"] not in cc.TRADITIONS or not 1 <= len(info["stages"]) <= cc.MAX_STAGES:
+            err(f"project {key}: its tradition or stage count is out of bounds")
+        for stage_id, _name, renown, contributors, days, requirements in info["stages"]:
+            if not (1 <= contributors <= cc.MAX_CONTRIBUTORS and 1 <= days <= cc.MAX_DAYS and 1 <= len(requirements) <= cc.MAX_REQUIREMENTS):
+                err(f"project {key} stage {stage_id}: its cooperation rule or requirements are out of bounds")
+            for requirement_id, kind, target, count in requirements:
+                if kind == "research" and (target not in {f"{MOD}:{r}" for r in research} or count != 1):
+                    err(f"project {key} stage {stage_id}: the research requirement {target} must name an entry, once")
+                if kind == "practice" and target not in cc.ACTIVITIES:
+                    err(f"project {key} stage {stage_id}: {target} is not a practice the Conclave knows")
+            if f"compose.{MOD}.conclave.stage.{key}.{stage_id}" not in lang:
+                err(f"project {key}: missing the name of the stage {stage_id}")
+    # The acceptance condition: a solo player, without teaching, reaches every rank.
+    by_tradition, solo_kinds, reached = cc.solo_route(research)
+    if reached != [rank[0] for rank in cc.RANKS]:
+        err(f"conclave: a solo player reaches only {reached} (renown {sum(by_tradition.values())}, {solo_kinds} kinds)")
+    # Reuse, not replacement: parties and UseMode are Jugcraft's own; renown is never spent and is no currency.
+    starbound = java("starbound/Starbound.java")
+    lectern = java("starbound/ConclaveLecternBlockEntity.java")
+    if "JugcraftParties.partyId(" not in starbound or "JugcraftParties.isLeader(" not in starbound or "UseMode" not in lectern:
+        err("conclave: projects and lecterns use Jugcraft's own parties and the shared UseMode switch")
+    if re.search(r"Jugs\.|\.take\(|renown\(\) -|\bspend\w*\(", starbound + java("conclave/Standing.java")):
+        err("conclave: renown is standing, never spent, and no coin")
+    if "ConcordanceProgress.listen(" not in starbound:
+        err("conclave: research, practice and teaching are heard from ConcordanceProgress")
+    # Every word has its text.
+    reasons = set()
+    for name in ("conclave/Conclave.java", "conclave/Projects.java", "starbound/Starbound.java"):
+        reasons |= set(re.findall(r'(?:return |Award\(0, |Contribution\(0, )"([a-z_]+)"', java(name)))
+        reasons |= set(re.findall(r'refuse\(player, "([a-z_]+)"\)', java(name)))
+    reasons -= {""}
+    for reason in sorted(reasons | set(cc.REASONS)):
+        if f"compose.{MOD}.conclave.reason.{reason}" not in lang:
+            err(f"conclave: missing lang for the reason {reason}")
+    if not reasons <= set(cc.REASONS):
+        err(f"conclave: reasons {sorted(reasons - set(cc.REASONS))} are not in REASONS")
+    for key in re.findall(r'say\(player, "([a-z_.]+)"', starbound):
+        if not key.endswith(".") and f"message.{MOD}.concordance.conclave.{key}" not in lang:
+            err(f"starbound/Starbound.java: missing lang message.{MOD}.concordance.conclave.{key}")
+    for key in re.findall(r'"message\.jugcraft\.concordance\.(conclave\.[a-z_]+)"', starbound):
+        if f"message.{MOD}.concordance.{key}" not in lang:
+            err(f"starbound/Starbound.java: missing lang message.{MOD}.concordance.{key}")
+    for mode in ("personal", "party"):
+        if f"message.{MOD}.concordance.conclave.mode.{mode}" not in lang:
+            err(f"conclave: missing lang for the lectern's {mode} mode")
+    for rank in cc.RANKS:
+        if f"compose.{MOD}.conclave.rank.{rank[0]}" not in lang:
+            err(f"conclave: missing the name of the rank {rank[0]}")
+    for key in cc.ADVANCEMENTS:
+        if not (DATA / MOD / "advancement" / f"{key}.json").is_file():
+            err(f"conclave: missing the advancement {key}")
+    for key in re.findall(r'award\([^;]*?Jugcraft\.id\("(conclave_[a-z_]+)"', starbound):
+        if not any(advancement.startswith(key) for advancement in cc.ADVANCEMENTS):
+            err(f"starbound/Starbound.java: awards {key}, which has no advancement")
+    # The lectern: registered, made, mined; its model reads only its regions; its texture and icon are drawn.
+    if "conclave_lectern" not in registered or not (DATA / MOD / "recipe" / "conclave_lectern.json").is_file():
+        err("conclave: the Conclave Lectern needs a registration and a recipe")
+    axe = load(DATA / "minecraft" / "tags" / "block" / "mineable" / "axe.json") or {}
+    if rid_value("conclave_lectern") not in axe.get("values", []):
+        err("conclave: the Conclave Lectern is mined with an axe")
+    import concordance_conclave_models as models
+    import model_writer
+    model = load(ASSETS / "models" / "block" / "conclave_lectern.json") or {}
+    expected = models.lectern_model()
+    model_writer.finish_elements(expected["elements"])  # as the generator writes it: no two faces share a plane
+    if model != expected:
+        err("conclave: the lectern's block model differs from tools/concordance_conclave_models.py")
+    texture = ASSETS / "textures" / "block" / "conclave_lectern.png"
+    if not texture.is_file():
+        err("conclave: missing textures/block/conclave_lectern.png")
+    else:
+        with Image.open(texture) as img:
+            if img.size != (16, 16):
+                err("conclave: the lectern's texture must be 16x16")
+    import item_icons
+    icon = ASSETS / "textures" / "item" / "conclave_lectern.png"
+    if not item_icons.has("conclave_lectern") or not icon.is_file():
+        err("conclave: conclave_lectern needs its map tools/item_icons/conclave_lectern.txt and its texture")
+    else:
+        with Image.open(icon) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw("conclave_lectern").tobytes() or img.size != (16, 16):
+                err("conclave: textures/item/conclave_lectern.png differs from its map: run tools/generate_textures.py")
 
 
 def rid_value(path):

@@ -464,13 +464,14 @@ SPELLS = {"kindle": kindle_icon, "composed": composed_icon, "aegis": aegis_icon,
 
 
 def textures():
-    """Every texture as {(kind, name): image}, in a fixed order (roadmap steps 12 to 22 from concordance_ritual_art,
+    """Every texture as {(kind, name): image}, in a fixed order (roadmap steps 12 to 23 from concordance_ritual_art,
     concordance_alchemy_art, concordance_ecology_art, concordance_celestial_art, concordance_crimson_art,
     concordance_worker_art, concordance_logistics_art, concordance_artifice_art, concordance_relics_art,
-    concordance_equivalence_art and concordance_hexes_art)."""
+    concordance_equivalence_art, concordance_hexes_art and concordance_conclave_art)."""
     import concordance_alchemy_art
     import concordance_artifice_art
     import concordance_celestial_art
+    import concordance_conclave_art
     import concordance_crimson_art
     import concordance_ecology_art
     import concordance_equivalence_art
@@ -494,6 +495,7 @@ def textures():
     out.update(concordance_relics_art.textures())
     out.update(concordance_equivalence_art.textures())
     out.update(concordance_hexes_art.textures())
+    out.update(concordance_conclave_art.textures())
     return out
 
 

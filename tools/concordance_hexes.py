@@ -198,7 +198,7 @@ MESSAGES = {
     "hex.ward_held": "Warded against %s (%s s left)",
     "hex.blank_sigil": "This sigil wards against nothing",
     "dream.refused": "You cannot dream: %s",
-    "dream.begun": "You drift into a dream (at most %s s). Catch the wisps; use the censer again to wake.",
+    "dream.begun": "You drift into a dream (at most %s s). Catch the wisps by walking into them; use the censer again to wake.",
     "dream.ended": "You wake: %s. %s dreamglass came back with you.",
     "dream.caught": "Dreamglass: %s / %s",
 }
@@ -278,8 +278,8 @@ def codex():
         ("crafting_recipe", "The Oneiric Censer",
          f"Use the censer at night ({DREAM_FOCUS} Focus) to dream. Everything you carry is held for you; you dream in "
          f"adventure mode, with nothing, for at most {seconds(DREAM_TICKS)}, within {DREAM_RADIUS} blocks of your body. "
-         f"Catch the dream wisps: {DREAM_WISPS} gather at once and one more every {seconds(WISP_TICKS)}; each is one "
-         f"dreamglass, at most {MAX_CAUGHT}. Use the censer again to wake.",
+         f"Catch the dream wisps by walking into them: {DREAM_WISPS} gather at once and one more every "
+         f"{seconds(WISP_TICKS)}; each is one dreamglass, at most {MAX_CAUGHT}. Use the censer again to wake.",
          rid("oneiric_censer")),
         ("text", "Waking",
          "However a dream ends, you wake with exactly what you carried, in the same slots, where your body lay, and "

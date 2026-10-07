@@ -35,6 +35,9 @@ import org.jspecify.annotations.Nullable;
 public final class ConcordanceProgress {
 	private static final Map<String, TagKey<Item>> TAGS = new ConcurrentHashMap<>();
 
+	/** Who hears every recorded piece of evidence ({@link #listen}). */
+	private static final java.util.List<Listener> LISTENERS = new java.util.concurrent.CopyOnWriteArrayList<>();
+
 	/** Item tag membership for the rules, from the running registries. */
 	public static final EvidenceRule.TagLookup TAG_LOOKUP = (item, tag) -> {
 		Identifier id = Identifier.tryParse(item);
@@ -100,7 +103,25 @@ public final class ConcordanceProgress {
 			player.setAttached(JugcraftConcordance.KNOWLEDGE, result.knowledge());
 			announce(player, result);
 		}
+		for (Listener listener : LISTENERS) {
+			listener.recorded(player, evidence, result);
+		}
 		return result;
+	}
+
+	/**
+	 * Something that hears every piece of evidence the server records for a player, repeats included, and what it changed
+	 * (roadmap step 23: the Starbound Conclave recognises research advanced, practices carried through and notes that
+	 * taught someone). Listeners only read: the research itself has already been recorded.
+	 */
+	@FunctionalInterface
+	public interface Listener {
+		void recorded(ServerPlayer player, Evidence evidence, ResearchEngine.Result result);
+	}
+
+	/** Adds a listener (at registration). */
+	public static void listen(Listener listener) {
+		LISTENERS.add(listener);
 	}
 
 	private static void announce(ServerPlayer player, ResearchEngine.Result result) {

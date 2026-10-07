@@ -147,7 +147,12 @@ yet.
   magical, glinting, changed, uncatalogued and excluded stacks are refused and nothing moves either way); the ledger
   never passes its cap; every declared crafting and smelting conversion is the game's own recipe, output and count;
   and the catalogue is balanced, this server's live recipes included.
-- CI: pending (this record is updated with the run).
+- CI: the first run on this step (commit fdf36745) found three faults, fixed in 65d98e8b (26.3's component patch
+  has no entry set, so a stack's changes are compared component by component), 65870d7d (an item's nature is judged
+  against a plain item's defaults, which already carry an empty enchantment list) and ca66a3e1 (a formed ingot may
+  join the stack the pattern is in). Run 37640896275 (commit a1088c59, which also carries step 22) passes the whole
+  Build workflow: it builds, passes the data checks and all 1017 required server game tests (the six above among
+  them), and the client test shards pass.
 
 Not yet run: any client (the scale's model and icon, the codex pages), a two-client dedicated server.
 

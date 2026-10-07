@@ -27,6 +27,10 @@ import io.github.jimbozoomer.jugcraft.concordance.artifice.ArtificeParser;
 import io.github.jimbozoomer.jugcraft.concordance.artifice.Gem;
 import io.github.jimbozoomer.jugcraft.concordance.artifice.Rune;
 import io.github.jimbozoomer.jugcraft.concordance.artifice.Substrate;
+import io.github.jimbozoomer.jugcraft.concordance.conclave.CommissionDefinition;
+import io.github.jimbozoomer.jugcraft.concordance.conclave.ConclaveCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.conclave.ConclaveParser;
+import io.github.jimbozoomer.jugcraft.concordance.conclave.ProjectDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.EquivalenceCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.EquivalenceParser;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.Material;
@@ -69,7 +73,7 @@ import org.jspecify.annotations.Nullable;
 public final class ConcordanceRules {
 	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
 			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, EcologyCatalog.EMPTY, CelestialCatalog.EMPTY, CrimsonCatalog.EMPTY, WorkerCatalog.EMPTY, ArtificeCatalog.EMPTY,
-			RelicCatalog.EMPTY, EquivalenceCatalog.EMPTY, HexCatalog.EMPTY, List.of());
+			RelicCatalog.EMPTY, EquivalenceCatalog.EMPTY, HexCatalog.EMPTY, ConclaveCatalog.EMPTY, List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
@@ -88,6 +92,7 @@ public final class ConcordanceRules {
 	private final RelicCatalog relics;
 	private final EquivalenceCatalog equivalence;
 	private final HexCatalog hexes;
+	private final ConclaveCatalog conclave;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
@@ -95,7 +100,8 @@ public final class ConcordanceRules {
 			Map<String, Definitions.Working> workings, ConversionTable conversions, Catalog catalog,
 			Map<String, Map<String, Authored>> authored, Map<String, StructurePattern> structures, Map<String, RitualDefinition> rituals,
 			AlchemyCatalog alchemy, EcologyCatalog ecology, CelestialCatalog celestial, CrimsonCatalog crimson, WorkerCatalog workers,
-			ArtificeCatalog artifice, RelicCatalog relics, EquivalenceCatalog equivalence, HexCatalog hexes, List<String> problems) {
+			ArtificeCatalog artifice, RelicCatalog relics, EquivalenceCatalog equivalence, HexCatalog hexes, ConclaveCatalog conclave,
+			List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
@@ -113,6 +119,7 @@ public final class ConcordanceRules {
 		this.relics = relics;
 		this.equivalence = equivalence;
 		this.hexes = hexes;
+		this.conclave = conclave;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -216,6 +223,11 @@ public final class ConcordanceRules {
 		return hexes;
 	}
 
+	/** The Starbound Conclave's commissions and projects (roadmap step 23). */
+	public ConclaveCatalog conclave() {
+		return conclave;
+	}
+
 	public List<String> problems() {
 		return problems;
 	}
@@ -290,6 +302,9 @@ public final class ConcordanceRules {
 		Map<String, Transmutation> transmutations = new TreeMap<>();
 		HexParser hexParser = new HexParser();
 		Map<String, CurseDefinition> curses = new TreeMap<>();
+		ConclaveParser conclaveParser = new ConclaveParser();
+		Map<String, CommissionDefinition> commissions = new TreeMap<>();
+		Map<String, ProjectDefinition> projects = new TreeMap<>();
 		Map<String, Organism> organisms = new TreeMap<>();
 		Map<String, Disturbance> disturbances = new TreeMap<>();
 		Map<String, Definitions.Research> research = new TreeMap<>();
@@ -455,10 +470,22 @@ public final class ConcordanceRules {
 						curses.put(curse.id(), curse);
 					}
 				}
+				case "commission" -> {
+					CommissionDefinition commission = conclaveParser.commission(source.id(), source.json());
+					if (commission != null) {
+						commissions.put(commission.id(), commission);
+					}
+				}
+				case "project" -> {
+					ProjectDefinition project = conclaveParser.project(source.id(), source.json());
+					if (project != null) {
+						projects.put(project.id(), project);
+					}
+				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
 						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
-						+ "preparation, property, organism, disturbance, pattern, offering, worker, substrate, gem, rune, affix, relic, material, transmutation "
-						+ "or curse)");
+						+ "preparation, property, organism, disturbance, pattern, offering, worker, substrate, gem, rune, affix, relic, material, transmutation, "
+						+ "curse, commission or project)");
 			}
 		}
 		problems.addAll(0, parser.problems());
@@ -482,6 +509,12 @@ public final class ConcordanceRules {
 		problems.addAll(equivalenceProblems);
 		problems.addAll(hexParser.problems());
 		problems.addAll(HexParser.check(curses));
+		problems.addAll(conclaveParser.problems());
+		java.util.Set<String> traditions = new java.util.TreeSet<>();
+		for (Definitions.Research entry : research.values()) {
+			traditions.add(entry.tradition());
+		}
+		problems.addAll(ConclaveParser.check(commissions.values(), projects.values(), traditions, research.keySet()));
 		// Prerequisites must exist and must not loop; entries in a loop could never be started.
 		boolean changed = true;
 		while (changed) {
@@ -655,7 +688,7 @@ public final class ConcordanceRules {
 				Collections.unmodifiableMap(new LinkedHashMap<>(rituals)), alchemy, ecology, new CelestialCatalog(patterns), new CrimsonCatalog(rites),
 				new WorkerCatalog(workerDefinitions), new ArtificeCatalog(substrates, gems, runes, affixes),
 				new RelicCatalog(relicDefinitions), new EquivalenceCatalog(EquivalenceParser.byItem(materials), transmutations, equivalenceProblems),
-				new HexCatalog(curses), List.copyOf(problems));
+				new HexCatalog(curses), new ConclaveCatalog(commissions, projects), List.copyOf(problems));
 	}
 
 	/**

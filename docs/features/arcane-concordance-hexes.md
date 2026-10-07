@@ -187,7 +187,12 @@ shown to the owner yet.
   gather with time and the dream ends when its time is over; an unseen death keeps the dream on the dead body and the
   respawned body gets the escrow back once; and a dream refuses creative mode, too little Focus and anything worn in an
   accessory slot.
-- CI: pending (this record is updated with the run).
+- CI: the first runs on this step (commit ea28d223) found three faults, fixed in 9e49e692 (Fabric API 0.161 has no
+  world-change event, so the dream check ends a dream that leaves its dimension), 380fc147 (a dreamer's game mode is
+  read from their abilities) and a1088c59 (wisps are caught by touch and are not pickable: a pickable wisp stopped
+  another test's harpoon). Run 37640896275 (commit a1088c59) passes the whole Build workflow: it builds, passes the
+  data checks and all 1017 required server game tests (the eight above among them), and the client test shards
+  pass.
 
 Not yet run: any client (the censer's and wisp's models and animations, the icons, the codex pages), a two-client
 dedicated server (two players cursing and warding each other with PvP on and off; a dreamer disconnecting and
