@@ -11,18 +11,18 @@ Fifteen rare, strange lands and two cave biomes, spread over all four layouts of
 
 | Biome | Layout: replaces | What it is |
 | --- | --- | --- |
-| **Cinder Barrens** | meadow: badlands | a burnt-out waste of ash-grey tuff and gravel, smouldering with magma, blood-red water, lava pools, ash in the air; no animals |
+| **Cinder Barrens** | meadow: badlands | a burnt-out waste of ash-grey tuff and gravel, smouldering with magma, grey snags on its coarse dirt, blood-red water, lava pools, ash in the air; no animals |
 | **Elder Vale** | meadow: mushroom islands | a vale of the old world: bright, simple grass, plain oaks, poppies and dandelions under a clear sky; no monsters spawn |
 | **Frostlight Garden** | woodland: dry snowy plains | firs and birches in the snow, frost irises and glimmerblooms, a cold, shimmering sky; no monsters spawn |
 | **Gilded Shrubland** | wetland: savanna plateaus | golden grass and golden-leaved oak scrub, goldenrod, dry grass, little lakes |
 | **Glimmer Grove** | wild: flower forests | jacarandas and giant red mushrooms, glimmerblooms, alliums, lilacs and hydrangeas under pink air, pink water; only witches spawn |
 | **Gloomweald** | wild: dark forests | dark oaks, dead trees and giant mushrooms over leaf litter and toadstools, dark purple pools, a dim sky |
 | **Glowcap Grotto** | wetland: dripstone caves | a cave of mud floors grown with **glowcaps** that light the dark, moss and glow lichen |
-| **Hallowed Bog** | meadow: swamps | a pale, bright bog of willows and vine-hung oaks, lilies of the valley and daisies, clear blue water; no monsters spawn |
+| **Hallowed Bog** | meadow: swamps | a pale, bright bog of willows and young white aspens standing in its water, lilies of the valley and daisies, clear blue water; no monsters spawn |
 | **Highsun Meadow** | wetland: savannas, warm plains | sunny, golden-green grass, sunflowers, goldenrod and wildflowers, a few small oaks |
 | **Mycelial Jungle** | wild: jungles | huge red and brown mushrooms, jungle bushes and oaks over grass and mycelium, toadstools, spore-green air; mooshrooms |
 | **Shrine Springs** | wild: bamboo jungles | great oaks two blocks wide, warm pools banked with calcite, ferns, dark green grass |
-| **Snowpetal Grove** | wild: dry snowy plains | blossoming cherries and birches in the snow, snowpetals and clover, mossy boulders, snowflakes on the air |
+| **Snowpetal Grove** | wild: dry snowy plains | blossoming cherries and white-trunked aspens in the snow, snowpetals and clover, mossy boulders, snowflakes on the air |
 | **Spider Nest** | wild: dripstone caves | a cave strung with cobwebs from ceiling to floor; spiders and cave spiders |
 | **Starlit Wood** | meadow: dark forests | soaring birches and tall firs, glimmerblooms and lilies of the valley, motes of light under a twilight-blue sky |
 | **Toadstool Field** | woodland: mushroom islands | mycelium patched with grass, giant mushrooms, toadstools and glowcaps; mooshrooms, and no monsters, as on vanilla's mushroom islands |
