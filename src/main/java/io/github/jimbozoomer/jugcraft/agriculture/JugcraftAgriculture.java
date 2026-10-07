@@ -926,7 +926,8 @@ public final class JugcraftAgriculture {
 		registerItem("wild_rice", props -> new DoubleHighBlockItem(wildRice, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
 
 		// Nine of a thing packed into a block: the owner's sack, and bales that soften a fall as a hay bale does.
-		Block bag = registerBlock("rice_bag", RiceBagBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.WHITE_WOOL).mapColor(MapColor.WOOD));
+		Block bag = registerBlock("rice_bag", RiceBagBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(0.8F).sound(SoundType.WOOL).ignitedByLava());
 		registerItem("rice_bag", props -> new BlockItem(bag, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		for (String bale : List.of("rice_bale", "straw_bale")) {
 			Block block = registerBlock(bale, HayBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.HAY_BLOCK));
@@ -934,9 +935,9 @@ public final class JugcraftAgriculture {
 		}
 		Block tatami = registerBlock("tatami", TatamiBlock::new, woven());
 		registerItem("tatami", props -> new BlockItem(tatami, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
-		Block fullMat = registerBlock("full_tatami_mat", FullTatamiMatBlock::new, woven().noOcclusion().pushReaction(PushReaction.DESTROY));
+		Block fullMat = registerBlock("full_tatami_mat", FullTatamiMatBlock::new, woven().noOcclusion().pushReaction(PushReaction.POPPED));
 		registerItem("full_tatami_mat", props -> new BlockItem(fullMat, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
-		Block halfMat = registerBlock("half_tatami_mat", TatamiMatBlock::new, woven().noOcclusion().pushReaction(PushReaction.DESTROY));
+		Block halfMat = registerBlock("half_tatami_mat", TatamiMatBlock::new, woven().noOcclusion().pushReaction(PushReaction.POPPED));
 		registerItem("half_tatami_mat", props -> new BlockItem(halfMat, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 
 		// The dishes, in a bowl (given back) or in hand.

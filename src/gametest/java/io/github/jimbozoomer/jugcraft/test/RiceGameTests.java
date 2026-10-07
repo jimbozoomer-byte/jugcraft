@@ -423,7 +423,7 @@ public class RiceGameTests {
 	public void riceDishesSetDown(GameTestHelper helper) {
 		floor(helper);
 		for (String dish : List.of("cooked_rice", "fried_rice", "mushroom_rice", "salmon_roll", "cod_roll", "kelp_roll", "kelp_roll_slice")) {
-			helper.assertTrue(MenuDishes.PLACED.stream().anyMatch(placed -> placed.id().equals(dish))
+			helper.assertTrue(MenuDishes.PLACED.stream().anyMatch(entry -> entry.id().equals(dish))
 					&& block(dish) instanceof PlacedDishBlock placed && placed.dish() == item(dish), dish + " sets down as itself");
 		}
 		BlockPos ground = new BlockPos(3, 1, 3);
