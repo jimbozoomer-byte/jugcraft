@@ -3,7 +3,8 @@
 Run from the repository root:  python3 tools/generate_textures.py
 Every pixel is generated here from fixed seeds; no Mojang texture is read, traced or
 recolored. Colors follow the real minerals: cassiterite is glossy brown-black, tin is
-pale cool silver, bronze is warm golden-brown.
+pale cool silver, bronze is warm golden-brown. Metal parts and powders (plates, gears,
+wire, dusts, washed ore) are drawn by tools/material_style.py.
 """
 import json
 import random
@@ -12,6 +13,7 @@ from pathlib import Path
 from PIL import Image
 
 import electric_textures
+import material_style as ms
 
 ROOT = Path(__file__).resolve().parents[1]
 TEX = ROOT / "src" / "main" / "resources" / "assets" / "jugcraft" / "textures"
@@ -206,14 +208,9 @@ def pile(seed, palette):
 
 
 def blend(seed):
-    rng = random.Random(seed)
-    img = new()
-    grey = [TIN[1], TIN[2], TIN[3]]
-    for y, row in enumerate(PILE):
-        for x, ch in enumerate(row):
-            if ch == "x":
-                img.putpixel((x, y), rng.choice(COPPER + COPPER + COPPER + grey) + (255,))
-    return img
+    """Bronze blend: a heap of copper powder with small clumps of tin powder through it. `seed` is kept for the
+    caller."""
+    return ms.blend(COPPER_METAL, TIN)
 
 
 # name: (ore specks, glint, metal palette dark->light). Colors follow the real ore minerals.
@@ -263,6 +260,8 @@ MINERAL_COLORS = {
                  [(140, 84, 36), (178, 116, 52), (206, 150, 78), (226, 180, 110)]),
 }
 
+SULFUR = [(150, 126, 18), (200, 176, 30), (230, 208, 58), (244, 228, 104), (252, 244, 168)]
+
 BAUXITE = [(126, 58, 36), (150, 72, 44), (170, 88, 54), (188, 108, 68), (112, 50, 32)]
 OIL_SAND_BASE = [(176, 152, 108), (190, 166, 120), (160, 136, 94), (146, 124, 86), (132, 110, 76)]
 BITUMEN = [(14, 12, 12), (28, 24, 22), (44, 40, 36)]
@@ -291,7 +290,7 @@ def main_extra():
     save(speckled(BAUXITE, 300, [(214, 170, 130), (226, 190, 150)]), "block", "bauxite")
     save(speckled(OIL_SAND_BASE, 301, BITUMEN, count=40), "block", "oil_sand")
     save(raw_chunk(302, BITUMEN, (120, 116, 110)), "item", "bitumen")
-    save(pile(303, [(222, 200, 40), (240, 222, 70), (250, 238, 120)]), "item", "sulfur_dust")
+    save(ms.dust(SULFUR), "item", "sulfur_dust")
     save(raw_chunk(304, [(46, 54, 72), (70, 80, 102), (100, 112, 138)], (190, 206, 236)), "item", "silicon")
     save(pile(305, [(236, 236, 240), (248, 248, 250), (222, 224, 230)]), "item", "lithium_carbonate")
     save(pile(306, [(232, 196, 210), (196, 224, 196), (240, 228, 196), (214, 206, 232)]), "item", "rare_earth_oxide")
@@ -1055,71 +1054,6 @@ def part_palette(metal):
     return list(material_icons.METAL_RAMPS[metal])
 
 
-def dust(palette):
-    """A heap of metal powder: mid tones with dark grains, lighter on the lit top-left."""
-    rng = random.Random(sum(palette[2]))
-    img = new()
-    for y, row in enumerate(PILE):
-        for x, ch in enumerate(row):
-            if ch == "x":
-                shade = rng.choice([1, 2, 2, 3]) + (1 if x + y < 14 else 0)
-                if rng.random() < 0.12:
-                    shade = 0
-                img.putpixel((x, y), palette[min(4, shade)] + (255,))
-    return img
-
-
-def washed_ore(metal, seed):
-    """A clean chunk of ore in the metal's own colours, still wet: a few blue highlights."""
-    img = raw_chunk(seed, part_palette(metal)[1:4], (236, 246, 255))
-    for x, y in [(5, 9), (10, 7), (7, 11)]:
-        img.putpixel((x, y), (120, 190, 240, 255))
-    return img
-
-
-def plate(palette):
-    img = new()
-    for y in range(3, 13):
-        for x in range(2, 14):
-            if x == 2 or y == 3:
-                c = palette[4]
-            elif x == 13 or y == 12:
-                c = palette[0]
-            else:
-                c = palette[2 if (x + y) % 5 else 3]
-            img.putpixel((x, y), c + (255,))
-    return img
-
-
-def gear(palette):
-    img = new()
-    for y in range(16):
-        for x in range(16):
-            dx, dy = x - 7.5, y - 7.5
-            r2 = dx * dx + dy * dy
-            tooth = (abs(dx) < 1.6 or abs(dy) < 1.6 or abs(abs(dx) - abs(dy)) < 1.2)
-            if r2 <= 2.2:
-                continue  # axle hole
-            if r2 <= 22 or (r2 <= 49 and tooth):
-                shade = 4 if dx + dy < -4 else (0 if dx + dy > 5 else 2)
-                img.putpixel((x, y), palette[shade] + (255,))
-    return img
-
-
-def wire(palette):
-    img = new()
-    for i in range(4):
-        cy = 4 + i * 3
-        for x in range(3, 13):
-            y = cy + (1 if (x // 2) % 2 else 0)
-            img.putpixel((x, y), palette[3 if x % 3 else 4] + (255,))
-            img.putpixel((x, y + 1), palette[1] + (255,))
-    for y in range(3, 15):
-        img.putpixel((2, y), (96, 70, 44, 255))
-        img.putpixel((13, y), (96, 70, 44, 255))
-    return img
-
-
 def circuit(advanced):
     img = new()
     board = [(24, 96, 56), (30, 112, 64)] if not advanced else [(28, 60, 110), (34, 72, 128)]
@@ -1225,12 +1159,12 @@ def machines():
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from materials import COMPONENTS
-    for form, draw in (("plate", plate), ("gear", gear), ("wire", wire), ("dust", dust)):
+    for form, draw in (("plate", ms.plate), ("gear", ms.gear), ("wire", ms.wire), ("dust", ms.dust)):
         for metal in COMPONENTS[form]:
             save(draw(part_palette(metal)), "item", f"{metal}_{form}")
     from materials import WASHED_ORES
-    for index, metal in enumerate(WASHED_ORES):
-        save(washed_ore(metal, 900 + index), "item", f"washed_{metal}_ore")
+    for metal in WASHED_ORES:
+        save(ms.washed(part_palette(metal)), "item", f"washed_{metal}_ore")
     save(pile(950, [(196, 160, 108), (214, 180, 126), (176, 140, 92), (230, 200, 150)]), "item", "sawdust")
     # Coke: porous gray-black lumps with a dull silver sheen.
     save(raw_chunk(951, [(28, 28, 30), (48, 48, 52), (74, 74, 80)], (150, 150, 158)), "item", "coke")

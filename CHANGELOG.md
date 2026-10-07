@@ -8,6 +8,21 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Clean textures, set 9: metal parts, petrochemistry and deposits
+- The ores, storage blocks, raw ores, ingots and nuggets are left to the material sets (#218), as the owner chose on 6 October 2026. This set cleans the rest of the materials.
+- Metal parts are drawn in `tools/material_style.py`:
+  - dusts are clean heaps;
+  - plates have an outline and a sheen;
+  - gears have eight square teeth;
+  - wire is wound on a spool;
+  - washed ore is a clean chunk with drops of water.
+- Bronze blend and sulfur dust are clean heaps too.
+- Petrochemistry:
+  - The fluid buckets share a new iron pail with the fluid in its mouth.
+  - Flowing fluids run in soft streaks, and still fluids are mostly one tone with lighter swells.
+  - Guncotton, PVC resin, alumina, titanium sponge, asphalt, asphalt binder, fertilizer, the cracking catalyst and the turbocharger lose their random speckle.
+- The four resource deposits are packed rubble of stone and ore lumps, in the manner of gravel. IDs and models are unchanged.
+
 ### Unmerged: Clean textures, set 8: crops (outside the tree work)
 - Only the crop textures that open PRs #195 (wood repaint) and #206 (new trees) don't touch are changed. Trees, logs, wood, leaves, planks and saplings are left to those PRs.
   - The squash and gourd skins vary in soft clumps with even stripes; the warty gourd keeps its warts.
