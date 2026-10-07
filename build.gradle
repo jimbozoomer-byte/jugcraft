@@ -123,11 +123,14 @@ fabricApi {
 def notInClientGameTests = frameworkLock.dependencies.findAll { it.key in ["iris", "sodium"] }
 		.collect { it.maven.split(":")[1] } // Modrinth project ids, which name the jars wherever Gradle keeps them
 tasks.matching { it.name == "runClientGameTest" }.configureEach { task ->
+	// Loom's run task keeps its own classpath, fixed once the task runs, so it is replaced here, while the task is
+	// configured: by a filtered copy of what Loom put in it (filtering the property itself would refer to itself).
+	def sources = new ArrayList(task.classpath.from)
+	def leftOut = { file -> notInClientGameTests.any { file.path.contains(it) } }
+	task.classpath = project.files(sources).filter { file -> !leftOut(file) }
 	task.doFirst {
-		def kept = task.classpath.files.findAll { file -> !notInClientGameTests.any { file.path.contains(it) } }
-		task.logger.lifecycle("Client game tests run without Iris and Sodium (see build.gradle): "
-				+ "${task.classpath.files.size() - kept.size()} jar(s) left out")
-		task.classpath = project.files(kept)
+		int count = project.files(sources).files.count { leftOut(it) }
+		task.logger.lifecycle("Client game tests run without Iris and Sodium (see build.gradle): ${count} jar(s) left out")
 	}
 }
 
