@@ -42,13 +42,13 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -124,11 +124,15 @@ public final class Garden {
 		GLEANER = block("gleaner", GleanerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_ORANGE)
 				.strength(1.0F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		Item bed = item("verdant_bed", properties -> new GardenItem(VERDANT_BED, properties), new Item.Properties().useBlockDescriptionPrefix());
-		SUNPETAL = item("sunpetal", properties -> new GardenItem(SUNPETAL_CROP, properties), new Item.Properties().useItemDescriptionPrefix());
-		DEWMOSS = item("dewmoss", properties -> new GardenItem(DEWMOSS_CROP, properties), new Item.Properties().useItemDescriptionPrefix());
-		GLOAMCAP = item("gloamcap", properties -> new GardenItem(GLOAMCAP_CROP, properties), new Item.Properties().useItemDescriptionPrefix());
-		MENDVETCH = item("mendvetch", properties -> new GardenItem(MENDVETCH_CROP, properties), new Item.Properties().useItemDescriptionPrefix());
-		VERDANT_CHAFF = item("verdant_chaff", GardenItem.Plain::new, new Item.Properties());
+		SUNPETAL = item("sunpetal", properties -> new GardenItem(SUNPETAL_CROP, properties), new Item.Properties().useItemDescriptionPrefix()
+				.compostable(ContextIntProviders.COMPOSTABLE_LOW));
+		DEWMOSS = item("dewmoss", properties -> new GardenItem(DEWMOSS_CROP, properties), new Item.Properties().useItemDescriptionPrefix()
+				.compostable(ContextIntProviders.COMPOSTABLE_LOW));
+		GLOAMCAP = item("gloamcap", properties -> new GardenItem(GLOAMCAP_CROP, properties), new Item.Properties().useItemDescriptionPrefix()
+				.compostable(ContextIntProviders.COMPOSTABLE_LOW));
+		MENDVETCH = item("mendvetch", properties -> new GardenItem(MENDVETCH_CROP, properties), new Item.Properties().useItemDescriptionPrefix()
+				.compostable(ContextIntProviders.COMPOSTABLE_LOW));
+		VERDANT_CHAFF = item("verdant_chaff", GardenItem.Plain::new, new Item.Properties().compostable(ContextIntProviders.COMPOSTABLE_MEDIUM));
 		Item heart = item("verdant_heart", properties -> new GardenItem(VERDANT_HEART, properties), new Item.Properties().useBlockDescriptionPrefix());
 		Item maw = item("mulch_maw", properties -> new GardenItem(MULCH_MAW, properties), new Item.Properties().useBlockDescriptionPrefix());
 		Item gauge = item("habitat_gauge", properties -> new GardenItem(HABITAT_GAUGE, properties), new Item.Properties().useBlockDescriptionPrefix());
@@ -159,9 +163,11 @@ public final class Garden {
 		});
 	}
 
+	/** A crop's block: a wheat-like plant, but not a copy of wheat's properties (wheat's colour reads its own age 0-7). */
 	private static Block crop(String name) {
 		return block(name + "_crop", properties -> new OrganismCropBlock(properties, Jugcraft.id(name)),
-				BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT));
+				BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).noCollision().randomTicks().instabreak().sound(SoundType.CROP)
+						.pushReaction(PushReaction.POPPED));
 	}
 
 	private static Block block(String id, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties properties) {

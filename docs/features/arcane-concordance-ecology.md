@@ -121,6 +121,8 @@ crops master Verdant Husbandry.
 - **Depleted inputs constrain output**: an empty bed stalls every crop with a cost, and a starved Heart makes nothing.
   The step 14 harness simulates a row of eight beds for 2000 rounds: with Mendvetch (and optionally a Maw) it keeps
   yielding; with neither, its starting nutrients run out and it stops.
+- **Vanilla composters** take the crops as they take seeds (a 30% chance of a layer) and chaff at 50%: a harvest
+  composts to about a sixth of a bone meal (a third of a nutrient), far less than the two it cost to regrow.
 - Verdance into Ley Charge loses a third (3 for 2), and nothing turns back into Verdance.
 - The Gleaner costs a Verdance a harvest, so automation draws on the garden's own producer.
 - **Simulation budget**: crops cost only on random ticks; a sample is 100 reads, reused for 10 seconds, at most 16 a
