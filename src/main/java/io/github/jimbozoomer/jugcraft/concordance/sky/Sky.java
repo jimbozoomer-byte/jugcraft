@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.celestial.Attunement;
 import io.github.jimbozoomer.jugcraft.concordance.celestial.Calendar;
 import io.github.jimbozoomer.jugcraft.concordance.celestial.CelestialCatalog;
@@ -108,7 +109,7 @@ public final class Sky {
 				DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 		RESONANT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("resonant"),
 				DataComponentType.<Unit>builder().persistent(MapCodec.unitCodec(Unit.INSTANCE)).networkSynchronized(Unit.STREAM_CODEC).build());
-		ATTUNEMENT = AttachmentRegistry.<Attunement>builder().persistent(ATTUNEMENT_CODEC).buildAndRegister(Jugcraft.id("celestial_attunement"));
+		ATTUNEMENT = AttachmentRegistry.<Attunement>builder().persistent(Saved.versioned("celestial_attunement", ATTUNEMENT_CODEC)).buildAndRegister(Jugcraft.id("celestial_attunement"));
 		OBSERVATORY = block("observatory", ObservatoryBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.GOLD)
 				.strength(2.5F, 6.0F).sound(SoundType.COPPER).requiresCorrectToolForDrops().noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		Item observatory = item("observatory", properties -> new SkyItem(OBSERVATORY, properties), new Item.Properties().useBlockDescriptionPrefix());

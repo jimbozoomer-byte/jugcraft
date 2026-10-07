@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.concordance.courier;
 
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -142,6 +143,7 @@ public class CourierPostBlockEntity extends BlockEntity implements WorldlyContai
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		Saved.stamp(output, 1);
 		ContainerHelper.saveAllItems(output, items);
 		if (owner != null) {
 			output.store("owner", UUIDUtil.CODEC, owner);

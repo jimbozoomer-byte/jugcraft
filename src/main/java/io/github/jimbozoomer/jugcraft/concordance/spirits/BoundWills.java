@@ -1,10 +1,14 @@
 package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWillLedger;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
@@ -23,11 +27,14 @@ public final class BoundWills extends SavedData {
 			Codec.STRING.fieldOf("counterpart").forGetter(BoundWill::counterpart), UUIDUtil.CODEC.fieldOf("holder").forGetter(BoundWill::holder),
 			Codec.LONG.fieldOf("sealed_at").forGetter(BoundWill::sealedAt), Codec.BOOL.fieldOf("transferable").forGetter(BoundWill::transferable))
 			.apply(i, BoundWill::new));
-	public static final Codec<BoundWills> CODEC = Codec.unboundedMap(UUIDUtil.STRING_CODEC, RECORD)
-			.xmap(records -> new BoundWills(new BoundWillLedger(records)), wills -> wills.ledger.records());
+	/** Versioned, and read will by will: one that cannot be read is kept as written (roadmap step 30). */
+	public static final Codec<BoundWills> CODEC = Saved.versioned("bound_wills", Saved.keeping("bound_wills", UUIDUtil.STRING_CODEC, RECORD)
+			.xmap(kept -> new BoundWills(new BoundWillLedger(kept.read()), kept.unread()), wills -> new Saved.Kept<>(wills.ledger.records(), wills.unread)));
 	static final SavedDataType<BoundWills> TYPE = new SavedDataType<>(Jugcraft.id("bound_wills"), BoundWills::new, CODEC, null);
 
 	private BoundWillLedger ledger;
+	/** Bound Wills saved in a form this version cannot read, kept to be written back unchanged. */
+	private final Map<String, Dynamic<?>> unread = new LinkedHashMap<>();
 
 	BoundWills() {
 		this(BoundWillLedger.EMPTY);
@@ -35,6 +42,11 @@ public final class BoundWills extends SavedData {
 
 	BoundWills(BoundWillLedger ledger) {
 		this.ledger = ledger;
+	}
+
+	private BoundWills(BoundWillLedger ledger, Map<String, Dynamic<?>> unread) {
+		this(ledger);
+		this.unread.putAll(unread);
 	}
 
 	public static BoundWills of(MinecraftServer server) {

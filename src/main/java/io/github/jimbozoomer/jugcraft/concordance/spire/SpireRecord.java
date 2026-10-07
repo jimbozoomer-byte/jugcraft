@@ -1,8 +1,10 @@
 package io.github.jimbozoomer.jugcraft.concordance.spire;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.wonder.SpireState;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -33,20 +35,25 @@ public final class SpireRecord extends SavedData {
 			UUIDUtil.CODEC.listOf().xmap(TreeSet::new, List::copyOf).fieldOf("contributors").forGetter(state -> new TreeSet<>(state.contributors())))
 			.apply(i, SpireState::new));
 
-	public static final Codec<SpireRecord> CODEC = Codec.unboundedMap(Codec.STRING, STATE_CODEC).xmap(SpireRecord::new, SpireRecord::saved);
+	/** Versioned, and read spire by spire: one that cannot be read is kept as written (roadmap step 30). */
+	public static final Codec<SpireRecord> CODEC = Saved.versioned("spires",
+			Saved.keeping("spires", Codec.STRING, STATE_CODEC).xmap(SpireRecord::new, SpireRecord::saved));
 	static final SavedDataType<SpireRecord> TYPE = new SavedDataType<>(Jugcraft.id("spires"), SpireRecord::new, CODEC, null);
 
 	private final Map<String, SpireState> spires = new LinkedHashMap<>();
+	/** Spires saved in a form this version cannot read, kept to be written back unchanged. */
+	private final Map<String, Dynamic<?>> unread = new LinkedHashMap<>();
 
 	SpireRecord() {
 	}
 
-	private SpireRecord(Map<String, SpireState> saved) {
-		spires.putAll(saved);
+	private SpireRecord(Saved.Kept<String, SpireState> saved) {
+		spires.putAll(saved.read());
+		unread.putAll(saved.unread());
 	}
 
-	private Map<String, SpireState> saved() {
-		return Map.copyOf(spires);
+	private Saved.Kept<String, SpireState> saved() {
+		return new Saved.Kept<>(spires, unread);
 	}
 
 	public static SpireRecord of(MinecraftServer server) {

@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWillLedger;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
@@ -243,6 +244,7 @@ public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyConta
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		Saved.stamp(output, 1);
 		ContainerHelper.saveAllItems(output, items);
 		if (agreement != null) {
 			output.store("agreement", AGREEMENT_CODEC, agreement);

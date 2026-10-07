@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.crimson.CrimsonCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.crimson.Exhaustion;
 import io.github.jimbozoomer.jugcraft.concordance.crimson.Growth;
@@ -112,7 +113,7 @@ public final class Vigil {
 				DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 		GROWTH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("growth"),
 				DataComponentType.<Growth>builder().persistent(GROWTH_CODEC).networkSynchronized(ByteBufCodecs.fromCodec(GROWTH_CODEC)).build());
-		OFFERING = AttachmentRegistry.<OfferingState>builder().persistent(OFFERING_CODEC).copyOnDeath()
+		OFFERING = AttachmentRegistry.<OfferingState>builder().persistent(Saved.versioned("offering_state", OFFERING_CODEC)).copyOnDeath()
 				.syncWith(OFFERING_STREAM, AttachmentSyncPredicate.targetOnly()).buildAndRegister(Jugcraft.id("offering_state"));
 		CRIMSON_CHALICE = item("crimson_chalice", CrimsonChaliceItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 		THORNHEART_BLADE = item("thornheart_blade", ThornheartBladeItem::new,

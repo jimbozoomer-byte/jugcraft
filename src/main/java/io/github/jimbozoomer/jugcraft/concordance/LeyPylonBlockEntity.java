@@ -169,6 +169,7 @@ public class LeyPylonBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		Saved.stamp(output, 1);
 		output.putLong("ley", ley);
 		output.putLong("energy", energy.getAmount());
 		if (owner != null) {

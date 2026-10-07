@@ -296,4 +296,28 @@ public class ConcordanceConclaveGameTests {
 				"The lectern is registered");
 		helper.succeed();
 	}
+
+	/**
+	 * Roadmap step 30: a project whose definition is gone (a data pack removed or renamed it) can never be finished, so
+	 * it does not block a new one; when one begins it is set aside exactly as it was, with its contributions, and kept
+	 * through a save.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aProjectWhoseDefinitionIsGoneIsSetAside(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = fellow(helper);
+		String owner = Projects.personal(player.getUUID());
+		ConclaveProjects record = ConclaveProjects.of(level.getServer());
+		ProjectState orphan = new ProjectState("jugcraft:a_project_no_longer_defined", owner, player.getUUID(), 5L, 1, Map.of("watches", 2),
+				Set.of(player.getUUID()), Set.of(3L), Set.of(player.getUUID()), 0L);
+		record.put(orphan);
+		helper.assertValueEqual(Starbound.start(player, "jugcraft:starward_chart", false), "", "a new project begins: the orphan is not in its way");
+		helper.assertTrue(record.project(owner) != null && record.project(owner).project().equals("jugcraft:starward_chart"),
+				"the new project is the current one");
+		helper.assertTrue(record.setAsideFor(owner).equals(java.util.List.of(orphan)), "the orphan is set aside exactly as it was");
+		var ops = level.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+		ConclaveProjects reread = ConclaveProjects.CODEC.parse(ops, ConclaveProjects.CODEC.encodeStart(ops, record).getOrThrow()).getOrThrow();
+		helper.assertTrue(reread.setAsideFor(owner).equals(java.util.List.of(orphan)), "and kept through a save");
+		helper.succeed();
+	}
 }

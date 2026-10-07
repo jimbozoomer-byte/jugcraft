@@ -7,6 +7,7 @@ import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.util.GeckoLibUtil;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.relic.Context;
 import io.github.jimbozoomer.jugcraft.concordance.relic.Mode;
@@ -273,6 +274,7 @@ public class ReliquaryShrineBlockEntity extends BlockEntity implements GeoBlockE
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		Saved.stamp(output, 1);
 		if (!relic.isEmpty()) {
 			output.store("relic", ItemStack.CODEC, relic);
 		}

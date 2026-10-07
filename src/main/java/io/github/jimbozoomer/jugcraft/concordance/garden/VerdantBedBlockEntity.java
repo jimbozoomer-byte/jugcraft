@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.concordance.garden;
 
 import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
@@ -223,6 +224,7 @@ public class VerdantBedBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		Saved.stamp(output, 1);
 		output.putInt("nutrients", nutrients);
 		output.putBoolean("awake", awake);
 		if (keeper != null) {

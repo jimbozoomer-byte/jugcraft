@@ -9,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
@@ -122,8 +123,8 @@ public final class Sympathy {
 				DataComponentType.<Link>builder().persistent(LINK_CODEC).networkSynchronized(ByteBufCodecs.fromCodec(LINK_CODEC)).build());
 		WARD = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("ward"),
 				DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
-		CURSES = AttachmentRegistry.<List<Curse>>builder().persistent(CURSE_CODEC.listOf()).buildAndRegister(Jugcraft.id("curses"));
-		WARDS = AttachmentRegistry.<List<Ward>>builder().persistent(WARD_CODEC.listOf()).buildAndRegister(Jugcraft.id("wards"));
+		CURSES = AttachmentRegistry.<List<Curse>>builder().persistent(Saved.versioned("curses", CURSE_CODEC.listOf())).buildAndRegister(Jugcraft.id("curses"));
+		WARDS = AttachmentRegistry.<List<Ward>>builder().persistent(Saved.versioned("wards", WARD_CODEC.listOf())).buildAndRegister(Jugcraft.id("wards"));
 		TAGLOCK = item("taglock", TaglockItem::new, new Item.Properties().stacksTo(1));
 		SCRYING_GLASS = item("scrying_glass", ScryingGlassItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 		WARD_SIGIL = item("ward_sigil", WardSigilItem::new, new Item.Properties().stacksTo(16));

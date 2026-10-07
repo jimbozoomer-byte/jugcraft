@@ -515,6 +515,7 @@ public class LampwrightBenchBlockEntity extends BaseContainerBlockEntity impleme
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		Saved.stamp(output, 1);
 		ContainerHelper.saveAllItems(output, items);
 		if (student != null && studied != null) {
 			output.store("student", UUIDUtil.CODEC, student);

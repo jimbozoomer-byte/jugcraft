@@ -157,10 +157,10 @@ public final class JugcraftConcordance {
 		FORMULA = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("formula"),
 				DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 
-		KNOWLEDGE = AttachmentRegistry.<Knowledge>builder().persistent(ConcordanceCodecs.KNOWLEDGE).copyOnDeath()
+		KNOWLEDGE = AttachmentRegistry.<Knowledge>builder().persistent(Saved.versioned("concordance_knowledge", ConcordanceCodecs.KNOWLEDGE)).copyOnDeath()
 				.syncWith(ConcordanceCodecs.KNOWLEDGE_STREAM, AttachmentSyncPredicate.targetOnly())
 				.buildAndRegister(Jugcraft.id("concordance_knowledge"));
-		FOCUS = AttachmentRegistry.<FocusPool>builder().persistent(ConcordanceCodecs.FOCUS).copyOnDeath()
+		FOCUS = AttachmentRegistry.<FocusPool>builder().persistent(Saved.versioned("concordance_focus", ConcordanceCodecs.FOCUS)).copyOnDeath()
 				.syncWith(ConcordanceCodecs.FOCUS_STREAM, AttachmentSyncPredicate.targetOnly())
 				.buildAndRegister(Jugcraft.id("concordance_focus"));
 

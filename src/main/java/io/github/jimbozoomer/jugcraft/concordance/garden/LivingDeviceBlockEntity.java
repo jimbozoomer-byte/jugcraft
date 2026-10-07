@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.concordance.garden;
 
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Ownership;
 import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 import java.util.HashSet;
@@ -114,6 +115,7 @@ public abstract class LivingDeviceBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		Saved.stamp(output, 1);
 		output.putBoolean("awake", awake);
 		if (keeper != null) {
 			output.store("keeper", UUIDUtil.CODEC, keeper);

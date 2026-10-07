@@ -1,10 +1,13 @@
 package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -36,17 +39,26 @@ public final class WorkerRoster extends SavedData {
 			Codec.STRING.fieldOf("kind").forGetter(Entry::kind), Codec.STRING.fieldOf("status").forGetter(Entry::status),
 			Codec.STRING.fieldOf("dimension").forGetter(Entry::dimension), Codec.LONG.fieldOf("pos").forGetter(Entry::pos))
 			.apply(i, Entry::new));
-	public static final Codec<WorkerRoster> CODEC = Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.unboundedMap(UUIDUtil.STRING_CODEC, ENTRY))
-			.xmap(WorkerRoster::new, roster -> roster.entries);
+	/** Versioned, and read player by player: a roster that cannot be read is kept as written (roadmap step 30). */
+	public static final Codec<WorkerRoster> CODEC = Saved.versioned("worker_roster",
+			Saved.keeping("worker_roster", UUIDUtil.STRING_CODEC, Codec.unboundedMap(UUIDUtil.STRING_CODEC, ENTRY))
+					.xmap(WorkerRoster::new, roster -> new Saved.Kept<>(roster.entries, roster.unread)));
 	static final SavedDataType<WorkerRoster> TYPE = new SavedDataType<>(Jugcraft.id("worker_roster"), WorkerRoster::new, CODEC, null);
 
 	private final Map<UUID, Map<UUID, Entry>> entries = new HashMap<>();
+	/** Rosters saved in a form this version cannot read, kept to be written back unchanged. */
+	private final Map<String, Dynamic<?>> unread = new LinkedHashMap<>();
 
 	WorkerRoster() {
 	}
 
 	WorkerRoster(Map<UUID, Map<UUID, Entry>> entries) {
 		entries.forEach((owner, workers) -> this.entries.put(owner, new TreeMap<>(workers)));
+	}
+
+	private WorkerRoster(Saved.Kept<UUID, Map<UUID, Entry>> saved) {
+		this(saved.read());
+		unread.putAll(saved.unread());
 	}
 
 	public static WorkerRoster of(MinecraftServer server) {

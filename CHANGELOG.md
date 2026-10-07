@@ -46,6 +46,13 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: The Arcane Concordance: saves that last
+- Everything the Concordance keeps in a world (spires, workers, Bound Wills, the sky's claims, Conclave projects, courier deliveries, and what it keeps on each player) is now saved with a version, so a later Jugcraft can read and update it. Older saves still load.
+- One entry a record cannot read (from a newer version, or damaged) is kept exactly as it was instead of emptying the whole record.
+- A Conclave project whose definition was removed no longer blocks new projects; it is set aside, contributions and all.
+- Breaking blocks near circles costs less on big worlds: only the circles nearby are checked.
+- Back up your world before moving to an older Jugcraft: it cannot read the new versioned saves. Record: [arcane-concordance-persistence.md](docs/features/arcane-concordance-persistence.md).
+
 ### Unmerged: The Arcane Concordance: no free lunch
 - **A Verdant Spire no longer makes nutrients from nothing.** Its field now grows Verdant Bed crops by their own rules: each hastened step costs the bed at least one nutrient, and a hastened Mendvetch fixes none. Before, a spire over Mendvetch could feed Verdant Hearts for free. Vanilla crops still simply grow.
 - **Light is no longer free.** Putting a Kindled Lantern out, or breaking a Lumen Sconce, spends the measure of Radiance it had begun, so relighting or re-placing it is no way round its burning. Lighting and putting out at once still costs nothing.

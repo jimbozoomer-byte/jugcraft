@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Event;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Logistics;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Place;
@@ -74,13 +75,17 @@ public final class CourierLedger extends SavedData {
 		static final Codec<Sample> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.LONG.fieldOf("id").forGetter(Sample::id),
 				ItemVariant.CODEC.fieldOf("item").forGetter(Sample::item)).apply(i, Sample::new));
 	}
-	private record Saved(long nextId, List<Request> requests, List<History> histories, List<Sample> samples) {
-		static final Codec<Saved> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.LONG.fieldOf("next_id").forGetter(Saved::nextId),
-				REQUEST.listOf().fieldOf("requests").forGetter(Saved::requests),
-				History.CODEC.listOf().fieldOf("history").forGetter(Saved::histories),
-				Sample.CODEC.listOf().fieldOf("samples").forGetter(Saved::samples)).apply(i, Saved::new));
+	private record Stored(long nextId, List<Request> requests, List<History> histories, List<Sample> samples) {
+		static final Codec<Stored> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.LONG.fieldOf("next_id").forGetter(Stored::nextId),
+				REQUEST.listOf().fieldOf("requests").forGetter(Stored::requests),
+				History.CODEC.listOf().fieldOf("history").forGetter(Stored::histories),
+				Sample.CODEC.listOf().fieldOf("samples").forGetter(Stored::samples)).apply(i, Stored::new));
 	}
-	public static final Codec<CourierLedger> CODEC = Saved.CODEC.xmap(CourierLedger::new, CourierLedger::saved);
+	/**
+	 * Versioned (roadmap step 30). Read whole, not entry by entry: its requests, reservations, cargo and samples refer to
+	 * one another, so it is either read as written or not at all.
+	 */
+	public static final Codec<CourierLedger> CODEC = Saved.versioned("courier_ledger", Stored.CODEC.xmap(CourierLedger::new, CourierLedger::saved));
 	static final SavedDataType<CourierLedger> TYPE = new SavedDataType<>(Jugcraft.id("courier_ledger"), CourierLedger::new, CODEC, null);
 
 	private Logistics ledger;
@@ -90,7 +95,7 @@ public final class CourierLedger extends SavedData {
 		ledger = new Logistics();
 	}
 
-	private CourierLedger(Saved saved) {
+	private CourierLedger(Stored saved) {
 		Map<Place, List<Event>> histories = new LinkedHashMap<>();
 		for (History history : saved.histories()) {
 			histories.put(history.post(), history.events());
@@ -103,7 +108,7 @@ public final class CourierLedger extends SavedData {
 		}
 	}
 
-	private Saved saved() {
+	private Stored saved() {
 		List<History> histories = new ArrayList<>();
 		ledger.histories().forEach((post, events) -> histories.add(new History(post, events)));
 		List<Sample> kept = new ArrayList<>();
@@ -113,7 +118,7 @@ public final class CourierLedger extends SavedData {
 				kept.add(new Sample(request.id(), item));
 			}
 		}
-		return new Saved(ledger.nextId(), ledger.requests(), histories, kept);
+		return new Stored(ledger.nextId(), ledger.requests(), histories, kept);
 	}
 
 	public static CourierLedger of(MinecraftServer server) {

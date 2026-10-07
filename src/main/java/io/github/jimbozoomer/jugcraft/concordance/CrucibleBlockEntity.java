@@ -616,6 +616,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		Saved.stamp(output, 1);
 		ContainerHelper.saveAllItems(output, items);
 		water.writeValue(output);
 		output.putInt("temperature", temperature);

@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.dream.DreamRules;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
@@ -95,8 +96,8 @@ public final class Dreaming {
 	}
 
 	public static void register() {
-		EXPEDITION = AttachmentRegistry.<DreamExpedition>builder().persistent(DreamExpedition.CODEC).buildAndRegister(Jugcraft.id("dream_expedition"));
-		DREAMS = AttachmentRegistry.<Integer>builder().persistent(Codec.INT).copyOnDeath().buildAndRegister(Jugcraft.id("dreams"));
+		EXPEDITION = AttachmentRegistry.<DreamExpedition>builder().persistent(Saved.versioned("dream_expedition", DreamExpedition.CODEC)).buildAndRegister(Jugcraft.id("dream_expedition"));
+		DREAMS = AttachmentRegistry.<Integer>builder().persistent(Saved.versioned("dreams", Codec.INT)).copyOnDeath().buildAndRegister(Jugcraft.id("dreams"));
 		ResourceKey<Block> censerKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("oneiric_censer"));
 		CENSER = Registry.register(BuiltInRegistries.BLOCK, censerKey, new OneiricCenserBlock(BlockBehaviour.Properties.of()
 				.mapColor(MapColor.COLOR_PURPLE).strength(2.0F, 6.0F).sound(SoundType.LANTERN).noOcclusion().lightLevel(state -> 5)

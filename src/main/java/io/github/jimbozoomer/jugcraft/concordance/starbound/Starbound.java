@@ -8,6 +8,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.conclave.CommissionDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.conclave.Conclave;
 import io.github.jimbozoomer.jugcraft.concordance.conclave.ConclaveCatalog;
@@ -92,7 +93,7 @@ public final class Starbound {
 	}
 
 	public static void register() {
-		STANDING = AttachmentRegistry.<Standing>builder().persistent(STANDING_CODEC).copyOnDeath().buildAndRegister(Jugcraft.id("conclave_standing"));
+		STANDING = AttachmentRegistry.<Standing>builder().persistent(Saved.versioned("conclave_standing", STANDING_CODEC)).copyOnDeath().buildAndRegister(Jugcraft.id("conclave_standing"));
 		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, Jugcraft.id("conclave_lectern"));
 		LECTERN = Registry.register(BuiltInRegistries.BLOCK, key, new ConclaveLecternBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
 				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().setId(key)));
@@ -346,9 +347,17 @@ public final class Starbound {
 			owner = Projects.personal(player.getUUID());
 		}
 		ConclaveProjects record = ConclaveProjects.of(server(player));
-		String reason = Projects.mayStart(standing(player), now(player), communal, JugcraftParties.isLeader(player.getUUID()), record.project(owner));
+		ProjectState current = record.project(owner);
+		// A project whose definition is gone can never be finished (roadmap step 30): it does not block a new one, and is
+		// set aside as it was when one begins.
+		boolean orphaned = current != null && !current.complete() && catalog().project(current.project()) == null;
+		String reason = Projects.mayStart(standing(player), now(player), communal, JugcraftParties.isLeader(player.getUUID()),
+				orphaned ? null : current);
 		if (!reason.isEmpty()) {
 			return reason;
+		}
+		if (orphaned) {
+			record.setAside(owner);
 		}
 		record.put(Projects.start(project, owner, player.getUUID(), now(player)));
 		say(player, "started", projectName(project.id()));

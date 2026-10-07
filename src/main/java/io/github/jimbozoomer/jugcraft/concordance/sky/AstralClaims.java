@@ -1,10 +1,13 @@
 package io.github.jimbozoomer.jugcraft.concordance.sky;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.resource.AstralLedger;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -24,14 +27,20 @@ public final class AstralClaims extends SavedData {
 			Codec.LONG.fieldOf("occurrence").forGetter(AstralLedger.Claim::occurrence),
 			Codec.LONG.fieldOf("game_time").forGetter(AstralLedger.Claim::gameTime)).apply(i, AstralLedger.Claim::new));
 	private static final Codec<AstralLedger> LEDGER = Codec.unboundedMap(Codec.STRING, CLAIM).xmap(AstralLedger::new, AstralLedger::claims);
-	public static final Codec<AstralClaims> CODEC = RecordCodecBuilder.create(i -> i.group(
-			Codec.unboundedMap(UUIDUtil.STRING_CODEC, LEDGER).fieldOf("ledgers").forGetter(d -> d.ledgers),
-			Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.unboundedMap(Codec.STRING, Codec.LONG)).fieldOf("observed").forGetter(d -> d.observed))
-			.apply(i, AstralClaims::new));
+	/** Versioned, and read player by player: a player's claims that cannot be read are kept as written (step 30). */
+	public static final Codec<AstralClaims> CODEC = Saved.versioned("astral_claims", RecordCodecBuilder.create(i -> i.group(
+			Saved.keeping("astral_claims", UUIDUtil.STRING_CODEC, LEDGER).fieldOf("ledgers")
+					.forGetter(d -> new Saved.Kept<>(d.ledgers, d.unreadLedgers)),
+			Saved.keeping("astral_claims", UUIDUtil.STRING_CODEC, Codec.unboundedMap(Codec.STRING, Codec.LONG)).fieldOf("observed")
+					.forGetter(d -> new Saved.Kept<>(d.observed, d.unreadObserved)))
+			.apply(i, AstralClaims::new)));
 	static final SavedDataType<AstralClaims> TYPE = new SavedDataType<>(Jugcraft.id("astral_claims"), AstralClaims::new, CODEC, null);
 
 	private final Map<UUID, AstralLedger> ledgers = new HashMap<>();
 	private final Map<UUID, Map<String, Long>> observed = new HashMap<>();
+	/** Players' claims and observations saved in a form this version cannot read, kept to be written back unchanged. */
+	private final Map<String, Dynamic<?>> unreadLedgers = new LinkedHashMap<>();
+	private final Map<String, Dynamic<?>> unreadObserved = new LinkedHashMap<>();
 
 	AstralClaims() {
 	}
@@ -39,6 +48,12 @@ public final class AstralClaims extends SavedData {
 	AstralClaims(Map<UUID, AstralLedger> ledgers, Map<UUID, Map<String, Long>> observed) {
 		this.ledgers.putAll(ledgers);
 		observed.forEach((player, patterns) -> this.observed.put(player, new TreeMap<>(patterns)));
+	}
+
+	private AstralClaims(Saved.Kept<UUID, AstralLedger> ledgers, Saved.Kept<UUID, Map<String, Long>> observed) {
+		this(ledgers.read(), observed.read());
+		unreadLedgers.putAll(ledgers.unread());
+		unreadObserved.putAll(observed.unread());
 	}
 
 	public static AstralClaims of(MinecraftServer server) {

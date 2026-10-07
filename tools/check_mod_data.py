@@ -7557,6 +7557,7 @@ def check_concordance(registered):
     check_signs(co, root, lang)
     check_authority(root, lang)
     check_economy(root)
+    check_persistence(root)
     check_game_test_entrypoints()
 
 
@@ -9100,7 +9101,7 @@ def check_sympathy(co, root, lang, registered, research):
         err("Sympathy: the moving ward guards the shared boundary")
     # The dream's escrow: one attachment, never copied on death; every ending goes through end().
     expedition = re.search(r'EXPEDITION = AttachmentRegistry[^;]*;', dreaming)
-    if not expedition or "copyOnDeath" in expedition.group(0) or ".persistent(DreamExpedition.CODEC)" not in expedition.group(0):
+    if not expedition or "copyOnDeath" in expedition.group(0) or ".persistent(Saved.versioned(\"dream_expedition\", DreamExpedition.CODEC))" not in expedition.group(0):
         err("Dreaming.EXPEDITION must be one persistent attachment that is not copied on death")
     for event in ("ServerPlayConnectionEvents.JOIN", "ServerPlayConnectionEvents.DISCONNECT", "ServerLivingEntityEvents.ALLOW_DEATH",
                   "ServerPlayerEvents.AFTER_RESPAWN"):
@@ -10086,6 +10087,45 @@ def check_economy(root):
     table = re.search(r"<!-- economy:start -->\n(.*?)\n<!-- economy:end -->", record, re.S)
     if not table or table.group(1).strip() != ec.table().strip():
         err("docs/features/arcane-concordance-economy.md: its table is not tools/concordance_economy.py's (run it and paste)")
+
+
+# Concordance saves whose loads read nothing (never saved), and the bases whose stamp their subclasses inherit.
+UNSAVED_ENTITIES = {"dreaming/DreamWispEntity.java"}
+STAMPING_BASES = ("LivingDeviceBlockEntity", "WorkerEntity")
+# The records whose entries are independent, read entry by entry (an unreadable one kept as written).
+ENTRY_BY_ENTRY = {"spire/SpireRecord.java", "spirits/BoundWills.java", "spirits/WorkerRoster.java", "sky/AstralClaims.java",
+                  "starbound/ConclaveProjects.java"}
+
+
+def check_persistence(root):
+    """Roadmap step 30: every format the Concordance saves in a world carries a version. Each SavedData's codec and each
+    persistent attachment goes through Saved.versioned (which reads saves from before versions and brings older ones
+    forward); each block entity's and creature's save stamps its version (Saved.stamp), directly or through its base;
+    and the records whose entries are independent read entry by entry (Saved.keeping), keeping what they cannot read."""
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    saved = text(root / "Saved.java")
+    for needle in ("public static <A> Codec<A> versioned(", "public static <K, V> Codec<Kept<K, V>> keeping(",
+                   "public static void stamp(ValueOutput output, int version)"):
+        if needle not in saved:
+            err(f"concordance/Saved.java: missing {needle}")
+    for path in sorted(root.rglob("*.java")):
+        source = text(path)
+        relative = path.relative_to(root).as_posix()
+        if re.search(r"extends SavedData\b", source) and not re.search(r"CODEC = Saved\.versioned\(", source):
+            err(f"concordance/{relative}: a SavedData's CODEC goes through Saved.versioned (roadmap step 30)")
+        for match in re.finditer(r"AttachmentRegistry\.<[^;]*?\.persistent\(([^;]*?)\)", source, re.S):
+            if not match.group(1).startswith("Saved.versioned("):
+                err(f"concordance/{relative}: a persistent attachment goes through Saved.versioned ({match.group(1)[:40]})")
+        if re.search(r"void (saveAdditional|addAdditionalSaveData)\(ValueOutput output\)", source) and relative not in UNSAVED_ENTITIES:
+            inherits = any(f"extends {base}" in source for base in STAMPING_BASES)
+            if "Saved.stamp(output, " not in source and not inherits:
+                err(f"concordance/{relative}: its save stamps its version (Saved.stamp) or inherits a base that does")
+            if inherits and "super." not in source.split("ValueOutput output)", 1)[1][:200]:
+                err(f"concordance/{relative}: its save calls its base's, which stamps the version")
+    for relative in ENTRY_BY_ENTRY:
+        if "Saved.keeping(" not in text(root / relative):
+            err(f"concordance/{relative}: its entries are read one by one (Saved.keeping), so one it cannot read is kept")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.concordance.starbound;
 
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.conclave.Projects;
 import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 import io.github.jimbozoomer.jugcraft.party.UseMode;
@@ -71,6 +72,7 @@ public class ConclaveLecternBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		Saved.stamp(output, 1);
 		if (owner != null) {
 			output.store("owner", UUIDUtil.CODEC, owner);
 		}

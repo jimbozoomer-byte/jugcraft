@@ -157,6 +157,7 @@ public class LumenSconceBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		Saved.stamp(output, 1);
 		output.putLong("stored", stored);
 		output.putLong("since", since);
 		if (owner != null) {

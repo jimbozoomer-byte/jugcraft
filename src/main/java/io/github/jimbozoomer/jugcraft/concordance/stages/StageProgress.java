@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.conclave.Conclave;
 import io.github.jimbozoomer.jugcraft.concordance.conclave.Standing;
 import io.github.jimbozoomer.jugcraft.concordance.progression.ProgressionCatalog;
@@ -51,8 +52,8 @@ public final class StageProgress {
 	}
 
 	public static void register() {
-		STAGE = AttachmentRegistry.<String>builder().persistent(Codec.STRING).copyOnDeath().buildAndRegister(Jugcraft.id("concordance_stage"));
-		MILESTONES = AttachmentRegistry.<List<String>>builder().persistent(Codec.STRING.listOf()).copyOnDeath()
+		STAGE = AttachmentRegistry.<String>builder().persistent(Saved.versioned("concordance_stage", Codec.STRING)).copyOnDeath().buildAndRegister(Jugcraft.id("concordance_stage"));
+		MILESTONES = AttachmentRegistry.<List<String>>builder().persistent(Saved.versioned("concordance_milestones", Codec.STRING.listOf())).copyOnDeath()
 				.buildAndRegister(Jugcraft.id("concordance_milestones"));
 		ConcordanceProgress.listen((player, evidence, result) -> {
 			if (!result.transitions().isEmpty()) {

@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.CycleAudit;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.Eligibility;
@@ -104,7 +105,7 @@ public final class Assaying {
 	}
 
 	public static void register() {
-		LEDGER = AttachmentRegistry.<Long>builder().persistent(Codec.LONG).copyOnDeath().buildAndRegister(Jugcraft.id("prima_ledger"));
+		LEDGER = AttachmentRegistry.<Long>builder().persistent(Saved.versioned("prima_ledger", Codec.LONG)).copyOnDeath().buildAndRegister(Jugcraft.id("prima_ledger"));
 		ResourceKey<Block> scaleKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("assayers_scale"));
 		SCALE = Registry.register(BuiltInRegistries.BLOCK, scaleKey, new AssayersScaleBlock(BlockBehaviour.Properties.of()
 				.mapColor(MapColor.WOOD).strength(2.0F, 3.0F).sound(SoundType.WOOD).noOcclusion().setId(scaleKey)));

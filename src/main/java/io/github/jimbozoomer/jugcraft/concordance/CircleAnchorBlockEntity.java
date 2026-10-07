@@ -945,6 +945,7 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		Saved.stamp(output, 1);
 		ContainerHelper.saveAllItems(output, items);
 		if (!this.output.isEmpty()) {
 			output.store("output", ItemStack.CODEC, this.output);

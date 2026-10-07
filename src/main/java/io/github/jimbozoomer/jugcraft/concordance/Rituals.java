@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
@@ -28,9 +30,12 @@ import org.jspecify.annotations.Nullable;
  * pylon's charge changing. Anything else (an explosion, a piston, fluid flowing into a clearance) is caught by the
  * anchor's own checks: every ritual step checks the whole circle again, and an idle report is kept at most
  * {@link CircleAnchorBlockEntity#CACHE_TICKS} ticks. Server thread only.
+ * <p>
+ * The index is kept by chunk (roadmap step 30), so a change looks only at the anchors in the few chunks within reach of
+ * it, however many circles a world holds, and an anchor loaded again is indexed once, never twice.
  */
 public final class Rituals {
-	private static final Map<ResourceKey<Level>, Set<BlockPos>> ANCHORS = new HashMap<>();
+	private static final Map<ResourceKey<Level>, Map<Long, Set<BlockPos>>> ANCHORS = new HashMap<>();
 	private static final List<Completed> COMPLETED = new CopyOnWriteArrayList<>();
 
 	/**
@@ -48,14 +53,19 @@ public final class Rituals {
 	static void register() {
 		ServerBlockEntityEvents.BLOCK_ENTITY_LOAD.register((blockEntity, level) -> {
 			if (blockEntity instanceof CircleAnchorBlockEntity) {
-				ANCHORS.computeIfAbsent(level.dimension(), unused -> new HashSet<>()).add(blockEntity.getBlockPos().immutable());
+				BlockPos pos = blockEntity.getBlockPos().immutable();
+				ANCHORS.computeIfAbsent(level.dimension(), unused -> new HashMap<>())
+						.computeIfAbsent(ChunkPos.containing(pos).pack(), unused -> new HashSet<>()).add(pos);
 			}
 		});
 		ServerBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register((blockEntity, level) -> {
 			if (blockEntity instanceof CircleAnchorBlockEntity) {
-				Set<BlockPos> anchors = ANCHORS.get(level.dimension());
-				if (anchors != null) {
-					anchors.remove(blockEntity.getBlockPos());
+				Map<Long, Set<BlockPos>> chunks = ANCHORS.get(level.dimension());
+				BlockPos pos = blockEntity.getBlockPos();
+				long chunk = ChunkPos.containing(pos).pack();
+				Set<BlockPos> anchors = chunks == null ? null : chunks.get(chunk);
+				if (anchors != null && anchors.remove(pos) && anchors.isEmpty()) {
+					chunks.remove(chunk);
 				}
 			}
 		});
@@ -77,19 +87,37 @@ public final class Rituals {
 	 * them, so a containment that fails because of it is their doing (roadmap step 28).
 	 */
 	public static void changed(ServerLevel level, BlockPos pos, @Nullable UUID player) {
-		Set<BlockPos> anchors = ANCHORS.get(level.dimension());
-		if (anchors == null || anchors.isEmpty()) {
-			return;
-		}
-		int reach = StructurePattern.MAX_REACH;
-		for (BlockPos anchor : List.copyOf(anchors)) {
-			if (Math.abs(anchor.getX() - pos.getX()) <= reach && Math.abs(anchor.getY() - pos.getY()) <= reach
-					&& Math.abs(anchor.getZ() - pos.getZ()) <= reach
-					&& level.getBlockEntity(anchor) instanceof CircleAnchorBlockEntity found) {
+		for (BlockPos anchor : near(level, pos)) {
+			if (level.getBlockEntity(anchor) instanceof CircleAnchorBlockEntity found) {
 				found.invalidate();
 				found.disturbedBy(player, level.getGameTime());
 			}
 		}
+	}
+
+	/** The loaded anchors within {@link StructurePattern#MAX_REACH} of {@code pos}, from the chunks in reach only. */
+	public static List<BlockPos> near(ServerLevel level, BlockPos pos) {
+		Map<Long, Set<BlockPos>> chunks = ANCHORS.get(level.dimension());
+		if (chunks == null || chunks.isEmpty()) {
+			return List.of();
+		}
+		int reach = StructurePattern.MAX_REACH;
+		List<BlockPos> found = new ArrayList<>();
+		for (int cx = (pos.getX() - reach) >> 4; cx <= (pos.getX() + reach) >> 4; cx++) {
+			for (int cz = (pos.getZ() - reach) >> 4; cz <= (pos.getZ() + reach) >> 4; cz++) {
+				Set<BlockPos> anchors = chunks.get(new ChunkPos(cx, cz).pack());
+				if (anchors == null) {
+					continue;
+				}
+				for (BlockPos anchor : anchors) {
+					if (Math.abs(anchor.getX() - pos.getX()) <= reach && Math.abs(anchor.getY() - pos.getY()) <= reach
+							&& Math.abs(anchor.getZ() - pos.getZ()) <= reach) {
+						found.add(anchor);
+					}
+				}
+			}
+		}
+		return found;
 	}
 
 	/** Adds a listener told whenever a ritual completes (at registration). */
@@ -106,7 +134,14 @@ public final class Rituals {
 
 	/** How many anchors are loaded in a level (tests). */
 	public static int loaded(ServerLevel level) {
-		Set<BlockPos> anchors = ANCHORS.get(level.dimension());
-		return anchors == null ? 0 : anchors.size();
+		Map<Long, Set<BlockPos>> chunks = ANCHORS.get(level.dimension());
+		if (chunks == null) {
+			return 0;
+		}
+		int count = 0;
+		for (Set<BlockPos> anchors : chunks.values()) {
+			count += anchors.size();
+		}
+		return count;
 	}
 }
