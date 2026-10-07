@@ -3,7 +3,8 @@
 Run from the repository root:  python3 tools/generate_textures.py
 Every pixel is generated here from fixed seeds; no Mojang texture is read, traced or
 recolored. Colors follow the real minerals: cassiterite is glossy brown-black, tin is
-pale cool silver, bronze is warm golden-brown.
+pale cool silver, bronze is warm golden-brown. Metal parts and powders (plates, gears,
+wire, dusts, washed ore) are drawn by tools/material_style.py.
 """
 import json
 import random
@@ -11,7 +12,9 @@ from pathlib import Path
 
 from PIL import Image
 
+import block_style as bs
 import electric_textures
+import material_style as ms
 
 ROOT = Path(__file__).resolve().parents[1]
 TEX = ROOT / "src" / "main" / "resources" / "assets" / "jugcraft" / "textures"
@@ -161,6 +164,26 @@ def raw_chunk(seed, palette=None, glint=GLINT):
     return img
 
 
+def lump(palette, glint):
+    """A raw lump (bitumen, silicon, coke, borax, ferroboron): the lumpy chunk of tools/material_style.py in the
+    palette's tones, darkest first, with `glint` as its highlight."""
+    tones = sorted(palette, key=bs._luma)
+    return ms.raw_item((tones + tones[-1:] * 3)[:3] + [glint])
+
+
+def ramp5(palette):
+    """Five tones, darkest first, from a palette of three or more: its own tones sorted by lightness (the two closest
+    in lightness merged when there are more than four) under one darker tone for outlines."""
+    tones = sorted(palette, key=bs._luma)
+    while len(tones) > 4:
+        gaps = [bs._luma(tones[i + 1]) - bs._luma(tones[i]) for i in range(len(tones) - 1)]
+        i = gaps.index(min(gaps))
+        tones[i:i + 2] = [bs._lerp(tones[i], tones[i + 1], 0.5)]
+    if len(tones) == 3:
+        tones.insert(1, bs._lerp(tones[0], tones[1], 0.5))
+    return [tuple(int(v * 0.72) for v in tones[0])] + tones
+
+
 def raw_block(seed, palette=None, glint=GLINT):
     palette = palette or CASSITERITE
     rng = random.Random(seed)
@@ -196,24 +219,15 @@ def metal_block(palette, seed):
 
 
 def pile(seed, palette):
-    rng = random.Random(seed)
-    img = new()
-    for y, row in enumerate(PILE):
-        for x, ch in enumerate(row):
-            if ch == "x":
-                img.putpixel((x, y), rng.choice(palette) + (255,))
-    return img
+    """A heap of powder or grains in `palette` (tools/material_style.py's clean heap). `seed` is kept for the
+    callers."""
+    return ms.dust(ramp5(palette))
 
 
 def blend(seed):
-    rng = random.Random(seed)
-    img = new()
-    grey = [TIN[1], TIN[2], TIN[3]]
-    for y, row in enumerate(PILE):
-        for x, ch in enumerate(row):
-            if ch == "x":
-                img.putpixel((x, y), rng.choice(COPPER + COPPER + COPPER + grey) + (255,))
-    return img
+    """Bronze blend: a heap of copper powder with small clumps of tin powder through it. `seed` is kept for the
+    caller."""
+    return ms.blend(COPPER_METAL, TIN)
 
 
 # name: (ore specks, glint, metal palette dark->light). Colors follow the real ore minerals.
@@ -263,60 +277,53 @@ MINERAL_COLORS = {
                  [(140, 84, 36), (178, 116, 52), (206, 150, 78), (226, 180, 110)]),
 }
 
+SULFUR = [(150, 126, 18), (200, 176, 30), (230, 208, 58), (244, 228, 104), (252, 244, 168)]
+
 BAUXITE = [(126, 58, 36), (150, 72, 44), (170, 88, 54), (188, 108, 68), (112, 50, 32)]
 OIL_SAND_BASE = [(176, 152, 108), (190, 166, 120), (160, 136, 94), (146, 124, 86), (132, 110, 76)]
 BITUMEN = [(14, 12, 12), (28, 24, 22), (44, 40, 36)]
 
 
 def speckled(base, seed, specks, count=18):
-    img = rock(base, seed)
-    rng = random.Random(seed + 7)
-    for _ in range(count):
-        img.putpixel((rng.randrange(16), rng.randrange(16)), rng.choice(specks) + (255,))
-    return img
+    """Speckled rock in the manner of vanilla granite or diorite: a clumped base of `base` with about `count` small
+    specks of `specks` spread evenly, never touching."""
+    return bs.img(bs.speckled(sorted(base, key=bs._luma), specks, seed, density=count / 256))
 
 
 def main_extra():
-    seed = 100
-    for metal, (specks, glint, palette) in METAL_COLORS.items():
-        seed += 10
-        if specks:
-            save(ore(STONE, seed, specks=specks, glint=glint), "block", f"{metal}_ore")
-            save(ore(DEEPSLATE, seed + 1, streaks=True, specks=specks, glint=glint), "block", f"deepslate_{metal}_ore")
-            save(raw_block(seed + 2, specks, glint), "block", f"raw_{metal}_block")
-            save(raw_chunk(seed + 3, specks, glint), "item", f"raw_{metal}")
-        save(metal_block(palette, seed + 4), "block", f"{metal}_block")
-        save(from_mask(INGOT, palette), "item", f"{metal}_ingot")
-        save(from_mask(NUGGET, palette), "item", f"{metal}_nugget")
-
+    # The metals' ingots, nuggets and storage blocks, their ores, raw ores and raw blocks, and the minerals' ores are the
+    # material sets (tools/material_icons.py, docs/MATERIAL_SETS.md). The metals kept seeds 110-190, so the minerals'
+    # blocks and items below keep theirs.
+    import material_icons
+    material_icons.draw_materials(save)
+    seed = 100 + 10 * len(METAL_COLORS)
     for mineral, (specks, glint, palette) in MINERAL_COLORS.items():
         seed += 10
-        save(ore(STONE, seed, specks=specks, glint=glint), "block", f"{mineral}_ore")
-        save(ore(DEEPSLATE, seed + 1, streaks=True, specks=specks, glint=glint), "block", f"deepslate_{mineral}_ore")
         save(rock(palette, seed + 2), "block", f"{mineral}_block")
         save(pile(seed + 3, palette), "item", mineral)
 
-    for index, (metal, (_, _, palette)) in enumerate(ALLOY_COLORS.items()):
-        save(metal_block(palette, 700 + index), "block", f"{metal}_block")
-        save(from_mask(INGOT, palette), "item", f"{metal}_ingot")
-        save(from_mask(NUGGET, palette), "item", f"{metal}_nugget")
-
     save(speckled(BAUXITE, 300, [(214, 170, 130), (226, 190, 150)]), "block", "bauxite")
     save(speckled(OIL_SAND_BASE, 301, BITUMEN, count=40), "block", "oil_sand")
-    save(raw_chunk(302, BITUMEN, (120, 116, 110)), "item", "bitumen")
-    save(pile(303, [(222, 200, 40), (240, 222, 70), (250, 238, 120)]), "item", "sulfur_dust")
-    save(raw_chunk(304, [(46, 54, 72), (70, 80, 102), (100, 112, 138)], (190, 206, 236)), "item", "silicon")
+    save(lump(BITUMEN, (120, 116, 110)), "item", "bitumen")
+    save(ms.dust(SULFUR), "item", "sulfur_dust")
+    save(lump([(46, 54, 72), (70, 80, 102), (100, 112, 138)], (190, 206, 236)), "item", "silicon")
     save(pile(305, [(236, 236, 240), (248, 248, 250), (222, 224, 230)]), "item", "lithium_carbonate")
-    save(pile(306, [(232, 196, 210), (196, 224, 196), (240, 228, 196), (214, 206, 232)]), "item", "rare_earth_oxide")
+    # Rare earth oxides: a cream heap with grains of the pastel oxides through it.
+    oxide = ms.dust(ramp5([(214, 204, 186), (232, 222, 204), (244, 236, 220), (252, 248, 238)]))
+    for (x, y), c in zip(sorted(ms.GRAINS), [(232, 196, 210), (196, 224, 196), (214, 206, 232)] * 3):
+        oxide.putpixel((x, y), c + (255,))
+    save(oxide, "item", "rare_earth_oxide")
 
 
 STEEL = [(62, 66, 72), (86, 90, 97), (110, 114, 121), (134, 138, 145), (160, 164, 170)]
 
 
 def panel(seed, palette=STEEL, trim=BRONZE):
-    """A riveted machine panel: bronze frame around a steel plate."""
-    rng = random.Random(seed)
+    """A riveted machine panel: a bronze frame, lit along its top and left and shaded along its bottom and right,
+    round a recessed steel plate. The plate is one ground tone with soft clumps a tone either side, in shadow under
+    the frame's top and left lip and catching the light along its bottom and right (docs/ART_DIRECTION.md)."""
     img = new()
+    g = bs.grain(16, 16, seed, 3.0, 6.0, 0.5)
     for y in range(16):
         for x in range(16):
             if x in (0, 15) or y in (0, 15):
@@ -325,8 +332,13 @@ def panel(seed, palette=STEEL, trim=BRONZE):
                 c = trim[3]
             elif x == 14 or y == 14:
                 c = trim[0]
+            elif x == 2 or y == 2:
+                c = palette[1]
+            elif x == 13 or y == 13:
+                c = palette[3]
             else:
-                c = palette[rng.choice([1, 2, 2, 3])]
+                v = g(x, y)
+                c = palette[3] if v > 0.75 else palette[1] if v < 0.25 else palette[2]
             img.putpixel((x, y), c + (255,))
     for x, y in [(2, 2), (13, 2), (2, 13), (13, 13)]:
         img.putpixel((x, y), trim[4] + (255,))
@@ -334,17 +346,28 @@ def panel(seed, palette=STEEL, trim=BRONZE):
 
 
 def window(seed, inner, glow=None):
-    """A machine front with a recessed dark window; glow colors light it when running."""
+    """A machine front with a recessed window, its top and left inner walls in shadow and its bottom and right ones
+    catching the light. Behind it the inner colours lie in soft clumps; when running, the glow colours rise in smooth
+    bands to the brightest at the bottom, like the fire in a furnace."""
     img = panel(seed)
-    rng = random.Random(seed + 1)
     for y in range(4, 12):
         for x in range(4, 12):
-            edge = x in (4, 11) or y in (4, 11)
-            if edge:
+            if y == 4 or x == 4:
                 img.putpixel((x, y), STEEL[0] + (255,))
-            else:
-                palette = glow if glow else inner
-                img.putpixel((x, y), rng.choice(palette) + (255,))
+            elif y == 11 or x == 11:
+                img.putpixel((x, y), STEEL[3] + (255,))
+    if glow:
+        tones = sorted(glow, key=bs._luma)
+        g = bs.grain(16, 16, seed + 1, 2.0, 4.0, 0.5)
+        for y in range(5, 11):
+            for x in range(5, 11):
+                k = int(round((y - 5) / 5 * (len(tones) - 1) + (g(x, y) - 0.5) * 1.6))
+                img.putpixel((x, y), tones[max(0, min(len(tones) - 1, k))] + (255,))
+    else:
+        s = bs.surface(inner, seed + 1, spread=0.7)
+        for y in range(5, 11):
+            for x in range(5, 11):
+                img.putpixel((x, y), s(x, y) + (255,))
     return img
 
 
@@ -357,13 +380,16 @@ def grate(seed, glow=None):
 
 
 def jaws(seed, active):
+    """Crusher jaws behind the window: a row of teeth above meeting a row below, crumbs between them when running."""
     img = window(seed, [(40, 40, 44), (52, 52, 58)])
     tooth = STEEL[4] if active else STEEL[3]
     for x in range(5, 11):
-        top = 5 + (x % 2)
-        bottom = 10 - (x % 2)
-        img.putpixel((x, top), tooth + (255,))
-        img.putpixel((x, bottom), tooth + (255,))
+        img.putpixel((x, 5), tooth + (255,))
+        img.putpixel((x, 10), STEEL[2] + (255,))
+    for x in (5, 7, 9):
+        img.putpixel((x, 6), tooth + (255,))
+    for x in (6, 8, 10):
+        img.putpixel((x, 9), STEEL[2] + (255,))
     if active:
         for x, y in [(6, 7), (8, 8), (9, 7)]:
             img.putpixel((x, y), (190, 180, 160, 255))
@@ -392,14 +418,14 @@ def washer_front(seed, active):
 
 
 def sieve_front(seed, active):
-    """A fine mesh; grains fall through when running."""
+    """A fine mesh of crossing wires; grains fall through when running."""
     img = window(seed, [(34, 30, 28), (42, 38, 34)])
     for y in range(5, 11):
         for x in range(5, 11):
-            if (x + y) % 2 == 0:
-                img.putpixel((x, y), STEEL[2] + (255,))
+            if x in (6, 8, 10) or y in (6, 8, 10):
+                img.putpixel((x, y), (STEEL[3] if x + y < 15 else STEEL[2]) + (255,))
     if active:
-        for x, y in [(6, 7), (9, 9), (7, 10)]:
+        for x, y in [(7, 7), (9, 9), (7, 9)]:
             img.putpixel((x, y), (190, 170, 120, 255))
     return img
 
@@ -428,10 +454,12 @@ def battery_front(seed):
 
 
 def bricks(seed):
+    """Pale firebricks, one tone a brick, lit along each brick's top edge, with grey mortar."""
     rng = random.Random(seed)
     img = new()
     brick = [(196, 176, 150), (210, 192, 166), (182, 160, 134)]
     mortar = (120, 110, 100)
+    tones = {}
     for y in range(16):
         for x in range(16):
             row = y // 4
@@ -439,7 +467,10 @@ def bricks(seed):
             if y % 4 == 3 or (x + offset) % 8 == 7:
                 c = mortar
             else:
-                c = rng.choice(brick)
+                key = (row, (x + offset) // 8)
+                c = tones.setdefault(key, brick[rng.randrange(3)])
+                if y % 4 == 0:
+                    c = tuple(min(255, v + 12) for v in c)
             img.putpixel((x, y), c + (255,))
     return img
 
@@ -601,12 +632,13 @@ def save_animation(frames, name, frametime=2):
 
 
 def belt_texture():
-    """A dark leather belt: brown with a lighter stitch line along each edge (length runs down the texture)."""
-    rng = random.Random(970)
+    """A dark leather belt: brown in soft clumps with a lighter stitch line along each edge (length runs down the
+    texture)."""
     img = new()
+    g = bs.grain(16, 16, 970, 2.0, 5.0, 0.5)
     for y in range(16):
         for x in range(16):
-            c = (74, 46, 28) if rng.random() < 0.7 else (86, 54, 32)
+            c = (86, 54, 32) if g(x, y) > 0.66 else (74, 46, 28)
             if x in (1, 14):
                 c = (168, 136, 96) if y % 3 else (74, 46, 28)
             if x in (0, 15):
@@ -618,11 +650,10 @@ def belt_texture():
 def conveyor_frame(shift):
     """Rubberised conveyor belt, seen from above with the front (where items go) at the top: dark rubber with
     chevron ribs pointing forwards. Shifting the ribs two pixels a frame makes them run at the items' speed."""
-    rng = random.Random(975)
     img = new()
     for y in range(16):
         for x in range(16):
-            c = (38, 36, 34) if rng.random() < 0.75 else (46, 43, 40)
+            c = (38, 36, 34)
             phase = (y - int(abs(x - 7.5) / 2) + shift) % 8
             if phase == 0:
                 c = (78, 74, 68)
@@ -785,54 +816,52 @@ def pump_port(seed, intake):
 
 
 def hazard_plinth(seed):
-    """Dark steel footing with a yellow-black hazard edge."""
-    rng = random.Random(seed)
+    """Dark steel footing in soft clumps with a yellow-black hazard edge."""
     img = new()
+    s = bs.surface(STEEL[:3], seed, weights=[1, 3, 1], spread=0.7)
     for y in range(16):
         for x in range(16):
             if y in (0, 15) or x in (0, 15):
                 c = (214, 170, 40) if (x + y) // 2 % 2 else (30, 28, 26)
             else:
-                c = STEEL[rng.choice([0, 1, 1])]
+                c = s(x, y)
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def geothermal_front(seed, lit):
-    """Vented front with a glowing heat exchanger when running."""
+    """Vented front: steel slats over a heat exchanger that glows in soft clumps when running."""
     img = panel(seed)
     glow = [(255, 120, 20), (255, 170, 40), (230, 80, 10)] if lit else [(60, 30, 24), (74, 36, 28)]
-    rng = random.Random(seed + 1)
+    s = bs.surface(glow, seed + 1, spread=0.7)
     for y in range(3, 13):
         for x in range(3, 13):
-            if y % 2 == 0:
-                img.putpixel((x, y), STEEL[0] + (255,))
-            else:
-                img.putpixel((x, y), rng.choice(glow) + (255,))
+            img.putpixel((x, y), (STEEL[0] if y % 2 == 0 else s(x, y)) + (255,))
     return img
 
 
 def geothermal_tank(seed):
     """Tinted steel shell with a narrow window of lava."""
-    rng = random.Random(seed)
     img = new()
-    lava = [(230, 90, 20), (250, 140, 30), (200, 60, 10)]
+    shell = bs.surface(STEEL[:3], seed, weights=[1, 3, 1], spread=0.6)
+    lava = bs.surface([(230, 90, 20), (250, 140, 30), (200, 60, 10)], seed + 1, spread=0.8)
     for y in range(16):
         for x in range(16):
             if 6 <= x <= 9 and 2 <= y <= 13:
-                c = STEEL[0] if x in (6, 9) else rng.choice(lava)
+                c = STEEL[0] if x in (6, 9) else lava(x, y)
             else:
-                c = (STEEL[1] if (x + y) % 5 else STEEL[2])
+                c = shell(x, y)
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def stack(seed):
-    rng = random.Random(seed)
+    """Chimney stack: steel rings with a dark seam every four pixels."""
     img = new()
+    s = bs.surface([STEEL[1], STEEL[2]], seed, spread=0.6)
     for y in range(16):
         for x in range(16):
-            c = STEEL[0] if y % 4 == 0 else STEEL[rng.choice([1, 2])]
+            c = STEEL[0] if y % 4 == 0 else STEEL[3] if y % 4 == 1 else s(x, y)
             img.putpixel((x, y), c + (255,))
     return img
 
@@ -850,31 +879,33 @@ def lattice(seed):
 
 
 def nacelle(seed):
-    rng = random.Random(seed)
+    """White fibreglass housing, a shade darker along its top seam, with a few soft clumps."""
     img = new()
+    g = bs.grain(16, 16, seed, 3.0, 6.0, 0.5)
     for y in range(16):
         for x in range(16):
-            c = (224, 226, 228) if y > 1 else (180, 184, 190)
-            if rng.random() < 0.08:
-                c = (206, 208, 212)
+            c = (180, 184, 190) if y <= 1 else (206, 208, 212) if g(x, y) < 0.3 else (224, 226, 228)
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def blade(seed):
+    """White blade skin with one soft sheen running along it."""
     img = new()
     for y in range(16):
         for x in range(16):
-            c = (238, 240, 242) if (x + y) % 4 else (216, 220, 226)
+            c = (246, 247, 248) if abs(x - y) <= 1 else (238, 240, 242) if x + y < 22 else (226, 230, 234)
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def blade_tip():
+    """Red warning paint on the blade tip, lit along one sheen."""
     img = new()
     for y in range(16):
         for x in range(16):
-            img.putpixel((x, y), ((206, 56, 46) if (x + y) % 4 else (180, 44, 38)) + (255,))
+            c = (226, 74, 62) if abs(x - y) <= 1 else (206, 56, 46) if x + y < 22 else (184, 46, 38)
+            img.putpixel((x, y), c + (255,))
     return img
 
 
@@ -893,30 +924,33 @@ def turbine_front(seed):
 
 
 def firebrick(seed):
-    """Small red-brown refractory bricks."""
+    """Small red-brown refractory bricks, one tone a brick, lit along each brick's top edge."""
     rng = random.Random(seed)
     img = new()
     brick = [(142, 62, 40), (158, 72, 46), (126, 54, 36)]
+    tones = {}
     for y in range(16):
         for x in range(16):
             offset = 2 if (y // 3) % 2 else 0
             if y % 3 == 2 or (x + offset) % 4 == 3:
                 c = (84, 72, 64)
             else:
-                c = rng.choice(brick)
+                c = tones.setdefault((y // 3, (x + offset) // 4), brick[rng.randrange(3)])
+                if y % 3 == 0:
+                    c = tuple(min(255, v + 14) for v in c)
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def crucible(seed):
-    """Dark cast iron with a glowing seam, for the alloy crucible."""
-    rng = random.Random(seed)
+    """Dark cast iron in soft clumps with two glowing seams, for the alloy crucible."""
     img = new()
+    s = bs.surface([(38, 36, 38), (46, 44, 46), (56, 54, 56)], seed, spread=0.7)
     for y in range(16):
         for x in range(16):
-            c = rng.choice([(46, 44, 46), (56, 54, 56), (38, 36, 38)])
+            c = s(x, y)
             if y in (4, 11) and 2 <= x <= 13:
-                c = (240, 130, 40) if x % 3 else (255, 190, 80)
+                c = (255, 190, 80) if 5 <= x <= 10 else (240, 130, 40)
             img.putpixel((x, y), c + (255,))
     return img
 
@@ -999,9 +1033,9 @@ def gui():
 
 
 def solar_top():
+    """Four blue photovoltaic cells in a bronze frame, split by silver bus bars, each lit at its top left."""
     img = new()
     cell = [(22, 34, 78), (28, 44, 96), (34, 54, 112)]
-    rng = random.Random(600)
     for y in range(16):
         for x in range(16):
             if x in (0, 15) or y in (0, 15):
@@ -1009,19 +1043,21 @@ def solar_top():
             elif x in (5, 10) or y in (5, 10):
                 c = (176, 182, 190)
             else:
-                c = rng.choice(cell)
-                if rng.random() < 0.06:
-                    c = (120, 150, 220)
+                cx, cy = (x - 1) % 5, (y - 1) % 5
+                c = cell[2] if cx + cy <= 1 else cell[0] if cx + cy >= 6 else cell[1]
             img.putpixel((x, y), c + (255,))
     return img
 
 
 def boiler(seed, lit):
+    """A round bronze boiler end, lit at its upper left, with a pressure gauge and a firebox slot below."""
     img = panel(seed)
     for y in range(3, 13):
         for x in range(3, 13):
-            if (x - 7.5) ** 2 + (y - 7.5) ** 2 <= 20:
-                img.putpixel((x, y), BRONZE[2 if (x + y) % 3 else 3] + (255,))
+            dx, dy = x - 7.5, y - 7.5
+            if dx * dx + dy * dy <= 20:
+                c = BRONZE[3] if dx + dy < -2.5 else BRONZE[1] if dx + dy > 3 else BRONZE[2]
+                img.putpixel((x, y), c + (255,))
     gauge = (238, 238, 230)
     for x, y in [(6, 5), (7, 5), (8, 5), (9, 5), (6, 6), (9, 6)]:
         img.putpixel((x, y), gauge + (255,))
@@ -1041,7 +1077,7 @@ def crucibles(seed, lit):
                 if edge:
                     c = STEEL[0]
                 elif lit and y >= 7:
-                    c = [(250, 150, 40), (255, 200, 80), (230, 110, 30)][(x + y) % 3]
+                    c = (230, 110, 30) if y <= 8 else (250, 150, 40) if y == 9 else (255, 200, 80)
                 else:
                     c = (40, 36, 34)
                 img.putpixel((x, y), c + (255,))
@@ -1060,72 +1096,12 @@ def part_palette(metal):
         return fixed[metal]
     if metal in METAL_COLORS:
         return METAL_COLORS[metal][2]
-    return ALLOY_COLORS[metal][2]
-
-
-def dust(palette):
-    """A heap of metal powder: mid tones with dark grains, lighter on the lit top-left."""
-    rng = random.Random(sum(palette[2]))
-    img = new()
-    for y, row in enumerate(PILE):
-        for x, ch in enumerate(row):
-            if ch == "x":
-                shade = rng.choice([1, 2, 2, 3]) + (1 if x + y < 14 else 0)
-                if rng.random() < 0.12:
-                    shade = 0
-                img.putpixel((x, y), palette[min(4, shade)] + (255,))
-    return img
-
-
-def washed_ore(metal, seed):
-    """A clean chunk of ore in the metal's own colours, still wet: a few blue highlights."""
-    img = raw_chunk(seed, part_palette(metal)[1:4], (236, 246, 255))
-    for x, y in [(5, 9), (10, 7), (7, 11)]:
-        img.putpixel((x, y), (120, 190, 240, 255))
-    return img
-
-
-def plate(palette):
-    img = new()
-    for y in range(3, 13):
-        for x in range(2, 14):
-            if x == 2 or y == 3:
-                c = palette[4]
-            elif x == 13 or y == 12:
-                c = palette[0]
-            else:
-                c = palette[2 if (x + y) % 5 else 3]
-            img.putpixel((x, y), c + (255,))
-    return img
-
-
-def gear(palette):
-    img = new()
-    for y in range(16):
-        for x in range(16):
-            dx, dy = x - 7.5, y - 7.5
-            r2 = dx * dx + dy * dy
-            tooth = (abs(dx) < 1.6 or abs(dy) < 1.6 or abs(abs(dx) - abs(dy)) < 1.2)
-            if r2 <= 2.2:
-                continue  # axle hole
-            if r2 <= 22 or (r2 <= 49 and tooth):
-                shade = 4 if dx + dy < -4 else (0 if dx + dy > 5 else 2)
-                img.putpixel((x, y), palette[shade] + (255,))
-    return img
-
-
-def wire(palette):
-    img = new()
-    for i in range(4):
-        cy = 4 + i * 3
-        for x in range(3, 13):
-            y = cy + (1 if (x // 2) % 2 else 0)
-            img.putpixel((x, y), palette[3 if x % 3 else 4] + (255,))
-            img.putpixel((x, y + 1), palette[1] + (255,))
-    for y in range(3, 15):
-        img.putpixel((2, y), (96, 70, 44, 255))
-        img.putpixel((13, y), (96, 70, 44, 255))
-    return img
+    if metal in ALLOY_COLORS:
+        return ALLOY_COLORS[metal][2]
+    # Metals added since the material sets (thallite) draw their plates, dusts and washed ores in their set's own ramp
+    # (tools/material_icons.py), outline to highlight.
+    import material_icons
+    return list(material_icons.METAL_RAMPS[metal])
 
 
 def circuit(advanced):
@@ -1192,11 +1168,11 @@ def drawer_front(seed, lit):
 
 
 def assembler_front(seed, lit):
+    """A circuit board behind the window: gold traces that brighten when running."""
     img = window(seed, [(24, 60, 40), (28, 70, 46)])
-    for x in range(5, 11):
-        for y in range(5, 11):
-            if (x + y) % 3 == 0:
-                img.putpixel((x, y), ((230, 200, 90) if lit else (120, 110, 70)) + (255,))
+    trace = (230, 200, 90) if lit else (120, 110, 70)
+    for x, y in [(x, 6) for x in range(5, 11)] + [(x, 9) for x in range(5, 11)] + [(7, 7), (7, 8), (9, 7), (9, 8)]:
+        img.putpixel((x, y), trace + (255,))
     return img
 
 
@@ -1233,15 +1209,15 @@ def machines():
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from materials import COMPONENTS
-    for form, draw in (("plate", plate), ("gear", gear), ("wire", wire), ("dust", dust)):
+    for form, draw in (("plate", ms.plate), ("gear", ms.gear), ("wire", ms.wire), ("dust", ms.dust)):
         for metal in COMPONENTS[form]:
             save(draw(part_palette(metal)), "item", f"{metal}_{form}")
     from materials import WASHED_ORES
-    for index, metal in enumerate(WASHED_ORES):
-        save(washed_ore(metal, 900 + index), "item", f"washed_{metal}_ore")
+    for metal in WASHED_ORES:
+        save(ms.washed(part_palette(metal)), "item", f"washed_{metal}_ore")
     save(pile(950, [(196, 160, 108), (214, 180, 126), (176, 140, 92), (230, 200, 150)]), "item", "sawdust")
     # Coke: porous gray-black lumps with a dull silver sheen.
-    save(raw_chunk(951, [(28, 28, 30), (48, 48, 52), (74, 74, 80)], (150, 150, 158)), "item", "coke")
+    save(lump([(28, 28, 30), (48, 48, 52), (74, 74, 80)], (150, 150, 158)), "item", "coke")
     glass_textures()
     ember = [(250, 140, 30), (255, 190, 60), (220, 80, 20)]
     save(grate(952), "block", "coke_oven_front")
@@ -1321,6 +1297,17 @@ def machines():
     save(jaws(956, False), "block", "ore_drill_front")
     save(jaws(956, True), "block", "ore_drill_front_on")
     save(window(953, [(30, 26, 26)], glow=[(255, 200, 80), (255, 236, 150), (250, 150, 40)]), "block", "steel_foundry_front_on")
+    # The refinery's later machines: their fronts were first committed as pictures in the old style; drawn here now so
+    # they match the rest.
+    fire = [(255, 170, 40), (255, 214, 110), (230, 140, 30)]
+    for index, (machine, inner, glow) in enumerate((
+            ("catalytic_reformer", [(30, 26, 26), (44, 36, 34)], fire),
+            ("chemical_mixer", [(40, 46, 50), (52, 60, 64)], fire),
+            ("crystal_grower", [(40, 46, 50), (52, 60, 64)], [(80, 210, 230), (150, 240, 250), (60, 170, 200)]),
+            ("oil_sand_extractor", [(40, 34, 26), (52, 44, 32)], fire),
+            ("vacuum_distillation_unit", [(30, 26, 26), (44, 36, 34)], fire))):
+        save(window(990 + index, inner), "block", f"{machine}_front")
+        save(window(990 + index, inner[:1], glow=glow), "block", f"{machine}_front_on")
     save(circuit(False), "item", "basic_circuit")
     save(circuit(True), "item", "advanced_circuit")
     save(processor(), "item", "processor")
@@ -1381,6 +1368,16 @@ def machines():
     artillery.draw_all(save)
     import tower_guns
     tower_guns.draw_all(save)
+    import fortifications
+    fortifications.draw_all(save)
+    import bunkerworks
+    bunkerworks.draw_all(save)
+    import fire_control
+    fire_control.draw_all(save)
+    import raiders
+    import armoured_walker
+    armoured_walker.draw_all(save)
+    raiders.draw_all(save)
     import plastic
     plastic.draw_all(save)
     save(conveyor_frame(0), "block", "conveyor_belt")
@@ -1436,7 +1433,7 @@ def glass_textures():
     """Glass chemistry (batch 16): tincal crust, borax crystals, borosilicate glass and a coil of optical fibre."""
     save(speckled([(214, 206, 186), (224, 216, 196), (204, 196, 176), (232, 226, 210), (196, 188, 168)], 1601,
                   [(246, 246, 240), (236, 240, 244), (180, 176, 164)], count=36), "block", "tincal")
-    save(raw_chunk(1602, [(196, 200, 204), (226, 230, 234), (246, 248, 250)], (255, 255, 255)), "item", "borax")
+    save(lump([(196, 200, 204), (226, 230, 234), (246, 248, 250)], (255, 255, 255)), "item", "borax")
     glass = new()
     for y in range(2, 14):
         shift = (13 - y) // 4
@@ -1455,20 +1452,10 @@ def glass_textures():
     for x, y in ((13, 7), (14, 6), (15, 5)):
         fibre.putpixel((x, y), (200, 250, 255, 255))
     save(fibre, "item", "optical_fibre")
-    save(raw_chunk(1603, [(70, 72, 78), (104, 106, 114), (140, 142, 150)], (210, 214, 222)), "item", "ferroboron")
+    save(lump([(70, 72, 78), (104, 106, 114), (140, 142, 150)], (210, 214, 222)), "item", "ferroboron")
 
 
 def main():
-    save(ore(STONE, 11), "block", "tin_ore")
-    save(ore(DEEPSLATE, 12, streaks=True), "block", "deepslate_tin_ore")
-    save(raw_block(13), "block", "raw_tin_block")
-    save(metal_block(TIN, 14), "block", "tin_block")
-    save(metal_block(BRONZE, 15), "block", "bronze_block")
-    save(raw_chunk(16), "item", "raw_tin")
-    save(from_mask(INGOT, TIN), "item", "tin_ingot")
-    save(from_mask(NUGGET, TIN), "item", "tin_nugget")
-    save(from_mask(INGOT, BRONZE), "item", "bronze_ingot")
-    save(from_mask(NUGGET, BRONZE), "item", "bronze_nugget")
     save(blend(17), "item", "bronze_blend")
     icon = ore(STONE, 11)
     icon.paste(from_mask(INGOT, BRONZE), (0, 3), from_mask(INGOT, BRONZE))
@@ -1481,6 +1468,8 @@ def main():
     dieselpunk_textures.draw_all()
     import dieselrust_textures
     dieselrust_textures.draw_all()
+    import mill_textures
+    mill_textures.draw_all()
     electric_textures.draw_all()
     import crop_textures
     for (kind, name), image in crop_textures.crop_textures().items():

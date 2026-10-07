@@ -121,7 +121,64 @@ SHAPES = {
     "dead_tree": {"wood": "dead", "survives_as": "minecraft:oak_sapling",
                   "trunk": {"type": "fancy", "base_height": 5, "height_rand_a": 4},
                   "foliage": None},
+    # The tree roster's batch 1 (docs/branches/TREES.md, docs/features/trees-batch-1.md): northern, wet and cool-forest
+    # shapes, all but the cedar on existing woods.
+    # A stunted fir: young or suppressed balsam fir, a squat cone with needles nearly to the ground.
+    "stunted_fir": {"wood": "fir",
+                    "trunk": {"type": "straight", "base_height": 4, "height_rand_a": 3},
+                    "foliage": {"type": "spruce", "radius": [1, 2], "offset": [0, 1], "trunk_height": [0, 1]}},
+    # A bog fir: black spruce drawn on fir, a pencil-thin, ragged spire with a tuft at its top (a "club top").
+    "bog_fir": {"wood": "fir",
+                "trunk": {"type": "straight", "base_height": 4, "height_rand_a": 3},
+                "foliage": {"type": "spruce", "radius": [0, 1], "offset": [0, 1], "trunk_height": [2, 3]}},
+    # A subalpine fir: a tall, narrow spire over a short bare bole, flaring a little at its foot.
+    "subalpine_fir": {"wood": "fir",
+                      "trunk": {"type": "straight", "base_height": 10, "height_rand_a": 4},
+                      "foliage": {"type": "spruce", "radius": [1, 2], "offset": [1, 2], "trunk_height": [3, 4]}},
+    # A fir bush: krummholz, one fir log in a low, dark, wind-pressed mound of needles.
+    "fir_bush": {"wood": "fir",
+                 "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},
+                 "foliage": {"type": "bush", "radius": 2, "offset": 1, "height": 2}},
+    # A tamarack: a thin larch pole with a small, sparse tuft at its top (vanilla's pine foliage shape), gold in
+    # autumn and bare in winter. The larch sapling still grows Alpine Spawn's cone.
+    "tamarack": {"wood": "larch",
+                 "trunk": {"type": "straight", "base_height": 6, "height_rand_a": 3},
+                 "foliage": {"type": "pine", "radius": 1, "offset": 1, "height": 3}},
+    # Dead snags: straight grey spars broken off at the top, and about a quarter with one crooked top (vanilla's
+    # bending trunk), both bare like the dead tree, standing where an oak sapling could. The bent snag's "leaves" (air)
+    # start above its tallest trunk, as the young aspen's do: otherwise the bending trunk gives every trunk log a crown
+    # whose air could replace water beside a low bend in a swamp's 2-deep water.
+    "dead_snag": {"wood": "dead", "survives_as": "minecraft:oak_sapling",
+                  "trunk": {"type": "straight", "base_height": 3, "height_rand_a": 4, "height_rand_b": 3},
+                  "foliage": None},
+    "dead_snag_bent": {"wood": "dead", "survives_as": "minecraft:oak_sapling",
+                       "trunk": {"type": "bending", "base_height": 4, "height_rand_a": 3, "min_height_for_leaves": 8,
+                                 "bend_length": 1},
+                       "foliage": None},
+    # A willow bush: shrub willow, a low, round mound of willow leaves with no hanging curtains.
+    "willow_bush": {"wood": "willow",
+                    "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 1},
+                    "foliage": {"type": "bush", "radius": 2, "offset": 1, "height": 2}},
+    # A young aspen: a thin, slightly leaning white pole. Its leaves start above its tallest trunk, so only the bend
+    # carries a crown, not a stack of blobs.
+    "young_aspen": {"wood": "aspen",
+                    "trunk": {"type": "bending", "base_height": 4, "height_rand_a": 2, "min_height_for_leaves": 7,
+                              "bend_length": 1},
+                    "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 3}},
+    # Cedar: the swamp cedar (Atlantic and northern white cedar), a clear, stringy red-brown bole under a dense,
+    # narrow cone of scale-leaves. Its own wood, from the owner's painted western red cedar.
+    "cedar": {"wood": "cedar", "sapling": True,
+              "trunk": {"type": "straight", "base_height": 7, "height_rand_a": 3},
+              "foliage": {"type": "spruce", "radius": [1, 2], "offset": [0, 1], "trunk_height": [3, 5]}},
+    # A mossy maple: the bigleaf maple of temperate rainforests, spreading like a big maple, with moss carpet on the
+    # upper faces of its limbs (vanilla's attached_to_logs, as FALLEN's mushrooms use it) and vines on trunk and leaves.
+    "mossy_maple": {"wood": "maple",
+                    "trunk": {"type": "fancy", "base_height": 9, "height_rand_a": 4},
+                    "foliage": {"type": "fancy", "radius": 2, "offset": 4, "height": 4},
+                    "decorators": [{"type": "minecraft:attached_to_logs", "probability": 0.35,
+                                    "block_provider": {"id": "minecraft:moss_carpet"}, "directions": ["up"]},
+                                   {"type": "minecraft:trunk_vine"}, {"type": "minecraft:leave_vine", "probability": 0.3}]},
 }
 
 # Fallen logs lying on the forest floor (vanilla's fallen_tree feature), with mushrooms on some.
-FALLEN = {"fir": [5, 8], "maple": [4, 6], "aspen": [5, 7], "dead": [4, 7], "redwood": [6, 9]}
+FALLEN = {"fir": [5, 8], "maple": [4, 6], "aspen": [5, 7], "dead": [4, 7], "redwood": [6, 9], "larch": [5, 8]}

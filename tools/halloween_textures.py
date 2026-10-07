@@ -1,7 +1,9 @@
 """Original 16x16 textures for the Agriculture branch's Halloween harvest (requires Pillow).
 
 Called from crop_textures.crop_textures(). As with the rest of the branch's art, every pixel is drawn here
-by code from fixed seeds; no Mojang texture is read, traced or recoloured. The giant pumpkin's sides and top
+by code from fixed seeds; no Mojang texture is read, traced or recoloured. Surfaces are painted in the manner of the
+vanilla blocks with tools/block_style.py: variation in small clumps, never a random colour at every pixel; wood as
+planks and straw as streaks. The giant pumpkin's sides and top
 are drawn as one big picture per size (32x32 or 48x48) and cut into 16x16 tiles, one per block face; each
 picture is mirror-symmetric, so the pumpkin looks the same from every side. Block textures are opaque except
 where a plant, decoration or cut-out shape needs see-through pixels.
@@ -15,6 +17,7 @@ from agriculture import GIANT_PUMPKIN, DYE_COLORS, giant_tile
 from crop_textures import Canvas, rgb, outline, seeds_item, corn_stalk_middle, KERNEL6, LEAF
 from festival_textures import gourd_side, gourd_top, STALK, BARK
 from kitchen_textures import bowl_item
+import block_style as bs
 
 GIANT = [rgb("7c3e0e"), rgb("a45616"), rgb("c86e1e"), rgb("df8a2c"), rgb("eda444"), rgb("f6c06a")]
 GIANT_STEM = [rgb("3d3a16"), rgb("5a5422"), rgb("7a7232"), rgb("9a9046")]
@@ -70,8 +73,7 @@ def giant_side_picture(size):
     """One side of a giant pumpkin `size` blocks wide: deep ribs every 8 pixels, swelling between them,
     darker towards the top, bottom and the two edges where it curves away. Mirror-symmetric."""
     width = size * 16
-    rng = random.Random(4100 + size)
-    half_noise = [[rng.random() for _ in range(width // 2)] for _ in range(width)]
+    grain = bs.grain(width, width, 4100 + size)
     img = Image.new("RGBA", (width, width))
     for y in range(width):
         for x in range(width):
@@ -80,11 +82,11 @@ def giant_side_picture(size):
             u = (x + 0.5) / width
             light = 3.4 - 1.6 * max(0.0, swell) ** 2 + 0.5 * (1 - swell) / 2
             light -= 1.8 * max(0.0, abs(v - 0.45) - 0.3) * 4 + 1.6 * max(0.0, abs(u - 0.5) - 0.38) * 5
-            noise = half_noise[y][min(x, width - 1 - x)]
-            if noise < 0.07:
-                light -= 0.6
-            elif noise > 0.95:
-                light += 0.5
+            v = grain(min(x, width - 1 - x), y)    # mirrored, so the side stays symmetric
+            if v < 0.3:
+                light -= 0.45
+            elif v > 0.7:
+                light += 0.4
             img.putpixel((x, y), GIANT[max(0, min(5, int(round(light))))] + (255,))
     return img
 
@@ -93,7 +95,7 @@ def giant_top_picture(size):
     """The top: ribs running into a thick, corky stem in the middle, darker out at the rim."""
     width = size * 16
     middle = width / 2
-    rng = random.Random(4200 + size)
+    grain = bs.grain(width, width, 4200 + size)
     img = Image.new("RGBA", (width, width))
     for y in range(width):
         for x in range(width):
@@ -102,8 +104,8 @@ def giant_top_picture(size):
             angle = math.atan2(dy, dx)
             rib = math.cos(angle * size * 6)
             light = 4.2 - 2.4 * dist - (0.9 if rib > 0.75 and dist > 0.15 else 0)
-            if rng.random() < 0.06:
-                light -= 0.6
+            if grain(x, y) < 0.3:
+                light -= 0.45
             color = GIANT[max(0, min(5, int(round(light))))]
             stem_radius = 2.5 + size
             if math.hypot(dx, dy) < stem_radius:
@@ -116,10 +118,7 @@ def giant_top_picture(size):
 
 def giant_bottom():
     c = Canvas()
-    rng = random.Random(4300)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, GIANT[1 if rng.random() < 0.2 else 2])
+    bs.fill(c, 0, 0, 15, 15, GIANT[1:3], 4300, [1, 4])
     return c.img
 
 
@@ -150,7 +149,7 @@ def wood_grain(c, palette, seed, vertical=True, x0=0, y0=0, x1=15, y1=15):
 def scale_side():
     """Planks with an iron band along the top of the platform (rows 12-15 show on the platform's sides)."""
     c = Canvas()
-    wood_grain(c, PLANK, 5100, vertical=False)
+    bs.planks(PLANK, 5100)(c)
     for x in range(16):
         c.px(x, 12, IRON[2])
         c.px(x, 15, IRON[1])
@@ -161,7 +160,7 @@ def scale_side():
 
 def scale_top():
     c = Canvas()
-    wood_grain(c, PLANK, 5200, vertical=False)
+    bs.planks(PLANK, 5200)(c)
     for i in range(16):
         for edge in (0, 15):
             c.px(i, edge, IRON[1])
@@ -174,7 +173,7 @@ def scale_top():
 def scale_dial():
     """The dial in columns 5-10, rows 2-11 (where the post shows it): a white face, ticks and a red needle."""
     c = Canvas()
-    wood_grain(c, PLANK, 5300)
+    bs.planks(PLANK, 5300, vertical=True)(c)
     for y in range(2, 12):
         for x in range(5, 11):
             c.px(x, y, IRON[1])
@@ -194,33 +193,25 @@ def scale_dial():
 
 def straw():
     c = Canvas()
-    rng = random.Random(5400)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, STRAW[2 if (x + rng.randrange(3)) % 3 else 1])
-    for _ in range(18):
-        x, y = rng.randrange(16), rng.randrange(16)
-        c.px(x, y, STRAW[4])
-        c.px(x, y + 1, STRAW[3])
+    bs.streaks(STRAW, 5400, spread=0.9)(c)
     return c.img
 
 
 def post():
     c = Canvas()
-    wood_grain(c, BARK[1:], 5500)
+    bs.streaks(BARK[1:], 5500, along=6.0)(c)
     return c.img
 
 
 def trousers():
     """Patched denim, stuffed: the legs show the whole texture's width."""
     c = Canvas()
-    rng = random.Random(5600)
     for y in range(16):
         for x in range(16):
-            c.px(x, y, DENIM[2 if (x + y) % 3 else 1] if rng.random() > 0.08 else DENIM[3])
+            c.px(x, y, DENIM[2 if (x + y) % 3 else 1])  # the twill
     for y in range(8, 12):
         for x in range(3, 7):
-            c.px(x, y, PATCH[(x + y) % 2])
+            c.px(x, y, PATCH[0])
     for x in range(3, 7):
         c.px(x, 8, PATCH[1])
     for y in (0, 15):
@@ -249,7 +240,6 @@ def flannel(color):
 def stook(top):
     """Dry corn stalks standing round: wide at the ground (lower) or drawn in and tied with a band (upper)."""
     c = Canvas()
-    rng = random.Random(5700 + top)
     for i in range(9):
         x_ground = 1 + i * 1.75
         for y in range(16):
@@ -259,7 +249,7 @@ def stook(top):
                 x = 8 + (x_ground - 8) * (0.3 + 0.5 * (1 - t)) if y < 9 else 8 + (x_ground - 8) * (0.25 + 0.15 * (t - 0.6))
             else:
                 x = 8 + (x_ground - 8) * (0.45 + 0.55 * t)
-            c.px(x, y, STRAW[1 + (i % 3)] if rng.random() > 0.1 else STRAW[0])
+            c.px(x, y, STRAW[1 + (i % 3)])
     if top:
         for x in range(5, 11):
             c.px(x, 9, rgb("8a7a5a"))
@@ -270,14 +260,16 @@ def stook(top):
 
 
 def ear_of(c, x, top, length, seed, husk=True):
-    """A hanging ear of flint corn: multicoloured kernels, with its husk pulled up above it."""
+    """A hanging ear of flint corn: kernels of one colour, every third kernel another, with its husk pulled up above
+    it."""
     rng = random.Random(seed)
+    main, accent = rng.sample(FLINT, 2)
     for i in range(length):
         y = top + i
         half = 1.5 if 1 <= i < length - 1 else 1.0
         for dx in (-1, 0, 1):
             if abs(dx) <= half:
-                kernel = FLINT[rng.randrange(len(FLINT))]
+                kernel = accent if (i + dx) % 3 == 0 else main
                 c.px(x + dx, y, kernel if dx < 1 else shade(kernel, 0.8))
     if husk:
         for i in range(4):
@@ -300,10 +292,7 @@ def corn_bundle():
 def birdhouse_side(front):
     """A dried gourd's skin, mottled; the front has a round door with a perch peg under it (columns 4-11, rows 4-10)."""
     c = Canvas()
-    rng = random.Random(5900 + front)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, DRIED[2 if rng.random() > 0.2 else rng.choice((1, 3))])
+    bs.fill(c, 0, 0, 15, 15, DRIED[1:4], 5900 + front, [1, 4, 1])
     if front:
         for y in range(5, 9):
             for x in range(6, 10):
@@ -338,10 +327,11 @@ def birdhouse_string():
 def mum_bush(colors, seed):
     """A garden mum: a mound of small leaves topped with round, many-petalled blooms."""
     c = Canvas()
-    rng = random.Random(seed)
-    for _ in range(40):
-        x, y = rng.uniform(2, 13), rng.uniform(9, 15)
-        c.px(x, y, LEAF[rng.choice((1, 2, 3))])
+    leaves = bs.surface(LEAF[1:4], seed)
+    for y in range(9, 16):
+        for x in range(2, 14):
+            if ((x - 7.5) / 6.2) ** 2 + ((y - 15.5) / 6.5) ** 2 <= 1:
+                c.px(x, y, leaves(x, y))
     for x in (5, 8, 11):
         for y in range(10, 16):
             c.px(x + (y % 3 == 0), y, LEAF[1])
@@ -350,11 +340,8 @@ def mum_bush(colors, seed):
             for dx in range(-3, 4):
                 d = math.hypot(dx, dy)
                 if d <= r:
-                    petal = 3 if (dx + dy) % 2 == 0 else 2
-                    if d < 0.9:
-                        petal = 0
-                    elif d < 1.6:
-                        petal = 1 if petal == 2 else 2
+                    # A round bloom: a dark heart, then petals lit along its upper left.
+                    petal = 0 if d < 0.9 else 1 if d < 1.6 else 3 if dx + dy < 0 else 2
                     c.px(cx + dx, cy + dy, colors[petal])
     return c.img
 
@@ -376,11 +363,12 @@ def giant_seeds_item():
 
 def guts_item():
     c = Canvas()
-    rng = random.Random(6100)
-    for _ in range(70):
-        x = rng.uniform(2, 13)
-        y = 8 + math.sin(x * 1.3) * 2 + rng.uniform(-3, 3)
-        c.px(x, y, GUTS[rng.randrange(4)])
+    for k in range(3):
+        # Three stringy strands, each shaded below and lit along its top every few pixels.
+        for x in range(2, 14):
+            y = 5.5 + k * 2.5 + math.sin(x * 1.1 + k * 2) * 1.5
+            c.px(x, y, GUTS[3] if x % 3 == k else GUTS[1 + k % 2])
+            c.px(x, y + 1, GUTS[0])
     for x, y in ((4, 7), (9, 6), (11, 10), (6, 11)):
         c.px(x, y, SEED_PALE[2])
         c.px(x + 1, y, SEED_PALE[1])
@@ -419,11 +407,10 @@ def bottle_gourd_item(dried=False, strap=False):
 
 def ornamental_corn_item():
     c = Canvas()
-    rng = random.Random(6200)
     for i in range(10):
         cx, cy = 4 + i * 0.85, 12 - i * 0.85
         for w in range(-1, 2):
-            kernel = FLINT[rng.randrange(len(FLINT))]
+            kernel = FLINT[3] if (i + w) % 3 == 0 else FLINT[0]
             c.px(cx - w * 0.7, cy - w * 0.7, kernel)
             c.px(cx - w * 0.7 + 1, cy - w * 0.7, shade(kernel, 0.85))
     for x, y in ((2, 13), (3, 14), (1, 12), (4, 15), (2, 11), (5, 14), (1, 14), (0, 15), (3, 12)):
@@ -485,11 +472,12 @@ def caramel_apple_item():
 
 def popcorn_ball_item():
     c = Canvas()
-    rng = random.Random(6400)
+    pop = bs.surface(POP, 6400)
     for y in range(3, 14):
         for x in range(3, 14):
             if (x - 8) ** 2 + (y - 8.5) ** 2 <= 26:
-                c.px(x, y, POP[rng.randrange(3)] if rng.random() > 0.3 else CARAMEL[3 + rng.randrange(2)])
+                # Popped kernels in clumps, drizzled with caramel in slanting lines.
+                c.px(x, y, CARAMEL[3] if (x + y) % 5 == 0 else pop(x, y))
     outline(c, CARAMEL[1])
     return c.img
 
@@ -608,15 +596,13 @@ def birdhouse_icon():
 
 def kabocha_side():
     """A kabocha's skin: dark green with faint ribs, flecked and streaked here and there with pale grey-green."""
-    img = gourd_side(KABOCHA, 4, 6505, warts=3)
+    img = gourd_side(KABOCHA, 4, 6505, warts=3, clean=True)
     c = Canvas()
     c.img = img
-    rng = random.Random(6507)
-    for _ in range(22):
-        x, y = rng.randrange(16), rng.randrange(16)
-        length = rng.choice((1, 1, 2, 3))
-        for dy in range(length):
-            c.px(x, y + dy, KABOCHA_FLECK[rng.randrange(2)] if rng.random() < 0.6 else KABOCHA[4])
+    for x in (2, 6, 10, 14):
+        for y in range(16):
+            if (y * 3 + x) % 7 in (0, 1):
+                c.px(x, y, KABOCHA_FLECK[(y // 2) % 2])  # short pale streaks down the middle of each lobe
     return c.img
 
 
@@ -628,14 +614,15 @@ def tempura_item():
         for x in range(1, 15):
             if abs(x - 7.5) + abs(y - 12) * 1.6 < 8:
                 c.px(x, y, PAPER[2 if (x + y) % 5 else 3])
-    rng = random.Random(6506)
+    crisp = bs.grain(16, 16, 6506)
     for i, (cx, cy) in enumerate(((5.0, 9.5), (8.5, 7.5), (11.5, 9.0))):
         for y in range(16):
             for x in range(16):
                 d = math.hypot(x - cx, (y - cy) * 1.4)
                 if 1.6 < d < 4.4 and y <= cy + 1:
                     edge = d > 3.6
-                    batter = TEMPURA[rng.choice((1, 2, 2, 3))] if rng.random() < 0.45 else None
+                    v = crisp(x, y)
+                    batter = (TEMPURA[3] if v > 0.68 else TEMPURA[2]) if v > 0.52 else None
                     if edge:
                         c.px(x, y, KABOCHA[3] if not batter else batter)
                     else:
@@ -649,17 +636,17 @@ def halloween_textures():
     """(kind, name) -> image for every Halloween-harvest texture."""
     out = giant_textures()
     out.update({
-        ("block", "white_pumpkin_side"): gourd_side(WHITE_PUMPKIN, 4, 6500),
+        ("block", "white_pumpkin_side"): gourd_side(WHITE_PUMPKIN, 4, 6500, clean=True),
         ("block", "white_pumpkin_top"): gourd_top(WHITE_PUMPKIN, 8, STALK[1]),
-        ("block", "jarrahdale_pumpkin_side"): gourd_side(JARRAHDALE, 3, 6501),
+        ("block", "jarrahdale_pumpkin_side"): gourd_side(JARRAHDALE, 3, 6501, clean=True),
         ("block", "jarrahdale_pumpkin_top"): gourd_top(JARRAHDALE, 10, STALK[0]),
-        ("block", "cinderella_pumpkin_side"): gourd_side(CINDERELLA, 3, 6502),
+        ("block", "cinderella_pumpkin_side"): gourd_side(CINDERELLA, 3, 6502, clean=True),
         ("block", "cinderella_pumpkin_top"): gourd_top(CINDERELLA, 10, STALK[1]),
-        ("block", "red_kuri_pumpkin_side"): gourd_side(RED_KURI, 8, 6504, warts=2),
+        ("block", "red_kuri_pumpkin_side"): gourd_side(RED_KURI, 8, 6504, warts=2, clean=True),
         ("block", "red_kuri_pumpkin_top"): gourd_top(RED_KURI, 6, STALK[0]),
         ("block", "kabocha_pumpkin_side"): kabocha_side(),
         ("block", "kabocha_pumpkin_top"): gourd_top(KABOCHA, 8, STALK[1]),
-        ("block", "bottle_gourd_side"): gourd_side(BOTTLE, 0, 6503, spot=BOTTLE_SPOT + [BOTTLE_SPOT[0]]),
+        ("block", "bottle_gourd_side"): gourd_side(BOTTLE, 0, 6503, spot=BOTTLE_SPOT + [BOTTLE_SPOT[0]], clean=True),
         ("block", "bottle_gourd_top"): gourd_top(BOTTLE, 0, STALK[1]),
         ("block", "ornamental_corn_middle_ears"): ornamental_middle(),
         ("block", "harvest_scale_side"): scale_side(),
@@ -719,13 +706,12 @@ def halloween_textures():
 
 
 def ornamental_middle():
-    """Corn's ripe middle block, with the golden kernels of its ears swapped for flint corn's colours."""
+    """Corn's ripe middle block, with the golden kernels of its ears swapped for flint corn's red, every third one gold."""
     img = corn_stalk_middle("ripe")
-    rng = random.Random(6700)
     golden = set(KERNEL6)
     for y in range(16):
         for x in range(16):
             pixel = img.getpixel((x, y))
             if pixel[3] and pixel[:3] in golden:
-                img.putpixel((x, y), FLINT[rng.randrange(len(FLINT))] + (255,))
+                img.putpixel((x, y), (FLINT[3] if (x + y) % 3 == 0 else FLINT[0]) + (255,))
     return img

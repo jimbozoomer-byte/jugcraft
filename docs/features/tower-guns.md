@@ -58,9 +58,9 @@ Each barrel of a salvo uses one shell. A gunner with fewer shells fires as many 
 
 ## Dependencies and assets
 - No dependencies. All art is original.
-  - The new textures are drawn in `tools/tower_guns.py`: `tg_port` (a round port cover), `tg_warning` (a hazard sign) and `tg_slots` (the plinth's vent slots). So are the item icons.
+  - The new textures are drawn in `tools/tower_guns.py`: `tg_port` (a round port cover), `tg_warning` (a hazard sign) and `tg_slots` (the plinth's vent slots); since the 5 October 2026 art fixes also `tg_tube` (barrel steel), `tg_steel` (seamless plate), `tg_soot` and the `tg_bore` decal. The ports, signs and bores are drawn whole on their own plates. The item icons are 16×16 maps in `tools/item_icons/` (`tools/item_icons.py`; redrawn from the old 32×32 icons on 7 October 2026, [ITEM_ICONS.md](../ITEM_ICONS.md)). See [big-guns-art-fixes.md](big-guns-art-fixes.md).
   - The models reuse the big guns', the dieselpunk and the Kaiserworks textures.
-- The models are exported to `assets/jugcraft/tower_gun_quads.json` (a plinth, a turntable and a barrel for each gun) and drawn by `client/TowerGunRenderer`.
+- The models are exported to `assets/jugcraft/tower_gun_quads.json` (a plinth, a turntable, a cradle and a barrel for each gun) and drawn by `client/TowerGunRenderer`. The cradle (the breech or housing on the trunnions) elevates with the barrel but stays put when the gun fires; only the barrel recoils, back through it.
 - Code:
   - `artillery/TowerGun` and `artillery/JugcraftTowerGuns` (each gun is a `Spec`).
   - `CrewedGun` gains a forward pivot (for trunnions ahead of the turntable) and several barrels.
@@ -86,3 +86,4 @@ Not applicable: the guns are crafted and placed by players only.
 ## Rollout and open questions
 - The towers are any blocks the player builds. A ready-made gun tower block or structure could follow if the owner wants one.
 - Automatic fire without a gunner (a sentry mode) is left out on purpose: the guns need a crew.
+- **Fixed 5 October 2026 (shared render fixes):** the guns are drawn closed (no see-through gaps in barrels, rings and plinths), and the quads no longer z-fight. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

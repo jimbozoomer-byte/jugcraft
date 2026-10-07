@@ -29,7 +29,8 @@ import org.jspecify.annotations.Nullable;
  * <li>nine eyeballs, each rolling to follow the nearest player within {@value OddityJarBlock#WATCH_RANGE} blocks, a
  * little behind the others;</li>
  * <li>a heart on its brass stand that swells with each beat the block gives (and slowly turns);</li>
- * <li>a bat hanging asleep from the lid, or, awake, fluttering round the jar with its wings beating;</li>
+ * <li>a bat hanging asleep from the lid, or, awake, fluttering in the middle of the jar with its wings beating, always
+ * inside the glass;</li>
  * <li>a coiled two-headed snake whose heads sway, their tongues flicking for a moment after the jar is used;</li>
  * <li>a floating hand drumming its fingers one after another, or, powered, pointing at the nearest player.</li>
  * </ul>
@@ -39,7 +40,27 @@ public class OddityJarRenderer implements BlockEntityRenderer<DecorationBlockEnt
 			{8.0F, 5.0F, 6.2F}, {6.4F, 7.2F, 6.8F}, {9.4F, 7.4F, 7.6F}, {7.8F, 7.6F, 9.8F}};
 	private static final float[][] KNUCKLES = {{-1.5F, 1.6F, 0.0F}, {-0.5F, 1.6F, 0.0F}, {0.5F, 1.6F, 0.0F}, {1.5F, 1.6F, 0.0F}};
 	private static final float EYE_TURN = 6.0F;
+	/**
+	 * The bat, in its jar's glass (2.2 to 13.8 pixels across): drawn at {@value #BAT_SCALE}; awake it circles
+	 * {@value #BAT_ORBIT} pixels round the middle at {@value #BAT_FLY_Y} pixels up, bobbing {@value #BAT_BOB}; asleep it hangs
+	 * at {@value #BAT_HANG_Y}. tools/decor17.py JARS bat_in_a_jar holds the same numbers, and the audit checks that its
+	 * wings never leave the glass.
+	 */
+	private static final float BAT_SCALE = 0.9F;
+	private static final float BAT_ORBIT = 0.2F;
+	private static final float BAT_FLY_Y = 7.2F;
+	private static final float BAT_BOB = 1.0F;
+	private static final float BAT_HANG_Y = 11.2F;
 	private static final float MAX_PITCH = 50.0F;
+	/**
+	 * The heart: its middle in the jar (pixels), how much more it swells at the peak of a beat and the ticks a beat takes
+	 * to settle. tools/decor17.py JARS beating_heart_jar holds the middle and swell ("heart", "swell"), and the audit
+	 * checks that the heart, at its fullest and turned any way, stays inside the glass. The Giant's Beating Heart draws it
+	 * the same.
+	 */
+	static final float[] HEART = {8.0F, 6.4F, 8.0F};
+	static final float HEART_SWELL = 0.14F;
+	static final float HEART_DECAY_TICKS = 7.0F;
 	/** Each jar's eyes as this client last left them: {yaw, pitch} per eye, then the game time. */
 	private final Map<DecorationBlockEntity, double[]> eyes = new WeakHashMap<>();
 	/** When each heart's last beat began, as this client saw it: {beat was on, game time}. */
@@ -89,7 +110,7 @@ public class OddityJarRenderer implements BlockEntityRenderer<DecorationBlockEnt
 					seen[1] = now;
 				}
 				seen[0] = beat ? 1.0 : 0.0;
-				state.pulse = (float) Math.max(0.0, 1.0 - (now - seen[1]) / 7.0);
+				state.pulse = pulse(now - seen[1]);
 			}
 			case BAT -> state.awake = block.hasProperty(BatJarBlock.AWAKE) && block.getValue(BatJarBlock.AWAKE);
 			case SNAKE -> state.flicking = now - jar.marked() < OddityJarBlock.FLICK_TICKS;
@@ -176,18 +197,31 @@ public class OddityJarRenderer implements BlockEntityRenderer<DecorationBlockEnt
 	}
 
 	private static void heart(State state, PoseStack pose, SubmitNodeCollector collector) {
+		heart(pose, collector, state.time, state.pulse, state.lightCoords);
+	}
+
+	/** How far through its swell the heart is, {@code ticks} after its beat began: 1 at the beat, settling to 0. */
+	static float pulse(double ticks) {
+		return (float) Math.max(0.0, 1.0 - ticks / HEART_DECAY_TICKS);
+	}
+
+	/**
+	 * The heart on its brass stand, in a jar's block ({@code pose} at its corner): turning slowly with {@code time} (ticks)
+	 * and swelling with {@code pulse} ({@link #pulse}). The Giant's Beating Heart draws this in a pose scaled up with it.
+	 */
+	static void heart(PoseStack pose, SubmitNodeCollector collector, float time, float pulse, int light) {
 		QuadModel stand = DecorQuads.get("oddity_heart_stand");
 		QuadModel heart = DecorQuads.get("oddity_heart");
 		if (stand != null) {
-			stand.submit(pose, collector, state.lightCoords);
+			stand.submit(pose, collector, light);
 		}
 		if (heart != null) {
-			float swell = 1.0F + 0.14F * state.pulse * state.pulse;
+			float swell = 1.0F + HEART_SWELL * pulse * pulse;
 			pose.pushPose();
-			pose.translate(0.5F, 6.4F / 16, 0.5F);
-			pose.rotateDegrees(Axis.YP, state.time * 0.6F % 360.0F);
+			pose.translate(HEART[0] / 16, HEART[1] / 16, HEART[2] / 16);
+			pose.rotateDegrees(Axis.YP, time * 0.6F % 360.0F);
 			pose.scale(swell, swell * 0.96F + 0.04F, swell);
-			heart.submit(pose, collector, state.lightCoords);
+			heart.submit(pose, collector, light);
 			pose.popPose();
 		}
 	}
@@ -199,18 +233,20 @@ public class OddityJarRenderer implements BlockEntityRenderer<DecorationBlockEnt
 		pose.pushPose();
 		float wing;
 		if (state.awake) {
-			// Round and round the jar, bobbing, head up, wings beating fast.
+			// Round and round the middle of the jar, bobbing, head up, wings beating fast.
 			float a = state.time * 0.35F;
-			pose.translate(0.5F + 1.6F / 16 * Mth.cos(a), (6.5F + 1.2F * Mth.sin(state.time * 0.5F)) / 16, 0.5F + 1.6F / 16 * Mth.sin(a));
+			pose.translate(0.5F + BAT_ORBIT / 16 * Mth.cos(a), (BAT_FLY_Y + BAT_BOB * Mth.sin(state.time * 0.5F)) / 16,
+					0.5F + BAT_ORBIT / 16 * Mth.sin(a));
 			pose.rotateDegrees(Axis.YP, (float) Math.toDegrees(-a) + 180.0F);
 			pose.rotateDegrees(Axis.ZP, 180.0F);
 			wing = 55.0F * Mth.sin(state.time * 1.6F);
 		} else {
 			// Hanging by its feet from under the lid, head down, wings wrapped round it.
-			pose.translate(0.5F, 9.4F / 16, 0.5F);
+			pose.translate(0.5F, BAT_HANG_Y / 16, 0.5F);
 			pose.rotateDegrees(Axis.YP, 20.0F * Mth.sin(state.time * 0.02F + state.seed));
 			wing = 80.0F;
 		}
+		pose.scale(BAT_SCALE, BAT_SCALE, BAT_SCALE);
 		if (body != null) {
 			body.submit(pose, collector, state.lightCoords);
 		}

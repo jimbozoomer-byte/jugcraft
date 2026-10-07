@@ -3,14 +3,15 @@
 Every pixel is drawn here by code, with no randomness at all, so the same run always writes the same files. Nothing is
 traced or copied from another game or mod. The style follows docs/ART_DIRECTION.md:
 
-- the Initiate's Wand and the Kindled Lantern (unlit and lit) are 64x64 items drawn with tools/hd_art.py, like the
-  other high-detail items. The wand lies on the held-item diagonal (grip bottom left, crystal top right) and is early
-  tier: turned dark wood, copper and brass, not dieselpunk. The two lanterns share every shape, so they read as one
-  item; only the glass, the crystal wick and the light on the cage change;
-- the codex (the Arcane Concordance book) and the spell icons (Kindle, the inscribed spell, and the step 10
-  invocations: Dawn Aegis, Revelation, Lance of Dawn, Flashstep and Lanternward) are 32x32 pixel art: flat fills from
-  four or five shades a material, lit from the top left, a dark outline. The spell icons share one round violet
-  ground and each shows its role at a glance (a shell, an eye, a beam, chevrons, a lantern in a ring);
+- the item icons (the Initiate's Wand, the Kindled Lantern unlit and lit, the Research Notes blank and written, and
+  the codex) are 16x16 maps in tools/item_icons/, drawn by tools/item_icons.py in the owner's manner
+  (docs/ITEM_ICONS.md). The wand lies on the held-item diagonal (grip bottom left, crystal top right) and is early
+  tier: dark wood and brass, not dieselpunk. The two lanterns share every shape, so they read as one item; only the
+  glass and its light change;
+- the spell icons (Kindle, the inscribed spell, and the step 10 invocations: Dawn Aegis, Revelation, Lance of Dawn,
+  Flashstep and Lanternward) are 32x32 pixel art: flat fills from four or five shades a material, lit from the top
+  left, a dark outline. They share one round violet ground and each shows its role at a glance (a shell, an eye, a
+  beam, chevrons, a lantern in a ring);
 - the Lampwright's Bench faces are opaque block textures: an oak desk top in planks with a brass inlay (32x32), darker
   oak for its legs and apron (32x32), polished brass with a bevel (16x16) and the lens, violet glass in a brass rim
   (16x16), which is also the Kindled mote's particle.
@@ -23,6 +24,7 @@ from PIL import Image
 
 import clean_metal as cm
 import hd_art as hd
+import item_icons
 from construction_art import Tool
 
 # ------------------------------------------------------------------------------------------------------- palettes
@@ -107,237 +109,9 @@ def _outline(img, colour=(14, 8, 22)):
 
 # ------------------------------------------------------------------------------------------------- the wand (64)
 
-def initiate_wand():
-    """The Initiate's Wand: a turned dark-wood shaft with a copper ferrule at the butt, a copper band at the top of the
-    grip and another under the head, and a brass claw holding a pale amethyst point with a soft gold glint inside."""
-    c = hd.Canvas()
-    tool = Tool((9, 55), -45)
-    deg = tool.angle
-
-    # The shaft, from the butt up: the grip, a turned bead, then a long taper towards the head.
-    c.capsule(tool(2, 0), tool(17, 0), 2.7, DARK_WOOD)
-    for s in (6.5, 11.5):  # lathe-turned rings round the grip
-        c.capsule(tool(s - 0.6, 0), tool(s + 0.6, 0), 3.0, DARK_WOOD)
-    c.capsule(tool(17, 0), tool(31, 0), 2.2, DARK_WOOD)
-    c.capsule(tool(31, 0), tool(46, 0), 1.8, DARK_WOOD)
-    c.capsule(tool(21.5, 0), tool(22.5, 0), 2.7, DARK_WOOD)  # the bead above the first band
-
-    # Copper: the ferrule capping the butt, the band at the top of the grip, the band under the head.
-    c.capsule(tool(0.6, 0), tool(4.2, 0), 2.9, COPPER, flat_ends=True)
-    c.disc(tool(0.4, 0), 1.6, COPPER, 0.8)
-    c.capsule(tool(17.2, 0), tool(19.6, 0), 3.0, COPPER, flat_ends=True)
-    c.capsule(tool(43.4, 0), tool(45.6, 0), 2.4, COPPER, flat_ends=True)
-
-    # The brass claw: a cup at the top of the shaft and two prongs curling round the crystal (drawn behind it).
-    c.capsule(tool(45.6, 0), tool(48.6, 0), 2.6, hd.BRASS, flat_ends=True)
-    for side in (1, -1):
-        pts = [tool(47.5, 2.0 * side), tool(50.5, 3.7 * side), tool(54.0, 3.4 * side)]
-        for a, b in zip(pts, pts[1:]):
-            c.capsule(a, b, 0.9, hd.BRASS)
-
-    # The amethyst point: a hexagonal prism seen side on, four flat facets lit from the top left.
-    ux, uy = tool.ux, tool.uy  # across the shaft, towards the top left
-    ax, ay = tool.ax, tool.ay  # along the shaft, towards the tip
-    up = (ux * 0.55, uy * 0.55, 0.83)
-    down = (-ux * 0.55, -uy * 0.55, 0.83)
-    tip_up = (ux * 0.45 + ax * 0.45, uy * 0.45 + ay * 0.45, 0.77)
-    tip_down = (-ux * 0.35 + ax * 0.5, -uy * 0.35 + ay * 0.5, 0.79)
-    base, shoulder, point = 48.0, 58.5, 64.5
-    c.polygon([tool(base, 0), tool(base, 2.9), tool(shoulder, 3.3), tool(shoulder, 0)], AMETHYST, up)
-    c.polygon([tool(base, 0), tool(shoulder, 0), tool(shoulder, -3.3), tool(base, -2.9)], AMETHYST, down)
-    c.polygon([tool(shoulder, 0), tool(shoulder, 3.3), tool(point, 0)], AMETHYST, tip_up)
-    c.polygon([tool(shoulder, 0), tool(point, 0), tool(shoulder, -3.3)], AMETHYST, tip_down)
-    # The ridge between the facets, and a bright edge along the lit side.
-    c.line(tool(base + 1, 0.2), tool(point - 1.5, 0.2), AMETHYST.ramp[4])
-    c.line(tool(base + 2, 2.4), tool(shoulder - 1, 2.7), AMETHYST.ramp[5])
-
-    # The soft gold glint deep inside: a small warm core with a pale heart, and a white catchlight on the tip.
-    g = tool(53.5, 0.6)
-    _flat_disc(c, g[0], g[1], 1.8, GLINT_GOLD[1])
-    _flat_disc(c, g[0], g[1], 0.9, GLINT_GOLD[2])
-    t = tool(60.5, 1.2)
-    c.put(int(t[0]), int(t[1]), WHITE)
-
-    # The claw's front prong, over the crystal's base.
-    c.capsule(tool(47.8, -0.6), tool(51.0, -1.2), 0.8, hd.BRASS)
-    return c.finish()
-
-
 # ----------------------------------------------------------------------------------------------- the lantern (64)
 
-def kindled_lantern(lit):
-    """A small hand lantern: a brass ring handle and roof, copper corner posts and rims, a front pane between them
-    (the lantern has four; one faces the viewer) and a crystal wick standing in a brass cup. Unlit, the glass is dim
-    and cool and the crystal pale; lit, warm gold-white light fills the glass, brightest round the crystal, and the
-    cage's inner edges catch it. Both states share every outline."""
-    c = hd.Canvas()
-    cx = 32
-
-    # The ring handle on top (its lower half hides behind the roof) and the post it hangs from.
-    c.ring((cx, 9.5), 6.4, 4.0, hd.BRASS)
-    c.capsule((cx, 14), (cx, 18), 2.2, hd.BRASS, flat_ends=True)
-
-    # The roof: a low pyramid with a row of vent slots, on a copper rim.
-    roof = [(cx - 6, 17), (cx + 6, 17), (cx + 15, 23), (cx - 15, 23)]
-    c.polygon(roof, hd.BRASS, (0, -0.55, 0.83))
-    c.polygon([(cx - 6, 17), (cx + 6, 17), (cx + 5, 18), (cx - 5, 18)], hd.BRASS, (0, -0.2, 0.98))
-    for vx in (cx - 8, cx - 3, cx + 2, cx + 7):
-        _flat_rect(c, vx, 20, vx + 1, 21, hd.BRASS.ramp[0])
-        c.put(vx, 22, hd.BRASS.ramp[2])
-        c.put(vx + 1, 22, hd.BRASS.ramp[2])
-    c.box((cx, 24.5), 16, 1.9, 0, COPPER, bevel=1.2)
-
-    # The glass, and what shows through it.
-    x0, x1, y0, y1 = cx - 11, cx + 10, 27, 48
-    if lit:
-        _flat_rect(c, x0, y0, x1, y1, PANE_LIT[1])
-        for r, colour in ((11.5, PANE_LIT[2]), (8.0, PANE_LIT[3]), (5.0, PANE_LIT[4])):
-            for y in range(y0, y1 + 1):
-                for x in range(x0, x1 + 1):
-                    if math.hypot((x + 0.5 - cx) * 1.1, (y + 0.5 - 38) * 0.8) <= r:
-                        c.put(x, y, colour)
-        # The panes' corners stay a shade deeper, so the light reads as filling them from the middle.
-        for x, y in ((x0, y0), (x1, y0), (x0, y1), (x1, y1)):
-            c.put(x, y, PANE_LIT[0])
-    else:
-        _flat_rect(c, x0, y0, x1, y1, PANE_DIM[1])
-        _flat_rect(c, x0, y1 - 3, x1, y1, PANE_DIM[0])  # the bottom of the glass, in shadow
-    # The crystal wick, standing in its cup.
-    if lit:
-        facets = [(255, 252, 236), (255, 240, 196), (255, 255, 255)]
-    else:
-        facets = [AMETHYST.ramp[3], AMETHYST.ramp[1], AMETHYST.ramp[4]]
-    left = [(cx - 3, 44), (cx - 3, 35), (cx, 31), (cx, 44)]
-    right = [(cx, 44), (cx, 31), (cx + 3, 35), (cx + 3, 44)]
-    c.polygon(left, AMETHYST)
-    c.polygon(right, AMETHYST)
-    for pts, colour in ((left, facets[0]), (right, facets[1])):
-        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
-        for y in range(int(min(ys)), int(max(ys)) + 1):
-            for x in range(int(min(xs)), int(max(xs)) + 1):
-                if hd._inside(pts, x + 0.5, y + 0.5):
-                    c.put(x, y, colour)
-    for y in range(34, 43):  # the bright edge down the lit facet
-        c.put(cx - 2, y, facets[2])
-    c.box((cx, 45.5), 4.5, 1.6, 0, hd.BRASS, bevel=1.0)  # the cup
-    # Highlights on the glass: two short diagonal streaks, upper left, over whatever is behind.
-    streak = PANE_LIT[4] if lit else PANE_DIM[3]
-    for i in range(5):
-        c.put(x0 + 2 + i, y0 + 6 - i, streak)
-    for i in range(3):
-        c.put(x0 + 2 + i, y0 + 9 - i, streak)
-
-    # Guard wires across the glass, top and bottom, standing off the pane.
-    for wy in (30, 41):
-        for x in range(x0, x1 + 1):
-            if not (lit and cx - 3 <= x <= cx + 3 and wy == 41):
-                c.put(x, wy, COPPER.ramp[3] if not lit else CAGE_GLOW[0])
-            c.put(x, wy + 1, COPPER.ramp[1] if not lit else PANE_LIT[0])
-
-    # The cage: copper corner posts with brass caps, the base rim and the foot.
-    for px in (cx - 14, cx + 13):
-        c.box((px + 0.5, 37.5), 2.4, 11.6, 0, COPPER, bevel=1.2)
-        c.disc((px + 0.5, 27.6), 1.4, hd.BRASS, 0.9)
-        c.disc((px + 0.5, 47.4), 1.4, hd.BRASS, 0.9)
-    c.box((cx, 50.5), 16, 2.0, 0, COPPER, bevel=1.2)
-    c.box((cx, 54.0), 12, 1.6, 0, hd.BRASS, bevel=1.0)
-
-    if lit:
-        # The cage lit from inside: warm light along every edge that faces the glass.
-        for y in range(y0, y1 + 1):
-            c.put(x0 - 1, y, CAGE_GLOW[1])
-            c.put(x1 + 1, y, CAGE_GLOW[0])
-        for x in range(x0, x1 + 1):
-            c.put(x, y0 - 1, CAGE_GLOW[0])
-            c.put(x, y1 + 1, CAGE_GLOW[1])
-        for x in range(cx - 4, cx + 5):  # the cup's rim catches the crystal's light
-            c.put(x, 44, CAGE_GLOW[1])
-    return c.finish()
-
-
 # ------------------------------------------------------------------------------------------------- the codex (32)
-
-def arcane_concordance():
-    """The codex: a closed book in deep violet leather, its spine to the left with raised bands, a tooled border, brass
-    caps on the corners, a brass clasp across the fore-edge set with an amethyst and an eight-rayed sunburst."""
-    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    # The back board and the page block peeking out along the right and the bottom.
-    cm.rect(img, 5, 3, 29, 29, VIOLET[1])
-    cm.rect(img, 6, 4, 28, 28, PAGE[1])
-    for y in range(5, 28, 2):  # page edges as even lines
-        cm.put(img, 27, y, PAGE[0])
-        cm.put(img, 28, y, PAGE[2])
-    for x in range(7, 28, 2):
-        cm.put(img, x, 27, PAGE[0])
-    # The front board, bevelled: lit top and left, shaded bottom and right.
-    cm.bevel(img, 2, 1, 26, 26, VIOLET[3], VIOLET[1], VIOLET[2])
-    # The spine: a darker strip with three raised bands and the hinge groove beside it.
-    cm.rect(img, 3, 2, 5, 25, VIOLET[1])
-    cm.rect(img, 2, 1, 2, 26, VIOLET[3])
-    for y in (5, 13, 21):
-        cm.put(img, 3, y, VIOLET[4])
-        cm.put(img, 4, y, VIOLET[3])
-        cm.put(img, 5, y, VIOLET[3])
-        cm.put(img, 3, y + 1, VIOLET[2])
-        cm.put(img, 4, y + 1, VIOLET[0])
-        cm.put(img, 5, y + 1, VIOLET[0])
-    for y in range(2, 26):
-        cm.put(img, 6, y, VIOLET[0])
-        cm.put(img, 7, y, VIOLET[3])
-    # The tooled border: a fine lighter line set in from the board's edge.
-    cm.inset(img, 9, 3, 24, 24, VIOLET[3], VIOLET[1])
-    # Brass corner caps on the fore-edge corners, and at the head and tail of the spine.
-    caps = {
-        (26, 1): [(0, 0), (-1, 0), (-2, 0), (-3, 0), (0, 1), (-1, 1), (-2, 1), (0, 2), (-1, 2), (0, 3)],
-        (26, 26): [(0, 0), (-1, 0), (-2, 0), (-3, 0), (0, -1), (-1, -1), (-2, -1), (0, -2), (-1, -2), (0, -3)],
-        (2, 1): [(0, 0), (1, 0), (2, 0), (3, 0), (0, 1), (1, 1), (2, 1), (0, 2), (1, 2), (0, 3)],
-        (2, 26): [(0, 0), (1, 0), (2, 0), (3, 0), (0, -1), (1, -1), (2, -1), (0, -2), (1, -2), (0, -3)],
-    }
-    for (x, y), pixels in caps.items():
-        for dx, dy in pixels:
-            # Lit along the top and left, shaded along the bottom and right, mid tone between.
-            edge_top = dy == 0 and y < 10
-            edge_left = dx == 0 and x < 10
-            if edge_top or edge_left:
-                colour = BRASS[4]
-            elif dy == 0 or dx == 0:
-                colour = BRASS[1]
-            else:
-                colour = BRASS[3]
-            cm.put(img, x + dx, y + dy, colour)
-    # The sunburst: a round boss with eight rays, four long and four short, in brass, lit from the top left.
-    sx, sy = 16, 13
-    for i in range(8):
-        a = math.radians(i * 45)
-        length = 6 if i % 2 == 0 else 4
-        for k in range(2, length + 1):
-            x, y = round(sx + math.cos(a) * k), round(sy + math.sin(a) * k)
-            lit_side = math.cos(a) + math.sin(a) < -0.1
-            colour = BRASS[4] if lit_side else (BRASS[2] if math.cos(a) + math.sin(a) > 0.1 else BRASS[3])
-            if k == length:
-                colour = BRASS[2] if not lit_side else BRASS[3]
-            cm.put(img, x, y, colour)
-    _mask(img, [
-        ".bab.",
-        "bcccb",
-        "accca",
-        "bccda",
-        ".bdd.",
-    ], {"a": BRASS[2], "b": BRASS[3], "c": BRASS[4], "d": BRASS[1]}, sx - 2, sy - 2)
-    cm.put(img, sx - 1, sy - 1, BRASS[5])
-    # The clasp: a brass strap from the back board over the fore-edge, its plate set with an amethyst.
-    cm.bevel(img, 21, 11, 29, 15, BRASS[4], BRASS[1], BRASS[3])
-    cm.rect(img, 27, 12, 29, 14, BRASS[2])
-    cm.put(img, 29, 12, BRASS[1])
-    _mask(img, [
-        ".aa.",
-        "acba",
-        "abba",
-        ".aa.",
-    ], {"a": GEM[0], "b": GEM[1], "c": GEM[3]}, 22, 11)
-    cm.put(img, 24, 12, GEM[2])
-    return _outline(img)
-
 
 # --------------------------------------------------------------------------------------------- the spell icon (32)
 
@@ -675,52 +449,10 @@ def bench_lens():
 
 # ------------------------------------------------------------------------------------------- research notes (32)
 
-def research_notes(written):
-    """A sheet of notes: cream paper with faint rules and a folded top corner. Written, its lines are filled in violet
-    ink, a small sketch of a rayed light sits at the head of the page, and a violet wax seal closes the foot."""
-    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    cm.rect(img, 6, 3, 25, 28, PAGE[2])
-    cm.rect(img, 25, 4, 25, 28, PAGE[1])  # shaded right edge and foot
-    cm.rect(img, 7, 28, 25, 28, PAGE[1])
-    # The folded corner: cut away the top right and lay the fold over it.
-    for i in range(5):
-        for j in range(5 - i):
-            img.putpixel((25 - j, 3 + i), (0, 0, 0, 0))
-    for i in range(5):
-        for j in range(i + 1):
-            cm.put(img, 21 + j, 3 + i, PAGE[1] if j < i else PAGE[0])
-    # Faint rules.
-    for y in range(9, 27, 3):
-        for x in range(9, 23):
-            cm.put(img, x, y, PAGE[1])
-    if written:
-        # Lines of writing: strokes of fixed lengths with word gaps, so every sheet looks the same.
-        lengths = [(9, 13), (15, 22), (9, 11), (13, 20), (9, 16), (18, 22)]
-        for row, (x0, x1) in enumerate(lengths):
-            y = 11 + row * 3 - 1
-            if y > 25:
-                break
-            for x in range(x0, x1 + 1):
-                if (x - x0) % 5 != 4:
-                    cm.put(img, x, y, VIOLET[2])
-        # A sketch of a rayed light at the head of the page.
-        for dx, dy in ((0, 0), (-2, 0), (2, 0), (0, -2), (0, 2), (-1, -1), (1, 1), (1, -1), (-1, 1)):
-            cm.put(img, 11 + dx, 6 + dy, VIOLET[3] if (dx, dy) == (0, 0) else VIOLET[2])
-        # The seal.
-        _disc(img, 21.5, 25.5, 2.6, GEM[1])
-        cm.put(img, 21, 24, GEM[2])
-        cm.put(img, 20, 25, GEM[2])
-    return _outline(img)
-
-
-ITEMS = {
-    "research_notes": lambda: research_notes(False),
-    "research_notes_written": lambda: research_notes(True),
-    "initiate_wand": initiate_wand,
-    "kindled_lantern": lambda: kindled_lantern(False),
-    "kindled_lantern_lit": lambda: kindled_lantern(True),
-    "arcane_concordance": arcane_concordance,
-}
+# The item icons are 16x16 maps in tools/item_icons/ (docs/ITEM_ICONS.md), drawn by tools/item_icons.py.
+ITEMS = {name: (lambda name=name: item_icons.draw(name)) for name in (
+    "research_notes", "research_notes_written", "initiate_wand", "kindled_lantern", "kindled_lantern_lit",
+    "arcane_concordance")}
 BLOCKS = {
     "lampwright_bench_top": bench_top,
     "lampwright_bench_wood": bench_wood,

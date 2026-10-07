@@ -1,6 +1,7 @@
-"""Textures for roadmap step 12, rituals (tools/concordance_rituals.py): the Adept's Wand, the Circle Anchor (its
-GeckoLib sheet and its item icon), the Ley Pylon and the Warding Stone (plain, and the 4x4 connected sheet the Fusion
-built-in pack uses). Original pixel art drawn from code; tools/concordance_art.py includes these in its textures().
+"""Textures for roadmap step 12, rituals (tools/concordance_rituals.py): the Adept's Wand (a 16x16 map in
+tools/item_icons/, docs/ITEM_ICONS.md), the Circle Anchor (its GeckoLib sheet and its item icon), the Ley Pylon and the
+Warding Stone (plain, and the 4x4 connected sheet the Fusion built-in pack uses). Original pixel art drawn from code;
+tools/concordance_art.py includes these in its textures().
 """
 
 import random
@@ -10,6 +11,7 @@ from PIL import Image
 
 import clean_metal as cm
 import hd_art as hd
+import item_icons
 from construction_art import Tool
 
 GOLD = hd.Material([(86, 56, 10), (140, 98, 22), (196, 148, 40), (232, 192, 74), (250, 226, 132), (255, 246, 206)],
@@ -30,55 +32,6 @@ VIOLET = [(40, 22, 64), (66, 40, 104), (98, 68, 150), (140, 112, 196), (188, 166
 
 
 # ------------------------------------------------------------------------------------------------- the wand (64)
-
-def adept_wand():
-    """The Adept's Wand: the Initiate's Wand attuned in a circle. The same turned shaft, now banded in gold, a gold
-    collar ringed with three studs, and a longer lapis point held in a four-pronged claw, a bright mote at its heart."""
-    c = hd.Canvas()
-    tool = Tool((9, 55), -45)
-    c.capsule(tool(2, 0), tool(17, 0), 2.7, DARK_WOOD)
-    for s in (6.5, 11.5):
-        c.capsule(tool(s - 0.6, 0), tool(s + 0.6, 0), 3.0, DARK_WOOD)
-    c.capsule(tool(17, 0), tool(31, 0), 2.2, DARK_WOOD)
-    c.capsule(tool(31, 0), tool(44, 0), 1.9, DARK_WOOD)
-    c.capsule(tool(21.5, 0), tool(22.5, 0), 2.7, DARK_WOOD)
-    # Gold where the Initiate's had copper, and a second band near the head.
-    c.capsule(tool(0.6, 0), tool(4.2, 0), 2.9, GOLD, flat_ends=True)
-    c.disc(tool(0.4, 0), 1.6, GOLD, 0.8)
-    c.capsule(tool(17.2, 0), tool(19.6, 0), 3.0, GOLD, flat_ends=True)
-    c.capsule(tool(36.0, 0), tool(37.4, 0), 2.3, GOLD, flat_ends=True)
-    c.capsule(tool(41.2, 0), tool(44.4, 0), 2.6, GOLD, flat_ends=True)
-    for along in (38.6, 39.8):
-        stud = tool(along, 0)
-        c.disc(stud, 1.0, GOLD, 0.6)
-    # The claw: four prongs (two behind the point, two in front of it).
-    c.capsule(tool(44.4, 0), tool(47.2, 0), 2.8, hd.BRASS, flat_ends=True)
-    for side in (1, -1):
-        pts = [tool(46.0, 2.3 * side), tool(49.5, 4.2 * side), tool(53.5, 4.0 * side)]
-        for a, b in zip(pts, pts[1:]):
-            c.capsule(a, b, 0.9, hd.BRASS)
-    ux, uy = tool.ux, tool.uy
-    ax, ay = tool.ax, tool.ay
-    up = (ux * 0.55, uy * 0.55, 0.83)
-    down = (-ux * 0.55, -uy * 0.55, 0.83)
-    tip_up = (ux * 0.45 + ax * 0.45, uy * 0.45 + ay * 0.45, 0.77)
-    tip_down = (-ux * 0.35 + ax * 0.5, -uy * 0.35 + ay * 0.5, 0.79)
-    base, shoulder, point = 46.5, 57.5, 65.0
-    c.polygon([tool(base, 0), tool(base, 3.2), tool(shoulder, 3.8), tool(shoulder, 0)], LAPIS, up)
-    c.polygon([tool(base, 0), tool(shoulder, 0), tool(shoulder, -3.8), tool(base, -3.2)], LAPIS, down)
-    c.polygon([tool(shoulder, 0), tool(shoulder, 3.8), tool(point, 0)], LAPIS, tip_up)
-    c.polygon([tool(shoulder, 0), tool(point, 0), tool(shoulder, -3.8)], LAPIS, tip_down)
-    c.line(tool(base + 1, 0.2), tool(point - 1.5, 0.2), LAPIS.ramp[4])
-    c.line(tool(base + 2, 2.8), tool(shoulder - 1, 3.2), LAPIS.ramp[5])
-    g = tool(52.5, 0.4)
-    c.disc(g, 1.9, GOLD, 0.9)
-    c.put(int(g[0]), int(g[1]), GLINT[2])
-    t = tool(61.0, 1.3)
-    c.put(int(t[0]), int(t[1]), WHITE)
-    for side in (1, -1):
-        c.capsule(tool(46.3, -0.7 * side), tool(50.0, -1.6 * side), 0.8, hd.BRASS)
-    return c.finish()
-
 
 # ------------------------------------------------------------------------------------------------- blocks (16)
 
@@ -267,7 +220,7 @@ def circle_anchor_item():
 
 
 def textures():
-    return {("item", "adept_wand"): adept_wand(), ("item", "circle_anchor"): circle_anchor_item(),
+    return {("item", "adept_wand"): item_icons.draw("adept_wand"), ("item", "circle_anchor"): circle_anchor_item(),
             ("block", "circle_anchor"): circle_anchor_sheet(), ("block", "ley_pylon_stone"): pylon_stone(),
             ("block", "ley_pylon_copper"): pylon_copper(), ("block", "ley_pylon_crystal"): pylon_crystal(),
             ("block", "warding_stone"): warding_stone(), ("block", "warding_stone_connected"): warding_stone_connected()}

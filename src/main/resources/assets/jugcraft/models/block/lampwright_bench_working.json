@@ -277,16 +277,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            3.0,
+            8.0,
+            5.0,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            11.0,
+            8.0,
+            13.0,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            11.0,
+            8.0,
+            13.0,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            3.0,
+            8.0,
+            5.0,
+            16.0
+          ]
         },
         "up": {
           "texture": "#brass"
@@ -309,16 +333,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            3.5,
+            10.0,
+            9.5,
+            11.0
+          ]
         },
         "east": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            11.5,
+            10.0,
+            12.5,
+            11.0
+          ]
         },
         "south": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            6.5,
+            10.0,
+            12.5,
+            11.0
+          ]
         },
         "west": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            3.5,
+            10.0,
+            4.5,
+            11.0
+          ]
         },
         "up": {
           "texture": "#brass"
@@ -341,16 +389,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#lens"
+          "texture": "#lens",
+          "uv": [
+            6.0,
+            10.0,
+            10.0,
+            14.0
+          ]
         },
         "east": {
-          "texture": "#lens"
+          "texture": "#lens",
+          "uv": [
+            13.0,
+            10.0,
+            14.0,
+            14.0
+          ]
         },
         "south": {
-          "texture": "#lens"
+          "texture": "#lens",
+          "uv": [
+            6.0,
+            10.0,
+            10.0,
+            14.0
+          ]
         },
         "west": {
-          "texture": "#lens"
+          "texture": "#lens",
+          "uv": [
+            2.0,
+            10.0,
+            3.0,
+            14.0
+          ]
         },
         "up": {
           "texture": "#lens"

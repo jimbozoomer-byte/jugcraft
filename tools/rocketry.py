@@ -479,29 +479,26 @@ def guidance_unit():
     return c.finish()
 
 
-def _powder(colours, seed):
-    import random
-    import hd_art as hd
-    c = hd.Canvas()
-    c.capsule((14, 50), (50, 50), 7, hd.PAPER, flat_ends=True)  # a paper tray
-    for i, (x, y, r) in enumerate(((32, 40, 12), (22, 44, 8), (42, 44, 8))):
-        c.blob((x, y), r, colours[i % len(colours)], seed=seed + i, lumps=5)
-    return c.finish()
+def _powder(palette):
+    """A clean heap of powder (tools/material_style.py): lit at the upper left, outlined, a few grains a tone apart.
+    `palette` runs darkest first, five tones."""
+    import material_style as ms
+    return ms.dust(palette)
 
 
 def iodine():
-    import hd_art as hd
-    return _powder([hd.Material([(30, 20, 40), (50, 34, 64), (78, 52, 96), (110, 80, 130), (150, 120, 170)], 0.6, 20)], 3810)
+    """Iodine: a heap of dark violet-black crystals."""
+    return _powder([(30, 20, 40), (50, 34, 64), (78, 52, 96), (110, 80, 130), (150, 120, 170)])
 
 
 def ammonium_perchlorate():
-    import hd_art as hd
-    return _powder([hd.WHITE_PAINT], 3811)
+    """Ammonium perchlorate: a heap of white crystalline powder."""
+    return _powder([(150, 152, 158), (196, 198, 202), (222, 224, 226), (240, 240, 242), (252, 252, 252)])
 
 
 def silver_iodide():
-    import hd_art as hd
-    return _powder([hd.Material([(110, 100, 60), (150, 140, 90), (190, 180, 120), (220, 212, 160), (240, 236, 200)], 0.4, 14)], 3812)
+    """Silver iodide: a heap of pale yellow powder."""
+    return _powder([(110, 100, 60), (150, 140, 90), (190, 180, 120), (220, 212, 160), (240, 236, 200)])
 
 
 def solid_propellant():
@@ -553,7 +550,7 @@ def rocket_launcher():
     c.capsule((30, 38), (28, 52), 3.0, hd.RUBBER, flat_ends=True)  # the grip
     c.capsule((40, 34), (39, 46), 2.4, hd.RUBBER, flat_ends=True)  # the fore grip
     c.line((32, 42), (35, 44), (40, 40, 44), width=1.4)  # trigger
-    return c.finish()
+    return c.finish(alpha=255)   # an opaque outline: no see-through rim on the in-hand sprite
 
 
 def he_rocket():
@@ -561,7 +558,7 @@ def he_rocket():
     import hd_art as hd
     c = hd.Canvas()
     _rocket(c, hd, hd.GUNMETAL, hd.RED, hd.SAFETY_YELLOW, fins=True)
-    return c.finish()
+    return c.finish(alpha=255)   # an opaque outline: no see-through rim (5 October 2026)
 
 
 def homing_rocket():
@@ -569,7 +566,7 @@ def homing_rocket():
     import hd_art as hd
     c = hd.Canvas()
     _rocket(c, hd, hd.WHITE_PAINT, hd.RED, hd.RED, fins=True, tip=hd.GLASS)
-    return c.finish()
+    return c.finish(alpha=255)   # an opaque outline: no see-through rim (5 October 2026)
 
 
 def line_rocket():
@@ -583,7 +580,7 @@ def line_rocket():
         c.ring((48, 50), r + 1.6, r, hd.SAFETY_YELLOW)
     _rocket(c, hd, hd.RED, hd.WHITE_PAINT, hd.STEEL, fins=True, tip=hd.CHROME)
     c.line((14, 56), (12, 56), (200, 160, 30), width=1.8)
-    return c.finish()
+    return c.finish(alpha=255)   # an opaque outline: no see-through rim (5 October 2026)
 
 
 def delivery_rocket():
