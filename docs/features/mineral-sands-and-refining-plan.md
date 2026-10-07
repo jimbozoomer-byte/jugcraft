@@ -84,11 +84,13 @@ Connections to earlier industries include ceramic linings/insulators, suitable a
 
 Candidate route: bauxite preparation, alkaline digestion, clarification/filtration, recovery of a precipitate and calcination into alumina. Alumina then branches into appropriate ceramic products or aluminum electrolysis.
 
+The [7 October material planning follow-up](industrial-chemistry-and-fuels-plan.md#material-production-decisions-third-batch) selects aluminum's broad first product range: electrical parts, structural stock, building panels and vehicle components. Initial refining stations are compact functional installations, with optional larger bulk plants. Exact recipes/capacities remain to design; oxide/ceramic and metal consumers keep independently useful roles.
+
 This gives the refinery a useful oxide output as well as a metal consumer. Preserve existing alumina/aluminum identities and keep prior reachable recipes until their replacement route works. The inspected electrolytic-cell recipe uses aluminum cable while producing aluminum. In the [7 October chemistry planning follow-up](industrial-chemistry-and-fuels-plan.md#machinery-and-operation-decisions-second-batch), the owner selected **earlier copper conductors for entry aluminum-processing equipment**, with aluminum improvements later. Exact construction recipes remain to design; verify this bootstrap before the current starting route is removed.
 
 ### Titanium materials
 
-Separated titanium-bearing minerals can branch into pigment products or a metal-refining route. A candidate metal route is chlorination, purification, reduction into titanium sponge and appropriate melting.
+Separated titanium-bearing minerals can branch into pigment products or a metal-refining route. The owner now selected **distinct chemical treatment, purification, reduction and melting stages**, using shared equipment where suitable. Chlorination, purification, reduction into titanium sponge and appropriate melting remain a candidate specific route within that structure; exact intermediates/reagents/reductants are not finalized. Selected titanium destinations include advanced process equipment, tools/armor, vehicle and precision components.
 
 The current titanium recipe compresses chemical recovery into one conversion. If the expanded route uses magnesium reduction, magnesium must have an independently obtainable feedstock and equipment built before titanium. A recovery loop can later return some magnesium/chlorine from spent salts, with explicit energy and losses; it cannot be the source of the very first batch of magnesium.
 
@@ -109,6 +111,8 @@ Form, purity, grade and actual recipes remain to be designed. Not every named ma
 ### Direct mineral uses
 
 Zircon and garnet retain suitable direct preparation routes for ceramic materials and abrasives. New advanced zirconium or other metal products should be introduced with real consumers, rather than adding every possible element simply because a mineral contains it.
+
+The later material batch selects advanced ceramic manufacturing as powder preparation -> shaping blanks -> firing -> precision finishing where a consumer needs it. Use shared preparation/forming/kiln roles and appropriate earlier tooling. Compact first refining stations and optional larger plants do not erase the substantial first digester or accessible clay-based first steel-casting route. A small new alloy set with distinct applications uses compatible upgraded alloy equipment; compositions and consumer recipes remain to design.
 
 ## Rare-earth expansion is a planned follow-up
 

@@ -48,8 +48,14 @@ Owner-requested 7 October 2026. Independent planning brief: [industrial chemistr
 - [ ] Add optional CO2 capture/release to industrial carbonate cement processing and optional Coke Oven gas/condensate recovery. Full CO2 capture storage defaults to continued production/excess venting, with optional stop-instead; account for material, energy and recovered/released amounts once.
 - [ ] Use earlier copper conductors in entry aluminum-processing equipment, with aluminum improvements later; verify construction and reagent producers without self-output gates.
 - [ ] Verify filled gas tanks retain exact content through break, pickup and placement and reconnect through shared pipes; cover joined-tank partitioning, simultaneous transfers and multiplayer pickup.
-- [ ] Detail H2/chlorine -> HCl and useful carbon-bearing monomer/polymer connections, while retaining existing PVC, butadiene rubber and natural-rubber routes.
+- [ ] Detail H2/chlorine -> HCl and the selected existing-refinery-feed plastics entry with named intermediates and appropriate HCl connections, while retaining existing PVC, butadiene rubber and natural-rubber routes.
 - [ ] Expand process-specific reagents, useful rigid/flexible/protective/heat-resistant polymers and advanced ceramic linings/insulators/cutting/precision parts. Limit purity grades to meaningful consumers; prioritize refining/electronics over broad new everyday finishes.
+- [ ] Develop the selected distinct titanium treatment, purification, reduction and melting stages using shared equipment where suitable; verify independent reagent/reductant supplies and preserve existing source routes until replacements work.
+- [ ] Add aluminum electrical parts, structural stock, building panels and vehicle components, plus titanium process-equipment, tool/armor, vehicle and precision-component destinations with useful consumer-specific balance.
+- [ ] Build the selected shared **Polymer Molding Press with reusable molds** for compatible housings, fittings and flexible parts; use earlier supplies for the first station/tooling.
+- [ ] Implement prepared ceramic powders -> shaped blanks -> firing -> consumer-specific precision finishing where needed, reusing shared forming/kiln roles and preserving the accessible clay-based first steel-casting route.
+- [ ] Define a small useful new-alloy set with distinct consumers on compatible upgraded alloy equipment; exact compositions/material identities remain to select and audit.
+- [ ] Begin refining with compact functional stations and optional larger bulk plants; retain the separately selected substantial first Anaerobic Digester.
 - [ ] Develop mainly larger/better general-purpose batteries with a limited set of useful specialty choices.
 - [ ] Document actual machine roles, recipes, consumer links and optional paths in the Encyclopedia; audit reachability, gas/element units, energy loops, pollution, bounded factory work and persistence before gameplay delivery.
 

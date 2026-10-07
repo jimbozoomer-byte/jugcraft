@@ -1,6 +1,6 @@
 # Industrial chemistry, gas fuels and advanced materials
 
-Status: owner-selected planning direction, recorded and updated 7 October 2026. This independent brief records two completed ten-answer batches and the owner's detailed fuel-processing request. Steel-built electrical equipment is the main chemistry entry; gas processing, aluminum and titanium are the first development priorities. The latest batch selects shared hydrogen/methane generation, a separate lower-output biogas/bioethanol generator, automatic gas-pipe pressurization, reusable nickel catalyst entry, CO/hydrogen separation, a shorter initial ethanol route, automatic excess-CO2 venting, a substantial first digester and copper-conductor aluminum equipment. Exact station identities, recipes, capacities, upgrade benefits and fuel values remain to design and balance. This document implements no gameplay.
+Status: owner-selected planning direction, recorded and updated 7 October 2026. This independent brief records two completed ten-answer batches, the owner's detailed fuel-processing request and the following eight-question material batch. Steel-built electrical equipment is the main chemistry entry; gas processing, aluminum and titanium are the first development priorities. Generator roles, automatic gas-pipe pressurization and the reachable copper-conductor entry remain selected. Material production now includes staged titanium refining, broad aluminum/titanium products, existing refinery feeds with named intermediates/HCl connections, a shared Polymer Molding Press, shaped/fired ceramic blanks, a limited useful alloy set and compact first refining stations with optional larger plants. Exact identities, compositions, recipes, capacities, upgrade benefits and fuel values remain to design and balance. This document implements no gameplay.
 
 Proposal issue: direct owner instructions during industrial planning; no separate issue.
 Owner: jimbozoomer-byte.
@@ -41,6 +41,23 @@ The owner answered the following ten decisions on 7 October. Custom qualificatio
 | 8 | A | When optional CO2 capture fills, continue production and vent excess by default; provide an optional stop-instead setting |
 | 9 | A | The first advanced Anaerobic Digester is a substantial bulk-processing installation, with larger versions later |
 | 10 | A | Earlier copper conductors build entry aluminum-processing equipment; aluminum improves later versions |
+
+## Material production decisions: third batch
+
+The owner selected A for all eight questions on 7 October, clarifying question 4 as existing refinery feeds with named intermediates and HCl connections.
+
+| # | Owner answer | Selected direction |
+| --- | --- | --- |
+| 1 | A | Distinct titanium chemical treatment, purification, reduction and melting stages, using shared equipment where suitable |
+| 2 | A | Aluminum's first substantial product range includes electrical parts, structural stock, building panels and vehicle components |
+| 3 | A | Titanium has useful advanced process-equipment, tool/armor, vehicle and precision-component destinations |
+| 4 | A, clarified | Expand existing refinery feeds with named intermediates and appropriate HCl connections for the initial plastics route |
+| 5 | A | One shared Polymer Molding Press with reusable molds for suitable housings, fittings and flexible parts |
+| 6 | A | Prepare ceramic powders, shape blanks, fire them and finish precision parts where needed |
+| 7 | A | Include a small set of new alloys with distinct applications, using compatible upgraded alloy equipment |
+| 8 | A | Compact functional first refining stations, followed by optional larger bulk plants |
+
+The material-expansion layout does not replace the selected substantial first Anaerobic Digester with small vats. "Compact" means a practical initial refining layout, not a promise that every process is one block or lacks an industrial model. The exact material identities, alloy compositions, recipes, capacities and station footprints remain to design.
 
 ## Design from products and reactions
 
@@ -175,11 +192,15 @@ Released gas contributes to the selected numeric pollution/map/marauder system. 
 
 Brine electrolysis -> chlorine and hydrogen -> suitable reactor -> hydrogen chloride. Give HCl explicit storage, reaction and aqueous-acid roles where useful; gas and dissolved acid must not interchange for free or duplicate material.
 
-The owner's desired gas-to-polymer connection needs a carbon-bearing monomer preparation route. HCl by itself is not a plastic or rubber feedstock. A candidate PVC connection uses HCl within vinyl-chloride manufacture, followed by the existing polymerization/material-forming family. [EPA documents HCl's role in vinyl-chloride processes](https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=P100RPT1.TXT). Select the simplified route and its carbon source before adding recipes; this brief does not commit to a particular historical catalyst or introduce its full real-world operating procedure.
+The owner selected **existing refinery feeds with named intermediates and appropriate HCl connections** for the initial plastics route. Extend reachable refinery/cracking outputs into product-specific monomer preparation, polymerization and forming. HCl by itself is not a plastic or rubber feedstock. A candidate PVC connection uses HCl within vinyl-chloride manufacture, followed by the existing polymerization/material-forming family. [EPA documents HCl's role in vinyl-chloride processes](https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=P100RPT1.TXT). Exact carbon-feed, intermediate and reaction recipes remain to design; the selected route does not require an initial dedicated acetylene-production branch or commit to a particular historical catalyst/full operating procedure.
 
 Existing rubber from butadiene and natural-rubber alternatives remain useful. HCl can connect to an explicitly designed compatible specialty/chlorinated-polymer pathway, but it is not a universal mandatory ingredient for all rubber. Treat that specialty rubber connection as a candidate to develop, while preserving the owner's request for linked gas/polymer chemistry.
 
 Develop multiple polymer product families with actual consumers: rigid equipment panels/housings, flexible cable insulation, protective coatings and heat-resistant specialty parts. Reuse existing PVC/plastic/rubber identities where appropriate. New types need a distinct capability or material role; do not force every circuit through every polymer family.
+
+The owner selected **one shared Polymer Molding Press with reusable interchangeable molds** for suitable housings, fittings and flexible parts. Prepared polymer stock -> appropriate molding recipe/heat -> selected finished component. A mold chooses its compatible product family; a rigid resin does not gain every flexible or heat-resistant material property simply by using another mold. Exact stock forms, recipes, heat levels, shape families and drive/interface details remain to design.
+
+The machine handles molding operations internally without adding player-managed pressure. Build its first molds and station from earlier reachable metal/ceramic supplies, not exclusively from the molded output they enable. Molds remain reusable and recoverable, with no routine replacement. Multiple presses with different molds can specialize parallel lines; one station with changed tooling also remains useful. Preserve existing press/crafting outputs while adding the selected shaping role.
 
 Process-specific reagents and meaningful intermediate preparation are selected. Purity variants remain limited to consumers that need them; detail comes from distinct reactions and uses rather than duplicate ordinary/high-purity versions of every item.
 
@@ -187,13 +208,33 @@ Process-specific reagents and meaningful intermediate preparation are selected. 
 
 Gas processing, aluminum and titanium are the first chains to detail together:
 
-- **Aluminum:** reachable bauxite/alkaline processing, filtration/recovery and alumina. Alumina branches into useful ceramics or electrical metal recovery. The owner selected **earlier copper conductors for entry equipment**, with aluminum improvements later. Reuse current IDs and keep the first cell reachable without its own aluminum output.
-- **Titanium:** regional mineral feed separates into pigment/material uses or an appropriate chlorination/purification/reduction/sponge/melting chain. Independently source a reductant such as magnesium if the expanded recipe needs it; partial recovery cannot create the first reductant.
-- **Advanced ceramics:** useful heat-resistant linings, electrical insulators, cutting heads and precision components, alongside appropriate building variants. Later mineral-based refractories improve equipment without removing the selected accessible clay-based first steel-casting route.
+- **Aluminum:** reachable bauxite/alkaline processing, filtration/recovery and alumina. Alumina branches into useful ceramics or electrical metal recovery. The owner selected **earlier copper conductors for entry equipment**, with aluminum improvements later, and a broad first product range of **electrical parts, structural stock, building panels and vehicle components**. Reuse current IDs and keep the first cell reachable without its own aluminum output.
+- **Titanium:** the owner selected distinct **chemical treatment, purification, reduction and melting stages**, using shared equipment where suitable. Regional mineral feeds retain pigment/material side branches. Titanium's selected destinations include **advanced process equipment, tools/armor, vehicle and precision components**. Independently source a reductant such as magnesium if the expanded recipe needs it; partial recovery cannot create the first reductant.
+- **Advanced ceramics:** the owner selected **powder preparation -> shaping blanks -> firing -> precision finishing where needed**. Useful outputs include heat-resistant linings, electrical insulators, cutting heads and precision components, alongside building variants. Later mineral-based refractories improve equipment without removing the selected accessible clay-based first steel-casting route.
 - **Polymers and electronics:** prioritize refining reagents, insulation and electronics materials before a broad new everyday adhesives/sealants industry. Existing soap, agricultural coatings and ordinary materials are not removed.
 - **Batteries:** primarily a capacity/performance progression for general storage. Consider a small number of specialty cases, such as portable packs or high-output banks, where they provide a real use. Do not replace the owner's mostly linear preference with a large mandatory chemistry-specific battery web.
 
 The [mineral refining plan](mineral-sands-and-refining-plan.md) retains its regional sands, shared roles and explicit later rare-earth expansion. Named neodymium/cerium/yttrium products remain the initial set, not the final roster. This chemistry priority choice does not cancel those additional materials or their useful applications.
+
+### Material chains, useful products and station connections
+
+| Selected branch | Production arrangement to develop | Finished destinations and entry boundary |
+| --- | --- | --- |
+| Aluminum and alumina | Prepared bauxite -> shared alkaline digestion -> clarification/filtration and compound recovery -> calcination -> alumina; electrical recovery supplies aluminum | Alumina ceramics plus electrical parts, structural stock, building panels and vehicle components. Entry equipment uses copper; do not require its own aluminum output |
+| Titanium | Prepared regional mineral feed -> chemical treatment -> purification -> reduction into suitable sponge/material -> melting | Advanced process-equipment parts, tools/armor, vehicle and precision components. Treatment/purification can use appropriate shared reactor/separation roles; a sealed retort is a candidate where reduction needs it, and existing Arc Furnace integration should be reviewed for melting |
+| Molded polymers | Existing refinery feeds -> named monomer preparation/HCl connections where appropriate -> compatible polymer stock -> shared Polymer Molding Press with reusable molds | Housings, fittings and flexible parts with material-specific roles. Exact feed/intermediate recipes remain open; first tooling cannot require its own molded product |
+| Advanced ceramics | Prepared powders -> shaped unfired blanks -> suitable kiln firing -> finishing only where a precision consumer requires it | Linings, insulators, cutting/precision parts and building variants. Earlier tools/molds supply initial shaping; firing and finishing need explicit costs and matching yields |
+| Limited useful alloy set | Reachable metals/materials -> compatible upgraded alloy equipment -> useful alloy stock/forms | Distinct product or equipment applications beside pure metals. Exact alloys, compositions, conversion units and consumers are proposals, not yet selected names |
+
+Titanium's stage structure is selected, but exact intermediate identities/reagents and reductant choices are not. A proposed chloride-based treatment/purification route must specify its obtainable gases, independently reachable reductant, residues and useful recovery before replacing current simplified recipes. Do not build the first reduction/melting station exclusively from titanium it alone produces. Existing titanium/sponge identities and reachable source routes remain until their successors are reviewed.
+
+The broad metal product ranges are independently useful destinations and trade goods. Reuse appropriate shared presses, dies and assembly roles for stock and components; exact aluminum/titanium forming capability still needs review rather than assuming every ordinary steel die supports every material. Vehicle parts support their relevant vehicle features without adding a compulsory vehicle build to chemistry. Tool/armor statistics and process-equipment capabilities need their own consumer-specific balance; selecting a material does not automatically make it strongest in every role.
+
+For ceramics, use common preparation/shaping and kiln roles where suitable. Ordinary building/lining pieces can be finished products straight from firing; add cutting/grinding/polishing only where the specific precision part needs it. Exact shaping/finishing machine assignments are proposals. The selected Polymer Molding Press does not automatically become universal equipment for every ceramic or metal. Fired/unfired forms must not be interchangeable for free, and reusable tooling must not introduce routine maintenance.
+
+**New alloys:** include a small set with clear applications during this material expansion. Use compatible upgraded alloy equipment as selected earlier; a dedicated alloy station is justified only by a genuinely different process capability. Add each alloy with its useful consumers, preserve material accounting and avoid making every ordinary machine require the complete alloy catalog.
+
+**Refinery scale:** begin with compact functional refining stations, keeping initial construction and small-batch work practical. Optional larger plants reward sustained throughput and handling rather than being the only way to make the first material. Exact physical footprints remain to design under the industrial art direction. This does not override the substantial first digester, earlier larger foundry/press choices or any genuine process-hardware requirement.
 
 ## Optional Coke Oven chemical byproducts
 
@@ -219,8 +260,11 @@ These are functional machine roles for the selected processes, not approval of e
 | Crop preparation / fermentation | Crops -> mash -> broth/CO2 | Reuse mechanical mill/mixing roles; decide suitable shared fermenter/biorefinery capability |
 | Distillation / later dehydration | Broth -> Bio-Generator ethanol; later drying -> demanding fuel/blend uses | Selected earlier generator route stops at distillation; shared distillation/drying architecture remains to choose |
 | Cement kiln / gas capture | Carbonate-bearing feed -> cement-stage material + captured/released CO2 | Optional collection; full capture defaults to excess venting and continued production, with optional stop-instead |
-| HCl / monomer / polymerization | H2 + chlorine and appropriate carbon-bearing intermediate feeds -> reagents/monomers -> polymers | Extend shared reaction and polymerization machinery with distinct recipes |
-| Aluminum / titanium refining | Prepared regional feeds + relevant reagents/energy -> useful material products | Follow selected shared digestion/filtration/separation/recovery and process-specific electrical/retort roles |
+| HCl / monomer / polymerization | H2 + chlorine and appropriate carbon-bearing intermediate feeds -> reagents/monomers -> polymers | Selected existing-refinery-feed entry with named intermediates and appropriate HCl connections; extend shared reaction/polymerization machinery with distinct recipes |
+| Polymer Molding Press | Compatible polymer stock + suitable heat + reusable mold -> selected housings/fittings/flexible parts | Selected one shared molding station with reusable tooling; exact recipes and drive details pending |
+| Aluminum / titanium refining | Prepared regional feeds + relevant reagents/energy -> useful material products | Selected compact first stations, optional larger plants and distinct titanium treatment/purification/reduction/melting; exact hardware/reagent mapping pending |
+| Ceramic shaping / kiln / precision finishing | Prepared powders -> shaped blanks -> fired parts -> finished precision components where needed | Selected staged manufacturing; reuse common roles, with consumer-specific finishing and no self-output tooling gate |
+| Compatible upgraded alloy equipment | Reachable materials -> a limited set of useful alloy stock/forms | Selected small useful alloy expansion; exact compositions/consumers remain proposals |
 | Coke byproduct collection | Coal-coking stream -> gas/condensates | Optional collection and chemical processing; coke supply stays independently useful |
 | Portable gas tanks | Exact filled gas amount -> carried tank -> placed pipe-connected supply | Reuse existing storage components and network handling |
 
@@ -246,10 +290,12 @@ Use authoritative server state, existing access rules and stable IDs. Preserve c
 2. Specify methanation heat capability, the selected existing-nickel/ceramic reusable bed, water separation and optional catalyst improvements. Keep gas-pipe pressurization automatic.
 3. Detail the earlier coal gasifier and optional cement/Coke Oven gas capture without making capture a starter-steel prerequisite.
 4. Detail the selected substantial first digester and earlier milling/mashing -> fermentation -> distillation crop-power route, with later dehydration and concentrated CO2 collection.
-5. Add the selected polymer/ceramic/storage product depth using actual consumers; refine HCl's specialty-polymer connection.
+5. Develop the selected staged titanium route, broad aluminum/titanium destinations, shared reusable-mold Polymer Molding Press, ceramic blank/firing/finishing stages and limited useful alloy set. Keep first refining stations compact, with optional larger plants.
 6. Balance construction, work rates, gas units and electricity/fuel values; implement the selected excess-CO2 vent default and optional stop-instead setting. Additional planning questions should arrive in batches of **8–12 inline questions**, not two at a time.
 
 The generator fuel split, methane benefit, reusable nickel entry, automatic pressure handling, CO/hydrogen mixture separation, earlier ethanol stages, CO2 capture default, first-digester scale and copper-conductor entry are selected. Remaining decisions include exact station IDs/footprints/recipes, reagent catalog, heat levels, catalyst quantities/upgrades, distillation/drying architecture, gas units/rates, generator fuel/output values, control UI and battery sidegrades. Owner-selected directions are distinct from assistant equipment/recipe proposals.
+
+The third batch settles all eight material directions listed above, including **expanded existing refinery feeds with named intermediates and appropriate HCl connections**. Next, select concrete end products and station roles within those branches. Exact intermediate/reductant/alloy identities, molding/shaping station recipes, precision finishing and product statistics remain to design; they are not settled merely by choosing the overall routes.
 
 ## Verification, dependencies and provenance
 
