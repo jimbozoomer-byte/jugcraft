@@ -59,6 +59,9 @@ public class RiceClientGameTests implements FabricClientGameTest {
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 6, y, z - 16, x + 18, y + 10, z + 16));
 			context.waitTicks(10);
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
+			// The paddy is planted once the light has reached its new water: a crop needs light 8 to stay, as vanilla's do.
+			context.waitTicks(20);
+			server.runOnServer(minecraft -> plant(minecraft.overworld(), origin));
 			for (int i = 0; i < ITEMS.size(); i++) {
 				server.runCommand("summon minecraft:item_frame %d %d %d {Facing:3b,Fixed:1b,Item:{id:\"jugcraft:%s\",count:1}}"
 						.formatted(x + 1 + i % WALL, y + 3 - i / WALL, z - 11, ITEMS.get(i)));
@@ -69,7 +72,7 @@ public class RiceClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 4, y + 2, z - 1, 0, 30, "jugcraft_rice_paddy");
 			shoot(context, singleplayer, x + 5, y + 6, z - 3, 0, 50, "jugcraft_rice_overview");
 			shoot(context, singleplayer, x + 4, y + 3, z + 4, 0, 50, "jugcraft_rice_storage_and_tatami");
-			shoot(context, singleplayer, x + 7, y + 3, z + 9, 0, 50, "jugcraft_rice_medley_and_dishes");
+			shoot(context, singleplayer, x + 5, y + 3, z + 9, 0, 50, "jugcraft_rice_medley_and_dishes");
 			shoot(context, singleplayer, x + 5, y + 2, z - 5, 180, 5, "jugcraft_rice_items");
 		}
 	}
@@ -104,6 +107,27 @@ public class RiceClientGameTests implements FabricClientGameTest {
 		set(level, pos, Blocks.WATER);
 	}
 
+	/** The paddy: rice at every age in a row of shallows, a second row ripe behind it, and wild rice beyond. */
+	private static void plant(ServerLevel level, BlockPos origin) {
+		int x = origin.getX();
+		int y = origin.getY();
+		int z = origin.getZ();
+		TallCropBlock rice = JugcraftAgriculture.TALL_CROPS.get(TallCrop.RICE);
+		for (int age = 0; age <= TallCropBlock.MAX_AGE; age++) {
+			for (int row = 0; row < 2; row++) {
+				BlockPos bottom = new BlockPos(x + age, y - 1, z + 2 + row);
+				set(level, bottom, rice);
+				rice.growTo(level, bottom, row == 0 ? age : TallCropBlock.MAX_AGE);
+			}
+		}
+		for (int i = 0; i < 4; i++) {
+			BlockPos lower = new BlockPos(x + 9 + i % 2, y - 1, z + 2 + i / 2);
+			level.setBlock(lower, block("wild_rice").defaultBlockState().setValue(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER), Block.UPDATE_ALL);
+			level.setBlock(lower.above(), block("wild_rice").defaultBlockState().setValue(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER),
+					Block.UPDATE_ALL);
+		}
+	}
+
 	private static void build(ServerLevel level, BlockPos origin) {
 		int x = origin.getX();
 		int y = origin.getY();
@@ -114,22 +138,14 @@ public class RiceClientGameTests implements FabricClientGameTest {
 				set(level, new BlockPos(x + dx, y + dy, z - 12), Blocks.BRICKS);
 			}
 		}
-		// The paddy: rice at every age in a row of shallows, a second row ripe behind it, and wild rice beyond.
-		TallCropBlock rice = JugcraftAgriculture.TALL_CROPS.get(TallCrop.RICE);
+		// The paddy's shallows and wild rice's (planted by plant()).
 		for (int age = 0; age <= TallCropBlock.MAX_AGE; age++) {
 			for (int row = 0; row < 2; row++) {
-				BlockPos bottom = new BlockPos(x + age, y - 1, z + 2 + row);
-				shallows(level, bottom);
-				set(level, bottom, rice);
-				rice.growTo(level, bottom, row == 0 ? age : TallCropBlock.MAX_AGE);
+				shallows(level, new BlockPos(x + age, y - 1, z + 2 + row));
 			}
 		}
 		for (int i = 0; i < 4; i++) {
-			BlockPos lower = new BlockPos(x + 9 + i % 2, y - 1, z + 2 + i / 2);
-			shallows(level, lower);
-			level.setBlock(lower, block("wild_rice").defaultBlockState().setValue(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER), Block.UPDATE_ALL);
-			level.setBlock(lower.above(), block("wild_rice").defaultBlockState().setValue(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER),
-					Block.UPDATE_ALL);
+			shallows(level, new BlockPos(x + 9 + i % 2, y - 1, z + 2 + i / 2));
 		}
 		// The storehouse: the Bag of Rice and the bales, standing and laid on their sides.
 		int store = z + 7;
