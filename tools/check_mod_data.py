@@ -15,7 +15,7 @@ from PIL import Image
 from party import PARTY_LANG
 import drones
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
-                       all_blocks, all_items, feature_of)
+                       all_blocks, all_items, feature_of, ore_gens, ore_gen_owners)
 import agriculture as ag
 import werewolf_model
 import midway
@@ -372,7 +372,10 @@ def check_recipes(registered):
             continue
         name = path.stem
         conditions = recipe.get("fabric:load_conditions", [])
-        features = [c.get("feature") for c in conditions if c.get("condition") == f"{MOD}:feature_enabled"]
+        switches = [c for c in conditions if c.get("condition") == f"{MOD}:feature_enabled"]
+        features = [c.get("feature") for c in switches]
+        # Each condition is one switch, or several any one of which loads the recipe ("or": a wood's WOOD_SWITCHES).
+        groups = [sorted([c.get("feature"), *c.get("or", [])]) for c in switches]
         if not features:
             err(f"{name}: missing feature switch condition")
         if "result" not in recipe:
@@ -380,8 +383,12 @@ def check_recipes(registered):
             if recipe["type"] not in SPECIAL_RECIPES:
                 err(f"{name}: no result, and {recipe['type']} is not a known special recipe")
             continue
-        if features and split(recipe["result"]["id"])[1] in registered and feature_of(split(recipe["result"]["id"])[1]) not in features:
-            err(f"{name}: gated by {features} but its result belongs to {feature_of(split(recipe['result']['id'])[1])}")
+        result = split(recipe["result"]["id"])[1]
+        if features and result in registered:
+            owner = feature_of(result)
+            owner = sorted(owner) if isinstance(owner, list) else [owner]
+            if owner not in groups:
+                err(f"{name}: gated by {groups} but its result belongs to {owner} (any of them)")
 
         kind = recipe["type"]
         if kind == "minecraft:crafting_shaped":
@@ -422,6 +429,7 @@ def check_recipes(registered):
 def check_machine_recipe_files(registered):
     """Machine recipes are data-driven files under recipe/<type>/; each must resolve and match its type."""
     from generate_material_data import RECIPE_TYPES
+    from machines import FEATURE as MACHINE_SWITCH
     kinds = MACHINE_JAVA.read_text(encoding="utf-8")
     for machine, kind in RECIPE_TYPES.items():
         if f'"{kind}"' not in kinds:
@@ -439,6 +447,17 @@ def check_machine_recipe_files(registered):
             err(f"{label}: type {recipe.get('type')} does not match its folder")
         if not recipe.get("fabric:load_conditions"):
             err(f"{label}: missing feature switch condition")
+        # A Jugcraft wood's sawmill recipe follows the machines switch and its wood's switches, any one of which loads it
+        # (agriculture.WOOD_SWITCHES, TREES.md rule 4), as the wood's hand recipes do. The tree farm follows the machines
+        # switch alone, by design.
+        wood = path.stem.removesuffix("_logs")
+        if path.parent.name == "sawing" and wood in ag.WOOD_SETS:
+            groups = sorted(sorted([c.get("feature"), *c.get("or", [])]) for c in recipe.get("fabric:load_conditions", [])
+                            if c.get("condition") == f"{MOD}:feature_enabled")
+            wanted = sorted([[MACHINE_SWITCH], sorted(ag.WOOD_SWITCHES.get(wood, []))])
+            if groups != wanted:
+                err(f"{label}: gated by {groups}, not by the machines switch and the {wood} wood's switches "
+                    f"{ag.WOOD_SWITCHES.get(wood)} (any of them)")
         refs = [part["ingredient"] for part in recipe.get("ingredients", [])] or [recipe.get("ingredient", "")]
         refs += [entry["result"]["id"] for entry in recipe.get("byproducts", [])]
         for ref in refs + [recipe["result"]["id"]]:
@@ -2221,6 +2240,58 @@ def check_biomes():
             err(f"Tree shape {shape} is giant but no tree's saplings grow it (agriculture.TREES \"giant\")")
 
 
+def check_wood_switches():
+    """TREES.md rule 4: a wood's hand and sawmill recipes, and its tree's leaves and sapling, are on whenever any feature
+    switch that places its logs is on. Every switch that places a tree shape, fallen log or placed tree of a Jugcraft wood
+    (a biome's trees or extras, Alpine Spawn's selector, agriculture's wild patches such as the chestnut trees) must be in
+    that wood's agriculture.WOOD_SWITCHES."""
+    if set(ag.WOOD_SWITCHES) != set(ag.WOOD_SETS):
+        err(f"agriculture.WOOD_SWITCHES {sorted(ag.WOOD_SWITCHES)} should list exactly the wood sets {sorted(ag.WOOD_SETS)}")
+    for wood, switches in ag.WOOD_SWITCHES.items():
+        if (not isinstance(switches, list) or not switches or len(set(switches)) != len(switches)
+                or any(switch not in FEATURES for switch in switches)):
+            err(f"agriculture.WOOD_SWITCHES[{wood!r}] = {switches} is not a list of known feature switches")
+    placers = {}  # a placed or configured feature's path, without "_checked": the switches that place it
+
+    def placed_by(ref, switch):
+        ns, path = split(ref)
+        if ns == MOD:
+            placers.setdefault(path.removesuffix("_checked"), set()).add(switch)
+    for info in bm.BIOMES.values():
+        if info["trees"] is not None:
+            for ref in [info["trees"]["default"]] + [feature for feature, _ in info["trees"]["picks"]]:
+                placed_by(ref, bm.FEATURE)
+        for extra in info.get("extras", []):
+            if "feature" in bm.EXTRAS.get(extra, {}):
+                placed_by(bm.EXTRAS[extra]["feature"], bm.FEATURE)
+    for key in ("larch", "spruce"):
+        placed_by(al.TREES[key], al.FEATURE)
+    # Agriculture's wild patches (JugcraftAgriculture.registerWorldgen, under the agriculture switch): the wild chestnut
+    # trees, and anything else a patch_<name> placed feature places. A patch placed anywhere else has no known switch.
+    agriculture = (AGRICULTURE_JAVA / "JugcraftAgriculture.java").read_text(encoding="utf-8")
+    gated = re.search(r"private static void registerWorldgen\(\) \{\n\t\tif \(!JugcraftConfig\.isFeatureEnabled\(FEATURE\)\) \{"
+                      r"(.*?)\n\t\}\n", agriculture, re.S)
+    if not gated:
+        err("JugcraftAgriculture.registerWorldgen() not found, or not gated by the agriculture switch first")
+    inside = set(re.findall(r'wildPatch\("([a-z_]+)"', gated.group(1))) if gated else set()
+    for name in re.findall(r'wildPatch\("([a-z_]+)"', agriculture):
+        patch = load(DATA / MOD / "worldgen" / "placed_feature" / f"patch_{name}.json")
+        if patch is not None:
+            placed_by(patch["feature"], ag.FEATURE if name in inside else f"(patch_{name}, outside registerWorldgen)")
+    woods = {shape: info["wood"] for shape, info in tr.SHAPES.items() if info["wood"] in ag.WOOD_SETS}
+    woods.update({f"fallen_{wood}_tree": wood for wood in tr.FALLEN})
+    for placed, (feature, _) in bm.PLACED_TREES.items():
+        ns, path = split(feature)
+        if ns == MOD and path in ag.WOOD_SETS:
+            woods[placed.removesuffix("_checked")] = path
+    for what, wood in woods.items():
+        switches = ag.WOOD_SWITCHES.get(wood, [])
+        missing = placers.get(what, set()) - (set(switches) if isinstance(switches, list) else {switches})
+        if missing:
+            err(f"{what} is placed by {sorted(missing)}, which the {wood} wood's switches {ag.WOOD_SWITCHES.get(wood)} "
+                f"lack (agriculture.WOOD_SWITCHES, TREES.md rule 4)")
+
+
 def check_alpine():
     """Alpine Spawn: Java's placement and spawn numbers match tools/alpine.py, and its data is all there."""
     java = (WORLD_JAVA / "AlpineSpawn.java").read_text(encoding="utf-8")
@@ -2275,10 +2346,16 @@ def check_java():
     source = JAVA.read_text(encoding="utf-8")
     declared = {}
     for name, chain in re.findall(r'MetalFamily\.builder\("([a-z_]+)"\)([^;]*)\.build\(\)', source):
-        declared[name] = {"mined": ".mined()" in chain, "extras": re.findall(r'extraItem\("([a-z_]+)"\)', chain)}
-    expected = {name: {"mined": info["mined"], "extras": info.get("extras", [])} for name, info in METALS.items()}
+        declared[name] = {"mined": ".mined()" in chain, "extras": re.findall(r'extraItem\("([a-z_]+)"\)', chain),
+                          "lore": ".lore()" in chain}
+    expected = {name: {"mined": info["mined"], "extras": info.get("extras", []), "lore": "lore" in info}
+                for name, info in METALS.items()}
     if declared != expected:
         err(f"JugcraftMaterials.java metals {declared} != tools/materials.py {expected}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for metal, info in METALS.items():
+        if "lore" in info and lang.get(f"tooltip.{MOD}.{metal}_ingot") != info["lore"]:
+            err(f"No lore line tooltip.{MOD}.{metal}_ingot (run tools/generate_material_data.py)")
 
     minerals = re.findall(r'MineralFamily\.register\("([a-z_]+)"\)', source)
     if minerals != list(MINERALS):
@@ -2314,10 +2391,29 @@ def check_java():
     in_java = sorted(set(re.findall(r'\{"([a-z_]+)", "[a-z_]+"\}', worldgen)) | set(re.findall(r'add\("([a-z_]+)"', worldgen)))
     if placed != in_java:
         err(f"JugcraftWorldgen adds {in_java}, data defines {placed}")
+    owners = {placed: feature for placed, (_, feature) in ore_gen_owners().items()}
+    owners.update({rock: info["feature"] for rock, info in ROCKS.items()})
     for name, feature in re.findall(r'\{"([a-z_]+)", "([a-z_]+)"\}', worldgen) + re.findall(r'add\("([a-z_]+)", "([a-z_]+)"', worldgen):
-        owner = feature_of(name if name in ROCKS else f"{name}_ore")
+        owner = owners.get(name)
         if feature != owner:
             err(f"JugcraftWorldgen gates {name} by {feature}, expected {owner}")
+    # Veins with "biomes" on their worldgen entry go in the biomeOres list, placed by the biome tag has_ore/<name>; every
+    # other metal or mineral vein in the ores list, everywhere in the Overworld.
+    def java_list(name):
+        match = re.search(name + r" = \{([^;]*)\};", worldgen)
+        return re.findall(r'\{"([a-z_]+)", "[a-z_]+"\}', match.group(1)) if match else []
+    gens = {placed: gen for name, info in list(METALS.items()) + list(MINERALS.items()) for placed, gen in ore_gens(name, info)}
+    limited = sorted(placed for placed, gen in gens.items() if gen.get("biomes"))
+    if sorted(java_list("biomeOres")) != limited:
+        err(f"JugcraftWorldgen.biomeOres {sorted(java_list('biomeOres'))} != the veins with biomes in tools/materials.py {limited}")
+    if sorted(java_list("ores")) != sorted(set(gens) - set(limited)):
+        err(f"JugcraftWorldgen.ores {sorted(java_list('ores'))} != the Overworld-wide veins in tools/materials.py")
+    if limited and 'Jugcraft.id("has_ore/" + ore[0])' not in worldgen:
+        err("JugcraftWorldgen does not place biomeOres by their biome tag jugcraft:has_ore/<name>")
+    for placed in limited:
+        tag = load(DATA / MOD / "tags" / "worldgen" / "biome" / "has_ore" / f"{placed}.json") or {}
+        if tag.get("values") != gens[placed]["biomes"]:
+            err(f"#{MOD}:has_ore/{placed} {tag.get('values')} != tools/materials.py {gens[placed]['biomes']}")
 
 
 def check_machines(registered):
@@ -2330,8 +2426,10 @@ def check_machines(registered):
                 if split(ref)[0] == MOD and split(ref)[1] not in registered:
                     err(f"{label}: unknown item {ref}")
             for feature in recipe["features"]:
-                if feature not in FEATURES:
-                    err(f"{label}: unknown feature {feature}")
+                # A list is a wood's WOOD_SWITCHES: any of them loads the recipe.
+                for one in [feature] if isinstance(feature, str) else feature:
+                    if one not in FEATURES:
+                        err(f"{label}: unknown feature {one}")
             units_in = sum(sum(item_units(ref).values()) * count for ref, count in inputs)
             units_out = sum(item_units(recipe["output"]).values()) * recipe["count"]
             bonus = recipe.get("ore_bonus") or (ORE_PROCESSING_MULTIPLIER if recipe.get("ore") else 1)
@@ -6689,6 +6787,84 @@ def check_model_uvs():
                     err(f"{path.relative_to(ROOT)}: the {side} face reads {list(uv)} outside its see-through texture {texture}; pin its uv")
 
 
+def check_material_sets():
+    """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
+    committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
+    layers its overlay on vanilla's own stone or deepslate through the template, every metal's ramp steps from dark
+    to light, and no two metals (vanilla's iron, gold and copper included) look alike."""
+    import material_icons as mi
+    from generate_textures import COPPER_METAL, GOLD_METAL, IRON_METAL
+    for map_path in sorted(Path(mi.FOLDER).glob("*.txt")):
+        try:
+            mi.load(map_path.stem)
+        except ValueError as exc:
+            err(f"Material sets: {exc}")
+    # The owner's ingot (6 October 2026): its pixels are kept exactly and only recoloured, for every metal. Its 16x12
+    # rows sit in rows 2-13 of the map; edit its colours in material_icons.ingot_palette, never the map.
+    owner_ingot = [
+                    "..........33....",
+                    ".......333553...",
+                    "....3335666653..",
+                    ".33356666666653.",
+                    "3866666666668873",
+                    "3586666668886351",
+                    "3558668886433451",
+                    "3555886433335551",
+                    "345564333355411.",
+                    ".345643344111...",
+                    "..34542111......",
+                    "...3311.........",
+    ]
+    try:
+        ingot = mi.load("ingot")
+        if ingot[2:14] != owner_ingot or any(set(row) != {"."} for row in ingot[:2] + ingot[14:]):
+            err("Material sets: tools/material_icons/ingot.txt must be the owner's ingot exactly; recolour it in "
+                "material_icons.ingot_palette, never redraw it")
+    except ValueError:
+        pass
+    for (kind, name), image in mi.textures().items():
+        path = ASSETS / "textures" / kind / f"{name}.png"
+        if not path.is_file():
+            err(f"Material sets: missing {kind}/{name}.png")
+            continue
+        with Image.open(path) as committed:
+            if committed.convert("RGBA").tobytes() != image.tobytes():
+                err(f"Material sets: {kind}/{name}.png differs from its map; run tools/generate_textures.py")
+    if mi.OVERLAY:
+        template = load(ASSETS / "models" / "block" / f"{mi.TEMPLATE}.json") or {}
+        if template != mi.template():
+            err(f"Material sets: models/block/{mi.TEMPLATE}.json is not the template; run tools/generate_material_data.py")
+        elements = template.get("elements", [])
+        if [(e.get("from"), e.get("to")) for e in elements] != [([0, 0, 0], [16, 16, 16])] * 2:
+            err(f"Material sets: {mi.TEMPLATE} must be the stone cube then the overlay cube, both exactly 0..16 (as vanilla's grass_block)")
+        for element in elements:
+            for face, info in element.get("faces", {}).items():
+                if info.get("uv") != [0, 0, 16, 16] or info.get("cullface") != face:
+                    err(f"Material sets: {mi.TEMPLATE}'s {face} face needs uv [0, 0, 16, 16] and cullface {face}")
+    for block, _ore, rock in mi.ore_blocks():
+        model = load(ASSETS / "models" / "block" / f"{block}.json") or {}
+        expected = mi.block_model(block) or {"parent": "minecraft:block/cube_all", "textures": {"all": f"{MOD}:block/{block}"}}
+        if model != expected:
+            err(f"Material sets: models/block/{block}.json is not the {rock} ore model; run tools/generate_material_data.py")
+        if mi.OVERLAY:
+            with Image.open(ASSETS / "textures" / "block" / f"{block}.png") as overlay:
+                alphas = set(overlay.convert("RGBA").getchannel("A").tobytes())
+            if alphas != {0, 255}:
+                err(f"Material sets: block/{block}.png must be cut out (alpha 0 or 255 only, some of each), not {sorted(alphas)[:4]}")
+    for metal, tones in mi.METAL_RAMPS.items():
+        lumas = [mi.luma(tone) for tone in tones]
+        if any(b <= a for a, b in zip(lumas, lumas[1:])) or lumas[1] - lumas[0] < 30:
+            err(f"Material sets: {metal}'s ramp must step from dark to light, D at least 30 luma above O")
+    vanilla = {"vanilla iron": IRON_METAL, "vanilla gold": GOLD_METAL, "vanilla copper": COPPER_METAL}
+    names = list(mi.METAL_RAMPS)
+    for i, first in enumerate(names):
+        for second, tones in [(n, mi.METAL_RAMPS[n]) for n in names[i + 1:]] + list(vanilla.items()):
+            distance = mi.ramp_distance(mi.METAL_RAMPS[first], tones)
+            if distance < mi.PAIR_FLOOR:
+                err(f"Material sets: {first} and {second} look alike (CIEDE2000 {distance:.1f} over D, M and L, under "
+                    f"{mi.PAIR_FLOOR:g}); move one ramp in tools/material_icons.py")
+
+
 def check_art():
     """The art's geometry and texture rules for every block/item model and quad part (tools/art_check.py; the rules are
     in docs/ART_DIRECTION.md, Rules for everything): no shared or nearly shared face planes, UVs inside their sprites,
@@ -6999,6 +7175,7 @@ def main():
     check_seasons()
     check_alpine()
     check_biomes()
+    check_wood_switches()
     check_machines(registered)
     check_large_machines()
     check_style_pack()
@@ -7011,6 +7188,7 @@ def main():
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()
+    check_material_sets()
     check_art()
     check_pixel_hollows()
     check_town()

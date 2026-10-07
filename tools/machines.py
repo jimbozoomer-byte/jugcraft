@@ -345,7 +345,9 @@ ORE_LEACHING_MULTIPLIER = 4
 # second, as the real ores occur together. Chance per operation.
 BYPRODUCTS = {"copper": ("gold", 0.1), "iron": ("nickel", 0.1), "gold": ("silver", 0.1), "tin": ("tungsten", 0.05),
               "zinc": ("lead", 0.1), "lead": ("silver", 0.1), "silver": ("lead", 0.1), "nickel": ("iron", 0.1),
-              "tungsten": ("tin", 0.1), "uranium": ("lead", 0.1)}
+              "tungsten": ("tin", 0.1), "uranium": ("lead", 0.1),
+              # Thallite is named for epidote, a green iron-rich mineral (docs/features/thallite.md).
+              "thallite": ("iron", 0.1)}
 # Byproducts may not add more than this share of the input's metal (expected value), and a
 # renewable recipe (no metal in) at most this many nugget units per operation.
 BYPRODUCT_SHARE = 0.25
@@ -809,7 +811,7 @@ def _sawmill():
         recipes.append({"input": f"#minecraft:{tag}", "output": f"minecraft:{wood}_planks", "count": planks, "ticks": 100,
                         "features": [FEATURE], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
     # Jugcraft's own woods (agriculture.WOOD_SETS): the chestnut, Alpine Spawn's larch and the biomes branch's trees, each
-    # also following the switch of whatever grows its tree.
+    # also following its wood's switches (agriculture.WOOD_SWITCHES: any one of them loads the recipe).
     from agriculture import WOOD_SETS, WOOD_SWITCHES
     for wood in WOOD_SETS:
         recipes.append({"input": f"#jugcraft:{wood}_logs", "output": f"jugcraft:{wood}_planks", "count": 6, "ticks": 100,
