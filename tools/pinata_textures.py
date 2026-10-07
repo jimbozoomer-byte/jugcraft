@@ -12,7 +12,7 @@ import math
 
 from PIL import Image
 
-from fur_paint import Painter, mix, ramp
+from fur_paint import mix, clean_painter as Painter, clean_ramp as ramp
 from crop_textures import rgb
 
 N = 64
