@@ -2,7 +2,8 @@
 
 Called from crop_textures.crop_textures(). As with the rest of the branch's art, every pixel is drawn
 here by code from fixed seeds; no Mojang texture is read, traced or recolored. Gourd, lantern and wood
-textures are mapped onto their models by position, so each is drawn where its model shows it.
+textures are mapped onto their models by position, so each is drawn where its model shows it. The chestnut
+tree's wood and leaves are drawn with every other tree's by wood_style.py.
 """
 import math
 import random
@@ -25,11 +26,7 @@ CRAN_STEM = [rgb("5a2a1c"), rgb("7a3a24")]
 CRANBERRY = [rgb("4a0810"), rgb("7a0f1c"), rgb("a8182a"), rgb("d0344a"), rgb("f07a88")]
 CRAN_FLOWER = [rgb("c8708c"), rgb("e8a2b8"), rgb("fbd8e4")]
 BARK = [rgb("2b2119"), rgb("3b2e22"), rgb("4e3d2d"), rgb("63503b"), rgb("7a6449")]
-HEARTWOOD = [rgb("6e4424"), rgb("8a5a30"), rgb("a8743f"), rgb("c49455"), rgb("dcb070")]
-SAPWOOD = [rgb("9a6c3e"), rgb("b48450"), rgb("cc9e64"), rgb("e0b87c")]
-PLANK = [rgb("5e3a1c"), rgb("7a4d27"), rgb("955f31"), rgb("ad733d"), rgb("c48a4e")]
 CHESTNUT_LEAF = [rgb("1b3514"), rgb("254a1b"), rgb("306024"), rgb("3e772d"), rgb("508f38"), rgb("6aa84a")]
-BUR = [rgb("5a7a20"), rgb("7c9c2c"), rgb("a2bc3e"), rgb("d0d86a")]
 BUR_DRY = [rgb("6a4e22"), rgb("8c6a30"), rgb("b08a44"), rgb("d2b064")]
 NUT = [rgb("3a1c0c"), rgb("5a2c12"), rgb("7c3e1a"), rgb("a05a2a"), rgb("c88048")]
 NUT_BASE = [rgb("b8a07a"), rgb("d8c49c")]
@@ -256,116 +253,6 @@ def cranberries_item():
 
 # ---------------------------------------------------------------- the chestnut tree
 
-def bark():
-    """Deeply furrowed chestnut bark whose ridges spiral gently up the trunk; tiles vertically."""
-    c = Canvas()
-    rng = random.Random(5)
-    for y in range(16):
-        for x in range(16):
-            # A ridge every 4 columns, slanting one column per 8 rows so it wraps seamlessly.
-            phase = (x + y / 8) % 4
-            shade = 3 if phase < 1.2 else 2 if phase < 2.2 else 1 if phase < 3.2 else 0
-            if rng.random() < 0.12:
-                shade = min(4, shade + 1)
-            c.px(x, y, BARK[shade])
-    return c.img
-
-
-def log_top(stripped):
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            d = max(abs(x - 7.5), abs(y - 7.5))
-            ring = math.hypot(x - 7.5, y - 7.5)
-            if d > 6.9 and not stripped:
-                c.px(x, y, BARK[2 if (x + y) % 3 else 1])
-            elif d > 6.9:
-                c.px(x, y, SAPWOOD[0])
-            else:
-                shade = 3 if int(ring) % 3 == 0 else 2
-                if ring < 1.5:
-                    shade = 1
-                c.px(x, y, HEARTWOOD[shade])
-    return c.img
-
-
-def stripped_log():
-    c = Canvas()
-    rng = random.Random(9)
-    for y in range(16):
-        for x in range(16):
-            shade = 2 if x % 5 else 1
-            if (x + y // 5) % 7 == 3:
-                shade = 3
-            if rng.random() < 0.06:
-                shade = 0
-            c.px(x, y, SAPWOOD[shade])
-    return c.img
-
-
-def planks():
-    """Four boards of warm chestnut wood with staggered seams, like a vanilla planks layout."""
-    c = Canvas()
-    rng = random.Random(21)
-    for board in range(4):
-        seam = (3, 11, 7, 13)[board]
-        for y in range(board * 4, board * 4 + 4):
-            for x in range(16):
-                shade = 3 if y % 4 == 0 else 2 if y % 4 < 3 else 1
-                if (x + board * 5) % 7 == 0:
-                    shade -= 1
-                if rng.random() < 0.05:
-                    shade = max(0, shade - 1)
-                c.px(x, y, PLANK[shade])
-            c.px(seam, y, PLANK[0])
-        for x in range(16):
-            c.px(x, board * 4 + 3, PLANK[1])
-    return c.img
-
-
-def leaves(fruit=0):
-    """Long, toothed chestnut leaves with gaps; fruit 1 adds green spiny burs, 2 ripe split burs with nuts."""
-    rng = random.Random(33)
-    c = Canvas()
-    # Transparent gaps keep a dark leaf colour, so fast graphics (drawn opaque) look like dense foliage.
-    for y in range(16):
-        for x in range(16):
-            c.img.putpixel((x, y), CHESTNUT_LEAF[0] + (0,))
-    for _ in range(26):
-        x0, y0 = rng.randrange(16), rng.randrange(16)
-        angle = rng.uniform(-0.9, 0.9) + (math.pi if rng.random() < 0.5 else 0)
-        length = rng.randint(3, 5)
-        for i in range(length + 1):
-            x = (x0 + math.sin(angle) * i) % 16
-            y = (y0 - math.cos(angle) * i) % 16
-            shade = 4 if i < length // 2 else 3
-            c.px(x, y, CHESTNUT_LEAF[shade])
-            c.px((x + 1) % 16, y, CHESTNUT_LEAF[shade - 2 if i % 2 else shade - 1])
-    for y in range(16):
-        for x in range(16):
-            if c.empty(x, y) and rng.random() < 0.55:
-                c.px(x, y, CHESTNUT_LEAF[rng.choice((1, 2))])
-    if fruit:
-        for cx, cy in ((4, 5), (11, 10), (12, 2)):
-            if fruit == 1:
-                for dx in range(-1, 2):
-                    for dy in range(-1, 2):
-                        c.px(cx + dx, cy + dy, BUR[2 if dx + dy < 0 else 1])
-                for sx, sy in ((-2, 0), (2, 0), (0, -2), (0, 2), (-2, -2), (2, 2), (2, -2), (-2, 2)):
-                    c.px(cx + sx, cy + sy, BUR[3])
-            else:
-                for sx, sy in ((-2, 0), (2, 0), (0, -2), (-2, -2), (2, -2), (-2, 2), (2, 2)):
-                    c.px(cx + sx, cy + sy, BUR_DRY[3])
-                for dx, dy in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
-                    c.px(cx + dx, cy + dy, BUR_DRY[1])
-                c.px(cx, cy, NUT[3])
-                c.px(cx - 1, cy, NUT[2])
-                c.px(cx + 1, cy, NUT[2])
-                c.px(cx, cy + 1, NUT[1])
-                c.px(cx, cy - 1, NUT[4])
-    return c.img
-
-
 def sapling():
     c = Canvas()
     c.line(8, 15, 8, 7, NUT[1])
@@ -529,14 +416,6 @@ def festival_textures():
         ("block", "gourd_stem"): gourd_stem(),
         ("block", "gourd_stem_attached"): gourd_stem_attached(),
         ("block", "gourd_stalk"): gourd_stalk(),
-        ("block", "chestnut_log"): bark(),
-        ("block", "chestnut_log_top"): log_top(False),
-        ("block", "stripped_chestnut_log"): stripped_log(),
-        ("block", "stripped_chestnut_log_top"): log_top(True),
-        ("block", "chestnut_planks"): planks(),
-        ("block", "chestnut_leaves"): leaves(0),
-        ("block", "chestnut_leaves_burs"): leaves(1),
-        ("block", "chestnut_leaves_ripe"): leaves(2),
         ("block", "chestnut_sapling"): sapling(),
         ("block", "turnip_lantern_side"): lantern_side(False),
         ("block", "turnip_lantern_face"): lantern_side(True),
