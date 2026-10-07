@@ -1338,6 +1338,10 @@ The third slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking-
 
 The fourth slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking-expansion-planned), and slice 7 of the [crop roster](#crop-roster-what-comes-next-planned): rice grown in flooded fields, in the owner's own textures. Details, the balance table and test evidence: [features/rice-and-wet-farming.md](../features/rice-and-wet-farming.md).
 
+| **The paddy** at every stage, and wild rice | **The table:** the rice dishes and the Rice Roll Medley |
+| --- | --- |
+| ![The paddy](../images/ingame_rice_paddy.jpg) | ![The rice dishes and the medley](../images/ingame_rice_medley_and_dishes.jpg) |
+
 - **Rice paddies.** Rice is its own seed: plant it into still water one block deep over bog soil (dirt, grass, mud, sand, clay or gravel) with air above. It grows two blocks tall, its panicles above the water; use a ripe plant or a sickle to pick 2-3 Rice Panicles, and the stalks stay to grow more. Flooded soil counts as moist farmland, under the plant and around it. The plant keeps its water when broken.
 - **Wild rice** grows in swamp and river shallows (shears take the plant; otherwise it gives rice), and rice drops from short grass.
 - **Straw and storage.** The Cutting Board cuts a panicle into two rice and a Straw. Nine rice make a Bag of Rice, nine panicles a Rice Bale and nine straw a Straw Bale, each crafting back into its nine.

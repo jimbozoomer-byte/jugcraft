@@ -19,7 +19,13 @@ Flood a field, grow rice in it, and cook and lay out what it gives:
 - **Seven rice dishes,** each in the owner's icon, and each **set down** as the menu's are (sneak and use it on a block; an empty hand takes it back): **Cooked Rice** and **Fried Rice** heaped in the owner's bowl, **Mushroom Rice** on their plate, and the **Salmon Roll**, **Cod Roll**, **Kelp Roll** and **Kelp Roll Slice** lying flat.
 - **The Rice Roll Medley:** a platter of rolls, crafted from a platter, a kelp roll and two each of the salmon and cod rolls, and set down whole. Each use takes the next roll into your inventory (four kelp roll slices, two cod and two salmon rolls, exactly what went in); once it is bare, a use clears it and gives the platter back. A comparator reads the rolls left. Broken whole, it drops itself; once served from, it drops its platter.
 
-Screenshots: to come from CI's client game test (`RiceClientGameTests`).
+| **The paddy:** rice at every stage in front, a ripe row behind, wild rice on the left | **The storehouse and the tatami room:** the bales and the Bag of Rice, a tatami floor and the mats |
+| --- | --- |
+| ![The paddy](../images/ingame_rice_paddy.jpg) | ![Storage and tatami](../images/ingame_rice_storage_and_tatami.jpg) |
+| **The table:** the rice dishes set down, and the medley bare, part served and whole | **The wall:** the slice's items in item frames |
+| ![The rice dishes and the medley](../images/ingame_rice_medley_and_dishes.jpg) | ![The items](../images/ingame_rice_items.jpg) |
+
+*In-game screenshots from CI's client game test (`RiceClientGameTests`, software rendering, small previews).*
 
 ## Connections
 - Existing input producer: short grass (rice), swamp and river biomes (wild rice), water and bog soil; vanilla eggs, carrots, mushrooms, dried kelp and fish; Jugcraft's onion (Kitchen Garden), the Cutting Board's fish slices and the Platter (slice 2).
@@ -78,7 +84,13 @@ No new dependency.
 **The models** (`tools/rice_data.py`, `tools/menu_data.py`): the paddy plant uses Jugcraft's crop model on each section; wild rice is a cross on each half; the bag turns its tied side to the player; the bales stand or lie; a paired tatami shows the owner's even and odd halves turned to its partner; the mats are a pixel thick; the medley is the platter with its eight rolls (kelp slices standing, the nigiri lying), each taken in turn. The dishes use the menu's bowl, plate and flat templates. They pass the art check (`tools/art_check.py`: no holes, no faces left open).
 
 ## Verification
-CI: recorded by the pull request's checks.
+CI (7 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `95a32d3` | Build | **Failed to compile:** 26.3 has no `Blocks.WHITE_WOOL` to copy and calls the push reaction `POPPED`, not `DESTROY` |
+| `e611777` | Build, data audit, game tests, optional integrations absent, client game tests, repository check | All pass; but the client screenshot showed an empty paddy: the test planted the rice into water that had been solid grass a tick before, where the light had not yet reached, and a crop needs light 8 to stay |
+| `bef291a` | The same, with the test flooding the paddy, waiting 20 ticks, then planting | **All pass:** all 931 required game tests (`RiceGameTests` among them) and every client class (`RiceClientGameTests` among them). Two client shards first stopped at the 30-minute limit inside `apt-get update`, before any test ran; their one re-run passed. The screenshots above are from this commit. |
 
 Run locally (7 October 2026):
 
