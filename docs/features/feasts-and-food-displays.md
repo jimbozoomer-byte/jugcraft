@@ -16,6 +16,14 @@ Cook a feast, set the table, and show food off:
 
 Every texture is the owner's own, imported unchanged, except the plate, which their library does not have (see Dependencies and assets).
 
+| **The feast table:** each feast whole (back), half eaten, and as leftovers (front) | **The pies:** apple, chocolate, the sweet berry cheesecake and a pumpkin pie set down, whole and half eaten |
+| --- | --- |
+| ![Feasts at every serving](../images/ingame_feasts.jpg) | ![The pies in the owner's art](../images/ingame_feast_pies.jpg) |
+| **The displays:** a plate with a slice of pie, a platter of roast food, a tray with a cake and an apple pie | **The wall:** the feasts, servings, pies, slices and displays |
+| ![Plate, platter and serving tray](../images/ingame_food_displays.jpg) | ![The new items in item frames](../images/ingame_feast_items.jpg) |
+
+*In-game screenshots from CI's client game test (`FeastsClientGameTests`, software rendering, small previews).*
+
 ## Connections
 - Existing input producer: vanilla food (cooked chicken and porkchops, baked potatoes, carrots, bread, honey, sweet and glow berries, melon, pumpkins, mushrooms, cocoa, milk); Jugcraft's onion and cabbage (Kitchen Garden) and cooked mutton chops (Farmhouse Kitchen); the Hearth Oven's pastry. The displays need slabs and sticks, or white terracotta.
 - Existing output consumer: food for every player. The servings and the pumpkin pie slice carry `c:foods` (and the slice `c:foods/pie`); the new pies join the Spirit Board's pie wishes. The plates, platters and trays dress the Harvest Feast Table, the kitchen and market stalls.
@@ -67,6 +75,13 @@ No new dependency; Fabric API's use-block event, already used elsewhere, carries
 The library's [catalog](../../art/owner-library/catalog/files.csv) lists each source file's SHA-256. **The plate** (`block/plate`: a round white glazed plate with a blue band) is drawn by code (`tools/feasts_textures.py`) because the library has no plate. The models (`tools/feasts_data.py`) are drawn to fit the owner's textures: each face's UVs are where that part sits in their texture, checked against their whole-feast icons in an isometric preview.
 
 ## Verification
+CI (7 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `2697dc6` | Build, data audit, game tests (with `FeastsGameTests`), client game tests (19 chosen classes, `FeastsClientGameTests` among them), repository check | **All pass.** The screenshots above are from this run. |
+| later | the same | Recorded by the PR's checks. |
+
 Run locally (7 October 2026):
 
 | Check | Result |
@@ -75,7 +90,7 @@ Run locally (7 October 2026):
 | `python3 tools/check_mod_data.py`: also checks `FeastDish`, `FeastBlock`, `FoodDisplay` and the placed pumpkin pie against `tools/feasts.py`, every feast's balance against its ingredients, the pie fillings (now named pies), and every feast's and display's models, blockstates, loot, recipes, items and words | Pass, 1603 IDs |
 | `python3 tools/generate_material_data.py`, then `git status` | No drift |
 | `python3 tools/generate_textures.py` | Writes this slice's textures; it also rewrites 24 unrelated Styx textures (its flowers and an entity) differently from what is committed; that drift predates this slice, and those files are left as committed |
-| `./gradlew build`, game tests and client game tests | Not run locally (no Minecraft jar here); run by CI, recorded by the PR's checks |
+| `./gradlew build`, game tests and client game tests | Not run locally (no Minecraft jar here); run by CI, above |
 
 The 4 new game tests (`FeastsGameTests`):
 1. a sweet berry cheesecake bakes in the Hearth Oven and comes out whole; a hungry player eats a slice of chocolate pie (four food); a knife cuts a slice of cheesecake; both raw pies exist;
@@ -83,7 +98,7 @@ The 4 new game tests (`FeastsGameTests`):
 3. a whole roast chicken reads 15 on a comparator; a bowl takes a serving (five food, one to a stack); a full player eats nothing; a hungry one eats a serving (five food); the last serving leaves leftovers (0) that a use clears for a bone; the stuffed pumpkin's leftovers give two seeds; a whole ham breaks into itself, a served shepherd's pie into nothing; the gleaming salad glows only while any is left;
 4. a platter holds an apple at its north-west and bread at its south-east (a comparator reads 7) and gives the apple back to an empty hand; a plate holds one slice of cake and gives it back; broken, it spills its slice and drops itself.
 
-The client game test (`FeastsClientGameTests`, CI job `client`) lays a feast table (each feast whole, half eaten and as leftovers), a pie table (apple, chocolate, cheesecake and pumpkin, whole and half eaten), the three displays laid with food, and a wall of the new items in item frames, and takes four screenshots.
+The client game test (`FeastsClientGameTests`, CI job `client`) lays a feast table (each feast whole, half eaten and as leftovers), a pie table (apple, chocolate, cheesecake and pumpkin, whole and half eaten), the three displays laid with food, and a wall of the new items in item frames, and takes four screenshots; it passed on `2697dc6`.
 
 Not done: play in a real client and a two-client dedicated-server session (two diners at one feast, two players at one platter).
 

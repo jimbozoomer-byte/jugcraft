@@ -1312,6 +1312,10 @@ The first slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking-
 
 The second slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking-expansion-planned): food to set on the table and show off, in the owner's own textures. Details and test evidence: [features/feasts-and-food-displays.md](../features/feasts-and-food-displays.md).
 
+| **Feasts:** whole, half eaten and leftovers | **The displays** laid with food |
+| --- | --- |
+| ![Feasts at every serving](../images/ingame_feasts.jpg) | ![Plate, platter and serving tray](../images/ingame_food_displays.jpg) |
+
 - **Feasts:** Roast Chicken, Honey-Glazed Ham, Shepherd's Pie, Stuffed Pumpkin and the glowing Gleaming Salad, each crafted from five or six foods and placed whole. A bowl takes a serving away; a hungry player eats one in place. The model is eaten down a serving at a time to the leftovers, which a use clears (for a bone or pumpkin seeds). Four servings give about what the ingredients do.
 - **Pies in the owner's art:** the apple pie (same ID and baking, the owner's look), and two new Hearth Oven pies, chocolate and the sweet berry cheesecake.
 - **The pumpkin pie set down:** sneak and use vanilla's pumpkin pie on a block to set it down as a pie, eaten or cut in four slices that add up to the pie.
