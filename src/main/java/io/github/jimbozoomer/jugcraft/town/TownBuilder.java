@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.town;
 
+import io.github.jimbozoomer.jugcraft.styx.StyxTownDistrict;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
@@ -56,7 +57,8 @@ public final class TownBuilder {
 	/** Queues a chunk if it overlaps the town and is not built yet. */
 	public static void queue(ServerLevel level, ChunkPos pos) {
 		BlockPos origin = TownState.get(level).origin();
-		if (origin == null || !overlaps(origin, pos)) {
+		if (origin == null || !(overlaps(origin, pos)
+				|| TownState.get(level).styxDistrict() && StyxTownDistrict.overlaps(origin, pos))) {
 			return;
 		}
 		long key = pos.pack();
@@ -72,7 +74,8 @@ public final class TownBuilder {
 			return;
 		}
 		int size = TownData.get().size;
-		for (int cx = origin.getX() >> 4; cx <= (origin.getX() + size - 1) >> 4; cx++) {
+		int width = TownState.get(level).styxDistrict() ? StyxTownDistrict.MAX_X + 1 : size;
+		for (int cx = origin.getX() >> 4; cx <= (origin.getX() + width - 1) >> 4; cx++) {
 			for (int cz = origin.getZ() >> 4; cz <= (origin.getZ() + size - 1) >> 4; cz++) {
 				if (level.getChunkSource().getChunkNow(cx, cz) != null) {
 					queue(level, new ChunkPos(cx, cz));
@@ -124,6 +127,10 @@ public final class TownBuilder {
 			for (int wz = pos.z() << 4; wz <= (pos.z() << 4) + 15; wz++) {
 				int x = wx - origin.getX();
 				int z = wz - origin.getZ();
+				if (TownState.get(level).styxDistrict() && StyxTownDistrict.contains(x, z)) {
+					StyxTownDistrict.buildColumn(level, chunk, origin, x, z);
+					continue;
+				}
 				int mask = data.mask(x, z);
 				if (mask == 0) {
 					continue;
