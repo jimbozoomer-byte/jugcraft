@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.weapons;
 
+import io.github.jimbozoomer.jugcraft.gear.TraitTooltips;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -36,10 +37,14 @@ public class ArmCrossbowItem extends CrossbowItem {
 	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip,
 			TooltipFlag flag) {
 		super.appendHoverText(stack, context, display, tooltip, flag);
-		tooltip.accept(Component.translatable("tooltip.jugcraft.arms." + ranged.name()).withStyle(ChatFormatting.GRAY));
-		tooltip.accept(Component.translatable("tooltip.jugcraft.arms.arbalest.stats",
-				Math.round((ranged.speed() / JugcraftArms.CROSSBOW_SPEED - 1.0F) * 100.0F),
-				Math.round((ranged.damage() / VANILLA_DAMAGE - 1.0F) * 100.0F)).withStyle(ChatFormatting.DARK_GRAY));
+		// Its trait, with what it is and its numbers as the description (docs/features/trait-details.md).
+		String key = "tooltip.jugcraft.arms." + ranged.name();
+		TraitTooltips traits = TraitTooltips.of(tooltip);
+		traits.trait(key + ".trait", ChatFormatting.YELLOW, Component.translatable(key),
+				Component.translatable("tooltip.jugcraft.arms.arbalest.stats",
+						Math.round((ranged.speed() / JugcraftArms.CROSSBOW_SPEED - 1.0F) * 100.0F),
+						Math.round((ranged.damage() / VANILLA_DAMAGE - 1.0F) * 100.0F)));
+		traits.end();
 	}
 
 	@Override

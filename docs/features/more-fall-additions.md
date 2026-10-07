@@ -637,7 +637,7 @@ The 6 new game tests (`SpiritBoardGameTests`):
 6. the wishes' tags hold what they should (a pie slice is a pie, wool socks aren't a sweater), candles and aura candles light a séance, and the recipe, loot table and advancements load.
 
 Found by CI and fixed before this record:
-- 26.3 has no `PushReaction.DESTROY`; the board pops off when pushed (`POPPED`), as the pies do (`292af1a`).
+- 26.3 has no `PushReaction.POPPED`; the board pops off when pushed (`POPPED`), as the pies do (`292af1a`).
 - The first screenshots were too far off to read the letters; the cameras moved closer (`acbf7c9`).
 
 Not run: a two-client dedicated-server playtest, and any play by hand. A séance has been seen only in the game tests, with mock players and posed spirits.

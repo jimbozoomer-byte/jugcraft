@@ -20,9 +20,10 @@ import math
 
 from PIL import Image
 
-from clean_metal import CHIP, CHIP_WIDE, bolt, corner_bolts, inset, patch, plate
+import gun_icons
 from steampunk_models import box, cyl
-from zeppelin import round_section, tiled_quads
+from tower_guns import STEEL, TUBE, bore
+from zeppelin import tiled_quads
 
 MOD = "jugcraft"
 
@@ -86,15 +87,22 @@ TOOLTIPS = {
 }
 ENTITIES = ["siege_mortar", "self_propelled_howitzer", "flak_gun", "observation_balloon", "heavy_shell", "flak_shell"]
 
-YELLOW, GUNMETAL, OLIVE, HAZARD, CONCRETE, DECK = "ar_yellow", "dp_gunmetal", "dp_olive", "dp_hazard", "ar_concrete", "ar_deck"
+# The guns share the tower guns' clean steel (tools/tower_guns.py): tg_tube for barrels, tg_steel for brakes and
+# housings, tg_soot for vents and exhaust mouths, and a tg_bore decal in each muzzle.
+YELLOW, OLIVE, HAZARD, CONCRETE, DECK = "ar_yellow", "ar_olive", "dp_hazard", "ar_concrete", "ar_deck"
+GUNMETAL, SOOT = STEEL, "tg_soot"
 SKID, BAND, NUT, BRASS, LACQUER, COPPER = "dr_skid", "dr_band", "dr_nut", "ik_brass", "ik_lacquer", "dr_copper_pipe"
-EXHAUST, SOOT, CANVAS, STRIPE, WICKER, ARMOR = "dp_exhaust", "dr_soot", "dz_canvas", "dz_canvas_stripe", "ar_wicker", "ar_armor"
+EXHAUST, WICKER, ARMOR = "dp_exhaust", "ar_wicker", "ar_armor"
 
 # Pivots, in pixels from the entity's feet (facing +z). Keep in sync with client/ArtilleryRenderers.
 MORTAR_TURNTABLE = (0, 10, 0)
 MORTAR_TRUNNION = (0, 30, 2)
 HOWITZER_GUN = (6, 32, 4)
 FLAK_HEAD = (0, 18, 0)
+# Each gun's elevation limits in degrees (artillery/SiegeMortar, SelfPropelledHowitzer and FlakGun) and how far its
+# barrel kicks back when it fires, in pixels (client/ArtilleryRenderers): tools/gun_poses.py poses the guns over these.
+MORTAR_PITCH, HOWITZER_PITCH, FLAK_PITCH = (45, 85), (-5, 70), (-5, 85)
+MORTAR_RECOIL, HOWITZER_RECOIL, FLAK_RECOIL = 6, 8, 2
 # The howitzer's track path round each track unit, (z, y) in pixels, and the units' x span.
 HOWITZER_TRACK = [(-38, 1), (36, 1), (44, 8), (44, 16), (36, 23), (-38, 23), (-46, 16), (-46, 8)]
 HOWITZER_TRACK_X = (17, 29)
@@ -106,7 +114,8 @@ def mortar_base():
     """The fixed concrete ring with its steel rim and four anchor feet."""
     m = cyl("y", 0, 0, 26, 0, 6, CONCRETE, CONCRETE)
     m += cyl("y", 0, 0, 27, 5, 7, BAND)
-    m += cyl("y", 0, 0, 21, 6, 9, SKID, DECK)
+    # The bearing ring rises to the turntable's pivot, so no slit shows under the deck.
+    m += cyl("y", 0, 0, 21, 6, MORTAR_TURNTABLE[1], SKID, DECK)
     for x, z in ((-26, -26), (22, -26), (-26, 22), (22, 22)):
         m.append(box((x, 0, z), (x + 4, 3, z + 4), SKID))
     return m
@@ -115,13 +124,14 @@ def mortar_base():
 def mortar_turntable():
     """The turning deck, about its pivot: tread plate, hazard edge, railings on three sides, the cradle side plates
     and trunnion hubs, an elevation wheel and an ammunition rack."""
-    m = cyl("y", 0, 0, 20, 0, 3, SKID, DECK)
-    m += cyl("y", 0, 0, 20.5, 2, 3, HAZARD)
-    # Railings round the back and sides.
+    # The deck's top is the hazard rim's tread cap, as on the tower guns, so the tread and the stripes never share a plane.
+    m = cyl("y", 0, 0, 20, 0, 2, SKID, DECK)
+    m += cyl("y", 0, 0, 20.5, 2, 3, HAZARD, DECK)
+    # Railings round the back and sides; the top rails ride half a pixel above the cradle plates' tops.
     for angle in range(90, 271, 30):
         a = math.radians(angle)
         x, z = 18.5 * math.sin(a), 18.5 * math.cos(a)
-        m.append(box((x - 0.5, 3, z - 0.5), (x + 0.5, 14, z + 0.5), SKID))
+        m.append(box((x - 0.5, 3, z - 0.5), (x + 0.5, 14.5, z + 0.5), SKID))
     for a0 in range(90, 270, 30):
         a, b = math.radians(a0), math.radians(a0 + 30)
         x0, z0, x1, z1 = 18.5 * math.sin(a), 18.5 * math.cos(a), 18.5 * math.sin(b), 18.5 * math.cos(b)
@@ -129,7 +139,7 @@ def mortar_turntable():
         half = math.hypot(x1 - x0, z1 - z0) / 2
         angle = math.degrees(math.atan2(x1 - x0, z1 - z0))
         snapped = max(-45, min(45, round(((angle + 90) % 180 - 90) / 22.5) * 22.5))
-        m.append(box((mx - 0.5, 13, mz - half), (mx + 0.5, 14, mz + half), SKID, rotation=("y", snapped, (mx, 13, mz))))
+        m.append(box((mx - 0.5, 13.5, mz - half), (mx + 0.5, 14.5, mz + half), SKID, rotation=("y", snapped, (mx, 13.5, mz))))
     # Cradle side plates rising to the trunnions, yellow with dark edging.
     tz = MORTAR_TRUNNION[2]
     for x0, x1 in ((-15, -10), (10, 15)):
@@ -142,65 +152,81 @@ def mortar_turntable():
     # The elevation wheel on the right and a rack of shells at the back.
     m += cyl("x", 10, tz + 4, 4, 17, 18, BRASS)
     for i in range(4):
-        m += cyl("y", -6 + i * 4, -15, 1.6, 3, 10, BRASS, GUNMETAL)
+        m += cyl("y", -6 + i * 4, -15, 1.6, 3, 10, BRASS, TUBE)
+    return m
+
+
+def mortar_cradle():
+    """The cradle, about the trunnions, along +z: the yellow breech ring and the recuperator under the barrel. It
+    elevates with the barrel but stays put when it fires, while the barrel recoils back through it."""
+    # The breech stops a pixel short of the old -16, so its lower rear corner clears the deck at the steepest elevations.
+    m = [box((-9, -9, -15), (9, 9, 4), {"*": YELLOW})]
+    m.append(box((-9.5, -9.5, -6), (9.5, 9.5, -4), BAND))
+    m += cyl("z", 0, -10.5, 2.5, -10, 22, COPPER)
     return m
 
 
 def mortar_barrel():
-    """The barrel, about the trunnions, along +z: a yellow breech ring, a fat black tube with reinforcing bands and a
-    belled muzzle, and a recuperator under it."""
-    m = [box((-9, -9, -16), (9, 9, 4), {"*": YELLOW})]
-    m.append(box((-9.5, -9.5, -6), (9.5, 9.5, -4), BAND))
-    m += cyl("z", 0, 0, 8, 4, 54, GUNMETAL, SOOT)
-    m += cyl("z", 0, 0, 9.5, 4, 14, GUNMETAL)
-    m += cyl("z", 0, 0, 9.5, 50, 56, GUNMETAL, SOOT)
-    m += cyl("z", 0, -10.5, 2.5, -10, 22, COPPER)
+    """The barrel, along +z out of its breech: a fat black tube with a sleeve, which stays a quarter pixel inside the
+    breech's sides as it recoils into it, and a belled muzzle round the bore."""
+    m = cyl("z", 0, 0, 8, 4, 53, TUBE)
+    m += cyl("z", 0, 0, 8.75, 4, 14, TUBE)
+    m += cyl("z", 0, 0, 9.5, 50, 56, TUBE)
+    m.append(bore(56, 6, 9.5))
     return m
 
 
 # ------------------------------------------------------------------ the self-propelled howitzer
 
 def howitzer_body():
-    """The carriage: two track units, the hull between them, an armoured cab at the back left, the engine with its
-    domed housing and exhausts, and the gun's mounting ring."""
+    """The carriage: two track units, the hull between them, an armoured cab at the back left, a low engine deck at the
+    front right with its exhausts behind the crew, and the gun's mounting ring. The gun sweeps 30 degrees either side
+    and from -5 to 70 degrees up without passing through any of it (tools/check_mod_data.py samples the sweep)."""
     m = []
     x0, x1 = HOWITZER_TRACK_X
     for sign in (1, -1):
         a, b = (x0, x1) if sign > 0 else (-x1, -x0)
         m.append(box((a + 1, 4, -38), (b - 1, 20, 38), {"*": ARMOR, "up": SKID}))
         for z in (-28, -12, 4, 20):
-            m += cyl("x", 6, z, 4.5, a + (11 if sign > 0 else -0.5), a + (12 if sign > 0 else 0.5), SKID, NUT)
+            # Wheel hubs on the units' outer faces, standing a quarter pixel proud of the track links' sides.
+            m += cyl("x", 6, z, 4.5, *((a + 11, a + 12.25) if sign > 0 else (a - 0.25, a + 1)), SKID, NUT)
     m.append(box((-17, 6, -36), (17, 22, 30), {"*": ARMOR, "up": DECK}))
-    m.append(box((-17.5, 21, -36.5), (17.5, 23, 30.5), BAND))
+    m.append(box((-17.5, 21, -36.5), (17.5, 23, 30.5), {"*": BAND, "up": DECK}))
     # The cab: tall, slab-sided, vision slits, a hatch and a rail.
     m.append(box((-17, 22, -36), (-1, 46, -12), {"*": ARMOR}))
     m.append(box((-15, 46, -32), (-3, 48, -16), {"*": OLIVE}))
     for z in (-34, -26, -18):
         m.append(box((-17.5, 38, z), (-16.5, 39.5, z + 4), NUT))
     m.append(box((-14, 38, -12), (-4, 39.5, -11.5), NUT))
-    # The engine at the front right: a domed housing, cooling grille and two exhausts.
-    m += cyl("z", 9, 32, 7, 14, 28, OLIVE, BRASS)
-    m.append(box((2, 22, 14), (16, 30, 28), {"*": ARMOR, "south": "dp_grille"}))
-    for x in (6, 12):
-        m += cyl("y", x, 10, 1.6, 30, 40, EXHAUST, SOOT)
-    # The gun's mounting ring and recoil buffers' housing.
+    # The engine under a low grille deck at the front right (clear of the gun's sweep), and two exhausts at the back
+    # right, behind the crew.
+    m.append(box((2, 23, 16), (16, 25, 30), {"*": ARMOR, "up": "dp_grille"}))
+    for x in (4, 14):
+        m += cyl("y", x, -34, 1.6, 23, 36, EXHAUST, SOOT)
+    # The gun's mounting ring.
     gx, gy, gz = HOWITZER_GUN
-    m += cyl("y", gx, gz, 8, 22, 26, SKID, DECK)
+    m += cyl("y", gx, gz, 8, 22, 24, SKID, DECK)
     return m
 
 
 def howitzer_gun():
-    """The gun, about its pivot, along +z: a cradle with recoil cylinders, an armoured shield and a long barrel with
-    a muzzle brake."""
-    m = [box((-6, -5, -12), (6, 6, 12), {"*": ARMOR})]
-    m.append(box((-11, -8, 8), (11, 10, 10), {"*": ARMOR}))
+    """The gun's cradle, about its pivot, along +z: the cradle with its recoil cylinders and the armoured shield. It
+    turns and elevates with the barrel but stays put when it fires, while the barrel recoils back through it."""
+    m = [box((-6, -5, -7), (6, 6, 12), {"*": ARMOR})]
+    m.append(box((-11, -6.5, 8), (11, 10, 10), {"*": ARMOR}))
     for x in (-4, 4):
         m += cyl("z", x, 7, 2, -10, 20, COPPER)
-    m += cyl("z", 0, 0, 3.5, 10, 88, GUNMETAL, SOOT)
-    m += cyl("z", 0, 0, 4.5, 10, 24, GUNMETAL)
+    return m
+
+
+def howitzer_barrel():
+    """The howitzer's barrel, along +z out of its cradle: a long tube with a sleeve and a muzzle brake round the bore."""
+    m = cyl("z", 0, 0, 3.5, 10, 89, TUBE)
+    m += cyl("z", 0, 0, 4.5, 10, 24, TUBE)
     m.append(box((-5, -4, 88), (5, 4, 96), {"*": GUNMETAL}))
     for z in (90, 93):
         m.append(box((-5.5, -2, z), (5.5, 2, z + 1.5), SOOT))
+    m.append(bore(96, 2.6, 5))
     return m
 
 
@@ -220,35 +246,160 @@ def flak_mount():
 
 
 def flak_head():
-    """The turning head, about its pivot: the cradle, twin barrels with flash hiders, ammunition drums and the
-    gunner's seat and sights."""
-    m = [box((-7, -4, -10), (7, 6, 8), {"*": OLIVE})]
+    """The turning head, about its pivot: the cradle, ammunition drums and the gunner's sights. It stays put when the
+    gun fires, while the twin barrels (flak_barrels) recoil back into the cradle."""
+    # The cradle's back stops at z -5, so at full elevation it swings clear of the pedestal.
+    m = [box((-7, -4, -5), (7, 6, 8), {"*": OLIVE})]
     for x in (-4, 4):
-        m += cyl("z", x, 1, 1.4, 8, 44, GUNMETAL, SOOT)
-        m += cyl("z", x, 1, 2.2, 40, 46, GUNMETAL, SOOT)
-        m += cyl("x", 7, -4, 4, x - 1.5 if x < 0 else x - 1.5, x + 1.5, OLIVE, BRASS)
+        m += cyl("x", 7, -3.5, 4, x - 1.5, x + 1.5, OLIVE, BRASS)
     m.append(box((-1, 6, 2), (1, 10, 4), SKID))
-    m.append(box((-2, 9, 2), (2, 12, 3), NUT))
+    m.append(box((-2, 9, 1.5), (2, 12, 2.75), NUT))
+    return m
+
+
+def flak_barrels():
+    """The twin barrels, along +z out of the cradle, with flash hiders round their bores."""
+    m = []
+    for x in (-4, 4):
+        m += cyl("z", x, 1, 1.4, 8, 44, TUBE)
+        m += cyl("z", x, 1, 2.2, 40, 46, TUBE)
+        m.append(bore(46, 1.1, 2.2, x, 1))
     return m
 
 
 # ------------------------------------------------------------------ the observation balloon
 
 BALLOON_Y = 104
-BALLOON_STATIONS = [(-60, 6), (-48, 16), (-30, 22), (-6, 24), (20, 22), (38, 16), (50, 8)]
+# The envelope, a smooth closed surface turned about the z axis at BALLOON_Y (5 October 2026: the owner found the old
+# stair-stepped boxes' envelope had "tons of transparency"). Its widest ring is BALLOON_R pixels at BALLOON_WAIST; the nose reaches
+# BALLOON_NOSE and the tail BALLOON_TAIL, each end rounded as a superellipse with the exponent beside it (the nose blunt,
+# the tail a plain ellipse). Three inflated lobes (BALLOON_LOBES: their angle round the axis, in degrees) steady its tail.
+BALLOON_R = 24
+BALLOON_WAIST = -6
+BALLOON_NOSE, NOSE_ROUND = 55, 2.3
+BALLOON_TAIL, TAIL_ROUND = -62, 2.0
+BALLOON_GORES = 24
+BALLOON_LOBES = (90, 210, 330)
+LOBE_OFFSET, LOBE_R, LOBE_Z = 15, 6.5, (-72, -46)
+ENVELOPE_TEXTURE = "entity/observation_balloon/envelope"
+# The envelope texture: BALLOON_GORES gores of GORE_TEXELS columns round it, the body in the top three quarters (nose at
+# the top) and the lobes in the bottom quarter.
+GORE_TEXELS = 8
+ENVELOPE_SIZE = (BALLOON_GORES * GORE_TEXELS, 128)
+BODY_V = 0.75
 
 
-def balloon_envelope():
-    """The kite balloon high above its basket: a sausage envelope with painted bands and three tail lobes."""
-    m = []
-    for (z0, r0), (z1, r1) in zip(BALLOON_STATIONS, BALLOON_STATIONS[1:]):
-        m += round_section(BALLOON_Y, (r0 + r1) / 2, z0, z1, CANVAS, 4)
-    for z in (-24, 12):
-        m += round_section(BALLOON_Y, 23.5, z, z + 3, STRIPE, 4)
-    for dx, dy in ((0, 1), (1, -1), (-1, -1)):
-        cx, cy = dx * 12, BALLOON_Y + dy * 12
-        m.append(box((cx - 6, cy - 6, -70), (cx + 6, cy + 6, -54), {"*": CANVAS}))
-    return m
+def _profile(phi, p):
+    """A superellipse quarter: phi 0 at the waist, pi/2 at the pole; returns (distance along the axis, radius) as
+    fractions of the half's length and of the waist radius."""
+    c, s = math.cos(phi), math.sin(phi)
+    return (abs(s) ** (2 / p), abs(c) ** (2 / p))
+
+
+def _meridian(rings_tail=9, rings_nose=10):
+    """The envelope's outline from tail pole to nose pole: [(z, r, nz, nr)] with the outward normal in the (z, r) plane.
+    The rings are spaced evenly in the superellipse's angle, so they crowd where it curves most, at the poles."""
+    out = []
+    # The tail half from its pole to the waist, then the nose half on from the waist to its pole.
+    halves = ((rings_tail, BALLOON_WAIST - BALLOON_TAIL, TAIL_ROUND, -1), (rings_nose, BALLOON_NOSE - BALLOON_WAIST, NOSE_ROUND, 1))
+    for rings, length, p, sign in halves:
+        steps = range(rings, -1, -1) if sign < 0 else range(1, rings + 1)
+        for i in steps:
+            phi = math.pi / 2 * i / rings
+            t, r = _profile(phi, p)
+            z = BALLOON_WAIST + sign * t * length
+            # The outline's slope from two close points, for a normal that lights it smoothly.
+            e = 1e-4
+            t2, r2 = _profile(min(math.pi / 2, phi + e), p)
+            t1, r1 = _profile(max(0.0, phi - e), p)
+            dz, dr = sign * (t2 - t1) * length, (r2 - r1) * BALLOON_R
+            nz, nr = sign * abs(dr), abs(dz)
+            if i == rings:
+                nz, nr = float(sign), 0.0
+            n = math.hypot(nz, nr) or 1.0
+            out.append((z, r * BALLOON_R, nz / n, nr / n))
+    return out
+
+
+def _lathe(outline, cx, cy, gores, u0, u1, v0, v1, texture):
+    """Quads of a surface turned about the line x = cx, y = cy (along z): `outline` [(z, r, nz, nr)] from one pole to the
+    other, `gores` segments round it, shared corners (no cracks), each corner with its own normal, wound to face out.
+    The texture runs u0 to u1 round it and v0 to v1 from the first ring to the last, by length along the outline."""
+    lengths = [0.0]
+    for (za, ra, *_), (zb, rb, *_) in zip(outline, outline[1:]):
+        lengths.append(lengths[-1] + math.hypot(zb - za, rb - ra))
+    total = lengths[-1]
+    out = []
+    for j in range(len(outline) - 1):
+        for k in range(gores):
+            corners, uvs, normals = [], [], []
+            for jj, kk in ((j, k), (j, k + 1), (j + 1, k + 1), (j + 1, k)):
+                z, r, nz, nr = outline[jj]
+                a = 2 * math.pi * kk / gores
+                corners.append([cx + r * math.cos(a), cy + r * math.sin(a), z])
+                normals.append([nr * math.cos(a), nr * math.sin(a), nz])
+                uvs.append((u0 + (u1 - u0) * kk / gores, v0 + (v1 - v0) * lengths[jj] / total))
+            # (c2 - c0) x (c3 - c1) must point the way the surface faces (outward).
+            d1 = [corners[2][i] - corners[0][i] for i in range(3)]
+            d2 = [corners[3][i] - corners[1][i] for i in range(3)]
+            n = [d1[1] * d2[2] - d1[2] * d2[1], d1[2] * d2[0] - d1[0] * d2[2], d1[0] * d2[1] - d1[1] * d2[0]]
+            size = math.sqrt(sum(c * c for c in n))
+            if size < 1e-9:
+                continue
+            mid = [sum(c[i] for c in normals) for i in range(3)]
+            if sum(n[i] * mid[i] for i in range(3)) < 0:
+                corners, uvs, normals = corners[::-1], uvs[::-1], normals[::-1]
+                n = [-c for c in n]
+            out.append({"texture": texture, "normal": [round(c / size, 4) for c in n],
+                        "normals": [[round(c, 3) for c in nn] for nn in normals],
+                        "vertices": [[round(p[0], 3), round(p[1], 3), round(p[2], 3), round(u, 5), round(v, 5)]
+                                     for p, (u, v) in zip(corners, uvs)]})
+    return out
+
+
+def lobe_outline(rings=8):
+    """A tail lobe's outline: an ellipsoid LOBE_R across and as long as LOBE_Z."""
+    z0, z1 = LOBE_Z
+    half, mid = (z1 - z0) / 2, (z0 + z1) / 2
+    out = []
+    for i in range(rings + 1):
+        phi = math.pi * i / rings - math.pi / 2
+        z, r = mid + half * math.sin(phi), LOBE_R * math.cos(phi)
+        nz, nr = math.sin(phi) / half, math.cos(phi) / LOBE_R
+        n = math.hypot(nz, nr)
+        out.append((z, max(0.0, r), nz / n, nr / n))
+    return out
+
+
+def envelope_quads():
+    """The kite balloon high above its basket: the envelope turned smooth and closed (a quad mesh with no gaps, every
+    quad facing out, so it draws solid with back faces culled), and its three tail lobes, all mapped once on
+    ENVELOPE_TEXTURE (the painted bands and the serial are in the texture, not boxes)."""
+    quads = _lathe(_meridian(), 0, BALLOON_Y, BALLOON_GORES, 0.0, 1.0, BODY_V, 0.0, ENVELOPE_TEXTURE)
+    for angle in BALLOON_LOBES:
+        a = math.radians(angle)
+        quads += _lathe(lobe_outline(), LOBE_OFFSET * math.cos(a), BALLOON_Y + LOBE_OFFSET * math.sin(a), 12,
+                        0.0, 1.0, 1.0, BODY_V + 0.02, ENVELOPE_TEXTURE)
+    return quads
+
+
+def envelope_row(z):
+    """The texture row (from the top) where the envelope's ring at z is drawn."""
+    outline = _meridian()
+    lengths = [0.0]
+    for (za, ra, *_), (zb, rb, *_) in zip(outline, outline[1:]):
+        lengths.append(lengths[-1] + math.hypot(zb - za, rb - ra))
+    for i, ((za, *_), (zb, *_)) in enumerate(zip(outline, outline[1:])):
+        if za <= z <= zb:
+            t = (z - za) / (zb - za) if zb != za else 0.0
+            along = lengths[i] + (lengths[i + 1] - lengths[i]) * t
+            return (BODY_V - BODY_V * along / lengths[-1]) * ENVELOPE_SIZE[1]
+    raise ValueError(z)
+
+
+def envelope_column(angle):
+    """The texture column round the envelope at `angle` degrees about its axis (0 = +x, 90 = up)."""
+    return (angle % 360) / 360 * ENVELOPE_SIZE[0]
 
 
 def balloon_basket():
@@ -256,7 +407,7 @@ def balloon_basket():
     m = [box((-10, 0, -10), (10, 14, 10), {"*": WICKER})]
     m.append(box((-10.5, 13, -10.5), (10.5, 15, 10.5), {"*": SKID}))
     for x, z in ((-9, -9), (9, -9), (-9, 9), (9, 9)):
-        m.append(box((x - 0.5, 15, z - 0.5), (x + 0.5, BALLOON_Y - 22, z + 0.5), BAND))
+        m.append(box((x - 0.5, 15, z - 0.5), (x + 0.5, BALLOON_Y - 20, z + 0.5), BAND))
     m += cyl("y", 0, 0, 1.5, -2, 0, NUT)
     return m
 
@@ -267,11 +418,18 @@ def balloon_cable():
 
 
 def export():
+    # Part names share one table with every other file client/DecorQuads loads (tools/check_mod_data.py checks that
+    # none repeats): the basket is "observation_basket", since balloon_quads.json's "balloon_basket" is the hot-air one.
+    # Each gun's cradle stays put when it fires and its barrel recoils back through it: client/ArtilleryRenderers
+    # draws mortar_cradle, howitzer_gun and flak_head before the recoil, and mortar_barrel, howitzer_barrel and
+    # flak_barrels after it.
     return {"mortar_base": tiled_quads(mortar_base()), "mortar_turntable": tiled_quads(mortar_turntable()),
-            "mortar_barrel": tiled_quads(mortar_barrel()), "howitzer_body": tiled_quads(howitzer_body()),
-            "howitzer_gun": tiled_quads(howitzer_gun()), "flak_mount": tiled_quads(flak_mount()),
-            "flak_head": tiled_quads(flak_head()), "balloon_envelope": tiled_quads(balloon_envelope()),
-            "balloon_basket": tiled_quads(balloon_basket()), "balloon_cable": tiled_quads(balloon_cable())}
+            "mortar_cradle": tiled_quads(mortar_cradle()), "mortar_barrel": tiled_quads(mortar_barrel()),
+            "howitzer_body": tiled_quads(howitzer_body()), "howitzer_gun": tiled_quads(howitzer_gun()),
+            "howitzer_barrel": tiled_quads(howitzer_barrel()), "flak_mount": tiled_quads(flak_mount()),
+            "flak_head": tiled_quads(flak_head()), "flak_barrels": tiled_quads(flak_barrels()),
+            "balloon_envelope": envelope_quads(),
+            "observation_basket": tiled_quads(balloon_basket()), "balloon_cable": tiled_quads(balloon_cable())}
 
 
 RECIPES = {
@@ -330,16 +488,100 @@ def _put(img, x, y, c):
 
 
 
-def yellow():
-    """Warning-yellow paint on steel: a bevelled panel with a recessed inset, six bolts and two chipped corners."""
+def painted(pal):
+    """Painted armour that tiles without a frame (5 October 2026: big housings tiled with a framed, bolted panel read as
+    stacks of crates): a flat coat, one welded seam across the foot of each 16-pixel course with its lit lip on the row
+    above the next course, and two short scuffs one shade off; no bolts, bevelled frame or chips. pal runs dark to light:
+    seam, scuff, coat, lip."""
     img = _img()
-    pal = [(130, 96, 18), (176, 134, 28), (214, 170, 42), (236, 196, 72), (250, 220, 120)]
-    plate(img, pal)
-    inset(img, 4, 4, 11, 11, pal[3], pal[1])
-    for x, y in ((2, 2), (12, 2), (2, 12), (12, 12), (7, 2), (7, 12)):
-        bolt(img, x, y, pal)
-    patch(img, CHIP_WIDE, (84, 82, 78), 1, 13)
-    patch(img, CHIP, (84, 82, 78), 13, 1)
+    _rect(img, 0, 0, 15, 15, pal[2])
+    for x in range(16):
+        _put(img, x, 15, pal[0])
+        _put(img, x, 0, pal[3])
+    for x, y, length, c in ((3, 5, 3, pal[3]), (10, 10, 2, pal[1])):
+        for i in range(length):
+            _put(img, x + i, y, c)
+    return img
+
+
+def yellow():
+    """Warning-yellow paint on the gun housings."""
+    return painted([(176, 134, 28), (200, 158, 36), (214, 170, 42), (234, 192, 70)])
+
+
+def armor():
+    """Khaki-bronze armour on the howitzer's hull and tracks."""
+    return painted([(96, 86, 58), (114, 103, 71), (122, 110, 76), (140, 127, 89)])
+
+
+def olive():
+    """Olive drab on the flak gun and the howitzer's hatch."""
+    return painted([(66, 74, 44), (80, 88, 54), (88, 96, 60), (104, 112, 72)])
+
+
+ENVELOPE_PAL = [(150, 138, 104), (172, 160, 124), (188, 176, 138), (202, 192, 154)]
+ENVELOPE_RED, ENVELOPE_CREAM, ENVELOPE_STENCIL = (150, 36, 28), (224, 214, 184), (62, 58, 50)
+# Painted bands round the envelope (the z of each band's tail edge, in pixels) and their width.
+ENVELOPE_BANDS, BAND_WIDTH = (-32, 14), 8
+SERIAL = "51"
+GLYPHS = {"5": ["111", "100", "111", "001", "111"], "1": ["010", "110", "010", "010", "111"]}
+
+
+def envelope_texture():
+    """The observation balloon's envelope, in the clean style: flat doped canvas, each gore's seam one shade down with a
+    lit edge beside it, a sewn ring every 16 pixels along it, a darker reinforced nose, two red and cream bands, patches
+    where the rigging meets it, and the stencilled serial on both flanks, reading level along the hull."""
+    w, h = ENVELOPE_SIZE
+    img = Image.new("RGBA", (w, h), ENVELOPE_PAL[2] + (255,))
+    px = img.load()
+    body = round(h * BODY_V)
+    nose = round(envelope_row(BALLOON_NOSE - 7))
+
+    def paint(x, y, c):
+        px[x % w, y] = tuple(c) + (255,)
+
+    for y in range(body):
+        for x in range(w):
+            g = x % GORE_TEXELS
+            c = ENVELOPE_PAL[1] if g == 0 else ENVELOPE_PAL[3] if g == 1 else ENVELOPE_PAL[2]
+            if y < nose:
+                c = tuple(int(v * 0.86) for v in c)
+            paint(x, y, c)
+    for z in range(BALLOON_WAIST - 48, BALLOON_NOSE - 7, 16):
+        y = round(envelope_row(z))
+        for x in range(w):
+            if x % GORE_TEXELS:
+                paint(x, y, ENVELOPE_PAL[1])
+    for z in ENVELOPE_BANDS:
+        top, bottom = round(envelope_row(z + BAND_WIDTH)), round(envelope_row(z))
+        for y in range(top, bottom):
+            part = (y - top) / max(1, bottom - top)
+            c = ENVELOPE_CREAM if 0.25 <= part < 0.75 else ENVELOPE_RED
+            for x in range(w):
+                paint(x, y, c)
+    # Rigging patches, where the four lines from the basket meet the underside.
+    for x0 in (-9, 9):
+        column = round(envelope_column(math.degrees(math.atan2(-20, x0))))
+        for z0 in (-9, 9):
+            row = round(envelope_row(z0))
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    paint(column + dx, row + dy, ENVELOPE_STENCIL if (dx, dy) == (0, 0) else ENVELOPE_PAL[0])
+    # The serial on each flank, two texels to a glyph pixel, its top towards the envelope's top: on the +x flank the text
+    # runs tail-wards and on the -x flank nose-wards, so from outside it reads left to right either way.
+    bits = [[c == "1" for ch in SERIAL for c in GLYPHS[ch][row] + "0"][:-1] for row in range(5)]
+    tall, long = 10, len(bits[0]) * 2
+    middle = round(envelope_row(BALLOON_WAIST))
+    for side, column in ((1, round(envelope_column(0))), (-1, round(envelope_column(180)))):
+        for gy in range(tall):
+            for gx in range(long):
+                if bits[gy // 2][gx // 2]:
+                    paint(column + side * (tall // 2 - gy), middle + side * (gx - long // 2), ENVELOPE_STENCIL)
+    # The lobes, in the bottom quarter: twelve gores, seams as on the body.
+    for y in range(body, h):
+        for x in range(w):
+            g = x % (w // 12)
+            paint(x, y, ENVELOPE_PAL[1] if g == 0 else ENVELOPE_PAL[3] if g == 1 else ENVELOPE_PAL[2])
     return img
 
 
@@ -372,18 +614,6 @@ def deck():
     return img
 
 
-def armor():
-    """Khaki-bronze armour plate: a bevelled panel split by a welded seam, with bolts at the corners."""
-    pal = [(78, 70, 48), (100, 90, 62), (122, 110, 76), (142, 128, 90), (172, 158, 114)]
-    img = _img()
-    plate(img, pal)
-    for x in range(1, 15):
-        _put(img, x, 8, pal[0])
-        _put(img, x, 9, pal[3])
-    corner_bolts(img, pal)
-    return img
-
-
 def wicker():
     """Woven wicker: alternating light and dark strands."""
     img = _img()
@@ -403,57 +633,11 @@ def _rect(img, x0, y0, x1, y1, c):
             _put(img, x, y, c)
 
 
-def icon(kind):
-    img = _img()
-    black, yel, olive, steel, brass, canvas = (34, 34, 38), (222, 176, 44), (96, 104, 62), (120, 118, 112), (196, 160, 80), (214, 204, 180)
-    if kind == "siege_mortar":
-        _rect(img, 2, 13, 13, 14, (130, 128, 120))
-        _rect(img, 4, 11, 11, 12, steel)
-        _rect(img, 5, 8, 10, 10, yel)
-        for i in range(7):
-            _rect(img, 7 + i, 7 - i, 9 + i, 8 - i, black)
-    elif kind == "self_propelled_howitzer":
-        _rect(img, 1, 11, 14, 13, (60, 58, 54))
-        _rect(img, 2, 8, 13, 10, (126, 112, 76))
-        _rect(img, 2, 5, 6, 7, (126, 112, 76))
-        for i in range(8):
-            _put(img, 8 + i, 7 - i // 2, black)
-            _put(img, 8 + i, 8 - i // 2, black)
-    elif kind == "flak_gun":
-        _rect(img, 2, 14, 13, 14, olive)
-        _rect(img, 6, 10, 9, 13, olive)
-        for i in range(8):
-            _put(img, 6 + i, 9 - i, black)
-            _put(img, 8 + i, 10 - i, black)
-    elif kind == "observation_balloon":
-        _rect(img, 2, 2, 13, 6, canvas)
-        _rect(img, 1, 3, 14, 5, canvas)
-        _rect(img, 2, 4, 13, 4, (170, 40, 40))
-        _put(img, 6, 8, steel)
-        _put(img, 9, 8, steel)
-        _rect(img, 6, 10, 9, 12, (160, 124, 70))
-    elif kind == "heavy_shell":
-        _rect(img, 6, 6, 9, 14, brass)
-        _rect(img, 6, 3, 9, 5, steel)
-        _rect(img, 7, 1, 8, 2, steel)
-        _rect(img, 6, 11, 9, 11, (140, 110, 50))
-    elif kind == "flak_shell":
-        _rect(img, 6, 8, 9, 13, brass)
-        _rect(img, 6, 5, 9, 7, (170, 40, 40))
-        _rect(img, 7, 3, 8, 4, steel)
-    elif kind == "range_finder":
-        _rect(img, 1, 6, 14, 9, black)
-        _rect(img, 1, 6, 3, 9, brass)
-        _rect(img, 12, 6, 14, 9, brass)
-        _rect(img, 6, 4, 9, 5, steel)
-        _put(img, 2, 7, (180, 220, 255))
-        _put(img, 13, 7, (180, 220, 255))
-    return img
-
-
 def draw_all(save):
     for name, img in (("ar_yellow", yellow()), ("ar_concrete", concrete()), ("ar_deck", deck()), ("ar_armor", armor()),
-                      ("ar_wicker", wicker())):
+                      ("ar_wicker", wicker()), ("ar_olive", olive())):
         save(img, "block", name)
+    folder, name = ENVELOPE_TEXTURE.rsplit("/", 1)
+    save(envelope_texture(), folder, name)
     for item in ITEMS:
-        save(icon(item), "item", item)
+        save(gun_icons.draw(item), "item", item)

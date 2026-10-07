@@ -71,8 +71,9 @@ public class WitchFireBrazierRenderer implements BlockEntityRenderer<DecorationB
 		int color = state.color;
 		int pale = 0xE0000000 | (lighter(color >> 16) << 16) | (lighter(color >> 8) << 8) | lighter(color);
 		collector.submitCustomGeometry(pose, FLAME, (matrix, buffer) -> {
-			sheets(buffer, matrix, WIDTH, HEIGHT * state.flicker, state.sway, color);
-			sheets(buffer, matrix, WIDTH * 0.55F, HEIGHT * 0.65F * (2.0F - state.flicker), -state.sway, pale);
+			sheets(buffer, matrix, WIDTH, HEIGHT * state.flicker, state.sway, color, DecorDraw.TWO_SIDED_LIFT);
+			// The pale core shares the big sheets' planes, so it stands further out on each side to show in front of them.
+			sheets(buffer, matrix, WIDTH * 0.55F, HEIGHT * 0.65F * (2.0F - state.flicker), -state.sway, pale, 3 * DecorDraw.TWO_SIDED_LIFT);
 		});
 	}
 
@@ -80,8 +81,11 @@ public class WitchFireBrazierRenderer implements BlockEntityRenderer<DecorationB
 		return Math.min(255, (channel & 0xFF) + 80);
 	}
 
-	/** Two crossed sheets of flame, each drawn from both sides, their tips leaning by {@code sway} pixels. */
-	private static void sheets(VertexConsumer buffer, PoseStack.Pose matrix, float width, float height, float sway, int color) {
+	/**
+	 * Two crossed sheets of flame, each drawn from both sides (each side {@code lift} pixels off the middle, never one plane
+	 * twice), their tips leaning by {@code sway} pixels.
+	 */
+	private static void sheets(VertexConsumer buffer, PoseStack.Pose matrix, float width, float height, float sway, int color, float lift) {
 		float y0 = BASE_Y / 16;
 		float y1 = (BASE_Y + height) / 16;
 		float h = width / 2 / 16 * 0.7071F;
@@ -91,10 +95,8 @@ public class WitchFireBrazierRenderer implements BlockEntityRenderer<DecorationB
 			float dz = diagonal == 0 ? h : -h;
 			float[][] front = {{0.5F - dx, y0, 0.5F - dz, 0, 1}, {0.5F - dx + s, y1, 0.5F - dz, 0, 0}, {0.5F + dx + s, y1, 0.5F + dz, 1, 0},
 					{0.5F + dx, y0, 0.5F + dz, 1, 1}};
-			float[][] back = {front[3], front[2], front[1], front[0]};
 			float nx = diagonal == 0 ? -0.7071F : 0.7071F;
-			DecorDraw.quad(buffer, matrix, front, nx, 0, 0.7071F, color, FULL_BRIGHT);
-			DecorDraw.quad(buffer, matrix, back, -nx, 0, -0.7071F, color, FULL_BRIGHT);
+			DecorDraw.twoSided(buffer, matrix, front, nx, 0, 0.7071F, color, FULL_BRIGHT, lift);
 		}
 	}
 }
