@@ -292,6 +292,10 @@ Planned features get a row when their step starts.
 
 ## 7. Roadmap checklist (32 steps)
 
+Owner review, 7 October 2026: the owner approved steps 14 to 25 as built: their designs, balance numbers, art, icons
+and provenance (the adapted library textures among them). The open design choices stay as built, with no features
+beyond what steps 26 to 32 ask for. Steps 26 to 32 continue on their own branch and pull request.
+
 Legend: **done** (implemented and tested in CI), **in milestone 1** (implemented for First Light; the general system
 grows with later content), **planned**.
 

@@ -166,5 +166,6 @@ No worldgen, creatures or seasons.
 - Save compatibility: additive.
 - Known limit: the blade is not in `#minecraft:swords` (the Concordance's tag writer would replace the arms
   generator's file), so sword enchantments are not offered for it at the table.
-- Open: the owner's approval of the icons and the offering numbers; a GeckoLib blade; whether blood magic suits the
-  project's tone at all (a fan-facing question for the owner).
+- Owner review: the icons, the offering numbers and blood magic as the Crimson Rites' theme were approved as built on
+  7 October 2026.
+- Open: a GeckoLib blade.

@@ -215,5 +215,6 @@ No worldgen, creatures or seasons. The crops are not found in the world; they ar
   `/whole`; the bed joins `#minecraft:supports_crops` and `#minecraft:grows_crops`, the crops `#minecraft:crops`, the
   Mendvetch `#jugcraft:nitrogen_fixing_crops`.
 - Save compatibility: additive.
-- Open: the owner's approval of the crop colours, icons and the adapted soil; a GuiLib garden overview; SmartBrainLib
-  pollinators if a mobile organism is wanted later.
+- Owner review: the crop colours, the icons and the adapted soil and mushroom textures were approved as built on
+  7 October 2026.
+- Open: a GuiLib garden overview; SmartBrainLib pollinators if a mobile organism is wanted later.

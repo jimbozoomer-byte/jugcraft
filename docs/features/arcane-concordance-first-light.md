@@ -100,7 +100,7 @@ in `tools/item_icons/`, with three new materials in `tools/icon_materials.py` (a
 glass). `tools/check_icon_maps.py` passes them with no warnings, `tools/check_mod_data.py` checks that each committed
 texture is its map's drawing, and they were looked at at 1× and 2× on light and dark slots. The owner asset library
 was searched (lanterns, staffs and a crystal-staff reference sheet); nothing was reused, as the maps were drawn from the
-old icons' designs. Not yet done: the owner's approval of the redraws, and a look in the game. Weapons: `data/jugcraft/spell_assignments/` opts every Jugcraft
+old icons' designs. The owner approved the redraws on 7 October 2026; they have not yet been looked at in the game. Weapons: `data/jugcraft/spell_assignments/` opts every Jugcraft
 weapon out of Spell Engine's automatic weapon skills, so they keep their own weapon arts and are no spell casters.
 
 ## Verification

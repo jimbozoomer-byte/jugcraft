@@ -193,4 +193,5 @@ Harvest Moon to the Halloween event's Harvest Moon nights. Neither gates progres
   `jugcraft:astral_claims`; research `jugcraft:celestial_attunement`; practice `jugcraft:observation`; six patterns; item
   tag `jugcraft:celestial_specimens`.
 - Save compatibility: additive. The Astral ledger's format changed before release (it was unused outside tests).
-- Open: the owner's approval of the icons and the pattern effects; a GuiLib observatory (step 26).
+- Owner review: the icons and the pattern effects were approved as built on 7 October 2026.
+- Open: a GuiLib observatory (step 26).
