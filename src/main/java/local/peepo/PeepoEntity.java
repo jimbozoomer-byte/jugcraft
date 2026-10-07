@@ -64,6 +64,7 @@ public final class PeepoEntity extends PathfinderMob {
         }
     }
     private CompanionRoutine routine;
+    public CompanionTransport transport;
     public final CompanionPreferences preferences=new CompanionPreferences(this);
     public final CompanionReport report=new CompanionReport(this);
     public final CompanionFood food=new CompanionFood(this);
@@ -187,7 +188,7 @@ public final class PeepoEntity extends PathfinderMob {
     public boolean isJughead() { return getType()==PeepoMod.JUGHEAD || getType()==PeepoMod.LEGACY_JUGHEAD; }
     public boolean isWearingPumpkin() { return entityData.get(PUMPKIN); }
     @Override protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output); orders.save(output);assignments.save(output);preferences.save(output);food.save(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
+        super.addAdditionalSaveData(output); orders.save(output);assignments.save(output);preferences.save(output);food.save(output);transport.save(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
         if(lunchOrigin!=null)output.store("LunchOrigin",net.minecraft.core.GlobalPos.CODEC,lunchOrigin);
         net.minecraft.world.ContainerHelper.saveAllItems(output.child("Belongings"),belongings.getItems());
         output.putBoolean("NaturallySpawned", naturallySpawned);
@@ -214,6 +215,7 @@ public final class PeepoEntity extends PathfinderMob {
         var saved=input.child("Belongings");
         if(saved.isPresent())net.minecraft.world.ContainerHelper.loadAllItems(saved.get(),belongings.getItems());
         else if(isWearingPumpkin())belongings.getItems().set(8,new ItemStack(Items.JACK_O_LANTERN));
+        transport.load(input);
         syncBelongings();
     }
     public boolean isBlushing() { return entityData.get(BLUSHING); }
@@ -276,6 +278,7 @@ public final class PeepoEntity extends PathfinderMob {
         goalSelector.addGoal(1, new RestGoal());
         goalSelector.addGoal(2, new FindFoodGoal());
         goalSelector.addGoal(2, new FindLunchGoal(this));
+        transport=new CompanionTransport(this);goalSelector.addGoal(2,transport);
         goalSelector.addGoal(3,new CompanionOrders.CommandGoal(this));
         routine=new CompanionRoutine(this);
         goalSelector.addGoal(3,routine);

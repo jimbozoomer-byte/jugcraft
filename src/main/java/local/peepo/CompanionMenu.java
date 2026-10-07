@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.flag.FeatureFlags;
 
 public final class CompanionMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT=29, RECIPE_START=46;
+    public static final int DATA_COUNT=31, RECIPE_START=46;
     public static MenuType<CompanionMenu> TYPE;
     private final PeepoEntity npc;
     private final ContainerData data;
@@ -17,13 +17,15 @@ public final class CompanionMenu extends AbstractContainerMenu {
     private final int[] recipeEnabled=new int[4];
     private long nextRecipeRefresh,nextRecipeEdit;
     public boolean showRecipes=true;
-    public static int assignmentY(int row){return row==0?78:row==5?168:94+(row-1)*18;}
+    public static int assignmentY(int row){return row==0?78:row>=5?168+(row-5)*18:94+(row-1)*18;}
+    public static int assignmentData(int row){return row<6?12+row:29+row-6;}
     public static void initialize(){TYPE=Registry.register(BuiltInRegistries.MENU,PeepoMod.id("companion_commands"),new MenuType<>(CompanionMenu::new,FeatureFlags.VANILLA_SET));}
     public CompanionMenu(int id,Inventory inventory){this(id,inventory,null);}
     public CompanionMenu(int id,Inventory inventory,PeepoEntity npc){
         super(TYPE,id);this.npc=npc;playerInventory=inventory;
         data=npc==null?new SimpleContainerData(DATA_COUNT):new ContainerData(){
             public int get(int i){
+                if(i>=29 && i<31)return npc.report.row(i-29+6);
                 if(i>=25 && i<29)return recipeEnabled[i-25];
                 if(i>=12 && i<18)return npc.report.row(i-12);
                 return switch(i){case 0->npc.orders.mode();case 1->npc.getEnergy()*100/npc.getEnergyCapacity();case 2->Math.round(npc.getHealth()*100/npc.getMaxHealth());case 3->npc.orders.radius();case 4->npc.orders.party()?1:0;case 5->npc.orders.owner(inventory.player)?1:0;case 6->npc.orders.homeHere()?1:0;case 7->npc.orders.workHere()?1:0;case 8->npc.orders.targetAvailable()?1:0;case 9->npc.getId()&0xffff;case 10->(npc.getId()>>>16)&0xffff;
@@ -40,8 +42,8 @@ public final class CompanionMenu extends AbstractContainerMenu {
             public int getMaxStackSize(){return 1;}
         });
         addSlot(new Slot(contents,9,70,54){public int getMaxStackSize(){return 1;}});
-        for(int row=0;row<3;row++)for(int col=0;col<9;col++)addSlot(new Slot(inventory,col+row*9+9,80+col*18,194+row*18));
-        for(int col=0;col<9;col++)addSlot(new Slot(inventory,col,80+col*18,252));
+        for(int row=0;row<3;row++)for(int col=0;col<9;col++)addSlot(new Slot(inventory,col+row*9+9,80+col*18,230+row*18));
+        for(int col=0;col<9;col++)addSlot(new Slot(inventory,col,80+col*18,288));
         for(int row=0;row<4;row++){
             final int at=row;
             addSlot(new Slot(recipeIcons,row,256,assignmentY(row+1)){

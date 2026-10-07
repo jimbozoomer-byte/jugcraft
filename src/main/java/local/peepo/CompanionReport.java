@@ -26,6 +26,8 @@ public final class CompanionReport {
             else if(!target.present(npc.level()))value=CompanionStatus.MISSING;
             else if(i==CompanionAssignments.LUNCH){
                 value=npc.level().getBlockEntity(target.at().pos()) instanceof LunchBlockEntity food && food.feeds(npc)?lunch():CompanionStatus.FORBIDDEN;
+            }else if(i>=CompanionAssignments.SUPPLY){
+                value=CompanionStorage.find(npc,target)==null?CompanionStatus.FORBIDDEN:npc.transport.containerStatus(i);
             }else if(i==0){
                 var activity=npc.stationStatus(target.at().pos());value=activity!=null?activity:CompanionStatus.READY;
             }else{
@@ -41,7 +43,7 @@ public final class CompanionReport {
         overall=npc.isEating()?CompanionStatus.EATING:npc.getRestMode()!=CompanionEnergy.Rest.NONE?CompanionStatus.RESTING:
             npc.orders.mode()==0?CompanionStatus.FOLLOWING:npc.orders.mode()==1?CompanionStatus.STAYING:
             lunch()==CompanionStatus.FETCHING_FOOD?CompanionStatus.FETCHING_FOOD:
-            npc.isRecovering()?CompanionStatus.RECOVERING:!npc.preferences.onShift()?CompanionStatus.SCHEDULED_REST:npc.routineStatus();
+            npc.transport.activity()!=CompanionStatus.IDLE?npc.transport.activity():npc.isRecovering()?CompanionStatus.RECOVERING:!npc.preferences.onShift()?CompanionStatus.SCHEDULED_REST:npc.routineStatus();
         if(overall==CompanionStatus.IDLE){
             if(npc.needsAutomaticFood() && lunch().problem())overall=lunch();
             else if(npc.orders.mode()==3)for(int i=1;i<5;i++)if(rows[i]!=CompanionStatus.NONE){overall=rows[i];break;}

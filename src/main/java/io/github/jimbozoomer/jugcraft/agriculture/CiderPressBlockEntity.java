@@ -35,6 +35,28 @@ public class CiderPressBlockEntity extends BlockEntity {
 	private int juice;
 	/** When the crank or screw last moved (game time); never, at first. */
 	private long lastWork = -WORK_TICKS;
+	public final local.peepo.CiderPressJob companionJob=new local.peepo.CiderPressJob(this);
+	public local.peepo.CompanionStatus companionStatus(){
+		if(apples<=0 && pulp<=0)return local.peepo.CompanionStatus.NO_INPUT;
+		if(juice>=TROUGH || (apples<=0 || pressing()) && juice+nextRelease()>TROUGH)return local.peepo.CompanionStatus.FULL;
+		return local.peepo.CompanionStatus.READY;
+	}
+	public local.peepo.CompanionStatus assist(local.peepo.PeepoEntity npc){
+		if(!companionJob.isOccupant(npc) || !local.peepo.CompanionJobs.permitted(npc,worldPosition))return local.peepo.CompanionStatus.FORBIDDEN;
+		var status=companionStatus();if(status!=local.peepo.CompanionStatus.READY)return status;
+		long now=level.getGameTime();if(!ready(now))return local.peepo.CompanionStatus.WORKING;
+		try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){
+			if(npc.extractEnergy(64,tx)<=0)return local.peepo.CompanionStatus.RECOVERING;
+			tx.commit();
+		}
+		if(apples>0 && !pressing())grind(now);
+		else {
+			int pomace=turn(now);
+			if(pomace>0)Block.popResource(level,worldPosition,new net.minecraft.world.item.ItemStack(JugcraftAgriculture.item("apple_pomace"),pomace));
+		}
+		return local.peepo.CompanionStatus.WORKING;
+	}
+	@Override public void setRemoved(){companionJob.removed();super.setRemoved();}
 
 	public CiderPressBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.CIDER_PRESS_ENTITY, pos, state);

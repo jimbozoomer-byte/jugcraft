@@ -13,15 +13,16 @@ import net.minecraft.world.phys.*;
 import io.github.jimbozoomer.jugcraft.machine.*;
 import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
 
-/** Home, four jobs, and a separate lunch link. No chunk loads. */
+/** Home, four jobs, lunch, supply and output links. No chunk loads. */
 public final class CompanionAssignments {
-    public record Target(GlobalPos at,Identifier block){
+    public record Target(GlobalPos at,Identifier block,Direction face){
+        public Target(GlobalPos at,Identifier block){this(at,block,Direction.UP);}
         public String name(){return BuiltInRegistries.BLOCK.getValue(block).getName().getString();}
         public boolean local(Level level){return at.dimension().equals(level.dimension());}
         public boolean present(Level level){return local(level)&&level.hasChunkAt(at.pos())&&BuiltInRegistries.BLOCK.getKey(level.getBlockState(at.pos()).getBlock()).equals(block);}
     }
     private final PeepoEntity npc;
-    public static final int LUNCH=5,COUNT=6;
+    public static final int LUNCH=5,SUPPLY=6,OUTPUT=7,COUNT=8;
     private final Target[] targets=new Target[COUNT];
     private boolean homeManaged,workManaged;
     private String cached="";private List<Target> clientTargets=Collections.nCopies(COUNT,null);
@@ -31,13 +32,23 @@ public final class CompanionAssignments {
     public boolean workManaged(){return workManaged;}
     public static BlockPos canonical(Level level,BlockPos pos){
         var state=level.getBlockState(pos);
+        if(state.getBlock() instanceof ChestBlock && state.getValue(ChestBlock.TYPE)==ChestType.RIGHT)return pos.relative(ChestBlock.getConnectedDirection(state));
         if(state.getBlock() instanceof WheelBlock)return WheelBlock.master(pos,state);
         if(state.getBlock() instanceof MachineBlock machine)return machine.masterPos(pos,state);
         if(state.getBlock() instanceof BedBlock && state.getValue(BlockStateProperties.BED_PART)==BedPart.FOOT)return pos.relative(state.getValue(BlockStateProperties.HORIZONTAL_FACING));
         return pos;
     }
     public static boolean bed(Level level,BlockPos pos){var b=level.getBlockState(pos).getBlock();return b instanceof CompanionBedBlock || b instanceof BedBlock;}
-    public static boolean work(Level level,BlockPos pos){var be=level.getBlockEntity(pos);return be instanceof WheelBlockEntity || be instanceof MachineBlockEntity || be instanceof CookingPotBlockEntity;}
+    public static boolean work(Level level,BlockPos pos){var be=level.getBlockEntity(pos);return be instanceof WheelBlockEntity || be instanceof MachineBlockEntity || be instanceof CookingPotBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;}
+    public String assignContainer(Level level,BlockPos pos,Direction face,boolean output){
+        if(!level.hasChunkAt(pos) || pos.distToCenterSqr(npc.position())>64*64)return "Keep a loaded container within 64 blocks of the companion.";
+        var target=new Target(GlobalPos.of(level.dimension(),pos),BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()),face);
+        var storage=CompanionStorage.find(npc,target);
+        if(storage==null || (output?!storage.supportsInsertion():!storage.supportsExtraction()))return "This container face is unavailable, locked, or does not support that transfer.";
+        for(int i=0;i<COUNT;i++)if(i!=(output?OUTPUT:SUPPLY) && targets[i]!=null && targets[i].at.equals(target.at))return "This container already has another role for this companion.";
+        targets[output?OUTPUT:SUPPLY]=target;changed();
+        return (output?"Output":"Supply")+" container assigned: "+target.name();
+    }
     public String assign(Level level,BlockPos clicked){
         var pos=canonical(level,clicked);
         if(!level.hasChunkAt(pos))return "That target is not loaded.";
@@ -60,12 +71,12 @@ public final class CompanionAssignments {
     }
     public String remove(Level level,BlockPos clicked){
         var pos=canonical(level,clicked);var at=GlobalPos.of(level.dimension(),pos);
-        for(int i=0;i<COUNT;i++)if(targets[i]!=null && targets[i].at.equals(at)){clear(i);return i==0?"Home removed.":i==LUNCH?"Lunch source removed.":"Work assignment removed.";}
+        for(int i=0;i<COUNT;i++)if(targets[i]!=null && targets[i].at.equals(at)){clear(i);return i==0?"Home removed.":i==LUNCH?"Lunch source removed.":i==SUPPLY?"Supply removed.":i==OUTPUT?"Output removed.":"Work assignment removed.";}
         return "This block is not assigned to the selected companion.";
     }
     public void clear(int slot){
         if(slot<0 || slot>=COUNT || targets[slot]==null)return;
-        targets[slot]=null;if(slot>0 && slot<LUNCH)compactWork();changed();if(slot!=LUNCH)npc.orders.assignmentRemoved(slot==0);
+        targets[slot]=null;if(slot>0 && slot<LUNCH)compactWork();changed();if(slot<LUNCH)npc.orders.assignmentRemoved(slot==0);
         if(slot==LUNCH)npc.report.lunch(CompanionStatus.READY);
     }
     private void compactWork(){
@@ -111,7 +122,7 @@ public final class CompanionAssignments {
     }
     public void save(ValueOutput out){
         out.putBoolean("AssignedHomeManaged",homeManaged);out.putBoolean("AssignedWorkManaged",workManaged);
-        for(int i=0;i<COUNT;i++)if(targets[i]!=null){var child=out.child("Assignment"+i);child.store("At",GlobalPos.CODEC,targets[i].at);child.putString("Block",targets[i].block.toString());}
+        for(int i=0;i<COUNT;i++)if(targets[i]!=null){var child=out.child("Assignment"+i);child.store("At",GlobalPos.CODEC,targets[i].at);child.putString("Block",targets[i].block.toString());child.putInt("Face",targets[i].face.ordinal());}
     }
     public void load(ValueInput in){
         homeManaged=in.getBooleanOr("AssignedHomeManaged",false);workManaged=in.getBooleanOr("AssignedWorkManaged",false);
@@ -119,13 +130,13 @@ public final class CompanionAssignments {
         for(int i=0;i<COUNT;i++){
             var child=in.child("Assignment"+i);if(child.isEmpty())continue;
             var at=child.get().read("At",GlobalPos.CODEC).orElse(null);var id=Identifier.tryParse(child.get().getStringOr("Block",""));
-            if(at!=null && id!=null)targets[i]=new Target(at,id);
+            if(at!=null && id!=null)targets[i]=new Target(at,id,Direction.values()[Math.clamp(child.get().getIntOr("Face",Direction.UP.ordinal()),0,5)]);
         }
         compactWork();changed();
     }
     private String encode(){
         var array=new JsonArray();
-        for(var t:targets){if(t==null){array.add(JsonNull.INSTANCE);continue;}var o=new JsonObject();o.addProperty("d",t.at.dimension().identifier().toString());o.addProperty("p",t.at.pos().asLong());o.addProperty("b",t.block.toString());array.add(o);}
+        for(var t:targets){if(t==null){array.add(JsonNull.INSTANCE);continue;}var o=new JsonObject();o.addProperty("d",t.at.dimension().identifier().toString());o.addProperty("p",t.at.pos().asLong());o.addProperty("b",t.block.toString());o.addProperty("f",t.face.ordinal());array.add(o);}
         return array.toString();
     }
     public List<Target> view(){
@@ -134,7 +145,7 @@ public final class CompanionAssignments {
         var list=new ArrayList<Target>(Collections.nCopies(COUNT,null));
         try{var array=JsonParser.parseString(data).getAsJsonArray();for(int i=0;i<Math.min(COUNT,array.size());i++)if(array.get(i).isJsonObject()){
             var o=array.get(i).getAsJsonObject();var dim=ResourceKey.create(Registries.DIMENSION,Identifier.parse(o.get("d").getAsString()));
-            list.set(i,new Target(GlobalPos.of(dim,BlockPos.of(o.get("p").getAsLong())),Identifier.parse(o.get("b").getAsString())));
+            list.set(i,new Target(GlobalPos.of(dim,BlockPos.of(o.get("p").getAsLong())),Identifier.parse(o.get("b").getAsString()),Direction.values()[Math.clamp(o.has("f")?o.get("f").getAsInt():Direction.UP.ordinal(),0,5)]));
         }}catch(RuntimeException ignored){}clientTargets=Collections.unmodifiableList(list);return clientTargets;
     }
 }

@@ -37,7 +37,7 @@ public final class CompanionOrders {
     public boolean command(Player p,int button){
         if(!allowed(p) || p.isSpectator())return false;
         long now=npc.level().getGameTime();if(now<nextCommand)return false;nextCommand=now+2;
-        if(button>=20 && button<26){npc.assignments.clear(button-20);return true;}
+        if(button>=20 && button<20+CompanionAssignments.COUNT){npc.assignments.clear(button-20);return true;}
         if(button>=30 && button<38)return npc.assignments.moveWork(1+(button-30)/2,button%2==0?-1:1);
         if(button>=40 && button<=47)return npc.preferences.command(button);
         if(button<0 || button>8)return false;

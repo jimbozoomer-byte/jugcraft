@@ -26,6 +26,18 @@ final class CompanionWorkPose {
         arm.x=side*2.3F;arm.y=19.2F;arm.z=-1.4F;
         reach(arm,gripX(s)+side*.35F,GRIP_Y,gripZ(s));
     }
+    static void crank(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg,ModelPart[] torso){
+        float lift=Math.max(0,17.0F-s.crankY),sway=s.crankX*.7F;
+        // The entity stays on its safe approach point. Only the client rig jumps and hangs.
+        for(var part:torso){part.y-=lift;part.x+=sway;}
+        leftLeg.y-=lift;rightLeg.y-=lift;leftLeg.x+=sway;rightLeg.x+=sway;
+        float kick=Mth.sin(s.workPhase)*.35F;
+        leftLeg.xRot=lift>0?.4F+kick:0;rightLeg.xRot=lift>0?.4F-kick:0;
+        leftLeg.yRot=rightLeg.yRot=leftLeg.zRot=rightLeg.zRot=0;
+        left.x=sway+2.3F;right.x=sway-2.3F;left.y=right.y=19.2F-lift;left.z=right.z=-1.4F;
+        reach(left,s.crankX+.32F,s.crankY,s.crankZ);reach(right,s.crankX-.32F,s.crankY,s.crankZ);
+        head.yRot=0;head.xRot=-.12F;
+    }
     static void tool(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg,ModelPart[] torso){
         var p=s.toolPose;
         left.x=s.pumpkin?2.9F:2.3F;right.x=-left.x;

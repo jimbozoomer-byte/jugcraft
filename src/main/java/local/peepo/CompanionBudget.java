@@ -42,6 +42,8 @@ public final class CompanionBudget {
             "Searches: "+b.searches.granted+" admitted, "+b.searches.deferred+" deferred; paths: "+b.paths.granted+" admitted, "+b.paths.deferred+" deferred";
     }
     public static void initialize(){
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents.CHUNK_LOAD.register((level,chunk,generated)->io.github.jimbozoomer.jugcraft.kinetic.KineticNetworks.invalidate(level));
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents.CHUNK_UNLOAD.register((level,chunk)->io.github.jimbozoomer.jugcraft.kinetic.KineticNetworks.invalidate(level));
         net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register((dispatcher,context,selection)->
             dispatcher.register(net.minecraft.commands.Commands.literal("peepobudget")
                 .requires(source->net.minecraft.commands.Commands.LEVEL_GAMEMASTERS.check(source.permissions()))

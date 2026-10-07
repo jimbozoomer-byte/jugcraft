@@ -3,7 +3,7 @@ package local.peepo;
 /** Only action changes are synchronized. Motion phases are evaluated on the client. */
 public enum WorkAnimation {
     // Append actions: the ordinal is an entity-data wire ID.
-    NONE(80), INTERACT(80), STIR(80), VALVE(100), LEVER(64), MALLET(48), WRENCH(64);
+    NONE(80), INTERACT(80), STIR(80), VALVE(100), LEVER(64), MALLET(48), WRENCH(64), CRANK(60);
     private final int period;
     WorkAnimation(int period){this.period=period;}
     public boolean hasTool(){return this==VALVE || this==LEVER || this==MALLET || this==WRENCH;}

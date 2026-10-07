@@ -5,5 +5,6 @@ public final class PeepoState extends LivingEntityRenderState { public final Ite
     public local.peepo.WorkAnimation work=local.peepo.WorkAnimation.NONE;
     public float workPhase;
     final MachineWorkClip toolPose=new MachineWorkClip();
+    float crankX,crankY,crankZ;
 }
 

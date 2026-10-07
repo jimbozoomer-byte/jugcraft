@@ -49,6 +49,32 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.sitting=entity.getRestMode()==CompanionEnergy.Rest.SITTING;
         state.work=state.eating || state.sleeping || state.sitting || state.wheelRunning || !entity.isAlive()?WorkAnimation.NONE:entity.workAnimation();
         state.workPhase=(float)WorkAnimation.stirPhase(entity.level().getGameTime(),partialTick);
+        if(state.work==WorkAnimation.CRANK){
+            var target=entity.workTarget();var level=entity.level();
+            if(!level.hasChunkAt(target) || !(level.getBlockState(target).getBlock() instanceof io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlock))state.work=WorkAnimation.NONE;
+            else{
+                // Match kinetic_rotors.json exactly: six degrees per tick, radius 4.5 pixels.
+                // No UUID phase offset: both hands must follow the actual block's wooden handle.
+                double angle=(Math.floorMod(level.getGameTime(),60)+partialTick)*Math.PI*2/60;
+                state.workPhase=(float)angle;
+                double x=-Math.sin(angle)*4.5/16,y=Math.cos(angle)*4.5/16,z=3.5/16;
+                var facing=level.getBlockState(target).getValue(io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlock.FACING);
+                var offset=switch(facing){
+                    case NORTH -> new net.minecraft.world.phys.Vec3(x,y,z);
+                    case SOUTH -> new net.minecraft.world.phys.Vec3(-x,y,-z);
+                    case EAST -> new net.minecraft.world.phys.Vec3(-z,y,x);
+                    case WEST -> new net.minecraft.world.phys.Vec3(z,y,-x);
+                    case UP -> new net.minecraft.world.phys.Vec3(x,-z,y);
+                    case DOWN -> new net.minecraft.world.phys.Vec3(x,z,-y);
+                };
+                var delta=net.minecraft.world.phys.Vec3.atCenterOf(target).add(offset).subtract(entity.getPosition(partialTick));
+                double yaw=Math.toRadians(entity.getYRot());
+                state.crankX=(float)((delta.x*Math.cos(yaw)+delta.z*Math.sin(yaw))*16);
+                state.crankZ=(float)((delta.x*Math.sin(yaw)-delta.z*Math.cos(yaw))*16);
+                state.crankY=(float)(24-delta.y*16);
+                state.bodyRot=entity.getYRot();state.yRot=0;state.xRot=0;
+            }
+        }
         if(state.work==WorkAnimation.STIR){
             var target=entity.workTarget();
             // The server plants the companion on the rim; only the hands/spoon animate.

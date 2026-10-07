@@ -8,10 +8,10 @@ Craft the **Companion Planner** from an iron nugget above three paper, with a st
 
 1. Feed a companion once to tame it. Right-click it with the planner to select it; its name appears on the tool.
 2. Right-click a companion bed/bunk or either half of a vanilla bed to assign home. A new home replaces the previous home.
-3. Right-click up to four Generator Wheels, Jugcraft machines, or cooking pots to assign work. Any part of a supported multi-block machine resolves to its controller. Assigning work switches the command to Work.
+3. Right-click up to four Generator Wheels, Hand Cranks, Cider Presses, Jugcraft machines, or cooking pots to assign work. Any part of a supported multi-block machine resolves to its controller. Assigning work switches the command to Work.
 4. Hold the selected planner to see green frames around that companion and its assigned places. A missing/replaced target is orange. Only loaded targets in the current dimension are drawn.
 5. Left-click an assigned block with the planner to remove its assignment without breaking it. Shift-right-click air to clear the selection. Selecting another companion replaces the selection on that tool only.
-6. Shift-right-click a companion normally to open its inventory/commands. Home, four work rows and a separate Lunch row show names and coordinates. Hover for full name, dimension and server status. The x buttons also remove assignments, including targets that have been destroyed, unloaded, or left in another dimension.
+6. Shift-right-click a companion normally to open its inventory/commands. Home, four work rows and separate Lunch, Supply and Output rows show names and coordinates. Hover for full name, dimension and server status. The x buttons also remove assignments, including targets that have been destroyed, unloaded, or left in another dimension.
 7. Use the up/down arrows beside work rows to set priority. Work 1 at the top is highest; home stays fixed. The order is saved with the companion. Removing a workstation closes the gap; new assignments go at the bottom. Existing saves with gaps are compacted while preserving their relative order.
 8. Right-click a lunch crate or lunch cover with the planner to bind the separate food source. Use the Routine tab for work shifts, recovery thresholds, food preferences, carried meals and optional alerts. See [jobs and routines](companion-jobs.md).
 
@@ -21,7 +21,7 @@ Assignments must be within 64 blocks of the selected companion when added. The c
 
 Generator Wheels are functional jobs: once the planner is used, Work mode uses assigned wheels only. Full, occupied, invalid and temporarily unreachable wheels are skipped, allowing other assigned wheels to be considered. Exhausted companions still rest and recover through the existing energy routine. Nearby seats and lunch sources retain the existing behavior; food is allowed near the assigned places within the GUI's range.
 
-[Cooking Pots now support assistance](companion-cooking.md): one helper gives +50% cooking speed, with a saved ghost recipe selector in the companion GUI for future supply integration. [Processor helper teams](companion-jobs.md#processor-assistance-and-helper-teams) now support all 36 item/fluid/extraction/farming processors. Full multiblocks take two helpers at +25% each; single-block/compact machines take one at +50%. Power generators and storage remain Unsupported job.
+[Cooking Pots now support assistance](companion-cooking.md): one helper gives +50% cooking speed, with a saved ghost recipe selector in the companion GUI used by Supply transport. [Processor helper teams](companion-jobs.md#processor-assistance-and-helper-teams) now support all 36 item/fluid/extraction/farming processors. Full multiblocks take two helpers at +25% each; single-block/compact machines take one at +50%. Power generators and storage remain Unsupported job.
 
 Work selection uses row priority before distance. Reordering in Work mode prompts a new selection without interrupting exhaustion recovery or changing the selected command. While working a lower-priority wheel, the companion checks higher-priority links every 80-99 ticks, with at most two path attempts and the existing unreachable cooldown. It switches only after a usable higher-priority wheel can be reached and claimed; otherwise it keeps its current job. Full, occupied, unloaded, missing and unimplemented jobs do not block lower priorities. Reordering uses the existing server-validated menu buttons and assignment snapshot; it adds no per-tick world scan or separate save format.
 
@@ -31,9 +31,9 @@ The selected home limits bed choice to that bed/bunk. Vanilla beds have an adapt
 
 - Every change is server-authoritative and checks current owner/party permissions, player reach, loaded chunks, dimension, level interaction permission and the built-in town protection. The planner never breaks blocks. Edits have a five-tick cooldown.
 - The tool stores the selected UUID/dimension, display name and a refreshable entity ID. Those values never grant permission. Only the held tool refreshes its entity ID/name once per second, without an entity/world scan.
-- A fixed six-entry target array persists one home, four jobs and one lunch source with dimension, position and block identity. Duplicate links and a fifth workstation are rejected. Missing targets stay visible/removable instead of silently being reassigned.
+- A fixed eight-entry target array persists one home, four jobs, one lunch source, Supply and Output with dimension, position and block identity. Duplicate links and a fifth workstation are rejected. Missing targets stay visible/removable instead of silently being reassigned.
 - Existing saves retain old area orders until the planner is first used. Explicit targets then take precedence; removing all workstation links does not resume random wheel assignment.
-- A small entity-data snapshot changes only when assignments change/load. Clients cache its parsed form. The menu reads the tracked companion; preview rendering touches at most six assigned targets, never scans nearby machines. Multi-block frame bounds use at most 256 footprint cells.
+- A small entity-data snapshot changes only when assignments change/load. Clients cache its parsed form. The menu reads the tracked companion; preview rendering touches at most eight assigned targets, never scans nearby machines. Multi-block frame bounds use at most 256 footprint cells.
 - Station searches retain their staggered 80-99 tick interval, at most two path attempts per search, and unreachable-target cooldown. Explicit navigation is bounded to 64 blocks and only uses loaded chunks. No server lighting/outline entities or ticking tool block entities were added.
 
 ## Progression and assets
@@ -53,3 +53,5 @@ Manual cases: select Peepo and Jughead; assign one home and four wheels; reject 
 - Optional round-robin work as an alternative to the implemented priority order.
 - Live status, day/night schedules, configurable recovery thresholds, assigned lunch and carried meals are implemented in [jobs and routines](companion-jobs.md).
 - Bulk assignment for several selected companions, with a preview and per-station worker limits.
+
+Supply/Output extension (7 October 2026): right-click a container with the selected planner for Supply; Shift-right-click for Output. These are separate links, not work slots. Clicked-face automation rules and double-chest locks apply. Set a Cooking Pot ghost recipe to fetch missing ingredients; finished food and returned containers go to Output. Cider Press now accepts an assigned helper using the general INTERACT animation; loading apples and bottling remain manual. Hand Cranks accept one operator and pause for a full connected flywheel. See [jobs and limits](companion-jobs.md#hand-crank-cider-press-and-transport).

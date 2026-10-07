@@ -13,6 +13,8 @@ public final class CompanionJobs {
     public static CompanionJob resolve(PeepoEntity npc,BlockPos pos){
         if(!npc.level().hasChunkAt(pos))return null;
         var be=npc.level().getBlockEntity(pos);if(be==null || be.isRemoved())return null;
+        if(be instanceof io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity crank)return crank.companionJob.prepare(npc);
+        if(be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity press)return press.companionJob.prepare(npc);
         if(be instanceof io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity pot)return pot.companionJob.prepare(npc);
         if(be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine){
             var job=machine.companionJob(npc);if(job!=null)return job;

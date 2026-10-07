@@ -24,11 +24,11 @@ Discovery/workshop convenience using existing farming inputs, crafted bowls/bott
 - Heat and recipe ingredients are still required. Recipe completion uses the existing batch-consumption, preserve timestamps and container-remainder handling. Assistance never invokes the entire block-entity tick twice.
 - The same scheduler/search/path budgets and bounded priority retry rules apply. A Cooking Pot must be explicitly assigned; wild/unassigned companions do not take over cooking stations.
 
-## Recipe and future supply contract
+## Recipe and supply contract
 
 The block entity persists `CompanionRecipe` as a stable recipe identifier, not a list index or output-item ID. Missing keys preserve Auto for existing saves. If a datapack removes a selected recipe, the saved ID remains and the pot reports Recipe unavailable instead of silently cooking a different meal. Selecting Auto or another recipe recovers it.
 
-`CookingPotBlockEntity.supplyPlan()` exposes the selected ID, exact counted `Ingredient` predicates, output and time as `CookingPotPlan`. Auto has no supply plan. A later porter can use the predicates/counts for ingredient choice and quantities; the method grants no access to storage and performs no transfer. **Porter/supply transport is not implemented in this change.**
+`CookingPotBlockEntity.supplyPlan()` exposes the selected ID, exact counted `Ingredient` predicates, output and time as `CookingPotPlan`. Auto has no supply plan. The porter now uses those predicates/counts for ingredient choice and quantities; the method itself grants no access to storage and performs no transfer. The separate [Supply/Output jobs](companion-jobs.md#supply-and-output) validate storage and physically carry the ingredients and finished products.
 
 The recipe catalogue is cached per server and invalidated on datapack reload/shutdown. Output matching uses the live server catalogue; no recipe index or client-provided item is trusted. The server reads the real menu cursor stack and sends only the four ghost previews through ordinary slot synchronization. Current ingredient previews show one example per ingredient predicate; supply jobs retain the complete predicates. Edits are limited to once per two ticks. While the menu is open, previews refresh at most twice per second, plus immediately after an edit/reorder. No recipe catalogue is sent when opening a pot.
 

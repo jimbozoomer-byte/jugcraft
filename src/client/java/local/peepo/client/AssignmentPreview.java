@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import com.mojang.blaze3d.vertex.*;
 
-/** Draw only the selected entity and six explicit targets, never scan nearby world blocks. */
+/** Draw only the selected entity and eight explicit targets, never scan nearby world blocks. */
 public final class AssignmentPreview {
     private record Frame(AABB box,int color){}
     public static void initialize(){
@@ -21,7 +21,7 @@ public final class AssignmentPreview {
             var stack=mc.player.getMainHandItem().is(AssignmentTool.ITEM)?mc.player.getMainHandItem():mc.player.getOffhandItem();
             var npc=AssignmentTool.selected(mc.level,stack);if(npc==null)return;
             var camera=context.levelState().cameraRenderState.pos;
-            var frames=new ArrayList<Frame>(7);
+            var frames=new ArrayList<Frame>(9);
             frames.add(new Frame(npc.getBoundingBox().inflate(.06).move(-camera.x,-camera.y,-camera.z),0xFF66FF88));
             for(var target:npc.assignments.view()){
                 if(target==null || !target.local(mc.level) || !mc.level.hasChunkAt(target.at().pos()) || target.at().pos().distToCenterSqr(mc.player.position())>128*128)continue;
