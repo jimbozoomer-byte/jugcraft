@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.function.Consumer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -143,6 +144,10 @@ public final class Starbound {
 
 	private static void say(ServerPlayer player, String key, Object... args) {
 		player.sendSystemMessage(Component.translatable("message.jugcraft.concordance.conclave." + key, args));
+	}
+
+	private static void say(Consumer<Component> out, String key, Object... args) {
+		out.accept(Component.translatable("message.jugcraft.concordance.conclave." + key, args));
 	}
 
 	private static void refuse(ServerPlayer player, String reason) {
@@ -510,29 +515,39 @@ public final class Starbound {
 
 	/** A player's standing, in lines: rank, renown, breadth, variety, what the next rank needs and their obligation. */
 	public static void status(ServerPlayer player) {
+		status(player, player::sendSystemMessage);
+	}
+
+	/** {@code player}'s rank, renown and obligation, and what the next rank asks (the command and the Journal). */
+	public static void status(ServerPlayer player, Consumer<Component> out) {
 		Standing standing = standing(player);
 		if (!standing.member()) {
-			say(player, "not_member");
+			say(out, "not_member");
 			return;
 		}
 		Rank rank = Conclave.rank(standing);
-		say(player, "status", Component.translatable("compose.jugcraft.conclave.rank." + rank.id), standing.renown(), Conclave.traditions(standing),
+		say(out, "status", Component.translatable("compose.jugcraft.conclave.rank." + rank.id), standing.renown(), Conclave.traditions(standing),
 				standing.kinds().size());
 		if (rank.ordinal() + 1 < Rank.values().length) {
 			Rank next = Rank.values()[rank.ordinal() + 1];
-			say(player, "next", Component.translatable("compose.jugcraft.conclave.rank." + next.id), next.renown, next.traditions,
+			say(out, "next", Component.translatable("compose.jugcraft.conclave.rank." + next.id), next.renown, next.traditions,
 					Conclave.TRADITION_RENOWN, next.kinds);
 		}
 		long now = now(player);
 		if (Conclave.goodStanding(standing, now)) {
-			say(player, "obligation_met", (Conclave.OBLIGATION_TICKS - (now - standing.lastContribution())) / 24_000L + 1);
+			say(out, "obligation_met", (Conclave.OBLIGATION_TICKS - (now - standing.lastContribution())) / 24_000L + 1);
 		} else {
-			say(player, "lapsed");
+			say(out, "lapsed");
 		}
 	}
 
 	/** Every commission, with whether it can be fulfilled now or why not. */
 	public static void commissions(ServerPlayer player) {
+		commissions(player, player::sendSystemMessage);
+	}
+
+	/** Every commission, with whether it can be fulfilled now or why not (the command and the Journal). */
+	public static void commissions(ServerPlayer player, Consumer<Component> out) {
 		Standing standing = standing(player);
 		long now = now(player);
 		for (CommissionDefinition commission : catalog().commissions().values()) {
@@ -541,7 +556,7 @@ public final class Starbound {
 					? Component.translatable("message.jugcraft.concordance.conclave.ask_deliver", commission.count(), new ItemStack(item(commission.item())).getHoverName())
 					: Component.translatable("message.jugcraft.concordance.conclave.ask_practice",
 							Component.translatable("compose.jugcraft.conclave.activity." + commission.activity().substring(commission.activity().indexOf(':') + 1)));
-			say(player, "commission", commissionName(commission.id()), commission.tier(), ask,
+			say(out, "commission", commissionName(commission.id()), commission.tier(), ask,
 					reason.isEmpty() ? Component.translatable("compose.jugcraft.conclave.open") : Component.translatable("compose.jugcraft.conclave.reason." + reason));
 		}
 	}

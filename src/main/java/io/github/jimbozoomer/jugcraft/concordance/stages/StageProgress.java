@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -29,6 +30,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.Nullable;
 
@@ -133,13 +135,18 @@ public final class StageProgress {
 		return Component.translatable("compose.jugcraft.stage." + stage);
 	}
 
-	/** {@code player}'s stage and, for the next one, every route and what it still needs. */
+	/** {@code player}'s stage and, for the next one, every route and what it still needs (in their chat). */
 	public static void describe(ServerPlayer player) {
+		describe(player, player::sendSystemMessage);
+	}
+
+	/** {@code player}'s stage and, for the next one, every route and what it still needs (the command and the Journal). */
+	public static void describe(ServerPlayer player, Consumer<Component> out) {
 		StageDefinition held = stage(player);
 		if (held == null) {
-			player.sendSystemMessage(Component.translatable("message.jugcraft.concordance.stage.none"));
+			out.accept(Component.translatable("message.jugcraft.concordance.stage.none"));
 		} else {
-			player.sendSystemMessage(Component.translatable("message.jugcraft.concordance.stage.current", name(held.id())));
+			out.accept(Component.translatable("message.jugcraft.concordance.stage.current", name(held.id())));
 		}
 		StageDefinition next = null;
 		for (StageDefinition stage : catalog().ordered()) {
@@ -149,17 +156,49 @@ public final class StageProgress {
 			}
 		}
 		if (next == null) {
-			player.sendSystemMessage(Component.translatable("message.jugcraft.concordance.stage.last"));
+			out.accept(Component.translatable("message.jugcraft.concordance.stage.last"));
 			return;
 		}
 		Stages.Situation situation = situation(player);
-		player.sendSystemMessage(Component.translatable("message.jugcraft.concordance.stage.next", name(next.id())));
+		out.accept(Component.translatable("message.jugcraft.concordance.stage.next", name(next.id())));
 		for (Route route : next.routes()) {
 			List<String> missing = Stages.missing(route, situation);
 			Component text = Component.translatable("compose.jugcraft.stage." + next.id() + "." + route.id());
-			player.sendSystemMessage(missing.isEmpty() ? Component.translatable("message.jugcraft.concordance.stage.route_met", text)
-					: Component.translatable("message.jugcraft.concordance.stage.route", text, String.join(", ", missing)));
+			MutableComponent needs = Component.empty();
+			for (int i = 0; i < missing.size(); i++) {
+				needs.append(i == 0 ? Component.empty() : Component.literal("; ")).append(need(missing.get(i)));
+			}
+			out.accept(missing.isEmpty() ? Component.translatable("message.jugcraft.concordance.stage.route_met", text)
+					: Component.translatable("message.jugcraft.concordance.stage.route", text, needs));
 		}
+	}
+
+	/**
+	 * One thing a route still needs, in words: {@link Stages#missing} names it as data ("research jugcraft:first_light@mastered",
+	 * "mastered 5 (2)", "rank starbound", "milestone jugcraft:spire_raised"); the player reads the research's and the
+	 * rank's names and how far they are.
+	 */
+	public static Component need(String token) {
+		String[] parts = token.split(" ", 2);
+		String rest = parts.length > 1 ? parts[1] : "";
+		int open = rest.indexOf(" (");
+		String first = open < 0 ? rest : rest.substring(0, open);
+		String have = open < 0 ? "" : rest.substring(open + 2, rest.length() - 1);
+		return switch (parts[0]) {
+			case "research" -> {
+				int at = first.indexOf('@');
+				yield at < 0 ? Component.literal(token) : Component.translatable("message.jugcraft.concordance.stage.need.research",
+						ConcordanceProgress.researchName(first.substring(0, at)), Component.translatable("journal.jugcraft.state." + first.substring(at + 1)));
+			}
+			case "mastered" -> Component.translatable("message.jugcraft.concordance.stage.need.mastered", first, have);
+			case "understood" -> Component.translatable("message.jugcraft.concordance.stage.need.understood", first, have);
+			case "traditions" -> Component.translatable("message.jugcraft.concordance.stage.need.traditions", first, have);
+			case "projects" -> Component.translatable("message.jugcraft.concordance.stage.need.projects", first, have);
+			case "rank" -> Component.translatable("message.jugcraft.concordance.stage.need.rank", Component.translatable("compose.jugcraft.conclave.rank." + first));
+			case "milestone" -> Component.translatable("message.jugcraft.concordance.stage.need.milestone",
+					Component.translatable("compose.jugcraft.milestone." + first.substring(first.indexOf(':') + 1)));
+			default -> Component.literal(token);
+		};
 	}
 
 	private static void command(CommandDispatcher<CommandSourceStack> dispatcher) {

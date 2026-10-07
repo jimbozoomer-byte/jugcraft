@@ -7553,6 +7553,7 @@ def check_concordance(registered):
     check_conclave(co, root, lang, registered, research)
     check_progression(co, root, lang, registered, research)
     check_spire(co, root, lang, registered, research)
+    check_journal(co, root, lang)
     check_game_test_entrypoints()
 
 
@@ -9298,7 +9299,7 @@ def check_conclave(co, root, lang, registered, research):
             err(f"conclave: missing lang for the reason {reason}")
     if not reasons <= set(cc.REASONS):
         err(f"conclave: reasons {sorted(reasons - set(cc.REASONS))} are not in REASONS")
-    for key in re.findall(r'say\(player, "([a-z_.]+)"', starbound):
+    for key in re.findall(r'say\((?:player|out), "([a-z_.]+)"', starbound):
         if not key.endswith(".") and f"message.{MOD}.concordance.conclave.{key}" not in lang:
             err(f"starbound/Starbound.java: missing lang message.{MOD}.concordance.conclave.{key}")
     for key in re.findall(r'"message\.jugcraft\.concordance\.(conclave\.[a-z_]+)"', starbound):
@@ -9647,7 +9648,7 @@ def check_spire(co, root, lang, registered, research):
     if not routes or split(sp.MILESTONE)[1] not in pg.MILESTONES:
         err("spire: the Architect stage needs a route through the raised spire's milestone and its gate")
     # Every word has its text.
-    for key in re.findall(r'(?:say|tell)\(player, "([a-z_]+)"', spire_java) + re.findall(r'"message\.jugcraft\.concordance\.spire\.([a-z_]+)"', spire_java):
+    for key in re.findall(r'(?:say|tell)\((?:player|out), "([a-z_]+)"', spire_java) + re.findall(r'"message\.jugcraft\.concordance\.spire\.([a-z_]+)"', spire_java):
         if f"message.{MOD}.concordance.spire.{key}" not in lang:
             err(f"spire/ConcordSpire.java: missing lang message.{MOD}.concordance.spire.{key}")
     for key in re.findall(r'refuse\(player, "([a-z_]+)"\)', spire_java) + re.findall(r'return "([a-z_]+)";', spire_java + java("wonder/Spires.java")):
@@ -9865,6 +9866,56 @@ def main():
         print("\n".join(errors), file=sys.stderr)
         sys.exit(1)
     print(f"PASS: {len(registered)} material IDs, data files and recipe audit. No Minecraft build or game test performed.")
+
+
+def check_journal(co, root, lang):
+    """Roadmap step 26: the Concordance Journal's sections are tools/concordance_journal.py's, in its order, each with a
+    title; every word the journal, the stage report and the journal's screens use has its text (the states, the rule
+    kinds, the milestones); the journal only reads (it records, grants and changes nothing); the GuiLib workspace is
+    reached only when GuiLib is installed, and its stylesheet is shipped; the screens only send the request, which
+    carries nothing."""
+    jn = co.journal
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    journal = text(root / "journal" / "Journal.java")
+    stages = text(root / "stages" / "StageProgress.java")
+    client = text(CLIENT_JAVA_ROOT / "JournalClient.java") + text(CLIENT_JAVA_ROOT / "JournalScreen.java")
+    workspace_path = ROOT / "src" / "client" / "kotlin" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JournalWorkspace.kt"
+    workspace = text(workspace_path)
+    sections = re.findall(r'contribute\("([a-z_]+)"', journal)
+    if sections != list(jn.SECTIONS):
+        err(f"journal/Journal.java: sections {sections} differ from SECTIONS in tools/concordance_journal.py")
+    for key in jn.SECTIONS:
+        if f"journal.{MOD}.section.{key}" not in lang:
+            err(f"journal: missing lang journal.{MOD}.section.{key}")
+    for state in ("none", "encountered", "observed", "understood", "mastered"):
+        if f"journal.{MOD}.state.{state}" not in lang:
+            err(f"journal: missing lang journal.{MOD}.state.{state}")
+    kinds = re.findall(r'^\t\t[A-Z]+\("([a-z]+)"\)', text(root / "rules" / "EvidenceRule.java"), re.M)
+    if not kinds or set(kinds) != set(jn.RULES):
+        err(f"journal: RULES in tools/concordance_journal.py must name every evidence kind {kinds}")
+    for milestone in co.progression.MILESTONES:
+        if f"compose.{MOD}.milestone.{milestone}" not in lang:
+            err(f"journal: missing lang compose.{MOD}.milestone.{milestone}")
+    for source, name in ((journal, "journal/Journal.java"), (stages, "stages/StageProgress.java"), (client, "the journal's screens"),
+                         (workspace, "JournalWorkspace.kt")):
+        for key in re.findall(r'"((?:journal|screen|key)\.jugcraft\.[a-z_.]+|message\.jugcraft\.concordance\.stage\.need\.[a-z_]+)"', source):
+            if not key.endswith(".") and key not in lang:
+                err(f"{name}: missing lang {key}")
+    if re.search(r"ConcordanceProgress\.(record|grant|award|setFocus)\(|StageProgress\.milestone\(|\.put\(", journal):
+        err("journal/Journal.java: the journal only reads; it records, grants and changes nothing")
+    if "RateGate.allow(player, \"journal\"" not in journal:
+        err("journal/Journal.java: the server answers a journal request at most every REQUEST_TICKS (RateGate)")
+    if not re.search(r'isModLoaded\("guilib"\)\)\s*\{\s*JournalWorkspace\.open\(\)', client):
+        err("JournalClient.java: the GuiLib workspace opens only when GuiLib is installed")
+    for path in CLIENT_JAVA_ROOT.rglob("*.java"):
+        if path.name != "JournalClient.java" and "JournalWorkspace" in text(path):
+            err(f"{path.name}: only JournalClient reaches the GuiLib workspace (behind its isModLoaded check)")
+    if '"jugcraft:ui/journal.css"' not in workspace or not (ASSETS / "ui" / "journal.css").is_file():
+        err("journal: the GuiLib workspace's stylesheet assets/jugcraft/ui/journal.css must exist and be the one it opens")
+    request = text(root / "journal" / "JournalRequestPayload.java")
+    if "StreamCodec.unit(" not in request:
+        err("journal/JournalRequestPayload.java: a request carries nothing (the server decides what a player sees)")
 
 
 if __name__ == "__main__":

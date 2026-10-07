@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -356,25 +357,36 @@ public final class Sympathy {
 		return Component.translatable("message.jugcraft.concordance.hex.traced_curse", curseName(curse.curse()), remedy, curse.casterName(), seconds);
 	}
 
+	/**
+	 * The curses on {@code player} (each with its remedy and who cast it) and the wards they hold, one line each, for
+	 * the hexes command and the Concordance Journal; returns how many curses are on them.
+	 */
+	public static int report(ServerPlayer player, Consumer<Component> out) {
+		long now = player.level().getGameTime();
+		List<Curse> curses = curses(player).stream().filter(curse -> curse.active(now)).toList();
+		if (curses.isEmpty()) {
+			out.accept(Component.translatable("message.jugcraft.concordance.hex.clean"));
+		}
+		for (Curse curse : curses) {
+			out.accept(describe(curse, now));
+		}
+		for (Ward ward : wards(player)) {
+			if (ward.active(now)) {
+				out.accept(Component.translatable("message.jugcraft.concordance.hex.ward_held",
+						Component.translatable("compose.jugcraft.hex.ward." + ward.category().id), (ward.until() - now) / 20));
+			}
+		}
+		return curses.size();
+	}
+
+	/** Whether anything sympathetic touches {@code player} now: a curse on them or a ward they hold. */
+	public static boolean touched(ServerPlayer player) {
+		long now = player.level().getGameTime();
+		return curses(player).stream().anyMatch(curse -> curse.active(now)) || wards(player).stream().anyMatch(ward -> ward.active(now));
+	}
+
 	private static void command(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("jugcraft").then(Commands.literal("concordance").then(Commands.literal("hexes")
-				.executes(context -> {
-					ServerPlayer player = context.getSource().getPlayerOrException();
-					long now = player.level().getGameTime();
-					List<Curse> curses = curses(player).stream().filter(curse -> curse.active(now)).toList();
-					if (curses.isEmpty()) {
-						context.getSource().sendSuccess(() -> Component.translatable("message.jugcraft.concordance.hex.clean"), false);
-					}
-					for (Curse curse : curses) {
-						context.getSource().sendSuccess(() -> describe(curse, now), false);
-					}
-					for (Ward ward : wards(player)) {
-						if (ward.active(now)) {
-							context.getSource().sendSuccess(() -> Component.translatable("message.jugcraft.concordance.hex.ward_held",
-									Component.translatable("compose.jugcraft.hex.ward." + ward.category().id), (ward.until() - now) / 20), false);
-						}
-					}
-					return curses.size();
-				}))));
+				.executes(context -> report(context.getSource().getPlayerOrException(), line -> context.getSource().sendSuccess(() -> line, false))))));
 	}
 }

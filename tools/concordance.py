@@ -449,6 +449,8 @@ BLOCKS.update(conclave.BLOCKS)
 import concordance_progression as progression  # noqa: E402
 # Roadmap step 25 (tools/concordance_spire.py): the Concord Spire; its structures and its rite join the rituals' own.
 import concordance_spire as spire  # noqa: E402
+# Roadmap step 26 (tools/concordance_journal.py): the Concordance Journal's words and codex page.
+import concordance_journal as journal  # noqa: E402
 ITEMS.update(spire.ITEMS)
 BLOCKS.update(spire.BLOCKS)
 rituals.STRUCTURES.update(spire.STRUCTURES)
@@ -963,6 +965,7 @@ def codex():
         **conclave.codex(),
         **progression.codex(),
         **spire.codex(),
+        **journal.codex(),
     }
 
 
@@ -1720,6 +1723,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     conclave.write_all(write, assets, data, lang, condition, self_drop)
     progression.write_all(write, data, lang)
     spire.write_all(write, assets, data, lang, condition, self_drop)
+    journal.lang_entries(lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})

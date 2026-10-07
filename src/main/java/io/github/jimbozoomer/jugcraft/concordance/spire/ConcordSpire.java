@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -176,6 +177,10 @@ public final class ConcordSpire {
 		player.sendSystemMessage(Component.translatable("message.jugcraft.concordance.spire." + key, args));
 	}
 
+	private static void say(Consumer<Component> out, String key, Object... args) {
+		out.accept(Component.translatable("message.jugcraft.concordance.spire." + key, args));
+	}
+
 	private static void refuse(ServerPlayer player, String reason) {
 		player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.spire.refused",
 				Component.translatable("compose.jugcraft.spire.reason." + reason)));
@@ -289,7 +294,7 @@ public final class ConcordSpire {
 			say(player, next.communal() ? "shared" : "kept");
 			return;
 		}
-		describe(player, level, heart.getBlockPos(), state);
+		describe(player::sendSystemMessage, level, heart.getBlockPos(), state);
 	}
 
 	/** The configuration's upkeep item used on a heart goes into its store (the keeper's side only). */
@@ -701,35 +706,35 @@ public final class ConcordSpire {
 	// ---------------------------------------------------------------- inspecting
 
 	/** How a spire stands, line by line: what it is, its phase and what it needs, its upkeep, its field, its attendance. */
-	public static void describe(ServerPlayer player, ServerLevel level, BlockPos heart, SpireState state) {
+	public static void describe(Consumer<Component> out, ServerLevel level, BlockPos heart, SpireState state) {
 		SpireDefinition definition = definition();
 		SpireConfiguration configuration = catalog().configuration(state.configuration());
 		if (definition == null || configuration == null) {
-			refuse(player, "unknown");
+			out.accept(Component.translatable("message.jugcraft.concordance.spire.refused", Component.translatable("compose.jugcraft.spire.reason.unknown")));
 			return;
 		}
 		ServerPlayer keeper = level.getServer().getPlayerList().getPlayer(state.keeper());
-		say(player, state.communal() ? "title_shared" : "title", configurationName(configuration.id()),
+		say(out, state.communal() ? "title_shared" : "title", configurationName(configuration.id()),
 				keeper == null ? Component.translatable("message.jugcraft.concordance.spire.away") : keeper.getDisplayName());
 		long now = level.getGameTime();
 		Standing standing = stand(level, heart, definition, configuration, state);
 		SpireDefinition.Phase phase = Spires.phase(definition, state);
 		if (phase != null) {
 			String missing = Spires.missing(definition, state, standing.intact());
-			say(player, "phase", state.phase() + 1, definition.phases().size(), phaseName(phase.id()), needs(definition, configuration, state, phase,
+			say(out, "phase", state.phase() + 1, definition.phases().size(), phaseName(phase.id()), needs(definition, configuration, state, phase,
 					missing, standing));
 		}
 		if (Spires.upkeepRuns(definition, state)) {
-			say(player, "upkeep", configuration.upkeepCount(), itemName(configuration.upkeepItem()), configuration.upkeepLey(),
+			say(out, "upkeep", configuration.upkeepCount(), itemName(configuration.upkeepItem()), configuration.upkeepLey(),
 					heart(level, heart) == null ? 0 : heart(level, heart).count(configuration.upkeepItem()), standing.ley(),
 					Math.max(0L, (state.nextDay() - now) / 1200L));
 		}
 		String dormant = Spires.dormant(definition, state, standing.intact(), now);
-		say(player, dormant.isEmpty() ? "field_working" : "field_resting",
+		say(out, dormant.isEmpty() ? "field_working" : "field_resting",
 				Component.translatable("compose.jugcraft.spire.field." + configuration.field().id, configuration.radius()),
 				Component.translatable("compose.jugcraft.spire.dormant." + (dormant.isEmpty() ? "raising" : dormant)));
 		long left = definition.attendanceDays() - (now - state.lastAttended()) / Spires.DAY;
-		say(player, Spires.attended(definition, state, now) ? "attended" : "unattended", Math.max(0L, left),
+		say(out, Spires.attended(definition, state, now) ? "attended" : "unattended", Math.max(0L, left),
 				Component.translatable("compose.jugcraft.conclave.activity." + configuration.practice().substring(configuration.practice().indexOf(':') + 1)));
 	}
 
@@ -794,23 +799,31 @@ public final class ConcordSpire {
 		return "";
 	}
 
+	/**
+	 * Every spire in {@code player}'s dimension that they keep or share, each as {@link #describe} shows it, or that they
+	 * keep none (the command and the Concordance Journal); returns how many.
+	 */
+	public static int report(ServerPlayer player, Consumer<Component> out) {
+		ServerLevel level = (ServerLevel) player.level();
+		int shown = 0;
+		for (SpireState state : SpireRecord.of(level.getServer()).all()) {
+			BlockPos heart = pos(level, state.id());
+			if (heart != null && belongs(state, player.getUUID())) {
+				describe(out, level, heart, state);
+				shown++;
+			}
+		}
+		if (shown == 0) {
+			say(out, "none");
+		}
+		return shown;
+	}
+
 	private static void command(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("jugcraft").then(Commands.literal("concordance").then(Commands.literal("spire")
 				.executes(context -> {
 					ServerPlayer player = context.getSource().getPlayerOrException();
-					ServerLevel level = (ServerLevel) player.level();
-					int shown = 0;
-					for (SpireState state : SpireRecord.of(level.getServer()).all()) {
-						BlockPos heart = pos(level, state.id());
-						if (heart != null && belongs(state, player.getUUID())) {
-							describe(player, level, heart, state);
-							shown++;
-						}
-					}
-					if (shown == 0) {
-						say(player, "none");
-					}
-					return shown;
+					return report(player, player::sendSystemMessage);
 				})
 				.then(Commands.literal("realign").then(Commands.argument("configuration", StringArgumentType.word()).executes(context -> {
 					ServerPlayer player = context.getSource().getPlayerOrException();

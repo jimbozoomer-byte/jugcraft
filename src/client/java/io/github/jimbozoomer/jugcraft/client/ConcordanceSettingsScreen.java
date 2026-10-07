@@ -16,7 +16,8 @@ public final class ConcordanceSettingsScreen {
 	}
 
 	public static Screen create(@Nullable Screen parent) {
-		boolean[] values = {ConcordanceClientOptions.hud(), ConcordanceClientOptions.reducedMotion()};
+		boolean[] values = {ConcordanceClientOptions.hud(), ConcordanceClientOptions.reducedMotion(), ConcordanceClientOptions.exactValues(),
+				ConcordanceClientOptions.simpleJournal()};
 		ConfigBuilder builder = ConfigBuilder.create().setParentScreen(parent)
 				.setTitle(Component.translatable("screen.jugcraft.concordance.config.title"));
 		ConfigEntryBuilder entries = builder.entryBuilder();
@@ -31,7 +32,17 @@ public final class ConcordanceSettingsScreen {
 				.setTooltip(Component.translatable("screen.jugcraft.concordance.config.reduced_motion.tooltip"))
 				.setSaveConsumer(value -> values[1] = value)
 				.build());
-		builder.setSavingRunnable(() -> ConcordanceClientOptions.set(values[0], values[1]));
+		display.addEntry(entries.startBooleanToggle(Component.translatable("screen.jugcraft.concordance.config.exact"), values[2])
+				.setDefaultValue(false)
+				.setTooltip(Component.translatable("screen.jugcraft.concordance.config.exact.tooltip"))
+				.setSaveConsumer(value -> values[2] = value)
+				.build());
+		display.addEntry(entries.startBooleanToggle(Component.translatable("screen.jugcraft.concordance.config.simple_journal"), values[3])
+				.setDefaultValue(false)
+				.setTooltip(Component.translatable("screen.jugcraft.concordance.config.simple_journal.tooltip"))
+				.setSaveConsumer(value -> values[3] = value)
+				.build());
+		builder.setSavingRunnable(() -> ConcordanceClientOptions.set(values[0], values[1], values[2], values[3]));
 		return builder.build();
 	}
 }

@@ -14,11 +14,11 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Instrument;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Plan;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Slot;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.journal.Journal;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
-import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.List;
@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -121,37 +122,15 @@ public final class ConcordanceCommand {
 	}
 
 	private static int status(CommandSourceStack source, ServerPlayer player) {
-		ConcordanceRules rules = ConcordanceData.rules();
 		Knowledge knowledge = ConcordanceProgress.knowledge(player);
 		source.sendSuccess(() -> Component.translatable("message.jugcraft.concordance.focus",
 				ConcordanceProgress.currentFocus(player), FocusPool.MAX), false);
-		for (String research : rules.research().keySet()) {
-			StringBuilder line = new StringBuilder(research).append(": ").append(knowledge.state(research).id());
-			for (ResearchEngine.Explanation explanation : ResearchEngine.explain(knowledge, rules, research, ConcordanceProgress.TAG_LOOKUP)) {
-				line.append(" | ").append(describe(explanation));
-			}
-			String text = line.toString();
-			source.sendSuccess(() -> Component.literal(text), false);
-		}
+		// The Concordance Journal's research report: names and states in words, the exact figures after them.
+		Journal.research(player, (text, exact) -> source.sendSuccess(() -> exact == null ? text
+				: text.copy().append(" ").append(exact.copy().withStyle(ChatFormatting.GRAY)), false));
 		String invocations = knowledge.invocations().isEmpty() ? "none" : knowledge.invocations().toString();
 		source.sendSuccess(() -> Component.literal("Invocations (spell=Focus): " + invocations), false);
 		return knowledge.entries().size();
-	}
-
-	private static String describe(ResearchEngine.Explanation explanation) {
-		return switch (explanation) {
-			case ResearchEngine.Explanation.Unknown unknown -> "not defined by the loaded data";
-			case ResearchEngine.Explanation.NeedsPrerequisite needs -> "needs " + needs.requirement().research() + " "
-					+ needs.requirement().state().id() + " (has " + needs.has().id() + ")";
-			case ResearchEngine.Explanation.Complete complete -> "complete";
-			case ResearchEngine.Explanation.Next next -> {
-				StringBuilder text = new StringBuilder("next ").append(next.state().id()).append(":");
-				for (ResearchEngine.RuleProgress rule : next.alternatives()) {
-					text.append(' ').append(rule.rule().kind().id).append(' ').append(rule.have()).append('/').append(rule.need());
-				}
-				yield text.toString();
-			}
-		};
 	}
 
 	/**

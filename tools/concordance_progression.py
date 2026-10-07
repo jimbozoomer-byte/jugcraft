@@ -78,7 +78,7 @@ PRACTICES = {
 # and the wonder whose raising records it; the graph follows the wonder's configurations down to things at hand.
 MILESTONES = {
     "spire_raised": {"stage": "master", "requires": [{"research": rid("circle_lore"), "state": "understood"}],
-                     "wonder": "concord_spire"},
+                     "wonder": "concord_spire", "name": "a Concord Spire raised, or helped to raise"},
 }
 
 # What the world gives by itself, and how a player who lacks it gets it anyway.
@@ -748,12 +748,21 @@ MESSAGES = {
     "stage.route": "  %s: %s",
     "stage.route_met": "  %s: met",
     "stage.last": "There is no stage beyond this one",
+    "stage.need.research": "%s %s",
+    "stage.need.mastered": "%s entries mastered (you have %s)",
+    "stage.need.understood": "%s entries understood (you have %s)",
+    "stage.need.traditions": "across %s traditions (you have %s)",
+    "stage.need.projects": "%s Conclave projects finished (you have %s)",
+    "stage.need.rank": "the Conclave rank of %s",
+    "stage.need.milestone": "%s",
     "progression.whole": "The progression graph is whole: %s steps, every stage reachable alone",
     "progression.problem": "Progression: %s",
 }
 
 
 def lang_entries(lang):
+    for key, info in MILESTONES.items():
+        lang[f"compose.{MOD}.milestone.{key}"] = info["name"]
     for key, info in STAGES.items():
         lang[f"compose.{MOD}.stage.{key}"] = info["name"]
         for route in info["routes"]:

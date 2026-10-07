@@ -481,18 +481,22 @@ public final class Reliquary {
 
 	private static void command(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("jugcraft").then(Commands.literal("concordance").then(Commands.literal("relics")
-				.executes(context -> {
-					ServerPlayer player = context.getSource().getPlayerOrException();
-					List<Found> found = find(player);
-					if (found.isEmpty()) {
-						context.getSource().sendSuccess(() -> Component.translatable("message.jugcraft.concordance.relic.none"), false);
-						return 0;
-					}
-					for (Found relic : found) {
-						Outcome outcome = work(player, relic, false);
-						context.getSource().sendSuccess(() -> line(relic.stack(), outcome), false);
-					}
-					return found.size();
-				}))));
+				.executes(context -> report(context.getSource().getPlayerOrException(), line -> context.getSource().sendSuccess(() -> line, false))))));
+	}
+
+	/**
+	 * Every relic {@code player} carries or has installed, each with whether it works where it is and why not (its
+	 * check only: nothing pulses), for the relics command and the Concordance Journal; returns how many.
+	 */
+	public static int report(ServerPlayer player, java.util.function.Consumer<Component> out) {
+		List<Found> found = find(player);
+		if (found.isEmpty()) {
+			out.accept(Component.translatable("message.jugcraft.concordance.relic.none"));
+			return 0;
+		}
+		for (Found relic : found) {
+			out.accept(line(relic.stack(), work(player, relic, false)));
+		}
+		return found.size();
 	}
 }
