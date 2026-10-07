@@ -284,6 +284,14 @@ On 5 October 2026 the owner drew a whole set for a new ore (its ore, raw ore, nu
 
 *Before (above) and after (below), drawn from the textures outside the game. The new ores are shown over a stand-in rock; in game each sits on vanilla's own stone or deepslate.*
 
+## Ores, ingots and tools: the owner's material sets
+On 5 October 2026 the owner drew a whole set for a new ore (its ore, raw ore, nugget, ingot, blocks, tools, armor and weapons) in one chartreuse palette, as "a basis on how new ores that turn into tools are styled". **Follow [MATERIAL_SETS.md](MATERIAL_SETS.md)** for every material's set, in every tier: 16×16, vanilla's forms (every ingot is the owner's ingot recoloured, never redrawn; nuggets in vanilla's form, drawn fresh), one clear hue, told apart from vanilla's metals, stepped into four tones and an outline in its darkest, chunky rounded ore blobs and a four-panel storage block. Jugcraft's metals, ores and bronze and steel tools are drawn this way ([material-sets.md](features/material-sets.md)), from the maps in `tools/material_icons/`.
+- **Ore overlays are cut out:** like glass, leaves and crops, an ore's texture has see-through pixels (fully clear or fully opaque only), which the ore's block model lays over vanilla's own stone or deepslate, referenced by name and never copied, so the ore matches the rock round it.
+
+![Before and after: every metal's ingot, nugget and storage block, every ore and deepslate ore, the raw ores and raw blocks, and the bronze and steel tools](images/material_sets_before_after.png)
+
+*Before (above) and after (below), drawn from the textures outside the game. The new ores are shown over a stand-in rock; in game each sits on vanilla's own stone or deepslate.*
+
 ## Outside the tech tiers: the Pixel Hollows and the arcade
 Places and decor that are not machines keep their own identity. The Pixel Hollows and the Retro Trader are retro electronics: dark slate with copper traces, square-faceted teal and violet crystals, LED-pixel lamps, and an 1980s arcade cabinet with neon side art, a CRT and a lit marquee. Everything is original (no real consoles, games, brands or characters). Textures are drawn by `tools/pixel_hollows_textures.py` (names `ph_*` and `rt_*`) and the cluster and cabinet models are in `tools/retro_models.py`. The arcade cabinet is real-life sized: two blocks tall.
 
