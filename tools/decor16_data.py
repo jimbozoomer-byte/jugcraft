@@ -284,7 +284,8 @@ def wax(palette, seed=1):
         for y in range(p.h):
             for x in range(p.w):
                 across = x / max(1, p.w - 1)
-                k = n - 3 - int(abs(across - 0.35) * 2.2) + rng.choice((0, 0, 0, -1, 1))
+                jitter = rng.choice((0, 0, 0, -1, 1))  # drawn all the same, so the drips fall where they did
+                k = n - 3 - int(abs(across - 0.35) * 2.2) + (0 if fa.QUIET else jitter)
                 if y > p.h * 0.85:
                     k -= 1
                 p.put(x, y, shade(palette, k))
@@ -625,6 +626,7 @@ def specimen_eye_elements(key="#p"):
 
 # ---------------------------------------------------------------- the pillar candles
 
+@fa.quietly
 def pillar_candles(block):
     """One to four church candles in a cluster (tools/decor16.py CANDLES), each dripping wax down its sides with a wick
     on its melted top, unlit or lit (the wick's tip glowing; the flame is vanilla's particle)."""

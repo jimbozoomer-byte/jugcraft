@@ -1,10 +1,9 @@
-"""Original textures for the hot-air balloon fiesta (fall addition 29), painted by code (docs/ART_DIRECTION.md, "High
-resolution"):
-  - the basket and rigging at 64 by 64: close-woven wicker, padded oxblood leather, the floor's planks, gunmetal steel,
-    brass, the burner's copper coils, a fuel tank in red enamel with a stencilled serial, the instrument panel's three
-    green-lit dials, the load cables and the suede sleeves on the uprights;
-  - each envelope as one wrap 768 by 384 (entity/hot_air_balloon/envelope_<kind>), 32 pixels to each of its 24 gores,
-    its crown at the top and its throat at the bottom, with the load tapes down its seams:
+"""Original textures for the hot-air balloon fiesta (fall addition 29):
+  - the basket and rigging: close-woven wicker, padded oxblood leather, the floor's planks, gunmetal steel, brass, the
+    burner's copper coils, a fuel tank in red enamel with a stencilled serial, the instrument panel's three green-lit
+    dials, the load cables and the suede sleeves on the uprights;
+  - each envelope as one wrap 768 by 384 (entity/hot_air_balloon/envelope_<kind>), 32 texels to each of its 24 gores,
+    its crown at the top and its throat at the bottom:
     - Harvest Stripes: gores of pumpkin, gold, cranberry and cream, a band of maple leaves round its widest, a cream
       crown;
     - the Jack-o'-Lantern: a ribbed orange pumpkin with a carved face on its front and back, over a green skirt of
@@ -12,15 +11,21 @@ resolution"):
     - Harvest Moon: a night sky deepening to the crown, stars, a great harvest moon on its front with a witch on her
       broom across it, bats round it, and hills with pumpkins along its foot;
   - the burner's flame (blue at its root, gold at its tongues), the pumpkin's stem, the pibal's red latex;
-  - the Mooring Post at 64 by 64: black cast iron, a granite plinth, tarred rope and brass;
+  - the Mooring Post: black cast iron, a granite plinth, tarred rope and brass;
   - the items: the three balloons, the burner and a pibal.
 
-Called from crop_textures.crop_textures(). Every pixel is drawn here from a fixed seed (tools/fur_paint.py's painter);
-nothing is read, traced or recoloured.
+Drawn in vanilla's manner (tools/fair_pixels.py, after the owner's note of 6 October 2026): the basket, post and
+items at 16 texels a block (or 16 by 16 icons), scaled up to the 64 by 64 the models were made for; the envelopes in flat
+bands with pixel art four texels to a pixel (the Jack-o'-Lantern's face seven).
+
+Called from crop_textures.crop_textures(). Every pixel is drawn here by code; nothing is read, traced or recoloured.
 """
 import math
+import random
 
-from fur_paint import mix, clean_painter as Painter, clean_ramp as ramp
+import block_style as bs
+from fair_pixels import box, px16
+from fur_paint import clean_painter as Painter, clean_ramp as ramp
 from crop_textures import rgb
 
 N = 64
@@ -52,159 +57,128 @@ SOOT = [rgb("101010"), rgb("1e1c1a"), rgb("2e2a26"), rgb("403a34")]
 # ---------------------------------------------------------------- basket and rigging
 
 def wicker():
-    """Close basket weave: stakes upright, the weavers passing in front of one and behind the next, each lit along its
-    top, darker in the gaps."""
-    p = Painter(N, N, 29001)
-    for y in range(N):
-        for x in range(N):
-            row, col = y // 4, x // 8
-            over = (row + col) % 2 == 0
-            v = (y % 4) / 3.0
-            f = 0.62 - 0.32 * abs(v - 0.35) + (0.08 if over else -0.12) + 0.06 * (p.noise(x, y, 6.0) - 0.5)
-            if x % 8 in (0, 7):
-                f -= 0.18
-            p.put(x, y, ramp(WICKER, f))
-    return p.img
+    """Close basket weave: weavers two pixels deep passing in front of one stake and behind the next, each lit along its
+    top, darker in the gaps between stakes."""
+    def paint(p):
+        for y in range(16):
+            for x in range(16):
+                over = (y // 2 + x // 4) % 2 == 0
+                if x % 4 == 3:
+                    k = 0
+                elif over:
+                    k = 3 if y % 2 == 0 else 2
+                else:
+                    k = 2 if y % 2 == 0 else 1
+                p.put(x, y, WICKER[k])
+    return px16(paint)
 
 
 def leather():
-    """Padded oxblood leather: soft folds across, a row of stitching along each edge."""
-    p = Painter(N, N, 29002)
-    for y in range(N):
-        for x in range(N):
-            f = 0.55 + 0.12 * math.sin(y / N * math.pi * 3) + 0.08 * (p.noise(x, y, 9.0) - 0.5)
-            p.put(x, y, ramp(LEATHER, f))
-    for x in range(2, N, 4):
-        for y in (4, N - 5):
-            p.put(x, y, ramp(CREAM, 0.6))
-            p.put(x + 1, y, ramp(CREAM, 0.45))
-    return p.img
+    """Padded oxblood leather: lit along its top, a shade darker at its foot, a row of cream stitches along each edge."""
+    def paint(p):
+        for y in range(16):
+            for x in range(16):
+                p.put(x, y, LEATHER[3] if y == 0 else LEATHER[1] if y == 15 else LEATHER[2])
+        for x in range(0, 16, 2):
+            p.put(x, 1, CREAM[3])
+            p.put(x, 14, CREAM[3])
+    return px16(paint)
 
 
 def floor():
-    p = Painter(N, N, 29003)
-    for y in range(N):
-        for x in range(N):
-            board = x // 16
-            f = 0.55 + 0.1 * math.sin(board * 2.1) + 0.12 * (p.noise(x * 0.3, y * 2.5, 5.0) - 0.5)
-            if x % 16 == 0:
-                f -= 0.3
-            p.put(x, y, ramp(PLANK, f))
-    return p.img
+    return px16(bs.planks(PLANK, 29003, boards=4, vertical=True))
+
+
+def plate(palette, rivets=True, band=None):
+    """A flat metal plate as a vanilla iron block: one tone, lit along its top and left, a shade darker along its
+    bottom and right; raised bolts at the corners (lit, with a shadow below them); `band` rows rubbed bright."""
+    def paint(p):
+        for y in range(16):
+            for x in range(16):
+                k = 3 if x == 0 or y == 0 else 1 if x == 15 or y == 15 else 2
+                if band and y in band:
+                    k = 4 if y == band[0] else 3
+                p.put(x, y, palette[k])
+        if rivets:
+            for x, y in ((2, 2), (13, 2), (2, 13), (13, 13)):
+                p.put(x, y, palette[4])
+                p.put(x, y + 1, palette[1])
+    return px16(paint)
 
 
 def steel():
-    """Gunmetal, worn bright at its edges, with heavy bolts."""
-    p = Painter(N, N, 29004)
-    for y in range(N):
-        for x in range(N):
-            edge = min(x, y, N - 1 - x, N - 1 - y)
-            f = 0.48 + 0.06 * (p.noise(x, y, 7.0) - 0.5) + (0.25 if edge < 2 else 0.0)
-            p.put(x, y, ramp(GUNMETAL, f))
-    for x, y in ((7, 7), (N - 8, 7), (7, N - 8), (N - 8, N - 8)):
-        p.blob(x, y, 2.6, 2.6, ramp(GUNMETAL, 0.15), ramp(GUNMETAL, 0.9))
-    return p.img
+    """Gunmetal with heavy bolts at its corners."""
+    return plate(GUNMETAL)
+
+
+# Brass across a rail or a cap, lit on its left as a vanilla gold block is: an index into BRASS for each column.
+BRASS_COLUMNS = [4, 4, 5, 4, 4, 3, 3, 3, 3, 3, 3, 2, 2, 2, 1, 1]
 
 
 def brass():
-    p = Painter(N, N, 29005)
-    for y in range(N):
-        for x in range(N):
-            p.put(x, y, ramp(BRASS, 0.5 + 0.35 * math.cos((x / N) * math.pi * 2.4 + 0.7) + 0.06 * (p.noise(x, y, 8.0) - 0.5)))
-    return p.img
+    return px16(lambda p: [p.put(x, y, BRASS[BRASS_COLUMNS[x]]) for y in range(16) for x in range(16)])
+
+
+HEAT = [rgb("4a3a6a"), rgb("6a5a8a"), rgb("8a7aa8")]
 
 
 def coil():
-    """The burner's coil seen from the side: copper tube wound in tight turns, blued and sooted by the heat towards
-    the top."""
-    p = Painter(N, N, 29006)
-    for y in range(N):
-        turn = (y % 8) / 7.0
-        heat = 1.0 - y / N
-        for x in range(N):
-            f = 0.3 + 0.55 * math.sin(turn * math.pi) + 0.05 * (p.noise(x, y, 5.0) - 0.5)
-            colour = ramp(COPPER, f)
-            colour = mix(colour, (70, 60, 110), 0.35 * heat * (0.5 + 0.5 * math.sin(x * 0.2)))
-            colour = mix(colour, SOOT[1], 0.25 * heat ** 2)
-            p.put(x, y, colour)
-    return p.img
+    """The burner's coil from the side: copper tube in tight turns two pixels deep, each lit along its top, blued by
+    the heat in the top turns."""
+    def paint(p):
+        for y in range(16):
+            colours = HEAT if y < 4 else COPPER[1:]
+            for x in range(16):
+                k = 2 if y % 2 == 0 else 0
+                if x == 0 and k < 2:
+                    k += 1
+                p.put(x, y, colours[k])
+    return px16(paint)
 
 
 def tank():
-    """A fuel tank in red enamel, a white band round it with a stencilled serial, the paint chipped to steel."""
-    p = Painter(N, N, 29007)
-    for y in range(N):
-        for x in range(N):
-            f = 0.55 + 0.3 * math.cos((x / N - 0.35) * math.pi * 2) * 0.5 + 0.05 * (p.noise(x, y, 6.0) - 0.5)
-            p.put(x, y, ramp(RED, f))
-            if 26 <= y < 38:
-                p.put(x, y, ramp(CREAM, f + 0.15))
-            if p.noise(x * 3, y * 3, 3.0) > 0.86:
-                p.put(x, y, ramp(GUNMETAL, 0.6))
-    # The serial: blocky stencil marks.
-    for k, x in enumerate(range(10, 54, 7)):
-        for y in range(29, 35):
-            if (k + y) % 3 != 0:
-                p.put(x, y, ramp(GUNMETAL, 0.15))
-                p.put(x + 2, y, ramp(GUNMETAL, 0.15))
-        for xx in range(x, x + 3):
-            p.put(xx, 29 + (k % 2) * 5, ramp(GUNMETAL, 0.15))
-    return p.img
+    """A fuel tank in red enamel, lit down its left; a cream band round it with a stencilled serial, and two chips in
+    the paint to the steel."""
+    columns = [3, 4, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1]
+
+    def paint(p):
+        for y in range(16):
+            for x in range(16):
+                p.put(x, y, (CREAM if 6 <= y < 10 else RED)[columns[x]])
+        for x in (2, 3, 5, 6, 8, 9, 11, 12):
+            p.put(x, 7, GUNMETAL[1])
+            p.put(x, 8, GUNMETAL[1] if x % 3 else CREAM[columns[x]])
+        for x, y in ((4, 2), (13, 12)):
+            p.put(x, y, GUNMETAL[3])
+    return px16(paint)
 
 
 def gauge():
-    """The instrument panel: three round dials with green-lit faces (altimeter, variometer, envelope heat) in a
-    gunmetal panel, their needles, and a caged amber lamp."""
-    p = Painter(N, N, 29008)
-    for y in range(N):
-        for x in range(N):
-            p.put(x, y, ramp(GUNMETAL, 0.4 + 0.05 * (p.noise(x, y, 6.0) - 0.5)))
-    for cx, angle in ((12, 2.3), (32, 0.6), (52, 1.6)):
-        cy = 30
-        for y in range(N):
-            for x in range(N):
-                d = math.hypot(x + 0.5 - cx, y + 0.5 - cy)
-                if d < 9:
-                    p.put(x, y, mix(rgb("0c3a18"), rgb("5aff8a"), 0.35 * (1 - d / 9)) if d < 7.5 else ramp(BRASS, 0.7))
-        for k in range(9):
-            a = math.pi * (0.8 + 1.4 * k / 8)
-            p.put(cx + 6 * math.cos(a), cy + 6 * math.sin(a), rgb("b8ffcc"))
-        p.line(cx, cy, cx + 6 * math.cos(math.pi + angle), cy - 6 * math.sin(angle), rgb("f4f4e0"), width=1.0)
-    p.blob(32, 52, 4, 4, rgb("8a4a00"), rgb("ffd060"))
-    p.line(28, 52, 36, 52, ramp(GUNMETAL, 0.2), width=0.8)
-    return p.img
+    """The instrument panel: three square dials with green-lit faces (altimeter, variometer, envelope heat) in brass
+    rims on a gunmetal panel, each with its needle, and an amber lamp below."""
+    def paint(p):
+        for y in range(16):
+            for x in range(16):
+                p.put(x, y, GUNMETAL[2])
+        for x0, needle in ((1, (2, 6)), (6, (8, 5)), (11, (13, 6))):
+            box(p, x0, 4, x0 + 3, 7, BRASS[3])
+            box(p, x0 + 1, 5, x0 + 2, 6, rgb("1c6a30"))
+            p.put(*needle, rgb("b8ffcc"))
+        box(p, 7, 11, 8, 12, rgb("e0a020"))
+        p.put(7, 11, rgb("ffd060"))
+    return px16(paint)
 
 
 def rope():
-    p = Painter(N, N, 29009)
-    for y in range(N):
-        for x in range(N):
-            twist = math.sin((x * 0.6 + y * 0.35))
-            p.put(x, y, ramp(ROPE, 0.5 + 0.25 * twist + 0.05 * (p.noise(x, y, 4.0) - 0.5)))
-    return p.img
+    """Load cable: its strands twisting on a slant, three tones."""
+    return px16(lambda p: [p.put(x, y, ROPE[(3, 2, 1)[((x + y) // 2) % 3]]) for y in range(16) for x in range(16)])
 
 
 def suede():
-    p = Painter(N, N, 29010)
-    for y in range(N):
-        for x in range(N):
-            p.put(x, y, ramp(SUEDE, 0.55 + 0.12 * (p.noise(x, y, 4.0) - 0.5) + 0.05 * (p.noise(x, y, 1.5) - 0.5)))
-    return p.img
+    return px16(lambda p: bs.cloth(SUEDE[1:4], 29010)(p))
 
 
 # ---------------------------------------------------------------- envelopes
-
-def seams(p, colours, dark=0.12):
-    """The load tapes down every seam between gores, and the horizontal seams between panels, sewn a shade darker."""
-    for y in range(WRAP_H):
-        for x in range(WRAP_W):
-            if x % GORE in (0, 1):
-                old = p.px[x, y]
-                p.put(x, y, mix(old[:3], (20, 14, 10), 0.35 if x % GORE == 0 else 0.15))
-            elif y % 48 == 0 and y > 24:
-                old = p.px[x, y]
-                p.put(x, y, mix(old[:3], (20, 14, 10), dark))
-
 
 def crown_and_throat(p, crown, throat_colours):
     """The crown's parachute valve (a ring of a darker shade and its edge tape) and the throat's scorch-proof scoop."""
@@ -219,92 +193,183 @@ def crown_and_throat(p, crown, throat_colours):
                 p.put(x, y, ramp(throat_colours, f))
 
 
-def leaf(p, cx, cy, size, colours, angle=0.0):
-    """A maple leaf: five pointed lobes on short stalks, veined."""
-    lobes = ((0.0, 1.0), (-1.1, 0.75), (1.1, 0.75), (-2.0, 0.45), (2.0, 0.45))
-    for y in range(int(cy - size * 1.3), int(cy + size * 1.3) + 1):
-        for x in range(int(cx - size * 1.3), int(cx + size * 1.3) + 1):
-            dx, dy = (x + 0.5 - cx) / size, (y + 0.5 - cy) / size
-            rx = dx * math.cos(angle) + dy * math.sin(angle)
-            ry = -dx * math.sin(angle) + dy * math.cos(angle)
-            a = math.atan2(rx, -ry)
-            r = math.hypot(rx, ry)
-            reach = 0.25
-            for la, ll in lobes:
-                d = abs((a - la * 0.62 + math.pi) % (2 * math.pi) - math.pi)
-                reach = max(reach, ll * max(0.0, 1 - d / 0.42) ** 0.8)
-            if r <= reach or (abs(rx) < 0.06 and 0 < ry < 0.9):
-                f = 0.55 + 0.25 * (1 - r) - (0.25 if abs(rx) < 0.04 else 0)
-                p.put(x, y, ramp(colours, f))
+# The envelopes' cells: CELL texels to a pixel, so a gore is GORE // CELL pixels wide.
+CELL = 4
+CW, CH, CG = WRAP_W // CELL, WRAP_H // CELL, GORE // CELL
+
+
+def gore_tone(colours, x):
+    """A gore's flat bands across: its load tape dark, lit left of its middle, a shade darker towards its right seam."""
+    across = x % CG
+    return colours[1] if across == 0 else colours[3] if across in (1, 2, 3) else colours[2] if across < CG - 1 else colours[1]
+
+
+def crown_and_throat_cells(p, crown):
+    """The crown's valve in the crown colour with a brass edge tape, and the throat's dark scorch-proof scoop."""
+    for x in range(CW):
+        for y in range(3):
+            p.put(x, y, crown[1] if y < 2 else crown[2])
+        p.put(x, 3, BRASS[3])
+        for y in range(CH - 4, CH):
+            p.put(x, y, SOOT[1] if y < CH - 2 else SOOT[0])
+
+
+MAPLE = [
+    "...#...",
+    ".#.#.#.",
+    ".#####.",
+    "#######",
+    ".#####.",
+    "...#...",
+    "...#...",
+]
 
 
 def harvest():
-    """Harvest Stripes: gores of pumpkin, gold, cranberry and cream down from a cream crown, with a band of maple leaves
-    round its widest in the colours of fall, edged in gold."""
-    p = Painter(WRAP_W, WRAP_H, 29101)
+    """Harvest Stripes in cells: gores of pumpkin, gold, cranberry and cream in flat bands down from a cream crown, and a
+    dark band round its widest, edged in gold, with a pixel maple leaf on each gore in the colours of fall."""
     order = (PUMPKIN, GOLD, CRANBERRY, CREAM)
-    band = (int(WRAP_H * (1 - 0.66)), int(WRAP_H * (1 - 0.54)))
-    for y in range(WRAP_H):
-        for x in range(WRAP_W):
-            gore = x // GORE
-            colours = order[gore % 4]
-            across = (x % GORE) / GORE
-            f = 0.6 - 0.12 * abs(across - 0.5) * 2 - 0.12 * (y / WRAP_H) + 0.04 * (p.noise(x, y, 14.0) - 0.5)
-            if y < 46:
-                colours, f = CREAM, 0.7 - 0.1 * (1 - y / 46)
-            if band[0] <= y < band[1]:
-                colours, f = SOOT, 0.55 + 0.1 * (p.noise(x, y, 10.0) - 0.5)
-            if y in (band[0], band[0] + 1, band[1] - 2, band[1] - 1):
-                colours, f = GOLD, 0.8
-            p.put(x, y, ramp(colours, f))
-    middle = (band[0] + band[1]) / 2
-    for k in range(24):
-        x = k * GORE + GORE / 2
-        leaf(p, x, middle, 12, (PUMPKIN, GOLD, CRANBERRY)[k % 3], angle=0.4 * math.sin(k * 1.7))
-    crown_and_throat(p, CREAM, SOOT)
-    seams(p, PUMPKIN)
-    return p.img
+    band = (int(CH * 0.34), int(CH * 0.46))
+
+    def paint(p):
+        for y in range(CH):
+            for x in range(CW):
+                if y < 12:
+                    colour = CREAM[3] if y > 5 else CREAM[2]
+                elif band[0] <= y < band[1]:
+                    colour = GOLD[3] if y in (band[0], band[1] - 1) else SOOT[1]
+                else:
+                    colour = gore_tone(order[(x // CG) % 4], x)
+                p.put(x, y, colour)
+        top = band[0] + 2
+        for k in range(CW // CG):
+            colours = (PUMPKIN, GOLD, CRANBERRY)[k % 3]
+            left = k * CG + 1
+            for r, row in enumerate(MAPLE):
+                for c, ch in enumerate(row):
+                    if ch == "#":
+                        p.put(left + c, top + r, colours[3] if r < 3 else colours[2])
+        crown_and_throat_cells(p, CREAM)
+    return px16(paint, CW, CH, CELL)
+
+
+WITCH = [
+    "......#.................",
+    ".....##.................",
+    "....###.................",
+    "..#######...............",
+    "....###.................",
+    "...#####................",
+    "..#######...............",
+    ".#########..............",
+    "########################",
+    "..#####.......######....",
+    "...###.........######...",
+    "................####....",
+]
+BAT = ["#...#", "##.##", ".###."]
+
+
+def moon():
+    """Harvest Moon in cells: night blue in three bands deepening to the crown, single-pixel stars, a great pixel moon
+    on its front with a witch on her broom across it, bats round about, and dark hills edged in gold along its foot with
+    lit pumpkins on them."""
+    rng = random.Random(29104)
+    hills = int(CH * 0.8)
+
+    def paint(p):
+        for y in range(CH):
+            colour = NIGHT[1] if y < CH * 0.33 else NIGHT[2] if y < CH * 0.66 else NIGHT[3]
+            for x in range(CW):
+                p.put(x, y, colour)
+        for _ in range(110):
+            x, y = rng.randrange(CW), rng.randrange(5, hills - 2)
+            p.put(x, y, (255, 248, 210) if rng.random() < 0.3 else NIGHT[4])
+        mx, my, mr = CW * 0.25, CH * 0.42, 17
+        for y in range(CH):
+            for x in range(CW):
+                dx, dy = x + 0.5 - mx, (y + 0.5 - my) * 1.15
+                d = math.hypot(dx, dy)
+                if d <= mr:
+                    p.put(x, y, MOON[4] if dx + dy < -mr * 0.6 else MOON[2] if d > mr - 1.5 and dx + dy > 0 else MOON[3])
+        for cx, cy in ((-6, -4), (5, 3), (-2, 7), (8, -6)):
+            box(p, int(mx + cx), int(my + cy), int(mx + cx) + 1, int(my + cy) + 1, MOON[2])
+        left, top = int(mx - 13), int(my - 3)
+        for r, row in enumerate(WITCH):
+            for c, ch in enumerate(row):
+                if ch == "#":
+                    p.put(left + c, top + r, (8, 8, 14))
+        for k in range(14):
+            bx, by = rng.randrange(CW - 5), rng.randrange(14, hills - 10)
+            if abs(bx - mx) < mr + 6 and abs(by - my) < mr + 6:
+                continue
+            for r, row in enumerate(BAT):
+                for c, ch in enumerate(row):
+                    if ch == "#":
+                        p.put(bx + c, by + r, (8, 8, 14))
+        for x in range(CW):
+            crest = hills + round(2.5 * math.sin(x * 0.084) + 1.5 * math.sin(x * 0.23 + 1.3))
+            p.put(x, crest - 1, GOLD[3])
+            for y in range(crest, CH):
+                p.put(x, y, SOOT[2] if y == crest else SOOT[1])
+        for k in range(14):
+            x = 5 + k * 13 + rng.randrange(5)
+            crest = hills + round(2.5 * math.sin(x * 0.084) + 1.5 * math.sin(x * 0.23 + 1.3))
+            box(p, x, crest + 1, x + 2, crest + 2, PUMPKIN[3])
+            p.put(x + 1, crest + 1, GLOW[3])
+        crown_and_throat_cells(p, NIGHT)
+    return px16(paint, CW, CH, CELL)
+
+
+# The Jack-o'-Lantern's carved face as pixel art, in the manner of vanilla's carved pumpkin (the owner's note on the
+# fall fair, 6 October 2026: nothing in it looked like Minecraft): stepped triangle eyes and nose and a grin with square
+# teeth, one character a cell of FACE_CELL texels. '#' is cut.
+FACE = [
+    "........#............#........",
+    ".......###..........###.......",
+    ".......###..........###.......",
+    "......#####........#####......",
+    ".....#######......#######.....",
+    ".....#######......#######.....",
+    "....#########....#########....",
+    "..............................",
+    "..............##..............",
+    ".............####.............",
+    "..............................",
+    "..............................",
+    "...##....................##...",
+    "....#####..########..#####....",
+    "....#####..########..#####....",
+    ".....####################.....",
+    "......######..##..######......",
+    "........####..##..####........",
+    "..........##########..........",
+]
+FACE_CELL = 7
 
 
 def pumpkin_face(p, cx, colours, lit):
-    """A carved jack-o'-lantern face centred at `cx`: two triangle eyes, a triangle nose and a wide grin with teeth.
-    Lit, it is the glow of the candle inside; carved, the dark of the cut with a rind of paler flesh round it."""
-    eye_y0, eye_y1 = int(WRAP_H * (1 - 0.74)), int(WRAP_H * (1 - 0.62))
-    nose_y0, nose_y1 = eye_y1 + 6, eye_y1 + 22
-    mouth_y0, mouth_y1 = int(WRAP_H * (1 - 0.52)), int(WRAP_H * (1 - 0.38))
+    """The carved face (FACE) centred at `cx`, its top at the eyes' line. Lit, the cut glows in three flat tones,
+    brightest at the middle; carved, the cut is dark, its top row a shade of the shell's inside for the depth."""
+    top = int(WRAP_H * 0.26)
+    left = int(cx) - len(FACE[0]) * FACE_CELL // 2
+    rows, cols = len(FACE), len(FACE[0])
 
-    def inside(x, y):
-        for side in (-1, 1):
-            ex = cx + side * 38
-            t = (y - eye_y0) / (eye_y1 - eye_y0)
-            if 0 <= t <= 1 and abs(x - ex) <= 22 * t:
-                return True
-        t = (y - nose_y0) / (nose_y1 - nose_y0)
-        if 0 <= t <= 1 and abs(x - cx) <= 10 * t:
-            return True
-        u = (x - cx) / 74.0
-        if abs(u) <= 1:
-            top = mouth_y0 + 18 * (1 - u * u) * 0.4 - 8 * u * u
-            bottom = mouth_y1 - 6 + 10 * (1 - u * u) - 18 * u * u
-            tooth = (abs(u) < 0.6 and (int((u + 1) * 5) % 2 == 0))
-            if top <= y <= bottom:
-                if tooth and y < top + 12:
-                    return False
-                if tooth and y > bottom - 10 and abs(u) < 0.4:
-                    return False
-                return True
-        return False
-    for y in range(int(eye_y0 - 4), int(mouth_y1 + 10)):
-        for x in range(int(cx - 90), int(cx + 90)):
-            xx = x % WRAP_W
-            if inside(x, y):
+    def cut(r, c):
+        return 0 <= r < rows and 0 <= c < cols and FACE[r][c] == "#"
+    for r in range(-1, rows + 1):
+        for c in range(-1, cols + 1):
+            if cut(r, c):
                 if lit:
-                    d = abs(x - cx) / 90
-                    p.put(xx, y, ramp(GLOW, 0.95 - 0.35 * d - 0.15 * (p.noise(x, y, 6.0) - 0.5)))
+                    d = abs(c + 0.5 - cols / 2) / (cols / 2)
+                    colour = GLOW[4] if d < 0.3 else GLOW[3] if d < 0.65 else GLOW[2]
                 else:
-                    p.put(xx, y, ramp(SOOT, 0.25 + 0.1 * (p.noise(x, y, 5.0) - 0.5)))
-            elif not lit and any(inside(x + dx, y + dy) for dx, dy in ((2, 0), (-2, 0), (0, 2), (0, -2))):
-                p.put(xx, y, ramp(PUMPKIN, 0.95))
+                    colour = SOOT[1] if cut(r - 1, c) else PUMPKIN[0]
+            else:
+                continue
+            for y in range(top + r * FACE_CELL, top + (r + 1) * FACE_CELL):
+                for x in range(left + c * FACE_CELL, left + (c + 1) * FACE_CELL):
+                    p.put(x % WRAP_W, y, colour)
 
 
 def pumpkin():
@@ -314,15 +379,16 @@ def pumpkin():
     skirt_y = int(WRAP_H * (1 - 0.18))
     for y in range(WRAP_H):
         for x in range(WRAP_W):
+            # Each rib in flat bands, as the ribs of vanilla's pumpkin: a dark crease, a shoulder, the body and a lit
+            # swell left of its middle.
             rib = (x % (2 * GORE)) / (2 * GORE)
-            f = 0.62 + 0.22 * math.sin(rib * math.pi) - 0.28 * (1 - math.sin(rib * math.pi)) ** 3
-            f += 0.05 * (p.noise(x * 0.5, y * 3, 9.0) - 0.5) - 0.1 * abs(y / WRAP_H - 0.45)
-            colours = PUMPKIN
+            colour = (PUMPKIN[1] if rib < 0.06 or rib > 0.94 else PUMPKIN[2] if rib < 0.2 or rib > 0.8
+                      else PUMPKIN[4] if 0.32 < rib < 0.48 else PUMPKIN[3])
             if y < 18:
-                colours, f = LEAF_GREEN, 0.4 + 0.2 * (p.noise(x, y, 5.0) - 0.5)
+                colour = LEAF_GREEN[2]
             if y >= skirt_y:
-                colours, f = LEAF_GREEN, 0.45 + 0.2 * math.sin(x * 0.3) * 0.5 + 0.15 * (p.noise(x, y, 6.0) - 0.5)
-            p.put(x, y, ramp(colours, f))
+                colour = LEAF_GREEN[3] if (x // 12) % 2 else LEAF_GREEN[2]
+            p.put(x, y, colour)
     # Scalloped leaf points over the skirt's top.
     for x in range(WRAP_W):
         u = (x % 24) / 24
@@ -343,223 +409,151 @@ def pumpkin_glow():
     return p.img
 
 
-def moon():
-    """Harvest Moon: night blue deepening to the crown, sprinkled with stars; a great harvest moon on its front with a
-    witch on her broom across it; bats round about; and a gold-edged band of dark hills with lit pumpkins at its foot."""
-    p = Painter(WRAP_W, WRAP_H, 29104)
-    hills_y = int(WRAP_H * (1 - 0.2))
-    for y in range(WRAP_H):
-        for x in range(WRAP_W):
-            f = 0.25 + 0.5 * (y / WRAP_H) + 0.06 * (p.noise(x, y, 30.0) - 0.5)
-            p.put(x, y, ramp(NIGHT, f))
-    for _ in range(420):
-        x, y = p.rng.randrange(WRAP_W), p.rng.randrange(14, hills_y - 4)
-        bright = p.rng.random()
-        p.put(x, y, mix(NIGHT[3], (255, 250, 220), 0.5 + 0.5 * bright))
-        if bright > 0.85:
-            p.glint(x, y, (255, 248, 210))
-    # The moon, on the front gores.
-    mx, my, mr = WRAP_W * 0.25, WRAP_H * 0.42, 70
-    for y in range(int(my - mr - 6), int(my + mr + 6)):
-        for x in range(int(mx - mr - 6), int(mx + mr + 6)):
-            d = math.hypot(x + 0.5 - mx, (y + 0.5 - my) * 1.15)
-            if d <= mr:
-                f = 0.75 - 0.25 * (d / mr) ** 2 + 0.12 * (p.noise(x, y, 18.0) - 0.5)
-                f -= 0.18 * max(0.0, p.noise(x + 300, y, 9.0) - 0.62) * 4
-                p.put(x, y, ramp(MOON, f))
-            elif d <= mr + 6:
-                p.put(x, y, ramp(MOON, 0.6), 0.25 * (1 - (d - mr) / 6))
-    # The witch: a silhouette on her broom across the moon, her hat's brim and point, her cloak streaming back.
-    black = (8, 8, 14)
-    p.line(mx - 62, my + 22, mx + 40, my + 2, black, width=3.2)
-    for k in range(10):
-        p.line(mx + 38, my + 2, mx + 58 + k * 0.6, my - 6 + k * 2.0, black, width=1.2)
-    p.ellipse(mx - 12, my + 6, 12, 15, black)
-    p.ellipse(mx - 14, my - 14, 8, 8, black)
-    p.line(mx - 30, my - 18, mx + 2, my - 22, black, width=2.4)
-    for k in range(18):
-        t = k / 17
-        p.line(mx - 18 + 6 * t, my - 22 - 20 * t, mx - 8 + 2 * t, my - 22 - 20 * t, black, width=1.2)
-    for k in range(6):
-        p.line(mx - 22, my + 4 + k * 3, mx - 46 - k * 2, my - 2 + k * 5, black, width=2.0)
-    # Bats round the sky.
-    for k in range(18):
-        bx, by = p.rng.randrange(WRAP_W), p.rng.randrange(60, hills_y - 40)
-        if abs(bx - mx) < mr + 20 and abs(by - my) < mr + 20:
-            continue
-        s = p.rng.uniform(5, 9)
-        p.ellipse(bx, by, s * 0.35, s * 0.5, black)
-        for side in (-1, 1):
-            for j in range(3):
-                p.line(bx, by, bx + side * s * (1.0 + 0.5 * j), by - s * 0.5 + j * s * 0.35, black, width=1.4)
-    # The hills and their pumpkins, edged in gold.
-    for x in range(WRAP_W):
-        crest = hills_y + 10 * math.sin(x * 0.021) + 6 * math.sin(x * 0.057 + 1.3)
-        for y in range(int(crest), WRAP_H):
-            p.put(x, y, ramp(SOOT, 0.3 + 0.1 * (p.noise(x, y, 8.0) - 0.5)))
-        p.put(x, int(crest) - 1, ramp(GOLD, 0.7))
-    for k in range(14):
-        x = 20 + k * 54 + p.rng.randrange(20)
-        crest = hills_y + 10 * math.sin(x * 0.021) + 6 * math.sin(x * 0.057 + 1.3)
-        p.blob(x, crest + 7, 5, 4, ramp(PUMPKIN, 0.45), ramp(GLOW, 0.9))
-    crown_and_throat(p, NIGHT, SOOT)
-    seams(p, NIGHT, dark=0.06)
-    return p.img
-
-
 def flame():
-    """The burner's flame, 64 by 128: a hard blue root over the jets, flaring gold and orange, licking into tongues,
-    cut out round them."""
-    w, h = 64, 128
-    p = Painter(w, h, 29201)
-    for y in range(h):
-        t = 1 - y / h
-        for x in range(w):
-            u = (x + 0.5) / w - 0.5
-            width = 0.18 + 0.28 * math.sin(min(1.0, t * 1.6) * math.pi * 0.85)
-            wobble = 0.08 * math.sin(y * 0.21 + x * 0.05) + 0.12 * (p.noise(x, y, 9.0) - 0.5) * t
-            if abs(u + wobble * t) < width * (1 - t ** 3):
-                core = 1 - abs(u) / max(0.01, width)
+    """The burner's flame, 64 by 128 (drawn 16 by 32): a hard blue root over the jets, flaring gold with a white-hot core,
+    licking into tongues at the top, cut out round them."""
+    def paint(p):
+        for y in range(32):
+            t = 1 - (y + 0.5) / 32
+            half = 2.0 + 5.5 * math.sin(min(1.0, t * 1.6) * math.pi * 0.85) * (1 - t ** 3)
+            for x in range(16):
+                u = abs(x + 0.5 - 8)
+                if u > half or (t > 0.7 and (x + y) % 3 == 0 and u > half - 2):
+                    continue
+                core = 1 - u / max(0.5, half)
                 if t < 0.14:
-                    colour = mix(rgb("2040ff"), rgb("a0c8ff"), core)
+                    colour = rgb("a0c8ff") if core > 0.5 else rgb("2040ff")
                 else:
-                    colour = ramp(GLOW, 0.35 + 0.6 * core - 0.35 * t)
+                    colour = GLOW[4] if core > 0.66 else GLOW[3] if core > 0.33 else GLOW[2]
                 p.put(x, y, colour)
-    return p.img
+    return px16(paint, 16, 32)
 
 
 def stem():
-    p = Painter(N, N, 29202)
-    for y in range(N):
-        for x in range(N):
-            p.put(x, y, ramp(LEAF_GREEN, 0.45 + 0.2 * math.sin(x * 0.4) + 0.1 * (p.noise(x, y * 0.3, 6.0) - 0.5)))
-    return p.img
+    """The Jack-o'-Lantern's stem: green in fibres running down it."""
+    return px16(bs.streaks(LEAF_GREEN[1:5], 29202, vertical=True, spread=0.7))
 
 
 def pibal_latex():
-    """Red latex, glossy where the light catches it."""
-    p = Painter(N, N, 29203)
-    for y in range(N):
-        for x in range(N):
-            f = 0.6 + 0.2 * math.cos((x / N) * math.pi * 2 - 0.8) * math.sin(y / N * math.pi) + 0.03 * (p.noise(x, y, 8.0) - 0.5)
-            p.put(x, y, ramp(RED, f))
-    p.ellipse(20, 18, 4, 7, (255, 220, 210), 0.6)
-    return p.img
+    """Red latex, lit down its left with a glint."""
+    columns = [3, 4, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1]
+
+    def paint(p):
+        for y in range(16):
+            for x in range(16):
+                p.put(x, y, RED[columns[x]])
+        box(p, 3, 3, 4, 5, (255, 220, 210))
+    return px16(paint)
 
 
 # ---------------------------------------------------------------- the mooring post
 
 def iron():
-    """Black cast iron, its casting a little rough, rubbed bright where hands and ropes go."""
-    p = Painter(N, N, 29301)
-    for y in range(N):
-        for x in range(N):
-            f = 0.45 + 0.1 * (p.noise(x, y, 3.0) - 0.5) + 0.05 * (p.noise(x, y, 11.0) - 0.5)
-            if 40 <= y < 46:
-                f += 0.25
-            p.put(x, y, ramp(IRON, f))
-    return p.img
+    """Black cast iron, as a vanilla iron block in black, rubbed bright in a band where hands and ropes go."""
+    return plate(IRON, rivets=False, band=(10, 11))
 
 
 def granite():
-    p = Painter(N, N, 29302)
-    for y in range(N):
-        for x in range(N):
-            f = 0.5 + 0.2 * (p.noise(x, y, 2.0) - 0.5) + 0.1 * (p.noise(x, y, 7.0) - 0.5)
-            p.put(x, y, ramp(GRANITE, f))
-    for x in range(N):
-        p.put(x, 0, ramp(GRANITE, 0.85))
-    return p.img
+    """The plinth's granite, as vanilla stone: small clumps of grey with a few cracks, lit along its top."""
+    def paint(p):
+        bs.stone(GRANITE[1:4], 29302, cracks=2, spread=0.7)(p)
+        for x in range(16):
+            p.put(x, 0, GRANITE[4])
+    return px16(paint)
+
+
+TAR = [rgb("1a140c"), rgb("3a2e1c"), rgb("5e4c30"), rgb("84704c")]
 
 
 def tarred_rope():
-    p = Painter(N, N, 29303)
-    for y in range(N):
-        for x in range(N):
-            twist = math.sin(x * 0.55 - y * 0.55)
-            p.put(x, y, ramp([rgb("1a140c"), rgb("3a2e1c"), rgb("5e4c30"), rgb("84704c")], 0.5 + 0.3 * twist))
-    return p.img
+    return px16(lambda p: [p.put(x, y, TAR[(3, 2, 1)[((x - y) // 2) % 3]]) for y in range(16) for x in range(16)])
 
 
 # ---------------------------------------------------------------- items
 
+def envelope_mask():
+    """The balloon's envelope on a 16 by 16 icon: (x, y) -> inside, round over a tapering skirt down to its throat."""
+    def inside(x, y):
+        dx, dy = (x + 0.5 - 8) / 6.6, (y + 0.5 - 6.5) / 6.2
+        if y > 11:
+            return False
+        if dy <= 0:
+            return dx * dx + dy * dy <= 1
+        return abs(dx) <= math.sqrt(max(0.0, 1 - dy * dy)) * (1 - 0.5 * dy)
+    return inside
+
+
 def balloon_item(kind):
-    """A balloon aloft: its envelope in its design, the basket below on its cables."""
-    p = Painter(N, N, 29400 + ("harvest", "pumpkin", "moon").index(kind))
-    cx, cy = 32, 25
-    for y in range(N):
-        for x in range(N):
-            dx, dy = (x + 0.5 - cx) / 21.0, (y + 0.5 - cy) / 22.0
-            if dy < 0.7:
-                inside = dx * dx + dy * dy <= 1.0 if dy <= 0 else abs(dx) <= math.sqrt(max(0.0, 1 - dy * dy)) * (1 - 0.55 * dy / 0.7)
-            else:
-                inside = False
-            if not inside:
-                continue
-            light = 0.62 + 0.25 * (-dx - dy) * 0.5
-            if kind == "harvest":
-                band = int((math.asin(max(-1, min(1, dx / max(0.2, math.sqrt(max(0.04, 1 - min(dy, 0.99) ** 2)))))) + 1.6) * 2.4)
-                colours = (PUMPKIN, GOLD, CRANBERRY, CREAM)[band % 4]
-                if -0.1 < dy < 0.05:
-                    colours = SOOT
-            elif kind == "pumpkin":
-                colours = PUMPKIN
-                light += 0.15 * math.cos(dx * 9)
-            else:
-                colours = NIGHT
-                light = 0.35 + 0.3 * (dy + 1) / 2
-            p.put(x, y, ramp(colours, light))
-    if kind == "pumpkin":
-        for ex in (26, 38):
-            p.line(ex - 3, 22, ex + 3, 22, ramp(GLOW, 0.9), width=1.2)
-            p.line(ex - 3, 22, ex, 18, ramp(GLOW, 0.9), width=1.2)
-            p.line(ex + 3, 22, ex, 18, ramp(GLOW, 0.9), width=1.2)
-        p.line(24, 30, 40, 30, ramp(GLOW, 0.9), width=2.0)
-        p.line(24, 30, 32, 34, ramp(GLOW, 0.8), width=2.0)
-        p.line(40, 30, 32, 34, ramp(GLOW, 0.8), width=2.0)
-        p.line(32, 4, 34, 0, ramp(LEAF_GREEN, 0.5), width=2.5)
-    if kind == "moon":
-        p.blob(26, 22, 8, 8, ramp(MOON, 0.45), ramp(MOON, 0.95))
-        for k in range(6):
-            p.put(36 + k * 2, 10 + (k % 3) * 9, (255, 250, 220))
-    for side in (-1, 1):
-        p.line(cx + side * 9, 41, cx + side * 4, 52, ramp(ROPE, 0.4), width=0.8)
-    for y in range(52, 60):
-        for x in range(26, 38):
-            p.put(x, y, ramp(WICKER, 0.65 - 0.25 * (y - 52) / 8 + (0.08 if (x // 2 + y // 2) % 2 else -0.05)))
-    for x in range(25, 39):
-        p.put(x, 52, ramp(LEATHER, 0.6))
-    return p.img
+    """A balloon aloft as a vanilla item icon: its envelope in its design, outlined, the basket below on its cables."""
+    inside = envelope_mask()
+
+    def paint(p):
+        for y in range(16):
+            for x in range(16):
+                if not inside(x, y):
+                    continue
+                lit = x < 7
+                if kind == "harvest":
+                    colours = SOOT if y == 7 else (PUMPKIN, GOLD, CRANBERRY, CREAM)[(x // 2) % 4]
+                elif kind == "pumpkin":
+                    colours = PUMPKIN
+                    lit = lit and x not in (4, 8)
+                else:
+                    colours = NIGHT
+                p.put(x, y, colours[3] if lit else colours[2])
+                if not all(inside(x + dx, y + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                    p.put(x, y, colours[0] if kind != "moon" else NIGHT[0])
+        if kind == "pumpkin":
+            for x, y in ((5, 4), (4, 5), (5, 5), (6, 5), (10, 4), (9, 5), (10, 5), (11, 5),
+                         (5, 8), (6, 8), (7, 8), (8, 8), (9, 8), (10, 8), (6, 9), (9, 9)):
+                p.put(x, y, GLOW[3])
+            p.put(8, 0, LEAF_GREEN[3])
+        if kind == "moon":
+            box(p, 4, 3, 6, 5, MOON[3])
+            p.put(4, 3, MOON[4])
+            for x, y in ((9, 2), (11, 5), (8, 7), (12, 8)):
+                p.put(x, y, (255, 248, 210))
+        for x, y in ((5, 12), (10, 12)):
+            p.put(x, y, ROPE[2])
+        for x in range(5, 11):
+            p.put(x, 13, LEATHER[2])
+            p.put(x, 14, WICKER[3])
+            p.put(x, 15, WICKER[1])
+    return px16(paint)
 
 
 def burner_item():
-    """The burner: two copper coils on a gunmetal frame, a brass valve lever, a blue pilot flame."""
-    p = Painter(N, N, 29410)
-    for x0 in (14, 34):
-        for y in range(22, 46):
-            for x in range(x0, x0 + 16):
-                turn = ((y - 22) % 4) / 3.0
-                p.put(x, y, ramp(COPPER, 0.35 + 0.5 * math.sin(turn * math.pi) + 0.15 * math.cos((x - x0) / 16 * math.pi * 2)))
-        for x in range(x0 + 3, x0 + 13):
-            for y in range(17, 22):
-                p.put(x, y, ramp(BRASS, 0.6 + 0.2 * math.cos((x - x0) / 10 * 6)))
-    for y in range(46, 52):
-        for x in range(8, 56):
-            p.put(x, y, ramp(GUNMETAL, 0.5))
-    p.line(30, 50, 22, 60, ramp(BRASS, 0.8), width=2.5)
-    p.ellipse(32, 12, 3, 6, rgb("6a9cff"))
-    p.ellipse(32, 13, 1.5, 3.5, rgb("d8e8ff"))
-    return p.img
+    """The burner: two copper coils capped in brass on a gunmetal frame, a brass valve lever, a blue pilot flame."""
+    def paint(p):
+        for x0 in (3, 9):
+            box(p, x0, 3, x0 + 3, 4, BRASS[4])
+            for y in range(5, 11):
+                for x in range(x0, x0 + 4):
+                    p.put(x, y, COPPER[3] if y % 2 == 0 else COPPER[1])
+        box(p, 2, 11, 13, 12, GUNMETAL[3])
+        box(p, 2, 12, 13, 12, GUNMETAL[1])
+        for k in range(3):
+            p.put(10 + k, 13 + k, BRASS[3])
+        box(p, 7, 0, 8, 2, rgb("6a9cff"))
+        p.put(7, 1, rgb("d8e8ff"))
+    return px16(paint)
 
 
 def pibal_item():
-    p = Painter(N, N, 29411)
-    p.blob(32, 24, 15, 18, ramp(RED, 0.3), ramp(RED, 0.95))
-    p.ellipse(26, 16, 3, 6, (255, 225, 215), 0.7)
-    p.line(32, 42, 32, 46, ramp(RED, 0.4), width=2.5)
-    for y in range(46, 62):
-        p.put(32 + int(2 * math.sin(y * 0.5)), y, ramp(CREAM, 0.7))
-    return p.img
+    """The pibal: a red latex balloon lit at its upper left, knotted, on a wavy cream string."""
+    def paint(p):
+        for y in range(11):
+            for x in range(16):
+                dx, dy = (x + 0.5 - 8) / 5.2, (y + 0.5 - 5.5) / 5.4
+                if dx * dx + dy * dy <= 1:
+                    edge = (dx * dx + dy * dy) > 0.72
+                    p.put(x, y, RED[1] if edge and dx + dy > 0 else RED[3] if dx + dy < -0.4 else RED[2])
+        box(p, 5, 2, 6, 3, (255, 220, 210))
+        p.put(7, 11, RED[1])
+        p.put(8, 11, RED[1])
+        for y, x in zip(range(12, 16), (8, 7, 8, 9)):
+            p.put(x, y, CREAM[3])
+    return px16(paint)
 
 
 def hot_air_balloon_textures():
