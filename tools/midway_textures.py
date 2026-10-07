@@ -9,12 +9,37 @@ painter); no other texture is read, traced or recoloured.
 """
 import math
 
+from PIL import Image
+
+import block_style as bs
 from fur_paint import mix, clean_painter as Painter, clean_ramp as ramp
 from crop_textures import rgb
 from midway import HIGH_STRIKER, RING_TOSS, PLUSHES
 
 N = 64
 S = 4  # texels to a model pixel
+
+
+class _Grid:
+    """Pixel access to a 16 by 16 drawing (block_style's painters draw on anything with `w`, `h` and `put`)."""
+
+    def __init__(self, img):
+        self.img = img
+        self.w, self.h = img.size
+
+    def put(self, x, y, c):
+        x, y = int(x), int(y)
+        if 0 <= x < self.w and 0 <= y < self.h:
+            self.img.putpixel((x, y), tuple(c[:3]) + (255,))
+
+
+def px16(painter):
+    """A texture in vanilla's manner (the owner's note on the fall fair, 6 October 2026: nothing in it looked like
+    Minecraft): drawn at vanilla's density, one texel to a model pixel and 16 to a block, then scaled up four times
+    without smoothing, so the 64 by 64 file keeps its UVs and models but its pixels are vanilla-sized."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    painter(_Grid(img))
+    return img.resize((N, N), Image.NEAREST)
 
 WOOD_WHITE = [rgb("8c8478"), rgb("bab2a2"), rgb("d8d0be"), rgb("ece6d6"), rgb("f8f4ea")]
 LACQUER_RED = [rgb("4a0a0a"), rgb("7a1212"), rgb("a81c18"), rgb("cc2e26"), rgb("e85a48")]
@@ -63,98 +88,128 @@ def stripe_border(paint, colours, width=3, level=0.65, inset=2):
                 paint.put(x, y, ramp(colours, level + 0.1 * math.sin(i * 0.4)))
 
 
+# Brass across a rail or bell, lit on its left as a vanilla gold block is: an index into GOLD for each column.
+GOLD_COLUMNS = [3, 3, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1]
+# Painted planks: the paint's palette without its darkest tone, so the seams between boards stay a shade, not a gap.
+WHITE_PAINT = WOOD_WHITE[1:]
+RED_PAINT = [rgb("7a1212"), rgb("a81c18"), rgb("b42420"), rgb("cc2e26"), rgb("e85a48")]
+
+
 def striker_textures():
+    """The High Striker in vanilla's manner (px16): white- and red-painted planks, brass like a gold block, lamps of
+    flat glass tones with a square glint, and a scale of plain coloured bands with ticks."""
     out = {}
-    p = Painter(N, N, 26001)
-    wood(p, (0, 0, N, N), WOOD_WHITE, boards=3)
-    for x in (2, 3, N - 4, N - 3):
-        for y in range(N):
-            p.put(x, y, ramp(LACQUER_RED, 0.6))
-    out["high_striker_post"] = p.img
 
-    p = Painter(N, N, 26002)
-    wood(p, (0, 0, N, N), LACQUER_RED, boards=4, vertical=False)
-    stripe_border(p, GOLD, width=2, inset=3)
-    out["high_striker_red"] = p.img
+    def post(p):
+        bs.planks(WHITE_PAINT, 26001, boards=4, vertical=True)(p)
+        for y in range(16):
+            p.put(0, y, LACQUER_RED[3])
+            p.put(15, y, LACQUER_RED[2])
+    out["high_striker_post"] = px16(post)
 
-    p = Painter(N, N, 26003)
-    wood(p, (0, 0, N, N), PLANK, boards=5, vertical=False)
-    for r, level in ((22, 0.6), (16, 0.2), (10, 0.6)):
-        p.ellipse(32, 32, r, r, ramp(LACQUER_RED if level < 0.5 else WOOD_WHITE, 0.6), 0.85)
-    star(p, 32, 32, 8, GOLD)
-    out["high_striker_deck"] = p.img
+    def red(p):
+        bs.planks(RED_PAINT, 26002, boards=4)(p)
+        for i in range(1, 15):
+            for x, y in ((i, 1), (1, i)):
+                p.put(x, y, GOLD[3])
+            for x, y in ((i, 14), (14, i)):
+                p.put(x, y, GOLD[2])
+    out["high_striker_red"] = px16(red)
 
-    p = Painter(N, N, 26004)
-    for y in range(N):
-        for x in range(N):
-            f = 0.5 + 0.35 * math.cos((x / N) * math.pi * 2.2 + 0.6) + 0.06 * (p.noise(x, y, 8.0) - 0.5)
-            p.put(x, y, ramp(BRASS, f))
-    out["high_striker_brass"] = p.img
+    def deck(p):
+        bs.planks(PLANK, 26003, boards=4)(p)
+        for y in range(16):
+            for x in range(16):
+                d = math.hypot(x + 0.5 - 8, y + 0.5 - 8)
+                if d <= 1.6:
+                    p.put(x, y, GOLD[4] if (x, y) == (7, 7) else GOLD[3])
+                elif d <= 5.6:
+                    p.put(x, y, LACQUER_RED[3] if 2.9 < d <= 4.1 else WOOD_WHITE[3])
+    out["high_striker_deck"] = px16(deck)
+
+    def rail(lift):
+        def paint(p):
+            for y in range(16):
+                for x in range(16):
+                    p.put(x, y, GOLD[min(4, GOLD_COLUMNS[x] + lift)])
+        return paint
+    out["high_striker_brass"] = px16(rail(0))
 
     for lit in (False, True):
-        p = Painter(N, N, 26005)
         glass = [rgb("3a2a08"), rgb("6a4c10"), rgb("9a7020"), rgb("c09634")] if not lit else [rgb("e09a20"), rgb("ffc840"), rgb("fff090"), rgb("ffffff")]
-        for y in range(N):
-            for x in range(N):
-                d = math.hypot(x + 0.5 - N / 2, y + 0.5 - N / 2) / (N / 2)
-                p.put(x, y, ramp(glass, 0.85 - 0.6 * d + 0.08 * (p.noise(x, y, 6.0) - 0.5)))
-        p.ellipse(22, 18, 7, 5, ramp(glass, 1.0), 0.7)
-        out["high_striker_lamp_on" if lit else "high_striker_lamp_off"] = p.img
 
-    p = Painter(N, N, 26006)
-    for y in range(N):
-        for x in range(N):
-            band = 24 <= y < 40
-            p.put(x, y, ramp(WOOD_WHITE if band else LACQUER_RED, 0.7 - 0.3 * y / N + 0.05 * (p.noise(x, y) - 0.5)))
-    p.line(4, 6, N - 6, 6, ramp(LACQUER_RED, 0.95), width=2, alpha=0.7)
-    out["high_striker_puck"] = p.img
+        def lamp(p, glass=glass):
+            for y in range(16):
+                for x in range(16):
+                    d = math.hypot(x + 0.5 - 8, y + 0.5 - 8)
+                    p.put(x, y, glass[3 if d < 2.5 else 2 if d < 5 else 1 if d < 7 else 0])
+            for x, y in ((4, 4), (5, 4), (4, 5)):
+                p.put(x, y, glass[3])
+        out["high_striker_lamp_on" if lit else "high_striker_lamp_off"] = px16(lamp)
 
-    p = Painter(N, N, 26007)
-    for y in range(N):
-        for x in range(N):
-            d = math.hypot(x + 0.5 - N / 2, y + 0.5 - N / 2)
-            ring = int(d / 7) % 2 == 0
-            p.put(x, y, ramp(RUBBER if ring else YELLOW, 0.5 + 0.1 * (p.noise(x, y, 5.0) - 0.5) - 0.004 * d))
-    p.blob(32, 32, 6, 6, LACQUER_RED[1], LACQUER_RED[4])
-    out["high_striker_pad"] = p.img
+    def puck(p):
+        for y in range(16):
+            band = WOOD_WHITE if 6 <= y < 10 else LACQUER_RED
+            k = 4 if y in (0, 6) else 1 if y in (9, 15) else 3 if band is WOOD_WHITE else 2
+            for x in range(16):
+                p.put(x, y, band[k])
+        for x in range(1, 15):
+            p.put(x, 1, LACQUER_RED[4])
+    out["high_striker_puck"] = px16(puck)
+
+    def pad(p):
+        for y in range(16):
+            for x in range(16):
+                d = math.hypot(x + 0.5 - 8, y + 0.5 - 8)
+                if d < 1.6:
+                    c = LACQUER_RED[4] if (x, y) == (7, 7) else LACQUER_RED[3]
+                else:
+                    c = RUBBER[2] if int(d / 1.75) % 2 == 0 else YELLOW[2]
+                p.put(x, y, c)
+    out["high_striker_pad"] = px16(pad)
 
     for part, band in SCALE_BANDS.items():
-        p = Painter(N, N, 26010 + part)
-        wood(p, (0, 0, N, N), WOOD_WHITE, boards=1)
-        # The gauge: a coloured band up the middle, ticks across it, a bright step at each lamp.
-        for y in range(N):
-            for x in range(14, 50):
-                p.put(x, y, ramp(band, 0.55 + 0.25 * (1 - y / N) + 0.05 * (p.noise(x, y) - 0.5)))
-        for y in range(2, N, 16):
-            p.line(10, y, 54, y, ramp(RUBBER, 0.25), width=1.2, alpha=0.85)
-        for y in range(10, N, 16):
-            p.line(16, y, 48, y, ramp(RUBBER, 0.35), width=0.8, alpha=0.6)
-        for y in range(N):
-            for x in (12, 13, 50, 51):
-                p.put(x, y, ramp(GOLD, 0.6))
-        out[f"high_striker_scale_{part}"] = p.img
+        def scale(p, band=band, part=part):
+            bs.planks(WHITE_PAINT, 26010 + part, boards=1, vertical=True, joint=False)(p)
+            for y in range(16):
+                for x in range(4, 12):
+                    p.put(x, y, band[2] if x == 4 else band[0] if x == 11 else band[1])
+                p.put(3, y, GOLD[3])
+                p.put(12, y, GOLD[2])
+            for y in (0, 8):
+                for x in range(4, 12):
+                    p.put(x, y, band[0])
+            for y in (4, 12):
+                for x in range(4, 7):
+                    p.put(x, y, band[0])
+        out[f"high_striker_scale_{part}"] = px16(scale)
 
     for lit in (False, True):
-        p = Painter(N, N, 26020)
-        for y in range(N):
-            for x in range(N):
-                f = 0.55 + 0.3 * math.cos((x / N) * math.pi * 2.0 + 0.8) - 0.15 * y / N + 0.05 * (p.noise(x, y, 7.0) - 0.5)
-                p.put(x, y, ramp(BRASS, f + (0.25 if lit else 0.0)))
-        if lit:
-            p.ellipse(20, 20, 10, 8, rgb("fffbe8"), 0.6)
-        out["high_striker_bell_lit" if lit else "high_striker_bell"] = p.img
+        def bell(p, lit=lit):
+            rail(1 if lit else 0)(p)
+            for x in range(16):
+                p.put(x, 15, BRASS[1])
+            if lit:
+                for x, y in ((3, 3), (4, 3), (3, 4)):
+                    p.put(x, y, rgb("fffbe8"))
+        out["high_striker_bell_lit" if lit else "high_striker_bell"] = px16(bell)
 
-    p = Painter(N, N, 26030)
-    wood(p, (0, 0, N, N), LACQUER_RED, boards=4, vertical=False)
-    for k in range(5):
-        star(p, 6 + k * 13, 8, 5, GOLD)
-    for y in (17, 30):
-        for x in range(N):
-            p.put(x, y, ramp(GOLD, 0.7))
-    star(p, 32, 24, 6, GOLD, 0.8)
-    for cx in (12, 52):
-        p.ellipse(cx, 24, 3, 3, ramp(GOLD, 0.5))
-    out["high_striker_sign"] = p.img
+    def sign(p):
+        bs.planks(RED_PAINT, 26030, boards=4)(p)
+        for cx in (3, 12):
+            for x, y in ((cx, 1), (cx - 1, 2), (cx, 2), (cx + 1, 2), (cx, 3)):
+                p.put(x, y, GOLD[4] if (x, y) == (cx, 1) else GOLD[3])
+        for x, y in ((7, 1), (8, 1), (6, 2), (7, 2), (8, 2), (9, 2), (7, 3), (8, 3)):
+            p.put(x, y, GOLD[4] if y == 1 else GOLD[3])
+        for y in (4, 7):
+            for x in range(16):
+                p.put(x, y, GOLD[3])
+        for x, y in ((7, 5), (8, 5), (7, 6), (8, 6)):
+            p.put(x, y, GOLD[4] if (x, y) == (7, 5) else GOLD[3])
+        for x in (3, 12):
+            p.put(x, 5, GOLD[3])
+            p.put(x, 6, GOLD[2])
+    out["high_striker_sign"] = px16(sign)
     return out
 
 
@@ -232,6 +287,18 @@ def felt(paint, colours, level=0.55, seams=()):
                        ramp(colours, level + 0.3), width=1.2)
 
 
+def wool16(p, colours, seed):
+    """Felt in vanilla's manner (px16): wool's soft low-contrast clumps in `colours` (three neighbouring tones)."""
+    bs.cloth(colours, seed)(p)
+
+
+def seam16(p, colours, column=None, row=None):
+    """A seam where two felt pieces meet (px16): a darker line, its stitches a tone lighter every other pixel."""
+    for i in range(16):
+        x, y = (column, i) if column is not None else (i, row)
+        p.put(x, y, colours[2] if i % 2 else colours[0])
+
+
 def button_eye(paint, cx, cy, r, colours=BLACK_FELT, shine=(255, 255, 255)):
     paint.blob(cx, cy, r, r, colours[0], colours[2])
     paint.ellipse(cx - r * 0.35, cy - r * 0.35, max(1.2, r * 0.3), max(1.2, r * 0.3), shine)
@@ -278,18 +345,21 @@ def plush_textures():
                     p.put(x, y, ramp(colours, 0.55 + 0.15 * math.sin(math.atan2(y - 32, x - 32) * 12) - 0.2 * d / r))
     out["plush_rosette"] = p.img
 
-    # The ghost: white felt, button eyes, rosy cheeks, a little "o" of a mouth.
-    p = Painter(N, N, 26230)
-    felt(p, FELT["ghost"], level=0.65, seams=[(0, 58, 64, 58)])
-    out["ghost_plush"] = p.img
-    p = Painter(N, N, 26231)
-    felt(p, FELT["ghost"], level=0.65)
-    for cx in (22, 42):
-        button_eye(p, cx, 22, 5.5)
-        p.ellipse(cx + (-4 if cx < 32 else 4), 34, 5, 3, PINK[1], 0.6)
-    p.ellipse(32, 40, 3.5, 4.5, BLACK_FELT[1])
-    p.ellipse(32, 40, 2, 3, PINK[0])
-    out["ghost_plush_face"] = p.img
+    # The ghost: white felt, square eyes with a glint, rosy cheeks, a little "o" of a mouth (px16).
+    ghost = FELT["ghost"][2:]
+    out["ghost_plush"] = px16(lambda q: (wool16(q, ghost, 26230), seam16(q, ghost, row=14)))
+
+    def ghost_face(q):
+        wool16(q, ghost, 26231)
+        for x0 in (5, 9):
+            for x, y in ((x0, 6), (x0 + 1, 6), (x0, 7), (x0 + 1, 7)):
+                q.put(x, y, BLACK_FELT[1])
+        for x in (3, 4, 11, 12):
+            q.put(x, 9, PINK[1])
+        for x in (7, 8):
+            q.put(x, 10, BLACK_FELT[1])
+            q.put(x, 11, PINK[0])
+    out["ghost_plush_face"] = px16(ghost_face)
 
     # The bat: near-black felt; big white felt eyes, two tiny fangs; wings of purple felt with scalloped edges.
     p = Painter(N, N, 26240)
@@ -315,22 +385,25 @@ def plush_textures():
     out["bat_plush_wing"] = p.img
 
     # The black cat: black felt, big green-gold eyes, a pink nose, stitched whiskers; an orange bow.
-    p = Painter(N, N, 26250)
-    felt(p, FELT["cat"], seams=[(32, 0, 32, 64)])
-    out["black_cat_plush"] = p.img
-    p = Painter(N, N, 26251)
-    felt(p, FELT["cat"])
-    for cx in (20, 44):
-        p.ellipse(cx, 26, 8, 7, rgb("c8d43a"))
-        p.ellipse(cx, 26, 2.2, 6, BLACK_FELT[0])
-        p.ellipse(cx - 3, 23, 1.6, 1.6, rgb("ffffff"))
-    p.tooth(32, 38, 6, 5, PINK)
-    stitches(p, [(32, 42), (28, 46)], PINK[0])
-    stitches(p, [(32, 42), (36, 46)], PINK[0])
-    for side in (-1, 1):
-        for k in range(3):
-            stitches(p, [(32 + side * 10, 40 + k * 3), (32 + side * 26, 36 + k * 5)], rgb("d8d8d8"), width=1.0)
-    out["black_cat_plush_face"] = p.img
+    cat = [rgb("1c1c22"), rgb("222228"), rgb("2c2c34")]
+    out["black_cat_plush"] = px16(lambda q: (wool16(q, cat, 26250), seam16(q, cat, column=8)))
+
+    def cat_face(q):
+        """Green-gold eyes with a black slit pupil, a pink nose, a little mouth and two whiskers a side, in the manner of
+        vanilla's black cat."""
+        wool16(q, cat, 26251)
+        for x0 in (4, 9):
+            for x in range(x0, x0 + 3):
+                for y in (6, 7):
+                    q.put(x, y, BLACK_FELT[0] if x == x0 + 1 else rgb("d8e04a") if y == 6 else rgb("b4c030"))
+        q.put(7, 9, PINK[2])
+        q.put(8, 9, PINK[1])
+        for x, y in ((7, 10), (8, 10), (6, 11), (9, 11)):
+            q.put(x, y, PINK[0])
+        for y in (9, 11):
+            for x in (1, 2, 3, 12, 13, 14):
+                q.put(x, y, rgb("d8d8d8"))
+    out["black_cat_plush_face"] = px16(cat_face)
     p = Painter(N, N, 26252)
     felt(p, FELT["orange"])
     for y in range(4, N, 12):

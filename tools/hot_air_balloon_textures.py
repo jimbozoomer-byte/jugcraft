@@ -266,45 +266,55 @@ def harvest():
     return p.img
 
 
-def pumpkin_face(p, cx, colours, lit):
-    """A carved jack-o'-lantern face centred at `cx`: two triangle eyes, a triangle nose and a wide grin with teeth.
-    Lit, it is the glow of the candle inside; carved, the dark of the cut with a rind of paler flesh round it."""
-    eye_y0, eye_y1 = int(WRAP_H * (1 - 0.74)), int(WRAP_H * (1 - 0.62))
-    nose_y0, nose_y1 = eye_y1 + 6, eye_y1 + 22
-    mouth_y0, mouth_y1 = int(WRAP_H * (1 - 0.52)), int(WRAP_H * (1 - 0.38))
+# The Jack-o'-Lantern's carved face as pixel art, in the manner of vanilla's carved pumpkin (the owner's note on the
+# fall fair, 6 October 2026: nothing in it looked like Minecraft): stepped triangle eyes and nose and a grin with square
+# teeth, one character a cell of FACE_CELL texels. '#' is cut.
+FACE = [
+    "........#............#........",
+    ".......###..........###.......",
+    ".......###..........###.......",
+    "......#####........#####......",
+    ".....#######......#######.....",
+    ".....#######......#######.....",
+    "....#########....#########....",
+    "..............................",
+    "..............##..............",
+    ".............####.............",
+    "..............................",
+    "..............................",
+    "...##....................##...",
+    "....#####..########..#####....",
+    "....#####..########..#####....",
+    ".....####################.....",
+    "......######..##..######......",
+    "........####..##..####........",
+    "..........##########..........",
+]
+FACE_CELL = 7
 
-    def inside(x, y):
-        for side in (-1, 1):
-            ex = cx + side * 38
-            t = (y - eye_y0) / (eye_y1 - eye_y0)
-            if 0 <= t <= 1 and abs(x - ex) <= 22 * t:
-                return True
-        t = (y - nose_y0) / (nose_y1 - nose_y0)
-        if 0 <= t <= 1 and abs(x - cx) <= 10 * t:
-            return True
-        u = (x - cx) / 74.0
-        if abs(u) <= 1:
-            top = mouth_y0 + 18 * (1 - u * u) * 0.4 - 8 * u * u
-            bottom = mouth_y1 - 6 + 10 * (1 - u * u) - 18 * u * u
-            tooth = (abs(u) < 0.6 and (int((u + 1) * 5) % 2 == 0))
-            if top <= y <= bottom:
-                if tooth and y < top + 12:
-                    return False
-                if tooth and y > bottom - 10 and abs(u) < 0.4:
-                    return False
-                return True
-        return False
-    for y in range(int(eye_y0 - 4), int(mouth_y1 + 10)):
-        for x in range(int(cx - 90), int(cx + 90)):
-            xx = x % WRAP_W
-            if inside(x, y):
+
+def pumpkin_face(p, cx, colours, lit):
+    """The carved face (FACE) centred at `cx`, its top at the eyes' line. Lit, the cut glows in three flat tones,
+    brightest at the middle; carved, the cut is dark, its top row a shade of the shell's inside for the depth."""
+    top = int(WRAP_H * 0.26)
+    left = int(cx) - len(FACE[0]) * FACE_CELL // 2
+    rows, cols = len(FACE), len(FACE[0])
+
+    def cut(r, c):
+        return 0 <= r < rows and 0 <= c < cols and FACE[r][c] == "#"
+    for r in range(-1, rows + 1):
+        for c in range(-1, cols + 1):
+            if cut(r, c):
                 if lit:
-                    d = abs(x - cx) / 90
-                    p.put(xx, y, ramp(GLOW, 0.95 - 0.35 * d - 0.15 * (p.noise(x, y, 6.0) - 0.5)))
+                    d = abs(c + 0.5 - cols / 2) / (cols / 2)
+                    colour = GLOW[4] if d < 0.3 else GLOW[3] if d < 0.65 else GLOW[2]
                 else:
-                    p.put(xx, y, ramp(SOOT, 0.25 + 0.1 * (p.noise(x, y, 5.0) - 0.5)))
-            elif not lit and any(inside(x + dx, y + dy) for dx, dy in ((2, 0), (-2, 0), (0, 2), (0, -2))):
-                p.put(xx, y, ramp(PUMPKIN, 0.95))
+                    colour = SOOT[1] if cut(r - 1, c) else PUMPKIN[0]
+            else:
+                continue
+            for y in range(top + r * FACE_CELL, top + (r + 1) * FACE_CELL):
+                for x in range(left + c * FACE_CELL, left + (c + 1) * FACE_CELL):
+                    p.put(x % WRAP_W, y, colour)
 
 
 def pumpkin():
@@ -314,15 +324,16 @@ def pumpkin():
     skirt_y = int(WRAP_H * (1 - 0.18))
     for y in range(WRAP_H):
         for x in range(WRAP_W):
+            # Each rib in flat bands, as the ribs of vanilla's pumpkin: a dark crease, a shoulder, the body and a lit
+            # swell left of its middle.
             rib = (x % (2 * GORE)) / (2 * GORE)
-            f = 0.62 + 0.22 * math.sin(rib * math.pi) - 0.28 * (1 - math.sin(rib * math.pi)) ** 3
-            f += 0.05 * (p.noise(x * 0.5, y * 3, 9.0) - 0.5) - 0.1 * abs(y / WRAP_H - 0.45)
-            colours = PUMPKIN
+            colour = (PUMPKIN[1] if rib < 0.06 or rib > 0.94 else PUMPKIN[2] if rib < 0.2 or rib > 0.8
+                      else PUMPKIN[4] if 0.32 < rib < 0.48 else PUMPKIN[3])
             if y < 18:
-                colours, f = LEAF_GREEN, 0.4 + 0.2 * (p.noise(x, y, 5.0) - 0.5)
+                colour = LEAF_GREEN[2]
             if y >= skirt_y:
-                colours, f = LEAF_GREEN, 0.45 + 0.2 * math.sin(x * 0.3) * 0.5 + 0.15 * (p.noise(x, y, 6.0) - 0.5)
-            p.put(x, y, ramp(colours, f))
+                colour = LEAF_GREEN[3] if (x // 12) % 2 else LEAF_GREEN[2]
+            p.put(x, y, colour)
     # Scalloped leaf points over the skirt's top.
     for x in range(WRAP_W):
         u = (x % 24) / 24
