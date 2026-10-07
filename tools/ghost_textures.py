@@ -7,7 +7,7 @@ read, traced or recoloured. The items are see-through round their shapes.
 """
 from agriculture import GHOSTS
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 from decor13_textures import icon
 
 LANTERN = [
@@ -60,7 +60,7 @@ def ectoplasm():
 def spirit():
     """Pale, wispy stuff: near white, with faint streaks running down (tinted and made see-through by the renderer)."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("e2ecf8"), rgb("eef4fc"), rgb("fafcff")], 33101, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, [rgb("e2ecf8"), rgb("eef4fc"), rgb("fafcff")], 33101, [2, 3, 2])
     for x in (2, 7, 12):
         for y in range(16):
             if (y + x) % 5:

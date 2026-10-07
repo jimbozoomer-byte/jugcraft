@@ -60,7 +60,7 @@ Primary specialty and supported player role: exploration and settling; every pla
   - The cost is one date lookup per random tick of a needle block, which is bounded by vanilla's random tick rate. The catch-up runs only when a needle changes and visits at most 128 needles.
   - With seasons off (`seasons.mode=off`) every needle turns green.
 - **Settings:**
-  - `alpine_spawn.enabled=false` stops new Alpine Spawn generation and the larch's hand recipes. Meadows and the cool plateau's forest and taiga are vanilla's again in new chunks, and the spawn move is skipped. The biome and every larch block and item stay registered, so old chunks and inventories keep them.
+  - `alpine_spawn.enabled=false` stops new Alpine Spawn generation. The larch's hand and sawmill recipes stop only when `biomes.enabled` is off too, since larches, tamaracks and fallen larches also grow in Jugcraft's biomes ([trees-batch-1.md](trees-batch-1.md), TREES.md rule 4). Meadows and the cool plateau's forest and taiga are vanilla's again in new chunks, and the spawn move is skipped. The biome and every larch block and item stay registered, so old chunks and inventories keep them.
   - `alpine_spawn.start=off` keeps vanilla's spawn but still generates the biome.
 - **Existing worlds:**
   - Old chunks are never rewritten. New chunks where meadows or cool plateau forest and taiga would have generated become Alpine Spawn, which may leave seams next to old chunks.
@@ -69,7 +69,7 @@ Primary specialty and supported player role: exploration and settling; every pla
 ## Dependencies and assets
 - **Hook.** The biome is placed through #53's `mixin/OverworldBiomeBuilderMixin`, which now also wraps the builder's output, because Fabric API cannot place new Overworld biomes.
 - **Copied layouts.** The biome's layout, features and mobs follow vanilla 26.3's meadow; the village uses vanilla's taiga pieces by name; the larch uses vanilla's spruce foliage shape and spruce-leaf drop chances. No Mojang file is copied.
-- **Larch textures.** These are drawn by code in `tools/larch_textures.py` (bark, log ends, stripped wood, planks, the three needle looks and the sapling). No texture is read, traced or recoloured.
+- **Larch textures.** These are drawn by code: the sapling in `tools/larch_textures.py`; since the [wood repaint](wood-repaint.md), the bark, log ends, stripped wood, planks and the three needle looks in `tools/wood_style.py`. No texture is read, traced or recoloured.
 - **Shared code.** The larch wood set reuses the chestnut's wood-set data and code. `WOOD_SETS` in `tools/agriculture.py` and `JugcraftAgriculture.registerWoodSet` now generate and register both woods. The chestnut's generated files are unchanged.
 - No new dependencies.
 

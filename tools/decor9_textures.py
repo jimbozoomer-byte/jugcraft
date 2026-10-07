@@ -8,12 +8,14 @@ and the Dead Hollow Tree's bark, hollow, face and eyes.
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code or from the small pixel-art grids below,
 from fixed seeds; no Mojang texture is read, traced or recoloured. Block textures are 16x16 and opaque, except the
 weathervane silhouettes and the cobweb (see-through round their shapes) and the witch's eyes (an entity texture).
+
+Surfaces are painted in the manner of the vanilla blocks with tools/block_style.py: a short palette in small clumps,
+never a random colour at every pixel; wood as planks, and straw, bark and hair as streaks.
 """
 import math
-import random
 
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 
 WHITE_VINYL = [rgb("c8ccd4"), rgb("dadee6"), rgb("eceff4"), rgb("ffffff")]
 BLACK_VINYL = [rgb("101014"), rgb("1a1a20"), rgb("26262e"), rgb("44444e")]
@@ -43,12 +45,13 @@ def put(img, x, y, color, alpha=255):
 
 
 def grid(rows, colours, fill, seed=0):
-    """A texture from a 16x16 grid of letters; letters not in `colours` take a random shade from `fill`."""
+    """A texture from a 16x16 grid of letters; letters not in `colours` take a clumped surface of `fill`
+    (tools/block_style.py)."""
     c = Canvas()
-    rng = random.Random(seed)
+    surface = bs.surface(fill, seed)
     for y, row in enumerate(rows):
         for x, ch in enumerate(row):
-            c.px(x, y, colours.get(ch) or fill[rng.randrange(len(fill))])
+            c.px(x, y, colours.get(ch) or surface(x, y))
     return c.img
 
 
@@ -67,12 +70,11 @@ def cutout(rows, colours):
 def vinyl(palette, seed, seams=True):
     """Shiny vinyl: smooth, a soft highlight down one side and a sewn seam."""
     c = Canvas()
-    rng = random.Random(seed)
+    crease = bs.wobble(seed, 1)
     for y in range(16):
         for x in range(16):
             tone = 1 + (1 if 3 <= x <= 5 else 0) + (1 if x == 4 and y % 5 != 0 else 0)
-            if rng.random() < 0.08:
-                tone = max(0, tone - 1)
+            tone = max(0, tone + min(0, int(crease(x, y))))
             c.px(x, y, palette[min(3, tone)])
     if seams:
         for y in range(16):
@@ -82,7 +84,7 @@ def vinyl(palette, seed, seams=True):
 
 def blower():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BLACK_VINYL[:3], 19101, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, BLACK_VINYL[:3], 19101, [2, 3, 1])
     for y in (4, 6, 8, 10, 12):
         c.line(3, y, 12, y, BLACK_VINYL[0])
     c.px(13, 3, rgb("e02020"))  # the power light
@@ -173,12 +175,9 @@ def face(rows, colours, palette, seed):
 def ribbed(palette, seed):
     """Pumpkin vinyl: printed ribs."""
     c = Canvas()
-    rng = random.Random(seed)
     for y in range(16):
         for x in range(16):
             tone = [0, 1, 2, 3, 2, 1, 1, 2][x % 8]
-            if rng.random() < 0.06:
-                tone = max(0, tone - 1)
             c.px(x, y, palette[tone])
     return c.img
 
@@ -194,14 +193,14 @@ def striped_spider():
 
 def bow():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, ORANGE_VINYL[1:], 19131, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, ORANGE_VINYL[1:], 19131, [2, 3, 1])
     c.rect(6, 5, 9, 10, ORANGE_VINYL[0])
     return c.img
 
 
 def hat():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, PURPLE[:3], 19141, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, PURPLE[:3], 19141, [2, 3, 1])
     c.rect(0, 13, 15, 15, rgb("1a1a1a"))
     c.rect(6, 13, 9, 15, rgb("c8a030"))  # a buckle
     return c.img
@@ -211,7 +210,7 @@ def hat():
 
 def pot():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, POT[:3], 19201, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, POT[:3], 19201, [2, 3, 1])
     c.rect(0, 0, 15, 1, POT[3])
     for x in (2, 8, 13):
         c.px(x, 4, POT[3])
@@ -220,10 +219,7 @@ def pot():
 
 def brew():
     c = Canvas()
-    rng = random.Random(19211)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, BREW[rng.choice((0, 1, 1, 2))])
+    bs.fill(c, 0, 0, 15, 15, BREW[:3], 19211, [1, 2, 1])
     for x, y in ((3, 4), (10, 2), (7, 9), (12, 12), (4, 12)):
         c.rect(x, y, x + 1, y + 1, BREW[3])
     return c.img
@@ -231,7 +227,7 @@ def brew():
 
 def robe():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, ROBE, 19221, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, ROBE, 19221, [2, 3, 2])
     for x in range(0, 16, 4):
         for y in range(16):
             if (y + x) % 7 == 0:
@@ -241,7 +237,7 @@ def robe():
 
 def witch_skin():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, WITCH_SKIN, 19231, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, WITCH_SKIN, 19231, [2, 3, 2])
     c.px(4, 9, WITCH_SKIN[0])
     c.px(11, 5, WITCH_SKIN[0])
     return c.img
@@ -267,19 +263,19 @@ WITCH_FACE = [
 
 
 def witch_face():
-    rng = random.Random(19241)
+    skin = bs.surface(WITCH_SKIN[1:], 19241, [2, 1], spread=0.6)
     colours = {"H": rgb("2a3a1c"), "w": rgb("e8e8d0"), "g": rgb("8ae040"), "K": rgb("101010"), "n": WITCH_SKIN[0],
                "m": rgb("2a1414"), "W": rgb("e0dcc0")}
     c = Canvas()
     for y, row in enumerate(WITCH_FACE):
         for x, ch in enumerate(row):
-            c.px(x, y, colours.get(ch) or WITCH_SKIN[rng.choice((1, 1, 2))])
+            c.px(x, y, colours.get(ch) or skin(x, y))
     return c.img
 
 
 def witch_hat():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("121214"), rgb("1a1a1e"), rgb("22222a")], 19251, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, [rgb("121214"), rgb("1a1a1e"), rgb("22222a")], 19251, [2, 3, 1])
     c.rect(0, 12, 15, 14, PURPLE[2])
     c.rect(6, 12, 9, 14, rgb("c8a030"))
     return c.img
@@ -287,11 +283,7 @@ def witch_hat():
 
 def hair():
     c = Canvas()
-    rng = random.Random(19261)
-    for x in range(16):
-        tone = rng.randrange(3)
-        for y in range(16):
-            c.px(x, y, HAIR[(tone + (1 if rng.random() < 0.2 else 0)) % 3])
+    bs.streaks(HAIR, 19261)(c)
     return c.img
 
 
@@ -316,7 +308,7 @@ def witch_eyes():
 
 def hands_dirt():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, DIRT, 19301, [3, 3, 2, 1])
+    bs.dirt([DIRT[3]] + DIRT[:3], 19301)(c)
     for x, y in ((3, 5), (11, 9), (6, 13)):
         c.px(x, y, rgb("2a2a2a"))
     return c.img
@@ -325,7 +317,7 @@ def hands_dirt():
 def hands_skin():
     """Grey-green rotting skin, dark sores and yellowed nails along the top."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, ROT, 19311, [2, 3, 2, 1])
+    bs.fill(c, 0, 0, 15, 15, ROT, 19311, [2, 3, 2, 1])
     for x, y in ((4, 6), (10, 10), (7, 13), (12, 4)):
         c.px(x, y, rgb("3a2a22"))
     for x in range(16):
@@ -337,7 +329,7 @@ def hands_skin():
 
 def bone(seed):
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BONE[:3], seed, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, BONE[:3], seed, [2, 3, 2])
     for x, y in ((3, 4), (12, 9), (7, 13)):
         c.px(x, y, BONE[0])
     return c.img
@@ -369,11 +361,11 @@ def skull(seed):
 def ribs():
     """Ribs: bone bars with dark gaps between them, and the breastbone down the middle."""
     c = Canvas()
-    rng = random.Random(19411)
+    bone = bs.surface(BONE[1:], 19411, spread=0.6)
     for y in range(16):
         for x in range(16):
             if 7 <= x <= 8 or y % 3 != 2:
-                c.px(x, y, BONE[rng.choice((1, 2, 2, 3))])
+                c.px(x, y, bone(x, y))
             else:
                 c.px(x, y, rgb("1e1a16"))
     return c.img
@@ -383,21 +375,19 @@ def ribs():
 
 def chimes_iron():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 19501, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 19501, [2, 3, 1])
     return c.img
 
 
 def chimes_wood():
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, WOOD[[0, 1, 2, 1, 1][(x * 2 + y) % 5]])
+    bs.planks(WOOD, 19502, vertical=True, joint=False)(c)
     return c.img
 
 
 def string():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("b8b4a8"), rgb("cac6ba"), rgb("dcd8cc")], 19511)
+    bs.fill(c, 0, 0, 15, 15, [rgb("b8b4a8"), rgb("cac6ba"), rgb("dcd8cc")], 19511)
     return c.img
 
 
@@ -424,7 +414,7 @@ CHIME_SKULL = [
 
 def vane_iron():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 19601, [3, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 19601, [3, 3, 1])
     return c.img
 
 
@@ -439,7 +429,7 @@ LETTERS = {
 def letter(name):
     """A compass point: a raised gilt letter on a black iron plate."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 19611 + ord(name))
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 19611 + ord(name))
     for y, row in enumerate(LETTERS[name]):
         for x, ch in enumerate(row):
             if ch == "X":
@@ -488,10 +478,7 @@ WITCH = [
 def sign_wood():
     """Weathered grey boards with dark gaps, cracks and two nails."""
     c = Canvas()
-    rng = random.Random(19701)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, GREY_WOOD[rng.choice((0, 1, 2, 2, 3))] if y % 5 != 4 else GREY_WOOD[0])
+    bs.planks(GREY_WOOD, 19701)(c)
     c.line(10, 1, 13, 3, GREY_WOOD[0])
     for x, y in ((1, 1), (14, 6), (1, 11)):
         c.px(x, y, rgb("2a2a2e"))
@@ -509,18 +496,10 @@ def stake():
 # ---------------------------------------------------------------- the haunted archway and the lanterns
 
 def archway_stone():
-    """Mossy stone blocks."""
+    """Mossy stone blocks, as vanilla mossy stone bricks: two courses of two blocks, moss in clumps, thicker low down."""
     c = Canvas()
-    rng = random.Random(19801)
-    for y in range(16):
-        for x in range(16):
-            mortar = y % 8 == 7 or (x + (4 if (y // 8) % 2 else 0)) % 8 == 7
-            if mortar:
-                c.px(x, y, STONE[0])
-            elif rng.random() < 0.18 + (0.25 if y > 10 else 0):
-                c.px(x, y, MOSS[rng.randrange(3)])
-            else:
-                c.px(x, y, STONE[rng.choice((1, 2, 2, 3))])
+    bs.bricks(STONE, 19801, rows=2, cols=2)(c)
+    bs.moss_over(c, MOSS, 19802, amount=0.25, ground=5)
     return c.img
 
 
@@ -559,7 +538,7 @@ def web():
 
 def lantern_iron():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 19811, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 19811, [2, 3, 1])
     return c.img
 
 
@@ -581,12 +560,11 @@ def lantern_glass():
 def bark(seed):
     """Grey-brown dead bark in long furrows."""
     c = Canvas()
-    rng = random.Random(seed)
-    columns = [rng.randrange(4) for _ in range(16)]
-    for x in range(16):
+    bs.streaks(BARK[1:], seed, along=6.0)(c)
+    for x in range(0, 16, 4):
         for y in range(16):
-            tone = columns[x] if rng.random() > 0.12 else max(0, columns[x] - 1)
-            c.px(x, y, BARK[tone] if x % 4 else BARK[0])
+            if (y + x) % 7 not in (0, 1):
+                c.px(x, y, BARK[0])  # the furrows, broken here and there
     return c.img
 
 

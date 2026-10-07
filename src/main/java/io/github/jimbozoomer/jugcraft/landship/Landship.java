@@ -175,7 +175,7 @@ public class Landship extends Entity {
 			for (int side = -1; side <= 1; side += 2) {
 				double x = getX() + 0.5 * side * Math.cos(yaw) + 1.7 * Math.sin(yaw);
 				double z = getZ() + 0.5 * side * Math.sin(yaw) - 1.7 * Math.cos(yaw);
-				level().addParticle(ParticleTypes.LARGE_SMOKE, x, getY() + 2.9, z, 0, 0.04, 0);
+				level().addParticle(ParticleTypes.LARGE_SMOKE, x, getY() + 2.3, z, 0, 0.04, 0);
 			}
 		}
 	}
