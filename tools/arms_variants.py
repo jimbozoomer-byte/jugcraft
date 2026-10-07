@@ -15,6 +15,7 @@ tools/arms_variants_art.py; the Runebound arms are smooth meshes in the hand, wi
 """
 import arms
 import arms_heads
+import arms_icons
 import arms_mesh
 import arms_variants_art
 
@@ -248,11 +249,17 @@ def write_all(write, assets, data, lang, condition):
 
 
 def draw_all(save):
-    """Each variant's icon and model texture (tools/arms_variants_art.py; the Runebound arms' icons rendered from their
-    meshes, tools/arms_mesh.py), the patterns' sprites, and the meshes' painted atlas and glowing rune strip."""
-    for name, kind_, *_ in VARIANTS:
+    """Each variant's icon and model texture (tools/arms_variants_art.py), the patterns' sprites, and the Runebound meshes'
+    painted atlas and glowing rune strip. The inventory icon: the Runebound arms' rendered from their meshes
+    (tools/arms_mesh.py), else the variant's 16x16 map in its line's materials (tools/arms_icons.py), else its drawing."""
+    for name, kind_, line, *_ in VARIANTS:
         held = arms.KINDS[kind_]["held"]
-        save(arms_mesh.draw(name) if name in arms_mesh.NAMES else arms_variants_art.draw(name, held), "item", name)
+        if name in arms_mesh.NAMES:
+            save(arms_mesh.draw(name), "item", name)
+        elif arms_icons.has(name):
+            save(arms_icons.draw(name, arms_variants_art.LINE_STYLES[line]), "item", name)
+        else:
+            save(arms_variants_art.draw(name, held), "item", name)
         save(arms_variants_art.model(name, held)[0], "item", f"{name}_model")
     save(arms_mesh.atlas(), "item", arms_mesh.ATLAS)
     save(arms_mesh.rune_strip(), "item", arms_mesh.RUNE, animation=arms_mesh.rune_animation())
