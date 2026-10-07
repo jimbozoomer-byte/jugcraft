@@ -11,6 +11,7 @@ import random
 
 from PIL import Image
 
+import block_style as bs
 import cute_art as ca
 import decor16_data as d16d
 import decor8_data as d8d
@@ -83,7 +84,7 @@ def noise(palette, seed=1, base=None, spread=(0, 0, 0, -1, 1)):
         k = len(palette) // 2 if base is None else base
         for y in range(p.h):
             for x in range(p.w):
-                p.put(x, y, shade(palette, k + rng.choice(spread)))
+                p.put(x, y, shade(palette, k + (0 if fa.QUIET else rng.choice(spread))))
     return paint
 
 
@@ -292,16 +293,20 @@ def stones(seed=1, glow_hole=False):
 
 
 def wood(palette=WOOD, seed=1, grain=True, panel=False):
-    """Dark polished wood: long grain, a lit edge; with a sunken panel's bevel if `panel`."""
+    """Dark polished wood: long grain, a lit edge; with a sunken panel's bevel if `panel`. In the clean style
+    (flora_art.QUIET) the grain is thin streaks along the piece's length, as on vanilla planks."""
     def paint(p):
         rng = random.Random(seed)
         n = len(palette)
-        offsets = [rng.random() * 6 for _ in range(p.h + 1)]
-        for y in range(p.h):
-            for x in range(p.w):
-                g = math.sin((x + offsets[y // 3] * 2) * 0.9 + y * 0.05) if grain else 0
-                k = n // 2 + (1 if g > 0.6 else 0) - (1 if g < -0.7 else 0) + rng.choice((0, 0, 0, -1))
-                p.put(x, y, shade(palette, k))
+        if fa.QUIET and grain:
+            bs.streaks(palette[1:n - 1], seed, vertical=p.h > p.w, spread=0.7)(p)
+        else:
+            offsets = [rng.random() * 6 for _ in range(p.h + 1)]
+            for y in range(p.h):
+                for x in range(p.w):
+                    g = math.sin((x + offsets[y // 3] * 2) * 0.9 + y * 0.05) if grain else 0
+                    k = n // 2 + (1 if g > 0.6 else 0) - (1 if g < -0.7 else 0) + (0 if fa.QUIET else rng.choice((0, 0, 0, -1)))
+                    p.put(x, y, shade(palette, k))
         if panel and p.w > 6 and p.h > 6:
             for x in range(2, p.w - 2):
                 p.put(x, 2, palette[n - 1])
@@ -361,7 +366,7 @@ def fluid(palette, seed=1, alpha=150):
         rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
-                p.put(x, y, palette[rng.choice((0, 1, 1, 2))], alpha)
+                p.put(x, y, palette[1 if fa.QUIET else rng.choice((0, 1, 1, 2))], alpha)
     return paint
 
 
@@ -409,7 +414,7 @@ def velvet(seed=1):
         rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
-                k = 2 + (1 if (x + y) % 7 == 0 else 0) + rng.choice((0, 0, -1))
+                k = 2 + (1 if (x + y) % 7 == 0 else 0) + (0 if fa.QUIET else rng.choice((0, 0, -1)))
                 p.put(x, y, shade(VELVET, k))
     return paint
 
@@ -929,6 +934,7 @@ def enchanted_broom():
     return sc
 
 
+@fa.quietly
 def dustpan():
     """A tin dustpan lying open to its front (north), its back and sides turned up, a short handle at the back."""
     sc = Sculpt(d17.DUSTPAN["block"], 175)
@@ -950,6 +956,7 @@ def dustpan():
 PAN_HEAP = [(6.0, 7.0), (10.0, 8.0), (8.0, 10.5)]
 
 
+@fa.quietly
 def broom_rack():
     """A dark oak rail for a wall (facing north, on the wall to its south) with three turned pegs; the brooms hung on
     them are the client's."""
@@ -972,6 +979,7 @@ RACK_PEGS = [3.5, 8.0, 12.5]
 
 # ---------------------------------------------------------------- 4. the cabinet of curiosities
 
+@fa.quietly
 def curiosity_cabinet():
     """A carved mahogany cabinet two blocks tall (the lower block's model holds it all; the upper is empty), facing
     north: bun feet, a plinth, panelled sides and back, three shelves lined in purple velvet, and a crown with a carved
@@ -1400,13 +1408,13 @@ def specimen_vessel(name):
 
 def tint_textures():
     """Textures the client tints: brew (a rippled surface), fume (a wisp, fading up), wax (a candle's side and top),
-    flame (white-hot core, paler edge, cut out), and glow (a flat square for the skull's sockets)."""
+    flame (white-hot core, paler edge, cut out), and glow (a flat square for the skull's sockets). All in even steps, with
+    no per-pixel noise."""
     out = {}
-    rng = random.Random(1717)
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y in range(16):
         for x in range(16):
-            v = 200 + int(35 * math.sin(x * 0.9 + y * 0.4) * math.cos(y * 0.7 - x * 0.2)) + rng.randrange(-10, 10)
+            v = 200 + 12 * round(35 * math.sin(x * 0.9 + y * 0.4) * math.cos(y * 0.7 - x * 0.2) / 12)
             img.putpixel((x, y), (v, v, v, 215))
     out["witchs_workshop_brew"] = img
     img = Image.new("RGBA", (16, 64), (0, 0, 0, 0))
@@ -1416,13 +1424,12 @@ def tint_textures():
             core = abs(x - 7.5 - math.sin(t * 9) * 3) / 8
             a = int(max(0, (1 - core * 1.4)) * 180 * t ** 0.6)
             if a > 0:
-                v = 230 + rng.randrange(-15, 15)
-                img.putpixel((x, y), (v, v, v, max(0, min(255, a))))
+                img.putpixel((x, y), (230, 230, 230, max(0, min(255, a))))
     out["witchs_workshop_fume"] = img
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y in range(16):
         for x in range(16):
-            v = 210 + int(25 * (1 - abs(x - 5) / 10)) + rng.randrange(-8, 8)
+            v = 210 + 6 * round(25 * (1 - abs(x - 5) / 10) / 6)
             if x >= 12:
                 v = 236 - (y % 3) * 6
             img.putpixel((x, y), (min(255, v), min(255, v), min(255, v), 255))
