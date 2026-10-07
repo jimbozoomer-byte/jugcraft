@@ -344,8 +344,8 @@ def canvas(seed, stripe=False, nose=False):
 
 
 def draw_all(save):
-    import gun_icons  # the 32x32 icon, drawn with the big guns' and the other war machines' (tools/gun_icons.py)
+    import item_icons  # the 16x16 icon, a map in tools/item_icons/ like the big guns' and the other war machines'
     save(canvas(4601), "block", CANVAS)
     save(canvas(4602, stripe=True), "block", STRIPE)
     save(canvas(4603, nose=True), "block", NOSE)
-    save(gun_icons.draw("zeppelin"), "item", "zeppelin")
+    save(item_icons.draw("zeppelin"), "item", "zeppelin")

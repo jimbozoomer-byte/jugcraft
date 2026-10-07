@@ -24,7 +24,7 @@ import json
 import math
 
 import clean_metal
-import gun_icons
+import item_icons
 from steampunk_models import box, cyl
 from zeppelin import tiled_quads
 
@@ -643,4 +643,4 @@ def draw_all(save):
                       ("tg_steel", steel()), ("tg_soot", soot()), ("tg_bore", bore_decal())):
         save(img, "block", name)
     for item in list(GUNS) + ["great_shell"]:
-        save(gun_icons.draw(item), "item", item)
+        save(item_icons.draw(item), "item", item)
