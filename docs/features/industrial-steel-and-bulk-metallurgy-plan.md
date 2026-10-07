@@ -1,6 +1,6 @@
 # Industrial steel and bulk metallurgy
 
-Status: owner-selected planning direction, recorded 6 October and updated 7 October 2026. The steel entry, hand plates, larger workshops, shared forming dies and optional steel casting choices below are selected. Casting uses a basin attached to the appropriately upgraded larger foundry, with fuel-fired heat and hand bellows that later accept shaft automation. Exact products, equipment specifications and costs remain proposals for discussion. The existing coke route is present in source; this document implements none of the selected new recipes, tooling or equipment.
+Status: owner-selected planning direction, recorded 6 October and updated 7 October 2026. The steel entry, hand plates, larger workshops, shared forming dies and optional steel casting choices below are selected. The latest ten-answer batch selects accessible clay-based casting refractories, shared bench/kiln tooling, common components, internal item-based casting, automatic completion at readable heat levels, a shaft-driven larger press, an optional larger Coke Oven and heat upgrades for compatible alloy equipment. Industrial chemistry and advanced materials is the selected next topic. Exact products, equipment specifications and costs remain proposals for discussion. The existing coke route is present in source; this document implements none of the selected new recipes, tooling or equipment.
 Proposal issue: direct owner choices during industrial planning; no separate issue.
 Owner: jimbozoomer-byte.
 Target capability: accessible steel production alongside first electricity, followed by optional bulk metallurgy and useful steel products.
@@ -17,10 +17,19 @@ Related documentation: [starter workshop plan](industrial-starter-workshop-plan.
 - **Include optional steel casting at this stage, using reusable molds and suitable heat capability.** Selected 7 October; develop products such as gears and housings alongside the existing plate-based routes. Casting is a sideways expansion, not a new mandatory step for all steel products.
 - **Use a casting basin attached to the larger foundry, with a suitable heat upgrade.** Selected 7 October; a separate independently heated casting station is not the initial selected arrangement.
 - **Steel casting is reachable before electricity through fuel-fired heat and hand-operated bellows, with later shaft automation.** Selected 7 October; appropriate heat-resistant materials are still required. Manual and shaft bellows support the same casting capability rather than producing different steel grades.
+- **Use accessible upgraded clay-based linings and molds for first steel casting.** Specialist mineral refractories improve later equipment; a rare regional refractory is not required for the first cast.
+- **Make first dies and molds at the shared bench and kiln from earlier supplies.** Initial tooling does not require a dedicated toolmaking station or a product available only from the equipment it enables.
+- **Use common plates, rods, gears and housings for machinery.** Specialist small parts belong where they add a useful product or capability, rather than a universal bolt/rivet/spring chain.
+- **Load metal items and handle melting and transfer internally at the attached casting setup.** Exposed molten-metal storage and transport are outside the initial selected arrangement.
+- **Finish casts automatically once the required heat and materials are supplied.** Players still load inputs and operate manual bellows; individual casts do not require a player pouring action.
+- **Show clear heat levels and readable recipe requirements.** Numeric temperature tuning and adjustable fuel/air controls are not required for this casting entry.
+- **Drive the larger press with shaft power, including later electric-motor drive.** A larger press does not introduce an electric-only forming gate.
+- **Include an optional larger Coke Oven for bulk production.** Banks of ordinary ovens remain valid; the larger version rewards volume and handling.
+- **Extend compatible existing alloy equipment through heat upgrades for the next alloy recipes.** A separate heavy alloy furnace is reserved for a genuinely new process capability, rather than the default next purchase.
 - Retain the earlier selected industrial structure: a manageable essential route with many useful sideways products; steel develops in parallel with electricity. A first electrical generator or basic circuit does not acquire a new steel requirement.
 - Earlier workshops remain useful and can accept motor drive. Larger replacements are optional for ordinary processes; new equipment is required only when a process actually needs a new capability. These principles come from the [starter workshop plan](industrial-starter-workshop-plan.md).
 
-The eight bold directions are owner-selected. Exact charcoal quantities, work rates, construction recipes, casting attachment details and other candidate expansion machines remain to develop. The owner requested batches of **8–12 inline planning questions at a time**; use that cadence for subsequent decisions instead of two-question exchanges.
+These directions are owner-selected. The latest batch was answered A for all ten choices on 7 October, including **industrial chemistry and advanced materials as the next major topic**. Exact charcoal quantities, work rates, construction recipes, tooling/product identities and station specifications remain to develop. The owner requested batches of **8–12 inline planning questions at a time**; use that cadence for subsequent decisions instead of two-question exchanges.
 
 ## Player experience and reachable entry
 
@@ -70,7 +79,7 @@ The existing **4 steel plates -> 1 steel gear** recipe then provides a reachable
 | Hammer at shared bench | First steel plates and occasional small orders | Active player work; same metal yield as the press; no mandatory electricity |
 | Existing workshop Metal Press | Routine production with shaft drive and later motor drive | Faster work/automation; remains useful for small factories and secondary lines |
 | Existing-machine upgrades | Improve an eligible small station within its supported upgrade system | Optional alternative or companion to a larger purchase; do not assume every unpowered machine already accepts upgrade cards |
-| Larger Metal Press with reusable dies | Bulk plate, rod and structural-shape orders for tanks, building stock and machinery | Selected shared forming arrangement; exact product list, construction, drive capacity and batch rate remain to define |
+| Larger Metal Press with reusable dies | Bulk plate, rod and structural-shape orders for tanks, building stock and machinery | Shaft drive with later motor drive; exact product list, construction, drive capacity and batch rate remain to define |
 | Larger Steel Foundry | Sustained steel supply for those bulk orders | Selected larger station; starter-produced steel and earlier ceramics/parts must make its construction reachable |
 
 Larger construction should consume earlier steel plates/gears and suitable ceramics/ordinary parts, rather than requiring a component only the new machine can produce. Larger machines reward volume, throughput and handling; keep ordinary steel and plate recipes usable on small equipment. New process-specific stock or alloy capabilities can justify additional equipment only where that capability is genuinely needed.
@@ -106,17 +115,17 @@ Steel products should be useful as end results, trade goods and equipment materi
 
 ## Selected expansion structure and proposed machine roles
 
-The first expansion wave includes **larger Steel Foundry and Metal Press stations alongside existing-machine upgrades**, as selected above. The table develops those roles and marks the other machines as candidates. Reuse shared machines, recipe families and interfaces rather than creating unrelated specialist variants for every metal.
+The first expansion wave includes **larger Steel Foundry, Metal Press and optional Coke Oven stations alongside existing-machine upgrades**, as selected above. Extend compatible alloy equipment with heat upgrades for the next alloy recipes. The table develops those roles and marks additional equipment as candidates. Reuse shared machines, recipe families and interfaces rather than creating unrelated specialist variants for every metal.
 
-| Candidate expansion | Inputs and useful output | Why build it; entry constraint |
+| Expansion role | Inputs and useful output | Why build it; entry constraint |
 | --- | --- | --- |
-| Larger Coke Oven or oven bank (candidate) | Existing coal -> existing coke | Improve coal throughput/handling for several consumers. Standard ovens remain a valid route; proposed construction uses previously obtainable steel and ceramics |
+| Larger Coke Oven (selected optional station; specification draft) | Existing coal -> existing coke | Improve coal throughput/handling for several consumers. Standard ovens and oven banks remain valid; proposed construction uses previously obtainable steel and ceramics |
 | Larger Steel Foundry (selected station; specification draft) | Earlier iron and approved carbon inputs -> ordinary steel in larger batches | Optional sustained production and handling/operating economy. A starter foundry supplies its steel parts; no larger-foundry-only part in its own construction |
-| Larger Metal Press with reusable dies (selected arrangement; specification draft) | Suitable metal stock -> plates, rods and structural shapes | Batch forming for tanks/buildings/frames; equal metal yields. Reuse one larger station with interchangeable dies; output recipes and operating costs remain to define |
-| Heavier alloy furnace capability (candidate) | Earlier metals and appropriate heat/lining -> selected alloys | Add genuinely new supported processes where needed. Identify each alloy's producer and consumer; do not require every alloy or add pig-iron refining to ordinary starter steel |
+| Larger Metal Press with reusable dies (selected arrangement; specification draft) | Suitable metal stock -> plates, rods and structural shapes | Shaft-powered batch forming with later motor drive; equal metal yields. Output recipes, drive requirements and operating costs remain to define |
+| Heat upgrades for compatible alloy equipment (selected direction; recipe/specification draft) | Earlier metals and appropriate upgraded heat/lining -> compatible next-stage alloys | Extend existing equipment where its process supports the recipe. Identify each alloy's producer and consumer; separate equipment remains possible for genuinely new capabilities, without pig-iron refining in ordinary starter steel |
 | Electric Arc Furnace steel option (candidate) | Reachable iron/carbon and electricity -> ordinary steel | Consider a later bulk recipe on the already registered Arc Furnace, not a duplicate machine. Its existing registration does not mean an electric steel recipe is already present or required |
 
-Early bronze/brass ceramic gear casting does not automatically permit steel casting in the same crucible. The selected steel-casting branch uses a basin attached to the larger foundry, suitable heat upgrade and fuel-fired heat supported by manual-to-shaft bellows. Attachment details and lining/mold materials remain to develop. Furnace linings, molds, dies and machine parts remain reusable construction equipment; this plan adds no routine lubricant, filter, mold or lining replacement requirement.
+Early bronze/brass ceramic gear casting does not automatically permit steel casting in the same crucible. The selected steel-casting branch uses a basin attached to the larger foundry, a suitable heat upgrade, accessible upgraded clay-based refractories and fuel-fired heat supported by manual-to-shaft bellows. Exact clay mixes, firing recipes and attachment specifications remain to develop. Furnace linings, molds, dies and machine parts remain reusable construction equipment; this plan adds no routine lubricant, filter, mold or lining replacement requirement.
 
 ## Selected reusable forming dies
 
@@ -128,9 +137,9 @@ The larger press has a reusable tooling position; install a suitable die to choo
 | Rod die | Steel rod/bar stock for useful supports, fittings or selected mechanical parts | Exact stock identities, consumers and batch quantities are proposals; audit material units before adding recipes |
 | Structural-shape die | Suitable beam/section stock for industrial frames, catwalk supports and buildings | Reuse existing building identities where appropriate. Audit existing beam recipes and any new forming/recovery route together; a visual shape is not a license for extra recoverable steel |
 
-**Proposed tooling entry:** make initial dies at the shared bench from previously obtainable metal/parts. They cannot require a die or shaped product available only from the larger press. Exact ingredients remain to design. One station can run a chosen forming job, while several presses with different dies can specialize parallel lines. Neither arrangement is required for starter steel plates.
+**Selected tooling entry:** make initial dies and molds through the shared bench and kiln using previously obtainable metal/parts and suitable clay-based materials. Use the station appropriate to each material; this does not require firing every metal die. Tooling cannot require a die, cast component or shaped product available only from the equipment it enables. Exact ingredients remain to design. One station can run a chosen forming job, while several presses with different dies can specialize parallel lines. Neither arrangement is required for starter steel plates.
 
-Keep the separately selected Wire Drawer and Circuit Assembler roles. Introduce new stock/components only with clear product consumers and audited conversion units; avoid adding a chain of minor parts to every ordinary steel recipe. The die choice covers the stated steel-forming families, not universal manual or press access to all advanced materials.
+Keep the separately selected Wire Drawer and Circuit Assembler roles. The owner selected common plates, rods, gears and housings as the ordinary component set; specialist small parts need a meaningful use. Introduce new stock/components only with clear product consumers and audited conversion units. The die choice covers the stated steel-forming families, not universal manual or press access to all advanced materials.
 
 ## Selected optional steel casting
 
@@ -141,19 +150,19 @@ Add an optional casting capability within the steel expansion, using suitable he
 | Steel gear mold | Existing steel gear for workshop construction/upgrades | Draft 4 steel ingots -> 1 gear matches 4 plates -> 1 gear: 36 nugget units in/out. Heat/work costs remain additional and unbalanced |
 | Housing mold | Suitable machinery housing or casing component where it has an actual construction consumer | Product identity, ingredients and units remain proposals. Reuse an existing suitable output where available; do not require a new housing for every old machine |
 
-Molds remain installed or recoverable/reusable after a batch; no per-cast mold loss or routine replacement is introduced. Their first construction must use earlier reachable materials and shaping equipment, without requiring the finished gear/housing they produce. Suitable staged heat-resistant materials and mold recipes need design; ordinary early bronze/brass molds and basic crucible heat do not automatically support steel.
+Molds remain installed or recoverable/reusable after a batch; no per-cast mold loss or routine replacement is introduced. Their first construction uses earlier reachable supplies and the shared bench/kiln, without requiring the finished gear/housing they produce. Accessible upgraded clay-based materials provide first steel-casting molds and lining; exact mixes and firing recipes remain to design. Specialist mineral refractories improve later equipment. Ordinary early bronze/brass molds and basic crucible heat do not automatically support steel.
 
 The gear quantity is an assistant recipe draft derived from the existing component units, not a new implementation or an owner-approved operating-time/fuel number. Casting can reward batch handling and an alternate product route while preserving metal parity. Do not assume casting is faster or more energy-efficient than pressing before its full heat/work costs are defined and measured.
 
 ### Selected casting attachment and fuel-fired heat
 
-Attach a reusable-mold casting basin to the larger foundry with a suitable casting heat upgrade. The foundry supplies the process heat; the basin shapes the selected product. Ordinary foundry steel production remains useful without this optional attachment. Exact connection faces, footprint, internal metal handoff and inventory layout remain implementation details; the selection does not itself create a molten-metal fluid network.
+Attach a reusable-mold casting basin to the larger foundry with a suitable casting heat upgrade. The foundry supplies the process heat; the basin shapes the selected product. Load metal items; melting and metal transfer happen internally within the attached setup. The initial arrangement requires no exposed molten-metal storage or transport network. Ordinary foundry steel production remains useful without this optional attachment. Exact connection faces, footprint, inventory layout and atomic handoff behavior remain implementation details.
 
 Fuel-fired heat and hand-operated bellows make this casting capability reachable before electricity. The bellows later accept shaft drive, following the earlier manual-to-shaft approach. Both arrangements use the same molds, recipes and metal yields; automation reduces active work. Bellows do not replace fuel, and casting heat costs are additional to the earlier production of steel stock. This is a new casting capability, not a claim that the current coke-based foundry already has a separate heating-fuel slot.
 
-Construct the heat upgrade, basin, bellows and first molds from earlier obtainable materials. Their heat-resistant material route must be reachable without requiring a cast output they enable. The chosen pre-electric route also means that initial heat-resistant supplies cannot depend solely on an electric chemical refinery. Whether accessible upgraded ceramics suffice or a mechanically prepared regional refractory is needed remains a material-design choice below. No rare refractory is newly required for ordinary steel ingots or hand plates.
+Construct the heat upgrade, basin, bellows and first molds from earlier obtainable materials. Their heat-resistant material route must be reachable without requiring a cast output they enable. Accessible upgraded clay-based materials are selected for first casting, with specialist mineral refractories reserved for later improvements. Initial supplies cannot depend solely on an electric chemical refinery. No rare refractory is newly required for ordinary steel ingots, hand plates or first steel casting.
 
-The owner selected the arrangement and fuel/bellows access, not numeric temperatures, fuel amounts, warm-up/cooling time, manual pouring or molten-metal transport. Those details are pending in the larger question batch. Later electrical convenience can extend the same workshop; a separate electric-only casting prerequisite is not the selected entry.
+Use clear heat levels and readable recipe requirements. Once the required heat and materials are supplied, casts finish automatically; players handle loading and manual bellows until shaft automation is installed. No player pouring action is required per batch. Exact fuel amounts, work rates, warm-up/cooling behavior and heat-upgrade costs remain to balance. Later electrical convenience can extend the same workshop; a separate electric-only casting prerequisite is not the selected entry.
 
 Coke-oven chemical byproducts can feed the [Chemistry branch](../branches/CHEMISTRY.md) later. Optional recovery needs useful consumers and explicit storage/full-output behavior, without making an entire chemical plant mandatory for first steel. Apply the separately selected [recovery/pollution planning direction](https://github.com/jimbozoomer-byte/jugcraft/pull/210) when defining industrial emissions; this brief adds no new appearance, crop-damage or maintenance effects.
 
@@ -171,23 +180,25 @@ Documentation checks are repository/local-link validation and whitespace checks;
 
 Before implementing the charcoal or expansion recipes, audit shared material conversions and the full survival construction path; compare charcoal/coke small and bulk production; test output blockage and carbon consumption atomically; and verify persistence and two-client operation. The Encyclopedia should explain both carbon options, each useful product branch and optional expansion machinery without quest-gating ordinary production.
 
-### Pending planning batch: ten decisions
+### Recorded planning batch: all ten answers A
 
-These alternatives are questions, not selected requirements. A is the assistant's recommendation in each row. Equipment/carbon quantities and casting heat/work costs still need a later balance pass.
+The owner selected every A direction on 7 October 2026. These are decisions rather than pending alternatives; equipment/carbon quantities and casting heat/work costs still need a later balance pass.
 
-| # | Decision | A: recommended | B / C: alternative |
-| --- | --- | --- | --- |
-| 1 | First casting refractory | Accessible upgraded clay-based lining; regional refractories improve later equipment | B: require mechanically prepared regional refractory material for first steel casting |
-| 2 | First dies and molds | Make initial tooling at the shared bench/kiln from earlier supplies | B: require a dedicated toolmaking station for initial tooling |
-| 3 | Component depth | Common plates, rods, gears and housings; specialist small parts only where useful | B: use a broader bolt/rivet/spring component set across machinery |
-| 4 | Molten-metal handling | Accept metal items; handle melting/casting internally at the attached setup | B: expose molten-metal storage/transfer between equipment through shared fluid handling |
-| 5 | Casting operation | Finish casts automatically once heat and inputs are supplied | B: player pouring per batch until pouring automation is built |
-| 6 | Heat model | Clear heat levels and recipe requirements | B: numeric temperatures with adjustable fuel/air control |
-| 7 | Larger press power | Shaft drive, with motor drive available later | B: larger presses are electric-only; small presses keep shaft operation |
-| 8 | Bulk coke equipment | Include an optional larger Coke Oven in the bulk expansion | B: use banks of ordinary ovens first; defer a larger oven |
-| 9 | Next alloy equipment | Upgrade existing alloy equipment for compatible next-stage recipes | B: introduce a dedicated heavy alloy furnace for that stage |
-| 10 | Next major planning topic | Industrial chemistry and advanced materials | B: precision electronics/factory control; C: heavy transport/vehicles |
+| # | Decision | Selected direction |
+| --- | --- | --- |
+| 1 | First casting refractory | Accessible upgraded clay-based lining and molds; specialist mineral refractories improve later equipment |
+| 2 | First dies and molds | Shared bench/kiln using earlier supplies; no dedicated initial toolmaking station |
+| 3 | Component depth | Common plates, rods, gears and housings; specialist small parts only where useful |
+| 4 | Molten-metal handling | Metal items enter; melting and transfer happen internally at the attached setup |
+| 5 | Casting operation | Automatic completion when required heat and materials are supplied; loading/manual bellows remain player work |
+| 6 | Heat model | Clear heat levels and readable recipe requirements |
+| 7 | Larger press power | Shaft drive, with later electric-motor drive |
+| 8 | Bulk coke equipment | Optional larger Coke Oven; ordinary ovens and oven banks remain valid |
+| 9 | Next alloy equipment | Heat upgrades extend compatible existing alloy equipment; new process capabilities can justify separate equipment later |
+| 10 | Next major planning topic | Industrial chemistry and advanced materials |
 
-After these choices, develop exact tooling/product identities, charcoal supply costs, station construction, batch sizes and fuel/energy budgets in fewer, larger planning passes. Keep the selected manageable core, material parity, no routine equipment replacement and useful sideways products throughout.
+The steel expansion's main arrangement is settled for this pass. Develop exact tooling/product identities, charcoal supply costs, station construction, batch sizes and fuel/energy budgets during later recipe/balance work. Keep the selected manageable core, material parity, no routine equipment replacement and useful sideways products throughout.
+
+Next, plan industrial chemistry and advanced materials from the existing [Chemistry branch](../branches/CHEMISTRY.md) and [mineral-sands/refining plan](mineral-sands-and-refining-plan.md). Preserve their shared processing roles, regional feeds, existing materials and useful product branches. Record subsequent chemistry decisions separately from this steel brief; pending chemistry questions are proposals until the owner answers them.
 
 AI-assisted planning documentation: OpenAI Codex, GPT-6 family. No gameplay feature implementation is included.
