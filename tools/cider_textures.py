@@ -8,10 +8,9 @@ read, traced or recoloured. The block textures are 16x16; the leaves are see-thr
 are), the rest opaque.
 """
 import math
-import random
 
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 from decor9_textures import put
 from decor13_textures import bottle, icon
 
@@ -30,26 +29,21 @@ JUICE = [rgb("b0741c"), rgb("c88a26"), rgb("dca23a"), rgb("f0c46a")]
 
 
 def leaves(fruit=0):
-    """Rounded apple leaves with gaps; fruit 1 adds white-and-pink blossom, 2 ripe red apples."""
-    rng = random.Random(26101)
+    """Apple leaves in clumps, as vanilla leaves: each clump lit along its top and shaded along its foot, with gaps
+    between; fruit 1 adds white-and-pink blossom, 2 ripe red apples."""
     c = Canvas()
+    grain = bs.grain(16, 16, 26101, 1.6, 4.0)
     for y in range(16):
         for x in range(16):
-            c.img.putpixel((x, y), LEAF[0] + (0,))
-    for _ in range(30):
-        x0, y0 = rng.randrange(16), rng.randrange(16)
-        angle = rng.uniform(0, 2 * math.pi)
-        for i in range(3):
-            x = (x0 + math.sin(angle) * i) % 16
-            y = (y0 - math.cos(angle) * i) % 16
-            c.px(x, y, LEAF[4 if i == 1 else 3])
-            c.px((x + 1) % 16, y, LEAF[2 if i % 2 else 3])
-            if i == 1:
-                c.px(x, (y + 1) % 16, LEAF[5])
-    for y in range(16):
-        for x in range(16):
-            if c.empty(x, y) and rng.random() < 0.6:
-                c.px(x, y, LEAF[rng.choice((1, 2))])
+            g = grain(x, y)
+            if g < 0.3:
+                c.img.putpixel((x, y), LEAF[0] + (0,))  # a gap
+            elif grain(x, (y - 1) % 16) < 0.3:
+                c.px(x, y, LEAF[4])                      # lit along the top of a clump
+            elif grain(x, (y + 1) % 16) < 0.3:
+                c.px(x, y, LEAF[1])                      # shaded along its foot
+            else:
+                c.px(x, y, LEAF[3] if g > 0.6 else LEAF[2])
     if fruit == 1:
         for cx, cy in ((3, 4), (11, 3), (7, 9), (13, 12), (3, 13)):
             for dx, dy in ((0, -1), (-1, 0), (1, 0), (0, 1)):
@@ -88,36 +82,21 @@ def sapling():
 def press_wood():
     """Dark oak boards with a grain, two to a face."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, OAK[1:4], 26102, [2, 3, 1])
-    rng = random.Random(26103)
-    for y in (0, 8):
-        for x in range(16):
-            c.px(x, y, OAK[0])
-    for _ in range(10):
-        x, y = rng.randrange(16), rng.randrange(1, 15)
-        if y % 8:
-            c.px(x, y, OAK[0])
-            c.px(x + 1, y, OAK[1])
+    bs.planks(OAK, 26102, boards=2)(c)
     return c.img
 
 
 def press_slats():
     """Upright oak slats with dark gaps between them, where the juice runs out."""
     c = Canvas()
-    rng = random.Random(26104)
-    for x in range(16):
-        for y in range(16):
-            if x % 4 == 3:
-                c.px(x, y, SLAT[0])
-            else:
-                c.px(x, y, SLAT[1 + (x % 4 == 0)] if rng.random() < 0.8 else SLAT[3])
+    bs.planks(SLAT, 26104, vertical=True, joint=False)(c)
     return c.img
 
 
 def press_iron():
     """Dark iron with a few rivets."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 26105, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 26105, [1, 3, 2])
     for x, y in ((2, 2), (13, 2), (2, 13), (13, 13), (8, 8)):
         c.px(x, y, IRON[3])
         c.px(x + 1, y + 1, IRON[0])
@@ -128,14 +107,7 @@ def staves(across):
     """Barrel staves running along the barrel: down the texture for its top and bottom (`across` False), along it for its
     sides."""
     c = Canvas()
-    rng = random.Random(26106 + across)
-    for y in range(16):
-        for x in range(16):
-            u = y if across else x
-            if u % 4 == 0:
-                c.px(x, y, STAVE[0])
-            else:
-                c.px(x, y, STAVE[1 + (u % 4 == 1)] if rng.random() < 0.85 else STAVE[3])
+    bs.planks(STAVE, 26106 + across, vertical=not across, joint=False)(c)
     return c.img
 
 
@@ -164,24 +136,25 @@ def head(mark):
 
 def brass():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BRASS[1:4], 26107, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, BRASS[1:4], 26107, [2, 3, 1])
     return c.img
 
 
 def pulp():
     """Ground apple: cream and tan, flecked with red skin."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, PULP[:3], 26108, [2, 3, 2])
-    rng = random.Random(26109)
-    for _ in range(18):
-        c.px(rng.randrange(16), rng.randrange(16), PULP[3])
+    bs.fill(c, 0, 0, 15, 15, PULP[:3], 26108, [2, 3, 2])
+    for y in range(1, 16, 4):
+        for x in range((y // 4) % 2 * 2 + 1, 16, 4):
+            c.px(x, y, PULP[3])  # flecks of red skin, set evenly
+            c.px(x + 1, y, PULP[3])
     return c.img
 
 
 def juice():
     """Fresh apple juice: cloudy amber with a few highlights."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, JUICE[:3], 26110, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, JUICE[:3], 26110, [2, 3, 2])
     for x, y in ((3, 4), (4, 4), (11, 9), (12, 9), (7, 13)):
         c.px(x, y, JUICE[3])
     return c.img
@@ -189,7 +162,7 @@ def juice():
 
 def apple_skin():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, APPLE[1:4], 26111, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, APPLE[1:4], 26111, [2, 3, 1])
     for x, y in ((3, 3), (4, 3), (3, 4), (11, 10)):
         c.px(x, y, APPLE[4])
     return c.img
