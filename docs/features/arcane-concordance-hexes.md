@@ -53,7 +53,7 @@ Concordance effect pushes you). A fresh sigil renews a ward; wards never stack.
 or adventure mode with 10 Focus and nothing worn in an accessory slot uses the censer to dream. Everything they carry
 (hotbar, inventory, armour, off hand) goes into one escrow on them; they dream in adventure mode with nothing, for at
 most three minutes, within 24 blocks of their body. Three dream wisps gather at once and one more every 30 s; catching
-one (use it) is one dreamglass, at most eight. Using the censer again wakes them.
+one (touching it) is one dreamglass, at most eight. Using the censer again wakes them.
 
 However a dream ends, they wake with exactly what they carried, in the same slots, where their body lay, and never
 with more experience than they had: experience gained in the dream is gone, and experience spent there (an
@@ -91,7 +91,8 @@ running out, straying or leaving the body's dimension (checked every half second
 on leaving the server, and on joining with a dream still open (a crash). A dreamer who died some way the death event
 did not see keeps the expedition on the dead body (ending it there does nothing) until they respawn; the new body then
 gets the escrow and game mode back (`Dreaming.recover`), once. Wisps are GeckoLib entities that are never saved and
-fade the moment their dreamer is not dreaming; only their dreamer can catch them.
+fade the moment their dreamer is not dreaming; only their dreamer can catch them, by touch, and nothing can pick or
+strike them (no projectile stops at one).
 
 ## Connections
 
@@ -134,7 +135,7 @@ fade the moment their dreamer is not dreaming; only their dreamer can catch them
 No new dependency. Framework use:
 
 - **Fabric API**: data components, attachments (the expedition is saved with the player), events (join, disconnect,
-  damage, death, respawn, entity use) and commands.
+  damage, death, respawn) and commands.
 - **The shared effect boundary** (Jugcraft): every curse pulse, the dream's night vision and the moving ward's guard.
 - **Spell Engine**: not used. A curse travels through a link held in a taglock, not as a cast spell, a projectile or
   an area, so no Spell Engine delivery applies; wards are items. (Morning question 35.)

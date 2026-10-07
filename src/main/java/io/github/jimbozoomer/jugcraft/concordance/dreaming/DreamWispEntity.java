@@ -22,9 +22,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A dream wisp (roadmap step 22): a small light that drifts round a point near the censer while its dreamer dreams,
- * and only its dreamer can catch it (use it: {@link Dreaming#catchWisp}). It is never saved and fades the moment its
- * dreamer is not dreaming or not here, so no wisp outlives its dream. It has no brain: it only drifts (SmartBrainLib is
- * for creatures that decide). GeckoLib draws it.
+ * and only its dreamer can catch it, by touching it ({@link Dreaming#catchWisp}). It is never saved and fades the moment
+ * its dreamer is not dreaming or not here, so no wisp outlives its dream. Nothing can pick or strike it (no projectile
+ * stops at a wisp). It has no brain: it only drifts (SmartBrainLib is for creatures that decide). GeckoLib draws it.
  */
 public class DreamWispEntity extends Entity implements GeoEntity {
 	private static final RawAnimation DRIFT = RawAnimation.begin().thenLoop("animation.dream_wisp.drift");
@@ -68,11 +68,9 @@ public class DreamWispEntity extends Entity implements GeoEntity {
 		}
 		double t = (tickCount + phase * 200.0) * 0.04;
 		setPos(anchor.x + Math.cos(t) * 2.5, anchor.y + Math.sin(t * 1.7) * 0.6, anchor.z + Math.sin(t) * 2.5);
-	}
-
-	@Override
-	public boolean isPickable() {
-		return true;
+		if (owner.getBoundingBox().inflate(0.5).intersects(getBoundingBox())) {
+			Dreaming.catchWisp(owner, this);
+		}
 	}
 
 	@Override
