@@ -31,7 +31,7 @@ Three guns, each the owner's model with the owner's animations:
 **Controls:**
 - **Left click** fires (held, for the Midge). With a gun in hand the attack button never mines or punches.
 - **Right click** (held) aims down the sights: the gun slides so its sight sits on the crosshair, the spread tightens, and you walk at 60%.
-- **R** reloads. **I** inspects. Both are rebindable under Jugcraft's controls.
+- **G** reloads. **H** inspects. Both are rebindable under Jugcraft's controls. They are not R and I because Iris, in the pack, keeps R for reloading shaders and I for its shader screen.
 - Pulling the trigger on an empty gun clicks, and reloads it if you carry its rounds.
 
 **What you see:**
@@ -132,7 +132,7 @@ The owner supplied each gun's parts as Blockbench Java item models (`Guns/models
 2. **Places the arm bones.** The animations move `right_arm` and `left_arm`, whose models were not supplied:
    - **Hierarchy:** each is a child of `gun_body`, so the hands follow the gun. This fit the Thunderpipe's shell-carrying left hand best of the arrangements tried (1.1 px, against 1.2 to 2.1).
    - **Pivot:** each pivot is the hand, placed so the idle pose's offsets bring it to the grip (right) and the fore-end or magazine (left).
-   - **The arm:** drawn back along the bone's -y, where every idle pose points it at the camera.
+   - **The arm:** each idle pose turns the arm bone so its -y points straight back at the camera, which showed the arms end-on as big slabs. So each arm runs instead toward a `<side>_shoulder` locator 10 px from the hand, down, back and out (`"arms"` in `BUILDS`, in the bone's own frame). The directions were chosen in a first-person preview of the idle pose, and the renderer turns the player's arm from -y onto the locator.
    - **Rest points (owner pixels):**
      - Midge: right hand (8, 2.2, 14.8), left (7.2, 0.6, 10.7);
      - Carbine: right (8, 1.2, 16.0), left (8, 2.8, 7.0);
@@ -215,7 +215,7 @@ Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns 
 
 ## Rollout and open questions
 - **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Light Round, Rifle Round, Buckshot Shell). The owner may rename them before release; IDs are stable only after release.
-- **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points above are the knobs.
+- **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **Not in this slice:**
   - attachments (the owner's parts include silencers, stocks, grips, scopes, extended magazines and bayonets);
   - the jam the Gnat's sound suggests;

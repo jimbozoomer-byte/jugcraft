@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.client.guns;
 
 import com.geckolib.cache.model.GeoBone;
+import com.geckolib.cache.model.GeoLocator;
 import com.geckolib.renderer.GeoItemRenderer;
 import com.geckolib.renderer.base.GeoRenderState;
 import com.geckolib.renderer.base.PerBoneRender;
@@ -14,12 +15,13 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import org.joml.Quaternionf;
 
 /**
  * The player's arms in their own first-person view of a gun, drawn at the gun model's right_arm and left_arm bones
- * (tools/guns.py places them; the owner's animations move them). Each bone's pivot is the hand; the arm runs back from
- * it along the bone's -y, twelve pixels with the fist two past the pivot, as the idle turns point it at the camera.
- * The arms are the player model's own (the skin's arm and sleeve, wide or slim).
+ * (tools/guns.py places them; the owner's animations move them). Each bone's pivot is the hand; the arm runs from it
+ * toward the bone's "&lt;side&gt;_shoulder" locator (down, back and out from the gun), twelve pixels with the fist two
+ * past the pivot. The arms are the player model's own (the skin's arm and sleeve, wide or slim).
  */
 final class GunArmsLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderData, GeoRenderState> {
 	/** The player model's arm runs from y -2 (shoulder) to 10 (fist); this puts the fist 2 px past the bone's pivot. */
@@ -40,17 +42,30 @@ final class GunArmsLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderD
 		for (int side = 0; side < 2; side++) {
 			boolean right = side == 0;
 			info.model().getBone(right ? "right_arm" : "left_arm")
-					.ifPresent(bone -> consumer.accept(bone, (pass, posed, tasks) -> arm(pass, tasks, view, right)));
+					.ifPresent(bone -> consumer.accept(bone, (pass, posed, tasks) -> arm(pass, tasks, view, bone, right)));
 		}
 	}
 
 	private static void arm(RenderPassInfo<GeoRenderState> pass, net.minecraft.client.renderer.SubmitNodeCollector tasks,
-			GunRenderer.View view, boolean right) {
+			GunRenderer.View view, GeoBone bone, boolean right) {
 		ModelPart part = parts(view.slim())[right ? 0 : 1];
 		// Centre the arm on the bone: a wide arm's box spans x -3..1 (right) or -1..3 (left), a slim one's -2..1 or -1..2.
 		float centre = view.slim() ? 0.5F : 1.0F;
 		PoseStack poseStack = pass.poseStack();
 		poseStack.pushPose();
+		// The arm runs along -y; turn that onto the way to the shoulder (the bone's pivot and locators are both in the
+		// model's rest space, so their difference is a direction in the posed bone's own frame).
+		String name = right ? "right_shoulder" : "left_shoulder";
+		for (GeoLocator shoulder : bone.locators()) {
+			if (shoulder.name().equals(name)) {
+				float x = shoulder.offsetX() - bone.pivotX();
+				float y = shoulder.offsetY() - bone.pivotY();
+				float z = shoulder.offsetZ() - bone.pivotZ();
+				if (x * x + y * y + z * z > 1.0E-4F) {
+					poseStack.mulPose(new Quaternionf().rotationTo(0.0F, -1.0F, 0.0F, x, y, z));
+				}
+			}
+		}
 		poseStack.translate((right ? centre : -centre) / 16.0F, -FIST / 16.0F, 0.0F);
 		int light = pass.packedLight();
 		tasks.submitCustomGeometry(poseStack, RenderTypes.entityTranslucent(view.skin()), (pose, buffer) -> {

@@ -92,8 +92,12 @@ RECIPES = {
 # their own centres (docs/features/guns.md has the survey of the animations that chose them).
 # "hands": where the right hand holds the grip and the left hand holds the gun in the idle pose. The arm bones are
 # children of gun_body, so the hands go where the gun goes; each one's pivot is the hand, placed so that the idle
-# animation's offset brings it to these points (arm_pivot()). The renderer draws the player's arm from the pivot
-# back along the bone's -y, the way the idle turns point every arm back toward the camera.
+# animation's offset brings it to these points (arm_pivot()).
+# "arms": which way each arm runs from the hand to the shoulder, in its arm bone's own frame (owner axes). The idle
+# animation turns the arm bones so that their -y points straight back at the camera, which showed the arms end-on as
+# big slabs; these run each arm down, back and out, so it rises from the bottom of the screen to the gun (chosen in a
+# first-person preview of the idle pose; docs/features/guns.md). The model carries each as a "<side>_shoulder"
+# locator ARM_REACH pixels from the pivot, and the renderer turns the player's arm from -y onto it.
 # "muzzle" and "sight": the locators the shot's smoke and aiming down the sights use.
 BUILDS = {
     "rust_midge": {
@@ -105,6 +109,7 @@ BUILDS = {
             ("magazine", "gun_body", ["stan_mag"], (8.0, 2.39, 10.71)),
         ],
         "hands": {"right": (8.0, 2.2, 14.8), "left": (7.2, 0.6, 10.7)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.2847, -0.4787, 0.8305)},
         "muzzle": (8.05, 4.4, 5.47),
         "sight": (8.0, 5.95, 14.5),
     },
@@ -116,6 +121,7 @@ BUILDS = {
             ("magazine_2", "gun_body", [], (7.99, 3.47, 11.5)),
         ],
         "hands": {"right": (8.0, 1.2, 16.0), "left": (8.0, 2.8, 7.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
         "muzzle": (8.01, 4.06, 3.77),
         "sight": (8.0, 5.22, 15.0),
     },
@@ -127,6 +133,7 @@ BUILDS = {
             ("shell", "gun_body", ["@shell"], (9.0, 4.17, 14.4)),
         ],
         "hands": {"right": (8.0, 1.6, 17.0), "left": (8.0, 2.8, 9.5)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
         "muzzle": (8.0, 4.17, 1.91),
         "sight": (8.0, 5.68, 14.0),
     },
@@ -405,6 +412,17 @@ def arm_pivot(gun, side):
     return (hx + ox, hy - oy, hz - oz)
 
 
+ARM_REACH = 10.0
+
+
+def shoulder(gun, side):
+    """Owner-space rest point of an arm's shoulder locator: ARM_REACH pixels from the arm bone's pivot along "arms"."""
+    x, y, z = BUILDS[gun]["arms"][side]
+    norm = math.sqrt(x * x + y * y + z * z)
+    px, py, pz = arm_pivot(gun, side)
+    return (px + ARM_REACH * x / norm, py + ARM_REACH * y / norm, pz + ARM_REACH * z / norm)
+
+
 def build_geo(gun):
     build = BUILDS[gun]
     size_px = atlas_size(gun)
@@ -428,7 +446,8 @@ def build_geo(gun):
             bone["locators"] = {**bone.get("locators", {}), "muzzle": geo_point(build["muzzle"])}
         bones.append(bone)
     for side in ("right", "left"):
-        bones.append({"name": f"{side}_arm", "parent": "gun_body", "pivot": geo_point(arm_pivot(gun, side))})
+        bones.append({"name": f"{side}_arm", "parent": "gun_body", "pivot": geo_point(arm_pivot(gun, side)),
+                      "locators": {f"{side}_shoulder": geo_point(shoulder(gun, side))}})
     return {"format_version": "1.12.0", "minecraft:geometry": [{
         "description": {"identifier": f"geometry.{MOD}.{gun}", "texture_width": size_px[0],
                         "texture_height": size_px[1], "visible_bounds_width": 4, "visible_bounds_height": 3,
@@ -551,6 +570,11 @@ def check():
             px, py, pz = 8.0 - bone["pivot"][0], bone["pivot"][1], bone["pivot"][2] + 8.0
             if not close((px - ox, py + oy, pz + oz), BUILDS[gun]["hands"][side], 1e-3):
                 problems.append(f"{gun}: the idle {side} hand is not at the grip")
+            sx, sy, sz = bone.get("locators", {}).get(f"{side}_shoulder", (8.0, 0.0, -8.0))
+            reach = (8.0 - sx - px, sy - py, sz + 8.0 - pz)
+            length = math.sqrt(sum(v * v for v in reach))
+            if abs(length - ARM_REACH) > 1e-3 or reach[1] >= 0:
+                problems.append(f"{gun}: the {side} shoulder locator is not {ARM_REACH} px below the hand")
         anim = ASSETS / "geckolib" / "animations" / "item" / f"{gun}.animation.json"
         source = LIBRARY / "item" / f"{GUNS[gun]['source']}.animation.json"
         if not anim.exists() or anim.read_bytes() != source.read_bytes():

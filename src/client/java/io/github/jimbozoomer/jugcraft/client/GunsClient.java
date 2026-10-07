@@ -41,7 +41,8 @@ import org.jspecify.annotations.Nullable;
  * ammunition counter.
  * <ul>
  * <li>With a gun in the main hand the attack button is the trigger (it never mines or punches): a press fires a
- * single-shot gun, holding fires an automatic at its rate. Right click (held) aims. R reloads and I inspects.</li>
+ * single-shot gun, holding fires an automatic at its rate. Right click (held) aims. G reloads and H inspects (not R
+ * and I, which Iris, in the pack, keeps for its shaders).</li>
  * <li>Each shot asks the server and at once plays the shot, its sound and a little kick of the view here; the server
  * may still refuse (it decides). The counter allows for shots the server has not answered yet.</li>
  * <li>Switching to a gun plays its draw, and it cannot fire until the draw is done.</li>
@@ -82,8 +83,8 @@ public final class GunsClient {
 				return renderer;
 			}
 		});
-		reloadKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.reload", InputConstants.KEY_R, PartyClient.CATEGORY));
-		inspectKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.inspect", InputConstants.KEY_I, PartyClient.CATEGORY));
+		reloadKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.reload", InputConstants.KEY_G, PartyClient.CATEGORY));
+		inspectKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.inspect", InputConstants.KEY_H, PartyClient.CATEGORY));
 		ClientPreAttackCallback.EVENT.register(GunsClient::attack);
 		ClientTickEvents.END_CLIENT_TICK.register(GunsClient::tick);
 		ClientPlayNetworking.registerGlobalReceiver(GunActionPayload.TYPE, (payload, context) -> receive(payload));
