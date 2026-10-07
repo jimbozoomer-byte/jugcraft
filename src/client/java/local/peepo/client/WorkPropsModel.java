@@ -41,29 +41,36 @@ final class WorkPropsModel extends EntityModel<PeepoState> {
         var valveMount=root.addOrReplaceChild("valve_mount",CubeListBuilder.create(),PartPose.ZERO);
         var leverMount=root.addOrReplaceChild("lever_mount",CubeListBuilder.create(),PartPose.ZERO);
         if(metal){
-            // Octagonal rim, four spokes and a fixed mounting shaft behind the rotating handwheel.
+            // Large octagonal rim; the fixed hub and downpipe belong to the stationary mount.
             for(int i=0;i<8;i++){
                 float angle=i*Mth.PI/4;
-                valve.addOrReplaceChild("rim_"+i,box(-.17F,-.58F,-.17F,.34F,1.16F,.34F),
+                valve.addOrReplaceChild("rim_"+i,box(-.25F,-1.11F,-.25F,.5F,2.22F,.5F),
                     PartPose.offsetAndRotation(Mth.cos(angle)*MachineWorkClip.VALVE_RADIUS,
                         Mth.sin(angle)*MachineWorkClip.VALVE_RADIUS,0,0,0,angle));
             }
-            valve.addOrReplaceChild("spokes",box(-1.25F,-.10F,-.12F,2.5F,.2F,.24F)
-                .texOffs(0,0).addBox(-.10F,-1.25F,-.12F,.2F,2.5F,.24F),PartPose.ZERO);
-            valveMount.addOrReplaceChild("shaft",box(-.20F,-.20F,-1.4F,.4F,.4F,1.4F),PartPose.ZERO);
-            valveMount.addOrReplaceChild("plate",box(-.6F,-.6F,-1.5F,1.2F,1.2F,.22F),PartPose.ZERO);
+            valve.addOrReplaceChild("spokes",box(-2.5F,-.16F,-.18F,5,.32F,.36F)
+                .texOffs(0,0).addBox(-.16F,-2.5F,-.18F,.32F,5,.36F),PartPose.ZERO);
+            valve.addOrReplaceChild("hub",box(-.42F,-.42F,-.28F,.84F,.84F,.56F),PartPose.ZERO);
+            valveMount.addOrReplaceChild("shaft",box(-.25F,-.25F,-.95F,.5F,.5F,1.05F),PartPose.ZERO);
+            float ground=24-MachineWorkClip.VALVE_Y;
+            valveMount.addOrReplaceChild("downpipe",box(-.30F,-.3F,-1.05F,.6F,ground+.08F,.6F),PartPose.ZERO);
+            valveMount.addOrReplaceChild("collar",box(-.42F,.20F,-1.17F,.84F,.42F,.84F),PartPose.ZERO);
+            valveMount.addOrReplaceChild("foot_flange",box(-.65F,ground-.22F,-1.4F,1.3F,.22F,1.3F),PartPose.ZERO);
             lever.addOrReplaceChild("shaft",box(-.28F,MachineWorkClip.LEVER_GRIP,-.28F,.56F,3.7F,.56F),PartPose.ZERO);
             leverMount.addOrReplaceChild("pivot",box(-.8F,-.4F,-.5F,1.6F,.8F,1),PartPose.ZERO);
             leverMount.addOrReplaceChild("bracket",box(-.6F,-.25F,-1.5F,1.2F,.5F,1.25F),PartPose.ZERO);
-            mallet.addOrReplaceChild("band",box(-.24F,-2.135F,-.485F,.48F,.97F,.97F),PartPose.ZERO);
+            // Match the wooden head's quarter-turn around the handle, including its metal strap.
+            mallet.addOrReplaceChild("band",box(-.35F,-.69F,-.69F,.7F,1.38F,1.38F),
+                PartPose.offsetAndRotation(0,-3.05F,0,0,Mth.PI/2,0));
             wrench.addOrReplaceChild("handle",box(-.36F,-.05F,-.27F,.72F,3.5F,.54F),PartPose.ZERO);
             wrench.addOrReplaceChild("jaw_base",box(-1.05F,-.5F,-.32F,2.1F,.7F,.64F),PartPose.ZERO);
             wrench.addOrReplaceChild("jaw_left",box(-1.05F,-1.5F,-.32F,.52F,1,.64F),PartPose.ZERO);
             wrench.addOrReplaceChild("jaw_right",box(.53F,-1.5F,-.32F,.52F,1,.64F),PartPose.ZERO);
         }else{
             lever.addOrReplaceChild("grip",box(-1.05F,MachineWorkClip.LEVER_GRIP-.32F,-.35F,2.1F,.64F,.7F),PartPose.ZERO);
-            mallet.addOrReplaceChild("handle",box(-.21F,-1.85F,-.21F,.42F,2.2F,.42F),PartPose.ZERO);
-            mallet.addOrReplaceChild("head",box(-1.1F,-2.1F,-.45F,2.2F,.9F,.9F),PartPose.ZERO);
+            mallet.addOrReplaceChild("handle",box(-.30F,-3.1F,-.30F,.6F,3.5F,.6F),PartPose.ZERO);
+            mallet.addOrReplaceChild("head",box(-1.65F,-.65F,-.65F,3.3F,1.3F,1.3F),
+                PartPose.offsetAndRotation(0,-3.05F,0,0,Mth.PI/2,0));
         }
         return LayerDefinition.create(mesh,16,16);
     }

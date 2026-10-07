@@ -31,7 +31,7 @@ final class CompanionWorkPose {
         left.x=s.pumpkin?2.9F:2.3F;right.x=-left.x;
         left.y=right.y=19.2F;left.z=right.z=s.pumpkin?-2.6F:-1.4F;
         head.yRot=0;head.xRot=.14F;
-        if(p.bodyPitch!=0 || p.bodyRoll!=0 || p.bodyX!=0){
+        if(p.bodyPitch!=0 || p.bodyRoll!=0 || p.bodyX!=0 || p.bodyY!=0){
             for(var part:torso)lean(part,p);
             lean(left,p);lean(right,p);
         }
@@ -47,7 +47,7 @@ final class CompanionWorkPose {
         float y=dy*cosX-part.z*sinX,z=dy*sinX+part.z*cosX;
         float cosZ=Mth.cos(pose.bodyRoll),sinZ=Mth.sin(pose.bodyRoll);
         float x=part.x*cosZ-y*sinZ;
-        part.y=22.5F+part.x*sinZ+y*cosZ;part.x=x+pose.bodyX;part.z=z;
+        part.y=22.5F+part.x*sinZ+y*cosZ+pose.bodyY;part.x=x+pose.bodyX;part.z=z;
         part.xRot+=pose.bodyPitch;part.zRot+=pose.bodyRoll;
     }
     private static void reach(ModelPart arm,float x,float y,float z){
