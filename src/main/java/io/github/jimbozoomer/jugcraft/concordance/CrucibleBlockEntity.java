@@ -324,7 +324,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		Reagent reagent = held.get(JugcraftConcordance.REAGENT);
 		boolean ingredient = reagent != null || catalog.ingredient(ConcordanceProgress.itemId(held)) != null;
 		Item form = formFor(held);
-		boolean formula = held.is(JugcraftConcordance.FORMULA);
+		boolean formula = held.is(JugcraftConcordance.FORMULA_ITEM);
 		if (!water && !stirrer && !ingredient && form == null && !formula) {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
