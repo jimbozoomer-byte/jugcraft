@@ -10,6 +10,8 @@ Related documents: [Chemistry branch](../branches/CHEMISTRY.md), [steel plan](in
 
 ## Recorded owner choices
 
+The next [starter factory construction and balance draft](industrial-starter-gas-and-acid-factory.md) compares current construction gates, proposes steel/copper entry equipment and game recipe quantities, and budgets hydrogen/methane generation across upgrades and heat recovery. Its ten-question decision batch is **pending**; those quantities and limits are not additional owner selections. The seven selected batches below remain the approved planning direction.
+
 | # | Owner answer | Selected direction |
 | --- | --- | --- |
 | 1 | Electrical steel entry, with detailed gas/fuel request | Proper industrial chemistry becomes substantial with steel-built electrical equipment, particularly processing usable gasoline and other fuels. Water electrolysis, hydrogen burning, chlorine/hydrogen chemistry, catalytic methane, coal-derived CO, later digesters and staged bioethanol form connected production branches |

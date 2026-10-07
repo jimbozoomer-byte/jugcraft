@@ -8,6 +8,8 @@ Related plans: [industrial chemistry and fuels](industrial-chemistry-and-fuels-p
 
 ## Shared machines requested by the owner
 
+The [starter gas/acid construction and balance draft](industrial-starter-gas-and-acid-factory.md) develops the first selected delivery milestone into proposed component bills, gas/acid batches and energy limits. Its ten owner questions remain pending; it does not approve those numbers, replace chemical grades or implement the catalog.
+
 These names describe Jugcraft machine roles. Reuse Jugcraft's shared gas/fluid, energy, recipes, inventories and side configuration; no external mod dependency, borrowed implementation/assets or separate incompatible chemical network is selected.
 
 | Requested machine | Input and useful outputs | Capability and existing-system integration |

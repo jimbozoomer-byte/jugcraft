@@ -4,6 +4,8 @@ Status: **in progress.** The petrochemistry (oil) line below is being built in b
 
 ## Owner planning: mineral sands and shared refining
 
+The [starter gas and acid factory draft](../features/industrial-starter-gas-and-acid-factory.md) proposes construction bills, reaction quantities and energy limits for the already selected first milestone. Current aluminum-cable/titanium construction gates need reachable steel/copper alternatives. The ten new questions and numerical proposals remain pending owner decisions; earlier selected directions are preserved.
+
 The [mineral-sands and refining plan](../features/mineral-sands-and-refining-plan.md) records dedicated plentiful regional sands as a major industrial supply, hybrid finite-deposit extraction, moderate physical separation and shared chemical machines with distinct roles. Proposed recipes and equipment remain planning work.
 
 Rare-earth development starts with named neodymium, cerium and yttrium products. **Expansion beyond this initial set is explicitly planned at the owner's request; three materials are not the final roster.** Add further named materials alongside useful consumers and reachable recovery routes, following the plan's expansion criteria.

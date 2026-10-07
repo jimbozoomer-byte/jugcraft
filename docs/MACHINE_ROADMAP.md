@@ -38,6 +38,8 @@ The [sixth material/product batch](features/industrial-chemistry-and-fuels-plan.
 
 The [seventh operation/delivery batch](features/industrial-chemistry-and-fuels-plan.md#starter-resources-operation-and-delivery-seventh-batch) selects coastal-seawater magnesium brine, regional chromium ore, recipe-internal water conditioning, PTFE advanced-machine construction parts, distinct speed/power and efficiency/energy effects, local automation before remote controls, and broad fertilizer crop groups. The [first milestone](features/industrial-chemistry-and-fuels-plan.md#first-delivery-milestone-starter-gas-and-acid-factory) is a usable starter gas/acid factory with electrolysis, preparation/synthesis, tanks and generator fuels; magnesium/aluminum/titanium and alloys follow. This is delivery order, not a requirement for every player to complete every industry. Construction recipes, source settings and balance remain to design.
 
+The [starter gas/acid construction and balance draft](features/industrial-starter-gas-and-acid-factory.md) proposes steel/copper entry machines, concrete game quantities and bounded fuel returns for the selected first chemistry milestone. Ten owner decisions remain pending, including machine forms, construction cost, heat, acid entry and output handling. These new numerical proposals are neither approved nor implemented.
+
 ## What exists now
 
 | Role | Implemented |
