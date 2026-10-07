@@ -58,6 +58,7 @@ import armoured_walker
 import gear
 import arms
 import arms_variants
+import check_icon_maps
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
@@ -134,7 +135,9 @@ def texture(ref):
     animated = png.with_name(png.name + ".mcmeta").is_file()
     with Image.open(png) as img:
         # Square: 16x16, or 32x32, 48x48 or 64x64 for high-resolution art, or 128x128 for a sculpted prop's packed texture
-        # (docs/ART_DIRECTION.md, "High resolution"; 48 for the icons of the long arms, which the arms' texel size wants).
+        # (docs/ART_DIRECTION.md, "High resolution"). New item icons are 16x16 (docs/ITEM_ICONS.md): 32, 48 and 64 remain
+        # for the 122 older icons not yet redrawn (tools/legacy_item_icons.txt, which tools/check_icon_maps.py holds to),
+        # and for block and model textures.
         # Animated textures are a vertical strip of square frames of 16x16, 32x32, 48x48 or 64x64 with an .mcmeta beside
         # them.
         width, height = img.size
@@ -939,23 +942,29 @@ def check_gun_art():
     texture exists and block ones are opaque; each decal (port cover, hazard sign, bore) is drawn whole, UV 0 to 1; the
     Observation Balloon's envelope is a closed, outward-facing mesh on its own opaque texture; nothing opaque is drawn
     through the translucent "nocull" path (opaque two-sided quads are "cutout", which 26.3 draws from both sides); and every
-    icon tools/gun_icons.py draws is committed as drawn, inside its one-pixel margin (CI does not regenerate textures)."""
-    import gun_icons
+    war machine's icon is its 16x16 map in tools/item_icons/, committed as drawn (CI does not regenerate textures;
+    tools/check_icon_maps.py checks the maps themselves against docs/ITEM_ICONS.md)."""
     import gun_poses
-    for kind in gun_icons.KINDS:
+    import item_icons
+    kinds = sorted(set(artillery.ITEMS) | set(tower_guns.items()) | set(landship.ITEMS) | set(mech.ITEMS)
+                   | set(zeppelin.ITEMS))
+    for kind in kinds:
+        if not item_icons.has(kind):
+            err(f"tools/item_icons/{kind}.txt is missing: every war machine's icon is a 16x16 map (docs/ITEM_ICONS.md)")
+            continue
         path = ASSETS / "textures" / "item" / f"{kind}.png"
         if not path.is_file():
             err(f"textures/item/{kind}.png is missing: run tools/generate_textures.py")
             continue
         try:
-            drawn = gun_icons.draw(kind)
+            drawn = item_icons.draw(kind)
         except ValueError as problem:
-            err(f"tools/gun_icons.py cannot draw {kind}: {problem}")
+            err(f"tools/item_icons.py cannot draw {kind}: {problem}")
             continue
         with Image.open(path) as img:
             saved = img.convert("RGBA")
         if saved.size != drawn.size or saved.tobytes() != drawn.tobytes():
-            err(f"textures/item/{kind}.png differs from tools/gun_icons.py's drawing: run tools/generate_textures.py")
+            err(f"textures/item/{kind}.png differs from its map in tools/item_icons/: run tools/generate_textures.py")
     files = ("artillery_quads.json", "tower_gun_quads.json", "landship_quads.json", "walker_quads.json", "balloon_quads.json")
     quads = {name: load(ASSETS / name) or {} for name in files}
     opacity = {}
@@ -1739,6 +1748,13 @@ def check_arms():
         definition = load(ASSETS / "items" / f"{item}.json") or {}
         if not definition.get("swap_animation_scale"):
             err(f"items/{item}.json has no swap_animation_scale")
+
+
+def check_item_icons():
+    """The 16x16 item icon maps, the materials they are coloured in and the item icons' sizes (tools/check_icon_maps.py,
+    docs/ITEM_ICONS.md); and the checker's own self-test, so a later edit cannot quietly weaken it."""
+    for message in check_icon_maps.errors() + check_icon_maps.self_test():
+        err(f"Item icon maps: {message}")
 
 
 def check_arms_variants():
@@ -7143,6 +7159,7 @@ def main():
     check_deposits()
     check_gear()
     check_arms()
+    check_item_icons()
     check_arms_variants()
     check_mesh_models()
     check_arms_motion()
