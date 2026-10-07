@@ -154,7 +154,13 @@ public final class CompanionSeats {
             for(BlockPos check:BlockPos.betweenClosed(BlockPos.containing(box.minX,box.minY,box.minZ),BlockPos.containing(box.maxX,box.maxY,box.maxZ))) {
                 if(!level.hasChunkAt(check))return false;
                 var state=level.getBlockState(check);
-                var shape=fence(state)?state.getShape(level,check):state.getCollisionShape(level,check);
+                var shape=state.getCollisionShape(level,check);
+                if(fence(state)) {
+                    // The selection shape also fills rails to 16 pixels, not their visible 15.
+                    // Clip only the arms; preserve the full-height four-pixel center post.
+                    shape=Shapes.or(Block.box(6,0,6,10,16,10),Shapes.join(
+                        state.getShape(level,check),Block.box(0,0,0,16,15,16),BooleanOp.AND));
+                }
                 if(Shapes.joinIsNotEmpty(shape.move(check.getX(),check.getY(),check.getZ()),Shapes.create(box),BooleanOp.AND))return false;
             }
             return true;
