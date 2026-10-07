@@ -645,6 +645,14 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 			Sign warning = warning(reason);
 			if (warning != null) {
 				Signs.show(level, worldPosition, warning);
+				// And where it fell short or broke: each part the last check found at fault (a dry channel, a missing stone).
+				if (report != null && (reason == RitualMachine.Interruption.POWER || reason == RitualMachine.Interruption.STRUCTURE
+						|| reason == RitualMachine.Interruption.CONTAINMENT)) {
+					for (StructureValidator.Fault fault : report.faults()) {
+						StructurePattern.Offset offset = fault.part().offset();
+						Signs.show(level, worldPosition.offset(offset.x(), offset.y(), offset.z()), warning);
+					}
+				}
 			} else {
 				sound(level, JugcraftConcordance.CIRCLE_BREAK_SOUND, 1.0F);
 			}

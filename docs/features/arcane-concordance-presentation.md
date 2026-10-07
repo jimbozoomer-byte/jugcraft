@@ -84,8 +84,10 @@ subtitles. The crucible's colour repeats what a spoon, Jade and the journal say 
 
 The events are wired as follows:
 
-- `CircleAnchorBlockEntity`: preparation at the start, a flow from each channel at each draw, a shortage at the short
-  channel, success at commit. `warning(Interruption)` gives shortage, danger or nothing.
+- `CircleAnchorBlockEntity`: preparation at the start, a flow from each channel at each draw, success at commit.
+  `warning(Interruption)` gives shortage, danger or nothing. A stop for power, structure or containment also shows its
+  warning at each part the circle's last check found at fault (the dry channel, the missing part, the lost boundary
+  stone), and a draw that finds a channel short shows it there.
 - `CrucibleBlockEntity`: work or danger per step, success per bottle, and a shortage once when its formula starts
   waiting.
 - `LeyPylonBlock`: a flow from the lantern when Radiance is poured; a shortage when the lantern holds too little.
