@@ -60,6 +60,7 @@ public final class WheelBlockEntity extends BlockEntity implements CompanionJob,
     private PeepoEntity npc(){return level instanceof ServerLevel s && occupant!=null && s.getEntity(occupant) instanceof PeepoEntity p?p:null;}
     private void expire(){if(occupant!=null && (level.getGameTime()>lease || npc()==null || !npc().isAlive())){var old=npc();if(old!=null)release(old);else{occupant=null;mounted=false;}}}
     public Kind kind(){return Kind.WHEEL;}
+    public WorkAnimation animation(){return WorkAnimation.NONE;}
     public CompanionStatus workStatus(PeepoEntity p){return !availableTo(p)?CompanionStatus.OCCUPIED:energySpace()==0?CompanionStatus.FULL:CompanionStatus.READY;}
     public boolean worthStarting(PeepoEntity p){return workStatus(p)==CompanionStatus.READY && energySpace()>=640;}
     public CompanionStatus work(PeepoEntity p){return CompanionWork.transfer(p,this)>0?CompanionStatus.WORKING:workStatus(p);}

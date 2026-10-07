@@ -35,6 +35,17 @@ public final class PeepoEntity extends PathfinderMob {
     private static final EntityDataAccessor<Integer> REST = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> WHEEL_RUNNING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> RECOVERING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> WORK_ANIMATION = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<net.minecraft.core.BlockPos> WORK_TARGET = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BLOCK_POS);
+    private int workAnimationTicks;
+    public WorkAnimation workAnimation(){return WorkAnimation.values()[Math.clamp(entityData.get(WORK_ANIMATION),0,WorkAnimation.values().length-1)];}
+    public net.minecraft.core.BlockPos workTarget(){return entityData.get(WORK_TARGET);}
+    public void setWorkAnimation(WorkAnimation action,net.minecraft.core.BlockPos target){
+        if(level().isClientSide())return;
+        if(!isAlive() || isEating() || getRestMode()!=CompanionEnergy.Rest.NONE)action=WorkAnimation.NONE;
+        if(action!=WorkAnimation.NONE)entityData.set(WORK_TARGET,target.immutable());
+        entityData.set(WORK_ANIMATION,action.ordinal());workAnimationTicks=action==WorkAnimation.NONE?0:5;
+    }
     public final net.minecraft.world.SimpleContainer belongings=new net.minecraft.world.SimpleContainer(10){
         @Override public void setChanged(){syncBelongings();}
     };
@@ -164,6 +175,7 @@ public final class PeepoEntity extends PathfinderMob {
         builder.define(ENERGY,CompanionEnergy.CAPACITY);builder.define(FOOD_BONUS,0);builder.define(FOOD_TIME,0);builder.define(REST,0);
         builder.define(WHEEL_RUNNING,false);
         builder.define(RECOVERING,false);
+        builder.define(WORK_ANIMATION,0);builder.define(WORK_TARGET,net.minecraft.core.BlockPos.ZERO);
     }
     public boolean isJughead() { return getType()==PeepoMod.JUGHEAD || getType()==PeepoMod.LEGACY_JUGHEAD; }
     public boolean isWearingPumpkin() { return entityData.get(PUMPKIN); }
@@ -199,9 +211,12 @@ public final class PeepoEntity extends PathfinderMob {
     }
     public boolean isBlushing() { return entityData.get(BLUSHING); }
     @Override public void tick() {
-        if (!level().isClientSide() && bedExit != null && getRestMode() == CompanionEnergy.Rest.NONE) leaveCompanionBed();
+        if (!level().isClientSide() && bedExit != null && getRestMode() == CompanionEnergy.Rest.NONE && workAnimation()!=WorkAnimation.STIR) leaveCompanionBed();
         super.tick();
         if(!level().isClientSide()) {
+            if(workAnimationTicks>0)--workAnimationTicks;
+            if(workAnimationTicks==0 || !isAlive() || isEating() || getRestMode()!=CompanionEnergy.Rest.NONE)
+                setWorkAnimation(WorkAnimation.NONE,blockPosition());
             if(wheelRunningTicks>0)--wheelRunningTicks;
             if(wheelRunningTicks==0 || !isAlive() || getEnergy()==0 || isEating() || getRestMode()!=CompanionEnergy.Rest.NONE)
                 setWheelRunning(false);

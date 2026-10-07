@@ -395,7 +395,7 @@ public final class JugcraftAgriculture {
 	/** What each kind of pumpkin becomes when first carved by hand, and the loot table its seeds come from. */
 	private static final Map<Block, Block> CARVED_FROM = new HashMap<>();
 	private static final Map<Block, ResourceKey<LootTable>> CARVE_LOOT = new HashMap<>();
-	public static ExtendedMenuType<CookingPotMenu, BlockPos> COOKING_POT_MENU;
+	public static ExtendedMenuType<CookingPotMenu, CookingPotPlan.Opening> COOKING_POT_MENU;
 
 	private JugcraftAgriculture() {
 	}
@@ -659,7 +659,7 @@ public final class JugcraftAgriculture {
 		COOKING_POT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("cooking_pot"),
 				FabricBlockEntityTypeBuilder.create(CookingPotBlockEntity::new, pot).build());
 		COOKING_POT_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("cooking_pot"),
-				new ExtendedMenuType<>((containerId, inventory, pos) -> new CookingPotMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
+				new ExtendedMenuType<>(CookingPotMenu::new, CookingPotPlan.Opening.CODEC));
 		POT_COOKING = Registry.register(BuiltInRegistries.RECIPE_TYPE, Jugcraft.id("pot_cooking"), new RecipeType<CookingPotRecipe>() {
 			@Override
 			public String toString() {

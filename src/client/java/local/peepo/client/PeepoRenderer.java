@@ -17,11 +17,13 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         items=context.getItemModelResolver();
         addLayer(new FoodLayer(this));
         addLayer(new HeldLayer(this));
+        addLayer(new SpoonLayer(this,new StirringSpoonModel(context.bakeLayer(PeepoClient.SPOON))));
         addLayer(new EyesLayer<PeepoState,PeepoModel>(this) {
             @Override public RenderType renderType() { return RenderTypes.eyes(PeepoMod.id("textures/entity/peepo_pumpkin_glow.png")); }
         });
     }
     @Override public PeepoState createRenderState() { return new PeepoState(); }
+    @Override public net.minecraft.world.phys.Vec3 getRenderOffset(PeepoState state){return super.getRenderOffset(state).add(state.workOffset);}
     @Override protected void setupRotations(PeepoState state, PoseStack pose, float bodyRot, float scale) {
         super.setupRotations(state, pose, bodyRot, scale);
         if (state.sleeping && state.deathTime <= 0) {
@@ -44,9 +46,30 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.wheelRunning=entity.isWheelRunning();
         state.sleeping=entity.getRestMode()==CompanionEnergy.Rest.SLEEPING;
         state.sitting=entity.getRestMode()==CompanionEnergy.Rest.SITTING;
+        state.work=state.eating || state.sleeping || state.sitting || state.wheelRunning || !entity.isAlive()?WorkAnimation.NONE:entity.workAnimation();
+        state.workPhase=(float)WorkAnimation.stirPhase(entity.level().getGameTime(),partialTick);
+        state.workOffset=net.minecraft.world.phys.Vec3.ZERO;
+        if(state.work==WorkAnimation.STIR){
+            var target=entity.workTarget();
+            // Smooth the same orbit used by the server's actual mounted entity/hitbox.
+            if(!entity.level().hasChunkAt(target) || !(entity.level().getBlockState(target).getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlock))state.work=WorkAnimation.NONE;
+            else{
+                double dx=Math.cos(state.workPhase)*WorkAnimation.STIR_RADIUS,dz=Math.sin(state.workPhase)*WorkAnimation.STIR_RADIUS;
+                state.workOffset=new net.minecraft.world.phys.Vec3(target.getX()+.5+dx-state.x,target.getY()+WorkAnimation.STIR_HEIGHT-state.y,target.getZ()+.5+dz-state.z);
+                state.bodyRot=(float)Math.toDegrees(Math.atan2(dx,-dz));state.yRot=0;state.xRot=0;state.shadowRadius=0;
+            }
+        }
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;
-        items.updateForLiving(state.held,!state.eating && !state.sleeping ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,state.holdingLight ? ItemDisplayContext.NONE : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
+        items.updateForLiving(state.held,!state.eating && !state.sleeping && state.work==WorkAnimation.NONE ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,state.holdingLight ? ItemDisplayContext.NONE : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
         items.updateForLiving(state.food,state.eating ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.FIXED,entity);
+    }
+    private static final class SpoonLayer extends RenderLayer<PeepoState,PeepoModel>{
+        private final StirringSpoonModel spoon;
+        SpoonLayer(PeepoRenderer parent,StirringSpoonModel spoon){super(parent);this.spoon=spoon;}
+        @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
+            if(state.isInvisible || state.work!=WorkAnimation.STIR)return;
+            collector.order(1).submitModel(spoon,state,pose,RenderTypes.entitySolid(io.github.jimbozoomer.jugcraft.Jugcraft.id("textures/block/cider_press_wood.png")),light,OverlayTexture.NO_OVERLAY,state.outlineColor);
+        }
     }
     private static final class HeldLayer extends RenderLayer<PeepoState,PeepoModel> {
         HeldLayer(PeepoRenderer renderer){super(renderer);}

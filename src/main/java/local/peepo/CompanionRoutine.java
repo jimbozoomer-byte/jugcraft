@@ -94,7 +94,7 @@ final class CompanionRoutine extends Goal {
     @Override public void start(){active=true;}
     private void release(){
         if(station!=null)station.release(npc);
-        station=null;block=null;npc.setWheelRunning(false);npc.setRestMode(CompanionEnergy.Rest.NONE);npc.getNavigation().stop();state=CompanionStatus.IDLE;
+        station=null;block=null;npc.setWheelRunning(false);npc.setWorkAnimation(WorkAnimation.NONE,npc.blockPosition());npc.setRestMode(CompanionEnergy.Rest.NONE);npc.getNavigation().stop();state=CompanionStatus.IDLE;
     }
     @Override public void stop(){release();active=false;}
     private void reconsiderWork(){
@@ -137,7 +137,8 @@ final class CompanionRoutine extends Goal {
         }
         npc.getNavigation().stop();if(!station.occupy(npc)){release();return;}
         if(station instanceof CompanionJob job){
-            npc.setRestMode(CompanionEnergy.Rest.NONE);state=job.work(npc);if(state!=CompanionStatus.WORKING)release();
+            npc.setRestMode(CompanionEnergy.Rest.NONE);state=job.work(npc);
+            if(state!=CompanionStatus.WORKING)release();else npc.setWorkAnimation(job.animation(),job.stationPosition());
         }else{
             npc.setRestMode(station.kind()==CompanionStation.Kind.BED?CompanionEnergy.Rest.SLEEPING:CompanionEnergy.Rest.SITTING);state=CompanionStatus.RESTING;
         }

@@ -21,7 +21,7 @@ Assignments must be within 64 blocks of the selected companion when added. The c
 
 Generator Wheels are functional jobs: once the planner is used, Work mode uses assigned wheels only. Full, occupied, invalid and temporarily unreachable wheels are skipped, allowing other assigned wheels to be considered. Exhausted companions still rest and recover through the existing energy routine. Nearby seats and lunch sources retain the existing behavior; food is allowed near the assigned places within the GUI's range.
 
-Other machines/cooking pots can be recorded for future jobs, but **do not receive production speedups or companion labor yet**. The tool feedback and assignment tooltip state this explicitly.
+[Cooking Pots now support assistance](companion-cooking.md): one helper gives +50% cooking speed, with a saved recipe selector in the pot's GUI for future supply integration. Other machines can be recorded for future jobs but do not receive production speedups yet; their status remains Unsupported job.
 
 Work selection uses row priority before distance. Reordering in Work mode prompts a new selection without interrupting exhaustion recovery or changing the selected command. While working a lower-priority wheel, the companion checks higher-priority links every 80-99 ticks, with at most two path attempts and the existing unreachable cooldown. It switches only after a usable higher-priority wheel can be reached and claimed; otherwise it keeps its current job. Full, occupied, unloaded, missing and unimplemented jobs do not block lower priorities. Reordering uses the existing server-validated menu buttons and assignment snapshot; it adds no per-tick world scan or separate save format.
 

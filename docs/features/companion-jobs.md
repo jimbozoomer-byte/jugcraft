@@ -1,6 +1,6 @@
 # Companion jobs, budgets, status, lunch and schedules
 
-Owner-directed stages 1-4 of the companion roadmap, implemented locally with OpenAI Codex (GPT-6) on `peepo-companion`. This extends the existing wheel, inventory, planner and rest behavior. It does not add Cooking Pot or industrial production bonuses; those remain the next adapter stages.
+Owner-directed stages 1-4 of the companion roadmap, implemented locally with OpenAI Codex (GPT-6) on `peepo-companion`. This extends the existing wheel, inventory, planner and rest behavior. [Cooking Pot assistance and recipe plans](companion-cooking.md) are now the next implemented adapter; industrial production assistance remains future work.
 
 ## Player use
 

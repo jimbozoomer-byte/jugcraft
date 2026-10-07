@@ -31,3 +31,7 @@ References: https://github.com/speedygroyper/jugcraft/blob/8ca8aee5/distribution
 The local branch is now `peepo-companion`. Use the Companion Planner to select a tamed companion and then assign one home and up to four workstations. Left-click with the tool unassigns without mining; Shift-right-click air clears the selection. The GUI now lists assignments and coordinates in place of Set home/Set work. See [the assignment feature record](docs/features/companion-assignments.md) for supported jobs, limits and suggested follow-ups.
 
 The planner also binds a separate lunch crate/cover. The companion GUI's Routine tab controls Auto/Day/Night shifts, break/resume energy, carried meals, food preference and optional problem alerts. Operator command `/peepobudget` shows server-wide search/path admissions and deferrals. See [the job-system record](docs/features/companion-jobs.md).
+
+## Cooking Pot assistance
+
+Assign a Cooking Pot with the planner, then open the pot to search/select a recipe. Its saved plan shows the ingredients per batch and filters input items. Auto restores normal ingredient-driven cooking. One helper adds 50% cooking speed while spending up to 16 JE/t, with heat and ingredients still required. Leave room beside/above the pot for the angled spoon and hanging companion; Jughead needs extra jug clearance. Schedules, recovery and workstation priorities still apply. Future supply transport can read the plan but is not implemented yet. See [Cooking Pot assistance](docs/features/companion-cooking.md).

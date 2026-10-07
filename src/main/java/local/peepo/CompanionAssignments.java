@@ -56,7 +56,7 @@ public final class CompanionAssignments {
         changed();
         if(lunch){npc.report.lunch(CompanionStatus.READY);return "Lunch source assigned: "+targets[slot].name();}
         npc.orders.assigned(home,at);
-        return (home?"Home assigned: ":"Work "+slot+" assigned: ")+targets[slot].name()+(home || level.getBlockEntity(pos) instanceof WheelBlockEntity?"":" (work behavior not implemented yet)");
+        return (home?"Home assigned: ":"Work "+slot+" assigned: ")+targets[slot].name()+(home || CompanionJobs.resolve(npc,pos)!=null?"":" (work behavior not implemented yet)");
     }
     public String remove(Level level,BlockPos clicked){
         var pos=canonical(level,clicked);var at=GlobalPos.of(level.dimension(),pos);
