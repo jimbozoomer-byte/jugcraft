@@ -17,6 +17,7 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,13 +116,13 @@ public final class Garden {
 		GLOAMCAP_CROP = crop("gloamcap");
 		MENDVETCH_CROP = crop("mendvetch");
 		VERDANT_HEART = block("verdant_heart", VerdantHeartBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
-				.strength(1.0F).sound(SoundType.AZALEA).noOcclusion().pushReaction(PushReaction.BLOCK));
+				.strength(1.0F).sound(SoundType.AZALEA).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		MULCH_MAW = block("mulch_maw", MulchMawBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_ORANGE)
-				.strength(1.0F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.BLOCK));
+				.strength(1.0F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		HABITAT_GAUGE = block("habitat_gauge", HabitatGaugeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
-				.strength(0.5F).sound(SoundType.AZALEA).noOcclusion().pushReaction(PushReaction.DESTROY));
+				.strength(0.5F).sound(SoundType.AZALEA).noOcclusion().pushReaction(PushReaction.POPPED));
 		GLEANER = block("gleaner", GleanerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_ORANGE)
-				.strength(1.0F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.BLOCK));
+				.strength(1.0F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		Item bed = item("verdant_bed", properties -> new GardenItem(VERDANT_BED, properties), new Item.Properties().useBlockDescriptionPrefix());
 		SUNPETAL = item("sunpetal", properties -> new GardenItem(SUNPETAL_CROP, properties), new Item.Properties().useItemDescriptionPrefix());
 		DEWMOSS = item("dewmoss", properties -> new GardenItem(DEWMOSS_CROP, properties), new Item.Properties().useItemDescriptionPrefix());
@@ -302,10 +303,24 @@ public final class Garden {
 		return given;
 	}
 
+	/**
+	 * The positions within {@code reach} blocks of {@code center} across and {@code height} up or down, nearest first (the
+	 * same order every time, so devices share and harvest the same way).
+	 */
+	public static List<BlockPos> nearest(BlockPos center, int reach, int height) {
+		List<BlockPos> positions = new ArrayList<>();
+		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-reach, -height, -reach), center.offset(reach, height, reach))) {
+			positions.add(pos.immutable());
+		}
+		positions.sort(Comparator.<BlockPos>comparingDouble(pos -> pos.distSqr(center)).thenComparingInt(BlockPos::getY)
+				.thenComparingInt(BlockPos::getX).thenComparingInt(BlockPos::getZ));
+		return positions;
+	}
+
 	/** The beds within {@code reach} blocks of {@code center} (and one above or below), nearest first, in loaded chunks. */
 	public static List<VerdantBedBlockEntity> bedsAround(ServerLevel level, BlockPos center, int reach) {
 		List<VerdantBedBlockEntity> beds = new ArrayList<>();
-		for (BlockPos pos : BlockPos.withinManhattan(center, reach, 1, reach)) {
+		for (BlockPos pos : nearest(center, reach, 1)) {
 			if (level.isLoaded(pos) && level.getBlockEntity(pos) instanceof VerdantBedBlockEntity bed) {
 				beds.add(bed);
 			}

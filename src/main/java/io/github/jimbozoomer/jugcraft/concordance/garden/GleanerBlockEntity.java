@@ -86,7 +86,7 @@ public class GleanerBlockEntity extends LivingDeviceBlockEntity implements GeoBl
 			status("no_verdance");
 			return status;
 		}
-		for (BlockPos pos : BlockPos.withinManhattan(worldPosition, REACH, 1, REACH)) {
+		for (BlockPos pos : Garden.nearest(worldPosition, REACH, 1)) {
 			if (!level.isLoaded(pos)) {
 				continue;
 			}
@@ -116,7 +116,7 @@ public class GleanerBlockEntity extends LivingDeviceBlockEntity implements GeoBl
 	/** Draws Verdance from the Verdant Hearts in reach, nearest first, until it has {@value #DRAW} more or none is left. */
 	private void draw(ServerLevel level) {
 		UUID actor = keeper == null ? NO_ONE : keeper;
-		for (BlockPos pos : BlockPos.withinManhattan(worldPosition, HEART_REACH, HEART_REACH, HEART_REACH)) {
+		for (BlockPos pos : Garden.nearest(worldPosition, HEART_REACH, HEART_REACH)) {
 			long want = Math.min(DRAW, CAPACITY - verdance);
 			if (want <= 0) {
 				return;
