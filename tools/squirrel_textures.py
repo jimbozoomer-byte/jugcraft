@@ -1,12 +1,10 @@
 """Original textures for squirrels and acorns (fall addition 24) (requires Pillow): the squirrel, red and grey (32 by 32,
 laid out as client/SquirrelModel.java's boxes: soft fur, a cream belly, dark eyes and nose, a bushy tail paler at its
-tip); the acorn and roasted acorns as items.
+tip); the acorn and roasted acorns as items. Clean, cartoon style: flat fur lit along the top, no random speckle.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code, from a fixed seed; no Mojang texture is
 read, traced or recoloured.
 """
-import random
-
 from PIL import Image
 
 from agriculture import SQUIRRELS
@@ -24,10 +22,10 @@ ROAST = [rgb("3e2412"), rgb("5c361a"), rgb("7a4c26")]
 def squirrel(coat):
     palette = COATS[coat]
     img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    rng = random.Random(24001 + (coat == "grey"))
+    # Flat fur: the coat's middle tone, a step lighter in a band along the top of each strip of the layout.
     for y in range(32):
         for x in range(32):
-            img.putpixel((x, y), palette[rng.choice((0, 1, 1, 2, 2, 2, 3))] + (255,))
+            img.putpixel((x, y), palette[3 if y % 8 == 0 else 2] + (255,))
     # The body's underside (4 x 7 at 11, 0) and the head's underside (4 x 4 at 8, 11): cream.
     for y in range(0, 7):
         for x in range(11, 15):
@@ -38,6 +36,7 @@ def squirrel(coat):
     # The head's front (4 x 4 at 4, 15): two dark eyes with a glint, a pale muzzle below.
     for ex in (4, 7):
         img.putpixel((ex, 16), EYE + (255,))
+        img.putpixel((ex, 17), EYE + (255,))
     for x in range(5, 7):
         img.putpixel((x, 18), BELLY[coat] + (255,))
     # The snout's front (2 x 2 at 17, 12): a dark nose.
@@ -46,8 +45,7 @@ def squirrel(coat):
     # The tail's tip (4 x 5 x 4 at 12, 19): paler, frosted fur.
     for y in range(19, 28):
         for x in range(12, 28):
-            if rng.random() < 0.45:
-                img.putpixel((x, y), palette[3] + (255,))
+            img.putpixel((x, y), palette[3] + (255,) if y >= 25 or y == 19 else palette[2] + (255,))
     return img
 
 
@@ -63,7 +61,7 @@ def acorn():
     for y in range(4, 8):
         for x in range(3, 13):
             if abs(x - 7.5) <= 4.4 - (7 - y) * 0.4:
-                img.putpixel((x, y), CAP[(x + y) % 3] + (255,))
+                img.putpixel((x, y), CAP[2 if y == 4 else 1 if (x + y // 2 * 2) % 3 else 0] + (255,))
     img.putpixel((8, 3), CAP[0] + (255,))
     img.putpixel((8, 2), CAP[0] + (255,))
     img.putpixel((6, 9), NUT[2] + (255,))
