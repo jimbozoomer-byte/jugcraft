@@ -182,6 +182,7 @@ provisional; replace it with measures when a family's maps are approved.
 | **Food and produce** | Compact, about a quarter to a third of the canvas, outlined in the food's own dark, lit top left with one or two highlight pixels. A stem or leaf makes a 2-pixel cue. | `tomato`, `turnip`, `cranberries`, `popcorn`, `king_size_candy_bar` | speckled `pan_de_muerto`; unoutlined `marshmallow`, `burnt_sugar` |
 | **Seeds** | Each kind its own shape and colour. | `chestnut`, `giant_pumpkin_seeds` | 20 of 25 seeds share one speck layout |
 | **Bottles and containers** | Upright, in vanilla's form. See *Bottles and their contents* below. Every pixel is fully opaque or fully clear. | `mason_jar`, the soup bowls; `giants_draught` for its form only | `giants_draught`'s single near-black outline (#1a120c, luma 20), the same round cork, glass and contents; `wisp_in_a_jar`'s semi-transparent glass; the buckets' mid-grey outline |
+| **Guns and vehicles** | Centred (`# family: compact`). A gun from the side, its barrel raised to the upper right out of its housing, with a dark bore (`k`); a vehicle whole, from the side or the front. A tier cue: a hazard band (`k` on `F`) or a phosphor lamp. Shells lie on the diagonal (`# family: short`), told apart by size, band and nose. | the war machines' maps in `tools/item_icons/` (7 October 2026; not yet shown to the owner) | |
 | **Parts and gadgets** | The object's real silhouette, never a square tile: a gear with teeth, a coil or spool of wire, a plate as a slab with a lit top edge, a card with a margin round it. | `turbocharger`, `speed_upgrade`, `carving_knife`, `first_prize_ribbon` | `basic_circuit` fills the slot; `copper_wire` is a ladder; the drones have no outline |
 
 **Bottles and their contents.**
@@ -290,7 +291,9 @@ provisional; replace it with measures when a family's maps are approved.
   | Iron | #26262c | #828288 | #aaaab0 | #ccccd0 | #e8e8ec |
   | Gold | #422806 | #ba8c1c | #e6be32 | #f8de64 | #fff6b4 |
 
-  The table also holds the arms' materials and a provisional clear glass (#222c3a to #f4faff) for bottles.
+  The table also holds the arms' materials, a provisional clear glass (#222c3a to #f4faff) for bottles, and the war
+  machines' paints and stuffs (hazard yellow, concrete, canvas, khaki, red paint and black lacquer, 7 October 2026,
+  provisional). Hazard yellow sits near gold, so it is only ever a second material.
 - **A new material gets a five-tone ramp:** outline, dark, mid, light and highlight. In code it is an
   `arms_pixel.Material`; its second tone, the outline towards the light, is used by the 3D models, and by the icons only
   for the chain's `c`. Add it to `tools/icon_materials.py`. The ramp must:
@@ -455,7 +458,8 @@ provisional; replace it with measures when a family's maps are approved.
 ## Maps and the checker
 
 A map is a text file of 16 lines of 16 symbols that the owner can edit in any text editor. Lines starting with `#` are
-comments. The arms' maps are in `tools/arms_icons/`, coloured by `tools/arms_icons.py`.
+comments. The arms' maps are in `tools/arms_icons/`, coloured by `tools/arms_icons.py`; other items' maps are in
+`tools/item_icons/`, drawn by `tools/item_icons.py` in their declared materials.
 
 ### The symbols
 Every icon map shares one table. A symbol names a role, not a material: the arm's style, or the map's `# materials:`
@@ -468,7 +472,7 @@ into `SYMBOLS` and `ROLES` in `tools/check_icon_maps.py` together.
 | `O D M L H` | `main`: outline, dark, mid, light, highlight | the blade or head | an ingot, a coin, a bottle's contents |
 | `g f F Y` | `second`: outline, dark, mid, light | fittings (guard, pommel, rings, socket, trim) | a bottle's glass, a trim |
 | `w b B` | `wood`: outline, dark, light. `w` also outlines a wrap. | the haft | a stick, a cork |
-| `k K` | `wrap`: dark, light | the grip | a cloth band, a string |
+| `k K` | `wrap`: dark, light | the grip | a cloth band, a string; a gun's bore and a hazard stripe's black (`wrap=rubber`) |
 | `a A` | `stone`: dark, light | a set stone | a lens, a lamp |
 | `e E` | `accent`: dark, light | runes, a hazard stripe | |
 | `c C` | chain: dark (its own edge), light | | |
@@ -480,9 +484,9 @@ A map declares its materials, its family and any deliberate exception in comment
 
 | Directive | Means | Used by |
 |---|---|---|
-| `# materials: main=<m> second=<m> wood=<m> wrap=<m> stone=<m> accent=<m>` | The material of each role the map uses, from `tools/icon_materials.py`; every role the map uses must be named. Every map that is not an arm needs one: without it the checker previews and checks the map as an arm, in bronze and steel. | no map in the repository yet; the material sets, coins and bottles will |
-| `# family: <family>` | The size norms for a map whose name is not a known arm: `long_sword`, `thrusting_sword`, `polearm`, `staff`, `headed`, `short` or `tool` (span and share), or `compact`, `upright` or `flat` (cover and position; no highlight-edge warning). | |
-| `# allow: pinhole - <why>` | The drawing may enclose transparency. | chakram (the ring), harpoon (the rope's eye), katar (the hand gap), rapier (inside the knuckle bow), war fork (between the tines) |
+| `# materials: main=<m> second=<m> wood=<m> wrap=<m> stone=<m> accent=<m>` | The material of each role the map uses, from `tools/icon_materials.py`; every role the map uses must be named. Every map that is not an arm needs one: without it the checker previews and checks the map as an arm, in bronze and steel. | the war machines' maps in `tools/item_icons/`; the material sets, coins and bottles will |
+| `# family: <family>` | The size norms for a map whose name is not a known arm: `long_sword`, `thrusting_sword`, `polearm`, `staff`, `headed`, `short` or `tool` (span and share), or `compact`, `upright` or `flat` (cover and position; no highlight-edge warning). | the war machines' maps: `compact`, the shells `short` |
+| `# allow: pinhole - <why>` | The drawing may enclose transparency. | chakram (the ring), harpoon (the rope's eye), katar (the hand gap), rapier (inside the knuckle bow), war fork (between the tines), observation balloon (between the basket's rigging lines) |
 | `# allow: bare k K - <why>` | These fill symbols may touch transparency, but never the canvas edge. | harpoon (the rope's inner edge) |
 | `# type: face` or `# type: overlay` | A full block face, which has no transparency or outline rules, or an ore overlay, where the rock is the outline. | the material sets' block faces and ore overlays |
 
@@ -492,7 +496,8 @@ the liked material-set drafts and a test coin and bottle drawn from this page al
 table of other items.
 
 ### What the checker does
-`python3 tools/check_icon_maps.py` checks every map in `tools/arms_icons/`, the palettes and the item icons' sizes.
+`python3 tools/check_icon_maps.py` checks every map in `tools/arms_icons/` and `tools/item_icons/`, the palettes and
+the item icons' sizes.
 Give it other folders or files to check those maps instead. `tools/check_mod_data.py` runs it and its self-test, so the
 Build workflow fails on any error.
 
@@ -541,10 +546,10 @@ The checker is a lint, not a judge: it cannot tell whether an icon reads well. L
 2. **Write the map:**
    - for an arm or a variant: `tools/arms_icons/<name>.txt` (`arms.py` and `arms_variants.py` use a map when one
      exists);
-   - for any other item: a map with a `# materials:` line and a `# family:` line. The checker can check and preview it
-     today. No texture generator for these exists yet: the first family to move to maps adds a map folder and a loader
-     like `tools/arms_icons.py` (it can colour a map with `Map.style()` in `tools/check_icon_maps.py`), and adds the
-     folder to `FOLDERS` in the checker so CI checks it.
+   - for any other item: `tools/item_icons/<name>.txt`, a map with a `# materials:` line and a `# family:` line. The
+     checker checks it in CI (`FOLDERS`), and the item's generator saves `item_icons.draw(name)`
+     (`tools/item_icons.py`). The war machines were the first family moved there (7 October 2026); a family that
+     needs its own loader adds its folder to `FOLDERS` too.
 3. **Declare any deliberate exception** in the map, with the reason.
 4. **For a new material, add its ramp** to `tools/icon_materials.py` (rule 6). An item of vanilla's copper, iron or gold
    uses that metal's ramp.

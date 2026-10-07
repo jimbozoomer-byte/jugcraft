@@ -917,23 +917,29 @@ def check_gun_art():
     texture exists and block ones are opaque; each decal (port cover, hazard sign, bore) is drawn whole, UV 0 to 1; the
     Observation Balloon's envelope is a closed, outward-facing mesh on its own opaque texture; nothing opaque is drawn
     through the translucent "nocull" path (opaque two-sided quads are "cutout", which 26.3 draws from both sides); and every
-    icon tools/gun_icons.py draws is committed as drawn, inside its one-pixel margin (CI does not regenerate textures)."""
-    import gun_icons
+    war machine's icon is its 16x16 map in tools/item_icons/, committed as drawn (CI does not regenerate textures;
+    tools/check_icon_maps.py checks the maps themselves against docs/ITEM_ICONS.md)."""
     import gun_poses
-    for kind in gun_icons.KINDS:
+    import item_icons
+    kinds = sorted(set(artillery.ITEMS) | set(tower_guns.items()) | set(landship.ITEMS) | set(mech.ITEMS)
+                   | set(zeppelin.ITEMS))
+    for kind in kinds:
+        if not item_icons.has(kind):
+            err(f"tools/item_icons/{kind}.txt is missing: every war machine's icon is a 16x16 map (docs/ITEM_ICONS.md)")
+            continue
         path = ASSETS / "textures" / "item" / f"{kind}.png"
         if not path.is_file():
             err(f"textures/item/{kind}.png is missing: run tools/generate_textures.py")
             continue
         try:
-            drawn = gun_icons.draw(kind)
+            drawn = item_icons.draw(kind)
         except ValueError as problem:
-            err(f"tools/gun_icons.py cannot draw {kind}: {problem}")
+            err(f"tools/item_icons.py cannot draw {kind}: {problem}")
             continue
         with Image.open(path) as img:
             saved = img.convert("RGBA")
         if saved.size != drawn.size or saved.tobytes() != drawn.tobytes():
-            err(f"textures/item/{kind}.png differs from tools/gun_icons.py's drawing: run tools/generate_textures.py")
+            err(f"textures/item/{kind}.png differs from its map in tools/item_icons/: run tools/generate_textures.py")
     files = ("artillery_quads.json", "tower_gun_quads.json", "landship_quads.json", "walker_quads.json", "balloon_quads.json")
     quads = {name: load(ASSETS / name) or {} for name in files}
     opacity = {}

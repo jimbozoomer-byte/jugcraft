@@ -2,7 +2,8 @@
 of text files, colour values and image sizes; NOT a Minecraft build or game test, and no judge of how an icon reads
 (look at it for that).
 
-    python3 tools/check_icon_maps.py                   every map in tools/arms_icons/, the palettes and the icon sizes
+    python3 tools/check_icon_maps.py                   every map in tools/arms_icons/ and tools/item_icons/, the
+                                                       palettes and the icon sizes
     python3 tools/check_icon_maps.py <folder|map> ...  those maps instead (and the palettes)
     python3 tools/check_icon_maps.py --preview [out.png] [<folder|map> ...]
                                                        also draw each map in its materials at 8x, 2x and 1x, on a light
@@ -58,7 +59,7 @@ import icon_materials  # noqa: E402
 
 SIZE = 16
 ROOT = os.path.dirname(HERE)
-FOLDERS = [os.path.join(HERE, "arms_icons")]
+FOLDERS = [os.path.join(HERE, "arms_icons"), os.path.join(HERE, "item_icons")]
 ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft")
 LEGACY = os.path.join(HERE, "legacy_item_icons.txt")
 

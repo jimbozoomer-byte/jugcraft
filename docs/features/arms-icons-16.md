@@ -85,6 +85,26 @@ Every map was drawn fresh.
   them, and `tools/check_mod_data.py` runs it and its self-test in CI. The five maps with a deliberate hole declare it
   in a comment: the chakram's ring, the harpoon's rope (whose inner edge is also left unoutlined), the katar's hand gap,
   the rapier's knuckle bow and the war fork's tines.
+- **The war machines' icons, after merging main (7 October 2026).** Main had gained 17 item icons drawn at 32×32 since
+  this branch began: the five tower guns, the Siege Mortar, Self-Propelled Howitzer, Flak Gun and Range Finder, the
+  Heavy, Flak, Great and Cannon Shells, the Landship, the Diesel Walker, the Zeppelin and the Observation Balloon. The
+  icon-size rule failed them, and the owner chose to redraw them at 16×16 rather than add them to the legacy list.
+  - Each is a map in `tools/item_icons/` with its `# materials:` and `# family:` lines, drawn by
+    `tools/item_icons.py`; `tools/gun_icons.py`, which drew the 32×32 icons, is gone, and the generators that saved
+    them (`tower_guns.py`, `artillery.py`, `landship.py`, `mech.py`, `zeppelin.py`) save the maps' drawings instead.
+  - Guns are side views on their mounts, each with its old cue: the Grand Mortar's fat barrel and dark bore on a tall
+    slotted tower, the Bastion Mortar's shorter barrel on a low block, the Bastion Autocannon's twin steep barrels,
+    the Fortress Rifle's long low barrel with a muzzle brake and the range finder across its roof, the Triple
+    Battery's round drum and three barrels, the Siege Mortar's round deck with a hazard rim. The howitzer and the
+    Landship are seen from the side on their tracks, the Diesel Walker from the front, the Zeppelin and the balloon in
+    profile (the balloon fatter, with its basket hanging on rigging). The shells lie on the diagonal, told apart by
+    size (Great 5 lines across, Heavy 4, Cannon and Flak 3) and by band and nose (red band; copper band; black band
+    under a gunmetal nose; red nose).
+  - New provisional materials in `tools/icon_materials.py`: hazard yellow (a second material only, as it sits near
+    gold), concrete, canvas, khaki, red paint and black lacquer. The tower guns' bores and hazard stripes use rubber's
+    near-black in the wrap role (`k`).
+  - `check_mod_data`'s `check_gun_art` now requires each war machine's icon to be its map, committed as drawn.
+    `BigGunsClientGameTests` still shows them all in the hotbar and inventory (only its comments changed).
 
 ## Connections
 None changed: no recipes, numbers, IDs, tags, components or Java. Every arm keeps its tooltips, motion and weapon art.
@@ -119,6 +139,7 @@ Not applicable: no gameplay change.
 | `python3 scripts/check_repository.py` | PASS. |
 | `./gradlew build` and the server game tests (CI job `mod`) | Not run locally. PR #201 CI on 1254ba18: passed. |
 | `ArmsClientGameTests` (every arm in an item frame, as an inventory sprite, and held), CI jobs `client (shard 0, 1 and 2 of 3)` | PR #201 CI on 1254ba18: all three shards and the `client` result passed. The close-up shots `jugcraft_arms_frames_close_1` to `_9` show all 34 kinds on main in both metals in item frames, read at a glance; the four thrown arms are not on main yet. |
+| The 17 war machines' maps, after merging main (7 October 2026) | `generate_textures.py` and `generate_material_data.py` run: only the 17 icons changed (and three flail model textures the merge's generators redraw). `check_icon_maps.py`: PASS, 55 maps, 680 item icons' sizes (122 legacy, list unchanged), no new warning; `--self-test` PASS. `check_mod_data.py`: PASS (1469 material IDs). `check_repository.py`: PASS. Judged on a contact sheet at 8×, 2× and 1× on light and dark slots beside the arms. Not yet seen in game or by the owner. |
 | Played in a client | Not done. |
 
 ## World and event applicability
@@ -131,4 +152,7 @@ Not applicable: art only.
   - the 32 Arms VII variants' maps;
   - the longbow and arbalest sprites (vanilla's bow and crossbow are 16×16 too);
   - the smithing patterns.
+- **The owner has not seen the 17 war machines' 16×16 icons yet**; they replace the 32×32 icons drawn on
+  5 October 2026, when the owner asked for every weapon's icon to "look way cooler, maybe not even accurate but
+  cooler". Show them old and new side by side.
 - **The owner may edit any map directly:** change the letters, run `python3 tools/generate_textures.py` and look.
