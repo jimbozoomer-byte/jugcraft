@@ -8,7 +8,7 @@ Primary specialty and supported player role: power and chemistry
 
 ## Owner-requested major grid-storage expansion (7 October 2026)
 
-The [industrial chemical catalog](industrial-chemical-catalog-and-routes.md#battery-progression-major-grid-storage-and-other-advanced-uses) selects vanadyl-sulfate/formulated vanadium electrolyte chemistry for major grid storage, building on this existing battery. General storage develops before portable/specialty banks. No routine cycle-degradation upkeep is selected; energy losses, finite capacity and charging requirements still apply. Exact electrolyte processing and tank/stack expansion remain to design; existing IDs and saved storage behavior are preserved during review.
+The [industrial chemical catalog](industrial-chemical-catalog-and-routes.md#battery-progression-major-grid-storage-and-other-advanced-uses) selects vanadyl-sulfate/formulated vanadium electrolyte chemistry for major grid storage, building on this existing battery. General storage develops before portable/specialty banks. Modular tank additions increase capacity; cell-stack upgrades increase charge/discharge output. Exact electrolyte processing, module sizes, stack tiers and limits remain to design. No routine cycle-degradation upkeep is selected; energy losses, finite capacity and charging requirements still apply. Account for electrolyte/energy once across the connected installation and preserve existing IDs and saved storage behavior during review.
 
 ## Player experience
 - **Vanadium electrolyte:** two asphalt binder leached in a bucket of sulfuric acid in the chemical reactor make a bucket of deep-blue **vanadium electrolyte**. Heavy oil residue is rich in vanadium. The electrolyte is a liquid with a bucket.

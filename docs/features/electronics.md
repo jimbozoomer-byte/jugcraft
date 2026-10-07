@@ -9,7 +9,7 @@ Primary specialty and supported player role: technology; the player who builds f
 
 ## Owner-requested advanced expansion (7 October 2026)
 
-The [industrial chemical catalog](industrial-chemical-catalog-and-routes.md#a-manageable-advanced-chip-line) records later photoresist patterning/development, selective oxide etching, cleaning and silane deposition with a small distinct reagent set. Exact core selection and station layout remain to confirm; the existing lithography route and basic-circuit entry remain available until a reachable transition is designed. These are planning additions, not new test evidence or implemented recipes.
+The [industrial chemical catalog](industrial-chemical-catalog-and-routes.md#a-manageable-advanced-chip-line) selects a first advanced line using one sulfuric/peroxide cleaner, TMAH developer, selective HF oxide etching and one polymer-derived photoresist. Wet-processing and lithography are separate connected stations; silane/deposition follows later. Ordinary, concentrated and electronic-grade sulfuric supplies have distinct requirements to design. Both installed upgrade chips/modules and larger advanced machines are selected, with independent controls for the first wafer line. Exact producers, footprints, recipes and upgrade effects remain open; the existing lithography route and basic-circuit entry remain available until a reachable transition is designed. These are planning additions, not new test evidence or implemented recipes.
 
 ## Plan
 

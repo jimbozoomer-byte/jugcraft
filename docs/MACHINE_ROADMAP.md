@@ -32,6 +32,8 @@ The [latest material/product choices](features/industrial-chemistry-and-fuels-pl
 
 The owner's [expanded chemical catalog](features/industrial-chemical-catalog-and-routes.md) maps Electrolytic Separator, Chemical Infuser, Chemical Oxidizer, Chemical Dissolution Chamber and Rotary Condensator roles onto shared systems. It connects the sulfuric-acid backbone to fluoride/phosphate refining, fertilizers, food/pharmacy, distinct wafer operations, named polymers, cobalt-catalyzed synthetic fuels, rocket families, LiPF6 and major vanadium flow storage. Existing cells, reactors, lithography, refinery/cryogenic stations and Flow Battery are foundations; exact new capabilities, recipes and footprints remain to design.
 
+The [factory-layout and supply choices](features/industrial-chemistry-and-fuels-plan.md#factory-layout-upgrades-and-supplies-fifth-batch) select both installed upgrade chips/modules and larger advanced machines; three sulfuric-acid supplies; snow-biome fluorite; separate wet-processing/lithography and later deposition with a cleaner/TMAH/HF first core and one photoresist; and a shared Polymer Extruder alongside molding. Rotary Condensators handle appropriate ordinary phase changes, upgraded Cryogenic Liquefiers handle rocket liquids, and vanadium tank/stack modules expand capacity/output respectively. Industrial fertilizers, refining and polymers precede new optional chemical foods/adhesives/medicine. Exact footprints, recipes and upgrade statistics remain to design.
+
 ## What exists now
 
 | Role | Implemented |

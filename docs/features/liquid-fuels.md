@@ -8,7 +8,7 @@ Primary specialty and supported player role: refining, power and rocketry.
 
 ## Owner-requested fuel-family expansion (7 October 2026)
 
-The [industrial chemical catalog](industrial-chemical-catalog-and-routes.md#rocket-families-and-phase-conversion) records future methane/LOX, LH2/LOX and hydrazine/MMH/N2O4 roles alongside existing RP-1/LOX, with station/satellite uses. Shared rotary phase conversion and advanced cold capabilities should integrate with this Cryogenic Liquefier. Exact game recipes, progression and space compatibility remain to design; this plan preserves existing kerosene, oxygen and motor routes and implements no new launches or dimensions.
+The [industrial chemical catalog](industrial-chemical-catalog-and-routes.md#rocket-families-and-phase-conversion) records future methane/LOX, LH2/LOX and hydrazine/MMH/N2O4 roles alongside existing RP-1/LOX, with station/satellite uses. The owner selects Rotary Condensators for appropriate ordinary phase changes and upgraded Cryogenic Liquefiers for rocket liquids, building on this existing family. Exact per-fluid capabilities, cooling costs, recipes, progression and space compatibility remain to design; this plan preserves existing kerosene, oxygen and motor routes and implements no new launches or dimensions.
 
 ## Player experience
 - **RP-1 kerosene** (a straw-tinted liquid with a bucket), hydrocracked in the **catalytic cracker**.
