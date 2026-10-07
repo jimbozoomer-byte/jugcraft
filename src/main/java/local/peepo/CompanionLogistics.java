@@ -8,6 +8,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity;
 
 /** Explicit workstation ports. Future ovens/processors opt in without changing porter navigation. */
 public final class CompanionLogistics {
@@ -23,6 +24,12 @@ public final class CompanionLogistics {
     public static Port resolve(PeepoEntity npc,CompanionAssignments.Target target){
         if(target==null || !target.present(npc.level()) || !npc.assignments.assignedWork(target.at().pos()) || !CompanionJobs.permitted(npc,target.at().pos()))return null;
         var be=npc.level().getBlockEntity(target.at().pos());
+        if(be instanceof CiderPressBlockEntity press)return new Port(){
+            public Identifier plan(){return Identifier.fromNamespaceAndPath("jugcraft","sweet_cider");}
+            public int needed(ItemStack candidate){return press.companionNeed(candidate);}
+            public Storage<ItemVariant> inputs(){return press.companionInputs();}
+            public Storage<ItemVariant> outputs(){return press.companionOutputs();}
+        };
         if(be instanceof CookingPotBlockEntity pot && !pot.isLocked())return new Port(){
             public Identifier plan(){return pot.supplyPlan().map(p->p.id()).orElse(null);}
             public int needed(ItemStack candidate){
