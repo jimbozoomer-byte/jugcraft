@@ -126,7 +126,12 @@ def item_name(item):
 
 
 def assets():
-    lang = {}
+    lang = {
+        "generator.jugcraft.designed": "Jugcraft Designed",
+        "config.jade.plugin_jugcraft.machine_status": "Machine status",
+        "tooltip.jugcraft.machine_energy": "Energy: %s / %s JE",
+        "tooltip.jugcraft.machine_progress": "Processing: %s%%",
+    }
     for block in all_blocks():
         write(ASSETS / "blockstates" / f"{block}.json", {"variants": {"": {"model": rid(f"block/{block}")}}})
         write(ASSETS / "models" / "block" / f"{block}.json", material_icons.block_model(block)
@@ -146,6 +151,8 @@ def assets():
     agriculture_data.assets(ASSETS, write, lang)
     pixel_hollows_assets(lang)
     town_assets.assets(ASSETS, write, lang)
+    import styx
+    styx.write_all(write, ASSETS, DATA / MOD, lang)
     import deposits
     deposits.write_all(write, ASSETS, DATA / MOD, lang)
     import tank_display
@@ -225,6 +232,8 @@ def assets():
     # Last: it adds diagonal parts to the fence blockstates written above.
     import diagonal_connections
     diagonal_connections.write_all(write, ASSETS, RES / "assets" / "minecraft")
+    import scary_data
+    scary_data.write_all(write, RES, lang)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
 
 

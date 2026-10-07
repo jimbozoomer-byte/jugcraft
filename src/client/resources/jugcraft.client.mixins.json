@@ -9,7 +9,8 @@
     "ArmsItemInHandLayerMixin",
     "ArmsRenderStateMixin",
     "ClientLevelSeasonMixin",
-    "DiagonalParticlesMixin"
+    "DiagonalParticlesMixin",
+    "JeiRegistryBootstrapMixin"
   ],
   "injectors": {
     "defaultRequire": 1

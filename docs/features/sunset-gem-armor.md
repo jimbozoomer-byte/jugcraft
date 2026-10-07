@@ -1,6 +1,6 @@
 # Sunset Gem Armor: the fourth of the owner's armor tiers
 
-Status: implemented on `claude/sunset-gem-armor`, awaiting review. It is stacked on `claude/hades-armor` ([hades-armor.md](hades-armor.md)), since the sets share the lists they are added to. It uses the armor-only tier code that came with Bloodthorn ([bloodthorn-armor.md](bloodthorn-armor.md)) on the knight armor's 3D engine ([knight-armor.md](knight-armor.md)). **Not yet compiled, game-tested or played:** the Java compiles only in CI.
+Status: implemented on `claude/sunset-gem-armor`, awaiting review. It is stacked on `claude/hades-armor` (#240, [hades-armor.md](hades-armor.md)), since the sets share the lists they are added to; that branch is on `integration/oct7-pr-backlog`, with the knight armor, Bloodthorn and White Diamond. It uses the armor-only tier code that came with Bloodthorn ([bloodthorn-armor.md](bloodthorn-armor.md)) on the knight armor's 3D engine ([knight-armor.md](knight-armor.md)). **Not yet compiled, game-tested or played:** the Java compiles only in CI.
 Proposal issue: none. This is the fourth of the five armor designs the owner sent on 6 October 2026 ("Can we start implementing the next 5 that I created. Again want you to use the the complex armor for each one to capture the shape of each piece like I have... Lets do these 1 by 1"). Its picture is titled "SUNSET GEM". The owner's answers for all five ([bloodthorn-armor.md](bloodthorn-armor.md)):
 - what kind of armor: "New stronger armor tiers";
 - how players get it: "They might get dropped by bosses or be craftable for now just make the armor we can figure that out later".
@@ -85,6 +85,11 @@ One `ARMOR_TIERS` entry, one Java material and one `armorTier(...)` call, and a 
 - **`check_mod_data.py`:** PASS (1525 material IDs), with the art check: no armor finding, and none is allow-listed.
 - **`check_repository.py`:** PASS. **`check_icon_maps.py`:** PASS. **`armor_models.py`:** no problems (the reach warnings above). **`armor_smoke.py --no-render`:** all pass.
 - **Java:** the 2 merged files parse (syntax only).
+
+**After merging Hades again,** rebuilt on `integration/oct7-pr-backlog` (#240):
+- **The merge** needed no hand resolution, and the branch differs from Hades by exactly Sunset Gem's own changes, file for file and line for line.
+- **Generators:** data, textures, data again, all exit 0, with nothing left to change but the 24 textures the integration branch already redraws (Hades' record), left as committed. Sunset Gem's 9 entries are identical to its own branch's, and the other sets' 45 to Hades'.
+- **`check_mod_data.py`:** PASS (1554 material IDs). **`check_repository.py`**, **`check_icon_maps.py`:** PASS. **`armor_models.py`:** no problems. **`armor_smoke.py --no-render`:** all pass. **Java:** the 2 changed files parse.
 
 **In CI:** not run yet. It will compile the material and its registration, run `ArmorTiersGameTests` on the server, and run `ArmorTiersClientGameTests`, which writes the `jugcraft_armor_tier_sunset_gem_*` shots.
 

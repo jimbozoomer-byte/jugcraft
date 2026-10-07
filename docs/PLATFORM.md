@@ -17,7 +17,10 @@ The bootstrap scaffold pins these in `gradle.properties`:
 | Gradle wrapper | 9.6.0, sha256 `bbaeb2fef8710818cf0e261201dab964c572f92b942812df0c3620d62a529a01` | Fabric 26.3 announcement; checksum computed from the downloaded distribution |
 | Fabric Loom | 1.17 (`net.fabricmc.fabric-loom`, resolved to 1.17.21; no mappings: 26.x is unobfuscated) | Fabric 26.3 announcement |
 | Fabric API | 0.161.0+26.3 | Modrinth listing |
-| Fabric Loader | 0.19.3 | Required by Fabric API 0.161.0+26.3 (found by the game tests: 0.18.4 cannot load it) |
+| Fabric Loader | 0.19.5 | Required by the actual PAL, spell, lighting, and GuiLib artifacts in the owner-approved framework foundation |
+| Kotlin compiler | 2.4.20 | GuiLib authoring support, matching the selected Fabric Language Kotlin runtime |
+
+The 5 October framework foundation raises only the loader patch level from 0.19.3 and adds Kotlin authoring support. The original bootstrap verification below is historical evidence for the earlier pins. Current foundation verification is recorded in [features/framework-foundation.md](features/framework-foundation.md); exact library artifacts are in [FRAMEWORKS.md](FRAMEWORKS.md).
 
 All pins resolved and the mod compiled in the Build workflow on 30 September 2026 (`./gradlew build` → BUILD SUCCESSFUL, Temurin JDK 25.0.4; PR #4). That proved compilation only; see step 4 and 6 below for what has run since.
 

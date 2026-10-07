@@ -45,13 +45,15 @@ import net.minecraft.world.level.block.Block;
  * <p>Steampunk and Kaiser Armor (docs/features/steampunk-and-kaiser-armor.md) are bronze and steel armor in another
  * look: their materials are the metal's with only the equipment asset changed ({@link #restyle}), and a smithing
  * template ({@link #STYLE_TEMPLATES}) turns a plain piece into a styled one and back (data-driven recipes).
+ * <p>Thallite (docs/features/thallite.md) is the third metal with a full set, and Earthbound thallite a style of its
+ * armor, one-way and with a perk; their traits, Regrowth and Rooted, are {@link ThalliteGear}.
  * <p>Armor-only tiers ({@link #ARMOR_TIERS}; docs/features/bloodthorn-armor.md) are the owner's own armor designs, each
  * a new tier with numbers of its own, worn as a 3D model (client/WornModelLayer) with no flat layer. They have no recipe
  * or drop yet, so for now they come only from the creative tab.
  */
 public final class JugcraftGear {
 	/** Metals with a full set of tools and armor (tools/gear.py: GEAR_TIERS). */
-	public static final List<String> TIERS = List.of("bronze", "steel");
+	public static final List<String> TIERS = List.of("bronze", "steel", "thallite");
 	public static final List<String> PIECES = List.of("sword", "pickaxe", "axe", "shovel", "hoe", "helmet", "chestplate",
 			"leggings", "boots");
 	/** Paxel tiers (tools/gear.py: PAXEL_TIERS). */
@@ -74,14 +76,22 @@ public final class JugcraftGear {
 	/** Steel armor: between iron and diamond. */
 	public static final ArmorMaterial STEEL_ARMOR = new ArmorMaterial(25, defense(3, 6, 7, 3), 10,
 			SoundEvents.ARMOR_EQUIP_IRON, 1.5F, 0.05F, repairs("steel"), asset("steel"));
+	/** Thallite: iron's drops and speed, fewer uses, and the best enchantability; its gear regrows (ThalliteGear). */
+	public static final ToolMaterial THALLITE = new ToolMaterial(BlockTags.INCORRECT_FOR_IRON_TOOL, 200, 6.0F, 2.0F, 18,
+			repairs("thallite"));
+	/** Thallite armor: iron's defense, a little less durable, and the best enchantability. */
+	public static final ArmorMaterial THALLITE_ARMOR = new ArmorMaterial(13, defense(2, 5, 6, 2), 18,
+			SoundEvents.ARMOR_EQUIP_IRON, 0.0F, 0.0F, repairs("thallite"), asset("thallite"));
 	/** Styled armor (tools/gear.py: ARMOR_STYLES): a metal's armor in every number, in another look. */
-	public static final List<String> ARMOR_STYLES = List.of("steampunk", "kaiser");
+	public static final List<String> ARMOR_STYLES = List.of("steampunk", "kaiser", "earthbound_thallite");
 	/** Their smithing templates (tools/gear.py: style_templates()). */
-	public static final List<String> STYLE_TEMPLATES = List.of("steampunk_pattern", "kaiser_pattern");
+	public static final List<String> STYLE_TEMPLATES = List.of("steampunk_pattern", "kaiser_pattern", "earthbinding_template");
 	/** Steampunk armor: bronze armor in the steampunk look (goggles, gauge, boiler). */
 	public static final ArmorMaterial STEAMPUNK_ARMOR = restyle(BRONZE_ARMOR, "steampunk");
 	/** Kaiser armor: steel armor in the kaiserpunk parade dress of the Winged Cog. */
 	public static final ArmorMaterial KAISER_ARMOR = restyle(STEEL_ARMOR, "kaiser");
+	/** Earthbound thallite: thallite armor bound with gold, one-way; it adds Rooted (ThalliteGear). */
+	public static final ArmorMaterial EARTHBOUND_THALLITE_ARMOR = restyle(THALLITE_ARMOR, "earthbound_thallite");
 	/** The styled armor's templates, by id, for the Ingredients tab. */
 	public static final Map<String, Item> TEMPLATES = new LinkedHashMap<>();
 	/** Armor-only tiers with numbers of their own, each worn as a 3D model (tools/gear.py: ARMOR_TIERS). */
@@ -133,10 +143,13 @@ public final class JugcraftGear {
 	}
 
 	public static void register() {
-		set("bronze", BRONZE, BRONZE_ARMOR, 6.0F, -3.1F, -2.0F, -1.0F);
-		set("steel", STEEL, STEEL_ARMOR, 5.5F, -3.0F, -2.5F, 0.0F);
-		styled("steampunk", STEAMPUNK_ARMOR);
-		styled("kaiser", KAISER_ARMOR);
+		set("bronze", BRONZE, BRONZE_ARMOR, 6.0F, -3.1F, -2.0F, -1.0F, Item::new);
+		set("steel", STEEL, STEEL_ARMOR, 5.5F, -3.0F, -2.5F, 0.0F, Item::new);
+		set("thallite", THALLITE, THALLITE_ARMOR, 6.0F, -3.1F, -2.0F, -1.0F, properties -> new ThalliteGearItem(properties, false));
+		styled("steampunk", STEAMPUNK_ARMOR, DescribedItem::new);
+		styled("kaiser", KAISER_ARMOR, DescribedItem::new);
+		styled("earthbound_thallite", EARTHBOUND_THALLITE_ARMOR, properties -> new ThalliteGearItem(properties, true));
+		ThalliteGear.register();
 		armorTier("bloodthorn", BLOODTHORN_ARMOR, true);
 		armorTier("reforged_white_diamond", REFORGED_WHITE_DIAMOND_ARMOR, false);
 		armorTier("hades", HADES_ARMOR, true);
@@ -214,29 +227,32 @@ public final class JugcraftGear {
 				|| id.equals("ronin_katana");
 	}
 
-	/** One metal's sword, pickaxe, axe, shovel and hoe, then its helmet, chestplate, leggings and boots. */
+	/**
+	 * One metal's sword, pickaxe, axe, shovel and hoe, then its helmet, chestplate, leggings and boots, each made by
+	 * {@code make} (a plain Item, or thallite's with its traits) from properties that already carry its tool or armor.
+	 */
 	private static void set(String tier, ToolMaterial material, ArmorMaterial armor, float axeDamage, float axeSpeed,
-			float hoeDamage, float hoeSpeed) {
-		item(tier + "_sword", properties -> new Item(properties.sword(material, 3.0F, -2.4F)));
-		item(tier + "_pickaxe", properties -> new Item(properties.pickaxe(material, 1.0F, -2.8F)));
-		item(tier + "_axe", properties -> new Item(properties.axe(material, axeDamage, axeSpeed)));
-		item(tier + "_shovel", properties -> new Item(properties.shovel(material, 1.5F, -3.0F)));
-		item(tier + "_hoe", properties -> new Item(properties.hoe(material, hoeDamage, hoeSpeed)));
-		item(tier + "_helmet", properties -> new Item(properties.humanoidArmor(armor, ArmorType.HELMET)));
-		item(tier + "_chestplate", properties -> new Item(properties.humanoidArmor(armor, ArmorType.CHESTPLATE)));
-		item(tier + "_leggings", properties -> new Item(properties.humanoidArmor(armor, ArmorType.LEGGINGS)));
-		item(tier + "_boots", properties -> new Item(properties.humanoidArmor(armor, ArmorType.BOOTS)));
+			float hoeDamage, float hoeSpeed, Function<Item.Properties, Item> make) {
+		item(tier + "_sword", properties -> make.apply(properties.sword(material, 3.0F, -2.4F)));
+		item(tier + "_pickaxe", properties -> make.apply(properties.pickaxe(material, 1.0F, -2.8F)));
+		item(tier + "_axe", properties -> make.apply(properties.axe(material, axeDamage, axeSpeed)));
+		item(tier + "_shovel", properties -> make.apply(properties.shovel(material, 1.5F, -3.0F)));
+		item(tier + "_hoe", properties -> make.apply(properties.hoe(material, hoeDamage, hoeSpeed)));
+		item(tier + "_helmet", properties -> make.apply(properties.humanoidArmor(armor, ArmorType.HELMET)));
+		item(tier + "_chestplate", properties -> make.apply(properties.humanoidArmor(armor, ArmorType.CHESTPLATE)));
+		item(tier + "_leggings", properties -> make.apply(properties.humanoidArmor(armor, ArmorType.LEGGINGS)));
+		item(tier + "_boots", properties -> make.apply(properties.humanoidArmor(armor, ArmorType.BOOTS)));
 	}
 
 	/**
 	 * A style's helmet, chestplate, leggings and boots: its metal's armor in another look, common like the plain piece,
-	 * with a grey line of lore (tooltip.jugcraft.&lt;id&gt;).
+	 * with a grey line of lore (tooltip.jugcraft.&lt;id&gt;), made by {@code make} (Earthbound's adds its traits).
 	 */
-	private static void styled(String style, ArmorMaterial armor) {
-		item(style + "_helmet", properties -> new DescribedItem(properties.humanoidArmor(armor, ArmorType.HELMET)));
-		item(style + "_chestplate", properties -> new DescribedItem(properties.humanoidArmor(armor, ArmorType.CHESTPLATE)));
-		item(style + "_leggings", properties -> new DescribedItem(properties.humanoidArmor(armor, ArmorType.LEGGINGS)));
-		item(style + "_boots", properties -> new DescribedItem(properties.humanoidArmor(armor, ArmorType.BOOTS)));
+	private static void styled(String style, ArmorMaterial armor, Function<Item.Properties, Item> make) {
+		item(style + "_helmet", properties -> make.apply(properties.humanoidArmor(armor, ArmorType.HELMET)));
+		item(style + "_chestplate", properties -> make.apply(properties.humanoidArmor(armor, ArmorType.CHESTPLATE)));
+		item(style + "_leggings", properties -> make.apply(properties.humanoidArmor(armor, ArmorType.LEGGINGS)));
+		item(style + "_boots", properties -> make.apply(properties.humanoidArmor(armor, ArmorType.BOOTS)));
 	}
 
 	/**

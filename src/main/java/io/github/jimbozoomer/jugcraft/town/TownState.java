@@ -32,7 +32,8 @@ public final class TownState extends SavedData {
 			Codec.unboundedMap(Codec.STRING, UUIDUtil.STRING_CODEC).optionalFieldOf("townsfolk", Map.of()).forGetter(TownState::townsfolkSaved),
 			UUIDUtil.STRING_CODEC.listOf().optionalFieldOf("welcomed", List.of()).forGetter(s -> List.copyOf(s.welcomed)),
 			Codec.STRING.optionalFieldOf("theme", "").forGetter(s -> s.theme),
-			Codec.LONG.optionalFieldOf("theme_since", 0L).forGetter(s -> s.themeSince))
+			Codec.LONG.optionalFieldOf("theme_since", 0L).forGetter(s -> s.themeSince),
+			Codec.BOOL.optionalFieldOf("styx_district", false).forGetter(s -> s.styxDistrict))
 			.apply(i, TownState::new));
 	static final SavedDataType<TownState> TYPE = new SavedDataType<>(Jugcraft.id("town"), TownState::new, CODEC, null);
 
@@ -43,13 +44,15 @@ public final class TownState extends SavedData {
 	private final Set<UUID> welcomed = new HashSet<>();
 	private String theme;
 	private long themeSince;
+	private boolean styxDistrict;
 
 	TownState() {
-		this(Optional.empty(), List.of(), List.of(), Map.of(), List.of(), "", 0L);
+		this(Optional.empty(), List.of(), List.of(), Map.of(), List.of(), "", 0L, false);
 	}
 
 	TownState(Optional<BlockPos> origin, List<Long> built, List<String> siteThemes, Map<String, UUID> townsfolk,
-			List<UUID> welcomed, String theme, long themeSince) {
+			List<UUID> welcomed, String theme, long themeSince, boolean styxDistrict) {
+		this.styxDistrict = styxDistrict;
 		this.origin = origin.orElse(null);
 		this.built.addAll(built);
 		this.siteThemes.addAll(siteThemes);
@@ -85,6 +88,12 @@ public final class TownState extends SavedData {
 	}
 
 	public void place(BlockPos origin) {
+		place(origin, false);
+	}
+
+	/** Only newly planned towns reserve the east district; missing fields in old saves stay false. */
+	public void place(BlockPos origin, boolean styxDistrict) {
+		this.styxDistrict = styxDistrict;
 		this.origin = origin.immutable();
 		built.clear();
 		siteThemes.clear();
@@ -94,6 +103,7 @@ public final class TownState extends SavedData {
 
 	/** Forgets the town (for tests and `/jugcraft town forget`): its blocks stay, its protection and NPC care end. */
 	public void forget() {
+		styxDistrict = false;
 		origin = null;
 		built.clear();
 		siteThemes.clear();
@@ -103,6 +113,10 @@ public final class TownState extends SavedData {
 
 	public boolean built(long chunk) {
 		return built.contains(chunk);
+	}
+
+	public boolean styxDistrict() {
+		return styxDistrict;
 	}
 
 	public void markBuilt(long chunk) {

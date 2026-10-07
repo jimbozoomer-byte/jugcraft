@@ -13,6 +13,7 @@ import armor_styles
 import arms_variants_art
 import gear
 import hitech
+import thallite_armor
 
 # Mask characters: digits are the head's palette shade; h/H the handle (dark/light); . is empty.
 HANDLE = [(58, 40, 22), (98, 70, 40)]
@@ -223,6 +224,9 @@ def draw_all(save, save_armor, part_palette):
         save_armor(armor_styles.layer(style, armor, False), "humanoid", style)
         save_armor(armor_styles.layer(style, armor, True), "humanoid_leggings", style)
         save(arms_variants_art.pattern16(style), "item", gear.ARMOR_STYLES[style]["template"])
+    # Thallite armor, plain and Earthbound, and the Earthbinding Template: hand-drawn maps (tools/thallite_armor.py).
+    thallite_armor.draw(save, save_armor)
+
     # The armor-only tiers (gear.ARMOR_TIERS; Bloodthorn first): icons from each tier's own maps
     # (tools/armor_icons/<tier>/), coloured as its 3D model is painted; worn, each is only that model, with no flat layer.
     for tier in gear.ARMOR_TIERS:

@@ -1,9 +1,11 @@
 # Thallite: the Earth school's green metal
 
 Status: approved. The owner chose this concept on 5 October 2026 and approved its numbers on 6 October 2026: "the
-Thallite numbers all look good carry on". It is built in slices, each its own PR (below). **Slice 1 (ore and
-materials) is implemented on `claude/thallite-ore`, awaiting review; not yet compiled or played** (the Java compiles
-only in CI, which has not run on this branch). Slices 2 to 5 are not built.
+Thallite numbers all look good carry on". It is built in slices, each its own PR (below).
+- **Slice 1 (ore and materials)** is implemented on `claude/thallite-ore` (PR
+  [#221](https://github.com/jimbozoomer-byte/jugcraft/pull/221)), awaiting review. Its CI passed; it has not been played.
+- **Slice 2 (gear)** is implemented on `claude/thallite-gear`, awaiting review. **It has not been compiled or played.**
+- Slices 3 to 5 are not built.
 
 Proposal issue: none. On 5 October 2026 the owner drew a complete set for a new ore in one chartreuse palette and asked
 what it should be: "maybe something in the magic tier". The set covers:
@@ -78,10 +80,12 @@ Two bounded traits; neither adds damage, defense or speed.
 
 - **Regrowth (all thallite gear):**
   - Every 5 seconds, each thallite item worn or held gets back one use while its holder stands on living soil
-    (`#jugcraft:living_ground`: grass, dirt, podzol, mud, moss, rooted dirt, farmland).
+    (`#jugcraft:living_ground`: grass, dirt, coarse dirt, podzol, mud, moss, rooted dirt and farmland by name, and
+    whatever else vanilla's `#minecraft:dirt`, `#minecraft:grass_blocks` and `#minecraft:mud` tags hold).
   - It stops at 75% of full and never brings back a broken item.
   - A tool goes from empty to 75% in about 12 minutes outdoors.
-  - It shows as a faint leaf particle and as the trait "Regrowth" in the tooltip, described while Shift is held
+  - It shows as a faint green sparkle (vanilla's happy-villager particle) and as the trait "Regrowth" in the tooltip,
+    described while Shift is held
     ([trait-details.md](https://github.com/jimbozoomer-byte/jugcraft/blob/claude/trait-details/docs/features/trait-details.md)).
 - **Rooted (Earthbound armor only):**
   - Each Earthbound piece gives +0.075 knockback resistance while the wearer stands on natural ground
@@ -178,7 +182,8 @@ Each slice builds on the open PRs whose systems it uses, so it waits for them or
 1. **Ore and materials:** the ore, material forms, worldgen (with a small optional "biomes" key on a metal's worldgen
    entry, which only rocks had) and processing. Its art is drawn by the material-set maps and ore overlays of the
    material-sets PR, so it is stacked on that branch. **Implemented on `claude/thallite-ore`** (below).
-2. **Gear:** tools, both armor looks, the Earthbinding Template, Regrowth and Rooted.
+2. **Gear:** tools, both armor looks, the Earthbinding Template, Regrowth and Rooted. **Implemented on
+   `claude/thallite-gear`** (below).
    - Earthbound is an entry in the one armor-style system of the Steampunk and Kaiser PR
      ([#215](https://github.com/jimbozoomer-byte/jugcraft/pull/215)), one-way and with a perk.
    - The traits use the Shift details of [#216](https://github.com/jimbozoomer-byte/jugcraft/pull/216).
@@ -271,6 +276,76 @@ and storage block are drawn from the shared maps in `tools/material_icons/` in t
   `JugcraftWorldgen`, `JugcraftConfig` and `OreSurvey`.
 - Tests: `ThalliteGameTests` and `ThalliteClientGameTests`.
 
+## Slice 2, as built: gear
+Branch `claude/thallite-gear`. It is stacked on `claude/thallite-ore` and merges the two open PRs whose systems it uses:
+- the armor-style system of [#215](https://github.com/jimbozoomer-byte/jugcraft/pull/215) (`claude/armor-styles`);
+- the Shift trait details of [#216](https://github.com/jimbozoomer-byte/jugcraft/pull/216) (`claude/trait-details`).
+
+Until those merge, its diff against `claude/thallite-ore` shows their changes too.
+
+**What a player gets:**
+- **Tools:** `jugcraft:thallite_<sword|pickaxe|axe|shovel|hoe>`.
+  - Crafted from thallite ingots and sticks in iron's shapes, and repaired with thallite ingots
+    (`#jugcraft:repairs_thallite_gear`, which holds `#c:ingots/thallite`).
+  - Iron's attack numbers (the axe 6 + 2, -3.1; the hoe -2, -1), iron's drops and speed, 200 uses, enchantability 18.
+- **Armor:** `jugcraft:thallite_<helmet|chestplate|leggings|boots>`, iron's defense (2, 6, 5, 2), no toughness or
+  knockback resistance, enchantability 18. The durability multiplier is 13: 143, 208, 195 and 169 uses.
+- **Earthbound armor:** `jugcraft:earthbound_thallite_<piece>`.
+  - The same numbers in a gold-trimmed look (equipment asset `jugcraft:earthbound_thallite`), plus Rooted.
+  - It is the `earthbound_thallite` entry in `tools/gear.py` `ARMOR_STYLES`: one-way (`"reversible": False`, so no recipe
+    turns it back) and with a perk (`"perk": "rooted"`).
+- **The Earthbinding Template** (`jugcraft:earthbinding_template`, uncommon): rooted dirt in the centre, a thallite
+  nugget on each side and a gold nugget in each corner make one.
+  - At a smithing table, the template, a thallite armor piece and a gold ingot make the Earthbound piece. Vanilla's
+    smithing keeps its enchantments, wear, name and trim.
+  - A full set takes 4 templates and 4 gold ingots: 16 gold nuggets and 4 ingots, about 5.8 ingots of gold.
+- **No paxel and no arms yet.** Thallite is not in `PAXEL_TIERS`. Its `GEAR_TIERS` entry has `"arms": False`, so
+  `tools/arms.py` `METALS` (and `JugcraftArms.METALS`) stay bronze and steel until slice 3 adds its drawn kinds.
+
+**The traits** (`gear/ThalliteGear`, numbers in `tools/gear.py` and checked against Java by
+`tools/check_mod_data.py`):
+- **Who:** a server tick handles players only, never mobs or armor stands. Every 10 ticks it reads the block under each
+  player's feet: in the air or in water there is none.
+- **Regrowth, every 100 ticks:**
+  - Each stack in `#jugcraft:thallite_gear` (all 13 thallite pieces) in either hand or an armor slot loses one damage if
+    it has more than the cap's. The cap is `max - max × 75 / 100`: 50 of 200 for a tool, 36 of 143 for a helmet.
+  - It works on `#jugcraft:living_ground`, or on `#jugcraft:earthen_ground` with 2 or more Earthbound pieces worn.
+  - When anything mended, two happy-villager sparkles show at the player.
+- **Rooted, every 10 ticks:** the transient knockback resistance modifier `jugcraft:rooted` is removed. If the player
+  stands on `#jugcraft:earthen_ground`, it is added back at 0.075 for each piece in `#jugcraft:earthbound_armor` worn.
+  It is never saved.
+- **Natural ground,** `#jugcraft:earthen_ground`: `#jugcraft:living_ground`, `#minecraft:base_stone_overworld` (stone,
+  granite, diorite, andesite, tuff and deepslate), `#minecraft:sand` and gravel, with stone, deepslate and sand by name
+  too.
+- **Why soils are named:** the first CI run (job 112483970162) showed grass outside `#minecraft:dirt` in 26.3, so
+  Regrowth and Rooted did nothing on grass. Each ground tag now names its blocks as well as vanilla's tags.
+- **The tooltip** (`gear/ThalliteGearItem`):
+  - every piece names **Regrowth** (green), and an Earthbound piece also its lore line first and **Rooted** (gold);
+  - while Shift is held, each is described, through #216's `TraitTooltips`;
+  - the texts are `tooltip.jugcraft.thallite.<trait>` and `.trait`, from `tools/gear.py` `TRAITS`.
+- **The handbook:** two pages after Steampunk and Kaiser Armor, "Thallite Gear" (with the pickaxe's recipe) and
+  "Earthbound Armor" (with the template's).
+
+**Art:**
+- **The tools** are the material-set maps (`tools/material_icons/<tool>.txt`) in thallite's metal ramp, as bronze's and
+  steel's are. `material_icons.TOOL_METALS` now includes thallite, and `PAXEL_METALS` keeps the paxel to bronze and steel.
+- **The armor icons, worn layers and template** are drawn in `tools/thallite_armor.py` (called from
+  `tools/gear_textures.py`), after the owner's sheet: a dome helmet with a visor, a breastplate with a round green boss,
+  green gems at the knees and boot cuffs, and gold trim on the Earthbound pieces. They are drawn fresh; the sheet is not
+  committed or traced.
+
+**Code and data changed:**
+- **Tools:**
+  - `tools/gear.py`: the tier, the style, and the traits' numbers, texts and tags;
+  - `tools/arms.py`: `METALS` skips a metal with `"arms": False`;
+  - `tools/material_icons.py` and `tools/gear_textures.py`;
+  - `tools/thallite_armor.py` (new);
+  - `tools/arms_variants_art.py`: the parchment, shared with the template;
+  - `tools/handbook.py`;
+  - `tools/check_mod_data.py`: `check_thallite_gear`.
+- **Java:** `gear/JugcraftGear`, and the new `gear/ThalliteGear` and `gear/ThalliteGearItem`.
+- **Tests:** the new `ThalliteGearGameTests`, and more scenes in `ThalliteClientGameTests`.
+
 ## Verification
 Slice 1. Run locally on 6 October 2026, on the working tree of `claude/thallite-ore`:
 - **`python3 tools/generate_textures.py`:** 10 new PNGs (the four block textures, raw thallite, ingot, nugget, dust,
@@ -315,6 +390,45 @@ Not run: `./gradlew build` (nothing here has been compiled), both test classes, 
 with two clients, and the veins' real rates in a generated world (the tests check the features and their biomes, not
 how much ore a chunk gets). Update this list once CI has run.
 
+Slice 2. Run locally on 6 October 2026, on the working tree of `claude/thallite-gear`:
+- **`python3 tools/generate_textures.py`:** 18 new PNGs (the five tools, the eight armor icons, the template and the four
+  worn layers). No existing PNG changed: the Steampunk and Kaiser patterns, redrawn through `parchment16`, came out
+  pixel-identical.
+- **`python3 tools/generate_material_data.py`:** the 14 items' models and definitions, the two equipment assets, 14
+  recipes, the four new tags and the repair tag, and the shared files that list gear (vanilla's tool and armor tags, the
+  lang file and the handbook). No other file changed.
+- **Determinism:** a second run of both generators changed nothing.
+- **`python3 tools/check_mod_data.py`:** `PASS: 1489 material IDs, data files and recipe audit.` (1475 before).
+- **Negative test of `check_thallite_gear`:**
+  - **What was broken** (temporary edits, then restored): Java's `ROOTED_PER_PIECE` set to 0.08, a piece dropped from
+    `#jugcraft:earthbound_armor`, and Rooted's description removed from the lang file.
+  - **Result:** three errors and exit 1. Restored, it passed again.
+- **`python3 scripts/check_repository.py`:** PASS.
+- **Java syntax only** (a parser, not a compiler): the three changed or new main classes and the two test classes parse.
+- **Art previews** (scratch, not committed), looked at:
+  - every icon at 1×, 2× and 8× on light and dark slots, beside the owner's sheet;
+  - the worn layers on a rough box-model render, front, back and three-quarter, plain and Earthbound.
+
+  A script checked the maps: 16×16 icons, a closed outline with no fill touching air, no stray outline pixels or
+  pinholes, plain and Earthbound with the same silhouettes, and 64×32 layers.
+
+Written, not run (CI only):
+- **`ThalliteGearGameTests`** (server):
+  - every piece's numbers, tags, asset and class;
+  - the template's recipe, and one-way Earthbinding keeping enchantments, wear and name (and no tool bound);
+  - Regrowth on grass, farmland and moss but not stone or air, stopping at the cap, and on stone and sand with two
+    Earthbound pieces;
+  - Rooted per piece, and none off natural ground;
+  - an armor stand's footing on grass;
+  - the traits in every piece's tooltip, folded and expanded.
+- **`ThalliteClientGameTests`**, new shots:
+  - `jugcraft_thallite_gear_icons` (tools, template and both armor sets in frames);
+  - `jugcraft_thallite_gear_worn` and `_worn_back` (two armor stands);
+  - `jugcraft_thallite_gear_tooltip` and `_tooltip_details` (the Earthbound chestplate hovered, folded and with details).
+
+Not run for slice 2: `./gradlew build`, both test classes, a real player standing on grass (the tick is tested through
+its parts, not end to end), the client, play, and a dedicated server with two clients.
+
 ## World and event applicability
 - **Overworld worldgen only:**
   - the rich pockets lie in vanilla Lush Caves and Jugcraft's Glowcap Grotto;
@@ -331,8 +445,18 @@ how much ore a chunk gets). Update this list once CI has run.
     metal with a hand-made plate, an exception to "plates need their machines" (TECH_TREE.md).
   - **The Metal Press recipe** follows every metal in being gated by `machines` only (above).
   - **The lore line** sits on the ingot alone.
-- **Save compatibility:** slice 1 only adds IDs; nothing is renamed or removed. Existing worlds get thallite only in
-  new chunks.
+- **Save compatibility:** slices 1 and 2 only add IDs; nothing is renamed or removed. Existing worlds get thallite only
+  in new chunks. Rooted's modifier is transient, so nothing about it is saved.
+- **Slice 2, for the owner:**
+  - **The armor art** follows the sheet's design but is drawn fresh, so it is boxier and a little darker than the sheet.
+    If the owner wants their own armor icons used exactly, as with the ingot, each is a 16-row map in
+    `tools/thallite_armor.py`.
+  - **Living soil** is the record's list by name plus vanilla's dirt, grass and mud tags, so it may also count a few
+    soils beyond the list, such as mycelium or pale moss.
+  - **The particle** is vanilla's green happy-villager sparkle, not a leaf: a leaf particle needs an API this mod has
+    not compiled against yet.
+  - **Players only:** mobs that pick up thallite gear get neither trait.
+  - **The feature switch** stops the recipes, but gear already made keeps its traits.
 - **Approved by the owner on 6 October 2026:** the numbers above; the two long blades (the big one a greatsword, the other a
   longsword); and the horse armor left to us (the second drawing).
 - **Tooltips:** Regrowth, Rooted and Rooting (the arrow) are named in the tooltip and described while Shift is held, as
