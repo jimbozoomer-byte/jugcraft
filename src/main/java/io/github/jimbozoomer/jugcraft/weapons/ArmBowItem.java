@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.weapons;
 
+import io.github.jimbozoomer.jugcraft.gear.TraitTooltips;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -42,9 +43,13 @@ public class ArmBowItem extends BowItem {
 	@Override
 	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip,
 			TooltipFlag flag) {
-		tooltip.accept(Component.translatable("tooltip.jugcraft.arms." + ranged.name()).withStyle(ChatFormatting.GRAY));
-		tooltip.accept(Component.translatable("tooltip.jugcraft.arms.longbow.stats", String.format(Locale.ROOT, "%.1f", ranged.draw() / 20.0F),
-				Math.round((ranged.speed() / VANILLA_SPEED - 1.0F) * 100.0F)).withStyle(ChatFormatting.DARK_GRAY));
+		// Its trait, with what it is and its numbers as the description (docs/features/trait-details.md).
+		String key = "tooltip.jugcraft.arms." + ranged.name();
+		TraitTooltips traits = TraitTooltips.of(tooltip);
+		traits.trait(key + ".trait", ChatFormatting.YELLOW, Component.translatable(key),
+				Component.translatable("tooltip.jugcraft.arms.longbow.stats", String.format(Locale.ROOT, "%.1f", ranged.draw() / 20.0F),
+						Math.round((ranged.speed() / VANILLA_SPEED - 1.0F) * 100.0F)));
+		traits.end();
 	}
 
 	/** How far drawn a longbow is after this many ticks: vanilla's curve stretched over its draw (1 is a full draw). */
