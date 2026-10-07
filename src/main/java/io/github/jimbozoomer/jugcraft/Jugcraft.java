@@ -54,6 +54,7 @@ public final class Jugcraft implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		JugcraftConfig.load();
+		io.github.jimbozoomer.jugcraft.world.design.WorldDesigner.register();
 		// Registration always happens, even when a feature is disabled, so saved
 		// blocks and items are never lost. The config only controls acquisition.
 		JugcraftMaterials.register();

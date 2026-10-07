@@ -52,6 +52,7 @@ public final class TownPlanner {
 			return;
 		}
 		BlockPos start = level.getRespawnData().pos();
+		if (io.github.jimbozoomer.jugcraft.world.design.WorldDesigner.applyTown(level)) return;
 		BlockPos origin = choose(level, start);
 		if (origin == null) {
 			Jugcraft.LOGGER.info("Town: no dry, open ground {}-{} blocks from the start; no town in this world", MIN_DISTANCE, MAX_DISTANCE);

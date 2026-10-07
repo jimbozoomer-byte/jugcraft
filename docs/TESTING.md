@@ -61,6 +61,8 @@ Checks:
 
 ## Content-specific scenarios
 
+- **World Designer:** run `node --test tools/world-designer/model.test.cjs`, the three `WorldDesignerGameTests`, and `WorldDesignerClientGameTests`. Also load an actual exported ZIP into a new world's datapacks, select `jugcraft:designed`, generate the pinned chunks, and inspect structure starts. The [feature record](features/world-designer.md) distinguishes compiler, browser, real-world and persistence evidence.
+
 Use the cases relevant to the feature; do not claim a scenario was run just because it appears here.
 
 - Progression: start each affected specialty without advanced goods from itself; test required/optional connections, trade and documented solo routes.

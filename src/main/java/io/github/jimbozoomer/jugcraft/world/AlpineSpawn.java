@@ -94,6 +94,7 @@ public final class AlpineSpawn {
 
 	private static void moveWorldSpawn(MinecraftServer server) {
 		ServerLevel level = server.overworld();
+		if (io.github.jimbozoomer.jugcraft.world.design.WorldDesigner.applySpawn(level)) return;
 		if (!JugcraftConfig.isFeatureEnabled(FEATURE) || !JugcraftConfig.textOption("alpine_spawn.start").trim().equalsIgnoreCase("on")
 				|| level.getGameTime() != 0L || !(level.getChunkSource().getGenerator().getBiomeSource() instanceof MultiNoiseBiomeSource)) {
 			return;

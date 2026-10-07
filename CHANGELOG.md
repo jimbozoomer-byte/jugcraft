@@ -6,7 +6,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 ## Unreleased
 
-No numbered release yet. Everything below is on `main`.
+No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
+
+### World Designer
+- An offline browser map editor sculpts terrain, paints installed biomes, places spawn and one Jugcraft walled city, and pins native village/structure start chunks.
+- `/jugcraft design export` supplies the editor and live mod catalog. Its exported datapack adds the **Jugcraft Designed** preset for new worlds; existing generated chunks are not edited.
+- Reuses native generation and Jugcraft's town systems. Read the [guide](docs/WORLD_DESIGNER.md) and [actual test evidence and limits](docs/features/world-designer.md).
 
 ### Unmerged: Thallite, slice 2: gear
 - **Thallite tools and armor:** a sword, pickaxe, axe, shovel and hoe, and a helmet, chestplate, leggings and boots, crafted from thallite ingots like iron's and repaired with them. They mine and protect as iron does, last a little less (200 uses a tool) and enchant best of all (18).

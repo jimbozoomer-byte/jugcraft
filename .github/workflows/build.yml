@@ -30,6 +30,8 @@ jobs:
           git diff --exit-code -- src/main/resources
       - name: Check material data
         run: python3 tools/check_mod_data.py
+      - name: Test world designer and pack compiler
+        run: node --test tools/world-designer/model.test.cjs
       - name: Build mod
         run: ./gradlew build --no-daemon
       - name: Verify pinned library downloads

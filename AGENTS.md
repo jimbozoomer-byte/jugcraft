@@ -4,6 +4,8 @@ Read [CLAUDE.md](CLAUDE.md), [CONTRIBUTING.md](CONTRIBUTING.md), and the relevan
 
 ## Approved frameworks and installation
 
+For authored terrain, biome maps or settlement placement, read [World Designer](docs/WORLD_DESIGNER.md) and its [feature record](docs/features/world-designer.md). Extend the shared offline editor/model and serialized generation codecs. Reuse the existing town builder. Do not create a global active-design singleton, silently rewrite generated chunks, or claim native structure pins control exact building layouts.
+
 The owner authorized the framework foundation and automatic-install companion pack on 5 October 2026. Read [docs/FRAMEWORKS.md](docs/FRAMEWORKS.md) before creating animation, texture, spell, creature, UI, or inspection infrastructure. These libraries are deliberately available for contributors to use; proposing the same dependency again is unnecessary. Integration still requires implementation, tests, and review.
 
 - Exact releases, original download URLs, hashes, sides, and licenses live in [distribution/frameworks.lock.json](distribution/frameworks.lock.json). Gradle and the Modrinth pack use that list.
