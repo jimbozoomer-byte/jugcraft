@@ -55,7 +55,8 @@
           "text": [
             "Get power running and double every ore.",
             "Mine copper and tin and smelt bronze. Build a machine casing, a coal generator and copper cable.",
-            "Put the crusher first: every ore through it gives two raw ores, twice the ingots."
+            "Put the crusher first: every ore through it gives two raw ores, twice the ingots.",
+            "Bronze armor protects like iron; a Steampunk Pattern at a smithing table makes it Steampunk armor (see Steampunk and Kaiser Armor)."
           ],
           "steps": [
             {
@@ -549,165 +550,173 @@
         },
         {
           "title": "Milestones (6)",
-          "icon": "jugcraft:wood_paxel",
+          "icon": "jugcraft:steampunk_helmet",
           "text": [
+            "Goggles On: Smith a Steampunk Pattern onto a piece of bronze armor.",
+            "On Parade: Smith a Kaiser Pattern onto a piece of steel armor.",
             "Jack of All Trades: Make a paxel.",
             "Man-at-Arms: Forge a longsword, greatsword, rapier, mace, war hammer, glaive, halberd, spear or lance.",
-            "Armory: Forge a dagger, sabre, estoc, battle axe, flail, scythe, quarterstaff or pike.",
-            "Two-Hander: Forge a zweihander, maul, executioner's sword or bill.",
-            "Masterwork: Forge a labrys, battleblade, war fork, kama or war pick."
+            "Armory: Forge a dagger, sabre, estoc, battle axe, flail, scythe, quarterstaff or pike."
           ]
         },
         {
           "title": "Milestones (7)",
-          "icon": "jugcraft:bronze_twinblade",
+          "icon": "jugcraft:bronze_zweihander",
           "text": [
+            "Two-Hander: Forge a zweihander, maul, executioner's sword or bill.",
+            "Masterwork: Forge a labrys, battleblade, war fork, kama or war pick.",
             "Weapon Art: Forge a twinblade, nodachi, earthbreaker, katar, moonblade or kusarigama.",
             "War Kit: Forge a katana, brazier mace, longbow, arbalest, heater shield or tower shield.",
-            "Let Fly: Forge a javelin, francisca, chakram or harpoon.",
-            "Deep Breath: Make scuba gear and breathe under water on oxygen.",
-            "Light on Your Feet: Make free runners and never take fall damage."
+            "Let Fly: Forge a javelin, francisca, chakram or harpoon."
           ]
         },
         {
           "title": "Milestones (8)",
-          "icon": "jugcraft:power_katana",
+          "icon": "jugcraft:scuba_mask",
           "text": [
+            "Deep Breath: Make scuba gear and breathe under water on oxygen.",
+            "Light on Your Feet: Make free runners and never take fall damage.",
             "Charged Up: Make a power katana or power bow.",
             "Lego My Ego: Mould coloured plastic blocks.",
-            "Steel Samurai: Build a piece of the powered exosuit.",
-            "Masterless: Repaint your exosuit or katana in the Ronin livery.",
-            "Black Gold: Fill a bucket with crude oil."
+            "Steel Samurai: Build a piece of the powered exosuit."
           ]
         },
         {
           "title": "Milestones (9)",
-          "icon": "jugcraft:pumpjack",
+          "icon": "jugcraft:ronin_exosuit_helmet",
           "text": [
+            "Masterless: Repaint your exosuit or katana in the Ronin livery.",
+            "Black Gold: Fill a bucket with crude oil.",
             "Nodding Donkey: Build a pumpjack over an oil reservoir.",
             "Fractional Thinking: Build a distillation tower.",
-            "Tight Spot: Build a fracking rig for shale oil.",
-            "Diesel Power: Build a diesel generator.",
-            "Spool Up: Build a gas turbine."
+            "Tight Spot: Build a fracking rig for shale oil."
           ]
         },
         {
           "title": "Milestones (10)",
-          "icon": "jugcraft:premium_diesel_bucket",
+          "icon": "jugcraft:diesel_generator",
           "text": [
+            "Diesel Power: Build a diesel generator.",
+            "Spool Up: Build a gas turbine.",
             "Top Shelf: Make premium diesel or premium gasoline in the hydrotreater.",
             "Waste Not: Build a heat recovery unit to make power from a generator's exhaust.",
-            "Eight Cylinders: Build a diesel engine.",
-            "Fantastic Plastic: Press a plastic sheet.",
-            "Bouncing Back: Make synthetic rubber."
+            "Eight Cylinders: Build a diesel engine."
           ]
         },
         {
           "title": "Milestones (11)",
-          "icon": "jugcraft:pvc_resin",
+          "icon": "jugcraft:plastic_sheet",
           "text": [
+            "Fantastic Plastic: Press a plastic sheet.",
+            "Bouncing Back: Make synthetic rubber.",
             "Vinyl Revival: Make PVC resin from chlorine.",
             "Squeaky Clean: Boil soap from lye.",
-            "Light Speed: Draw borosilicate glass into optical fibre.",
-            "Pin Pulled: Make a grenade.",
-            "Going with the Flow: Build a flow battery."
+            "Light Speed: Draw borosilicate glass into optical fibre."
           ]
         },
         {
           "title": "Milestones (12)",
-          "icon": "jugcraft:asphalt",
+          "icon": "jugcraft:grenade",
           "text": [
+            "Pin Pulled: Make a grenade.",
+            "Going with the Flow: Build a flow battery.",
             "Hit the Road: Lay asphalt, and walk faster on it.",
             "Split Decision: Build an electrolytic cell.",
-            "Oil of Vitriol: Make sulfuric acid.",
-            "Green Revolution: Make fertilizer.",
-            "Moonshine: Ferment crops into bioethanol."
+            "Oil of Vitriol: Make sulfuric acid."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:alumina",
+          "icon": "jugcraft:fertilizer",
           "text": [
+            "Green Revolution: Make fertilizer.",
+            "Moonshine: Ferment crops into bioethanol.",
             "The Bayer Way: Digest bauxite into alumina.",
             "Clean Burn: Build a hydrogen fuel cell.",
-            "Thin Air: Build an air separation unit.",
-            "Reel Me In: Make a pneumatic grapple.",
-            "Filtered: Make a gas mask."
+            "Thin Air: Build an air separation unit."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:chlorine_grenade",
+          "icon": "jugcraft:pneumatic_grapple",
           "text": [
+            "Reel Me In: Make a pneumatic grapple.",
+            "Filtered: Make a gas mask.",
             "Chemical Arsenal: Make a chlorine, smoke or thermite grenade or a flashbang.",
             "Expanding Foam: Make a foam sprayer.",
-            "Bunker Down: Cast blast-proof concrete, as blast-proof as obsidian.",
-            "Field Medic: Make a first aid kit in the chemical reactor.",
-            "Bread from Air: Build a synthesis converter, to make ammonia from air."
+            "Bunker Down: Cast blast-proof concrete, as blast-proof as obsidian."
           ]
         },
         {
           "title": "Milestones (15)",
-          "icon": "jugcraft:nitric_acid_bucket",
+          "icon": "jugcraft:first_aid_kit",
           "text": [
+            "Field Medic: Make a first aid kit in the chemical reactor.",
+            "Bread from Air: Build a synthesis converter, to make ammonia from air.",
             "Aqua Fortis: Make nitric acid.",
             "Kroll Call: Chlorinate titanium and melt the sponge.",
-            "Power Wall: Build a lithium battery bank.",
-            "Strong Attraction: Make a neodymium magnet.",
-            "Lossless (Almost): Build a magnet dynamo or magnet motor."
+            "Power Wall: Build a lithium battery bank."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:silicon_boule",
+          "icon": "jugcraft:neodymium_magnet",
           "text": [
+            "Strong Attraction: Make a neodymium magnet.",
+            "Lossless (Almost): Build a magnet dynamo or magnet motor.",
             "Pulling Strings: Pull a silicon boule in the arc furnace.",
             "Etched in Light: Etch microchips in the lithography station.",
-            "Central Processing: Assemble a processor.",
-            "Hello, World: Build a network terminal.",
-            "In Control: Build a logic controller."
+            "Central Processing: Assemble a processor."
           ]
         },
         {
           "title": "Milestones (17)",
-          "icon": "jugcraft:control_monitor",
+          "icon": "jugcraft:network_terminal",
           "text": [
+            "Hello, World: Build a network terminal.",
+            "In Control: Build a logic controller.",
             "Mission Control: Build control monitor panels.",
             "Under Pressure: Build a gas holder.",
-            "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter.",
-            "Here Comes the Sun: Build an advanced solar panel."
+            "Shut-Off Valve: Make a fluid valve."
           ]
         },
         {
           "title": "Milestones (18)",
-          "icon": "jugcraft:tank_gauge",
+          "icon": "jugcraft:fluid_filter",
           "text": [
+            "Strained Relations: Make a fluid filter.",
+            "Here Comes the Sun: Build an advanced solar panel.",
             "Full of It: Make a tank gauge.",
             "Concentrate: Build a solar receiver for a heliostat field.",
-            "Spool Up: Make a turbocharger for the advanced engine.",
-            "Keep It Spinning: Build a flywheel.",
-            "Four on the Floor: Build an advanced combustion engine."
+            "Spool Up: Make a turbocharger for the advanced engine."
           ]
         },
         {
           "title": "Milestones (19)",
-          "icon": "jugcraft:cotton",
+          "icon": "jugcraft:flywheel",
           "text": [
+            "Keep It Spinning: Build a flywheel.",
+            "Four on the Floor: Build an advanced combustion engine.",
             "King Cotton: Grow cotton.",
             "Make It Rain: Build a sprinkler.",
-            "Silver Lining: Build an electroplating bath.",
-            "Ice Cold: Build an ammonia chiller.",
-            "Minus 183: Build a cryogenic liquefier."
+            "Silver Lining: Build an electroplating bath."
           ]
         },
         {
           "title": "Milestones (20)",
-          "icon": "jugcraft:rocket_workshop",
+          "icon": "jugcraft:ammonia_chiller",
           "text": [
+            "Ice Cold: Build an ammonia chiller.",
+            "Minus 183: Build a cryogenic liquefier.",
             "Rocket Science: Build a rocket workshop.",
             "Eye in the Sky: Assemble a survey rocket.",
-            "Soil Optional: Build a hydroponic bay.",
+            "Soil Optional: Build a hydroponic bay."
+          ]
+        },
+        {
+          "title": "Milestones (21)",
+          "icon": "jugcraft:crop_harvester",
+          "text": [
             "Reaping What You Sow: Build a crop harvester."
           ]
         }
@@ -2566,8 +2575,9 @@
           "icon": "jugcraft:steel_pickaxe",
           "text": [
             "Bronze and steel make swords, pickaxes, axes, shovels, hoes and armor, shaped like iron ones.",
-            "Bronze tools get the same drops as iron and last a little longer. Bronze armor matches iron's and is slightly tougher: steampunk brass, with goggles, a pressure gauge and a boiler on the back.",
-            "Steel tools mine obsidian and ancient debris, and last over three times as long as iron. Steel armor sits between iron and diamond: a spiked helmet, a field-grey tunic over a steel cuirass, and jackboots."
+            "Bronze tools get the same drops as iron and last a little longer. Bronze armor matches iron's and is slightly tougher.",
+            "Steel tools mine obsidian and ancient debris, and last over three times as long as iron. Steel armor sits between iron and diamond.",
+            "Steampunk and Kaiser armor keep the stylized looks bronze and steel armor were first made in, as sets of their own. For now bronze and steel armor wear those looks too."
           ],
           "craft": {
             "grid": [
@@ -2583,6 +2593,53 @@
             ],
             "result": "jugcraft:steel_pickaxe",
             "count": 1
+          }
+        },
+        {
+          "title": "Steampunk and Kaiser Armor",
+          "icon": "jugcraft:kaiser_helmet",
+          "text": [
+            "Steampunk armor is a bronze engineer's rig: an aviator cap with teal-glassed goggles, a breastplate with a pressure gauge, a copper boiler on the back, and buckled boots. Kaiser armor is the parade dress of the Winged Cog: a black spiked helmet with a gold plate, a field-grey tunic under a steel cuirass, gilt epaulettes and black jackboots.",
+            "At a smithing table, a Steampunk Pattern, a piece of bronze armor and a copper ingot make the Steampunk piece. A Kaiser Pattern, a piece of steel armor and a gold ingot make the Kaiser piece. Each pattern craft makes 4, one for each piece of a set. The Kaiser Pattern needs an Imperial Crest, made from black lacquer plates.",
+            "Same protection as the bronze or steel piece, and for now the same look: bronze and steel armor still wear these looks too, until they get their own design. Enchantments, wear, trims and plating carry over. The same pattern and an ingot of the metal turn it back."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:copper_ingot",
+              "minecraft:leather",
+              "minecraft:copper_ingot",
+              "minecraft:glass_pane",
+              "minecraft:paper",
+              "minecraft:glass_pane",
+              "minecraft:copper_ingot",
+              "minecraft:leather",
+              "minecraft:copper_ingot"
+            ],
+            "result": "jugcraft:steampunk_pattern",
+            "count": 4
+          }
+        },
+        {
+          "title": "Kaiser Pattern",
+          "icon": "jugcraft:kaiser_pattern",
+          "text": [
+            "The Kaiser Pattern takes an Imperial Crest, the Winged Cog of the Kaiserworks blocks: three black lacquer plates, four gold nuggets, a gold ingot and a red dye make two crests.",
+            "Black lacquer plates come from iron plates and black dye."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:gold_nugget",
+              "jugcraft:imperial_crest",
+              "minecraft:gold_nugget",
+              "minecraft:black_dye",
+              "minecraft:paper",
+              "minecraft:black_dye",
+              "minecraft:gold_nugget",
+              "minecraft:red_dye",
+              "minecraft:gold_nugget"
+            ],
+            "result": "jugcraft:kaiser_pattern",
+            "count": 4
           }
         },
         {
