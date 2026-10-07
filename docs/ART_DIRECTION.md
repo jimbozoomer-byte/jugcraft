@@ -1,6 +1,12 @@
 # Art direction
 
-Jugcraft's look changes with its tiers, the way real technology did: the early game is brass-and-steam, the later tiers move towards dieselpunk, and electrical power gear and the high-tech tiers to come are graphite and glowing light. Every texture and model is original, drawn by the generators in `tools/`.
+Jugcraft's look changes with its tiers, the way real technology did: the early game is brass-and-steam, the later tiers move towards dieselpunk, and electrical power gear and the high-tech tiers to come are graphite and glowing light. Production art uses the generators in `tools/` and suitable assets from the [shared owner library](../art/owner-library/README.md).
+
+## Shared assets for every content branch
+
+The owner supplied a [reusable asset collection](../art/owner-library/README.md) on 6 October 2026 and explicitly permits direct use, recoloring/adaptation, or reference when an asset fits the feature. Browse the [complete catalog](../art/owner-library/catalog/README.md) before making new assets. It includes blocks, ores, metals, machinery, guns, planes, sounds, animations, weapons, armor, trees, biomes, farming and food. Its supplied stone sheets are useful for the building and ceramics branch as well as industrial settings.
+
+Keep the originals in the library intact, preserve required sidecars and frame layouts, and record the source path and changes in the feature's provenance. Adapt material palettes to the appropriate branch and tier. A suitable owner-supplied asset may be reused directly; other external references retain their documented source and license rules.
 
 ## Rules for everything
 - Detailed models built from boxes (see `tools/steampunk_models.py`): round prisms, gears, gauges, rivets, pipes. No flat cubes where a real machine would have shape.
@@ -27,6 +33,7 @@ On 4 October 2026 the owner rejected the noisy, rust-covered dieselpunk textures
 - **Shape comes from light.** Give a panel a one-pixel bevel: lit along the top and left, shaded along the bottom and right. A panel inside a face, or a part of a model, also gets a dark seam round the outside; a building block that tiles does not (it splits the seam across its edge, see [Tiling building blocks](#tiling-building-blocks)). Shade recessed insets the other way round. Draw bolts as two-by-two heads lit at the top left.
 - **Wear is placed, not sprinkled.** Use a chip at a corner, a stain weeping from a bolt or a seam, or a few short streaks one shade off the fill. Rust is an accent, never a whole surface. Item icons have no wear at all ([ITEM_ICONS.md](ITEM_ICONS.md)): at 16 pixels it reads as dirt.
 - **Pattern beats noise.** Show grain, ribs, tread and ripples as regular shapes: plank lines, ribs every four rows, raised lozenges, long ripple lines.
+- **Each material looks like its vanilla counterpart.** On 5 October 2026 the owner added that flat is not the goal either: stone should look like stone, cobblestone or stone bricks, and every material should take after the vanilla textures so it does not stand out. The painters in `tools/block_style.py` work that way. `bs.fill` gives one ground tone with small clumps of the tones either side, in place of a random shade at every pixel. Stone, cobblestone and bricks are lit along their top and left, wood is drawn as planks, and straw and hair as streaks.
 - **Tubes and barrels** read best with a flat, even tube texture: the 16-pixel tiling cuts across a stepped cylinder at arbitrary places, so bevels, seams and bolts belong on flat panels.
 
 ### Tiling building blocks
@@ -365,3 +372,4 @@ On 5 October 2026 the owner found the big guns' barrels and the Grand Mortar "se
 - **Round envelopes are turned surfaces**, not stacked boxes: a closed quad mesh with shared corners, a normal at each corner and its own texture wrapped once round it (the hot-air balloons and the Observation Balloon). Opaque surfaces seen from both sides are flagged `cutout` (26.3's `entityCutout` draws both sides in the opaque pass), never `nocull`, which is the translucent pass and is only for really translucent textures such as the searchlight's beam.
 - **Things the server moves are eased on the client** (`SmoothFlight`), so they glide rather than stand still and jump each update.
 - **Their item icons** (the guns, shells, balloon, Range Finder, Landship, Diesel Walker and Zeppelin) are 16×16 maps in `tools/item_icons/` drawn by [ITEM_ICONS.md](ITEM_ICONS.md) (redrawn from 32×32 on 7 October 2026). Each gun keeps a silhouette of its own (a tall slotted tower, a compact block, twin steep barrels, a long low barrel with a range finder, a round drum with three barrels, a round deck), so they tell apart in a hotbar.
+- **Record asset provenance.** Original work remains the priority. Suitable owner-supplied library assets may be reused directly or adapted under the owner's authorization; follow [the library guide](../art/owner-library/README.md) and [LICENSE_POLICY.md](../LICENSE_POLICY.md). Other style references do not authorize copying their assets.

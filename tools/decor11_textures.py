@@ -9,13 +9,15 @@ Called from crop_textures.crop_textures(). Every pixel is drawn here by code or 
 from fixed seeds; no Mojang texture is read, traced or recoloured. Block textures are 16x16 and opaque; the ribbon item
 and the dance floor's glow (an entity texture) are see-through round their shapes. The spirit board is drawn at 32x16
 and cut into two block textures, one for each half of the board.
+
+Surfaces are painted in the manner of the vanilla blocks with tools/block_style.py: a short palette in small clumps,
+never a random colour at every pixel; wood as planks, and straw, bark and hair as streaks.
 """
-import random
 
 from PIL import Image
 
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 from decor9_textures import IRON, BONE, MOSS, BARK, put, grid
 
 PLANK = [rgb("6e5232"), rgb("7e5e3a"), rgb("8e6c44"), rgb("5c4428")]
@@ -68,11 +70,7 @@ def write_text(img, x, y, text, color, scale=1):
 def planks(seed, palette=PLANK):
     """Rough planks laid across, four pixels wide, dark gaps between them and a nail at each end."""
     c = Canvas()
-    rng = random.Random(seed)
-    for y in range(16):
-        tone = rng.randrange(3)
-        for x in range(16):
-            c.px(x, y, palette[3] if y % 4 == 3 else palette[max(0, min(2, tone + (1 if rng.random() < 0.15 else 0)))])
+    bs.planks([palette[3]] + palette[:3], seed)(c)
     for y in range(1, 16, 4):
         c.px(1, y, IRON[0])
         c.px(14, y, IRON[0])
@@ -123,13 +121,13 @@ def lid():
 
 def inside():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, DARK_WOOD, 21104)
+    bs.fill(c, 0, 0, 15, 15, DARK_WOOD, 21104)
     return c.img
 
 
 def band():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[1:4], 21105, [3, 2, 1])
+    bs.fill(c, 0, 0, 15, 15, IRON[1:4], 21105, [3, 2, 1])
     for y in (2, 8, 13):
         c.px(7, y, IRON[3])
     return c.img
@@ -138,11 +136,11 @@ def band():
 def sheet(seed):
     """A white sheet with soft grey folds."""
     c = Canvas()
-    rng = random.Random(seed)
+    cloth = bs.surface(WHITE[1:], seed, spread=0.6)
     for y in range(16):
         for x in range(16):
             fold = (x + y // 3) % 6 == 0
-            c.px(x, y, WHITE[0] if fold else WHITE[rng.choice((1, 2, 2, 3))])
+            c.px(x, y, WHITE[0] if fold else cloth(x, y))
     return c.img
 
 
@@ -182,7 +180,7 @@ def spring():
 
 def velvet(palette, seed):
     c = Canvas()
-    noise(c, 0, 0, 15, 15, palette, seed, [1, 3, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, palette, seed, [1, 3, 3, 1])
     return c.img
 
 
@@ -209,7 +207,7 @@ def footlight():
 def drape(palette, seed, stars=False):
     """Velvet hanging to a gold trim and fringe at its foot (the bottom rows), with gold stars sprinkled if `stars`."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, palette, seed, [1, 3, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, palette, seed, [1, 3, 3, 1])
     for x in range(16):
         c.px(x, 11, GOLD[2])
         for y in range(12, 16):
@@ -222,7 +220,7 @@ def drape(palette, seed, stars=False):
 
 def velvet_top(palette, seed, stars=False):
     c = Canvas()
-    noise(c, 0, 0, 15, 15, palette, seed, [1, 3, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, palette, seed, [1, 3, 3, 1])
     if stars:
         for x, y in ((2, 3), (12, 2), (7, 9), (14, 12), (4, 13)):
             c.px(x, y, GOLD[3])
@@ -231,7 +229,7 @@ def velvet_top(palette, seed, stars=False):
 
 def polished(palette, seed):
     c = Canvas()
-    noise(c, 0, 0, 15, 15, palette, seed)
+    bs.fill(c, 0, 0, 15, 15, palette, seed)
     for y in range(16):
         c.px(4, y, palette[-1])
     return c.img
@@ -239,7 +237,7 @@ def polished(palette, seed):
 
 def ballot():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("141214"), rgb("1c1a1c"), rgb("242024")], 21141)
+    bs.fill(c, 0, 0, 15, 15, [rgb("141214"), rgb("1c1a1c"), rgb("242024")], 21141)
     for x in range(16):
         c.px(x, 1, GOLD[1])
         c.px(x, 14, GOLD[1])
@@ -248,7 +246,7 @@ def ballot():
 
 def ballot_slot():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("141214"), rgb("1c1a1c"), rgb("242024")], 21142)
+    bs.fill(c, 0, 0, 15, 15, [rgb("141214"), rgb("1c1a1c"), rgb("242024")], 21142)
     c.rect(3, 7, 12, 8, rgb("020202"))
     return c.img
 
@@ -303,18 +301,16 @@ def pin_band():
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            c.px(x, y, rgb("f0eee8") if 7 <= y <= 8 else [rgb("b01a1a"), rgb("c82222")][(x + y) % 2])
+            c.px(x, y, rgb("f0eee8") if 7 <= y <= 8 else rgb("b01a1a") if y in (6, 9) else rgb("c82222"))
     return c.img
 
 
 def rind(seed):
     """Orange rind in ribs."""
     c = Canvas()
-    rng = random.Random(seed)
     for y in range(16):
         for x in range(16):
-            tone = 0 if x % 4 == 0 else 2 if x % 4 == 2 else 1
-            c.px(x, y, ORANGE[min(3, tone + (1 if rng.random() < 0.1 else 0))])
+            c.px(x, y, ORANGE[0 if x % 4 == 0 else 2 if x % 4 == 2 else 1])
     return c.img
 
 
@@ -343,13 +339,13 @@ def pumpkin_top():
 
 def pumpkin_stem():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("3e4a1c"), rgb("4e5a22"), rgb("5e6a2a")], 21174)
+    bs.fill(c, 0, 0, 15, 15, [rgb("3e4a1c"), rgb("4e5a22"), rgb("5e6a2a")], 21174)
     return c.img
 
 
 def frame_wood():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("5a3a1e"), rgb("6a4626"), rgb("7a522e")], 21181)
+    bs.fill(c, 0, 0, 15, 15, [rgb("5a3a1e"), rgb("6a4626"), rgb("7a522e")], 21181)
     for y in range(0, 16, 5):
         for x in range(16):
             c.px(x, y, rgb("4a2e16"))
@@ -359,16 +355,15 @@ def frame_wood():
 def slate():
     """A dark slate, rubbed with old chalk."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, SLATE, 21182, [3, 2, 1])
-    rng = random.Random(21183)
-    for _ in range(9):
-        c.px(rng.randrange(16), rng.randrange(16), rgb("3c4640"))
+    bs.fill(c, 0, 0, 15, 15, SLATE, 21182, [3, 2, 1])
+    for x, y in ((3, 2), (4, 2), (11, 5), (6, 9), (7, 9), (13, 12), (2, 13)):
+        c.px(x, y, rgb("3c4640"))  # old chalk, rubbed in a few smudges
     return c.img
 
 
 def chalk():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("e8e8e2"), rgb("f4f4f0"), rgb("ffffff")], 21184)
+    bs.fill(c, 0, 0, 15, 15, [rgb("e8e8e2"), rgb("f4f4f0"), rgb("ffffff")], 21184)
     return c.img
 
 
@@ -377,14 +372,12 @@ def chalk():
 def mossy_bark(seed):
     """Dark bark in furrows, flecked with moss."""
     c = Canvas()
-    rng = random.Random(seed)
-    columns = [rng.randrange(4) for _ in range(16)]
-    for x in range(16):
+    bs.streaks(BARK[1:], seed, along=6.0)(c)
+    for x in range(0, 16, 4):
         for y in range(16):
-            if rng.random() < 0.08 + (0.12 if y > 11 else 0):
-                c.px(x, y, MOSS[rng.randrange(3)])
-            else:
-                c.px(x, y, BARK[columns[x]] if x % 4 else BARK[0])
+            if (y + x) % 7 not in (0, 1):
+                c.px(x, y, BARK[0])  # the furrows, broken here and there
+    bs.moss_over(c, MOSS, seed + 1, amount=0.15, ground=4)
     return c.img
 
 
@@ -410,13 +403,13 @@ def rings():
 
 def moss():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, MOSS, 21194, [1, 2, 2])
+    bs.fill(c, 0, 0, 15, 15, MOSS, 21194, [1, 2, 2])
     return c.img
 
 
 def hollow():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("0a0806"), rgb("120e0a"), rgb("1a140e")], 21195)
+    bs.fill(c, 0, 0, 15, 15, [rgb("0a0806"), rgb("120e0a"), rgb("1a140e")], 21195)
     return c.img
 
 
@@ -440,7 +433,7 @@ def dance_tile():
 
 def dance_side():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("0c0c10"), rgb("121216"), rgb("18181e")], 21202)
+    bs.fill(c, 0, 0, 15, 15, [rgb("0c0c10"), rgb("121216"), rgb("18181e")], 21202)
     for x in range(16):
         c.px(x, 0, rgb("8a8c94"))
         c.px(x, 1, rgb("4a4c54"))
@@ -464,17 +457,14 @@ def dance_glow():
 
 def post_wood():
     c = Canvas()
-    rng = random.Random(21211)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, DARK_WOOD[rng.choice((0, 1, 2, 2))] if x % 5 else DARK_WOOD[0])
+    bs.planks(DARK_WOOD, 21211, vertical=True)(c)
     return c.img
 
 
 def bronze():
     """Old bronze, gone green in places."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BRONZE, 21212, [2, 3, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, BRONZE, 21212, [2, 3, 3, 1])
     for y in range(16):
         c.px(5, y, rgb("a8844a"))
     return c.img
@@ -482,7 +472,7 @@ def bronze():
 
 def iron():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 21213)
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 21213)
     return c.img
 
 
@@ -516,13 +506,13 @@ PARCHMENT = [rgb("a87c4a"), rgb("b88a54"), rgb("c49a62")]
 
 def spirit_board():
     """The spirit board at 32x16: YES and NO in the top corners, a moon and a sun between them, two rows of letters
-    (worn to specks) and GOODBYE along the foot, inside a dark border."""
+    (worn to little bars) and GOODBYE along the foot, inside a dark border."""
     img = Image.new("RGBA", (32, 16), (0, 0, 0, 255))
-    rng = random.Random(21221)
+    parchment = bs.surface(PARCHMENT, 21221, spread=0.6, size=(32, 16))
     for y in range(16):
         for x in range(32):
             edge = x in (0, 31) or y in (0, 15)
-            img.putpixel((x, y), (rgb("3a2410") if edge else PARCHMENT[rng.randrange(3)]) + (255,))
+            img.putpixel((x, y), (rgb("3a2410") if edge else parchment(x, y)) + (255,))
     ink = rgb("1e1208")
     write_text(img, 2, 1, "YES", ink)
     write_text(img, 30 - text_width("NO"), 1, "NO", ink)
@@ -533,8 +523,7 @@ def spirit_board():
     for row, y in enumerate((7, 9)):
         for x in range(4 + row, 28, 3):
             img.putpixel((x, y), ink + (255,))
-            if rng.random() < 0.6:
-                img.putpixel((x, y - 1), ink + (255,))
+            img.putpixel((x, y - 1), ink + (255,))
     write_text(img, (32 - text_width("GOODBYE")) // 2, 10, "GOODBYE", ink)
     return img
 
@@ -593,7 +582,7 @@ def card_face(name):
 def planchette():
     """Pale wood with a darker rim and a round glass lens in the middle."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("c8a46c"), rgb("d4b07a"), rgb("dcbc88")], 21231)
+    bs.fill(c, 0, 0, 15, 15, [rgb("c8a46c"), rgb("d4b07a"), rgb("dcbc88")], 21231)
     for i in range(16):
         for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
             c.px(x, y, rgb("8a6438"))
