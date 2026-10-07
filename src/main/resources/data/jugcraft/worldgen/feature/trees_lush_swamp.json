@@ -5,6 +5,10 @@
     {
       "chance": 0.3,
       "feature": "jugcraft:willow_checked"
+    },
+    {
+      "chance": 0.1429,
+      "feature": "jugcraft:maple_checked"
     }
   ]
 }

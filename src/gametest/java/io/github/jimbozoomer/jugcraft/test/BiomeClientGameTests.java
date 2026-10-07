@@ -47,7 +47,7 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 	 */
 	private static final double FOUND_SHARE = 0.5;
 	/** Biomes to photograph, if found. */
-	private static final String[] SHOTS = {"maple_woods", "seasonal_forest", "aspen_glade", "coniferous_forest", "dead_forest", "tundra",
+	private static final String[] SHOTS = {"maple_woods", "seasonal_forest", "aspen_glade", "coniferous_forest", "dead_forest", "tundra", "muskeg",
 			"field", "flower_meadow", "grassland", "heathland", "lavender_field", "lush_grassland", "prairie", "shrubland", "steppe",
 			"bog", "dead_swamp", "lush_swamp", "swamp_woods", "bayou", "floodplain", "ghost_forest", "sludge_mire", "lush_river", "fen",
 			"lake_district", "quagmire", "marsh", "wetland",

@@ -4,7 +4,7 @@
   "features": [
     {
       "chance": 0.25,
-      "feature": "minecraft:birch_checked"
+      "feature": "jugcraft:aspen_checked"
     }
   ]
 }
