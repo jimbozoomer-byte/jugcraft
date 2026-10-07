@@ -75,7 +75,7 @@ public class HearthlingEntity extends WorkerEntity<HearthlingEntity> {
 		this.bond = bond;
 	}
 
-	private @Nullable WorkerDefinition.Familiar terms() {
+	private WorkerDefinition.@Nullable Familiar terms() {
 		return Workers.catalog().get(DEFINITION, WorkerDefinition.Familiar.class);
 	}
 

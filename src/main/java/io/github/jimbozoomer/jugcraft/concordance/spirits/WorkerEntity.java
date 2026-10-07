@@ -23,6 +23,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.player.Player;
@@ -31,8 +32,6 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.tslat.smartbrainlib.api.SmartBrainOwner;
-import net.tslat.smartbrainlib.api.core.BrainActivityGroup;
-import net.tslat.smartbrainlib.api.core.SmartBrainProvider;
 import net.tslat.smartbrainlib.api.core.behaviour.custom.look.LookAtTarget;
 import net.tslat.smartbrainlib.api.core.behaviour.custom.move.MoveToWalkTarget;
 import net.tslat.smartbrainlib.api.core.sensor.ExtendedSensor;
@@ -64,11 +63,6 @@ public abstract class WorkerEntity<T extends WorkerEntity<T>> extends Pathfinder
 	protected WorkerEntity(EntityType<? extends PathfinderMob> type, Level level) {
 		super(type, level);
 		setPersistenceRequired();
-	}
-
-	@SuppressWarnings("unchecked")
-	private T self() {
-		return (T) this;
 	}
 
 	@Override
@@ -148,24 +142,19 @@ public abstract class WorkerEntity<T extends WorkerEntity<T>> extends Pathfinder
 		return Vec3.atBottomCenterOf(pos);
 	}
 
+	/** SmartBrainLib builds the brain from these for every {@link SmartBrainOwner} and ticks it after each AI step. */
 	@Override
-	protected Brain.Provider<?> brainProvider() {
-		return new SmartBrainProvider<>(self());
+	public List<? extends ExtendedSensor<?>> getSensors(T owner) {
+		return List.of(new NearbyPlayersSensor<T>());
 	}
 
 	@Override
-	public List<? extends ExtendedSensor<? extends T>> getSensors() {
-		return List.of(new NearbyPlayersSensor<>());
-	}
-
-	@Override
-	public BrainActivityGroup<? extends T> getCoreTasks() {
-		return BrainActivityGroup.coreTasks(new LookAtTarget<>(), new MoveToWalkTarget<>());
+	public List<? extends BehaviorControl<?>> getAlwaysRunningBehaviours(T owner) {
+		return List.of(new LookAtTarget<T>(), new MoveToWalkTarget<T>());
 	}
 
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
-		tickBrain(self());
 		if ((tickCount + getId()) % THINK_TICKS == 0) {
 			think(level);
 		}

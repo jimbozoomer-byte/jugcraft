@@ -107,7 +107,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 		return carried.stream().mapToInt(ItemStack::getCount).sum();
 	}
 
-	public static @Nullable WorkerDefinition.Construct terms() {
+	public static WorkerDefinition.@Nullable Construct terms() {
 		return Workers.catalog().get(DEFINITION, WorkerDefinition.Construct.class);
 	}
 
