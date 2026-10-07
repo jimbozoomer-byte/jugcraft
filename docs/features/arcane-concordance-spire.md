@@ -198,7 +198,8 @@ Provenance:
   reachable by one player alone. Architect now has no single mandatory step, because the Conclave and the spire are
   independent routes.
 - Game tests added: `ConcordanceSpireGameTests` (ten).
-- CI: pending (this record is updated with the run).
+- CI: run 37655111143 (commit ff992934) passes the whole Build workflow on its first run: it builds, passes the data
+  checks and all 1042 required server game tests (the ten above among them), and the three client test shards pass.
 
 Not yet run: any client (the heart's model, animations and icon, the codex pages, Jade), a two-client dedicated server
 (a party raising and keeping a spire, one of them offline at the raising), and days of real play with a porter keeping

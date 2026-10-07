@@ -174,7 +174,7 @@ No new art: the stage advancements use vanilla icons.
 - Game tests added: `ConcordanceProgressionGameTests` (five).
 - CI: run 37649575481 (commit 55f4f576) builds, passes the data checks and all 1032 required server game tests (the
   five above among them), and client shards 0 and 1 pass. Shard 2 stalled installing Mesa before any test ran; the
-  next push's run covers it (see the [spire](arcane-concordance-spire.md) record).
+  next push's run, 37655111143 (commit ff992934), passes every job, all three client shards among them.
 
 Not yet run: any client (the codex entry, the advancements' toasts), a two-client dedicated server, and a real climb
 from a fresh world to Architect by ordinary play (the tests climb the first two stages by ordinary evidence and grant the
