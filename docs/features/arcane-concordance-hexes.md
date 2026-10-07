@@ -87,7 +87,7 @@ by slot. It is saved with the player, in the same record as the inventory, so at
 their own things and no expedition exists, or the expedition holds them and the dreamer holds only what the dream gave.
 `Dreaming.end` takes back whatever the dreamer holds, puts the escrow back into its slots, removes the expedition and
 restores the rest in one server tick; ending a dream that is not open does nothing. It runs on waking, on the time
-running out or straying (checked every half second), on harm, before death (the death event), on changing dimension,
+running out, straying or leaving the body's dimension (checked every half second), on harm, before death (the death event),
 on leaving the server, and on joining with a dream still open (a crash). A dreamer who died some way the death event
 did not see keeps the expedition on the dead body (ending it there does nothing) until they respawn; the new body then
 gets the escrow and game mode back (`Dreaming.recover`), once. Wisps are GeckoLib entities that are never saved and
@@ -134,7 +134,7 @@ fade the moment their dreamer is not dreaming; only their dreamer can catch them
 No new dependency. Framework use:
 
 - **Fabric API**: data components, attachments (the expedition is saved with the player), events (join, disconnect,
-  damage, death, respawn, dimension change, entity use) and commands.
+  damage, death, respawn, entity use) and commands.
 - **The shared effect boundary** (Jugcraft): every curse pulse, the dream's night vision and the moving ward's guard.
 - **Spell Engine**: not used. A curse travels through a link held in a taglock, not as a cast spell, a projectile or
   an area, so no Spell Engine delivery applies; wards are items. (Morning question 35.)
@@ -164,7 +164,8 @@ shown to the owner yet.
   numbers and ward categories equal the generator's; the curses on disk are the generator's and each is bounded; curse
   pulses go through the boundary as harmful under its multiplayer rules and every cast and pulse is revalidated; the
   moving ward guards the boundary; the expedition is one persistent attachment never copied on death, and dreams end
-  on join, disconnect, death, respawn and dimension change, never giving back spent experience; every reason, end and
+  on join, disconnect, death and respawn and when the dreamer leaves the body's dimension, never giving back spent
+  experience; every reason, end and
   message has its text; every ward has a sigil recipe made with dreamglass; the GeckoLib models and animations are the
   generator's, the clips played exist and every box fits its sheet; the icons are their maps. The pure-package rule
   covers `concordance/hex` and `concordance/dream`.

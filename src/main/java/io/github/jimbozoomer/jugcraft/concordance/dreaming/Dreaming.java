@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -128,11 +127,6 @@ public final class Dreaming {
 				end(player, DreamRules.End.DIED);
 			}
 			return true;
-		});
-		ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
-			if (dreaming(player)) {
-				end(player, DreamRules.End.STRAYED);
-			}
 		});
 		// A dreamer who died unseen respawns with their dream still on the old body: the new body gets the escrow.
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {

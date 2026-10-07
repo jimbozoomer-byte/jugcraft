@@ -9091,9 +9091,11 @@ def check_sympathy(co, root, lang, registered, research):
     if not expedition or "copyOnDeath" in expedition.group(0) or ".persistent(DreamExpedition.CODEC)" not in expedition.group(0):
         err("Dreaming.EXPEDITION must be one persistent attachment that is not copied on death")
     for event in ("ServerPlayConnectionEvents.JOIN", "ServerPlayConnectionEvents.DISCONNECT", "ServerLivingEntityEvents.ALLOW_DEATH",
-                  "ServerPlayerEvents.AFTER_RESPAWN", "AFTER_PLAYER_CHANGE_WORLD"):
+                  "ServerPlayerEvents.AFTER_RESPAWN"):
         if event not in dreaming:
             err(f"Dreaming: a dream must end (or be recovered) on {event}")
+    if "DreamRules.check(now, expedition.until(), here, distance)" not in dreaming:
+        err("Dreaming: the check must end a dream whose dreamer left the body's dimension")
     if "DreamRules.spent(" not in dreaming:
         err("Dreaming: a dream never gives back more experience than was entered with (DreamRules.spent)")
     # Every word has its text.
