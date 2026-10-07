@@ -51,6 +51,13 @@ if (frameworkLock.minecraft != project.minecraft_version || frameworkLock.fabric
 	throw new GradleException("Platform pins disagree with distribution/frameworks.lock.json")
 }
 def withOptionalIntegrations = providers.gradleProperty("jugcraftOptionalIntegrations").getOrElse("true").toBoolean()
+// Iris and Sodium (optional, client-only, compatibility only: no Jugcraft code uses them) are installed by the Jugcraft
+// Complete pack, but join the development classpaths only with -PjugcraftShaderMods=true. Loom bakes a development
+// dependency's injected interfaces into the development Minecraft jar, so once Iris is on the compile classpath every
+// development client must load it (its classes are missing otherwise); and Iris aborts under CI's xvfb, where OpenGL
+// finds no GLX visual and the game runs on Vulkan. Without them the client game tests run as before the foundation.
+def withShaderMods = providers.gradleProperty("jugcraftShaderMods").getOrElse("false").toBoolean()
+def shaderMods = ["iris", "sodium"]
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -61,7 +68,7 @@ dependencies {
 	compileOnly "mezz.jei:jei-${project.minecraft_version}-fabric-api:${project.jei_version}"
 	frameworkLock.dependencies.each { library ->
 		// Fabric API and the JEI API already have their established declarations above.
-		if (library.key != "fabric-api") {
+		if (library.key != "fabric-api" && (withShaderMods || !(library.key in shaderMods))) {
 			boolean clientOnly = library.side == "client"
 			if (library.requiredByJugcraft) {
 				add(clientOnly ? "clientImplementation" : "implementation", library.maven) { transitive = false }
@@ -113,24 +120,6 @@ fabricApi {
 		enableGameTests = true
 		enableClientGameTests = true // Real client with rendering; CI's client jobs run it and keep the screenshots.
 		eula = true // Accepts the Minecraft EULA for the test server only.
-	}
-}
-
-// Iris and Sodium (optional, client-only, compatibility only: nothing in Jugcraft uses them) stay on the development
-// client (runClient) and in Jugcraft Complete, but are left off the client game tests. Under CI's xvfb, OpenGL finds no
-// GLX visual, so the game falls back to its Vulkan backend, and Iris then calls OpenGL with no context and aborts the
-// JVM before any test starts. Without them the client game tests run as they did before the framework foundation.
-def notInClientGameTests = frameworkLock.dependencies.findAll { it.key in ["iris", "sodium"] }
-		.collect { it.maven.split(":")[1] } // Modrinth project ids, which name the jars wherever Gradle keeps them
-tasks.matching { it.name == "runClientGameTest" }.configureEach { task ->
-	// Loom's run task keeps its own classpath, fixed once the task runs, so it is replaced here, while the task is
-	// configured: by a filtered copy of what Loom put in it (filtering the property itself would refer to itself).
-	def sources = new ArrayList(task.classpath.from)
-	def leftOut = { file -> notInClientGameTests.any { file.path.contains(it) } }
-	task.classpath = project.files(sources).filter { file -> !leftOut(file) }
-	task.doFirst {
-		int count = project.files(sources).files.count { leftOut(it) }
-		task.logger.lifecycle("Client game tests run without Iris and Sodium (see build.gradle): ${count} jar(s) left out")
 	}
 }
 

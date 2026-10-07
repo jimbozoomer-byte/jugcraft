@@ -37,7 +37,7 @@ Author models and clips in Blockbench and export the appropriate formats. GeckoL
 
 Jugcraft already has [ArmsMotion](features/arms-motion.md), including first-person and third-person weapon poses. Player Animation Library and Spell Engine do not automatically replace it. A feature using either must specify which system owns each action, transitions, off-hand behavior, handedness, riding, and remote-player playback. Keep hit timing and resource spending server-authoritative.
 
-Fusion requires authored texture/model definitions. High-resolution images and ordinary animated block/item sprites do not inherently require a library. Emissive surfaces, dynamic lighting, and shader bloom are different effects. Use LambDynamicLights only for visual illumination; gameplay lighting rules remain explicit. Test custom rendering with the pinned Sodium/Iris combination and without it.
+Fusion requires authored texture/model definitions. High-resolution images and ordinary animated block/item sprites do not inherently require a library. Emissive surfaces, dynamic lighting, and shader bloom are different effects. Use LambDynamicLights only for visual illumination; gameplay lighting rules remain explicit. Test custom rendering with the pinned Sodium/Iris combination and without it. Development runs leave Sodium and Iris out unless `-PjugcraftShaderMods=true` is given (see [TESTING.md](TESTING.md)); the Jugcraft Complete pack always installs them.
 
 ### Spells and progression
 

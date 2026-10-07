@@ -16,7 +16,7 @@ Game tests run in the Build workflow too. The `mod` job's `./gradlew build` runs
 
 Three client jobs share the chosen classes out by their rough running time (`./gradlew runClientGameTest -PclientTests=<Class,Class,...>`). A job with nothing to run passes at once. The `client` job passes only when the choice and all three jobs pass.
 
-The client game tests run without Iris and Sodium (`build.gradle` leaves them off `runClientGameTest` only; `runClient` and Jugcraft Complete keep them). CI's xvfb has no GLX visual for OpenGL, so the game falls back to Vulkan, and Iris aborts on its first OpenGL call. Nothing in Jugcraft uses either; their compatibility needs a real GPU and a person.
+Development runs, including the client game tests, leave out Iris and Sodium unless `-PjugcraftShaderMods=true` is given (`build.gradle`); Jugcraft Complete still installs them. CI's xvfb has no GLX visual for OpenGL, so the game falls back to Vulkan, and Iris aborts on its first OpenGL call; and once Iris is a development dependency, Loom bakes its injected interfaces into the development Minecraft jar, so it cannot simply be left off one run. Nothing in Jugcraft uses either. To test with them (docs/FRAMEWORKS.md), run `./gradlew runClient -PjugcraftShaderMods=true` on a machine with a GPU.
 
 Locally:
 - `./gradlew runClientGameTest` runs every class.
