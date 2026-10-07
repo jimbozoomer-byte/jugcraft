@@ -27,7 +27,7 @@ chunks** masters it.
 With nothing offered, use the anchor with an empty hand to hear what is wrong: a part **missing**, the **wrong block**, a space **obstructed**,
 a pylon **without Ley Charge**, a pylon that **belongs to someone else**, or a part **out of reach** (in an unloaded
 chunk). `/jugcraft concordance circle <pos>` gives the same report for an anchor within 16 blocks. With Jade, looking at
-the anchor shows its phase, its step and its first fault; looking at a pylon shows its charge.
+the anchor shows its phase, its step, how many faults it has and the first three; looking at a pylon shows its charge.
 
 **Ley Pylons** hold up to 64 Ley Charge. Two ways in, neither of which comes back out:
 
@@ -173,7 +173,7 @@ No new dependency. Framework use:
   cast gestures.
 - **Fusion** (optional): a built-in resource pack `jugcraft:fusion_textures`, registered only when Fusion is installed,
   joins neighbouring Warding Stones with a connected texture; without Fusion they are plain cubes.
-- **Jade** (optional): anchor phase, step and first fault; pylon charge.
+- **Jade** (optional): anchor phase, step, fault count and the first three faults; pylon charge.
 - **JEI** (optional): a Circle Anchor category showing Adept's Attunement (its offerings and the Adept's Wand), with
   the anchor as its catalyst.
 - **Modonomicon**: a new **Circles** codex category (Circle Lore, the Lesser Circle, the Ley Pylon, Working a Ritual, and
