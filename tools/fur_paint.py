@@ -16,7 +16,9 @@ The painter works face by face on an RGBA canvas:
 A painter made with `clean=True` paints the clean, cartoon style (docs/ART_DIRECTION.md, "Creatures and faces: cute and
 clean"): every tone is snapped to a few flat bands, there is no soft noise or jitter, locks sit in neat staggered rows
 as big flat tapering points with a dark edge on their shadow side, fine strands are left out, and tufts and ragged
-edges are even points.
+edges are even points. `clean_painter` and `clean_ramp` go one step further for props painted mostly by formula (the
+fall fair): the painter's `noise` is flat, so formulas built on it lose their mottling, and `clean_ramp` snaps the
+tones those formulas pick to the same flat bands.
 
 Everything is deterministic (each texture is painted from a fixed seed) and drawn by code: no other texture is read,
 traced or recoloured.
@@ -25,6 +27,16 @@ import math
 import random
 
 from PIL import Image
+
+
+def clean_ramp(colours, f):
+    """`ramp`, with `f` snapped to the clean style's flat bands."""
+    return ramp(colours, band(f))
+
+
+def clean_painter(width, height, seed):
+    """A clean painter whose `noise` is flat: every formula that adds a little noise to a tone paints it evenly."""
+    return Painter(width, height, seed, clean=True, quiet=True)
 
 
 def mix(a, b, t):
@@ -48,9 +60,10 @@ def band(f):
 
 
 class Painter:
-    def __init__(self, width, height, seed, clean=False):
+    def __init__(self, width, height, seed, clean=False, quiet=False):
         self.width = width
         self.height = height
+        self.quiet = quiet
         self.img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
         self.px = self.img.load()
         self.rng = random.Random(seed)
@@ -58,7 +71,10 @@ class Painter:
         self.clean = clean
 
     def noise(self, x, y, cell=8.0):
-        """Smooth value noise (0 to 1) with features about `cell` pixels across: the soft light and dark patches of a coat."""
+        """Smooth value noise (0 to 1) with features about `cell` pixels across: the soft light and dark patches of a coat
+        (a flat 0.5 for a `quiet` painter)."""
+        if self.quiet:
+            return 0.5
         gx, gy = x / cell, y / cell
         ix, iy = math.floor(gx), math.floor(gy)
         tx, ty = gx - ix, gy - iy

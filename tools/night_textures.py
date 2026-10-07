@@ -7,12 +7,12 @@ the bottom at (u + d + w, v), and the sides in a row at v + d: (u, d wide), the 
 d wide), the back (u + 2d + w, w wide). The cloak is drawn on the 64 x 32 humanoid armour layout.
 """
 import math
-import random
 
 from PIL import Image
 
 from crop_textures import Canvas, rgb, outline
-from halloween_textures import PLANK, IRON, shade, wood_grain
+from halloween_textures import PLANK, IRON, shade
+import block_style as bs
 
 COAT = [rgb("101014"), rgb("17171d"), rgb("1f1f27"), rgb("292933")]
 MANE = [rgb("1c1424"), rgb("2a1f36"), rgb("3a2c4a")]
@@ -31,13 +31,14 @@ GLASS_EDGE = (225, 245, 250, 170)
 
 
 def noise(img, x0, y0, w, h, palette, seed, weights=None):
-    """Fills a rectangle with the palette's shades picked at random."""
-    rng = random.Random(seed)
-    picks = [i for i, n in enumerate(weights or [1] * len(palette)) for _ in range(n)]
+    """Fills a rectangle with the palette's shades in small clumps, in the manner of the vanilla textures
+    (tools/block_style.py)."""
+    alpha = {color[:3]: (color[3] if len(color) == 4 else 255) for color in palette}
+    surface = bs.surface([color[:3] for color in palette], seed, weights, spread=0.7, size=img.size)
     for y in range(y0, y0 + h):
         for x in range(x0, x0 + w):
-            color = palette[rng.choice(picks)]
-            img.putpixel((x, y), color if len(color) == 4 else color + (255,))
+            color = surface(x, y)
+            img.putpixel((x, y), color + (alpha[color],))
 
 
 def box_faces(u, v, w, h, d):
@@ -113,12 +114,12 @@ def horseman_glow():
     for px in (0, fw - 1):
         img.putpixel((x + px, y + 1), EYE[0] + (255,))
         img.putpixel((x + px, y + 2), EYE[1] + (255,))
-    rng = random.Random(7400)
     x, y, fw, fh = box_faces(*HORSEMAN_BOXES["collar"][:5])["up"]
     for yy in range(y + 1, y + fh - 1):
         for xx in range(x + 1, x + fw - 1):
-            if rng.random() < 0.7:
-                img.putpixel((xx, yy), rng.choice(EMBER) + (255,))
+            # Embers glowing hottest in the middle of the stump.
+            d = abs(xx - (x + fw / 2 - 0.5)) + abs(yy - (y + fh / 2 - 0.5))
+            img.putpixel((xx, yy), EMBER[2 if d < 1.5 else 1 if d < 3 else 0] + (255,))
     x, y, fw, fh = box_faces(*HORSEMAN_BOXES["lantern"][:5])["front"]
     for px, py in ((1, 1), (3, 1), (1, 3), (2, 3), (3, 3)):
         img.putpixel((x + px, y + py), GLOW[0] + (255,))
@@ -197,13 +198,13 @@ def jar_string():
 
 def trebuchet_wood():
     c = Canvas()
-    wood_grain(c, PLANK, 7440, vertical=False)
+    bs.planks(PLANK, 7440)(c)
     return c.img
 
 
 def trebuchet_beam():
     c = Canvas()
-    wood_grain(c, [shade(p, 0.8) for p in PLANK], 7441)
+    bs.planks([shade(p, 0.8) for p in PLANK], 7441, vertical=True)(c)
     for y in (0, 15):
         for x in range(16):
             c.px(x, y, IRON[1])
@@ -213,7 +214,7 @@ def trebuchet_beam():
 def trebuchet_iron():
     """The counterweight: an iron-strapped box of stones."""
     c = Canvas()
-    noise(c.img, 0, 0, 16, 16, [rgb("6a6660"), rgb("807a72"), rgb("948e84")], 7442)
+    bs.cobble([rgb("4a4640"), rgb("6a6660"), rgb("807a72"), rgb("948e84")], 7442, count=6)(c)  # the stones
     for i in range(16):
         for band in (0, 7, 8, 15):
             c.px(i, band, IRON[2] if i % 4 else IRON[3])
@@ -235,7 +236,7 @@ def lantern_pumpkin(face=False):
     for y in range(16):
         for x in range(16):
             rib = x % 4 == 0
-            c.px(x, y, PUMPKIN[0] if rib else PUMPKIN[1 + (y // 4 + x) % 3 % 2])
+            c.px(x, y, PUMPKIN[0] if rib else PUMPKIN[2] if x % 4 == 2 else PUMPKIN[1])
     if face:
         for x, y in LANTERN_FACE:
             c.px(x, y, rgb("3a1a04"))
