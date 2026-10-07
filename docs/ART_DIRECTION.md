@@ -345,6 +345,7 @@ The owner asked for armor that is not held to vanilla's shape: "make it so that 
   - faces where another slot's vanilla armor draws.
 
   Skirts hang from the legs, never the body, or they swing out when sneaking.
+- **Closed.** Leave a face out only where another part of the same piece covers it. An opening the wearer's body fills is a hole on an armor stand's thin limbs, and `tools/art_check.py` (H1) refuses a worn entry that shows more than 0.5% see-through on its own.
 - **Within the quad budget:** a full set should be about 600 quads, with caps of 900 per set and 200 per piece on one body part.
 - **Icons match.** Inventory icons stay vanilla's 16×16: a hand-drawn map per piece in the same palette (`tools/armor_icons/`), with a one-pixel outline darker than the armor's darkest tone.
 

@@ -319,8 +319,9 @@ def helmet(r, knob=False):
         *am.pair(am.span("rib_inner_right", (-2.4, -5.0, -5.5), (-1.6, -1.0, -5), skip="back", paint=r["rib"])),
         *am.pair(am.span("rib_outer_right", (-4.4, -6.0, -5.5), (-3.6, -1.0, -5), skip="back", paint=r["rib"])),
         # the gold collar ring; a bevor plate in front of it, so the gold shows at the sides as drawn, and the clasp.
-        # Both reach 0.65 below the head, past the hat layer's bottom (+0.5), or that showed as a line round the neck
-        am.span("collar", (-4.75, -1, -4.75), (4.75, 0.65, 4.75), skip="ends", paint=r["collar"]),
+        # Both reach 0.65 below the head, past the hat layer's bottom (+0.5), or that showed as a line round the neck.
+        # The collar is closed underneath: open, the helm showed the sky through it from below (and on an armor stand)
+        am.span("collar", (-4.75, -1, -4.75), (4.75, 0.65, 4.75), skip="top", paint=r["collar"]),
         am.span("bevor", (-3.75, -1, -5), (3.75, 0.65, -4.75), skip=("back", "top"), paint=r["bevor"]),
         am.span("clasp", (-0.7, -0.75, -5.4), (0.7, 0.4, -4.75), skip="back", paint=r["clasp"]),
         # neck guard: three lames at the back, each flaring further out
@@ -431,15 +432,20 @@ def leg(r, side="right", skirt=skirt_paint):
     # sleeve's (2.7) and the glove's (2.95).
     # The hip band starts 0.75 above the hip, inside the belt, and is closed on top: a leg swung back tips the top of
     # the pants layer forward under the belt, and from the front that showed. (Not at 1.0: vanilla boots' shell.)
-    out = [am.span("hip_right", (-2.825, -0.75, -2.825), (1.9, 1.5, 2.825), skip=("left", "bottom"), paint=r["hip"]),
-           am.span("lining_right", (1.9, -0.75, -2.55), (2.5, 12.5, 2.55), skip=("top", "right"), paint=r["breeches"]),
+    # Closed at the centre line and the lining on top too, or the piece showed the sky through it from some angles
+    # (tools/art_check.py H1); the lining starts 0.15 below the hip band, so its top is not in the other hip's plane.
+    out = [am.span("hip_right", (-2.825, -0.75, -2.825), (1.9, 1.5, 2.825), skip="bottom", paint=r["hip"]),
+           am.span("lining_right", (1.9, -0.6, -2.55), (2.5, 12.5, 2.55), skip="right", paint=r["breeches"]),
            # from where the top lame's slit opens (y 2.7) down; higher they would only swing through the belt
            am.span("breeches_right", (-2.7, 2.5, -2.7), (LAME_IN, 12, 2.7), skip=("ends", "left"),
                    paint=r["breeches"])]
     for i, (top, outer, depth) in enumerate(SKIRT):
-        h = LAME_H + (HEM_DROP if i == len(SKIRT) - 1 else 0.0)
+        hem = i == len(SKIRT) - 1
+        h = LAME_H + (HEM_DROP if hem else 0.0)
+        # each lame's foot is under the next; the hem's is closed, or the skirt showed the sky through it from below
         out.append(am.span(f"skirt_{i}_right", (outer, top, -2 - depth), (LAME_IN, top + h, 2 + depth),
-                           pivot=(LAME_IN, top, 0), rotation=(0, 0, SKIRT_ROLL), paint=skirt(i), skip="bottom"))
+                           pivot=(LAME_IN, top, 0), rotation=(0, 0, SKIRT_ROLL), paint=skirt(i),
+                           skip=() if hem else "bottom"))
     if side == "right":
         return out
     left = []
@@ -456,10 +462,11 @@ def boot(r):
     """Greave with a knee cop, sabaton with three instep lames overlapping toward the toe, a diamond toe cap on the
     sabaton's front (under the skirt only its point shows below the hem)."""
     out = [
-        am.span("greave_right", (-3.0, 4.5, -3.0), (1.75, 10.25, 3.0), skip=("left", "top"), paint=r["greave"]),
+        # closed all round (tools/art_check.py H1): open on top and inside, the boot showed the sky through it
+        am.span("greave_right", (-3.0, 4.5, -3.0), (1.75, 10.25, 3.0), paint=r["greave"]),
         am.diamond("poleyn_right", (-0.55, 5.2, -3.2), 2.4, 0.6, pitch=10, paint=r["poleyn"]),
         # the sabaton reaches the centre line, where the leggings' lining starts: between them the pants showed
-        am.span("foot_right", (-3.0, 10.25, -3.25), (1.9, 12.75, 3.0), skip="left", paint=r["foot"]),
+        am.span("foot_right", (-3.0, 10.25, -3.25), (1.9, 12.75, 3.0), paint=r["foot"]),
         am.diamond("toe_right", (-0.6, 11.35, -3.65), 2.3, 0.6, pitch=25, paint=r["toe"]),
     ]
     for i in range(3):   # instep lames, scales overlapping toward the toe, each drooping at its front
