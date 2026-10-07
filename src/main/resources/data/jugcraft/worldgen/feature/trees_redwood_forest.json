@@ -7,11 +7,15 @@
       "feature": "jugcraft:giant_redwood_checked"
     },
     {
-      "chance": 0.1,
-      "feature": "minecraft:spruce_checked"
+      "chance": 0.0923,
+      "feature": "jugcraft:fir_checked"
     },
     {
-      "chance": 0.02,
+      "chance": 0.0847,
+      "feature": "jugcraft:mossy_maple_checked"
+    },
+    {
+      "chance": 0.037,
       "feature": "jugcraft:fallen_redwood_tree"
     }
   ]
