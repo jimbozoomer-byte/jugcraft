@@ -8,6 +8,9 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Rules: fan homages allowed
+- Jugcraft may now include fan homages: creatures, characters and things inspired by films, shows, cartoons and games, with changed names and the owner's approval. Their textures, models, sounds and code must still be made for Jugcraft or licensed; nothing ripped or copied from the source. See [LICENSE_POLICY.md](LICENSE_POLICY.md#fan-homages).
+
 ### Unmerged: New trees, batch 1
 - **Ten new trees, from the tree roster** ([TREES.md](docs/branches/TREES.md)):
   - **Firs:** stunted firs and thin bog firs, narrow subalpine fir spires and low fir bushes.
