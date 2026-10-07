@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/stairs",
   "textures": {
-    "bottom": "jugcraft:block/dr_rust_bare",
-    "top": "jugcraft:block/dr_rust_bare",
-    "side": "jugcraft:block/dr_rust_bare"
+    "bottom": "jugcraft:block/dw_steel_plate",
+    "top": "jugcraft:block/dw_steel_plate",
+    "side": "jugcraft:block/dw_steel_plate"
   }
 }
