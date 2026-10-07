@@ -7559,6 +7559,7 @@ def check_concordance(registered):
     check_economy(root)
     check_persistence(root)
     check_journey()
+    check_delivery()
     check_game_test_entrypoints()
 
 
@@ -10146,6 +10147,24 @@ def check_journey():
     client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JournalClient.java")
     if "public static KeyMapping key()" not in (client.read_text(encoding="utf-8") if client.exists() else ""):
         err("client/JournalClient.java: key() gives tests the journal's key")
+
+
+def check_delivery():
+    """Roadmap step 32: tools/concordance_delivery.py's library integration matrix has one row for every library in the
+    lock and none other, agrees with the lock on whether Jugcraft needs each, names only game tests that exist and calls
+    unused only what Jugcraft's code never refers to; the delivery record's matrix and the player guide's tables are the
+    tool's."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import concordance_delivery as dl
+    for problem in dl.problems():
+        err(problem)
+    for name, marker, lines in (("docs/features/arcane-concordance-delivery.md", "matrix", dl.table()),
+                                ("docs/ARCANE_CONCORDANCE_GUIDE.md", "guide", dl.guide_tables())):
+        path = ROOT / name
+        text = path.read_text(encoding="utf-8") if path.exists() else ""
+        block = re.search(rf"<!-- {marker}:start -->\n(.*?)\n<!-- {marker}:end -->", text, re.S)
+        if not block or block.group(1).strip() != "\n".join(lines).strip():
+            err(f"{name}: its {marker} tables are not tools/concordance_delivery.py's (run it and paste)")
 
 
 if __name__ == "__main__":

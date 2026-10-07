@@ -46,6 +46,10 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: The Arcane Concordance: ready for review
+- A **player's guide** to the Concordance: your first spell, the controls, Focus, every research entry with how to begin, understand and master it, the stages, the three routes, playing with others and what to do when something goes wrong. Guide: [ARCANE_CONCORDANCE_GUIDE.md](docs/ARCANE_CONCORDANCE_GUIDE.md).
+- For reviewers, one record gathers it all: which libraries the Concordance really uses and what happens without each, what is finished, what is partial and what is still assumed, every known issue and what to do next, and the test results. Record: [arcane-concordance-delivery.md](docs/features/arcane-concordance-delivery.md).
+
 ### Unmerged: The Arcane Concordance: three ways to a Spire
 - Three routes from a fresh world to an endgame Spire are laid out and checked: **cultivation** (the garden, its brews and helpers, to a Verdant Spire), **exploration and combat** (the sky, the Crimson Vigil, relics and hexes, with a trip to the Nether, to a Star Spire) and **crafting and infrastructure** (circles, rings, the assay scale and porters, to a Lantern Spire). Each is reachable by one player alone with only its own research.
 - The Initiate's Wand's codex entry has a new **Casting** page: holding an instrument, the use key casts your first invocation and the number keys 2, 3 and on cast the ones after it (they stop changing the hotbar slot while it is held; scroll instead).

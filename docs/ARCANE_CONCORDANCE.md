@@ -4,14 +4,15 @@ Jugcraft's magic: a practice learned by observing the world, studied at workstat
 is not a mana bar. This document is the contract every Concordance feature builds on: who owns which state, how
 content loads, the vocabulary, which library does what, and where each of the 32 roadmap steps stands.
 
-Status: milestone 1 (First Light), milestone 2 (shared records and typed resources, roadmap steps 6 and 7) and
-milestone 3 (composed spells and the shared effect system, steps 8 and 9) are implemented on branch
-`claude/awesome-davinci-iwv3b9`; their records are
-[features/arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
-[features/arcane-concordance-sharing.md](features/arcane-concordance-sharing.md) and
-[features/arcane-concordance-composition.md](features/arcane-concordance-composition.md). The names below (Principles,
-resources, stages, traditions) are **new proposals**: no earlier Jugcraft document defined a magic taxonomy. Only the
-ids milestone 1 uses are persisted so far (see "Stable identifiers").
+Status: the 32 roadmap steps are implemented on two unmerged branches: steps 1 to 25 on `claude/awesome-davinci-iwv3b9`,
+26 to 32 on `claude/concordance-steps-26-32`. Section 7 gives each step's status and record. Step 31's player journey is
+checked by machine, but no person has played it yet. Where to start:
+- the [delivery record](features/arcane-concordance-delivery.md) indexes the evidence, the library integration matrix
+  and what remains;
+- players start with [the guide](ARCANE_CONCORDANCE_GUIDE.md).
+
+The names below (Principles, resources, stages, traditions) were new proposals at step 2: no earlier Jugcraft document
+defined a magic taxonomy.
 
 ## 1. Architecture contract (step 1)
 
@@ -154,6 +155,9 @@ Specialties a player can follow without mastering the rest ([CONTENT_BRANCHES.md
   resource table; *mastery* is the Mastered research state, earned by practice (milestone 1: Kindle cast in 8 chunks).
 
 ## 3. Feature-to-library map
+
+The [delivery record](features/arcane-concordance-delivery.md) has the full library integration matrix: versions from
+the lock, what happens without each library, the tests that exercise it and what is still limited.
 
 | Library | Concordance use | Status |
 |---|---|---|
@@ -332,7 +336,7 @@ grows with later content), **planned**.
 | 29 | Interaction and economy tests | done: one model of every conversion and every source driven by time (`tools/concordance_economy.py`), tied to the figures in the Java and data and audited across the systems for any cycle that gains, every crop's regrow-and-compost loop included; a Verdant Spire's field now hastens Concordance crops by their own rules (at least a nutrient a step, no fixing), closing a loop that minted nutrients and Ley Charge; a measure of Radiance begun is spent when a lantern is put out or a sconce taken down; a day's balance of representative installations recorded; the brief's combinations mapped to their tests, with new ones for growth with energy, remote storage with an interrupted ritual and relit light ([record](features/arcane-concordance-economy.md)) |
 | 30 | Persistence, migration, performance | done: every world record and attachment written in a versioned envelope (`Saved.versioned`) that reads saves from before versions, brings older ones forward step by step and reads what it can of newer ones; records with independent entries read entry by entry, keeping one they cannot read exactly as written (`Saved.keeping`); every block entity and creature stamps its version; a Conclave project whose definition is gone is set aside rather than blocking; the circle index kept by chunk; every persistent format, the unloaded-region rules and a stated work budget recorded ([record](features/arcane-concordance-persistence.md)) |
 | 31 | Complete player journey | partial: three routes (cultivation, exploration and combat, crafting and infrastructure) from a fresh world to their own Spire, each checked against the progression graph with only its own research (`tools/concordance_journey.py`, `check_journey`) and climbed on a server (`ConcordanceJourneyGameTests`); the first success played by ordinary keys in a real client (`ConcordanceJourneyClientGameTests`); every step, cooperative case and recovery mapped to its game tests; the codex now explains the spell bar's keys. **The human playtest and the two-client test have not been run** ([journey](features/arcane-concordance-journey.md)) |
-| 32 | Reviewable delivery | in progress |
+| 32 | Reviewable delivery | done: the [delivery record](features/arcane-concordance-delivery.md) indexes what is delivered and where each build stage stands (no local build here, a branch, CI, not merged, no pack imported, nothing published). Its library integration matrix (`tools/concordance_delivery.py`, `check_delivery`) takes versions from the lock, says what happens without each library and names the tests. It records what is complete, partial or assumed, every remaining issue with its next action, the CI results of steps 26 to 32, mutation tests of the checks and measured workloads (`ConcordanceWorkloadGameTests`). Players start with the [guide](ARCANE_CONCORDANCE_GUIDE.md) |
 
 ## Stable identifiers
 
