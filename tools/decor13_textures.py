@@ -7,14 +7,16 @@ punch.
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code or from the small pixel-art grids below,
 from fixed seeds; no Mojang texture is read, traced or recoloured. Block textures are 16x16 and opaque, except the
 bowl's glass (half see-through in the middle) and the punch (translucent); the items are see-through round their shapes.
+
+Surfaces are painted in the manner of the vanilla blocks with tools/block_style.py: a short palette in small clumps,
+never a random colour at every pixel; wood as planks, and straw, bark and hair as streaks.
 """
 import math
-import random
 
 from PIL import Image
 
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 from decor9_textures import put
 
 IRON = [rgb("1e1e22"), rgb("2a2a30"), rgb("36363e"), rgb("4a4a54")]
@@ -51,7 +53,7 @@ def bowl_glass():
 
 def stand():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 23101, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 23101, [2, 3, 1])
     for x, y in ((2, 2), (13, 2), (2, 13), (13, 13)):
         c.px(x, y, IRON[3])
     return c.img
@@ -60,11 +62,11 @@ def stand():
 def punch():
     """Glowing green punch, translucent, swirled darker and brighter."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    rng = random.Random(23102)
+    middle = bs.surface(PUNCH[1:3], 23102, [1, 2])
     for y in range(16):
         for x in range(16):
             swirl = math.sin(x * 0.7 + math.sin(y * 0.5) * 2.0)
-            tone = 0 if swirl < -0.7 else 3 if swirl > 0.8 else rng.choice((1, 2, 2))
+            tone = 0 if swirl < -0.7 else 3 if swirl > 0.8 else PUNCH.index(middle(x, y))
             put(img, x, y, PUNCH[tone], 205)
     return img
 
@@ -72,16 +74,15 @@ def punch():
 def eyeball():
     """A floating eyeball: veined white, a green iris and a black pupil in the middle, and a glint."""
     c = Canvas()
-    rng = random.Random(23103)
     for y in range(16):
         for x in range(16):
             d = math.hypot(x - 7.5, y - 7.5)
             if d < 2.2:
                 colour = rgb("101010")
             elif d < 4.8:
-                colour = rgb("2e8a2e") if (x + y) % 3 else rgb("48a83a")
+                colour = rgb("48a83a") if d < 3.0 or y < 6 and d < 4.0 else rgb("2e8a2e")
             else:
-                colour = rgb("f4eee6") if rng.random() > 0.08 else rgb("c83030")
+                colour = rgb("f4eee6")
             c.px(x, y, colour)
     for x, y in ((0, 3), (1, 4), (2, 4), (3, 5), (15, 11), (14, 11), (13, 10), (12, 10)):
         c.px(x, y, rgb("b02828"))
@@ -91,7 +92,7 @@ def eyeball():
 
 def ladle():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[1:], 23104)
+    bs.fill(c, 0, 0, 15, 15, IRON[1:], 23104)
     return c.img
 
 
@@ -99,14 +100,14 @@ def ladle():
 
 def crust():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, CRUST, 23111, [1, 2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, CRUST, 23111, [1, 2, 3, 2])
     return c.img
 
 
 def glazed_top():
     """A glossy sugar glaze, catching the light in streaks, with a few fruits showing through."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, GLAZE[:3], 23112, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, GLAZE[:3], 23112, [2, 3, 2])
     for i in range(10):
         c.px(2 + i, 3 + i // 3, GLAZE[3])
     for x, y in ((4, 10), (11, 6), (8, 13), (13, 12)):
@@ -117,13 +118,10 @@ def glazed_top():
 def crumb():
     """The cut loaf: a soft tea-soaked crumb studded with raisins, candied peel and a cherry, crusted at its top."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, CRUMB, 23113, [2, 3, 2])
-    rng = random.Random(23114)
-    for _ in range(14):
-        x, y = rng.randrange(1, 15), rng.randrange(2, 15)
-        c.px(x, y, RAISIN[rng.randrange(2)])
-        if rng.random() < 0.5:
-            c.px(x + 1, y, RAISIN[1])
+    bs.fill(c, 0, 0, 15, 15, CRUMB, 23113, [2, 3, 2])
+    for x, y in ((2, 3), (8, 2), (12, 4), (5, 9), (13, 9), (1, 11), (9, 13), (6, 14), (12, 14)):
+        c.px(x, y, RAISIN[0])  # a raisin, two pixels wide
+        c.px(x + 1, y, RAISIN[1])
     for x, y in ((5, 6), (11, 12), (3, 13)):
         c.px(x, y, PEEL)
     c.px(9, 8, CHERRY)
@@ -134,7 +132,7 @@ def crumb():
 def loaf_end():
     """The end of the loaf: crust, browner round its edges."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, CRUST[1:], 23115, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, CRUST[1:], 23115, [2, 3, 2])
     for i in range(16):
         for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
             c.px(x, y, CRUST[0])
@@ -146,7 +144,7 @@ def loaf_end():
 def sugar(palette, seed):
     """Glossy boiled sugar: soft shading and a highlight streak."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, palette[-3:], seed, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, palette[-3:], seed, [2, 3, 2])
     for i in range(8):
         c.px(3 + i, 2 + i // 2, rgb("fffbea"))
     return c.img
@@ -186,7 +184,7 @@ def lollipop_stick():
 def wrapper():
     """A shiny purple wrapper striped orange, with glints."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, PURPLE[1:], 23131, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, PURPLE[1:], 23131, [2, 3, 2])
     for y in range(16):
         for x in (3, 4, 11, 12):
             c.px(x, y, ORANGE[2] if x in (3, 11) else ORANGE[1])
@@ -198,11 +196,11 @@ def wrapper():
 def twist():
     """The wrapper's twisted, crinkled ends."""
     c = Canvas()
-    rng = random.Random(23132)
     for x in range(16):
-        tone = rng.choice((0, 1, 2, 3))
         for y in range(16):
-            c.px(x, y, PURPLE[tone] if (x + y // 4) % 3 else PURPLE[0])
+            # Crinkles: slanting folds, lit along one side.
+            fold = (x + y // 4) % 3
+            c.px(x, y, PURPLE[0] if fold == 0 else PURPLE[3] if fold == 1 else PURPLE[2])
     for y in (4, 12):
         for x in range(0, 16, 3):
             c.px(x, y, ORANGE[2])
@@ -212,12 +210,11 @@ def twist():
 def gumdrop():
     """A green gumdrop crusted with sugar crystals."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, GUMDROP, 23141, [2, 3, 2])
-    rng = random.Random(23142)
-    for y in range(16):
-        for x in range(16):
-            if rng.random() < 0.12:
-                c.px(x, y, rgb("e8ffe8") if rng.random() < 0.5 else rgb("b8f0b0"))
+    bs.fill(c, 0, 0, 15, 15, GUMDROP, 23141, [2, 3, 2])
+    for y in range(1, 16, 3):
+        for x in range((y // 3) % 2 * 2 + 1, 16, 4):
+            c.px(x, y, rgb("e8ffe8"))  # sugar crystals, set evenly
+            c.px(x + 1, y + 1, rgb("b8f0b0"))
     return c.img
 
 
