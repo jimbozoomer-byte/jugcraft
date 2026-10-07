@@ -17,7 +17,7 @@ import math
 
 from PIL import Image
 
-import gun_icons
+import item_icons
 from steampunk_models import box, cyl
 from tower_guns import TUBE, bore
 from zeppelin import tiled_quads
@@ -235,5 +235,5 @@ def tread():
 
 def draw_all(save):
     save(tread(), "block", TREAD)
-    save(gun_icons.draw("landship"), "item", "landship")
-    save(gun_icons.draw("cannon_shell"), "item", "cannon_shell")
+    save(item_icons.draw("landship"), "item", "landship")
+    save(item_icons.draw("cannon_shell"), "item", "cannon_shell")
