@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Clean textures, set 15: the Witching Season's last noisy props
+- The dark wood of the broom rack, curiosity cabinet, iron-bound coffin, ribcage bookcase, haunted dining chair, silk spool stack and grandfather clock is long-grain planks, as vanilla planks, in place of blotches.
+- Flat, without speckle: the coffin's and chair's velvet, the brain vat console's brass, the lightning harness's copper, the dustpan's tin, the witch's lantern's violet glass and both pillar candles' wax.
+- The effigy ashes and the hearth ash item are soft clumped ash with a few charred flecks and embers set in place. The egg sacs' web mat is drawn as threads.
+- The workshop's tinted brew, fume and wax textures (the cauldron's brew, its fumes and the candelabra's candles) are smooth, without per-pixel grain.
+- The props are drawn in the clean style (`flora_art.QUIET`), switched on for just these builders. The Beating Heart Jar keeps its original look, which the owner loves. The 25 props the owner's art review redid (#219), the faces, moons, webs, pumpkins, plushes, garlands and glows are unchanged. IDs and models are unchanged. Before and after: [clean_textures_set15.jpg](docs/images/clean_textures_set15.jpg).
+
 ### Unmerged: Clean textures, set 14: the town and the Pixel Hollows
 - The 18 townsfolk wear clean cloth in the manner of the vanilla skins: lit in its upper half, a shade darker below and at the hem, with no speckle. Their hair is flat with neat strands. Each keeps the face, hair style and outfit it had. The raiders, which share the painter, are unchanged.
 - The Retro Trader keeps his buffalo-check flannel. His hair and beard are drawn in strands, not a checkerboard, his trousers are a plain navy plaid and his sneakers are plain black.
