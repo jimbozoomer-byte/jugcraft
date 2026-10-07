@@ -21,6 +21,12 @@ import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.crimson.CrimsonCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.crimson.CrimsonParser;
 import io.github.jimbozoomer.jugcraft.concordance.crimson.Rite;
+import io.github.jimbozoomer.jugcraft.concordance.artifice.Affix;
+import io.github.jimbozoomer.jugcraft.concordance.artifice.ArtificeCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.artifice.ArtificeParser;
+import io.github.jimbozoomer.jugcraft.concordance.artifice.Gem;
+import io.github.jimbozoomer.jugcraft.concordance.artifice.Rune;
+import io.github.jimbozoomer.jugcraft.concordance.artifice.Substrate;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerParser;
@@ -52,7 +58,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ConcordanceRules {
 	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
-			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, EcologyCatalog.EMPTY, CelestialCatalog.EMPTY, CrimsonCatalog.EMPTY, WorkerCatalog.EMPTY, List.of());
+			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, EcologyCatalog.EMPTY, CelestialCatalog.EMPTY, CrimsonCatalog.EMPTY, WorkerCatalog.EMPTY, ArtificeCatalog.EMPTY, List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
@@ -67,6 +73,7 @@ public final class ConcordanceRules {
 	private final CelestialCatalog celestial;
 	private final CrimsonCatalog crimson;
 	private final WorkerCatalog workers;
+	private final ArtificeCatalog artifice;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
@@ -74,7 +81,7 @@ public final class ConcordanceRules {
 			Map<String, Definitions.Working> workings, ConversionTable conversions, Catalog catalog,
 			Map<String, Map<String, Authored>> authored, Map<String, StructurePattern> structures, Map<String, RitualDefinition> rituals,
 			AlchemyCatalog alchemy, EcologyCatalog ecology, CelestialCatalog celestial, CrimsonCatalog crimson, WorkerCatalog workers,
-			List<String> problems) {
+			ArtificeCatalog artifice, List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
@@ -88,6 +95,7 @@ public final class ConcordanceRules {
 		this.celestial = celestial;
 		this.crimson = crimson;
 		this.workers = workers;
+		this.artifice = artifice;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -171,6 +179,11 @@ public final class ConcordanceRules {
 		return workers;
 	}
 
+	/** Substrates, gems, runes and affixes (roadmap step 19). */
+	public ArtificeCatalog artifice() {
+		return artifice;
+	}
+
 	public List<String> problems() {
 		return problems;
 	}
@@ -233,6 +246,11 @@ public final class ConcordanceRules {
 		Map<String, Rite> rites = new TreeMap<>();
 		WorkerParser workerParser = new WorkerParser();
 		Map<String, WorkerDefinition> workerDefinitions = new TreeMap<>();
+		ArtificeParser artificeParser = new ArtificeParser();
+		Map<String, Substrate> substrates = new TreeMap<>();
+		Map<String, Gem> gems = new TreeMap<>();
+		Map<String, Rune> runes = new TreeMap<>();
+		Map<String, Affix> affixes = new TreeMap<>();
 		Map<String, Organism> organisms = new TreeMap<>();
 		Map<String, Disturbance> disturbances = new TreeMap<>();
 		Map<String, Definitions.Research> research = new TreeMap<>();
@@ -350,9 +368,33 @@ public final class ConcordanceRules {
 						workerDefinitions.put(worker.id(), worker);
 					}
 				}
+				case "substrate" -> {
+					Substrate substrate = artificeParser.substrate(source.id(), source.json());
+					if (substrate != null) {
+						substrates.put(substrate.id(), substrate);
+					}
+				}
+				case "gem" -> {
+					Gem gem = artificeParser.gem(source.id(), source.json());
+					if (gem != null) {
+						gems.put(gem.id(), gem);
+					}
+				}
+				case "rune" -> {
+					Rune rune = artificeParser.rune(source.id(), source.json());
+					if (rune != null) {
+						runes.put(rune.id(), rune);
+					}
+				}
+				case "affix" -> {
+					Affix affix = artificeParser.affix(source.id(), source.json());
+					if (affix != null) {
+						affixes.put(affix.id(), affix);
+					}
+				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
 						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
-						+ "preparation, property, organism, disturbance, pattern, offering or worker)");
+						+ "preparation, property, organism, disturbance, pattern, offering, worker, substrate, gem, rune or affix)");
 			}
 		}
 		problems.addAll(0, parser.problems());
@@ -360,6 +402,8 @@ public final class ConcordanceRules {
 		problems.addAll(celestialParser.problems());
 		problems.addAll(crimsonParser.problems());
 		problems.addAll(workerParser.problems());
+		problems.addAll(artificeParser.problems());
+		problems.addAll(ArtificeParser.check(substrates, gems, runes, affixes));
 		// Prerequisites must exist and must not loop; entries in a loop could never be started.
 		boolean changed = true;
 		while (changed) {
@@ -531,7 +575,7 @@ public final class ConcordanceRules {
 				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, catalog,
 				Collections.unmodifiableMap(authored), Collections.unmodifiableMap(new LinkedHashMap<>(structures)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(rituals)), alchemy, ecology, new CelestialCatalog(patterns), new CrimsonCatalog(rites),
-				new WorkerCatalog(workerDefinitions), List.copyOf(problems));
+				new WorkerCatalog(workerDefinitions), new ArtificeCatalog(substrates, gems, runes, affixes), List.copyOf(problems));
 	}
 
 	/**

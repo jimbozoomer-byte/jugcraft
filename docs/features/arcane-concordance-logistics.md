@@ -148,7 +148,10 @@ and did not fit) or from Mojang's files. The art has not been shown to the owner
   saved and loaded keeps it; another courier takes it up and delivers it); cancelling and recovering give items back
   (taken back to the chest; stranded cargo recovered by its requester, once); and a broken post turns its request back
   with every item counted. Every test audits the ledger against its cargo.
-- CI: pending (this record is updated with the run).
+- CI: the first push (d86f0895) failed to compile: in 26.3 `Inventory.placeItemBackInInventory` takes a `Prediction`
+  (recovered cargo now uses `SERVER_ONLY`, as the crucible and circle anchor do). Fixed in 8c20db46; run 37619575937
+  passes the whole Build workflow: it builds, passes the data checks and all 990 required server game tests (the five
+  above among them), and the client test shards pass.
 
 Not yet run: any client (the post's look, Jade lines, codex page), a two-client dedicated server, real walking between
 chests, and a real restart of a server with couriers mid-delivery (the test saves and loads the ledger's codec).

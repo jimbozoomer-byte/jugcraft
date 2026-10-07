@@ -7545,6 +7545,7 @@ def check_concordance(registered):
     check_crimson(co, root, lang, registered, research)
     check_workers(co, root, lang, registered, research)
     check_logistics(co, root, lang, registered)
+    check_artifice(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -7813,7 +7814,7 @@ def check_baselines(root):
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
     for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
-                    "worker", "logistics"):
+                    "worker", "logistics", "artifice"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -8619,6 +8620,148 @@ def check_logistics(co, root, lang, registered):
         with Image.open(texture) as img:
             if img.convert("RGBA").tobytes() != item_icons.draw("courier_post").tobytes() or img.size != (16, 16):
                 err("logistics: textures/item/courier_post.png differs from its map: run tools/generate_textures.py")
+
+
+def check_artifice(co, root, lang, registered, research):
+    """Roadmap step 19: the Java mirrors tools/concordance_artifice.py (qualities, limits, costs, tools); the definitions
+    are the generator's; salvage always gives back less than forging costs; no item is two things at the bench; no ring
+    can add more of an attribute than its cap, whatever is rolled, inscribed and set; every word has its text; rings are
+    Trinkets rings that give their modifiers only through Trinkets (exactly once); the icons are their maps."""
+    ar = co.artifice
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    if not re.search(rf"\bint BOND_CAPACITY = {ar.BOND_CAPACITY};", java("artifice/Forge.java")):
+        err("concordance/artifice/Forge.java: BOND_CAPACITY differs from tools/concordance_artifice.py")
+    qualities = {m[0]: (int(m[1]), int(m[2]), int(m[3])) for m in re.findall(r'^\t[A-Z]+\("([a-z]+)", (-?\d+), (\d+), (\d+)\)',
+                                                                          java("artifice/Quality.java"), re.M)}
+    if qualities != ar.QUALITIES or sum(weight for _b, _a, weight in ar.QUALITIES.values()) != 100:
+        err(f"concordance/artifice/Quality.java: qualities {qualities} differ from QUALITIES (weights must total 100)")
+    for const, value in (("MAX_COST", ar.MAX_COST), ("MAX_CAPACITY", ar.MAX_CAPACITY), ("MAX_SOCKETS", ar.MAX_SOCKETS),
+                         ("MAX_RUNES", ar.MAX_RUNES), ("MAX_PART_COST", ar.MAX_PART_COST)):
+        if not re.search(rf"\bint {const} = {value};", java("artifice/ArtificeParser.java")):
+            err(f"concordance/artifice/ArtificeParser.java: {const} differs from tools/concordance_artifice.py ({value})")
+    smithy = java("smithy/Artificery.java")
+    for const, value in (("FORGE_FOCUS", ar.FORGE_FOCUS), ("REFORGE_FOCUS", ar.REFORGE_FOCUS), ("INSCRIBE_FOCUS", ar.INSCRIBE_FOCUS),
+                         ("BOND_FOCUS", ar.BOND_FOCUS), ("CONFIRM_TICKS", ar.CONFIRM_TICKS), ("WEAR_TICKS", ar.WEAR_TICKS)):
+        if not re.search(rf"\bint {const} = {value};", smithy):
+            err(f"concordance/smithy/Artificery.java: {const} differs from tools/concordance_artifice.py ({value})")
+    tools = {"REFORGE_CATALYST": ar.REFORGE_CATALYST, "UNSOCKET_TOOL": ar.UNSOCKET_TOOL, "SALVAGE_TOOL": ar.SALVAGE_TOOL,
+             "BOND_TOOL": ar.BOND_TOOL}
+    for const, item in tools.items():
+        if f"Item {const} = Items.{split(item)[1].upper()};" not in smithy:
+            err(f"concordance/smithy/Artificery.java: {const} differs from tools/concordance_artifice.py ({item})")
+    if not re.search(r'String ACTIVITY = "' + re.escape(ar.ARTIFICE_PRACTICE) + '";', smithy):
+        err("Artificery.ACTIVITY differs from tools/concordance_artifice.py ARTIFICE_PRACTICE")
+    practice = [rule for block in research.get("runesmithing", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != ar.ARTIFICE_PRACTICE:
+        err("Runesmithing must be mastered by the artifice practice")
+    # The definitions are the generator's.
+    folder = DATA / MOD / "concordance"
+    for kind, table in (("substrate", ar.SUBSTRATES), ("gem", ar.GEMS), ("rune", ar.RUNES), ("affix", ar.AFFIXES)):
+        found = {p.stem for p in (folder / kind).glob("*.json")}
+        if found != set(table):
+            err(f"concordance/{kind}: {sorted(found)} differ from the generator's {sorted(table)}")
+    # No gain, and nothing is two things at the bench.
+    bench_items = {}
+    for key, info in ar.SUBSTRATES.items():
+        if info["salvage"] >= info["cost"]:
+            err(f"substrate {key}: salvage ({info['salvage']}) must give back less than forging costs ({info['cost']})")
+        bench_items.setdefault(info["item"], []).append(f"substrate {key}")
+    for key, info in ar.GEMS.items():
+        bench_items.setdefault(info["item"], []).append(f"gem {key}")
+    for key, info in ar.RUNES.items():
+        bench_items.setdefault(info["item"], []).append(f"rune {key}")
+    for item in tools.values():
+        bench_items.setdefault(item, []).append("a bench tool")
+    for item, uses in bench_items.items():
+        if len(uses) > 1:
+            err(f"artifice: {item} is {' and '.join(uses)} at the bench")
+    # The most of each attribute a ring of each substrate could add.
+    for key, info in ar.SUBSTRATES.items():
+        most = {}
+        best_affix = {}
+        for affix in info["affixes"]:
+            a = ar.AFFIXES[affix]
+            best_affix[a["attribute"]] = max(best_affix.get(a["attribute"], 0.0), a["max"])
+        for attribute, value in best_affix.items():
+            most[attribute] = most.get(attribute, 0.0) + value
+        runes = {}
+        for rune in ar.RUNES.values():
+            if not rune.get("substrates") or key in rune["substrates"]:
+                runes.setdefault(rune["stat"]["attribute"], []).append(rune["stat"]["amount"])
+        for attribute, amounts in runes.items():
+            most[attribute] = most.get(attribute, 0.0) + sum(sorted(amounts, reverse=True)[:info["runes"]])
+        for gem in ar.GEMS.values():
+            attribute = gem["stat"]["attribute"]
+            most[attribute] = most.get(attribute, 0.0) + gem["stat"]["amount"] * info["sockets"]
+        for attribute, value in most.items():
+            if attribute not in ar.ATTRIBUTE_CAPS:
+                err(f"artifice: {attribute} has no cap in ATTRIBUTE_CAPS")
+            elif value > ar.ATTRIBUTE_CAPS[attribute] + 1e-9:
+                err(f"artifice: a {key} ring could add {value} {attribute}, above its cap {ar.ATTRIBUTE_CAPS[attribute]}")
+    # Every word has its text.
+    for word in set(re.findall(r'Result\.no\("([a-z_]+)"\)|Removal\([^;]*"([a-z_]+)"\)', java("artifice/Forge.java"))):
+        for refusal in word:
+            if refusal and f"compose.{MOD}.artifice.refusal.{refusal}" not in lang:
+                err(f"artifice: missing lang for the refusal {refusal}")
+    for refusal in re.findall(r'refuse\(player, "([a-z_]+)"\)', smithy):
+        if f"compose.{MOD}.artifice.refusal.{refusal}" not in lang:
+            err(f"artifice: missing lang for the refusal {refusal}")
+    processes = re.findall(r'^\t\t[A-Z]+\("([a-z]+)", EnumSet', java("artifice/Forge.java"), re.M)
+    if sorted(processes) != sorted(ar.PROCESSES):
+        err(f"artifice: processes {processes} differ from PROCESSES")
+    for key in list(ar.QUALITIES):
+        if f"compose.{MOD}.artifice.quality.{key}" not in lang:
+            err(f"artifice: missing lang for the quality {key}")
+    for table, kind in ((ar.SUBSTRATES, "substrate"), (ar.AFFIXES, "affix"), (ar.GEMS, "gem"), (ar.RUNES, "rune")):
+        for key in table:
+            if f"compose.{MOD}.artifice.{kind}.{key}" not in lang:
+                err(f"artifice: missing lang for the {kind} {key}")
+    for attribute in {a["attribute"] for a in ar.AFFIXES.values()}:
+        if f"compose.{MOD}.artifice.attribute.{attribute.replace(':', '.')}" not in lang:
+            err(f"artifice: missing lang for the attribute {attribute}")
+    for path in sorted((root / "smithy").glob("*.java")):
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(artifice\.[a-z_.]+)"', path.read_text(encoding="utf-8")):
+            if not key.endswith(".") and f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+        for key in re.findall(r'"tooltip\.jugcraft\.concordance\.(artifice\.[a-z_.]+)"', path.read_text(encoding="utf-8")):
+            if f"tooltip.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang tooltip.{MOD}.concordance.{key}")
+    # Rings are Trinkets rings, and their modifiers come only through Trinkets (exactly once on equip and unequip).
+    ring = java("smithy/ResonantRingItem.java")
+    if "implements TrinketCallback" not in ring or "forEachTrinketModifier" not in ring:
+        err("smithy/ResonantRingItem.java: a ring gives its modifiers through Trinkets' TrinketCallback")
+    if "ATTRIBUTE_MODIFIERS" in smithy + ring:
+        err("smithy: a ring must not carry vanilla attribute modifiers too (they would apply in the hand as well)")
+    slot = load(ROOT / "src" / "main" / "resources" / "data" / "trinkets" / "tags" / "item" / "hand" / "ring.json") or {}
+    if rid_value("resonant_ring") not in slot.get("values", []):
+        err("data/trinkets/tags/item/hand/ring.json must list jugcraft:resonant_ring")
+    entities = load(ROOT / "src" / "main" / "resources" / "data" / "trinkets" / "entities" / f"{MOD}.json") or {}
+    if "hand/ring" not in entities.get("slots", []) or "player" not in entities.get("entities", []):
+        err("data/trinkets/entities/jugcraft.json must give players the hand/ring slot")
+    for thing in list(ar.ITEMS) + list(ar.BLOCKS):
+        if thing not in registered:
+            err(f"artifice: {thing} is not registered")
+    if not (DATA / MOD / "recipe" / "artificer_bench.json").is_file():
+        err("artifice: the Artificer's Bench needs a recipe")
+    for face in ("side", "top", "bottom"):
+        if not (ASSETS / "textures" / "block" / f"artificer_bench_{face}.png").is_file():
+            err(f"artifice: missing textures/block/artificer_bench_{face}.png")
+    import item_icons
+    for icon in list(ar.ITEMS) + list(ar.BLOCKS):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"artifice: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"artifice: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+
+
+def rid_value(path):
+    return f"{MOD}:{path}"
 
 
 # The most Vitae an hour of offering can give, whatever heals the giver (docs/features/arcane-concordance-vitae.md).

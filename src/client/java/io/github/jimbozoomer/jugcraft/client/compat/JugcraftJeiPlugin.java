@@ -128,6 +128,8 @@ public class JugcraftJeiPlugin implements IModPlugin {
 			registration.addRecipes(station.type(), station.recipes());
 		}
 		addAlchemyInfo(registration);
+		// Roadmap step 19: rings are forged at the Artificer's Bench, their properties rolled once on the server.
+		registration.addIngredientInfo(item("jugcraft:resonant_ring"), Component.translatable("jei.jugcraft.artifice.ring"));
 	}
 
 	@Override

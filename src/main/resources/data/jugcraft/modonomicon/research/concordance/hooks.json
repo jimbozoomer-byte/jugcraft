@@ -166,5 +166,29 @@
     "trigger_type": "modonomicon:advancement",
     "trigger_target": "jugcraft:concordance_binding_arts_mastered",
     "fact_id": "jugcraft:concordance/binding_arts_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/runesmithing_encountered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_runesmithing_encountered",
+    "fact_id": "jugcraft:concordance/runesmithing_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/runesmithing_observed_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_runesmithing_observed",
+    "fact_id": "jugcraft:concordance/runesmithing_observed"
+  },
+  {
+    "id": "jugcraft:concordance/runesmithing_understood_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_runesmithing_understood",
+    "fact_id": "jugcraft:concordance/runesmithing_understood"
+  },
+  {
+    "id": "jugcraft:concordance/runesmithing_mastered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_runesmithing_mastered",
+    "fact_id": "jugcraft:concordance/runesmithing_mastered"
   }
 ]

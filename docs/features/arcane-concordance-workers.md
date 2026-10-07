@@ -180,7 +180,11 @@ been seen in game. The art has not been shown to the owner yet.
   porter says why it stops (no route: idle; an empty source: waiting for resources; it carries and delivers, spending
   energy and wear; a full target: full, keeping its load; worn out: needs repair, and copper mends it; unfuelled: no
   energy, and a pylon by its source fuels it); and the workers' models survive a save.
-- CI: pending (this record is updated with the run).
+- CI: the first push (e52f3564) failed to compile: SmartBrainLib 2.0.3 has no `BrainActivityGroup` or
+  `SmartBrainProvider`, takes its sensors from `getSensors(owner)` and builds and ticks the brain itself, and a
+  `@Nullable` on a qualified type must sit on the simple name. Fixed in 86ff567d. Run 37619575937 (commit 8c20db46, which
+  also carries step 18) passes the whole Build workflow: it builds, passes the data checks and all 990 required server
+  game tests (the four above among them), and the client test shards pass.
 
 Not yet run: any client (the models, animations, icons, Jade lines and codex pages in game), a two-client dedicated
 server, real walking over real terrain (the tests stand workers within reach), and a night of a shade's work.

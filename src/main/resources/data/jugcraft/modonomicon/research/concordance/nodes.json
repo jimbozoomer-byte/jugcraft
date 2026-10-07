@@ -166,5 +166,29 @@
     "required_facts": [
       "jugcraft:concordance/binding_arts_mastered"
     ]
+  },
+  {
+    "id": "jugcraft:concordance/runesmithing_encountered",
+    "required_facts": [
+      "jugcraft:concordance/runesmithing_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/runesmithing_observed",
+    "required_facts": [
+      "jugcraft:concordance/runesmithing_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/runesmithing_understood",
+    "required_facts": [
+      "jugcraft:concordance/runesmithing_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/runesmithing_mastered",
+    "required_facts": [
+      "jugcraft:concordance/runesmithing_mastered"
+    ]
   }
 ]

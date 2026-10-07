@@ -416,9 +416,15 @@ BLOCKS.update(workers.BLOCKS)
 # Roadmap step 18 (tools/concordance_logistics.py): Courier Posts, requests, reservations and accountable transit.
 import concordance_logistics as logistics  # noqa: E402
 BLOCKS.update(logistics.BLOCKS)
+# Roadmap step 19 (tools/concordance_artifice.py): Runesmithing, the Artificer's Bench and Resonant Rings.
+import concordance_artifice as artifice  # noqa: E402
+RESEARCH.update(artifice.RESEARCH)
+ITEMS.update(artifice.ITEMS)
+BLOCKS.update(artifice.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
-                 celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG]
+                 celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
+                 artifice.ARTIFICE_SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -916,6 +922,7 @@ def codex():
         **crimson.codex(),
         **workers.codex(),
         **logistics.codex(),
+        **artifice.codex(),
     }
 
 
@@ -1020,6 +1027,7 @@ CATEGORIES = {
     **celestial.CATEGORY,
     **crimson.CATEGORY,
     **workers.CATEGORY,
+    **artifice.CATEGORY,
 }
 
 ENTRY_BACKGROUNDS = {None: "square_gray", "encountered": "square_gray", "observed": "square_gray",
@@ -1428,6 +1436,7 @@ MESSAGES = {
     **crimson.MESSAGES,
     **workers.MESSAGES,
     **logistics.MESSAGES,
+    **artifice.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1464,6 +1473,7 @@ TOOLTIPS = {
     **crimson.TOOLTIPS,
     **workers.TOOLTIPS,
     **logistics.TOOLTIPS,
+    **artifice.TOOLTIPS,
 }
 
 
@@ -1646,6 +1656,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     crimson.write_all(write, assets, data, lang, condition, self_drop)
     workers.write_all(write, assets, data, lang, condition, self_drop)
     logistics.write_all(write, assets, data, lang, condition, self_drop)
+    artifice.write_all(write, assets, data, lang, condition, self_drop)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -1783,6 +1794,7 @@ def write_data(write, res):
     crimson.write_data(write, data)
     workers.write_data(write, data)
     logistics.write_data(write, data)
+    artifice.write_data(write, data)
     # LambDynamicLights (optional, client): a lit Kindled Lantern glows in hand. Without the mod nothing reads this.
     write(assets / "dynamiclights" / "item" / "kindled_lantern.json",
           {"match": {"items": rid("kindled_lantern"), "components": {rid("lantern_lit"): {}}},
@@ -1802,6 +1814,7 @@ def tags(tags):
     crimson.tags(tags)
     workers.tags(tags)
     logistics.tags(tags)
+    artifice.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     tags.add("block", "minecraft:mineable/axe", rid("lampwright_bench"))
