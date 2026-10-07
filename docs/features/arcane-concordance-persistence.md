@@ -104,8 +104,10 @@ thing once.
 | Signs | at most 48 a level a tick, plus 16 warnings |
 | Courier ledger | at most 1,024 open requests, 32 history events a post |
 
-The budget is stated in work, not in milliseconds. It has not been profiled under load. A large installation's frame
-cost (GeckoLib, particles, GUI, shaders) has not been measured on a client.
+The budget is stated in work, not in milliseconds. It has not been profiled under load. Four pieces of it (a block
+change's circle look-up, a spell compile, the graph's audit walk, a garden sample) are timed on a CI runner by
+`ConcordanceWorkloadGameTests`; the figures are in the [delivery record](arcane-concordance-delivery.md). A large
+installation's frame cost (GeckoLib, particles, GUI, shaders) has not been measured on a client.
 
 ## Connections
 

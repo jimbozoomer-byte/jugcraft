@@ -53,10 +53,12 @@ From a fresh world, with nothing from the Nether or the End and nothing past the
   held, Spell Engine sends the number keys 2 and on to the spells after the first, so those keys no longer change the
   hotbar slot. Scrolling still does, and binding Spell Engine's own spell keys frees them. The wand's codex entry now has
   a **Casting** page that says so.
-- **Spell order.** The three invocations learned first are all tier 1. Which one lands on the use key is Spell Engine's
-  order; the upstream source suggests it orders by id, which would put Aegis first. The client test logs which
-  invocation the use key cast, and the record will be updated from that log. Whether Kindle, the light First Light is
-  about, should be the one on the use key is an open question for the owner.
+- **Spell order.** Jugcraft offers a player's learned invocations sorted by id, and Spell Engine keeps the order it is
+  given, so the use key should cast Aegis, 2 Kindle and 3 Revelation. That order is read from the two sources. The
+  client test casts with the use key and with 2, and it passed: two different invocations were cast, and whenever
+  Kindle is one of them the test also requires its light in the room. Its log line naming the two is in the part of
+  CI's log the tools here cannot fetch. Whether Kindle, the light First Light is about, should be on the use key is
+  an open question for the owner. It would be a small change to the order `ConcordanceSpells` offers them in.
 
 ## The three routes
 
@@ -204,7 +206,11 @@ No new dependency or asset. The codex's new Casting page is generated text.
   as raising records it.
 - Client game test added: `ConcordanceJourneyClientGameTests.theFirstSuccessByOrdinaryControls`. The specimens and the
   wand are given, so it tests the controls, not the search.
-- CI: pending (this record is updated with the run).
+- CI: Build run 37687379240 on 6ce87a9 (step 32), every job passed. "All 1077 required tests passed" in `mod` and in
+  `optional integrations absent`, `eachRouteClimbsItsOwnWay` among them. Client shard 1 ran
+  `ConcordanceJourneyClientGameTests` and saved `jugcraft_concordance_journey_first_light` and
+  `jugcraft_concordance_journey_journal`. The run on 314126f (step 31) passed `optional integrations absent` before it
+  was cancelled by step 32's push.
 
 Not yet run:
 - the playtest of each route, in both setups;

@@ -23,7 +23,8 @@ import net.minecraft.server.level.ServerLevel;
  * <ul>
  * <li>a block change's look-up of the circle anchors in reach (every block broken or placed near a circle);</li>
  * <li>compiling a spell (every inscription, check and cast of a composed spell);</li>
- * <li>the progression graph's fixed point (every stage refresh asks what a player can reach);</li>
+ * <li>the progression graph's fixed point (the graph's own audit runs it seven times at every data load: once, and once
+ * for each route through the two middle stages);</li>
  * <li>a level's whole garden allowance for one tick (16 area samples of at most 100 reads).</li>
  * </ul>
  * The times are a CI runner's, shared with every other test running at once: an indication, not a profile. The bounds
