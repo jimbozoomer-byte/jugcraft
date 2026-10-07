@@ -29,6 +29,47 @@ No numbered release yet. Everything below is on `main`.
 - **Nothing else changes:** same items, IDs, stats and recipes, so armor you already have just looks new. Trims stay on the item but do not show on the 3D models, and babies wear none.
 - The old steampunk and kaiserpunk looks are no longer worn by bronze and steel armor; Steampunk Armor and Kaiser Armor (below) keep them. Record: [knight-armor.md](docs/features/knight-armor.md).
 
+### Unmerged: Arms icons in the owner's 16×16 style
+- **Every arm's inventory icon is redrawn at 16×16** in the owner's manner: on the diagonal, a one-pixel outline in each part's own dark tone, flat tones lit from the top left, chunky parts that read at a glance. Each kind is one map of letters in `tools/arms_icons/` that the owner can edit.
+- **The big arms show the whole weapon**: the longsword, greatsword, zweihander, executioner, battleblade, moonblade, sabre, nodachi and halberd fit the full diagonal whole, every part present, instead of cropped.
+- **The 3D models in the hand stay**; bronze becomes the owner's tan bronze and steel a dark blue-grey, in the icons and models alike, which also re-tints the bows, arbalests, shields and some variants. Record: [arms-icons-16.md](docs/features/arms-icons-16.md).
+- **[ITEM_ICONS.md](docs/ITEM_ICONS.md): rules for every item icon**, measured from these maps: 16×16 at vanilla's scale, the whole item with every part present and never cropped, a one-pixel outline in each part's own dark, light from the top left, flat tones, each metal its own palette, vanilla kinds in vanilla's form drawn fresh. `tools/check_icon_maps.py` checks the maps, the materials they declare (`tools/icon_materials.py`) and the item icons' sizes, and runs with its self-test in CI through `tools/check_mod_data.py`.
+- **New item icons are 16×16 only**: ART_DIRECTION.md and CLAUDE.md now say so, `tools/hd_art.py` draws no new icons, and the 122 larger icons are frozen in `tools/legacy_item_icons.txt` until each is redrawn; CI fails any other item icon larger than 16×16.
+- **The 17 war machines' icons are redrawn at 16×16** after merging main, whose 32×32 icons failed that rule: the five tower guns, the Siege Mortar, Self-Propelled Howitzer, Flak Gun, Range Finder, the four shells, the Landship, the Diesel Walker, the Zeppelin and the Observation Balloon. Each is a map in `tools/item_icons/` (drawn by `tools/item_icons.py`, replacing `tools/gun_icons.py`) and keeps its old cue; the legacy list is unchanged.
+
+### Rules: fan homages allowed
+- Jugcraft may now include fan homages: creatures, characters and things inspired by films, shows, cartoons and games, with changed names and the owner's approval. Their textures, models, sounds and code must still be made for Jugcraft or licensed; nothing ripped or copied from the source. See [LICENSE_POLICY.md](LICENSE_POLICY.md#fan-homages).
+
+### Unmerged: New trees, batch 1
+- **Ten new trees, from the tree roster** ([TREES.md](docs/branches/TREES.md)):
+  - **Firs:** stunted firs and thin bog firs, narrow subalpine fir spires and low fir bushes.
+  - **The tamarack:** a thin larch, gold in autumn and bare in winter, over the Muskeg, Bog and Fen.
+  - **Grey dead snags**, straight and bent, in the dead and burnt biomes, and on the Cinder Barrens' and Wasteland's coarse dirt.
+  - **Willow bushes**, and **young aspens** standing in the Hallowed Bog's water.
+  - **The swamp cedar**, in the Wetland and Ghost Forest, and the moss-hung **bigleaf maple** of the Temperate Rainforest and Redwood Forest.
+- **Cedar, a new wood** from the owner's painted western red cedar: log, wood, stripped log and wood, planks, stairs, slab, fence and fence gate, sage-green cedar leaves and a cedar sapling that grows a cedar, drawn as the other woods are. Its wood is darkened a little so it sits apart from vanilla spruce and the cypress.
+- **29 biomes change their trees.** Besides the new trees, firs replace vanilla spruces in the Maple Woods, Redwood Forest and Lake District and join the Seasonal Forest; larches join the Coniferous Forest, Shield and Lake District; aspens replace the Shield's oaks and the Snowpetal Grove's birches and join the Snowy Forest; fallen dead and larch logs, willows, maples, azaleas and a rare great oak join where the roster says; and the Wasteland gets a tree try in every chunk.
+- **A wood's recipes follow any switch that grows it:** `jugcraft:feature_enabled` takes an `"or"` list, so the larch's recipes stay on with either Alpine Spawn or the biomes, and the chestnut's with either agriculture or the biomes.
+- New chunks only; nothing saved is renamed or removed. Record: [trees-batch-1.md](docs/features/trees-batch-1.md). Not yet played.
+
+### Unmerged: Wood repaint
+- **Every wood the mod adds is redrawn** in its colour from the owner's 24 painted woods, matched to the closest painting: bark, log ends, stripped logs and planks, so its stairs, slabs, fences and gates follow too.
+- **Drawn as vanilla draws wood:**
+  - **Bark:** long vertical furrows, with no rings across the trunk.
+  - **Log ends:** square growth rings.
+  - **Stripped wood:** straight grain.
+  - **Planks:** four lit boards with staggered joints.
+- **Every tree's leaves**, in every season's look, are redrawn in vanilla's fine speckle; needles, blossom, fronds and bare twigs each in their own way.
+- **The owner's second set** of eight painted woods: the jacaranda takes its mauve wood, and the other seven wait in a bank for new trees (cedar, plane, walnut, wenge, elm, hickory and yew).
+- **[NATURAL_TEXTURES.md](docs/NATURAL_TEXTURES.md):** how these woods were drawn, as the rule for every future wood and natural texture.
+- Original textures drawn by code (`tools/wood_style.py`); nothing of vanilla's is recoloured. Record: [wood-repaint.md](docs/features/wood-repaint.md).
+
+### Unmerged: Thallite, slice 1
+- **Thallite, the Earth school's green metal** (the owner's chartreuse set): Thallite Ore and Deepslate Thallite Ore in every Overworld biome (veins of 7, 4 a chunk, Y −32 to 48), and rich pockets in Lush Caves and the Glowcap Grotto (6 more veins of 9 a chunk) that show in the cave walls. A stone pickaxe mines it; each ore drops one raw thallite, with Fortune as on vanilla's ores.
+- **Smelt it** in a furnace or blast furnace (0.7 xp) into **Thallite Ingots**, which say "Green as a new shoot." Nuggets, ingots and blocks, and raw thallite and raw blocks, go 9 to 1 both ways. No alloy, on purpose.
+- **Through the machines:** the Crusher and Pulverizer give 2 a block (the Pulverizer a 10% iron dust too), the Ore Washer 3 and acid leaching 4. The Ore Drill and Prospector find it. **Thallite plates** come from the Metal Press, or by hand at 2 ingots a plate.
+- Its own switch, `thallite`: off stops its worldgen and recipes and keeps every block and item. Worldgen reaches new chunks only. A metal's worldgen entry may now name its biomes (as rocks do), placed through a `jugcraft:has_ore/<feature>` biome tag. Gear, arms, the arrow, horse armor and magic come in later slices. Record: [thallite.md](docs/features/thallite.md).
+
 ### Unmerged: Material sets: tools, ingots and ores redrawn
 - **Every metal's ingot and nugget in vanilla's form:** the ingot is the owner's own, recoloured for each metal and never redrawn, and the nugget a shard drawn fresh from memory; one shared ingot and nugget for all fourteen metals, each in its own five-tone ramp, meant to sit beside vanilla's in an inventory as one set. A client test sets them beside vanilla's iron, gold and copper for the owner to judge. Bronze and steel take the owner's chosen palettes; the other twelve stand on the same ladder, each kept clear of the others and of vanilla's iron, gold and copper.
 - **Storage blocks** in the owner's four-panel inlay; **raw ores and raw blocks** as lumpy chunks and packed lumps in each ore's own tones.

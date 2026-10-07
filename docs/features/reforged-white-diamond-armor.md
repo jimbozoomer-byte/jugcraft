@@ -80,7 +80,7 @@ Beyond that, `tools/armor_preview.py`'s reference panels take an optional option
 - **Generators:** `generate_material_data.py`, `generate_textures.py`, then `generate_material_data.py` again, all exit 0; the second run changed nothing.
   - This set's own output: 9 `worn_models.json` entries, 4 names, the 4 vanilla slot tags, the item and model files, 4 icons, the atlas and the repair tag.
   - The knight and Bloodthorn outputs are byte-identical: 3 atlases, 224 item textures and every earlier `worn_models.json` entry.
-- **`check_mod_data.py`:** PASS, with `check_armor_tiers` and main's art check (`tools/art_check.py`). Every Reforged White Diamond entry is 0.00% see-through (H1, limit 0.5%), with no flicker or texture findings.
+- **`check_mod_data.py`:** PASS (1516 material IDs), with `check_armor_tiers` and main's art check (`tools/art_check.py`). Every Reforged White Diamond entry is 0.00% see-through (H1, limit 0.5%), with no flicker or texture findings.
 - **`check_repository.py`:** PASS.
 - **`armor_models.py`:** no problems. Its reach warnings are the crest, wings and pauldrons (see "The look").
 - **`armor_smoke.py --no-render`:** all checks pass.
