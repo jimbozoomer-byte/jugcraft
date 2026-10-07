@@ -62,22 +62,26 @@ public final class JugcraftGuns {
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
 
 	static {
-		ATTACHMENTS.put("silencer", new GunAttachment("barrel", false, 0.95F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.35F));
-		ATTACHMENTS.put("baffled_silencer", new GunAttachment("barrel", false, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.2F));
-		ATTACHMENTS.put("muzzle_brake", new GunAttachment("barrel", false, 1.0F, 1.0F, 1.0F, 0.85F, 1.0F, 1.0F, 0.5F, 1.0F));
-		ATTACHMENTS.put("extended_barrel", new GunAttachment("barrel", true, 1.0F, 1.3F, 0.85F, 0.85F, 1.0F, 1.0F, 1.0F, 1.0F));
-		ATTACHMENTS.put("extended_magazine", new GunAttachment("magazine", true, 1.0F, 1.0F, 1.0F, 1.0F, 1.5F, 1.15F, 1.0F, 1.0F));
-		ATTACHMENTS.put("speed_magazine", new GunAttachment("magazine", true, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.65F, 1.0F, 1.0F));
-		ATTACHMENTS.put("light_stock", new GunAttachment("stock", true, 1.0F, 1.0F, 0.85F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F));
-		ATTACHMENTS.put("weighted_stock", new GunAttachment("stock", true, 1.0F, 1.0F, 1.0F, 0.7F, 1.0F, 1.0F, 0.6F, 1.0F));
-		ATTACHMENTS.put("wooden_stock", new GunAttachment("stock", true, 1.0F, 1.0F, 0.9F, 0.85F, 1.0F, 1.0F, 0.75F, 1.0F));
-		ATTACHMENTS.put("light_grip", new GunAttachment("grip", false, 1.0F, 1.0F, 0.8F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F));
-		ATTACHMENTS.put("vertical_grip", new GunAttachment("grip", false, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.65F, 1.0F));
+		ATTACHMENTS.put("silencer", new GunAttachment("barrel", false, 0.95F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.35F, 0.0F));
+		ATTACHMENTS.put("baffled_silencer", new GunAttachment("barrel", false, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.2F, 0.0F));
+		ATTACHMENTS.put("muzzle_brake", new GunAttachment("barrel", false, 1.0F, 1.0F, 1.0F, 0.85F, 1.0F, 1.0F, 0.5F, 1.0F, 0.0F));
+		ATTACHMENTS.put("extended_barrel", new GunAttachment("barrel", true, 1.0F, 1.3F, 0.85F, 0.85F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F));
+		ATTACHMENTS.put("extended_magazine", new GunAttachment("magazine", true, 1.0F, 1.0F, 1.0F, 1.0F, 1.5F, 1.15F, 1.0F, 1.0F, 0.0F));
+		ATTACHMENTS.put("speed_magazine", new GunAttachment("magazine", true, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.65F, 1.0F, 1.0F, 0.0F));
+		ATTACHMENTS.put("light_stock", new GunAttachment("stock", true, 1.0F, 1.0F, 0.85F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F));
+		ATTACHMENTS.put("weighted_stock", new GunAttachment("stock", true, 1.0F, 1.0F, 1.0F, 0.7F, 1.0F, 1.0F, 0.6F, 1.0F, 0.0F));
+		ATTACHMENTS.put("wooden_stock", new GunAttachment("stock", true, 1.0F, 1.0F, 0.9F, 0.85F, 1.0F, 1.0F, 0.75F, 1.0F, 0.0F));
+		ATTACHMENTS.put("light_grip", new GunAttachment("grip", false, 1.0F, 1.0F, 0.8F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F));
+		ATTACHMENTS.put("vertical_grip", new GunAttachment("grip", false, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.65F, 1.0F, 0.0F));
+		ATTACHMENTS.put("iron_bayonet", new GunAttachment("grip", false, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 4.0F));
+		ATTACHMENTS.put("steel_bayonet", new GunAttachment("grip", false, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 5.0F));
+		ATTACHMENTS.put("diamond_bayonet", new GunAttachment("grip", false, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 5.0F));
+		ATTACHMENTS.put("netherite_bayonet", new GunAttachment("grip", false, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 6.0F));
 	}
 
 	/** The attachment slots: a gun takes one attachment in each (tools/guns.py SLOTS). */
 	public static final List<String> SLOTS = List.of("barrel", "magazine", "stock", "grip");
-	/** The attachments each gun takes: those it has a part of its own for (tools/guns.py fits()). */
+	/** The attachments each gun takes: those the owner made a part of that gun for (tools/guns.py fits()). */
 	public static final Map<String, List<String>> ACCEPTS = new LinkedHashMap<>();
 
 	static {
@@ -85,16 +89,27 @@ public final class JugcraftGuns {
 				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock"));
 		ACCEPTS.put("patchwork_carbine", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
-				"vertical_grip"));
+				"vertical_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
 		ACCEPTS.put("thunderpipe", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
-				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip"));
+				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip", "iron_bayonet",
+				"steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
 		ACCEPTS.put("warden_pistol", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"extended_magazine", "speed_magazine"));
 		ACCEPTS.put("riveter_smg", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock"));
 		ACCEPTS.put("haymaker", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel"));
 		ACCEPTS.put("longhorn_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
-				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip"));
+				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip", "iron_bayonet",
+				"steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
+		ACCEPTS.put("drover_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
+		ACCEPTS.put("coach_gun", List.of("light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
+				"netherite_bayonet"));
+		ACCEPTS.put("duelling_pistol", List.of("light_stock", "weighted_stock", "wooden_stock"));
+		ACCEPTS.put("line_musket", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"vertical_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
+		ACCEPTS.put("bellmouth", List.of("light_grip", "vertical_grip", "iron_bayonet", "steel_bayonet",
+				"diamond_bayonet", "netherite_bayonet"));
 	}
 
 	/** The rounds. */

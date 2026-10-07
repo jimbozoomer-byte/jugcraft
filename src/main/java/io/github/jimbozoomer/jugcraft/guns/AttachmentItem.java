@@ -31,6 +31,11 @@ public class AttachmentItem extends Item {
 		GunAttachment attachment = JugcraftGuns.ATTACHMENTS.get(name);
 		tooltip.accept(Component.translatable("tooltip.jugcraft.guns.slot." + attachment.slot()).withStyle(ChatFormatting.GOLD));
 		effects(attachment, tooltip);
+		if (attachment.bayonet()) {
+			// Half hearts, shown as the game shows attack damage; and the key that stabs.
+			tooltip.accept(Component.translatable("tooltip.jugcraft.guns.stab", attachment.stab(), Component.keybind("key.jugcraft.stab"))
+					.withStyle(ChatFormatting.GREEN));
+		}
 		MutableComponent guns = Component.empty();
 		JugcraftGuns.ACCEPTS.forEach((gun, takes) -> {
 			if (takes.contains(name)) {

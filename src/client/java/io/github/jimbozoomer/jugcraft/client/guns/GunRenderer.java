@@ -42,6 +42,9 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	public static final DataTicket<Fitted> FITTED = DataTicket.create("jugcraft_gun_attachments", Fitted.class);
 	/** A muzzle flash to draw: the shot was moments ago and nothing fitted hides it. */
 	public static final DataTicket<Flash> FLASH = DataTicket.create("jugcraft_gun_flash", Flash.class);
+	/** How far a bayonet stab drives the gun forward, and down, on screen at full thrust (blocks). */
+	private static final float THRUST_REACH = 0.35F;
+	private static final float THRUST_DROP = 0.06F;
 	/** A slot's attachment bones, and a second set where the slot is on two bones (the Warden Pistol's spare magazine). */
 	private static final List<String> SETS = List.of("", "_2");
 
@@ -70,7 +73,8 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 		Minecraft client = Minecraft.getInstance();
 		if (data.renderPerspective().firstPerson() && owner instanceof AbstractClientPlayer player && player == client.player) {
 			boolean slim = player.getSkin().model() == PlayerModelType.SLIM;
-			state.addGeckolibData(VIEW, new View(player.getSkin().body().texturePath(), slim, GunView.aim(partialTick)));
+			state.addGeckolibData(VIEW, new View(player.getSkin().body().texturePath(), slim, GunView.aim(partialTick),
+					GunEffects.thrust(player.getId(), player.level().getGameTime(), partialTick)));
 		}
 	}
 
@@ -123,15 +127,20 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 				poseStack.last().pose().translateLocal(-at.x() * view.aim(), -at.y() * view.aim(), 0.0F);
 			}
 		}
+		if (view != null && view.thrust() > 0) {
+			// A bayonet stab drives the gun forward and a little down, and back (in view space).
+			poseStack.last().pose().translateLocal(0.0F, -THRUST_DROP * view.thrust(), -THRUST_REACH * view.thrust());
+		}
 		poseStack.translate(0.5F, 0.0F, 0.5F);
 	}
 
 	/**
-	 * @param skin the player's skin texture
-	 * @param slim whether their arms are three pixels wide
-	 * @param aim  how far into aiming down the sights (0 to 1)
+	 * @param skin   the player's skin texture
+	 * @param slim   whether their arms are three pixels wide
+	 * @param aim    how far into aiming down the sights (0 to 1)
+	 * @param thrust how far into a bayonet stab's thrust (0 to 1; {@link GunEffects#thrust})
 	 */
-	public record View(net.minecraft.resources.Identifier skin, boolean slim, float aim) {
+	public record View(net.minecraft.resources.Identifier skin, boolean slim, float aim, float thrust) {
 	}
 
 	/** @param attachments the attachments fitted to the gun drawn ({@link GunItem#attachments}) */

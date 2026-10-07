@@ -415,6 +415,7 @@ PROPS = {
 #   model    the owner's item model for the attachment (Guns/models/item/<model>.json), drawn with...
 #   texture  ...its one texture, copied to textures/item/guns/attachments/<texture>.png (ATTACHMENT_TEXTURES)
 #   hides_flash  a can over the muzzle: a shot through it shows no muzzle flash (slice 6)
+#   stab     a bayonet's stab, in half hearts (slice 7); 0 for the rest
 # The numbers are starting points for the owner.
 ATTACHMENTS = {
     "silencer": {
@@ -476,6 +477,28 @@ ATTACHMENTS = {
         "replaces": False, "effects": {"kick": 0.65}, "model": "vertical_grip", "texture": "grips",
         "tooltip": "A grip to pull the gun down by: less kick.",
     },
+    # Slice 7: bayonets, under the barrel (so a gun has a bayonet or a grip). Each stabs (the stab key, V) for "stab"
+    # damage; they change none of the gun's numbers. The owner's anthralite bayonet is Jugcraft's steel one.
+    "iron_bayonet": {
+        "display": "Iron Bayonet", "slot": "grip", "parts": ["iron_bayonet"], "replaces": False, "effects": {},
+        "stab": 4.0, "model": "iron_bayonet", "texture": "iron_bayonet",
+        "tooltip": "A blade under the muzzle. Stab with it up close.",
+    },
+    "steel_bayonet": {
+        "display": "Steel Bayonet", "slot": "grip", "parts": ["anthralite_bayonet"], "replaces": False, "effects": {},
+        "stab": 5.0, "model": "anthralite_bayonet", "texture": "steel_bayonet",
+        "tooltip": "A steel blade under the muzzle, wrapped at the grip. Stab with it up close.",
+    },
+    "diamond_bayonet": {
+        "display": "Diamond Bayonet", "slot": "grip", "parts": ["diamond_bayonet"], "replaces": False, "effects": {},
+        "stab": 5.0, "model": "diamond_bayonet", "texture": "diamond_bayonet",
+        "tooltip": "A diamond blade under the muzzle. Stab with it up close.",
+    },
+    "netherite_bayonet": {
+        "display": "Netherite Bayonet", "slot": "grip", "parts": ["netherite_bayonet"], "replaces": False, "effects": {},
+        "stab": 6.0, "model": "netherite_bayonet", "texture": "netherite_bayonet",
+        "tooltip": "A netherite blade under the muzzle. Stab with it up close.",
+    },
 }
 # The order the effects are listed in (and GunAttachment's fields).
 EFFECTS = ("damage", "range", "hip_spread", "aim_spread", "capacity", "reload", "kick", "volume")
@@ -487,6 +510,8 @@ ATTACHMENT_TEXTURES = {
     "muzzle_devices": "greaser_smg_barrels", "baffled_silencer": "advanced_silencer", "extended_barrel": "extended_barrel",
     "extended_magazine": "extended_mag", "speed_magazine": "carabine", "light_stock": "light_stock",
     "weighted_stock": "greaser_smg_stocks", "wooden_stock": "musket_stocks", "grips": "carabine_grips",
+    "iron_bayonet": "iron_bayonet", "steel_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
+    "netherite_bayonet": "netherite_bayonet",
 }
 # Attachment recipes, from the same early metal and wood as the guns.
 ATTACHMENT_RECIPES = {
@@ -501,18 +526,23 @@ ATTACHMENT_RECIPES = {
     "wooden_stock": (["PPL"], {"P": "#minecraft:planks", "L": "minecraft:leather"}),
     "light_grip": (["L", "S"], {"L": "minecraft:leather", "S": "minecraft:stick"}),
     "vertical_grip": (["I", "S", "L"], {"I": "minecraft:iron_ingot", "S": "minecraft:stick", "L": "minecraft:leather"}),
+    # A blade over a ring that slips onto the muzzle.
+    "iron_bayonet": (["I", "N"], {"I": "minecraft:iron_ingot", "N": "minecraft:iron_nugget"}),
+    "steel_bayonet": (["S", "N"], {"S": "#c:ingots/steel", "N": "minecraft:iron_nugget"}),
+    "diamond_bayonet": (["D", "N"], {"D": "minecraft:diamond", "N": "minecraft:iron_nugget"}),
 }
+# The Netherite Bayonet is a Diamond Bayonet upgraded at a smithing table, as netherite tools are.
+NETHERITE_UPGRADES = {"netherite_bayonet": "diamond_bayonet"}
 
 
 def attachment_part(gun, kind):
-    """The owner's part file this gun shows the attachment with, or None: the first of its "parts" the gun has, if it
-    is drawn on the gun's own atlas."""
-    folder = LIBRARY / "models" / "special" / GUNS[gun]["source"]
+    """The owner's part file this gun shows the attachment with, or None: the first of its "parts" the gun has, if
+    every face draws on a texture in the library (the gun's own or, since slice 7, one the owner shares between guns,
+    merged into the gun's atlas by atlas_layout())."""
     for name in ATTACHMENTS[kind]["parts"]:
-        path = folder / f"{name}.json"
-        if path.exists():
-            textures = set(json.loads(path.read_text()).get("textures", {}).values())
-            return name if textures == {f"scguns:item/{GUNS[gun]['source']}"} else None
+        if (LIBRARY / "models" / "special" / GUNS[gun]["source"] / f"{name}.json").exists():
+            faces = [face for element in load_part(gun, name).get("elements", []) for face in element.get("faces", {}).values()]
+            return name if faces and all(texture_file(face["_texture"]) for face in faces) else None
     return None
 
 
@@ -714,6 +744,12 @@ def write_all(write, assets, data, lang, condition):
         lang[f"tooltip.{MOD}.guns.{kind}"] = att["tooltip"]
         write(assets / "models" / "item" / f"{kind}.json", attachment_model(kind))
         write(assets / "items" / f"{kind}.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/{kind}"}})
+        if kind in NETHERITE_UPGRADES:
+            write(data / "recipe" / f"{kind}.json", {
+                "fabric:load_conditions": condition("guns"), "type": "minecraft:smithing_transform",
+                "template": "minecraft:netherite_upgrade_smithing_template", "base": f"{MOD}:{NETHERITE_UPGRADES[kind]}",
+                "addition": "minecraft:netherite_ingot", "result": {"id": f"{MOD}:{kind}"}})
+            continue
         pattern, key = ATTACHMENT_RECIPES[kind]
         write(data / "recipe" / f"{kind}.json", {
             "fabric:load_conditions": condition("guns"), "type": "minecraft:crafting_shaped",
@@ -723,7 +759,10 @@ def write_all(write, assets, data, lang, condition):
     for recipe in ("gun_attachment", "gun_attachment_removal"):
         write(data / "recipe" / f"{recipe}.json", {"fabric:load_conditions": condition("guns"), "type": f"{MOD}:{recipe}"})
     for slot in SLOTS:
-        lang[f"tooltip.{MOD}.guns.slot.{slot}"] = f"{slot.capitalize()} attachment"
+        # The grip slot also takes the bayonets (slice 7): it is everything under the barrel.
+        lang[f"tooltip.{MOD}.guns.slot.{slot}"] = "Under-barrel attachment" if slot == "grip" else f"{slot.capitalize()} attachment"
+    lang[f"tooltip.{MOD}.guns.stab"] = "Stab: %s damage (%s)"
+    lang[f"key.{MOD}.stab"] = "Stab with bayonet"
     for effect, text in {"damage": "Damage", "range": "Range", "hip_spread": "Spread from the hip",
                          "aim_spread": "Spread aimed", "capacity": "Rounds", "reload": "Reload time", "kick": "Kick",
                          "volume": "Shot sound"}.items():
@@ -774,7 +813,147 @@ def base_model(gun):
 # ------------------------------------------------------------------ converting the parts
 
 def load_part(gun, part):
-    return json.loads((LIBRARY / "models" / "special" / GUNS[gun]["source"] / f"{part_file(part)}.json").read_text())
+    """The owner's part file, each face noting the texture it draws from ("_texture": a texture id)."""
+    data = json.loads((LIBRARY / "models" / "special" / GUNS[gun]["source"] / f"{part_file(part)}.json").read_text())
+    textures = data.get("textures", {})
+    for element in data.get("elements", []):
+        for face in element.get("faces", {}).values():
+            face["_texture"] = face_texture(textures, face.get("texture", ""))
+    return data
+
+
+def face_texture(textures, ref):
+    """The texture id a face's "#key" names in its part file's textures (following "#key" to "#key"), or None."""
+    seen = set()
+    while ref.startswith("#"):
+        key = ref[1:]
+        if key in seen or key not in textures:
+            return None
+        seen.add(key)
+        ref = textures[key]
+    return ref or None
+
+
+def texture_file(texture):
+    """The library file a texture id ("scguns:item/<name>") names, or None if the library lacks it."""
+    prefix = "scguns:item/"
+    if texture and texture.startswith(prefix):
+        path = LIBRARY / "item" / f"{texture[len(prefix):]}.png"
+        return path if path.exists() else None
+    return None
+
+
+def own_texture(gun):
+    return f"scguns:item/{GUNS[gun]['source']}"
+
+
+def gun_textures(gun):
+    """Every texture the gun's parts (its attachments' included) draw from, its own first."""
+    found = [own_texture(gun)]
+    for _, _, parts, _ in effective_bones(gun):
+        for part in parts:
+            if part.startswith("@"):
+                continue
+            for element in part_elements(gun, part):
+                for face in element.get("faces", {}).values():
+                    if face["_texture"] not in found:
+                        found.append(face["_texture"])
+    return found
+
+
+def atlas_layout(gun):
+    """The gun's atlas (slice 7): its own texture at the top left and, where its attachment parts draw on textures
+    the owner shares between guns (bayonets, stocks, grips), those packed into room the own texture leaves free:
+    blocks that are clear and that no face's UVs or prop reaches (own_footprint()), largest first, on an 8-pixel grid.
+    A square atlas, grown from the own texture's size to 128 at most (tools/check_mod_data.py's texture rule) only
+    when they do not fit. Returns ((width, height), {texture id: (x, y, width, height)})."""
+    from PIL import Image
+    sizes = {}
+    for texture in gun_textures(gun):
+        with Image.open(texture_file(texture)) as image:
+            sizes[texture] = image.size
+    own = own_texture(gun)
+    ow, oh = sizes[own]
+    place = {own: (0, 0, ow, oh)}
+    others = sorted((t for t in sizes if t != own), key=lambda t: (-sizes[t][0] * sizes[t][1], t))
+    if not others:
+        return (ow, oh), place
+    used = own_footprint(gun)
+    side = max(ow, oh)
+    while side <= 128:
+        taken = {}
+        for texture in others:
+            w, h = sizes[texture]
+            spot = next(((x, y) for y in range(0, side - h + 1, 8) for x in range(0, side - w + 1, 8)
+                         if not used[y:min(y + h, oh), x:min(x + w, ow)].any()
+                         and all(x + w <= tx or tx + tw <= x or y + h <= ty or ty + th <= y
+                                 for tx, ty, tw, th in taken.values())), None)
+            if spot is None:
+                break
+            taken[texture] = (*spot, w, h)
+        else:
+            return (side, side), {**place, **taken}
+        side *= 2
+    raise ValueError(f"{gun}: its shared textures do not fit a 128 x 128 atlas")
+
+
+def own_footprint(gun):
+    """Which pixels of the gun's own texture are in use: drawn on, under any face's UVs, or a prop's block."""
+    import numpy as np
+    from PIL import Image
+    with Image.open(LIBRARY / "item" / f"{GUNS[gun]['source']}.png") as image:
+        rgba = np.asarray(image.convert("RGBA"))
+    used = rgba[:, :, 3] > 0
+    height, width = used.shape
+    for _, _, parts, _ in effective_bones(gun):
+        for part in parts:
+            if part.startswith("@"):
+                continue
+            for element in part_elements(gun, part):
+                lo = [min(a, b) for a, b in zip(element["from"], element["to"])]
+                hi = [max(a, b) for a, b in zip(element["from"], element["to"])]
+                for face, data in element.get("faces", {}).items():
+                    if data["_texture"] != own_texture(gun):
+                        continue
+                    u0, v0, u1, v1 = data.get("uv") or default_uv(face, lo, hi)
+                    x0, x1 = sorted((u0 * width / 16, u1 * width / 16))
+                    y0, y1 = sorted((v0 * height / 16, v1 * height / 16))
+                    used[max(0, math.floor(y0)):math.ceil(y1) + 1, max(0, math.floor(x0)):math.ceil(x1) + 1] = True
+    for prop in PROPS.get(gun, {}).values():
+        tu, tv = prop["texture_at"]
+        bw, bh = prop_block(prop)
+        used[tv:tv + bh, tu:tu + max(bw, 8)] = True
+    return used
+
+
+def to_atlas(corners, placement, size):
+    """Corner UVs in 0..16 of a face's own texture -> 0..16 of the gun's atlas, where that texture sits at
+    placement (x, y, width, height) in an atlas of this size."""
+    x, y, w, h = placement
+    return {key: ((x + u * w / 16) * 16 / size[0], (y + v * h / 16) * 16 / size[1]) for key, (u, v) in corners.items()}
+
+
+def compose_atlas(gun):
+    """The gun's atlas as written: the owner's own texture (with any props drawn into it) and the shared textures
+    its attachments draw on, placed by atlas_layout(); None when it is the owner's file unchanged."""
+    from PIL import Image
+    size, place = atlas_layout(gun)
+    if gun not in PROPS and len(place) == 1:
+        return None
+    with Image.open(LIBRARY / "item" / f"{GUNS[gun]['source']}.png") as image:
+        own = image.convert("RGBA")
+    if gun in PROPS:
+        own = draw_props(own, gun)
+    if len(place) == 1:
+        return own
+    atlas = Image.new("RGBA", size, (0, 0, 0, 0))
+    for texture, (x, y, _, _) in place.items():
+        if texture == own_texture(gun):
+            atlas.paste(own, (x, y))
+        else:
+            with Image.open(texture_file(texture)) as image:
+                atlas.paste(image.convert("RGBA"), (x, y))
+    return atlas
 
 
 def part_file(part):
@@ -884,8 +1063,10 @@ def rnd(x):
     return int(x) if x == int(x) else x
 
 
-def element_cube(element, size_px):
-    """One owner element -> one GeckoLib cube with the same corners, the same UV at each corner and the same turn."""
+def element_cube(element, layout):
+    """One owner element -> one GeckoLib cube with the same corners, the same UV at each corner (in the gun's atlas,
+    layout = atlas_layout()) and the same turn."""
+    size_px, place = layout
     lo = [min(a, b) for a, b in zip(element["from"], element["to"])]
     hi = [max(a, b) for a, b in zip(element["from"], element["to"])]
     size = [rnd(b - a) for a, b in zip(lo, hi)]
@@ -905,7 +1086,7 @@ def element_cube(element, size_px):
         if data is None:
             continue
         uv = data.get("uv") or default_uv(face, lo, hi)
-        corners = java_corner_uvs(face, uv, int(data.get("rotation", 0)) % 360)
+        corners = to_atlas(java_corner_uvs(face, uv, int(data.get("rotation", 0)) % 360), place[data["_texture"]], size_px)
         faces[face] = gecko_face(face, corners, size_px)
     cube["uv"] = faces
     return cube
@@ -974,7 +1155,8 @@ def shoulder(gun, side):
 
 def build_geo(gun):
     build = BUILDS[gun]
-    size_px = atlas_size(gun)
+    layout = atlas_layout(gun)
+    size_px = layout[0]
     bones = []
     for name, parent, parts, pivot in effective_bones(gun):
         bone = {"name": name, "pivot": geo_point(pivot)}
@@ -986,7 +1168,7 @@ def build_geo(gun):
                 cubes.append(prop_cube(gun, part[1:]))
                 continue
             for element in part_elements(gun, part):
-                cubes.append(element_cube(element, size_px))
+                cubes.append(element_cube(element, layout))
         if cubes:
             bone["cubes"] = cubes
         if name == "gun_body":
@@ -1007,12 +1189,6 @@ def build_geo(gun):
                         "texture_height": size_px[1], "visible_bounds_width": 4, "visible_bounds_height": 3,
                         "visible_bounds_offset": [0, 0.5, 0]},
         "bones": bones}]}
-
-
-def atlas_size(gun):
-    from PIL import Image
-    with Image.open(LIBRARY / "item" / f"{GUNS[gun]['source']}.png") as image:
-        return image.size
 
 
 def animations(gun):
@@ -1049,7 +1225,9 @@ def zero_face(size, face):
     return False
 
 
-def java_faces(element):
+def java_faces(element, layout):
+    """Each face of the owner's element: [(face, [(owner-space corner, (u, v) in 0..16 of the gun's atlas)])]."""
+    size_px, place = layout
     lo = [min(a, b) for a, b in zip(element["from"], element["to"])]
     hi = [max(a, b) for a, b in zip(element["from"], element["to"])]
     out = []
@@ -1060,7 +1238,7 @@ def java_faces(element):
         if zero_face([b - a for a, b in zip(lo, hi)], face):
             continue  # GeckoLib drops these edge-on faces, and they draw nothing in vanilla either
         uv = data.get("uv") or default_uv(face, lo, hi)
-        corners = java_corner_uvs(face, uv, int(data.get("rotation", 0)) % 360)
+        corners = to_atlas(java_corner_uvs(face, uv, int(data.get("rotation", 0)) % 360), place[data["_texture"]], size_px)
         out.append((face, [(tuple((lo, hi)[s][k] for k, s in enumerate(pick)), uv) for pick, uv in corners.items()]))
     return out
 
@@ -1082,7 +1260,8 @@ def check():
         geo = json.loads(geo_path.read_text())
         if geo != build_geo(gun):
             problems.append(f"{gun}: the GeckoLib model is out of date (run python3 tools/guns.py)")
-        size_px = atlas_size(gun)
+        layout = atlas_layout(gun)
+        size_px = layout[0]
         bones = {b["name"]: b for b in geo["minecraft:geometry"][0]["bones"]}
         for name, parent, parts, pivot in effective_bones(gun):
             cubes = []
@@ -1102,7 +1281,7 @@ def check():
                 continue
             for i, (cube, element) in enumerate(zip(cubes, want)):
                 got = bake_cube(cube, size_px)
-                exp = java_faces(element)
+                exp = java_faces(element, layout)
                 if sorted(f for f, _ in got) != sorted(f for f, _ in exp):
                     problems.append(f"{gun}/{name} element {i}: faces {sorted(f for f, _ in got)} != "
                                     f"{sorted(f for f, _ in exp)}")
@@ -1161,15 +1340,36 @@ def check():
                         continue
                     for element in part_elements(gun, part):
                         for face in element.get("faces", {}).values():
-                            if "uv" not in face:
+                            if "uv" not in face or face["_texture"] != own_texture(gun):
                                 continue
-                            u0, v0, u1, v1 = (c * s / 16.0 for c, s in zip(face["uv"], size_px * 2))
+                            u0, v0, u1, v1 = (c * s / 16.0 for c, s in zip(face["uv"], layout[1][own_texture(gun)][2:] * 2))
                             if min(u0, u1) < tu + bw and max(u0, u1) > tu and min(v0, v1) < tv + bh and max(v0, v1) > tv:
                                 problems.append(f"{gun}: the {prop_name} prop's corner overlaps part {part}'s texture")
+    from PIL import Image, ImageChops
+    for gun, spec in GUNS.items():
+        size, place = atlas_layout(gun)
+        used = own_footprint(gun)
+        ow, oh = place[own_texture(gun)][2:]
+        for texture, (x, y, w, h) in place.items():
+            if texture != own_texture(gun) and used[y:min(y + h, oh), x:min(x + w, ow)].any():
+                problems.append(f"{gun}: {texture} is packed over pixels the gun's own texture uses")
+        if size[0] != size[1] or size[0] > 128:
+            problems.append(f"{gun}: its atlas is {size}, not a square of 128 or less")
+        texture = ASSETS / "textures" / "item" / "guns" / f"{gun}.png"
+        atlas = compose_atlas(gun)
+        if not texture.exists():
+            continue  # reported with the model
+        if atlas is None:
+            if texture.read_bytes() != (LIBRARY / "item" / f"{spec['source']}.png").read_bytes():
+                problems.append(f"{gun}: its atlas is not the owner's {spec['source']}.png unchanged")
+        else:
+            with Image.open(texture) as written:
+                if written.size != atlas.size or ImageChops.difference(written.convert("RGBA"), atlas).getbbox():
+                    problems.append(f"{gun}: its atlas is out of date (run python3 tools/guns.py)")
     for kind, att in ATTACHMENTS.items():
         if not any(kind in fits(gun) for gun in GUNS):
             problems.append(f"attachment {kind}: no gun takes it")
-        if kind not in ATTACHMENT_RECIPES or att["texture"] not in ATTACHMENT_TEXTURES:
+        if (kind not in ATTACHMENT_RECIPES and kind not in NETHERITE_UPGRADES) or att["texture"] not in ATTACHMENT_TEXTURES:
             problems.append(f"attachment {kind}: no recipe or no texture")
         source = json.loads((LIBRARY / "models" / "item" / f"{att['model']}.json").read_text())
         if len({v for k, v in source["textures"].items() if k != "particle"}) != 1:
@@ -1292,9 +1492,9 @@ def write_files():
         shutil.copyfile(LIBRARY / "item" / f"{spec['source']}.animation.json", target)
         texture = ASSETS / "textures" / "item" / "guns" / f"{gun}.png"
         texture.parent.mkdir(parents=True, exist_ok=True)
-        if gun in PROPS:
-            with Image.open(LIBRARY / "item" / f"{spec['source']}.png") as image:
-                draw_props(image.convert("RGBA"), gun).save(texture)
+        atlas = compose_atlas(gun)
+        if atlas is not None:
+            atlas.save(texture)
         else:
             shutil.copyfile(LIBRARY / "item" / f"{spec['source']}.png", texture)
     for name, source in ATTACHMENT_TEXTURES.items():
@@ -1325,6 +1525,8 @@ def provenance():
         for _, _, parts, _ in effective_bones(gun):
             paths += [f"models/special/{src}/{part_file(p)}.json" for p in parts if not p.startswith("@")]
         paths.append(f"sounds/{SHOT_SOUNDS[gun]}")
+        # The shared textures its attachments draw on, merged into its atlas (slice 7).
+        paths += [str(texture_file(t).relative_to(LIBRARY)) for t in atlas_layout(gun)[1] if t != own_texture(gun)]
         rows += [(gun, p) for p in dict.fromkeys(paths)]  # a part on two bones (a spare magazine) counts once
     rows += [("shared", f"sounds/{p}") for p in sorted(set(EVENT_SOUNDS.values()))]
     rows += [(kind, f"models/item/{att['model']}.json") for kind, att in ATTACHMENTS.items()]

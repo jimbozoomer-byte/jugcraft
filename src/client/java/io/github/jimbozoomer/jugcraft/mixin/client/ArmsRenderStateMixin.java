@@ -25,6 +25,6 @@ public abstract class ArmsRenderStateMixin {
 			float partialTick, CallbackInfo info) {
 		ArmsMotion.extract(entity, state, partialTick);
 		FlailHeads.extract(entity, state, resolver, partialTick);
-		GunPose.extract(entity, state);
+		GunPose.extract(entity, state, partialTick);
 	}
 }

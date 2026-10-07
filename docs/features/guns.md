@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slice 5) and the guns in use (slice 6)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7) and the guns in use (slice 6)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -6,7 +6,8 @@ Status:
 - **Slice 3** (the lever set: the Longhorn Rifle, Drover Rifle and Coach Gun; [below](#slice-3-the-lever-set)): implemented on `claude/guns-lever` (#253), stacked on slice 2, awaiting review.
 - **Slice 4** (the black powder guns: the Duelling Pistol, Line Musket and Bellmouth, and the Paper Cartridge; [below](#slice-4-the-black-powder-guns)): implemented on `claude/guns-powder` (#255), stacked on slice 3, awaiting review.
 - **Slice 5** (the attachments: silencers, a muzzle brake, an extended barrel, magazines, stocks and grips; [below](#slice-5-the-attachments)): implemented on `claude/guns-attachments` (#256), stacked on slice 4, awaiting review.
-- **Slice 6** (the guns in use: muzzle flash, spent casings, a zoom when aiming and the hold seen from outside; [below](#slice-6-the-guns-in-use)): implemented on `claude/guns-polish`, stacked on slice 5, awaiting review.
+- **Slice 6** (the guns in use: muzzle flash, spent casings, a zoom when aiming and the hold seen from outside; [below](#slice-6-the-guns-in-use)): implemented on `claude/guns-polish` (#259), stacked on slice 5, awaiting review.
+- **Slice 7** (finishing the attachments: bayonets that stab, and the five guns whose parts use shared textures; [below](#slice-7-bayonets-and-the-shared-texture-guns)): implemented on `claude/guns-attachments-2`, stacked on slice 6, awaiting review. Scopes wait for the owner (see there).
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -221,7 +222,7 @@ The silencers and the muzzle brake sit at the muzzle in front of the barrel; the
 | Haymaker | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel | – | – | – |
 | Longhorn Rifle | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel | – | Light Stock, Weighted Stock, Wooden Stock | Light Grip, Vertical Grip |
 
-The Drover Rifle, the Coach Gun and the muzzle-loaders take none yet: the owner drew their attachments on textures shared between guns (`carabine_grips`, `flintlock_stocks`, `musket_bayonets` and others), and a GeckoLib model draws from one texture. Bayonets, the tactical grip and scopes wait for a later slice too.
+The Drover Rifle, the Coach Gun and the muzzle-loaders took none in slice 5: the owner drew their attachments on textures shared between guns (`carabine_grips`, `flintlock_stocks`, `musket_bayonets` and others), and a GeckoLib model draws from one texture. Slice 7 packs those into each gun's atlas and adds the bayonets ([below](#slice-7-bayonets-and-the-shared-texture-guns)); the tactical grip and scopes wait for a later slice.
 
 **Fitting and taking off** (a crafting table, or the 2 × 2 grid):
 - A gun and an attachment it takes, alone in the grid, give the gun with the attachment fitted. The rounds loaded stay. An attachment the gun wore in that slot comes off and stays in the grid where the new one lay.
@@ -304,6 +305,56 @@ It multiplies vanilla's own modifier (sprinting, a speed effect), and the camera
 - The flash's timing comes from the shot, not from the animation, so a remote player's flash shows when their shot reaches you.
 - Cases do not bounce or roll; they stop where they land.
 - The zoom does not follow the field of view effects slider, as the spyglass's does not.
+
+## Slice 7: bayonets and the shared-texture guns
+Slice 7 finishes the attachments the owner modelled for these twelve guns, except the scopes.
+
+**Bayonets** (the grip slot, now called "under-barrel": a gun has a bayonet or a grip, not both):
+
+| Bayonet | Stab | Crafting |
+|---|---|---|
+| Iron Bayonet | 4 | an iron ingot over an iron nugget |
+| Steel Bayonet | 5 | a steel ingot over an iron nugget |
+| Diamond Bayonet | 5 | a diamond over an iron nugget |
+| Netherite Bayonet | 6 | a Diamond Bayonet, a netherite ingot and a netherite upgrade template, at a smithing table |
+
+- The owner's art for each: the item icon, and the blade on each gun that takes one. The owner's fourth bayonet is anthralite, a Scorched Guns metal Jugcraft does not have. Its grey blade and wrapped grip read as steel, so it is the Steel Bayonet (a proposed name).
+- **Which guns:** the Patchwork Carbine, Thunderpipe, Longhorn Rifle, Drover Rifle, Coach Gun, Line Musket and Bellmouth take all four. The pistols, the SMG and the Haymaker have no bayonet parts.
+- **Stabbing:** V (the "Stab with bayonet" key) thrusts the gun forward and back. The server strikes the nearest creature along the look within the player's reach, stopping at blocks:
+  - for the bayonet's damage, as a melee blow, with a sword's push;
+  - at most once every 12 ticks, and not while reloading;
+  - past the same ally, mount and protection checks a bullet uses.
+- **Others see it:** the server tells the clients that see the stabber (`GunActionPayload.STAB`); they thrust the stabber's arms forward.
+- Bayonets change none of the gun's numbers. The owner's animations have no stab, so the thrust is drawn in code: the gun driven 0.35 blocks forward on screen and back over 6 ticks, and the arms 4 pixels forward seen from outside.
+
+**The shared-texture guns:** the owner drew some guns' attachment parts on textures shared between guns. GeckoLib draws a model from one texture, so slice 5 left them out. `tools/guns.py` now builds each gun one atlas:
+- the gun's own texture, plus the shared textures its parts use;
+- packed into room the gun's own texture leaves free: clear blocks that no face's UVs and no prop reach (`atlas_layout()`, `own_footprint()`);
+- a 64 px atlas grows to 128 to make room. Every atlas stays a square of 128 or less, the texture rule for packed textures.
+
+| Gun | Now takes | Its atlas |
+|---|---|---|
+| Drover Rifle | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Light Grip, the bayonets | 128, with `advanced_silencer`, `carabine_grips`, `greaser_smg_barrels` and `makeshift_rifle_bayonets` in its free room |
+| Coach Gun | Light Grip, the bayonets | 128, with `carabine_grips` and `makeshift_rifle_bayonets` |
+| Duelling Pistol | Light, Weighted and Wooden Stocks | 64 grown to 128, with `flintlock_stocks` |
+| Line Musket | the three stocks, Light and Vertical Grips, the bayonets | 64 grown to 128, with `musket_bayonets`, `musket_stocks` and `musket_grips` |
+| Bellmouth | Light and Vertical Grips, the bayonets | 64 grown to 128, with `musket_bayonets` and `musket_grips` |
+
+- Each face's UVs are moved into the atlas from its own texture, and the face check compares them that way. Every attachment part re-bakes face for face as before.
+- A new check holds the written atlas to its parts: the owner's files and the props, placed as the layout says, never over a pixel the gun's own texture uses.
+- The Muzzle Brake's and Extended Barrel's flash comes from their front on the Drover too (slice 6's locators).
+
+**Connections:** iron, steel (Jugcraft's), diamond and netherite, as their tools are; the Netherite Bayonet is an upgrade, as netherite tools are. A bayonet is a choice against a grip: a melee blow against less spread or kick.
+
+**Balance:** a bayonet stab is weaker than a sword of its metal (a sword is 6 to 8), and a stab every 12 ticks. It is a last resort, not a melee weapon.
+
+**Known limits:**
+- **No scopes:**
+  - The owner's scope models (reflex sight, medium and long scopes, laser sight) draw their lenses with reticle and vignette textures (`scguns:effect/...`). Those are not in the library.
+  - Where a scope sits on each gun is not in the library either (Scorched Guns keeps it in gun data).
+  - Scopes need those textures from the owner, or ones drawn here; and a mount point set on each gun.
+- **The tactical grip:** the Drover's and Coach Gun's `tact_grip` parts are not an item yet.
+- **The thrust is code, not an animation:** the owner may want to animate a stab.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
@@ -588,6 +639,70 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
 | flash_1 | `Big Cannons and Mounted Guns/textures/muzzleflash2.png` | `31029be6554ebd9f` |
 | flash_2 | `Big Cannons and Mounted Guns/textures/muzzleflash3.png` | `5c695fc1d9c5b365` |
 | flash_3 | `Big Cannons and Mounted Guns/textures/muzzleflash4.png` | `189ef124242eaa98` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/iron_bayonet.json` | `fd7d5b1b45d681a4` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/anthralite_bayonet.json` | `815aea98eeb13043` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/diamond_bayonet.json` | `46735b82875edf0e` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/netherite_bayonet.json` | `5ffc2005b15bff2e` |
+| thunderpipe | `Guns/models/special/boomstick/iron_bayonet.json` | `dedc0f2f291b357f` |
+| thunderpipe | `Guns/models/special/boomstick/anthralite_bayonet.json` | `58e120d3a0dc3692` |
+| thunderpipe | `Guns/models/special/boomstick/diamond_bayonet.json` | `f093c45484d3a732` |
+| thunderpipe | `Guns/models/special/boomstick/netherite_bayonet.json` | `52793ba001a50581` |
+| longhorn_rifle | `Guns/models/special/marlin/iron_bayonet.json` | `5ea1cf38b1cae83b` |
+| longhorn_rifle | `Guns/models/special/marlin/anthralite_bayonet.json` | `114add26956515e8` |
+| longhorn_rifle | `Guns/models/special/marlin/diamond_bayonet.json` | `ada6f62d7bd00777` |
+| longhorn_rifle | `Guns/models/special/marlin/netherite_bayonet.json` | `6e046c9c441e1c77` |
+| drover_rifle | `Guns/models/special/winnie/silencer.json` | `46a106c68f3b9acc` |
+| drover_rifle | `Guns/models/special/winnie/advanced_silencer.json` | `0ba9ea154fd1c29e` |
+| drover_rifle | `Guns/models/special/winnie/muzzle_brake.json` | `35232221bcd934fd` |
+| drover_rifle | `Guns/models/special/winnie/ext_barrel.json` | `c3102b0d3a24de87` |
+| drover_rifle | `Guns/models/special/winnie/light_grip.json` | `2c40e0b3c5c89703` |
+| drover_rifle | `Guns/models/special/winnie/iron_bayonet.json` | `25131e44a4015957` |
+| drover_rifle | `Guns/models/special/winnie/anthralite_bayonet.json` | `689d50f88cc9bfd1` |
+| drover_rifle | `Guns/models/special/winnie/diamond_bayonet.json` | `267d49add46a2579` |
+| drover_rifle | `Guns/models/special/winnie/netherite_bayonet.json` | `f102098b23e5dff6` |
+| drover_rifle | `Guns/item/advanced_silencer.png` | `f94615d5c4cdd84c` |
+| drover_rifle | `Guns/item/carabine_grips.png` | `e54eb16b4a01aa0b` |
+| drover_rifle | `Guns/item/greaser_smg_barrels.png` | `e912ec7c95188909` |
+| drover_rifle | `Guns/item/makeshift_rifle_bayonets.png` | `dfc93f5032504095` |
+| coach_gun | `Guns/models/special/callwell/light_grip.json` | `1d9cf66979d3b6c6` |
+| coach_gun | `Guns/models/special/callwell/iron_bayonet.json` | `0f47d60920ffe6cd` |
+| coach_gun | `Guns/models/special/callwell/anthralite_bayonet.json` | `87f6acec33f5554b` |
+| coach_gun | `Guns/models/special/callwell/diamond_bayonet.json` | `ad1f37ed70be7c3f` |
+| coach_gun | `Guns/models/special/callwell/netherite_bayonet.json` | `83ba23f2e811940b` |
+| coach_gun | `Guns/item/carabine_grips.png` | `e54eb16b4a01aa0b` |
+| coach_gun | `Guns/item/makeshift_rifle_bayonets.png` | `dfc93f5032504095` |
+| duelling_pistol | `Guns/models/special/flintlock_pistol/light_stock.json` | `024de83c7d6232ed` |
+| duelling_pistol | `Guns/models/special/flintlock_pistol/heavy_stock.json` | `d478328ccbef3984` |
+| duelling_pistol | `Guns/models/special/flintlock_pistol/wooden_stock.json` | `0cf64a73c5e531d2` |
+| duelling_pistol | `Guns/item/flintlock_stocks.png` | `f08f21f3c71aafed` |
+| line_musket | `Guns/models/special/musket/light_stock.json` | `a608540600bd9c78` |
+| line_musket | `Guns/models/special/musket/heavy_stock.json` | `3d715a98ab3195fd` |
+| line_musket | `Guns/models/special/musket/wooden_stock.json` | `cafc11238b17b3d3` |
+| line_musket | `Guns/models/special/musket/light_grip.json` | `eb4cf964a249f4fc` |
+| line_musket | `Guns/models/special/musket/vert_grip.json` | `3a8ebd80047712e9` |
+| line_musket | `Guns/models/special/musket/iron_bayonet.json` | `d723788a1b9f6e99` |
+| line_musket | `Guns/models/special/musket/anthralite_bayonet.json` | `1eaccdbb7a9b5fbd` |
+| line_musket | `Guns/models/special/musket/diamond_bayonet.json` | `291bb6a540371af6` |
+| line_musket | `Guns/models/special/musket/netherite_bayonet.json` | `267a94385517eb04` |
+| line_musket | `Guns/item/musket_bayonets.png` | `0830d15655ef543b` |
+| line_musket | `Guns/item/musket_stocks.png` | `848fb17c2a71ad8d` |
+| line_musket | `Guns/item/musket_grips.png` | `7f451a500ba89baa` |
+| bellmouth | `Guns/models/special/blunderbuss/light_grip.json` | `9b57e017c6ec6be9` |
+| bellmouth | `Guns/models/special/blunderbuss/vert_grip.json` | `1c12cccb8864994d` |
+| bellmouth | `Guns/models/special/blunderbuss/iron_bayonet.json` | `486b32647347a744` |
+| bellmouth | `Guns/models/special/blunderbuss/anthralite_bayonet.json` | `51b6c59e0ab545bb` |
+| bellmouth | `Guns/models/special/blunderbuss/diamond_bayonet.json` | `289974a1f5a20182` |
+| bellmouth | `Guns/models/special/blunderbuss/netherite_bayonet.json` | `b69269d8a63c8f4e` |
+| bellmouth | `Guns/item/musket_bayonets.png` | `0830d15655ef543b` |
+| bellmouth | `Guns/item/musket_grips.png` | `7f451a500ba89baa` |
+| iron_bayonet | `Guns/models/item/iron_bayonet.json` | `6daa8ca0d9223b8e` |
+| steel_bayonet | `Guns/models/item/anthralite_bayonet.json` | `c8e0836f6f6e3098` |
+| diamond_bayonet | `Guns/models/item/diamond_bayonet.json` | `fcc0759915935a9a` |
+| netherite_bayonet | `Guns/models/item/netherite_bayonet.json` | `89e257ea581a1a6e` |
+| iron_bayonet | `Guns/item/iron_bayonet.png` | `b3bc20be7702ac39` |
+| steel_bayonet | `Guns/item/anthralite_bayonet.png` | `a9d69f394988fc4f` |
+| diamond_bayonet | `Guns/item/diamond_bayonet.png` | `2262785d6c0da5d0` |
+| netherite_bayonet | `Guns/item/netherite_bayonet.png` | `f7a49396eac13816` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
@@ -654,6 +769,21 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
   - fired, at least one muzzle flash frame is drawn;
   - fired and reloaded, a casing (or a puff) is thrown if its animation cues one;
   - in third person, each gun is held and fired (screenshots `_third_person` and `_third_person_fired`), and the player is posed holding it; the Longhorn and the Warden Pistol are also shown from behind.
+- **Slice 7, run locally (7 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of every attachment part, the bayonets and the five guns' shared-texture parts included, re-bakes to the owner's through the gun's atlas. The atlases are the owner's files placed as the layout says, over no pixel the gun's own texture uses.
+  - `python3 tools/generate_material_data.py`: the four bayonets' items, models, recipes and names.
+  - `python3 tools/check_mod_data.py`: PASS (1576 material IDs). Its texture rule first failed the atlases at 256 × 128, which led to packing into free room. `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews:** side views of the five guns bare and with each kind of attachment, and of the bayonets on four guns, drawn from the converted models. The bayonet blades are one-sided planes (GeckoLib draws them from both sides).
+- **Slice 7 game tests (written; they run in CI):**
+  - `GunsGameTests` adds:
+    - a Patchwork Carbine's Iron Bayonet strikes a pig two blocks ahead for 4, and cannot stab again at once;
+    - a bare carbine cannot stab;
+    - a bayonet does not reach a pig seven blocks off;
+    - the Drover Rifle, Line Musket, Coach Gun, Duelling Pistol and Bellmouth each take a shared-texture attachment through the crafting recipe;
+    - the Netherite Bayonet's smithing recipe loads;
+    - "Every gun registered" checks the fifteen attachments.
+  - `GunsClientGameTests` adds a third fitted set (Muzzle Brake, Wooden Stock, Iron Bayonet) on every gun that takes attachments (now all twelve), and a Steel Bayonet stab with the V key that hurts the husk.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -662,7 +792,7 @@ Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns 
 ## Rollout and open questions
 - **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
-- **Later slices,** each its own pull request: attachments for the guns whose parts use shared textures (the Drover Rifle, Coach Gun and muzzle-loaders), bayonets, the tactical grip and scopes.
+- **Later slices,** each its own pull request: the tactical grip and scopes (scopes wait for the owner's reticle and vignette textures, or leave to draw them here).
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - off-hand guns;

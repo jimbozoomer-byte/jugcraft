@@ -108,6 +108,20 @@ public class GunItem extends Item implements GeoItem {
 		return stack.getOrDefault(JugcraftGuns.FITTED, List.<String>of()).stream().filter(JugcraftGuns.ATTACHMENTS::containsKey).toList();
 	}
 
+	/** The bayonet fitted to this gun (slice 7), or null. */
+	public static @Nullable GunAttachment bayonet(ItemStack stack) {
+		if (!(stack.getItem() instanceof GunItem)) {
+			return null;
+		}
+		for (String name : attachments(stack)) {
+			GunAttachment attachment = JugcraftGuns.ATTACHMENTS.get(name);
+			if (attachment.bayonet()) {
+				return attachment;
+			}
+		}
+		return null;
+	}
+
 	/** Whether this gun takes this attachment. */
 	public static boolean takes(ItemStack stack, String attachment) {
 		return stack.getItem() instanceof GunItem gun && JugcraftGuns.ACCEPTS.getOrDefault(gun.name, List.of()).contains(attachment);

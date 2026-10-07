@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
@@ -26,6 +27,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
@@ -50,6 +52,8 @@ import net.minecraft.world.phys.Vec3;
  * or creature in range. Creatures the shooter may not strike (allies, their own mount, marker stands, or anything
  * other code refuses through AttackEntityCallback, such as the town's protection) are passed through. A shotgun's
  * pellets on one creature land as one hit.</li>
+ * <li>A gun with a bayonet fitted stabs (slice 7, {@link #stab}): a melee blow within the player's reach, at most once
+ * every {@link #STAB_TICKS}.</li>
  * </ul>
  */
 public final class GunShots {
@@ -57,9 +61,15 @@ public final class GunShots {
 	static final double BURST = 2.0;
 	/** How far a bullet's box test reaches past a creature's hitbox (blocks). */
 	private static final double HIT_MARGIN = 0.15;
+	/** Ticks between two bayonet stabs (slice 7). */
+	public static final int STAB_TICKS = 12;
+	/** How hard a stab pushes its foe back (a sword's knockback is 0.4, and more for a sprinting strike). */
+	private static final float STAB_KNOCKBACK = 0.4F;
 
 	private static final Map<UUID, Trigger> TRIGGERS = new HashMap<>();
 	private static final Map<UUID, Reload> RELOADS = new LinkedHashMap<>();
+	/** Each player's last stab (game time). */
+	private static final Map<UUID, Long> STABS = new HashMap<>();
 
 	private GunShots() {
 	}
@@ -67,9 +77,11 @@ public final class GunShots {
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(GunShotPayload.TYPE, GunShotPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(GunReloadPayload.TYPE, GunReloadPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(GunStabPayload.TYPE, GunStabPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(GunActionPayload.TYPE, GunActionPayload.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(GunShotPayload.TYPE, (payload, context) -> fire(context.player()));
 		ServerPlayNetworking.registerGlobalReceiver(GunReloadPayload.TYPE, (payload, context) -> reload(context.player()));
+		ServerPlayNetworking.registerGlobalReceiver(GunStabPayload.TYPE, (payload, context) -> stab(context.player()));
 		ServerTickEvents.END_SERVER_TICK.register(GunShots::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.getPlayer()));
 	}
@@ -115,6 +127,55 @@ public final class GunShots {
 		level.playSound(player, eye.x, eye.y, eye.z, JugcraftGuns.sound("guns." + gun.name() + ".fire"), SoundSource.PLAYERS,
 				GunItem.volume(stack), 0.95F + player.getRandom().nextFloat() * 0.1F);
 		announce(player, aiming ? GunActionPayload.AIM_SHOOT : GunActionPayload.SHOOT, 0);
+		return true;
+	}
+
+	/**
+	 * Stabs with the bayonet on the gun in the player's main hand (slice 7); whether it struck. A stab needs a bayonet
+	 * fitted, no reload under way and {@link #STAB_TICKS} since the last; it reaches as far as the player's own reach,
+	 * stops at a block, and strikes the nearest creature along the look that the player may strike, for the bayonet's
+	 * damage as a melee blow, with a sword's push.
+	 */
+	public static boolean stab(ServerPlayer player) {
+		ItemStack stack = player.getMainHandItem();
+		GunAttachment bayonet = GunItem.bayonet(stack);
+		if (bayonet == null || !player.isAlive() || player.isSpectator() || RELOADS.containsKey(player.getUUID())) {
+			return false;
+		}
+		ServerLevel level = (ServerLevel) player.level();
+		long now = level.getGameTime();
+		Long last = STABS.get(player.getUUID());
+		if (last != null && now >= last && now - last < STAB_TICKS) {
+			return false;
+		}
+		STABS.put(player.getUUID(), now);
+		Vec3 eye = player.getEyePosition();
+		Vec3 end = eye.add(player.getLookAngle().scale(player.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE)));
+		BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		if (block.getType() != HitResult.Type.MISS) {
+			end = block.getLocation();
+		}
+		LivingEntity foe = null;
+		double nearest = Double.MAX_VALUE;
+		for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(1.0),
+				candidate -> target(player, candidate))) {
+			var clip = candidate.getBoundingBox().inflate(HIT_MARGIN).clip(eye, end);
+			if (clip.isPresent() && clip.get().distanceToSqr(eye) < nearest) {
+				nearest = clip.get().distanceToSqr(eye);
+				foe = candidate;
+			}
+		}
+		// The stabber's client plays its own stab; everyone else sees and hears it here.
+		announce(player, GunActionPayload.STAB, 0);
+		level.playSound(player, eye.x, eye.y, eye.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.3F);
+		if (foe == null || !allowed(player, level, foe)) {
+			return false;
+		}
+		DamageSource source = player.damageSources().playerAttack(player);
+		if (foe.hurtServer(level, source, bayonet.stab())) {
+			foe.knockback(STAB_KNOCKBACK, player.getX() - foe.getX(), player.getZ() - foe.getZ(), source, bayonet.stab());
+		}
+		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, 1.0F);
 		return true;
 	}
 
@@ -313,6 +374,7 @@ public final class GunShots {
 	private static void forget(ServerPlayer player) {
 		TRIGGERS.remove(player.getUUID());
 		RELOADS.remove(player.getUUID());
+		STABS.remove(player.getUUID());
 	}
 
 	private static final class Trigger {

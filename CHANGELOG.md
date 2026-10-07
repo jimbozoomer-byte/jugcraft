@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 7 (bayonets and the shared-texture guns)
+- **Four bayonets,** each the owner's art: **Iron**, **Steel** (the owner's anthralite one), **Diamond** and **Netherite** (a smithing upgrade). Under the barrel, in place of a grip. **V stabs** for 4 to 6 damage within reach, every 12 ticks; the server deals the blow. Seven guns take them.
+- **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.
+- Scopes wait for the owner's reticle textures. Record: [guns.md, slice 7](docs/features/guns.md#slice-7-bayonets-and-the-shared-texture-guns).
+
 ### Unmerged: Guns, slice 6 (the guns in use)
 - **Muzzle flash:** each shot shows one of the owner's flash frames at the muzzle (or at a fitted muzzle brake or extended barrel), seen by everyone near; a silencer hides it, and black powder also blows a white cloud.
 - **Spent casings:** where the owner's animations eject a case, it flies out to the gun's side, tumbles and lands: copper for Light Rounds, brass for Rifle Rounds, red for Buckshot Shells. A muzzle-loader's lock puffs smoke instead.

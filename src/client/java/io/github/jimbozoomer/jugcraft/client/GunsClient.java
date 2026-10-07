@@ -15,6 +15,7 @@ import io.github.jimbozoomer.jugcraft.guns.GunHooks;
 import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunReloadPayload;
 import io.github.jimbozoomer.jugcraft.guns.GunShotPayload;
+import io.github.jimbozoomer.jugcraft.guns.GunStabPayload;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
 import io.github.jimbozoomer.jugcraft.guns.GunSpec;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
@@ -31,6 +32,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -51,6 +53,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Switching to a gun plays its draw, and it cannot fire until the draw is done.</li>
  * <li>Other players' guns are animated from the server's {@link GunActionPayload}.</li>
  * <li>Every shot, the player's own and others', shows its muzzle flash and black powder's smoke ({@link GunEffects}).</li>
+ * <li>V stabs with a fitted bayonet (slice 7): the thrust and its swish at once, the blow from the server.</li>
  * </ul>
  */
 public final class GunsClient {
@@ -60,6 +63,8 @@ public final class GunsClient {
 	private static final int IN_FLIGHT_TICKS = 10;
 	private static KeyMapping reloadKey;
 	private static KeyMapping inspectKey;
+	private static KeyMapping stabKey;
+	private static long nextStab;
 	private static long nextShot;
 	private static long readyAt;
 	private static long reloadingUntil;
@@ -89,6 +94,7 @@ public final class GunsClient {
 		});
 		reloadKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.reload", InputConstants.KEY_G, PartyClient.CATEGORY));
 		inspectKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.inspect", InputConstants.KEY_H, PartyClient.CATEGORY));
+		stabKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.stab", InputConstants.KEY_V, PartyClient.CATEGORY));
 		ClientPreAttackCallback.EVENT.register(GunsClient::attack);
 		ClientTickEvents.END_CLIENT_TICK.register(GunsClient::tick);
 		ClientPlayNetworking.registerGlobalReceiver(GunActionPayload.TYPE, (payload, context) -> receive(payload));
@@ -104,6 +110,11 @@ public final class GunsClient {
 	/** The inspect key (for the client game tests). */
 	public static KeyMapping inspectKey() {
 		return inspectKey;
+	}
+
+	/** The bayonet stab key (for the client game tests). */
+	public static KeyMapping stabKey() {
+		return stabKey;
 	}
 
 	/** The attack button, with a gun in the main hand, is the trigger. */
@@ -184,6 +195,9 @@ public final class GunsClient {
 			while (inspectKey.consumeClick()) {
 				// nothing to inspect
 			}
+			while (stabKey.consumeClick()) {
+				// nothing to stab with
+			}
 			return;
 		}
 		if (now - lastShot > IN_FLIGHT_TICKS) {
@@ -197,6 +211,21 @@ public final class GunsClient {
 				GunAnimations.trigger(player, "inspect");
 			}
 		}
+		while (stabKey.consumeClick()) {
+			stab(client, player, now);
+		}
+	}
+
+	/** Stabs with the gun's bayonet, if it has one: asks the server, and plays the thrust and its swish here at once. */
+	private static void stab(Minecraft client, LocalPlayer player, long now) {
+		if (GunItem.bayonet(player.getMainHandItem()) == null || now < nextStab || now < readyAt || now < reloadingUntil) {
+			return;
+		}
+		ClientPlayNetworking.send(GunStabPayload.INSTANCE);
+		nextStab = now + GunShots.STAB_TICKS;
+		GunEffects.stabbed(player);
+		player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS,
+				0.8F, 1.3F, false);
 	}
 
 	/** Asks for a reload, if there is room and something to load, and plays it here. */
@@ -253,6 +282,7 @@ public final class GunsClient {
 				GunEffects.shot(holder);
 			}
 			case GunActionPayload.RELOAD -> GunAnimations.trigger(holder, GunAnimations.reloadName(gun.spec(), payload.rounds()));
+			case GunActionPayload.STAB -> GunEffects.stabbed(holder);
 			default -> GunAnimations.trigger(holder, "idle");
 		}
 	}

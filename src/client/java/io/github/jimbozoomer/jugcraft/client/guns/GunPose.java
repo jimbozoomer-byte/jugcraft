@@ -19,12 +19,16 @@ import net.minecraft.world.entity.player.Player;
  * <p>
  * The arms motion hooks call this: {@link #extract} as a player's render state is filled (ArmsRenderStateMixin) and
  * {@link #apply} after vanilla poses the model (ArmsHumanoidModelMixin); armor posed from the same state follows. The
- * pose is one of four shared values, so nothing is allocated per frame. Players only, and not while swimming, gliding
- * or asleep.
+ * pose is one of four shared values, so nothing is allocated per frame (a bayonet's thrust, slice 7, only while it
+ * lasts). Players only, and not while swimming, gliding or asleep.
  */
 public final class GunPose {
 	/** The hold on a player's render state: null when they hold no gun. */
 	public static final RenderStateDataKey<Hold> HOLD = RenderStateDataKey.create(() -> "jugcraft:gun_hold");
+	/** How far into a bayonet stab's thrust they are (slice 7): null at rest. */
+	public static final RenderStateDataKey<Float> THRUST = RenderStateDataKey.create(() -> "jugcraft:gun_thrust");
+	/** How far the arms drive forward at full thrust (model pixels). */
+	private static final float THRUST_REACH = 4.0F;
 	/** Vanilla raises a crouching player's arms this much with the crouch; the raised arms keep it. */
 	private static final float CROUCH = 0.4F;
 	/** Frames posed so far (for the client game tests). */
@@ -33,8 +37,8 @@ public final class GunPose {
 	private GunPose() {
 	}
 
-	/** The gun's hold for this frame, kept on the player's render state. */
-	public static void extract(LivingEntity entity, ArmedEntityRenderState state) {
+	/** The gun's hold for this frame, and any bayonet thrust, kept on the player's render state. */
+	public static void extract(LivingEntity entity, ArmedEntityRenderState state, float partialTick) {
 		Hold hold = null;
 		if (entity instanceof Player && entity.getMainHandItem().getItem() instanceof GunItem gun && !entity.isVisuallySwimming()
 				&& !entity.isFallFlying() && !entity.isSleeping()) {
@@ -45,6 +49,10 @@ public final class GunPose {
 		}
 		if (state.getData(HOLD) != hold) {
 			state.setData(HOLD, hold);
+		}
+		float thrust = hold == null ? 0.0F : GunEffects.thrust(entity.getId(), entity.level().getGameTime(), partialTick);
+		if (thrust > 0.0F || state.getData(THRUST) != null) {
+			state.setData(THRUST, thrust > 0.0F ? thrust : null);
 		}
 	}
 
@@ -69,6 +77,14 @@ public final class GunPose {
 			other.xRot = -1.5F + head.xRot + crouch;
 			other.yRot = head.yRot + 0.6F * side;
 			other.zRot = 0.0F;
+		}
+		Float thrust = state.getData(THRUST);
+		if (thrust != null) {
+			// A bayonet stab: the arms drive the gun forward and back.
+			main.z -= THRUST_REACH * thrust;
+			if (hold.twoHanded()) {
+				other.z -= THRUST_REACH * thrust;
+			}
 		}
 	}
 

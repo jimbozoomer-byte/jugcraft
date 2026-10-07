@@ -22,7 +22,9 @@ import net.minecraft.world.phys.Vec3;
  * <li>the spent casing the owner's animations eject at their "eject_casing" cue ({@link #eject}): the round's
  * {@link JugcraftGuns#CASINGS} particle, thrown out to the gun's right. A paper cartridge leaves no case, so a
  * muzzle-loader's cue puffs a little smoke from its lock instead;</li>
- * <li>black powder's white cloud in front of the muzzle with each shot.</li>
+ * <li>black powder's white cloud in front of the muzzle with each shot;</li>
+ * <li>a bayonet's thrust (slice 7): the gun driven forward and back, in the stabber's hands and, seen from outside,
+ * with their arms ({@link #thrust}).</li>
  * </ul>
  */
 public final class GunEffects {
@@ -35,6 +37,10 @@ public final class GunEffects {
 	private static final long FORGET_TICKS = 20;
 	/** Each shooter's last shot: entity id to game time. Pruned once it holds more than a few. */
 	private static final Map<Integer, Long> SHOTS = new HashMap<>();
+	/** Ticks a bayonet thrust takes, out and back (slice 7). */
+	static final float THRUST_TICKS = 6.0F;
+	/** Each stabber's last stab, the same way. */
+	private static final Map<Integer, Long> STABS = new HashMap<>();
 	/** Flashes drawn and casings (or puffs) thrown, counted for the client game tests. */
 	private static long flashes;
 	private static long ejected;
@@ -61,6 +67,25 @@ public final class GunEffects {
 						look.z * 0.04 + random.nextGaussian() * 0.01);
 			}
 		}
+	}
+
+	/** This entity stabbed with its gun's bayonet, now (slice 7). */
+	public static void stabbed(LivingEntity stabber) {
+		long now = stabber.level().getGameTime();
+		if (STABS.size() > 32) {
+			STABS.values().removeIf(time -> now - time > FORGET_TICKS || time > now);
+		}
+		STABS.put(stabber.getId(), now);
+	}
+
+	/** How far into its thrust this entity's bayonet is: 0 at rest, 1 at full reach, out and back over THRUST_TICKS. */
+	public static float thrust(int entityId, long gameTime, float partialTick) {
+		Long stab = STABS.get(entityId);
+		if (stab == null || stab > gameTime) {
+			return 0.0F;
+		}
+		float age = gameTime - stab + partialTick;
+		return age < THRUST_TICKS ? (float) Math.sin(Math.PI * age / THRUST_TICKS) : 0.0F;
 	}
 
 	/** Ticks since this entity's last shot, if its flash still shows; otherwise -1. */

@@ -36,8 +36,9 @@ import net.minecraft.world.phys.AABB;
  * shell-at-a-time reload part way; each gun that takes attachments held with two sets of them fitted (slice 5), the
  * client seeing a fitted magazine's capacity; each gun held in third person and shown in the inventory with the
  * attachments. Slice 6: each gun narrows the view aimed, shows a muzzle flash fired and throws the spent casings its
- * animations cue; in third person the player is posed holding it, and fires it. Screenshots jugcraft_guns_* (CI job
- * {@code client}).
+ * animations cue; in third person the player is posed holding it, and fires it. Slice 7: a third set of attachments
+ * with a bayonet (and the guns whose parts use shared textures), and a stab with the stab key that hurts the husk.
+ * Screenshots jugcraft_guns_* (CI job {@code client}).
  */
 public class GunsClientGameTests implements FabricClientGameTest {
 	@Override
@@ -155,7 +156,8 @@ public class GunsClientGameTests implements FabricClientGameTest {
 
 			// Attachments: each gun that takes any, with one of each slot it has from two sets, held and aimed.
 			List<List<String>> sets = List.of(List.of("silencer", "extended_magazine", "light_stock", "light_grip"),
-					List.of("extended_barrel", "speed_magazine", "weighted_stock", "vertical_grip"));
+					List.of("extended_barrel", "speed_magazine", "weighted_stock", "vertical_grip"),
+					List.of("muzzle_brake", "wooden_stock", "iron_bayonet"));
 			for (String gun : JugcraftGuns.ACCEPTS.keySet()) {
 				for (int set = 0; set < sets.size(); set++) {
 					List<String> fitted = sets.get(set).stream().filter(JugcraftGuns.ACCEPTS.get(gun)::contains).toList();
@@ -170,6 +172,22 @@ public class GunsClientGameTests implements FabricClientGameTest {
 					context.waitTicks(5);
 				}
 			}
+			// Slice 7: the stab key stabs the husk with a Steel Bayonet from two blocks off; the server deals the blow.
+			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 10", x + 0.5, y, z - 4.0));
+			server.runCommand("item replace entity @p weapon.mainhand with jugcraft:patchwork_carbine[jugcraft:attachments=%s]"
+					.formatted(snbt(List.of("steel_bayonet"))));
+			context.waitTicks(20);
+			float unstabbed = health(server, x, y, z);
+			context.getInput().pressKey(options -> GunsClient.stabKey());
+			context.takeScreenshot("jugcraft_guns_bayonet_stab");
+			context.waitTicks(5);
+			float stabbed = health(server, x, y, z);
+			Jugcraft.LOGGER.info("[guns] a Steel Bayonet stab: husk health {} -> {}", unstabbed, stabbed);
+			if (!(stabbed < unstabbed)) {
+				throw new AssertionError("The Steel Bayonet's stab did not hurt the husk: health " + unstabbed + " -> " + stabbed);
+			}
+			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
+
 			server.runCommand("item replace entity @p weapon.mainhand with jugcraft:rust_midge[jugcraft:attachments=[\"extended_magazine\"]]");
 			context.waitTicks(10);
 			int seen = context.computeOnClient(client -> GunItem.spec(client.player.getMainHandItem()).capacity());

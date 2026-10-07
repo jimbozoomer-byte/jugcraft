@@ -1395,7 +1395,8 @@ def check_guns():
             err(f"JugcraftGuns.SPECS differs from tools/guns.py for {gun}: expected {line}")
     for kind, att in guns.ATTACHMENTS.items():
         effects = ", ".join(f"{float(att['effects'].get(e, 1.0))}F" for e in guns.EFFECTS)
-        line = f'ATTACHMENTS.put("{kind}", new GunAttachment("{att["slot"]}", {str(att["replaces"]).lower()}, {effects}));'
+        line = (f'ATTACHMENTS.put("{kind}", new GunAttachment("{att["slot"]}", {str(att["replaces"]).lower()}, {effects}, '
+                f'{float(att.get("stab", 0.0))}F));')
         if line not in java:
             err(f"JugcraftGuns.ATTACHMENTS differs from tools/guns.py for {kind}: expected {line}")
     accepts = {gun: re.findall(r'"([a-z_]+)"', listed) for gun, listed in re.findall(r'ACCEPTS\.put\("([a-z_]+)", List\.of\(([^)]*)\)\)', java)}
@@ -1430,7 +1431,7 @@ def check_guns():
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in [f"key.{MOD}.reload", f"key.{MOD}.inspect", f"hud.{MOD}.guns.ammo", f"hud.{MOD}.guns.reloading",
                 f"message.{MOD}.guns.no_ammo", f"death.attack.{MOD}.bullet", f"tooltip.{MOD}.guns.fits",
-                f"tooltip.{MOD}.guns.fitting", f"tooltip.{MOD}.guns.fitted"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
+                f"tooltip.{MOD}.guns.fitting", f"tooltip.{MOD}.guns.fitted", f"tooltip.{MOD}.guns.stab", f"key.{MOD}.stab"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
                 f"tooltip.{MOD}.guns.slot.{slot}" for slot in guns.SLOTS] + [f"tooltip.{MOD}.guns.effect.{e}" for e in guns.EFFECTS]:
         if key not in lang:
             err(f"Missing name {key}")

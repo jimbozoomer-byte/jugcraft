@@ -59,7 +59,7 @@ public class GunsGameTests {
 		});
 		helper.assertTrue(JugcraftGuns.GUNS.size() == 12 && JugcraftGuns.ROUNDS.size() == 4, "Not twelve guns and four rounds");
 		helper.assertTrue(JugcraftGuns.ATTACHMENT_ITEMS.keySet().equals(JugcraftGuns.ATTACHMENTS.keySet())
-				&& JugcraftGuns.ATTACHMENTS.size() == 11, "Not eleven attachments, each with its item");
+				&& JugcraftGuns.ATTACHMENTS.size() == 15, "Not fifteen attachments, each with its item");
 		JugcraftGuns.ACCEPTS.forEach((gun, takes) -> helper.assertTrue(JugcraftGuns.GUNS.containsKey(gun)
 				&& JugcraftGuns.ATTACHMENTS.keySet().containsAll(takes), gun + " takes an unknown attachment"));
 		helper.succeed();
@@ -494,6 +494,54 @@ public class GunsGameTests {
 		float expected = JugcraftGuns.SPECS.get("rust_midge").damage() * 0.95F;
 		helper.assertTrue(Math.abs(200.0F - pig.getHealth() - expected) < 1.0E-3F,
 				"The silenced shot took " + (200.0F - pig.getHealth()) + ", not " + expected);
+		helper.succeed();
+	}
+
+	/**
+	 * Slice 7: a bayonet stabs. A Patchwork Carbine with an Iron Bayonet strikes a pig two blocks ahead for the bayonet's
+	 * damage, and cannot stab again until its time has passed; a bare carbine cannot stab, and the bayonet does not reach
+	 * a pig seven blocks off.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 40)
+	public void bayonetStabsWithinReach(GameTestHelper helper) {
+		floor(helper);
+		Mob near = pig(helper, new BlockPos(1, 2, 3));
+		near.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0);
+		near.setHealth(200.0F);
+		ServerPlayer bare = shooter(helper, "patchwork_carbine", 10, near, GameType.SURVIVAL);
+		helper.assertFalse(GunShots.stab(bare), "A carbine with no bayonet stabbed");
+		helper.assertTrue(near.getHealth() == 200.0F, "A carbine with no bayonet hurt the pig");
+		GunItem.fit(bare.getMainHandItem(), "iron_bayonet");
+		helper.assertTrue(GunShots.stab(bare), "The carbine's Iron Bayonet did not strike the pig two blocks ahead");
+		float stab = JugcraftGuns.ATTACHMENTS.get("iron_bayonet").stab();
+		helper.assertTrue(Math.abs(200.0F - near.getHealth() - stab) < 1.0E-3F,
+				"The stab took " + (200.0F - near.getHealth()) + ", not " + stab);
+		helper.assertFalse(GunShots.stab(bare), "The bayonet stabbed again at once");
+		helper.runAfterDelay(GunShots.STAB_TICKS + 1, () -> {
+			Mob far = pig(helper, new BlockPos(1, 2, 8));
+			ServerPlayer reaching = shooter(helper, "patchwork_carbine", 10, far, GameType.SURVIVAL);
+			GunItem.fit(reaching.getMainHandItem(), "iron_bayonet");
+			float health = far.getHealth();
+			helper.assertFalse(GunShots.stab(reaching), "The bayonet reached a pig seven blocks off");
+			helper.assertTrue(far.getHealth() == health, "The bayonet hurt a pig seven blocks off");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Slice 7: the guns whose attachment parts the owner drew on shared textures take them now. The Drover Rifle takes a
+	 * Silencer, the Line Musket a Wooden Stock and the Coach Gun a Steel Bayonet; the Netherite Bayonet is a smithing
+	 * upgrade, and its recipe loads.
+	 */
+	@GameTest
+	public void sharedTextureGunsTakeTheirAttachments(GameTestHelper helper) {
+		for (String[] pair : new String[][] {{"drover_rifle", "silencer"}, {"line_musket", "wooden_stock"}, {"coach_gun", "steel_bayonet"},
+				{"duelling_pistol", "light_stock"}, {"bellmouth", "vertical_grip"}}) {
+			Crafted fitted = craft(helper, new ItemStack(JugcraftGuns.GUNS.get(pair[0])), attachment(pair[1]));
+			helper.assertTrue(GunItem.attachments(fitted.result()).equals(List.of(pair[1])), "The " + pair[0] + " did not take a " + pair[1]);
+		}
+		helper.assertTrue(helper.getLevel().recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id("netherite_bayonet")))
+				.isPresent(), "The Netherite Bayonet's smithing recipe does not load");
 		helper.succeed();
 	}
 
