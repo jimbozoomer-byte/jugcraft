@@ -567,149 +567,156 @@
             "Masterwork: Forge a labrys, battleblade, war fork, kama or war pick.",
             "Weapon Art: Forge a twinblade, nodachi, earthbreaker, katar, moonblade or kusarigama.",
             "War Kit: Forge a katana, brazier mace, longbow, arbalest, heater shield or tower shield.",
-            "Deep Breath: Make scuba gear and breathe under water on oxygen."
+            "Let Fly: Forge a javelin, francisca, chakram or harpoon."
           ]
         },
         {
           "title": "Milestones (8)",
-          "icon": "jugcraft:free_runners",
+          "icon": "jugcraft:scuba_mask",
           "text": [
+            "Deep Breath: Make scuba gear and breathe under water on oxygen.",
             "Light on Your Feet: Make free runners and never take fall damage.",
             "Charged Up: Make a power katana or power bow.",
             "Lego My Ego: Mould coloured plastic blocks.",
-            "Steel Samurai: Build a piece of the powered exosuit.",
-            "Masterless: Repaint your exosuit or katana in the Ronin livery."
+            "Steel Samurai: Build a piece of the powered exosuit."
           ]
         },
         {
           "title": "Milestones (9)",
-          "icon": "jugcraft:crude_oil_bucket",
+          "icon": "jugcraft:ronin_exosuit_helmet",
           "text": [
+            "Masterless: Repaint your exosuit or katana in the Ronin livery.",
             "Black Gold: Fill a bucket with crude oil.",
             "Nodding Donkey: Build a pumpjack over an oil reservoir.",
             "Fractional Thinking: Build a distillation tower.",
-            "Tight Spot: Build a fracking rig for shale oil.",
-            "Diesel Power: Build a diesel generator."
+            "Tight Spot: Build a fracking rig for shale oil."
           ]
         },
         {
           "title": "Milestones (10)",
-          "icon": "jugcraft:gas_turbine",
+          "icon": "jugcraft:diesel_generator",
           "text": [
+            "Diesel Power: Build a diesel generator.",
             "Spool Up: Build a gas turbine.",
             "Top Shelf: Make premium diesel or premium gasoline in the hydrotreater.",
             "Waste Not: Build a heat recovery unit to make power from a generator's exhaust.",
-            "Eight Cylinders: Build a diesel engine.",
-            "Fantastic Plastic: Press a plastic sheet."
+            "Eight Cylinders: Build a diesel engine."
           ]
         },
         {
           "title": "Milestones (11)",
-          "icon": "jugcraft:rubber",
+          "icon": "jugcraft:plastic_sheet",
           "text": [
+            "Fantastic Plastic: Press a plastic sheet.",
             "Bouncing Back: Make synthetic rubber.",
             "Vinyl Revival: Make PVC resin from chlorine.",
             "Squeaky Clean: Boil soap from lye.",
-            "Light Speed: Draw borosilicate glass into optical fibre.",
-            "Pin Pulled: Make a grenade."
+            "Light Speed: Draw borosilicate glass into optical fibre."
           ]
         },
         {
           "title": "Milestones (12)",
-          "icon": "jugcraft:flow_battery",
+          "icon": "jugcraft:grenade",
           "text": [
+            "Pin Pulled: Make a grenade.",
             "Going with the Flow: Build a flow battery.",
             "Hit the Road: Lay asphalt, and walk faster on it.",
             "Split Decision: Build an electrolytic cell.",
-            "Oil of Vitriol: Make sulfuric acid.",
-            "Green Revolution: Make fertilizer."
+            "Oil of Vitriol: Make sulfuric acid."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:bioethanol_bucket",
+          "icon": "jugcraft:fertilizer",
           "text": [
+            "Green Revolution: Make fertilizer.",
             "Moonshine: Ferment crops into bioethanol.",
             "The Bayer Way: Digest bauxite into alumina.",
             "Clean Burn: Build a hydrogen fuel cell.",
-            "Thin Air: Build an air separation unit.",
-            "Reel Me In: Make a pneumatic grapple."
+            "Thin Air: Build an air separation unit."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:gas_mask",
+          "icon": "jugcraft:pneumatic_grapple",
           "text": [
+            "Reel Me In: Make a pneumatic grapple.",
             "Filtered: Make a gas mask.",
             "Chemical Arsenal: Make a chlorine, smoke or thermite grenade or a flashbang.",
             "Expanding Foam: Make a foam sprayer.",
-            "Bunker Down: Cast blast-proof concrete, as blast-proof as obsidian.",
-            "Field Medic: Make a first aid kit in the chemical reactor."
+            "Bunker Down: Cast blast-proof concrete, as blast-proof as obsidian."
           ]
         },
         {
           "title": "Milestones (15)",
-          "icon": "jugcraft:synthesis_converter",
+          "icon": "jugcraft:first_aid_kit",
           "text": [
+            "Field Medic: Make a first aid kit in the chemical reactor.",
             "Bread from Air: Build a synthesis converter, to make ammonia from air.",
             "Aqua Fortis: Make nitric acid.",
             "Kroll Call: Chlorinate titanium and melt the sponge.",
-            "Power Wall: Build a lithium battery bank.",
-            "Strong Attraction: Make a neodymium magnet."
+            "Power Wall: Build a lithium battery bank."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:magnet_dynamo",
+          "icon": "jugcraft:neodymium_magnet",
           "text": [
+            "Strong Attraction: Make a neodymium magnet.",
             "Lossless (Almost): Build a magnet dynamo or magnet motor.",
             "Pulling Strings: Pull a silicon boule in the arc furnace.",
             "Etched in Light: Etch microchips in the lithography station.",
-            "Central Processing: Assemble a processor.",
-            "Hello, World: Build a network terminal."
+            "Central Processing: Assemble a processor."
           ]
         },
         {
           "title": "Milestones (17)",
-          "icon": "jugcraft:logic_controller",
+          "icon": "jugcraft:network_terminal",
           "text": [
+            "Hello, World: Build a network terminal.",
             "In Control: Build a logic controller.",
             "Mission Control: Build control monitor panels.",
             "Under Pressure: Build a gas holder.",
-            "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter."
+            "Shut-Off Valve: Make a fluid valve."
           ]
         },
         {
           "title": "Milestones (18)",
-          "icon": "jugcraft:advanced_solar_panel",
+          "icon": "jugcraft:fluid_filter",
           "text": [
+            "Strained Relations: Make a fluid filter.",
             "Here Comes the Sun: Build an advanced solar panel.",
             "Full of It: Make a tank gauge.",
             "Concentrate: Build a solar receiver for a heliostat field.",
-            "Spool Up: Make a turbocharger for the advanced engine.",
-            "Keep It Spinning: Build a flywheel."
+            "Spool Up: Make a turbocharger for the advanced engine."
           ]
         },
         {
           "title": "Milestones (19)",
-          "icon": "jugcraft:advanced_engine",
+          "icon": "jugcraft:flywheel",
           "text": [
+            "Keep It Spinning: Build a flywheel.",
             "Four on the Floor: Build an advanced combustion engine.",
             "King Cotton: Grow cotton.",
             "Make It Rain: Build a sprinkler.",
-            "Silver Lining: Build an electroplating bath.",
-            "Ice Cold: Build an ammonia chiller."
+            "Silver Lining: Build an electroplating bath."
           ]
         },
         {
           "title": "Milestones (20)",
-          "icon": "jugcraft:cryogenic_liquefier",
+          "icon": "jugcraft:ammonia_chiller",
           "text": [
+            "Ice Cold: Build an ammonia chiller.",
             "Minus 183: Build a cryogenic liquefier.",
             "Rocket Science: Build a rocket workshop.",
             "Eye in the Sky: Assemble a survey rocket.",
-            "Soil Optional: Build a hydroponic bay.",
+            "Soil Optional: Build a hydroponic bay."
+          ]
+        },
+        {
+          "title": "Milestones (21)",
+          "icon": "jugcraft:crop_harvester",
+          "text": [
             "Reaping What You Sow: Build a crop harvester."
           ]
         }
@@ -3042,6 +3049,30 @@
               "jugcraft:steel_ingot"
             ],
             "result": "jugcraft:steel_tower_shield",
+            "count": 1
+          }
+        },
+        {
+          "title": "Arms: Thrown Arms",
+          "icon": "jugcraft:steel_javelin",
+          "text": [
+            "A javelin, francisca, chakram or harpoon fights in the hand like any arm. Hold use to wind it back and let go to throw it, as a trident is thrown; a steel javelin's throw hits for 8, more with Sharpness and the like. It comes down where it struck, as itself, to be picked up again.",
+            "Javelin: flies far and straight. Francisca: tumbles end over end and knocks a raised shield down for 3 seconds.",
+            "Chakram: flies flat, cuts every foe on its way out (up to 12 blocks) and back, and returns to your hand. Harpoon: keeps its speed underwater and hauls what it strikes towards you."
+          ],
+          "craft": {
+            "grid": [
+              null,
+              null,
+              "jugcraft:steel_ingot",
+              null,
+              "minecraft:stick",
+              null,
+              "minecraft:stick",
+              "minecraft:iron_nugget",
+              null
+            ],
+            "result": "jugcraft:steel_javelin",
             "count": 1
           }
         },

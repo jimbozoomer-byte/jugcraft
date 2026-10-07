@@ -2,6 +2,8 @@
 
 The broad vision is approved as direction, not as a promise that all content is available or a fixed delivery schedule. All gameplay remains unimplemented in this contribution foundation.
 
+Concrete owner-requested follow-ups are tracked in the [TODO list](TODO.md), including the independently documented [Jugcraft Encyclopedia](features/jugcraft-encyclopedia.md) and its ten UI reference images. The Encyclopedia's approved direction is a full UI with technology/magic route explanations, detailed pathway guidance and quests, accessed from the inventory or a keybind without an item.
+
 | Milestone | Deliverable | Exit evidence |
 | --- | --- | --- |
 | 0 — Contribution foundation | Repository, proposals, shared design, checks and review protection | Published files and verified GitHub settings; established |

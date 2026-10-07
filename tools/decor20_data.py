@@ -6,6 +6,7 @@ with the other heirlooms in tools/halloween_textures.py.
 
 Everything is drawn here by code from fixed seeds; no Mojang texture is read, traced or copied.
 """
+import copy
 import math
 import random
 
@@ -18,6 +19,7 @@ import decor20 as d20
 import flora_art as fa
 from flora_art import Px, Sculpt, cube, pal, plane_xy, plane_zy, rotation, shade, solid, strip
 from decor6_data import quads
+from model_writer import separate_coplanar
 
 MOD = "jugcraft"
 FACINGS = {"north": 0, "east": 90, "south": 180, "west": 270}
@@ -54,6 +56,14 @@ VOICE_SKIN = {"bass": pal("5a2204", "7e3208", "a4460c", "c45e14", "dc7a22", "ec9
               "alto": pal("7e4206", "a8600c", "cc8016", "e49e26", "f2ba3e", "fad468"),
               "soprano": pal("82806e", "a6a492", "c4c2b0", "dcdac8", "eeecde", "fafaf2")}
 STEM = pal("2a2410", "3e3618", "564a22", "6e5e2e")
+
+
+def separated(elements):
+    """A copy of a model drawn whole and then shared out among several blocks' part models, its differently drawn faces
+    pulled apart first (model_writer.separate_coplanar): each part's own pass at writing cannot see the others'."""
+    elements = copy.deepcopy(elements)
+    separate_coplanar(elements)
+    return elements
 
 
 def rid(path):
@@ -388,8 +398,8 @@ def farm_stand():
     for x in (-POST_X, POST_X):
         el.append(cube((x - 0.7, 0.0, 0.6), (x + 0.7, FRONT_POST_TOP, 2.0), faces(post, ("north", "south", "east", "west"), up=post_end)))
         el.append(cube((x - 0.7, 0.0, 14.0), (x + 0.7, 30.0, 15.4), faces(post, ("north", "south", "east", "west"), up=post_end)))
-    el += halves((-STAND_W, TABLE_TOP - 1.0, 0.6), (STAND_W, TABLE_TOP, 9.0), faces(top, ("up", "down"), north=apron, south=apron))
-    el += halves((-STAND_W + 0.2, TABLE_TOP - 3.2, 0.6), (STAND_W - 0.2, TABLE_TOP - 1.0, 1.0), faces(apron, ("north", "south")))
+    el += halves((-STAND_W, TABLE_TOP - 1.0, 0.6), (STAND_W, TABLE_TOP, 9.0), faces(top, ("up", "down"), north=apron, south=apron, east=apron, west=apron))
+    el += halves((-STAND_W + 0.2, TABLE_TOP - 3.2, 0.6), (STAND_W - 0.2, TABLE_TOP - 1.0, 1.0), faces(apron, ("north", "south", "down", "east", "west")))
     el += halves((-STAND_W, TABLE_TOP - 1.0, 9.0), (STAND_W, RISER_TOP, 15.4), faces(riser, ("north", "east", "west", "south"), up=top))
     # Crossbraces between the legs, low down.
     el += halves((-POST_X + 0.7, 1.6, 14.2), (POST_X - 0.7, 2.6, 15.2), faces(post, ALL6))
@@ -411,8 +421,8 @@ def farm_stand():
     # scalloped valance hanging from its front edge.
     slope = rotation((0.0, 30.0, 15.4), "x", -22.5)
     length = 15.4 / math.cos(math.radians(22.5)) + 0.6
-    for x0, x1 in ((-STAND_W - 0.5, 0.0), (0.0, STAND_W + 0.5)):
-        el.append(cube((x0, 30.0, 15.4 - length), (x1, 30.5, 15.4), faces(awning, ("up", "down", "north")), slope))
+    for x0, x1, outer in ((-STAND_W - 0.5, 0.0, "west"), (0.0, STAND_W + 0.5, "east")):
+        el.append(cube((x0, 30.0, 15.4 - length), (x1, 30.5, 15.4), faces(awning, ("up", "down", "north"), **{outer: ridge}), slope))
         el.append(plane_xy(x0, x1, 21.0, 23.6, -0.5, valance))
         el.append(cube((x0, 29.6, 14.6), (x1, 31.2, 16.0), faces(ridge, ALL6)))
     # The slate header board standing over the awning's front edge, braced back to the awning.
@@ -436,6 +446,7 @@ def farm_stand():
             el.append(plane_xy(x + side * 0.3 - 0.9, x + side * 0.3 + 0.9, top - 0.6, top + 2.6, 0.35, husk,
                                rotation((x, top, 0.35), "z", -22.5 * side)))
     el.append(cube((POST_X - 1.4, 21.4, 0.2), (POST_X + 1.4, 22.0, 0.6), faces(twine, ALL6)))
+    el = separated(el)
     sc.models["whole"] = el
     for part, dx in ((0, 0.0), (1, 16.0)):
         mine = [e for e in el if ((e["from"][0] + e["to"][0]) / 2 >= 0) == (part == 0)]
@@ -496,6 +507,7 @@ def harvest_effigy():
         rot = rotation((x, 1.5, z), axis, angle)
         el.append(plane_xy(x - 2.5, x + 2.5, 1.5, 16.5, z, sheaf, rot))
         el.append(plane_zy(z - 2.5, z + 2.5, 1.5, 16.5, x, sheaf, rot))
+    el = separated(el)
     sc.models["whole"] = el
     for part in range(3):
         mine = [e for e in el if part * 16 <= (e["from"][1] + e["to"][1]) / 2 < (part + 1) * 16 or (part == 2 and (e["from"][1] + e["to"][1]) / 2 >= 48)]
@@ -738,7 +750,7 @@ def build(name):
 def decor20_quads():
     """The renderer's models: the effigy's cloak (tinted with its dye), cut out round its tatters."""
     cloak = build("harvest_effigy_cloak")
-    return {"harvest_effigy_cloak": [dict(q, cutout=True) for q in quads(cloak.models["harvest_effigy_cloak"],
+    return {"harvest_effigy_cloak": [dict(q, cutout=True) for q in quads(d17d.single_sheets(cloak.models["harvest_effigy_cloak"]),
                                                                          {"p": "entity/harvest_effigy_cloak"})]}
 
 
@@ -756,7 +768,17 @@ EFFIGY_ITEM = {"gui": {"rotation": [25, 225, 0], "translation": [0, -0.5, 0], "s
                "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 1, 0], "scale": [0.2, 0.2, 0.2]}}
 
 
+def _image_of(name):
+    """The Sculpt texture a model's "#p" (block/<name>) is drawn from, for fa.closing_writer; None for another."""
+    try:
+        return build(name).atlas.img
+    except KeyError:
+        return None
+
+
 def assets(root, write, lang):
+    # Every block and item model is closed: no face a box leaves out shows a hole (docs/ART_DIRECTION.md).
+    write = fa.closing_writer(write, _image_of)
     models = root / "models" / "block"
     states = root / "blockstates"
     items = root / "models" / "item"

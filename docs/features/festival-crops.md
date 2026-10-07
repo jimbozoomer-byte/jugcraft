@@ -45,7 +45,7 @@ Nothing is seasonal: every crop, block and recipe is available all year and stay
 - New IDs only. The only existing behaviour that changes is which seeds short grass can drop (18 instead of 12, at the same overall rate). The `agriculture` switch stops recipes, wild plants, gourd and cranberry patches and chestnut trees in new chunks, and grass drops. Registered blocks and items stay, so saved fields, bogs and trees survive.
 
 ## Dependencies and assets
-No new dependencies. Uses Fabric API's flammable-block registry (content registries), loot, biome modification and creative tab APIs, which are already required. Every texture is drawn by `tools/festival_textures.py` from fixed seeds; no Mojang texture is read, traced or recolored. Models reuse vanilla's model templates (cross, cube, stairs, slab, fence, fence gate) with Jugcraft textures; the stem models are rebuilt without vanilla's biome tint.
+No new dependencies. Uses Fabric API's flammable-block registry (content registries), loot, biome modification and creative tab APIs, which are already required. Every texture is drawn by `tools/festival_textures.py` from fixed seeds (since the [wood repaint](wood-repaint.md), the chestnut's wood and leaves by `tools/wood_style.py`); no Mojang texture is read, traced or recolored. Models reuse vanilla's model templates (cross, cube, stairs, slab, fence, fence gate) with Jugcraft textures; the stem models are rebuilt without vanilla's biome tint.
 
 ## Verification
 Actual results (30 September 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):

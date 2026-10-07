@@ -277,6 +277,21 @@ def bonecarved_dagger():
     return d
 
 
+def bonecarved_flail_handle(d=None):
+    """The Bonecarved Flail's handle alone: the bone haft and its knobbed joints, the grip, the horn collar and a horn
+    eye the spine hangs from (tools/arms_heads.py VARIANT_HEADS draws the spine and skull swinging, in the hand)."""
+    st = BONECARVED
+    d = d or Design(34, grip=5.5)
+    d.disc(1.0, 0.0, 1.2, HORN, depth=2.4)
+    d.strip(1.0, 14.0, 0.9, material=BONE, depth=1.9)
+    for s in (5.0, 10.0):
+        d.strip(s - 0.5, s + 0.5, 1.15, material=BONE, depth=2.3, z=1)
+    grip(d, 1.8, 9.8, 1.05, st)
+    d.strip(13.5, 15.5, 1.1, material=HORN, depth=2.6)
+    d.ring(arms_art.FLAIL_EYE, 0.0, 1.1, 0.45, HORN, depth=1.2, part="eye")
+    return d
+
+
 def bonecarved_flail():
     st = BONECARVED
     d = Design(34, grip=5.5)
@@ -705,6 +720,15 @@ def design(name):
     return DESIGNS[name]()
 
 
+# Variants whose head swings free (tools/arms_heads.py VARIANT_HEADS): their 3D model is the handle alone.
+HANDLES = {"bonecarved_flail": bonecarved_flail_handle}
+
+
+def model_design(name):
+    """The design a variant's 3D model is built from: the handle alone for one whose head swings free, else the whole."""
+    return HANDLES[name]() if name in HANDLES else design(name)
+
+
 def layout(name, held):
     """(icon size, grip pixel, diagonal steps to a design unit, hand factor), as arms_art.layout."""
     d = design(name)
@@ -728,11 +752,23 @@ def model(name, held):
     size, grip_px, scale, _factor = layout(name, held)
     unit = scale * math.sqrt(2.0) * 16.0 / size
     grip_model = (grip_px[0] * 16.0 / size, 16.0 - grip_px[1] * 16.0 / size)
-    d = design(name)
+    d = model_design(name)
     upright, elements = px.model_elements(d, arms_art.MODEL_TEXTURE, (0, 0), grip_model, unit, width=px.upright_width(d))
     texture = Image.new("RGBA", (arms_art.MODEL_TEXTURE, arms_art.MODEL_TEXTURE), (0, 0, 0, 0))
     texture.paste(upright, (0, 0))
+    if name in HANDLES:
+        import arms_heads
+        arms_heads.paint_swatches(texture, {"chain": BONE, "blade": BONE, "fitting": HORN}, skull=True)
     return texture, elements
+
+
+def head_layout(name, held):
+    """For a variant whose head swings free: (the hand's point in model pixels, model pixels a design unit, the grip and
+    the eye along the haft in design units), from the same layout as its model (tools/arms_heads.py entry)."""
+    size, grip_px, scale, _factor = layout(name, held)
+    unit = scale * math.sqrt(2.0) * 16.0 / size
+    grip_model = (grip_px[0] * 16.0 / size, 16.0 - grip_px[1] * 16.0 / size)
+    return grip_model, unit, design(name).grip, arms_art.FLAIL_EYE
 
 
 # ---------------------------------------------------------------- the patterns (smithing templates)

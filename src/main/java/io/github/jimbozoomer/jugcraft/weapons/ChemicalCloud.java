@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.weapons;
 
+import io.github.jimbozoomer.jugcraft.building.GasCurtainBlock;
 import java.util.UUID;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -33,6 +34,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Smoke hides anyone inside from mobs (they lose their target) and blinds players inside without a mask.</li>
  * <li>Thermite burns on the floor: it hurts and sets alight whatever stands in it, once a second, through armor.</li>
  * </ul>
+ * Chlorine and smoke do not reach a target behind a hanging Gas Curtain (batch 59, {@link GasCurtainBlock#shields}).
  */
 public class ChemicalCloud extends Entity {
 	public enum Kind {
@@ -126,6 +128,10 @@ public class ChemicalCloud extends Entity {
 				target -> target.isAlive() && !target.isSpectator() && target.getType() != EntityTypes.ARMOR_STAND
 						&& contains(target))) {
 			if (!FieldChemistry.mayAffect(owner, target)) {
+				continue;
+			}
+			// A hanging gas curtain between the cloud and the target keeps chlorine and smoke out (not thermite's fire).
+			if (kind != Kind.THERMITE && GasCurtainBlock.shields(level, position(), target.getEyePosition())) {
 				continue;
 			}
 			switch (kind) {

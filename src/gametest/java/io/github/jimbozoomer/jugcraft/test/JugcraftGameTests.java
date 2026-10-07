@@ -3598,4 +3598,186 @@ public class JugcraftGameTests {
 			helper.assertTrue(open.bounds().getXsize() < 0.2, "An open gate should leave only its post");
 		});
 	}
+
+	/** Batch 59: a stone floor at y = 0 from (0, 0) to (x1, z1), for blocks that stand only on a solid top. */
+	private static void bunkerFloor(GameTestHelper helper, int x1, int z1) {
+		for (int x = 0; x <= x1; x++) {
+			for (int z = 0; z <= z1; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+	}
+
+	/**
+	 * Bunker interiors (batch 59): every block places; the periscope, curtain and bunk stand two blocks tall (placing the
+	 * lower half puts up the upper one), the lamp hangs from a ceiling, the shoring is a pillar and the field kitchen has
+	 * its block entity.
+	 */
+	@GameTest
+	public void bunkerBlocksPlace(GameTestHelper helper) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS;
+		ServerLevel level = helper.getLevel();
+		bunkerFloor(helper, 7, 7);
+		int x = 0;
+		for (String id : List.of("map_table", "field_kitchen", "corrugated_iron", "corrugated_iron_slab", "corrugated_iron_stairs",
+				"timber_shoring", "bunker_lamp")) {
+			BlockPos pos = new BlockPos(x++, 1, 0);
+			helper.setBlock(pos, blocks.get(id));
+			helper.assertBlockPresent(blocks.get(id), pos);
+		}
+		helper.getBlockEntity(new BlockPos(1, 1, 0), io.github.jimbozoomer.jugcraft.building.FieldKitchenBlock.Entity.class);
+		x = 0;
+		for (String id : List.of("trench_periscope", "gas_curtain", "bunker_bunk")) {
+			BlockPos lower = new BlockPos(x, 1, 3);
+			x += 2;
+			Block block = blocks.get(id);
+			BlockState state = block.defaultBlockState().setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.LOWER);
+			helper.setBlock(lower, state);
+			block.setPlacedBy(level, helper.absolutePos(lower), state, null, ItemStack.EMPTY);
+			helper.assertBlockPresent(block, lower.above());
+			helper.assertBlockProperty(lower.above(), net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.UPPER);
+		}
+		BlockPos lamp = new BlockPos(6, 2, 6);
+		helper.setBlock(lamp.above(), Blocks.STONE);
+		helper.setBlock(lamp, blocks.get("bunker_lamp").defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true));
+		helper.assertTrue(helper.getBlockState(lamp).canSurvive(level, helper.absolutePos(lamp)), "A bunker lamp should hang from a ceiling");
+		helper.assertTrue(helper.getBlockState(lamp).getLightEmission() == io.github.jimbozoomer.jugcraft.building.Bunkerworks.LAMP_LIGHT,
+				"A bunker lamp should shine");
+		BlockPos beam = new BlockPos(0, 1, 6);
+		helper.setBlock(beam, blocks.get("timber_shoring").defaultBlockState()
+				.setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, Direction.Axis.X));
+		helper.assertBlockProperty(beam, net.minecraft.world.level.block.RotatedPillarBlock.AXIS, Direction.Axis.X);
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 59: a trench periscope looking south counts the three zombies in front of it (not the one behind it) for a
+	 * comparator, and a player looking through it marks the nearest one, as a Range Finder would.
+	 */
+	@GameTest(maxTicks = 120)
+	public void periscopeCountsAndMarks(GameTestHelper helper) {
+		Block periscope = io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS.get("trench_periscope");
+		BlockState state = periscope.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.agriculture.TallDecorationBlock.FACING, Direction.SOUTH);
+		BlockPos lower = new BlockPos(1, 1, 1);
+		bunkerFloor(helper, 7, 7);
+		helper.setBlock(lower, state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.LOWER));
+		helper.setBlock(lower.above(), state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.UPPER));
+		net.minecraft.world.entity.Mob nearest = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(1, 1, 5));
+		helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(3, 1, 6));
+		helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(0, 1, 7));
+		helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(2, 1, 0));
+		helper.runAfterDelay(io.github.jimbozoomer.jugcraft.building.Bunkerworks.PERISCOPE_INTERVAL + 10, () -> {
+			ServerLevel level = helper.getLevel();
+			helper.assertBlockProperty(lower, io.github.jimbozoomer.jugcraft.building.TrenchPeriscopeBlock.SEEN, 3);
+			helper.assertTrue(helper.getBlockState(lower).getAnalogOutputSignal(level, helper.absolutePos(lower), Direction.NORTH) == 3,
+					"A comparator should read the three zombies in front, not the one behind");
+			ServerPlayer spotter = helper.makeMockServerPlayerInLevel();
+			helper.useBlock(lower.above(), spotter);
+			BlockPos mark = io.github.jimbozoomer.jugcraft.artillery.Spotting.own(level, spotter);
+			helper.assertTrue(nearest.blockPosition().equals(mark), "Looking through it should mark the nearest zombie, "
+					+ nearest.blockPosition() + ", not " + mark);
+			spotter.setShiftKeyDown(true);
+			helper.useBlock(lower, spotter);
+			helper.assertTrue(io.github.jimbozoomer.jugcraft.artillery.Spotting.own(level, spotter) == null, "Sneak-using it should clear the mark");
+			spotter.discard();
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 59: a chlorine cloud on one side of a hanging gas curtain does not hurt a pig on the other side; rolled up (by
+	 * using it, both halves at once), the next pulse does.
+	 */
+	@GameTest(maxTicks = 100)
+	public void gasCurtainStopsChlorine(GameTestHelper helper) {
+		Block curtain = io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS.get("gas_curtain");
+		BlockState state = curtain.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.agriculture.TallDecorationBlock.FACING, Direction.EAST);
+		BlockPos lower = new BlockPos(4, 1, 3);
+		bunkerFloor(helper, 7, 7);
+		helper.setBlock(lower, state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.LOWER));
+		helper.setBlock(lower.above(), state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.UPPER));
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(5, 1, 3));
+		io.github.jimbozoomer.jugcraft.weapons.ChemicalCloud.spawn(helper.getLevel(), helper.absoluteVec(new Vec3(3.0, 1.5, 3.5)),
+				io.github.jimbozoomer.jugcraft.weapons.ChemicalCloud.Kind.CHLORINE, null);
+		// After the cloud's first two pulses the pig behind the hanging curtain is unhurt; then the curtain is rolled up.
+		int pulse = io.github.jimbozoomer.jugcraft.weapons.ChemicalCloud.PULSE;
+		helper.runAfterDelay(pulse * 2 + 5, () -> {
+			helper.assertTrue(pig.getHealth() == pig.getMaxHealth(), "The curtain should keep the chlorine off the pig: " + pig.getHealth());
+			ServerPlayer player = helper.makeMockServerPlayerInLevel();
+			helper.useBlock(lower, player);
+			player.discard();
+			helper.assertBlockProperty(lower, io.github.jimbozoomer.jugcraft.building.GasCurtainBlock.ROLLED, true);
+			helper.assertBlockProperty(lower.above(), io.github.jimbozoomer.jugcraft.building.GasCurtainBlock.ROLLED, true);
+		});
+		// Two pulses later, with the curtain rolled up, the chlorine has reached it.
+		helper.runAfterDelay(pulse * 4 + 5, () -> {
+			helper.assertTrue(pig.getHealth() < pig.getMaxHealth(), "With the curtain rolled up the chlorine should reach the pig");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 59: a field kitchen with coal and a Cooking Pot on top lights and cooks Trench Stew from beef, a potato, a carrot
+	 * and a bowl, burning one coal; one with coal but no pot stays cold and keeps its coal.
+	 */
+	@GameTest(maxTicks = 420)
+	public void fieldKitchenHeatsThePot(GameTestHelper helper) {
+		Block kitchen = io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS.get("field_kitchen");
+		BlockPos withPot = new BlockPos(1, 1, 1);
+		BlockPos bare = new BlockPos(4, 1, 1);
+		helper.setBlock(withPot, kitchen);
+		helper.setBlock(bare, kitchen);
+		var cooking = helper.getBlockEntity(withPot, io.github.jimbozoomer.jugcraft.building.FieldKitchenBlock.Entity.class);
+		var cold = helper.getBlockEntity(bare, io.github.jimbozoomer.jugcraft.building.FieldKitchenBlock.Entity.class);
+		for (var stove : List.of(cooking, cold)) {
+			try (Transaction transaction = Transaction.openOuter()) {
+				helper.assertTrue(stove.fuel.insert(ItemVariant.of(Items.COAL), 2, transaction) == 2, "A field kitchen should take coal");
+				helper.assertTrue(stove.fuel.insert(ItemVariant.of(Items.DIRT), 1, transaction) == 0, "A field kitchen should refuse dirt");
+				transaction.commit();
+			}
+		}
+		helper.setBlock(withPot.above(), io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.block("cooking_pot"));
+		var pot = helper.getBlockEntity(withPot.above(), io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity.class);
+		pot.setItem(0, new ItemStack(Items.BOWL));
+		pot.setItem(1, new ItemStack(Items.BEEF));
+		pot.setItem(2, new ItemStack(Items.POTATO));
+		pot.setItem(3, new ItemStack(Items.CARROT));
+		helper.succeedWhen(() -> {
+			ItemStack made = pot.getItem(io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity.RESULT);
+			helper.assertTrue(made.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item("trench_stew")),
+					"The pot on the field kitchen should cook Trench Stew, found " + made);
+			helper.assertBlockProperty(withPot, io.github.jimbozoomer.jugcraft.building.FieldKitchenBlock.LIT, true);
+			helper.assertTrue(cooking.fuelCount() == 1, "One coal should be burning, one left, but " + cooking.fuelCount() + " left");
+			helper.assertBlockProperty(bare, io.github.jimbozoomer.jugcraft.building.FieldKitchenBlock.LIT, false);
+			helper.assertTrue(cold.fuelCount() == 2 && cold.burn() == 0, "With no pot on top a field kitchen must not start its coal");
+		});
+	}
+
+	/**
+	 * Batch 59: with a mark plotted next to it, sneak-using a map table hands that mark to the fire control table within
+	 * four blocks of it.
+	 */
+	@GameTest
+	public void mapTablePlotsTargetsToFireControl(GameTestHelper helper) {
+		BlockPos mapPos = new BlockPos(1, 1, 1);
+		helper.setBlock(mapPos, io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS.get("map_table"));
+		BlockPos tablePos = new BlockPos(4, 1, 1);
+		helper.setBlock(tablePos, io.github.jimbozoomer.jugcraft.building.FireControl.TABLE);
+		ServerPlayer spotter = helper.makeMockServerPlayerInLevel();
+		// Right beside the map table, so no other test's mark can be nearer.
+		BlockPos target = helper.absolutePos(new BlockPos(1, 1, 2));
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.mark(spotter, target);
+		ServerPlayer officer = helper.makeMockServerPlayerInLevel();
+		officer.setShiftKeyDown(true);
+		helper.useBlock(mapPos, officer);
+		var table = helper.getBlockEntity(tablePos, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		helper.assertTrue(target.equals(table.target()), "The map table should lay the fire control table on the plotted mark, not "
+				+ table.target());
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.clear(spotter);
+		spotter.discard();
+		officer.discard();
+		helper.succeed();
+	}
 }

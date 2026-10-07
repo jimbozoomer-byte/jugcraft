@@ -516,6 +516,16 @@ def arms_pages():
             "while held.",
             "Hold use to block with either, as with a shield. An axe's blow still knocks them down for a while."],
          "craft": craft("tower_shield")},
+        # Arms VIII (batch 59).
+        {"title": "Arms: Thrown Arms", "icon": f"{MOD}:steel_javelin", "text": [
+            "A javelin, francisca, chakram or harpoon fights in the hand like any arm. Hold use to wind it back and let go "
+            f"to throw it, as a trident is thrown; a steel javelin's throw hits for {arms.THROWN[('javelin', 'steel')]['damage']:g}, "
+            "more with Sharpness and the like. It comes down where it struck, as itself, to be picked up again.",
+            "Javelin: flies far and straight. Francisca: tumbles end over end and knocks a raised shield down for "
+            f"{arms.FRANCISCA_DISABLE:g} seconds.",
+            f"Chakram: flies flat, cuts every foe on its way out (up to {arms.CHAKRAM_RANGE:g} blocks) and back, and "
+            "returns to your hand. Harpoon: keeps its speed underwater and hauls what it strikes towards you."],
+         "craft": craft("javelin")},
     ] + variant_pages()
 
 

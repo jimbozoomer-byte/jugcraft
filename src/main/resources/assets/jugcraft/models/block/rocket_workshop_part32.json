@@ -84,7 +84,7 @@
       "from": [
         1.5,
         12.0,
-        3.98
+        3.9
       ],
       "to": [
         16,
@@ -137,21 +137,33 @@
     },
     {
       "from": [
-        1.0,
+        0.9,
         5.75,
         15.5
       ],
       "to": [
-        2.0,
+        2.1,
         10.25,
         16.0
       ],
       "faces": {
         "north": {
-          "texture": "#dr_band"
+          "texture": "#dr_band",
+          "uv": [
+            14.0,
+            5.75,
+            15.0,
+            10.25
+          ]
         },
         "south": {
-          "texture": "#dr_band"
+          "texture": "#dr_band",
+          "uv": [
+            1.0,
+            5.75,
+            2.0,
+            10.25
+          ]
         },
         "east": {
           "texture": "#dr_band"
@@ -160,10 +172,22 @@
           "texture": "#dr_band"
         },
         "up": {
-          "texture": "#dr_band"
+          "texture": "#dr_band",
+          "uv": [
+            1.0,
+            15.5,
+            2.0,
+            16.0
+          ]
         },
         "down": {
-          "texture": "#dr_band"
+          "texture": "#dr_band",
+          "uv": [
+            1.0,
+            0.0,
+            2.0,
+            0.5
+          ]
         }
       }
     }

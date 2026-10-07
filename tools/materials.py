@@ -309,6 +309,9 @@ def feature_of(entry_id):
     import fortifications
     if entry_id in fortifications.blocks():
         return "machines"
+    import bunkerworks
+    if entry_id in bunkerworks.blocks():
+        return "machines"
     import fire_control
     if entry_id in fire_control.blocks() + fire_control.items():
         return "machines"
