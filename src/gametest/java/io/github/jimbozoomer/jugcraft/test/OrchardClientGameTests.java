@@ -133,8 +133,10 @@ public class OrchardClientGameTests implements FabricClientGameTest {
 		for (int i = 0; i < trees.length; i++) {
 			set(level, new BlockPos(x + 1 + 2 * i, y, z + 8), block(trees[i].sapling()).defaultBlockState());
 		}
-		// The pantry shelf of the new preserves, sealed and fresh, at the end of the table against planks.
-		BlockPos shelfPos = new BlockPos(x + 7, y, z + 6);
+		// The pantry shelf of the new preserves, sealed and fresh, behind the middle of the table, raised on planks to face
+		// the camera.
+		BlockPos shelfPos = new BlockPos(x + 3, y + 1, z + 5);
+		set(level, shelfPos.below(), Blocks.SPRUCE_PLANKS.defaultBlockState());
 		set(level, shelfPos.north(), Blocks.SPRUCE_PLANKS.defaultBlockState());
 		set(level, shelfPos, block("pantry_shelf").defaultBlockState().setValue(PantryShelfBlock.FACING, Direction.SOUTH));
 		if (level.getBlockEntity(shelfPos) instanceof PantryShelfBlockEntity shelf) {

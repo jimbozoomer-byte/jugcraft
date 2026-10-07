@@ -197,6 +197,8 @@ public class OrchardGameTests {
 	public void juicesAreDrinks(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		// In survival: a creative player keeps the drink and gets no bottle back.
+		player.setGameMode(GameType.SURVIVAL);
 		for (String juice : List.of("orange_juice", "lemonade")) {
 			FoodProperties food = new ItemStack(item(juice)).get(DataComponents.FOOD);
 			helper.assertTrue(food != null && food.canAlwaysEat(), juice + " can be drunk on a full stomach");
