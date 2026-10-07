@@ -51,7 +51,7 @@ While the pilot sits in it, their own hands do nothing: use and attack go to the
 
 ## Dependencies and assets
 - No dependencies. All art is original. The sounds are vanilla's (iron golem steps and attack, block hit sounds).
-- The model is in `tools/mech.py` and the 32x32 item icon in `tools/gun_icons.py` (since 5 October 2026). The model reuses the giants' `dr_*` textures and the mining drill's bit texture. Since the 5 October 2026 art fixes the thighs stop a quarter pixel inside the pelvis's side planes and the chest walls, knees, toe bands and drill band stand a quarter pixel off their neighbours, so nothing flickers as it walks ([big-guns-art-fixes.md](big-guns-art-fixes.md)).
+- The model is in `tools/mech.py` and the item icon is a 16×16 map, `tools/item_icons/diesel_walker.txt` (redrawn from the 5 October 2026 32x32 icon on 7 October 2026, [ITEM_ICONS.md](../ITEM_ICONS.md)). The model reuses the giants' `dr_*` textures and the mining drill's bit texture. Since the 5 October 2026 art fixes the thighs stop a quarter pixel inside the pelvis's side planes and the chest walls, knees, toe bands and drill band stand a quarter pixel off their neighbours, so nothing flickers as it walks ([big-guns-art-fixes.md](big-guns-art-fixes.md)).
 - The model is exported as six animated parts to `assets/jugcraft/walker_quads.json` (about 770 faces, 16-pixel tiles, hidden faces culled). `client/DieselWalkerRenderer` draws and animates it.
 
 ## Verification
