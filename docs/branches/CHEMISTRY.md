@@ -8,6 +8,12 @@ The [mineral-sands and refining plan](../features/mineral-sands-and-refining-pla
 
 Rare-earth development starts with named neodymium, cerium and yttrium products. **Expansion beyond this initial set is explicitly planned at the owner's request; three materials are not the final roster.** Add further named materials alongside useful consumers and reachable recovery routes, following the plan's expansion criteria.
 
+## Owner-selected industrial expansion (7 October 2026)
+
+The independent [industrial chemistry, gas fuels and advanced materials plan](../features/industrial-chemistry-and-fuels-plan.md) records the owner's detailed fuel request and ten decisions. Substantial chemistry begins with **steel-built electrical equipment**, particularly usable gasoline and gas processing. Priorities are gas processing, aluminum and titanium; shared stations support more process-specific reagents, limited purity grades, useful polymer/ceramic products and mostly larger general-purpose batteries with a few specialty options.
+
+Selected fuel branches include water electrolysis and direct hydrogen burning, catalytic methane from CO2 or CO with hydrogen, an earlier polluting coal-gasification route, advanced 60/40 methane/CO2 digesters, and milling/mashing -> fermentation -> distillation -> dehydration for bioethanol. Cement processing and later breweries provide optionally captured CO2; Coke Oven chemical byproduct recovery is optional. Filled gas tanks are picked up, placed and pipe-connected using shared storage. Balanced reaction ratios, existing-source distinctions, machine proposals and unresolved costs are in the brief and [TODO](../TODO.md#industrial-chemistry-gas-fuels-and-advanced-materials); these additions are planning, not implemented by that document.
+
 ## What belongs here
 
 Anything that changes what a substance *is* through a reaction, as opposed to its shape or mix (mechanical) or where it is (fluids):
