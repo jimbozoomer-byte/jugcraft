@@ -71,7 +71,10 @@ public class ArmItem extends Item {
 		this(kind, null, null, properties);
 	}
 
-	/** An Arms VII variant ({@link ArmVariants}): of `kind`, in `line` (a style or a boss), with `boon` (or null). */
+	/**
+	 * An Arms VII variant ({@link ArmVariants}): of `kind`, in `line` (a style, a boss or an armor set), with `boon` (or
+	 * null).
+	 */
 	public ArmItem(String kind, String line, ArmVariants.Boon boon, Properties properties) {
 		super(properties);
 		this.kind = kind;
@@ -108,7 +111,8 @@ public class ArmItem extends Item {
 
 	/**
 	 * The arm's traits (docs/features/trait-details.md): its kind's, two-handed, its weapon art, its boon and its line,
-	 * each a name with a brief description shown while Shift is held. A boss trophy's line is a name only.
+	 * each a name with a brief description shown while Shift is held. A boss trophy's line ("Trophy of the Mire Hag") and
+	 * an armor set's arm's ("Of the Hades Armor set") are a name only.
 	 */
 	public void traits(TraitTooltips traits) {
 		String arms = "tooltip.jugcraft.arms.";
