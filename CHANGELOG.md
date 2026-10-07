@@ -6,7 +6,18 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 ## Unreleased
 
-No numbered release yet. Everything below is on `main`.
+No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
+
+### World Designer
+- An offline browser map editor sculpts terrain, paints installed biomes, places spawn and one Jugcraft walled city, and pins native village/structure start chunks.
+- `/jugcraft design export` supplies the editor and live mod catalog. Its exported datapack adds the **Jugcraft Designed** preset for new worlds; existing generated chunks are not edited.
+- Reuses native generation and Jugcraft's town systems. Read the [guide](docs/WORLD_DESIGNER.md) and [actual test evidence and limits](docs/features/world-designer.md).
+
+### Unmerged: Thallite, slice 2: gear
+- **Thallite tools and armor:** a sword, pickaxe, axe, shovel and hoe, and a helmet, chestplate, leggings and boots, crafted from thallite ingots like iron's and repaired with them. They mine and protect as iron does, last a little less (200 uses a tool) and enchant best of all (18).
+- **Regrowth:** thallite gear you wear or hold gets back one use every 5 seconds while you stand on living soil (grass, dirt, podzol, moss, mud, rooted dirt or farmland), up to 75% of full, with a faint green sparkle. It never brings back a broken piece.
+- **Earthbound armor:** an Earthbinding Template (rooted dirt, four thallite nuggets and four gold nuggets), a thallite piece and a gold ingot at a smithing table bind the piece into its gold-trimmed Earthbound twin, for good, keeping its enchantments, wear and name. Earthbound pieces are **Rooted**: on natural ground (soil, stone, sand or gravel) each takes 7.5% off knockback, 30% for a full set, and with two or more worn Regrowth works on stone, sand and gravel too.
+- Both traits are named in the tooltip and described while Shift is held. Two handbook pages. Arms, the arrow, horse armor and magic come in later slices. Record: [thallite.md](docs/features/thallite.md).
 
 ### Unmerged: Hades Armor and the Hades Scythe
 - **Hades Armor, the third of the owner's new armor tiers:** dark slate plate worn as a 3D model in the owner's own design: a narrow helm with a beaked visor and two great horns, layered pauldrons rising toward the outside, a V of bars on the breastplate, a flared plate skirt, and a blood-red tabard from chest to hem.
@@ -34,6 +45,43 @@ No numbered release yet. Everything below is on `main`.
 - **Any armor piece can now have a 3D model:** boxes of any size, at any angle, on any body part, drawn on players, mobs and armor stands, with vanilla's glint when enchanted. The exosuit's 3D parts use the same layer and look as before.
 - **Nothing else changes:** same items, IDs, stats and recipes, so armor you already have just looks new. Trims stay on the item but do not show on the 3D models, and babies wear none.
 - The old steampunk and kaiserpunk looks are no longer worn by bronze and steel armor; Steampunk Armor and Kaiser Armor (below) keep them. Record: [knight-armor.md](docs/features/knight-armor.md).
+
+### Framework foundation and Jugcraft Complete
+- One pinned dependency manifest makes animation, spellcasting, UI, texture, and creature frameworks available to contributors and AI agents; see [FRAMEWORKS.md](docs/FRAMEWORKS.md).
+- The Build workflow produces an importable Modrinth `.mrpack` with the original Jugcraft JAR and hashed upstream library downloads, plus standalone release dependency metadata. No startup downloader or third-party JARs are added to Jugcraft.
+- Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
+- Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
+
+### Unmerged: The fall fair in Minecraft's own look
+- The owner found that nothing in the fall fair looked like Minecraft (its eyes, mouths, brass and bulbs). Every fair texture is now drawn at vanilla's density, 16 texels to a block, and scaled up to its file's size, so models and UVs are unchanged.
+- **High Striker:** painted planks, a brass rail and bell lit like a gold block, flat glass lamps, a plain scale with ticks and a pixel-star sign. **Ring Toss:** a plank crate banded in red and white, bottles lit like vanilla glass and a striped ring.
+- **The plushes** (pumpkin, jumbo pumpkin, ghost, bat, black cat, squirrel and werewolf, and their acorn, bow, leaf, rosette and stem) are wool-like felt with square pixel faces.
+- **The piñatas:** paper fringe in tiers, cut along each tier's foot, torn to newsprint; the pumpkin's carved face, the bat's eyes and fangs, scalloped wings, the rope and the blindfold.
+- **The balloons:** the basket's wicker, leather, planks, steel, brass, coils, tank, gauges and rope; the Harvest Stripes and Harvest Moon envelopes in flat gores with pixel maple leaves, a pixel moon, a witch and bats; the Jack-o'-Lantern's carved face; the flame; the mooring post.
+- **Items:** the striker, mallet, ring, piñatas, stick, blindfold, three balloons, burner and pibal are 16-by-16 pixel icons.
+- The Ferris wheel is left to the art-fix work (#219). Before and after: [fall_fair_minecraft.jpg](docs/images/fall_fair_minecraft.jpg).
+
+### Unmerged: Clean textures, set 15: the Witching Season's last noisy props
+- The dark wood of the broom rack, curiosity cabinet, iron-bound coffin, ribcage bookcase, haunted dining chair, silk spool stack and grandfather clock is long-grain planks, as vanilla planks, in place of blotches.
+- Flat, without speckle: the coffin's and chair's velvet, the brain vat console's brass, the lightning harness's copper, the dustpan's tin, the witch's lantern's violet glass and both pillar candles' wax.
+- The effigy ashes and the hearth ash item are soft clumped ash with a few charred flecks and embers set in place. The egg sacs' web mat is drawn as threads.
+- The workshop's tinted brew, fume and wax textures (the cauldron's brew, its fumes and the candelabra's candles) are smooth, without per-pixel grain.
+- The props are drawn in the clean style (`flora_art.QUIET`), switched on for just these builders. The Beating Heart Jar keeps its original look, which the owner loves. The 25 props the owner's art review redid (#219), the faces, moons, webs, pumpkins, plushes, garlands and glows are unchanged. IDs and models are unchanged. Before and after: [clean_textures_set15.jpg](docs/images/clean_textures_set15.jpg).
+
+### Unmerged: Clean textures, set 14: the town and the Pixel Hollows
+- The 18 townsfolk wear clean cloth in the manner of the vanilla skins: lit in its upper half, a shade darker below and at the hem, with no speckle. Their hair is flat with neat strands. Each keeps the face, hair style and outfit it had. The raiders, which share the painter, are unchanged.
+- The Retro Trader keeps his buffalo-check flannel. His hair and beard are drawn in strands, not a checkerboard, his trousers are a plain navy plaid and his sneakers are plain black.
+- Circuitstone is dark slate in thin streaks, as vanilla deepslate, under the same copper traces. The bricks are laid as deepslate bricks and polished circuitstone is smooth.
+- The Jug Teller (the town's ATM) is flat cast iron and brass, lit along the top and left.
+- The Pixel Hollows map is plain parchment with its folds.
+- The arcade cabinet parts, crystals, pixel lamp, shard and map marker were already flat and are unchanged. So are the guide screenshots, the tower outlines and the machine screens, which are pictures rather than textures. IDs and models are unchanged. Before and after: [clean_textures_set14.jpg](docs/images/clean_textures_set14.jpg).
+
+### Unmerged: Clean textures, set 13: tower and drones (the noisy few)
+- The control screen and holo table, loose and formed, are flat navy glass behind their grid lines and glows, with plain steel sides lit along the top.
+- The cargo packager's white panels are flat with a short sheen.
+- Reinforced concrete keeps its soft mottling, seam and tie holes, with a few spaced pores in place of a per-pixel jitter.
+- The survey stake is straight-grained wood under its red band.
+- Silicon carbide armour is left to the art fixes PR (#219), which redraws the tower's armour plates. The hangar and landing pads, drones and other tower blocks were already clean. IDs and models are unchanged.
 
 ### Unmerged: Clean textures, set 12: dieselpunk war machines (the noisy few)
 - Kaiserworks marble (plain, fluted and the column end) is calm cream in soft clumps with one smooth grey vein, like vanilla calcite. The black station tiles are flat with a lit edge, and their cream tiles are clumped marble.

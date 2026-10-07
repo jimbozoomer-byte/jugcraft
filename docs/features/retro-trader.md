@@ -111,3 +111,8 @@ Build workflow run 36815372169 on commit 568409c (1 October 2026, merged with `m
 ## Rollout and open questions
 - The villager in the shop usually takes its cabinet, but any unemployed villager may claim it first.
 - Village-styled shops, wandering-trader stock and cosmetic outfits are later proposals.
+
+
+### October 7 integration: rare exhausted layouts
+
+Full CI found normal desert and snowy villages that still had no shop after the old eight-layout limit. The bounded retry budget is now 32 layouts; generation still stops on success, excludes zombie villages and places at most one shop. The village regression now deliberately withholds the shop for the first eight layouts in its final round, requiring recovery beyond the old limit. This improves the rare-case fallback; a finite budget does not promise a suitable site for every possible world seed. Results of the combined validation are recorded in the integration PR.

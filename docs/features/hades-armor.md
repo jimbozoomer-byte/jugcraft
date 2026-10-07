@@ -1,6 +1,6 @@
 # Hades Armor and the Hades Scythe: the third of the owner's armor tiers
 
-Status: implemented on `claude/hades-armor`, awaiting review. It is stacked on `claude/bloodthorn-armor` (#235), whose armor-only tier code it reuses; that branch carries Reforged White Diamond and the knight armor's 3D engine (#227). **Not yet compiled, game-tested or played:** the Java compiles only in CI.
+Status: implemented on `claude/hades-armor`, awaiting review. It is built on `integration/oct7-pr-backlog`, which carries the knight armor's 3D engine (#227) and Bloodthorn and Reforged White Diamond (#235), whose armor-only tier code it reuses. **Not yet compiled, game-tested or played:** the Java compiles only in CI.
 Proposal issue: none. This is the third of the five armor designs the owner sent on 6 October 2026 ("Can we start implementing the next 5 that I created. Again want you to use the the complex armor for each one to capture the shape of each piece like I have... Lets do these 1 by 1"), with its weapon: "I also want the scythe from my Hades Armor set." Its picture is titled "HADES ARMOR". The owner's answers for all five ([bloodthorn-armor.md](bloodthorn-armor.md)):
 - what kind of armor: "New stronger armor tiers";
 - how players get it: "They might get dropped by bosses or be craftable for now just make the armor we can figure that out later".
@@ -94,6 +94,13 @@ Hades is the toughest and the hardest to knock back, a point lower in defense an
   - **Generators:** data, textures, data again, all exit 0; nothing is left to change.
   - **`check_mod_data.py`:** PASS (1521 material IDs), with the art check: every Hades entry is 0.00% see-through.
   - **`check_repository.py`:** PASS. **`armor_smoke.py --no-render`:** all pass. **`armor_models.py`:** no problems.
+  - **Java:** the 8 changed files parse (syntax only).
+
+- **After merging `integration/oct7-pr-backlog`** (the knight armor, Bloodthorn and White Diamond as merged there, thallite gear and the rest of the 7 October backlog):
+  - **Each conflict** took the integration branch's side, with this branch's own changes applied on top; the result differs from the integration branch by exactly those changes, file for file and line for line.
+  - **Generators:** data, textures, data again, all exit 0. Hades' output is as before: its 9 `worn_models.json` entries are identical to this branch's before the merge, and the knight, Bloodthorn and White Diamond entries to the integration branch's.
+  - **Left out:** the texture generator also redraws 24 textures that came with the integration branch (the conservatory's flowers and Styxhexenhammer); the integration branch alone does the same, so they are not this change's and are left as committed.
+  - **`check_mod_data.py`:** PASS (1550 material IDs), with the art check. **`check_repository.py`**, **`check_icon_maps.py`:** PASS. **`armor_models.py`:** no problems. **`armor_smoke.py --no-render`:** all pass.
   - **Java:** the 8 changed files parse (syntax only).
 
 **In CI:** not run yet. It will compile the material, the variant and the set line; run `ArmorTiersGameTests` and `ArmsVIIGameTests` (now with the set line, and the scythe's Wither landing on a pig) and `TraitDetailsGameTests`; and shoot `ArmorTiersClientGameTests` (`jugcraft_armor_tier_hades_*`) and `ArmsVIIClientGameTests` (every variant racked, the scythe held).

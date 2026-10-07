@@ -313,6 +313,8 @@ def item_for(ref):
         return f"minecraft:raw_{metal}" if metal in ("copper", "iron", "gold") else f"{MOD}:raw_{metal}"
     if form in ("plates", "gears", "wires", "dusts"):
         return f"{MOD}:{metal}_{form[:-1]}"
+    if form == "nuggets":
+        return f"minecraft:{metal}_nugget" if metal in ("copper", "iron", "gold") else f"{MOD}:{metal}_nugget"
     raise KeyError(ref)
 
 
@@ -571,6 +573,32 @@ def set_pages():
         "as steel, and fight as their kinds do."]}]
 
 
+def thallite_gear_pages():
+    """Thallite's tools and armor, and Earthbound armor with its Earthbinding Template (docs/features/thallite.md)."""
+    import gear
+    pickaxe = [item_for(gear.GEAR_TIERS["thallite"]["ingot"]) if ch == "#" else ("minecraft:stick" if ch == "S" else None)
+               for row in gear.PATTERNS["pickaxe"] for ch in row.ljust(3)]
+    style = gear.ARMOR_STYLES["earthbound_thallite"]
+    rows, key = style["template_recipe"]
+    template = [item_for(key[ch]) if ch in key else None for row in rows for ch in row.ljust(3)]
+    return [
+        {"title": "Thallite Gear", "icon": f"{MOD}:thallite_pickaxe", "text": [
+            "Thallite makes swords, pickaxes, axes, shovels, hoes and armor, shaped like iron ones. They mine and "
+            "protect as iron does, wear out a little sooner, and take enchantments best of all.",
+            f"Regrowth: thallite gear you wear or hold mends while you stand on living soil (grass, dirt, moss, mud "
+            f"or farmland): one use every {gear.REGROWTH_SECONDS} seconds, up to {gear.REGROWTH_CAP_PERCENT}% of "
+            "full. It never brings back a broken piece, so mending and anvils still matter."],
+         "craft": {"grid": pickaxe, "result": f"{MOD}:thallite_pickaxe", "count": 1}},
+        {"title": "Earthbound Armor", "icon": f"{MOD}:earthbound_thallite_chestplate", "text": [
+            "At a smithing table, an Earthbinding Template, a piece of thallite armor and a gold ingot bind the piece "
+            "into Earthbound armor, trimmed in gold, for good. It keeps its enchantments and wear.",
+            "Rooted: on natural ground (soil, stone, sand or gravel), each Earthbound piece takes 7.5% off knockback, "
+            f"30% for a full set. With {gear.EARTHBOUND_FOR_STONE} or more worn, Regrowth works on stone, sand and "
+            "gravel too."],
+         "craft": {"grid": template, "result": f"{MOD}:{style['template']}", "count": style["template_count"]}},
+    ]
+
+
 def armor_style_pages():
     """Steampunk and Kaiser Armor (docs/features/steampunk-and-kaiser-armor.md): bronze and steel armor in another look,
     smithed with a pattern."""
@@ -622,7 +650,7 @@ def gear_pages():
             "Steampunk and Kaiser armor keep the stylized looks bronze and steel armor were first made in, as sets of "
             "their own."],
          "craft": {"grid": grid, "result": f"{MOD}:steel_pickaxe", "count": 1}},
-    ] + armor_style_pages() + arms_pages() + [
+    ] + armor_style_pages() + thallite_gear_pages() + arms_pages() + [
         {"title": "Paxels", "icon": f"{MOD}:steel_paxel", "text": [
             "A paxel is a pickaxe, an axe and a shovel in one tool: it mines stone, wood and dirt at full speed.",
             "Craft one from a pickaxe, an axe and a shovel of the same tier, from wood to netherite, bronze or steel. "

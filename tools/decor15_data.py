@@ -99,7 +99,7 @@ def glass(seed=1):
             for x in range(p.w):
                 came = (x + y) % 5 == 0 or (x - y) % 5 == 0
                 glow = 1 - abs(x - (p.w - 1) / 2) / p.w - abs(y - p.h * 0.6) / p.h
-                k = 2 + int(glow * 4) + rng.choice((0, 0, -1))
+                k = 2 + int(glow * 4) + (0 if fa.QUIET else rng.choice((0, 0, -1)))
                 p.put(x, y, IRON[1] if came else shade(VIOLET, k))
     return paint
 
@@ -283,6 +283,7 @@ def giant_bone_hand():
     return sc
 
 
+@fa.quietly
 def witchs_lantern():
     """A gothic lantern: an iron base, four corner posts round violet leaded glass, a stepped roof with a spire and a
     ring; hanging, it hangs lower on a chain."""

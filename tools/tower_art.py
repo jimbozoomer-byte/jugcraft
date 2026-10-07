@@ -132,10 +132,10 @@ def reinforced_concrete():
     """Cast-in-place concrete: mottled grey, fine pores, a formwork seam across the middle, four tie-rod holes."""
     n = pnoise(1, 18) * 0.6 + pnoise(2, 5) * 0.4
     img = colorize((138, 137, 132), n, 14)
+    # A few pores, spaced apart, in place of a sprinkle at every few pixels and a jitter on every pixel.
     rng = np.random.default_rng(3)
-    pores = rng.random((N, N)) < 0.025
-    img[pores] *= 0.7
-    img *= (1 + rng.normal(size=(N, N)) * 0.025)[..., None]
+    for px_, py_ in rng.integers(2, N - 2, size=(14, 2)):
+        img[py_, px_] *= 0.75
     # A faint formwork joint once a block (real pours show seams, but a line on every block edge turned
     # walls and the buttresses into a grid of stripes).
     groove(img, 0, 63, N, 64, dark=0.9, lip=1.0)

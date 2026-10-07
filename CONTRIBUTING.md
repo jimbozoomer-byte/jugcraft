@@ -1,5 +1,9 @@
 # Contributing to Jugcraft
 
+## Use the available frameworks
+
+Read the [approved framework catalog](docs/FRAMEWORKS.md) before proposing custom rendering, animation, spellcasting, UI, creature-AI, or inspection infrastructure. The owner has authorized this foundation; contributors may use its APIs within the documented side and optional-integration boundaries. Gradle and the [automatic-install pack](docs/DISTRIBUTION.md) share the same locked releases. New libraries or version changes remain reviewable changes. Installing a library does not implement a Jugcraft feature; include the actual integration and tests in your feature record.
+
 ## Owner-authorized development
 
 The owner authorized Claude to build the Minecraft 26.3 + Fabric bootstrap without a separate proposal issue or second maintainer. That bootstrap is done: the scaffold, pinned toolchain, Build workflow, base materials, machines and power were merged in PRs #4–#7 (see [docs/PLATFORM.md](docs/PLATFORM.md)). The project license is MIT (see [LICENSE_POLICY.md](LICENSE_POLICY.md)). Still outstanding: running the client and dedicated server, and the two-client playtest.
