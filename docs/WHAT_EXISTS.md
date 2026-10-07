@@ -5,6 +5,10 @@ A map of everything built so far, written for AI agents and contributors who nee
 - Player-facing explanations: [TECH_TREE.md](TECH_TREE.md).
 - Per-feature records: [features/](features/).
 - History of changes: [CHANGELOG.md](../CHANGELOG.md).
+- Approved libraries for new work: [FRAMEWORKS.md](FRAMEWORKS.md).
+- Automatic installation and build artifacts: [DISTRIBUTION.md](DISTRIBUTION.md).
+
+The [framework foundation](features/framework-foundation.md) provides pinned animation, spellcasting, UI, texture, and creature libraries. Consult its individual verification status; being on the classpath is not a claim that existing content uses the library. The optional Jade adapter adds server-backed energy and progress text for the shared machine implementation.
 
 > **Status.** Everything here compiles and loads in CI. Where a feature has an automated game test, that test passes on a headless server. Nothing has been play-tested in a client or on a dedicated server with two players yet.
 >

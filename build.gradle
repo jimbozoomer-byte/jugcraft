@@ -1,5 +1,6 @@
 plugins {
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'org.jetbrains.kotlin.jvm' version "${kotlin_version}"
 	id 'maven-publish'
 }
 
@@ -11,6 +12,16 @@ base {
 }
 
 repositories {
+	maven {
+		name = "Modrinth"
+		url = "https://api.modrinth.com/maven"
+		content { includeGroup "maven.modrinth" }
+	}
+	maven {
+		name = "GuiLib"
+		url = "https://skyblockoverhaul.github.io/maven"
+		content { includeGroup "net.sbo" }
+	}
 	// JEI (optional recipe viewer integration, compile-time API only; see client/compat/JugcraftJeiPlugin).
 	maven {
 		name = "BlameJared"
@@ -32,6 +43,15 @@ loom {
 	}
 }
 
+// One reviewed list controls the development classpaths, pack downloads, and release metadata.
+def frameworkLockFile = file("distribution/frameworks.lock.json")
+def frameworkLock = new groovy.json.JsonSlurper().parse(frameworkLockFile)
+if (frameworkLock.minecraft != project.minecraft_version || frameworkLock.fabricLoader != project.loader_version
+		|| frameworkLock.kotlin != project.kotlin_version) {
+	throw new GradleException("Platform pins disagree with distribution/frameworks.lock.json")
+}
+def withOptionalIntegrations = providers.gradleProperty("jugcraftOptionalIntegrations").getOrElse("true").toBoolean()
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -39,13 +59,43 @@ dependencies {
 	// Only the API: Jugcraft runs without JEI; with it, JEI loads our plugin (entrypoint "jei_mod_plugin").
 	compileOnly "mezz.jei:jei-${project.minecraft_version}-common-api:${project.jei_version}"
 	compileOnly "mezz.jei:jei-${project.minecraft_version}-fabric-api:${project.jei_version}"
+	frameworkLock.dependencies.each { library ->
+		// Fabric API and the JEI API already have their established declarations above.
+		if (library.key != "fabric-api") {
+			boolean clientOnly = library.side == "client"
+			if (library.requiredByJugcraft) {
+				add(clientOnly ? "clientImplementation" : "implementation", library.maven) { transitive = false }
+			} else {
+				if (library.key != "jei") {
+					add(clientOnly ? "clientCompileOnly" : "compileOnly", library.maven) { transitive = false }
+				}
+				if (withOptionalIntegrations) {
+					add(clientOnly ? "clientRuntimeOnly" : "runtimeOnly", library.maven) { transitive = false }
+				}
+			}
+		}
+	}
 }
 
 processResources {
 	inputs.property "version", project.version
+	inputs.file frameworkLockFile
 
 	filesMatching("fabric.mod.json") {
 		expand "version": inputs.properties.version
+	}
+	doLast {
+		File manifest = new File(destinationDir, "fabric.mod.json")
+		def metadata = new groovy.json.JsonSlurper().parse(manifest)
+		frameworkLock.dependencies.each { library ->
+			if (library.requiredByJugcraft) {
+				metadata.depends[library.modId] = ">=${library.modVersion}"
+			} else {
+				if (!metadata.suggests) metadata.suggests = [:]
+				metadata.suggests[library.modId] = ">=${library.modVersion}"
+			}
+		}
+		manifest.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(metadata)) + "\n"
 	}
 }
 
@@ -67,6 +117,17 @@ fabricApi {
 }
 
 // CI chooses and shares out the client game tests (tools/select_client_tests.py, docs/TESTING.md):
+// Loom deletes build/run/clientGameTest before each run, so CI must write these AFTER that dependency.
+// Restrict this to CI: never overwrite a local developer's client settings.
+tasks.named("runClientGameTest") {
+	doFirst {
+		if (System.getenv("CI") == "true") {
+			workingDir.mkdirs()
+			new File(workingDir, "options.txt").text = 'preferredGraphicsBackend:"opengl"\nfullscreen:false\nlang:en_us\n'
+		}
+	}
+}
+
 // -PclientTests=<Class,Class,...> keeps only those classes of the test mod's client test list (simple names), and
 // -PclientTestShard=<n> -PclientTestShards=<count> keeps the classes at positions n, n + count, n + 2 * count ... of
 // it. Without them every class runs. Server game tests are never split.
@@ -120,6 +181,10 @@ java {
 	withSourcesJar()
 	sourceCompatibility = JavaVersion.VERSION_25
 	targetCompatibility = JavaVersion.VERSION_25
+}
+
+kotlin {
+	jvmToolchain(25)
 }
 
 jar {

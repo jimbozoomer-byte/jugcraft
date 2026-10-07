@@ -126,7 +126,11 @@ def item_name(item):
 
 
 def assets():
-    lang = {}
+    lang = {
+        "config.jade.plugin_jugcraft.machine_status": "Machine status",
+        "tooltip.jugcraft.machine_energy": "Energy: %s / %s JE",
+        "tooltip.jugcraft.machine_progress": "Processing: %s%%",
+    }
     for block in all_blocks():
         write(ASSETS / "blockstates" / f"{block}.json", {"variants": {"": {"model": rid(f"block/{block}")}}})
         write(ASSETS / "models" / "block" / f"{block}.json", material_icons.block_model(block)

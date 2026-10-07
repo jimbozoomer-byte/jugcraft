@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.mixin;
 
 import com.mojang.datafixers.util.Pair;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
+import io.github.jimbozoomer.jugcraft.biome.BiomeBootstrapScope;
 import io.github.jimbozoomer.jugcraft.world.AlpineSpawn;
 import io.github.jimbozoomer.jugcraft.world.PixelHollows;
 import java.util.function.Consumer;
@@ -36,6 +37,11 @@ public abstract class OverworldBiomeBuilderMixin {
 	@ModifyVariable(method = "addBiomes", at = @At("HEAD"), argsOnly = true)
 	private Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> jugcraft$wrap(
 			Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> biomes) {
+		if (BiomeBootstrapScope.isVanillaOnly()) {
+			jugcraft$recorder = null;
+			jugcraft$output = null;
+			return biomes;
+		}
 		jugcraft$recorder = JugcraftRegions.recorder(biomes);
 		jugcraft$output = AlpineSpawn.wrap(jugcraft$recorder != null ? jugcraft$recorder : biomes);
 		return jugcraft$output;
@@ -44,7 +50,7 @@ public abstract class OverworldBiomeBuilderMixin {
 	@Inject(method = "pickPlateauBiome", at = @At("HEAD"), cancellable = true)
 	private void jugcraft$alpinePlateau(int temperature, int humidity, Climate.Parameter weirdness,
 			CallbackInfoReturnable<ResourceKey<Biome>> cir) {
-		if (AlpineSpawn.takesPlateau(temperature, humidity)) {
+		if (!BiomeBootstrapScope.isVanillaOnly() && AlpineSpawn.takesPlateau(temperature, humidity)) {
 			cir.setReturnValue(AlpineSpawn.BIOME);
 		}
 	}
@@ -52,6 +58,7 @@ public abstract class OverworldBiomeBuilderMixin {
 	/** Appends the Pixel Hollows (in every region), then lists the Jugcraft biomes and publishes their layout. */
 	@Inject(method = "addBiomes", at = @At("TAIL"))
 	private void jugcraft$addPixelHollows(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> biomes, CallbackInfo ci) {
+		if (BiomeBootstrapScope.isVanillaOnly()) return;
 		PixelHollows.addToOverworld(jugcraft$output != null ? jugcraft$output : biomes);
 		if (jugcraft$recorder != null) {
 			jugcraft$recorder.finish();
