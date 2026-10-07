@@ -1173,8 +1173,14 @@ public class JugcraftGameTests {
 		}
 		helper.runAfterDelay(80, () -> {
 			int left = gunner.getInventory().countItem(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM);
-			helper.assertTrue(left == 2, "A salvo should use three Heavy Shells, leaving 2, but left " + left);
-			helper.succeed();
+			try {
+				helper.assertTrue(left == 2, "A salvo should use three Heavy Shells, leaving 2, but left " + left
+						+ "; gun ticks=" + battery.tickCount + ", crewed=" + (battery.getFirstPassenger() == gunner)
+						+ ", aim=" + battery.aimYaw(1.0F) + "/" + battery.aimPitch());
+				helper.succeed();
+			} finally {
+				io.github.jimbozoomer.jugcraft.artillery.Spotting.clear(gunner);
+			}
 		});
 	}
 

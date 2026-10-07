@@ -8,6 +8,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"fabric-gametest": [
+			"io.github.jimbozoomer.jugcraft.test.FrameworkGameTests",
 			"io.github.jimbozoomer.jugcraft.test.JugcraftGameTests",
 			"io.github.jimbozoomer.jugcraft.test.AgricultureGameTests",
 			"io.github.jimbozoomer.jugcraft.test.KitchenGardenGameTests",
@@ -95,6 +96,10 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIIIGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ThalliteGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ThalliteGearGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmorTiersGameTests",
+			"io.github.jimbozoomer.jugcraft.test.StyxGameTests",
+			"io.github.jimbozoomer.jugcraft.test.WorldDesignerGameTests",
 			"io.github.jimbozoomer.jugcraft.test.FarmhouseKitchenGameTests"
 		],
 		"fabric-client-gametest": [
@@ -189,6 +194,12 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmorSetsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ThalliteClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.WoodClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ScaryCreaturesClientTests",
+			"io.github.jimbozoomer.jugcraft.test.KnightArmorClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmorTiersClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.StyxClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.StyxTownClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.WorldDesignerClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.FarmhouseKitchenClientGameTests"
 		]
 	},

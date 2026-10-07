@@ -25,6 +25,8 @@ The client tests a pull request skips still run on `main` after it merges. A bre
 
 ## Gameplay PR evidence after bootstrap
 
+For framework/pack changes, also run `python scripts/package_modrinth.py check`, `python -m unittest discover -s scripts/tests -v`, `python scripts/package_modrinth.py verify`, and `python scripts/package_modrinth.py build` after compilation. Test `./gradlew build -PjugcraftOptionalIntegrations=false` and the corresponding client run. The [distribution guide](DISTRIBUTION.md) explains clean launcher import and client/server file flags. A generated `.mrpack` is not proof that importing or playing it passed.
+
 Record commit SHA, exact client/server/dependency versions, test world origin, commands, observed results, and test date. Do not commit worlds or logs with player information; attach redacted evidence when needed.
 
 - Build and relevant unit/game tests.
@@ -44,8 +46,8 @@ Record commit SHA, exact client/server/dependency versions, test world origin, c
 
 Setup:
 1. `./gradlew build`; the mod is the jar in `build/libs/` without `-sources`.
-2. A dedicated server for Minecraft 26.3 with Fabric Loader 0.19.3 (the official installer at https://fabricmc.net/use/server/), with Fabric API 0.161.0+26.3 and the Jugcraft jar in `mods/`. Accept the EULA and start it.
-3. Two clients, each a Fabric 26.3 profile with the same Fabric API and Jugcraft jars, signed in as different accounts. Both join.
+2. A dedicated server for Minecraft 26.3 with Fabric Loader 0.19.5 (the official installer at https://fabricmc.net/use/server/), with the common files from the exact Jugcraft Complete pack. Use a server installer that honors the `.mrpack` environment flags; see [DISTRIBUTION.md](DISTRIBUTION.md). Accept the EULA and start it.
+3. Two clients using that same Jugcraft Complete pack, signed in as different accounts. Both join. Also exercise optional integrations absent as described above.
 
 Checks:
 - Both join without a registry or mod-mismatch disconnect, and see each other.
@@ -58,6 +60,8 @@ Checks:
 - Set `pixel_hollows.enabled=false` and `retro_trader.enabled=false` in `config/jugcraft.properties`, restart: existing blocks, caves and traders remain.
 
 ## Content-specific scenarios
+
+- **World Designer:** run `node --test tools/world-designer/model.test.cjs`, the three `WorldDesignerGameTests`, and `WorldDesignerClientGameTests`. Also load an actual exported ZIP into a new world's datapacks, select `jugcraft:designed`, generate the pinned chunks, and inspect structure starts. The [feature record](features/world-designer.md) distinguishes compiler, browser, real-world and persistence evidence.
 
 Use the cases relevant to the feature; do not claim a scenario was run just because it appears here.
 

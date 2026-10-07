@@ -27,7 +27,7 @@ import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
  */
 public final class RetroShopPlacement {
 	/** How many layouts a village may try for its shop; the last one stays, with or without a shop. */
-	public static final int LAYOUTS = 8;
+	public static final int LAYOUTS = 32;
 
 	/** For the structure being built on this thread. Null outside jigsaw placement. */
 	private static final ThreadLocal<State> STATE = new ThreadLocal<>();

@@ -48,7 +48,7 @@ def items():
             + ["ronin_katana", "ronin_livery", "vanguard_livery"])
 
 
-# ---------------------------------------------------------------- 3D parts on the body (client/ExosuitLayer)
+# ---------------------------------------------------------------- 3D parts on the body (client/WornModelLayer)
 # Boxes in each body part's own space, in pixels, before it moves: x towards the model's left (the right arm and leg
 # are at -x), y DOWN from the part's pivot, z towards the back. The head and body pivot at the neck; an arm pivots at
 # its shoulder (its 4x12x4 box spans x -3..1 for the right arm, -1..3 for the left, y -2..10); a leg at its hip (x -2..2,

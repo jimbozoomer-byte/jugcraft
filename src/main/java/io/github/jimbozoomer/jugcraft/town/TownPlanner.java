@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.town;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import io.github.jimbozoomer.jugcraft.styx.StyxTownDistrict;
 import java.util.Arrays;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -51,6 +52,7 @@ public final class TownPlanner {
 			return;
 		}
 		BlockPos start = level.getRespawnData().pos();
+		if (io.github.jimbozoomer.jugcraft.world.design.WorldDesigner.applyTown(level)) return;
 		BlockPos origin = choose(level, start);
 		if (origin == null) {
 			Jugcraft.LOGGER.info("Town: no dry, open ground {}-{} blocks from the start; no town in this world", MIN_DISTANCE, MAX_DISTANCE);
@@ -61,7 +63,8 @@ public final class TownPlanner {
 
 	/** Puts the town's corner here and builds whatever of it is already loaded. */
 	public static void place(ServerLevel level, BlockPos origin) {
-		TownState.get(level).place(origin);
+		TownState.get(level).place(origin, io.github.jimbozoomer.jugcraft.styx.StyxTownDistrict.canReserve(level, origin));
+		io.github.jimbozoomer.jugcraft.styx.StyxTownDistrict.reserve(level);
 		TownBuilder.queueLoaded(level);
 		BlockPos centre = Town.centre(origin);
 		Jugcraft.LOGGER.info("Town: placed with its middle at {} {} {}", centre.getX(), centre.getY(), centre.getZ());
@@ -90,7 +93,13 @@ public final class TownPlanner {
 				if (distance < MIN_DISTANCE || distance > MAX_DISTANCE) {
 					continue;
 				}
-				int[] heights = new int[GRID * GRID];
+				BlockPos candidate = originAround(cx, 0, cz);
+				// The east district must not cover the spawn village. Include it when scoring terrain,
+				// without generating any chunks merely to choose a location.
+				BlockPos home = StyxTownDistrict.home(candidate);
+				if (start.getX() >= home.getX() - 48 && start.getX() < home.getX() + StyxTownDistrict.WIDTH + 48
+						&& start.getZ() >= home.getZ() - 48 && start.getZ() < home.getZ() + StyxTownDistrict.DEPTH + 48) continue;
+				int[] heights = new int[GRID * GRID + 9];
 				int wet = 0;
 				int n = 0;
 				for (int i = 0; i < GRID; i++) {
@@ -104,6 +113,13 @@ public final class TownPlanner {
 						}
 						heights[n++] = floor;
 					}
+				}
+				for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
+					int x = home.getX() + (StyxTownDistrict.WIDTH - 1) * i / 2;
+					int z = home.getZ() + (StyxTownDistrict.DEPTH - 1) * j / 2;
+					int floor = generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, level, random);
+					if (generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level, random) > floor) wet++;
+					heights[n++] = floor;
 				}
 				if (wet > MAX_WET) {
 					continue;

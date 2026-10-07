@@ -1,6 +1,6 @@
 # Industrial starter workshop and first electricity
 
-Status: owner-endorsed planning direction, recorded and updated 6 October 2026. This is the starter-route portion of planning step 7. The alloy station, manual tools, mechanical production arrangement, sustained shaft-source options, equal material-yield policy, basic-silicon route, manual-to-shaft bellows, optional reusable gear casting and first-electricity checkpoint are selected below. The initial starter recipes/costs are accepted as a provisional playtesting baseline. Heat-upgrade and mechanical-station construction quantities remain proposals; structures, work rates and operating costs remain to balance. No gameplay is implemented by this document.
+Status: owner-endorsed planning direction, recorded and updated 6 October 2026. This is the starter-route portion of planning step 7. The alloy station, manual tools, mechanical production arrangement, sustained shaft-source options, equal material-yield policy, basic-silicon route, manual-to-shaft bellows, optional reusable gear casting, moderate throughput target, early item handling and first-electricity checkpoint are selected below. The initial starter recipes/costs are accepted as a provisional playtesting baseline. Heat-upgrade and mechanical-station construction quantities remain proposals; exact structures, work rates and operating costs remain to balance. Conveyor performance and the conditional late-game pipe alternative need measurement. No gameplay is implemented by this document.
 Proposal issue: direct owner choices during industrial planning.
 Owner: jimbozoomer-byte.
 Target capability: a useful mechanical workshop and first electricity before mod steel, with steel developing in parallel.
@@ -21,6 +21,9 @@ Related documentation: [machine roadmap](../MACHINE_ROADMAP.md), [current techno
 - **Basic silicon comes from accessible Overworld quartz and charcoal in a heat-upgraded crucible furnace.** This is the selected simplified gameplay route for Workshop circuits. A separate silicon furnace, electricity, steel or a mandatory Nether trip is not required to begin this path.
 - **Bellows can be operated manually first, then connected to shafts to automate the same equipment.** Shaft power is not compulsory for the first higher-heat process; motor drive remains a later way to power the shaft arrangement.
 - **Include optional reusable ceramic gear molds for early bronze/brass casting alongside plate-based gear crafting.** Both routes use the same amount of metal. Casting adds ceramics/metallurgy depth without becoming a compulsory step or consuming a mold per gear.
+- **Small machines target roughly 3–4 times the throughput of equivalent manual work, plus automatic operation.** This is a provisional balancing target; manual work stays practical for small jobs and material yields remain equal.
+- **Early workshop material handling includes hoppers and shaft-powered conveyors.** Pipe networks and detailed filtering are optional expansions; no logistics network is required for first electricity.
+- **Review conveyor performance at late-game factory scale.** The owner noted that, if conveyors are really costly at that scale, late-game transport can use item pipes whose moving items are not visible. Keep this conditional replacement route in the plan and measure it before claiming that either transport is faster.
 - **First-electricity pacing target:** approximately 2–4 active hours from a fresh world following known recipes, excluding optional building detours. This is a balancing/playtest target, not measured current behavior or a timed unlock.
 
 Earlier choices remain constraints: a semi-substantial mechanical era with many pre-electric products; a manageable essential route into the next capability; first electricity and basic circuits in the Workshop stage; electricity and steel as parallel capabilities; ceramics supplying suitable insulators and alloy-equipment materials; motors reusing earlier workshops; and selected cross-industry dependencies instead of completing every specialty.
@@ -108,6 +111,12 @@ The owner chose separate shaft-powered stations as the normal expansion beyond t
 Construction can use earlier ingots and selected manually made parts. It cannot require an output available only from the very station being constructed. Motor drive can electrify an existing line later; any direct electrical input should reuse the existing shared interface. Larger throughput/efficiency versions remain optional unless a process genuinely requires their new capability.
 
 The shared manual bench remains useful for starter quantities, small jobs and appropriate fallback recipes. Powered bench attachments are not the selected primary mechanization route. Material yields are equal for equivalent approved recipes; exact station structures, batch sizes and manual-versus-machine work rates remain to balance.
+
+### Selected throughput target
+
+For equivalent supported plate, wire and basic-circuit recipes, a sufficiently supplied small machine should aim for roughly **3–4 times the manual recipe throughput**, with automation as an additional benefit. Compare equivalent outputs per unit of time, accounting for batch size. This is a balance target, not a material multiplier, a power-conversion bonus or measured current behavior.
+
+Keep starter manual batches practical instead of lengthening every hand operation solely to create a large speed advantage. Input supply, power sharing, interrupted heat and full outputs can limit a real line; the 3–4 times target does not promise that every whole factory maintains that advantage in every layout. Larger stations and justified new process capabilities remain separately balanced expansions. Exact manual/machine durations and operating fuel/power need recipe work and playtesting.
 
 ### Selected material-yield policy
 
@@ -265,6 +274,24 @@ Early bronze/brass casting uses the basic alloy furnace capability; the silicon 
 
 The proposed press removes a large initial iron purchase rather than reducing the plate recipe's yield. The separate electrical interface remains available as appropriate; removing a cable from a proposed construction recipe does not introduce a new power system. Exact recipe shapes, footprints, source output, work rates and operating heat/fuel remain later balance tasks.
 
+## Selected early item handling and conveyor performance review
+
+Hoppers and shaft-powered conveyors are the basic pre-electric workshop options. They can move ingredients/results between appropriate inventories and useful machines through the existing shared inventory/side interfaces. A player can still load a small workshop manually. Conveyor lines are optional automation purchases, budgeted separately from the four minimum electricity examples.
+
+Reuse the existing conveyor, inventory and item-pipe systems. Pipe networks and detailed filtering expand routing as needed; their availability does not mean that every first workshop must be a complete logistics factory. Do not introduce a second incompatible item-transport API for this plan.
+
+### Owner note: possible late-game replacement with non-rendered item transport
+
+Record the owner's condition explicitly: **if conveyor belts prove very costly in late-game factories, use item pipes with no visible moving items as the replacement transport option for those bulk lines.** Static pipe blocks and readable connection/status information can remain visible; the transported item stacks are not drawn moving through the world. The desired fallback is functional transport without per-stack transport animation.
+
+This is a future performance decision, not evidence that conveyors are currently too slow or that pipes are already a proven fix. Reducing visible-item rendering may address client cost while server transfer/routing cost still needs separate measurement. Compare conveyor and non-rendered pipe layouts at matched material throughput, route complexity and source/destination count.
+
+The future review should cover small, expanding and large late-game factory workloads, recording loaded segment counts, active lines, moving stack counts, inventories/filters, players and hardware/settings. Measure server median/p95 tick time, client frame time, synchronization traffic and memory under active, idle and blocked-output conditions. Use those results to identify whether cost comes from item rendering, belt simulation, updates or routing before choosing an optimization or moving bulk lines to pipes.
+
+If that comparison shows unacceptable conveyor cost and a suitable pipe alternative, make the pipe route accessible for affected late-game lines and explain the switch in the Encyclopedia. Existing conveyor content, inventories and saved identities need ordinary compatibility handling; the note does not perform an automatic world conversion. Performance thresholds and tested workloads remain to agree from evidence. No conveyor/pipe benchmark has been run for this planning contribution.
+
+The same note is recorded independently in the [conveyor feature brief](conveyors.md#owner-selected-performance-review-and-pipe-alternative), so the transport performance task remains visible outside this starter plan.
+
 ## Sideways industries and larger equipment
 
 Keep many useful products available around the essential route: brick/tile palettes, construction materials, containers and pipes, crop milling/pressing, textiles/cordage, wood and paper products, workshop metal goods, simple separation/abrasives and selected recovery operations. Each branch needs outputs useful on their own, as well as appropriate later consumers.
@@ -281,7 +308,7 @@ The same data currently gives the metal press, wire drawer and circuit assembler
 
 [tools/generate_material_data.py](../../tools/generate_material_data.py) currently generates gears from four same-metal plates. The proposed manual plate route therefore also supplies early gears; the selected mold-casting direction is an additional planned alternative, not a claim that gears lack an existing crafting recipe.
 
-The [current item-logistics overview](../TECH_TREE.md#item-logistics) documents hoppers/inventory interfaces, shaft-driven conveyors and optional pipe/routing equipment. These are the source starting points for the next workshop-handling pass; do not introduce a duplicate transport system or require a complete logistics network for the first generator.
+The [current item-logistics overview](../TECH_TREE.md#item-logistics) documents hoppers/inventory interfaces, shaft-driven conveyors and optional pipe/routing equipment. These supply the selected early handling roles and the starting point for the conditional late-game pipe alternative. Source behavior is not evidence of acceptable large-factory performance.
 
 [tools/materials.py](../../tools/materials.py) provides a bronze-blend furnace route and a quartz-blasting silicon stand-in. These are starting points to audit; this document does not remove them or claim that manual plate/wire/circuit recipes already exist. The registered Water Wheel currently has electrical generation data; do not describe it as a shaft source without an explicit implementation change.
 
@@ -294,11 +321,12 @@ Preserve stable registrations and working entry paths during any later implement
 3. Budget optional electronics, mechanical expansion, storage and bulk processing separately from the two generator entry routes. Include reachable Overworld quartz supply and heat-upgrade construction in the circuit-path budget.
 4. Include required gathering, fuel, heating, crafting and setup work in the 2–4 hour target. Exclude optional cosmetic builds and specialty detours, rather than hiding necessary resource acquisition from the timing.
 5. Compare realistic solo and trade starts, including multiple ordinary world seeds, interrupted processing/full outputs and relevant configuration combinations.
-6. Tune quantities, processing time, fuel/power, conversion losses and mechanical/electrical scaling from evidence. Audit manual/machine/recycling cycles so alternatives cannot multiply material.
+6. Tune quantities, processing time, fuel/power, conversion losses and mechanical/electrical scaling from evidence, using the selected 3–4 times small-machine throughput target. Audit manual/machine/recycling cycles so alternatives cannot multiply material.
+7. Profile conveyor and non-rendered item-pipe workloads at increasing factory scale. Retain the owner's conditional late-game pipe replacement direction; performance claims require actual measurements.
 
 The [independent Jugcraft Encyclopedia brief and TODO record](https://github.com/jimbozoomer-byte/jugcraft/pull/211) should explain both starter routes and distinguish essential capabilities from optional products and quest-order suggestions. No quest completion or carried guide item becomes a new industrial unlock requirement.
 
-The essential workshop route is mapped: early alloys, manual parts, separate mechanical stations, sustained shaft sources, equal material yields, the first-electricity checkpoint, the provisional initial costs, starter silicon, manual-to-shaft bellows and optional reusable gear casting are settled. Remaining detail includes review/tuning of new construction quantities, quartz supply, source outputs/site requirements, station structures, tool durability and processing/throughput/fuel costs. Next, settle the size of the manual-to-machine throughput improvement and the early item-handling scope, using the shared logistics systems. Optional electronics, casting, automation and broader specialties remain expansions around the reachable route.
+The essential workshop route is mapped: early alloys, manual parts, separate mechanical stations, sustained shaft sources, equal material yields, the first-electricity checkpoint, the provisional initial costs, starter silicon, manual-to-shaft bellows, optional reusable gear casting, moderate throughput scaling and early hopper/conveyor handling are settled. Remaining detail includes review/tuning of new construction quantities, quartz supply, source outputs/site requirements, station structures, tool durability, exact processing/fuel costs and conveyor/pipe performance. The next broader planning topic is steel and bulk metallurgy developing alongside electricity; keep the manageable essential route and useful sideways products. Optional electronics, casting, automation and broader specialties remain expansions around that route.
 
 Documentation validation: repository/link and whitespace checks apply. Future gameplay work needs relevant recipe audits, survival-route tests, restart/unload behavior and two-client evidence. This plan contains no new build, timing or game-test results.
 

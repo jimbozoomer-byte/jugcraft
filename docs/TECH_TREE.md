@@ -413,7 +413,7 @@ Empty tools mine like a bare hand and get no drops.
 
 ### Steampunk and Kaiser Armor (batch 60)
 
-The stylized looks bronze and steel armor were first drawn in, as sets of their own. Each piece protects exactly as its plain piece does (same defense, toughness, durability, enchantability and repair), and smithing keeps its enchantments and wear. **For now bronze and steel armor still wear the same looks**, so each styled piece looks exactly like its plain piece; a following PR gives bronze and steel armor their own new 3D look.
+The stylized looks bronze and steel armor were first drawn in, as sets of their own. Each piece protects exactly as its plain piece does (same defense, toughness, durability, enchantability and repair), and smithing keeps its enchantments and wear. Bronze and steel armor wear their own 3D look, the owner's knight design ([knight-armor.md](features/knight-armor.md)).
 
 | Item | What it does | Built from |
 | --- | --- | --- |
@@ -448,7 +448,7 @@ The stylized looks bronze and steel armor were first drawn in, as sets of their 
 | Ronin Exosuit pieces, Ronin Katana | The same, in the crimson Ronin livery | smithing: Ronin Livery + piece (or power katana) + red dye |
 | Ronin / Vanguard Livery | Smithing templates that repaint the suit and katana, keeping charge | dyes around a steel plate (2) |
 
-**Code:** `gear/` (`JugcraftExosuit`, `ExosuitItem`, `Exosuit`), `tools/Jetpack`, client `ExosuitLayer`; data and art from `tools/exosuit.py` and `tools/exosuit_art.py` ([feature record](features/exosuit.md)).
+**Code:** `gear/` (`JugcraftExosuit`, `ExosuitItem`, `Exosuit`), `tools/Jetpack`, client `WornModelLayer`; data and art from `tools/exosuit.py` and `tools/exosuit_art.py` ([feature record](features/exosuit.md)).
 
 ### Pneumatic grapple (batch 30)
 

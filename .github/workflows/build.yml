@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: jugcraft-build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   mod:
     runs-on: ubuntu-latest
@@ -27,8 +30,36 @@ jobs:
           git diff --exit-code -- src/main/resources
       - name: Check material data
         run: python3 tools/check_mod_data.py
+      - name: Test world designer and pack compiler
+        run: node --test tools/world-designer/model.test.cjs
       - name: Build mod
         run: ./gradlew build --no-daemon
+      - name: Verify pinned library downloads
+        run: python3 scripts/package_modrinth.py verify
+      - name: Package Jugcraft Complete
+        run: python3 scripts/package_modrinth.py build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jugcraft-installers
+          path: |
+            build/libs/*.jar
+            build/distributions/*
+          if-no-files-found: error
+
+  optional-absent:
+    name: optional integrations absent
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Build and run server tests without optional integrations
+        run: ./gradlew build --no-daemon -PjugcraftOptionalIntegrations=false
 
   # Which client game test classes to run, shared out between the three client jobs (tools/select_client_tests.py).
   # A pull request runs the classes that show what it changed; main and a manual run of this workflow run them all.
@@ -72,6 +103,10 @@ jobs:
         shard: [0, 1, 2]
     env:
       CLASSES: ${{ needs.plan.outputs[format('shard{0}', matrix.shard)] }}
+      LIBGL_ALWAYS_SOFTWARE: 'true'
+      # SDL 3 uses EGL for the software OpenGL context; Xvfb's GLX visual selection fails here.
+      # https://wiki.libsdl.org/SDL3/SDL_HINT_VIDEO_FORCE_EGL
+      SDL_VIDEO_FORCE_EGL: '1'
     steps:
       - name: Classes for this job
         run: |
@@ -88,12 +123,13 @@ jobs:
           cache: gradle
       - name: Install Mesa (software rendering)
         if: env.CLASSES != ''
-        run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers
+        run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers libgl1-mesa-dri libglx-mesa0 libegl1 libegl-mesa0 mesa-utils xvfb
       - name: Prepare run directory
         if: env.CLASSES != ''
         run: |
-          mkdir -p run && echo "eula=true" > run/eula.txt
-          echo 'preferredGraphicsBackend:"opengl"' > run/options.txt
+          # Test options are written by runClientGameTest after Loom cleans its run directory.
+          mkdir -p run
+          echo "eula=true" > run/eula.txt
       - name: Run client game tests (shard ${{ matrix.shard }} of 3)
         if: env.CLASSES != ''
         run: ./gradlew runClientGameTest --no-daemon "-PclientTests=$CLASSES"
