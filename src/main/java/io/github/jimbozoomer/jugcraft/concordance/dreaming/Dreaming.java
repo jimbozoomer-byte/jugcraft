@@ -236,11 +236,22 @@ public final class Dreaming {
 		return "";
 	}
 
-	/** A wisp gathers for {@code player}'s dream round {@code censer}: the {@code index}th, each further out. */
+	/**
+	 * A wisp gathers for {@code player}'s dream round {@code censer}: the {@code index}th, each further out, but only
+	 * where creatures are live (a loaded, ticking chunk). Where its place is not, it gathers nearer the censer, so no wisp
+	 * the dream counts is lost in a region nobody can reach.
+	 */
 	private static void gather(ServerLevel level, ServerPlayer player, BlockPos censer, int index) {
 		double angle = index * 2.39996;
-		double reach = 5.0 + index % 3 * 2.0;
-		Vec3 at = Vec3.atCenterOf(censer).add(Math.cos(angle) * reach, 1.5, Math.sin(angle) * reach);
+		Vec3 centre = Vec3.atCenterOf(censer);
+		Vec3 at = centre.add(0.0, 1.5, 0.0);
+		for (double reach = 5.0 + index % 3 * 2.0; reach >= 1.0; reach -= 1.0) {
+			Vec3 place = centre.add(Math.cos(angle) * reach, 1.5, Math.sin(angle) * reach);
+			if (level.isPositionEntityTicking(BlockPos.containing(place))) {
+				at = place;
+				break;
+			}
+		}
 		DreamWispEntity.spawn(level, player, at, index * 0.37F);
 	}
 

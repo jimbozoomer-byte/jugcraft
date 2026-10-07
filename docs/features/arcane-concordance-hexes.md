@@ -92,7 +92,8 @@ on leaving the server, and on joining with a dream still open (a crash). A dream
 did not see keeps the expedition on the dead body (ending it there does nothing) until they respawn; the new body then
 gets the escrow and game mode back (`Dreaming.recover`), once. Wisps are GeckoLib entities that are never saved and
 fade the moment their dreamer is not dreaming; only their dreamer can catch them, by touch, and nothing can pick or
-strike them (no projectile stops at one).
+strike them (no projectile stops at one). A wisp gathers only where creatures are live (a loaded, ticking chunk); where
+its place is not, it gathers nearer the censer, so none the dream counts is lost where nobody can reach it.
 
 ## Connections
 

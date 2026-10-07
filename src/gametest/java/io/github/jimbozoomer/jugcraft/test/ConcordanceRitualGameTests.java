@@ -12,6 +12,7 @@ import io.github.jimbozoomer.jugcraft.concordance.Rituals;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructureValidator;
+import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
@@ -375,10 +376,16 @@ public class ConcordanceRitualGameTests {
 		helper.assertTrue(taken == terms.energy() && before - after == taken,
 				"The porter took exactly what the pylons lost: " + taken + " of " + (before - after));
 		helper.assertTrue(channels.stream().anyMatch(channel -> pylon(helper, channel).ley() == 0), "and left a channel dry");
+		int focusAtStart = ConcordanceProgress.currentFocus(player);
+		long started = level.getGameTime();
 		helper.succeedWhen(() -> {
 			offeringsKept(helper, anchor, RitualMachine.Interruption.POWER);
 			helper.assertTrue(porter.body().energy() == taken, "The porter's charge is its own; nothing was returned to the pylons");
-			helper.assertTrue(ConcordanceProgress.currentFocus(player) == 20 - 6, "The ritual's Focus is not refunded");
+			// Focus comes back with time, so the stop must not have added a refund on top: no more than time alone gives.
+			int regained = ConcordanceProgress.currentFocus(player) - focusAtStart;
+			long elapsed = level.getGameTime() - started;
+			helper.assertTrue(regained <= elapsed / FocusPool.REGEN_TICKS + 1,
+					"The ritual's Focus is not refunded: " + regained + " regained in " + elapsed + " ticks");
 		});
 	}
 
