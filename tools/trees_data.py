@@ -108,12 +108,13 @@ def tree_blocks(wood):
 
 
 def minimum_size(info):
-    """The free space a tree needs, as vanilla sets it for the same placers (spruce, fancy oak, bush, oak)."""
+    """The free space a tree needs, as vanilla sets it for the same placers (spruce, pine, fancy oak, bush, oak)."""
     foliage = (info["foliage"] or {}).get("type")
     if info.get("giant") or info["trunk"]["type"] in ("giant", "mega_jungle"):
         # Two blocks wide: vanilla's giant spruce and mega jungle tree.
         return {"type": "minecraft:two_layers_feature_size", "lower_size": 1, "upper_size": 2}
-    if foliage == "spruce":
+    if foliage in ("spruce", "pine"):
+        # Vanilla's spruce and pine trees alike.
         return {"type": "minecraft:two_layers_feature_size", "limit": 2, "upper_size": 2}
     if info["trunk"]["type"] == "fancy":
         return {"type": "minecraft:two_layers_feature_size", "limit": 0, "min_clipped_height": 4, "upper_size": 0}

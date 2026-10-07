@@ -372,7 +372,10 @@ def check_recipes(registered):
             continue
         name = path.stem
         conditions = recipe.get("fabric:load_conditions", [])
-        features = [c.get("feature") for c in conditions if c.get("condition") == f"{MOD}:feature_enabled"]
+        switches = [c for c in conditions if c.get("condition") == f"{MOD}:feature_enabled"]
+        features = [c.get("feature") for c in switches]
+        # Each condition is one switch, or several any one of which loads the recipe ("or": a wood's WOOD_SWITCHES).
+        groups = [sorted([c.get("feature"), *c.get("or", [])]) for c in switches]
         if not features:
             err(f"{name}: missing feature switch condition")
         if "result" not in recipe:
@@ -380,8 +383,12 @@ def check_recipes(registered):
             if recipe["type"] not in SPECIAL_RECIPES:
                 err(f"{name}: no result, and {recipe['type']} is not a known special recipe")
             continue
-        if features and split(recipe["result"]["id"])[1] in registered and feature_of(split(recipe["result"]["id"])[1]) not in features:
-            err(f"{name}: gated by {features} but its result belongs to {feature_of(split(recipe['result']['id'])[1])}")
+        result = split(recipe["result"]["id"])[1]
+        if features and result in registered:
+            owner = feature_of(result)
+            owner = sorted(owner) if isinstance(owner, list) else [owner]
+            if owner not in groups:
+                err(f"{name}: gated by {groups} but its result belongs to {owner} (any of them)")
 
         kind = recipe["type"]
         if kind == "minecraft:crafting_shaped":
@@ -422,6 +429,7 @@ def check_recipes(registered):
 def check_machine_recipe_files(registered):
     """Machine recipes are data-driven files under recipe/<type>/; each must resolve and match its type."""
     from generate_material_data import RECIPE_TYPES
+    from machines import FEATURE as MACHINE_SWITCH
     kinds = MACHINE_JAVA.read_text(encoding="utf-8")
     for machine, kind in RECIPE_TYPES.items():
         if f'"{kind}"' not in kinds:
@@ -439,6 +447,17 @@ def check_machine_recipe_files(registered):
             err(f"{label}: type {recipe.get('type')} does not match its folder")
         if not recipe.get("fabric:load_conditions"):
             err(f"{label}: missing feature switch condition")
+        # A Jugcraft wood's sawmill recipe follows the machines switch and its wood's switches, any one of which loads it
+        # (agriculture.WOOD_SWITCHES, TREES.md rule 4), as the wood's hand recipes do. The tree farm follows the machines
+        # switch alone, by design.
+        wood = path.stem.removesuffix("_logs")
+        if path.parent.name == "sawing" and wood in ag.WOOD_SETS:
+            groups = sorted(sorted([c.get("feature"), *c.get("or", [])]) for c in recipe.get("fabric:load_conditions", [])
+                            if c.get("condition") == f"{MOD}:feature_enabled")
+            wanted = sorted([[MACHINE_SWITCH], sorted(ag.WOOD_SWITCHES.get(wood, []))])
+            if groups != wanted:
+                err(f"{label}: gated by {groups}, not by the machines switch and the {wood} wood's switches "
+                    f"{ag.WOOD_SWITCHES.get(wood)} (any of them)")
         refs = [part["ingredient"] for part in recipe.get("ingredients", [])] or [recipe.get("ingredient", "")]
         refs += [entry["result"]["id"] for entry in recipe.get("byproducts", [])]
         for ref in refs + [recipe["result"]["id"]]:
@@ -2286,6 +2305,58 @@ def check_biomes():
             err(f"Tree shape {shape} is giant but no tree's saplings grow it (agriculture.TREES \"giant\")")
 
 
+def check_wood_switches():
+    """TREES.md rule 4: a wood's hand and sawmill recipes, and its tree's leaves and sapling, are on whenever any feature
+    switch that places its logs is on. Every switch that places a tree shape, fallen log or placed tree of a Jugcraft wood
+    (a biome's trees or extras, Alpine Spawn's selector, agriculture's wild patches such as the chestnut trees) must be in
+    that wood's agriculture.WOOD_SWITCHES."""
+    if set(ag.WOOD_SWITCHES) != set(ag.WOOD_SETS):
+        err(f"agriculture.WOOD_SWITCHES {sorted(ag.WOOD_SWITCHES)} should list exactly the wood sets {sorted(ag.WOOD_SETS)}")
+    for wood, switches in ag.WOOD_SWITCHES.items():
+        if (not isinstance(switches, list) or not switches or len(set(switches)) != len(switches)
+                or any(switch not in FEATURES for switch in switches)):
+            err(f"agriculture.WOOD_SWITCHES[{wood!r}] = {switches} is not a list of known feature switches")
+    placers = {}  # a placed or configured feature's path, without "_checked": the switches that place it
+
+    def placed_by(ref, switch):
+        ns, path = split(ref)
+        if ns == MOD:
+            placers.setdefault(path.removesuffix("_checked"), set()).add(switch)
+    for info in bm.BIOMES.values():
+        if info["trees"] is not None:
+            for ref in [info["trees"]["default"]] + [feature for feature, _ in info["trees"]["picks"]]:
+                placed_by(ref, bm.FEATURE)
+        for extra in info.get("extras", []):
+            if "feature" in bm.EXTRAS.get(extra, {}):
+                placed_by(bm.EXTRAS[extra]["feature"], bm.FEATURE)
+    for key in ("larch", "spruce"):
+        placed_by(al.TREES[key], al.FEATURE)
+    # Agriculture's wild patches (JugcraftAgriculture.registerWorldgen, under the agriculture switch): the wild chestnut
+    # trees, and anything else a patch_<name> placed feature places. A patch placed anywhere else has no known switch.
+    agriculture = (AGRICULTURE_JAVA / "JugcraftAgriculture.java").read_text(encoding="utf-8")
+    gated = re.search(r"private static void registerWorldgen\(\) \{\n\t\tif \(!JugcraftConfig\.isFeatureEnabled\(FEATURE\)\) \{"
+                      r"(.*?)\n\t\}\n", agriculture, re.S)
+    if not gated:
+        err("JugcraftAgriculture.registerWorldgen() not found, or not gated by the agriculture switch first")
+    inside = set(re.findall(r'wildPatch\("([a-z_]+)"', gated.group(1))) if gated else set()
+    for name in re.findall(r'wildPatch\("([a-z_]+)"', agriculture):
+        patch = load(DATA / MOD / "worldgen" / "placed_feature" / f"patch_{name}.json")
+        if patch is not None:
+            placed_by(patch["feature"], ag.FEATURE if name in inside else f"(patch_{name}, outside registerWorldgen)")
+    woods = {shape: info["wood"] for shape, info in tr.SHAPES.items() if info["wood"] in ag.WOOD_SETS}
+    woods.update({f"fallen_{wood}_tree": wood for wood in tr.FALLEN})
+    for placed, (feature, _) in bm.PLACED_TREES.items():
+        ns, path = split(feature)
+        if ns == MOD and path in ag.WOOD_SETS:
+            woods[placed.removesuffix("_checked")] = path
+    for what, wood in woods.items():
+        switches = ag.WOOD_SWITCHES.get(wood, [])
+        missing = placers.get(what, set()) - (set(switches) if isinstance(switches, list) else {switches})
+        if missing:
+            err(f"{what} is placed by {sorted(missing)}, which the {wood} wood's switches {ag.WOOD_SWITCHES.get(wood)} "
+                f"lack (agriculture.WOOD_SWITCHES, TREES.md rule 4)")
+
+
 def check_alpine():
     """Alpine Spawn: Java's placement and spawn numbers match tools/alpine.py, and its data is all there."""
     java = (WORLD_JAVA / "AlpineSpawn.java").read_text(encoding="utf-8")
@@ -2420,8 +2491,10 @@ def check_machines(registered):
                 if split(ref)[0] == MOD and split(ref)[1] not in registered:
                     err(f"{label}: unknown item {ref}")
             for feature in recipe["features"]:
-                if feature not in FEATURES:
-                    err(f"{label}: unknown feature {feature}")
+                # A list is a wood's WOOD_SWITCHES: any of them loads the recipe.
+                for one in [feature] if isinstance(feature, str) else feature:
+                    if one not in FEATURES:
+                        err(f"{label}: unknown feature {one}")
             units_in = sum(sum(item_units(ref).values()) * count for ref, count in inputs)
             units_out = sum(item_units(recipe["output"]).values()) * recipe["count"]
             bonus = recipe.get("ore_bonus") or (ORE_PROCESSING_MULTIPLIER if recipe.get("ore") else 1)
@@ -7168,6 +7241,7 @@ def main():
     check_seasons()
     check_alpine()
     check_biomes()
+    check_wood_switches()
     check_machines(registered)
     check_large_machines()
     check_style_pack()

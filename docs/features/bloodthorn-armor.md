@@ -88,7 +88,7 @@ The five sets are armor-only tiers with numbers of their own. This first one add
 - **Generators:** `generate_material_data.py`, `generate_textures.py`, then `generate_material_data.py` again, all exit 0. The merged tree is what they write, with nothing left to change.
   - Bloodthorn's own output: 9 `worn_models.json` entries, 4 names, the 4 vanilla slot tags, the item and model files, 4 icons, the atlas `textures/entity/equipment/3d/bloodthorn.png` and the repair tag.
   - Before the merge, the knight armor's entries, atlases and icons were byte-identical to their baseline.
-- **`check_mod_data.py`:** PASS (1501 material IDs, after main brought thallite slice 1 and the wood repaint). This includes the new `check_armor_tiers` and main's art check (`tools/art_check.py`). Every Bloodthorn entry is 0.00% see-through (H1, limit 0.5%), with no flicker or texture findings.
+- **`check_mod_data.py`:** PASS (1512 material IDs, after main brought thallite slice 1, the wood repaint and trees batch 1). This includes the new `check_armor_tiers` and main's art check (`tools/art_check.py`). Every Bloodthorn entry is 0.00% see-through (H1, limit 0.5%), with no flicker or texture findings.
 - **`check_repository.py`:** PASS.
 - **`armor_models.py`:** no problems. Five reach warnings: the centre spike, the low spikes and the pauldrons' lames (see "The look").
 - **`armor_smoke.py --no-render`:** all checks pass.
