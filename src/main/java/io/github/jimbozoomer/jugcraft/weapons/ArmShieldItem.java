@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.weapons;
 
+import io.github.jimbozoomer.jugcraft.gear.TraitTooltips;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -30,6 +31,10 @@ public class ArmShieldItem extends ShieldItem {
 	@Override
 	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip,
 			TooltipFlag flag) {
-		tooltip.accept(Component.translatable("tooltip.jugcraft.arms." + kind).withStyle(ChatFormatting.GRAY));
+		// Its trait, with what it is as the description (docs/features/trait-details.md).
+		String key = "tooltip.jugcraft.arms." + kind;
+		TraitTooltips traits = TraitTooltips.of(tooltip);
+		traits.trait(key + ".trait", ChatFormatting.YELLOW, Component.translatable(key));
+		traits.end();
 	}
 }

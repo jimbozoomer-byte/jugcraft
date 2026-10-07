@@ -1,21 +1,23 @@
-"""Styled bronze and steel armor: steampunk bronze, kaiserpunk steel. These are the worn 64x32 layers and the inventory
-icons. tools/gear_textures.py draws them.
+"""Steampunk Armor and Kaiser Armor (docs/features/steampunk-and-kaiser-armor.md): the stylized looks first drawn for
+bronze and steel armor (2 October 2026), kept as their own sets on 5 October 2026. These are the worn 64x32 layers and
+the inventory icons. tools/gear_textures.py draws them, and for now draws the bronze and steel armor with them too.
+tools/check_mod_data.py (check_armor_looks) pins the Steampunk and Kaiser PNGs to these pixels.
 
 Everything is hand-drawn pixel art, written out below as rows of characters.
 - '.' is empty.
-- '0' to '4' are the metal's own five shades, darkest to lightest.
+- '0' to '4' are the style's five metal shades, darkest to lightest (PALETTES).
 - Letters are each style's own colours (COLORS).
 - Faces not listed stay empty.
 
-Bronze (steampunk) has the following.
-- Helmet: a brass-crowned aviator cap with leather ear flaps and valve ear cups. Teal-glassed goggles sit on the brow, on the
-  outer hat layer so they stand proud of the cap.
-- Chestplate: a brass breastplate with a pressure gauge, a copper boiler on the back, leather straps and a buckled
-  belt. Brass pauldrons with copper bosses, and leather bracers.
+Steampunk (from bronze) has the following.
+- Helmet: a bronze-crowned aviator cap with leather ear flaps and valve ear cups. Teal-glassed goggles sit on the brow, on
+  the outer hat layer so they stand proud of the cap.
+- Chestplate: a bronze breastplate with a pressure gauge, a copper boiler on the back, leather straps and a buckled
+  belt. Bronze pauldrons with copper bosses, and leather bracers.
 - Leggings: riveted thigh plates with copper knee cops.
-- Boots: buckled leather with brass cuffs and toe caps.
+- Boots: buckled leather with bronze cuffs and toe caps.
 
-Steel (kaiserpunk) has the following.
+Kaiser (kaiserpunk, from steel) has the following.
 - Helmet: a black leather Pickelhaube with a gold star plate, a gold cruciform spike base (raised on the hat layer)
   and a steel brim. Chin scales run down the cheeks.
 - Chestplate: a field-grey tunic with a red-and-gold collar, under a steel cuirass. A double row of gold buttons, a
@@ -26,14 +28,14 @@ Steel (kaiserpunk) has the following.
 from PIL import Image
 
 COLORS = {
-    "bronze": {
+    "steampunk": {
         "L": (70, 44, 24), "l": (108, 70, 38),          # leather
         "C": (132, 62, 34), "c": (186, 96, 52), "p": (226, 146, 92),  # copper
         "G": (40, 140, 132), "g": (190, 246, 232),      # teal goggle glass and its glint
         "W": (234, 224, 192), "n": (176, 32, 26),       # gauge dial and needle
         "k": (30, 24, 20), "S": (112, 116, 120),        # near black, steam pipe
     },
-    "steel": {
+    "kaiser": {
         "K": (24, 22, 26), "k": (54, 52, 60), "w": (132, 134, 146),  # black leather and its gloss
         "F": (88, 96, 82), "f": (116, 124, 106),        # field grey
         "Y": (204, 158, 48), "y": (248, 214, 120),      # gold
@@ -59,10 +61,10 @@ def _sides(rows):
     return {"right": rows, "left": rows, "back": rows}
 
 
-# ---------------------------------------------------------------- bronze: steampunk
+# ---------------------------------------------------------------- Steampunk (first drawn for bronze)
 B_HEAD_SIDE = ["13444431", "23333332", "LLLLLLLL", "LLLLLLLL", "LLL34LLL", "LL3cp3LL", "LLL23LLL", "lLLLLLLl"]
 B_ARM = ["3443", "3cp3", "2332", "1221", "LLLL", "....", "....", "....", "L4LL", "LLLL", "2332", "1221"]
-BRONZE = {
+STEAMPUNK = {
     "layer1": {
         "head": {
             "top": ["12233221", "23344332", "2343c432", "234cpc32", "2343c432", "23344332", "12333321", "11222211"],
@@ -108,13 +110,13 @@ BRONZE = {
     },
 }
 
-# ---------------------------------------------------------------- steel: kaiserpunk
+# ---------------------------------------------------------------- Kaiser (first drawn for steel)
 S_HEAD_SIDE = ["KkKKKKkK", "KKKKKKKK", "KkKKKKkK", "34444443", "...Yy...", "...yY...", "...Yy...", "...yY..."]
 S_ARM = ["YyYy", "yYyY", "FFFF", "FfFF", "FFFF", "FFfF", "FFFF", "FfFF", "FFFF", "RRRR", "RYRR", "rRRr"]
 S_LEG = ["FFFF", "FfFF", "FFFF", "FFfF", "FFFF", "3443", "2332", "FFFF", "FfFF", "....", "....", "...."]
 S_LEG_SIDE = ["FRFF", "FRfF", "FRFF", "FRFF", "FRFF", "3443", "2332", "FRFF", "FRfF", "....", "....", "...."]
 S_BOOT = ["...."] * 4 + ["kKKk", "KwKK", "KwKK", "KKKK", "KwKK", "KKKK", "3443", "1111"]
-STEEL = {
+KAISER = {
     "layer1": {
         "head": {
             "top": ["KKKYYKKK", "KkKYYKkK", "KKKYyKKK", "YYYyyYYY", "YYYwyYYY", "KKKYYKKK", "KkKYYKkK",
@@ -152,18 +154,16 @@ STEEL = {
     },
 }
 
-STYLES = {"bronze": BRONZE, "steel": STEEL}
-# The armor's own metal shades where they differ from the ingot's: bronze armor is a deeper, polished brass, so it
-# reads against the leather and copper.
-PALETTES = {"bronze": [(46, 28, 12), (94, 58, 22), (146, 96, 36), (192, 142, 58), (232, 190, 100)]}
-
-
-def palette(style, default):
-    return PALETTES.get(style, default)
+STYLES = {"steampunk": STEAMPUNK, "kaiser": KAISER}
+# Each style's five metal shades, pinned here so a repaint of the ingots never shifts these looks. Steampunk's is a
+# deeper, polished bronze, so it reads against the leather and copper; Kaiser's is the steel ingot's palette of
+# 2 October 2026.
+PALETTES = {"steampunk": [(46, 28, 12), (94, 58, 22), (146, 96, 36), (192, 142, 58), (232, 190, 100)],
+            "kaiser": [(44, 48, 56), (72, 78, 88), (102, 108, 120), (136, 142, 154), (176, 182, 194)]}
 
 # ---------------------------------------------------------------- inventory icons (16x16)
 ICONS = {
-    "bronze": {
+    "steampunk": {
         "helmet": [
             "................",
             "................",
@@ -237,7 +237,7 @@ ICONS = {
             "................",
         ],
     },
-    "steel": {
+    "kaiser": {
         "helmet": [
             ".......yy.......",
             ".......Yy.......",
