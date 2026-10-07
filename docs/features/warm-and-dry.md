@@ -22,8 +22,8 @@ Fifteen warm or dry biomes. The meadow layout takes the dry grasslands and sandy
 | **Lush Savanna** | wild: savanna | a field of poppies and rose bushes on grass blotched with coarse dirt; no trees, no animals |
 | **Outback** | wild: desert (one half) | red sand patched with grass, tiny acacias and cacti, pools of water and lava; villages |
 | **Oasis** | wild: desert (other half) | sand around pools of water, palms, grass and sugar cane |
-| **Wasteland** | wild: badlands | dried salt flats (calcite) with rock-salt outcrops, dead trees and dead grass; no animals; husks |
-| **Burnt Forest** | wild: warm forest | charred dead trunks on scorched grass and coarse dirt, ash drifting in the air |
+| **Wasteland** | wild: badlands | dried salt flats (calcite) with rock-salt outcrops, dead trees and grey snags on its coarse dirt, dead grass; no animals; husks |
+| **Burnt Forest** | wild: warm forest | grey snags and dead trunks on scorched grass and coarse dirt, fallen logs, ash drifting in the air |
 | **Mediterranean Forest** | woodland: warm forest | tall cypresses, oaks and dark oaks, shrubs, peonies; villages |
 | **Orchard** | woodland: temperate plains | the agriculture branch's chestnut trees, oaks with bees and flowering azaleas, rose bushes, daisies |
 

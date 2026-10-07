@@ -811,7 +811,7 @@ def _sawmill():
         recipes.append({"input": f"#minecraft:{tag}", "output": f"minecraft:{wood}_planks", "count": planks, "ticks": 100,
                         "features": [FEATURE], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
     # Jugcraft's own woods (agriculture.WOOD_SETS): the chestnut, Alpine Spawn's larch and the biomes branch's trees, each
-    # also following the switch of whatever grows its tree.
+    # also following its wood's switches (agriculture.WOOD_SWITCHES: any one of them loads the recipe).
     from agriculture import WOOD_SETS, WOOD_SWITCHES
     for wood in WOOD_SETS:
         recipes.append({"input": f"#jugcraft:{wood}_logs", "output": f"jugcraft:{wood}_planks", "count": 6, "ticks": 100,

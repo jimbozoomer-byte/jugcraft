@@ -14,6 +14,18 @@ No numbered release yet. Everything below is on `main`.
 - **Earthbound armor:** an Earthbinding Template (rooted dirt, four thallite nuggets and four gold nuggets), a thallite piece and a gold ingot at a smithing table bind the piece into its gold-trimmed Earthbound twin, for good, keeping its enchantments, wear and name. Earthbound pieces are **Rooted**: on natural ground (soil, stone, sand or gravel) each takes 7.5% off knockback, 30% for a full set, and with two or more worn Regrowth works on stone, sand and gravel too.
 - Both traits are named in the tooltip and described while Shift is held. Two handbook pages. Arms, the arrow, horse armor and magic come in later slices. Record: [thallite.md](docs/features/thallite.md).
 
+### Unmerged: New trees, batch 1
+- **Ten new trees, from the tree roster** ([TREES.md](docs/branches/TREES.md)):
+  - **Firs:** stunted firs and thin bog firs, narrow subalpine fir spires and low fir bushes.
+  - **The tamarack:** a thin larch, gold in autumn and bare in winter, over the Muskeg, Bog and Fen.
+  - **Grey dead snags**, straight and bent, in the dead and burnt biomes, and on the Cinder Barrens' and Wasteland's coarse dirt.
+  - **Willow bushes**, and **young aspens** standing in the Hallowed Bog's water.
+  - **The swamp cedar**, in the Wetland and Ghost Forest, and the moss-hung **bigleaf maple** of the Temperate Rainforest and Redwood Forest.
+- **Cedar, a new wood** from the owner's painted western red cedar: log, wood, stripped log and wood, planks, stairs, slab, fence and fence gate, sage-green cedar leaves and a cedar sapling that grows a cedar, drawn as the other woods are. Its wood is darkened a little so it sits apart from vanilla spruce and the cypress.
+- **29 biomes change their trees.** Besides the new trees, firs replace vanilla spruces in the Maple Woods, Redwood Forest and Lake District and join the Seasonal Forest; larches join the Coniferous Forest, Shield and Lake District; aspens replace the Shield's oaks and the Snowpetal Grove's birches and join the Snowy Forest; fallen dead and larch logs, willows, maples, azaleas and a rare great oak join where the roster says; and the Wasteland gets a tree try in every chunk.
+- **A wood's recipes follow any switch that grows it:** `jugcraft:feature_enabled` takes an `"or"` list, so the larch's recipes stay on with either Alpine Spawn or the biomes, and the chestnut's with either agriculture or the biomes.
+- New chunks only; nothing saved is renamed or removed. Record: [trees-batch-1.md](docs/features/trees-batch-1.md). Not yet played.
+
 ### Unmerged: Wood repaint
 - **Every wood the mod adds is redrawn** in its colour from the owner's 24 painted woods, matched to the closest painting: bark, log ends, stripped logs and planks, so its stairs, slabs, fences and gates follow too.
 - **Drawn as vanilla draws wood:**

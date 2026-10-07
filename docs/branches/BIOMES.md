@@ -44,6 +44,9 @@ The engine and its settings are recorded in [features/biome-regions.md](../featu
 
 98 biomes in all. Large batches may be split when they are built.
 
+**New trees.** Many of these biomes still borrow vanilla trees as stand-ins. The survey of what each biome needs, a
+roster of 57 trees in 14 batches, is [TREES.md](TREES.md). It is a plan; none of it is built.
+
 ## The catalog, entry by entry
 
 Every page in the catalog, what Jugcraft does with it, and in which batch. "Removed" means the catalog marks it removed or outdated in Biomes O' Plenty; removed biomes are remade too unless they are vanilla duplicates.

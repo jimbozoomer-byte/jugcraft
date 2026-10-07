@@ -1,10 +1,13 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.datafixers.util.Pair;
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.SeasonalLeavesBlock;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftDimensions;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
+import io.github.jimbozoomer.jugcraft.config.FeatureEnabledCondition;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
 import java.util.ArrayList;
@@ -21,13 +24,17 @@ import net.minecraft.world.level.biome.FeatureSorter;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -48,11 +55,16 @@ import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** The biomes branch: Jugcraft regions, the seasonal-forest trees (batch 1), and the fields' plants and jacaranda (batch 2). */
+/**
+ * The biomes branch: Jugcraft regions, the seasonal-forest trees (batch 1), and the fields' plants and jacaranda (batch 2);
+ * and the tree roster's batch 1: its shapes, the cedar's wood and the tree lists of the biomes it changed.
+ */
 public class BiomeGameTests {
 	private static final Logger LOGGER = LoggerFactory.getLogger("jugcraft-test");
 
@@ -312,6 +324,262 @@ public class BiomeGameTests {
 		for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-8, 0, -8), absolute.offset(9, 48, 9))) {
 			helper.getLevel().setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
 		}
+	}
+
+	// ---------------------------------------------------------------- the tree roster's batch 1
+
+	/** One of the tree roster's batch-1 shapes: its log, its leaves ("" for none) and the height of its top log. */
+	private record Shape(String id, String log, String leaves, int lowest, int highest) {
+	}
+
+	/**
+	 * The tree roster's batch 1 (tools/trees.py; docs/features/trees-batch-1.md). Heights are of the top log above the
+	 * soil, from vanilla's placers: a straight trunk's base + height_rand_a + height_rand_b exactly; a bending trunk's
+	 * one more for its bend, and the fancy trunk's (the mossy maple's), loosely, to be narrowed from CI's logged sizes.
+	 */
+	private static final List<Shape> BATCH_ONE = List.of(
+			new Shape("stunted_fir", "fir_log", "fir_needles", 4, 7),
+			new Shape("bog_fir", "fir_log", "fir_needles", 4, 7),
+			new Shape("subalpine_fir", "fir_log", "fir_needles", 10, 14),
+			new Shape("fir_bush", "fir_log", "fir_needles", 1, 1),
+			new Shape("tamarack", "larch_log", "larch_needles", 6, 9),
+			new Shape("dead_snag", "dead_log", "", 3, 10),
+			new Shape("dead_snag_bent", "dead_log", "", 4, 9),
+			new Shape("willow_bush", "willow_log", "willow_leaves", 1, 2),
+			new Shape("young_aspen", "aspen_log", "aspen_leaves", 4, 8),
+			new Shape("cedar", "cedar_log", "cedar_leaves", 7, 10),
+			new Shape("mossy_maple", "maple_log", "maple_leaves", 4, 16));
+
+	private static PlacedFeature placedFeature(ServerLevel level, String id) {
+		return level.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE)
+				.getOrThrow(ResourceKey.create(Registries.PLACED_FEATURE, Jugcraft.id(id))).value();
+	}
+
+	/** Air round a placed tree, and `soil` under its trunk. */
+	private static void reset(ServerLevel level, BlockPos absolute, Block soil) {
+		for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-8, 0, -8), absolute.offset(8, 24, 8))) {
+			level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+		}
+		level.setBlock(absolute.below(), soil.defaultBlockState(), Block.UPDATE_ALL);
+	}
+
+	/**
+	 * Every batch-1 shape, placed through its "_checked" feature on dirt from four seeds in autumn: its own logs reach the
+	 * height its trunk placer gives; the leafy shapes have their leaves (all in autumn colours where they are seasonal,
+	 * from the seasonal_leaves decorator), the snags none at all; the mossy maple lays moss carpet on its limbs and vines.
+	 */
+	@GameTest(maxTicks = 200)
+	public void batchOneShapesGrow(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		MinecraftServer server = level.getServer();
+		SeasonCalendar.Settings before = JugcraftSeasons.settings();
+		BlockPos absolute = helper.absolutePos(open(helper, new BlockPos(3, 2, 3)));
+		int moss = 0;
+		int vines = 0;
+		try {
+			JugcraftSeasons.setMode(server, SeasonCalendar.Mode.AUTUMN);
+			for (Shape shape : BATCH_ONE) {
+				PlacedFeature placed = placedFeature(level, shape.id() + "_checked");
+				Block log = block(shape.log());
+				Block leaves = shape.leaves().isEmpty() ? null : block(shape.leaves());
+				boolean seasonal = leaves != null && leaves.defaultBlockState().hasProperty(SeasonalLeavesBlock.SEASON);
+				List<String> sizes = new ArrayList<>();
+				for (long seed = 1; seed <= 4; seed++) {
+					reset(level, absolute, Blocks.DIRT);
+					placed.place(level, level.getChunkSource().getGenerator(), RandomSource.create(seed), absolute);
+					int top = 0;
+					int logs = 0;
+					int leaf = 0;
+					int gold = 0;
+					int anyLeaves = 0;
+					for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-8, 0, -8), absolute.offset(8, 24, 8))) {
+						BlockState state = level.getBlockState(pos);
+						if (state.is(log)) {
+							logs++;
+							top = Math.max(top, pos.getY() - absolute.getY() + 1);
+						}
+						anyLeaves += state.is(BlockTags.LEAVES) ? 1 : 0;
+						if (leaves != null && state.is(leaves)) {
+							leaf++;
+							gold += state.hasProperty(SeasonalLeavesBlock.SEASON)
+									&& state.getValue(SeasonalLeavesBlock.SEASON) == SeasonalLeavesBlock.Foliage.GOLD ? 1 : 0;
+						}
+						if (shape.id().equals("mossy_maple")) {
+							moss += state.is(Blocks.MOSS_CARPET) ? 1 : 0;
+							vines += state.is(Blocks.VINE) ? 1 : 0;
+						}
+					}
+					sizes.add(logs + " logs to " + top + ", " + leaf + " leaves");
+					helper.assertTrue(top >= shape.lowest() && top <= shape.highest(),
+							shape.id() + " (seed " + seed + "): its top log is " + top + " up, not " + shape.lowest() + "-" + shape.highest());
+					if (leaves == null) {
+						helper.assertTrue(anyLeaves == 0, shape.id() + " (seed " + seed + ") has " + anyLeaves + " leaves");
+					} else {
+						helper.assertTrue(leaf >= 4, shape.id() + " (seed " + seed + ") has only " + leaf + " leaves");
+						helper.assertTrue(seasonal ? gold == leaf : gold == 0,
+								shape.id() + " (seed " + seed + "): " + gold + " of " + leaf + " leaves in autumn colours");
+					}
+				}
+				LOGGER.info("[trees] {}: {}", shape.id(), String.join("; ", sizes));
+			}
+		} finally {
+			JugcraftSeasons.setMode(server, before.mode());
+		}
+		reset(level, absolute, Blocks.DIRT);
+		LOGGER.info("[trees] mossy_maple, four trees: {} moss carpets, {} vines", moss, vines);
+		helper.assertTrue(moss > 0 && vines > 0, "Four mossy maples laid " + moss + " moss carpets and " + vines + " vines");
+		helper.succeed();
+	}
+
+	/**
+	 * A batch-1 shape stands only where its sapling could: on stone none places a log; the dead snags, which stand where
+	 * an oak sapling could, grow on coarse dirt (the Wasteland's, Cinder Barrens' and Rotted Expanse's tree ground) but
+	 * not on calcite or tuff (their bare floors).
+	 */
+	@GameTest(maxTicks = 100)
+	public void batchOneShapesNeedTheirSoil(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos absolute = helper.absolutePos(open(helper, new BlockPos(3, 2, 3)));
+		for (Shape shape : BATCH_ONE) {
+			Block[] soils = shape.log().equals("dead_log")
+					? new Block[] {Blocks.STONE, Blocks.CALCITE, Blocks.TUFF, Blocks.COARSE_DIRT}
+					: new Block[] {Blocks.STONE};
+			for (Block soil : soils) {
+				reset(level, absolute, soil);
+				placedFeature(level, shape.id() + "_checked").place(level, level.getChunkSource().getGenerator(), RandomSource.create(7), absolute);
+				int logs = 0;
+				for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-8, 0, -8), absolute.offset(8, 24, 8))) {
+					logs += level.getBlockState(pos).is(block(shape.log())) ? 1 : 0;
+				}
+				boolean grows = soil == Blocks.COARSE_DIRT;
+				helper.assertTrue(grows ? logs > 0 : logs == 0, shape.id() + " on " + soil + ": " + logs + " logs");
+			}
+		}
+		reset(level, absolute, Blocks.DIRT);
+		helper.succeed();
+	}
+
+	/**
+	 * Larch joined the fallen logs (tools/trees.py FALLEN): on a flat dirt floor, fallen_larch_tree leaves a larch stump
+	 * and a larch log lying along the ground. Its log starts 2-3 blocks from the stump and lies at most 6 blocks long (log
+	 * length 5-8, less 2), so it ends within 8 blocks: the box stays within the -8..+9 every other test here uses.
+	 */
+	@GameTest(maxTicks = 100)
+	public void fallenLarchesLie(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos absolute = helper.absolutePos(open(helper, new BlockPos(3, 2, 3)));
+		Block log = block("larch_log");
+		for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-8, 0, -8), absolute.offset(8, 6, 8))) {
+			level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+		}
+		for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-8, -1, -8), absolute.offset(8, -1, 8))) {
+			level.setBlock(pos, Blocks.DIRT.defaultBlockState(), Block.UPDATE_CLIENTS);
+		}
+		placedFeature(level, "fallen_larch_tree").place(level, level.getChunkSource().getGenerator(), RandomSource.create(3), absolute);
+		int lying = 0;
+		for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-8, 0, -8), absolute.offset(8, 6, 8))) {
+			BlockState state = level.getBlockState(pos);
+			lying += state.is(log) && state.getValue(RotatedPillarBlock.AXIS) != Direction.Axis.Y ? 1 : 0;
+		}
+		boolean stump = level.getBlockState(absolute).is(log);
+		LOGGER.info("[trees] A fallen larch: stump {}, {} lying logs", stump, lying);
+		helper.assertTrue(stump && lying >= 3, "A fallen larch: stump " + stump + ", " + lying + " lying logs");
+		for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-8, 0, -8), absolute.offset(8, 6, 8))) {
+			level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+		}
+		helper.succeed();
+	}
+
+	/** The cedar (the tree roster's batch 1, a wood of its own): its sapling grows a cedar of cedar logs and leaves. */
+	@GameTest(maxTicks = 100)
+	public void cedarSaplingsGrow(GameTestHelper helper) {
+		BlockPos at = open(helper, new BlockPos(3, 2, 3));
+		int[] counts = grow(helper, JugcraftAgriculture.CEDAR_GROWER, at, block("cedar_sapling"), "cedar_log", "cedar_leaves");
+		LOGGER.info("A cedar: {} logs, {} leaves", counts[0], counts[1]);
+		helper.assertTrue(counts[0] >= 7 && counts[0] <= 10 && counts[1] >= 10, "A cedar of " + counts[0] + " logs and " + counts[1] + " leaves");
+		clear(helper, at);
+		helper.succeed();
+	}
+
+	/** Any axe strips a cedar log; cedar logs burn, its planks are planks, and its sapling and evergreen leaves are in vanilla's tags. */
+	@GameTest
+	public void cedarWoodWorksLikeWood(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 2, 1);
+		helper.setBlock(pos, block("cedar_log").defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Z));
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
+		helper.useBlock(pos, player);
+		BlockState stripped = helper.getBlockState(pos);
+		helper.assertTrue(stripped.is(block("stripped_cedar_log")) && stripped.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Z,
+				"An axe should strip the cedar log along its axis, found " + stripped);
+		// Vanilla's #minecraft:logs_that_burn by name (26.3's BlockTags has no constant of that name).
+		TagKey<Block> logsThatBurn = TagKey.create(Registries.BLOCK, Identifier.withDefaultNamespace("logs_that_burn"));
+		helper.assertTrue(block("cedar_log").defaultBlockState().is(logsThatBurn), "Cedar logs do not burn");
+		helper.assertTrue(new ItemStack(JugcraftAgriculture.item("cedar_planks")).is(ItemTags.PLANKS), "Cedar planks are not planks");
+		helper.assertTrue(block("cedar_sapling").defaultBlockState().is(BlockTags.SAPLINGS), "The cedar sapling is not a sapling");
+		BlockState leaves = block("cedar_leaves").defaultBlockState();
+		helper.assertTrue(leaves.is(BlockTags.LEAVES) && !leaves.hasProperty(SeasonalLeavesBlock.SEASON), "Cedar leaves are not evergreen leaves");
+		helper.succeed();
+	}
+
+	/**
+	 * TREES.md rule 4: jugcraft:feature_enabled's "or" loads a recipe when any of its switches is on, so the larch's and
+	 * the chestnut's recipes (grown by two switches each) and the cedar's load.
+	 */
+	@GameTest
+	public void woodRecipesFollowAnyOfTheirSwitches(GameTestHelper helper) {
+		helper.assertTrue(new FeatureEnabledCondition("no_such_switch", List.of("biomes")).test(null) == JugcraftConfig.isFeatureEnabled("biomes"),
+				"An \"or\" switch does not load the recipe");
+		helper.assertTrue(!new FeatureEnabledCondition("no_such_switch", List.of("no_other_switch")).test(null),
+				"No switch on, yet the recipe loads");
+		ServerLevel level = helper.getLevel();
+		for (String recipe : new String[] {"larch_planks", "larch_fence", "sawing/larch_logs", "chestnut_planks", "sawing/chestnut_logs",
+				"cedar_planks", "cedar_wood", "stripped_cedar_wood", "cedar_stairs", "cedar_slab", "cedar_fence", "cedar_fence_gate",
+				"sawing/cedar_logs", "tree_growing/cedar_sapling"}) {
+			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(recipe))).isPresent(), recipe + " loads");
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * The biomes whose tree lists the tree roster's batch 1 changed (tools/biomes.py; docs/features/trees-batch-1.md): all
+	 * but the last are Jugcraft regions' Overworld biomes; the Rotted Expanse is an End biome.
+	 */
+	private static final List<String> BATCH_ONE_BIOMES = List.of("coniferous_forest", "snowy_coniferous_forest", "maple_woods",
+			"seasonal_forest", "aspen_glade", "dead_forest", "tundra", "snowy_forest", "muskeg", "bog", "dead_swamp", "lush_swamp",
+			"swamp_woods", "floodplain", "ghost_forest", "lush_river", "fen", "lake_district", "wetland", "wasteland", "burnt_forest",
+			"dense_forest", "redwood_forest", "temperate_rainforest", "shield", "cinder_barrens", "hallowed_bog", "snowpetal_grove",
+			"rotted_expanse");
+
+	/**
+	 * Every biome batch 1 changed places its own tree list ({@code jugcraft:trees_<biome>}), in the vegetation step and no other:
+	 * the Cinder Barrens' list is new (it had no trees), the others' changed. Each is placed in its dimension, a Jugcraft
+	 * region's Overworld biome or (the Rotted Expanse) an End biome, so the feature order tests sort its features too
+	 * (PixelHollowsGameTests.overworldFeatureOrderHasNoCycle, dimensionBiomesArePlaced).
+	 */
+	@GameTest
+	public void batchOneBiomesPlaceTheirTrees(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Registry<Biome> biomes = level.registryAccess().lookupOrThrow(Registries.BIOME);
+		Registry<PlacedFeature> features = level.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE);
+		int vegetation = GenerationStep.Decoration.VEGETAL_DECORATION.ordinal();
+		for (String name : BATCH_ONE_BIOMES) {
+			ResourceKey<Biome> key = ResourceKey.create(Registries.BIOME, Jugcraft.id(name));
+			Holder<PlacedFeature> trees = features.getOrThrow(ResourceKey.create(Registries.PLACED_FEATURE, Jugcraft.id("trees_" + name)));
+			var steps = biomes.getOrThrow(key).value().getGenerationSettings().features();
+			List<Integer> found = new ArrayList<>();
+			for (int step = 0; step < steps.size(); step++) {
+				if (steps.get(step).contains(trees)) {
+					found.add(step);
+				}
+			}
+			helper.assertTrue(found.equals(List.of(vegetation)),
+					name + " places jugcraft:trees_" + name + " in steps " + found + ", not in the vegetation step (" + vegetation + ") alone");
+			boolean placed = name.equals("rotted_expanse") ? JugcraftDimensions.end().contains(key) : JugcraftRegions.biomes().contains(key);
+			helper.assertTrue(placed, name + " is not placed in " + (name.equals("rotted_expanse") ? "the End" : "Jugcraft's regions"));
+		}
+		LOGGER.info("[trees] {} batch-1 biomes place their own trees in step {}", BATCH_ONE_BIOMES.size(), vegetation);
+		helper.succeed();
 	}
 
 	/** The tropical plants (batch 5): hibiscus is a small flower with a potted form; a hydrangea takes two blocks and drops one. */
