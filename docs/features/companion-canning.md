@@ -21,7 +21,7 @@ Only transport has a companion energy cost: up to **2 JE per moving tick**, usin
 - Jars that spoil inside the kettle are carried to **Output unchanged and unsealed** as rejected products. They are never refreshed, sealed or destroyed. The workstation reports **Spoiled jars** until they are removed. The kettle no longer increments a spoiled jar's timer indefinitely. Sealed jars, by contrast, remain safe while awaiting collection.
 - The single empty bucket from filling is buffered in the kettle and saved until collected. Ordinary empty-hand right-click also collects this bucket into available player inventory space, alongside the kettle's existing jar interaction. Any bucket that does not fit stays inside. Breaking the kettle drops the actual jars and any pending bucket once; water is lost as before.
 - Existing manual water filling/draining, jar insertion, sealed-jar removal and shift-empty-hand removal of all jars remain available. The juice press, Cooking Pot and processor jobs keep their existing behavior.
-- These are companion ports, not public hopper/pipe/fluid connections. The Hearth Oven remains unimplemented for companions.
+- These are companion ports, not public hopper/pipe/fluid connections. [Hearth Oven automation](companion-hearth.md) is now implemented separately.
 
 ## Server cost, transactions and compatibility
 

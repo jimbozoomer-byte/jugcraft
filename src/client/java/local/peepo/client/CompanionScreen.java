@@ -89,10 +89,11 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
                     lines.add(slot.getItem().getHoverName());
                     var lore=slot.getItem().get(net.minecraft.core.component.DataComponents.LORE);
                     if(lore!=null)lines.addAll(lore.lines());
-                }else lines.add(Component.literal("Recipe: automatic"));
+                }else lines.add(Component.literal(menu.value(25+i)==2?"Choose a pie to enable supplies.":"Recipe: automatic"));
                 lines.add(Component.literal("Click with the finished food to set a ghost recipe."));
                 lines.add(Component.literal("Your item stays on the cursor. Right-click to clear."));
-                lines.add(Component.literal("Click the same output again to cycle matching recipes."));
+                if(menu.value(25+i)==2)lines.add(Component.literal("Clearing stops new pies; an existing pie can still finish."));
+                else lines.add(Component.literal("Click the same output again to cycle matching recipes."));
                 g.setTooltipForNextFrame(font,lines,java.util.Optional.empty(),mouseX,mouseY);
             }
         }

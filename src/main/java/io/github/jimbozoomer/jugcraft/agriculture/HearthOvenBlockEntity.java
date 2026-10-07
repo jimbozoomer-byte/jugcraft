@@ -26,6 +26,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.UUID;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 
 /**
  * A Hearth Oven's fire and its pie. It burns what generators burn, as long ({@link GeneratorFuels}: coal, charcoal, coke),
@@ -51,6 +60,75 @@ public class HearthOvenBlockEntity extends BlockEntity {
 	private int heat;
 	private @Nullable PieFilling pie;
 	private int baked;
+	private @Nullable PieFilling selectedPie;
+	private UUID tender;
+	private long tenderUntil;
+	private final Transfers transfers = new Transfers();
+	private final Storage<ItemVariant> companionInputs = new Storage<>() {
+		@Override public long insert(ItemVariant resource, long maxAmount, TransactionContext tx) {
+			if (resource.isBlank() || maxAmount <= 0) return 0;
+			var stack = resource.toStack(1);
+			int count = (int) Math.min(maxAmount, companionNeed(stack));
+			if (count <= 0) return 0;
+			transfers.updateSnapshots(tx);
+			var filling = rawFilling(stack);
+			if (filling != null) { pie = filling; baked = 0; }
+			else burn += burnTicks(stack) * count;
+			return count;
+		}
+		@Override public long extract(ItemVariant resource, long maxAmount, TransactionContext tx) { return 0; }
+		@Override public boolean supportsExtraction() { return false; }
+		@Override public Iterator<StorageView<ItemVariant>> iterator() { return Collections.emptyIterator(); }
+	};
+	private final SingleSlotStorage<ItemVariant> companionOutputs = new SingleSlotStorage<>() {
+		@Override public long insert(ItemVariant resource, long maxAmount, TransactionContext tx) { return 0; }
+		@Override public boolean supportsInsertion() { return false; }
+		@Override public long extract(ItemVariant resource, long maxAmount, TransactionContext tx) {
+			if (maxAmount <= 0 || isResourceBlank() || !getResource().equals(resource)) return 0;
+			transfers.updateSnapshots(tx); pie = null; baked = 0; return 1;
+		}
+		@Override public boolean isResourceBlank() { return !live() || pie == null || baked < BAKED; }
+		@Override public ItemVariant getResource() { return isResourceBlank() ? ItemVariant.blank() : ItemVariant.of(JugcraftAgriculture.item(baked >= BURNT ? "burnt_pie" : pie.pie())); }
+		@Override public long getAmount() { return isResourceBlank() ? 0 : 1; }
+		@Override public long getCapacity() { return 1; }
+	};
+	private record TransferSnapshot(int burn, @Nullable PieFilling pie, int baked) {}
+	private final class Transfers extends SnapshotParticipant<TransferSnapshot> {
+		@Override protected TransferSnapshot createSnapshot() { return new TransferSnapshot(burn, pie, baked); }
+		@Override protected void readSnapshot(TransferSnapshot s) { burn=s.burn(); pie=s.pie(); baked=s.baked(); }
+		@Override protected void onFinalCommit() { changed(true); }
+	}
+	private boolean live() { return level != null && !level.isClientSide() && !isRemoved(); }
+	public @Nullable PieFilling selectedPie() { return selectedPie; }
+	public void selectPie(@Nullable PieFilling filling) { selectedPie = filling; changed(true); }
+	public static @Nullable PieFilling selectedFilling(ItemStack stack) {
+		for (var filling : PieFilling.values())
+			if (stack.is(JugcraftAgriculture.item(filling.pie())) || stack.is(JugcraftAgriculture.item(filling.rawPie()))) return filling;
+		return null;
+	}
+	public int companionNeed(ItemStack stack) {
+		if (!live()) return 0;
+		var filling = rawFilling(stack);
+		if (filling != null) return pie == null && filling == selectedPie ? 1 : 0;
+		int duration = burnTicks(stack);
+		// Fuel only a real unfinished pie, never continually reheat an empty oven. Coal blocks cannot fit.
+		if (pie == null || baked >= BAKED || duration <= 0 || duration > MAX_BURN || burn >= 600) return 0;
+		return Math.min((600 - burn + duration - 1) / duration, (MAX_BURN - burn) / duration);
+	}
+	public Storage<ItemVariant> companionInputs() { return companionInputs; }
+	public Storage<ItemVariant> companionOutputs() { return companionOutputs; }
+	/** Tending wins over ordinary transport while a pie can advance or needs immediate collection. */
+	public boolean needsTending() { return live() && pie != null && (baked >= BAKED || burn > 0 || heat >= BAKE_HEAT); }
+	public boolean claimTender(UUID worker) {
+		if (!live() || tender != null && !tender.equals(worker) && level.getGameTime() <= tenderUntil) return false;
+		tender = worker; tenderUntil = level.getGameTime() + 100; return true;
+	}
+	public void releaseTender(UUID worker) { if (worker.equals(tender)) tender = null; }
+	public local.peepo.CompanionStatus companionStatus() {
+		if (!live()) return local.peepo.CompanionStatus.UNLOADED;
+		if (pie != null) return baked >= BAKED ? local.peepo.CompanionStatus.READY : needsTending() ? local.peepo.CompanionStatus.WORKING : local.peepo.CompanionStatus.NO_HEAT;
+		return selectedPie == null ? local.peepo.CompanionStatus.RECIPE_MISSING : local.peepo.CompanionStatus.NO_INPUT;
+	}
 
 	public HearthOvenBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.HEARTH_OVEN_ENTITY, pos, state);
@@ -83,7 +161,9 @@ public class HearthOvenBlockEntity extends BlockEntity {
 
 	/** The filling of the raw pie {@code stack} is, or null. */
 	public static @Nullable PieFilling rawFilling(ItemStack stack) {
-		return stack.isEmpty() ? null : PieFilling.ofRaw(BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath());
+		if (stack.isEmpty()) return null;
+		var id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+		return id.getNamespace().equals("jugcraft") ? PieFilling.ofRaw(id.getPath()) : null;
 	}
 
 	/** How long one of {@code stack} burns in the oven, in ticks; 0 if it isn't fuel. */
@@ -238,6 +318,10 @@ public class HearthOvenBlockEntity extends BlockEntity {
 		int filling = input.getIntOr("pie", -1);
 		pie = filling >= 0 && filling < PieFilling.values().length ? PieFilling.values()[filling] : null;
 		baked = Math.clamp(input.getIntOr("baked", 0), 0, BURNT);
+		selectedPie = null;
+		String selected = input.getStringOr("companionPie", "");
+		for (var value : PieFilling.values()) if (value.id.equals(selected)) selectedPie = value;
+		tender = null;
 	}
 
 	@Override
@@ -247,6 +331,7 @@ public class HearthOvenBlockEntity extends BlockEntity {
 		output.putInt("heat", heat);
 		output.putInt("pie", pie == null ? -1 : pie.ordinal());
 		output.putInt("baked", baked);
+		if (selectedPie != null) output.putString("companionPie", selectedPie.id);
 	}
 
 	@Override

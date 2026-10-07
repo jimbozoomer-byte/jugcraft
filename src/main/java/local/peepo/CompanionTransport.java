@@ -23,10 +23,12 @@ public final class CompanionTransport extends Goal {
     private long nextSearch,deadline,nextPath;
     private long nextValidity;
     private boolean validRoute;
+    private io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity tending;
+    private long tendingStarted;
     private CompanionStatus status=CompanionStatus.IDLE;
     private final Map<BlockPos,Long> blocked=new HashMap<>();
     public CompanionTransport(PeepoEntity npc){this.npc=npc;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK));}
-    public boolean reserved(int slot){return cargoSlot==slot && !manifest.isEmpty();}
+    public boolean reserved(int slot){return cargoSlot==slot && (tending!=null || !manifest.isEmpty());}
     public CompanionStatus activity(){return active?status:CompanionStatus.IDLE;}
     public CompanionStatus containerStatus(int row){
         return store!=null && store.equals(npc.assignments.get(row)) && (active || !manifest.isEmpty())?status:CompanionStatus.READY;
@@ -49,8 +51,22 @@ public final class CompanionTransport extends Goal {
         if(now>=nextValidity){nextValidity=now+10;validRoute=loaded();}
         return validRoute && linked();
     }
-    private void forget(){manifest=ItemStack.EMPTY;cargoSlot=-1;workstation=store=null;recipe=null;returning=false;approach=null;}
+    private void releaseTending(){if(tending!=null){tending.releaseTender(npc.getUUID());tending=null;npc.setWorkAnimation(WorkAnimation.NONE,npc.blockPosition());}}
+    private void forget(){releaseTending();manifest=ItemStack.EMPTY;cargoSlot=-1;workstation=store=null;recipe=null;returning=false;approach=null;}
     private int emptySlot(){for(int i=0;i<8;i++)if(npc.belongings.getItem(i).isEmpty())return i;return -1;}
+    /** A loaded hot pie has a deadline. One helper stays until it can take the result into real cargo. */
+    private boolean readyTending(CompanionAssignments.Target work,boolean here){
+        var port=CompanionLogistics.resolve(npc,work);
+        var output=npc.assignments.get(CompanionAssignments.OUTPUT);
+        int slot=emptySlot();
+        if(port==null || slot<0 || CompanionStorage.find(npc,output)==null
+            || !(npc.level().getBlockEntity(work.at().pos()) instanceof io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity oven)
+            || !oven.needsTending() || !oven.claimTender(npc.getUUID()))return false;
+        workstation=work;store=output;supply=returning=false;recipe=port.plan();cargoSlot=slot;
+        tending=oven;tendingStarted=0;nextValidity=0;deadline=npc.level().getGameTime()+600;
+        if(!here){approach=null;nextPath=0;}
+        return true;
+    }
     private boolean readyRoute(CompanionAssignments.Target work,boolean supplying){
         var bound=npc.assignments.get(supplying?CompanionAssignments.SUPPLY:CompanionAssignments.OUTPUT);
         var port=CompanionLogistics.resolve(npc,work);var storage=CompanionStorage.find(npc,bound);
@@ -89,6 +105,10 @@ public final class CompanionTransport extends Goal {
         }
         forget();if(emptySlot()<0)return false;
         blocked.entrySet().removeIf(e->e.getValue()<=now);
+        // Rescue/tend an existing hot pie before ordinary job priority. At most four assigned blocks.
+        for(int i=1;i<5;i++){
+            var work=npc.assignments.get(i);if(work!=null && !blocked.containsKey(work.at().pos()) && readyTending(work,false))return true;
+        }
         // Respect workstation priority; clear outputs before stocking the next recipe batch.
         for(int i=1;i<5;i++){
             var work=npc.assignments.get(i);if(work==null || blocked.containsKey(work.at().pos()))continue;
@@ -132,6 +152,7 @@ public final class CompanionTransport extends Goal {
     @Override public void tick(){
         if(!allowed() || !travelValid()){fail(CompanionStatus.FORBIDDEN);return;}
         long now=npc.level().getGameTime();
+        if(tending!=null && (tending.isRemoved() || !tending.claimTender(npc.getUUID()))){fail(CompanionStatus.OCCUPIED);return;}
         if(!manifest.isEmpty() && carried().isEmpty()){forget();active=false;return;}
         status=manifest.isEmpty()?(supply?CompanionStatus.FETCHING_SUPPLIES:CompanionStatus.COLLECTING_OUTPUT):returning?CompanionStatus.RETURNING_SUPPLIES:CompanionStatus.DELIVERING;
         var target=destination();
@@ -141,6 +162,10 @@ public final class CompanionTransport extends Goal {
             lastPosition=npc.position();return;
         }
         npc.getNavigation().stop();
+        if(tending!=null){
+            if(target.at().pos().distToCenterSqr(npc.position())>6.25){fail(CompanionStatus.BLOCKED);return;}
+            tendAtWork();return;
+        }
         // Never rely on the travel cache for an inventory mutation.
         if(!loaded()){fail(CompanionStatus.FORBIDDEN);return;}
         if(supply && !manifest.isEmpty() && !returning){
@@ -149,6 +174,30 @@ public final class CompanionTransport extends Goal {
         }
         if(target.at().pos().distToCenterSqr(npc.position())>6.25){fail(CompanionStatus.BLOCKED);return;}
         if(manifest.isEmpty())pickup();else deliver();
+    }
+    private void tendAtWork(){
+        long now=npc.level().getGameTime();
+        if(!tending.needsTending()){forget();active=false;nextSearch=now+20;return;}
+        if(tendingStarted==0){tendingStarted=now;deadline=now+800;}
+        status=CompanionStatus.WORKING;
+        var pos=workstation.at().pos();
+        float yaw=(float)Math.toDegrees(Math.atan2(-(pos.getX()+.5-npc.getX()),pos.getZ()+.5-npc.getZ()));
+        npc.setYRot(yaw);npc.yBodyRot=yaw;npc.setYHeadRot(yaw);npc.setWorkAnimation(WorkAnimation.INTERACT,pos);
+        var outputs=tending.companionOutputs();
+        for(var view:outputs){
+            if(view.isResourceBlank() || view.getAmount()==0)continue;
+            // Waiting uses the ten-tick route cache; collection rechecks access immediately.
+            if(!loaded()){fail(CompanionStatus.FORBIDDEN);return;}
+            int slot=cargoSlot>=0 && npc.belongings.getItem(cargoSlot).isEmpty()?cargoSlot:emptySlot();
+            if(slot<0){fail(CompanionStatus.FULL);return;}
+            var variant=view.getResource();var stack=variant.toStack(1);
+            try(var tx=Transaction.openOuter()){
+                if(view.extract(variant,1,tx)!=1 || !npc.food.putCargo(slot,stack,tx))return;
+                if(npc.extractEnergy(16,tx)<=0){fail(CompanionStatus.RECOVERING);return;}
+                tx.commit();cargoSlot=slot;manifest=stack.copy();
+            }
+            releaseTending();approach=null;nextPath=0;deadline=now+600;return;
+        }
     }
     private void pickup(){
         var selected=candidate();int slot=emptySlot();
@@ -160,6 +209,8 @@ public final class CompanionTransport extends Goal {
             if(taken<=0){fail(CompanionStatus.NO_INPUT);return;}
             var stack=selected.copyWithCount(taken);
             if(!npc.food.putCargo(slot,stack,tx)){fail(CompanionStatus.FULL);return;}
+            if(!supply && npc.level().getBlockEntity(workstation.at().pos()) instanceof io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity
+                && npc.extractEnergy(16,tx)<=0){fail(CompanionStatus.RECOVERING);return;}
             tx.commit();cargoSlot=slot;manifest=stack.copy();
         }
         approach=null;nextPath=0;deadline=npc.level().getGameTime()+600;
@@ -178,7 +229,10 @@ public final class CompanionTransport extends Goal {
             tx.commit();
         }
         manifest.shrink(inserted);
-        if(manifest.isEmpty()){forget();active=false;nextSearch=npc.level().getGameTime()+20;}
+        if(manifest.isEmpty()){
+            if(supply && !returning && readyTending(workstation,true))return;
+            forget();active=false;nextSearch=npc.level().getGameTime()+20;
+        }
         else if(supply && !returning){returning=true;approach=null;nextPath=0;}
         else fail(CompanionStatus.FULL);
     }

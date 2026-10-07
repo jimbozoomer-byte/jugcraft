@@ -1,6 +1,9 @@
 package local.peepo;
 
 import net.minecraft.core.Registry;
+import io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.inventory.*;
@@ -49,24 +52,27 @@ public final class CompanionMenu extends AbstractContainerMenu {
             addSlot(new Slot(recipeIcons,row,256,assignmentY(row+1)){
                 public boolean mayPlace(ItemStack stack){return false;}
                 public boolean mayPickup(Player player){return false;}
-                public boolean isActive(){return showRecipes && value(25+at)==1;}
+                public boolean isActive(){return showRecipes && value(25+at)>0;}
             });
         }
         refreshRecipes();
     }
-    private io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity recipePot(int row){
+    private net.minecraft.world.level.block.entity.BlockEntity recipeStation(int row){
         if(npc==null || row<0 || row>=4 || !stillValid(playerInventory.player))return null;
         var target=npc.assignments.get(row+1);
         if(target==null || !target.present(npc.level()) || target.at().pos().distToCenterSqr(npc.position())>64*64
             || !CompanionJobs.permitted(npc,target.at().pos())
             || io.github.jimbozoomer.jugcraft.town.TownProtection.denies(playerInventory.player,npc.level(),target.at().pos()))return null;
-        return npc.level().getBlockEntity(target.at().pos()) instanceof io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity pot
-            && !pot.isLocked()?pot:null;
+        var be=npc.level().getBlockEntity(target.at().pos());
+        return be instanceof HearthOvenBlockEntity || be instanceof CookingPotBlockEntity pot && !pot.isLocked()?be:null;
     }
     private void refreshRecipes(){
         if(npc==null)return;
         for(int row=0;row<4;row++){
-            var pot=recipePot(row);recipeEnabled[row]=pot==null?0:1;
+            var station=recipeStation(row);
+            var pot=station instanceof CookingPotBlockEntity p?p:null;
+            var oven=station instanceof HearthOvenBlockEntity o?o:null;
+            recipeEnabled[row]=oven!=null?2:pot!=null?1:0;
             var plan=pot==null?null:pot.supplyPlan().orElse(null);var icon=plan==null?ItemStack.EMPTY:plan.output().create().copyWithCount(1);
             if(plan!=null){
                 var lines=new java.util.ArrayList<net.minecraft.network.chat.Component>();
@@ -76,6 +82,13 @@ public final class CompanionMenu extends AbstractContainerMenu {
                     if(item.isPresent())lines.add(net.minecraft.network.chat.Component.literal(part.count()+" x ").append(new ItemStack(item.get()).getHoverName()));
                 }
                 icon.set(net.minecraft.core.component.DataComponents.LORE,new net.minecraft.world.item.component.ItemLore(lines));
+            }
+            if(oven!=null && oven.selectedPie()!=null){
+                icon=new ItemStack(JugcraftAgriculture.item(oven.selectedPie().pie()));
+                var raw=new ItemStack(JugcraftAgriculture.item(oven.selectedPie().rawPie()));
+                icon.set(net.minecraft.core.component.DataComponents.LORE,new net.minecraft.world.item.component.ItemLore(java.util.List.of(
+                    net.minecraft.network.chat.Component.literal("1 x ").append(raw.getHoverName()),
+                    net.minecraft.network.chat.Component.literal("Fuel: logs, charcoal, coal or coke. No coal blocks."))));
             }
             if(!ItemStack.matches(recipeIcons.getItem(row),icon))recipeIcons.setItem(row,icon);
         }
@@ -89,9 +102,19 @@ public final class CompanionMenu extends AbstractContainerMenu {
         if(slot>=RECIPE_START && slot<RECIPE_START+4){
             // These are display copies, never inventory. Ignore drag, swap, clone, throw and shift-click.
             if(type!=ContainerInput.PICKUP || button<0 || button>1 || npc==null || !stillValid(player))return;
-            var pot=recipePot(slot-RECIPE_START);long now=npc.level().getGameTime();
-            if(pot==null || now<nextRecipeEdit)return;nextRecipeEdit=now+2;
+            var station=recipeStation(slot-RECIPE_START);long now=npc.level().getGameTime();
+            if(station==null || now<nextRecipeEdit)return;nextRecipeEdit=now+2;
             var held=getCarried();
+            if(station instanceof HearthOvenBlockEntity oven){
+                if(button==1 || held.isEmpty())oven.selectPie(null);
+                else {
+                    var filling=HearthOvenBlockEntity.selectedFilling(held);
+                    if(filling==null){player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Choose a whole raw or baked Hearth Oven pie."));return;}
+                    oven.selectPie(filling);
+                }
+                refreshRecipes();broadcastChanges();return;
+            }
+            var pot=(CookingPotBlockEntity)station;
             if(button==1 || held.isEmpty())pot.selectRecipe(null);
             else {
                 var options=io.github.jimbozoomer.jugcraft.agriculture.CookingPotRecipe.catalog(((net.minecraft.server.level.ServerLevel)npc.level()).getServer())

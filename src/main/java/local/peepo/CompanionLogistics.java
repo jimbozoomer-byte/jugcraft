@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.CanningKettleBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity;
 
 /** Explicit workstation ports. Future ovens/processors opt in without changing porter navigation. */
 public final class CompanionLogistics {
@@ -27,6 +28,23 @@ public final class CompanionLogistics {
     public static Port resolve(PeepoEntity npc,CompanionAssignments.Target target){
         if(target==null || !target.present(npc.level()) || !npc.assignments.assignedWork(target.at().pos()) || !CompanionJobs.permitted(npc,target.at().pos()))return null;
         var be=npc.level().getBlockEntity(target.at().pos());
+        if(be instanceof HearthOvenBlockEntity oven)return new Port(){
+            public Identifier plan(){return Identifier.fromNamespaceAndPath("jugcraft",oven.selectedPie()==null?"hearth_oven":oven.selectedPie().pie());}
+            public int needed(ItemStack candidate){
+                int need=oven.companionNeed(candidate);if(need<=0)return 0;
+                var output=CompanionStorage.find(npc,npc.assignments.get(CompanionAssignments.OUTPUT));
+                if(output==null)return 0;
+                var filling=HearthOvenBlockEntity.rawFilling(candidate);
+                if(filling!=null)try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){
+                    var pie=ItemVariant.of(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item(filling.pie()));
+                    if(output.insert(pie,1,tx)!=1)return 0;
+                }
+                return need;
+            }
+            public Storage<ItemVariant> inputs(){return oven.companionInputs();}
+            public Storage<ItemVariant> outputs(){return oven.companionOutputs();}
+            public CompanionStatus status(){return oven.companionStatus();}
+        };
         if(be instanceof CanningKettleBlockEntity kettle)return new Port(){
             public Identifier plan(){return Identifier.fromNamespaceAndPath("jugcraft","canning_kettle");}
             public int needed(ItemStack candidate){return kettle.companionNeed(candidate);}
