@@ -1,6 +1,6 @@
 """Tools, armor and paxels (batch 25, docs/features/tools-and-armor.md), inspired by Mekanism: Tools (MIT; no code or
-art taken). Keep GEAR_TIERS, PIECES, PAXEL_TIERS and ARMOR_STYLES in sync with gear/JugcraftGear.java (ARMOR_STYLES also
-with STYLE_TEMPLATES); tools/check_mod_data.py checks it.
+art taken). Keep GEAR_TIERS, PIECES, PAXEL_TIERS, ARMOR_STYLES and ARMOR_TIERS in sync with gear/JugcraftGear.java
+(ARMOR_STYLES also with STYLE_TEMPLATES); tools/check_mod_data.py checks it.
 """
 
 MOD = "jugcraft"
@@ -16,6 +16,12 @@ GEAR_TIERS = {
     "steel": {"display": "Steel", "ingot": "#c:ingots/steel", "feature": "machines",
               "tool": (900, 7.0, 2.5, 12), "drops": "diamond",
               "armor": (25, (3, 6, 7, 3), 10, 1.5, 0.05)},
+    # Thallite (docs/features/thallite.md): iron's drops, speed and defense, fewer uses, and the best enchantability.
+    # Its gear regrows on living soil (REGROWTH). "arms": False keeps it out of tools/arms.py METALS: its arms are only
+    # the kinds the owner drew, in a later slice.
+    "thallite": {"display": "Thallite", "ingot": "#c:ingots/thallite", "feature": "thallite",
+                 "tool": (200, 6.0, 2.0, 18), "drops": "iron",
+                 "armor": (13, (2, 5, 6, 2), 18, 0.0, 0.0), "arms": False},
 }
 TOOLS = ["sword", "pickaxe", "axe", "shovel", "hoe"]
 ARMOR = ["helmet", "chestplate", "leggings", "boots"]
@@ -43,8 +49,8 @@ ITEM_TAGS = {"sword": "swords", "pickaxe": "pickaxes", "axe": "axes", "shovel": 
 # The key is the styled items' prefix (<key>_<piece>) and their equipment asset. Armor only (not in GEAR_TIERS:
 # no tools, paxels or arms). Every number is the metal's: Java derives the material with restyle(...). A smithing
 # template plus the addition dresses a plain piece; if "reversible", the template plus the metal's ingot undresses
-# it. "perk" names behaviour a style adds outside the material (None here; thallite's planned Earthbound would add
-# Rooted). Java: JugcraftGear.ARMOR_STYLES and STYLE_TEMPLATES.
+# it. "perk" names behaviour a style adds outside the material (Earthbound's Rooted, gear/ThalliteGear.java). Java:
+# JugcraftGear.ARMOR_STYLES and STYLE_TEMPLATES.
 ARMOR_STYLES = {
     "steampunk": {"display": "Steampunk", "metal": "bronze", "template": "steampunk_pattern",
                   "template_name": "Steampunk Pattern", "template_count": 4, "addition": "minecraft:copper_ingot",
@@ -66,6 +72,73 @@ ARMOR_STYLES = {
                "template_tooltip": "A smithing template, made with an Imperial Crest. With a gold ingot it turns a "
                                    "steel helmet, chestplate, leggings or boots into Kaiser armor; with a steel "
                                    "ingot it turns Kaiser armor back. Keeps enchantments and wear."},
+    # Earthbound thallite (docs/features/thallite.md): one-way, with the Rooted perk. One template a piece: a full set
+    # costs 4 gold ingots and 16 gold nuggets, about 5.8 ingots.
+    "earthbound_thallite": {"display": "Earthbound Thallite", "metal": "thallite", "template": "earthbinding_template",
+                            "template_name": "Earthbinding Template", "template_count": 1,
+                            "addition": "minecraft:gold_ingot", "reversible": False, "perk": "rooted",
+                            "template_recipe": (["GTG", "TRT", "GTG"], {"G": "minecraft:gold_nugget",
+                                                                        "T": "#c:nuggets/thallite",
+                                                                        "R": "minecraft:rooted_dirt"}),
+                            "lore": "Earthbound: thallite bound with gold. Protects as thallite armor does.",
+                            "template_tooltip": "A smithing template. With a gold ingot it binds a thallite helmet, "
+                                                "chestplate, leggings or boots into Earthbound armor, for good. Keeps "
+                                                "enchantments and wear."},
+}
+
+# Thallite's traits (gear/ThalliteGear.java, docs/features/thallite.md). Regrowth: every REGROWTH_SECONDS, each item
+# in jugcraft:thallite_gear worn or held gets back one use while its holder stands on jugcraft:living_ground, up to
+# REGROWTH_CAP_PERCENT of full; with EARTHBOUND_FOR_STONE or more Earthbound pieces worn, on any jugcraft:earthen_ground.
+# Rooted: each Earthbound piece worn (jugcraft:earthbound_armor) adds ROOTED_PER_PIECE knockback resistance while its
+# wearer stands on jugcraft:earthen_ground, refreshed every ROOTED_TICKS.
+REGROWTH_SECONDS = 5
+REGROWTH_CAP_PERCENT = 75
+EARTHBOUND_FOR_STONE = 2
+ROOTED_PER_PIECE = 0.075
+ROOTED_TICKS = 10
+# Living soil: vanilla 26.3's dirt, grass and mud tags (grass is not in #minecraft:dirt; tools/agriculture.py BOG_SOIL
+# names the three apart too), and by name each soil the record lists, so none depends on what a vanilla tag holds.
+LIVING_GROUND = ["#minecraft:dirt", "#minecraft:grass_blocks", "#minecraft:mud", "minecraft:grass_block", "minecraft:dirt",
+                 "minecraft:coarse_dirt", "minecraft:podzol", "minecraft:mud", "minecraft:moss_block", "minecraft:rooted_dirt",
+                 "minecraft:farmland"]
+# Natural ground: living soil, the Overworld's base stone (stone, granite, diorite, andesite, tuff, deepslate), sand
+# and gravel; stone, deepslate and sand by name too.
+EARTHEN_GROUND = [f"#{MOD}:living_ground", "#minecraft:base_stone_overworld", "minecraft:stone", "minecraft:deepslate",
+                  "#minecraft:sand", "minecraft:sand", "minecraft:gravel"]
+TRAITS = {
+    "regrowth": ("Regrowth", "While you stand on living soil, it mends one use every 5 s, up to 75% of full."),
+    "rooted": ("Rooted", "On natural ground, each Earthbound piece takes 7.5% off knockback (30% for a full set). "
+                         "With two or more worn, Regrowth works on stone, sand and gravel too."),
+}
+
+
+def thallite_gear():
+    """Every item with Regrowth (jugcraft:thallite_gear): thallite's tools and armor, plain and Earthbound."""
+    return ([f"{MOD}:thallite_{piece}" for piece in PIECES]
+            + [f"{MOD}:{style}_{piece}" for style, info in ARMOR_STYLES.items() if info["metal"] == "thallite"
+               for piece in ARMOR])
+
+
+def earthbound_armor():
+    """Every armor piece with Rooted (jugcraft:earthbound_armor)."""
+    return [f"{MOD}:{style}_{piece}" for style, info in ARMOR_STYLES.items() if info["perk"] == "rooted"
+            for piece in ARMOR]
+
+
+# Armor-only tiers with numbers of their own (docs/features/bloodthorn-armor.md): the owner's own armor designs, each a
+# new tier stronger than vanilla's, worn as a 3D model (tools/<tier>_armor.py; every piece must have one, so no flat
+# layer is drawn or needed). Not in GEAR_TIERS: no tools, paxels or arms. "armor" is as in GEAR_TIERS: durability
+# multiplier, defense (boots, leggings, chestplate, helmet), enchantability, toughness, knockback resistance; netherite
+# is 37, (3, 6, 8, 3), 15, 3.0, 0.1. "repair" is what mends it at an anvil, "fire_resistant" as netherite. No recipe
+# or drop yet: the owner, 6 October 2026, "for now just make the armor we can figure that out later" (they might be
+# dropped by bosses or craftable), so for now they are creative-only. Java: JugcraftGear.ARMOR_TIERS.
+ARMOR_TIERS = {
+    "bloodthorn": {"display": "Bloodthorn", "armor": (40, (3, 7, 9, 3), 15, 3.5, 0.15),
+                   "repair": "minecraft:netherite_ingot", "fire_resistant": True},
+    # Reforged White Diamond: beside Bloodthorn rather than above it, in other strengths: the heavier helm, the longest
+    # wear and the best enchanting, but netherite's toughness and no fire resistance; mended with diamonds.
+    "reforged_white_diamond": {"display": "Reforged White Diamond", "armor": (45, (3, 7, 8, 4), 20, 3.0, 0.1),
+                               "repair": "minecraft:diamond", "fire_resistant": False},
 }
 
 
@@ -124,10 +197,15 @@ def feature(item):
     return "machines"
 
 
+def tier_items():
+    """The armor-only tiers' pieces, <tier>_<piece>, in ARMOR_TIERS order."""
+    return [f"{tier}_{piece}" for tier in ARMOR_TIERS for piece in ARMOR]
+
+
 def items():
     """Every item this module registers, in registration order."""
-    return ([f"{tier}_{piece}" for tier in GEAR_TIERS for piece in PIECES] + style_items() + style_templates()
-            + [f"{tier}_paxel" for tier in PAXEL_TIERS] + list(EXTRAS))
+    return ([f"{tier}_{piece}" for tier in GEAR_TIERS for piece in PIECES] + style_items() + tier_items()
+            + style_templates() + [f"{tier}_paxel" for tier in PAXEL_TIERS] + list(EXTRAS))
 
 
 def display(item):
@@ -140,6 +218,8 @@ def display(item):
         return f"{PAXEL_TIERS[tier]} Paxel"
     if tier in ARMOR_STYLES:
         return f"{ARMOR_STYLES[tier]['display']} {piece.capitalize()}"
+    if tier in ARMOR_TIERS:
+        return f"{ARMOR_TIERS[tier]['display']} {piece.capitalize()}"
     return f"{GEAR_TIERS[tier]['display']} {piece.capitalize()}"
 
 
@@ -176,9 +256,17 @@ def write_all(write, assets, data, lang, condition):
                                                                              "model": f"{MOD}:item/{item}_pulling_{n}"}}
                                                   for n, t in ((1, 0.65), (2, 0.9))]}}
         write(assets / "items" / f"{item}.json", {"model": definition})
-    for tier in list(GEAR_TIERS) + list(ARMOR_STYLES):
-        write(assets / "equipment" / f"{tier}.json", {"layers": {
-            "humanoid": [{"texture": f"{MOD}:{tier}"}], "humanoid_leggings": [{"texture": f"{MOD}:{tier}"}]}})
+    # A flat layer is left out when every piece drawn with it has a 3D model (tools/armor_models.py, drawn by
+    # client/WornModelLayer): helmet, chestplate and boots use "humanoid", leggings "humanoid_leggings". With no layer
+    # left there is no asset file at all: 26.3 cannot read an empty layer map, and a missing asset draws nothing.
+    import armor_models
+    worn = {item for armor_set in armor_models.sets() for item in armor_set.pieces}
+    for tier in list(GEAR_TIERS) + list(ARMOR_STYLES) + list(ARMOR_TIERS):
+        layers = {layer: [{"texture": f"{MOD}:{tier}"}]
+                  for layer, pieces in (("humanoid", ("helmet", "chestplate", "boots")), ("humanoid_leggings", ("leggings",)))
+                  if not all(f"{tier}_{piece}" in worn for piece in pieces)}
+        if layers:
+            write(assets / "equipment" / f"{tier}.json", {"layers": layers})
     for asset in ("scuba", "free_runners"):
         write(assets / "equipment" / f"{asset}.json", {"layers": {"humanoid": [{"texture": f"{MOD}:{asset}"}]}})
     lang[f"tooltip.{MOD}.oxygen"] = "Oxygen: %s / %s mB"
@@ -187,6 +275,9 @@ def write_all(write, assets, data, lang, condition):
         for piece in ARMOR:
             lang[f"tooltip.{MOD}.{style}_{piece}"] = info["lore"]
         lang[f"tooltip.{MOD}.{info['template']}"] = info["template_tooltip"]
+    for trait, (name, text) in TRAITS.items():
+        lang[f"tooltip.{MOD}.thallite.{trait}.trait"] = name
+        lang[f"tooltip.{MOD}.thallite.{trait}"] = text
 
     recipes = data / "recipe"
     for tier, info in GEAR_TIERS.items():
@@ -241,6 +332,9 @@ def write_all(write, assets, data, lang, condition):
     for style in ARMOR_STYLES:  # styled armor is armor of its slot, so it enchants, trims and equips as the plain piece
         for piece in ARMOR:
             by_tag[ITEM_TAGS[piece]].append(f"{MOD}:{style}_{piece}")
+    for tier in ARMOR_TIERS:  # so the armor-only tiers enchant and equip as any armor of their slot
+        for piece in ARMOR:
+            by_tag[ITEM_TAGS[piece]].append(f"{MOD}:{tier}_{piece}")
     for tier in PAXEL_TIERS:
         for tag in ("pickaxes", "axes", "shovels"):
             by_tag.setdefault(tag, []).append(f"{MOD}:{tier}_paxel")
@@ -267,6 +361,12 @@ def write_all(write, assets, data, lang, condition):
         write(tags / f"{tag}.json", {"replace": False, "values": values})
     for tier, info in GEAR_TIERS.items():
         write(data / "tags" / "item" / f"repairs_{tier}_gear.json", {"values": [info["ingot"]]})
+    for tier, info in ARMOR_TIERS.items():
+        write(data / "tags" / "item" / f"repairs_{tier}_gear.json", {"values": [info["repair"]]})
     write(data / "tags" / "item" / "repairs_rubber_gear.json", {"values": [f"{MOD}:rubber"]})
     write(data / "tags" / "block" / "mineable" / "paxel.json", {"values": [
         "#minecraft:mineable/pickaxe", "#minecraft:mineable/axe", "#minecraft:mineable/shovel"]})
+    write(data / "tags" / "item" / "thallite_gear.json", {"values": thallite_gear()})
+    write(data / "tags" / "item" / "earthbound_armor.json", {"values": earthbound_armor()})
+    write(data / "tags" / "block" / "living_ground.json", {"values": LIVING_GROUND})
+    write(data / "tags" / "block" / "earthen_ground.json", {"values": EARTHEN_GROUND})

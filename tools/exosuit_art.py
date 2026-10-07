@@ -254,7 +254,7 @@ def layer(style, leggings):
 
 # ---------------------------------------------------------------- textures for the 3D parts (16x16)
 def part_textures():
-    """name -> image, saved as textures/block/<name>.png and drawn by client/ExosuitLayer."""
+    """name -> image, saved as textures/block/<name>.png and drawn by client/WornModelLayer."""
     out = {}
     v, r = PALETTES["vanguard"], PALETTES["ronin"]
 

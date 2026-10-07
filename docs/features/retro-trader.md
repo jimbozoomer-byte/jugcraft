@@ -38,7 +38,7 @@ Everything is original: no real shop names, logos, colours, uniforms, games or f
 - How this specialty stays useful without mastering every other branch: a map seller and a small decor shop; nothing requires him.
 
 ## Balance and automation
-- **One shop in every new village** (owner request, replacing the proposal's about 1 in 6): the shop joins the houses pool of all five village types (plains, desert, savanna, snowy, taiga) with weight 1, and `world/RetroShopPlacement` makes it the first choice for each of a new village's house slots until it is placed, then removes it, so there is exactly one. Village houses are built inside their street's own plot, and many plots are too small for the 9 by 8 shop (in a desert village only 12 of the 38 house slots can hold it), so now and then a village's layout has no slot with room. Then the village is laid out again from its start piece (`mixin/JigsawPlacementMixin` runs the placer again), up to 8 layouts, drawing on the same seeded random source, so a world seed still makes the same village. Zombie villages (about 2% of villages, abandoned, with zombie villagers) get none. The storefront is the same oak shop in every village type.
+- **One shop in every new village** (owner request, replacing the proposal's about 1 in 6): the shop joins the houses pool of all five village types (plains, desert, savanna, snowy, taiga) with weight 1, and `world/RetroShopPlacement` makes it the first choice for each of a new village's house slots until it is placed, then removes it, so there is exactly one. Village houses are built inside their street's own plot, and many plots are too small for the 9 by 8 shop (in a desert village only 12 of the 38 house slots can hold it), so now and then a village's layout has no slot with room. Then the village is laid out again from its start piece (`mixin/JigsawPlacementMixin` runs the placer again), up to 32 layouts, drawing on the same seeded random source, so a world seed still makes the same village. Zombie villages (about 2% of villages, abandoned, with zombie villagers) get none. The storefront is the same oak shop in every village type.
 - **Trades** are data (26.1+): `data/jugcraft/villager_trade/retro_trader/*.json`, one tag per level (`#jugcraft:retro_trader/level_1` …) and a trade set per level (`data/jugcraft/trade_set/retro_trader/level_<n>.json`) that the profession names. All are generated from `TRADES` in `tools/pixel_hollows.py`. The last column is each trade's `reputation_discount` (the old price multiplier):
 
 | Level | Trade | Uses per restock | XP | Price multiplier |
@@ -111,3 +111,8 @@ Build workflow run 36815372169 on commit 568409c (1 October 2026, merged with `m
 ## Rollout and open questions
 - The villager in the shop usually takes its cabinet, but any unemployed villager may claim it first.
 - Village-styled shops, wandering-trader stock and cosmetic outfits are later proposals.
+
+
+### October 7 integration: rare exhausted layouts
+
+Full CI found normal desert and snowy villages that still had no shop after the old eight-layout limit. The bounded retry budget is now 32 layouts; generation still stops on success, excludes zombie villages and places at most one shop. The village regression now deliberately withholds the shop for the first eight layouts in its final round, requiring recovery beyond the old limit. This improves the rare-case fallback; a finite budget does not promise a suitable site for every possible world seed. Results of the combined validation are recorded in the integration PR.

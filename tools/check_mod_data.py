@@ -68,6 +68,7 @@ import biomes as bm
 import biomes_data
 import trees as tr
 import plants
+import styx
 import town_assets
 import graveyard as gy
 import diagonal_connections as dg
@@ -96,7 +97,10 @@ EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_repla
                   "minecraft:wooden_doors", "minecraft:fence_gates", "minecraft:buttons", "minecraft:beds",
                   "minecraft:is_forest", "minecraft:is_taiga",
                   # Fabric's conventional biome tag (ConventionalBiomeTags.IS_SNOWY): the snow werewolf's haunts.
-                  "c:is_snowy"}
+                  "c:is_snowy",
+                  # Vanilla's Overworld stone (stone, granite, diorite, andesite, tuff, deepslate): thallite's natural
+                  # ground (tools/gear.py EARTHEN_GROUND).
+                  "minecraft:base_stone_overworld"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -176,7 +180,7 @@ def item_models(definition):
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
-                  + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
+                  + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
                   + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
@@ -197,7 +201,7 @@ def check_assets(registered):
         if definition:
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
-                        + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
+                        + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
                         + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
@@ -282,7 +286,7 @@ UNITS = {"ingots": 9, "nuggets": 1, "raw_materials": 9, "ores": 9, "storage_bloc
 
 
 import guide_books
-NON_METAL = set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks())
+NON_METAL = set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
 
 
 def item_units(ref):
@@ -575,7 +579,11 @@ def check_tags():
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
-                                                    + ag.all_blocks() + ag.all_items() + town_assets.blocks())
+                                                    + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks()))
+        if registry == "entity_type":
+            # These entity IDs have no same-named item. Derive them from actual registrations.
+            scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
+            known |= set(re.findall(r'Registry\.register\(BuiltInRegistries\.ENTITY_TYPE,\s*id\("([a-z_]+)"\)', scary))
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
@@ -659,6 +667,31 @@ def check_exosuit():
             for _, _, tex in boxes:
                 if not (textures / "block" / f"{tex}.png").exists():
                     err(f"Missing exosuit part texture block/{tex}.png")
+
+
+def check_worn_armor():
+    """The 3D armor sets (tools/armor_models.py, drawn by client/WornModelLayer). Every texture a quad in
+    worn_models.json names exists (QuadModel's rule: a plain name is a block texture), and each set's atlas is there, is
+    the size its layout gives the quads' UVs, and is exactly what tools/armor_paint.py paints. CI regenerates
+    worn_models.json but not the textures, so a set changed without rerunning generate_textures.py stops here."""
+    import armor_models
+    import armor_paint
+    textures = ASSETS / "textures"
+    worn = load(ASSETS / "worn_models.json") or {}
+    for name in sorted({quad["texture"] for quads in worn.values() for quad in quads}):
+        if not (textures / (f"{name}.png" if "/" in name else f"block/{name}.png")).is_file():
+            err(f"worn_models.json: missing texture {name}.png")
+    for armor_set in armor_models.sets():
+        path = textures / f"{armor_set.texture}.png"
+        if not path.is_file():
+            err(f"Missing 3D armor atlas {path.relative_to(ROOT)} (run tools/generate_textures.py)")
+            continue
+        image = Image.open(path).convert("RGBA")
+        size = armor_models.layout(armor_set)[1]
+        if image.size != size:
+            err(f"{path.name} is {image.size[0]}x{image.size[1]}; set {armor_set.name}'s layout is {size[0]}x{size[1]}")
+        elif image.tobytes() != armor_paint.paint_atlas(armor_set).convert("RGBA").tobytes():
+            err(f"{path.name} is not what tools/armor_paint.py paints for {armor_set.name} (run tools/generate_textures.py)")
 
 
 def check_hydroponics():
@@ -1389,6 +1422,61 @@ def check_gear():
                 err(f"Missing item texture {frame}.png")
     check_armor_styles(java)
     check_armor_looks()
+    check_armor_tiers(java)
+
+
+def check_armor_tiers(java):
+    """The armor-only tiers (tools/gear.py ARMOR_TIERS, docs/features/bloodthorn-armor.md) against JugcraftGear: the
+    list, each tier's material and its fire resistance; and, since they draw no flat layer, that every piece has a 3D
+    model (tools/armor_models.py), an icon and no equipment asset file."""
+    import armor_models
+    match = re.search(r"ARMOR_TIERS = List\.of\(([^)]*)\)", java)
+    found = re.findall(r'"([a-z_]+)"', match.group(1)) if match else None
+    if found != list(gear.ARMOR_TIERS):
+        err(f"JugcraftGear.ARMOR_TIERS {found} != tools/gear.py {list(gear.ARMOR_TIERS)}")
+    worn = {item for armor_set in armor_models.sets() for item in armor_set.pieces}
+    for tier, info in gear.ARMOR_TIERS.items():
+        mult, (boots, legs, chest, helmet), enchant, tough, knock = info["armor"]
+        armor = f"{tier.upper()}_ARMOR = new ArmorMaterial({mult}, defense({boots}, {legs}, {chest}, {helmet}), {enchant},"
+        if armor not in java or f"{tough}F, {knock}F, repairs(\"{tier}\"), asset(\"{tier}\"))" not in java:
+            err(f"JugcraftGear: the {tier} armor material differs from tools/gear.py")
+        call = f'armorTier("{tier}", {tier.upper()}_ARMOR, {str(info["fire_resistant"]).lower()});'
+        if call not in java:
+            err(f"JugcraftGear must register the {tier} pieces as {call}")
+        repairs = load(DATA / MOD / "tags" / "item" / f"repairs_{tier}_gear.json") or {}
+        if repairs.get("values") != [info["repair"]]:
+            err(f"{MOD}:repairs_{tier}_gear must hold {info['repair']}")
+        for piece in gear.ARMOR:
+            item = f"{tier}_{piece}"
+            if item not in worn:
+                err(f"{item} has no 3D model: an armor-only tier draws no flat layer (tools/armor_models.SET_MODULES)")
+            if not (ASSETS / "textures" / "item" / f"{item}.png").is_file():
+                err(f"Missing item texture {item}.png")
+        if (ASSETS / "equipment" / f"{tier}.json").exists():
+            err(f"equipment/{tier}.json should not exist: every {tier} piece is drawn as a 3D model")
+
+
+def check_thallite_gear():
+    """Thallite's traits (docs/features/thallite.md): gear/ThalliteGear.java's numbers against tools/gear.py, the trait
+    and ground tags, each trait's name and description, and the thallite tools' and armor's icons."""
+    java = (JAVA_ROOT / "gear" / "ThalliteGear.java").read_text(encoding="utf-8")
+    for name in ("REGROWTH_SECONDS", "REGROWTH_CAP_PERCENT", "EARTHBOUND_FOR_STONE", "ROOTED_PER_PIECE", "ROOTED_TICKS"):
+        if f"{name} = {getattr(gear, name)};" not in java:
+            err(f"ThalliteGear.{name} differs from tools/gear.py ({getattr(gear, name)})")
+    tags = {("item", "thallite_gear"): gear.thallite_gear(), ("item", "earthbound_armor"): gear.earthbound_armor(),
+            ("block", "living_ground"): gear.LIVING_GROUND, ("block", "earthen_ground"): gear.EARTHEN_GROUND}
+    for (kind, name), values in tags.items():
+        found = (load(DATA / MOD / "tags" / kind / f"{name}.json") or {}).get("values")
+        if found != values:
+            err(f"{MOD}:{name} ({kind} tag) is {found}, expected {values} (tools/gear.py)")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for trait in gear.TRAITS:
+        for key in (f"tooltip.{MOD}.thallite.{trait}.trait", f"tooltip.{MOD}.thallite.{trait}"):
+            if not lang.get(key):
+                err(f"Missing thallite trait text {key}")
+    for item in gear.thallite_gear() + [f"{MOD}:{gear.ARMOR_STYLES['earthbound_thallite']['template']}"]:
+        if not (ASSETS / "textures" / "item" / f"{item.split(':')[1]}.png").is_file():
+            err(f"Missing item texture {item.split(':')[1]}.png")
 
 
 def check_armor_styles(java):
@@ -1406,6 +1494,10 @@ def check_armor_styles(java):
         if line not in java:
             err(f"JugcraftGear must derive the {style} armor material from its metal's: {line}")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
+    # A set whose every piece has a 3D model (tools/armor_models.py, docs/features/knight-armor.md) draws no flat layer
+    # and has no equipment asset; its 64x32 layers are still generated, as a fallback.
+    import armor_models
+    worn = {item for armor_set in armor_models.sets() for item in armor_set.pieces}
     for asset in list(gear.GEAR_TIERS) + list(gear.ARMOR_STYLES):
         for layer in ("humanoid", "humanoid_leggings"):
             png = ASSETS / "textures" / "entity" / "equipment" / layer / f"{asset}.png"
@@ -1415,6 +1507,10 @@ def check_armor_styles(java):
                         err(f"Worn armor texture {layer}/{asset}.png is {img.size}, expected 64x32")
             else:
                 err(f"Missing worn armor texture {layer}/{asset}.png")
+        if all(f"{asset}_{piece}" in worn for piece in gear.ARMOR):
+            if (ASSETS / "equipment" / f"{asset}.json").exists():
+                err(f"equipment/{asset}.json should not exist: every {asset} piece is drawn as a 3D model")
+            continue
         equipment = load(ASSETS / "equipment" / f"{asset}.json") or {}
         for layer in ("humanoid", "humanoid_leggings"):
             if equipment.get("layers", {}).get(layer) != [{"texture": f"{MOD}:{asset}"}]:
@@ -7145,7 +7241,7 @@ def main():
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
-                  | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
+                  | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks())))
     check_assets(sorted(registered))
     check_model_textures()
     check_petro()
@@ -7158,6 +7254,7 @@ def main():
     check_java()
     check_deposits()
     check_gear()
+    check_thallite_gear()
     check_arms()
     check_item_icons()
     check_arms_variants()
@@ -7165,6 +7262,7 @@ def main():
     check_arms_motion()
     check_flail_heads()
     check_exosuit()
+    check_worn_armor()
     check_grapple()
     check_field_chemistry()
     check_construction()

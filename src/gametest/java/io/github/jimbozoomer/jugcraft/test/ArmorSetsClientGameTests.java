@@ -25,8 +25,8 @@ import net.minecraft.world.phys.AABB;
  * boiler) by day with the HUD hidden. Then all 24 pieces and the two patterns in frames on a wall, in the stands'
  * order (their icons). Before any shot the server checks that each stand wears its four pieces and that its
  * chestplate is drawn from its set's equipment asset; a wrong stand fails the test. CI job {@code client}.
- * <p>In this change bronze and steel armor still draw the same stylized art as Steampunk and Kaiser, so those pairs
- * look alike in the shots until bronze and steel get their own look.
+ * <p>Bronze and steel armor wear the knight armor's 3D models (KnightArmorClientGameTests,
+ * docs/features/knight-armor.md), so in these shots they stand beside Steampunk and Kaiser in their own look.
  */
 public class ArmorSetsClientGameTests implements FabricClientGameTest {
 	/** Each set's ID prefix and equipment asset, in the stands' order. */

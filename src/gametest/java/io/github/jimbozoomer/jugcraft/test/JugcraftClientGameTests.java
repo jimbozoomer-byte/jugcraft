@@ -162,8 +162,8 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_rocket_pack_worn");
-			// Batch 25: kaiserpunk steel armor with a steel paxel in hand, from the front; then steampunk bronze, from the
-			// front and from behind (its boiler).
+			// Batch 25: steel armor (the 3D knight armor, docs/features/knight-armor.md) with a steel paxel in hand, from the
+			// front; then bronze, from the front and from behind. KnightArmorClientGameTests shoots both from every side.
 			server.runCommand("item replace entity @p armor.head with jugcraft:steel_helmet");
 			server.runCommand("item replace entity @p armor.chest with jugcraft:steel_chestplate");
 			server.runCommand("item replace entity @p armor.legs with jugcraft:steel_leggings");

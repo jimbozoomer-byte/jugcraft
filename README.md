@@ -10,7 +10,17 @@ Build factories and magical workshops, specialize in agriculture or a school of 
 
 Jugcraft's original gameplay ships as one mod, organized into internal feature packages. Third-party mods, if approved, remain separately installed dependencies in an accompanying pack. We do not copy their code or bundle their JARs into Jugcraft.
 
+## Frameworks and automatic installation
+
+**Jugcraft Complete** is the companion Modrinth `.mrpack`: import it in Modrinth App and confirm installation to download Jugcraft and the selected pinned libraries together. Successful Build workflow runs provide it in the **jugcraft-installers** artifact. A public Modrinth listing is not configured yet; see [installation and publishing](docs/DISTRIBUTION.md).
+
+**Contributors and AI agents:** use the [approved framework catalog](docs/FRAMEWORKS.md) before building new animation, texture, spell, creature, or UI infrastructure. The foundation includes GeckoLib, Player Animation Library, Spell Engine/Spell Power, Modonomicon, SmartBrainLib, GuiLib, Fusion, and the supporting libraries, plus Jade/JEI and optional visual integrations. Their availability does not mean existing content has already been migrated. Jade's adapter reports shared-machine energy and processing progress. Exact versions and sides come from one [dependency lock](distribution/frameworks.lock.json).
+
+Minecraft remains **26.3 + Fabric**, with **Loader 0.19.5** required by the selected framework artifacts. Read the [feature record](docs/features/framework-foundation.md) for actual verification and outstanding playtests.
+
 ## Start here
+
+- [Design a new world's terrain, biomes, spawn, city and villages with World Designer](docs/WORLD_DESIGNER.md).
 
 - [Start contributing now: fork, connect your AI, and open a PR](docs/COMMUNITY_QUICKSTART.md).
 - [Propose a feature](../../issues/new?template=feature.yml): no coding experience needed.

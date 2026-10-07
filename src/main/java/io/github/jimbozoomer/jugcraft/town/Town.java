@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.town;
 
+import io.github.jimbozoomer.jugcraft.styx.StyxTownDistrict;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -37,7 +38,8 @@ public final class Town {
 		if (dy < -PROTECT_BELOW || dy > PROTECT_ABOVE) {
 			return false;
 		}
-		return TownData.get().protectedColumn(pos.getX() - origin.getX(), pos.getZ() - origin.getZ());
+		return TownData.get().protectedColumn(pos.getX() - origin.getX(), pos.getZ() - origin.getZ())
+				|| districtColumn(level, origin, pos);
 	}
 
 	/** Whether a position is inside the town's wall (its streets, houses and wall), at any height near the ground. */
@@ -48,7 +50,13 @@ public final class Town {
 		}
 		int dy = pos.getY() - origin.getY();
 		return dy >= -PROTECT_BELOW && dy <= PROTECT_ABOVE
-				&& TownData.get().mask(pos.getX() - origin.getX(), pos.getZ() - origin.getZ()) == TownData.INSIDE;
+				&& (TownData.get().mask(pos.getX() - origin.getX(), pos.getZ() - origin.getZ()) == TownData.INSIDE
+				|| districtColumn(level, origin, pos));
+	}
+
+	private static boolean districtColumn(Level level, BlockPos origin, BlockPos pos) {
+		return level instanceof ServerLevel server && TownState.get(server).styxDistrict()
+				&& StyxTownDistrict.contains(pos.getX() - origin.getX(), pos.getZ() - origin.getZ());
 	}
 
 	/** A town position in the world. */
