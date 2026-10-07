@@ -206,6 +206,8 @@ Plant residues should not ferment straight into refined alcohol at early tiers m
 
 Chemical feedstocks can keep farm goods in demand after petroleum processing arrives. Natural rubber, oils and fibre producers continue supplying suitable components and blends; later chemistry adds choices rather than making farming a temporary unlock chore.
 
+The owner's [sixth industrial-chemistry batch](industrial-chemistry-and-fuels-plan.md#materials-and-useful-factory-products-sixth-batch), selected 7 October 2026, adds **named nitrogen and phosphate fertilizers with distinct crop applications and optional blends**, including ammonium-nitrate/triple-superphosphate connections. Define crop compatibility, effects, blend identities and application costs alongside this agriculture plan. Preserve ordinary compost/fertilizer and independently useful farms. The selection does not introduce mandatory soil-nutrient management; benefits and seed/crop/residue feedback must remain bounded. Industrial fertilizer/refining/polymer delivery precedes new optional chemical consumer goods, while earlier foods and agricultural workshops remain useful. These are planning additions, not implemented recipes or agronomy test results.
+
 ## Sidegrade dimensions
 
 | Choice | Possible effects to define | Boundary |

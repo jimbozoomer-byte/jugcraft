@@ -34,6 +34,8 @@ The owner's [expanded chemical catalog](features/industrial-chemical-catalog-and
 
 The [factory-layout and supply choices](features/industrial-chemistry-and-fuels-plan.md#factory-layout-upgrades-and-supplies-fifth-batch) select both installed upgrade chips/modules and larger advanced machines; three sulfuric-acid supplies; snow-biome fluorite; separate wet-processing/lithography and later deposition with a cleaner/TMAH/HF first core and one photoresist; and a shared Polymer Extruder alongside molding. Rotary Condensators handle appropriate ordinary phase changes, upgraded Cryogenic Liquefiers handle rocket liquids, and vanadium tank/stack modules expand capacity/output respectively. Industrial fertilizers, refining and polymers precede new optional chemical foods/adhesives/medicine. Exact footprints, recipes and upgrade statistics remain to design.
 
+The [sixth material/product batch](features/industrial-chemistry-and-fuels-plan.md#materials-and-useful-factory-products-sixth-batch) selects chromium/nickel stainless steel and aluminum-magnesium structural alloy, with independent brine/chloride/molten-electrolysis magnesium. One resin/additive photoresist and one advanced chip feed the wafer/upgrade line; PTFE supplies processing seals/fittings/liners. Named nitrogen/phosphate fertilizers gain distinct crop applications and optional blends. Shared reagent purification and larger machines' throughput/energy-efficiency benefits develop compatible factories, while small upgraded stations stay useful. Snow-biome fluorite is underground with occasional surface outcrops. Exact producer recipes, capacities, upgrade effects and generation settings remain to design.
+
 ## What exists now
 
 | Role | Implemented |
