@@ -146,7 +146,7 @@ TEMPLATES = {"bowl": bowl, "plate": plate, "stack": stack, "flat": flat, "stand"
 
 
 def dish_model(name):
-    template, *params = menu.placed()[name]
+    template, *params = menu.all_placed()[name]
     elements = TEMPLATES[template](name, **(params[0] if params else {}))
     texture = rid(f"block/menu/{name}")
     return {"parent": "minecraft:block/block", "textures": {"particle": texture, "dish": texture}, "elements": elements}
@@ -177,7 +177,7 @@ def cooking_pot_model(contents):
 
 def assets(root, write, lang):
     models, states = root / "models" / "block", root / "blockstates"
-    for name in menu.placed():
+    for name in menu.all_placed():
         write(models / f"{name}.json", dish_model(name))
         write(states / f"{name}.json", {"variants": {f"facing={f}": turned(rid(f"block/{name}"), OPPOSITE[f])
                                                      for f in ("north", "south", "east", "west")}})
@@ -188,7 +188,7 @@ def assets(root, write, lang):
 
 def loot(out, write):
     """A placed dish drops its food."""
-    for name in menu.placed():
+    for name in menu.all_placed():
         write(out / f"{name}.json", {"type": "minecraft:block", "random_sequence": rid(f"blocks/{name}"), "pools": [{
             "rolls": 1, "entries": [{"type": "minecraft:item", "name": rid(name)}],
             "condition": {"type": "minecraft:survives_explosion"}}]})

@@ -4387,6 +4387,31 @@
         {
           "in": [
             [
+              "jugcraft:rice",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:rice_panicle",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:rice",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:rice",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
               "jugcraft:butternut_squash_seeds",
               1
             ]

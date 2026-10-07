@@ -46,6 +46,14 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: Rice and wet farming
+- The fourth slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **Rice paddies:** rice, its own seed, plants into still water one block deep over bog soil and grows two blocks tall; picking a ripe plant gives 2-3 rice panicles and leaves the stalks standing. Flooded soil counts as moist farmland, and the plant keeps its water when broken. Rice drops from grass, and **wild rice** grows in swamp and river shallows.
+- **Straw and storage:** the Cutting Board cuts a panicle into two rice and a straw. A Bag of Rice, a Rice Bale and a Straw Bale each hold nine.
+- **Tatami** woven from straw pair into two-block mats as you lay them; Full and Half Tatami Mats lie a pixel thick.
+- **Rice dishes:** cooked, fried and mushroom rice, salmon, cod and kelp rolls and kelp roll slices, each set down as a 3D model like the menu's, and the **Rice Roll Medley**, a platter served a roll at a time.
+- Details: [docs/features/rice-and-wet-farming.md](docs/features/rice-and-wet-farming.md).
+
 ### Unmerged: The menu
 - The third slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
 - **55 new items:** drinks (hot cocoa, creamy corn drink, melon juice, glow berry custard, and a milk bottle that clears effects), soups and stews, plated meals and pastas, sandwiches, the hamburger, wraps and tacos, dumplings, ham and smoked ham, corn dogs, a barbecue stick and popsicles, honey and sweet berry cookies, caramel popcorn, boiled corn, cornbread, tortillas and chips, and the doughs and batters they start from. No dish gives more than 3 hunger over its ingredients.

@@ -256,3 +256,9 @@ def blocks():
 
 def items():
     return []
+
+
+def all_placed():
+    """Every dish that sets down: the menu's, then the rice slice's (tools/rice.py); MenuDishes.PLACED in this order."""
+    import rice
+    return {**placed(), **rice.placed()}

@@ -66,6 +66,7 @@ import trees_data
 import kitchen_data
 import feasts_data
 import menu_data
+import rice_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
                          HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, STALKS, WILD_BONUS, crop_blocks)
@@ -273,6 +274,7 @@ def assets(root, write, lang):
     kitchen_data.assets(root, write, lang)
     feasts_data.assets(root, write, lang)
     menu_data.assets(root, write, lang)
+    rice_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -415,6 +417,7 @@ def loot(data, write):
     kitchen_data.loot(out, write)
     feasts_data.loot(out, write)
     menu_data.loot(out, write)
+    rice_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -550,6 +553,7 @@ def tags(tags):
     kitchen_data.tags(tags)
     feasts_data.tags(tags)
     menu_data.tags(tags)
+    rice_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen
@@ -566,6 +570,7 @@ def worldgen(data, write):
     halloween_data.worldgen(data, write)
     foraging_data.worldgen(data, write)
     werewolf_data.worldgen(data, write)
+    rice_data.worldgen(data, write)
     spread = WILD_PATCH["spread_xz"]
     for wild in WILD_CROPS:
         write(data / MOD / "worldgen" / "feature" / f"{wild}.json",

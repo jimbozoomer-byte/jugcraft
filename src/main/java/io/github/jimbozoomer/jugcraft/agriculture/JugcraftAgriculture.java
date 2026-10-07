@@ -94,6 +94,7 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.HayBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.GlowLichenBlock;
@@ -143,7 +144,7 @@ public final class JugcraftAgriculture {
 			"butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
 			"giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "red_kuri_pumpkin_seeds",
 			"kabocha_pumpkin_seeds", "bottle_gourd_seeds",
-			"ornamental_corn_kernels", "mandrake_root");
+			"ornamental_corn_kernels", "mandrake_root", "rice");
 	/** The chestnut tree's feature (data/jugcraft/worldgen/feature/chestnut.json), grown by its sapling. */
 	public static final ResourceKey<Feature> CHESTNUT_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("chestnut"));
 	public static final TreeGrower CHESTNUT_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_chestnut", WeightedList.of(CHESTNUT_TREE),
@@ -449,7 +450,8 @@ public final class JugcraftAgriculture {
 			if (crop.trellis || crop.height(TallCropBlock.MAX_AGE) > 1) {
 				properties = properties.strength(0.2F);
 			}
-			TALL_CROPS.put(crop, (TallCropBlock) registerBlock(crop.blockId, props -> new TallCropBlock(props, crop), properties));
+			TALL_CROPS.put(crop, (TallCropBlock) registerBlock(crop.blockId,
+					props -> crop.paddy ? new PaddyCropBlock(props, crop) : new TallCropBlock(props, crop), properties));
 		}
 		crop("bean_crop", "beans", true);
 		crop("sweet_potato_crop", "sweet_potato", false);
@@ -641,6 +643,8 @@ public final class JugcraftAgriculture {
 		registerKitchen();
 		registerFeasts();
 		registerMenu();
+		registerRice();
+		registerPlacedDishes();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
@@ -888,8 +892,13 @@ public final class JugcraftAgriculture {
 		petFood("horse_feed", EntityTypes.HORSE, 10, false, List.of(new PetFoodItem.Treat(MobEffects.SPEED, 120),
 				new PetFoodItem.Treat(MobEffects.JUMP_BOOST, 120)));
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> PetFoodItem.feed(player, level, hand, entity));
+	}
 
-		// Every dish set down: a block named as its food, with no item of its own; set down in the same phase as the pie.
+	/**
+	 * Every dish of the menu and the rice slice set down ({@link MenuDishes}): a block named as its food, with no item of its
+	 * own, set down in the same use-block phase as the pie. Registered once all their foods are.
+	 */
+	private static void registerPlacedDishes() {
 		Map<Item, PlacedDishBlock> placed = new HashMap<>();
 		for (MenuDishes.Dish dish : MenuDishes.PLACED) {
 			Item food = item(dish.id());
@@ -899,6 +908,54 @@ public final class JugcraftAgriculture {
 			placed.put(food, block);
 		}
 		UseBlockCallback.EVENT.register(SET_DOWN_PHASE, (player, level, hand, hit) -> PlacedDishBlock.setDown(placed, player, level, hand, hit));
+	}
+
+	/**
+	 * Rice and wet farming (the kitchen and cooking expansion's slice 4, tools/rice.py), in the owner's own textures: rice,
+	 * its own seed, planted in shallow water as a paddy crop ({@link PaddyCropBlock}, registered with the other tall crops);
+	 * the panicles a ripe plant gives and the straw cut from them; wild rice in swamp and river shallows; the Bag of Rice and
+	 * the rice and straw bales; tatami woven from the straw; the rice dishes and rolls (set down as the menu's are); and the
+	 * Rice Roll Medley.
+	 */
+	private static void registerRice() {
+		seeds("rice", "rice_crop", COMPOST_LOW);
+		plain("rice_panicle", COMPOST_MEDIUM);
+		plain("straw", COMPOST_LOW);
+		Block wildRice = registerBlock("wild_rice", WildRiceBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS)
+				.sound(SoundType.WET_GRASS));
+		registerItem("wild_rice", props -> new DoubleHighBlockItem(wildRice, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
+
+		// Nine of a thing packed into a block: the owner's sack, and bales that soften a fall as a hay bale does.
+		Block bag = registerBlock("rice_bag", RiceBagBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.WHITE_WOOL).mapColor(MapColor.WOOD));
+		registerItem("rice_bag", props -> new BlockItem(bag, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		for (String bale : List.of("rice_bale", "straw_bale")) {
+			Block block = registerBlock(bale, HayBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.HAY_BLOCK));
+			registerItem(bale, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		Block tatami = registerBlock("tatami", TatamiBlock::new, woven());
+		registerItem("tatami", props -> new BlockItem(tatami, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block fullMat = registerBlock("full_tatami_mat", FullTatamiMatBlock::new, woven().noOcclusion().pushReaction(PushReaction.DESTROY));
+		registerItem("full_tatami_mat", props -> new BlockItem(fullMat, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block halfMat = registerBlock("half_tatami_mat", TatamiMatBlock::new, woven().noOcclusion().pushReaction(PushReaction.DESTROY));
+		registerItem("half_tatami_mat", props -> new BlockItem(halfMat, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// The dishes, in a bowl (given back) or in hand.
+		stew("cooked_rice", 6, 0.5F);
+		stew("fried_rice", 10, 0.7F);
+		stew("mushroom_rice", 9, 0.6F);
+		meal("salmon_roll", 5, 0.6F);
+		meal("cod_roll", 4, 0.6F);
+		meal("kelp_roll", 12, 0.6F);
+		meal("kelp_roll_slice", 3, 0.6F);
+		Block medley = registerBlock("rice_roll_medley", RollMedleyBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem("rice_roll_medley", props -> new BlockItem(medley, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1),
+				FOOD_TAB);
+	}
+
+	/** Woven straw: the tatami's and its mats' properties (a new set each, as block properties are not shared). */
+	private static BlockBehaviour.Properties woven() {
+		return BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(0.5F).sound(SoundType.WOOL).ignitedByLava();
 	}
 
 	/** A kitchen knife: a light, quick blade of {@code material} ({@link KitchenKnifeItem}); the netherite one doesn't burn. */
@@ -2802,6 +2859,8 @@ public final class JugcraftAgriculture {
 		wildPatch("acorn_squash", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_TAIGA);
 		wildPatch("warty_gourd", ConventionalBiomeTags.IS_SWAMP, ConventionalBiomeTags.IS_SPOOKY);
 		wildPatch("cranberry_bush", ConventionalBiomeTags.IS_SWAMP);
+		// Rice and wet farming: wild rice in swamp and river shallows.
+		wildPatch("wild_rice", ConventionalBiomeTags.IS_SWAMP, ConventionalBiomeTags.IS_RIVER);
 		wildPatch("chestnut_tree", ConventionalBiomeTags.IS_FOREST);
 		wildPatch("apple_tree", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
 		// Halloween harvest: heirloom pumpkins and bottle gourds on grass, and mums in flower-rich places.

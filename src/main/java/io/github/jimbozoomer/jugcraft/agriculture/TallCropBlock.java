@@ -164,9 +164,14 @@ public class TallCropBlock extends VegetationBlock implements BonemealableBlock 
 		if (age >= MAX_AGE || level.getRawBrightness(pos, 0) < CropGrowth.MIN_GROWTH_LIGHT) {
 			return;
 		}
-		if (random.nextInt(CropGrowth.chanceDivisor(CropGrowth.speed(level, pos, false), crop.growthTime)) == 0) {
+		if (random.nextInt(CropGrowth.chanceDivisor(growthSpeed(level, pos), crop.growthTime)) == 0) {
 			growTo(level, pos, age + 1);
 		}
+	}
+
+	/** How fast the plant whose bottom is at {@code pos} grows: from the farmland round it ({@link CropGrowth#speed}). */
+	protected float growthSpeed(ServerLevel level, BlockPos pos) {
+		return CropGrowth.speed(level, pos, false);
 	}
 
 	/**
@@ -281,7 +286,8 @@ public class TallCropBlock extends VegetationBlock implements BonemealableBlock 
 				if (!player.preventsBlockDrops()) {
 					Block.dropResources(bottomState, level, bottom, null, player, player.getMainHandItem());
 				}
-				level.setBlock(bottom, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL | Block.UPDATE_SUPPRESS_DROPS);
+				// What the bottom held stays: air, or a paddy crop's water.
+				level.setBlock(bottom, bottomState.getFluidState().createLegacyBlock(), Block.UPDATE_ALL | Block.UPDATE_SUPPRESS_DROPS);
 				level.levelEvent(player, LevelEvent.PARTICLES_AND_SOUND_DESTROY_BLOCK, bottom, Block.getId(bottomState));
 			}
 		}

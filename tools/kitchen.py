@@ -119,6 +119,9 @@ CUTTING = {
     # The menu (tools/menu.py): wheat dough cut into pasta, a tortilla into chips.
     "raw_pasta": {"input": "jugcraft:wheat_dough", "results": [["raw_pasta", 2]]},
     "tortilla_chip": {"input": "jugcraft:tortilla", "results": [["tortilla_chip", 2]]},
+    # Rice (tools/rice.py): a panicle cut into two rice and its straw; a kelp roll into four slices.
+    "rice": {"input": "jugcraft:rice_panicle", "results": [["rice", 2], ["straw", 1]]},
+    "kelp_roll_slice": {"input": "jugcraft:kelp_roll", "results": [["kelp_roll_slice", 4]]},
 }
 
 # Crafting.
