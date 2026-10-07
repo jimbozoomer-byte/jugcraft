@@ -59,6 +59,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import org.jspecify.annotations.Nullable;
@@ -177,14 +178,16 @@ public final class Sky {
 
 	/**
 	 * Why the sky over {@code pos} hides a pattern: {@code "elsewhere"} (only the Overworld has this sky),
-	 * {@code "no_sky"} (something is overhead) or {@code "clouded"} (rain or a storm, for a pattern that needs a clear
-	 * sky); {@code null} when it can be seen. The server's level decides; never a client's rendered sky.
+	 * {@code "no_sky"} (a block that stops movement stands anywhere above it, glass and leaves included, by the
+	 * server's heightmap, which changes the moment a block is placed) or {@code "clouded"} (rain or a storm, for a
+	 * pattern that needs a clear sky); {@code null} when it can be seen. The server's level decides; never a client's
+	 * rendered sky.
 	 */
 	public static @Nullable String obscured(ServerLevel level, BlockPos pos, Pattern pattern) {
 		if (level.dimension() != Level.OVERWORLD) {
 			return "elsewhere";
 		}
-		if (!level.canSeeSky(pos.above())) {
+		if (level.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ()) > pos.getY() + 1) {
 			return "no_sky";
 		}
 		return pattern.clearSky() && level.isRaining() ? "clouded" : null;

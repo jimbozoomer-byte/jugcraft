@@ -72,8 +72,10 @@ with the world and no command moves it, so turning the clock forward skips to a 
 sooner than the world has really run). Half a period lets a player who sleeps through nights still meet every
 occurrence. Recalls use the same ledger under `recall:<pattern>`.
 
-**Observation conditions** (`Sky.obscured`, on the server): the Overworld, the open sky over the block (or player), and
-no rain for a pattern that needs a clear sky; the pattern's season (Jugcraft's season from the server's date, any season
+**Observation conditions** (`Sky.obscured`, on the server): the Overworld, the open sky over the block (or player):
+nothing that stops movement anywhere above it by the server's heightmap, so glass and leaves count as a roof (the
+heightmap changes the moment a block is placed; sky light can lag a tick behind), and no rain for a pattern that needs a
+clear sky; the pattern's season (Jugcraft's season from the server's date, any season
 when seasons are off; the Harvest Moon only while `HarvestMoon.rising` says so).
 
 **Collection** (`ObservatoryBlockEntity.gather`, every 100 ticks, staggered by position): for each pattern up and in
