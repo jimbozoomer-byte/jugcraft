@@ -78,6 +78,7 @@ public final class PeepoModel extends EntityModel<PeepoState> {
         }
         if(s.work!=local.peepo.WorkAnimation.NONE && !s.eating && !s.sleeping && !s.sitting && !s.wheelRunning){
             if(s.work==local.peepo.WorkAnimation.STIR)CompanionWorkPose.stir(s,leftArm,rightArm,head,leftLeg,rightLeg);
+            else if(s.work.hasTool())CompanionWorkPose.tool(s,leftArm,rightArm,head,leftLeg,rightLeg);
             else CompanionWorkPose.interact(s,leftArm,rightArm,head);
         }
         if(!s.held.isEmpty() && !s.eating && !s.wheelRunning && !s.sleeping && s.work==local.peepo.WorkAnimation.NONE)rightArm.xRot=-.65F;

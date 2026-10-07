@@ -24,9 +24,21 @@ final class CompanionWorkPose {
     private static void grip(PeepoState s,ModelPart arm,int side){
         // Move the shoulders towards the front of the broad torso; both hands share the spoon grip.
         arm.x=side*2.3F;arm.y=19.2F;arm.z=-1.4F;
-        float dx=gripX(s)+side*.35F-arm.x,dy=GRIP_Y-arm.y,dz=gripZ(s)-arm.z;
+        reach(arm,gripX(s)+side*.35F,GRIP_Y,gripZ(s));
+    }
+    static void tool(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg){
+        var p=s.toolPose;
+        left.x=s.pumpkin?2.9F:2.3F;right.x=-left.x;
+        left.y=right.y=19.2F;left.z=right.z=s.pumpkin?-2.6F:-1.4F;
+        reach(left,p.leftX,p.leftY,p.leftZ);reach(right,p.rightX,p.rightY,p.rightZ);
+        head.yRot=0;head.xRot=.14F;
+        leftLeg.xRot=rightLeg.xRot=0;
+        leftLeg.yRot=rightLeg.yRot=leftLeg.zRot=rightLeg.zRot=0;
+    }
+    private static void reach(ModelPart arm,float x,float y,float z){
+        float dx=x-arm.x,dy=y-arm.y,dz=z-arm.z;
         float length=Mth.sqrt(dx*dx+dy*dy+dz*dz);
-        arm.xRot=-(float)Math.acos(dy/length);arm.yRot=(float)Math.atan2(-dx,-dz);arm.zRot=0;
+        arm.xRot=-(float)Math.acos(Mth.clamp(dy/length,-1,1));arm.yRot=(float)Math.atan2(-dx,-dz);arm.zRot=0;
         arm.yScale=length/2.7F;
     }
 }

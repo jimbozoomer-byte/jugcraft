@@ -20,6 +20,7 @@ public final class ProcessorJob implements CompanionJob {
     private boolean clearance;
 
     public ProcessorJob(MachineBlockEntity machine,int slot) { this.machine=machine;this.slot=slot; }
+    @Override public WorkAnimation animation(){return WorkAnimation.processor(machine.kind(),slot);}
     public boolean requestedAt(long now){return worker!=null && requested>=now-1 && requested<=now;}
     public boolean assignedTo(PeepoEntity npc){return worker!=null && worker.equals(npc.getUUID());}
     public Vec3 reservedPosition(){expire();return worker==null?null:entrance;}

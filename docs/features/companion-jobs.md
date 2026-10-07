@@ -30,7 +30,7 @@ The existing per-station exclusive reservations remain the authority. Travel ren
 
 Owner-requested on 7 October 2026, implemented with OpenAI Codex (GPT-6), against base commit `4bc09ffd`. The four-machine pilot is now expanded to all **36 processing machine types** in `MachineBlockEntity`: standard item recipes, fluid recipes, special crafting/plating, mining, farming and continuous pumping/separation. Electrical generators, kinetic engines, batteries and tanks have no processing-speed job and remain unsupported. The Generator Wheel and Cooking Pot retain their separate existing jobs.
 
-Use the Companion Planner to assign the same machine to each tamed companion. Clicking any linked machine part resolves to its controller. Each companion still has its own four-job list, priority, schedule, meals and recovery settings. Full multiblock machines (including the Arc Furnace's casing structure) have **two helper positions**, each adding up to **25% of ordinary processing speed**; one worker gives 25%, two give 50%. A physically single-block machine, including an old compact copy, has one position adding up to 50%. Provide separate reachable standing spaces at the front/sides and sufficient headroom for Jughead. Workers face the machine and use the existing two-arm INTERACT clip; the suggestions below are not implemented animations.
+Use the Companion Planner to assign the same machine to each tamed companion. Clicking any linked machine part resolves to its controller. Each companion still has its own four-job list, priority, schedule, meals and recovery settings. Full multiblock machines (including the Arc Furnace's casing structure) have **two helper positions**, each adding up to **25% of ordinary processing speed**; one worker gives 25%, two give 50%. A physically single-block machine, including an old compact copy, has one position adding up to 50%. Provide separate reachable standing spaces at the front/sides and sufficient headroom for Jughead. Workers face the machine and use the reusable valve, lever, mallet or wrench clips described below. Each helper position has a complementary role; the older machine-specific ideas remain future options.
 
 ### Companion reserve drain and animation suggestions
 
@@ -38,48 +38,61 @@ These numbers are **per Peepo/Jughead**, in JE per productive server tick. At 20
 
 The table describes full-size placed machines. **Compact legacy copies override their row to one helper at 16 JE/t.** The Arc Furnace uses two even though only its controller is a block entity.
 
-| Machine | Maximum helpers | JE/t per helper | Suggested clip (not implemented) |
-| --- | ---: | ---: | --- |
-| Electric Furnace | 2 | 8 | Slide a tray with tongs; adjust the control dial |
-| Crusher | 2 | 8 | Feed the hopper with a little shovel; pull a lever |
-| Arc Furnace Controller | 2 | 8 | Long tongs at the hatch; a second helper checks the controls |
-| Alloy Smelter | 2 | 8 | Tongs at the loading hatch; turn the pour-control handwheel |
-| Metal Press | 2 | 8 | Pull the press lever; arrange parts on the feed tray |
-| Wire Drawer | 2 | 8 | Turn a crank; guide wire onto a spool |
-| Circuit Assembler | 2 | 8 | Solder a component; inspect it with a magnifier |
-| Pulverizer | 2 | 8 | Scoop feed into a chute; work a crank |
-| Ore Washer | 2 | 8 | Swish a sieve basket; scrub with a small brush |
-| Sieve | 2 | 8 | Rock a screening tray side to side |
-| Sawmill | 2 | 8 | Guide a board along the feed table; turn a feed wheel |
-| Coke Oven | 2 | 8 | Shovel coal; work a long poker |
-| Steel Foundry | 2 | 8 | Work the bellows/control lever; steady a long ladle |
-| Ore Drill | 2 | 8 | Brace and turn the feed crank; check a gauge |
-| Deposit Drill | 2 | 8 | Adjust a lever; tighten a fitting with a wrench |
-| Cobblestone Generator | 1 | 16 | Tap and clear the output chute with a small hammer |
-| Tree Farm | 1 | 16 | Prune a sapling; tend the seedling tray |
-| Auto-Crafter | 1 | 16 | Pick, place and tap parts on a small work surface |
-| Crop Harvester | 2 | 8 | Sort the collection tray; adjust the cutting-height lever |
-| Hydroponic Bay | 2 | 8 | Water seedlings; inspect leaves |
-| Electroplating Bath | 2 | 8 | Raise and lower a parts rack |
-| Rocket Workshop | 2 | 8 | Turn a wrench; inspect a panel |
-| Pumpjack | 2 | 8 | Operate the stroke lever; grease a bearing |
-| Fracking Rig | 2 | 8 | Turn a pressure valve; watch the gauge |
-| Air Separation Unit | 2 | 8 | Turn a cold-box valve; wipe a frosted gauge |
-| Distillation Tower | 2 | 8 | Turn a valve; read a temperature gauge |
-| Catalytic Cracker | 2 | 8 | Work a pump lever; adjust a valve |
-| Settling Plant | 2 | 8 | Rake the settling tray; brush the filter |
-| Polymerization Reactor | 2 | 8 | Work the mixing control; collect a scoop of pellets |
-| Electrolytic Cell | 2 | 8 | Raise an electrode rack; adjust the controls |
-| Chemical Reactor | 2 | 8 | Work a mixing lever; check the sight glass |
-| Synthesis Converter | 2 | 8 | Lean into a large handwheel; check pressure |
-| Hydrotreater | 2 | 8 | Turn a valve; inspect a pipe fitting |
-| Lithography Station | 2 | 8 | Adjust a lens; inspect a wafer |
-| Ammonia Chiller | 2 | 8 | Wipe frost; turn the coolant valve |
-| Cryogenic Liquefier | 1 | 16 | Turn an insulated valve; watch the gauge |
+| Machine | Maximum helpers | JE/t per helper | Active clips (first / second helper) | Future specialized idea (not implemented) |
+| --- | ---: | ---: | --- | --- |
+| Electric Furnace | 2 | 8 | Lever / wrench | Slide a tray with tongs; adjust the control dial |
+| Crusher | 2 | 8 | Mallet / lever | Feed the hopper with a little shovel; pull a lever |
+| Arc Furnace Controller | 2 | 8 | Lever / wrench | Long tongs at the hatch; a second helper checks the controls |
+| Alloy Smelter | 2 | 8 | Lever / wrench | Tongs at the loading hatch; turn the pour-control handwheel |
+| Metal Press | 2 | 8 | Mallet / lever | Pull the press lever; arrange parts on the feed tray |
+| Wire Drawer | 2 | 8 | Lever / wrench | Turn a crank; guide wire onto a spool |
+| Circuit Assembler | 2 | 8 | Wrench / lever | Solder a component; inspect it with a magnifier |
+| Pulverizer | 2 | 8 | Mallet / lever | Scoop feed into a chute; work a crank |
+| Ore Washer | 2 | 8 | Valve / wrench | Swish a sieve basket; scrub with a small brush |
+| Sieve | 2 | 8 | Mallet / lever | Rock a screening tray side to side |
+| Sawmill | 2 | 8 | Lever / wrench | Guide a board along the feed table; turn a feed wheel |
+| Coke Oven | 2 | 8 | Lever / wrench | Shovel coal; work a long poker |
+| Steel Foundry | 2 | 8 | Lever / wrench | Work the bellows/control lever; steady a long ladle |
+| Ore Drill | 2 | 8 | Lever / wrench | Brace and turn the feed crank; check a gauge |
+| Deposit Drill | 2 | 8 | Lever / wrench | Adjust a lever; tighten a fitting with a wrench |
+| Cobblestone Generator | 1 | 16 | Mallet | Tap and clear the output chute with a small hammer |
+| Tree Farm | 1 | 16 | Lever | Prune a sapling; tend the seedling tray |
+| Auto-Crafter | 1 | 16 | Wrench | Pick, place and tap parts on a small work surface |
+| Crop Harvester | 2 | 8 | Lever / wrench | Sort the collection tray; adjust the cutting-height lever |
+| Hydroponic Bay | 2 | 8 | Valve / wrench | Water seedlings; inspect leaves |
+| Electroplating Bath | 2 | 8 | Valve / wrench | Raise and lower a parts rack |
+| Rocket Workshop | 2 | 8 | Wrench / lever | Turn a wrench; inspect a panel |
+| Pumpjack | 2 | 8 | Valve / wrench | Operate the stroke lever; grease a bearing |
+| Fracking Rig | 2 | 8 | Valve / wrench | Turn a pressure valve; watch the gauge |
+| Air Separation Unit | 2 | 8 | Valve / wrench | Turn a cold-box valve; wipe a frosted gauge |
+| Distillation Tower | 2 | 8 | Valve / wrench | Turn a valve; read a temperature gauge |
+| Catalytic Cracker | 2 | 8 | Valve / wrench | Work a pump lever; adjust a valve |
+| Settling Plant | 2 | 8 | Valve / wrench | Rake the settling tray; brush the filter |
+| Polymerization Reactor | 2 | 8 | Valve / wrench | Work the mixing control; collect a scoop of pellets |
+| Electrolytic Cell | 2 | 8 | Valve / wrench | Raise an electrode rack; adjust the controls |
+| Chemical Reactor | 2 | 8 | Valve / wrench | Work a mixing lever; check the sight glass |
+| Synthesis Converter | 2 | 8 | Valve / wrench | Lean into a large handwheel; check pressure |
+| Hydrotreater | 2 | 8 | Valve / wrench | Turn a valve; inspect a pipe fitting |
+| Lithography Station | 2 | 8 | Wrench / lever | Adjust a lens; inspect a wafer |
+| Ammonia Chiller | 2 | 8 | Valve / wrench | Wipe frost; turn the coolant valve |
+| Cryogenic Liquefier | 1 | 16 | Valve | Turn an insulated valve; watch the gauge |
 
 The Cooking Pot remains one helper, +50%, up to 16 JE/t (320 JE/s). The Generator Wheel remains one runner extracting up to 64 JE/t (1,280 JE/s), depending on available buffer space. These rates apply equally to Peepo and Jughead.
 
-For efficient animation work, start with three reusable clips: **turn a crank/valve**, **pull a lever**, and **handle a tray/tool**. Assign complementary roles to the two positions, offset their phases, and add sparse client-only particles where appropriate. Avoid per-frame server messages, real tool/item entities, or simulated fluid/block edits for the visual action.
+### Reusable work clips
+
+Owner-requested on 7 October 2026, implemented with OpenAI Codex (GPT-6), against base commit `2a45e269`. All 36 supported processors now select one of four shared actions through `WorkAnimation.processor(kind, slot)`. Compact copies use their first role. Future job adapters can return any of these action IDs; the rendering layer currently validates processor targets as loaded `MachineBlock` instances. The Cooking Pot keeps its rim-standing spoon clip and the wheel keeps its running animation.
+
+- **VALVE (100 ticks):** two hands turn an octagonal metal handwheel back and forth. Its shaft and mounting plate remain still.
+- **LEVER (64 ticks):** both hands rock a wooden grip on a hinged metal lever with a fixed support.
+- **MALLET (48 ticks):** both hands lift a wooden mallet with a metal band, then make a quick downstroke and pause at contact.
+- **WRENCH (64 ticks):** both hands turn a small open-ended wrench through a tightening stroke and faster return.
+
+These are procedural clips on the existing vanilla `EntityModel` rig, shared by Peepo and Jughead and offset forward for the pumpkin costume. `MachineWorkClip` computes one reusable pose in each render state; both arm grips and the tool model read that pose. Feet stay planted. Action changes use the existing synchronized action/target data; phase comes from world time with a stable companion UUID offset. There are no new per-frame messages, server scans, item entities, tool inventory mutations, particles or sound events. Props disappear on cancellation, eating, resting, death or a removed/unloaded target. Equipped items return using the existing held-item layer.
+
+The owner asset catalog was inspected; no suitable companion-rig clip was found. The closed-cube props and clip math are original source authored here. Wood and iron reuse unchanged Jugcraft textures `assets/jugcraft/textures/block/cider_press_wood.png` and `cider_press_iron.png` (existing original assets generated by `tools/cider_textures.py`). No library originals were modified or third-party art imported. This extends the simple existing renderer allowed by the framework policy; no new animation dependency or Blockbench export is introduced.
+
+Reserve drain, machine power costs, production bonuses, reservations, recipe plans and save keys are unchanged. New action IDs are appended after NONE/INTERACT/STIR; update both client and server to render them. Common/client compilation and JAR assembly passed with `build-local.ps1 -Tasks assemble`; automated tests and in-game visual checks were not run at the owner's request. The packaged mod must still be inspected in game for all machine orientations, both characters, pumpkin costumes, two helpers, interruption/restart, and existing cooking/wheel actions.
 
 ### Processing and resource conservation
 

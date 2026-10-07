@@ -8,6 +8,8 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 public final class PeepoClient implements ClientModInitializer {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(PeepoMod.id("peepo"), "main");
     public static final ModelLayerLocation SPOON = new ModelLayerLocation(PeepoMod.id("stirring_spoon"), "main");
+    public static final ModelLayerLocation WORK_WOOD = new ModelLayerLocation(PeepoMod.id("work_tools"), "wood");
+    public static final ModelLayerLocation WORK_METAL = new ModelLayerLocation(PeepoMod.id("work_tools"), "metal");
     @Override public void onInitializeClient() {
         AssignmentPreview.initialize();
         net.minecraft.client.gui.screens.MenuScreens.register(local.peepo.CompanionMenu.TYPE,CompanionScreen::new);
@@ -15,6 +17,8 @@ public final class PeepoClient implements ClientModInitializer {
         net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(local.peepo.GeneratorWheel.ENTITY,WheelRenderer::new);
         ModelLayerRegistry.registerModelLayer(LAYER, PeepoGeometry::create);
         ModelLayerRegistry.registerModelLayer(SPOON, StirringSpoonModel::create);
+        ModelLayerRegistry.registerModelLayer(WORK_WOOD, () -> WorkPropsModel.create(false));
+        ModelLayerRegistry.registerModelLayer(WORK_METAL, () -> WorkPropsModel.create(true));
         EntityRendererRegistry.register(PeepoMod.PEEPO, PeepoRenderer::new);
         EntityRendererRegistry.register(PeepoMod.JUGHEAD, PeepoRenderer::new);
         EntityRendererRegistry.register(PeepoMod.LEGACY_JUGHEAD, PeepoRenderer::new);

@@ -18,6 +18,8 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         addLayer(new FoodLayer(this));
         addLayer(new HeldLayer(this));
         addLayer(new SpoonLayer(this,new StirringSpoonModel(context.bakeLayer(PeepoClient.SPOON))));
+        addLayer(new WorkPropsLayer(this,new WorkPropsModel(context.bakeLayer(PeepoClient.WORK_WOOD)),
+            new WorkPropsModel(context.bakeLayer(PeepoClient.WORK_METAL))));
         addLayer(new EyesLayer<PeepoState,PeepoModel>(this) {
             @Override public RenderType renderType() { return RenderTypes.eyes(PeepoMod.id("textures/entity/peepo_pumpkin_glow.png")); }
         });
@@ -55,9 +57,30 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
                 state.bodyRot=entity.getYRot();state.yRot=0;state.xRot=0;state.shadowRadius=0;
             }
         }
+        if(state.work.hasTool()){
+            var target=entity.workTarget();
+            if(!entity.level().hasChunkAt(target) || !(entity.level().getBlockState(target).getBlock() instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlock))state.work=WorkAnimation.NONE;
+            else{
+                state.bodyRot=entity.getYRot();state.yRot=0;state.xRot=0;
+                state.workPhase=state.work.phase(entity.level().getGameTime(),partialTick,entity.getUUID().hashCode());
+                state.toolPose.evaluate(state.work,state.workPhase,state.pumpkin);
+            }
+        }
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;
         items.updateForLiving(state.held,!state.eating && !state.sleeping && state.work==WorkAnimation.NONE ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,state.holdingLight ? ItemDisplayContext.NONE : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
         items.updateForLiving(state.food,state.eating ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.FIXED,entity);
+    }
+    private static final class WorkPropsLayer extends RenderLayer<PeepoState,PeepoModel>{
+        private static final Identifier WOOD=io.github.jimbozoomer.jugcraft.Jugcraft.id("textures/block/cider_press_wood.png");
+        private static final Identifier METAL=io.github.jimbozoomer.jugcraft.Jugcraft.id("textures/block/cider_press_iron.png");
+        private final WorkPropsModel wood,metal;
+        WorkPropsLayer(PeepoRenderer parent,WorkPropsModel wood,WorkPropsModel metal){super(parent);this.wood=wood;this.metal=metal;}
+        @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
+            if(state.isInvisible || !state.work.hasTool())return;
+            if(state.work==WorkAnimation.LEVER || state.work==WorkAnimation.MALLET)
+                collector.order(1).submitModel(wood,state,pose,RenderTypes.entitySolid(WOOD),light,OverlayTexture.NO_OVERLAY,state.outlineColor);
+            collector.order(1).submitModel(metal,state,pose,RenderTypes.entitySolid(METAL),light,OverlayTexture.NO_OVERLAY,state.outlineColor);
+        }
     }
     private static final class SpoonLayer extends RenderLayer<PeepoState,PeepoModel>{
         private final StirringSpoonModel spoon;
