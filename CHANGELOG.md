@@ -8,6 +8,20 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Clean textures, set 10: machines
+- Every bronze-framed machine front loses its speckle.
+  - The steel plate is one tone with a few soft clumps, recessed under the frame's lit top and left edge.
+  - Windows are recessed, with their contents in soft clumps instead of random pixels.
+  - A running machine's glow (fire, arc light, a crystal's shine) rises in smooth bands to its brightest at the bottom, like a furnace.
+  - The crusher's jaws are two neat rows of teeth, the sieve is a crossed mesh, the circuit assembler shows gold traces, and the boilers are round and lit at the top left.
+- The machine casings, tanks, pump sides, plinths, the geothermal tank and stack, the crucible, the solar panel, the belts and the conveyor are cleaned the same way. Bricks take one tone a brick, lit along the top.
+- The five refinery machines whose fronts were committed as pictures in the old style (catalytic reformer, chemical mixer, crystal grower, oil sand extractor, vacuum distillation unit) are now drawn by the same code.
+- The leftover materials match set 9:
+  - salt, phosphate, lepidolite, monazite, sawdust, lithium carbonate, rare earth oxide and thermite are clean heaps;
+  - bitumen, silicon, coke, borax and ferroboron are lumpy chunks;
+  - bauxite, oil sand and tincal are evenly speckled rock.
+- The owner's library (#207) was used as a style reference only: many of its machine files match other mods' textures, so none is copied. IDs and models are unchanged.
+
 ### Unmerged: Clean textures, set 9: metal parts, petrochemistry and deposits
 - The ores, storage blocks, raw ores, ingots and nuggets are left to the material sets (#218), as the owner chose on 6 October 2026. This set cleans the rest of the materials.
 - Metal parts are drawn in `tools/material_style.py`:
