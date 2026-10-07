@@ -51,13 +51,16 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			// The player looks north at a still husk seven blocks away, in front of a brick wall.
 			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
 			server.runCommand(String.format(Locale.ROOT, "summon minecraft:husk %.1f %d %.1f {NoAI:1b,PersistenceRequired:1b,"
-					+ "Rotation:[0f,0f],attributes:[{id:\"minecraft:armor\",base:0.0d},{id:\"minecraft:max_health\",base:1000.0d}],"
-					+ "Health:1000.0f}", x + 0.5, y, z - 6.5));
+					+ "Rotation:[0f,0f],attributes:[{id:\"minecraft:armor\",base:0.0d},{id:\"minecraft:max_health\",base:1000.0d},"
+					+ "{id:\"minecraft:knockback_resistance\",base:1.0d}],Health:1000.0f}", x + 0.5, y, z - 6.5));
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 
 			for (String gun : JugcraftGuns.SPECS.keySet()) {
 				String round = JugcraftGuns.SPECS.get(gun).ammo();
 				int capacity = JugcraftGuns.SPECS.get(gun).capacity();
+				// Each gun starts from the same aim: every shot kicks the view up, and twelve guns' kicks would lift it
+				// over the husk.
+				server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
 				server.runCommand("clear @p");
 				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:%s[jugcraft:loaded_rounds=%d]".formatted(gun, capacity));
 				server.runCommand("give @p jugcraft:%s 32".formatted(round));
