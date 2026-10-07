@@ -50,6 +50,11 @@ public final class JournalClient {
 		});
 	}
 
+	/** The key that opens the journal (J unless remapped); tests press it as a player would. */
+	public static KeyMapping key() {
+		return open;
+	}
+
 	/** Opens the journal (and asks the server for it again). */
 	public static void open(Minecraft client) {
 		request();

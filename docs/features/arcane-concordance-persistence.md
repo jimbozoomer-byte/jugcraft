@@ -143,7 +143,8 @@ No new dependency or asset.
     its save from before versions back to itself; block entities stamp their version; the circle index looks only in
     reach and indexes an anchor once;
   - `ConcordanceConclaveGameTests.aProjectWhoseDefinitionIsGoneIsSetAside`.
-- CI: pending (this record is updated with the run).
+- CI: Build run 37683103100 on 441cd24, the first compile of `Saved` and of this step's tests: `mod` and `optional
+  integrations absent` passed, "All 1075 required tests passed" in each.
 
 Not yet run:
 - a real world saved by an earlier build and opened with this one (none is kept: world saves are not committed);

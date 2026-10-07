@@ -156,7 +156,10 @@ No new dependency, art, sound or animation.
   - `ConcordanceSpireGameTests.aVerdantFieldHastensOnlyWhatItsBedsPay`;
   - `ConcordanceGardenGameTests.aHastenedStepPaysAndFixesNothing`;
   - `ConcordanceRitualGameTests.aPorterFuellingFromACircleStopsItCleanly`.
-- CI: pending (this record is updated with the run).
+- CI: the first run, on bd916c4, failed two of 1069 server tests, both fixed in 9f50a1d. One was this step's porter test,
+  which asserted that Focus stayed put although it returns with time. The other was a dream test whose wisps fell where
+  creatures were not live. Build run 37680579216 on 9f50a1d: `mod` and `optional integrations absent` passed, with all
+  1069 server tests. This step adds no client test.
 
 Not yet run:
 - a representative installation simulated over real world time in a running world (the tests advance their systems by

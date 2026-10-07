@@ -7558,6 +7558,7 @@ def check_concordance(registered):
     check_authority(root, lang)
     check_economy(root)
     check_persistence(root)
+    check_journey()
     check_game_test_entrypoints()
 
 
@@ -10126,6 +10127,25 @@ def check_persistence(root):
     for relative in ENTRY_BY_ENTRY:
         if "Saved.keeping(" not in text(root / relative):
             err(f"concordance/{relative}: its entries are read one by one (Saved.keeping), so one it cannot read is kept")
+
+
+def check_journey():
+    """Roadmap step 31: tools/concordance_journey.py's three routes each reach the Architect stage for one player alone
+    with only their own research, need their own Spire's practice and differ from one another; the first success is the
+    data's; every game test the routes name exists; and the record's routes are the tool's."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import concordance_journey as jr
+    for problem in jr.problems():
+        err(problem)
+    path = ROOT / "docs" / "features" / "arcane-concordance-journey.md"
+    record = path.read_text(encoding="utf-8") if path.exists() else ""
+    block = re.search(r"<!-- journey:start -->\n(.*?)\n<!-- journey:end -->", record, re.S)
+    if not block or block.group(1).strip() != "\n".join(jr.table()).strip():
+        err("docs/features/arcane-concordance-journey.md: its routes are not tools/concordance_journey.py's (run it and paste)")
+    # The client test presses the journal's own key, as a player would.
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JournalClient.java")
+    if "public static KeyMapping key()" not in (client.read_text(encoding="utf-8") if client.exists() else ""):
+        err("client/JournalClient.java: key() gives tests the journal's key")
 
 
 if __name__ == "__main__":

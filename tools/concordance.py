@@ -866,6 +866,11 @@ def codex():
                 ("crafting_recipe", "Initiate's Wand",
                  "An instrument channels invocations. Hold it in your **main hand**; the invocations you have "
                  "understood appear on the spell bar, and the first is cast with the use key.", f"{MOD}:initiate_wand"),
+                ("text", "Casting",
+                 "The spell bar lists your invocations in order. The **use key** casts the first; the number keys "
+                 "**2**, **3** and on cast the ones after it. While the instrument is in your hand those number keys "
+                 "cast instead of changing the hotbar slot: scroll to change slot, or bind Spell Engine's own spell "
+                 "keys in Controls to free them."),
             ],
         },
         ("foundations", "research_notes"): {

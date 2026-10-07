@@ -46,6 +46,11 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: The Arcane Concordance: three ways to a Spire
+- Three routes from a fresh world to an endgame Spire are laid out and checked: **cultivation** (the garden, its brews and helpers, to a Verdant Spire), **exploration and combat** (the sky, the Crimson Vigil, relics and hexes, with a trip to the Nether, to a Star Spire) and **crafting and infrastructure** (circles, rings, the assay scale and porters, to a Lantern Spire). Each is reachable by one player alone with only its own research.
+- The Initiate's Wand's codex entry has a new **Casting** page: holding an instrument, the use key casts your first invocation and the number keys 2, 3 and on cast the ones after it (they stop changing the hotbar slot while it is held; scroll instead).
+- Nobody has played the routes yet: the playtest plan is in the record, ready to run. Record: [arcane-concordance-journey.md](docs/features/arcane-concordance-journey.md).
+
 ### Unmerged: The Arcane Concordance: saves that last
 - Everything the Concordance keeps in a world (spires, workers, Bound Wills, the sky's claims, Conclave projects, courier deliveries, and what it keeps on each player) is now saved with a version, so a later Jugcraft can read and update it. Older saves still load.
 - One entry a record cannot read (from a newer version, or damaged) is kept exactly as it was instead of emptying the whole record.

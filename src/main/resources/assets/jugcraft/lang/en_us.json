@@ -1754,6 +1754,8 @@
   "book.jugcraft.arcane_concordance.foundations.initiate_wand.name": "Initiate's Wand",
   "book.jugcraft.arcane_concordance.foundations.initiate_wand.p0.text": "An instrument channels invocations. Hold it in your **main hand**; the invocations you have understood appear on the spell bar, and the first is cast with the use key.",
   "book.jugcraft.arcane_concordance.foundations.initiate_wand.p0.title": "Initiate's Wand",
+  "book.jugcraft.arcane_concordance.foundations.initiate_wand.p1.text": "The spell bar lists your invocations in order. The **use key** casts the first; the number keys **2**, **3** and on cast the ones after it. While the instrument is in your hand those number keys cast instead of changing the hotbar slot: scroll to change slot, or bind Spell Engine's own spell keys in Controls to free them.",
+  "book.jugcraft.arcane_concordance.foundations.initiate_wand.p1.title": "Casting",
   "book.jugcraft.arcane_concordance.foundations.journal.description": "Everything you know and everything in your way, in one place",
   "book.jugcraft.arcane_concordance.foundations.journal.name": "The Concordance Journal",
   "book.jugcraft.arcane_concordance.foundations.journal.p0.text": "Press **J** (Controls: Concordance Journal) to open your journal. It shows what the server knows of your work: your Focus and stage, every research entry you have met and what its next state asks, each route to the next stage and what it still needs, and, once you know their traditions, your Vitae, the sky's forecast, your workers, deliveries, relics, the curses and wards on you, your Conclave standing, your spires and your Prima Materia.",

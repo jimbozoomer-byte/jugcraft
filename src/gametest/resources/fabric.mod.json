@@ -35,6 +35,7 @@
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceAuthorityGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceEconomyGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordancePersistenceGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ConcordanceJourneyGameTests",
 			"io.github.jimbozoomer.jugcraft.test.JugcraftGameTests",
 			"io.github.jimbozoomer.jugcraft.test.AgricultureGameTests",
 			"io.github.jimbozoomer.jugcraft.test.KitchenGardenGameTests",
@@ -130,6 +131,7 @@
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceJournalClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordancePresentationClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ConcordanceJourneyClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.AgricultureClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.KitchenGardenClientGameTests",
