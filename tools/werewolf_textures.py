@@ -96,6 +96,12 @@ def blaze(paint, rect, colours, width_top, width_bottom, level=0.55):
     for y in range(h):
         half = w * (width_top + (width_bottom - width_top) * y / max(1, h - 1)) / 2.0
         for x in range(w):
+            if paint.clean:
+                # Clean: one crisp pale band, a step lighter down its middle.
+                d = abs(x + 0.5 - w / 2.0)
+                if d <= half:
+                    paint.put(x0 + x, y0 + y, ramp(colours, level + (0.08 if d < half * 0.5 else -0.04)))
+                continue
             # Feathered: the pale fur thins out into the dark over a few pixels, unevenly.
             d = abs(x + 0.5 - w / 2.0) + 4.0 * (paint.noise(x0 + x, y0 + y, 5.0) - 0.5)
             if d <= half + 4:
@@ -118,7 +124,7 @@ def werewolf(kind, eyes_only=False):
     glowing eyes for the eyes layer)."""
     pal = KINDS[kind]
     width, height = TEXTURE_SIZE
-    paint = Painter(width * SCALE, height * SCALE, {"brown": 23101, "snow": 23102, "shadow": 23103}[kind])
+    paint = Painter(width * SCALE, height * SCALE, {"brown": 23101, "snow": 23102, "shadow": 23103}[kind], clean=True)
     glow = Painter(width * SCALE, height * SCALE, 0)
     fur, belly = pal["fur"], pal["belly"]
 
@@ -299,22 +305,19 @@ HD = 4
 def rug(kind):
     """The pelt seen from above (64 by 64): the kind's fur flowing along it, a darker stripe down the spine."""
     pal = KINDS[kind]
-    paint = Painter(16 * HD, 16 * HD, 23003 + len(kind))
+    paint = Painter(16 * HD, 16 * HD, 23003 + len(kind), clean=True)
     paint.shade((0, 0, 16 * HD, 16 * HD), pal["fur"], 0.55, spread=0.2, light="centre", edge=0.1)
-    paint.strands((0, 0, 16 * HD, 16 * HD), pal["fur"], 0.55, density=1.6, length=(5, 12))
-    for x in range(26, 38):
-        for y in range(16 * HD):
-            paint.put(x, y, ramp(pal["fur"], 0.15), 0.55 - abs(x - 31.5) / 14.0)
-    paint.strands((26, 0, 12, 16 * HD), pal["fur"], 0.2, density=1.0, length=(6, 12), spread=0.1)
+    paint.locks((0, 0, 16 * HD, 16 * HD), pal["fur"], 0.5, flow=(0.0, 1.0), length=(7, 11), width=(3.0, 5.0), light=0.1)
+    paint.locks((26, 0, 12, 16 * HD), pal["fur"], 0.25, flow=(0.0, 1.0), length=(7, 11), width=(3.0, 5.0), light=0.0)
     return paint.img
 
 
 def rug_head(kind):
     """The rug's snarling head (64 by 64): fur, glaring eyes, a black nose and a row of teeth at the front."""
     pal = KINDS[kind]
-    paint = Painter(16 * HD, 16 * HD, 23004 + len(kind))
+    paint = Painter(16 * HD, 16 * HD, 23004 + len(kind), clean=True)
     paint.shade((0, 0, 16 * HD, 16 * HD), pal["fur"], 0.5, spread=0.3, light="centre", edge=0.1)
-    paint.strands((0, 0, 16 * HD, 16 * HD), pal["fur"], 0.5, density=1.6, length=(4, 9))
+    paint.locks((0, 14, 16 * HD, 36), pal["fur"], 0.5, flow=(0.0, 1.0), length=(6, 9), width=(3.0, 4.6), light=0.1)
     # The eyes where the head's top face reads (near its front edge), the nose and teeth where its front face does.
     for cx in (26, 38):
         paint.ellipse(cx, 8, 4.5, 3.0, pal["socket"])
@@ -329,13 +332,13 @@ def rug_head(kind):
 def pelt(kind):
     """A folded pelt as an item (64 by 64): the kind's fur, a paler inner edge showing, ragged ends."""
     pal = KINDS[kind]
-    paint = Painter(16 * HD, 16 * HD, 23005 + len(kind))
+    paint = Painter(16 * HD, 16 * HD, 23005 + len(kind), clean=True)
     for y in range(12, 54):
         inset = 6 + int(3 * abs(((y - 12) % 14) - 7) / 7.0)
         for x in range(inset, 64 - inset):
-            f = 0.5 + 0.25 * (0.5 - (y - 12) / 42.0) + paint.rng.uniform(-0.05, 0.05)
-            paint.put(x, y, ramp(pal["fur"], f))
-    paint.strands((6, 12, 52, 42), pal["fur"], 0.5, density=1.4, length=(4, 9))
+            f = 0.5 + 0.25 * (0.5 - (y - 12) / 42.0)
+            paint.put(x, y, ramp(pal["fur"], round(f / 0.16) * 0.16))
+    paint.locks((6, 12, 52, 40), pal["fur"], 0.5, flow=(0.0, 1.0), length=(6, 9), width=(3.0, 4.6), light=0.1)
     for x in range(8, 56):
         paint.put(x, 52, ramp(pal["belly"], 0.6))
         paint.put(x, 53, ramp(pal["belly"], 0.4))

@@ -5,14 +5,16 @@ glass and face, the Tattered Curtains' cheesecloth, hem and rod, and the Creepy 
 and hair.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code or from the small pixel-art grids below,
-from fixed seeds; no Mojang texture is read, traced or recoloured. Block textures are 16x16 and opaque; the flame, the
-glow, the sheet's sides, the face, the cheesecloth and the item icons have see-through pixels.
+from fixed seeds; no Mojang texture is read, traced or recoloured. Surfaces are painted in the manner of the vanilla
+blocks with tools/block_style.py: a short palette in small clumps, never a random colour at every pixel, and wood as
+planks. Block textures are 16x16 and opaque; the flame, the glow, the sheet's sides, the face, the cheesecloth and the
+item icons have see-through pixels.
 """
 import math
 import random
 
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 
 IRON = [rgb("16141a"), rgb("1f1c22"), rgb("2a262c"), rgb("3a3438")]
 RUST = rgb("5a3420")
@@ -48,19 +50,19 @@ def put(img, x, y, color, alpha=255):
 def chandelier_iron():
     """Black wrought iron with hammer marks and a few rust specks."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 17101, [2, 3, 2])
-    rng = random.Random(17102)
-    for _ in range(6):
-        c.px(rng.randrange(16), rng.randrange(16), RUST)
-    for _ in range(8):
-        c.px(rng.randrange(16), rng.randrange(16), IRON[3])
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 17101, [2, 3, 2])
+    for x, y in ((3, 4), (11, 9), (6, 13)):
+        c.px(x, y, RUST)
+        c.px(x + 1, y, RUST)
+    for x, y in ((9, 2), (2, 10), (13, 14)):
+        c.px(x, y, IRON[3])
     return c.img
 
 
 def chandelier_wax():
     """Old ivory wax, with darker drips running down from the top."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, WAX[1:], 17111, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, WAX[1:], 17111, [2, 3, 1])
     rng = random.Random(17112)
     for x in range(0, 16, 3):
         length = rng.randint(3, 9)
@@ -101,20 +103,16 @@ def flame():
 # ---------------------------------------------------------------- the phantom pipe organ
 
 def organ_case():
-    """Dark stained wood with a fine vertical grain."""
+    """Dark stained wood: upright boards with a fine grain."""
     c = Canvas()
-    rng = random.Random(17201)
-    for x in range(16):
-        base = 1 + (1 if (x * 5) % 7 == 0 else 0)
-        for y in range(16):
-            c.px(x, y, CASE[min(3, max(0, base + (1 if rng.random() < 0.2 else 0) - (1 if rng.random() < 0.15 else 0)))])
+    bs.planks(CASE, 17201, vertical=True)(c)
     return c.img
 
 
 def organ_panel():
     """A carved panel: a raised frame round a pointed gothic arch sunk into the wood."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, CASE[1:3], 17211, [3, 2])
+    bs.fill(c, 0, 0, 15, 15, CASE[1:3], 17211, [3, 2])
     c.rect(0, 0, 15, 0, CASE[3])
     c.rect(0, 0, 0, 15, CASE[3])
     c.rect(0, 15, 15, 15, CASE[0])
@@ -134,12 +132,12 @@ def organ_panel():
 def organ_pipe():
     """Tarnished pewter, bright down one side of each pipe and dark down the other."""
     c = Canvas()
-    rng = random.Random(17221)
+    tarnish = bs.wobble(17221, 1)
     shades = [3, 4, 2, 1, 2, 3]
     for x in range(16):
         tone = shades[x % len(shades)]
         for y in range(16):
-            c.px(x, y, PEWTER[max(0, min(4, tone - (1 if rng.random() < 0.12 else 0)))])
+            c.px(x, y, PEWTER[max(0, min(4, tone + min(0, int(tarnish(x, y)))))])
     for y in (4, 11):
         c.rect(0, y, 15, y, PEWTER[1])
     return c.img
@@ -166,7 +164,7 @@ def organ_pedals():
 def organ_music():
     """A sheet of old music: staves and notes in faded ink."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, PAPER, 17241, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, PAPER, 17241, [1, 3, 2])
     for staff in (2, 9):
         for line in range(4):
             c.rect(1, staff + line, 14, staff + line, rgb("8a7c64"))
@@ -182,14 +180,14 @@ def organ_music():
 
 def ivory():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IVORY, 17251, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, IVORY, 17251, [1, 3, 2])
     c.rect(0, 15, 15, 15, IVORY[0])
     return c.img
 
 
 def ebony():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, EBONY, 17261, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, EBONY, 17261, [2, 3, 1])
     return c.img
 
 
@@ -222,7 +220,7 @@ def mail():
 
 def armor_wood():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, OAK, 17311, [2, 3, 2])
+    bs.planks(OAK, 17311, vertical=True)(c)
     return c.img
 
 
@@ -242,11 +240,11 @@ def visor():
 
 
 def plume():
-    """Red feathers, their barbs slanting."""
+    """Red feathers four pixels wide, their barbs slanting in bands two pixels wide, dark between the feathers."""
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            c.px(x, y, PLUME[(x + y // 2) % 3 + (1 if (x * 7 + y) % 11 == 0 else 0)])
+            c.px(x, y, PLUME[0] if x % 4 == 3 else PLUME[1 + (x + y // 2) // 2 % 2 + (1 if x % 4 == 1 and y % 4 == 0 else 0)])
     return c.img
 
 
@@ -276,19 +274,16 @@ def linen_folds(seed):
     c = Canvas()
     rng = random.Random(seed)
     folds = [rng.uniform(0, 16) for _ in range(3)]
+    grain = bs.wobble(seed, 0.5)
     for y in range(16):
         for x in range(16):
-            shade = 2.6 + sum(math.cos((x - f) * 0.9) * 0.45 for f in folds) + rng.uniform(-0.5, 0.5)
+            shade = 2.6 + sum(math.cos((x - f) * 0.9) * 0.45 for f in folds) + grain(x, y)
             c.px(x, y, LINEN[max(0, min(4, int(shade)))])
     return c
 
 
 def dust_sheet_top():
-    c = linen_folds(17401)
-    rng = random.Random(17402)
-    for _ in range(14):
-        c.px(rng.randrange(16), rng.randrange(16), LINEN[0])
-    return c.img
+    return linen_folds(17401).img
 
 
 def dust_sheet_side():
@@ -317,23 +312,25 @@ def dust_sheet_item():
 # ---------------------------------------------------------------- the spirit mirror
 
 def gilt():
-    """Gilded carving: gold leaf rubbed through to the dark ground in the hollows."""
+    """Gilded carving: gold leaf in soft clumps, with a carved bead moulding across it every eight rows."""
     c = Canvas()
-    for y in range(16):
+    bs.fill(c, 0, 0, 15, 15, GILT, 17491)
+    for y in (3, 11):
         for x in range(16):
-            c.px(x, y, GILT[(x * 3 + y * 5) % 4 if (x + y) % 3 else 1])
+            c.px(x, y, GILT[3] if x % 2 == 0 else GILT[2])
+            c.px(x, y + 1, GILT[0] if x % 2 == 0 else GILT[1])
     return c.img
 
 
 def mirror_glass():
     """Old silvered glass: dark and grey, a pale streak of reflection across it, the silvering gone at the corners."""
     c = Canvas()
-    rng = random.Random(17501)
+    grain = bs.wobble(17501, 0.4)
     for y in range(16):
         for x in range(16):
             streak = math.exp(-((x + y - 12) / 2.5) ** 2) * 2.5
             corner = min(x, 15 - x) + min(y, 15 - y)
-            tone = 1.6 + streak + rng.uniform(-0.4, 0.4) - (1.2 if corner < 4 else 0)
+            tone = 1.6 + streak + grain(x, y) - (1.2 if corner < 4 else 0)
             c.px(x, y, GLASS[max(0, min(4, int(tone)))])
     return c.img
 
@@ -364,11 +361,12 @@ def gauze(hem):
     """Loose-woven cheesecloth gone grey, with holes and tears through it; with `hem`, a ragged bottom edge."""
     c = Canvas()
     rng = random.Random(17601 + (1 if hem else 0))
+    grain = bs.wobble(17601 + (1 if hem else 0), 1)
     for y in range(16):
         for x in range(16):
-            if (x % 3 == 2 and y % 2 == 1) or rng.random() < 0.06:
-                continue  # the weave's gaps and moth holes
-            c.px(x, y, GAUZE[(x + y) % 2 + (1 if rng.random() < 0.4 else 0) + (1 if x % 3 == 0 else 0)])
+            if x % 3 == 2 and y % 3 == 1:
+                continue  # the weave's gaps
+            c.px(x, y, GAUZE[max(0, min(3, 1 + (1 if x % 3 == 0 else 0) + int(grain(x, y))))])
     for _ in range(2):
         x, y = rng.randrange(2, 13), rng.randrange(2, 12)
         for dy in range(rng.randint(2, 4)):
@@ -386,7 +384,7 @@ def gauze(hem):
 
 def curtain_rod():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[1:], 17611, [2, 2, 1])
+    bs.fill(c, 0, 0, 15, 15, IRON[1:], 17611, [2, 2, 1])
     return c.img
 
 
@@ -425,38 +423,38 @@ def curtains_item():
 def dress():
     """Faded plum velvet, worn pale in patches."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, VELVET[:3], 17701, [2, 3, 2])
-    rng = random.Random(17702)
-    for _ in range(10):
-        c.px(rng.randrange(16), rng.randrange(16), VELVET[3])
+    bs.fill(c, 0, 0, 15, 15, VELVET, 17701, [2, 3, 2, 1], spread=0.7)
     return c.img
 
 
 def lace():
-    """Yellowed lace: a scalloped pattern of holes."""
+    """Yellowed lace: eyelets in offset rows, each a little hole ringed with raised thread."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, LACE[0] if (x + 2 * y) % 4 == 0 else LACE[1] if (x * y) % 3 else LACE[2])
+    c.rect(0, 0, 15, 15, LACE[1])
+    for y in range(1, 16, 4):
+        for x in range(1 + (y // 4) % 2 * 2, 16, 4):
+            c.px(x, y, LACE[0])
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                c.px((x + dx) % 16, (y + dy) % 16, LACE[2])
     return c.img
 
 
 def stocking():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, LACE, 17721, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, LACE, 17721, [1, 3, 2])
     return c.img
 
 
 def shoe():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("0c0a0c"), rgb("161216"), rgb("26202a")], 17731, [3, 2, 1])
+    bs.fill(c, 0, 0, 15, 15, [rgb("0c0a0c"), rgb("161216"), rgb("26202a")], 17731, [3, 2, 1])
     return c.img
 
 
 def porcelain():
     """Pale porcelain with a faint blush."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, PORCELAIN, 17741, [1, 3, 3])
+    bs.fill(c, 0, 0, 15, 15, PORCELAIN, 17741, [1, 3, 3], spread=0.6)
     return c.img
 
 
@@ -484,10 +482,10 @@ def doll_face():
     c = Canvas()
     colours = {"b": rgb("3a2a2a"), "e": rgb("0e0a0c"), "E": rgb("e8e8f0"), "c": rgb("e8b0b0"), "r": rgb("9a1c24"), "l": rgb("c8303a"),
                "k": rgb("6a5a50")}
-    rng = random.Random(17751)
+    skin = bs.surface(PORCELAIN[1:], 17751, [1, 2], spread=0.6)
     for y, row in enumerate(DOLL_FACE):
         for x, ch in enumerate(row):
-            c.px(x, y, colours.get(ch, PORCELAIN[rng.choice((1, 2, 2))]))
+            c.px(x, y, colours.get(ch) or skin(x, y))
     return c.img
 
 
@@ -503,7 +501,7 @@ def hair():
 
 def bow():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BOW, 17771, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, BOW, 17771, [1, 3, 2])
     return c.img
 
 

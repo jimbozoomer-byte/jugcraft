@@ -10,6 +10,12 @@ Use the contributor's GitHub identity and fork. The owner's Claude installation 
 
 Build and test changes on the contributor's PC when tools and access permit. Run relevant automated checks and, when possible, launch Minecraft to exercise the feature and inspect models/textures in-game. Fix problems within the change's scope. Report exactly what ran, results, and what remains unverified. If local building or gameplay testing is unavailable, continue implementing and submit a draft PR with that limitation; inability to launch Minecraft must not block coding, modeling, or submitting work. Never claim an unperformed test passed. Maintainers still assess integration and release readiness.
 
+## Shared owner asset library
+
+Before creating or replacing any art, sound or animation, read [art/owner-library/README.md](art/owner-library/README.md) and search its [catalog](art/owner-library/catalog/README.md). The owner explicitly authorizes suitable assets from this supplied collection for direct reuse, recoloring/adaptation, or reference, without another per-asset permission request. This applies across blocks, ores, metals, machines, guns, planes, sounds, animations, weapons, armor, trees, biomes, farming and food; the original folder name `Blocks` does not limit its scope.
+
+Keep the library originals intact. Copy chosen assets into the feature's runtime resources, preserve or adapt accompanying texture/animation metadata, and record the source path plus modifications in the feature's provenance. Match the relevant branch's art direction. This collection-specific authorization does not change the rules for unrelated third-party material in LICENSE_POLICY.md.
+
 ## Owner-authorized development
 
 The owner authorized Claude to build the Minecraft 26.3 + Fabric bootstrap without a separate proposal issue or second maintainer. That bootstrap is done: the scaffold, pinned toolchain, Build workflow, base materials, machines and power were merged in PRs #4–#7 (see [docs/PLATFORM.md](docs/PLATFORM.md)). The project license is MIT (see [LICENSE_POLICY.md](LICENSE_POLICY.md)). Still outstanding: running the client and dedicated server, and the two-client playtest.
