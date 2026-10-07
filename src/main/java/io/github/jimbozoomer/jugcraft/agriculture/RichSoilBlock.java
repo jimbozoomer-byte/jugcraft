@@ -64,7 +64,7 @@ public class RichSoilBlock extends Block {
 		}
 		if (!level.isClientSide()) {
 			level.setBlock(pos, JugcraftAgriculture.block("rich_soil_farmland").defaultBlockState(), Block.UPDATE_ALL);
-			level.playSound(null, pos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 1.0F);
+			level.playSound(null, pos, SoundEvents.HOE_TILL.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
 			stack.hurtAndBreak(1, player, hand);
 		}
