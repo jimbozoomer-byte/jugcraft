@@ -229,6 +229,9 @@ def draw_all(save, save_armor, part_palette):
     save(hitech.katana(), "item", "power_katana", animation={"frametime": 2})
     save_armor(hitech.scuba_layer(), "humanoid", "scuba")
     save_armor(hitech.runners_layer(), "humanoid", "free_runners")
-    for tier, palette in list(VANILLA_TIERS.items()) + [("bronze", part_palette("bronze")),
-                                                         ("steel", part_palette("steel"))]:
+    for tier, palette in VANILLA_TIERS.items():
         save(icon(PAXEL, palette), "item", f"{tier}_paxel")
+    # Bronze and steel tools and paxels: the material-set maps (tools/material_icons.py, docs/MATERIAL_SETS.md), drawn
+    # over the masks the loop at the top of this function still draws for them.
+    import material_icons
+    material_icons.draw_tools(save)
