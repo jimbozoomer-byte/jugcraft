@@ -223,6 +223,11 @@ def draw_all(save, save_armor, part_palette):
         save_armor(armor_styles.layer(style, armor, False), "humanoid", style)
         save_armor(armor_styles.layer(style, armor, True), "humanoid_leggings", style)
         save(arms_variants_art.pattern16(style), "item", gear.ARMOR_STYLES[style]["template"])
+    # The armor-only tiers (gear.ARMOR_TIERS; Bloodthorn first): icons from each tier's own maps
+    # (tools/armor_icons/<tier>/), coloured as its 3D model is painted; worn, each is only that model, with no flat layer.
+    for tier in gear.ARMOR_TIERS:
+        for piece in armor_icons.PIECES:
+            save(armor_icons.icon(tier, piece), "item", f"{tier}_{piece}")
     steel = part_palette("steel")
     save(icon(BOW_BASE, steel), "item", "power_bow")
     for step in range(3):

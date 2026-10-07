@@ -1414,6 +1414,38 @@ def check_gear():
                 err(f"Missing item texture {frame}.png")
     check_armor_styles(java)
     check_armor_looks()
+    check_armor_tiers(java)
+
+
+def check_armor_tiers(java):
+    """The armor-only tiers (tools/gear.py ARMOR_TIERS, docs/features/bloodthorn-armor.md) against JugcraftGear: the
+    list, each tier's material and its fire resistance; and, since they draw no flat layer, that every piece has a 3D
+    model (tools/armor_models.py), an icon and no equipment asset file."""
+    import armor_models
+    match = re.search(r"ARMOR_TIERS = List\.of\(([^)]*)\)", java)
+    found = re.findall(r'"([a-z_]+)"', match.group(1)) if match else None
+    if found != list(gear.ARMOR_TIERS):
+        err(f"JugcraftGear.ARMOR_TIERS {found} != tools/gear.py {list(gear.ARMOR_TIERS)}")
+    worn = {item for armor_set in armor_models.sets() for item in armor_set.pieces}
+    for tier, info in gear.ARMOR_TIERS.items():
+        mult, (boots, legs, chest, helmet), enchant, tough, knock = info["armor"]
+        armor = f"{tier.upper()}_ARMOR = new ArmorMaterial({mult}, defense({boots}, {legs}, {chest}, {helmet}), {enchant},"
+        if armor not in java or f"{tough}F, {knock}F, repairs(\"{tier}\"), asset(\"{tier}\"))" not in java:
+            err(f"JugcraftGear: the {tier} armor material differs from tools/gear.py")
+        call = f'armorTier("{tier}", {tier.upper()}_ARMOR, {str(info["fire_resistant"]).lower()});'
+        if call not in java:
+            err(f"JugcraftGear must register the {tier} pieces as {call}")
+        repairs = load(DATA / MOD / "tags" / "item" / f"repairs_{tier}_gear.json") or {}
+        if repairs.get("values") != [info["repair"]]:
+            err(f"{MOD}:repairs_{tier}_gear must hold {info['repair']}")
+        for piece in gear.ARMOR:
+            item = f"{tier}_{piece}"
+            if item not in worn:
+                err(f"{item} has no 3D model: an armor-only tier draws no flat layer (tools/armor_models.SET_MODULES)")
+            if not (ASSETS / "textures" / "item" / f"{item}.png").is_file():
+                err(f"Missing item texture {item}.png")
+        if (ASSETS / "equipment" / f"{tier}.json").exists():
+            err(f"equipment/{tier}.json should not exist: every {tier} piece is drawn as a 3D model")
 
 
 def check_armor_styles(java):
