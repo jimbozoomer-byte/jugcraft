@@ -66,7 +66,7 @@ Mineral-depleted sand should have useful construction outlets and remain deplete
 
 | Role | Proposed shared uses | Capability boundaries |
 | --- | --- | --- |
-| Leaching/digestion vessel | Appropriate acid or alkaline treatment of different mineral feeds | Material compatibility, heating and pressure where genuinely required |
+| Leaching/digestion vessel | Appropriate acid or alkaline treatment of different mineral feeds | Material compatibility and heating; gas pipes automatically supply process pressure under the later owner choice |
 | Filter press | Separate useful solutions from solid residues | Suitable durable filters; approved recovery/purity behavior |
 | Precipitation/crystallization tank | Recover useful compounds from solution | Required reagents, temperature and product-specific recipes |
 | Chemical separation unit | Separate selected dissolved materials, including rare-earth fractions | Appropriate separation chemistry; avoid one universal recipe for unrelated feeds |
@@ -74,7 +74,7 @@ Mineral-depleted sand should have useful construction outlets and remain deplete
 | Electrolytic cell | Selected metal and reagent production | Appropriate electrodes and bath conditions; molten-salt and aqueous operations need their real capability distinction |
 | Sealed reduction retort | Controlled-atmosphere reduction and appropriate recovery operations | Dedicated process hardware where shared open vessels cannot perform the job |
 
-A line uses the operations it actually needs. Small batches stay practical. Larger stations can offer throughput; control, heat, pressure, lining or electrode changes can unlock genuinely different processes. Preserve shared kinetic/electrical/item/fluid systems rather than inventing parallel APIs or energy currencies.
+A line uses the operations it actually needs. Small batches stay practical. Larger stations can offer throughput; control, heat, lining or electrode changes can unlock genuinely different processes. The later chemistry choice makes gas-pipe pressurization automatic, rather than a player-managed pressure tier or compressor prerequisite. Preserve shared kinetic/electrical/item/fluid systems rather than inventing parallel APIs or energy currencies.
 
 Connections to earlier industries include ceramic linings/insulators, suitable agricultural filter cloth and seals, basic metal vessels and later compatible materials. Essential components need a reachable hand/solo/trade route. These connections must not require every farmer or engineer to complete every specialty.
 
@@ -84,7 +84,7 @@ Connections to earlier industries include ceramic linings/insulators, suitable a
 
 Candidate route: bauxite preparation, alkaline digestion, clarification/filtration, recovery of a precipitate and calcination into alumina. Alumina then branches into appropriate ceramic products or aluminum electrolysis.
 
-This gives the refinery a useful oxide output as well as a metal consumer. Preserve existing alumina/aluminum identities and keep prior reachable recipes until their replacement route works. The inspected electrolytic-cell recipe uses aluminum cable while producing aluminum: a starter version needs earlier conductors or another verified bootstrap before the current starting route is removed.
+This gives the refinery a useful oxide output as well as a metal consumer. Preserve existing alumina/aluminum identities and keep prior reachable recipes until their replacement route works. The inspected electrolytic-cell recipe uses aluminum cable while producing aluminum. In the [7 October chemistry planning follow-up](industrial-chemistry-and-fuels-plan.md#machinery-and-operation-decisions-second-batch), the owner selected **earlier copper conductors for entry aluminum-processing equipment**, with aluminum improvements later. Exact construction recipes remain to design; verify this bootstrap before the current starting route is removed.
 
 ### Titanium materials
 
