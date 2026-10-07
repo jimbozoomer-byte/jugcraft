@@ -9,9 +9,11 @@ flat as Minecraft lights entities (two fixed lights: top 1.0, front and back 0.7
     python3 tools/armor_preview.py --set steel_knight --poses walk --views front,right
     python3 tools/armor_preview.py --set steel_knight --compare path/to/owner_design.png
     python3 tools/armor_preview.py --set bloodthorn --compare path/to/owner_design.png
+    python3 tools/armor_preview.py --set reforged_white_diamond --compare path/to/owner_design.png
                                                            a set with a REFERENCES layout gets each of the reference's
-                                                           views beside ours from the same camera, lit as Blockbench
-                                                           lights its renders and as the game does
+                                                           views beside ours from the same camera and in the same pose,
+                                                           lit as the reference is (Blockbench's shading, or unlit) and
+                                                           as the game does
     python3 tools/armor_preview.py --json vanguard_         entries already in worn_models.json (here the exosuit)
     python3 tools/armor_preview.py --set steel_knight --wearer --poses stand,walk,sneak
                                                            where the wearer shows through: the mannequin's skin green
@@ -20,8 +22,8 @@ flat as Minecraft lights entities (two fixed lights: top 1.0, front and back 0.7
 Images go to build/armor_preview/ (git-ignored). Views: front, back, right (the model's right side), left,
 three_quarter (front-right, from a little above), top, bottom, and the Bloodthorn render's two: front_left (front
 three-quarter from the model's left) and back_right (from behind, a little to its right). Poses: stand, walk (arms and
-legs swung), sneak, owner (the owner's knight design render: arms 20 degrees out, head turned 17 degrees), joined with
-"+" (sneak+walk).
+legs swung), sneak, owner (the owner's knight and White Diamond renders: arms 20 degrees out, head turned 17
+degrees), joined with "+" (sneak+walk).
 """
 import argparse
 import functools
@@ -327,30 +329,45 @@ def render_all(name, entries, textures, out_dir, views=DEFAULT_VIEWS, poses=DEFA
 
 # Reference renders in more than one view, for --compare: set -> panels, each (label, crop box (x0, y0, x1, y1) of the
 # reference image, view (azimuth, elevation), camera distance, camera target height above the feet, image px per
-# model px at the target, (u, v) where the target lands in the image). A set with none gets compare()'s front view.
+# model px at the target, (u, v) where the target lands in the image), then optionally a dict: the pose the reference
+# shows ("pose", default compare_panels' own), how it is lit ("lighting": "blockbench", the default, or "unlit") and the
+# colour behind ours ("background"). A set with none gets compare()'s front view.
 REFERENCES = {
     # the owner's Bloodthorn render (671 x 633): a front three-quarter from the model's front left at about head
     # height, and the back from a little to the model's right; perspective cameras fitted to its two silhouettes
     "bloodthorn": (("front three-quarter", (40, 90, 345, 633), (-24, 0), 60, 30, 11.61, (181.69, 240.06)),
                    ("back", (346, 90, 651, 633), (162, 0), 60, 30, 11.09, (508.56, 250.45))),
+    # the owner's Reforged White Diamond render (691 x 649): one front view at about head height, unlit, the figure in
+    # the owner's pose (arms 20 degrees out, head turned 17); the camera fitted to its dark sleeves, then its scale and
+    # offset to its silhouette
+    "reforged_white_diamond": (("front", (30, 85, 420, 649), (0, 0), 60, 30, 12.645, (222.94, 219.94),
+                                {"pose": "owner", "lighting": "unlit", "background": (117, 130, 188)}),),
 }
 
 
 def compare_panels(entries, textures, owner, path, panels, pose="stand"):
     """A reference image's panels, each beside ours from its camera at its scale: lit as the reference's renderer
-    lights faces (Blockbench) and lit as the game does. One row per panel."""
+    lights faces (Blockbench's flat shading, or none for an unlit render) and lit as the game does. One row per panel;
+    a panel's options (REFERENCES) may set the pose it shows, its lighting and the background behind ours."""
     ref = Image.open(owner).convert("RGB")
-    base = world_quads(entries, pose, textures)
+    posed = {}
     tiles = []
-    for name, (x0, y0, x1, y1), view, distance, height, k, (u, v) in panels:
+    for name, (x0, y0, x1, y1), view, distance, height, k, (u, v), *extra in panels:
+        options = extra[0] if extra else {}
+        shown = options.get("pose", pose)
+        if shown not in posed:
+            posed[shown] = world_quads(entries, shown, textures)
         lift = np.array([0.0, height - 16.0, 0.0])   # project() aims at (0, 16, 0)
-        quads = [(pts - lift, uv, n, tex) for pts, uv, n, tex in base]
+        quads = [(pts - lift, uv, n, tex) for pts, uv, n, tex in posed[shown]]
         left, top = -u / k, 16.0 + v / k
         frame = (left + x0 / k, left + x1 / k, top - y1 / k, top - y0 / k)
+        background = tuple(options.get("background", (48, 50, 58)))
         tiles.append(label(ref.crop((x0, y0, x1, y1)), f"owner's design, {name}"))
-        for lighting, text in (("blockbench", "ours, lit as their render"), ("game", "ours, lit as in game")):
-            tiles.append(label(render(quads, view, k, frame, False, distance, background=(48, 50, 58),
-                                      lighting=lighting), text))
+        for lighting, text in ((options.get("lighting", "blockbench"), "ours, lit as their render"),
+                               ("game", "ours, lit as in game")):
+            unlit = lighting == "unlit"
+            tiles.append(label(render(quads, view, k, frame, unlit, distance, background=background,
+                                      lighting="game" if unlit else lighting), text))
     sheet(tiles, 3).save(path)
     return path
 

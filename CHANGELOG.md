@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Reforged White Diamond Armor
+- **Reforged White Diamond Armor, the second of the owner's new armor tiers:** an icy white and pale cyan set worn as a 3D model in the owner's own design: a big V crest and rising wing bars over a charcoal face plate, wide winged pauldrons over a lavender-edged V on the chest, a long skirt of tassets in an A over light and lavender stripes, and diamond plates on the toes.
+- **Beside Bloodthorn, in other strengths:** defense 4, 8, 7 and 3 (helmet to boots), toughness 3.0, knockback resistance 0.1, durability 495, 720, 675 and 585, enchantability 20. Not fire resistant, and repaired with diamonds.
+- **No recipe or drop yet:** creative tab only, until the owner decides. Record: [reforged-white-diamond-armor.md](docs/features/reforged-white-diamond-armor.md).
+
 ### Unmerged: Bloodthorn Armor
 - **Bloodthorn Armor, the first of the owner's new armor tiers:** a crimson plate set worn as a 3D model in the owner's own design, with a fan of thorn-like spikes behind the helm, layered pauldrons and diamond plates on the forearms and knees.
 - **A step above netherite:** defense 3, 9, 7 and 3 (helmet to boots), toughness 3.5, knockback resistance 0.15, durability 440, 640, 600 and 520, enchantability 15. Fire resistant, and repaired with netherite ingots.

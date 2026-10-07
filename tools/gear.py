@@ -74,11 +74,15 @@ ARMOR_STYLES = {
 # layer is drawn or needed). Not in GEAR_TIERS: no tools, paxels or arms. "armor" is as in GEAR_TIERS: durability
 # multiplier, defense (boots, leggings, chestplate, helmet), enchantability, toughness, knockback resistance; netherite
 # is 37, (3, 6, 8, 3), 15, 3.0, 0.1. "repair" is what mends it at an anvil, "fire_resistant" as netherite. No recipe
-# or drop yet: the owner, 7 October 2026, "for now just make the armor we can figure that out later" (they might be
+# or drop yet: the owner, 6 October 2026, "for now just make the armor we can figure that out later" (they might be
 # dropped by bosses or craftable), so for now they are creative-only. Java: JugcraftGear.ARMOR_TIERS.
 ARMOR_TIERS = {
     "bloodthorn": {"display": "Bloodthorn", "armor": (40, (3, 7, 9, 3), 15, 3.5, 0.15),
                    "repair": "minecraft:netherite_ingot", "fire_resistant": True},
+    # Reforged White Diamond: beside Bloodthorn rather than above it, in other strengths: the heavier helm, the longest
+    # wear and the best enchanting, but netherite's toughness and no fire resistance; mended with diamonds.
+    "reforged_white_diamond": {"display": "Reforged White Diamond", "armor": (45, (3, 7, 8, 4), 20, 3.0, 0.1),
+                               "repair": "minecraft:diamond", "fire_resistant": False},
 }
 
 
