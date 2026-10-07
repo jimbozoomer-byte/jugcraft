@@ -14,6 +14,8 @@ import random
 
 from PIL import Image
 
+import block_style as bs
+
 MOD = "jugcraft"
 
 # id: (display name, kind, hardness, blast resistance); the kinds are those of tools/dieselworks.py, plus "crest", a
@@ -220,18 +222,21 @@ def crest():
 
 
 def marble(seed=4806):
-    """Polished cream marble with thin grey veins."""
+    """Polished cream marble in the manner of vanilla calcite: one ground tone with soft clumps a tone either side and
+    a single smooth grey vein wandering down it."""
     rng = random.Random(seed)
     img = _img()
+    s = bs.surface(MARBLE[2:5], seed, weights=[1, 3, 1], spread=0.7)
     for y in range(16):
         for x in range(16):
-            _put(img, x, y, MARBLE[rng.choice([2, 3, 3, 3, 4])])
+            _put(img, x, y, s(x, y))
     x = rng.randint(0, 15)
     for y in range(16):
-        x = (x + rng.choice([-1, 0, 0, 1])) % 16
-        _put(img, x, y, MARBLE[0])
-        if rng.random() < 0.4:
-            _put(img, (x + 1) % 16, y, MARBLE[1])
+        if y % 3 == 0:
+            x = (x + rng.choice([-1, 1])) % 16
+        _put(img, x, y, MARBLE[1])
+        if y % 5 == 2:
+            _put(img, x, y, MARBLE[0])
     return img
 
 
@@ -275,15 +280,19 @@ def iron_column():
 
 
 def tiles():
-    """Black and cream station tiles: a 2x2 checker with fine brass grout lines."""
+    """Black and cream station tiles: a 2x2 checker with fine brass grout lines, the black tiles flat with a lit top
+    left edge, the cream ones clumped marble."""
     img = _img()
-    rng = random.Random(4810)
+    cream = bs.surface(MARBLE[2:5], 4810, weights=[1, 3, 1], spread=0.6)
     for y in range(16):
         for x in range(16):
             dark = (x // 8 + y // 8) % 2 == 1
-            c = (BLACK[2] if rng.random() < 0.85 else BLACK[3]) if dark else MARBLE[rng.choice([2, 3, 3, 4])]
             if x % 8 == 0 or y % 8 == 0:
                 c = BRASS[1]
+            elif dark:
+                c = BLACK[3] if x % 8 == 1 or y % 8 == 1 else BLACK[2]
+            else:
+                c = cream(x, y)
             _put(img, x, y, c)
     return img
 

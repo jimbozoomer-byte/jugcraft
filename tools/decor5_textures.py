@@ -3,14 +3,16 @@ for Apples Tub and its apples, the Pumpkin Crate and its label, the Hay Bale Sea
 four colours of mums) and the red, orange and yellow Leaf Piles.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code from fixed seeds; no Mojang texture is
-read, traced or recoloured. Block textures are 16x16 and fully opaque.
+read, traced or recoloured. Surfaces are painted in the manner of the vanilla blocks with tools/block_style.py: a
+short palette in small clumps, never a random colour at every pixel, wood as planks and straw in streaks. Block
+textures are 16x16 and fully opaque.
 """
 import math
 import random
 
 from crop_textures import Canvas, rgb
-from decor_textures import noise
 from halloween_textures import shade
+import block_style as bs
 
 STAVE = [rgb("6a4628"), rgb("7c5432"), rgb("8c623c"), rgb("9c7046")]
 BAND = [rgb("2c2c32"), rgb("3a3a42"), rgb("4a4a54"), rgb("62626c")]
@@ -39,19 +41,13 @@ PILES = {"red": [rgb("4a1a10"), rgb("7a1e14"), rgb("a02a18"), rgb("c43c1e"), rgb
 def staves():
     """Upright plank staves, four pixels wide, with dark seams and grain."""
     c = Canvas()
-    rng = random.Random(15101)
-    for x in range(16):
-        seam = x % 4 == 0
-        base = rng.randrange(1, 3)
-        for y in range(16):
-            tone = 0 if seam else min(3, base + (1 if rng.random() < 0.25 else 0) - (1 if rng.random() < 0.15 else 0))
-            c.px(x, y, STAVE[max(0, tone)])
+    bs.planks(STAVE, 15101, vertical=True, joint=False)(c)
     return c.img
 
 
 def band():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BAND[:3], 15111, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, BAND[:3], 15111, [2, 3, 1])
     for x in range(0, 16, 5):
         c.px(x + 2, 7, BAND[3])
         c.px(x + 2, 8, BAND[0])
@@ -74,22 +70,20 @@ def water():
 def apple():
     """Glossy red skin: darker low down, a bright highlight high on one side, a few pale freckles."""
     c = Canvas()
-    rng = random.Random(15131)
+    grain = bs.wobble(15131, 1)
     for y in range(16):
         for x in range(16):
             tone = 2 if y < 6 else 1 if y < 12 else 0
-            if rng.random() < 0.12:
-                tone = max(0, tone - 1)
-            c.px(x, y, APPLE[tone])
+            c.px(x, y, APPLE[max(0, tone + min(0, int(grain(x, y))))])
     c.rect(3, 2, 6, 4, APPLE[3])
-    for _ in range(5):
-        c.px(rng.randrange(16), rng.randrange(16), APPLE[3])
+    for x, y in ((10, 3), (13, 8), (6, 9), (11, 13)):
+        c.px(x, y, APPLE[3])
     return c.img
 
 
 def stem():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, STEM, 15141)
+    bs.fill(c, 0, 0, 15, 15, STEM, 15141)
     return c.img
 
 
@@ -98,12 +92,7 @@ def stem():
 def crate_wood():
     """Pale rough-sawn slats running across, with grain and a couple of nail heads."""
     c = Canvas()
-    rng = random.Random(15201)
-    for y in range(16):
-        row = rng.randrange(1, 3)
-        for x in range(16):
-            tone = row + (1 if rng.random() < 0.2 else 0) - (1 if rng.random() < 0.2 else 0)
-            c.px(x, y, CRATE[max(0, min(3, tone))])
+    bs.planks(CRATE, 15201, boards=2, joint=False)(c)
     for x in (1, 14):
         for y in (4, 11):
             c.px(x, y, POST[0])
@@ -112,10 +101,7 @@ def crate_wood():
 
 def crate_post():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, POST, 15211, [1, 3, 2])
-    for y in range(0, 16, 5):
-        c.px(4, y, POST[0])
-        c.px(11, y + 2, POST[0])
+    bs.planks(POST, 15211, boards=2, vertical=True)(c)
     return c.img
 
 
@@ -136,35 +122,20 @@ def crate_label():
 # ---------------------------------------------------------------- the hay bale seat
 
 def straw(seed, horizontal):
-    """Packed straw: streaks running one way, light and dark, with a few stray bright stalks."""
+    """Packed straw, as a vanilla hay bale's side: streaks running one way, light and dark."""
     c = Canvas()
-    rng = random.Random(seed)
-    for a in range(16):
-        tone = rng.randrange(1, 4)
-        length = rng.randrange(3, 8)
-        b = 0
-        while b < 16:
-            for i in range(length):
-                x, y = (b + i, a) if horizontal else (a, b + i)
-                c.px(x, y, STRAW[tone])
-            b += length
-            tone = max(0, min(4, tone + rng.choice((-1, 0, 1))))
-            length = rng.randrange(3, 8)
-    for _ in range(8):
-        x, y = rng.randrange(16), rng.randrange(16)
-        c.px(x, y, STRAW[4])
+    bs.streaks(STRAW, seed, vertical=not horizontal, spread=0.9)(c)
     return c.img
 
 
 def straw_ends():
-    """The cut end of the bale: a jumble of stalk ends, dark between them."""
+    """The cut end of the bale: a soft straw surface dotted evenly with the dark ends of hollow stalks."""
     c = Canvas()
-    rng = random.Random(15311)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, STRAW[rng.choice((0, 1, 1, 2, 2, 3, 4))])
-    for _ in range(14):
-        c.px(rng.randrange(16), rng.randrange(16), STRAW[0])
+    bs.fill(c, 0, 0, 15, 15, STRAW[1:], 15311)
+    for y in range(1, 16, 3):
+        for x in range((y // 3) % 2 * 2 + 1, 16, 4):
+            c.px(x, y, STRAW[0])
+            c.px(x, y - 1, STRAW[4])
     return c.img
 
 
@@ -172,14 +143,14 @@ def twine():
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            c.px(x, y, TWINE[(x + y) % 3])
+            c.px(x, y, TWINE[(x + y) // 2 % 3])  # the twist, two pixels wide
     return c.img
 
 
 # ---------------------------------------------------------------- the autumn wreath
 
 def wreath_leaves():
-    """Overlapping autumn leaves, rust to gold, with dark gaps and a few bright veins."""
+    """Overlapping autumn leaves in three tones, rust to gold (a few browned), with dark gaps and bright midribs."""
     c = Canvas()
     rng = random.Random(15401)
     for y in range(16):
@@ -187,7 +158,7 @@ def wreath_leaves():
             c.px(x, y, WREATH_LEAVES[5])
     for _ in range(22):
         cx, cy = rng.uniform(0, 16), rng.uniform(0, 16)
-        tone = rng.randrange(0, 5)
+        tone = rng.choice((1, 2, 2, 3, 3, 4))
         angle = rng.uniform(0, math.pi)
         for y in range(16):
             for x in range(16):
@@ -200,22 +171,27 @@ def wreath_leaves():
 
 
 def corn():
-    """Ornamental corn: rows of kernels in red, gold, purple and cream."""
+    """Ornamental corn: rows of plump kernels two pixels square, offset row to row, in red, gold, purple and cream;
+    each kernel lit at its upper left and shaded at its lower right."""
     c = Canvas()
     rng = random.Random(15411)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, KERNELS[rng.randrange(len(KERNELS))] if (x + y) % 2 == 0 or y % 2 == 0 else shade(KERNELS[rng.randrange(len(KERNELS))], 0.7))
+    for row in range(8):
+        for k in range(8):
+            x, y = k * 2 + row % 2, row * 2
+            kernel = KERNELS[rng.randrange(len(KERNELS))]
+            c.px(x, y, shade(kernel, 1.2))
+            c.px(x + 1, y, kernel)
+            c.px(x, y + 1, kernel)
+            c.px(x + 1, y + 1, shade(kernel, 0.7))
+            if x + 1 == 16:
+                c.px(0, y, kernel)
+                c.px(0, y + 1, shade(kernel, 0.7))
     return c.img
 
 
 def husk():
     c = Canvas()
-    rng = random.Random(15421)
-    for x in range(16):
-        tone = rng.randrange(3)
-        for y in range(16):
-            c.px(x, y, HUSK[tone] if rng.random() > 0.1 else HUSK[0])
+    bs.streaks(HUSK, 15421, spread=0.8)(c)
     return c.img
 
 
@@ -234,25 +210,30 @@ def mum(colour):
 # ---------------------------------------------------------------- the leaf piles
 
 def pile(colour, top):
-    """Heaped fallen leaves of one colour (with a few browned ones), opaque; the side a little darker."""
+    """Heaped fallen leaves of one colour in two tones (with a few browned ones), each shaded along its lower edge,
+    over a darker ground; opaque, the side a little darker."""
     palette = PILES[colour]
     c = Canvas()
     rng = random.Random(15501 + list(PILES).index(colour) * 7 + (0 if top else 3))
     for y in range(16):
         for x in range(16):
-            c.px(x, y, palette[0])
-    for _ in range(40):
+            c.px(x, y, palette[1])
+    for _ in range(30):
         cx, cy = rng.uniform(-1, 17), rng.uniform(-1, 17)
-        tone = rng.choice((1, 2, 2, 3, 3, 4, 5))
+        tone = rng.choice((2, 2, 3, 3, 3, 4))
         angle = rng.uniform(0, math.pi)
-        length, width = rng.uniform(2.2, 3.4), rng.uniform(1.2, 1.8)
+        length, width = rng.uniform(2.4, 3.6), rng.uniform(1.3, 1.9)
+
+        def inside(x, y):
+            dx, dy = x - cx, y - cy
+            u = dx * math.cos(angle) + dy * math.sin(angle)
+            v = -dx * math.sin(angle) + dy * math.cos(angle)
+            return (u / length) ** 2 + (v / width) ** 2 <= 1.0
         for y in range(16):
             for x in range(16):
-                dx, dy = x - cx, y - cy
-                u = dx * math.cos(angle) + dy * math.sin(angle)
-                v = -dx * math.sin(angle) + dy * math.cos(angle)
-                if (u / length) ** 2 + (v / width) ** 2 <= 1.0:
-                    color = palette[tone]
+                if inside(x, y):
+                    # Each leaf is shaded along its lower edge, so it reads against the leaves under it.
+                    color = palette[tone] if inside(x, y + 1) else palette[1]
                     c.px(x, y, color if top else shade(color, 0.85))
     return c.img
 

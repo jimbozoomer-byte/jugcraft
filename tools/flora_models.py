@@ -5,10 +5,13 @@ frame two blocks high (y 0..32) and cut into their lower and upper blocks by whe
 The look follows hand-built plants: a few bent stems of small boxes carrying flat, cut-out leaves and petals at angles,
 and the flowers themselves as little boxes (bells, trumpets, berries, cups) where a flat picture would read thin.
 """
+import copy
 import math
 import random
 
 from PIL import Image
+
+import model_writer
 
 from flora_art import (ANTHER, ASPHODEL, ASPHODEL_VEIN, BERRY, CALYX, CAPSULE, DRY, DUSK_LEAF, FERN, FERN_RIB, FINGER,
                        FINGER_TIP, FOX, FOX_SPOT, GHOST, GHOST_FLECK, HEART_PINK, HEART_WHITE, IVY, LEAF, LILY,
@@ -16,6 +19,7 @@ from flora_art import (ANTHER, ASPHODEL, ASPHODEL_VEIN, BERRY, CALYX, CAPSULE, D
                        SIDES4, SNOW_GREEN, SNOW_WHITE, SOIL, SPIDER_RED, SPORE, STEM, Px, Sculpt, TEXELS, blades, column,
                        cube, frond, ivy_leaf, ivy_sheet, leaf, leaf_flat, leaf_out, pal, plane_xy, plane_xz, plane_zy,
                        rgb, root_face, rotation, segment, shade, solid, star, strip, upright, wisps)
+import flora_art as fa
 
 
 # ---------------------------------------------------------------- painters only these plants use
@@ -77,7 +81,7 @@ def bell_side(palette, tip=None, seed=1, spots=None):
         for y in range(p.h):
             for x in range(p.w):
                 t = y / max(1, p.h - 1)
-                k = n - 2 - (1 if x >= p.w * 0.6 else 0) + (1 if t < 0.3 else 0) + rng.choice((0, 0, 0, -1))
+                k = n - 2 - (1 if x >= p.w * 0.6 else 0) + (1 if t < 0.3 else 0) + (0 if fa.QUIET else rng.choice((0, 0, 0, -1)))
                 p.put(x, y, shade(palette, k))
         if p.w >= 3:
             for y in range(p.h // 2, p.h):
@@ -127,7 +131,7 @@ def bell_picture(palette, lobes=3, tip=None, inner=None, seed=1, spots=None, fla
                             p.put(x, y, inner)
                         continue
                 k = n - 2 - (1 if d > half * 0.35 else 0) + (1 if d < -half * 0.4 else 0) - (1 if t > 0.85 else 0)
-                k += rng.choice((0, 0, 0, -1))
+                k += 0 if fa.QUIET else rng.choice((0, 0, 0, -1))
                 c = shade(palette, k)
                 if tip and t > 0.88:
                     c = tip
@@ -203,7 +207,7 @@ def rose_core(top=False, seed=1):
                 else:
                     band = (y + (x // 3) * 2) % 4
                     k = 2 + (2 if band == 0 else 0) + (1 if y < 2 else 0)
-                p.put(x, y, shade(ROSE, k + rng.choice((0, 0, -1))))
+                p.put(x, y, shade(ROSE, k + (0 if fa.QUIET else rng.choice((0, 0, -1)))))
     return paint
 
 
@@ -252,7 +256,7 @@ def moss_top(seed=1):
         rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
-                k = 2 + rng.choice((0, 0, 1, 1, -1, 2))
+                k = 2 + (1 if fa.QUIET else rng.choice((0, 0, 1, 1, -1, 2)))
                 p.put(x, y, shade(MOSS, k))
     return paint
 
@@ -279,7 +283,7 @@ def finger_side(tip=False, seed=1):
         rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
-                k = 2 + rng.choice((0, 0, 1, -1)) - (1 if x == p.w - 1 else 0) + (1 if x == 0 else 0)
+                k = 2 + (0 if fa.QUIET else rng.choice((0, 0, 1, -1))) - (1 if x == p.w - 1 else 0) + (1 if x == 0 else 0)
                 if rng.random() < 0.12:
                     k = 0
                 c = shade(FINGER, k)
@@ -370,6 +374,10 @@ def split_tall(elements):
 
 
 def tall_models(sc, elements):
+    # The halves are drawn one above the other: separate the whole frame first, so no face of one half shares a plane
+    # with a face of the other (each half's own pass at writing cannot see the other's).
+    elements = copy.deepcopy(elements)
+    model_writer.separate_coplanar(elements)
     lower, upper = split_tall(elements)
     sc.models[f"{sc.name}_bottom"] = lower
     sc.models[f"{sc.name}_top"] = upper
@@ -984,5 +992,10 @@ _built = {}
 def build(name):
     """The plant's Sculpt (built once)."""
     if name not in _built:
-        _built[name] = BUILDERS[name]()
+        # The graveyard flora is painted in the clean style: no per-pixel random tones (tools/flora_art.py QUIET).
+        quiet, fa.QUIET = fa.QUIET, True
+        try:
+            _built[name] = BUILDERS[name]()
+        finally:
+            fa.QUIET = quiet
     return _built[name]

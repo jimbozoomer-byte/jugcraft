@@ -73,9 +73,8 @@ def puffball():
     """A round white puffball sitting in the grass, freckled."""
     c = Canvas()
     disc(c, 8, 10.5, 5.2, 4.6, lambda dx, dy: PUFF[3] if dx + dy < -0.6 else PUFF[2] if dx + dy < 0.4 else PUFF[1])
-    rng = random.Random(27101)
-    for _ in range(7):
-        c.px(rng.randrange(5, 12), rng.randrange(8, 13), PUFF[0])
+    for x, y in ((6, 9), (9, 8), (11, 10), (7, 12), (10, 12)):
+        c.px(x, y, PUFF[0])  # freckles, set evenly
     outline(c, rgb("8a8070"))
     return c.img
 
@@ -133,10 +132,13 @@ def pan_food(colors, seed):
             if (x - 7.5) ** 2 / 36 + (y - 11.5) ** 2 / 4 <= 1:
                 c.px(x, y, rgb("e8e4dc") if y < 12 else rgb("c8c0b0"))
     rng = random.Random(seed)
-    for _ in range(9):
-        x, y = rng.randrange(4, 12), rng.randrange(6, 11)
-        for dx, dy in ((0, 0), (1, 0), (0, 1)):
-            c.px(x + dx, y + dy, colors[rng.randrange(len(colors))])
+    for x, y in ((4, 8), (7, 7), (10, 8), (5, 10), (8, 9), (11, 10), (6, 6), (9, 6)):
+        # A golden piece, one colour, lit at its upper left.
+        tones = sorted(colors, key=lambda c: sum(c))
+        base = rng.randrange(len(tones))
+        c.px(x, y, tones[min(len(tones) - 1, base + 1)])
+        c.px(x + 1, y, tones[base])
+        c.px(x, y + 1, tones[max(0, base - 1)])
     outline(c, rgb("3a2a14"))
     return c.img
 

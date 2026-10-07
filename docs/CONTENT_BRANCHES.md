@@ -37,6 +37,8 @@ Proposals may cover orchards, culinary specialties, animal products, breeding, m
 
 The branch's first three slices (the Fall Harvest: tall corn, wild plants and sickles; the Kitchen Garden: trellis crops, vegetables, grains and the Cooking Pot; the Festival Crops: gourds, turnips and Turnip Lanterns, cranberry bogs and the chestnut tree; and pumpkin carving) and its planned crop roster and farm equipment are in [branches/AGRICULTURE.md](branches/AGRICULTURE.md).
 
+The owner-endorsed [industrial agriculture plan](features/industrial-agriculture-plan.md) gives farming and forestry finished-product industries: textiles, coated fabrics, paper, packaging, panels, linoleum, rubber goods and later fuels/chemical materials. It records machine routes, sidegrade choices, bootstrap boundaries and a proposed delivery sequence; it is planning documentation rather than a claim of shipped content.
+
 ## Cozy surface biomes
 
 Biomes should belong geographically: temperature, moisture, elevation, water, neighboring terrain, vegetation and animal ecology need a coherent explanation. Give players attractive building palettes, usable regional resources, quiet scenic places and ambient life. Example proposals: orchard valleys, misty woodland workshops, warm meadows or sheltered snowy groves.
