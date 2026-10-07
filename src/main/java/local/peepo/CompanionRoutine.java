@@ -56,6 +56,7 @@ final class CompanionRoutine extends Goal {
             }
         }
         candidates.sort(Comparator.<CompanionStation>comparingInt(this::rank)
+            .thenComparingInt(s->s.kind()==CompanionStation.Kind.WHEEL && npc.assignments.workManaged()?npc.assignments.workPriority(positionOf(s)):0)
             .thenComparingDouble(b->npc.position().distanceToSqr(b.approachPosition())));
         int stationPaths=0;
         for(var candidate:candidates) {
@@ -87,6 +88,26 @@ final class CompanionRoutine extends Goal {
         npc.getNavigation().stop();
     }
     @Override public void stop() { release();active=false; }
+    /** Check only higher-priority links at the normal search cadence; keep working if none is reachable. */
+    private void reconsiderWork(){
+        if(station==null || station.kind()!=CompanionStation.Kind.WHEEL || !npc.assignments.workManaged())return;
+        long now=npc.level().getGameTime();if(now<nextSearch)return;
+        nextSearch=now+80+Math.floorMod(npc.getId(),20);
+        unreachable.entrySet().removeIf(e->e.getValue()<=now);
+        int priority=npc.assignments.workPriority(positionOf(station)),attempts=0;
+        for(int i=1;i<priority;i++){
+            var target=npc.assignments.get(i);
+            if(target==null || !target.present(npc.level()) || unreachable.containsKey(target.at().pos()))continue;
+            var be=npc.level().getBlockEntity(target.at().pos());
+            if(!(be instanceof CompanionStation candidate) || candidate.kind()!=CompanionStation.Kind.WHEEL || !useful(candidate))continue;
+            if(attempts++>=2)break;
+            var path=npc.getNavigation().createPath(BlockPos.containing(candidate.approachPosition()),0,pathRange());
+            if(path==null || !path.canReach()){unreachable.put(target.at().pos(),now+200);continue;}
+            if(candidate.claim(npc)){
+                release();station=candidate;block=be;deadline=now+600;repath=0;return;
+            }
+        }
+    }
     @Override public void tick() {
         if(station!=null && station.kind()==CompanionStation.Kind.CHAIR && !npc.isRecovering()
                 && npc.level().getGameTime()>=chairUntil) {
@@ -95,6 +116,7 @@ final class CompanionRoutine extends Goal {
         if(station!=null && ((block!=null && (block.isRemoved() || !npc.level().hasChunkAt(block.getBlockPos())
                 || npc.level().getBlockEntity(block.getBlockPos())!=block)) || !useful(station)))release();
         if(station==null)search();
+        reconsiderWork();
         if(station==null) { npc.getNavigation().stop();return; }
         var target=station.approachPosition();
         if(npc.position().distanceToSqr(target)>.64) {

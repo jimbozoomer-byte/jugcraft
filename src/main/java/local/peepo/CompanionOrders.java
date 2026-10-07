@@ -36,6 +36,7 @@ public final class CompanionOrders {
     public boolean command(Player p,int button){
         if(!allowed(p) || p.isSpectator())return false;
         if(button>=20 && button<25){npc.assignments.clear(button-20);return true;}
+        if(button>=30 && button<38)return npc.assignments.moveWork(1+(button-30)/2,button%2==0?-1:1);
         if(button<0 || button>8)return false;
         if(button<=3){mode=Mode.values()[button];if(mode==Mode.FOLLOW)follow=p.getUUID();if(mode==Mode.STAY)stay=here();}
         else switch(button){case 4,5->{return false;}case 6->radius=Math.max(4,radius-4);case 7->radius=Math.min(16,radius+4);case 8->{if(!owner(p))return false;party=!party;}default->{return false;}}
@@ -46,6 +47,7 @@ public final class CompanionOrders {
     }
     public void assigned(boolean isHome,GlobalPos at){if(isHome)home=at;else{work=at;mode=Mode.WORK;}apply();}
     public void assignmentRemoved(boolean isHome){if(isHome)home=null;apply();}
+    public void workReordered(){if(mode==Mode.WORK && !npc.isRecovering())apply();}
     private void apply(){
         npc.resetCompanionRoutine();npc.getNavigation().stop();npc.setRestMode(CompanionEnergy.Rest.NONE);npc.setNoGravity(false);npc.leaveCompanionBed();
         GlobalPos anchor=mode==Mode.HOME?home:mode==Mode.WORK?work:mode==Mode.STAY?stay:null;

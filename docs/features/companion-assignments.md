@@ -12,6 +12,7 @@ Craft the **Companion Planner** from an iron nugget above three paper, with a st
 4. Hold the selected planner to see green frames around that companion and its assigned places. A missing/replaced target is orange. Only loaded targets in the current dimension are drawn.
 5. Left-click an assigned block with the planner to remove its assignment without breaking it. Shift-right-click air to clear the selection. Selecting another companion replaces the selection on that tool only.
 6. Shift-right-click a companion normally to open its inventory/commands. The five assignment rows replace Set home/Set work; they show block names and coordinates. Hover for full name, dimension and status. The x buttons also remove assignments, including targets that have been destroyed, unloaded, or left in another dimension.
+7. Use the up/down arrows beside work rows to set priority. Work 1 at the top is highest; home stays fixed. The order is saved with the companion. Removing a workstation closes the gap; new assignments go at the bottom. Existing saves with gaps are compacted while preserving their relative order.
 
 Assignments must be within 64 blocks of the selected companion when added. The companion must remain loaded, within 128 blocks of the player, and in the same dimension when editing with the tool. There is no remote teleport or chunk loading.
 
@@ -20,6 +21,8 @@ Assignments must be within 64 blocks of the selected companion when added. The c
 Generator Wheels are functional jobs: once the planner is used, Work mode uses assigned wheels only. Full, occupied, invalid and temporarily unreachable wheels are skipped, allowing other assigned wheels to be considered. Exhausted companions still rest and recover through the existing energy routine. Nearby seats and lunch sources retain the existing behavior; food is allowed near the assigned places within the GUI's range.
 
 Other machines/cooking pots can be recorded for future jobs, but **do not receive production speedups or companion labor yet**. The tool feedback and assignment tooltip state this explicitly.
+
+Work selection uses row priority before distance. Reordering in Work mode prompts a new selection without interrupting exhaustion recovery or changing the selected command. While working a lower-priority wheel, the companion checks higher-priority links every 80-99 ticks, with at most two path attempts and the existing unreachable cooldown. It switches only after a usable higher-priority wheel can be reached and claimed; otherwise it keeps its current job. Full, occupied, unloaded, missing and unimplemented jobs do not block lower priorities. Reordering uses the existing server-validated menu buttons and assignment snapshot; it adds no per-tick world scan or separate save format.
 
 The selected home limits bed choice to that bed/bunk. Vanilla beds have an adapter that shares the existing seat reservations, uses a safe ground approach, refuses beds occupied by players, and sleeps only at night. Companions keep their existing closed-eye sleeping pose and wake/dismount behavior. Bunks retain their bottom entrance.
 
@@ -46,7 +49,7 @@ Manual cases: select Peepo and Jughead; assign one home and four wheels; reject 
 
 ## Possible follow-ups
 
-- Drag/reorder work slots to choose explicit priority, with optional round-robin work.
+- Optional round-robin work as an alternative to the implemented priority order.
 - Live status for each job: working, full, occupied, path blocked, resting or awaiting implementation.
 - Per-companion day/night schedules and a configurable minimum energy before resuming work.
 - Bulk assignment for several selected companions, with a preview and per-station worker limits.

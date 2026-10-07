@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Inventory;
 /** Compact player-style storage and command panel, with five explicit assignment rows. */
 public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu> {
     private final Button[] buttons=new Button[9],remove=new Button[5];
+    private final Button[] moveUp=new Button[5],moveDown=new Button[5];
     private static final String[] MODES={"Follow","Stay","Home","Work"};
     public CompanionScreen(CompanionMenu menu,Inventory inventory,Component title){super(menu,inventory,title,320,232);}
     private Button button(String text,int x,int y,int width,int height,int id){return addRenderableWidget(Button.builder(Component.literal(text),b->{if(minecraft!=null && minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,id);}).bounds(leftPos+x,topPos+y,width,height).build());}
@@ -22,6 +23,12 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         for(int i=0;i<5;i++){
             remove[i]=button("x",301,78+i*11,11,10,20+i);
             remove[i].setTooltip(Tooltip.create(Component.literal(i==0?"Clear home assignment":"Clear work "+i+" assignment")));
+            if(i>0){
+                moveUp[i]=button("\u2191",277,78+i*11,11,10,30+(i-1)*2);
+                moveDown[i]=button("\u2193",289,78+i*11,11,10,31+(i-1)*2);
+                moveUp[i].setTooltip(Tooltip.create(Component.literal("Move up: higher work priority")));
+                moveDown[i].setTooltip(Tooltip.create(Component.literal("Move down: lower work priority")));
+            }
         }
     }
     private PeepoEntity npc(){return minecraft==null || minecraft.player==null?null:menu.companion(minecraft.player);}
@@ -30,12 +37,17 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         buttons[6].active=menu.value(3)>4;buttons[7].active=menu.value(3)<16;buttons[8].active=menu.value(5)==1;
         buttons[8].setMessage(Component.literal(menu.value(4)==1?"Party: Allowed":"Owner only"));
         var npc=npc();for(int i=0;i<5;i++)remove[i].active=npc!=null && npc.assignments.view().get(i)!=null;
+        for(int i=1;i<5;i++){
+            moveUp[i].active=remove[i].active && i>1 && remove[i-1].active;
+            moveDown[i].active=remove[i].active && i<4 && remove[i+1].active;
+        }
         extractBackground(g,mouseX,mouseY,delta);super.extractRenderState(g,mouseX,mouseY,delta);extractTooltip(g,mouseX,mouseY);
         int row=(mouseY-topPos-78)/11;
-        if(npc!=null && mouseX>=leftPos+100 && mouseX<leftPos+300 && mouseY>=topPos+78 && row>=0 && row<5){
+        if(npc!=null && mouseX>=leftPos+100 && mouseX<leftPos+(row==0?300:277) && mouseY>=topPos+78 && row>=0 && row<5){
             var target=npc.assignments.view().get(row);
             String tip=target==null?"Use a Companion Planner: select this companion, then right-click a "+(row==0?"bed.":"workstation."):
                 target.name()+" at "+target.at().pos().toShortString()+" in "+target.at().dimension().identifier()+" - "+status(target,npc);
+            if(row>0 && target!=null)tip+=". Priority "+row+" (top is highest).";
             g.setTooltipForNextFrame(font,Component.literal(tip),mouseX,mouseY);
         }
     }
@@ -50,7 +62,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         int x=leftPos,y=topPos;
         g.fill(x,y,x+320,y+232,0xFF373737);g.fill(x+1,y+1,x+318,y+230,0xFFFFFFFF);g.fill(x+3,y+3,x+319,y+231,0xFF555555);g.fill(x+4,y+4,x+316,y+228,0xFFC6C6C6);
         for(var slot:menu.slots){int sx=x+slot.x,sy=y+slot.y;g.fill(sx-1,sy-1,sx+17,sy+17,0xFFFFFFFF);g.fill(sx-1,sy-1,sx+16,sy+16,0xFF373737);g.fill(sx,sy,sx+16,sy+16,0xFF8B8B8B);}
-        for(int i=0;i<5;i++)g.fill(x+99,y+77+i*11,x+300,y+87+i*11,0xFFDADADA);
+        for(int i=0;i<5;i++)g.fill(x+99,y+77+i*11,x+(i==0?300:276),y+87+i*11,0xFFDADADA);
     }
     @Override protected void extractLabels(GuiGraphicsExtractor g,int mouseX,int mouseY){
         g.text(font,title,8,8,0xFF404040,false);
@@ -63,9 +75,10 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         for(int i=0;i<5;i++){
             var target=npc==null?null:npc.assignments.view().get(i);
             String label=(i==0?"Home: ":"Work "+i+": ");
+            int labelWidth=i==0?195:172;
             if(target==null)label+="Not assigned";
-            else {var p=target.at().pos();String coords=" "+p.getX()+","+p.getY()+","+p.getZ();int room=195-font.width(label+coords);String name=target.name();label+=(font.width(name)>room?font.plainSubstrByWidth(name,Math.max(0,room-9))+"...":name)+coords;}
-            if(font.width(label)>195)label=font.plainSubstrByWidth(label,186)+"...";
+            else {var p=target.at().pos();String coords=" "+p.getX()+","+p.getY()+","+p.getZ();int room=labelWidth-font.width(label+coords);String name=target.name();label+=(font.width(name)>room?font.plainSubstrByWidth(name,Math.max(0,room-9))+"...":name)+coords;}
+            if(font.width(label)>labelWidth)label=font.plainSubstrByWidth(label,labelWidth-9)+"...";
             int color=target!=null && !target.present(npc.level())?0xFF994433:0xFF304030;
             g.text(font,label,101,79+i*11,color,false);
         }

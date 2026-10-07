@@ -57,7 +57,26 @@ public final class CompanionAssignments {
         for(int i=0;i<5;i++)if(targets[i]!=null && targets[i].at.equals(at)){clear(i);return i==0?"Home removed.":"Work assignment removed.";}
         return "This block is not assigned to the selected companion.";
     }
-    public void clear(int slot){if(slot<0 || slot>=5 || targets[slot]==null)return;targets[slot]=null;changed();npc.orders.assignmentRemoved(slot==0);}
+    public void clear(int slot){
+        if(slot<0 || slot>=5 || targets[slot]==null)return;
+        targets[slot]=null;if(slot>0)compactWork();changed();npc.orders.assignmentRemoved(slot==0);
+    }
+    private void compactWork(){
+        int next=1;
+        for(int i=1;i<5;i++)if(targets[i]!=null)targets[next++]=targets[i];
+        while(next<5)targets[next++]=null;
+    }
+    public boolean moveWork(int slot,int direction){
+        if(npc.level().isClientSide() || slot<1 || slot>4 || Math.abs(direction)!=1)return false;
+        int other=slot+direction;
+        if(other<1 || other>4 || targets[slot]==null || targets[other]==null)return false;
+        var swap=targets[slot];targets[slot]=targets[other];targets[other]=swap;
+        changed();npc.orders.workReordered();return true;
+    }
+    public int workPriority(BlockPos pos){
+        for(int i=1;i<5;i++)if(targets[i]!=null && targets[i].local(npc.level()) && targets[i].at.pos().equals(pos))return i;
+        return 5;
+    }
     private void changed(){npc.syncAssignments(encode());}
     public List<BlockPos> loadedStations(){
         var result=new ArrayList<BlockPos>(5);
@@ -68,14 +87,13 @@ public final class CompanionAssignments {
     public boolean foodNear(Vec3 point,int radius){for(var t:targets)if(t!=null && t.local(npc.level()) && t.at.pos().distToCenterSqr(point)<=radius*radius)return true;return false;}
     public Vec3 homeApproach(){return approach(targets[0]);}
     public Vec3 workApproach(){
-        Vec3 best=null;double distance=Double.MAX_VALUE;
         for(int i=1;i<5;i++){
             var t=targets[i];if(t==null || !t.present(npc.level()))continue;
             // Only wheel assignments currently have a runnable companion job.
             if(!(npc.level().getBlockEntity(t.at.pos()) instanceof WheelBlockEntity wheel) || wheel.energySpace()==0 || !wheel.availableTo(npc))continue;
-            var at=wheel.approachPosition();double d=npc.position().distanceToSqr(at);if(d<distance){best=at;distance=d;}
+            return wheel.approachPosition();
         }
-        return best;
+        return null;
     }
     private Vec3 approach(Target target){
         if(target==null || !target.present(npc.level()))return null;
@@ -96,7 +114,7 @@ public final class CompanionAssignments {
             var at=child.get().read("At",GlobalPos.CODEC).orElse(null);var id=Identifier.tryParse(child.get().getStringOr("Block",""));
             if(at!=null && id!=null)targets[i]=new Target(at,id);
         }
-        changed();
+        compactWork();changed();
     }
     private String encode(){
         var array=new JsonArray();
