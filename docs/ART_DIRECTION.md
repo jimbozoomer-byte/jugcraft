@@ -45,6 +45,13 @@ On 5 October 2026 the owner called the steel plate blocks and blast-proof concre
 
 *Before (top) and after (bottom), tiled outside the game; bastion concrete (left) is the reference the owner liked.*
 
+## Woods, leaves and other natural textures: vanilla's manner
+On 5 October 2026 the owner repainted the woods and asked for every tree to look "more similar to how the vanilla textures are" ([wood-repaint.md](features/wood-repaint.md)); seeing the result in game, they asked for the way it was done to become the rule for "any additional wood or natural textures". **Follow [NATURAL_TEXTURES.md](NATURAL_TEXTURES.md)** for every wood, tree, leaf, sapling, plant, stone, soil or ore texture. In short:
+- 16×16, drawn by code in vanilla's manner (never recoloured from Mojang's files).
+- One colour a material, from the owner's paintings, stepped into a lightness ramp; kept within vanilla's brightness and saturation.
+- Marks that follow the material: vertical bark furrows (never rings across a trunk), straight stripped grain, four lit boards, square rings on log ends, a fine clumped speckle of leaves with a few small gaps.
+- Low contrast, no outlines or gradients, one trait a species; seamless and seeded.
+
 ## Creatures and faces: cute and clean
 On 5 October 2026 the owner found the Ember Bed's fire speckly and the Horned Skull Cauldron's nostrils ugly, and asked for every creature prop to be simplified: cute, or at least smooth, but still good-looking, after their reference pictures (the Frankenstein head above all). The painters in `tools/cute_art.py` draw this way, and every skull, bone, monster, bug, ghost and other creature prop should follow it:
 - **Two or three tones a material, no noise.** Fill flat, light the top and left edge, shade the bottom and right one. A rounded form gets a lighter band over its top and a darker one under it, nothing else.

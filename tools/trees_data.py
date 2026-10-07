@@ -1,6 +1,6 @@
 """Generated data for Jugcraft's own trees (agriculture.TREES, trees.SHAPES): saplings and leaves (models,
 blockstates, items, loot and tags) and the tree features biomes and saplings grow. Wood sets are generated with the
-other woods (festival_data.wood_assets); textures are drawn by larch_textures.py and forest_textures.py.
+other woods (festival_data.wood_assets); wood and leaf textures are drawn by wood_style.py.
 """
 from agriculture import TREES, SEASON_STATES, SAPLING_CHANCES, sapling, leaf_looks
 from trees import SHAPES, FALLEN, DECORATOR

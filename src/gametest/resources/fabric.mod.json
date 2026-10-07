@@ -186,7 +186,8 @@
 			"io.github.jimbozoomer.jugcraft.test.TraitDetailsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIIIClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmorSetsClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.ThalliteClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.ThalliteClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.WoodClientGameTests"
 		]
 	},
 	"depends": {
