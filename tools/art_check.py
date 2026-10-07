@@ -5,7 +5,8 @@ Each rule returns error strings, grouped one line per model or part; the allow-l
 offenders, each with its reason.
 
 Block, item and classic-pack models (assets/jugcraft/models, resourcepacks/alternate_machines):
-  Z1  two faces on one plane, facing the same way, overlapping, drawing different texels (they flicker; rotated
+  Z1  two faces on one plane, facing the same way, overlapping, drawing different texels (they flicker; the same face of
+      two identical unrotated boxes, vanilla's overlay layering, is exempt: it draws at exactly one depth; rotated
       elements included through their turned faces).
   N1  the same with the planes 0 < gap < N1_GAP px apart: too close for the depth buffer at a distance.
   U1  a face's UV (written, or automatic from the element's position) leaves the sprite (0..16): the block atlas's
@@ -460,6 +461,15 @@ def _open_faces(elements, faces):
     return out
 
 
+def _layered(elements, a, b):
+    """Whether two faces are the same face of two identical, unrotated boxes: vanilla's overlay layering (grass_block's
+    side overlay, the ore template in tools/material_icons.py). Their quads are the same quad, so they draw at exactly
+    the same depth and the later element always wins: no flicker, unlike faces that are only nearly flush."""
+    ea, eb = elements[a.label[0]], elements[b.label[0]]
+    return (a.label[1] == b.label[1] and not ea.get("rotation") and not eb.get("rotation")
+            and all(abs(ea[k][i] - eb[k][i]) < 1e-9 for k in ("from", "to") for i in range(3)))
+
+
 def _family(stem):
     """A model's family name: without part numbers, lit/active states and wear stages."""
     stem = re.sub(r"_part\d+", "", stem)
@@ -503,6 +513,8 @@ def check_block_models(machines):
                           "the sprite (model_writer.fit_uvs does)")
         z1, n1 = [], []
         for i, j, gap, overlap, u, v, n, d in _pairs(faces, N1_GAP):
+            if gap == 0 and _layered(elements, faces[i], faces[j]):
+                continue
             if _differ(faces[i], faces[j], overlap, u, v, n, d):
                 (z1 if gap == 0 else n1).append((faces[i], faces[j], gap, abs(_area(overlap))))
         for rule, found, what in (("Z1", z1, "share a plane"), ("N1", n1, f"lie closer than {N1_GAP} px")):

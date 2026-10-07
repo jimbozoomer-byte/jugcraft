@@ -277,29 +277,16 @@ def speckled(base, seed, specks, count=18):
 
 
 def main_extra():
-    seed = 100
-    for metal, (specks, glint, palette) in METAL_COLORS.items():
-        seed += 10
-        if specks:
-            save(ore(STONE, seed, specks=specks, glint=glint), "block", f"{metal}_ore")
-            save(ore(DEEPSLATE, seed + 1, streaks=True, specks=specks, glint=glint), "block", f"deepslate_{metal}_ore")
-            save(raw_block(seed + 2, specks, glint), "block", f"raw_{metal}_block")
-            save(raw_chunk(seed + 3, specks, glint), "item", f"raw_{metal}")
-        save(metal_block(palette, seed + 4), "block", f"{metal}_block")
-        save(from_mask(INGOT, palette), "item", f"{metal}_ingot")
-        save(from_mask(NUGGET, palette), "item", f"{metal}_nugget")
-
+    # The metals' ingots, nuggets and storage blocks, their ores, raw ores and raw blocks, and the minerals' ores are the
+    # material sets (tools/material_icons.py, docs/MATERIAL_SETS.md). The metals kept seeds 110-190, so the minerals'
+    # blocks and items below keep theirs.
+    import material_icons
+    material_icons.draw_materials(save)
+    seed = 100 + 10 * len(METAL_COLORS)
     for mineral, (specks, glint, palette) in MINERAL_COLORS.items():
         seed += 10
-        save(ore(STONE, seed, specks=specks, glint=glint), "block", f"{mineral}_ore")
-        save(ore(DEEPSLATE, seed + 1, streaks=True, specks=specks, glint=glint), "block", f"deepslate_{mineral}_ore")
         save(rock(palette, seed + 2), "block", f"{mineral}_block")
         save(pile(seed + 3, palette), "item", mineral)
-
-    for index, (metal, (_, _, palette)) in enumerate(ALLOY_COLORS.items()):
-        save(metal_block(palette, 700 + index), "block", f"{metal}_block")
-        save(from_mask(INGOT, palette), "item", f"{metal}_ingot")
-        save(from_mask(NUGGET, palette), "item", f"{metal}_nugget")
 
     save(speckled(BAUXITE, 300, [(214, 170, 130), (226, 190, 150)]), "block", "bauxite")
     save(speckled(OIL_SAND_BASE, 301, BITUMEN, count=40), "block", "oil_sand")
@@ -1060,7 +1047,12 @@ def part_palette(metal):
         return fixed[metal]
     if metal in METAL_COLORS:
         return METAL_COLORS[metal][2]
-    return ALLOY_COLORS[metal][2]
+    if metal in ALLOY_COLORS:
+        return ALLOY_COLORS[metal][2]
+    # Metals added since the material sets (thallite) draw their plates, dusts and washed ores in their set's own ramp
+    # (tools/material_icons.py), outline to highlight.
+    import material_icons
+    return list(material_icons.METAL_RAMPS[metal])
 
 
 def dust(palette):
@@ -1467,16 +1459,6 @@ def glass_textures():
 
 
 def main():
-    save(ore(STONE, 11), "block", "tin_ore")
-    save(ore(DEEPSLATE, 12, streaks=True), "block", "deepslate_tin_ore")
-    save(raw_block(13), "block", "raw_tin_block")
-    save(metal_block(TIN, 14), "block", "tin_block")
-    save(metal_block(BRONZE, 15), "block", "bronze_block")
-    save(raw_chunk(16), "item", "raw_tin")
-    save(from_mask(INGOT, TIN), "item", "tin_ingot")
-    save(from_mask(NUGGET, TIN), "item", "tin_nugget")
-    save(from_mask(INGOT, BRONZE), "item", "bronze_ingot")
-    save(from_mask(NUGGET, BRONZE), "item", "bronze_nugget")
     save(blend(17), "item", "bronze_blend")
     icon = ore(STONE, 11)
     icon.paste(from_mask(INGOT, BRONZE), (0, 3), from_mask(INGOT, BRONZE))

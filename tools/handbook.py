@@ -681,12 +681,28 @@ def gear_pages():
     ]
 
 
+def biome_names(biomes):
+    """'Lush Caves and the Glowcap Grotto' for a worldgen entry's biome ids (biome tags are left out)."""
+    import biomes as bm
+    names = []
+    for biome in biomes:
+        if biome.startswith("#"):
+            continue
+        namespace, path = biome.split(":")
+        names.append(f"the {bm.BIOMES[path]['display']}" if namespace == MOD and path in bm.BIOMES
+                     else " ".join(word.capitalize() for word in path.split("_")))
+    return " and ".join(names) if len(names) < 3 else ", ".join(names[:-1]) + " and " + names[-1]
+
+
 def ores_page():
     lines = []
     for metal, info in METALS.items():
         if info["mined"]:
             gen = info["gen"]
-            lines.append(f"{info['display']}: Y {gen['min_y']} to {gen['max_y']}, needs a {info['tool']} pickaxe.")
+            line = f"{info['display']}: Y {gen['min_y']} to {gen['max_y']}, needs a {info['tool']} pickaxe."
+            if "rich_gen" in info and info["rich_gen"].get("biomes"):
+                line += f" Richer in {biome_names(info['rich_gen']['biomes'])}."
+            lines.append(line)
     for mineral, info in MINERALS.items():
         gen = info["gen"]
         lines.append(f"{info['ore_display']}: Y {gen['min_y']} to {gen['max_y']}.")
