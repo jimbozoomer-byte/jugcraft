@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.flag.FeatureFlags;
 
 public final class CompanionMenu extends AbstractContainerMenu {
+    public static final int DATA_COUNT=25;
     public static MenuType<CompanionMenu> TYPE;
     private final PeepoEntity npc;
     private final ContainerData data;
@@ -15,9 +16,14 @@ public final class CompanionMenu extends AbstractContainerMenu {
     public CompanionMenu(int id,Inventory inventory){this(id,inventory,null);}
     public CompanionMenu(int id,Inventory inventory,PeepoEntity npc){
         super(TYPE,id);this.npc=npc;
-        data=npc==null?new SimpleContainerData(11):new ContainerData(){
-            public int get(int i){return switch(i){case 0->npc.orders.mode();case 1->npc.getEnergy()*100/npc.getEnergyCapacity();case 2->Math.round(npc.getHealth()*100/npc.getMaxHealth());case 3->npc.orders.radius();case 4->npc.orders.party()?1:0;case 5->npc.orders.owner(inventory.player)?1:0;case 6->npc.orders.homeHere()?1:0;case 7->npc.orders.workHere()?1:0;case 8->npc.orders.targetAvailable()?1:0;case 9->npc.getId()&0xffff;case 10->(npc.getId()>>>16)&0xffff;default->0;};}
-            public void set(int i,int value){}public int getCount(){return 11;}
+        data=npc==null?new SimpleContainerData(DATA_COUNT):new ContainerData(){
+            public int get(int i){
+                if(i>=12 && i<18)return npc.report.row(i-12);
+                return switch(i){case 0->npc.orders.mode();case 1->npc.getEnergy()*100/npc.getEnergyCapacity();case 2->Math.round(npc.getHealth()*100/npc.getMaxHealth());case 3->npc.orders.radius();case 4->npc.orders.party()?1:0;case 5->npc.orders.owner(inventory.player)?1:0;case 6->npc.orders.homeHere()?1:0;case 7->npc.orders.workHere()?1:0;case 8->npc.orders.targetAvailable()?1:0;case 9->npc.getId()&0xffff;case 10->(npc.getId()>>>16)&0xffff;
+                    case 11->npc.report.overall();case 18->npc.preferences.schedule;case 19->npc.preferences.breakAt;case 20->npc.preferences.resumeAt;
+                    case 21->npc.preferences.foodPolicy;case 22->npc.preferences.carryMeals;case 23->npc.preferences.alerts?1:0;case 24->npc.food.meals();default->0;};
+            }
+            public void set(int i,int value){}public int getCount(){return DATA_COUNT;}
         };
         addDataSlots(data);
         var contents=npc==null?new net.minecraft.world.SimpleContainer(10):npc.belongings;
@@ -27,8 +33,8 @@ public final class CompanionMenu extends AbstractContainerMenu {
             public int getMaxStackSize(){return 1;}
         });
         addSlot(new Slot(contents,9,70,54){public int getMaxStackSize(){return 1;}});
-        for(int row=0;row<3;row++)for(int col=0;col<9;col++)addSlot(new Slot(inventory,col+row*9+9,80+col*18,150+row*18));
-        for(int col=0;col<9;col++)addSlot(new Slot(inventory,col,80+col*18,208));
+        for(int row=0;row<3;row++)for(int col=0;col<9;col++)addSlot(new Slot(inventory,col+row*9+9,80+col*18,194+row*18));
+        for(int col=0;col<9;col++)addSlot(new Slot(inventory,col,80+col*18,252));
     }
     public PeepoEntity companion(Player player){if(npc!=null)return npc;var entity=player.level().getEntity((data.get(9)&0xffff)|((data.get(10)&0xffff)<<16));return entity instanceof PeepoEntity p?p:null;}
     public int value(int i){return data.get(i);}

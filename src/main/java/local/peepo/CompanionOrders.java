@@ -17,6 +17,7 @@ public final class CompanionOrders {
     private Mode mode=Mode.WORK;
     private int radius=8;
     private boolean party,returningHome;
+    private long nextCommand;
     CompanionOrders(PeepoEntity npc){this.npc=npc;}
     public boolean tamed(){return owner!=null;}
     public boolean owner(Player p){return p.getUUID().equals(owner);}
@@ -35,8 +36,10 @@ public final class CompanionOrders {
     }
     public boolean command(Player p,int button){
         if(!allowed(p) || p.isSpectator())return false;
-        if(button>=20 && button<25){npc.assignments.clear(button-20);return true;}
+        long now=npc.level().getGameTime();if(now<nextCommand)return false;nextCommand=now+2;
+        if(button>=20 && button<26){npc.assignments.clear(button-20);return true;}
         if(button>=30 && button<38)return npc.assignments.moveWork(1+(button-30)/2,button%2==0?-1:1);
+        if(button>=40 && button<=47)return npc.preferences.command(button);
         if(button<0 || button>8)return false;
         if(button<=3){mode=Mode.values()[button];if(mode==Mode.FOLLOW)follow=p.getUUID();if(mode==Mode.STAY)stay=here();}
         else switch(button){case 4,5->{return false;}case 6->radius=Math.max(4,radius-4);case 7->radius=Math.min(16,radius+4);case 8->{if(!owner(p))return false;party=!party;}default->{return false;}}
@@ -58,9 +61,9 @@ public final class CompanionOrders {
     public boolean station(CompanionStation s){
         if(!tamed())return true;
         if(mode!=Mode.HOME && mode!=Mode.WORK)return false;
-        if(s.kind()==CompanionStation.Kind.WHEEL){
-            if(mode!=Mode.WORK)return false;
-            if(npc.assignments.workManaged())return s instanceof net.minecraft.world.level.block.entity.BlockEntity be && npc.assignments.assignedWork(be.getBlockPos());
+        if(s instanceof CompanionJob){
+            if(mode!=Mode.WORK || !npc.preferences.canWork())return false;
+            if(npc.assignments.workManaged())return npc.assignments.assignedWork(s.stationPosition());
             return in(work,s.approachPosition());
         }
         if(s.kind()==CompanionStation.Kind.BED && npc.assignments.homeManaged()){
@@ -72,7 +75,9 @@ public final class CompanionOrders {
     }
     public boolean food(Vec3 point){
         if(!tamed())return true;
-        return switch(mode){case STAY->npc.position().distanceToSqr(point)<1;case HOME->in(home,point);case WORK->in(home,point)||(npc.assignments.workManaged()?npc.assignments.foodNear(point,radius):in(work,point));case FOLLOW->{Player p=followPlayer();yield p!=null && p.position().distanceToSqr(point)<64;}};
+        var lunch=npc.assignments.get(CompanionAssignments.LUNCH);
+        boolean nearLunch=lunch!=null && lunch.local(npc.level()) && lunch.at().pos().distToCenterSqr(point)<=radius*radius;
+        return switch(mode){case STAY->npc.position().distanceToSqr(point)<1;case HOME->in(home,point)||nearLunch;case WORK->in(home,point)||nearLunch||(npc.assignments.workManaged()?npc.assignments.foodNear(point,radius):in(work,point));case FOLLOW->{Player p=followPlayer();yield p!=null && p.position().distanceToSqr(point)<64;}};
     }
     private Player followPlayer(){
         if(follow==null)return null;
@@ -82,10 +87,10 @@ public final class CompanionOrders {
     private Vec3 target(){
         if(mode==Mode.FOLLOW){var p=followPlayer();return p==null?null:p.position();}
         if(mode==Mode.HOME && npc.assignments.homeManaged())return npc.assignments.homeApproach();
-        if(mode==Mode.WORK && npc.assignments.workManaged()){
-            Vec3 job=npc.isRecovering()?null:npc.assignments.workApproach();
+        if(mode==Mode.WORK && (npc.assignments.workManaged() || !npc.preferences.canWork())){
+            Vec3 job=npc.preferences.canWork()?npc.assignments.workApproach():null;
             if(job!=null)return job;
-            if(npc.assignments.homeManaged())return npc.assignments.homeApproach();
+            if(npc.assignments.homeManaged()){var rest=npc.assignments.homeApproach();return rest==null?npc.position():rest;}
             return local(home)?Vec3.atBottomCenterOf(home.pos()):npc.position();
         }
         GlobalPos pos=mode==Mode.STAY?stay:mode==Mode.HOME || npc.isRecovering()?home:work;
@@ -112,14 +117,14 @@ public final class CompanionOrders {
         public boolean requiresUpdateEveryTick(){return true;}
         public boolean canUse(){
             var o=npc.orders;if(!o.tamed() || npc.isEating())return false;
-            if(o.mode==Mode.WORK && npc.assignments.workManaged() && !npc.isRecovering() && npc.assignments.workApproach()!=null)return false;
+            if(o.mode==Mode.WORK && npc.assignments.workManaged() && npc.preferences.canWork() && npc.assignments.workApproach()!=null)return false;
             Vec3 target=o.target();
             if(o.returningHome && o.mode==Mode.HOME && target!=null){if(npc.position().distanceToSqr(target)>4)return true;o.returningHome=false;}
             return o.mode==Mode.STAY || o.mode==Mode.FOLLOW || target==null || npc.position().distanceToSqr(target)>o.radius*o.radius;
         }
         public boolean canContinueToUse(){
             var o=npc.orders;if(npc.isEating())return false;
-            if(o.mode==Mode.WORK && npc.assignments.workManaged() && !npc.isRecovering() && npc.assignments.workApproach()!=null)return false;
+            if(o.mode==Mode.WORK && npc.assignments.workManaged() && npc.preferences.canWork() && npc.assignments.workApproach()!=null)return false;
             if(o.mode==Mode.FOLLOW || o.mode==Mode.STAY)return canUse();
             var target=o.target();return target==null || npc.position().distanceToSqr(target)>4;
         }
@@ -129,7 +134,7 @@ public final class CompanionOrders {
             var o=npc.orders;Vec3 target=o.target();
             double near=o.mode==Mode.FOLLOW?4:o.mode==Mode.STAY?.25:4;
             if(target==null || !npc.level().hasChunkAt(BlockPos.containing(target)) || npc.position().distanceToSqr(target)<=near){npc.getNavigation().stop();return;}
-            if(--repath<=0){repath=40+Math.floorMod(npc.getId(),10);npc.getNavigation().moveTo(npc.getNavigation().createPath(BlockPos.containing(target),0,64),1.05);}
+            if(--repath<=0 && CompanionBudget.path(npc)){repath=40+Math.floorMod(npc.getId(),10);npc.getNavigation().moveTo(npc.getNavigation().createPath(BlockPos.containing(target),0,64),1.05);}
         }
     }
 }

@@ -26,6 +26,7 @@ final class AssignedVanillaBed implements CompanionStation {
         return null;
     }
     public Kind kind(){return Kind.BED;}
+    public BlockPos stationPosition(){return pos;}
     private BlockPos foot(){return pos.relative(facing.getOpposite());}
     private Vec3 pillow(){return new Vec3(pos.getX()+.5-facing.getStepX()*.2,pos.getY()+.5625,pos.getZ()+.5-facing.getStepZ()*.2);}
     public Vec3 approachPosition(){return mounted?pillow():entry;}

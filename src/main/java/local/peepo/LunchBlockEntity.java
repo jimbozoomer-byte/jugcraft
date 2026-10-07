@@ -26,7 +26,8 @@ public final class LunchBlockEntity extends BaseContainerBlockEntity {
     public boolean party(){return party;}
     public void toggleParty(){party=!party;setChanged();}
     public boolean allowed(Player p){return !p.isSpectator() && (isOwner(p) || owner!=null && party && JugcraftParties.sameParty(owner,p.getUUID()));}
-    public boolean feeds(PeepoEntity npc){return !isRemoved() && owner!=null && npc.orders.foodAccess(owner,party) && !isLocked();}
+    public boolean feeds(PeepoEntity npc){return !isRemoved() && owner!=null && npc.orders.foodAccess(owner,party) && !isLocked()
+        && CompanionJobs.permitted(npc,worldPosition) && CompanionJobs.permitted(npc,sourcePos());}
     public Storage<ItemVariant> source(){
         BlockPos pos=sourcePos();if(level==null || !level.hasChunkAt(pos))return null;
         if(!cover())return inventory;
@@ -40,7 +41,11 @@ public final class LunchBlockEntity extends BaseContainerBlockEntity {
     }
     /** Inspect a bounded number of accessible views and preserve all food components. */
     public ItemStack takeMeal(PeepoEntity npc,boolean take){
-        if(!feeds(npc) || !npc.needsAutomaticFood() || npc.isEating())return ItemStack.EMPTY;
+        return meal(npc,take,false);
+    }
+    public boolean stockMeal(PeepoEntity npc){return !meal(npc,true,true).isEmpty();}
+    private ItemStack meal(PeepoEntity npc,boolean take,boolean stock){
+        if(!feeds(npc) || npc.isEating() || !(npc.needsAutomaticFood() || npc.food.needsSupplies()))return ItemStack.EMPTY;
         var storage=source();if(storage==null || !storage.supportsExtraction())return ItemStack.EMPTY;
         ItemVariant best=null;int score=-1,views=0;
         for(var view:storage){
@@ -48,14 +53,17 @@ public final class LunchBlockEntity extends BaseContainerBlockEntity {
             if(view.isResourceBlank() || view.getAmount()<1)continue;
             var variant=view.getResource();var stack=variant.toStack(1);
             if(!PeepoEntity.isEdible(stack))continue;
-            int quality=CompanionEnergy.meal(stack.get(DataComponents.FOOD)).bonusPerTick();if(quality<=score)continue;
+            int quality=npc.preferences.foodScore(stack);if(quality<=score)continue;
+            if(stock)try(var tx=Transaction.openOuter()){if(npc.food.store(stack,tx)!=1)continue;}
             try(var tx=Transaction.openOuter()){if(view.extract(variant,1,tx)!=1)continue;}
             best=variant;score=quality;
         }
         if(best==null)return ItemStack.EMPTY;
         if(!take)return best.toStack(1);
         try(var tx=Transaction.openOuter()){
-            if(storage.extract(best,1,tx)!=1)return ItemStack.EMPTY;tx.commit();return best.toStack(1);
+            if(storage.extract(best,1,tx)!=1)return ItemStack.EMPTY;
+            if(stock && npc.food.store(best.toStack(1),tx)!=1)return ItemStack.EMPTY;
+            tx.commit();return best.toStack(1);
         }
     }
     public ItemStack returnRemainder(PeepoEntity npc,ItemStack stack){

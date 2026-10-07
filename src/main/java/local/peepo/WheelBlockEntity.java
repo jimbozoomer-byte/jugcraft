@@ -12,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
 import io.github.jimbozoomer.jugcraft.energy.*;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
-public final class WheelBlockEntity extends BlockEntity implements CompanionStation, net.minecraft.world.MenuProvider {
+public final class WheelBlockEntity extends BlockEntity implements CompanionJob, net.minecraft.world.MenuProvider {
     private int outputRate;
     private final net.minecraft.world.inventory.ContainerData menuData = new net.minecraft.world.inventory.ContainerData() {
         public int get(int index) {
@@ -60,6 +60,9 @@ public final class WheelBlockEntity extends BlockEntity implements CompanionStat
     private PeepoEntity npc(){return level instanceof ServerLevel s && occupant!=null && s.getEntity(occupant) instanceof PeepoEntity p?p:null;}
     private void expire(){if(occupant!=null && (level.getGameTime()>lease || npc()==null || !npc().isAlive())){var old=npc();if(old!=null)release(old);else{occupant=null;mounted=false;}}}
     public Kind kind(){return Kind.WHEEL;}
+    public CompanionStatus workStatus(PeepoEntity p){return !availableTo(p)?CompanionStatus.OCCUPIED:energySpace()==0?CompanionStatus.FULL:CompanionStatus.READY;}
+    public boolean worthStarting(PeepoEntity p){return workStatus(p)==CompanionStatus.READY && energySpace()>=640;}
+    public CompanionStatus work(PeepoEntity p){return CompanionWork.transfer(p,this)>0?CompanionStatus.WORKING:workStatus(p);}
     public Vec3 approachPosition(){return mounted?point(1,5/16.0,.5):point(1,0,-.45);}
     public boolean availableTo(PeepoEntity p){expire();return !isRemoved() && (occupant==null || occupant.equals(p.getUUID()));}
     public boolean claim(PeepoEntity p){if(!availableTo(p))return false;occupant=p.getUUID();lease=level.getGameTime()+240;return true;}

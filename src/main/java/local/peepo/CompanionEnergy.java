@@ -22,7 +22,7 @@ public final class CompanionEnergy extends SnapshotParticipant<CompanionEnergy.S
         return new Meal(quality*2, (30+quality*10)*20);
     }
     public int extract(int requested, TransactionContext transaction) {
-        if (owner.level().isClientSide() || !owner.isAlive() || owner.isRecovering() || owner.isEating()
+        if (owner.level().isClientSide() || !owner.isAlive() || !owner.preferences.canWork() || owner.isEating()
                 || owner.getRestMode()!=Rest.NONE || requested<=0) return 0;
         long now=owner.level().getGameTime();
         int used=outputTick==now ? outputAmount : 0;

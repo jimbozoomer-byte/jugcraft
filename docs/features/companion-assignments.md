@@ -11,8 +11,9 @@ Craft the **Companion Planner** from an iron nugget above three paper, with a st
 3. Right-click up to four Generator Wheels, Jugcraft machines, or cooking pots to assign work. Any part of a supported multi-block machine resolves to its controller. Assigning work switches the command to Work.
 4. Hold the selected planner to see green frames around that companion and its assigned places. A missing/replaced target is orange. Only loaded targets in the current dimension are drawn.
 5. Left-click an assigned block with the planner to remove its assignment without breaking it. Shift-right-click air to clear the selection. Selecting another companion replaces the selection on that tool only.
-6. Shift-right-click a companion normally to open its inventory/commands. The five assignment rows replace Set home/Set work; they show block names and coordinates. Hover for full name, dimension and status. The x buttons also remove assignments, including targets that have been destroyed, unloaded, or left in another dimension.
+6. Shift-right-click a companion normally to open its inventory/commands. Home, four work rows and a separate Lunch row show names and coordinates. Hover for full name, dimension and server status. The x buttons also remove assignments, including targets that have been destroyed, unloaded, or left in another dimension.
 7. Use the up/down arrows beside work rows to set priority. Work 1 at the top is highest; home stays fixed. The order is saved with the companion. Removing a workstation closes the gap; new assignments go at the bottom. Existing saves with gaps are compacted while preserving their relative order.
+8. Right-click a lunch crate or lunch cover with the planner to bind the separate food source. Use the Routine tab for work shifts, recovery thresholds, food preferences, carried meals and optional alerts. See [jobs and routines](companion-jobs.md).
 
 Assignments must be within 64 blocks of the selected companion when added. The companion must remain loaded, within 128 blocks of the player, and in the same dimension when editing with the tool. There is no remote teleport or chunk loading.
 
@@ -30,9 +31,9 @@ The selected home limits bed choice to that bed/bunk. Vanilla beds have an adapt
 
 - Every change is server-authoritative and checks current owner/party permissions, player reach, loaded chunks, dimension, level interaction permission and the built-in town protection. The planner never breaks blocks. Edits have a five-tick cooldown.
 - The tool stores the selected UUID/dimension, display name and a refreshable entity ID. Those values never grant permission. Only the held tool refreshes its entity ID/name once per second, without an entity/world scan.
-- A fixed five-entry target array persists dimension, block position and block identity. Duplicate links and a fifth workstation are rejected. Missing targets stay visible/removable instead of silently being reassigned.
+- A fixed six-entry target array persists one home, four jobs and one lunch source with dimension, position and block identity. Duplicate links and a fifth workstation are rejected. Missing targets stay visible/removable instead of silently being reassigned.
 - Existing saves retain old area orders until the planner is first used. Explicit targets then take precedence; removing all workstation links does not resume random wheel assignment.
-- A small entity-data snapshot changes only when assignments change/load. Clients cache its parsed form. The menu reads the tracked companion; preview rendering touches at most five assigned targets, never scans nearby machines. Multi-block frame bounds use at most 256 footprint cells.
+- A small entity-data snapshot changes only when assignments change/load. Clients cache its parsed form. The menu reads the tracked companion; preview rendering touches at most six assigned targets, never scans nearby machines. Multi-block frame bounds use at most 256 footprint cells.
 - Station searches retain their staggered 80-99 tick interval, at most two path attempts per search, and unreachable-target cooldown. Explicit navigation is bounded to 64 blocks and only uses loaded chunks. No server lighting/outline entities or ticking tool block entities were added.
 
 ## Progression and assets
@@ -50,7 +51,5 @@ Manual cases: select Peepo and Jughead; assign one home and four wheels; reject 
 ## Possible follow-ups
 
 - Optional round-robin work as an alternative to the implemented priority order.
-- Live status for each job: working, full, occupied, path blocked, resting or awaiting implementation.
-- Per-companion day/night schedules and a configurable minimum energy before resuming work.
+- Live status, day/night schedules, configurable recovery thresholds, assigned lunch and carried meals are implemented in [jobs and routines](companion-jobs.md).
 - Bulk assignment for several selected companions, with a preview and per-station worker limits.
-- A bound lunch source and carried-food preference so each companion has a predictable supply route.

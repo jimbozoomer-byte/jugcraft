@@ -90,6 +90,7 @@ public final class CompanionSeats {
         for(var seat:candidates) {
             if(++checks>8 || paths>=2)break;
             if(!npc.orders.station(seat) || !seat.availableTo(npc))continue;
+            if(!CompanionBudget.path(npc))break;
             paths++;
             var path=npc.getNavigation().createPath(BlockPos.containing(seat.approachPosition()),0);
             if(path!=null && path.canReach())return seat;
@@ -131,6 +132,7 @@ public final class CompanionSeats {
             return new Vec3(pos.getX()+.5+facing.getStepX()*offset,pos.getY()+height-.094,pos.getZ()+.5+facing.getStepZ()*offset);
         }
         public Kind kind() { return Kind.CHAIR; }
+        public BlockPos stationPosition(){return pos;}
         public Vec3 approachPosition() { return mounted?seatPosition():entrance(); }
         public boolean availableTo(PeepoEntity npc) {
             if(!level.hasChunkAt(pos) || level.getBlockState(pos)!=original || npc.isPassenger())return false;

@@ -33,6 +33,8 @@ Quality = nutrition + rounded half of saturation restored, clamped to 1–16. Sa
 
 Shift-right-click opens the owner/authorized-party command GUI with energy and health percentages. Ordinary empty-hand clicking still triggers blush.
 
+The Routine tab now sets Auto/Day/Night work shifts and energy break/resume percentages. Defaults preserve breaking at 0% and resuming at 80%; the resume setting is always at least 10 percentage points higher. Schedules use the Overworld clock across dimensions, while sleep remains Overworld-night-only. Carried meals and a separately assigned lunch source reuse the same food/energy rules. See [jobs and routines](../features/companion-jobs.md).
+
 ## Furniture hooks and wheel integration
 
 `PeepoEntity.setRestMode(CompanionEnergy.Rest.SITTING/SLEEPING/NONE)` is a server-only hook. Furniture must validate occupancy and clear the state on dismount/removal. Rest blocks wandering; direct feeding ends rest. Furniture must re-establish occupancy after load: rest itself resets to NONE to avoid immobilizing an NPC at a missing chair/bed. Colored, stackable companion beds implement the sleeping hook. Stools, shared player chairs and supported block edges implement seated rest; see SEATING.md.

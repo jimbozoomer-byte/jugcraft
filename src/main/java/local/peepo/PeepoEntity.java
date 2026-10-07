@@ -53,8 +53,14 @@ public final class PeepoEntity extends PathfinderMob {
         }
     }
     private CompanionRoutine routine;
+    public final CompanionPreferences preferences=new CompanionPreferences(this);
+    public final CompanionReport report=new CompanionReport(this);
+    public final CompanionFood food=new CompanionFood(this);
     public final CompanionOrders orders=new CompanionOrders(this);
     public void resetCompanionRoutine(){if(routine!=null)routine.resetOrders();}
+    boolean isUsingJobAt(net.minecraft.core.BlockPos pos){return routine!=null && routine.atJob(pos);}
+    CompanionStatus routineStatus(){return routine==null?CompanionStatus.IDLE:routine.state();}
+    CompanionStatus stationStatus(net.minecraft.core.BlockPos pos){return routine==null?null:routine.status(pos);}
     private net.minecraft.core.BlockPos bedExit;
     public void setBedExit(net.minecraft.core.BlockPos pos) { bedExit = pos; }
     /** Also used after reload, so a companion never becomes stranded in an upper bunk. */
@@ -80,8 +86,8 @@ public final class PeepoEntity extends PathfinderMob {
     public boolean isRecovering() { return entityData.get(RECOVERING); }
     public void updateRecoveryState() {
         if(level().isClientSide())return;
-        if(getEnergy()==0) { entityData.set(RECOVERING,true);setWheelRunning(false); }
-        else if(getEnergy()>=CompanionEnergy.CAPACITY*80/100)entityData.set(RECOVERING,false);
+        if(getEnergy()<=CompanionEnergy.CAPACITY*preferences.breakAt/100) { entityData.set(RECOVERING,true);setWheelRunning(false); }
+        else if(getEnergy()>=CompanionEnergy.CAPACITY*preferences.resumeAt/100)entityData.set(RECOVERING,false);
     }
     private int wheelRunningTicks;
     public boolean isWheelRunning() { return entityData.get(WHEEL_RUNNING); }
@@ -162,7 +168,7 @@ public final class PeepoEntity extends PathfinderMob {
     public boolean isJughead() { return getType()==PeepoMod.JUGHEAD || getType()==PeepoMod.LEGACY_JUGHEAD; }
     public boolean isWearingPumpkin() { return entityData.get(PUMPKIN); }
     @Override protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output); orders.save(output);assignments.save(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
+        super.addAdditionalSaveData(output); orders.save(output);assignments.save(output);preferences.save(output);food.save(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
         if(lunchOrigin!=null)output.store("LunchOrigin",net.minecraft.core.GlobalPos.CODEC,lunchOrigin);
         net.minecraft.world.ContainerHelper.saveAllItems(output.child("Belongings"),belongings.getItems());
         output.putBoolean("NaturallySpawned", naturallySpawned);
@@ -171,7 +177,7 @@ public final class PeepoEntity extends PathfinderMob {
         if (bedExit != null) output.store("CompanionBedExit", net.minecraft.core.BlockPos.CODEC, bedExit);
     }
     @Override protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input); orders.load(input);assignments.load(input); entityData.set(PUMPKIN,input.getBooleanOr("PumpkinCostume",false));
+        super.readAdditionalSaveData(input); orders.load(input);assignments.load(input);preferences.load(input);food.load(input); entityData.set(PUMPKIN,input.getBooleanOr("PumpkinCostume",false));
         naturallySpawned = input.getBooleanOr("NaturallySpawned", false);
         setStoredEnergy(input.getIntOr("Energy",CompanionEnergy.CAPACITY));
         entityData.set(RECOVERING,input.getBooleanOr("Recovering",false));updateRecoveryState();
@@ -200,7 +206,7 @@ public final class PeepoEntity extends PathfinderMob {
             if(wheelRunningTicks==0 || !isAlive() || getEnergy()==0 || isEating() || getRestMode()!=CompanionEnergy.Rest.NONE)
                 setWheelRunning(false);
         }
-        if(!level().isClientSide())tickEnergy();
+        if(!level().isClientSide()){tickEnergy();food.tick();report.tick();}
         if (!level().isClientSide() && blushTicks > 0 && --blushTicks == 0) entityData.set(BLUSHING, false);
         if (level() instanceof ServerLevel server && isEating()) {
             getNavigation().stop();
@@ -227,6 +233,7 @@ public final class PeepoEntity extends PathfinderMob {
                             && level().hasChunkAt(lunchOrigin.pos()) && lunchOrigin.pos().distToCenterSqr(position())<=16
                             && level().getBlockEntity(lunchOrigin.pos()) instanceof LunchBlockEntity lunch)
                         leftover=lunch.returnRemainder(this,leftover);
+                    if(!leftover.isEmpty())leftover=this.food.keepRemainder(leftover);
                     if(!leftover.isEmpty())spawnAtLocation(server,leftover);
                 }
                 lunchOrigin=null;
@@ -250,7 +257,7 @@ public final class PeepoEntity extends PathfinderMob {
         goalSelector.addGoal(3,new CompanionOrders.CommandGoal(this));
         routine=new CompanionRoutine(this);
         goalSelector.addGoal(3,routine);
-        goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, .8));
+        goalSelector.addGoal(5, new BudgetedStroll());
         goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6));
         goalSelector.addGoal(5, new RandomLookAroundGoal(this));
     }
@@ -309,6 +316,7 @@ public final class PeepoEntity extends PathfinderMob {
     public int getEatingTicks() { return entityData.get(EATING); }
     void beginLunchMeal(ItemStack stack,net.minecraft.core.GlobalPos source){beginEating(stack);lunchOrigin=source;}
     private void beginEating(ItemStack stack) {
+        resetCompanionRoutine();leaveCompanionBed();
         lunchOrigin=null;
         setWheelRunning(false);
         setRestMode(CompanionEnergy.Rest.NONE);
@@ -321,6 +329,15 @@ public final class PeepoEntity extends PathfinderMob {
         EatInPlaceGoal() { setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK)); }
         @Override public boolean canUse() { return isEating(); }
         @Override public void tick() { getNavigation().stop(); }
+    }
+    private final class BudgetedStroll extends WaterAvoidingRandomStrollGoal {
+        private long nextCheck;
+        BudgetedStroll(){super(PeepoEntity.this,.8);setInterval(1);}
+        @Override public boolean canUse(){
+            long now=level().getGameTime();if(now<nextCheck || !CompanionBudget.search(PeepoEntity.this))return false;
+            nextCheck=now+80+Math.floorMod(getId(),20);
+            return super.canUse() && CompanionBudget.path(PeepoEntity.this);
+        }
     }
     private final class RestGoal extends Goal {
         RestGoal() { setFlags(EnumSet.of(Flag.MOVE,Flag.JUMP)); }
@@ -338,10 +355,10 @@ public final class PeepoEntity extends PathfinderMob {
                 && distanceToSqr(item)<64 && orders.food(item.position());
         }
         @Override public boolean canUse() {
-            if (!needsAutomaticFood() || isEating() || level().getGameTime()<nextSearch) return false;
+            if (!needsAutomaticFood() || isEating() || food.meals()>0 || level().getGameTime()<nextSearch || !CompanionBudget.search(PeepoEntity.this)) return false;
             nextSearch=level().getGameTime()+20;
             target=level().getEntitiesOfClass(ItemEntity.class,getBoundingBox().inflate(8,3,8),this::valid)
-                .stream().filter(item->getSensing().hasLineOfSight(item))
+                .stream().limit(32).filter(item->getSensing().hasLineOfSight(item))
                 .min(Comparator.comparingDouble(item->distanceToSqr(item))).orElse(null);
             return target!=null;
         }
@@ -352,7 +369,7 @@ public final class PeepoEntity extends PathfinderMob {
             elapsed++;
             if (!valid(target)) return;
             getLookControl().setLookAt(target,20,30);
-            if (--repath<=0) { repath=10;getNavigation().moveTo(getNavigation().createPath(target,0),1.15); }
+            if (--repath<=0 && CompanionBudget.path(PeepoEntity.this)) { repath=40;getNavigation().moveTo(getNavigation().createPath(target,0),1.15); }
             if (distanceToSqr(target)<.64 && getSensing().hasLineOfSight(target)) {
                 var food=target.getItem();
                 beginEating(food.copyWithCount(1));

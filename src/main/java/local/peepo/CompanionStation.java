@@ -5,8 +5,9 @@ import net.minecraft.world.phys.Vec3;
 
 /** Implement on a loaded wheel/chair/bed block entity. No global registry or chunk loading. */
 public interface CompanionStation {
-    enum Kind { WHEEL, CHAIR, BED }
+    enum Kind { WHEEL, WORK, CHAIR, BED }
     Kind kind();
+    default net.minecraft.core.BlockPos stationPosition(){return this instanceof net.minecraft.world.level.block.entity.BlockEntity be?be.getBlockPos():net.minecraft.core.BlockPos.containing(approachPosition());}
     /** Safe reachable standing/mounting point, outside the block's collision shape. */
     Vec3 approachPosition();
     boolean availableTo(PeepoEntity companion);

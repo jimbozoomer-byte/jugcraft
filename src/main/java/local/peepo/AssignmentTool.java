@@ -36,7 +36,7 @@ public final class AssignmentTool extends Item {
     private static void select(Player player,ItemStack stack,PeepoEntity npc){
         var tag=new CompoundTag();tag.putString("Companion",npc.getUUID().toString());tag.putString("Dimension",npc.level().dimension().identifier().toString());tag.putInt("EntityId",npc.getId());tag.putString("Name",npc.getDisplayName().getString());
         CustomData.set(DataComponents.CUSTOM_DATA,stack,tag);
-        player.sendOverlayMessage(Component.literal("Selected "+npc.getDisplayName().getString()+". Right-click bed/workstation; left-click to unassign."));
+        player.sendOverlayMessage(Component.literal("Selected "+npc.getDisplayName().getString()+". Right-click bed, workstation, or lunch source; left-click to unassign."));
     }
     @Override public Component getName(ItemStack stack){String name=data(stack).getStringOr("Name","");return name.isEmpty()?super.getName(stack):Component.literal("Companion Planner: "+name);}
     @Override public InteractionResult use(Level level,Player player,InteractionHand hand){

@@ -33,6 +33,7 @@ public final class PeepoMod implements ModInitializer {
     public static final Item SUMMONER = Registry.register(BuiltInRegistries.ITEM, id("peepo_summoner"),
         new PeepoSummoner(new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id("peepo_summoner"))).stacksTo(16)));
     @Override public void onInitialize() {
+        CompanionBudget.initialize();
         GeneratorWheel.initialize();
         CompanionBeds.initialize();
         CompanionStool.initialize();
