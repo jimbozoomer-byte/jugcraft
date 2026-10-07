@@ -14,8 +14,8 @@ import math
 from PIL import Image
 
 from steampunk_models import box, cyl, wheel
-from kinetic_rotors import FACE_CORNERS, face_texture, quads as rotated_quads
-from model_writer import unpack
+from kinetic_rotors import FACE_CORNERS, face_texture, quads as rotated_quads, turn_for_separation
+from model_writer import separate_boxes, unpack
 
 MOD = "jugcraft"
 
@@ -150,23 +150,62 @@ def body():
 
 # ------------------------------------------------------------------ export
 
+_AXIS = {"north": 2, "south": 2, "west": 0, "east": 0, "up": 1, "down": 1}
+_EPS = 1e-6
+
+
+def _merge(cells):
+    """Greedy merge of kept grid cells {(i, j)} into rectangles of index ranges [(i0, i1, j0, j1)]."""
+    left = set(cells)
+    out = []
+    for i, j in sorted(cells):
+        if (i, j) not in left:
+            continue
+        j1 = j
+        while (i, j1 + 1) in left:
+            j1 += 1
+        i1 = i
+        while all((i1 + 1, jj) in left for jj in range(j, j1 + 1)):
+            i1 += 1
+        for ii in range(i, i1 + 1):
+            for jj in range(j, j1 + 1):
+                left.discard((ii, jj))
+        out.append((i, i1, j, j1))
+    return out
+
+
 def tiled_quads(elements):
     """Quads for big models: every face cut into 16-pixel cells, each mapped as vanilla maps a block face, so the
     texture repeats over the face instead of stretching (the renderer draws each texture once, 0..1). Rotated
-    elements and stretched ("!") faces go through kinetic_rotors.quads unchanged."""
-    out, rest = [], []
-    solids = [(unpack(item)[0], unpack(item)[1]) for item in elements if not unpack(item)[3].get("rotation")]
+    elements and stretched ("!") faces go through kinetic_rotors.quads unchanged.
 
-    def hidden(point, normal):
-        """Whether the face cell centred at point is covered by another box (just outside it, along its normal)."""
-        probe = [point[k] + normal[k] * 0.01 for k in range(3)]
-        return any(all(frm[k] < probe[k] < to[k] for k in range(3)) for frm, to in solids)
-
-    for item in elements:
+    Hidden faces are removed exactly, because QuadModel draws plain quads with a culling render type: a face area
+    that is left out but exposed is a window straight through the model (docs/ART_DIRECTION.md, closed geometry).
+    For each face of an unrotated box, the parts covered by another unrotated box (whose inside lies just outside
+    the face) are cut away; where two boxes have faces on the same plane facing the same way, only the smaller face
+    (the detail; the lower index on a tie) is kept in the overlap, so nothing z-fights. The face is cut at its own
+    edges, every cover's edges and the 16-pixel grid; the uncovered pieces are merged back into rectangles inside
+    each 16-pixel cell, so the cell-local UVs stay exactly as they were. Faces drawn the other way (rotated elements
+    and stretched faces) cannot be cut like that, so where one of them shares a plane with another face, the smaller
+    of the two boxes is first pushed out by model_writer.COPLANAR_NUDGE (separate_boxes, whole boxes only)."""
+    def drawn_whole(item, face):
+        frm, to, texture, options = unpack(item)
+        return bool(options.get("rotation")) or str(face_texture(texture, face)).endswith("!")
+    elements = separate_boxes(elements, turn=turn_for_separation,
+                              pair_filter=lambda a, fa, b, fb: drawn_whole(a, fa) or drawn_whole(b, fb))
+    out, rest, plain = [], [], []
+    for index, item in enumerate(elements):
         frm, to, texture, options = unpack(item)
         if options.get("rotation"):
             rest.append(item)
-            continue
+        else:
+            plain.append((index, frm, to, texture))
+
+    def face_area(frm, to, axis):
+        a, b = [k for k in range(3) if k != axis]
+        return (to[a] - frm[a]) * (to[b] - frm[b])
+
+    for index, frm, to, texture in plain:
         for face, (corners, normal) in FACE_CORNERS.items():
             name = face_texture(texture, face)
             if name is None:
@@ -174,32 +213,69 @@ def tiled_quads(elements):
             if name.endswith("!"):
                 rest.append((frm, to, {face: name, "*": None}))
                 continue
-            axis = {"north": 2, "south": 2, "west": 0, "east": 0, "up": 1, "down": 1}[face]
+            axis = _AXIS[face]
             spans = [k for k in range(3) if k != axis]
-            fixed = to[axis] if normal[axis] > 0 else frm[axis]
+            sign = normal[axis]
+            fixed = to[axis] if sign > 0 else frm[axis]
+            mine = face_area(frm, to, axis)
+            if mine <= _EPS:
+                continue
+            covers = []
+            for other, f2, t2, texture2 in plain:
+                if other == index:
+                    continue
+                lo = [max(frm[k], f2[k]) for k in spans]
+                hi = [min(to[k], t2[k]) for k in spans]
+                if lo[0] >= hi[0] - _EPS or lo[1] >= hi[1] - _EPS:
+                    continue
+                # Another box whose inside lies just outside this face hides it there.
+                if (f2[axis] - _EPS < fixed < t2[axis] - _EPS) if sign > 0 else (f2[axis] + _EPS < fixed < t2[axis] + _EPS):
+                    covers.append((lo, hi))
+                    continue
+                # A face of another box on the same plane, facing the same way: the smaller one (the detail) is drawn.
+                plane = t2[axis] if sign > 0 else f2[axis]
+                if abs(plane - fixed) < _EPS and face_texture(texture2, face) is not None:
+                    theirs = face_area(f2, t2, axis)
+                    if theirs < mine - _EPS or (abs(theirs - mine) <= _EPS and other < index):
+                        covers.append((lo, hi))
+            # Cut lines: the face's edges, every cover's edges and the 16-pixel grid.
             cuts = []
-            for k in spans:
-                edges = [frm[k]] + [16 * i for i in range(math.floor(frm[k] / 16) + 1, math.ceil(to[k] / 16))] + [to[k]]
-                cuts.append(list(zip(edges, edges[1:])))
-            for a0, a1 in cuts[0]:
-                for b0, b1 in cuts[1]:
+            for n, k in enumerate(spans):
+                edges = {frm[k], to[k]}
+                edges.update(16 * i for i in range(math.floor(frm[k] / 16) + 1, math.ceil(to[k] / 16)))
+                for lo, hi in covers:
+                    edges.update((lo[n], hi[n]))
+                cuts.append(sorted(e for e in edges if frm[k] - _EPS <= e <= to[k] + _EPS))
+            kept = {}
+            for i in range(len(cuts[0]) - 1):
+                a0, a1 = cuts[0][i], cuts[0][i + 1]
+                if a1 - a0 <= _EPS:
+                    continue
+                for j in range(len(cuts[1]) - 1):
+                    b0, b1 = cuts[1][j], cuts[1][j + 1]
+                    if b1 - b0 <= _EPS:
+                        continue
+                    ca, cb = (a0 + a1) / 2, (b0 + b1) / 2
+                    if any(lo[0] < ca < hi[0] and lo[1] < cb < hi[1] for lo, hi in covers):
+                        continue
+                    kept.setdefault((math.floor(ca / 16), math.floor(cb / 16)), set()).add((i, j))
+            for cell in sorted(kept):
+                for i0, i1, j0, j1 in _merge(kept[cell]):
                     lo, hi = [0.0] * 3, [0.0] * 3
                     lo[axis] = hi[axis] = fixed
-                    lo[spans[0]], hi[spans[0]] = a0, a1
-                    lo[spans[1]], hi[spans[1]] = b0, b1
-                    if hidden([(lo[k] + hi[k]) / 2 for k in range(3)], normal):
-                        continue
-                    cell = [math.floor(((lo[k] + hi[k]) / 2) / 16) * 16 for k in range(3)]
+                    lo[spans[0]], hi[spans[0]] = cuts[0][i0], cuts[0][i1 + 1]
+                    lo[spans[1]], hi[spans[1]] = cuts[1][j0], cuts[1][j1 + 1]
+                    base = [math.floor(((lo[k] + hi[k]) / 2) / 16) * 16 for k in range(3)]
                     points = [[hi[k] if corner[k] else lo[k] for k in range(3)] for corner in corners]
                     vertices = []
                     for p in points:
-                        local = [p[k] - cell[k] for k in range(3)]
+                        local = [p[k] - base[k] for k in range(3)]
                         u, v = {"north": (16 - local[0], 16 - local[1]), "south": (local[0], 16 - local[1]),
                                 "west": (local[2], 16 - local[1]), "east": (16 - local[2], 16 - local[1]),
                                 "up": (local[0], local[2]), "down": (local[0], 16 - local[2])}[face]
                         vertices.append([round(p[0], 4), round(p[1], 4), round(p[2], 4), round(u / 16, 5), round(v / 16, 5)])
                     out.append({"texture": name, "normal": list(normal), "vertices": vertices})
-    out += rotated_quads(rest)
+    out += rotated_quads(rest, separate=False)
     for quad in out:
         if quad["texture"] == "dw_porthole":
             quad["cutout"] = True
@@ -267,34 +343,9 @@ def canvas(seed, stripe=False, nose=False):
     return img
 
 
-def icon():
-    """The item: a zeppelin in profile, envelope over a red gondola with a propeller."""
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    for x in range(1, 15):
-        half = 3.6 * math.sqrt(max(0.0, 1 - ((x - 7.5) / 7.0) ** 2))
-        for y in range(16):
-            if abs(y - 6) <= half:
-                c = CANVAS_COLORS[2] if y < 6 else CANVAS_COLORS[1]
-                if abs(y - 6) > half - 1:
-                    c = CANVAS_COLORS[0]
-                if x == 5:
-                    c = (150, 36, 28)
-                img.putpixel((x, y), c + (255,))
-    for x, y in ((1, 2), (1, 3), (2, 3), (1, 9), (1, 10), (2, 9)):
-        img.putpixel((x, y), (150, 36, 28, 255))
-    for x in range(5, 11):
-        for y in (11, 12):
-            img.putpixel((x, y), (138, 36, 26, 255) if y == 11 else (98, 52, 28, 255))
-    for x in (6, 9):
-        img.putpixel((x, 10), (70, 65, 62, 255))
-    img.putpixel((8, 11), (240, 168, 40, 255))
-    for y in (10, 11, 12, 13):
-        img.putpixel((4, y), (160, 160, 156, 255))
-    return img
-
-
 def draw_all(save):
+    import item_icons  # the 16x16 icon, a map in tools/item_icons/ like the big guns' and the other war machines'
     save(canvas(4601), "block", CANVAS)
     save(canvas(4602, stripe=True), "block", STRIPE)
     save(canvas(4603, nose=True), "block", NOSE)
-    save(icon(), "item", "zeppelin")
+    save(item_icons.draw("zeppelin"), "item", "zeppelin")

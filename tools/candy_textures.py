@@ -9,11 +9,10 @@ read, traced or recoloured. The block textures are 16x16 (the dial is round, see
 see-through round their shapes.
 """
 import math
-import random
 
 from agriculture import CANDY
 from crop_textures import Canvas, rgb, outline
-from decor_textures import noise
+import block_style as bs
 
 COPPER = [rgb("9a5228"), rgb("b86a36"), rgb("d4844a"), rgb("f0a868")]
 DARK = [rgb("3a2014"), rgb("4a2a1a"), rgb("5a3420")]
@@ -30,11 +29,9 @@ SWING = 270.0
 def kettle():
     """Polished copper: bright, with a few dents catching the light and a band of rivets."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, COPPER[1:4], 26101, [2, 3, 1])
-    rng = random.Random(26102)
-    for _ in range(8):
-        x, y = rng.randrange(16), rng.randrange(16)
-        c.px(x, y, COPPER[3])
+    bs.fill(c, 0, 0, 15, 15, COPPER[1:4], 26101, [2, 3, 1])
+    for x, y in ((3, 5), (10, 4), (6, 9), (13, 10), (2, 13), (9, 13)):
+        c.px(x, y, COPPER[3])  # a dent catching the light
         c.px(x + 1, y, COPPER[0])
     for x in range(1, 16, 3):
         c.px(x, 1, COPPER[3])
@@ -45,13 +42,13 @@ def kettle():
 def trivet():
     """Black iron, a little rough."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("1e1e22"), rgb("2a2a30"), rgb("36363c")], 26105, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, [rgb("1e1e22"), rgb("2a2a30"), rgb("36363c")], 26105, [2, 3, 1])
     return c.img
 
 
 def kettle_inside():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, DARK, 26103, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, DARK, 26103, [2, 3, 2])
     return c.img
 
 
@@ -102,9 +99,7 @@ def syrup():
         for x in range(16):
             wave = math.sin(x * 0.7 + math.sin(y * 0.5) * 2.0)
             c.px(x, y, PALE[3] if wave > 0.6 else PALE[2])
-    rng = random.Random(26104)
-    for _ in range(9):
-        x, y = rng.randrange(1, 15), rng.randrange(1, 15)
+    for x, y in ((3, 3), (10, 2), (6, 7), (12, 8), (2, 11), (8, 12)):
         c.px(x, y, PALE[3])
         c.px(x + 1, y, PALE[1])
     return c.img
@@ -149,11 +144,11 @@ def tray_candy():
 def rock_candy():
     """Clusters of crystals grown up a stick (tinted)."""
     c = Canvas()
-    rng = random.Random(26110)
     for y in range(2, 11):
         half = 3 if 3 <= y <= 9 else 2
         for x in range(8 - half, 8 + half + 1):
-            c.px(x, y, PALE[rng.choice((1, 2, 2, 3))])
+            # Crystals two pixels across, each lit along its upper left edge.
+            c.px(x, y, PALE[3] if (x + y) % 4 == 0 else PALE[1] if (x + y) % 4 == 3 else PALE[2])
     for x, y in ((4, 4), (11, 6), (4, 8), (12, 9), (8, 1)):
         c.px(x, y, PALE[3])
     outline(c, PALE[0])
@@ -279,12 +274,13 @@ def toffee():
 def burnt_sugar():
     """Black lumps with a bitter brown glint."""
     c = Canvas()
-    rng = random.Random(26120)
     for cx, cy, r in ((5, 8, 3), (10, 7, 3), (8, 11, 2)):
         for y in range(16):
             for x in range(16):
                 if (x - cx) ** 2 + (y - cy) ** 2 <= r * r:
-                    c.px(x, y, rgb(rng.choice(("1a1008", "241610", "2e1c12"))))
+                    # Each lump lit at its upper left.
+                    d = (x - cx) + (y - cy)
+                    c.px(x, y, rgb("2e1c12" if d < -1 else "1a1008" if d > 1 else "241610"))
     for x, y in ((4, 7), (9, 6)):
         c.px(x, y, rgb("6a3a1a"))
     outline(c, rgb("0a0604"))

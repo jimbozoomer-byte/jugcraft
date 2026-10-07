@@ -11,6 +11,12 @@ Main requires a PR and passing checks, but zero independent approvals while ther
 
 **You can start in your own fork now and submit a draft PR.** You do not need collaborator access or an approved issue to propose a focused implementation. See [the fork and AI setup guide](docs/COMMUNITY_QUICKSTART.md). Maintainers decide acceptance during review; submission does not guarantee merging.
 
+## Shared art, sounds and animations
+
+Before creating assets, browse the [owner asset library](art/owner-library/README.md) and its [complete catalog](art/owner-library/catalog/README.md). The owner explicitly authorizes suitable assets from that supplied collection to be used directly, recolored/adapted, or used as reference. This applies to every content branch: blocks, ores, metals, machines, guns, planes, sounds, animations, weapons, armor, trees, biomes, farming and food. It is not limited to machinery.
+
+Preserve the library's originals, copy required files into the feature's runtime resources, keep animation sidecars with their textures, and record source paths and changes in the feature's asset provenance. Follow the library's import guide and [art direction](docs/ART_DIRECTION.md); unrelated third-party assets still follow [LICENSE_POLICY.md](LICENSE_POLICY.md).
+
 ## 1. Describe the idea
 
 Open a Feature proposal or Existing mod integration issue using the Issues tab. Search existing issues first. Describe the player experience, specialty, progression tier, inputs, outputs, and connections to other systems. Read docs/CONTENT_BRANCHES.md for the content scope. State which connections are required or optional, how trade/solo routes work, and why the specialty remains useful without mastering every branch. Small documentation corrections and bug fixes can go straight to a PR.

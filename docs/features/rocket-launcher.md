@@ -37,7 +37,7 @@ Primary specialty and supported player role: combat (a heavy ranged weapon besid
 
 ## Dependencies and assets
 - No new dependencies.
-- Three 64x64 high-detail icons drawn with `tools/hd_art.py` in `tools/rocketry.py`.
+- Three 64x64 high-detail icons drawn with `tools/hd_art.py` in `tools/rocketry.py`. Since 6 October 2026 the launcher's and the HE, homing and line-throwing rockets' outlines are opaque: drawn part-transparent, they showed as a see-through rim on the sprite in the hand.
 - In flight a rocket is drawn as its item, trailing smoke and flame.
 - It uses vanilla firework launch and explosion sounds.
 

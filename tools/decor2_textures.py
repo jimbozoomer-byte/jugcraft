@@ -2,17 +2,16 @@
 colour, Floating Candles, the Skeleton Hand Sconce and Bat Bunting.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code from fixed seeds; no Mojang texture is
-read, traced or recoloured. The dye colours below are plain colour values. Block and item textures are 16x16; the
-bunting's strip is 64x16.
+read, traced or recoloured. Surfaces are painted in the manner of the vanilla blocks with tools/block_style.py: a
+short palette in small clumps, never a random colour at every pixel. The dye colours below are plain colour values.
+Block and item textures are 16x16; the bunting's strip is 64x16.
 """
-import random
-
 from PIL import Image
 
 from agriculture import DYE_COLORS
 from crop_textures import Canvas, rgb, outline
-from decor_textures import noise
 from halloween_textures import IRON, shade
+import block_style as bs
 
 # Paper in each dye colour: plain paper for white, otherwise paper dyed (lighter than the dye itself).
 DYES = {"white": "f2ecdc", "orange": "f08a2a", "magenta": "c45ab8", "light_blue": "58b8de", "yellow": "f6d24a", "lime": "8ccc34",
@@ -43,11 +42,11 @@ def luminaria(color, lit):
     paper = rgb(DYES[color])
     if lit:
         paper = mix(paper, GLOW, 0.45 if color != "black" else 0.25)
-    rng = random.Random(9200 + DYE_COLORS.index(color))
+    grain = bs.wobble(9200 + DYE_COLORS.index(color), 0.04)
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y in range(16):
         for x in range(16):
-            tone = 1.0 + rng.uniform(-0.04, 0.04)
+            tone = 1.0 + grain(x, y)
             local_x, local_y = x - BAG_X, y - BAG_Y
             if local_y == 0:
                 tone += 0.08  # the rim, folded over
@@ -65,7 +64,7 @@ def luminaria(color, lit):
 
 def luminaria_inside(lit):
     """The inside of the bag: plain paper in shadow, or lit warm by the candle, brightest low down in the middle."""
-    rng = random.Random(9221 + lit)
+    grain = bs.wobble(9221 + lit, 0.03)
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y in range(16):
         for x in range(16):
@@ -74,20 +73,20 @@ def luminaria_inside(lit):
                 color = mix(rgb("f6c25a"), rgb("fff4c8"), near)
             else:
                 color = shade(rgb(DYES["white"]), 0.62)
-            img.putpixel((x, y), shade(color, 1.0 + rng.uniform(-0.03, 0.03)) + (255,))
+            img.putpixel((x, y), shade(color, 1.0 + grain(x, y)) + (255,))
     return img
 
 
 def luminaria_sand():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, SAND, 9231, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, SAND, 9231, [2, 3, 2])
     return c.img
 
 
 def luminaria_candle():
     """Cream wax with a drip or two below the top, and the wick in the middle of the top."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, WAX[1:], 9241, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, WAX[1:], 9241, [2, 3, 1])
     for x, y in ((7, 10), (8, 11), (8, 10)):
         c.px(x, y, WAX[3])
     c.px(8, 7, rgb("2a2018"))
@@ -96,7 +95,7 @@ def luminaria_candle():
 
 def flame():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, FLAME[1:], 9251, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, FLAME[1:], 9251, [2, 3, 2])
     return c.img
 
 
@@ -106,10 +105,10 @@ def floating_candle_entity():
     """The renderer's texture: four 2-pixel strips of wax with drips at the top (u 0-8), a flame (u 8-12, 6 rows) and
     the top of the wax with its wick (u 12-14, 2 rows)."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    rng = random.Random(9301)
+    wax = bs.surface(WAX[:3], 9301)
     for y in range(16):
         for x in range(8):
-            img.putpixel((x, y), rng.choice(WAX[:3]) + (255,))
+            img.putpixel((x, y), wax(x, y) + (255,))
     for x, depth in ((0, 2), (1, 1), (2, 3), (3, 1), (4, 1), (5, 2), (6, 1), (7, 3)):
         for y in range(depth):
             img.putpixel((x, y), WAX[3] + (255,))
@@ -128,7 +127,7 @@ def floating_candle_entity():
 
 def floating_candle_block():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, WAX[:3], 9311, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, WAX[:3], 9311, [1, 3, 2])
     return c.img
 
 
@@ -154,13 +153,13 @@ def floating_candle_item():
 
 def sconce_bone():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BONE, 9401, [1, 2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, BONE, 9401, [1, 2, 3, 2])
     return c.img
 
 
 def sconce_iron():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 9411, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 9411, [2, 3, 1], spread=0.6)
     for x, y in ((6, 4), (9, 4), (6, 11), (9, 11)):
         c.px(x, y, IRON[3])
     return c.img
@@ -168,13 +167,13 @@ def sconce_iron():
 
 def sconce_wood():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("4a3018"), rgb("5e3e20"), rgb("74502a")], 9421, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, [rgb("4a3018"), rgb("5e3e20"), rgb("74502a")], 9421, [1, 3, 2])
     return c.img
 
 
 def sconce_coal():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("16161a"), rgb("222226"), rgb("303036")], 9431)
+    bs.fill(c, 0, 0, 15, 15, [rgb("16161a"), rgb("222226"), rgb("303036")], 9431)
     return c.img
 
 
@@ -203,13 +202,13 @@ def sconce_item():
 
 def pennant(img, x0, palette, seed):
     """A triangle hanging point down from a folded top."""
-    rng = random.Random(seed)
+    paper = bs.surface(palette[1:], seed)
     for y in range(16):
         half = 7.5 * (1 - y / 16)
         for x in range(16):
             if abs(x - 7.5) <= half:
                 edge = abs(x - 7.5) > half - 1
-                color = palette[0] if y <= 1 or edge else rng.choice(palette[1:])
+                color = palette[0] if y <= 1 or edge else paper(x, y)
                 img.putpixel((x0 + x, y), color + (255,))
 
 
@@ -227,10 +226,9 @@ def bat(img, x0):
 
 def bunting_entity():
     img = Image.new("RGBA", (64, 16), (0, 0, 0, 0))
-    rng = random.Random(9501)
     for y in range(16):
         for x in range(16):
-            img.putpixel((x, y), rng.choice(TWINE) + (255,))
+            img.putpixel((x, y), TWINE[(x + y) // 2 % 3] + (255,))  # the cord's twist, two pixels wide
     pennant(img, 16, ORANGE, 9511)
     pennant(img, 32, BLACK, 9521)
     bat(img, 48)

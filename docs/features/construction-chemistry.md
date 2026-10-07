@@ -43,6 +43,8 @@ Primary specialty and supported player role: building, caving and base defence.
 ## Dependencies and assets
 No new dependencies. Block and item textures, models, recipes and loot tables come from `tools/construction.py`. All original.
 
+On 5 October 2026 the owner called blast-proof concrete horrific and said bastion concrete looks good. The old texture gave every pixel a random shade, framed each block with a dark top and left edge and a bright bottom and right one, and stamped four tie holes like dice pips. It is now drawn like bastion's sibling ([ART_DIRECTION.md](../ART_DIRECTION.md#tiling-building-blocks)): four flat shades of a cooler, darker grey, two smooth cast lifts a block, each lit along its top with its joint along its bottom (so the block edge looks like any other joint and a wall reads as continuous lifts), and recessed tie holes on an even, staggered lattice. Plain concrete, which used the same per-pixel speckle and stands beside it in the screenshot, is redrawn the same way as its lighter, warmer, smooth sibling: four flat shades, one cast lift a block (lit along its top, joint along its bottom, no vertical joints), two faint form marks one shade under the fill, one in each slab half, and no tie holes. Construction foam keeps its speckled look for now.
+
 ## Verification
 - `tools/check_mod_data.py`: numbers and block strengths in `ConstructionChemistry` match `tools/construction.py`; blocks, items, textures, names and loot tables exist.
 - Game test `foamFillsOpenSpaceAndCementSetsIt` (CI):
@@ -50,7 +52,8 @@ No new dependencies. Block and item textures, models, recipes and loot tables co
   - a canister runs down and is used up;
   - cement turns foam into concrete and is consumed;
   - blast-proof concrete's blast resistance is at least 1200.
-- Client screenshot: `jugcraft_foam_sprayer` (a foam-bridged trench and the concrete blocks, sprayer in hand).
+- Client screenshot: `jugcraft_foam_sprayer` (a foam-bridged trench and the concrete blocks, sprayer in hand). Since 5 October 2026 the row ends with the drone tower's Steel Armor Plate, its slab and stairs, then Hazard Plating and its slab, with a hazard block capping the stacked armour.
+- Concrete and blast-proof concrete textures (5 October 2026): checked offline in 3 x 3 tilings and in perspective renders of the screenshot row (before, first redraw and final) beside bastion concrete; four colours each, no step under 10 brightness, nothing across the slab cut. Not yet seen in the game.
 - Not run: client play (aiming), two players, the walled town in play.
 
 ## World and event applicability

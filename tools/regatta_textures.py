@@ -1,7 +1,8 @@
 """Original textures for the pumpkin regatta and trick-or-treating (requires Pillow).
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code from fixed seeds; no Mojang
-texture is read, traced or recoloured. Block and item textures are 16x16; the pumpkin boats' cut flesh
+texture is read, traced or recoloured. Surfaces vary in small clumps in the manner of the vanilla blocks
+(tools/block_style.py), never a random colour at every pixel. Block and item textures are 16x16; the pumpkin boats' cut flesh
 (entity/pumpkin_boat_flesh, stretched over the inside of a boat) is 64x64, and the view from under a
 ghost sheet (misc/ghost_sheet, stretched over the screen) is 256x128, and the sheet as worn (entity/ghost_sheet,
 drawn by GhostSheetLayer) is 128x64.
@@ -13,6 +14,7 @@ from PIL import Image
 
 from crop_textures import Canvas, rgb, outline
 from halloween_textures import GIANT, CARAMEL, PAPER, STRAW, shade
+import block_style as bs
 
 FLESH = [rgb("d8741c"), rgb("e8902e"), rgb("f2a844"), rgb("f8c066"), rgb("fcd890")]
 SEEDS = [rgb("efe2c0"), rgb("fbf6e6")]
@@ -30,12 +32,13 @@ HAT_BAND = [rgb("6e1a14"), rgb("942820"), rgb("b43a2c")]
 
 
 def fabric(colors, seed, weave=False):
-    """A 16x16 cloth: speckled shades, with a faint cross weave."""
-    rng = random.Random(seed)
+    """A 16x16 cloth: its middle shades in small clumps, with a faint cross weave."""
+    tones = colors[:3]
+    cloth = bs.surface(tones, seed, [1, 3, 2][:len(tones)], spread=0.6)
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            i = rng.choice([1, 1, 2, 2, 1, 0]) if len(colors) > 2 else rng.randrange(len(colors))
+            i = tones.index(cloth(x, y))
             if weave and (x + y) % 4 == 0:
                 i = max(0, i - 1)
             c.px(x, y, colors[min(i, len(colors) - 1)])
@@ -44,12 +47,11 @@ def fabric(colors, seed, weave=False):
 
 def straw_weave(seed):
     """Plaited straw: diagonal bands of light and dark gold."""
-    rng = random.Random(seed)
     c = Canvas()
     for y in range(16):
         for x in range(16):
             band = ((x + y) // 2) % 2
-            c.px(x, y, STRAW[(3 if band else 2) - (1 if rng.random() < 0.15 else 0)])
+            c.px(x, y, STRAW[3 if band else 2])
             if (x - y) % 8 == 0:
                 c.px(x, y, STRAW[1])
     return c.img
@@ -80,7 +82,7 @@ SHEET_BOXES = {"hood": (0, 0, 10, 10, 10), "crown": (40, 0, 8, 1, 8), "drape": (
 def worn_sheet():
     """The ghost sheet as worn (entity/ghost_sheet, 128x64): plain cloth with soft folds running down the sides, two
     eye holes and a round mouth on the front of the hood."""
-    rng = random.Random(7111)
+    grain = bs.grain(128, 64, 7111)
     img = Image.new("RGBA", (128, 64), (0, 0, 0, 0))
     for name, (u, v, w, h, d) in SHEET_BOXES.items():
         for y in range(v, v + d + h):
@@ -88,7 +90,8 @@ def worn_sheet():
                 top_row = y < v + d
                 if top_row and not (u + d <= x < u + d + 2 * w):
                     continue
-                shade_index = rng.choice([1, 2, 2, 3, 2])
+                v = grain(x, y)
+                shade_index = 3 if v > 0.68 else 1 if v < 0.32 else 2
                 if not top_row and (x - u) % 4 == 3:
                     shade_index -= 1  # a fold down the cloth
                 if not top_row and y >= v + d + h - 1 and name in ("skirt", "drape"):
@@ -120,31 +123,29 @@ def flag_cloth():
 
 
 def flag_pole():
-    rng = random.Random(7102)
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, POLE[1] if rng.random() < 0.7 else POLE[2 if x % 4 == 1 else 0])
+    bs.planks(POLE, 7102, vertical=True, joint=False)(c)
     return c.img
 
 
 def buoy_paint(colors, seed):
-    rng = random.Random(seed)
     c = Canvas()
-    for y in range(16):
+    bs.fill(c, 0, 0, 15, 15, colors[:2], seed, [1, 5], spread=0.6)
+    for y in range(2):
         for x in range(16):
-            c.px(x, y, colors[2] if y < 2 else colors[1] if rng.random() < 0.85 else colors[0])
+            c.px(x, y, colors[2])
     return c.img
 
 
 def boat_flesh():
     """The inside of a hollowed giant pumpkin, 64x64: fibrous orange flesh with a few seeds left in it."""
     rng = random.Random(7103)
+    grain = bs.grain(64, 64, 7104)
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 255))
     for y in range(64):
         for x in range(64):
             fibre = math.sin(x * 0.45 + math.sin(y * 0.2) * 2.0) * 0.5 + 0.5
-            i = 1 + int(fibre * 2.5) + (1 if rng.random() < 0.08 else 0)
+            i = 1 + int(fibre * 2.5) + (1 if grain(x, y) > 0.72 else 0)
             img.putpixel((x, y), FLESH[min(i, len(FLESH) - 1)] + (255,))
     for _ in range(18):
         x, y = rng.randrange(2, 61), rng.randrange(2, 61)

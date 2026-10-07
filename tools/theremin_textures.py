@@ -7,11 +7,11 @@ Called from crop_textures.crop_textures(). Every pixel is drawn here by code, fr
 read, traced or recoloured.
 """
 import math
-import random
 
 from PIL import Image
 
 from crop_textures import rgb
+import block_style as bs
 
 WALNUT = [rgb("3a2416"), rgb("4a2e1c"), rgb("5a3a24"), rgb("6a462c")]
 BRASS = [rgb("8a6a24"), rgb("b08a34"), rgb("caa44a"), rgb("e4c470")]
@@ -21,22 +21,22 @@ CLOTH = [rgb("a89470"), rgb("b8a480"), rgb("c4b28e")]
 
 
 def noise(palette, seed, weights=None):
+    """A plain 16x16 of the palette in small clumps, in the manner of the vanilla blocks (tools/block_style.py)."""
     img = Image.new("RGBA", (16, 16))
-    rng = random.Random(seed)
+    surface = bs.surface(palette, seed, weights)
     for x in range(16):
         for y in range(16):
-            img.putpixel((x, y), rng.choices(palette, weights or [1] * len(palette))[0] + (255,))
+            img.putpixel((x, y), surface(x, y) + (255,))
     return img
 
 
 def walnut(seed=19001):
-    """Figured walnut: dark grain running across in waves."""
+    """Figured walnut: bands of grain running across in waves, a dark line between every few."""
     img = Image.new("RGBA", (16, 16))
-    rng = random.Random(seed)
     for y in range(16):
         for x in range(16):
             wave = int(2 * math.sin((x + seed % 7) * 0.6) + y)
-            img.putpixel((x, y), WALNUT[(wave + rng.choice((0, 0, 1))) % 4] + (255,))
+            img.putpixel((x, y), (WALNUT[0] if wave % 6 == 0 else WALNUT[1 + (wave // 3) % 2]) + (255,))
     return img
 
 
