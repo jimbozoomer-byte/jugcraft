@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -37,6 +38,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -137,11 +139,17 @@ public final class Assaying {
 
 	// ---------------------------------------------------------------- what a stack is
 
-	/** The components {@code stack} adds to or removes from its item's own, by id. */
+	/**
+	 * The components {@code stack} adds to, removes from or changes on its item's own, by id: every registered component
+	 * whose value on the stack differs from the item's default.
+	 */
 	public static Set<String> patched(ItemStack stack) {
 		Set<String> ids = new TreeSet<>();
-		for (Map.Entry<DataComponentType<?>, Optional<?>> entry : stack.getComponentsPatch().entrySet()) {
-			ids.add(componentId(entry.getKey()));
+		DataComponentMap defaults = stack.getItem().components();
+		for (DataComponentType<?> type : BuiltInRegistries.DATA_COMPONENT_TYPE) {
+			if (!Objects.equals(stack.get(type), defaults.get(type))) {
+				ids.add(componentId(type));
+			}
 		}
 		return ids;
 	}
