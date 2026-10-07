@@ -7,9 +7,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -101,6 +103,8 @@ public final class JugcraftGuns {
 	public static final List<String> SOUND_EVENTS = List.of("bolt", "bolt_pull", "bolt_release", "dry_fire",
 			"gun_rustle", "insert", "jam", "lever", "metal", "rack", "reload_end", "reload_mag_in", "reload_mag_out",
 			"shell_in", "slap");
+	/** The rounds that leave a spent case, each with its particle jugcraft:&lt;round&gt;_casing (tools/guns.py CASINGS). */
+	public static final List<String> CASING_AMMO = List.of("light_round", "rifle_round", "buckshot_shell");
 	/** Walking speed while aiming down the sights (vanilla's using an item is 0.2). */
 	public static final float AIM_SPEED = 0.6F;
 
@@ -108,6 +112,8 @@ public final class JugcraftGuns {
 	public static final Map<String, Item> ROUNDS = new LinkedHashMap<>();
 	public static final Map<String, SoundEvent> SOUNDS = new LinkedHashMap<>();
 	public static final Map<String, Item> ATTACHMENT_ITEMS = new LinkedHashMap<>();
+	/** Each round's spent case, a particle the client throws from the gun (client/guns/GunEffects). */
+	public static final Map<String, SimpleParticleType> CASINGS = new LinkedHashMap<>();
 	public static final ResourceKey<DamageType> BULLET = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("bullet"));
 	/** Rounds loaded in a gun. */
 	public static DataComponentType<Integer> LOADED;
@@ -138,6 +144,10 @@ public final class JugcraftGuns {
 		}
 		for (String round : AMMO) {
 			ROUNDS.put(round, JugcraftRegistry.item(round, AmmoItem::new));
+		}
+		for (String round : CASING_AMMO) {
+			CASINGS.put(round, Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id(round + "_casing"),
+					FabricParticleTypes.simple()));
 		}
 		SPECS.forEach((name, spec) -> GUNS.put(name, (GunItem) JugcraftRegistry.item(name, properties -> new GunItem(name, spec,
 				properties.stacksTo(1).rarity(Rarity.UNCOMMON).component(LOADED, 0)

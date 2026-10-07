@@ -15,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.PlayerModelType;
+import net.minecraft.world.item.ItemDisplayContext;
 import java.util.List;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -29,6 +30,8 @@ import org.joml.Vector3f;
  * The model's coordinates are the owner's item-model pixels less (8, 0, 8), so moving it by half a block puts it where
  * the owner's item model was, and the owner's display transforms (the base model, models/item/&lt;gun&gt;) apply as
  * they were made.
+ * <p>
+ * Slice 6: just after a shot, a gun in someone's hand shows its muzzle flash ({@link GunFlashLayer}).
  */
 public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	/** The entity holding the gun (for where its sounds play). */
@@ -37,26 +40,44 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	public static final DataTicket<View> VIEW = DataTicket.create("jugcraft_gun_view", View.class);
 	/** The gun's fitted attachments. */
 	public static final DataTicket<Fitted> FITTED = DataTicket.create("jugcraft_gun_attachments", Fitted.class);
+	/** A muzzle flash to draw: the shot was moments ago and nothing fitted hides it. */
+	public static final DataTicket<Flash> FLASH = DataTicket.create("jugcraft_gun_flash", Flash.class);
 	/** A slot's attachment bones, and a second set where the slot is on two bones (the Warden Pistol's spare magazine). */
 	private static final List<String> SETS = List.of("", "_2");
 
 	public GunRenderer(GunItem gun) {
 		super(new DefaultedItemGeoModel<GunItem>(Jugcraft.id(gun.name())).withAltTexture(Jugcraft.id("guns/" + gun.name())));
 		withRenderLayer(new GunArmsLayer(this));
+		withRenderLayer(new GunFlashLayer(this));
 	}
 
 	@Override
 	public void addRenderData(GunItem gun, RenderData data, GeoRenderState state, float partialTick) {
-		state.addGeckolibData(FITTED, new Fitted(GunItem.attachments(data.itemStack())));
+		List<String> fitted = GunItem.attachments(data.itemStack());
+		state.addGeckolibData(FITTED, new Fitted(fitted));
 		Entity owner = data.itemOwner() instanceof Entity entity ? entity : null;
 		if (owner != null) {
 			state.addGeckolibData(OWNER, owner.getId());
+			float age = GunEffects.flashAge(owner.getId(), owner.level().getGameTime(), partialTick);
+			if (age >= 0.0F && inHand(data.renderPerspective()) && fitted.stream().noneMatch(GunLooks.HIDE_FLASH::contains)) {
+				// From the muzzle, or from the front of a barrel attachment that lengthens it.
+				String locator = fitted.stream().filter(name -> JugcraftGuns.ATTACHMENTS.get(name).slot().equals("barrel")).findFirst()
+						.map(name -> "muzzle_" + name).orElse("muzzle");
+				state.addGeckolibData(FLASH, new Flash(age, GunEffects.lastShot(owner.getId()),
+						GunLooks.FLASH_SIZES.getOrDefault(gun.spec().ammo(), 6.0F), locator));
+			}
 		}
 		Minecraft client = Minecraft.getInstance();
 		if (data.renderPerspective().firstPerson() && owner instanceof AbstractClientPlayer player && player == client.player) {
 			boolean slim = player.getSkin().model() == PlayerModelType.SLIM;
 			state.addGeckolibData(VIEW, new View(player.getSkin().body().texturePath(), slim, GunView.aim(partialTick)));
 		}
+	}
+
+	/** Whether the gun is drawn in someone's hand (not in a slot, on the ground or in a frame). */
+	private static boolean inHand(ItemDisplayContext context) {
+		return context == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND
+				|| context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND || context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
 	}
 
 	/** The props the animations move on bones of their own (tools/guns.py PROPS). */
@@ -115,5 +136,14 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 
 	/** @param attachments the attachments fitted to the gun drawn ({@link GunItem#attachments}) */
 	public record Fitted(List<String> attachments) {
+	}
+
+	/**
+	 * @param age     ticks since the shot
+	 * @param shot    the shot's game time (picks the frame and its turn)
+	 * @param size    across, in the model's pixels ({@link GunLooks#FLASH_SIZES})
+	 * @param locator where it comes out: "muzzle", or "muzzle_&lt;attachment&gt;" for a barrel attachment
+	 */
+	public record Flash(float age, long shot, float size, String locator) {
 	}
 }

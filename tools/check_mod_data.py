@@ -1439,6 +1439,35 @@ def check_guns():
                      f"textures/item/guns/{gun}.png"):
             if not (ASSETS / path).exists():
                 err(f"Missing {path}")
+    # Slice 6, the guns in use: the client's looks, the casings and the hooks that show them.
+    client_guns = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "guns"
+    looks = (client_guns / "GunLooks.java").read_text(encoding="utf-8")
+    for gun in guns.GUNS:
+        line = f'LOOKS.put("{gun}", new Look({str(guns.two_handed(gun)).lower()}, {guns.ZOOM[gun]}F));'
+        if line not in looks:
+            err(f"GunLooks.LOOKS differs from tools/guns.py for {gun}: expected {line}")
+    for ammo, size in guns.FLASH_SIZE.items():
+        if f'"{ammo}", {size}F' not in looks:
+            err(f"GunLooks.FLASH_SIZES differs from tools/guns.py FLASH_SIZE for {ammo} ({size})")
+    hide = re.search(r"HIDE_FLASH = List\.of\(([^)]*)\)", looks)
+    hiding = [kind for kind, att in guns.ATTACHMENTS.items() if att.get("hides_flash")]
+    if not hide or re.findall(r'"([a-z_]+)"', hide.group(1)) != hiding:
+        err(f"GunLooks.HIDE_FLASH differs from tools/guns.py's hides_flash attachments {hiding}")
+    casings = re.search(r"CASING_AMMO = List\.of\(([^)]*)\)", java)
+    if not casings or re.findall(r'"([a-z_]+)"', casings.group(1)) != list(guns.CASINGS):
+        err(f"JugcraftGuns.CASING_AMMO differs from tools/guns.py CASINGS {list(guns.CASINGS)}")
+    for ammo in guns.CASINGS:
+        if load(ASSETS / "particles" / f"{ammo}_casing.json") != {"textures": [f"{MOD}:{ammo}_casing"]}:
+            err(f"particles/{ammo}_casing.json does not draw textures/particle/{ammo}_casing.png")
+    if f'EJECT_CUE = "{guns.EJECT_CUE}";' not in animations:
+        err(f"GunAnimations.EJECT_CUE differs from tools/guns.py ({guns.EJECT_CUE})")
+    client_mixins = load(ROOT / "src" / "client" / "resources" / f"{MOD}.client.mixins.json") or {}
+    if "GunFovMixin" not in client_mixins.get("client", []):
+        err(f"{MOD}.client.mixins.json does not list GunFovMixin (no zoom aimed down the sights)")
+    mixin_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin" / "client"
+    for mixin, call in (("ArmsRenderStateMixin", "GunPose.extract"), ("ArmsHumanoidModelMixin", "GunPose.apply")):
+        if call not in (mixin_dir / f"{mixin}.java").read_text(encoding="utf-8"):
+            err(f"{mixin} does not call {call} (a held gun would hang at the player's side, pointing down)")
     for problem in guns.check():
         err(f"guns: {problem}")
 

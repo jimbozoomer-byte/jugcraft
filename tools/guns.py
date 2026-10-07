@@ -1,13 +1,16 @@
 """Guns (docs/features/guns.md): slice 1, the owner's Rust Midge, Patchwork Carbine and Thunderpipe; slice 2, the
 iron set: the Warden Pistol, Riveter SMG and Haymaker; slice 3, the Longhorn Rifle, Drover Rifle and Coach Gun;
-slice 4, the black powder guns: the Duelling Pistol, Line Musket and Bellmouth.
+slice 4, the black powder guns: the Duelling Pistol, Line Musket and Bellmouth; slice 5, the attachments; slice 6,
+the guns in use: muzzle flash, spent casings, the view narrowed while aiming and the two-handed hold seen from outside.
 
 The owner made these guns (inspired by Scorched Guns 2) and supplied, in the owner asset library:
   - a Blockbench Java model of every part (art/owner-library/originals/Blocks/Guns/models/special/<gun>/<part>.json),
   - a packed 128 x 128 texture atlas for each gun (.../Guns/item/<gun>.png),
   - Bedrock animations for each gun (.../Guns/item/<gun>.animation.json: draw, idle, shoot, aim_shoot, inspect and
     reload, or reload_start / reload_loop / reload_stop for a gun loaded a shell at a time),
-  - the sounds (.../Guns/sounds/item/...).
+  - the sounds (.../Guns/sounds/item/...),
+  - casing art (.../Guns/item/<casing>.png) and muzzle flash frames
+    (art/owner-library/originals/Blocks/Big Cannons and Mounted Guns/textures/muzzleflash*.png).
 The animations were made for GeckoLib models that were not supplied, so this module rebuilds those models from the
 parts: one GeckoLib bone per animated part (gun_body, bolt, barrels, magazine ...), cube for cube and face for face,
 plus the bones the animations move the player's arms by. GeckoLib then plays the owner's animations unchanged.
@@ -30,7 +33,8 @@ from pathlib import Path
 
 MOD = "jugcraft"
 ROOT = Path(__file__).resolve().parents[1]
-LIBRARY = ROOT / "art" / "owner-library" / "originals" / "Blocks" / "Guns"
+BLOCKS = ROOT / "art" / "owner-library" / "originals" / "Blocks"
+LIBRARY = BLOCKS / "Guns"
 ASSETS = ROOT / "src" / "main" / "resources" / "assets" / MOD
 
 # ------------------------------------------------------------------ the guns
@@ -410,16 +414,19 @@ PROPS = {
 #            kick (the view's jump) and volume (the shot's sound); the rest stay 1
 #   model    the owner's item model for the attachment (Guns/models/item/<model>.json), drawn with...
 #   texture  ...its one texture, copied to textures/item/guns/attachments/<texture>.png (ATTACHMENT_TEXTURES)
+#   hides_flash  a can over the muzzle: a shot through it shows no muzzle flash (slice 6)
 # The numbers are starting points for the owner.
 ATTACHMENTS = {
     "silencer": {
         "display": "Silencer", "slot": "barrel", "parts": ["silencer"], "replaces": False,
         "effects": {"volume": 0.35, "damage": 0.95}, "model": "silencer", "texture": "muzzle_devices",
+        "hides_flash": True,
         "tooltip": "A wool-packed can for the muzzle: a much quieter shot, a little weaker.",
     },
     "baffled_silencer": {
         "display": "Baffled Silencer", "slot": "barrel", "parts": ["advanced_silencer"], "replaces": False,
         "effects": {"volume": 0.2}, "model": "advanced_silencer", "texture": "baffled_silencer",
+        "hides_flash": True,
         "tooltip": "Brass baffles in a long can: quieter still, and nothing lost.",
     },
     "muzzle_brake": {
@@ -550,6 +557,49 @@ def attachment_model(kind):
     texture = f"{MOD}:item/guns/attachments/{ATTACHMENTS[kind]['texture']}"
     model["textures"] = {key: texture for key in model["textures"]}
     return model
+
+
+# ------------------------------------------------------------------ in use (slice 6)
+
+# How far each gun narrows the view aimed down its sights: the field of view is multiplied by this at full aim
+# (client/guns/GunLooks.LOOKS; client/GunFovMixin applies it). Pistols and shotguns a little, rifles more.
+ZOOM = {
+    "rust_midge": 0.9, "patchwork_carbine": 0.82, "thunderpipe": 0.92, "warden_pistol": 0.9, "riveter_smg": 0.88,
+    "haymaker": 0.92, "longhorn_rifle": 0.75, "drover_rifle": 0.8, "coach_gun": 0.9, "duelling_pistol": 0.9,
+    "line_musket": 0.82, "bellmouth": 0.92,
+}
+
+
+def two_handed(gun):
+    """Whether the gun is held in both hands. A one-handed gun's idle hides the left arm, so BUILDS gives it a
+    "hand_pose"; seen from outside (client/guns/GunPose), a two-handed gun brings both arms up, a one-handed one the
+    gun arm only."""
+    return "hand_pose" not in BUILDS[gun]
+
+
+# The spent case a round leaves where the owner's animations eject one (their "eject_casing" particle cue, mostly at
+# the start of shoot and aim_shoot; the Coach Gun's as it breaks open to reload). The owner's casing art
+# (Guns/item/<file>.png) is copied to textures/particle/<round>_casing.png for the particle jugcraft:<round>_casing
+# (JugcraftGuns.CASINGS). A paper cartridge leaves no case: its cue puffs smoke from the lock instead.
+CASINGS = {"light_round": "small_copper_casing", "rifle_round": "large_brass_casing", "buckshot_shell": "shotgun_shell"}
+# The animations' particle cues: GunAnimations ejects a casing at EJECT_CUE; the others mark points in a reload that
+# the server's timing already covers, and show nothing.
+EJECT_CUE = "eject_casing"
+QUIET_CUES = ("loaded", "end_reload", "loop_end", "reload_end")
+# The muzzle flash: the owner's four flash frames, copied to textures/item/guns/flash/flash_<n>.png; each shot shows
+# one, turned at random about the barrel. A silencer hides it ("hides_flash").
+FLASH_FRAMES = ["muzzleflash", "muzzleflash2", "muzzleflash3", "muzzleflash4"]
+FLASH_SOURCE = BLOCKS / "Big Cannons and Mounted Guns" / "textures"
+# How big the flash is, across, in the gun model's pixels, by the round: black powder flares widest.
+FLASH_SIZE = {"light_round": 5.0, "rifle_round": 7.0, "buckshot_shell": 8.0, "paper_cartridge": 10.0}
+
+
+def barrel_front(gun, kind):
+    """Where a barrel attachment's flash comes out, in owner space: on the gun's bore (its "muzzle" x and y) at the
+    front of the attachment's part, so a muzzle brake or extended barrel moves the flash forward."""
+    mx, my, _ = BUILDS[gun]["muzzle"]
+    zs = [v for element in part_elements(gun, attachment_part(gun, kind)) for v in (element["from"][2], element["to"][2])]
+    return (mx, my, round(min(zs), 4))
 
 
 # The sounds the animations name (sound_effects keys), per gun where they differ, and the gun's own shots.
@@ -683,6 +733,9 @@ def write_all(write, assets, data, lang, condition):
     lang[f"tooltip.{MOD}.guns.fitted"] = "Fitted: %s"
     for name, text in SUBTITLES.items():
         lang[f"subtitles.{MOD}.guns.{name}"] = text
+    # The spent casings' particles (JugcraftGuns.CASINGS); their textures are the owner's, copied by write_files().
+    for ammo in CASINGS:
+        write(assets / "particles" / f"{ammo}_casing.json", {"textures": [f"{MOD}:{ammo}_casing"]})
     lang[f"key.{MOD}.reload"] = "Reload gun"
     lang[f"key.{MOD}.inspect"] = "Inspect gun"
     lang[f"tooltip.{MOD}.guns.ammo"] = "Loaded: %s / %s"
@@ -940,6 +993,10 @@ def build_geo(gun):
             bone["locators"] = {"sight": geo_point(build["sight"])}
         if name in ("barrels",) or (name == "gun_body" and not any(b[0] == "barrels" for b in build["bones"])):
             bone["locators"] = {**bone.get("locators", {}), "muzzle": geo_point(build["muzzle"])}
+        kind = name.removeprefix("att_")
+        if name.startswith("att_") and kind in ATTACHMENTS and ATTACHMENTS[kind]["slot"] == "barrel":
+            # The flash of a gun with this barrel attachment fitted comes from here (GunFlashLayer).
+            bone["locators"] = {f"muzzle_{kind}": geo_point(barrel_front(gun, kind))}
         bones.append(bone)
     for side in ("right", "left"):
         parent = build.get("arm_parents", {}).get(side, "gun_body")
@@ -1088,6 +1145,12 @@ def check():
             for event in (data.get("sound_effects") or {}).values():
                 if event["effect"] not in EVENT_SOUNDS:
                     problems.append(f"{gun}: animation {name} plays {event['effect']}, which has no sound")
+            for event in (data.get("particle_effects") or {}).values():
+                if event["effect"] != EJECT_CUE and event["effect"] not in QUIET_CUES:
+                    problems.append(f"{gun}: animation {name} cues particle {event['effect']}, which nothing shows")
+        for kind in fits(gun):
+            if ATTACHMENTS[kind]["slot"] == "barrel" and f"muzzle_{kind}" not in bones.get(f"att_{kind}", {}).get("locators", {}):
+                problems.append(f"{gun}: the {kind} bone has no muzzle_{kind} locator for the flash")
         # The props' atlas corners must stay clear of every part's faces, the attachments' included.
         for prop_name, prop in PROPS.get(gun, {}).items():
             tu, tv = prop["texture_at"]
@@ -1115,6 +1178,19 @@ def check():
         target = ASSETS / "textures" / "item" / "guns" / "attachments" / f"{name}.png"
         if not target.exists() or target.read_bytes() != (LIBRARY / "item" / f"{source}.png").read_bytes():
             problems.append(f"attachment texture {name}: not the library's {source}.png unchanged")
+    # Slice 6: the look in use.
+    if set(ZOOM) != set(GUNS) or not all(0.5 <= z <= 1.0 for z in ZOOM.values()):
+        problems.append("ZOOM must give every gun a zoom between 0.5 and 1")
+    if not set(CASINGS) <= set(AMMO) or set(FLASH_SIZE) != set(AMMO):
+        problems.append("CASINGS must name rounds, and FLASH_SIZE every round")
+    for ammo, casing in CASINGS.items():
+        target = ASSETS / "textures" / "particle" / f"{ammo}_casing.png"
+        if not target.exists() or target.read_bytes() != (LIBRARY / "item" / f"{casing}.png").read_bytes():
+            problems.append(f"casing {ammo}: {target.relative_to(ROOT)} is not the library's {casing}.png unchanged")
+    for n, frame in enumerate(FLASH_FRAMES):
+        target = ASSETS / "textures" / "item" / "guns" / "flash" / f"flash_{n}.png"
+        if not target.exists() or target.read_bytes() != (FLASH_SOURCE / f"{frame}.png").read_bytes():
+            problems.append(f"flash {n}: {target.relative_to(ROOT)} is not the library's {frame}.png unchanged")
     for name, path in {**EVENT_SOUNDS, **{f"{g}.fire": p for g, p in SHOT_SOUNDS.items()}}.items():
         target = ASSETS / "sounds" / "guns" / f"{sound_file(path)}.ogg"
         if not target.exists() or target.read_bytes() != (LIBRARY / "sounds" / path).read_bytes():
@@ -1225,6 +1301,14 @@ def write_files():
         target = ASSETS / "textures" / "item" / "guns" / "attachments" / f"{name}.png"
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(LIBRARY / "item" / f"{source}.png", target)
+    for ammo, casing in CASINGS.items():
+        target = ASSETS / "textures" / "particle" / f"{ammo}_casing.png"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(LIBRARY / "item" / f"{casing}.png", target)
+    for n, frame in enumerate(FLASH_FRAMES):
+        target = ASSETS / "textures" / "item" / "guns" / "flash" / f"flash_{n}.png"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(FLASH_SOURCE / f"{frame}.png", target)
     for path in sorted({*EVENT_SOUNDS.values(), *SHOT_SOUNDS.values()}):
         target = ASSETS / "sounds" / "guns" / f"{sound_file(path)}.ogg"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -1232,7 +1316,8 @@ def write_files():
 
 
 def provenance():
-    """Library path and SHA-256 of every owner file the guns use, for docs/features/guns.md."""
+    """Path (under the owner's Blocks folder) and SHA-256 of every owner file the guns use, for
+    docs/features/guns.md."""
     rows = []
     for gun, spec in GUNS.items():
         src = spec["source"]
@@ -1244,13 +1329,17 @@ def provenance():
     rows += [("shared", f"sounds/{p}") for p in sorted(set(EVENT_SOUNDS.values()))]
     rows += [(kind, f"models/item/{att['model']}.json") for kind, att in ATTACHMENTS.items()]
     rows += [(name, f"item/{source}.png") for name, source in ATTACHMENT_TEXTURES.items()]
-    return [(gun, path, hashlib.sha256((LIBRARY / path).read_bytes()).hexdigest()) for gun, path in rows]
+    rows += [(f"{ammo}_casing", f"item/{casing}.png") for ammo, casing in CASINGS.items()]
+    rows = [(owner, LIBRARY / path) for owner, path in rows]
+    rows += [(f"flash_{n}", FLASH_SOURCE / f"{frame}.png") for n, frame in enumerate(FLASH_FRAMES)]
+    return [(owner, path.relative_to(BLOCKS).as_posix(), hashlib.sha256(path.read_bytes()).hexdigest())
+            for owner, path in rows]
 
 
 if __name__ == "__main__":
     if "--provenance" in sys.argv:
         for gun, path, digest in provenance():
-            print(f"| {gun} | `Guns/{path}` | `{digest[:16]}` |")
+            print(f"| {gun} | `{path}` | `{digest[:16]}` |")
         sys.exit(0)
     if "--check" not in sys.argv:
         write_files()

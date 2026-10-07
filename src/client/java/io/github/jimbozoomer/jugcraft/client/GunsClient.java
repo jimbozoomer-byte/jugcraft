@@ -6,6 +6,8 @@ import com.geckolib.renderer.GeoItemRenderer;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.guns.GunAnimations;
+import io.github.jimbozoomer.jugcraft.client.guns.GunCasingParticle;
+import io.github.jimbozoomer.jugcraft.client.guns.GunEffects;
 import io.github.jimbozoomer.jugcraft.client.guns.GunRenderer;
 import io.github.jimbozoomer.jugcraft.client.guns.GunView;
 import io.github.jimbozoomer.jugcraft.guns.GunActionPayload;
@@ -19,6 +21,7 @@ import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback;
@@ -47,6 +50,7 @@ import org.jspecify.annotations.Nullable;
  * may still refuse (it decides). The counter allows for shots the server has not answered yet.</li>
  * <li>Switching to a gun plays its draw, and it cannot fire until the draw is done.</li>
  * <li>Other players' guns are animated from the server's {@link GunActionPayload}.</li>
+ * <li>Every shot, the player's own and others', shows its muzzle flash and black powder's smoke ({@link GunEffects}).</li>
  * </ul>
  */
 public final class GunsClient {
@@ -89,6 +93,7 @@ public final class GunsClient {
 		ClientTickEvents.END_CLIENT_TICK.register(GunsClient::tick);
 		ClientPlayNetworking.registerGlobalReceiver(GunActionPayload.TYPE, (payload, context) -> receive(payload));
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, Jugcraft.id("gun_ammo"), GunsClient::hud);
+		JugcraftGuns.CASINGS.values().forEach(casing -> ParticleProviderRegistry.getInstance().register(casing, GunCasingParticle::provider));
 	}
 
 	/** The reload key (for the client game tests). */
@@ -142,6 +147,7 @@ public final class GunsClient {
 		reloadingUntil = 0;
 		boolean aiming = GunItem.aiming(player, stack);
 		GunAnimations.trigger(player, aiming ? "aim_shoot" : "shoot");
+		GunEffects.shot(player);
 		player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), JugcraftGuns.sound("guns." + gun.name() + ".fire"),
 				SoundSource.PLAYERS, GunItem.volume(stack), 0.95F + player.getRandom().nextFloat() * 0.1F, false);
 		// A little kick of the view: more for a heavier shot, less when aimed or with a brake, stock or grip.
@@ -238,8 +244,14 @@ public final class GunsClient {
 			return;
 		}
 		switch (payload.action()) {
-			case GunActionPayload.SHOOT -> GunAnimations.trigger(holder, "shoot");
-			case GunActionPayload.AIM_SHOOT -> GunAnimations.trigger(holder, "aim_shoot");
+			case GunActionPayload.SHOOT -> {
+				GunAnimations.trigger(holder, "shoot");
+				GunEffects.shot(holder);
+			}
+			case GunActionPayload.AIM_SHOOT -> {
+				GunAnimations.trigger(holder, "aim_shoot");
+				GunEffects.shot(holder);
+			}
 			case GunActionPayload.RELOAD -> GunAnimations.trigger(holder, GunAnimations.reloadName(gun.spec(), payload.rounds()));
 			default -> GunAnimations.trigger(holder, "idle");
 		}

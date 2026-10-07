@@ -1,11 +1,12 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4) and the attachments (slice 5)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slice 5) and the guns in use (slice 6)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
 - **Slice 2** (the iron set: the Warden Pistol, Riveter SMG and Haymaker; [below](#slice-2-the-iron-set)): implemented on `claude/guns-iron` (#252), stacked on slice 1, awaiting review.
 - **Slice 3** (the lever set: the Longhorn Rifle, Drover Rifle and Coach Gun; [below](#slice-3-the-lever-set)): implemented on `claude/guns-lever` (#253), stacked on slice 2, awaiting review.
 - **Slice 4** (the black powder guns: the Duelling Pistol, Line Musket and Bellmouth, and the Paper Cartridge; [below](#slice-4-the-black-powder-guns)): implemented on `claude/guns-powder` (#255), stacked on slice 3, awaiting review.
-- **Slice 5** (the attachments: silencers, a muzzle brake, an extended barrel, magazines, stocks and grips; [below](#slice-5-the-attachments)): implemented on `claude/guns-attachments`, stacked on slice 4, awaiting review.
+- **Slice 5** (the attachments: silencers, a muzzle brake, an extended barrel, magazines, stocks and grips; [below](#slice-5-the-attachments)): implemented on `claude/guns-attachments` (#256), stacked on slice 4, awaiting review.
+- **Slice 6** (the guns in use: muzzle flash, spent casings, a zoom when aiming and the hold seen from outside; [below](#slice-6-the-guns-in-use)): implemented on `claude/guns-polish`, stacked on slice 5, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -14,6 +15,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the names: "Propose names";
 - the eight sounds that carry other sources' tags: "I have the rights";
 - the next guns ("Ok lets do more!!!"): all four sets offered, the iron set, the lever rifles, the black powder guns and the attachments, each in its own slice; names: "Propose names".
+- what next ("ok what next"): all four offered, each its own pull request: gun polish (this slice 6), finishing the attachments, more guns, and the flaky tests.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -244,6 +246,65 @@ The Drover Rifle, the Coach Gun and the muzzle-loaders take none yet: the owner 
 
 **Known limits:** the left hand stays where the owner's animations put it, so it does not move onto a vertical grip; a silenced shot is quieter, not shorter-ranged: other players within 16 blocks still hear it, softly (no gun's shot is sent to players farther away than that).
 
+## Slice 6: the guns in use
+Slice 6 adds no items. It makes a shot look like one, and a gun look held, using the owner's flash and casing art and the cues the owner put in the animations.
+
+**Muzzle flash:**
+- Each shot shows one of the owner's four flash frames (`Big Cannons and Mounted Guns/textures/muzzleflash*.png`) at the gun's `muzzle` locator, full bright, for two ticks. It swells a little and fades.
+- Each shot picks its frame and its turn about the barrel from its time, so a burst flickers.
+- The frame faces back down the barrel: the shooter sees a star. Two copies cross along the barrel, so a player beside them sees the flash too.
+- **Size,** in the model's pixels, by the round: light 5, rifle 7, buckshot 8, paper cartridge 10 (black powder flares widest).
+- **Barrel attachments:** a Muzzle Brake or an Extended Barrel moves the flash to its own front (a `muzzle_<attachment>` locator, on the bore at the front of the part). A Silencer or a Baffled Silencer hides it.
+- **Black powder:** a muzzle-loader's shot also blows a white cloud in front of the muzzle.
+- **Who sees it:** everyone near the shooter. The player's own shots show as they fire; other players' shots show when the server's `GunActionPayload` arrives.
+
+**Spent casings:**
+- The owner's animations cue `eject_casing` where a case comes out: at the start of the shot for most guns, and as the Coach Gun breaks open to load. The Drover Rifle's also cues one as its loading ends. The Line Musket has none.
+- At the cue, the round's case flies out of the ejection port to the gun's right and a little up. It tumbles, falls and lies where it lands for two or three seconds. A left-handed player's go to the left.
+- **Each case** is the owner's art: a Light Round's is `small_copper_casing`, a Rifle Round's `large_brass_casing`, a Buckshot Shell's `shotgun_shell`. They are particles: `jugcraft:light_round_casing`, `rifle_round_casing` and `buckshot_shell_casing`.
+- A paper cartridge leaves no case. The Duelling Pistol's and the Bellmouth's cue puffs a little smoke from the lock instead.
+- The other cues (`loaded`, `end_reload`, `loop_end`, `reload_end`) mark points in a reload that the server's timing already covers, and show nothing.
+
+**Zoom:** aimed down the sights, the view narrows, eased in and out with the aim.
+
+| Guns | Field of view, aimed |
+|---|---|
+| Thunderpipe, Haymaker, Bellmouth | 92% |
+| Rust Midge, Warden Pistol, Coach Gun, Duelling Pistol | 90% |
+| Riveter SMG | 88% |
+| Patchwork Carbine, Line Musket | 82% |
+| Drover Rifle | 80% |
+| Longhorn Rifle | 75% |
+
+It multiplies vanilla's own modifier (sprinting, a speed effect), and the camera smooths it as it does vanilla's. Scopes (a later slice) will narrow it further.
+
+**Seen from outside:**
+- The gun arm comes up along the look, so the gun points where the player looks. The owner's third-person transforms are made for a raised arm: hanging at the side, the gun pointed at the ground.
+- For a gun held in both hands, the other arm comes across to the fore-end, as vanilla holds a loaded crossbow.
+- The Warden Pistol, the Haymaker and the Duelling Pistol are one-handed (their idle hides the left arm). The other arm stays as vanilla poses it.
+- The arms follow the head up and down, keep vanilla's crouch, and a left-handed player's are mirrored.
+- The other arm keeps to its own work while it eats or holds up a shield.
+- Not while swimming, gliding or asleep. Armor is posed from the same state, so it follows.
+
+**How:**
+- `client/guns/GunEffects`: the shots, the casings and the smoke.
+- `GunFlashLayer`: a GeckoLib render layer at the muzzle locator's bone.
+- `GunCasingParticle`: the cases.
+- `GunLooks`: each gun's hold and zoom, the flash sizes, and the attachments that hide the flash.
+- `GunPose`: the hold. It is called from the arms motion hooks (`ArmsRenderStateMixin`, `ArmsHumanoidModelMixin`) that already pose players.
+- `GunView.fov`: the zoom.
+- **One new client mixin,** `GunFovMixin`:
+  - It multiplies what `AbstractClientPlayer.getFieldOfViewModifier` returns; Fabric API has no field of view event.
+  - It takes no arguments and is optional (`require = 0`): a renamed method would load without the zoom, and the client game test would fail and say so.
+- **`tools/guns.py`:** the numbers (`ZOOM`, `FLASH_SIZE`, `CASINGS`, `two_handed()`, `hides_flash`), the locators and the art copies. `check_guns` holds the Java to them.
+
+**Server and saves:** nothing changes on the server, and nothing is saved. The flash, casings, smoke, zoom and pose are drawn by each client from what it already knows. The three casing particle types are registered on both sides, as particle types must be.
+
+**Known limits:**
+- The flash's timing comes from the shot, not from the animation, so a remote player's flash shows when their shot reaches you.
+- Cases do not bounce or roll; they stop where they land.
+- The zoom does not follow the field of view effects slider, as the spyglass's does not.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -296,10 +357,11 @@ The Drover Rifle, the Coach Gun and the muzzle-loaders take none yet: the owner 
 - **Icons:** the item-icon maps (`tools/item_icons/`, `docs/ITEM_ICONS.md`) for the rounds.
 - **Keys:** Jugcraft's key category, beside the party key.
 - **Frameworks:** GeckoLib 5.5.7, already a required, approved dependency (`docs/FRAMEWORKS.md`); this is the first Jugcraft code to use it.
-- **ArmsMotion** is untouched: it animates only Jugcraft's melee arms (`ArmItem`), and a gun is not one.
+- **ArmsMotion** animates only Jugcraft's melee arms (`ArmItem`), and a gun is not one.
   - GeckoLib owns everything a gun does: the gun's parts and, in first person, the arms that hold it.
-  - Third person is vanilla's pose: the gun in the right hand.
+  - In third person (slice 6), `GunPose` raises the arms through the same two hooks that pose ArmsMotion's: `ArmsRenderStateMixin` and `ArmsHumanoidModelMixin`.
   - The off hand plays no part: guns fire from the main hand only.
+- **Particles:** the casings are registered as the Fog Machine's fog is (`FabricParticleTypes.simple()`, a provider on the client).
 
 ## How the owner's models became GeckoLib models
 The owner supplied each gun's parts as Blockbench Java item models (`Guns/models/special/<gun>/<part>.json`) and Bedrock animations made for GeckoLib models that were not in the upload. `tools/guns.py`:
@@ -330,7 +392,7 @@ The animations' sound cues map to the library's sounds as follows:
 - `reload_mag_out`, `reload_mag_in`: mag_out, mag_in (the Thunderpipe's `reload_mag_in` plays the shell insert)
 - `slap`, `reload_end`: the sound of the same name
 
-An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fire.ogg`. The animations' particle cues (`eject_casing`, `loaded`, `end_reload`, `loop_end`) are not drawn yet.
+An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fire.ogg`. Of the animations' particle cues, `eject_casing` throws a spent casing ([slice 6](#slice-6-the-guns-in-use)); the others show nothing.
 
 ## Dependencies and assets
 - **No new dependencies.** GeckoLib 5.5.7 is already required (`distribution/frameworks.lock.json`).
@@ -519,6 +581,13 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
 | texture `weighted_stock` | `Guns/item/greaser_smg_stocks.png` | `247deccc5517be15` |
 | texture `wooden_stock` | `Guns/item/musket_stocks.png` | `848fb17c2a71ad8d` |
 | texture `grips` | `Guns/item/carabine_grips.png` | `e54eb16b4a01aa0b` |
+| light_round_casing | `Guns/item/small_copper_casing.png` | `534d4d0375da46cc` |
+| rifle_round_casing | `Guns/item/large_brass_casing.png` | `2b43b9961479bdbb` |
+| buckshot_shell_casing | `Guns/item/shotgun_shell.png` | `89657710d20d041d` |
+| flash_0 | `Big Cannons and Mounted Guns/textures/muzzleflash.png` | `9e6b36b22790ec34` |
+| flash_1 | `Big Cannons and Mounted Guns/textures/muzzleflash2.png` | `31029be6554ebd9f` |
+| flash_2 | `Big Cannons and Mounted Guns/textures/muzzleflash3.png` | `5c695fc1d9c5b365` |
+| flash_3 | `Big Cannons and Mounted Guns/textures/muzzleflash4.png` | `189ef124242eaa98` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
@@ -574,6 +643,17 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
 - **Slice 5 game tests (written; they run in CI):**
   - `GunsGameTests` adds: attachments fit and come off through the crafting recipes (an Extended Magazine gives the Rust Midge 30 rounds and a 54-tick reload; a Speed Magazine replaces it, leaving it in the grid, for a 31-tick reload; a Silencer fits beside it at 35% volume and 95% damage; the Thunderpipe refuses a magazine, a gun a second Silencer, shears a bare gun; shears take the Silencer off and stay); an Extended Magazine loads 30 rounds after its longer reload and not in the Midge's own time, and with it taken off the gun keeps and fires them but will not reload; a silenced shot lands 95% of the damage. "Every gun registered" checks the eleven attachments.
   - `GunsClientGameTests` adds each gun that takes attachments held and aimed with two sets fitted, checks that the client sees a fitted Extended Magazine's 30 rounds, and shows the attachments and a fitted Patchwork Carbine in the inventory.
+- **Slice 6, run locally (7 October 2026):**
+  - `python3 tools/guns.py`: PASS. The new locators changed the seven models with barrel attachments and nothing else. The casing and flash textures are the owner's files unchanged, and every particle cue in the animations is one the guns know.
+  - `python3 tools/generate_material_data.py`: it added only the three casing particle definitions.
+  - `python3 tools/check_mod_data.py`: PASS (1572 material IDs), with `check_guns`, which now also holds `GunLooks` and `JugcraftGuns.CASING_AMMO` to `tools/guns.py` and checks the hooks are called. `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - Not seen yet: the flash, the casings and the pose in the game. The CI screenshots are the first look.
+- **Slice 6 game tests (written; they run in CI):** `GunsClientGameTests`, for every gun:
+  - aimed, the field of view modifier is narrowed (or the test says the mixin never ran);
+  - fired, at least one muzzle flash frame is drawn;
+  - fired and reloaded, a casing (or a puff) is thrown if its animation cues one;
+  - in third person, each gun is held and fired (screenshots `_third_person` and `_third_person_fired`), and the player is posed holding it; the Longhorn and the Warden Pistol are also shown from behind.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -585,9 +665,6 @@ Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns 
 - **Later slices,** each its own pull request: attachments for the guns whose parts use shared textures (the Drover Rifle, Coach Gun and muzzle-loaders), bayonets, the tactical grip and scopes.
 - **Not yet:**
   - the jam the Gnat's sound suggests;
-  - casings and muzzle flash (the `eject_casing` cue);
-  - a two-handed third-person pose;
-  - a zoom when aiming;
   - off-hand guns;
   - mob use;
   - the guns beyond these sets.

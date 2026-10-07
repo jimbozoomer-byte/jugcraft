@@ -2860,7 +2860,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_silencer": [
+       0,
+       5.6,
+       -8.1625
+      ]
+     }
     },
     {
      "name": "att_baffled_silencer",
@@ -3039,7 +3046,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_baffled_silencer": [
+       0,
+       5.6,
+       -9.0375
+      ]
+     }
     },
     {
      "name": "att_muzzle_brake",
@@ -3974,7 +3988,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_muzzle_brake": [
+       0,
+       5.6,
+       -7.0457
+      ]
+     }
     },
     {
      "name": "att_extended_barrel",
@@ -4227,7 +4248,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_extended_barrel": [
+       0,
+       5.6,
+       -9.0164
+      ]
+     }
     },
     {
      "name": "att_light_stock",

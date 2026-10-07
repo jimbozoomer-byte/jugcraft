@@ -3957,7 +3957,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_silencer": [
+       -0.05,
+       4.4,
+       -6.6625
+      ]
+     }
     },
     {
      "name": "att_baffled_silencer",
@@ -4136,7 +4143,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_baffled_silencer": [
+       -0.05,
+       4.4,
+       -7.5125
+      ]
+     }
     },
     {
      "name": "att_muzzle_brake",
@@ -5071,7 +5085,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_muzzle_brake": [
+       -0.05,
+       4.4,
+       -5.3958
+      ]
+     }
     },
     {
      "name": "att_extended_barrel",
@@ -5250,7 +5271,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_extended_barrel": [
+       -0.05,
+       4.4,
+       -7.525
+      ]
+     }
     },
     {
      "name": "magazine",

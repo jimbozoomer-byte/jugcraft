@@ -2,9 +2,15 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.GunsClient;
+import io.github.jimbozoomer.jugcraft.client.guns.GunEffects;
+import io.github.jimbozoomer.jugcraft.client.guns.GunPose;
+import io.github.jimbozoomer.jugcraft.client.guns.GunView;
 import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -29,7 +35,9 @@ import net.minecraft.world.phys.AABB;
  * reload key (part way through and done: the rounds come out of the inventory), and inspected; the Thunderpipe's
  * shell-at-a-time reload part way; each gun that takes attachments held with two sets of them fitted (slice 5), the
  * client seeing a fitted magazine's capacity; each gun held in third person and shown in the inventory with the
- * attachments. Screenshots jugcraft_guns_* (CI job {@code client}).
+ * attachments. Slice 6: each gun narrows the view aimed, shows a muzzle flash fired and throws the spent casings its
+ * animations cue; in third person the player is posed holding it, and fires it. Screenshots jugcraft_guns_* (CI job
+ * {@code client}).
  */
 public class GunsClientGameTests implements FabricClientGameTest {
 	@Override
@@ -71,11 +79,26 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				context.getInput().holdKey(options -> options.keyUse);
 				context.waitTicks(10);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_aimed");
+				// Slice 6: aimed, the view narrows by the gun's zoom (GunFovMixin hands vanilla's modifier to GunView).
+				float fovIn = context.computeOnClient(client -> GunView.lastFovIn());
+				float fovOut = context.computeOnClient(client -> GunView.lastFovOut());
+				Jugcraft.LOGGER.info("[guns] {} aimed: field of view modifier {} -> {}", gun, fovIn, fovOut);
+				if (!(fovOut < fovIn * 0.99F)) {
+					throw new AssertionError("Aiming the " + gun + " does not narrow the view: modifier " + fovIn + " -> " + fovOut
+							+ (Float.isNaN(fovIn) ? " (GunFovMixin never ran: has AbstractClientPlayer.getFieldOfViewModifier moved?)" : ""));
+				}
 				float before = health(server, x, y, z);
+				long flashes = context.computeOnClient(client -> GunEffects.flashes());
+				long ejected = context.computeOnClient(client -> GunEffects.ejected());
+				// The shot, with its flash (it shows for two ticks).
 				context.getInput().pressKey(options -> options.keyAttack);
-				context.waitTicks(1);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_fired");
-				context.waitTicks(10);
+				long flashed = context.computeOnClient(client -> GunEffects.flashes()) - flashes;
+				Jugcraft.LOGGER.info("[guns] {} fired: {} muzzle flash frames drawn", gun, flashed);
+				if (flashed <= 0) {
+					throw new AssertionError("The " + gun + " showed no muzzle flash when fired");
+				}
+				context.waitTicks(11);
 				context.getInput().releaseKey(options -> options.keyUse);
 				context.waitTicks(5);
 				float after = health(server, x, y, z);
@@ -98,6 +121,22 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				if (reloaded != capacity || left != 31) {
 					throw new AssertionError("The " + gun + " reload did not load the one round from the inventory: " + reloaded
 							+ " loaded, " + left + " left");
+				}
+
+				// The owner's animations cue a spent casing (or, for a paper cartridge, a puff from the lock) on the shot or the
+				// reload; every gun whose animations have the cue threw one.
+				long thrown = context.computeOnClient(client -> GunEffects.ejected()) - ejected;
+				boolean cued = context.computeOnClient(client -> client.getResourceManager()
+						.getResource(Jugcraft.id("geckolib/animations/item/" + gun + ".animation.json")).map(resource -> {
+							try (InputStream in = resource.open()) {
+								return new String(in.readAllBytes(), StandardCharsets.UTF_8).contains("\"eject_casing\"");
+							} catch (IOException e) {
+								return false;
+							}
+						}).orElse(false));
+				Jugcraft.LOGGER.info("[guns] {} fired and reloaded: {} casings thrown (its animations cue them: {})", gun, thrown, cued);
+				if (cued && thrown <= 0) {
+					throw new AssertionError("The " + gun + "'s animations cue a spent casing, but none was thrown");
 				}
 
 				context.getInput().pressKey(options -> GunsClient.inspectKey());
@@ -139,13 +178,31 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				throw new AssertionError("The client sees the Extended Magazine's Rust Midge hold " + seen + " rounds, not 30");
 			}
 
+			// Seen from outside (slice 6): the gun arm raised along the look, the other across to the fore-end for a gun held
+			// in both hands; then a shot, its flash seen from in front.
+			long posed = context.computeOnClient(client -> GunPose.posed());
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			for (String gun : JugcraftGuns.SPECS.keySet()) {
-				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:" + gun);
+				server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
+				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:%s[jugcraft:loaded_rounds=1]".formatted(gun));
 				context.waitTicks(20);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_third_person");
+				context.getInput().pressKey(options -> options.keyAttack);
+				context.takeScreenshot("jugcraft_guns_" + gun + "_third_person_fired");
+				context.waitTicks(10);
+			}
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
+			for (String gun : List.of("longhorn_rifle", "warden_pistol")) {
+				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:" + gun);
+				context.waitTicks(20);
+				context.takeScreenshot("jugcraft_guns_" + gun + "_third_person_back");
 			}
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
+			long posedFrames = context.computeOnClient(client -> GunPose.posed()) - posed;
+			Jugcraft.LOGGER.info("[guns] in third person the player was posed holding a gun for {} frames", posedFrames);
+			if (posedFrames <= 0) {
+				throw new AssertionError("In third person the player was never posed holding a gun (GunPose)");
+			}
 
 			server.runCommand("clear @p");
 			for (String gun : JugcraftGuns.SPECS.keySet()) {

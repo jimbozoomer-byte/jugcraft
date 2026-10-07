@@ -21,11 +21,14 @@ import net.minecraft.world.item.ItemStack;
  * The guns' GeckoLib animation controller: the owner's idle loops; draw, shoot, aim_shoot, inspect and the reloads are
  * triggered (by GunsClient for the player's own gun, by the server's GunActionPayload for others'), each played once
  * and back to idle. A gun loaded a shell at a time has one reload per shell count: reload_start, reload_loop that many
- * times, reload_stop. The animations' sound keyframes play the guns' sounds where the gun is. A magazine change plays
- * faster or slower with the gun's magazine attachment, so that it ends when the reload does.
+ * times, reload_stop. The animations' sound keyframes play the guns' sounds where the gun is, and their "eject_casing"
+ * particle keyframes throw a spent casing ({@link GunEffects#eject}). A magazine change plays faster or slower with the
+ * gun's magazine attachment, so that it ends when the reload does.
  */
 public final class GunAnimations {
 	public static final String CONTROLLER = "main";
+	/** The animations' particle cue for a spent casing (tools/guns.py EJECT_CUE). */
+	static final String EJECT_CUE = "eject_casing";
 	private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
 	/** Animation sound keyframes that play another event's sound (tools/guns.py EVENT_SOUNDS: "rustle" is a rustle). */
 	public static final Map<String, String> SOUND_ALIASES = Map.of("rustle", "gun_rustle");
@@ -58,6 +61,13 @@ public final class GunAnimations {
 		controller.setSoundKeyframeHandler(event -> {
 			Integer owner = event.renderState().getGeckolibData(GunRenderer.OWNER);
 			play(gun, event.keyframeData().getSound(), owner == null ? -1 : owner);
+		});
+		// The owner's particle cues: a spent casing at "eject_casing" (the others mark points in a reload and show nothing).
+		controller.setParticleKeyframeHandler(event -> {
+			Integer owner = event.renderState().getGeckolibData(GunRenderer.OWNER);
+			if (owner != null && EJECT_CUE.equals(event.keyframeData().getEffect())) {
+				GunEffects.eject(gun, owner);
+			}
 		});
 		registrar.add(controller);
 	}

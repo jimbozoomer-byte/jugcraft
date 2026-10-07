@@ -1996,7 +1996,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_silencer": [
+       0,
+       4.9,
+       -5.05
+      ]
+     }
     },
     {
      "name": "att_baffled_silencer",
@@ -2175,7 +2182,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_baffled_silencer": [
+       0,
+       4.9,
+       -5.8125
+      ]
+     }
     },
     {
      "name": "att_muzzle_brake",
@@ -3110,7 +3124,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_muzzle_brake": [
+       0,
+       4.9,
+       -3.5906
+      ]
+     }
     },
     {
      "name": "att_extended_barrel",
@@ -3605,7 +3626,14 @@
         }
        }
       }
-     ]
+     ],
+     "locators": {
+      "muzzle_extended_barrel": [
+       0,
+       4.9,
+       -6.075
+      ]
+     }
     },
     {
      "name": "bolt",

@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 6 (the guns in use)
+- **Muzzle flash:** each shot shows one of the owner's flash frames at the muzzle (or at a fitted muzzle brake or extended barrel), seen by everyone near; a silencer hides it, and black powder also blows a white cloud.
+- **Spent casings:** where the owner's animations eject a case, it flies out to the gun's side, tumbles and lands: copper for Light Rounds, brass for Rifle Rounds, red for Buckshot Shells. A muzzle-loader's lock puffs smoke instead.
+- **A zoom when aiming,** from 92% of the view (shotguns) to 75% (the Longhorn Rifle); and **the hold seen from outside:** the gun arm raised along the look, and for a two-handed gun the other arm across to the fore-end. Before, a gun in third person hung at the player's side, pointing down.
+- One new client mixin (the field of view; Fabric has no event for it). No new items; nothing saved; the server unchanged. Record: [guns.md, slice 6](docs/features/guns.md#slice-6-the-guns-in-use).
+
 ### Unmerged: Guns, slice 5 (the attachments)
 - **Eleven attachments,** each the owner's model: the **Silencer** and **Baffled Silencer**, the **Muzzle Brake** and **Extended Barrel** (barrel); the **Extended Magazine** and **Speed Magazine**; the **Light**, **Weighted** and **Wooden Stocks**; the **Light** and **Vertical Grips**. One a slot; on each gun an attachment shows as that gun's own part.
 - **Fitted at a crafting table:** a gun and an attachment it takes give the gun with it fitted (one already in the slot stays in the grid); a gun and shears take the last one off. They change the gun's numbers: quieter shots, farther reach, tighter spread, less kick, more rounds or a quicker reload, each with its cost. Seven of the twelve guns take them so far. Record: [guns.md, slice 5](docs/features/guns.md#slice-5-the-attachments).
