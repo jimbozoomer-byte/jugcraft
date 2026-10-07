@@ -13,6 +13,8 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.logistics.JugcraftLogistics;
+import io.github.jimbozoomer.jugcraft.logistics.PneumaticExtractorBlock;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -36,6 +38,8 @@ import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.AABB;
@@ -44,8 +48,9 @@ import net.minecraft.world.phys.AABB;
  * Roadmap step 13, experimental alchemy: a crucible takes its heat from the block beneath; the same process in two
  * crucibles makes the same mixture and the same draught, whose effect follows from what was put in; only someone who
  * understands the Alembic Arts may work one; the mortar prepares ingredients; a bowl makes a salve for a creature; a
- * recorded formula is followed by another crucible fed by pipe and hopper, making the same draught; a broken crucible
- * drops its items; and a crucible saves its mixture and formula.
+ * recorded formula is followed by another crucible fed by pipe and hopper, making the same draught; real machinery (a
+ * hopper, a campfire and a Pneumatic Extractor) runs a formula twice; a broken crucible drops its items; and a crucible
+ * saves its mixture and formula.
  */
 public class ConcordanceAlchemyGameTests {
 	private static final String GLOW = "minecraft:glowstone_dust";
@@ -197,7 +202,8 @@ public class ConcordanceAlchemyGameTests {
 	/**
 	 * A formula recorded from a fresh mixture is followed by another crucible: water by pipe, the glowstone from its
 	 * buffer, two stirs once it is hot, and a draught into its output from a supplied bottle, the same draught as the
-	 * one made by hand. Hoppers reach only the buffer and bottle slot from above or the side, and the output from below.
+	 * one made by hand. Hoppers reach only the buffer and bottle slot from above or a side; the output comes out from a side
+	 * or below, never from above.
 	 */
 	@GameTest(maxTicks = 400)
 	public void aFormulaIsRepeatedByAnotherCrucible(GameTestHelper helper) {
@@ -224,8 +230,10 @@ public class ConcordanceAlchemyGameTests {
 					&& !automated.canPlaceItemThroughFace(0, new ItemStack(Items.GLOWSTONE_DUST), Direction.DOWN)
 					&& automated.canPlaceItemThroughFace(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE), Direction.NORTH)
 					&& !automated.canTakeItemThroughFace(CrucibleBlockEntity.OUTPUT_SLOT, ItemStack.EMPTY, Direction.UP)
-					&& automated.canTakeItemThroughFace(CrucibleBlockEntity.OUTPUT_SLOT, ItemStack.EMPTY, Direction.DOWN),
-					"Hoppers reach the buffer and bottles from above and the sides, and the output only from below");
+					&& automated.canTakeItemThroughFace(CrucibleBlockEntity.OUTPUT_SLOT, ItemStack.EMPTY, Direction.EAST)
+					&& automated.canTakeItemThroughFace(CrucibleBlockEntity.OUTPUT_SLOT, ItemStack.EMPTY, Direction.DOWN)
+					&& !automated.canTakeItemThroughFace(0, ItemStack.EMPTY, Direction.EAST),
+					"Hoppers reach the buffer and bottles from above and the sides; the output comes out of a side or below");
 			automated.setItem(0, new ItemStack(Items.GLOWSTONE_DUST));
 			automated.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE));
 			helper.succeedWhen(() -> {
@@ -235,6 +243,55 @@ public class ConcordanceAlchemyGameTests {
 				helper.assertTrue(automated.getItem(0).isEmpty() && automated.water.amount == 0 && automated.mixture().isEmpty(),
 						"It used exactly the glowstone and the water");
 			});
+		});
+	}
+
+	/**
+	 * A crucible run entirely by machinery: a campfire beneath, a hopper above dropping in glowstone and bottles, water
+	 * in its tank through the Transfer API, and a Pneumatic Extractor at its side moving each draught into a chest. The
+	 * formula runs twice over and makes two draughts, both the one the worked example predicts.
+	 */
+	@GameTest(maxTicks = 600)
+	public void machineryRunsAFormulaTwice(GameTestHelper helper) {
+		BlockPos at = new BlockPos(2, 2, 2);
+		CrucibleBlockEntity crucible = crucible(helper, at, true);
+		crucible.setTemperature(120);
+		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
+		ItemStack written = new ItemStack(JugcraftConcordance.FORMULA_ITEM);
+		written.set(JugcraftConcordance.FORMULA, "water 1; add minecraft:glowstone_dust jugcraft:raw; stir hot; stir hot");
+		helper.assertTrue(use(crucible, player, written).consumesAction() && crucible.program() != null, "The formula is set");
+		try (Transaction transaction = Transaction.openOuter()) {
+			crucible.water.insert(FluidVariant.of(Fluids.WATER), FluidConstants.BOTTLE * 2, transaction);
+			transaction.commit();
+		}
+		helper.setBlock(at.above(), Blocks.HOPPER);
+		HopperBlockEntity hopper = helper.getBlockEntity(at.above(), HopperBlockEntity.class);
+		hopper.setItem(0, new ItemStack(Items.GLOWSTONE_DUST, 2));
+		hopper.setItem(1, new ItemStack(Items.GLASS_BOTTLE, 2));
+		BlockPos side = at.east();
+		helper.setBlock(side, JugcraftLogistics.PNEUMATIC_EXTRACTOR.defaultBlockState().setValue(PneumaticExtractorBlock.FACING, Direction.WEST));
+		helper.setBlock(side.east(), Blocks.CHEST);
+		ChestBlockEntity chest = helper.getBlockEntity(side.east(), ChestBlockEntity.class);
+		helper.succeedWhen(() -> {
+			int made = 0;
+			Brew first = null;
+			boolean same = true;
+			for (int i = 0; i < chest.getContainerSize(); i++) {
+				ItemStack stack = chest.getItem(i);
+				if (stack.is(JugcraftConcordance.DRAUGHT)) {
+					made += stack.getCount();
+					Brew brew = stack.get(JugcraftConcordance.BREW);
+					same &= first == null || first.equals(brew);
+					first = first == null ? brew : first;
+				}
+			}
+			helper.assertTrue(made == 2, "Waiting for two draughts in the chest: " + made + " (step " + crucible.step() + ", "
+					+ crucible.mixture() + ", output " + crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT) + ")");
+			helper.assertTrue(same && first != null && first.effects().size() == 1
+					&& first.effects().get(0).status().equals("minecraft:night_vision") && first.effects().get(0).ticks() == 1435,
+					"Both are Night Vision I for 1435 ticks: " + first);
+			helper.assertTrue(hopper.isEmpty() && crucible.water.amount == 0 && crucible.mixture().isEmpty()
+					&& crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty(), "It used exactly the glowstone, bottles and water");
 		});
 	}
 

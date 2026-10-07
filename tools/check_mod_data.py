@@ -6805,6 +6805,18 @@ def check_alchemy(co, root, lang, registered, research):
             err(f"property {key}: status must be a vanilla effect id")
         if key == "contaminant" and entry.get("intent") != "harmful":
             err("property contaminant: must be harmful")
+        # A brew never outlasts the vanilla potion of the same effect at the highest level it can reach (vanilla's
+        # Potions: night vision, fire resistance and water breathing 3600 ticks; regeneration and poison 900, and at
+        # level II 450 and 432). Effects with no vanilla potion (resistance, nausea) keep the shared limit above.
+        vanilla = {("minecraft:night_vision", 1): 3600, ("minecraft:fire_resistance", 1): 3600,
+                   ("minecraft:water_breathing", 1): 3600, ("minecraft:regeneration", 1): 900,
+                   ("minecraft:regeneration", 2): 450, ("minecraft:poison", 1): 900, ("minecraft:poison", 2): 432}
+        status, top = entry.get("status"), entry.get("max_level", 1)
+        bound = vanilla.get((status, top)) if (status, 1) in vanilla else None
+        if (status, 1) in vanilla and bound is None:
+            err(f"property {key}: {status} has no vanilla potion at level {top}")
+        elif bound is not None and entry.get("max_ticks", 0) > bound:
+            err(f"property {key}: {entry.get('max_ticks')} ticks outlasts vanilla's level {top} {status} potion ({bound})")
     for ref in al.ALCHEMY_SPECIMENS:
         if ref not in items:
             err(f"alchemy specimen {ref} is not an ingredient")

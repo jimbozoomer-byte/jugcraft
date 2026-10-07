@@ -59,11 +59,11 @@ Put in water first (a water bottle is one part, a water bucket three; at most si
 | Property | Effect | Threshold | Stronger by | Highest level | Duration per unit (cap) |
 |---|---|---|---|---|---|
 | Radiance | Night Vision | 0.50 | | I | 60 s (120 s) |
-| Verdance | Regeneration | 0.60 | 1.50 | II | 15 s (30 s) |
+| Verdance | Regeneration | 0.60 | 1.50 | II | 15 s (22.5 s) |
 | Ember | Fire Resistance | 0.60 | | I | 60 s (120 s) |
 | Rime | Resistance | 0.80 | | I | 30 s (60 s) |
 | Tide | Water Breathing | 0.60 | | I | 60 s (120 s) |
-| Hollow | Poison | 0.40 | 1.00 | II | 10 s (30 s) |
+| Hollow | Poison | 0.40 | 1.00 | II | 10 s (21.6 s) |
 | Contaminant | Nausea | 0.50 | | I | 8 s (20 s) |
 
 Below its threshold a property does nothing, and the explanation says so.
@@ -109,7 +109,8 @@ parsed back and replayed against the catalog before it is accepted.
 only, one bucket), five buffer slots, a bottle slot, an output slot and an optional formula. Temperature is computed on
 the server every tick from the block beneath. Every hand operation goes through `Mixture.apply`, which refuses with a
 reason rather than half-applying. Hoppers reach the buffer (ingredients and reagents) and the bottle slot (bottles and
-bowls) from above and the sides, and the output only from below.
+bowls) from above and the sides. Brews come out from the sides or below: the heat source sits beneath, so a Pneumatic
+Extractor at a side is what empties an automated crucible.
 
 **Brews** carry their effects as the item component `jugcraft:brew` (status, level, ticks, harmful), and a ground
 ingredient is a Reagent item with `jugcraft:reagent` (item and preparation). A brew is applied through the shared effect
@@ -136,11 +137,12 @@ counts once.
 
 ## Balance
 
-- Every effect is a vanilla status effect at level I or II. Level I effects last at most 2 minutes (vanilla's night
-  vision, fire resistance and water breathing potions last 3, or 8 with redstone); Resistance I (at most 1 minute) has no
-  vanilla potion. Regeneration II and Poison II last up to 30 seconds, a little longer than vanilla's strong potions (22
-  and 21.6 seconds), but a dose needs two or three ingredients' worth dissolved in one part (and spider eyes bring
-  enough contaminant for nausea). This is a deliberate first calibration, to be revisited with the baselines.
+- Every effect is a vanilla status effect at level I or II, and **no brew outlasts the vanilla potion of the same effect
+  at the highest level it can reach**: night vision, fire resistance and water breathing at most 2 minutes (vanilla: 3);
+  Regeneration (which reaches II) at most 22.5 seconds and Poison (which reaches II) at most 21.6 seconds, vanilla's
+  strong-potion durations, even at level I. Resistance I (at most 1 minute) and Nausea have no vanilla potion.
+  `tools/check_mod_data.py` enforces this. Brewing is cheaper than vanilla brewing (no blaze powder, nether wart or
+  brewing stand), so it is held to vanilla's ceilings rather than allowed to exceed them.
 - Nothing alchemy makes is a resource another system consumes, so there is no conversion loop.
 - Searing heat trades quality for speed (85% of Radiance and Verdance kept and contaminant added), so the fastest fire
   is not always the best.
@@ -183,8 +185,9 @@ Sounds `jugcraft:concordance.crucible_add`, `.crucible_stir`, `.crucible_bottle`
 - `python3 tools/check_mod_data.py` passes. New step 13 checks (`check_alchemy`): the Java axes, bands, heat sources and
   limits equal the generator's; every ingredient, preparation and property parses and is reachable; exactly one
   preparation has no tool; the contaminant property is harmful; every line the simulation can say has its words; the
-  crucible's GeckoLib model, animations and animated sheet agree. A new rule (found while testing this step): every
-  sound a spell plays must be registered as a SoundEvent (see below).
+  crucible's GeckoLib model, animations and animated sheet agree; no property outlasts the vanilla potion of its effect
+  at its highest level (setting Poison's cap back to 600 ticks fails the check). A new rule (found while testing this
+  step): every sound a spell plays must be registered as a SoundEvent (see below).
 - `python3 scripts/check_repository.py` passes.
 - The pure core compiles with JDK 21. The step 13 harness passes **61 checks** against the generated data, including:
   the worked example to the thousandth; two independent replays of the same operations giving equal mixtures and doses;
@@ -192,13 +195,15 @@ Sounds `jugcraft:concordance.crucible_add`, `.crucible_stir`, `.crucible_bottle`
   formula's canonical text parsing back to the same operations; refusals (no water, overflow, unknown ingredient, too
   long) changing nothing; each assay level's content; and three distinct outcomes mastering the research while a repeat
   counts once. The step 12 mutation script also covers alchemy data and code.
-- Game tests added: `ConcordanceAlchemyGameTests` (six): heat comes from beneath (about 60 after 40 ticks over a
+- Game tests added: `ConcordanceAlchemyGameTests` (seven): heat comes from beneath (about 60 after 40 ticks over a
   campfire, settling at 120; cooling to 20 with nothing beneath); the same process in two crucibles makes the same
   mixture and the same draught, Night Vision I for 1435 ticks, recorded as practice; only an alembist works the crucible
   (a novice can still taste it), the mortar grinds, a bowl makes a salve that takes on a pig; a formula recorded by hand
   is repeated by another crucible fed by tank and buffer, making the same draught and using exactly its inputs, with
-  hoppers reaching only the right slots from the right sides; a broken crucible drops its items; a crucible saves its
-  mixture and formula exactly.
+  hoppers reaching only the right slots from the right sides; **real machinery runs a formula twice** (a campfire
+  beneath, a vanilla hopper above dropping in glowstone and bottles, water in the tank through the Transfer API, and a
+  Pneumatic Extractor at the side moving each draught into a chest: two identical draughts, the inputs used exactly); a
+  broken crucible drops its items; a crucible saves its mixture and formula exactly.
 - CI, run 37554993916 (Build workflow, run manually on this branch, commit `6caef7eb`, which carries steps 12 and 13):
   `mod` passed with **"All 880 required tests passed"** (the thirteen ritual tests and the six alchemy tests included)
   and `optional integrations absent` passed. The client test shards fail before any test starts, with the same OpenGL
@@ -215,8 +220,8 @@ registered as SoundEvents, which Spell Engine looks up. They are registered now,
 build for any spell sound that is not.
 
 Not yet run: any client (the crucible's GeckoLib animation and animated surface, the codex pages and JEI information in
-game), a two-client dedicated server, and a real hopper and pipe chain feeding a crucible over several minutes (the test
-feeds the tank and buffer directly through the same interfaces).
+game), a two-client dedicated server, and a fluid pipe network filling the tank (the machinery test fills it through
+the Transfer API, the interface pipes use).
 
 ## World and event applicability
 

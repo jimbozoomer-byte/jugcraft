@@ -78,9 +78,10 @@ import org.jspecify.annotations.Nullable;
  * (water from its tank, an ingredient from its {@value #BUFFER_SLOTS} buffer slots, a stir once the heat is right),
  * then bottles into its output while it has bottles or bowls. It never substitutes or guesses: it waits.</li>
  * </ul>
- * Hoppers and pipes: ingredients and reagents into the buffer, bottles and bowls into the bottle slot, from any side but
- * below; brews out from below; water into the tank. The mixture is saved with the crucible; broken, its slots drop and
- * the mixture spills. Keep the numbers equal to tools/concordance_alchemy.py.
+ * Hoppers and pipes: ingredients and reagents into the buffer, bottles and bowls into the bottle slot, from above or the
+ * sides; brews out from the sides or below (the heat source usually sits below); water into the tank. The mixture is
+ * saved with the crucible; broken, its slots drop and the mixture spills. Keep the numbers equal to
+ * tools/concordance_alchemy.py.
  */
 public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, WorldlyContainer {
 	public static final int BUFFER_SLOTS = 5;
@@ -90,8 +91,10 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	public static final int STIR_TICKS = 10;
 	public static final int AUTOMATION_TICKS = 20;
 	public static final int WATER_PER_BUCKET = 3;
+	/** From above, only what goes in; from the sides, that and the output; from below, only the output. */
+	private static final int[] ABOVE = {0, 1, 2, 3, 4, BOTTLE_SLOT};
+	private static final int[] SIDES = {0, 1, 2, 3, 4, BOTTLE_SLOT, OUTPUT_SLOT};
 	private static final int[] BELOW = {OUTPUT_SLOT};
-	private static final int[] SIDES = {0, 1, 2, 3, 4, BOTTLE_SLOT};
 	private static final RawAnimation EMPTY = RawAnimation.begin().thenLoop("animation.crucible.empty");
 	private static final RawAnimation STILL = RawAnimation.begin().thenLoop("animation.crucible.still");
 	private static final RawAnimation SIMMER = RawAnimation.begin().thenLoop("animation.crucible.simmer");
@@ -465,7 +468,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 
 	@Override
 	public int[] getSlotsForFace(Direction side) {
-		return side == Direction.DOWN ? BELOW : SIDES;
+		return side == Direction.DOWN ? BELOW : side == Direction.UP ? ABOVE : SIDES;
 	}
 
 	@Override
@@ -475,7 +478,8 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 
 	@Override
 	public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
-		return slot == OUTPUT_SLOT && side == Direction.DOWN;
+		// The heat source sits beneath, so an extractor at a side must be able to take the brews too.
+		return slot == OUTPUT_SLOT && side != Direction.UP;
 	}
 
 	@Override

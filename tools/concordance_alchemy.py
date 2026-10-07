@@ -108,8 +108,9 @@ PREPARATIONS = {
 PROPERTIES = {
     "radiance": {"status": "minecraft:night_vision", "intent": "helpful", "threshold": 0.5, "per_level": 10.0,
                  "max_level": 1, "ticks_per_unit": 1200, "max_ticks": 2400},
+    # Regeneration and Poison reach level II, so they last no longer than vanilla's strong potions (450 and 432 ticks).
     "verdance": {"status": "minecraft:regeneration", "intent": "helpful", "threshold": 0.6, "per_level": 1.5,
-                 "max_level": 2, "ticks_per_unit": 300, "max_ticks": 600},
+                 "max_level": 2, "ticks_per_unit": 300, "max_ticks": 450},
     "ember": {"status": "minecraft:fire_resistance", "intent": "helpful", "threshold": 0.6, "per_level": 10.0,
               "max_level": 1, "ticks_per_unit": 1200, "max_ticks": 2400},
     "rime": {"status": "minecraft:resistance", "intent": "helpful", "threshold": 0.8, "per_level": 10.0,
@@ -117,7 +118,7 @@ PROPERTIES = {
     "tide": {"status": "minecraft:water_breathing", "intent": "helpful", "threshold": 0.6, "per_level": 10.0,
              "max_level": 1, "ticks_per_unit": 1200, "max_ticks": 2400},
     "hollow": {"status": "minecraft:poison", "intent": "harmful", "threshold": 0.4, "per_level": 1.0,
-               "max_level": 2, "ticks_per_unit": 200, "max_ticks": 600},
+               "max_level": 2, "ticks_per_unit": 200, "max_ticks": 432},
     "contaminant": {"status": "minecraft:nausea", "intent": "harmful", "threshold": 0.5, "per_level": 10.0,
                     "max_level": 1, "ticks_per_unit": 160, "max_ticks": 400},
 }
@@ -234,12 +235,17 @@ def _ingredient_table():
                        for info in INGREDIENTS.values())
 
 
+def _seconds(ticks):
+    value = ticks / 20
+    return str(int(value)) if value == int(value) else f"{value:g}"
+
+
 def _property_table():
     names = {"minecraft:night_vision": "Night Vision", "minecraft:regeneration": "Regeneration",
              "minecraft:fire_resistance": "Fire Resistance", "minecraft:resistance": "Resistance",
              "minecraft:water_breathing": "Water Breathing", "minecraft:poison": "Poison", "minecraft:nausea": "Nausea"}
     return "\\\n".join(f"- {axis.title()}: {names[info['status']]} from {_units(info['threshold'])} a part, "
-                       f"{info['ticks_per_unit'] // 20} s a unit (at most {info['max_ticks'] // 20} s)"
+                       f"{_seconds(info['ticks_per_unit'])} s a unit (at most {_seconds(info['max_ticks'])} s)"
                        for axis, info in PROPERTIES.items())
 
 
@@ -322,6 +328,7 @@ def codex():
                  f"water through a pipe and "
                  f"ingredients through a hopper (up to {BUFFER_SLOTS} kinds waiting), it follows the formula step "
                  f"by step, waiting for the heat each stir needs, and bottles into its output when it has bottles. "
+                 f"A Pneumatic Extractor at its side takes the brews out, so the fire can stay beneath. "
                  f"It never guesses: a missing ingredient or the wrong heat simply waits."),
             ],
         },
