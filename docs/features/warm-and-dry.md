@@ -53,7 +53,7 @@ Fifteen warm or dry biomes. The meadow layout takes the dry grasslands and sandy
 
 ## Dependencies and assets
 - **Surfaces:** Jugcraft's material rule (`jugcraft:overworld/surface`, generated from the biomes' "surface" in `tools/biomes.py`) sets the floor and the layer under it, with noise patches, in Jugcraft biomes that ask for it. It runs first through a small override of vanilla's top-level `minecraft:overworld` material rule, which lists vanilla's named parts by reference with Jugcraft's added. Another mod or data pack that also replaces `minecraft:overworld`'s top-level rule would conflict with this one (the last loaded wins); vanilla's own surface rules are not touched.
-- Trees use vanilla's bending, forking and straight trunk placers and acacia and spruce foliage. Textures drawn by code in `tools/wild_textures.py`. No Mojang file is copied.
+- Trees use vanilla's bending, forking and straight trunk placers and acacia and spruce foliage. Textures drawn by code in `tools/wild_textures.py`. No Mojang file is copied. Since the [wood repaint](wood-repaint.md), their woods and leaves are drawn by `tools/wood_style.py`.
 
 ## Verification
 Results are recorded under "Results" below after CI runs.
