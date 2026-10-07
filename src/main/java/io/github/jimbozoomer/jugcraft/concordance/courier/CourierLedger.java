@@ -24,6 +24,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
@@ -288,7 +289,7 @@ public final class CourierLedger extends SavedData {
 			int stack = Math.max(1, item.toStack().getMaxStackSize());
 			while (left > 0) {
 				int count = Math.min(left, stack);
-				player.getInventory().placeItemBackInInventory(item.toStack(count));
+				player.getInventory().placeItemBackInInventory(item.toStack(count), Prediction.SERVER_ONLY);
 				left -= count;
 			}
 			samples.remove(id);
