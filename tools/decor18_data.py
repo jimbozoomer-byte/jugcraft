@@ -101,7 +101,7 @@ def lining(seed=1, palette=VELVET, border=2):
         for y in range(p.h):
             for x in range(p.w):
                 u, v = (x + y) % 6, (x - y) % 6
-                k = 2 + (1 if u in (2, 3) or v in (2, 3) else 0) - (1 if u == 0 or v == 0 else 0) + rng.choice((0, 0, -1))
+                k = 2 + (1 if u in (2, 3) or v in (2, 3) else 0) - (1 if u == 0 or v == 0 else 0) + (0 if fa.QUIET else rng.choice((0, 0, -1)))
                 p.put(x, y, shade(palette, k))
                 if u == 0 and v == 0:
                     p.put(x, y, BRASS[3])
@@ -118,7 +118,7 @@ def velvet(palette=RED, seed=1, tufted=True):
         for y in range(p.h):
             for x in range(p.w):
                 u, v = (x + y) % 5, (x - y) % 5
-                k = 2 + (1 if tufted and (u == 2 or v == 2) else 0) + rng.choice((0, 0, -1))
+                k = 2 + (1 if tufted and (u == 2 or v == 2) else 0) + (0 if fa.QUIET else rng.choice((0, 0, -1)))
                 p.put(x, y, shade(palette, k))
                 if tufted and u == 0 and v == 0:
                     p.put(x, y, GOLD[3])
@@ -130,7 +130,7 @@ def iron_plate(seed=1, rivets=True):
         rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
-                k = 3 + (1 if y == 0 or x == 0 else 0) - (1 if y == p.h - 1 or x == p.w - 1 else 0) + rng.choice((0, 0, -1))
+                k = 3 + (1 if y == 0 or x == 0 else 0) - (1 if y == p.h - 1 or x == p.w - 1 else 0) + (0 if fa.QUIET else rng.choice((0, 0, -1)))
                 p.put(x, y, shade(IRON, k))
         if rivets and p.w > 3 and p.h > 3:
             for cx, cy in ((1, 1), (p.w - 2, 1), (1, p.h - 2), (p.w - 2, p.h - 2)):
@@ -529,6 +529,7 @@ COFFIN_LID = 2.0
 HINGE = {"origin": [15.2, 9.0, 8.0], "axis": "z", "angle": -45}
 
 
+@fa.quietly
 def iron_bound_coffin():
     """The Iron-Bound Coffin's halves, head toward north: a six-sided coffin of black wood, purple velvet inside, under a
     lid with a raised panel; riveted iron bands round body and lid, iron caps on its corners, ring handles on its sides,
@@ -968,6 +969,7 @@ def bone_throne():
 BOOK_PLACES = [(10.6, 14.6, 8.4), (6.0, 10.0, 8.4), (1.4, 5.4, 8.4), (10.6, 14.6, 1.6), (6.0, 10.0, 1.6), (1.4, 5.4, 1.6)]
 
 
+@fa.quietly
 def ribcage_bookcase():
     """The Ribcage Bookcase, facing north: a dark plank plinth and cap, a spine up the back and three pairs of ribs
     curving round the sides to the front, a femur and a board for the shelf between its two rows. Each place's books
