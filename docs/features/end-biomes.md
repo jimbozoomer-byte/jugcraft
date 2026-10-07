@@ -15,7 +15,7 @@ Five new biomes of the outer End islands. Four share the highlands with vanilla'
 | **Ender Wilds** | moss over the end stone under violet jacarandas and azaleas, glowcaps and glimmerblooms, glinting motes |
 | **Outer Flats** | low, wide barrens of end stone, sand and gravel at the islands' edges, with dead bushes |
 | **Phantom Garden** | pale moss and its carpets, pale oaks and eyeblossoms in the End's dark |
-| **Rotted Expanse** | coarse dirt and soul soil seeping through the end stone, dead trees, obsidian pillars and murky pools; no endermen |
+| **Rotted Expanse** | coarse dirt and soul soil seeping through the end stone, dead trees, grey snags and fallen logs, obsidian pillars and murky pools; no endermen |
 
 - Biomes O' Plenty's names become ours: the End Reef becomes the Chorus Reef, the End Wilds the Ender Wilds, the End Flats the Outer Flats, the Spectral Garden the Phantom Garden and the End Corruption the Rotted Expanse (rot, not a fake glitch).
 - No new blocks: the batch uses vanilla's and the earlier batches' (jacarandas, glowcaps, glimmerblooms, dead trees).

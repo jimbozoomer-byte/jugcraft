@@ -11,11 +11,15 @@
       "feature": "jugcraft:aspen_checked"
     },
     {
-      "chance": 0.05,
+      "chance": 0.0577,
       "feature": "jugcraft:big_maple_checked"
     },
     {
-      "chance": 0.0125,
+      "chance": 0.0816,
+      "feature": "jugcraft:fir_checked"
+    },
+    {
+      "chance": 0.0222,
       "feature": "jugcraft:fallen_maple_tree"
     }
   ]
