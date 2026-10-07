@@ -16,6 +16,8 @@ Game tests run in the Build workflow too. The `mod` job's `./gradlew build` runs
 
 Three client jobs share the chosen classes out by their rough running time (`./gradlew runClientGameTest -PclientTests=<Class,Class,...>`). A job with nothing to run passes at once. The `client` job passes only when the choice and all three jobs pass.
 
+The client game tests run without Iris and Sodium (`build.gradle` leaves them off `runClientGameTest` only; `runClient` and Jugcraft Complete keep them). CI's xvfb has no GLX visual for OpenGL, so the game falls back to Vulkan, and Iris aborts on its first OpenGL call. Nothing in Jugcraft uses either; their compatibility needs a real GPU and a person.
+
 Locally:
 - `./gradlew runClientGameTest` runs every class.
 - `python3 tools/select_client_tests.py --base origin/main` shows what a branch would run.

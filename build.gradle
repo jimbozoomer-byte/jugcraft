@@ -116,6 +116,21 @@ fabricApi {
 	}
 }
 
+// Iris and Sodium (optional, client-only, compatibility only: nothing in Jugcraft uses them) stay on the development
+// client (runClient) and in Jugcraft Complete, but are left off the client game tests. Under CI's xvfb, OpenGL finds no
+// GLX visual, so the game falls back to its Vulkan backend, and Iris then calls OpenGL with no context and aborts the
+// JVM before any test starts. Without them the client game tests run as they did before the framework foundation.
+def notInClientGameTests = frameworkLock.dependencies.findAll { it.key in ["iris", "sodium"] }
+		.collect { it.maven.split(":")[1] } // Modrinth project ids, which name the jars wherever Gradle keeps them
+tasks.matching { it.name == "runClientGameTest" }.configureEach { task ->
+	task.doFirst {
+		def kept = task.classpath.files.findAll { file -> !notInClientGameTests.any { file.path.contains(it) } }
+		task.logger.lifecycle("Client game tests run without Iris and Sodium (see build.gradle): "
+				+ "${task.classpath.files.size() - kept.size()} jar(s) left out")
+		task.classpath = project.files(kept)
+	}
+}
+
 // CI chooses and shares out the client game tests (tools/select_client_tests.py, docs/TESTING.md):
 // -PclientTests=<Class,Class,...> keeps only those classes of the test mod's client test list (simple names), and
 // -PclientTestShard=<n> -PclientTestShards=<count> keeps the classes at positions n, n + count, n + 2 * count ... of
