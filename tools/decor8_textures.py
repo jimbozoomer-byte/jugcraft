@@ -8,12 +8,16 @@ Called from crop_textures.crop_textures(). Every pixel is drawn here by code or 
 from fixed seeds; no Mojang texture is read, traced or recoloured. Block textures are 16x16 and opaque, except the
 jar's glass (see-through in the middle) and its fluid (translucent); the arc, bubble and cat's eyes have see-through
 pixels.
+
+Surfaces are painted in the manner of the vanilla blocks with tools/block_style.py: a short palette in small clumps,
+never a random colour at every pixel; wood as planks, and straw, bark and hair as streaks.
 """
 import math
 import random
 
 from crop_textures import Canvas, rgb
 from decor_textures import noise
+import block_style as bs
 
 IRON = [rgb("2a2a2e"), rgb("38383e"), rgb("46464e"), rgb("6a6a74")]
 COPPER = [rgb("7a3e1c"), rgb("a4562a"), rgb("c8743a"), rgb("e89a5a")]
@@ -45,7 +49,7 @@ def put(img, x, y, color, alpha=255):
 def coil_iron():
     """Dark riveted plate."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 18101, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 18101, [2, 3, 2])
     for x, y in ((1, 1), (14, 1), (1, 14), (14, 14), (7, 1), (7, 14)):
         c.px(x, y, IRON[3])
     return c.img
@@ -63,11 +67,11 @@ def coil_copper():
 def winding():
     """Fine copper wire wound round and round: thin bright and dark rows."""
     c = Canvas()
-    rng = random.Random(18121)
+    tarnish = bs.wobble(18121, 1)
     for y in range(16):
         for x in range(16):
             tone = 3 if y % 2 == 0 else 1
-            c.px(x, y, COPPER[max(0, tone - (1 if rng.random() < 0.15 else 0))])
+            c.px(x, y, COPPER[max(0, tone + min(0, int(tarnish(x, y))))])
     return c.img
 
 
@@ -99,12 +103,10 @@ def arc():
 # ---------------------------------------------------------------- the lab table
 
 def table_steel():
-    """Brushed steel with scratches."""
+    """Brushed steel, its grain in long streaks across, with scratches."""
     c = Canvas()
     rng = random.Random(18201)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, STEEL[1 + (1 if (x * 3 + y) % 5 == 0 else 0)])
+    bs.streaks(STEEL[:3], 18202, vertical=False, spread=0.7)(c)
     for _ in range(6):
         x, y = rng.randrange(14), rng.randrange(16)
         c.px(x, y, STEEL[3])
@@ -114,7 +116,7 @@ def table_steel():
 
 def leather():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, LEATHER, 18211, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, LEATHER, 18211, [2, 3, 1])
     c.rect(5, 6, 10, 9, STEEL[3])  # the buckle
     c.rect(6, 7, 9, 8, LEATHER[0])
     return c.img
@@ -138,7 +140,7 @@ def table_sheet():
 def skin():
     """Grey-green skin, with dark nails at one end."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, SKIN, 18231, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, SKIN, 18231, [2, 3, 2])
     c.rect(0, 13, 15, 15, rgb("3a4436"))
     return c.img
 
@@ -147,7 +149,7 @@ def skin():
 
 def jar_iron():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[1:], 18301, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, IRON[1:], 18301, [2, 3, 1])
     return c.img
 
 
@@ -166,10 +168,10 @@ def jar_glass():
 def jar_fluid():
     """Glowing green fluid, translucent, a little cloudy."""
     c = Canvas()
-    rng = random.Random(18311)
+    fluid = bs.surface(FLUID, 18311)
     for y in range(16):
         for x in range(16):
-            put(c.img, x, y, FLUID[rng.choice((0, 1, 1, 2))], 150)
+            put(c.img, x, y, fluid(x, y), 150)
     return c.img
 
 
@@ -184,14 +186,14 @@ def bubble():
 
 def nerve():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("8a2a2a"), rgb("a43a34"), rgb("c05a4a")], 18331, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, [rgb("8a2a2a"), rgb("a43a34"), rgb("c05a4a")], 18331, [2, 3, 1])
     return c.img
 
 
 def tentacle():
     """Purple skin with pale suckers in a row."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("4a2058"), rgb("5c2a6c"), rgb("6e3680")], 18341, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, [rgb("4a2058"), rgb("5c2a6c"), rgb("6e3680")], 18341, [2, 3, 2])
     for y in range(1, 16, 4):
         for x in (4, 11):
             c.rect(x, y, x + 1, y + 1, rgb("d6a8c8"))
@@ -209,7 +211,7 @@ def pumpkin():
 
 def stem():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("3a4a1e"), rgb("4a5c26")], 18351, [1, 1])
+    bs.fill(c, 0, 0, 15, 15, [rgb("3a4a1e"), rgb("4a5c26")], 18351, [1, 1])
     return c.img
 
 
@@ -228,7 +230,7 @@ def brain():
 def sarcophagus_case():
     """Sandstone painted with bands of lapis and gold."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, SANDSTONE, 18401, [1, 2, 2])
+    bs.fill(c, 0, 0, 15, 15, SANDSTONE, 18401, [1, 2, 2])
     for y in (3, 11):
         c.rect(0, y, 15, y, LAPIS[1])
         c.rect(0, y + 1, 15, y + 1, GOLD[2])
@@ -237,13 +239,13 @@ def sarcophagus_case():
 
 def sarcophagus_inside():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("1e140c"), rgb("281a10"), rgb("322216")], 18411, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, [rgb("1e140c"), rgb("281a10"), rgb("322216")], 18411, [2, 3, 1])
     return c.img
 
 
 def sarcophagus_gold():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, GOLD[:3], 18421, [1, 2, 2])
+    bs.fill(c, 0, 0, 15, 15, GOLD[:3], 18421, [1, 2, 2])
     for i in range(0, 16, 4):
         c.px(i, i % 3, GOLD[3])
     return c.img
@@ -282,13 +284,12 @@ def lid_face():
 def wraps():
     """Old linen wrappings, crossing in bands, grimy."""
     c = Canvas()
-    rng = random.Random(18431)
+    grime = bs.wobble(18431, 1)
     for y in range(16):
         for x in range(16):
             band = (x + 2 * y) % 6 < 3
             tone = 2 if band else 1
-            if rng.random() < 0.12:
-                tone -= 1
+            tone += min(0, int(grime(x, y)))
             c.px(x, y, WRAPS[max(0, tone)])
         if y % 5 == 4:
             c.rect(0, y, 15, y, WRAPS[0])
@@ -309,7 +310,7 @@ def mummy_face():
 
 def perch_wood():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, WOOD, 18501, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, WOOD, 18501, [2, 3, 2])
     return c.img
 
 
@@ -334,7 +335,7 @@ def wing():
 
 def beak():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("1a1a1c"), rgb("26262a"), rgb("38383e")], 18521, [2, 2, 1])
+    bs.fill(c, 0, 0, 15, 15, [rgb("1a1a1c"), rgb("26262a"), rgb("38383e")], 18521, [2, 2, 1])
     return c.img
 
 
@@ -350,14 +351,13 @@ def raven_eye():
 # ---------------------------------------------------------------- the black cat
 
 def fur():
-    """Glossy black fur."""
+    """Glossy black fur in short streaks, with a glint every few rows."""
     c = Canvas()
-    rng = random.Random(18601)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, FUR[rng.choice((0, 1, 1, 2))])
-        if y % 4 == 1:
-            c.px(rng.randrange(16), y, FUR[3])
+    bs.streaks(FUR[:3], 18601, across=1.5, along=4.0)(c)
+    for y in range(1, 16, 4):
+        x = (y * 5) % 16
+        c.px(x, y, FUR[3])
+        c.px(x + 1, y, FUR[3])
     return c.img
 
 
@@ -402,10 +402,10 @@ def cat_face(grid):
     c = Canvas()
     colours = {"e": rgb("6ac83a"), "K": rgb("080808"), "n": rgb("8a4a52"), "W": rgb("4a4a52"), "M": rgb("5a1820"),
                "w": rgb("f0f0e8")}
-    rng = random.Random(18611)
+    fur = bs.surface(FUR[:3], 18611)
     for y, row in enumerate(grid):
         for x, ch in enumerate(row):
-            c.px(x, y, colours.get(ch, FUR[rng.choice((0, 1, 2))]))
+            c.px(x, y, colours.get(ch) or fur(x, y))
     return c.img
 
 
