@@ -34,6 +34,23 @@ Exact visuals, default key, quests/rewards and release order remain to design. T
 
 Related owner planning records: [industrial agriculture, PR #208](https://github.com/jimbozoomer-byte/jugcraft/pull/208), [mineral sands/refining, PR #209](https://github.com/jimbozoomer-byte/jugcraft/pull/209), and [waste/recycling/pollution, PR #210](https://github.com/jimbozoomer-byte/jugcraft/pull/210). These are planning work, not claims that those proposed systems are implemented.
 
+## Industrial chemistry, gas fuels and advanced materials
+
+Owner-requested 7 October 2026. Independent planning brief: [industrial chemistry and fuels](features/industrial-chemistry-and-fuels-plan.md). These follow-ups are planning work, not implemented recipes or tested balance.
+
+- [ ] Map a reachable **steel-built electrical chemistry entry**, preserving the earlier workshop/first-electricity route and prioritizing gas processing, aluminum and titanium.
+- [ ] Extend existing electrolysis/generator systems for directly usable hydrogen and catalytic methane, with complete electricity, compression, heat, separation and generation budgets that prevent closed positive-power loops.
+- [ ] Define distinct CO2 + 4 H2 and CO + 3 H2 methanation recipes, reusable catalyst capability, nickel entry, optional later ruthenium improvement, readable heat/pressure requirements and recovered water.
+- [ ] Add an earlier steel-era coal gasifier with an accounted CO-bearing output, cleanup and substantial numeric pollution; keep CO separate from digester CO2.
+- [ ] Design advanced organic-waste/food digesters using the selected 60/40 methane/CO2 game mixture, usable digestate and hydrogen upgrading into separated pure methane.
+- [ ] Develop milling/mashing -> fermentation -> distillation -> dehydration for crop bioethanol, a modest earlier bio-generator role and later brewery CO2 collection/cleanup, preserving existing bioethanol IDs and consumers.
+- [ ] Add optional CO2 capture/release to industrial carbonate cement processing and optional Coke Oven gas/condensate recovery with explicit material, energy and full-storage accounting.
+- [ ] Verify filled gas tanks retain exact content through break, pickup and placement and reconnect through shared pipes; cover joined-tank partitioning, simultaneous transfers and multiplayer pickup.
+- [ ] Detail H2/chlorine -> HCl and useful carbon-bearing monomer/polymer connections, while retaining existing PVC, butadiene rubber and natural-rubber routes.
+- [ ] Expand process-specific reagents, useful rigid/flexible/protective/heat-resistant polymers and advanced ceramic linings/insulators/cutting/precision parts. Limit purity grades to meaningful consumers; prioritize refining/electronics over broad new everyday finishes.
+- [ ] Develop mainly larger/better general-purpose batteries with a limited set of useful specialty choices.
+- [ ] Document actual machine roles, recipes, consumer links and optional paths in the Encyclopedia; audit reachability, gas/element units, energy loops, pollution, bounded factory work and persistence before gameplay delivery.
+
 ## Reference gallery
 
 All ten original owner-attached UI screenshots are preserved unchanged. They are documentation/design references, not Jugcraft runtime textures. Descriptions and individual file links are in the [independent feature brief](features/jugcraft-encyclopedia.md#visual-references-and-provenance); provenance and integrity metadata are in [the manifest](images/jugcraft-encyclopedia/reference-manifest.json).
