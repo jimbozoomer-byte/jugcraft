@@ -13,7 +13,7 @@ import random
 from PIL import Image
 
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 from decor9_textures import put
 
 COPPER = [rgb("8a4a26"), rgb("a85c32"), rgb("c4743e"), rgb("e0925a")]
@@ -25,11 +25,9 @@ WAX = [rgb("c8c8c4"), rgb("dcdcd8"), rgb("ececea"), rgb("f8f8f6")]
 def pot():
     """Hammered copper: dimpled, with a band of rivets."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, COPPER[:3], 25101, [2, 3, 2])
-    rng = random.Random(25102)
-    for _ in range(10):
-        x, y = rng.randrange(16), rng.randrange(16)
-        c.px(x, y, COPPER[3])
+    bs.fill(c, 0, 0, 15, 15, COPPER[:3], 25101, [2, 3, 2])
+    for x, y in ((2, 5), (7, 4), (12, 6), (4, 9), (10, 10), (14, 9), (1, 11), (7, 12)):
+        c.px(x, y, COPPER[3])  # a hammer dimple, lit at its upper left
         c.px(x + 1, y + 1, COPPER[0])
     for x in range(1, 16, 4):
         c.px(x, 2, COPPER[3])
@@ -39,13 +37,13 @@ def pot():
 
 def pot_inside():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, DARK_COPPER, 25103, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, DARK_COPPER, 25103, [2, 3, 2])
     return c.img
 
 
 def dish():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BRASS[:3], 25104, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, BRASS[:3], 25104, [1, 3, 2])
     for i in range(4, 12):
         c.px(i, 5, BRASS[3])
     return c.img
@@ -65,10 +63,11 @@ def candle_wax():
     """A candle's side: the faint rings of its dipped layers and a few runs (tinted by its colour as it is drawn)."""
     c = Canvas()
     rng = random.Random(25105)
+    wax = bs.surface(WAX[2:4], 25106, [2, 1], spread=0.6)
     for y in range(16):
         ring = WAX[1] if y % 4 == 0 else None
         for x in range(16):
-            c.px(x, y, ring or WAX[rng.choice((2, 2, 3))])
+            c.px(x, y, ring or wax(x, y))
     for x in (3, 9, 13):
         for y in range(rng.randrange(0, 4), rng.randrange(8, 14)):
             c.px(x, y, WAX[3])
