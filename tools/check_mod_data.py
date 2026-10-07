@@ -96,7 +96,10 @@ EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_repla
                   "minecraft:wooden_doors", "minecraft:fence_gates", "minecraft:buttons", "minecraft:beds",
                   "minecraft:is_forest", "minecraft:is_taiga",
                   # Fabric's conventional biome tag (ConventionalBiomeTags.IS_SNOWY): the snow werewolf's haunts.
-                  "c:is_snowy"}
+                  "c:is_snowy",
+                  # Vanilla's Overworld stone (stone, granite, diorite, andesite, tuff, deepslate): thallite's natural
+                  # ground (tools/gear.py EARTHEN_GROUND).
+                  "minecraft:base_stone_overworld"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -1393,6 +1396,29 @@ def check_gear():
                 err(f"Missing item texture {frame}.png")
     check_armor_styles(java)
     check_armor_looks()
+
+
+def check_thallite_gear():
+    """Thallite's traits (docs/features/thallite.md): gear/ThalliteGear.java's numbers against tools/gear.py, the trait
+    and ground tags, each trait's name and description, and the thallite tools' and armor's icons."""
+    java = (JAVA_ROOT / "gear" / "ThalliteGear.java").read_text(encoding="utf-8")
+    for name in ("REGROWTH_SECONDS", "REGROWTH_CAP_PERCENT", "EARTHBOUND_FOR_STONE", "ROOTED_PER_PIECE", "ROOTED_TICKS"):
+        if f"{name} = {getattr(gear, name)};" not in java:
+            err(f"ThalliteGear.{name} differs from tools/gear.py ({getattr(gear, name)})")
+    tags = {("item", "thallite_gear"): gear.thallite_gear(), ("item", "earthbound_armor"): gear.earthbound_armor(),
+            ("block", "living_ground"): gear.LIVING_GROUND, ("block", "earthen_ground"): gear.EARTHEN_GROUND}
+    for (kind, name), values in tags.items():
+        found = (load(DATA / MOD / "tags" / kind / f"{name}.json") or {}).get("values")
+        if found != values:
+            err(f"{MOD}:{name} ({kind} tag) is {found}, expected {values} (tools/gear.py)")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for trait in gear.TRAITS:
+        for key in (f"tooltip.{MOD}.thallite.{trait}.trait", f"tooltip.{MOD}.thallite.{trait}"):
+            if not lang.get(key):
+                err(f"Missing thallite trait text {key}")
+    for item in gear.thallite_gear() + [f"{MOD}:{gear.ARMOR_STYLES['earthbound_thallite']['template']}"]:
+        if not (ASSETS / "textures" / "item" / f"{item.split(':')[1]}.png").is_file():
+            err(f"Missing item texture {item.split(':')[1]}.png")
 
 
 def check_armor_styles(java):
@@ -7162,6 +7188,7 @@ def main():
     check_java()
     check_deposits()
     check_gear()
+    check_thallite_gear()
     check_arms()
     check_item_icons()
     check_arms_variants()

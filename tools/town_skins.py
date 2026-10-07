@@ -37,14 +37,18 @@ def faces(part):
 
 
 class Skin:
-    def __init__(self, seed):
+    def __init__(self, seed, clean=False):
         self.img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
         self.px = self.img.load()
         self.rng = random.Random(seed)
+        self.clean = clean
 
-    def fill(self, part, colour, sides=None, rows=None, noise=8, alpha=255):
+    def fill(self, part, colour, sides=None, rows=None, noise=8, alpha=255, folds=True):
         """Colours a part's faces (all, or the named ones), optionally only rows [r0, r1) of the side faces counted
-        from the top, with a little noise and a shade from top (light) to bottom (dark)."""
+        from the top, with a little noise and a shade from top (light) to bottom (dark).
+
+        A clean skin (the townsfolk's) has no noise, in the manner of the vanilla skins: cloth is lit in its upper half,
+        a shade darker below and darker again at the hem; bare skin (`folds=False`) keeps its sides flat."""
         for name, (x, y, w, h) in faces(part).items():
             if sides and name not in sides:
                 continue
@@ -55,9 +59,18 @@ class Skin:
                     continue
                 if rows and name == "bottom" and rows[1] < PARTS[part][3]:
                     continue
+                if name in ("top", "bottom"):
+                    f = 1.06 if name == "top" else 0.8
+                elif not self.clean:
+                    f = 1.0 - 0.18 * (j / max(1, h - 1))
+                elif not folds:
+                    f = 1.0
+                else:
+                    f = 0.84 if j == h - 1 else 0.92 if j >= h // 2 else 1.0
                 for i in range(w):
-                    f = 1.0 - 0.18 * (j / max(1, h - 1)) if name not in ("top", "bottom") else (1.06 if name == "top" else 0.8)
                     n = self.rng.randint(-noise, noise)
+                    if self.clean:
+                        n = 0  # drawn all the same, so each seed keeps the hair style it gave before
                     self.px[x + i, y + j] = tuple(max(0, min(255, int(c * f) + n)) for c in colour) + (alpha,)
 
     def dot(self, part, face, i, j, colour, alpha=255):
@@ -75,6 +88,18 @@ class Skin:
         self.img.save(path, optimize=True)
 
 
+def strands(s, hair, style):
+    """Hair in neat strands, a shade darker on a regular slant across the crown, the back and the sides."""
+    strand = darker(hair, 0.82)
+    rows = {"top": 8, "back": 7 if style == "long" else 5, "right": 5 if style == "long" else 3}
+    rows["left"] = rows["right"]
+    for face, h in rows.items():
+        for j in range(h):
+            for i in range(8):
+                if (i + 2 * j) % 5 == 0:
+                    s.dot("head", face, i, j, strand)
+
+
 def darker(c, f=0.75):
     return tuple(int(v * f) for v in c)
 
@@ -83,15 +108,16 @@ def lighter(c, f=1.2):
     return tuple(min(255, int(v * f)) for v in c)
 
 
-def person(seed, outfit):
-    """A townsperson: skin, face and hair from the seed, then the outfit (a function drawing the clothes)."""
-    s = Skin(seed)
+def person(seed, outfit, clean=False):
+    """A townsperson: skin, face and hair from the seed, then the outfit (a function drawing the clothes). A clean
+    person (the townsfolk) is drawn without noise, its hair in neat strands."""
+    s = Skin(seed, clean)
     rng = s.rng
     skin = rng.choice(SKIN_TONES)
     hair = rng.choice(HAIR)
     eyes = rng.choice(EYES)
     for part in ("head", "body", "right_arm", "left_arm", "right_leg", "left_leg"):
-        s.fill(part, skin, noise=3)
+        s.fill(part, skin, noise=3, folds=False)
     # Face: eyes, brows, nose shade, mouth.
     for i in (1, 2, 5, 6):
         s.dot("head", "front", i, 4, (245, 245, 245))
@@ -117,6 +143,8 @@ def person(seed, outfit):
             s.dot("head", "front", 7, 2, hair)
             s.dot("head", "front", 0, 3, hair)
             s.dot("head", "front", 7, 3, hair)
+        if clean:
+            strands(s, hair, style)
     else:
         s.fill("head", darker(skin, 0.95), sides=["top"], noise=3)
         for i in range(1, 7):
@@ -325,7 +353,7 @@ ROLE_SKINS = {
 def write():
     OUT.mkdir(parents=True, exist_ok=True)
     for name, (seed, outfit) in SKINS.items():
-        person(seed, outfit).save(OUT / f"{name}.png")
+        person(seed, outfit, clean=True).save(OUT / f"{name}.png")
     return list(SKINS)
 
 

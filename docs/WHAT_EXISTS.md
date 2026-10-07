@@ -369,6 +369,11 @@ Every `FenceBlock` and `IronBarsBlock` has the properties `north_east`, `south_e
   - `smithing_transform` recipes both ways (`<style>_<piece>`, `<metal>_<piece>_from_<style>_<piece>`) and the shaped pattern recipes, from `tools/gear.py` `ARMOR_STYLES`; the pieces are in the `minecraft:<slot>_armor` tags;
   - art: `tools/armor_styles.py` (the styled looks, pinned pixel for pixel by `check_armor_looks`) and `tools/arms_variants_art.py` `pattern()` for the patterns. For now `tools/gear_textures.py` (`METAL_ARMOR_LOOK`) draws bronze and steel armor in the same looks;
   - record: [steampunk-and-kaiser-armor.md](features/steampunk-and-kaiser-armor.md).
+- **Thallite gear (thallite, slice 2):**
+  - items `thallite_<sword|pickaxe|axe|shovel|hoe|helmet|chestplate|leggings|boots>` (`THALLITE` and `THALLITE_ARMOR` in `gear/JugcraftGear`, a third entry in `TIERS`; no paxel and, for now, no arms) and `earthbound_thallite_<helmet|chestplate|leggings|boots>` (the style `earthbound_thallite`, one-way, `EARTHBOUND_THALLITE_ARMOR`), all `gear/ThalliteGearItem`s; the template `earthbinding_template`; equipment assets `jugcraft:thallite` and `jugcraft:earthbound_thallite`;
+  - `gear/ThalliteGear`: Regrowth and Rooted on a server tick, for players, by the item tags `#jugcraft:thallite_gear` and `#jugcraft:earthbound_armor` and the block tags `#jugcraft:living_ground` and `#jugcraft:earthen_ground` (all from `tools/gear.py`); Rooted is the `jugcraft:rooted` knockback resistance modifier;
+  - art: the tools from the material-set maps in thallite's ramp (`tools/material_icons.py`), the armor and template from `tools/thallite_armor.py`;
+  - record: [thallite.md](features/thallite.md).
 - **Arms motion (batch 43, client):**
   - `client/arms/ArmsMotion` plays keyframed guards, combos and parry poses for the arms, in third person (torso, head, arms, legs and the item in the hand, with the off hand kept on two-handed weapons) and first person. `ArmsPose` is one player's pose, kept on the render state with Fabric's render state data.
   - Motion files: `assets/jugcraft/arms_motion/<kind>.json`, from `tools/arms_moves.py` on `tools/arms_motion.py`. Preview renders: `tools/arms_motion_preview.py`.
