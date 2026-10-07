@@ -25,6 +25,7 @@ Read CONTRIBUTING.md, docs/DESIGN.md, docs/ARCHITECTURE.md and docs/PLATFORM.md 
 - Target Minecraft Java Edition 26.3 + Fabric with the pins in docs/PLATFORM.md; do not change them without a reviewed platform PR. Original content is the priority, not external-mod availability.
 - Read docs/CONTENT_BRANCHES.md for factories, farming, biomes, caves, creatures, space, realms, loot, schools and seasons. Preserve independently useful specialties with selected collaboration milestones; do not force every player through every branch.
 - Higher tiers look more dieselpunk and less steampunk, with detailed models and real-life-sized stations: follow docs/ART_DIRECTION.md.
+- Woods, leaves and other natural textures (plants, stone, soil, ores) follow docs/NATURAL_TEXTURES.md: 16×16 in vanilla's manner, colours from the owner's paintings, never recoloured from Mojang's files.
 - Every required dependency has a reachable route, including trading or staged solo production where appropriate. Seasonal content must preserve earned items/world data after events end and cannot be the sole gate to core progression.
 - Connect additions to shared tech/magic progression. Every gameplay feature records tier, input producer, output consumer, costs, unlocks, failure behavior, and test evidence in docs/features/.
 - Extend shared material tags, progression, configuration, recipes, and energy interfaces. Avoid duplicate currencies, ores, registries, and incompatible power systems.

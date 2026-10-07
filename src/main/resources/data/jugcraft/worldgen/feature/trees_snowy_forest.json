@@ -9,6 +9,10 @@
     {
       "chance": 0.2,
       "feature": "jugcraft:maple_checked"
+    },
+    {
+      "chance": 0.3571,
+      "feature": "jugcraft:aspen_checked"
     }
   ]
 }

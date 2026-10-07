@@ -3,8 +3,12 @@
   "default": "jugcraft:willow_checked",
   "features": [
     {
-      "chance": 0.3,
+      "chance": 0.2,
       "feature": "jugcraft:tall_vine_oak_checked"
+    },
+    {
+      "chance": 0.125,
+      "feature": "jugcraft:azalea_tree_checked"
     }
   ]
 }

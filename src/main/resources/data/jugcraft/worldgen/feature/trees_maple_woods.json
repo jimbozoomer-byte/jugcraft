@@ -7,11 +7,11 @@
       "feature": "jugcraft:big_maple_checked"
     },
     {
-      "chance": 0.12,
-      "feature": "minecraft:spruce_checked"
+      "chance": 0.1364,
+      "feature": "jugcraft:fir_checked"
     },
     {
-      "chance": 0.0125,
+      "chance": 0.0132,
       "feature": "jugcraft:fallen_maple_tree"
     }
   ]
