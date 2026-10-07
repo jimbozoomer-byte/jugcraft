@@ -14,6 +14,13 @@ No numbered release yet. Everything below is on `main`.
 - **Earthbound armor:** an Earthbinding Template (rooted dirt, four thallite nuggets and four gold nuggets), a thallite piece and a gold ingot at a smithing table bind the piece into its gold-trimmed Earthbound twin, for good, keeping its enchantments, wear and name. Earthbound pieces are **Rooted**: on natural ground (soil, stone, sand or gravel) each takes 7.5% off knockback, 30% for a full set, and with two or more worn Regrowth works on stone, sand and gravel too.
 - Both traits are named in the tooltip and described while Shift is held. Two handbook pages. Arms, the arrow, horse armor and magic come in later slices. Record: [thallite.md](docs/features/thallite.md).
 
+### Unmerged: Clean textures, set 13: tower and drones (the noisy few)
+- The control screen and holo table, loose and formed, are flat navy glass behind their grid lines and glows, with plain steel sides lit along the top.
+- The cargo packager's white panels are flat with a short sheen.
+- Reinforced concrete keeps its soft mottling, seam and tie holes, with a few spaced pores in place of a per-pixel jitter.
+- The survey stake is straight-grained wood under its red band.
+- Silicon carbide armour is left to the art fixes PR (#219), which redraws the tower's armour plates. The hangar and landing pads, drones and other tower blocks were already clean. IDs and models are unchanged.
+
 ### Unmerged: Clean textures, set 12: dieselpunk war machines (the noisy few)
 - Kaiserworks marble (plain, fluted and the column end) is calm cream in soft clumps with one smooth grey vein, like vanilla calcite. The black station tiles are flat with a lit edge, and their cream tiles are clumped marble.
 - The glass tank's fluid is near-white in soft clumps with even diagonal ripples. Construction foam is clumped with evenly spaced pores.
