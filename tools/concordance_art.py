@@ -464,13 +464,15 @@ SPELLS = {"kindle": kindle_icon, "composed": composed_icon, "aegis": aegis_icon,
 
 
 def textures():
-    """Every texture as {(kind, name): image}, in a fixed order (roadmap steps 12 to 16 from concordance_ritual_art,
-    concordance_alchemy_art, concordance_ecology_art, concordance_celestial_art and concordance_crimson_art)."""
+    """Every texture as {(kind, name): image}, in a fixed order (roadmap steps 12 to 17 from concordance_ritual_art,
+    concordance_alchemy_art, concordance_ecology_art, concordance_celestial_art, concordance_crimson_art and
+    concordance_worker_art)."""
     import concordance_alchemy_art
     import concordance_celestial_art
     import concordance_crimson_art
     import concordance_ecology_art
     import concordance_ritual_art
+    import concordance_worker_art
     out = {}
     for kind, table in (("item", ITEMS), ("block", BLOCKS), ("spell", SPELLS)):
         for name, draw in table.items():
@@ -480,6 +482,7 @@ def textures():
     out.update(concordance_ecology_art.textures())
     out.update(concordance_celestial_art.textures())
     out.update(concordance_crimson_art.textures())
+    out.update(concordance_worker_art.textures())
     return out
 
 

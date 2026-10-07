@@ -142,5 +142,29 @@
     "required_facts": [
       "jugcraft:concordance/crimson_rites_mastered"
     ]
+  },
+  {
+    "id": "jugcraft:concordance/binding_arts_encountered",
+    "required_facts": [
+      "jugcraft:concordance/binding_arts_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/binding_arts_observed",
+    "required_facts": [
+      "jugcraft:concordance/binding_arts_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/binding_arts_understood",
+    "required_facts": [
+      "jugcraft:concordance/binding_arts_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/binding_arts_mastered",
+    "required_facts": [
+      "jugcraft:concordance/binding_arts_mastered"
+    ]
   }
 ]

@@ -46,6 +46,12 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: The Arcane Concordance: familiars, spirits and constructs
+- Once you understand the **Binding Arts**, three helpers answer you, each by its own rules. A **Bonding Charm** binds a **Hearthling** familiar: the longer you spend near it the stronger your bond, and once it is strong enough it mends you when you are badly hurt.
+- A **Spirit Anchor** seals an agreement with a **Gathering Shade**: it gathers dropped items near the anchor through the night, up to its daily quota, and brings them to the anchor for a hopper. Sneak-use the anchor to suspend it; break it to release the spirit.
+- A **Clockwork Porter** carries items between two containers you set with a **Porter Key**, running on Ley Charge from a nearby pylon and mended with copper.
+- Every worker tells you what it is doing or exactly why not (waiting for resources, blocked, cannot find a way, outside its agreement, finished, and more), through Jade, an empty-hand click or `/jugcraft concordance workers`, which also lists workers that are not loaded. None loads chunks or follows anyone through a portal. Record: [arcane-concordance-workers.md](docs/features/arcane-concordance-workers.md).
+
 ### Unmerged: The Arcane Concordance: the Crimson Vigil
 - Once you understand **Crimson Rites**, a **Crimson Chalice** turns your health into **Vitae**: 4 health for up to 4 Vitae, never below 8 health. Each offering leaves **exhaustion** that only time clears (no food or potion does), and the more exhausted you are, the less an offering gives, so healing up never resets it. The HUD and `/jugcraft concordance vitae` show your health, Vitae and exhaustion apart.
 - Sneak-use the chalice for a **Crimson Surge**: 6 Vitae become 6 Focus at once, once a minute. The **Thornheart Blade** is a living sword that grows by slaying different enemies, enduring different harms and being fed Vitae; repeating one kill stops counting, and its stages give extra damage while it is fed. Record: [arcane-concordance-vitae.md](docs/features/arcane-concordance-vitae.md).

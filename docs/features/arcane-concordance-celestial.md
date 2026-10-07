@@ -172,7 +172,11 @@ library file is read, never changed. The icons have not been shown to the owner 
   recalls once per occurrence (not without an observation, not twice, again after the next full moon; a practitioner
   cannot); and claims, observations and an observatory survive a save. The step 7 resource test now checks the monotonic
   ledger.
-- CI: pending (this record is updated with the run).
+- CI: the first push (87acb052) built and failed one server test, `anObservatorySaysWhyItWaits`: the roof was placed
+  in the same tick as the check, and the sky-light answer behind `canSeeSky` updates a tick later, so the roofed
+  observatory still read open sky. The observatory now reads the motion-blocking heightmap, which updates as the block
+  is placed (9b9950d1). Run 37610863921 (commit 0a73cf15) passes the whole Build workflow: it builds, passes the data
+  checks and all 981 required server game tests (the six above among them), and the client test shards pass.
 
 Not yet run: any client (the GeckoLib observatory, the icons, Jade lines, the dynamic light and the codex pages in game),
 a two-client dedicated server, and a real night of play.

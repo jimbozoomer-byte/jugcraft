@@ -408,9 +408,14 @@ BLOCKS.update(celestial.BLOCKS)
 import concordance_crimson as crimson  # noqa: E402
 RESEARCH.update(crimson.RESEARCH)
 ITEMS.update(crimson.ITEMS)
+# Roadmap step 17 (tools/concordance_workers.py): the Binding Arts, familiars, spirits and constructs.
+import concordance_workers as workers  # noqa: E402
+RESEARCH.update(workers.RESEARCH)
+ITEMS.update(workers.ITEMS)
+BLOCKS.update(workers.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
-                 celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG]
+                 celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -906,6 +911,7 @@ def codex():
         **ecology.codex(),
         **celestial.codex(),
         **crimson.codex(),
+        **workers.codex(),
     }
 
 
@@ -1009,6 +1015,7 @@ CATEGORIES = {
     **ecology.CATEGORY,
     **celestial.CATEGORY,
     **crimson.CATEGORY,
+    **workers.CATEGORY,
 }
 
 ENTRY_BACKGROUNDS = {None: "square_gray", "encountered": "square_gray", "observed": "square_gray",
@@ -1415,6 +1422,7 @@ MESSAGES = {
     **ecology.MESSAGES,
     **celestial.MESSAGES,
     **crimson.MESSAGES,
+    **workers.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1449,6 +1457,7 @@ TOOLTIPS = {
     **ecology.TOOLTIPS,
     **celestial.TOOLTIPS,
     **crimson.TOOLTIPS,
+    **workers.TOOLTIPS,
 }
 
 
@@ -1629,6 +1638,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     ecology.write_all(write, assets, data, lang, condition, self_drop, assets.parents[1] / "resourcepacks")
     celestial.write_all(write, assets, data, lang, condition, self_drop)
     crimson.write_all(write, assets, data, lang, condition, self_drop)
+    workers.write_all(write, assets, data, lang, condition, self_drop)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -1764,6 +1774,7 @@ def write_data(write, res):
     ecology.write_data(write, data)
     celestial.write_data(write, data)
     crimson.write_data(write, data)
+    workers.write_data(write, data)
     # LambDynamicLights (optional, client): a lit Kindled Lantern glows in hand. Without the mod nothing reads this.
     write(assets / "dynamiclights" / "item" / "kindled_lantern.json",
           {"match": {"items": rid("kindled_lantern"), "components": {rid("lantern_lit"): {}}},
@@ -1781,6 +1792,7 @@ def tags(tags):
     ecology.tags(tags)
     celestial.tags(tags)
     crimson.tags(tags)
+    workers.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     tags.add("block", "minecraft:mineable/axe", rid("lampwright_bench"))

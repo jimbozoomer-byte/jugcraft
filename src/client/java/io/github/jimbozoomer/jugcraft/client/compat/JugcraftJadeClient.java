@@ -20,6 +20,8 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlock;
 import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlock;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
+import io.github.jimbozoomer.jugcraft.compat.jade.WorkerDataProvider;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import net.minecraft.world.level.block.state.BlockState;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
@@ -27,6 +29,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import snownee.jade.api.BlockAccessor;
+import snownee.jade.api.EntityAccessor;
+import snownee.jade.api.IEntityComponentProvider;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.IWailaClientRegistration;
@@ -48,6 +52,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		registration.registerBlockComponent(ConcordanceTooltip.GAUGE, HabitatGaugeBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.GLEANER, GleanerBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.OBSERVATORY, ObservatoryBlock.class);
+		registration.registerEntityComponent(WorkerTooltip.INSTANCE, WorkerEntity.class);
 		registration.registerBlockComponent(CropTooltip.INSTANCE, OrganismCropBlock.class);
 	}
 
@@ -58,6 +63,36 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 			case "waiting" -> Component.translatable("compose.jugcraft.ecology.status.waiting");
 			default -> Component.translatable("compose.jugcraft.ecology.growth." + growth);
 		};
+	}
+
+	/** A familiar, spirit or construct (roadmap step 17): its status, then its own model's numbers. */
+	private enum WorkerTooltip implements IEntityComponentProvider {
+		INSTANCE;
+
+		@Override
+		public Identifier getUid() {
+			return WorkerDataProvider.ID;
+		}
+
+		@Override
+		public void appendTooltip(ITooltip tooltip, EntityAccessor accessor, IPluginConfig config) {
+			accessor.getServerData().getCompound(WorkerDataProvider.KEY).ifPresent(data -> {
+				tooltip.add(Component.translatable("compose.jugcraft.worker.status." + data.getStringOr("status", "idle")));
+				int bondMax = data.getIntOr("bond_max", 0);
+				if (bondMax > 0) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.bond", data.getIntOr("bond", 0), bondMax));
+				}
+				int integrityMax = data.getIntOr("integrity_max", 0);
+				if (integrityMax > 0) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.body", data.getIntOr("integrity", 0), integrityMax,
+							data.getLongOr("energy", 0L), data.getIntOr("energy_max", 0)));
+				}
+				int carried = data.getIntOr("carried", 0);
+				if (carried > 0) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.carried", carried));
+				}
+			});
+		}
 	}
 
 	/** One of the simulation's reasons, sent as "key|factor|value|a|b" (VerdantBedBlockEntity.note). */

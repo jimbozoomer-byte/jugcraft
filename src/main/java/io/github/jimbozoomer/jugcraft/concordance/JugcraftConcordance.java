@@ -245,6 +245,8 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.sky.Sky.register();
 		// Roadmap step 16: the Crimson Vigil: offerings, Vitae, exhaustion and the living Thornheart Blade.
 		io.github.jimbozoomer.jugcraft.concordance.vigil.Vigil.register();
+		// Roadmap step 17: familiars, spirits and constructs.
+		io.github.jimbozoomer.jugcraft.concordance.spirits.Workers.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

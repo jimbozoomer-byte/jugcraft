@@ -7543,6 +7543,7 @@ def check_concordance(registered):
     check_ecology(co, root, lang, registered, research)
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
+    check_workers(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -7810,7 +7811,8 @@ def check_baselines(root):
     """Roadmap step 11: the benchmark and the rules it runs are pure Java (the harness and the game test run the same
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
-    for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson"):
+    for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
+                    "worker"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -8144,11 +8146,12 @@ def check_alchemy(co, root, lang, registered, research):
         err("the crucible must be drawn by GeckoLib on the client")
 
 
-def check_geckolib(name, java_text, uvs, sizes):
-    """A GeckoLib block's assets agree: every animation the Java names exists, every animated bone exists, and every
-    cube's box-UV region lies inside the sheet without overlapping another's; the sheet is the size the model says."""
-    geo = load(ASSETS / "geckolib" / "models" / "block" / f"{name}.geo.json") or {}
-    animations = load(ASSETS / "geckolib" / "animations" / "block" / f"{name}.animation.json") or {}
+def check_geckolib(name, java_text, uvs, sizes, kind="block"):
+    """A GeckoLib block's (or entity's) assets agree: every animation the Java names exists, every animated bone exists,
+    and every cube's box-UV region lies inside the sheet without overlapping another's; the sheet is the size the model
+    says."""
+    geo = load(ASSETS / "geckolib" / "models" / kind / f"{name}.geo.json") or {}
+    animations = load(ASSETS / "geckolib" / "animations" / kind / f"{name}.animation.json") or {}
     clips = set(animations.get("animations", {}))
     for clip in re.findall(r'thenLoop\("([^"]+)"\)', java_text):
         if clip not in clips:
@@ -8174,13 +8177,13 @@ def check_geckolib(name, java_text, uvs, sizes):
         for b in regions[i + 1:]:
             if a != b and a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
                 err(f"{name}.geo.json: UV regions {a} and {b} overlap")
-    sheet = ASSETS / "textures" / "block" / f"{name}.png"
+    sheet = ASSETS / "textures" / kind / f"{name}.png"
     if not sheet.is_file():
-        err(f"{name}: missing its GeckoLib sheet textures/block/{name}.png")
+        err(f"{name}: missing its GeckoLib sheet textures/{kind}/{name}.png")
     else:
         with Image.open(sheet) as image:
             if image.size != (width, height):
-                err(f"textures/block/{name}.png must be {width}x{height}")
+                err(f"textures/{kind}/{name}.png must be {width}x{height}")
 
 
 def check_ecology(co, root, lang, registered, research):
@@ -8430,6 +8433,117 @@ def check_celestial(co, root, lang, registered, research):
     for component in light.get("match", {}).get("components", {}):
         if f'"{split(component)[1]}"' not in java("Sky.java", sky):
             err(f"dynamiclights/item/astrolabe.json: component {component} is not registered in Sky")
+
+
+def check_workers(co, root, lang, registered, research):
+    """Roadmap step 17: the Java mirrors tools/concordance_workers.py (the bond, navigation, parser limits, the roster
+    and the statuses, in order); every worker definition is its table's and has its entity, name and GeckoLib assets;
+    every status a worker can give has its text, and the inactive reasons the brief names are there; mastery comes from
+    each kind's service; the brains keep no saved state and no worker loads a chunk or uses a portal; every word has its
+    text; the icons are their maps."""
+    wk = co.workers
+    spirits = root / "spirits"
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "worker/Bond.java": {"MAX": wk.BOND_MAX, "GAIN": wk.BOND_GAIN, "DAILY_GAIN": wk.BOND_DAILY_GAIN,
+                             "NEGLECT": wk.BOND_NEGLECT, "FIRST": wk.BOND_FIRST, "SECOND": wk.BOND_SECOND},
+        "worker/Navigation.java": {"GIVE_UP": wk.GIVE_UP, "RETRY_TICKS": wk.RETRY_TICKS},
+        "worker/WorkerParser.java": {"MAX_RADIUS": wk.MAX_RADIUS, "MAX_CARRY": wk.MAX_CARRY, "MAX_QUOTA": wk.MAX_QUOTA,
+                                     "MAX_SUPPORT_TICKS": wk.MAX_SUPPORT_TICKS},
+        "spirits/WorkerEntity.java": {"THINK_TICKS": wk.THINK_TICKS},
+        "spirits/WorkerRoster.java": {"MAX_PER_PLAYER": wk.ROSTER_MAX},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_workers.py ({value})")
+    if f"long VISIT_TICKS = {wk.VISIT_TICKS}L;" not in java("HearthlingEntity.java", spirits):
+        err("spirits/HearthlingEntity.java: VISIT_TICKS differs from tools/concordance_workers.py")
+    work = re.search(r"WORK = List\.of\(([^)]*)\)", java("worker/WorkerParser.java"))
+    if not work or re.findall(r'"([a-z_]+)"', work.group(1)) != wk.WORK:
+        err("worker/WorkerParser.java: WORK differs from tools/concordance_workers.py")
+    statuses = re.findall(r'^\t[A-Z_]+\("([a-z_]+)", (?:true|false)\)', java("worker/Status.java"), re.M)
+    if statuses != list(wk.STATUSES):
+        err(f"worker/Status.java: statuses {statuses} differ from STATUSES (same order)")
+    for reason in ("waiting_for_resources", "blocked_by_access", "cannot_navigate", "outside_agreement", "finished"):
+        if reason not in statuses:
+            err(f"worker/Status.java: a worker must be able to say {reason}")
+    for status in statuses:
+        if f"compose.{MOD}.worker.status.{status}" not in lang:
+            err(f"workers: missing lang compose.{MOD}.worker.status.{status}")
+    if not re.search(r'String ACTIVITY = "' + re.escape(wk.SERVICE) + '";', java("Workers.java", spirits)):
+        err("Workers.ACTIVITY differs from tools/concordance_workers.py SERVICE")
+    practice = [rule for block in research.get("binding_arts", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != wk.SERVICE or practice[0].get("distinct", 0) != 3:
+        err("the Binding Arts must be mastered by the service of all three kinds (practice, distinct 3)")
+    # The definitions, their entities and their assets.
+    folder = DATA / MOD / "concordance" / "worker"
+    defined = {p.stem: load(p) or {} for p in folder.glob("*.json")}
+    if set(defined) != set(wk.WORKERS):
+        err(f"concordance/worker: {sorted(defined)} differ from WORKERS")
+    kinds = {info["kind"] for info in wk.WORKERS.values()}
+    if kinds != {"familiar", "spirit", "construct"}:
+        err(f"workers: the three kinds need a definition each, found {sorted(kinds)}")
+    registry = java("Workers.java", spirits)
+    client = java("WorkerClient.java", CLIENT_JAVA_ROOT)
+    classes = {"hearthling": "HearthlingEntity", "gathering_shade": "GatheringShadeEntity", "clockwork_porter": "ClockworkPorterEntity"}
+    for key, info in wk.WORKERS.items():
+        if defined.get(key, {}).get("kind") != info["kind"]:
+            err(f"concordance/worker/{key}.json: differs from WORKERS (run tools/generate_material_data.py)")
+        if f'entity("{key}"' not in registry:
+            err(f"workers: {key} needs its entity type in Workers")
+        if f"entity.{MOD}.{key}" not in lang:
+            err(f"workers: missing lang entity.{MOD}.{key}")
+        if f"Workers.{key.upper()}" not in client:
+            err(f"workers: {key} must be drawn by GeckoLib on the client (WorkerClient)")
+        source = java(f"{classes.get(key, key)}.java", spirits)
+        if f'DEFINITION = "{MOD}:{key}"' not in source:
+            err(f"spirits/{classes.get(key, key)}.java: must read its definition {MOD}:{key}")
+        check_geckolib(key, source, None, None, kind="entity")
+    # The brains keep no saved state; no worker loads a chunk, or follows anyone through a portal.
+    for path in sorted(spirits.glob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"spirits/{path.name}: a worker never {why} ({banned})")
+        # A familiar may hop beside its person in the same level: teleportTo(x, y, z), never the level-taking form.
+        for call in re.findall(r"teleportTo\(([^;]*)\);", text):
+            if call.count(",") != 2:
+                err(f"spirits/{path.name}: a worker only hops within its own level (teleportTo(x, y, z))")
+        if "MemoryModuleType" in text and path.name != "WorkerEntity.java":
+            err(f"spirits/{path.name}: only WorkerEntity talks to the brain; a worker's model never lives in its memories")
+    # Every word has its text.
+    for path in sorted(spirits.glob("*.java")):
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(workers\.[a-z_]+)"', path.read_text(encoding="utf-8")):
+            if not key.endswith(".") and f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+    for kind in sorted(kinds):
+        if f"message.{MOD}.concordance.workers.kind.{kind}" not in lang:
+            err(f"workers: missing lang for the kind {kind}")
+    jade = java("compat/jade/WorkerDataProvider.java", JAVA_ROOT) + java("compat/JugcraftJadeClient.java", CLIENT_JAVA_ROOT)
+    for key in re.findall(r'"tooltip\.jugcraft\.concordance\.(jade\.[a-z_]+)"', jade):
+        if f"tooltip.{MOD}.concordance.{key}" not in lang:
+            err(f"Jade: missing lang tooltip.{MOD}.concordance.{key}")
+    if "WorkerDataProvider" not in java("compat/jade/JugcraftJadePlugin.java", JAVA_ROOT):
+        err("Jade: the worker provider must be registered in JugcraftJadePlugin")
+    for thing in list(wk.ITEMS) + list(wk.BLOCKS):
+        if thing not in registered or not (DATA / MOD / "recipe" / f"{thing}.json").is_file():
+            err(f"workers: {thing} needs a registration and a recipe")
+    import item_icons
+    for icon in list(wk.ITEMS) + list(wk.BLOCKS):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"workers: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"workers: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
 
 
 # The most Vitae an hour of offering can give, whatever heals the giver (docs/features/arcane-concordance-vitae.md).

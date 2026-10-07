@@ -14,6 +14,8 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.vigil.Vigil;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -55,6 +57,7 @@ final class ConcordanceClient {
 		ItemTooltipCallback.EVENT.register(ConcordanceClient::tooltip);
 		CircleClient.register();
 		VigilClient.register();
+		WorkerClient.register();
 		openSettings = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.concordance_config",
 				InputConstants.UNKNOWN.getValue(), PartyClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -95,6 +98,12 @@ final class ConcordanceClient {
 		}
 		if (stack.is(Sky.SPECIMENS)) {
 			lines.add(Component.translatable("tooltip.jugcraft.concordance.celestial_specimen").withStyle(ChatFormatting.DARK_AQUA));
+		}
+		if (stack.is(Vigil.SPECIMENS)) {
+			lines.add(Component.translatable("tooltip.jugcraft.concordance.crimson_specimen").withStyle(ChatFormatting.DARK_AQUA));
+		}
+		if (stack.is(Workers.SPECIMENS)) {
+			lines.add(Component.translatable("tooltip.jugcraft.concordance.binding_specimen").withStyle(ChatFormatting.DARK_AQUA));
 		}
 		if (stack.is(JugcraftConcordance.LUMEN_SCONCE.asItem()) && stack.has(JugcraftConcordance.RADIANCE)) {
 			// A sconce item keeps the Radiance it held when it was broken (unlit, so none burns).

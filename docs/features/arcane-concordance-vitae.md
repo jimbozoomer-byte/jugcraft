@@ -146,7 +146,8 @@ been shown to the owner yet.
   wake it; fed, it carries its modifier; a blow spends vigor; days of varied use grow it to its second stage, which
   masters Crimson Rites); a real kill with the blade counts (the death event); and Vitae, growth and offering state
   survive a save.
-- CI: pending (this record is updated with the run).
+- CI: run 37610863921 (commit 0a73cf15) passes the whole Build workflow: it builds, passes the data checks and all 981
+  required server game tests (the seven above among them), and the client test shards pass.
 
 Not yet run: any client (the gesture, HUD line, icons and codex pages in game), a two-client dedicated server, and an
 hour of real offering against the bound.

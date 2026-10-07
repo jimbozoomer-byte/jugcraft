@@ -11,6 +11,7 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity;
 import net.fabricmc.loader.api.FabricLoader;
 import snownee.jade.api.IWailaClientRegistration;
@@ -33,6 +34,7 @@ public final class JugcraftJadePlugin implements IWailaPlugin {
 		registration.registerBlockDataProvider(ConcordanceDataProvider.GAUGE, HabitatGaugeBlockEntity.class);
 		registration.registerBlockDataProvider(ConcordanceDataProvider.GLEANER, GleanerBlockEntity.class);
 		registration.registerBlockDataProvider(ConcordanceDataProvider.OBSERVATORY, ObservatoryBlockEntity.class);
+		registration.registerEntityDataProvider(WorkerDataProvider.INSTANCE, WorkerEntity.class);
 	}
 
 	@Override
