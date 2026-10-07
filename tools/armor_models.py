@@ -90,7 +90,11 @@ SET_MODULES = ("knight_armor",         # the knight armor: the owner's steel des
                "white_diamond_armor",  # Reforged White Diamond: the owner's icy design
                "hades_armor",          # Hades Armor: the owner's underworld design
                "sunset_gem_armor",     # Sunset Gem: the owner's sunset design
-               "pharaoh_armor")        # Pharaoh: the owner's golden design
+               "pharaoh_armor",        # Pharaoh: the owner's golden design
+               "dread_knight_armor",   # Dread Knight: the owner's dark crowned knight
+               "valkyrie_armor",       # Valkyrie: the owner's white and gold winged design
+               "wayfarer_armor",       # Wayfarer: the owner's blue hooded cloak
+               "spartan_armor")        # Spartan: the owner's gold plumed design
 
 
 def face_name(name):

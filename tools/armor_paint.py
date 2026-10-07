@@ -9,6 +9,10 @@ changes). The names, in ramps from light to dark (shade() steps along a ramp):
     under      under_light, under_mid, under_dark, under_darkest     (the dark padded layer under the plates)
     gold       gold_light, gold_dark                                  (trim: brass in BRONZE)
 
+A palette may add tones of its own beyond these (a set's accents: feathers, a plume, a third gold), each named for what
+it colours ("feather_pink"). They are used by name like any other; shade() leaves them as they are, so they suit flat
+paint (solid, marks) rather than the patterned painters.
+
 A part's paint is one spec for the whole box, or a dict of specs by face ("front", "sides", "ends", "*" for the rest;
 vanilla names too). A spec is a painter name, P(name, **options), or a list of them painted in order (a plate, then
 rivets on it). With a whole-box spec, faces one texel thin (the edges of a plate) get a plain edge instead of a
@@ -159,6 +163,63 @@ PHARAOH = {
     "leather_dark": (51, 60, 55), "leather_darkest": (34, 33, 38),
     "under_light": (206, 176, 104), "under_mid": (185, 154, 89), "under_dark": (166, 131, 73),
     "under_darkest": (147, 113, 65),
+}
+# The four designs the owner sent on 7 October 2026 ("Here is art of new ones that I made!"): a sheet of the four on a
+# blank mannequin, lit as Blockbench lights a model (tops brightest, the fronts darker and the sides darker still), and a
+# screenshot of each worn in game. The sheet's fronts are taken as about 0.8 of the texture colour, as Bloodthorn's
+# were, and the game shots (lit warmer, under shaders) only to choose between near tones; the whites, which the sheet
+# shows at full white, are its own.
+# Dread Knight (tools/dread_knight_armor.py): cool steel greys from the light grey of the crown, the bands and the
+# frames to the near-black of the plates; "gold" names the faint pink sheen the owner put on the lit greys (the crown's
+# merlons and the nasal bar); the leathers are a black leather ramp for the belt and straps; the under-layer is the
+# near-black of the waist and skirt, its darkest the eye slits.
+DREAD_KNIGHT = {
+    "light": (192, 196, 198), "mid_light": (158, 163, 165), "mid": (124, 130, 131), "dark": (93, 98, 99),
+    "seam": (65, 68, 70), "void": (42, 43, 46),
+    "gold_light": (214, 190, 201), "gold_dark": (168, 146, 158),
+    "leather_light": (84, 78, 78), "leather_mid_light": (70, 65, 66), "leather_mid": (58, 54, 55),
+    "leather_dark": (46, 43, 44), "leather_darkest": (31, 29, 31),
+    "under_light": (60, 62, 66), "under_mid": (46, 47, 51), "under_dark": (34, 35, 39), "under_darkest": (19, 19, 24),
+}
+# Valkyrie (tools/valkyrie_armor.py): the metal is the white plate, from ivory through cream and beige to the blue-grey
+# and mauve of its shading and muscle lines, and a deeper mauve for the icons' outline; "gold" the gold trim, with a
+# third gold (gold_mid) for its shaded bands; "leather" the red cloth wrapped on the shoulders, from a lit coral to a
+# wine; the under-layer the brown leather of the straps and the skirt. The feathers of the wings: white (the metal's
+# light), then pink, lilac and violet, the owner's tints.
+VALKYRIE = {
+    "light": (255, 251, 238), "mid_light": (241, 230, 210), "mid": (221, 209, 192), "dark": (186, 189, 191),
+    "seam": (181, 156, 165), "void": (126, 104, 117),
+    "gold_light": (255, 217, 118), "gold_dark": (196, 147, 62), "gold_mid": (224, 186, 98),
+    "leather_light": (210, 78, 58), "leather_mid_light": (178, 60, 46), "leather_mid": (148, 44, 36),
+    "leather_dark": (118, 28, 36), "leather_darkest": (82, 15, 28),
+    "under_light": (104, 58, 44), "under_mid": (84, 42, 38), "under_dark": (66, 32, 32), "under_darkest": (44, 25, 31),
+    "feather_pink": (246, 210, 210), "feather_lilac": (214, 206, 240), "feather_violet": (176, 158, 204),
+}
+# Wayfarer (tools/wayfarer_armor.py): the metal is the cloak's blue, from the light teal of its rim and front edges
+# through teal and blue to the navy of its folds and the darkest navy; "gold" the clasp's pale silver; the leathers the
+# dark red-brown of the belt, the skirt and the boots; the under-layer the hood's shadowed inside and the cloak's lining.
+# The boots' wings: white, ice blue and the pink of their tips, over a steel blue.
+WAYFARER = {
+    "light": (126, 204, 214), "mid_light": (68, 148, 168), "mid": (34, 98, 144), "dark": (26, 72, 112),
+    "seam": (22, 49, 76), "void": (13, 30, 46),
+    "gold_light": (234, 234, 216), "gold_dark": (170, 172, 178),
+    "leather_light": (112, 62, 48), "leather_mid_light": (96, 50, 42), "leather_mid": (80, 38, 36),
+    "leather_dark": (62, 28, 28), "leather_darkest": (41, 13, 18),
+    "under_light": (38, 60, 82), "under_mid": (26, 43, 61), "under_dark": (17, 31, 45), "under_darkest": (10, 20, 30),
+    "feather_white": (255, 250, 238), "feather_ice": (204, 232, 244), "feather_pink": (242, 206, 208),
+    "feather_steel": (106, 154, 176),
+}
+# Spartan (tools/spartan_armor.py): the metal is the gold, from a pale lit gold through the warm golds of the muscle
+# plate to the bronze browns of its lines and edges; "gold" names the plume's oranges, and "plume_yellow" its lit
+# tips; "leather" the reds of the plume and the cape, from a red orange to the cape's wine; the under-layer the
+# brown leather of the skirt, the belt and the sandals.
+SPARTAN = {
+    "light": (249, 223, 142), "mid_light": (232, 201, 117), "mid": (206, 168, 88), "dark": (175, 134, 70),
+    "seam": (146, 103, 62), "void": (112, 74, 42),
+    "gold_light": (238, 124, 30), "gold_dark": (206, 72, 10), "plume_yellow": (250, 178, 52),
+    "leather_light": (192, 46, 10), "leather_mid_light": (166, 24, 8), "leather_mid": (138, 36, 30),
+    "leather_dark": (112, 23, 14), "leather_darkest": (80, 15, 27),
+    "under_light": (100, 54, 41), "under_mid": (80, 39, 36), "under_dark": (61, 28, 28), "under_darkest": (40, 15, 18),
 }
 # The smoke test's face colours (tools/armor_smoke.py): one hue per face, so a render shows which face is where.
 TEST = {**STEEL, "t_top": (230, 230, 90), "t_bottom": (90, 70, 40), "t_right": (220, 70, 70), "t_front": (80, 200, 90),

@@ -151,6 +151,23 @@ ARMOR_TIERS = {
     # good enchanting, netherite's toughness; fire resistant, as the desert sun asks; mended with gold.
     "pharaoh": {"display": "Pharaoh", "armor": (41, (3, 6, 9, 4), 22, 3.0, 0.1),
                 "repair": "minecraft:gold_ingot", "fire_resistant": True},
+    # The four designs the owner sent on 7 October 2026 ("just create the armors... we can figure that out later"),
+    # beside the others in other strengths, each after its look (docs/features/four-armor-designs.md).
+    # Dread Knight: the heaviest plate of all and among the steadiest, but the poorest enchanting; fire resistant, as
+    # its dark forge asks; mended with netherite.
+    "dread_knight": {"display": "Dread Knight", "armor": (44, (3, 7, 9, 4), 10, 3.5, 0.2),
+                     "repair": "minecraft:netherite_ingot", "fire_resistant": True},
+    # Valkyrie: the light plate of a winged rider: netherite's toughness, long wear and good enchanting, a point of
+    # defense over netherite; mended with phantom membranes, as wings are.
+    "valkyrie": {"display": "Valkyrie", "armor": (46, (3, 7, 8, 3), 24, 3.0, 0.1),
+                 "repair": "minecraft:phantom_membrane", "fire_resistant": False},
+    # Wayfarer: a traveller's cloak and leathers: netherite's defense, the longest wear and the best enchanting of all,
+    # but less toughness and no knockback resistance; mended with leather.
+    "wayfarer": {"display": "Wayfarer", "armor": (50, (3, 6, 8, 3), 30, 2.5, 0.0),
+                 "repair": "minecraft:leather", "fire_resistant": False},
+    # Spartan: a hoplite's bronze: the heavier helm, tough and steady, middling enchanting; mended with bronze.
+    "spartan": {"display": "Spartan", "armor": (43, (3, 7, 8, 4), 18, 3.5, 0.15),
+                "repair": "jugcraft:bronze_ingot", "fire_resistant": False},
 }
 
 

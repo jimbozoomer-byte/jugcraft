@@ -53,7 +53,19 @@ public class ArmorTiersGameTests {
 					"minecraft:amethyst_shard", false),
 			// Pharaoh: the heaviest helm and chest, leggings like netherite's, good enchanting; fire resistant.
 			new Tier("pharaoh", new int[] {4, 9, 6, 3}, new int[] {451, 656, 615, 533}, 3.0, 0.1, 22,
-					"minecraft:gold_ingot", true));
+					"minecraft:gold_ingot", true),
+			// Dread Knight: the heaviest plate of all, among the steadiest, the poorest enchanting; fire resistant.
+			new Tier("dread_knight", new int[] {4, 9, 7, 3}, new int[] {484, 704, 660, 572}, 3.5, 0.2, 10,
+					"minecraft:netherite_ingot", true),
+			// Valkyrie: a point over netherite, long wear and good enchanting; mended with phantom membranes.
+			new Tier("valkyrie", new int[] {3, 8, 7, 3}, new int[] {506, 736, 690, 598}, 3.0, 0.1, 24,
+					"minecraft:phantom_membrane", false),
+			// Wayfarer: netherite's defense, the longest wear and the best enchanting, no knockback resistance.
+			new Tier("wayfarer", new int[] {3, 8, 6, 3}, new int[] {550, 800, 750, 650}, 2.5, 0.0, 30,
+					"minecraft:leather", false),
+			// Spartan: the heavier helm, tough and steady, middling enchanting; mended with bronze.
+			new Tier("spartan", new int[] {4, 8, 7, 3}, new int[] {473, 688, 645, 559}, 3.5, 0.15, 18,
+					"jugcraft:bronze_ingot", false));
 
 	/** Every tier's four pieces have its numbers, repair, fire resistance, slot, look and tags. */
 	@GameTest
