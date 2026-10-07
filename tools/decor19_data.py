@@ -87,7 +87,7 @@ def coil(seed=1, palette=COPPER):
                 k = 3 if y % 2 == 0 else 1
                 if x == 0:
                     k += 1
-                k += rng.choice((0, 0, 0, -1))
+                k += 0 if fa.QUIET else rng.choice((0, 0, 0, -1))
                 p.put(x, y, shade(palette, k))
     return paint
 
@@ -180,23 +180,24 @@ def web_sheet(size=64, seed=1, dew=0.2):
     thread = (232, 236, 240, 200)
     faint = (220, 226, 232, 130)
     anchors = [(0, 0), (size - 1, 0), (size // 2, 0)]
+    step = 2 if fa.QUIET else 1  # the clean style draws every other thread, so a small sheet does not clog
     for ax, ay in anchors:
-        for k in range(9):
-            a = math.radians(20 + k * 17 + rng.uniform(-4, 4))
-            length = size * rng.uniform(0.7, 1.1)
+        for k in range(0, 9, step):
+            a = math.radians(20 + k * 17 + (0 if fa.QUIET else rng.uniform(-4, 4)))
+            length = size * (0.9 if fa.QUIET else rng.uniform(0.7, 1.1))
             ex = ax + math.cos(a) * length * (1 if ax <= size // 2 else -1) * (0.6 if ax == size // 2 else 1)
             ey = ay + math.sin(a) * length
             draw.line([(ax, ay), (ex, ey)], fill=faint, width=1)
-    for row in range(1, 9):
+    for row in range(1, 9, step):
         y0 = row * size / 10
         pts = []
         for i in range(17):
             x = i * (size - 1) / 16
             sag = math.sin(i / 16 * math.pi) * size * 0.05 * (1 + row * 0.1)
-            pts.append((x, y0 + sag + rng.uniform(-0.6, 0.6)))
+            pts.append((x, y0 + sag + (0 if fa.QUIET else rng.uniform(-0.6, 0.6))))
         draw.line(pts, fill=thread, width=1)
     px = img.load()
-    for _ in range(int(size * size * dew / 40)):
+    for _ in range(0 if fa.QUIET else int(size * size * dew / 40)):
         x, y = rng.randrange(size), rng.randrange(size)
         if px[x, y][3]:
             px[x, y] = (250, 252, 255, 255)
@@ -258,6 +259,7 @@ def wisp_texture():
 
 # ---------------------------------------------------------------- 11. the reanimation rig
 
+@fa.quietly
 def lightning_harness():
     """The Lightning Harness, hung from a ceiling: a riveted copper crown plate, a cage of copper ribs and coil rings
     round a wound coil, two glass valves on the crown, and two brass electrode arms hanging on chains each side, their
@@ -297,6 +299,7 @@ def lightning_harness():
     return sc
 
 
+@fa.quietly
 def brain_vat_console():
     """The Brain-Vat Console, facing north: a riveted brass console with a sloping gauge panel and a toggle lever, and on
     its back a glass vat of green fluid with a brain floating in it under a brass cap; cords run from the cap down into
@@ -402,6 +405,7 @@ def silk_cocoon():
     return sc
 
 
+@fa.quietly
 def egg_sac_cluster(glisten=0):
     """The Egg Sac Cluster on the north face of its block (the blockstate turns it to each face): a mat of web over the
     face and a cluster of round sacs of several sizes on it. Its texture is a strip of frames, the sacs' glints
@@ -467,6 +471,7 @@ def web_drape():
 SPOOL_X = [12.0, 8.0, 4.0]
 
 
+@fa.quietly
 def silk_spool_stack():
     """The Silk Spool Stack, facing north: a walnut board with three tall turned spools standing on it, each a core
     between two flanges; the silk wound on them is the client's (tinted). A long needle lies across the board's front."""
@@ -516,6 +521,7 @@ def spiderling(sc):
 
 # ---------------------------------------------------------------- 13. the poltergeist's dinner party
 
+@fa.quietly
 def haunted_dining_chair():
     """The Haunted Dining Chair, its sitter facing north to the table: four turned legs and an apron, a tufted red velvet
     seat, and a tall gothic back between two posts with finials: a pierced tracery splat under a carved crest rail.
@@ -820,6 +826,7 @@ def ghost_face(seed=1):
     return paint
 
 
+@fa.quietly
 def grandfather_clock():
     """The Grandfather Clock, two blocks tall and facing north: a moulded plinth; a trunk with a glazed door, the
     weights on their chains inside it; a hood with corner columns, the brass dial (its centre at DIAL) and above it an
