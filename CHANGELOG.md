@@ -35,6 +35,105 @@ No numbered release yet. Everything below is on `main`.
 - **Nothing else changes:** same items, IDs, stats and recipes, so armor you already have just looks new. Trims stay on the item but do not show on the 3D models, and babies wear none.
 - The old steampunk and kaiserpunk looks are no longer worn by bronze and steel armor; Steampunk Armor and Kaiser Armor (below) keep them. Record: [knight-armor.md](docs/features/knight-armor.md).
 
+### Unmerged: Clean textures, set 12: dieselpunk war machines (the noisy few)
+- Kaiserworks marble (plain, fluted and the column end) is calm cream in soft clumps with one smooth grey vein, like vanilla calcite. The black station tiles are flat with a lit edge, and their cream tiles are clumped marble.
+- The glass tank's fluid is near-white in soft clumps with even diagonal ripples. Construction foam is clumped with evenly spaced pores.
+- The artillery deck and wicker are left to the art fixes PR (#219), which reworks their painters, along with the 22 textures it fixes. The other war-machine tiles were already clean. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 11: weapons and armour (the powders)
+- Four noisy powders are clean 16×16 heaps in the manner of the set 9 dusts, following the item icon rules (#201): ammonium perchlorate, iodine, silver iodide and cement mix.
+- Left to other work:
+  - the arms icons, which #201 redraws;
+  - the four textures #219 fixes;
+  - the bronze and steel armour, which gets the owner's new 3D knight look in #215's follow-up.
+- The exosuits, the rocketry items and the construction items are already clean pixel art and are unchanged. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 10: machines
+- Every bronze-framed machine front loses its speckle.
+  - The steel plate is one tone with a few soft clumps, recessed under the frame's lit top and left edge.
+  - Windows are recessed, with their contents in soft clumps instead of random pixels.
+  - A running machine's glow (fire, arc light, a crystal's shine) rises in smooth bands to its brightest at the bottom, like a furnace.
+  - The crusher's jaws are two neat rows of teeth, the sieve is a crossed mesh, the circuit assembler shows gold traces, and the boilers are round and lit at the top left.
+- The machine casings, tanks, pump sides, plinths, the geothermal tank and stack, the crucible, the solar panel, the belts and the conveyor are cleaned the same way. Bricks take one tone a brick, lit along the top.
+- The five refinery machines whose fronts were committed as pictures in the old style (catalytic reformer, chemical mixer, crystal grower, oil sand extractor, vacuum distillation unit) are now drawn by the same code.
+- The leftover materials match set 9:
+  - salt, phosphate, lepidolite, monazite, sawdust, lithium carbonate, rare earth oxide and thermite are clean heaps;
+  - bitumen, silicon, coke, borax and ferroboron are lumpy chunks;
+  - bauxite, oil sand and tincal are evenly speckled rock.
+- The owner's library (#207) was used as a style reference only: many of its machine files match other mods' textures, so none is copied. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 9: metal parts, petrochemistry and deposits
+- The ores, storage blocks, raw ores, ingots and nuggets are left to the material sets (#218), as the owner chose on 6 October 2026. This set cleans the rest of the materials.
+- Metal parts are drawn in `tools/material_style.py`:
+  - dusts are clean heaps;
+  - plates have an outline and a sheen;
+  - gears have eight square teeth;
+  - wire is wound on a spool;
+  - washed ore is a clean chunk with drops of water.
+- Bronze blend and sulfur dust are clean heaps too.
+- Petrochemistry:
+  - The fluid buckets share a new iron pail with the fluid in its mouth.
+  - Flowing fluids run in soft streaks, and still fluids are mostly one tone with lighter swells.
+  - Guncotton, PVC resin, alumina, titanium sponge, asphalt, asphalt binder, fertilizer, the cracking catalyst and the turbocharger lose their random speckle.
+- The four resource deposits are packed rubble of stone and ore lumps, in the manner of gravel. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 8: crops (outside the tree work)
+- Only the crop textures that open PRs #195 (wood repaint) and #206 (new trees) don't touch are changed. Trees, logs, wood, leaves, planks and saplings are left to those PRs.
+  - The squash and gourd skins vary in soft clumps with even stripes; the warty gourd keeps its warts.
+  - The cooking-pot soup is a clumped surface with a few glints.
+  - The turnip lantern's lid stalks are lit at the top.
+  - The sauerkraut's shreds run in even lines.
+- `gourd_side` now paints cleanly by default. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 7: the fall fair
+- The fall fair's high-resolution textures (the midway games and plush prizes, the piñatas and the hot-air balloons) lose their soft mottling and fine noise. They are painted in the clean, cartoon style of the werewolves:
+  - Every tone sits in a few flat bands. Brass, glass and glowing bulbs shade in clean steps, and felt, enamel, canvas and wood are even.
+  - Piñata fringes hang at even lengths, and the torn holes are round.
+  - The squirrel plush's tail has a cream band of points along its tip.
+- `tools/fur_paint.py` gains `clean_painter` and `clean_ramp`, used only by the fair's modules. Faces, stitches, stripes and painted designs keep their drawn detail. IDs and models are unchanged.
+- The Ferris wheel is left to the art fixes PR (#219), which redraws it so it no longer flashes; its textures are main's here.
+
+### Unmerged: Clean textures, set 6: fall food and kitchen
+- The pies and hearth oven, the Harvest Feast Table, the candy kitchen, the cider mill, the preserves pantry and autumn foraging lose their per-pixel speckle and are painted in the manner of the vanilla blocks with `tools/block_style.py`.
+  - The oven is vanilla-style bricks, its stone is stone and its embers a heap of glowing coals.
+  - Pie tops are a woven lattice, each strip lit along one edge, over a clumped filling, and the cut side has clean crust layers.
+  - Wood is planks: the feast table, cider press, barrel staves and pantry shelves.
+  - Apple leaves are clumps with gaps, lit along their tops, as vanilla leaves. Graniteware is flecked evenly, as vanilla diorite.
+  - Raw pies, slices, dough, rock candy and burnt sugar are lit at their upper left instead of speckled.
+- IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 5: the Halloween harvest and festivities
+- The Halloween harvest and festivities lose their per-pixel speckle and are painted in the manner of the vanilla blocks with `tools/block_style.py`. That covers the giant pumpkins and the heirloom pumpkins, the Harvest Scale, scarecrow, corn shocks and ornamental corn, gourd birdhouse and mums, the regatta and trick-or-treat costumes, the Judging Stand, festivity candles and ghosts, the Headless Horseman, wisps and trebuchet, the corn maze and ghost hunting, and the knitting, chandlery, firework launcher, spirit board, theremin, ofrenda, mooncakes and broomstick.
+  - Pumpkin skins vary in soft clumps; the giant pumpkin stays mirror-symmetric.
+  - Wood is planks, and straw and bark are streaks. The gravestone is stone and the trebuchet's counterweight cobblestone.
+  - Ornamental corn ears are one colour with an accent kernel. The mums are round blooms over a leafy mound, and marigold petals lie in neat clumps.
+  - Sugar skulls, pan de muerto, popcorn balls, guts and fizz rocks are drawn as shapes instead of scattered pixels.
+- `gourd_side` in `tools/festival_textures.py` gains an opt-in `clean` mode, used here only, so the festival gourds of a later set are unchanged until that set. Faces, letters and cut-outs keep their drawn detail. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 4: Halloween decorations, batches 8 to 14
+- The next seven batches lose their per-pixel speckle and are painted in the manner of the vanilla blocks with `tools/block_style.py`: the mad scientist's lab, the yard inflatables, porch witch, poseable skeleton, grasping hands, spooky sign and dead tree, the archway and lanterns, the brazier and the shadow-puppet lamp's wood, the party games (jump-scare trap, costume runway, bowling, scoreboard, candy cache, ghost bell, fortune teller), the bonfire and hayride, the treats, and the costumes and costume trunk.
+  - Surfaces are one ground tone with small clumps of its neighbours. Wood is planks.
+  - Bark, hair, straw and brushed steel are streaks.
+  - The archway is mossy stone bricks, the bonfire ring cobblestone, and the brazier's coals and the trunk's clothes are heaps.
+  - Sweets get evenly set sugar crystals and raisins.
+  - The costumes' black cloth, fur and bat wings are clumped instead of speckled.
+- Faces, letters, cards and cut-outs keep their drawn detail. IDs and models are unchanged.
+- The Shadow Puppet Lamp's brass, candle and paper panels, the floating witch hat's candle (it shares the lamp's candle) and the Specimen Jar's eye are left to the art fixes PR (#219), which redraws them.
+
+### Unmerged: Clean textures, set 3: Halloween decorations, batches 1 to 7
+- The first seven batches of Halloween decorations lose their per-pixel speckle and are painted in the manner of the vanilla blocks, with `bs.fill` and the other painters in `tools/block_style.py`. This covers the string lights, candy bowl, coffin, haunted portraits, fog machine, luminaria, floating candles, sconce, bunting, cauldron and hex brews, apothecary shelf, crystal ball, grimoire, broom, bobbing tub, pumpkin crate, hay bale seat, autumn wreath, leaf piles, rocking chair, lurking eyes, silhouette windows, music box, giant spider, chandelier, pipe organ, suit of armour, dust sheet, spirit mirror, curtains and creepy doll.
+  - Each surface is one ground tone with small clumps of its neighbours.
+  - Wood is planks; straw, husk and bristles are streaks.
+  - The candy bowl is a heap of round foil sweets with candy corn on top, and the ornamental corn is rows of plump kernels.
+  - Leaves are shaded along their lower edges; lace is eyelets; the plume is feathers in bands.
+- Faces, cut-outs and portraits keep their drawn detail. Every pattern tiles, and IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 2: the graveyard
+- The memorial stones (marble, slate, granite and sandstone in all four weathering stages, their carved, rough and knotwork faces), the chippings and flower beds, bronze and iron, oak and roof slates, the crypt set, the grave mound, the Mourning Angel, the Pop-Up Skeleton (its skull now cute, with no nose hole) and the graveyard flora, painted in the manner of the vanilla blocks so they sit beside them: stone as stone (granite speckled like vanilla granite, rough granite like cobblestone), oak as planks, chippings as gravel, beds as dirt, and moss and lichen in clumps as on mossy cobblestone; no salt-and-pepper speckle and no flat fills. Every pattern tiles, so blocks still join up. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 1: the fall creatures
+- The owner asked for every texture to lose its noise and look cleaner, flatter and cuter, set by set (15 sets, after the reference pictures). Set 1 is the fall creatures: the **werewolves**, their rugs and pelts (big flat locks of fur in neat rows instead of fine hairs), the **turkeys** and the roast turkey dinner, **squirrels** and acorns, the **crow**, the **Pumpkling**, the **Hay Golem** and the **Bat House**: flat tones and regular patterns, no random speckle. The Bat House's planks and guano, the turkey's bone and skin and the silver platter are painted in the manner of the vanilla blocks (`tools/block_style.py`). IDs and models are unchanged.
+
 ### Unmerged: Arms icons in the owner's 16×16 style
 - **Every arm's inventory icon is redrawn at 16×16** in the owner's manner: on the diagonal, a one-pixel outline in each part's own dark tone, flat tones lit from the top left, chunky parts that read at a glance. Each kind is one map of letters in `tools/arms_icons/` that the owner can edit.
 - **The big arms show the whole weapon**: the longsword, greatsword, zweihander, executioner, battleblade, moonblade, sabre, nodachi and halberd fit the full diagonal whole, every part present, instead of cropped.

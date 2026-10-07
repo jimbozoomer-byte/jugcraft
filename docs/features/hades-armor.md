@@ -90,7 +90,11 @@ Hades is the toughest and the hardest to knock back, a point lower in defense an
   - **Generators:** clean; the other arms' output is byte-identical (16,314 of 16,317 files; the rest only gained entries).
   - **`check_mod_data.py`:** PASS, with `check_icon_maps.py` and the new set-line checks, each shown to fail when broken (a chest table dropping the scythe, a boss table for the set, a recipe, a line in two groups, Java out of step, a tooltip naming a boss).
   - **Java:** the 6 changed files parse (syntax only).
-- **After merging the two and the base:** see the PR for the final run.
+- **After merging the two and the base** (`claude/bloodthorn-armor`, with White Diamond and the newest main):
+  - **Generators:** data, textures, data again, all exit 0; nothing is left to change.
+  - **`check_mod_data.py`:** PASS (1521 material IDs), with the art check: every Hades entry is 0.00% see-through.
+  - **`check_repository.py`:** PASS. **`armor_smoke.py --no-render`:** all pass. **`armor_models.py`:** no problems.
+  - **Java:** the 8 changed files parse (syntax only).
 
 **In CI:** not run yet. It will compile the material, the variant and the set line; run `ArmorTiersGameTests` and `ArmsVIIGameTests` (now with the set line, and the scythe's Wither landing on a pig) and `TraitDetailsGameTests`; and shoot `ArmorTiersClientGameTests` (`jugcraft_armor_tier_hades_*`) and `ArmsVIIClientGameTests` (every variant racked, the scythe held).
 

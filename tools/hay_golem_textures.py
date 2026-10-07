@@ -1,13 +1,11 @@
 """The Hay Golem's texture (fall additions 14) (requires Pillow): golden straw running along each bundle, bound with
 twine (two bands round the body, one round each wrist and ankle), a sackcloth patch stitched on its chest, and loose straw
 splaying out at the collar, wrists and ankles; laid out for the client's HayGolemModel (64 by 64; each box's faces where
-a vanilla model box puts them).
+a vanilla model box puts them). Clean, cartoon style: even straw stripes, regular ragged ends, no random speckle.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code, from a fixed seed; no Mojang texture is
 read, traced or recoloured.
 """
-import random
-
 from PIL import Image
 
 from crop_textures import rgb
@@ -32,19 +30,17 @@ def box_area(u, v, w, h, d):
             yield x, y, False
 
 
-def straw(rng, x, y, along_y=True):
-    """A straw texel: streaks run down the bundle (or across, on its ends), lighter and darker straws side by side."""
-    stripe = x if along_y else y
-    base = (stripe * 7 + (stripe // 2) * 3) % len(STRAW)
-    return STRAW[max(0, min(len(STRAW) - 1, base + rng.choice((-1, 0, 0, 1))))]
+def straw(x, y, along_y=True):
+    """A straw texel: straws two texels wide run down the bundle (or across, on its ends) in a fixed run of tones."""
+    stripe = (x if along_y else y) // 2
+    return STRAW[(2, 3, 2, 4, 3, 1)[stripe % 6]]
 
 
 def hay_golem():
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    rng = random.Random(14014)
     for name, (u, v, w, h, d) in BOXES.items():
         for x, y, end in box_area(u, v, w, h, d):
-            colour = straw(rng, x, y, along_y=not end)
+            colour = straw(x, y, along_y=not end)
             side_y = y - (v + d)
             if not end:
                 # Twine: two bands round the body, one near the end of each limb's bundle.
@@ -53,7 +49,7 @@ def hay_golem():
                 elif name in ("arm", "leg") and side_y == h - 2:
                     colour = TWINE[x % 3]
                 # Loose straw at the collar, wrists and ankles: ragged ends with gaps.
-                elif name in ("collar", "wrist", "ankle") and side_y == h - 1 and rng.random() < 0.35:
+                elif name in ("collar", "wrist", "ankle") and side_y == h - 1 and x % 3 == 1:
                     colour = None
             if colour is None:
                 continue
@@ -61,7 +57,7 @@ def hay_golem():
     # A sackcloth patch stitched on the chest (the body's front face: u 8-19, v 8-21), a little left of centre.
     for x in range(10, 15):
         for y in range(12, 16):
-            img.putpixel((x, y), SACK[rng.randrange(3)] + (255,))
+            img.putpixel((x, y), SACK[2 if y == 12 else 1] + (255,))
     for x in range(10, 15):
         if x % 2 == 0:
             img.putpixel((x, 12), STITCH + (255,))

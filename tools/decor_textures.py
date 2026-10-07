@@ -1,7 +1,9 @@
 """Original textures for the first batch of Halloween decorations (requires Pillow).
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code from fixed seeds; no Mojang texture is
-read, traced or recoloured. Block and item textures are 16x16. The Haunted Portrait's eye whites sit exactly where
+read, traced or recoloured. Surfaces are painted in the manner of the vanilla blocks with tools/block_style.py: a
+short palette in small clumps (bs.fill), never a random colour at every pixel, and wood as planks. Block and item
+textures are 16x16. The Haunted Portrait's eye whites sit exactly where
 HAUNTED_PORTRAIT in tools/agriculture.py says, because the client draws the moving pupils there.
 """
 import math
@@ -11,7 +13,8 @@ from PIL import Image
 
 from agriculture import HAUNTED_PORTRAIT
 from crop_textures import Canvas, rgb, outline
-from halloween_textures import PLANK, IRON, shade, wood_grain
+from halloween_textures import IRON, shade
+import block_style as bs
 
 TERRACOTTA = [rgb("8a3f12"), rgb("a24c18"), rgb("b85a1e"), rgb("c86a28")]
 FACE = rgb("2a1206")
@@ -29,6 +32,8 @@ BULB_ON = [rgb("ffb21e"), rgb("ffd23c"), rgb("fff0a0")]
 
 
 def noise(c, x0, y0, x1, y1, palette, seed, weights=None):
+    """A random palette colour at every pixel, for the modules not yet repainted in the vanilla manner (this module's
+    own surfaces use bs.fill)."""
     rng = random.Random(seed)
     picks = [i for i, n in enumerate(weights or [1] * len(palette)) for _ in range(n)]
     for y in range(y0, y1 + 1):
@@ -40,7 +45,7 @@ def noise(c, x0, y0, x1, y1, palette, seed, weights=None):
 
 def hook_iron():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 8101, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 8101, [2, 3, 1], spread=0.6)
     return c.img
 
 
@@ -50,7 +55,9 @@ def bulb(lit):
     palette = BULB_ON if lit else BULB_OFF
     for y in range(16):
         for x in range(16):
-            c.px(x, y, palette[0] if x % 5 == 0 else palette[1 + (y // 5 + x) % 2])
+            # Ribs: a dark groove every five pixels, each bulge lit in the middle and shaded towards the grooves.
+            rib = x % 5
+            c.px(x, y, palette[0] if rib == 0 else palette[1] if rib in (1, 4) else palette[2])
     face = rgb("fff6c8") if lit else rgb("3a1a04")
     for x, y in ((5, 6), (6, 6), (9, 6), (10, 6), (5, 10), (6, 11), (7, 11), (8, 11), (9, 11), (10, 10)):
         c.px(x, y, face)
@@ -60,10 +67,10 @@ def bulb(lit):
 def string_lights_entity():
     """The strand's texture: the left half is the wire, the right half a bulb (the renderer picks the halves)."""
     c = Canvas()
-    noise(c, 0, 0, 7, 15, [rgb("16200e"), rgb("1e2a14"), rgb("26341a")], 8111)
+    bs.fill(c, 0, 0, 7, 15, [rgb("16200e"), rgb("1e2a14"), rgb("26341a")], 8111)
     for y in range(16):
         for x in range(8, 16):
-            c.px(x, y, BULB_ON[0] if x % 3 == 0 else BULB_ON[1 + (x + y) % 2])
+            c.px(x, y, BULB_ON[0] if x % 3 == 0 else BULB_ON[1] if x % 3 == 1 else BULB_ON[2])
     for x, y in ((10, 6), (13, 6), (10, 10), (11, 11), (12, 11), (13, 10)):
         c.px(x, y, rgb("fff6c8"))
     return c.img
@@ -101,7 +108,7 @@ def hook_item():
 
 def bowl():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, TERRACOTTA, 8201, [1, 3, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, TERRACOTTA, 8201, [1, 3, 3, 1])
     for x in range(16):
         c.px(x, 0, TERRACOTTA[3])
     return c.img
@@ -110,7 +117,7 @@ def bowl():
 def bowl_face():
     """The front of the bowl: a jack-o'-lantern grin glazed in near-black, in the part the front shows (v 11-15)."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, TERRACOTTA, 8202, [1, 3, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, TERRACOTTA, 8202, [1, 3, 3, 1])
     for x, y in ((5, 11), (6, 11), (9, 11), (10, 11), (6, 12), (9, 12), (4, 13), (11, 13), (5, 14), (6, 14), (7, 14), (8, 14), (9, 14),
                  (10, 14)):
         c.px(x, y, FACE)
@@ -118,25 +125,16 @@ def bowl_face():
 
 
 def candy():
-    """A heap of sweets: wrapped toffees in bright foil and candy corn, packed edge to edge."""
+    """A heap of sweets in the manner of vanilla gravel: round toffees in bright foil, each lit along its upper left and
+    shaded along its lower right, packed in dark gaps, with three candy corns on top."""
     c = Canvas()
-    rng = random.Random(8203)
     foils = [rgb("8a3cc0"), rgb("4cb84a"), rgb("d8344a"), rgb("2f7ad8"), rgb("e8b020"), rgb("e05a9a")]
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, shade(foils[rng.randrange(len(foils))], 0.55))
-    for _ in range(34):
-        x, y = rng.randrange(16), rng.randrange(16)
-        if rng.random() < 0.45:
-            # Candy corn: white tip, orange middle, yellow base.
-            c.px(x, y, rgb("f4f0e0"))
-            c.px(x, y + 1, rgb("e8601a"))
-            c.px(x, y + 2, rgb("f7b21e"))
-        else:
-            foil = foils[rng.randrange(len(foils))]
-            c.px(x, y, foil)
-            c.px(x + 1, y, shade(foil, 1.25))
-            c.px(x - 1, y, shade(foil, 0.8))
+    bs.heap([[shade(f, 0.7), f, shade(f, 1.25)] for f in foils], 8203, count=14, joint=rgb("2a1610"))(c)
+    for x, y in ((3, 2), (11, 6), (6, 11)):
+        # Candy corn: a white tip, an orange middle and a yellow base.
+        c.px(x, y, rgb("f4f0e0"))
+        c.rect(x - 1, y + 1, x + 1, y + 1, rgb("e8601a"))
+        c.rect(x - 1, y + 2, x + 1, y + 2, rgb("f7b21e"))
     return c.img
 
 
@@ -145,14 +143,14 @@ def bowl_item():
     for y in range(7, 14):
         half = 7 - (y - 7) // 2
         for x in range(8 - half, 8 + half):
-            c.px(x, y, TERRACOTTA[1 + (x + y) % 2])
+            c.px(x, y, TERRACOTTA[3] if y == 7 else TERRACOTTA[2] if y < 11 else TERRACOTTA[1])
     for x, y in ((5, 9), (6, 9), (9, 9), (10, 9), (5, 11), (6, 12), (7, 12), (8, 12), (9, 12), (10, 11)):
         c.px(x, y, FACE)
-    rng = random.Random(8205)
+    # The sweets heaped above the rim, two pixels each.
     for x in range(2, 14):
         for y in range(4, 7):
             if abs(x - 7.5) + (6 - y) * 2 < 7:
-                c.px(x, y, CANDY[rng.randrange(1, 6)])
+                c.px(x, y, CANDY[1 + (x // 2 * 2 + y) % 5])
     outline(c, rgb("2a1206"))
     return c.img
 
@@ -161,14 +159,14 @@ def bowl_item():
 
 def coffin_wood():
     c = Canvas()
-    wood_grain(c, COFFIN_WOOD, 8301, vertical=False)
+    bs.planks(COFFIN_WOOD, 8301)(c)
     return c.img
 
 
 def coffin_lid():
     """The lid: dark planks along the length with a brass cross on the head half (u 6-9, v 2-12)."""
     c = Canvas()
-    wood_grain(c, COFFIN_WOOD, 8302, vertical=True)
+    bs.planks(COFFIN_WOOD, 8302, vertical=True)(c)
     for y in range(2, 13):
         c.px(7, y, BRASS[2])
         c.px(8, y, BRASS[1])
@@ -180,13 +178,13 @@ def coffin_lid():
 
 def coffin_lid_plain():
     c = Canvas()
-    wood_grain(c, COFFIN_WOOD, 8305, vertical=True)
+    bs.planks(COFFIN_WOOD, 8305, vertical=True)(c)
     return c.img
 
 
 def velvet():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, VELVET, 8303, [1, 3, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, VELVET, 8303, [1, 3, 3, 1], spread=0.6)
     for y in range(0, 16, 4):
         for x in range(16):
             c.px(x, y, VELVET[0])
@@ -195,7 +193,7 @@ def velvet():
 
 def brass():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BRASS, 8304, [1, 2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, BRASS, 8304, [1, 2, 3, 1])
     return c.img
 
 
@@ -217,7 +215,7 @@ def coffin_item():
 
 def frame():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, GOLD, 8401, [1, 2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, GOLD, 8401, [1, 2, 3, 1])
     return c.img
 
 
@@ -234,19 +232,20 @@ def portrait(name):
     """A gilt frame (the outer pixel) round a dark canvas with the sitter; the eye whites are left for the renderer's pupils."""
     background, figure, skin, hair = SITTERS[name]
     c = Canvas()
-    noise(c, 0, 0, 15, 15, GOLD, 8410, [1, 2, 3, 1])
-    noise(c, 1, 1, 14, 14, background, 8411)
-    rng = random.Random(8412 + len(name))
+    bs.fill(c, 0, 0, 15, 15, GOLD, 8410, [1, 2, 3, 1])
+    bs.fill(c, 1, 1, 14, 14, background, 8411)
+    fig = bs.surface(figure, 8412 + len(name))
+    face = bs.surface(skin, 8413 + len(name), spread=0.6) if skin else None
     if name in ("lady", "captain"):
         # Shoulders and a dark coat or gown below, an oval face above.
         for y in range(10, 15):
             for x in range(3, 13):
                 if abs(x - 7.5) < 3 + (y - 10):
-                    c.px(x, y, figure[rng.randrange(len(figure))])
+                    c.px(x, y, fig(x, y))
         for y in range(3, 11):
             for x in range(4, 12):
                 if ((x - 7.5) / 3.6) ** 2 + ((y - 6.8) / 3.9) ** 2 <= 1:
-                    c.px(x, y, skin[rng.randrange(len(skin))])
+                    c.px(x, y, face(x, y))
         for x in range(4, 12):
             c.px(x, 3, hair[0])
             c.px(x, 4 if name == "lady" else 3, hair[1])
@@ -266,7 +265,7 @@ def portrait(name):
         for y in range(4, 15):
             for x in range(3, 13):
                 if ((x - 7.5) / 4.6) ** 2 + ((y - 8.5) / 4.2) ** 2 <= 1 or y >= 12:
-                    c.px(x, y, figure[rng.randrange(len(figure))])
+                    c.px(x, y, fig(x, y))
         for x, y in ((4, 3), (4, 4), (5, 4), (11, 3), (11, 4), (10, 4)):
             c.px(x, y, figure[1])
         c.px(7, 10, rgb("b05a6a"))
@@ -275,11 +274,11 @@ def portrait(name):
         for y in range(3, 15):
             for x in range(3, 13):
                 if ((x - 7.5) / 4.8) ** 2 + ((y - 8.5) / 5.6) ** 2 <= 1:
-                    c.px(x, y, figure[rng.randrange(len(figure))])
+                    c.px(x, y, fig(x, y))
         for y in range(4, 9):
             for x in range(3, 13):
                 if ((x - 7.5) / 4.6) ** 2 + ((y - 6.5) / 2.6) ** 2 <= 1:
-                    c.px(x, y, skin[rng.randrange(len(skin))])
+                    c.px(x, y, face(x, y))
         c.px(7, 8, rgb("d0a030"))
         c.px(8, 8, rgb("d0a030"))
         c.px(4, 3, figure[2])
@@ -308,7 +307,7 @@ def portrait_item():
 def riveted(palette, seed, rivets=True):
     """Dieselpunk plate: steel or olive noise, a darker seam round the edge and rivets in the corners."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, palette, seed, [1, 3, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, palette, seed, [1, 3, 3, 1])
     for i in range(16):
         c.px(i, 0, palette[0])
         c.px(i, 15, palette[0])
@@ -333,7 +332,7 @@ def fog_body():
 
 def fog_tank():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BRASS, 8502, [1, 2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, BRASS, 8502, [1, 2, 3, 1])
     for y in (3, 12):
         for x in range(16):
             c.px(x, y, BRASS[0])
@@ -343,7 +342,7 @@ def fog_tank():
 
 def fog_grille():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, STEEL, 8503)
+    bs.fill(c, 0, 0, 15, 15, STEEL, 8503)
     for y in range(1, 15, 2):
         for x in range(1, 15):
             c.px(x, y, rgb("101214"))
@@ -353,7 +352,7 @@ def fog_grille():
 def fog_gauge():
     """A round dial on a steel plate (u 4-11, v 4-11): white face, red sector, a needle pointing up-right."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, STEEL, 8504)
+    bs.fill(c, 0, 0, 15, 15, STEEL, 8504)
     for y in range(16):
         for x in range(16):
             d = math.hypot(x - 7.5, y - 7.5)
@@ -371,7 +370,7 @@ def fog_gauge():
 def fog_lamp(lit):
     c = Canvas()
     palette = [rgb("ffb020"), rgb("ffd040"), rgb("fff0a0")] if lit else [rgb("4a2a0a"), rgb("5c360e"), rgb("6c4214")]
-    noise(c, 0, 0, 15, 15, palette, 8505)
+    bs.fill(c, 0, 0, 15, 15, palette, 8505)
     return c.img
 
 
