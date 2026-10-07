@@ -11,6 +11,8 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -122,10 +124,10 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				server.runCommand("give @p jugcraft:%s 16".formatted(round));
 			}
 			context.waitTicks(10);
-			context.getInput().pressKey(options -> options.keyInventory);
+			context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
 			context.waitTicks(10);
 			context.takeScreenshot("jugcraft_guns_inventory");
-			context.runOnClient(client -> client.setScreen(null));
+			context.setScreen(() -> null);
 		}
 	}
 
