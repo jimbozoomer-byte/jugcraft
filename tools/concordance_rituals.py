@@ -545,7 +545,7 @@ def write_all(write, assets, data, lang, condition, self_drop, packs):
     import concordance_ritual_art
     write(assets / "textures" / "block" / "warding_stone_connected.png.mcmeta", concordance_ritual_art.FUSION_METADATA)
     pack = packs / "fusion_textures"
-    write(pack / "pack.mcmeta", {"pack": {"description": "Connected textures for Jugcraft's Warding Stones (needs Fusion)",
+    write(pack / "pack.mcmeta", {"pack": {"description": "Connected textures for Jugcraft's Warding Stones and Verdant Beds (needs Fusion)",
                                           "min_format": 71, "max_format": 2048}})
     write(pack / "assets" / MOD / "models" / "block" / "warding_stone.json", fusion_model())
     # The Circle Anchor: GeckoLib draws it in the world (its block renders nothing); the item and the breaking

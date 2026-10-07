@@ -114,6 +114,18 @@ public class LeyPylonBlockEntity extends BlockEntity {
 		return true;
 	}
 
+	/**
+	 * Takes up to {@code amount} Ley Charge made elsewhere by a conversion (roadmap step 14: a Verdant Heart's pour);
+	 * returns how much it took. The caller has already spent what made it.
+	 */
+	public long fill(ServerLevel level, long amount) {
+		long taken = Math.clamp(amount, 0L, CAPACITY - ley);
+		if (taken > 0) {
+			change(level, ley + taken);
+		}
+		return taken;
+	}
+
 	/** Operators and tests: sets the charge. */
 	public void setLey(ServerLevel level, long amount) {
 		change(level, Math.clamp(amount, 0L, CAPACITY));

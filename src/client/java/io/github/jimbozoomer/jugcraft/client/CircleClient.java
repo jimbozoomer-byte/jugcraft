@@ -11,6 +11,10 @@ import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.LumenMoteBlock;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +44,9 @@ import net.minecraft.world.phys.Vec3;
  * on a Player Animation Library layer of Jugcraft's own;</li>
  * <li>motes run along the channels the server last validated (the anchor's linked mask), never along a channel the
  * server did not check;</li>
- * <li>with Fusion installed, the built-in pack {@code fusion_textures} joins neighbouring Warding Stones.</li>
+ * <li>with Fusion installed, the built-in pack {@code fusion_textures} joins neighbouring Warding Stones and Verdant
+ * Beds;</li>
+ * <li>GeckoLib draws the garden's Verdant Heart, Mulch Maw and Gleaner (roadmap step 14).</li>
  * </ul>
  * Anchors are tracked as their block entities load and unload on this client, so nothing scans the world.
  */
@@ -62,6 +68,13 @@ public final class CircleClient {
 		// Roadmap step 13: GeckoLib draws the Alembic Crucible too (its liquid's surface is an animated texture).
 		BlockEntityRenderers.register(JugcraftConcordance.CRUCIBLE_ENTITY,
 				context -> new GeoBlockRenderer<CrucibleBlockEntity, BlockEntityRenderState>(context, JugcraftConcordance.CRUCIBLE_ENTITY));
+		// Roadmap step 14: the garden's living devices, animated from the status the server sent.
+		BlockEntityRenderers.register(Garden.HEART_ENTITY,
+				context -> new GeoBlockRenderer<VerdantHeartBlockEntity, BlockEntityRenderState>(context, Garden.HEART_ENTITY));
+		BlockEntityRenderers.register(Garden.MAW_ENTITY,
+				context -> new GeoBlockRenderer<MulchMawBlockEntity, BlockEntityRenderState>(context, Garden.MAW_ENTITY));
+		BlockEntityRenderers.register(Garden.GLEANER_ENTITY,
+				context -> new GeoBlockRenderer<GleanerBlockEntity, BlockEntityRenderState>(context, Garden.GLEANER_ENTITY));
 		PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(LAYER, LAYER_PRIORITY,
 				avatar -> new PlayerAnimationController(avatar, (controller, state, setter) -> PlayState.STOP));
 		ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register((blockEntity, level) -> {

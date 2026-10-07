@@ -239,6 +239,8 @@ public final class JugcraftConcordance {
 				FabricBlockEntityTypeBuilder.create(CrucibleBlockEntity::new, CRUCIBLE).build());
 		// Water by pipe into the crucible's tank (a formula's water steps draw on it); items through its container.
 		FluidStorage.SIDED.registerForBlockEntity((entity, side) -> entity.water, CRUCIBLE_ENTITY);
+		// Roadmap step 14: the Greenwardens' beds, crops and living devices.
+		io.github.jimbozoomer.jugcraft.concordance.garden.Garden.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

@@ -15,6 +15,10 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Instrument;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Plan;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Slot;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Disturbance;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.EcologyCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.EcologyParser;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ConversionTable;
 import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceType;
@@ -39,7 +43,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ConcordanceRules {
 	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
-			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, List.of());
+			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, EcologyCatalog.EMPTY, List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
@@ -50,13 +54,14 @@ public final class ConcordanceRules {
 	private final Map<String, StructurePattern> structures;
 	private final Map<String, RitualDefinition> rituals;
 	private final AlchemyCatalog alchemy;
+	private final EcologyCatalog ecology;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
 	private ConcordanceRules(Map<String, Definitions.Research> research, Map<String, Definitions.Invocation> invocations,
 			Map<String, Definitions.Working> workings, ConversionTable conversions, Catalog catalog,
 			Map<String, Map<String, Authored>> authored, Map<String, StructurePattern> structures, Map<String, RitualDefinition> rituals,
-			AlchemyCatalog alchemy, List<String> problems) {
+			AlchemyCatalog alchemy, EcologyCatalog ecology, List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
@@ -66,6 +71,7 @@ public final class ConcordanceRules {
 		this.structures = structures;
 		this.rituals = rituals;
 		this.alchemy = alchemy;
+		this.ecology = ecology;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -129,6 +135,11 @@ public final class ConcordanceRules {
 		return alchemy;
 	}
 
+	/** Organisms and disturbance sources (roadmap step 14). */
+	public EcologyCatalog ecology() {
+		return ecology;
+	}
+
 	public List<String> problems() {
 		return problems;
 	}
@@ -177,13 +188,16 @@ public final class ConcordanceRules {
 
 	/**
 	 * The files under {@code data/<ns>/concordance/}: kind (research, invocation, working, conversion, component,
-	 * instrument, structure, ritual, ingredient, preparation or property), id, content.
+	 * instrument, structure, ritual, ingredient, preparation, property, organism or disturbance), id, content.
 	 */
 	public record Source(String kind, String id, JsonElement json) {
 	}
 
 	public static ConcordanceRules build(List<Source> sources) {
 		RulesParser parser = new RulesParser();
+		EcologyParser ecologyParser = new EcologyParser();
+		Map<String, Organism> organisms = new TreeMap<>();
+		Map<String, Disturbance> disturbances = new TreeMap<>();
 		Map<String, Definitions.Research> research = new TreeMap<>();
 		Map<String, Definitions.Invocation> invocations = new TreeMap<>();
 		Map<String, Definitions.Working> workings = new TreeMap<>();
@@ -269,12 +283,25 @@ public final class ConcordanceRules {
 						properties.put(property.id(), property);
 					}
 				}
+				case "organism" -> {
+					Organism organism = ecologyParser.organism(source.id(), source.json());
+					if (organism != null) {
+						organisms.put(organism.id(), organism);
+					}
+				}
+				case "disturbance" -> {
+					Disturbance disturbance = ecologyParser.disturbance(source.id(), source.json());
+					if (disturbance != null) {
+						disturbances.put(disturbance.id(), disturbance);
+					}
+				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
 						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
-						+ "preparation or property)");
+						+ "preparation, property, organism or disturbance)");
 			}
 		}
 		problems.addAll(0, parser.problems());
+		problems.addAll(ecologyParser.problems());
 		// Prerequisites must exist and must not loop; entries in a loop could never be started.
 		boolean changed = true;
 		while (changed) {
@@ -398,6 +425,19 @@ public final class ConcordanceRules {
 			problems.add("alchemy: exactly one preparation must have no tool (how an ingredient goes in as it comes); found " + plain);
 		}
 		AlchemyCatalog alchemy = new AlchemyCatalog(byItem, preparations, properties);
+		// Ecology: a block is one organism and an item plants one crop, or the garden could not tell which grows.
+		Map<String, String> organismBlocks = new HashMap<>();
+		Map<String, String> organismItems = new HashMap<>();
+		for (Organism organism : List.copyOf(organisms.values())) {
+			String sameBlock = organismBlocks.putIfAbsent(organism.block(), organism.id());
+			String sameItem = organism.item() == null ? null : organismItems.putIfAbsent(organism.item(), organism.id());
+			if (sameBlock != null || sameItem != null) {
+				problems.add("organism " + organism.id() + ": its " + (sameBlock != null ? "block" : "item") + " is already organism "
+						+ (sameBlock != null ? sameBlock : sameItem));
+				organisms.remove(organism.id());
+			}
+		}
+		EcologyCatalog ecology = new EcologyCatalog(organisms, disturbances);
 		// Unlock lists and invoke evidence must name things that exist (a typo would silently teach nothing).
 		for (Definitions.Research entry : research.values()) {
 			for (Map.Entry<ResearchState, Definitions.Unlocks> unlock : entry.unlocks().entrySet()) {
@@ -432,7 +472,7 @@ public final class ConcordanceRules {
 				Collections.unmodifiableMap(new LinkedHashMap<>(invocations)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, catalog,
 				Collections.unmodifiableMap(authored), Collections.unmodifiableMap(new LinkedHashMap<>(structures)),
-				Collections.unmodifiableMap(new LinkedHashMap<>(rituals)), alchemy, List.copyOf(problems));
+				Collections.unmodifiableMap(new LinkedHashMap<>(rituals)), alchemy, ecology, List.copyOf(problems));
 	}
 
 	/**

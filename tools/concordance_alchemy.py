@@ -97,6 +97,11 @@ INGREDIENTS = {
     "dried_kelp": {"item": "minecraft:dried_kelp", "properties": {"tide": 1.2}},
     "honeycomb": {"item": "minecraft:honeycomb", "properties": {"tide": 0.6, "verdance": 0.4}},
     "spider_eye": {"item": "minecraft:spider_eye", "properties": {"hollow": 1.2}, "contaminant": 0.3},
+    # The Greenwardens' crops (roadmap step 14, tools/concordance_ecology.py): a garden's harvest for the crucible.
+    "sunpetal": {"item": "jugcraft:sunpetal", "properties": {"radiance": 1.0, "verdance": 0.6}},
+    "dewmoss": {"item": "jugcraft:dewmoss", "properties": {"tide": 1.4, "verdance": 0.3}},
+    "gloamcap": {"item": "jugcraft:gloamcap", "properties": {"hollow": 0.9, "rime": 0.4}, "contaminant": 0.1},
+    "mendvetch": {"item": "jugcraft:mendvetch", "properties": {"verdance": 1.4}},
 }
 # How an ingredient is prepared: scaled, part dissolved at once ("ready"), the rest stirred out.
 PREPARATIONS = {

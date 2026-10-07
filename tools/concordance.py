@@ -392,8 +392,15 @@ import concordance_alchemy as alchemy  # noqa: E402
 RESEARCH.update(alchemy.RESEARCH)
 ITEMS.update(alchemy.ITEMS)
 BLOCKS.update(alchemy.BLOCKS)
+# Roadmap step 14 (tools/concordance_ecology.py): Verdant Husbandry, its beds, crops and living devices.
+import concordance_ecology as ecology  # noqa: E402
+RESEARCH.update(ecology.RESEARCH)
+ITEMS.update(ecology.ITEMS)
+BLOCKS.update(ecology.BLOCKS)
+ITEMLESS_BLOCKS.update(ecology.ITEMLESS_BLOCKS)
+CONVERSIONS.update(ecology.CONVERSIONS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
-SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG]
+SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -886,6 +893,7 @@ def codex():
         **invocation_codex(),
         **rituals.codex(INSTRUMENT_LIMITS["initiate_wand"]),
         **alchemy.codex(),
+        **ecology.codex(),
     }
 
 
@@ -986,6 +994,7 @@ CATEGORIES = {
                     "description": "Spells the Lampwrights wrote down, and how to answer them"},
     **rituals.CATEGORY,
     **alchemy.CATEGORY,
+    **ecology.CATEGORY,
 }
 
 ENTRY_BACKGROUNDS = {None: "square_gray", "encountered": "square_gray", "observed": "square_gray",
@@ -1389,6 +1398,7 @@ MESSAGES = {
     "disabled": "The Concordance is switched off on this server",
     **rituals.MESSAGES,
     **alchemy.MESSAGES,
+    **ecology.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1420,6 +1430,7 @@ TOOLTIPS = {
     "jade.notes": "Notes waiting for their owner",
     **rituals.TOOLTIPS,
     **alchemy.TOOLTIPS,
+    **ecology.TOOLTIPS,
 }
 
 
@@ -1597,6 +1608,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     lang_entries(lang)
     rituals.write_all(write, assets, data, lang, condition, self_drop, assets.parents[1] / "resourcepacks")
     alchemy.write_all(write, assets, data, lang, condition, self_drop)
+    ecology.write_all(write, assets, data, lang, condition, self_drop, assets.parents[1] / "resourcepacks")
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -1729,6 +1741,7 @@ def write_data(write, res):
         write(assets / "player_animations" / f"{name}.json", clip)
     rituals.write_data(write, data, assets)
     alchemy.write_data(write, data)
+    ecology.write_data(write, data)
     # LambDynamicLights (optional, client): a lit Kindled Lantern glows in hand. Without the mod nothing reads this.
     write(assets / "dynamiclights" / "item" / "kindled_lantern.json",
           {"match": {"items": rid("kindled_lantern"), "components": {rid("lantern_lit"): {}}},
@@ -1743,6 +1756,7 @@ def tags(tags):
         tags.add("item", ALL_SPECIMENS_TAG, f"#{tag}")
     rituals.tags(tags)
     alchemy.tags(tags)
+    ecology.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     tags.add("block", "minecraft:mineable/axe", rid("lampwright_bench"))

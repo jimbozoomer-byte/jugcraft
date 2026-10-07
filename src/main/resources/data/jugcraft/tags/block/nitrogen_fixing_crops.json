@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:bean_crop"
+    "jugcraft:bean_crop",
+    "jugcraft:mendvetch_crop"
   ]
 }

@@ -11,6 +11,15 @@ import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.HabitatGaugeBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlock;
+import io.github.jimbozoomer.jugcraft.Jugcraft;
+import net.minecraft.world.level.block.state.BlockState;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -31,6 +40,68 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		registration.registerBlockComponent(ConcordanceTooltip.ANCHOR, CircleAnchorBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.PYLON, LeyPylonBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.CRUCIBLE, CrucibleBlock.class);
+		registration.registerBlockComponent(ConcordanceTooltip.BED, VerdantBedBlock.class);
+		registration.registerBlockComponent(ConcordanceTooltip.HEART, VerdantHeartBlock.class);
+		registration.registerBlockComponent(ConcordanceTooltip.MAW, MulchMawBlock.class);
+		registration.registerBlockComponent(ConcordanceTooltip.GAUGE, HabitatGaugeBlock.class);
+		registration.registerBlockComponent(ConcordanceTooltip.GLEANER, GleanerBlock.class);
+		registration.registerBlockComponent(CropTooltip.INSTANCE, OrganismCropBlock.class);
+	}
+
+	/** A growth word as the server noted it: a pace, dormant, or waiting for a reading. */
+	private static Component growthText(String growth) {
+		return switch (growth) {
+			case "dormant" -> Component.translatable("tooltip.jugcraft.concordance.jade.dormant");
+			case "waiting" -> Component.translatable("compose.jugcraft.ecology.status.waiting");
+			default -> Component.translatable("compose.jugcraft.ecology.growth." + growth);
+		};
+	}
+
+	/** One of the simulation's reasons, sent as "key|factor|value|a|b" (VerdantBedBlockEntity.note). */
+	private static Component reasonText(String encoded) {
+		String[] parts = encoded.split("\\|");
+		Object[] args = new Object[parts.length - 1];
+		for (int i = 1; i < parts.length; i++) {
+			args[i - 1] = i == 1 ? Component.translatable("compose.jugcraft.factor." + parts[1]) : parts[i];
+		}
+		return Component.translatable("compose.jugcraft." + parts[0], args);
+	}
+
+	private static void verdict(ITooltip tooltip, String growth, String reasons) {
+		if (!growth.isEmpty()) {
+			tooltip.add(growthText(growth));
+		}
+		if (!reasons.isEmpty()) {
+			for (String reason : reasons.split("\n")) {
+				tooltip.add(reasonText(reason));
+			}
+		}
+	}
+
+	/**
+	 * A Greenwarden crop: its step, and its bed's last verdict for it, which the server sends with the bed (a crop
+	 * has no block entity of its own to ask).
+	 */
+	private enum CropTooltip implements IBlockComponentProvider {
+		INSTANCE;
+
+		@Override
+		public Identifier getUid() {
+			return Jugcraft.id("organism");
+		}
+
+		@Override
+		public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+			BlockState state = accessor.getBlockState();
+			if (!(state.getBlock() instanceof OrganismCropBlock crop)) {
+				return;
+			}
+			tooltip.add(Component.translatable("message.jugcraft.concordance.garden.crop", crop.getName(), crop.getAge(state),
+					OrganismCropBlock.MAX_AGE, crop.isMaxAge(state) ? Component.translatable("compose.jugcraft.ecology.mature") : Component.empty()));
+			if (!crop.isMaxAge(state) && accessor.getLevel().getBlockEntity(accessor.getPosition().below()) instanceof VerdantBedBlockEntity bed) {
+				verdict(tooltip, bed.growth(), String.join("\n", bed.reasons()));
+			}
+		}
 	}
 
 	private enum MachineTooltip implements IBlockComponentProvider {
@@ -86,7 +157,12 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		SCONCE(ConcordanceDataProvider.SCONCE),
 		ANCHOR(ConcordanceDataProvider.ANCHOR),
 		PYLON(ConcordanceDataProvider.PYLON),
-		CRUCIBLE(ConcordanceDataProvider.CRUCIBLE);
+		CRUCIBLE(ConcordanceDataProvider.CRUCIBLE),
+		BED(ConcordanceDataProvider.BED),
+		HEART(ConcordanceDataProvider.HEART),
+		MAW(ConcordanceDataProvider.MAW),
+		GAUGE(ConcordanceDataProvider.GAUGE),
+		GLEANER(ConcordanceDataProvider.GLEANER);
 
 		private final ConcordanceDataProvider provider;
 
@@ -129,6 +205,37 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 						if (!next.isEmpty()) {
 							tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.waiting", next));
 						}
+					}
+				}
+				int capacity = data.getIntOr("capacity", -1);
+				if (capacity >= 0) {
+					if (!data.getBooleanOr("awake", true)) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.dormant"));
+					}
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.nutrients", data.getIntOr("nutrients", 0), capacity));
+					int[] habitat = data.getIntArray("habitat").orElse(new int[0]);
+					if (habitat.length == 5) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.habitat", habitat[0], habitat[1], habitat[2]));
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.area", habitat[3], habitat[4]));
+					}
+					verdict(tooltip, data.getStringOr("growth", ""), data.getStringOr("reasons", ""));
+				}
+				String device = data.getStringOr("device", "");
+				if (!device.isEmpty()) {
+					tooltip.add(Component.translatable("compose.jugcraft.ecology.status." + device));
+					int verdanceCapacity = data.getIntOr("verdance_capacity", 0);
+					if (verdanceCapacity > 0) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.verdance", data.getLongOr("verdance", 0L), verdanceCapacity));
+					}
+					int held = data.getIntOr("held", -1);
+					if (held >= 0) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.maw", held));
+					}
+					String mode = data.getStringOr("mode", "");
+					if (!mode.isEmpty()) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.gauge",
+								Component.translatable(mode.equals("suitability") ? "compose.jugcraft.ecology.gauge.suitability" : "compose.jugcraft.factor." + mode),
+								data.getIntOr("signal", 0)));
 					}
 				}
 				String phase = data.getStringOr("phase", "");

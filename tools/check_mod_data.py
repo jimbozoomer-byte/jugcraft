@@ -588,7 +588,7 @@ def check_tags():
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
-                                                    + concordance.items() + concordance.blocks())
+                                                    + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         if registry == "entity_type":
             # These entity IDs have no same-named item. Derive them from actual registrations.
             scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
@@ -7540,6 +7540,7 @@ def check_concordance(registered):
     check_baselines(root)
     check_rituals(co, root, lang, registered, research)
     check_alchemy(co, root, lang, registered, research)
+    check_ecology(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -7807,7 +7808,7 @@ def check_baselines(root):
     """Roadmap step 11: the benchmark and the rules it runs are pure Java (the harness and the game test run the same
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
-    for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy"):
+    for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -8139,6 +8140,173 @@ def check_alchemy(co, root, lang, registered, research):
         err("textures/block/crucible.png needs its animation metadata (GeckoLib animates the liquid's surface)")
     if "CRUCIBLE_ENTITY" not in java("CircleClient.java", CLIENT_JAVA_ROOT):
         err("the crucible must be drawn by GeckoLib on the client")
+
+
+def check_geckolib(name, java_text, uvs, sizes):
+    """A GeckoLib block's assets agree: every animation the Java names exists, every animated bone exists, and every
+    cube's box-UV region lies inside the sheet without overlapping another's; the sheet is the size the model says."""
+    geo = load(ASSETS / "geckolib" / "models" / "block" / f"{name}.geo.json") or {}
+    animations = load(ASSETS / "geckolib" / "animations" / "block" / f"{name}.animation.json") or {}
+    clips = set(animations.get("animations", {}))
+    for clip in re.findall(r'thenLoop\("([^"]+)"\)', java_text):
+        if clip not in clips:
+            err(f"{name}: animation {clip} is not in {name}.animation.json")
+    definition = (geo.get("minecraft:geometry") or [{}])[0]
+    width = definition.get("description", {}).get("texture_width", 0)
+    height = definition.get("description", {}).get("texture_height", 0)
+    bones = {bone["name"] for bone in definition.get("bones", [])}
+    for clip in animations.get("animations", {}).values():
+        for bone in clip.get("bones", {}):
+            if bone not in bones:
+                err(f"{name}.animation.json: animates unknown bone {bone}")
+    regions = []
+    for bone in definition.get("bones", []):
+        for cube in bone.get("cubes", []):
+            w, h, d = cube["size"]
+            u, v = cube["uv"]
+            region = (u, v, u + 2 * (w + d), v + d + h)
+            if region[2] > width or region[3] > height:
+                err(f"{name}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+            regions.append(region)
+    for i, a in enumerate(regions):
+        for b in regions[i + 1:]:
+            if a != b and a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                err(f"{name}.geo.json: UV regions {a} and {b} overlap")
+    sheet = ASSETS / "textures" / "block" / f"{name}.png"
+    if not sheet.is_file():
+        err(f"{name}: missing its GeckoLib sheet textures/block/{name}.png")
+    else:
+        with Image.open(sheet) as image:
+            if image.size != (width, height):
+                err(f"textures/block/{name}.png must be {width}x{height}")
+
+
+def check_ecology(co, root, lang, registered, research):
+    """Roadmap step 14: the Java mirrors tools/concordance_ecology.py (factors, sampling bounds, devices); every organism
+    and disturbance names things that exist and can be grown or made; composting never gives back what growing cost (no
+    positive loop); every word the garden says has its text; its icons are their maps; its GeckoLib assets agree."""
+    ec = co.ecology
+    garden = root / "garden"
+    registered = set(registered) | set(co.itemless_blocks())
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "ecology/Habitat.java": {"MAX_NUTRIENTS": ec.MAX_NUTRIENTS},
+        "ecology/Sampler.java": {"RADIUS": ec.SAMPLE_RADIUS, "HEIGHT": ec.SAMPLE_HEIGHT, "MAX_DIVERSITY": ec.MAX_DIVERSITY,
+                                 "MAX_DISTURBANCE": ec.MAX_DISTURBANCE, "FRESH_TICKS": ec.FRESH_TICKS},
+        "ecology/SampleBudget.java": {"PER_TICK": ec.SAMPLES_PER_TICK},
+        "ecology/Mulch.java": {"QUARTERS": ec.MULCH_QUARTERS},
+        "ecology/Organism.java": {"STAGES": ec.STAGES},
+        "garden/Garden.java": {"BONE_MEAL_NUTRIENTS": ec.BONE_MEAL_NUTRIENTS, "AWAKEN_LIMIT": ec.AWAKEN_LIMIT,
+                               "WATER_REACH": ec.WATER_REACH},
+        "garden/VerdantHeartBlockEntity.java": {"BEAT_TICKS": ec.BEAT_TICKS, "CAPACITY": ec.HEART_CAPACITY},
+        "garden/MulchMawBlockEntity.java": {"DIGEST_TICKS": ec.DIGEST_TICKS, "REACH": ec.MAW_REACH},
+        "garden/HabitatGaugeBlockEntity.java": {"GAUGE_TICKS": ec.GAUGE_TICKS},
+        "garden/GleanerBlockEntity.java": {"GLEAN_TICKS": ec.GLEAN_TICKS, "REACH": ec.GLEAN_REACH, "SLOTS": ec.GLEANER_SLOTS,
+                                           "CAPACITY": ec.GLEANER_CAPACITY, "DRAW": ec.GLEANER_DRAW,
+                                           "HEART_REACH": ec.HEART_REACH, "COST": ec.GLEAN_COST},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_ecology.py ({value})")
+    factors = {m[0]: m[1] for m in re.findall(r'^\t[A-Z_]+\("([a-z_]+)", ([A-Za-z_.0-9]+)\)', java("ecology/Factor.java"), re.M)}
+    if list(factors) != list(ec.FACTORS):
+        err(f"concordance/ecology/Factor.java: factors {list(factors)} differ from FACTORS (same order)")
+    if not re.search(r'String ACTIVITY = "' + re.escape(ec.CULTIVATION) + '";', java("garden/Garden.java")):
+        err("Garden.ACTIVITY differs from tools/concordance_ecology.py CULTIVATION")
+    practised = {rule.get("activity") for block in research.get("verdant_husbandry", {}).get("states", {}).values()
+                 for rule in block.get("any", []) if rule.get("type") == "practice"}
+    if ec.CULTIVATION not in practised:
+        err("Verdant Husbandry does not learn from the cultivation practice")
+    # Organisms and disturbances.
+    folder = DATA / MOD / "concordance"
+    organisms = {p.stem: load(p) or {} for p in (folder / "organism").glob("*.json")}
+    disturbances = {p.stem: load(p) or {} for p in (folder / "disturbance").glob("*.json")}
+    recipes = {p.stem for p in (DATA / MOD / "recipe").glob("*.json")}
+    if set(organisms) != set(ec.ORGANISMS):
+        err(f"organisms: {sorted(organisms)} differ from ORGANISMS")
+    mulch = {}
+    for name, (quarters, values) in ec.MULCH.items():
+        for value in values:
+            mulch[value] = quarters
+    for key, entry in organisms.items():
+        block = split(entry.get("block", ":"))[1]
+        if block not in registered:
+            err(f"organism {key}: block {entry.get('block')} is not registered")
+        niche = entry.get("niche", {})
+        for factor, values in niche.items():
+            top = ec.FACTORS.get(factor)
+            if top is None or len(values) != 4 or values != sorted(values) or values[0] < 0 or values[3] > top:
+                err(f"organism {key}: niche.{factor} must be [least, ideal from, ideal to, most] within 0..{top}")
+        floor = niche.get("nutrients", [0])[0]
+        if floor < entry.get("cost", 0):
+            err(f"organism {key}: its nutrient floor ({floor}) is below its cost")
+        if entry.get("role") != "crop":
+            continue
+        item = split(entry.get("item", ":"))[1]
+        if item not in registered or item not in recipes:
+            err(f"organism {key}: {entry.get('item')} is not a Jugcraft item with a recipe (its first seed)")
+        for stage in range(ec.STAGES + 1):
+            if not (ASSETS / "textures" / "block" / f"{key}_stage{stage}.png").is_file():
+                err(f"organism {key}: missing textures/block/{key}_stage{stage}.png")
+        if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
+            err(f"organism {key}: missing its loot table")
+        # Composting a harvest never gives back what regrowing it cost: no positive loop through the Maw.
+        if entry.get("cost", 0) > 0:
+            back = entry.get("produce", 0) * mulch.get(entry.get("item"), 0) + entry.get("chaff", 0) * mulch.get(f"{MOD}:verdant_chaff", 0)
+            spent = (ec.STAGES - entry.get("replant", 0)) * entry.get("cost", 0) * ec.MULCH_QUARTERS
+            if back >= spent:
+                err(f"organism {key}: composting its harvest ({back} quarters) returns at least what regrowing cost ({spent})")
+        if entry.get("item") not in mulch:
+            err(f"organism {key}: its item is not food for a Mulch Maw (#jugcraft:mulch/*)")
+    for key, entry in disturbances.items():
+        if not (1 <= entry.get("value", 0) <= ec.MAX_DISTURBANCE) or not entry.get("blocks"):
+            err(f"disturbance {key}: needs blocks and a value from 1 to {ec.MAX_DISTURBANCE}")
+        for ref in entry.get("blocks", []):
+            ns, path = split(ref.lstrip("#"))
+            if ns == MOD and not ref.startswith("#") and path not in registered:
+                err(f"disturbance {key}: {ref} is not a registered block")
+    for device in ("verdant_bed", "verdant_heart", "mulch_maw", "habitat_gauge", "gleaner"):
+        if device not in recipes:
+            err(f"garden: {device} has no recipe")
+    # Every word the garden says has its text.
+    for path in sorted((root / "ecology").glob("*.java")) + sorted(garden.glob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        for key in re.findall(r'Text\.of\("([a-z_.]+)"', text):
+            if not key.endswith(".") and f"compose.{MOD}.{key}" not in lang:
+                err(f"{path.name}: missing lang compose.{MOD}.{key}")
+        for key in re.findall(r'(?:status|Garden\.status)\("([a-z_]+)"', text):
+            if f"compose.{MOD}.ecology.status.{key}" not in lang:
+                err(f"{path.name}: missing lang compose.{MOD}.ecology.status.{key}")
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(garden\.[a-z_]+)"', text) + re.findall(r'tell\([a-z]+, "(garden\.[a-z_]+)"', text):
+            if f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+    for growth in ("thriving", "tolerating", "stalled"):
+        if f"compose.{MOD}.ecology.growth.{growth}" not in lang:
+            err(f"garden: missing lang compose.{MOD}.ecology.growth.{growth}")
+    for factor in ec.FACTORS:
+        if f"compose.{MOD}.factor.{factor}" not in lang:
+            err(f"garden: missing lang compose.{MOD}.factor.{factor}")
+    # The icons are their maps.
+    import item_icons
+    for icon in ("sunpetal", "dewmoss", "gloamcap", "mendvetch", "verdant_chaff", "verdant_heart", "mulch_maw", "gleaner",
+                 "habitat_gauge"):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"garden: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"garden: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+    for name in ("verdant_heart", "mulch_maw", "gleaner"):
+        uvs, sizes = ec.SIZES[name]
+        entity = {"verdant_heart": "VerdantHeartBlockEntity", "mulch_maw": "MulchMawBlockEntity", "gleaner": "GleanerBlockEntity"}[name]
+        check_geckolib(name, java(f"{entity}.java", garden), uvs, sizes)
+    if not re.search(r"HEART_ENTITY", java("CircleClient.java", CLIENT_JAVA_ROOT)):
+        err("the garden's living devices must be drawn by GeckoLib on the client")
 
 
 def KINDLE_MOTE_STEPS_FIT(co):

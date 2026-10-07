@@ -34,5 +34,17 @@
   },
   {
     "id": "jugcraft:concordance/alembic_arts_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/verdant_husbandry_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/verdant_husbandry_observed"
+  },
+  {
+    "id": "jugcraft:concordance/verdant_husbandry_understood"
+  },
+  {
+    "id": "jugcraft:concordance/verdant_husbandry_mastered"
   }
 ]

@@ -70,5 +70,29 @@
     "required_facts": [
       "jugcraft:concordance/alembic_arts_mastered"
     ]
+  },
+  {
+    "id": "jugcraft:concordance/verdant_husbandry_encountered",
+    "required_facts": [
+      "jugcraft:concordance/verdant_husbandry_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/verdant_husbandry_observed",
+    "required_facts": [
+      "jugcraft:concordance/verdant_husbandry_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/verdant_husbandry_understood",
+    "required_facts": [
+      "jugcraft:concordance/verdant_husbandry_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/verdant_husbandry_mastered",
+    "required_facts": [
+      "jugcraft:concordance/verdant_husbandry_mastered"
+    ]
   }
 ]

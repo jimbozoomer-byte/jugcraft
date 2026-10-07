@@ -6873,6 +6873,22 @@
     {
       "item": "minecraft:spider_eye",
       "key": "spider_eye"
+    },
+    {
+      "item": "jugcraft:sunpetal",
+      "key": "sunpetal"
+    },
+    {
+      "item": "jugcraft:dewmoss",
+      "key": "dewmoss"
+    },
+    {
+      "item": "jugcraft:gloamcap",
+      "key": "gloamcap"
+    },
+    {
+      "item": "jugcraft:mendvetch",
+      "key": "mendvetch"
     }
   ]
 }
