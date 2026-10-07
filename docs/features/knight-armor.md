@@ -120,6 +120,7 @@ python3 tools/check_mod_data.py
 - **Skin:** no face over a body part may lie within 0.15 pixel of the skin or its outer layer, nor cross them: 0 and 0.5 pixel out on the head (the hat), 0 and 0.25 elsewhere (jacket, sleeves, pants). A tilted plate is measured over the whole of its part above the body part, so one whose far side dips into the leg is caught. A face is let off only where another part's face hides it, further out and itself clear of the layers (the skirt lames' inner sides behind the mail lining, the crest's edges inside the helm).
 - **Mixed sets:** a piece may not lie on, or cross, the shell where another slot's vanilla armor draws, so knight leggings worn with an iron chestplate do not flicker.
 - **Two body parts:** standing, no front or back faces of two body parts may share a plane (nor any parallel faces of the body and the legs, which never sway apart). The two legs' boxes overlap 0.2 pixel at the centre line, so a split skirt must not meet itself there.
+- **Closed:** a face is left out only where another part of the same piece on the same body part covers it. An opening the wearer's body fills is still a hole on an armor stand's thin limbs. `tools/art_check.py` (rule H1, run by `check_mod_data.py`) draws each `worn_models.json` entry alone from 12 views and refuses one whose see-through share is over 0.5%.
 - **What the checker cannot see** is a gap: a place where nothing covers the wearer at all. `armor_preview.py --wearer` shows those (the neck under the collar, the body under the belt when sneaking, the far leg's inner side when walking were all found that way).
 - **A skirt hangs from the legs, not the body.** A body-hung skirt swings out in front of the legs when sneaking, and walking legs poke through it.
 - **Reach** (warned, not refused): parts more than 12 pixels to either side, 6 above the head or 1 below the feet may pop out at the edge of the screen or sink into the floor.
@@ -129,12 +130,12 @@ Every box is 6 quads, fewer when faces are skipped. Each quad is drawn every fra
 
 | | Cap | Steel knight | Bronze knight |
 | --- | --- | --- | --- |
-| One worn entry (one piece on one body part) | 200 | at most 133 | at most 139 |
-| Helmet | 220 | 133 | 139 |
+| One worn entry (one piece on one body part) | 200 | at most 134 | at most 140 |
+| Helmet | 220 | 134 | 140 |
 | Chestplate (body and both arms) | 320 | 174 | 174 |
-| Leggings (belt and both legs) | 260 | 92 | 97 |
-| Boots | 100 | 72 | 72 |
-| **Full set** | **900** (aim for 600) | **471** | **482** |
+| Leggings (belt and both legs) | 260 | 98 | 103 |
+| Boots | 100 | 78 | 78 |
+| **Full set** | **900** (aim for 600) | **484** | **495** |
 
 For scale, the exosuit's 3D parts are 138 quads (Vanguard) and 132 (Ronin), and the rocket pack 192. The steel knight is 91 boxes painted on one 128 × 128 texture. The chevrons, eye slits and hammered strips are paint, not boxes.
 
@@ -154,7 +155,7 @@ Not applicable: art and client rendering only. Defense, toughness, durability, e
 - **Disabling:** there is no switch. The `tin` and `machines` feature switches gate the recipes as before. If `worn_models.json` is missing, the layer logs a warning and draws nothing, and since the flat layers are gone, bronze and steel armor would then be invisible when worn. It would not be lost.
 - **Performance:**
   - The file is parsed once per resource reload.
-  - Each frame, each wearer costs four map lookups, then one submission per worn body part: 471 quads (1,884 vertices) for a full steel set and 482 for bronze, twice that when every piece is enchanted.
+  - Each frame, each wearer costs four map lookups, then one submission per worn body part: 484 quads (1,936 vertices) for a full steel set and 495 for bronze, twice that when every piece is enchanted.
   - There is no per-tick work.
 
 ## Dependencies and assets
@@ -199,8 +200,8 @@ Not applicable: art and client rendering only. Defense, toughness, durability, e
   - The deepest overlaps come only when sneak-walking or riding: up to about 4 pixels, where the top skirt lame swings into the belt.
   - We expect the lames and belt to hide this, but that has not been seen in game.
 
-**In CI (has not run on this branch yet):**
-- `./gradlew build` compiles the new client code. These names are believed right for 26.3 from Fabric API's sources, but only the build will tell:
+**In CI:** passed on `d6254a50e` (6 October 2026, before the merge with main below): the repository and mod jobs and all three client shards.
+- `./gradlew build` compiled the new client code, so these 26.3 names are right:
   - `RenderTypes.armorCutoutNoCull` and `armorCutoutNoCullGlint` taking a texture;
   - `ArmorStandRenderState` being a `HumanoidRenderState`.
 - The client game test's existing shots `jugcraft_steel_armor_worn` (front), `jugcraft_bronze_armor_worn` (front) and `jugcraft_bronze_armor_back` will show the knight armor in game for the first time.
@@ -216,8 +217,9 @@ Not applicable: art and client rendering only. Defense, toughness, durability, e
     - The player in steel from the front, standing and then sneaking with the real sneak key (`jugcraft_knight_armor_player`, `..._player_sneaking`), and sneaking from behind (`..._player_sneaking_back`), where the belt now closes the tipped body's underside.
     - The eight icons in item frames (`jugcraft_knight_armor_icons`).
   - The HUD is hidden for every shot, and put back as the earlier test left it.
+- **The screenshots from that run were looked at:** the knight row from four sides with its glint and the zombie, the close-ups, the player standing and sneaking, the icons, the three older armor shots and the `jugcraft_armor_sets_*` row. The closed faces (below) came after it and have not been seen in game.
 
-**Not run:** the game client by hand; babies and small armor stands wearing it; a player with a cape; two players on a dedicated server; any play. Until CI runs the client test above, nothing has shown the armor stands, the zombie, the sneaking player or the glint in game.
+**Not run:** the game client by hand; babies and small armor stands wearing it; a player with a cape; two players on a dedicated server; any play.
 
 ### Stacked on `claude/armor-styles`
 This branch merges `claude/armor-styles` ([#215](https://github.com/jimbozoomer-byte/jugcraft/pull/215), Steampunk and Kaiser Armor), whose PR it is stacked on. The merge, done on 6 October 2026:
@@ -233,12 +235,26 @@ This branch merges `claude/armor-styles` ([#215](https://github.com/jimbozoomer-
   - the `ArmorSetsClientGameTests` javadoc.
 - **After the merge:** `generate_material_data.py` and `generate_textures.py` ran clean, `check_mod_data.py` passed (1447 IDs) and `armor_smoke.py` passed.
 
+### Merged with main (7 October 2026)
+#215 landed in main squashed, with the other session's later fixes, so this branch merged main again (`dc2e52962`):
+- **Conflicts** kept this branch's side where the two meet: the 3D-aware equipment loop (`gear.py`) and equipment check (`check_mod_data.py`), the knight icons (`gear_textures.py`), the knight sentences (`handbook.py`) and the `ArmorSetsClientGameTests` javadoc. The test lists, the changelog and the other docs take main's new entries as well. The handbook JSON was regenerated.
+- **Main's new art check** (`tools/art_check.py`, from the see-through and flicker fixes) draws each `worn_models.json` entry alone. Its rule H1 refused the knight helmet (3.2% see-through), leggings (5.8% a leg) and boots (24% a leg): openings left for the wearer's body, through which the sky showed from below, between the legs and on armor stands.
+- **Closed, in `knight_armor.py`:**
+  - the collar's underside;
+  - the hip band's side at the centre line, and the lining's top, which now starts 0.15 pixel lower so it is not in the other hip's plane;
+  - the skirt hem's foot;
+  - the greaves' tops and inner sides;
+  - the sabatons' inner sides.
+
+  That is 13 quads a set (steel 484, bronze 495). The atlases are unchanged, since every face's region was already painted, and the armor looks the same from outside.
+- **After:** `generate_material_data.py` and `generate_textures.py` ran clean; `check_mod_data.py` passed (1487 IDs, the art check included); `check_repository.py`, `armor_models.py` (no problems or warnings) and `armor_smoke.py --no-render` passed. The wearer audit was not re-run.
+
 ## World and event applicability
 Not applicable: looks only. Mobs that wear bronze or steel armor (given it, or picking it up) show the knight armor too.
 
 ## Rollout and open questions
 **Known limits,** expected from how the layer works; none has been seen in game yet:
-- **From below,** looking up into the collar ring, the neck shows, as under any helmet.
+- **From below,** the collar's closed underside shows where the neck did (closed on 7 October 2026; not yet seen in game).
 - **Trims** can still be applied and are kept on the item, but they do not show on the 3D models.
 - **Babies** wear no visible bronze or steel armor. As far as we can tell they had none before either, because Jugcraft's equipment assets have no baby layer (vanilla's gained one in 26.3). Small armor stands should be the same.
 - **Odd wearers:** a zombie villager's taller head clips the helm, a skeleton's thin limbs leave the arm and leg plates floating, and a piglin's ears poke through.

@@ -1,7 +1,7 @@
 # Bloodthorn Armor: the first of the owner's armor tiers
 
-Status: implemented on `claude/bloodthorn-armor` (from `claude/knight-armor`, whose 3D armor engine it uses), awaiting review. **Not yet compiled, game-tested or played:** the Java compiles only in CI.
-Proposal issue: none. The owner sent five armor designs of their own on 7 October 2026 ("Can we start implementing the next 5 that I created. Again want you to use the the complex armor for each one to capture the shape of each piece like I have... Lets do these 1 by 1"). This is the first, a crimson set with no title on its picture, which the owner named:
+Status: implemented on `claude/bloodthorn-armor`, awaiting review. It is stacked on `claude/knight-armor` (#227), whose 3D armor engine it uses. **Not yet compiled, game-tested or played:** the Java compiles only in CI.
+Proposal issue: none. The owner sent five armor designs of their own on 6 October 2026 ("Can we start implementing the next 5 that I created. Again want you to use the the complex armor for each one to capture the shape of each piece like I have... Lets do these 1 by 1"). This is the first, a crimson set with no title on its picture, which the owner named:
 - the name: "Bloodthorn Armor";
 - what kind of armor: "New stronger armor tiers";
 - how players get it: "They might get dropped by bosses or be craftable for now just make the armor we can figure that out later".
@@ -84,7 +84,34 @@ The five sets are armor-only tiers with numbers of their own. This first one add
 - The design is the owner's (`docs` has no copy; the reference picture is not committed). The model, its paint and the icons are drawn by code, in `tools/bloodthorn_armor.py`, `tools/armor_paint.py` (`BLOODTHORN`) and `tools/armor_icons/bloodthorn/`. No Mojang or third-party texture is used.
 
 ## Verification
-VERIFICATION_PLACEHOLDER
+**Run locally on 7 October 2026,** on this branch after merging `claude/knight-armor` (which carries main):
+- **Generators:** `generate_material_data.py`, `generate_textures.py`, then `generate_material_data.py` again, all exit 0. The merged tree is what they write, with nothing left to change.
+  - Bloodthorn's own output: 9 `worn_models.json` entries, 4 names, the 4 vanilla slot tags, the item and model files, 4 icons, the atlas `textures/entity/equipment/3d/bloodthorn.png` and the repair tag.
+  - Before the merge, the knight armor's entries, atlases and icons were byte-identical to their baseline.
+- **`check_mod_data.py`:** PASS (1491 material IDs). This includes the new `check_armor_tiers` and main's art check (`tools/art_check.py`). Every Bloodthorn entry is 0.00% see-through (H1, limit 0.5%), with no flicker or texture findings.
+- **`check_repository.py`:** PASS.
+- **`armor_models.py`:** no problems. Five reach warnings: the centre spike, the low spikes and the pauldrons' lames (see "The look").
+- **`armor_smoke.py --no-render`:** all checks pass.
+- **Java:** the three changed or new Java files parse (syntax only; nothing compiles outside CI).
+- **Wearer audit** (`armor_preview.py`'s wearer mannequin, totalled by a scratch script): 0.00 model px² of skin or outer layer shows.
+  - It covers 7 poses × 9 views, plus a walk and sneak-walk cycle (32 poses × 9 views).
+  - With the left boot left off, it reports 44.9, so it does see the wearer.
+- **Icons,** checked by a scratch script:
+  - each outline is its part's own darkest tone, never pure black;
+  - no fill pixel touches transparency;
+  - each icon is lit from the top left.
+- **Renders** with `armor_preview.py` (not committed):
+  - the owner's two views beside ours from fitted cameras, lit as their render and as the game lights entities;
+  - stand, walk and sneak from six views.
+
+  The silhouettes overlap the owner's at 0.898 (front three-quarter) and 0.892 (back), as intersection over union.
+
+**In CI:** not run yet. It will:
+- compile `armorTier` and the material;
+- run `ArmorTiersGameTests` on the server;
+- run `ArmorTiersClientGameTests`, which writes the `jugcraft_armor_tier_bloodthorn_*` shots.
+
+**Not run:** the client by hand, a two-client dedicated server, and any play.
 
 ## World and event applicability
 Not applicable yet: it is placed in no structure, loot table or boss drop. When the owner chooses bosses, their records will carry its drop rates.
@@ -93,4 +120,14 @@ Not applicable yet: it is placed in no structure, loot table or boss drop. When 
 - **How it is obtained:** boss drops or a recipe, as the owner decides; until then it is creative-only.
 - **Its numbers** against the other four sets, once they exist: whether they form a ladder or sit side by side with different strengths.
 - **A perk:** the name suggests thorns (hurting attackers). None is added; the owner may want one.
-- ROLLOUT_PLACEHOLDER
+- **Where the model differs from the design** (each can be changed if the owner wants):
+  - **Pauldrons:** in the front view ours sit 1–2 pixels lower and about 1 further out at the flared lame. In the back view they match, so the two views disagree.
+  - **Spikes:** the low pair's tips are about 1.5 pixels higher than drawn.
+  - **Knee diamonds:** ours are squares on their corners, about 4 pixels across. The owner's read narrower and taller (about 2.4 × 4.3); the toolkit's diamond is always square.
+  - **The V:** its dark notch sits behind the breastplate, so only the near-black stripe reads as the dark V.
+  - **Helm:** a little narrower in the owner's render. Ours is 9.5 pixels wide, the least that clears the hat layer.
+  - **Neck:** the owner's dark band is the collar's plum inside; ours is a plum band on the helm. With the helmet off, the collar shows a closed magenta top.
+  - **Strips:** generated runs with the render's share of each tone, not texel-exact copies.
+  - **Scale:** the owner's two views differ in scale by 4.6%, so either their zoom differs or our proportions are off by that much.
+  - If the design was built in a modelling program, its file would give the exact box sizes.
+- **The other four sets** (Reforged White Diamond, Hades with its scythe, Sunset Gem, Pharaoh) each add an `ARMOR_TIERS` entry, a model module and icon maps. The registration, checks and tests here cover them as they come.
