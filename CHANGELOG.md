@@ -8,6 +8,19 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Steampunk Armor and Kaiser Armor
+- **The stylized armor looks return as two sets of their own:**
+  - **Steampunk Armor:** an aviator cap with teal goggles, a pressure gauge and a copper boiler on the back.
+  - **Kaiser Armor:** a black spiked helmet, a field-grey tunic over a steel cuirass, and jackboots: the parade dress of the Winged Cog.
+  - Each protects exactly as bronze or steel armor does: the same defense, toughness, durability, enchantability and repair.
+- **Made at a smithing table:**
+  - a **Steampunk Pattern**, a bronze piece and a copper ingot make the Steampunk piece;
+  - a **Kaiser Pattern** (made with an Imperial Crest), a steel piece and a gold ingot make the Kaiser piece;
+  - the same pattern and an ingot of the metal turn it back.
+  - Enchantments, wear, name, trims and plating carry over. Each pattern craft makes 4, one for each piece of a set.
+- **Bronze and steel armor keep their current look in this PR,** so for now each looks exactly like its Steampunk or Kaiser twin. Their IDs, stats and recipes are unchanged, and nothing needs converting. Their new 3D look comes in a following PR.
+- The **Goggles On** and **On Parade** advancements (a Kaiser piece also counts for Suited Up), and two handbook pages. Record: [steampunk-and-kaiser-armor.md](docs/features/steampunk-and-kaiser-armor.md).
+
 ### Unmerged: Arms VIII, batch 59
 - **Thrown arms** in bronze and steel, each an arm in the hand that you can also throw: hold use to wind it back and let go, as you throw a trident. What it strikes takes its damage (up to 8, the trident's), more with Sharpness and the like, and it comes down where it struck as itself, enchantments and wear kept, to be picked up again.
   - **Javelin:** flies far and straight.

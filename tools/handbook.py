@@ -553,6 +553,38 @@ def variant_pages():
     ]
 
 
+def armor_style_pages():
+    """Steampunk and Kaiser Armor (docs/features/steampunk-and-kaiser-armor.md): bronze and steel armor in another look,
+    smithed with a pattern."""
+    import gear
+
+    def grid(style):
+        rows, key = gear.ARMOR_STYLES[style]["template_recipe"]
+        return [item_for(key[ch]) if ch in key else None for row in rows for ch in row.ljust(3)]
+    steampunk, kaiser = gear.ARMOR_STYLES["steampunk"], gear.ARMOR_STYLES["kaiser"]
+    return [
+        {"title": "Steampunk and Kaiser Armor", "icon": f"{MOD}:kaiser_helmet", "text": [
+            "Steampunk armor is a bronze engineer's rig: an aviator cap with teal-glassed goggles, a breastplate with a "
+            "pressure gauge, a copper boiler on the back, and buckled boots. Kaiser armor is the parade dress of the "
+            "Winged Cog: a black spiked helmet with a gold plate, a field-grey tunic under a steel cuirass, gilt "
+            "epaulettes and black jackboots.",
+            "At a smithing table, a Steampunk Pattern, a piece of bronze armor and a copper ingot make the Steampunk "
+            f"piece. A Kaiser Pattern, a piece of steel armor and a gold ingot make the Kaiser piece. Each pattern "
+            f"craft makes {steampunk['template_count']}, one for each piece of a set. The Kaiser Pattern needs an "
+            "Imperial Crest, made from black lacquer plates.",
+            "Same protection as the bronze or steel piece, and for now the same look: bronze and steel armor still "
+            "wear these looks too, until they get their own design. Enchantments, wear, trims and plating carry over. "
+            "The same pattern and an ingot of the metal turn it back."],
+         "craft": {"grid": grid("steampunk"), "result": f"{MOD}:{steampunk['template']}",
+                   "count": steampunk["template_count"]}},
+        {"title": "Kaiser Pattern", "icon": f"{MOD}:{kaiser['template']}", "text": [
+            "The Kaiser Pattern takes an Imperial Crest, the Winged Cog of the Kaiserworks blocks: three black lacquer "
+            "plates, four gold nuggets, a gold ingot and a red dye make two crests.",
+            "Black lacquer plates come from iron plates and black dye."],
+         "craft": {"grid": grid("kaiser"), "result": f"{MOD}:{kaiser['template']}", "count": kaiser["template_count"]}},
+    ]
+
+
 def gear_pages():
     """Batch 25: bronze and steel tools and armor, and paxels; batch 27 gear; batch 28 exosuit."""
     import exosuit
@@ -566,11 +598,13 @@ def gear_pages():
         {"title": "Bronze and Steel Gear", "icon": f"{MOD}:steel_pickaxe", "text": [
             "Bronze and steel make swords, pickaxes, axes, shovels, hoes and armor, shaped like iron ones.",
             "Bronze tools get the same drops as iron and last a little longer. Bronze armor matches iron's and is "
-            "slightly tougher: steampunk brass, with goggles, a pressure gauge and a boiler on the back.",
+            "slightly tougher.",
             "Steel tools mine obsidian and ancient debris, and last over three times as long as iron. Steel armor sits "
-            "between iron and diamond: a spiked helmet, a field-grey tunic over a steel cuirass, and jackboots."],
+            "between iron and diamond.",
+            "Steampunk and Kaiser armor keep the stylized looks bronze and steel armor were first made in, as sets of "
+            "their own. For now bronze and steel armor wear those looks too."],
          "craft": {"grid": grid, "result": f"{MOD}:steel_pickaxe", "count": 1}},
-    ] + arms_pages() + [
+    ] + armor_style_pages() + arms_pages() + [
         {"title": "Paxels", "icon": f"{MOD}:steel_paxel", "text": [
             "A paxel is a pickaxe, an axe and a shovel in one tool: it mines stone, wood and dirt at full speed.",
             "Craft one from a pickaxe, an axe and a shovel of the same tier, from wood to netherite, bronze or steel. "
@@ -665,7 +699,9 @@ def ores_page():
 PROGRESSION = [
     ("Bronze Age", "bronze_ingot", "Get power running and double every ore.", [
         "Mine copper and tin and smelt bronze. Build a machine casing, a coal generator and copper cable.",
-        "Put the crusher first: every ore through it gives two raw ores, twice the ingots."], [
+        "Put the crusher first: every ore through it gives two raw ores, twice the ingots.",
+        "Bronze armor protects like iron; a Steampunk Pattern at a smithing table makes it Steampunk armor (see "
+        "Steampunk and Kaiser Armor)."], [
         ("tin_ingot", "Mine tin, copper"), ("bronze_ingot", "Smelt bronze"), ("machine_casing", "Machine casing"),
         ("coal_generator", "Coal generator"), ("copper_cable", "Copper cable"), ("electric_furnace", "Electric furnace"),
         ("crusher", "Crusher: 2x ore")]),
