@@ -129,11 +129,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			RecipeManager.createCheck(RecipeType.CRAFTING);
 
 	private final MachineKind kind;
-	/** Only the explicitly enabled pilot processors allocate companion job state. Never saved. */
-	private final local.peepo.@Nullable ProcessorJob companionJob;
+	/** One helper on compact processors, two on full multiblocks. Reservations are never saved. */
+	private final local.peepo.ProcessorJob[] companionJobs;
 	private local.peepo.CompanionStatus companionStatus = local.peepo.CompanionStatus.IDLE;
-	private long lastProcessorTick = -1000, lastAssisted = -1000;
-	private int assistHalf;
+	private long lastProcessorTick = -1000, lastContributed = -1000;
+	private int assistQuarters, assistedArgonTicks;
 	private final SimpleEnergyStorage energy;
 	private NonNullList<ItemStack> items;
 	private int progress;
@@ -200,7 +200,10 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	public MachineBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftMachines.MACHINE_ENTITY, pos, state);
 		this.kind = ((MachineBlock) state.getBlock()).kind();
-		this.companionJob = kind.supportsCompanionAssistance() ? new local.peepo.ProcessorJob(this) : null;
+		this.companionJobs = kind.supportsCompanionAssistance()
+			? new local.peepo.ProcessorJob[kind == MachineKind.ARC_FURNACE || footprint(state).size() > 1 ? 2 : 1]
+			: new local.peepo.ProcessorJob[0];
+		for (int i = 0; i < companionJobs.length; i++) companionJobs[i] = new local.peepo.ProcessorJob(this, i);
 		this.items = NonNullList.withSize(kind.containerSize(), ItemStack.EMPTY);
 		this.sides = kind == MachineKind.DEPOSIT_DRILL ? SideConfig.allOutputs() : new SideConfig();
 		// Producers only give energy out; consumers only take it in; the battery box does both.
@@ -462,6 +465,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	// ------------------------------------------------------------------ ticking
 
 	public void serverTick(ServerLevel level, BlockPos pos, BlockState state) {
+		if (companionJobs.length > 0) companionStatus = local.peepo.CompanionStatus.NO_INPUT;
 		boolean active = switch (kind) {
 			case COAL_GENERATOR -> tickGenerator(level, pos);
 			case SOLAR_PANEL -> tickSolar(level, pos);
@@ -489,6 +493,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case HEAT_RECOVERY_UNIT -> tickHeatRecovery(level, pos, state);
 			default -> kind.isFluidProcessor() ? tickFluidProcessor(level, pos, state) : tickProcessor(level, pos, state);
 		};
+		if (companionJobs.length > 0 && lastProcessorTick != level.getGameTime()) {
+			resetCompanionEffort();
+			if (!sides.redstone().allows(poweredByRedstone(level, pos, state))) companionStatus = local.peepo.CompanionStatus.REDSTONE_DISABLED;
+			else if (energy.getAmount() < (kind.isProcessor() ? upgrades().use(kind.usePerTick) : kind.usePerTick)) companionStatus = local.peepo.CompanionStatus.NO_POWER;
+		}
 		if (state.getValue(MachineBlock.LIT) != active) {
 			level.setBlock(pos, state.setValue(MachineBlock.LIT, active), 3);
 		}
@@ -830,7 +839,6 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false; // Keeps progress; resumes when power returns.
 		}
 		processorStatus(local.peepo.CompanionStatus.READY);
-		if (companionJob != null) lastProcessorTick = level.getGameTime();
 		energy.setAmount(energy.getAmount() - use);
 		int steps = 1;
 		// Boost gas (oxygen in the foundry, argon in the arc furnace): a second step this tick, for the gas.
@@ -838,7 +846,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			tank -= kind.boostPerTick();
 			steps++;
 		}
-		advanceProcessor(level, result.get(), steps);
+		advanceProcessor(level, result.get(), steps + companionBonus(use, maxProgress - progress - steps));
 		return true;
 	}
 
@@ -872,56 +880,70 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		setChanged();
 	}
 
+	private boolean processorStopped(local.peepo.CompanionStatus status) { processorStatus(status); return false; }
+
 	private void processorStatus(local.peepo.CompanionStatus status) {
-		if (companionJob == null) return;
+		if (companionJobs.length == 0) return;
 		companionStatus = status;
 		if (status != local.peepo.CompanionStatus.READY) resetCompanionEffort();
 	}
 
-	/** Cached by the normal processing tick; inspection/navigation never performs recipe searches. */
+	/** Updated by normal processing only: status/menu/navigation never rematches recipes. */
 	public local.peepo.CompanionStatus companionStatus() {
-		return companionJob == null ? local.peepo.CompanionStatus.UNSUPPORTED : companionStatus;
+		return companionJobs.length == 0 ? local.peepo.CompanionStatus.UNSUPPORTED : companionStatus;
 	}
+	public int companionHelperCount() { return companionJobs.length; }
 
 	public local.peepo.@Nullable CompanionJob companionJob(local.peepo.PeepoEntity npc) {
-		return companionJob == null ? null : companionJob.prepare(npc);
+		for (var job : companionJobs) if (job.assignedTo(npc)) return job.prepare(npc);
+		local.peepo.ProcessorJob fallback = null;
+		for (var job : companionJobs) if (job.availableTo(npc)) {
+			job.prepare(npc);
+			if (job.workStatus(npc) == local.peepo.CompanionStatus.READY) return job;
+			fallback = job;
+		}
+		return fallback != null ? fallback : companionJobs.length == 0 ? null : companionJobs[0];
 	}
 
-	public void resetCompanionEffort() { assistHalf = 0; }
-
-	/** +50% progress from one helper. Every bonus step pays the same upgraded JE cost as a normal step. */
-	public boolean assistProcessor(local.peepo.PeepoEntity npc) {
-		if (!(level instanceof ServerLevel server) || companionJob == null || isRemoved() || isLocked()
-				|| lastAssisted == level.getGameTime() || !companionJob.isOccupant(npc)
-				|| !npc.preferences.canWork() || !npc.orders.station(companionJob)
-				|| !npc.assignments.assignedWork(worldPosition) || !local.peepo.CompanionJobs.permitted(npc, worldPosition)) return false;
-		long now = level.getGameTime();
-		if (now - lastProcessorTick > 1 || companionStatus != local.peepo.CompanionStatus.READY) return false;
-		// Inventories, power and redstone can change after the machine tick. Revalidate before spending effort.
-		var result = findResult(server);
-		if (result.isEmpty()) { processorStatus(local.peepo.CompanionStatus.NO_INPUT); return false; }
-		if (!canOutput(result.get().stack()) || !byproductsFit(result.get().byproducts())) {
-			processorStatus(local.peepo.CompanionStatus.FULL); return false;
-		}
-		if (!sides.redstone().allows(poweredByRedstone(server, worldPosition, getBlockState()))) {
-			processorStatus(local.peepo.CompanionStatus.REDSTONE_DISABLED); return false;
-		}
-		var upgrades = upgrades();
-		long use = upgrades.use(kind.usePerTick);
-		if (energy.getAmount() < use) { processorStatus(local.peepo.CompanionStatus.NO_POWER); return false; }
-		if (now - lastAssisted > 1) assistHalf = 0;
-		try (var tx = net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()) {
-			if (npc.extractEnergy(16, tx) <= 0) return false;
-			tx.commit();
-		}
-		lastAssisted = now;
-		if (++assistHalf >= 2) {
-			assistHalf = 0;
-			maxProgress = upgrades.ticks(result.get().ticks());
-			energy.setAmount(energy.getAmount() - use);
-			advanceProcessor(server, result.get(), 1);
+	public boolean helperPositionAvailable(int slot, net.minecraft.world.phys.Vec3 point) {
+		if (point == null) return false;
+		for (int i = 0; i < companionJobs.length; i++) if (i != slot) {
+			var reserved = companionJobs[i].reservedPosition();
+			if (reserved != null && reserved.distanceToSqr(point) < .64) return false;
 		}
 		return true;
+	}
+	public void resetCompanionEffort() { assistQuarters = 0; }
+	private boolean hasCompanionRequests() {
+		for (var job : companionJobs) if (job.requestedAt(level.getGameTime())) return true;
+		return false;
+	}
+
+
+	/**
+	 * Called only at the validated, paid production step. Add at most one extra step, never another machine tick.
+	 * Each of two helpers contributes one quarter; a sole compact-machine helper contributes two.
+	 * Extra steps pay the normal electrical cost. All recipe/structure/fluid/output checks precede this hook.
+	 */
+	private int companionBonus(long use, int roomForSteps) {
+		if (companionJobs.length == 0) return 0;
+		long now = level.getGameTime();
+		if (lastProcessorTick == now) return 0;
+		lastProcessorTick = now;
+		companionStatus = local.peepo.CompanionStatus.READY;
+		if (isLocked()) { processorStatus(local.peepo.CompanionStatus.FORBIDDEN); return 0; }
+		if (energy.getAmount() < use) { processorStatus(local.peepo.CompanionStatus.NO_POWER); return 0; }
+		if (roomForSteps <= 0) { resetCompanionEffort(); return 0; }
+		if (now - lastContributed > 1) assistQuarters = 0;
+		int quarters = 0;
+		for (var job : companionJobs) quarters += job.contribute(now);
+		if (quarters == 0) { resetCompanionEffort(); return 0; }
+		lastContributed = now;
+		assistQuarters += quarters;
+		if (assistQuarters < 4) return 0;
+		assistQuarters -= 4;
+		energy.setAmount(energy.getAmount() - use);
+		return 1;
 	}
 
 	/**
@@ -933,6 +955,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		List<ItemStack> inputs = items.subList(0, kind.outputSlot());
 		Optional<FluidRecipe> found = FluidRecipes.find(level.getServer(), kind, inputs, tanks);
 		if (found.isEmpty() || !found.get().fluidResultsFit(tanks) || !itemResultsFit(found.get())) {
+			processorStatus(found.isEmpty() ? local.peepo.CompanionStatus.NO_INPUT : local.peepo.CompanionStatus.FULL);
 			if (progress != 0) {
 				progress = 0;
 				setChanged();
@@ -948,7 +971,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false; // Keeps progress; resumes when power returns.
 		}
 		energy.setAmount(energy.getAmount() - kind.usePerTick);
-		if (++progress >= maxProgress) {
+		if ((progress += 1 + companionBonus(kind.usePerTick, maxProgress - progress - 1)) >= maxProgress) {
 			progress = 0;
 			for (int slot = 0; slot < recipe.items().size(); slot++) {
 				items.get(slot).shrink(recipe.items().get(slot).count());
@@ -991,7 +1014,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			}
 		}
 		FluidTank tank = tanks.output(0);
-		if (!formed || !tank.fits(PetroFluids.CRUDE_OIL.source(), MachineKind.PUMPJACK_RATE)
+		if (!tank.fits(PetroFluids.CRUDE_OIL.source(), MachineKind.PUMPJACK_RATE)) return processorStopped(local.peepo.CompanionStatus.FULL);
+		if (!formed
 				|| !sides.redstone().allows(poweredByRedstone(level, pos, state)) || energy.getAmount() < kind.usePerTick) {
 			return false;
 		}
@@ -1003,8 +1027,13 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 		energy.setAmount(energy.getAmount() - kind.usePerTick);
 		tank.fill(PetroFluids.CRUDE_OIL.source(), pumped);
+		boolean extraRoom = hasCompanionRequests() && tank.fits(PetroFluids.CRUDE_OIL.source(), MachineKind.PUMPJACK_RATE)
+			&& !OilReservoirs.get(level, chunk).isDry();
+		int bonus = companionBonus(kind.usePerTick, extraRoom ? 1 : 0);
+		if (bonus > 0) tank.fill(PetroFluids.CRUDE_OIL.source(), OilReservoirs.extract(level, chunk,
+			OilReservoirs.Kind.CONVENTIONAL, MachineKind.PUMPJACK_RATE));
 		maxProgress = PUMPJACK_STROKE;
-		progress = (progress + 1) % PUMPJACK_STROKE;
+		progress = (progress + 1 + bonus) % PUMPJACK_STROKE;
 		setChanged();
 		return true;
 	}
@@ -1025,8 +1054,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		Fluid o2 = PetroFluids.OXYGEN.fluid();
 		Fluid ar = PetroFluids.ARGON.fluid();
 		if (!nitrogen.fits(n2, MachineKind.ASU_NITROGEN_PER_TICK) || !oxygen.fits(o2, MachineKind.ASU_OXYGEN_PER_TICK)
-				|| !argon.fits(ar, 1)
-				|| !sides.redstone().allows(poweredByRedstone(level, pos, state)) || energy.getAmount() < kind.usePerTick) {
+				|| !argon.fits(ar, 1)) return processorStopped(local.peepo.CompanionStatus.FULL);
+		if (!sides.redstone().allows(poweredByRedstone(level, pos, state)) || energy.getAmount() < kind.usePerTick) {
 			return false;
 		}
 		energy.setAmount(energy.getAmount() - kind.usePerTick);
@@ -1035,8 +1064,16 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		if (level.getGameTime() % MachineKind.ASU_ARGON_INTERVAL == 0) {
 			argon.fill(ar, 1);
 		}
+		boolean extraRoom = nitrogen.fits(n2, MachineKind.ASU_NITROGEN_PER_TICK)
+			&& oxygen.fits(o2, MachineKind.ASU_OXYGEN_PER_TICK) && argon.fits(ar, 1);
+		int bonus = companionBonus(kind.usePerTick, extraRoom ? 1 : 0);
+		if (bonus > 0) {
+			nitrogen.fill(n2, MachineKind.ASU_NITROGEN_PER_TICK);
+			oxygen.fill(o2, MachineKind.ASU_OXYGEN_PER_TICK);
+			if (++assistedArgonTicks >= MachineKind.ASU_ARGON_INTERVAL) { assistedArgonTicks = 0; argon.fill(ar, 1); }
+		}
 		maxProgress = PUMPJACK_STROKE;
-		progress = (progress + 1) % PUMPJACK_STROKE;
+		progress = (progress + 1 + bonus) % PUMPJACK_STROKE;
 		setChanged();
 		return true;
 	}
@@ -1063,10 +1100,10 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		int oilShare = MachineKind.FRACK_OIL_PER_TICK * 3 / 4;
 		int gasShare = MachineKind.FRACK_OIL_PER_TICK - oilShare;
 		FluidTank fluid = tanks.input(0);
-		if (!formed || !fluid.has(PetroFluids.FRACKING_FLUID.source(), MachineKind.FRACK_FLUID_PER_TICK)
-				|| !tanks.output(0).fits(PetroFluids.CRUDE_OIL.source(), oilShare)
+		if (!tanks.output(0).fits(PetroFluids.CRUDE_OIL.source(), oilShare)
 				|| !tanks.output(1).fits(PetroFluids.REFINERY_GAS.fluid(), gasShare)
-				|| !tanks.output(2).fits(PetroFluids.FLOWBACK_WATER.source(), MachineKind.FRACK_FLOWBACK_PER_TICK)
+				|| !tanks.output(2).fits(PetroFluids.FLOWBACK_WATER.source(), MachineKind.FRACK_FLOWBACK_PER_TICK)) return processorStopped(local.peepo.CompanionStatus.FULL);
+		if (!formed || !fluid.has(PetroFluids.FRACKING_FLUID.source(), MachineKind.FRACK_FLUID_PER_TICK)
 				|| !sides.redstone().allows(poweredByRedstone(level, pos, state)) || energy.getAmount() < kind.usePerTick) {
 			return false;
 		}
@@ -1084,8 +1121,22 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			tanks.output(1).fill(PetroFluids.REFINERY_GAS.fluid(), freed - oil);
 		}
 		tanks.output(2).fill(PetroFluids.FLOWBACK_WATER.source(), MachineKind.FRACK_FLOWBACK_PER_TICK);
+		boolean extraRoom = hasCompanionRequests() && fluid.has(PetroFluids.FRACKING_FLUID.source(), MachineKind.FRACK_FLUID_PER_TICK)
+			&& tanks.output(0).fits(PetroFluids.CRUDE_OIL.source(), oilShare)
+			&& tanks.output(1).fits(PetroFluids.REFINERY_GAS.fluid(), gasShare)
+			&& tanks.output(2).fits(PetroFluids.FLOWBACK_WATER.source(), MachineKind.FRACK_FLOWBACK_PER_TICK)
+			&& !OilReservoirs.get(level, chunk).isDry();
+		int bonus = companionBonus(kind.usePerTick, extraRoom ? 1 : 0);
+		if (bonus > 0) {
+			int extra = OilReservoirs.extract(level, chunk, OilReservoirs.Kind.SHALE, MachineKind.FRACK_OIL_PER_TICK);
+			fluid.drain(MachineKind.FRACK_FLUID_PER_TICK);
+			int extraOil = extra * 3 / 4;
+			tanks.output(0).fill(PetroFluids.CRUDE_OIL.source(), extraOil);
+			if (extra > extraOil) tanks.output(1).fill(PetroFluids.REFINERY_GAS.fluid(), extra - extraOil);
+			tanks.output(2).fill(PetroFluids.FLOWBACK_WATER.source(), MachineKind.FRACK_FLOWBACK_PER_TICK);
+		}
 		maxProgress = PUMPJACK_STROKE;
-		progress = (progress + 1) % PUMPJACK_STROKE;
+		progress = (progress + 1 + bonus) % PUMPJACK_STROKE;
 		setChanged();
 		return true;
 	}
@@ -1277,7 +1328,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false;
 		}
 		ItemStack mined = new ItemStack(ore.getBlock().asItem());
-		if (resultSlotFor(mined) < 0 || !sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+		if (resultSlotFor(mined) < 0) return processorStopped(local.peepo.CompanionStatus.FULL);
+		if (!sides.redstone().allows(poweredByRedstone(level, pos, state))) {
 			return false;
 		}
 		MachineUpgrades.Effect upgrades = upgrades();
@@ -1287,7 +1339,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false;
 		}
 		energy.setAmount(energy.getAmount() - use);
-		if (++progress >= maxProgress) {
+		if ((progress += 1 + companionBonus(use, maxProgress - progress - 1)) >= maxProgress) {
 			progress = 0;
 			int slot = resultSlotFor(mined);
 			if (items.get(slot).isEmpty()) {
@@ -1338,7 +1390,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				return false;
 			}
 			energy.setAmount(energy.getAmount() - use);
-			progress++;
+			progress += 1 + companionBonus(use, maxProgress - progress - 1);
 		}
 		if (progress >= maxProgress) {
 			BlockState crop = level.getBlockState(target);
@@ -1353,7 +1405,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			}
 			if (!storeAll(drops)) {
 				setChanged();
-				return false; // Full: wait with the harvest ready.
+				return processorStopped(local.peepo.CompanionStatus.FULL); // Wait with the harvest ready.
 			}
 			level.setBlock(target, replant && crop.getBlock() instanceof CropBlock block ? block.getStateForAge(0)
 					: Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
@@ -1435,7 +1487,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			}
 		}
 		ItemStack first = new ItemStack(((DepositBlock) level.getBlockState(depositTarget).getBlock()).yield());
-		if (resultSlotFor(first) < 0 || !sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+		if (resultSlotFor(first) < 0) return processorStopped(local.peepo.CompanionStatus.FULL);
+		if (!sides.redstone().allows(poweredByRedstone(level, pos, state))) {
 			return false;
 		}
 		MachineUpgrades.Effect upgrades = upgrades();
@@ -1445,7 +1498,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false;
 		}
 		energy.setAmount(energy.getAmount() - use);
-		if (++progress >= maxProgress) {
+		if ((progress += 1 + companionBonus(use, maxProgress - progress - 1)) >= maxProgress) {
 			progress = 0;
 			for (BlockPos source : findDeposits(level, pos, state)) {
 				ItemStack mined = new ItemStack(((DepositBlock) level.getBlockState(source).getBlock()).yield(),
@@ -1520,7 +1573,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			formed = water && lava;
 		}
 		ItemStack cobble = new ItemStack(Items.COBBLESTONE);
-		if (!formed || !canOutput(cobble) || !sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+		if (!canOutput(cobble)) return processorStopped(local.peepo.CompanionStatus.FULL);
+		if (!formed || !sides.redstone().allows(poweredByRedstone(level, pos, state))) {
 			return false;
 		}
 		MachineUpgrades.Effect upgrades = upgrades();
@@ -1530,7 +1584,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false;
 		}
 		energy.setAmount(energy.getAmount() - use);
-		if (++progress >= maxProgress) {
+		if ((progress += 1 + companionBonus(use, maxProgress - progress - 1)) >= maxProgress) {
 			progress = 0;
 			ItemStack output = items.get(kind.outputSlot());
 			if (output.isEmpty()) {
@@ -1612,8 +1666,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				return false; // Two kinds of remainder: not supported, and nothing is ever lost.
 			}
 		}
-		if (result.isEmpty() || !canOutput(result) || (!remainder.isEmpty() && byproductSlotFor(remainder) < 0)
-				|| !sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+		if (!canOutput(result) || (!remainder.isEmpty() && byproductSlotFor(remainder) < 0)) return processorStopped(local.peepo.CompanionStatus.FULL);
+		if (result.isEmpty() || !sides.redstone().allows(poweredByRedstone(level, pos, state))) {
 			return false;
 		}
 		MachineUpgrades.Effect upgrades = upgrades();
@@ -1623,7 +1677,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false;
 		}
 		energy.setAmount(energy.getAmount() - use);
-		if (++progress >= maxProgress) {
+		if ((progress += 1 + companionBonus(use, maxProgress - progress - 1)) >= maxProgress) {
 			progress = 0;
 			ItemStack output = items.get(kind.outputSlot());
 			if (output.isEmpty()) {
@@ -1656,6 +1710,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		ItemStack result = metal == null || item.isEmpty() ? ItemStack.EMPTY
 				: Electroplating.plate(item, metal, level.registryAccess());
 		if (result.isEmpty() || tank < Electroplating.ACID_PER_PLATING || !items.get(kind.outputSlot()).isEmpty()) {
+			processorStatus(!items.get(kind.outputSlot()).isEmpty() ? local.peepo.CompanionStatus.FULL : local.peepo.CompanionStatus.NO_INPUT);
 			if (progress != 0) {
 				progress = 0;
 				setChanged();
@@ -1672,7 +1727,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false; // Keeps progress; resumes when power returns.
 		}
 		energy.setAmount(energy.getAmount() - use);
-		if (++progress >= maxProgress) {
+		if ((progress += 1 + companionBonus(use, maxProgress - progress - 1)) >= maxProgress) {
 			progress = 0;
 			items.set(kind.outputSlot(), result);
 			item.shrink(1);
@@ -1988,7 +2043,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 
 	@Override
 	public void setRemoved() {
-		if (companionJob != null) companionJob.removed();
+		for (var job : companionJobs) job.removed();
 		super.setRemoved();
 	}
 
@@ -1998,6 +2053,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		items = NonNullList.withSize(kind.containerSize(), ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(input, items);
 		progress = input.getInt("progress").orElse(0);
+		assistedArgonTicks = Math.clamp(input.getIntOr("CompanionArgonTicks", 0), 0, MachineKind.ASU_ARGON_INTERVAL - 1);
 		maxProgress = input.getInt("max_progress").orElse(0);
 		burn = input.getInt("burn").orElse(0);
 		maxBurn = input.getInt("max_burn").orElse(0);
@@ -2020,6 +2076,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		ContainerHelper.saveAllItems(output, items);
 		output.putLong("energy", energy.getAmount());
 		output.putInt("progress", progress);
+		if (kind == MachineKind.AIR_SEPARATION_UNIT) output.putInt("CompanionArgonTicks", assistedArgonTicks);
 		output.putInt("max_progress", maxProgress);
 		output.putInt("burn", burn);
 		output.putInt("max_burn", maxBurn);

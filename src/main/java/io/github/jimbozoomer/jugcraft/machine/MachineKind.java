@@ -498,12 +498,12 @@ public enum MachineKind implements StringRepresentable {
 		};
 	}
 
-	/** Standard item processors enabled for the initial companion-assistance rollout. */
+	/** Processing jobs, including continuous extraction/separation; never power production or storage. */
 	public boolean supportsCompanionAssistance() {
-		// Staged rollout: vanilla smelting, single input, multiple inputs and byproducts.
-		// Other processors need their costs and completion paths reviewed before opting in.
-		return switch (this) {
-			case ELECTRIC_FURNACE, CRUSHER, ALLOY_SMELTER, PULVERIZER -> true;
+		return isProcessor() || switch (this) {
+			case PUMPJACK, FRACKING_RIG, AIR_SEPARATION_UNIT, DISTILLATION_TOWER, CATALYTIC_CRACKER,
+				FLOWBACK_TREATMENT_UNIT, POLYMERIZATION_REACTOR, ELECTROLYTIC_CELL, CHEMICAL_REACTOR,
+				SYNTHESIS_CONVERTER, HYDROTREATER, LITHOGRAPHY_STATION, AMMONIA_CHILLER, CRYOGENIC_LIQUEFIER -> true;
 			default -> false;
 		};
 	}
