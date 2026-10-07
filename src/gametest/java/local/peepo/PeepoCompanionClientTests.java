@@ -80,7 +80,7 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
             server.runOnServer(s -> group("all bed colors, bunks, sleep and release", () -> beds(s.overworld())));
             server.runCommand("time set noon");
             server.runOnServer(s -> group("cooking recipe plan, gating and assistance", () -> cooking(s.overworld(),s.getPlayerList().getPlayers().getFirst())));
-            group("recipe GUI synchronization and button packets", () -> cookingGui(context, server));
+            group("ordinary pot GUI without recipe editing", () -> cookingGui(context, server));
             group("companion GUI synchronization and commands", () -> companionGui(context, server));
             group("automatic cooking approach and animation synchronization", () -> automaticCooking(context, server));
             group("automatic ground food pickup and eating", () -> groundFood(server));
@@ -187,7 +187,7 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
         check(clone.orders.owner(player) && clone.belongings.getItem(0).getCount()==3,"cargo or owner persistence");
         check(clone.isWearingPumpkin() && clone.getMainHandItem().is(Items.TORCH),"equipment persistence");
         var menu=new CompanionMenu(1,player.getInventory(),npc);
-        check(menu.slots.size()==46 && menu.slots.get(8).getMaxStackSize()==1,"8 cargo + 2 equipment slots");
+        check(menu.slots.size()==50 && menu.slots.get(8).getMaxStackSize()==1,"8 cargo + 2 equipment slots");
         check(!menu.slots.get(8).mayPlace(new ItemStack(Items.STONE)),"costume slot accepts junk");
         check(!menu.clickMenuButton(player,999) && menu.quickMoveStack(player,-1).isEmpty(),"invalid menu input");
         npc.discard();
@@ -306,13 +306,10 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
     private void cookingGui(ClientGameTestContext context,TestServerContext server){
         server.runOnServer(s -> s.getPlayerList().getPlayers().getFirst().openMenu((CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4))));
         context.waitForScreen(CookingPotScreen.class);
-        context.waitFor(c->((CookingPotMenu)c.player.containerMenu).selected()>=0,100);
-        check(context.computeOnClient(c->!((CookingPotMenu)c.player.containerMenu).recipes().isEmpty()),"recipe catalog missing client-side");
-        context.takeScreenshot("peepo_cooking_recipe_gui");
-        context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,0));
-        server.waitFor(s->((CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4))).selectedRecipe()==null,100);
+        context.waitTicks(3);
+        server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();check(!p.containerMenu.clickMenuButton(p,0),"pot still accepts recipe selection buttons");});
+        context.takeScreenshot("peepo_ordinary_pot_gui");
         closeMenu(context,server);
-        server.runOnServer(s->((CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4))).selectRecipe(recipeId));
     }
     private void companionGui(ClientGameTestContext context,TestServerContext server){
         server.runOnServer(s->{
@@ -323,12 +320,45 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
         });
         context.waitForScreen(CompanionScreen.class);
         context.waitFor(c->c.player.containerMenu.getSlot(0).getItem().getCount()==3,100);
-        check(context.computeOnClient(c->c.player.containerMenu.slots.size()==46),"companion slot sync");
+        check(context.computeOnClient(c->c.player.containerMenu.slots.size()==50),"companion slot sync");
         context.takeScreenshot("peepo_companion_gui");
         context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,40));
         try { server.waitFor(s->((PeepoEntity)s.overworld().getEntity(savedNpc)).preferences.schedule==1,100); }
         catch(AssertionError e){throw new AssertionError(server.computeOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();var n=(PeepoEntity)s.overworld().getEntity(savedNpc);return "schedule="+n.preferences.schedule+", distance="+p.distanceTo(n)+", owner="+n.orders.owner(p)+", menu="+p.containerMenu.getClass()+", valid="+p.containerMenu.stillValid(p);}),e);}
+        ghostRecipeGui(context,server);
         closeMenu(context,server);
+    }
+    private void ghostRecipeGui(ClientGameTestContext context,TestServerContext server){
+        server.runOnServer(s->{
+            var pot=(CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4));pot.selectRecipe(null);
+            var output=CookingPotRecipe.catalog(s).get(recipeId).output().create().copyWithCount(4);
+            s.getPlayerList().getPlayers().getFirst().getInventory().setItem(9,output);
+        });
+        context.waitFor(c->c.player.containerMenu.getSlot(10).getItem().getCount()==4 && c.player.containerMenu.getSlot(46).getItem().isEmpty(),100);
+        clickSlot(context,10,0,net.minecraft.world.inventory.ContainerInput.PICKUP);
+        context.waitFor(c->c.player.containerMenu.getCarried().getCount()==4,100);
+        clickSlot(context,46,0,net.minecraft.world.inventory.ContainerInput.PICKUP);
+        server.waitFor(s->recipeId.equals(((CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4))).selectedRecipe()),100);
+        context.waitFor(c->c.player.containerMenu.getSlot(46).getItem().getCount()==1,100);
+        check(context.computeOnClient(c->c.player.containerMenu.getCarried().getCount()==4),"ghost consumed cursor item");
+        for(var type:new net.minecraft.world.inventory.ContainerInput[]{net.minecraft.world.inventory.ContainerInput.QUICK_MOVE,net.minecraft.world.inventory.ContainerInput.CLONE,net.minecraft.world.inventory.ContainerInput.THROW,net.minecraft.world.inventory.ContainerInput.SWAP})clickSlot(context,46,0,type);
+        server.runOnServer(s->{
+            var p=s.getPlayerList().getPlayers().getFirst();var menu=p.containerMenu;
+            check(menu.getCarried().getCount()==4 && menu.getSlot(46).getItem().getCount()==1,"ghost extraction/duplication");
+            check(!menu.getSlot(46).mayPickup(p) && !menu.getSlot(46).mayPlace(new ItemStack(Items.APPLE)),"ghost became storage");
+        });
+        context.waitTicks(3);clickSlot(context,46,1,net.minecraft.world.inventory.ContainerInput.PICKUP);
+        server.waitFor(s->((CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4))).selectedRecipe()==null,100);
+        context.waitFor(c->c.player.containerMenu.getSlot(46).getItem().isEmpty(),100);
+        check(context.computeOnClient(c->c.player.containerMenu.getCarried().getCount()==4),"clearing ghost changed cursor");
+        context.waitTicks(3);clickSlot(context,46,0,net.minecraft.world.inventory.ContainerInput.PICKUP);
+        context.waitFor(c->c.player.containerMenu.getSlot(46).getItem().getCount()==1,100);
+        clickSlot(context,10,0,net.minecraft.world.inventory.ContainerInput.PICKUP);
+        context.waitFor(c->c.player.containerMenu.getCarried().isEmpty() && c.player.containerMenu.getSlot(10).getItem().getCount()==4,100);
+        context.takeScreenshot("peepo_companion_ghost_recipe");
+    }
+    private void clickSlot(ClientGameTestContext context,int slot,int button,net.minecraft.world.inventory.ContainerInput type){
+        context.runOnClient(c->c.gameMode.handleContainerInput(c.player.containerMenu.containerId,slot,button,type,c.player));
     }
     private void automaticCooking(ClientGameTestContext context,TestServerContext server){
         closeMenu(context,server);

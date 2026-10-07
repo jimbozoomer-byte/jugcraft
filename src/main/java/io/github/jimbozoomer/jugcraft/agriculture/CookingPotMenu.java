@@ -19,35 +19,18 @@ public class CookingPotMenu extends AbstractContainerMenu {
 
 	private final Container container;
 	private final ContainerData data;
-	private final java.util.List<CookingPotPlan> recipes;
 	private final Object revision = CookingPotRecipe.revision();
-	private long nextEdit;
-	private boolean selectionInitialized;
-	private net.minecraft.resources.Identifier displayedRecipe;
-	private final net.minecraft.world.inventory.DataSlot selection = net.minecraft.world.inventory.DataSlot.standalone();
 
-	/** Client-side constructor: contents arrive through slot and data syncing. */
 	public CookingPotMenu(int containerId, Inventory inventory) {
-		this(containerId, inventory, new CookingPotPlan.Opening(java.util.List.of()));
-	}
-	public CookingPotMenu(int containerId, Inventory inventory, CookingPotPlan.Opening opening) {
 		this(containerId, inventory, new SimpleContainer(CookingPotBlockEntity.SLOTS),
-				new SimpleContainerData(CookingPotBlockEntity.DATA_COUNT), opening.recipes());
+			new SimpleContainerData(CookingPotBlockEntity.DATA_COUNT));
 	}
-
 	public CookingPotMenu(int containerId, Inventory inventory, Container container, ContainerData data) {
-		this(containerId, inventory, container, data, inventory.player.level() instanceof net.minecraft.server.level.ServerLevel server
-			? CookingPotRecipe.plans(server.getServer()) : java.util.List.of());
-	}
-	private CookingPotMenu(int containerId, Inventory inventory, Container container, ContainerData data, java.util.List<CookingPotPlan> recipes) {
 		super(JugcraftAgriculture.COOKING_POT_MENU, containerId);
 		checkContainerSize(container, CookingPotBlockEntity.SLOTS);
 		checkContainerDataCount(data, CookingPotBlockEntity.DATA_COUNT);
 		this.container = container;
 		this.data = data;
-		this.recipes = java.util.List.copyOf(recipes);
-		selection.set(-1);
-		addDataSlot(selection);
 		for (int slot = 0; slot < CookingPotBlockEntity.INPUTS; slot++) {
 			addSlot(new Slot(container, slot, INPUT_X + (slot % 3) * 18, INPUT_Y + (slot / 3) * 18) {
 				@Override
@@ -64,32 +47,11 @@ public class CookingPotMenu extends AbstractContainerMenu {
 				}
 			});
 		}
-		addStandardInventorySlots(inventory, 8, 166);
+		addStandardInventorySlots(inventory, 8, 84);
 		addDataSlots(data);
-		updateSelection();
 	}
-	public java.util.List<CookingPotPlan> recipes() { return recipes; }
-	public int selected() { return selection.get(); }
 	public boolean assisted() { return data.get(CookingPotBlockEntity.DATA_ASSISTED) != 0; }
 	public local.peepo.CompanionStatus status() { return local.peepo.CompanionStatus.from(data.get(CookingPotBlockEntity.DATA_STATUS)); }
-	private void updateSelection() {
-		if (!(container instanceof CookingPotBlockEntity pot)) return;
-		var id = pot.selectedRecipe();
-		if (selectionInitialized && java.util.Objects.equals(id, displayedRecipe)) return;
-		selectionInitialized = true; displayedRecipe = id;
-		int index = id == null ? -1 : -2;
-		for (int i=0; i<recipes.size(); i++) if (recipes.get(i).id().equals(id)) { index=i; break; }
-		selection.set(index);
-	}
-	@Override public void broadcastChanges() { updateSelection(); super.broadcastChanges(); }
-	@Override public boolean clickMenuButton(Player player, int button) {
-		if (!(container instanceof CookingPotBlockEntity pot) || !stillValid(player) || button < 0 || button > recipes.size()) return false;
-		long now = player.level().getGameTime();
-		if (now < nextEdit) return false;
-		nextEdit = now + 2;
-		pot.selectRecipe(button == 0 ? null : recipes.get(button-1).id());
-		broadcastChanges(); return true;
-	}
 
 	/** Cooking progress from 0 to {@code width}. */
 	public int progress(int width) {

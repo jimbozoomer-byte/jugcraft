@@ -4,7 +4,6 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -41,7 +40,7 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Hoppers and pipes put ingredients in from the top and sides and take meals out from the bottom.
  */
-public class CookingPotBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, ExtendedMenuProvider<CookingPotPlan.Opening> {
+public class CookingPotBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer {
 	/** What heats the pot from directly below. Keep in sync with HEAT_TAG in tools/agriculture.py. */
 	public static final TagKey<Block> HEAT_SOURCES = TagKey.create(Registries.BLOCK, Jugcraft.id("heat_sources"));
 	/**
@@ -395,11 +394,6 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 	@Override
 	protected AbstractContainerMenu createMenu(int containerId, Inventory inventory) {
 		return new CookingPotMenu(containerId, inventory, this, data);
-	}
-
-	@Override
-	public CookingPotPlan.Opening getScreenOpeningData(ServerPlayer player) {
-		return new CookingPotPlan.Opening(CookingPotRecipe.plans(player.level().getServer()));
 	}
 
 	// ---------------------------------------------------------------- saving

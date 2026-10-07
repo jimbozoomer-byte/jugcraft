@@ -26,11 +26,11 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         buttons[8]=button("Party",210,56,102,18,8);
         tip(buttons[8],"Only the owner can allow party members to give commands.");
         for(int i=0;i<6;i++){
-            remove[i]=button("x",301,78+i*15,11,12,20+i);
+            remove[i]=button("x",301,CompanionMenu.assignmentY(i)+2,11,12,20+i);
             tip(remove[i],i==0?"Clear home":i==5?"Clear assigned lunch source":"Clear work "+i);
             if(i>0 && i<5){
-                moveUp[i]=button("\u2191",277,78+i*15,11,12,30+(i-1)*2);
-                moveDown[i]=button("\u2193",289,78+i*15,11,12,31+(i-1)*2);
+                moveUp[i]=button("\u2191",277,CompanionMenu.assignmentY(i)+2,11,12,30+(i-1)*2);
+                moveDown[i]=button("\u2193",289,CompanionMenu.assignmentY(i)+2,11,12,31+(i-1)*2);
                 tip(moveUp[i],"Move up: higher work priority");tip(moveDown[i],"Move down: lower work priority");
             }
         }
@@ -50,6 +50,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
     }
     private PeepoEntity npc(){return minecraft==null || minecraft.player==null?null:menu.companion(minecraft.player);}
     private void updateButtons(){
+        menu.showRecipes=!routineTab;
         tab.setMessage(Component.literal(routineTab?"< Jobs":"Routine >"));
         for(var setting:settings)setting.visible=routineTab;
         var npc=npc();
@@ -72,22 +73,42 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         buttons[8].setMessage(Component.literal(menu.value(4)==1?"Party: Allowed":"Owner only"));
         updateButtons();
         extractBackground(g,mouseX,mouseY,delta);super.extractRenderState(g,mouseX,mouseY,delta);extractTooltip(g,mouseX,mouseY);
-        int row=(mouseY-topPos-78)/15;var npc=npc();
-        if(!routineTab && npc!=null && mouseX>=leftPos+100 && mouseX<leftPos+277 && mouseY>=topPos+78 && row>=0 && row<6){
+        int row=assignmentRow(mouseY-topPos);var npc=npc();
+        if(!routineTab && npc!=null && mouseX>=leftPos+100 && mouseX<leftPos+253 && mouseY>=topPos+78 && row>=0 && row<6){
             var target=npc.assignments.view().get(row);
             String text=target==null?"Use the Companion Planner to select this companion, then right-click a "+(row==0?"bed.":row==5?"lunch crate or lunch cover.":"workstation."):
                 target.name()+" at "+target.at().pos().toShortString()+" in "+target.at().dimension().identifier()+" - "+CompanionStatus.from(menu.value(12+row)).label;
             if(row>0 && row<5 && target!=null)text+=". Priority "+row+" (top is highest).";
             g.setTooltipForNextFrame(font,Component.literal(text),mouseX,mouseY);
         }
+        if(!routineTab)for(int i=0;i<4;i++){
+            var slot=menu.getSlot(CompanionMenu.RECIPE_START+i);
+            if(slot.isActive() && mouseX>=leftPos+slot.x && mouseX<leftPos+slot.x+16 && mouseY>=topPos+slot.y && mouseY<topPos+slot.y+16){
+                var lines=new java.util.ArrayList<Component>();
+                if(slot.hasItem()){
+                    lines.add(slot.getItem().getHoverName());
+                    var lore=slot.getItem().get(net.minecraft.core.component.DataComponents.LORE);
+                    if(lore!=null)lines.addAll(lore.lines());
+                }else lines.add(Component.literal("Recipe: automatic"));
+                lines.add(Component.literal("Click with the finished food to set a ghost recipe."));
+                lines.add(Component.literal("Your item stays on the cursor. Right-click to clear."));
+                lines.add(Component.literal("Click the same output again to cycle matching recipes."));
+                g.setTooltipForNextFrame(font,lines,java.util.Optional.empty(),mouseX,mouseY);
+            }
+        }
+
+    }
+    private int assignmentRow(int y){
+        for(int row=0;row<6;row++)if(y>=CompanionMenu.assignmentY(row) && y<CompanionMenu.assignmentY(row)+16)return row;
+        return -1;
     }
     private int color(CompanionStatus status){return status.problem()?0xFF994433:status==CompanionStatus.WORKING?0xFF168030:status==CompanionStatus.UNSUPPORTED?0xFF775577:0xFF304030;}
     private String fit(String text,int width){return font.width(text)>width?font.plainSubstrByWidth(text,width-9)+"...":text;}
     @Override public void extractBackground(GuiGraphicsExtractor g,int mouseX,int mouseY,float delta){
         int x=leftPos,y=topPos;
         g.fill(x,y,x+320,y+276,0xFF373737);g.fill(x+1,y+1,x+318,y+274,0xFFFFFFFF);g.fill(x+3,y+3,x+319,y+275,0xFF555555);g.fill(x+4,y+4,x+316,y+272,0xFFC6C6C6);
-        for(var slot:menu.slots){int sx=x+slot.x,sy=y+slot.y;g.fill(sx-1,sy-1,sx+17,sy+17,0xFFFFFFFF);g.fill(sx-1,sy-1,sx+16,sy+16,0xFF373737);g.fill(sx,sy,sx+16,sy+16,0xFF8B8B8B);}
-        if(!routineTab)for(int i=0;i<6;i++)g.fill(x+99,y+77+i*15,x+(i==0 || i==5?300:276),y+90+i*15,0xFFDADADA);
+        for(var slot:menu.slots){if(!slot.isActive())continue;int sx=x+slot.x,sy=y+slot.y;g.fill(sx-1,sy-1,sx+17,sy+17,0xFFFFFFFF);g.fill(sx-1,sy-1,sx+16,sy+16,0xFF373737);g.fill(sx,sy,sx+16,sy+16,0xFF8B8B8B);}
+        if(!routineTab)for(int i=0;i<6;i++)g.fill(x+99,y+CompanionMenu.assignmentY(i),x+(i==0 || i==5?300:252),y+CompanionMenu.assignmentY(i)+14,0xFFDADADA);
     }
     @Override protected void extractLabels(GuiGraphicsExtractor g,int mouseX,int mouseY){
         g.text(font,fit(title.getString(),222),8,8,0xFF404040,false);
@@ -107,10 +128,8 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             var rowStatus=CompanionStatus.from(menu.value(12+i));
             String prefix=i==0?"Home":i==5?"Lunch":"Work "+i;
             String label=prefix+": "+(target==null?"Not assigned":target.name()+" "+target.at().pos().toShortString());
-            g.text(font,fit(label,i==0 || i==5?195:172),101,80+i*15,color(rowStatus),false);
+            g.text(font,fit(label,i==0 || i==5?195:148),101,CompanionMenu.assignmentY(i)+3,color(rowStatus),false);
         }
-        int row=(mouseY-topPos-78)/15;
-        String detail=row>=0 && row<6 && mouseY>=topPos+78 && mouseX>=leftPos+100 && mouseX<leftPos+277?CompanionStatus.from(menu.value(12+row)).label:"Hover a place for its status";
-        g.text(font,fit(detail,210),101,172,0xFF404040,false);
+
     }
 }
