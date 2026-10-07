@@ -57,7 +57,7 @@ public class ArmsVIIIGameTests {
 		helper.assertTrue(thrower.getMainHandItem().isEmpty(), "The javelin is still in hand after the throw");
 		float max = pig.getMaxHealth();
 		helper.succeedWhen(() -> {
-			helper.assertTrue(pig.getHealth() < max, "The pig is not struck yet");
+			helper.assertTrue(pig.getHealth() < max, "The pig is not struck yet (" + flight(helper, "steel_javelin") + ")");
 			helper.assertTrue(Math.abs(max - pig.getHealth() - thrown.damage()) < 1.0E-3F,
 					"The javelin took " + (max - pig.getHealth()) + " from the pig, not " + thrown.damage());
 			List<ItemEntity> landed = items(helper, "steel_javelin");
@@ -121,7 +121,8 @@ public class ArmsVIIIGameTests {
 		release(thrower, thrown);
 		float max = pig.getMaxHealth();
 		helper.succeedWhen(() -> {
-			helper.assertTrue(Math.abs(max - pig.getHealth() - thrown.damage()) < 1.0E-3F, "The harpoon took " + (max - pig.getHealth()) + ", not " + thrown.damage());
+			helper.assertTrue(Math.abs(max - pig.getHealth() - thrown.damage()) < 1.0E-3F, "The harpoon took " + (max - pig.getHealth()) + ", not "
+					+ thrown.damage() + " (" + flight(helper, "steel_harpoon") + ")");
 			helper.assertTrue(pig.getZ() < start - 2.0, "The harpoon has hauled the pig only from " + start + " to " + pig.getZ());
 		});
 	}
@@ -152,7 +153,7 @@ public class ArmsVIIIGameTests {
 		helper.assertTrue(thrower.getMainHandItem().is(JugcraftArms.ITEMS.get("bronze_javelin")), "The creative thrower's javelin is gone");
 		float max = pig.getMaxHealth();
 		helper.succeedWhen(() -> {
-			helper.assertTrue(pig.getHealth() < max, "The pig is not struck yet");
+			helper.assertTrue(pig.getHealth() < max, "The pig is not struck yet (" + flight(helper, "bronze_javelin") + ")");
 			helper.assertTrue(items(helper, "bronze_javelin").isEmpty(), "A creative throw left a javelin behind");
 		});
 	}
@@ -180,8 +181,7 @@ public class ArmsVIIIGameTests {
 
 	/** Where a mob is, relative to the test's origin, for a failure message. */
 	private static String where(GameTestHelper helper, Mob mob) {
-		BlockPos origin = helper.absolutePos(BlockPos.ZERO);
-		return String.format(java.util.Locale.ROOT, "%.2f %.2f %.2f", mob.getX() - origin.getX(), mob.getY() - origin.getY(), mob.getZ() - origin.getZ());
+		return relative(helper, mob.position());
 	}
 
 	private static List<ItemEntity> items(GameTestHelper helper, String arm) {
@@ -189,10 +189,36 @@ public class ArmsVIIIGameTests {
 				item -> item.getItem().is(JugcraftArms.ITEMS.get(arm)));
 	}
 
+	/** Where a throw went, relative to the test's origin, for a failure message: the arm in flight and any come down. */
+	private static String flight(GameTestHelper helper, String arm) {
+		AABB area = new AABB(helper.absolutePos(BlockPos.ZERO)).inflate(40);
+		List<String> at = new java.util.ArrayList<>();
+		for (ThrownArm flying : helper.getLevel().getEntitiesOfClass(ThrownArm.class, area)) {
+			at.add("in flight at " + relative(helper, flying.position()));
+		}
+		for (ItemEntity item : items(helper, arm)) {
+			at.add("come down at " + relative(helper, item.position()));
+		}
+		return at.isEmpty() ? "the " + arm + " is nowhere" : String.join(", ", at);
+	}
+
+	/** A point relative to the test's origin, for a failure message. */
+	private static String relative(GameTestHelper helper, Vec3 at) {
+		BlockPos origin = helper.absolutePos(BlockPos.ZERO);
+		return String.format(java.util.Locale.ROOT, "%.2f %.2f %.2f", at.x - origin.getX(), at.y - origin.getY(), at.z - origin.getZ());
+	}
+
+	/**
+	 * A stone floor at y 1 and clear air above it, up to the arena's top. The arena structure places nothing, so without
+	 * this whatever stands there (a neighbouring test's growth or build) could lie in a throw's path.
+	 */
 	private static void floor(GameTestHelper helper) {
 		for (int x = 0; x <= 15; x++) {
 			for (int z = 0; z <= 15; z++) {
 				helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
+				for (int y = 2; y <= 7; y++) {
+					helper.setBlock(new BlockPos(x, y, z), Blocks.AIR);
+				}
 			}
 		}
 	}
