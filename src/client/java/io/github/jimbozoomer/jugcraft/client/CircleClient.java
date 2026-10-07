@@ -29,6 +29,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Rituals on the client (roadmap step 12). Nothing here decides anything; it shows what the server sent:
@@ -92,7 +93,7 @@ public final class CircleClient {
 			}
 			participants.addAll(anchor.run().joined());
 			if (beams && anchor.phase() == RitualMachine.Phase.CHANNELING && client.player != null
-					&& client.player.distanceToSqr(anchor.getBlockPos().getCenter()) <= BEAM_RANGE * BEAM_RANGE) {
+					&& client.player.distanceToSqr(Vec3.atCenterOf(anchor.getBlockPos())) <= BEAM_RANGE * BEAM_RANGE) {
 				beams(level, anchor);
 			}
 		}
