@@ -39,12 +39,14 @@ Related owner planning records: [industrial agriculture, PR #208](https://github
 Owner-requested 7 October 2026. Independent planning brief: [industrial chemistry and fuels](features/industrial-chemistry-and-fuels-plan.md). These follow-ups are planning work, not implemented recipes or tested balance.
 
 - [ ] Map a reachable **steel-built electrical chemistry entry**, preserving the earlier workshop/first-electricity route and prioritizing gas processing, aluminum and titanium.
-- [ ] Extend existing electrolysis/generator systems for directly usable hydrogen and catalytic methane, with complete electricity, compression, heat, separation and generation budgets that prevent closed positive-power loops.
-- [ ] Define distinct CO2 + 4 H2 and CO + 3 H2 methanation recipes, reusable catalyst capability, nickel entry, optional later ruthenium improvement, readable heat/pressure requirements and recovered water.
-- [ ] Add an earlier steel-era coal gasifier with an accounted CO-bearing output, cleanup and substantial numeric pollution; keep CO separate from digester CO2.
-- [ ] Design advanced organic-waste/food digesters using the selected 60/40 methane/CO2 game mixture, usable digestate and hydrogen upgrading into separated pure methane.
-- [ ] Develop milling/mashing -> fermentation -> distillation -> dehydration for crop bioethanol, a modest earlier bio-generator role and later brewery CO2 collection/cleanup, preserving existing bioethanol IDs and consumers.
-- [ ] Add optional CO2 capture/release to industrial carbonate cement processing and optional Coke Oven gas/condensate recovery with explicit material, energy and full-storage accounting.
+- [ ] Build the selected shared hydrogen/methane gas-burning generator role and separate lower-output **Bio-Generator for cleaned biogas and bioethanol**; methane improves electricity per tank and upgraded gas-generator output. Audit complete processing/generation energy to prevent closed positive-power loops.
+- [ ] Define distinct CO2 + 4 H2 and CO + 3 H2 methanation recipes, the reusable first catalyst bed from existing nickel/ceramic supplies, optional later ruthenium improvement, readable heat requirements and recovered water.
+- [ ] Keep gas-pipe pressurization automatic, with no player-managed compressor machines/modules, pressure tiers/settings or per-pipe pressure simulation.
+- [ ] Add the earlier steel-era coal gasifier's CO/hydrogen mixture, cleanup and separation into useful gases, with substantial numeric pollution; keep CO separate from digester CO2.
+- [ ] Design the substantial first bulk Anaerobic Digester, with larger versions later, using the selected 60/40 methane/CO2 game mixture, usable digestate, direct cleaned-biogas Bio-Generator use and optional hydrogen upgrading into separated methane.
+- [ ] Develop the earlier milling/mashing -> fermentation -> distillation Bio-Generator fuel route, adding dehydration for later demanding fuel/blending uses and brewery CO2 collection/cleanup; preserve existing bioethanol IDs and consumers.
+- [ ] Add optional CO2 capture/release to industrial carbonate cement processing and optional Coke Oven gas/condensate recovery. Full CO2 capture storage defaults to continued production/excess venting, with optional stop-instead; account for material, energy and recovered/released amounts once.
+- [ ] Use earlier copper conductors in entry aluminum-processing equipment, with aluminum improvements later; verify construction and reagent producers without self-output gates.
 - [ ] Verify filled gas tanks retain exact content through break, pickup and placement and reconnect through shared pipes; cover joined-tank partitioning, simultaneous transfers and multiplayer pickup.
 - [ ] Detail H2/chlorine -> HCl and useful carbon-bearing monomer/polymer connections, while retaining existing PVC, butadiene rubber and natural-rubber routes.
 - [ ] Expand process-specific reagents, useful rigid/flexible/protective/heat-resistant polymers and advanced ceramic linings/insulators/cutting/precision parts. Limit purity grades to meaningful consumers; prioritize refining/electronics over broad new everyday finishes.
