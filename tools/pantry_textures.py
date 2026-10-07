@@ -6,11 +6,9 @@ jar; and the items: an empty Mason Jar, cider vinegar, and each preserve's jar, 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code, from fixed seeds; no Mojang texture is
 read, traced or recoloured. Block textures are 16x16 and opaque; the items are see-through round their shapes.
 """
-import random
-
 from agriculture import PANTRY
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 from decor9_textures import put
 from decor13_textures import bottle, icon
 
@@ -22,27 +20,21 @@ TIN = [rgb("6a6a70"), rgb("9a9aa2"), rgb("c8c8d0")]
 
 
 def enamel():
-    """Graniteware: deep blue enamel flecked with white."""
+    """Graniteware: deep blue enamel flecked with white, the flecks set evenly apart as on vanilla diorite."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, ENAMEL, 27101, [2, 3, 2])
-    rng = random.Random(27102)
-    for _ in range(26):
-        c.px(rng.randrange(16), rng.randrange(16), SPECK)
+    bs.speckled(ENAMEL, [SPECK], 27101, density=0.07)(c)
     return c.img
 
 
 def enamel_inside():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("16243a"), rgb("1e2e48"), rgb("263856")], 27103, [2, 3, 2])
-    rng = random.Random(27104)
-    for _ in range(10):
-        c.px(rng.randrange(16), rng.randrange(16), rgb("8a96a8"))
+    bs.speckled([rgb("16243a"), rgb("1e2e48"), rgb("263856")], [rgb("8a96a8")], 27103, density=0.03)(c)
     return c.img
 
 
 def rack():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, TIN[:2], 27105, [2, 1])
+    bs.fill(c, 0, 0, 15, 15, TIN[:2], 27105, [2, 1])
     for x in range(0, 16, 4):
         for y in range(16):
             c.px(x, y, TIN[2])
@@ -52,26 +44,20 @@ def rack():
 def shelf_wood():
     """Honey oak boards."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, OAK[1:4], 27106, [2, 3, 1])
-    for y in (0, 5, 10, 15):
-        for x in range(16):
-            c.px(x, y, OAK[0])
+    bs.planks(OAK, 27106)(c)
     return c.img
 
 
 def beadboard():
     """The cupboard's back: narrow upright boards with a bead between them."""
     c = Canvas()
-    rng = random.Random(27107)
-    for x in range(16):
-        for y in range(16):
-            c.px(x, y, OAK[0] if x % 4 == 0 else OAK[2] if x % 4 == 1 else OAK[1] if rng.random() < 0.8 else OAK[2])
+    bs.planks(OAK, 27107, vertical=True, joint=False)(c)
     return c.img
 
 
 def water():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("3a6aaa"), rgb("4a7cbc"), rgb("5a8ece")], 27108, [2, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, [rgb("3a6aaa"), rgb("4a7cbc"), rgb("5a8ece")], 27108, [2, 3, 2])
     for x, y in ((3, 4), (4, 4), (10, 9), (11, 9), (6, 13)):
         c.px(x, y, rgb("a8c8ec"))
     return c.img
@@ -91,7 +77,7 @@ def jar_glass():
 
 def lid():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, TIN, 27109, [1, 2, 1])
+    bs.fill(c, 0, 0, 15, 15, TIN, 27109, [1, 2, 1])
     return c.img
 
 
