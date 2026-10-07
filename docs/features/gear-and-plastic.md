@@ -75,6 +75,7 @@ No new dependencies. All art is original; nothing is traced or recoloured from v
     - a dive computer on each wrist;
     - white-shelled free runners with a cyan light strip, a sprung sole and a heel coil.
 - The power bow keeps its 16x16 icon and draw frames from `tools/gear_textures.py`, and the plastic textures come from `tools/plastic.py`.
+- Since 6 October 2026 the power katana's outline and the glow fringe along its edge (now the blade's own bright glow, opaque), and the scuba mask's, scuba tank's and free runners' outlines, are opaque (`tools/hitech.py`): drawn part-transparent, they showed as a see-through rim on the sprite in the hand.
 
 ## Verification
 - `tools/check_mod_data.py` (340 IDs):

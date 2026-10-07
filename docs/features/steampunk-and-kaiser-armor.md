@@ -10,7 +10,7 @@ Primary specialty and supported player role: everyone. A cosmetic set for fighte
 **Bronze and steel armor keep their current look in this PR.**
 - They still wear the stylized looks drawn for them on 2 October 2026. So for now a Steampunk piece looks exactly like a bronze piece, and a Kaiser piece exactly like a steel piece, pixel for pixel, worn and in the inventory.
 - Smithing one into the other changes the item's name, lore line and ID. It does not change its picture yet.
-- **A following PR gives bronze and steel armor their new 3D look:** a knight design the owner drew. Steampunk and Kaiser Armor keep today's looks after that; a check pins their pixels (see Verification).
+- **A following PR gives bronze and steel armor their new 3D look:** a knight design the owner drew ([knight-armor.md](knight-armor.md)). Steampunk and Kaiser Armor keep today's looks after that; a check pins their pixels (see Verification).
 
 ## Player experience
 Two new four-piece armor sets, each a metal's armor in a stylized look:
@@ -227,7 +227,7 @@ All four sets use the iron equip sound and are repaired at an anvil with their m
 - A future boss, such as the Kaiser's Zeppelin ([branches/BOSSES.md](../branches/BOSSES.md)), may drop a Kaiser Pattern as a bonus, never as the only route.
 
 ## Rollout and open questions
-- **Bronze and steel's own look:** a following PR gives them the 3D knight design the owner drew. That PR answers the owner's request for more intricate armor models, bigger than vanilla armor, with parts that stand out from the body. This PR does not do that. Until that PR lands, each styled piece looks exactly like its plain piece.
+- **Bronze and steel's own look:** a following PR gives them the 3D knight design the owner drew ([knight-armor.md](knight-armor.md)). That PR answers the owner's request for more intricate armor models, bigger than vanilla armor, with parts that stand out from the body. This PR does not do that. Until that PR lands, each styled piece looks exactly like its plain piece.
 - **Owner questions, built with their defaults:**
   - **Route and cost:** as above. Alternatives:
     - a black lacquer plate in place of the crest saves a craft and the first-time gold;

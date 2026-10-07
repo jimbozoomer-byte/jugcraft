@@ -1379,6 +1379,16 @@ def machines():
     artillery.draw_all(save)
     import tower_guns
     tower_guns.draw_all(save)
+    import fortifications
+    fortifications.draw_all(save)
+    import bunkerworks
+    bunkerworks.draw_all(save)
+    import fire_control
+    fire_control.draw_all(save)
+    import raiders
+    import armoured_walker
+    armoured_walker.draw_all(save)
+    raiders.draw_all(save)
     import plastic
     plastic.draw_all(save)
     import armor_paint   # the atlases of the 3D armor sets (tools/armor_models.py)
@@ -1481,6 +1491,8 @@ def main():
     dieselpunk_textures.draw_all()
     import dieselrust_textures
     dieselrust_textures.draw_all()
+    import mill_textures
+    mill_textures.draw_all()
     electric_textures.draw_all()
     import crop_textures
     for (kind, name), image in crop_textures.crop_textures().items():

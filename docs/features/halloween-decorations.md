@@ -198,7 +198,7 @@ The 8 new game tests (`DecorGameTests`):
 The client game test (`DecorClientGameTests`) builds string lights on three fence posts, three Candy Bowls (empty, half full, heaped), an open and a closed Coffin, the four portraits on a wall and a running Fog Machine, and photographs them by day, up close and at midnight: the strands glow at night, the open coffin shows its velvet, the pupils are dark by day and red at night and lean toward the camera from the side, and fog lies on the ground round the machine.
 
 Found by CI and fixed before this record:
-- 26.3 blocks no longer have codecs, `PushReaction.DESTROY` is now `POPPED`, and `PoseStack` turns with `rotateDegrees` (compile errors).
+- 26.3 blocks no longer have codecs, `PushReaction.POPPED` is now `POPPED`, and `PoseStack` turns with `rotateDegrees` (compile errors).
 - Vanilla's bed rule makes beds explode in the Nether and the End; the coffin only refuses there, so 27 slots of belongings are never blown up.
 
 **Not run:**
