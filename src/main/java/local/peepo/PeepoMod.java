@@ -37,6 +37,7 @@ public final class PeepoMod implements ModInitializer {
         CompanionBeds.initialize();
         CompanionStool.initialize();
         CompanionLunch.initialize();
+        TikiTorch.initialize();
         CompanionMenu.initialize();
         PeepoSpawns.initialize();
         FabricDefaultAttributeRegistry.register(PEEPO, PeepoEntity.attributes());

@@ -11,3 +11,9 @@ Shift-right-click an owned Peepo or Jughead to open the command screen. The left
 - Storage and equipment retain exact slots and item components across saves. Contents drop once on normal death, under the existing mob-loot rules. Access uses the existing owner/party command permissions.
 
 Manual checks: transfer full and partial stacks, equip/remove a costume, hold a torch/tool while walking and sitting, feed while equipped (including changing the hand item during a meal), reload during eating, and check normal death drops for duplication. No automated tests run.
+
+## Held lights and tiki torches
+
+Companions raise their right arm when holding a light, including while sitting or running. Eating and sleeping keep their existing poses. The held-light tag `peepo_companion:held_lights` covers torches/lanterns and the tiki torch; other block items with an emissive default state also qualify. This pose does not introduce dynamic lighting.
+
+Craft one Tiki Torch with coal above a stick above another stick in a crafting table. It occupies two vertical blocks on a sturdy floor and has a wooden shaft, bound basket, coal and embers. Its upper half emits light level 14 and client-side flame/smoke particles. Breaking it removes both halves and drops one torch in survival. It can also be equipped in the companion Hand slot.

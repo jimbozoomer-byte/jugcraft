@@ -40,6 +40,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.pumpkin = entity.isWearingPumpkin();
         state.jughead = entity.isJughead();
         state.eating=entity.isEating();
+        state.holdingLight=TikiTorch.isHeldLight(entity.getMainHandItem());
         state.wheelRunning=entity.isWheelRunning();
         state.sleeping=entity.getRestMode()==CompanionEnergy.Rest.SLEEPING;
         state.sitting=entity.getRestMode()==CompanionEnergy.Rest.SITTING;

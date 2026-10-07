@@ -71,6 +71,9 @@ public final class PeepoModel extends EntityModel<PeepoState> {
             head.xRot=.04F;
         }
         if(!s.held.isEmpty() && !s.eating && !s.wheelRunning && !s.sleeping)rightArm.xRot=-.65F;
+        if(s.holdingLight && !s.held.isEmpty() && !s.eating && !s.sleeping){
+            rightArm.xRot=-2.55F;rightArm.yRot=0;rightArm.zRot=.15F;
+        }
         if(s.sleeping) {
             head.xRot=head.yRot=0;
             leftLeg.xRot=rightLeg.xRot=0;
