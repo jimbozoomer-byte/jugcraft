@@ -15,7 +15,9 @@ Details and numbers: [TECH_TREE.md → Steel tier](../TECH_TREE.md#steel-tier).
 
 The [independent steel and bulk-metallurgy plan](industrial-steel-and-bulk-metallurgy-plan.md) selects Coke Oven -> Steel Foundry as the simple core route, with **charcoal-based starter steel as an alternative in the same foundry** and coke suited to efficient bulk production. Extra refining steps belong to later expansion. Steel develops alongside first electricity, without becoming a new prerequisite for the starter generator or basic circuits.
 
-Charcoal steel is a selected future addition, **not a recipe implemented by this brief**. The source behavior and numbers below describe the existing coke route. The starter plan's manual iron plates must make foundry construction reachable before a powered workshop; steel plate hand-forming, charcoal costs and larger equipment still need decisions. The linked plan separates existing product consumers from proposed expansion roles.
+The owner also selected **hammer/bench steel plates for small batches**, with the same metal yield as machine forming, and **larger foundries and presses alongside existing-machine upgrades** for the first bulk expansion. Small workshops remain useful; a shaft press is optional for the first steel plate. Exact construction, work rates, carbon costs and broader forming/casting scope remain to develop.
+
+Charcoal steel and hammer/bench steel plates are selected future additions, **not recipes implemented by this brief**. The source behavior and numbers below describe the existing coke route. The starter plan's manual iron plates must make foundry construction reachable before a powered workshop. The linked plan separates selected expansion roles from proposed specifications and additional candidates.
 
 ## Connections
 - Existing input producer: vanilla coal and iron (smelted, crushed ×2 or pulverized/washed ×3), bricks, and iron plates from the metal press.
