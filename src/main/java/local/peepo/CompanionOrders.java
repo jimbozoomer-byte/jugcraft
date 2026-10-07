@@ -21,6 +21,7 @@ public final class CompanionOrders {
     public boolean tamed(){return owner!=null;}
     public boolean owner(Player p){return p.getUUID().equals(owner);}
     public boolean allowed(Player p){return owner(p) || owner!=null && party && JugcraftParties.sameParty(owner,p.getUUID());}
+    public boolean foodAccess(UUID sourceOwner,boolean shared){return owner!=null && (owner.equals(sourceOwner) || shared && JugcraftParties.sameParty(owner,sourceOwner));}
     public int mode(){return mode.ordinal();}
     public int radius(){return radius;}
     public boolean party(){return party;}

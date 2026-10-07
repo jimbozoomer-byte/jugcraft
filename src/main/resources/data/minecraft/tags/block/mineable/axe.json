@@ -103,6 +103,8 @@
     "peepo_companion:green_companion_bed",
     "peepo_companion:red_companion_bed",
     "peepo_companion:black_companion_bed",
-    "peepo_companion:wooden_stool"
+    "peepo_companion:wooden_stool",
+    "peepo_companion:lunch_crate",
+    "peepo_companion:lunch_cover"
   ]
 }

@@ -123,6 +123,7 @@ public final class PeepoEntity extends PathfinderMob {
     public static final int EAT_DURATION = 40;
     public static final int BLUSH_DURATION = 80;
     private int blushTicks;
+    private net.minecraft.core.GlobalPos lunchOrigin;
     private boolean naturallySpawned;
     public boolean isNaturallySpawned() { return naturallySpawned; }
     @Override public SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level,
@@ -141,6 +142,7 @@ public final class PeepoEntity extends PathfinderMob {
     public boolean isWearingPumpkin() { return entityData.get(PUMPKIN); }
     @Override protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output); orders.save(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
+        if(lunchOrigin!=null)output.store("LunchOrigin",net.minecraft.core.GlobalPos.CODEC,lunchOrigin);
         output.putBoolean("NaturallySpawned", naturallySpawned);
         output.putInt("Energy",getEnergy());output.putInt("FoodRegenBonus",getFoodRegenBonus());output.putInt("FoodRegenTicks",getFoodRegenTicks());
         output.putBoolean("Recovering",isRecovering());
@@ -158,6 +160,7 @@ public final class PeepoEntity extends PathfinderMob {
         entityData.set(REST,0);
         bedExit = input.read("CompanionBedExit", net.minecraft.core.BlockPos.CODEC).orElse(null);
         if (bedExit != null) setNoGravity(false);
+        lunchOrigin=input.read("LunchOrigin",net.minecraft.core.GlobalPos.CODEC).orElse(null);
         int remaining=Math.clamp(input.getIntOr("EatingTicks",0),0,EAT_DURATION);
         entityData.set(EATING,isEdible(getMainHandItem()) ? remaining : 0);
     }
@@ -191,7 +194,15 @@ public final class PeepoEntity extends PathfinderMob {
                 applyMealEnergy(food);
                 var remainder=eaten.get(DataComponents.USE_REMAINDER);
                 setItemSlot(EquipmentSlot.MAINHAND,ItemStack.EMPTY);
-                if(remainder!=null)spawnAtLocation(server,remainder.convertInto().create());
+                if(remainder!=null){
+                    var leftover=remainder.convertInto().create();
+                    if(lunchOrigin!=null && lunchOrigin.dimension().equals(level().dimension())
+                            && level().hasChunkAt(lunchOrigin.pos()) && lunchOrigin.pos().distToCenterSqr(position())<=16
+                            && level().getBlockEntity(lunchOrigin.pos()) instanceof LunchBlockEntity lunch)
+                        leftover=lunch.returnRemainder(this,leftover);
+                    if(!leftover.isEmpty())spawnAtLocation(server,leftover);
+                }
+                lunchOrigin=null;
                 playSound(SoundEvents.PLAYER_BURP,.35F,1.3F);
             }
         }
@@ -208,6 +219,7 @@ public final class PeepoEntity extends PathfinderMob {
         goalSelector.addGoal(1, new EatInPlaceGoal());
         goalSelector.addGoal(1, new RestGoal());
         goalSelector.addGoal(2, new FindFoodGoal());
+        goalSelector.addGoal(2, new FindLunchGoal(this));
         goalSelector.addGoal(3,new CompanionOrders.CommandGoal(this));
         routine=new CompanionRoutine(this);
         goalSelector.addGoal(3,routine);
@@ -268,7 +280,9 @@ public final class PeepoEntity extends PathfinderMob {
     public boolean needsAutomaticFood() { return needsFood() && (getHealth()<getMaxHealth() || getFoodRegenTicks()==0); }
     public boolean isEating() { return getEatingTicks()>0; }
     public int getEatingTicks() { return entityData.get(EATING); }
+    void beginLunchMeal(ItemStack stack,net.minecraft.core.GlobalPos source){beginEating(stack);lunchOrigin=source;}
     private void beginEating(ItemStack stack) {
+        lunchOrigin=null;
         setWheelRunning(false);
         setRestMode(CompanionEnergy.Rest.NONE);
         setItemSlot(EquipmentSlot.MAINHAND,stack);

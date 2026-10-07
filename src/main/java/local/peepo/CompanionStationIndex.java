@@ -16,7 +16,7 @@ final class CompanionStationIndex {
         if(entry==null || entry.expires<level.getGameTime()) {
             List<BlockPos> positions=new ArrayList<>();
             for(var be:level.getChunkAt(chunkOrigin).getBlockEntities().values())
-                if(be instanceof CompanionStation && !be.isRemoved())positions.add(be.getBlockPos().immutable());
+                if((be instanceof CompanionStation || be instanceof LunchBlockEntity) && !be.isRemoved())positions.add(be.getBlockPos().immutable());
             entry=new Entry(level.getGameTime()+80,List.copyOf(positions));cache.put(key,entry);
             if(cache.size()>512)cache.remove(cache.keySet().iterator().next());
         }
