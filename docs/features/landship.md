@@ -56,7 +56,7 @@ Cannon Shells: a steel plate, gunpowder and a brass nugget make 4.
 
 ## Dependencies and assets
 - No dependencies. All art is original.
-  - The tread texture is drawn in `tools/landship.py`; the Landship's and the Cannon Shell's 32x32 icons in `tools/gun_icons.py`, with the big guns' (since 5 October 2026).
+  - The tread texture is drawn in `tools/landship.py`; the Landship's and the Cannon Shell's icons are 16×16 maps in `tools/item_icons/`, with the big guns' (32x32 from 5 October 2026, redrawn at 16×16 on 7 October 2026, [ITEM_ICONS.md](../ITEM_ICONS.md)).
   - The model reuses the Kaiserworks `ik_*` and the giants' `dr_*` textures; its cannon and sponson guns use the tower guns' `tg_tube` steel and `tg_bore` decal. Since the 5 October 2026 art fixes the turret's brass ring sits on the casemate's gilt band (no slit under the turret), no barrel faces share a plane, the sloped front plate is two halves a tile wide (so its texture stays inside the sprite), and the smokestacks stop at 35.75 pixels, just under the cannon's lowest sweep, so the cannon no longer passes through them when the turret turns to the rear (the stack smoke rises from 2.3 blocks); the render box reaches 1.25 blocks above the hit box, so the raised cannon stays drawn ([big-guns-art-fixes.md](big-guns-art-fixes.md)).
   - The sounds are vanilla's: explosion, dispenser and minecart.
 - The model is exported as quads to `assets/jugcraft/landship_quads.json` (about 1,030 faces, 16-pixel tiles, hidden faces culled) in four parts: body, turret, barrel and one track link. `client/LandshipRenderer` lays about 33 links round each side and animates them.
