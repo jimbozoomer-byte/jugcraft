@@ -27,6 +27,9 @@ import io.github.jimbozoomer.jugcraft.concordance.artifice.ArtificeParser;
 import io.github.jimbozoomer.jugcraft.concordance.artifice.Gem;
 import io.github.jimbozoomer.jugcraft.concordance.artifice.Rune;
 import io.github.jimbozoomer.jugcraft.concordance.artifice.Substrate;
+import io.github.jimbozoomer.jugcraft.concordance.relic.RelicCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.relic.RelicDefinition;
+import io.github.jimbozoomer.jugcraft.concordance.relic.RelicParser;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerParser;
@@ -58,7 +61,8 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ConcordanceRules {
 	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
-			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, EcologyCatalog.EMPTY, CelestialCatalog.EMPTY, CrimsonCatalog.EMPTY, WorkerCatalog.EMPTY, ArtificeCatalog.EMPTY, List.of());
+			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, EcologyCatalog.EMPTY, CelestialCatalog.EMPTY, CrimsonCatalog.EMPTY, WorkerCatalog.EMPTY, ArtificeCatalog.EMPTY,
+			RelicCatalog.EMPTY, List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
@@ -74,6 +78,7 @@ public final class ConcordanceRules {
 	private final CrimsonCatalog crimson;
 	private final WorkerCatalog workers;
 	private final ArtificeCatalog artifice;
+	private final RelicCatalog relics;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
@@ -81,7 +86,7 @@ public final class ConcordanceRules {
 			Map<String, Definitions.Working> workings, ConversionTable conversions, Catalog catalog,
 			Map<String, Map<String, Authored>> authored, Map<String, StructurePattern> structures, Map<String, RitualDefinition> rituals,
 			AlchemyCatalog alchemy, EcologyCatalog ecology, CelestialCatalog celestial, CrimsonCatalog crimson, WorkerCatalog workers,
-			ArtificeCatalog artifice, List<String> problems) {
+			ArtificeCatalog artifice, RelicCatalog relics, List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
@@ -96,6 +101,7 @@ public final class ConcordanceRules {
 		this.crimson = crimson;
 		this.workers = workers;
 		this.artifice = artifice;
+		this.relics = relics;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -184,6 +190,11 @@ public final class ConcordanceRules {
 		return artifice;
 	}
 
+	/** Relics and the contexts they work in (roadmap step 20). */
+	public RelicCatalog relics() {
+		return relics;
+	}
+
 	public List<String> problems() {
 		return problems;
 	}
@@ -251,6 +262,8 @@ public final class ConcordanceRules {
 		Map<String, Gem> gems = new TreeMap<>();
 		Map<String, Rune> runes = new TreeMap<>();
 		Map<String, Affix> affixes = new TreeMap<>();
+		RelicParser relicParser = new RelicParser();
+		Map<String, RelicDefinition> relicDefinitions = new TreeMap<>();
 		Map<String, Organism> organisms = new TreeMap<>();
 		Map<String, Disturbance> disturbances = new TreeMap<>();
 		Map<String, Definitions.Research> research = new TreeMap<>();
@@ -392,9 +405,15 @@ public final class ConcordanceRules {
 						affixes.put(affix.id(), affix);
 					}
 				}
+				case "relic" -> {
+					RelicDefinition relic = relicParser.relic(source.id(), source.json());
+					if (relic != null) {
+						relicDefinitions.put(relic.id(), relic);
+					}
+				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
 						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
-						+ "preparation, property, organism, disturbance, pattern, offering, worker, substrate, gem, rune or affix)");
+						+ "preparation, property, organism, disturbance, pattern, offering, worker, substrate, gem, rune, affix or relic)");
 			}
 		}
 		problems.addAll(0, parser.problems());
@@ -404,6 +423,14 @@ public final class ConcordanceRules {
 		problems.addAll(workerParser.problems());
 		problems.addAll(artificeParser.problems());
 		problems.addAll(ArtificeParser.check(substrates, gems, runes, affixes));
+		problems.addAll(relicParser.problems());
+		Map<String, String> relicItems = new TreeMap<>();
+		for (RelicDefinition relic : relicDefinitions.values()) {
+			String previous = relicItems.put(relic.item(), relic.id());
+			if (previous != null) {
+				problems.add("relics " + previous + " and " + relic.id() + " are both " + relic.item());
+			}
+		}
 		// Prerequisites must exist and must not loop; entries in a loop could never be started.
 		boolean changed = true;
 		while (changed) {
@@ -575,7 +602,8 @@ public final class ConcordanceRules {
 				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, catalog,
 				Collections.unmodifiableMap(authored), Collections.unmodifiableMap(new LinkedHashMap<>(structures)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(rituals)), alchemy, ecology, new CelestialCatalog(patterns), new CrimsonCatalog(rites),
-				new WorkerCatalog(workerDefinitions), new ArtificeCatalog(substrates, gems, runes, affixes), List.copyOf(problems));
+				new WorkerCatalog(workerDefinitions), new ArtificeCatalog(substrates, gems, runes, affixes),
+				new RelicCatalog(relicDefinitions), List.copyOf(problems));
 	}
 
 	/**

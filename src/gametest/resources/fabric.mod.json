@@ -24,6 +24,7 @@
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceWorkerGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceLogisticsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceArtificeGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ConcordanceRelicGameTests",
 			"io.github.jimbozoomer.jugcraft.test.JugcraftGameTests",
 			"io.github.jimbozoomer.jugcraft.test.AgricultureGameTests",
 			"io.github.jimbozoomer.jugcraft.test.KitchenGardenGameTests",

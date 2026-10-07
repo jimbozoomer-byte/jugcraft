@@ -14,6 +14,7 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
+import io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary;
 import io.github.jimbozoomer.jugcraft.concordance.smithy.Artificery;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.vigil.Vigil;
@@ -108,6 +109,9 @@ final class ConcordanceClient {
 		}
 		if (stack.is(Artificery.SPECIMENS)) {
 			lines.add(Component.translatable("tooltip.jugcraft.concordance.artifice_specimen").withStyle(ChatFormatting.DARK_AQUA));
+		}
+		if (stack.is(Reliquary.SPECIMENS)) {
+			lines.add(Component.translatable("tooltip.jugcraft.concordance.relic_specimen").withStyle(ChatFormatting.DARK_AQUA));
 		}
 		if (stack.is(JugcraftConcordance.LUMEN_SCONCE.asItem()) && stack.has(JugcraftConcordance.RADIANCE)) {
 			// A sconce item keeps the Radiance it held when it was broken (unlit, so none burns).

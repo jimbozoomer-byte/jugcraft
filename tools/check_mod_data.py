@@ -7546,6 +7546,7 @@ def check_concordance(registered):
     check_workers(co, root, lang, registered, research)
     check_logistics(co, root, lang, registered)
     check_artifice(co, root, lang, registered, research)
+    check_relics(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -7814,7 +7815,7 @@ def check_baselines(root):
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
     for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
-                    "worker", "logistics", "artifice"):
+                    "worker", "logistics", "artifice", "relic"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -8758,6 +8759,158 @@ def check_artifice(co, root, lang, registered, research):
         with Image.open(texture) as img:
             if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
                 err(f"artifice: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+
+
+def check_relics(co, root, lang, registered, research):
+    """Roadmap step 20: the Java mirrors tools/concordance_relics.py (the budgets, limits, contexts and the shrine's
+    numbers); the definitions are the generator's, each relic works somewhere and never carried loose or worn for show,
+    gives only an allowed effect within the limits, and can be made and recharged; nothing inside a container is ever
+    looked at and relic charge never turns back into Ley Charge; every reason, context, mode and message has its text;
+    the shrine's GeckoLib animations are the ones its block entity plays; Jade, Trinkets and the icons agree."""
+    rl = co.relics
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    reliquary = java("reliquary/Reliquary.java")
+    shrine = java("reliquary/ReliquaryShrineBlockEntity.java")
+    constants = {
+        "relic/Relics.java": {"BUDGET": rl.BUDGET, "SHRINE_BUDGET": rl.SHRINE_BUDGET, "BUDGET_TICKS": rl.BUDGET_TICKS,
+                              "CALM_TICKS": rl.CALM_TICKS},
+        "relic/RelicParser.java": {"MAX_CAPACITY": rl.MAX_CAPACITY, "MAX_RANGE": rl.MAX_RANGE, "MIN_INTERVAL": rl.MIN_INTERVAL,
+                                   "MAX_INTERVAL": rl.MAX_INTERVAL, "MAX_DURATION": rl.MAX_DURATION, "MAX_AMPLIFIER": rl.MAX_AMPLIFIER},
+        "reliquary/Reliquary.java": {"CHECK_TICKS": rl.CHECK_TICKS, "CHARGE_PER_LEY": rl.CHARGE_PER_LEY,
+                                     "RECHARGE_PER_SECOND": rl.RECHARGE_PER_SECOND, "PYLON_REACH": rl.PYLON_REACH,
+                                     "MAX_TARGETS": rl.MAX_TARGETS},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_relics.py ({value})")
+    contexts = re.findall(r'^\t[A-Z_]+\("([a-z_]+)"\)', java("relic/Context.java"), re.M)
+    if contexts != list(rl.CONTEXTS):
+        err(f"relic/Context.java: contexts {contexts} differ from CONTEXTS (same order)")
+    ids = re.search(r"RELIC_IDS = List\.of\(([^)]*)\)", reliquary)
+    if not ids or re.findall(r'"([a-z_]+)"', ids.group(1)) != rl.RELIC_IDS:
+        err("reliquary/Reliquary.java: RELIC_IDS differs from tools/concordance_relics.py")
+    if not re.search(r'String ACTIVITY = "' + re.escape(rl.RELIC_PRACTICE) + '";', reliquary):
+        err("Reliquary.ACTIVITY differs from tools/concordance_relics.py RELIC_PRACTICE")
+    if f'String RESEARCH = "{MOD}:relic_lore";' not in reliquary:
+        err("Reliquary.RESEARCH must be jugcraft:relic_lore")
+    practice = [rule for block in research.get("relic_lore", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != rl.RELIC_PRACTICE:
+        err("Relic Lore must be mastered by the relic practice")
+    elif len({c for info in rl.RELICS.values() for m in info["modes"] for c in m["contexts"]}) < practice[0].get("distinct", 1):
+        err("Relic Lore's mastery asks for more different contexts than the relics have")
+    # The definitions are the generator's, and each keeps to the rules.
+    folder = DATA / MOD / "concordance" / "relic"
+    found = {p.stem: load(p) or {} for p in folder.glob("*.json")}
+    if set(found) != set(rl.RELICS):
+        err(f"concordance/relic: {sorted(found)} differ from RELICS")
+    recipes = {p.stem for p in (DATA / MOD / "recipe").glob("*.json")}
+    for key, info in rl.RELICS.items():
+        entry = found.get(key, {})
+        if entry.get("modes") != info["modes"] or entry.get("capacity") != info["capacity"] or entry.get("owned") != info["owned"]:
+            err(f"concordance/relic/{key}.json differs from the generator's: run tools/generate_material_data.py")
+        if key not in rl.RELIC_IDS or key not in registered or key not in recipes:
+            err(f"relic {key}: needs its item id in RELIC_IDS, a registration and a recipe")
+        if not 1 <= info["capacity"] <= rl.MAX_CAPACITY:
+            err(f"relic {key}: capacity must be 1 to {rl.MAX_CAPACITY}")
+        seen = set()
+        for m in info["modes"]:
+            where = set(m["contexts"])
+            if not where or where & {"inventory", "cosmetic"} or not where <= set(rl.CONTEXTS) or where & seen:
+                err(f"relic {key} mode {m['id']}: contexts must be working ones, each in one mode only")
+            seen |= where
+            if m["status"] not in rl.RELIC_EFFECTS or not 0 <= m["amplifier"] <= rl.MAX_AMPLIFIER:
+                err(f"relic {key} mode {m['id']}: its status must be one of RELIC_EFFECTS, amplifier 0 to {rl.MAX_AMPLIFIER}")
+            if not (20 <= m["duration"] <= rl.MAX_DURATION and rl.MIN_INTERVAL <= m["interval"] <= rl.MAX_INTERVAL
+                    and 1 <= m["cost"] <= info["capacity"] and 0 <= m["range"] <= rl.MAX_RANGE):
+                err(f"relic {key} mode {m['id']}: its duration, interval, cost or range is out of bounds")
+            if (m["target"] == "self") != (m["range"] == 0) or (m["target"] == "self" and "installed" in where):
+                err(f"relic {key} mode {m['id']}: a self mode has no range and is never installed; the others need one")
+            if m["interval"] % rl.CHECK_TICKS:
+                err(f"relic {key} mode {m['id']}: its interval should be a whole number of checks ({rl.CHECK_TICKS} ticks)")
+            if f"compose.{MOD}.relic.mode.{m['id']}" not in lang:
+                err(f"relic {key}: missing lang for the mode {m['id']}")
+        if f"tooltip.{MOD}.{key}" not in lang or f"item.{MOD}.{key}" not in lang:
+            err(f"relic {key}: missing its name or tooltip")
+    # Nothing inside a container is ever looked at, and charge never becomes Ley Charge again.
+    for forbidden in ("CONTAINER", "BUNDLE_CONTENTS", "getEnderChestInventory"):
+        if forbidden in reliquary:
+            err(f"reliquary/Reliquary.java: relics are never looked for inside containers ({forbidden})")
+    for path in sorted((root / "reliquary").glob("*.java")):
+        if re.search(r"\.fill\(|\.setLey\(", path.read_text(encoding="utf-8")):
+            err(f"{path.name}: relic charge must never be turned back into Ley Charge")
+    if "Cause.Origin.SHRINE" not in shrine or "Reliquary.give(" not in shrine or "ConcordanceEffects.apply(" not in reliquary:
+        err("reliquary: relics give their effects only through the shared effect boundary (shrines as SHRINE causes)")
+    # Every word has its text.
+    reasons = set(re.findall(r'new Verdict\((?:null|mode), (?:context == Context\.INSTALLED \? "[a-z_]+" : )?"([a-z_]+)"', java("relic/Relics.java")))
+    reasons |= set(re.findall(r'"(cannot_install)"', java("relic/Relics.java")))
+    reasons |= set(re.findall(r'new Outcome\([^;]*?"([a-z_]+)", 0\)', reliquary))
+    reasons |= set(re.findall(r'return "([a-z_]+)";', shrine)) | set(re.findall(r'next = (?:definition == null \? )?"([a-z_]+)"', shrine))
+    reasons -= {"working", "empty", ""}
+    for reason in sorted(reasons | set(rl.REASONS)):
+        if f"compose.{MOD}.relic.reason.{reason}" not in lang:
+            err(f"relics: missing lang for the reason {reason}")
+    if not reasons <= set(rl.REASONS):
+        err(f"relics: reasons {sorted(reasons - set(rl.REASONS))} are not in REASONS")
+    for context in rl.CONTEXTS:
+        if f"compose.{MOD}.relic.context.{context}" not in lang:
+            err(f"relics: missing lang for the context {context}")
+    sources = sorted((root / "reliquary").glob("*.java")) + [JAVA_ROOT / "compat" / "jade" / "ShrineDataProvider.java"]
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "compat" / "JugcraftJadeClient.java"
+    for path in sources + [client]:
+        text = path.read_text(encoding="utf-8") if path.exists() else ""
+        for kind, key in re.findall(r'"(message|tooltip|compose)\.jugcraft\.((?:concordance\.)?(?:relic|jade\.shrine)[a-z_.]*)"', text):
+            if not key.endswith(".") and f"{kind}.{MOD}.{key}" not in lang:
+                err(f"{path.name}: missing lang {kind}.{MOD}.{key}")
+    # The shrine: its GeckoLib animations are the ones it plays; Jade shows it; Trinkets gives the necklace slot.
+    animations = load(ASSETS / "geckolib" / "animations" / "block" / "reliquary_shrine.animation.json") or {}
+    for name in re.findall(r'thenLoop\("([a-z_.]+)"\)', shrine):
+        if name not in animations.get("animations", {}):
+            err(f"reliquary_shrine.animation.json: missing {name}")
+    if not (ASSETS / "geckolib" / "models" / "block" / "reliquary_shrine.geo.json").is_file():
+        err("relics: missing the shrine's GeckoLib model")
+    plugin = (JAVA_ROOT / "compat" / "jade" / "JugcraftJadePlugin.java").read_text(encoding="utf-8")
+    if "ShrineDataProvider.INSTANCE, ReliquaryShrineBlockEntity.class" not in plugin or "ReliquaryShrineBlock.class" not in (
+            client.read_text(encoding="utf-8") if client.exists() else ""):
+        err("Jade: the Reliquary Shrine needs its data provider and its tooltip")
+    if f"config.jade.plugin_{MOD}.reliquary_shrine" not in lang:
+        err("Jade: missing the shrine's config name")
+    for relic, slot in rl.TRINKET_SLOTS.items():
+        group, name = slot.split("/")
+        tag = load(ROOT / "src" / "main" / "resources" / "data" / "trinkets" / "tags" / "item" / group / f"{name}.json") or {}
+        if rid_value(relic) not in tag.get("values", []):
+            err(f"data/trinkets/tags/item/{slot}.json must list {rid_value(relic)}")
+    entities = load(ROOT / "src" / "main" / "resources" / "data" / "trinkets" / "entities" / f"{MOD}_relics.json") or {}
+    if set(rl.TRINKET_SLOTS.values()) - set(entities.get("slots", [])) or "player" not in entities.get("entities", []):
+        err(f"data/trinkets/entities/{MOD}_relics.json must give players {sorted(set(rl.TRINKET_SLOTS.values()))}")
+    if "TrinketsApi.getAttachment(" not in reliquary or "Context.COSMETIC" not in reliquary:
+        err("Reliquary.find must read the Trinkets slots, treating cosmetic ones as worn for show")
+    if "reliquary_shrine" not in registered or "reliquary_shrine" not in recipes:
+        err("relics: the Reliquary Shrine needs a registration and a recipe")
+    equipment = load(ASSETS / "equipment" / "owlsight_circlet.json") or {}
+    worn = ASSETS / "textures" / "entity" / "equipment" / "humanoid" / "owlsight_circlet.png"
+    if not equipment.get("layers", {}).get("humanoid") or not worn.is_file():
+        err("relics: the Owlsight Circlet needs its equipment asset and worn texture")
+    sheet = ASSETS / "textures" / "block" / "reliquary_shrine.png"
+    if not sheet.is_file():
+        err("relics: missing textures/block/reliquary_shrine.png")
+    else:
+        with Image.open(sheet) as img:
+            if img.size != (64, 64):
+                err("relics: the shrine's sheet must be 64x64")
+    import item_icons
+    for icon in rl.RELIC_IDS + ["reliquary_shrine"]:
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"relics: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"relics: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
 
 
 def rid_value(path):

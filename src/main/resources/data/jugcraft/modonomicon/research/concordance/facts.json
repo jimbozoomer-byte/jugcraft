@@ -94,5 +94,17 @@
   },
   {
     "id": "jugcraft:concordance/runesmithing_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/relic_lore_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/relic_lore_observed"
+  },
+  {
+    "id": "jugcraft:concordance/relic_lore_understood"
+  },
+  {
+    "id": "jugcraft:concordance/relic_lore_mastered"
   }
 ]

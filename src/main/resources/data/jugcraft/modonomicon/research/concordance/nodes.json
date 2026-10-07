@@ -190,5 +190,29 @@
     "required_facts": [
       "jugcraft:concordance/runesmithing_mastered"
     ]
+  },
+  {
+    "id": "jugcraft:concordance/relic_lore_encountered",
+    "required_facts": [
+      "jugcraft:concordance/relic_lore_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/relic_lore_observed",
+    "required_facts": [
+      "jugcraft:concordance/relic_lore_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/relic_lore_understood",
+    "required_facts": [
+      "jugcraft:concordance/relic_lore_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/relic_lore_mastered",
+    "required_facts": [
+      "jugcraft:concordance/relic_lore_mastered"
+    ]
   }
 ]

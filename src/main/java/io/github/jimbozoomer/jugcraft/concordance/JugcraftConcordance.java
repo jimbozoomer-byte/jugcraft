@@ -251,6 +251,8 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.courier.Couriers.register();
 		// Roadmap step 19: Runesmithing: the Artificer's Bench and Resonant Rings.
 		io.github.jimbozoomer.jugcraft.concordance.smithy.Artificery.register();
+		// Roadmap step 20: relics in their explicit contexts, and the Reliquary Shrine.
+		io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

@@ -26,6 +26,10 @@ import io.github.jimbozoomer.jugcraft.compat.jade.CourierDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlock;
 import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Event;
+import io.github.jimbozoomer.jugcraft.compat.jade.ShrineDataProvider;
+import io.github.jimbozoomer.jugcraft.concordance.relic.Context;
+import io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary;
+import io.github.jimbozoomer.jugcraft.concordance.reliquary.ReliquaryShrineBlock;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import net.minecraft.world.level.block.state.BlockState;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
@@ -58,6 +62,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		registration.registerBlockComponent(ConcordanceTooltip.OBSERVATORY, ObservatoryBlock.class);
 		registration.registerEntityComponent(WorkerTooltip.INSTANCE, WorkerEntity.class);
 		registration.registerBlockComponent(CourierTooltip.INSTANCE, CourierPostBlock.class);
+		registration.registerBlockComponent(ShrineTooltip.INSTANCE, ReliquaryShrineBlock.class);
 		registration.registerBlockComponent(CropTooltip.INSTANCE, OrganismCropBlock.class);
 	}
 
@@ -118,6 +123,52 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.courier_last", Couriers.event(new Event(0L,
 							data.getLongOr("request", 0L), kind, data.getIntOr("amount", 0), data.getStringOr("note", "")))));
 				}
+			});
+		}
+	}
+
+	/**
+	 * A Reliquary Shrine (roadmap step 20): the relic it holds and its charge, and whether it works or exactly why not
+	 * (the reasons that name where a relic works list its contexts).
+	 */
+	private enum ShrineTooltip implements IBlockComponentProvider {
+		INSTANCE;
+
+		@Override
+		public Identifier getUid() {
+			return ShrineDataProvider.ID;
+		}
+
+		@Override
+		public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+			accessor.getServerData().getCompound(ShrineDataProvider.KEY).ifPresent(data -> {
+				String relic = data.getStringOr("relic", "");
+				if (relic.isEmpty()) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.shrine_empty"));
+					return;
+				}
+				String status = data.getStringOr("status", "");
+				Component state;
+				if (status.equals("working")) {
+					state = Component.translatable("tooltip.jugcraft.concordance.jade.shrine_working",
+							Component.translatable("compose.jugcraft.relic.mode." + data.getStringOr("mode", "")));
+				} else if (status.equals("wrong_context") || status.equals("cannot_install")) {
+					java.util.List<Context> contexts = new java.util.ArrayList<>();
+					for (String id : data.getStringOr("contexts", "").split(",")) {
+						Context context = Context.fromId(id);
+						if (context != null) {
+							contexts.add(context);
+						}
+					}
+					state = Component.translatable("message.jugcraft.concordance.relic.cannot",
+							Component.translatable("compose.jugcraft.relic.reason." + status, Reliquary.contexts(contexts)));
+				} else {
+					state = Component.translatable("message.jugcraft.concordance.relic.cannot",
+							Component.translatable("compose.jugcraft.relic.reason." + status));
+				}
+				tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.shrine", Component.translatable(relic), state));
+				tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.shrine_charge", data.getIntOr("charge", 0),
+						data.getIntOr("capacity", 0)));
 			});
 		}
 	}

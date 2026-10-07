@@ -421,10 +421,15 @@ import concordance_artifice as artifice  # noqa: E402
 RESEARCH.update(artifice.RESEARCH)
 ITEMS.update(artifice.ITEMS)
 BLOCKS.update(artifice.BLOCKS)
+# Roadmap step 20 (tools/concordance_relics.py): Relic Lore, relics in explicit contexts and the Reliquary Shrine.
+import concordance_relics as relics  # noqa: E402
+RESEARCH.update(relics.RESEARCH)
+ITEMS.update(relics.ITEMS)
+BLOCKS.update(relics.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
-                 artifice.ARTIFICE_SPECIMEN_TAG]
+                 artifice.ARTIFICE_SPECIMEN_TAG, relics.RELIC_SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -923,6 +928,7 @@ def codex():
         **workers.codex(),
         **logistics.codex(),
         **artifice.codex(),
+        **relics.codex(),
     }
 
 
@@ -1028,6 +1034,7 @@ CATEGORIES = {
     **crimson.CATEGORY,
     **workers.CATEGORY,
     **artifice.CATEGORY,
+    **relics.CATEGORY,
 }
 
 ENTRY_BACKGROUNDS = {None: "square_gray", "encountered": "square_gray", "observed": "square_gray",
@@ -1437,6 +1444,7 @@ MESSAGES = {
     **workers.MESSAGES,
     **logistics.MESSAGES,
     **artifice.MESSAGES,
+    **relics.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1474,6 +1482,7 @@ TOOLTIPS = {
     **workers.TOOLTIPS,
     **logistics.TOOLTIPS,
     **artifice.TOOLTIPS,
+    **relics.TOOLTIPS,
 }
 
 
@@ -1657,6 +1666,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     workers.write_all(write, assets, data, lang, condition, self_drop)
     logistics.write_all(write, assets, data, lang, condition, self_drop)
     artifice.write_all(write, assets, data, lang, condition, self_drop)
+    relics.write_all(write, assets, data, lang, condition, self_drop)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -1795,6 +1805,7 @@ def write_data(write, res):
     workers.write_data(write, data)
     logistics.write_data(write, data)
     artifice.write_data(write, data)
+    relics.write_data(write, data)
     # LambDynamicLights (optional, client): a lit Kindled Lantern glows in hand. Without the mod nothing reads this.
     write(assets / "dynamiclights" / "item" / "kindled_lantern.json",
           {"match": {"items": rid("kindled_lantern"), "components": {rid("lantern_lit"): {}}},
@@ -1815,6 +1826,7 @@ def tags(tags):
     workers.tags(tags)
     logistics.tags(tags)
     artifice.tags(tags)
+    relics.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     tags.add("block", "minecraft:mineable/axe", rid("lampwright_bench"))
