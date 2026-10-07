@@ -1,6 +1,6 @@
 """Tools, armor and paxels (batch 25, docs/features/tools-and-armor.md), inspired by Mekanism: Tools (MIT; no code or
-art taken). Keep GEAR_TIERS, PIECES, PAXEL_TIERS and ARMOR_STYLES in sync with gear/JugcraftGear.java (ARMOR_STYLES also
-with STYLE_TEMPLATES); tools/check_mod_data.py checks it.
+art taken). Keep GEAR_TIERS, PIECES, PAXEL_TIERS, ARMOR_STYLES and ARMOR_TIERS in sync with gear/JugcraftGear.java
+(ARMOR_STYLES also with STYLE_TEMPLATES); tools/check_mod_data.py checks it.
 """
 
 MOD = "jugcraft"
@@ -125,6 +125,23 @@ def earthbound_armor():
             for piece in ARMOR]
 
 
+# Armor-only tiers with numbers of their own (docs/features/bloodthorn-armor.md): the owner's own armor designs, each a
+# new tier stronger than vanilla's, worn as a 3D model (tools/<tier>_armor.py; every piece must have one, so no flat
+# layer is drawn or needed). Not in GEAR_TIERS: no tools, paxels or arms. "armor" is as in GEAR_TIERS: durability
+# multiplier, defense (boots, leggings, chestplate, helmet), enchantability, toughness, knockback resistance; netherite
+# is 37, (3, 6, 8, 3), 15, 3.0, 0.1. "repair" is what mends it at an anvil, "fire_resistant" as netherite. No recipe
+# or drop yet: the owner, 6 October 2026, "for now just make the armor we can figure that out later" (they might be
+# dropped by bosses or craftable), so for now they are creative-only. Java: JugcraftGear.ARMOR_TIERS.
+ARMOR_TIERS = {
+    "bloodthorn": {"display": "Bloodthorn", "armor": (40, (3, 7, 9, 3), 15, 3.5, 0.15),
+                   "repair": "minecraft:netherite_ingot", "fire_resistant": True},
+    # Reforged White Diamond: beside Bloodthorn rather than above it, in other strengths: the heavier helm, the longest
+    # wear and the best enchanting, but netherite's toughness and no fire resistance; mended with diamonds.
+    "reforged_white_diamond": {"display": "Reforged White Diamond", "armor": (45, (3, 7, 8, 4), 20, 3.0, 0.1),
+                               "repair": "minecraft:diamond", "fire_resistant": False},
+}
+
+
 # Batch 27 gear (docs/features/gear-and-plastic.md), after Mekanism's scuba gear, free runners, Meka-Tana and
 # Meka-Bow (MIT; no code or art taken): display name, crafting pattern and key, and the item model it uses.
 EXTRAS = {
@@ -180,10 +197,15 @@ def feature(item):
     return "machines"
 
 
+def tier_items():
+    """The armor-only tiers' pieces, <tier>_<piece>, in ARMOR_TIERS order."""
+    return [f"{tier}_{piece}" for tier in ARMOR_TIERS for piece in ARMOR]
+
+
 def items():
     """Every item this module registers, in registration order."""
-    return ([f"{tier}_{piece}" for tier in GEAR_TIERS for piece in PIECES] + style_items() + style_templates()
-            + [f"{tier}_paxel" for tier in PAXEL_TIERS] + list(EXTRAS))
+    return ([f"{tier}_{piece}" for tier in GEAR_TIERS for piece in PIECES] + style_items() + tier_items()
+            + style_templates() + [f"{tier}_paxel" for tier in PAXEL_TIERS] + list(EXTRAS))
 
 
 def display(item):
@@ -196,6 +218,8 @@ def display(item):
         return f"{PAXEL_TIERS[tier]} Paxel"
     if tier in ARMOR_STYLES:
         return f"{ARMOR_STYLES[tier]['display']} {piece.capitalize()}"
+    if tier in ARMOR_TIERS:
+        return f"{ARMOR_TIERS[tier]['display']} {piece.capitalize()}"
     return f"{GEAR_TIERS[tier]['display']} {piece.capitalize()}"
 
 
@@ -232,9 +256,17 @@ def write_all(write, assets, data, lang, condition):
                                                                              "model": f"{MOD}:item/{item}_pulling_{n}"}}
                                                   for n, t in ((1, 0.65), (2, 0.9))]}}
         write(assets / "items" / f"{item}.json", {"model": definition})
-    for tier in list(GEAR_TIERS) + list(ARMOR_STYLES):
-        write(assets / "equipment" / f"{tier}.json", {"layers": {
-            "humanoid": [{"texture": f"{MOD}:{tier}"}], "humanoid_leggings": [{"texture": f"{MOD}:{tier}"}]}})
+    # A flat layer is left out when every piece drawn with it has a 3D model (tools/armor_models.py, drawn by
+    # client/WornModelLayer): helmet, chestplate and boots use "humanoid", leggings "humanoid_leggings". With no layer
+    # left there is no asset file at all: 26.3 cannot read an empty layer map, and a missing asset draws nothing.
+    import armor_models
+    worn = {item for armor_set in armor_models.sets() for item in armor_set.pieces}
+    for tier in list(GEAR_TIERS) + list(ARMOR_STYLES) + list(ARMOR_TIERS):
+        layers = {layer: [{"texture": f"{MOD}:{tier}"}]
+                  for layer, pieces in (("humanoid", ("helmet", "chestplate", "boots")), ("humanoid_leggings", ("leggings",)))
+                  if not all(f"{tier}_{piece}" in worn for piece in pieces)}
+        if layers:
+            write(assets / "equipment" / f"{tier}.json", {"layers": layers})
     for asset in ("scuba", "free_runners"):
         write(assets / "equipment" / f"{asset}.json", {"layers": {"humanoid": [{"texture": f"{MOD}:{asset}"}]}})
     lang[f"tooltip.{MOD}.oxygen"] = "Oxygen: %s / %s mB"
@@ -300,6 +332,9 @@ def write_all(write, assets, data, lang, condition):
     for style in ARMOR_STYLES:  # styled armor is armor of its slot, so it enchants, trims and equips as the plain piece
         for piece in ARMOR:
             by_tag[ITEM_TAGS[piece]].append(f"{MOD}:{style}_{piece}")
+    for tier in ARMOR_TIERS:  # so the armor-only tiers enchant and equip as any armor of their slot
+        for piece in ARMOR:
+            by_tag[ITEM_TAGS[piece]].append(f"{MOD}:{tier}_{piece}")
     for tier in PAXEL_TIERS:
         for tag in ("pickaxes", "axes", "shovels"):
             by_tag.setdefault(tag, []).append(f"{MOD}:{tier}_paxel")
@@ -326,6 +361,8 @@ def write_all(write, assets, data, lang, condition):
         write(tags / f"{tag}.json", {"replace": False, "values": values})
     for tier, info in GEAR_TIERS.items():
         write(data / "tags" / "item" / f"repairs_{tier}_gear.json", {"values": [info["ingot"]]})
+    for tier, info in ARMOR_TIERS.items():
+        write(data / "tags" / "item" / f"repairs_{tier}_gear.json", {"values": [info["repair"]]})
     write(data / "tags" / "item" / "repairs_rubber_gear.json", {"values": [f"{MOD}:rubber"]})
     write(data / "tags" / "block" / "mineable" / "paxel.json", {"values": [
         "#minecraft:mineable/pickaxe", "#minecraft:mineable/axe", "#minecraft:mineable/shovel"]})

@@ -1,12 +1,14 @@
 """Tool and armor textures (batch 25, docs/features/tools-and-armor.md): bronze and steel swords, pickaxes, axes,
-shovels and hoes, and paxels for every tier. The armor (icons and worn layers) is drawn in armor_styles.py: Steampunk
-and Kaiser Armor (docs/features/steampunk-and-kaiser-armor.md) and, for now, bronze and steel armor in the same looks.
+shovels and hoes, and paxels for every tier. Bronze and steel armor's icons are the knight armor's (armor_icons.py;
+docs/features/knight-armor.md), worn as 3D models. Steampunk and Kaiser Armor (docs/features/steampunk-and-kaiser-armor.md)
+are drawn in armor_styles.py, icons and worn layers.
 
 All original: each icon is a hand-drawn mask below, coloured from a five-shade palette (0 darkest .. 4 lightest);
 handles are oak brown.
 """
 from PIL import Image
 
+import armor_icons
 import armor_styles
 import arms_variants_art
 import gear
@@ -195,8 +197,8 @@ def bow_drawn(step):
     return ["".join(r) for r in rows]
 
 
-# The look bronze and steel armor wear until they get their own design: the stylized looks they were first drawn in
-# (2 October 2026), which Steampunk and Kaiser Armor keep. The same code draws both, so the pixels match.
+# The flat worn layers bronze and steel armor keep as a fallback (no equipment asset draws them; they wear the knight
+# armor's 3D models): the stylized looks they were first drawn in (2 October 2026), which Steampunk and Kaiser Armor keep.
 METAL_ARMOR_LOOK = {"bronze": "steampunk", "steel": "kaiser"}
 
 
@@ -206,10 +208,13 @@ def draw_all(save, save_armor, part_palette):
         palette = part_palette(metal)
         for tool, mask in TOOLS.items():
             save(icon(mask, palette), "item", f"{metal}_{tool}")
+        # Armor: the icons are the knight armor's (tools/armor_icons.py, a hand-drawn map a piece), and the worn look is
+        # its 3D model (tools/knight_armor.py). These flat layers, in the stylized looks Steampunk and Kaiser Armor keep,
+        # are a fallback that no equipment asset draws.
+        for piece in armor_icons.PIECES:
+            save(armor_icons.icon(metal, piece), "item", f"{metal}_{piece}")
         look = METAL_ARMOR_LOOK[metal]
         armor = armor_styles.PALETTES[look]
-        for piece in gear.ARMOR:
-            save(armor_styles.icon(look, piece, armor), "item", f"{metal}_{piece}")
         save_armor(armor_styles.layer(look, armor, False), "humanoid", metal)
         save_armor(armor_styles.layer(look, armor, True), "humanoid_leggings", metal)
     # Steampunk and Kaiser Armor: the stylized looks, unchanged (tools/armor_styles.py), and their patterns.
@@ -221,6 +226,12 @@ def draw_all(save, save_armor, part_palette):
         save(arms_variants_art.pattern16(style), "item", gear.ARMOR_STYLES[style]["template"])
     # Thallite armor, plain and Earthbound, and the Earthbinding Template: hand-drawn maps (tools/thallite_armor.py).
     thallite_armor.draw(save, save_armor)
+
+    # The armor-only tiers (gear.ARMOR_TIERS; Bloodthorn first): icons from each tier's own maps
+    # (tools/armor_icons/<tier>/), coloured as its 3D model is painted; worn, each is only that model, with no flat layer.
+    for tier in gear.ARMOR_TIERS:
+        for piece in armor_icons.PIECES:
+            save(armor_icons.icon(tier, piece), "item", f"{tier}_{piece}")
     steel = part_palette("steel")
     save(icon(BOW_BASE, steel), "item", "power_bow")
     for step in range(3):

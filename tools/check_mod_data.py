@@ -668,6 +668,31 @@ def check_exosuit():
                     err(f"Missing exosuit part texture block/{tex}.png")
 
 
+def check_worn_armor():
+    """The 3D armor sets (tools/armor_models.py, drawn by client/WornModelLayer). Every texture a quad in
+    worn_models.json names exists (QuadModel's rule: a plain name is a block texture), and each set's atlas is there, is
+    the size its layout gives the quads' UVs, and is exactly what tools/armor_paint.py paints. CI regenerates
+    worn_models.json but not the textures, so a set changed without rerunning generate_textures.py stops here."""
+    import armor_models
+    import armor_paint
+    textures = ASSETS / "textures"
+    worn = load(ASSETS / "worn_models.json") or {}
+    for name in sorted({quad["texture"] for quads in worn.values() for quad in quads}):
+        if not (textures / (f"{name}.png" if "/" in name else f"block/{name}.png")).is_file():
+            err(f"worn_models.json: missing texture {name}.png")
+    for armor_set in armor_models.sets():
+        path = textures / f"{armor_set.texture}.png"
+        if not path.is_file():
+            err(f"Missing 3D armor atlas {path.relative_to(ROOT)} (run tools/generate_textures.py)")
+            continue
+        image = Image.open(path).convert("RGBA")
+        size = armor_models.layout(armor_set)[1]
+        if image.size != size:
+            err(f"{path.name} is {image.size[0]}x{image.size[1]}; set {armor_set.name}'s layout is {size[0]}x{size[1]}")
+        elif image.tobytes() != armor_paint.paint_atlas(armor_set).convert("RGBA").tobytes():
+            err(f"{path.name} is not what tools/armor_paint.py paints for {armor_set.name} (run tools/generate_textures.py)")
+
+
 def check_hydroponics():
     """MachineKind's hydroponic bay numbers against tools/hydroponics.py."""
     java = MACHINE_JAVA.read_text(encoding="utf-8")
@@ -1396,6 +1421,38 @@ def check_gear():
                 err(f"Missing item texture {frame}.png")
     check_armor_styles(java)
     check_armor_looks()
+    check_armor_tiers(java)
+
+
+def check_armor_tiers(java):
+    """The armor-only tiers (tools/gear.py ARMOR_TIERS, docs/features/bloodthorn-armor.md) against JugcraftGear: the
+    list, each tier's material and its fire resistance; and, since they draw no flat layer, that every piece has a 3D
+    model (tools/armor_models.py), an icon and no equipment asset file."""
+    import armor_models
+    match = re.search(r"ARMOR_TIERS = List\.of\(([^)]*)\)", java)
+    found = re.findall(r'"([a-z_]+)"', match.group(1)) if match else None
+    if found != list(gear.ARMOR_TIERS):
+        err(f"JugcraftGear.ARMOR_TIERS {found} != tools/gear.py {list(gear.ARMOR_TIERS)}")
+    worn = {item for armor_set in armor_models.sets() for item in armor_set.pieces}
+    for tier, info in gear.ARMOR_TIERS.items():
+        mult, (boots, legs, chest, helmet), enchant, tough, knock = info["armor"]
+        armor = f"{tier.upper()}_ARMOR = new ArmorMaterial({mult}, defense({boots}, {legs}, {chest}, {helmet}), {enchant},"
+        if armor not in java or f"{tough}F, {knock}F, repairs(\"{tier}\"), asset(\"{tier}\"))" not in java:
+            err(f"JugcraftGear: the {tier} armor material differs from tools/gear.py")
+        call = f'armorTier("{tier}", {tier.upper()}_ARMOR, {str(info["fire_resistant"]).lower()});'
+        if call not in java:
+            err(f"JugcraftGear must register the {tier} pieces as {call}")
+        repairs = load(DATA / MOD / "tags" / "item" / f"repairs_{tier}_gear.json") or {}
+        if repairs.get("values") != [info["repair"]]:
+            err(f"{MOD}:repairs_{tier}_gear must hold {info['repair']}")
+        for piece in gear.ARMOR:
+            item = f"{tier}_{piece}"
+            if item not in worn:
+                err(f"{item} has no 3D model: an armor-only tier draws no flat layer (tools/armor_models.SET_MODULES)")
+            if not (ASSETS / "textures" / "item" / f"{item}.png").is_file():
+                err(f"Missing item texture {item}.png")
+        if (ASSETS / "equipment" / f"{tier}.json").exists():
+            err(f"equipment/{tier}.json should not exist: every {tier} piece is drawn as a 3D model")
 
 
 def check_thallite_gear():
@@ -1436,6 +1493,10 @@ def check_armor_styles(java):
         if line not in java:
             err(f"JugcraftGear must derive the {style} armor material from its metal's: {line}")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
+    # A set whose every piece has a 3D model (tools/armor_models.py, docs/features/knight-armor.md) draws no flat layer
+    # and has no equipment asset; its 64x32 layers are still generated, as a fallback.
+    import armor_models
+    worn = {item for armor_set in armor_models.sets() for item in armor_set.pieces}
     for asset in list(gear.GEAR_TIERS) + list(gear.ARMOR_STYLES):
         for layer in ("humanoid", "humanoid_leggings"):
             png = ASSETS / "textures" / "entity" / "equipment" / layer / f"{asset}.png"
@@ -1445,6 +1506,10 @@ def check_armor_styles(java):
                         err(f"Worn armor texture {layer}/{asset}.png is {img.size}, expected 64x32")
             else:
                 err(f"Missing worn armor texture {layer}/{asset}.png")
+        if all(f"{asset}_{piece}" in worn for piece in gear.ARMOR):
+            if (ASSETS / "equipment" / f"{asset}.json").exists():
+                err(f"equipment/{asset}.json should not exist: every {asset} piece is drawn as a 3D model")
+            continue
         equipment = load(ASSETS / "equipment" / f"{asset}.json") or {}
         for layer in ("humanoid", "humanoid_leggings"):
             if equipment.get("layers", {}).get(layer) != [{"texture": f"{MOD}:{asset}"}]:
@@ -7196,6 +7261,7 @@ def main():
     check_arms_motion()
     check_flail_heads()
     check_exosuit()
+    check_worn_armor()
     check_grapple()
     check_field_chemistry()
     check_construction()

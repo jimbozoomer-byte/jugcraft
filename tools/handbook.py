@@ -600,9 +600,9 @@ def armor_style_pages():
             f"piece. A Kaiser Pattern, a piece of steel armor and a gold ingot make the Kaiser piece. Each pattern "
             f"craft makes {steampunk['template_count']}, one for each piece of a set. The Kaiser Pattern needs an "
             "Imperial Crest, made from black lacquer plates.",
-            "Same protection as the bronze or steel piece, and for now the same look: bronze and steel armor still "
-            "wear these looks too, until they get their own design. Enchantments, wear, trims and plating carry over. "
-            "The same pattern and an ingot of the metal turn it back."],
+            "Same protection as the bronze or steel piece, in its own look: bronze and steel armor are knight's plate. "
+            "Enchantments, wear, trims and plating carry over. The same pattern and an ingot of the metal turn it "
+            "back."],
          "craft": {"grid": grid("steampunk"), "result": f"{MOD}:{steampunk['template']}",
                    "count": steampunk["template_count"]}},
         {"title": "Kaiser Pattern", "icon": f"{MOD}:{kaiser['template']}", "text": [
@@ -626,11 +626,11 @@ def gear_pages():
         {"title": "Bronze and Steel Gear", "icon": f"{MOD}:steel_pickaxe", "text": [
             "Bronze and steel make swords, pickaxes, axes, shovels, hoes and armor, shaped like iron ones.",
             "Bronze tools get the same drops as iron and last a little longer. Bronze armor matches iron's and is "
-            "slightly tougher.",
+            "slightly tougher: knight's plate in copper-bronze, riveted in brass, with a brass collar.",
             "Steel tools mine obsidian and ancient debris, and last over three times as long as iron. Steel armor sits "
-            "between iron and diamond.",
+            "between iron and diamond: knight's plate with a crested helm, layered pauldrons and a skirt of plates.",
             "Steampunk and Kaiser armor keep the stylized looks bronze and steel armor were first made in, as sets of "
-            "their own. For now bronze and steel armor wear those looks too."],
+            "their own."],
          "craft": {"grid": grid, "result": f"{MOD}:steel_pickaxe", "count": 1}},
     ] + armor_style_pages() + thallite_gear_pages() + arms_pages() + [
         {"title": "Paxels", "icon": f"{MOD}:steel_paxel", "text": [
