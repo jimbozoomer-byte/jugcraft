@@ -1,8 +1,9 @@
-"""Original 16x16 textures for the biomes branch's later batches (requires Pillow): their woods (agriculture.WOOD_SETS,
-agriculture.TREES) and wild plants (tools/plants.py).
+"""Original 16x16 textures for the biomes branch's later batches (requires Pillow): their trees' saplings
+(agriculture.TREES) and wild plants (tools/plants.py).
 
 Called from crop_textures.crop_textures(), after the seasonal forests'. Every pixel is drawn here by code from fixed
-seeds; no Mojang or other mod's texture is read, traced or recolored.
+seeds; no Mojang or other mod's texture is read, traced or recolored. These trees' woods and leaves are drawn with
+every other tree's by wood_style.py.
 """
 import math
 import random
@@ -68,137 +69,8 @@ FRONDS = pal("173d14", "1f5019", "2b671f", "3a8028", "4f9a34", "6db44c")
 SCALES = pal("0f2a1a", "163522", "1e432b", "275235", "326240", "41754e")
 WILLOW = {"green": pal("223f18", "2f5620", "3f6e29", "548834", "6fa244", "93bd62"),
           "gold": pal("6a5a0e", "8f7a12", "b39a1c", "cdb52e", "e2cd4a", "f0e27c")}
-TWIG = pal("2a221c", "3e3228", "564637", "6e5a48")
 BLOSSOM = {"jacaranda": pal("3b2a6b", "523b8e", "6b52b0", "8670cc", "a492e0", "c4b8f0")}
 LEAF_GREEN = pal("1f3b16", "2b501d", "3a6826", "4c8231", "659c40", "86b85a")
-
-
-def bark(wood, seed):
-    w = WOODS[wood]
-    p = w["bark"]
-    rng = random.Random(seed)
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            if w["style"] == "fissured":
-                # Smooth plates split by shallow, wandering vertical fissures.
-                lane = (x + (y // 5) % 2) % 5
-                shade = 1 if lane == 0 else 3 if lane == 2 else 2
-            elif w["style"] == "ringed":
-                # Rings where old fronds fell, every few rows.
-                shade = 1 if y % 4 == 0 else 3 if y % 4 == 1 else 2
-            elif w["style"] == "stringy":
-                # Long, fibrous strands.
-                shade = 3 if (x * 2 + y // 4) % 5 == 0 else 1 if x % 3 == 0 else 2
-            elif w["style"] == "shaggy":
-                # Long, thick ridges with deep, dark grooves, broken here and there.
-                lane = (x + (1 if (y // 7) % 2 else 0)) % 4
-                shade = 0 if lane == 0 else 4 if lane == 2 and y % 5 else 3 if lane == 2 else 2
-            elif w["style"] == "streaked":
-                # Smooth green bark; streaks of colour are laid over it below.
-                shade = 2 if (x + y // 6) % 4 else 3
-            elif w["style"] == "scaly":
-                # Small plates, offset row by row, edged dark.
-                plate_x = (x + (2 if (y // 3) % 2 else 0)) % 4
-                shade = 1 if plate_x == 0 or y % 3 == 0 else 3 if plate_x == 2 else 2
-            elif w["style"] == "furrowed":
-                # Deep, interlacing furrows between narrow ridges.
-                lane = (x + (1 if (y // 3) % 2 else 0)) % 3
-                shade = 0 if lane == 0 else 3 if lane == 1 else 2
-            else:
-                shade = 2
-            if rng.random() < 0.08:
-                shade = max(0, min(4, shade + rng.choice((-1, 1))))
-            c.px(x, y, p[shade])
-    if w["style"] == "streaked":
-        # Long vertical streaks where the bark has peeled, each in one of the wood's streak colours.
-        for i in range(7):
-            x = rng.randrange(16)
-            top = rng.randrange(16)
-            colour = w["streaks"][i % len(w["streaks"])]
-            for k in range(rng.randrange(5, 12)):
-                c.px(x, (top + k) % 16, colour)
-                if k % 3 == 1:
-                    c.px((x + 1) % 16, (top + k) % 16, colour)
-    return c.img
-
-
-def log_top(wood, stripped):
-    w = WOODS[wood]
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            edge = max(abs(x - 7.5), abs(y - 7.5))
-            ring = math.hypot(x - 7.5, y - 7.5)
-            if edge > 6.9:
-                c.px(x, y, w["sap"][1] if stripped else w["bark"][1 if (x + y * 3) % 4 else 3])
-            elif ring > 5.0:
-                c.px(x, y, w["sap"][2 if int(ring * 2) % 2 else 1])
-            else:
-                shade = 2 if int(ring * 1.5) % 2 else 1
-                c.px(x, y, w["heart"][0] if ring < 1.2 else w["heart"][shade + 1 if ring < 3 else shade])
-    return c.img
-
-
-def stripped_log(wood, seed):
-    w = WOODS[wood]
-    rng = random.Random(seed)
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            shade = 2 if x % 3 else 1
-            if (x * 3 + y // 5) % 11 == 6:
-                c.px(x, y, w["heart"][3])
-                continue
-            if rng.random() < 0.05:
-                shade = 0
-            c.px(x, y, w["sap"][shade])
-    return c.img
-
-
-def planks(wood, seed):
-    """Four boards with staggered seams in the wood's colour and grain."""
-    p = WOODS[wood]["plank"]
-    rng = random.Random(seed)
-    c = Canvas()
-    for board in range(4):
-        seam = (6, 13, 2, 9)[board]
-        for y in range(board * 4, board * 4 + 4):
-            for x in range(16):
-                shade = 3 if y % 4 == 0 else 2
-                if (x * 2 + board * 3) % 7 == 0:
-                    shade -= 1
-                if rng.random() < 0.05:
-                    shade = max(0, shade - 1)
-                c.px(x, y, p[shade])
-            c.px(seam, y, p[0])
-        for x in range(16):
-            c.px(x, board * 4 + 3, p[1])
-    return c.img
-
-
-def blossom_leaves(tree, seed):
-    """Leaves in bloom: clusters of small flowers over a few leaves. Gaps keep a dark colour, so fast graphics (drawn
-    opaque) still look dense."""
-    rng = random.Random(seed)
-    bloom = BLOSSOM[tree]
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.img.putpixel((x, y), bloom[0] + (0,))
-    for _ in range(9):
-        x0, y0 = rng.randrange(16), rng.randrange(16)
-        for dx, dy in ((0, 0), (1, 0), (0, 1)):
-            c.px((x0 + dx) % 16, (y0 + dy) % 16, LEAF_GREEN[3 if dx else 2])
-    for _ in range(26):
-        x0, y0 = rng.randrange(16), rng.randrange(16)
-        for dx, dy, shade in ((0, 0, 4), (1, 0, 3), (0, 1, 3), (-1, 0, 2), (0, -1, 5)):
-            c.px((x0 + dx) % 16, (y0 + dy) % 16, bloom[shade])
-    for y in range(16):
-        for x in range(16):
-            if c.empty(x, y) and rng.random() < 0.35:
-                c.px(x, y, bloom[rng.choice((1, 2))])
-    return c.img
 
 
 def blossom_sapling(tree):
@@ -217,40 +89,6 @@ def blossom_sapling(tree):
     return c.img
 
 
-def willow_leaves(look, seed):
-    """Long, narrow willow leaves hanging in strands; "bare" draws the winter twigs. Gaps keep a dark colour, so fast
-    graphics (drawn opaque) still look dense."""
-    rng = random.Random(seed)
-    c = Canvas()
-    if look == "bare":
-        for y in range(16):
-            for x in range(16):
-                c.img.putpixel((x, y), TWIG[0] + (0,))
-        for x in (1, 5, 9, 13):
-            for y in range(16):
-                if rng.random() < 0.8:
-                    c.px(x + (y // 6) % 2, y, TWIG[1 + (y % 2)])
-        return c.img
-    palette = WILLOW[look]
-    for y in range(16):
-        for x in range(16):
-            c.img.putpixel((x, y), palette[0] + (0,))
-    for strand in range(7):
-        x = strand * 2 + rng.randrange(0, 2)
-        top = rng.randrange(-4, 4)
-        for k in range(rng.randrange(8, 14)):
-            y = (top + k) % 16
-            shade = 4 if k % 3 == 0 else 3 if k % 3 == 1 else 2
-            c.px(x, y, palette[shade])
-            if k % 4 == 2:
-                c.px((x + 1) % 16, y, palette[shade - 1])
-    for y in range(16):
-        for x in range(16):
-            if c.empty(x, y) and rng.random() < 0.3:
-                c.px(x, y, palette[1])
-    return c.img
-
-
 def willow_sapling():
     c = Canvas()
     stem = WOODS["willow"]["bark"][3]
@@ -260,98 +98,6 @@ def willow_sapling():
         for k in range(5):
             c.px(x0 + (1 if k > 2 and x0 > 8 else 0) - (1 if k > 2 and x0 < 8 else 0), 4 + k, green[4 if k % 2 else 3])
     c.line(5, 4, 11, 4, green[2])
-    return c.img
-
-
-def fronds_leaves(seed):
-    """Palm fronds: long feathery leaves with a midrib, crossing the tile."""
-    rng = random.Random(seed)
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.img.putpixel((x, y), FRONDS[0] + (0,))
-    for _ in range(5):
-        x0, y0 = rng.randrange(16), rng.randrange(16)
-        dx, dy = rng.choice(((1, 0), (0, 1), (1, 1), (1, -1)))
-        for k in range(-7, 8):
-            x, y = (x0 + dx * k) % 16, (y0 + dy * k) % 16
-            c.px(x, y, FRONDS[2])
-            for side in (-1, 1):
-                if k % 2 == 0:
-                    c.px((x + dy * side) % 16, (y - dx * side) % 16, FRONDS[4 if side > 0 else 3])
-    for y in range(16):
-        for x in range(16):
-            if c.empty(x, y) and rng.random() < 0.3:
-                c.px(x, y, FRONDS[1])
-    return c.img
-
-
-def scale_leaves(seed):
-    """Dense cypress scale-leaves: small upright sprays, dark and nearly closed."""
-    rng = random.Random(seed)
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, SCALES[rng.choice((0, 1, 1, 2))])
-    for _ in range(20):
-        x, y = rng.randrange(16), rng.randrange(16)
-        c.px(x, y, SCALES[4])
-        c.px(x, (y + 1) % 16, SCALES[3])
-        c.px((x + 1) % 16, (y + 1) % 16, SCALES[5] if rng.random() < 0.3 else SCALES[3])
-    return c.img
-
-
-def needle_leaves(seed):
-    """Redwood needles: short, flat sprays of dark needles along twigs, nearly closed."""
-    rng = random.Random(seed)
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, NEEDLES[rng.choice((0, 1, 1))])
-    for _ in range(9):
-        x0, y0 = rng.randrange(16), rng.randrange(16)
-        for k in range(-3, 4):
-            x = (x0 + k) % 16
-            c.px(x, y0, NEEDLES[2])
-            c.px(x, (y0 - 1) % 16, NEEDLES[4 if k % 2 else 3])
-            c.px(x, (y0 + 1) % 16, NEEDLES[3 if k % 2 else 5])
-    return c.img
-
-
-def eucalyptus_leaves(seed):
-    """Eucalyptus: long, narrow, sickle-shaped leaves in a dusty blue-green, hanging loosely. Gaps keep a dark colour,
-    so fast graphics (drawn opaque) still look dense."""
-    rng = random.Random(seed)
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.img.putpixel((x, y), EUCALYPTUS[0] + (0,))
-    for _ in range(11):
-        x0, y0 = rng.randrange(16), rng.randrange(16)
-        bend = rng.choice((-1, 1))
-        for k in range(6):
-            x = (x0 + (bend if k >= 3 else 0) + (bend if k >= 5 else 0)) % 16
-            c.px(x, (y0 + k) % 16, EUCALYPTUS[3 + (k % 2) if k < 5 else 2])
-        c.px(x0, y0, EUCALYPTUS[5])
-    for y in range(16):
-        for x in range(16):
-            if c.empty(x, y) and rng.random() < 0.3:
-                c.px(x, y, EUCALYPTUS[1])
-    return c.img
-
-
-def mahogany_leaves(seed):
-    """Mahogany: glossy, broad, paired leaflets in a deep green, densely set."""
-    rng = random.Random(seed)
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, MAHOGANY[rng.choice((0, 1))])
-    for _ in range(14):
-        x0, y0 = rng.randrange(16), rng.randrange(16)
-        for dx, dy, shade in ((0, 0, 3), (1, 0, 4), (0, 1, 2), (1, 1, 3), (2, 0, 2), (-1, 1, 2)):
-            c.px((x0 + dx) % 16, (y0 + dy) % 16, MAHOGANY[shade])
-        c.px((x0 + 1) % 16, (y0 - 1) % 16, MAHOGANY[5])
     return c.img
 
 
@@ -778,23 +524,11 @@ def duckweed():
 def wild_textures():
     """(kind, name) -> image for every texture of the later batches' trees and plants."""
     out = {}
-    for index, wood in enumerate(WOODS):
-        out[("block", f"{wood}_log")] = bark(wood, 501 + index)
-        out[("block", f"{wood}_log_top")] = log_top(wood, False)
-        out[("block", f"stripped_{wood}_log")] = stripped_log(wood, 511 + index)
-        out[("block", f"stripped_{wood}_log_top")] = log_top(wood, True)
-        out[("block", f"{wood}_planks")] = planks(wood, 521 + index)
-    out[("block", "jacaranda_leaves")] = blossom_leaves("jacaranda", 531)
     out[("block", "jacaranda_sapling")] = blossom_sapling("jacaranda")
-    out[("block", "palm_fronds")] = fronds_leaves(551)
     out[("block", "palm_sapling")] = palm_sapling()
-    out[("block", "cypress_leaves")] = scale_leaves(561)
     out[("block", "cypress_sapling")] = cypress_sapling()
-    out[("block", "redwood_needles")] = needle_leaves(571)
     out[("block", "redwood_sapling")] = redwood_sapling()
-    out[("block", "eucalyptus_leaves")] = eucalyptus_leaves(581)
     out[("block", "eucalyptus_sapling")] = eucalyptus_sapling()
-    out[("block", "mahogany_leaves")] = mahogany_leaves(591)
     out[("block", "mahogany_sapling")] = mahogany_sapling()
     out[("block", "bramble")] = bramble()
     out[("block", "glowcap")] = glowcap()
@@ -807,9 +541,6 @@ def wild_textures():
     out[("block", "hibiscus")] = hibiscus()
     out[("block", "hydrangea_bottom")] = hydrangea("bottom")
     out[("block", "hydrangea_top")] = hydrangea("top")
-    out[("block", "willow_leaves")] = willow_leaves("green", 541)
-    out[("block", "willow_leaves_gold")] = willow_leaves("gold", 541)
-    out[("block", "willow_leaves_bare")] = willow_leaves("bare", 543)
     out[("block", "willow_sapling")] = willow_sapling()
     out[("block", "cattail_bottom")] = cattail("bottom")
     out[("block", "cattail_top")] = cattail("top")

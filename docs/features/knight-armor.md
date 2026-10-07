@@ -247,6 +247,7 @@ This branch merges `claude/armor-styles` ([#215](https://github.com/jimbozoomer-
   - the sabatons' inner sides.
 
   That is 13 quads a set (steel 484, bronze 495). The atlases are unchanged, since every face's region was already painted, and the armor looks the same from outside.
+- **Main again,** after the material sets (#218, `8d604814e`) and after thallite slice 1 and the wood repaint (#221, #195): only the changelog conflicted each time, and the generators changed nothing.
 - **After:** `generate_material_data.py` and `generate_textures.py` ran clean; `check_mod_data.py` passed (1487 IDs, the art check included); `check_repository.py`, `armor_models.py` (no problems or warnings) and `armor_smoke.py --no-render` passed. The wearer audit was not re-run.
 
 ## World and event applicability

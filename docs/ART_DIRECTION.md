@@ -45,6 +45,13 @@ On 5 October 2026 the owner called the steel plate blocks and blast-proof concre
 
 *Before (top) and after (bottom), tiled outside the game; bastion concrete (left) is the reference the owner liked.*
 
+## Woods, leaves and other natural textures: vanilla's manner
+On 5 October 2026 the owner repainted the woods and asked for every tree to look "more similar to how the vanilla textures are" ([wood-repaint.md](features/wood-repaint.md)); seeing the result in game, they asked for the way it was done to become the rule for "any additional wood or natural textures". **Follow [NATURAL_TEXTURES.md](NATURAL_TEXTURES.md)** for every wood, tree, leaf, sapling, plant, stone, soil or ore texture. In short:
+- 16×16, drawn by code in vanilla's manner (never recoloured from Mojang's files).
+- One colour a material, from the owner's paintings, stepped into a lightness ramp; kept within vanilla's brightness and saturation.
+- Marks that follow the material: vertical bark furrows (never rings across a trunk), straight stripped grain, four lit boards, square rings on log ends, a fine clumped speckle of leaves with a few small gaps.
+- Low contrast, no outlines or gradients, one trait a species; seamless and seeded.
+
 ## Creatures and faces: cute and clean
 On 5 October 2026 the owner found the Ember Bed's fire speckly and the Horned Skull Cauldron's nostrils ugly, and asked for every creature prop to be simplified: cute, or at least smooth, but still good-looking, after their reference pictures (the Frankenstein head above all). The painters in `tools/cute_art.py` draw this way, and every skull, bone, monster, bug, ghost and other creature prop should follow it:
 - **Two or three tones a material, no noise.** Fill flat, light the top and left edge, shade the bottom and right one. A rounded form gets a lighter band over its top and a darker one under it, nothing else.
@@ -275,6 +282,14 @@ The owner asked on 1 October 2026 for the electrical things to look like a moder
 - **Tanks (batch 10):** the owner's reference: white bodies with bold black-and-white checker bands (`tk_checker`), dark rims and lids (`tk_rim`), sight glasses and flanges; the tinplate tank, steel tank and gas holder share it (`tools/tank_models.py`).
 - **Advanced power (batch 10):** the advanced solar panel is a white pedestal with a green-lit ring and deep blue cell wings (`el_white`, `el_solar_large`); the advanced engine is graphite with a light ribbed cylinder bank (`el_ribbed`) and white caps.
 - **Next tiers:** cyan (`el_glow_cyan`) is reserved for the high-tech tier after oil, with glass tanks, conduits in violet and cyan, monitor banks and keyboards (`el_keyboard`), following the owner's other reference images. Textures start with `el_` (`tools/electric_textures.py`).
+
+## Ores, ingots and tools: the owner's material sets
+On 5 October 2026 the owner drew a whole set for a new ore (its ore, raw ore, nugget, ingot, blocks, tools, armor and weapons) in one chartreuse palette, as "a basis on how new ores that turn into tools are styled". **Follow [MATERIAL_SETS.md](MATERIAL_SETS.md)** for every material's set, in every tier: 16×16, vanilla's forms (every ingot is the owner's ingot recoloured, never redrawn; nuggets in vanilla's form, drawn fresh), one clear hue, told apart from vanilla's metals, stepped into four tones and an outline in its darkest, chunky rounded ore blobs and a four-panel storage block. Jugcraft's metals, ores and bronze and steel tools are drawn this way ([material-sets.md](features/material-sets.md)), from the maps in `tools/material_icons/`. The first new ore drawn on it is [thallite](features/thallite.md).
+- **Ore overlays are cut out:** like glass, leaves and crops, an ore's texture has see-through pixels (fully clear or fully opaque only), which the ore's block model lays over vanilla's own stone or deepslate, referenced by name and never copied, so the ore matches the rock round it.
+
+![Before and after: every metal's ingot, nugget and storage block, every ore and deepslate ore, the raw ores and raw blocks, and the bronze and steel tools](images/material_sets_before_after.png)
+
+*Before (above) and after (below), drawn from the textures outside the game. The new ores are shown over a stand-in rock; in game each sits on vanilla's own stone or deepslate.*
 
 ## Ores, ingots and tools: the owner's material sets
 On 5 October 2026 the owner drew a whole set for a new ore (its ore, raw ore, nugget, ingot, blocks, tools, armor and weapons) in one chartreuse palette, as "a basis on how new ores that turn into tools are styled". **Follow [MATERIAL_SETS.md](MATERIAL_SETS.md)** for every material's set, in every tier: 16×16, vanilla's forms (every ingot is the owner's ingot recoloured, never redrawn; nuggets in vanilla's form, drawn fresh), one clear hue, told apart from vanilla's metals, stepped into four tones and an outline in its darkest, chunky rounded ore blobs and a four-panel storage block. Jugcraft's metals, ores and bronze and steel tools are drawn this way ([material-sets.md](features/material-sets.md)), from the maps in `tools/material_icons/`.

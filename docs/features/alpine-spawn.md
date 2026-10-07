@@ -69,7 +69,7 @@ Primary specialty and supported player role: exploration and settling; every pla
 ## Dependencies and assets
 - **Hook.** The biome is placed through #53's `mixin/OverworldBiomeBuilderMixin`, which now also wraps the builder's output, because Fabric API cannot place new Overworld biomes.
 - **Copied layouts.** The biome's layout, features and mobs follow vanilla 26.3's meadow; the village uses vanilla's taiga pieces by name; the larch uses vanilla's spruce foliage shape and spruce-leaf drop chances. No Mojang file is copied.
-- **Larch textures.** These are drawn by code in `tools/larch_textures.py` (bark, log ends, stripped wood, planks, the three needle looks and the sapling). No texture is read, traced or recoloured.
+- **Larch textures.** These are drawn by code: the sapling in `tools/larch_textures.py`; since the [wood repaint](wood-repaint.md), the bark, log ends, stripped wood, planks and the three needle looks in `tools/wood_style.py`. No texture is read, traced or recoloured.
 - **Shared code.** The larch wood set reuses the chestnut's wood-set data and code. `WOOD_SETS` in `tools/agriculture.py` and `JugcraftAgriculture.registerWoodSet` now generate and register both woods. The chestnut's generated files are unchanged.
 - No new dependencies.
 

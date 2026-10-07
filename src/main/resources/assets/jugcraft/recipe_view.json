@@ -231,6 +231,34 @@
         {
           "in": [
             [
+              "jugcraft:thallite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:raw_thallite",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_thallite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:raw_thallite",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
               "minecraft:iron_ore",
               1
             ]
@@ -949,6 +977,20 @@
           ],
           "out": [
             "jugcraft:titanium_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:thallite_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:thallite_plate",
             1
           ],
           "extra": [],
@@ -2023,6 +2065,94 @@
           ],
           "extra": [],
           "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:thallite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:thallite_dust",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:iron_dust",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_thallite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:thallite_dust",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:iron_dust",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:washed_thallite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:thallite_dust",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:iron_dust",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:raw_thallite",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:thallite_dust",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:thallite_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:thallite_dust",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
         }
       ]
     },
@@ -2305,6 +2435,34 @@
           ],
           "out": [
             "jugcraft:washed_uranium_ore",
+            3
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:thallite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:washed_thallite_ore",
+            3
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_thallite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:washed_thallite_ore",
             3
           ],
           "extra": [],
@@ -5909,6 +6067,50 @@
           "results": [
             [
               "jugcraft:washed_uranium_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:thallite_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_thallite_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:deepslate_thallite_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_thallite_ore",
               4
             ]
           ],

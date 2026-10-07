@@ -49,7 +49,7 @@ Eight forests, mostly in the **woodland** layout of Jugcraft regions. The two gi
 ## Dependencies and assets
 - Giant trees use vanilla's giant and mega jungle trunk shapes and mega pine and jungle crowns. Four saplings in a square are found by `agriculture/GiantSaplingBlock`, which grows the giant from the square's north-west corner and leaves the saplings if there is no room. The other trees use vanilla's straight, fancy, forking and bending trunks.
 - Leaf litter, melons, bamboo, fallen oak logs and vanilla's oaks with leaf litter come from vanilla's own features, by reference.
-- Textures drawn by code in `tools/wild_textures.py`. No Mojang file is copied.
+- Textures drawn by code in `tools/wild_textures.py`. No Mojang file is copied. Since the [wood repaint](wood-repaint.md), their woods and leaves are drawn by `tools/wood_style.py`.
 
 ## Verification
 Results are recorded under "Results" below after CI runs.
