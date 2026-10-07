@@ -225,6 +225,14 @@
       }
     ]
   },
+  "guns.lever": {
+    "subtitle": "subtitles.jugcraft.guns.lever",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/lever_lever"
+      }
+    ]
+  },
   "guns.rust_midge.fire": {
     "subtitle": "subtitles.jugcraft.guns.fire",
     "sounds": [
@@ -275,6 +283,33 @@
     "sounds": [
       {
         "name": "jugcraft:guns/bruiser_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.longhorn_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/heavy_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.drover_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/cowboy_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.coach_gun.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/brass_shotgun_fire",
         "attenuation_distance": 64
       }
     ]

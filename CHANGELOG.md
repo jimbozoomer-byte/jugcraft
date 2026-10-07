@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 3 (the lever set)
+- **Three more of the owner's guns:** the **Longhorn Rifle** and the **Drover Rifle**, lever-action rifles worked between shots and loaded a round at a time, and the **Coach Gun**, an over-and-under shotgun that breaks open to load. The levers swing and the barrels tip open with the owner's animations.
+- They fire the existing Rifle Rounds and Buckshot Shells. Record: [guns.md, slice 3](docs/features/guns.md#slice-3-the-lever-set).
+
 ### Unmerged: Guns, slice 2 (the iron set)
 - **Three more of the owner's guns,** in iron and brass: the **Warden Pistol** (a one-handed service pistol, 12 rounds), the **Riveter SMG** (automatic, 30 rounds) and the **Haymaker** (a one-handed pump shotgun, five shells loaded one at a time). Each has the owner's model, texture, animations and shot.
 - They fire the existing Light Rounds and Buckshot Shells; no new round or material. Record: [guns.md, slice 2](docs/features/guns.md#slice-2-the-iron-set).

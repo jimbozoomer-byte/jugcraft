@@ -23,13 +23,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * In-game tests for the guns (slices 1 and 2, docs/features/guns.md), worked through the server's own entry points (the ones
+ * In-game tests for the guns (slices 1 to 3, docs/features/guns.md), worked through the server's own entry points (the ones
  * the trigger and reload payloads call): GunShots.fire and GunShots.reload. A shot hurts what it is aimed at by the
  * gun's damage and spends a round; an empty gun, an empty hand and a too-fast trigger do not fire; a creative player
  * spends nothing; a magazine reload takes the gun's reload time and loads from the inventory; a shell-at-a-time reload
  * loads one round per shell's time, and a shot or a switch of item cuts it short; a shotgun's pellets land together;
  * bullets count as projectiles; the iron set's pistol and SMG land their damage, and the Haymaker loads only the shells
- * there are. Shooters face south (+z) and aim at their target's middle.
+ * there are; the lever rifles land theirs and load a round at a time, and the Coach Gun's pellets land together. Shooters
+ * face south (+z) and aim at their target's middle.
  */
 public class GunsGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
@@ -43,7 +44,7 @@ public class GunsGameTests {
 			helper.assertTrue(JugcraftGuns.ammo(spec) != null, name + " fires " + spec.ammo() + ", which is not registered");
 			helper.assertTrue(new ItemStack(JugcraftGuns.GUNS.get(name)).getMaxStackSize() == 1, name + " stacks");
 		});
-		helper.assertTrue(JugcraftGuns.GUNS.size() == 6 && JugcraftGuns.ROUNDS.size() == 3, "Not six guns and three rounds");
+		helper.assertTrue(JugcraftGuns.GUNS.size() == 9 && JugcraftGuns.ROUNDS.size() == 3, "Not nine guns and three rounds");
 		helper.succeed();
 	}
 
@@ -276,6 +277,60 @@ public class GunsGameTests {
 					"At close range the pellets took only " + taken + " (one pellet is " + spec.damage() + ")");
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * The lever rifles each land one shot's damage and spend a round (one shooter, the second rifle after the first's
+	 * interval), and the Drover loads a round at a time.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 120)
+	public void leverRiflesLandAndLoadByTheRound(GameTestHelper helper) {
+		floor(helper);
+		Mob pig = pig(helper, new BlockPos(1, 2, 8));
+		pig.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0);
+		pig.setHealth(200.0F);
+		GunSpec longhorn = JugcraftGuns.SPECS.get("longhorn_rifle");
+		GunSpec drover = JugcraftGuns.SPECS.get("drover_rifle");
+		ServerPlayer shooter = shooter(helper, "longhorn_rifle", 1, pig, GameType.SURVIVAL);
+		helper.assertTrue(GunShots.fire(shooter), "The loaded Longhorn did not fire");
+		helper.assertTrue(Math.abs(200.0F - pig.getHealth() - longhorn.damage()) < 1.0E-3F,
+				"The Longhorn took " + (200.0F - pig.getHealth()) + ", not " + longhorn.damage());
+		helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == 0, "The Longhorn did not spend its round");
+		helper.runAfterDelay(longhorn.interval() + 1, () -> {
+			ItemStack stack = new ItemStack(JugcraftGuns.GUNS.get("drover_rifle"));
+			GunItem.setLoaded(stack, 1);
+			shooter.setItemInHand(InteractionHand.MAIN_HAND, stack);
+			helper.assertTrue(GunShots.fire(shooter), "The loaded Drover did not fire");
+			float expected = longhorn.damage() + drover.damage();
+			helper.assertTrue(Math.abs(200.0F - pig.getHealth() - expected) < 1.0E-3F,
+					"After the Drover the pig had lost " + (200.0F - pig.getHealth()) + ", not " + expected);
+			shooter.getInventory().add(new ItemStack(JugcraftGuns.ROUNDS.get("rifle_round"), 3));
+			helper.assertTrue(drover.byShell() && GunShots.reload(shooter), "The Drover's round-at-a-time reload did not start");
+			helper.runAfterDelay(drover.shellStart() + drover.shellEach() + 1, () -> helper.assertTrue(
+					GunItem.loaded(shooter.getMainHandItem()) == 1, "One round's time in, not one round loaded"));
+		});
+		helper.runAfterDelay(longhorn.interval() + 1 + drover.reloadTicks(3) + 3, () -> {
+			helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == 3, "The Drover did not load the three rounds");
+			helper.assertFalse(GunShots.reloading(shooter), "Still reloading after the last round");
+			helper.succeed();
+		});
+	}
+
+	/** At close range the Coach Gun's pellets land together. */
+	@GameTest(structure = ARENA, maxTicks = 20)
+	public void coachGunPelletsLand(GameTestHelper helper) {
+		floor(helper);
+		Mob pig = pig(helper, new BlockPos(1, 2, 4));
+		pig.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0);
+		pig.setHealth(200.0F);
+		ServerPlayer shooter = shooter(helper, "coach_gun", 2, pig, GameType.SURVIVAL);
+		helper.assertTrue(GunShots.fire(shooter), "The Coach Gun did not fire");
+		GunSpec spec = JugcraftGuns.SPECS.get("coach_gun");
+		float taken = 200.0F - pig.getHealth();
+		helper.assertTrue(taken >= spec.damage() * (spec.pellets() - 2),
+				"At close range the pellets took only " + taken + " (one pellet is " + spec.damage() + ")");
+		helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == 1, "The shot did not spend one barrel");
+		helper.succeed();
 	}
 
 	/** A bullet is a projectile (Projectile Protection guards against it). */

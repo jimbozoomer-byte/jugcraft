@@ -1,5 +1,5 @@
 """Guns (docs/features/guns.md): slice 1, the owner's Rust Midge, Patchwork Carbine and Thunderpipe; slice 2, the
-iron set: the Warden Pistol, Riveter SMG and Haymaker.
+iron set: the Warden Pistol, Riveter SMG and Haymaker; slice 3, the Longhorn Rifle, Drover Rifle and Coach Gun.
 
 The owner made these guns (inspired by Scorched Guns 2) and supplied, in the owner asset library:
   - a Blockbench Java model of every part (art/owner-library/originals/Blocks/Guns/models/special/<gun>/<part>.json),
@@ -89,6 +89,30 @@ GUNS = {
         "damage": 3.0, "pellets": 8, "interval": 14, "auto": False, "capacity": 5,
         "reload": (7, 11, 23), "spread": (7.0, 5.0), "range": 28, "ammo": "buckshot_shell",
     },
+    # Slice 3: two lever rifles, worked between shots and loaded a round at a time, and a break-open coach gun.
+    "longhorn_rifle": {
+        "display": "Longhorn Rifle",
+        "source": "marlin",
+        "tooltip": "A heavy lever-action rifle, worked between shots and loaded a round at a time. Fires rifle rounds.",
+        "damage": 8.0, "pellets": 1, "interval": 13, "auto": False, "capacity": 6,
+        "reload": (8, 11, 14), "spread": (1.5, 0.15), "range": 120, "ammo": "rifle_round",
+    },
+    "drover_rifle": {
+        "display": "Drover Rifle",
+        "source": "winnie",
+        "tooltip": "A lever-action rifle with a long tube, worked between shots and loaded a round at a time. Fires rifle "
+                   "rounds.",
+        "damage": 6.5, "pellets": 1, "interval": 13, "auto": False, "capacity": 10,
+        "reload": (8, 12, 17), "spread": (2.0, 0.3), "range": 100, "ammo": "rifle_round",
+    },
+    "coach_gun": {
+        "display": "Coach Gun",
+        "source": "callwell",
+        "tooltip": "An over-and-under shotgun that breaks open to load. Eight pellets a shot, two barrels. Fires "
+                   "buckshot shells.",
+        "damage": 3.0, "pellets": 8, "interval": 8, "auto": False, "capacity": 2,
+        "reload": (12, 13, 13), "spread": (6.0, 4.0), "range": 32, "ammo": "buckshot_shell",
+    },
 }
 
 # The rounds: display name, tooltip, recipe (pattern, key, count). Cheap and early: copper or brass, lead and gunpowder.
@@ -112,6 +136,12 @@ RECIPES = {
     "riveter_smg": (["III", "BLI"], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "B": "#c:ingots/brass"}),
     "haymaker": (["III", "BLP"], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "B": "#c:ingots/brass",
                                   "P": "#minecraft:planks"}),
+    "longhorn_rifle": (["IIB", "PL "], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "B": "#c:ingots/brass",
+                                        "P": "#minecraft:planks"}),
+    "drover_rifle": (["IIB", " LP"], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "B": "#c:ingots/brass",
+                                      "P": "#minecraft:planks"}),
+    "coach_gun": (["II ", "BLP"], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "B": "#c:ingots/brass",
+                                   "P": "#minecraft:planks"}),
 }
 
 # How each gun is built from the owner's parts, in the owner's model space (Java item-model pixels: x east, y up,
@@ -207,13 +237,60 @@ BUILDS = {
         "muzzle": (8.0, 5.1, 4.6),
         "sight": (8.0, 6.4, 14.7),
     },
+    # Slice 3. The owner's lever rifles keep the lever loop in their main part, as one flat element (the Marlin's 8th,
+    # the Winnie's 11th): it rides the lever bone, which turns about the loop's front where it meets the receiver.
+    # The Marlin's reload carries a cartridge in on the shell bone (SHELLS); the Winnie's and the Callwell's keep it
+    # at scale 0, so their shell bones are empty.
+    "longhorn_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-#8", "stan_barrel", "sights"], (8.0, 1.7, 16.4)),
+            ("lever", "gun_body", ["main#8"], (8.0, 2.0, 12.7)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 4.0, 14.66)),
+            ("shell", "gun_body", ["@shell"], (8.8, 3.2, 13.5)),
+        ],
+        "hands": {"right": (8.0, 1.7, 16.4), "left": (8.0, 2.3, 8.0)},
+        "arms": {"right": (-0.2762, -0.2601, 0.9253), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 3.76, -0.7),
+        "sight": (8.0, 4.85, 10.86),
+    },
+    "drover_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-#11", "stan_barrel", "sights", "hammer"], (8.0, 1.9, 16.4)),
+            ("lever", "gun_body", ["main#11"], (8.0, 2.3, 12.9)),
+            ("bolt", "gun_body", [], (8.0, 4.0, 14.5)),
+            ("shell", "gun_body", [], (8.8, 3.2, 13.5)),
+        ],
+        "hands": {"right": (8.0, 1.9, 16.4), "left": (8.0, 2.3, 7.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 4.08, 1.05),
+        "sight": (8.0, 4.98, 11.05),
+    },
+    # The Callwell's barrels and fore-end are the main part's elements the owner named "barrel": they ride the barrel
+    # bone, which tips them open about the hinge at the front of the frame.
+    "coach_gun": {
+        "bones": [
+            ("gun_body", None, ["main-@barrel"], (8.0, 1.9, 16.4)),
+            ("barrel", "gun_body", ["main@barrel"], (8.0, 1.9, 11.6)),
+            ("bolt", "gun_body", [], (8.0, 4.0, 14.5)),
+            ("shell", "gun_body", [], (8.0, 3.4, 13.0)),
+        ],
+        "hands": {"right": (8.0, 1.9, 16.4), "left": (8.0, 1.5, 8.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 3.4, -1.95),
+        "sight": (8.0, 5.25, 14.8),
+    },
 }
 
-# The shell the Thunderpipe's reload loop pushes into the breech (the owner's animation moves a "shell" bone that had
-# no part): a 2 x 2 x 5 px shell drawn into a free corner of the atlas copy. In the idle pose it is scaled to 0.
-# Its rest place is the breech it ends in (x 9, y 4.17, z 12.4..17.4) less the loop's last offset (render
-# -0.278, -0.25, -7.515), so the loop slides it home.
-SHELL = {"from": (8.278, 3.42, 19.9), "size": (2.0, 2.0, 5.0), "texture_at": (112, 119)}
+# The rounds the reload loops carry in ("@shell" in a bone's parts: the owner's animations move a "shell" bone that had
+# no part), each drawn into a free corner of the gun's atlas copy (the corner must be empty). In the idle pose they are
+# scaled to 0.
+#   kind "buckshot": a red paper hull with crimp lines and a brass head; "cartridge": a brass case with a lead tip.
+# The Thunderpipe's 2 x 2 x 5 px shell rests at the breech it ends in (x 9, y 4.17, z 12.4..17.4) less the loop's last
+# offset (render -0.278, -0.25, -7.515), so the loop slides it home.
+SHELLS = {
+    "thunderpipe": {"kind": "buckshot", "from": (8.278, 3.42, 19.9), "size": (2.0, 2.0, 5.0), "texture_at": (112, 119)},
+    "longhorn_rifle": {"kind": "cartridge", "from": (8.8, 2.7, 12.0), "size": (1.0, 1.0, 3.0), "texture_at": (119, 122)},
+}
 
 # The sounds the animations name (sound_effects keys), per gun where they differ, and the gun's own shots.
 # Each event: library file under Guns/sounds/ -> copied to assets/jugcraft/sounds/guns/.
@@ -230,9 +307,12 @@ EVENT_SOUNDS = {
     "reload_end": "item/reload_end/reload_end.ogg",
     "shell_in": "item/gun_sounds/insert.ogg",
     "dry_fire": "item/rusty_gnat/copper_jam.ogg",
+    "lever": "item/lever/lever.ogg",
 }
-# The Thunderpipe's and Haymaker's reload_loop name "reload_mag_in"; they push a shell, so they play the shell insert.
-EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"reload_mag_in": "shell_in"}}
+# The shell-at-a-time guns' reload_loop names "reload_mag_in"; they push a shell or a round, so they play the insert.
+EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"reload_mag_in": "shell_in"},
+                   "longhorn_rifle": {"reload_mag_in": "shell_in"}, "drover_rifle": {"reload_mag_in": "shell_in"},
+                   "coach_gun": {"reload_mag_in": "shell_in"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -240,6 +320,9 @@ SHOT_SOUNDS = {
     "warden_pistol": "item/iron_pistol/fire.ogg",
     "riveter_smg": "item/greaser_smg/fire.ogg",
     "haymaker": "item/bruiser/fire.ogg",
+    "longhorn_rifle": "item/heavy_rifle/fire.ogg",
+    "drover_rifle": "item/cowboy/fire.ogg",
+    "coach_gun": "item/brass_shotgun/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -254,6 +337,7 @@ SUBTITLES = {
     "slap": "Magazine slaps home",
     "reload_end": "Gun snaps shut",
     "shell_in": "Shell goes in",
+    "lever": "Lever works",
 }
 
 
@@ -346,7 +430,30 @@ def base_model(gun):
 # ------------------------------------------------------------------ converting the parts
 
 def load_part(gun, part):
-    return json.loads((LIBRARY / "models" / "special" / GUNS[gun]["source"] / f"{part}.json").read_text())
+    return json.loads((LIBRARY / "models" / "special" / GUNS[gun]["source"] / f"{part_file(part)}.json").read_text())
+
+
+def part_file(part):
+    """A bone's part entry names the owner's part file, optionally narrowed to some of its elements:
+    "main@barrel" (the elements the owner named "barrel"), "main#8" (element 8), and "main-@barrel", "main-#8" (all
+    but those). Several numbers are comma-separated: "main#8,9"."""
+    return part.split("@")[0].split("#")[0].removesuffix("-")
+
+
+def part_elements(gun, part):
+    """The owner's elements a bone's part entry stands for, in the file's order."""
+    elements = load_part(gun, part).get("elements", [])
+    rest = part[len(part_file(part)):]
+    if not rest:
+        return elements
+    exclude = rest.startswith("-")
+    rest = rest.removeprefix("-")
+    if rest.startswith("@"):
+        keep = [e.get("name") == rest[1:] for e in elements]
+    else:
+        wanted = {int(n) for n in rest[1:].split(",")}
+        keep = [i in wanted for i in range(len(elements))]
+    return [e for e, k in zip(elements, keep) if k != exclude]
 
 
 def geo_point(p):
@@ -460,15 +567,23 @@ def element_cube(element, size_px):
     return cube
 
 
-def shell_cube():
-    x, y, z = SHELL["from"]
-    sx, sy, sz = SHELL["size"]
-    tu, tv = SHELL["texture_at"]
-    # One texture block per face: the hull is red with a brass head at the back (south) end.
+def shell_cube(gun):
+    shell = SHELLS[gun]
+    x, y, z = shell["from"]
+    sx, sy, sz = shell["size"]
+    w, h, d = int(sx), int(sy), int(sz)
+    tu, tv = shell["texture_at"]
+    # One texture block per face (shell_block): the ends side by side, the sides below them, the top and bottom below.
     return {"origin": [rnd(8.0 - (x + sx)), rnd(y), rnd(z - 8.0)], "size": [sx, sy, sz], "uv": {
-        "north": {"uv": [tu, tv], "uv_size": [2, 2]}, "south": {"uv": [tu + 2, tv], "uv_size": [2, 2]},
-        "east": {"uv": [tu, tv + 2], "uv_size": [5, 2]}, "west": {"uv": [tu, tv + 2], "uv_size": [5, 2]},
-        "up": {"uv": [tu, tv + 4], "uv_size": [2, 5]}, "down": {"uv": [tu + 2, tv + 4], "uv_size": [2, 5]}}}
+        "north": {"uv": [tu, tv], "uv_size": [w, h]}, "south": {"uv": [tu + w, tv], "uv_size": [w, h]},
+        "east": {"uv": [tu, tv + h], "uv_size": [d, h]}, "west": {"uv": [tu, tv + h], "uv_size": [d, h]},
+        "up": {"uv": [tu, tv + 2 * h], "uv_size": [w, d]}, "down": {"uv": [tu + w, tv + 2 * h], "uv_size": [w, d]}}}
+
+
+def shell_block(gun):
+    """The atlas block (width, height) a shell's faces take."""
+    w, h, d = (int(v) for v in SHELLS[gun]["size"])
+    return max(2 * w, d), 2 * h + d
 
 
 def key_value(channel, time=None):
@@ -519,9 +634,9 @@ def build_geo(gun):
         cubes = []
         for part in parts:
             if part == "@shell":
-                cubes.append(shell_cube())
+                cubes.append(shell_cube(gun))
                 continue
-            for element in load_part(gun, part).get("elements", []):
+            for element in part_elements(gun, part):
                 cubes.append(element_cube(element, size_px))
         if cubes:
             bone["cubes"] = cubes
@@ -622,7 +737,7 @@ def check():
                 if part == "@shell":
                     cubes.pop()  # drawn here, not the owner's
                     continue
-                want += load_part(gun, part).get("elements", [])
+                want += part_elements(gun, part)
             if len(cubes) != len(want):
                 problems.append(f"{gun}/{name}: {len(cubes)} cubes for {len(want)} owner elements")
                 continue
@@ -685,12 +800,18 @@ def dump(path, data):
     path.write_text(json.dumps(data, indent=1) + "\n")
 
 
-def draw_shell(atlas):
-    """The shell's 8 x 9 block of the atlas copy, in a corner the owner's atlas leaves empty: a red paper hull with
-    darker crimp lines and a brass head."""
-    tu, tv = SHELL["texture_at"]
-    if any(atlas.getpixel((tu + x, tv + y))[3] for x in range(8) for y in range(9)):
-        raise ValueError(f"the atlas is not empty at {tu},{tv}")
+def draw_shell(atlas, gun):
+    """A shell's block of the atlas copy, in a corner the owner's atlas leaves empty."""
+    tu, tv = SHELLS[gun]["texture_at"]
+    bw, bh = shell_block(gun)
+    if any(atlas.getpixel((tu + x, tv + y))[3] for x in range(max(bw, 8)) for y in range(bh)):
+        raise ValueError(f"{gun}: the atlas is not empty at {tu},{tv}")
+    return (draw_buckshot if SHELLS[gun]["kind"] == "buckshot" else draw_cartridge)(atlas, gun)
+
+
+def draw_buckshot(atlas, gun):
+    """A 2 x 2 x 5 red paper hull with darker crimp lines and a brass head."""
+    tu, tv = SHELLS[gun]["texture_at"]
     red, red_dark, brass, brass_dark = (178, 44, 36, 255), (122, 28, 26, 255), (214, 170, 72, 255), (150, 112, 44, 255)
     for x in range(2):
         for y in range(2):
@@ -707,6 +828,24 @@ def draw_shell(atlas):
     return atlas
 
 
+def draw_cartridge(atlas, gun):
+    """A brass case with a lead tip at the front (north) end, the case's head at the back a darker ring."""
+    tu, tv = SHELLS[gun]["texture_at"]
+    w, h, d = (int(v) for v in SHELLS[gun]["size"])
+    lead, brass, brass_dark = (120, 124, 132, 255), (214, 170, 72, 255), (150, 112, 44, 255)
+    for x in range(w):
+        for y in range(h):
+            atlas.putpixel((tu + x, tv + y), lead)               # north: the bullet's tip
+            atlas.putpixel((tu + w + x, tv + y), brass_dark)     # south: the case head
+    for z in range(d):  # the sides (u along the length) and the top and bottom (v along it): tip, case, head
+        colour = lead if z == 0 else brass_dark if z == d - 1 else brass
+        for y in range(h):
+            atlas.putpixel((tu + z, tv + h + y), colour)
+        for x in range(2 * w):
+            atlas.putpixel((tu + x, tv + 2 * h + z), colour)
+    return atlas
+
+
 def write_files():
     from PIL import Image
     for gun, spec in GUNS.items():
@@ -718,7 +857,7 @@ def write_files():
         texture.parent.mkdir(parents=True, exist_ok=True)
         if any(part == "@shell" for _, _, parts, _ in BUILDS[gun]["bones"] for part in parts):
             with Image.open(LIBRARY / "item" / f"{spec['source']}.png") as image:
-                draw_shell(image.convert("RGBA")).save(texture)
+                draw_shell(image.convert("RGBA"), gun).save(texture)
         else:
             shutil.copyfile(LIBRARY / "item" / f"{spec['source']}.png", texture)
     for path in sorted({*EVENT_SOUNDS.values(), *SHOT_SOUNDS.values()}):
@@ -734,7 +873,7 @@ def provenance():
         src = spec["source"]
         paths = [f"models/item/{src}.json", f"item/{src}.png", f"item/{src}.animation.json"]
         for _, _, parts, _ in BUILDS[gun]["bones"]:
-            paths += [f"models/special/{src}/{p}.json" for p in parts if not p.startswith("@")]
+            paths += [f"models/special/{src}/{part_file(p)}.json" for p in parts if not p.startswith("@")]
         paths.append(f"sounds/{SHOT_SOUNDS[gun]}")
         rows += [(gun, p) for p in dict.fromkeys(paths)]  # a part on two bones (a spare magazine) counts once
     rows += [("shared", f"sounds/{p}") for p in sorted(set(EVENT_SOUNDS.values()))]

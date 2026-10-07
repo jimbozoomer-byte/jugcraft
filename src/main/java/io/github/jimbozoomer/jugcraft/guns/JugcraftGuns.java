@@ -45,13 +45,16 @@ public final class JugcraftGuns {
 		SPECS.put("warden_pistol", new GunSpec(4.0F, 1, 5, false, 12, 47, 0, 0, 0, 2.5F, 0.75F, 56, "light_round"));
 		SPECS.put("riveter_smg", new GunSpec(2.5F, 1, 3, true, 30, 45, 0, 0, 0, 3.0F, 1.0F, 48, "light_round"));
 		SPECS.put("haymaker", new GunSpec(3.0F, 8, 14, false, 5, 0, 7, 11, 23, 7.0F, 5.0F, 28, "buckshot_shell"));
+		SPECS.put("longhorn_rifle", new GunSpec(8.0F, 1, 13, false, 6, 0, 8, 11, 14, 1.5F, 0.15F, 120, "rifle_round"));
+		SPECS.put("drover_rifle", new GunSpec(6.5F, 1, 13, false, 10, 0, 8, 12, 17, 2.0F, 0.3F, 100, "rifle_round"));
+		SPECS.put("coach_gun", new GunSpec(3.0F, 8, 8, false, 2, 0, 12, 13, 13, 6.0F, 4.0F, 32, "buckshot_shell"));
 	}
 
 	/** The rounds. */
 	public static final List<String> AMMO = List.of("light_round", "rifle_round", "buckshot_shell");
 	/** The sound events the animations and the guns play (assets/jugcraft/sounds.json, written by tools/guns.py). */
 	public static final List<String> SOUND_EVENTS = List.of("bolt", "bolt_pull", "bolt_release", "dry_fire", "gun_rustle",
-			"rack", "reload_end", "reload_mag_in", "reload_mag_out", "shell_in", "slap");
+			"lever", "rack", "reload_end", "reload_mag_in", "reload_mag_out", "shell_in", "slap");
 	/** Walking speed while aiming down the sights (vanilla's using an item is 0.2). */
 	public static final float AIM_SPEED = 0.6F;
 

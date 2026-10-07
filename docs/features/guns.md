@@ -1,8 +1,9 @@
-# Guns: the scrap guns (slice 1) and the iron set (slice 2)
+# Guns: the scrap guns (slice 1), the iron set (slice 2) and the lever set (slice 3)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
-- **Slice 2** (the iron set: the Warden Pistol, Riveter SMG and Haymaker; [below](#slice-2-the-iron-set)): implemented on `claude/guns-iron`, stacked on slice 1, awaiting review.
+- **Slice 2** (the iron set: the Warden Pistol, Riveter SMG and Haymaker; [below](#slice-2-the-iron-set)): implemented on `claude/guns-iron` (#252), stacked on slice 1, awaiting review.
+- **Slice 3** (the lever set: the Longhorn Rifle, Drover Rifle and Coach Gun; [below](#slice-3-the-lever-set)): implemented on `claude/guns-lever`, stacked on slice 2, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -111,6 +112,43 @@ Three more of the owner's guns, a step up from the scrap guns, in iron and brass
 - **Arms:** run down, back and out from each hand, as for the scrap guns (each arm's direction is set in its reference pose).
 - **Sounds:** each gun's own shot (the Warden fires the library's iron pistol shot); the Haymaker's loop plays the shell insert, as the Thunderpipe's does.
 
+## Slice 3: the lever set
+The owner's two lever rifles and the Callwell, offered as the "lever rifles". The Callwell turned out to be an over-and-under shotgun that breaks open to load, not a lever gun; it is here as the owner chose it, as the Coach Gun.
+
+| | Longhorn Rifle | Drover Rifle | Coach Gun |
+|---|---|---|---|
+| The owner's gun | Marlin | Winnie | Callwell |
+| What it is | a heavy lever-action rifle | a lever-action rifle with a long tube | an over-and-under shotgun that breaks open |
+| Fires | one shot, then the lever is worked | the same | one shot each pull, 8 pellets |
+| Damage | 8 | 6.5 | 3 a pellet (24 if all land) |
+| Rate | 1.5 a second (every 13 ticks: the lever) | 1.5 a second | 2.5 a second (every 8 ticks) |
+| Holds | 6 | 10 | 2 |
+| Reload, a round at a time | 0.4 s, then 0.55 s a round, then 0.7 s | 0.4 s, then 0.6 s a round, then 0.85 s | 0.6 s, then 0.65 s a shell, then 0.65 s |
+| Spread, hip / aimed | 1.5° / 0.15° | 2° / 0.3° | 6° / 4° |
+| Range | 120 blocks | 100 | 32 |
+| Round | Rifle Round | Rifle Round | Buckshot Shell |
+
+**What you see:** after each shot the rifles' levers swing down and back, and the gun cants as the lever is worked. The Longhorn's left hand carries each cartridge to the receiver. The Coach Gun's barrels tip open on their hinge for loading and snap shut.
+
+**Crafting** (a crafting table):
+- **Longhorn Rifle:** two iron ingots and a brass ingot over planks and a lever.
+- **Drover Rifle:** two iron ingots and a brass ingot over a lever and planks.
+- **Coach Gun:** two iron ingots over a brass ingot, a lever and planks.
+
+**Connections and balance:** the same metals as the iron set; no new round or material. The rifles are the long-range option: the Longhorn's 8 a shot at 120 blocks against the Patchwork Carbine's 6 at 96, at under half the carbine's rate. The Coach Gun sits between the Thunderpipe and the Haymaker. Starting numbers.
+
+**How the models were built** (`tools/guns.py`): the lever loops and the Callwell's barrels are not separate parts in the owner's files, so a bone's part can now be some of a part's elements:
+
+| Gun | Bones |
+|---|---|
+| Longhorn Rifle | `gun_body` (main but its 8th element, standard barrel, sights); `lever` (main's 8th element: the flat lever loop), turning about (8, 2, 12.7); `bolt`; `shell` (a drawn cartridge) |
+| Drover Rifle | `gun_body` (main but its 11th element, standard barrel, sights, hammer); `lever` (main's 11th element), turning about (8, 2.3, 12.9); empty `bolt` and `shell` (its animations never show the round) |
+| Coach Gun | `gun_body` (main's elements the owner named "main"); `barrel` (those named "barrel": both barrels, the rib, the bead and the fore-end), tipping about the hinge (8, 1.9, 11.6); empty `bolt` and `shell` |
+
+- **The cartridge:** a 1 × 1 × 3 px brass case with a lead tip, drawn into an empty corner of the Longhorn's atlas copy. Its rest place keeps it beside the left hand while the hand carries it in (2 to 3 px off through the carry), and puts it at the receiver's side as it goes in.
+- **Hands:** the right hand on each wrist, low on it, (8, 1.7 to 1.9, 16.4). Placed at the wrist's middle, the fist reached up to the sight line when aiming and hid the target in a first-person preview. The left hands are on the fore-ends.
+- **Sounds:** the rifles' lever cue plays the library's lever sound (a new shared event, `guns.lever`); each loop's insert cue plays the shell insert. Shots: the Longhorn the library's heavy rifle shot, the Drover the cowboy rifle's, the Coach Gun the brass shotgun's.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -151,7 +189,7 @@ Three more of the owner's guns, a step up from the scrap guns, in iron and brass
 - **Others' animations:** the server tells the clients that see the shooter (not the shooter's own) with `GunActionPayload`, and they play the shot or reload on that gun.
 - **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
 - **Disconnect:** clears that player's trigger credit and reload.
-- **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns' and rounds' recipes (nine with slice 2). Items stay registered, so saved guns and rounds survive with it off.
+- **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns' and rounds' recipes (twelve with slice 3). Items stay registered, so saved guns and rounds survive with it off.
 
 ## The shared parts it uses
 - **Items:** `JugcraftRegistry.item` for every gun and round; the Combat tab.
@@ -249,11 +287,33 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | haymaker | `Guns/models/special/bruiser/main.json` | `3d2bb3bdad310541` |
 | haymaker | `Guns/models/special/bruiser/barrel.json` | `ea98ae5f5582c0ce` |
 | haymaker | `Guns/sounds/item/bruiser/fire.ogg` | `b965c68e659f88e3` |
+| longhorn_rifle | `Guns/models/item/marlin.json` | `e55dbcff4031e78b` |
+| longhorn_rifle | `Guns/item/marlin.png` | `103b847aa693002d` |
+| longhorn_rifle | `Guns/item/marlin.animation.json` | `142ef222c32d4677` |
+| longhorn_rifle | `Guns/models/special/marlin/main.json` | `c6ad3d720abbf099` |
+| longhorn_rifle | `Guns/models/special/marlin/stan_barrel.json` | `6fb89e7f959d1014` |
+| longhorn_rifle | `Guns/models/special/marlin/sights.json` | `8f5fcc8e50769101` |
+| longhorn_rifle | `Guns/models/special/marlin/bolt.json` | `eff14fef76793cd0` |
+| longhorn_rifle | `Guns/sounds/item/heavy_rifle/fire.ogg` | `389a087108dc1565` |
+| drover_rifle | `Guns/models/item/winnie.json` | `19ff6562ae558f77` |
+| drover_rifle | `Guns/item/winnie.png` | `8f41f0400c45d5d1` |
+| drover_rifle | `Guns/item/winnie.animation.json` | `949f1214d786712c` |
+| drover_rifle | `Guns/models/special/winnie/main.json` | `ff44e4d5052b6601` |
+| drover_rifle | `Guns/models/special/winnie/stan_barrel.json` | `73e379d0f13ab28e` |
+| drover_rifle | `Guns/models/special/winnie/sights.json` | `7e42e8d0e4b10629` |
+| drover_rifle | `Guns/models/special/winnie/hammer.json` | `d92ff90ae9bcb8e2` |
+| drover_rifle | `Guns/sounds/item/cowboy/fire.ogg` | `27ab9051ec48ba94` |
+| coach_gun | `Guns/models/item/callwell.json` | `4bffc3664e0333c3` |
+| coach_gun | `Guns/item/callwell.png` | `6c7198a2cc8a4f19` |
+| coach_gun | `Guns/item/callwell.animation.json` | `ab04e81b8490abec` |
+| coach_gun | `Guns/models/special/callwell/main.json` | `1c1681b7bdadd76f` |
+| coach_gun | `Guns/sounds/item/brass_shotgun/fire.ogg` | `95eee6d27b87d35a` |
 | shared | `Guns/sounds/item/bolt/bolt.ogg` | `1cf1102f6ba52725` |
 | shared | `Guns/sounds/item/bolt_pull/bolt_pull.ogg` | `dbbda8b00abcab8c` |
 | shared | `Guns/sounds/item/bolt_release/bolt_release.ogg` | `7c1096f545d72ec3` |
 | shared | `Guns/sounds/item/gun_rustle/gun_rustle.ogg` | `aeec657cb4c25acd` |
 | shared | `Guns/sounds/item/gun_sounds/insert.ogg` | `cbc0479276e5262c` |
+| shared | `Guns/sounds/item/lever/lever.ogg` | `0b6c3fb22142e42e` |
 | shared | `Guns/sounds/item/mag_in/mag_in.ogg` | `9595cc14d1209f85` |
 | shared | `Guns/sounds/item/mag_out/mag_out.ogg` | `5f805eaadc8fd476` |
 | shared | `Guns/sounds/item/rack/rack.ogg` | `aa98a804ed7809ab` |
@@ -291,15 +351,22 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 - **Slice 2 game tests (written; they run in CI):**
   - `GunsGameTests` adds: the Warden Pistol and the Riveter SMG each land one shot's damage and spend a round; the Haymaker loads a shell at a time, stops at the two shells there are, then its pellets land together. "Every gun registered" now expects six guns.
   - `GunsClientGameTests` runs every gun, so the new three are drawn, aimed, fired at the husk, reloaded and inspected through the real keys too.
+- **Slice 3, run locally (7 October 2026):**
+  - `python3 tools/guns.py`: PASS for all nine guns, the lever loops and the Callwell's barrels included (each element on its bone re-bakes to the owner's).
+  - `python3 tools/generate_material_data.py`: run twice; the second run changed nothing.
+  - `python3 tools/check_mod_data.py`: PASS (1557 material IDs), with `check_guns`; `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews:** side and top views of the levers swinging and the Coach Gun breaking open; first-person views held, aimed and reloading, which led to the lowered right hands. The preview now clips what crosses the near plane, as the game does, instead of dropping it.
+- **Slice 3 game tests (written; they run in CI):** `GunsGameTests` adds: the Longhorn and the Drover each land one shot's damage and spend a round, and the Drover loads three rounds one at a time; the Coach Gun's pellets land together and spend one barrel. "Every gun registered" expects nine guns. The client test runs every gun.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Light Round, Rifle Round, Buckshot Shell). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Light Round, Rifle Round, Buckshot Shell). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
-- **Next slices,** each its own pull request: the lever rifles, the black powder guns, and the attachments (the owner's parts include silencers, stocks, grips, scopes, extended magazines and bayonets).
+- **Next slices,** each its own pull request: the black powder guns and the attachments (the owner's parts include silencers, stocks, grips, scopes, extended magazines and bayonets).
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - casings and muzzle flash (the `eject_casing` cue);

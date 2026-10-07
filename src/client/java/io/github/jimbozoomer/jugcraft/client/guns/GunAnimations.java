@@ -28,10 +28,13 @@ public final class GunAnimations {
 	private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
 	/** Animation sound keyframes that play another event's sound (tools/guns.py EVENT_SOUNDS: "rustle" is a rustle). */
 	public static final Map<String, String> SOUND_ALIASES = Map.of("rustle", "gun_rustle");
-	/** The same, per gun: the Thunderpipe's and Haymaker's loops push a shell, not a magazine. */
+	/** The same, per gun: the shell-at-a-time guns' loops push a shell or a round, not a magazine. */
 	public static final Map<String, Map<String, String>> GUN_SOUND_ALIASES = Map.of(
 			"thunderpipe", Map.of("reload_mag_in", "shell_in"),
-			"haymaker", Map.of("reload_mag_in", "shell_in"));
+			"haymaker", Map.of("reload_mag_in", "shell_in"),
+			"longhorn_rifle", Map.of("reload_mag_in", "shell_in"),
+			"drover_rifle", Map.of("reload_mag_in", "shell_in"),
+			"coach_gun", Map.of("reload_mag_in", "shell_in"));
 
 	private GunAnimations() {
 	}
