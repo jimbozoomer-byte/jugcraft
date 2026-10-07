@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:gas_curtain",
     "jugcraft:corn_shock",
     "jugcraft:harvest_effigy",
     "jugcraft:hay_bale_seat",

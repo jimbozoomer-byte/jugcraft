@@ -411,6 +411,19 @@ Empty tools mine like a bare hand and get no drops.
 
 **Code:** `gear/JugcraftGear`; data and art from `tools/gear.py` and `tools/gear_textures.py` ([feature record](features/tools-and-armor.md)).
 
+### Steampunk and Kaiser Armor (batch 60)
+
+The stylized looks bronze and steel armor were first drawn in, as sets of their own. Each piece protects exactly as its plain piece does (same defense, toughness, durability, enchantability and repair), and smithing keeps its enchantments and wear. **For now bronze and steel armor still wear the same looks**, so each styled piece looks exactly like its plain piece; a following PR gives bronze and steel armor their own new 3D look.
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Steampunk helmet, chestplate, leggings, boots | Bronze armor's protection, in the steampunk look: aviator cap and goggles, pressure gauge, copper boiler | smithing: Steampunk Pattern + bronze piece + copper ingot |
+| Kaiser helmet, chestplate, leggings, boots | Steel armor's protection, in the kaiserpunk parade dress of the Winged Cog: spiked helmet, field-grey tunic, jackboots | smithing: Kaiser Pattern + steel piece + gold ingot |
+| Steampunk Pattern | Smithing template: bronze armor to Steampunk and, with a bronze ingot, back | 4 copper ingots, 2 leather, 2 glass panes, paper (4) |
+| Kaiser Pattern | Smithing template: steel armor to Kaiser and, with a steel ingot, back | Imperial Crest, 4 gold nuggets, 2 black dye, red dye, paper (4) |
+
+**Code:** `gear/JugcraftGear` (`ARMOR_STYLES`, `STYLE_TEMPLATES`, `restyle`, `TEMPLATES`); data from `tools/gear.py` (`ARMOR_STYLES`), armor art from `tools/armor_styles.py`, pattern art from `tools/arms_variants_art.py` ([feature record](features/steampunk-and-kaiser-armor.md)).
+
 ### Scuba gear, free runners and power weapons (batch 27)
 
 | Item | What it does | Built from |
@@ -567,6 +580,19 @@ Two more arms and a war kit in bronze and steel. Shot for shot the longbow and a
 Trophies last twice as long as steel. Glowing parts (runes, magma, venom, soul fire, sparks) are lit in the dark.
 
 **Code:** `weapons/ArmVariants` (the variants, boons and numbers), `ArmItem` (`boon`, `boonBonus`, `shock`); data from `tools/arms_variants.py`, art from `tools/arms_variants_art.py` ([feature record](features/arms-vii.md)).
+
+### Arms VIII (batch 59): thrown arms
+
+Four arms in bronze and steel that fight in the hand and are thrown with the use key: hold to wind back, let go to throw, as a trident is thrown. What a throw strikes takes its damage, more for the arm's damage enchantments; then the arm comes down where it struck, as itself, to be picked up (the chakram flies back). No throw hits harder than the trident's 8, and throwing one after another deals less a second than a netherite sword.
+
+| Item | In the hand | Thrown (bronze, steel) | Built from |
+| --- | --- | --- | --- |
+| Javelin | Hits 5.5 (steel 6) at 1.4 a second | 7, 8; wind 0.5 s; flies far and straight | ingot, 2 sticks, iron nugget |
+| Francisca | Hits 7 (7.5) at 1.1 a second; chops wood | 6, 7; wind 0.3 s; tumbles; knocks a raised shield down for 3 s | 2 ingots, stick |
+| Chakram | Hits 5 (5.5) at 1.8 a second | 4, 5 to each foe it passes, out and back; flies flat 12 blocks and returns to you | 3 ingots, leather |
+| Harpoon | Hits 6 (6.5) at 1.3 a second | 5, 6; keeps its speed underwater; hauls its catch towards you and out of the saddle | 2 ingots, stick, string |
+
+**Code:** `weapons/ThrownArmItem` (the wind and throw), `weapons/ThrownArm` (the flight and strike), `JugcraftArms.THROWN`; client `arms/ThrownArmRenderer` (each drawn as its 3D model, turned to its flight); data from `tools/arms.py`, art from `tools/arms_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-viii.md)).
 
 ### Construction chemistry (batch 32)
 
