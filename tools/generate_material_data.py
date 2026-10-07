@@ -225,6 +225,8 @@ def assets():
     # Last: it adds diagonal parts to the fence blockstates written above.
     import diagonal_connections
     diagonal_connections.write_all(write, ASSETS, RES / "assets" / "minecraft")
+    import scary_data
+    scary_data.write_all(write, RES, lang)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
 
 

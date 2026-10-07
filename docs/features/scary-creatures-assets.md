@@ -1,13 +1,13 @@
 # Scary creature asset provenance
 
-The contributor requested restoration of the local prototype audio and skeleton-skull model in the Audio and model Fix revision.
+The four creatures are fan homages to the costumed villains of Scooby-Doo. Their display names are Spectral Cosmonaut, Drowned Diver, Emerald Phantom and Onyx Warden. Stable internal prototype IDs are retained so existing test saves remain readable. No official affiliation is implied.
 
-- Geometry and suit/ghost/armor textures: project-generated cuboid models and atlases, including the contributor's Space Kook Edit 1 Blockbench edits.
-- Space Kook skull: recolored vanilla Minecraft skeleton skull pixels, restored from the local prototype. This region is Mojang material, not original MIT artwork.
-- Space Kook laugh: https://tuna.voicemod.net/sound/9961d7a8-2372-4814-a1b3-71755466eb33
-- Captain Cutler vocals: Scooby-Doo 2: Monsters Unleashed (PC), https://sounds.spriters-resource.com/pc_computer/scoobydoo2monstersunleashed/asset/432163/
-- Black Knight vocals: same game, https://sounds.spriters-resource.com/pc_computer/scoobydoo2monstersunleashed/asset/432162/
-- Phantom Shadow vocals: Green Ghost samples from Scooby-Doo: Night of 100 Frights, https://www.101soundboards.com/boards/1627986-scooby-doo-night-of-100-frights-playstation-2-sound-effects ; chain rattle: https://www.101soundboards.com/sounds/1561583-chain-rattle4
-- Original local audio processing (normalization, fades, short attack/hurt cuts) is preserved. Suit Foley remains the original project-generated audio where used. All 26 runtime Ogg files are byte-identical to the local prototype.
+The integration revision restores the contributor's original alternatives from commit `8f985cf84`, before sampled game recordings and recolored vanilla skull pixels were reintroduced:
 
-Third-party recordings, character references and Mojang texture pixels are identified separately from the repository MIT contribution; no new license or redistribution permission is asserted for them. Download archives and reference images are not included. The public alternative generators `tools/scary_sounds.py` and `tools/scary_skull.py` remain optional alternatives and would replace these restored assets if run.
+- Geometry and suit/ghost/armor textures: project-generated cuboid models and atlases, including the contributor's editable Blockbench model.
+- Skull pixels: original procedural drawing from `tools/scary_skull.py`, included in both runtime atlases and the editable model. No recolored Minecraft skull is shipped.
+- All 26 runtime sound files: original procedural synthesis from `tools/scary_sounds.py`, under MIT. No game/show voice recordings or sampled chain audio are shipped. Restoring the already-generated files avoids unnecessary encoder differences.
+- The skull screenshot is restored from the matching original-art revision. Other model screenshots are unchanged.
+- Names, sound mappings, spawn eggs and tags now have editable generation sources in `tools/scary_data.json` and `tools/scary_data.py`.
+
+This applies the owner's fan-homage direction and the repository's [asset rules](../../LICENSE_POLICY.md#fan-homages). Historical third-party files remain in prior commits; they are not part of the integration's runtime tree. No redistribution rights are claimed for those historical recordings or pixels.

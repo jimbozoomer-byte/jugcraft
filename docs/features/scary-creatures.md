@@ -5,9 +5,9 @@ Owner/contributor: speedygroyper. Specialty: hunting/exploration, workshop throu
 
 ## Player experience
 
-Four hostile fan-inspired mobs: Space Kook (bulky space suit, flashing red chase helmet), Captain Cutler (player-sized glowing diving suit), Phantom Shadow (legless, chained floating ghost with orange emissive face), and Black Knight Ghost (larger armored enemy with green seams and a right-hand greatsword). Creative/spectator players are ignored. Entities, spawn eggs and resource IDs use `jugcraft:` and are registered unconditionally. No separate mod or dependency is needed.
+Four hostile fan-inspired mobs: Spectral Cosmonaut (internal ID `space_kook`) (bulky space suit, flashing red chase helmet), Drowned Diver (player-sized glowing diving suit), Emerald Phantom (legless, chained floating ghost with orange emissive face), and Onyx Warden (larger armored enemy with green seams and a right-hand greatsword). Creative/spectator players are ignored. Entities, spawn eggs and resource IDs use `jugcraft:` and are registered unconditionally. No separate mod or dependency is needed.
 
-Space Kook laughs less often while idle than during pursuit. Audio is restored from the local prototype, including sourced character recordings; see the asset provenance record. Editable Blockbench models are in `art/scary-creatures/`. Kook uses the restored recolored vanilla skeleton skull.
+The cosmonaut laughs less often while idle than during pursuit. The integration restores the contributor's original procedural audio and original skull drawing; see the [asset provenance record](scary-creatures-assets.md). Editable Blockbench models are in `art/scary-creatures/`. Stable internal IDs remain unchanged.
 
 ## Connections
 
