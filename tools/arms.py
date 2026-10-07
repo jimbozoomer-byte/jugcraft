@@ -458,6 +458,7 @@ TRAIT_NAMES = {
     "earthbreaker": "Guard Break", "katar": "Quick Jabs", "moonblade": "Broad Sweeps", "kusarigama": "Hooking Cuts",
     "katana": "Clean Cuts", "brazier_mace": "Ignite",
     "longbow": "Heavy Draw", "arbalest": "Metal Prod", "heater_shield": "Quick Raise", "tower_shield": "Bulwark",
+    "javelin": "Light Spear", "francisca": "Chop", "chakram": "Slicing Cuts", "harpoon": "Barbed Line",
 }
 # A shield's sprites: its painted face, its bare back (and grip strap), and its metal trim (rim and boss).
 SHIELD_SPRITES = ["_face", "_back", "_trim"]
