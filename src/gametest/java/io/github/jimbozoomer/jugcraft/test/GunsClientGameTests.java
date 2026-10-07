@@ -63,6 +63,10 @@ public class GunsClientGameTests implements FabricClientGameTest {
 					+ "Rotation:[0f,0f],attributes:[{id:\"minecraft:armor\",base:0.0d},{id:\"minecraft:max_health\",base:1000.0d},"
 					+ "{id:\"minecraft:knockback_resistance\",base:1.0d}],Health:1000.0f}", x + 0.5, y, z - 6.5));
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
+			// The HUD shown (F1 hides the hand, and the gun and its flash with it), whatever an earlier test in the shard left;
+			// its state is put back at the end.
+			boolean hudWasHidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+			setHudHidden(context, false);
 
 			for (String gun : JugcraftGuns.SPECS.keySet()) {
 				String round = JugcraftGuns.SPECS.get(gun).ammo();
@@ -239,7 +243,17 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			context.waitTicks(10);
 			context.takeScreenshot("jugcraft_guns_inventory");
 			context.setScreen(() -> null);
+			setHudHidden(context, hudWasHidden);
 		}
+	}
+
+	/** Hides or shows the HUD, hand and chat (F1) whatever state an earlier test left it in, as ArmorTiersClientGameTests does. */
+	private static void setHudHidden(ClientGameTestContext context, boolean hidden) {
+		context.runOnClient(client -> {
+			if (client.gui.hud.isHidden() != hidden) {
+				client.gui.hud.toggle();
+			}
+		});
 	}
 
 	/** A list of attachment ids as SNBT, for an item component in a command. */
