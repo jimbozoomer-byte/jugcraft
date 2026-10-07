@@ -1,4 +1,7 @@
-"""High-detail item art (64x64): a small shaded-shape renderer for items that need more than 16x16 pixels.
+"""High-detail art (64x64): a small shaded-shape renderer, which drew the items that once needed more than 16x16 pixels.
+
+Retired for item icons: a new item icon is 16x16, drawn from a map (docs/ITEM_ICONS.md), because this renderer dithers
+and paints wear. The 64x64 icons it draws today stay until each is redrawn; it may still paint 3D model textures.
 
 Items are built from shapes painted in order, each with a material:
 - `capsule` (a rod or tube between two points), `box` (a rotated, bevelled block), `disc` (a dome, bolt head or gauge),
@@ -12,7 +15,8 @@ drawn pixel-art look at four times the detail, rather than a blurry render. Fina
 Materials are colour ramps, darkest first. `worn` paints wear: bare metal showing through paint near the edges, as the
 dieselpunk style asks for (docs/ART_DIRECTION.md). Everything is deterministic: no randomness without a fixed seed.
 
-Minecraft draws an item texture of any square size; a 64x64 icon is just finer, in the hand and in the inventory.
+Minecraft draws an item texture of any square size, but beside vanilla's 16x16 items a 64x64 icon looks like it comes
+from another game (docs/ITEM_ICONS.md, rule 1).
 """
 import math
 import random

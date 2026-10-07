@@ -23,6 +23,7 @@ from PIL import Image
 
 import arms_art
 import arms_heads
+import arms_icons
 import gear
 
 MOD = "jugcraft"
@@ -776,7 +777,9 @@ def draw_all(save):
             continue
         held, mirrored = KINDS[kind]["held"], kind in CHARGING
         frames, ticks = arms_art.ANIMATED.get(kind, (1, 0))
-        icons = [arms_art.draw(kind, metal, held, frame) for frame in range(frames)]
+        # The inventory icon: the kind's 16x16 map (tools/arms_icons.py), or its drawing if it has none.
+        icons = [arms_icons.icon(kind, metal, frame) if arms_icons.has(kind) else arms_art.draw(kind, metal, held, frame)
+                 for frame in range(frames)]
         textures = [arms_art.model(kind, metal, held, frame, mirrored=mirrored)[0] for frame in range(frames)]
         for name, images in ((item, icons), (f"{item}_model", textures)):
             if frames == 1:
