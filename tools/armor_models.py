@@ -87,7 +87,8 @@ REACH_X, REACH_UP, FLOOR = 12.0, -14.0, 25.0   # FLOOR: 1 px into the ground, as
 # Modules that define armor sets, each with a SETS list.
 SET_MODULES = ("knight_armor",         # the knight armor: the owner's steel design and its bronze variant
                "bloodthorn_armor",     # Bloodthorn Armor: the owner's crimson design
-               "white_diamond_armor")  # Reforged White Diamond: the owner's icy design
+               "white_diamond_armor",  # Reforged White Diamond: the owner's icy design
+               "sunset_gem_armor")     # Sunset Gem: the owner's sunset design
 
 
 def face_name(name):

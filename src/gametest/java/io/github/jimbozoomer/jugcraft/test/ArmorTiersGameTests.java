@@ -44,7 +44,10 @@ public class ArmorTiersGameTests {
 					"minecraft:netherite_ingot", true),
 			// Reforged White Diamond: beside Bloodthorn, a heavier helm, the longest wear and the best enchanting.
 			new Tier("reforged_white_diamond", new int[] {4, 8, 7, 3}, new int[] {495, 720, 675, 585}, 3.0, 0.1, 20,
-					"minecraft:diamond", false));
+					"minecraft:diamond", false),
+			// Sunset Gem: the longest wear and the best enchanting of all.
+			new Tier("sunset_gem", new int[] {3, 8, 7, 3}, new int[] {528, 768, 720, 624}, 3.0, 0.1, 25,
+					"minecraft:amethyst_shard", false));
 
 	/** Every tier's four pieces have its numbers, repair, fire resistance, slot, look and tags. */
 	@GameTest

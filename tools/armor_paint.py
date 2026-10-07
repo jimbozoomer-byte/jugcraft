@@ -108,6 +108,23 @@ WHITE_DIAMOND = {
     "leather_dark": (63, 64, 86), "leather_darkest": (50, 50, 68),
     "under_light": (82, 92, 102), "under_mid": (68, 74, 86), "under_dark": (58, 61, 70), "under_darkest": (48, 49, 55),
 }
+# Sunset Gem, the owner's sunset design (tools/sunset_gem_armor.py), sampled from their render. That render is unlit, as
+# White Diamond's is: each tone shows at one value on faces of every direction, and five of its eight warm tones keep a
+# red of 255, which no lit side, bottom or front face could (Blockbench would draw them at 0.5 to 0.8 of it), so these
+# are its texture colours as sampled. Its gems run as a sunset from the top of the armor to the feet in eight tones:
+# cream, pale yellow, apricot, peach, coral and red make the metal's six steps; the two deepest, a crimson rose and a
+# mauve that sit low on the skirt and boots, are "gold", for trim. The under-layer is its olive. The design has no
+# leather: the leathers are a dark olive-brown ramp for straps, unused by the armor itself; their darkest is the olive's
+# own outline for the icons (armor_icons.OWN "w"), where olive meets the edge.
+SUNSET_GEM = {
+    "light": (255, 255, 229), "mid_light": (255, 246, 153), "mid": (255, 211, 140), "dark": (255, 171, 116),
+    "seam": (255, 120, 101), "void": (240, 79, 87),
+    "gold_light": (197, 59, 93), "gold_dark": (145, 71, 108),
+    "leather_light": (124, 98, 62), "leather_mid_light": (106, 83, 53), "leather_mid": (90, 70, 45),
+    "leather_dark": (72, 56, 36), "leather_darkest": (52, 40, 25),
+    "under_light": (206, 176, 104), "under_mid": (188, 157, 91), "under_dark": (166, 131, 74),
+    "under_darkest": (139, 106, 67),
+}
 # The smoke test's face colours (tools/armor_smoke.py): one hue per face, so a render shows which face is where.
 TEST = {**STEEL, "t_top": (230, 230, 90), "t_bottom": (90, 70, 40), "t_right": (220, 70, 70), "t_front": (80, 200, 90),
         "t_left": (70, 110, 230), "t_back": (200, 90, 210), "t_mark": (20, 20, 20), "t_rule": (255, 255, 255)}

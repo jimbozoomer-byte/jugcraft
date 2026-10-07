@@ -1,8 +1,8 @@
 """The 3D armor sets' 16x16 inventory icons: the bronze and steel armor's, the knight armor (tools/knight_armor.py)
-drawn small, and Bloodthorn Armor's and Reforged White Diamond's (tools/bloodthorn_armor.py and
-tools/white_diamond_armor.py, below), in the owner's style for item icons (vanilla's own size, a one-pixel outline in
-each part's darkest tone, never pure black, light from the top left, a few flat tones, chunky parts that read at a
-glance).
+drawn small, and Bloodthorn Armor's, Reforged White Diamond's and Sunset Gem's (tools/bloodthorn_armor.py,
+tools/white_diamond_armor.py and tools/sunset_gem_armor.py, below), in the owner's style for item icons (vanilla's own
+size, a one-pixel outline in each part's darkest tone, never pure black, light from the top left, a few flat tones,
+chunky parts that read at a glance).
 
 Each piece is one hand-drawn map, tools/armor_icons/<piece>.txt: 16 lines of 16 symbols, which the owner can edit
 directly (lines starting with # are comments). A map names no colours, only what each pixel is made of, so one map
@@ -67,6 +67,27 @@ Their symbols:
     H L M D S V     the metal, light to dark: "light" (icy white), "mid_light" (pale cyan), "mid" (light cyan), "dark"
                     (light blue), "seam" (blue), "void" (lavender)
     U m u x         the charcoal under-layer: "under_light", "under_mid", "under_dark", "under_darkest" (the face)
+Sunset Gem (tools/sunset_gem_armor.py) has sunset_gem/helmet.txt and so on, coloured from armor_paint.SUNSET_GEM and
+drawn after the owner's renders of each piece on its own:
+    helmet      the crown of gem shards, the broad cream spike over the band, a smaller one at each corner and a shard
+                splayed out at each side; the cream brow over the olive face with its yellow nose bar, peach cheek
+                guards round the open chin, the coral jaw
+    chestplate  the wings, cream and yellow crescents rising from the shoulders to their tips, the peach pauldrons under
+                them, the breastplate with the cream U of its collar, in strips yellow and apricot down to coral (no
+                forearms: the owner's chestplate on its own has none)
+    leggings    the belt's red V, the flaps fanning out from it with crimson inner edges and a glint at each hip, the
+                centre panel in strips, the hem with the crimson band and its mauve middle, parted between the legs
+    boots       two chunky boots, a crimson cuff with a mauve middle, a peach strip, coral with crimson blocks, red
+                soles, a shard flaring up from each outer side
+Their symbols:
+    .                   transparent
+    O                   the outline of the gems: the metal's "void" (red) taken down to OUTLINE_LUMA, a deep red brown
+    H L M D S V K Q     the gems, light to dark: "light" (cream), "mid_light" (pale yellow), "mid" (apricot), "dark"
+                        (peach), "seam" (coral), "void" (red), "gold_light" (crimson) and "gold_dark" (mauve)
+    U m u x             the olive under-layer: "under_light", "under_mid", "under_dark", "under_darkest"
+    w                   the olive's own outline, for olive drawn against the edge: "leather_darkest", a dark olive
+                        brown (the olive's darkest tone is far lighter than an icon's outline). None of the four maps
+                        needs it yet: the olive shows only inside the helm's face.
 """
 import os
 
@@ -98,7 +119,11 @@ OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "
        "reforged_white_diamond": (armor_paint.WHITE_DIAMOND, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark",
                                                               "S": "seam", "V": "void", "U": "under_light",
                                                               "m": "under_mid", "u": "under_dark",
-                                                              "x": "under_darkest"})}
+                                                              "x": "under_darkest"}),
+       "sunset_gem": (armor_paint.SUNSET_GEM, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                               "V": "void", "K": "gold_light", "Q": "gold_dark", "U": "under_light",
+                                               "m": "under_mid", "u": "under_dark", "x": "under_darkest",
+                                               "w": "leather_darkest"})}
 
 
 def luma(colour):

@@ -83,6 +83,10 @@ ARMOR_TIERS = {
     # wear and the best enchanting, but netherite's toughness and no fire resistance; mended with diamonds.
     "reforged_white_diamond": {"display": "Reforged White Diamond", "armor": (45, (3, 7, 8, 4), 20, 3.0, 0.1),
                                "repair": "minecraft:diamond", "fire_resistant": False},
+    # Sunset Gem: beside the others in other strengths: the longest wear and the best enchanting of all, but a point
+    # less defense than Bloodthorn's and netherite's toughness; mended with amethyst shards.
+    "sunset_gem": {"display": "Sunset Gem", "armor": (48, (3, 7, 8, 3), 25, 3.0, 0.1),
+                   "repair": "minecraft:amethyst_shard", "fire_resistant": False},
 }
 
 
