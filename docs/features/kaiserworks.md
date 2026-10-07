@@ -30,7 +30,7 @@ The crest belongs to an empire of our own, with no real nation's arms. It shows 
 
 ## Connections
 - Existing input producer: the plates from the metal press, calcite, iron bars, glass, glowstone, gold and dye.
-- Existing output consumer: building only.
+- Existing output consumer: building. The Imperial Crest also goes into the Landship ([landship.md](landship.md)) and the Kaiser Pattern ([steampunk-and-kaiser-armor.md](steampunk-and-kaiser-armor.md)).
 - Technology/magic connection: none; this is decoration. The set matches the Dieselworks blocks (batch 45) and the giants.
 
 ## Balance and automation
