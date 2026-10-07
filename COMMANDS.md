@@ -25,3 +25,7 @@ Checked upstream `origin/main` at `8ca8aee5`: `distribution/frameworks.lock.json
 LambDynamicLights already reads held equipment on living entities, including Peepo/Jughead's synchronized main hand, so no entity scan, server ticking light blocks, or mandatory Java dependency is added. Vanilla torch lighting is supplied by LambDynamicLights. Install/enable the pinned client mod to see moving illumination; this jar does not bundle it. Gameplay block lighting continues to come from placed torches. No remote branch changes were merged into this branch.
 
 References: https://github.com/speedygroyper/jugcraft/blob/8ca8aee5/distribution/frameworks.lock.json and https://lambdaurora.dev/projects/lambdynamiclights/docs/v4/item.html and https://lambdaurora.dev/projects/lambdynamiclights/docs/v4/entity.html .
+
+## Explicit home/work assignments
+
+The local branch is now `peepo-companion`. Use the Companion Planner to select a tamed companion and then assign one home and up to four workstations. Left-click with the tool unassigns without mining; Shift-right-click air clears the selection. The GUI now lists assignments and coordinates in place of Set home/Set work. See [the assignment feature record](docs/features/companion-assignments.md) for supported jobs, limits and suggested follow-ups.

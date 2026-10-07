@@ -22,6 +22,10 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 public final class PeepoEntity extends PathfinderMob {
+    private static final EntityDataAccessor<String> ASSIGNMENTS = SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.STRING);
+    public final CompanionAssignments assignments=new CompanionAssignments(this);
+    public String assignmentData(){return entityData.get(ASSIGNMENTS);}
+    void syncAssignments(String value){if(!level().isClientSide())entityData.set(ASSIGNMENTS,value);}
     private static final EntityDataAccessor<Boolean> BLUSHING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> PUMPKIN = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> EATING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.INT);
@@ -150,7 +154,7 @@ public final class PeepoEntity extends PathfinderMob {
     }
     private long nextGreeting;
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder); builder.define(BLUSHING, false); builder.define(PUMPKIN, false); builder.define(EATING,0);
+        super.defineSynchedData(builder);builder.define(ASSIGNMENTS,"[]"); builder.define(BLUSHING, false); builder.define(PUMPKIN, false); builder.define(EATING,0);
         builder.define(ENERGY,CompanionEnergy.CAPACITY);builder.define(FOOD_BONUS,0);builder.define(FOOD_TIME,0);builder.define(REST,0);
         builder.define(WHEEL_RUNNING,false);
         builder.define(RECOVERING,false);
@@ -158,7 +162,7 @@ public final class PeepoEntity extends PathfinderMob {
     public boolean isJughead() { return getType()==PeepoMod.JUGHEAD || getType()==PeepoMod.LEGACY_JUGHEAD; }
     public boolean isWearingPumpkin() { return entityData.get(PUMPKIN); }
     @Override protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output); orders.save(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
+        super.addAdditionalSaveData(output); orders.save(output);assignments.save(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
         if(lunchOrigin!=null)output.store("LunchOrigin",net.minecraft.core.GlobalPos.CODEC,lunchOrigin);
         net.minecraft.world.ContainerHelper.saveAllItems(output.child("Belongings"),belongings.getItems());
         output.putBoolean("NaturallySpawned", naturallySpawned);
@@ -167,7 +171,7 @@ public final class PeepoEntity extends PathfinderMob {
         if (bedExit != null) output.store("CompanionBedExit", net.minecraft.core.BlockPos.CODEC, bedExit);
     }
     @Override protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input); orders.load(input); entityData.set(PUMPKIN,input.getBooleanOr("PumpkinCostume",false));
+        super.readAdditionalSaveData(input); orders.load(input);assignments.load(input); entityData.set(PUMPKIN,input.getBooleanOr("PumpkinCostume",false));
         naturallySpawned = input.getBooleanOr("NaturallySpawned", false);
         setStoredEnergy(input.getIntOr("Energy",CompanionEnergy.CAPACITY));
         entityData.set(RECOVERING,input.getBooleanOr("Recovering",false));updateRecoveryState();

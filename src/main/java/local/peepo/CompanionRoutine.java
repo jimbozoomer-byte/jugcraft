@@ -32,11 +32,18 @@ final class CompanionRoutine extends Goal {
         if(s.kind()==CompanionStation.Kind.WHEEL)return 0;
         return s.kind()==CompanionStation.Kind.BED?1:2;
     }
+    private int pathRange(){return npc.assignments.workManaged()||npc.assignments.homeManaged()?64:16;}
+    private BlockPos positionOf(CompanionStation s){return s instanceof BlockEntity be?be.getBlockPos():s instanceof AssignedVanillaBed bed?bed.pos:((CompanionSeats.Surface)s).pos;}
     private void search() {
         long now=npc.level().getGameTime();
         if(now<nextSearch)return;
         nextSearch=now+80+Math.floorMod(npc.getId(),20);unreachable.entrySet().removeIf(e->e.getValue()<=now);
-        List<BlockEntity> candidates=new ArrayList<>();
+        List<CompanionStation> candidates=new ArrayList<>();
+        for(var assigned:npc.assignments.loadedStations()){
+            var be=npc.level().getBlockEntity(assigned);
+            CompanionStation s=be instanceof CompanionStation station?station:AssignedVanillaBed.create(npc,assigned);
+            if(s!=null && useful(s) && !unreachable.containsKey(assigned))candidates.add(s);
+        }
         int cx=npc.blockPosition().getX()>>4,cz=npc.blockPosition().getZ()>>4;
         for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++) {
             var pos=new BlockPos((cx+dx)*16,npc.blockPosition().getY(),(cz+dz)*16);
@@ -45,19 +52,19 @@ final class CompanionRoutine extends Goal {
                 var be=npc.level().getBlockEntity(stationPos);
                 if(be instanceof CompanionStation s && !be.isRemoved() && useful(s)
                         && npc.position().distanceToSqr(s.approachPosition())<=256
-                        && !unreachable.containsKey(be.getBlockPos()))candidates.add(be);
+                        && !unreachable.containsKey(be.getBlockPos()) && !candidates.contains(s))candidates.add(s);
             }
         }
-        candidates.sort(Comparator.<BlockEntity>comparingInt(b->rank((CompanionStation)b))
-            .thenComparingDouble(b->npc.position().distanceToSqr(((CompanionStation)b).approachPosition())));
+        candidates.sort(Comparator.<CompanionStation>comparingInt(this::rank)
+            .thenComparingDouble(b->npc.position().distanceToSqr(b.approachPosition())));
         int stationPaths=0;
         for(var candidate:candidates) {
             if(stationPaths++>=2)break;
-            var s=(CompanionStation)candidate;
-            var path=npc.getNavigation().createPath(BlockPos.containing(s.approachPosition()),0);
-            if(path==null || !path.canReach()) { unreachable.put(candidate.getBlockPos(),now+200);continue; }
+            var s=candidate;
+            var path=npc.getNavigation().createPath(BlockPos.containing(s.approachPosition()),0,pathRange());
+            if(path==null || !path.canReach()) { unreachable.put(positionOf(candidate),now+200);continue; }
             if(s.claim(npc)) {
-                station=s;block=candidate;deadline=now+200;chairUntil=now+600;repath=0;return;
+                station=s;block=candidate instanceof BlockEntity be?be:null;deadline=now+600;chairUntil=now+600;repath=0;return;
             }
         }
         if (needsRest() || now >= nextLeisure) {
@@ -92,9 +99,9 @@ final class CompanionRoutine extends Goal {
         var target=station.approachPosition();
         if(npc.position().distanceToSqr(target)>.64) {
             if(npc.level().getGameTime()>deadline) {
-                unreachable.put(block!=null ? block.getBlockPos() : ((CompanionSeats.Surface)station).pos,npc.level().getGameTime()+200);release();return;
+                unreachable.put(positionOf(station),npc.level().getGameTime()+200);release();return;
             }
-            if(--repath<=0) { repath=20;npc.getNavigation().moveTo(npc.getNavigation().createPath(BlockPos.containing(target),0),1); }
+            if(--repath<=0) { repath=40;npc.getNavigation().moveTo(npc.getNavigation().createPath(BlockPos.containing(target),0,pathRange()),1); }
             return;
         }
         npc.getNavigation().stop();

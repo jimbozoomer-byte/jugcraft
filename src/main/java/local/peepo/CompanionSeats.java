@@ -31,6 +31,9 @@ public final class CompanionSeats {
         }
         return true;
     }
+    static boolean externalAvailable(PeepoEntity npc,BlockPos pos){return !isReserved(npc.level(),pos) || CLAIMS.get(npc.level()).get(pos).npc.equals(npc.getUUID());}
+    static void reserveExternal(PeepoEntity npc,BlockPos pos,int ticks){CLAIMS.computeIfAbsent(npc.level(),l->new HashMap<>()).put(pos,new Claim(npc.getUUID(),npc.level().getGameTime()+ticks));}
+    static void releaseExternal(PeepoEntity npc,BlockPos pos){var map=CLAIMS.get(npc.level());if(map!=null && map.containsKey(pos) && map.get(pos).npc.equals(npc.getUUID()))map.remove(pos);}
     private static boolean fence(BlockState state) { return state.getBlock() instanceof FenceBlock || state.is(BlockTags.FENCES); }
     private static boolean connected(BlockState state,int dx,int dz) {
         String name=dz<0?"north":dz>0?"south":"";
