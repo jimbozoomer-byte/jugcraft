@@ -193,7 +193,7 @@ public final class Dreaming {
 		if (!knows(player)) {
 			return "unknown";
 		}
-		GameType mode = player.gameMode();
+		GameType mode = currentMode(player);
 		if (mode != GameType.SURVIVAL && mode != GameType.ADVENTURE) {
 			return "mode";
 		}
@@ -307,6 +307,20 @@ public final class Dreaming {
 		}
 		player.sendSystemMessage(Component.translatable("message.jugcraft.concordance.dream.ended",
 				Component.translatable("compose.jugcraft.dream.end." + end.id), glass));
+	}
+
+	/**
+	 * The game mode {@code player} plays in, read from what it lets them do (spectating, building instantly, building at
+	 * all), as the game mode itself sets those abilities.
+	 */
+	public static GameType currentMode(ServerPlayer player) {
+		if (player.isSpectator()) {
+			return GameType.SPECTATOR;
+		}
+		if (player.getAbilities().instabuild) {
+			return GameType.CREATIVE;
+		}
+		return player.getAbilities().mayBuild ? GameType.SURVIVAL : GameType.ADVENTURE;
 	}
 
 	/** The game mode an expedition noted (by its enum name); survival if it is not one. */

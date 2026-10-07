@@ -183,7 +183,7 @@ public class ConcordanceHexGameTests {
 		helper.assertTrue(reason.isEmpty(), "At night the dream begins: " + reason);
 		DreamExpedition expedition = Dreaming.expedition(dreamer);
 		helper.assertTrue(expedition != null && expedition.items() == 3 + 12 + 1 && dreamer.getInventory().isEmpty()
-				&& dreamer.gameMode() == GameType.ADVENTURE, "Everything is held in the escrow; the dreamer carries nothing, in adventure mode");
+				&& Dreaming.currentMode(dreamer) == GameType.ADVENTURE, "Everything is held in the escrow; the dreamer carries nothing, in adventure mode");
 		// In the dream: pick something up, gain experience, catch a wisp.
 		dreamer.getInventory().setItem(3, new ItemStack(Items.COBBLESTONE, 5));
 		dreamer.experienceLevel = 30;
@@ -201,7 +201,7 @@ public class ConcordanceHexGameTests {
 		helper.assertTrue(dreamer.getInventory().getItem(0).getCount() == 3 && dreamer.getInventory().getItem(0).is(Items.DIAMOND)
 				&& dreamer.getInventory().getItem(7).getCount() == 12 && dreamer.getItemBySlot(EquipmentSlot.HEAD).is(Items.IRON_HELMET),
 				"Every item is back in its own slot");
-		helper.assertTrue(dreamer.experienceLevel == 5 && dreamer.gameMode() == GameType.SURVIVAL && Dreaming.expedition(dreamer) == null,
+		helper.assertTrue(dreamer.experienceLevel == 5 && Dreaming.currentMode(dreamer) == GameType.SURVIVAL && Dreaming.expedition(dreamer) == null,
 				"The experience and game mode are as before; no expedition remains");
 		helper.assertTrue(dreamer.getInventory().countItem(Items.COBBLESTONE) == 0 && dreamer.getInventory().countItem(Dreaming.DREAMGLASS) == 1,
 				"What was picked up in the dream fell at the dreamer's feet; one dreamglass came back");
@@ -267,7 +267,7 @@ public class ConcordanceHexGameTests {
 		ServerPlayer respawned = helper.makeMockServerPlayerInLevel();
 		respawned.setGameMode(GameType.ADVENTURE);
 		helper.assertTrue(Dreaming.recover(dreamer, respawned) && respawned.getInventory().getItem(2).getCount() == 9
-				&& respawned.gameMode() == GameType.SURVIVAL && !Dreaming.dreaming(dreamer), "The new body has the gold back, in survival");
+				&& Dreaming.currentMode(respawned) == GameType.SURVIVAL && !Dreaming.dreaming(dreamer), "The new body has the gold back, in survival");
 		helper.assertTrue(!Dreaming.recover(dreamer, respawned) && respawned.getInventory().countItem(Items.GOLD_INGOT) == 9,
 				"and recovering again gives nothing");
 		dreamer.setHealth(dreamer.getMaxHealth());
