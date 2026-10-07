@@ -18,7 +18,13 @@ Plant an orchard that fruits every year:
   - **Orange Marmalade, Peach Preserves and Pear Butter,** cooked into a Mason Jar in the Cooking Pot, sealed in the Canning Kettle and shown on a Pantry Shelf as the other preserves are.
 - **Wild trees:** pears and peaches in the Orchard; lemons and oranges in the Mediterranean Forest and the Subtropics; and, outside Jugcraft's biomes, pears in forests, peaches in plains and savannas, lemons in savannas and oranges in savannas and jungles.
 
-The screenshots will be added from CI's client game test (`OrchardClientGameTests`).
+| **Ripe:** the pear, peach, lemon and orange trees hung with fruit (left to right), the blossoming row behind | **In blossom:** the same trees in flower, seen from the far side (orange, lemon, peach, pear) |
+| --- | --- |
+| ![The ripe trees](../images/ingame_orchard_ripe.jpg) | ![The trees in blossom](../images/ingame_orchard_blossom.jpg) |
+| **The table:** the peach and lemon meringue pies (one cut), orange juice and lemonade set down, a Pantry Shelf of the new preserves, and the four saplings (the pear and peach in blossom) | **The wall:** the fruit, seeds, leaves, juices, raw pies, slices and preserves in item frames |
+| ![The table](../images/ingame_orchard_table.jpg) | ![The items](../images/ingame_orchard_items.jpg) |
+
+*In-game screenshots from CI's client game test (`OrchardClientGameTests`, software rendering, small previews).*
 
 ## Connections
 - Existing input producer: wild trees in five vanilla biome groups and three Jugcraft biomes; bone meal grows a sapling as any sapling's. Sugar, eggs, glass bottles, pastry dough and Mason Jars as the other recipes take them.
@@ -63,6 +69,13 @@ No new dependency.
 The trees use vanilla oak logs, so no new wood is added. The set-down juices' models are fitted to their icons as the menu's are (`tools/menu_data.py`).
 
 ## Verification
+CI (7 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `76bd76d` | Build, data audit, game tests, client game tests | Compiled; **948 of 949 game tests passed**: `juicesAreDrinks` failed ("orange_juice leaves its bottle"), its mock player not being in survival (a creative player keeps a drink and gets no bottle back). The client screenshots were taken, but the pantry shelf stood side-on |
+| `a343378` | The same, the test's player in survival (as the cider test's) and the shelf facing the camera | **All pass:** all 949 required game tests (`OrchardGameTests` among them) and the chosen client classes (`OrchardClientGameTests`, `MenuClientGameTests` and `PieClientGameTests` among them). The screenshots above are from this commit. |
+
 Run locally (7 October 2026):
 
 | Check | Result |

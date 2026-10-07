@@ -1365,6 +1365,10 @@ The fifth slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking-
 
 The sixth slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking-expansion-planned): four fruit trees that fruit every year, in Jugcraft's own art (the owner's library has no fruit trees; the owner chose to build it this way). Details and test evidence: [features/orchards.md](../features/orchards.md).
 
+| **The orchard:** pear, peach, lemon and orange trees hung with fruit | **The table:** the new pies, juices, preserves and saplings |
+| --- | --- |
+| ![The orchard](../images/ingame_orchard_ripe.jpg) | ![The table](../images/ingame_orchard_table.jpg) |
+
 - **Pear, peach, lemon and orange trees** grow from their seeds (the peach's pit) into oak-trunked trees, each in its own shape. As the [apple tree's](#the-cider-mill), their leaves blossom and then hang with ripe fruit; a right-click picks one to three, and the leaves fruit again. A fruit crafts into its seed.
 - **Wild:** pears and peaches in the Orchard, lemons and oranges in the Mediterranean Forest and the Subtropics; pears in forests, peaches in plains and savannas, lemons in savannas and oranges in savannas and jungles elsewhere.
 - **Orange Juice** and **Lemonade,** drinks that set down as the menu's do; **Peach** and **Lemon Meringue Pies** from the Hearth Oven; **Orange Marmalade**, **Peach Preserves** and **Pear Butter** in Mason Jars.
