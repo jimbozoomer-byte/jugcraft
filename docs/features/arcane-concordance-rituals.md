@@ -204,7 +204,7 @@ Sounds `jugcraft:concordance.circle_start`, `.circle_step`, `.circle_complete`, 
   calling it off; a broken anchor dropping its offerings once; a ritual saved mid-run lapsing on load; the Vigil
   gathering two and shielding them; the Vigil refused in the light; a pylon filling from a lantern and from energy and
   keeping its charge when broken; refusals taking nothing.
-- CI, run 37554993916 (commit `6caef7eb`, which also carries step 13): `mod` passed with **"All 880 required tests
+- CI, run 37567742360 (commit `e17a6efb`, which also carries step 13): `mod` passed with **"All 881 required tests
   passed"**, the thirteen ritual tests included, and `optional integrations absent` passed. Earlier, run 37552117833 (commit `3d3f3634`) passed 873 of 874: the
   pylon's drop check counted item entities after the test helper's `destroyBlock`, which drops no loot; it now reads
   the block's drops with `Block.getDrops`. Runs before that found

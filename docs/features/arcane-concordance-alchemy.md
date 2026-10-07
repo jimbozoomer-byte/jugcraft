@@ -204,12 +204,12 @@ Sounds `jugcraft:concordance.crucible_add`, `.crucible_stir`, `.crucible_bottle`
   beneath, a vanilla hopper above dropping in glowstone and bottles, water in the tank through the Transfer API, and a
   Pneumatic Extractor at the side moving each draught into a chest: two identical draughts, the inputs used exactly); a
   broken crucible drops its items; a crucible saves its mixture and formula exactly.
-- CI, run 37554993916 (Build workflow, run manually on this branch, commit `6caef7eb`, which carries steps 12 and 13):
-  `mod` passed with **"All 880 required tests passed"** (the thirteen ritual tests and the six alchemy tests included)
-  and `optional integrations absent` passed. The client test shards fail before any test starts, with the same OpenGL
-  startup crash (`Couldn't find matching GLX visual`) as on the framework foundation branch. The run before it,
-  37554056736 (commit `6d07d0dd`), passed 879 of 879, before the crucible drop test was added. Neither log shows Spell
-  Engine failing to play a sound.
+- CI, run 37567742360 (Build workflow, run manually on this branch, commit `e17a6efb`, with the side output, the
+  machinery test and the vanilla duration ceilings): `mod` passed with **"All 881 required tests passed"** (the thirteen
+  ritual tests and the seven alchemy tests included) and `optional integrations absent` passed. The client test shards
+  fail before any test starts, with the same OpenGL startup crash (`Couldn't find matching GLX visual`) as on the
+  framework foundation branch. Earlier runs: 37554993916 (commit `6caef7eb`) passed 880 of 880 and 37554056736 (commit
+  `6d07d0dd`) 879 of 879, as tests were added. No log shows Spell Engine failing to play a sound.
 - Earlier runs on this branch found and fixed: a compile error (the crucible compared the held item with the formula
   data component instead of the formula item; run 37553902529), and, for step 12, run 37552117833 passed 873 of 874,
   failing only the pylon's drop check (see the rituals record).
