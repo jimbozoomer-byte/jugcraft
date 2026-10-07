@@ -182,12 +182,21 @@ def held_model(name):
     return {"textures": {"particle": texture, "tex": texture}, "elements": elements, "display": display}
 
 
+def trait(text):
+    """A perk or boon's text, "Name: what it does.", as its trait's name and its description (gear/TraitTooltips.java):
+    ("Name", "What it does.")."""
+    name, _, rest = text.partition(": ")
+    return name, rest[0].upper() + rest[1:]
+
+
 def write_all(write, assets, data, lang, condition):
     """Each variant's models and definition, its name and its line's and boon's tooltips; the patterns, their recipes
     and the styles' smithing recipes; and each boss's trophy loot table."""
     models = assets / "models" / "item"
     for style, info in STYLES.items():
-        lang[f"tooltip.{MOD}.arms.line.{style}"] = info["perk"]
+        name, text = trait(info["perk"])
+        lang[f"tooltip.{MOD}.arms.line.{style}.trait"] = name
+        lang[f"tooltip.{MOD}.arms.line.{style}"] = text
         lang[f"item.{MOD}.{info['pattern']}"] = info["pattern_name"]
         lang[f"tooltip.{MOD}.{info['pattern']}"] = info["pattern_tooltip"]
         write(models / f"{info['pattern']}.json", {"parent": "minecraft:item/generated",
@@ -199,11 +208,13 @@ def write_all(write, assets, data, lang, condition):
             "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shaped", "category": "misc",
             "pattern": rows, "key": key, "result": {"id": f"{MOD}:{info['pattern']}", "count": 1}})
     for boss, info in BOSSES.items():
-        lang[f"tooltip.{MOD}.arms.line.{boss}"] = f"A trophy of {info['display']}."
+        lang[f"tooltip.{MOD}.arms.line.{boss}.trait"] = f"Trophy of {info['display']}"
         write(data / "loot_table" / "bosses" / f"{boss}.json", {
             "type": "minecraft:entity", "random_sequence": f"{MOD}:bosses/{boss}",
             "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{MOD}:{name}"} for name in trophies(boss)]}]})
     for boon, text in BOONS.items():
+        name, text = trait(text)
+        lang[f"tooltip.{MOD}.arms.boon.{boon}.trait"] = name
         lang[f"tooltip.{MOD}.arms.boon.{boon}"] = text
     for name, kind_, at, _boon, display in VARIANTS:
         lang[f"item.{MOD}.{name}"] = display

@@ -16,7 +16,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -41,7 +43,9 @@ import net.minecraft.world.item.component.Weapon;
  * kusarigamas, each with a weapon art ({@link #ARTS}, worked by {@link WeaponArts}); and Arms VI (batch 55,
  * docs/features/arms-vi.md): katanas and brazier maces, longbows and arbalests ({@link #RANGED}) and heater and tower
  * shields ({@link #SHIELDS}); and Arms VII (batch 56, docs/features/arms-vii.md): named variants of the kinds, crafted
- * in four styles or dropped by bosses ({@link ArmVariants}).
+ * in four styles or dropped by bosses ({@link ArmVariants}); and Arms VIII (batch 59, docs/features/arms-viii.md):
+ * javelins, franciscas, chakrams and harpoons, arms that are also thrown ({@link #THROWN}, {@link ThrownArmItem},
+ * {@link ThrownArm}).
  *
  * <p>After studying how Epic Knights and Simply Swords make, show and animate their weapons (none of their code, models
  * or art is used): every trait here is one of 26.3's own item components, so these are plain items with no per-tick
@@ -103,7 +107,12 @@ public final class JugcraftArms {
 			new Kind("kusarigama", 2.0F, -2.3F, SwingAnimationType.WHACK, 6, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
 			// Arms VI (batch 55); its bows, crossbows and shields are RANGED and SHIELDS.
 			new Kind("katana", 3.0F, -2.5F, SwingAnimationType.WHACK, 7, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
-			new Kind("brazier_mace", 5.0F, -3.0F, SwingAnimationType.WHACK, 10, 0.0F, 3.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false));
+			new Kind("brazier_mace", 5.0F, -3.0F, SwingAnimationType.WHACK, 10, 0.0F, 3.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
+			// Arms VIII (batch 59): thrown arms; how each flies is THROWN.
+			new Kind("javelin", 2.5F, -2.6F, SwingAnimationType.STAB, 7, 0.0F, 3.25F, 0.125F, 0.0F, 1, 0.0F, 0.0F, false, false),
+			new Kind("francisca", 4.0F, -2.9F, SwingAnimationType.WHACK, 9, 0.0F, 3.0F, 0.0F, 2.0F, 1, 0.0F, 0.0F, false, false),
+			new Kind("chakram", 2.0F, -2.2F, SwingAnimationType.WHACK, 6, 0.0F, 2.75F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
+			new Kind("harpoon", 3.0F, -2.7F, SwingAnimationType.STAB, 8, 0.0F, 3.25F, 0.125F, 0.0F, 1, 0.0F, 0.0F, false, false));
 
 	/**
 	 * What an Arms II kind does besides its numbers (tools/arms.py: TRAITS), worked by {@link ArmItem} on the server:
@@ -123,7 +132,7 @@ public final class JugcraftArms {
 			Map.entry("scythe", Trait.REAP), Map.entry("pike", Trait.RIDERS), Map.entry("maul", Trait.QUAKE),
 			Map.entry("executioner", Trait.EXECUTE), Map.entry("bill", Trait.HOOK), Map.entry("labrys", Trait.WHIRL),
 			Map.entry("battleblade", Trait.SUNDER), Map.entry("war_fork", Trait.BRACE), Map.entry("kama", Trait.CLEAR),
-			Map.entry("war_pick", Trait.DELVE), Map.entry("brazier_mace", Trait.IGNITE));
+			Map.entry("war_pick", Trait.DELVE), Map.entry("brazier_mace", Trait.IGNITE), Map.entry("francisca", Trait.CHOP));
 	/** A backstab, within BACKSTAB_ANGLE degrees of straight behind the target's body, deals BACKSTAB of the blow more. */
 	public static final float BACKSTAB = 0.5F;
 	public static final float BACKSTAB_ANGLE = 70.0F;
@@ -320,6 +329,59 @@ public final class JugcraftArms {
 			new Shield("heater_shield", "steel", 0.1F, 90.0F, 0.8F, 900, 1.0F, 0.0F, 0.0F),
 			new Shield("tower_shield", "steel", 0.35F, 130.0F, 0.5F, 1350, 0.75F, 0.5F, 0.08F));
 
+	/**
+	 * A thrown arm in one metal (tools/arms.py: THROWN; Arms VIII, batch 59): held at least wind ticks before it is let
+	 * go, it leaves at speed blocks a tick, falls gravity blocks a tick faster each tick (0: it flies flat), and strikes
+	 * for damage (vanilla's trident: 8), more for the arm's damage enchantments ({@link ThrownArm}).
+	 */
+	public record Thrown(String name, String metal, int wind, float speed, float gravity, float damage) {
+	}
+
+	public static final List<Thrown> THROWN = List.of(
+			new Thrown("javelin", "bronze", 10, 2.6F, 0.035F, 7.0F),
+			new Thrown("francisca", "bronze", 6, 1.6F, 0.06F, 6.0F),
+			new Thrown("chakram", "bronze", 6, 1.4F, 0.0F, 4.0F),
+			new Thrown("harpoon", "bronze", 10, 2.0F, 0.04F, 5.0F),
+			new Thrown("javelin", "steel", 10, 2.8F, 0.035F, 8.0F),
+			new Thrown("francisca", "steel", 6, 1.7F, 0.06F, 7.0F),
+			new Thrown("chakram", "steel", 6, 1.5F, 0.0F, 5.0F),
+			new Thrown("harpoon", "steel", 10, 2.2F, 0.04F, 6.0F));
+	/** A throw wears the arm by THROW_WEAR; another of the same arm can be thrown THROW_COOLDOWN ticks later. */
+	public static final int THROW_WEAR = 1;
+	public static final int THROW_COOLDOWN = 10;
+	/** A thrown francisca stops a raised shield (or parrying arm) blocking for this many seconds, as an axe's blow does. */
+	public static final float FRANCISCA_DISABLE = 3.0F;
+	/**
+	 * The chakram turns back CHAKRAM_RANGE blocks from where it was thrown (or where it meets a block) and flies back at
+	 * CHAKRAM_RETURN blocks a tick, through anything; it strikes each foe once each way, up to CHAKRAM_TARGETS each way;
+	 * it is caught within CHAKRAM_CATCH blocks of its thrower, and falls where it is after CHAKRAM_MAX_TICKS.
+	 */
+	public static final float CHAKRAM_RANGE = 12.0F;
+	public static final float CHAKRAM_RETURN = 1.2F;
+	public static final int CHAKRAM_TARGETS = 4;
+	public static final float CHAKRAM_CATCH = 1.5F;
+	public static final int CHAKRAM_MAX_TICKS = 100;
+	/**
+	 * Underwater the harpoon keeps HARPOON_WATER of its speed a tick, as in air; a foe it strikes is hauled towards its
+	 * thrower at HARPOON_PULL blocks a tick for each block it is off (at most HARPOON_PULL_MAX), less its knockback
+	 * resistance, and dragged from the saddle.
+	 */
+	public static final float HARPOON_WATER = 0.99F;
+	public static final float HARPOON_PULL = 0.2F;
+	public static final float HARPOON_PULL_MAX = 1.6F;
+	/** A thrown arm in flight. */
+	public static EntityType<ThrownArm> THROWN_ARM;
+
+	/** The thrown numbers of a kind in a metal, or null if it is not thrown. */
+	public static Thrown thrown(String kind, String metal) {
+		for (Thrown thrown : THROWN) {
+			if (thrown.name().equals(kind) && thrown.metal().equals(metal)) {
+				return thrown;
+			}
+		}
+		return null;
+	}
+
 	/** A two-handed swing slows its wielder by this share while it is in the air. */
 	public static final float TWO_HANDED_SLOW = 0.6F;
 	/** The finishing blow of a combo is this many times as strong. */
@@ -367,14 +429,18 @@ public final class JugcraftArms {
 	}
 
 	public static void register() {
+		ResourceKey<EntityType<?>> thrownKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("thrown_arm"));
+		THROWN_ARM = Registry.register(BuiltInRegistries.ENTITY_TYPE, thrownKey,
+				EntityType.Builder.<ThrownArm>of(ThrownArm::new, MobCategory.MISC)
+						.sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(10).build(thrownKey));
 		for (String metal : METALS) {
 			ToolMaterial material = metal.equals("bronze") ? JugcraftGear.BRONZE : JugcraftGear.STEEL;
 			for (Kind kind : KINDS) {
-				item(metal + "_" + kind.name(), kind.name(), properties -> arm(properties, material, kind));
+				item(metal + "_" + kind.name(), kind.name(), thrown(kind.name(), metal), properties -> arm(properties, material, kind));
 			}
 			for (Charge charge : CHARGES) {
 				if (charge.metal().equals(metal)) {
-					item(metal + "_" + charge.name(), charge.name(), properties -> charge(properties, material, charge));
+					item(metal + "_" + charge.name(), charge.name(), null, properties -> charge(properties, material, charge));
 				}
 			}
 			for (Ranged ranged : RANGED) {
@@ -485,8 +551,11 @@ public final class JugcraftArms {
 		KIT.put(name, Registry.register(BuiltInRegistries.ITEM, key, factory.apply(new Item.Properties().setId(key))));
 	}
 
-	private static void item(String name, String kind, Function<Item.Properties, Item.Properties> traits) {
+	/** An arm: an {@link ArmItem}, or a {@link ThrownArmItem} if it is thrown. */
+	private static void item(String name, String kind, Thrown thrown, Function<Item.Properties, Item.Properties> traits) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Jugcraft.id(name));
-		ITEMS.put(name, Registry.register(BuiltInRegistries.ITEM, key, new ArmItem(kind, traits.apply(new Item.Properties().setId(key)))));
+		Item.Properties properties = traits.apply(new Item.Properties().setId(key));
+		ITEMS.put(name, Registry.register(BuiltInRegistries.ITEM, key,
+				thrown != null ? new ThrownArmItem(kind, thrown, properties) : new ArmItem(kind, properties)));
 	}
 }
