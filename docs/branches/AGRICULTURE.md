@@ -1325,6 +1325,10 @@ The second slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking
 
 The third slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking-expansion-planned): dishes from the owner's own food art, each one set down as a 3D model. Details, the balance table and test evidence: [features/the-menu.md](../features/the-menu.md).
 
+| **The table:** every dish set down | **The Cooking Pot** in the owner's pot, and the nachos |
+| --- | --- |
+| ![Every dish set down](../images/ingame_menu_table.jpg) | ![The Cooking Pot and the nachos](../images/ingame_menu_pot.jpg) |
+
 - **55 new items:** drinks (hot cocoa, a creamy corn drink, melon juice, glow berry custard and a milk bottle that clears effects), soups and stews, plated meals and pastas, sandwiches, burgers, wraps and tacos, dumplings and ham, things on a stick (corn dogs, a barbecue stick, popsicles), cookies and caramel popcorn, boiled corn, cornbread, tortillas and chips, and the doughs and batters they start from. Corn on the cob gives its corncob back.
 - **Every dish sets down:** sneak and use it on a block to set it down facing you, as a model fitted to the owner's icon (a bowl, a plate, a stacked sandwich, a standing mug or bottle, or the icon lying flat); an empty hand takes it back.
 - **The owner's art on old favourites:** the onion, vegetable and pumpkin soups, cabbage rolls, roasted corn and mulled cider wear the owner's icons (same IDs, recipes and food), popcorn set down is the owner's striped popcorn box, and the **Cooking Pot** is the owner's iron pot (same block, recipes and screen).

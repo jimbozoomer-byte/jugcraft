@@ -25,7 +25,15 @@ Cook a menu and lay it out:
 - **Nachos, a sixth feast** ([feasts](feasts-and-food-displays.md)): a tray of tortilla chips under beef, tomato and pepper, served four times like the others (a bowl takes a Bowl of Nachos away) down to the last bitten chip.
 - **Dog Food and Horse Feed.** Use Dog Food on your own tamed wolf to restore 20 health and give it Strength and Speed for 5 minutes, leaving the bowl. Use Horse Feed on a horse you tamed to restore 10 health and give it Speed and Jump Boost for 2 minutes. Someone else's pet, or a wild one, is left to vanilla (a wolf sits, a horse is mounted).
 
-Screenshots from CI's client game test are added once it has run (see Verification).
+| **The table:** every dish set down, drinks and bowls in front, the popcorn box and mulled cider at the back | **The Cooking Pot** in the owner's pot, cooking on a campfire and empty, with the nachos whole, half eaten and down to the last chip |
+| --- | --- |
+| ![Every dish set down](../images/ingame_menu_table.jpg) | ![The Cooking Pot and the nachos](../images/ingame_menu_pot.jpg) |
+| **Drinks and bowls:** the mugs and the milk bottle standing, soups and stews in the owner's bowl | **Plates:** meals and pastas heaped on the owner's wide plate |
+| ![Drinks and bowls](../images/ingame_menu_drinks_and_bowls.jpg) | ![Plated meals](../images/ingame_menu_plates.jpg) |
+| **Food in hand,** lying flat: sandwiches, the taco, ham, food on a stick, cookies and corn | **The wall:** every new item, the restyled foods, the nachos and the Cooking Pot |
+| ![Food in hand](../images/ingame_menu_hand_food.jpg) | ![The new items in item frames](../images/ingame_menu_items.jpg) |
+
+*In-game screenshots from CI's client game test (`MenuClientGameTests`, software rendering, small previews).*
 
 ## Connections
 - Existing input producer: vanilla food and farming (wheat, potatoes, carrots, beetroot, melons, apples, berries, cocoa, milk, eggs, honey, mushrooms, Nether fungi, ink sacs, ice); Jugcraft's corn (Fall Harvest), tomato, onion, garlic, cabbage and pepper (Kitchen Garden), and the Farmhouse Kitchen's cuts (minced beef, beef patties, bacon, chicken cuts, mutton chops, fish slices, fried eggs, cabbage leaves). Popcorn and caramel come from the Halloween harvest.
@@ -120,15 +128,20 @@ The library's [catalog](../../art/owner-library/catalog/files.csv) lists each so
 **The models** (`tools/menu_data.py`) are fitted to the owner's icons, and each face's UVs are where that part is drawn on the icon: a bowl (a foot, the bowl's band, a rim and the soup inside, with a heap of what is in it), a wide plate, a stacked sandwich, the icon extruded a pixel thick lying flat, the icon extruded standing (the mugs and bottles), and the popcorn box. They pass the art check (`tools/art_check.py`: no holes, no faces left open). The Cooking Pot's model is the owner's pot: a body, lugs each side and a bail handle.
 
 ## Verification
-CI (GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)): **not run yet**; results are added when the pull request's checks finish.
+CI (7 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `f546e2b` | Build, data audit, game tests (920 required, `MenuGameTests` among them), optional integrations absent, client game tests (every one of the 100 classes, as the change touched 74 of them; `MenuClientGameTests` and `FeastsClientGameTests` among them), repository check | **All pass.** The screenshots above are from this run. |
+| later | the same | Recorded by the pull request's checks. |
 
 Run locally (7 October 2026):
 
 | Check | Result |
 | --- | --- |
-| `python3 scripts/check_repository.py` | See the pull request |
-| `python3 tools/check_mod_data.py`: also checks `MenuDishes` and `PlacedDishBlock`'s shapes against `tools/menu.py`, the pet food's animal, healing and effects, that the corn foods give their cob back, every dish's balance against its ingredients, every set-down dish's model (wearing its own icon), blockstate for each facing, loot and words, and the Cooking Pot's owner textures | See the pull request |
-| `python3 tools/generate_material_data.py`, then `git status` | See the pull request |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py`: also checks `MenuDishes` and `PlacedDishBlock`'s shapes against `tools/menu.py`, the pet food's animal, healing and effects, that the corn foods give their cob back, every dish's balance against its ingredients, every set-down dish's model (wearing its own icon), blockstate for each facing, loot and words, and the Cooking Pot's owner textures | Pass, 1660 IDs |
+| `python3 tools/generate_material_data.py`, then `git status` | No drift |
 | `python3 tools/generate_textures.py` | Writes this slice's textures; it also rewrites 24 unrelated Styx textures (its flowers and an entity) differently from what is committed; that drift predates this slice, and those files are left as committed |
 | `./gradlew build`, game tests and client game tests | Not run locally (no Minecraft jar here); run by CI |
 
@@ -142,7 +155,7 @@ The 8 new game tests (`MenuGameTests`):
 7. a stranger cannot feed someone else's wolf, nor the owner a wild one; the owner's wolf eats Dog Food (10 to 30 health, Strength and Speed, the bowl given back); the owner's horse eats Horse Feed (Speed and Jump Boost, no bowl);
 8. four bowls take the nachos down to the last chip, each a Bowl of Nachos of three food, and a use clears it.
 
-The client game test (`MenuClientGameTests`, CI job `client`) lays a table with every dish set down, the Cooking Pot empty and cooking on a campfire beside the nachos whole, half eaten and down to the last chip, and a wall of the new items in item frames, and takes six screenshots.
+The client game test (`MenuClientGameTests`, CI job `client`) lays a table with every dish set down, the Cooking Pot empty and cooking on a campfire beside the nachos whole, half eaten and down to the last chip, and a wall of the new items in item frames, and takes six screenshots; it passed on `f546e2b`.
 
 Not done: play in a real client and a two-client dedicated-server session (two players setting dishes down and taking them back, feeding each other's pets).
 
