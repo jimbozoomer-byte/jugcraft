@@ -10,6 +10,7 @@ import com.geckolib.renderer.base.RenderPassInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.guns.GunItem;
+import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.entity.Entity;
@@ -22,7 +23,8 @@ import org.joml.Vector3f;
  * Draws a gun with GeckoLib: the model rebuilt from the owner's parts (assets/jugcraft/geckolib/models/item/&lt;gun&gt;),
  * the owner's atlas (textures/item/guns/&lt;gun&gt;) and animations. In the player's own first-person view it also
  * draws their arms where the animations put them ({@link GunArmsLayer}) and, while they aim, slides the gun so its
- * sight sits on the middle of the screen.
+ * sight sits on the middle of the screen. The gun's fitted attachments show as its own parts, in place of the standard
+ * parts they replace (tools/guns.py effective_bones()).
  * <p>
  * The model's coordinates are the owner's item-model pixels less (8, 0, 8), so moving it by half a block puts it where
  * the owner's item model was, and the owner's display transforms (the base model, models/item/&lt;gun&gt;) apply as
@@ -33,6 +35,10 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	public static final DataTicket<Integer> OWNER = DataTicket.create("jugcraft_gun_owner", Integer.class);
 	/** The player's own first-person view: what the arms and aiming need. */
 	public static final DataTicket<View> VIEW = DataTicket.create("jugcraft_gun_view", View.class);
+	/** The gun's fitted attachments. */
+	public static final DataTicket<Fitted> FITTED = DataTicket.create("jugcraft_gun_attachments", Fitted.class);
+	/** A slot's attachment bones, and a second set where the slot is on two bones (the Warden Pistol's spare magazine). */
+	private static final List<String> SETS = List.of("", "_2");
 
 	public GunRenderer(GunItem gun) {
 		super(new DefaultedItemGeoModel<GunItem>(Jugcraft.id(gun.name())).withAltTexture(Jugcraft.id("guns/" + gun.name())));
@@ -41,6 +47,7 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 
 	@Override
 	public void addRenderData(GunItem gun, RenderData data, GeoRenderState state, float partialTick) {
+		state.addGeckolibData(FITTED, new Fitted(GunItem.attachments(data.itemStack())));
 		Entity owner = data.itemOwner() instanceof Entity entity ? entity : null;
 		if (owner != null) {
 			state.addGeckolibData(OWNER, owner.getId());
@@ -59,11 +66,26 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	 * A prop (a shell, a ball, a ramrod, a priming flash) rests out of place: an animation's offsets bring it where it
 	 * belongs, and an animation that leaves it alone (an inspect, the idle) would show it at its rest. So it shows only
 	 * while an animation moves it.
+	 * <p>
+	 * Each attachment's bone ("att_&lt;id&gt;") shows only while it is fitted, and a slot's standard part
+	 * ("std_&lt;slot&gt;") only while nothing fitted replaces it.
 	 */
 	@Override
 	public void adjustModelBonesForRender(RenderPassInfo<GeoRenderState> info, BoneSnapshots snapshots) {
 		for (String prop : PROPS) {
 			snapshots.ifPresent(prop, bone -> bone.skipRender(!bone.hasTranslation()));
+		}
+		Fitted fitted = info.getGeckolibData(FITTED);
+		List<String> on = fitted == null ? List.of() : fitted.attachments();
+		for (String set : SETS) {
+			for (String name : JugcraftGuns.ATTACHMENTS.keySet()) {
+				snapshots.ifPresent("att_" + name + set, bone -> bone.skipRender(!on.contains(name)));
+			}
+			for (String slot : JugcraftGuns.SLOTS) {
+				boolean replaced = on.stream().map(JugcraftGuns.ATTACHMENTS::get)
+						.anyMatch(attachment -> attachment.slot().equals(slot) && attachment.replaces());
+				snapshots.ifPresent("std_" + slot + set, bone -> bone.skipRender(replaced));
+			}
 		}
 	}
 
@@ -89,5 +111,9 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	 * @param aim  how far into aiming down the sights (0 to 1)
 	 */
 	public record View(net.minecraft.resources.Identifier skin, boolean slim, float aim) {
+	}
+
+	/** @param attachments the attachments fitted to the gun drawn ({@link GunItem#attachments}) */
+	public record Fitted(List<String> attachments) {
 	}
 }

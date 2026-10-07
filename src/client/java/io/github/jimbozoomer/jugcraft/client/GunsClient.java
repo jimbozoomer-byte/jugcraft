@@ -119,7 +119,7 @@ public final class GunsClient {
 		if (client.level == null) {
 			return;
 		}
-		GunSpec spec = gun.spec();
+		GunSpec spec = GunItem.spec(stack);
 		long now = client.level.getGameTime();
 		if (now < nextShot || now < readyAt || now < reloadingUntil && !spec.byShell()) {
 			return;
@@ -143,9 +143,9 @@ public final class GunsClient {
 		boolean aiming = GunItem.aiming(player, stack);
 		GunAnimations.trigger(player, aiming ? "aim_shoot" : "shoot");
 		player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), JugcraftGuns.sound("guns." + gun.name() + ".fire"),
-				SoundSource.PLAYERS, 1.0F, 0.95F + player.getRandom().nextFloat() * 0.1F, false);
-		// A little kick of the view: more for a heavier shot, less when aimed.
-		float kick = (0.5F + 0.125F * spec.damage() * spec.pellets()) * (aiming ? 0.6F : 1.0F);
+				SoundSource.PLAYERS, GunItem.volume(stack), 0.95F + player.getRandom().nextFloat() * 0.1F, false);
+		// A little kick of the view: more for a heavier shot, less when aimed or with a brake, stock or grip.
+		float kick = (0.5F + 0.125F * spec.damage() * spec.pellets()) * (aiming ? 0.6F : 1.0F) * GunItem.kick(stack);
 		player.setXRot(player.getXRot() - kick);
 	}
 
@@ -196,11 +196,11 @@ public final class GunsClient {
 	/** Asks for a reload, if there is room and something to load, and plays it here. */
 	private static void reload(Minecraft client, LocalPlayer player) {
 		ItemStack stack = player.getMainHandItem();
-		if (!(stack.getItem() instanceof GunItem gun) || client.level == null) {
+		if (!(stack.getItem() instanceof GunItem) || client.level == null) {
 			return;
 		}
 		long now = client.level.getGameTime();
-		GunSpec spec = gun.spec();
+		GunSpec spec = GunItem.spec(stack);
 		int room = spec.capacity() - predicted(stack);
 		int rounds = player.hasInfiniteMaterials() ? room : Math.min(room, GunShots.count(player.getInventory(), JugcraftGuns.ammo(spec)));
 		if (now < reloadingUntil || room <= 0) {
@@ -250,11 +250,11 @@ public final class GunsClient {
 		Minecraft client = Minecraft.getInstance();
 		LocalPlayer player = client.player;
 		if (player == null || client.gui.hud.isHidden() || client.level == null
-				|| !(player.getMainHandItem().getItem() instanceof GunItem gun)) {
+				|| !(player.getMainHandItem().getItem() instanceof GunItem)) {
 			return;
 		}
 		ItemStack stack = player.getMainHandItem();
-		GunSpec spec = gun.spec();
+		GunSpec spec = GunItem.spec(stack);
 		// The rounds loaded less the shots the server has not answered yet (each answer settles one).
 		int loaded = Math.max(0, predicted(stack));
 		Component count = Component.translatable("hud.jugcraft.guns.ammo", loaded, spec.capacity());

@@ -397,6 +397,161 @@ PROPS = {
     },
 }
 
+# ------------------------------------------------------------------ the attachments (slice 5)
+
+# Each attachment is one item that fits every gun with a part of that kind among the owner's parts, drawn on the gun's
+# own atlas (fits()); on each gun it shows as that gun's own part. Several of the owner's guns draw some parts on shared
+# atlases (the Drover Rifle's, the Coach Gun's and the muzzle-loaders' grips, stocks and silencers); those wait for a
+# later slice, as do the bayonets and the tactical grip.
+#   slot     one attachment a slot: barrel, magazine, stock, grip (SLOTS)
+#   parts    the owner's part file names for it, in the order tried (the guns name some differently)
+#   replaces it takes the place of the slot's standard part (the barrel, the magazine, the Thunderpipe's pistol grip)
+#   effects  multipliers on the gun's numbers: damage, range, hip_spread, aim_spread, capacity (rounds), reload (time),
+#            kick (the view's jump) and volume (the shot's sound); the rest stay 1
+#   model    the owner's item model for the attachment (Guns/models/item/<model>.json), drawn with...
+#   texture  ...its one texture, copied to textures/item/guns/attachments/<texture>.png (ATTACHMENT_TEXTURES)
+# The numbers are starting points for the owner.
+ATTACHMENTS = {
+    "silencer": {
+        "display": "Silencer", "slot": "barrel", "parts": ["silencer"], "replaces": False,
+        "effects": {"volume": 0.35, "damage": 0.95}, "model": "silencer", "texture": "muzzle_devices",
+        "tooltip": "A wool-packed can for the muzzle: a much quieter shot, a little weaker.",
+    },
+    "baffled_silencer": {
+        "display": "Baffled Silencer", "slot": "barrel", "parts": ["advanced_silencer"], "replaces": False,
+        "effects": {"volume": 0.2}, "model": "advanced_silencer", "texture": "baffled_silencer",
+        "tooltip": "Brass baffles in a long can: quieter still, and nothing lost.",
+    },
+    "muzzle_brake": {
+        "display": "Muzzle Brake", "slot": "barrel", "parts": ["muzzle_brake"], "replaces": False,
+        "effects": {"kick": 0.5, "aim_spread": 0.85}, "model": "muzzle_brake", "texture": "muzzle_devices",
+        "tooltip": "Ports at the muzzle throw the blast aside: half the kick, steadier aimed.",
+    },
+    "extended_barrel": {
+        "display": "Extended Barrel", "slot": "barrel", "parts": ["ext_barrel"], "replaces": True,
+        "effects": {"range": 1.3, "hip_spread": 0.85, "aim_spread": 0.85}, "model": "extended_barrel",
+        "texture": "extended_barrel",
+        "tooltip": "A longer barrel: reaches farther and strays less.",
+    },
+    "extended_magazine": {
+        "display": "Extended Magazine", "slot": "magazine", "parts": ["ext_mag"], "replaces": True,
+        "effects": {"capacity": 1.5, "reload": 1.15}, "model": "extended_mag", "texture": "extended_magazine",
+        "tooltip": "Half as many rounds again, a little slower to change.",
+    },
+    "speed_magazine": {
+        "display": "Speed Magazine", "slot": "magazine", "parts": ["speed_mag"], "replaces": True,
+        "effects": {"reload": 0.65}, "model": "speed_mag", "texture": "speed_magazine",
+        "tooltip": "A sprung, flared magazine: changed in two thirds of the time.",
+    },
+    "light_stock": {
+        "display": "Light Stock", "slot": "stock", "parts": ["light_stock", "stock_light"], "replaces": True,
+        "effects": {"hip_spread": 0.85}, "model": "light_stock", "texture": "light_stock",
+        "tooltip": "A skeleton stock: steadier from the hip.",
+    },
+    "weighted_stock": {
+        "display": "Weighted Stock", "slot": "stock", "parts": ["heavy_stock", "stock_weighted"], "replaces": True,
+        "effects": {"kick": 0.6, "aim_spread": 0.7}, "model": "weighted_stock", "texture": "weighted_stock",
+        "tooltip": "A heavy stock: soaks up the kick and holds the aim.",
+    },
+    "wooden_stock": {
+        "display": "Wooden Stock", "slot": "stock", "parts": ["wooden_stock", "stock_wooden"], "replaces": True,
+        "effects": {"kick": 0.75, "hip_spread": 0.9, "aim_spread": 0.85}, "model": "wooden_stock",
+        "texture": "wooden_stock",
+        "tooltip": "A plain wooden stock: a little of everything.",
+    },
+    "light_grip": {
+        "display": "Light Grip", "slot": "grip", "parts": ["light_grip", "grip_light"], "replaces": False,
+        "effects": {"hip_spread": 0.8}, "model": "light_grip", "texture": "grips",
+        "tooltip": "A short grip under the fore-end: steadier from the hip.",
+    },
+    "vertical_grip": {
+        "display": "Vertical Grip", "slot": "grip", "parts": ["vertical_grip", "vert_grip", "grip_vertical"],
+        "replaces": False, "effects": {"kick": 0.65}, "model": "vertical_grip", "texture": "grips",
+        "tooltip": "A grip to pull the gun down by: less kick.",
+    },
+}
+# The order the effects are listed in (and GunAttachment's fields).
+EFFECTS = ("damage", "range", "hip_spread", "aim_spread", "capacity", "reload", "kick", "volume")
+# Each slot's standard parts: an attachment rides the bone that holds one (the gun body when the gun has none), and one
+# that "replaces" takes its place.
+SLOTS = {"barrel": ("stan_barrel", "barrel"), "magazine": ("stan_mag",), "stock": ("stan_grip",), "grip": ()}
+# The attachments' textures: the owner's (Guns/item/<file>.png), copied under Jugcraft names.
+ATTACHMENT_TEXTURES = {
+    "muzzle_devices": "greaser_smg_barrels", "baffled_silencer": "advanced_silencer", "extended_barrel": "extended_barrel",
+    "extended_magazine": "extended_mag", "speed_magazine": "carabine", "light_stock": "light_stock",
+    "weighted_stock": "greaser_smg_stocks", "wooden_stock": "musket_stocks", "grips": "carabine_grips",
+}
+# Attachment recipes, from the same early metal and wood as the guns.
+ATTACHMENT_RECIPES = {
+    "silencer": (["IWI"], {"I": "minecraft:iron_ingot", "W": "#minecraft:wool"}),
+    "baffled_silencer": (["BSB"], {"B": "#c:ingots/brass", "S": f"{MOD}:silencer"}),
+    "muzzle_brake": (["NBN"], {"N": "minecraft:iron_nugget", "B": "#c:ingots/brass"}),
+    "extended_barrel": (["IIB"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass"}),
+    "extended_magazine": (["I", "B", "I"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass"}),
+    "speed_magazine": (["B", "S", "B"], {"B": "#c:ingots/brass", "S": "minecraft:slime_ball"}),
+    "light_stock": (["SSL"], {"S": "minecraft:stick", "L": "minecraft:leather"}),
+    "weighted_stock": (["PPI"], {"P": "#minecraft:planks", "I": "minecraft:iron_ingot"}),
+    "wooden_stock": (["PPL"], {"P": "#minecraft:planks", "L": "minecraft:leather"}),
+    "light_grip": (["L", "S"], {"L": "minecraft:leather", "S": "minecraft:stick"}),
+    "vertical_grip": (["I", "S", "L"], {"I": "minecraft:iron_ingot", "S": "minecraft:stick", "L": "minecraft:leather"}),
+}
+
+
+def attachment_part(gun, kind):
+    """The owner's part file this gun shows the attachment with, or None: the first of its "parts" the gun has, if it
+    is drawn on the gun's own atlas."""
+    folder = LIBRARY / "models" / "special" / GUNS[gun]["source"]
+    for name in ATTACHMENTS[kind]["parts"]:
+        path = folder / f"{name}.json"
+        if path.exists():
+            textures = set(json.loads(path.read_text()).get("textures", {}).values())
+            return name if textures == {f"scguns:item/{GUNS[gun]['source']}"} else None
+    return None
+
+
+def fits(gun):
+    """The attachments this gun takes, in ATTACHMENTS order (JugcraftGuns.ACCEPTS)."""
+    return [kind for kind in ATTACHMENTS if attachment_part(gun, kind)]
+
+
+def effective_bones(gun):
+    """BUILDS' bones with the attachments added. Each slot the gun has attachments for gets, under each bone holding
+    one of its standard parts (or under gun_body), an "att_<kind>" bone for each attachment, with that bone's pivot so
+    it rides the barrel or magazine as the animations move it; where an attachment replaces the standard part, the part
+    moves to a "std_<slot>" bone of its own. A slot on two bones (the Warden Pistol's magazine and the spare its reload
+    brings in) gets a second set suffixed "_2". The renderer shows the fitted attachments' bones and hides the standard
+    parts they replace (GunRenderer)."""
+    kinds = fits(gun)
+    bones = BUILDS[gun]["bones"]
+    anchors = {slot: [name for name, _, parts, _ in bones if set(parts) & set(standard)] or ["gun_body"]
+               for slot, standard in SLOTS.items()}
+    replaced = {ATTACHMENTS[kind]["slot"] for kind in kinds if ATTACHMENTS[kind]["replaces"]}
+    out = []
+    for name, parent, parts, pivot in bones:
+        children = []
+        for slot, standard in SLOTS.items():
+            if name not in anchors[slot]:
+                continue
+            suffix = "" if anchors[slot].index(name) == 0 else f"_{anchors[slot].index(name) + 1}"
+            own = [p for p in parts if p in standard]
+            if own and slot in replaced:
+                parts = [p for p in parts if p not in standard]
+                children.append((f"std_{slot}{suffix}", name, own, pivot))
+            children += [(f"att_{kind}{suffix}", name, [attachment_part(gun, kind)], pivot)
+                         for kind in kinds if ATTACHMENTS[kind]["slot"] == slot]
+        out.append((name, parent, parts, pivot))
+        out += children
+    return out
+
+
+def attachment_model(kind):
+    """The owner's item model for the attachment, its texture renamed to the Jugcraft copy."""
+    model = json.loads((LIBRARY / "models" / "item" / f"{ATTACHMENTS[kind]['model']}.json").read_text())
+    texture = f"{MOD}:item/guns/attachments/{ATTACHMENTS[kind]['texture']}"
+    model["textures"] = {key: texture for key in model["textures"]}
+    return model
+
+
 # The sounds the animations name (sound_effects keys), per gun where they differ, and the gun's own shots.
 # Each event: library file under Guns/sounds/ -> copied to assets/jugcraft/sounds/guns/.
 EVENT_SOUNDS = {
@@ -456,7 +611,7 @@ SUBTITLES = {
 
 
 def items():
-    return list(GUNS) + list(AMMO)
+    return list(GUNS) + list(AMMO) + list(ATTACHMENTS)
 
 
 def sound_events():
@@ -504,6 +659,28 @@ def write_all(write, assets, data, lang, condition):
         write(data / "recipe" / f"{ammo}.json", {
             "fabric:load_conditions": condition("guns"), "type": "minecraft:crafting_shaped",
             "category": "equipment", "pattern": pattern, "key": key, "result": {"id": f"{MOD}:{ammo}", "count": count}})
+    for kind, att in ATTACHMENTS.items():
+        lang[f"item.{MOD}.{kind}"] = att["display"]
+        lang[f"tooltip.{MOD}.guns.{kind}"] = att["tooltip"]
+        write(assets / "models" / "item" / f"{kind}.json", attachment_model(kind))
+        write(assets / "items" / f"{kind}.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/{kind}"}})
+        pattern, key = ATTACHMENT_RECIPES[kind]
+        write(data / "recipe" / f"{kind}.json", {
+            "fabric:load_conditions": condition("guns"), "type": "minecraft:crafting_shaped",
+            "category": "equipment", "pattern": pattern, "key": key, "result": {"id": f"{MOD}:{kind}"}})
+    # A gun and an attachment it takes, in a crafting grid, give the gun with it fitted (any in the same slot stays in
+    # the grid); a gun and shears take its last attachment off (GunAttachmentRecipe).
+    for recipe in ("gun_attachment", "gun_attachment_removal"):
+        write(data / "recipe" / f"{recipe}.json", {"fabric:load_conditions": condition("guns"), "type": f"{MOD}:{recipe}"})
+    for slot in SLOTS:
+        lang[f"tooltip.{MOD}.guns.slot.{slot}"] = f"{slot.capitalize()} attachment"
+    for effect, text in {"damage": "Damage", "range": "Range", "hip_spread": "Spread from the hip",
+                         "aim_spread": "Spread aimed", "capacity": "Rounds", "reload": "Reload time", "kick": "Kick",
+                         "volume": "Shot sound"}.items():
+        lang[f"tooltip.{MOD}.guns.effect.{effect}"] = f"{text} %s"
+    lang[f"tooltip.{MOD}.guns.fits"] = "Fits: %s"
+    lang[f"tooltip.{MOD}.guns.fitting"] = "Fit it with the gun in a crafting grid; the gun and shears take the last off."
+    lang[f"tooltip.{MOD}.guns.fitted"] = "Fitted: %s"
     for name, text in SUBTITLES.items():
         lang[f"subtitles.{MOD}.guns.{name}"] = text
     lang[f"key.{MOD}.reload"] = "Reload gun"
@@ -746,7 +923,7 @@ def build_geo(gun):
     build = BUILDS[gun]
     size_px = atlas_size(gun)
     bones = []
-    for name, parent, parts, pivot in build["bones"]:
+    for name, parent, parts, pivot in effective_bones(gun):
         bone = {"name": name, "pivot": geo_point(pivot)}
         if parent:
             bone["parent"] = parent
@@ -850,7 +1027,7 @@ def check():
             problems.append(f"{gun}: the GeckoLib model is out of date (run python3 tools/guns.py)")
         size_px = atlas_size(gun)
         bones = {b["name"]: b for b in geo["minecraft:geometry"][0]["bones"]}
-        for name, parent, parts, pivot in BUILDS[gun]["bones"]:
+        for name, parent, parts, pivot in effective_bones(gun):
             cubes = []
             want = []
             found = list(bones.get(name, {}).get("cubes", []))
@@ -911,6 +1088,33 @@ def check():
             for event in (data.get("sound_effects") or {}).values():
                 if event["effect"] not in EVENT_SOUNDS:
                     problems.append(f"{gun}: animation {name} plays {event['effect']}, which has no sound")
+        # The props' atlas corners must stay clear of every part's faces, the attachments' included.
+        for prop_name, prop in PROPS.get(gun, {}).items():
+            tu, tv = prop["texture_at"]
+            bw, bh = prop_block(prop)
+            for _, _, parts, _ in effective_bones(gun):
+                for part in parts:
+                    if part.startswith("@"):
+                        continue
+                    for element in part_elements(gun, part):
+                        for face in element.get("faces", {}).values():
+                            if "uv" not in face:
+                                continue
+                            u0, v0, u1, v1 = (c * s / 16.0 for c, s in zip(face["uv"], size_px * 2))
+                            if min(u0, u1) < tu + bw and max(u0, u1) > tu and min(v0, v1) < tv + bh and max(v0, v1) > tv:
+                                problems.append(f"{gun}: the {prop_name} prop's corner overlaps part {part}'s texture")
+    for kind, att in ATTACHMENTS.items():
+        if not any(kind in fits(gun) for gun in GUNS):
+            problems.append(f"attachment {kind}: no gun takes it")
+        if kind not in ATTACHMENT_RECIPES or att["texture"] not in ATTACHMENT_TEXTURES:
+            problems.append(f"attachment {kind}: no recipe or no texture")
+        source = json.loads((LIBRARY / "models" / "item" / f"{att['model']}.json").read_text())
+        if len({v for k, v in source["textures"].items() if k != "particle"}) != 1:
+            problems.append(f"attachment {kind}: the owner's model {att['model']} draws on more than one texture")
+    for name, source in ATTACHMENT_TEXTURES.items():
+        target = ASSETS / "textures" / "item" / "guns" / "attachments" / f"{name}.png"
+        if not target.exists() or target.read_bytes() != (LIBRARY / "item" / f"{source}.png").read_bytes():
+            problems.append(f"attachment texture {name}: not the library's {source}.png unchanged")
     for name, path in {**EVENT_SOUNDS, **{f"{g}.fire": p for g, p in SHOT_SOUNDS.items()}}.items():
         target = ASSETS / "sounds" / "guns" / f"{sound_file(path)}.ogg"
         if not target.exists() or target.read_bytes() != (LIBRARY / "sounds" / path).read_bytes():
@@ -1017,6 +1221,10 @@ def write_files():
                 draw_props(image.convert("RGBA"), gun).save(texture)
         else:
             shutil.copyfile(LIBRARY / "item" / f"{spec['source']}.png", texture)
+    for name, source in ATTACHMENT_TEXTURES.items():
+        target = ASSETS / "textures" / "item" / "guns" / "attachments" / f"{name}.png"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(LIBRARY / "item" / f"{source}.png", target)
     for path in sorted({*EVENT_SOUNDS.values(), *SHOT_SOUNDS.values()}):
         target = ASSETS / "sounds" / "guns" / f"{sound_file(path)}.ogg"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -1029,11 +1237,13 @@ def provenance():
     for gun, spec in GUNS.items():
         src = spec["source"]
         paths = [f"models/item/{src}.json", f"item/{src}.png", f"item/{src}.animation.json"]
-        for _, _, parts, _ in BUILDS[gun]["bones"]:
+        for _, _, parts, _ in effective_bones(gun):
             paths += [f"models/special/{src}/{part_file(p)}.json" for p in parts if not p.startswith("@")]
         paths.append(f"sounds/{SHOT_SOUNDS[gun]}")
         rows += [(gun, p) for p in dict.fromkeys(paths)]  # a part on two bones (a spare magazine) counts once
     rows += [("shared", f"sounds/{p}") for p in sorted(set(EVENT_SOUNDS.values()))]
+    rows += [(kind, f"models/item/{att['model']}.json") for kind, att in ATTACHMENTS.items()]
+    rows += [(name, f"item/{source}.png") for name, source in ATTACHMENT_TEXTURES.items()]
     return [(gun, path, hashlib.sha256((LIBRARY / path).read_bytes()).hexdigest()) for gun, path in rows]
 
 

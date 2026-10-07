@@ -1,15 +1,21 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
 import io.github.jimbozoomer.jugcraft.guns.GunSpec;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
+import java.util.List;
+import java.util.Optional;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
@@ -18,6 +24,11 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -30,8 +41,9 @@ import net.minecraft.world.phys.Vec3;
  * loads one round per shell's time, and a shot or a switch of item cuts it short; a shotgun's pellets land together;
  * bullets count as projectiles; the iron set's pistol and SMG land their damage, and the Haymaker loads only the shells
  * there are; the lever rifles land theirs and load a round at a time, and the Coach Gun's pellets land together; a
- * muzzle-loader lands its one heavy shot and reloads a paper cartridge, and the Bellmouth's balls land together. Shooters
- * face south (+z) and aim at their target's middle.
+ * muzzle-loader lands its one heavy shot and reloads a paper cartridge, and the Bellmouth's balls land together.
+ * Attachments (slice 5) fit and come off in a crafting grid, change a gun's numbers, and the server fires and loads by
+ * them. Shooters face south (+z) and aim at their target's middle.
  */
 public class GunsGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
@@ -46,6 +58,10 @@ public class GunsGameTests {
 			helper.assertTrue(new ItemStack(JugcraftGuns.GUNS.get(name)).getMaxStackSize() == 1, name + " stacks");
 		});
 		helper.assertTrue(JugcraftGuns.GUNS.size() == 12 && JugcraftGuns.ROUNDS.size() == 4, "Not twelve guns and four rounds");
+		helper.assertTrue(JugcraftGuns.ATTACHMENT_ITEMS.keySet().equals(JugcraftGuns.ATTACHMENTS.keySet())
+				&& JugcraftGuns.ATTACHMENTS.size() == 11, "Not eleven attachments, each with its item");
+		JugcraftGuns.ACCEPTS.forEach((gun, takes) -> helper.assertTrue(JugcraftGuns.GUNS.containsKey(gun)
+				&& JugcraftGuns.ATTACHMENTS.keySet().containsAll(takes), gun + " takes an unknown attachment"));
 		helper.succeed();
 	}
 
@@ -381,6 +397,124 @@ public class GunsGameTests {
 		helper.assertTrue(helper.getLevel().registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(JugcraftGuns.BULLET)
 				.is(DamageTypeTags.IS_PROJECTILE), "The bullet damage type is not a projectile");
 		helper.succeed();
+	}
+
+	/**
+	 * Attachments fit in a crafting grid and change the gun's numbers: an Extended Magazine gives the Rust Midge half as
+	 * many rounds again and a slower reload, its loaded rounds kept; a Speed Magazine takes its place (the Extended
+	 * Magazine staying in the grid) and quickens the reload; a Silencer fits beside it, quietens the shot and weakens it a
+	 * little. A gun takes no attachment it has no part for, none it already wears, and shears take nothing off a bare gun;
+	 * a gun and shears take the last attachment off, leaving it and the shears in the grid.
+	 */
+	@GameTest
+	public void attachmentsFitAndComeOff(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		for (String recipe : List.of("gun_attachment", "gun_attachment_removal")) {
+			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(recipe))).isPresent(),
+					"The " + recipe + " recipe does not load");
+		}
+		GunSpec midge = JugcraftGuns.SPECS.get("rust_midge");
+		ItemStack gun = new ItemStack(JugcraftGuns.GUNS.get("rust_midge"));
+		GunItem.setLoaded(gun, 5);
+
+		Crafted extended = craft(helper, gun, attachment("extended_magazine"));
+		helper.assertTrue(GunItem.attachments(extended.result()).equals(List.of("extended_magazine")) && GunItem.loaded(extended.result()) == 5,
+				"The Extended Magazine did not fit, rounds kept: " + GunItem.attachments(extended.result()));
+		GunSpec spec = GunItem.spec(extended.result());
+		helper.assertTrue(spec.capacity() == 30 && spec.reload() == Math.round(midge.reload() * 1.15F),
+				"With the Extended Magazine: " + spec.capacity() + " rounds, " + spec.reload() + " ticks to reload");
+		helper.assertTrue(extended.left().stream().allMatch(ItemStack::isEmpty), "Something stayed in the grid");
+
+		Crafted swapped = craft(helper, extended.result(), attachment("speed_magazine"));
+		spec = GunItem.spec(swapped.result());
+		helper.assertTrue(GunItem.attachments(swapped.result()).equals(List.of("speed_magazine")), "The Speed Magazine did not replace it");
+		helper.assertTrue(spec.capacity() == midge.capacity() && spec.reload() == Math.round(midge.reload() * 0.65F),
+				"With the Speed Magazine: " + spec.capacity() + " rounds, " + spec.reload() + " ticks to reload");
+		helper.assertTrue(swapped.left().get(1).is(JugcraftGuns.ATTACHMENT_ITEMS.get("extended_magazine")),
+				"The Extended Magazine did not stay in the grid");
+
+		Crafted silenced = craft(helper, swapped.result(), attachment("silencer"));
+		ItemStack quiet = silenced.result();
+		helper.assertTrue(GunItem.attachments(quiet).equals(List.of("speed_magazine", "silencer")), "The Silencer did not fit beside it");
+		helper.assertTrue(Math.abs(GunItem.volume(quiet) - 0.35F) < 1.0E-4F && Math.abs(GunItem.spec(quiet).damage() - midge.damage() * 0.95F) < 1.0E-4F,
+				"Silenced: volume " + GunItem.volume(quiet) + ", damage " + GunItem.spec(quiet).damage());
+
+		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
+		helper.assertFalse(crafting.getRecipeFor(grid(new ItemStack(JugcraftGuns.GUNS.get("thunderpipe")), attachment("speed_magazine")), level)
+				.isPresent(), "The Thunderpipe took a magazine");
+		helper.assertFalse(crafting.getRecipeFor(grid(quiet, attachment("silencer")), level).isPresent(), "A second Silencer fitted");
+		helper.assertFalse(crafting.getRecipeFor(grid(gun, new ItemStack(Items.SHEARS)), level).isPresent(), "Shears worked on a bare gun");
+
+		Crafted stripped = craft(helper, quiet, new ItemStack(Items.SHEARS));
+		helper.assertTrue(GunItem.attachments(stripped.result()).equals(List.of("speed_magazine")), "The shears did not take the Silencer off");
+		helper.assertTrue(stripped.left().get(0).is(JugcraftGuns.ATTACHMENT_ITEMS.get("silencer")) && stripped.left().get(1).is(Items.SHEARS),
+				"The Silencer and the shears did not stay in the grid: " + stripped.left());
+		helper.succeed();
+	}
+
+	/**
+	 * A Rust Midge with an Extended Magazine loads 30 rounds, after its longer reload. With the magazine taken off it keeps
+	 * them and fires them, and will not reload while it holds more than its own 20.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 100)
+	public void extendedMagazineLoadsMore(GameTestHelper helper) {
+		floor(helper);
+		Mob pig = pig(helper, new BlockPos(1, 2, 4));
+		ServerPlayer shooter = shooter(helper, "rust_midge", 0, pig, GameType.SURVIVAL);
+		GunItem.fit(shooter.getMainHandItem(), "extended_magazine");
+		shooter.getInventory().add(new ItemStack(JugcraftGuns.ROUNDS.get("light_round"), 64));
+		int own = JugcraftGuns.SPECS.get("rust_midge").reload();
+		int longer = GunItem.spec(shooter.getMainHandItem()).reload();
+		helper.assertTrue(longer > own + 2, "The Extended Magazine's reload is not longer");
+		helper.assertTrue(GunShots.reload(shooter), "The reload did not start");
+		helper.runAfterDelay(own + 2, () -> helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == 0,
+				"The Extended Magazine loaded in the Midge's own reload time"));
+		helper.runAfterDelay(longer + 2, () -> {
+			ItemStack stack = shooter.getMainHandItem();
+			helper.assertTrue(GunItem.loaded(stack) == 30, "Loaded " + GunItem.loaded(stack) + ", not 30");
+			helper.assertTrue(GunShots.count(shooter.getInventory(), JugcraftGuns.ROUNDS.get("light_round")) == 34, "Not 30 rounds taken");
+			GunItem.remove(stack, "extended_magazine");
+			helper.assertTrue(GunItem.loaded(stack) == 30, "The rounds went with the magazine");
+			helper.assertTrue(GunShots.fire(shooter) && GunItem.loaded(stack) == 29, "It did not fire the rounds it held");
+			helper.assertFalse(GunShots.reload(shooter), "It reloaded while holding more than its own magazine");
+			helper.succeed();
+		});
+	}
+
+	/** The server fires a silenced Rust Midge's shot with the silencer's damage. */
+	@GameTest(structure = ARENA, maxTicks = 20)
+	public void silencedShotIsALittleWeaker(GameTestHelper helper) {
+		floor(helper);
+		Mob pig = pig(helper, new BlockPos(1, 2, 4));
+		pig.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0);
+		pig.setHealth(200.0F);
+		ServerPlayer shooter = shooter(helper, "rust_midge", 20, pig, GameType.SURVIVAL);
+		GunItem.fit(shooter.getMainHandItem(), "silencer");
+		helper.assertTrue(GunShots.fire(shooter), "The silenced Midge did not fire");
+		float expected = JugcraftGuns.SPECS.get("rust_midge").damage() * 0.95F;
+		helper.assertTrue(Math.abs(200.0F - pig.getHealth() - expected) < 1.0E-3F,
+				"The silenced shot took " + (200.0F - pig.getHealth()) + ", not " + expected);
+		helper.succeed();
+	}
+
+	/** What a crafting grid gave, and what stayed in it. */
+	private record Crafted(ItemStack result, NonNullList<ItemStack> left) {
+	}
+
+	/** Crafts a gun and another item side by side in a 2 x 1 grid (the test fails if no recipe takes them). */
+	private static Crafted craft(GameTestHelper helper, ItemStack gun, ItemStack other) {
+		CraftingInput input = grid(gun, other);
+		Optional<RecipeHolder<CraftingRecipe>> recipe = RecipeManager.createCheck(RecipeType.CRAFTING).getRecipeFor(input, helper.getLevel());
+		helper.assertTrue(recipe.isPresent(), "No recipe takes " + gun + " and " + other);
+		return new Crafted(recipe.get().value().assemble(input), recipe.get().value().getRemainingItems(input));
+	}
+
+	private static CraftingInput grid(ItemStack first, ItemStack second) {
+		return CraftingInput.of(2, 1, List.of(first.copy(), second.copy()));
+	}
+
+	private static ItemStack attachment(String name) {
+		return new ItemStack(JugcraftGuns.ATTACHMENT_ITEMS.get(name));
 	}
 
 	/** A mock player holding a gun with this many rounds loaded, at the arena's (1, 2, 1), aimed at the target's middle. */

@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 5 (the attachments)
+- **Eleven attachments,** each the owner's model: the **Silencer** and **Baffled Silencer**, the **Muzzle Brake** and **Extended Barrel** (barrel); the **Extended Magazine** and **Speed Magazine**; the **Light**, **Weighted** and **Wooden Stocks**; the **Light** and **Vertical Grips**. One a slot; on each gun an attachment shows as that gun's own part.
+- **Fitted at a crafting table:** a gun and an attachment it takes give the gun with it fitted (one already in the slot stays in the grid); a gun and shears take the last one off. They change the gun's numbers: quieter shots, farther reach, tighter spread, less kick, more rounds or a quicker reload, each with its cost. Seven of the twelve guns take them so far. Record: [guns.md, slice 5](docs/features/guns.md#slice-5-the-attachments).
+
 ### Unmerged: Guns, slice 4 (the black powder guns)
 - **Three of the owner's muzzle-loaders:** the **Duelling Pistol**, the **Line Musket** and the **Bellmouth** (a blunderbuss, ten balls a shot). One heavy shot, then a long reload: the ball goes down the muzzle and the ramrod drives it home, with the owner's animations.
 - **A new round, the Paper Cartridge** (paper, a lead nugget and gunpowder). The guns are the cheapest yet: iron, wood and a flint. Record: [guns.md, slice 4](docs/features/guns.md#slice-4-the-black-powder-guns).

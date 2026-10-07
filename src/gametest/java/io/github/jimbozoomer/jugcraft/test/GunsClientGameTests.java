@@ -5,7 +5,9 @@ import io.github.jimbozoomer.jugcraft.client.GunsClient;
 import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
@@ -25,8 +27,9 @@ import net.minecraft.world.phys.AABB;
  * Client game test for the guns (slice 1), end to end through the real input: each gun drawn in first person, aimed down
  * its sights and fired so at a husk with the attack key (the server lands the shot and spends a round), reloaded with the
  * reload key (part way through and done: the rounds come out of the inventory), and inspected; the Thunderpipe's
- * shell-at-a-time reload part way; each gun held in third person and shown in the inventory. Screenshots
- * jugcraft_guns_* (CI job {@code client}).
+ * shell-at-a-time reload part way; each gun that takes attachments held with two sets of them fitted (slice 5), the
+ * client seeing a fitted magazine's capacity; each gun held in third person and shown in the inventory with the
+ * attachments. Screenshots jugcraft_guns_* (CI job {@code client}).
  */
 public class GunsClientGameTests implements FabricClientGameTest {
 	@Override
@@ -108,6 +111,31 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_guns_thunderpipe_shell");
 			context.waitTicks(40);
 
+			// Attachments: each gun that takes any, with one of each slot it has from two sets, held and aimed.
+			List<List<String>> sets = List.of(List.of("silencer", "extended_magazine", "light_stock", "light_grip"),
+					List.of("extended_barrel", "speed_magazine", "weighted_stock", "vertical_grip"));
+			for (String gun : JugcraftGuns.ACCEPTS.keySet()) {
+				for (int set = 0; set < sets.size(); set++) {
+					List<String> fitted = sets.get(set).stream().filter(JugcraftGuns.ACCEPTS.get(gun)::contains).toList();
+					server.runCommand("item replace entity @p weapon.mainhand with jugcraft:%s[jugcraft:loaded_rounds=1,jugcraft:attachments=%s]"
+							.formatted(gun, snbt(fitted)));
+					context.waitTicks(20);
+					context.takeScreenshot("jugcraft_guns_" + gun + "_fitted_" + (set + 1));
+					context.getInput().holdKey(options -> options.keyUse);
+					context.waitTicks(10);
+					context.takeScreenshot("jugcraft_guns_" + gun + "_fitted_" + (set + 1) + "_aimed");
+					context.getInput().releaseKey(options -> options.keyUse);
+					context.waitTicks(5);
+				}
+			}
+			server.runCommand("item replace entity @p weapon.mainhand with jugcraft:rust_midge[jugcraft:attachments=[\"extended_magazine\"]]");
+			context.waitTicks(10);
+			int seen = context.computeOnClient(client -> GunItem.spec(client.player.getMainHandItem()).capacity());
+			Jugcraft.LOGGER.info("[guns] the client sees a Rust Midge with an Extended Magazine hold {} rounds", seen);
+			if (seen != 30) {
+				throw new AssertionError("The client sees the Extended Magazine's Rust Midge hold " + seen + " rounds, not 30");
+			}
+
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			for (String gun : JugcraftGuns.SPECS.keySet()) {
 				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:" + gun);
@@ -123,12 +151,22 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			for (String round : JugcraftGuns.AMMO) {
 				server.runCommand("give @p jugcraft:%s 16".formatted(round));
 			}
+			for (String attachment : JugcraftGuns.ATTACHMENTS.keySet()) {
+				server.runCommand("give @p jugcraft:" + attachment);
+			}
+			server.runCommand("give @p jugcraft:patchwork_carbine[jugcraft:attachments=%s]".formatted(
+					snbt(List.of("baffled_silencer", "extended_magazine", "wooden_stock", "vertical_grip"))));
 			context.waitTicks(10);
 			context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
 			context.waitTicks(10);
 			context.takeScreenshot("jugcraft_guns_inventory");
 			context.setScreen(() -> null);
 		}
+	}
+
+	/** A list of attachment ids as SNBT, for an item component in a command. */
+	private static String snbt(List<String> ids) {
+		return ids.stream().map(id -> "\"" + id + "\"").collect(Collectors.joining(",", "[", "]"));
 	}
 
 	private static ServerPlayer player(MinecraftServer minecraft) {

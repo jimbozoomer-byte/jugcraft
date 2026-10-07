@@ -85,7 +85,7 @@ public final class GunShots {
 		if (!(stack.getItem() instanceof GunItem gun) || !player.isAlive() || player.isSpectator()) {
 			return false;
 		}
-		GunSpec spec = gun.spec();
+		GunSpec spec = GunItem.spec(stack);
 		ServerLevel level = (ServerLevel) player.level();
 		Reload loading = RELOADS.get(player.getUUID());
 		if (loading != null) {
@@ -113,7 +113,7 @@ public final class GunShots {
 		Vec3 eye = player.getEyePosition();
 		// The shooter's client plays its own shot; everyone else hears it here.
 		level.playSound(player, eye.x, eye.y, eye.z, JugcraftGuns.sound("guns." + gun.name() + ".fire"), SoundSource.PLAYERS,
-				1.0F, 0.95F + player.getRandom().nextFloat() * 0.1F);
+				GunItem.volume(stack), 0.95F + player.getRandom().nextFloat() * 0.1F);
 		announce(player, aiming ? GunActionPayload.AIM_SHOOT : GunActionPayload.SHOOT, 0);
 		return true;
 	}
@@ -125,7 +125,7 @@ public final class GunShots {
 				|| RELOADS.containsKey(player.getUUID())) {
 			return false;
 		}
-		GunSpec spec = gun.spec();
+		GunSpec spec = GunItem.spec(stack);
 		int room = spec.capacity() - GunItem.loaded(stack);
 		if (room <= 0) {
 			return false;

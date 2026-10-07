@@ -4,10 +4,13 @@ import com.geckolib.animatable.GeoItem;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.util.GeckoLibUtil;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -27,6 +30,9 @@ import org.jspecify.annotations.Nullable;
  * A gun ({@link JugcraftGuns}). Held right click aims down the sights (using the item, so the server and the other
  * players know); the trigger and reload come as payloads ({@link GunShots}). GeckoLib draws it from
  * assets/jugcraft/geckolib (models and the owner's animations, tools/guns.py) through the client's renderer.
+ * <p>
+ * Its attachments ({@link JugcraftGuns#FITTED}, fitted in a crafting grid by {@link GunAttachmentRecipe}) change its
+ * numbers: everything that fires, loads or shows the gun reads them through {@link #spec(ItemStack)}.
  */
 public class GunItem extends Item implements GeoItem {
 	/** The ammunition gauge's colour: brass. */
@@ -45,16 +51,108 @@ public class GunItem extends Item implements GeoItem {
 		return name;
 	}
 
+	/** The gun's own numbers, without attachments. */
 	public GunSpec spec() {
 		return spec;
+	}
+
+	/** This gun's numbers with its attachments' effects (the stack must hold a gun). */
+	public static GunSpec spec(ItemStack stack) {
+		GunSpec base = ((GunItem) stack.getItem()).spec;
+		List<String> fitted = attachments(stack);
+		if (fitted.isEmpty()) {
+			return base;
+		}
+		float damage = 1.0F;
+		float range = 1.0F;
+		float hipSpread = 1.0F;
+		float aimSpread = 1.0F;
+		float capacity = 1.0F;
+		float reload = 1.0F;
+		for (String name : fitted) {
+			GunAttachment attachment = JugcraftGuns.ATTACHMENTS.get(name);
+			damage *= attachment.damage();
+			range *= attachment.range();
+			hipSpread *= attachment.hipSpread();
+			aimSpread *= attachment.aimSpread();
+			capacity *= attachment.capacity();
+			reload *= attachment.reload();
+		}
+		// A gun loaded a shell at a time keeps its reload of 0 (and its shell times).
+		return new GunSpec(base.damage() * damage, base.pellets(), base.interval(), base.auto(),
+				Math.max(1, Math.round(base.capacity() * capacity)), base.byShell() ? 0 : Math.max(1, Math.round(base.reload() * reload)),
+				base.shellStart(), base.shellEach(), base.shellFinish(), base.hipSpread() * hipSpread, base.aimSpread() * aimSpread,
+				Math.max(1, Math.round(base.range() * range)), base.ammo());
+	}
+
+	/** How far the view jumps with each shot, against the gun alone. */
+	public static float kick(ItemStack stack) {
+		float kick = 1.0F;
+		for (String name : attachments(stack)) {
+			kick *= JugcraftGuns.ATTACHMENTS.get(name).kick();
+		}
+		return kick;
+	}
+
+	/** How loud the shot is, against the gun alone. */
+	public static float volume(ItemStack stack) {
+		float volume = 1.0F;
+		for (String name : attachments(stack)) {
+			volume *= JugcraftGuns.ATTACHMENTS.get(name).volume();
+		}
+		return volume;
+	}
+
+	/** The attachments fitted to this gun, oldest first (ids no longer known are left out). */
+	public static List<String> attachments(ItemStack stack) {
+		return stack.getOrDefault(JugcraftGuns.FITTED, List.<String>of()).stream().filter(JugcraftGuns.ATTACHMENTS::containsKey).toList();
+	}
+
+	/** Whether this gun takes this attachment. */
+	public static boolean takes(ItemStack stack, String attachment) {
+		return stack.getItem() instanceof GunItem gun && JugcraftGuns.ACCEPTS.getOrDefault(gun.name, List.of()).contains(attachment);
+	}
+
+	/** The attachment fitted in this slot, or null. */
+	public static @Nullable String inSlot(ItemStack stack, String slot) {
+		for (String name : attachments(stack)) {
+			if (JugcraftGuns.ATTACHMENTS.get(name).slot().equals(slot)) {
+				return name;
+			}
+		}
+		return null;
+	}
+
+	/** Fits this attachment, taking off any the slot held. */
+	public static void fit(ItemStack stack, String attachment) {
+		String slot = JugcraftGuns.ATTACHMENTS.get(attachment).slot();
+		List<String> fitted = new ArrayList<>(attachments(stack));
+		fitted.removeIf(name -> JugcraftGuns.ATTACHMENTS.get(name).slot().equals(slot));
+		fitted.add(attachment);
+		stack.set(JugcraftGuns.FITTED, List.copyOf(fitted));
+	}
+
+	/** Takes this attachment off. */
+	public static void remove(ItemStack stack, String attachment) {
+		List<String> fitted = new ArrayList<>(attachments(stack));
+		fitted.remove(attachment);
+		if (fitted.isEmpty()) {
+			stack.remove(JugcraftGuns.FITTED);
+		} else {
+			stack.set(JugcraftGuns.FITTED, List.copyOf(fitted));
+		}
 	}
 
 	public static int loaded(ItemStack stack) {
 		return stack.getOrDefault(JugcraftGuns.LOADED, 0);
 	}
 
+	/**
+	 * Sets the rounds loaded, up to the magazine's capacity. A gun whose larger magazine came off keeps the rounds it
+	 * held beyond that until they are fired.
+	 */
 	public static void setLoaded(ItemStack stack, int rounds) {
-		int capacity = stack.getItem() instanceof GunItem gun ? gun.spec.capacity() : 0;
+		int capacity = stack.getItem() instanceof GunItem ? Math.max(spec(stack).capacity(), loaded(stack)) : 0;
 		stack.set(JugcraftGuns.LOADED, Math.max(0, Math.min(capacity, rounds)));
 	}
 
@@ -102,7 +200,7 @@ public class GunItem extends Item implements GeoItem {
 
 	@Override
 	public int getBarWidth(ItemStack stack) {
-		return Math.round(13.0F * loaded(stack) / spec.capacity());
+		return Math.min(13, Math.round(13.0F * loaded(stack) / spec(stack).capacity()));
 	}
 
 	@Override
@@ -113,11 +211,23 @@ public class GunItem extends Item implements GeoItem {
 	@Override
 	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip,
 			TooltipFlag flag) {
-		tooltip.accept(Component.translatable("tooltip.jugcraft.guns.ammo", loaded(stack), spec.capacity())
+		GunSpec fitted = spec(stack);
+		tooltip.accept(Component.translatable("tooltip.jugcraft.guns.ammo", loaded(stack), fitted.capacity())
 				.withStyle(ChatFormatting.GOLD));
-		tooltip.accept(Component.translatable("tooltip.jugcraft.guns.stats", String.format(Locale.ROOT, "%.1f", spec.damage()),
-				spec.pellets(), String.format(Locale.ROOT, "%.1f", 20.0F / spec.interval()), spec.range())
+		tooltip.accept(Component.translatable("tooltip.jugcraft.guns.stats", String.format(Locale.ROOT, "%.1f", fitted.damage()),
+				fitted.pellets(), String.format(Locale.ROOT, "%.1f", 20.0F / fitted.interval()), fitted.range())
 				.withStyle(ChatFormatting.BLUE));
+		List<String> attachments = attachments(stack);
+		if (!attachments.isEmpty()) {
+			MutableComponent names = Component.empty();
+			for (String attachment : attachments) {
+				if (!names.getSiblings().isEmpty()) {
+					names.append(", ");
+				}
+				names.append(Component.translatable(JugcraftGuns.ATTACHMENT_ITEMS.get(attachment).getDescriptionId()));
+			}
+			tooltip.accept(Component.translatable("tooltip.jugcraft.guns.fitted", names).withStyle(ChatFormatting.DARK_AQUA));
+		}
 		tooltip.accept(Component.translatable("tooltip.jugcraft.guns." + name).withStyle(ChatFormatting.GRAY));
 	}
 

@@ -375,7 +375,7 @@ def item_units(ref):
 
 
 # Special recipes, which make their result from what is in the grid: their type, registered by Java.
-SPECIAL_RECIPES = {f"{MOD}:{decor18.KEY['recipe']}"}
+SPECIAL_RECIPES = {f"{MOD}:{decor18.KEY['recipe']}", f"{MOD}:gun_attachment", f"{MOD}:gun_attachment_removal"}
 
 
 def check_recipes(registered):
@@ -1393,6 +1393,18 @@ def check_guns():
                 f'{spec["spread"][1]}F, {spec["range"]}, "{spec["ammo"]}"));')
         if line not in java:
             err(f"JugcraftGuns.SPECS differs from tools/guns.py for {gun}: expected {line}")
+    for kind, att in guns.ATTACHMENTS.items():
+        effects = ", ".join(f"{float(att['effects'].get(e, 1.0))}F" for e in guns.EFFECTS)
+        line = f'ATTACHMENTS.put("{kind}", new GunAttachment("{att["slot"]}", {str(att["replaces"]).lower()}, {effects}));'
+        if line not in java:
+            err(f"JugcraftGuns.ATTACHMENTS differs from tools/guns.py for {kind}: expected {line}")
+    accepts = {gun: re.findall(r'"([a-z_]+)"', listed) for gun, listed in re.findall(r'ACCEPTS\.put\("([a-z_]+)", List\.of\(([^)]*)\)\)', java)}
+    expected = {gun: guns.fits(gun) for gun in guns.GUNS if guns.fits(gun)}
+    if accepts != expected:
+        err(f"JugcraftGuns.ACCEPTS differs from tools/guns.py fits(): {accepts} != {expected}")
+    slots = re.search(r"SLOTS = List\.of\(([^)]*)\)", java)
+    if not slots or re.findall(r'"([a-z_]+)"', slots.group(1)) != list(guns.SLOTS):
+        err(f"JugcraftGuns.SLOTS differs from tools/guns.py {list(guns.SLOTS)}")
     listed = re.search(r"AMMO = List\.of\(([^)]*)\)", java)
     if not listed or re.findall(r'"([a-z_]+)"', listed.group(1)) != list(guns.AMMO):
         err(f"JugcraftGuns.AMMO differs from tools/guns.py {list(guns.AMMO)}")
@@ -1417,7 +1429,9 @@ def check_guns():
                 err(f"GunAnimations.GUN_SOUND_ALIASES does not play {sound} for {gun}'s {event} (tools/guns.py)")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in [f"key.{MOD}.reload", f"key.{MOD}.inspect", f"hud.{MOD}.guns.ammo", f"hud.{MOD}.guns.reloading",
-                f"message.{MOD}.guns.no_ammo", f"death.attack.{MOD}.bullet"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()]:
+                f"message.{MOD}.guns.no_ammo", f"death.attack.{MOD}.bullet", f"tooltip.{MOD}.guns.fits",
+                f"tooltip.{MOD}.guns.fitting", f"tooltip.{MOD}.guns.fitted"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
+                f"tooltip.{MOD}.guns.slot.{slot}" for slot in guns.SLOTS] + [f"tooltip.{MOD}.guns.effect.{e}" for e in guns.EFFECTS]:
         if key not in lang:
             err(f"Missing name {key}")
     for gun in guns.GUNS:

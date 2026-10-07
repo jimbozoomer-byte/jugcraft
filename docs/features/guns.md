@@ -1,10 +1,11 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3) and the black powder guns (slice 4)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4) and the attachments (slice 5)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
 - **Slice 2** (the iron set: the Warden Pistol, Riveter SMG and Haymaker; [below](#slice-2-the-iron-set)): implemented on `claude/guns-iron` (#252), stacked on slice 1, awaiting review.
 - **Slice 3** (the lever set: the Longhorn Rifle, Drover Rifle and Coach Gun; [below](#slice-3-the-lever-set)): implemented on `claude/guns-lever` (#253), stacked on slice 2, awaiting review.
-- **Slice 4** (the black powder guns: the Duelling Pistol, Line Musket and Bellmouth, and the Paper Cartridge; [below](#slice-4-the-black-powder-guns)): implemented on `claude/guns-powder`, stacked on slice 3, awaiting review.
+- **Slice 4** (the black powder guns: the Duelling Pistol, Line Musket and Bellmouth, and the Paper Cartridge; [below](#slice-4-the-black-powder-guns)): implemented on `claude/guns-powder` (#255), stacked on slice 3, awaiting review.
+- **Slice 5** (the attachments: silencers, a muzzle brake, an extended barrel, magazines, stocks and grips; [below](#slice-5-the-attachments)): implemented on `claude/guns-attachments`, stacked on slice 4, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -185,6 +186,64 @@ Muzzle-loaders: one heavy shot, then a long reload (bite the cartridge, pour, dr
 
 **Balance:** starting numbers. The Line Musket hits hardest of any gun so far (14) but needs 3.9 s to reload; the Bellmouth's 25 at point blank falls off fast.
 
+## Slice 5: the attachments
+The owner's parts include, for most guns, a set of attachments drawn to fit that gun: silencers, a muzzle brake, an extended barrel, magazines, stocks and grips. Slice 5 makes each kind one item that fits every gun with such a part, and shows it on each gun as that gun's own part.
+
+**The attachments** (each the owner's item model, with its texture; a gun takes one in each slot):
+
+| Attachment | Slot | Effect |
+|---|---|---|
+| Silencer | barrel | damage −5%, shot sound −65% |
+| Baffled Silencer | barrel | shot sound −80% |
+| Muzzle Brake | barrel | aimed spread −15%, kick −50% |
+| Extended Barrel | barrel | range +30%, hip spread −15%, aimed spread −15% |
+| Extended Magazine | magazine | rounds +50%, reload time +15% |
+| Speed Magazine | magazine | reload time −35% |
+| Light Stock | stock | hip spread −15% |
+| Weighted Stock | stock | aimed spread −30%, kick −40% |
+| Wooden Stock | stock | hip spread −10%, aimed spread −15%, kick −25% |
+| Light Grip | grip | hip spread −20% |
+| Vertical Grip | grip | kick −35% |
+
+The silencers and the muzzle brake sit at the muzzle in front of the barrel; the Extended Barrel takes the barrel's place, the magazines the magazine's, and on the Thunderpipe a stock takes the place of its pistol grip (the owner's stocks carry their own grip). The grips go under the fore-end.
+
+**Which guns take which** (where the owner made the part for the gun, on the gun's own texture):
+
+| Gun | Barrel | Magazine | Stock | Grip |
+|---|---|---|---|---|
+| Rust Midge | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel | Extended Magazine, Speed Magazine | Light Stock, Weighted Stock, Wooden Stock | – |
+| Patchwork Carbine | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel | Extended Magazine, Speed Magazine | Light Stock, Weighted Stock, Wooden Stock | Light Grip, Vertical Grip |
+| Thunderpipe | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel | – | Light Stock, Weighted Stock, Wooden Stock | Light Grip, Vertical Grip |
+| Warden Pistol | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel | Extended Magazine, Speed Magazine | – | – |
+| Riveter SMG | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel | Extended Magazine, Speed Magazine | Light Stock, Weighted Stock, Wooden Stock | – |
+| Haymaker | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel | – | – | – |
+| Longhorn Rifle | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel | – | Light Stock, Weighted Stock, Wooden Stock | Light Grip, Vertical Grip |
+
+The Drover Rifle, the Coach Gun and the muzzle-loaders take none yet: the owner drew their attachments on textures shared between guns (`carabine_grips`, `flintlock_stocks`, `musket_bayonets` and others), and a GeckoLib model draws from one texture. Bayonets, the tactical grip and scopes wait for a later slice too.
+
+**Fitting and taking off** (a crafting table, or the 2 × 2 grid):
+- A gun and an attachment it takes, alone in the grid, give the gun with the attachment fitted. The rounds loaded stay. An attachment the gun wore in that slot comes off and stays in the grid where the new one lay.
+- A gun with attachments and shears give the gun without the attachment fitted last; that attachment stays in the grid where the gun lay, and the shears are kept.
+- The recipe book does not list these (they are special recipes, as the Skeleton Key's copying); each attachment's tooltip says how, and names the guns it fits.
+- A gun whose larger magazine comes off keeps the rounds it held beyond its own magazine until they are fired; it will not reload until it is below its own.
+
+**What you see:** the attachment on the gun, in your hands, in other players' hands and in the inventory; it moves with the part it is fixed to (a magazine drops out with the reload, the Haymaker's silencer rides its pump). A Speed Magazine's change plays the owner's reload faster, an Extended Magazine's a little slower, so the animation ends when the reload does. The tooltips list each attachment's effects, green where it helps and red where it costs, and a gun's tooltip its attachments and its numbers with them.
+
+**Crafting** (a crafting table):
+- Silencer: an iron ingot, wool, an iron ingot in a row; the Baffled Silencer: a brass ingot either side of a Silencer.
+- Muzzle Brake: an iron nugget, a brass ingot, an iron nugget in a row; Extended Barrel: two iron ingots and a brass ingot in a row.
+- Extended Magazine: an iron ingot over a brass ingot over an iron ingot; Speed Magazine: a brass ingot over a slime ball over a brass ingot.
+- Light Stock: two sticks and leather in a row; Weighted Stock: two planks and an iron ingot; Wooden Stock: two planks and leather.
+- Light Grip: leather over a stick; Vertical Grip: an iron ingot over a stick over leather.
+
+**How the models were built** (`tools/guns.py`, `effective_bones()`): each gun's model gains, under the bone holding a slot's standard part (or under `gun_body`), an `att_<id>` bone for each attachment it takes, with that bone's pivot, so the attachment rides the barrel or magazine as the animations move them. Where an attachment replaces the standard part, the part moves to a `std_<slot>` bone of its own. The Warden Pistol's magazine slot is on two bones (the magazine and the one its reload brings in), so it has a second set suffixed `_2`. Every attachment part is re-baked and compared face for face with the owner's, as the guns' own parts are; the props' atlas corners are checked to stay clear of every attachment's texture. The renderer shows a fitted attachment's bone and hides a replaced part's; nothing else in the model or the animations changes.
+
+**Connections:** iron, brass, wool, leather, sticks, planks and a slime ball, all early. Each attachment is a choice, not a strict upgrade: the Silencer costs a little damage, the Extended Magazine reload time; the slots keep a gun from stacking two of a kind.
+
+**Balance:** starting numbers. The largest changes: a Riveter SMG with an Extended Magazine holds 45; a Patchwork Carbine with an Extended Barrel reaches 125 blocks; a Weighted Stock and a Muzzle Brake together leave 30% of the kick.
+
+**Known limits:** the left hand stays where the owner's animations put it, so it does not move onto a vertical grip; a silenced shot is quieter, not shorter-ranged: other players within 16 blocks still hear it, softly (no gun's shot is sent to players farther away than that).
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -223,12 +282,14 @@ Muzzle-loaders: one heavy shot, then a long reload (bite the cartridge, pour, dr
   - A shell-at-a-time reload loads one shell after each shell's time, and a shot cuts it short.
   - The player's own client times its animation from the same numbers.
 - **Others' animations:** the server tells the clients that see the shooter (not the shooter's own) with `GunActionPayload`, and they play the shot or reload on that gun.
-- **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
+- **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). Its attachments are another, `jugcraft:attachments` (a list of up to four attachment ids, oldest first; an id no longer known is ignored). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
+- **Attachments and authority:** attachments are fitted only by the crafting recipes, which the server runs. The server reads a gun's numbers from its own copy of the stack (`GunItem.spec(stack)`), for the shot, the trigger rate, the reload and the rounds it may load; the client uses the same numbers only to predict.
 - **Disconnect:** clears that player's trigger credit and reload.
-- **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns' and rounds' recipes (sixteen with slice 4). Items stay registered, so saved guns and rounds survive with it off.
+- **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns', rounds' and attachments' recipes (twenty-nine with slice 5: sixteen guns and rounds, eleven attachments, and the fitting and removal recipes). Items and the attachments component stay registered, so saved guns, rounds and attachments survive with it off.
 
 ## The shared parts it uses
-- **Items:** `JugcraftRegistry.item` for every gun and round; the Combat tab.
+- **Items:** `JugcraftRegistry.item` for every gun, round and attachment; the Combat tab.
+- **Recipes:** two special crafting recipes, `jugcraft:gun_attachment` and `jugcraft:gun_attachment_removal`, built as the Skeleton Key's copying is (`CustomRecipe`).
 - **Config:** the `guns` feature switch (`JugcraftConfig.FEATURES`, `tools/materials.py`).
 - **Damage type:** `jugcraft:bullet`, tagged `minecraft:is_projectile` (Projectile Protection works against it) and `minecraft:bypasses_cooldown` (each shot counts).
 - **Sounds:** in `sounds.json`, through `tools/generate_material_data.py`.
@@ -377,6 +438,88 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | shared | `Guns/sounds/item/rusty_gnat/copper_jam.ogg` | `d1b93136045c83cc` |
 | shared | `Guns/sounds/item/slap/slap.ogg` | `ed6fbb36974a444a` |
 
+Slice 5's files: each gun's attachment parts, and each attachment's item model and texture (copied to `textures/item/guns/attachments/<name>.png`):
+
+| Gun or attachment | Library file | SHA-256 (first 16) |
+|---|---|---|
+| rust_midge | `Guns/models/special/rusty_gnat/stock_light.json` | `f89f9862600c31ef` |
+| rust_midge | `Guns/models/special/rusty_gnat/stock_weighted.json` | `a0339d40d9cc62cf` |
+| rust_midge | `Guns/models/special/rusty_gnat/stock_wooden.json` | `8925d4a0861f75a2` |
+| rust_midge | `Guns/models/special/rusty_gnat/silencer.json` | `7992f7b7c39283d9` |
+| rust_midge | `Guns/models/special/rusty_gnat/advanced_silencer.json` | `4f8e878fa1f24ff2` |
+| rust_midge | `Guns/models/special/rusty_gnat/muzzle_brake.json` | `ebd59126a5057c32` |
+| rust_midge | `Guns/models/special/rusty_gnat/ext_barrel.json` | `0fa9b18a2b500014` |
+| rust_midge | `Guns/models/special/rusty_gnat/ext_mag.json` | `d3fb272f16cdba67` |
+| rust_midge | `Guns/models/special/rusty_gnat/speed_mag.json` | `6c1e0d6dbb380fc6` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/silencer.json` | `dffc0edb1e71755e` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/advanced_silencer.json` | `91afc30e748e26b0` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/muzzle_brake.json` | `f71cac197c938957` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/ext_barrel.json` | `c77d09365b3319fc` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/stock_light.json` | `dac577681811ba5e` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/stock_weighted.json` | `9015f21f7e8a80a0` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/stock_wooden.json` | `c2fe96d4aaa65326` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/light_grip.json` | `d4ca3eaba519db7c` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/vertical_grip.json` | `4745ab80863d07a0` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/ext_mag.json` | `79e5c531276a42f6` |
+| patchwork_carbine | `Guns/models/special/makeshift_rifle/speed_mag.json` | `223c1ed7dde033ce` |
+| thunderpipe | `Guns/models/special/boomstick/stock_light.json` | `741f67115e17eb74` |
+| thunderpipe | `Guns/models/special/boomstick/stock_weighted.json` | `d2b1bde81916a3ea` |
+| thunderpipe | `Guns/models/special/boomstick/stock_wooden.json` | `17478321875df40d` |
+| thunderpipe | `Guns/models/special/boomstick/grip_light.json` | `69354d23e651023f` |
+| thunderpipe | `Guns/models/special/boomstick/grip_vertical.json` | `606dfa6f76926cd6` |
+| thunderpipe | `Guns/models/special/boomstick/silencer.json` | `817c4466213b999c` |
+| thunderpipe | `Guns/models/special/boomstick/advanced_silencer.json` | `f63167ba66948f9d` |
+| thunderpipe | `Guns/models/special/boomstick/muzzle_brake.json` | `843ea4ed4bebdece` |
+| thunderpipe | `Guns/models/special/boomstick/ext_barrel.json` | `dab35bd7189c1fc2` |
+| warden_pistol | `Guns/models/special/defender_pistol/silencer.json` | `7a8d0cfd65d78b73` |
+| warden_pistol | `Guns/models/special/defender_pistol/advanced_silencer.json` | `ca7ee9d5a5f47d8e` |
+| warden_pistol | `Guns/models/special/defender_pistol/muzzle_brake.json` | `feb08e673e6f0537` |
+| warden_pistol | `Guns/models/special/defender_pistol/ext_barrel.json` | `5f915c9b732d162b` |
+| warden_pistol | `Guns/models/special/defender_pistol/ext_mag.json` | `b04afe2b90af3acd` |
+| warden_pistol | `Guns/models/special/defender_pistol/speed_mag.json` | `0b48d5f83ddb9d4f` |
+| riveter_smg | `Guns/models/special/greaser_smg/silencer.json` | `ae24d4720cdab105` |
+| riveter_smg | `Guns/models/special/greaser_smg/advanced_silencer.json` | `3eb2f44c0d7119d1` |
+| riveter_smg | `Guns/models/special/greaser_smg/muzzle_brake.json` | `ef6827ac9edbf547` |
+| riveter_smg | `Guns/models/special/greaser_smg/ext_barrel.json` | `25b9012c673d7378` |
+| riveter_smg | `Guns/models/special/greaser_smg/light_stock.json` | `985e1ffda3e8b38c` |
+| riveter_smg | `Guns/models/special/greaser_smg/heavy_stock.json` | `77f98977d10dfb6e` |
+| riveter_smg | `Guns/models/special/greaser_smg/wooden_stock.json` | `d09f18d87edd8dd8` |
+| riveter_smg | `Guns/models/special/greaser_smg/ext_mag.json` | `479107b02452fd12` |
+| riveter_smg | `Guns/models/special/greaser_smg/speed_mag.json` | `d942ea99e194948b` |
+| haymaker | `Guns/models/special/bruiser/silencer.json` | `d7fa4a7a73675bd0` |
+| haymaker | `Guns/models/special/bruiser/advanced_silencer.json` | `2fedfc9db6cb22d1` |
+| haymaker | `Guns/models/special/bruiser/muzzle_brake.json` | `598d5dde49e75d04` |
+| haymaker | `Guns/models/special/bruiser/ext_barrel.json` | `569b881c2d9d7d1b` |
+| longhorn_rifle | `Guns/models/special/marlin/silencer.json` | `06bf50eaea127309` |
+| longhorn_rifle | `Guns/models/special/marlin/advanced_silencer.json` | `4b7fe982ca0d6f0f` |
+| longhorn_rifle | `Guns/models/special/marlin/muzzle_brake.json` | `ebeda0ce9770bfb1` |
+| longhorn_rifle | `Guns/models/special/marlin/ext_barrel.json` | `b15a641d1ee802e9` |
+| longhorn_rifle | `Guns/models/special/marlin/light_stock.json` | `35101c5b5528e6c1` |
+| longhorn_rifle | `Guns/models/special/marlin/heavy_stock.json` | `581c80a1bd6b41f1` |
+| longhorn_rifle | `Guns/models/special/marlin/wooden_stock.json` | `2af1dbde0f745927` |
+| longhorn_rifle | `Guns/models/special/marlin/light_grip.json` | `266eff6b2f577212` |
+| longhorn_rifle | `Guns/models/special/marlin/vert_grip.json` | `9179d93c68a1ff68` |
+| silencer | `Guns/models/item/silencer.json` | `049d959e9534d047` |
+| texture `baffled_silencer` | `Guns/models/item/advanced_silencer.json` | `4c139fb12152d923` |
+| muzzle_brake | `Guns/models/item/muzzle_brake.json` | `47dff9ea7cd62512` |
+| texture `extended_barrel` | `Guns/models/item/extended_barrel.json` | `c5d63e72f9e28a5f` |
+| texture `extended_magazine` | `Guns/models/item/extended_mag.json` | `ef32296bd1f9a1cc` |
+| texture `speed_magazine` | `Guns/models/item/speed_mag.json` | `990831d677e8b769` |
+| texture `light_stock` | `Guns/models/item/light_stock.json` | `709b176621240c73` |
+| texture `weighted_stock` | `Guns/models/item/weighted_stock.json` | `1e0aa4edf441a53d` |
+| texture `wooden_stock` | `Guns/models/item/wooden_stock.json` | `dceb43555135ec17` |
+| light_grip | `Guns/models/item/light_grip.json` | `8965dcdf94effedb` |
+| vertical_grip | `Guns/models/item/vertical_grip.json` | `31667ebc84eaa55d` |
+| texture `muzzle_devices` | `Guns/item/greaser_smg_barrels.png` | `e912ec7c95188909` |
+| texture `baffled_silencer` | `Guns/item/advanced_silencer.png` | `f94615d5c4cdd84c` |
+| texture `extended_barrel` | `Guns/item/extended_barrel.png` | `2fc5027a3f329c25` |
+| texture `extended_magazine` | `Guns/item/extended_mag.png` | `0b34bd0828783d13` |
+| texture `speed_magazine` | `Guns/item/carabine.png` | `305297d9327603b1` |
+| texture `light_stock` | `Guns/item/light_stock.png` | `2b4a27580b4871ae` |
+| texture `weighted_stock` | `Guns/item/greaser_smg_stocks.png` | `247deccc5517be15` |
+| texture `wooden_stock` | `Guns/item/musket_stocks.png` | `848fb17c2a71ad8d` |
+| texture `grips` | `Guns/item/carabine_grips.png` | `e54eb16b4a01aa0b` |
+
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
 - **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's shell, the Longhorn's cartridge, the muzzle-loaders' balls, ramrods and flashes).
@@ -421,15 +564,25 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
   - **Java:** a syntax parse only: 0 errors in the changed files.
   - **Previews:** side and top views of the shots (hammer, flash) and the reloads (ball, ramrod); first-person views held, aimed and through the Duelling Pistol's reload, which found the known limit above and shrank the flash from 2 px to 1.
 - **Slice 4 game tests (written; they run in CI):** `GunsGameTests` adds: the Line Musket lands its 14, will not fire again empty, and loads one cartridge after its reload and not before; the Bellmouth's balls land together at close range. "Every gun registered" expects twelve guns and four rounds. The client test runs every gun; its husk now has 1000 health, enough for all twelve.
+- **Slice 5, run locally (7 October 2026):**
+  - `python3 tools/guns.py`: PASS for all twelve guns with their attachment bones: every attachment part re-bakes to the owner's, face for face, and no prop's atlas corner overlaps a part's texture.
+  - `python3 tools/generate_material_data.py`: run twice; the second run changed nothing.
+  - `python3 tools/check_mod_data.py`: PASS (1572 material IDs), with `check_guns`, which now also holds `JugcraftGuns.ATTACHMENTS`, `SLOTS` and `ACCEPTS` to `tools/guns.py`. Changing one attachment's number or one gun's list in the Java made it fail, as it should.
+  - `python3 scripts/check_repository.py`: PASS. A check for recipes sharing a pattern found none for the eleven new ones.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews:** side views of the seven guns bare and with four sets of attachments fitted, drawn from the converted models; each attachment sits where the owner modelled it, and the replaced barrels, magazines and the Thunderpipe's grip are hidden.
+- **Slice 5 game tests (written; they run in CI):**
+  - `GunsGameTests` adds: attachments fit and come off through the crafting recipes (an Extended Magazine gives the Rust Midge 30 rounds and a 54-tick reload; a Speed Magazine replaces it, leaving it in the grid, for a 31-tick reload; a Silencer fits beside it at 35% volume and 95% damage; the Thunderpipe refuses a magazine, a gun a second Silencer, shears a bare gun; shears take the Silencer off and stay); an Extended Magazine loads 30 rounds after its longer reload and not in the Midge's own time, and with it taken off the gun keeps and fires them but will not reload; a silenced shot lands 95% of the damage. "Every gun registered" checks the eleven attachments.
+  - `GunsClientGameTests` adds each gun that takes attachments held and aimed with two sets fitted, checks that the client sees a fitted Extended Magazine's 30 rounds, and shows the attachments and a fitted Patchwork Carbine in the inventory.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
-- **Next slice,** its own pull request: the attachments (the owner's parts include silencers, stocks, grips, scopes, extended magazines and bayonets).
+- **Later slices,** each its own pull request: attachments for the guns whose parts use shared textures (the Drover Rifle, Coach Gun and muzzle-loaders), bayonets, the tactical grip and scopes.
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - casings and muzzle flash (the `eject_casing` cue);

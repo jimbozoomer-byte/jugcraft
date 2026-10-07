@@ -21,7 +21,8 @@ import net.minecraft.world.item.ItemStack;
  * The guns' GeckoLib animation controller: the owner's idle loops; draw, shoot, aim_shoot, inspect and the reloads are
  * triggered (by GunsClient for the player's own gun, by the server's GunActionPayload for others'), each played once
  * and back to idle. A gun loaded a shell at a time has one reload per shell count: reload_start, reload_loop that many
- * times, reload_stop. The animations' sound keyframes play the guns' sounds where the gun is.
+ * times, reload_stop. The animations' sound keyframes play the guns' sounds where the gun is. A magazine change plays
+ * faster or slower with the gun's magazine attachment, so that it ends when the reload does.
  */
 public final class GunAnimations {
 	public static final String CONTROLLER = "main";
@@ -74,7 +75,15 @@ public final class GunAnimations {
 	public static void trigger(LivingEntity holder, String animation) {
 		ItemStack stack = holder.getMainHandItem();
 		if (stack.getItem() instanceof GunItem gun) {
-			gun.triggerAnim(holder, GeoItem.getId(stack), CONTROLLER, animation);
+			long id = GeoItem.getId(stack);
+			AnimatableManager<GunItem> manager = gun.getAnimatableInstanceCache().getManagerForId(id);
+			AnimationController<GunItem> controller = manager.getAnimationControllers().get(CONTROLLER);
+			if (controller != null) {
+				// The owner's magazine change lasts the gun's own reload; a speed or extended magazine changes that.
+				controller.setAnimationSpeed(animation.equals("reload") && !gun.spec().byShell()
+						? (double) gun.spec().reload() / GunItem.spec(stack).reload() : 1.0);
+			}
+			gun.triggerAnim(holder, id, CONTROLLER, animation);
 		}
 	}
 
