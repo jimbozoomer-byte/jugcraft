@@ -157,21 +157,21 @@ Specialties a player can follow without mastering the rest ([CONTENT_BRANCHES.md
 
 | Library | Concordance use | Status |
 |---|---|---|
-| Fabric API | Attachments (knowledge, Focus), data components (lantern charge, notes), reload listener, menus, commands, events, HUD element, key mapping. The Transfer API is not used yet: no pipe carries essences (see the sharing record) | Used (milestones 1 and 2) |
+| Fabric API | Attachments (knowledge, Focus), data components (lantern charge, notes, Ley Charge, reagents, brews, formulas), reload listener, menus, commands, events (block-entity load and unload for the ritual index), HUD element, key mapping. The Transfer API carries the Alembic Crucible's water (`FluidStorage.SIDED`); no pipe carries essences yet (see the sharing record) | Used (milestones 1, 2 and 5) |
 | Spell Engine | Cast timeline, targeting, cooldown, HUD and casting sound for invocations and the carrier spell `jugcraft:composed` that casts inscribed spells; Jugcraft hooks: a container source (learned spells, and the carrier while the held instrument carries an inscription), the casting gate, `CUSTOM` impacts, cost-consume event, the cooldown manager (a composed spell's own cooldown); `spell_assignments` for the wand (TAG resolver) and to opt Jugcraft weapons out of the weapon fallback. Composed deliveries are Jugcraft's own bounded traces, not Spell Engine projectiles (see the composition record) | Used (milestones 1 and 3) |
 | Spell Power | Schools name each Principle's damage type: the effect boundary deals damage through the school's damage type (Radiance: `arcane`), so its resistances apply once. Spell-power scaling is not applied yet (step 11) | Used: schools and damage types |
-| Modonomicon | The *Arcane Concordance* codex; research facts granted through advancements; Kindle, lantern and Composition pages unlock at Understood; the component pages are generated from the component data | Used (milestones 1 and 3) |
-| Player Animation Library | Original cast and release gestures for Kindle (`kindle_cast`, `kindle_release`) | Used (milestone 1) |
+| Modonomicon | The *Arcane Concordance* codex; research facts granted through advancements; Kindle, lantern and Composition pages unlock at Understood; the component pages are generated from the component data; the Circles (ritual instructions) and Alembic categories | Used (milestones 1, 3 and 5) |
+| Player Animation Library | Original cast and release gestures for the invocations; the ritual participants' `circle_channel` gesture on a Jugcraft layer, driven by the anchor's synced participants | Used (milestones 1, 4 and 5) |
 | Cloth Config | Client settings screen (Focus line, reduced motion) | Used (milestone 1) |
-| Jade (optional) | Bench study progress, waiting notes, lantern Radiance; Lumen Sconce charge | Used (milestones 1 and 2) |
-| JEI (optional) | Lampwright's Bench category (kindle and infuse) | Used (milestone 1) |
+| Jade (optional) | Bench study progress, waiting notes, lantern Radiance; Lumen Sconce charge; Circle Anchor phase, step and faults; Ley Pylon charge; crucible temperature, volume and formula progress | Used (milestones 1, 2 and 5) |
+| JEI (optional) | Lampwright's Bench category (kindle and infuse); Circle Anchor category (Adept's Attunement); alchemy ingredients' properties as ingredient information (never outcomes) | Used (milestones 1 and 5) |
 | LambDynamicLights (optional) | A lit Kindled Lantern glows in hand (JSON only) | Used (milestone 1) |
 | Mod Menu (optional) | Opens the Cloth Config screen | Used (milestone 1) |
-| GeckoLib | Animated magical blocks and creatures | Planned (steps 14, 17, 20) |
+| GeckoLib | Animated magical blocks and creatures: the Circle Anchor (idle and channel, from the synced phase) and the Alembic Crucible (empty, still and simmer, with an animated liquid sheet); creatures later | Used (milestone 5); more planned (steps 14, 17, 20) |
 | SmartBrainLib | Spirit, familiar and construct behaviour | Planned (step 17) |
 | Trinkets Updated | Foci, charms and relic slots | Planned (steps 19, 20) |
-| GuiLib, Fabric Language Kotlin | Richer optional composer and research screens with vanilla fallbacks. Not built: the `compose` command is the composer every player has, and explains every problem | Planned (step 26) |
-| Fusion | Authored connected textures for ritual floors | Planned (step 12) |
+| GuiLib, Fabric Language Kotlin | Richer optional composer, research, ritual-schematic and crucible screens with vanilla fallbacks. Not built: the `compose` command is the composer every player has, and the circle report (anchor, `circle` command, Jade) names every faulty part | Planned (step 26) |
+| Fusion (optional, client) | Warding Stones join their neighbours with a connected texture, through a built-in resource pack registered only when Fusion is installed; plain cubes otherwise | Used (milestone 5) |
 | Iris, Sodium | Compatibility only; nothing depends on them | Not used |
 
 Optional APIs are reached only through their own entrypoints (`jade`, `jei_mod_plugin`, `modmenu`) or data files, so
@@ -233,6 +233,11 @@ starts: stable id, `schema`, display, tags, dependencies, and a parser that name
 | CONC-4.1 | Authored invocations | One answer per role: Kindle, Dawn Aegis, Revelation, Lance of Dawn, Flashstep, Lanternward | Focus > light, a shell, glow, damage, a dash, healing and wards | First Light understood (three) and mastered (three) | `Invocations`, `ConcordanceRules.compile`, `Compiler.compileAuthored` | Spell Engine, Spell Power (Lance only), PAL | spell bar, gestures, sounds, particles, icons, codex | none (required libraries) | `ConcordanceInvocationGameTests`, harness |
 | CONC-4.3 | Combat baselines | Measure the Initiate stage against controlled encounters | compiled plans + Spell Engine timings > outcomes, seven measures, acceptance | n/a (measurement) | `concordance/balance` (`Benchmark`, `Baselines`) | Spell Engine, Spell Power (calibrated) | server log, the baselines record | n/a | `ConcordanceBaselineGameTests`, harness |
 | CONC-4.2 | Tuning | One modifier per invocation, from its list | modifier Focus > changed numbers, same effect | the modifier's research | `ConcordanceCommand` (`tune`), `Tunings` | none | command, wand tooltip | the command is the interface | `aegisShieldsAndIsTuned`, `forgedTuningsAreChargedByTheServer` |
+| CONC-5.1 | Ritual structures | Built workings checked part by part | anchor, pylons, stones, clearance > a report of faults | Circle Lore understood (to work one) | `StructureValidator`, `CircleAnchorBlockEntity`, `Rituals` | Jade, Fusion (optional) | anchor use, `circle` command, Jade, codex | the report is text | `theCircleIsCheckedPartByPart`, harness |
+| CONC-5.2 | Rituals | Attune an instrument; bless a party | offerings, Focus, Ley Charge > a transformed item or effects | Circle Lore understood | `RitualMachine`, `RitualRun`, `CircleAnchorBlockEntity` | GeckoLib, PAL, Modonomicon | anchor, gesture, motes, codex | none (required libraries) | `ConcordanceRitualGameTests`, harness |
+| CONC-5.3 | Ley Pylon | Power a circle | Radiance (3 > 2) or JE (1000 > 1) > Ley Charge | none | `LeyPylonBlockEntity` | Jade (optional) | lantern pour, energy, Jade | works without Jade | `aPylonFillsFromLightAndElectricity` |
+| CONC-5.4 | Alchemy | Brew effects a player can explain | water, ingredients, heat, stirs > draughts and salves | the Alembic Arts understood | `Mixture`, `CrucibleBlockEntity`, `Alchemy` | GeckoLib, Jade, JEI (optional) | crucible, spoon, Assay Glass, codex | sampling is text | `ConcordanceAlchemyGameTests`, harness |
+| CONC-5.5 | Formulas | Repeat a recorded process by automation | a fresh mixture > canonical text; text + water + ingredients + bottles > the same brew | the Alembic Arts understood | `Formula`, `CrucibleBlockEntity` | Fabric Transfer API | formula item, hoppers, pipes | none needed | `aFormulaIsRepeatedByAnotherCrucible` |
 | CONC-1.6 | First Light mastery | Practice | Kindle in 8 distinct chunks > Mastered, cheaper Kindle | Understood | `ConcordanceSpells.consume` | Spell Engine | codex | command | partly (`kindleCastsThroughSpellEngine` records the evidence) |
 
 Planned features get a row when their step starts.
@@ -255,8 +260,8 @@ grows with later content), **planned**.
 | 9 | Shared effect system | done: ten operations at one server boundary with friendly fire, tolerance, protection, stacking, expiry, causes kept through triggers and one-time accounting; used by every invocation and inscribed spell; potions, weapons, creatures and shrines join it with their steps |
 | 10 | Authored invocations | done: six invocations, one per role, written in the shared grammar and compiled under the same limits as composed spells; a cost and cooldown floor from the composition; declared work and persistence; one-modifier tunings; Spell Power scaling for the Lance only ([invocations](features/arcane-concordance-invocations.md)) |
 | 11 | Combat and progression baselines | done: a deterministic benchmark of seven kits and one character per invocation through five encounter shapes, seven measures, acceptance checks run by a game test over the loaded rules, and calibrations of armour, absorption, hurt immunity, push reach, costs and cooldowns against the server ([baselines](features/arcane-concordance-baselines.md)) |
-| 12 | Ritual structures | planned |
-| 13 | Experimental alchemy | planned |
+| 12 | Ritual structures | done: data structures and rituals, a bounded and cached validator that names missing, wrong, obstructed, unpowered, foreign and unloaded parts, the full state machine with reservation, one-tick consumption and commitment, and a defined outcome for every interruption (structure, containment, power, participants, conditions, unloaded, lapsed, cancelled, removed, disabled, forgotten, tampered); Circle Lore, Ley Pylons, Adept's Attunement and the two-person Lumen Vigil ([rituals](features/arcane-concordance-rituals.md)); a GuiLib schematic is not built |
+| 13 | Experimental alchemy | done: ingredients as six-axis property vectors, explicit preparations, a deterministic crucible simulation (volume, pending and dissolved properties, contaminant, heat bands, stirring), outcomes with reasons, three sampling levels, and canonical formulas that another crucible repeats by automation ([alchemy](features/arcane-concordance-alchemy.md)) |
 | 14 | Ecological cultivation | planned |
 | 15 | Celestial cycles | planned |
 | 16 | Crimson resources | planned |

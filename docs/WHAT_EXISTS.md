@@ -281,18 +281,20 @@ Record: [walled-town.md](features/walled-town.md).
 
 ### The Arcane Concordance (`concordance/`, `tools/concordance.py`)
 
-Magic, milestones 1 to 3. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records:
+Magic, milestones 1 to 5. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),
 [arcane-concordance-composition.md](features/arcane-concordance-composition.md),
 [arcane-concordance-invocations.md](features/arcane-concordance-invocations.md),
-[arcane-concordance-baselines.md](features/arcane-concordance-baselines.md).
+[arcane-concordance-baselines.md](features/arcane-concordance-baselines.md),
+[arcane-concordance-rituals.md](features/arcane-concordance-rituals.md),
+[arcane-concordance-alchemy.md](features/arcane-concordance-alchemy.md).
 
 | ID / part | Class / data | What |
 | --- | --- | --- |
 | rules | `concordance/rules/` (pure Java), `ConcordanceData` (reload listener); `data/jugcraft/concordance/{research,invocation,working}/` | research states and evidence, invocations, bench workings; malformed data is reported and left out |
 | player state | attachments `jugcraft:concordance_knowledge`, `jugcraft:concordance_focus` (`ConcordanceProgress`) | knowledge and Focus, saved, kept through death, synced to their owner only |
-| examining | `concordance/Examination` | sneak-use a `#jugcraft:luminous_specimens` item |
+| examining | `concordance/Examination` | sneak-use a `#jugcraft:concordance_specimens` item (luminous, circle and alchemy specimens) |
 | `jugcraft:lampwright_bench` | `LampwrightBenchBlock`, `...BlockEntity`, `...Menu`, `BenchStatus`; client `LampwrightBenchScreen` | study (100 ticks), kindle, infuse and channel workings, all checked on the server |
 | `jugcraft:initiate_wand` | `InitiateWandItem`; `data/jugcraft/spell_assignments/initiate_wand.json` | the first instrument (`#jugcraft:concordance_instruments`) |
 | invocations | `data/jugcraft/concordance/invocation/`, `data/jugcraft/spell/{kindle,aegis,revelation,lance,flashstep,lanternward}.json`; `Invocations` (impact `jugcraft:invocation`), `ConcordanceSpells` (Spell Engine bridge, settlement) | Kindle (utility), Dawn Aegis (defense), Revelation (investigation), Lance of Dawn (damage), Flashstep (movement), Lanternward (support); compositions compiled under the wand's limits |
@@ -301,15 +303,23 @@ Magic, milestones 1 to 3. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCAN
 | `jugcraft:lumen_mote` | `LumenMoteBlock`, `Illumination` | the Kindled light and a lantern's trail light; open air only |
 | `jugcraft:kindled_lantern` | `KindledLanternItem`, components `jugcraft:radiance` (`LanternCharge`), `jugcraft:lantern_lit` | 64 Radiance, 1 per 400 ticks while lit |
 | codex | `data/jugcraft/modonomicon/` | Modonomicon book `jugcraft:arcane_concordance`; research nodes from advancements `jugcraft:concordance_*` |
-| commands | `ConcordanceCommand` | `/jugcraft concordance status [player]`, `compose`, `tune`, `diagnose`, `grant`, `reset`, `focus` |
+| commands | `ConcordanceCommand` | `/jugcraft concordance status [player]`, `compose`, `tune`, `circle`, `diagnose`, `grant`, `reset`, `focus` |
 | client | `ConcordanceClient`, `ConcordanceClientOptions`, `ConcordanceSettingsScreen` (Cloth Config), `compat/ConcordanceModMenu` | Focus line, tooltips, settings (`config/jugcraft-client.properties`) |
-| optional | `compat/jade/ConcordanceDataProvider`, JEI bench category, `assets/jugcraft/dynamiclights/item/kindled_lantern.json` | Jade, JEI and LambDynamicLights display |
+| optional | `compat/jade/ConcordanceDataProvider`, JEI bench and Circle Anchor categories and alchemy ingredient information, `assets/jugcraft/dynamiclights/item/kindled_lantern.json` | Jade, JEI and LambDynamicLights display |
 | `jugcraft:research_notes` | `ResearchNotesItem`, component `ResearchNotes`, `RateGate` | write what you know; others read it as evidence (never mastery) |
 | `jugcraft:lumen_sconce` | `LumenSconceBlock`, `LumenSconceBlockEntity` | burns Radiance for light 15; anyone pours, the owner draws |
 | typed resources | `concordance/resource/` (pure Java); `data/jugcraft/concordance/conversion/` | containers, transfers, conversions, allocation, Bound Will and Astral ledgers, Prima values |
 | composition | `concordance/compose/` (pure Java: grammar, parser, compiler, plans, explanations); `data/jugcraft/concordance/{component,instrument}/`; `ConcordanceCommand` (`compose check\|inscribe\|show\|clear`) | players write spells from 17 data components (6 more belong to invocations); every problem is named; plans carry their limits |
 | `jugcraft:composed` spell | `data/jugcraft/spell/composed.json`; `ComposedSpells`, component `jugcraft:inscription` (`Inscription`) | casts the spell inscribed on the held instrument; recompiled on the server every cast, run under a ledger |
 | effects | `concordance/effect/` (pure Java: kinds, causes, stacking, tolerance, ledger); `ConcordanceEffects`; tags `#jugcraft:concordance/{immune,resistant,interactable,harvestable}` | the one boundary every Concordance effect goes through: friendly fire, tolerance, protection, attribution, one-time accounting |
+| rituals | `concordance/ritual/` (pure Java: `StructurePattern`, `StructureValidator`, `RitualDefinition`, `Offerings`, `RitualMachine`, `RitualRun`); `data/jugcraft/concordance/{structure,ritual}/`; `Rituals` (anchor index) | structures checked part by part (cached, bounded); offerings reserved at the start and consumed with the result in one tick; a defined outcome for every interruption |
+| `jugcraft:circle_anchor` | `CircleAnchorBlock`, `CircleAnchorBlockEntity` (GeckoLib); client `CircleClient` | six offering slots and an output; runs Adept's Attunement and Lumen Vigil; `/jugcraft concordance circle <pos>` reports its circle |
+| `jugcraft:ley_pylon` | `LeyPylonBlock`, `LeyPylonBlockEntity`, component `jugcraft:ley_charge` | 64 Ley Charge, from Radiance (`jugcraft:radiance_to_ley`, 3 > 2) or Jugcraft Energy (1000 JE > 1); owned by its placer |
+| `jugcraft:warding_stone` | `WardingStoneBlock`; tag `#jugcraft:concordance/ritual_boundary`; built-in pack `jugcraft:fusion_textures` (with Fusion) | a circle's boundary |
+| `jugcraft:adept_wand` | `InitiateWandItem`; instrument `data/jugcraft/concordance/instrument/adept_wand.json` | the second instrument (capacity 12, 8 targets, 72 work, two branches), made only by Adept's Attunement |
+| alchemy | `concordance/alchemy/` (pure Java: `Axis`, `Vector`, `Band`, `Heat`, `Mixture`, `Operation`, `Outcome`, `Formula`, `Assay`, `AlchemyCatalog`); `data/jugcraft/concordance/{ingredient,preparation,property}/`; `Alchemy` | eleven ingredients on six axes, two preparations, seven properties; a deterministic mixture in thousandths |
+| `jugcraft:crucible` | `CrucibleBlock`, `CrucibleBlockEntity` (GeckoLib, `WorldlyContainer`, water `FluidStorage`) | heat from beneath, stirring, bottling, sampling; follows a written formula from its buffer and tank |
+| alchemy items | `MortarItem`, `AlchemyItem`, `BrewItem`; components `jugcraft:reagent` (`Reagent`), `jugcraft:brew` (`Brew`), `jugcraft:formula` | `mortar`, `stirring_rod`, `sampling_spoon`, `assay_glass`, `formula`, `reagent`, `draught`, `salve` |
 
 ## Shared systems and how to plug in
 

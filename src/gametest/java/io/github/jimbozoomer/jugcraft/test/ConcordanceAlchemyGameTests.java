@@ -29,6 +29,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -37,13 +38,14 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.phys.AABB;
 
 /**
  * Roadmap step 13, experimental alchemy: a crucible takes its heat from the block beneath; the same process in two
  * crucibles makes the same mixture and the same draught, whose effect follows from what was put in; only someone who
  * understands the Alembic Arts may work one; the mortar prepares ingredients; a bowl makes a salve for a creature; a
- * recorded formula is followed by another crucible fed by pipe and hopper, making the same draught; and a crucible
- * saves its mixture and formula.
+ * recorded formula is followed by another crucible fed by pipe and hopper, making the same draught; a broken crucible
+ * drops its items; and a crucible saves its mixture and formula.
  */
 public class ConcordanceAlchemyGameTests {
 	private static final String GLOW = "minecraft:glowstone_dust";
@@ -234,6 +236,25 @@ public class ConcordanceAlchemyGameTests {
 						"It used exactly the glowstone and the water");
 			});
 		});
+	}
+
+	/** Broken, a crucible drops what its buffer, bottle slot and output hold; its mixture spills. */
+	@GameTest(maxTicks = 20)
+	public void aBrokenCrucibleDropsItsItems(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = new BlockPos(2, 2, 2);
+		CrucibleBlockEntity crucible = crucible(helper, at, false);
+		crucible.setItem(0, new ItemStack(Items.GLOWSTONE_DUST, 3));
+		crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE, 2));
+		helper.destroyBlock(at);
+		int glowstone = 0;
+		int bottles = 0;
+		for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(at)).inflate(3.0))) {
+			glowstone += item.getItem().is(Items.GLOWSTONE_DUST) ? item.getItem().getCount() : 0;
+			bottles += item.getItem().is(Items.GLASS_BOTTLE) ? item.getItem().getCount() : 0;
+		}
+		helper.assertTrue(glowstone == 3 && bottles == 2, "The crucible's items drop once: " + glowstone + " glowstone, " + bottles + " bottles");
+		helper.succeed();
 	}
 
 	/** A crucible saves its mixture (to the milli-unit), its history and its formula. */

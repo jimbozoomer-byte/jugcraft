@@ -318,7 +318,8 @@ def codex():
                  "Use a blank formula on a crucible to write down its whole process (water, every ingredient and how "
                  "it was prepared, every stir and how hot) while nothing has been drawn from it.", rid("formula")),
                 ("text", "Repeating It",
-                 f"**Sneak** and use a written formula on a crucible to set it. Fed water through a pipe and "
+                 f"Use a written formula on a crucible to set it (**sneak** with an empty hand to clear it). Fed "
+                 f"water through a pipe and "
                  f"ingredients through a hopper (up to {BUFFER_SLOTS} kinds waiting), it follows the formula step "
                  f"by step, waiting for the heat each stir needs, and bottles into its output when it has bottles. "
                  f"It never guesses: a missing ingredient or the wrong heat simply waits."),

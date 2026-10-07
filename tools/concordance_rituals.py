@@ -195,7 +195,7 @@ MESSAGES = {
     "circle.unknown": "You have not learned %s (the codex says how)",
     "circle.no_focus": "%s needs %s Focus",
     "circle.started": "%s begins",
-    "circle.waiting": "%s: %s more must join, holding an instrument",
+    "circle.waiting": "%s: %s more must join (use the anchor with an empty hand)",
     "circle.joined": "You join %s",
     "circle.already": "You are already part of this ritual",
     "circle.leader_only": "Only the one who began it can call it off",
@@ -347,7 +347,7 @@ def codex(initiate):
             "description": "What a ritual takes, and what it risks",
             "pages": [
                 ("text", "Beginning",
-                 f"Put the **offerings** in the anchor (use it with each). Then use it holding an **instrument**: "
+                 f"Put the **offerings** in the anchor (use it with each). Then use it with an **empty hand**: "
                  f"the anchor finds the ritual the offerings answer, checks the circle, and takes your **Focus**. "
                  f"A ritual for more than one waits {_seconds(GATHER_TICKS)} seconds for the others, who join the "
                  f"same way. **Sneak** with an empty hand to take your offerings back before it begins."),
@@ -355,7 +355,7 @@ def codex(initiate):
                  f"Every {_seconds(STEP_TICKS)} seconds the ritual checks the whole circle again and draws Ley Charge. "
                  f"Every participant must stay within {PARTICIPANT_MARGIN} blocks of the circle's edge. The "
                  f"offerings are **held**: nothing can be added or taken until it ends. The leader can call it off "
-                 f"by sneaking with their instrument."),
+                 f"by sneaking with an empty hand."),
                 ("text", "How It Ends",
                  "**Completed:** the offerings are used and the result is made, both at the same moment, once.\\\n\\\n"
                  "**Broken off** (a part broken, a pylon dry, someone gone, too bright, the anchor's chunk unloaded or "
