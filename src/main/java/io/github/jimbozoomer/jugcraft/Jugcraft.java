@@ -54,6 +54,7 @@ public final class Jugcraft implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		JugcraftConfig.load();
+		io.github.jimbozoomer.jugcraft.world.design.WorldDesigner.register();
 		// Registration always happens, even when a feature is disabled, so saved
 		// blocks and items are never lost. The config only controls acquisition.
 		JugcraftMaterials.register();
@@ -96,6 +97,7 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.chemistry.ConstructionChemistry.register();
 		JugcraftGuide.register();
 		JugcraftAgriculture.register();
+		io.github.jimbozoomer.jugcraft.styx.JugcraftStyx.register();
 		JugcraftDrones.register();
 		io.github.jimbozoomer.jugcraft.tower.JugcraftTower.register();
 		io.github.jimbozoomer.jugcraft.blueprint.JugcraftBlueprints.register();
@@ -107,6 +109,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftRegions.register();
 		JugcraftDimensions.register();
 		JugcraftSeasons.register();
+		new io.github.jimbozoomer.jugcraft.creatures.scary.ScaryMod().onInitialize();
 		io.github.jimbozoomer.jugcraft.town.JugcraftTown.register();
 		io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance.register();
 		io.github.jimbozoomer.jugcraft.diagonal.DiagonalWalls.register();

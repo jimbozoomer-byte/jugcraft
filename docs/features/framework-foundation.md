@@ -41,6 +41,10 @@ The Jade overlay changes no acquisition, rewards, resource balances, or saved ID
 - The final complete-set rerun after the salvo fixture change also passed all **821 required server tests**: `gradlew.bat build --no-daemon`. The public Modrinth import and broader multiplayer checks below remain outstanding.
 - Not yet established: clean Modrinth App import, two independent clients on a dedicated server, visual quality of every combined renderer, or migration of existing content to these APIs.
 
+## October 7 integration checks
+
+The updated foundation passed all 881 required server tests against the expanded main branch, and the nine packaging contract tests still pass. Linux client CI now installs the Mesa OpenGL/EGL runtime, asks SDL to use EGL in the virtual display, and writes the OpenGL preference after Loom recreates its disposable test directory. This fixes the GLX-window startup failure without removing any test. The workflows cancel superseded runs for the same PR or branch, keeping runner capacity available for the current commits. Final combined results remain visible in the PR checks; these local results do not imply a public launcher import or a multiplayer playtest.
+
 ## Follow-up test plan
 
 Run the full set of client test classes in CI. In a clean Modrinth instance, import the actual pack and check the installed versions against the lock. Inspect a powered processing machine with Jade on client/server, without Jade, and with a client connected to a server without Jade. Exercise the existing weapon animations while the new casting libraries are installed. Check screens at different GUI scales, resource reload, reconnect, and a dedicated-server restart. Record the actual observations rather than treating library availability as gameplay verification. All local tests above used temporary test servers/worlds; no live server was required or deployed.

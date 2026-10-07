@@ -298,5 +298,194 @@
         "attenuation_distance": 16
       }
     ]
+  },
+  "space_kook.laugh": {
+    "subtitle": "subtitles.jugcraft.laugh",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/laugh"
+      }
+    ]
+  },
+  "space_kook.hurt": {
+    "subtitle": "subtitles.jugcraft.hurt",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/hurt"
+      }
+    ]
+  },
+  "space_kook.death": {
+    "subtitle": "subtitles.jugcraft.death",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/death"
+      }
+    ]
+  },
+  "space_kook.step": {
+    "subtitle": "subtitles.jugcraft.step",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/step"
+      }
+    ]
+  },
+  "captain_cutler.ambient": {
+    "subtitle": "subtitles.jugcraft.cutler.ambient",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/cutler/cutler1"
+      },
+      {
+        "name": "jugcraft:scary/cutler/cutler2"
+      }
+    ]
+  },
+  "captain_cutler.chase": {
+    "subtitle": "subtitles.jugcraft.cutler.chase",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/cutler/cutler01"
+      },
+      {
+        "name": "jugcraft:scary/cutler/cutler04"
+      }
+    ]
+  },
+  "captain_cutler.hurt": {
+    "subtitle": "subtitles.jugcraft.cutler.hurt",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/cutler/cutler3"
+      }
+    ]
+  },
+  "captain_cutler.death": {
+    "subtitle": "subtitles.jugcraft.cutler.death",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/cutler/cutler02"
+      },
+      {
+        "name": "jugcraft:scary/cutler/cutler03"
+      }
+    ]
+  },
+  "captain_cutler.step": {
+    "subtitle": "subtitles.jugcraft.cutler.step",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/cutler/step"
+      }
+    ]
+  },
+  "phantom_shadow.ambient": {
+    "subtitle": "subtitles.jugcraft.shadow.ambient",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/shadow/laugh1"
+      },
+      {
+        "name": "jugcraft:scary/shadow/laugh2"
+      }
+    ]
+  },
+  "phantom_shadow.chase": {
+    "subtitle": "subtitles.jugcraft.shadow.chase",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/shadow/laugh1"
+      },
+      {
+        "name": "jugcraft:scary/shadow/laugh2"
+      },
+      {
+        "name": "jugcraft:scary/shadow/laugh3"
+      }
+    ]
+  },
+  "phantom_shadow.attack": {
+    "subtitle": "subtitles.jugcraft.shadow.attack",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/shadow/attack"
+      }
+    ]
+  },
+  "phantom_shadow.hurt": {
+    "subtitle": "subtitles.jugcraft.shadow.hurt",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/shadow/hurt"
+      }
+    ]
+  },
+  "phantom_shadow.death": {
+    "subtitle": "subtitles.jugcraft.shadow.death",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/shadow/death"
+      }
+    ]
+  },
+  "phantom_shadow.chain": {
+    "subtitle": "subtitles.jugcraft.shadow.chain",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/shadow/chain"
+      }
+    ]
+  },
+  "black_knight.ambient": {
+    "subtitle": "subtitles.jugcraft.knight.ambient",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/knight/bk1"
+      },
+      {
+        "name": "jugcraft:scary/knight/bk2"
+      }
+    ]
+  },
+  "black_knight.chase": {
+    "subtitle": "subtitles.jugcraft.knight.chase",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/knight/bkmedieval"
+      }
+    ]
+  },
+  "black_knight.attack": {
+    "subtitle": "subtitles.jugcraft.knight.attack",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/knight/bk5"
+      }
+    ]
+  },
+  "black_knight.hurt": {
+    "subtitle": "subtitles.jugcraft.knight.hurt",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/knight/bk3"
+      }
+    ]
+  },
+  "black_knight.death": {
+    "subtitle": "subtitles.jugcraft.knight.death",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/knight/bk4"
+      }
+    ]
+  },
+  "black_knight.step": {
+    "subtitle": "subtitles.jugcraft.knight.step",
+    "sounds": [
+      {
+        "name": "jugcraft:scary/knight/step"
+      }
+    ]
   }
 }

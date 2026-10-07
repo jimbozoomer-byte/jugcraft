@@ -44,6 +44,10 @@ CI runs all of these and fails if generated files are out of date.
 
 ## Content inventory
 
+### World Designer (`world/design/`, `tools/world-designer/`)
+
+The [offline editor](WORLD_DESIGNER.md) shapes a new world's height field, paints registered biomes, selects spawn and the existing walled town, and pins native structure start chunks. The operator command `/jugcraft design export` writes its UI and a live registry catalog. `model.js` validates the versioned design and compiles a datapack with the `jugcraft:designed` preset. `DesignDensity`, `DesignBiomeSource`, `DesignPlacement` and `DesignGrid` serialize generation state per world; `WorldDesigner` connects the existing spawn and town hooks. No extra library is required. New-world generation only; no arbitrary city assembly, structure rotation or retrogen. See the [feature record](features/world-designer.md) before extending it.
+
 ### Materials (`materials/`, `tools/materials.py`)
 
 | Metal | Forms | Source | Feature switch |
@@ -413,8 +417,20 @@ Every `FenceBlock` and `IronBarsBlock` has the properties `north_east`, `south_e
   - items `steampunk_<helmet|chestplate|leggings|boots>`, `kaiser_<helmet|chestplate|leggings|boots>` (`DescribedItem`s with a lore line), `steampunk_pattern` and `kaiser_pattern`; equipment assets `jugcraft:steampunk` and `jugcraft:kaiser`;
   - `gear/JugcraftGear`: `ARMOR_STYLES`, `STYLE_TEMPLATES`, `STEAMPUNK_ARMOR` and `KAISER_ARMOR` derived by `restyle` from `BRONZE_ARMOR` and `STEEL_ARMOR` (a look is only an equipment asset; the numbers are always the base's), and `TEMPLATES` (the patterns, uncommon, in the Ingredients tab);
   - `smithing_transform` recipes both ways (`<style>_<piece>`, `<metal>_<piece>_from_<style>_<piece>`) and the shaped pattern recipes, from `tools/gear.py` `ARMOR_STYLES`; the pieces are in the `minecraft:<slot>_armor` tags;
-  - art: `tools/armor_styles.py` (the styled looks, pinned pixel for pixel by `check_armor_looks`) and `tools/arms_variants_art.py` `pattern()` for the patterns. For now `tools/gear_textures.py` (`METAL_ARMOR_LOOK`) draws bronze and steel armor in the same looks;
+  - art: `tools/armor_styles.py` (the styled looks, pinned pixel for pixel by `check_armor_looks`) and `tools/arms_variants_art.py` `pattern()` for the patterns. Bronze and steel armor wear the knight armor's 3D models instead ([knight-armor.md](features/knight-armor.md)); `tools/gear_textures.py` (`METAL_ARMOR_LOOK`) still writes their flat layers in these looks as an unused fallback;
   - record: [steampunk-and-kaiser-armor.md](features/steampunk-and-kaiser-armor.md).
+- **Thallite gear (thallite, slice 2):**
+  - items `thallite_<sword|pickaxe|axe|shovel|hoe|helmet|chestplate|leggings|boots>` (`THALLITE` and `THALLITE_ARMOR` in `gear/JugcraftGear`, a third entry in `TIERS`; no paxel and, for now, no arms) and `earthbound_thallite_<helmet|chestplate|leggings|boots>` (the style `earthbound_thallite`, one-way, `EARTHBOUND_THALLITE_ARMOR`), all `gear/ThalliteGearItem`s; the template `earthbinding_template`; equipment assets `jugcraft:thallite` and `jugcraft:earthbound_thallite`;
+  - `gear/ThalliteGear`: Regrowth and Rooted on a server tick, for players, by the item tags `#jugcraft:thallite_gear` and `#jugcraft:earthbound_armor` and the block tags `#jugcraft:living_ground` and `#jugcraft:earthen_ground` (all from `tools/gear.py`); Rooted is the `jugcraft:rooted` knockback resistance modifier;
+  - art: the tools from the material-set maps in thallite's ramp (`tools/material_icons.py`), the armor and template from `tools/thallite_armor.py`;
+  - record: [thallite.md](features/thallite.md).
+
+- **Armor-only tiers (the owner's armor designs):**
+  - items `bloodthorn_<helmet|chestplate|leggings|boots>`: plain armor items in `BLOODTHORN_ARMOR`, a step above netherite and fire resistant, repaired with netherite ingots (`#jugcraft:repairs_bloodthorn_gear`). No recipe or drop yet: creative only;
+  - items `reforged_white_diamond_<helmet|chestplate|leggings|boots>`: in `REFORGED_WHITE_DIAMOND_ARMOR`, beside Bloodthorn (a heavier helm, the longest wear, the best enchanting; not fire resistant), repaired with diamonds (`#jugcraft:repairs_reforged_white_diamond_gear`). Creative only;
+  - `gear/JugcraftGear`: `ARMOR_TIERS` and `armorTier(...)`, from `tools/gear.py` `ARMOR_TIERS`. Each tier is worn only as a 3D model (`tools/bloodthorn_armor.py` and `tools/white_diamond_armor.py`, on the knight armor's toolkit, drawn by `client/WornModelLayer`), so it has no flat layer and no equipment asset file; `check_mod_data.py` (`check_armor_tiers`) holds every piece to a 3D model and an icon;
+  - tests `ArmorTiersGameTests` and `ArmorTiersClientGameTests` cover every tier in the list;
+  - records: [bloodthorn-armor.md](features/bloodthorn-armor.md), [reforged-white-diamond-armor.md](features/reforged-white-diamond-armor.md).
 - **Arms motion (batch 43, client):**
   - `client/arms/ArmsMotion` plays keyframed guards, combos and parry poses for the arms, in third person (torso, head, arms, legs and the item in the hand, with the off hand kept on two-handed weapons) and first person. `ArmsPose` is one player's pose, kept on the render state with Fabric's render state data.
   - Motion files: `assets/jugcraft/arms_motion/<kind>.json`, from `tools/arms_moves.py` on `tools/arms_motion.py`. Preview renders: `tools/arms_motion_preview.py`.

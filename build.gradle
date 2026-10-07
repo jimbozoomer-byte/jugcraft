@@ -51,13 +51,6 @@ if (frameworkLock.minecraft != project.minecraft_version || frameworkLock.fabric
 	throw new GradleException("Platform pins disagree with distribution/frameworks.lock.json")
 }
 def withOptionalIntegrations = providers.gradleProperty("jugcraftOptionalIntegrations").getOrElse("true").toBoolean()
-// Iris and Sodium (optional, client-only, compatibility only: no Jugcraft code uses them) are installed by the Jugcraft
-// Complete pack, but join the development classpaths only with -PjugcraftShaderMods=true. Loom bakes a development
-// dependency's injected interfaces into the development Minecraft jar, so once Iris is on the compile classpath every
-// development client must load it (its classes are missing otherwise); and Iris aborts under CI's xvfb, where OpenGL
-// finds no GLX visual and the game runs on Vulkan. Without them the client game tests run as before the foundation.
-def withShaderMods = providers.gradleProperty("jugcraftShaderMods").getOrElse("false").toBoolean()
-def shaderMods = ["iris", "sodium"]
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -68,7 +61,7 @@ dependencies {
 	compileOnly "mezz.jei:jei-${project.minecraft_version}-fabric-api:${project.jei_version}"
 	frameworkLock.dependencies.each { library ->
 		// Fabric API and the JEI API already have their established declarations above.
-		if (library.key != "fabric-api" && (withShaderMods || !(library.key in shaderMods))) {
+		if (library.key != "fabric-api") {
 			boolean clientOnly = library.side == "client"
 			if (library.requiredByJugcraft) {
 				add(clientOnly ? "clientImplementation" : "implementation", library.maven) { transitive = false }
@@ -85,6 +78,10 @@ dependencies {
 }
 
 processResources {
+	from('tools/world-designer') {
+		include 'index.html', 'style.css', 'model.js', 'editor.js'
+		into 'jugcraft/world-designer'
+	}
 	inputs.property "version", project.version
 	inputs.file frameworkLockFile
 
@@ -124,6 +121,17 @@ fabricApi {
 }
 
 // CI chooses and shares out the client game tests (tools/select_client_tests.py, docs/TESTING.md):
+// Loom deletes build/run/clientGameTest before each run, so CI must write these AFTER that dependency.
+// Restrict this to CI: never overwrite a local developer's client settings.
+tasks.named("runClientGameTest") {
+	doFirst {
+		if (System.getenv("CI") == "true") {
+			workingDir.mkdirs()
+			new File(workingDir, "options.txt").text = 'preferredGraphicsBackend:"opengl"\nfullscreen:false\nlang:en_us\n'
+		}
+	}
+}
+
 // -PclientTests=<Class,Class,...> keeps only those classes of the test mod's client test list (simple names), and
 // -PclientTestShard=<n> -PclientTestShards=<count> keeps the classes at positions n, n + count, n + 2 * count ... of
 // it. Without them every class runs. Server game tests are never split.

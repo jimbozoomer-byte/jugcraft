@@ -20,6 +20,8 @@ Minecraft remains **26.3 + Fabric**, with **Loader 0.19.5** required by the sele
 
 ## Start here
 
+- [Design a new world's terrain, biomes, spawn, city and villages with World Designer](docs/WORLD_DESIGNER.md).
+
 - [Start contributing now: fork, connect your AI, and open a PR](docs/COMMUNITY_QUICKSTART.md).
 - [Propose a feature](../../issues/new?template=feature.yml): no coding experience needed.
 - [Propose an existing mod integration](../../issues/new?template=integration.yml).

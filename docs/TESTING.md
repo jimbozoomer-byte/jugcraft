@@ -16,8 +16,6 @@ Game tests run in the Build workflow too. The `mod` job's `./gradlew build` runs
 
 Three client jobs share the chosen classes out by their rough running time (`./gradlew runClientGameTest -PclientTests=<Class,Class,...>`). A job with nothing to run passes at once. The `client` job passes only when the choice and all three jobs pass.
 
-Development runs, including the client game tests, leave out Iris and Sodium unless `-PjugcraftShaderMods=true` is given (`build.gradle`); Jugcraft Complete still installs them. CI's xvfb has no GLX visual for OpenGL, so the game falls back to Vulkan, and Iris aborts on its first OpenGL call; and once Iris is a development dependency, Loom bakes its injected interfaces into the development Minecraft jar, so it cannot simply be left off one run. Nothing in Jugcraft uses either. To test with them (docs/FRAMEWORKS.md), run `./gradlew runClient -PjugcraftShaderMods=true` on a machine with a GPU.
-
 Locally:
 - `./gradlew runClientGameTest` runs every class.
 - `python3 tools/select_client_tests.py --base origin/main` shows what a branch would run.
@@ -62,6 +60,8 @@ Checks:
 - Set `pixel_hollows.enabled=false` and `retro_trader.enabled=false` in `config/jugcraft.properties`, restart: existing blocks, caves and traders remain.
 
 ## Content-specific scenarios
+
+- **World Designer:** run `node --test tools/world-designer/model.test.cjs`, the three `WorldDesignerGameTests`, and `WorldDesignerClientGameTests`. Also load an actual exported ZIP into a new world's datapacks, select `jugcraft:designed`, generate the pinned chunks, and inspect structure starts. The [feature record](features/world-designer.md) distinguishes compiler, browser, real-world and persistence evidence.
 
 Use the cases relevant to the feature; do not claim a scenario was run just because it appears here.
 

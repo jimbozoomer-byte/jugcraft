@@ -130,6 +130,7 @@ def item_name(item):
 
 def assets():
     lang = {
+        "generator.jugcraft.designed": "Jugcraft Designed",
         "config.jade.plugin_jugcraft.machine_status": "Machine status",
         "tooltip.jugcraft.machine_energy": "Energy: %s / %s JE",
         "tooltip.jugcraft.machine_progress": "Processing: %s%%",
@@ -153,6 +154,8 @@ def assets():
     agriculture_data.assets(ASSETS, write, lang)
     pixel_hollows_assets(lang)
     town_assets.assets(ASSETS, write, lang)
+    import styx
+    styx.write_all(write, ASSETS, DATA / MOD, lang)
     import deposits
     deposits.write_all(write, ASSETS, DATA / MOD, lang)
     import tank_display
@@ -236,6 +239,8 @@ def assets():
     # Last: it adds diagonal parts to the fence blockstates written above.
     import diagonal_connections
     diagonal_connections.write_all(write, ASSETS, RES / "assets" / "minecraft")
+    import scary_data
+    scary_data.write_all(write, RES, lang)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
 
 
@@ -869,10 +874,12 @@ def powered_tools(lang):
     # rocket_pack.png), and the pack itself in 3D on the back (client/RocketPackLayer draws these quads).
     write(ASSETS / "equipment" / "rocket_pack.json", {"layers": {"humanoid": [{"texture": rid("rocket_pack")}]}})
     import kinetic_rotors
-    # The exosuit's 3D parts (shoulder plates, skirt plates, the Ronin's hat) too: client/ExosuitLayer.
+    # The exosuit's 3D parts (shoulder plates, skirt plates, the Ronin's hat) too: client/WornModelLayer.
     import exosuit
-    write(ASSETS / "worn_models.json", {"rocket_pack": kinetic_rotors.quads(tool_models.ITEMS["rocket_pack"]),
-                                        **exosuit.worn_models(kinetic_rotors.quads)})
+    worn = {"rocket_pack": kinetic_rotors.quads(tool_models.ITEMS["rocket_pack"]), **exosuit.worn_models(kinetic_rotors.quads)}
+    # ...and the 3D armor sets (tools/armor_models.py), keyed "<item>_<bone>".
+    import armor_models
+    write(ASSETS / "worn_models.json", {**worn, **armor_models.entries(taken=worn)})
     for module, (display, short, about) in UPGRADE_MODULES.items():
         lang[f"item.{MOD}.{module}"] = display
         lang[f"item.{MOD}.{module}.short"] = short
