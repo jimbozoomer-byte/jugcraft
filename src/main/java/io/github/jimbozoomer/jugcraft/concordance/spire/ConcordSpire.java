@@ -19,6 +19,7 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
+import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Logistics;
 import io.github.jimbozoomer.jugcraft.concordance.progression.StageDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
@@ -642,7 +643,8 @@ public final class ConcordSpire {
 	/**
 	 * Crops in the field grow one step each (once a pulse); nothing ripe is touched and nothing is harvested or replaced.
 	 * Only crops its keeper could tend by hand grow (roadmap step 28), and only while they are here, unless the server
-	 * lets a stand-in answer for absent owners.
+	 * lets a stand-in answer for absent owners. A Concordance crop grows by its own rules, paying its bed and fixing
+	 * nothing ({@link OrganismCropBlock#hasten}, roadmap step 29); a vanilla crop simply ages, as bone meal ages it.
 	 */
 	private static int grow(ServerLevel level, BlockPos heart, SpireState state, SpireConfiguration configuration) {
 		ServerPlayer keeper = Authority.answering(level, state.keeper());
@@ -659,6 +661,13 @@ public final class ConcordSpire {
 					break;
 				}
 				BlockState crop = level.isLoaded(at) ? level.getBlockState(at) : null;
+				if (crop != null && crop.getBlock() instanceof OrganismCropBlock organism && !organism.isMaxAge(crop)) {
+					if (Authority.mayChange(level, keeper, at) && organism.hasten(level, at, crop, random) == OrganismCropBlock.Growth.GREW) {
+						grown.add(at);
+						Signs.show(level, at, Sign.WORK);
+					}
+					break;
+				}
 				BlockState older = crop != null && crop.getBlock() instanceof CropBlock growing && !growing.isMaxAge(crop) ? older(crop) : null;
 				if (older != null && Authority.mayChange(level, keeper, at)) {
 					level.setBlock(at, older, Block.UPDATE_CLIENTS);

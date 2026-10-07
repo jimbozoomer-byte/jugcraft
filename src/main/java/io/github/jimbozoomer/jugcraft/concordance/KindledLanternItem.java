@@ -73,8 +73,10 @@ public class KindledLanternItem extends Item {
 		boolean wasLit = lit(stack);
 		int left = remaining(stack, now);
 		if (wasLit) {
-			set(stack, left, now, false);
-			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.lantern.out", left));
+			// The measure now burning is spent (roadmap step 29): relighting never gives light for nothing.
+			int kept = charge(stack).kept(now, true);
+			set(stack, kept, now, false);
+			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.lantern.out", kept));
 			server.playSound(null, player.blockPosition(), JugcraftConcordance.LANTERN_SNUFF_SOUND, SoundSource.PLAYERS, 0.7F, 1.0F);
 			return InteractionResult.SUCCESS;
 		}

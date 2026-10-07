@@ -10,6 +10,10 @@ import io.github.jimbozoomer.jugcraft.concordance.Rituals;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Request;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
@@ -390,6 +394,64 @@ public class ConcordanceSpireGameTests {
 		helper.assertTrue(zombie.hasEffect(MobEffects.GLOWING), "a hostile creature is revealed");
 		zombie.discard();
 		helper.succeed();
+	}
+
+	/**
+	 * Roadmap step 29, growth acceleration with energy generation: a Verdant field hastens Concordance crops only as
+	 * their beds pay (a nutrient a step at least) and fixes nothing, so over many pulses a Mendvetch (free and fixing
+	 * when time grows it) and a Sunpetal each grow exactly as far as their beds' nutrients go, and the beds hold no
+	 * more than they were given. Nothing the field does can feed a Verdant Heart for free.
+	 */
+	@GameTest(maxTicks = 80)
+	public void aVerdantFieldHastensOnlyWhatItsBedsPay(GameTestHelper helper) {
+		heart(helper);
+		BlockPos vetch = new BlockPos(1, 1, 3);
+		BlockPos petal = new BlockPos(5, 1, 3);
+		for (BlockPos at : List.of(vetch, petal)) {
+			helper.setBlock(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+			helper.setBlock(at.above().north(), Blocks.GLOWSTONE);
+		}
+		helper.setBlock(vetch.above(), Garden.MENDVETCH_CROP);
+		helper.setBlock(petal.above(), Garden.SUNPETAL_CROP);
+		ServerPlayer keeper = master(helper, "jugcraft:verdant_spire");
+		// Awake from the start, so the crops' own ticks have read the area round them by the time the field pulses.
+		VerdantBedBlockEntity vetchBed = helper.getBlockEntity(vetch, VerdantBedBlockEntity.class);
+		VerdantBedBlockEntity petalBed = helper.getBlockEntity(petal, VerdantBedBlockEntity.class);
+		for (VerdantBedBlockEntity bed : List.of(vetchBed, petalBed)) {
+			bed.awaken(keeper.getUUID());
+			bed.setNutrients(4);
+		}
+		// Read the area round each crop early (a level takes only so many readings a tick): any one reading serves.
+		for (int tick : new int[] {10, 20, 30}) {
+			helper.runAtTickTime(tick, () -> {
+				vetchBed.habitat(helper.getLevel());
+				petalBed.habitat(helper.getLevel());
+			});
+		}
+		helper.runAtTickTime(40, () -> {
+			ServerLevel level = helper.getLevel();
+			BlockPos heart = helper.absolutePos(HEART);
+			SpireState state = Spires.found(ConcordSpire.id(level, heart), spire(), configuration("jugcraft:verdant_spire"), keeper.getUUID(), false, 0L);
+			SpireConfiguration verdant = configuration("jugcraft:verdant_spire");
+			SpireConfiguration field = new SpireConfiguration(verdant.id(), verdant.wonder(), verdant.tradition(), verdant.requires(), verdant.practice(),
+					verdant.crown(), verdant.upkeepItem(), verdant.upkeepCount(), verdant.upkeepLey(), FieldKind.GROWTH, 2, 6);
+			// Set again: a random tick may have grown a step meanwhile.
+			helper.setBlock(vetch.above(), Garden.MENDVETCH_CROP);
+			helper.setBlock(petal.above(), Garden.SUNPETAL_CROP);
+			vetchBed.setNutrients(1);
+			petalBed.setNutrients(1);
+			int grown = 0;
+			for (int pulse = 0; pulse < 12; pulse++) {
+				grown += ConcordSpire.field(level, heart, state, field);
+				helper.assertTrue(vetchBed.nutrients() + petalBed.nutrients() <= 2, "the beds never gain: " + vetchBed.nutrients() + "/" + petalBed.nutrients());
+			}
+			int vetchAge = helper.getBlockState(vetch.above()).getValue(OrganismCropBlock.AGE);
+			int petalAge = helper.getBlockState(petal.above()).getValue(OrganismCropBlock.AGE);
+			helper.assertTrue(vetchAge == 1 && petalAge == 1 && grown == 2,
+					"each grew one step for its bed's one nutrient, and no further: " + vetchAge + ", " + petalAge + ", " + grown);
+			helper.assertTrue(vetchBed.nutrients() == 0 && petalBed.nutrients() == 0, "both beds paid; the Mendvetch fixed nothing");
+			helper.succeed();
+		});
 	}
 
 	/** While its store holds less than two days' upkeep, the heart asks the keeper's Courier Post for the rest, once. */

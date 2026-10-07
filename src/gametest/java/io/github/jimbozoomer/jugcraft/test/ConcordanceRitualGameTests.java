@@ -14,6 +14,10 @@ import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructureValidator;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Body;
+import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +31,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -39,6 +44,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Roadmap step 12, rituals: a Lesser Circle built round a Circle Anchor, checked part by part; the Adept's Attunement
@@ -325,6 +331,54 @@ public class ConcordanceRitualGameTests {
 				helper.assertTrue(player.getHealth() == player.getMaxHealth(),
 						"Where PvP forbids it, the vandal's backlash spares the participant: " + player.getHealth());
 			}
+		});
+	}
+
+	/**
+	 * Roadmap step 29, remote storage with an interrupted ritual: a Clockwork Porter whose source chest stands by the
+	 * circle fuels itself from a channel's pylon mid-ritual. The Ley Charge it took is exactly what the pylons lost;
+	 * the ritual then stops for want of power, keeps every offering and makes nothing; and neither the Focus it took nor
+	 * the Ley Charge the porter took comes back. Nothing is counted twice or returned.
+	 */
+	@GameTest(maxTicks = 200)
+	public void aPorterFuellingFromACircleStopsItCleanly(GameTestHelper helper) {
+		CircleAnchorBlockEntity anchor = build(helper, 64);
+		ServerPlayer player = startAttunement(helper, anchor);
+		ServerLevel level = helper.getLevel();
+		List<BlockPos> channels = new ArrayList<>();
+		for (StructurePattern.Part part : circle().parts()) {
+			if (part.role() == StructurePattern.Role.CHANNEL) {
+				channels.add(at(part.offset()));
+			}
+		}
+		BlockPos chest = new BlockPos(6, 2, 5);
+		helper.setBlock(chest, Blocks.CHEST);
+		WorkerDefinition.Construct terms = ClockworkPorterEntity.terms();
+		ClockworkPorterEntity porter = Workers.CLOCKWORK_PORTER.create(level, EntitySpawnReason.MOB_SUMMONED);
+		porter.setOwner(player.getUUID());
+		porter.setBody(new Body(terms.integrity(), 0L));
+		Vec3 stand = helper.absoluteVec(new Vec3(6.5, 2.0, 6.5));
+		porter.snapTo(stand.x, stand.y, stand.z, 0.0F, 0.0F);
+		level.addFreshEntity(porter);
+		porter.setRoute(new ClockworkPorterEntity.Route(helper.absolutePos(chest), helper.absolutePos(new BlockPos(6, 2, 6)),
+				level.dimension().identifier().toString()));
+		long before = 0;
+		for (BlockPos channel : channels) {
+			before += pylon(helper, channel).ley();
+		}
+		porter.think(level, 18000L, level.getGameTime());
+		long after = 0;
+		for (BlockPos channel : channels) {
+			after += pylon(helper, channel).ley();
+		}
+		long taken = porter.body().energy();
+		helper.assertTrue(taken == terms.energy() && before - after == taken,
+				"The porter took exactly what the pylons lost: " + taken + " of " + (before - after));
+		helper.assertTrue(channels.stream().anyMatch(channel -> pylon(helper, channel).ley() == 0), "and left a channel dry");
+		helper.succeedWhen(() -> {
+			offeringsKept(helper, anchor, RitualMachine.Interruption.POWER);
+			helper.assertTrue(porter.body().energy() == taken, "The porter's charge is its own; nothing was returned to the pylons");
+			helper.assertTrue(ConcordanceProgress.currentFocus(player) == 20 - 6, "The ritual's Focus is not refunded");
 		});
 	}
 

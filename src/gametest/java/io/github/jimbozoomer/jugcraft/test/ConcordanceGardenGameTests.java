@@ -217,6 +217,41 @@ public class ConcordanceGardenGameTests {
 		});
 	}
 
+	/**
+	 * Roadmap step 29: a step hastened by a Verdant Spire grows by the crop's own rules but costs its bed at least a
+	 * nutrient and fixes none. A Mendvetch, free and fixing when time grows it, pays one and feeds no neighbour; on an
+	 * empty bed nothing is hastened.
+	 */
+	@GameTest(maxTicks = 80)
+	public void aHastenedStepPaysAndFixesNothing(GameTestHelper helper) {
+		BlockPos centre = new BlockPos(3, 1, 3);
+		VerdantBedBlockEntity own = bed(helper, centre, 4);
+		VerdantBedBlockEntity east = bed(helper, centre.east(), 1);
+		VerdantBedBlockEntity empty = bed(helper, new BlockPos(6, 1, 6), 0);
+		helper.setBlock(centre.above(), Garden.MENDVETCH_CROP);
+		helper.setBlock(centre.above().north(), Blocks.GLOWSTONE);
+		helper.setBlock(new BlockPos(6, 2, 6), Garden.MENDVETCH_CROP);
+		helper.setBlock(new BlockPos(6, 2, 5), Blocks.GLOWSTONE);
+		helper.runAtTickTime(40, () -> {
+			ServerLevel level = level(helper);
+			helper.setBlock(centre.above(), Garden.MENDVETCH_CROP);
+			helper.setBlock(new BlockPos(6, 2, 6), Garden.MENDVETCH_CROP);
+			own.setNutrients(4);
+			east.setNutrients(1);
+			empty.setNutrients(0);
+			BlockState vetch = helper.getBlockState(centre.above());
+			helper.assertTrue(((OrganismCropBlock) vetch.getBlock()).hasten(level, helper.absolutePos(centre.above()), vetch, level.getRandom())
+					== OrganismCropBlock.Growth.GREW && age(helper, centre.above()) == 1, "The vetch is hastened a step");
+			helper.assertTrue(own.nutrients() == 4 - OrganismCropBlock.HASTENED_COST && east.nutrients() == 1,
+					"It paid its bed a nutrient and fed no neighbour: " + own.nutrients() + "/" + east.nutrients());
+			BlockState starved = helper.getBlockState(new BlockPos(6, 2, 6));
+			helper.assertTrue(((OrganismCropBlock) starved.getBlock()).hasten(level, helper.absolutePos(new BlockPos(6, 2, 6)), starved,
+					level.getRandom()) == OrganismCropBlock.Growth.STALLED && age(helper, new BlockPos(6, 2, 6)) == 0 && empty.nutrients() == 0,
+					"On an empty bed nothing is hastened");
+			helper.succeed();
+		});
+	}
+
 	// ---------------------------------------------------------------- the producer
 
 	/**

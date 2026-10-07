@@ -936,7 +936,7 @@ def codex():
                  f"Use it with a **Kindled Lantern** to pour up to {SCONCE_POUR} Radiance in; what does not fit "
                  f"stays in the lantern. Anyone may pour, so a Lampwright can keep a town's lamps lit. **Sneak** to "
                  f"draw Radiance back into your lantern: only the sconce's owner may. Only Radiance burns in a "
-                 f"sconce, and broken, it keeps what it held."),
+                 f"sconce, and broken, it keeps what it held, less the measure it was burning."),
             ],
         },
         ("radiance", "kindled_lantern"): {
@@ -946,7 +946,8 @@ def codex():
                 ("text", "Kindled Lantern",
                  f"Use it to light it or put it out. Lit, it burns one Radiance every "
                  f"{seconds(LANTERN_BURN_TICKS)} seconds whether carried or not, and while it is in either hand the "
-                 f"air round you is lit (light {TRAIL_LIGHT}). It holds up to {LANTERN_CAPACITY} Radiance.\\\n\\\n"
+                 f"air round you is lit (light {TRAIL_LIGHT}). Put out, it has spent the measure it was burning. It holds up "
+                 f"to {LANTERN_CAPACITY} Radiance.\\\n\\\n"
                  f"A lantern can be given or traded; anyone may carry its light, but only someone who understands "
                  f"First Light can recharge it."),
             ],

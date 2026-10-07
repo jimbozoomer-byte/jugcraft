@@ -7556,6 +7556,7 @@ def check_concordance(registered):
     check_journal(co, root, lang)
     check_signs(co, root, lang)
     check_authority(root, lang)
+    check_economy(root)
     check_game_test_entrypoints()
 
 
@@ -10045,6 +10046,46 @@ def check_authority(root, lang):
                 f"message.{MOD}.concordance.courier.too_fast", f"message.{MOD}.concordance.workers.key_refused"):
         if key not in lang:
             err(f"authority: missing lang {key}")
+
+
+def check_economy(root):
+    """Roadmap step 29: tools/concordance_economy.py models every Concordance conversion and every source that time alone
+    drives. Its figures must be the game's (each anchor is in its Java or data file), the data conversions must all be
+    in it, no cycle of conversions across the systems (every crop's regrow-and-compost loop included, grown by time and
+    hastened by a spire) may come back with as much as it started with, and the record's table must be the model's."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import concordance_economy as ec
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    for name, anchors in ec.ANCHORS.items():
+        for where, needle in anchors:
+            if where.startswith("data:"):
+                if not (DATA / MOD / where[5:]).is_file():
+                    err(f"economy {name}: {where[5:]} is missing")
+            elif needle not in text(root / where):
+                err(f"economy {name}: concordance/{where} no longer says {needle}; update tools/concordance_economy.py")
+    conversions = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "conversion").glob("*.json")}
+    modelled = {key: (amount, made) for key, _, amount, _, made in ec.CONVERSIONS}
+    for key, entry in conversions.items():
+        if modelled.get(key) != (entry.get("from", {}).get("amount"), entry.get("to", {}).get("amount")):
+            err(f"economy: the conversion {key} is not modelled as it is in the data ({modelled.get(key)})")
+    heart = load(DATA / MOD / "concordance" / "organism" / "verdant_heart.json") or {}
+    if (heart.get("cost"), max(heart.get("thriving", 0), heart.get("tolerating", 0))) != (1, 2):
+        err("economy: the Verdant Heart's beat is modelled as 1 nutrient for at most 2 Verdance")
+    if f"MAX = {ec.FOCUS_MAX};" not in text(root / "rules" / "FocusPool.java"):
+        err("economy: FOCUS_MAX is not FocusPool.MAX")
+    if ec.VITAE_AN_HOUR != HOURLY_VITAE_BOUND:
+        err("economy: VITAE_AN_HOUR is not check_crimson's HOURLY_VITAE_BOUND")
+    gaining = ec.gaining_cycles(ec.edges())
+    if gaining:
+        err(f"economy: a cycle of conversions gives back at least what it took, from {gaining}")
+    for name, back, spent in ec.crop_loops():
+        if back >= spent:
+            err(f"economy: the crop loop {name} composts back {back} quarters for {spent} spent")
+    record = text(ROOT / "docs" / "features" / "arcane-concordance-economy.md")
+    table = re.search(r"<!-- economy:start -->\n(.*?)\n<!-- economy:end -->", record, re.S)
+    if not table or table.group(1).strip() != ec.table().strip():
+        err("docs/features/arcane-concordance-economy.md: its table is not tools/concordance_economy.py's (run it and paste)")
 
 
 if __name__ == "__main__":

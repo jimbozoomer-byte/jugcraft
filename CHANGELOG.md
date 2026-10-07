@@ -46,6 +46,11 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: The Arcane Concordance: no free lunch
+- **A Verdant Spire no longer makes nutrients from nothing.** Its field now grows Verdant Bed crops by their own rules: each hastened step costs the bed at least one nutrient, and a hastened Mendvetch fixes none. Before, a spire over Mendvetch could feed Verdant Hearts for free. Vanilla crops still simply grow.
+- **Light is no longer free.** Putting a Kindled Lantern out, or breaking a Lumen Sconce, spends the measure of Radiance it had begun, so relighting or re-placing it is no way round its burning. Lighting and putting out at once still costs nothing.
+- Every Concordance conversion is now checked together, across all its systems, so no chain of them can give back more than it took. The record lists what representative installations take and give in a day. Record: [arcane-concordance-economy.md](docs/features/arcane-concordance-economy.md).
+
 ### Unmerged: The Arcane Concordance: magic answers to its player
 - Magic now does nothing for you that you could not do by hand. A spell's light, harvest or harm, a Gleaner, a spire's field, a porter, a courier and a Gathering Shade change only what their player or owner could change themselves: protection mods' claims, towns, spawn protection and the PvP rules apply to them as to that player, checked again every time they act. Monsters may always be fought.
 - **Devices and workers wait while their owner is away** (offline or in another dimension) and say so. A server can let them carry on with `concordance.absent_owner_authority=true`; claims still judge them as their owner.

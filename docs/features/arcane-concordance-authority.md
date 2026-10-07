@@ -154,7 +154,9 @@ that tag's source. No art, sound or animation; the four new messages are text.
     is set).
 - Server game tests changed: the Gleaner's harvest test and the spire's field test now have their keepers present, and
   the field test also shows a spire whose keeper is away changing nothing.
-- CI: pending (this record is updated with the run).
+- CI: Build run [37676787998](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37676787998) on 3bbd117:
+  `mod` and `optional integrations absent` passed, "All 1064 required tests passed" in each (the eight new tests
+  among them). This was the first compile of `Authority` and the new tests.
 
 Not yet run: a real protection mod (only the stand-in listener in the tests); a two-client server with one player
 trying the routes against another's claim; a server with the absent-owner option on in play.

@@ -51,6 +51,8 @@ import org.jspecify.annotations.Nullable;
 public class OrganismCropBlock extends CropBlock {
 	public static final int MAX_AGE = Organism.STAGES;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
+	/** The least a step forced by a Verdant Spire costs its bed, whatever the crop (roadmap step 29). */
+	public static final int HASTENED_COST = 1;
 
 	private final Identifier organism;
 
@@ -122,6 +124,20 @@ public class OrganismCropBlock extends CropBlock {
 	 * gives its nutrients to the poorest bed round it) and dries the bed by one.
 	 */
 	public Growth grow(ServerLevel level, BlockPos pos, BlockState state, RandomSource random, boolean certain) {
+		return grow(level, pos, state, random, certain, false);
+	}
+
+	/**
+	 * One step forced by a Verdant Spire's field (roadmap step 29): by the crop's own rules (its awake bed, its niche),
+	 * for certain, but costing at least {@value #HASTENED_COST} nutrient a step and fixing none. Time grows a fixer for
+	 * nothing and it fixes as it grows; a hastened step skips that time, so it must neither be free nor make nutrients,
+	 * or a spire's field would mint them (and through a Verdant Heart, Ley Charge) without end.
+	 */
+	public Growth hasten(ServerLevel level, BlockPos pos, BlockState state, RandomSource random) {
+		return grow(level, pos, state, random, true, true);
+	}
+
+	private Growth grow(ServerLevel level, BlockPos pos, BlockState state, RandomSource random, boolean certain, boolean hastened) {
 		if (isMaxAge(state)) {
 			return Growth.RIPE;
 		}
@@ -150,13 +166,13 @@ public class OrganismCropBlock extends CropBlock {
 		if (!certain && random.nextInt(CropGrowth.chanceDivisor(speed, (float) definition.growth())) != 0) {
 			return Growth.NOT_THIS_TICK;
 		}
-		// The niche's nutrient floor is at least the cost, so a bed that passed it can pay.
-		if (!bed.take(definition.cost())) {
+		// The niche's nutrient floor is at least the cost, so a bed that passed it can pay (a hastened step may still not).
+		if (!bed.take(hastened ? Math.max(HASTENED_COST, definition.cost()) : definition.cost())) {
 			return Growth.STALLED;
 		}
 		level.setBlock(pos, getStateForAge(getAge(state) + 1), Block.UPDATE_CLIENTS);
 		bed.dry(level);
-		if (definition.fix() > 0) {
+		if (!hastened && definition.fix() > 0) {
 			Garden.nourish(Garden.bedAndNeighbours(level, pos.below()), definition.fix());
 		}
 		return Growth.GREW;

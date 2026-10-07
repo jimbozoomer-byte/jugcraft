@@ -329,7 +329,8 @@ def codex():
                  "The heart checks every part of the spire it has raised. If one is missing or wrong, the spire rests "
                  "and says which and where; put it back and it works again at once. Nothing is lost: not its phase, "
                  "not its days. The spire never breaks or replaces a block itself: its light goes only into open air "
-                 "and its growth only into crops."),
+                 "and its growth only into crops. A Verdant Bed's crop it hastens grows by its own rules: its bed pays "
+                 "at least a nutrient a step, and a Mendvetch fixes none while hastened."),
                 ("text", "Inspecting",
                  "Use the heart with an empty hand, or **/jugcraft concordance spire**, for its phase and what it "
                  "still needs, its upkeep and store, its field and its attendance. Jade, when installed, shows the "

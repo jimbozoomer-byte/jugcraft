@@ -38,6 +38,18 @@ public record LanternCharge(int stored, long since) {
 	}
 
 	/**
+	 * The measures kept if it stops burning at {@code now} (put out): a measure begun is a measure spent (roadmap step
+	 * 29), so putting a lantern out and lighting it again never burns for nothing.
+	 */
+	public int kept(long now, boolean lit) {
+		if (!lit || now <= since) {
+			return stored;
+		}
+		long begun = Math.ceilDiv(now - since, (long) KindledLanternItem.BURN_TICKS);
+		return (int) Math.max(0L, stored - begun);
+	}
+
+	/**
 	 * The charge fixed at {@code now}: the burnt measures taken off and the clock moved to the start of the measure
 	 * now burning, so lighting, putting out and recharging never lose or gain part of a measure.
 	 */

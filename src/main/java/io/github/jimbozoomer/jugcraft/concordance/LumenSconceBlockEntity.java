@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  * is open for offerings, so a Lampwright can keep a town's lamps lit), at most {@value #POUR} per pour and
  * {@value #RATE_LIMIT} per {@value #RATE_WINDOW} ticks; what does not fit stays in the lantern. Only the player who
  * placed it may draw Radiance back out into a lantern. Broken, it keeps its Radiance as the item's
- * {@code jugcraft:radiance}. Keep the numbers equal to tools/concordance.py.
+ * {@code jugcraft:radiance}, less the measure it was burning. Keep the numbers equal to tools/concordance.py.
  */
 public class LumenSconceBlockEntity extends BlockEntity {
 	public static final int CAPACITY = KindledLanternItem.CAPACITY;
@@ -164,12 +164,23 @@ public class LumenSconceBlockEntity extends BlockEntity {
 		}
 	}
 
-	/** Broken, the sconce keeps what is left as an unlit charge on the item. */
+	/**
+	 * The Radiance kept if it is taken down at {@code now}: a measure begun is a measure spent (roadmap step 29), so
+	 * breaking a sconce and placing it again never gives light for nothing.
+	 */
+	public long kept(long now) {
+		if (stored == 0 || now <= since) {
+			return stored;
+		}
+		return Math.max(0L, stored - Math.ceilDiv(now - since, (long) BURN_TICKS));
+	}
+
+	/** Broken, the sconce keeps what is left as an unlit charge on the item, less the measure it was burning. */
 	@Override
 	protected void collectImplicitComponents(DataComponentMap.Builder components) {
 		super.collectImplicitComponents(components);
 		long now = now();
-		long left = remaining(now);
+		long left = kept(now);
 		if (left > 0) {
 			components.set(JugcraftConcordance.RADIANCE, new LanternCharge((int) left, now));
 		}
