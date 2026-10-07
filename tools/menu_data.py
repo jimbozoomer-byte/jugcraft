@@ -19,6 +19,7 @@ from PIL import Image
 
 import agriculture as ag
 import menu
+import orchard
 from decor_data import MOD, rid, turned, self_drop
 
 LIBRARY = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "art", "owner-library", "originals", "Blocks",
@@ -42,7 +43,11 @@ def around(uv):
 
 
 def icon(name):
-    """The owner's icon a dish wears (its alpha decides the extruded templates' shape)."""
+    """The icon a dish wears (its alpha decides the extruded templates' shape): the owner's, or, for the orchards' juices
+    (tools/orchard.py, in Jugcraft's own art), the one tools/orchard_textures.py draws."""
+    if name in orchard.DISHES:
+        import orchard_textures
+        return orchard_textures.dish_icon(name)
     image = Image.open(os.path.join(LIBRARY, menu.owner(name) + ".png")).convert("RGBA")
     return image.crop((0, 0, 16, 16))
 

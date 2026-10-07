@@ -9,6 +9,14 @@
     {
       "chance": 0.15,
       "feature": "jugcraft:azalea_tree_checked"
+    },
+    {
+      "chance": 0.2,
+      "feature": "jugcraft:pear_checked"
+    },
+    {
+      "chance": 0.2,
+      "feature": "jugcraft:peach_checked"
     }
   ]
 }

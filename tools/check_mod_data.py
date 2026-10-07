@@ -22,6 +22,7 @@ import feasts
 import menu
 import rice
 import soil
+import orchard
 import owner_art
 import werewolf_model
 import midway
@@ -3002,6 +3003,7 @@ def check_agriculture():
     expected["mums"] = ag.MUM_PATCH["biomes"]
     expected[ag.WOLFSBANE["block"]] = ag.WOLFSBANE["biomes"]
     expected[rice.WILD_RICE["block"]] = rice.WILD_RICE["biomes"]
+    expected.update({orchard.feature(tree): info["biomes"] for tree, info in orchard.TREES.items()})
     expected.update({name: info["biomes"] for name, info in ag.FORAGING["mushrooms"].items()})
     if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
@@ -3302,11 +3304,12 @@ def check_menu():
             best = max(best, sum(value(i, seen + (ref,)) for i in inputs) / count)
         return best
 
-    dishes = {**menu.DISHES, **rice.DISHES}
+    dishes = {**menu.DISHES, **rice.DISHES, **orchard.DISHES}
     pot = {**menu.POT_RECIPES, **rice.POT_RECIPES}
     recipes = [(name, [ref for ref, n in info["inputs"].items() for _ in range(n)], info.get("count", 1)) for name, info in pot.items()]
     recipes += [(name, inputs, count) for name, (inputs, count) in menu.SHAPELESS.items()]
-    recipes += [(recipe["result"], recipe["inputs"], recipe["count"]) for recipe in rice.SHAPELESS if recipe["result"] in dishes]
+    recipes += [(recipe["result"], recipe["inputs"], recipe["count"]) for recipe in rice.SHAPELESS + orchard.SHAPELESS
+                if recipe["result"] in dishes]
     recipes += [(name, [full(info["input"])], 1) for name, info in menu.COOKING.items()]
     recipes += [(result, [info["input"]], count) for info in kitchen.CUTTING.values() for result, count in info["results"] if result in dishes]
     for name, inputs, count in recipes:
@@ -3316,7 +3319,7 @@ def check_menu():
             err(f"{name}: {count} give {given} hunger from {taken:g} in ingredients (at most {menu.COOK_BONUS} more)")
     for name, info in dishes.items():
         if "food" in info and not any(name == recipe[0] for recipe in recipes):
-            err(f"{name} has no recipe in tools/menu.py or tools/rice.py")
+            err(f"{name} has no recipe in tools/menu.py, tools/rice.py or tools/orchard.py")
 
     for name in menu.all_placed():
         model = load(ASSETS / "models" / "block" / f"{name}.json") or {}
@@ -3530,6 +3533,96 @@ def check_soil():
     loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{soil.RICH_FARMLAND['block']}.json") or {})
     if f'"{MOD}:{soil.RICH_SOIL["block"]}"' not in loot:
         err("Rich Soil Farmland must drop Rich Soil")
+
+
+def check_orchard():
+    """Orchards (tools/orchard.py): Java's OrchardTree, OrchardLeavesBlock and registrations match it; each tree's sapling
+    (planted by its seed, which a fruit crafts into), its leaves (a model for each fruit stage), their loot, tags and words;
+    each tree as a feature of oak and its own leaves in the shape TREES gives, a wild patch where its sapling could stand,
+    and the Jugcraft biomes that pick it; every texture Jugcraft draws for it; the juices' recipes and textures. (The pies,
+    preserves, foods and set-down juices are checked with the others: check_pies, check_pantry, the item check, check_menu.)"""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    declared = re.findall(r'^\t([A-Z]+)\("([a-z_]+)", "([a-z_]+)", (\d+), (\d+)\)[,;]', java.get("OrchardTree", ""), re.M)
+    wanted = [(tree.upper(), tree, info["seed"], str(info["pick"][0]), str(info["pick"][1])) for tree, info in orchard.TREES.items()]
+    if declared != wanted:
+        err(f"OrchardTree.java's trees {declared} differ from tools/orchard.py TREES (id, seed, pick, in order)")
+    chance = re.search(r"\bint FRUIT_CHANCE = (\d+);", java.get("OrchardLeavesBlock", ""))
+    if not chance or int(chance.group(1)) != orchard.FRUIT_CHANCE:
+        err("OrchardLeavesBlock.FRUIT_CHANCE differs from tools/orchard.py FRUIT_CHANCE")
+    for call in ("registerOrchardTrees();", "registerOrchards();", "props -> new OrchardLeavesBlock(tree, props)",
+                 "props -> new SaplingBlock(tree.grower, props)", 'Jugcraft.id(id + "_tree")'):
+        if call not in main + java.get("OrchardTree", ""):
+            err(f"The orchards' Java must call {call}")
+
+    def tagged(registry, path, entry):
+        return f"{MOD}:{entry}" in (load(DATA / "minecraft" / "tags" / registry / f"{path}.json") or {}).get("values", [])
+    for tree, info in orchard.TREES.items():
+        sapling, leaves, seed = orchard.sapling(tree), orchard.leaves(tree), info["seed"]
+        if ag.ITEMS.get(seed, {}).get("plants") != sapling or sapling not in ag.planted_blocks():
+            err(f"{seed} must plant {sapling}")
+        recipe = next((r for r in orchard.SHAPELESS if r["id"] == seed), None)
+        if not recipe or recipe["inputs"] != [f"{MOD}:{tree}"] or not (DATA / MOD / "recipe" / f"{seed}.json").exists():
+            err(f"A {tree} must craft into its {seed}")
+        state = load(ASSETS / "blockstates" / f"{leaves}.json") or {}
+        if set(state.get("variants", {})) != {f"fruit={f}" for f in range(len(orchard.LEAF_STAGES))}:
+            err(f"{leaves}: blockstate does not cover every fruit stage")
+        for stage in orchard.LEAF_STAGES:
+            model = load(ASSETS / "models" / "block" / f"{leaves}{stage}.json") or {}
+            if model.get("textures", {}).get("all") != f"{MOD}:block/{leaves}{stage}":
+                err(f"{leaves}{stage} needs its model, wearing block/{leaves}{stage}")
+        for kind, name in (("block", f"{leaves}{stage}") for stage in orchard.LEAF_STAGES):
+            if not (ASSETS / "textures" / kind / f"{name}.png").exists():
+                err(f"Missing texture {kind}/{name}")
+        for kind, name in (("block", sapling), ("item", tree), ("item", seed)):
+            if not (ASSETS / "textures" / kind / f"{name}.png").exists():
+                err(f"Missing texture {kind}/{name}")
+        for path in (ASSETS / "blockstates" / f"{sapling}.json", ASSETS / "models" / "block" / f"{sapling}.json",
+                     ASSETS / "items" / f"{leaves}.json", ASSETS / "items" / f"{tree}.json", ASSETS / "items" / f"{seed}.json"):
+            if not path.exists():
+                err(f"{tree} tree needs {path.relative_to(ROOT)}")
+        for key in (f"block.{MOD}.{sapling}", f"block.{MOD}.{leaves}", f"item.{MOD}.{tree}", f"item.{MOD}.{seed}"):
+            if key not in lang:
+                err(f"Missing words for {key}")
+        loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{leaves}.json") or {})
+        if f'"{MOD}:{seed}"' not in loot or f'"{MOD}:{tree}"' not in loot or '"fruit": "2"' not in loot:
+            err(f"{leaves} must drop its seed now and then, and its {tree}s when ripe")
+        if f'"{MOD}:{seed}"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{sapling}.json") or {}):
+            err(f"{sapling} must give its {seed} back")
+        if not (tagged("block", "leaves", leaves) and tagged("item", "leaves", leaves) and tagged("block", "saplings", sapling)):
+            err(f"The {tree} tree's leaves and sapling must be in minecraft:leaves and minecraft:saplings")
+        # The tree: oak logs under its own leaves, in its shape; wild where its sapling could stand; picked by its biomes.
+        feature = load(DATA / MOD / "worldgen" / "feature" / f"{orchard.feature(tree)}.json") or {}
+        if (feature.get("trunk_provider", {}).get("id") != "minecraft:oak_log"
+                or feature.get("foliage_provider", {}).get("id") != f"{MOD}:{leaves}"
+                or feature.get("trunk_placer", {}).get("base_height") != info["trunk"]["base_height"]
+                or feature.get("trunk_placer", {}).get("height_rand_a") != info["trunk"]["height_rand_a"]
+                or feature.get("foliage_placer", {}).get("radius") != info["foliage"]["radius"]
+                or feature.get("foliage_placer", {}).get("height") != info["foliage"]["height"]):
+            err(f"worldgen/feature/{orchard.feature(tree)}.json differs from tools/orchard.py TREES[{tree!r}]")
+        patch = load(DATA / MOD / "worldgen" / "placed_feature" / f"patch_{orchard.feature(tree)}.json") or {}
+        text = json.dumps(patch)
+        if (patch.get("feature") != f"{MOD}:{orchard.feature(tree)}" or f'"chance": {info["rarity"]}' not in text
+                or f'"state": "{MOD}:{sapling}"' not in text):
+            err(f"patch_{orchard.feature(tree)} must place the {tree} tree, one in {info['rarity']} chunks, where its sapling could stand")
+        if bm.PLACED_TREES.get(orchard.checked(tree)) != (f"{MOD}:{orchard.feature(tree)}", f"{MOD}:{sapling}"):
+            err(f"tools/biomes.py PLACED_TREES must place {orchard.checked(tree)} where the {tree} sapling could stand")
+        for biome, share in info["regions"].items():
+            if [f"{MOD}:{orchard.checked(tree)}", share] not in bm.BIOMES[biome]["trees"]["picks"]:
+                err(f"tools/biomes.py {biome} must pick {orchard.checked(tree)} ({share})")
+    for name in orchard.DISHES:
+        for kind, path in (("item", name), ("block", f"menu/{name}")):
+            if not (ASSETS / "textures" / kind / f"{path}.png").exists():
+                err(f"Missing texture {kind}/{path}")
+        if not (DATA / MOD / "recipe" / f"{name}.json").exists():
+            err(f"recipe/{name}.json is missing")
+    for preserve in orchard.PRESERVES:
+        if ag.PANTRY["preserves"].get(preserve) != orchard.PRESERVES[preserve] or preserve not in ag.POT_RECIPES:
+            err(f"{preserve} must be a preserve (tools/agriculture.py PANTRY) cooked in the Cooking Pot")
+    for filling, info in orchard.PIES.items():
+        if ag.PIES["fillings"].get(filling) != info:
+            err(f"The {filling} pie must be one of tools/agriculture.py PIES' fillings")
 
 
 def check_kitchen():
@@ -7805,6 +7898,7 @@ def main():
     check_menu()
     check_rice()
     check_soil()
+    check_orchard()
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()

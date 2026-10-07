@@ -4,10 +4,11 @@ import io.github.jimbozoomer.jugcraft.agriculture.PlacedDishBlock.DishShape;
 import java.util.List;
 
 /**
- * The menu (the kitchen and cooking expansion's slice 3, tools/menu.py) and the rice slice (slice 4, tools/rice.py): every
- * dish that can be set down as a {@link PlacedDishBlock} and how it stands, in the order of tools/menu.py all_placed() (the
- * menu's dishes, the foods Jugcraft already had that now wear the owner's art, then the rice dishes). Each block shares its
- * food's ID; tools/check_mod_data.py compares this list with tools/menu.py.
+ * The menu (the kitchen and cooking expansion's slice 3, tools/menu.py), the rice slice (slice 4, tools/rice.py) and the
+ * orchards (slice 6, tools/orchard.py): every dish that can be set down as a {@link PlacedDishBlock} and how it stands, in
+ * the order of tools/menu.py all_placed() (the menu's dishes, the foods Jugcraft already had that now wear the owner's art,
+ * the rice dishes, then the orchards' juices). Each block shares its food's ID; tools/check_mod_data.py compares this list
+ * with tools/menu.py.
  */
 public final class MenuDishes {
 	/** A dish that can be set down: its food's (and block's) ID and the shape its model takes. */
@@ -78,7 +79,9 @@ public final class MenuDishes {
 			new Dish("salmon_roll", DishShape.FLAT),
 			new Dish("cod_roll", DishShape.FLAT),
 			new Dish("kelp_roll", DishShape.FLAT),
-			new Dish("kelp_roll_slice", DishShape.FLAT));
+			new Dish("kelp_roll_slice", DishShape.FLAT),
+			new Dish("orange_juice", DishShape.STAND),
+			new Dish("lemonade", DishShape.STAND));
 
 	private MenuDishes() {
 	}

@@ -24,6 +24,7 @@ import feasts
 import menu
 import rice
 import soil
+import orchard
 
 FEATURE = "agriculture"
 
@@ -1535,6 +1536,8 @@ PANTRY = {"jar": "mason_jar", "jar_display": "Mason Jar", "vinegar": "cider_vine
               "pickled_peppers": {"display": "Pickled Peppers", "food": [2, 0.4], "effect": ["FIRE_RESISTANCE", 15], "color": 0x4A8A2A,
                                   "kind": "pickle"},
               "corn_relish": {"display": "Corn Relish", "food": [3, 0.5], "effect": None, "color": 0xE0B828, "kind": "pickle"}}}
+# Orchards (tools/orchard.py): marmalade, peach preserves and pear butter.
+PANTRY["preserves"].update(orchard.PRESERVES)
 
 
 # ---------------------------------------------------------------- Fall additions 4: crows and working scarecrows
@@ -1826,6 +1829,8 @@ PIES = {"oven": "hearth_oven", "oven_display": "Hearth Oven", "dough": "pastry_d
                             "with": ["minecraft:sweet_berries", "minecraft:sweet_berries", "minecraft:milk_bucket"], "owner": True}}}
 # The apple pie wears the owner's art too (the owner chose it over Jugcraft's on 7 October 2026; tools/feasts.py).
 PIES["fillings"]["apple"]["owner"] = True
+# Orchards (tools/orchard.py): the peach and lemon meringue pies, in Jugcraft's art (after the others: PieFilling's order).
+PIES["fillings"].update(orchard.PIES)
 
 
 def pie_name(filling):
@@ -2611,13 +2616,14 @@ def giant_blocks():
 def planted_blocks():
     """Blocks that a seed item places: crops, gourd stems and vines, the cranberry bush and the fruit trees' saplings."""
     return (crop_blocks() + [stem(gourd) for gourd in GOURDS]
-            + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"], GIANT_PUMPKIN["vine"]])
+            + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"], GIANT_PUMPKIN["vine"]]
+            + [orchard.sapling(tree) for tree in orchard.TREES])
 
 
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
-            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless() + list(feasts.PLACED_PIES) + menu.blocks() + rice.itemless() + soil.itemless())
+            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless() + list(feasts.PLACED_PIES) + menu.blocks() + rice.itemless() + soil.itemless() + orchard.itemless())
 
 
 def all_blocks():
@@ -2628,7 +2634,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks())
 
 
 def all_items():
@@ -2639,7 +2645,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items() + feasts.items() + rice.items() + soil.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items())
 
 
 def owns(entry_id):
@@ -2772,3 +2778,8 @@ SHAPELESS += soil.SHAPELESS
 SHAPED += soil.SHAPED
 # Unpacking a storage block gives back exactly what packed it; tools/check_mod_data.py's recipe-loop check leaves these out.
 UNPACKING = rice.UNPACKING + soil.UNPACKING
+
+# Kitchen and cooking expansion, slice 6: orchards (tools/orchard.py). The pies and preserves joined PIES and PANTRY above.
+ITEMS.update(orchard.ITEMS)
+POT_RECIPES.update(orchard.POT_RECIPES)
+SHAPELESS += orchard.SHAPELESS

@@ -92,6 +92,12 @@
     "jugcraft:cod_roll",
     "jugcraft:kelp_roll",
     "jugcraft:kelp_roll_slice",
+    "jugcraft:pear",
+    "jugcraft:peach",
+    "jugcraft:lemon",
+    "jugcraft:orange",
+    "jugcraft:orange_juice",
+    "jugcraft:lemonade",
     "jugcraft:sweet_berry_jam",
     "jugcraft:apple_butter",
     "jugcraft:pumpkin_butter",
@@ -100,6 +106,9 @@
     "jugcraft:pickled_beets",
     "jugcraft:pickled_peppers",
     "jugcraft:corn_relish",
+    "jugcraft:orange_marmalade",
+    "jugcraft:peach_preserves",
+    "jugcraft:pear_butter",
     "jugcraft:red_bean_mooncake",
     "jugcraft:chestnut_mooncake",
     "jugcraft:pumpkin_mooncake",
@@ -109,6 +118,8 @@
     "jugcraft:sweet_potato_pie_slice",
     "jugcraft:chestnut_pie_slice",
     "jugcraft:chocolate_pie_slice",
-    "jugcraft:sweet_berry_cheesecake_slice"
+    "jugcraft:sweet_berry_cheesecake_slice",
+    "jugcraft:peach_pie_slice",
+    "jugcraft:lemon_meringue_pie_slice"
   ]
 }

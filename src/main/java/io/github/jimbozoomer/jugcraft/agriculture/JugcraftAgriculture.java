@@ -483,6 +483,7 @@ public final class JugcraftAgriculture {
 				.sound(SoundType.WET_GRASS));
 		registerChestnutTree();
 		registerAppleTree();
+		registerOrchardTrees();
 		// Generated trees' seasonal leaves start in today's look (tools/trees.py DECORATOR).
 		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("seasonal_leaves"), SeasonalLeavesDecorator.TYPE);
 		registerTree("larch", "larch_needles", LARCH_GROWER, LARCH_LEAVES, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
@@ -647,6 +648,7 @@ public final class JugcraftAgriculture {
 		registerMenu();
 		registerRice();
 		registerSoil();
+		registerOrchards();
 		registerPlacedDishes();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
@@ -2875,6 +2877,43 @@ public final class JugcraftAgriculture {
 		FlammableBlockRegistry.getDefaultInstance().add(leaves, 30, 60);
 	}
 
+	/**
+	 * The orchards' fruit trees ({@link OrchardTree}, tools/orchard.py): each one's sapling (planted from its seed) and its
+	 * leaves, which blossom and fruit as the apple tree's do. Their trunks are vanilla oak, so they need no wood of their own.
+	 */
+	private static void registerOrchardTrees() {
+		for (OrchardTree tree : OrchardTree.values()) {
+			registerBlock(tree.sapling(), props -> new SaplingBlock(tree.grower, props) {
+			}, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING));
+			Block leaves = registerBlock(tree.leaves(), props -> new OrchardLeavesBlock(tree, props),
+					BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES).mapColor(MapColor.PLANT));
+			registerItem(tree.leaves(), props -> new BlockItem(leaves, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
+			FlammableBlockRegistry.getDefaultInstance().add(leaves, 30, 60);
+		}
+	}
+
+	/**
+	 * Orchards (the kitchen and cooking expansion's slice 6, tools/orchard.py), in Jugcraft's own art: the pear, peach,
+	 * lemon and orange, each tree's seed (a fruit crafts into it), the two juices (set down standing, MenuDishes) and the
+	 * three preserves. Their trees are registered with the others ({@link #registerOrchardTrees()}); their pies are
+	 * {@link PieFilling#PEACH} and {@link PieFilling#LEMON}.
+	 */
+	private static void registerOrchards() {
+		food("pear", 4, 0.3F, COMPOST_MEDIUM_HIGH);
+		seeds("pear_seeds", "pear_sapling", COMPOST_LOW);
+		food("peach", 4, 0.3F, COMPOST_MEDIUM_HIGH);
+		seeds("peach_pit", "peach_sapling", COMPOST_LOW);
+		food("lemon", 2, 0.1F, COMPOST_MEDIUM_HIGH);
+		seeds("lemon_seeds", "lemon_sapling", COMPOST_LOW);
+		food("orange", 4, 0.3F, COMPOST_MEDIUM_HIGH);
+		seeds("orange_seeds", "orange_sapling", COMPOST_LOW);
+		drink("orange_juice", 5, 0.5F, MobEffects.HEALTH_BOOST, 60);
+		drink("lemonade", 4, 0.4F, MobEffects.SPEED, 30);
+		preserve("orange_marmalade", 3, 0.4F, null, 0, 0xE0761A);
+		preserve("peach_preserves", 3, 0.4F, null, 0, 0xF09A50);
+		preserve("pear_butter", 4, 0.5F, null, 0, 0xB8923E);
+	}
+
 	/** Wild plant patches (data/jugcraft/worldgen) in the biomes each crop comes from. New chunks only. */
 	private static void registerWorldgen() {
 		if (!JugcraftConfig.isFeatureEnabled(FEATURE)) {
@@ -2904,6 +2943,11 @@ public final class JugcraftAgriculture {
 		wildPatch("wild_rice", ConventionalBiomeTags.IS_SWAMP, ConventionalBiomeTags.IS_RIVER);
 		wildPatch("chestnut_tree", ConventionalBiomeTags.IS_FOREST);
 		wildPatch("apple_tree", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
+		// The orchards' fruit trees, in the biomes they grow in (tools/orchard.py TREES "biomes").
+		wildPatch("pear_tree", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_BIRCH_FOREST);
+		wildPatch("peach_tree", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_SAVANNA);
+		wildPatch("lemon_tree", ConventionalBiomeTags.IS_SAVANNA);
+		wildPatch("orange_tree", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_JUNGLE);
 		// Halloween harvest: heirloom pumpkins and bottle gourds on grass, and mums in flower-rich places.
 		wildPatch("white_pumpkin", ConventionalBiomeTags.IS_BIRCH_FOREST, ConventionalBiomeTags.IS_SNOWY);
 		wildPatch("jarrahdale_pumpkin", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_WINDSWEPT);

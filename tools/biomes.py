@@ -148,6 +148,8 @@ RULES = [
 
 # Trees from other features, given a placed feature ("<name>") that checks the given sapling-like block would survive.
 PLACED_TREES = {"chestnut_checked": ("jugcraft:chestnut", "jugcraft:chestnut_sapling"),
+                # The orchards' fruit trees (tools/orchard.py), picked by the Orchard, Mediterranean Forest and Subtropics.
+                **{f"{tree}_checked": (f"jugcraft:{tree}_tree", f"jugcraft:{tree}_sapling") for tree in ("pear", "peach", "lemon", "orange")},
                 "azalea_tree_checked": ("minecraft:azalea_tree", "minecraft:azalea"),
                 # Huge mushrooms as trees, on soil (where an oak sapling could stand).
                 "huge_red_mushroom_on_soil": ("minecraft:huge_red_mushroom", "minecraft:oak_sapling"),
@@ -833,20 +835,23 @@ BIOMES = {
         "untags": ["minecraft:is_forest"],
         "tags": ["c:is_dead", "c:is_dry"],
     },
-    # A Mediterranean forest: tall cypresses, oaks and dark oaks, shrubs, peonies; villages.
+    # A Mediterranean forest: tall cypresses, oaks and dark oaks, lemon and orange trees, shrubs, peonies; villages.
     "mediterranean_forest": {
         "display": "Mediterranean Forest", "base": "forest", "temperature": 0.8, "downfall": 0.5, "seasons": True, "winter_snow": False,
         "trees": {"count": [5, 6], "default": "jugcraft:cypress_checked", "picks": [
-            ["minecraft:oak_checked", 0.3], ["minecraft:dark_oak_checked", 0.15], ["jugcraft:oak_bush_checked", 0.2]]},
+            ["minecraft:oak_checked", 0.3], ["minecraft:dark_oak_checked", 0.15], ["jugcraft:oak_bush_checked", 0.2],
+            ["jugcraft:lemon_checked", 0.1], ["jugcraft:orange_checked", 0.1]]},
         "extras": ["peonies", "bushes_dense"],
         "tags": ["minecraft:has_structure/village_plains"],
     },
-    # An orchard: chestnut trees (the agriculture branch's), oaks with bees and flowering azaleas, rose bushes and daisies.
+    # An orchard: chestnut, pear and peach trees (the agriculture branch's), oaks with bees and flowering azaleas, rose
+    # bushes and daisies.
     "orchard": {
         "display": "Orchard", "base": "plains", "temperature": 0.8, "downfall": 0.5, "seasons": True,
         "effects": {"grass_color": "#8fbd5a", "foliage_color": "#77ad48"},
         "trees": {"count": [2, 3], "default": "jugcraft:chestnut_checked", "picks": [
-            ["minecraft:oak_bees_002", 0.3], ["jugcraft:azalea_tree_checked", 0.15]]},
+            ["minecraft:oak_bees_002", 0.3], ["jugcraft:azalea_tree_checked", 0.15], ["jugcraft:pear_checked", 0.2],
+            ["jugcraft:peach_checked", 0.2]]},
         "extras": ["rose_bushes", "oxeye_daisies"],
         "tags": ["c:is_plains"],
     },
@@ -886,14 +891,14 @@ BIOMES = {
                       ["minecraft:sheep", 8, 4, 4]],
         "tags": ["c:is_tropical", "minecraft:has_structure/jungle_temple"],
     },
-    # Warm, green, plains-like country with flowering azaleas, oaks, birches, small palms and vine-hung oaks,
-    # hydrangeas and sugar cane; villages.
+    # Warm, green, plains-like country with flowering azaleas, oaks, birches, small palms, vine-hung oaks and lemon and
+    # orange trees, hydrangeas and sugar cane; villages.
     "subtropics": {
         "display": "Subtropics", "base": "plains", "temperature": 0.9, "downfall": 0.7, "seasons": False,
         "effects": {"grass_color": "#6cc043", "foliage_color": "#5ab035"},
         "trees": {"count": [2, 3], "default": "jugcraft:azalea_tree_checked", "picks": [
             ["minecraft:oak_checked", 0.3], ["minecraft:birch_checked", 0.1], ["jugcraft:small_palm_checked", 0.2],
-            ["jugcraft:tall_vine_oak_checked", 0.1]]},
+            ["jugcraft:tall_vine_oak_checked", 0.1], ["jugcraft:lemon_checked", 0.15], ["jugcraft:orange_checked", 0.15]]},
         "extras": ["hydrangeas", "field_flowers"],
         "tags": [],
     },

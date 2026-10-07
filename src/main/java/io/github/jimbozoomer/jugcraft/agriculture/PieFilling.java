@@ -4,9 +4,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The pies a Hearth Oven bakes, each from its filling (and pastry and sugar): apple, pumpkin cream, cranberry, sweet potato,
- * chestnut, chocolate and the sweet berry cheesecake. Each comes as a raw pie ({@code raw_<pie>}), a baked pie placed like a
- * cake ({@code <pie>}, eaten or cut a slice at a time) and a slice ({@code <pie>_slice}); {@code <pie>} is
- * {@code <id>_pie} but for the cheesecake. {@link #color} is the filling's, for the oven's renderer. The Hearth Oven saves a
+ * chestnut, chocolate, the sweet berry cheesecake, and the orchards' peach and lemon meringue pies. Each comes as a raw pie
+ * ({@code raw_<pie>}), a baked pie placed like a cake ({@code <pie>}, eaten or cut a slice at a time) and a slice
+ * ({@code <pie>_slice}); {@code <pie>} is {@code <id>_pie} but for the cheesecake and the lemon meringue pie. {@link #color} is the filling's, for the oven's renderer. The Hearth Oven saves a
  * filling by its place in this list, so new fillings go at the end.
  */
 public enum PieFilling {
@@ -16,7 +16,9 @@ public enum PieFilling {
 	SWEET_POTATO("sweet_potato", "sweet_potato_pie", 4, 0.7F, 0xD8682A),
 	CHESTNUT("chestnut", "chestnut_pie", 5, 0.7F, 0x6A3E1E),
 	CHOCOLATE("chocolate", "chocolate_pie", 4, 0.6F, 0x5A3220),
-	SWEET_BERRY("sweet_berry", "sweet_berry_cheesecake", 4, 0.6F, 0xB0283C);
+	SWEET_BERRY("sweet_berry", "sweet_berry_cheesecake", 4, 0.6F, 0xB0283C),
+	PEACH("peach", "peach_pie", 4, 0.6F, 0xE8904A),
+	LEMON("lemon", "lemon_meringue_pie", 4, 0.6F, 0xF0D040);
 
 	public final String id;
 	/** The baked pie's ID; the raw pie and the slice are named from it. */

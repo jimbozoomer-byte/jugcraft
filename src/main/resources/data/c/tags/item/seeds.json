@@ -24,6 +24,10 @@
     "#c:seeds/ornamental_corn",
     "#c:seeds/apple",
     "#c:seeds/rice",
+    "#c:seeds/pear",
+    "#c:seeds/peach",
+    "#c:seeds/lemon",
+    "#c:seeds/orange",
     "jugcraft:acorn"
   ]
 }

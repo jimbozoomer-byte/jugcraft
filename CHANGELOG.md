@@ -46,6 +46,13 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: Orchards
+- The sixth slice of the kitchen and cooking expansion: four fruit trees in Jugcraft's own art, as the owner chose (their library has no fruit trees yet).
+- **Pear, peach, lemon and orange trees** grow from their seeds (a peach's pit) on oak trunks, each in its own shape. Like the apple tree, their leaves blossom and then hang with ripe fruit; a right-click picks it and the tree fruits again. A fruit crafts into its seed.
+- **Wild trees:** pears and peaches in the Orchard, lemons and oranges in the Mediterranean Forest and the Subtropics, and all four in vanilla forests, plains, savannas and jungles.
+- **What the fruit makes:** Orange Juice and Lemonade (set down as the menu's drinks are), Peach and Lemon Meringue Pies from the Hearth Oven, and Orange Marmalade, Peach Preserves and Pear Butter in Mason Jars.
+- Details: [docs/features/orchards.md](docs/features/orchards.md).
+
 ### Unmerged: Soil, compost and storage
 - The fifth slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
 - **Organic Compost** (dirt, straw, bone meal and rotten flesh) rots through four stages into **Rich Soil**, faster when wet.

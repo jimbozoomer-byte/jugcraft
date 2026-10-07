@@ -259,6 +259,8 @@ def items():
 
 
 def all_placed():
-    """Every dish that sets down: the menu's, then the rice slice's (tools/rice.py); MenuDishes.PLACED in this order."""
+    """Every dish that sets down: the menu's, then the rice slice's (tools/rice.py), then the orchards' juices
+    (tools/orchard.py); MenuDishes.PLACED in this order."""
+    import orchard
     import rice
-    return {**placed(), **rice.placed()}
+    return {**placed(), **rice.placed(), **orchard.placed()}

@@ -104,7 +104,8 @@
 			"io.github.jimbozoomer.jugcraft.test.FeastsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MenuGameTests",
 			"io.github.jimbozoomer.jugcraft.test.RiceGameTests",
-			"io.github.jimbozoomer.jugcraft.test.SoilGameTests"
+			"io.github.jimbozoomer.jugcraft.test.SoilGameTests",
+			"io.github.jimbozoomer.jugcraft.test.OrchardGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
@@ -208,7 +209,8 @@
 			"io.github.jimbozoomer.jugcraft.test.FeastsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MenuClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.RiceClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.SoilClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.SoilClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.OrchardClientGameTests"
 		]
 	},
 	"depends": {
