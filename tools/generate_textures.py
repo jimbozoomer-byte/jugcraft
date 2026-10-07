@@ -1336,6 +1336,8 @@ def machines():
     exosuit_art.draw_all(save, save_armor)
     import grapple
     grapple.draw_all(save)
+    import guns
+    guns.draw_all(save)
     import arms
     arms.draw_all(save)
     import arms_variants

@@ -207,6 +207,8 @@ def assets():
     artillery.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import tower_guns
     tower_guns.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import guns
+    guns.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
@@ -957,7 +959,8 @@ def pixel_hollows_assets(lang):
         lang[f"subtitles.{MOD}.{event}"] = subtitle
     import choir_sounds
     import drone_sounds
-    write(ASSETS / "sounds.json", {**drone_sounds.SOUNDS, **ph.SOUNDS, **choir_sounds.SOUNDS})
+    import guns
+    write(ASSETS / "sounds.json", {**drone_sounds.SOUNDS, **ph.SOUNDS, **choir_sounds.SOUNDS, **guns.SOUNDS})
 
 
 def petro_assets(lang):

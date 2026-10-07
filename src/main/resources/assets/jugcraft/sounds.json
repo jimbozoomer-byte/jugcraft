@@ -137,6 +137,121 @@
       }
     ]
   },
+  "guns.gun_rustle": {
+    "subtitle": "subtitles.jugcraft.guns.gun_rustle",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_rustle_gun_rustle"
+      }
+    ]
+  },
+  "guns.rack": {
+    "subtitle": "subtitles.jugcraft.guns.rack",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/rack_rack"
+      }
+    ]
+  },
+  "guns.bolt_release": {
+    "subtitle": "subtitles.jugcraft.guns.bolt_release",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bolt_release_bolt_release"
+      }
+    ]
+  },
+  "guns.bolt": {
+    "subtitle": "subtitles.jugcraft.guns.bolt",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bolt_bolt"
+      }
+    ]
+  },
+  "guns.bolt_pull": {
+    "subtitle": "subtitles.jugcraft.guns.bolt_pull",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bolt_pull_bolt_pull"
+      }
+    ]
+  },
+  "guns.reload_mag_out": {
+    "subtitle": "subtitles.jugcraft.guns.reload_mag_out",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/mag_out_mag_out"
+      }
+    ]
+  },
+  "guns.reload_mag_in": {
+    "subtitle": "subtitles.jugcraft.guns.reload_mag_in",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/mag_in_mag_in"
+      }
+    ]
+  },
+  "guns.slap": {
+    "subtitle": "subtitles.jugcraft.guns.slap",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/slap_slap"
+      }
+    ]
+  },
+  "guns.reload_end": {
+    "subtitle": "subtitles.jugcraft.guns.reload_end",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/reload_end_reload_end"
+      }
+    ]
+  },
+  "guns.shell_in": {
+    "subtitle": "subtitles.jugcraft.guns.shell_in",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_sounds_insert"
+      }
+    ]
+  },
+  "guns.dry_fire": {
+    "subtitle": "subtitles.jugcraft.guns.dry_fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/rusty_gnat_copper_jam"
+      }
+    ]
+  },
+  "guns.rust_midge.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/rusty_gnat_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.patchwork_carbine.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/makeshift_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.thunderpipe.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/boomstick_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [
