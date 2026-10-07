@@ -33,8 +33,15 @@ TREE = {
                                  "fortune_module"], "Tinkerer", "Make an upgrade module for a powered tool", "task"),
     "rocket_pack": ("charging_station", "rocket_pack", "Rocketeer", "Make a rocket pack and take to the air", "challenge"),
     # Batch 25: gear.
-    "steel_armor": ("steel", ["steel_helmet", "steel_chestplate", "steel_leggings", "steel_boots"], "Suited Up",
+    # A Kaiser piece is steel armor too (docs/features/steampunk-and-kaiser-armor.md), so one got by trade counts.
+    "steel_armor": ("steel", ["steel_helmet", "steel_chestplate", "steel_leggings", "steel_boots", "kaiser_helmet",
+                              "kaiser_chestplate", "kaiser_leggings", "kaiser_boots"], "Suited Up",
                     "Make a piece of steel armor", "task"),
+    # Steampunk and Kaiser Armor: bronze and steel armor smithed into their stylized looks.
+    "steampunk_armor": ("bronze", ["steampunk_helmet", "steampunk_chestplate", "steampunk_leggings", "steampunk_boots"],
+                        "Goggles On", "Smith a Steampunk Pattern onto a piece of bronze armor", "task"),
+    "kaiser_armor": ("steel_armor", ["kaiser_helmet", "kaiser_chestplate", "kaiser_leggings", "kaiser_boots"],
+                     "On Parade", "Smith a Kaiser Pattern onto a piece of steel armor", "task"),
     "paxel": ("steel", [f"{tier}_paxel" for tier in ("wood", "stone", "iron", "gold", "diamond", "netherite", "bronze",
                                                       "steel")], "Jack of All Trades", "Make a paxel", "task"),
     # Batch 42: the arms, in bronze from the bronze age on.
@@ -61,6 +68,10 @@ TREE = {
     "arms_vi": ("bronze", [f"{metal}_{kind}" for metal in ("bronze", "steel") for kind in (
         "katana", "brazier_mace", "longbow", "arbalest", "heater_shield", "tower_shield")],
         "War Kit", "Forge a katana, brazier mace, longbow, arbalest, heater shield or tower shield", "task"),
+    # Batch 59: Arms VIII, the thrown arms, from the bronze age on.
+    "arms_viii": ("bronze", [f"{metal}_{kind}" for metal in ("bronze", "steel") for kind in (
+        "javelin", "francisca", "chakram", "harpoon")],
+        "Let Fly", "Forge a javelin, francisca, chakram or harpoon", "task"),
     # Batch 27: gear and plastic blocks.
     "scuba": ("rubber", ["scuba_mask", "scuba_tank"], "Deep Breath", "Make scuba gear and breathe under water on oxygen",
               "task"),
