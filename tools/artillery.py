@@ -20,7 +20,7 @@ import math
 
 from PIL import Image
 
-import gun_icons
+import item_icons
 from steampunk_models import box, cyl
 from tower_guns import STEEL, TUBE, bore
 from zeppelin import tiled_quads
@@ -640,4 +640,4 @@ def draw_all(save):
     folder, name = ENVELOPE_TEXTURE.rsplit("/", 1)
     save(envelope_texture(), folder, name)
     for item in ITEMS:
-        save(gun_icons.draw(item), "item", item)
+        save(item_icons.draw(item), "item", item)
