@@ -79,6 +79,10 @@ ARMOR_STYLES = {
 ARMOR_TIERS = {
     "bloodthorn": {"display": "Bloodthorn", "armor": (40, (3, 7, 9, 3), 15, 3.5, 0.15),
                    "repair": "minecraft:netherite_ingot", "fire_resistant": True},
+    # Reforged White Diamond: beside Bloodthorn rather than above it, in other strengths: the heavier helm, the longest
+    # wear and the best enchanting, but netherite's toughness and no fire resistance; mended with diamonds.
+    "reforged_white_diamond": {"display": "Reforged White Diamond", "armor": (45, (3, 7, 8, 4), 20, 3.0, 0.1),
+                               "repair": "minecraft:diamond", "fire_resistant": False},
 }
 
 

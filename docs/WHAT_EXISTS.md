@@ -371,9 +371,10 @@ Every `FenceBlock` and `IronBarsBlock` has the properties `north_east`, `south_e
   - record: [steampunk-and-kaiser-armor.md](features/steampunk-and-kaiser-armor.md).
 - **Armor-only tiers (the owner's armor designs):**
   - items `bloodthorn_<helmet|chestplate|leggings|boots>`: plain armor items in `BLOODTHORN_ARMOR`, a step above netherite and fire resistant, repaired with netherite ingots (`#jugcraft:repairs_bloodthorn_gear`). No recipe or drop yet: creative only;
-  - `gear/JugcraftGear`: `ARMOR_TIERS` and `armorTier(...)`, from `tools/gear.py` `ARMOR_TIERS`. Each tier is worn only as a 3D model (`tools/bloodthorn_armor.py` on the knight armor's toolkit, drawn by `client/WornModelLayer`), so it has no flat layer and no equipment asset file; `check_mod_data.py` (`check_armor_tiers`) holds every piece to a 3D model and an icon;
+  - items `reforged_white_diamond_<helmet|chestplate|leggings|boots>`: in `REFORGED_WHITE_DIAMOND_ARMOR`, beside Bloodthorn (a heavier helm, the longest wear, the best enchanting; not fire resistant), repaired with diamonds (`#jugcraft:repairs_reforged_white_diamond_gear`). Creative only;
+  - `gear/JugcraftGear`: `ARMOR_TIERS` and `armorTier(...)`, from `tools/gear.py` `ARMOR_TIERS`. Each tier is worn only as a 3D model (`tools/bloodthorn_armor.py` and `tools/white_diamond_armor.py`, on the knight armor's toolkit, drawn by `client/WornModelLayer`), so it has no flat layer and no equipment asset file; `check_mod_data.py` (`check_armor_tiers`) holds every piece to a 3D model and an icon;
   - tests `ArmorTiersGameTests` and `ArmorTiersClientGameTests` cover every tier in the list;
-  - record: [bloodthorn-armor.md](features/bloodthorn-armor.md).
+  - records: [bloodthorn-armor.md](features/bloodthorn-armor.md), [reforged-white-diamond-armor.md](features/reforged-white-diamond-armor.md).
 - **Arms motion (batch 43, client):**
   - `client/arms/ArmsMotion` plays keyframed guards, combos and parry poses for the arms, in third person (torso, head, arms, legs and the item in the hand, with the off hand kept on two-handed weapons) and first person. `ArmsPose` is one player's pose, kept on the render state with Fabric's render state data.
   - Motion files: `assets/jugcraft/arms_motion/<kind>.json`, from `tools/arms_moves.py` on `tools/arms_motion.py`. Preview renders: `tools/arms_motion_preview.py`.

@@ -1,7 +1,8 @@
 """The 3D armor sets' 16x16 inventory icons: the bronze and steel armor's, the knight armor (tools/knight_armor.py)
-drawn small, and Bloodthorn Armor's (tools/bloodthorn_armor.py, below), in the owner's style for item icons (vanilla's
-own size, a one-pixel outline in each part's darkest tone, never pure black, light from the top left, a few flat
-tones, chunky parts that read at a glance).
+drawn small, and Bloodthorn Armor's and Reforged White Diamond's (tools/bloodthorn_armor.py and
+tools/white_diamond_armor.py, below), in the owner's style for item icons (vanilla's own size, a one-pixel outline in
+each part's darkest tone, never pure black, light from the top left, a few flat tones, chunky parts that read at a
+glance).
 
 Each piece is one hand-drawn map, tools/armor_icons/<piece>.txt: 16 lines of 16 symbols, which the owner can edit
 directly (lines starting with # are comments). A map names no colours, only what each pixel is made of, so one map
@@ -51,6 +52,21 @@ Their symbols:
                     see armor_paint.BLOODTHORN), "mid" (crimson), "dark" (magenta), "seam" (plum), "void" (dark plum)
     U m u x         the under-layer: "under_light", "under_mid", "under_dark", and "under_darkest", which is both the
                     eye slits and the under-layer's own outline
+Reforged White Diamond (tools/white_diamond_armor.py) has reforged_white_diamond/helmet.txt and so on, coloured from
+armor_paint.WHITE_DIAMOND and drawn after the owner's renders of each piece on its own:
+    helmet      the white V crest, its point dipping into the charcoal T of the face, the light blue peak behind it, and
+                the swept wings rising outside it
+    chestplate  the wing pauldrons rising toward the outside over their lames, the light blue gem at the collar and the
+                white V down the chest, strips at the waist (no sleeves: the owner's chestplate on its own has none)
+    leggings    the belt, its top edge light blue, over the A of the two tassets, white along their outer edges and
+                lined lavender, then blue, inside, with the striped under-skirt between and under them
+    boots       two chunky boots under a light blue band, each with its diamond plate, a blue rim round a white heart
+Their symbols:
+    .               transparent
+    O               the outline: the metal's "void" (lavender) taken down to OUTLINE_LUMA, a deep blue violet
+    H L M D S V     the metal, light to dark: "light" (icy white), "mid_light" (pale cyan), "mid" (light cyan), "dark"
+                    (light blue), "seam" (blue), "void" (lavender)
+    U m u x         the charcoal under-layer: "under_light", "under_mid", "under_dark", "under_darkest" (the face)
 """
 import os
 
@@ -78,7 +94,11 @@ FITTINGS = {"steel": {"R": "light", "r": "mid", "Q": "leather_mid"},
 # metal's outline, its "void" taken down to OUTLINE_LUMA.
 OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "R": "gold_light", "M": "mid",
                                                "D": "dark", "S": "seam", "V": "void", "U": "under_light",
-                                               "m": "under_mid", "u": "under_dark", "x": "under_darkest"})}
+                                               "m": "under_mid", "u": "under_dark", "x": "under_darkest"}),
+       "reforged_white_diamond": (armor_paint.WHITE_DIAMOND, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark",
+                                                              "S": "seam", "V": "void", "U": "under_light",
+                                                              "m": "under_mid", "u": "under_dark",
+                                                              "x": "under_darkest"})}
 
 
 def luma(colour):

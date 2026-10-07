@@ -41,7 +41,10 @@ public class ArmorTiersGameTests {
 	private static final List<Tier> TIERS = List.of(
 			// Bloodthorn: a step above netherite (3/8/6/3, multiplier 37, 3.0, 0.1, 15).
 			new Tier("bloodthorn", new int[] {3, 9, 7, 3}, new int[] {440, 640, 600, 520}, 3.5, 0.15, 15,
-					"minecraft:netherite_ingot", true));
+					"minecraft:netherite_ingot", true),
+			// Reforged White Diamond: beside Bloodthorn, a heavier helm, the longest wear and the best enchanting.
+			new Tier("reforged_white_diamond", new int[] {4, 8, 7, 3}, new int[] {495, 720, 675, 585}, 3.0, 0.1, 20,
+					"minecraft:diamond", false));
 
 	/** Every tier's four pieces have its numbers, repair, fire resistance, slot, look and tags. */
 	@GameTest
