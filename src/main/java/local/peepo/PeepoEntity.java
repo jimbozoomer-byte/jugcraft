@@ -31,6 +31,23 @@ public final class PeepoEntity extends PathfinderMob {
     private static final EntityDataAccessor<Integer> REST = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> WHEEL_RUNNING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> RECOVERING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
+    public final net.minecraft.world.SimpleContainer belongings=new net.minecraft.world.SimpleContainer(10){
+        @Override public void setChanged(){syncBelongings();}
+    };
+    private void syncBelongings(){
+        if(level().isClientSide())return;
+        entityData.set(PUMPKIN,belongings.getItem(8).is(Items.JACK_O_LANTERN));
+        if(!isEating())setItemSlot(EquipmentSlot.MAINHAND,belongings.getItem(9).copy());
+    }
+    @Override protected void dropCustomDeathLoot(ServerLevel server,DamageSource source,boolean playerKill){
+        // The displayed hand is a copy; only the inventory owns the equipped item.
+        if(!isEating())setItemSlot(EquipmentSlot.MAINHAND,ItemStack.EMPTY);
+        super.dropCustomDeathLoot(server,source,playerKill);
+        for(int i=0;i<belongings.getContainerSize();i++){
+            var stack=belongings.removeItemNoUpdate(i);
+            if(!stack.isEmpty())spawnAtLocation(server,stack);
+        }
+    }
     private CompanionRoutine routine;
     public final CompanionOrders orders=new CompanionOrders(this);
     public void resetCompanionRoutine(){if(routine!=null)routine.resetOrders();}
@@ -143,6 +160,7 @@ public final class PeepoEntity extends PathfinderMob {
     @Override protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output); orders.save(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
         if(lunchOrigin!=null)output.store("LunchOrigin",net.minecraft.core.GlobalPos.CODEC,lunchOrigin);
+        net.minecraft.world.ContainerHelper.saveAllItems(output.child("Belongings"),belongings.getItems());
         output.putBoolean("NaturallySpawned", naturallySpawned);
         output.putInt("Energy",getEnergy());output.putInt("FoodRegenBonus",getFoodRegenBonus());output.putInt("FoodRegenTicks",getFoodRegenTicks());
         output.putBoolean("Recovering",isRecovering());
@@ -163,6 +181,11 @@ public final class PeepoEntity extends PathfinderMob {
         lunchOrigin=input.read("LunchOrigin",net.minecraft.core.GlobalPos.CODEC).orElse(null);
         int remaining=Math.clamp(input.getIntOr("EatingTicks",0),0,EAT_DURATION);
         entityData.set(EATING,isEdible(getMainHandItem()) ? remaining : 0);
+        belongings.getItems().replaceAll(stack->ItemStack.EMPTY);
+        var saved=input.child("Belongings");
+        if(saved.isPresent())net.minecraft.world.ContainerHelper.loadAllItems(saved.get(),belongings.getItems());
+        else if(isWearingPumpkin())belongings.getItems().set(8,new ItemStack(Items.JACK_O_LANTERN));
+        syncBelongings();
     }
     public boolean isBlushing() { return entityData.get(BLUSHING); }
     @Override public void tick() {
@@ -177,7 +200,7 @@ public final class PeepoEntity extends PathfinderMob {
         if (!level().isClientSide() && blushTicks > 0 && --blushTicks == 0) entityData.set(BLUSHING, false);
         if (level() instanceof ServerLevel server && isEating()) {
             getNavigation().stop();
-            if (!isEdible(getMainHandItem())) { entityData.set(EATING,0); return; }
+            if (!isEdible(getMainHandItem())) { entityData.set(EATING,0); lunchOrigin=null;syncBelongings();return; }
             int remaining=getEatingTicks();
             if (remaining%8==0) {
                 double angle=Math.toRadians(yBodyRot);
@@ -193,7 +216,7 @@ public final class PeepoEntity extends PathfinderMob {
                 heal(Math.max(1,food.nutrition()));
                 applyMealEnergy(food);
                 var remainder=eaten.get(DataComponents.USE_REMAINDER);
-                setItemSlot(EquipmentSlot.MAINHAND,ItemStack.EMPTY);
+                setItemSlot(EquipmentSlot.MAINHAND,belongings.getItem(9).copy());
                 if(remainder!=null){
                     var leftover=remainder.convertInto().create();
                     if(lunchOrigin!=null && lunchOrigin.dimension().equals(level().dimension())
@@ -258,7 +281,7 @@ public final class PeepoEntity extends PathfinderMob {
         if (stack.is(Items.JACK_O_LANTERN)) {
             if(!level().isClientSide() && orders.tamed() && !orders.allowed(player))return InteractionResult.CONSUME;
             if (!level().isClientSide() && !isWearingPumpkin()) {
-                entityData.set(PUMPKIN,true);
+                belongings.setItem(8,stack.copyWithCount(1));
                 stack.consume(1,player);
             }
             return InteractionResult.SUCCESS;

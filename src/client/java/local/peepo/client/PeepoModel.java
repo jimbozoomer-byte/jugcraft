@@ -11,6 +11,10 @@ public final class PeepoModel extends EntityModel<PeepoState> {
         leftArm=root.getChild("left_arm");rightArm=root.getChild("right_arm");
         leftLeg=root.getChild("left_leg");rightLeg=root.getChild("right_leg");
     }
+    public void translateToHand(com.mojang.blaze3d.vertex.PoseStack pose){
+        rightArm.translateAndRotate(pose);
+        pose.translate(0,2.6F/16F,0);
+    }
     @Override public void setupAnim(PeepoState s) {
         super.setupAnim(s);
         head.getChild("sleeping_eyes").visible=s.sleeping;
@@ -66,6 +70,7 @@ public final class PeepoModel extends EntityModel<PeepoState> {
             leftArm.zRot=rightArm.zRot=0;
             head.xRot=.04F;
         }
+        if(!s.held.isEmpty() && !s.eating && !s.wheelRunning && !s.sleeping)rightArm.xRot=-.65F;
         if(s.sleeping) {
             head.xRot=head.yRot=0;
             leftLeg.xRot=rightLeg.xRot=0;

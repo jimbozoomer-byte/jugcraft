@@ -16,6 +16,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
     public PeepoRenderer(EntityRendererProvider.Context context) { super(context, new PeepoModel(context.bakeLayer(PeepoClient.LAYER)), .18F);
         items=context.getItemModelResolver();
         addLayer(new FoodLayer(this));
+        addLayer(new HeldLayer(this));
         addLayer(new EyesLayer<PeepoState,PeepoModel>(this) {
             @Override public RenderType renderType() { return RenderTypes.eyes(PeepoMod.id("textures/entity/peepo_pumpkin_glow.png")); }
         });
@@ -43,7 +44,21 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.sleeping=entity.getRestMode()==CompanionEnergy.Rest.SLEEPING;
         state.sitting=entity.getRestMode()==CompanionEnergy.Rest.SITTING;
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;
+        items.updateForLiving(state.held,!state.eating && !state.sleeping ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
         items.updateForLiving(state.food,state.eating ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.FIXED,entity);
+    }
+    private static final class HeldLayer extends RenderLayer<PeepoState,PeepoModel> {
+        HeldLayer(PeepoRenderer renderer){super(renderer);}
+        @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
+            if(state.isInvisible || state.held.isEmpty())return;
+            pose.pushPose();
+            getParentModel().translateToHand(pose);
+            pose.rotateDegrees(com.mojang.math.Axis.XP,-90);
+            pose.rotateDegrees(com.mojang.math.Axis.YP,180);
+            pose.scale(.35F,.35F,.35F);
+            state.held.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,state.outlineColor);
+            pose.popPose();
+        }
     }
     private static final class FoodLayer extends RenderLayer<PeepoState,PeepoModel> {
         FoodLayer(PeepoRenderer renderer) { super(renderer); }
