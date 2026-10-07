@@ -14,7 +14,7 @@ from PIL import Image
 
 from agriculture import FIREWORKS
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 from decor9_textures import put
 from decor13_textures import icon
 
@@ -61,10 +61,7 @@ def rocket(shape):
 def crate():
     """Dark stained planks laid across, with iron corner straps and rivets."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, STAIN[1:], 28101, [2, 3, 1])
-    for y in (0, 5, 10, 15):
-        for x in range(16):
-            c.px(x, y, STAIN[0])
+    bs.planks(STAIN, 28101)(c)
     for x in (0, 1, 14, 15):
         for y in range(16):
             c.px(x, y, IRON[1] if x in (1, 14) else IRON[0])
@@ -76,19 +73,19 @@ def crate():
 
 def crate_top():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, STAIN[1:], 28102, [2, 3, 1])
-    for x in (0, 5, 10, 15):
-        for y in range(16):
-            c.px(x, y, STAIN[0])
+    bs.planks(STAIN, 28102, vertical=True)(c)
     return c.img
 
 
 def tube():
     """A mortar tube painted in orange and black bands (stretched round a narrow tube, so the bands run across)."""
     c = Canvas()
+    paints = {id(BLACK): bs.surface(BLACK, 28103, [2, 3, 1][:len(BLACK)], spread=0.6),
+              id(ORANGE): bs.surface(ORANGE, 28104, [2, 3, 1][:len(ORANGE)], spread=0.6)}
     for y in range(16):
         band = BLACK if (y // 4) % 2 else ORANGE
-        noise(c, 0, y, 15, y, band, 28103 + y, [2, 3, 1][:len(band)])
+        for x in range(16):
+            c.px(x, y, paints[id(band)](x, y))
     for x in range(0, 16, 4):
         c.px(x, 1, ORANGE[2])
         c.px(x + 2, 9, ORANGE[2])
@@ -108,7 +105,7 @@ def tube_top():
 def dial(mode):
     """A brass plate with a dark border and the mode's pips in red: one, a row of three, or three rows of three."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, BRASS, 28104, [1, 3, 2])
+    bs.fill(c, 0, 0, 15, 15, BRASS, 28104, [1, 3, 2])
     for i in range(16):
         for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
             c.px(x, y, BRASS[0])
@@ -122,7 +119,7 @@ def dial(mode):
 def paper():
     """A rocket's paper, pale, with faint wraps (tinted by the renderer)."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("e8e8e8"), rgb("f2f2f2"), rgb("ffffff")], 28105, [1, 2, 3])
+    bs.fill(c, 0, 0, 15, 15, [rgb("e8e8e8"), rgb("f2f2f2"), rgb("ffffff")], 28105, [1, 2, 3], spread=0.6)
     for y in (3, 8, 13):
         for x in range(16):
             c.px(x, y, rgb("d0d0d0"))

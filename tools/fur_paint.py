@@ -13,6 +13,13 @@ The painter works face by face on an RGBA canvas:
   textures are drawn as cut-outs, so cleared pixels let the fur's outline break the box's straight edge);
 - `ellipse`, `blob`, `line` and `glint` paint eyes, noses, pads, teeth and claws on top.
 
+A painter made with `clean=True` paints the clean, cartoon style (docs/ART_DIRECTION.md, "Creatures and faces: cute and
+clean"): every tone is snapped to a few flat bands, there is no soft noise or jitter, locks sit in neat staggered rows
+as big flat tapering points with a dark edge on their shadow side, fine strands are left out, and tufts and ragged
+edges are even points. `clean_painter` and `clean_ramp` go one step further for props painted mostly by formula (the
+fall fair): the painter's `noise` is flat, so formulas built on it lose their mottling, and `clean_ramp` snaps the
+tones those formulas pick to the same flat bands.
+
 Everything is deterministic (each texture is painted from a fixed seed) and drawn by code: no other texture is read,
 traced or recoloured.
 """
@@ -20,6 +27,16 @@ import math
 import random
 
 from PIL import Image
+
+
+def clean_ramp(colours, f):
+    """`ramp`, with `f` snapped to the clean style's flat bands."""
+    return ramp(colours, band(f))
+
+
+def clean_painter(width, height, seed):
+    """A clean painter whose `noise` is flat: every formula that adds a little noise to a tone paints it evenly."""
+    return Painter(width, height, seed, clean=True, quiet=True)
 
 
 def mix(a, b, t):
@@ -34,17 +51,30 @@ def ramp(colours, f):
     return mix(colours[i], colours[i + 1], f - i)
 
 
+# The clean style's band width: tones snap to multiples of this along a palette's ramp.
+BAND = 0.16
+
+
+def band(f):
+    return round(f / BAND) * BAND
+
+
 class Painter:
-    def __init__(self, width, height, seed):
+    def __init__(self, width, height, seed, clean=False, quiet=False):
         self.width = width
         self.height = height
+        self.quiet = quiet
         self.img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
         self.px = self.img.load()
         self.rng = random.Random(seed)
         self._grid = {}
+        self.clean = clean
 
     def noise(self, x, y, cell=8.0):
-        """Smooth value noise (0 to 1) with features about `cell` pixels across: the soft light and dark patches of a coat."""
+        """Smooth value noise (0 to 1) with features about `cell` pixels across: the soft light and dark patches of a coat
+        (a flat 0.5 for a `quiet` painter)."""
+        if self.quiet:
+            return 0.5
         gx, gy = x / cell, y / cell
         ix, iy = math.floor(gx), math.floor(gy)
         tx, ty = gx - ix, gy - iy
@@ -88,13 +118,18 @@ class Painter:
                     f = level
                 border = min(x, w - 1 - x, y, h - 1 - y) / max(2.0, min(w, h) * 0.18)
                 f -= edge * max(0.0, 1.0 - border)
-                f += 0.2 * (self.noise(x0 + x, y0 + y, 15.0) - 0.5) + self.rng.uniform(-0.015, 0.015)
+                if self.clean:
+                    f = band(f)
+                else:
+                    f += 0.2 * (self.noise(x0 + x, y0 + y, 15.0) - 0.5) + self.rng.uniform(-0.015, 0.015)
                 self.put(x0 + x, y0 + y, ramp(colours, f))
 
     def strands(self, rect, colours, level=0.5, flow=(0.0, 1.0), density=0.5, length=(4, 9), spread=0.22, light=0.15):
         """Short tapering hairs over `rect`, flowing along `flow`: `density` hairs per pixel of area (times 1/8), each
         `length` pixels long, its tone `level` give or take `spread`, lighter by `light` near the face's top."""
         x0, y0, w, h = rect
+        if self.clean:
+            return
         count = int(w * h * density / 8) + 1
         fx, fy = flow
         norm = math.hypot(fx, fy) or 1.0
@@ -120,6 +155,9 @@ class Painter:
         """Clumps of fur over `rect`: tapering locks flowing along `flow` (give or take a little), each lit along one side
         and shadowed along the other, darker at the root where it tucks under the lock above."""
         x0, y0, w, h = rect
+        if self.clean:
+            self._clean_locks(rect, colours, level, flow, length, width, light)
+            return
         fx, fy = flow
         norm = math.hypot(fx, fy) or 1.0
         fx, fy = fx / norm, fy / norm
@@ -158,8 +196,8 @@ class Painter:
         x0, y0, w, h = rect
         x = 0
         while x < w:
-            span = self.rng.randint(every - 1, every + 2)
-            tip = self.rng.randint(depth // 2, depth)
+            span = every + 1 if self.clean else self.rng.randint(every - 1, every + 2)
+            tip = (depth * 3) // 4 if self.clean else self.rng.randint(depth // 2, depth)
             for k in range(span):
                 # A V between two points: the gap is deepest between them.
                 cut = int(tip * (1.0 - abs(2.0 * k / max(1, span - 1) - 1.0)) ** 0.8)
@@ -173,10 +211,52 @@ class Painter:
         """Points of darker fur hanging into a face's bottom `depth` rows, one every `every` pixels."""
         x0, y0, w, h = rect
         for x in range(0, w, every):
-            tip = self.rng.randint(depth // 2, depth)
+            tip = depth if self.clean else self.rng.randint(depth // 2, depth)
             for k in range(tip):
                 for dx in range(-(tip - k) // 2, (tip - k) // 2 + 1):
-                    self.put(x0 + x + dx, y0 + h - 1 - k, ramp(colours, level - 0.1 + 0.05 * k / tip), 0.9)
+                    if self.clean:
+                        self.put(x0 + x + dx, y0 + h - 1 - k, ramp(colours, band(level - 0.1)))
+                    else:
+                        self.put(x0 + x + dx, y0 + h - 1 - k, ramp(colours, level - 0.1 + 0.05 * k / tip), 0.9)
+
+    def _clean_locks(self, rect, colours, level, flow, length, width, light):
+        """The clean style's locks: flat tapering points in neat staggered rows along `flow`, each one flat tone (two
+        alternating bands, lighter towards the face's top), edged with a darker band on its shadow side."""
+        x0, y0, w, h = rect
+        fx, fy = flow
+        norm = math.hypot(fx, fy) or 1.0
+        fx, fy = fx / norm, fy / norm
+        px, py = -fy, fx
+        n = int((length[0] + length[1]) * 0.9)
+        half = (width[0] + width[1]) / 2.4
+        step_along = max(3.0, n * 0.75)
+        step_across = max(2.0, half * 2.0)
+        # Cover the rect in lattice coordinates (along, across) about its centre.
+        cx0, cy0 = x0 + w / 2.0, y0 + h / 2.0
+        reach = math.hypot(w, h) / 2.0 + n
+        rows = int(reach / step_along) + 1
+        cols = int(reach / step_across) + 1
+        # Far rows first, so each lock's tip lies over the root of the lock beyond it: points hang the way the fur flows.
+        for i in range(rows, -rows - 1, -1):
+            for j in range(-cols, cols + 1):
+                a = i * step_along
+                b = j * step_across + (step_across / 2.0 if i % 2 else 0.0)
+                sx, sy = cx0 + fx * a + px * b, cy0 + fy * a + py * b
+                if not (x0 - n <= sx < x0 + w + n and y0 - n <= sy < y0 + h + n):
+                    continue
+                top = 1.0 - (sy - y0) / max(1, h)
+                tone = band(level + light * top + (0.08 if (i + j) % 2 else -0.04))
+                for k in range(n):
+                    t = k / n
+                    r = half * (1.0 - t) + 0.35
+                    lx, ly = sx + fx * k, sy + fy * k
+                    for jj in range(-int(r) - 1, int(r) + 2):
+                        if abs(jj) > r + 0.5:
+                            continue
+                        x, y = lx + px * jj, ly + py * jj
+                        if not (x0 <= x < x0 + w and y0 <= y < y0 + h):
+                            continue
+                        self.put(x, y, ramp(colours, tone - (BAND if jj > r - 0.5 else 0.0)))
 
     def ellipse(self, cx, cy, rx, ry, colour, alpha=1.0):
         for y in range(int(cy - ry) - 1, int(cy + ry) + 2):
@@ -192,7 +272,10 @@ class Painter:
                 u = (x + 0.5 - cx) / rx
                 v = (y + 0.5 - cy) / ry
                 if u * u + v * v <= 1.0:
-                    self.put(x, y, mix(light, dark, 0.5 + 0.5 * (u + v) / 1.414), alpha)
+                    t = 0.5 + 0.5 * (u + v) / 1.414
+                    if self.clean:
+                        t = 0.15 if t < 0.35 else 0.55 if t < 0.75 else 0.9
+                    self.put(x, y, mix(light, dark, t), alpha)
 
     def line(self, xa, ya, xb, yb, colour, width=1.0, alpha=1.0):
         n = int(max(abs(xb - xa), abs(yb - ya)) * 2) + 1

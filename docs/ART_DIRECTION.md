@@ -1,6 +1,12 @@
 # Art direction
 
-Jugcraft's look changes with its tiers, the way real technology did: the early game is brass-and-steam, the later tiers move towards dieselpunk, and electrical power gear and the high-tech tiers to come are graphite and glowing light. Every texture and model is original, drawn by the generators in `tools/`.
+Jugcraft's look changes with its tiers, the way real technology did: the early game is brass-and-steam, the later tiers move towards dieselpunk, and electrical power gear and the high-tech tiers to come are graphite and glowing light. Production art uses the generators in `tools/` and suitable assets from the [shared owner library](../art/owner-library/README.md).
+
+## Shared assets for every content branch
+
+The owner supplied a [reusable asset collection](../art/owner-library/README.md) on 6 October 2026 and explicitly permits direct use, recoloring/adaptation, or reference when an asset fits the feature. Browse the [complete catalog](../art/owner-library/catalog/README.md) before making new assets. It includes blocks, ores, metals, machinery, guns, planes, sounds, animations, weapons, armor, trees, biomes, farming and food. Its supplied stone sheets are useful for the building and ceramics branch as well as industrial settings.
+
+Keep the originals in the library intact, preserve required sidecars and frame layouts, and record the source path and changes in the feature's provenance. Adapt material palettes to the appropriate branch and tier. A suitable owner-supplied asset may be reused directly; other external references retain their documented source and license rules.
 
 ## Rules for everything
 - Detailed models built from boxes (see `tools/steampunk_models.py`): round prisms, gears, gauges, rivets, pipes. No flat cubes where a real machine would have shape.
@@ -10,14 +16,14 @@ Jugcraft's look changes with its tiers, the way real technology did: the early g
   - Textures on an opaque piece are opaque to their corners (a round dish painted on a square face fills the corners with metal).
   - Sculpted decor is closed by its writer (`model_writer.finish_closed` through `flora_art.closing_writer`, used by the Witching Season sets): a face a box leaves out where nothing covers it is drawn, looking like the box's other faces. A face left out on purpose is named in the element's `"_keep_open"` (never written to the model) and the model is allow-listed in `art_check` O1 with its reason.
   - Write every element from its low corner to its high one (`from` ≤ `to` on every axis): a backwards box draws inside out, and the writers refuse it.
-- **No shared face planes, in any export** (that flickers, z-fighting). Two differently drawn faces never lie on one plane, or closer than 0.09 pixels, facing the same way. The generators enforce it with a 0.1 pixel push (`model_writer.COPLANAR_NUDGE`; 0.02 aliased again beyond about 30 blocks):
+- **No shared face planes, in any export** (that flickers, z-fighting). Two differently drawn faces never lie on one plane, or closer than 0.09 pixels, facing the same way. The one exception is vanilla's overlay layering: the same face of two identical, unrotated boxes (grass_block's side overlay, the ores' template in `tools/material_icons.py`) is one quad drawn twice at exactly one depth, so the later one always wins. The generators enforce the rule with a 0.1 pixel push (`model_writer.COPLANAR_NUDGE`; 0.02 aliased again beyond about 30 blocks):
   - `model_writer.separate_coplanar` runs on every block and item model written (and the classic pack), pushing the smaller face (the band, dial or trim) out, or the face in front of a nearly flush pair, until it stands 0.1 pixels proud. It covers rotated elements too: elements turned the same way are compared in their own space, and faces along their rotation axis (gear and handwheel caps) as turned polygons. A push keeps the element a closed box (a one-sided decal plane moves whole) and keeps the UVs it had.
   - Quad exports separate their boxes the same way before turning them into quads (`model_writer.separate_boxes` in `kinetic_rotors.quads`, `separate_coplanar` in `decor6_data.quads`), never by moving single quads of a closed box (that opens cracks). `tiled_quads` needs no push: where two faces share a plane, only the smaller is drawn.
   - Models drawn together are separated together: a multi-block machine is cut by `model_writer.split_model` (separated before the cut and across its parts after it, the pieces of one cut element moving together so no step opens at a seam); a thing drawn whole and shared out among its blocks (tall flowers, the Farm Stand, the Harvest Effigy) is separated whole first.
   - Parts drawn separately never share a plane and never leave a slit between them: a spinning rotor is set `kinetic_models.ROTOR_GAP` inside, or that much narrower than, the still part it meets (an axle starts inside its hub plate), never held off it, which shows the world through the gap.
 - **Two-sided planes:** in 26.3 `entityCutout` and `entityTranslucent` do not cull, so a plane seen from both sides (a wing, a cloak, a leaf cut out) is either one quad (`decor17_data.single_sheets` keeps one face of a sheet), or two sides each lifted 0.05 pixels along its own normal (`DecorDraw.twoSided`, `TWO_SIDED_LIFT` in the quad exporters). Never draw an exact reversed twin on one plane: both sides then draw at the same depth and fight. A smaller plane through the same middle (a flame's core) is lifted further, so it stays in front. A picture that must read the same way round from behind (a flame) uses `DecorDraw.twoSidedReadable`, which flips the back's u.
 - **UVs stay inside the sprite (0..16).** A face whose UV leaves it shows strips of the neighbouring textures in the block atlas. The writers give such faces a UV inside it at the same texel density (`model_writer.fit_uvs`: shifted by whole 16-pixel tiles, then slid the least distance inside when the span straddles a tile edge; only a span longer than 16 reads the whole sprite, a little stretched).
-- Textures are deterministic (seeded) and opaque on blocks. They are 16×16, or 32×32, 64×64 or (for a sculpted prop's packed texture) 128×128 where the art needs the detail (see [High resolution](#high-resolution)). **Machine and gun textures are fully opaque**: `entitySolid` ignores alpha, so a see-through texel draws as its colour. `entityCutout` textures have no half-transparent texels (cutout draws them solid).
+- Textures are deterministic (seeded) and opaque on blocks. Block and model textures are 16×16, or 32×32, 64×64 or (for a sculpted prop's packed texture) 128×128 where the art needs the detail (see [High resolution](#high-resolution)). New item icons are 16×16 ([ITEM_ICONS.md](ITEM_ICONS.md)); the 122 older, larger ones stay until each is redrawn. **Machine and gun textures are fully opaque**: `entitySolid` ignores alpha, so a see-through texel draws as its colour. `entityCutout` textures have no half-transparent texels (cutout draws them solid).
 - **Previews show what the game draws:** render the exported quads with back faces culled, not the source boxes with every face, or holes never show in review. Check the preview's winding on one plain box first: a block model drawn inside out still looks closed from outside, and hides every hole.
 - `tools/art_check.py` (run by `check_mod_data.py`) checks all of this on every model and quad part, and on the models drawn together (a multi-block's parts, two-block halves, decor parts and each spinning rotor with its block). Its allow-lists name the few accepted exceptions, each with its reason.
 
@@ -25,8 +31,10 @@ Jugcraft's look changes with its tiers, the way real technology did: the early g
 On 4 October 2026 the owner rejected the noisy, rust-covered dieselpunk textures ("you are doing way too much in terms of noise"). They pointed to vanilla copper blocks, a weathered pipe, Immersive Engineering Reimmersed's machines and a car drawn in vanilla's palette as the standard. Those references guided the style only; nothing of them is copied. The helpers in `tools/clean_metal.py` draw this way, and new textures should follow it:
 - **Flat fills from a short palette.** Use four or five shades per material. Never pick a random shade for every pixel.
 - **Shape comes from light.** Give a panel a one-pixel bevel: lit along the top and left, shaded along the bottom and right. A panel inside a face, or a part of a model, also gets a dark seam round the outside; a building block that tiles does not (it splits the seam across its edge, see [Tiling building blocks](#tiling-building-blocks)). Shade recessed insets the other way round. Draw bolts as two-by-two heads lit at the top left.
-- **Wear is placed, not sprinkled.** Use a chip at a corner, a stain weeping from a bolt or a seam, or a few short streaks one shade off the fill. Rust is an accent, never a whole surface.
+- **Wear is placed, not sprinkled.** Use a chip at a corner, a stain weeping from a bolt or a seam, or a few short streaks one shade off the fill. Rust is an accent, never a whole surface. Item icons have no wear at all ([ITEM_ICONS.md](ITEM_ICONS.md)): at 16 pixels it reads as dirt.
 - **Pattern beats noise.** Show grain, ribs, tread and ripples as regular shapes: plank lines, ribs every four rows, raised lozenges, long ripple lines.
+- **Each material looks like its vanilla counterpart.** On 5 October 2026 the owner added that flat is not the goal either: stone should look like stone, cobblestone or stone bricks, and every material should take after the vanilla textures so it does not stand out. The painters in `tools/block_style.py` work that way. `bs.fill` gives one ground tone with small clumps of the tones either side, in place of a random shade at every pixel. Stone, cobblestone and bricks are lit along their top and left, wood is drawn as planks, and straw and hair as streaks.
+- **Machine faces are clean plates with one clear feature.** A machine front is a frame lit along its top and left round a recessed plate of one tone, with one feature in it: a recessed window, vent or port. A running glow rises in smooth bands, brightest at the bottom. `panel()` and `window()` in `tools/generate_textures.py` draw this way.
 - **Tubes and barrels** read best with a flat, even tube texture: the 16-pixel tiling cuts across a stepped cylinder at arbitrary places, so bevels, seams and bolts belong on flat panels.
 
 ### Tiling building blocks
@@ -45,6 +53,13 @@ On 5 October 2026 the owner called the steel plate blocks and blast-proof concre
 
 *Before (top) and after (bottom), tiled outside the game; bastion concrete (left) is the reference the owner liked.*
 
+## Woods, leaves and other natural textures: vanilla's manner
+On 5 October 2026 the owner repainted the woods and asked for every tree to look "more similar to how the vanilla textures are" ([wood-repaint.md](features/wood-repaint.md)); seeing the result in game, they asked for the way it was done to become the rule for "any additional wood or natural textures". **Follow [NATURAL_TEXTURES.md](NATURAL_TEXTURES.md)** for every wood, tree, leaf, sapling, plant, stone, soil or ore texture. In short:
+- 16×16, drawn by code in vanilla's manner (never recoloured from Mojang's files).
+- One colour a material, from the owner's paintings, stepped into a lightness ramp; kept within vanilla's brightness and saturation.
+- Marks that follow the material: vertical bark furrows (never rings across a trunk), straight stripped grain, four lit boards, square rings on log ends, a fine clumped speckle of leaves with a few small gaps.
+- Low contrast, no outlines or gradients, one trait a species; seamless and seeded.
+
 ## Creatures and faces: cute and clean
 On 5 October 2026 the owner found the Ember Bed's fire speckly and the Horned Skull Cauldron's nostrils ugly, and asked for every creature prop to be simplified: cute, or at least smooth, but still good-looking, after their reference pictures (the Frankenstein head above all). The painters in `tools/cute_art.py` draw this way, and every skull, bone, monster, bug, ghost and other creature prop should follow it:
 - **Two or three tones a material, no noise.** Fill flat, light the top and left edge, shade the bottom and right one. A rounded form gets a lighter band over its top and a darker one under it, nothing else.
@@ -58,6 +73,16 @@ On 5 October 2026 the owner found the Ember Bed's fire speckly and the Horned Sk
 ![Before and after: the hearth, the monster head, the Colossal Skull, a chimera and the crawling hand, the singing pumpkins and the Harvest Moon](images/cute_creatures_before_after.jpg)
 
 *Before (left) and after (right), drawn from the block models and textures outside the game.*
+
+## Item icons: the owner's 16×16 manner
+On 5 October 2026 the owner sent a sheet of their own weapon icons ("heres how I draw my style for texturing most weapons"); the arms were redrawn in that manner ([arms-icons-16.md](features/arms-icons-16.md)), and the owner asked for rules for every item icon: "The new weapon icons look so great! Can you make rules for how item icons should be drawn". **Follow [ITEM_ICONS.md](ITEM_ICONS.md)** for every item icon. In short:
+- 16×16 at vanilla's scale, never 32, 48 or 64 for a new icon; the whole item, every part present, in proportions that read at 16; on the diagonal or centred, never cropped or zoomed in.
+- A one-pixel outline, a single-pixel staircase along a diagonal edge, in each part's own darkest tone, never pure black.
+- Light from the top left; flat tones, up to four a material plus the outline; no noise, dithering or wear.
+- Chunky parts that read at 1× and 2×; siblings told apart by one or two cues.
+- Each metal its own palette, told apart from copper, iron and gold (vanilla's own metals use their own ramps); vanilla kinds in vanilla's form, drawn fresh.
+- Drawn from text maps and checked by `tools/check_icon_maps.py`, which `tools/check_mod_data.py` runs.
+- The tiers below show on an icon only through its palette and one signature part: no wear, serials or soot at 16 pixels.
 
 ## What the owner likes (5 and 6 October 2026)
 On 5 October 2026 the owner played a server built from `main` and the open pull requests (Witching Season #183, Arms VII #184, Fortifications #185, Armoured Walker #193). They said what works and what doesn't, and asked for the way they like things drawn to be written down from their examples. On 6 October they added one more lesson, about the Giant's Beating Heart. Where this section disagrees with an older rule in this file, this section wins; for item icons, the owner's own style sheet ([PR #201](https://github.com/jimbozoomer-byte/jugcraft/pull/201)) wins over both.
@@ -242,11 +267,19 @@ This amends "Simple faces" in "Creatures and faces: cute and clean".
 ## Steampunk: stone, bronze and early steel tiers
 Brass, copper and riveted iron; glass portholes and valve wheels; firebrick and wood. Textures start with `sp_` (`tools/steampunk_textures.py`). Since batch 53 they follow [Texturing: keep it clean](#texturing-keep-it-clean) too. The classic style pack keeps the older plain look for anyone who prefers it.
 
+**Steampunk Armor** (`steampunk_*`) is the bronze-age engineer's rig: a bronze-crowned cap and teal goggles, a pressure gauge, and a copper boiler on the back (`tools/armor_styles.py`; [record](features/steampunk-and-kaiser-armor.md)).
+
 ## Dieselpunk: steel tier and above
 As the tech gets higher tier, it becomes more dieselpunk and less steampunk. The powered tools and the charging station (#40) are the first dieselpunk content.
 - **Materials:** gunmetal and olive-drab paint worn through to bare metal at the edges; chrome trim; yellow-and-black hazard stripes; black rubber hoses and grips; bakelite handles; louvred grilles; soot-stained exhaust stacks.
 - **Details:** green phosphor gauges, caged amber warning lamps, stencilled serials, heavy bolts rather than decorative rivets.
+- **Item icons** take only the palette and one signature part of this (a hazard band or a phosphor-green lamp), never the wear or serials ([ITEM_ICONS.md](ITEM_ICONS.md), rule 6).
 - Textures start with `dp_` (`tools/dieselpunk_textures.py`); models for tools and stations are in `tools/tool_models.py`.
+- **Kaiser Armor** (`kaiser_*`) is kaiserpunk within dieselpunk: the parade dress of the Winged Cog, the mod's own empire, in field grey and gilt (`tools/armor_styles.py`). No real nation's insignia.
+
+**Armor looks are sets of their own.** On 5 October 2026 the owner kept the stylized looks first drawn for bronze and steel armor as Steampunk Armor and Kaiser Armor. A metal's dressed-up look is its own set, smithed from the plain piece and back, with the plain piece's numbers.
+- `tools/check_mod_data.py` (`check_armor_looks`) pins the Steampunk and Kaiser pixels. A redraw needs the owner's OK and new hashes.
+- For now bronze and steel armor still wear these looks too. A following PR gives them their own 3D look, a knight design the owner drew.
 
 The steel-tier machines went dieselpunk in #41: the steel foundry, capacitor bank, steel tank, ore drill and high-pressure extractor (`tools/dieselpunk_models.py`, which replaces their entries in `steampunk_models.MODELS`). Their footprints, ports and running lights are unchanged, and the classic style pack keeps their plain look. The coke oven stays brick: it is the bridge into steel.
 
@@ -269,22 +302,40 @@ The owner asked on 1 October 2026 for the electrical things to look like a moder
 - **Advanced power (batch 10):** the advanced solar panel is a white pedestal with a green-lit ring and deep blue cell wings (`el_white`, `el_solar_large`); the advanced engine is graphite with a light ribbed cylinder bank (`el_ribbed`) and white caps.
 - **Next tiers:** cyan (`el_glow_cyan`) is reserved for the high-tech tier after oil, with glass tanks, conduits in violet and cyan, monitor banks and keyboards (`el_keyboard`), following the owner's other reference images. Textures start with `el_` (`tools/electric_textures.py`).
 
+## Ores, ingots and tools: the owner's material sets
+On 5 October 2026 the owner drew a whole set for a new ore (its ore, raw ore, nugget, ingot, blocks, tools, armor and weapons) in one chartreuse palette, as "a basis on how new ores that turn into tools are styled". **Follow [MATERIAL_SETS.md](MATERIAL_SETS.md)** for every material's set, in every tier: 16×16, vanilla's forms (every ingot is the owner's ingot recoloured, never redrawn; nuggets in vanilla's form, drawn fresh), one clear hue, told apart from vanilla's metals, stepped into four tones and an outline in its darkest, chunky rounded ore blobs and a four-panel storage block. Jugcraft's metals, ores and bronze and steel tools are drawn this way ([material-sets.md](features/material-sets.md)), from the maps in `tools/material_icons/`. The first new ore drawn on it is [thallite](features/thallite.md).
+- **Ore overlays are cut out:** like glass, leaves and crops, an ore's texture has see-through pixels (fully clear or fully opaque only), which the ore's block model lays over vanilla's own stone or deepslate, referenced by name and never copied, so the ore matches the rock round it.
+
+![Before and after: every metal's ingot, nugget and storage block, every ore and deepslate ore, the raw ores and raw blocks, and the bronze and steel tools](images/material_sets_before_after.png)
+
+*Before (above) and after (below), drawn from the textures outside the game. The new ores are shown over a stand-in rock; in game each sits on vanilla's own stone or deepslate.*
+
+## Ores, ingots and tools: the owner's material sets
+On 5 October 2026 the owner drew a whole set for a new ore (its ore, raw ore, nugget, ingot, blocks, tools, armor and weapons) in one chartreuse palette, as "a basis on how new ores that turn into tools are styled". **Follow [MATERIAL_SETS.md](MATERIAL_SETS.md)** for every material's set, in every tier: 16×16, vanilla's forms (every ingot is the owner's ingot recoloured, never redrawn; nuggets in vanilla's form, drawn fresh), one clear hue, told apart from vanilla's metals, stepped into four tones and an outline in its darkest, chunky rounded ore blobs and a four-panel storage block. Jugcraft's metals, ores and bronze and steel tools are drawn this way ([material-sets.md](features/material-sets.md)), from the maps in `tools/material_icons/`.
+- **Ore overlays are cut out:** like glass, leaves and crops, an ore's texture has see-through pixels (fully clear or fully opaque only), which the ore's block model lays over vanilla's own stone or deepslate, referenced by name and never copied, so the ore matches the rock round it.
+
+![Before and after: every metal's ingot, nugget and storage block, every ore and deepslate ore, the raw ores and raw blocks, and the bronze and steel tools](images/material_sets_before_after.png)
+
+*Before (above) and after (below), drawn from the textures outside the game. The new ores are shown over a stand-in rock; in game each sits on vanilla's own stone or deepslate.*
+
 ## Outside the tech tiers: the Pixel Hollows and the arcade
 Places and decor that are not machines keep their own identity. The Pixel Hollows and the Retro Trader are retro electronics: dark slate with copper traces, square-faceted teal and violet crystals, LED-pixel lamps, and an 1980s arcade cabinet with neon side art, a CRT and a lit marquee. Everything is original (no real consoles, games, brands or characters). Textures are drawn by `tools/pixel_hollows_textures.py` (names `ph_*` and `rt_*`) and the cluster and cabinet models are in `tools/retro_models.py`. The arcade cabinet is real-life sized: two blocks tall.
 
 ## High-detail items (64x64)
-Items that need more than 16 pixels, starting with the batch 32 construction tools, are drawn at 64x64 with `tools/hd_art.py`, a small shaded-shape renderer:
+**Retired for item icons:** new item icons are 16×16 ([ITEM_ICONS.md](ITEM_ICONS.md)), so `hd_art` draws no new icons. The 64x64 icons it draws today (in `construction_art`, `control_electronics`, `gas_storage`, `rocketry` and `arms_kit_art`) stay until each is redrawn at 16×16. It may still paint 3D model textures.
+
+Items that needed more than 16 pixels, starting with the batch 32 construction tools, were drawn at 64x64 with `tools/hd_art.py`, a small shaded-shape renderer:
 - **Shapes:** capsules (rods and tubes), bevelled boxes, domes and discs, rims, flat polygons and lumpy blobs. They are painted in order onto a canvas, so later shapes cover earlier ones.
 - **Lighting:** every shape gives each pixel a surface normal, lit from the top left with a specular glint.
 - **Pixel-art finish:** the brightness snaps to the material's colour ramp, with ordered dithering only across the falloff between two steps, so the result stays crisp pixel art rather than a blurry render.
 - **Materials:** a shared palette (steel, gunmetal, chrome, brass, rubber, olive drab, safety yellow, hazard black, glass, foam and more), plus paint helpers for hazard stripes and paint worn through to bare metal at the edges (`hazard`, `worn`).
 - **Tool space:** `construction_art.Tool` lays a tool out along its barrel (s) and across it (t), so a diagonal held tool can be drawn with straight-line coordinates.
 
-The 64x64 items are listed in `construction_art.ITEMS`. New high-detail items should use the same renderer and palette, so they match each other.
+The 64x64 items are listed in `construction_art.ITEMS`. A 3D model texture that needs this renderer should use the same palette, so it matches them.
 
 ## High resolution
-The owner asked on 3 October 2026 that new art not be held to Minecraft's 16×16, so it can follow the reference images more closely. From then on:
-- **Blocks and items** may use 32×32 or 64×64 textures (`tools/check_mod_data.py` allows 16, 32, 48 and 64; 48 is for the long arms' icons). A block model's faces sample their texture by position (0 to 16), so a 64×64 texture draws four times finer with no change to the model. Vanilla blocks beside them stay 16×16, so new things look sharper than the world around them.
+The owner asked on 3 October 2026 that new art not be held to Minecraft's 16×16, so it can follow the reference images more closely. For item icons, the owner's 16×16 manner of 5 October replaces this ([ITEM_ICONS.md](ITEM_ICONS.md)); it still holds for blocks, model textures, props and creatures. From then on:
+- **Blocks and 3D model textures** may use 32×32 or 64×64 textures (`tools/check_mod_data.py` allows 16, 32, 48 and 64). **Item icons are 16×16** ([ITEM_ICONS.md](ITEM_ICONS.md)); the older 32, 48 and 64-pixel icons stay until each is redrawn. A block model's faces sample their texture by position (0 to 16), so a 64×64 texture draws four times finer with no change to the model. Vanilla blocks beside them stay 16×16, so new things look sharper than the world around them.
 - **Sculpted props** (`tools/flora_art.py`'s `Sculpt`, which packs every painted piece of a prop into one texture) may use 128×128 when a prop has too many pieces for 64×64 at the same detail: a cabinet two blocks tall, a chandelier three blocks across. The Witch's Workshop (batch 17, 4 October 2026) was the first to need it; `tools/check_mod_data.py` allows 128×128 for these.
 - **Creatures** are painted at several times their model's texture size. The model keeps its layout (its `LayerDefinition` size) and samples the larger image by it, so each model pixel shows a patch of painted detail. The werewolves are painted at four times (512×512, `TEXTURE_SCALE` in `tools/werewolf_model.py`).
 - **Fur** is painted by `tools/fur_paint.py`:
@@ -304,11 +355,11 @@ The owner asked on 3 October 2026 that new art not be held to Minecraft's 16×16
     - a faceted tube lying on a surface is turned so a ridge, not a facet, runs along it, and where it ends it dives into the surface, its capped end inside and deep enough that its hidden facets stay 0.1 pixel from the surface's (the staff's helix);
     - every quad turns anticlockwise seen from outside, and textures are solid.
 - **Weapons are pixel art, with 3D in the hand** ([arms-restyle.md](features/arms-restyle.md)):
-  - icons are 32×32 or 48×48, on the 45-degree pixel diagonal, in flat tones lit from the top left, with a one-pixel outline: no dithering, noise or glints;
+  - icons are 16×16 in the owner's manner, from hand-drawn maps ([arms-icons-16.md](features/arms-icons-16.md)): on the diagonal, a one-pixel outline in each part's own dark tone, flat tones lit from the top left, chunky parts. A kind or variant without a map keeps its 32×32 or 48×48 drawn icon until it is redrawn as a map (the Arms VII variants, longbows, arbalests and smithing patterns are queued); every new icon follows [ITEM_ICONS.md](ITEM_ICONS.md);
   - in the hand each weapon is a box model with thickness, built from the same design (`tools/arms_pixel.py`);
   - the Runebound arms are the exception above: their icons (48×48) are rendered from their meshes, tipped back so guards show their faces, and thicker than true where an arm is thin so it reads ("maybe not even accurate but cooler"; the Nodachi 1.3×, the Staff and War Hammer about 1.15×). Each pixel takes the material and light band that most of its subsamples show and is painted that material's flat icon tone (four bands from the top left and a highlight, from a short ramp per material, lighter than the model's own colours), so they keep their siblings' short palettes (about 20 colours) and brightness; a one-pixel outline turns cyan beside a glowing part;
   - **a part that hangs free swings free** (5 October 2026, the owner: "flails should have an animated ball that actually flails around"): the flail's model in the hand is its handle alone, and its chain and spiked ball are small box models of their own (`tools/arms_heads.py`: closed boxes, no two faces facing one way in one plane, flat tones from swatches in the flail's own texture) that a little chain simulation draws each frame (`client/arms/FlailHeads.java`), hanging, trailing and whipping round, and keeping clear of its holder's posed body. A small 3D part reads by its shape: a few spikes, each turned about one axis only, in two tones (the game shades the faces too), never many stepped tiers or highlights, which speckle. Never bake a free-hanging part into a held model's boxes.
-- **Art stays original.** References guide the look; nothing is traced or copied from them.
+- **Art is drawn for Jugcraft.** References, including the shows and games a fan homage comes from ([LICENSE_POLICY.md](../LICENSE_POLICY.md#fan-homages)), guide the idea and the look; nothing is traced, ripped or copied from them.
 
 ## Big models drawn as quads: guns, vehicles and balloons
 On 5 October 2026 the owner found the big guns' barrels and the Grand Mortar "see through", their textures "conflicting", the Landship and the walkers see-through "at a bunch of angles" with a "flashing" barrel, and the Observation Balloon full of holes and "glitching upward" as it rose ([big-guns-art-fixes.md](features/big-guns-art-fixes.md)). Entities drawn from exported quads (`QuadModel`) follow these rules:
@@ -321,4 +372,5 @@ On 5 October 2026 the owner found the big guns' barrels and the Grand Mortar "se
 - **Single-image designs are decals.** A port cover, a hazard sign or a muzzle's bore is a `!` face (drawn whole, UV 0 to 1) on its own plate standing proud of the surface (a bore 0.1 pixel proud of its muzzle), never an ordinary face the grid would chop.
 - **Round envelopes are turned surfaces**, not stacked boxes: a closed quad mesh with shared corners, a normal at each corner and its own texture wrapped once round it (the hot-air balloons and the Observation Balloon). Opaque surfaces seen from both sides are flagged `cutout` (26.3's `entityCutout` draws both sides in the opaque pass), never `nocull`, which is the translucent pass and is only for really translucent textures such as the searchlight's beam.
 - **Things the server moves are eased on the client** (`SmoothFlight`), so they glide rather than stand still and jump each update.
-- **Their item icons** (`tools/gun_icons.py`: the guns, shells, balloon, Range Finder, Landship, Diesel Walker and Zeppelin) follow the arms icons' rules at 32×32, keep every shape inside a one-pixel margin so the outline closes all round, and give each gun a silhouette of its own (a tower, a compact block, a long low barrel with a range finder, a round drum, a railed deck), so they tell apart in a hotbar.
+- **Their item icons** (the guns, shells, balloon, Range Finder, Landship, Diesel Walker and Zeppelin) are 16×16 maps in `tools/item_icons/` drawn by [ITEM_ICONS.md](ITEM_ICONS.md) (redrawn from 32×32 on 7 October 2026). Each gun keeps a silhouette of its own (a tall slotted tower, a compact block, twin steep barrels, a long low barrel with a range finder, a round drum with three barrels, a round deck), so they tell apart in a hotbar.
+- **Record asset provenance.** Original work remains the priority. Suitable owner-supplied library assets may be reused directly or adapted under the owner's authorization; follow [the library guide](../art/owner-library/README.md) and [LICENSE_POLICY.md](../LICENSE_POLICY.md). Other style references do not authorize copying their assets.
