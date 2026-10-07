@@ -302,4 +302,6 @@ The essential workshop route is mapped: early alloys, manual parts, separate mec
 
 Documentation validation: repository/link and whitespace checks apply. Future gameplay work needs relevant recipe audits, survival-route tests, restart/unload behavior and two-client evidence. This plan contains no new build, timing or game-test results.
 
+The next topic is recorded independently in the [steel and bulk-metallurgy plan](industrial-steel-and-bulk-metallurgy-plan.md): the owner selected a simple Coke Oven -> Steel Foundry route with a charcoal starter alternative, with extra refining left to later expansion. Steel and electricity remain parallel. Charcoal steel and the new manual part routes are planned additions, not claims about current recipes.
+
 AI-assisted planning documentation: OpenAI Codex, GPT-6 family. No gameplay feature implementation is included.
