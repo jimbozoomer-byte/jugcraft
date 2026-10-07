@@ -1,10 +1,10 @@
 # Local companion integration
 
-Branch: `codex/peepo-wheel`, based on Jugcraft main `ca938b54`.
+Branch: `codex/peepo-wheel`, updated with fork main `8ca8aee5` on 2026-10-07.
 
 Build: `./build-local.ps1 -Tasks assemble` (compilation and packaging only; no tests run).
 Jar: `build/libs/jugcraft-0.1.0-alpha.jar`.
-Use Minecraft 26.3, Java 25, Fabric Loader 0.19.3 or later and Fabric API for 26.3.
+Use Minecraft 26.3, Java 25, Fabric Loader 0.19.5 or later and the pinned dependencies from `distribution/frameworks.lock.json` (see `docs/DISTRIBUTION.md`).
 This jar replaces the regular Jugcraft jar and includes Peepo/Jughead. Remove the separate Peepo Companion jar from the test instance to avoid duplicate registrations. Use a separate creative test world.
 
 ## Manual wheel check
@@ -18,3 +18,5 @@ This jar replaces the regular Jugcraft jar and includes Peepo/Jughead. Remove th
 7. Try both companion variants, each wheel orientation, both side ports, breaking an occupied wheel, and saving/reloading when convenient.
 
 No in-game verification or automated test run was performed for this integration. Companion beds are now available; see BEDS.md. Stools and shared chair/perch support are available; see SEATING.md. Workstation assignment is not included yet.
+
+Fork update performed locally with OpenAI Codex (GPT-6). Companion registrations and wheel rendering retained alongside upstream framework/Jade entries. No automated tests or gameplay checks were run for this update.

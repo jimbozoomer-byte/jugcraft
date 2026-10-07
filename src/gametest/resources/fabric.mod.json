@@ -8,6 +8,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"fabric-gametest": [
+			"io.github.jimbozoomer.jugcraft.test.FrameworkGameTests",
 			"io.github.jimbozoomer.jugcraft.test.JugcraftGameTests",
 			"io.github.jimbozoomer.jugcraft.test.AgricultureGameTests",
 			"io.github.jimbozoomer.jugcraft.test.KitchenGardenGameTests",
@@ -89,7 +90,16 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmsIVGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIGameTests",
-			"io.github.jimbozoomer.jugcraft.test.ArmsVIIGameTests"
+			"io.github.jimbozoomer.jugcraft.test.ArmsVIIGameTests",
+			"io.github.jimbozoomer.jugcraft.test.MachineMotionGameTests",
+			"io.github.jimbozoomer.jugcraft.test.TraitDetailsGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmsVIIIGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ThalliteGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ThalliteGearGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmorTiersGameTests",
+			"io.github.jimbozoomer.jugcraft.test.StyxGameTests",
+			"io.github.jimbozoomer.jugcraft.test.WorldDesignerGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
@@ -141,8 +151,8 @@
 			"io.github.jimbozoomer.jugcraft.test.GuideScreenshotGameTests",
 			"io.github.jimbozoomer.jugcraft.test.JugcraftServerClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SeasonClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.AlpineClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BiomeClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.AlpineClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.TownClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.HeadstoneClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MonumentClientGameTests",
@@ -166,12 +176,29 @@
 			"io.github.jimbozoomer.jugcraft.test.LaboratoryLarderDiningClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PumpkinNightClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DiagonalClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.MaterialSetsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsMotionClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.TwoHandedClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.WeaponArtsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.ArmsVIIClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.ArmsVIIClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.MachineMotionClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FlailClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.RuneboundClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BigGunsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BiggerJarsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.TraitDetailsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmsVIIIClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmorSetsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ThalliteClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.WoodClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ScaryCreaturesClientTests",
+			"io.github.jimbozoomer.jugcraft.test.KnightArmorClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmorTiersClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.StyxClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.StyxTownClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.WorldDesignerClientGameTests"
 		]
 	},
 	"depends": {

@@ -10,6 +10,8 @@ Idle machines should do negligible work. Cache networks and invalidate on topolo
 
 ## Magical workshops and schools
 
+The [Styxhexenhammer and Nightglass Observatory](features/styxhexenhammer.md) prototype adds a reference-led dark wizard/herbalist, the owner's brick observatory and timber greenhouse reconstructed from screenshots, and eight decorative flower cultivars. Placement is operator-controlled; natural discovery, flower uses and deeper magic integration remain future work.
+
 Magic supports transport, crafting and combat. Every school needs a distinct identity, an accessible starting spell or craft, deeper specialties, and useful cross-system interactions. Effects below are proposal seeds; exact mechanics and numbers need review.
 
 | School | Workshop, farming or exploration possibilities | Combat identity and boundaries |
@@ -34,6 +36,8 @@ Start from useful ordinary crops, food, livestock and soils. Branch into magical
 Proposals may cover orchards, culinary specialties, animal products, breeding, magical herbs, climate cultivation, fiber/fuel crops and off-world farming. Explain planting conditions, growth limits, harvesting automation, outputs, regional role and interactions with both industry and magic. Prevent infinite growth/yield feedback loops. Avoid excessive breeding/entity counts as the optimal farming strategy.
 
 The branch's first three slices (the Fall Harvest: tall corn, wild plants and sickles; the Kitchen Garden: trellis crops, vegetables, grains and the Cooking Pot; the Festival Crops: gourds, turnips and Turnip Lanterns, cranberry bogs and the chestnut tree; and pumpkin carving) and its planned crop roster and farm equipment are in [branches/AGRICULTURE.md](branches/AGRICULTURE.md).
+
+The owner-endorsed [industrial agriculture plan](features/industrial-agriculture-plan.md) gives farming and forestry finished-product industries: textiles, coated fabrics, paper, packaging, panels, linoleum, rubber goods and later fuels/chemical materials. It records machine routes, sidegrade choices, bootstrap boundaries and a proposed delivery sequence; it is planning documentation rather than a claim of shipped content.
 
 ## Cozy surface biomes
 

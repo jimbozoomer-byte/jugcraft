@@ -1,8 +1,6 @@
 """The walled town's assets and data for tools/generate_material_data.py: the Jug Teller (the town's ATM: model,
 blockstate, item model, textures drawn here, loot), the town's usable-blocks tag, its text, the townsfolk's skins and
 the town itself (tools/town.py)."""
-import random
-
 from PIL import Image
 
 import town_lang
@@ -28,26 +26,26 @@ def rid(path):
 
 IRON = (54, 56, 62)
 IRON_LIGHT = (84, 88, 96)
+IRON_LIT = (64, 66, 73)
+IRON_SHADE = (46, 48, 53)
 BRASS = (196, 150, 64)
+BRASS_LIGHT = (222, 180, 92)
+BRASS_SHADE = (170, 126, 50)
 BRASS_DARK = (138, 98, 36)
 SCREEN = (30, 70, 40)
 GLOW = (140, 255, 156)
 
 
-def _noise(img, rng, amount=6):
-    px = img.load()
-    for y in range(img.height):
-        for x in range(img.width):
-            r, g, b, a = px[x, y]
-            n = rng.randint(-amount, amount)
-            px[x, y] = (max(0, min(255, r + n)), max(0, min(255, g + n)), max(0, min(255, b + n)), a)
-
-
 def textures():
-    """The Jug Teller's faces: a riveted cast-iron body, a brass-framed green screen with a jug on it and a keypad."""
-    rng = random.Random(9)
+    """The Jug Teller's faces: a riveted cast-iron body, a brass-framed green screen with a jug on it and a keypad.
+    Flat tones lit from the top left (docs/ART_DIRECTION.md), no noise."""
     side = Image.new("RGBA", (16, 16), IRON + (255,))
     px = side.load()
+    for i in range(1, 15):
+        px[i, 1] = IRON_LIT + (255,)
+        px[1, i] = IRON_LIT + (255,)
+        px[i, 14] = IRON_SHADE + (255,)
+        px[14, i] = IRON_SHADE + (255,)
     for i in range(16):
         px[i, 0] = BRASS_DARK + (255,)
         px[i, 15] = BRASS_DARK + (255,)
@@ -58,7 +56,6 @@ def textures():
     for y in range(4, 12):
         px[7, y] = IRON_LIGHT + (255,)
         px[8, y] = (40, 42, 46, 255)
-    _noise(side, rng)
     front = side.copy()
     px = front.load()
     for x in range(3, 13):
@@ -79,10 +76,14 @@ def textures():
         px[i, 15] = BRASS_DARK + (255,)
         px[0, i] = BRASS_DARK + (255,)
         px[15, i] = BRASS_DARK + (255,)
+    for i in range(1, 15):
+        px[i, 1] = BRASS_LIGHT + (255,)
+        px[1, i] = BRASS_LIGHT + (255,)
+        px[i, 14] = BRASS_SHADE + (255,)
+        px[14, i] = BRASS_SHADE + (255,)
     for x in range(5, 11):
         px[x, 7] = (30, 24, 16, 255)
         px[x, 8] = (30, 24, 16, 255)
-    _noise(top, rng, 5)
     return {"atm_side": side, "atm_front": front, "atm_top": top}
 
 

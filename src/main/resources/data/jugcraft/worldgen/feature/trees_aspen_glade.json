@@ -7,7 +7,15 @@
       "feature": "jugcraft:maple_checked"
     },
     {
-      "chance": 0.0125,
+      "chance": 0.1667,
+      "feature": "jugcraft:young_aspen_checked"
+    },
+    {
+      "chance": 0.0667,
+      "feature": "jugcraft:subalpine_fir_checked"
+    },
+    {
+      "chance": 0.0143,
       "feature": "jugcraft:fallen_aspen_tree"
     }
   ]

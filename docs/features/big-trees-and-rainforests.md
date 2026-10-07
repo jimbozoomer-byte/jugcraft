@@ -15,9 +15,9 @@ Eight forests, mostly in the **woodland** layout of Jugcraft regions. The two gi
 | **Eucalyptus Forest** | woodland: other jungles, savanna plateaus | tall eucalyptus with rainbow-streaked bark, oak scrub, melons and wildflowers; parrots among the farm animals |
 | **Tropics** | woodland: sparse jungles | bright green land of palms, small palms, flowering azaleas and jungle bushes; hibiscus, hydrangeas and bamboo; turquoise water; parrots; jungle temples |
 | **Subtropics** | woodland: savannas, warm plains | green, plains-like country with flowering azaleas, oaks, birches, small palms and vine-hung oaks; hydrangeas, sugar cane; villages |
-| **Dense Forest** | woodland: dark forests | big spreading oaks packed close, dark oaks among them, leaf litter and ferns; woodland mansions |
-| **Redwood Forest** | woodland and wild: old-growth pine taigas | giant redwoods two blocks wide and tall single ones on podzol broken by moss; ferns and tall ferns |
-| **Temperate Rainforest** | woodland and wild: old-growth spruce taigas | firs and redwoods, vine-hung oaks and willows, thick with ferns and berry bushes |
+| **Dense Forest** | woodland: dark forests | big spreading oaks packed close, dark oaks and a rare great oak among them, leaf litter and ferns; woodland mansions |
+| **Redwood Forest** | woodland and wild: old-growth pine taigas | giant redwoods two blocks wide and tall single ones, a few firs and mossy maples, on podzol broken by moss; ferns and tall ferns |
+| **Temperate Rainforest** | woodland and wild: old-growth spruce taigas | firs and redwoods, moss-hung bigleaf maples and willows, thick with ferns and berry bushes |
 | **Woodland** | woodland: flower forests, sunflower plains | plain oak woodland: oaks big and small, fallen logs, leaf litter, poppies, daisies, berry bushes; villages and woodland mansions |
 
 - Biomes O' Plenty's Redwood Forest Edge merges into the Redwood Forest, the Temperate Rainforest Hills into the Temperate Rainforest, the old Rainforest into the Rainforest, the Tropic Beach into the Tropics, and the Deciduous Forest and Timber into the Woodland.
@@ -49,7 +49,7 @@ Eight forests, mostly in the **woodland** layout of Jugcraft regions. The two gi
 ## Dependencies and assets
 - Giant trees use vanilla's giant and mega jungle trunk shapes and mega pine and jungle crowns. Four saplings in a square are found by `agriculture/GiantSaplingBlock`, which grows the giant from the square's north-west corner and leaves the saplings if there is no room. The other trees use vanilla's straight, fancy, forking and bending trunks.
 - Leaf litter, melons, bamboo, fallen oak logs and vanilla's oaks with leaf litter come from vanilla's own features, by reference.
-- Textures drawn by code in `tools/wild_textures.py`. No Mojang file is copied.
+- Textures drawn by code in `tools/wild_textures.py`. No Mojang file is copied. Since the [wood repaint](wood-repaint.md), their woods and leaves are drawn by `tools/wood_style.py`.
 
 ## Verification
 Results are recorded under "Results" below after CI runs.

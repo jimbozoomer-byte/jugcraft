@@ -21,8 +21,13 @@ FACINGS = {"north": 0, "east": 90, "south": 180, "west": 270}
 FACE_TURNS = {"north": {}, "south": {"y": 180}, "east": {"y": 90}, "west": {"y": 270}, "up": {"x": 270}, "down": {"x": 90}}
 
 SCLERA = pal("b9a49a", "d8c8bd", "ece0d6", "f8f1ea", "fffcf8")
+# The eyes the owner looks at closely (the Flying Eyeball and the Specimen Jar's eye): a warmer, softer ivory than pure
+# white, so the eye sits in its scene instead of glowing out of it (5 October 2026).
+WARM_SCLERA = pal("9a8578", "bba798", "d6c6b6", "e6dacb", "f1e8dc")
 VEIN = pal("7a0e14", "a3161e", "c8323a")
 IRIS = pal("06301c", "0b5230", "167a45", "2fa45e", "5ccf7e", "a6f0b4")
+# The Specimen Jar's eye is blue, to stand out against its green fluid.
+BLUE_IRIS = pal("0a1a44", "143272", "22519e", "3a76c8", "66a2e6", "b0d6fa")
 PUPIL = pal("040406", "101014")
 WING = pal("5a0c0c", "8a1a14", "b52e1c", "d9482a", "f06a3a", "ff9a5c")
 WING_BONE = pal("3a0606", "5c0e0e", "7e1a14")
@@ -69,9 +74,10 @@ def felt(palette, seed=1, seam=True, k=None):
     return paint
 
 
-def sclera(seed=1, veins=5, toward=None):
+def sclera(seed=1, veins=5, toward=None, palette=SCLERA):
     """The white of the eye, clean and glossy: bright white with a soft grey shade round its lower edge, and a few smooth
-    red veins curling in from the edges (toward the iris, `toward` (x, y) in 0..1), each a single even line."""
+    red veins curling in from the edges (toward the iris, `toward` (x, y) in 0..1), each a single even line. `palette`
+    (five shades, darkest first) gives the white."""
     def paint(p):
         w, h = p.w, p.h
         for y in range(h):
@@ -81,7 +87,7 @@ def sclera(seed=1, veins=5, toward=None):
                     k = 1
                 elif y >= h * 0.8 or x >= w * 0.85:
                     k = 2
-                p.put(x, y, SCLERA[k])
+                p.put(x, y, palette[k])
         tx, ty = toward or (0.5, 0.5)
         for v in range(veins):
             # Fixed, even spacing round the edge (the seed turns them), each curving gently inward.
@@ -99,9 +105,10 @@ def sclera(seed=1, veins=5, toward=None):
     return paint
 
 
-def iris():
-    """The iris seen face on: a clean green disc in three rings (pale round the pupil to deep at its rim), a dark rim, a
-    big round black pupil and two white glints; white of the eye in the corners."""
+def iris(palette=IRIS, corner=SCLERA[3], glint=ca.GLINT, glints=2):
+    """The iris seen face on: a clean disc in three rings of `palette` (pale round the pupil to deep at its rim), a dark
+    rim, a big round black pupil and `glints` glints of colour `glint`. `corner` fills the corners outside the disc (the
+    white of the eye); None leaves them see-through, for an iris laid over a white drawn separately."""
     def paint(p):
         cx, cy = (p.w - 1) / 2, (p.h - 1) / 2
         r = p.w / 2
@@ -109,17 +116,20 @@ def iris():
             for x in range(p.w):
                 d = math.hypot(x - cx, y - cy) / r
                 if d > 0.98:
-                    p.put(x, y, SCLERA[3])
+                    if corner is not None:
+                        p.put(x, y, corner)
                 elif d > 0.84:
-                    p.put(x, y, IRIS[1])
+                    p.put(x, y, palette[1])
                 elif d > 0.66:
-                    p.put(x, y, IRIS[3] if y < cy else IRIS[2])
+                    p.put(x, y, palette[3] if y < cy else palette[2])
                 elif d > 0.42:
-                    p.put(x, y, IRIS[4] if y < cy else IRIS[3])
+                    p.put(x, y, palette[4] if y < cy else palette[3])
                 else:
                     p.put(x, y, PUPIL[0])
-        ca.ellipse(p, cx - r * 0.3 + 0.5, cy - r * 0.3 + 0.5, max(1.0, r * 0.2), max(1.0, r * 0.2), ca.GLINT)
-        p.put(cx + r * 0.25, cy + r * 0.2, ca.GLINT)
+        if glints:
+            ca.ellipse(p, cx - r * 0.3 + 0.5, cy - r * 0.3 + 0.5, max(1.0, r * 0.2), max(1.0, r * 0.2), glint)
+        if glints > 1:
+            p.put(cx + r * 0.25, cy + r * 0.2, glint)
     return paint
 
 
@@ -184,6 +194,88 @@ def bat_wing(seed=1):
     return paint
 
 
+def membrane_wing():
+    """The Flying Eyeball's bat wing, its hinge on the right-hand edge, drawn clean (5 October 2026): the membrane in
+    flat panels between the fingers, alternately lit and shaded so the wing reads as stretched skin, a lit band under
+    the arm along its leading edge, three neat scallops along its trailing edge with a darker rim, the arm two texels
+    thick and the fingers one, meeting at a knuckle with a little pale claw. No pixel is picked at random."""
+    def paint(p):
+        w, h = p.w, p.h
+        hinge_top, hinge_bottom = (w - 1, h * 0.38), (w - 1, h * 0.72)
+        wrist = (w * 0.42, h * 0.08)
+        tips = [(0, h * 0.22), (w * 0.02, h * 0.62), (w * 0.28, h * 0.94), (w * 0.62, h * 0.9)]
+        polygon = [hinge_top, wrist] + tips + [hinge_bottom]
+
+        def inside(x, y):
+            n, c = len(polygon), False
+            for i in range(n):
+                (x1, y1), (x2, y2) = polygon[i], polygon[(i + 1) % n]
+                if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / ((y2 - y1) or 1e-9) + x1:
+                    c = not c
+            return c
+
+        # Each panel lies between two neighbouring fingers, seen from the wrist.
+        rays = [math.atan2(ty - wrist[1], tx - wrist[0]) for tx, ty in tips + [hinge_bottom]]
+
+        def panel(x, y):
+            a = math.atan2(y - wrist[1], x - wrist[0])
+            for k in range(len(rays) - 1):
+                lo, hi = sorted((rays[k], rays[k + 1]))
+                if lo <= a <= hi:
+                    return k
+            return len(rays)
+
+        def near_arm(x, y):
+            ax, ay = hinge_top
+            bx, by = wrist
+            t = max(0.0, min(1.0, ((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2)))
+            return math.hypot(x - (ax + (bx - ax) * t), y - (ay + (by - ay) * t))
+
+        for y in range(h):
+            for x in range(w):
+                if inside(x + 0.5, y + 0.5):
+                    k = 3 if panel(x + 0.5, y + 0.5) % 2 == 0 else 2
+                    if near_arm(x + 0.5, y + 0.5) < 3.0:
+                        k = 4
+                    p.put(x, y, WING[k])
+        # Scallops: bite the trailing edge between each pair of neighbouring tips.
+        edge = tips + [hinge_bottom]
+        for (x1, y1), (x2, y2) in zip(edge, edge[1:]):
+            mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+            span = math.hypot(x2 - x1, y2 - y1)
+            ox, oy = mx - wrist[0], my - wrist[1]
+            norm = math.hypot(ox, oy) or 1
+            bx, by = mx + ox / norm * span * 0.42, my + oy / norm * span * 0.42
+            radius = span * 0.62
+            for y in range(h):
+                for x in range(w):
+                    if math.hypot(x + 0.5 - bx, y + 0.5 - by) < radius:
+                        p.img.putpixel((x, y), (0, 0, 0, 0))
+        # A darker rim along the trailing edge, a texel wide, so the scallops read cleanly.
+        for x, y in p.filled():
+            if y > h * 0.3 and any(p.get(x + dx, y + dy) is None for dx, dy in ((0, 1), (1, 0), (-1, 0))):
+                p.put(x, y, WING[1])
+
+        def line(a, b, c, lit=None):
+            steps = int(max(abs(b[0] - a[0]), abs(b[1] - a[1]))) + 1
+            for s in range(steps + 1):
+                t = s / steps
+                x, y = a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t
+                if p.get(x, y):
+                    p.put(x, y, c)
+                    if lit is not None and p.get(x, y + 1):
+                        p.put(x, y + 1, c)
+                        p.put(x, y, lit)
+
+        for tip in tips:
+            line(wrist, tip, WING_BONE[1])
+        line(hinge_top, wrist, WING_BONE[1], lit=WING_BONE[2])
+        p.put(wrist[0], wrist[1], WING_BONE[0])
+        p.put(wrist[0] + 1, wrist[1], WING_BONE[0])
+        p.put(wrist[0] - 1, wrist[1] - 1, IVORY[3])
+    return paint
+
+
 def wax(palette, seed=1):
     """A church candle's side: shaded wax, its top rim lighter, drips of fresh wax running down from it unevenly."""
     def paint(p):
@@ -192,7 +284,8 @@ def wax(palette, seed=1):
         for y in range(p.h):
             for x in range(p.w):
                 across = x / max(1, p.w - 1)
-                k = n - 3 - int(abs(across - 0.35) * 2.2) + rng.choice((0, 0, 0, -1, 1))
+                jitter = rng.choice((0, 0, 0, -1, 1))  # drawn all the same, so the drips fall where they did
+                k = n - 3 - int(abs(across - 0.35) * 2.2) + (0 if fa.QUIET else jitter)
                 if y > p.h * 0.85:
                     k -= 1
                 p.put(x, y, shade(palette, k))
@@ -436,38 +529,56 @@ WING_HINGES = {"left": (4.8, 9.0, 8.6), "right": (11.2, 9.0, 8.6)}
 
 def flying_eyeball():
     """The eyeball (centred on EYE_CENTRE, its iris to the north) and its two wings (each hinged at the origin, for the
-    renderer to sweep back and beat), as models for the client; and the whole, wings raised, as the item's model."""
+    renderer to sweep back and beat), as models for the client; and the whole, wings raised, as the item's model.
+
+    The iris is a disc with see-through corners (the client draws it glowing, so nothing round it may glow), with a white
+    glint inside the disc, laid 0.1 pixel proud of the cap's white front; the cap's thin sides sample a thin strip,
+    about four texels to a pixel like the rest. The client's wings are one face each: 26.3 draws a cut-out quad from
+    both sides, so a second, back-to-back face would only fight it. The item's wings are drawn from both sides as two
+    faces 0.1 pixel apart (each lifted 0.05 off the wing's plane), so they cannot fight whether or not items cull."""
     sc = Sculpt(d16.FLYING_EYEBALL["block"], 71)
-    wing = sc.piece("wing", 28, 24, bat_wing(5))
-    side = sc.piece("sclera", 24, 24, sclera(3, 6))
-    front = sc.piece("sclera_front", 24, 24, sclera(4, 9, (0.5, 0.5)))
-    small = sc.piece("sclera_small", 16, 16, sclera(5, 3))
-    eye = sc.piece("iris", 16, 16, iris())
+    wing = sc.piece("wing", 28, 24, membrane_wing())
+    side = sc.piece("sclera", 24, 24, sclera(3, 6, palette=WARM_SCLERA))
+    front = sc.piece("sclera_front", 24, 24, sclera(4, 9, (0.5, 0.5), palette=WARM_SCLERA))
+    small = sc.piece("sclera_small", 16, 16, sclera(5, 3, palette=WARM_SCLERA))
+    eye = sc.piece("iris", 16, 16, iris(corner=None, glint=ca.GLINT, glints=1))
     nerve = sc.piece("nerve", 4, 12, ca.bevel(NERVE, 2, sides="lr"))
+    nu0, nv0, nu1, nv1 = nerve
+    nerve_tip = (nu0, nv0, nu1, nv0 + (nu1 - nu0))          # a 4 x 4 texel end of the strip, for the nerve's tip
+    rim = sc.piece("cap_side", 16, 2, ca.bevel(WARM_SCLERA, 3, sides="b"))
+    u0, v0, u1, v1 = rim
+    rim_end = (u0, v0, u0 + (v1 - v0), v1)                 # a 2 x 2 texel corner of the strip, for the 0.5-px-wide ends
     sides = {s: side for s in ("south", "east", "west", "up", "down")}
     body = [cube((5, 5, 5), (11, 11, 11), {"north": front, **sides}),
             cube((4.5, 6, 6), (11.5, 10, 10), {s: small for s in ("east", "west", "up", "down", "north", "south")}),
             cube((6, 4.5, 6), (10, 11.5, 10), {s: small for s in ("up", "down", "north", "south", "east", "west")}),
             cube((6, 6, 10), (10, 10, 11.5), {s: small for s in ("south", "east", "west", "up", "down")}),
-            cube((6, 6, 4.5), (10, 10, 5), {s: small for s in ("east", "west", "up", "down")}),
+            # The cornea's cap, its front white behind the iris's see-through corners.
+            cube((6, 6, 4.5), (10, 10, 5), {"north": small, "up": rim, "down": rim, "east": rim_end, "west": rim_end}),
             # The optic nerve trailing behind, drooping.
             cube((7.3, 7.3, 11.5), (8.7, 8.7, 13.5), {s: nerve for s in ("east", "west", "up", "down")}),
-            cube((7.45, 7.45, 13.3), (8.55, 8.55, 16.0), {s: nerve for s in ("east", "west", "up", "down", "south")},
+            cube((7.45, 7.45, 13.3), (8.55, 8.55, 16.0), {**{s: nerve for s in ("east", "west", "up", "down")}, "south": nerve_tip},
                  rotation((8, 8, 13.5), "x", 22.5))]
-    iris_quad = [cube((6, 6, 4.5), (10, 10, 4.5), {"north": eye})]
+    iris_quad = [cube((6, 6, 4.4), (10, 10, 4.4), {"north": eye})]
     u0, v0, u1, v1 = wing
-    left = [plane_xy(-7.0, 0.0, -2.5, 3.5, 0.0, wing)]
-    right = [plane_xy(0.0, 7.0, -2.5, 3.5, 0.0, (u1, v0, u0, v1))]
+    left = plane_xy(-7.0, 0.0, -2.5, 3.5, 0.0, wing)
+    right = plane_xy(0.0, 7.0, -2.5, 3.5, 0.0, (u1, v0, u0, v1))
     sc.models["flying_eyeball_body"] = body
     sc.models["flying_eyeball_iris"] = iris_quad
-    sc.models["flying_eyeball_wing_left"] = left
-    sc.models["flying_eyeball_wing_right"] = right
-    # The item: the whole at rest, wings raised in a V.
+    # The client's wings: the south face only (see above).
+    sc.models["flying_eyeball_wing_left"] = [dict(left, faces={"south": left["faces"]["south"]})]
+    sc.models["flying_eyeball_wing_right"] = [dict(right, faces={"south": right["faces"]["south"]})]
+    # The item: the whole at rest, wings raised in a V, each wing's two faces lifted apart (see above).
     lx, ly, lz = WING_HINGES["left"]
     rx, ry, rz = WING_HINGES["right"]
+
+    def lifted(sheet):
+        sheet["from"][2] = round(sheet["from"][2] - 0.05, 4)
+        sheet["to"][2] = round(sheet["to"][2] + 0.05, 4)
+        return sheet
     item = body + iris_quad + [
-        plane_xy(lx - 7.0, lx, ly - 2.5, ly + 3.5, lz, wing, rotation((lx, ly, lz), "z", -22.5)),
-        plane_xy(rx, rx + 7.0, ry - 2.5, ry + 3.5, rz, (u1, v0, u0, v1), rotation((rx, ry, rz), "z", 22.5))]
+        lifted(plane_xy(lx - 7.0, lx, ly - 2.5, ly + 3.5, lz, wing, rotation((lx, ly, lz), "z", -22.5))),
+        lifted(plane_xy(rx, rx + 7.0, ry - 2.5, ry + 3.5, rz, (u1, v0, u0, v1), rotation((rx, ry, rz), "z", 22.5)))]
     sc.models["flying_eyeball_item"] = item
     return sc
 
@@ -481,8 +592,41 @@ def eyeball_quads():
     return out
 
 
+def specimen_eye():
+    """The Specimen Jar's eye (tools/decor8_data.py draws it in the jar; client/SpecimenJarRenderer turns it about the
+    jar's middle, (8, 6, 8)): the Flying Eyeball's clean white and veins round a blue iris (it stands out against the
+    green fluid), built rounder than a cube: a 4-pixel body with a bulge through each side, its optic nerve hanging
+    straight down on the axis it turns about. Every face shows its own piece at about four texels to a pixel. The whole
+    specimen is lit by the fluid's glow, so the iris's corners are white of the eye, drawn solid."""
+    sc = Sculpt("specimen_eye", 74)
+    body = sc.piece("sclera", 16, 16, sclera(6, 3, palette=WARM_SCLERA))
+    front = sc.piece("sclera_front", 16, 16, sclera(7, 4, (0.5, 0.5), palette=WARM_SCLERA))
+    wide = sc.piece("bulge_wide", 18, 12, sclera(8, 2, palette=WARM_SCLERA))
+    tall = sc.piece("bulge_tall", 12, 18, sclera(9, 2, palette=WARM_SCLERA))
+    end = sc.piece("bulge_end", 12, 12, sclera(10, 1, palette=WARM_SCLERA))
+    eye = sc.piece("iris", 12, 12, iris(BLUE_IRIS, corner=WARM_SCLERA[3], glint=BLUE_IRIS[5], glints=1))
+    nerve = sc.piece("nerve", 4, 5, ca.bevel(NERVE, 2, sides="lr"))
+    u0, v0, u1, v1 = nerve
+    nerve_end = (u0, v0, u1, v0 + (u1 - u0))
+    sc.models["specimen_eye"] = [
+        cube((6, 4, 6), (10, 8, 10), {"north": front, **{s: body for s in ("south", "east", "west", "up", "down")}}),
+        cube((5.75, 4.5, 6.5), (10.25, 7.5, 9.5), {"east": end, "west": end, **{s: wide for s in ("north", "south", "up", "down")}}),
+        cube((6.5, 3.75, 6.5), (9.5, 8.25, 9.5), {"up": end, "down": end, **{s: tall for s in ("north", "south", "east", "west")}}),
+        cube((6.5, 4.5, 5.75), (9.5, 7.5, 10.25), {"north": eye, "south": end, "east": wide, "west": wide, "up": tall, "down": tall}),
+        # The nerve, its top hidden 0.1 pixel up inside the lower bulge.
+        cube((7.5, 2.5, 7.5), (8.5, 3.85, 8.5), {"north": nerve, "south": nerve, "east": nerve, "west": nerve, "down": nerve_end})]
+    return sc
+
+
+def specimen_eye_elements(key="#p"):
+    """The Specimen Jar eye's elements, drawing on texture `key` (the jar's models call it #eye)."""
+    sc = build("specimen_eye")
+    return [dict(e, faces={side: dict(face, texture=key) for side, face in e["faces"].items()}) for e in sc.models["specimen_eye"]]
+
+
 # ---------------------------------------------------------------- the pillar candles
 
+@fa.quietly
 def pillar_candles(block):
     """One to four church candles in a cluster (tools/decor16.py CANDLES), each dripping wax down its sides with a wick
     on its melted top, unlit or lit (the wick's tip glowing; the flame is vanilla's particle)."""
@@ -867,7 +1011,7 @@ _built = {}
 
 def build(name):
     if name not in _built:
-        builders = {"flying_eyeball": flying_eyeball, "monster_head": monster_head, **PLUSH_BUILDERS,
+        builders = {"flying_eyeball": flying_eyeball, "specimen_eye": specimen_eye, "monster_head": monster_head, **PLUSH_BUILDERS,
                     **{block: (lambda b=block: pillar_candles(b)) for block in d16.PILLAR_CANDLES}}
         _built[name] = builders[name]()
     return _built[name]
@@ -964,8 +1108,8 @@ def tags(tags):
 
 
 def textures():
-    """(kind, name) -> image for each prop's and harvest plush's texture."""
-    out = {("block", name): build(name).atlas.img for name in [d16.FLYING_EYEBALL["block"], *d16.PILLAR_CANDLES,
+    """(kind, name) -> image for each prop's and harvest plush's texture, and the Specimen Jar's eye (tools/decor8_data.py)."""
+    out = {("block", name): build(name).atlas.img for name in [d16.FLYING_EYEBALL["block"], "specimen_eye", *d16.PILLAR_CANDLES,
                                                                 d16.MONSTER_HEAD["block"], *PLUSH_BUILDERS]}
     out[("block", d16.SPIDER_WEB["block"])] = web()
     return out

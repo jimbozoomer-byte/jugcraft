@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.weapons;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.gear.TraitTooltips;
 import io.github.jimbozoomer.jugcraft.town.TownProtection;
 import java.util.ArrayList;
 import java.util.List;
@@ -102,20 +103,36 @@ public class ArmItem extends Item {
 	@Override
 	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip,
 			TooltipFlag flag) {
-		tooltip.accept(Component.translatable("tooltip.jugcraft.arms." + kind).withStyle(ChatFormatting.GRAY));
+		traits(TraitTooltips.of(tooltip));
+	}
+
+	/**
+	 * The arm's traits (docs/features/trait-details.md): its kind's, two-handed, its weapon art, its boon and its line,
+	 * each a name with a brief description shown while Shift is held. A boss trophy's line is a name only.
+	 */
+	public void traits(TraitTooltips traits) {
+		String arms = "tooltip.jugcraft.arms.";
+		traits.trait(arms + kind + ".trait", ChatFormatting.YELLOW, Component.translatable(arms + kind));
 		if (JugcraftArms.TWO_HANDED.containsKey(kind)) {
-			tooltip.accept(Component.translatable("tooltip.jugcraft.arms.two_handed").withStyle(ChatFormatting.DARK_GRAY));
+			traits.trait(arms + "two_handed.trait", ChatFormatting.GRAY, Component.translatable(arms + "two_handed"));
 		}
 		if (art != null) {
-			tooltip.accept(Component.translatable("tooltip.jugcraft.arms.art." + art.move().id()).withStyle(ChatFormatting.GOLD));
+			String key = arms + "art." + art.move().id();
+			traits.trait(key + ".trait", ChatFormatting.GOLD, Component.translatable(key));
 		}
 		if (boon != null) {
-			tooltip.accept(Component.translatable("tooltip.jugcraft.arms.boon." + boon.name().toLowerCase(Locale.ROOT))
-					.withStyle(ChatFormatting.AQUA));
+			String key = arms + "boon." + boon.name().toLowerCase(Locale.ROOT);
+			traits.trait(key + ".trait", ChatFormatting.AQUA, Component.translatable(key));
 		}
 		if (line != null) {
-			tooltip.accept(Component.translatable("tooltip.jugcraft.arms.line." + line).withStyle(ChatFormatting.DARK_PURPLE));
+			String key = arms + "line." + line;
+			if (ArmVariants.STYLES.contains(line)) {
+				traits.trait(key + ".trait", ChatFormatting.DARK_PURPLE, Component.translatable(key));
+			} else {
+				traits.trait(key + ".trait", ChatFormatting.DARK_PURPLE);
+			}
 		}
+		traits.end();
 	}
 
 	/**

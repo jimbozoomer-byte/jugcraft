@@ -70,6 +70,11 @@ DREADNOUGHT = Style(GUNSTEEL, px.GUNMETAL, px.RUBBER, px.GUNMETAL, ARC, COPPER, 
 WEREWOLF = Style(SILVER, DARK_IRON, WOLF, px.DARK_WOOD, MOONSTONE, SILVER, WOLF)
 ROC = Style(STORMSTEEL, px.GUNMETAL, px.LEATHER, px.DARK_WOOD, BOLT, BOLT, FEATHER)
 LEVIATHAN = Style(SEABRONZE, SEABRONZE, px.LEATHER, px.DARK_WOOD, PEARL, PEARL, TIDEGLOW)
+# Each line's materials, by its name in tools/arms_variants.py (a variant's 16x16 icon is coloured from them).
+LINE_STYLES = {"gilded": GILDED, "ironclad": IRONCLAD, "bonecarved": BONECARVED, "runebound": RUNEBOUND,
+               "yeti_king": YETI, "cinder_tyrant": CINDER, "mire_hag": HAG, "crypt_lich": LICH,
+               "iron_dreadnought": DREADNOUGHT, "werewolf_alpha": WEREWOLF, "storm_roc": ROC,
+               "abyssal_leviathan": LEVIATHAN}
 
 
 # ---------------------------------------------------------------- shared parts
@@ -274,6 +279,21 @@ def bonecarved_dagger():
            part="blade", bevel=lambda s: -0.2 + 0.03 * (s - 7.4))
     teeth(d, 8.4, 17.0, 1.5, 1, size=0.6, step=1.4)
     d.glint(19.5, -0.4)
+    return d
+
+
+def bonecarved_flail_handle(d=None):
+    """The Bonecarved Flail's handle alone: the bone haft and its knobbed joints, the grip, the horn collar and a horn
+    eye the spine hangs from (tools/arms_heads.py VARIANT_HEADS draws the spine and skull swinging, in the hand)."""
+    st = BONECARVED
+    d = d or Design(34, grip=5.5)
+    d.disc(1.0, 0.0, 1.2, HORN, depth=2.4)
+    d.strip(1.0, 14.0, 0.9, material=BONE, depth=1.9)
+    for s in (5.0, 10.0):
+        d.strip(s - 0.5, s + 0.5, 1.15, material=BONE, depth=2.3, z=1)
+    grip(d, 1.8, 9.8, 1.05, st)
+    d.strip(13.5, 15.5, 1.1, material=HORN, depth=2.6)
+    d.ring(arms_art.FLAIL_EYE, 0.0, 1.1, 0.45, HORN, depth=1.2, part="eye")
     return d
 
 
@@ -705,6 +725,15 @@ def design(name):
     return DESIGNS[name]()
 
 
+# Variants whose head swings free (tools/arms_heads.py VARIANT_HEADS): their 3D model is the handle alone.
+HANDLES = {"bonecarved_flail": bonecarved_flail_handle}
+
+
+def model_design(name):
+    """The design a variant's 3D model is built from: the handle alone for one whose head swings free, else the whole."""
+    return HANDLES[name]() if name in HANDLES else design(name)
+
+
 def layout(name, held):
     """(icon size, grip pixel, diagonal steps to a design unit, hand factor), as arms_art.layout."""
     d = design(name)
@@ -728,17 +757,93 @@ def model(name, held):
     size, grip_px, scale, _factor = layout(name, held)
     unit = scale * math.sqrt(2.0) * 16.0 / size
     grip_model = (grip_px[0] * 16.0 / size, 16.0 - grip_px[1] * 16.0 / size)
-    d = design(name)
+    d = model_design(name)
     upright, elements = px.model_elements(d, arms_art.MODEL_TEXTURE, (0, 0), grip_model, unit, width=px.upright_width(d))
     texture = Image.new("RGBA", (arms_art.MODEL_TEXTURE, arms_art.MODEL_TEXTURE), (0, 0, 0, 0))
     texture.paste(upright, (0, 0))
+    if name in HANDLES:
+        import arms_heads
+        arms_heads.paint_swatches(texture, {"chain": BONE, "blade": BONE, "fitting": HORN}, skull=True)
     return texture, elements
+
+
+def head_layout(name, held):
+    """For a variant whose head swings free: (the hand's point in model pixels, model pixels a design unit, the grip and
+    the eye along the haft in design units), from the same layout as its model (tools/arms_heads.py entry)."""
+    size, grip_px, scale, _factor = layout(name, held)
+    unit = scale * math.sqrt(2.0) * 16.0 / size
+    grip_model = (grip_px[0] * 16.0 / size, 16.0 - grip_px[1] * 16.0 / size)
+    return grip_model, unit, design(name).grip, arms_art.FLAIL_EYE
 
 
 # ---------------------------------------------------------------- the patterns (smithing templates)
 
+# The goggle glass of Steampunk Armor (tools/armor_styles.py: G and g).
+TEAL = M((14, 56, 52), (24, 92, 86), (32, 116, 108), (40, 140, 132), (110, 200, 188), (190, 246, 232))
+# The black leather of Kaiser Armor's helmet (tools/armor_styles.py: K, k and w).
+BLACK_LEATHER = M((10, 9, 12), (18, 17, 20), (24, 22, 26), (40, 38, 44), (54, 52, 60), (132, 134, 146), shine=False)
+
+# Arms VII's four styles, and the styled armor's two (tools/gear.py: ARMOR_STYLES), all drawn by pattern() below.
 PATTERN_INK = {"gilded": (GOLD, SAPPHIRE), "ironclad": (HAZARD, px.OLIVE), "bonecarved": (BONE, px.GARNET),
-               "runebound": (RUNE, VIOLET)}
+               "runebound": (RUNE, VIOLET), "steampunk": (px.BRASS, TEAL), "kaiser": (GOLD, BLACK_LEATHER)}
+
+
+# The styled armor's patterns at vanilla's 16x16 (docs/ITEM_ICONS.md on PR #201: every new item icon is 16x16; the four
+# Arms VII patterns below are legacy 32-pixel icons). A small rolled sheet of parchment with its ends curled, and the
+# style's emblem in a 10x8 map laid on the sheet: O, D, M and H the ink's outline, dark, mid and highlight; o, m, l and h
+# the second ink's dark, mid, light and highlight; k a leather strap; "." leaves the parchment.
+PATTERN16_EMBLEMS = {
+    "steampunk": [   # a pair of brass-rimmed goggles with teal glass, on a leather strap
+        "..........",
+        "..........",
+        "..DD..DD..",
+        "kDhlDDhlDk",
+        "kDlmDDlmDk",
+        "..DD..DD..",
+        "..........",
+        "..........",
+    ],
+    "kaiser": [      # a black spiked helmet with a gold spike, plate and brim
+        "....OO....",
+        "....HM....",
+        "...OMMO...",
+        "..ohmmmo..",
+        "..omHMmo..",
+        "..ommmmo..",
+        ".OMMMMMMO.",
+        "..........",
+    ],
+}
+
+
+def parchment16(emblem, colours):
+    """A 16-pixel smithing pattern: a rolled sheet of parchment, its ends curled, with a 10x8 emblem laid on the sheet at
+    (3, 4). emblem is 8 rows of 10 symbols; colours maps each symbol to an RGB colour, and "." leaves the parchment.
+    pattern16 below and the Earthbinding Template (tools/thallite_armor.py) draw on it."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    g = ImageDraw.Draw(img)
+    outline, face, light, shade = (92, 70, 40), (226, 206, 160), (242, 228, 190), (200, 176, 128)
+    g.rectangle((2, 3, 13, 12), fill=face, outline=outline)
+    g.line((3, 4, 12, 4), fill=light)
+    g.line((3, 11, 12, 11), fill=shade)
+    for x in (1, 13):   # the curled ends, a pixel taller than the sheet
+        g.rectangle((x, 2, x + 1, 13), fill=shade, outline=outline)
+    g.line((1, 3, 1, 12), fill=shade)
+    g.line((14, 3, 14, 12), fill=light)
+    assert len(emblem) == 8 and all(len(row) == 10 for row in emblem), emblem
+    for y, row in enumerate(emblem):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                img.putpixel((3 + x, 4 + y), tuple(colours[ch]) + (255,))
+    return img
+
+
+def pattern16(style):
+    """A 16-pixel smithing pattern: a rolled sheet of parchment, its ends curled, the style's emblem (PATTERN16_EMBLEMS)."""
+    ink, second = PATTERN_INK[style]
+    colours = {"O": ink.outline_dark, "D": ink.dark, "M": ink.mid, "H": ink.highlight,
+               "o": second.dark, "m": second.mid, "l": second.light, "h": second.highlight, "k": (70, 44, 24)}
+    return parchment16(PATTERN16_EMBLEMS[style], colours)
 
 
 def pattern(style):
@@ -778,6 +883,32 @@ def pattern(style):
         g.rectangle((18, 13, 19, 15), fill=(40, 30, 20))
         g.point((16, 17), fill=(40, 30, 20))
         g.point((16, 15), fill=tuple(second.mid))
+    elif style == "steampunk":
+        # A brass cog behind a pair of teal-glassed goggles on their strap.
+        for i in range(8):
+            a = i * math.pi / 4
+            x, y = round(15 + 6.6 * math.cos(a)), round(15 + 6.6 * math.sin(a))   # a tooth, 3 pixels square
+            g.rectangle((x - 1, y - 1, x + 1, y + 1), fill=c, outline=dk)
+        g.ellipse((10, 10, 21, 21), fill=c, outline=dk)
+        g.ellipse((13, 13, 18, 18), fill=tuple(ink.light), outline=dk)
+        g.line((7, 15, 25, 15), fill=(70, 44, 24), width=2)   # the leather strap
+        for left in (9, 17):
+            g.ellipse((left, 12, left + 6, 18), fill=dk, outline=tuple(ink.outline_dark))
+            g.ellipse((left + 1, 13, left + 5, 17), fill=tuple(second.mid))
+            g.point((left + 2, 14), fill=tuple(second.highlight))
+        g.rectangle((15, 14, 16, 15), fill=hi)   # the bridge
+    elif style == "kaiser":
+        # A black spiked helmet with a gold plate, a gold spike and a gold brim.
+        leather, gloss = tuple(second.mid), tuple(second.light)
+        g.polygon([(15, 8), (16, 8), (17, 12), (14, 12)], fill=c, outline=dk)   # the spike
+        g.line((15, 9, 15, 11), fill=hi)
+        g.rectangle((13, 12, 18, 13), fill=c, outline=dk)                      # its base
+        g.chord((9, 13, 22, 27), 180, 360, fill=leather, outline=tuple(second.outline_dark))
+        g.arc((11, 15, 20, 25), 200, 260, fill=gloss)
+        g.line((8, 20, 23, 20), fill=c)                                        # the brim
+        g.line((8, 21, 23, 21), fill=dk)
+        g.polygon([(15, 15), (16, 15), (18, 17), (16, 19), (15, 19), (13, 17)], fill=c, outline=dk)   # the plate
+        g.point((15, 16), fill=hi)
     else:
         # A glowing rune: a diamond with a bar through it.
         g.polygon([(16, 9), (22, 15), (16, 21), (10, 15)], outline=c)

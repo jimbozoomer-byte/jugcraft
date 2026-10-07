@@ -382,13 +382,15 @@ public class PixelHollowsGameTests {
 	private static final String[] VILLAGE_TYPES = {"plains", "desert", "savanna", "snowy", "taiga"};
 	/** Rounds of one village of each type, generated one round at a time so only five villages' chunks are loaded. */
 	private static final int VILLAGE_ROUNDS = 4;
+	/** Exercise recovery beyond the old eight-layout cap, which occasionally left normal villages without a shop. */
+	private static final int WITHHELD_LAYOUTS = 8;
 
 	/**
 	 * Every new village has exactly one Retro Game Shop. Each round, one village of each type is generated as /place
 	 * structure does, far from the other tests, after its area is force-loaded; then its arcade cabinets (one per shop),
 	 * villagers and zombie villagers are counted. A zombie village (about 2% of villages; no villagers) gets no shop.
 	 * Now and then a village's first layout has no house slot with room for the shop and it is laid out again (see
-	 * RetroShopPlacement). The last round's villages have the shop withheld from their first layout, so each of them
+	 * RetroShopPlacement). The last round's villages have the shop withheld from their first eight layouts, so each of them
 	 * must be laid out again, and still has exactly one shop.
 	 */
 	@GameTest(maxTicks = 4800)
@@ -412,7 +414,7 @@ public class PixelHollowsGameTests {
 						}
 					}
 				}
-				// The last round's villages get no shop in their first layout, so each must be laid out again.
+				// Force recovery beyond the old cap rather than depending on a rare random layout failure.
 				boolean withhold = round[0] == VILLAGE_ROUNDS - 1;
 				int relayoutsBeforeRound = RetroShopPlacement.relayouts();
 				int withVillagers = 0;
@@ -421,7 +423,7 @@ public class PixelHollowsGameTests {
 					BlockPos centre = centres.get(i);
 					String place = "place structure minecraft:village_%s %d %d %d".formatted(type, centre.getX(), centre.getY(), centre.getZ());
 					try {
-						RetroShopPlacement.withholdShopForTests(withhold ? 1 : 0);
+						RetroShopPlacement.withholdShopForTests(withhold ? WITHHELD_LAYOUTS : 0);
 						// Through the dispatcher, so an exception inside generation reaches the test instead of a chat line.
 						server.getCommands().getDispatcher().execute(place, server.createCommandSourceStack());
 					} catch (Exception exception) {
@@ -449,7 +451,7 @@ public class PixelHollowsGameTests {
 				if (withhold) {
 					lastRoundRelayouts[0] = relaidOut;
 				}
-				if (withhold && relaidOut < withVillagers) {
+				if (withhold && relaidOut < withVillagers * WITHHELD_LAYOUTS) {
 					problems.add("with the shop withheld from first layouts, only " + relaidOut + " of " + withVillagers + " villages were laid out again");
 				}
 				forceload(server, centres, "remove");

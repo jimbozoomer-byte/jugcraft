@@ -40,7 +40,7 @@ flowchart LR
 
 ## Progression, step by step
 
-1. **Mine and smelt** tin, zinc, lead and copper with a stone pickaxe and a vanilla furnace. Make **bronze** by hand: 3 copper + 1 tin, crafted into bronze blend, then smelted.
+1. **Mine and smelt** tin, zinc, lead and copper with a stone pickaxe and a vanilla furnace. Make **bronze** by hand: 3 copper + 1 tin, crafted into bronze blend, then smelted. **Thallite**, the Earth school's green metal, is mined and smelted the same way; it is richest in Lush Caves and the Glowcap Grotto and makes no alloy ([thallite.md](features/thallite.md)).
 2. **Craft a Machine Casing** (bronze + zinc), **Copper Cable** (copper + tin) and a **Coal Generator**. This is the first power.
 3. **Early machines:**
    - **Electric Furnace:** twice the vanilla furnace's speed.
@@ -411,6 +411,19 @@ Empty tools mine like a bare hand and get no drops.
 
 **Code:** `gear/JugcraftGear`; data and art from `tools/gear.py` and `tools/gear_textures.py` ([feature record](features/tools-and-armor.md)).
 
+### Steampunk and Kaiser Armor (batch 60)
+
+The stylized looks bronze and steel armor were first drawn in, as sets of their own. Each piece protects exactly as its plain piece does (same defense, toughness, durability, enchantability and repair), and smithing keeps its enchantments and wear. Bronze and steel armor wear their own 3D look, the owner's knight design ([knight-armor.md](features/knight-armor.md)).
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Steampunk helmet, chestplate, leggings, boots | Bronze armor's protection, in the steampunk look: aviator cap and goggles, pressure gauge, copper boiler | smithing: Steampunk Pattern + bronze piece + copper ingot |
+| Kaiser helmet, chestplate, leggings, boots | Steel armor's protection, in the kaiserpunk parade dress of the Winged Cog: spiked helmet, field-grey tunic, jackboots | smithing: Kaiser Pattern + steel piece + gold ingot |
+| Steampunk Pattern | Smithing template: bronze armor to Steampunk and, with a bronze ingot, back | 4 copper ingots, 2 leather, 2 glass panes, paper (4) |
+| Kaiser Pattern | Smithing template: steel armor to Kaiser and, with a steel ingot, back | Imperial Crest, 4 gold nuggets, 2 black dye, red dye, paper (4) |
+
+**Code:** `gear/JugcraftGear` (`ARMOR_STYLES`, `STYLE_TEMPLATES`, `restyle`, `TEMPLATES`); data from `tools/gear.py` (`ARMOR_STYLES`), armor art from `tools/armor_styles.py`, pattern art from `tools/arms_variants_art.py` ([feature record](features/steampunk-and-kaiser-armor.md)).
+
 ### Scuba gear, free runners and power weapons (batch 27)
 
 | Item | What it does | Built from |
@@ -435,7 +448,7 @@ Empty tools mine like a bare hand and get no drops.
 | Ronin Exosuit pieces, Ronin Katana | The same, in the crimson Ronin livery | smithing: Ronin Livery + piece (or power katana) + red dye |
 | Ronin / Vanguard Livery | Smithing templates that repaint the suit and katana, keeping charge | dyes around a steel plate (2) |
 
-**Code:** `gear/` (`JugcraftExosuit`, `ExosuitItem`, `Exosuit`), `tools/Jetpack`, client `ExosuitLayer`; data and art from `tools/exosuit.py` and `tools/exosuit_art.py` ([feature record](features/exosuit.md)).
+**Code:** `gear/` (`JugcraftExosuit`, `ExosuitItem`, `Exosuit`), `tools/Jetpack`, client `WornModelLayer`; data and art from `tools/exosuit.py` and `tools/exosuit_art.py` ([feature record](features/exosuit.md)).
 
 ### Pneumatic grapple (batch 30)
 
@@ -568,6 +581,19 @@ Trophies last twice as long as steel. Glowing parts (runes, magma, venom, soul f
 
 **Code:** `weapons/ArmVariants` (the variants, boons and numbers), `ArmItem` (`boon`, `boonBonus`, `shock`); data from `tools/arms_variants.py`, art from `tools/arms_variants_art.py` ([feature record](features/arms-vii.md)).
 
+### Arms VIII (batch 59): thrown arms
+
+Four arms in bronze and steel that fight in the hand and are thrown with the use key: hold to wind back, let go to throw, as a trident is thrown. What a throw strikes takes its damage, more for the arm's damage enchantments; then the arm comes down where it struck, as itself, to be picked up (the chakram flies back). No throw hits harder than the trident's 8, and throwing one after another deals less a second than a netherite sword.
+
+| Item | In the hand | Thrown (bronze, steel) | Built from |
+| --- | --- | --- | --- |
+| Javelin | Hits 5.5 (steel 6) at 1.4 a second | 7, 8; wind 0.5 s; flies far and straight | ingot, 2 sticks, iron nugget |
+| Francisca | Hits 7 (7.5) at 1.1 a second; chops wood | 6, 7; wind 0.3 s; tumbles; knocks a raised shield down for 3 s | 2 ingots, stick |
+| Chakram | Hits 5 (5.5) at 1.8 a second | 4, 5 to each foe it passes, out and back; flies flat 12 blocks and returns to you | 3 ingots, leather |
+| Harpoon | Hits 6 (6.5) at 1.3 a second | 5, 6; keeps its speed underwater; hauls its catch towards you and out of the saddle | 2 ingots, stick, string |
+
+**Code:** `weapons/ThrownArmItem` (the wind and throw), `weapons/ThrownArm` (the flight and strike), `JugcraftArms.THROWN`; client `arms/ThrownArmRenderer` (each drawn as its 3D model, turned to its flight); data from `tools/arms.py`, art from `tools/arms_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-viii.md)).
+
 ### Construction chemistry (batch 32)
 
 | Item | What it does | Built from |
@@ -687,9 +713,9 @@ Ore processing gives more metal per ore and turns everyday blocks into useful th
 | Sieve | Gravel → flint (12% iron nugget, 8% tin nugget); soul sand → soul soil (15% quartz, 8% gold nugget) | 8 JE/t, 100 ticks | iron plates, iron bars, hopper, cables, casing |
 | Sawmill | Log → 6 planks (bamboo block → 3), 50% sawdust; planks → 3 sticks | 12 JE/t, 100 ticks (sticks 60) | iron ingots, iron gear, iron plates, cables, casing |
 
-**Dusts** exist for copper, iron, gold, tin, zinc, lead, silver, nickel, tungsten and uranium, tagged `c:dusts/<metal>`. A dust smelts into one ingot wherever that metal's raw ore can be smelted. Nickel, tungsten and uranium dust melt in the Arc Furnace instead, like their raw ores. **Washed ores** (`washed_<metal>_ore`) are an intermediate: grind them, don't smelt them. Four **sawdust** make a sheet of paper.
+**Dusts** exist for copper, iron, gold, tin, zinc, lead, silver, nickel, tungsten, uranium and thallite, tagged `c:dusts/<metal>`. A dust smelts into one ingot wherever that metal's raw ore can be smelted. Nickel, tungsten and uranium dust melt in the Arc Furnace instead, like their raw ores. **Washed ores** (`washed_<metal>_ore`) are an intermediate: grind them, don't smelt them. Four **sawdust** make a sheet of paper.
 
-**Byproducts** (pulverizing ore or washed ore): copper → gold, iron → nickel, gold → silver, tin → tungsten (5%), zinc → lead, lead → silver, silver → lead, nickel → iron, tungsten → tin, uranium → lead, each 10% unless marked. The pairs follow ores that really occur together. A byproduct from a disabled feature switch is never made.
+**Byproducts** (pulverizing ore or washed ore): copper → gold, iron → nickel, gold → silver, tin → tungsten (5%), zinc → lead, lead → silver, silver → lead, nickel → iron, tungsten → tin, uranium → lead, thallite → iron, each 10% unless marked. The pairs follow ores that really occur together. A byproduct from a disabled feature switch is never made.
 
 **Byproduct slots.** The Pulverizer, Sieve and Sawmill have two byproduct slots above the output. A machine waits rather than lose a byproduct: it only finishes an operation when every byproduct it might roll has room. Hoppers, pipes and *Eject* take from the byproduct slots as well as the output.
 
@@ -746,7 +772,7 @@ The defaults keep the old behavior: ingredients in from the top and sides, resul
 
 | Component | Made by | Metals | Used for |
 | --- | --- | --- | --- |
-| Plate | Metal Press, 1 ingot → 1 plate | copper, iron, tin, bronze, brass, invar, aluminum, nickel, lead, tungsten | Gears; the Circuit Assembler (tin plates); advanced circuits (invar); pipes (bronze) and tanks (tin); future casings and rocket hulls |
+| Plate | Metal Press, 1 ingot → 1 plate; thallite also by hand, 2 ingots → 1 plate | copper, iron, tin, bronze, brass, invar, aluminum, nickel, lead, tungsten, steel, titanium, thallite | Gears; the Circuit Assembler (tin plates); advanced circuits (invar); pipes (bronze) and tanks (tin); future casings and rocket hulls |
 | Gear | Crafting, 4 plates of one metal | iron, bronze, brass, invar | The Circuit Assembler (bronze gear); the Electric Pump (iron); future mechanical machines |
 | Wire | Wire Drawer, 1 ingot → 3 wires | copper, silver, aluminum | Circuits (copper for basic, silver for advanced); future cable tiers |
 | Basic Circuit | Circuit Assembler | silicon, copper wire, solder | Future higher-tier machines and upgrades |
@@ -837,7 +863,7 @@ To add a test, write a public method annotated `@GameTest` in `JugcraftGameTests
 Full numbers, conversion losses and the loops that were checked: [BALANCE.md](BALANCE.md).
 
 - **No free metal.** Every recipe keeps or loses metal: plates 1:1, 4 plates → 1 gear, 1 ingot → 3 wires, and alloys at exact ratios. The only gain is the crusher's ore doubling, defined once for all ores. `tools/check_mod_data.py` audits every recipe, including two- and three-input machine recipes.
-- **Nothing is hand-only or machine-only without reason.** Bronze has a hand route; plates, wires and circuits need their machines, because processing is what those machines are for.
+- **Nothing is hand-only or machine-only without reason.** Bronze has a hand route; plates, wires and circuits need their machines, because processing is what those machines are for. The one exception is thallite's plate, which also has a dearer hand route (2 ingots → 1 plate) for the Earth school's metal ([thallite.md](features/thallite.md)).
 - **Stand-ins are temporary.** Blast-furnace and arc-furnace recipes that really need chemistry are listed in [branches/CHEMISTRY.md](branches/CHEMISTRY.md) and will move there without changing item IDs.
 
 ## Where to change things
@@ -854,4 +880,5 @@ Full numbers, conversion losses and the loops that were checked: [BALANCE.md](BA
 | Textures | `tools/generate_textures.py` | `python3 tools/generate_textures.py` |
 | Crops, seeds, foods, sickles, wild plants, trellis, Cooking Pot recipes, gourds, cranberries, the chestnut tree and its wood (Agriculture) | `tools/agriculture.py` (plus the matching Java in `agriculture/`) | `python3 tools/generate_material_data.py` |
 | Crop and farm-item textures | `tools/crop_textures.py` and `tools/kitchen_textures.py` (previews: `tools/render_agriculture.py`) | `python3 tools/generate_textures.py` |
+| Material sets: the metals' ingots, nuggets and storage blocks, the ores, raw ores and raw blocks, the bronze and steel tools ([MATERIAL_SETS.md](MATERIAL_SETS.md)) | the maps in `tools/material_icons/*.txt`; ramps and ore models in `tools/material_icons.py` | `python3 tools/generate_textures.py` and `python3 tools/generate_material_data.py` |
 | Verify | — | `python3 tools/check_mod_data.py` and `./gradlew build` |

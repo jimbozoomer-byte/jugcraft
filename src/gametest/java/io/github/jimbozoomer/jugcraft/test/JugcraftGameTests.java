@@ -751,6 +751,70 @@ public class JugcraftGameTests {
 		helper.succeedWhen(() -> helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The fist should hit the pig"));
 	}
 
+	private static io.github.jimbozoomer.jugcraft.walker.ArmouredWalker pilotedArmouredWalker(GameTestHelper helper, Vec3 at, ServerPlayer pilot) {
+		io.github.jimbozoomer.jugcraft.walker.ArmouredWalker walker = helper.spawn(
+				io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.ARMOURED_WALKER, at);
+		walker.setFuel(1000);
+		pilot.setPos(walker.getX(), walker.getY(), walker.getZ());
+		helper.assertTrue(pilot.startRiding(walker, true, true), "The pilot could not climb in");
+		return walker;
+	}
+
+	/** Batch 58: the Armoured Walker walks on fuel, as the Diesel Walker does. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 200)
+	public void armouredWalkerWalksOnFuel(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		var walker = pilotedArmouredWalker(helper, new Vec3(7.5, 1, 2.5), pilot);
+		Vec3 start = walker.position();
+		helper.onEachTick(() -> walker.steer(pilot, 1, 0, 0, 0, 0));
+		helper.runAfterDelay(40, () -> {
+			double walked = walker.position().subtract(start).horizontalDistance();
+			helper.assertTrue(walked > 3, "Holding forward should walk it forward, but it moved " + walked);
+			helper.assertTrue(walker.fuel() < 1000, "Walking should burn fuel");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 58: holding use fires the hull cannon (a Heavy Shell toward where the pilot looks), at most once every
+	 * {@value io.github.jimbozoomer.jugcraft.walker.ArmouredWalker#CANNON_COOLDOWN} ticks.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 120, skyAccess = true)
+	public void armouredWalkerFiresItsCannon(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		var walker = pilotedArmouredWalker(helper, new Vec3(20.5, 1, 6.5), pilot);
+		pilot.getInventory().add(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 4));
+		Vec3 aim = helper.absoluteVec(new Vec3(20.5, 4, 40.5));
+		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 26, 44);
+		java.util.Set<java.util.UUID> shells = new java.util.HashSet<>();
+		helper.onEachTick(() -> {
+			pilot.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, aim);
+			walker.steer(pilot, 0, 0, 0, 1, 0);
+			for (var shell : helper.getLevel().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.artillery.ArtilleryShell.class, area)) {
+				if (shells.add(shell.getUUID())) {
+					helper.assertTrue(shell.getDeltaMovement().z > 1.0, "The shell should fly where the pilot looks, not " + shell.getDeltaMovement());
+				}
+			}
+		});
+		helper.runAfterDelay(60, () -> {
+			helper.assertTrue(shells.size() == 2, "Sixty ticks of holding use should fire twice (once every 40), not " + shells.size());
+			helper.succeed();
+		});
+	}
+
+	/** Batch 58: attack rams the piston into what stands in front, throwing it. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 100)
+	public void armouredWalkerRams(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		var walker = pilotedArmouredWalker(helper, new Vec3(7.5, 1, 3.5), pilot);
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(7, 1, 6));
+		helper.runAfterDelay(5, () -> walker.steer(pilot, 0, 0, 0, 0, 1));
+		helper.succeedWhen(() -> helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The ram should hit the pig"));
+	}
+
 	/** Batch 47: a Diesel Walker's fuel is saved with it. */
 	@GameTest
 	public void dieselWalkerKeepsFuel(GameTestHelper helper) {
@@ -1099,8 +1163,9 @@ public class JugcraftGameTests {
 		gunner.getInventory().add(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 5));
 		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
 		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
-		gunner.setYRot(0.0F);
-		gunner.setXRot(-20.0F);
+		// The gunner's own mark straight ahead, in range: other tests' marks (which outlive their players) could
+		// otherwise draw the gun's aim away, as a gun follows the nearest spotter's mark when its gunner has none.
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.mark(gunner, helper.absolutePos(new BlockPos(2, 0, 30)));
 		// One press, held for a moment: the gun fires once it has turned onto the gunner's line.
 		for (int tick = 1; tick <= 40; tick++) {
 			int pressed = tick <= 30 ? 1 : 0;
@@ -1108,8 +1173,448 @@ public class JugcraftGameTests {
 		}
 		helper.runAfterDelay(80, () -> {
 			int left = gunner.getInventory().countItem(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM);
-			helper.assertTrue(left == 2, "A salvo should use three Heavy Shells, leaving 2, but left " + left);
+			try {
+				helper.assertTrue(left == 2, "A salvo should use three Heavy Shells, leaving 2, but left " + left
+						+ "; gun ticks=" + battery.tickCount + ", crewed=" + (battery.getFirstPassenger() == gunner)
+						+ ", aim=" + battery.aimYaw(1.0F) + "/" + battery.aimPitch());
+				helper.succeed();
+			} finally {
+				io.github.jimbozoomer.jugcraft.artillery.Spotting.clear(gunner);
+			}
+		});
+	}
+
+	/**
+	 * Batch 55: every fortification block places; the parapet has its crenel (a gap you can stand in), the wall joins
+	 * walls, the ladder is climbable and the hoist and rack have their block entities.
+	 */
+	@GameTest
+	public void fortificationBlocksPlace(GameTestHelper helper) {
+		int x = 0;
+		for (var entry : io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.entrySet()) {
+			if (entry.getKey().equals("blast_door") || entry.getKey().equals("steel_ladder")) {
+				continue;
+			}
+			BlockPos pos = new BlockPos(x++ % 8, 1, x / 8 * 2);
+			helper.setBlock(pos, entry.getValue());
+			helper.assertBlockPresent(entry.getValue(), pos);
+		}
+		ServerLevel level = helper.getLevel();
+		BlockPos parapet = new BlockPos(0, 3, 4);
+		helper.setBlock(parapet, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("bastion_parapet"));
+		var shape = helper.getBlockState(parapet).getShape(level, helper.absolutePos(parapet));
+		helper.assertTrue(shape.max(Direction.Axis.Y) == 1.0 && !Block.isShapeFullBlock(shape), "A parapet is full height but not a full cube");
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("bastion_concrete_wall").defaultBlockState().is(net.minecraft.tags.BlockTags.WALLS),
+				"The bastion wall should be in #minecraft:walls");
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("steel_ladder").defaultBlockState().is(net.minecraft.tags.BlockTags.CLIMBABLE),
+				"The steel ladder should be climbable");
+		BlockPos hoist = new BlockPos(2, 3, 4);
+		helper.setBlock(hoist, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ammo_hoist"));
+		helper.getBlockEntity(hoist, io.github.jimbozoomer.jugcraft.building.AmmoHoistBlock.Entity.class);
+		BlockPos rack = new BlockPos(4, 3, 4);
+		helper.setBlock(rack, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		helper.getBlockEntity(rack, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		helper.succeed();
+	}
+
+	/** Batch 55: a blast door will not open by hand (its set is iron's) but opens on a redstone signal. */
+	@GameTest
+	public void blastDoorOpensOnlyByRedstone(GameTestHelper helper) {
+		var door = (net.minecraft.world.level.block.DoorBlock) io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("blast_door");
+		helper.assertFalse(door.type().canOpenByHand(), "A blast door must not open by hand");
+		BlockPos lower = new BlockPos(2, 1, 2);
+		helper.setBlock(lower, door.defaultBlockState().setValue(net.minecraft.world.level.block.DoorBlock.HALF,
+				net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER));
+		helper.setBlock(lower.above(), door.defaultBlockState().setValue(net.minecraft.world.level.block.DoorBlock.HALF,
+				net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER));
+		helper.assertBlockProperty(lower, net.minecraft.world.level.block.DoorBlock.OPEN, false);
+		helper.setBlock(lower.east(), Blocks.REDSTONE_BLOCK);
+		helper.succeedWhen(() -> helper.assertBlockProperty(lower, net.minecraft.world.level.block.DoorBlock.OPEN, true));
+	}
+
+	/**
+	 * Batch 55: shells loaded into the bottom of a four-high ammo hoist climb the shaft into the ready rack on top, and a
+	 * hopper cannot take them back out of the shaft.
+	 */
+	@GameTest(maxTicks = 300)
+	public void ammoHoistLiftsShellsToTheRack(GameTestHelper helper) {
+		for (int y = 1; y <= 4; y++) {
+			helper.setBlock(new BlockPos(2, y, 2), io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ammo_hoist"));
+		}
+		BlockPos rackPos = new BlockPos(2, 5, 2);
+		helper.setBlock(rackPos, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		helper.assertBlockProperty(new BlockPos(2, 4, 2), io.github.jimbozoomer.jugcraft.building.AmmoHoistBlock.TOP, true);
+		helper.assertBlockProperty(new BlockPos(2, 1, 2), io.github.jimbozoomer.jugcraft.building.AmmoHoistBlock.TOP, false);
+		ServerLevel level = helper.getLevel();
+		var bottom = ItemStorage.SIDED.find(level, helper.absolutePos(new BlockPos(2, 1, 2)), Direction.DOWN);
+		helper.assertTrue(bottom != null && bottom.supportsInsertion() && !bottom.supportsExtraction(),
+				"A hoist should take items in but never give them up to a hopper");
+		ItemVariant shell = ItemVariant.of(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM);
+		try (Transaction transaction = Transaction.openOuter()) {
+			helper.assertTrue(bottom.insert(shell, 8, transaction) == 8, "The bottom hoist should take 8 shells");
+			transaction.commit();
+		}
+		var rack = helper.getBlockEntity(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(rack.count() == 8, "The rack on top should hold all 8 shells, but holds " + rack.count());
+			helper.assertBlockProperty(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.FILL, 1);
+		});
+	}
+
+	/**
+	 * Batch 55: a gunner with no shells on them fires a Triple Battery's salvo from the ready rack beside it, and the
+	 * rack loses three shells.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void gunsDrawShellsFromReadyRacks(GameTestHelper helper) {
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		BlockPos rackPos = new BlockPos(5, 1, 2);
+		helper.setBlock(rackPos, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		var rack = helper.getBlockEntity(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		rack.shells.addItem(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 5));
+		var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("triple_battery");
+		io.github.jimbozoomer.jugcraft.artillery.TowerGun battery = helper.spawn(type, new Vec3(2.5, 1, 2.5));
+		battery.face(0.0F);
+		ServerPlayer gunner = helper.makeMockServerPlayerInLevel();
+		gunner.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
+		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
+		// The gunner's own mark straight ahead, in range: other tests' marks (which outlive their players) could
+		// otherwise draw the gun's aim away, as a gun follows the nearest spotter's mark when its gunner has none.
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.mark(gunner, helper.absolutePos(new BlockPos(2, 0, 30)));
+		for (int tick = 1; tick <= 40; tick++) {
+			int pressed = tick <= 30 ? 1 : 0;
+			helper.runAfterDelay(tick, () -> battery.steer(gunner, 0, 0, pressed));
+		}
+		helper.runAfterDelay(80, () -> {
+			helper.assertTrue(rack.count() == 2, "The salvo should take three shells from the rack, leaving 2, but left " + rack.count());
 			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 56 helper: a Triple Battery on a stone pad, a ready rack of five Heavy Shells beside it and a fire control
+	 * table facing south (down the range) with the battery linked to it through the wire, in {@code mode}. Returns the
+	 * battery; the rack is at (5, 1, 2) and the table at (8, 1, 2).
+	 */
+	private static io.github.jimbozoomer.jugcraft.artillery.TowerGun linkedBattery(GameTestHelper helper,
+			io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode mode) {
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		BlockPos rackPos = new BlockPos(5, 1, 2);
+		helper.setBlock(rackPos, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		helper.getBlockEntity(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class).shells
+				.addItem(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 5));
+		BlockPos tablePos = new BlockPos(8, 1, 2);
+		helper.setBlock(tablePos, io.github.jimbozoomer.jugcraft.building.FireControl.TABLE.defaultBlockState()
+				.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.SOUTH)
+				.setValue(io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.MODE, mode));
+		var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("triple_battery");
+		io.github.jimbozoomer.jugcraft.artillery.TowerGun battery = helper.spawn(type, new Vec3(2.5, 1, 2.5));
+		battery.face(0.0F);
+		ServerPlayer layer = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.building.FireControl.startLink(layer, helper.getLevel(), helper.absolutePos(tablePos));
+		io.github.jimbozoomer.jugcraft.building.FireControl.link(layer, battery);
+		layer.discard();
+		return battery;
+	}
+
+	/**
+	 * Batch 56: linking through the wire, the link limit, a parallel sheaf's spacing, and that the wire on a linked gun
+	 * unlinks it.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void fireControlTableLinksGuns(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.PARALLEL);
+		BlockPos tablePos = new BlockPos(8, 1, 2);
+		var table = helper.getBlockEntity(tablePos, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		helper.assertTrue(table.linked(battery.getUUID()), "The wire should have linked the battery to the table");
+		helper.assertTrue(helper.absolutePos(tablePos).equals(battery.director()), "The battery should know its table");
+		for (int i = 1; i < io.github.jimbozoomer.jugcraft.building.FireControl.MAX_GUNS; i++) {
+			helper.assertTrue(table.link(java.util.UUID.randomUUID()), "A table should take " + io.github.jimbozoomer.jugcraft.building.FireControl.MAX_GUNS + " guns");
+		}
+		helper.assertFalse(table.link(java.util.UUID.randomUUID()), "A table should refuse a gun past its limit");
+		// Three guns on a parallel sheaf straight down the range lay on points six blocks apart across it.
+		while (table.links().size() > 3) {
+			table.unlink(table.links().get(table.links().size() - 1));
+		}
+		BlockPos target = helper.absolutePos(new BlockPos(8, 0, 30));
+		table.setTarget(target);
+		Vec3 first = table.aimPoint(table.links().get(0));
+		Vec3 middle = table.aimPoint(table.links().get(1));
+		Vec3 last = table.aimPoint(table.links().get(2));
+		helper.assertTrue(middle.distanceTo(Vec3.atCenterOf(target).add(0, 0.5, 0)) < 1.0E-6, "The middle gun should lay on the target");
+		helper.assertTrue(Math.abs(first.distanceTo(middle) - io.github.jimbozoomer.jugcraft.building.FireControl.SHEAF_SPACING) < 1.0E-6
+				&& Math.abs(last.distanceTo(middle) - io.github.jimbozoomer.jugcraft.building.FireControl.SHEAF_SPACING) < 1.0E-6
+				&& Math.abs(first.z - last.z) < 1.0E-6, "A parallel sheaf should spread across the line of fire, six blocks apart");
+		ServerPlayer layer = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.building.FireControl.startLink(layer, helper.getLevel(), helper.absolutePos(tablePos));
+		io.github.jimbozoomer.jugcraft.building.FireControl.link(layer, battery);
+		helper.assertFalse(table.linked(battery.getUUID()), "The wire on a linked gun should unlink it");
+		helper.assertTrue(battery.director() == null, "An unlinked gun should forget its table");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 56: an uncrewed battery linked to a table on converge lays on the table's target but holds fire until a
+	 * redstone pulse into the table, then fires exactly one salvo from the ready rack; the table's comparator reads it as
+	 * ready while it waits.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 260, skyAccess = true)
+	public void fireControlSalvoOnPulse(GameTestHelper helper) {
+		linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CONVERGE);
+		BlockPos tablePos = new BlockPos(8, 1, 2);
+		var table = helper.getBlockEntity(tablePos, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		table.setTarget(helper.absolutePos(new BlockPos(2, 0, 30)));
+		var rack = helper.getBlockEntity(new BlockPos(5, 1, 2), io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		helper.runAfterDelay(70, () -> {
+			helper.assertTrue(rack.count() == 5, "A laid gun must not fire before the table orders it, but the rack holds " + rack.count());
+			helper.assertTrue(table.readyCount(helper.getLevel().getGameTime()) == 1, "The laid, loaded battery should report ready");
+			ServerLevel level = helper.getLevel();
+			BlockState state = level.getBlockState(helper.absolutePos(tablePos));
+			helper.assertTrue(state.getAnalogOutputSignal(level, helper.absolutePos(tablePos), Direction.NORTH) == 1,
+					"The table's comparator should read one ready gun");
+			helper.setBlock(new BlockPos(9, 1, 2), Blocks.REDSTONE_BLOCK);
+		});
+		helper.runAfterDelay(160, () -> helper.assertTrue(rack.count() == 2,
+				"One pulse should fire one salvo of three shells, leaving 2, but left " + rack.count()));
+		helper.runAfterDelay(240, () -> {
+			helper.assertTrue(rack.count() == 2, "A held signal must not fire again, but the rack holds " + rack.count());
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 56: on sentry an uncrewed battery ignores a hostile mob outside the table's 90 degree sector and one with a
+	 * player beside it, and lays on and fires at one inside the sector.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
+	public void fireControlSentryKeepsToItsSector(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.SENTRY);
+		var table = helper.getBlockEntity(new BlockPos(8, 1, 2), io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		table.setSectorWidth(90);
+		var rack = helper.getBlockEntity(new BlockPos(5, 1, 2), io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		for (int x = 30; x <= 32; x++) {
+			for (int z = 1; z <= 3; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		// East of the table: outside a sector facing south.
+		var outside = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new Vec3(31.5, 1, 2.5));
+		// South, in the sector, but with a player standing beside it.
+		for (int x = 1; x <= 3; x++) {
+			for (int z = 27; z <= 29; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		var guarded = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new Vec3(2.5, 1, 28.5));
+		ServerPlayer friend = helper.makeMockServerPlayerInLevel();
+		friend.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		friend.setPos(helper.absoluteVec(new Vec3(4.5, 1, 28.5)));
+		for (int tick = 5; tick <= 80; tick += 5) {
+			helper.runAfterDelay(tick, () -> {
+				var target = battery.sentryTarget();
+				helper.assertFalse(target == outside, "A sentry must not engage a mob outside its sector");
+				helper.assertFalse(target == guarded, "A sentry must not engage a mob with a player beside it");
+			});
+		}
+		helper.runAfterDelay(85, () -> {
+			helper.assertTrue(rack.count() == 5, "Nothing should have been fired yet, but the rack holds " + rack.count());
+			friend.discard();
+			guarded.discard();
+			outside.discard();
+			for (int x = 1; x <= 3; x++) {
+				for (int z = 31; z <= 33; z++) {
+					helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+				}
+			}
+			// The first salvo is enough to pass, whether or not it kills the husk.
+			helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new Vec3(2.5, 1, 32.5));
+		});
+		helper.runAfterDelay(280, () -> {
+			helper.assertTrue(rack.count() < 5, "A sentry should fire at a hostile mob in its sector, but the rack still holds " + rack.count());
+			helper.succeed();
+		});
+	}
+
+	/** Batch 57 helper: a stone floor over the whole of a drone_tower test's 44 x 44 ground. */
+	private static void raiderFloor(GameTestHelper helper) {
+		for (int x = 0; x < 44; x++) {
+			for (int z = 0; z < 44; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+	}
+
+	private static void killOutright(GameTestHelper helper, net.minecraft.world.entity.LivingEntity mob) {
+		mob.hurtServer(helper.getLevel(), helper.getLevel().damageSources().genericKill(), 10000.0F);
+	}
+
+	/**
+	 * Batch 57: every raider is a hostile mob (so sentries and town guards fight it), and a raider's blast hurts the pig
+	 * beside it but spares the raider standing just as close.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void raidersAreHostileAndSpareEachOther(GameTestHelper helper) {
+		raiderFloor(helper);
+		var grunt = helper.spawnWithNoFreeWill(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(10.5, 1, 10.5));
+		var walker = helper.spawnWithNoFreeWill(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.WALKER, new Vec3(20.5, 1, 20.5));
+		var blimp = helper.spawnWithNoFreeWill(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BLIMP, new Vec3(30.5, 8, 30.5));
+		for (Object raider : new Object[] {grunt, walker, blimp}) {
+			helper.assertTrue(raider instanceof net.minecraft.world.entity.monster.Enemy, raider + " should be a hostile mob");
+			helper.assertTrue(raider instanceof io.github.jimbozoomer.jugcraft.raiders.Raider, raider + " should be a raider");
+		}
+		var pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new Vec3(12.5, 1, 10.5));
+		Vec3 center = helper.absoluteVec(new Vec3(11.5, 1.5, 10.5));
+		io.github.jimbozoomer.jugcraft.weapons.Blast.detonate(helper.getLevel(), center, null, null,
+				io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BOMB_RADIUS, io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BOMB_DAMAGE,
+				target -> target instanceof io.github.jimbozoomer.jugcraft.raiders.Raider);
+		helper.assertTrue(grunt.getHealth() == grunt.getMaxHealth(), "A raider's blast should spare the raider");
+		helper.assertTrue(pig.getHealth() < pig.getMaxHealth(), "A raider's blast should hurt the pig");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 57: a level 1 raid gathers its party (three grunts, a grenadier and an officer) bound for its objective; when
+	 * every raider has fallen the raid is won and the world's raid level goes up by one (to at most five).
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void raidIsWonWhenEveryRaiderFalls(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerLevel level = helper.getLevel();
+		int before = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raidLevel(level);
+		BlockPos objective = helper.absolutePos(new BlockPos(5, 1, 5));
+		var raid = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.start(level, objective, helper.absolutePos(new BlockPos(35, 1, 35)), 1,
+				level.getRandom());
+		helper.assertTrue(raid.total() == 5 && raid.members().size() == 5, "A level 1 raid should bring five raiders, not " + raid.total());
+		int[] kinds = new int[3];
+		for (java.util.UUID id : raid.members()) {
+			if (level.getEntity(id) instanceof io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry raider) {
+				kinds[raider.role().ordinal()]++;
+				helper.assertTrue(objective.equals(raider.objective()) && raid.id().equals(raider.raid()), "Each raider should know its raid");
+			}
+		}
+		helper.assertTrue(kinds[0] == 3 && kinds[1] == 1 && kinds[2] == 1, "Three grunts, a grenadier and an officer, not " + java.util.Arrays.toString(kinds));
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.active(level, raid.id()), "The raid should be under way");
+		helper.runAfterDelay(5, () -> {
+			for (java.util.UUID id : raid.members()) {
+				if (level.getEntity(id) instanceof net.minecraft.world.entity.LivingEntity raider) {
+					killOutright(helper, raider);
+				}
+			}
+		});
+		helper.succeedWhen(() -> {
+			helper.assertFalse(io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.active(level, raid.id()), "With every raider fallen the raid should end");
+			int after = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raidLevel(level);
+			helper.assertTrue(after >= Math.min(5, before + 1), "A won raid should raise the raid level from " + before + ", not leave it at " + after);
+		});
+	}
+
+	/**
+	 * Batch 57: a raid that withdraws takes its loaded raiders with it, and a raider whose raid has ended (it was
+	 * elsewhere when the raid withdrew) leaves at its next check.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
+	public void raidersWithdrawWithTheirRaid(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerLevel level = helper.getLevel();
+		var raid = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.start(level, helper.absolutePos(new BlockPos(5, 1, 5)),
+				helper.absolutePos(new BlockPos(30, 1, 30)), 1, level.getRandom());
+		var members = raid.members();
+		io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
+		helper.assertFalse(io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.active(level, raid.id()), "A withdrawn raid should be over");
+		for (java.util.UUID id : members) {
+			helper.assertTrue(level.getEntity(id) == null, "Its raiders should leave with it");
+		}
+		var straggler = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(20.5, 1, 20.5));
+		straggler.joinRaid(java.util.UUID.randomUUID(), helper.absolutePos(new BlockPos(5, 1, 5)));
+		helper.succeedWhen(() -> helper.assertTrue(straggler.isRemoved(), "A raider whose raid is over should leave"));
+	}
+
+	/**
+	 * Batch 57: an officer rallies the raiders near them (Speed and Strength); when the officer falls, the raiders lose
+	 * heart (Weakness).
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void officerRalliesAndTheirFallRoutsTheRest(GameTestHelper helper) {
+		raiderFloor(helper);
+		var officer = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.OFFICER, new Vec3(20.5, 1, 20.5));
+		var grunt = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(23.5, 1, 20.5));
+		helper.runAfterDelay(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.RALLY_TICKS + 5, () -> {
+			helper.assertTrue(grunt.hasEffect(net.minecraft.world.effect.MobEffects.SPEED)
+					&& grunt.hasEffect(net.minecraft.world.effect.MobEffects.STRENGTH), "The officer should rally the grunt");
+			killOutright(helper, officer);
+			helper.assertTrue(grunt.hasEffect(net.minecraft.world.effect.MobEffects.WEAKNESS), "The officer's fall should rout the grunt");
+			helper.assertFalse(grunt.hasEffect(net.minecraft.world.effect.MobEffects.STRENGTH), "A routed raider loses the rally's strength");
+			helper.succeed();
+		});
+	}
+
+	/** Batch 57: a grenadier's throw puts a grenade in the air toward its target. */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 100, skyAccess = true)
+	public void grenadierLobsGrenades(GameTestHelper helper) {
+		raiderFloor(helper);
+		var grenadier = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, new Vec3(10.5, 1, 20.5));
+		var pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new Vec3(22.5, 1, 20.5));
+		grenadier.performRangedAttack(pig, 1.0F);
+		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 26, 44);
+		var bombs = helper.getLevel().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderBomb.class, area);
+		helper.assertTrue(bombs.size() == 1 && !bombs.get(0).heavy(), "A throw should put one grenade in the air, not " + bombs.size());
+		helper.assertTrue(bombs.get(0).getDeltaMovement().x > 0, "The grenade should fly toward the pig");
+		// Too close to throw at, it clubs instead.
+		pig.teleportTo(grenadier.getX() + 1.5, grenadier.getY(), grenadier.getZ());
+		grenadier.performRangedAttack(pig, 1.0F);
+		helper.assertTrue(helper.getLevel().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderBomb.class, area).size() == 1,
+				"A grenadier should not throw at something closer than " + io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADE_MIN_RANGE + " blocks");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 57: raiders find and go for the people they hunt by themselves: a grunt hunts a townsperson down to striking
+	 * distance, and a grenadier lobs grenades at them. (A townsperson stands in for a player: the test server's mock
+	 * player is always in creative mode, and no hostile mob targets a creative player. Townsfolk cannot be hurt, so the
+	 * test checks the grunt closes in rather than that the blow lands; the fist itself is vanilla's.)
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 400, skyAccess = true)
+	public void raidersHuntOnTheirOwn(GameTestHelper helper) {
+		raiderFloor(helper);
+		var victim = helper.spawnWithNoFreeWill(io.github.jimbozoomer.jugcraft.town.JugcraftTown.TOWNSFOLK, new Vec3(20.5, 1, 20.5));
+		var grunt = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(16.5, 1, 20.5));
+		var grenadier = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, new Vec3(20.5, 1, 8.5));
+		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 26, 44);
+		boolean[] threw = {false};
+		boolean[] closed = {false};
+		helper.onEachTick(() -> {
+			threw[0] |= !helper.getLevel().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderBomb.class, area).isEmpty();
+			closed[0] |= grunt.getTarget() == victim && grunt.distanceTo(victim) < 2.0F;
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(grunt.getTarget() == victim, "The grunt should hunt the townsperson, not " + grunt.getTarget());
+			helper.assertTrue(closed[0], "The grunt should close to striking distance, but is " + grunt.distanceTo(victim) + " away");
+			helper.assertTrue(threw[0], "The grenadier should have thrown at the townsperson (it hunts " + grenadier.getTarget() + ")");
+		});
+	}
+
+	/** Batch 57: a blimp climbs to cruise well above what it hunts. */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
+	public void blimpCruisesOverItsQuarry(GameTestHelper helper) {
+		raiderFloor(helper);
+		var blimp = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BLIMP, new Vec3(30.5, 2, 30.5));
+		var pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new Vec3(20.5, 1, 20.5));
+		double start = blimp.getY();
+		helper.succeedWhen(() -> {
+			if (blimp.getTarget() == null) {
+				blimp.setTarget(pig);
+			}
+			helper.assertTrue(blimp.getY() > start + 8, "The blimp should climb toward its cruising height: at " + blimp.getY()
+					+ " from " + start + ", hunting " + blimp.getTarget() + ", moving " + blimp.getDeltaMovement() + ", removed " + blimp.isRemoved());
 		});
 	}
 
@@ -2889,6 +3394,396 @@ public class JugcraftGameTests {
 			helper.assertTrue(cobble == 0, "Accepted cobblestone into an empty grid slot");
 			transaction.abort();
 		}
+		helper.succeed();
+	}
+
+	/**
+	 * Raider extras: grunts marching on an objective behind a wall they cannot path round prop siege ladders up it, which
+	 * are climbable and drop nothing.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 600, skyAccess = true)
+	public void siegeLaddersGoUpWalls(GameTestHelper helper) {
+		raiderFloor(helper);
+		// A walled yard round the objective: closed on every side, since the test world's ground runs on past the
+		// floor and an open-ended wall is simply walked round.
+		for (int i = 12; i <= 28; i++) {
+			for (int y = 1; y <= 5; y++) {
+				helper.setBlock(new BlockPos(i, y, 2), Blocks.STONE_BRICKS);
+				helper.setBlock(new BlockPos(i, y, 18), Blocks.STONE_BRICKS);
+				helper.setBlock(new BlockPos(12, y, i - 10), Blocks.STONE_BRICKS);
+				helper.setBlock(new BlockPos(28, y, i - 10), Blocks.STONE_BRICKS);
+			}
+		}
+		ServerLevel level = helper.getLevel();
+		var raid = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.start(level, helper.absolutePos(new BlockPos(20, 1, 10)),
+				helper.absolutePos(new BlockPos(20, 1, 34)), 1, level.getRandom());
+		helper.succeedWhen(() -> {
+			boolean ladder = false;
+			for (int x = 10; x <= 30 && !ladder; x++) {
+				for (int z = 0; z <= 20 && !ladder; z++) {
+					for (int y = 1; y <= 5 && !ladder; y++) {
+						ladder = io.github.jimbozoomer.jugcraft.raiders.SiegeLadderBlock.is(helper.getBlockState(new BlockPos(x, y, z)));
+					}
+				}
+			}
+			if (!ladder) {
+				// Say where the raid's infantry are and what they are doing, so a failure shows why.
+				StringBuilder seen = new StringBuilder();
+				for (var raider : level.getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry.class,
+						new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).inflate(64))) {
+					BlockPos rel = raider.blockPosition().subtract(helper.absolutePos(BlockPos.ZERO));
+					seen.append(' ').append(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(raider.getType()).getPath()).append('@').append(rel.getX()).append(',').append(rel.getY()).append(',')
+							.append(rel.getZ()).append(raider.getTarget() != null ? " target=" + net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(raider.getTarget().getType()).getPath() : "")
+							.append(raider.getNavigation().isDone() ? " idle" : " moving").append(';');
+				}
+				helper.assertTrue(false, "A grunt stuck at the wall should have propped a siege ladder against it; raiders:" + seen);
+			}
+			helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.SIEGE_LADDER.defaultBlockState()
+					.is(net.minecraft.tags.BlockTags.CLIMBABLE), "A siege ladder should be climbable");
+			io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
+		});
+	}
+
+	/**
+	 * Raider extras: the Raider War Horn calls a raid at the world's raid level on the blower's base, or refuses (and is
+	 * kept) while another raid is under way.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 100, skyAccess = true)
+	public void raidHornCallsARaid(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setPos(helper.absoluteVec(new Vec3(20.5, 1, 20.5)));
+		player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.RAID_HORN));
+		int before = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raids(level).size();
+		var result = io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.RAID_HORN.use(level, player, net.minecraft.world.InteractionHand.MAIN_HAND);
+		var raids = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raids(level);
+		if (before > 0) {
+			// Another test's raid is under way: the horn must refuse and start nothing.
+			helper.assertTrue(result == net.minecraft.world.InteractionResult.FAIL && raids.size() == before, "The horn should refuse while a raid is under way");
+		} else if (result == net.minecraft.world.InteractionResult.SUCCESS) {
+			helper.assertTrue(raids.size() == 1, "Blowing the horn should start one raid");
+			var raid = raids.get(0);
+			helper.assertTrue(raid.objective().equals(player.blockPosition()) && raid.level() == io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raidLevel(level),
+					"It should come for the blower's base at the world's raid level");
+			io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
+		} else {
+			// Nowhere loaded and open for the party to gather (the test area's surroundings): refused, nothing started.
+			helper.assertTrue(raids.isEmpty(), "A refused horn should start nothing");
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * Raider extras: a raider camp on flat ground has its sandbag ring, campfire, tents and a supply barrel with its loot
+	 * table, held by a garrison of four raiders who never despawn; on uneven ground none is built.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void raiderCampHoldsItsGround(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = helper.absolutePos(new BlockPos(14, 1, 14));
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.build(level, origin, level.getRandom()),
+				"A camp should be built on flat ground");
+		helper.assertBlockPresent(Blocks.CAMPFIRE, new BlockPos(14, 1, 14));
+		helper.assertBlockPresent(Blocks.BARREL, new BlockPos(17, 1, 16));
+		var barrel = helper.getBlockEntity(new BlockPos(17, 1, 16), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.LOOT.equals(barrel.getLootTable()), "The barrel should hold the camp's loot");
+		var raiders = level.getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry.class,
+				new net.minecraft.world.phys.AABB(origin).inflate(8));
+		helper.assertTrue(raiders.size() == 4 && raiders.stream().allMatch(net.minecraft.world.entity.Mob::isPersistenceRequired),
+				"Four raiders should hold the camp, for good, not " + raiders.size());
+		// A tall step in the ground: no camp.
+		for (int x = 32; x < 44; x++) {
+			for (int z = 30; z < 44; z++) {
+				for (int y = 1; y <= 4; y++) {
+					helper.setBlock(new BlockPos(x, y, z), Blocks.STONE);
+				}
+			}
+		}
+		helper.assertFalse(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.build(level, helper.absolutePos(new BlockPos(32, 1, 32)),
+				level.getRandom()), "No camp on uneven ground");
+		for (var raider : raiders) {
+			raider.discard();
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * Fire control extras: a creeping barrage fires its first salvo on the target, then each salvo after steps the point
+	 * {@value io.github.jimbozoomer.jugcraft.building.FireControl#CREEP_STEP} blocks further down range, starting again after
+	 * {@value io.github.jimbozoomer.jugcraft.building.FireControl#CREEP_STEPS} steps; setting a new target starts it afresh.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void creepingBarrageWalksDownRange(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CREEPING);
+		var table = helper.getBlockEntity(new BlockPos(8, 1, 2), io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		var mode = io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CREEPING;
+		table.setTarget(helper.absolutePos(new BlockPos(8, 0, 20)));
+		Vec3 start = table.aimPoint(battery.getUUID());
+		int step = io.github.jimbozoomer.jugcraft.building.FireControl.CREEP_STEP;
+		int steps = io.github.jimbozoomer.jugcraft.building.FireControl.CREEP_STEPS;
+		helper.assertTrue(table.fire(mode), "A creeping barrage with a target should fire");
+		helper.assertTrue(table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6, "The first salvo lands on the target itself");
+		helper.assertTrue(table.fire(mode), "and the second fires too");
+		Vec3 next = table.aimPoint(battery.getUUID());
+		helper.assertTrue(Math.abs(next.z - start.z - step) < 1.0E-6 && Math.abs(next.x - start.x) < 1.0E-6,
+				"The second salvo should land " + step + " blocks further down range, not at " + next.subtract(start));
+		for (int i = 2; i <= steps; i++) {
+			table.fire(mode);
+		}
+		helper.assertTrue(table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6, "After " + steps + " steps it starts again");
+		table.fire(mode);
+		table.setTarget(helper.absolutePos(new BlockPos(8, 0, 20)));
+		helper.assertTrue(table.creep() == 0 && table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6,
+				"Setting the target again starts the barrage afresh");
+		helper.succeed();
+	}
+
+	/**
+	 * Fire control extras: a gunner aboard a linked gun, with no mark of their own, has the gun laid on the table's point
+	 * (whichever way they look); they still choose when it fires.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void crewedGunFollowsTheTable(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CONVERGE);
+		var table = helper.getBlockEntity(new BlockPos(8, 1, 2), io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		// Off to the side of the battery's start, so it has to turn to it.
+		BlockPos target = helper.absolutePos(new BlockPos(30, 0, 30));
+		table.setTarget(target);
+		ServerPlayer gunner = helper.makeMockServerPlayerInLevel();
+		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
+		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.clear(gunner);
+		helper.onEachTick(() -> gunner.setYRot(90.0F));
+		helper.succeedWhen(() -> {
+			Vec3 to = Vec3.atCenterOf(target).subtract(battery.position());
+			float wanted = (float) Math.toDegrees(Math.atan2(-to.x, to.z));
+			float off = Math.abs(net.minecraft.util.Mth.wrapDegrees(battery.aimYaw(0) - wanted));
+			helper.assertTrue(off < 4.0F, "The crewed gun should turn to the table's target (yaw " + wanted + "), not " + battery.aimYaw(0));
+		});
+	}
+
+	/**
+	 * Fortification extras: the bunker door opens by hand; two sliding gates side by side open together on one signal and
+	 * leave only a post to bump into; the embrasure has a slit through it; the parapet corner's merlon turns with it.
+	 */
+	@GameTest(maxTicks = 60)
+	public void fortificationExtras(GameTestHelper helper) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS;
+		var door = (net.minecraft.world.level.block.DoorBlock) blocks.get("bunker_door");
+		helper.assertTrue(door.type().canOpenByHand(), "A bunker door should open by hand");
+		ServerLevel level = helper.getLevel();
+		BlockPos embrasure = new BlockPos(5, 1, 5);
+		helper.setBlock(embrasure, blocks.get("bastion_embrasure"));
+		var shape = helper.getBlockState(embrasure).getShape(level, helper.absolutePos(embrasure));
+		helper.assertTrue(!net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(shape,
+				net.minecraft.world.phys.shapes.Shapes.box(0.4, 0.6, 0.0, 0.6, 0.65, 1.0), net.minecraft.world.phys.shapes.BooleanOp.AND),
+				"An embrasure should have a slit right through it");
+		var corner = blocks.get("bastion_parapet_corner").defaultBlockState();
+		var north = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.NORTH);
+		var south = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.SOUTH);
+		helper.setBlock(new BlockPos(1, 1, 5), north);
+		helper.setBlock(new BlockPos(3, 1, 5), south);
+		var corner_nw = net.minecraft.world.phys.shapes.Shapes.box(0.1, 0.7, 0.1, 0.3, 0.9, 0.3);
+		helper.assertTrue(net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(1, 1, 5))
+				.getShape(level, helper.absolutePos(new BlockPos(1, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND)
+				&& !net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(3, 1, 5))
+						.getShape(level, helper.absolutePos(new BlockPos(3, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND),
+				"The corner's merlon should stand at the north-west facing north, and turn with it");
+		BlockPos left = new BlockPos(2, 1, 2);
+		BlockPos right = new BlockPos(3, 1, 2);
+		helper.setBlock(left, blocks.get("sliding_gate"));
+		helper.setBlock(right, blocks.get("sliding_gate"));
+		helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, false);
+		helper.setBlock(new BlockPos(1, 1, 2), Blocks.REDSTONE_BLOCK);
+		helper.succeedWhen(() -> {
+			helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
+			helper.assertBlockProperty(right, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
+			var open = helper.getBlockState(right).getCollisionShape(level, helper.absolutePos(right));
+			helper.assertTrue(open.bounds().getXsize() < 0.2, "An open gate should leave only its post");
+		});
+	}
+
+	/** Batch 59: a stone floor at y = 0 from (0, 0) to (x1, z1), for blocks that stand only on a solid top. */
+	private static void bunkerFloor(GameTestHelper helper, int x1, int z1) {
+		for (int x = 0; x <= x1; x++) {
+			for (int z = 0; z <= z1; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+	}
+
+	/**
+	 * Bunker interiors (batch 59): every block places; the periscope, curtain and bunk stand two blocks tall (placing the
+	 * lower half puts up the upper one), the lamp hangs from a ceiling, the shoring is a pillar and the field kitchen has
+	 * its block entity.
+	 */
+	@GameTest
+	public void bunkerBlocksPlace(GameTestHelper helper) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS;
+		ServerLevel level = helper.getLevel();
+		bunkerFloor(helper, 7, 7);
+		int x = 0;
+		for (String id : List.of("map_table", "field_kitchen", "corrugated_iron", "corrugated_iron_slab", "corrugated_iron_stairs",
+				"timber_shoring", "bunker_lamp")) {
+			BlockPos pos = new BlockPos(x++, 1, 0);
+			helper.setBlock(pos, blocks.get(id));
+			helper.assertBlockPresent(blocks.get(id), pos);
+		}
+		helper.getBlockEntity(new BlockPos(1, 1, 0), io.github.jimbozoomer.jugcraft.building.FieldKitchenBlock.Entity.class);
+		x = 0;
+		for (String id : List.of("trench_periscope", "gas_curtain", "bunker_bunk")) {
+			BlockPos lower = new BlockPos(x, 1, 3);
+			x += 2;
+			Block block = blocks.get(id);
+			BlockState state = block.defaultBlockState().setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.LOWER);
+			helper.setBlock(lower, state);
+			block.setPlacedBy(level, helper.absolutePos(lower), state, null, ItemStack.EMPTY);
+			helper.assertBlockPresent(block, lower.above());
+			helper.assertBlockProperty(lower.above(), net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.UPPER);
+		}
+		BlockPos lamp = new BlockPos(6, 2, 6);
+		helper.setBlock(lamp.above(), Blocks.STONE);
+		helper.setBlock(lamp, blocks.get("bunker_lamp").defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true));
+		helper.assertTrue(helper.getBlockState(lamp).canSurvive(level, helper.absolutePos(lamp)), "A bunker lamp should hang from a ceiling");
+		helper.assertTrue(helper.getBlockState(lamp).getLightEmission() == io.github.jimbozoomer.jugcraft.building.Bunkerworks.LAMP_LIGHT,
+				"A bunker lamp should shine");
+		BlockPos beam = new BlockPos(0, 1, 6);
+		helper.setBlock(beam, blocks.get("timber_shoring").defaultBlockState()
+				.setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, Direction.Axis.X));
+		helper.assertBlockProperty(beam, net.minecraft.world.level.block.RotatedPillarBlock.AXIS, Direction.Axis.X);
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 59: a trench periscope looking south counts the three zombies in front of it (not the one behind it) for a
+	 * comparator, and a player looking through it marks the nearest one, as a Range Finder would.
+	 */
+	@GameTest(maxTicks = 120)
+	public void periscopeCountsAndMarks(GameTestHelper helper) {
+		Block periscope = io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS.get("trench_periscope");
+		BlockState state = periscope.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.agriculture.TallDecorationBlock.FACING, Direction.SOUTH);
+		BlockPos lower = new BlockPos(1, 1, 1);
+		bunkerFloor(helper, 7, 7);
+		helper.setBlock(lower, state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.LOWER));
+		helper.setBlock(lower.above(), state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.UPPER));
+		net.minecraft.world.entity.Mob nearest = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(1, 1, 5));
+		helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(3, 1, 6));
+		helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(0, 1, 7));
+		helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(2, 1, 0));
+		helper.runAfterDelay(io.github.jimbozoomer.jugcraft.building.Bunkerworks.PERISCOPE_INTERVAL + 10, () -> {
+			ServerLevel level = helper.getLevel();
+			helper.assertBlockProperty(lower, io.github.jimbozoomer.jugcraft.building.TrenchPeriscopeBlock.SEEN, 3);
+			helper.assertTrue(helper.getBlockState(lower).getAnalogOutputSignal(level, helper.absolutePos(lower), Direction.NORTH) == 3,
+					"A comparator should read the three zombies in front, not the one behind");
+			ServerPlayer spotter = helper.makeMockServerPlayerInLevel();
+			helper.useBlock(lower.above(), spotter);
+			BlockPos mark = io.github.jimbozoomer.jugcraft.artillery.Spotting.own(level, spotter);
+			helper.assertTrue(nearest.blockPosition().equals(mark), "Looking through it should mark the nearest zombie, "
+					+ nearest.blockPosition() + ", not " + mark);
+			spotter.setShiftKeyDown(true);
+			helper.useBlock(lower, spotter);
+			helper.assertTrue(io.github.jimbozoomer.jugcraft.artillery.Spotting.own(level, spotter) == null, "Sneak-using it should clear the mark");
+			spotter.discard();
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 59: a chlorine cloud on one side of a hanging gas curtain does not hurt a pig on the other side; rolled up (by
+	 * using it, both halves at once), the next pulse does.
+	 */
+	@GameTest(maxTicks = 100)
+	public void gasCurtainStopsChlorine(GameTestHelper helper) {
+		Block curtain = io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS.get("gas_curtain");
+		BlockState state = curtain.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.agriculture.TallDecorationBlock.FACING, Direction.EAST);
+		BlockPos lower = new BlockPos(4, 1, 3);
+		bunkerFloor(helper, 7, 7);
+		helper.setBlock(lower, state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.LOWER));
+		helper.setBlock(lower.above(), state.setValue(net.minecraft.world.level.block.DoublePlantBlock.HALF, DoubleBlockHalf.UPPER));
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(5, 1, 3));
+		io.github.jimbozoomer.jugcraft.weapons.ChemicalCloud.spawn(helper.getLevel(), helper.absoluteVec(new Vec3(3.0, 1.5, 3.5)),
+				io.github.jimbozoomer.jugcraft.weapons.ChemicalCloud.Kind.CHLORINE, null);
+		// After the cloud's first two pulses the pig behind the hanging curtain is unhurt; then the curtain is rolled up.
+		int pulse = io.github.jimbozoomer.jugcraft.weapons.ChemicalCloud.PULSE;
+		helper.runAfterDelay(pulse * 2 + 5, () -> {
+			helper.assertTrue(pig.getHealth() == pig.getMaxHealth(), "The curtain should keep the chlorine off the pig: " + pig.getHealth());
+			ServerPlayer player = helper.makeMockServerPlayerInLevel();
+			helper.useBlock(lower, player);
+			player.discard();
+			helper.assertBlockProperty(lower, io.github.jimbozoomer.jugcraft.building.GasCurtainBlock.ROLLED, true);
+			helper.assertBlockProperty(lower.above(), io.github.jimbozoomer.jugcraft.building.GasCurtainBlock.ROLLED, true);
+		});
+		// Two pulses later, with the curtain rolled up, the chlorine has reached it.
+		helper.runAfterDelay(pulse * 4 + 5, () -> {
+			helper.assertTrue(pig.getHealth() < pig.getMaxHealth(), "With the curtain rolled up the chlorine should reach the pig");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 59: a field kitchen with coal and a Cooking Pot on top lights and cooks Trench Stew from beef, a potato, a carrot
+	 * and a bowl, burning one coal; one with coal but no pot stays cold and keeps its coal.
+	 */
+	@GameTest(maxTicks = 420)
+	public void fieldKitchenHeatsThePot(GameTestHelper helper) {
+		Block kitchen = io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS.get("field_kitchen");
+		BlockPos withPot = new BlockPos(1, 1, 1);
+		BlockPos bare = new BlockPos(4, 1, 1);
+		helper.setBlock(withPot, kitchen);
+		helper.setBlock(bare, kitchen);
+		var cooking = helper.getBlockEntity(withPot, io.github.jimbozoomer.jugcraft.building.FieldKitchenBlock.Entity.class);
+		var cold = helper.getBlockEntity(bare, io.github.jimbozoomer.jugcraft.building.FieldKitchenBlock.Entity.class);
+		for (var stove : List.of(cooking, cold)) {
+			try (Transaction transaction = Transaction.openOuter()) {
+				helper.assertTrue(stove.fuel.insert(ItemVariant.of(Items.COAL), 2, transaction) == 2, "A field kitchen should take coal");
+				helper.assertTrue(stove.fuel.insert(ItemVariant.of(Items.DIRT), 1, transaction) == 0, "A field kitchen should refuse dirt");
+				transaction.commit();
+			}
+		}
+		helper.setBlock(withPot.above(), io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.block("cooking_pot"));
+		var pot = helper.getBlockEntity(withPot.above(), io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity.class);
+		pot.setItem(0, new ItemStack(Items.BOWL));
+		pot.setItem(1, new ItemStack(Items.BEEF));
+		pot.setItem(2, new ItemStack(Items.POTATO));
+		pot.setItem(3, new ItemStack(Items.CARROT));
+		helper.succeedWhen(() -> {
+			ItemStack made = pot.getItem(io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity.RESULT);
+			helper.assertTrue(made.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item("trench_stew")),
+					"The pot on the field kitchen should cook Trench Stew, found " + made);
+			helper.assertBlockProperty(withPot, io.github.jimbozoomer.jugcraft.building.FieldKitchenBlock.LIT, true);
+			helper.assertTrue(cooking.fuelCount() == 1, "One coal should be burning, one left, but " + cooking.fuelCount() + " left");
+			helper.assertBlockProperty(bare, io.github.jimbozoomer.jugcraft.building.FieldKitchenBlock.LIT, false);
+			helper.assertTrue(cold.fuelCount() == 2 && cold.burn() == 0, "With no pot on top a field kitchen must not start its coal");
+		});
+	}
+
+	/**
+	 * Batch 59: with a mark plotted next to it, sneak-using a map table hands that mark to the fire control table within
+	 * four blocks of it.
+	 */
+	@GameTest
+	public void mapTablePlotsTargetsToFireControl(GameTestHelper helper) {
+		BlockPos mapPos = new BlockPos(1, 1, 1);
+		helper.setBlock(mapPos, io.github.jimbozoomer.jugcraft.building.Bunkerworks.BLOCKS.get("map_table"));
+		BlockPos tablePos = new BlockPos(4, 1, 1);
+		helper.setBlock(tablePos, io.github.jimbozoomer.jugcraft.building.FireControl.TABLE);
+		ServerPlayer spotter = helper.makeMockServerPlayerInLevel();
+		// Right beside the map table, so no other test's mark can be nearer.
+		BlockPos target = helper.absolutePos(new BlockPos(1, 1, 2));
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.mark(spotter, target);
+		ServerPlayer officer = helper.makeMockServerPlayerInLevel();
+		officer.setShiftKeyDown(true);
+		helper.useBlock(mapPos, officer);
+		var table = helper.getBlockEntity(tablePos, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		helper.assertTrue(target.equals(table.target()), "The map table should lay the fire control table on the plotted mark, not "
+				+ table.target());
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.clear(spotter);
+		spotter.discard();
+		officer.discard();
 		helper.succeed();
 	}
 }

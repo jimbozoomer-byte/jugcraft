@@ -201,33 +201,69 @@
     },
     {
       "from": [
-        1.2,
-        6.78,
+        1.1,
+        6.7,
         2.8
       ],
       "to": [
-        2.6,
+        2.7,
         10.2,
-        3.8
+        3.9
       ],
       "faces": {
         "north": {
-          "texture": "#iron"
+          "texture": "#iron",
+          "uv": [
+            13.4,
+            5.8,
+            14.8,
+            9.2
+          ]
         },
         "south": {
-          "texture": "#iron"
+          "texture": "#iron",
+          "uv": [
+            1.2,
+            5.8,
+            2.6,
+            9.2
+          ]
         },
         "east": {
-          "texture": "#iron"
+          "texture": "#iron",
+          "uv": [
+            12.2,
+            5.8,
+            13.2,
+            9.2
+          ]
         },
         "west": {
-          "texture": "#iron"
+          "texture": "#iron",
+          "uv": [
+            2.8,
+            5.8,
+            3.8,
+            9.2
+          ]
         },
         "up": {
-          "texture": "#iron"
+          "texture": "#iron",
+          "uv": [
+            1.2,
+            2.8,
+            2.6,
+            3.8
+          ]
         },
         "down": {
-          "texture": "#iron"
+          "texture": "#iron",
+          "uv": [
+            1.2,
+            12.2,
+            2.6,
+            13.2
+          ]
         }
       }
     },

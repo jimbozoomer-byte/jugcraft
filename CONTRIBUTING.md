@@ -1,5 +1,9 @@
 # Contributing to Jugcraft
 
+## Use the available frameworks
+
+Read the [approved framework catalog](docs/FRAMEWORKS.md) before proposing custom rendering, animation, spellcasting, UI, creature-AI, or inspection infrastructure. The owner has authorized this foundation; contributors may use its APIs within the documented side and optional-integration boundaries. Gradle and the [automatic-install pack](docs/DISTRIBUTION.md) share the same locked releases. New libraries or version changes remain reviewable changes. Installing a library does not implement a Jugcraft feature; include the actual integration and tests in your feature record.
+
 ## Owner-authorized development
 
 The owner authorized Claude to build the Minecraft 26.3 + Fabric bootstrap without a separate proposal issue or second maintainer. That bootstrap is done: the scaffold, pinned toolchain, Build workflow, base materials, machines and power were merged in PRs #4–#7 (see [docs/PLATFORM.md](docs/PLATFORM.md)). The project license is MIT (see [LICENSE_POLICY.md](LICENSE_POLICY.md)). Still outstanding: running the client and dedicated server, and the two-client playtest.
@@ -10,6 +14,12 @@ Main requires a PR and passing checks, but zero independent approvals while ther
 ## Community quick start
 
 **You can start in your own fork now and submit a draft PR.** You do not need collaborator access or an approved issue to propose a focused implementation. See [the fork and AI setup guide](docs/COMMUNITY_QUICKSTART.md). Maintainers decide acceptance during review; submission does not guarantee merging.
+
+## Shared art, sounds and animations
+
+Before creating assets, browse the [owner asset library](art/owner-library/README.md) and its [complete catalog](art/owner-library/catalog/README.md). The owner explicitly authorizes suitable assets from that supplied collection to be used directly, recolored/adapted, or used as reference. This applies to every content branch: blocks, ores, metals, machines, guns, planes, sounds, animations, weapons, armor, trees, biomes, farming and food. It is not limited to machinery.
+
+Preserve the library's originals, copy required files into the feature's runtime resources, keep animation sidecars with their textures, and record source paths and changes in the feature's asset provenance. Follow the library's import guide and [art direction](docs/ART_DIRECTION.md); unrelated third-party assets still follow [LICENSE_POLICY.md](LICENSE_POLICY.md).
 
 ## 1. Describe the idea
 

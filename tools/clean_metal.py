@@ -10,7 +10,12 @@ what these helpers draw:
 - Wear only where it would gather (corners, seams, under bolts) and in small clusters of one or two shades, never
   speckled over a whole face.
 
-Every helper works on 16x16 RGBA images and draws deterministically: the same arguments give the same pixels.
+plate() draws a machine panel with a dark seam all round it. A building block that tiles in a wall must not do that
+(two blocks side by side would show a doubled dark seam, a grid of framed tiles): use sheet(), which splits the seam
+across the block's edge ("Tiling building blocks" in docs/ART_DIRECTION.md).
+
+canvas() and ramp() make 16x16 images; the other helpers draw on an image of any size. Every helper draws
+deterministically: the same arguments give the same pixels.
 """
 
 from PIL import Image
@@ -52,14 +57,31 @@ def inset(img, x0, y0, x1, y1, light, shade):
 
 
 def plate(img, palette, outline=True):
-    """A full-face plate: an outline seam in the darkest shade, then a bevelled panel filled with the middle shade.
+    """A machine panel: an outline seam in the darkest shade, then a bevelled panel filled with the middle shade.
 
-    `palette` runs dark to light with at least four shades; the panel uses palette[1], [2] and [3]."""
+    `palette` runs dark to light with at least four shades; the panel uses palette[1], [2] and [3]. Not for building
+    blocks that tile in a wall (the outline doubles where two meet): use sheet() for those."""
     if outline:
         rect(img, 0, 0, 15, 15, palette[0])
         bevel(img, 1, 1, 14, 14, palette[3], palette[1], palette[2])
     else:
         bevel(img, 0, 0, 15, 15, palette[3], palette[1], palette[2])
+
+
+def sheet(img, light, fill, seam):
+    """A tiling building block's sheet of metal: filled, lit along the top row and left column, with the seam along
+    the bottom row and right column. In a wall the seam meets the next block's lit edge, so each boundary shows one
+    seam and one lit edge, the way bastion concrete splits its course lines, never a doubled dark outline. The two
+    corners where a lit edge meets the seam take the fill."""
+    n = img.width
+    rect(img, 0, 0, n - 1, n - 1, fill)
+    for i in range(n):
+        put(img, i, 0, light)
+        put(img, 0, i, light)
+        put(img, i, n - 1, seam)
+        put(img, n - 1, i, seam)
+    put(img, n - 1, 0, fill)
+    put(img, 0, n - 1, fill)
 
 
 def bolt(img, x, y, palette):

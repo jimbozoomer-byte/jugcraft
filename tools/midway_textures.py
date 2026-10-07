@@ -1,15 +1,21 @@
-"""Original textures for the fall fair midway (fall addition 26), painted at 64 by 64 (docs/ART_DIRECTION.md, "High
-resolution"), four texels to each model pixel: the High Striker's painted wood, brass rail and bell, its lamps lit and
-unlit, the puck and pad, the four bands of its scale and its signboard; Ring Toss's slatted crate and its green, amber and
-milk-glass bottles and the ring; the first seven plushes' felt and embroidered faces (the harvest plushes are painted in
-tools/decor16_data.py); and the striker, mallet and ring as items.
+"""Original textures for the fall fair midway (fall addition 26): the High Striker's painted wood, brass rail and
+bell, its lamps lit and unlit, the puck and pad, the four bands of its scale and its signboard; Ring Toss's crate and its
+green, amber and milk-glass bottles and the ring; the first seven plushes' felt and faces (the harvest plushes are
+painted in tools/decor16_data.py); and the striker, mallet and ring as items.
 
-Called from crop_textures.crop_textures(). Every pixel is drawn here by code from a fixed seed (tools/fur_paint.py's
-painter); no other texture is read, traced or recoloured.
+Drawn in vanilla's manner (tools/fair_pixels.py, after the owner's note of 6 October 2026): 16 texels a block, scaled
+up to the 64 by 64 the models were made for, so every file keeps its UVs. Painted wood is planks, brass is lit like a gold
+block, felt is wool and the faces are square pixel eyes and mouths.
+
+Called from crop_textures.crop_textures(). Every pixel is drawn here by code; no other texture is read, traced or
+recoloured.
 """
 import math
 
-from fur_paint import Painter, mix, ramp
+import block_style as bs
+import fair_pixels as fp
+from fair_pixels import box, px16, sprite
+from fur_paint import mix
 from crop_textures import rgb
 from midway import HIGH_STRIKER, RING_TOSS, PLUSHES
 
@@ -30,168 +36,163 @@ SCALE_BANDS = {1: [rgb("1e5a1e"), rgb("2e8a2e"), rgb("54b84a")], 2: [rgb("6a6a10
                3: [rgb("8a4a08"), rgb("cc7212"), rgb("f09a2a")], 4: [rgb("7a0e0e"), rgb("c01c1c"), rgb("f04434")]}
 
 
-def wood(paint, rect, colours, level=0.55, boards=4, vertical=True):
-    """Painted boards: grain running along them, a dark seam between each, the paint worn pale at the edges."""
-    x0, y0, w, h = rect
-    across = w if vertical else h
-    for y in range(h):
-        for x in range(w):
-            a, b = (x, y) if vertical else (y, x)
-            board = int(a * boards / across)
-            seam = (a * boards) % across < boards * 0.9 and a > 0
-            grain = 0.06 * math.sin(b * 0.35 + board * 2.1 + 3.0 * paint.noise(x0 + x, y0 + y, 6.0))
-            f = level + grain + 0.1 * (paint.noise(x0 + x, y0 + y, 10.0) - 0.5) - (0.35 if seam else 0.0)
-            paint.put(x0 + x, y0 + y, ramp(colours, f))
-
-
-def star(paint, cx, cy, r, colours, level=0.7):
-    """A five-pointed star, lit from the top left."""
-    for y in range(int(cy - r) - 1, int(cy + r) + 2):
-        for x in range(int(cx - r) - 1, int(cx + r) + 2):
-            dx, dy = x + 0.5 - cx, y + 0.5 - cy
-            angle = math.atan2(dy, dx) + math.pi / 2
-            reach = r * (0.5 + 0.5 * abs(math.cos(angle * 2.5))) ** 1.6
-            if math.hypot(dx, dy) <= reach:
-                paint.put(x, y, ramp(colours, level + 0.2 * (-dx - dy) / max(1.0, r)))
-
-
-def stripe_border(paint, colours, width=3, level=0.65, inset=2):
-    """A painted pinstripe round the texture, `inset` from its edge."""
-    for i in range(N):
-        for k in range(width):
-            for x, y in ((i, inset + k), (i, N - 1 - inset - k), (inset + k, i), (N - 1 - inset - k, i)):
-                paint.put(x, y, ramp(colours, level + 0.1 * math.sin(i * 0.4)))
+# Brass across a rail or bell, lit on its left as a vanilla gold block is: an index into GOLD for each column.
+GOLD_COLUMNS = [3, 3, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1]
+# Painted planks: the paint's palette without its darkest tone, so the seams between boards stay a shade, not a gap.
+WHITE_PAINT = WOOD_WHITE[1:]
+RED_PAINT = [rgb("7a1212"), rgb("a81c18"), rgb("b42420"), rgb("cc2e26"), rgb("e85a48")]
 
 
 def striker_textures():
+    """The High Striker in vanilla's manner (px16): white- and red-painted planks, brass like a gold block, lamps of
+    flat glass tones with a square glint, and a scale of plain coloured bands with ticks."""
     out = {}
-    p = Painter(N, N, 26001)
-    wood(p, (0, 0, N, N), WOOD_WHITE, boards=3)
-    for x in (2, 3, N - 4, N - 3):
-        for y in range(N):
-            p.put(x, y, ramp(LACQUER_RED, 0.6))
-    out["high_striker_post"] = p.img
 
-    p = Painter(N, N, 26002)
-    wood(p, (0, 0, N, N), LACQUER_RED, boards=4, vertical=False)
-    stripe_border(p, GOLD, width=2, inset=3)
-    out["high_striker_red"] = p.img
+    def post(p):
+        bs.planks(WHITE_PAINT, 26001, boards=4, vertical=True)(p)
+        for y in range(16):
+            p.put(0, y, LACQUER_RED[3])
+            p.put(15, y, LACQUER_RED[2])
+    out["high_striker_post"] = px16(post)
 
-    p = Painter(N, N, 26003)
-    wood(p, (0, 0, N, N), PLANK, boards=5, vertical=False)
-    for r, level in ((22, 0.6), (16, 0.2), (10, 0.6)):
-        p.ellipse(32, 32, r, r, ramp(LACQUER_RED if level < 0.5 else WOOD_WHITE, 0.6), 0.85)
-    star(p, 32, 32, 8, GOLD)
-    out["high_striker_deck"] = p.img
+    def red(p):
+        bs.planks(RED_PAINT, 26002, boards=4)(p)
+        for i in range(1, 15):
+            for x, y in ((i, 1), (1, i)):
+                p.put(x, y, GOLD[3])
+            for x, y in ((i, 14), (14, i)):
+                p.put(x, y, GOLD[2])
+    out["high_striker_red"] = px16(red)
 
-    p = Painter(N, N, 26004)
-    for y in range(N):
-        for x in range(N):
-            f = 0.5 + 0.35 * math.cos((x / N) * math.pi * 2.2 + 0.6) + 0.06 * (p.noise(x, y, 8.0) - 0.5)
-            p.put(x, y, ramp(BRASS, f))
-    out["high_striker_brass"] = p.img
+    def deck(p):
+        bs.planks(PLANK, 26003, boards=4)(p)
+        for y in range(16):
+            for x in range(16):
+                d = math.hypot(x + 0.5 - 8, y + 0.5 - 8)
+                if d <= 1.6:
+                    p.put(x, y, GOLD[4] if (x, y) == (7, 7) else GOLD[3])
+                elif d <= 5.6:
+                    p.put(x, y, LACQUER_RED[3] if 2.9 < d <= 4.1 else WOOD_WHITE[3])
+    out["high_striker_deck"] = px16(deck)
+
+    def rail(lift):
+        def paint(p):
+            for y in range(16):
+                for x in range(16):
+                    p.put(x, y, GOLD[min(4, GOLD_COLUMNS[x] + lift)])
+        return paint
+    out["high_striker_brass"] = px16(rail(0))
 
     for lit in (False, True):
-        p = Painter(N, N, 26005)
         glass = [rgb("3a2a08"), rgb("6a4c10"), rgb("9a7020"), rgb("c09634")] if not lit else [rgb("e09a20"), rgb("ffc840"), rgb("fff090"), rgb("ffffff")]
-        for y in range(N):
-            for x in range(N):
-                d = math.hypot(x + 0.5 - N / 2, y + 0.5 - N / 2) / (N / 2)
-                p.put(x, y, ramp(glass, 0.85 - 0.6 * d + 0.08 * (p.noise(x, y, 6.0) - 0.5)))
-        p.ellipse(22, 18, 7, 5, ramp(glass, 1.0), 0.7)
-        out["high_striker_lamp_on" if lit else "high_striker_lamp_off"] = p.img
 
-    p = Painter(N, N, 26006)
-    for y in range(N):
-        for x in range(N):
-            band = 24 <= y < 40
-            p.put(x, y, ramp(WOOD_WHITE if band else LACQUER_RED, 0.7 - 0.3 * y / N + 0.05 * (p.noise(x, y) - 0.5)))
-    p.line(4, 6, N - 6, 6, ramp(LACQUER_RED, 0.95), width=2, alpha=0.7)
-    out["high_striker_puck"] = p.img
+        def lamp(p, glass=glass):
+            for y in range(16):
+                for x in range(16):
+                    d = math.hypot(x + 0.5 - 8, y + 0.5 - 8)
+                    p.put(x, y, glass[3 if d < 2.5 else 2 if d < 5 else 1 if d < 7 else 0])
+            for x, y in ((4, 4), (5, 4), (4, 5)):
+                p.put(x, y, glass[3])
+        out["high_striker_lamp_on" if lit else "high_striker_lamp_off"] = px16(lamp)
 
-    p = Painter(N, N, 26007)
-    for y in range(N):
-        for x in range(N):
-            d = math.hypot(x + 0.5 - N / 2, y + 0.5 - N / 2)
-            ring = int(d / 7) % 2 == 0
-            p.put(x, y, ramp(RUBBER if ring else YELLOW, 0.5 + 0.1 * (p.noise(x, y, 5.0) - 0.5) - 0.004 * d))
-    p.blob(32, 32, 6, 6, LACQUER_RED[1], LACQUER_RED[4])
-    out["high_striker_pad"] = p.img
+    def puck(p):
+        for y in range(16):
+            band = WOOD_WHITE if 6 <= y < 10 else LACQUER_RED
+            k = 4 if y in (0, 6) else 1 if y in (9, 15) else 3 if band is WOOD_WHITE else 2
+            for x in range(16):
+                p.put(x, y, band[k])
+        for x in range(1, 15):
+            p.put(x, 1, LACQUER_RED[4])
+    out["high_striker_puck"] = px16(puck)
+
+    def pad(p):
+        for y in range(16):
+            for x in range(16):
+                d = math.hypot(x + 0.5 - 8, y + 0.5 - 8)
+                if d < 1.6:
+                    c = LACQUER_RED[4] if (x, y) == (7, 7) else LACQUER_RED[3]
+                else:
+                    c = RUBBER[2] if int(d / 1.75) % 2 == 0 else YELLOW[2]
+                p.put(x, y, c)
+    out["high_striker_pad"] = px16(pad)
 
     for part, band in SCALE_BANDS.items():
-        p = Painter(N, N, 26010 + part)
-        wood(p, (0, 0, N, N), WOOD_WHITE, boards=1)
-        # The gauge: a coloured band up the middle, ticks across it, a bright step at each lamp.
-        for y in range(N):
-            for x in range(14, 50):
-                p.put(x, y, ramp(band, 0.55 + 0.25 * (1 - y / N) + 0.05 * (p.noise(x, y) - 0.5)))
-        for y in range(2, N, 16):
-            p.line(10, y, 54, y, ramp(RUBBER, 0.25), width=1.2, alpha=0.85)
-        for y in range(10, N, 16):
-            p.line(16, y, 48, y, ramp(RUBBER, 0.35), width=0.8, alpha=0.6)
-        for y in range(N):
-            for x in (12, 13, 50, 51):
-                p.put(x, y, ramp(GOLD, 0.6))
-        out[f"high_striker_scale_{part}"] = p.img
+        def scale(p, band=band, part=part):
+            bs.planks(WHITE_PAINT, 26010 + part, boards=1, vertical=True, joint=False)(p)
+            for y in range(16):
+                for x in range(4, 12):
+                    p.put(x, y, band[2] if x == 4 else band[0] if x == 11 else band[1])
+                p.put(3, y, GOLD[3])
+                p.put(12, y, GOLD[2])
+            for y in (0, 8):
+                for x in range(4, 12):
+                    p.put(x, y, band[0])
+            for y in (4, 12):
+                for x in range(4, 7):
+                    p.put(x, y, band[0])
+        out[f"high_striker_scale_{part}"] = px16(scale)
 
     for lit in (False, True):
-        p = Painter(N, N, 26020)
-        for y in range(N):
-            for x in range(N):
-                f = 0.55 + 0.3 * math.cos((x / N) * math.pi * 2.0 + 0.8) - 0.15 * y / N + 0.05 * (p.noise(x, y, 7.0) - 0.5)
-                p.put(x, y, ramp(BRASS, f + (0.25 if lit else 0.0)))
-        if lit:
-            p.ellipse(20, 20, 10, 8, rgb("fffbe8"), 0.6)
-        out["high_striker_bell_lit" if lit else "high_striker_bell"] = p.img
+        def bell(p, lit=lit):
+            rail(1 if lit else 0)(p)
+            for x in range(16):
+                p.put(x, 15, BRASS[1])
+            if lit:
+                for x, y in ((3, 3), (4, 3), (3, 4)):
+                    p.put(x, y, rgb("fffbe8"))
+        out["high_striker_bell_lit" if lit else "high_striker_bell"] = px16(bell)
 
-    p = Painter(N, N, 26030)
-    wood(p, (0, 0, N, N), LACQUER_RED, boards=4, vertical=False)
-    for k in range(5):
-        star(p, 6 + k * 13, 8, 5, GOLD)
-    for y in (17, 30):
-        for x in range(N):
-            p.put(x, y, ramp(GOLD, 0.7))
-    star(p, 32, 24, 6, GOLD, 0.8)
-    for cx in (12, 52):
-        p.ellipse(cx, 24, 3, 3, ramp(GOLD, 0.5))
-    out["high_striker_sign"] = p.img
+    def sign(p):
+        bs.planks(RED_PAINT, 26030, boards=4)(p)
+        for cx in (3, 12):
+            for x, y in ((cx, 1), (cx - 1, 2), (cx, 2), (cx + 1, 2), (cx, 3)):
+                p.put(x, y, GOLD[4] if (x, y) == (cx, 1) else GOLD[3])
+        for x, y in ((7, 1), (8, 1), (6, 2), (7, 2), (8, 2), (9, 2), (7, 3), (8, 3)):
+            p.put(x, y, GOLD[4] if y == 1 else GOLD[3])
+        for y in (4, 7):
+            for x in range(16):
+                p.put(x, y, GOLD[3])
+        for x, y in ((7, 5), (8, 5), (7, 6), (8, 6)):
+            p.put(x, y, GOLD[4] if (x, y) == (7, 5) else GOLD[3])
+        for x in (3, 12):
+            p.put(x, 5, GOLD[3])
+            p.put(x, 6, GOLD[2])
+    out["high_striker_sign"] = px16(sign)
     return out
 
 
 def ring_toss_textures():
+    """Ring Toss in vanilla's manner (fair_pixels): a crate of planks banded in red and white with a gold star, glass
+    bottles lit down one side like vanilla's glass, and a ring striped red, yellow and blue."""
     out = {}
-    p = Painter(N, N, 26101)
-    wood(p, (0, 0, N, N), PLANK, boards=4, vertical=False)
-    for y in range(18, 46):
-        for x in range(N):
-            if (x // 8) % 2 == 0:
-                p.put(x, y, ramp(LACQUER_RED, 0.55 + 0.05 * (p.noise(x, y) - 0.5)), 0.9)
-            else:
-                p.put(x, y, ramp(WOOD_WHITE, 0.7 + 0.05 * (p.noise(x, y) - 0.5)), 0.9)
-    star(p, 32, 32, 9, GOLD)
-    out["ring_toss_crate"] = p.img
 
-    p = Painter(N, N, 26102)
-    wood(p, (0, 0, N, N), PLANK, boards=4, vertical=False)
-    out["ring_toss_crate_top"] = p.img
+    def crate(p):
+        bs.planks(PLANK, 26101, boards=4)(p)
+        for y in range(5, 11):
+            for x in range(16):
+                p.put(x, y, (LACQUER_RED[3] if y < 7 else LACQUER_RED[2]) if (x // 2) % 2 == 0 else (WOOD_WHITE[3] if y < 7 else WOOD_WHITE[2]))
+        for x, y in ((7, 6), (8, 6), (6, 7), (7, 7), (8, 7), (9, 7), (7, 8), (8, 8), (7, 9), (8, 9)):
+            p.put(x, y, GOLD[4] if y == 6 else GOLD[3])
+    out["ring_toss_crate"] = px16(crate)
+    out["ring_toss_crate_top"] = px16(bs.planks(PLANK, 26102, boards=4))
 
+    # Glass across a bottle: lit down its left, a bright streak, darkest at its right edge.
+    columns = [2, 3, 4, 3, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 0]
     for name, glass in GLASS.items():
-        p = Painter(N, N, 26110 + len(name))
-        for y in range(N):
-            for x in range(N):
-                f = 0.45 + 0.3 * math.cos((x / N) * math.pi * 2.0 + 0.7) + 0.04 * (p.noise(x, y, 8.0) - 0.5)
-                p.put(x, y, ramp(glass, f))
-        for y in range(N):
-            for x in (12, 13, 14):
-                p.put(x, y, ramp(glass, 1.0), 0.7)
-        out[f"ring_toss_bottle_{name}"] = p.img
+        def bottle(p, glass=glass):
+            for y in range(16):
+                for x in range(16):
+                    p.put(x, y, glass[columns[x]])
+        out[f"ring_toss_bottle_{name}"] = px16(bottle)
 
-    p = Painter(N, N, 26120)
-    for y in range(N):
-        for x in range(N):
-            colour = [LACQUER_RED, YELLOW, [rgb("0a2a6a"), rgb("1a4aa8"), rgb("3a74dc"), rgb("80b0f8")]][((x + y) // 8) % 3]
-            p.put(x, y, ramp(colour, 0.6 + 0.2 * math.sin(y * 0.5)))
-    out["ring_toss_ring"] = p.img
+    blue = [rgb("0a2a6a"), rgb("1a4aa8"), rgb("3a74dc"), rgb("80b0f8")]
+
+    def ring(p):
+        for y in range(16):
+            for x in range(16):
+                colours = (LACQUER_RED, YELLOW, blue)[((x + y) // 4) % 3]
+                p.put(x, y, colours[3] if y % 8 == 0 else colours[2])
+    out["ring_toss_ring"] = px16(ring)
     return out
 
 
@@ -217,224 +218,254 @@ BLACK_FELT = [rgb("040404"), rgb("101012"), rgb("202024")]
 PINK = [rgb("a04a5a"), rgb("d8788a"), rgb("f4a8b6")]
 
 
-def felt(paint, colours, level=0.55, seams=()):
-    """Soft felt: a fine fuzz over gentle patches, and seams of stitches (each (x0, y0, x1, y1)) where pieces meet."""
-    for y in range(N):
-        for x in range(N):
-            f = level + 0.1 * (paint.noise(x, y, 12.0) - 0.5) + paint.rng.uniform(-0.05, 0.05)
-            paint.put(x, y, ramp(colours, f))
-    for x0, y0, x1, y1 in seams:
-        paint.line(x0, y0, x1, y1, ramp(colours, level - 0.35), width=2.2, alpha=0.7)
-        length = max(abs(x1 - x0), abs(y1 - y0))
-        for k in range(0, int(length), 4):
-            t = k / max(1, length)
-            paint.line(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, x0 + (x1 - x0) * (t + 1.5 / length), y0 + (y1 - y0) * (t + 1.5 / length),
-                       ramp(colours, level + 0.3), width=1.2)
-
-
-def button_eye(paint, cx, cy, r, colours=BLACK_FELT, shine=(255, 255, 255)):
-    paint.blob(cx, cy, r, r, colours[0], colours[2])
-    paint.ellipse(cx - r * 0.35, cy - r * 0.35, max(1.2, r * 0.3), max(1.2, r * 0.3), shine)
-
-
-def stitches(paint, points, colour=THREAD_DARK, width=1.6):
-    for (xa, ya), (xb, yb) in zip(points, points[1:]):
-        paint.line(xa, ya, xb, yb, colour, width=width)
-
-
 def plush_textures():
+    """The plushes in vanilla's manner (fair_pixels): felt drawn as wool, seams as stitched lines, and faces of square
+    pixel eyes and mouths as on vanilla's mobs."""
     out = {}
-    # The pumpkin: orange felt, its ribs stitched; a jack-o'-lantern face of black felt sewn on.
-    for name, grin in (("pumpkin_plush", 1.0), ("jumbo_pumpkin_plush", 1.25)):
-        p = Painter(N, N, 26200 + len(name))
-        felt(p, FELT["pumpkin"], seams=[(16, 0, 16, 64), (32, 0, 32, 64), (48, 0, 48, 64)])
-        out[name] = p.img
-        p = Painter(N, N, 26210 + len(name))
-        felt(p, FELT["pumpkin"])
-        for cx in (20, 44):
-            for y in range(14, 28):
-                half = (y - 14) * 0.55
-                for x in range(int(cx - half), int(cx + half) + 1):
-                    p.put(x, y, ramp(BLACK_FELT, 0.4))
-        p.blob(32, 32, 3, 3, BLACK_FELT[0], BLACK_FELT[2])
-        teeth = [(10, 40), (18, 48), (24, 42), (32, 50), (40, 42), (46, 48), (54, 40)]
-        for (xa, ya), (xb, yb) in zip(teeth, teeth[1:]):
-            p.line(xa, ya, xb, yb, ramp(BLACK_FELT, 0.4), width=4.0 * grin)
-        stitches(p, [(8, 38), (56, 38)], ramp(FELT["pumpkin"], 0.2), width=1.0)
-        out[f"{name}_face"] = p.img
-    p = Painter(N, N, 26220)
-    felt(p, FELT["stem"], seams=[(0, 32, 64, 32)])
-    out["plush_stem"] = p.img
-    p = Painter(N, N, 26221)
-    felt(p, FELT["green"], seams=[(4, 32, 60, 32), (16, 32, 28, 16), (36, 32, 48, 16), (16, 32, 28, 48), (36, 32, 48, 48)])
-    out["plush_leaf"] = p.img
-    p = Painter(N, N, 26222)
-    felt(p, FELT["blue"])
-    for r, colours in ((28, FELT["blue"]), (18, GOLD), (10, LACQUER_RED)):
-        for y in range(N):
-            for x in range(N):
-                d = math.hypot(x + 0.5 - 32, y + 0.5 - 32)
-                if d <= r:
-                    p.put(x, y, ramp(colours, 0.55 + 0.15 * math.sin(math.atan2(y - 32, x - 32) * 12) - 0.2 * d / r))
-    out["plush_rosette"] = p.img
+    white = (255, 255, 255)
 
-    # The ghost: white felt, button eyes, rosy cheeks, a little "o" of a mouth.
-    p = Painter(N, N, 26230)
-    felt(p, FELT["ghost"], level=0.65, seams=[(0, 58, 64, 58)])
-    out["ghost_plush"] = p.img
-    p = Painter(N, N, 26231)
-    felt(p, FELT["ghost"], level=0.65)
-    for cx in (22, 42):
-        button_eye(p, cx, 22, 5.5)
-        p.ellipse(cx + (-4 if cx < 32 else 4), 34, 5, 3, PINK[1], 0.6)
-    p.ellipse(32, 40, 3.5, 4.5, BLACK_FELT[1])
-    p.ellipse(32, 40, 2, 3, PINK[0])
-    out["ghost_plush_face"] = p.img
+    # The pumpkin: orange felt, its ribs stitched; a jack-o'-lantern face cut from black felt, as a carved pumpkin's.
+    pumpkin = FELT["pumpkin"][1:4]
+    for name in ("pumpkin_plush", "jumbo_pumpkin_plush"):
+        def body(p):
+            fp.wool(p, pumpkin, 26200)
+            for column in (4, 8, 12):
+                fp.seam(p, pumpkin, column=column)
+        out[name] = px16(body)
 
-    # The bat: near-black felt; big white felt eyes, two tiny fangs; wings of purple felt with scalloped edges.
-    p = Painter(N, N, 26240)
-    felt(p, FELT["bat"], seams=[(32, 0, 32, 64)])
-    out["bat_plush"] = p.img
-    p = Painter(N, N, 26241)
-    felt(p, FELT["bat"])
-    for cx in (20, 44):
-        p.ellipse(cx, 28, 9, 10, rgb("f2f0ea"))
-        button_eye(p, cx + (2 if cx < 32 else -2), 30, 5)
-    stitches(p, [(24, 46), (32, 50), (40, 46)], rgb("e8d0d8"))
-    for cx in (27, 37):
-        p.tooth(cx, 49, 4, 6, [rgb("c8c0b0"), rgb("f4f0e6"), rgb("ffffff")])
-    out["bat_plush_face"] = p.img
-    p = Painter(N, N, 26242)
-    felt(p, FELT["bat"][1:] + [rgb("6a4c7e")], level=0.5, seams=[(4, 6, 20, 50), (4, 6, 40, 52), (4, 6, 60, 46)])
-    for k in range(4):
-        cx = 8 + k * 16
-        for y in range(N - 12, N):
-            for x in range(cx - 8, cx + 8):
-                if (x - cx) ** 2 + (y - N - 2) ** 2 < 100 and 0 <= x < N:
-                    p.px[x, y] = (0, 0, 0, 0)
-    out["bat_plush_wing"] = p.img
+        def face(p, jumbo=name.startswith("jumbo")):
+            fp.wool(p, pumpkin, 26210)
+            for x0 in (3, 10):
+                for x, y in ((x0 + 1, 4), (x0, 5), (x0 + 1, 5), (x0 + 2, 5), (x0, 6), (x0 + 1, 6), (x0 + 2, 6)):
+                    p.put(x, y, BLACK_FELT[1])
+            p.put(7, 8, BLACK_FELT[1])
+            p.put(8, 8, BLACK_FELT[1])
+            grin = [(x, 10) for x in range(3, 13)] + [(x, 11) for x in range(4, 12)] + [(x, 12) for x in range(6, 10)]
+            if jumbo:
+                grin += [(2, 9), (13, 9)]
+            for x, y in grin:
+                p.put(x, y, BLACK_FELT[1])
+            for x in (5, 10):
+                p.put(x, 10, pumpkin[2])
+            p.put(7, 12, pumpkin[2])
+            p.put(8, 12, pumpkin[2])
+        out[f"{name}_face"] = px16(face)
+    stem = FELT["stem"][1:]
+    out["plush_stem"] = px16(lambda p: (fp.wool(p, stem, 26220), fp.seam(p, stem, row=8)))
+    leaf = FELT["green"][1:4]
 
-    # The black cat: black felt, big green-gold eyes, a pink nose, stitched whiskers; an orange bow.
-    p = Painter(N, N, 26250)
-    felt(p, FELT["cat"], seams=[(32, 0, 32, 64)])
-    out["black_cat_plush"] = p.img
-    p = Painter(N, N, 26251)
-    felt(p, FELT["cat"])
-    for cx in (20, 44):
-        p.ellipse(cx, 26, 8, 7, rgb("c8d43a"))
-        p.ellipse(cx, 26, 2.2, 6, BLACK_FELT[0])
-        p.ellipse(cx - 3, 23, 1.6, 1.6, rgb("ffffff"))
-    p.tooth(32, 38, 6, 5, PINK)
-    stitches(p, [(32, 42), (28, 46)], PINK[0])
-    stitches(p, [(32, 42), (36, 46)], PINK[0])
-    for side in (-1, 1):
-        for k in range(3):
-            stitches(p, [(32 + side * 10, 40 + k * 3), (32 + side * 26, 36 + k * 5)], rgb("d8d8d8"), width=1.0)
-    out["black_cat_plush_face"] = p.img
-    p = Painter(N, N, 26252)
-    felt(p, FELT["orange"])
-    for y in range(4, N, 12):
-        for x in range(4 + (y // 12) % 2 * 6, N, 12):
-            p.ellipse(x, y, 2.5, 2.5, rgb("fff0d8"))
-    out["plush_bow"] = p.img
+    def plush_leaf(p):
+        fp.wool(p, leaf, 26221)
+        fp.seam(p, leaf, row=8)
+        for k in range(1, 5):
+            for x, y in ((4 + k, 8 - k), (4 + k, 8 + k), (9 + k, 8 - k), (9 + k, 8 + k)):
+                p.put(x, y, leaf[0])
+    out["plush_leaf"] = px16(plush_leaf)
+    blue = FELT["blue"][1:4]
 
-    # The squirrel: rust felt with a cream muzzle, a bushy painted tail; an acorn held in front.
-    p = Painter(N, N, 26260)
-    felt(p, FELT["squirrel"], seams=[(32, 0, 32, 64)])
-    out["squirrel_plush"] = p.img
-    p = Painter(N, N, 26261)
-    felt(p, FELT["squirrel"])
-    p.ellipse(32, 46, 16, 12, ramp(FELT["cream"], 0.6))
-    for cx in (20, 44):
-        button_eye(p, cx, 26, 5)
-    p.blob(32, 38, 4, 3, PINK[0], PINK[2])
-    stitches(p, [(28, 46), (32, 44), (36, 46)])
-    out["squirrel_plush_face"] = p.img
-    p = Painter(N, N, 26262)
-    p.shade((0, 0, N, N), FELT["squirrel"], 0.5, spread=0.3, light="centre")
-    p.locks((0, 0, N, N), FELT["squirrel"], 0.6, flow=(0.0, -1.0), density=1.2, length=(10, 18), width=(4.0, 7.0))
-    p.locks((0, 0, N, N), FELT["cream"], 0.7, flow=(0.0, -1.0), density=0.15, length=(6, 10), width=(2.0, 4.0))
-    out["squirrel_plush_tail"] = p.img
-    p = Painter(N, N, 26263)
-    felt(p, FELT["acorn"], level=0.6)
-    p.ellipse(20, 20, 8, 12, ramp(FELT["acorn"], 0.95), 0.5)
-    out["plush_acorn"] = p.img
-    p = Painter(N, N, 26264)
-    felt(p, FELT["cap"])
-    for y in range(0, N, 6):
-        for x in range(0 + (y // 6) % 2 * 3, N, 6):
-            p.ellipse(x, y, 2, 2, ramp(FELT["cap"], 0.15))
-    out["plush_acorn_cap"] = p.img
+    def rosette(p):
+        fp.wool(p, blue, 26222)
+        for y in range(16):
+            for x in range(16):
+                d = max(abs(x + 0.5 - 8), abs(y + 0.5 - 8))
+                if d <= 2:
+                    p.put(x, y, LACQUER_RED[3] if d <= 1 else LACQUER_RED[2])
+                elif d <= 4:
+                    p.put(x, y, GOLD[3] if (x + y) % 2 else GOLD[2])
+                elif d <= 6 and (x + y) % 2 == 0:
+                    p.put(x, y, blue[2])
+    out["plush_rosette"] = px16(rosette)
+
+    # The ghost: white felt, square eyes, rosy cheeks, a little "o" of a mouth.
+    ghost = FELT["ghost"][2:]
+    out["ghost_plush"] = px16(lambda p: (fp.wool(p, ghost, 26230), fp.seam(p, ghost, row=14)))
+
+    def ghost_face(p):
+        fp.wool(p, ghost, 26231)
+        for x0 in (5, 9):
+            box(p, x0, 6, x0 + 1, 7, BLACK_FELT[1])
+        for x in (3, 4, 11, 12):
+            p.put(x, 9, PINK[1])
+        for x in (7, 8):
+            p.put(x, 10, BLACK_FELT[1])
+            p.put(x, 11, PINK[0])
+    out["ghost_plush_face"] = px16(ghost_face)
+
+    # The bat: near-black felt; big white eyes, two little fangs; wings of purple-black felt, scalloped at their foot.
+    bat = FELT["bat"][1:4]
+    out["bat_plush"] = px16(lambda p: (fp.wool(p, bat, 26240), fp.seam(p, bat, column=8)))
+
+    def bat_face(p):
+        fp.wool(p, bat, 26241)
+        for x0 in (3, 9):
+            box(p, x0, 5, x0 + 3, 8, rgb("f2f0ea"))
+            box(p, x0 + 1, 6, x0 + 2, 7, BLACK_FELT[0])
+            p.put(x0 + 1, 6, white)
+        for x in (6, 7, 8, 9):
+            p.put(x, 11, rgb("c86a8a"))
+        for x in (6, 9):
+            p.put(x, 12, rgb("f4f0e6"))
+    out["bat_plush_face"] = px16(bat_face)
+    wing = FELT["bat"][2:] + [rgb("6a4c7e")]
+
+    def bat_wing(p):
+        fp.wool(p, wing[:3], 26242)
+        for x0, x1 in ((1, 5), (1, 10), (1, 15)):
+            for k in range(13):
+                x = x0 + round((x1 - x0) * k / 12)
+                p.put(x, 1 + k, wing[3])
+        for x in range(16):
+            depth = (0, 1, 2, 2, 1, 0)[x % 6] if x % 6 else 0
+            for y in range(16 - 3 + depth, 16):
+                p.clear(x, y)
+    out["bat_plush_wing"] = px16(bat_wing)
+
+    # The black cat: black felt, green-gold eyes with slit pupils, a pink nose, white whiskers; an orange bow.
+    cat = [rgb("1c1c22"), rgb("222228"), rgb("2c2c34")]
+    out["black_cat_plush"] = px16(lambda p: (fp.wool(p, cat, 26250), fp.seam(p, cat, column=8)))
+
+    def cat_face(p):
+        fp.wool(p, cat, 26251)
+        for x0 in (4, 9):
+            for x in range(x0, x0 + 3):
+                for y in (6, 7):
+                    p.put(x, y, BLACK_FELT[0] if x == x0 + 1 else rgb("d8e04a") if y == 6 else rgb("b4c030"))
+        p.put(7, 9, PINK[2])
+        p.put(8, 9, PINK[1])
+        for x, y in ((7, 10), (8, 10), (6, 11), (9, 11)):
+            p.put(x, y, PINK[0])
+        for y in (9, 11):
+            for x in (1, 2, 3, 12, 13, 14):
+                p.put(x, y, rgb("d8d8d8"))
+    out["black_cat_plush_face"] = px16(cat_face)
+    orange = FELT["orange"][1:4]
+
+    def bow(p):
+        fp.wool(p, orange, 26252)
+        for y in range(1, 16, 4):
+            for x in range(1 + (y // 4) % 2 * 2, 16, 4):
+                p.put(x, y, rgb("fff0d8"))
+    out["plush_bow"] = px16(bow)
+
+    # The squirrel: rust felt with a cream muzzle, a bushy tail with a pale tip; an acorn held in front.
+    squirrel = FELT["squirrel"][1:4]
+    cream = FELT["cream"][1:4]
+    out["squirrel_plush"] = px16(lambda p: (fp.wool(p, squirrel, 26260), fp.seam(p, squirrel, column=8)))
+
+    def squirrel_face(p):
+        fp.wool(p, squirrel, 26261)
+        box(p, 4, 9, 11, 14, cream[1])
+        box(p, 5, 9, 10, 9, cream[2])
+        for x0 in (4, 10):
+            box(p, x0, 5, x0 + 1, 6, BLACK_FELT[0])
+            p.put(x0, 5, white)
+        box(p, 7, 9, 8, 10, PINK[1])
+        p.put(7, 9, PINK[2])
+        for x, y in ((6, 12), (7, 11), (8, 11), (9, 12)):
+            p.put(x, y, THREAD_DARK)
+    out["squirrel_plush_face"] = px16(squirrel_face)
+
+    def tail(p):
+        bs.streaks(FELT["squirrel"][1:5], 26262, vertical=True, spread=0.7)(p)
+        for x in range(16):
+            tip = 3 if x % 4 in (1, 2) else 2
+            for y in range(tip):
+                p.put(x, y, cream[2] if y == 0 else cream[1])
+    out["squirrel_plush_tail"] = px16(tail)
+    acorn = FELT["acorn"][1:4]
+
+    def plush_acorn(p):
+        fp.wool(p, acorn, 26263)
+        box(p, 3, 3, 4, 6, FELT["acorn"][3])
+    out["plush_acorn"] = px16(plush_acorn)
+    cap = FELT["cap"][1:4]
+
+    def acorn_cap(p):
+        fp.wool(p, cap, 26264)
+        for y in range(1, 16, 3):
+            for x in range((y // 3) % 2 * 2, 16, 4):
+                p.put(x, y, FELT["cap"][0])
+                p.put(x + 1, y, cap[2])
+    out["plush_acorn_cap"] = px16(acorn_cap)
 
     # The werewolf: brown felt, a tan muzzle with a black nose and two felt fangs, yellow eyes under cross brows.
-    p = Painter(N, N, 26270)
-    felt(p, FELT["werewolf"], seams=[(32, 0, 32, 64)])
-    out["werewolf_plush"] = p.img
-    p = Painter(N, N, 26271)
-    felt(p, FELT["werewolf"])
-    for cx, side in ((20, -1), (44, 1)):
-        p.ellipse(cx, 30, 7, 6, rgb("f0c428"))
-        p.ellipse(cx, 31, 2.5, 4, BLACK_FELT[0])
-        p.ellipse(cx - 2, 28, 1.4, 1.4, rgb("ffffff"))
-        stitches(p, [(cx - side * 9, 18), (cx + side * 7, 24)], BLACK_FELT[1], width=3.0)
-    for cx in (12, 52):
-        p.ellipse(cx, 50, 6, 4, ramp(FELT["tan"], 0.6))
-    out["werewolf_plush_face"] = p.img
-    p = Painter(N, N, 26272)
-    felt(p, FELT["tan"])
-    out["werewolf_plush_muzzle"] = p.img
-    p = Painter(N, N, 26273)
-    felt(p, FELT["tan"])
-    p.blob(32, 18, 14, 10, BLACK_FELT[0], BLACK_FELT[2])
-    p.ellipse(27, 15, 3, 2, rgb("6a6a70"))
-    stitches(p, [(32, 28), (32, 40)])
-    stitches(p, [(18, 42), (32, 40), (46, 42)])
-    for cx in (22, 42):
-        p.tooth(cx, 44, 6, 12, [rgb("c8c0b0"), rgb("f4f0e6"), rgb("ffffff")])
-    out["werewolf_plush_snout"] = p.img
+    wolf = FELT["werewolf"][1:4]
+    tan = FELT["tan"][1:4]
+    out["werewolf_plush"] = px16(lambda p: (fp.wool(p, wolf, 26270), fp.seam(p, wolf, column=8)))
+
+    def wolf_face(p):
+        fp.wool(p, wolf, 26271)
+        for x0, brow in ((4, ((3, 5), (4, 5), (5, 6))), (10, ((12, 5), (11, 5), (10, 6)))):
+            box(p, x0, 7, x0 + 1, 8, rgb("f0c428"))
+            p.put(x0 + (1 if x0 < 8 else 0), 8, BLACK_FELT[0])
+            for x, y in brow:
+                p.put(x, y, BLACK_FELT[1])
+        for x0 in (2, 12):
+            box(p, x0, 12, x0 + 1, 13, tan[1])
+    out["werewolf_plush_face"] = px16(wolf_face)
+    out["werewolf_plush_muzzle"] = px16(lambda p: fp.wool(p, tan, 26276))
+
+    def snout(p):
+        fp.wool(p, tan, 26273)
+        box(p, 5, 2, 10, 5, BLACK_FELT[1])
+        box(p, 6, 2, 7, 2, rgb("6a6a70"))
+        for y in (6, 7, 8, 9):
+            p.put(8, y, THREAD_DARK)
+        for x, y in ((4, 11), (5, 10), (6, 10), (7, 10), (9, 10), (10, 10), (11, 11)):
+            p.put(x, y, THREAD_DARK)
+        for x0 in (5, 10):
+            box(p, x0, 11, x0, 13, rgb("f4f0e6"))
+    out["werewolf_plush_snout"] = px16(snout)
     return out
 
 
 def items():
+    """The midway's items as vanilla item icons (fair_pixels.sprite): 16 by 16 pixel art, outlined, lit from the top
+    left."""
     out = {}
-    # The High Striker: its tower in red and white, lamps up its front, the bell on top, on its base.
-    p = Painter(N, N, 26300)
-    for y in range(10, 54):
-        for x in range(26, 38):
-            p.put(x, y, ramp(WOOD_WHITE if (y // 6) % 2 else LACQUER_RED, 0.75 - 0.3 * abs(x - 31.5) / 6))
-    for y in range(14, 52, 6):
-        for cx in (22, 42):
-            p.blob(cx, y, 2.2, 2.2, rgb("c08a14"), rgb("fff0a0"))
-    p.blob(32, 7, 7, 6, BRASS[1], BRASS[4])
-    for y in range(54, 62):
-        for x in range(12, 52):
-            p.put(x, y, ramp(LACQUER_RED, 0.7 - 0.3 * (y - 54) / 8))
-    p.blob(32, 44, 4, 2.5, LACQUER_RED[1], LACQUER_RED[4])
-    out["high_striker"] = p.img
+    colours = {"o": rgb("3a2008"), "G": GOLD[4], "g": GOLD[3], "d": GOLD[1], "R": LACQUER_RED[3], "r": LACQUER_RED[2],
+               "W": WOOD_WHITE[4], "w": WOOD_WHITE[2], "y": rgb("f0c428"), "Y": rgb("fff090"), "b": LACQUER_RED[1],
+               "k": LACQUER_RED[0]}
+    out["high_striker"] = sprite([
+        "................",
+        "......oooo......",
+        ".....oGGgdo.....",
+        ".....ogggdo.....",
+        "......oooo......",
+        ".......Rr.......",
+        "....Y..Ww..Y....",
+        ".......Rr.......",
+        "....y..Ww..y....",
+        ".......Rr.......",
+        "....y..Ww..y....",
+        ".......Rr.......",
+        ".......Ww.......",
+        "....kRRRRRrk....",
+        "...kbbbbbbbbk...",
+        "................",
+    ], colours)
 
-    # The Carnival Mallet: a big wooden head banded in red, on a long handle, held aslant.
-    p = Painter(N, N, 26301)
-    for k in range(0, 40):
-        x, y = 12 + k * 0.85, 56 - k * 0.85
-        p.line(x - 2, y - 2, x + 2, y + 2, ramp(PLANK, 0.55 + 0.25 * math.sin(k * 0.3)), width=2.0)
-    for k2 in range(-28, 29):
-        for j2 in range(-16, 17):
-            k, j = k2 / 2.0, j2 / 2.0
-            x = 44 + k * 0.7 + j * 0.7
-            y = 18 - k * 0.7 + j * 0.7
-            band = abs(k) > 10 or abs(k) < 2
-            p.put(x, y, ramp(LACQUER_RED if band else WOOD_WHITE, 0.75 - 0.025 * (j + k)))
-    out["carnival_mallet"] = p.img
+    def mallet(p):
+        for k in range(8):
+            p.put(9 - k, 7 + k, PLANK[3])
+            p.put(10 - k, 7 + k, PLANK[1])
+        for y in range(1, 7):
+            for x in range(8, 15):
+                edge = y in (1, 6) or x in (8, 14)
+                band = x in (9, 13)
+                p.put(x, y, rgb("3a1008") if edge else (LACQUER_RED[3] if y < 4 else LACQUER_RED[2]) if band
+                      else (WOOD_WHITE[4] if y < 4 else WOOD_WHITE[2]))
+    out["carnival_mallet"] = px16(mallet)
 
-    # The Toss Ring: a striped ring, seen tilted.
-    p = Painter(N, N, 26302)
-    for a in range(360):
-        t = math.radians(a)
-        for r in (17, 18, 19, 20, 21):
-            x, y = 32 + r * math.cos(t), 32 + r * 0.62 * math.sin(t)
-            colour = [LACQUER_RED, YELLOW][(a // 30) % 2]
-            p.put(x, y, ramp(colour, 0.7 - 0.25 * math.sin(t) + 0.04 * (r - 19)))
-    out["toss_ring"] = p.img
+    def toss_ring(p):
+        for y in range(16):
+            for x in range(16):
+                dx, dy = (x + 0.5 - 8) / 7.0, (y + 0.5 - 8) / 4.4
+                d = dx * dx + dy * dy
+                if 0.45 <= d <= 1.0:
+                    colours = LACQUER_RED if (x // 3) % 2 == 0 else YELLOW
+                    p.put(x, y, colours[3] if y < 8 else colours[1])
+    out["toss_ring"] = px16(toss_ring)
     return out
 
 

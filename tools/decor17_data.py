@@ -11,12 +11,16 @@ import random
 
 from PIL import Image
 
+import block_style as bs
 import cute_art as ca
 import decor16_data as d16d
+import decor8_data as d8d
+import agriculture as ag
 import decor17 as d17
 import flora_art as fa
 from flora_art import SIDES4, Px, Sculpt, column, cube, pal, plane_xy, plane_xz, plane_zy, rotation, shade, solid, strip
 from decor6_data import quads
+from decor_data import block_model
 
 MOD = "jugcraft"
 FACINGS = {"north": 0, "east": 90, "south": 180, "west": 270}
@@ -80,7 +84,7 @@ def noise(palette, seed=1, base=None, spread=(0, 0, 0, -1, 1)):
         k = len(palette) // 2 if base is None else base
         for y in range(p.h):
             for x in range(p.w):
-                p.put(x, y, shade(palette, k + rng.choice(spread)))
+                p.put(x, y, shade(palette, k + (0 if fa.QUIET else rng.choice(spread))))
     return paint
 
 
@@ -140,15 +144,21 @@ def wrought(seed=1, horizontal=False):
     return paint
 
 
+def wrought_clean(horizontal=False):
+    """Wrought iron, clean (5 October 2026; it replaces the speckled `wrought` everywhere but the Beating Heart Jar's lid,
+    which the owner loves as it is): flat dark iron, a lit line along its top and left and a dark one along its bottom
+    and right; `horizontal` lights only the top and shades only the bottom, for a long bar."""
+    return ca.bevel(IRON, 3, light=2, dark=2, sides="tb" if horizontal else "tlbr")
+
+
 def twisted(seed=1):
-    """A twisted iron bar seen from the side: bright ridges running diagonally round it."""
+    """A twisted iron bar seen from the side: bright ridges running diagonally round it, evenly (`seed` is kept for
+    callers and no longer speckles it)."""
     def paint(p):
-        rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
                 phase = (x * 1.6 + y) % 5
                 k = 5 if phase < 1 else (4 if phase < 2 else 2)
-                k += rng.choice((0, 0, -1))
                 p.put(x, y, shade(IRON, k))
     return paint
 
@@ -199,14 +209,13 @@ def scroll(kind="leg", seed=1):
 
 
 def drip_pan():
-    """A wrought-iron drip pan from above: a dish with a lit rim and a dark well."""
+    """A wrought-iron drip pan from above: a dish with a lit rim and a dark well, its square corners solid iron (opaque,
+    so the pan never shows its own inside)."""
     def paint(p):
         cx, cy = (p.w - 1) / 2, (p.h - 1) / 2
         for y in range(p.h):
             for x in range(p.w):
                 d = math.hypot(x - cx, y - cy) / (p.w / 2)
-                if d > 1.05:
-                    continue
                 p.put(x, y, IRON[5] if d > 0.78 else (IRON[2] if d > 0.4 else IRON[1]))
     return paint
 
@@ -284,16 +293,20 @@ def stones(seed=1, glow_hole=False):
 
 
 def wood(palette=WOOD, seed=1, grain=True, panel=False):
-    """Dark polished wood: long grain, a lit edge; with a sunken panel's bevel if `panel`."""
+    """Dark polished wood: long grain, a lit edge; with a sunken panel's bevel if `panel`. In the clean style
+    (flora_art.QUIET) the grain is thin streaks along the piece's length, as on vanilla planks."""
     def paint(p):
         rng = random.Random(seed)
         n = len(palette)
-        offsets = [rng.random() * 6 for _ in range(p.h + 1)]
-        for y in range(p.h):
-            for x in range(p.w):
-                g = math.sin((x + offsets[y // 3] * 2) * 0.9 + y * 0.05) if grain else 0
-                k = n // 2 + (1 if g > 0.6 else 0) - (1 if g < -0.7 else 0) + rng.choice((0, 0, 0, -1))
-                p.put(x, y, shade(palette, k))
+        if fa.QUIET and grain:
+            bs.streaks(palette[1:n - 1], seed, vertical=p.h > p.w, spread=0.7)(p)
+        else:
+            offsets = [rng.random() * 6 for _ in range(p.h + 1)]
+            for y in range(p.h):
+                for x in range(p.w):
+                    g = math.sin((x + offsets[y // 3] * 2) * 0.9 + y * 0.05) if grain else 0
+                    k = n // 2 + (1 if g > 0.6 else 0) - (1 if g < -0.7 else 0) + (0 if fa.QUIET else rng.choice((0, 0, 0, -1)))
+                    p.put(x, y, shade(palette, k))
         if panel and p.w > 6 and p.h > 6:
             for x in range(2, p.w - 2):
                 p.put(x, 2, palette[n - 1])
@@ -353,7 +366,7 @@ def fluid(palette, seed=1, alpha=150):
         rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
-                p.put(x, y, palette[rng.choice((0, 1, 1, 2))], alpha)
+                p.put(x, y, palette[1 if fa.QUIET else rng.choice((0, 1, 1, 2))], alpha)
     return paint
 
 
@@ -376,12 +389,32 @@ def label(seed=1, lines=3):
     return paint
 
 
+def label_clean(lines=2):
+    """A paper label, clean: flat paper inside a one-texel darker edge, and lines of ink as even dashes (a word, a gap,
+    a longer word), each line starting a step further in."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                edge = x in (0, p.w - 1) or y in (0, p.h - 1)
+                p.put(x, y, PAPER[1] if edge else PAPER[3])
+        words = (3, 2, 4, 2)
+        for line in range(lines):
+            y = int((line + 1) * p.h / (lines + 1))
+            x, k = 2 + line, line
+            while x < p.w - 2:
+                for xx in range(x, min(p.w - 2, x + words[k % len(words)])):
+                    p.put(xx, y, INK[1])
+                x += words[k % len(words)] + 1
+                k += 1
+    return paint
+
+
 def velvet(seed=1):
     def paint(p):
         rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
-                k = 2 + (1 if (x + y) % 7 == 0 else 0) + rng.choice((0, 0, -1))
+                k = 2 + (1 if (x + y) % 7 == 0 else 0) + (0 if fa.QUIET else rng.choice((0, 0, -1)))
                 p.put(x, y, shade(VELVET, k))
     return paint
 
@@ -562,60 +595,95 @@ def cute_jaw():
 
 
 def horned_skull_cauldron():
-    """A squat black-iron pot on four clawed feet with two riveted bands, a lip round its rim and a hollow inside, and a
-    friendly ram's skull bolted to its front (big round sockets, no nose holes), its ringed horns curling out past the
-    rim. The brew, the floating things, the
-    fumes and the skull's glowing eyes are the client's (the pot's inside is 3.3..12.7 across, its floor at 8.5)."""
+    """A squat black-iron pot on four clawed feet with two riveted bands, a lip round its rim and a hollow inside lined
+    with iron down to its floor, and a ram's skull bolted to its front, its ringed horns curling out past the rim. The
+    skull's eye sockets are square and dark, the Minecraft way (SKULL_EYES, which the client's glow covers exactly);
+    there are no nose holes. The brew, the floating things, the fumes and the glow are the client's (the pot's inside is
+    3.3..12.7 across, its floor at 8.5).
+
+    Closed everywhere (5 October 2026, after the owner saw through the old pot's open shells): the belly is three boxes
+    side by side that never overlap, with undersides; its shoulder outside the neck is capped with flat plates; the neck,
+    the rim and the band round the neck are box_ring frames, so each is capped on top without lidding the inside, and the
+    neck's lining runs from the inside floor up to the rim. Every piece is sized to its face (about 4 to 5 texels a
+    pixel), so no face squeezes a large picture into a thin strip."""
     sc = Sculpt(d17.CAULDRON["block"], 171, 128)
-    outer = sc.piece("outer", 48, 34, ca.soft(ca.IRON, 2))
-    inner = sc.piece("inner", 38, 30, ca.bevel(ca.IRON, 1))
-    floor = sc.piece("floor", 38, 38, ca.bevel(ca.IRON, 1, edge=2))
-    rim = sc.piece("rim", 52, 6, ca.bevel(ca.IRON, 4))
-    bands = sc.piece("band", 52, 4, ca.riveted(ca.IRON, 3, 8))
-    foot = sc.piece("foot", 8, 12, ca.bevel(ca.IRON, 2))
-    claws = sc.piece("claw", 4, 6, ca.bevel(ca.IRON, 4))
-    face = sc.piece("skull_face", 24, 18, ca.skull_face(sockets=0.26, socket_x=0.232, socket_y=0.61, mouth=False))
-    side = sc.piece("skull_side", 12, 18, ca.soft(ca.BONE, 2))
-    top = sc.piece("skull_top", 24, 12, ca.soft(ca.BONE, 3))
+    # Packed row by row, so the tall pieces go first, side by side.
+    under = sc.piece("under", 36, 36, ca.bevel(ca.IRON, 1, light=0))
+    floor = sc.piece("floor", 36, 36, ca.bevel(ca.IRON, 1, edge=2))
+    under_side = sc.piece("under_side", 10, 36, ca.bevel(ca.IRON, 1, light=0))
+    shoulder_side = sc.piece("shoulder_side", 4, 36, ca.bevel(ca.IRON, 3))
+    neck_under_side = sc.piece("neck_under_side", 5, 36, ca.bevel(ca.IRON, 1, light=0))
+    rim_top_side = sc.piece("rim_top_side", 4, 36, ca.bevel(ca.IRON, 4))
+    neck_band_top_side = sc.piece("neck_band_top_side", 1, 36, ca.bevel(ca.IRON, 4, edge=0))
+    outer = sc.piece("outer", 46, 31, ca.soft(ca.IRON, 2))
+    outer_end = sc.piece("outer_end", 10, 31, ca.soft(ca.IRON, 2))
+    face = sc.piece("skull_face", 28, 22, ca.block_skull_face(SKULL_FACE, SKULL_EYES))
+    side = sc.piece("skull_side", 6, 22, ca.soft(ca.BONE, 2))
     nose = sc.piece("snout", 16, 12, ca.soft(ca.BONE, 3, bottom=0.3))
-    jaw = sc.piece("jaw", 12, 4, cute_jaw())
-    horns = sc.piece("horn", 10, 26, ca.bands(ca.HORN, 3, period=4, width=1))
+    nose_side = sc.piece("snout_side", 6, 12, ca.soft(ca.BONE, 2))
+    neck = sc.piece("neck", 46, 16, ca.soft(ca.IRON, 2, top=0.4, bottom=0.0))
+    inner = sc.piece("inner", 46, 16, ca.bevel(ca.IRON, 1))
+    foot = sc.piece("foot", 8, 12, ca.bevel(ca.IRON, 2))
+    horns = sc.piece("horn", 12, 10, ca.bands(ca.HORN, 3, period=4, width=1))
+    neck_end = sc.piece("neck_end", 5, 16, ca.soft(ca.IRON, 2, top=0.4, bottom=0.0))
+    rim = sc.piece("rim", 52, 4, ca.bevel(ca.IRON, 4))
+    band = sc.piece("band", 52, 4, ca.riveted(ca.IRON, 3, 8))
+    foot_end = sc.piece("foot_end", 8, 8, ca.bevel(ca.IRON, 2))
+    band_flat = sc.piece("band_flat", 8, 8, ca.bevel(ca.IRON, 3))
+    rim_top = sc.piece("rim_top", 52, 4, ca.bevel(ca.IRON, 4))
+    neck_band = sc.piece("neck_band", 48, 4, ca.riveted(ca.IRON, 3, 8))
+    band_end = sc.piece("band_end", 8, 4, ca.bevel(ca.IRON, 3))
+    rim_end = sc.piece("rim_end", 4, 4, ca.bevel(ca.IRON, 4))
+    tiny_end = sc.piece("tiny_end", 1, 4, ca.bevel(ca.IRON, 3, edge=0))
     bolt = sc.piece("bolt", 4, 4, d16d.bolt_head())
-    # A rounded belly (a cross of two boxes with a third turned between them), a narrower neck whose walls are hollow
-    # above it, and a flared lip; the inside's floor is at 8.5.
-    belly = {s: outer for s in SIDES4}
-    els = [cube((1.4, 3.6, 3.4), (14.6, 9.8, 12.6), belly),
-           cube((3.4, 3.6, 1.4), (12.6, 9.8, 14.6), belly),
-           cube((3.2, 3.6, 3.2), (12.8, 9.8, 12.8), belly, rotation((8, 6.7, 8), "y", 45)),
-           cube((2.6, 2.4, 2.6), (13.4, 3.6, 13.4), {**{s: outer for s in SIDES4}, "down": floor}),
-           cube((2.2, 9.8, 2.2), (13.8, 12.6, 3.3), {"north": outer, "south": inner, "east": outer, "west": outer}),
-           cube((2.2, 9.8, 12.7), (13.8, 12.6, 13.8), {"south": outer, "north": inner, "east": outer, "west": outer}),
-           cube((2.2, 9.8, 3.3), (3.3, 12.6, 12.7), {"west": outer, "east": inner}),
-           cube((12.7, 9.8, 3.3), (13.8, 12.6, 12.7), {"east": outer, "west": inner}),
+    neck_under = sc.piece("neck_under", 46, 5, ca.bevel(ca.IRON, 1, light=0))
+    base = sc.piece("base", 48, 6, ca.bevel(ca.IRON, 2))
+    top = sc.piece("skull_top", 24, 6, ca.soft(ca.BONE, 3))
+    band_short = sc.piece("band_short", 40, 4, ca.riveted(ca.IRON, 3, 6))
+    shoulder = sc.piece("shoulder", 36, 4, ca.bevel(ca.IRON, 3))
+    neck_band_top = sc.piece("neck_band_top", 48, 1, ca.bevel(ca.IRON, 4, edge=0))
+    jaw = sc.piece("jaw", 12, 4, cute_jaw())
+    claws = sc.piece("claw", 4, 6, ca.bevel(ca.IRON, 4))
+    # The belly: a middle box the pot's depth and a box each side of it, so nothing overlaps; each draws only its
+    # outward sides and its underside.
+    els = [cube((3.4, 3.6, 1.4), (12.6, 9.8, 14.6), {"north": outer, "south": outer, "east": outer, "west": outer, "down": under}),
+           cube((1.4, 3.6, 3.4), (3.4, 9.8, 12.6), {"north": outer_end, "south": outer_end, "west": outer, "down": under_side}),
+           cube((12.6, 3.6, 3.4), (14.6, 9.8, 12.6), {"north": outer_end, "south": outer_end, "east": outer, "down": under_side}),
+           cube((2.6, 2.4, 2.6), (13.4, 3.6, 13.4), {**{s: base for s in SIDES4}, "up": under, "down": floor}),
+           # The shoulder: the belly's top where it shows outside the neck, as flat plates that never cover the inside.
+           cube((3.4, 9.8, 1.4), (12.6, 9.8, 2.2), {"up": shoulder}), cube((3.4, 9.8, 13.8), (12.6, 9.8, 14.6), {"up": shoulder}),
+           cube((1.4, 9.8, 3.4), (2.2, 9.8, 12.6), {"up": shoulder_side}), cube((13.8, 9.8, 3.4), (14.6, 9.8, 12.6), {"up": shoulder_side}),
+           # The neck: walls lined from the inside floor up, closed underneath where they overhang the belly's corners
+           # and on top inside the rim; and the inside floor.
+           *fa.box_ring(2.2, 2.2, 13.8, 13.8, 1.1, 8.5, 12.6, neck, inner, top=(neck_under, neck_under_side), bottom=(neck_under, neck_under_side),
+                        ends=neck_end),
            cube((3.3, 8.0, 3.3), (12.7, 8.5, 12.7), {"up": floor}),
-           cube((1.5, 12.6, 1.5), (14.5, 13.6, 2.5), {"north": rim, "south": rim, "up": rim, "east": rim, "west": rim, "down": rim}),
-           cube((1.5, 12.6, 13.5), (14.5, 13.6, 14.5), {"north": rim, "south": rim, "up": rim, "east": rim, "west": rim, "down": rim}),
-           cube((1.5, 12.6, 2.5), (2.5, 13.6, 13.5), {"east": rim, "west": rim, "up": rim, "down": rim}),
-           cube((13.5, 12.6, 2.5), (14.5, 13.6, 13.5), {"east": rim, "west": rim, "up": rim, "down": rim}),
-           cube((1.3, 5.0, 3.3), (14.7, 6.0, 12.7), {s: bands for s in SIDES4}),
-           cube((3.3, 5.0, 1.3), (12.7, 6.0, 14.7), {s: bands for s in SIDES4}),
-           cube((2.1, 9.8, 2.1), (13.9, 10.6, 13.9), {s: bands for s in SIDES4}),
-           ]
+           # A rolled lip round the top, a pixel wide, standing on the walls' outer edge.
+           *fa.box_ring(1.5, 1.5, 14.5, 14.5, 1.0, 12.6, 13.6, rim, rim, top=(rim_top, rim_top_side), bottom=(rim_top, rim_top_side),
+                        ends=rim_end),
+           # Two riveted bands round the belly, and a band round the neck capped on top.
+           cube((3.3, 5.0, 1.3), (12.7, 6.0, 14.7), {"north": band_short, "south": band_short, "east": band, "west": band, "up": band_flat,
+                                                      "down": band_flat}),
+           cube((1.3, 5.0, 3.3), (3.3, 6.0, 12.7), {"north": band_end, "south": band_end, "west": band_short, "up": band_flat, "down": band_flat}),
+           cube((12.7, 5.0, 3.3), (14.7, 6.0, 12.7), {"north": band_end, "south": band_end, "east": band_short, "up": band_flat,
+                                                       "down": band_flat}),
+           *fa.box_ring(2.1, 2.1, 13.9, 13.9, 0.2, 9.8, 10.6, neck_band, top=(neck_band_top, neck_band_top_side), ends=tiny_end)]
     # Four feet, each ending in three iron claws.
     for x, z in ((2.2, 2.2), (11.8, 2.2), (2.2, 11.8), (11.8, 11.8)):
-        els.append(cube((x, 0.6, z), (x + 2.0, 3.4, z + 2.0), {**{s: foot for s in SIDES4}, "down": foot}))
+        els.append(cube((x, 0.6, z), (x + 2.0, 3.4, z + 2.0), {**{s: foot for s in SIDES4}, "up": foot_end, "down": foot_end}))
         cx, cz = x + 1.0, z + 1.0
         ox = -1 if cx < 8 else 1
         oz = -1 if cz < 8 else 1
-        els.append(cube((cx - 0.4 + ox * 1.0, 0.0, cz - 0.4), (cx + 0.4 + ox * 1.0, 1.2, cz + 0.4), {s: claws for s in SIDES4 + ("up",)}))
-        els.append(cube((cx - 0.4, 0.0, cz - 0.4 + oz * 1.0), (cx + 0.4, 1.2, cz + 0.4 + oz * 1.0), {s: claws for s in SIDES4 + ("up",)}))
-        els.append(cube((cx - 0.4 + ox * 0.7, 0.0, cz - 0.4 + oz * 0.7), (cx + 0.4 + ox * 0.7, 1.0, cz + 0.4 + oz * 0.7),
-                        {s: claws for s in SIDES4 + ("up",)}))
+        claw = {s: claws for s in ALL6}
+        els.append(cube((cx - 0.4 + ox * 1.0, 0.0, cz - 0.4), (cx + 0.4 + ox * 1.0, 1.2, cz + 0.4), claw))
+        els.append(cube((cx - 0.4, 0.0, cz - 0.4 + oz * 1.0), (cx + 0.4, 1.2, cz + 0.4 + oz * 1.0), claw))
+        els.append(cube((cx - 0.4 + ox * 0.7, 0.0, cz - 0.4 + oz * 0.7), (cx + 0.4 + ox * 0.7, 1.0, cz + 0.4 + oz * 0.7), claw))
     # The ram's skull on the front: cranium, brow, the long face and its jaw, and a bolt at each temple.
-    els += [cube((5.2, 7.4, 0.7), (10.8, 11.8, 2.0), {"north": face, "east": side, "west": side, "up": top, "down": side}),
-            cube((5.0, 10.0, 0.45), (11.0, 10.9, 0.9), {"north": top, "up": top, "east": side, "west": side, "down": side}),
-            cube((6.2, 5.0, 0.3), (9.8, 7.6, 1.5), {"north": nose, "east": side, "west": side, "down": side}),
-            cube((6.6, 4.3, 0.5), (9.4, 5.0, 1.4), {"north": jaw, "east": side, "west": side, "down": side}),
+    x0, y0, x1, y1 = SKULL_FACE
+    els += [cube((x0, y0, d17.CAULDRON["skull_face_z"]), (x1, y1, 2.0), {"north": face, "east": side, "west": side, "up": top, "down": top}),
+            cube((5.0, 10.0, 0.45), (11.0, 10.9, 0.9), {"north": top, "up": top, "east": side, "west": side, "down": top}),
+            cube((6.2, 5.0, 0.3), (9.8, 7.6, 1.5), {"north": nose, "east": nose_side, "west": nose_side, "up": top, "down": top}),
+            cube((6.6, 4.3, 0.5), (9.4, 5.0, 1.4), {"north": jaw, "east": side, "west": side, "up": top, "down": top}),
             cube((4.6, 9.0, 1.3), (5.2, 9.6, 1.9), {s: bolt for s in ALL6}),
             cube((10.8, 9.0, 1.3), (11.4, 9.6, 1.9), {s: bolt for s in ALL6})]
     # The horns, each a chain of tapering segments: up and out from the crown, back down past the cheek, curling forward.
@@ -623,20 +691,22 @@ def horned_skull_cauldron():
         def mx(a, b):
             lo, hi = (a, b) if sign < 0 else (16 - b, 16 - a)
             return lo, hi
-        x0, x1 = mx(3.2, 6.2)
-        els.append(cube((x0, 10.6, 0.6), (x1, 12.6, 2.6), {s: horns for s in ALL6}, rotation(((x0 + x1) / 2, 11.6, 1.6), "z", -22.5 * sign)))
-        x0, x1 = mx(1.2, 3.6)
-        els.append(cube((x0, 8.6, 0.7), (x1, 11.2, 2.5), {s: horns for s in ALL6}, rotation(((x0 + x1) / 2, 9.9, 1.6), "z", 22.5 * sign)))
-        x0, x1 = mx(0.4, 2.4)
-        els.append(cube((x0, 6.2, 0.6), (x1, 8.9, 2.2), {s: horns for s in ALL6}, rotation(((x0 + x1) / 2, 8.9, 1.4), "x", 22.5)))
-        x0, x1 = mx(0.8, 2.2)
-        els.append(cube((x0, 5.0, -0.6), (x1, 6.6, 0.8), {s: horns for s in ALL6}, rotation(((x0 + x1) / 2, 6.6, 0.8), "x", 45)))
+        hx0, hx1 = mx(3.2, 6.2)
+        els.append(cube((hx0, 10.6, 0.4), (hx1, 12.6, 2.4), {s: horns for s in ALL6}, rotation(((hx0 + hx1) / 2, 11.6, 1.4), "z", -22.5 * sign)))
+        hx0, hx1 = mx(1.2, 3.6)
+        els.append(cube((hx0, 8.6, 0.7), (hx1, 11.2, 2.5), {s: horns for s in ALL6}, rotation(((hx0 + hx1) / 2, 9.9, 1.6), "z", 22.5 * sign)))
+        hx0, hx1 = mx(0.4, 2.4)
+        els.append(cube((hx0, 6.2, 0.6), (hx1, 8.9, 2.2), {s: horns for s in ALL6}, rotation(((hx0 + hx1) / 2, 8.9, 1.4), "x", 22.5)))
+        hx0, hx1 = mx(0.8, 2.2)
+        els.append(cube((hx0, 5.0, -0.6), (hx1, 6.6, 0.8), {s: horns for s in ALL6}, rotation(((hx0 + hx1) / 2, 6.6, 0.8), "x", 45)))
     sc.models[d17.CAULDRON["block"]] = els
     return sc
 
 
-# Where the skull's eyes are, for the client's glow: {x0, y0, x1, y1} on the face at z = 0.65, pixels.
-SKULL_EYES = [(5.9, 8.6, 7.1, 9.6), (8.9, 8.6, 10.1, 9.6)]
+# The ram skull's face and its square eye sockets, which the client's glow covers exactly (tools/decor17.py CAULDRON); the
+# face's texture is 5 texels to a pixel, so the sockets' edges fall on whole texels.
+SKULL_FACE = d17.CAULDRON["skull_face"]
+SKULL_EYES = d17.CAULDRON["skull_eyes"]
 
 
 def ember_bed():
@@ -686,8 +756,8 @@ def candelabra():
     """The four iron fittings on one texture: the frames only (the candles and their flames are the client's, at
     tools/decor17.py CANDELABRA)."""
     sc = Sculpt("candelabra", 173, 128)
-    iron = sc.piece("iron", 16, 16, wrought(2))
-    iron_h = sc.piece("iron_h", 32, 4, wrought(3, horizontal=True))
+    iron = sc.piece("iron", 16, 16, wrought_clean())
+    iron_h = sc.piece("iron_h", 32, 4, wrought_clean(horizontal=True))
     twist = sc.piece("twist", 8, 40, twisted(4))
     c_scroll = sc.piece("c_scroll", 16, 24, scroll("leg", 5))
     s_scroll = sc.piece("s_scroll", 16, 28, scroll("bracket", 6))
@@ -695,7 +765,7 @@ def candelabra():
     pan = sc.piece("pan", 8, 8, drip_pan())
     mirror = sc.piece("mirror", 12, 18, mirror_glass())
     chain = sc.piece("chain", 4, 40, chain_links())
-    knop = sc.piece("knop", 6, 6, wrought(8))
+    knop = sc.piece("knop", 6, 6, wrought_clean())
     hook = sc.piece("hook", 10, 10, hook_ring())
     plate = sc.piece("plate", 18, 26, back_plate())
     sc.piece("item_wax", 4, 10, solid(pal("c8bc9c", "ddd2b4", "efe6cc"), 30))
@@ -712,7 +782,7 @@ def candelabra():
         """A drip pan whose top is at `y` with the candle's socket in it."""
         r = w / 2
         return [cube((x - r, y - 0.5, z - r), (x + r, y, z + r), {**{s: iron for s in SIDES4}, "up": pan, "down": pan}),
-                cube((x - 0.55, y - 1.4, z - 0.55), (x + 0.55, y - 0.5, z + 0.55), {s: iron for s in SIDES4})]
+                cube((x - 0.55, y - 1.4, z - 0.55), (x + 0.55, y - 0.5, z + 0.55), {**{s: iron for s in SIDES4}, "down": iron})]
 
     floor = []
     # Four scrolled feet round a base ring, a knop, the twisted stem with two more knops.
@@ -782,7 +852,8 @@ def candelabra():
     for x, y, z, _ in d17.CANDELABRA["branching_chandelier"]["candles"]:
         hanging += cup(x, y, z, 2.4)
     for x, z in ((-10.0, 8.0), (26.0, 8.0), (8.0, -10.0), (8.0, 26.0)):
-        hanging.append(cube((x - 0.5, -6.4, z - 0.5), (x + 0.5, -7.6, z + 0.5), {s: knop for s in SIDES4}))
+        # A drop under each long arm's tip (from its low corner up: a box written top-down draws inside out).
+        hanging.append(cube((x - 0.5, -7.6, z - 0.5), (x + 0.5, -6.4, z + 0.5), {**{s: knop for s in SIDES4}, "down": knop}))
     sc.models["branching_chandelier"] = hanging
     return sc
 
@@ -822,17 +893,15 @@ def hook_ring():
 
 
 def back_plate():
-    """The girandole's cast back-plate: scrolls and a shell in relief round the mirror's place."""
+    """The girandole's cast back-plate, clean: flat dark iron bevelled at its edges, a raised bead round the mirror's
+    place lit along its upper half and shaded along its lower."""
     def paint(p):
-        wrought(9)(p)
-        rng = random.Random(10)
-        for i in range(40):
-            a = i / 40 * math.tau
+        wrought_clean()(p)
+        for i in range(80):
+            a = i / 80 * math.tau
             x = p.w / 2 + math.cos(a) * p.w * 0.42
             y = p.h / 2 + math.sin(a) * p.h * 0.42
-            p.put(x, y, IRON[6])
-        for _ in range(30):
-            p.put(rng.randrange(p.w), rng.randrange(p.h), IRON[4])
+            p.put(x, y, IRON[6] if math.sin(a) < 0 else IRON[4])
     return paint
 
 
@@ -865,6 +934,7 @@ def enchanted_broom():
     return sc
 
 
+@fa.quietly
 def dustpan():
     """A tin dustpan lying open to its front (north), its back and sides turned up, a short handle at the back."""
     sc = Sculpt(d17.DUSTPAN["block"], 175)
@@ -886,6 +956,7 @@ def dustpan():
 PAN_HEAP = [(6.0, 7.0), (10.0, 8.0), (8.0, 10.5)]
 
 
+@fa.quietly
 def broom_rack():
     """A dark oak rail for a wall (facing north, on the wall to its south) with three turned pegs; the brooms hung on
     them are the client's."""
@@ -908,6 +979,7 @@ RACK_PEGS = [3.5, 8.0, 12.5]
 
 # ---------------------------------------------------------------- 4. the cabinet of curiosities
 
+@fa.quietly
 def curiosity_cabinet():
     """A carved mahogany cabinet two blocks tall (the lower block's model holds it all; the upper is empty), facing
     north: bun feet, a plinth, panelled sides and back, three shelves lined in purple velvet, and a crown with a carved
@@ -926,17 +998,18 @@ def curiosity_cabinet():
     crest = sc.piece("crest", 18, 12, carved_crest(9))
     foot = sc.piece("foot", 6, 6, wood(WOOD, 10))
     top = sc.piece("top", 32, 28, wood(WOOD, 11))
-    els = [cube((1.0, 1.5, 3.0), (2.0, 30.0, 15.0), {"west": side, "east": side, "up": frame, "down": frame}),
-           cube((14.0, 1.5, 3.0), (15.0, 30.0, 15.0), {"east": side, "west": side, "up": frame, "down": frame}),
+    els = [cube((1.0, 1.5, 3.0), (2.0, 30.0, 15.0), {"west": side, "east": side, "up": frame, "down": frame, "south": frame}),
+           cube((14.0, 1.5, 3.0), (15.0, 30.0, 15.0), {"east": side, "west": side, "up": frame, "down": frame, "south": frame}),
            cube((2.0, 1.5, 14.0), (14.0, 30.0, 15.0), {"north": back, "south": side}),
            cube((0.6, 1.5, 2.6), (15.4, 2.5, 15.4), {**{s: rail for s in SIDES4}, "up": shelf, "down": shelf}),
            cube((2.0, 11.4, 3.2), (14.0, 12.4, 14.0), {"up": shelf, "down": shelf, "north": shelf_edge}),
            cube((2.0, 21.4, 3.2), (14.0, 22.4, 14.0), {"up": shelf, "down": shelf, "north": shelf_edge}),
            cube((2.0, 29.0, 3.0), (14.0, 30.0, 14.0), {"down": shelf}),
            cube((0.4, 30.0, 2.4), (15.6, 31.6, 15.6), {**{s: crown for s in SIDES4}, "up": top, "down": top}),
-           cube((5.0, 29.6, 2.1), (11.0, 31.9, 2.4), {"north": crest, "up": rail, "east": rail, "west": rail}),
-           cube((1.0, 2.5, 2.6), (2.0, 30.0, 3.0), {"north": frame, "east": frame}),
-           cube((14.0, 2.5, 2.6), (15.0, 30.0, 3.0), {"north": frame, "west": frame})]
+           cube((5.0, 29.6, 2.1), (11.0, 31.9, 2.4), {"north": crest, "south": rail, "up": rail, "down": rail,
+                                                       "east": rail, "west": rail}),
+           cube((1.0, 2.5, 2.6), (2.0, 30.0, 3.0), {"north": frame, "east": frame, "west": frame}),
+           cube((14.0, 2.5, 2.6), (15.0, 30.0, 3.0), {"north": frame, "west": frame, "east": frame})]
     for x, z in ((1.0, 2.8), (13.0, 2.8), (1.0, 13.2), (13.0, 13.2)):
         els.append(cube((x, 0.0, z), (x + 2.0, 1.5, z + 2.0), {**{s: foot for s in SIDES4}, "down": foot}))
     sc.models[d17.CABINET["block"]] = els
@@ -971,6 +1044,11 @@ def bell_jar():
     els = [cube((2.5, 0.0, 2.5), (13.5, 1.5, 13.5), {**{s: plinth for s in SIDES4}, "up": plinth_top, "down": plinth_top}),
            cube((3.5, 1.5, 3.5), (12.5, 2.6, 12.5), {**{s: plinth for s in SIDES4}, "up": plinth_top}),
            cube((4.2, 2.6, 4.2), (11.8, 11.8, 11.8), {s: glass_side for s in SIDES4}),
+           # The shoulder where the dome narrows: flat glass over the lower part's top round the upper's foot.
+           *[cube(lo, hi, {"up": glass_top, "down": glass_top}) for lo, hi in (((4.2, 11.8, 4.2), (11.8, 11.8, 5.0)),
+                                                                              ((4.2, 11.8, 11.0), (11.8, 11.8, 11.8)),
+                                                                              ((4.2, 11.8, 5.0), (5.0, 11.8, 11.0)),
+                                                                              ((11.0, 11.8, 5.0), (11.8, 11.8, 11.0)))],
            cube((5.0, 11.8, 5.0), (11.0, 13.2, 11.0), {**{s: glass_side for s in SIDES4}, "up": glass_top}),
            cube((7.2, 13.2, 7.2), (8.8, 14.6, 8.8), {s: knob for s in ALL6})]
     sc.models[d17.BELL_JAR["block"]] = els
@@ -981,8 +1059,8 @@ def moth_case():
     """A shallow glazed case for a wall (facing north, on the wall to its south): a black frame round a cream backing with
     a hand-written label. The moths are the client's: pinned at MOTHS, their wings opening and closing at night."""
     sc = Sculpt(d17.MOTH_CASE["block"], 179, 128)
-    frame = sc.piece("frame", 4, 28, wrought(2))
-    frame_h = sc.piece("frame_h", 30, 4, wrought(3, horizontal=True))
+    frame = sc.piece("frame", 4, 28, wrought_clean())
+    frame_h = sc.piece("frame_h", 30, 4, wrought_clean(horizontal=True))
     backing = sc.piece("backing", 26, 22, ca.bevel(BACKING, 1, light=1, dark=0))
     tag = sc.piece("tag", 10, 3, label(5, 1))
     pane = sc.piece("pane", 26, 22, glass(40))
@@ -1012,24 +1090,60 @@ MOTHS = [(8.0, 8.6, 15.3, 1.0), (4.2, 5.4, 15.3, 0.55), (11.8, 5.4, 15.3, 0.55)]
 
 # ---------------------------------------------------------------- 5. the oddity jars
 
-def jar(name, murk_alpha=140, dry=False):
+# The oddity jars' shape (tools/decor17.py ODDITY_JAR).
+JAR = d17.ODDITY_JAR
+
+
+def lid_top_clean():
+    """A jar lid from above, clean: flat dark iron with a lit top-left edge and a pressed ring round its middle."""
+    def paint(p):
+        ca.bevel(IRON, 3)(p)
+        i = max(2, p.w // 5)
+        for x in range(i, p.w - i):
+            p.put(x, i, IRON[1])
+            p.put(x, p.h - 1 - i, IRON[5])
+        for y in range(i, p.h - i):
+            p.put(i, y, IRON[1])
+            p.put(p.w - 1 - i, y, IRON[5])
+    return paint
+
+
+def jar(name, murk_alpha=140, dry=False, size=None, legacy=False):
     """A squat glass jar on a dark base under an iron lid with a knob, a paper label on its front, and (unless `dry`)
-    murky fluid; what is in it is the client's (round its middle, (8, 6, 8))."""
+    murky fluid; what is in it is the client's (round its middle, (8, 6, 8)). `size` changes its shape (JAR).
+
+    The lid, base and knob are clean bevelled iron, the murk lies in three even bands and the label is flat paper with
+    even lines of ink and a plain paper back (5 October 2026). `legacy` keeps the first look exactly, hammered iron,
+    speckled murk and all: the Beating Heart Jar keeps it, as the owner loves it."""
+    j = dict(JAR, **(size or {}))
     sc = Sculpt(name, 180 + list(d17.JARS).index(name), 64)
     glass_side = sc.piece("glass", 14, 22, glass(50))
-    lid = sc.piece("lid", 18, 4, wrought(2, horizontal=True))
-    lid_top = sc.piece("lid_top", 16, 16, wrought(3))
-    base = sc.piece("base", 18, 3, wrought(4, horizontal=True))
-    tag = sc.piece("label", 12, 8, label(5))
-    knob = sc.piece("knob", 4, 4, wrought(6))
-    els = [cube((4.0, 0.0, 4.0), (12.0, 1.0, 12.0), {**{s: base for s in SIDES4}, "down": lid_top, "up": lid_top}),
-           cube((4.3, 1.0, 4.3), (11.7, 11.6, 11.7), {s: glass_side for s in SIDES4}),
-           cube((3.9, 11.6, 3.9), (12.1, 12.8, 12.1), {**{s: lid for s in SIDES4}, "up": lid_top, "down": lid_top}),
-           cube((7.0, 12.8, 7.0), (9.0, 13.6, 9.0), {**{s: knob for s in SIDES4}, "up": knob}),
-           cube((5.2, 2.6, 4.2), (10.8, 6.0, 4.25), {"north": tag})]
+    if legacy:
+        lid = sc.piece("lid", 18, 4, wrought(2, horizontal=True))
+        lid_top = sc.piece("lid_top", 16, 16, wrought(3))
+        base = sc.piece("base", 18, 3, wrought(4, horizontal=True))
+        base_top = lid_top
+    else:
+        lid = sc.piece("lid", 18, 4, ca.bevel(IRON, 4))
+        lid_top = sc.piece("lid_top", 16, 16, lid_top_clean())
+        base = sc.piece("base", 18, 3, ca.bevel(IRON, 3))
+        base_top = lid_top
+    tag = sc.piece("label", 12, 8, label(5) if legacy else label_clean())
+    knob = sc.piece("knob", 4, 4, wrought(6) if legacy else ca.bevel(IRON, 5))
+    b, g, ld, k = j["base"], j["glass"], j["lid"], j["knob"]
+    lx0, ly0, lx1, ly1 = j["label"]
+    els = [cube((b, 0.0, b), (16 - b, 1.0, 16 - b), {**{s: base for s in SIDES4}, "down": base_top, "up": base_top}),
+           cube((g, 1.0, g), (16 - g, j["glass_top"], 16 - g), {s: glass_side for s in SIDES4}),
+           cube((ld, j["glass_top"], ld), (16 - ld, j["lid_top"], 16 - ld), {**{s: lid for s in SIDES4}, "up": lid_top, "down": lid_top}),
+           cube((8 - k, j["lid_top"], 8 - k), (8 + k, j["knob_top"], 8 + k), {**{s: knob for s in SIDES4}, "up": knob})]
+    if legacy:
+        els.append(cube((lx0, ly0, g - 0.1), (lx1, ly1, g - 0.05), {"north": tag}))
+    else:
+        back = sc.piece("label_back", 6, 4, ca.bevel(PAPER, 2))
+        els.append(cube((lx0, ly0, g - 0.15), (lx1, ly1, g - 0.05), {"north": tag, "south": back}))
     if not dry:
-        murk = sc.piece("murk", 14, 18, fluid(MURK[name], 7, murk_alpha))
-        murk_top = sc.piece("murk_top", 14, 14, fluid(MURK[name], 8, murk_alpha))
+        murk = sc.piece("murk", 14, 18, fluid(MURK[name], 7, murk_alpha) if legacy else murk_clean(MURK[name], murk_alpha))
+        murk_top = sc.piece("murk_top", 14, 14, fluid(MURK[name], 8, murk_alpha) if legacy else murk_clean(MURK[name], murk_alpha, top=True))
         els.append(cube((4.6, 1.0, 4.6), (11.4, 9.6, 11.4), {**{s: murk for s in SIDES4}, "up": murk_top}))
     sc.models[name] = els
     return sc
@@ -1051,7 +1165,7 @@ EYEBALLS = [(6.2, 2.4, 6.4), (9.6, 2.5, 6.6), (7.8, 2.3, 9.6), (6.6, 4.8, 8.6), 
 
 
 def beating_heart_jar():
-    sc = jar("beating_heart_jar", 120)
+    sc = jar("beating_heart_jar", 120, legacy=True)
     muscle = sc.piece("heart", 14, 14, heart(21))
     vessel = sc.piece("vessel", 4, 8, ca.bevel(HEART, 2, sides="lr"))
     stand = sc.piece("stand", 6, 6, strip(BRASS, 23, light=True))
@@ -1080,7 +1194,7 @@ def dial_face():
 
 
 def bat_in_a_jar():
-    sc = jar("bat_in_a_jar", dry=True)
+    sc = jar("bat_in_a_jar", dry=True, size=d17.JARS["bat_in_a_jar"]["jar"])
     body = sc.piece("bat_fur", 8, 8, fur(21))
     face = sc.piece("bat_face", 6, 5, bat_face())
     wing = sc.piece("bat_wing", 14, 12, bat_wing())
@@ -1090,7 +1204,10 @@ def bat_in_a_jar():
                                     cube((-1.0, -3.2, -1.0), (1.0, -1.6, 0.8), {"north": face, "south": body, "east": body, "west": body,
                                                                                  "down": body}),
                                     cube((-1.0, -3.9, -0.3), (-0.4, -3.2, 0.3), {s: ear for s in ALL6}),
-                                    cube((0.4, -3.9, -0.3), (1.0, -3.2, 0.3), {s: ear for s in ALL6})]
+                                    cube((0.4, -3.9, -0.3), (1.0, -3.2, 0.3), {s: ear for s in ALL6}),
+                                    # Its little feet, gripping the lid as it hangs.
+                                    cube((-0.8, 1.6, -0.3), (-0.3, 2.3, 0.3), {**{s: ear for s in SIDES4}, "up": ear}),
+                                    cube((0.3, 1.6, -0.3), (0.8, 2.3, 0.3), {**{s: ear for s in SIDES4}, "up": ear})]
     sc.models["oddity_bat_wing_left"] = [plane_xy(-4.6, 0.0, -2.0, 2.0, 0.0, wing)]
     sc.models["oddity_bat_wing_right"] = [plane_xy(0.0, 4.6, -2.0, 2.0, 0.0, mirror_uv(wing))]
     return sc
@@ -1174,17 +1291,130 @@ def hand_in_a_jar():
 KNUCKLES = [(-1.5, 1.6, 0.0), (-0.5, 1.6, 0.0), (0.5, 1.6, 0.0), (1.5, 1.6, 0.0)]
 
 
+# ---------------------------------------------------------------- 6. the bigger jars
+
+FACE_AXIS = {"west": (0, -1), "east": (0, 1), "down": (1, -1), "up": (1, 1), "north": (2, -1), "south": (2, 1)}
+
+
+def _default_uv(side, lo, hi):
+    fx, fy, fz = lo
+    tx, ty, tz = hi
+    return {"down": (fx, 16 - tz, tx, 16 - fz), "up": (fx, fz, tx, tz), "north": (16 - tx, 16 - ty, 16 - fx, 16 - fy),
+            "south": (fx, 16 - ty, tx, 16 - fy), "west": (fz, 16 - ty, tz, 16 - fy), "east": (16 - tz, 16 - ty, 16 - fz, 16 - fy)}[side]
+
+
+def crop_uv(side, frm, to, lo, hi, uv):
+    """The part of a face's pinned `uv` that its box clipped to lo..hi keeps (the picture laid over the whole face as a
+    block model lays it, so the cropped pieces join up)."""
+    whole, part = _default_uv(side, frm, to), _default_uv(side, lo, hi)
+    u0, v0, u1, v1 = uv
+
+    def at(a, b, lo_, hi_, x):
+        return a + (b - a) * ((x - lo_) / (hi_ - lo_) if hi_ != lo_ else 0.0)
+    return (round(at(u0, u1, whole[0], whole[2], part[0]), 4), round(at(v0, v1, whole[1], whole[3], part[1]), 4),
+            round(at(u0, u1, whole[0], whole[2], part[2]), 4), round(at(v0, v1, whole[1], whole[3], part[3]), 4))
+
+
+def cell_part(elements, cell, size):
+    """The part of a prop modelled whole in its own frame (pixels from 0 to 16 x `size` blocks) inside its block `cell`
+    (blocks across, up and deep), moved into that block: boxes clipped to it, the faces on the cuts left out and each
+    pinned uv cropped to the part of its face kept, so a picture runs on unbroken from block to block. What reaches out
+    past the prop's outer sides stays with the outer blocks; a sheet on the boundary between two blocks goes to the upper
+    one. Unrotated boxes only."""
+    lo_cell = [cell[k] * 16 if cell[k] > 0 else -64.0 for k in range(3)]
+    hi_cell = [cell[k] * 16 + 16 if cell[k] < size[k] - 1 else 16 * size[k] + 64.0 for k in range(3)]
+    origin = [cell[k] * 16 for k in range(3)]
+    out = []
+    for e in elements:
+        assert "rotation" not in e, "cell_part cuts unrotated boxes only"
+        frm, to = e["from"], e["to"]
+        lo = [max(frm[k], lo_cell[k]) for k in range(3)]
+        hi = [min(to[k], hi_cell[k]) for k in range(3)]
+        if any((to[k] - frm[k] < 1e-9 and not lo_cell[k] <= frm[k] < hi_cell[k]) or (to[k] - frm[k] >= 1e-9 and hi[k] - lo[k] <= 1e-6)
+               for k in range(3)):
+            continue
+        faces = {}
+        for side, spec in e["faces"].items():
+            axis, sign = FACE_AXIS[side]
+            if (sign < 0 and lo[axis] > frm[axis] + 1e-9) or (sign > 0 and hi[axis] < to[axis] - 1e-9):
+                continue
+            spec = dict(spec)
+            if "uv" in spec:
+                spec["uv"] = list(crop_uv(side, frm, to, lo, hi, spec["uv"]))
+            faces[side] = spec
+        if faces:
+            out.append({**e, "from": [round(lo[k] - origin[k], 4) for k in range(3)], "to": [round(hi[k] - origin[k], 4) for k in range(3)],
+                        "faces": faces})
+    return out
+
+
+def cells(size):
+    """The blocks of a prop `size` (across, up, deep) in part order, as MultiDecorationBlock counts them: {right, up,
+    away} from its first block, the part being right + across x (up + up-count x away). The frame runs across to the
+    placer's left, so its block across is (across - 1 - right)."""
+    w, h, d = size
+    return [(r, u, a) for a in range(d) for u in range(h) for r in range(w)]
+
+
+def frame_cell(size, part):
+    r, u, a = cells(size)[part]
+    return (size[0] - 1 - r, u, a)
+
+
+def murk_clean(palette, alpha, top=False):
+    """Murky fluid, clean: three even bands, palest at the top under a one-texel bright line where the surface meets the
+    glass; from above (`top`) one flat shade inside a pale rim."""
+    def paint(p):
+        for y in range(p.h):
+            for x in range(p.w):
+                if top:
+                    c = palette[2] if (x in (0, p.w - 1) or y in (0, p.h - 1)) else palette[1]
+                else:
+                    c = palette[2] if y == 0 else palette[2 - min(2, int(3 * y / p.h))]
+                p.put(x, y, c, alpha)
+    return paint
+
+
+def pinned(elements):
+    """`elements` with each face's uv written out where a block model works it out from the box's place, so a face keeps
+    its picture when its box is moved or scaled."""
+    return [dict(e, faces={side: dict(spec, uv=list(spec.get("uv") or _default_uv(side, e["from"], e["to"])))
+                           for side, spec in e["faces"].items()}) for e in elements]
+
+
+def grown(elements, scale, size):
+    """`elements`, modelled in one block, `scale` times bigger in the frame of a prop `size` blocks (across, up, deep)
+    (tools/decor17.py): every box about the block's bottom middle (8, 0, 8), set at the middle of the frame's floor, each
+    face keeping its picture, so it looks just the same, only bigger."""
+    return fa.transformed(pinned(elements), scale, (8 * size[0] - 8, 0, 8 * size[2] - 8))
+
+
+def giant_beating_heart():
+    """The Giant's Beating Heart, modelled whole in its frame: the Beating Heart Jar's boxes, three times bigger, on the
+    jar's own texture. Its heart and brass stand are the jar's too, drawn as much bigger by the client."""
+    g = d17.GIANT_HEART
+    return grown(build("beating_heart_jar").models["beating_heart_jar"], g["size"], (g["size"],) * 3)
+
+
+def specimen_vessel(name):
+    """A bigger Specimen Jar, modelled whole in its frame: the Specimen Jar's boxes (tools/decor8_data.py jar_elements),
+    `scale` times bigger, on its own textures. What floats in it is the jar's specimen, drawn as much bigger by the
+    client."""
+    v = d17.SPECIMEN_VESSELS[name]
+    return grown(d8d.jar_elements(), v["scale"], v["size"])
+
+
 # ---------------------------------------------------------------- the client's greyscale textures
 
 def tint_textures():
     """Textures the client tints: brew (a rippled surface), fume (a wisp, fading up), wax (a candle's side and top),
-    flame (white-hot core, paler edge, cut out), and glow (a soft dot)."""
+    flame (white-hot core, paler edge, cut out), and glow (a flat square for the skull's sockets). All in even steps, with
+    no per-pixel noise."""
     out = {}
-    rng = random.Random(1717)
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y in range(16):
         for x in range(16):
-            v = 200 + int(35 * math.sin(x * 0.9 + y * 0.4) * math.cos(y * 0.7 - x * 0.2)) + rng.randrange(-10, 10)
+            v = 200 + 12 * round(35 * math.sin(x * 0.9 + y * 0.4) * math.cos(y * 0.7 - x * 0.2) / 12)
             img.putpixel((x, y), (v, v, v, 215))
     out["witchs_workshop_brew"] = img
     img = Image.new("RGBA", (16, 64), (0, 0, 0, 0))
@@ -1194,13 +1424,12 @@ def tint_textures():
             core = abs(x - 7.5 - math.sin(t * 9) * 3) / 8
             a = int(max(0, (1 - core * 1.4)) * 180 * t ** 0.6)
             if a > 0:
-                v = 230 + rng.randrange(-15, 15)
-                img.putpixel((x, y), (v, v, v, max(0, min(255, a))))
+                img.putpixel((x, y), (230, 230, 230, max(0, min(255, a))))
     out["witchs_workshop_fume"] = img
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y in range(16):
         for x in range(16):
-            v = 210 + int(25 * (1 - abs(x - 5) / 10)) + rng.randrange(-8, 8)
+            v = 210 + 6 * round(25 * (1 - abs(x - 5) / 10) / 6)
             if x >= 12:
                 v = 236 - (y % 3) * 6
             img.putpixel((x, y), (min(255, v), min(255, v), min(255, v), 255))
@@ -1216,12 +1445,13 @@ def tint_textures():
                 v = 255 if inner else 200
                 img.putpixel((x, y), (v, v, int(v * (1.0 if inner else 0.92)), 255))
     out["witchs_workshop_flame"] = img
+    # The skull's glowing sockets: a flat square, nearly opaque, with a one-texel rim a little fainter (the client draws it
+    # exactly over each square socket, so a lit socket stays square, with no soft halo round it).
     img = Image.new("RGBA", (8, 8), (0, 0, 0, 0))
     for y in range(8):
         for x in range(8):
-            d = math.hypot(x - 3.5, y - 3.5) / 4
-            if d < 1:
-                img.putpixel((x, y), (255, 255, 255, int(255 * (1 - d) ** 0.7)))
+            rim = x in (0, 7) or y in (0, 7)
+            img.putpixel((x, y), (255, 255, 255, 170 if rim else 235))
     out["witchs_workshop_glow"] = img
     return out
 
@@ -1244,8 +1474,9 @@ def build(name):
 
 
 def texture_of(block):
-    """The texture (and Sculpt) block `block` is drawn from: the candelabra share one."""
-    return "candelabra" if block in d17.CANDELABRA else block
+    """The texture (and Sculpt) block `block` is drawn from: the candelabra share one, and the Giant's Beating Heart is
+    drawn on the Beating Heart Jar's."""
+    return "candelabra" if block in d17.CANDELABRA else "beating_heart_jar" if block == d17.GIANT_HEART["block"] else block
 
 
 TALL_ITEM = {"gui": {"rotation": [25, 225, 0], "translation": [0, -3.5, 0], "scale": [0.5, 0.5, 0.5]},
@@ -1272,6 +1503,21 @@ def item_candles(kind):
     return out
 
 
+def single_sheets(elements):
+    """`elements` with each sheet of no thickness keeping only its first face: the renderer draws these parts cut out or
+    see-through, and 26.3's entityCutout and entityTranslucent draw both sides of a quad, so a reversed twin on the same
+    plane would fight it (the moths' and bat's wings flickered as they flapped)."""
+    out = []
+    for e in elements:
+        thin = [k for k in range(3) if abs(e["to"][k] - e["from"][k]) < 1e-9]
+        if thin:
+            axis_faces = {0: ("east", "west"), 1: ("up", "down"), 2: ("north", "south")}[thin[0]]
+            keep = next(f for f in e["faces"] if f in axis_faces)
+            e = dict(e, faces={keep: e["faces"][keep]})
+        out.append(e)
+    return out
+
+
 def decor17_quads():
     """The renderer's models: the broom, the cabinet's doors, the moths and what floats in the jars."""
     out = {}
@@ -1287,7 +1533,7 @@ def decor17_quads():
                          ("hand_in_a_jar", ["oddity_hand_palm", "oddity_hand_finger"])):
         sc = build(block)
         for name in names:
-            qs = quads(sc.models[name], {"p": block})
+            qs = quads(single_sheets(sc.models[name]), {"p": block})
             # Glass is drawn see-through from both sides; everything else cut out.
             out[name] = [dict(q, nocull=True) if name.endswith("_pane") else dict(q, cutout=True) for q in qs]
     return out
@@ -1295,7 +1541,17 @@ def decor17_quads():
 
 # ---------------------------------------------------------------- files
 
+def _image_of(name):
+    """The Sculpt texture a model's "#p" (block/<name>) is drawn from, for fa.closing_writer; None for another."""
+    try:
+        return build(name).atlas.img
+    except KeyError:
+        return None
+
+
 def assets(root, write, lang):
+    # Every block and item model is closed: no face a box leaves out shows a hole (docs/ART_DIRECTION.md).
+    write = fa.closing_writer(write, _image_of)
     models = root / "models" / "block"
     states = root / "blockstates"
     items = root / "models" / "item"
@@ -1374,16 +1630,88 @@ def assets(root, write, lang):
         write(states / f"{name}.json", {"variants": {"": {"model": rid(f"block/{name}")}}})
     write(states / "hand_in_a_jar.json", {"variants": {f"powered={str(p).lower()}": {"model": rid("block/hand_in_a_jar")} for p in (False, True)}})
 
+    big_jar_assets(root, write)
     for block in d17.items():
-        write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+        if block not in d17.SPECIMEN_VESSELS:
+            write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
     write(root / "decor17_quads.json", decor17_quads())
     # The candelabra's candles, for Java to light and draw them by.
     write(root.parent.parent / MOD / "candelabra.json", d17.layout())
 
 
+def multi_part_models(models, states, write, block, elements, size, model):
+    """A prop of several blocks: one model per block, cut from its whole model `elements` (model(elements) makes a block
+    model of them, and of nothing, for a block with nothing of it to draw, the particles only), and a blockstate choosing
+    each block's model by its part and turning it by its facing."""
+    write(models / f"{block}_part.json", {"textures": {"particle": model([])["textures"]["particle"]}})
+    parts = []
+    for part in range(len(cells(size))):
+        cut = cell_part(elements, frame_cell(size, part), size)
+        name = f"{block}_{part}" if cut else f"{block}_part"
+        if cut:
+            write(models / f"{name}.json", model(cut))
+        for facing, y in FACINGS.items():
+            parts.append({"when": {"facing": facing, "part": str(part)}, "apply": {"model": rid(f"block/{name}"), **({"y": y} if y else {})}})
+    write(states / f"{block}.json", {"multipart": parts})
+
+
+def bigger(display, k, elements):
+    """Item `display` with the item (`elements`) drawn `k` times bigger in an inventory slot and moved up or down to its
+    middle, so it stays inside the slot (a bigger jar's item is its small jar's)."""
+    gui = display["gui"]
+    scale = gui["scale"][0] * k
+    ax, ay = (math.radians(a) for a in gui["rotation"][:2])
+    # Each corner turned as the slot turns it (about y, then x), and how high it lands.
+    ys = [((p[1] - 8) * math.cos(ax) - (-(p[0] - 8) * math.sin(ay) + (p[2] - 8) * math.cos(ay)) * math.sin(ax)) * scale
+          for e in elements for p in ((x, y, z) for x in (e["from"][0], e["to"][0]) for y in (e["from"][1], e["to"][1])
+                                      for z in (e["from"][2], e["to"][2]))]
+    return dict(display, gui=dict(gui, translation=[0, round(-(min(ys) + max(ys)) / 2, 2), 0], scale=[round(scale, 4)] * 3))
+
+
+# Vanilla's block display (minecraft:block/block), which the Specimen Jar's item keeps.
+BLOCK_DISPLAY = {"gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [0.625, 0.625, 0.625]}}
+
+
+def big_jar_assets(root, write):
+    """The bigger jars' block models (one a block, cut from the whole), blockstates and items. Each item is its small
+    jar's, a little bigger in a slot: the Giant's Beating Heart's the Beating Heart Jar with its heart resting on its
+    stand, each specimen jar's the Specimen Jar's own item with the specimen it holds."""
+    models, states, items = root / "models" / "block", root / "blockstates", root / "models" / "item"
+    g = d17.GIANT_HEART
+    heart = build("beating_heart_jar")
+    multi_part_models(models, states, write, g["block"], giant_beating_heart(), (g["size"],) * 3, lambda els: fa.model(heart.name, els))
+    resting = fa.transformed(heart.models["oddity_heart"], 1.0, d17.JARS["beating_heart_jar"]["heart"], (0, 0, 0))
+    write(items / f"{g['block']}.json", fa.model(heart.name, heart.models["beating_heart_jar"] + heart.models["oddity_heart_stand"] + resting,
+                                                bigger(fa.PLANT_DISPLAY, g["icon"], heart.models["beating_heart_jar"])))
+    jar = ag.SPECIMEN_JAR["block"]
+    for name, v in d17.SPECIMEN_VESSELS.items():
+        multi_part_models(models, states, write, name, specimen_vessel(name), v["size"],
+                          lambda els: dict(block_model(d8d.JAR_TEXTURES, els, d8d.JAR_TEXTURES["glass"]), ambientocclusion=False))
+        for specimen in ag.SPECIMEN_JAR["specimens"]:
+            write(items / f"{name}_{specimen}.json", {"parent": rid(f"block/{jar}_{specimen}_item"),
+                                                      "display": bigger(BLOCK_DISPLAY, v["icon"], d8d.jar_elements())})
+        first = ag.SPECIMEN_JAR["specimens"][0]
+        write(root / "items" / f"{name}.json", {"model": {
+            "type": "minecraft:select", "property": "minecraft:block_state", "block_state_property": "specimen",
+            "cases": [{"when": s_, "model": {"type": "minecraft:model", "model": rid(f"item/{name}_{s_}")}}
+                      for s_ in ag.SPECIMEN_JAR["specimens"] if s_ != first],
+            "fallback": {"type": "minecraft:model", "model": rid(f"item/{name}_{first}")}}})
+
+
 def loot(out, write):
     from decor_data import self_drop
+    for block in d17.big_jars():
+        # Placed and broken as one: the first block drops it (a specimen jar keeping its specimen).
+        entry = {"type": "minecraft:item", "name": rid(block)}
+        if block in d17.SPECIMEN_VESSELS:
+            entry["modifier"] = {"type": "minecraft:copy_state", "block": rid(block), "properties": ["specimen"]}
+        write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
+            "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
+                                                                {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},
+            "entries": [entry], "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
     for block in d17.blocks():
+        if block in d17.big_jars():
+            continue
         if block in ("floor_candelabrum", d17.CABINET["block"]):
             # Two blocks tall: the lower half drops it.
             write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
@@ -1404,11 +1732,14 @@ def tags(tags):
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     for block in [d17.BROOM_RACK["block"], d17.CABINET["block"], d17.BELL_JAR["block"]]:
         tags.add("block", "minecraft:mineable/axe", rid(block))
+    for block in d17.big_jars():
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
 
 
 def textures():
     """(kind, name) -> image for each block's texture, the ladle's item picture and the client's tinted textures."""
-    out = {("block", texture_of(block)): build(texture_of(block)).atlas.img for block in d17.blocks()}
+    # The bigger specimen jars draw on the Specimen Jar's textures (tools/decor8_textures.py).
+    out = {("block", texture_of(block)): build(texture_of(block)).atlas.img for block in d17.blocks() if block not in d17.SPECIMEN_VESSELS}
     out[("item", d17.LADLE["item"])] = brew_ladle()
     for name, img in tint_textures().items():
         out[("entity", name)] = img

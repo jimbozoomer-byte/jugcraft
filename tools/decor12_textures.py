@@ -7,6 +7,9 @@ Called from crop_textures.crop_textures(). Every pixel is drawn here by code or 
 from fixed seeds; no Mojang texture is read, traced or recoloured. Block textures are 16x16; the streamers and the
 hayride's wheels are see-through between their strips and spokes; the flame (an entity texture) and the items are
 see-through round their shapes.
+
+Surfaces are painted in the manner of the vanilla blocks with tools/block_style.py: a short palette in small clumps,
+never a random colour at every pixel; wood as planks, and straw, bark and hair as streaks.
 """
 import math
 import random
@@ -14,7 +17,7 @@ import random
 from PIL import Image
 
 from crop_textures import Canvas, rgb
-from decor_textures import noise
+import block_style as bs
 from decor9_textures import IRON, put
 
 PAPER = [rgb("d8d8d0"), rgb("e8e8e2"), rgb("f6f6f2"), rgb("ffffff")]
@@ -71,21 +74,20 @@ def roll():
 # ---------------------------------------------------------------- the bonfire
 
 def stone():
+    """The fire ring's stones, as vanilla cobblestone."""
     c = Canvas()
-    noise(c, 0, 0, 15, 15, STONE, 22121, [1, 3, 2, 1])
-    for x, y in ((3, 4), (11, 2), (7, 11), (13, 13)):
-        c.px(x, y, STONE[0])
+    bs.cobble(STONE, 22121)(c)
     return c.img
 
 
 def log():
     """Bark charred black in places, glowing in its cracks."""
     c = Canvas()
-    rng = random.Random(22122)
-    for x in range(16):
-        tone = rng.randrange(1, 4)
+    bs.streaks(CHAR[1:], 22122, along=6.0)(c)
+    for x in range(0, 16, 4):
         for y in range(16):
-            c.px(x, y, CHAR[tone if x % 4 else 0] if rng.random() > 0.05 else rgb("e0601a"))
+            # The cracks between the bark ridges, glowing here and there.
+            c.px(x, y, rgb("e0601a") if (y * 3 + x) % 11 == 0 else CHAR[0])
     return c.img
 
 
@@ -102,26 +104,25 @@ def embers(lit):
     c = Canvas()
     palette = [rgb("8a1a06"), rgb("c8380a"), rgb("f07a1a"), rgb("ffc040")] if lit else [rgb("3a3634"), rgb("4a4644"), rgb("5c5854"),
                                                                                        rgb("2a2624")]
-    noise(c, 0, 0, 15, 15, palette, 22124 if lit else 22125, [2, 3, 2, 1])
+    bs.fill(c, 0, 0, 15, 15, palette, 22124 if lit else 22125, [2, 3, 2, 1])
     return c.img
 
 
 def skewer():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("8a6a3e"), rgb("9a7848"), rgb("aa8654")], 22126)
+    bs.fill(c, 0, 0, 15, 15, [rgb("8a6a3e"), rgb("9a7848"), rgb("aa8654")], 22126)
     return c.img
 
 
 def flame():
     """A big tongue of fire: yellow-white at its root, orange, then red at its ragged tip; see-through round it."""
     img = Image.new("RGBA", (16, 32), (0, 0, 0, 0))
-    rng = random.Random(22127)
     for y in range(32):
         t = y / 31.0                      # 0 at the tip, 1 at the root
         half = 1.5 + 6.3 * (t ** 0.45)
         for x in range(16):
             d = abs(x - 7.5) / half
-            if d > 1 or rng.random() < 0.08 * (1 - t):
+            if d > 1:
                 continue
             heat = (1 - d) * 0.6 + t * 0.6
             colour = rgb("fff2b0") if heat > 0.95 else rgb("ffc040") if heat > 0.75 else rgb("f07a1a") if heat > 0.5 else rgb("c8380a")
@@ -134,11 +135,7 @@ def flame():
 
 def planks():
     c = Canvas()
-    rng = random.Random(22131)
-    for y in range(16):
-        tone = rng.randrange(3)
-        for x in range(16):
-            c.px(x, y, PLANK[3] if y % 4 == 3 else PLANK[tone])
+    bs.planks([PLANK[3]] + PLANK[:3], 22131)(c)
     for y in range(1, 16, 4):
         c.px(2, y, IRON[1])
         c.px(13, y, IRON[1])
@@ -148,16 +145,16 @@ def planks():
 def hay_side():
     """A bale's side: straw in long strands, bound with two twine bands."""
     c = Canvas()
-    rng = random.Random(22132)
+    bs.streaks([HAY[3]] + HAY[:3], 22132, vertical=False, spread=0.9)(c)
     for y in range(16):
-        for x in range(16):
-            c.px(x, y, rgb("6a4a20") if x in (4, 11) else HAY[rng.choice((0, 1, 1, 2, 3))] if y % 2 else HAY[rng.choice((1, 2, 2))])
+        for x in (4, 11):
+            c.px(x, y, rgb("6a4a20"))
     return c.img
 
 
 def hay_top():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, HAY, 22133, [2, 3, 2, 1])
+    bs.fill(c, 0, 0, 15, 15, HAY, 22133, [2, 3, 2, 1])
     for x in range(16):
         c.px(x, 4, rgb("6a4a20"))
         c.px(x, 11, rgb("6a4a20"))
@@ -185,7 +182,7 @@ def wheel():
 
 def iron():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 22135)
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 22135)
     return c.img
 
 
@@ -260,7 +257,6 @@ def hayride_icon():
 def mallow(colours, on_stick, seed):
     """A marshmallow (a soft square), toasted or burnt by `colours` (top, side, shadow), on a stick if `on_stick`."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    rng = random.Random(seed)
     if on_stick:
         for i in range(9):
             put(img, 3 + i // 2 + i % 2, 14 - i, rgb("8a6a3e") if i % 2 else rgb("6a4c2a"))
@@ -272,8 +268,6 @@ def mallow(colours, on_stick, seed):
             if (x, y) in ((0, 0), (6, 0), (0, 6), (6, 6)):
                 continue
             tone = colours[0] if y < 2 else colours[2] if x > 4 or y > 4 else colours[1]
-            if rng.random() < 0.15:
-                tone = colours[0]
             put(img, x0 + x, y0 + y, tone)
     return img
 

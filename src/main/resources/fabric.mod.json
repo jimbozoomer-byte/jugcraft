@@ -26,6 +26,12 @@
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.client.compat.JugcraftJeiPlugin"
+    ],
+    "jade": [
+      "io.github.jimbozoomer.jugcraft.compat.jade.JugcraftJadePlugin"
+    ],
+    "jugcraft:jade_client": [
+      "io.github.jimbozoomer.jugcraft.client.compat.JugcraftJadeClient"
     ]
   },
   "mixins": [
@@ -37,12 +43,9 @@
     }
   ],
   "depends": {
-    "fabricloader": ">=0.19.3",
+    "fabricloader": ">=0.19.5",
     "minecraft": "~26.3",
     "java": ">=25",
     "fabric-api": "*"
-  },
-  "suggests": {
-    "lambdynlights": ">=4.13.0"
   }
 }

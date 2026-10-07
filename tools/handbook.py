@@ -313,6 +313,8 @@ def item_for(ref):
         return f"minecraft:raw_{metal}" if metal in ("copper", "iron", "gold") else f"{MOD}:raw_{metal}"
     if form in ("plates", "gears", "wires", "dusts"):
         return f"{MOD}:{metal}_{form[:-1]}"
+    if form == "nuggets":
+        return f"minecraft:{metal}_nugget" if metal in ("copper", "iron", "gold") else f"{MOD}:{metal}_nugget"
     raise KeyError(ref)
 
 
@@ -514,6 +516,16 @@ def arms_pages():
             "while held.",
             "Hold use to block with either, as with a shield. An axe's blow still knocks them down for a while."],
          "craft": craft("tower_shield")},
+        # Arms VIII (batch 59).
+        {"title": "Arms: Thrown Arms", "icon": f"{MOD}:steel_javelin", "text": [
+            "A javelin, francisca, chakram or harpoon fights in the hand like any arm. Hold use to wind it back and let go "
+            f"to throw it, as a trident is thrown; a steel javelin's throw hits for {arms.THROWN[('javelin', 'steel')]['damage']:g}, "
+            "more with Sharpness and the like. It comes down where it struck, as itself, to be picked up again.",
+            "Javelin: flies far and straight. Francisca: tumbles end over end and knocks a raised shield down for "
+            f"{arms.FRANCISCA_DISABLE:g} seconds.",
+            f"Chakram: flies flat, cuts every foe on its way out (up to {arms.CHAKRAM_RANGE:g} blocks) and back, and "
+            "returns to your hand. Harpoon: keeps its speed underwater and hauls what it strikes towards you."],
+         "craft": craft("javelin")},
     ] + variant_pages()
 
 
@@ -543,6 +555,64 @@ def variant_pages():
     ]
 
 
+def thallite_gear_pages():
+    """Thallite's tools and armor, and Earthbound armor with its Earthbinding Template (docs/features/thallite.md)."""
+    import gear
+    pickaxe = [item_for(gear.GEAR_TIERS["thallite"]["ingot"]) if ch == "#" else ("minecraft:stick" if ch == "S" else None)
+               for row in gear.PATTERNS["pickaxe"] for ch in row.ljust(3)]
+    style = gear.ARMOR_STYLES["earthbound_thallite"]
+    rows, key = style["template_recipe"]
+    template = [item_for(key[ch]) if ch in key else None for row in rows for ch in row.ljust(3)]
+    return [
+        {"title": "Thallite Gear", "icon": f"{MOD}:thallite_pickaxe", "text": [
+            "Thallite makes swords, pickaxes, axes, shovels, hoes and armor, shaped like iron ones. They mine and "
+            "protect as iron does, wear out a little sooner, and take enchantments best of all.",
+            f"Regrowth: thallite gear you wear or hold mends while you stand on living soil (grass, dirt, moss, mud "
+            f"or farmland): one use every {gear.REGROWTH_SECONDS} seconds, up to {gear.REGROWTH_CAP_PERCENT}% of "
+            "full. It never brings back a broken piece, so mending and anvils still matter."],
+         "craft": {"grid": pickaxe, "result": f"{MOD}:thallite_pickaxe", "count": 1}},
+        {"title": "Earthbound Armor", "icon": f"{MOD}:earthbound_thallite_chestplate", "text": [
+            "At a smithing table, an Earthbinding Template, a piece of thallite armor and a gold ingot bind the piece "
+            "into Earthbound armor, trimmed in gold, for good. It keeps its enchantments and wear.",
+            "Rooted: on natural ground (soil, stone, sand or gravel), each Earthbound piece takes 7.5% off knockback, "
+            f"30% for a full set. With {gear.EARTHBOUND_FOR_STONE} or more worn, Regrowth works on stone, sand and "
+            "gravel too."],
+         "craft": {"grid": template, "result": f"{MOD}:{style['template']}", "count": style["template_count"]}},
+    ]
+
+
+def armor_style_pages():
+    """Steampunk and Kaiser Armor (docs/features/steampunk-and-kaiser-armor.md): bronze and steel armor in another look,
+    smithed with a pattern."""
+    import gear
+
+    def grid(style):
+        rows, key = gear.ARMOR_STYLES[style]["template_recipe"]
+        return [item_for(key[ch]) if ch in key else None for row in rows for ch in row.ljust(3)]
+    steampunk, kaiser = gear.ARMOR_STYLES["steampunk"], gear.ARMOR_STYLES["kaiser"]
+    return [
+        {"title": "Steampunk and Kaiser Armor", "icon": f"{MOD}:kaiser_helmet", "text": [
+            "Steampunk armor is a bronze engineer's rig: an aviator cap with teal-glassed goggles, a breastplate with a "
+            "pressure gauge, a copper boiler on the back, and buckled boots. Kaiser armor is the parade dress of the "
+            "Winged Cog: a black spiked helmet with a gold plate, a field-grey tunic under a steel cuirass, gilt "
+            "epaulettes and black jackboots.",
+            "At a smithing table, a Steampunk Pattern, a piece of bronze armor and a copper ingot make the Steampunk "
+            f"piece. A Kaiser Pattern, a piece of steel armor and a gold ingot make the Kaiser piece. Each pattern "
+            f"craft makes {steampunk['template_count']}, one for each piece of a set. The Kaiser Pattern needs an "
+            "Imperial Crest, made from black lacquer plates.",
+            "Same protection as the bronze or steel piece, in its own look: bronze and steel armor are knight's plate. "
+            "Enchantments, wear, trims and plating carry over. The same pattern and an ingot of the metal turn it "
+            "back."],
+         "craft": {"grid": grid("steampunk"), "result": f"{MOD}:{steampunk['template']}",
+                   "count": steampunk["template_count"]}},
+        {"title": "Kaiser Pattern", "icon": f"{MOD}:{kaiser['template']}", "text": [
+            "The Kaiser Pattern takes an Imperial Crest, the Winged Cog of the Kaiserworks blocks: three black lacquer "
+            "plates, four gold nuggets, a gold ingot and a red dye make two crests.",
+            "Black lacquer plates come from iron plates and black dye."],
+         "craft": {"grid": grid("kaiser"), "result": f"{MOD}:{kaiser['template']}", "count": kaiser["template_count"]}},
+    ]
+
+
 def gear_pages():
     """Batch 25: bronze and steel tools and armor, and paxels; batch 27 gear; batch 28 exosuit."""
     import exosuit
@@ -556,11 +626,13 @@ def gear_pages():
         {"title": "Bronze and Steel Gear", "icon": f"{MOD}:steel_pickaxe", "text": [
             "Bronze and steel make swords, pickaxes, axes, shovels, hoes and armor, shaped like iron ones.",
             "Bronze tools get the same drops as iron and last a little longer. Bronze armor matches iron's and is "
-            "slightly tougher: steampunk brass, with goggles, a pressure gauge and a boiler on the back.",
+            "slightly tougher: knight's plate in copper-bronze, riveted in brass, with a brass collar.",
             "Steel tools mine obsidian and ancient debris, and last over three times as long as iron. Steel armor sits "
-            "between iron and diamond: a spiked helmet, a field-grey tunic over a steel cuirass, and jackboots."],
+            "between iron and diamond: knight's plate with a crested helm, layered pauldrons and a skirt of plates.",
+            "Steampunk and Kaiser armor keep the stylized looks bronze and steel armor were first made in, as sets of "
+            "their own."],
          "craft": {"grid": grid, "result": f"{MOD}:steel_pickaxe", "count": 1}},
-    ] + arms_pages() + [
+    ] + armor_style_pages() + thallite_gear_pages() + arms_pages() + [
         {"title": "Paxels", "icon": f"{MOD}:steel_paxel", "text": [
             "A paxel is a pickaxe, an axe and a shovel in one tool: it mines stone, wood and dirt at full speed.",
             "Craft one from a pickaxe, an axe and a shovel of the same tier, from wood to netherite, bronze or steel. "
@@ -637,12 +709,28 @@ def gear_pages():
     ]
 
 
+def biome_names(biomes):
+    """'Lush Caves and the Glowcap Grotto' for a worldgen entry's biome ids (biome tags are left out)."""
+    import biomes as bm
+    names = []
+    for biome in biomes:
+        if biome.startswith("#"):
+            continue
+        namespace, path = biome.split(":")
+        names.append(f"the {bm.BIOMES[path]['display']}" if namespace == MOD and path in bm.BIOMES
+                     else " ".join(word.capitalize() for word in path.split("_")))
+    return " and ".join(names) if len(names) < 3 else ", ".join(names[:-1]) + " and " + names[-1]
+
+
 def ores_page():
     lines = []
     for metal, info in METALS.items():
         if info["mined"]:
             gen = info["gen"]
-            lines.append(f"{info['display']}: Y {gen['min_y']} to {gen['max_y']}, needs a {info['tool']} pickaxe.")
+            line = f"{info['display']}: Y {gen['min_y']} to {gen['max_y']}, needs a {info['tool']} pickaxe."
+            if "rich_gen" in info and info["rich_gen"].get("biomes"):
+                line += f" Richer in {biome_names(info['rich_gen']['biomes'])}."
+            lines.append(line)
     for mineral, info in MINERALS.items():
         gen = info["gen"]
         lines.append(f"{info['ore_display']}: Y {gen['min_y']} to {gen['max_y']}.")
@@ -655,7 +743,9 @@ def ores_page():
 PROGRESSION = [
     ("Bronze Age", "bronze_ingot", "Get power running and double every ore.", [
         "Mine copper and tin and smelt bronze. Build a machine casing, a coal generator and copper cable.",
-        "Put the crusher first: every ore through it gives two raw ores, twice the ingots."], [
+        "Put the crusher first: every ore through it gives two raw ores, twice the ingots.",
+        "Bronze armor protects like iron; a Steampunk Pattern at a smithing table makes it Steampunk armor (see "
+        "Steampunk and Kaiser Armor)."], [
         ("tin_ingot", "Mine tin, copper"), ("bronze_ingot", "Smelt bronze"), ("machine_casing", "Machine casing"),
         ("coal_generator", "Coal generator"), ("copper_cable", "Copper cable"), ("electric_furnace", "Electric furnace"),
         ("crusher", "Crusher: 2x ore")]),
