@@ -14,6 +14,9 @@ public final class CompanionJobs {
         if(!npc.level().hasChunkAt(pos))return null;
         var be=npc.level().getBlockEntity(pos);if(be==null || be.isRemoved())return null;
         if(be instanceof io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity pot)return pot.companionJob.prepare(npc);
+        if(be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine){
+            var job=machine.companionJob(npc);if(job!=null)return job;
+        }
         if(be instanceof CompanionJob job)return job;
         for(var adapter:ADAPTERS){var job=adapter.resolve(npc,be);if(job!=null)return job;}
         return null;

@@ -498,6 +498,16 @@ public enum MachineKind implements StringRepresentable {
 		};
 	}
 
+	/** Standard item processors enabled for the initial companion-assistance rollout. */
+	public boolean supportsCompanionAssistance() {
+		// Staged rollout: vanilla smelting, single input, multiple inputs and byproducts.
+		// Other processors need their costs and completion paths reviewed before opting in.
+		return switch (this) {
+			case ELECTRIC_FURNACE, CRUSHER, ALLOY_SMELTER, PULVERIZER -> true;
+			default -> false;
+		};
+	}
+
 	/** Generators only produce energy; they never accept it. */
 	public boolean isGenerator() {
 		return this == COAL_GENERATOR || this == SOLAR_PANEL || this == STEAM_GENERATOR
