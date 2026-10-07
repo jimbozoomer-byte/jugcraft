@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Clean textures, set 14: the town and the Pixel Hollows
+- The 18 townsfolk wear clean cloth in the manner of the vanilla skins: lit in its upper half, a shade darker below and at the hem, with no speckle. Their hair is flat with neat strands. Each keeps the face, hair style and outfit it had. The raiders, which share the painter, are unchanged.
+- The Retro Trader keeps his buffalo-check flannel. His hair and beard are drawn in strands, not a checkerboard, his trousers are a plain navy plaid and his sneakers are plain black.
+- Circuitstone is dark slate in thin streaks, as vanilla deepslate, under the same copper traces. The bricks are laid as deepslate bricks and polished circuitstone is smooth.
+- The Jug Teller (the town's ATM) is flat cast iron and brass, lit along the top and left.
+- The Pixel Hollows map is plain parchment with its folds.
+- The arcade cabinet parts, crystals, pixel lamp, shard and map marker were already flat and are unchanged. So are the guide screenshots, the tower outlines and the machine screens, which are pictures rather than textures. IDs and models are unchanged. Before and after: [clean_textures_set14.jpg](docs/images/clean_textures_set14.jpg).
+
 ### Unmerged: Clean textures, set 13: tower and drones (the noisy few)
 - The control screen and holo table, loose and formed, are flat navy glass behind their grid lines and glows, with plain steel sides lit along the top.
 - The cargo packager's white panels are flat with a short sheen.
