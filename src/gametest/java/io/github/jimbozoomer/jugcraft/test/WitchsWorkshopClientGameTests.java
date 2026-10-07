@@ -43,7 +43,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Client game test for the Witch's Workshop: a dark oak room open to the south. Two Horned Skull Cauldrons stand on Ember
- * Beds, brewing green and pink potions with ingredients floating in them; a Curiosity Cabinet of oddments stands against
+ * Beds, brewing green and pink potions with ingredients floating in them, and by the door an empty one and one a third
+ * full, looked down into; a Curiosity Cabinet of oddments stands against
  * the back wall between a Moth Display Case and a Broom Rack; the five Oddity Jars and a Bell Jar stand on a table with a
  * table candelabrum; a floor candelabrum, a wall girandole and a branching chandelier burn in four waxes and four
  * flames; and an Enchanted Broom sweeps beside a Dustpan. By day, close up, and by candlelight at night. CI job
@@ -79,6 +80,7 @@ public class WitchsWorkshopClientGameTests implements FabricClientGameTest {
 
 			shoot(context, singleplayer, x, y + 1, z + 2, 180, 12, "jugcraft_witchs_workshop");
 			watchFrom(context, singleplayer, origin, new Vec3(-4.5, 1.3, -3.2), 200.0F, 32.0F, "jugcraft_witchs_workshop_cauldrons");
+			watchFrom(context, singleplayer, origin, new Vec3(-3.5, 2.4, -0.1), 180.0F, 50.0F, "jugcraft_witchs_workshop_cauldrons_inside");
 			watchFrom(context, singleplayer, origin, new Vec3(0.5, 0.9, -3.5), 180.0F, 12.0F, "jugcraft_witchs_workshop_cabinet");
 			watchFrom(context, singleplayer, origin, new Vec3(3.5, 0.6, -3.0), 180.0F, 26.0F, "jugcraft_witchs_workshop_jars");
 			watchFrom(context, singleplayer, origin, new Vec3(4.0, 0.4, -1.5), 140.0F, 24.0F, "jugcraft_witchs_workshop_broom");
@@ -176,6 +178,13 @@ public class WitchsWorkshopClientGameTests implements FabricClientGameTest {
 		// Two cauldrons brewing over ember beds on the west side, ingredients floating in them.
 		cauldron(level, origin, -5, -5, Potions.POISON, List.of(new ItemStack(Items.SPIDER_EYE), new ItemStack(Items.BONE), new ItemStack(Items.RED_MUSHROOM)));
 		cauldron(level, origin, -3, -6, Potions.REGENERATION, List.of(new ItemStack(Items.APPLE), new ItemStack(Items.FEATHER)));
+		// By the door, an empty cold cauldron and one holding a single bottle of swiftness, to look down into.
+		put(level, origin, -5, 0, -2, block("horned_skull_cauldron").defaultBlockState().setValue(HornedSkullCauldronBlock.FACING, Direction.SOUTH));
+		put(level, origin, -3, 0, -2, block("horned_skull_cauldron").defaultBlockState().setValue(HornedSkullCauldronBlock.FACING, Direction.SOUTH)
+				.setValue(HornedSkullCauldronBlock.LEVEL, 1).setValue(HornedSkullCauldronBlock.POTION, true));
+		if (level.getBlockEntity(origin.offset(-3, 0, -2)) instanceof HornedSkullCauldronBlockEntity pot) {
+			pot.setContents(new PotionContents(Potions.SWIFTNESS));
+		}
 		// The Curiosity Cabinet on the back wall, full of oddments, with the moth case and the broom rack either side.
 		BlockState cabinet = block("curiosity_cabinet").defaultBlockState().setValue(CuriosityCabinetBlock.FACING, Direction.SOUTH);
 		put(level, origin, 0, 0, -7, cabinet.setValue(CuriosityCabinetBlock.HALF, DoubleBlockHalf.LOWER));

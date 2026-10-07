@@ -1,5 +1,6 @@
 """Tool and armor textures (batch 25, docs/features/tools-and-armor.md): bronze and steel swords, pickaxes, axes,
-shovels and hoes, and paxels for every tier. The bronze and steel armor (icons and worn layers) is in armor_styles.py.
+shovels and hoes, and paxels for every tier. The armor (icons and worn layers) is drawn in armor_styles.py: Steampunk
+and Kaiser Armor (docs/features/steampunk-and-kaiser-armor.md) and, for now, bronze and steel armor in the same looks.
 
 All original: each icon is a hand-drawn mask below, coloured from a five-shade palette (0 darkest .. 4 lightest);
 handles are oak brown.
@@ -7,6 +8,8 @@ handles are oak brown.
 from PIL import Image
 
 import armor_styles
+import arms_variants_art
+import gear
 import hitech
 
 # Mask characters: digits are the head's palette shade; h/H the handle (dark/light); . is empty.
@@ -191,18 +194,30 @@ def bow_drawn(step):
     return ["".join(r) for r in rows]
 
 
+# The look bronze and steel armor wear until they get their own design: the stylized looks they were first drawn in
+# (2 October 2026), which Steampunk and Kaiser Armor keep. The same code draws both, so the pixels match.
+METAL_ARMOR_LOOK = {"bronze": "steampunk", "steel": "kaiser"}
+
+
 def draw_all(save, save_armor, part_palette):
     """save(img, kind, name) as in generate_textures; save_armor(img, layer, name) for the worn layers."""
     for metal in ("bronze", "steel"):
         palette = part_palette(metal)
         for tool, mask in TOOLS.items():
             save(icon(mask, palette), "item", f"{metal}_{tool}")
-        # Armor: steampunk bronze and kaiserpunk steel, drawn in tools/armor_styles.py.
-        armor = armor_styles.palette(metal, palette)
-        for piece in ("helmet", "chestplate", "leggings", "boots"):
-            save(armor_styles.icon(metal, piece, armor), "item", f"{metal}_{piece}")
-        save_armor(armor_styles.layer(metal, armor, False), "humanoid", metal)
-        save_armor(armor_styles.layer(metal, armor, True), "humanoid_leggings", metal)
+        look = METAL_ARMOR_LOOK[metal]
+        armor = armor_styles.PALETTES[look]
+        for piece in gear.ARMOR:
+            save(armor_styles.icon(look, piece, armor), "item", f"{metal}_{piece}")
+        save_armor(armor_styles.layer(look, armor, False), "humanoid", metal)
+        save_armor(armor_styles.layer(look, armor, True), "humanoid_leggings", metal)
+    # Steampunk and Kaiser Armor: the stylized looks, unchanged (tools/armor_styles.py), and their patterns.
+    for style, armor in armor_styles.PALETTES.items():
+        for piece in gear.ARMOR:
+            save(armor_styles.icon(style, piece, armor), "item", f"{style}_{piece}")
+        save_armor(armor_styles.layer(style, armor, False), "humanoid", style)
+        save_armor(armor_styles.layer(style, armor, True), "humanoid_leggings", style)
+        save(arms_variants_art.pattern16(style), "item", gear.ARMOR_STYLES[style]["template"])
     steel = part_palette("steel")
     save(icon(BOW_BASE, steel), "item", "power_bow")
     for step in range(3):

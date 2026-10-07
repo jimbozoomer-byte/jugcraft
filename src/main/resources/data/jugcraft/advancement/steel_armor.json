@@ -23,7 +23,11 @@
               "jugcraft:steel_helmet",
               "jugcraft:steel_chestplate",
               "jugcraft:steel_leggings",
-              "jugcraft:steel_boots"
+              "jugcraft:steel_boots",
+              "jugcraft:kaiser_helmet",
+              "jugcraft:kaiser_chestplate",
+              "jugcraft:kaiser_leggings",
+              "jugcraft:kaiser_boots"
             ]
           }
         ]

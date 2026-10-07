@@ -23,7 +23,7 @@ public final class JugcraftConfig {
 			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "thallite", "aluminum",
 			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
 			"deposits", "explosives", "agriculture", "parties", "drones",
-			"pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections");
+			"pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections", "raiders");
 
 	/**
 	 * Other server options, with their defaults. {@code carving.free_draw}: players may carve any face into a
@@ -53,6 +53,9 @@ public final class JugcraftConfig {
 	 * {@code parties.invite_minutes} before an invite expires (1 to 60) and {@code parties.invites_per_minute}
 	 * each player may send (1 to 60).</li>
 	 * <li>{@code town.protection} ({@code on} or {@code off}) keeps the walled town as it was built (town/TownProtection).</li>
+	 * <li>Raids (see {@code raiders/RaiderRaids}): {@code raiders.raids} ({@code on} or {@code off}); a player is raided only
+	 * after {@code raiders.grace_days} days of play, and the world at most once every {@code raiders.interval_days} days;
+	 * {@code raiders.walkers} and {@code raiders.blimps} ({@code on} or {@code off}) let walkers and blimps join them.</li>
 	 * </ul>
 	 */
 	public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
@@ -65,7 +68,9 @@ public final class JugcraftConfig {
 			Map.entry("parties.max_size", "8"), Map.entry("parties.invite_minutes", "5"), Map.entry("parties.invites_per_minute", "10"),
 			Map.entry("alpine_spawn.start", "on"),
 			Map.entry("biomes.region_size", "1024"), Map.entry("biomes.region_share", "0.5"),
-			Map.entry("town.protection", "on"));
+			Map.entry("town.protection", "on"),
+			Map.entry("raiders.raids", "on"), Map.entry("raiders.grace_days", "3"), Map.entry("raiders.interval_days", "3"),
+			Map.entry("raiders.walkers", "on"), Map.entry("raiders.blimps", "on"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -137,7 +142,8 @@ public final class JugcraftConfig {
 					+ " december MM-DD..MM-DD or off; parties.max_size 2-64, parties.invite_minutes 1-60, parties.invites_per_minute 1-60;"
 					+ " alpine_spawn.start on or off: new worlds start in the Alpine Spawn biome;"
 					+ " biomes.region_size in blocks and biomes.region_share from 0 to 1: Jugcraft regions with the new biomes;"
-					+ " town.protection on or off).");
+					+ " town.protection on or off; raiders.raids on or off, raiders.grace_days and raiders.interval_days in game days,"
+					+ " raiders.walkers and raiders.blimps on or off).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}

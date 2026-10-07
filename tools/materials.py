@@ -14,7 +14,7 @@ MOD = "jugcraft"
 FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "thallite", "aluminum",
             "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "deposits",
             "explosives", "agriculture", "parties", "drones",
-            "pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections"]
+            "pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections", "raiders"]
 
 # Metals use the vanilla form set. "mined" adds ore, deepslate ore, raw item and raw block.
 # cook: which vanilla cookers can smelt the ore/raw form. tool: minimum pickaxe tier.
@@ -254,8 +254,7 @@ def feature_of(entry_id):
         return "crude_oil"
     import gear
     if entry_id in gear.items():
-        tier = entry_id.rsplit("_", 1)[0]
-        return gear.GEAR_TIERS[tier]["feature"] if tier in gear.GEAR_TIERS else FEATURE
+        return gear.feature(entry_id)
     import exosuit
     if entry_id in exosuit.items():
         return FEATURE
@@ -306,6 +305,21 @@ def feature_of(entry_id):
         return "machines"
     import tower_guns
     if entry_id in tower_guns.items():
+        return "machines"
+    import fortifications
+    if entry_id in fortifications.blocks():
+        return "machines"
+    import bunkerworks
+    if entry_id in bunkerworks.blocks():
+        return "machines"
+    import fire_control
+    if entry_id in fire_control.blocks() + fire_control.items():
+        return "machines"
+    import raiders
+    if entry_id in raiders.ITEMS or entry_id in raiders.BLOCKS:
+        return "raiders"
+    import armoured_walker
+    if entry_id in armoured_walker.ITEMS:
         return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

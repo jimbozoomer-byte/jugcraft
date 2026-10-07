@@ -860,33 +860,69 @@
     },
     {
       "from": [
-        0.5,
+        0.4,
         7.75,
-        0.5
+        0.4
       ],
       "to": [
-        15.5,
+        15.6,
         8.5,
-        11.52
+        11.6
       ],
       "faces": {
         "north": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            7.5,
+            15.5,
+            8.25
+          ]
         },
         "south": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            7.5,
+            15.5,
+            8.25
+          ]
         },
         "east": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            4.5,
+            7.5,
+            15.5,
+            8.25
+          ]
         },
         "west": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            7.5,
+            11.5,
+            8.25
+          ]
         },
         "up": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            0.5,
+            15.5,
+            11.5
+          ]
         },
         "down": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_gunmetal",
+          "uv": [
+            0.5,
+            4.5,
+            15.5,
+            15.5
+          ]
         }
       }
     },

@@ -51,7 +51,7 @@ While the pilot sits in it, their own hands do nothing: use and attack go to the
 
 ## Dependencies and assets
 - No dependencies. All art is original. The sounds are vanilla's (iron golem steps and attack, block hit sounds).
-- The model and the item icon are in `tools/mech.py`. The model reuses the giants' `dr_*` textures and the mining drill's bit texture.
+- The model is in `tools/mech.py` and the 32x32 item icon in `tools/gun_icons.py` (since 5 October 2026). The model reuses the giants' `dr_*` textures and the mining drill's bit texture. Since the 5 October 2026 art fixes the thighs stop a quarter pixel inside the pelvis's side planes and the chest walls, knees, toe bands and drill band stand a quarter pixel off their neighbours, so nothing flickers as it walks ([big-guns-art-fixes.md](big-guns-art-fixes.md)).
 - The model is exported as six animated parts to `assets/jugcraft/walker_quads.json` (about 770 faces, 16-pixel tiles, hidden faces culled). `client/DieselWalkerRenderer` draws and animates it.
 
 ## Verification
@@ -74,3 +74,4 @@ Not applicable: it is crafted and placed by players only.
 - The hitbox is 2.5 wide and 4.25 tall. The fist and drill reach a little past it.
 - Movement is server-driven, so with high ping the pilot's keys answer a little late.
 - Ideas for later: arm swaps (a second fist, a claw or a cannon arm, damage only), a bigger two-seat walker and a mech bay to refuel and repair.
+- **Fixed 5 October 2026 (shared render fixes):** the walker is drawn closed (no see-through gaps), and the quads inside each part no longer z-fight. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).
