@@ -5,7 +5,7 @@
 Shift-right-click an owned Peepo or Jughead to open the command screen. The left panel contains eight general storage slots in two rows of four, plus separate Costume and Hand slots. The lower inventory is the player's inventory.
 
 - Put one Jack o'Lantern in Costume to equip the pumpkin outfit; removing it restores the default appearance. Existing equipped outfits migrate into this slot on loading.
-- Hand accepts one item, including tools and torches, and displays it attached to the right hand. This equips the item visually; it does not add tool work or dynamic torch lighting.
+- Hand accepts one item, including tools and torches, and displays it attached to the right hand. This equips the item visually; tool work is not yet automated. Held lighting uses the optional integration described below.
 - Eating temporarily displays the meal; the equipped item stays safely in its slot and returns afterward. You may change equipment while eating.
 - Shift-click moves items between companion storage and player inventory; a Jack o'Lantern first fills an empty costume slot. Place held items directly in Hand.
 - Storage and equipment retain exact slots and item components across saves. Contents drop once on normal death, under the existing mob-loot rules. Access uses the existing owner/party command permissions.
@@ -14,6 +14,14 @@ Manual checks: transfer full and partial stacks, equip/remove a costume, hold a 
 
 ## Held lights and tiki torches
 
-Companions raise their right arm when holding a light, including while sitting or running. Eating and sleeping keep their existing poses. The held-light tag `peepo_companion:held_lights` covers torches/lanterns and the tiki torch; other block items with an emissive default state also qualify. This pose does not introduce dynamic lighting.
+Companions raise their right arm when holding a light, including while sitting or running. Eating and sleeping keep their existing poses. The held-light tag `peepo_companion:held_lights` covers torches/lanterns and the tiki torch; other block items with an emissive default state also qualify. Held lights stay upright independently of the animated arm. Optional LambDynamicLights support supplies moving illumination when that client mod is installed and enabled.
 
-Craft one Tiki Torch with coal above a stick above another stick in a crafting table. It occupies two vertical blocks on a sturdy floor and has a wooden shaft, bound basket, coal and embers. Its upper half emits light level 14 and client-side flame/smoke particles. Breaking it removes both halves and drops one torch in survival. It can also be equipped in the companion Hand slot.
+Craft one Tiki Torch with coal above a stick above another stick in a crafting table. It occupies two vertical blocks on a sturdy floor and has a wooden shaft, tapered open supports, woven reed basket, black cap and wick. Its upper half emits light level 14 and client-side flame/smoke particles. Breaking it removes both halves and drops one torch in survival. It can also be equipped in the companion Hand slot.
+
+### Dynamic-light integration
+
+Checked upstream `origin/main` at `8ca8aee5`: `distribution/frameworks.lock.json` pins LambDynamicLights **4.13.0+26.3** as optional/client-side (`lambdynlights`). This local branch adds the data-only definition `assets/peepo_companion/dynamiclights/item/tiki_torch.json` with luminance 14 and water sensitivity. An explicit definition is needed because the torch's lower/default block half emits zero light.
+
+LambDynamicLights already reads held equipment on living entities, including Peepo/Jughead's synchronized main hand, so no entity scan, server ticking light blocks, or mandatory Java dependency is added. Vanilla torch lighting is supplied by LambDynamicLights. Install/enable the pinned client mod to see moving illumination; this jar does not bundle it. Gameplay block lighting continues to come from placed torches. No remote branch changes were merged into this branch.
+
+References: https://github.com/speedygroyper/jugcraft/blob/8ca8aee5/distribution/frameworks.lock.json and https://lambdaurora.dev/projects/lambdynamiclights/docs/v4/item.html and https://lambdaurora.dev/projects/lambdynamiclights/docs/v4/entity.html .

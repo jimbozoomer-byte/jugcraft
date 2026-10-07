@@ -15,6 +15,12 @@ public final class PeepoModel extends EntityModel<PeepoState> {
         rightArm.translateAndRotate(pose);
         pose.translate(0,2.6F/16F,0);
     }
+    public void translateToUprightHand(com.mojang.blaze3d.vertex.PoseStack pose){
+        // Follow the animated hand position without inheriting the arm's tilt.
+        var grip=new org.joml.Vector3f(0,2.6F*rightArm.yScale/16F,0);
+        new org.joml.Quaternionf().rotationZYX(rightArm.zRot,rightArm.yRot,rightArm.xRot).transform(grip);
+        pose.translate(rightArm.x/16F+grip.x,rightArm.y/16F+grip.y,rightArm.z/16F+grip.z);
+    }
     @Override public void setupAnim(PeepoState s) {
         super.setupAnim(s);
         head.getChild("sleeping_eyes").visible=s.sleeping;

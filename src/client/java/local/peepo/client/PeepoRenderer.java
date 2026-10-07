@@ -45,7 +45,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.sleeping=entity.getRestMode()==CompanionEnergy.Rest.SLEEPING;
         state.sitting=entity.getRestMode()==CompanionEnergy.Rest.SITTING;
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;
-        items.updateForLiving(state.held,!state.eating && !state.sleeping ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
+        items.updateForLiving(state.held,!state.eating && !state.sleeping ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,state.holdingLight ? ItemDisplayContext.NONE : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
         items.updateForLiving(state.food,state.eating ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.FIXED,entity);
     }
     private static final class HeldLayer extends RenderLayer<PeepoState,PeepoModel> {
@@ -53,10 +53,18 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
             if(state.isInvisible || state.held.isEmpty())return;
             pose.pushPose();
-            getParentModel().translateToHand(pose);
-            pose.rotateDegrees(com.mojang.math.Axis.XP,-90);
-            pose.rotateDegrees(com.mojang.math.Axis.YP,180);
-            pose.scale(.35F,.35F,.35F);
+            if(state.holdingLight){
+                getParentModel().translateToUprightHand(pose);
+                // Raw item model: remove both arm tilt and third-person item rotation.
+                pose.rotateDegrees(com.mojang.math.Axis.XP,180);
+                pose.scale(.35F,.35F,.35F);
+                pose.translate(0,.25F,0);
+            }else{
+                getParentModel().translateToHand(pose);
+                pose.rotateDegrees(com.mojang.math.Axis.XP,-90);
+                pose.rotateDegrees(com.mojang.math.Axis.YP,180);
+                pose.scale(.35F,.35F,.35F);
+            }
             state.held.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,state.outlineColor);
             pose.popPose();
         }

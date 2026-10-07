@@ -23,7 +23,7 @@ public final class TikiTorch extends DoublePlantBlock {
         return stack.is(HELD_LIGHTS) || stack.getItem() instanceof BlockItem item && item.getBlock().defaultBlockState().getLightEmission()>0;
     }
     protected VoxelShape getShape(BlockState state,BlockGetter level,BlockPos pos,CollisionContext context){
-        return state.getValue(HALF)==DoubleBlockHalf.LOWER?Block.box(7,0,7,9,16,9):Shapes.or(Block.box(7,0,7,9,7,9),Block.box(5,7,5,11,13,11));
+        return state.getValue(HALF)==DoubleBlockHalf.LOWER?Shapes.or(Block.box(7,0,7,9,6,9),Block.box(5.5,6,5.5,10.5,16,10.5)):Shapes.or(Block.box(5.5,0,5.5,10.5,2,10.5),Block.box(5,2,5,11,14,11));
     }
     protected boolean canSurvive(BlockState state,LevelReader level,BlockPos pos){
         return state.getValue(HALF)==DoubleBlockHalf.UPPER?super.canSurvive(state,level,pos):level.getBlockState(pos.below()).isFaceSturdy(level,pos.below(),Direction.UP);
@@ -34,8 +34,8 @@ public final class TikiTorch extends DoublePlantBlock {
     }
     public void animateTick(BlockState state,Level level,BlockPos pos,RandomSource random){
         if(state.getValue(HALF)!=DoubleBlockHalf.UPPER)return;
-        level.addParticle(ParticleTypes.FLAME,pos.getX()+.5,pos.getY()+.86,pos.getZ()+.5,0,0,0);
-        level.addParticle(ParticleTypes.SMOKE,pos.getX()+.5,pos.getY()+.92,pos.getZ()+.5,0,0,0);
+        level.addParticle(ParticleTypes.FLAME,pos.getX()+.5,pos.getY()+.91,pos.getZ()+.5,0,0,0);
+        level.addParticle(ParticleTypes.SMOKE,pos.getX()+.5,pos.getY()+.97,pos.getZ()+.5,0,0,0);
     }
     public static void initialize(){
         var id=PeepoMod.id("tiki_torch");
