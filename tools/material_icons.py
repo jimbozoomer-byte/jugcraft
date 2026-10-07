@@ -63,6 +63,9 @@ METAL_RAMPS = {
     "tungsten": ramp("1a1c1e 3d4045 5f646c 898d94 bfc1c6"),  # dark neutral grey
     "uranium": ramp("303426 6e7a55 a0ab86 cbd0be f4f5f1"),   # pale olive
     "titanium": ramp("2a3144 5e73a4 95a4c5 c5cddd f3f5f7"),  # light periwinkle grey
+    # The owner's chartreuse sheet (docs/features/thallite.md). Its outline, 354514, is darkened to 303f12 (same hue and
+    # saturation, CIEDE2000 2.0) so that D stands 30 luma above O, as check_mod_data.py asks of every ramp.
+    "thallite": ramp("303f12 4e611d 7c8a37 aab053 dbdd85"),
     "bronze": ramp("3e2410 7e5222 b4803c dcaa5c f6d696"),    # the owner's choice
     "aluminum": ramp("2e3d4b 6c8cab afbdd3 dfe5ec f5f6f9"),  # very pale blue-white
     "brass": ramp("3c310c 8d7116 cca21a eecb5a faf2d5"),     # deep yellow, darker and more ochre than gold
@@ -89,6 +92,7 @@ ORE_RAMPS = {
     "phosphate": ramp("1e4a44 2e6e66 48968c 74bcae aadcce"),   # apatite: sea green
     "lepidolite": ramp("5a3c6a 966eaa ba92cc d4b6e2 f4e4fa"),  # lilac mica
     "monazite": ramp("5a3010 965a28 ba7838 d49c52 f6d696"),    # honey-brown
+    "thallite": ramp("4a5a2e 6e8048 98a86a c0cc8e e4ecb8"),    # the owner's sheet: sage green, the mineral as dug
 }
 
 # The three overlay layouts, taken in turn down ORE_RAMPS, so neighbouring ores do not look alike.
