@@ -46,6 +46,14 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: Soil, compost and storage
+- The fifth slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **Organic Compost** (dirt, straw, bone meal and rotten flesh) rots through four stages into **Rich Soil**, faster when wet.
+- **Rich Soil** and **Rich Soil Farmland** (a hoe tills it) give whatever grows on them an extra random tick, about twice the pace. The farmland keeps moist as farmland does, is never trampled, and dries back into Rich Soil.
+- **Produce crates** for beetroot, cabbage, carrots, corn, onions, potatoes and tomatoes, and a **Bag of Corn Kernels**, nine to a block. The Pumpkin Crate is unchanged.
+- **Wooden and Bamboo Baskets:** nine-slot storage blocks, open at the top, that take in items dropped into them. The Foraging Basket is unchanged.
+- Details: [docs/features/soil-compost-and-storage.md](docs/features/soil-compost-and-storage.md).
+
 ### Unmerged: Rice and wet farming
 - The fourth slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
 - **Rice paddies:** rice, its own seed, plants into still water one block deep over bog soil and grows two blocks tall; picking a ripe plant gives 2-3 rice panicles and leaves the stalks standing. Flooded soil counts as moist farmland, and the plant keeps its water when broken. Rice drops from grass, and **wild rice** grows in swamp and river shallows.

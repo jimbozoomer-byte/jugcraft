@@ -106,6 +106,15 @@
     "jugcraft:warped_cabinet",
     "jugcraft:platter",
     "jugcraft:serving_tray",
-    "jugcraft:rice_roll_medley"
+    "jugcraft:rice_roll_medley",
+    "jugcraft:beetroot_crate",
+    "jugcraft:cabbage_crate",
+    "jugcraft:carrot_crate",
+    "jugcraft:corn_crate",
+    "jugcraft:onion_crate",
+    "jugcraft:potato_crate",
+    "jugcraft:tomato_crate",
+    "jugcraft:wooden_basket",
+    "jugcraft:bamboo_basket"
   ]
 }

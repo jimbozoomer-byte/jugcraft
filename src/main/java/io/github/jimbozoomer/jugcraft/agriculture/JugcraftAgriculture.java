@@ -201,6 +201,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<SkilletBlockEntity> SKILLET_ENTITY;
 	public static BlockEntityType<CuttingBoardBlockEntity> CUTTING_BOARD_ENTITY;
 	public static BlockEntityType<KitchenCabinetBlockEntity> KITCHEN_CABINET_ENTITY;
+	/** Soil, compost and storage (tools/soil.py): the baskets' contents. */
+	public static BlockEntityType<BasketBlockEntity> BASKET_ENTITY;
 	public static RecipeType<CuttingRecipe> CUTTING;
 	public static RecipeSerializer<CuttingRecipe> CUTTING_SERIALIZER;
 	/** Everything that cuts on a Cutting Board and slices pies, cakes and the roast turkey: the Carving Knife and the kitchen knives. */
@@ -644,6 +646,7 @@ public final class JugcraftAgriculture {
 		registerFeasts();
 		registerMenu();
 		registerRice();
+		registerSoil();
 		registerPlacedDishes();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
@@ -952,6 +955,43 @@ public final class JugcraftAgriculture {
 				.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
 		registerItem("rice_roll_medley", props -> new BlockItem(medley, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1),
 				FOOD_TAB);
+	}
+
+	/**
+	 * Soil, compost and storage (the kitchen and cooking expansion's slice 5, tools/soil.py), in the owner's own textures:
+	 * Organic Compost, which rots into Rich Soil; Rich Soil and its farmland, which speed what grows on them; seven
+	 * produce crates and the Bag of Corn Kernels, nine to a block; and the wooden and bamboo baskets, storage blocks of
+	 * their own (the Foraging Basket is unchanged, as the owner chose).
+	 */
+	private static void registerSoil() {
+		Block richSoil = registerBlock("rich_soil", RichSoilBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.DIRT).randomTicks());
+		registerItem("rich_soil", props -> new BlockItem(richSoil, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerBlock("rich_soil_farmland", RichFarmlandBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.FARMLAND).randomTicks());
+		Block compost = registerBlock("organic_compost", OrganicCompostBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.DIRT)
+				.mapColor(MapColor.COLOR_BROWN).sound(SoundType.ROOTED_DIRT).randomTicks());
+		registerItem("organic_compost", props -> new BlockItem(compost, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Crates of the farm's produce, nine to a crate, and the Bag of Corn Kernels, the owner's sack as the Bag of Rice.
+		for (String crate : List.of("beetroot_crate", "cabbage_crate", "carrot_crate", "corn_crate", "onion_crate", "potato_crate",
+				"tomato_crate")) {
+			Block block = registerBlock(crate, Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F)
+					.sound(SoundType.WOOD).ignitedByLava());
+			registerItem(crate, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		Block kernels = registerBlock("corn_kernel_bag", RiceBagBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(0.8F).sound(SoundType.WOOL).ignitedByLava());
+		registerItem("corn_kernel_bag", props -> new BlockItem(kernels, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// The baskets: storage blocks of their own, woven of wood or bamboo.
+		List<Block> baskets = new ArrayList<>();
+		for (String name : List.of("wooden_basket", "bamboo_basket")) {
+			Block basket = registerBlock(name, BasketBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F)
+					.sound(SoundType.SCAFFOLDING).noOcclusion().ignitedByLava());
+			registerItem(name, props -> new BlockItem(basket, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+			baskets.add(basket);
+		}
+		BASKET_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("basket"),
+				FabricBlockEntityTypeBuilder.create(BasketBlockEntity::new, baskets.toArray(Block[]::new)).build());
 	}
 
 	/** Woven straw: the tatami's and its mats' properties (a new set each, as block properties are not shared). */

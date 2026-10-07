@@ -67,6 +67,7 @@ import kitchen_data
 import feasts_data
 import menu_data
 import rice_data
+import soil_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
                          HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, STALKS, WILD_BONUS, crop_blocks)
@@ -275,6 +276,7 @@ def assets(root, write, lang):
     feasts_data.assets(root, write, lang)
     menu_data.assets(root, write, lang)
     rice_data.assets(root, write, lang)
+    soil_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -418,6 +420,7 @@ def loot(data, write):
     feasts_data.loot(out, write)
     menu_data.loot(out, write)
     rice_data.loot(out, write)
+    soil_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -554,6 +557,7 @@ def tags(tags):
     feasts_data.tags(tags)
     menu_data.tags(tags)
     rice_data.tags(tags)
+    soil_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

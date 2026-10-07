@@ -9,7 +9,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 
 /**
  * A Bag of Rice (the kitchen and cooking expansion's slice 4; tools/rice.py STORAGE): nine rice in one block, the owner's
- * sack, its tied side turned to the player who set it down. It packs and unpacks by crafting.
+ * sack, its tied side turned to the player who set it down. It packs and unpacks by crafting. The Bag of Corn Kernels
+ * (slice 5, tools/soil.py SACKS) is the same sack with the owner's kernel bag top.
  */
 public class RiceBagBlock extends HorizontalDirectionalBlock {
 	public RiceBagBlock(Properties properties) {

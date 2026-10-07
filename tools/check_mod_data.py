@@ -21,6 +21,7 @@ import kitchen
 import feasts
 import menu
 import rice
+import soil
 import owner_art
 import werewolf_model
 import midway
@@ -3112,13 +3113,13 @@ def check_agriculture():
             err(f"pot_cooking/{result}: wrong type or missing feature switch condition")
 
     # No recipe loop among agriculture items: every conversion leads away from where it started. Unpacking a storage block
-    # (tools/rice.py UNPACKING) only gives back what packed it, so it is left out.
+    # (tools/agriculture.py UNPACKING: tools/rice.py's and tools/soil.py's) only gives back what packed it, so it is left out.
     edges = {}
 
     def edge(ref, result):
         edges.setdefault(split(ref.lstrip("#"))[1], set()).add(split(result)[1] if ":" in result else result)
     for recipe in ag.SHAPELESS:
-        if recipe.get("id") in rice.UNPACKING:
+        if recipe.get("id") in ag.UNPACKING:
             continue
         for ref in recipe["inputs"]:
             edge(ref, recipe["result"])
@@ -3443,6 +3444,92 @@ def check_rice():
     loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {})
     if f'"rolls": "{count}"' not in loot or f'"{MOD}:{rice.MEDLEY["platter"]}"' not in loot or '"minecraft:inverted"' not in loot:
         err(f"{name} must drop itself only whole, and its platter otherwise")
+
+
+def check_soil():
+    """Soil, compost and storage (tools/soil.py): Java's numbers and registrations match it; Rich Soil counts as dirt and
+    its farmland as farmland; each crate and bag packs and unpacks nine; each block has its blockstate, item (but the
+    farmland), loot and words; the farmland drops Rich Soil."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (\d+);", java.get(source, ""))
+        return int(match.group(1)) if match else None
+
+    expected = {("RichSoilBlock", "BOOST"): soil.BOOST, ("RichFarmlandBlock", "WATER_REACH"): soil.WATER_REACH,
+                ("RichFarmlandBlock", "MAX_MOISTURE"): 7, ("OrganicCompostBlock", "TURN_CHANCE"): soil.COMPOST["turn_chance"],
+                ("OrganicCompostBlock", "LAST_STAGE"): soil.COMPOST["stages"] - 1, ("BasketBlockEntity", "SLOTS"): soil.BASKET_SLOTS,
+                ("BasketBlockEntity", "PICKUP_TICKS"): soil.PICKUP_TICKS}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} must be {value} (tools/soil.py)")
+    if len(soil.COMPOST["textures"]) != soil.COMPOST["stages"]:
+        err("tools/soil.py COMPOST needs a texture for each stage")
+
+    constructors = {soil.RICH_SOIL["block"]: "RichSoilBlock::new", soil.RICH_FARMLAND["block"]: "RichFarmlandBlock::new",
+                    soil.COMPOST["block"]: "OrganicCompostBlock::new"}
+    constructors.update({name: "RiceBagBlock::new" for name in soil.SACKS})
+    for name, constructor in constructors.items():
+        if f'registerBlock("{name}", {constructor}' not in main:
+            err(f"JugcraftAgriculture must register {name} with {constructor}")
+    crates = re.search(r'for \(String crate : List\.of\(([^)]*)\)\) \{\s*Block block = registerBlock\(crate, Block::new', main)
+    if not crates or re.findall(r'"([a-z_]+)"', crates.group(1)) != list(soil.CRATES):
+        err("JugcraftAgriculture must register tools/soil.py CRATES, in order, as plain blocks")
+    baskets = re.search(r'for \(String name : List\.of\(([^)]*)\)\) \{\s*Block basket = registerBlock\(name, BasketBlock::new', main)
+    if not baskets or re.findall(r'"([a-z_]+)"', baskets.group(1)) != list(soil.BASKETS) or 'Jugcraft.id("basket")' not in main:
+        err("JugcraftAgriculture must register tools/soil.py BASKETS as BasketBlocks, with the jugcraft:basket block entity")
+    if f'registerBlock("{soil.RICH_FARMLAND["block"]}"' in main and f'registerItem("{soil.RICH_FARMLAND["block"]}"' in main:
+        err("Rich Soil Farmland has no item: a hoe makes it")
+
+    # Packing: nine in, the same nine out.
+    for block, info in list(soil.CRATES.items()) + list(soil.SACKS.items()):
+        pack = next((r for r in soil.SHAPED if r["id"] == block), None)
+        unpack = next((r for r in soil.SHAPELESS if r["id"] == info["unpack"]), None)
+        if (not pack or "".join(pack["pattern"]).count("#") != soil.PACK or pack["key"] != {"#": info["item"]}
+                or not unpack or unpack["inputs"] != [f"{MOD}:{block}"] or unpack["result"] != info["item"] or unpack["count"] != soil.PACK):
+            err(f"{block} must pack {soil.PACK} {info['item']} and unpack into the same {soil.PACK}")
+    if sorted(soil.UNPACKING) != sorted(info["unpack"] for info in list(soil.CRATES.values()) + list(soil.SACKS.values())):
+        err("tools/soil.py UNPACKING must name exactly the crates' and bags' unpacking recipes")
+    for recipe in soil.SHAPELESS + soil.SHAPED:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").exists():
+            err(f"recipe/{recipe['id']}.json is missing")
+
+    # Tags: rich soil is dirt, its farmland takes crops; tools reach them.
+    def tagged(path, entry):
+        return rid_of(entry) in (load(DATA / "minecraft" / "tags" / "block" / f"{path}.json") or {}).get("values", [])
+    if not tagged("dirt", soil.RICH_SOIL["block"]):
+        err("Rich Soil must be in minecraft:dirt")
+    for tag in ("supports_crops", "grows_crops"):
+        if not tagged(tag, soil.RICH_FARMLAND["block"]):
+            err(f"Rich Soil Farmland must be in minecraft:{tag}")
+    for name in (soil.RICH_SOIL["block"], soil.RICH_FARMLAND["block"], soil.COMPOST["block"]):
+        if not tagged("mineable/shovel", name):
+            err(f"{name} must be mineable with a shovel")
+    for name in (*soil.CRATES, *soil.BASKETS):
+        if not tagged("mineable/axe", name):
+            err(f"{name} must be mineable with an axe")
+
+    for name in soil.blocks():
+        for path in (ASSETS / "blockstates" / f"{name}.json", DATA / MOD / "loot_table" / "blocks" / f"{name}.json"):
+            if not path.exists():
+                err(f"{name} needs {path.relative_to(ROOT)}")
+        if name in soil.items() and not (ASSETS / "items" / f"{name}.json").exists():
+            err(f"{name} needs its item model")
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"{name} has no words")
+    if f"container.{MOD}.basket" not in lang:
+        err("The basket's screen has no title")
+    state = load(ASSETS / "blockstates" / f"{soil.RICH_FARMLAND['block']}.json") or {}
+    if set(state.get("variants", {})) != {f"moisture={m}" for m in range(8)}:
+        err("Rich Soil Farmland's blockstate needs every moisture")
+    state = load(ASSETS / "blockstates" / f"{soil.COMPOST['block']}.json") or {}
+    if set(state.get("variants", {})) != {f"composting={s}" for s in range(soil.COMPOST["stages"])}:
+        err("Organic Compost's blockstate needs every stage")
+    loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{soil.RICH_FARMLAND['block']}.json") or {})
+    if f'"{MOD}:{soil.RICH_SOIL["block"]}"' not in loot:
+        err("Rich Soil Farmland must drop Rich Soil")
 
 
 def check_kitchen():
@@ -7717,6 +7804,7 @@ def main():
     check_feasts()
     check_menu()
     check_rice()
+    check_soil()
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()
