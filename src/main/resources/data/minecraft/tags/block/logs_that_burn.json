@@ -13,6 +13,7 @@
     "#jugcraft:cypress_logs",
     "#jugcraft:redwood_logs",
     "#jugcraft:eucalyptus_logs",
-    "#jugcraft:mahogany_logs"
+    "#jugcraft:mahogany_logs",
+    "#jugcraft:cedar_logs"
   ]
 }

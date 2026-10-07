@@ -11,11 +11,11 @@
       "feature": "jugcraft:tall_fir_checked"
     },
     {
-      "chance": 0.2,
-      "feature": "jugcraft:tall_vine_oak_checked"
+      "chance": 0.1964,
+      "feature": "jugcraft:mossy_maple_checked"
     },
     {
-      "chance": 0.1,
+      "chance": 0.0889,
       "feature": "jugcraft:willow_checked"
     }
   ]
