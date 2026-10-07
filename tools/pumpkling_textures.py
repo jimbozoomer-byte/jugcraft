@@ -1,12 +1,11 @@
 """Original textures for the Pumpkling (fall addition 25) (requires Pillow): its vine body (32 by 32, laid out as
 client/PumpklingModel.java's boxes: twisted green vine for the legs, arms and tendril, a root curl for each foot, broad
-leaves for hands and at the tendril's tip). The pumpkin it wears is the carved pumpkin's own model and carving.
+leaves for hands and at the tendril's tip). The pumpkin it wears is the carved pumpkin's own model and carving. Clean,
+cartoon style: even twisted bands, no random speckle.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code, from a fixed seed; no Mojang texture is
 read, traced or recoloured.
 """
-import random
-
 from PIL import Image
 
 from crop_textures import rgb
@@ -17,16 +16,16 @@ VEIN = rgb("8ccf5e")
 ROOT = [rgb("4a3820"), rgb("5a4426"), rgb("6e5530"), rgb("82663a")]
 
 
-def _box(img, rng, u, v, w, h, d, palette, twist=False):
+def _box(img, u, v, w, h, d, palette, twist=False):
     """Paints a box's whole unwrapped area (as a model box at texOffs(u, v) of size w, h, d lays it out)."""
     width, height = 2 * (w + d), d + h
     for y in range(height):
         for x in range(width):
             if twist:
                 # Spiralling light and dark bands, as a twisted vine.
-                tone = 3 if (x + y) % 4 == 0 else 0 if (x + y) % 4 == 2 else rng.choice((1, 2))
+                tone = (3, 2, 0, 1)[(x + y) % 4]
             else:
-                tone = rng.choice((0, 1, 1, 2, 2, 3))
+                tone = 2 if y < d else 1 if y % 3 else 0
             img.putpixel((u + x, v + y), palette[tone] + (255,))
 
 
@@ -45,11 +44,10 @@ def _leaf(img, u, v, w, d):
 
 def pumpkling():
     img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    rng = random.Random(25001)
-    _box(img, rng, 0, 0, 2, 5, 2, VINE, twist=True)   # legs
-    _box(img, rng, 0, 13, 3, 1, 3, ROOT)              # feet, a curl of root
-    _box(img, rng, 8, 0, 1, 5, 1, VINE, twist=True)   # arms
-    _box(img, rng, 12, 0, 1, 4, 1, VINE, twist=True)  # tendril
+    _box(img, 0, 0, 2, 5, 2, VINE, twist=True)   # legs
+    _box(img, 0, 13, 3, 1, 3, ROOT)              # feet, a curl of root
+    _box(img, 8, 0, 1, 5, 1, VINE, twist=True)   # arms
+    _box(img, 12, 0, 1, 4, 1, VINE, twist=True)  # tendril
     _leaf(img, 0, 8, 3, 4)                            # hands
     _leaf(img, 16, 0, 3, 3)                           # the tendril's leaf
     return img

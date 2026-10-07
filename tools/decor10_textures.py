@@ -15,6 +15,7 @@ import random
 from PIL import Image
 
 from crop_textures import Canvas, rgb
+import block_style as bs
 from decor_textures import noise
 from decor9_textures import BAT, IRON, put, grid
 
@@ -126,7 +127,7 @@ def shape(rows, color, alpha=255):
 
 def fixture():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("121214"), rgb("18181c"), rgb("202026")], 20101, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, [rgb("121214"), rgb("18181c"), rgb("202026")], 20101, [2, 3, 1])
     return c.img
 
 
@@ -160,21 +161,21 @@ def paint_jar():
 
 def brazier_iron():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, IRON[:3], 20201, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, IRON[:3], 20201, [2, 3, 1])
     for x in range(0, 16, 5):
         c.px(x, 2, IRON[3])
     return c.img
 
 
 def coals(lit):
+    """Coals heaped like vanilla gravel: rounded lumps lit at their upper left; glowing, or burnt out."""
     c = Canvas()
-    rng = random.Random(20211)
-    hot = [rgb("ff7a1a"), rgb("ffb040"), rgb("c03a10"), rgb("2a1a14")]
-    dark = [rgb("1a1614"), rgb("26201c"), rgb("3a302a"), rgb("121010")]
-    for y in range(16):
-        for x in range(16):
-            palette = hot if lit else dark
-            c.px(x, y, palette[rng.choice((0, 1, 2, 2, 3))])
+    if lit:
+        lumps = [[rgb("c03a10"), rgb("ff7a1a"), rgb("ffb040")], [rgb("8a2a0c"), rgb("c03a10"), rgb("ff7a1a")]]
+        bs.heap(lumps, 20211, count=12, joint=rgb("2a1a14"), weights=[3, 2])(c)
+    else:
+        lumps = [[rgb("1a1614"), rgb("26201c"), rgb("3a302a")], [rgb("121010"), rgb("1a1614"), rgb("26201c")]]
+        bs.heap(lumps, 20211, count=12, joint=rgb("0a0808"), weights=[3, 2])(c)
     return c.img
 
 
@@ -393,7 +394,7 @@ def pumpkin_face(lit):
 
 def stem():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("3a5a1a"), rgb("4a6a22"), rgb("2e4814")], 20421)
+    bs.fill(c, 0, 0, 15, 15, [rgb("3a5a1a"), rgb("4a6a22"), rgb("2e4814")], 20421)
     return c.img
 
 
@@ -401,13 +402,13 @@ def stem():
 
 def felt():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("16101c"), rgb("1e1626"), rgb("281e32")], 20501, [2, 3, 1])
+    bs.fill(c, 0, 0, 15, 15, [rgb("16101c"), rgb("1e1626"), rgb("281e32")], 20501, [2, 3, 1])
     return c.img
 
 
 def band():
     c = Canvas()
-    noise(c, 0, 0, 15, 15, [rgb("16101c"), rgb("1e1626")], 20511)
+    bs.fill(c, 0, 0, 15, 15, [rgb("16101c"), rgb("1e1626")], 20511)
     c.rect(0, 9, 15, 13, rgb("e07818"))
     c.rect(6, 8, 9, 14, rgb("d8b048"))
     c.rect(7, 10, 8, 12, rgb("1e1626"))
