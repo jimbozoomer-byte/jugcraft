@@ -38,10 +38,10 @@ import net.minecraft.world.phys.Vec3;
  * muzzle and turret ring; the Diesel Walker's hips; and the whole Observation Balloon envelope. Then it rides the
  * Observation Balloon up and checks the client eases after the server: the client's balloon (and so its rider) climbs
  * with it a tick at a time instead of standing still and jumping. Before the ride, the inventory with every war machine's
- * icon (tools/gun_icons.py). CI job {@code client}.
+ * 16x16 icon (its map in tools/item_icons/). CI job {@code client}.
  */
 public class BigGunsClientGameTests implements FabricClientGameTest {
-	/** The items whose icons tools/gun_icons.py draws, in the order they fill the hotbar and the inventory. */
+	/** The items whose icons are maps in tools/item_icons/, in the order they fill the hotbar and the inventory. */
 	private static final String[] ICONS = {"grand_mortar", "bastion_mortar", "fortress_rifle", "bastion_autocannon", "triple_battery",
 			"siege_mortar", "self_propelled_howitzer", "flak_gun", "landship", "diesel_walker", "zeppelin", "observation_balloon",
 			"range_finder", "great_shell", "heavy_shell", "flak_shell", "cannon_shell"};
