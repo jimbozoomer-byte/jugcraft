@@ -45,6 +45,9 @@ import net.minecraft.world.level.block.Block;
  * <p>Steampunk and Kaiser Armor (docs/features/steampunk-and-kaiser-armor.md) are bronze and steel armor in another
  * look: their materials are the metal's with only the equipment asset changed ({@link #restyle}), and a smithing
  * template ({@link #STYLE_TEMPLATES}) turns a plain piece into a styled one and back (data-driven recipes).
+ * <p>Armor-only tiers ({@link #ARMOR_TIERS}; docs/features/bloodthorn-armor.md) are the owner's own armor designs, each
+ * a new tier with numbers of its own, worn as a 3D model (client/WornModelLayer) with no flat layer. They have no recipe
+ * or drop yet, so for now they come only from the creative tab.
  */
 public final class JugcraftGear {
 	/** Metals with a full set of tools and armor (tools/gear.py: GEAR_TIERS). */
@@ -81,6 +84,11 @@ public final class JugcraftGear {
 	public static final ArmorMaterial KAISER_ARMOR = restyle(STEEL_ARMOR, "kaiser");
 	/** The styled armor's templates, by id, for the Ingredients tab. */
 	public static final Map<String, Item> TEMPLATES = new LinkedHashMap<>();
+	/** Armor-only tiers with numbers of their own, each worn as a 3D model (tools/gear.py: ARMOR_TIERS). */
+	public static final List<String> ARMOR_TIERS = List.of("bloodthorn");
+	/** Bloodthorn: a step above netherite (37, 3/6/8/3, 15, 3.0, 0.1) in durability, defense, toughness and knockback. */
+	public static final ArmorMaterial BLOODTHORN_ARMOR = new ArmorMaterial(40, defense(3, 7, 9, 3), 15,
+			SoundEvents.ARMOR_EQUIP_NETHERITE, 3.5F, 0.15F, repairs("bloodthorn"), asset("bloodthorn"));
 
 	/** Scuba gear: leather-like protection, repaired with rubber. */
 	public static final ArmorMaterial SCUBA_ARMOR = new ArmorMaterial(10, defense(1, 1, 2, 1), 10,
@@ -117,6 +125,7 @@ public final class JugcraftGear {
 		set("steel", STEEL, STEEL_ARMOR, 5.5F, -3.0F, -2.5F, 0.0F);
 		styled("steampunk", STEAMPUNK_ARMOR);
 		styled("kaiser", KAISER_ARMOR);
+		armorTier("bloodthorn", BLOODTHORN_ARMOR, true);
 		for (String id : STYLE_TEMPLATES) {
 			ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Jugcraft.id(id));
 			TEMPLATES.put(id, Registry.register(BuiltInRegistries.ITEM, key,
@@ -213,6 +222,18 @@ public final class JugcraftGear {
 		item(style + "_chestplate", properties -> new DescribedItem(properties.humanoidArmor(armor, ArmorType.CHESTPLATE)));
 		item(style + "_leggings", properties -> new DescribedItem(properties.humanoidArmor(armor, ArmorType.LEGGINGS)));
 		item(style + "_boots", properties -> new DescribedItem(properties.humanoidArmor(armor, ArmorType.BOOTS)));
+	}
+
+	/**
+	 * An armor-only tier's helmet, chestplate, leggings and boots: plain armor items in its own material, fire resistant
+	 * as netherite is if {@code fireResistant}. How they look is their 3D model (tools/&lt;tier&gt;_armor.py).
+	 */
+	private static void armorTier(String tier, ArmorMaterial armor, boolean fireResistant) {
+		Function<Item.Properties, Item.Properties> fire = properties -> fireResistant ? properties.fireResistant() : properties;
+		item(tier + "_helmet", properties -> new Item(fire.apply(properties.humanoidArmor(armor, ArmorType.HELMET))));
+		item(tier + "_chestplate", properties -> new Item(fire.apply(properties.humanoidArmor(armor, ArmorType.CHESTPLATE))));
+		item(tier + "_leggings", properties -> new Item(fire.apply(properties.humanoidArmor(armor, ArmorType.LEGGINGS))));
+		item(tier + "_boots", properties -> new Item(fire.apply(properties.humanoidArmor(armor, ArmorType.BOOTS))));
 	}
 
 	/** The same armor material worn in another look: every number, sound and repair tag is the base's. */

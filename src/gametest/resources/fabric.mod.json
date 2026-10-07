@@ -90,7 +90,8 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmsVGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIIGameTests",
-			"io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests"
+			"io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmorTiersGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
@@ -174,7 +175,8 @@
 			"io.github.jimbozoomer.jugcraft.test.WeaponArtsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsVIIClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.ArmorSetsClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.ArmorSetsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmorTiersClientGameTests"
 		]
 	},
 	"depends": {

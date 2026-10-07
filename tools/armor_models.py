@@ -85,7 +85,8 @@ VANILLA_SHELLS = {"chestplate": {"body": 0.5}, "leggings": {b: 1.0 for b in ("bo
 REACH_X, REACH_UP, FLOOR = 12.0, -14.0, 25.0   # FLOOR: 1 px into the ground, as vanilla boots
 
 # Modules that define armor sets, each with a SETS list.
-SET_MODULES = ("knight_armor",)   # the knight armor: the owner's steel design and its bronze variant
+SET_MODULES = ("knight_armor",      # the knight armor: the owner's steel design and its bronze variant
+               "bloodthorn_armor")  # Bloodthorn Armor: the owner's crimson design
 
 
 def face_name(name):

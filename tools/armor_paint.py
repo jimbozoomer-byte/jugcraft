@@ -77,6 +77,22 @@ BRONZE = {**STEEL,
           "gold_light": (236, 204, 96), "gold_dark": (196, 160, 60),
           "leather_light": (82, 56, 42), "leather_mid_light": (70, 48, 36), "leather_mid": (62, 42, 32),
           "leather_dark": (46, 31, 25), "leather_darkest": (32, 22, 18)}
+# Bloodthorn, the owner's crimson design (tools/bloodthorn_armor.py), sampled from their render. That render is lit as
+# Blockbench lights a model (front and back faces 0.8, sides 0.6, tops 1.0: its side faces measure 0.75 of the fronts,
+# and a lit top edge 1.22), so each tone is the median of its texel interiors on front and back faces divided by 0.8.
+# Its metal runs orange, coral, red, crimson, magenta, plum and dark plum (bright at the top of the armor, dark at the
+# feet); the ramp keeps six of them and folds the red, the rarest, into coral and crimson. The near-black purple
+# under-layer is the design's own, with a darker step added for the eye slits. The design has no leather or gold:
+# "gold" names its red, for trim (the owner's red between coral and crimson), and the leathers are a dark wine ramp
+# for straps, unused by the armor itself.
+BLOODTHORN = {
+    "light": (239, 92, 70), "mid_light": (232, 71, 72), "mid": (178, 34, 76), "dark": (150, 34, 89),
+    "seam": (109, 28, 78), "void": (80, 21, 64),
+    "gold_light": (212, 49, 71), "gold_dark": (176, 38, 62),
+    "leather_light": (110, 42, 58), "leather_mid_light": (94, 35, 52), "leather_mid": (80, 29, 46),
+    "leather_dark": (62, 23, 38), "leather_darkest": (44, 17, 29),
+    "under_light": (66, 55, 81), "under_mid": (44, 42, 55), "under_dark": (32, 31, 39), "under_darkest": (23, 21, 29),
+}
 # The smoke test's face colours (tools/armor_smoke.py): one hue per face, so a render shows which face is where.
 TEST = {**STEEL, "t_top": (230, 230, 90), "t_bottom": (90, 70, 40), "t_right": (220, 70, 70), "t_front": (80, 200, 90),
         "t_left": (70, 110, 230), "t_back": (200, 90, 210), "t_mark": (20, 20, 20), "t_rule": (255, 255, 255)}

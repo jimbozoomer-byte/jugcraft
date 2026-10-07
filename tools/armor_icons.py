@@ -1,6 +1,7 @@
-"""The bronze and steel armor's 16x16 inventory icons: the knight armor (tools/knight_armor.py) drawn small, in the
-owner's style for item icons (vanilla's own size, a one-pixel outline in the material's darkest tone, light from the
-top left, a few flat tones, chunky parts that read at a glance).
+"""The 3D armor sets' 16x16 inventory icons: the bronze and steel armor's, the knight armor (tools/knight_armor.py)
+drawn small, and Bloodthorn Armor's (tools/bloodthorn_armor.py, below), in the owner's style for item icons (vanilla's
+own size, a one-pixel outline in each part's darkest tone, never pure black, light from the top left, a few flat
+tones, chunky parts that read at a glance).
 
 Each piece is one hand-drawn map, tools/armor_icons/<piece>.txt: 16 lines of 16 symbols, which the owner can edit
 directly (lines starting with # are comments). A map names no colours, only what each pixel is made of, so one map
@@ -32,6 +33,24 @@ Symbols:
     w k b B     leather: outline, strap, plate, top edge ("leather_darkest", "leather_dark", "leather_mid",
                 "leather_light")
     u U         the dark under-layer: fill, top edge ("under_dark", "under_light")
+
+A set may instead have maps of its own, tools/armor_icons/<set>/<piece>.txt, with its own symbols (OWN): Bloodthorn
+Armor (tools/bloodthorn_armor.py) has bloodthorn/helmet.txt and so on, coloured from armor_paint.BLOODTHORN:
+    helmet      the boxy great helm cut by three slits (two wide, a narrower one below) under its crown of spikes: the
+                tall one at the centre, a long pair and a lower pair splayed wider
+    chestplate  the pauldrons tilted up toward the outside, the collar with its dark inside showing, the breastplate
+                running coral to crimson, and the magenta V over the dark waist
+    leggings    the dark belt; the tassets, lit at the top left with a nested L toward the inner lower corner, their
+                tops stepping down to the centre; the front plate with its dark strap; the diamond knee plates on the
+                dark knees
+    boots       two chunky boots in magenta and plum strips, notched dark at the top
+Their symbols:
+    .               transparent
+    O               the outline: the metal's "void" taken down to OUTLINE_LUMA
+    H L R M D S V   the metal, light to dark: "light" (orange), "mid_light" (coral), "gold_light" (the design's red,
+                    see armor_paint.BLOODTHORN), "mid" (crimson), "dark" (magenta), "seam" (plum), "void" (dark plum)
+    U m u x         the under-layer: "under_light", "under_mid", "under_dark", and "under_darkest", which is both the
+                    eye slits and the under-layer's own outline
 """
 import os
 
@@ -55,6 +74,11 @@ TONES = {"D": "dark", "M": "mid", "L": "mid_light", "H": "light", "F": "gold_dar
 # symbol -> tone, per metal: the bronze's brass fittings are its own plate on the steel
 FITTINGS = {"steel": {"R": "light", "r": "mid", "Q": "leather_mid"},
             "bronze": {"R": "gold_light", "r": "gold_dark", "Q": "gold_light"}}
+# Sets with maps of their own (armor_icons/<set>/<piece>.txt): set -> (palette, {symbol: tone name}); "O" is always the
+# metal's outline, its "void" taken down to OUTLINE_LUMA.
+OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "R": "gold_light", "M": "mid",
+                                               "D": "dark", "S": "seam", "V": "void", "U": "under_light",
+                                               "m": "under_mid", "u": "under_dark", "x": "under_darkest"})}
 
 
 def luma(colour):
@@ -77,28 +101,39 @@ def palette(metal):
     return {symbol: tuple(colour) + (255,) for symbol, colour in colours.items()}
 
 
-def path(piece):
-    return os.path.join(FOLDER, piece + ".txt")
+def own_palette(name):
+    """Symbol -> RGBA for a set with maps of its own (OWN)."""
+    tones, symbols = OWN[name]
+    colours = {symbol: tones[tone] for symbol, tone in symbols.items()}
+    colours["O"] = deepen(tones["void"])
+    return {symbol: tuple(colour) + (255,) for symbol, colour in colours.items()}
 
 
-def load(piece):
+def path(piece, folder=None):
+    """A map's file: armor_icons/<piece>.txt, or armor_icons/<folder>/<piece>.txt for a set with its own maps."""
+    return os.path.join(FOLDER, folder, piece + ".txt") if folder else os.path.join(FOLDER, piece + ".txt")
+
+
+def load(piece, folder=None):
     """The map's 16 rows (comment lines, starting with #, are skipped)."""
-    with open(path(piece), encoding="utf-8") as f:
+    with open(path(piece, folder), encoding="utf-8") as f:
         rows = [line.rstrip("\n") for line in f if line.strip() and not line.startswith("#")]
     if len(rows) != SIZE or any(len(row) != SIZE for row in rows):
-        raise ValueError(f"{path(piece)}: a map is {SIZE} rows of {SIZE} symbols, not {[len(r) for r in rows]}")
+        raise ValueError(f"{path(piece, folder)}: a map is {SIZE} rows of {SIZE} symbols, not {[len(r) for r in rows]}")
     return rows
 
 
 def icon(metal, piece):
-    """The 16x16 icon of `metal`_`piece` (an RGBA image)."""
-    colours = palette(metal)
+    """The 16x16 icon of `metal`_`piece` (an RGBA image): a knight metal from the shared maps, or a set of OWN from
+    its own."""
+    folder = metal if metal in OWN else None
+    colours = own_palette(metal) if folder else palette(metal)
     img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-    for y, row in enumerate(load(piece)):
+    for y, row in enumerate(load(piece, folder)):
         for x, symbol in enumerate(row):
             if symbol == ".":
                 continue
             if symbol not in colours:
-                raise ValueError(f"{path(piece)}: unknown symbol {symbol!r} at ({x}, {y})")
+                raise ValueError(f"{path(piece, folder)}: unknown symbol {symbol!r} at ({x}, {y})")
             img.putpixel((x, y), colours[symbol])
     return img

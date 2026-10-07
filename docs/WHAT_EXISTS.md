@@ -366,6 +366,11 @@ Every `FenceBlock` and `IronBarsBlock` has the properties `north_east`, `south_e
   - `smithing_transform` recipes both ways (`<style>_<piece>`, `<metal>_<piece>_from_<style>_<piece>`) and the shaped pattern recipes, from `tools/gear.py` `ARMOR_STYLES`; the pieces are in the `minecraft:<slot>_armor` tags;
   - art: `tools/armor_styles.py` (the styled looks, pinned pixel for pixel by `check_armor_looks`) and `tools/arms_variants_art.py` `pattern()` for the patterns. Bronze and steel armor wear the knight armor's 3D models instead ([knight-armor.md](features/knight-armor.md)); `tools/gear_textures.py` (`METAL_ARMOR_LOOK`) still writes their flat layers in these looks as an unused fallback;
   - record: [steampunk-and-kaiser-armor.md](features/steampunk-and-kaiser-armor.md).
+- **Armor-only tiers (the owner's armor designs):**
+  - items `bloodthorn_<helmet|chestplate|leggings|boots>`: plain armor items in `BLOODTHORN_ARMOR`, a step above netherite and fire resistant, repaired with netherite ingots (`#jugcraft:repairs_bloodthorn_gear`). No recipe or drop yet: creative only;
+  - `gear/JugcraftGear`: `ARMOR_TIERS` and `armorTier(...)`, from `tools/gear.py` `ARMOR_TIERS`. Each tier is worn only as a 3D model (`tools/bloodthorn_armor.py` on the knight armor's toolkit, drawn by `client/WornModelLayer`), so it has no flat layer and no equipment asset file; `check_mod_data.py` (`check_armor_tiers`) holds every piece to a 3D model and an icon;
+  - tests `ArmorTiersGameTests` and `ArmorTiersClientGameTests` cover every tier in the list;
+  - record: [bloodthorn-armor.md](features/bloodthorn-armor.md).
 - **Arms motion (batch 43, client):**
   - `client/arms/ArmsMotion` plays keyframed guards, combos and parry poses for the arms, in third person (torso, head, arms, legs and the item in the hand, with the off hand kept on two-handed weapons) and first person. `ArmsPose` is one player's pose, kept on the render state with Fabric's render state data.
   - Motion files: `assets/jugcraft/arms_motion/<kind>.json`, from `tools/arms_moves.py` on `tools/arms_motion.py`. Preview renders: `tools/arms_motion_preview.py`.

@@ -8,14 +8,20 @@ flat as Minecraft lights entities (two fixed lights: top 1.0, front and back 0.7
     python3 tools/armor_preview.py                         every registered set: 4 views x 3 poses, and a sheet
     python3 tools/armor_preview.py --set steel_knight --poses walk --views front,right
     python3 tools/armor_preview.py --set steel_knight --compare path/to/owner_design.png
+    python3 tools/armor_preview.py --set bloodthorn --compare path/to/owner_design.png
+                                                           a set with a REFERENCES layout gets each of the reference's
+                                                           views beside ours from the same camera, lit as Blockbench
+                                                           lights its renders and as the game does
     python3 tools/armor_preview.py --json vanguard_         entries already in worn_models.json (here the exosuit)
     python3 tools/armor_preview.py --set steel_knight --wearer --poses stand,walk,sneak
                                                            where the wearer shows through: the mannequin's skin green
                                                            and its outer layer (hat, jacket, sleeves, pants) magenta,
                                                            unlit, with the area that shows printed for each image
 Images go to build/armor_preview/ (git-ignored). Views: front, back, right (the model's right side), left,
-three_quarter (front-right, from a little above), top and bottom. Poses: stand, walk (arms and legs swung), sneak, owner (the
-owner's design render: arms 20 degrees out, head turned 17 degrees), joined with "+" (sneak+walk).
+three_quarter (front-right, from a little above), top, bottom, and the Bloodthorn render's two: front_left (front
+three-quarter from the model's left) and back_right (from behind, a little to its right). Poses: stand, walk (arms and
+legs swung), sneak, owner (the owner's knight design render: arms 20 degrees out, head turned 17 degrees), joined with
+"+" (sneak+walk).
 """
 import argparse
 import functools
@@ -37,7 +43,10 @@ OUT = ROOT / "build/armor_preview"
 BACKGROUND = (52, 55, 62)
 SCALE = 20                    # image pixels per model pixel
 VIEWS = {"front": (0, 0), "back": (180, 0), "right": (90, 0), "left": (270, 0), "three_quarter": (35, 15),
-         "top": (0, 90), "bottom": (0, -90)}   # (azimuth: 90 looks at the model's right side; elevation) in degrees
+         "top": (0, 90), "bottom": (0, -90),
+         # the owner's Bloodthorn render (REFERENCES): a front three-quarter from the model's left, and the back from a
+         # little to its right, both from about head height
+         "front_left": (-24, 0), "back_right": (162, 0)}   # (azimuth: 90 looks at the model's right side; elevation)
 DEFAULT_VIEWS = ("front", "back", "right", "three_quarter")
 DEFAULT_POSES = ("stand", "walk", "sneak")
 # Minecraft's entity lights (Lighting.DIFFUSE_LIGHT_0/1) in world space, y up; the model faces north (-z).
@@ -204,10 +213,15 @@ def project(points, view, perspective=None, target=(0.0, 16.0, 0.0)):
     return sx, sy + target[1], depth
 
 
-def shade(normal, unlit=False):
+def shade(normal, unlit=False, lighting="game"):
+    """A face's brightness: the game's entity lights, or ("blockbench") the flat face shading of Blockbench's
+    preview, measured on the owner's Bloodthorn render (top 1.0, bottom 0.5, front and back 0.8, sides 0.6; a turned
+    face blends them), for comparing with a render made there."""
     if unlit:
         return 1.0
     n = normal / (np.linalg.norm(normal) or 1)
+    if lighting == "blockbench":
+        return float(n[0] ** 2 * 0.6 + n[1] ** 2 * (1.0 if n[1] > 0 else 0.5) + n[2] ** 2 * 0.8)
     return min(1.0, 0.4 + 0.6 * sum(max(0.0, float(n @ light)) for light in LIGHTS))
 
 
@@ -222,8 +236,9 @@ def frame_of(quads, views, perspective=None, margin=1.5):
     return min(xs) - margin, max(xs) + margin, min(ys) - margin, max(ys) + margin
 
 
-def render(quads, view, scale=SCALE, frame=None, unlit=False, perspective=None, background=BACKGROUND):
-    """One view as an RGB image."""
+def render(quads, view, scale=SCALE, frame=None, unlit=False, perspective=None, background=BACKGROUND,
+           lighting="game"):
+    """One view as an RGB image (lighting: see shade())."""
     x0, x1, y0, y1 = frame or frame_of(quads, [view], perspective)
     width, height = int(math.ceil((x1 - x0) * scale)), int(math.ceil((y1 - y0) * scale))
     color = np.empty((height, width, 3), dtype=np.float32)
@@ -232,7 +247,7 @@ def render(quads, view, scale=SCALE, frame=None, unlit=False, perspective=None, 
     for pts, uv, normal, tex in quads:
         sx, sy, depth = project(pts, view, perspective)
         px, py = (sx - x0) * scale, (y1 - sy) * scale
-        light = shade(normal, unlit)
+        light = shade(normal, unlit, lighting)
         th, tw = tex.shape[:2]
         umin, umax = uv[:, 0].min() * tw + 1e-3, uv[:, 0].max() * tw - 1e-3
         vmin, vmax = uv[:, 1].min() * th + 1e-3, uv[:, 1].max() * th - 1e-3
@@ -310,6 +325,36 @@ def render_all(name, entries, textures, out_dir, views=DEFAULT_VIEWS, poses=DEFA
     return paths + [path]
 
 
+# Reference renders in more than one view, for --compare: set -> panels, each (label, crop box (x0, y0, x1, y1) of the
+# reference image, view (azimuth, elevation), camera distance, camera target height above the feet, image px per
+# model px at the target, (u, v) where the target lands in the image). A set with none gets compare()'s front view.
+REFERENCES = {
+    # the owner's Bloodthorn render (671 x 633): a front three-quarter from the model's front left at about head
+    # height, and the back from a little to the model's right; perspective cameras fitted to its two silhouettes
+    "bloodthorn": (("front three-quarter", (40, 90, 345, 633), (-24, 0), 60, 30, 11.61, (181.69, 240.06)),
+                   ("back", (346, 90, 651, 633), (162, 0), 60, 30, 11.09, (508.56, 250.45))),
+}
+
+
+def compare_panels(entries, textures, owner, path, panels, pose="stand"):
+    """A reference image's panels, each beside ours from its camera at its scale: lit as the reference's renderer
+    lights faces (Blockbench) and lit as the game does. One row per panel."""
+    ref = Image.open(owner).convert("RGB")
+    base = world_quads(entries, pose, textures)
+    tiles = []
+    for name, (x0, y0, x1, y1), view, distance, height, k, (u, v) in panels:
+        lift = np.array([0.0, height - 16.0, 0.0])   # project() aims at (0, 16, 0)
+        quads = [(pts - lift, uv, n, tex) for pts, uv, n, tex in base]
+        left, top = -u / k, 16.0 + v / k
+        frame = (left + x0 / k, left + x1 / k, top - y1 / k, top - y0 / k)
+        tiles.append(label(ref.crop((x0, y0, x1, y1)), f"owner's design, {name}"))
+        for lighting, text in (("blockbench", "ours, lit as their render"), ("game", "ours, lit as in game")):
+            tiles.append(label(render(quads, view, k, frame, False, distance, background=(48, 50, 58),
+                                      lighting=lighting), text))
+    sheet(tiles, 3).save(path)
+    return path
+
+
 def compare(entries, textures, owner, path, pose="owner", perspective=None):
     """The owner's design image beside our front view at the same scale (16 image pixels per model pixel, feet at the
     same height), unlit like their render, and lit as the game lights it."""
@@ -362,7 +407,10 @@ def main():
         for path in render_all(name, entries, textures, args.out / name, views, poses, args.scale, args.unlit,
                                args.perspective, args.phase, args.amount, args.wearer):
             print(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path)
-        if args.compare:
+        if args.compare and name in REFERENCES:
+            print(compare_panels(entries, textures, args.compare, args.out / name / f"{name}_compare.png",
+                                 REFERENCES[name]))
+        elif args.compare:
             print(compare(entries, textures, args.compare, args.out / name / f"{name}_compare.png",
                           perspective=args.perspective))
 
