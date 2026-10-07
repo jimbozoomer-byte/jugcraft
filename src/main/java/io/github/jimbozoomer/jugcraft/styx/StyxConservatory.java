@@ -26,7 +26,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
-/** Explicit, previewed operator placement. Natural world generation is a later stage of this feature. */
+/** New-town resident plus explicit, previewed placement for worlds without an assigned home. */
 public final class StyxConservatory {
 	public static final int WIDTH=67, HEIGHT=63, DEPTH=49, BLOCKS_PER_TICK=128, CURRENT_LAYOUT=3;
 	public record Placement(BlockPos offset, BlockState state) { }
@@ -95,11 +95,16 @@ public final class StyxConservatory {
 		StyxState state=StyxState.get(level);state.origin=Optional.of(origin.immutable());state.placed=0;state.layout=CURRENT_LAYOUT;state.setDirty();return true;
 	}
 	public static void tick(ServerLevel level) {
+		StyxTownDistrict.reserve(level);
 		StyxState state=StyxState.get(level);
 		if(state.origin.isEmpty() || state.resident.isPresent()) return;
 		BlockPos origin=state.origin.get();
 		if(!loaded(level,origin,state.layout)) return;
 		List<Placement> blocks=placements(state.layout);
+		if(state.townHome) {
+			if(!StyxTownDistrict.ready(level,origin)) return;
+			state.placed=blocks.size();
+		}
 		int end=Math.min(blocks.size(),state.placed+BLOCKS_PER_TICK);
 		state.setDirty(); // Retain progress even if a later entry in this batch is obstructed.
 		for(;state.placed<end;state.placed++) {

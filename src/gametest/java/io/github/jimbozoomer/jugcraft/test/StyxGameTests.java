@@ -96,4 +96,27 @@ public final class StyxGameTests {
 		h.assertTrue(!StyxConservatory.canPlace(h.getLevel(),pos).isEmpty(),"Placement rejects unavailable chunks");
 		h.assertTrue(!StyxConservatory.loaded(h.getLevel(),pos),"Validation does not load chunks");h.succeed();
 	}
+	@GameTest public void townDistrictIsOptInForOldSavesAndDoesNotOverlapCity(GameTestHelper h) {
+		var old = new com.google.gson.JsonObject();old.add("origin",BlockPos.CODEC.encodeStart(JsonOps.INSTANCE,new BlockPos(64,70,32)).getOrThrow());
+		var legacy = io.github.jimbozoomer.jugcraft.town.TownState.CODEC.parse(JsonOps.INSTANCE,old).getOrThrow();
+		h.assertTrue(!legacy.styxDistrict(),"Existing towns never gain an automatic land overwrite");
+		legacy.place(legacy.origin(),true);
+		legacy.markBuilt(new net.minecraft.world.level.ChunkPos(16,6).pack());
+		var saved = io.github.jimbozoomer.jugcraft.town.TownState.CODEC.encodeStart(JsonOps.INSTANCE,legacy).getOrThrow();
+		var restored = io.github.jimbozoomer.jugcraft.town.TownState.CODEC.parse(JsonOps.INSTANCE,saved).getOrThrow();
+		h.assertTrue(restored.styxDistrict() && restored.built(new net.minecraft.world.level.ChunkPos(16,6).pack()),"District reservation and chunk progress survive restart");
+		var town = io.github.jimbozoomer.jugcraft.town.TownData.get();
+		for(var block:StyxConservatory.placements(StyxTownDistrict.LAYOUT)) {
+			int x=block.offset().getX()+StyxTownDistrict.X,z=block.offset().getZ()+StyxTownDistrict.Z;
+			h.assertTrue(x>=town.size && StyxTownDistrict.contains(x,z),"Buildings fit their reserved plot outside all existing city blocks");
+		}
+		for(int x=StyxTownDistrict.ROAD_X;x<StyxTownDistrict.X;x++) for(int z=94;z<=98;z++) for(int y=1;y<=3;y++)
+			h.assertTrue(town.index(x,y,z)<=1,"The road connector does not intersect gate walls or buildings");
+		StyxState resident = new StyxState();resident.townHome=true;resident.layout=3;resident.origin=java.util.Optional.of(StyxTownDistrict.home(restored.origin()));
+		var home = StyxState.CODEC.encodeStart(JsonOps.INSTANCE,resident).getOrThrow();
+		h.assertTrue(StyxState.CODEC.parse(JsonOps.INSTANCE,home).getOrThrow().townHome,"Town-built resident retains its construction mode");
+		home.getAsJsonObject().remove("town_home");
+		h.assertTrue(!StyxState.CODEC.parse(JsonOps.INSTANCE,home).getOrThrow().townHome,"Earlier manual homes keep manual construction");
+		h.succeed();
+	}
 }

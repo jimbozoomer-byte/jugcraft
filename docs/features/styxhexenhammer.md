@@ -138,18 +138,19 @@ Example lines:
 
 His first magic is atmospheric: staff glow, a brief ritual, and a small hovering mote over a specimen. Do not introduce a new spell resource system for these effects. Gardening animations do not create valuable drops or harvest nearby player farms. He is a persistent, friendly landmark resident using the town's established NPC survivability policy; a future combat/quest design can expand his abilities separately.
 
-## Placement and persistence (long-term target)
+## Placement and persistence
 
-Propose **one named resident and one conservatory per Overworld**, identified by saved home position and resident UUID. Avoid random duplicate Styxhexenhammers in repeated structures.
+New spawn cities now reserve Styx's observatory and greenhouse as a district outside the east gate. Follow the cobblestone road east to reach the garden, tower library and greenhouse. The owner-reference layout occupies a 67 x 49 plot; the original 192-block town and its NPC indexes stay in place.
 
-- New-world placement seeks dry, gentle ground in temperate woodland or a meadow edge, initially targeting roughly 800-1,600 blocks from world spawn. This is a discovery destination; the spawn town remains the first landmark.
-- Use a fixed candidate budget and clear fallback: if no suitable location is found, keep the world playable and offer operator placement. Never search indefinitely or generate a broad area just to choose a site.
-- Keep a separation margin from the town, spawn village, protected builds, and other landmark footprints. Do not flatten mountains or build underwater merely to satisfy distance.
-- Existing saves receive the content through explicit operator placement in a reviewed empty area, avoiding automatic overwrites of established builds. A prototype placement command must preview its footprint and reject protected/occupied sites.
-- Natural location selection should follow after the command-placed building, NPC, and persistence have passed testing. The first draft implementation may expose only the explicit placement path, clearly labeled.
-- Persist versioned home data, resident UUID, routine destination, and each player's starter-collection claim. Resume a routine safely after reload.
-- Never infer that a resident is missing solely because its chunk is unloaded. Replacement rules must avoid duplicate entities and preserve identity/claims.
-- Feature disable stops new generation/acquisition; existing NPC, plants, items, and building registrations remain valid. Earned flowers and placed structures persist through every season.
+- The town's fixed candidate search samples the new district as well as the city, rejects wet or uneven sites, and keeps it clear of spawn. Construction uses the existing one-loaded-chunk-per-tick queue and saves completed chunk keys; it never forces chunks to load.
+- One home and one persistent resident are reserved per Overworld. Styx arrives only after the district's chunks finish building. The district and connecting road share the town's protection and hostile-spawn exclusion.
+- Existing saved towns default to no district, preventing automatic changes to established builds. Existing command-placed homes and their saved placement cursors stay valid. Operator placement remains available for an empty reviewed site; an existing home prevents a second reservation.
+- New `styx_district` and `town_home` saved fields default to false for old saves. A partially saved reservation repairs itself on the next tick. Resident UUID and per-player cutting claims remain stable through save/reopen.
+- One loaded NPC follows bounded work spots; unloaded chunks are never evidence that the resident should be duplicated. Plants, earned items and buildings remain year-round content.
+
+![District outside the east gate](../images/styx-city-district.png)
+![Connecting road](../images/styx-city-east-road.png)
+![Styx inside his observatory](../images/styx-city-resident.png)
 
 ## Connections, balance, and bounded work
 
@@ -166,7 +167,7 @@ Use server-owned interaction checks for distance, player identity, claim state, 
 1. **Appearance prototype:** custom entity/model, deterministic original texture source, reference comparison screenshots, persistent name and restrained idle/walk animation. Review likeness before expanding behavior.
 2. **Conservatory and collection:** reusable building asset, eight distinct plant models, garden blocks/items, growth and replanting, Creative access, and safe operator placement with the NPC at home.
 3. **Resident behavior:** bounded daily routine, atmospheric magic, original dialogue, and safe per-player starter collection, with saved state and unload/reload tests.
-4. **World discovery:** bounded location selection, overlap checks, one-home persistence, new-world tests, and existing-save opt-in placement. Record any deferred stage accurately in the implementation PR.
+4. **Spawn-city district:** bounded town placement, east-gate road, one-home persistence, new-world tests and safe defaults for existing saves.
 
 Use the Minecraft/Fabric/Java versions actually pinned on main at implementation time. No version bump or new runtime dependency is needed for this proposal. Reuse entity/rendering patterns from `Townsfolk` and its client model while keeping Styxhexenhammer's special model and behavior in a dedicated package; do not alter every town resident to add his appearance. Consult `TownPlanner`/`TownBuilder` for bounded landmark placement and the existing flora generators for plants.
 
@@ -191,7 +192,7 @@ Validation on Windows with Java 25.0.4.1, Minecraft 26.3, Fabric Loader 0.19.3, 
 The remaining acceptance checklist includes broader release checks; unlisted tests must not be assumed to have passed.
 
 - Source assets: `tools/styx.py` (character and flower geometry, player-face pixels, flower sprites and data), `tools/styx_structure.py` / `tools/styx_structure_v3.py` (current buildings), and `tools/styx_structure_v1.py` / `tools/styx_structure_v2.py` (frozen legacy homes). `python tools/generate_material_data.py` regenerates the JSON; `python tools/styx.py` regenerates these textures, and the general texture entry point includes them too. Keep the legacy blueprint and its ordering frozen so saved placement cursors remain valid.
-- Server test class: `StyxGameTests`; client test class: `StyxClientGameTests`. The client creates its own disposable world and never modifies a player save.
+- Server test class: `StyxGameTests`; client test classes: `StyxClientGameTests` and `StyxTownClientGameTests`. The client creates its own disposable world and never modifies a player save.
 - Actual two-client dedicated-server play, crash/reconnect during a claim, full chunk unload/reload and long-term performance measurements remain unverified. The SavedData codec round-trip is not a substitute for those tests.
 - Exact likeness has not been signed off by the owner. The supplied image remains the acceptance reference; the unseen rear is an original interpretation.
 
@@ -205,3 +206,7 @@ The remaining acceptance checklist includes broader release checks; unlisted tes
 - **Season/upgrade:** year-round plants and resident; no lost items/builds after season change, config disable, or restart; stable IDs and saved-data schema.
 
 Open design choices for later review: growth balancing, further building detail, dialogue presentation, discovery hints, and future flower recipes. Those do not block the appearance prototype. Visual fidelity to the attached character remains the highest-priority art requirement.
+
+### Spawn-city integration verification (October 7)
+
+The local `StyxTownClientGameTests` passed in a disposable normal world: every authored non-air building block, walkable/protected connecting road, greenhouse hostile exclusion, single-home reservation, and the same resident UUID after save/reopen. The three city screenshots above were captured in that run and inspected. Seven focused server tests also cover the legacy/default saved fields and district layout; full combined validation is reported by the PR checks. Existing player worlds were not edited.
