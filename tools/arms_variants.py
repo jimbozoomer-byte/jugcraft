@@ -10,9 +10,12 @@ own look, in two lines:
 A variant is an ArmItem of its kind (weapons/JugcraftArms.java VARIANTS), so its swing, reach, trait, two-handed blow,
 weapon art and motion are its kind's; its line adds a perk or a boon (BOONS), worked on the server in ArmItem. The
 numbers here and in Java are kept together by tools/check_mod_data.py (check_arms_variants). Art:
-tools/arms_variants_art.py.
+tools/arms_variants_art.py; the Runebound arms are smooth meshes in the hand, with icons rendered from them
+(tools/arms_mesh.py).
 """
 import arms
+import arms_heads
+import arms_mesh
 import arms_variants_art
 
 MOD = "jugcraft"
@@ -150,8 +153,8 @@ def trophies(boss):
 
 
 def textures():
-    """Every variant's icon and its 3D model's texture, and the patterns' sprites."""
-    return [n for name, *_ in VARIANTS for n in (name, f"{name}_model")] + patterns()
+    """Every variant's icon and its 3D model's texture, the patterns' sprites, and the Runebound meshes' textures."""
+    return [n for name, *_ in VARIANTS for n in (name, f"{name}_model")] + patterns() + [arms_mesh.ATLAS, arms_mesh.RUNE]
 
 
 def item_tags():
@@ -217,11 +220,24 @@ def write_all(write, assets, data, lang, condition):
         lang[f"item.{MOD}.{name}"] = display
         # The icon in inventories, frames, on the ground and on shelves; in the hand, the 3D model.
         write(models / f"{name}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": f"{MOD}:item/{name}"}})
-        write(models / f"{name}_in_hand.json", held_model(name))
+        if name in arms_mesh.NAMES:
+            # A smooth mesh (tools/arms_mesh.py), its box model kept beside it as a fallback. The shared writer does
+            # to the box elements what it does to every model; the file is then rewritten a quad a line.
+            write(models / f"{name}_in_hand.json", arms_mesh.held_model(name, held_model(name)))
+            arms_mesh.compact(models / f"{name}_in_hand.json")
+        else:
+            write(models / f"{name}_in_hand.json", held_model(name))
         model = {"type": "minecraft:select", "property": "minecraft:display_context",
                  "cases": [{"when": ["gui", "ground", "fixed", "on_shelf"],
                             "model": {"type": "minecraft:model", "model": f"{MOD}:item/{name}"}}],
                  "fallback": {"type": "minecraft:model", "model": f"{MOD}:item/{name}_in_hand"}}
+        if name in arms_heads.VARIANT_HEADS:
+            # Its swinging head (tools/arms_heads.py): the spine and skull models, picked by FlailHeads' render copies.
+            _grip, unit, _g, _e = arms_variants_art.head_layout(name, arms.KINDS[kind_]["held"])
+            for part, head_model in arms_heads.models(arms_heads.VARIANT_HEADS[name], unit).items():
+                head_model["textures"] = {"particle": f"{MOD}:item/{name}_model", "tex": f"{MOD}:item/{name}_model"}
+                write(models / f"{name}_{part}.json", head_model)
+            model = arms_heads.definition(name, model)
         write(assets / "items" / f"{name}.json", {"model": model, "swap_animation_scale": arms.KINDS[kind_]["held"]})
         if at in STYLES:
             style = STYLES[at]
@@ -232,10 +248,13 @@ def write_all(write, assets, data, lang, condition):
 
 
 def draw_all(save):
-    """Each variant's icon and model texture (tools/arms_variants_art.py), and the patterns' sprites."""
+    """Each variant's icon and model texture (tools/arms_variants_art.py; the Runebound arms' icons rendered from their
+    meshes, tools/arms_mesh.py), the patterns' sprites, and the meshes' painted atlas and glowing rune strip."""
     for name, kind_, *_ in VARIANTS:
         held = arms.KINDS[kind_]["held"]
-        save(arms_variants_art.draw(name, held), "item", name)
+        save(arms_mesh.draw(name) if name in arms_mesh.NAMES else arms_variants_art.draw(name, held), "item", name)
         save(arms_variants_art.model(name, held)[0], "item", f"{name}_model")
+    save(arms_mesh.atlas(), "item", arms_mesh.ATLAS)
+    save(arms_mesh.rune_strip(), "item", arms_mesh.RUNE, animation=arms_mesh.rune_animation())
     for style, info in STYLES.items():
         save(arms_variants_art.pattern(style), "item", info["pattern"])

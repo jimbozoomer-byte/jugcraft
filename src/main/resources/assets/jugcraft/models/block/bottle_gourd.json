@@ -116,16 +116,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#stem"
+          "texture": "#stem",
+          "uv": [
+            7.5,
+            0.0,
+            8.5,
+            1.5
+          ]
         },
         "south": {
-          "texture": "#stem"
+          "texture": "#stem",
+          "uv": [
+            7.5,
+            0.0,
+            8.5,
+            1.5
+          ]
         },
         "east": {
-          "texture": "#stem"
+          "texture": "#stem",
+          "uv": [
+            7.5,
+            0.0,
+            8.5,
+            1.5
+          ]
         },
         "west": {
-          "texture": "#stem"
+          "texture": "#stem",
+          "uv": [
+            7.5,
+            0.0,
+            8.5,
+            1.5
+          ]
         },
         "up": {
           "texture": "#stem"

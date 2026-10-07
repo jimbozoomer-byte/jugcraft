@@ -49,6 +49,11 @@ import mech
 import landship
 import artillery
 import tower_guns
+import fortifications
+import bunkerworks
+import fire_control
+import raiders
+import armoured_walker
 import gear
 import arms
 import arms_variants
@@ -168,7 +173,7 @@ def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
-                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks()):
+                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -189,7 +194,7 @@ def check_assets(registered):
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
-                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -326,7 +331,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -530,7 +535,7 @@ def check_fluid_recipes(registered):
 
 
 # The diagonal walls (tools/diagonal_connections.py), which join #minecraft:walls.
-DIAGONAL_WALLS = {dg.DIAGONAL_WALL.format(name) for name in dg.VANILLA_WALLS}
+DIAGONAL_WALLS = {dg.DIAGONAL_WALL.format(name) for _, name in dg.all_walls()}
 
 
 def check_tags():
@@ -541,7 +546,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -719,6 +724,34 @@ def check_walker():
         err("assets/jugcraft/walker_quads.json is missing: run tools/generate_material_data.py")
 
 
+def check_armoured_walker():
+    """walker/ArmouredWalker.java against tools/armoured_walker.py: the cannon, ram, toughness and size, the muzzle, and the
+    joints its renderers draw the parts at."""
+    java = (JAVA_ROOT / "walker" / "ArmouredWalker.java").read_text(encoding="utf-8")
+    for const in ("CANNON_COOLDOWN", "CANNON_SPEED", "RAM_DAMAGE", "RAM_KNOCKBACK", "RAM_REACH", "RAM_COOLDOWN", "HEALTH",
+                  "WIDTH", "HEIGHT"):
+        value = getattr(armoured_walker, const)
+        literal = f"{value}F" if const in ("WIDTH", "HEIGHT") else str(value)
+        if f" {const} = {literal};" not in java:
+            err(f"ArmouredWalker.{const} differs from tools/armoured_walker.py ({literal})")
+    mx, my, mz = (v / 16 for v in armoured_walker.MUZZLE)
+    if f"MUZZLE = new Vec3({mx:g}, {my:g}, {mz:g});" not in java.replace(".0,", ",").replace(".0)", ")"):
+        err(f"ArmouredWalker.MUZZLE differs from tools/armoured_walker.py ({mx}, {my}, {mz})")
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    joints = [*armoured_walker.HIPS.values(), armoured_walker.SHOULDER, armoured_walker.PISTON]
+    for name in ("ArmouredWalkerParts.java",):
+        text = (client / name).read_text(encoding="utf-8") if (client / name).is_file() else ""
+        for joint in joints:
+            if "{" + ", ".join(str(v) for v in joint) + "}" not in text:
+                err(f"{name} lacks the joint {joint} from tools/armoured_walker.py")
+        if f"PISTON_STROKE = {armoured_walker.PISTON_STROKE}" not in text:
+            err(f"{name} lacks PISTON_STROKE = {armoured_walker.PISTON_STROKE} from tools/armoured_walker.py")
+    quads = load(ASSETS / "armoured_walker_quads.json") or {}
+    for part in armoured_walker.parts():
+        if not quads.get(part):
+            err(f"armoured_walker_quads.json lacks {part}: run tools/generate_material_data.py")
+
+
 def check_artillery():
     """artillery/JugcraftArtillery.java against tools/artillery.py: the shells, guns, balloon and range finder, and the
     renderers' pivots and the howitzer's track."""
@@ -783,6 +816,324 @@ def check_tower_guns():
             err(f"{gun} fires an unknown shell {g['shell']}")
     if not (ASSETS / "tower_gun_quads.json").is_file():
         err("assets/jugcraft/tower_gun_quads.json is missing: run tools/generate_material_data.py")
+
+
+def _renderer(name):
+    path = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / f"{name}.java"
+    return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+
+def check_gun_culling(reach):
+    """Each big gun's, the Landship's and the Diesel Walker's culling box (its renderer's getBoundingBoxForCulling, the
+    entity's box inflated) holds the whole model over its travel, or the game stops drawing a raised barrel whenever the
+    gun's own box is out of view (5 October 2026: the owner found barrels "invisible")."""
+    pattern = r"getBoundingBoxForCulling\(%s \w+, float partialTick\) \{[^}]*?inflate\(([\d.]+), ([\d.]+), ([\d.]+)\)"
+    sizes = {gun: (g["size"] - 0.1, g["height"], "TowerGunRenderer", "TowerGun") for gun, g in tower_guns.GUNS.items()}
+    registry = (JAVA_ROOT / "artillery" / "JugcraftArtillery.java").read_text(encoding="utf-8")
+    for gun, cls in (("siege_mortar", "SiegeMortar"), ("self_propelled_howitzer", "SelfPropelledHowitzer"),
+                     ("flak_gun", "FlakGun")):
+        found = re.search(r'entity\("%s",[^;]*?\.sized\(([\d.]+)F, ([\d.]+)F\)' % gun, registry)
+        if not found:
+            err(f"JugcraftArtillery registers no size for {gun}")
+            continue
+        sizes[gun] = (float(found.group(1)), float(found.group(2)), "ArtilleryRenderers", cls)
+    sizes["landship"] = (landship.WIDTH, landship.HEIGHT, "LandshipRenderer", "Landship")
+    sizes["diesel_walker"] = (mech.WIDTH, mech.HEIGHT, "DieselWalkerRenderer", "DieselWalker")
+    for name, (top, bottom, radius) in reach.items():
+        width, height, renderer, cls = sizes[name]
+        found = re.search(pattern % cls, _renderer(renderer))
+        if not found:
+            err(f"{renderer} has no culling box for {cls}")
+            continue
+        across, up = min(float(found.group(1)), float(found.group(3))), float(found.group(2))
+        if top / 16 > height + up or -bottom / 16 > up or radius / 16 > width / 2 + across:
+            err(f"{renderer}'s culling box for {cls} (inflate {found.group(1)}, {up}, {found.group(3)}) does not hold "
+                f"{name} over its travel: it reaches {top / 16:.2f} blocks up and {radius / 16:.2f} out")
+
+
+def check_gun_renderers():
+    """The renderers pose the guns, the Landship and the Diesel Walker as tools/gun_poses.py checks them: the recoil,
+    elevation and swing numbers match, and each cradle is drawn before the recoil and its barrel after."""
+    text = _renderer("ArtilleryRenderers")
+    for cls, recoil in (("SiegeMortar", artillery.MORTAR_RECOIL), ("SelfPropelledHowitzer", artillery.HOWITZER_RECOIL),
+                        ("FlakGun", artillery.FLAK_RECOIL)):
+        if not re.search(r"extractRenderState\(%s gun, GunState state, float partialTick\) \{[^}]*?extract\(gun, state, "
+                         r"partialTick, %s\)" % (cls, f"{float(recoil)}F"), text):
+            err(f"ArtilleryRenderers' recoil for {cls} differs from tools/artillery.py ({recoil})")
+    for cls, (low, high) in (("SiegeMortar", artillery.MORTAR_PITCH), ("SelfPropelledHowitzer", artillery.HOWITZER_PITCH),
+                             ("FlakGun", artillery.FLAK_PITCH)):
+        java = (JAVA_ROOT / "artillery" / f"{cls}.java").read_text(encoding="utf-8")
+        for limit, value in (("minPitch", low), ("maxPitch", high)):
+            if not re.search(r"float %s\(\) \{\s*return %s;" % (limit, f"{float(value)}F"), java):
+                err(f"{cls}.{limit} differs from tools/artillery.py ({value})")
+    for cradle, barrel in (("mortar_cradle", "mortar_barrel"), ("howitzer_gun", "howitzer_barrel"), ("flak_head", "flak_barrels")):
+        if not re.search(r'draw\("%s"[^;]*;\s*pose\.translate\(0, 0, -state\.recoil / 16\.0F\);\s*draw\("%s"' % (cradle, barrel), text):
+            err(f"ArtilleryRenderers must draw {cradle} before the recoil and {barrel} after it")
+    if not re.search(r'draw\(state\.id \+ "_cradle"[^;]*;\s*pose\.translate\(0, 0, -state\.recoil / 16\.0F\);\s*'
+                     r'draw\(state\.id \+ "_barrel"', _renderer("TowerGunRenderer")):
+        err("TowerGunRenderer must draw each gun's cradle before the recoil and its barrel after it")
+    ship = (JAVA_ROOT / "landship" / "Landship.java").read_text(encoding="utf-8")
+    for name, value in (("BARREL_UP", landship.BARREL_PITCH[0]), ("BARREL_DOWN", landship.BARREL_PITCH[1])):
+        if f" {name} = {float(value)}F;" not in ship:
+            err(f"Landship.{name} differs from tools/landship.py BARREL_PITCH ({value})")
+    if f"getY() + {round((landship.STACK_TOP + 1) / 16, 1)}," not in ship:
+        err(f"Landship's stack smoke should rise from getY() + {round((landship.STACK_TOP + 1) / 16, 1)} (tools/landship.py "
+            f"STACK_TOP)")
+    if f" RECOIL = {float(landship.RECOIL)}F;" not in _renderer("LandshipRenderer"):
+        err(f"LandshipRenderer.RECOIL differs from tools/landship.py ({landship.RECOIL})")
+    walker = _renderer("DieselWalkerRenderer")
+    for line in (f" LEG_SWING = {float(mech.LEG_SWING)}F;", f" PUNCH_SWING = {float(mech.PUNCH_SWING)}F;",
+                 f"legSwing * {mech.ARM_FOLLOW}F", f"state.drilling ? -{float(mech.DRILL_RAISE)}F"):
+        if line not in walker:
+            err(f"DieselWalkerRenderer lacks '{line.strip()}' from tools/mech.py")
+
+
+def check_quad_names():
+    """client/DecorQuads loads every quad file it lists into one table by part name, later files overwriting earlier
+    ones, so a part name used in two files draws the wrong model (until 5 October 2026 the Observation Balloon's basket
+    replaced the hot-air balloons'). Every listed file must exist and every part name must be unique across them."""
+    java = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "DecorQuads.java"
+    files = re.findall(r'Jugcraft\.id\("([a-z0-9_]+\.json)"\)', java.read_text(encoding="utf-8")) if java.is_file() else []
+    if not files:
+        err("client/DecorQuads.java lists no quad files")
+    owner = {}
+    for name in files:
+        parts = load(ASSETS / name)
+        if parts is None:
+            err(f"assets/{MOD}/{name}, listed in DecorQuads, is missing: run tools/generate_material_data.py")
+            continue
+        for part in parts:
+            if part in owner:
+                err(f"Quad part '{part}' is in both {owner[part]} and {name}: DecorQuads would draw the second for both")
+            owner.setdefault(part, name)
+
+
+def check_gun_art():
+    """The 5 October 2026 art fixes for the big guns, the Landship, the Diesel Walker and the balloons stay fixed: no
+    moving gun part flickers against or cuts through its mount over its whole travel (tools/gun_poses.py); every quad
+    texture exists and block ones are opaque; each decal (port cover, hazard sign, bore) is drawn whole, UV 0 to 1; the
+    Observation Balloon's envelope is a closed, outward-facing mesh on its own opaque texture; nothing opaque is drawn
+    through the translucent "nocull" path (opaque two-sided quads are "cutout", which 26.3 draws from both sides); and every
+    icon tools/gun_icons.py draws is committed as drawn, inside its one-pixel margin (CI does not regenerate textures)."""
+    import gun_icons
+    import gun_poses
+    for kind in gun_icons.KINDS:
+        path = ASSETS / "textures" / "item" / f"{kind}.png"
+        if not path.is_file():
+            err(f"textures/item/{kind}.png is missing: run tools/generate_textures.py")
+            continue
+        try:
+            drawn = gun_icons.draw(kind)
+        except ValueError as problem:
+            err(f"tools/gun_icons.py cannot draw {kind}: {problem}")
+            continue
+        with Image.open(path) as img:
+            saved = img.convert("RGBA")
+        if saved.size != drawn.size or saved.tobytes() != drawn.tobytes():
+            err(f"textures/item/{kind}.png differs from tools/gun_icons.py's drawing: run tools/generate_textures.py")
+    files = ("artillery_quads.json", "tower_gun_quads.json", "landship_quads.json", "walker_quads.json", "balloon_quads.json")
+    quads = {name: load(ASSETS / name) or {} for name in files}
+    opacity = {}
+
+    def alpha(texture):
+        if texture not in opacity:
+            path = ASSETS / "textures" / (f"{texture}.png" if "/" in texture else f"block/{texture}.png")
+            if not path.is_file():
+                opacity[texture] = None
+            else:
+                with Image.open(path) as img:
+                    histogram = img.convert("RGBA").getchannel("A").histogram()
+                    lowest = next(v for v in range(256) if histogram[v])
+                    opacity[texture] = (lowest, any(histogram[1:255]))
+        return opacity[texture]
+
+    for name, parts in quads.items():
+        for part, qs in parts.items():
+            for quad in qs:
+                texture = quad["texture"]
+                found = alpha(texture)
+                if found is None:
+                    err(f"{name}'s {part} draws missing texture {texture}")
+                    break
+                if quad.get("nocull") and not found[1]:
+                    err(f"{name}'s {part} draws {texture}, which has no part-transparent pixels, through the translucent "
+                        f"'nocull' path: flag it 'cutout' (26.3's entityCutout draws both sides)")
+                    break
+                if "/" not in texture and not quad.get("cutout") and not quad.get("nocull") and found[0] < 255:
+                    err(f"{name}'s {part} draws {texture}, which has see-through pixels, as a solid quad")
+                    break
+                if texture in ("tg_port", "tg_warning", "tg_bore"):
+                    us = [v[3] for v in quad["vertices"]]
+                    vs = [v[4] for v in quad["vertices"]]
+                    if min(us) != 0 or max(us) != 1 or min(vs) != 0 or max(vs) != 1:
+                        err(f"{name}'s {part} cuts the {texture} decal (UV {min(us)}..{max(us)}, {min(vs)}..{max(vs)}): "
+                            f"give it a '!' face")
+                        break
+    moving = {}
+    for name in ("artillery_quads.json", "tower_gun_quads.json", "landship_quads.json", "walker_quads.json"):
+        moving.update(quads[name])
+    needed = [part for part in gun_poses.sources(artillery, tower_guns, landship, mech) if part not in moving]
+    if needed:
+        err(f"Quads missing for {', '.join(needed[:6])}: run tools/generate_material_data.py")
+    else:
+        found = gun_poses.problems(artillery, tower_guns, landship, mech, moving)
+        for problem in found[:12]:
+            err(problem)
+        if len(found) > 12:
+            err(f"... and {len(found) - 12} more poses where a gun, the Landship or the Diesel Walker flickers or cuts "
+                f"through itself")
+        check_gun_culling(gun_poses.reach(artillery, tower_guns, landship, mech, moving))
+    check_gun_renderers()
+    envelope = quads["artillery_quads.json"].get("balloon_envelope", [])
+    path = ASSETS / "textures" / f"{artillery.ENVELOPE_TEXTURE}.png"
+    if not path.is_file():
+        err(f"The Observation Balloon's envelope texture {artillery.ENVELOPE_TEXTURE} is missing: run tools/generate_textures.py")
+    elif Image.open(path).size != artillery.ENVELOPE_SIZE:
+        err(f"{path.relative_to(ROOT)} must be {artillery.ENVELOPE_SIZE[0]} by {artillery.ENVELOPE_SIZE[1]}")
+    edges = {}
+    for quad in envelope:
+        if quad["texture"] != artillery.ENVELOPE_TEXTURE or quad.get("nocull") or quad.get("cutout"):
+            err("The Observation Balloon's envelope must be plain (culled) quads on its own texture")
+            break
+        v = [tuple(round(c, 2) for c in p[:3]) for p in quad["vertices"]]
+        a = [v[2][k] - v[0][k] for k in range(3)]
+        b = [v[3][k] - v[1][k] for k in range(3)]
+        n = (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+        if sum(n[k] * quad["normal"][k] for k in range(3)) <= 0:
+            err("An Observation Balloon envelope quad is wound against its normal (it would be culled from outside)")
+            break
+        for k in range(4):
+            if v[k] != v[(k + 1) % 4]:
+                edges[(v[k], v[(k + 1) % 4])] = edges.get((v[k], v[(k + 1) % 4]), 0) + 1
+    open_edges = sum(1 for (p, q), count in edges.items() if count != 1 or edges.get((q, p)) != 1)
+    if envelope and open_edges:
+        err(f"The Observation Balloon's envelope is not closed: {open_edges} edges lack a matching neighbour")
+def check_raiders():
+    """raiders/*.java against tools/raiders.py: every kind's stats, the weapons' and raids' numbers, the party table and
+    the generated skins, paint and quads."""
+    folder = JAVA_ROOT / "raiders"
+    java = (folder / "JugcraftRaiders.java").read_text(encoding="utf-8")
+    raids = (folder / "RaiderRaids.java").read_text(encoding="utf-8")
+    for kind, (_, hp, dmg, armour, speed) in raiders.INFANTRY.items():
+        if f'infantry("{kind}", {hp}, {dmg}, {armour}, {speed:.2f});' not in java:
+            err(f"JugcraftRaiders.java does not give {kind} the stats tools/raiders.py does")
+    for kind, (_, hp, dmg, armour, speed, width, height) in raiders.MACHINES.items():
+        if f'machine("{kind}", {hp}, {dmg}, {armour}, {speed:.2f},' not in java or f".sized({width}F, {height}F)" not in java:
+            err(f"JugcraftRaiders.java does not give {kind} the stats or size tools/raiders.py does")
+    numbers = {"GRENADE_RADIUS": raiders.GRENADE_BLAST[0], "GRENADE_DAMAGE": f"{raiders.GRENADE_BLAST[1]}F",
+               "BOMB_RADIUS": raiders.BOMB_BLAST[0], "BOMB_DAMAGE": f"{raiders.BOMB_BLAST[1]}F"}
+    for const in ("GRENADE_COOLDOWN", "GRENADE_MIN_RANGE", "GRENADE_MAX_RANGE", "RALLY_TICKS", "RALLY_RADIUS", "RALLY_EFFECT",
+                  "ROUT_TICKS", "WALKER_PUNCH_COOLDOWN", "WALKER_LAUNCH_COOLDOWN", "WALKER_LAUNCH_MIN", "WALKER_LAUNCH_MAX",
+                  "BLIMP_CRUISE", "BLIMP_BOMB_COOLDOWN", "BLIMP_BOMB_REACH", "LADDER_STUCK", "LADDER_MAX", "LADDER_TTL"):
+        numbers[const] = getattr(raiders, const)
+    for const, value in numbers.items():
+        if f" {const} = {value};" not in java:
+            err(f"JugcraftRaiders.{const} differs from tools/raiders.py ({value})")
+    for const in ("RAID_CHECK_TICKS", "SPAWN_MIN", "SPAWN_MAX", "RAID_TIMEOUT", "ABANDON_TICKS", "ABANDON_RANGE", "MAX_LEVEL"):
+        if f" {const} = {getattr(raiders, const)};" not in raids:
+            err(f"RaiderRaids.{const} differs from tools/raiders.py ({getattr(raiders, const)})")
+    camps = (folder / "RaiderCamps.java").read_text(encoding="utf-8")
+    if f" RARITY = {raiders.CAMP_RARITY};" not in camps:
+        err(f"RaiderCamps.RARITY differs from tools/raiders.py CAMP_RARITY ({raiders.CAMP_RARITY})")
+    if f" SPAWN_CLEARANCE = {raiders.CAMP_SPAWN_CLEARANCE};" not in camps:
+        err(f"RaiderCamps.SPAWN_CLEARANCE differs from tools/raiders.py CAMP_SPAWN_CLEARANCE ({raiders.CAMP_SPAWN_CLEARANCE})")
+    if f" RAID_CHANCE = {raiders.RAID_CHANCE}F;" not in raids:
+        err(f"RaiderRaids.RAID_CHANCE differs from tools/raiders.py ({raiders.RAID_CHANCE})")
+    order = ["raider_grunt", "raider_grenadier", "raider_officer", "raider_blimp", "raider_walker"]
+    table = ", ".join("{" + ", ".join(str(raiders.party(level)[k]) for k in order) + "}" for level in range(1, raiders.MAX_LEVEL + 1))
+    if f"PARTY = {{{table}}};" not in raids:
+        err(f"RaiderRaids.PARTY differs from party() in tools/raiders.py ({table})")
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    for key, default in raiders.OPTIONS.items():
+        if f'Map.entry("{key}", "{default}")' not in config:
+            err(f"JugcraftConfig.TEXT_OPTIONS lacks {key} (default {default})")
+    for skin in raiders.SKINS:
+        if not (ASSETS / "textures" / "entity" / "raider" / f"{skin}.png").is_file():
+            err(f"textures/entity/raider/{skin}.png is missing: run tools/generate_textures.py")
+    quads = load(ASSETS / "raider_quads.json") or {}
+    for part in ("raider_walker_hull", "raider_walker_lamps", "raider_walker_leg", "raider_walker_tool_arm",
+                 "raider_walker_piston_base", "raider_walker_piston_head", "raider_blimp_body", "raider_blimp_propeller"):
+        if not quads.get(part):
+            err(f"raider_quads.json lacks {part}: run tools/generate_material_data.py")
+    for quad_list in quads.values():
+        for quad in quad_list:
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").is_file() and "/" not in quad["texture"]:
+                err(f"raider_quads.json uses a missing texture {quad['texture']}")
+                return
+    for entity in raiders.ENTITIES:
+        if f'"{entity}"' not in java:
+            err(f"JugcraftRaiders.java does not register {entity}")
+
+
+def check_bunkerworks():
+    """building/Bunkerworks.java against tools/bunkerworks.py: the list, kinds and strengths, the periscope's and the map
+    table's numbers, the lights, Trench Stew's food, effect and pot recipe, and the field kitchen as a heat source."""
+    java = (JAVA_ROOT / "building" / "Bunkerworks.java").read_text(encoding="utf-8")
+    for block, (_, kind, hardness, blast) in bunkerworks.BLOCKS.items():
+        if f'entry("{block}", "{kind}", {hardness}F, {blast}F);' not in java:
+            err(f"Bunkerworks.java does not register {block} as tools/bunkerworks.py does ({kind}, {hardness}, {blast})")
+    for const in ("PERISCOPE_INTERVAL", "PERISCOPE_RANGE", "PERISCOPE_CONE", "MAP_RANGE", "MAP_LINK", "MAP_LINES",
+                  "KITCHEN_LIGHT", "LAMP_LIGHT"):
+        if f" {const} = {getattr(bunkerworks, const)};" not in java:
+            err(f"Bunkerworks.{const} differs from tools/bunkerworks.py ({getattr(bunkerworks, const)})")
+    stew = bunkerworks.TRENCH_STEW
+    food = ag.ITEMS.get("trench_stew", {})
+    if food.get("food") != stew["food"] or food.get("stew_effect") != stew["effect"] or not food.get("stew"):
+        err("tools/agriculture.py ITEMS trench_stew differs from tools/bunkerworks.py TRENCH_STEW")
+    if ag.POT_RECIPES.get("trench_stew") != {"inputs": stew["inputs"], "time": stew["time"]}:
+        err("tools/agriculture.py POT_RECIPES trench_stew differs from tools/bunkerworks.py TRENCH_STEW")
+    main = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8")
+    n, sat = stew["food"]
+    effect, seconds = stew["effect"]
+    if f'stew("trench_stew", {n}, {sat}F, MobEffects.{effect}, {seconds});' not in main:
+        err("JugcraftAgriculture.java does not register trench_stew as tools/bunkerworks.py TRENCH_STEW says")
+    heat = (load(DATA / MOD / "tags" / "block" / "heat_sources.json") or {}).get("values", [])
+    if f"{MOD}:field_kitchen" not in heat:
+        err("The Field Kitchen must be in the block tag jugcraft:heat_sources")
+    for block in bunkerworks.TALL:
+        table = load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}
+        if '"half": "lower"' not in json.dumps(table):
+            err(f"{block} is two blocks tall: its loot table must drop it from the lower half only")
+    # The gas curtain's line of sight is walked in steps no longer than a quarter block.
+    curtain = (JAVA_ROOT / "building" / "GasCurtainBlock.java").read_text(encoding="utf-8")
+    if "STEP = 0.25;" not in curtain:
+        err("GasCurtainBlock.STEP must be 0.25 (blocks between the points it looks at)")
+
+
+def check_fire_control():
+    """building/FireControl.java against tools/fire_control.py: the table's strength, its modes and sectors, and every
+    number it and the guns it lays work by."""
+    java = (JAVA_ROOT / "building" / "FireControl.java").read_text(encoding="utf-8")
+    table = (JAVA_ROOT / "building" / "FireControlTableBlock.java").read_text(encoding="utf-8")
+    for block, (_, hardness, blast) in fire_control.BLOCKS.items():
+        if f".strength({hardness}F, {blast}F)" not in java:
+            err(f"FireControl.java does not give {block} the strength tools/fire_control.py does ({hardness}, {blast})")
+    for const in ("MAX_GUNS", "LINK_RANGE", "SHEAF_SPACING", "SENTRY_RANGE", "SENTRY_MIN_RANGE", "CHECK_FIRE", "SENTRY_SCAN",
+                  "TABLE_INTERVAL", "CREEP_STEP", "CREEP_STEPS"):
+        if f" {const} = {getattr(fire_control, const)};" not in java:
+            err(f"FireControl.{const} differs from tools/fire_control.py ({getattr(fire_control, const)})")
+    sectors = ", ".join(str(s) for s in fire_control.SECTORS)
+    if f"SECTORS = {{{sectors}}};" not in java:
+        err(f"FireControl.SECTORS differs from tools/fire_control.py ({sectors})")
+    modes = ", ".join(f'{m.upper()}("{m}")' for m in fire_control.MODES)
+    if modes not in table:
+        err(f"FireControlTableBlock.Mode differs from tools/fire_control.py ({modes})")
+
+
+def check_fortifications():
+    """building/Fortifications.java against tools/fortifications.py: the list, kinds and strengths, the hoist's and the
+    rack's numbers, and that the ready rack's shell tag lists every shell a gun fires."""
+    java = (JAVA_ROOT / "building" / "Fortifications.java").read_text(encoding="utf-8")
+    for block, (_, kind, hardness, blast) in fortifications.BLOCKS.items():
+        if f'entry("{block}", "{kind}", {hardness}F, {blast}F);' not in java:
+            err(f"Fortifications.java does not register {block} as tools/fortifications.py does ({kind}, {hardness}, {blast})")
+    for const in ("HOIST_INTERVAL", "HOIST_BATCH", "HOIST_BUFFER", "RACK_SLOTS", "RACK_REACH"):
+        if f" {const} = {getattr(fortifications, const)};" not in java:
+            err(f"Fortifications.{const} differs from tools/fortifications.py ({getattr(fortifications, const)})")
+    tag = set((load(DATA / MOD / "tags" / "item" / "artillery_shells.json") or {}).get("values", []))
+    for shell in ("heavy_shell", "flak_shell", "great_shell"):
+        if f"{MOD}:{shell}" not in tag:
+            err(f"#{MOD}:artillery_shells lacks {shell}, so ready racks would not hold it")
 
 
 def check_landship():
@@ -1316,6 +1667,79 @@ def check_arms_variants():
             err(f"recipe/{info['pattern']}.json is missing: the {style} pattern must be craftable")
 
 
+def check_mesh_models():
+    """The Runebound arms' mesh models (tools/arms_mesh.py, read in game by client/MeshItemModels.java): each in-hand
+    model is an optional "jugcraft:mesh" model keeping its box model as "elements"; every quad has four corners of
+    eight numbers (unit normals, UVs within the sprite, corners within -16..32 pixels) and a texture slot the model
+    defines; only the glyph strip and the atlas's glowing regions glow; there are at most arms_mesh.MAX_QUADS; every
+    part is closed (no edge belongs to one quad only: a see-through hole); no two surfaces within arms_mesh.PARALLEL
+    degrees of parallel lie closer than arms_mesh.LIFT (0.1 pixel) where they overlap without crossing (at
+    arms_mesh.CROSSING_ANGLE or more), compared triangle by triangle as they are drawn (drawn without culling they
+    could flicker); the mesh lies along the diagonal from the butt to the point of the design it replaces, held at its
+    grip, as the box model was; and its textures are solid (no see-through pixel)."""
+    import math
+    import arms_mesh as am
+    import arms_variants_art
+    glowing = [m for m in am.Mat.ALL if m.slot == "mesh" and m.glow]
+
+    def inside(mat, u, v):
+        x0, y0, x1, y1 = mat.region
+        return x0 / mat.size - 1e-4 <= u <= x1 / mat.size + 1e-4 and y0 / mat.size - 1e-4 <= v <= y1 / mat.size + 1e-4
+    for name in am.NAMES:
+        ref = f"models/item/{name}_in_hand.json"
+        model = load(ASSETS / "models" / "item" / f"{name}_in_hand.json") or {}
+        kind = model.get("fabric:type")
+        if not isinstance(kind, dict) or kind.get("id") != f"{MOD}:mesh" or kind.get("optional") is not True:
+            err(f"{ref}: expected \"fabric:type\": {{\"id\": \"{MOD}:mesh\", \"optional\": true}}")
+        if not model.get("elements"):
+            err(f"{ref}: the box model (\"elements\") must stay as the mesh's fallback")
+        textures = model.get("textures", {})
+        quads = model.get("quads") or []
+        if not quads or len(quads) > am.MAX_QUADS:
+            err(f"{ref}: {len(quads)} quads, expected 1 to {am.MAX_QUADS}")
+        problems = set()
+        corners = []
+        for q in quads:
+            v = q.get("v")
+            if q.get("t") not in textures:
+                problems.add(f"a quad's texture slot {q.get('t')} is not defined")
+            if not (isinstance(v, list) and len(v) == 4 and all(isinstance(c, list) and len(c) == 8 for c in v)):
+                problems.add("a quad is not four corners of eight numbers")
+                continue
+            corners.append([c[:3] for c in v])
+            for c in v:
+                if not all(-16 <= x <= 32 for x in c[:3]):
+                    problems.add("a corner lies outside -16..32")
+                if not (0 <= c[3] <= 1 and 0 <= c[4] <= 1):
+                    problems.add("a UV lies outside its sprite")
+                if abs(math.sqrt(sum(n * n for n in c[5:])) - 1.0) > 0.03:
+                    problems.add("a normal is not of unit length")
+            if q.get("t") == "rune" and not q.get("e"):
+                problems.add("a quad drawn in the glyph strip does not glow")
+            if q.get("t") == "mesh" and q.get("e") and not any(all(inside(m, c[3], c[4]) for c in v) for m in glowing):
+                problems.add("a glowing quad of the atlas lies outside its glowing regions")
+        for problem in sorted(problems):
+            err(f"{ref}: {problem}")
+        overlaps = am.parallel_overlaps(corners)
+        if overlaps:
+            err(f"{ref}: {len(overlaps)} pairs of quads run within {am.PARALLEL:g} degrees of parallel closer than "
+                f"{am.LIFT:g} px without crossing (they could flicker), e.g. quads {overlaps[0]}")
+        holes = am.open_edges(corners)
+        if holes:
+            err(f"{ref}: {len(holes)} edges belong to one quad only (a part is not closed), e.g. {holes[0]}")
+        # Held as the box model was: along the diagonal from the hand, from the design's butt to its point.
+        grip, (gx, gy), unit = am.placement(name)
+        length = arms_variants_art.design(name).length
+        along = [((x - gx) + (y - gy)) * am.C45 for q in corners for x, y, _z in q]
+        if corners and (abs(min(along) + grip * unit) > 0.6 or abs(max(along) - (length - grip) * unit) > 0.6):
+            err(f"{ref}: the mesh runs {min(along):.2f} to {max(along):.2f} px along the arm from the hand, not "
+                f"{-grip * unit:.2f} to {(length - grip) * unit:.2f} as its design")
+    for texture in (am.ATLAS, am.RUNE):
+        png = ASSETS / "textures" / "item" / f"{texture}.png"
+        if png.is_file() and Image.open(png).convert("RGBA").getextrema()[3][0] < 255:
+            err(f"textures/item/{texture}.png has see-through pixels: the mesh textures must be solid")
+
+
 def check_arms_motion():
     """client/arms/ArmsMotion.java against tools/arms_motion.py and tools/arms_moves.py (batch 43): every kind of arm has
     its motion file as the generator writes it, with whole poses, keys in time order from 0 to 1 and tensions from 0 to
@@ -1370,6 +1794,92 @@ def check_arms_motion():
     for mixin in ("ArmsRenderStateMixin", "ArmsHumanoidModelMixin", "ArmsItemInHandLayerMixin", "ArmsFirstPersonMixin"):
         if mixin not in mixins.get("client", []):
             err(f"{MOD}.client.mixins.json does not list {mixin}")
+
+
+def check_flail_heads():
+    """The flail's swinging head (tools/arms_heads.py, client/arms/FlailHeads.java): arms_heads.json is what the generator
+    writes; each head kind's link and ball models exist, have no parent (they are placed exactly, by Java) and no two
+    faces facing one way in one plane; each flail's in-hand model is its handle alone, its item definition picks the
+    head parts by FlailHeads' custom_model_data strings, and its _model texture stays one frame; and the Java and the
+    mixins name the same strings and hooks."""
+    import arms_art
+    import arms_heads
+    table = load(ASSETS / "arms_heads.json")
+    if table != json.loads(json.dumps(arms.heads_table())):
+        err("arms_heads.json is not what tools/arms.py writes (run tools/generate_material_data.py)")
+        table = table or {}
+    shared = [f"arms_{kind}" for kind in arms_heads.HEADS] + list(arms_heads.VARIANT_HEADS)
+    for name in shared:
+        for part in ("link", "ball"):
+            model = load(ASSETS / "models" / "item" / f"{name}_{part}.json") or {}
+            if "parent" in model or "display" in model or not model.get("elements"):
+                err(f"models/item/{name}_{part}.json must be elements with no parent and no display transforms")
+                continue
+            bad = arms_heads.coplanar(model["elements"])
+            if bad:
+                err(f"models/item/{name}_{part}.json: faces sharing a plane (they would flicker): {bad[:4]}")
+    for kind in arms_heads.HEADS:
+        # The handle alone: no box of the in-hand model reaches past the eye the chain hangs from.
+        held = load(ASSETS / "models" / "item" / f"arms_{kind}.json") or {}
+        grip_model, unit, grip, eye = arms_art.head_layout(kind, arms.KINDS[kind]["held"])
+        reach = (eye - grip + 1.5) * unit
+        for element in held.get("elements", []):
+            if element["to"][1] - grip_model[1] > reach + 1e-3:
+                err(f"models/item/arms_{kind}.json reaches past the eye: its head should be drawn live, not modelled")
+                break
+    for item in arms.items():
+        metal, kind = arms.split(item)
+        if kind not in arms_heads.HEADS:
+            continue
+        if f"{MOD}:{item}" not in table:
+            err(f"arms_heads.json has no entry for {item}")
+        definition = (load(ASSETS / "items" / f"{item}.json") or {}).get("model", {})
+        cases = {case.get("when"): case["model"].get("model") for case in definition.get("cases", [])}
+        if (definition.get("property") != "minecraft:custom_model_data"
+                or cases.get(arms_heads.LINK_CASE) != f"{MOD}:item/{item}_link"
+                or cases.get(arms_heads.BALL_CASE) != f"{MOD}:item/{item}_ball"):
+            err(f"items/{item}.json must pick {item}_link and {item}_ball by custom_model_data")
+        for part in ("link", "ball"):
+            model = load(ASSETS / "models" / "item" / f"{item}_{part}.json") or {}
+            if model.get("parent") != f"{MOD}:item/arms_{kind}_{part}" or model.get("textures", {}).get("tex") != f"{MOD}:item/{item}_model":
+                err(f"models/item/{item}_{part}.json must be arms_{kind}_{part} on {item}_model")
+        tex = ASSETS / "textures" / "item"
+        if (tex / f"{item}_model.png.mcmeta").is_file():
+            err(f"textures/item/{item}_model.png must stay one frame (the head swings live, not in the texture)")
+    # The Arms VII variants whose head swings: handle-only in the hand, their parts picked by FlailHeads' strings.
+    import arms_variants_art
+    for name in arms_heads.VARIANT_HEADS:
+        if f"{MOD}:{name}" not in table:
+            err(f"arms_heads.json has no entry for {name}")
+        definition = (load(ASSETS / "items" / f"{name}.json") or {}).get("model", {})
+        cases = {case.get("when"): case["model"].get("model") for case in definition.get("cases", [])}
+        if (definition.get("property") != "minecraft:custom_model_data" or cases.get(arms_heads.LINK_CASE) != f"{MOD}:item/{name}_link"
+                or cases.get(arms_heads.BALL_CASE) != f"{MOD}:item/{name}_ball"):
+            err(f"items/{name}.json must pick {name}_link and {name}_ball by custom_model_data")
+        held = load(ASSETS / "models" / "item" / f"{name}_in_hand.json") or {}
+        grip_model, unit, grip, eye = arms_variants_art.head_layout(name, arms.KINDS[arms_variants.kind(name)]["held"])
+        if any(e["to"][1] - grip_model[1] > (eye - grip + 1.5) * unit + 1e-3 for e in held.get("elements", [])):
+            err(f"models/item/{name}_in_hand.json reaches past the eye: its head should be drawn live, not modelled")
+        if (ASSETS / "textures" / "item" / f"{name}_model.png.mcmeta").is_file():
+            err(f"textures/item/{name}_model.png must stay one frame")
+    java = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "arms"
+            / "FlailHeads.java").read_text(encoding="utf-8")
+    for name, value in (("LINK", arms_heads.LINK_CASE), ("BALL", arms_heads.BALL_CASE)):
+        if f'{name} = "{value}";' not in java:
+            err(f"FlailHeads.{name} differs from tools/arms_heads.py ({value})")
+    mixins = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin" / "client"
+    for mixin, calls in (("ArmsRenderStateMixin", ("FlailHeads.extract",)),
+                         ("ArmsHumanoidModelMixin", ("FlailHeads.pose",)),
+                         ("ArmsItemInHandLayerMixin", ("FlailHeads.root", "FlailHeads.submitThirdPerson")),
+                         ("ArmsFirstPersonMixin", ("FlailHeads.beginFirstPerson", "FlailHeads.firstPersonFrame",
+                                                   "FlailHeads.endFirstPerson"))):
+        text = (mixins / f"{mixin}.java").read_text(encoding="utf-8")
+        for call in calls:
+            if call not in text:
+                err(f"{mixin} does not call {call} (the flail's head would not be drawn, or not kept clear of the body)")
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "FlailHeads.load()" not in client or "FlailHeads.register()" not in client:
+        err("JugcraftClient does not load and register FlailHeads")
 
 
 def check_end_shares():
@@ -1771,6 +2281,99 @@ def check_large_machines():
                 err(f"{path.name}: element outside -16..32")
 
 
+def check_machine_rotors():
+    """The turning parts client/MachineRotors draws (tools/machine_rotors.py, giant_models.ROTORS): every rotor names a
+    big machine and the parts it needs, its textures exist, are still and opaque (the solid render type ignores alpha)
+    and every UV stays inside its texture; the renderer reads the file; the static models of both styles keep clear of
+    the blade; the sawmill's and sieve's elements stay inside their footprints (an element kept whole outside them
+    stretches its texture and escapes the per-part separation), no face of theirs drawn with a stretched texture
+    ("name!") is cut by a block seam (each piece would show the whole texture again, squeezed), and their running lamps
+    are on the master block, the only one whose lit state changes."""
+    import steampunk_models  # noqa: F401  (loads giant_models after the helpers it builds on)
+    from giant_models import MODELS as GIANTS, ROTORS
+    from large_machines import ENLARGED, FOOTPRINTS, MODELS as CLASSIC
+    from model_writer import FACE_AXES, unpack
+    data = load(ASSETS / "machine_rotor_quads.json")
+    if data is None:
+        return
+    if set(data) != set(ROTORS):
+        err(f"machine_rotor_quads.json has {sorted(data)}, giant_models.ROTORS {sorted(ROTORS)}: run generate_material_data.py")
+    opaque = {}
+    for name, rotor in data.items():
+        if rotor.get("block") not in ENLARGED or rotor.get("axis") not in ("x", "y", "z"):
+            err(f"machine rotor {name}: block {rotor.get('block')} is not a big machine, or its axis is wrong")
+        if rotor.get("when", {}).get("compact") != "false":
+            err(f"machine rotor {name} must only draw on the big machine (when compact=false)")
+        for key in ("center", "property", "speed", "quads"):
+            if key not in rotor:
+                err(f"machine rotor {name} has no {key}")
+        for quad in rotor.get("quads", []):
+            texture = quad["texture"]
+            png = ASSETS / "textures" / "block" / f"{texture}.png"
+            if texture not in opaque:
+                if not png.is_file() or png.with_name(png.name + ".mcmeta").is_file():
+                    err(f"machine rotor {name}: texture {texture} is missing or animated (the renderer draws the whole image)")
+                    opaque[texture] = True
+                else:
+                    with Image.open(png) as img:
+                        opaque[texture] = img.convert("RGBA").getextrema()[3][0] == 255
+                    if not opaque[texture]:
+                        err(f"machine rotor {name}: texture {texture} has see-through pixels (rotors are drawn solid)")
+            if len(quad["vertices"]) != 4 or any(not (0 <= v[3] <= 1 and 0 <= v[4] <= 1) for v in quad["vertices"]):
+                err(f"machine rotor {name}: a {texture} quad has a UV outside its texture (nothing may rely on wrapping)")
+                break
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    rotors_java = (client / "MachineRotors.java").read_text(encoding="utf-8") if (client / "MachineRotors.java").is_file() else ""
+    renderer = (client / "WindTurbineRenderer.java").read_text(encoding="utf-8")
+    if '"machine_rotor_quads.json"' not in rotors_java or "MachineRotors.extract" not in renderer or "MachineRotors.submit" not in renderer:
+        err("client/MachineRotors must read machine_rotor_quads.json and the machine renderer must extract and submit it")
+    for name, rotor in ROTORS.items():
+        _, cy, cz = rotor["center"]
+        for style, models in (("steampunk", GIANTS), ("classic", CLASSIC)):
+            for item in models[rotor["block"]]:
+                frm, to, _texture, options = unpack(item)
+                if options.get("rotation"):
+                    continue
+                for x0, x1, radius in rotor.get("clear", []):
+                    if frm[0] >= x1 or to[0] <= x0:
+                        continue
+                    dy = max(frm[1] - cy, 0, cy - to[1])
+                    dz = max(frm[2] - cz, 0, cz - to[2])
+                    if dy * dy + dz * dz < radius * radius:
+                        err(f"{style} {rotor['block']}: element {frm}..{to} cuts into the turning {name} (x {x0}..{x1}, r {radius})")
+    for machine in ("sawmill", "sieve"):
+        footprint = FOOTPRINTS[machine]
+        for item in GIANTS[machine]:
+            frm, to, _texture, options = unpack(item)
+            if options.get("rotation"):
+                continue
+            covered = 0.0
+            for offset in footprint:
+                low = [offset[axis] * 16 for axis in range(3)]
+                a = [max(frm[axis], low[axis]) for axis in range(3)]
+                b = [min(to[axis], low[axis] + 16) for axis in range(3)]
+                if all(a[axis] < b[axis] for axis in range(3)):
+                    covered += (b[0] - a[0]) * (b[1] - a[1]) * (b[2] - a[2])
+            if abs(covered - (to[0] - frm[0]) * (to[1] - frm[1]) * (to[2] - frm[2])) > 1e-6:
+                err(f"{machine}: element {frm}..{to} reaches outside its footprint")
+        for style, models in (("steampunk", GIANTS), ("classic", CLASSIC)):
+            for item in models[machine]:
+                frm, to, texture, options = unpack(item)
+                if options.get("rotation"):
+                    continue  # kept whole on one part, never cut
+                faces = texture if isinstance(texture, dict) else {"*": texture}
+                for face, (u_axis, v_axis, _, _) in FACE_AXES.items():
+                    name = faces.get(face, faces.get("*"))
+                    if name and name.endswith("!") and any(
+                            frm[axis] < seam < to[axis] for axis in (u_axis, v_axis) for seam in range(-64, 129, 16)):
+                        err(f"{style} {machine}: the {face} face of {frm}..{to} stretches {name[:-1]} across a block seam "
+                            "(each part would show the whole texture again): keep it inside one block")
+        for index in range(len(footprint)):
+            path = ASSETS / "models" / "block" / f"{machine}_part{index}.json"
+            if index and '"#dr_amber"' in path.read_text(encoding="utf-8"):
+                err(f"{machine}_part{index} has the amber running lamp: only the master block (part 0) lights up")
+
+
 def check_handbook(registered):
     """Every Jugcraft item the Engineer's Handbook shows must exist."""
     book = load(ASSETS / "handbook" / "en_us.json")
@@ -1990,6 +2593,12 @@ def check_agriculture():
         items[name] = ("plain", None, None, compost.lower(), None)
     for name, n, sat in re.findall(r'\bstew\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
         items[name] = ("stew", int(n), float(sat), None, None)
+        if ag.ITEMS.get(name, {}).get("stew_effect"):
+            err(f"JugcraftAgriculture.java stew {name} gives no effect, but tools/agriculture.py gives it {ag.ITEMS[name]['stew_effect']}")
+    for name, n, sat, effect, seconds in re.findall(r'\bstew\("([a-z_]+)", (\d+), ([\d.]+)F, MobEffects\.(\w+), (\d+)\)', main):
+        items[name] = ("stew", int(n), float(sat), None, None)
+        if ag.ITEMS.get(name, {}).get("stew_effect") != [effect, int(seconds)]:
+            err(f"JugcraftAgriculture.java stew {name} gives {effect} for {seconds} s, not as tools/agriculture.py says")
     for name, n, sat in re.findall(r'\btreat\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
         items[name] = ("treat", int(n), float(sat), None, None)
     for name, n, sat, effect, seconds in re.findall(r'\bsweet\("([a-z_]+)", (\d+), ([\d.]+)F, MobEffects\.(\w+), (\d+)\)', main):
@@ -3127,6 +3736,168 @@ def check_pumpkin_night(java, lang):
             err(f"JugcraftClient.java must register {renderer_name}")
 
 
+def bat_reach(quads, bat):
+    """How far the Bat in a Jar's wings reach from the jar's middle, across (pixels), and their lowest and highest points,
+    over its flight awake and its sway asleep, turned and scaled as OddityJarRenderer.bat() draws them."""
+    import math
+
+    def mul(a, b):
+        return [[sum(a[i][k] * b[k][j] for k in range(4)) for j in range(4)] for i in range(4)]
+
+    def move(x, y, z):
+        return [[1, 0, 0, x], [0, 1, 0, y], [0, 0, 1, z], [0, 0, 0, 1]]
+
+    def turn(axis, degrees):
+        c, s = math.cos(math.radians(degrees)), math.sin(math.radians(degrees))
+        if axis == "y":
+            return [[c, 0, s, 0], [0, 1, 0, 0], [-s, 0, c, 0], [0, 0, 0, 1]]
+        return [[c, -s, 0, 0], [s, c, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+
+    k = bat["scale"]
+    scale = [[k, 0, 0, 0], [0, k, 0, 0], [0, 0, k, 0], [0, 0, 0, 1]]
+    reach, low, high = 0.0, 99.0, -99.0
+    for step in range(480):
+        t = step * 0.25
+        for awake in (True, False):
+            if awake:
+                a = t * 0.35
+                base = mul(mul(move(8 + bat["orbit"] * math.cos(a), bat["fly_y"] + bat["bob"] * math.sin(t * 0.5), 8 + bat["orbit"] * math.sin(a)),
+                               turn("y", math.degrees(-a) + 180)), turn("z", 180))
+                wing = 55 * math.sin(t * 1.6)
+            else:
+                base = mul(move(8, bat["hang_y"], 8), turn("y", 20 * math.sin(step * 0.37)))
+                wing = 80
+            base = mul(base, scale)
+            for part, m in (("oddity_bat_wing_left", mul(mul(base, move(-1.2, 0, 0)), turn("y", -wing))),
+                            ("oddity_bat_wing_right", mul(mul(base, move(1.2, 0, 0)), turn("y", wing)))):
+                for quad in quads.get(part, []):
+                    for v in quad["vertices"]:
+                        p = [sum(m[i][j] * (v[j] if j < 3 else 1.0) for j in range(4)) for i in range(3)]
+                        reach = max(reach, math.hypot(p[0] - 8, p[2] - 8))
+                        low, high = min(low, p[1]), max(high, p[1])
+    return reach, low, high
+
+
+def coplanar_pairs(quads, gap=0.1):
+    """How many pairs of a model's quads face the same way on planes closer than `gap` pixels and overlap: they would
+    flicker against each other (z-fighting)."""
+    faces = []
+    for quad in quads:
+        normal = quad["normal"]
+        axis = max(range(3), key=lambda k: abs(normal[k]))
+        if abs(abs(normal[axis]) - 1) > 1e-3:
+            continue
+        others = [k for k in range(3) if k != axis]
+        points = quad["vertices"]
+        faces.append((axis, normal[axis] > 0, sum(p[axis] for p in points) / len(points),
+                      [min(p[k] for p in points) for k in others], [max(p[k] for p in points) for k in others]))
+    pairs = 0
+    for a in range(len(faces)):
+        for b in range(a + 1, len(faces)):
+            (axis, sign, plane, lo, hi), (axis2, sign2, plane2, lo2, hi2) = faces[a], faces[b]
+            if axis == axis2 and sign == sign2 and abs(plane - plane2) < gap - 1e-6 \
+                    and all(min(hi[k], hi2[k]) - max(lo[k], lo2[k]) > 1e-4 for k in range(2)):
+                pairs += 1
+    return pairs
+
+
+def check_bigger_jars(java, quads, client):
+    """The Witch's Workshop's bigger jars, each its small jar made bigger: Java's numbers match tools/decor17.py; each is
+    its small jar's model `scale` times over on the small jar's textures (its parts, put back together, fill the small
+    jar's box made as much bigger), and its shapes and renderer scale the small jar's; the heart stays inside its glass at
+    its fullest swell; and every block of each has its model."""
+    import math
+
+    def number(text, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", text)
+        return float(match.group(1)) if match else None
+
+    def floats(text, name):
+        match = re.search(rf"\b{name} = \{{([^}}]*)\}};", text)
+        return [float(v.strip().rstrip("FLD")) for v in match.group(1).split(",")] if match else None
+
+    def source(name):
+        path = client / f"{name}.java"
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+    g = decor17.GIANT_HEART
+    block = java.get("GiantBeatingHeartBlock", "")
+    if floats(block, "TEMPOS") != [float(t) for t in g["tempos"]] or number(block, "PULSE_TICKS") != g["pulse_ticks"] or number(block, "SIZE") != g["size"]:
+        err("GiantBeatingHeartBlock's TEMPOS, PULSE_TICKS and SIZE differ from tools/decor17.py GIANT_HEART")
+    if "grown(OddityJarBlock.BOX, SIZE, SIZE, SIZE)" not in block:
+        err("GiantBeatingHeartBlock's shapes must be the Beating Heart Jar's box made SIZE times bigger")
+    renderer = source("GiantBeatingHeartRenderer")
+    if ("pose.scale(GiantBeatingHeartBlock.SIZE, GiantBeatingHeartBlock.SIZE, GiantBeatingHeartBlock.SIZE)" not in renderer
+            or "OddityJarRenderer.heart(pose" not in renderer):
+        err("GiantBeatingHeartRenderer must draw the Beating Heart Jar's heart (OddityJarRenderer.heart), SIZE times bigger")
+    # The jar's heart, at its fullest swell and turned any way, stays inside the glass (and so does the giant's, the same
+    # made bigger).
+    jar = decor17.JARS["beating_heart_jar"]
+    oddity = source("OddityJarRenderer")
+    if floats(oddity, "HEART") != list(jar["heart"]) or number(oddity, "HEART_SWELL") != jar["swell"]:
+        err("OddityJarRenderer.HEART and HEART_SWELL differ from tools/decor17.py JARS beating_heart_jar heart and swell")
+    heart = quads.get("oddity_heart", [])
+    if not heart:
+        err("decor17_quads.json has no oddity_heart")
+    else:
+        k = 1 + jar["swell"]
+        reach = max(math.hypot(v[0], v[2]) for q in heart for v in q["vertices"]) * k
+        top = jar["heart"][1] + max(v[1] for q in heart for v in q["vertices"]) * (k * 0.96 + 0.04)
+        shape = {**decor17.ODDITY_JAR, **jar.get("jar", {})}
+        glass = 8 - shape["glass"]
+        if reach > glass or top > shape["glass_top"]:
+            err(f"The Beating Heart Jar's heart leaves its glass at its fullest: it reaches {reach:.2f} across (the glass is at {glass:.2f}) and up to {top:.2f}")
+    vessel_renderer = source("SpecimenVesselRenderer")
+    if "pose.scale(state.scale, state.scale, state.scale)" not in vessel_renderer or "SpecimenJarRenderer.draw(pose" not in vessel_renderer:
+        err("SpecimenVesselRenderer must draw the Specimen Jar's specimen (SpecimenJarRenderer.draw), as many times bigger as the jar")
+    if "grown(SpecimenJarBlock.BOX, scale, across, deep)" not in java.get("SpecimenVesselBlock", ""):
+        err("SpecimenVesselBlock's shapes must be the Specimen Jar's box made `scale` times bigger")
+    for vessel, info in decor17.SPECIMEN_VESSELS.items():
+        source_ = java.get({"tall_specimen_jar": "TallSpecimenJarBlock", "specimen_tank": "SpecimenTankBlock"}[vessel], "")
+        cells = re.search(r"CELLS = box\((\d+), (\d+), (\d+)\);", source_)
+        if (number(source_, "LIGHT") != info["light"] or number(source_, "SCALE") != info["scale"]
+                or not cells or tuple(int(c) for c in cells.groups()) != tuple(info["size"])):
+            err(f"{vessel}'s LIGHT, SCALE and CELLS differ from tools/decor17.py SPECIMEN_VESSELS")
+    # Each is its small jar's model made bigger: put back together, its parts fill the small jar's box `scale` times
+    # over, and draw on the small jar's textures.
+    for big, small, scale, size in [(g["block"], "beating_heart_jar", g["size"], (g["size"],) * 3)] + [
+            (v, ag.SPECIMEN_JAR["block"], info["scale"], info["size"]) for v, info in decor17.SPECIMEN_VESSELS.items()]:
+        whole = load(ASSETS / "models" / "block" / f"{small}.json") or {}
+        lo = [min(e["from"][k] for e in whole.get("elements", [])) for k in range(3)] if whole.get("elements") else None
+        hi = [max(e["to"][k] for e in whole.get("elements", [])) for k in range(3)] if whole.get("elements") else None
+        cells = [(r, u, a) for a in range(size[2]) for u in range(size[1]) for r in range(size[0])]
+        found_lo, found_hi, textures = [1e9] * 3, [-1e9] * 3, set()
+        for part, (r, u, a) in enumerate(cells):
+            model = load(ASSETS / "models" / "block" / f"{big}_{part}.json")
+            if not model:
+                continue
+            origin = (16 * (size[0] - 1 - r), 16 * u, 16 * a)
+            textures |= {t for key, t in model.get("textures", {}).items() if key != "particle"}
+            for e in model.get("elements", []):
+                for k in range(3):
+                    found_lo[k] = min(found_lo[k], e["from"][k] + origin[k])
+                    found_hi[k] = max(found_hi[k], e["to"][k] + origin[k])
+        middle = (8 * size[0], 0, 8 * size[2])
+        if lo is None or any(abs(found_lo[k] - (middle[k] + (lo[k] - (0 if k == 1 else 8)) * scale)) > 0.2
+                             or abs(found_hi[k] - (middle[k] + (hi[k] - (0 if k == 1 else 8)) * scale)) > 0.2 for k in range(3)):
+            err(f"{big}'s parts don't make up the {small}'s model {scale} times bigger: {found_lo} to {found_hi}")
+        small_textures = {t for key, t in whole.get("textures", {}).items() if key != "particle"}
+        if not textures or not textures <= small_textures:
+            err(f"{big}'s models draw on {sorted(textures)}, not the {small}'s textures {sorted(small_textures)}")
+    for big in decor17.big_jars():
+        states = load(ASSETS / "blockstates" / f"{big}.json") or {}
+        for entry in states.get("multipart", []):
+            model = entry["apply"]["model"].split(":")[1]
+            if not (ASSETS / "models" / f"{model}.json").is_file():
+                err(f"blockstates/{big}.json uses {model}, which is missing")
+        if not states.get("multipart"):
+            err(f"blockstates/{big}.json has no parts")
+    registered = (client / "JugcraftClient.java").read_text(encoding="utf-8")
+    for entity, renderer_name in (("GIANT_HEART_ENTITY", "GiantBeatingHeartRenderer"), ("SPECIMEN_VESSEL_ENTITY", "SpecimenVesselRenderer")):
+        if f"{entity}, {renderer_name}::new" not in registered:
+            err(f"JugcraftClient.java must draw {entity} with {renderer_name}")
+
+
 def check_witchs_workshop(java, lang):
     """Halloween decorations batch 17, the Witch's Workshop: Java's numbers match tools/decor17.py; each block is registered,
     named, drawn on its texture, drops and has its recipe; the candelabra's layout is generated for Java; the ember bed is a
@@ -3181,6 +3952,8 @@ def check_witchs_workshop(java, lang):
             err(f"{block} has no name")
         if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
             err(f"{block} has no loot table")
+        if block in decor17.big_jars():
+            continue  # drawn on its small jar's textures (check_bigger_jars)
         texture = "candelabra" if block in decor17.CANDELABRA else block
         with Image.open(ASSETS / "textures" / "block" / f"{texture}.png") as img:
             if img.size not in ((64, 64), (128, 128)):
@@ -3215,6 +3988,37 @@ def check_witchs_workshop(java, lang):
     for name in ("witchs_workshop_brew", "witchs_workshop_fume", "witchs_workshop_wax", "witchs_workshop_flame", "witchs_workshop_glow"):
         if not (ASSETS / "textures" / "entity" / f"{name}.png").is_file():
             err(f"textures/entity/{name}.png is missing")
+    # The bat stays inside its jar: the renderer's numbers are tools/decor17.py's, and its wings never reach the glass.
+    bat = decor17.JARS["bat_in_a_jar"]
+    jar_renderer = (client / "OddityJarRenderer.java").read_text(encoding="utf-8")
+    for name, key in (("BAT_SCALE", "scale"), ("BAT_ORBIT", "orbit"), ("BAT_FLY_Y", "fly_y"), ("BAT_BOB", "bob"), ("BAT_HANG_Y", "hang_y")):
+        found = re.search(rf"\b{name} = (-?[\d.]+)F;", jar_renderer)
+        if not found or abs(float(found.group(1)) - bat[key]) > 1e-9:
+            err(f"OddityJarRenderer.{name} differs from tools/decor17.py JARS bat_in_a_jar {key}")
+    reach, low, high = bat_reach(quads, bat)
+    inside = 8 - bat["jar"]["glass"] - bat["margin"]
+    if not quads.get("oddity_bat_wing_left") or reach > inside or low < 1.0 + bat["margin"] or high > bat["jar"]["glass_top"] - bat["margin"]:
+        err(f"The Bat in a Jar's wings leave its glass: they reach {reach:.2f} across (at most {inside:.2f}) and {low:.2f} to {high:.2f} up")
+    check_bigger_jars(java, quads, client)
+    # The skull's glow lies exactly on its square sockets.
+    cauldron_renderer = (client / "HornedSkullCauldronRenderer.java").read_text(encoding="utf-8")
+    eyes = re.search(r"\bEYES = (\{.*?\});", cauldron_renderer, re.S)
+    found = [float(v.rstrip("F")) for v in re.findall(r"-?[\d.]+F?", eyes.group(1))] if eyes else None
+    if found != [v for eye in cauldron["skull_eyes"] for v in eye]:
+        err("HornedSkullCauldronRenderer.EYES differs from tools/decor17.py CAULDRON skull_eyes")
+    eye_z = re.search(r"\bEYE_Z = (-?[\d.]+)F;", cauldron_renderer)
+    if not eye_z or abs(float(eye_z.group(1)) - cauldron["eye_z"]) > 1e-9 or cauldron["eye_z"] > cauldron["skull_face_z"] - 0.1 + 1e-9:
+        err("HornedSkullCauldronRenderer.EYE_Z must be tools/decor17.py CAULDRON eye_z, at least 0.1 in front of the skull's face")
+    # The Colossal Skull's night glow lies on its sockets, in front of the hollow behind them (behind it, it never shows).
+    skull = decor18.SKULL
+    skull_renderer = (client / "ColossalSkullRenderer.java").read_text(encoding="utf-8")
+    sockets = re.search(r"\bSOCKETS = (\{.*?\});", skull_renderer, re.S)
+    found = [float(v.rstrip("F")) for v in re.findall(r"-?[\d.]+F?", sockets.group(1))] if sockets else None
+    socket_z = re.search(r"\bSOCKET_Z = (-?[\d.]+)F;", skull_renderer)
+    if found != [v for socket in skull["sockets"] for v in socket]:
+        err("ColossalSkullRenderer.SOCKETS differs from tools/decor18.py SKULL sockets")
+    if not socket_z or abs(float(socket_z.group(1)) - skull["glow_z"]) > 1e-9 or skull["glow_z"] > skull["hollow_z"] - 0.1 + 1e-9:
+        err("ColossalSkullRenderer.SOCKET_Z must be tools/decor18.py SKULL glow_z, at least 0.1 in front of the hollow behind the sockets")
 
 
 def check_graveyard_flora(java, number, lang):
@@ -5748,6 +6552,17 @@ def check_model_uvs():
                     err(f"{path.relative_to(ROOT)}: the {side} face reads {list(uv)} outside its see-through texture {texture}; pin its uv")
 
 
+def check_art():
+    """The art's geometry and texture rules for every block/item model and quad part (tools/art_check.py; the rules are
+    in docs/ART_DIRECTION.md, Rules for everything): no shared or nearly shared face planes, UVs inside their sprites,
+    closed models, and textures that suit their render type."""
+    import art_check
+    problems, summary = art_check.run(machine_blocks())
+    for problem in problems:
+        err(problem)
+    print(summary)
+
+
 def check_town():
     """The walled town: its data is written, its shops have no profit loop, every townsperson's skin and every line they
     can say exists, and the Java side names the same feature, shops screen ids and decor kinds."""
@@ -5962,12 +6777,12 @@ def check_diagonal_connections():
         if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != own:
             err(f"minecraft:{name}: the rebuilt blockstate lost vanilla's own parts")
     walls = set((load(RES / "data" / "minecraft" / "tags" / "block" / "walls.json") or {}).get("values", []))
-    for name in dg.VANILLA_WALLS:
+    for namespace, name in dg.all_walls():
         diagonal = dg.DIAGONAL_WALL.format(name)
         if (RES / "assets" / "minecraft" / "blockstates" / f"{name}.json").exists():
             err(f"minecraft:{name}: its blockstate is overridden; vanilla's walls are left as they are")
         parts = (load(ASSETS / "blockstates" / f"{diagonal}.json") or {}).get("multipart", [])
-        if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != dg.diagonal_wall(name):
+        if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != dg.diagonal_wall(name, namespace):
             err(f"{MOD}:{diagonal}: needs the wall's post and low sides, as tools/diagonal_connections.py writes them")
         if f"{MOD}:{diagonal}" not in walls:
             err(f"{MOD}:{diagonal} is not in #minecraft:walls, so walls, gates and bars would not join it")
@@ -6000,7 +6815,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
@@ -6016,7 +6831,9 @@ def main():
     check_gear()
     check_arms()
     check_arms_variants()
+    check_mesh_models()
     check_arms_motion()
+    check_flail_heads()
     check_exosuit()
     check_grapple()
     check_field_chemistry()
@@ -6031,9 +6848,16 @@ def main():
     check_trenchworks()
     check_zeppelin()
     check_walker()
+    check_armoured_walker()
     check_landship()
     check_artillery()
     check_tower_guns()
+    check_gun_art()
+    check_quad_names()
+    check_fortifications()
+    check_bunkerworks()
+    check_fire_control()
+    check_raiders()
     check_plastic()
     check_seasons()
     check_alpine()
@@ -6041,6 +6865,7 @@ def main():
     check_machines(registered)
     check_large_machines()
     check_style_pack()
+    check_machine_rotors()
     check_drones()
     check_tower()
     check_guide_books()
@@ -6049,6 +6874,7 @@ def main():
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()
+    check_art()
     check_pixel_hollows()
     check_town()
     check_diagonal_connections()

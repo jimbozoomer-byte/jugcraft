@@ -56,8 +56,8 @@ Cannon Shells: a steel plate, gunpowder and a brass nugget make 4.
 
 ## Dependencies and assets
 - No dependencies. All art is original.
-  - The tread texture and the item icons are drawn in `tools/landship.py`.
-  - The model reuses the Kaiserworks `ik_*` and the giants' `dr_*` textures.
+  - The tread texture is drawn in `tools/landship.py`; the Landship's and the Cannon Shell's 32x32 icons in `tools/gun_icons.py`, with the big guns' (since 5 October 2026).
+  - The model reuses the Kaiserworks `ik_*` and the giants' `dr_*` textures; its cannon and sponson guns use the tower guns' `tg_tube` steel and `tg_bore` decal. Since the 5 October 2026 art fixes the turret's brass ring sits on the casemate's gilt band (no slit under the turret), no barrel faces share a plane, the sloped front plate is two halves a tile wide (so its texture stays inside the sprite), and the smokestacks stop at 35.75 pixels, just under the cannon's lowest sweep, so the cannon no longer passes through them when the turret turns to the rear (the stack smoke rises from 2.3 blocks); the render box reaches 1.25 blocks above the hit box, so the raised cannon stays drawn ([big-guns-art-fixes.md](big-guns-art-fixes.md)).
   - The sounds are vanilla's: explosion, dispenser and minecart.
 - The model is exported as quads to `assets/jugcraft/landship_quads.json` (about 1,030 faces, 16-pixel tiles, hidden faces culled) in four parts: body, turret, barrel and one track link. `client/LandshipRenderer` lays about 33 links round each side and animates them.
 - The shell reuses `weapons/Blast`.
@@ -84,3 +84,4 @@ Not applicable: it is crafted and placed by players only.
   - A heavier four-track landship with a bigger gun, like the second reference.
   - Gunners in the sponsons aiming for themselves.
   - Breaking through walls, only if the owner wants block breaking.
+- **Fixed 5 October 2026 (shared render fixes):** the hull, turret and barrel are drawn closed (no see-through gaps), and the barrel's muzzle and the turret ring no longer flicker. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenEpitaphPayload;
 import io.github.jimbozoomer.jugcraft.agriculture.SpookyBurstPayload;
 import io.github.jimbozoomer.jugcraft.client.arms.ArmsMotion;
+import io.github.jimbozoomer.jugcraft.client.arms.FlailHeads;
 import io.github.jimbozoomer.jugcraft.client.arms.TwoHandedInput;
 import io.github.jimbozoomer.jugcraft.drone.DroneTerminalBlock;
 import io.github.jimbozoomer.jugcraft.drone.JugcraftDrones;
@@ -40,11 +41,13 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
  * pumpkin boats to theirs, gravestones to the renderer of their engravings, and Halloween's night creatures,
  * thrown pumpkins and landing markers to theirs; the Harvest Moon's state to the pumpkins' sparks; the drone
  * depot's renderers (drones, pickup lift, control room screen) and terminal screen, and the server's season to
- * grass and foliage colours, and the Party key to the Party screen.
+ * grass and foliage colours, and the Party key to the Party screen; and the mesh item models the Runebound arms are
+ * drawn with (MeshItemModels).
  */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
+		MeshItemModels.register();
 		for (MachineKind kind : MachineKind.values()) {
 			MenuScreens.register(JugcraftMachines.menuType(kind), MachineScreen::new);
 		}
@@ -63,8 +66,17 @@ public final class JugcraftClient implements ClientModInitializer {
 		BroomstickClient.register();
 		BalloonClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN, ZeppelinRenderer::new);
+		// The raider faction (batch 57): infantry in uniform, the walker and blimp in raider paint, and their bombs.
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, RaiderRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, RaiderRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.OFFICER, RaiderRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.WALKER, RaiderWalkerRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BLIMP, RaiderBlimpRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BOMB, ThrownItemRenderer::new);
+		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(RaiderModel.LAYER, TownsfolkModel::createLayer);
 		ZeppelinClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER, DieselWalkerRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.ARMOURED_WALKER, ArmouredWalkerRenderer::new);
 		WalkerClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP, LandshipRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.SHELL, ThrownItemRenderer::new);
@@ -82,6 +94,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		ArtilleryClient.register();
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.building.Trenchworks.SEARCHLIGHT_ENTITY, SearchlightRenderer::new);
 		ArmsMotion.load();
+		FlailHeads.load();
+		FlailHeads.register();
 		TwoHandedInput.register();
 		ClientPlayNetworking.registerGlobalReceiver(WeaponArtPayload.TYPE, (payload, context) -> ArmsMotion.receive(payload));
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
@@ -169,6 +183,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOWCASE_ENTITY, ShowcaseRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.MOTH_CASE_ENTITY, MothCaseRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.ODDITY_JAR_ENTITY, OddityJarRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.GIANT_HEART_ENTITY, GiantBeatingHeartRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPECIMEN_VESSEL_ENTITY, SpecimenVesselRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.COFFIN_WARDROBE_ENTITY, CoffinWardrobeRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SARCOPHAGUS_TOMB_ENTITY, SarcophagusRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.COLOSSAL_SKULL_ENTITY, ColossalSkullRenderer::new);

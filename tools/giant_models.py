@@ -376,59 +376,229 @@ def ore_washer():
     return m
 
 
-def sieve():
-    """Two wide, two tall, three long: a shaker screen. A rust hopper feeds an inclined deck of mesh screens in a
-    red-painted frame on coil springs; an eccentric green ribbed vibrator motor sits on the side, chutes at the end
-    drop the fines and the oversize, and an amber lamp, a gauge and copper dust lines finish it."""
-    m = skids(-16, 16, 0, 48)
-    for z in (6, 38):
-        for x in (-13, 9):
-            m += stack("y", x + 2, z, 1.75, 3, 12, COIL, 2, NUT)
-    m.append(box((-15, 12, 2), (15, 16, 46), {"*": "dr_red", "up": "sp_mesh"}))
-    m.append(box((-13, 16, 4), (13, 17, 44), {"*": RUST_BARE, "up": "sp_mesh"}))
-    for z in (2, 15, 29, 45):
-        m.append(box((-15.5, 11.5, z), (15.5, 16.5, z + 1), BAND))
-    # Feed hopper at the front.
-    m.append(box((-10, 17, 2), (10, 26, 14), {"*": RUST, "up": SOOT}))
-    m.append(box((-12, 26, 1), (12, 28, 15), {"*": BAND, "up": SOOT}))
-    # The vibrator motor on the left side.
-    m += stack("z", 12, 20, 4, 16, 30, RIB_PATINA, 4, BLUE)
-    m.append(box((15, 18, 22), (16, 22, 26), NUT))
-    # Chutes at the back end.
-    m.append(box((-12, 3, 44), (-2, 12, 48), {"*": RUST, "up": SOOT}))
-    m.append(box((2, 3, 44), (12, 12, 48), {"*": RUST, "up": SOOT}))
-    m.append(lamp("north", (-11, 8, 0.75), 2))
-    m.append(gauge("north", (11, 22, 0.75), 3))
-    m += pipe_run([(-12, 30, 8), (-12, 30, 40), (-12, 17, 40)], 0.75)
+# ------------------------------------------------------------------ sieve (redrawn 5 October 2026)
+
+# The screen box tilts 22.5 degrees about x: low at the front, where it discharges into the totes, high at the back,
+# where the hopper feeds it, so its deck faces the viewer from the front. A negative angle raises the back (a positive
+# one raises the front: kinetic_models.conveyor_slope). The origin is on the deck's mid line; its x of 0.5 keeps
+# slice_model's choice of part (the one nearest the origin: part 8, x 0..16, y 16..32, z 16..32) unambiguous.
+SCREEN_TILT = ("x", -22.5, (0.5, 17, 25))
+# Where its pieces are cut along z: every piece is at most 16 pixels long (a rotated element is kept whole, its UVs
+# pinned from 0, so a longer face would stretch its texture), the long ones a multiple of 4 (the mesh and the wall
+# bolts repeat every 4), and none lies inside part 8's z range 16..32, so every piece cut at them gets those pinned
+# UVs (an uncut piece within z 16..32 also needs to reach outside part 8 along x or y: see WIDE_CUT).
+SCREEN_Z = (9, 13, 29, 41)
+# Where the 24-pixel-wide pieces (x -12..12) are cut along x: 8 + 16. Both are multiples of every repeat on them (the
+# mesh's 2, the bolts' and rivets' 4, the hazard stripes' 8), so with each piece's UVs pinned from 0 the pattern carries
+# on across the cut on every face (on north faces, whose UVs run from the east end, for any texture). (A cut that left
+# odd pieces, 11 + 13, doubled a wire down the middle of the deck and restarted the stripes mid-lip.) Both pieces reach
+# west of x 0, outside part 8, so both get pinned UVs: a piece wholly inside part 8 (such as x 4..12 of a bar at z 21)
+# would read its texture by position instead. The motor beam runs the full width, x -16..16, cut at 0: its east half
+# lies inside part 8 and reads the plain paint by position, which carries on from the pinned west half without a seam.
+WIDE_CUT = (-4,)
+SCREEN_FRAME, SCREEN_MESH, GRAVEL, FLINT, NUGGETS, FINES = (
+    "dr_screen_frame", "dr_screen_mesh", "dr_gravel", "dr_flint_heap", "dr_nugget_heap", "dr_fines")
+PAINT, SPRING, SAWDUST = "dr_red_paint", "dr_spring", "dr_sawdust"
+# The vibrator motor's shaft (y, z before the tilt); its eccentric weights spin (client/MachineRotors).
+EXCITER = (27, 25)
+
+
+def _cuts(a0, a1, points):
+    """The pieces of a0..a1 between the given cut points (and a0, a1)."""
+    marks = [a0] + [p for p in points if a0 < p < a1] + [a1]
+    return list(zip(marks, marks[1:]))
+
+
+def tilted(frm, to, texture, x_cuts=(), z_cuts=SCREEN_Z):
+    """A box of the tilted screen, cut into pieces along x and z (the pieces' faces inside the box are left out), all
+    turned together about SCREEN_TILT's origin."""
+    out = []
+    xs, zs = _cuts(frm[0], to[0], x_cuts), _cuts(frm[2], to[2], z_cuts)
+    for i, (x0, x1) in enumerate(xs):
+        for j, (z0, z1) in enumerate(zs):
+            faces = dict(texture) if isinstance(texture, dict) else {"*": texture}
+            if i > 0:
+                faces["west"] = None
+            if i < len(xs) - 1:
+                faces["east"] = None
+            if j > 0:
+                faces["north"] = None
+            if j < len(zs) - 1:
+                faces["south"] = None
+            out.append(box((x0, frm[1], z0), (x1, to[1], z1), faces, rotation=SCREEN_TILT))
+    return out
+
+
+def screen_point(y, z, x=0.0):
+    """Where a point of the screen box (given before the tilt) ends up."""
+    import math
+    _, angle, (_, oy, oz) = SCREEN_TILT
+    c, s = math.cos(math.radians(angle)), math.sin(math.radians(angle))
+    dy, dz = y - oy, z - oz
+    return (x, oy + dy * c - dz * s, oz + dy * s + dz * c)
+
+
+def sieve_screen():
+    """The screen box (before the tilt the deck is at y 17, the box runs z 9..41): red side plates with a bolted
+    flange, a back wall at the high feed end, a grizzly of real bars under the feed (rocks ride on it, the small stuff
+    drops through), then a deck of woven wire with steel cross bars over it, and a hazard-striped discharge lip at the
+    low front end. Brackets on the sides sit on the coil springs; a beam across the middle carries the vibrator motor.
+    Everything turns together (SCREEN_TILT)."""
+    m = []
+    wall = {"*": SCREEN_FRAME, "up": BAND, "down": PAINT}
+    for x0, x1 in ((-13.5, -12), (12, 13.5)):
+        m += tilted((x0, 16, 9), (x1, 22, 41), wall)
+    m += tilted((-12, 16, 39.5), (12, 22, 41), wall, x_cuts=WIDE_CUT)
+    # Deck of woven wire over the front two thirds, on two bars underneath.
+    m += tilted((-12, 16.5, 9), (12, 17, 29), {"*": RUST_BARE, "up": SCREEN_MESH, "down": SCREEN_MESH}, x_cuts=WIDE_CUT)
+    for z in (12, 21):
+        m += tilted((-12, 15.5, z - 0.75), (12, 16.5, z + 0.75), RUST_BARE, x_cuts=WIDE_CUT, z_cuts=())
+    # Steel cross bars over the wire, every eight pixels (twice the weave), so they never beat against it.
+    for z in (13, 21):
+        m += tilted((-12, 17, z - 0.5), (12, 17.75, z + 0.5), "dp_chrome", x_cuts=WIDE_CUT, z_cuts=())
+    # The grizzly under the feed: bars along the flow on a cross member, with gaps to see through.
+    m += tilted((-12, 15.5, 29), (12, 17, 30.5), RUST_BARE, x_cuts=WIDE_CUT)
+    for x in (-10.5, -7.5, -4.5, -1.5, 1.5, 4.5, 7.5, 10.5):
+        m += tilted((x - 0.625, 16, 29.75), (x + 0.625, 17.5, 39.5), RUST_BARE)
+    # Gravel riding down the grizzly from the feed, heaped where the chute drops it.
+    m += tilted((-8, 17.5, 31), (8, 18.5, 39.5), GRAVEL)
+    m += tilted((-6, 18.5, 34), (5, 19.5, 39.5), GRAVEL)
+    # Discharge lip at the low end, its front edge hazard-striped.
+    m += tilted((-12, 15, 8.25), (12, 17.25, 9), {"*": RUST_BARE, "north": HAZARD}, x_cuts=WIDE_CUT)
+    # Spring brackets on the side plates, front and back.
+    for x0, x1 in ((-16, -13.5), (13.5, 16)):
+        for z in (12, 38):
+            m += tilted((x0, 14, z - 2), (x1, 16, z + 2), RUST_BARE, z_cuts=())
+    # The motor beam across the middle, the vibrator motor on its feet: patina housing, blue end bells.
+    m += tilted((-16, 22, 23), (16, 23.5, 27), PAINT, x_cuts=(0,), z_cuts=())
+    m += tilted((-3.5, 23.5, 23.75), (3.5, 24.75, 26.25), RUST_BARE, z_cuts=())
+    y, z = EXCITER
+    for x0, x1, r, texture, cap in ((-4.5, 4.5, 2.5, RIB_PATINA, BLUE), (-5, -4.5, 2, BLUE, BLUE), (4.5, 5, 2, BLUE, BLUE)):
+        for piece in cyl("x", y, z, r, x0, x1, texture, cap):
+            m.append((*piece[:3], {"rotation": SCREEN_TILT}))
     return m
 
 
+def sieve():
+    """Two wide, two tall, three long: a vibrating screen. A feed hopper behind it pours gravel down a chute onto a red
+    screen box tilted on blue coil springs; the gravel rides over a grizzly of steel bars and a woven wire deck, shaken
+    by a vibrator motor whose eccentric weights spin while it runs (client/MachineRotors). The oversize falls off a
+    hazard-striped lip into totes of flint and nuggets at the front, the fines through the deck into a pan; a control
+    box with a gauge and the amber running lamp stands on the master block."""
+    m = skids(-16, 16, 0, 48)
+    # Spring seats: red pedestals at the corners, short under the low front, tall under the high back. The springs
+    # are one-pixel coils with one-pixel gaps on a rod (no sub-pixel rings: those shimmer as the camera moves).
+    for xc in (-14.5, 14.5):
+        for z in (12, 38):
+            _, top, zc = screen_point(14, z)
+            seat = round(max(3.5, top - 6.25) * 4) / 4
+            zc = round(zc * 4) / 4
+            m.append(box((xc - 1.5, 3, zc - 1.75), (xc + 1.5, seat, zc + 1.75), PAINT))
+            m += cyl("y", xc, zc, 0.5, seat, top - 0.25, RUST_PIPE)
+            y = seat + 0.5
+            while y + 1 <= top - 0.5:
+                m += cyl("y", xc, zc, 1.25, y, y + 1, SPRING)
+                y += 2
+    # A pan under the deck catches the fines.
+    m.append(box((-12.5, 3, 11), (12.5, 5, 40), {"*": RUST_BARE, "up": FINES}))
+    for frm, to in (((-13, 4.5, 10.5), (13, 5.5, 11.25)), ((-13, 4.5, 39.75), (13, 5.5, 40.5)),
+                    ((-13, 4.5, 11.25), (-12.25, 5.5, 39.75)), ((12.25, 4.5, 11.25), (13, 5.5, 39.75))):
+        m.append(box(frm, to, BAND))
+    # Feed hopper behind the screen on two legs: a ribbed bin heaped with gravel under a banded rim, tapering to a
+    # chute that reaches over the screen's back wall.
+    for x in (-8.5, 7):
+        m.append(box((x, 3, 44), (x + 1.5, 22, 45.5), PAINT))
+    m.append(box((-7, 12, 44.25), (7, 13.25, 45.25), PAINT))
+    m.append(box((-6.5, 22, 42.5), (6.5, 25, 46.5), RIB_RUST))
+    m.append(box((-9, 25, 41.5), (9, 30, 47.5), {"*": RIB_RUST, "up": GRAVEL}))
+    for frm, to in (((-9.5, 29.5, 41), (9.5, 31, 41.75)), ((-9.5, 29.5, 47.25), (9.5, 31, 48)),
+                    ((-9.5, 29.5, 41.75), (-8.75, 31, 47.25)), ((8.75, 29.5, 41.75), (9.5, 31, 47.25))):
+        m.append(box(frm, to, BAND))
+    m.append(box((-7, 30, 43), (7, 30.75, 46), GRAVEL))
+    m.append(box((-3.5, 28.25, 36.5), (3.5, 29, 41.5), {"*": RUST_BARE, "up": GRAVEL}))
+    for x0, x1 in ((-4.25, -3.5), (3.5, 4.25)):
+        m.append(box((x0, 28.25, 36.5), (x1, 30, 41.5), RUST_BARE))
+    # Totes at the front: fines, flint and nuggets.
+    for x0, x1, heap in ((-14.5, -8, FINES), (-7.25, -0.75, FLINT), (0, 6.5, NUGGETS)):
+        m.append(box((x0, 3, 1), (x1, 6.75, 7.5), {"*": RUST_BARE, "up": SOOT}))
+        m.append(box((x0 - 0.25, 6, 0.75), (x1 + 0.25, 7.25, 7.75), BAND))
+        m.append(box((x0 + 0.75, 6.5, 1.75), (x1 - 0.75, 7.75, 6.75), heap))
+        m.append(box((x0 + 2, 7.75, 2.75), (x1 - 2, 8.5, 5.75), heap))
+    # Control box on the master block (part 0, the only block whose lit state changes): gauge and amber lamp.
+    m.append(box((8, 3, 0.75), (15.5, 13, 4.5), {"*": RUST_BARE, "north": "dr_red"}))
+    m.append(gauge("north", (11.75, 10, 0.5), 3.5))
+    m.append(lamp("north", (11.75, 5.5, 0.5), 2.5))
+    return m + sieve_screen()
+
+
+# ------------------------------------------------------------------ sawmill (redrawn 5 October 2026)
+
+# The blade, its arbor and the belt drive turn (client/MachineRotors); the block models leave them out.
+SAW_CENTER = (18, 44)  # y, z of the arbor
+SAW_R_GULLET, SAW_R_TIP, SAW_TEETH = 11.5, 13.25, 24
+SAW_X = (-1.0, 0.0)  # the blade's two faces
+SAW_DRIVE = (18, 66)  # y, z of the motor's pulley
+PULLEY_X, PULLEY_R = (-9.0, -6.5), 2.9
+
+
 def sawmill():
-    """Two wide, two tall, five long: a log sawmill. A long riveted rust bed carries a log carriage on rails past a
-    big saw blade in a red guard, driven by a belt from a green ribbed motor; an amber cutting lamp, a dust hood with
-    copper ducting and hex fittings, and a log on the carriage."""
+    """Two wide, two tall, five long: a log sawmill. A log rides a carriage on chrome rails into a big toothed blade
+    that runs in a slot in the riveted bed, under a red hood that leaves its front teeth bare. The blade turns on an
+    arbor in two pillow-block bearings, belted from a green ribbed motor; a copper duct takes the dust from the hood to
+    the back, and a control box with a gauge and the amber running lamp stands on the master block."""
+    cy, cz = SAW_CENTER
     m = skids(-16, 16, 0, 80)
-    m.append(box((-14, 3, 2), (14, 9, 78), {"*": RUST, "up": RUST_BARE}))
-    for z in range(2, 78, 15):
+    # The bed, in pieces round a slot (x -3..2, z 32..56) for the blade's lower arc; sawdust in the slot.
+    bed = {"*": RUST, "up": RUST_BARE}
+    m.append(box((-14, 3, 2), (14, 9, 32), bed))
+    m.append(box((-14, 3, 56), (14, 9, 78), bed))
+    m.append(box((-14, 3, 32), (-3, 9, 56), bed))
+    m.append(box((2, 3, 32), (14, 9, 56), bed))
+    m.append(box((-3, 3, 32), (2, 3.75, 56), {"*": RUST_BARE, "up": SAWDUST}))
+    m.append(box((-2.75, 3.75, 32.25), (1.75, 5.5, 35.5), SAWDUST))
+    m.append(box((-2.75, 3.75, 52.5), (1.75, 5.25, 55.75), SAWDUST))
+    for z in (2, 16, 30.5, 56.5, 66.5, 76.5):
         m.append(box((-14.5, 8, z), (14.5, 9.25, z + 1), BAND))
     for x in (-10, 8):
-        m.append(box((x, 9, 1), (x + 2, 10.5, 79), "dp_chrome"))
-    # The carriage with a log on it, near the front.
+        m.append(box((x, 9, 1), (x + 2, 10.5, 60), "dp_chrome"))
+    # The carriage with a log on it, its end just short of the teeth.
     m.append(box((-12, 10.5, 6), (12, 13, 30), {"*": RUST, "up": GRATE}))
     m += cyl("z", -1, 19, 6, 7, 29, "sp_bark", "sp_wood")
     for z in (8, 26):
         m.append(box((-12, 13, z), (-9, 21, z + 2), RUST_PIPE))
-    # The saw: a big blade in a red guard at the middle, its motor beside it.
-    m += cyl("x", 18, 44, 13, -1.5, 0.5, BAND, BLADE)
-    m.append(box((-3, 24, 30), (3, 33, 58), {"*": "dr_red"}))
-    m.append(box((-3.5, 25, 30), (3.5, 26, 58), BAND))
-    m += stack("x", 15, 66, 5, -14, -3, RIB_PATINA, 4, BLUE)
-    m.append(box((-3, 12, 45), (-2, 20, 66), RUBBER))
-    m.append(lamp("north", (0, 30, 29.75), 2.5))
-    # Dust hood and duct to the back.
-    m += pipe_run([(0, 33, 44), (0, 38, 44), (0, 38, 74), (0, 9, 74)], 2, COPPER)
-    m.append(gauge("north", (10, 14, 1.75), 3))
+    # Pillow-block bearings on red pedestals either side of the blade (the arbor runs through them): a foot plate, the
+    # housing with its bore on the arbor (y 18, z 44) and a cap. The housing's bearing face is stretched over it, so the
+    # housing lies wholly in the block above y 16; cut at the seam, each piece would show the whole face again.
+    for x0, x1 in ((-5.75, -2.75), (2.75, 5.75)):
+        m.append(box((x0 + 0.25, 9, 41.5), (x1 - 0.25, 15.25, 46.5), PAINT))
+        m.append(box((x0, 15.25, 40.75), (x1, 16, 47.25), RUST_BARE))
+        m.append(box((x0, 16, 42), (x1, 20, 46), {"*": RUST_BARE, "east": f"{NUT}!", "west": f"{NUT}!"}))
+        m.append(box((x0 + 0.25, 20, 42.5), (x1 - 0.25, 21.25, 45.5), RUST_BARE))
+        for z in (41, 46.25):
+            m.append(box((x0 + 0.75, 16, z), (x1 - 0.75, 16.5, z + 0.75), BAND))
+    # The hood over the blade's top and back: two cheek plates, a top plate and a back plate, open at the front and
+    # below, so the teeth show where they meet the log.
+    for x0, x1 in ((-2.75, -1.75), (0.75, 1.75)):
+        m.append(box((x0, 23, 40), (x1, 31.5, 58), PAINT))
+        m.append(box((x0 - 0.25, 23, 39.5), (x1 + 0.25, 24, 58.5), BAND))
+    m.append(box((-3.25, 31.5, 39.5), (2.25, 32, 58.5), PAINT))
+    m.append(box((-2.75, 22, 57.75), (1.75, 31.5, 58.5), PAINT))
+    # Motor on a red plinth behind the blade, its pulley belted to the arbor's (both pulleys turn).
+    m.append(box((-15, 9, 62), (-10, 13.5, 70), PAINT))
+    m += stack("x", SAW_DRIVE[0], SAW_DRIVE[1], 5, -15.5, -9.5, RIB_PATINA, 4, BLUE)
+    for y0, y1 in ((21, 21.75), (14.25, 15)):
+        m.append(box((PULLEY_X[0] + 0.25, y0, cz), (PULLEY_X[1] - 0.25, y1, SAW_DRIVE[1]), RUBBER))
+    # The dust duct from the hood's back down to the bed, inside the machine's blocks. It runs on the hood's centre
+    # line, across the x 0 block seam, so its joints are plain red flanges, not hex nuts: a stretched nut face cut at
+    # the seam would show twice, squeezed.
+    for frm, to, texture in pipe_run([(-0.5, 28.75, 58.5), (-0.5, 28.75, 72), (-0.5, 9.5, 72)], 1.5, COPPER):
+        stretched = isinstance(texture, dict) and any(t and t.endswith("!") for t in texture.values())
+        m.append(box(frm, to, PAINT) if stretched else (frm, to, texture))
     m += valve("x", 12, 70, 3, 14)
+    # Control box on the master block (part 0, the only block whose lit state changes): gauge and amber lamp.
+    m.append(box((10.5, 3, 0.75), (15.5, 14, 4.5), {"*": RUST_BARE, "north": "dr_red"}))
+    m.append(gauge("north", (13, 10.5, 0.5), 3.5))
+    m.append(lamp("north", (13, 5.75, 0.5), 2.5))
     return m
 
 
@@ -616,4 +786,67 @@ MODELS = {
     "electroplating_bath": electroplating_bath(),
     "ammonia_chiller": ammonia_chiller(),
     "rocket_workshop": rocket_workshop(),
+}
+
+
+# ------------------------------------------------------------------ moving parts (client/MachineRotors)
+
+def _sawmill_blade():
+    """The blade with its flanges, arbor nut, arbor and drive pulley: true round prisms, so they stay round turning."""
+    import machine_rotors as mr
+    cy, cz = SAW_CENTER
+    q = mr.saw_blade(SAW_X[0], SAW_X[1], cy, cz, SAW_R_GULLET, SAW_R_TIP, SAW_TEETH, "dr_saw_disc", "dr_saw_edge")
+    q += mr.disc("x", -2.25, SAW_X[0], cy, cz, 3.25, "dr_saw_edge", "dr_flange")
+    q += mr.disc("x", SAW_X[1], 1.25, cy, cz, 3.25, "dr_saw_edge", "dr_flange")
+    q += mr.prism("x", 1.25, 2.25, mr.ngon(cy, cz, 1.9, 6), "dr_saw_edge", "dr_nut")
+    q += mr.disc("x", -10, 5, cy, cz, 0.9, "dp_chrome", "dp_chrome", sides=8)
+    q += mr.disc("x", PULLEY_X[0], PULLEY_X[1], cy, cz, PULLEY_R, RUBBER, "dr_pulley")
+    return q
+
+
+def _sawmill_drive():
+    """The motor's pulley (the same size as the arbor's, so it turns at the blade's speed) on a stub of its shaft."""
+    import machine_rotors as mr
+    cy, cz = SAW_DRIVE
+    return (mr.disc("x", PULLEY_X[0], PULLEY_X[1], cy, cz, PULLEY_R, RUBBER, "dr_pulley")
+            + mr.disc("x", -9.75, PULLEY_X[0] + 0.25, cy, cz, 0.75, "dp_chrome", "dp_chrome", sides=8))
+
+
+def _sieve_exciter():
+    """The vibrator motor's shaft ends with an eccentric weight on each: a half disc and a hub, turned with the screen."""
+    import math
+    import machine_rotors as mr
+    y, z = EXCITER
+    q = mr.disc("x", -7, 7, y, z, 0.6, "dp_chrome", "dp_chrome", sides=8)
+    r = 3.25
+    lobe = [(y + r * math.sin(math.pi * k / 10), z + r * math.cos(math.pi * k / 10)) for k in range(11)]
+    for x0, x1 in ((-6.75, -5.25), (5.25, 6.75)):
+        q += mr.prism("x", x0, x1, lobe, "dr_weight", "dr_weight", (y - r, z - r, y + r, z + r))
+        q += mr.disc("x", x0 - 0.15, x1 + 0.15, y, z, 1.25, RUST_BARE, "dr_nut")
+    return mr.turned(q, "x", SCREEN_TILT[1], SCREEN_TILT[2])
+
+
+# Parts that turn: drawn by client/MachineRotors through the machines' block entity renderer, standing still while
+# the machine is idle ("always") and turning while its master block is lit, only on the big machine (compact=false).
+# Speeds in degrees per tick; a negative speed turns the sawmill's front teeth down into the log. A toothed part must
+# turn less than half its pitch a frame, or its teeth seem to run backwards: the 24-tooth blade (15-degree pitch) at
+# SAW_SPEED, 140 degrees a second, stays under 7.5 degrees a frame down to 20 frames a second. See machine_rotors.py.
+SAW_SPEED = -7
+ROTORS = {
+    "sawmill_blade": {"block": "sawmill", "axis": "x", "center": (0, *SAW_CENTER), "property": "lit",
+                      "speed": SAW_SPEED, "ease": 12, "always": True, "when": {"compact": "false"},
+                      "quads": _sawmill_blade(),
+                      # Slabs (x0, x1, radius) the static models of both styles keep clear: the blade, its flanges.
+                      "clear": [(SAW_X[0], SAW_X[1], SAW_R_TIP + 0.25), (-2.25, 1.25, 3.5)]},
+    "sawmill_drive": {"block": "sawmill", "axis": "x", "center": (0, *SAW_DRIVE), "property": "lit",
+                      "speed": SAW_SPEED, "ease": 12, "always": True, "when": {"compact": "false"},
+                      "quads": _sawmill_drive()},
+    "sieve_exciter": {"block": "sieve", "axis": "x", "center": screen_point(*EXCITER), "property": "lit", "speed": 24,
+                      "ease": 8, "always": True, "when": {"compact": "false"}, "quads": _sieve_exciter()},
+}
+# What the item icons add to the block models' elements, standing in for the rotors (in both styles).
+ITEM_EXTRAS = {
+    "sawmill": (cyl("x", SAW_CENTER[0], SAW_CENTER[1], SAW_R_TIP - 0.5, SAW_X[0], SAW_X[1], "dr_saw_edge")
+                + cyl("x", SAW_CENTER[0], SAW_CENTER[1], PULLEY_R, PULLEY_X[0], PULLEY_X[1], RUBBER)
+                + cyl("x", SAW_DRIVE[0], SAW_DRIVE[1], PULLEY_R, PULLEY_X[0], PULLEY_X[1], RUBBER)),
 }
