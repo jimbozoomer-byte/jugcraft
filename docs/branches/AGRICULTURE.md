@@ -1309,6 +1309,8 @@ The branch grows in small slices that each stand on their own. Each crop needs a
 | **7. Rice and wet farming** | Rice, taro, water chestnut | Paddy crops that grow in one block of still water | A distinct regional farm; rice dishes |
 | **8. Off-world farming** | Adapted crops for the Moon and beyond | Sealed greenhouse habitats | Expedition food; a shared engineering and agriculture milestone ([space](../CONTENT_BRANCHES.md#space-and-magical-realms)) |
 
+The owner's [industrial agriculture planning brief](../features/industrial-agriculture-plan.md) expands slice 5 into textiles/coated fabrics, paper/packaging, panels/linoleum, rubber goods and later agricultural chemistry. It records flexible common feedstocks, early optional natural rubber, reusable hand/shaft/motor equipment and construction uses without new routine upkeep. These are planning directions, not implemented equipment or final balance values.
+
 ## Farm equipment (planned, not industrial)
 
 Hand tools and farmstead blocks, made from wood, stone and early metals. None needs power.
