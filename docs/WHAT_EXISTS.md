@@ -286,14 +286,15 @@ Record: [walled-town.md](features/walled-town.md).
 
 ### The Arcane Concordance (`concordance/`, `tools/concordance.py`)
 
-Magic, milestones 1 to 5. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records:
+Magic, milestones 1 to 6. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),
 [arcane-concordance-composition.md](features/arcane-concordance-composition.md),
 [arcane-concordance-invocations.md](features/arcane-concordance-invocations.md),
 [arcane-concordance-baselines.md](features/arcane-concordance-baselines.md),
 [arcane-concordance-rituals.md](features/arcane-concordance-rituals.md),
-[arcane-concordance-alchemy.md](features/arcane-concordance-alchemy.md).
+[arcane-concordance-alchemy.md](features/arcane-concordance-alchemy.md),
+[arcane-concordance-ecology.md](features/arcane-concordance-ecology.md).
 
 | ID / part | Class / data | What |
 | --- | --- | --- |
@@ -314,6 +315,7 @@ Magic, milestones 1 to 5. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCAN
 | `jugcraft:research_notes` | `ResearchNotesItem`, component `ResearchNotes`, `RateGate` | write what you know; others read it as evidence (never mastery) |
 | `jugcraft:lumen_sconce` | `LumenSconceBlock`, `LumenSconceBlockEntity` | burns Radiance for light 15; anyone pours, the owner draws |
 | typed resources | `concordance/resource/` (pure Java); `data/jugcraft/concordance/conversion/` | containers, transfers, conversions, allocation, Bound Will and Astral ledgers, Prima values |
+| garden | `concordance/ecology/` (pure Java: `Sampler`, `SampleBudget`, `Verdict`, `Niche`), `concordance/garden/` (`Garden`, `VerdantBedBlock`, `OrganismCropBlock`, the living devices); `data/jugcraft/concordance/{organism,disturbance}/` | Verdant Beds, four crops with niches (Sunpetal, Dewmoss, Gloamcap, Mendvetch), the Verdant Heart, Mulch Maw, Habitat Gauge and Gleaner (roadmap step 14) |
 | composition | `concordance/compose/` (pure Java: grammar, parser, compiler, plans, explanations); `data/jugcraft/concordance/{component,instrument}/`; `ConcordanceCommand` (`compose check\|inscribe\|show\|clear`) | players write spells from 17 data components (6 more belong to invocations); every problem is named; plans carry their limits |
 | `jugcraft:composed` spell | `data/jugcraft/spell/composed.json`; `ComposedSpells`, component `jugcraft:inscription` (`Inscription`) | casts the spell inscribed on the held instrument; recompiled on the server every cast, run under a ledger |
 | effects | `concordance/effect/` (pure Java: kinds, causes, stacking, tolerance, ledger); `ConcordanceEffects`; tags `#jugcraft:concordance/{immune,resistant,interactable,harvestable}` | the one boundary every Concordance effect goes through: friendly fire, tolerance, protection, attribution, one-time accounting |

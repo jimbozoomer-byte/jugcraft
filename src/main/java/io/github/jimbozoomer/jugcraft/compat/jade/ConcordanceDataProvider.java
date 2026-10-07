@@ -75,10 +75,10 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 		} else if (this == CRUCIBLE && accessor.getBlockEntity() instanceof CrucibleBlockEntity crucible) {
 			data.put(dataKey, snapshot(crucible));
 		} else if (this == BED && accessor.getBlockEntity() instanceof VerdantBedBlockEntity bed && accessor.getLevel() instanceof ServerLevel level) {
-			data.put(dataKey, snapshot(bed, level));
+			data.put(dataKey, bedSnapshot(bed, level));
 		} else if (accessor.getBlockEntity() instanceof LivingDeviceBlockEntity device
 				&& (this == HEART || this == MAW || this == GAUGE || this == GLEANER)) {
-			data.put(dataKey, snapshot(device));
+			data.put(dataKey, deviceSnapshot(device));
 		} else if (this == PYLON && accessor.getBlockEntity() instanceof LeyPylonBlockEntity pylon) {
 			CompoundTag snapshot = new CompoundTag();
 			snapshot.putInt("ley", (int) pylon.ley());
@@ -145,7 +145,7 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 	}
 
 	/** A Verdant Bed: moisture, nutrients, whether it is awake, and its habitat (from its sample). */
-	public static CompoundTag snapshot(VerdantBedBlockEntity bed, ServerLevel level) {
+	public static CompoundTag bedSnapshot(VerdantBedBlockEntity bed, ServerLevel level) {
 		CompoundTag snapshot = new CompoundTag();
 		snapshot.putInt("nutrients", bed.nutrients());
 		snapshot.putInt("capacity", VerdantBedBlockEntity.CAPACITY);
@@ -161,7 +161,7 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 	}
 
 	/** A living device: its status, and its Verdance, digestion or reading. */
-	public static CompoundTag snapshot(LivingDeviceBlockEntity device) {
+	public static CompoundTag deviceSnapshot(LivingDeviceBlockEntity device) {
 		CompoundTag snapshot = new CompoundTag();
 		snapshot.putString("device", device.status());
 		snapshot.putBoolean("awake", device.awake());

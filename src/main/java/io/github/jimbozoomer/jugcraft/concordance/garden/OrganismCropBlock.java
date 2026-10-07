@@ -163,7 +163,7 @@ public class OrganismCropBlock extends CropBlock {
 	}
 
 	/** What harvesting it ripe yields: its produce and its chaff. Empty while it is not ripe. */
-	public List<ItemStack> yield(BlockState state) {
+	public List<ItemStack> harvestYield(BlockState state) {
 		Organism definition = organism();
 		if (!isMaxAge(state) || definition == null) {
 			return List.of();
@@ -175,7 +175,7 @@ public class OrganismCropBlock extends CropBlock {
 
 	/** Harvests it if ripe: it falls back to its replanting step; returns what it yielded (empty if it was not ripe). */
 	public List<ItemStack> harvest(ServerLevel level, BlockPos pos, BlockState state) {
-		List<ItemStack> out = yield(state);
+		List<ItemStack> out = harvestYield(state);
 		Organism definition = organism();
 		if (out.isEmpty() || definition == null) {
 			return List.of();

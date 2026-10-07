@@ -95,7 +95,7 @@ public class GleanerBlockEntity extends LivingDeviceBlockEntity implements GeoBl
 					|| !Illumination.mayChange(level, null, pos)) {
 				continue;
 			}
-			List<ItemStack> harvest = crop.yield(state);
+			List<ItemStack> harvest = crop.harvestYield(state);
 			if (!fits(harvest)) {
 				status("full");
 				return status;
