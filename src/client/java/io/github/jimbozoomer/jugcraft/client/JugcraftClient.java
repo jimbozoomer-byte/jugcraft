@@ -99,6 +99,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		TwoHandedInput.register();
 		ClientPlayNetworking.registerGlobalReceiver(WeaponArtPayload.TYPE, (payload, context) -> ArmsMotion.receive(payload));
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.weapons.JugcraftArms.THROWN_ARM,
+				io.github.jimbozoomer.jugcraft.client.arms.ThrownArmRenderer::new);
 		PetroFluidsClient.register();
 		RocketPackLayer.register();
 		GhostSheetLayer.register();

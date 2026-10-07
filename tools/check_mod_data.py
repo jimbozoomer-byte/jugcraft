@@ -1551,6 +1551,45 @@ def check_arms():
             err(f"tools/arms.py: the {metal} {name} {info} is out of range")
         if info["angle"] > arms.VANILLA_SHIELD["angle"] and info["delay"] <= arms.VANILLA_SHIELD["delay"]:
             err(f"The {metal} {name} covers more than vanilla's shield without being slower to raise")
+    # Arms VIII (batch 59): the thrown arms as tools/arms.py has them, in registration order, and their balance: no
+    # throw hits harder than the trident's, and throwing one after another deals less a second than a netherite sword.
+    found_thrown = [(name, metal, {"wind": int(wind), "speed": float(speed), "gravity": float(gravity), "damage": float(damage)})
+                    for name, metal, wind, speed, gravity, damage in re.findall(
+                        r'new Thrown\("([a-z_]+)", "([a-z]+)", (\d+), ([\d.]+)F, ([\d.]+)F, ([\d.]+)F\)', java)]
+    expected_thrown = [(name, metal, {"wind": info["wind"], "speed": float(info["speed"]), "gravity": float(info["gravity"]),
+                                      "damage": float(info["damage"])})
+                       for metal in arms.METALS for (name, at), info in arms.THROWN.items() if at == metal]
+    if found_thrown != expected_thrown:
+        err(f"JugcraftArms.THROWN {found_thrown} != tools/arms.py {expected_thrown}")
+    if sorted({name for name, _metal in arms.THROWN}) != sorted(arms.THROWN_KINDS) or any(
+            kind not in arms.KINDS or kind in arms.CHARGING or kind in arms.ARTS or kind in arms.TWO_HANDED
+            or arms.KINDS[kind]["parry"] for kind in arms.THROWN_KINDS):
+        err("tools/arms.py: THROWN_KINDS must be swung arms with no art, two-handed swing or parry, each in THROWN")
+    for name, value in (("FRANCISCA_DISABLE", arms.FRANCISCA_DISABLE), ("CHAKRAM_RANGE", arms.CHAKRAM_RANGE),
+                        ("CHAKRAM_RETURN", arms.CHAKRAM_RETURN), ("CHAKRAM_CATCH", arms.CHAKRAM_CATCH),
+                        ("HARPOON_WATER", arms.HARPOON_WATER), ("HARPOON_PULL", arms.HARPOON_PULL),
+                        ("HARPOON_PULL_MAX", arms.HARPOON_PULL_MAX)):
+        if f"{name} = {f(value)};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
+    for name, value in (("THROW_WEAR", arms.THROW_WEAR), ("THROW_COOLDOWN", arms.THROW_COOLDOWN),
+                        ("CHAKRAM_TARGETS", arms.CHAKRAM_TARGETS), ("CHAKRAM_MAX_TICKS", arms.CHAKRAM_MAX_TICKS)):
+        if f"{name} = {value};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "arms"
+                / "ThrownArmRenderer.java").read_text(encoding="utf-8")
+    flight = {kind: float(size) for kind, size in re.findall(r'"([a-z_]+)", ([\d.]+)F', re.search(
+        r"FLIGHT = Map\.of\((.*?)\);", renderer, re.S).group(1))}
+    if flight != {kind: float(size) for kind, size in arms.FLIGHT.items()} or sorted(flight) != sorted(arms.THROWN_KINDS):
+        err(f"ThrownArmRenderer.FLIGHT {flight} != tools/arms.py {arms.FLIGHT}")
+    netherite = (1.0 + 4.0 + 3.0) * 1.6
+    for (name, metal), info in arms.THROWN.items():
+        if not (1 <= info["wind"] <= 40 and 0 < info["speed"] <= 4 and 0 <= info["gravity"] <= 0.1 and info["damage"] > 0):
+            err(f"tools/arms.py: the thrown {metal} {name} {info} is out of range")
+        if info["damage"] > arms.VANILLA_TRIDENT["damage"]:
+            err(f"The thrown {metal} {name} hits for {info['damage']:g}, harder than the trident's {arms.VANILLA_TRIDENT['damage']:g}")
+        if arms.throw_per_second(name, metal) >= netherite:
+            err(f"Thrown one after another, the {metal} {name} deals {arms.throw_per_second(name, metal):.2f} a second, "
+                f"not below a netherite sword's {netherite:.2f}")
     if arms.kit() != [item for item in arms.items() if arms.split(item)[1] not in arms.KINDS]:
         err("tools/arms.py: kit() is not the arms outside KINDS")
     # No arm may take an id another generator already registers (two items of one id stop the game at start).
