@@ -26,6 +26,11 @@ public record FeatureEnabledCondition(String feature, List<String> or) implement
 	public static final ResourceConditionType<FeatureEnabledCondition> TYPE =
 			ResourceConditionType.create(Jugcraft.id("feature_enabled"), CODEC);
 
+	/** A condition on one switch alone (no alternatives), as written before the any-of switches. */
+	public FeatureEnabledCondition(String feature) {
+		this(feature, List.of());
+	}
+
 	public static void register() {
 		ResourceConditions.register(TYPE);
 	}
