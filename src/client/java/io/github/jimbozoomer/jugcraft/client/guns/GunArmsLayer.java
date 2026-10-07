@@ -62,7 +62,7 @@ final class GunArmsLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderD
 				float y = shoulder.offsetY() - bone.pivotY();
 				float z = shoulder.offsetZ() - bone.pivotZ();
 				if (x * x + y * y + z * z > 1.0E-4F) {
-					poseStack.mulPose(new Quaternionf().rotationTo(0.0F, -1.0F, 0.0F, x, y, z));
+					poseStack.rotate(new Quaternionf().rotationTo(0.0F, -1.0F, 0.0F, x, y, z));
 				}
 			}
 		}
