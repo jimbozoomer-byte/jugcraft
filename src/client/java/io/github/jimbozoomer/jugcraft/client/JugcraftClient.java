@@ -99,6 +99,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		TwoHandedInput.register();
 		ClientPlayNetworking.registerGlobalReceiver(WeaponArtPayload.TYPE, (payload, context) -> ArmsMotion.receive(payload));
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.weapons.JugcraftArms.THROWN_ARM,
+				io.github.jimbozoomer.jugcraft.client.arms.ThrownArmRenderer::new);
 		PetroFluidsClient.register();
 		RocketPackLayer.register();
 		GhostSheetLayer.register();
@@ -126,6 +128,8 @@ public final class JugcraftClient implements ClientModInitializer {
 			}
 		});
 		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
+		// Gear traits' descriptions show while Shift is held (gear/TraitTooltips.java, docs/features/trait-details.md).
+		io.github.jimbozoomer.jugcraft.gear.TraitTooltips.details = () -> Minecraft.getInstance().hasShiftDown();
 		SeasonColors.register();
 		PartyClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,

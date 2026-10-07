@@ -1,6 +1,6 @@
 """Tools, armor and paxels (batch 25, docs/features/tools-and-armor.md), inspired by Mekanism: Tools (MIT; no code or
-art taken). Keep GEAR_TIERS, PIECES and PAXEL_TIERS in sync with gear/JugcraftGear.java; tools/check_mod_data.py
-checks it.
+art taken). Keep GEAR_TIERS, PIECES, PAXEL_TIERS and ARMOR_STYLES in sync with gear/JugcraftGear.java (ARMOR_STYLES also
+with STYLE_TEMPLATES); tools/check_mod_data.py checks it.
 """
 
 MOD = "jugcraft"
@@ -39,6 +39,35 @@ PATTERNS = {
 ITEM_TAGS = {"sword": "swords", "pickaxe": "pickaxes", "axe": "axes", "shovel": "shovels", "hoe": "hoes",
              "helmet": "head_armor", "chestplate": "chest_armor", "leggings": "leg_armor", "boots": "foot_armor"}
 
+# Styled armor (docs/features/steampunk-and-kaiser-armor.md): another look for a metal's armor, as its own items.
+# The key is the styled items' prefix (<key>_<piece>) and their equipment asset. Armor only (not in GEAR_TIERS:
+# no tools, paxels or arms). Every number is the metal's: Java derives the material with restyle(...). A smithing
+# template plus the addition dresses a plain piece; if "reversible", the template plus the metal's ingot undresses
+# it. "perk" names behaviour a style adds outside the material (None here; thallite's planned Earthbound would add
+# Rooted). Java: JugcraftGear.ARMOR_STYLES and STYLE_TEMPLATES.
+ARMOR_STYLES = {
+    "steampunk": {"display": "Steampunk", "metal": "bronze", "template": "steampunk_pattern",
+                  "template_name": "Steampunk Pattern", "template_count": 4, "addition": "minecraft:copper_ingot",
+                  "reversible": True, "perk": None,
+                  "template_recipe": (["CLC", "GPG", "CLC"], {"C": "minecraft:copper_ingot", "L": "minecraft:leather",
+                                                              "G": "minecraft:glass_pane", "P": "minecraft:paper"}),
+                  "lore": "Steampunk: bronze and copper, with goggles and a boiler on the back. "
+                          "Protects as bronze armor does.",
+                  "template_tooltip": "A smithing template. With a copper ingot it turns a bronze helmet, chestplate, "
+                                      "leggings or boots into Steampunk armor; with a bronze ingot it turns "
+                                      "Steampunk armor back. Keeps enchantments and wear."},
+    "kaiser": {"display": "Kaiser", "metal": "steel", "template": "kaiser_pattern",
+               "template_name": "Kaiser Pattern", "template_count": 4, "addition": "minecraft:gold_ingot",
+               "reversible": True, "perk": None,
+               "template_recipe": (["NCN", "BPB", "NRN"], {"N": "minecraft:gold_nugget", "C": "jugcraft:imperial_crest",
+                                                           "B": "minecraft:black_dye", "P": "minecraft:paper",
+                                                           "R": "minecraft:red_dye"}),
+               "lore": "Kaiser: field grey and gilt, the parade dress of the Winged Cog. Protects as steel armor does.",
+               "template_tooltip": "A smithing template, made with an Imperial Crest. With a gold ingot it turns a "
+                                   "steel helmet, chestplate, leggings or boots into Kaiser armor; with a steel "
+                                   "ingot it turns Kaiser armor back. Keeps enchantments and wear."},
+}
+
 
 # Batch 27 gear (docs/features/gear-and-plastic.md), after Mekanism's scuba gear, free runners, Meka-Tana and
 # Meka-Bow (MIT; no code or art taken): display name, crafting pattern and key, and the item model it uses.
@@ -61,18 +90,56 @@ SCUBA_OXYGEN = 8_000
 SCUBA_OXYGEN_PER_TICK = 1
 
 
+def style_items():
+    """The styled armor pieces, <style>_<piece>, in ARMOR_STYLES order."""
+    return [f"{style}_{piece}" for style in ARMOR_STYLES for piece in ARMOR]
+
+
+def style_templates():
+    """The styled armor's smithing templates, in ARMOR_STYLES order."""
+    return [info["template"] for info in ARMOR_STYLES.values()]
+
+
+def base_piece(item):
+    """The plain piece a styled piece is smithed from: steampunk_helmet -> bronze_helmet."""
+    style, piece = item.rsplit("_", 1)
+    return f"{ARMOR_STYLES[style]['metal']}_{piece}"
+
+
+def style_of_template(template):
+    """The style whose smithing template this is."""
+    return next(style for style, info in ARMOR_STYLES.items() if info["template"] == template)
+
+
+def feature(item):
+    """The feature switch that gates an item's recipes: its metal's (a styled piece and its template go with the metal
+    they are made from); vanilla-tier paxels and the extras go with the machines."""
+    if item in style_templates():
+        return GEAR_TIERS[ARMOR_STYLES[style_of_template(item)]["metal"]]["feature"]
+    prefix = item.rsplit("_", 1)[0]
+    if prefix in GEAR_TIERS:
+        return GEAR_TIERS[prefix]["feature"]
+    if prefix in ARMOR_STYLES:
+        return GEAR_TIERS[ARMOR_STYLES[prefix]["metal"]]["feature"]
+    return "machines"
+
+
 def items():
     """Every item this module registers, in registration order."""
-    return ([f"{tier}_{piece}" for tier in GEAR_TIERS for piece in PIECES] + [f"{tier}_paxel" for tier in PAXEL_TIERS]
-            + list(EXTRAS))
+    return ([f"{tier}_{piece}" for tier in GEAR_TIERS for piece in PIECES] + style_items() + style_templates()
+            + [f"{tier}_paxel" for tier in PAXEL_TIERS] + list(EXTRAS))
 
 
 def display(item):
     if item in EXTRAS:
         return EXTRAS[item]["display"]
+    if item in style_templates():
+        return ARMOR_STYLES[style_of_template(item)]["template_name"]
     tier, piece = item.rsplit("_", 1)
     if piece == "paxel":
         return f"{PAXEL_TIERS[tier]} Paxel"
+    if tier in ARMOR_STYLES:
+        return f"{ARMOR_STYLES[tier]['display']} {piece.capitalize()}"
     return f"{GEAR_TIERS[tier]['display']} {piece.capitalize()}"
 
 
@@ -88,7 +155,11 @@ def write_all(write, assets, data, lang, condition):
     for item in items():
         lang[f"item.{MOD}.{item}"] = display(item)
         piece = item.rsplit("_", 1)[1]
-        kind = EXTRAS[item]["model"] if item in EXTRAS else ("generated" if piece in ARMOR else "handheld")
+        # Armor, styled armor and the styled armor's templates are flat icons; tools and paxels are held.
+        if item in EXTRAS:
+            kind = EXTRAS[item]["model"]
+        else:
+            kind = "generated" if piece in ARMOR or item in style_templates() else "handheld"
         model = {"parent": f"minecraft:item/{kind}", "textures": {"layer0": f"{MOD}:item/{item}"}}
         write(assets / "models" / "item" / f"{item}.json", model)
         definition = {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}
@@ -105,13 +176,17 @@ def write_all(write, assets, data, lang, condition):
                                                                              "model": f"{MOD}:item/{item}_pulling_{n}"}}
                                                   for n, t in ((1, 0.65), (2, 0.9))]}}
         write(assets / "items" / f"{item}.json", {"model": definition})
-    for tier in GEAR_TIERS:
+    for tier in list(GEAR_TIERS) + list(ARMOR_STYLES):
         write(assets / "equipment" / f"{tier}.json", {"layers": {
             "humanoid": [{"texture": f"{MOD}:{tier}"}], "humanoid_leggings": [{"texture": f"{MOD}:{tier}"}]}})
     for asset in ("scuba", "free_runners"):
         write(assets / "equipment" / f"{asset}.json", {"layers": {"humanoid": [{"texture": f"{MOD}:{asset}"}]}})
     lang[f"tooltip.{MOD}.oxygen"] = "Oxygen: %s / %s mB"
     lang[f"tooltip.{MOD}.scuba_tank"] = "Use on a tank or gas holder of oxygen to fill. Wear it with the scuba mask."
+    for style, info in ARMOR_STYLES.items():
+        for piece in ARMOR:
+            lang[f"tooltip.{MOD}.{style}_{piece}"] = info["lore"]
+        lang[f"tooltip.{MOD}.{info['template']}"] = info["template_tooltip"]
 
     recipes = data / "recipe"
     for tier, info in GEAR_TIERS.items():
@@ -124,15 +199,37 @@ def write_all(write, assets, data, lang, condition):
                 "fabric:load_conditions": condition(info["feature"]), "type": "minecraft:crafting_shaped",
                 "category": category, "pattern": PATTERNS[piece], "key": key,
                 "result": {"id": f"{MOD}:{tier}_{piece}", "count": 1}})
+    # Styled armor: the template at a crafting table; then at a smithing table the template, a plain piece and the
+    # addition dress the piece, and (if reversible) the template, the styled piece and the metal's ingot undress it.
+    # Smithing keeps the piece's enchantments, wear, name, trim and plating.
+    for style, info in ARMOR_STYLES.items():
+        metal = info["metal"]
+        template = info["template"]
+        pattern, key = info["template_recipe"]
+        write(recipes / f"{template}.json", {
+            "fabric:load_conditions": condition(feature(template)), "type": "minecraft:crafting_shaped",
+            "category": "misc", "pattern": pattern, "key": key,
+            "result": {"id": f"{MOD}:{template}", "count": info["template_count"]}})
+        for piece in ARMOR:
+            styled, plain = f"{style}_{piece}", f"{metal}_{piece}"
+            write(recipes / f"{styled}.json", {
+                "fabric:load_conditions": condition(feature(styled)), "type": "minecraft:smithing_transform",
+                "template": f"{MOD}:{template}", "base": f"{MOD}:{plain}", "addition": info["addition"],
+                "result": {"id": f"{MOD}:{styled}"}})
+            if info["reversible"]:
+                write(recipes / f"{plain}_from_{styled}.json", {
+                    "fabric:load_conditions": condition(feature(plain)), "type": "minecraft:smithing_transform",
+                    "template": f"{MOD}:{template}", "base": f"{MOD}:{styled}", "addition": GEAR_TIERS[metal]["ingot"],
+                    "result": {"id": f"{MOD}:{plain}"}})
     for item, info in EXTRAS.items():
         write(recipes / f"{item}.json", {
             "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped",
             "category": "equipment", "pattern": info["pattern"], "key": info["key"],
             "result": {"id": f"{MOD}:{item}", "count": 1}})
     for tier in PAXEL_TIERS:
-        feature = GEAR_TIERS[tier]["feature"] if tier in GEAR_TIERS else "machines"
         write(recipes / f"{tier}_paxel.json", {
-            "fabric:load_conditions": condition(feature), "type": "minecraft:crafting_shapeless", "category": "equipment",
+            "fabric:load_conditions": condition(feature(f"{tier}_paxel")), "type": "minecraft:crafting_shapeless",
+            "category": "equipment",
             "ingredients": [tool_ingredient(tier, tool) for tool in ("pickaxe", "axe", "shovel")],
             "result": {"id": f"{MOD}:{tier}_paxel", "count": 1}})
 
@@ -141,6 +238,9 @@ def write_all(write, assets, data, lang, condition):
     for tier in GEAR_TIERS:
         for piece in PIECES:
             by_tag.setdefault(ITEM_TAGS[piece], []).append(f"{MOD}:{tier}_{piece}")
+    for style in ARMOR_STYLES:  # styled armor is armor of its slot, so it enchants, trims and equips as the plain piece
+        for piece in ARMOR:
+            by_tag[ITEM_TAGS[piece]].append(f"{MOD}:{style}_{piece}")
     for tier in PAXEL_TIERS:
         for tag in ("pickaxes", "axes", "shovels"):
             by_tag.setdefault(tag, []).append(f"{MOD}:{tier}_paxel")
