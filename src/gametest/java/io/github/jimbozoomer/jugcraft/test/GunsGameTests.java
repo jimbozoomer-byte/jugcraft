@@ -410,12 +410,16 @@ public class GunsGameTests {
 		}
 	}
 
-	/** A pig that cannot walk off. */
+	/**
+	 * A pig that cannot walk off or be knocked back: a hit pushes a creature away (and up, once it stands on the
+	 * ground), so a later shot along the first aim could pass under it.
+	 */
 	private static Mob pig(GameTestHelper helper, BlockPos pos) {
 		@SuppressWarnings("unchecked")
 		EntityType<Mob> type = (EntityType<Mob>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("pig"));
 		Mob pig = helper.spawnWithNoFreeWill(type, pos);
 		pig.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.0);
+		pig.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0);
 		return pig;
 	}
 }
