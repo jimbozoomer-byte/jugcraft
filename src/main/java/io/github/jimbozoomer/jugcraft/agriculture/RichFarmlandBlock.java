@@ -61,11 +61,14 @@ public class RichFarmlandBlock extends Block {
 		return SHAPE;
 	}
 
-	/** A solid block on it (but a fence gate) presses it back into Rich Soil. */
+	/**
+	 * A solid block on it presses it back into Rich Soil, but a fence gate, or a crop that keeps farmland (Jugcraft's
+	 * corn stands solid once it is two blocks tall, and is in {@code minecraft:maintains_farmland}), does not.
+	 */
 	@Override
 	protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
 		BlockState above = level.getBlockState(pos.above());
-		return !above.isSolid() || above.getBlock() instanceof FenceGateBlock;
+		return !above.isSolid() || above.getBlock() instanceof FenceGateBlock || above.is(MAINTAINS_FARMLAND);
 	}
 
 	@Override

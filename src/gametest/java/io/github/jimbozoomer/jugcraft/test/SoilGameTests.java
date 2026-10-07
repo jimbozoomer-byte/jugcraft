@@ -184,6 +184,23 @@ public class SoilGameTests {
 		helper.succeed();
 	}
 
+	/** Corn grown three blocks tall (a solid wall) on Rich Soil Farmland keeps its farmland, as on farmland. */
+	@GameTest(maxTicks = 60)
+	public void tallCornKeepsRichFarmland(GameTestHelper helper) {
+		BlockPos soil = new BlockPos(2, 1, 2);
+		helper.setBlock(soil, block("rich_soil_farmland"));
+		helper.setBlock(soil.above(), JugcraftAgriculture.TALL_CROPS.get(TallCrop.CORN));
+		helper.assertTrue(JugcraftAgriculture.TALL_CROPS.get(TallCrop.CORN).growTo(helper.getLevel(), helper.absolutePos(soil.above()), 7),
+				"Corn grows to ripe on rich farmland");
+		helper.runAtTickTime(40, () -> {
+			helper.assertBlockPresent(block("rich_soil_farmland"), soil);
+			for (int section = 1; section <= 3; section++) {
+				helper.assertBlockPresent(JugcraftAgriculture.TALL_CROPS.get(TallCrop.CORN), soil.above(section));
+			}
+			helper.succeed();
+		});
+	}
+
 	// ---------------------------------------------------------------- compost
 
 	/** Wet Organic Compost turns a stage at every random tick and after its last is Rich Soil; a comparator reads its stage. */

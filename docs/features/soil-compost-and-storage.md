@@ -11,7 +11,7 @@ Make better soil for the farm, and store what it grows:
 
 - **Organic Compost:** dirt, four straw, two bone meal and two rotten flesh. Set it down and it rots through the owner's four stages into **Rich Soil**. Each random tick turns it a stage half the time, or every time while water touches it. A comparator reads how far it has gone.
 - **Rich Soil** counts as dirt: saplings, flowers and bushes grow on it, and rice planted in water over it. **Whatever grows on it gets an extra random tick for each of the soil's own**, so it grows about twice as fast.
-- **Rich Soil Farmland:** use a hoe on Rich Soil (with air above). Crops plant on it as on farmland, and it keeps moist within four blocks of water, or in the rain, as farmland does. The plant on it gets the same extra random tick. It is **never trampled**. Dry with nothing growing on it, or with a solid block set on it, it turns back into Rich Soil, not dirt; broken, it drops Rich Soil.
+- **Rich Soil Farmland:** use a hoe on Rich Soil (with air above). Crops plant on it as on farmland, and it keeps moist within four blocks of water, or in the rain, as farmland does. The plant on it gets the same extra random tick. It is **never trampled**. Dry with nothing growing on it, or with a solid block set on it (a crop that keeps farmland, as Jugcraft's tall corn, does not count), it turns back into Rich Soil, not dirt; broken, it drops Rich Soil.
 - **Produce crates,** in the owner's crate art: Beetroot, Cabbage, Carrot, Corn, Onion, Potato and Tomato Crates, nine of their crop each, crafted back into the nine. They stand beside the Halloween Pumpkin Crate, which is unchanged.
 - **The Bag of Corn Kernels:** nine kernels in the owner's sack (the Bag of Rice's sides, with the owner's kernel bag top), turned to the player who sets it down.
 - **Wooden and Bamboo Baskets,** the owner's woven baskets as storage blocks of their own (the Foraging Basket is unchanged). Use one to open its nine slots (a 3 by 3 screen). It is open at the top, so items dropped into it are taken in, a stack every few ticks. Hoppers reach it as any container, a comparator reads how full it is, and broken, it spills what it holds.
@@ -71,15 +71,16 @@ Run locally (7 October 2026):
 | `python3 tools/generate_textures.py` | Writes this slice's textures; it also rewrites the same 24 unrelated Styx textures as before, left as committed |
 | `./gradlew build`, game tests and client game tests | Not run locally (the Fabric Maven is out of reach here); run by CI |
 
-The 8 new game tests (`SoilGameTests`):
+The 9 new game tests (`SoilGameTests`):
 1. a hoe tills Rich Soil into dry Rich Soil Farmland and wears a use; covered, it stays Rich Soil;
 2. vanilla wheat seeds and Jugcraft's corn kernels plant on Rich Soil Farmland;
 3. random ticks of the soil alone ripen wheat on moist rich farmland and a sweet berry bush on Rich Soil;
 4. water moistens the farmland; away from it, it dries a step, then turns back into Rich Soil; a block set on it presses it back too;
-5. wet Organic Compost turns a stage each random tick and then is Rich Soil, reading 4 on a comparator when fresh; dry, it gets there too;
-6. every crate, bag, compost and basket recipe and every unpacking loads;
-7. a basket takes in five carrots dropped into it, reads on a comparator, opens a 3 by 3 screen, and spills them when broken;
-8. the Bag of Corn Kernels faces the player who sets it down.
+5. corn grown three blocks tall on it (a solid wall) leaves it farmland, as on farmland;
+6. wet Organic Compost turns a stage each random tick and then is Rich Soil, reading 4 on a comparator when fresh; dry, it gets there too;
+7. every crate, bag, compost and basket recipe and every unpacking loads;
+8. a basket takes in five carrots dropped into it, reads on a comparator, opens a 3 by 3 screen, and spills them when broken;
+9. the Bag of Corn Kernels faces the player who sets it down.
 
 The client game test (`SoilClientGameTests`, CI job `client`) builds a bed of Rich Soil, dry and moist rich farmland growing wheat and corn, the compost at each stage, the crates, the kernel bag and both baskets, and a wall of the slice's items, and takes four screenshots.
 
