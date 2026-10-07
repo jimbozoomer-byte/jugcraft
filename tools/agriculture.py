@@ -20,6 +20,7 @@ import decor18
 import decor19
 import decor20
 import kitchen
+import feasts
 
 FEATURE = "agriculture"
 
@@ -1813,7 +1814,25 @@ PIES = {"oven": "hearth_oven", "oven_display": "Hearth Oven", "dough": "pastry_d
             "sweet_potato": {"display": "Sweet Potato", "food": [4, 0.7], "color": 0xD8682A,
                              "with": ["jugcraft:sweet_potato", "jugcraft:sweet_potato"]},
             "chestnut": {"display": "Chestnut", "food": [5, 0.7], "color": 0x6A3E1E,
-                         "with": ["jugcraft:roasted_chestnuts", "jugcraft:roasted_chestnuts"]}}}
+                         "with": ["jugcraft:roasted_chestnuts", "jugcraft:roasted_chestnuts"]},
+            # Feasts and food displays (tools/feasts.py): two pies in the owner's own art, baked like the others.
+            "chocolate": {"display": "Chocolate", "food": [4, 0.6], "color": 0x5A3220,
+                          "with": ["minecraft:cocoa_beans", "minecraft:cocoa_beans", "minecraft:milk_bucket"], "owner": True},
+            "sweet_berry": {"display": "Sweet Berry", "pie": "sweet_berry_cheesecake", "pie_display": "Sweet Berry Cheesecake",
+                            "food": [4, 0.6], "color": 0xB0283C,
+                            "with": ["minecraft:sweet_berries", "minecraft:sweet_berries", "minecraft:milk_bucket"], "owner": True}}}
+# The apple pie wears the owner's art too (the owner chose it over Jugcraft's on 7 October 2026; tools/feasts.py).
+PIES["fillings"]["apple"]["owner"] = True
+
+
+def pie_name(filling):
+    """A filling's baked pie: `<filling>_pie`, or its own name (the sweet berry cheesecake)."""
+    return PIES["fillings"][filling].get("pie", f"{filling}_pie")
+
+
+def pie_display(filling):
+    info = PIES["fillings"][filling]
+    return info.get("pie_display", f"{info['display']} Pie")
 
 
 # The Spirit Board (fall additions 17): a séance (SpiritBoard, SpiritBoardBlock + entity) needs a lit candle (block tag
@@ -1833,7 +1852,7 @@ SPIRIT_BOARD = {"block": "spirit_board", "display": "Spirit Board", "candle_rang
                 # In the order of SpiritBoard.Wish: what the message calls it, and the items that grant it.
                 "wishes": {
                     "pie": {"display": "a pie, or a slice of one",
-                            "items": [f"jugcraft:{f}_pie" for f in PIES["fillings"]] + [f"jugcraft:{f}_pie_slice" for f in PIES["fillings"]]},
+                            "items": [f"jugcraft:{pie_name(f)}" for f in PIES["fillings"]] + [f"jugcraft:{pie_name(f)}_slice" for f in PIES["fillings"]]},
                     "candle": {"display": "a candle", "items": ["#minecraft:candles", "jugcraft:aura_candle"]},
                     "cider": {"display": "a bottle of cider",
                               "items": ["jugcraft:sweet_cider", "jugcraft:sparkling_cider", "jugcraft:aged_cider", "jugcraft:mulled_cider"]},
@@ -1894,12 +1913,12 @@ OFRENDA = {"block": "ofrenda", "display": "Ofrenda", "slots": 6, "check_ticks": 
 
 
 def pie_blocks():
-    return [PIES["oven"], PIES["burnt"]] + [f"{f}_pie" for f in PIES["fillings"]]
+    return [PIES["oven"], PIES["burnt"]] + [pie_name(f) for f in PIES["fillings"]]
 
 
 def pie_items():
-    return (pie_blocks() + [PIES["dough"]] + [f"raw_{f}_pie" for f in PIES["fillings"]]
-            + [f"{f}_pie_slice" for f in PIES["fillings"]])
+    return (pie_blocks() + [PIES["dough"]] + [f"raw_{pie_name(f)}" for f in PIES["fillings"]]
+            + [f"{pie_name(f)}_slice" for f in PIES["fillings"]])
 
 
 def knitting_items():
@@ -2595,7 +2614,7 @@ def planted_blocks():
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
-            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless())
+            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless() + list(feasts.PLACED_PIES))
 
 
 def all_blocks():
@@ -2606,7 +2625,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks())
 
 
 def all_items():
@@ -2617,7 +2636,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items() + feasts.items())
 
 
 def owns(entry_id):
@@ -2660,8 +2679,8 @@ EQUIPMENT_TEXTURES = ["trellis", "trellis_post", "cooking_pot_side", "cooking_po
 # bucket, as crafting with one does).
 SHAPELESS += [{"id": PIES["dough"], "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:egg"], "result": PIES["dough"], "count": 2,
                "category": "misc"}]
-SHAPELESS += [{"id": f"raw_{filling}_pie", "inputs": [f"jugcraft:{PIES['dough']}"] + info["with"] + ["minecraft:sugar"],
-               "result": f"raw_{filling}_pie", "count": 1, "category": "misc"} for filling, info in PIES["fillings"].items()]
+SHAPELESS += [{"id": f"raw_{pie_name(filling)}", "inputs": [f"jugcraft:{PIES['dough']}"] + info["with"] + ["minecraft:sugar"],
+               "result": f"raw_{pie_name(filling)}", "count": 1, "category": "misc"} for filling, info in PIES["fillings"].items()]
 
 # Fall additions 20: marigold petals strewn from a flower; papel picado cut from paper on a string; sugar skulls moulded
 # from sugar and an egg white, iced; pan de muerto dough (baked in COOKING).
@@ -2719,7 +2738,12 @@ SHAPELESS += decor19.SHAPELESS
 SHAPED += decor20.SHAPED
 SHAPELESS += decor20.SHAPELESS
 
-# Agriculture slice 9: the Farmhouse Kitchen (tools/kitchen.py).
+# Kitchen and cooking expansion, slice 1: the Farmhouse Kitchen (tools/kitchen.py).
 ITEMS.update(kitchen.ITEMS)
 COOKING.update(kitchen.COOKING)
 SHAPED += kitchen.SHAPED
+
+# Kitchen and cooking expansion, slice 2: feasts and food displays (tools/feasts.py).
+ITEMS.update(feasts.ITEMS)
+SHAPELESS += feasts.SHAPELESS
+SHAPED += feasts.SHAPED

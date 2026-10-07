@@ -234,6 +234,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.KITCHEN_STOVE_ENTITY, KitchenStoveRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SKILLET_ENTITY, SkilletRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CUTTING_BOARD_ENTITY, CuttingBoardRenderer::new);
+		// Feasts and food displays: what is set on a plate, a platter or a serving tray.
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.FOOD_DISPLAY_ENTITY, ShowcaseRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDY_KETTLE_ENTITY, CandyKettleRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPINNING_WHEEL_ENTITY, SpinningWheelRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.HEARTH_OVEN_ENTITY, HearthOvenRenderer::new);

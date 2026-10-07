@@ -8,7 +8,7 @@ read, traced or recoloured.
 """
 from PIL import Image
 
-from agriculture import PIES
+from agriculture import PIES, pie_name
 from crop_textures import Canvas, rgb, outline
 from halloween_textures import shade
 import block_style as bs
@@ -158,8 +158,11 @@ def pie_textures():
            ("item", PIES["dough"]): dough_item()}
     for i, (filling, info) in enumerate(PIES["fillings"].items()):
         palette = filling_palette(info["color"])
-        out[("block", f"{filling}_pie_top")] = lattice_top(palette, seed=16200 + 10 * i)
-        out[("block", f"{filling}_pie_inside")] = inside(palette, 16201 + 10 * i)
-        out[("item", f"raw_{filling}_pie")] = raw_pie_item(palette)
-        out[("item", f"{filling}_pie_slice")] = slice_item(palette)
+        name = pie_name(filling)
+        out[("item", f"raw_{name}")] = raw_pie_item(palette)
+        if info.get("owner"):
+            continue  # its top, filling and slice are the owner's own art (tools/feasts.py, tools/owner_art.py)
+        out[("block", f"{name}_top")] = lattice_top(palette, seed=16200 + 10 * i)
+        out[("block", f"{name}_inside")] = inside(palette, 16201 + 10 * i)
+        out[("item", f"{name}_slice")] = slice_item(palette)
     return out

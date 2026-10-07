@@ -64,6 +64,7 @@ import flora_data
 import plants_data
 import trees_data
 import kitchen_data
+import feasts_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
                          HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, STALKS, WILD_BONUS, crop_blocks)
@@ -282,6 +283,7 @@ def assets(root, write, lang):
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
     kitchen_data.assets(root, write, lang)
+    feasts_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -422,6 +424,7 @@ def loot(data, write):
     feast_data.loot(out, write)
     maze_data.loot(out, write)
     kitchen_data.loot(out, write)
+    feasts_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -555,6 +558,7 @@ def tags(tags):
     ofrenda_data.tags(tags)
     graveyard_data.tags(tags)
     kitchen_data.tags(tags)
+    feasts_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

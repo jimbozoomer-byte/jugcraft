@@ -1,8 +1,9 @@
-"""JSON resources for the Farmhouse Kitchen (agriculture slice 9), from tools/kitchen.py: the Kitchen Stove (a brick range,
-its firebox and grill aglow when lit), the Skillet (an iron pan with a wooden handle), the Cutting Board, the eleven
-kitchen cabinets (doors open while anyone is in one), the knives, and the cutting recipes. Every texture is the owner's
-own, imported from the shared library by tools/owner_art.py. The foods' item models, names and tags come from
-tools/agriculture.py ITEMS like every other food's; their cooking recipes from its COOKING table; the crafting from SHAPED.
+"""JSON resources for the Farmhouse Kitchen (the kitchen and cooking expansion's slice 1), from tools/kitchen.py: the
+Kitchen Stove (a brick range, its firebox and grill aglow when lit), the Skillet (an iron pan with a wooden handle), the
+Cutting Board, the eleven kitchen cabinets (doors open while anyone is in one), the knives, and the cutting recipes.
+Every texture is the owner's own, imported from the shared library by tools/owner_art.py. The foods' item models, names
+and tags come from tools/agriculture.py ITEMS like every other food's; their cooking recipes from its COOKING table; the
+crafting from SHAPED.
 
 Called from agriculture_data.py (assets, loot, recipes, tags). Formats follow vanilla Minecraft 26.3's own files
 (the smithing_transform recipe is shaped like vanilla's netherite tool upgrades).

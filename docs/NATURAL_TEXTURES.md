@@ -19,7 +19,8 @@ textures in there myself its all mine", and asked for them to be used.
   `tools/generate_textures.py` runs it last so no generator draws over them, and `tools/check_mod_data.py` fails if a
   copy drifts from its source.
 - Don't "clean up" or restyle an imported owner texture. A recolouring (such as the bronze and steel knives, made from
-  the owner's iron knife) is listed in the feature's `RECOLOURED` table and recorded in its feature document.
+  the owner's iron knife) is listed in the feature's `RECOLOURED` table, and an icon put together from the owner's
+  pieces (such as a serving in their bowl) in its `COMPOSED` table; both are recorded in the feature document.
 - Record each imported file's library path in the feature's asset provenance
   ([features/farmhouse-kitchen.md](features/farmhouse-kitchen.md#dependencies-and-assets) is the first).
 - The Mojang rule still stands: nothing traced, copied or recoloured from Minecraft's own textures.

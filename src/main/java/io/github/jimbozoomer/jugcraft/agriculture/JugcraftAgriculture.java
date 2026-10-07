@@ -210,6 +210,10 @@ public final class JugcraftAgriculture {
 	/** The woods the owner drew kitchen cabinets in. */
 	public static final List<String> CABINET_WOODS = List.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry",
 			"bamboo", "crimson", "warped");
+	/** The food displays' block entity (plates, platters and serving trays: {@link FoodDisplayBlock}). */
+	public static BlockEntityType<ShowcaseBlockEntity> FOOD_DISPLAY_ENTITY;
+	/** The use-block event phase that sets a vanilla pie down as a pie: after the default phase, as {@link #KNIFE_PHASE}. */
+	private static final Identifier SET_DOWN_PHASE = Jugcraft.id("set_down_pie");
 	public static BlockEntityType<CarvedPumpkinBlockEntity> CARVED_PUMPKIN_ENTITY;
 	/** A hand-carved pumpkin's design, on its item (copied from and to the block entity). */
 	public static DataComponentType<PumpkinCarving> CARVING;
@@ -632,6 +636,7 @@ public final class JugcraftAgriculture {
 		registerNight();
 		registerHalloweenDecorations();
 		registerKitchen();
+		registerFeasts();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
@@ -690,9 +695,9 @@ public final class JugcraftAgriculture {
 	}
 
 	/**
-	 * The Farmhouse Kitchen (agriculture slice 9, tools/kitchen.py), in the owner's own textures: the Kitchen Stove, the
-	 * Skillet, the Cutting Board with its cutting recipes, the kitchen knives, the cabinets, and the cuts and other foods
-	 * the board and the stove make.
+	 * The Farmhouse Kitchen (the kitchen and cooking expansion's slice 1, tools/kitchen.py), in the owner's own textures:
+	 * the Kitchen Stove, the Skillet, the Cutting Board with its cutting recipes, the kitchen knives, the cabinets, and the
+	 * cuts and other foods the board and the stove make.
 	 */
 	private static void registerKitchen() {
 		Block stove = registerBlock("kitchen_stove", KitchenStoveBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_RED)
@@ -760,6 +765,49 @@ public final class JugcraftAgriculture {
 		food("pumpkin_slice", 2, 0.3F, COMPOST_MEDIUM);
 		food("cake_slice", 2, 0.1F, COMPOST_MEDIUM_HIGH);
 		meal("fried_egg", 3, 0.6F);
+	}
+
+	/**
+	 * Feasts and food displays (the kitchen and cooking expansion's slice 2, tools/feasts.py), in the owner's own textures:
+	 * vanilla's pumpkin pie set down as a pie and cut in slices; the five feasts, served a bowl at a time; and the plate,
+	 * the platter and the serving tray to show food on. The Hearth Oven's pies in the owner's art (apple, chocolate, the
+	 * sweet berry cheesecake) are with the other pies ({@link PieFilling}).
+	 */
+	private static void registerFeasts() {
+		PlacedPieBlock pumpkinPie = (PlacedPieBlock) registerBlock("pumpkin_pie", props -> new PlacedPieBlock(Items.PUMPKIN_PIE,
+				"pumpkin_pie_slice", 2, 0.3F, props), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(0.5F)
+				.sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+		food("pumpkin_pie_slice", 2, 0.3F, COMPOST_MEDIUM_HIGH);
+		// A sneaking player sets a pumpkin pie down; this runs after the default phase, where the town's protection decides.
+		UseBlockCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, SET_DOWN_PHASE);
+		UseBlockCallback.EVENT.register(SET_DOWN_PHASE, (player, level, hand, hit) -> PlacedPieBlock.setDown(pumpkinPie, player, level, hand, hit));
+
+		for (FeastDish dish : FeastDish.values()) {
+			Block feast = registerBlock(dish.id, props -> new FeastBlock(dish, props), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+					.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED).lightLevel(FeastBlock.light(dish)));
+			registerItem(dish.id, props -> new BlockItem(feast, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
+		}
+		// A serving to go from each feast, in a bowl given back when eaten (FeastDish's food; tools/feasts.py FEASTS).
+		stew("bowl_of_roast_chicken", 5, 0.7F);
+		stew("bowl_of_honey_glazed_ham", 7, 0.8F);
+		stew("bowl_of_shepherds_pie", 5, 0.7F);
+		stew("bowl_of_stuffed_pumpkin", 5, 0.6F);
+		stew("bowl_of_gleaming_salad", 3, 0.6F);
+
+		List<Block> displays = new ArrayList<>();
+		for (FoodDisplay display : FoodDisplay.values()) {
+			boolean plate = display == FoodDisplay.PLATE;
+			BlockBehaviour.Properties properties = plate
+					? BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_WHITE).strength(0.6F).sound(SoundType.STONE)
+					: BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(0.8F).sound(SoundType.WOOD).ignitedByLava();
+			Block block = registerBlock(display.id, props -> new FoodDisplayBlock(display, plate ? SoundEvents.STONE_HIT : SoundEvents.WOOD_HIT, props),
+					properties.noOcclusion().pushReaction(PushReaction.POPPED));
+			registerItem(display.id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+			displays.add(block);
+		}
+		FOOD_DISPLAY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("food_display"),
+				FabricBlockEntityTypeBuilder.<ShowcaseBlockEntity>create((pos, state) -> new ShowcaseBlockEntity(FOOD_DISPLAY_ENTITY, pos, state),
+						displays.toArray(Block[]::new)).build());
 	}
 
 	/** A kitchen knife: a light, quick blade of {@code material} ({@link KitchenKnifeItem}); the netherite one doesn't burn. */

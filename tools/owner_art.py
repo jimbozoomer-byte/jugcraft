@@ -5,7 +5,9 @@ On 7 October 2026 the owner asked for their farming and food textures to be used
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte
 copy of its library file, with its .png.mcmeta animation sidecar when it has one (its line ends made LF, as Git stores
 the mod's text files). The only changes are the recolourings listed in a feature's RECOLOURED table (the bronze and
-steel knives: the owner's iron knife with its blade's tones swapped for the approved bronze and steel ramps). No generator draws over these files: tools/generate_textures.py runs this
+steel knives: the owner's iron knife with its blade's tones swapped for the approved bronze and steel ramps) and the
+icons listed in a feature's COMPOSED table (a serving the owner drew no icon for: their bowl with a window of their
+whole-dish icon heaped in it). No generator draws over these files: tools/generate_textures.py runs this
 import last, and tools/check_mod_data.py fails if a runtime copy differs from what this import would write.
 
     python3 tools/owner_art.py           write every import (generate_textures.py also does)
@@ -22,6 +24,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 import arms_pixel  # noqa: E402
+import feasts  # noqa: E402
 import kitchen  # noqa: E402
 
 LIBRARY = os.path.join(ROOT, "art", "owner-library", "originals", "Blocks")
@@ -32,14 +35,32 @@ TEXTURES = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft", 
 def imports():
     """(runtime path under textures/ without .png, library path under Blocks/ without .png) for every copied texture."""
     out = []
-    for target, source in kitchen.TEXTURES.items():
-        out.append((target, f"{FOOD}/{source}"))
+    for table in (kitchen.TEXTURES, feasts.TEXTURES):
+        for target, source in table.items():
+            out.append((target, f"{FOOD}/{source}"))
     return out
 
 
 def recolourings():
     """(runtime path, library path, ramp) for every recoloured texture."""
     return [(target, f"{FOOD}/{source}", getattr(arms_pixel, ramp)) for target, (source, ramp) in kitchen.RECOLOURED.items()]
+
+
+def compositions():
+    """(runtime path, spec) for every composed icon (tools/feasts.py COMPOSED)."""
+    return list(feasts.COMPOSED.items())
+
+
+def compose(spec):
+    """A serving's icon: the window `crop` of the owner's dish icon set at `at`, behind the front of their bowl (the
+    rows of their bowl icon from `bowl_from` down)."""
+    bowl = Image.open(_source(f"{FOOD}/{spec['bowl']}")).convert("RGBA")
+    out = Image.new("RGBA", bowl.size)
+    out.alpha_composite(Image.open(_source(f"{FOOD}/{spec['dish']}")).convert("RGBA").crop(tuple(spec["crop"])), tuple(spec["at"]))
+    front = Image.new("RGBA", bowl.size)
+    front.paste(bowl.crop((0, spec["bowl_from"], bowl.width, bowl.height)), (0, spec["bowl_from"]))
+    out.alpha_composite(front)
+    return out
 
 
 def _source(name):
@@ -90,6 +111,8 @@ def expected():
                 files[_target(target) + ".mcmeta"] = handle.read().replace(b"\r\n", b"\n")
     for target, source, ramp in recolourings():
         files[_target(target)] = _png_bytes(recolour(Image.open(_source(source)), ramp))
+    for target, spec in compositions():
+        files[_target(target)] = _png_bytes(compose(spec))
     return files
 
 

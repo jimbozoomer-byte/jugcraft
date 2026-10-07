@@ -46,6 +46,13 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: Feasts and food displays
+- The second slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **Five feasts:** Roast Chicken, Honey-Glazed Ham, Shepherd's Pie, Stuffed Pumpkin and the Gleaming Salad (it glows). Placed whole, served four times: a bowl takes a serving away, a hungry player eats one there, and the model is eaten down to leftovers that clear for a bone or seeds. Four servings give about what the ingredients do.
+- **Pies:** the apple pie wears the owner's art (same ID and baking); a new chocolate pie and sweet berry cheesecake bake in the Hearth Oven. Sneak and use vanilla's pumpkin pie on a block to set it down and cut it in four slices that add up to the pie.
+- **Plate, Platter and Serving Tray** to show food on: one thing on a plate, four on a platter or a tray.
+- Details: [docs/features/feasts-and-food-displays.md](docs/features/feasts-and-food-displays.md).
+
 ### Unmerged: Farmhouse Kitchen (the stove, skillet, cutting board, knives and cabinets)
 - The first slice of the kitchen and cooking expansion, in the owner's own farming and food textures, copied unchanged from their library.
 - **Kitchen Stove:** lit with flint and steel and put out with a shovel. It heats whatever stands on it (a Cooking Pot, a kettle or a Skillet). With nothing on top, its hob cooks six foods at twice a campfire's pace.

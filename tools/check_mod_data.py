@@ -18,6 +18,7 @@ from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS
                        all_blocks, all_items, feature_of, ore_gens, ore_gen_owners)
 import agriculture as ag
 import kitchen
+import feasts
 import owner_art
 import werewolf_model
 import midway
@@ -3132,10 +3133,97 @@ def check_agriculture():
 VANILLA_FOOD = {"porkchop": [3, 0.3], "cooked_porkchop": [8, 0.8], "beef": [3, 0.3], "cooked_beef": [8, 0.8],
                 "chicken": [2, 0.3], "cooked_chicken": [6, 0.6], "mutton": [2, 0.3], "cooked_mutton": [6, 0.8],
                 "cod": [2, 0.1], "cooked_cod": [5, 0.6], "salmon": [2, 0.1], "cooked_salmon": [6, 0.8],
-                "cake": [14, 0.1]}  # a cake is seven bites of 2 / 0.1
+                "cake": [14, 0.1],  # a cake is seven bites of 2 / 0.1
+                "baked_potato": [5, 0.6], "carrot": [3, 0.6], "bread": [5, 0.6], "honey_bottle": [6, 0.1], "sweet_berries": [2, 0.1],
+                "glow_berries": [2, 0.1], "melon_slice": [2, 0.3], "pumpkin_pie": [8, 0.3]}
 # A whole that is not food (a pumpkin, an egg) has nothing to outweigh; a cooked cut is held to the cooked whole.
 COOKED_WHOLE = {"porkchop": "cooked_porkchop", "beef": "cooked_beef", "chicken": "cooked_chicken", "mutton": "cooked_mutton",
                 "cod": "cooked_cod", "salmon": "cooked_salmon"}
+
+
+def check_feasts():
+    """Feasts and food displays (tools/feasts.py): FeastDish, FeastBlock, FoodDisplay and the placed pumpkin pie match it;
+    a feast's servings give no more than COOK_BONUS hunger over its ingredients, and a placed pie's slices add up to the
+    vanilla pie; each feast has a model for every serving left, a blockstate for every facing, its recipe, its words, and
+    loot that gives it back only whole and its leftovers only once eaten; each display has its model, blockstate, recipe,
+    words and loot, and the client draws it."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    dishes = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, (\d+), \d+, \d+, \d+\)', java.get("FeastDish", ""), re.M)
+    wanted = [(name, str(info["food"][0]), str(info["food"][1]), str(info["light"])) for name, info in feasts.FEASTS.items()]
+    if [(name, food, sat, light) for _, name, food, sat, light in dishes] != wanted:
+        err("FeastDish.java's feasts (food, light, in order) differ from FEASTS in tools/feasts.py")
+    servings = re.search(r"\bSERVINGS = (\d+);", java.get("FeastBlock", ""))
+    if not servings or any(int(servings.group(1)) != info["servings"] for info in feasts.FEASTS.values()):
+        err("FeastBlock.SERVINGS differs from a feast's servings in tools/feasts.py")
+    for name, info in feasts.FEASTS.items():
+        if f'stew("{info["serving"]}", {info["food"][0]}, {info["food"][1]}F)' not in main:
+            err(f"JugcraftAgriculture must register {info['serving']} as a bowl food of {info['food']}")
+    displays = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", new float\[\]\[\] \{(.*?)\}, ([\d.]+)F, ([\d.]+)F, \d+, \d+\)',
+                          java.get("FoodDisplay", ""), re.M)
+    wanted = [(name, [[float(x), float(z)] for x, z in info["layout"]], info["height"], info["scale"]) for name, info in feasts.DISPLAYS.items()]
+    found = [(name, [[float(v) for v in re.findall(r"[\d.]+", place)] for place in re.findall(r"\{([^{}]*)\}", layout)], float(height),
+              float(scale)) for _, name, layout, height, scale in displays]
+    if found != wanted:
+        err("FoodDisplay.java's displays (layout, height, scale, in order) differ from DISPLAYS in tools/feasts.py")
+    if 'Jugcraft.id("food_display")' not in main:
+        err("JugcraftAgriculture must register the food displays' block entity as jugcraft:food_display")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "ShowcaseRenderer.java")
+    if "FoodDisplayBlock" not in (renderer.read_text(encoding="utf-8") if renderer.exists() else ""):
+        err("ShowcaseRenderer must draw what is on the food displays")
+
+    # Balance: what a feast's servings give against what goes into it (a pumpkin counted as the slices a knife cuts).
+    foods = {name: info["food"] for name, info in ag.ITEMS.items() if "food" in info}
+
+    def hunger(ref):
+        namespace, name = split(ref)
+        if namespace == "minecraft" and name in VANILLA_FOOD:
+            return VANILLA_FOOD[name][0]
+        if namespace == MOD and name in foods:
+            return foods[name][0]
+        cut = next((info for info in kitchen.CUTTING.values() if info["input"] == ref), None)
+        return sum(hunger(f"{MOD}:{part}") * count for part, count in cut["results"]) if cut else 0
+
+    for name, info in feasts.FEASTS.items():
+        given = info["servings"] * info["food"][0]
+        taken = sum(hunger(item) for item in info["inputs"])
+        if given > taken + feasts.COOK_BONUS:
+            err(f"{name}: its servings give {given} hunger from {taken} in ingredients (at most {feasts.COOK_BONUS} more)")
+    for name, info in feasts.PLACED_PIES.items():
+        slices = ag.PIES["slices"]
+        if slices * info["food"][0] != info["whole"][0] or info["food"][1] != info["whole"][1] \
+                or VANILLA_FOOD.get(split(info["item"])[1]) != info["whole"]:
+            err(f"{name}: {slices} slices of {info['food']} must add up to the vanilla pie {info['whole']}")
+        call = rf'new PlacedPieBlock\(Items\.{split(info["item"])[1].upper()},\s*"{info["slice"]}", {info["food"][0]}, {info["food"][1]}F'
+        if not re.search(call, main) or f'food("{info["slice"]}", {info["food"][0]}, {info["food"][1]}F' not in main:
+            err(f"JugcraftAgriculture must register {name} as a PlacedPieBlock of {info['item']} and its slice {info['slice']}")
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"{name} has no words")
+
+    for name, info in feasts.FEASTS.items():
+        for count in range(info["servings"] + 1):
+            if not (ASSETS / "models" / "block" / f"{name}_{count}.json").exists():
+                err(f"{name} needs its model {name}_{count}.json")
+        state = load(ASSETS / "blockstates" / f"{name}.json") or {}
+        if len(state.get("variants", {})) != 4 * (info["servings"] + 1):
+            err(f"{name}'s blockstate needs a variant for every facing and serving left")
+        loot = load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {}
+        text = json.dumps(loot)
+        if f'"servings": "{info["servings"]}"' not in text or (info["leftovers"] and '"servings": "0"' not in text):
+            err(f"{name} must drop itself only whole, and its leftovers once eaten")
+        for path in (DATA / MOD / "recipe" / f"{name}.json", ASSETS / "items" / f"{name}.json", ASSETS / "items" / f"{info['serving']}.json"):
+            if not path.exists():
+                err(f"{name} needs {path.relative_to(ROOT)}")
+        if f"block.{MOD}.{name}" not in lang or f"item.{MOD}.{info['serving']}" not in lang:
+            err(f"{name} and its serving need their words")
+    for name in feasts.DISPLAYS:
+        for path in (ASSETS / "models" / "block" / f"{name}.json", ASSETS / "blockstates" / f"{name}.json", ASSETS / "items" / f"{name}.json",
+                     DATA / MOD / "recipe" / f"{name}.json", DATA / MOD / "loot_table" / "blocks" / f"{name}.json"):
+            if not path.exists():
+                err(f"{name} needs {path.relative_to(ROOT)}")
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"{name} has no words")
 
 
 def check_kitchen():
@@ -6503,16 +6591,17 @@ def check_pies(java, main):
         found = number(source, name)
         if found is None or abs(found - value) > 1e-9:
             err(f"{source}.{name} = {found} differs from PIES in tools/agriculture.py ({value})")
-    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6})\)', java.get("PieFilling", ""), re.M)
-    wanted = [(f, str(i["food"][0]), str(i["food"][1]), f"{i['color']:06X}") for f, i in pies["fillings"].items()]
-    if [(name, food, sat, color.upper()) for _, name, food, sat, color in declared] != wanted:
-        err("PieFilling.java's fillings (slice food, colour, in order) differ from PIES in tools/agriculture.py")
+    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", "([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6})\)', java.get("PieFilling", ""),
+                          re.M)
+    wanted = [(f, ag.pie_name(f), str(i["food"][0]), str(i["food"][1]), f"{i['color']:06X}") for f, i in pies["fillings"].items()]
+    if [(name, pie, food, sat, color.upper()) for _, name, pie, food, sat, color in declared] != wanted:
+        err("PieFilling.java's fillings (pie, slice food, colour, in order) differ from PIES in tools/agriculture.py")
     for call in ('registerBlock("hearth_oven", HearthOvenBlock::new', 'registerItem("pastry_dough"', "for (PieFilling filling : PieFilling.values())",
                  'registerBlock("burnt_pie", props -> new PieBlock(null, props)'):
         if call not in main:
             err(f"JugcraftAgriculture.java must call {call}")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    pies_blocks = [f"{f}_pie" for f in pies["fillings"]] + [pies["burnt"]]
+    pies_blocks = [ag.pie_name(f) for f in pies["fillings"]] + [pies["burnt"]]
     for block in pies_blocks:
         if f"block.jugcraft.{block}" not in lang:
             err(f"Pie baking has no words for {block}")
@@ -6527,11 +6616,12 @@ def check_pies(java, main):
             if not (ASSETS / "textures" / "block" / f"{texture}.png").exists():
                 err(f"{block} needs its texture {texture}")
     for filling in pies["fillings"]:
-        for item in (f"raw_{filling}_pie", f"{filling}_pie_slice"):
+        pie = ag.pie_name(filling)
+        for item in (f"raw_{pie}", f"{pie}_slice"):
             if f"item.jugcraft.{item}" not in lang or not (ASSETS / "textures" / "item" / f"{item}.png").exists():
                 err(f"Pie baking needs the words and texture of {item}")
-        if not (DATA / "jugcraft" / "recipe" / f"raw_{filling}_pie.json").exists():
-            err(f"raw_{filling}_pie needs its recipe")
+        if not (DATA / "jugcraft" / "recipe" / f"raw_{pie}.json").exists():
+            err(f"raw_{pie} needs its recipe")
     if f'"{pies["wood_tag"].split(":")[1]}"' not in java.get("HearthOvenBlockEntity", ""):
         err("HearthOvenBlockEntity.WOOD must be the tag PIES['wood_tag'] in tools/agriculture.py")
     for path in (DATA / "jugcraft" / "recipe" / "hearth_oven.json", DATA / "jugcraft" / "recipe" / "pastry_dough.json",
@@ -7405,6 +7495,7 @@ def main():
     check_handbook(registered)
     check_agriculture()
     check_kitchen()
+    check_feasts()
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()
