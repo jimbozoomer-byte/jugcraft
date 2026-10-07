@@ -4,7 +4,7 @@ Owner requested companion-only automated testing on 7 October 2026, superseding 
 
 ## Result
 
-**19 groups passed, 135 assertions, zero failed groups.** The successful run finished on 7 October 2026 at 13:38 local time, on `peepo-companion`, against base commit `aca7d907` plus the companion ghost-recipe UI change.
+**19 groups passed, 143 assertions, zero failed groups.** The successful run finished on 7 October 2026 at 14:09 local time, on `peepo-companion`, against base commit `c9fb3d14` plus the standing cooking animation change.
 
 Runtime: Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, Java 25.0.4.1+1, with the repository's normal development integrations. Tests used newly generated, disposable flat worlds. No player saves were opened. Only `PeepoCompanionClientTests` executed; unrelated test classes share the compilation source set but their suites did not run.
 
@@ -28,13 +28,13 @@ The equivalent Gradle command is `./gradlew runClientGameTest -PclientTests=Peep
 - Sixteen bed registrations, shared upper/lower bunk entrance, Jughead sleeping, increased sleep regeneration and ground-level exit.
 - Sixteen simultaneous budget requests: four searches and eight paths admitted in one server tick, with the rest deferred. This is a budget assertion, not a server-load benchmark.
 - Cooking recipe plans, invalid recipe IDs, required heat/ingredients, full outputs, ingredient filtering, one-helper exclusivity, energy cost, repeated same-tick assistance and release.
-- Both companions automatically approach and stir a pot. Measured progress over 40 server ticks matches 1.5x speed and 16 JE/t energy cost. Client animation state arrives and both rigs render with the angled spoon.
-- Model pose assertions for closed sleeping eyes, Jughead clothing, pumpkin visibility, general two-arm work, spoon grip, alternating seated kicks and running strides.
+- Both companions automatically approach and stir a pot. Measured progress over 40 server ticks matches 1.5x speed and 16 JE/t energy cost. Client animation state arrives and both rigs render with the angled spoon. Feet match the rim surface and edge, and the entity remains stationary throughout stirring.
+- Model pose assertions for closed sleeping eyes, Jughead clothing, pumpkin visibility, general two-arm work, forward spoon grip, moving stirring arms, planted feet, alternating seated kicks and running strides.
 - Automatic loose-food pickup and eating; swamp spawn registration with groups of 1–4, separate six-per-variant local caps and saved natural-spawn origin.
 - Actual companion ghost-recipe slot synchronization and slot packets: setting/clearing preserves the four real cursor items, a one-item ghost remains separate, and shift-click, creative clone, drop and hotbar swap cannot extract it. The ordinary pot GUI rejects recipe-edit buttons. Companion command packets, world save/reopen, and a real in-process dedicated server with one client disconnecting/reconnecting. Owner, cargo and preferences survive reconnect.
 - Automatic seated companion unload: release does not move the entity during section removal; its safe exit occurs on a subsequent tick. A world holding the seated companion closes and reopens successfully.
 
-Runtime screenshots of the companion GUI, ghost recipe slot, ordinary pot and both stirring variants were inspected. Local evidence is under `build/peepo-ghost-evidence/`; Gradle's disposable run files are under `build/run/clientGameTest/`. These generated logs, images and worlds are not committed.
+Runtime screenshots of the companion GUI, ghost recipe slot, ordinary pot and both stirring variants were inspected. Local evidence is under `build/peepo-rim-evidence/`; Gradle's disposable run files are under `build/run/clientGameTest/`. These generated logs, images and worlds are not committed.
 
 ## Earlier regression retained
 

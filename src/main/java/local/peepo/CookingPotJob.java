@@ -14,6 +14,7 @@ public final class CookingPotJob implements CompanionJob {
     private UUID worker;
     private long lease, nextEntrance;
     private Vec3 entrance;
+    private Direction rimSide = Direction.NORTH;
     private boolean mounted;
     private long nextClearance;
     private float checkedHeight;
@@ -24,12 +25,15 @@ public final class CookingPotJob implements CompanionJob {
         if (worker == null && (entrance == null || npc.level().getGameTime() >= nextEntrance)) {
             nextEntrance = npc.level().getGameTime() + 20;
             entrance = null;
+            nextClearance = 0;
             for (var side : Direction.Plane.HORIZONTAL) for (int dy = -1; dy <= 0; dy++) {
                 var pos = stationPosition().relative(side).offset(0, dy, 0);
                 if (!npc.level().hasChunkAt(pos) || !npc.level().getBlockState(pos.below()).isFaceSturdy(npc.level(), pos.below(), Direction.UP)) continue;
                 var point = Vec3.atBottomCenterOf(pos);
                 if (!npc.level().noCollision(new AABB(point.x-.22, point.y, point.z-.22, point.x+.22, point.y+1, point.z+.22))) continue;
-                if (entrance == null || npc.position().distanceToSqr(point) < npc.position().distanceToSqr(entrance)) entrance = point;
+                if (entrance == null || npc.position().distanceToSqr(point) < npc.position().distanceToSqr(entrance)) {
+                    entrance = point; rimSide = side;
+                }
             }
         }
         return this;
@@ -71,11 +75,16 @@ public final class CookingPotJob implements CompanionJob {
         long now=npc.level().getGameTime();
         if(now<nextClearance && checkedHeight==npc.getBbHeight())return clearance;
         nextClearance=now+20;checkedHeight=npc.getBbHeight();
-        var pos=stationPosition();double radius=WorkAnimation.STIR_RADIUS+npc.getBbWidth()/2+.01,y=pos.getY()+WorkAnimation.STIR_HEIGHT;
+        var pos=stationPosition();
         for(int dx=-1;dx<=1;dx+=2)for(int dz=-1;dz<=1;dz+=2)
             if(!npc.level().hasChunkAt(pos.offset(dx,0,dz)))return clearance=false;
-        // Whole sweep, including Jughead's jug; at most once per second for an unchanged rig.
-        return clearance=npc.level().noCollision(new AABB(pos.getX()+.5-radius,y,pos.getZ()+.5-radius,pos.getX()+.5+radius,y+npc.getBbHeight(),pos.getZ()+.5+radius));
+        // Stationary rim position, including Jughead's jug; at most once per second.
+        return clearance=npc.level().noCollision(npc.getBoundingBox().move(rimPosition().subtract(npc.position())));
+    }
+    private Vec3 rimPosition() {
+        var pos=stationPosition();
+        return new Vec3(pos.getX()+.5+rimSide.getStepX()*WorkAnimation.STIR_RADIUS,
+            pos.getY()+WorkAnimation.STIR_HEIGHT,pos.getZ()+.5+rimSide.getStepZ()*WorkAnimation.STIR_RADIUS);
     }
     public boolean claim(PeepoEntity npc) {
         if (workStatus(npc) != CompanionStatus.READY) return false;
@@ -84,15 +93,14 @@ public final class CookingPotJob implements CompanionJob {
     public boolean occupy(PeepoEntity npc) {
         if (!isOccupant(npc) || !availableTo(npc)) return false;
         lease = npc.level().getGameTime() + 100;
-        var pos=stationPosition();double phase=WorkAnimation.stirPhase(npc.level().getGameTime(),0);
-        double dx=Math.cos(phase)*WorkAnimation.STIR_RADIUS,dz=Math.sin(phase)*WorkAnimation.STIR_RADIUS;
-        var at=new Vec3(pos.getX()+.5+dx,pos.getY()+WorkAnimation.STIR_HEIGHT,pos.getZ()+.5+dz);
-        var bounds=npc.getBoundingBox().move(at.subtract(npc.position()));
-        if(!npc.level().noCollision(bounds))return false;
+        var at=rimPosition();
+        if(!roomFor(npc))return false;
         if(!mounted)npc.setBedExit(BlockPos.containing(entrance)); // Existing persisted safe-exit recovery also handles a save while stirring.
         mounted=true;npc.setNoGravity(true);npc.resetFallDistance();
-        float yaw = (float)Math.toDegrees(Math.atan2(dx,-dz));
-        npc.snapTo(at.x, at.y, at.z, yaw, 0);
+        float yaw = rimSide.getOpposite().toYRot();
+        // Only correct displacement; spoon motion is client-side and needs no position updates.
+        if(npc.position().distanceToSqr(at)>1.0E-8)npc.snapTo(at.x, at.y, at.z, yaw, 0);
+        npc.setYRot(yaw); npc.setXRot(0);
         npc.yBodyRot = yaw; npc.setYHeadRot(yaw); npc.setDeltaMovement(Vec3.ZERO); npc.getNavigation().stop();
         return true;
     }

@@ -23,7 +23,6 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         });
     }
     @Override public PeepoState createRenderState() { return new PeepoState(); }
-    @Override public net.minecraft.world.phys.Vec3 getRenderOffset(PeepoState state){return super.getRenderOffset(state).add(state.workOffset);}
     @Override protected void setupRotations(PeepoState state, PoseStack pose, float bodyRot, float scale) {
         super.setupRotations(state, pose, bodyRot, scale);
         if (state.sleeping && state.deathTime <= 0) {
@@ -48,15 +47,12 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.sitting=entity.getRestMode()==CompanionEnergy.Rest.SITTING;
         state.work=state.eating || state.sleeping || state.sitting || state.wheelRunning || !entity.isAlive()?WorkAnimation.NONE:entity.workAnimation();
         state.workPhase=(float)WorkAnimation.stirPhase(entity.level().getGameTime(),partialTick);
-        state.workOffset=net.minecraft.world.phys.Vec3.ZERO;
         if(state.work==WorkAnimation.STIR){
             var target=entity.workTarget();
-            // Smooth the same orbit used by the server's actual mounted entity/hitbox.
+            // The server plants the companion on the rim; only the hands/spoon animate.
             if(!entity.level().hasChunkAt(target) || !(entity.level().getBlockState(target).getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlock))state.work=WorkAnimation.NONE;
             else{
-                double dx=Math.cos(state.workPhase)*WorkAnimation.STIR_RADIUS,dz=Math.sin(state.workPhase)*WorkAnimation.STIR_RADIUS;
-                state.workOffset=new net.minecraft.world.phys.Vec3(target.getX()+.5+dx-state.x,target.getY()+WorkAnimation.STIR_HEIGHT-state.y,target.getZ()+.5+dz-state.z);
-                state.bodyRot=(float)Math.toDegrees(Math.atan2(dx,-dz));state.yRot=0;state.xRot=0;state.shadowRadius=0;
+                state.bodyRot=entity.getYRot();state.yRot=0;state.xRot=0;state.shadowRadius=0;
             }
         }
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;

@@ -375,6 +375,9 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
             }),e);}
             context.waitFor(c->{for(var e:c.level.entitiesForRendering())if(e.getUUID().equals(id) && e instanceof PeepoEntity p)return p.workAnimation()==WorkAnimation.STIR;return false;},100);
             check(context.computeOnClient(c->{for(var e:c.level.entitiesForRendering())if(e.getUUID().equals(id) && e instanceof PeepoEntity p)return p.workAnimation()==WorkAnimation.STIR;return false;}),"stir pose not synced");
+            var standingAt=server.computeOnServer(s->s.overworld().getEntity(id).position());
+            check(Math.abs(standingAt.y-origin.getY()-8.5/16)<1.0E-6,"feet on pot rim surface");
+            check(Math.abs(Math.max(Math.abs(standingAt.x-origin.getX()-.5),Math.abs(standingAt.z-origin.getZ()-4.5))-5.0/16)<1.0E-6,"standing on pot edge");
             long[] before=server.computeOnServer(s->{
                 var pot=(CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4));
                 pot.selectRecipe(null);pot.selectRecipe(recipeId);fill(pot,pot.supplyPlan().orElseThrow());
@@ -387,9 +390,19 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
                 long ticks=s.overworld().getGameTime()-before[0];int progress=menu.progress(pot.supplyPlan().orElseThrow().time());
                 check(Math.abs(progress-ticks*1.5)<=3,"assisted speed: "+progress+" progress in "+ticks+" ticks");
                 check(Math.abs(before[1]-p.getEnergy()-ticks*16)<=16,"assisted energy per tick");
+                check(p.position().distanceToSqr(standingAt)<1.0E-8,"stirring companion must stay planted");
             });
-            context.getInput().lookAt(origin.offset(0,1,4));context.waitTicks(15);
+            int previousFov=context.computeOnClient(c->c.options.fov().get());
+            var previousParticles=context.computeOnClient(c->c.options.particles().get());
+            var camera=server.computeOnServer(s->s.getPlayerList().getPlayers().getFirst().position());
+            server.runCommand(String.format(Locale.ROOT,"tp @a %.2f %.2f %.2f",origin.getX()+2.5,(double)origin.getY(),origin.getZ()+6.5));
+            context.runOnClient(c->{c.options.fov().set(40);c.options.particles().set(net.minecraft.server.level.ParticleStatus.MINIMAL);});
+            context.waitTicks(10);context.getInput().lookAt(origin.offset(0,0,4));context.waitTicks(15);
             context.takeScreenshot(jughead?"peepo_jughead_stirring":"peepo_stirring");
+            context.waitTicks(20);
+            context.takeScreenshot(jughead?"peepo_jughead_stirring_second_pose":"peepo_stirring_second_pose");
+            context.runOnClient(c->{c.options.fov().set(previousFov);c.options.particles().set(previousParticles);});
+            server.runCommand(String.format(Locale.ROOT,"tp @a %.2f %.2f %.2f",camera.x,camera.y,camera.z));
             server.runOnServer(s->{var p=(PeepoEntity)s.overworld().getEntity(id);p.resetCompanionRoutine();p.discard();});
         }
     }
@@ -407,7 +420,11 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
         s.pumpkin=true;model.setupAnim(s);check(root.getChild("pumpkin").visible && !root.getChild("body").visible && !root.getChild("jughead_shorts").visible,"pumpkin costume visibility");
         s.pumpkin=false;s.work=WorkAnimation.INTERACT;s.workPhase=0;model.setupAnim(s);float arm=root.getChild("left_arm").xRot;
         s.workPhase=.4F;model.setupAnim(s);check(Math.abs(arm-root.getChild("left_arm").xRot)>.1 && root.getChild("left_arm").xRot==root.getChild("right_arm").xRot,"general two-arm animation");
-        s.work=WorkAnimation.STIR;model.setupAnim(s);check(root.getChild("left_arm").xRot<-1.5 && root.getChild("right_arm").yRot<0,"spoon grip");
+        s.work=WorkAnimation.STIR;model.setupAnim(s);check(root.getChild("left_arm").xRot> -1.5 && root.getChild("left_arm").xRot<-.5 && root.getChild("right_arm").yRot<0,"forward spoon grip");
+        float stirringArm=root.getChild("left_arm").yRot;
+        s.workPhase+=1.5F;model.setupAnim(s);
+        check(Math.abs(stirringArm-root.getChild("left_arm").yRot)>.1,"arms move to stir spoon");
+        check(root.getChild("left_leg").xRot==0 && root.getChild("right_leg").xRot==0,"stirring feet stay planted");
         s.work=WorkAnimation.NONE;s.sitting=true;s.ageInTicks=4;model.setupAnim(s);check(root.getChild("left_leg").xRot!=root.getChild("right_leg").xRot,"sitting leg kicks");
         s.sitting=false;s.wheelRunning=true;model.setupAnim(s);check(root.getChild("left_leg").xRot*root.getChild("right_leg").xRot<0,"running stride");
     }

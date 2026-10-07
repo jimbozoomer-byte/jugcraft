@@ -5,7 +5,9 @@ import net.minecraft.util.Mth;
 
 /** Shared procedural clips on the existing rig. Work targets/timing stay server-authoritative. */
 final class CompanionWorkPose {
-    static final float GRIP_Y=17.5F, GRIP_Z=-3.4F;
+    static final float GRIP_Y=20F, GRIP_Z=-3.4F;
+    static float gripX(PeepoState s){return Mth.cos(s.workPhase)*.65F;}
+    static float gripZ(PeepoState s){return GRIP_Z+Mth.sin(s.workPhase)*.65F;}
     static void interact(PeepoState s,ModelPart left,ModelPart right,ModelPart head){
         float lift=Mth.sin(s.workPhase*3)*.24F;
         left.xRot=right.xRot=-1.45F+lift;
@@ -13,15 +15,16 @@ final class CompanionWorkPose {
         head.yRot=0;head.xRot=.12F+lift*.08F;
     }
     static void stir(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg){
-        grip(left,1);grip(right,-1);
-        head.yRot=0;head.xRot=.12F;
-        float kick=Mth.sin(s.workPhase*2)*.16F;
-        leftLeg.xRot=.22F+kick;rightLeg.xRot=.22F-kick;
+        grip(s,left,1);grip(s,right,-1);
+        head.yRot=0;head.xRot=.18F;
+        // Keep both feet planted on the rim while the hands circle the spoon.
+        leftLeg.xRot=rightLeg.xRot=0;
+        leftLeg.yRot=rightLeg.yRot=leftLeg.zRot=rightLeg.zRot=0;
     }
-    private static void grip(ModelPart arm,int side){
+    private static void grip(PeepoState s,ModelPart arm,int side){
         // Move the shoulders towards the front of the broad torso; both hands share the spoon grip.
         arm.x=side*2.3F;arm.y=19.2F;arm.z=-1.4F;
-        float dx=side*.35F-arm.x,dy=GRIP_Y-arm.y,dz=GRIP_Z-arm.z;
+        float dx=gripX(s)+side*.35F-arm.x,dy=GRIP_Y-arm.y,dz=gripZ(s)-arm.z;
         float length=Mth.sqrt(dx*dx+dy*dy+dz*dz);
         arm.xRot=-(float)Math.acos(dy/length);arm.yRot=(float)Math.atan2(-dx,-dz);arm.zRot=0;
         arm.yScale=length/2.7F;
