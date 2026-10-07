@@ -790,6 +790,12 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
   - `python3 tools/check_mod_data.py`: PASS (1576 material IDs). Its texture rule first failed the atlases at 256 × 128, which led to packing into free room. `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
   - **Previews:** side views of the five guns bare and with each kind of attachment, and of the bayonets on four guns, drawn from the converted models. The bayonet blades are one-sided planes (GeckoLib draws them from both sides).
+- **CI on `c6b72208b` (Build run 37697733190):** every job passed: the mod build and server game tests (the bayonet and shared-texture tests among them), the build without the optional integrations, and all three client shards.
+  - The client test's log: a Steel Bayonet stab with the V key took the husk from 876 to 871, the bayonet's 5.
+  - **Screenshots read:**
+    - the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth with their newly fitting attachments, drawn from their merged atlases with no missing or garbled texture;
+    - the Patchwork Carbine thrust forward at the husk in the stab.
+  - **The first run failed, not on this slice's code:** `ArmsVIIIGameTests.harpoonHaulsItsCatch`, the intermittent failure #257 fixes. That fix is ported into this branch.
 - **Slice 7 game tests (written; they run in CI):**
   - `GunsGameTests` adds:
     - a Patchwork Carbine's Iron Bayonet strikes a pig two blocks ahead for 4, and cannot stab again at once;
