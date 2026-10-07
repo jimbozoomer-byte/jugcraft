@@ -217,8 +217,9 @@ Not applicable: art and client rendering only. Defense, toughness, durability, e
     - The player in steel from the front, standing and then sneaking with the real sneak key (`jugcraft_knight_armor_player`, `..._player_sneaking`), and sneaking from behind (`..._player_sneaking_back`), where the belt now closes the tipped body's underside.
     - The eight icons in item frames (`jugcraft_knight_armor_icons`).
   - The HUD is hidden for every shot, and put back as the earlier test left it.
+- **The screenshots from that run were looked at:** the knight row from four sides with its glint and the zombie, the close-ups, the player standing and sneaking, the icons, the three older armor shots and the `jugcraft_armor_sets_*` row. The closed faces (below) came after it and have not been seen in game.
 
-**Not run:** the game client by hand; babies and small armor stands wearing it; a player with a cape; two players on a dedicated server; any play. Until CI runs the client test above, nothing has shown the armor stands, the zombie, the sneaking player or the glint in game.
+**Not run:** the game client by hand; babies and small armor stands wearing it; a player with a cape; two players on a dedicated server; any play.
 
 ### Stacked on `claude/armor-styles`
 This branch merges `claude/armor-styles` ([#215](https://github.com/jimbozoomer-byte/jugcraft/pull/215), Steampunk and Kaiser Armor), whose PR it is stacked on. The merge, done on 6 October 2026:
