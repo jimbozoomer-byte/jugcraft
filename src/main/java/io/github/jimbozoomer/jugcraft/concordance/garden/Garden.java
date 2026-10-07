@@ -63,6 +63,8 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Garden {
 	public static final String RESEARCH = "jugcraft:verdant_husbandry";
+	/** What a player examines to begin Verdant Husbandry. */
+	public static final TagKey<Item> SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("verdant_specimens"));
 	/** The practice a crop harvested by hand records; distinct crops count for mastery. */
 	public static final String ACTIVITY = "jugcraft:cultivation";
 	public static final ResourceType VERDANCE = ResourceType.essence("verdance");

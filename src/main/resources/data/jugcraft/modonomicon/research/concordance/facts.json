@@ -46,5 +46,17 @@
   },
   {
     "id": "jugcraft:concordance/verdant_husbandry_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/celestial_attunement_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/celestial_attunement_observed"
+  },
+  {
+    "id": "jugcraft:concordance/celestial_attunement_understood"
+  },
+  {
+    "id": "jugcraft:concordance/celestial_attunement_mastered"
   }
 ]

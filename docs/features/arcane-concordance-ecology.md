@@ -191,7 +191,11 @@ and icons have not been shown to the owner yet.
   is full; the Gauge reads moisture and judges an attuned crop; the Gleaner harvests a ripe sunpetal for a Verdance from
   a shared Heart, and a stranger's Gleaner may not draw; twenty beds in one tick get at most 16 samples and the rest are
   read later; a bed and a Heart keep what they hold through a save.
-- CI: pending (the code was pushed as commit `11149fd6`; this record is updated with the run).
+- CI: the first pushes failed to compile (`yield` is a restricted name; 26.3 has no `PushReaction.BLOCK`/`DESTROY` and
+  no four-argument `withinManhattan`), then the server failed to start (the crops copied wheat's properties, whose map
+  colour reads wheat's own age); each was fixed. Build run 37605176553 (commit `038153ea`) passed: compilation, the
+  data checks, every required server game test (including the nine garden tests) with and without the optional
+  integrations, and the three client test shards.
 
 Not yet run: any client (the GeckoLib devices, the Fusion beds, the crop textures, the Jade lines and the codex pages
 in game), a two-client dedicated server, and a long unattended garden on a real server.

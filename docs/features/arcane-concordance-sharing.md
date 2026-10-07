@@ -71,8 +71,10 @@ game tests and a standalone harness exercise it:
   (Ley conduits arrive with rituals); it is tested so the first network starts from a fixed policy.
 - **Bound Will** records are identities (id, agreement, counterpart, holder, transferable), never amounts: sealed once,
   handed on whole by their holder only, at most 32 per holder.
-- **Astral Resonance** claims are kept per event (named with its time); an event pays once and only within five days,
-  so the ledger stays small without ever paying twice.
+- **Astral Resonance** claims are kept per pattern: the latest occurrence that paid and the game time it did. A later
+  occurrence pays only once enough game time has passed, so moving the world's clock back or forward never pays twice
+  (made monotonic in step 15, [celestial](arcane-concordance-celestial.md); it had kept five days of events by time,
+  which a clock moved far enough could have reopened).
 - **Prima Materia** values are exact fractions, rounded down once on a batch's total.
 
 Fabric's Transfer API is not used yet: no pipe or automation carries essences, and the sconce is filled by hand. When

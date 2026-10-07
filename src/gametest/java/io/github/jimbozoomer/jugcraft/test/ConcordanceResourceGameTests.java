@@ -139,11 +139,16 @@ public class ConcordanceResourceGameTests {
 				&& handed.outcome() == BoundWillLedger.Outcome.DONE && handed.ledger().heldBy(second).size() == 1
 				&& handed.ledger().records().size() == 2, "A transferable record moves whole, by its holder only");
 
-		AstralLedger.Claim claim = AstralLedger.EMPTY.claim("jugcraft:full_moon@24000", 24000L, 30000L);
+		// Roadmap step 15 made the ledger monotonic: an occurrence pays once, turning the clock back brings back only
+		// occurrences that have paid, and turning it forward cannot make one pay before the world has run long enough.
+		AstralLedger.Result claim = AstralLedger.EMPTY.claim("jugcraft:full_moon", 3L, 100_000L, 96_000L);
+		AstralLedger after = claim.ledger();
 		helper.assertTrue(claim.outcome() == AstralLedger.Outcome.GRANTED
-				&& claim.ledger().claim("jugcraft:full_moon@24000", 24000L, 31000L).outcome() == AstralLedger.Outcome.ALREADY_CLAIMED
-				&& claim.ledger().claim("jugcraft:old@0", 0L, AstralLedger.RETENTION + 1).outcome() == AstralLedger.Outcome.EXPIRED,
-				"An alignment pays once, and only while recent");
+				&& after.claim("jugcraft:full_moon", 3L, 300_000L, 96_000L).outcome() == AstralLedger.Outcome.ALREADY_CLAIMED
+				&& after.claim("jugcraft:full_moon", 2L, 300_000L, 96_000L).outcome() == AstralLedger.Outcome.ALREADY_CLAIMED
+				&& after.claim("jugcraft:full_moon", 9L, 150_000L, 96_000L).outcome() == AstralLedger.Outcome.TOO_SOON
+				&& after.claim("jugcraft:full_moon", 4L, 196_000L, 96_000L).outcome() == AstralLedger.Outcome.GRANTED,
+				"An alignment pays once, however the clock is moved");
 
 		PrimaValue third = new PrimaValue(1, 3);
 		helper.assertTrue(third.grains(2) == 0 && third.grains(3) == 1 && third.grains(10) == 3, "Prima Materia rounds down, once");

@@ -241,6 +241,8 @@ public final class JugcraftConcordance {
 		FluidStorage.SIDED.registerForBlockEntity((entity, side) -> entity.water, CRUCIBLE_ENTITY);
 		// Roadmap step 14: the Greenwardens' beds, crops and living devices.
 		io.github.jimbozoomer.jugcraft.concordance.garden.Garden.register();
+		// Roadmap step 15: the Starwatchers' observatory, astrolabe and attunements.
+		io.github.jimbozoomer.jugcraft.concordance.sky.Sky.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

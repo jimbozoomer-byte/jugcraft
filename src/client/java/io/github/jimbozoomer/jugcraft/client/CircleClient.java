@@ -15,6 +15,8 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import java.util.HashSet;
 import java.util.List;
@@ -75,6 +77,10 @@ public final class CircleClient {
 				context -> new GeoBlockRenderer<MulchMawBlockEntity, BlockEntityRenderState>(context, Garden.MAW_ENTITY));
 		BlockEntityRenderers.register(Garden.GLEANER_ENTITY,
 				context -> new GeoBlockRenderer<GleanerBlockEntity, BlockEntityRenderState>(context, Garden.GLEANER_ENTITY));
+		// Roadmap step 15: the observatory's telescope turns to the pattern the server says it tracks; the client's own
+		// sky never decides what is up.
+		BlockEntityRenderers.register(Sky.OBSERVATORY_ENTITY,
+				context -> new GeoBlockRenderer<ObservatoryBlockEntity, BlockEntityRenderState>(context, Sky.OBSERVATORY_ENTITY));
 		PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(LAYER, LAYER_PRIORITY,
 				avatar -> new PlayerAnimationController(avatar, (controller, state, setter) -> PlayState.STOP));
 		ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register((blockEntity, level) -> {

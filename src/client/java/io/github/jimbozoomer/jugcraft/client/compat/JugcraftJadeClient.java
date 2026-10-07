@@ -18,6 +18,8 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlock;
+import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlock;
+import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import net.minecraft.world.level.block.state.BlockState;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
@@ -45,6 +47,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		registration.registerBlockComponent(ConcordanceTooltip.MAW, MulchMawBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.GAUGE, HabitatGaugeBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.GLEANER, GleanerBlock.class);
+		registration.registerBlockComponent(ConcordanceTooltip.OBSERVATORY, ObservatoryBlock.class);
 		registration.registerBlockComponent(CropTooltip.INSTANCE, OrganismCropBlock.class);
 	}
 
@@ -162,7 +165,8 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		HEART(ConcordanceDataProvider.HEART),
 		MAW(ConcordanceDataProvider.MAW),
 		GAUGE(ConcordanceDataProvider.GAUGE),
-		GLEANER(ConcordanceDataProvider.GLEANER);
+		GLEANER(ConcordanceDataProvider.GLEANER),
+		OBSERVATORY(ConcordanceDataProvider.OBSERVATORY);
 
 		private final ConcordanceDataProvider provider;
 
@@ -236,6 +240,17 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.gauge",
 								Component.translatable(mode.equals("suitability") ? "compose.jugcraft.ecology.gauge.suitability" : "compose.jugcraft.factor." + mode),
 								data.getIntOr("signal", 0)));
+					}
+				}
+				String sky = data.getStringOr("sky", "");
+				if (!sky.isEmpty()) {
+					tooltip.add(Component.translatable("compose.jugcraft.sky.status." + sky));
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.resonance", data.getLongOr("resonance", 0L),
+							data.getIntOr("resonance_capacity", 0)));
+					for (String pattern : data.getStringOr("visible", "").split("\n")) {
+						if (!pattern.isEmpty()) {
+							tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.visible", Sky.patternName(pattern)));
+						}
 					}
 				}
 				String phase = data.getStringOr("phase", "");

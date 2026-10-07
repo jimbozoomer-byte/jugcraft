@@ -15,6 +15,9 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Instrument;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Plan;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Slot;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.celestial.CelestialCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.celestial.CelestialParser;
+import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Disturbance;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.EcologyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.EcologyParser;
@@ -43,7 +46,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ConcordanceRules {
 	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
-			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, EcologyCatalog.EMPTY, List.of());
+			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, EcologyCatalog.EMPTY, CelestialCatalog.EMPTY, List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
@@ -55,13 +58,14 @@ public final class ConcordanceRules {
 	private final Map<String, RitualDefinition> rituals;
 	private final AlchemyCatalog alchemy;
 	private final EcologyCatalog ecology;
+	private final CelestialCatalog celestial;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
 	private ConcordanceRules(Map<String, Definitions.Research> research, Map<String, Definitions.Invocation> invocations,
 			Map<String, Definitions.Working> workings, ConversionTable conversions, Catalog catalog,
 			Map<String, Map<String, Authored>> authored, Map<String, StructurePattern> structures, Map<String, RitualDefinition> rituals,
-			AlchemyCatalog alchemy, EcologyCatalog ecology, List<String> problems) {
+			AlchemyCatalog alchemy, EcologyCatalog ecology, CelestialCatalog celestial, List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
@@ -72,6 +76,7 @@ public final class ConcordanceRules {
 		this.rituals = rituals;
 		this.alchemy = alchemy;
 		this.ecology = ecology;
+		this.celestial = celestial;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -140,6 +145,11 @@ public final class ConcordanceRules {
 		return ecology;
 	}
 
+	/** Celestial patterns (roadmap step 15). */
+	public CelestialCatalog celestial() {
+		return celestial;
+	}
+
 	public List<String> problems() {
 		return problems;
 	}
@@ -188,7 +198,7 @@ public final class ConcordanceRules {
 
 	/**
 	 * The files under {@code data/<ns>/concordance/}: kind (research, invocation, working, conversion, component,
-	 * instrument, structure, ritual, ingredient, preparation, property, organism or disturbance), id, content.
+	 * instrument, structure, ritual, ingredient, preparation, property, organism, disturbance or pattern), id, content.
 	 */
 	public record Source(String kind, String id, JsonElement json) {
 	}
@@ -196,6 +206,8 @@ public final class ConcordanceRules {
 	public static ConcordanceRules build(List<Source> sources) {
 		RulesParser parser = new RulesParser();
 		EcologyParser ecologyParser = new EcologyParser();
+		CelestialParser celestialParser = new CelestialParser();
+		Map<String, Pattern> patterns = new TreeMap<>();
 		Map<String, Organism> organisms = new TreeMap<>();
 		Map<String, Disturbance> disturbances = new TreeMap<>();
 		Map<String, Definitions.Research> research = new TreeMap<>();
@@ -295,13 +307,20 @@ public final class ConcordanceRules {
 						disturbances.put(disturbance.id(), disturbance);
 					}
 				}
+				case "pattern" -> {
+					Pattern pattern = celestialParser.pattern(source.id(), source.json());
+					if (pattern != null) {
+						patterns.put(pattern.id(), pattern);
+					}
+				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
 						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
-						+ "preparation, property, organism or disturbance)");
+						+ "preparation, property, organism, disturbance or pattern)");
 			}
 		}
 		problems.addAll(0, parser.problems());
 		problems.addAll(ecologyParser.problems());
+		problems.addAll(celestialParser.problems());
 		// Prerequisites must exist and must not loop; entries in a loop could never be started.
 		boolean changed = true;
 		while (changed) {
@@ -472,7 +491,7 @@ public final class ConcordanceRules {
 				Collections.unmodifiableMap(new LinkedHashMap<>(invocations)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, catalog,
 				Collections.unmodifiableMap(authored), Collections.unmodifiableMap(new LinkedHashMap<>(structures)),
-				Collections.unmodifiableMap(new LinkedHashMap<>(rituals)), alchemy, ecology, List.copyOf(problems));
+				Collections.unmodifiableMap(new LinkedHashMap<>(rituals)), alchemy, ecology, new CelestialCatalog(patterns), List.copyOf(problems));
 	}
 
 	/**

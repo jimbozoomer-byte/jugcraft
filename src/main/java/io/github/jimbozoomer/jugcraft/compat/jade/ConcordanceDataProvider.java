@@ -9,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
+import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.HabitatGaugeBlockEntity;
@@ -18,6 +19,9 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructureValidator;
+import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
@@ -30,8 +34,8 @@ import snownee.jade.api.IServerDataProvider;
  * The Concordance's blocks for Jade: the Lampwright's Bench (how far its study has come, whether notes wait for
  * someone, the Radiance in the lantern on it), the Lumen Sconce (its Radiance), the Circle Anchor (its ritual's phase
  * and progress and the circle's first faults), the Ley Pylon (its Ley Charge), the Alembic Crucible (its heat,
- * volume and formula step) and the garden (roadmap step 14: a bed's moisture, nutrients and habitat; each living
- * device's status and store). Bounded snapshots of the one block looked at; they name no player, reveal no one's
+ * volume and formula step), the garden (roadmap step 14: a bed's moisture, nutrients and habitat; each living
+ * device's status and store) and the Orrery Observatory (roadmap step 15: its resonance, status and visible patterns). Bounded snapshots of the one block looked at; they name no player, reveal no one's
  * research and change nothing (a bed's habitat comes from its sample, taken again no more often than a plant would).
  */
 public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor> {
@@ -44,7 +48,11 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 	HEART("verdant_heart"),
 	MAW("mulch_maw"),
 	GAUGE("habitat_gauge"),
-	GLEANER("gleaner");
+	GLEANER("gleaner"),
+	OBSERVATORY("observatory");
+
+	/** The most patterns an observatory's tooltip names. */
+	public static final int SHOWN_PATTERNS = 3;
 
 	/** The most structural faults the anchor's tooltip lists (the command lists them all). */
 	public static final int SHOWN_FAULTS = 3;
@@ -79,6 +87,9 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 		} else if (accessor.getBlockEntity() instanceof LivingDeviceBlockEntity device
 				&& (this == HEART || this == MAW || this == GAUGE || this == GLEANER)) {
 			data.put(dataKey, deviceSnapshot(device));
+		} else if (this == OBSERVATORY && accessor.getBlockEntity() instanceof ObservatoryBlockEntity observatory
+				&& accessor.getLevel() instanceof ServerLevel level) {
+			data.put(dataKey, observatorySnapshot(observatory, level));
 		} else if (this == PYLON && accessor.getBlockEntity() instanceof LeyPylonBlockEntity pylon) {
 			CompoundTag snapshot = new CompoundTag();
 			snapshot.putInt("ley", (int) pylon.ley());
@@ -177,6 +188,26 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 			snapshot.putString("mode", gauge.mode().id);
 			snapshot.putInt("signal", gauge.signal());
 		}
+		return snapshot;
+	}
+
+	/**
+	 * An observatory: its resonance, why it is idle, whether a Starwatcher has aligned it, and the patterns up and visible
+	 * from it now (the server's world clock, weather and sky; never the client's).
+	 */
+	public static CompoundTag observatorySnapshot(ObservatoryBlockEntity observatory, ServerLevel level) {
+		CompoundTag snapshot = new CompoundTag();
+		snapshot.putString("sky", observatory.status());
+		snapshot.putBoolean("aligned", observatory.aligned());
+		snapshot.putLong("resonance", observatory.resonance());
+		snapshot.putInt("resonance_capacity", ObservatoryBlockEntity.CAPACITY);
+		List<String> visible = new ArrayList<>();
+		for (Pattern pattern : observatory.visible(level)) {
+			if (visible.size() < SHOWN_PATTERNS) {
+				visible.add(pattern.id());
+			}
+		}
+		snapshot.putString("visible", String.join("\n", visible));
 		return snapshot;
 	}
 

@@ -7541,6 +7541,7 @@ def check_concordance(registered):
     check_rituals(co, root, lang, registered, research)
     check_alchemy(co, root, lang, registered, research)
     check_ecology(co, root, lang, registered, research)
+    check_celestial(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -7808,7 +7809,7 @@ def check_baselines(root):
     """Roadmap step 11: the benchmark and the rules it runs are pure Java (the harness and the game test run the same
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
-    for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology"):
+    for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -8307,6 +8308,127 @@ def check_ecology(co, root, lang, registered, research):
         check_geckolib(name, java(f"{entity}.java", garden), uvs, sizes)
     if not re.search(r"HEART_ENTITY", java("CircleClient.java", CLIENT_JAVA_ROOT)):
         err("the garden's living devices must be drawn by GeckoLib on the client")
+
+
+def check_celestial(co, root, lang, registered, research):
+    """Roadmap step 15: the Java mirrors tools/concordance_celestial.py (the calendar, the limits, the observatory, the
+    astrolabe and the pulse); every pattern keeps to its limits, gives an allowed effect, costs more to recall than to
+    attune and has its name; Celestial Attunement can be mastered from patterns that keep to no season; the sky's
+    classes read the world's clock and never a client's; every word the sky says has its text; the icons are their maps;
+    the observatory's GeckoLib assets agree, and its sheet is painted only in the owner's telescope's colours."""
+    ce = co.celestial
+    sky = root / "sky"
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "celestial/Calendar.java": {"DAY": ce.DAY, "RECALL_TICKS": ce.RECALL_TICKS, "MAX_FORECAST_DAYS": ce.MAX_FORECAST_DAYS,
+                                    "MAX_ATTUNEMENT_TICKS": ce.MAX_ATTUNEMENT_TICKS},
+        "celestial/CelestialParser.java": {"MAX_RESONANCE": ce.MAX_RESONANCE, "MAX_COST": ce.MAX_COST, "MAX_PERIOD": ce.MAX_PERIOD},
+        "sky/ObservatoryBlockEntity.java": {"CAPACITY": ce.OBSERVATORY_CAPACITY, "GATHER_TICKS": ce.GATHER_TICKS},
+        "sky/AstrolabeItem.java": {"CAPACITY": ce.ASTROLABE_CAPACITY},
+        "sky/Sky.java": {"PULSE_TICKS": ce.PULSE_TICKS, "EFFECT_TICKS": ce.EFFECT_TICKS, "FORECAST_DAYS": ce.FORECAST_DAYS},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_celestial.py ({value})")
+    if not re.search(rf'"amplifier", 0, {ce.MAX_AMPLIFIER}\)', java("celestial/CelestialParser.java")):
+        err(f"CelestialParser: the amplifier's limit differs from MAX_AMPLIFIER ({ce.MAX_AMPLIFIER})")
+    seasons = re.search(r"SEASONS = Set\.of\(([^)]*)\)", java("celestial/Pattern.java"))
+    if not seasons or sorted(re.findall(r'"([a-z_]+)"', seasons.group(1))) != sorted(ce.SEASONS):
+        err("celestial/Pattern.java: SEASONS differs from tools/concordance_celestial.py SEASONS")
+    harvest = (JAVA_ROOT / "agriculture" / "HarvestMoon.java").read_text(encoding="utf-8")
+    if f"long DUSK = {ce.DUSK};" not in harvest or f"long DAWN = {ce.DAWN};" not in harvest:
+        err("the night the patterns keep differs from the Harvest Moon's (agriculture/HarvestMoon.java DUSK and DAWN)")
+    if not re.search(r'String ACTIVITY = "' + re.escape(ce.OBSERVATION) + '";', java("sky/Sky.java")):
+        err("Sky.ACTIVITY differs from tools/concordance_celestial.py OBSERVATION")
+    if "getOverworldClockTime()" not in java("sky/Sky.java"):
+        err("Sky.time must read the overworld's clock (the one the sun and moon follow)")
+    for path in sorted(sky.glob("*.java")) + sorted((root / "celestial").glob("*.java")):
+        if re.search(r"^import net\.minecraft\.client", path.read_text(encoding="utf-8"), re.M):
+            err(f"{path.name}: the sky is decided on the server; it must not read the client's (net.minecraft.client)")
+    practice = [rule for block in research.get("celestial_attunement", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != ce.OBSERVATION:
+        err("Celestial Attunement does not learn from the observation practice")
+    elif sum(1 for info in ce.PATTERNS.values() if not info.get("season")) < practice[0].get("distinct", 1):
+        err("Celestial Attunement cannot be mastered from patterns that keep to no season")
+    # The patterns.
+    folder = DATA / MOD / "concordance" / "pattern"
+    patterns = {p.stem: load(p) or {} for p in folder.glob("*.json")}
+    if set(patterns) != set(ce.PATTERNS):
+        err(f"patterns: {sorted(patterns)} differ from PATTERNS")
+    for key, entry in patterns.items():
+        period, offset = entry.get("period", 0), entry.get("offset", -1)
+        attune = entry.get("attunement", {})
+        if not (1 <= period <= ce.MAX_PERIOD and 0 <= offset < period):
+            err(f"pattern {key}: period must be 1 to {ce.MAX_PERIOD} and its offset within it")
+        if not (0 <= entry.get("from", -1) < entry.get("to", 0) <= ce.DAY):
+            err(f"pattern {key}: its hours must run forward within a day")
+        if not (1 <= entry.get("resonance", 0) <= min(ce.MAX_RESONANCE, ce.OBSERVATORY_CAPACITY)):
+            err(f"pattern {key}: resonance must be 1 to {ce.MAX_RESONANCE} (and fit an observatory)")
+        if attune.get("effect") not in ce.ATTUNEMENT_EFFECTS or not (0 <= attune.get("amplifier", -1) <= ce.MAX_AMPLIFIER):
+            err(f"pattern {key}: its effect must be one of ATTUNEMENT_EFFECTS, amplifier 0 to {ce.MAX_AMPLIFIER}")
+        if not (1 <= attune.get("cost", 0) < attune.get("recall", 0) <= min(ce.MAX_COST, ce.ASTROLABE_CAPACITY)):
+            err(f"pattern {key}: attuning costs at least 1, recalling more, and an astrolabe must hold the recall")
+        if entry.get("season") is not None and entry.get("season") not in ce.SEASONS:
+            err(f"pattern {key}: unknown season {entry.get('season')}")
+        if f"pattern.{MOD}.{key}" not in lang:
+            err(f"pattern {key}: missing lang pattern.{MOD}.{key}")
+    recipes = {p.stem for p in (DATA / MOD / "recipe").glob("*.json")}
+    for thing in ("observatory", "astrolabe"):
+        if thing not in recipes or thing not in registered:
+            err(f"sky: {thing} needs a recipe and a registration")
+    # Every word the sky says has its text.
+    entity = java("ObservatoryBlockEntity.java", sky)
+    priority = re.search(r"PRIORITY = List\.of\(([^)]*)\)", entity)
+    statuses = set(re.findall(r'"([a-z_]+)"', priority.group(1))) if priority else set()
+    if not priority:
+        err("ObservatoryBlockEntity: PRIORITY, the statuses in order, is missing")
+    statuses |= set(re.findall(r'next = "([a-z_]+)"', entity)) | set(re.findall(r'return "([a-z_]+)"', java("Sky.java", sky)))
+    statuses |= set(re.findall(r'\? "([a-z_]+)" : null', java("Sky.java", sky)))
+    for status in sorted(statuses):
+        if f"compose.{MOD}.sky.status.{status}" not in lang:
+            err(f"sky: missing lang compose.{MOD}.sky.status.{status}")
+    for path in sorted(sky.glob("*.java")):
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(sky\.[a-z_]+)"', path.read_text(encoding="utf-8")):
+            if f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+    for phase in range(8):
+        if f"message.{MOD}.concordance.sky.moon.{phase}" not in lang:
+            err(f"sky: missing lang for moon phase {phase}")
+    for season in list(ce.SEASONS) + ["off"]:
+        if f"message.{MOD}.concordance.sky.season.{season}" not in lang:
+            err(f"sky: missing lang for season {season}")
+    # The icons are their maps.
+    import item_icons
+    for icon in ("astrolabe", "observatory"):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"sky: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"sky: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+    uvs, sizes = ce.SIZES["observatory"]
+    check_geckolib("observatory", entity, uvs, sizes)
+    if not re.search(r"OBSERVATORY_ENTITY", java("CircleClient.java", CLIENT_JAVA_ROOT)):
+        err("the observatory must be drawn by GeckoLib on the client")
+    import concordance_celestial_art as art
+    allowed = art.owner_colours() | art.EXTENDED
+    sheet = ASSETS / "textures" / "block" / "observatory.png"
+    if sheet.is_file():
+        with Image.open(sheet) as img:
+            used = {pixel[:3] for _count, pixel in img.convert("RGBA").getcolors(maxcolors=65536) if pixel[3] > 0}
+        if used - allowed:
+            err(f"textures/block/observatory.png: colours not from the owner's telescope: {sorted(used - allowed)[:4]}")
+    # LambDynamicLights (optional): the astrolabe's glow keys on a component the sky registers.
+    light = load(ASSETS / "dynamiclights" / "item" / "astrolabe.json") or {}
+    for component in light.get("match", {}).get("components", {}):
+        if f'"{split(component)[1]}"' not in java("Sky.java", sky):
+            err(f"dynamiclights/item/astrolabe.json: component {component} is not registered in Sky")
 
 
 def KINDLE_MOTE_STEPS_FIT(co):
