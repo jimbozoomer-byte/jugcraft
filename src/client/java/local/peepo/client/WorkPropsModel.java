@@ -52,16 +52,16 @@ final class WorkPropsModel extends EntityModel<PeepoState> {
                 .texOffs(0,0).addBox(-.10F,-1.25F,-.12F,.2F,2.5F,.24F),PartPose.ZERO);
             valveMount.addOrReplaceChild("shaft",box(-.20F,-.20F,-1.4F,.4F,.4F,1.4F),PartPose.ZERO);
             valveMount.addOrReplaceChild("plate",box(-.6F,-.6F,-1.5F,1.2F,1.2F,.22F),PartPose.ZERO);
-            lever.addOrReplaceChild("shaft",box(-.16F,-2F,-.16F,.32F,2.2F,.32F),PartPose.ZERO);
-            leverMount.addOrReplaceChild("pivot",box(-.5F,-.25F,-.35F,1,.5F,.7F),PartPose.ZERO);
-            leverMount.addOrReplaceChild("bracket",box(-.4F,-.15F,-1.5F,.8F,.3F,1.2F),PartPose.ZERO);
+            lever.addOrReplaceChild("shaft",box(-.28F,MachineWorkClip.LEVER_GRIP,-.28F,.56F,3.7F,.56F),PartPose.ZERO);
+            leverMount.addOrReplaceChild("pivot",box(-.8F,-.4F,-.5F,1.6F,.8F,1),PartPose.ZERO);
+            leverMount.addOrReplaceChild("bracket",box(-.6F,-.25F,-1.5F,1.2F,.5F,1.25F),PartPose.ZERO);
             mallet.addOrReplaceChild("band",box(-.24F,-2.135F,-.485F,.48F,.97F,.97F),PartPose.ZERO);
-            wrench.addOrReplaceChild("handle",box(-.22F,-.05F,-.15F,.44F,2.2F,.3F),PartPose.ZERO);
-            wrench.addOrReplaceChild("jaw_base",box(-.65F,-.3F,-.18F,1.3F,.45F,.36F),PartPose.ZERO);
-            wrench.addOrReplaceChild("jaw_left",box(-.65F,-.95F,-.18F,.32F,.65F,.36F),PartPose.ZERO);
-            wrench.addOrReplaceChild("jaw_right",box(.33F,-.95F,-.18F,.32F,.65F,.36F),PartPose.ZERO);
+            wrench.addOrReplaceChild("handle",box(-.36F,-.05F,-.27F,.72F,3.5F,.54F),PartPose.ZERO);
+            wrench.addOrReplaceChild("jaw_base",box(-1.05F,-.5F,-.32F,2.1F,.7F,.64F),PartPose.ZERO);
+            wrench.addOrReplaceChild("jaw_left",box(-1.05F,-1.5F,-.32F,.52F,1,.64F),PartPose.ZERO);
+            wrench.addOrReplaceChild("jaw_right",box(.53F,-1.5F,-.32F,.52F,1,.64F),PartPose.ZERO);
         }else{
-            lever.addOrReplaceChild("grip",box(-.6F,-2.2F,-.23F,1.2F,.4F,.46F),PartPose.ZERO);
+            lever.addOrReplaceChild("grip",box(-1.05F,MachineWorkClip.LEVER_GRIP-.32F,-.35F,2.1F,.64F,.7F),PartPose.ZERO);
             mallet.addOrReplaceChild("handle",box(-.21F,-1.85F,-.21F,.42F,2.2F,.42F),PartPose.ZERO);
             mallet.addOrReplaceChild("head",box(-1.1F,-2.1F,-.45F,2.2F,.9F,.9F),PartPose.ZERO);
         }

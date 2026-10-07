@@ -26,14 +26,29 @@ final class CompanionWorkPose {
         arm.x=side*2.3F;arm.y=19.2F;arm.z=-1.4F;
         reach(arm,gripX(s)+side*.35F,GRIP_Y,gripZ(s));
     }
-    static void tool(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg){
+    static void tool(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg,ModelPart[] torso){
         var p=s.toolPose;
         left.x=s.pumpkin?2.9F:2.3F;right.x=-left.x;
         left.y=right.y=19.2F;left.z=right.z=s.pumpkin?-2.6F:-1.4F;
-        reach(left,p.leftX,p.leftY,p.leftZ);reach(right,p.rightX,p.rightY,p.rightZ);
         head.yRot=0;head.xRot=.14F;
+        if(p.bodyPitch!=0 || p.bodyRoll!=0 || p.bodyX!=0){
+            for(var part:torso)lean(part,p);
+            lean(left,p);lean(right,p);
+        }
+        // Solve the arms after the shoulders move, keeping both hands on the fixed tool path.
+        reach(left,p.leftX,p.leftY,p.leftZ);reach(right,p.rightX,p.rightY,p.rightZ);
         leftLeg.xRot=rightLeg.xRot=0;
         leftLeg.yRot=rightLeg.yRot=leftLeg.zRot=rightLeg.zRot=0;
+    }
+    private static void lean(ModelPart part,MachineWorkClip pose){
+        // The rig's parts have different pivots (some at y=9.6). Rotate all around the hips,
+        // so head, shirt, bare torso, shorts and costume move together with the feet braced.
+        float dy=part.y-22.5F,cosX=Mth.cos(pose.bodyPitch),sinX=Mth.sin(pose.bodyPitch);
+        float y=dy*cosX-part.z*sinX,z=dy*sinX+part.z*cosX;
+        float cosZ=Mth.cos(pose.bodyRoll),sinZ=Mth.sin(pose.bodyRoll);
+        float x=part.x*cosZ-y*sinZ;
+        part.y=22.5F+part.x*sinZ+y*cosZ;part.x=x+pose.bodyX;part.z=z;
+        part.xRot+=pose.bodyPitch;part.zRot+=pose.bodyRoll;
     }
     private static void reach(ModelPart arm,float x,float y,float z){
         float dx=x-arm.x,dy=y-arm.y,dz=z-arm.z;

@@ -4,12 +4,14 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 public final class PeepoModel extends EntityModel<PeepoState> {
     private final ModelPart head,leftArm,rightArm,leftLeg,rightLeg,body,hips,pumpkin,hat,shorts,jug;
+    private final ModelPart[] workTorso;
     public PeepoModel(ModelPart root) {
         super(root);head=root.getChild("head");
         body=root.getChild("body");hips=root.getChild("hips");pumpkin=root.getChild("pumpkin");hat=head.getChild("pumpkin_hat");
         shorts=root.getChild("jughead_shorts");jug=head.getChild("jughead_jug");
         leftArm=root.getChild("left_arm");rightArm=root.getChild("right_arm");
         leftLeg=root.getChild("left_leg");rightLeg=root.getChild("right_leg");
+        workTorso=new ModelPart[]{head,body,hips,pumpkin,shorts};
     }
     public void translateToHand(com.mojang.blaze3d.vertex.PoseStack pose){
         rightArm.translateAndRotate(pose);
@@ -78,7 +80,7 @@ public final class PeepoModel extends EntityModel<PeepoState> {
         }
         if(s.work!=local.peepo.WorkAnimation.NONE && !s.eating && !s.sleeping && !s.sitting && !s.wheelRunning){
             if(s.work==local.peepo.WorkAnimation.STIR)CompanionWorkPose.stir(s,leftArm,rightArm,head,leftLeg,rightLeg);
-            else if(s.work.hasTool())CompanionWorkPose.tool(s,leftArm,rightArm,head,leftLeg,rightLeg);
+            else if(s.work.hasTool())CompanionWorkPose.tool(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
             else CompanionWorkPose.interact(s,leftArm,rightArm,head);
         }
         if(!s.held.isEmpty() && !s.eating && !s.wheelRunning && !s.sleeping && s.work==local.peepo.WorkAnimation.NONE)rightArm.xRot=-.65F;
