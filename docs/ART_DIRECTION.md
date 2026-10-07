@@ -243,11 +243,18 @@ This amends "Simple faces" in "Creatures and faces: cute and clean".
 ## Steampunk: stone, bronze and early steel tiers
 Brass, copper and riveted iron; glass portholes and valve wheels; firebrick and wood. Textures start with `sp_` (`tools/steampunk_textures.py`). Since batch 53 they follow [Texturing: keep it clean](#texturing-keep-it-clean) too. The classic style pack keeps the older plain look for anyone who prefers it.
 
+**Steampunk Armor** (`steampunk_*`) is the bronze-age engineer's rig: a bronze-crowned cap and teal goggles, a pressure gauge, and a copper boiler on the back (`tools/armor_styles.py`; [record](features/steampunk-and-kaiser-armor.md)).
+
 ## Dieselpunk: steel tier and above
 As the tech gets higher tier, it becomes more dieselpunk and less steampunk. The powered tools and the charging station (#40) are the first dieselpunk content.
 - **Materials:** gunmetal and olive-drab paint worn through to bare metal at the edges; chrome trim; yellow-and-black hazard stripes; black rubber hoses and grips; bakelite handles; louvred grilles; soot-stained exhaust stacks.
 - **Details:** green phosphor gauges, caged amber warning lamps, stencilled serials, heavy bolts rather than decorative rivets.
 - Textures start with `dp_` (`tools/dieselpunk_textures.py`); models for tools and stations are in `tools/tool_models.py`.
+- **Kaiser Armor** (`kaiser_*`) is kaiserpunk within dieselpunk: the parade dress of the Winged Cog, the mod's own empire, in field grey and gilt (`tools/armor_styles.py`). No real nation's insignia.
+
+**Armor looks are sets of their own.** On 5 October 2026 the owner kept the stylized looks first drawn for bronze and steel armor as Steampunk Armor and Kaiser Armor. A metal's dressed-up look is its own set, smithed from the plain piece and back, with the plain piece's numbers.
+- `tools/check_mod_data.py` (`check_armor_looks`) pins the Steampunk and Kaiser pixels. A redraw needs the owner's OK and new hashes.
+- For now bronze and steel armor still wear these looks too. A following PR gives them their own 3D look, a knight design the owner drew.
 
 The steel-tier machines went dieselpunk in #41: the steel foundry, capacitor bank, steel tank, ore drill and high-pressure extractor (`tools/dieselpunk_models.py`, which replaces their entries in `steampunk_models.MODELS`). Their footprints, ports and running lights are unchanged, and the classic style pack keeps their plain look. The coke oven stays brick: it is the bridge into steel.
 
