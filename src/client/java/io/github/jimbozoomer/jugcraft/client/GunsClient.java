@@ -32,6 +32,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import java.util.HashMap;
+import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -61,19 +63,21 @@ public final class GunsClient {
 	private static int lastSynced = -1;
 	private static long heldId = Long.MIN_VALUE;
 	private static boolean triggerHeld;
+	/** Each gun's GeoRenderProvider, made once. */
+	private static final Map<GunItem, GeoRenderProvider> PROVIDERS = new HashMap<>();
 
 	private GunsClient() {
 	}
 
 	public static void register() {
 		GunHooks.controllers = GunAnimations::register;
-		GunHooks.renderer = (gun, consumer) -> consumer.accept(new GeoRenderProvider() {
+		GunHooks.renderer = gun -> PROVIDERS.computeIfAbsent(gun, key -> new GeoRenderProvider() {
 			private @Nullable GunRenderer renderer;
 
 			@Override
 			public GeoItemRenderer<?> getGeoItemRenderer() {
 				if (renderer == null) {
-					renderer = new GunRenderer(gun);
+					renderer = new GunRenderer(key);
 				}
 				return renderer;
 			}

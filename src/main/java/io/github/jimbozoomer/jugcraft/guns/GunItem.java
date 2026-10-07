@@ -1,7 +1,6 @@
 package io.github.jimbozoomer.jugcraft.guns;
 
 import com.geckolib.animatable.GeoItem;
-import com.geckolib.animatable.client.GeoRenderProvider;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.util.GeckoLibUtil;
@@ -127,9 +126,10 @@ public class GunItem extends Item implements GeoItem {
 		GunHooks.controllers.accept(this, controllers);
 	}
 
+	/** The client's renderer for this gun ({@link GunHooks}); GeckoLib casts it to its GeoRenderProvider. */
 	@Override
-	public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
-		GunHooks.renderer.accept(this, consumer);
+	public Object getRenderProvider() {
+		return GunHooks.renderer.apply(this);
 	}
 
 	@Override

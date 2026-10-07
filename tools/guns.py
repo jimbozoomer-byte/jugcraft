@@ -243,6 +243,9 @@ def write_all(write, assets, data, lang, condition):
           {"message_id": f"{MOD}.bullet", "exhaustion": 0.1, "scaling": "when_caused_by_living_non_player"})
     write(data.parent / "minecraft" / "tags" / "damage_type" / "is_projectile.json",
           {"replace": False, "values": [f"{MOD}:bullet"]})
+    # Guns fire faster than the half second a creature is shielded after a hit: each shot counts.
+    write(data.parent / "minecraft" / "tags" / "damage_type" / "bypasses_cooldown.json",
+          {"replace": False, "values": [f"{MOD}:bullet"]})
 
 
 def draw_all(save):

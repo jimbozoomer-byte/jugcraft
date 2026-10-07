@@ -75,7 +75,10 @@ public class GunsGameTests {
 		helper.succeed();
 	}
 
-	/** The trigger keeps the gun's rate: two shots may be banked, a third at once is refused, one interval later it fires. */
+	/**
+	 * The trigger keeps the gun's rate: two shots may be banked (both land, despite the hit cooldown), a third at once is
+	 * refused, and one interval later it fires.
+	 */
 	@GameTest(structure = ARENA, maxTicks = 40)
 	public void triggerKeepsTheRate(GameTestHelper helper) {
 		floor(helper);
@@ -85,6 +88,10 @@ public class GunsGameTests {
 		ServerPlayer shooter = shooter(helper, "rust_midge", 20, pig, GameType.SURVIVAL);
 		helper.assertTrue(GunShots.fire(shooter) && GunShots.fire(shooter), "The first two shots were refused");
 		helper.assertFalse(GunShots.fire(shooter), "A third shot in the same tick fired");
+		// Both shots land: a bullet passes the half second a creature is shielded after a hit.
+		float damage = JugcraftGuns.SPECS.get("rust_midge").damage();
+		helper.assertTrue(Math.abs(200.0F - pig.getHealth() - 2 * damage) < 1.0E-3F,
+				"Two quick shots took " + (200.0F - pig.getHealth()) + ", not " + 2 * damage);
 		int interval = JugcraftGuns.SPECS.get("rust_midge").interval();
 		helper.runAfterDelay(interval, () -> {
 			helper.assertTrue(GunShots.fire(shooter), "The trigger did not fire again after its interval");

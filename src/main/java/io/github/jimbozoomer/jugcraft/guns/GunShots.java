@@ -265,11 +265,9 @@ public final class GunShots {
 		}
 		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
 				.getOrThrow(JugcraftGuns.BULLET), player, player);
-		hits.forEach((target, damage) -> {
-			// Guns fire faster than the half second a creature is shielded after a hit; each shot counts.
-			target.invulnerableTime = 0;
-			target.hurtServer(level, source, damage);
-		});
+		// Guns fire faster than the half second a creature is shielded after a hit; the bullet damage type is tagged
+		// minecraft:bypasses_cooldown, so each shot counts.
+		hits.forEach((target, damage) -> target.hurtServer(level, source, damage));
 		Vec3 muzzle = eye.add(look.scale(0.9)).add(0.0, -0.15, 0.0);
 		level.sendParticles(ParticleTypes.SMOKE, muzzle.x, muzzle.y, muzzle.z, 2, 0.03, 0.03, 0.03, 0.01);
 	}

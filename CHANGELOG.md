@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 1
+- **The owner's first three guns,** with the owner's models, textures, animations and sounds: the **Rust Midge** (an automatic copper machine pistol), the **Patchwork Carbine** (a stockless carbine) and the **Thunderpipe** (a sawn-off double barrel, eight pellets a shot, loaded a shell at a time).
+- **Controls:** left click fires (held for the Midge), right click aims down the sights, R reloads, I inspects. In first person you see your own arms work the gun; a counter by the hotbar shows the rounds.
+- **Rounds:** Light Rounds, Rifle Rounds and Buckshot Shells, crafted from copper or brass, lead and gunpowder; the guns from copper, iron, planks and a lever. A new `guns` switch gates the recipes.
+- **The server decides every shot and reload;** bullets are instant along the look, and count as projectiles. Record: [guns.md](docs/features/guns.md).
+
 ### World Designer
 - An offline browser map editor sculpts terrain, paints installed biomes, places spawn and one Jugcraft walled city, and pins native village/structure start chunks.
 - `/jugcraft design export` supplies the editor and live mod catalog. Its exported datapack adds the **Jugcraft Designed** preset for new worlds; existing generated chunks are not edited.
