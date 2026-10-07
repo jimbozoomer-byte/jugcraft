@@ -7542,6 +7542,7 @@ def check_concordance(registered):
     check_alchemy(co, root, lang, registered, research)
     check_ecology(co, root, lang, registered, research)
     check_celestial(co, root, lang, registered, research)
+    check_crimson(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -7809,7 +7810,7 @@ def check_baselines(root):
     """Roadmap step 11: the benchmark and the rules it runs are pure Java (the harness and the game test run the same
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
-    for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial"):
+    for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -8429,6 +8430,109 @@ def check_celestial(co, root, lang, registered, research):
     for component in light.get("match", {}).get("components", {}):
         if f'"{split(component)[1]}"' not in java("Sky.java", sky):
             err(f"dynamiclights/item/astrolabe.json: component {component} is not registered in Sky")
+
+
+# The most Vitae an hour of offering can give, whatever heals the giver (docs/features/arcane-concordance-vitae.md).
+HOURLY_VITAE_BOUND = 60
+
+
+def check_crimson(co, root, lang, registered, research):
+    """Roadmap step 16: the Java mirrors tools/concordance_crimson.py (exhaustion, efficiency, growth, the chalice,
+    surge and blade numbers); every rite gives no more Vitae than the health it takes and can be made from full health;
+    an hour of offering is bounded whatever heals the giver, and a surge never turns Vitae into more Focus; health is
+    taken in exactly one place; mastery comes from the blade's growth; every word has its text; the icons are their maps;
+    the offering gesture exists and skips players whose arms ArmsMotion poses."""
+    cr = co.crimson
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "crimson/Exhaustion.java": {"MAX": cr.EXHAUSTION_MAX, "RECOVERY_TICKS": cr.RECOVERY_TICKS},
+        "crimson/CrimsonParser.java": {"MAX_HEALTH": cr.MAX_HEALTH, "MAX_COOLDOWN": cr.MAX_COOLDOWN},
+        "crimson/Growth.java": {"MAX_SUBJECTS": cr.MAX_SUBJECTS, "DAILY_CAP": cr.DAILY_CAP, "MAX_VIGOR": cr.MAX_VIGOR,
+                                "VIGOR_PER_VITAE": cr.VIGOR_PER_VITAE, "MAX_STAGE": len(cr.STAGES) - 1},
+        "vigil/Vigil.java": {"CHALICE_CAPACITY": cr.CHALICE_CAPACITY, "SURGE_VITAE": cr.SURGE_VITAE, "SURGE_FOCUS": cr.SURGE_FOCUS,
+                             "SURGE_COOLDOWN": cr.SURGE_COOLDOWN, "NOURISH_VITAE": cr.NOURISH_VITAE, "BLOW_VIGOR": cr.BLOW_VIGOR},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_crimson.py ({value})")
+    growth = java("crimson/Growth.java")
+    if f"long WINDOW_TICKS = {cr.WINDOW_TICKS}L;" not in growth:
+        err("crimson/Growth.java: WINDOW_TICKS differs from tools/concordance_crimson.py")
+    diminishing = re.search(r"DIMINISHING = List\.of\(([^)]*)\)", growth)
+    if not diminishing or [int(n) for n in re.findall(r"\d+", diminishing.group(1))] != cr.DIMINISHING:
+        err("crimson/Growth.java: DIMINISHING differs from tools/concordance_crimson.py")
+    for name, column in (("TOTAL", 0), ("EACH", 1), ("KINDS", 2)):
+        found = re.search(rf"int\[\] {name} = \{{([^}}]*)\}}", growth)
+        if not found or [int(n) for n in re.findall(r"\d+", found.group(1))] != [stage[column] for stage in cr.STAGES]:
+            err(f"crimson/Growth.java: {name} differs from tools/concordance_crimson.py STAGES")
+    offerings = java("crimson/Offerings.java")
+    for top, percent in cr.EFFICIENCY[:2]:
+        if not re.search(rf"exhaustion <= {top}\) \{{\s*return {percent};", offerings):
+            err(f"crimson/Offerings.java: efficiency up to {top} points differs from EFFICIENCY ({percent}%)")
+    if f"? {cr.EFFICIENCY[2][1]} : 0" not in offerings:
+        err("crimson/Offerings.java: the last efficiency band differs from EFFICIENCY")
+    # The rites, and the hour's bound.
+    folder = DATA / MOD / "concordance" / "offering"
+    rites = {p.stem: load(p) or {} for p in folder.glob("*.json")}
+    if set(rites) != set(cr.RITES):
+        err(f"offering rites: {sorted(rites)} differ from RITES")
+    for key, rite in rites.items():
+        health, vitae, tired, floor = rite.get("health", 0), rite.get("vitae", 0), rite.get("exhaustion", 0), rite.get("floor", 0)
+        if not (1 <= vitae <= health <= cr.MAX_HEALTH) or not (1 <= tired <= cr.EXHAUSTION_MAX) or floor < 1:
+            err(f"offering {key}: needs 1 <= vitae <= health <= {cr.MAX_HEALTH}, exhaustion 1 to {cr.EXHAUSTION_MAX} and a floor")
+        if health + floor > 20:
+            err(f"offering {key}: it could never be made, even from full health (health {health} + floor {floor} > 20)")
+        offerings_an_hour = (cr.EXHAUSTION_MAX + 72000 // cr.RECOVERY_TICKS) // max(1, tired)
+        if offerings_an_hour * vitae > HOURLY_VITAE_BOUND:
+            err(f"offering {key}: an hour could give {offerings_an_hour * vitae} Vitae, above the bound of {HOURLY_VITAE_BOUND}")
+    if cr.SURGE_FOCUS > cr.SURGE_VITAE:
+        err("a Crimson Surge must not give more Focus than the Vitae it costs")
+    vigil = root / "vigil"
+    sets = sum(path.read_text(encoding="utf-8").count(".setHealth(") for path in sorted(vigil.glob("*.java")))
+    if sets != 1:
+        err(f"vigil: health must be taken in exactly one place (the offering), found {sets} setHealth calls")
+    if not re.search(r'String ACTIVITY = "' + re.escape(cr.LIVING_GROWTH) + '";', java("Vigil.java", vigil)):
+        err("Vigil.ACTIVITY differs from tools/concordance_crimson.py LIVING_GROWTH")
+    practice = [rule for block in research.get("crimson_rites", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != cr.LIVING_GROWTH or practice[0].get("distinct", 0) > len(cr.STAGES) - 1:
+        err("Crimson Rites must learn from the blade's growth, with no more stages than the blade has")
+    for thing in ("crimson_chalice", "thornheart_blade"):
+        if thing not in registered or not (DATA / MOD / "recipe" / f"{thing}.json").is_file():
+            err(f"vigil: {thing} needs a registration and a recipe")
+    # Every word has its text.
+    for path in sorted(vigil.glob("*.java")):
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(vigil\.[a-z_]+)"', path.read_text(encoding="utf-8")):
+            if not key.endswith(".") and f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+    for result in re.findall(r'return "([a-z_]+)";', java("Vigil.java", vigil)):
+        if f"message.{MOD}.concordance.vigil.{result}" not in lang:
+            err(f"Vigil.surge: missing lang message.{MOD}.concordance.vigil.{result}")
+    for stage in range(len(cr.STAGES)):
+        if f"message.{MOD}.concordance.vigil.stage.{stage}" not in lang:
+            err(f"vigil: missing lang for stage {stage}")
+    client = java("VigilClient.java", CLIENT_JAVA_ROOT)
+    for key in re.findall(r'"screen\.jugcraft\.concordance\.(vigil\.[a-z_]+)"', client):
+        if f"screen.{MOD}.concordance.{key}" not in lang:
+            err(f"VigilClient: missing lang screen.{MOD}.concordance.{key}")
+    gesture = re.search(r'GESTURE = Jugcraft\.id\("([a-z_]+)"\)', client)
+    if not gesture or not (ASSETS / "player_animations" / f"{gesture.group(1)}.json").is_file():
+        err("VigilClient: the offering gesture needs its clip in assets/jugcraft/player_animations")
+    if "instanceof ArmItem" not in client:
+        err("VigilClient: the offering gesture must skip players whose arms ArmsMotion poses (ArmItem)")
+    import item_icons
+    for icon in ("crimson_chalice", "thornheart_blade"):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"vigil: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"vigil: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
 
 
 def KINDLE_MOTE_STEPS_FIT(co):

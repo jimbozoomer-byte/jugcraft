@@ -243,6 +243,8 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.garden.Garden.register();
 		// Roadmap step 15: the Starwatchers' observatory, astrolabe and attunements.
 		io.github.jimbozoomer.jugcraft.concordance.sky.Sky.register();
+		// Roadmap step 16: the Crimson Vigil: offerings, Vitae, exhaustion and the living Thornheart Blade.
+		io.github.jimbozoomer.jugcraft.concordance.vigil.Vigil.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

@@ -118,5 +118,29 @@
     "trigger_type": "modonomicon:advancement",
     "trigger_target": "jugcraft:concordance_celestial_attunement_mastered",
     "fact_id": "jugcraft:concordance/celestial_attunement_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/crimson_rites_encountered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_crimson_rites_encountered",
+    "fact_id": "jugcraft:concordance/crimson_rites_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/crimson_rites_observed_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_crimson_rites_observed",
+    "fact_id": "jugcraft:concordance/crimson_rites_observed"
+  },
+  {
+    "id": "jugcraft:concordance/crimson_rites_understood_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_crimson_rites_understood",
+    "fact_id": "jugcraft:concordance/crimson_rites_understood"
+  },
+  {
+    "id": "jugcraft:concordance/crimson_rites_mastered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_crimson_rites_mastered",
+    "fact_id": "jugcraft:concordance/crimson_rites_mastered"
   }
 ]

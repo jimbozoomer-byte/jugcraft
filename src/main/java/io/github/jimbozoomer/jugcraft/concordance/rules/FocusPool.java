@@ -42,6 +42,16 @@ public record FocusPool(int stored, long stamp) {
 	}
 
 	/**
+	 * The pool after {@code amount} points are given back at {@code now} (up to {@link #MAX}), keeping the progress towards
+	 * the next point as {@link #spend} does. Only an explicit source gives Focus this way (roadmap step 16's Crimson Surge).
+	 */
+	public FocusPool gain(long now, int amount) {
+		int available = current(now);
+		long newStamp = available >= MAX || now <= stamp ? Math.max(now, stamp) : stamp + (now - stamp) / REGEN_TICKS * REGEN_TICKS;
+		return new FocusPool(available + Math.max(0, amount), newStamp);
+	}
+
+	/**
 	 * The pool after spending {@code cost} at {@code now}, or null if fewer points are available. Partial progress
 	 * towards the next point is kept, so spending never delays regeneration.
 	 */

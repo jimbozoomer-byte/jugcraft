@@ -54,6 +54,7 @@ final class ConcordanceClient {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, Jugcraft.id("concordance_focus"), ConcordanceClient::focusLine);
 		ItemTooltipCallback.EVENT.register(ConcordanceClient::tooltip);
 		CircleClient.register();
+		VigilClient.register();
 		openSettings = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.concordance_config",
 				InputConstants.UNKNOWN.getValue(), PartyClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {

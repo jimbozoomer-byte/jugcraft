@@ -118,5 +118,29 @@
     "required_facts": [
       "jugcraft:concordance/celestial_attunement_mastered"
     ]
+  },
+  {
+    "id": "jugcraft:concordance/crimson_rites_encountered",
+    "required_facts": [
+      "jugcraft:concordance/crimson_rites_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/crimson_rites_observed",
+    "required_facts": [
+      "jugcraft:concordance/crimson_rites_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/crimson_rites_understood",
+    "required_facts": [
+      "jugcraft:concordance/crimson_rites_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/crimson_rites_mastered",
+    "required_facts": [
+      "jugcraft:concordance/crimson_rites_mastered"
+    ]
   }
 ]
