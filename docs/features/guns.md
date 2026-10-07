@@ -420,7 +420,7 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
   - `python3 tools/check_mod_data.py`: PASS (1561 material IDs), with `check_guns`; `python3 scripts/check_repository.py` and `python3 tools/check_icon_maps.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
   - **Previews:** side and top views of the shots (hammer, flash) and the reloads (ball, ramrod); first-person views held, aimed and through the Duelling Pistol's reload, which found the known limit above and shrank the flash from 2 px to 1.
-- **Slice 4 game tests (written; they run in CI):** `GunsGameTests` adds: the Line Musket lands its 14, will not fire again empty, and loads one cartridge after its reload and not before; the Bellmouth's balls land together at close range. "Every gun registered" expects twelve guns and four rounds. The client test runs every gun; its husk now has 1000 health, enough for all twelve.
+- **Slice 4 game tests (written; they run in CI):** `GunsGameTests` adds: the Line Musket lands its 14, will not fire again empty, and loads one cartridge after its reload and not before; the Bellmouth's balls land together at close range. "Every gun registered" expects twelve guns and four rounds. The client test runs every gun; its husk now has 1000 health, enough for all twelve, and cannot be knocked back, and the player's aim is set afresh before each gun (on the first CI run the eleven shots before it had kicked the view up over the husk's head, so the Line Musket's shot passed over it).
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
