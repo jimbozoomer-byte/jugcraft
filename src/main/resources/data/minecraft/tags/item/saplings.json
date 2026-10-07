@@ -11,6 +11,7 @@
     "jugcraft:cypress_sapling",
     "jugcraft:redwood_sapling",
     "jugcraft:eucalyptus_sapling",
-    "jugcraft:mahogany_sapling"
+    "jugcraft:mahogany_sapling",
+    "jugcraft:cedar_sapling"
   ]
 }
