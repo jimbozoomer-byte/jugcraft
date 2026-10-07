@@ -11,6 +11,8 @@ import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.LumenMoteBlock;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
+import io.github.jimbozoomer.jugcraft.concordance.dreaming.Dreaming;
+import io.github.jimbozoomer.jugcraft.concordance.dreaming.OneiricCenserBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary;
 import io.github.jimbozoomer.jugcraft.concordance.reliquary.ReliquaryShrineBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
@@ -86,6 +88,9 @@ public final class CircleClient {
 		// Roadmap step 20: the Reliquary Shrine's crystal rests, turns or spins by the status the server sends.
 		BlockEntityRenderers.register(Reliquary.SHRINE_ENTITY,
 				context -> new GeoBlockRenderer<ReliquaryShrineBlockEntity, BlockEntityRenderState>(context, Reliquary.SHRINE_ENTITY));
+		// Roadmap step 22: the Oneiric Censer hangs still, or swings and smokes while anyone dreams by it.
+		BlockEntityRenderers.register(Dreaming.CENSER_ENTITY,
+				context -> new GeoBlockRenderer<OneiricCenserBlockEntity, BlockEntityRenderState>(context, Dreaming.CENSER_ENTITY));
 		PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(LAYER, LAYER_PRIORITY,
 				avatar -> new PlayerAnimationController(avatar, (controller, state, setter) -> PlayState.STOP));
 		ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register((blockEntity, level) -> {

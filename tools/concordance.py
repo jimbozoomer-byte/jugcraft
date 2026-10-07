@@ -431,10 +431,16 @@ import concordance_equivalence as equivalence  # noqa: E402
 RESEARCH.update(equivalence.RESEARCH)
 ITEMS.update(equivalence.ITEMS)
 BLOCKS.update(equivalence.BLOCKS)
+# Roadmap step 22 (tools/concordance_hexes.py): Sympathy and Dreamwalking, links, curses, wards and dreams.
+import concordance_hexes as hexes  # noqa: E402
+RESEARCH.update(hexes.RESEARCH)
+ITEMS.update(hexes.ITEMS)
+BLOCKS.update(hexes.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
-                 artifice.ARTIFICE_SPECIMEN_TAG, relics.RELIC_SPECIMEN_TAG, equivalence.ASSAY_SPECIMEN_TAG]
+                 artifice.ARTIFICE_SPECIMEN_TAG, relics.RELIC_SPECIMEN_TAG, equivalence.ASSAY_SPECIMEN_TAG,
+                 hexes.SYMPATHY_SPECIMEN_TAG, hexes.DREAM_SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -935,6 +941,7 @@ def codex():
         **artifice.codex(),
         **relics.codex(),
         **equivalence.codex(),
+        **hexes.codex(),
     }
 
 
@@ -1042,6 +1049,7 @@ CATEGORIES = {
     **artifice.CATEGORY,
     **relics.CATEGORY,
     **equivalence.CATEGORY,
+    **hexes.CATEGORY,
 }
 
 ENTRY_BACKGROUNDS = {None: "square_gray", "encountered": "square_gray", "observed": "square_gray",
@@ -1453,6 +1461,7 @@ MESSAGES = {
     **artifice.MESSAGES,
     **relics.MESSAGES,
     **equivalence.MESSAGES,
+    **hexes.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1492,6 +1501,7 @@ TOOLTIPS = {
     **artifice.TOOLTIPS,
     **relics.TOOLTIPS,
     **equivalence.TOOLTIPS,
+    **hexes.TOOLTIPS,
 }
 
 
@@ -1677,6 +1687,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     artifice.write_all(write, assets, data, lang, condition, self_drop)
     relics.write_all(write, assets, data, lang, condition, self_drop)
     equivalence.write_all(write, assets, data, lang, condition, self_drop)
+    hexes.write_all(write, assets, data, lang, condition, self_drop)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -1817,6 +1828,7 @@ def write_data(write, res):
     artifice.write_data(write, data)
     relics.write_data(write, data)
     equivalence.write_data(write, data)
+    hexes.write_data(write, data)
     # LambDynamicLights (optional, client): a lit Kindled Lantern glows in hand. Without the mod nothing reads this.
     write(assets / "dynamiclights" / "item" / "kindled_lantern.json",
           {"match": {"items": rid("kindled_lantern"), "components": {rid("lantern_lit"): {}}},
@@ -1839,6 +1851,7 @@ def tags(tags):
     artifice.tags(tags)
     relics.tags(tags)
     equivalence.tags(tags)
+    hexes.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     tags.add("block", "minecraft:mineable/axe", rid("lampwright_bench"))

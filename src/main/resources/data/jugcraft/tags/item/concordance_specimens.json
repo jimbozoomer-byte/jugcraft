@@ -10,6 +10,8 @@
     "#jugcraft:binding_specimens",
     "#jugcraft:artifice_specimens",
     "#jugcraft:relic_specimens",
-    "#jugcraft:assay_specimens"
+    "#jugcraft:assay_specimens",
+    "#jugcraft:sympathy_specimens",
+    "#jugcraft:dream_specimens"
   ]
 }

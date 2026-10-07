@@ -238,5 +238,53 @@
     "trigger_type": "modonomicon:advancement",
     "trigger_target": "jugcraft:concordance_assay_mastered",
     "fact_id": "jugcraft:concordance/assay_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_encountered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_sympathy_encountered",
+    "fact_id": "jugcraft:concordance/sympathy_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_observed_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_sympathy_observed",
+    "fact_id": "jugcraft:concordance/sympathy_observed"
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_understood_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_sympathy_understood",
+    "fact_id": "jugcraft:concordance/sympathy_understood"
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_mastered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_sympathy_mastered",
+    "fact_id": "jugcraft:concordance/sympathy_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_encountered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_dreamwalking_encountered",
+    "fact_id": "jugcraft:concordance/dreamwalking_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_observed_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_dreamwalking_observed",
+    "fact_id": "jugcraft:concordance/dreamwalking_observed"
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_understood_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_dreamwalking_understood",
+    "fact_id": "jugcraft:concordance/dreamwalking_understood"
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_mastered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_dreamwalking_mastered",
+    "fact_id": "jugcraft:concordance/dreamwalking_mastered"
   }
 ]

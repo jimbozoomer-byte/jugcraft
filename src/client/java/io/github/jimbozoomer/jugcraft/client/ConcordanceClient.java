@@ -10,13 +10,16 @@ import io.github.jimbozoomer.jugcraft.concordance.Invocations;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.Tunings;
+import io.github.jimbozoomer.jugcraft.concordance.assay.Assaying;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.dreaming.Dreaming;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary;
 import io.github.jimbozoomer.jugcraft.concordance.smithy.Artificery;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.sympathy.Sympathy;
 import io.github.jimbozoomer.jugcraft.concordance.vigil.Vigil;
 import java.util.List;
 import java.util.Map;
@@ -112,6 +115,15 @@ final class ConcordanceClient {
 		}
 		if (stack.is(Reliquary.SPECIMENS)) {
 			lines.add(Component.translatable("tooltip.jugcraft.concordance.relic_specimen").withStyle(ChatFormatting.DARK_AQUA));
+		}
+		if (stack.is(Assaying.SPECIMENS)) {
+			lines.add(Component.translatable("tooltip.jugcraft.concordance.assay_specimen").withStyle(ChatFormatting.DARK_AQUA));
+		}
+		if (stack.is(Sympathy.SPECIMENS)) {
+			lines.add(Component.translatable("tooltip.jugcraft.concordance.sympathy_specimen").withStyle(ChatFormatting.DARK_AQUA));
+		}
+		if (stack.is(Dreaming.SPECIMENS)) {
+			lines.add(Component.translatable("tooltip.jugcraft.concordance.dream_specimen").withStyle(ChatFormatting.DARK_AQUA));
 		}
 		if (stack.is(JugcraftConcordance.LUMEN_SCONCE.asItem()) && stack.has(JugcraftConcordance.RADIANCE)) {
 			// A sconce item keeps the Radiance it held when it was broken (unlit, so none burns).

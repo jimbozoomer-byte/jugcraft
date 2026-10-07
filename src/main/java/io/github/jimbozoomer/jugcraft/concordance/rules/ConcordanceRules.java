@@ -31,6 +31,9 @@ import io.github.jimbozoomer.jugcraft.concordance.equivalence.EquivalenceCatalog
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.EquivalenceParser;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.Material;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.Transmutation;
+import io.github.jimbozoomer.jugcraft.concordance.hex.CurseDefinition;
+import io.github.jimbozoomer.jugcraft.concordance.hex.HexCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.hex.HexParser;
 import io.github.jimbozoomer.jugcraft.concordance.relic.RelicCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.relic.RelicDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.relic.RelicParser;
@@ -66,7 +69,7 @@ import org.jspecify.annotations.Nullable;
 public final class ConcordanceRules {
 	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
 			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, EcologyCatalog.EMPTY, CelestialCatalog.EMPTY, CrimsonCatalog.EMPTY, WorkerCatalog.EMPTY, ArtificeCatalog.EMPTY,
-			RelicCatalog.EMPTY, EquivalenceCatalog.EMPTY, List.of());
+			RelicCatalog.EMPTY, EquivalenceCatalog.EMPTY, HexCatalog.EMPTY, List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
@@ -84,6 +87,7 @@ public final class ConcordanceRules {
 	private final ArtificeCatalog artifice;
 	private final RelicCatalog relics;
 	private final EquivalenceCatalog equivalence;
+	private final HexCatalog hexes;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
@@ -91,7 +95,7 @@ public final class ConcordanceRules {
 			Map<String, Definitions.Working> workings, ConversionTable conversions, Catalog catalog,
 			Map<String, Map<String, Authored>> authored, Map<String, StructurePattern> structures, Map<String, RitualDefinition> rituals,
 			AlchemyCatalog alchemy, EcologyCatalog ecology, CelestialCatalog celestial, CrimsonCatalog crimson, WorkerCatalog workers,
-			ArtificeCatalog artifice, RelicCatalog relics, EquivalenceCatalog equivalence, List<String> problems) {
+			ArtificeCatalog artifice, RelicCatalog relics, EquivalenceCatalog equivalence, HexCatalog hexes, List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
@@ -108,6 +112,7 @@ public final class ConcordanceRules {
 		this.artifice = artifice;
 		this.relics = relics;
 		this.equivalence = equivalence;
+		this.hexes = hexes;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -206,6 +211,11 @@ public final class ConcordanceRules {
 		return equivalence;
 	}
 
+	/** Every curse (roadmap step 22). */
+	public HexCatalog hexes() {
+		return hexes;
+	}
+
 	public List<String> problems() {
 		return problems;
 	}
@@ -278,6 +288,8 @@ public final class ConcordanceRules {
 		EquivalenceParser equivalenceParser = new EquivalenceParser();
 		Map<String, Material> materials = new TreeMap<>();
 		Map<String, Transmutation> transmutations = new TreeMap<>();
+		HexParser hexParser = new HexParser();
+		Map<String, CurseDefinition> curses = new TreeMap<>();
 		Map<String, Organism> organisms = new TreeMap<>();
 		Map<String, Disturbance> disturbances = new TreeMap<>();
 		Map<String, Definitions.Research> research = new TreeMap<>();
@@ -437,9 +449,16 @@ public final class ConcordanceRules {
 						transmutations.put(transmutation.id(), transmutation);
 					}
 				}
+				case "curse" -> {
+					CurseDefinition curse = hexParser.curse(source.id(), source.json());
+					if (curse != null) {
+						curses.put(curse.id(), curse);
+					}
+				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
 						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
-						+ "preparation, property, organism, disturbance, pattern, offering, worker, substrate, gem, rune, affix, relic, material or transmutation)");
+						+ "preparation, property, organism, disturbance, pattern, offering, worker, substrate, gem, rune, affix, relic, material, transmutation "
+						+ "or curse)");
 			}
 		}
 		problems.addAll(0, parser.problems());
@@ -461,6 +480,8 @@ public final class ConcordanceRules {
 		List<String> equivalenceProblems = new ArrayList<>(equivalenceParser.problems());
 		equivalenceProblems.addAll(EquivalenceParser.check(materials, transmutations));
 		problems.addAll(equivalenceProblems);
+		problems.addAll(hexParser.problems());
+		problems.addAll(HexParser.check(curses));
 		// Prerequisites must exist and must not loop; entries in a loop could never be started.
 		boolean changed = true;
 		while (changed) {
@@ -634,7 +655,7 @@ public final class ConcordanceRules {
 				Collections.unmodifiableMap(new LinkedHashMap<>(rituals)), alchemy, ecology, new CelestialCatalog(patterns), new CrimsonCatalog(rites),
 				new WorkerCatalog(workerDefinitions), new ArtificeCatalog(substrates, gems, runes, affixes),
 				new RelicCatalog(relicDefinitions), new EquivalenceCatalog(EquivalenceParser.byItem(materials), transmutations, equivalenceProblems),
-				List.copyOf(problems));
+				new HexCatalog(curses), List.copyOf(problems));
 	}
 
 	/**

@@ -238,5 +238,53 @@
     "required_facts": [
       "jugcraft:concordance/assay_mastered"
     ]
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_encountered",
+    "required_facts": [
+      "jugcraft:concordance/sympathy_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_observed",
+    "required_facts": [
+      "jugcraft:concordance/sympathy_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_understood",
+    "required_facts": [
+      "jugcraft:concordance/sympathy_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_mastered",
+    "required_facts": [
+      "jugcraft:concordance/sympathy_mastered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_encountered",
+    "required_facts": [
+      "jugcraft:concordance/dreamwalking_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_observed",
+    "required_facts": [
+      "jugcraft:concordance/dreamwalking_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_understood",
+    "required_facts": [
+      "jugcraft:concordance/dreamwalking_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_mastered",
+    "required_facts": [
+      "jugcraft:concordance/dreamwalking_mastered"
+    ]
   }
 ]

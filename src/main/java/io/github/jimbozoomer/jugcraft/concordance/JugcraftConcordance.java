@@ -255,6 +255,9 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary.register();
 		// Roadmap step 21: bounded material equivalence, the Assayer's Scale and its Prima Materia ledger.
 		io.github.jimbozoomer.jugcraft.concordance.assay.Assaying.register();
+		// Roadmap step 22: sympathetic links, curses and wards; dream expeditions at the Oneiric Censer.
+		io.github.jimbozoomer.jugcraft.concordance.sympathy.Sympathy.register();
+		io.github.jimbozoomer.jugcraft.concordance.dreaming.Dreaming.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 

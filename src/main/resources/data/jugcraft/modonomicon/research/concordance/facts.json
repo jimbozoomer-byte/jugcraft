@@ -118,5 +118,29 @@
   },
   {
     "id": "jugcraft:concordance/assay_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_observed"
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_understood"
+  },
+  {
+    "id": "jugcraft:concordance/sympathy_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_observed"
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_understood"
+  },
+  {
+    "id": "jugcraft:concordance/dreamwalking_mastered"
   }
 ]

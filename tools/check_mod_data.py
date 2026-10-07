@@ -7548,6 +7548,7 @@ def check_concordance(registered):
     check_artifice(co, root, lang, registered, research)
     check_relics(co, root, lang, registered, research)
     check_equivalence(co, root, lang, registered, research)
+    check_sympathy(co, root, lang, registered, research)
     check_game_test_entrypoints()
 
 
@@ -7816,7 +7817,7 @@ def check_baselines(root):
     code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
     and the one setting shared code can see (reduced motion) is read only in animateTick, which runs on the client."""
     for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
-                    "worker", "logistics", "artifice", "relic", "equivalence"):
+                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -9011,6 +9012,174 @@ def check_equivalence(co, root, lang, registered, research):
         with Image.open(texture) as img:
             if img.convert("RGBA").tobytes() != item_icons.draw("assayers_scale").tobytes() or img.size != (16, 16):
                 err("equivalence: textures/item/assayers_scale.png differs from its map: run tools/generate_textures.py")
+
+
+def check_sympathy(co, root, lang, registered, research):
+    """Roadmap step 22: the Java mirrors tools/concordance_hexes.py (link, curse, ward and dream numbers, the ward
+    categories); the curses on disk are the generator's and each is bounded (a hindrance from CURSE_EFFECTS, level I or
+    II, short pulses, minutes in all, castable through a fresh link, its remedy not its own reagent); hostile effects go
+    through the shared boundary under its multiplayer rules; the dream's escrow is one attachment that never survives a
+    death by copying; every reason, end and message has its text; ward sigils can be made for every category; the
+    censer's and wisp's GeckoLib assets are the ones played and fit their sheets; the icons are their maps.
+    (check_hexes is fall addition 21's cauldron hexes, a different feature.)"""
+    hx = co.hexes
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "hex/Hexes.java": {"MAX_RANGE": hx.MAX_RANGE, "MAX_CURSES": hx.MAX_CURSES, "INVESTIGATE_FOCUS": hx.INVESTIGATE_FOCUS},
+        "hex/Link.java": {"FRESH": hx.LINK_FRESH, "DECAY_TICKS": hx.DECAY_TICKS},
+        "hex/HexParser.java": {"MAX_AMPLIFIER": hx.MAX_AMPLIFIER, "MAX_PULSE_DURATION": hx.MAX_PULSE_DURATION,
+                               "MIN_PULSE_TICKS": hx.MIN_PULSE_TICKS, "MAX_TOTAL_TICKS": f"{hx.MAX_TOTAL_TICKS:_}", "MAX_FOCUS": hx.MAX_FOCUS},
+        "dream/DreamRules.java": {"MAX_TICKS": f"{hx.DREAM_TICKS:_}", "RADIUS": hx.DREAM_RADIUS, "WISPS": hx.DREAM_WISPS,
+                                  "WISP_TICKS": hx.WISP_TICKS, "MAX_CAUGHT": hx.MAX_CAUGHT, "FOCUS": hx.DREAM_FOCUS},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_hexes.py ({value})")
+    if f"long TICKS = {hx.WARD_TICKS:_}L;" not in java("hex/Ward.java"):
+        err("hex/Ward.java: TICKS differs from tools/concordance_hexes.py WARD_TICKS")
+    categories = re.findall(r'^\t[A-Z_]+\("([a-z_]+)"\)', java("hex/WardCategory.java"), re.M)
+    if categories != list(hx.WARDS):
+        err(f"hex/WardCategory.java: categories {categories} differ from WARDS (same order)")
+    sympathy, dreaming = java("sympathy/Sympathy.java"), java("dreaming/Dreaming.java")
+    for text, name, research_id, practice in ((sympathy, "Sympathy", "sympathy", hx.SYMPATHY_PRACTICE),
+                                              (dreaming, "Dreaming", "dreamwalking", hx.DREAM_PRACTICE)):
+        if f'String RESEARCH = "{MOD}:{research_id}";' not in text or f'String ACTIVITY = "{practice}";' not in text:
+            err(f"{name}.java: RESEARCH or ACTIVITY differs from tools/concordance_hexes.py")
+        rules = [rule for block in research.get(research_id, {}).get("states", {}).values()
+                 for rule in block.get("any", []) if rule.get("type") == "practice"]
+        if not rules or rules[0].get("activity") != practice:
+            err(f"{research_id} must be mastered by its practice {practice}")
+    if len(hx.CURSES) < next((rule.get("distinct", 1) for block in research.get("sympathy", {}).get("states", {}).values()
+                              for rule in block.get("any", []) if rule.get("type") == "practice"), 1):
+        err("Sympathy's mastery asks for more different curses than there are")
+    # The curses on disk are the generator's, and each is bounded.
+    folder = DATA / MOD / "concordance" / "curse"
+    found = {p.stem: load(p) or {} for p in folder.glob("*.json")}
+    if set(found) != set(hx.CURSES):
+        err(f"concordance/curse: {sorted(found)} differ from CURSES")
+    reagents = {}
+    for key, info in hx.CURSES.items():
+        entry = found.get(key, {})
+        if any(entry.get(field) != info[field] for field in ("reagent", "status", "amplifier", "pulse_duration", "pulse_ticks",
+                                                               "total_ticks", "strength", "focus", "remedy")):
+            err(f"concordance/curse/{key}.json differs from the generator's: run tools/generate_material_data.py")
+        if info["status"] not in hx.CURSE_EFFECTS or not 0 <= info["amplifier"] <= hx.MAX_AMPLIFIER:
+            err(f"curse {key}: its status must be a hindrance from CURSE_EFFECTS, level I or II")
+        if not (20 <= info["pulse_duration"] <= hx.MAX_PULSE_DURATION and hx.MIN_PULSE_TICKS <= info["pulse_ticks"] <= info["total_ticks"]
+                <= hx.MAX_TOTAL_TICKS):
+            err(f"curse {key}: its pulse or total time is out of bounds")
+        if not (1 <= info["strength"] <= hx.LINK_FRESH and 1 <= info["focus"] <= hx.MAX_FOCUS):
+            err(f"curse {key}: it must be castable through a fresh link, for Focus a player can have")
+        if info["remedy"] == info["reagent"] or info["reagent"] in reagents:
+            err(f"curse {key}: one curse per reagent, and no curse lifted by its own reagent")
+        reagents[info["reagent"]] = key
+        if f"compose.{MOD}.hex.curse.{key}" not in lang:
+            err(f"curse {key}: missing its name")
+    # Hostile effects go through the shared boundary, under its multiplayer rules; links and curses are revalidated.
+    if "ConcordanceEffects.mayHarm(" not in sympathy or "Intent.HARMFUL" not in sympathy or "ConcordanceEffects.apply(" not in sympathy:
+        err("Sympathy: curses pulse only through the shared effect boundary, as harmful, under its multiplayer rules")
+    if sympathy.count("Hexes.pulse(") != 1 or "Hexes.cast(" not in sympathy:
+        err("Sympathy: every cast and every pulse is revalidated by the pure rules")
+    if "ConcordanceEffects.guard(" not in sympathy or "WardCategory.MOVING" not in sympathy:
+        err("Sympathy: the moving ward guards the shared boundary")
+    # The dream's escrow: one attachment, never copied on death; every ending goes through end().
+    expedition = re.search(r'EXPEDITION = AttachmentRegistry[^;]*;', dreaming)
+    if not expedition or "copyOnDeath" in expedition.group(0) or ".persistent(DreamExpedition.CODEC)" not in expedition.group(0):
+        err("Dreaming.EXPEDITION must be one persistent attachment that is not copied on death")
+    for event in ("ServerPlayConnectionEvents.JOIN", "ServerPlayConnectionEvents.DISCONNECT", "ServerLivingEntityEvents.ALLOW_DEATH",
+                  "ServerPlayerEvents.AFTER_RESPAWN", "AFTER_PLAYER_CHANGE_WORLD"):
+        if event not in dreaming:
+            err(f"Dreaming: a dream must end (or be recovered) on {event}")
+    if "DreamRules.spent(" not in dreaming:
+        err("Dreaming: a dream never gives back more experience than was entered with (DreamRules.spent)")
+    # Every word has its text.
+    reasons = set(re.findall(r'return "([a-z_]+)";', java("hex/Hexes.java")))
+    for name in ("sympathy/TaglockItem.java", "sympathy/Sympathy.java"):
+        reasons |= set(re.findall(r'(?:reason = |return )"([a-z_]+)";', java(name)))
+    reasons |= set(re.findall(r'compose\.jugcraft\.hex\.reason\.([a-z_]+)"', java("sympathy/ScryingGlassItem.java")))
+    reasons -= {""}
+    for reason in sorted(reasons | set(hx.HEX_REASONS)):
+        if f"compose.{MOD}.hex.reason.{reason}" not in lang:
+            err(f"hexes: missing lang for the reason {reason}")
+    if not reasons <= set(hx.HEX_REASONS):
+        err(f"hexes: reasons {sorted(reasons - set(hx.HEX_REASONS))} are not in HEX_REASONS")
+    dream_reasons = set(re.findall(r'return "([a-z_]+)";', dreaming)) - {""}
+    for reason in sorted(dream_reasons | set(hx.DREAM_REASONS)):
+        if f"compose.{MOD}.dream.reason.{reason}" not in lang:
+            err(f"dreams: missing lang for the reason {reason}")
+    if not dream_reasons <= set(hx.DREAM_REASONS):
+        err(f"dreams: reasons {sorted(dream_reasons - set(hx.DREAM_REASONS))} are not in DREAM_REASONS")
+    ends = re.findall(r'^\t\t[A-Z_]+\("([a-z_]+)"\)', java("dream/DreamRules.java"), re.M)
+    if sorted(ends) != sorted(hx.DREAM_ENDS):
+        err(f"dream/DreamRules.java: ends {ends} differ from DREAM_ENDS")
+    for category in list(hx.WARDS) + ["none"]:
+        if f"compose.{MOD}.hex.ward.{category}" not in lang:
+            err(f"hexes: missing lang for the ward {category}")
+    for path in sorted((root / "sympathy").glob("*.java")) + sorted((root / "dreaming").glob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        for kind, key in re.findall(r'"(message|tooltip|compose)\.jugcraft\.((?:concordance\.)?(?:hex|dream)[a-z_.]*)"', text):
+            if not key.endswith(".") and f"{kind}.{MOD}.{key}" not in lang:
+                err(f"{path.name}: missing lang {kind}.{MOD}.{key}")
+        for key in re.findall(r'"tooltip\.jugcraft\.([a-z_]+)"', text):
+            if f"tooltip.{MOD}.{key}" not in lang:
+                err(f"{path.name}: missing lang tooltip.{MOD}.{key}")
+    if f"entity.{MOD}.dream_wisp" not in lang:
+        err("dreams: missing the dream wisp's name")
+    # What it takes to make and use: everything is registered, made from obtainable things, and every ward has a sigil.
+    recipes = {p.stem: load(p) or {} for p in (DATA / MOD / "recipe").glob("*.json")}
+    for thing in ("taglock", "scrying_glass", "ward_sigil", "dreamglass", "oneiric_censer"):
+        if thing not in registered:
+            err(f"hexes: {thing} is not registered")
+    for thing in ("taglock", "scrying_glass", "oneiric_censer"):
+        if thing not in recipes:
+            err(f"hexes: {thing} needs a recipe")
+    for category in hx.WARDS:
+        result = recipes.get(f"ward_sigil_{category}", {}).get("result", {})
+        if result.get("id") != rid_value("ward_sigil") or result.get("components", {}).get(rid_value("ward")) != category:
+            err(f"hexes: the {category} ward sigil needs its recipe, its result carrying {rid_value('ward')}={category}")
+        if rid_value("dreamglass") not in recipes.get(f"ward_sigil_{category}", {}).get("ingredients", []):
+            err(f"hexes: ward sigils are made with dreamglass (the {category} one is not)")
+    pickaxe = load(DATA / "minecraft" / "tags" / "block" / "mineable" / "pickaxe.json") or {}
+    if rid_value("oneiric_censer") not in pickaxe.get("values", []):
+        err("hexes: the Oneiric Censer is mined with a pickaxe")
+    # GeckoLib: the animations played exist; every cube's UV fits its sheet.
+    import concordance_hex_models as models
+    for kind, name, source in (("block", "oneiric_censer", "dreaming/OneiricCenserBlockEntity.java"),
+                               ("entity", "dream_wisp", "dreaming/DreamWispEntity.java")):
+        geo = load(ASSETS / "geckolib" / "models" / kind / f"{name}.geo.json") or {}
+        animations = load(ASSETS / "geckolib" / "animations" / kind / f"{name}.animation.json") or {}
+        if geo != models.GEO[name]() or animations != models.ANIMATIONS[name]():
+            err(f"hexes: the {name} GeckoLib model or animations differ from tools/concordance_hex_models.py")
+        for clip in re.findall(r'thenLoop\("([a-z_.]+)"\)', java(source)):
+            if clip not in animations.get("animations", {}):
+                err(f"{name}.animation.json: missing {clip}")
+        description = (geo.get("minecraft:geometry") or [{}])[0].get("description", {})
+        width, height = description.get("texture_width", 0), description.get("texture_height", 0)
+        uv, sizes = models.SIZES[name]
+        for cube, (u, v) in uv.items():
+            w, h, d = sizes[cube]
+            if u + 2 * (d + w) > width or v + d + h > height:
+                err(f"hexes: {name}'s {cube} box does not fit its {width}x{height} sheet")
+        sheet = ASSETS / "textures" / kind / f"{name}.png"
+        if not sheet.is_file():
+            err(f"hexes: missing textures/{kind}/{name}.png")
+        else:
+            with Image.open(sheet) as img:
+                if img.size != (width, height):
+                    err(f"hexes: textures/{kind}/{name}.png must be {width}x{height}")
+    import item_icons
+    for icon in ("taglock", "scrying_glass", "ward_sigil", "dreamglass", "oneiric_censer"):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"hexes: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"hexes: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
 
 
 def rid_value(path):

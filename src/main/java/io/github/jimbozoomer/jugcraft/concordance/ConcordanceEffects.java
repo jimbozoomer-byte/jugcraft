@@ -11,6 +11,8 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Tolerance;
 import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 import io.github.jimbozoomer.jugcraft.town.TownProtection;
 import io.github.jimbozoomer.jugcraft.weapons.ArmItem;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -78,6 +80,21 @@ public final class ConcordanceEffects {
 	public static final TagKey<Block> INTERACTABLE = TagKey.create(Registries.BLOCK, Jugcraft.id("concordance/interactable"));
 	public static final TagKey<Block> HARVESTABLE = TagKey.create(Registries.BLOCK, Jugcraft.id("concordance/harvestable"));
 	private static final AtomicLong SERIALS = new AtomicLong();
+	private static final List<Guard> GUARDS = new CopyOnWriteArrayList<>();
+
+	/**
+	 * A protection a feature adds to the boundary (roadmap step 22's moving ward): asked of every creature operation after
+	 * the multiplayer rules, it may refuse it, and the target is then immune to it.
+	 */
+	@FunctionalInterface
+	public interface Guard {
+		boolean refuses(Context context, EffectSpec spec, LivingEntity target);
+	}
+
+	/** Adds a guard (at registration). */
+	public static void guard(Guard guard) {
+		GUARDS.add(guard);
+	}
 
 	private ConcordanceEffects() {
 	}
@@ -140,6 +157,11 @@ public final class ConcordanceEffects {
 				return Result.IMMUNE;
 			}
 			effect = adjusted.spec();
+		}
+		for (Guard guard : GUARDS) {
+			if (guard.refuses(context, effect, target)) {
+				return Result.IMMUNE;
+			}
 		}
 		if (!context.ledger().admit(context.step(), target.getStringUUID(), spec.kind().work).admitted()) {
 			return Result.LIMIT;
