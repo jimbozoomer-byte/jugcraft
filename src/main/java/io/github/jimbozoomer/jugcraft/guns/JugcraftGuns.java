@@ -42,6 +42,9 @@ public final class JugcraftGuns {
 		SPECS.put("rust_midge", new GunSpec(2.0F, 1, 3, true, 20, 47, 0, 0, 0, 4.0F, 1.5F, 48, "light_round"));
 		SPECS.put("patchwork_carbine", new GunSpec(6.0F, 1, 6, false, 10, 48, 0, 0, 0, 2.0F, 0.25F, 96, "rifle_round"));
 		SPECS.put("thunderpipe", new GunSpec(2.5F, 8, 8, false, 2, 0, 5, 12, 13, 9.0F, 6.0F, 24, "buckshot_shell"));
+		SPECS.put("warden_pistol", new GunSpec(4.0F, 1, 5, false, 12, 47, 0, 0, 0, 2.5F, 0.75F, 56, "light_round"));
+		SPECS.put("riveter_smg", new GunSpec(2.5F, 1, 3, true, 30, 45, 0, 0, 0, 3.0F, 1.0F, 48, "light_round"));
+		SPECS.put("haymaker", new GunSpec(3.0F, 8, 14, false, 5, 0, 7, 11, 23, 7.0F, 5.0F, 28, "buckshot_shell"));
 	}
 
 	/** The rounds. */

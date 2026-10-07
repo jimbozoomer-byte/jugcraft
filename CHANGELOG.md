@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 2 (the iron set)
+- **Three more of the owner's guns,** in iron and brass: the **Warden Pistol** (a one-handed service pistol, 12 rounds), the **Riveter SMG** (automatic, 30 rounds) and the **Haymaker** (a one-handed pump shotgun, five shells loaded one at a time). Each has the owner's model, texture, animations and shot.
+- They fire the existing Light Rounds and Buckshot Shells; no new round or material. Record: [guns.md, slice 2](docs/features/guns.md#slice-2-the-iron-set).
+
 ### Unmerged: Guns, slice 1
 - **The owner's first three guns,** with the owner's models, textures, animations and sounds: the **Rust Midge** (an automatic copper machine pistol), the **Patchwork Carbine** (a stockless carbine) and the **Thunderpipe** (a sawn-off double barrel, eight pellets a shot, loaded a shell at a time).
 - **Controls:** left click fires (held for the Midge), right click aims down the sights, G reloads, H inspects (both rebindable). In first person you see your own arms work the gun; a counter by the hotbar shows the rounds.

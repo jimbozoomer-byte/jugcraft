@@ -1413,7 +1413,7 @@ def check_guns():
             err("GunAnimations.SOUND_ALIASES does not play gun_rustle for rustle (tools/guns.py EVENT_SOUNDS)")
     for gun, overrides in guns.EVENT_OVERRIDES.items():
         for event, sound in overrides.items():
-            if f'Map.of("{gun}", Map.of("{event}", "{sound}"))' not in animations:
+            if f'"{gun}", Map.of("{event}", "{sound}")' not in animations:
                 err(f"GunAnimations.GUN_SOUND_ALIASES does not play {sound} for {gun}'s {event} (tools/guns.py)")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in [f"key.{MOD}.reload", f"key.{MOD}.inspect", f"hud.{MOD}.guns.ammo", f"hud.{MOD}.guns.reloading",

@@ -252,6 +252,33 @@
       }
     ]
   },
+  "guns.warden_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/iron_pistol_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.riveter_smg.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/greaser_smg_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.haymaker.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bruiser_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

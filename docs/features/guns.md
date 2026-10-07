@@ -1,12 +1,16 @@
-# Guns, slice 1: the Rust Midge, Patchwork Carbine and Thunderpipe
+# Guns: the scrap guns (slice 1) and the iron set (slice 2)
 
-Status: implemented on `claude/guns`, awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library. **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
+Status:
+- **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
+- **Slice 2** (the iron set: the Warden Pistol, Riveter SMG and Haymaker; [below](#slice-2-the-iron-set)): implemented on `claude/guns-iron`, stacked on slice 1, awaiting review.
+- **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
 - on the models, with the upload: "I have rights for all these";
 - the first guns: "Gnat, Makeshift, Boomstick";
 - the names: "Propose names";
-- the eight sounds that carry other sources' tags: "I have the rights".
+- the eight sounds that carry other sources' tags: "I have the rights";
+- the next guns ("Ok lets do more!!!"): all four sets offered, the iron set, the lever rifles, the black powder guns and the attachments, each in its own slice; names: "Propose names".
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -63,6 +67,50 @@ Three guns, each the owner's model with the owner's animations:
 - **Patchwork Carbine:** three iron ingots over planks, a lever and a copper ingot.
 - **Thunderpipe:** two iron ingots over planks and a lever.
 
+## Slice 2: the iron set
+Three more of the owner's guns, a step up from the scrap guns, in iron and brass:
+
+| | Warden Pistol | Riveter SMG | Haymaker |
+|---|---|---|---|
+| The owner's gun | Defender Pistol | Greaser SMG | Bruiser |
+| What it is | an iron service pistol, held in one hand | an iron submachine gun | a short pump shotgun, fired one-handed |
+| Fires | one shot each pull | held, automatic | one shot each pull, 8 pellets |
+| Damage | 4 | 2.5 a bullet | 3 a pellet (24 if all land) |
+| Rate | 4 a second (every 5 ticks) | 6.7 a second (every 3 ticks) | 1.4 a second (every 14 ticks) |
+| Holds | 12 | 30 | 5 |
+| Reload | 2.35 s, the magazine | 2.25 s, the magazine | 0.35 s, then 0.55 s a shell, then 1.15 s |
+| Spread, hip / aimed | 2.5° / 0.75° | 3° / 1° | 7° / 5° |
+| Range | 56 blocks | 48 | 28 |
+| Round | Light Round | Light Round | Buckshot Shell |
+
+**What you see:** the owner's animations, as for the scrap guns.
+- The Warden Pistol and the Haymaker are held in the right hand alone; the left hand comes in only to reload. The pistol's slide kicks back on each shot, its magazine drops, and the left hand brings in the new one. The Haymaker's left hand feeds each shell, then works the pump.
+- The Riveter is held in both hands; its bolt runs on each shot, and the magazine drops out and back.
+
+**Crafting** (a crafting table, each round the same as before):
+- **Warden Pistol:** three iron ingots over a lever and a brass ingot.
+- **Riveter SMG:** three iron ingots over a brass ingot, a lever and an iron ingot.
+- **Haymaker:** three iron ingots over a brass ingot, a lever and planks.
+
+**Connections:** brass ingots (brass is alloyed from copper and zinc, the zinc switch's ore) join the iron. No new round, no new material: the pistol and SMG fire Light Rounds and the Haymaker Buckshot Shells.
+
+**Balance:** starting numbers, a little above the scrap guns. The Riveter's 16.7 damage a second empties 30 rounds in 4.5 seconds for 75 damage; the Haymaker's 24 at point blank outdoes the Thunderpipe's 20 but holds five and fires slower.
+
+**How the models were built** (as for the scrap guns, `tools/guns.py`):
+
+| Gun | Bones |
+|---|---|
+| Warden Pistol | `gun_body2` > `gun_body` (main and standard barrel); `bolt` (the owner's `receiver`, the slide); `magazine` and `magazine_2` (both the standard magazine: the reload drops one and brings the other in) |
+| Riveter SMG | `gun_body2` > `gun_body` (main, standard barrel and sights); `bolt`; `magazine` |
+| Haymaker | `gun_body2` > `gun_body` (main); `barrel` (the pump: the shot and the pump slide it back) |
+
+- **Hands:** the right hand on each grip (pistol (8, 1.9, 15.3), SMG (8, 1.45, 15.85), Haymaker (8, 1.7, 15.75)); the Riveter's left on the fore-end (8, 2, 8.5).
+- **One-handed guns:** the Warden's and Haymaker's idles hide the left arm, so its rest point is given for a reload keyframe instead (`"hand_pose"` in `BUILDS`):
+  - the Warden's left hand is at the magazine's base (8, 0.35, 15.3) at 1.75 s into the reload. Through the insert (1.37 to 1.7 s) the hand stays within a pixel of the new magazine;
+  - the Haymaker's is under the barrel (8, 4.3, 9) at 0.29 s into the reload's end. Through the pump (0.33 to 0.58 s) it stays about 2 px under the barrel as both slide back.
+- **Arms:** run down, back and out from each hand, as for the scrap guns (each arm's direction is set in its reference pose).
+- **Sounds:** each gun's own shot (the Warden fires the library's iron pistol shot); the Haymaker's loop plays the shell insert, as the Thunderpipe's does.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -103,10 +151,10 @@ Three guns, each the owner's model with the owner's animations:
 - **Others' animations:** the server tells the clients that see the shooter (not the shooter's own) with `GunActionPayload`, and they play the shot or reload on that gun.
 - **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
 - **Disconnect:** clears that player's trigger credit and reload.
-- **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the six recipes. Items stay registered, so saved guns and rounds survive with it off.
+- **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns' and rounds' recipes (nine with slice 2). Items stay registered, so saved guns and rounds survive with it off.
 
 ## The shared parts it uses
-- **Items:** `JugcraftRegistry.item` for the six items; the Combat tab.
+- **Items:** `JugcraftRegistry.item` for every gun and round; the Combat tab.
 - **Config:** the `guns` feature switch (`JugcraftConfig.FEATURES`, `tools/materials.py`).
 - **Damage type:** `jugcraft:bullet`, tagged `minecraft:is_projectile` (Projectile Protection works against it) and `minecraft:bypasses_cooldown` (each shot counts).
 - **Sounds:** in `sounds.json`, through `tools/generate_material_data.py`.
@@ -178,6 +226,29 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | thunderpipe | `Guns/models/special/boomstick/stan_grip.json` | `c1600f32e348032e` |
 | thunderpipe | `Guns/models/special/boomstick/barrel.json` | `5cfbb08d0c0ed36f` |
 | thunderpipe | `Guns/sounds/item/boomstick/fire.ogg` | `17a57973db433feb` |
+| warden_pistol | `Guns/models/item/defender_pistol.json` | `bf3301680bc96f45` |
+| warden_pistol | `Guns/item/defender_pistol.png` | `ad202f717aeba7ad` |
+| warden_pistol | `Guns/item/defender_pistol.animation.json` | `12cfc09f3808047f` |
+| warden_pistol | `Guns/models/special/defender_pistol/main.json` | `2876ee81c267a62b` |
+| warden_pistol | `Guns/models/special/defender_pistol/stan_barrel.json` | `19ad2fd0bd8b90fb` |
+| warden_pistol | `Guns/models/special/defender_pistol/receiver.json` | `36e10152e2d99dc9` |
+| warden_pistol | `Guns/models/special/defender_pistol/stan_mag.json` | `7ab12d526d23f4cc` |
+| warden_pistol | `Guns/sounds/item/iron_pistol/fire.ogg` | `6a0fe18dfc3165d5` |
+| riveter_smg | `Guns/models/item/greaser_smg.json` | `8f0509099a336944` |
+| riveter_smg | `Guns/item/greaser_smg.png` | `25c4edd154a19db3` |
+| riveter_smg | `Guns/item/greaser_smg.animation.json` | `f3652168b8a19a97` |
+| riveter_smg | `Guns/models/special/greaser_smg/main.json` | `18913c7642478b66` |
+| riveter_smg | `Guns/models/special/greaser_smg/stan_barrel.json` | `71ade7f1ea1cb5e2` |
+| riveter_smg | `Guns/models/special/greaser_smg/sights.json` | `8b2ddcda44cffbc1` |
+| riveter_smg | `Guns/models/special/greaser_smg/bolt.json` | `55f84a9152c3883b` |
+| riveter_smg | `Guns/models/special/greaser_smg/stan_mag.json` | `0d2d5d33f5974d07` |
+| riveter_smg | `Guns/sounds/item/greaser_smg/fire.ogg` | `201fd4258dea84a2` |
+| haymaker | `Guns/models/item/bruiser.json` | `26242eca95ba17df` |
+| haymaker | `Guns/item/bruiser.png` | `3bd5c461326585b5` |
+| haymaker | `Guns/item/bruiser.animation.json` | `2e58fe5e8cf7fa97` |
+| haymaker | `Guns/models/special/bruiser/main.json` | `3d2bb3bdad310541` |
+| haymaker | `Guns/models/special/bruiser/barrel.json` | `ea98ae5f5582c0ce` |
+| haymaker | `Guns/sounds/item/bruiser/fire.ogg` | `b965c68e659f88e3` |
 | shared | `Guns/sounds/item/bolt/bolt.ogg` | `1cf1102f6ba52725` |
 | shared | `Guns/sounds/item/bolt_pull/bolt_pull.ogg` | `dbbda8b00abcab8c` |
 | shared | `Guns/sounds/item/bolt_release/bolt_release.ogg` | `7c1096f545d72ec3` |
@@ -211,21 +282,30 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
   - The client test's log: the Midge took the husk from 200 to 198 health and spent a round; the Carbine took it from 198 to 192; the Thunderpipe from 192 to 174.5 (7 of its 8 pellets). Each reload then loaded one round and left 31 in the inventory.
   - **Screenshots read:** the guns in the owner's textures; your arms rising from the bottom of the screen to the grip and fore-end; the sight on the crosshair when aiming; the reloads and inspects; each gun in the right hand in third person; the guns and rounds in the inventory.
   - **Fixed after reading them:** the Thunderpipe's spare shell showed, out of place, during its inspect; and the counter read one round low until the next shot settled it (it now settles each answer as it comes). Their run is in the pull request.
+- **Slice 2, run locally (7 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the six guns' parts comes back at the same corners with the same UVs and turns; each hand is where `BUILDS` puts it in its pose; each shoulder locator is 10 px from its hand, below it.
+  - `python3 tools/generate_material_data.py`: run twice; the second run changed nothing.
+  - `python3 tools/check_mod_data.py`: PASS (1554 material IDs), with `check_guns`; `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **First-person previews** of each new gun held, aimed and part way through its reload, drawn with the game's hand transforms; and the hand-to-part distances above.
+- **Slice 2 game tests (written; they run in CI):**
+  - `GunsGameTests` adds: the Warden Pistol and the Riveter SMG each land one shot's damage and spend a round; the Haymaker loads a shell at a time, stops at the two shells there are, then its pellets land together. "Every gun registered" now expects six guns.
+  - `GunsClientGameTests` runs every gun, so the new three are drawn, aimed, fired at the husk, reloaded and inspected through the real keys too.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Light Round, Rifle Round, Buckshot Shell). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Light Round, Rifle Round, Buckshot Shell). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
-- **Not in this slice:**
-  - attachments (the owner's parts include silencers, stocks, grips, scopes, extended magazines and bayonets);
+- **Next slices,** each its own pull request: the lever rifles, the black powder guns, and the attachments (the owner's parts include silencers, stocks, grips, scopes, extended magazines and bayonets).
+- **Not yet:**
   - the jam the Gnat's sound suggests;
   - casings and muzzle flash (the `eject_casing` cue);
   - a two-handed third-person pose;
   - a zoom when aiming;
   - off-hand guns;
   - mob use;
-  - higher-tier guns.
+  - the guns beyond these sets.
 - **Balance:** the numbers are starting points for the owner to set.

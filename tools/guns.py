@@ -1,4 +1,5 @@
-"""Guns, slice 1 (docs/features/guns.md): the owner's Rust Midge, Patchwork Carbine and Thunderpipe.
+"""Guns (docs/features/guns.md): slice 1, the owner's Rust Midge, Patchwork Carbine and Thunderpipe; slice 2, the
+iron set: the Warden Pistol, Riveter SMG and Haymaker.
 
 The owner made these guns (inspired by Scorched Guns 2) and supplied, in the owner asset library:
   - a Blockbench Java model of every part (art/owner-library/originals/Blocks/Guns/models/special/<gun>/<part>.json),
@@ -65,6 +66,29 @@ GUNS = {
         "damage": 2.5, "pellets": 8, "interval": 8, "auto": False, "capacity": 2,
         "reload": (5, 12, 13), "spread": (9.0, 6.0), "range": 24, "ammo": "buckshot_shell",
     },
+    # Slice 2, the iron set: a step up from the scrap guns, in iron and brass.
+    "warden_pistol": {
+        "display": "Warden Pistol",
+        "source": "defender_pistol",
+        "tooltip": "An iron service pistol with a sliding breech, held in one hand. One shot each pull. Fires light rounds.",
+        "damage": 4.0, "pellets": 1, "interval": 5, "auto": False, "capacity": 12,
+        "reload": 47, "spread": (2.5, 0.75), "range": 56, "ammo": "light_round",
+    },
+    "riveter_smg": {
+        "display": "Riveter SMG",
+        "source": "greaser_smg",
+        "tooltip": "An iron submachine gun that empties a long magazine in a hurry. Hold to fire. Fires light rounds.",
+        "damage": 2.5, "pellets": 1, "interval": 3, "auto": True, "capacity": 30,
+        "reload": 45, "spread": (3.0, 1.0), "range": 48, "ammo": "light_round",
+    },
+    "haymaker": {
+        "display": "Haymaker",
+        "source": "bruiser",
+        "tooltip": "A short pump shotgun, fired one-handed. Eight pellets a shot, loaded a shell at a time. Fires buckshot "
+                   "shells.",
+        "damage": 3.0, "pellets": 8, "interval": 14, "auto": False, "capacity": 5,
+        "reload": (7, 11, 23), "spread": (7.0, 5.0), "range": 28, "ammo": "buckshot_shell",
+    },
 }
 
 # The rounds: display name, tooltip, recipe (pattern, key, count). Cheap and early: copper or brass, lead and gunpowder.
@@ -78,12 +102,16 @@ AMMO = {
                                                 "B": "#c:nuggets/brass"}, 4)),
 }
 
-# Gun recipes: crafted at a crafting table from early metal; the owner's art carries the scrap look.
+# Gun recipes: crafted at a crafting table from early metal (the iron set adds brass); the owner's art carries the look.
 RECIPES = {
     "rust_midge": (["CCI", " LI"], {"C": "minecraft:copper_ingot", "I": "minecraft:iron_ingot", "L": "minecraft:lever"}),
     "patchwork_carbine": (["III", "PLC"], {"I": "minecraft:iron_ingot", "P": "#minecraft:planks", "L": "minecraft:lever",
                                           "C": "minecraft:copper_ingot"}),
     "thunderpipe": (["II ", "PLP"], {"I": "minecraft:iron_ingot", "P": "#minecraft:planks", "L": "minecraft:lever"}),
+    "warden_pistol": (["III", " LB"], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "B": "#c:ingots/brass"}),
+    "riveter_smg": (["III", "BLI"], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "B": "#c:ingots/brass"}),
+    "haymaker": (["III", "BLP"], {"I": "minecraft:iron_ingot", "L": "minecraft:lever", "B": "#c:ingots/brass",
+                                  "P": "#minecraft:planks"}),
 }
 
 # How each gun is built from the owner's parts, in the owner's model space (Java item-model pixels: x east, y up,
@@ -92,12 +120,13 @@ RECIPES = {
 # their own centres (docs/features/guns.md has the survey of the animations that chose them).
 # "hands": where the right hand holds the grip and the left hand holds the gun in the idle pose. The arm bones are
 # children of gun_body, so the hands go where the gun goes; each one's pivot is the hand, placed so that the idle
-# animation's offset brings it to these points (arm_pivot()).
+# animation's offset brings it to these points (arm_pivot()). A one-handed gun's idle hides the left arm; its
+# "hand_pose" names the animation and keyframe whose offset the left hand point is given for instead.
 # "arms": which way each arm runs from the hand to the shoulder, in its arm bone's own frame (owner axes). The idle
 # animation turns the arm bones so that their -y points straight back at the camera, which showed the arms end-on as
 # big slabs; these run each arm down, back and out, so it rises from the bottom of the screen to the gun (chosen in a
-# first-person preview of the idle pose; docs/features/guns.md). The model carries each as a "<side>_shoulder"
-# locator ARM_REACH pixels from the pivot, and the renderer turns the player's arm from -y onto it.
+# first-person preview of the idle pose, or of the "hand_pose"; docs/features/guns.md). The model carries each as a
+# "<side>_shoulder" locator ARM_REACH pixels from the pivot, and the renderer turns the player's arm from -y onto it.
 # "muzzle" and "sight": the locators the shot's smoke and aiming down the sights use.
 BUILDS = {
     "rust_midge": {
@@ -137,6 +166,47 @@ BUILDS = {
         "muzzle": (8.0, 4.17, 1.91),
         "sight": (8.0, 5.68, 14.0),
     },
+    # The iron set. The Warden Pistol's slide is the owner's "receiver" part (the animations call it the bolt); its
+    # reload drops the magazine and brings a new one in on magazine_2, so both carry the magazine part.
+    "warden_pistol": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.9, 15.3)),
+            ("gun_body", "gun_body2", ["main", "stan_barrel"], (8.0, 1.9, 15.3)),
+            ("bolt", "gun_body", ["receiver"], (8.0, 5.38, 14.38)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 0.65, 15.05)),
+            ("magazine_2", "gun_body", ["stan_mag"], (8.0, 0.65, 15.05)),
+        ],
+        "hands": {"right": (8.0, 1.9, 15.3), "left": (8.0, 0.35, 15.3)},
+        "hand_pose": {"left": ("reload", "1.75")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.6771, -0.3794, 0.6306)},
+        "muzzle": (8.0, 4.9, 6.9),
+        "sight": (8.0, 6.0, 14.6),
+    },
+    "riveter_smg": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.45, 15.85)),
+            ("gun_body", "gun_body2", ["main", "stan_barrel", "sights"], (8.0, 1.45, 15.85)),
+            ("bolt", "gun_body", ["bolt"], (8.68, 5.33, 9.0)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 1.49, 11.0)),
+        ],
+        "hands": {"right": (8.0, 1.45, 15.85), "left": (8.0, 2.0, 8.5)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.1636, -0.6192, 0.768)},
+        "muzzle": (8.0, 5.6, 4.0),
+        "sight": (8.0, 6.85, 15.5),
+    },
+    # The Haymaker's pump is its barrel part: the shot and the pump slide it back.
+    "haymaker": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.7, 15.75)),
+            ("gun_body", "gun_body2", ["main"], (8.0, 1.7, 15.75)),
+            ("barrel", "gun_body", ["barrel"], (8.0, 5.25, 10.5)),
+        ],
+        "hands": {"right": (8.0, 1.7, 15.75), "left": (8.0, 4.3, 9.0)},
+        "hand_pose": {"left": ("reload_stop", "0.2917")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.5969, -0.4453, 0.6674)},
+        "muzzle": (8.0, 5.1, 4.6),
+        "sight": (8.0, 6.4, 14.7),
+    },
 }
 
 # The shell the Thunderpipe's reload loop pushes into the breech (the owner's animation moves a "shell" bone that had
@@ -161,12 +231,15 @@ EVENT_SOUNDS = {
     "shell_in": "item/gun_sounds/insert.ogg",
     "dry_fire": "item/rusty_gnat/copper_jam.ogg",
 }
-# The Thunderpipe's reload_loop names "reload_mag_in"; it pushes a shell, so it plays the shell insert.
-EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}}
+# The Thunderpipe's and Haymaker's reload_loop name "reload_mag_in"; they push a shell, so they play the shell insert.
+EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"reload_mag_in": "shell_in"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
     "thunderpipe": "item/boomstick/fire.ogg",
+    "warden_pistol": "item/iron_pistol/fire.ogg",
+    "riveter_smg": "item/greaser_smg/fire.ogg",
+    "haymaker": "item/bruiser/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -398,17 +471,29 @@ def shell_cube():
         "up": {"uv": [tu, tv + 4], "uv_size": [2, 5]}, "down": {"uv": [tu + 2, tv + 4], "uv_size": [2, 5]}}}
 
 
-def idle_arm_offsets(gun):
-    """The idle animation's (constant) arm positions, in the file's units."""
-    idle = animations(gun)["animations"]["idle"]["bones"]
-    return {side: idle[f"{side}_arm"]["position"] for side in ("right", "left")}
+def key_value(channel, time=None):
+    """A channel's value: a constant ([x, y, z] or {"post": ...}), or its keyframe at `time` (a key of the file; the
+    first when no time is given)."""
+    if isinstance(channel, dict) and not {"post", "vector", "pre"} & channel.keys():
+        # Keyframes: the one named, or the first of an idle that holds still.
+        channel = channel[time if time is not None else min(channel, key=float)]
+    if isinstance(channel, dict):
+        channel = channel.get("post", channel.get("vector", channel.get("pre")))
+    return [float(v) for v in channel]
+
+
+def arm_offset(gun, side):
+    """The arm's animated position, in the file's units, in the pose its hand point is given for: the idle (constant),
+    or the "hand_pose" keyframe for an arm the idle hides."""
+    anim, time = BUILDS[gun].get("hand_pose", {}).get(side, ("idle", None))
+    return key_value(animations(gun)["animations"][anim]["bones"][f"{side}_arm"]["position"], time)
 
 
 def arm_pivot(gun, side):
-    """Owner-space rest pivot of an arm bone: the hand point less the idle offset (GeckoLib moves a bone by
+    """Owner-space rest pivot of an arm bone: the hand point less the pose's offset (GeckoLib moves a bone by
     (-x, y, z) of its "position", BoneSnapshot.translate)."""
     hx, hy, hz = BUILDS[gun]["hands"][side]
-    ox, oy, oz = idle_arm_offsets(gun)[side]
+    ox, oy, oz = arm_offset(gun, side)
     return (hx + ox, hy - oy, hz - oz)
 
 
@@ -566,10 +651,10 @@ def check():
             if bone is None:
                 problems.append(f"{gun}: no {side}_arm bone")
                 continue
-            ox, oy, oz = idle_arm_offsets(gun)[side]
+            ox, oy, oz = arm_offset(gun, side)
             px, py, pz = 8.0 - bone["pivot"][0], bone["pivot"][1], bone["pivot"][2] + 8.0
             if not close((px - ox, py + oy, pz + oz), BUILDS[gun]["hands"][side], 1e-3):
-                problems.append(f"{gun}: the idle {side} hand is not at the grip")
+                problems.append(f"{gun}: the {side} hand is not where BUILDS puts it in its pose")
             sx, sy, sz = bone.get("locators", {}).get(f"{side}_shoulder", (8.0, 0.0, -8.0))
             reach = (8.0 - sx - px, sy - py, sz + 8.0 - pz)
             length = math.sqrt(sum(v * v for v in reach))
@@ -651,7 +736,7 @@ def provenance():
         for _, _, parts, _ in BUILDS[gun]["bones"]:
             paths += [f"models/special/{src}/{p}.json" for p in parts if not p.startswith("@")]
         paths.append(f"sounds/{SHOT_SOUNDS[gun]}")
-        rows += [(gun, p) for p in paths]
+        rows += [(gun, p) for p in dict.fromkeys(paths)]  # a part on two bones (a spare magazine) counts once
     rows += [("shared", f"sounds/{p}") for p in sorted(set(EVENT_SOUNDS.values()))]
     return [(gun, path, hashlib.sha256((LIBRARY / path).read_bytes()).hexdigest()) for gun, path in rows]
 
