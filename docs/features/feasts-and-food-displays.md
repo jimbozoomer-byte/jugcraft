@@ -107,4 +107,4 @@ Food and decoration only: no world generation, creatures, dimensions or loot tab
 
 ## Rollout and open questions
 - Three serving icons are composed from the owner's bowl and feast icons, as they drew none; the owner may want to draw their own.
-- The library's other feast-like art (cakes, more pies, the rest of the menu) belongs to slice 3, the menu.
+- The library's other feast-like art (cakes, more pies, the rest of the menu) belongs to slice 3, the menu, which adds the nachos as a sixth feast ([the-menu.md](the-menu.md)).

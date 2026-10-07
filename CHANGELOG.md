@@ -46,6 +46,14 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: The menu
+- The third slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **55 new items:** drinks (hot cocoa, creamy corn drink, melon juice, glow berry custard, and a milk bottle that clears effects), soups and stews, plated meals and pastas, sandwiches, the hamburger, wraps and tacos, dumplings, ham and smoked ham, corn dogs, a barbecue stick and popsicles, honey and sweet berry cookies, caramel popcorn, boiled corn, cornbread, tortillas and chips, and the doughs and batters they start from. No dish gives more than 3 hunger over its ingredients.
+- **Every dish sets down:** sneak and use it on a block to set it down as a 3D model of the owner's icon, facing you; an empty hand takes it back.
+- **The owner's art:** the Cooking Pot is now the owner's iron pot, and the onion, vegetable and pumpkin soups, cabbage rolls, roasted corn and mulled cider wear the owner's icons (same IDs, recipes and food). Popcorn set down is the owner's popcorn box. Roasted and boiled corn give a corncob back.
+- **Nachos,** a sixth feast, and **Dog Food** and **Horse Feed** for your own tamed wolf or horse.
+- Details: [docs/features/the-menu.md](docs/features/the-menu.md).
+
 ### Unmerged: Feasts and food displays
 - The second slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
 - **Five feasts:** Roast Chicken, Honey-Glazed Ham, Shepherd's Pie, Stuffed Pumpkin and the Gleaming Salad (it glows). Placed whole, served four times: a bowl takes a serving away, a hungry player eats one there, and the model is eaten down to leftovers that clear for a bone or seeds. Four servings give about what the ingredients do.

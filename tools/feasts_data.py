@@ -137,7 +137,28 @@ def gleaming_salad(servings):
     return out
 
 
-MODELS = {"roast_chicken": roast_chicken, "honey_glazed_ham": honey_glazed_ham, "shepherds_pie": shepherds_pie,
+def nachos(servings):
+    """A tray of nachos in quarters (as pie_data.pie draws a pie), chips standing in each quarter left; the leftovers are
+    the last bitten chip."""
+    if servings == 0:
+        return [box((4.5, 0, 8), (11.5, 7, 8), "#eaten", faces=("north", "south"), uvs={"north": [11, 9, 4, 16], "south": [4, 9, 11, 16]})]
+    out = []
+    for quarter in range(4 - servings, 4):
+        lo, hi = pie_data.QUARTERS[quarter]
+        faces = {}
+        for side, inner in (("west", lo[0] == 8), ("east", hi[0] == 8), ("north", lo[2] == 8), ("south", hi[2] == 8)):
+            if inner:
+                faces[side] = "#inside"
+        out.append(box((lo[0], 0, lo[2]), (hi[0], 2, hi[2]), "#side", textures={"up": "#top", "down": "#side", **faces}))
+        mz, mx = (lo[2] + hi[2]) / 2, (lo[0] + hi[0]) / 2
+        out.append(box((lo[0], 2, mz), (hi[0], 7, mz), "#chip", faces=("north", "south"),
+                       uvs={"north": [hi[0], 11, lo[0], 16], "south": [lo[0], 11, hi[0], 16]}))
+        out.append(box((mx, 2, lo[2]), (mx, 7, hi[2]), "#chip", faces=("east", "west"),
+                       uvs={"east": [16 - hi[2], 11, 16 - lo[2], 16], "west": [lo[2], 11, hi[2], 16]}))
+    return out
+
+
+MODELS = {"nachos": nachos, "roast_chicken": roast_chicken, "honey_glazed_ham": honey_glazed_ham, "shepherds_pie": shepherds_pie,
           "stuffed_pumpkin": stuffed_pumpkin, "gleaming_salad": gleaming_salad}
 
 

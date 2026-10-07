@@ -65,6 +65,7 @@ import plants_data
 import trees_data
 import kitchen_data
 import feasts_data
+import menu_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
                          HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, STALKS, WILD_BONUS, crop_blocks)
@@ -131,23 +132,6 @@ def trellis_crop_model():
             "textures": {"particle": "#crop"}, "elements": trellis_elements() + crop}
 
 
-def cooking_pot_model(contents):
-    """An iron pot: body, a raised rim around the contents, and a handle on each side."""
-    elements = [
-        box((3, 0, 3), (13, 7.5, 13), "#side", faces=("north", "south", "east", "west", "down")),
-        box((3.5, 7, 3.5), (12.5, 7, 12.5), "#contents", faces=("up",)),
-    ]
-    for lo, hi in (((2.5, 7, 2.5), (13.5, 8.5, 3.5)), ((2.5, 7, 12.5), (13.5, 8.5, 13.5)),
-                   ((2.5, 7, 3.5), (3.5, 8.5, 12.5)), ((12.5, 7, 3.5), (13.5, 8.5, 12.5))):
-        elements.append(box(lo, hi, "#rim", faces=("north", "south", "east", "west", "up")))
-    for lo, hi in (((1, 5, 7), (3, 6, 9)), ((13, 5, 7), (15, 6, 9))):
-        elements.append(box(lo, hi, "#rim"))
-    return {"parent": "minecraft:block/block",
-            "textures": {"particle": rid("block/cooking_pot_side"), "side": rid("block/cooking_pot_side"),
-                         "rim": rid("block/cooking_pot_rim"), "contents": rid(f"block/cooking_pot_{contents}")},
-            "elements": elements}
-
-
 # ---------------------------------------------------------------- assets
 
 def assets(root, write, lang):
@@ -202,12 +186,16 @@ def assets(root, write, lang):
         "textures": {"particle": rid("block/trellis_post"), "trellis": rid("block/trellis"), "post": rid("block/trellis_post")},
         "elements": trellis_elements()})
     write(root / "blockstates" / "trellis.json", {"variants": {"": {"model": rid("block/trellis")}}})
-    write(root / "models" / "block" / "cooking_pot.json", cooking_pot_model("empty"))
-    write(root / "models" / "block" / "cooking_pot_cooking.json", cooking_pot_model("soup"))
+    # The Cooking Pot's models are the owner's pot (tools/menu_data.py cooking_pot_model), written with the menu.
     write(root / "blockstates" / "cooking_pot.json", {"variants": {
         "cooking=false": {"model": rid("block/cooking_pot")}, "cooking=true": {"model": rid("block/cooking_pot_cooking")}}})
     for block, info in EQUIPMENT.items():
-        write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+        if block == "cooking_pot":
+            # the owner's pot icon (tools/menu.py COOKING_POT_TEXTURES)
+            write(root / "models" / "item" / f"{block}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{block}")}})
+            write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+        else:
+            write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
         lang[f"block.{MOD}.{block}"] = info["display"]
     lang[f"container.{MOD}.cooking_pot"] = "Cooking Pot"
     lang[f"container.{MOD}.cooking_pot.cold"] = "Needs heat below"
@@ -284,6 +272,7 @@ def assets(root, write, lang):
     graveyard_data.assets(root, write, lang)
     kitchen_data.assets(root, write, lang)
     feasts_data.assets(root, write, lang)
+    menu_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -425,6 +414,7 @@ def loot(data, write):
     maze_data.loot(out, write)
     kitchen_data.loot(out, write)
     feasts_data.loot(out, write)
+    menu_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -559,6 +549,7 @@ def tags(tags):
     graveyard_data.tags(tags)
     kitchen_data.tags(tags)
     feasts_data.tags(tags)
+    menu_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

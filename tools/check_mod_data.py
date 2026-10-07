@@ -19,6 +19,7 @@ from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS
 import agriculture as ag
 import kitchen
 import feasts
+import menu
 import owner_art
 import werewolf_model
 import midway
@@ -2941,6 +2942,12 @@ def check_agriculture():
         items[name] = ("seeds", int(n), float(sat), compost.lower(), crop)
     for name, compost in re.findall(r'\bplain\("([a-z_]+)", COMPOST_(\w+)\)', main):
         items[name] = ("plain", None, None, compost.lower(), None)
+    for name, n, sat, compost in re.findall(r'\bcob\("([a-z_]+)", (\d+), ([\d.]+)F, COMPOST_(\w+)\)', main):
+        items[name] = ("cob", int(n), float(sat), compost.lower(), None)
+    for name in re.findall(r'\bmilkBottle\("([a-z_]+)"\)', main):
+        items[name] = ("milk", None, None, None, None)
+    for name in re.findall(r'\bpetFood\("([a-z_]+)", EntityTypes\.', main):
+        items[name] = ("pet", None, None, None, None)
     for name, n, sat in re.findall(r'\bstew\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
         items[name] = ("stew", int(n), float(sat), None, None)
         if ag.ITEMS.get(name, {}).get("stew_effect"):
@@ -2970,6 +2977,7 @@ def check_agriculture():
     for name, info in ag.ITEMS.items():
         food = info.get("food") or [None, None]
         kind = ("stew" if info.get("stew") else "treat" if info.get("treat") else "sweet" if info.get("sweet") else "drink" if info.get("drink")
+                else "cob" if info.get("cob") else "milk" if info.get("milk") else "pet" if info.get("pet")
                 else "seeds" if "plants" in info
                 else "food" if "food" in info else "plain")
         expected[name] = (kind, food[0], food[1], info.get("compost"), info.get("plants"))
@@ -3136,6 +3144,8 @@ VANILLA_FOOD = {"porkchop": [3, 0.3], "cooked_porkchop": [8, 0.8], "beef": [3, 0
                 "cake": [14, 0.1],  # a cake is seven bites of 2 / 0.1
                 "baked_potato": [5, 0.6], "carrot": [3, 0.6], "bread": [5, 0.6], "honey_bottle": [6, 0.1], "sweet_berries": [2, 0.1],
                 "glow_berries": [2, 0.1], "melon_slice": [2, 0.3], "pumpkin_pie": [8, 0.3]}
+# Vanilla foods the menu cooks with that the kitchen does not cut: [hunger, saturation modifier].
+MENU_VANILLA_FOOD = {"apple": [4, 0.3], "beetroot": [1, 0.6], "potato": [1, 0.3], "rotten_flesh": [4, 0.1]}
 # A whole that is not food (a pumpkin, an egg) has nothing to outweigh; a cooked cut is held to the cooked whole.
 COOKED_WHOLE = {"porkchop": "cooked_porkchop", "beef": "cooked_beef", "chicken": "cooked_chicken", "mutton": "cooked_mutton",
                 "cod": "cooked_cod", "salmon": "cooked_salmon"}
@@ -3224,6 +3234,94 @@ def check_feasts():
                 err(f"{name} needs {path.relative_to(ROOT)}")
         if f"block.{MOD}.{name}" not in lang:
             err(f"{name} has no words")
+
+
+def check_menu():
+    """The menu (tools/menu.py): MenuDishes, PlacedDishBlock and the pet food match it; no dish gives more than
+    COOK_BONUS hunger over its ingredients; every dish set down has its model, a blockstate for each facing, loot that
+    gives its food back, and words; the corn foods give their cob back; the Cooking Pot wears the owner's pot."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    placed = re.findall(r'new Dish\("([a-z_]+)", DishShape\.([A-Z]+)\)', java.get("MenuDishes", ""))
+    if placed != [(name, model[0].upper()) for name, model in menu.placed().items()]:
+        err("MenuDishes.java's dishes (and their shapes, in order) differ from tools/menu.py placed()")
+    shapes = set(re.findall(r"^\t\t([A-Z]+)\(Block\.box\(", java.get("PlacedDishBlock", ""), re.M))
+    if shapes != {model[0].upper() for model in menu.placed().values()}:
+        err(f"PlacedDishBlock.DishShape {sorted(shapes)} must have exactly the templates tools/menu.py uses")
+    pets = {name: {"animal": animal.lower(), "heal": int(heal), "effects": [[e, int(t)] for e, t in re.findall(r"MobEffects\.(\w+), (\d+)", treats)],
+                   "returns": "minecraft:bowl" if bowl == "true" else None}
+            for name, animal, heal, bowl, treats in re.findall(
+                r'\bpetFood\("([a-z_]+)", EntityTypes\.(\w+), (\d+), (true|false), List\.of\((.*?)\)\);', main, re.S)}
+    if pets != menu.PETS:
+        err(f"JugcraftAgriculture pet food {pets} differs from tools/menu.py PETS")
+    if sorted(name for name, info in ag.ITEMS.items() if info.get("cob")) != sorted(menu.COB_FOODS) or menu.COB not in ag.ITEMS \
+            or f'usingConvertsTo(item("{menu.COB}"))' not in main:
+        err("The corn on the cob foods (tools/menu.py COB_FOODS) must each give the corncob back")
+    if "PlacedDishBlock.setDown" not in main or "PetFoodItem.feed" not in main:
+        err("JugcraftAgriculture must set dishes down and feed pets through the use events")
+
+    # Balance: what a dish gives against its ingredients, each counted as the most it would give: as itself, as what a
+    # furnace makes of it (raw meat, an egg, corn, sugar), as what a board cuts it into (a pumpkin as its slices), or, for
+    # an ingredient that is not food (a dough, a batter), as what went into it.
+    foods = {name: info["food"][0] for name, info in ag.ITEMS.items() if "food" in info}
+    made = {}
+    for recipe in ag.SHAPELESS:
+        made.setdefault(f"{MOD}:{split(recipe['result'])[1]}", ([*recipe["inputs"]], recipe.get("count", 1)))
+    for result, info in ag.POT_RECIPES.items():
+        made.setdefault(f"{MOD}:{result}", ([ref for ref, n in info["inputs"].items() for _ in range(n)], info.get("count", 1)))
+
+    def full(ref):
+        return ref if ":" in ref else f"{MOD}:{ref}"
+
+    def value(ref, seen=()):
+        ref = full(ref)
+        namespace, name = split(ref)
+        own = (VANILLA_FOOD.get(name, MENU_VANILLA_FOOD.get(name, [0]))[0] if namespace == "minecraft" else foods.get(name, 0))
+        best = own
+        if namespace == "minecraft" and name in COOKED_WHOLE:
+            best = max(best, VANILLA_FOOD[COOKED_WHOLE[name]][0])
+        for result, info in ag.COOKING.items():
+            if full(info["input"]) == ref:
+                best = max(best, value(result, seen + (ref,)))
+        cut = next((info for info in kitchen.CUTTING.values() if full(info["input"]) == ref), None)
+        if cut and ref not in seen:
+            best = max(best, sum(value(part, seen + (ref,)) * count for part, count in cut["results"]))
+        if not own and ref in made and ref not in seen:
+            inputs, count = made[ref]
+            best = max(best, sum(value(i, seen + (ref,)) for i in inputs) / count)
+        return best
+
+    recipes = [(name, [ref for ref, n in info["inputs"].items() for _ in range(n)], info.get("count", 1)) for name, info in menu.POT_RECIPES.items()]
+    recipes += [(name, inputs, count) for name, (inputs, count) in menu.SHAPELESS.items()]
+    recipes += [(name, [full(info["input"])], 1) for name, info in menu.COOKING.items()]
+    recipes += [(result, [info["input"]], count) for info in kitchen.CUTTING.values() for result, count in info["results"] if result in menu.DISHES]
+    for name, inputs, count in recipes:
+        given = foods.get(name, 0) * count
+        taken = sum(value(ref) for ref in inputs)
+        if given > taken + menu.COOK_BONUS:
+            err(f"{name}: {count} give {given} hunger from {taken:g} in ingredients (at most {menu.COOK_BONUS} more)")
+    for name, info in menu.DISHES.items():
+        if "food" in info and not any(name == recipe[0] for recipe in recipes):
+            err(f"{name} has no recipe in tools/menu.py")
+
+    for name in menu.placed():
+        model = load(ASSETS / "models" / "block" / f"{name}.json") or {}
+        if not model.get("elements") or model.get("textures", {}).get("dish") != f"{MOD}:block/menu/{name}":
+            err(f"{name} needs its model, wearing block/menu/{name}")
+        state = load(ASSETS / "blockstates" / f"{name}.json") or {}
+        if set(state.get("variants", {})) != {f"facing={f}" for f in ("north", "south", "east", "west")}:
+            err(f"{name}'s blockstate needs a variant for every facing")
+        loot = load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {}
+        if f'"name": "{MOD}:{name}"' not in json.dumps(loot):
+            err(f"{name} must drop its food when broken")
+        if f"block.{MOD}.{name}" not in lang or f"item.{MOD}.{name}" not in lang:
+            err(f"{name} needs its words, set down and in hand")
+        if name not in ag.ITEMS:
+            err(f"{name} is set down but is no food in tools/agriculture.py ITEMS")
+    pot = load(ASSETS / "models" / "block" / "cooking_pot.json") or {}
+    if any(pot.get("textures", {}).get(key) != f"{MOD}:block/cooking_pot_{key}" for key in ("side", "top", "bottom", "handle", "parts")):
+        err("The Cooking Pot must wear the owner's pot (tools/menu.py COOKING_POT_TEXTURES)")
 
 
 def check_kitchen():
@@ -7496,6 +7594,7 @@ def main():
     check_agriculture()
     check_kitchen()
     check_feasts()
+    check_menu()
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()

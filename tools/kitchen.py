@@ -116,6 +116,9 @@ CUTTING = {
     "cabbage_leaf": {"input": "jugcraft:cabbage", "results": [["cabbage_leaf", 2]]},
     "pumpkin_slice": {"input": "minecraft:pumpkin", "results": [["pumpkin_slice", 4]]},
     "cake_slice": {"input": "minecraft:cake", "results": [["cake_slice", 7]]},
+    # The menu (tools/menu.py): wheat dough cut into pasta, a tortilla into chips.
+    "raw_pasta": {"input": "jugcraft:wheat_dough", "results": [["raw_pasta", 2]]},
+    "tortilla_chip": {"input": "jugcraft:tortilla", "results": [["tortilla_chip", 2]]},
 }
 
 # Crafting.

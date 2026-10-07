@@ -95,6 +95,15 @@ FEASTS = {
                        "textures": {"bowl": "salad_bowl", "top": "gleaming_salad", "leftovers": "gleaming_salad_leftovers",
                                     "details": "gleaming_salad_details"},
                        "particle": "gleaming_salad"},
+    # The menu (tools/menu.py) adds nachos: a tray of tortilla chips under beef, tomato and pepper, eaten a quarter at a
+    # time down to the last bitten chip. 13 hunger in, 12 out.
+    "nachos": {"display": "Nachos", "servings": 4, "food": [3, 0.6], "light": 0,
+               "serving": "bowl_of_nachos", "serving_display": "Bowl of Nachos", "leftovers": [],
+               "inputs": ["jugcraft:tortilla_chip", "jugcraft:tortilla_chip", "jugcraft:tortilla_chip", "jugcraft:tortilla_chip",
+                          "jugcraft:beef_patty", "jugcraft:tomato", "jugcraft:pepper"],
+               "textures": {"top": "nacho_top", "side": "nacho_side", "inside": "nacho_inner", "chip": "nacho_chip",
+                            "eaten": "nacho_chip_eaten"},
+               "particle": "nacho_top"},
 }
 # The bowl a serving is taken with; a serving gives it back when eaten.
 SERVING_BOWL = "minecraft:bowl"
@@ -133,6 +142,10 @@ TEXTURES.update({
     "item/roast_chicken": "roast_chicken_block", "item/honey_glazed_ham": "honey_glazed_ham_block",
     "item/shepherds_pie": "shepherds_pie_block", "item/stuffed_pumpkin": "stuffed_pumpkin_block", "item/gleaming_salad": "gleaming_salad_block",
     "item/bowl_of_shepherds_pie": "shepherds_pie", "item/bowl_of_stuffed_pumpkin": "stuffed_pumpkin",
+    # the menu's nachos
+    "block/nacho_top": "nacho_top", "block/nacho_side": "nacho_side", "block/nacho_inner": "nacho_inner",
+    "block/nacho_chip": "nacho_chip", "block/nacho_chip_eaten": "nacho_chip_eaten",
+    "item/nachos": "nachos_block", "item/bowl_of_nachos": "nachos_bowl",
 })
 
 # The servings the owner drew no icon for: their bowl (from their shepherd's pie serving: the rows below `bowl_from`)

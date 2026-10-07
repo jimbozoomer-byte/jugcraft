@@ -21,6 +21,7 @@ import decor19
 import decor20
 import kitchen
 import feasts
+import menu
 
 FEATURE = "agriculture"
 
@@ -2614,7 +2615,7 @@ def planted_blocks():
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
-            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless() + list(feasts.PLACED_PIES))
+            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless() + list(feasts.PLACED_PIES) + menu.blocks())
 
 
 def all_blocks():
@@ -2625,7 +2626,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks())
 
 
 def all_items():
@@ -2673,7 +2674,7 @@ def textures():
     return out + EQUIPMENT_TEXTURES + TREE_TEXTURES + DECOR_TEXTURES + halloween_textures() + graveyard.textures() + plants.textures()
 
 
-EQUIPMENT_TEXTURES = ["trellis", "trellis_post", "cooking_pot_side", "cooking_pot_rim", "cooking_pot_empty", "cooking_pot_soup"]
+EQUIPMENT_TEXTURES = ["trellis", "trellis_post", "cooking_pot_soup"]
 
 # Fall additions 16: pastry from wheat and an egg; a raw pie of pastry, its filling and sugar (a milk bucket leaves its
 # bucket, as crafting with one does).
@@ -2747,3 +2748,10 @@ SHAPED += kitchen.SHAPED
 ITEMS.update(feasts.ITEMS)
 SHAPELESS += feasts.SHAPELESS
 SHAPED += feasts.SHAPED
+
+# Kitchen and cooking expansion, slice 3: the menu (tools/menu.py). Roasted Corn gives its cob back now, as Boiled Corn does.
+ITEMS.update(menu.ITEMS)
+ITEMS["roasted_corn"]["cob"] = True
+POT_RECIPES.update(menu.POT_RECIPES)
+SHAPELESS += menu.SHAPELESS_RECIPES
+COOKING.update(menu.COOKING)

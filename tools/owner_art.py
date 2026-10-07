@@ -26,6 +26,7 @@ sys.path.insert(0, HERE)
 import arms_pixel  # noqa: E402
 import feasts  # noqa: E402
 import kitchen  # noqa: E402
+import menu  # noqa: E402
 
 LIBRARY = os.path.join(ROOT, "art", "owner-library", "originals", "Blocks")
 FOOD = "farming and food textures"
@@ -35,7 +36,7 @@ TEXTURES = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft", 
 def imports():
     """(runtime path under textures/ without .png, library path under Blocks/ without .png) for every copied texture."""
     out = []
-    for table in (kitchen.TEXTURES, feasts.TEXTURES):
+    for table in (kitchen.TEXTURES, feasts.TEXTURES, menu.TEXTURES):
         for target, source in table.items():
             out.append((target, f"{FOOD}/{source}"))
     return out

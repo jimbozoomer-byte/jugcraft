@@ -62,6 +62,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.food.FoodProperties;
@@ -510,7 +511,9 @@ public final class JugcraftAgriculture {
 		// Seeds, produce and food.
 		food("corn", 3, 0.6F, COMPOST_MEDIUM);
 		seeds("corn_kernels", "corn_crop", COMPOST_LOW);
-		food("roasted_corn", 5, 0.6F, COMPOST_MEDIUM_HIGH);
+		// Corn on the cob gives its cob back when eaten (the menu, tools/menu.py COB_FOODS).
+		plain("corncob", COMPOST_LOW);
+		cob("roasted_corn", 5, 0.6F, COMPOST_MEDIUM_HIGH);
 		food("popcorn", 2, 0.3F, COMPOST_MEDIUM_HIGH);
 		seeds("sunflower_seeds", "sunflower_crop", COMPOST_LOW);
 		food("roasted_sunflower_seeds", 2, 0.3F, COMPOST_MEDIUM_HIGH);
@@ -637,6 +640,7 @@ public final class JugcraftAgriculture {
 		registerHalloweenDecorations();
 		registerKitchen();
 		registerFeasts();
+		registerMenu();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
@@ -793,6 +797,7 @@ public final class JugcraftAgriculture {
 		stew("bowl_of_shepherds_pie", 5, 0.7F);
 		stew("bowl_of_stuffed_pumpkin", 5, 0.6F);
 		stew("bowl_of_gleaming_salad", 3, 0.6F);
+		stew("bowl_of_nachos", 3, 0.6F);
 
 		List<Block> displays = new ArrayList<>();
 		for (FoodDisplay display : FoodDisplay.values()) {
@@ -808,6 +813,92 @@ public final class JugcraftAgriculture {
 		FOOD_DISPLAY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("food_display"),
 				FabricBlockEntityTypeBuilder.<ShowcaseBlockEntity>create((pos, state) -> new ShowcaseBlockEntity(FOOD_DISPLAY_ENTITY, pos, state),
 						displays.toArray(Block[]::new)).build());
+	}
+
+	/**
+	 * The menu (the kitchen and cooking expansion's slice 3, tools/menu.py), in the owner's own textures: drinks, soups,
+	 * stews and plated meals, sandwiches, sweets, corn on the cob, the doughs and batters they start from, and food for
+	 * a tamed wolf or horse. Every dish (and the soups, cabbage rolls, roasted corn, mulled cider and popcorn Jugcraft
+	 * already had, now in the owner's art) can be set down by a sneaking player as a {@link PlacedDishBlock}
+	 * ({@link MenuDishes}) and taken back with an empty hand.
+	 */
+	private static void registerMenu() {
+		// Drinks in the owner's glass mugs and bottle; milk in a bottle clears effects as a bucket of milk does.
+		drink("hot_cocoa", 3, 0.4F, MobEffects.REGENERATION, 8);
+		drink("creamy_corn_drink", 4, 0.5F, MobEffects.ABSORPTION, 30);
+		drink("melon_juice", 4, 0.4F, MobEffects.SPEED, 45);
+		drink("glow_berry_custard", 6, 0.6F, MobEffects.NIGHT_VISION, 30);
+		milkBottle("milk_bottle");
+		// Soups and stews in a bowl.
+		stew("beef_stew", 11, 0.8F);
+		stew("chicken_soup", 10, 0.8F);
+		stew("baked_cod_stew", 10, 0.8F);
+		stew("fish_stew", 10, 0.8F);
+		stew("bone_broth", 6, 0.6F);
+		stew("corn_soup", 9, 0.6F);
+		stew("noodle_soup", 9, 0.8F);
+		stew("tomato_sauce", 5, 0.5F);
+		stew("fruit_salad", 8, 0.6F);
+		stew("nether_salad", 3, 0.6F, MobEffects.NAUSEA, 4);
+		stew("creamed_corn", 8, 0.6F);
+		// Meals on the owner's wide plate (a bowl, given back).
+		stew("bacon_and_eggs", 10, 0.8F);
+		stew("steak_and_potatoes", 13, 0.8F);
+		stew("roasted_mutton_chops", 11, 0.8F);
+		stew("grilled_salmon", 10, 0.8F);
+		stew("ratatouille", 8, 0.6F);
+		stew("pasta_with_meatballs", 12, 0.8F);
+		stew("pasta_with_mutton_chop", 12, 0.8F);
+		stew("squid_ink_pasta", 10, 0.8F);
+		stew("vegetable_noodles", 9, 0.7F);
+		stew("cornbread_stuffing", 9, 0.7F);
+		// Sandwiches and food in hand.
+		meal("hamburger", 11, 0.8F);
+		meal("bacon_sandwich", 10, 0.8F);
+		meal("chicken_sandwich", 10, 0.8F);
+		meal("egg_sandwich", 8, 0.8F);
+		meal("mutton_wrap", 8, 0.8F);
+		meal("taco", 9, 0.8F);
+		meal("stuffed_potato", 10, 0.8F);
+		meal("dumplings", 4, 0.6F);
+		meal("ham", 5, 0.3F);
+		meal("smoked_ham", 14, 0.8F);
+		treat("barbecue_stick", 7, 0.8F);
+		treat("corn_dog", 8, 0.8F);
+		treat("classic_corn_dog", 10, 0.8F);
+		// Sweets.
+		meal("honey_cookie", 2, 0.2F);
+		meal("sweet_berry_cookie", 2, 0.2F);
+		meal("caramel_popcorn", 6, 0.5F);
+		treat("corn_popsicle", 3, 0.4F);
+		treat("melon_popsicle", 3, 0.4F);
+		// Corn on the cob, cornbread, tortillas and chips.
+		cob("boiled_corn", 5, 0.6F, COMPOST_MEDIUM_HIGH);
+		meal("cornbread", 6, 0.6F);
+		meal("tortilla", 2, 0.4F);
+		meal("tortilla_chip", 1, 0.3F);
+		// What they are made from (the corncob is registered with the corn).
+		plain("wheat_dough", COMPOST_MEDIUM);
+		plain("raw_pasta", COMPOST_MEDIUM);
+		plain("cornbread_batter", COMPOST_MEDIUM);
+		plain("tortilla_raw", COMPOST_MEDIUM);
+		// Food for pets, fed by their owner before the animal's own handling (which would sit a wolf down or mount a horse).
+		petFood("dog_food", EntityTypes.WOLF, 20, true, List.of(new PetFoodItem.Treat(MobEffects.STRENGTH, 300),
+				new PetFoodItem.Treat(MobEffects.SPEED, 300)));
+		petFood("horse_feed", EntityTypes.HORSE, 10, false, List.of(new PetFoodItem.Treat(MobEffects.SPEED, 120),
+				new PetFoodItem.Treat(MobEffects.JUMP_BOOST, 120)));
+		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> PetFoodItem.feed(player, level, hand, entity));
+
+		// Every dish set down: a block named as its food, with no item of its own; set down in the same phase as the pie.
+		Map<Item, PlacedDishBlock> placed = new HashMap<>();
+		for (MenuDishes.Dish dish : MenuDishes.PLACED) {
+			Item food = item(dish.id());
+			PlacedDishBlock block = (PlacedDishBlock) registerBlock(dish.id(), props -> new PlacedDishBlock(food, dish.shape(), props),
+					BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_WHITE).strength(0.3F).sound(SoundType.WOOL).noOcclusion()
+							.pushReaction(PushReaction.POPPED));
+			placed.put(food, block);
+		}
+		UseBlockCallback.EVENT.register(SET_DOWN_PHASE, (player, level, hand, hit) -> PlacedDishBlock.setDown(placed, player, level, hand, hit));
 	}
 
 	/** A kitchen knife: a light, quick blade of {@code material} ({@link KitchenKnifeItem}); the netherite one doesn't burn. */
@@ -2875,6 +2966,24 @@ public final class JugcraftAgriculture {
 				.build();
 		registerItem(id, Item::new, new Item.Properties().food(nourishment(nutrition, saturation), eaten).usingConvertsTo(Items.BOWL)
 				.stacksTo(1), FOOD_TAB);
+	}
+
+	/** Corn on the cob: eating it leaves the corncob (the menu, tools/menu.py COB_FOODS). */
+	private static void cob(String id, int nutrition, float saturation, ResourceKey<ContextIntProvider> compost) {
+		registerItem(id, Item::new, new Item.Properties().food(nourishment(nutrition, saturation)).usingConvertsTo(item("corncob"))
+				.compostable(compost), FOOD_TAB);
+	}
+
+	/** Milk in a bottle: drunk as a bucket of milk is (clearing every effect), leaving the bottle. */
+	private static void milkBottle(String id) {
+		registerItem(id, Item::new, new Item.Properties().component(DataComponents.CONSUMABLE, Consumables.MILK_BUCKET)
+				.usingConvertsTo(Items.GLASS_BOTTLE).stacksTo(16), FOOD_TAB);
+	}
+
+	/** Food for a tamed {@code animal} ({@link PetFoodItem}): heals it by {@code heal} and gives it {@code treats}. */
+	private static void petFood(String id, EntityType<?> animal, int heal, boolean bowl, List<PetFoodItem.Treat> treats) {
+		registerItem(id, props -> new PetFoodItem(props, animal, heal, bowl, treats), new Item.Properties().stacksTo(bowl ? 16 : 64),
+				FOOD_TAB);
 	}
 
 	private static void sickle(String id, int radius, int durability) {
