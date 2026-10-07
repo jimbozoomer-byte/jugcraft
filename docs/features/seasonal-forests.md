@@ -11,15 +11,15 @@ Nine biomes grow in Jugcraft regions, each in place of the vanilla biome with th
 
 | Biome | Replaces (in Jugcraft regions) | What grows |
 | --- | --- | --- |
-| **Coniferous Forest** | cool taiga | dense firs, with tall firs towering over them, some spruces, fallen fir logs |
-| **Snowy Coniferous Forest** | snowy taiga | firs under permanent snow |
-| **Maple Woods** | cool forest | maples (and big maples), some spruces |
-| **Seasonal Forest** | temperate forest | oaks, maples and aspens mixed, with leaf litter and dense pumpkin patches |
-| **Aspen Glade** | birch forests | tall, slender aspens, a few maples |
-| **Dead Forest** | dry cool plains | grey dead trees, a few spruces and oaks, dead bushes, sparse brown grass; rabbits and wolves only |
-| **Tundra** | cool plains | no trees: maple scrub, mossy boulders, dead bushes, ferns; rabbits, foxes and wolves |
-| **Snowy Forest** | snowy plains (moister) | snow-covered oaks, firs and maples |
-| **Muskeg** | snowy plains | dead trees and stunted firs in wet, snowy flats; rabbits only |
+| **Coniferous Forest** | cool taiga | dense firs, with tall firs towering over them, larches and stunted firs, a few grey snags, fallen fir logs |
+| **Snowy Coniferous Forest** | snowy taiga | firs, narrow subalpine fir spires and stunted firs under permanent snow |
+| **Maple Woods** | cool forest | maples (and big maples), some firs |
+| **Seasonal Forest** | temperate forest | oaks, maples and aspens mixed, a few firs, with leaf litter and dense pumpkin patches |
+| **Aspen Glade** | birch forests | tall, slender aspens and young aspens, a few maples and dark subalpine firs |
+| **Dead Forest** | dry cool plains | grey dead trees and broken snags, a few spruces and oaks, fallen logs, dead bushes, sparse brown grass; rabbits and wolves only |
+| **Tundra** | cool plains | no trees: maple, willow and fir scrub, mossy boulders, dead bushes, ferns; rabbits, foxes and wolves |
+| **Snowy Forest** | snowy plains (moister) | snow-covered oaks, firs, aspens and maples |
+| **Muskeg** | snowy plains | tamaracks, thin bog firs and grey snags, a few dead trees and fallen logs in wet, snowy flats; rabbits only |
 
 **The trees follow the seasons** (the server's season clock, [seasons.md](seasons.md)):
 - **Maples** are green in spring and summer, turn red, orange and gold in autumn (each leaf block its own colour, so crowns are fiery mixes), and stand bare in winter.
@@ -41,7 +41,7 @@ Nine biomes grow in Jugcraft regions, each in place of the vanilla biome with th
 
 ## Balance and automation
 - The new woods are ordinary wood: 4 planks per log by hand, 6 in the sawmill, a sapling in gives 6 logs and the sapling back in the tree farm, as for vanilla trees. No new conversions, no loops.
-- Dead wood has no sapling: it comes only from Dead Forests and Muskegs.
+- Dead wood has no sapling: it comes only from generated dead trees, dead snags and fallen dead logs, in the Dead Forest, the Muskeg and the other dead, burnt and wet biomes that grow them ([trees-batch-1.md](trees-batch-1.md)).
 - The leaves' look is cosmetic; drops, decay and fire are vanilla's in every season.
 
 ## Multiplayer and persistence
@@ -51,7 +51,7 @@ Nine biomes grow in Jugcraft regions, each in place of the vanilla biome with th
 - Existing worlds: new chunks only; see [biome-regions.md](biome-regions.md).
 
 ## Dependencies and assets
-- Textures drawn by code in `tools/forest_textures.py` (wood, leaves in every look, saplings); nothing read, traced or recoloured.
+- Textures drawn by code in `tools/forest_textures.py` (saplings); nothing read, traced or recoloured. Since the [wood repaint](wood-repaint.md), their woods and leaves are drawn by `tools/wood_style.py`.
 - Biomes start from the vanilla biome they replace, by reference (`tools/biome_bases.py`: its ore, cave, lake and spring features, mobs, music and sky), with their own trees and plants (`tools/biomes.py`, `tools/trees.py`). No Mojang file is copied.
 - The larch's one-off seasonal leaves became a general `SeasonalLeavesBlock`, shared by larch, maple and aspen; the larch's blocks and states are unchanged, and its tree feature now lists the `jugcraft:seasonal_leaves` decorator.
 

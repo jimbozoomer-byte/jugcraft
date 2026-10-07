@@ -466,40 +466,47 @@ BIOMES = {
     "coniferous_forest": {
         "display": "Coniferous Forest", "base": "taiga", "temperature": 0.25, "downfall": 0.8, "seasons": True,
         "trees": {"count": [9, 10], "default": "jugcraft:fir_checked", "picks": [
-            ["jugcraft:tall_fir_checked", 0.25], ["minecraft:spruce_checked", 0.08], ["jugcraft:fallen_fir_tree", 0.02]]},
+            ["jugcraft:tall_fir_checked", 0.2], ["jugcraft:larch_checked", 0.125],
+            ["jugcraft:stunted_fir_checked", 0.1143], ["jugcraft:dead_snag_checked", 0.0363],
+            ["jugcraft:dead_snag_bent_checked", 0.0126], ["jugcraft:fallen_fir_tree", 0.0339]]},
         "tags": ["c:is_coniferous_tree"],
     },
     "snowy_coniferous_forest": {
         "display": "Snowy Coniferous Forest", "base": "snowy_taiga", "temperature": -0.5, "downfall": 0.4, "seasons": False,
         "trees": {"count": [7, 8], "default": "jugcraft:fir_checked", "picks": [
-            ["jugcraft:tall_fir_checked", 0.2], ["jugcraft:fallen_fir_tree", 0.02]]},
+            ["jugcraft:tall_fir_checked", 0.2], ["jugcraft:subalpine_fir_checked", 0.25],
+            ["jugcraft:stunted_fir_checked", 0.1667], ["jugcraft:fallen_fir_tree", 0.04]]},
         "tags": ["c:is_coniferous_tree", "c:is_snowy"],
     },
     "maple_woods": {
         "display": "Maple Woods", "base": "forest", "temperature": 0.45, "downfall": 0.8, "seasons": True,
         "trees": {"count": [10, 11], "default": "jugcraft:maple_checked", "picks": [
-            ["jugcraft:big_maple_checked", 0.12], ["minecraft:spruce_checked", 0.12], ["jugcraft:fallen_maple_tree", 0.0125]]},
+            ["jugcraft:big_maple_checked", 0.12], ["jugcraft:fir_checked", 0.1364],
+            ["jugcraft:fallen_maple_tree", 0.0132]]},
         "tags": ["minecraft:has_structure/village_taiga", "c:is_deciduous_tree"],
     },
     "seasonal_forest": {
         "display": "Seasonal Forest", "base": "forest", "temperature": 0.6, "downfall": 0.8, "seasons": True,
         "trees": {"count": [10, 11], "default": "minecraft:oak_bees_0002_leaf_litter", "picks": [
-            ["jugcraft:maple_checked", 0.35], ["jugcraft:aspen_checked", 0.2], ["jugcraft:big_maple_checked", 0.05],
-            ["jugcraft:fallen_maple_tree", 0.0125]]},
+            ["jugcraft:maple_checked", 0.35], ["jugcraft:aspen_checked", 0.2], ["jugcraft:big_maple_checked", 0.0577],
+            ["jugcraft:fir_checked", 0.0816], ["jugcraft:fallen_maple_tree", 0.0222]]},
         "extras": ["patch_pumpkin_dense"],
         "tags": ["minecraft:has_structure/village_plains", "c:is_deciduous_tree"],
     },
     "aspen_glade": {
         "display": "Aspen Glade", "base": "birch_forest", "temperature": 0.5, "downfall": 0.6, "seasons": True,
         "trees": {"count": [10, 11], "default": "jugcraft:aspen_checked", "picks": [
-            ["jugcraft:maple_checked", 0.1], ["jugcraft:fallen_aspen_tree", 0.0125]]},
+            ["jugcraft:maple_checked", 0.1], ["jugcraft:young_aspen_checked", 0.1667],
+            ["jugcraft:subalpine_fir_checked", 0.0667], ["jugcraft:fallen_aspen_tree", 0.0143]]},
         "tags": ["minecraft:has_structure/village_plains", "c:is_deciduous_tree", "c:is_birch_forest"],
     },
     "dead_forest": {
         "display": "Dead Forest", "base": "plains", "temperature": 0.4, "downfall": 0.25, "seasons": True,
         "effects": {"grass_color": "#a39a5e", "foliage_color": "#9c8a52"},
         "trees": {"count": [2, 3], "default": "jugcraft:dead_tree_checked", "picks": [
-            ["minecraft:spruce_checked", 0.15], ["minecraft:oak_checked", 0.1], ["jugcraft:fallen_dead_tree", 0.05]]},
+            ["minecraft:spruce_checked", 0.1], ["minecraft:oak_checked", 0.1111],
+            ["jugcraft:dead_snag_checked", 0.3281], ["jugcraft:dead_snag_bent_checked", 0.1628],
+            ["jugcraft:fallen_dead_tree", 0.1111]]},
         "drop": ["minecraft:patch_tall_grass_2", "minecraft:flower_plains"],
         "swap": {"minecraft:patch_grass_plain": "minecraft:patch_grass_badlands"},
         "extras": ["patch_dead_bush", "flora_withered_grass", "flora_tall_withered_grass"],
@@ -512,7 +519,8 @@ BIOMES = {
     "tundra": {
         "display": "Tundra", "base": "plains", "temperature": 0.25, "downfall": 0.5, "seasons": True,
         "effects": {"grass_color": "#9a9a5e", "foliage_color": "#a07a3c"},
-        "trees": {"count": [3, 4], "default": "jugcraft:maple_bush_checked", "picks": []},
+        "trees": {"count": [3, 4], "default": "jugcraft:maple_bush_checked", "picks": [
+            ["jugcraft:willow_bush_checked", 0.3], ["jugcraft:fir_bush_checked", 0.2857]]},
         "drop": ["minecraft:flower_plains", "minecraft:patch_tall_grass_2"],
         "swap": {"minecraft:patch_grass_plain": "minecraft:patch_grass_taiga_2"},
         "extras": ["tundra_rocks", "patch_dead_bush"],
@@ -523,7 +531,7 @@ BIOMES = {
     "snowy_forest": {
         "display": "Snowy Forest", "base": "snowy_plains", "temperature": -0.3, "downfall": 0.5, "seasons": False,
         "trees": {"count": [7, 8], "default": "minecraft:oak_checked", "picks": [
-            ["jugcraft:fir_checked", 0.3], ["jugcraft:maple_checked", 0.2]]},
+            ["jugcraft:fir_checked", 0.3], ["jugcraft:maple_checked", 0.2], ["jugcraft:aspen_checked", 0.3571]]},
         "creatures": [["minecraft:sheep", 12, 4, 4], ["minecraft:pig", 10, 4, 4], ["minecraft:chicken", 10, 4, 4],
                       ["minecraft:cow", 8, 4, 4], ["minecraft:rabbit", 6, 2, 3], ["minecraft:wolf", 5, 4, 4]],
         "untags": ["minecraft:has_structure/village_snowy"],
@@ -532,46 +540,54 @@ BIOMES = {
     "muskeg": {
         "display": "Muskeg", "base": "snowy_plains", "temperature": -0.2, "downfall": 0.9, "seasons": False,
         "effects": {"grass_color": "#8c9a6a", "foliage_color": "#7f8f5a"},
-        "trees": {"count": [2, 3], "default": "jugcraft:dead_tree_checked", "picks": [
-            ["jugcraft:fir_checked", 0.25], ["jugcraft:fallen_dead_tree", 0.05]]},
+        "trees": {"count": [2, 3], "default": "jugcraft:tamarack_checked", "picks": [
+            ["jugcraft:bog_fir_checked", 0.3], ["jugcraft:dead_snag_checked", 0.2143],
+            ["jugcraft:dead_snag_bent_checked", 0.0909], ["jugcraft:dead_tree_checked", 0.2],
+            ["jugcraft:fallen_dead_tree", 0.075], ["jugcraft:fallen_larch_tree", 0.0541]]},
         "creatures": [["minecraft:rabbit", 6, 2, 3]],
         "untags": ["minecraft:has_structure/village_snowy"],
         "tags": ["c:is_snowy", "c:is_dead"],
     },
     # ---------------------------------------------------------------- batch 3: wetlands (bases' swamp colours unless set)
-    # A cool cranberry bog: reddish-orange grass, maple scrub and bushes, cranberries in its shallow, muddy pools.
+    # A cool cranberry bog: reddish-orange grass, maple scrub, tamaracks and thin bog firs, bushes, cranberries in its
+    # shallow, muddy pools.
     "bog": {
         "display": "Bog", "base": "swamp", "temperature": 0.4, "downfall": 0.8, "seasons": True,
         "effects": {"grass_color": "#ad6c3c", "foliage_color": "#9c5a30", "grass_color_modifier": "none", "water_color": "#4f6a54"},
-        "trees": {"count": [2, 3], "default": "jugcraft:maple_bush_checked", "picks": [["jugcraft:dead_tree_checked", 0.1]]},
+        "trees": {"count": [2, 3], "default": "jugcraft:maple_bush_checked", "picks": [
+            ["jugcraft:dead_tree_checked", 0.1], ["jugcraft:tamarack_checked", 0.3333],
+            ["jugcraft:bog_fir_checked", 0.25]]},
         "drop": ["minecraft:flower_swamp"],
         "extras": ["mud", "cranberries", "cattails", "watergrass", "bushes_dense", "berry_bushes"],
         "tags": ["c:is_swamp", "c:is_wet"],
     },
-    # Dark, muddy ponds and sparse dead trees; no animals; villages.
+    # Dark, muddy ponds with sparse dead trees and grey snags standing in them, and fallen logs; no animals; villages.
     "dead_swamp": {
         "display": "Dead Swamp", "base": "swamp", "temperature": 0.35, "downfall": 0.9, "seasons": True,
         "effects": {"grass_color": "#6f6a45", "foliage_color": "#6a6440", "grass_color_modifier": "none", "water_color": "#3e4528"},
-        "trees": {"count": [1, 2], "default": "jugcraft:dead_tree_checked", "picks": [], "water_depth": 2},
+        "trees": {"count": [1, 2], "default": "jugcraft:dead_tree_checked", "picks": [
+            ["jugcraft:dead_snag_checked", 0.375], ["jugcraft:dead_snag_bent_checked", 0.2],
+            ["jugcraft:fallen_dead_tree", 0.1]], "water_depth": 2},
         "drop": ["minecraft:flower_swamp", "minecraft:patch_pumpkin"],
         "extras": ["mud", "ponds", "cattails", "patch_dead_bush", "flora_spider_lily", "flora_withered_grass", "flora_shroud_moss"],
         "creatures": [],
         "tags": ["c:is_swamp", "c:is_dead", "minecraft:has_structure/village_taiga"],
     },
-    # A verdant swamp: vibrant grass and blue water, tall oaks hung with vines, cattails, ferns and berries.
+    # A verdant swamp: vibrant grass and blue water, tall oaks hung with vines, willows and red maples, cattails, ferns
+    # and berries.
     "lush_swamp": {
         "display": "Lush Swamp", "base": "swamp", "temperature": 0.7, "downfall": 0.9, "seasons": True,
         "effects": {"grass_color": "#56b13a", "foliage_color": "#4aa22e", "grass_color_modifier": "none", "water_color": "#2e86a8"},
-        "trees": {"count": [3, 4], "default": "jugcraft:tall_vine_oak_checked", "picks": [["jugcraft:willow_checked", 0.3]],
-                  "water_depth": 2},
+        "trees": {"count": [3, 4], "default": "jugcraft:tall_vine_oak_checked", "picks": [
+            ["jugcraft:willow_checked", 0.3], ["jugcraft:maple_checked", 0.1429]], "water_depth": 2},
         "extras": ["cattails", "watergrass", "duckweed", "lily_pads", "ferns", "berry_bushes"],
         "tags": ["c:is_swamp", "c:is_wet"],
     },
-    # More forest than swamp: willows and vine-hung oaks over moss, duckweed and lily pads; animals.
+    # More forest than swamp: willows, vine-hung oaks and swamp azaleas over moss, duckweed and lily pads; animals.
     "swamp_woods": {
         "display": "Swamp Woods", "base": "swamp", "temperature": 0.65, "downfall": 0.9, "seasons": True,
-        "trees": {"count": [7, 9], "default": "jugcraft:willow_checked", "picks": [["jugcraft:tall_vine_oak_checked", 0.3]],
-                  "water_depth": 2},
+        "trees": {"count": [7, 9], "default": "jugcraft:willow_checked", "picks": [
+            ["jugcraft:tall_vine_oak_checked", 0.2], ["jugcraft:azalea_tree_checked", 0.125]], "water_depth": 2},
         "extras": ["duckweed", "lily_pads", "cattails", "ferns"],
         "creatures": [["minecraft:frog", 10, 2, 5], ["minecraft:sheep", 8, 4, 4], ["minecraft:pig", 8, 4, 4], ["minecraft:cow", 6, 4, 4],
                       ["minecraft:chicken", 8, 4, 4]],
@@ -588,20 +604,24 @@ BIOMES = {
         "untags": ["minecraft:has_structure/trail_ruins"],
         "tags": ["c:is_swamp", "c:is_wet"],
     },
-    # A warm, flooded plain: brushy oaks and tall grass, orange cosmos, and lily pads and watergrass in the floods.
+    # A warm, flooded plain: willow scrub and a few oaks, tall grass, orange cosmos, and lily pads and watergrass in the
+    # floods.
     "floodplain": {
         "display": "Floodplain", "base": "mangrove_swamp", "temperature": 0.9, "downfall": 0.9, "seasons": True, "winter_snow": False,
         "effects": {"grass_color": "#6cb041", "foliage_color": "#5ea034", "grass_color_modifier": "none", "water_color": "#3d7f9a"},
-        "trees": {"count": [3, 4], "default": "jugcraft:oak_bush_checked", "picks": [["minecraft:oak_checked", 0.2]], "water_depth": 1},
+        "trees": {"count": [3, 4], "default": "jugcraft:willow_bush_checked", "picks": [
+            ["minecraft:oak_checked", 0.3]], "water_depth": 1},
         "extras": ["tall_grass_dense", "orange_cosmos", "watergrass", "lily_pads"],
         "tags": ["c:is_wet"],
     },
-    # A dead forest of grey trunks and dark oak scrub around many lakes, with clay.
+    # A dead forest of grey snags and dead trunks, with a living fringe of cedars, around many lakes, with clay.
     "ghost_forest": {
         "display": "Ghost Forest", "base": "dark_forest", "base_trees": "minecraft:dark_forest_vegetation",
         "temperature": 0.5, "downfall": 0.8, "seasons": True,
         "effects": {"grass_color": "#8b9478", "foliage_color": "#7d8670", "grass_color_modifier": "none"},
-        "trees": {"count": [3, 4], "default": "jugcraft:dead_tree_checked", "picks": [["minecraft:dark_oak_checked", 0.15]]},
+        "trees": {"count": [3, 4], "default": "jugcraft:dead_snag_checked", "picks": [
+            ["jugcraft:dead_tree_checked", 0.3], ["jugcraft:cedar_checked", 0.2143],
+            ["jugcraft:dead_snag_bent_checked", 0.25]]},
         "drop": ["minecraft:forest_flowers"],
         "extras": ["ponds", "patch_dead_bush", "flora_withered_grass", "flora_tall_withered_grass", "flora_ghost_pipe",
                    "flora_dead_mans_fingers", "flora_spider_lily", "flora_grave_moss", "flora_black_rose", "flora_shroud_moss"],
@@ -621,28 +641,31 @@ BIOMES = {
         "untags": ["minecraft:is_forest"],
         "tags": ["c:is_swamp", "c:is_wet", "minecraft:has_structure/village_taiga"],
     },
-    # A river lush with duckweed, lily pads and watergrass, oak bushes along its banks.
+    # A river lush with duckweed, lily pads and watergrass, willow scrub and willows along its banks.
     "lush_river": {
         "display": "Lush River", "base": "river", "temperature": 0.7, "downfall": 0.8, "seasons": True, "winter_snow": False,
         "effects": {"grass_color": "#5eb33f", "foliage_color": "#52a434", "water_color": "#2f9a96"},
-        "trees": {"count": [1, 2], "default": "jugcraft:oak_bush_checked", "picks": []},
+        "trees": {"count": [1, 2], "default": "jugcraft:willow_bush_checked", "picks": [
+            ["jugcraft:willow_checked", 0.2], ["jugcraft:oak_bush_checked", 0.125]]},
         "extras": ["duckweed", "lily_pads", "watergrass", "cattails"],
         "tags": ["c:is_wet"],
     },
-    # A cool fen: short firs and dark oaks over muddy pools, cattails and lily pads; cows, sheep and slimes.
+    # A cool fen: thin bog firs, tamaracks and willow scrub over muddy pools, cattails and lily pads; cows, sheep and
+    # slimes.
     "fen": {
         "display": "Fen", "base": "old_growth_spruce_taiga", "temperature": 0.3, "downfall": 0.9, "seasons": True,
         "effects": {"grass_color": "#6c8f4c", "foliage_color": "#5d8040"},
-        "trees": {"count": [4, 5], "default": "jugcraft:fir_checked", "picks": [["minecraft:dark_oak_checked", 0.3]]},
+        "trees": {"count": [4, 5], "default": "jugcraft:bog_fir_checked", "picks": [
+            ["jugcraft:tamarack_checked", 0.35], ["jugcraft:willow_bush_checked", 0.2308]]},
         "extras": ["mud", "ponds", "cattails", "lily_pads"],
         "untags": ["minecraft:is_taiga"],
         "tags": ["c:is_swamp", "c:is_wet"],
     },
-    # Forest of oaks and spruces broken by many lakes with muddy shores, cattails and lily pads.
+    # Forest of oaks, firs and larches broken by many lakes with muddy shores, cattails and lily pads.
     "lake_district": {
         "display": "Lake District", "base": "forest", "temperature": 0.5, "downfall": 0.8, "seasons": True,
         "trees": {"count": [6, 7], "default": "minecraft:oak_checked", "picks": [
-            ["minecraft:spruce_checked", 0.4], ["minecraft:fancy_oak_checked", 0.1]]},
+            ["jugcraft:fir_checked", 0.3], ["jugcraft:larch_checked", 0.1429], ["minecraft:fancy_oak_checked", 0.1]]},
         "extras": ["ponds", "mud", "cattails", "lily_pads"],
         "tags": ["c:is_wet"],
     },
@@ -666,11 +689,13 @@ BIOMES = {
         "creatures": [],
         "tags": ["c:is_swamp", "c:is_wet"],
     },
-    # Murky grass and mud with ferns, spruces and willows, cattails and sugar cane, and purple water; villages.
+    # Murky grass and mud with ferns, cedars, willows and a few spruces, cattails and sugar cane, and purple water;
+    # villages.
     "wetland": {
         "display": "Wetland", "base": "swamp", "temperature": 0.55, "downfall": 0.9, "seasons": True,
         "effects": {"water_color": "#6b5c9c"},
-        "trees": {"count": [2, 3], "default": "minecraft:spruce_checked", "picks": [["jugcraft:willow_checked", 0.4]], "water_depth": 1},
+        "trees": {"count": [2, 3], "default": "jugcraft:cedar_checked", "picks": [
+            ["jugcraft:willow_checked", 0.4], ["minecraft:spruce_checked", 0.1667]], "water_depth": 1},
         "extras": ["mud", "ferns", "cattails", "watergrass"],
         "tags": ["c:is_swamp", "c:is_wet", "minecraft:has_structure/village_taiga"],
     },
@@ -779,18 +804,20 @@ BIOMES = {
         "extras": ["ponds", "tall_grass_dense"],
         "tags": ["c:is_hot", "c:is_desert"],
     },
-    # A cruel waste of dried salt (pale calcite, rock salt) with dead trees and dead grass; no animals; husks.
+    # A cruel waste of dried salt (pale calcite, rock salt) with dead trees and snags on its coarse dirt, and dead grass;
+    # no animals; husks.
     "wasteland": {
         "display": "Wasteland", "base": "desert", "temperature": 2.0, "downfall": 0.0, "seasons": False, "precipitation": False,
         "effects": {"grass_color": "#9a9068", "foliage_color": "#8a8060"},
         "surface": {"floor": "minecraft:calcite", "under": "minecraft:calcite", "patches": [[-0.15, 0.15, "minecraft:coarse_dirt"]]},
-        "trees": {"count": [0, 1], "default": "jugcraft:dead_tree_checked", "picks": []},
+        "trees": {"count": [1, 1], "default": "jugcraft:dead_tree_checked", "picks": [
+            ["jugcraft:dead_snag_checked", 0.3], ["jugcraft:dead_snag_bent_checked", 0.1429]]},
         "extras": ["salt_outcrops", "dry_grass", "patch_dead_bush"],
         "creatures": [],
         "untags": ["minecraft:has_structure/village_desert"],
         "tags": ["c:is_dry", "c:is_hot", "c:is_dead", "c:is_wasteland"],
     },
-    # A burnt forest: charred dead trunks on scorched grass and coarse dirt, ash drifting in the air.
+    # A burnt forest: grey snags and dead trunks on scorched grass and coarse dirt, fallen logs, ash drifting in the air.
     "burnt_forest": {
         "display": "Burnt Forest", "base": "forest", "temperature": 0.9, "downfall": 0.3, "seasons": False,
         "effects": {"grass_color": "#5f5b48", "foliage_color": "#5a5446"},
@@ -798,7 +825,9 @@ BIOMES = {
                                                                "modifier": "append"},
                        "minecraft:visual/fog_color": "#8c867a"},
         "surface": {"floor": "minecraft:grass_block", "patches": [[-0.3, 0.3, "minecraft:coarse_dirt"]]},
-        "trees": {"count": [3, 4], "default": "jugcraft:dead_tree_checked", "picks": [["jugcraft:oak_bush_checked", 0.1]]},
+        "trees": {"count": [3, 4], "default": "jugcraft:dead_tree_checked", "picks": [
+            ["jugcraft:oak_bush_checked", 0.1], ["jugcraft:dead_snag_checked", 0.375],
+            ["jugcraft:dead_snag_bent_checked", 0.2], ["jugcraft:fallen_dead_tree", 0.1111]]},
         "drop": ["minecraft:forest_flowers", "minecraft:flower_default"],
         "extras": ["patch_dead_bush"],
         "untags": ["minecraft:is_forest"],
@@ -868,35 +897,38 @@ BIOMES = {
         "extras": ["hydrangeas", "field_flowers"],
         "tags": [],
     },
-    # A dense forest of big, spreading oaks, with dark oaks among them; leaf litter and ferns below; woodland
-    # mansions.
+    # A dense forest of big, spreading oaks, with dark oaks and a rare great oak among them; leaf litter and ferns
+    # below; woodland mansions.
     "dense_forest": {
         "display": "Dense Forest", "base": "forest", "temperature": 0.7, "downfall": 0.8, "seasons": True,
         "effects": {"grass_color": "#5a9a3a", "foliage_color": "#4a8a2c"},
         "trees": {"count": [14, 16], "default": "minecraft:fancy_oak_checked", "picks": [
-            ["minecraft:oak_checked", 0.3], ["minecraft:dark_oak_checked", 0.1], ["jugcraft:oak_bush_checked", 0.1]]},
+            ["minecraft:oak_checked", 0.3], ["minecraft:dark_oak_checked", 0.1], ["jugcraft:oak_bush_checked", 0.1111],
+            ["jugcraft:great_oak_checked", 0.0357]]},
         "extras": ["leaf_litter", "ferns"],
         "tags": ["minecraft:has_structure/woodland_mansion"],
     },
-    # A forest of giant redwoods two blocks wide and tall single ones, on podzol broken by moss; ferns and tall ferns.
+    # A forest of giant redwoods two blocks wide and tall single ones, with a few firs and mossy maples, on podzol
+    # broken by moss; ferns and tall ferns.
     "redwood_forest": {
         "display": "Redwood Forest", "base": "old_growth_pine_taiga", "temperature": 0.5, "downfall": 0.8, "seasons": True,
         "winter_snow": False,
         "surface": {"floor": "minecraft:podzol", "under": "minecraft:dirt",
                     "patches": [[-0.12, 0.12, "minecraft:moss_block"], [0.4, 0.55, "minecraft:coarse_dirt"]]},
         "trees": {"count": [10, 11], "default": "jugcraft:redwood_checked", "picks": [
-            ["jugcraft:giant_redwood_checked", 0.35], ["minecraft:spruce_checked", 0.1], ["jugcraft:fallen_redwood_tree", 0.02]]},
+            ["jugcraft:giant_redwood_checked", 0.35], ["jugcraft:fir_checked", 0.0923],
+            ["jugcraft:mossy_maple_checked", 0.0847], ["jugcraft:fallen_redwood_tree", 0.037]]},
         "extras": ["ferns", "large_ferns"],
         "tags": ["c:is_coniferous_tree", "c:is_old_growth"],
     },
-    # A cool, dripping rainforest under firs and redwoods, vine-hung oaks and willows, thick with ferns.
+    # A cool, dripping rainforest under firs and redwoods, moss-hung bigleaf maples and willows, thick with ferns.
     "temperate_rainforest": {
         "display": "Temperate Rainforest", "base": "old_growth_spruce_taiga", "temperature": 0.45, "downfall": 0.95,
         "seasons": True, "winter_snow": False,
         "effects": {"grass_color": "#78c84a", "foliage_color": "#62b53a"},
         "trees": {"count": [11, 12], "default": "jugcraft:fir_checked", "picks": [
-            ["jugcraft:redwood_checked", 0.3], ["jugcraft:tall_fir_checked", 0.2], ["jugcraft:tall_vine_oak_checked", 0.2],
-            ["jugcraft:willow_checked", 0.1]]},
+            ["jugcraft:redwood_checked", 0.3], ["jugcraft:tall_fir_checked", 0.2],
+            ["jugcraft:mossy_maple_checked", 0.1964], ["jugcraft:willow_checked", 0.0889]]},
         "extras": ["ferns", "large_ferns", "berry_bushes"],
         "tags": ["c:is_wet"],
     },
@@ -961,12 +993,13 @@ BIOMES = {
         "tags": ["c:is_dry"],
     },
     # A shield of old rock: humps of bare stone and andesite with seams of coal at the surface, among firs, pines,
-    # spruces and lakes.
+    # spruces, larches, aspens and lakes.
     "shield": {
         "display": "Shield", "base": "windswept_forest", "temperature": 0.25, "downfall": 0.7, "seasons": True,
         "surface": {"floor": "minecraft:grass_block", "patches": [[-0.12, 0.12, "minecraft:stone"], [0.45, 0.55, "minecraft:andesite"]]},
         "trees": {"count": [6, 7], "default": "jugcraft:fir_checked", "picks": [
-            ["minecraft:pine_checked", 0.3], ["minecraft:spruce_checked", 0.2], ["minecraft:oak_checked", 0.1]]},
+            ["minecraft:pine_checked", 0.25], ["minecraft:spruce_checked", 0.1867], ["jugcraft:aspen_checked", 0.1311],
+            ["jugcraft:larch_checked", 0.1509]]},
         "extras": ["ponds", "coal_outcrops", "tundra_rocks"],
         "tags": ["c:is_coniferous_tree"],
     },
@@ -1050,8 +1083,8 @@ BIOMES = {
         "tags": ["c:is_floral"],
     },
     # ---------------------------------------------------------------- batch 7: wonders and caves
-    # A burnt-out waste of ash-grey tuff and gravel, smouldering with magma, its water blood-red; lava pools, ash in
-    # the air; no animals.
+    # A burnt-out waste of ash-grey tuff and gravel, smouldering with magma, its water blood-red; grey snags on its
+    # coarse dirt (where an oak sapling could stand), lava pools, ash in the air; no animals.
     "cinder_barrens": {
         "display": "Cinder Barrens", "base": "badlands", "temperature": 2.0, "downfall": 0.0, "seasons": False, "precipitation": False,
         "effects": {"grass_color": "#6a5e4e", "foliage_color": "#5e5446", "water_color": "#8a1a1a"},
@@ -1060,7 +1093,8 @@ BIOMES = {
                        "minecraft:visual/fog_color": "#7a6e66", "minecraft:visual/water_fog_color": "#4a0a0a"},
         "surface": {"floor": "minecraft:tuff", "under": "minecraft:tuff",
                     "patches": [[-0.05, 0.05, "minecraft:magma_block"], [0.25, 0.45, "minecraft:gravel"], [-0.45, -0.3, "minecraft:coarse_dirt"]]},
-        "trees": None,
+        "trees": {"count": [1, 2], "default": "jugcraft:dead_snag_checked", "picks": [
+            ["jugcraft:dead_snag_bent_checked", 0.25]]},
         "extras": ["lava_pools", "patch_dead_bush"],
         "creatures": [],
         "tags": ["c:is_hot", "c:is_dry", "c:is_dead"],
@@ -1130,13 +1164,14 @@ BIOMES = {
         "extras": ["grotto_mud", "grotto_moss", "grotto_glowcaps"],
         "tags": [],
     },
-    # A hallowed bog, pale and bright: willows and vine-hung oaks over pale grass, lilies of the valley and daisies,
-    # clear blue water; no monsters spawn.
+    # A hallowed bog, pale and bright: willows and young white aspens over pale grass, lilies of the valley and
+    # daisies, clear blue water; no monsters spawn.
     "hallowed_bog": {
         "display": "Hallowed Bog", "base": "swamp", "temperature": 0.7, "downfall": 0.9, "seasons": True,
         "effects": {"grass_color": "#a8d890", "foliage_color": "#98c880", "grass_color_modifier": "none", "water_color": "#7fd0e8"},
         "attributes": {"minecraft:visual/sky_color": "#a8c8ff", "minecraft:visual/water_fog_color": "#4aa0c0"},
-        "trees": {"count": [2, 3], "default": "jugcraft:willow_checked", "picks": [["jugcraft:tall_vine_oak_checked", 0.3]], "water_depth": 2},
+        "trees": {"count": [2, 3], "default": "jugcraft:willow_checked", "picks": [
+            ["jugcraft:young_aspen_checked", 0.3]], "water_depth": 2},
         "extras": ["lilies_of_the_valley", "oxeye_daisies", "lily_pads", "cattails", "flora_snowdrop", "flora_funeral_lily",
                    "flora_asphodel"],
         "monsters": [],
@@ -1173,13 +1208,13 @@ BIOMES = {
         "extras": ["hot_pools", "ferns", "large_ferns"],
         "tags": ["c:is_tropical"],
     },
-    # A snowy grove of blossoming cherries and birches, snowpetals and clover, mossy boulders, snowflakes on the air.
+    # A snowy grove of blossoming cherries and aspens, snowpetals and clover, mossy boulders, snowflakes on the air.
     "snowpetal_grove": {
         "display": "Snowpetal Grove", "base": "snowy_plains", "temperature": -0.2, "downfall": 0.5, "seasons": False,
         "effects": {"grass_color": "#9ac8a0", "foliage_color": "#8ab890"},
         "attributes": {"minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:snowflake"}, "probability": 0.005}],
                                                                "modifier": "append"}},
-        "trees": {"count": [3, 4], "default": "minecraft:cherry_checked", "picks": [["minecraft:birch_checked", 0.25]]},
+        "trees": {"count": [3, 4], "default": "minecraft:cherry_checked", "picks": [["jugcraft:aspen_checked", 0.25]]},
         "extras": ["tundra_rocks", "snowpetals", "clover"],
         "creatures": [["minecraft:rabbit", 10, 2, 3], ["minecraft:fox", 6, 2, 4]],
         "tags": ["c:is_snowy", "c:is_cold"],
@@ -1392,15 +1427,17 @@ BIOMES = {
         "extras": ["pale_flowers"],
         "tags": [],
     },
-    # A rotted expanse: coarse dirt and soul soil seeping through the end stone, dead trees, obsidian pillars and
-    # murky pools; no endermen.
+    # A rotted expanse: coarse dirt and soul soil seeping through the end stone, dead trees, grey snags and fallen
+    # logs on its coarse dirt, obsidian pillars and murky pools; no endermen.
     "rotted_expanse": {
         "display": "Rotted Expanse", "base": "end_highlands", "temperature": 0.5, "downfall": 0.5, "seasons": False,
         "dimension": "end", "end": {"zone": "highlands", "share": 0.125},
         "effects": {"water_color": "#4a4a3a"},
         "ground": {"blocks": {"minecraft:end_stone": 3, "minecraft:coarse_dirt": 2, "minecraft:soul_soil": 1},
                    "replaceable": "#jugcraft:end_ground_replaceable"},
-        "trees": {"count": [1, 2], "default": "jugcraft:dead_tree_checked", "picks": []},
+        "trees": {"count": [1, 2], "default": "jugcraft:dead_tree_checked", "picks": [
+            ["jugcraft:dead_snag_checked", 0.225], ["jugcraft:dead_snag_bent_checked", 0.0968],
+            ["jugcraft:fallen_dead_tree", 0.1429]]},
         "extras": ["ponds", "obsidian_pillars"],
         "monsters": [],
         "tags": [],

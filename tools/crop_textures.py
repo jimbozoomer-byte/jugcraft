@@ -946,4 +946,6 @@ def crop_textures():
     out.update(laboratory_textures())
     from decor20_data import textures as pumpkin_night_textures  # and Pumpkin Night
     out.update(pumpkin_night_textures())
+    from wood_style import wood_textures  # and, last, every tree's woods and leaves, after the owner's paintings
+    out.update(wood_textures())
     return out
