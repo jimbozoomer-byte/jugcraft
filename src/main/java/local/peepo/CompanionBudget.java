@@ -49,7 +49,7 @@ public final class CompanionBudget {
         ServerLifecycleEvents.SERVER_STOPPED.register(SERVERS::remove);
         ServerEntityEvents.ENTITY_UNLOAD.register((entity,level)->{
             if(entity instanceof PeepoEntity npc){
-                npc.resetCompanionRoutine();
+                npc.unloadCompanionRoutine();
                 var budget=SERVERS.get(level.getServer());
                 if(budget!=null){budget.paths.waiting.remove(npc.getUUID());budget.searches.waiting.remove(npc.getUUID());}
             }

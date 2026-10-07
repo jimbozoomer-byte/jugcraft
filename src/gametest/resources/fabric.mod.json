@@ -102,6 +102,7 @@
 			"io.github.jimbozoomer.jugcraft.test.WorldDesignerGameTests"
 		],
 		"fabric-client-gametest": [
+			"local.peepo.PeepoCompanionClientTests",
 			"io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.AgricultureClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.KitchenGardenClientGameTests",

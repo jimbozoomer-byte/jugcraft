@@ -17,6 +17,7 @@ Game tests run in the Build workflow too. The `mod` job's `./gradlew build` runs
 Three client jobs share the chosen classes out by their rough running time (`./gradlew runClientGameTest -PclientTests=<Class,Class,...>`). A job with nothing to run passes at once. The `client` job passes only when the choice and all three jobs pass.
 
 Locally:
+- Companion-only: `./gradlew runClientGameTest -PclientTests=PeepoCompanionClientTests`. See [coverage and results](features/companion-tests.md), including the one-client dedicated-server check and explicit limits.
 - `./gradlew runClientGameTest` runs every class.
 - `python3 tools/select_client_tests.py --base origin/main` shows what a branch would run.
 - `-PclientTestShard=<n> -PclientTestShards=<count>` still keeps every count-th class.

@@ -35,3 +35,5 @@ The planner also binds a separate lunch crate/cover. The companion GUI's Routine
 ## Cooking Pot assistance
 
 Assign a Cooking Pot with the planner, then open the pot to search/select a recipe. Its saved plan shows the ingredients per batch and filters input items. Auto restores normal ingredient-driven cooking. One helper adds 50% cooking speed while spending up to 16 JE/t, with heat and ingredients still required. Leave room beside/above the pot for the angled spoon and hanging companion; Jughead needs extra jug clearance. Schedules, recovery and workstation priorities still apply. Future supply transport can read the plan but is not implemented yet. See [Cooking Pot assistance](docs/features/companion-cooking.md).
+
+Companion-only tests: `.\build-local.ps1 -Tasks @('runClientGameTest','-PclientTests=PeepoCompanionClientTests')`. See [results and coverage](docs/features/companion-tests.md).

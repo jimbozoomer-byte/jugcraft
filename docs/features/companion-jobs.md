@@ -49,7 +49,9 @@ Uses the existing Fabric event/transaction APIs, vanilla container UI and goals.
 
 ## Validation
 
-Common/client compilation and packaging use `build-local.ps1 -Tasks assemble`. No automated tests or game launches are run, following the owner's instruction. In-game UI, pathing, load behavior, multiplayer correctness and performance remain unverified by gameplay.
+Common/client compilation and packaging use `build-local.ps1 -Tasks assemble`. The initial implementation skipped automated tests at the owner's request. On 7 October 2026 the owner requested companion-only testing: [19 groups and 127 assertions passed](companion-tests.md), including gameplay, menus, save/reopen and one-client dedicated-server reconnect. Two-client concurrency and representative server-load performance remain unverified.
+
+Entity-unload cleanup defers safe-exit movement until a later active tick/load. Moving between entity sections from Minecraft's tracking-removal callback can reenter tracking and crash shutdown; ordinary command/food/job release still exits immediately.
 
 Manual acceptance before deployment:
 

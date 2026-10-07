@@ -75,7 +75,10 @@ public final class WheelBlockEntity extends BlockEntity implements CompanionJob,
     }
     public void release(PeepoEntity p){
         if(occupant==null || !occupant.equals(p.getUUID()))return;
-        if(mounted){var at=point(1,0,-.45);p.snapTo(at.x,at.y,at.z,p.getYRot(),0);}
+        if(mounted){var at=point(1,0,-.45);
+            if(p.isCompanionUnloading())p.setBedExit(BlockPos.containing(at));
+            else p.snapTo(at.x,at.y,at.z,p.getYRot(),0);
+        }
         p.setWheelRunning(false);occupant=null;mounted=false;
     }
     public int energySpace(){return (int)(energy.getCapacity()-energy.getAmount());}

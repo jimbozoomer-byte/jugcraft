@@ -69,6 +69,13 @@ public final class PeepoEntity extends PathfinderMob {
     public final CompanionFood food=new CompanionFood(this);
     public final CompanionOrders orders=new CompanionOrders(this);
     public void resetCompanionRoutine(){if(routine!=null)routine.resetOrders();}
+    private boolean companionUnloading;
+    boolean isCompanionUnloading(){return companionUnloading;}
+    /** Tracking callbacks cannot move an entity between sections while its old section is being removed. */
+    void unloadCompanionRoutine(){
+        companionUnloading=true;
+        try{resetCompanionRoutine();}finally{companionUnloading=false;}
+    }
     boolean isUsingJobAt(net.minecraft.core.BlockPos pos){return routine!=null && routine.atJob(pos);}
     CompanionStatus routineStatus(){return routine==null?CompanionStatus.IDLE:routine.state();}
     CompanionStatus stationStatus(net.minecraft.core.BlockPos pos){return routine==null?null:routine.status(pos);}
@@ -76,7 +83,7 @@ public final class PeepoEntity extends PathfinderMob {
     public void setBedExit(net.minecraft.core.BlockPos pos) { bedExit = pos; }
     /** Also used after reload, so a companion never becomes stranded in an upper bunk. */
     public void leaveCompanionBed() {
-        if (bedExit == null || level().isClientSide()) return;
+        if (bedExit == null || level().isClientSide() || companionUnloading) return;
         for (int radius = 0; radius <= 2; radius++) for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
             var pos = bedExit.offset(dx, 0, dz);
             if (!level().hasChunkAt(pos)) continue;
