@@ -86,7 +86,9 @@ def rid(path):
 
 
 def condition(feature):
-    return [{"condition": f"{MOD}:feature_enabled", "feature": feature}]
+    """A feature switch's load condition, as a one-item list; a list of switches (a wood's sawmill recipe) loads with
+    any of them (agriculture_data.condition)."""
+    return [agriculture_data.condition(feature)]
 
 
 def title(path):

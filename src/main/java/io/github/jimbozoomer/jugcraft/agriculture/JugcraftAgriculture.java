@@ -162,6 +162,8 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower REDWOOD_GROWER = grower("redwood");
 	public static final TreeGrower EUCALYPTUS_GROWER = grower("eucalyptus");
 	public static final TreeGrower MAHOGANY_GROWER = grower("mahogany");
+	/** The tree roster's batch 1: the swamp cedar, on its own wood (tools/trees.py "cedar"). */
+	public static final TreeGrower CEDAR_GROWER = grower("cedar");
 	/** Giant trees, which four saplings in a square grow ({@link GiantSaplingBlock}; agriculture.TREES "giant"). */
 	public static final TreeGrower GIANT_REDWOOD_GROWER = grower("giant_redwood");
 	public static final TreeGrower GIANT_MAHOGANY_GROWER = grower("giant_mahogany");
@@ -479,6 +481,8 @@ public final class JugcraftAgriculture {
 				MapColor.TERRACOTTA_GREEN, MapColor.TERRACOTTA_WHITE);
 		registerTree("mahogany", "mahogany_leaves", MAHOGANY_GROWER, null, Blocks.JUNGLE_SAPLING, Blocks.JUNGLE_LEAVES,
 				MapColor.TERRACOTTA_GRAY, MapColor.CRIMSON_STEM);
+		registerTree("cedar", "cedar_leaves", CEDAR_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.TERRACOTTA_BROWN, MapColor.COLOR_BROWN);
 		registerWoodSet("dead", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_LIGHT_GRAY);
 		registerWildPlants();
 

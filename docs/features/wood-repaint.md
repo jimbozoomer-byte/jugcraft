@@ -40,6 +40,7 @@ Every wood the mod adds is redrawn in its colour from the owner's paintings, and
 | redwood | 15 | `#ab5740` |
 | eucalyptus | 21 | `#bda281`, with its pastel flecks |
 | mahogany | 2 | `#7a1f0d` |
+| cedar (added by the tree roster's batch 1, [trees-batch-1.md](trees-batch-1.md)) | second set, row 0 | `#725543` (painted `#84654d`, darkened off vanilla spruce and the cypress) |
 
 The match is by colour first, then by species where two paintings were close: the speckled painting is the rainbow eucalyptus, and the deep red one is mahogany. The other eleven paintings are not used yet. Any pairing is one line to change in `WOOD` in `tools/wood_style.py`.
 
@@ -48,11 +49,11 @@ Later the same day the owner sent eight complete woods they had painted (bark, l
 
 Three independent judges then mapped the eight rows: one by the owner's intent, one by species realism, and one by distinctness from the other woods and from vanilla's. A change was made only where two agreed:
 - **The jacaranda takes row 6's mauve wood** (`#7a5a5e`, was `#a97b74`). It is the only purple wood, it suits the violet-blossom tree, and it moves the jacaranda further from the cypress. Its bark is unchanged, so only its log end, stripped log and ends, and planks are redrawn.
-- **The other seven rows wait in a bank** (`OWNER_BANK` in `tools/wood_style.py`) for new trees, each under the species judged to suit it:
+- **The other seven rows waited in a bank** (`OWNER_BANK` in `tools/wood_style.py`) for new trees, each under the species judged to suit it. Row 0 is now used: it became the **cedar** in the tree roster's batch 1 ([trees-batch-1.md](trees-batch-1.md)), and six rows remain banked:
 
 | Row | Suggested tree | Wood | Bark |
 |---|---|---|---|
-| 0 | western red cedar | `#84654d` | reddish-brown, furrowed |
+| 0 | western red cedar: **now used, for the cedar** (wood darkened to `#725543`, and the bark with it by the same lightness ratio; drawn stringy) | `#84654d` | reddish-brown, furrowed |
 | 1 | London plane | `#9b8059` | pale olive-grey, mottled |
 | 2 | black walnut (the clock, theremin and planchette are described as walnut) | `#67533c` | charcoal, furrowed |
 | 3 | wenge | `#544233` | dark mossy olive |

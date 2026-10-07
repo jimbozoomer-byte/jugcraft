@@ -2,8 +2,9 @@
 
 The owner repainted the woods (5 October 2026) and asked for every wood type to be matched to the closest of their
 paintings, with everything made from each wood based on it, looking "more similar to how the vanilla textures are".
-Each of the 13 woods takes its colour from one of the owner's 24 painted stripped logs (WOOD: which one, and the colour
-sampled from it), and is drawn here, by code from fixed seeds, in vanilla's manner:
+Each wood takes its colour from one of the owner's paintings (WOOD: which one, and the colour sampled from it): the
+first 13 from their 24 painted stripped logs or their second set, and the cedar (the tree roster's batch 1) from the
+second set's western red cedar. Each is drawn here, by code from fixed seeds, in vanilla's manner:
 
 - bark: long vertical furrows that wander a pixel now and then, ridges between them, a few light flecks, and no
   rings across the trunk (the owner: "I don't want rings in the trees"); each tree keeps its own bark colour and
@@ -60,15 +61,19 @@ WOOD = {
     "redwood": (15, "ab5740"),
     "eucalyptus": (21, "bda281"),
     "mahogany": (2, "7a1f0d"),
+    # The second set's western red cedar (#84654d), darkened (lightness 0.410 to 0.355, hue 26 to 23) so that it stands
+    # off vanilla spruce (dE 9.6 to 10.0) and our cypress (8.2 to 10.6); docs/features/trees-batch-1.md. Appended last,
+    # so every other wood keeps its seeds.
+    "cedar": ("2:0", "725543"),
 }
 # The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):
-# eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's; the other seven wait for new trees,
-# each under the species a panel judged it suits (docs/NATURAL_TEXTURES.md, "Adding a new wood"). Each: its row, the
+# eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's and row 0's (western red cedar) the
+# cedar's, in WOOD and BARK; the other six wait for new trees, each under the species a panel judged it suits
+# (docs/NATURAL_TEXTURES.md, "Adding a new wood"). Each: its row, the
 # wood's colour (the stripped side's), the bark's tones (dark to light) and the bark's kind. Only the colours are used;
-# the patterns are drawn here. Before one becomes a tree, check it against vanilla's woods and the others here: rows 0,
-# 4 and 5 are close to each other, and 2, 4 and 5 lie near vanilla's dark oak and spruce.
+# the patterns are drawn here. Before one becomes a tree, check it against vanilla's woods and the others here: rows 4
+# and 5 are close to each other and to the cedar (row 0), and 2, 4 and 5 lie near vanilla's dark oak and spruce.
 OWNER_BANK = {
-    "western_red_cedar": (0, "84654d", pal("483229", "513a2f", "563d31", "65493a", "6b4f40"), "furrowed"),
     "london_plane": (1, "9b8059", pal("676251", "78735f", "847f6b", "9a9583", "a29e8b"), "marked"),
     "black_walnut": (2, "67533c", pal("392e27", "3c322c", "413730", "4d433d", "594f49"), "furrowed"),
     "wenge": (3, "544233", pal("3a3323", "433b2b", "484031", "4f4637", "584c3e"), "furrowed"),
@@ -95,6 +100,11 @@ BARK = {
     "redwood": (pal("3a1a12", "552519", "6e3121", "88402b", "a35238"), "stringy"),
     "eucalyptus": (pal("4d6b4a", "6f8f5a", "8fae6c", "b4c486", "d7d9a4"), "streaked"),
     "mahogany": (pal("2e2420", "433530", "584741", "6e5a52", "856e64"), "plated"),
+    # The owner's painted western red cedar bark (second set, row 0: #483229 #513a2f #563d31 #65493a #6b4f40), darkened
+    # by the wood's own lightness ratio (0.355 / 0.410), so the log keeps the painting's contrast between bark and wood
+    # (dE 14 from the wood; as painted 17; the painted bark beside the darkened wood would be 10, the least of any wood).
+    # Stringy, as cedar bark peels in long fibrous strips. docs/features/trees-batch-1.md.
+    "cedar": (pal("3e2b24", "463229", "4a352a", "573f32", "5d4437"), "stringy"),
 }
 EUCALYPTUS_STREAKS = pal("d07a2e", "9a4f9e", "4f7fb8", "c9a63a", "5ea06a")
 
@@ -118,6 +128,9 @@ LEAVES = {
     "redwood_needles": (pal("102414", "16301b", "1d3d22", "264c2b", "315c35", "3f6f42"), "needles"),
     "eucalyptus_leaves": (pal("2c4a44", "3a5f56", "4a7468", "5e8a7c", "77a194", "96bcb0"), "leaves"),
     "mahogany_leaves": (pal("0e2a12", "143719", "1b4520", "245529", "2f6634", "3d7a42"), "leaves"),
+    # The cedar's flat sprays of scale-leaves: a muted sage green (hue 84), yellower than the cypress's blue-green and
+    # the fir's (mean dE 14.8 and 16.1); evergreen. Appended last, so every other look keeps its seed.
+    "cedar_leaves": (pal("27301a", "343f22", "43522c", "536539", "657a46", "7d9657"), "needles"),
 }
 # Bare deciduous leaves (twigs in the bark's colour), and the chestnut's fruit.
 BARE = {"larch_needles_bare": "larch", "maple_leaves_bare": "maple", "aspen_leaves_bare": "aspen",

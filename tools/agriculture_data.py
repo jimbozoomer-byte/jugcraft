@@ -74,9 +74,20 @@ def rid(path):
     return path if ":" in path else f"{MOD}:{path}"
 
 
+def condition(switch):
+    """One load condition for a feature switch, or for a list of switches any one of which loads the recipe (a wood's
+    agriculture.WOOD_SWITCHES): the first as "feature", the rest as "or" (config/FeatureEnabledCondition)."""
+    if isinstance(switch, str):
+        return {"condition": f"{MOD}:feature_enabled", "feature": switch}
+    data = {"condition": f"{MOD}:feature_enabled", "feature": switch[0]}
+    if len(switch) > 1:
+        data["or"] = list(switch[1:])
+    return data
+
+
 def conditions(*features, switch=FEATURE):
     """Load conditions: the recipe's switch (the agriculture feature unless it belongs to another) and any others."""
-    return [{"condition": f"{MOD}:feature_enabled", "feature": f} for f in (switch, *features)]
+    return [condition(f) for f in (switch, *features)]
 
 
 def stage_texture(crop, stage):

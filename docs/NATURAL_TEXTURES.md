@@ -111,9 +111,14 @@ The same rules carry over to other natural blocks and plants.
 | Water-side and swamp blocks | Muted, slightly greyed versions of the land colours, as vanilla's swamp and mangrove blocks are. |
 
 ## Adding a new wood or tree
-1. **Get its colour:** a painting from the owner, or an approved colour. The owner's second set of paintings waits in `OWNER_BANK` (`tools/wood_style.py`): seven woods with their bark, each under a suggested species ([features/wood-repaint.md](features/wood-repaint.md#the-owners-second-set)). Add it to `WOOD` with the painting's number and
+The trees the biomes still need, with their proposed shapes and colours, are planned in
+[branches/TREES.md](branches/TREES.md).
+
+1. **Get its colour:** a painting from the owner, or an approved colour. The owner's second set of paintings waits in `OWNER_BANK` (`tools/wood_style.py`): six woods with their bark, each under a suggested species ([features/wood-repaint.md](features/wood-repaint.md#the-owners-second-set)); row 0 became the cedar ([features/trees-batch-1.md](features/trees-batch-1.md)), and its record shows the check and the nudge a banked wood may need. Add it to `WOOD` with the painting's number and
    the sampled colour.
-2. **Give it bark:** a darker ramp and a kind (`furrowed`, `plated`, `stringy`, `streaked`, `marked`) in `BARK`.
+2. **Give it bark:** a darker ramp and a kind (`furrowed`, `plated`, `stringy`, `streaked`, `marked`) in `BARK`. If the
+   wood's colour was nudged lighter or darker, move the bark by the same lightness ratio, so the log keeps its contrast
+   with its stripped side (the cedar's record).
 3. **Give it leaves:** a ramp and a kind (`leaves`, `needles`, `blossom`, `fronds`) in `LEAVES`, one entry for each
    seasonal look. If it goes bare in winter, add it to `BARE` too.
 4. **Register the tree:**
