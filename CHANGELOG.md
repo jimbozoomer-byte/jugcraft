@@ -14,6 +14,76 @@ No numbered release yet. Everything below is on `main`.
 - **Earthbound armor:** an Earthbinding Template (rooted dirt, four thallite nuggets and four gold nuggets), a thallite piece and a gold ingot at a smithing table bind the piece into its gold-trimmed Earthbound twin, for good, keeping its enchantments, wear and name. Earthbound pieces are **Rooted**: on natural ground (soil, stone, sand or gravel) each takes 7.5% off knockback, 30% for a full set, and with two or more worn Regrowth works on stone, sand and gravel too.
 - Both traits are named in the tooltip and described while Shift is held. Two handbook pages. Arms, the arrow, horse armor and magic come in later slices. Record: [thallite.md](docs/features/thallite.md).
 
+### Unmerged: Clean textures, set 11: weapons and armour (the powders)
+- Four noisy powders are clean 16×16 heaps in the manner of the set 9 dusts, following the item icon rules (#201): ammonium perchlorate, iodine, silver iodide and cement mix.
+- Left to other work:
+  - the arms icons, which #201 redraws;
+  - the four textures #219 fixes;
+  - the bronze and steel armour, which gets the owner's new 3D knight look in #215's follow-up.
+- The exosuits, the rocketry items and the construction items are already clean pixel art and are unchanged. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 10: machines
+- Every bronze-framed machine front loses its speckle.
+  - The steel plate is one tone with a few soft clumps, recessed under the frame's lit top and left edge.
+  - Windows are recessed, with their contents in soft clumps instead of random pixels.
+  - A running machine's glow (fire, arc light, a crystal's shine) rises in smooth bands to its brightest at the bottom, like a furnace.
+  - The crusher's jaws are two neat rows of teeth, the sieve is a crossed mesh, the circuit assembler shows gold traces, and the boilers are round and lit at the top left.
+- The machine casings, tanks, pump sides, plinths, the geothermal tank and stack, the crucible, the solar panel, the belts and the conveyor are cleaned the same way. Bricks take one tone a brick, lit along the top.
+- The five refinery machines whose fronts were committed as pictures in the old style (catalytic reformer, chemical mixer, crystal grower, oil sand extractor, vacuum distillation unit) are now drawn by the same code.
+- The leftover materials match set 9:
+  - salt, phosphate, lepidolite, monazite, sawdust, lithium carbonate, rare earth oxide and thermite are clean heaps;
+  - bitumen, silicon, coke, borax and ferroboron are lumpy chunks;
+  - bauxite, oil sand and tincal are evenly speckled rock.
+- The owner's library (#207) was used as a style reference only: many of its machine files match other mods' textures, so none is copied. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 9: metal parts, petrochemistry and deposits
+- The ores, storage blocks, raw ores, ingots and nuggets are left to the material sets (#218), as the owner chose on 6 October 2026. This set cleans the rest of the materials.
+- Metal parts are drawn in `tools/material_style.py`:
+  - dusts are clean heaps;
+  - plates have an outline and a sheen;
+  - gears have eight square teeth;
+  - wire is wound on a spool;
+  - washed ore is a clean chunk with drops of water.
+- Bronze blend and sulfur dust are clean heaps too.
+- Petrochemistry:
+  - The fluid buckets share a new iron pail with the fluid in its mouth.
+  - Flowing fluids run in soft streaks, and still fluids are mostly one tone with lighter swells.
+  - Guncotton, PVC resin, alumina, titanium sponge, asphalt, asphalt binder, fertilizer, the cracking catalyst and the turbocharger lose their random speckle.
+- The four resource deposits are packed rubble of stone and ore lumps, in the manner of gravel. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 8: crops (outside the tree work)
+- Only the crop textures that open PRs #195 (wood repaint) and #206 (new trees) don't touch are changed. Trees, logs, wood, leaves, planks and saplings are left to those PRs.
+  - The squash and gourd skins vary in soft clumps with even stripes; the warty gourd keeps its warts.
+  - The cooking-pot soup is a clumped surface with a few glints.
+  - The turnip lantern's lid stalks are lit at the top.
+  - The sauerkraut's shreds run in even lines.
+- `gourd_side` now paints cleanly by default. IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 7: the fall fair
+- The fall fair's high-resolution textures (the midway games and plush prizes, the piñatas and the hot-air balloons) lose their soft mottling and fine noise. They are painted in the clean, cartoon style of the werewolves:
+  - Every tone sits in a few flat bands. Brass, glass and glowing bulbs shade in clean steps, and felt, enamel, canvas and wood are even.
+  - Piñata fringes hang at even lengths, and the torn holes are round.
+  - The squirrel plush's tail has a cream band of points along its tip.
+- `tools/fur_paint.py` gains `clean_painter` and `clean_ramp`, used only by the fair's modules. Faces, stitches, stripes and painted designs keep their drawn detail. IDs and models are unchanged.
+- The Ferris wheel is left to the art fixes PR (#219), which redraws it so it no longer flashes; its textures are main's here.
+
+### Unmerged: Clean textures, set 6: fall food and kitchen
+- The pies and hearth oven, the Harvest Feast Table, the candy kitchen, the cider mill, the preserves pantry and autumn foraging lose their per-pixel speckle and are painted in the manner of the vanilla blocks with `tools/block_style.py`.
+  - The oven is vanilla-style bricks, its stone is stone and its embers a heap of glowing coals.
+  - Pie tops are a woven lattice, each strip lit along one edge, over a clumped filling, and the cut side has clean crust layers.
+  - Wood is planks: the feast table, cider press, barrel staves and pantry shelves.
+  - Apple leaves are clumps with gaps, lit along their tops, as vanilla leaves. Graniteware is flecked evenly, as vanilla diorite.
+  - Raw pies, slices, dough, rock candy and burnt sugar are lit at their upper left instead of speckled.
+- IDs and models are unchanged.
+
+### Unmerged: Clean textures, set 5: the Halloween harvest and festivities
+- The Halloween harvest and festivities lose their per-pixel speckle and are painted in the manner of the vanilla blocks with `tools/block_style.py`. That covers the giant pumpkins and the heirloom pumpkins, the Harvest Scale, scarecrow, corn shocks and ornamental corn, gourd birdhouse and mums, the regatta and trick-or-treat costumes, the Judging Stand, festivity candles and ghosts, the Headless Horseman, wisps and trebuchet, the corn maze and ghost hunting, and the knitting, chandlery, firework launcher, spirit board, theremin, ofrenda, mooncakes and broomstick.
+  - Pumpkin skins vary in soft clumps; the giant pumpkin stays mirror-symmetric.
+  - Wood is planks, and straw and bark are streaks. The gravestone is stone and the trebuchet's counterweight cobblestone.
+  - Ornamental corn ears are one colour with an accent kernel. The mums are round blooms over a leafy mound, and marigold petals lie in neat clumps.
+  - Sugar skulls, pan de muerto, popcorn balls, guts and fizz rocks are drawn as shapes instead of scattered pixels.
+- `gourd_side` in `tools/festival_textures.py` gains an opt-in `clean` mode, used here only, so the festival gourds of a later set are unchanged until that set. Faces, letters and cut-outs keep their drawn detail. IDs and models are unchanged.
+
 ### Unmerged: Clean textures, set 4: Halloween decorations, batches 8 to 14
 - The next seven batches lose their per-pixel speckle and are painted in the manner of the vanilla blocks with `tools/block_style.py`: the mad scientist's lab, the yard inflatables, porch witch, poseable skeleton, grasping hands, spooky sign and dead tree, the archway and lanterns, the brazier and the shadow-puppet lamp's wood, the party games (jump-scare trap, costume runway, bowling, scoreboard, candy cache, ghost bell, fortune teller), the bonfire and hayride, the treats, and the costumes and costume trunk.
   - Surfaces are one ground tone with small clumps of its neighbours. Wood is planks.

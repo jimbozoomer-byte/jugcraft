@@ -8,12 +8,11 @@ marigold flower itself is drawn with the mums.
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code, from a fixed seed; no Mojang texture is
 read, traced or recoloured.
 """
-import random
-
 from PIL import Image
 
 from crop_textures import Canvas, rgb, outline
 from halloween_textures import shade
+import block_style as bs
 
 LINEN = [rgb("e8e4da"), rgb("f0ece2"), rgb("f6f2ea")]
 PINK = rgb("e0508a")
@@ -30,10 +29,10 @@ BREAD = [rgb("a8601e"), rgb("c47a2a"), rgb("d8943a"), rgb("e8ae52")]
 def cloth():
     """White linen, a fine weave."""
     img = Image.new("RGBA", (16, 16))
-    rng = random.Random(20001)
+    linen = bs.surface(LINEN, 20001, [1, 3, 2], spread=0.6)
     for x in range(16):
         for y in range(16):
-            img.putpixel((x, y), LINEN[(x + y) % 2 + rng.choice((0, 0, 1)) if (x + y) % 2 == 0 else 1] + (255,))
+            img.putpixel((x, y), linen(x, y) + (255,))
     return img
 
 
@@ -57,12 +56,14 @@ def cloth_front():
 
 
 def petals():
-    """Marigold petals scattered thick on the ground, the soil showing through between them."""
+    """Marigold petals strewn thick on the ground in little clumps, each lit at its upper left, the soil showing
+    through between them."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    rng = random.Random(20010)
-    for _ in range(70):
-        x, y = rng.randrange(16), rng.randrange(16)
-        img.putpixel((x, y), rng.choice(MARIGOLD) + (255,))
+    for gy in range(4):
+        for gx in range(4):
+            x, y = gx * 4 + (gy % 2) * 2, gy * 4 + (gx % 2)
+            for dx, dy, tone in ((0, 0, -1), (1, 0, -2), (0, 1, -2), (1, 1, -3)):
+                img.putpixel(((x + dx) % 16, (y + dy) % 16), MARIGOLD[tone] + (255,))
     return img
 
 
@@ -84,17 +85,17 @@ def papel_picado():
                 if y == 10 and x in (x0 + 1, x0 + 2):
                     cut = True
                 if not cut:
-                    img.putpixel((x, y), shade(colour, 0.92 + 0.08 * ((x + y) % 2)) + (255,))
+                    img.putpixel((x, y), colour + (255,))
     return img
 
 
 def skull_face():
     """A sugar skull's iced face (on the region the model's face reads: x 5 to 10, rows 4 to 9)."""
     img = Image.new("RGBA", (16, 16))
-    rng = random.Random(20020)
+    sugar = bs.surface(SUGAR, 20020, spread=0.6)
     for x in range(16):
         for y in range(16):
-            img.putpixel((x, y), SUGAR[rng.randrange(3)] + (255,))
+            img.putpixel((x, y), sugar(x, y) + (255,))
     # The eyes: dark sockets ringed with petals.
     for ex, ring in ((6, BLUE), (9, PINK)):
         img.putpixel((ex, 6), rgb("2a2028") + (255,))
@@ -113,12 +114,12 @@ def skull_face():
 def skull_side():
     """Moulded sugar, sparkling, dotted with icing."""
     img = Image.new("RGBA", (16, 16))
-    rng = random.Random(20030)
+    sugar = bs.surface(SUGAR, 20030, spread=0.6)
     for x in range(16):
         for y in range(16):
-            img.putpixel((x, y), SUGAR[rng.randrange(3)] + (255,))
-    for _ in range(6):
-        img.putpixel((rng.randrange(16), rng.randrange(16)), rng.choice((PINK, BLUE, ORANGE, PURPLE, GREEN)) + (255,))
+            img.putpixel((x, y), sugar(x, y) + (255,))
+    for (x, y), colour in zip(((3, 3), (11, 4), (7, 8), (2, 12), (12, 12), (8, 14)), (PINK, BLUE, ORANGE, PURPLE, GREEN, PINK)):
+        img.putpixel((x, y), colour + (255,))  # dots of icing, set evenly
     return img
 
 
@@ -129,7 +130,7 @@ def bread_item(dough):
     for y in range(4, 14):
         for x in range(2, 14):
             if (x - 7.5) ** 2 / 36 + (y - 9) ** 2 / 25 <= 1:
-                c.px(x, y, palette[(x + 2 * y) % 4])
+                c.px(x, y, palette[3 if x + y < 13 else 2 if x + y < 19 else 1])  # lit at its upper left
     for i in range(3, 13):
         c.px(i, 4 + (i - 3) * 9 // 10, shade(palette[3], 1.05))
         c.px(i, 13 - (i - 3) * 9 // 10, shade(palette[3], 1.05))

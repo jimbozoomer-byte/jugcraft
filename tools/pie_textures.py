@@ -6,13 +6,12 @@ bakes; and the raw pies, slices and pastry dough as items.
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code, from a fixed seed; no Mojang texture is
 read, traced or recoloured.
 """
-import random
-
 from PIL import Image
 
 from agriculture import PIES
 from crop_textures import Canvas, rgb, outline
 from halloween_textures import shade
+import block_style as bs
 
 BRICK = [rgb("8a3a26"), rgb("9c4430"), rgb("ae5038"), rgb("7a3220")]
 MORTAR = rgb("b8ad9c")
@@ -26,23 +25,30 @@ BURNT = [rgb("1c120c"), rgb("2a1a10"), rgb("3a2616"), rgb("4a3020")]
 
 
 def noise(palette, seed, weights=None):
+    """A plain 16x16 of the palette in small clumps, in the manner of the vanilla blocks (tools/block_style.py)."""
     img = Image.new("RGBA", (16, 16))
-    rng = random.Random(seed)
+    surface = bs.surface(palette, seed, weights)
     for x in range(16):
         for y in range(16):
-            img.putpixel((x, y), rng.choices(palette, weights or [1] * len(palette))[0] + (255,))
+            img.putpixel((x, y), surface(x, y) + (255,))
     return img
+
+
+def painted(painter):
+    """A 16x16 image painted by one of tools/block_style.py's painters."""
+    return bs.img(painter)
 
 
 def bricks():
-    """Red bricks in courses of four pixels, staggered, with pale mortar."""
-    img = noise(BRICK, 16101, [3, 4, 2, 1])
-    for y in range(16):
-        for x in range(16):
-            offset = 4 if (y // 4) % 2 else 0
-            if y % 4 == 3 or (x + offset) % 8 == 7:
-                img.putpixel((x, y), MORTAR + (255,))
-    return img
+    """Red bricks in courses of four pixels, staggered, with pale mortar, as vanilla bricks: each brick lit along its
+    top and left."""
+    return painted(bs.bricks([BRICK[3]] + BRICK[:3], 16101, rows=4, cols=2, mortar=MORTAR))
+
+
+def embers():
+    """Glowing coals heaped like vanilla gravel, each lump lit at its upper left."""
+    lumps = [[EMBER[0], EMBER[1], EMBER[2]], [EMBER[1], EMBER[2], EMBER[3]]]
+    return painted(bs.heap(lumps, 16120, count=12, joint=rgb("3a1406"), weights=[3, 2]))
 
 
 def filling_palette(color):
@@ -53,14 +59,18 @@ def filling_palette(color):
 def lattice_top(filling, crust=CRUST, seed=16200):
     """A pie's top: the filling, with a lattice of pastry strips over it (two pixels wide, every five) and a crust rim."""
     img = noise(filling, seed, [1, 3, 3, 1])
-    rng = random.Random(seed + 1)
     for y in range(16):
         for x in range(16):
-            strip = x % 5 in (1, 2) or y % 5 in (1, 2)
+            down, across = x % 5 in (1, 2), y % 5 in (1, 2)
             rim = x in (0, 15) or y in (0, 15)
-            if strip or rim:
-                tone = crust[rng.choice((1, 2, 2, 3))] if not rim else crust[1 + (x + y) % 2]
-                img.putpixel((x, y), tone + (255,))
+            if rim:
+                img.putpixel((x, y), crust[1] + (255,))
+            elif down or across:
+                # Woven: at each crossing the strip running down and the one running across take turns on top; each
+                # strip is lit along its first pixel.
+                on_top_down = down and (not across or (x // 5 + y // 5) % 2 == 0)
+                lit = x % 5 == 1 if on_top_down else y % 5 == 1
+                img.putpixel((x, y), crust[3 if lit else 2] + (255,))
     return img
 
 
@@ -68,8 +78,8 @@ def inside(filling, seed):
     """The filling where a pie is cut, under a line of top crust and over the bottom crust."""
     img = noise(filling, seed, [1, 3, 3, 1])
     for x in range(16):
-        for y in (0, 1, 2, 3, 12, 13, 14, 15):
-            img.putpixel((x, y), CRUST[1 + (x + y) % 3] + (255,))
+        for y, tone in ((0, 3), (1, 2), (2, 2), (3, 1), (12, 2), (13, 1), (14, 1), (15, 0)):
+            img.putpixel((x, y), CRUST[tone] + (255,))
     return img
 
 
@@ -86,10 +96,11 @@ def side():
 def crust_white():
     """Near-white crust for the oven's renderer to tint as the pie bakes."""
     img = Image.new("RGBA", (16, 16))
-    rng = random.Random(16300)
+    grain = bs.grain(16, 16, 16300)
     for x in range(16):
         for y in range(16):
-            v = rng.choice((214, 228, 240, 252)) if (x % 5) not in (1, 2) and (y % 5) not in (1, 2) else 255
+            g = grain(x, y)
+            v = (240 if g > 0.62 else 214 if g < 0.38 else 228) if (x % 5) not in (1, 2) and (y % 5) not in (1, 2) else 255
             img.putpixel((x, y), (v, v, v, 255))
     return img
 
@@ -101,7 +112,7 @@ def raw_pie_item(filling):
         for x in range(2, 14):
             if (x - 7.5) ** 2 + (y - 7.5) ** 2 <= 36:
                 strip = x % 4 == 1 or y % 4 == 1
-                c.px(x, y, RAW[2] if strip else filling[(x + y) % 3 + 1])
+                c.px(x, y, RAW[2] if strip else filling[3] if x + y < 12 else filling[2])
     for y in range(2, 14):
         for x in range(2, 14):
             if 30 < (x - 7.5) ** 2 + (y - 7.5) ** 2 <= 42:
@@ -119,7 +130,7 @@ def slice_item(filling):
             if y < 6:
                 c.px(x, y, CRUST[2] if x % 3 else CRUST[3])
             elif y < 11:
-                c.px(x, y, filling[(x + y) % 3 + 1])
+                c.px(x, y, filling[3] if y == 6 else filling[2] if y < 9 else filling[1])
             else:
                 c.px(x, y, CRUST[1])
     outline(c, shade(CRUST[0], 0.6))
@@ -132,7 +143,7 @@ def dough_item():
     for y in range(4, 14):
         for x in range(3, 14):
             if (x - 8) ** 2 / 25 + (y - 9) ** 2 / 20 <= 1:
-                c.px(x, y, RAW[(x * 3 + y) % 4])
+                c.px(x, y, RAW[3] if x + y < 13 else RAW[2] if x + y < 18 else RAW[1])  # lit at its upper left
     for x, y in ((6, 6), (9, 7), (7, 9), (10, 10)):
         c.px(x, y, (250, 248, 240))
     outline(c, shade(RAW[0], 0.7))
@@ -141,7 +152,7 @@ def dough_item():
 
 def pie_textures():
     out = {("block", "oven_brick"): bricks(), ("block", "oven_soot"): noise(SOOT, 16110, [2, 3, 2, 1]),
-           ("block", "oven_embers"): noise(EMBER, 16120, [2, 3, 2, 1]), ("block", "oven_stone"): noise(STONE, 16130, [1, 3, 3, 1]),
+           ("block", "oven_embers"): embers(), ("block", "oven_stone"): painted(bs.stone(STONE, 16130, cracks=2)),
            ("block", "pie_side"): side(), ("block", "pie_tin"): noise(TIN, 16140), ("block", "pie_crust"): crust_white(),
            ("block", "burnt_pie_top"): lattice_top(BURNT, BURNT, 16250), ("block", "burnt_pie_inside"): inside(BURNT, 16251),
            ("item", PIES["dough"]): dough_item()}

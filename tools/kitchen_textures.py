@@ -10,6 +10,7 @@ import random
 
 from crop_textures import (Canvas, rgb, ribbon, broad_leaf, stalk, heart, outline, seeds_item, LEAF, DRY, STALK, WOOD,
                            BLUE_GREEN, BEAN, KERNEL)
+import block_style as bs
 
 TOMATO = [rgb("6e120e"), rgb("a01e18"), rgb("cc3226"), rgb("e95a43"), rgb("f89a82")]
 TOMATO_GREEN = [rgb("35601a"), rgb("4f8226"), rgb("6fa436"), rgb("98c65a")]
@@ -343,16 +344,12 @@ def pot_empty():
 
 def pot_soup():
     c = Canvas()
-    rng = random.Random(77)
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, SOUP_TOMATO[1 + ((x * 3 + y * 5) % 7 == 0)])
+    bs.fill(c, 0, 0, 15, 15, SOUP_TOMATO[1:3], 77, [3, 1], spread=0.6)
     for x, y in ((4, 5), (10, 4), (7, 9), (12, 11), (3, 12), (9, 13)):
         c.px(x, y, KERNEL[3])
         c.px(x + 1, y, rgb("7aa34a"))
-    for _ in range(7):
-        x, y = rng.randrange(1, 15), rng.randrange(1, 15)
-        c.px(x, y, SOUP_TOMATO[3])
+    for x, y in ((2, 2), (13, 7), (6, 14)):
+        c.px(x, y, SOUP_TOMATO[3])  # a glint on the surface
     return c.img
 
 
@@ -502,7 +499,7 @@ def sauerkraut_item():
     # A glass jar of pale shredded cabbage with a wooden lid.
     for y in range(4, 15):
         for x in range(4, 12):
-            c.px(x, y, rgb("d9e4c0") if (x + y * 2) % 3 else rgb("bccd96"))
+            c.px(x, y, rgb("bccd96") if (x + y) % 4 == 0 else rgb("d9e4c0"))  # shreds in even slanting lines
     for y in range(4, 15):
         c.px(4, y, rgb("eef4f6"))
     for x in range(4, 12):
