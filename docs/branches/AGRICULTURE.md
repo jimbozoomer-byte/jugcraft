@@ -1298,6 +1298,10 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 The first slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking-expansion-planned): cooking devices and a preparation step, drawn in the owner's own farming and food textures. Details and test evidence: [features/farmhouse-kitchen.md](../features/farmhouse-kitchen.md).
 
+| **The Farmhouse Kitchen** | **Stoves:** a full hob, a skillet, a pot, and one out |
+| --- | --- |
+| ![The Farmhouse Kitchen](../images/ingame_farmhouse_kitchen.jpg) | ![The Kitchen Stoves](../images/ingame_kitchen_stoves.jpg) |
+
 - **Kitchen Stove.** A brick range (3 iron, 5 bricks and a campfire). Light it with flint and steel or a fire charge; a shovel puts it out. Lit, it glows and heats whatever stands on it, so a Cooking Pot, a kettle or a Skillet cooks on top. With nothing on top, its **hob** cooks up to six raw foods at twice a campfire's pace: use them on its top, and each pops off cooked. Its hot top burns what stands on it unless they sneak.
 - **Skillet.** An iron pan for any heat source: a lit stove, a campfire, fire, lava or magma. It takes up to 16 of one raw food and fries them one at a time at a furnace's pace; an empty hand takes everything out.
 - **Cutting Board** and **knives.** Set anything on the board; use a knife on it to cut what lies there. Porkchops become bacon, beef minced beef, chicken cuts, mutton chops, cod and salmon slices (with bone meal), cabbage leaves, pumpkin slices, and a cake seven slices. Knives come in flint, iron, bronze, gold, steel, diamond and netherite (a smithing upgrade). Any knife, the Carving Knife included, also cuts slices from pies and cakes and servings from the roast turkey.

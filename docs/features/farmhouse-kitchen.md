@@ -18,6 +18,14 @@ Build a kitchen and cook in it:
 
 Every block wears the owner's own textures, imported unchanged (see Dependencies and assets).
 
+| **The kitchen:** a cabinet counter in every wood with cutting boards, four stoves in front | **The stoves:** a full hob, a skillet of beef, a Cooking Pot, and one out |
+| --- | --- |
+| ![The Farmhouse Kitchen](../images/ingame_farmhouse_kitchen.jpg) | ![The Kitchen Stoves](../images/ingame_kitchen_stoves.jpg) |
+| **The counter:** cabinets with food on the boards | **The wall:** the seven knives and the new foods |
+| ![Kitchen cabinets and cutting boards](../images/ingame_kitchen_cabinets.jpg) | ![The knives and foods in item frames](../images/ingame_kitchen_items.jpg) |
+
+*In-game screenshots from CI's client game test (`FarmhouseKitchenClientGameTests`, software rendering, small previews).*
+
 ## Connections
 - Existing input producer: vanilla meat, fish, eggs, pumpkins and cakes; cabbage from the Kitchen Garden. The recipes use iron, bricks and a campfire for the stove; iron and a stick for the skillet; planks and a stick for the board; slabs and trapdoors for the cabinets. The bronze knife needs bronze (metals branch, `tin` feature) and the steel knife needs steel (`machines` feature).
 - Existing output consumer: food for every player. The stove joins the block tag `jugcraft:heat_sources`, so the Cooking Pot, Canning Kettle, Candy Kettle, Wax Melting Pot and Skillet all cook on it. The cuts carry `c:foods/*` and `minecraft:meat` tags, so pets, other mods and later dishes can use them. The knives tag `jugcraft:knives` now covers the pie and the roast turkey, which used to take only the Carving Knife.
@@ -71,7 +79,13 @@ No new dependency; Fabric API's use-block event, already used elsewhere, carries
 The library's [catalog](../../art/owner-library/catalog/files.csv) lists each source file's SHA-256. The models (`tools/kitchen_data.py`) are drawn to fit the owner's textures: the skillet's pan, rim and handle and the board's outline follow each texture's opaque pixels.
 
 ## Verification
-Not run yet in CI for this slice. Results will be recorded here.
+CI so far (7 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `558a572` | Build, data audit, client game tests | **Failed.** The stove recipe asked for `#minecraft:campfires`, a block tag with no item version, so recipes failed to load and no test world started. The two stove animation `.mcmeta` copies differed from the library in a fresh checkout (line ends). Both are fixed in `a2fefe5`. Everything compiled. |
+| `a2fefe5` | Build, data audit, game tests, client game tests | Build, data audit and all three client shards (with `FarmhouseKitchenClientGameTests`) **pass**. Game tests: every test passes except `skilletFriesOnHeat`, which found a real bug: using an item the pan can't fry (a stick) on a skillet emptied it into the player's hands. Fixed in `fcff850`. |
+| later | the same | Recorded by the PR's checks. |
 
 Run locally (7 October 2026):
 
@@ -81,7 +95,7 @@ Run locally (7 October 2026):
 | `python3 tools/check_mod_data.py`: also checks the kitchen's Java numbers, knives and cabinet woods against `tools/kitchen.py`, every cutting recipe file, that no cut outweighs its whole raw or cooked, the knives tag, the kitchen's messages, and that every imported owner texture still matches its source | Pass, 1545 IDs |
 | `python3 tools/owner_art.py --check` | Pass: every imported owner texture matches its source |
 | `python3 tools/generate_textures.py`, then `git status` | No drift: the generator rewrites every texture as committed |
-| `./gradlew build`, game tests and client game tests | Not run locally (no Minecraft jar here); run by CI |
+| `./gradlew build`, game tests and client game tests | Not run locally (no Minecraft jar here); run by CI, above |
 
 The 10 new game tests (`FarmhouseKitchenGameTests`):
 1. a placed stove is out and cold; flint and steel lights it (light 13, heats the block on top) and is worn; a shovel puts it out; a fire charge relights it and is used up;
@@ -95,9 +109,9 @@ The 10 new game tests (`FarmhouseKitchenGameTests`):
 9. no meat, fish or cabbage cut outweighs its whole, raw or cooked; those cutting recipes and their furnace, smoker and campfire recipes load, as do the stove's, skillet's, board's, oak cabinet's, knives' and fried egg's; every knife is in `jugcraft:knives`;
 10. every wood's cabinet holds 27, opens as a chest with its doors open and shuts after, and broken drops itself and what is inside.
 
-The client game test (`FarmhouseKitchenClientGameTests`, CI job `client`) builds a kitchen: a counter of cabinets in every wood with cutting boards on it, four stoves (a full hob, a skillet of beef, a Cooking Pot, and one out) and a wall of the knives and foods in item frames. It takes four screenshots.
+The client game test (`FarmhouseKitchenClientGameTests`, CI job `client`) builds a kitchen: a counter of cabinets in every wood with cutting boards on it, four stoves (a full hob, a skillet of beef, a Cooking Pot, and one out) and a wall of the knives and foods in item frames. It takes four screenshots; it passed on `a2fefe5`, and the pictures under Player experience are from that run.
 
-Not done: play in a real client, a two-client dedicated-server session (two cooks at one stove, board and cabinet), and in-game screenshots.
+Not done: play in a real client and a two-client dedicated-server session (two cooks at one stove, board and cabinet).
 
 ## World and event applicability
 Kitchen equipment and food only: no world generation, creatures, dimensions or loot tables beyond each block dropping itself. Nothing is seasonal.
