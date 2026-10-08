@@ -2025,11 +2025,12 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(HearthOvenBlockEntity::new, oven).build());
 		registerItem("hearth_oven", props -> new BlockItem(oven, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		registerItem("pastry_dough", Item::new, new Item.Properties().compostable(COMPOST_MEDIUM), INGREDIENT_TAB);
-		// The cakes the owner drew (tools/cakes.py) are baked the same way, from Cake Batter, and set down as CakeBlocks.
+		// The cakes the owner drew (tools/cakes.py) are baked the same way, from Cake Batter, and set down as CakeBlocks; so are
+		// the owner's square pies and tarts (tools/pies_and_tarts.py), each at its own height.
 		plain("cake_batter", COMPOST_MEDIUM);
 		for (PieFilling filling : PieFilling.values()) {
 			registerItem(filling.rawPie(), Item::new, new Item.Properties().stacksTo(16).compostable(COMPOST_MEDIUM_HIGH), FOOD_TAB);
-			Block pie = registerBlock(filling.pie(), props -> filling.cake ? new CakeBlock(filling, props) : new PieBlock(filling, props),
+			Block pie = registerBlock(filling.pie(), props -> filling.height > 0 ? new CakeBlock(filling, filling.height, props) : new PieBlock(filling, props),
 					BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(0.5F).sound(SoundType.WOOL).noOcclusion()
 							.pushReaction(PushReaction.POPPED));
 			registerItem(filling.pie(), props -> new BlockItem(pie, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);

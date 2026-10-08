@@ -25,6 +25,8 @@ import soil
 import orchard
 import cakes
 import cake_data
+import pie_tart_data
+import pies_and_tarts
 import owner_art
 import werewolf_model
 import midway
@@ -3695,7 +3697,7 @@ def check_cakes():
     quarters = [tuple(map(int, q)) for q in re.findall(r"\{(\d+), (\d+), (\d+), (\d+)\}", block.split("QUARTERS =", 1)[-1].split(";", 1)[0])]
     if quarters != [(x0, z0, x1, z1) for (x0, z0), (x1, z1) in cake_data.QUARTERS]:
         err("CakeBlock.QUARTERS differs from tools/cake_data.py QUARTERS (the order slices are taken)")
-    for call in ("filling.cake ? new CakeBlock(filling, props)", 'registerBlock("burnt_cake", props -> new CakeBlock(null, props)',
+    for call in ("filling.height > 0 ? new CakeBlock(filling, filling.height, props)", 'registerBlock("burnt_cake", props -> new CakeBlock(null, props)',
                  f'plain("{cakes.BATTER}"'):
         if call not in main:
             err(f"JugcraftAgriculture.java must call {call}")
@@ -3741,6 +3743,66 @@ def check_cakes():
         err("Cake Batter needs its recipe")
     if not (ROOT / "art" / "owner-library" / "drawings" / "cakes_and_bakes.png").exists():
         err("The owner's drawing the cakes are rebuilt from (art/owner-library/drawings/cakes_and_bakes.png) is missing")
+
+
+def check_pies_and_tarts():
+    """The owner's pies and tarts (tools/pies_and_tarts.py): Java's PieFilling holds them after the cakes, as BAKES has
+    them (ID, slice food, filling colour and height, in order), and they are set down as CakeBlocks of that height; every
+    bake has a model for each slice gone, a blockstate for each slice and facing (turned as the model faces north), its
+    textures (the toppings' too where it has them), words and loot (only while whole); its toppings stand on its top
+    within its crust (a tart's within its rim); the raw bakes and the slices have their words and textures, the raw bakes
+    their recipes (Pastry Dough, sugar but in the pork pie, and their own ingredients); the drawing they were rebuilt from
+    is kept."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    filling = java.get("PieFilling", "")
+    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6}), (\d+)\)[,;]', filling, re.M)
+    declared = [(c, i, f, s_, col.upper(), h) for c, i, f, s_, col, h in declared]
+    wanted = [(bake.upper(), bake, str(info["food"][0]), str(info["food"][1]), f"{info['color']:06X}", str(pies_and_tarts.height(bake)))
+              for bake, info in pies_and_tarts.BAKES.items()]
+    if declared != wanted:
+        err(f"PieFilling.java's pies and tarts {declared} differ from tools/pies_and_tarts.py BAKES (ID, slice food, colour, height, in order)")
+    last_cake = max((filling.find(f'"{c}"') for c in cakes.CAKES), default=-1)
+    if filling.find(f'"{next(iter(pies_and_tarts.BAKES))}"') < last_cake:
+        err("PieFilling.java must list the pies and tarts after the cakes: the Hearth Oven saves a filling by its place")
+    if "public CakeBlock(@Nullable PieFilling filling, int height, Properties properties)" not in java.get("CakeBlock", ""):
+        err("CakeBlock must take its height, for the pies and tarts")
+    if "filling.height > 0 ? new CakeBlock(filling, filling.height, props)" not in main:
+        err("JugcraftAgriculture.java must set the pies and tarts down as CakeBlocks of their height")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for bake, info in pies_and_tarts.BAKES.items():
+        if lang.get(f"block.{MOD}.{bake}") != info["display"]:
+            err(f"{bake} has no words, or not \"{info['display']}\"")
+        for bites in range(len(pie_tart_data.QUARTERS)):
+            if not (ASSETS / "models" / "block" / f"{pie_tart_data.model_name(bake, bites)}.json").exists():
+                err(f"{bake} needs its model {pie_tart_data.model_name(bake, bites)}")
+        variants = (load(ASSETS / "blockstates" / f"{bake}.json") or {}).get("variants", {})
+        for bites in range(len(pie_tart_data.QUARTERS)):
+            for facing, turn in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+                variant = variants.get(f"bites={bites},facing={facing}", {})
+                if variant.get("model") != f"{MOD}:block/{pie_tart_data.model_name(bake, bites)}" or variant.get("y", 0) != turn:
+                    err(f"{bake}'s blockstate must show {pie_tart_data.model_name(bake, bites)} turned {turn} for facing={facing}")
+        if '"bites": "0"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{bake}.json") or {}):
+            err(f"{bake} must drop only while whole")
+        for texture in ["top", "front", "side", "inside"] + (["toppings"] if info.get("toppings") else []):
+            path = ASSETS / "textures" / "block" / f"{bake}_{texture}.png"
+            if not path.exists():
+                err(f"{bake} needs its texture {bake}_{texture}")
+            elif Image.open(path).size != (16, 16):
+                err(f"{bake}_{texture}.png must be 16 x 16")
+        lo_edge, hi_edge = (0, 16) if info["shape"] == "pie" else (pies_and_tarts.INSET, 16 - pies_and_tarts.INSET)
+        for lo, hi in pies_and_tarts.topping_boxes(bake):
+            if lo[1] != pies_and_tarts.top_of(bake) or not (lo_edge <= lo[0] and hi[0] <= hi_edge and lo_edge <= lo[2] and hi[2] <= hi_edge):
+                err(f"{bake}'s topping at {lo}-{hi} must stand on its top, within its crust")
+        for item in (pies_and_tarts.raw(bake), pies_and_tarts.slice_item(bake)):
+            if f"item.{MOD}.{item}" not in lang or not (ASSETS / "textures" / "item" / f"{item}.png").exists():
+                err(f"The pies and tarts need the words and texture of {item}")
+        recipe = load(DATA / MOD / "recipe" / f"{pies_and_tarts.raw(bake)}.json") or {}
+        inputs = [f"{MOD}:{pies_and_tarts.DOUGH}"] + ([] if info.get("savory") else ["minecraft:sugar"]) + info["with"]
+        if sorted(json.dumps(i, sort_keys=True) for i in recipe.get("ingredients", [])) != sorted(json.dumps(i) for i in inputs):
+            err(f"{pies_and_tarts.raw(bake)}'s recipe must take {inputs}")
+    if not (ROOT / "art" / "owner-library" / "drawings" / "pies_and_tarts.png").exists():
+        err("The owner's drawing the pies and tarts are rebuilt from (art/owner-library/drawings/pies_and_tarts.png) is missing")
 
 
 def check_orchard():
@@ -10681,6 +10743,7 @@ def main():
     check_soil()
     check_orchard()
     check_cakes()
+    check_pies_and_tarts()
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()

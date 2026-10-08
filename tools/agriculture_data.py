@@ -70,6 +70,7 @@ import rice_data
 import soil_data
 import orchard_data
 import cake_data
+import pie_tart_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
                          HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, STALKS, WILD_BONUS, crop_blocks)
@@ -281,6 +282,7 @@ def assets(root, write, lang):
     soil_data.assets(root, write, lang)
     orchard_data.assets(root, write, lang)
     cake_data.assets(root, write, lang)
+    pie_tart_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -427,6 +429,7 @@ def loot(data, write):
     soil_data.loot(out, write)
     orchard_data.loot(out, write)
     cake_data.loot(out, write)
+    pie_tart_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -566,6 +569,7 @@ def tags(tags):
     soil_data.tags(tags)
     orchard_data.tags(tags)
     cake_data.tags(tags)
+    pie_tart_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen
