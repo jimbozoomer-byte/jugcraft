@@ -1004,6 +1004,17 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - inspected, seen in third person and in the inventory, and held with each set of its attachments fitted.
     - The new guns' screenshots are `jugcraft_guns_bulldog_pistol_*`, `jugcraft_guns_marshal_revolver_*` and `jugcraft_guns_sapper_revolver_*`.
   - The inventory screenshot is now two, `jugcraft_guns_inventory` (the guns and rounds) and `jugcraft_guns_inventory_attachments`: fifteen guns, four rounds and eighteen attachments no longer fit one inventory.
+- **Slice 8 in CI** ([run 37734950290](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37734950290), on c6f8c5772): every check passed.
+  - `mod`: the build and the server game tests passed, `handGunsLandAndLoad` among them.
+  - `client` (shard 0): `GunsClientGameTests` passed. Its log:
+    - **Bulldog Pistol:** aimed, the view narrowed to 0.9; fired, 6 flash frames, the husk 870.5 → 859.5 and rounds 1 → 0; reloaded 1, 31 Rifle Rounds left; 1 casing thrown.
+    - **Marshal Revolver:** aimed, 0.85; fired, 5 flash frames, the husk 859.5 → 854.5 and rounds 6 → 5; reloaded 6, 31 Light Rounds left; no casings (its animations cue none).
+    - **Sapper Revolver:** aimed, 0.9; fired, 5 flash frames, the husk 854.5 → 850.0 and rounds 6 → 5; reloaded 6, 31 left; 4 casings thrown.
+  - **Screenshots:**
+    - Mid-reload, the Bulldog's left hand brings the brass round up to the opened breech, the round on its fingertips.
+    - The Marshal's and Sapper's reloads raise the gun close, and the arms cover much of the screen, as the previews showed.
+    - Aimed, the gun hand's fist covers the lower middle of the screen, over the sights. The Warden Pistol, Duelling Pistol and Longhorn Rifle do the same in that run, so this predates slice 8 ([Rollout](#rollout-and-open-questions)).
+    - Both inventory screenshots are drawn.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -1013,6 +1024,7 @@ Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns 
 - **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **Later slices,** each its own pull request: the other three gun sets the owner chose on 8 October 2026 (the dieselpunk service arms, the heavy weapons and the energy weapons; the revolvers are slice 8); the tactical grip and the laser sight.
+- **Aimed, the gun hand covers the sights:** in the CI screenshots of 8 October, the right fist sits over the lower middle of the screen when aiming, on the one-handed guns and some long ones. The arm runs back toward the camera from the grip drawn at the middle of the view. This is a polish item for a pull request of its own.
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - off-hand guns;
