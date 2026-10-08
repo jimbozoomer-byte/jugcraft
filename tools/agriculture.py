@@ -27,6 +27,7 @@ import soil
 import orchard
 import cakes
 import pies_and_tarts
+import milkshakes
 import fruit_crops
 
 FEATURE = "agriculture"
@@ -2637,7 +2638,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks() + milkshakes.blocks())
 
 
 def all_items():
@@ -2795,6 +2796,11 @@ SHAPELESS += cakes.SHAPELESS
 # The owner's square pies and tarts (tools/pies_and_tarts.py), baked in the Hearth Oven after the cakes (PieFilling); their
 # blocks, models and textures are tools/pie_tart_data.py's and tools/pie_tart_art.py's.
 SHAPELESS += pies_and_tarts.SHAPELESS
+
+# The owner's milkshakes (tools/milkshakes.py): drinks of the menu's kind, set down as their 3D glass (menu.all_placed());
+# their models and textures are tools/milkshake_data.py's and tools/milkshake_art.py's.
+ITEMS.update(milkshakes.ITEMS)
+SHAPELESS += milkshakes.SHAPELESS
 
 # The fruit crops (tools/fruit_crops.py): strawberry, blueberry and coffee bushes (TALL_CROPS, after the others), their wild
 # plants and seeds, coffee beans, and the jams. The plum and banana trees are orchard trees (tools/orchard.py TREES).

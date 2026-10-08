@@ -81,7 +81,14 @@ public final class MenuDishes {
 			new Dish("kelp_roll", DishShape.FLAT),
 			new Dish("kelp_roll_slice", DishShape.FLAT),
 			new Dish("orange_juice", DishShape.STAND),
-			new Dish("lemonade", DishShape.STAND));
+			new Dish("lemonade", DishShape.STAND),
+			new Dish("strawberry_milkshake", DishShape.MILKSHAKE),
+			new Dish("banana_milkshake", DishShape.MILKSHAKE),
+			new Dish("plum_milkshake", DishShape.MILKSHAKE),
+			new Dish("apple_milkshake", DishShape.MILKSHAKE),
+			new Dish("blueberry_milkshake", DishShape.MILKSHAKE),
+			new Dish("pumpkin_milkshake", DishShape.MILKSHAKE),
+			new Dish("chocolate_milkshake", DishShape.MILKSHAKE));
 
 	private MenuDishes() {
 	}

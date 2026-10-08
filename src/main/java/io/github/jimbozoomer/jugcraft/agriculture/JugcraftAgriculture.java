@@ -650,6 +650,7 @@ public final class JugcraftAgriculture {
 		registerRice();
 		registerSoil();
 		registerOrchards();
+		registerMilkshakes();
 		registerPlacedDishes();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
@@ -2930,6 +2931,21 @@ public final class JugcraftAgriculture {
 		food("banana", 4, 0.4F, COMPOST_MEDIUM_HIGH);
 		seeds("banana_pup", "banana_sapling", COMPOST_LOW);
 		preserve("plum_jam", 3, 0.4F, null, 0, 0x6A1E4A);
+	}
+
+	/**
+	 * The owner's milkshakes (tools/milkshakes.py), from their "CAKES &amp; BAKES - 3D MILKSHAKE" page: drinks of the menu's
+	 * kind, each made from a Milk Bottle, a snowball, a sugar and its own flavour, and set down as the owner's 3D glass
+	 * ({@link MenuDishes}, {@link PlacedDishBlock.DishShape#MILKSHAKE}).
+	 */
+	private static void registerMilkshakes() {
+		drink("strawberry_milkshake", 5, 0.6F, MobEffects.HASTE, 30);
+		drink("banana_milkshake", 5, 0.6F, MobEffects.HASTE, 30);
+		drink("plum_milkshake", 5, 0.6F, MobEffects.HASTE, 30);
+		drink("apple_milkshake", 5, 0.6F, MobEffects.HASTE, 30);
+		drink("blueberry_milkshake", 5, 0.6F, MobEffects.HASTE, 30);
+		drink("pumpkin_milkshake", 5, 0.6F, MobEffects.HASTE, 30);
+		drink("chocolate_milkshake", 5, 0.6F, MobEffects.HASTE, 30);
 	}
 
 	/**

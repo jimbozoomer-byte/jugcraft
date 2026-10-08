@@ -212,6 +212,12 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The *Arcane Concordance* codex (Modonomicon) unlocks its pages with your research. Jade, JEI and LambDynamicLights show the bench, its workings and the lantern's glow when installed. Jugcraft's weapons no longer receive Spell Engine's automatic weapon skills.
 - Record: [arcane-concordance-first-light.md](docs/features/arcane-concordance-first-light.md); the whole plan: [ARCANE_CONCORDANCE.md](docs/ARCANE_CONCORDANCE.md).
 
+### Unmerged: Milkshakes
+- Seven milkshakes the owner drew, each read off their drawing as its own sundae glass: **Strawberry, Banana, Plum, Apple, Blueberry, Pumpkin and Chocolate**, with the fruit on top and a straw through the cream.
+- Made by hand from a **Milk Bottle**, a snowball, a sugar and the flavour. Drunk even when full, for five food and half a minute of Haste, leaving the glass bottle.
+- Set down by sneaking, facing you, as the 3D glass, and taken back with an empty hand. In the inventory, too, a milkshake is its glass.
+- Details: [docs/features/milkshakes.md](docs/features/milkshakes.md).
+
 ### Unmerged: Pies and tarts
 - Ten pies and tarts the owner drew, rebuilt from their drawing: **Strawberry, Plum, Banoffee, Whipped Pumpkin and Pork Pies** and **Blueberry, Sweet Berry, Lemon, Strawberry and Coffee Tarts**, with the drawing's lattices, cream, berries and lemon on top.
 - Baked in the **Hearth Oven** as the pies are: Pastry Dough, a sugar (none in the pork pie) and the bake's own ingredients make a raw pie or tart. Left in too long, it comes out a **Burnt Pie**.

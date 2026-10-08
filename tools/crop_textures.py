@@ -954,6 +954,8 @@ def crop_textures():
     out.update(fruit_crop_textures())
     from pie_tart_art import pie_tart_textures  # and the owner's pies and tarts, rebuilt from their drawing of them
     out.update(pie_tart_textures())
+    from milkshake_art import milkshake_textures  # and the owner's milkshakes, read off their drawing of them
+    out.update(milkshake_textures())
     from wood_style import wood_textures  # and, last, every tree's woods and leaves, after the owner's paintings
     out.update(wood_textures())
     return out
