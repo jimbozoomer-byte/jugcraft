@@ -51,6 +51,7 @@ import mech
 import landship
 import artillery
 import tower_guns
+import guns
 import fortifications
 import bunkerworks
 import fire_control
@@ -171,7 +172,12 @@ def item_models(definition):
     """Every model an item definition can show, through select (the blueprint's kinds), condition and range_dispatch
     (the power bow's draw)."""
     if "model" in definition:
-        model(definition["model"])
+        if isinstance(definition["model"], str):
+            model(definition["model"])
+        else:
+            item_models(definition["model"])  # a special model's renderer (GeckoLib's guns) names no model of its own
+    if definition.get("type") == "minecraft:special":
+        model(definition["base"])  # the base model gives a special model its display transforms and particle
     for case in definition.get("cases", []):
         item_models(case["model"])
     for key in ("on_true", "on_false", "fallback"):
@@ -347,7 +353,7 @@ def item_units(ref):
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
             or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
-            or path in concordance.items() or path in concordance.blocks():
+            or path in guns.items() or path in concordance.items() or path in concordance.blocks():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -377,7 +383,7 @@ def item_units(ref):
 
 
 # Special recipes, which make their result from what is in the grid: their type, registered by Java.
-SPECIAL_RECIPES = {f"{MOD}:{decor18.KEY['recipe']}"}
+SPECIAL_RECIPES = {f"{MOD}:{decor18.KEY['recipe']}", f"{MOD}:gun_attachment", f"{MOD}:gun_attachment_removal"}
 
 
 def check_recipes(registered):
@@ -589,7 +595,7 @@ def check_tags():
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
-                                                    + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
+                                                    + guns.items() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         if registry == "entity_type":
             # These entity IDs have no same-named item. Derive them from actual registrations.
             scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
@@ -1382,6 +1388,99 @@ def check_grapple():
     for path in ("item/pneumatic_grapple.png", "entity/grapple_hook.png"):
         if not (ASSETS / "textures" / path).exists():
             err(f"Missing texture {path}")
+
+
+def check_guns():
+    """guns/JugcraftGuns.java and client/guns/GunAnimations.java against tools/guns.py: each gun's numbers, the rounds,
+    the sound events and the animation sounds' aliases; then tools/guns.py's own check that every GeckoLib model gives
+    back the owner's parts face for face, that the animations and sounds are the library's files unchanged, and that
+    every sound an animation plays exists."""
+    java = (JAVA_ROOT / "guns" / "JugcraftGuns.java").read_text(encoding="utf-8")
+    for gun, spec in guns.GUNS.items():
+        reload, start, each, finish = (spec["reload"], 0, 0, 0) if isinstance(spec["reload"], int) else (0, *spec["reload"])
+        line = (f'SPECS.put("{gun}", new GunSpec({spec["damage"]}F, {spec["pellets"]}, {spec["interval"]}, '
+                f'{str(spec["auto"]).lower()}, {spec["capacity"]}, {reload}, {start}, {each}, {finish}, {spec["spread"][0]}F, '
+                f'{spec["spread"][1]}F, {spec["range"]}, "{spec["ammo"]}"));')
+        if line not in java:
+            err(f"JugcraftGuns.SPECS differs from tools/guns.py for {gun}: expected {line}")
+    for kind, att in guns.ATTACHMENTS.items():
+        effects = ", ".join(f"{float(att['effects'].get(e, 1.0))}F" for e in guns.EFFECTS)
+        line = (f'ATTACHMENTS.put("{kind}", new GunAttachment("{att["slot"]}", {str(att["replaces"]).lower()}, {effects}, '
+                f'{float(att.get("stab", 0.0))}F));')
+        if line not in java:
+            err(f"JugcraftGuns.ATTACHMENTS differs from tools/guns.py for {kind}: expected {line}")
+    accepts = {gun: re.findall(r'"([a-z_]+)"', listed) for gun, listed in re.findall(r'ACCEPTS\.put\("([a-z_]+)", List\.of\(([^)]*)\)\)', java)}
+    expected = {gun: guns.fits(gun) for gun in guns.GUNS if guns.fits(gun)}
+    if accepts != expected:
+        err(f"JugcraftGuns.ACCEPTS differs from tools/guns.py fits(): {accepts} != {expected}")
+    slots = re.search(r"SLOTS = List\.of\(([^)]*)\)", java)
+    if not slots or re.findall(r'"([a-z_]+)"', slots.group(1)) != list(guns.SLOTS):
+        err(f"JugcraftGuns.SLOTS differs from tools/guns.py {list(guns.SLOTS)}")
+    listed = re.search(r"AMMO = List\.of\(([^)]*)\)", java)
+    if not listed or re.findall(r'"([a-z_]+)"', listed.group(1)) != list(guns.AMMO):
+        err(f"JugcraftGuns.AMMO differs from tools/guns.py {list(guns.AMMO)}")
+    events = re.search(r"SOUND_EVENTS = List\.of\(([^)]*)\)", java)
+    shared = [name.removeprefix("guns.") for name in guns.sound_events() if name.count(".") == 1]
+    if not events or re.findall(r'"([a-z_]+)"', events.group(1)) != shared:
+        err(f"JugcraftGuns.SOUND_EVENTS differs from tools/guns.py {shared}")
+    sounds = load(ASSETS / "sounds.json") or {}
+    for name in guns.sound_events():
+        if name not in sounds:
+            err(f"sounds.json has no {name}")
+    animations = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "guns"
+                  / "GunAnimations.java").read_text(encoding="utf-8")
+    for alias, path in guns.EVENT_SOUNDS.items():
+        if alias != "rustle" or guns.EVENT_SOUNDS["gun_rustle"] != path:
+            continue
+        if 'Map.of("rustle", "gun_rustle")' not in animations:
+            err("GunAnimations.SOUND_ALIASES does not play gun_rustle for rustle (tools/guns.py EVENT_SOUNDS)")
+    for gun, overrides in guns.EVENT_OVERRIDES.items():
+        for event, sound in overrides.items():
+            if f'"{gun}", Map.of("{event}", "{sound}")' not in animations:
+                err(f"GunAnimations.GUN_SOUND_ALIASES does not play {sound} for {gun}'s {event} (tools/guns.py)")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in [f"key.{MOD}.reload", f"key.{MOD}.inspect", f"hud.{MOD}.guns.ammo", f"hud.{MOD}.guns.reloading",
+                f"message.{MOD}.guns.no_ammo", f"death.attack.{MOD}.bullet", f"tooltip.{MOD}.guns.fits",
+                f"tooltip.{MOD}.guns.fitting", f"tooltip.{MOD}.guns.fitted", f"tooltip.{MOD}.guns.stab", f"key.{MOD}.stab"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
+                f"tooltip.{MOD}.guns.slot.{slot}" for slot in guns.SLOTS] + [f"tooltip.{MOD}.guns.effect.{e}" for e in guns.EFFECTS]:
+        if key not in lang:
+            err(f"Missing name {key}")
+    for gun in guns.GUNS:
+        for path in (f"geckolib/models/item/{gun}.geo.json", f"geckolib/animations/item/{gun}.animation.json",
+                     f"textures/item/guns/{gun}.png"):
+            if not (ASSETS / path).exists():
+                err(f"Missing {path}")
+    # Slice 6, the guns in use: the client's looks, the casings and the hooks that show them.
+    client_guns = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "guns"
+    looks = (client_guns / "GunLooks.java").read_text(encoding="utf-8")
+    for gun in guns.GUNS:
+        line = f'LOOKS.put("{gun}", new Look({str(guns.two_handed(gun)).lower()}, {guns.ZOOM[gun]}F));'
+        if line not in looks:
+            err(f"GunLooks.LOOKS differs from tools/guns.py for {gun}: expected {line}")
+    for ammo, size in guns.FLASH_SIZE.items():
+        if f'"{ammo}", {size}F' not in looks:
+            err(f"GunLooks.FLASH_SIZES differs from tools/guns.py FLASH_SIZE for {ammo} ({size})")
+    hide = re.search(r"HIDE_FLASH = List\.of\(([^)]*)\)", looks)
+    hiding = [kind for kind, att in guns.ATTACHMENTS.items() if att.get("hides_flash")]
+    if not hide or re.findall(r'"([a-z_]+)"', hide.group(1)) != hiding:
+        err(f"GunLooks.HIDE_FLASH differs from tools/guns.py's hides_flash attachments {hiding}")
+    casings = re.search(r"CASING_AMMO = List\.of\(([^)]*)\)", java)
+    if not casings or re.findall(r'"([a-z_]+)"', casings.group(1)) != list(guns.CASINGS):
+        err(f"JugcraftGuns.CASING_AMMO differs from tools/guns.py CASINGS {list(guns.CASINGS)}")
+    for ammo in guns.CASINGS:
+        if load(ASSETS / "particles" / f"{ammo}_casing.json") != {"textures": [f"{MOD}:{ammo}_casing"]}:
+            err(f"particles/{ammo}_casing.json does not draw textures/particle/{ammo}_casing.png")
+    if f'EJECT_CUE = "{guns.EJECT_CUE}";' not in animations:
+        err(f"GunAnimations.EJECT_CUE differs from tools/guns.py ({guns.EJECT_CUE})")
+    client_mixins = load(ROOT / "src" / "client" / "resources" / f"{MOD}.client.mixins.json") or {}
+    if "GunFovMixin" not in client_mixins.get("client", []):
+        err(f"{MOD}.client.mixins.json does not list GunFovMixin (no zoom aimed down the sights)")
+    mixin_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin" / "client"
+    for mixin, call in (("ArmsRenderStateMixin", "GunPose.extract"), ("ArmsHumanoidModelMixin", "GunPose.apply")):
+        if call not in (mixin_dir / f"{mixin}.java").read_text(encoding="utf-8"):
+            err(f"{mixin} does not call {call} (a held gun would hang at the player's side, pointing down)")
+    for problem in guns.check():
+        err(f"guns: {problem}")
 
 
 def check_plastic():
@@ -9827,7 +9926,7 @@ def main():
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
-                  | set(concordance.items()) | set(concordance.blocks()))
+                  | set(guns.items()) | set(concordance.items()) | set(concordance.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
     check_petro()
@@ -9850,6 +9949,7 @@ def main():
     check_exosuit()
     check_worn_armor()
     check_grapple()
+    check_guns()
     check_field_chemistry()
     check_construction()
     check_hydroponics()

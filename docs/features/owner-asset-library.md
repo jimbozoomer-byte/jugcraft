@@ -10,6 +10,8 @@ Primary specialty: every content branch, including buildings, ores, metals, mach
 
 Browse [the shared library](../../art/owner-library/README.md), [paginated file catalogs](../../art/owner-library/catalog/README.md) and [searchable CSV inventory](../../art/owner-library/catalog/files.csv). The collection includes 16,449 supplied files: 15,749 PNGs, 30 JPEG reference sheets, 275 Ogg sounds, 186 animation JSON files and 209 texture metadata sidecars, plus six attached preview sheets.
 
+On 7 October 2026 the owner added the [gun models](../../art/owner-library/README.md#gun-models-7-october-2026): 2,589 files under `Guns/models/` (2,579 Blockbench Java model JSON files, 8 `.scmeta` attachment metadata files and 2 `.png.mcmeta` files), listed in the Guns catalog. The library now holds 19,038 supplied files.
+
 README.md, CONTRIBUTING.md, AGENTS.md, CLAUDE.md and ART_DIRECTION.md point contributors and AI agents to the library and record the owner's authorization for direct use, adaptation/recoloring or reference. Its scope is not limited to machinery.
 
 ## Connections and import contract
@@ -26,9 +28,13 @@ The library lives outside `src/main/resources/`; importing it does not add asset
 
 Source: project owner's supplied collection and six image attachments, 6 October 2026. The owner explicitly permits project contributors to use suitable files as reference, recolor/adapt them, or reuse them directly. Original filenames and relative folder structure are preserved. This records the owner's supplied provenance and authorization; filenames are not independent proof of authorship. Follow [LICENSE_POLICY.md](../../LICENSE_POLICY.md) and preserve any asset-specific attribution when integrating files. No license or permission changes are made for unrelated third-party content.
 
+The gun models are the owner's second upload, 7 October 2026, sent with the message "I have rights for all these". Their JSON keeps the supplied `scguns:` namespace as labels; an import rewrites references to `jugcraft:` and renames the model to Jugcraft's own name under the [fan-homage rules](../../LICENSE_POLICY.md#fan-homages).
+
 ## Verification
 
-All 16,449 original files and six preview attachments were copied byte-for-byte and matched by SHA-256. The CSV records a checksum for each original; [summary.json](../../art/owner-library/catalog/summary.json) records preview checksums and validation results. Images were verified with Pillow, animation JSON and `.mcmeta` were parsed, Ogg signatures were checked, and every `.mcmeta` was checked for an adjacent texture. No supplied-file validation issues were found.
+All 16,449 original files and six preview attachments were copied byte-for-byte and matched by SHA-256. The CSV records a checksum for each original; [summary.json](../../art/owner-library/catalog/summary.json) records preview checksums and validation results. Images were verified with Pillow, animation JSON and `.mcmeta` were parsed, Ogg signatures were checked, and every `.mcmeta` was checked for an adjacent texture. No supplied-file validation issues were found in that collection.
+
+The 2,589 gun model files were copied byte-for-byte and matched by SHA-256, and every one parsed as JSON. Their two `.png.mcmeta` files arrived without the PNGs beside them; summary.json records both. `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py` passed for that addition.
 
 `python scripts/check_repository.py` passed repository structure and local documentation link validation. Git whitespace checks passed for the documentation changes. No Java, recipes or runtime resources are changed; compilation and gameplay testing are not integration evidence for this library and have not been performed for it.
 

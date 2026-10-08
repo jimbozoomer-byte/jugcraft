@@ -35,6 +35,8 @@ All selected client files are installed by Jugcraft Complete. "Optional" means t
 
 Author models and clips in Blockbench and export the appropriate formats. GeckoLib plays authored animation; it does not create the models or poses. Use controllers for independent motions, meaningful preparation/release/recovery phases, and bounded effects. Retain simple existing renderers where they suffice.
 
+The first GeckoLib user is the [guns](features/guns.md): GeckoLib plays the owner's gun animations on each gun and, in the player's own first-person view, on the arms that hold it. The server times every shot and reload, and ArmsMotion does not touch guns.
+
 Jugcraft already has [ArmsMotion](features/arms-motion.md), including first-person and third-person weapon poses. Player Animation Library and Spell Engine do not automatically replace it. A feature using either must specify which system owns each action, transitions, off-hand behavior, handedness, riding, and remote-player playback. Keep hit timing and resource spending server-authoritative.
 
 Fusion requires authored texture/model definitions. High-resolution images and ordinary animated block/item sprites do not inherently require a library. Emissive surfaces, dynamic lighting, and shader bloom are different effects. Use LambDynamicLights only for visual illumination; gameplay lighting rules remain explicit. Test custom rendering with the pinned Sodium/Iris combination and without it.

@@ -134,6 +134,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		SeasonColors.register();
 		PartyClient.register();
 		ConcordanceClient.register();
+		GunsClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);

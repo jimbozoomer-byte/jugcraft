@@ -8,6 +8,39 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 7 (bayonets and the shared-texture guns)
+- **Four bayonets,** each the owner's art: **Iron**, **Steel** (the owner's anthralite one), **Diamond** and **Netherite** (a smithing upgrade). Under the barrel, in place of a grip. **V stabs** for 4 to 6 damage within reach, every 12 ticks; the server deals the blow. Seven guns take them.
+- **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.
+- Scopes wait for the owner's reticle textures. Record: [guns.md, slice 7](docs/features/guns.md#slice-7-bayonets-and-the-shared-texture-guns).
+
+### Unmerged: Guns, slice 6 (the guns in use)
+- **Muzzle flash:** each shot shows one of the owner's flash frames at the muzzle (or at a fitted muzzle brake or extended barrel), seen by everyone near; a silencer hides it, and black powder also blows a white cloud.
+- **Spent casings:** where the owner's animations eject a case, it flies out to the gun's side, tumbles and lands: copper for Light Rounds, brass for Rifle Rounds, red for Buckshot Shells. A muzzle-loader's lock puffs smoke instead.
+- **A zoom when aiming,** from 92% of the view (shotguns) to 75% (the Longhorn Rifle); and **the hold seen from outside:** the gun arm raised along the look, and for a two-handed gun the other arm across to the fore-end. Before, a gun in third person hung at the player's side, pointing down.
+- One new client mixin (the field of view; Fabric has no event for it). No new items; nothing saved; the server unchanged. Record: [guns.md, slice 6](docs/features/guns.md#slice-6-the-guns-in-use).
+
+### Unmerged: Guns, slice 5 (the attachments)
+- **Eleven attachments,** each the owner's model: the **Silencer** and **Baffled Silencer**, the **Muzzle Brake** and **Extended Barrel** (barrel); the **Extended Magazine** and **Speed Magazine**; the **Light**, **Weighted** and **Wooden Stocks**; the **Light** and **Vertical Grips**. One a slot; on each gun an attachment shows as that gun's own part.
+- **Fitted at a crafting table:** a gun and an attachment it takes give the gun with it fitted (one already in the slot stays in the grid); a gun and shears take the last one off. They change the gun's numbers: quieter shots, farther reach, tighter spread, less kick, more rounds or a quicker reload, each with its cost. Seven of the twelve guns take them so far. Record: [guns.md, slice 5](docs/features/guns.md#slice-5-the-attachments).
+
+### Unmerged: Guns, slice 4 (the black powder guns)
+- **Three of the owner's muzzle-loaders:** the **Duelling Pistol**, the **Line Musket** and the **Bellmouth** (a blunderbuss, ten balls a shot). One heavy shot, then a long reload: the ball goes down the muzzle and the ramrod drives it home, with the owner's animations.
+- **A new round, the Paper Cartridge** (paper, a lead nugget and gunpowder). The guns are the cheapest yet: iron, wood and a flint. Record: [guns.md, slice 4](docs/features/guns.md#slice-4-the-black-powder-guns).
+
+### Unmerged: Guns, slice 3 (the lever set)
+- **Three more of the owner's guns:** the **Longhorn Rifle** and the **Drover Rifle**, lever-action rifles worked between shots and loaded a round at a time, and the **Coach Gun**, an over-and-under shotgun that breaks open to load. The levers swing and the barrels tip open with the owner's animations.
+- They fire the existing Rifle Rounds and Buckshot Shells. Record: [guns.md, slice 3](docs/features/guns.md#slice-3-the-lever-set).
+
+### Unmerged: Guns, slice 2 (the iron set)
+- **Three more of the owner's guns,** in iron and brass: the **Warden Pistol** (a one-handed service pistol, 12 rounds), the **Riveter SMG** (automatic, 30 rounds) and the **Haymaker** (a one-handed pump shotgun, five shells loaded one at a time). Each has the owner's model, texture, animations and shot.
+- They fire the existing Light Rounds and Buckshot Shells; no new round or material. Record: [guns.md, slice 2](docs/features/guns.md#slice-2-the-iron-set).
+
+### Unmerged: Guns, slice 1
+- **The owner's first three guns,** with the owner's models, textures, animations and sounds: the **Rust Midge** (an automatic copper machine pistol), the **Patchwork Carbine** (a stockless carbine) and the **Thunderpipe** (a sawn-off double barrel, eight pellets a shot, loaded a shell at a time).
+- **Controls:** left click fires (held for the Midge), right click aims down the sights, G reloads, H inspects (both rebindable). In first person you see your own arms work the gun; a counter by the hotbar shows the rounds.
+- **Rounds:** Light Rounds, Rifle Rounds and Buckshot Shells, crafted from copper or brass, lead and gunpowder; the guns from copper, iron, planks and a lever. A new `guns` switch gates the recipes.
+- **The server decides every shot and reload;** bullets are instant along the look, and count as projectiles. Record: [guns.md](docs/features/guns.md).
+
 ### World Designer
 - An offline browser map editor sculpts terrain, paints installed biomes, places spawn and one Jugcraft walled city, and pins native village/structure start chunks.
 - `/jugcraft design export` supplies the editor and live mod catalog. Its exported datapack adds the **Jugcraft Designed** preset for new worlds; existing generated chunks are not edited.
