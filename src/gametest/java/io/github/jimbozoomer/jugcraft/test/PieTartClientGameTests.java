@@ -39,6 +39,12 @@ public class PieTartClientGameTests implements FabricClientGameTest {
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
 				.adjustSettings(creator -> creator.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE)).create()) {
 			singleplayer.getConnection().waitForChunksRender();
+			// Hide the HUD, hand and chat so the screenshots show only the bakes, whatever an earlier test in this client left.
+			context.runOnClient(client -> {
+				if (!client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
 			BlockPos origin = context.computeOnClient(client -> BlockPos.containing(client.player.position()));
 			int x = origin.getX();
 			int y = origin.getY();
@@ -66,14 +72,14 @@ public class PieTartClientGameTests implements FabricClientGameTest {
 				server.runCommand("summon minecraft:item_frame %d %d %d {Facing:3b,Fixed:1b,Item:{id:\"jugcraft:%s\",count:1}}"
 						.formatted(x + 1 + i % WALL, y + 3 - i / WALL, z + 19, items.get(i)));
 			}
-			// Long enough for the chat's lines from joining the world to fade from the screenshots.
-			context.waitTicks(200);
+			context.waitTicks(10);
 			singleplayer.getConnection().waitForChunksRender();
 
 			shoot(context, singleplayer, x + 4, y + 3, z + 1, 0, 32, "jugcraft_pies");
 			shoot(context, singleplayer, x + 16, y + 3, z + 1, 0, 32, "jugcraft_tarts");
 			shoot(context, singleplayer, x + 5, y + 2, z + 10, -45, 34, "jugcraft_pies_and_tarts_drawn");
-			shoot(context, singleplayer, x + 16, y + 1, z + 10, 0, 15, "jugcraft_pie_tart_ovens");
+			// From a dip in the ground, eye level with the ovens' mouths, to see the bakes inside.
+			shoot(context, singleplayer, x + 16, y - 1, z + 10, 0, 8, "jugcraft_pie_tart_ovens");
 			shoot(context, singleplayer, x + 5, y + 2, z + 24, 180, 5, "jugcraft_pie_tart_items");
 		}
 	}
@@ -111,13 +117,13 @@ public class PieTartClientGameTests implements FabricClientGameTest {
 		int y = origin.getY();
 		int z = origin.getZ();
 		// Two bakery displays facing north towards the camera, the pies' and the tarts': the whole bakes on the lower shelf,
-		// the cut ones a step up behind them.
+		// the cut ones a step up behind them, in the page's order from the camera's left (west is on its right).
 		List<PieFilling> pies = BAKES.stream().filter(b -> !b.pie().endsWith("_tart")).toList();
 		List<PieFilling> tarts = BAKES.stream().filter(b -> b.pie().endsWith("_tart")).toList();
 		for (int row = 0; row < 2; row++) {
 			List<PieFilling> shown = row == 0 ? pies : tarts;
 			for (int i = 0; i < shown.size(); i++) {
-				int at = x + 12 * row + 2 * i;
+				int at = x + 12 * row + 2 * (shown.size() - 1 - i);
 				set(level, new BlockPos(at, y, z + 5), Blocks.STRIPPED_OAK_WOOD.defaultBlockState());
 				set(level, new BlockPos(at, y + 1, z + 5), bake(shown.get(i).pie(), 0));
 				set(level, new BlockPos(at, y, z + 7), Blocks.STRIPPED_OAK_WOOD.defaultBlockState());
@@ -133,11 +139,13 @@ public class PieTartClientGameTests implements FabricClientGameTest {
 			set(level, pos, Blocks.STRIPPED_OAK_WOOD.defaultBlockState());
 			set(level, pos.above(), bake(drawn[i][0], Integer.parseInt(drawn[i][1])));
 		}
-		// Three Hearth Ovens facing the camera, baking a whipped pumpkin pie still raw, a blueberry tart baked and a plum pie burnt.
+		// Three Hearth Ovens facing the camera, baking (from its left) a whipped pumpkin pie still raw, a blueberry tart baked
+		// and a plum pie burnt, and the dip the camera stands in to look into them.
+		set(level, new BlockPos(x + 16, y - 1, z + 10), Blocks.AIR.defaultBlockState());
 		Object[][] ovens = {{PieFilling.WHIPPED_PUMPKIN_PIE, 0}, {PieFilling.BLUEBERRY_TART, HearthOvenBlockEntity.BAKED},
 				{PieFilling.PLUM_PIE, HearthOvenBlockEntity.BURNT}};
 		for (int i = 0; i < ovens.length; i++) {
-			BlockPos pos = new BlockPos(x + 14 + 2 * i, y, z + 13);
+			BlockPos pos = new BlockPos(x + 18 - 2 * i, y, z + 13);
 			set(level, pos, block("hearth_oven").defaultBlockState().setValue(HearthOvenBlock.FACING, Direction.NORTH));
 			if (level.getBlockEntity(pos) instanceof HearthOvenBlockEntity oven) {
 				oven.set(0, 0, (PieFilling) ovens[i][0], (Integer) ovens[i][1]);
