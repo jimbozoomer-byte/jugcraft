@@ -312,6 +312,17 @@ REAPER = {
     "under_light": (39, 34, 30), "under_mid": (29, 25, 22), "under_dark": (18, 15, 15), "under_darkest": (8, 7, 8),
     "hood_light": (82, 78, 72), "hood": (66, 62, 57), "hood_mid": (52, 48, 44), "hood_dark": (39, 35, 32),
 }
+# Banana (tools/banana_armor.py): the owner's banana costume: the metal is its yellow skin, from the lit ridges to the
+# shade; "leather" the brown of its stem and its blackened tip; "gold" its brown speckles; the under-layer the darker
+# yellow inside the hole for the face.
+BANANA = {
+    "light": (246, 218, 96), "mid_light": (232, 196, 70), "mid": (214, 172, 52), "dark": (184, 140, 38),
+    "seam": (146, 110, 26), "void": (104, 74, 22),
+    "gold_light": (150, 100, 40), "gold_dark": (124, 81, 30),
+    "leather_light": (101, 70, 21), "leather_mid_light": (85, 57, 14), "leather_mid": (70, 42, 10),
+    "leather_dark": (56, 33, 8), "leather_darkest": (41, 20, 5),
+    "under_light": (150, 114, 34), "under_mid": (126, 94, 26), "under_dark": (100, 74, 20), "under_darkest": (64, 46, 12),
+}
 # The smoke test's face colours (tools/armor_smoke.py): one hue per face, so a render shows which face is where.
 TEST = {**STEEL, "t_top": (230, 230, 90), "t_bottom": (90, 70, 40), "t_right": (220, 70, 70), "t_front": (80, 200, 90),
         "t_left": (70, 110, 230), "t_back": (200, 90, 210), "t_mark": (20, 20, 20), "t_rule": (255, 255, 255)}

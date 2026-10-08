@@ -212,6 +212,14 @@ and its apron of pleats; the dark wrapped boots with white bands.
                     the hood's)
     U u x X         the void's black: "under_light" to "under_dark", and "under_darkest", its outline
     a b e f         the hood's browns: "hood_light", "hood", "hood_mid", "hood_dark"
+Banana (tools/banana_armor.py, armor_paint.BANANA): the tall yellow box with the hole for the face and the brown stem
+on top; the yellow tube round the body, its ridges and speckles; the tube round the legs; its foot round the shins with
+the brown end sticking out on the right.
+    H L M D S V     the yellow, lit to shade ("O" is its void taken down)
+    G g             the brown speckles: "gold_light", "gold_dark"
+    C c q Q K       the stem's and the end's browns: "leather_light" to "leather_dark", and "leather_darkest", their
+                    outline
+    U u x X         inside the hole: "under_light" to "under_dark", and "under_darkest"
 """
 import os
 
@@ -315,7 +323,11 @@ OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "
                                        "G": "gold_light", "g": "gold_dark", "C": "leather_light", "c": "leather_mid_light",
                                        "q": "leather_mid", "Q": "leather_dark", "K": "leather_darkest",
                                        "U": "under_light", "u": "under_mid", "x": "under_dark", "X": "under_darkest",
-                                       "a": "hood_light", "b": "hood", "e": "hood_mid", "f": "hood_dark"})}
+                                       "a": "hood_light", "b": "hood", "e": "hood_mid", "f": "hood_dark"}),
+       "banana": (armor_paint.BANANA, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam", "V": "void",
+                                       "G": "gold_light", "g": "gold_dark", "C": "leather_light", "c": "leather_mid_light",
+                                       "q": "leather_mid", "Q": "leather_dark", "K": "leather_darkest",
+                                       "U": "under_light", "u": "under_mid", "x": "under_dark", "X": "under_darkest"})}
 
 
 def luma(colour):

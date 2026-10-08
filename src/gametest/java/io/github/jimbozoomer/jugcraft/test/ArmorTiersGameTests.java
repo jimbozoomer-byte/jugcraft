@@ -86,7 +86,10 @@ public class ArmorTiersGameTests {
 					"minecraft:packed_ice", false),
 			// Reaper: netherite's defense, good enchanting, less toughness, barely any knockback resistance; mended with bone.
 			new Tier("reaper", new int[] {3, 8, 6, 3}, new int[] {462, 672, 630, 546}, 2.5, 0.05, 24,
-					"minecraft:bone", false));
+					"minecraft:bone", false),
+			// Banana: a costume: iron's defense, no toughness or knockback resistance, long wear, the best enchanting.
+			new Tier("banana", new int[] {2, 6, 5, 2}, new int[] {275, 400, 375, 325}, 0.0, 0.0, 30,
+					"minecraft:yellow_wool", false));
 
 	/** Every tier's four pieces have its numbers, repair, fire resistance, slot, look and tags. */
 	@GameTest

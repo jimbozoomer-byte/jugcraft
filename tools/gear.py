@@ -195,6 +195,10 @@ ARMOR_TIERS = {
     # knockback resistance; mended with bone.
     "reaper": {"display": "Reaper", "armor": (42, (3, 6, 8, 3), 24, 2.5, 0.05),
                "repair": "minecraft:bone", "fire_resistant": False},
+    # Banana: a costume, not plate: iron's defense, no toughness or knockback resistance, but long wear and the best
+    # enchanting of all; mended with yellow wool.
+    "banana": {"display": "Banana", "armor": (25, (2, 5, 6, 2), 30, 0.0, 0.0),
+               "repair": "minecraft:yellow_wool", "fire_resistant": False},
 }
 
 
