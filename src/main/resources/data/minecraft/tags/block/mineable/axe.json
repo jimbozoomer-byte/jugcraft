@@ -92,14 +92,6 @@
     "jugcraft:theremin",
     "jugcraft:ofrenda",
     "jugcraft:lych_gate",
-    "jugcraft:verdant_heart",
-    "jugcraft:mulch_maw",
-    "jugcraft:habitat_gauge",
-    "jugcraft:gleaner",
-    "jugcraft:courier_post",
-    "jugcraft:assayers_scale",
-    "jugcraft:conclave_lectern",
-    "jugcraft:lampwright_bench",
     "jugcraft:cutting_board",
     "jugcraft:oak_cabinet",
     "jugcraft:spruce_cabinet",
@@ -124,6 +116,14 @@
     "jugcraft:tomato_crate",
     "jugcraft:wooden_basket",
     "jugcraft:bamboo_basket",
-    "jugcraft:banana_stem"
+    "jugcraft:banana_stem",
+    "jugcraft:verdant_heart",
+    "jugcraft:mulch_maw",
+    "jugcraft:habitat_gauge",
+    "jugcraft:gleaner",
+    "jugcraft:courier_post",
+    "jugcraft:assayers_scale",
+    "jugcraft:conclave_lectern",
+    "jugcraft:lampwright_bench"
   ]
 }

@@ -32,7 +32,11 @@ GENERATED_DIRS = [
     RES / "assets" / "minecraft",
     # The Arcane Concordance (tools/concordance.py): its rules, spells, Spell Engine opt-outs, codex and client clips.
     DATA / MOD / "concordance", DATA / MOD / "spell", DATA / MOD / "spell_assignments", DATA / MOD / "modonomicon",
-    ASSETS / "player_animations", ASSETS / "dynamiclights", ASSETS / "geckolib",
+    ASSETS / "player_animations", ASSETS / "dynamiclights",
+    # Item models/animations belong to tools/guns.py and are committed separately.
+    # Only remove the Concordance block/entity outputs regenerated in this pass.
+    *[ASSETS / "geckolib" / kind / category
+      for kind in ("models", "animations") for category in ("block", "entity")],
 ]
 
 CABLE_ROTATION = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {"y": 270},

@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:verdant_bed",
-    "jugcraft:rich_soil_farmland"
+    "jugcraft:rich_soil_farmland",
+    "jugcraft:verdant_bed"
   ]
 }
