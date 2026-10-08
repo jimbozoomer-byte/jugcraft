@@ -44,9 +44,9 @@ public class PieTartClientGameTests implements FabricClientGameTest {
 			int y = origin.getY();
 			int z = origin.getZ();
 			TestServerContext server = singleplayer.getServer();
+			server.runCommand("gamerule minecraft:send_command_feedback false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			server.runCommand("gamerule minecraft:send_command_feedback false");
 			// Within the fill command's limit of 32768 blocks.
 			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 6, y - 3, z - 8, x + 26, y - 1, z + 24));
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 6, y, z - 8, x + 26, y + 10, z + 24));
@@ -66,13 +66,14 @@ public class PieTartClientGameTests implements FabricClientGameTest {
 				server.runCommand("summon minecraft:item_frame %d %d %d {Facing:3b,Fixed:1b,Item:{id:\"jugcraft:%s\",count:1}}"
 						.formatted(x + 1 + i % WALL, y + 3 - i / WALL, z + 19, items.get(i)));
 			}
-			context.waitTicks(20);
+			// Long enough for the chat's lines from joining the world to fade from the screenshots.
+			context.waitTicks(200);
 			singleplayer.getConnection().waitForChunksRender();
 
-			shoot(context, singleplayer, x + 4, y + 3, z - 1, 0, 25, "jugcraft_pies");
-			shoot(context, singleplayer, x + 16, y + 3, z - 1, 0, 25, "jugcraft_tarts");
-			shoot(context, singleplayer, x + 2, y + 3, z + 10, -45, 31, "jugcraft_pies_and_tarts_drawn");
-			shoot(context, singleplayer, x + 16, y + 1, z + 9, 0, 12, "jugcraft_pie_tart_ovens");
+			shoot(context, singleplayer, x + 4, y + 3, z + 1, 0, 32, "jugcraft_pies");
+			shoot(context, singleplayer, x + 16, y + 3, z + 1, 0, 32, "jugcraft_tarts");
+			shoot(context, singleplayer, x + 5, y + 2, z + 10, -45, 34, "jugcraft_pies_and_tarts_drawn");
+			shoot(context, singleplayer, x + 16, y + 1, z + 10, 0, 15, "jugcraft_pie_tart_ovens");
 			shoot(context, singleplayer, x + 5, y + 2, z + 24, 180, 5, "jugcraft_pie_tart_items");
 		}
 	}
@@ -124,11 +125,11 @@ public class PieTartClientGameTests implements FabricClientGameTest {
 				set(level, new BlockPos(at, y + 2, z + 7), bake(shown.get(i).pie(), 1));
 			}
 		}
-		// The two the owner drew large, whole and cut, in a row across the view the owner drew them from (from above their
-		// front right): the strawberry pie whole, cut, then the blueberry tart whole, cut.
+		// The two the owner drew large, whole and cut, side by side across the view the owner drew them from (from above
+		// their front right): the strawberry pie whole, cut, then the blueberry tart whole, cut.
 		String[][] drawn = {{"strawberry_pie", "0"}, {"strawberry_pie", "1"}, {"blueberry_tart", "0"}, {"blueberry_tart", "1"}};
 		for (int i = 0; i < drawn.length; i++) {
-			BlockPos pos = new BlockPos(x + 9 - 2 * i, y, z + 11 + 2 * i);
+			BlockPos pos = new BlockPos(x + 9 - i, y, z + 11 + i);
 			set(level, pos, Blocks.STRIPPED_OAK_WOOD.defaultBlockState());
 			set(level, pos.above(), bake(drawn[i][0], Integer.parseInt(drawn[i][1])));
 		}
