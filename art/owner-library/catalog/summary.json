@@ -1,8 +1,8 @@
 {
-  "source": "Project owner uploads, 2026-10-06 and 2026-10-07",
-  "source_files": 19038,
-  "source_bytes": 33851386,
-  "unique_source_contents": 18166,
+  "source": "Project owner uploads, 2026-10-06 to 2026-10-08",
+  "source_files": 19056,
+  "source_bytes": 33870577,
+  "unique_source_contents": 18184,
   "uploads": [
     {
       "date": "2026-10-06",
@@ -16,6 +16,13 @@
       "path": "originals/Blocks/Guns/models",
       "files": 2589,
       "bytes": 8511427
+    },
+    {
+      "date": "2026-10-08",
+      "description": "Scope reticles, lens vignettes and muzzle flash frames (effect textures)",
+      "path": "originals/Blocks/Guns/effect",
+      "files": 18,
+      "bytes": 19191
     }
   ],
   "extensions": {
@@ -23,7 +30,7 @@
     ".json": 2765,
     ".mcmeta": 211,
     ".ogg": 275,
-    ".png": 15749,
+    ".png": 15767,
     ".scmeta": 8
   },
   "kinds": {
@@ -33,7 +40,7 @@
     "model JSON": 2579,
     "reference sheet": 30,
     "sound": 275,
-    "texture": 15540,
+    "texture": 15558,
     "texture metadata": 211
   },
   "categories": [
@@ -127,8 +134,8 @@
     },
     {
       "name": "Guns",
-      "files": 3790,
-      "bytes": 22636959,
+      "files": 3808,
+      "bytes": 22656150,
       "catalog": "guns/README.md",
       "source": "originals/Blocks/Guns",
       "pages": 16
@@ -248,6 +255,14 @@
     {
       "path": "originals/Blocks/Guns/models/item/shulker_core.png.mcmeta",
       "issue": "Texture metadata supplied without its PNG (no shulker_core.png beside it in the models upload). Its frame indices 0-6 fit the 16x112 strip originals/Blocks/Guns/item/shulker_core.png from the 2026-10-06 upload."
+    },
+    {
+      "path": "originals/Blocks/Guns/effect/red_dot_reticle.png",
+      "issue": "Embedded Photoshop history (XMP) records the file being opened and saved inside a Just Enough Guns mod source folder (assets/jeg/textures/effect/) on 2024-02-03. Asked about it on 2026-10-08, the owner answered that they made these files."
+    },
+    {
+      "path": "originals/Blocks/Guns/effect/muzzle_flash.png",
+      "issue": "Embedded Photoshop metadata (XMP) records the file as created in Adobe Photoshop CC 2019 on 2021-02-12. Asked about the upload on 2026-10-08, the owner answered that they made these files."
     }
   ]
 }

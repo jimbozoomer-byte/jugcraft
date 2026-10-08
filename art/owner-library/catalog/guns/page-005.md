@@ -6,6 +6,24 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 
 | File | Type | Image size | Metadata / texture |
 |---|---|---|---|
+| [Guns/item/syringe.png](../../originals/Blocks/Guns/item/syringe.png) | texture | 16×16 | — |
+| [Guns/item/syringe_3d.png](../../originals/Blocks/Guns/item/syringe_3d.png) | texture | 16×16 | — |
+| [Guns/item/target_tracker_module.png](../../originals/Blocks/Guns/item/target_tracker_module.png) | texture | 16×48 | — |
+| [Guns/item/team_log.png](../../originals/Blocks/Guns/item/team_log.png) | texture | 16×16 | — |
+| [Guns/item/tension_spring.png](../../originals/Blocks/Guns/item/tension_spring.png) | texture | 16×16 | — |
+| [Guns/item/terra_incognita.animation.json](../../originals/Blocks/Guns/item/terra_incognita.animation.json) | animation JSON | — | — |
+| [Guns/item/terra_incognita.png](../../originals/Blocks/Guns/item/terra_incognita.png) | texture | 128×256 | — |
+| [Guns/item/teslock_rifle.animation.json](../../originals/Blocks/Guns/item/teslock_rifle.animation.json) | animation JSON | — | — |
+| [Guns/item/teslock_rifle.png](../../originals/Blocks/Guns/item/teslock_rifle.png) | texture | 128×128 | — |
+| [Guns/item/the_pact.png](../../originals/Blocks/Guns/item/the_pact.png) | texture | 16×16 | — |
+| [Guns/item/thunderhead.animation.json](../../originals/Blocks/Guns/item/thunderhead.animation.json) | animation JSON | — | — |
+| [Guns/item/thunderhead.png](../../originals/Blocks/Guns/item/thunderhead.png) | texture | 128×128 | — |
+| [Guns/item/tl_runner.animation.json](../../originals/Blocks/Guns/item/tl_runner.animation.json) | animation JSON | — | — |
+| [Guns/item/tl_runner.png](../../originals/Blocks/Guns/item/tl_runner.png) | texture | 64×64 | — |
+| [Guns/item/treated_brass_blend.png](../../originals/Blocks/Guns/item/treated_brass_blend.png) | texture | 16×16 | — |
+| [Guns/item/treated_brass_blueprint.png](../../originals/Blocks/Guns/item/treated_brass_blueprint.png) | texture | 16×16 | — |
+| [Guns/item/treated_brass_boots.png](../../originals/Blocks/Guns/item/treated_brass_boots.png) | texture | 16×16 | — |
+| [Guns/item/treated_brass_chestplate.png](../../originals/Blocks/Guns/item/treated_brass_chestplate.png) | texture | 16×16 | — |
 | [Guns/item/treated_brass_flare.png](../../originals/Blocks/Guns/item/treated_brass_flare.png) | texture | 16×16 | — |
 | [Guns/item/treated_brass_gun_frame.png](../../originals/Blocks/Guns/item/treated_brass_gun_frame.png) | texture | 16×16 | — |
 | [Guns/item/treated_brass_helmet.png](../../originals/Blocks/Guns/item/treated_brass_helmet.png) | texture | 16×16 | — |
@@ -238,21 +256,3 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/models/block/lightning_battery_low_power.json](../../originals/Blocks/Guns/models/block/lightning_battery_low_power.json) | model JSON | — | — |
 | [Guns/models/block/lightning_battery_mid_power.json](../../originals/Blocks/Guns/models/block/lightning_battery_mid_power.json) | model JSON | — | — |
 | [Guns/models/block/lightning_battery_no_power.json](../../originals/Blocks/Guns/models/block/lightning_battery_no_power.json) | model JSON | — | — |
-| [Guns/models/block/lightning_rod_connector.json](../../originals/Blocks/Guns/models/block/lightning_rod_connector.json) | model JSON | — | — |
-| [Guns/models/block/lightning_rod_connector_on.json](../../originals/Blocks/Guns/models/block/lightning_rod_connector_on.json) | model JSON | — | — |
-| [Guns/models/block/lime_niter_glass_opaque.json](../../originals/Blocks/Guns/models/block/lime_niter_glass_opaque.json) | model JSON | — | — |
-| [Guns/models/block/macerator.json](../../originals/Blocks/Guns/models/block/macerator.json) | model JSON | — | — |
-| [Guns/models/block/macerator_on.json](../../originals/Blocks/Guns/models/block/macerator_on.json) | model JSON | — | — |
-| [Guns/models/block/macerator_wheels_on.json](../../originals/Blocks/Guns/models/block/macerator_wheels_on.json) | model JSON | — | — |
-| [Guns/models/block/magenta_niter_glass_opaque.json](../../originals/Blocks/Guns/models/block/magenta_niter_glass_opaque.json) | model JSON | — | — |
-| [Guns/models/block/mechanical_press_full.json](../../originals/Blocks/Guns/models/block/mechanical_press_full.json) | model JSON | — | — |
-| [Guns/models/block/mechanical_press_off.json](../../originals/Blocks/Guns/models/block/mechanical_press_off.json) | model JSON | — | — |
-| [Guns/models/block/mechanical_press_on.json](../../originals/Blocks/Guns/models/block/mechanical_press_on.json) | model JSON | — | — |
-| [Guns/models/block/mine_unit.json](../../originals/Blocks/Guns/models/block/mine_unit.json) | model JSON | — | — |
-| [Guns/models/block/mine_unit_primed.json](../../originals/Blocks/Guns/models/block/mine_unit_primed.json) | model JSON | — | — |
-| [Guns/models/block/mob_trap.json](../../originals/Blocks/Guns/models/block/mob_trap.json) | model JSON | — | — |
-| [Guns/models/block/mossy_asgharian_bricks.json](../../originals/Blocks/Guns/models/block/mossy_asgharian_bricks.json) | model JSON | — | — |
-| [Guns/models/block/mossy_asgharian_tiles.json](../../originals/Blocks/Guns/models/block/mossy_asgharian_tiles.json) | model JSON | — | — |
-| [Guns/models/block/nether_sulfur_ore.json](../../originals/Blocks/Guns/models/block/nether_sulfur_ore.json) | model JSON | — | — |
-| [Guns/models/block/niter_block.json](../../originals/Blocks/Guns/models/block/niter_block.json) | model JSON | — | — |
-| [Guns/models/block/niter_glass_opaque.json](../../originals/Blocks/Guns/models/block/niter_glass_opaque.json) | model JSON | — | — |
