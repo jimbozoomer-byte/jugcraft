@@ -25,7 +25,13 @@ Bake the owner's cakes and set them out:
 - **Set down whole,** a block wide and nine texels tall, its front to whoever set it down. A hungry player eats a quarter of it; a knife cuts a quarter off as a **slice** to take away. The front right quarter goes first, showing the cake's inside as the owner's INTERIOR drawing does, then the front left, the back left and the back right; the last quarter takes the cake. Only a whole cake can be picked up again.
 - **Inside:** the carrot cake's layers are the owner's own INTERIOR drawing; the layered cakes show their layers, the frosted ones a layer of their cream through the sponge, and the birthday cake a vanilla sponge in pink cream.
 
-<!-- Screenshots: added from CI's client game test once it has run. -->
+| **The display:** the seven cakes and the Burnt Cake whole on the lower shelf and cut on the upper (right to left: carrot, birthday, ice cream, red velvet, cheesecake, coffee, apple, burnt) | **As the owner drew it:** the carrot cake whole and cut, seen from above its front right |
+| --- | --- |
+| ![The cake display](../images/ingame_cakes.jpg) | ![The carrot cake whole and cut](../images/ingame_cakes_drawn.jpg) |
+| **Baking:** Hearth Ovens with a cake inside: burnt (birthday), baked (apple) and raw (red velvet), left to right | **The wall:** Cake Batter, the raw cakes, the slices and the Burnt Cake in item frames |
+| ![The ovens](../images/ingame_cake_ovens.jpg) | ![The items](../images/ingame_cake_items.jpg) |
+
+*In-game screenshots from CI's client game test (`CakeClientGameTests`, software rendering, small previews).*
 
 ## Connections
 - Existing input producer: wheat, eggs, sugar and milk for the batter; carrots, apples, beetroot, sweet berries, cocoa, snowballs, candles, pink dye and Coffee Beans (the [fruit crops'](fruit-crops.md)) for the cakes; the Hearth Oven and its fuel.
@@ -65,7 +71,12 @@ From the owner's own library: each slice's icon is their **Slice of Cake** (`far
 The cakes' models face north, the drawing turned half round (`tools/cakes.py` turn), so the quarter the INTERIOR drawing cuts away first is the model's front right. Each quarter is its own box, with the cake's inside on its cut faces; the toppings stand on the quarters they lie on. If the owner draws any of this again, their files can replace these under the same IDs.
 
 ## Verification
-CI: not yet run on this branch (see the pull request).
+CI (8 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `6fc6024` | Build, data audit, game tests, and every client game test class (the owner's drawing is a shared file, so all 104 ran) | Compiled; **953 of 954 game tests passed**, every cake test among them. `arms_viiigame_tests_harpoon_hauls_its_catch` failed ("The harpoon took 0.0, not 6.0 on tick 62"); the harpoon is not touched by this branch. **All 104 client classes passed**, `CakeClientGameTests` among them; the screenshots above are from this run |
+| `6fc6024`, the `mod` job run again once | Build, data audit, game tests | **All 954 required game tests passed**, the harpoon's among them: its failure did not come back |
 
 Run locally (8 October 2026):
 

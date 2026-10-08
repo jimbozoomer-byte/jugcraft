@@ -1377,6 +1377,10 @@ The sixth slice of the [kitchen and cooking expansion](#the-kitchen-and-cooking-
 
 Seven cakes the owner drew and shared on 8 October 2026 ("CAKES & BAKES - 3D CAKES"), rebuilt from their drawing and baked in the Hearth Oven as the pies are, as the owner chose. Details and test evidence: [features/cakes.md](../features/cakes.md).
 
+| **The display:** the seven cakes and the Burnt Cake, whole and cut | **As the owner drew it:** the carrot cake whole and cut |
+| --- | --- |
+| ![The cake display](../images/ingame_cakes.jpg) | ![The carrot cake whole and cut](../images/ingame_cakes_drawn.jpg) |
+
 - **Carrot, Birthday, Ice Cream, Red Velvet, Coffee and Apple Cakes and a Cheesecake.** Cake Batter (wheat, an egg, sugar and milk), a sugar and the cake's own two ingredients make a raw cake; the Hearth Oven bakes it, or burns it into a Burnt Cake.
 - **Set down whole,** a block wide and facing whoever set it down, with the drawing's toppings: carrots, candles, a square of berry jam, apple slices. Eaten, or cut with a knife into slices, a quarter at a time: the front right quarter first, showing the cake's inside as the owner's INTERIOR drawing does.
 
