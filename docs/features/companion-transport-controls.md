@@ -4,7 +4,9 @@ Owner-requested on 7 October 2026. Implemented by OpenAI Codex (GPT-6), on `peep
 
 ## Player setup
 
-Shift-right-click an owned/party-accessible companion. The top-right button cycles **Jobs → Transport → Routine → Jobs**. Transport lists all four workstations in their existing priority order, with separate **Supply** and **Output** buttons. Each cycles **Auto / On / Off**, defaulting to Auto. Hover for the current status; amber Auto means external item automation was detected. Unsupported directions are disabled.
+Shift-right-click an owned/party-accessible companion. Each workstation row in **Jobs** has separate **Supply** and **Output** buttons, next to its recipe slot and priority arrows. Each cycles **Auto → On → Off → Auto**, defaulting to Auto. Hover for the current status; amber Auto means external item automation was detected. Unsupported directions are disabled. The top-right button switches only between Jobs and Routine; there is no Transport page.
+
+The owner-requested inline layout revision uses a 480-by-312 panel so the two full button labels fit beside each job without increasing screen height. Inventory and recipe slot indices, saved settings, button actions and transport behavior remain unchanged; the ghost slots move horizontally with their job controls. Implemented by OpenAI Codex (GPT-6) from `c96d5179`.
 
 - **Auto:** Peepo handles that direction unless the standard machine detects external transport. Input and output decisions are independent.
 - **On:** Peepo may transport in that direction despite detected automation. Normal needs, storage space, permissions, orders, meals and energy recovery still apply.

@@ -12,6 +12,7 @@ import net.minecraft.world.flag.FeatureFlags;
 
 public final class CompanionMenu extends AbstractContainerMenu {
     public static final int DATA_COUNT=39, RECIPE_START=46;
+    public static final int WIDTH=480, RECIPE_X=416;
     public static MenuType<CompanionMenu> TYPE;
     private final PeepoEntity npc;
     private final ContainerData data;
@@ -51,7 +52,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
         for(int col=0;col<9;col++)addSlot(new Slot(inventory,col,80+col*18,288));
         for(int row=0;row<4;row++){
             final int at=row;
-            addSlot(new Slot(recipeIcons,row,256,assignmentY(row+1)){
+            addSlot(new Slot(recipeIcons,row,RECIPE_X,assignmentY(row+1)){
                 public boolean mayPlace(ItemStack stack){return false;}
                 public boolean mayPickup(Player player){return false;}
                 public boolean isActive(){return showRecipes && value(25+at)>0;}
