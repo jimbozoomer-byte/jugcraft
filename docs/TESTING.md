@@ -18,6 +18,7 @@ Three client jobs share the chosen classes out by their rough running time (`./g
 
 Locally:
 - Companion-only: `./gradlew runClientGameTest -PclientTests=PeepoCompanionClientTests`. See [coverage and results](features/companion-tests.md), including the one-client dedicated-server check and explicit limits.
+- Hearth-only (including companion spawn/render prerequisites): `./gradlew runClientGameTest -PclientTests=PeepoHearthClientTests`. This selects only the Hearth Oven regression class; it does not execute the full companion suite. See [Hearth Oven validation](features/companion-hearth.md#validation).
 - `./gradlew runClientGameTest` runs every class.
 - `python3 tools/select_client_tests.py --base origin/main` shows what a branch would run.
 - `-PclientTestShard=<n> -PclientTestShards=<count>` still keeps every count-th class.

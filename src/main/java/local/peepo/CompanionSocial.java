@@ -18,7 +18,8 @@ public final class CompanionSocial {
     private boolean ownerNearby,firstSpeaker,goalActive;
     private long nextScan,nextGreeting,nextConversation,until,started;
     private int spokenTurn=-1;
-    CompanionSocial(PeepoEntity npc){this.npc=npc;nextScan=npc.level().getGameTime()+20+Math.floorMod(npc.getId(),80);}
+    // Client spawn packets assign the numeric ID after constructing the entity. UUID already exists here.
+    CompanionSocial(PeepoEntity npc){this.npc=npc;nextScan=npc.level().getGameTime()+20+Math.floorMod(npc.getUUID().hashCode(),80);}
     public CompanionStatus activity(){return partner!=null && goalActive?CompanionStatus.CHATTING:greeted!=null?CompanionStatus.GREETING:CompanionStatus.IDLE;}
     private boolean idle(){return npc.preferences.social && npc.socialIdle() && npc.getNavigation().isDone()
         && npc.getDeltaMovement().horizontalDistanceSqr()<.0004 && !npc.isInWater() && !npc.isPassenger() && npc.onGround();}

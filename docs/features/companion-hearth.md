@@ -44,4 +44,18 @@ One transient display stack and action start time join the existing synchronized
 
 ## Validation
 
-Common/client compilation and assembly, followed by launcher packaging. No automated tests or in-game checks were run, following the owner's instruction. Manual checks remain: each pie/fuel, all four oven facings, both companion variants/costume, held props, blocked/elevated fronts, raw loading and finished/burnt carrying, rejected coal blocks and slices, ghost-item safety, cold/hot oven loading, fuel starvation, full Output, player-filled cargo, simultaneous helpers/manual use, interrupted reach/pull/tending and burnt results, recipe changes during trips, save/reload, locks/claims, unload/reload, dedicated-server concurrency and server-load measurements. Animation appearance, pack import and gameplay are unverified; compilation does not establish them.
+**8 October 2026: 10 groups passed, 115 assertions, zero failed groups.** The final hearth-only run completed successfully in 5 minutes 13 seconds on Minecraft 26.3 / Fabric Loader 0.19.5 / Fabric API 0.161.0+26.3 with the normal pinned development integrations. Gradle selected `PeepoHearthClientTests` alone (1 of 99 client test classes). Shared test sources compile together; no unrelated suites ran. Local evidence: `build/hearth-focused-tests-fixed.log`; the earlier failing run is `build/hearth-focused-tests.log` (generated logs are not committed).
+
+The initial animation implementation was compiled/assembled and packaged without automated or in-game tests, following the owner's instruction at that time. On 8 October 2026 the owner requested hearth-only tests after a companion spawn crash, superseding that restriction for this scope.
+
+The launcher log showed `IllegalStateException: Tried to access entity ID before ID assignment` from `CompanionSocial.<init>` while handling `ClientboundAddEntityPacket`. Initial social scan staggering now uses the available UUID instead of the not-yet-assigned client numeric ID. A first scoped run passed nine groups but timed out delivering from a west-facing oven. The Hearth Oven inherited the default passability of a non-full collision shape, allowing paths through its brick shell. It now declares itself non-passable, as the Cooking Pot already does. The fix changes navigation classification, not physical shape, saved data or baking rules.
+
+The new `PeepoHearthClientTests` entrypoint selects only Hearth Oven tests and their companion spawn/render prerequisite. It reuses the existing hearth-specific checks without executing the other companion or mod suites. Run locally with:
+
+```powershell
+.\build-local.ps1 -Tasks @('runClientGameTest','-PclientTests=PeepoHearthClientTests')
+```
+
+Coverage includes direct client construction of Peepo/Jughead/legacy Jughead before numeric ID assignment; real spawn packets; fuel/input/output transactions; tender exclusivity; a cold-oven cycle fetching pie and logs; all four oven facings with both rigs and costume variants; client-synchronized load/wait/take/carry actions and resolved 3D item models; interruption before insertion and resumption; full Output rescue; in-memory save/load of real cargo during delivery; all five fillings, one-pie capacity and burnt extraction. Tests use a fresh disposable flat world and do not open player saves. Implementation and investigation: OpenAI Codex (GPT-6), base `7d77cc7f` plus the fixes and tests documented here.
+
+Limits: a single integrated client/server, not two-client concurrency or server-load certification. All face/pose combinations resolve and run, but only a waiting-scene screenshot was visually inspected; it is not complete visual approval. Elevated/blocked fronts, external permission changes, player interference during every transfer, full disk restart mid-delivery, pack import and optional integrations absent remain untested by this focused run.

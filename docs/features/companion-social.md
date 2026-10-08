@@ -26,6 +26,8 @@ The shared owner library and full catalog were inspected for compatible frog sou
 
 ## Validation
 
-Common/client compilation and assembly succeeded. Automated tests and in-game checks were not run, following the owner's current instruction. Packaging uses the existing offline launcher-pack builder without dependency changes; package creation does not verify pack import or gameplay.
+On 8 October 2026 the owner's launcher log identified a client spawn disconnect: `CompanionSocial.<init>` called `Entity.getId()` before `ClientboundAddEntityPacket` assigned the numeric ID. Initial scan staggering now uses the already-available UUID. The hearth-only regression class includes direct client construction of Peepo, Jughead and the legacy variant, plus real Peepo/Jughead spawn packets. This fixes initialization without changing social cooldowns or saved data. See [Hearth Oven validation](companion-hearth.md#validation) for the scoped run; it does not retest all social behavior.
+
+The initial social implementation passed common/client compilation and assembly without automated or in-game tests, following the owner's instruction at that time. The later hearth-only run above verifies its spawn prerequisite; the other social acceptance cases below remain unverified. Packaging uses the existing offline launcher-pack builder without dependency changes; package creation does not verify pack import or gameplay.
 
 Manual acceptance remains: owner arrival/departure and cooldown; both character variants and held light poses; nearby pairs taking turns; work/food/rest/command/menu interruption; toggle and cooldown save/reload; partner unload/death/dimension change; two-client synchronization; crowded-server profiling. In-game animation appearance and sound volume are unverified.

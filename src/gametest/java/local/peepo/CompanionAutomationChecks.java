@@ -39,6 +39,14 @@ final class CompanionAutomationChecks {
         long ready=server.computeOnServer(s->s.overworld().getGameTime()+ticks);
         server.waitFor(s->s.overworld().getGameTime()>=ready,ticks+50);
     }
+    /** Narrow entry for hearth-only regression runs; no other automation suites execute. */
+    void runHearthOnly(ClientGameTestContext context,TestServerContext server){
+        teleportPlayer(server,-3.5);
+        server.runOnServer(s->staticGroup("hearth recipes, fuel, capacity and tender exclusivity",s.overworld(),
+            ()->hearth(s.overworld(),s.getPlayerList().getPlayers().getFirst())));
+        group.accept("automatic hearth fuel, tending and timely output",()->kitchen(server,"hearth_oven"));
+        server.runOnServer(s->reset(s.overworld()));
+    }
     void run(ClientGameTestContext context,TestServerContext server){
         teleportPlayer(server,-3.5);
         server.runOnServer(s->{
