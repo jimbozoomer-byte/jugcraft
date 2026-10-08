@@ -152,10 +152,15 @@ public class ConcordanceLogisticsGameTests {
 		helper.assertTrue(one.task() != 0L && two.task() != 0L && one.task() != two.task(), "Each courier holds a different request");
 		int reserved = ledger.ledger().get(one.task()).progress().reserved() + ledger.ledger().get(two.task()).progress().reserved();
 		helper.assertTrue(reserved == 40, "Together they reserve the chest's 40, not 60: " + reserved);
+		// The server-wide ledger also holds cargo from other tests. These synchronous decisions must add exactly
+		// our chest's forty items while leaving that existing cargo accounted for.
+		int carriedBefore = ledger.ledger().carried().values().stream().mapToInt(Integer::intValue).sum();
 		one.think(level, NIGHT, now + 20);
 		two.think(level, NIGHT, now + 20);
-		helper.assertTrue(count(chest, Items.COBBLESTONE) == 0 && ledger.ledger().carried().values().stream().mapToInt(Integer::intValue).sum() == 40,
-				"40 picked up in all, no more");
+		int carried = ledger.ledger().get(one.task()).progress().carried() + ledger.ledger().get(two.task()).progress().carried();
+		int carriedAfter = ledger.ledger().carried().values().stream().mapToInt(Integer::intValue).sum();
+		helper.assertTrue(count(chest, Items.COBBLESTONE) == 0 && carried == 40 && carriedAfter - carriedBefore == 40,
+				"40 picked up by these requests, no more: requests=" + carried + ", ledger increase=" + (carriedAfter - carriedBefore));
 		audit(helper, ledger, "both carrying");
 		helper.succeed();
 	}

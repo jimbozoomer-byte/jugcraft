@@ -10804,10 +10804,11 @@ def check_signs(co, root, lang):
 
 
 # Where Fabric's permission events are asked as questions rather than raised by vanilla: the Concordance's Authority,
-# and the arms and walkers that asked them first (relative to JAVA_ROOT).
+# and the arms, guns and walkers that ask for the actual player's permission (relative to JAVA_ROOT).
 PERMISSION_QUERIES = {
     "PlayerBlockBreakEvents.BEFORE": {"concordance/Authority.java", "walker/DieselWalker.java"},
-    "AttackEntityCallback.EVENT": {"weapons/TwoHanded.java"},
+    # GunShots.allowed asks as the shooter before either a bullet or bayonet deals damage.
+    "AttackEntityCallback.EVENT": {"weapons/TwoHanded.java", "guns/GunShots.java"},
 }
 # What each indirect route asks Authority (relative to the concordance package): roadmap step 28's audit.
 AUTHORITY_ROUTES = {
