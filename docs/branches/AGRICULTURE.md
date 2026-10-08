@@ -1408,6 +1408,10 @@ Ten pies and tarts the owner drew and shared on 8 October 2026 ("CAKES & BAKES -
 
 Seven milkshakes the owner drew and shared on 8 October 2026 ("CAKES & BAKES - 3D MILKSHAKE"), each read off their drawing as its own sundae glass. Details and test evidence: [features/milkshakes.md](../features/milkshakes.md).
 
+| **The seven** on a counter | **As drawn:** the strawberry and banana milkshakes |
+| --- | --- |
+| ![The milkshakes](../images/ingame_milkshakes.jpg) | ![As drawn](../images/ingame_milkshakes_drawn.jpg) |
+
 - **Strawberry, Banana, Plum, Apple, Blueberry, Pumpkin and Chocolate Milkshakes,** made by hand from a Milk Bottle, a snowball, a sugar and the flavour (the [fruit crops'](#what-exists-now-fruit-crops) strawberries, blueberries, plums and bananas among them). Drunk even when full, for five food and half a minute of Haste, leaving the bottle.
 - **Set down** by a sneaking player as the owner's glass: a foot of glass bars, the shake between the glass's posts, cream, the fruit on top and a leaning straw. An empty hand takes it back.
 

@@ -25,7 +25,13 @@ Make the owner's milkshakes and set them out:
 - **Drunk** as the menu's drinks are, even on a full stomach: five food and **Haste for 30 seconds** (a sugar rush), leaving the glass bottle the milk came in. They stack to 16.
 - **Set down** as the menu's dishes are: a sneaking player sets one down on a block, facing them, as the owner's 3D glass; an empty hand takes it back. In the inventory, in hand and in an item frame, too, a milkshake is its glass, shown nearly a slot's size.
 
-In-game screenshots come from CI's client game test (`MilkshakeClientGameTests`) and are added here once it has run.
+| **The seven,** set down on a counter, from the left: Strawberry, Banana, Plum, Apple, Blueberry, Pumpkin and Chocolate | **As drawn:** the strawberry and banana milkshakes from above their front right, as the page draws them |
+| --- | --- |
+| ![The milkshakes](../images/ingame_milkshakes.jpg) | ![As drawn](../images/ingame_milkshakes_drawn.jpg) |
+| **The items:** each milkshake's glass in an item frame, in the page's order, and the Milk Bottle they start from | |
+| ![The items](../images/ingame_milkshake_items.jpg) | |
+
+*In-game screenshots from CI's client game test (`MilkshakeClientGameTests`, software rendering, small previews).*
 
 ## Connections
 - Existing input producer: the Milk Bottle ([the menu](the-menu.md): a bucket of milk fills four glass bottles), snowballs, sugar, the [fruit crops'](fruit-crops.md) strawberries, blueberries, plums and bananas, apples, pumpkins, cocoa beans and sweet berries.
@@ -58,6 +64,13 @@ No new dependency.
 As an item the glass is shown as the flora's small 3D plants are (`tools/milkshake_data.py` DISPLAY: nine tenths of a slot, eight tenths of an item frame), since a full block's display would show the narrow glass at half that. Each milkshake wears one 64 × 64 texture (four pixels to a texel, so the glass's quarter texels are whole pixels; `docs/ART_DIRECTION.md` allows a packed model texture this size where the art needs the detail). The model is the drawing's own coordinates: a set-down dish faces whoever set it down with its south side, so a milkshake set down looks as drawn, its straw at the back right. As the page draws it, the glass's base stands a texel clear of its foot's bars. If the owner draws any of this again, their files can replace these under the same IDs.
 
 ## Verification
+CI (8 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `dc9b751` | Build, data audit, game tests, and every client game test class (111: the change adds to the owner's library, a file the selector counts as shared) | Compiled; data audit pass, 1900 IDs; **all 1172 required game tests passed**, the milkshakes' three among them; **every client class passed**, `MilkshakeClientGameTests` among them. The screenshots above are from this run |
+| `6a003e5`, `fd16d09` | The same, before the glass's item display and the client test's cameras were fixed | `fd16d09`: the same results (`6a003e5`'s run was cancelled by the next push) |
+
 Run locally (8 October 2026), on top of the pies and tarts (#266):
 
 | Check | Result |
