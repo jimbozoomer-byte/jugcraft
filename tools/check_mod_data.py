@@ -17,6 +17,15 @@ import drones
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
                        all_blocks, all_items, feature_of, ore_gens, ore_gen_owners)
 import agriculture as ag
+import kitchen
+import feasts
+import menu
+import rice
+import soil
+import orchard
+import cakes
+import cake_data
+import owner_art
 import werewolf_model
 import midway
 import ferris_wheel
@@ -40,6 +49,7 @@ import construction
 import hydroponics
 import electroplating
 import gas_storage
+import concordance
 import control_electronics
 import rocketry
 import dieselworks
@@ -79,6 +89,7 @@ RES = ROOT / "src" / "main" / "resources"
 ASSETS = RES / "assets" / MOD
 DATA = RES / "data"
 JAVA_ROOT = ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft"
+CLIENT_JAVA_ROOT = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
 JAVA = JAVA_ROOT / "materials" / "JugcraftMaterials.java"
 CONFIG = JAVA_ROOT / "config" / "JugcraftConfig.java"
 SEASON_JAVA = JAVA_ROOT / "season"
@@ -97,6 +108,8 @@ EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_repla
                   # The town's usable blocks (tools/town_assets.py USABLE): vanilla 26.3's own block tags.
                   "minecraft:wooden_doors", "minecraft:fence_gates", "minecraft:buttons", "minecraft:beds",
                   "minecraft:is_forest", "minecraft:is_taiga",
+                  # The Concordance's interaction and harvesting lists (tools/concordance.py), as optional entries.
+                  "minecraft:wooden_trapdoors", "minecraft:small_flowers",
                   # Fabric's conventional biome tag (ConventionalBiomeTags.IS_SNOWY): the snow werewolf's haunts.
                   "c:is_snowy",
                   # Vanilla's Overworld stone (stone, granite, diorite, andesite, tuff, deepslate): thallite's natural
@@ -187,7 +200,8 @@ def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
-                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()):
+                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
+                  + concordance.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -208,7 +222,8 @@ def check_assets(registered):
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
-                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
+                        + concordance.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -302,8 +317,9 @@ def item_units(ref):
         return {}  # vanilla tags used here (logs, planks), Jugcraft logs and heirloom pumpkins hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
-        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path in ("fermentable", "grave_flowers"):
-            return {}
+        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path in ("fermentable", "grave_flowers") \
+                or ns == MOD and form == "concordance":
+            return {}  # ... and the Concordance's own item tags (luminous matter) hold no metal
         if form not in UNITS or not metal:
             err(f"Recipe uses unsupported tag {ref}")
             return {}
@@ -345,7 +361,8 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items() or path in guns.items():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
+            or path in guns.items() or path in concordance.items() or path in concordance.blocks():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -483,7 +500,8 @@ def check_machine_recipe_files(registered):
 
 # Jugcraft entries of registries other than blocks and items that tags may name.
 OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE} | set(bm.BIOMES), "point_of_interest_type": {"arcade_cabinet"},
-                 "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES}}
+                 "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES},
+                 "spell": set(concordance.INVOCATIONS) | {"composed"}}
 
 
 def check_fluid_recipes(registered):
@@ -584,8 +602,9 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items() + guns.items()
-                                                    + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks()))
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
+                                                    + guns.items() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         if registry == "entity_type":
             # These entity IDs have no same-named item. Derive them from actual registrations.
             scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
@@ -1968,9 +1987,11 @@ def check_item_icons():
 
 def check_arms_variants():
     """weapons/ArmVariants.java against tools/arms_variants.py (Arms VII, batch 56): the variants in order with their kind,
-    line and boon; the styles and patterns; every number; each style variant's smithing recipe and each boss's trophy loot
-    table; the boons' and lines' tooltips; that every boon is bounded; and that no variant deals as much a second as a
-    netherite sword, whatever its boon adds."""
+    line and boon; the styles, the armor sets and the patterns; every number; each style variant's smithing recipe and
+    each boss's trophy loot table, and that an armor set's arm has neither a recipe nor any loot table yet (how a set is
+    won is the owner's to decide); the boons' and lines' tooltips, a boss's line naming its boss and a set's its set;
+    that every boon is bounded; and that no variant deals as much a second as a netherite sword, whatever its boon
+    adds."""
     import arms_variants as av
     java = (JAVA_ROOT / "weapons" / "ArmVariants.java").read_text(encoding="utf-8")
     found = [(name, kind, line, None if boon == "null" else boon.split(".")[1].lower())
@@ -1983,6 +2004,11 @@ def check_arms_variants():
         err(f"ArmVariants.Boon differs from tools/arms_variants.py BOONS {list(av.BOONS)}")
     if re.findall(r'"([a-z_]+)"', re.search(r"STYLES = List\.of\(([^)]*)\)", java).group(1)) != list(av.STYLES):
         err(f"ArmVariants.STYLES differs from tools/arms_variants.py {list(av.STYLES)}")
+    sets = re.search(r"\bSETS = List\.of\(([^)]*)\)", java)
+    if not sets or re.findall(r'"([a-z_]+)"', sets.group(1)) != list(av.SETS):
+        err(f"ArmVariants.SETS differs from tools/arms_variants.py {list(av.SETS)}")
+    if len(set(av.LINES)) != len(av.STYLES) + len(av.BOSSES) + len(av.SETS):
+        err("tools/arms_variants.py: a line is in more than one of STYLES, BOSSES and SETS")
     if re.findall(r'"([a-z_]+)"', re.search(r"PATTERN_NAMES = List\.of\(([^)]*)\)", java, re.S).group(1)) != av.patterns():
         err(f"ArmVariants.PATTERN_NAMES differs from tools/arms_variants.py {av.patterns()}")
     ints = {"FROST_TICKS": av.FROST[0], "FROST_AMPLIFIER": av.FROST[1], "EMBER_SECONDS": av.EMBER_SECONDS,
@@ -2009,9 +2035,9 @@ def check_arms_variants():
         if kind not in arms.KINDS or kind in arms.CHARGING:
             err(f"tools/arms_variants.py: {name} is of {kind}, not a swung kind of tools/arms.py")
         if line not in av.LINES:
-            err(f"tools/arms_variants.py: {name}'s line {line} is neither a style nor a boss")
-        # Each trait has a name, and a description to show with Shift (docs/features/trait-details.md); a boss's line
-        # is a name only.
+            err(f"tools/arms_variants.py: {name}'s line {line} is neither a style, a boss nor an armor set")
+        # Each trait has a name, and a description to show with Shift (docs/features/trait-details.md); a boss's or an
+        # armor set's line is a name only.
         if boon is not None and not {f"tooltip.{MOD}.arms.boon.{boon}", f"tooltip.{MOD}.arms.boon.{boon}.trait"} <= lang.keys():
             err(f"lang: no trait name and description for the {boon} boon")
         if f"tooltip.{MOD}.arms.line.{line}.trait" not in lang:
@@ -2024,7 +2050,8 @@ def check_arms_variants():
                                   or recipe.get("template") != f"{MOD}:{av.STYLES[line]['pattern']}"):
             err(f"recipe/{name}.json must smith the steel {kind} with the {line} pattern")
         if line not in av.STYLES and (DATA / MOD / "recipe" / f"{name}.json").is_file():
-            err(f"{name} is a trophy of {line}: it has no recipe")
+            what = f"the {av.SETS[line]['display']} set's arm" if line in av.SETS else f"a trophy of {line}"
+            err(f"{name} is {what}: it has no recipe")
         # A second at most: the steel arm's (its two-handed finisher too), with its boon at its best, below netherite's sword.
         info = arms.KINDS[kind]
         combo = arms.TWO_HANDED.get(kind, {}).get("combo", 1)
@@ -2043,6 +2070,23 @@ def check_arms_variants():
         dropped = re.findall(r'"name": "jugcraft:([a-z_]+)"', json.dumps(table, indent=0))
         if sorted(dropped) != sorted(av.trophies(boss)):
             err(f"loot_table/bosses/{boss}.json drops {dropped}, not its trophies {av.trophies(boss)}")
+    # A boss's line names its boss ("Trophy of the Yeti King"), an armor set's its set ("Of the Hades Armor set").
+    for line, info in list(av.BOSSES.items()) + list(av.SETS.items()):
+        if info["display"] not in lang.get(f"tooltip.{MOD}.arms.line.{line}.trait", info["display"]):
+            err(f"lang: the {line} line's name does not name {info['display']}")
+    # An armor set's arm is creative only for now: no recipe (above), no boss table of its own, and nothing drops it.
+    tables = {path: path.read_text(encoding="utf-8")
+              for folder in DATA.glob("*/loot_table") for path in folder.rglob("*.json")}
+    for armor_set, info in av.SETS.items():
+        if not av.set_arms(armor_set):
+            err(f"tools/arms_variants.py: the {info['display']} set has no arm")
+        if (DATA / MOD / "loot_table" / "bosses" / f"{armor_set}.json").is_file():
+            err(f"loot_table/bosses/{armor_set}.json: the {info['display']} set is no boss, and has no loot table yet")
+        for path, text in sorted(tables.items()):
+            for name in av.set_arms(armor_set):
+                if f'"{MOD}:{name}"' in text:
+                    err(f"{path.relative_to(DATA)} drops {name}, the {info['display']} set's arm, which nothing drops "
+                        "until the owner settles how the set is won")
     for style, info in av.STYLES.items():
         if not (DATA / MOD / "recipe" / f"{info['pattern']}.json").is_file():
             err(f"recipe/{info['pattern']}.json is missing: the {style} pattern must be craftable")
@@ -3014,13 +3058,14 @@ def check_agriculture():
     java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
 
     tall = {name.lower(): {"block": block, "seed": seed, "heights": [int(h) for h in heights.split(",")], "produce": produce,
-                           "pick": [int(low), int(high)], "reset": int(reset), "growth": float(growth), "trellis": trellis == "true"}
-            for name, block, seed, heights, produce, low, high, reset, growth, trellis in re.findall(
-                r'(\w+)\("([a-z_]+)", "([a-z_]+)", new int\[\] \{([\d, ]+)\}, "([a-z_]+)", (\d+), (\d+), (\d+), ([\d.]+)F, (true|false)\)',
+                           "pick": [int(low), int(high)], "reset": int(reset), "growth": float(growth), "trellis": trellis == "true", "paddy": paddy == "true"}
+            for name, block, seed, heights, produce, low, high, reset, growth, trellis, paddy in re.findall(
+                r'(\w+)\("([a-z_]+)", "([a-z_]+)", new int\[\] \{([\d, ]+)\}, "([a-z_]+)", (\d+), (\d+), (\d+), ([\d.]+)F, (true|false), (true|false)\)',
                 java.get("TallCrop", ""))}
     expected = {name: {"block": info["block"], "seed": info["seed"], "heights": info["heights"], "produce": info["pick"]["item"],
                        "pick": [info["pick"]["min"], info["pick"]["max"]], "reset": info["pick_reset"],
-                       "growth": info["growth_time"], "trellis": bool(info.get("trellis"))} for name, info in ag.TALL_CROPS.items()}
+                       "growth": info["growth_time"], "trellis": bool(info.get("trellis")), "paddy": bool(info.get("paddy"))}
+                for name, info in ag.TALL_CROPS.items()}
     if tall != expected:
         err(f"TallCrop.java {tall} != tools/agriculture.py {expected}")
     for name, info in ag.TALL_CROPS.items():
@@ -3051,6 +3096,12 @@ def check_agriculture():
         items[name] = ("seeds", int(n), float(sat), compost.lower(), crop)
     for name, compost in re.findall(r'\bplain\("([a-z_]+)", COMPOST_(\w+)\)', main):
         items[name] = ("plain", None, None, compost.lower(), None)
+    for name, n, sat, compost in re.findall(r'\bcob\("([a-z_]+)", (\d+), ([\d.]+)F, COMPOST_(\w+)\)', main):
+        items[name] = ("cob", int(n), float(sat), compost.lower(), None)
+    for name in re.findall(r'\bmilkBottle\("([a-z_]+)"\)', main):
+        items[name] = ("milk", None, None, None, None)
+    for name in re.findall(r'\bpetFood\("([a-z_]+)", EntityTypes\.', main):
+        items[name] = ("pet", None, None, None, None)
     for name, n, sat in re.findall(r'\bstew\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
         items[name] = ("stew", int(n), float(sat), None, None)
         if ag.ITEMS.get(name, {}).get("stew_effect"):
@@ -3080,6 +3131,7 @@ def check_agriculture():
     for name, info in ag.ITEMS.items():
         food = info.get("food") or [None, None]
         kind = ("stew" if info.get("stew") else "treat" if info.get("treat") else "sweet" if info.get("sweet") else "drink" if info.get("drink")
+                else "cob" if info.get("cob") else "milk" if info.get("milk") else "pet" if info.get("pet")
                 else "seeds" if "plants" in info
                 else "food" if "food" in info else "plain")
         expected[name] = (kind, food[0], food[1], info.get("compost"), info.get("plants"))
@@ -3100,6 +3152,8 @@ def check_agriculture():
     expected["apple_tree"] = ag.CIDER["tree"]["biomes"]
     expected["mums"] = ag.MUM_PATCH["biomes"]
     expected[ag.WOLFSBANE["block"]] = ag.WOLFSBANE["biomes"]
+    expected[rice.WILD_RICE["block"]] = rice.WILD_RICE["biomes"]
+    expected.update({orchard.feature(tree): info["biomes"] for tree, info in orchard.TREES.items()})
     expected.update({name: info["biomes"] for name, info in ag.FORAGING["mushrooms"].items()})
     if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
@@ -3116,8 +3170,9 @@ def check_agriculture():
         plants = info.get("plants")
         if plants and bool(info.get("trellis_seed")) != (plants in ag.trellis_crops()):
             err(f"{name}: a seed is a trellis seed exactly when it plants a climbing crop")
-        if plants and bool(info.get("bog_seed")) != (plants == ag.CRANBERRY["block"]):
-            err(f"{name}: a seed is a bog seed exactly when it plants the cranberry bush")
+        bog = plants == ag.CRANBERRY["block"] or any(crop["block"] == plants and crop.get("paddy") for crop in ag.TALL_CROPS.values())
+        if plants and bool(info.get("bog_seed")) != bog:
+            err(f"{name}: a seed is a bog seed exactly when it plants the cranberry bush or a paddy crop")
     check_festival(java, main)
     check_carving(java, main)
     check_halloween(java, main)
@@ -3209,12 +3264,15 @@ def check_agriculture():
         if recipe.get("type") != f"{MOD}:pot_cooking" or not recipe.get("fabric:load_conditions"):
             err(f"pot_cooking/{result}: wrong type or missing feature switch condition")
 
-    # No recipe loop among agriculture items: every conversion leads away from where it started.
+    # No recipe loop among agriculture items: every conversion leads away from where it started. Unpacking a storage block
+    # (tools/agriculture.py UNPACKING: tools/rice.py's and tools/soil.py's) only gives back what packed it, so it is left out.
     edges = {}
 
     def edge(ref, result):
         edges.setdefault(split(ref.lstrip("#"))[1], set()).add(split(result)[1] if ":" in result else result)
     for recipe in ag.SHAPELESS:
+        if recipe.get("id") in ag.UNPACKING:
+            continue
         for ref in recipe["inputs"]:
             edge(ref, recipe["result"])
     for recipe in ag.SHAPED:
@@ -3225,6 +3283,9 @@ def check_agriculture():
             edge(ref, result)
     for result, info in ag.COOKING.items():
         edges.setdefault(info["input"], set()).add(result)
+    for info in kitchen.CUTTING.values():
+        for result, _count in info["results"]:
+            edge(info["input"], result)
 
     def reaches(start, target, seen):
         for nxt in edges.get(start, ()):
@@ -3234,6 +3295,666 @@ def check_agriculture():
     for start in edges:
         if reaches(start, start, {start}):
             err(f"Agriculture recipes form a loop through {start}")
+
+
+# Vanilla's foods that the kitchen cuts: [hunger, saturation modifier] (the cuts must not outweigh them).
+VANILLA_FOOD = {"porkchop": [3, 0.3], "cooked_porkchop": [8, 0.8], "beef": [3, 0.3], "cooked_beef": [8, 0.8],
+                "chicken": [2, 0.3], "cooked_chicken": [6, 0.6], "mutton": [2, 0.3], "cooked_mutton": [6, 0.8],
+                "cod": [2, 0.1], "cooked_cod": [5, 0.6], "salmon": [2, 0.1], "cooked_salmon": [6, 0.8],
+                "cake": [14, 0.1],  # a cake is seven bites of 2 / 0.1
+                "baked_potato": [5, 0.6], "carrot": [3, 0.6], "bread": [5, 0.6], "honey_bottle": [6, 0.1], "sweet_berries": [2, 0.1],
+                "glow_berries": [2, 0.1], "melon_slice": [2, 0.3], "pumpkin_pie": [8, 0.3]}
+# Vanilla foods the menu cooks with that the kitchen does not cut: [hunger, saturation modifier].
+MENU_VANILLA_FOOD = {"apple": [4, 0.3], "beetroot": [1, 0.6], "potato": [1, 0.3], "rotten_flesh": [4, 0.1], "dried_kelp": [1, 0.3]}
+# A grain counts as the bread vanilla bakes from it: three wheat make a loaf of 5 hunger, and rice counts as wheat does.
+GRAIN = {"minecraft:wheat": 5 / 3, "jugcraft:rice": 5 / 3}
+# A whole that is not food (a pumpkin, an egg) has nothing to outweigh; a cooked cut is held to the cooked whole.
+COOKED_WHOLE = {"porkchop": "cooked_porkchop", "beef": "cooked_beef", "chicken": "cooked_chicken", "mutton": "cooked_mutton",
+                "cod": "cooked_cod", "salmon": "cooked_salmon"}
+
+
+def check_feasts():
+    """Feasts and food displays (tools/feasts.py): FeastDish, FeastBlock, FoodDisplay and the placed pumpkin pie match it;
+    a feast's servings give no more than COOK_BONUS hunger over its ingredients, and a placed pie's slices add up to the
+    vanilla pie; each feast has a model for every serving left, a blockstate for every facing, its recipe, its words, and
+    loot that gives it back only whole and its leftovers only once eaten; each display has its model, blockstate, recipe,
+    words and loot, and the client draws it."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    dishes = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, (\d+), \d+, \d+, \d+\)', java.get("FeastDish", ""), re.M)
+    wanted = [(name, str(info["food"][0]), str(info["food"][1]), str(info["light"])) for name, info in feasts.FEASTS.items()]
+    if [(name, food, sat, light) for _, name, food, sat, light in dishes] != wanted:
+        err("FeastDish.java's feasts (food, light, in order) differ from FEASTS in tools/feasts.py")
+    servings = re.search(r"\bSERVINGS = (\d+);", java.get("FeastBlock", ""))
+    if not servings or any(int(servings.group(1)) != info["servings"] for info in feasts.FEASTS.values()):
+        err("FeastBlock.SERVINGS differs from a feast's servings in tools/feasts.py")
+    for name, info in feasts.FEASTS.items():
+        if f'stew("{info["serving"]}", {info["food"][0]}, {info["food"][1]}F)' not in main:
+            err(f"JugcraftAgriculture must register {info['serving']} as a bowl food of {info['food']}")
+    displays = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", new float\[\]\[\] \{(.*?)\}, ([\d.]+)F, ([\d.]+)F, \d+, \d+\)',
+                          java.get("FoodDisplay", ""), re.M)
+    wanted = [(name, [[float(x), float(z)] for x, z in info["layout"]], info["height"], info["scale"]) for name, info in feasts.DISPLAYS.items()]
+    found = [(name, [[float(v) for v in re.findall(r"[\d.]+", place)] for place in re.findall(r"\{([^{}]*)\}", layout)], float(height),
+              float(scale)) for _, name, layout, height, scale in displays]
+    if found != wanted:
+        err("FoodDisplay.java's displays (layout, height, scale, in order) differ from DISPLAYS in tools/feasts.py")
+    if 'Jugcraft.id("food_display")' not in main:
+        err("JugcraftAgriculture must register the food displays' block entity as jugcraft:food_display")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "ShowcaseRenderer.java")
+    if "FoodDisplayBlock" not in (renderer.read_text(encoding="utf-8") if renderer.exists() else ""):
+        err("ShowcaseRenderer must draw what is on the food displays")
+
+    # Balance: what a feast's servings give against what goes into it (a pumpkin counted as the slices a knife cuts).
+    foods = {name: info["food"] for name, info in ag.ITEMS.items() if "food" in info}
+
+    def hunger(ref):
+        namespace, name = split(ref)
+        if namespace == "minecraft" and name in VANILLA_FOOD:
+            return VANILLA_FOOD[name][0]
+        if namespace == MOD and name in foods:
+            return foods[name][0]
+        cut = next((info for info in kitchen.CUTTING.values() if info["input"] == ref), None)
+        return sum(hunger(f"{MOD}:{part}") * count for part, count in cut["results"]) if cut else 0
+
+    for name, info in feasts.FEASTS.items():
+        given = info["servings"] * info["food"][0]
+        taken = sum(hunger(item) for item in info["inputs"])
+        if given > taken + feasts.COOK_BONUS:
+            err(f"{name}: its servings give {given} hunger from {taken} in ingredients (at most {feasts.COOK_BONUS} more)")
+    for name, info in feasts.PLACED_PIES.items():
+        slices = ag.PIES["slices"]
+        if slices * info["food"][0] != info["whole"][0] or info["food"][1] != info["whole"][1] \
+                or VANILLA_FOOD.get(split(info["item"])[1]) != info["whole"]:
+            err(f"{name}: {slices} slices of {info['food']} must add up to the vanilla pie {info['whole']}")
+        call = rf'new PlacedPieBlock\(Items\.{split(info["item"])[1].upper()},\s*"{info["slice"]}", {info["food"][0]}, {info["food"][1]}F'
+        if not re.search(call, main) or f'food("{info["slice"]}", {info["food"][0]}, {info["food"][1]}F' not in main:
+            err(f"JugcraftAgriculture must register {name} as a PlacedPieBlock of {info['item']} and its slice {info['slice']}")
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"{name} has no words")
+
+    for name, info in feasts.FEASTS.items():
+        for count in range(info["servings"] + 1):
+            if not (ASSETS / "models" / "block" / f"{name}_{count}.json").exists():
+                err(f"{name} needs its model {name}_{count}.json")
+        state = load(ASSETS / "blockstates" / f"{name}.json") or {}
+        if len(state.get("variants", {})) != 4 * (info["servings"] + 1):
+            err(f"{name}'s blockstate needs a variant for every facing and serving left")
+        loot = load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {}
+        text = json.dumps(loot)
+        if f'"servings": "{info["servings"]}"' not in text or (info["leftovers"] and '"servings": "0"' not in text):
+            err(f"{name} must drop itself only whole, and its leftovers once eaten")
+        for path in (DATA / MOD / "recipe" / f"{name}.json", ASSETS / "items" / f"{name}.json", ASSETS / "items" / f"{info['serving']}.json"):
+            if not path.exists():
+                err(f"{name} needs {path.relative_to(ROOT)}")
+        if f"block.{MOD}.{name}" not in lang or f"item.{MOD}.{info['serving']}" not in lang:
+            err(f"{name} and its serving need their words")
+    for name in feasts.DISPLAYS:
+        for path in (ASSETS / "models" / "block" / f"{name}.json", ASSETS / "blockstates" / f"{name}.json", ASSETS / "items" / f"{name}.json",
+                     DATA / MOD / "recipe" / f"{name}.json", DATA / MOD / "loot_table" / "blocks" / f"{name}.json"):
+            if not path.exists():
+                err(f"{name} needs {path.relative_to(ROOT)}")
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"{name} has no words")
+
+
+def check_menu():
+    """The menu (tools/menu.py): MenuDishes, PlacedDishBlock and the pet food match it; no dish gives more than
+    COOK_BONUS hunger over its ingredients; every dish set down has its model, a blockstate for each facing, loot that
+    gives its food back, and words; the corn foods give their cob back; the Cooking Pot wears the owner's pot."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    placed = re.findall(r'new Dish\("([a-z_]+)", DishShape\.([A-Z]+)\)', java.get("MenuDishes", ""))
+    if placed != [(name, model[0].upper()) for name, model in menu.all_placed().items()]:
+        err("MenuDishes.java's dishes (and their shapes, in order) differ from tools/menu.py all_placed()")
+    shapes = set(re.findall(r"^\t\t([A-Z]+)\(Block\.box\(", java.get("PlacedDishBlock", ""), re.M))
+    if shapes != {model[0].upper() for model in menu.all_placed().values()}:
+        err(f"PlacedDishBlock.DishShape {sorted(shapes)} must have exactly the templates tools/menu.py uses")
+    pets = {name: {"animal": animal.lower(), "heal": int(heal), "effects": [[e, int(t)] for e, t in re.findall(r"MobEffects\.(\w+), (\d+)", treats)],
+                   "returns": "minecraft:bowl" if bowl == "true" else None}
+            for name, animal, heal, bowl, treats in re.findall(
+                r'\bpetFood\("([a-z_]+)", EntityTypes\.(\w+), (\d+), (true|false), List\.of\((.*?)\)\);', main, re.S)}
+    if pets != menu.PETS:
+        err(f"JugcraftAgriculture pet food {pets} differs from tools/menu.py PETS")
+    if sorted(name for name, info in ag.ITEMS.items() if info.get("cob")) != sorted(menu.COB_FOODS) or menu.COB not in ag.ITEMS \
+            or f'usingConvertsTo(item("{menu.COB}"))' not in main:
+        err("The corn on the cob foods (tools/menu.py COB_FOODS) must each give the corncob back")
+    if "PlacedDishBlock.setDown" not in main or "PetFoodItem.feed" not in main:
+        err("JugcraftAgriculture must set dishes down and feed pets through the use events")
+
+    # Balance: what a dish gives against its ingredients, each counted as the most it would give: as itself, as what a
+    # furnace makes of it (raw meat, an egg, corn, sugar), as what a board cuts it into (a pumpkin as its slices), as the
+    # bread it would bake (a grain, GRAIN), or, for an ingredient that is not food (a dough, a batter), as what went into it.
+    foods = {name: info["food"][0] for name, info in ag.ITEMS.items() if "food" in info}
+    made = {}
+    for recipe in ag.SHAPELESS:
+        made.setdefault(f"{MOD}:{split(recipe['result'])[1]}", ([*recipe["inputs"]], recipe.get("count", 1)))
+    for result, info in ag.POT_RECIPES.items():
+        made.setdefault(f"{MOD}:{result}", ([ref for ref, n in info["inputs"].items() for _ in range(n)], info.get("count", 1)))
+
+    def full(ref):
+        return ref if ":" in ref else f"{MOD}:{ref}"
+
+    def value(ref, seen=()):
+        ref = full(ref)
+        namespace, name = split(ref)
+        own = (VANILLA_FOOD.get(name, MENU_VANILLA_FOOD.get(name, [0]))[0] if namespace == "minecraft" else foods.get(name, 0))
+        best = max(own, GRAIN.get(ref, 0))
+        if namespace == "minecraft" and name in COOKED_WHOLE:
+            best = max(best, VANILLA_FOOD[COOKED_WHOLE[name]][0])
+        for result, info in ag.COOKING.items():
+            if full(info["input"]) == ref:
+                best = max(best, value(result, seen + (ref,)))
+        cut = next((info for info in kitchen.CUTTING.values() if full(info["input"]) == ref), None)
+        if cut and ref not in seen:
+            best = max(best, sum(value(part, seen + (ref,)) * count for part, count in cut["results"]))
+        if not own and ref not in GRAIN and ref in made and ref not in seen:
+            inputs, count = made[ref]
+            best = max(best, sum(value(i, seen + (ref,)) for i in inputs) / count)
+        return best
+
+    dishes = {**menu.DISHES, **rice.DISHES, **orchard.DISHES}
+    pot = {**menu.POT_RECIPES, **rice.POT_RECIPES}
+    recipes = [(name, [ref for ref, n in info["inputs"].items() for _ in range(n)], info.get("count", 1)) for name, info in pot.items()]
+    recipes += [(name, inputs, count) for name, (inputs, count) in menu.SHAPELESS.items()]
+    recipes += [(recipe["result"], recipe["inputs"], recipe["count"]) for recipe in rice.SHAPELESS + orchard.SHAPELESS
+                if recipe["result"] in dishes]
+    recipes += [(name, [full(info["input"])], 1) for name, info in menu.COOKING.items()]
+    recipes += [(result, [info["input"]], count) for info in kitchen.CUTTING.values() for result, count in info["results"] if result in dishes]
+    for name, inputs, count in recipes:
+        given = foods.get(name, 0) * count
+        taken = sum(value(ref) for ref in inputs)
+        if given > taken + menu.COOK_BONUS:
+            err(f"{name}: {count} give {given} hunger from {taken:g} in ingredients (at most {menu.COOK_BONUS} more)")
+    for name, info in dishes.items():
+        if "food" in info and not any(name == recipe[0] for recipe in recipes):
+            err(f"{name} has no recipe in tools/menu.py, tools/rice.py or tools/orchard.py")
+
+    for name in menu.all_placed():
+        model = load(ASSETS / "models" / "block" / f"{name}.json") or {}
+        if not model.get("elements") or model.get("textures", {}).get("dish") != f"{MOD}:block/menu/{name}":
+            err(f"{name} needs its model, wearing block/menu/{name}")
+        state = load(ASSETS / "blockstates" / f"{name}.json") or {}
+        if set(state.get("variants", {})) != {f"facing={f}" for f in ("north", "south", "east", "west")}:
+            err(f"{name}'s blockstate needs a variant for every facing")
+        loot = load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {}
+        if f'"name": "{MOD}:{name}"' not in json.dumps(loot):
+            err(f"{name} must drop its food when broken")
+        if f"block.{MOD}.{name}" not in lang or f"item.{MOD}.{name}" not in lang:
+            err(f"{name} needs its words, set down and in hand")
+        if name not in ag.ITEMS:
+            err(f"{name} is set down but is no food in tools/agriculture.py ITEMS")
+    pot = load(ASSETS / "models" / "block" / "cooking_pot.json") or {}
+    if any(pot.get("textures", {}).get(key) != f"{MOD}:block/cooking_pot_{key}" for key in ("side", "top", "bottom", "handle", "parts")):
+        err("The Cooking Pot must wear the owner's pot (tools/menu.py COOKING_POT_TEXTURES)")
+
+
+def check_rice():
+    """Rice and wet farming (tools/rice.py): the rice plant is a paddy crop; wild rice, the storage blocks, the tatami, its
+    mats and the roll medley are registered as tools/rice.py says, each with its blockstate, item, loot and words; the
+    storage blocks give back exactly what packed them; the medley serves exactly the rolls it is made of; the board's rice
+    cuts are the kitchen's."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if ag.TALL_CROPS.get("rice") is not rice.CROP or not rice.CROP.get("paddy"):
+        err("tools/agriculture.py TALL_CROPS must hold the rice plant (tools/rice.py CROP) as a paddy crop")
+    paddy = java.get("PaddyCropBlock", "")
+    if "crop.paddy ? new PaddyCropBlock(props, crop)" not in main or "extends TallCropBlock" not in paddy \
+            or "CropGrowth.paddySpeed" not in paddy:
+        err("JugcraftAgriculture must register a paddy crop as a PaddyCropBlock, a tall crop that grows by CropGrowth.paddySpeed")
+    for name, info in rice.CUTTING.items():
+        if kitchen.CUTTING.get(name) != info:
+            err(f"tools/kitchen.py CUTTING[{name}] must be tools/rice.py's cut {info}")
+
+    # Registrations: each block by its class, each with an item.
+    blocks = {rice.WILD_RICE["block"]: "WildRiceBlock::new", "rice_bag": "RiceBagBlock::new", rice.TATAMI["block"]: "TatamiBlock::new",
+              rice.MEDLEY["block"]: "RollMedleyBlock::new"}
+    blocks.update({name: "FullTatamiMatBlock::new" if info["length"] == 2 else "TatamiMatBlock::new"
+                   for name, info in rice.TATAMI_MATS.items()})
+    for name, constructor in blocks.items():
+        if f'registerBlock("{name}", {constructor}' not in main:
+            err(f"JugcraftAgriculture must register {name} with {constructor}")
+    bales = [n for n, i in rice.STORAGE.items() if i["kind"] == "bale"]
+    found = re.search(r'for \(String bale : List\.of\(([^)]*)\)\) \{\s*Block block = registerBlock\(bale, HayBlock::new[^;]*;'
+                      r'\s*registerItem\(bale, ', main)
+    if not found or re.findall(r'"([a-z_]+)"', found.group(1)) != bales:
+        err("JugcraftAgriculture must register the bales of tools/rice.py STORAGE as hay bales, each with its item")
+    if [n for n, i in rice.STORAGE.items() if i["kind"] == "bag"] != ["rice_bag"]:
+        err("tools/rice.py STORAGE has one bag, the rice_bag")
+    for name in rice.items():
+        if name not in bales and f'registerItem("{name}"' not in main:
+            err(f"JugcraftAgriculture must register {name}'s item")
+        for path in (ASSETS / "blockstates" / f"{name}.json", ASSETS / "items" / f"{name}.json",
+                     DATA / MOD / "loot_table" / "blocks" / f"{name}.json"):
+            if not path.exists():
+                err(f"{name} needs {path.relative_to(ROOT)}")
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"{name} has no words")
+    for name in ("rice_panicle", "straw"):
+        if f'plain("{name}", COMPOST_{rice.ITEMS[name]["compost"].upper()})' not in main:
+            err(f"JugcraftAgriculture must register {name} as a plain item")
+
+    # Storage: nine in, the same nine out.
+    for block, info in rice.STORAGE.items():
+        pack = next((r for r in rice.SHAPED if r["id"] == block), None)
+        unpack = next((r for r in rice.SHAPELESS if r["id"] == info["unpack"]), None)
+        item = f"{MOD}:{info['item']}"
+        if (not pack or "".join(pack["pattern"]).count("#") != rice.PACK or pack["key"] != {"#": item} or pack["result"] != block
+                or not unpack or unpack["inputs"] != [f"{MOD}:{block}"] or unpack["result"] != info["item"] or unpack["count"] != rice.PACK):
+            err(f"{block} must pack {rice.PACK} {item} and unpack into the same {rice.PACK}")
+    if sorted(rice.UNPACKING) != sorted(info["unpack"] for info in rice.STORAGE.values()):
+        err("tools/rice.py UNPACKING must name exactly the storage blocks' unpacking recipes")
+    for recipe in rice.SHAPELESS + rice.SHAPED:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").exists():
+            err(f"recipe/{recipe['id']}.json is missing")
+
+    # The tatami pairs, the full mat has its two halves and drops from its foot.
+    sides = ("north", "south", "east", "west")
+    state = load(ASSETS / "blockstates" / f"{rice.TATAMI['block']}.json") or {}
+    if set(state.get("variants", {})) != {f"facing={f},paired={p}" for f in sides for p in ("false", "true")}:
+        err("The tatami's blockstate needs every facing, alone and paired")
+    for name, info in rice.TATAMI_MATS.items():
+        state = load(ASSETS / "blockstates" / f"{name}.json") or {}
+        wanted = ({f"facing={f},part={p}" for f in sides for p in ("foot", "head")} if info["length"] == 2
+                  else {f"facing={f}" for f in sides})
+        if set(state.get("variants", {})) != wanted:
+            err(f"{name}'s blockstate needs a variant for every facing{' and part' if info['length'] == 2 else ''}")
+        loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {})
+        if info["length"] == 2 and '"part": "foot"' not in loot:
+            err(f"{name} must drop once, from its foot")
+
+    # Wild rice: drops from its lower half only, and a patch places it.
+    loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{rice.WILD_RICE['block']}.json") or {})
+    if '"half": "lower"' not in loot or f'"{MOD}:{rice.WILD_RICE["drops"]["item"]}"' not in loot:
+        err("Wild rice must drop its rice once, from its lower half")
+    if not (DATA / MOD / "worldgen" / "placed_feature" / f"patch_{rice.WILD_RICE['block']}.json").exists():
+        err("Wild rice needs its placed feature patch_wild_rice")
+
+    # The medley: Java's pieces are tools/rice.py's, and its recipe holds exactly them (a kelp roll as its slices) on a platter.
+    medley = java.get("RollMedleyBlock", "")
+    pieces = re.search(r"PIECES = List\.of\((.*?)\);", medley, re.S)
+    most = re.search(r"\bMAX = (\d+);", medley)
+    if not pieces or re.findall(r'"([a-z_]+)"', pieces.group(1)) != rice.MEDLEY["pieces"] or not most \
+            or int(most.group(1)) != len(rice.MEDLEY["pieces"]):
+        err("RollMedleyBlock.PIECES and MAX differ from tools/rice.py MEDLEY")
+    recipe = next((r for r in rice.SHAPELESS if r["result"] == rice.MEDLEY["block"]), {"inputs": []})
+    served = []
+    for ref in recipe["inputs"]:
+        cut = next((info for info in rice.CUTTING.values() if info["input"] == ref), None)
+        if split(ref)[1] != rice.MEDLEY["platter"]:
+            served += [part for part, count in cut["results"] for _ in range(count)] if cut else [split(ref)[1]]
+    if sorted(served) != sorted(rice.MEDLEY["pieces"]) or recipe["inputs"].count(f"{MOD}:{rice.MEDLEY['platter']}") != 1:
+        err("The rice roll medley must be made of exactly the rolls it serves, on one platter")
+    name, count = rice.MEDLEY["block"], len(rice.MEDLEY["pieces"])
+    for rolls in range(count + 1):
+        if not (ASSETS / "models" / "block" / f"{name}_{rolls}.json").exists():
+            err(f"{name} needs its model {name}_{rolls}.json")
+    state = load(ASSETS / "blockstates" / f"{name}.json") or {}
+    if set(state.get("variants", {})) != {f"facing={f},rolls={r}" for f in sides for r in range(count + 1)}:
+        err(f"{name}'s blockstate needs a variant for every facing and roll left")
+    loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {})
+    if f'"rolls": "{count}"' not in loot or f'"{MOD}:{rice.MEDLEY["platter"]}"' not in loot or '"minecraft:inverted"' not in loot:
+        err(f"{name} must drop itself only whole, and its platter otherwise")
+
+
+def check_soil():
+    """Soil, compost and storage (tools/soil.py): Java's numbers and registrations match it; Rich Soil counts as dirt and
+    its farmland as farmland; each crate and bag packs and unpacks nine; each block has its blockstate, item (but the
+    farmland), loot and words; the farmland drops Rich Soil."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (\d+);", java.get(source, ""))
+        return int(match.group(1)) if match else None
+
+    expected = {("RichSoilBlock", "BOOST"): soil.BOOST, ("RichFarmlandBlock", "WATER_REACH"): soil.WATER_REACH,
+                ("RichFarmlandBlock", "MAX_MOISTURE"): 7, ("OrganicCompostBlock", "TURN_CHANCE"): soil.COMPOST["turn_chance"],
+                ("OrganicCompostBlock", "LAST_STAGE"): soil.COMPOST["stages"] - 1, ("BasketBlockEntity", "SLOTS"): soil.BASKET_SLOTS,
+                ("BasketBlockEntity", "PICKUP_TICKS"): soil.PICKUP_TICKS}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} must be {value} (tools/soil.py)")
+    if len(soil.COMPOST["textures"]) != soil.COMPOST["stages"]:
+        err("tools/soil.py COMPOST needs a texture for each stage")
+
+    constructors = {soil.RICH_SOIL["block"]: "RichSoilBlock::new", soil.RICH_FARMLAND["block"]: "RichFarmlandBlock::new",
+                    soil.COMPOST["block"]: "OrganicCompostBlock::new"}
+    constructors.update({name: "RiceBagBlock::new" for name in soil.SACKS})
+    for name, constructor in constructors.items():
+        if f'registerBlock("{name}", {constructor}' not in main:
+            err(f"JugcraftAgriculture must register {name} with {constructor}")
+    crates = re.search(r'for \(String crate : List\.of\(([^)]*)\)\) \{\s*Block block = registerBlock\(crate, Block::new', main)
+    if not crates or re.findall(r'"([a-z_]+)"', crates.group(1)) != list(soil.CRATES):
+        err("JugcraftAgriculture must register tools/soil.py CRATES, in order, as plain blocks")
+    baskets = re.search(r'for \(String name : List\.of\(([^)]*)\)\) \{\s*Block basket = registerBlock\(name, BasketBlock::new', main)
+    if not baskets or re.findall(r'"([a-z_]+)"', baskets.group(1)) != list(soil.BASKETS) or 'Jugcraft.id("basket")' not in main:
+        err("JugcraftAgriculture must register tools/soil.py BASKETS as BasketBlocks, with the jugcraft:basket block entity")
+    if f'registerBlock("{soil.RICH_FARMLAND["block"]}"' in main and f'registerItem("{soil.RICH_FARMLAND["block"]}"' in main:
+        err("Rich Soil Farmland has no item: a hoe makes it")
+
+    # Packing: nine in, the same nine out.
+    for block, info in list(soil.CRATES.items()) + list(soil.SACKS.items()):
+        pack = next((r for r in soil.SHAPED if r["id"] == block), None)
+        unpack = next((r for r in soil.SHAPELESS if r["id"] == info["unpack"]), None)
+        if (not pack or "".join(pack["pattern"]).count("#") != soil.PACK or pack["key"] != {"#": info["item"]}
+                or not unpack or unpack["inputs"] != [f"{MOD}:{block}"] or unpack["result"] != info["item"] or unpack["count"] != soil.PACK):
+            err(f"{block} must pack {soil.PACK} {info['item']} and unpack into the same {soil.PACK}")
+    if sorted(soil.UNPACKING) != sorted(info["unpack"] for info in list(soil.CRATES.values()) + list(soil.SACKS.values())):
+        err("tools/soil.py UNPACKING must name exactly the crates' and bags' unpacking recipes")
+    for recipe in soil.SHAPELESS + soil.SHAPED:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").exists():
+            err(f"recipe/{recipe['id']}.json is missing")
+
+    # Tags: rich soil is dirt, its farmland takes crops; tools reach them.
+    def tagged(path, entry):
+        return rid_of(entry) in (load(DATA / "minecraft" / "tags" / "block" / f"{path}.json") or {}).get("values", [])
+    if not tagged("dirt", soil.RICH_SOIL["block"]):
+        err("Rich Soil must be in minecraft:dirt")
+    for tag in ("supports_crops", "grows_crops"):
+        if not tagged(tag, soil.RICH_FARMLAND["block"]):
+            err(f"Rich Soil Farmland must be in minecraft:{tag}")
+    for name in (soil.RICH_SOIL["block"], soil.RICH_FARMLAND["block"], soil.COMPOST["block"]):
+        if not tagged("mineable/shovel", name):
+            err(f"{name} must be mineable with a shovel")
+    for name in (*soil.CRATES, *soil.BASKETS):
+        if not tagged("mineable/axe", name):
+            err(f"{name} must be mineable with an axe")
+
+    for name in soil.blocks():
+        for path in (ASSETS / "blockstates" / f"{name}.json", DATA / MOD / "loot_table" / "blocks" / f"{name}.json"):
+            if not path.exists():
+                err(f"{name} needs {path.relative_to(ROOT)}")
+        if name in soil.items() and not (ASSETS / "items" / f"{name}.json").exists():
+            err(f"{name} needs its item model")
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"{name} has no words")
+    if f"container.{MOD}.basket" not in lang:
+        err("The basket's screen has no title")
+    state = load(ASSETS / "blockstates" / f"{soil.RICH_FARMLAND['block']}.json") or {}
+    if set(state.get("variants", {})) != {f"moisture={m}" for m in range(8)}:
+        err("Rich Soil Farmland's blockstate needs every moisture")
+    state = load(ASSETS / "blockstates" / f"{soil.COMPOST['block']}.json") or {}
+    if set(state.get("variants", {})) != {f"composting={s}" for s in range(soil.COMPOST["stages"])}:
+        err("Organic Compost's blockstate needs every stage")
+    loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{soil.RICH_FARMLAND['block']}.json") or {})
+    if f'"{MOD}:{soil.RICH_SOIL["block"]}"' not in loot:
+        err("Rich Soil Farmland must drop Rich Soil")
+
+
+def check_cakes():
+    """The cakes (tools/cakes.py): Java's PieFilling holds them after the pies, as CAKES has them (ID, slice food and sponge
+    colour, in order); CakeBlock's height and quarters match tools/cakes.py and tools/cake_data.py; the cakes, the Burnt
+    Cake and Cake Batter are registered; every cake (and the Burnt Cake) has a model for each slice gone, a blockstate for
+    each slice and facing (turned as the model faces north), its textures (the toppings' too where it has them), words and
+    loot (only while whole); each topping stands inside one quarter but the jam the quarters share; the raw cakes and slices
+    have their words and textures, the raw cakes and the batter their recipes; the drawing they were rebuilt from is kept."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    filling = java.get("PieFilling", "")
+    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6})\)[,;]', filling, re.M)
+    wanted = [(cake.upper(), cake, str(info["food"][0]), str(info["food"][1]), f"{info['color']:06X}") for cake, info in cakes.CAKES.items()]
+    if [(c, i, f, s_, col.upper()) for c, i, f, s_, col in declared] != wanted:
+        err(f"PieFilling.java's cakes {declared} differ from tools/cakes.py CAKES (ID, slice food, colour, in order)")
+    last_pie = max((filling.find(f'"{ag.pie_name(f)}"') for f in ag.PIES["fillings"]), default=-1)
+    if declared and filling.find(f'"{next(iter(cakes.CAKES))}"') < last_pie:
+        err("PieFilling.java must list the cakes after the pies: the Hearth Oven saves a filling by its place")
+    block = java.get("CakeBlock", "")
+    height = re.search(r"\bint HEIGHT = (\d+);", block)
+    if not height or int(height.group(1)) != cakes.HEIGHT:
+        err("CakeBlock.HEIGHT differs from tools/cakes.py HEIGHT")
+    quarters = [tuple(map(int, q)) for q in re.findall(r"\{(\d+), (\d+), (\d+), (\d+)\}", block.split("QUARTERS =", 1)[-1].split(";", 1)[0])]
+    if quarters != [(x0, z0, x1, z1) for (x0, z0), (x1, z1) in cake_data.QUARTERS]:
+        err("CakeBlock.QUARTERS differs from tools/cake_data.py QUARTERS (the order slices are taken)")
+    for call in ("filling.cake ? new CakeBlock(filling, props)", 'registerBlock("burnt_cake", props -> new CakeBlock(null, props)',
+                 f'plain("{cakes.BATTER}"'):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    if 'cake ? "burnt_cake" : "burnt_pie"' not in filling or "pie.burnt()" not in java.get("HearthOvenBlockEntity", ""):
+        err("A cake left in the Hearth Oven must burn into a Burnt Cake (PieFilling.burnt, HearthOvenBlockEntity)")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for cake in cakes.blocks():
+        if f"block.{MOD}.{cake}" not in lang:
+            err(f"{cake} has no words")
+        for bites in range(len(cake_data.QUARTERS)):
+            if not (ASSETS / "models" / "block" / f"{cake_data.model_name(cake, bites)}.json").exists():
+                err(f"{cake} needs its model {cake_data.model_name(cake, bites)}")
+        variants = (load(ASSETS / "blockstates" / f"{cake}.json") or {}).get("variants", {})
+        for bites in range(len(cake_data.QUARTERS)):
+            for facing, turn in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+                variant = variants.get(f"bites={bites},facing={facing}", {})
+                if variant.get("model") != f"{MOD}:block/{cake_data.model_name(cake, bites)}" or variant.get("y", 0) != turn:
+                    err(f"{cake}'s blockstate must show {cake_data.model_name(cake, bites)} turned {turn} for facing={facing}")
+        if '"bites": "0"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{cake}.json") or {}):
+            err(f"{cake} must drop only while whole")
+        textures = ["top", "front", "side", "inside"] + (["toppings"] if cake in cakes.BARS or cake in cakes.CANDLES or cake in cakes.JAM else [])
+        for texture in textures:
+            path = ASSETS / "textures" / "block" / f"{cake}_{texture}.png"
+            if not path.exists():
+                err(f"{cake} needs its texture {cake}_{texture}")
+            elif Image.open(path).size != (16, 16):
+                err(f"{cake}_{texture}.png must be 16 x 16")
+    for cake in cakes.CAKES:
+        for box in cakes.topping_boxes(cake):
+            if cake in cakes.JAM and box == cakes.jam_box(cake):
+                continue
+            lo, hi = cakes.turn(*box)
+            quarter = cake_data.quarter_of(lo, hi)
+            (x0, z0), (x1, z1) = cake_data.QUARTERS[quarter]
+            if not (x0 <= lo[0] and hi[0] <= x1 and z0 <= lo[2] and hi[2] <= z1):
+                err(f"{cake}'s topping at {lo}-{hi} crosses a cut: each topping must stand inside one quarter")
+        for item in (cakes.raw(cake), cakes.slice_item(cake)):
+            if f"item.{MOD}.{item}" not in lang or not (ASSETS / "textures" / "item" / f"{item}.png").exists():
+                err(f"The cakes need the words and texture of {item}")
+        if not (DATA / MOD / "recipe" / f"{cakes.raw(cake)}.json").exists():
+            err(f"{cakes.raw(cake)} needs its recipe")
+    if not (DATA / MOD / "recipe" / f"{cakes.BATTER}.json").exists():
+        err("Cake Batter needs its recipe")
+    if not (ROOT / "art" / "owner-library" / "drawings" / "cakes_and_bakes.png").exists():
+        err("The owner's drawing the cakes are rebuilt from (art/owner-library/drawings/cakes_and_bakes.png) is missing")
+
+
+def check_orchard():
+    """Orchards (tools/orchard.py): Java's OrchardTree, OrchardLeavesBlock and registrations match it; each tree's sapling
+    (planted by its seed, which a fruit crafts into), its leaves (a model for each fruit stage), their loot, tags and words;
+    each tree as a feature of its trunk (oak, or the banana's own stem) and its own leaves in the shape TREES gives, a wild
+    patch where its sapling could stand, and the Jugcraft biomes that pick it; every texture Jugcraft draws for it; the
+    banana's stem; the juices' recipes and textures. (The pies, preserves, foods and set-down juices are checked with the
+    others: check_pies, check_pantry, the item check, check_menu.)"""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    declared = re.findall(r'^\t([A-Z]+)\("([a-z_]+)", "([a-z_]+)", (\d+), (\d+)\)[,;]', java.get("OrchardTree", ""), re.M)
+    wanted = [(tree.upper(), tree, info["seed"], str(info["pick"][0]), str(info["pick"][1])) for tree, info in orchard.TREES.items()]
+    if declared != wanted:
+        err(f"OrchardTree.java's trees {declared} differ from tools/orchard.py TREES (id, seed, pick, in order)")
+    chance = re.search(r"\bint FRUIT_CHANCE = (\d+);", java.get("OrchardLeavesBlock", ""))
+    if not chance or int(chance.group(1)) != orchard.FRUIT_CHANCE:
+        err("OrchardLeavesBlock.FRUIT_CHANCE differs from tools/orchard.py FRUIT_CHANCE")
+    for call in ("registerOrchardTrees();", "registerOrchards();", "props -> new OrchardLeavesBlock(tree, props)",
+                 "props -> new SaplingBlock(tree.grower, props)", 'Jugcraft.id(id + "_tree")'):
+        if call not in main + java.get("OrchardTree", ""):
+            err(f"The orchards' Java must call {call}")
+
+    def tagged(registry, path, entry):
+        return f"{MOD}:{entry}" in (load(DATA / "minecraft" / "tags" / registry / f"{path}.json") or {}).get("values", [])
+    for tree, info in orchard.TREES.items():
+        sapling, leaves, seed = orchard.sapling(tree), orchard.leaves(tree), info["seed"]
+        if ag.ITEMS.get(seed, {}).get("plants") != sapling or sapling not in ag.planted_blocks():
+            err(f"{seed} must plant {sapling}")
+        recipe = next((r for r in orchard.SHAPELESS if r["id"] == seed), None)
+        if not recipe or recipe["inputs"] != [f"{MOD}:{tree}"] or not (DATA / MOD / "recipe" / f"{seed}.json").exists():
+            err(f"A {tree} must craft into its {seed}")
+        state = load(ASSETS / "blockstates" / f"{leaves}.json") or {}
+        if set(state.get("variants", {})) != {f"fruit={f}" for f in range(len(orchard.LEAF_STAGES))}:
+            err(f"{leaves}: blockstate does not cover every fruit stage")
+        for stage in orchard.LEAF_STAGES:
+            model = load(ASSETS / "models" / "block" / f"{leaves}{stage}.json") or {}
+            if model.get("textures", {}).get("all") != f"{MOD}:block/{leaves}{stage}":
+                err(f"{leaves}{stage} needs its model, wearing block/{leaves}{stage}")
+        for kind, name in (("block", f"{leaves}{stage}") for stage in orchard.LEAF_STAGES):
+            if not (ASSETS / "textures" / kind / f"{name}.png").exists():
+                err(f"Missing texture {kind}/{name}")
+        for kind, name in (("block", sapling), ("item", tree), ("item", seed)):
+            if not (ASSETS / "textures" / kind / f"{name}.png").exists():
+                err(f"Missing texture {kind}/{name}")
+        for path in (ASSETS / "blockstates" / f"{sapling}.json", ASSETS / "models" / "block" / f"{sapling}.json",
+                     ASSETS / "items" / f"{leaves}.json", ASSETS / "items" / f"{tree}.json", ASSETS / "items" / f"{seed}.json"):
+            if not path.exists():
+                err(f"{tree} tree needs {path.relative_to(ROOT)}")
+        for key in (f"block.{MOD}.{sapling}", f"block.{MOD}.{leaves}", f"item.{MOD}.{tree}", f"item.{MOD}.{seed}"):
+            if key not in lang:
+                err(f"Missing words for {key}")
+        loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{leaves}.json") or {})
+        if f'"{MOD}:{seed}"' not in loot or f'"{MOD}:{tree}"' not in loot or '"fruit": "2"' not in loot:
+            err(f"{leaves} must drop its seed now and then, and its {tree}s when ripe")
+        if f'"{MOD}:{seed}"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{sapling}.json") or {}):
+            err(f"{sapling} must give its {seed} back")
+        if not (tagged("block", "leaves", leaves) and tagged("item", "leaves", leaves) and tagged("block", "saplings", sapling)):
+            err(f"The {tree} tree's leaves and sapling must be in minecraft:leaves and minecraft:saplings")
+        # The tree: its trunk under its own leaves, in its shape; wild where its sapling could stand; picked by its biomes.
+        feature = load(DATA / MOD / "worldgen" / "feature" / f"{orchard.feature(tree)}.json") or {}
+        placer = f"minecraft:{info['foliage'].get('type', 'blob')}_foliage_placer"
+        if (feature.get("trunk_provider", {}).get("id") != orchard.log(tree)
+                or feature.get("foliage_placer", {}).get("type") != placer
+                or feature.get("foliage_provider", {}).get("id") != f"{MOD}:{leaves}"
+                or feature.get("trunk_placer", {}).get("base_height") != info["trunk"]["base_height"]
+                or feature.get("trunk_placer", {}).get("height_rand_a") != info["trunk"]["height_rand_a"]
+                or feature.get("foliage_placer", {}).get("radius") != info["foliage"]["radius"]
+                or feature.get("foliage_placer", {}).get("height") != info["foliage"]["height"]):
+            err(f"worldgen/feature/{orchard.feature(tree)}.json differs from tools/orchard.py TREES[{tree!r}]")
+        patch = load(DATA / MOD / "worldgen" / "placed_feature" / f"patch_{orchard.feature(tree)}.json") or {}
+        text = json.dumps(patch)
+        if (patch.get("feature") != f"{MOD}:{orchard.feature(tree)}" or f'"chance": {info["rarity"]}' not in text
+                or f'"state": "{MOD}:{sapling}"' not in text):
+            err(f"patch_{orchard.feature(tree)} must place the {tree} tree, one in {info['rarity']} chunks, where its sapling could stand")
+        if bm.PLACED_TREES.get(orchard.checked(tree)) != (f"{MOD}:{orchard.feature(tree)}", f"{MOD}:{sapling}"):
+            err(f"tools/biomes.py PLACED_TREES must place {orchard.checked(tree)} where the {tree} sapling could stand")
+        for biome, share in info["regions"].items():
+            if [f"{MOD}:{orchard.checked(tree)}", share] not in bm.BIOMES[biome]["trees"]["picks"]:
+                err(f"tools/biomes.py {biome} must pick {orchard.checked(tree)} ({share})")
+    # The banana's stem: a pillar block (registered, with its item) that is a log to its fronds and to an axe, but no fuel.
+    stem = orchard.BANANA_STEM["block"]
+    if f'registerBlock("{stem}", RotatedPillarBlock::new' not in main:
+        err(f"JugcraftAgriculture must register {stem} as a RotatedPillarBlock")
+    if any(tree_info.get("log", f"{MOD}:{stem}") != f"{MOD}:{stem}" for tree_info in orchard.TREES.values()):
+        err("tools/orchard.py: a tree's own log must be the banana's stem, the only one registered")
+    state = load(ASSETS / "blockstates" / f"{stem}.json") or {}
+    if set(state.get("variants", {})) != {"axis=x", "axis=y", "axis=z"}:
+        err(f"{stem}: blockstate does not cover every axis")
+    for name in (stem, f"{stem}_top"):
+        if not (ASSETS / "textures" / "block" / f"{name}.png").exists():
+            err(f"Missing texture block/{name}")
+    if (not (ASSETS / "items" / f"{stem}.json").exists() or f"block.{MOD}.{stem}" not in lang
+            or f'"{MOD}:{stem}"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{stem}.json") or {})):
+        err(f"{stem} needs its item, words and loot")
+    if (not tagged("block", "logs", stem) or not tagged("item", "logs", stem) or not tagged("block", "mineable/axe", stem)
+            or tagged("item", "logs_that_burn", stem)):
+        err(f"{stem} must be in minecraft:logs and minecraft:mineable/axe, and not in minecraft:logs_that_burn")
+    for name in orchard.DISHES:
+        for kind, path in (("item", name), ("block", f"menu/{name}")):
+            if not (ASSETS / "textures" / kind / f"{path}.png").exists():
+                err(f"Missing texture {kind}/{path}")
+        if not (DATA / MOD / "recipe" / f"{name}.json").exists():
+            err(f"recipe/{name}.json is missing")
+    for preserve in orchard.PRESERVES:
+        if ag.PANTRY["preserves"].get(preserve) != orchard.PRESERVES[preserve] or preserve not in ag.POT_RECIPES:
+            err(f"{preserve} must be a preserve (tools/agriculture.py PANTRY) cooked in the Cooking Pot")
+    for filling, info in orchard.PIES.items():
+        if ag.PIES["fillings"].get(filling) != info:
+            err(f"The {filling} pie must be one of tools/agriculture.py PIES' fillings")
+
+
+def check_kitchen():
+    """The Farmhouse Kitchen: Java's numbers, knives and cabinet woods match tools/kitchen.py; every cutting recipe is
+    written and never a gain, raw or cooked; the knife tag holds every knife; the owner's textures are imported unchanged."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("KitchenStoveBlock", "LIGHT"): kitchen.STOVE["light"], ("KitchenStoveBlock", "BURN"): kitchen.STOVE["burn"],
+                ("KitchenStoveBlockEntity", "SLOTS"): kitchen.STOVE["slots"], ("KitchenStoveBlockEntity", "SPEED"): kitchen.STOVE["speed"],
+                ("SkilletBlockEntity", "CAPACITY"): kitchen.SKILLET["capacity"], ("SkilletBlockEntity", "SPEED"): kitchen.SKILLET["speed"],
+                ("KitchenCabinetBlockEntity", "SLOTS"): kitchen.CABINET_SLOTS, ("JugcraftAgriculture", "KNIFE_DAMAGE"): kitchen.KNIFE_DAMAGE,
+                ("JugcraftAgriculture", "KNIFE_SPEED"): kitchen.KNIFE_SPEED}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} is {number(source, name)}, tools/kitchen.py says {value}")
+    main = java.get("JugcraftAgriculture", "")
+    knives = dict(re.findall(r'\bknife\("([a-z_]+)", (?:ToolMaterial|io\.github\.jimbozoomer\.jugcraft\.gear\.JugcraftGear)\.([A-Z]+)\)', main))
+    if knives != {knife: info["tier"] for knife, info in kitchen.KNIVES.items()}:
+        err(f"JugcraftAgriculture knives {knives} differ from tools/kitchen.py KNIVES")
+    woods = re.search(r"CABINET_WOODS = List\.of\(([^)]*)\)", main)
+    if not woods or re.findall(r'"([a-z_]+)"', woods.group(1)) != list(kitchen.CABINET_WOODS):
+        err("JugcraftAgriculture.CABINET_WOODS differs from tools/kitchen.py CABINET_WOODS")
+    for block in (kitchen.STOVE["block"], kitchen.SKILLET["block"], kitchen.BOARD["block"]):
+        if f'registerBlock("{block}"' not in main:
+            err(f"{block} is not registered in JugcraftAgriculture")
+    if f'Jugcraft.id("{kitchen.CUTTING_TYPE.split(":")[1]}")' not in main or f'"{kitchen.KNIFE_TAG.split(":")[1]}"' not in main:
+        err("JugcraftAgriculture does not register the cutting recipe type or the knives tag of tools/kitchen.py")
+
+    # The knives tag: every kitchen knife and the Carving Knife.
+    tag = load(DATA / MOD / "tags" / "item" / f"{kitchen.KNIFE_TAG.split(':')[1]}.json") or {}
+    if set(tag.get("values", [])) != {f"{MOD}:{knife}" for knife in list(kitchen.KNIVES) + ["carving_knife"]}:
+        err(f"The item tag {kitchen.KNIFE_TAG} should hold every kitchen knife and the Carving Knife")
+
+    # Cutting recipes: one file each, the right type, tool and results, and never more food than the whole.
+    folder = DATA / MOD / "recipe" / "cutting"
+    if sorted(path.stem for path in folder.glob("*.json")) != sorted(kitchen.CUTTING):
+        err("recipe/cutting/ files differ from CUTTING in tools/kitchen.py")
+    foods = {name: info["food"] for name, info in ag.ITEMS.items() if "food" in info}
+
+    def food(ref):
+        namespace, name = split(ref) if ":" in ref else (MOD, ref)
+        return VANILLA_FOOD.get(name) if namespace == "minecraft" else foods.get(name)
+
+    def worth(value, count=1):
+        return count * value[0], count * value[0] * value[1] * 2
+
+    for name, info in kitchen.CUTTING.items():
+        recipe = load(folder / f"{name}.json") or {}
+        results = [{"id": result if ":" in result else f"{MOD}:{result}", **({"count": count} if count != 1 else {})}
+                   for result, count in info["results"]]
+        if (recipe.get("type") != kitchen.CUTTING_TYPE or recipe.get("ingredient") != info["input"]
+                or recipe.get("tool") != f"#{kitchen.KNIFE_TAG}" or recipe.get("results") != results):
+            err(f"cutting/{name}: the file differs from tools/kitchen.py")
+        whole = food(info["input"])
+        if whole is None:
+            continue
+        nutrition = saturation = 0.0
+        cooked_nutrition = cooked_saturation = 0.0
+        for result, count in info["results"]:
+            part = food(result)
+            if part is None:
+                continue
+            nutrition, saturation = nutrition + worth(part, count)[0], saturation + worth(part, count)[1]
+            cooked = next((out for out, cook in ag.COOKING.items() if cook["input"] == result), None)
+            if cooked:
+                cooked_nutrition += worth(food(cooked), count)[0]
+                cooked_saturation += worth(food(cooked), count)[1]
+        if nutrition > worth(whole)[0] or saturation > worth(whole)[1] + 1e-6:
+            err(f"cutting/{name}: the parts ({nutrition:g} hunger, {saturation:.2f} saturation) outweigh the whole {info['input']}")
+        cooked_whole = COOKED_WHOLE.get(split(info["input"])[1])
+        if cooked_nutrition and (not cooked_whole or cooked_nutrition > worth(VANILLA_FOOD[cooked_whole])[0]
+                                 or cooked_saturation > worth(VANILLA_FOOD[cooked_whole])[1] + 1e-6):
+            err(f"cutting/{name}: the cooked parts outweigh {cooked_whole or 'a cooked whole'}")
+
+    # The owner's textures: byte-for-byte copies of the library (and the two recoloured knives).
+    for problem in owner_art.errors():
+        err(problem)
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in kitchen.TEXT:
+        if key not in lang:
+            err(f"Missing lang key {key}")
+    used = "\n".join(java.get(source, "") for source in ("KitchenStoveBlock", "SkilletBlock", "CuttingBoardBlock", "KitchenCabinetBlockEntity"))
+    for key in kitchen.TEXT:
+        if f'"{key}"' not in used:
+            err(f"tools/kitchen.py TEXT {key} is not used by the kitchen's Java")
 
 
 def check_festival(java, main):
@@ -6512,16 +7233,17 @@ def check_pies(java, main):
         found = number(source, name)
         if found is None or abs(found - value) > 1e-9:
             err(f"{source}.{name} = {found} differs from PIES in tools/agriculture.py ({value})")
-    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6})\)', java.get("PieFilling", ""), re.M)
-    wanted = [(f, str(i["food"][0]), str(i["food"][1]), f"{i['color']:06X}") for f, i in pies["fillings"].items()]
-    if [(name, food, sat, color.upper()) for _, name, food, sat, color in declared] != wanted:
-        err("PieFilling.java's fillings (slice food, colour, in order) differ from PIES in tools/agriculture.py")
+    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", "([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6})\)', java.get("PieFilling", ""),
+                          re.M)
+    wanted = [(f, ag.pie_name(f), str(i["food"][0]), str(i["food"][1]), f"{i['color']:06X}") for f, i in pies["fillings"].items()]
+    if [(name, pie, food, sat, color.upper()) for _, name, pie, food, sat, color in declared] != wanted:
+        err("PieFilling.java's fillings (pie, slice food, colour, in order) differ from PIES in tools/agriculture.py")
     for call in ('registerBlock("hearth_oven", HearthOvenBlock::new', 'registerItem("pastry_dough"', "for (PieFilling filling : PieFilling.values())",
                  'registerBlock("burnt_pie", props -> new PieBlock(null, props)'):
         if call not in main:
             err(f"JugcraftAgriculture.java must call {call}")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    pies_blocks = [f"{f}_pie" for f in pies["fillings"]] + [pies["burnt"]]
+    pies_blocks = [ag.pie_name(f) for f in pies["fillings"]] + [pies["burnt"]]
     for block in pies_blocks:
         if f"block.jugcraft.{block}" not in lang:
             err(f"Pie baking has no words for {block}")
@@ -6536,11 +7258,12 @@ def check_pies(java, main):
             if not (ASSETS / "textures" / "block" / f"{texture}.png").exists():
                 err(f"{block} needs its texture {texture}")
     for filling in pies["fillings"]:
-        for item in (f"raw_{filling}_pie", f"{filling}_pie_slice"):
+        pie = ag.pie_name(filling)
+        for item in (f"raw_{pie}", f"{pie}_slice"):
             if f"item.jugcraft.{item}" not in lang or not (ASSETS / "textures" / "item" / f"{item}.png").exists():
                 err(f"Pie baking needs the words and texture of {item}")
-        if not (DATA / "jugcraft" / "recipe" / f"raw_{filling}_pie.json").exists():
-            err(f"raw_{filling}_pie needs its recipe")
+        if not (DATA / "jugcraft" / "recipe" / f"raw_{pie}.json").exists():
+            err(f"raw_{pie} needs its recipe")
     if f'"{pies["wood_tag"].split(":")[1]}"' not in java.get("HearthOvenBlockEntity", ""):
         err("HearthOvenBlockEntity.WOOD must be the tag PIES['wood_tag'] in tools/agriculture.py")
     for path in (DATA / "jugcraft" / "recipe" / "hearth_oven.json", DATA / "jugcraft" / "recipe" / "pastry_dough.json",
@@ -7347,14 +8070,2565 @@ def check_diagonal_connections():
         err(f"diagonal/DiagonalWalls.java does not register the diagonal walls as {dg.DIAGONAL_WALL}")
 
 
+def check_concordance(registered):
+    """The Arcane Concordance (tools/concordance.py): Java mirrors its numbers; its spells avoid Spell Engine's
+    null-default traps; its research graph resolves, has an entry with no prerequisites and no cycles; its codex,
+    research bridge and opt-outs name things that exist."""
+    co = concordance
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    root = JAVA_ROOT / "concordance"
+    constants = {
+        "rules/FocusPool.java": {"MAX": co.FOCUS_MAX, "REGEN_TICKS": co.FOCUS_REGEN_TICKS},
+        "Examination.java": {"DARK_LIGHT": co.DARK_LIGHT},
+        "LumenMoteBlock.java": {"LIGHT": co.MOTE_LIGHT, "TRAIL_LIGHT": co.TRAIL_LIGHT, "STEP_TICKS": co.MOTE_STEP_TICKS,
+                                "TRAIL_CHECK_TICKS": co.TRAIL_CHECK_TICKS},
+        "KindledLanternItem.java": {"CAPACITY": co.LANTERN_CAPACITY, "BURN_TICKS": co.LANTERN_BURN_TICKS},
+        "LampwrightBenchBlockEntity.java": {"STUDY_TICKS": co.STUDY_TICKS},
+        "LumenSconceBlockEntity.java": {"BURN_TICKS": co.SCONCE_BURN_TICKS, "POUR": co.SCONCE_POUR,
+                                        "RATE_LIMIT": co.SCONCE_RATE_LIMIT, "RATE_WINDOW": co.SCONCE_RATE_WINDOW},
+        "ResearchNotesItem.java": {"COOLDOWN_TICKS": co.NOTES_COOLDOWN_TICKS},
+        "ResearchNotes.java": {"MAX_ENTRIES": co.NOTES_MAX_ENTRIES},
+    }
+    for name, values in constants.items():
+        path = root / name
+        java = path.read_text(encoding="utf-8") if path.exists() else ""
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", java):
+                err(f"concordance/{name}: {const} differs from tools/concordance.py ({value})")
+    # Every Concordance item icon is its 16x16 map in tools/item_icons/, committed as drawn (docs/ITEM_ICONS.md).
+    import item_icons
+    for icon in ("initiate_wand", "adept_wand", "kindled_lantern", "kindled_lantern_lit", "research_notes",
+                 "research_notes_written", "arcane_concordance"):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"concordance: {icon} needs its map tools/item_icons/{icon}.txt and its texture (tools/generate_textures.py)")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"concordance: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+    resource_java = (root / "resource" / "ResourceType.java").read_text(encoding="utf-8") \
+        if (root / "resource" / "ResourceType.java").exists() else ""
+    match = re.search(r"PRINCIPLES = Set\.of\(([^;]*)\);", resource_java)
+    if not match or set(re.findall(r'"([a-z_]+)"', match.group(1))) != set(co.PRINCIPLES):
+        err("concordance/resource/ResourceType.java: PRINCIPLES differs from tools/concordance.py")
+    kinds_java = (root / "resource" / "ResourceKind.java").read_text(encoding="utf-8") \
+        if (root / "resource" / "ResourceKind.java").exists() else ""
+    if set(re.findall(r'^\t[A-Z_]+\("([a-z_]+)"', kinds_java, re.M)) != set(co.RESOURCES):
+        err("concordance/resource/ResourceKind.java: resource ids differ from RESOURCES in tools/concordance.py")
+    if not KINDLE_MOTE_STEPS_FIT(co):
+        err("concordance: a Kindled mote's steps do not fit its age property (0..15)")
+
+    # Spells: Spell Engine parses them with plain Gson, so a typo becomes null and crashes later.
+    targets = {"NONE", "CASTER", "AIM", "BEAM", "AREA", "FROM_TRIGGER"}
+    deliveries = {"DIRECT", "PROJECTILE", "METEOR", "CLOUD", "SHOOT_ARROW", "AFFECT_ARROW", "MELEE", "STASH_EFFECT",
+                  "CUSTOM"}
+    actions = {"DAMAGE", "HEAL", "STATUS_EFFECT", "FIRE", "SPAWN", "SUMMON", "TELEPORT", "COOLDOWN", "AGGRO", "DISRUPT",
+               "IMMUNITY", "VELOCITY", "CUSTOM"}
+    schools = {f"spell_power:{s}" for s in ("generic", "arcane", "fire", "frost", "healing", "lightning", "soul")}
+    animations = set()
+    for path in (ASSETS / "player_animations").glob("*.json"):
+        clip = load(path) or {}
+        if "animations" in clip:
+            animations |= {f"{MOD}:{name}" for name in clip["animations"]}
+        elif "name" in clip:
+            animations.add(f"{MOD}:{clip['name'].lower().replace(' ', '_')}")
+    sounds = load(ASSETS / "sounds.json") or {}
+    concordance_java = (root / "JugcraftConcordance.java").read_text(encoding="utf-8") if (root / "JugcraftConcordance.java").exists() else ""
+    registered_sounds = set(re.findall(r'sound\("([a-z_.]+)"\)', concordance_java))
+    loop = re.search(r'for \(String release : List\.of\(([^)]*)\)\)', concordance_java)
+    if loop:
+        registered_sounds |= {f"concordance.{name}" for name in re.findall(r'"([a-z_]+)"', loop.group(1))}
+    spells = set()
+    for path in sorted((DATA / MOD / "spell").glob("*.json")):
+        spell = load(path) or {}
+        name = path.stem
+        spells.add(name)
+        if spell.get("school") not in schools:
+            err(f"spell {name}: unknown school {spell.get('school')}")
+        target = spell.get("target", {}).get("type", "CASTER")
+        if target not in targets:
+            err(f"spell {name}: unknown target {target}")
+        if target == "AIM" and "aim" not in spell["target"] or target == "AREA" and "area" not in spell["target"]:
+            err(f"spell {name}: target {target} needs its own object")
+        if spell.get("deliver", {}).get("type", "DIRECT") not in deliveries:
+            err(f"spell {name}: unknown delivery")
+        for impact in spell.get("impacts", []):
+            action = impact.get("action", {})
+            if action.get("type") not in actions:
+                err(f"spell {name}: unknown impact {action.get('type')}")
+            if action.get("type") == "CUSTOM" and not action.get("custom", {}).get("handler"):
+                err(f"spell {name}: a CUSTOM impact needs custom.handler")
+        cast = spell.get("active", {}).get("cast", {})
+        if cast.get("duration", 0) > 0 and not cast.get("animation", {}).get("id"):
+            err(f"spell {name}: a timed cast needs an animation (Spell Engine's client reads it every tick)")
+        for clip in (cast.get("animation", {}).get("id"), spell.get("release", {}).get("animation", {}).get("id")):
+            if clip and clip.startswith(f"{MOD}:") and clip not in animations:
+                err(f"spell {name}: unknown player animation {clip}")
+        for sound in (cast.get("start_sound", {}).get("id"), spell.get("release", {}).get("sound", {}).get("id")):
+            if sound and sound.startswith(f"{MOD}:") and sound.split(":", 1)[1] not in sounds:
+                err(f"spell {name}: unknown sound {sound}")
+            # Spell Engine plays a spell's sounds on the server by looking them up in the sound registry.
+            if sound and sound.startswith(f"{MOD}:") and sound.split(":", 1)[1] not in registered_sounds:
+                err(f"spell {name}: sound {sound} is not registered as a SoundEvent in JugcraftConcordance.java")
+        if "learn" in spell:
+            err(f"spell {name}: a Concordance spell must not be bindable at a Spell Binding Table")
+        cost = spell.get("cost", {})
+        if cost.get("durability", 1) != 0 or cost.get("cooldown", {}).get("hosting_item", True):
+            err(f"spell {name}: set cost.durability 0 and cost.cooldown.hosting_item false")
+        for key in ("name", "description"):
+            text = lang.get(f"spell.{MOD}.{name}.{key}")
+            if text is None:
+                err(f"spell {name}: missing lang spell.{MOD}.{name}.{key}")
+            elif re.search(r"%(?!%)", text.replace("%%", "")):
+                err(f"spell {name}: Spell Engine formats its {key}; escape % as %%")
+        if not (ASSETS / "textures" / "spell" / f"{name}.png").is_file():
+            err(f"spell {name}: missing icon textures/spell/{name}.png")
+
+    # Research, invocations and workings.
+    research = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "research").glob("*.json")}
+    conversions = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "conversion").glob("*.json")}
+    resource_ids = {f"essence/{p}" for p in co.PRINCIPLES} | {r for r in co.RESOURCES if r not in ("essence", "bound_will")}
+    ratios = {}
+    for key, entry in conversions.items():
+        source, result = entry.get("from", {}), entry.get("to", {})
+        if entry.get("schema") != co.SCHEMA or source.get("resource") not in resource_ids \
+                or result.get("resource") not in resource_ids or source.get("resource") == result.get("resource"):
+            err(f"conversion {key}: needs schema {co.SCHEMA} and two different amount resources ({sorted(resource_ids)})")
+            continue
+        if not (isinstance(source.get("amount"), int) and isinstance(result.get("amount"), int)
+                and source["amount"] >= 1 and result["amount"] >= 1):
+            err(f"conversion {key}: amounts must be whole numbers of at least 1")
+            continue
+        edge = (source["resource"], result["resource"])
+        ratios[edge] = max(ratios.get(edge, 0), result["amount"] / source["amount"])
+    # No loop of conversions may come back with as much as it started with (Java: ConversionTable).
+    nodes = sorted({n for edge in ratios for n in edge})
+    best = {(a, b): ratios.get((a, b), 0.0) for a in nodes for b in nodes}
+    for k in nodes:
+        for a in nodes:
+            for b in nodes:
+                best[a, b] = max(best[a, b], best[a, k] * best[k, b])
+    for n in nodes:
+        if best[n, n] >= 1 - 1e-9:
+            err(f"conversions: {n} converts round without loss")
+    invocations = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "invocation").glob("*.json")}
+    workings = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "working").glob("*.json")}
+    def known_item(ref):
+        ns, path = split(ref)
+        return ns != MOD or path in registered
+    def resolves(ref):
+        return tag_exists("item", ref[1:]) if ref.startswith("#") else known_item(ref)
+    for key, entry in research.items():
+        if entry.get("schema") != co.SCHEMA:
+            err(f"research {key}: schema {entry.get('schema')}")
+        if entry.get("principle") not in co.PRINCIPLES or entry.get("tradition") not in co.TRADITIONS \
+                or entry.get("stage") not in co.STAGES:
+            err(f"research {key}: unknown principle, tradition or stage")
+        states = list(entry.get("states", {}))
+        if states != co.RESEARCH_STAGES[:len(states)] or not states:
+            err(f"research {key}: states must run in order from encountered ({states})")
+        for state, block in entry.get("states", {}).items():
+            for rule in block.get("any", []):
+                kind = rule.get("type")
+                if kind in ("examine", "study"):
+                    if not resolves(rule.get("specimens", "")):
+                        err(f"research {key}/{state}: unknown specimens {rule.get('specimens')}")
+                elif kind == "invoke":
+                    if split(rule.get("invocation", ":"))[1] not in invocations:
+                        err(f"research {key}/{state}: unknown invocation {rule.get('invocation')}")
+                elif kind == "notes":
+                    if state == "mastered":
+                        err(f"research {key}: notes cannot stand for mastery")
+                elif kind == "practice":
+                    if not re.fullmatch(r"[a-z0-9_.-]+:[a-z0-9_./-]+", rule.get("activity", "")):
+                        err(f"research {key}/{state}: practice needs an activity id")
+                else:
+                    err(f"research {key}/{state}: unknown evidence {kind}")
+        for requirement in entry.get("requires", []):
+            if split(requirement.get("research", ":"))[1] not in research:
+                err(f"research {key}: requires unknown {requirement}")
+        for state, unlocks in entry.get("unlocks", {}).items():
+            for ref in unlocks.get("invocations", []):
+                if split(ref)[1] not in invocations:
+                    err(f"research {key}: unlocks unknown invocation {ref}")
+            for ref in unlocks.get("workings", []):
+                if split(ref)[1] not in workings:
+                    err(f"research {key}: unlocks unknown working {ref}")
+            for ref in unlocks.get("rituals", []):
+                if not (DATA / MOD / "concordance" / "ritual" / f"{split(ref)[1]}.json").is_file():
+                    err(f"research {key}: unlocks unknown ritual {ref}")
+    if research and not any(not entry.get("requires") for entry in research.values()):
+        err("research: no entry can be started without another (no entry path)")
+    graph = {key: [split(r["research"])[1] for r in entry.get("requires", [])] for key, entry in research.items()}
+    state = {}
+    def visit(node):
+        if state.get(node) == 1:
+            err(f"research: prerequisite cycle through {node}")
+            return
+        if state.get(node) == 2:
+            return
+        state[node] = 1
+        for nxt in graph.get(node, []):
+            visit(nxt)
+        state[node] = 2
+    for node in graph:
+        visit(node)
+    for key, entry in invocations.items():
+        if key not in spells:
+            err(f"invocation {key}: no spell data/{MOD}/spell/{key}.json")
+        if split(entry.get("research", ":"))[1] not in research or entry.get("stage") not in co.RESEARCH_STAGES:
+            err(f"invocation {key}: unknown research or stage")
+        if not 0 < entry.get("mastered_focus", 0) <= entry.get("focus", 0) <= co.FOCUS_MAX:
+            err(f"invocation {key}: Focus costs must be 0 < mastered <= focus <= {co.FOCUS_MAX}")
+    for key, entry in workings.items():
+        if split(entry.get("research", ":"))[1] not in research:
+            err(f"working {key}: unknown research")
+        refs = [entry.get("work", "")] + list(entry.get("specimens", {})) + [entry.get(k) for k in ("specimen", "result") if entry.get(k)]
+        for ref in refs:
+            if not known_item(ref):
+                err(f"working {key}: unknown item {ref}")
+        if entry.get("type") == "channel":
+            conversion = conversions.get(split(entry.get("conversion", ":"))[1], {})
+            source, result = conversion.get("from", {}), conversion.get("to", {})
+            if source.get("resource") != "focus" or result.get("resource") != "essence/radiance":
+                err(f"working {key}: channels by {entry.get('conversion')}, which must turn focus into essence/radiance")
+            elif result.get("amount", 0) >= source.get("amount", 0):
+                err(f"working {key}: channelling must lose Focus (no free conversion)")
+        if entry.get("type") not in ("craft", "infuse", "channel"):
+            err(f"working {key}: unknown type {entry.get('type')}")
+
+    # The codex and its research bridge (Modonomicon refuses the whole reload over one bad research id).
+    research_dir = DATA / MOD / "modonomicon" / "research" / "concordance"
+    facts = {f["id"] for f in load(research_dir / "facts.json") or []}
+    nodes = {n["id"] for n in load(research_dir / "nodes.json") or []}
+    advancement_names = {path.stem for path in (DATA / MOD / "advancement").glob("*.json")}
+    for node in load(research_dir / "nodes.json") or []:
+        for fact in node.get("required_facts", []):
+            if fact not in facts:
+                err(f"codex research: node {node['id']} needs unknown fact {fact}")
+    for hook in load(research_dir / "hooks.json") or []:
+        if hook.get("fact_id") not in facts:
+            err(f"codex research: hook {hook.get('id')} grants unknown fact")
+        if split(hook["trigger_target"])[1] not in advancement_names:
+            err(f"codex research: hook {hook.get('id')} waits on unknown advancement {hook['trigger_target']}")
+    book = DATA / MOD / "modonomicon" / "books" / co.BOOK
+    for path in sorted(book.rglob("*.json")):
+        text = path.read_text(encoding="utf-8")
+        # An entry or category icon must be a real item: Modonomicon refuses to open a book with an empty icon.
+        for icon in re.findall(r'"icon": "([^"]+)"', text):
+            if split(icon)[0] == MOD and split(icon)[1] not in registered:
+                err(f"codex {path.relative_to(book)}: icon {icon} is not a Jugcraft item")
+        for node in re.findall(r'"node_id": "([^"]+)"', text):
+            if node not in nodes:
+                err(f"codex {path.relative_to(book)}: unknown research node {node}")
+        for recipe in re.findall(r'"recipe_id_1": "([^"]+)"', text):
+            if not (DATA / split(recipe)[0] / "recipe" / f"{split(recipe)[1]}.json").is_file():
+                err(f"codex {path.relative_to(book)}: unknown recipe {recipe}")
+        for key in re.findall(r'"(book\.[a-z_.0-9]+|research_node\.[a-z_.0-9]+)"', text):
+            if key not in lang:
+                err(f"codex {path.relative_to(book)}: missing lang {key}")
+    # Opt-outs name real items; the Kindled mote has its block state and name; LambDynamicLights names a real item.
+    for path in (DATA / MOD / "spell_assignments").glob("*.json"):
+        if path.stem not in registered:
+            err(f"spell_assignments/{path.name}: not a Jugcraft item")
+    for block in co.itemless_blocks():
+        if load(ASSETS / "blockstates" / f"{block}.json") is None or f"block.{MOD}.{block}" not in lang:
+            err(f"concordance: {block} needs a block state and a name")
+    lights = load(ASSETS / "dynamiclights" / "item" / "kindled_lantern.json") or {}
+    if split(lights.get("match", {}).get("items", ":"))[1] not in registered:
+        err("dynamiclights/item/kindled_lantern.json: unknown item")
+    for item in co.INSTRUMENTS:
+        resolver = load(DATA / MOD / "spell_assignments" / f"{item}.json") or {}
+        if resolver.get("access") != "TAG" or resolver.get("access_param") != co.SPELL_TAG:
+            err(f"spell_assignments/{item}.json: an instrument must resolve the {co.SPELL_TAG} spell tag")
+    # Every whole translation key the Concordance's Java names exists (keys built from a prefix are checked above).
+    sources = sorted(root.rglob("*.java")) + sorted(CLIENT_JAVA_ROOT.glob("Concordance*.java")) \
+        + sorted(CLIENT_JAVA_ROOT.glob("LampwrightBench*.java"))
+    for path in sources:
+        for key in re.findall(r'"((?:message|screen|tooltip|container|key)\.jugcraft\.[a-z_.]+[a-z_])"', path.read_text(encoding="utf-8")):
+            if key not in lang:
+                err(f"{path.name}: missing lang {key}")
+    sconce = (root / "LumenSconceBlock.java").read_text(encoding="utf-8") if (root / "LumenSconceBlock.java").exists() else ""
+    body = sconce[sconce.find("private static Component message("):]
+    body = body[:body.find("\n\t}\n")]
+    for key in re.findall(r'"([a-z_]+)"', body):
+        if f"message.{MOD}.concordance.sconce.{key}" not in lang:
+            err(f"LumenSconceBlock.java: missing lang message.{MOD}.concordance.sconce.{key}")
+    status = (root / "BenchStatus.java").read_text(encoding="utf-8") if (root / "BenchStatus.java").exists() else ""
+    for key in re.findall(r'[A-Z_]+\("([a-z_]+)"\)', status):
+        if f"message.{MOD}.concordance.bench.{key}" not in lang:
+            err(f"BenchStatus.java: missing lang message.{MOD}.concordance.bench.{key}")
+    components = (root / "JugcraftConcordance.java").read_text(encoding="utf-8") if (root / "JugcraftConcordance.java").exists() else ""
+    for component in lights.get("match", {}).get("components", {}):
+        if f'"{split(component)[1]}"' not in components:
+            err(f"dynamiclights/item/kindled_lantern.json: component {component} is not registered in JugcraftConcordance")
+    check_composition(co, root, lang, registered, research)
+    check_invocations(co, root, lang, research)
+    check_baselines(root)
+    check_rituals(co, root, lang, registered, research)
+    check_alchemy(co, root, lang, registered, research)
+    check_ecology(co, root, lang, registered, research)
+    check_celestial(co, root, lang, registered, research)
+    check_crimson(co, root, lang, registered, research)
+    check_workers(co, root, lang, registered, research)
+    check_logistics(co, root, lang, registered)
+    check_artifice(co, root, lang, registered, research)
+    check_relics(co, root, lang, registered, research)
+    check_equivalence(co, root, lang, registered, research)
+    check_sympathy(co, root, lang, registered, research)
+    check_conclave(co, root, lang, registered, research)
+    check_progression(co, root, lang, registered, research)
+    check_spire(co, root, lang, registered, research)
+    check_journal(co, root, lang)
+    check_signs(co, root, lang)
+    check_authority(root, lang)
+    check_economy(root)
+    check_persistence(root)
+    check_journey()
+    check_delivery()
+    check_game_test_entrypoints()
+
+
+def check_composition(co, root, lang, registered, research):
+    """Roadmap steps 8 and 9: the grammar's limits and effect kinds match the Java; every component and instrument is
+    within those limits and learnt from research that exists; the codex examples fit the instrument; every text the
+    compiler can show exists; and Concordance spells deliver their effects only through Jugcraft's own CUSTOM impacts
+    (the one effect boundary), never Spell Engine's damage or healing (which would apply effects twice)."""
+    def java(name):
+        path = root / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    for name, values in (("compose/Grammar.java", co.COMPOSE_LIMITS), ("effect/EffectSpec.java", co.EFFECT_LIMITS),
+                         ("ConcordanceCommand.java", {"COMPOSE_RATE_TICKS": co.COMPOSE_RATE_TICKS})):
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance.py ({value})")
+    kinds = {m[1]: (m[2].lower(), int(m[3])) for m in
+             re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", On\.([A-Z]+), (\d+)\)', java("effect/EffectKind.java"), re.M)}
+    if kinds != {k: (v["on"], v["work"]) for k, v in co.EFFECT_KINDS.items()}:
+        err("concordance/effect/EffectKind.java: kinds, targets or work differ from EFFECT_KINDS in tools/concordance.py")
+    limits = co.COMPOSE_LIMITS
+    states = set(co.RESEARCH_STAGES)
+    for key, info in co.COMPONENTS.items():
+        where = f"component {key}"
+        data = load(DATA / MOD / "concordance" / "component" / f"{key}.json")
+        if data != co.component_json(info):
+            err(f"{where}: data file differs from tools/concordance.py (regenerate)")
+        requires = info.get("requires", {})
+        if split(requires.get("research", ":"))[1] not in research or requires.get("state") not in states:
+            err(f"{where}: learnt from unknown research {requires}")
+        if not (0 <= info["capacity"] <= limits["MAX_COMPONENT_COST"] and 0 <= info["focus"] <= limits["MAX_COMPONENT_COST"]):
+            err(f"{where}: capacity and Focus must be 0..{limits['MAX_COMPONENT_COST']}")
+        slot = info["slot"]
+        body = info.get(slot)
+        if slot not in ("delivery", "selection", "operation", "modifier", "termination") or not isinstance(body, dict):
+            err(f"{where}: slot {slot} needs its own object")
+            continue
+        if slot == "delivery" and not (body["form"] in ("here", "touch", "ray")
+                                       and (body["range"] == 0) == (body["form"] == "here") and body["range"] <= limits["MAX_RANGE"]):
+            err(f"{where}: delivery form or range out of the grammar")
+        if slot == "selection" and not (body["pick"] in ("struck", "creatures", "blocks", "allies")
+                                        and ((body["radius"], body["targets"]) == (0, 1) if body["pick"] == "struck"
+                                             else 1 <= body["radius"] <= limits["MAX_RADIUS"] and 1 <= body["targets"] <= limits["MAX_TARGETS"])):
+            err(f"{where}: selection out of the grammar")
+        if slot == "operation":
+            effect = body.get("effect")
+            if effect not in co.EFFECT_KINDS or body.get("intent") not in ("helpful", "harmful") or body.get("principle") not in co.PRINCIPLES:
+                err(f"{where}: unknown effect, intent or Principle")
+            if effect == "damage" and body.get("school") != co.PRINCIPLES[body["principle"]]["school"]:
+                err(f"{where}: damage must use its Principle's Spell Power school")
+            if (effect == "status") != ("status" in body):
+                err(f"{where}: a status effect (and only a status effect) names a status")
+            if body.get("magnitude", 0) > co.EFFECT_LIMITS["MAX_MAGNITUDE"] or body.get("duration", 0) > co.EFFECT_LIMITS["MAX_DURATION"]:
+                err(f"{where}: beyond the effect limits")
+            if effect == "illumination" and body.get("duration", 0) > co.MOTE_STEP_TICKS * 15:
+                err(f"{where}: light cannot last longer than a mote's 15 steps")
+            if "scaling" in body and not (effect == "damage" and body.get("school")
+                                          and 0 <= body["scaling"] <= co.INVOCATION_SCALING_MAX):
+                err(f"{where}: only damage naming its school scales with Spell Power, by 0..{co.INVOCATION_SCALING_MAX}")
+        if info.get("authored") and slot == "modifier":
+            err(f"{where}: a modifier cannot be authored (tunings are how players change invocations)")
+        if slot == "modifier" and not (body["aspect"] in ("magnitude", "duration", "radius", "range")
+                                       and 1 <= body["amount"] <= limits["MAX_MODIFIER_AMOUNT"]):
+            err(f"{where}: modifier out of the grammar")
+        if slot == "termination" and not (1 <= body["pulses"] <= limits["MAX_PULSES"] and (
+                body["interval"] == 0 if body["pulses"] == 1 else limits["MIN_INTERVAL"] <= body["interval"] <= limits["MAX_INTERVAL"])):
+            err(f"{where}: termination out of the grammar")
+        for lang_key in (f"component.{MOD}.{key}", f"component.{MOD}.{key}.description"):
+            if lang_key not in lang:
+                err(f"{where}: missing lang {lang_key}")
+    for path in sorted((DATA / MOD / "concordance" / "component").glob("*.json")):
+        if path.stem not in co.COMPONENTS:
+            err(f"concordance/component/{path.name}: not in tools/concordance.py (stale file)")
+    for key, info in co.INSTRUMENT_LIMITS.items():
+        if split(info["item"])[1] not in registered or split(info["item"])[1] not in co.INSTRUMENTS:
+            err(f"instrument {key}: {info['item']} is not a Jugcraft instrument")
+        for field, cap in (("capacity", "MAX_CAPACITY"), ("targets", "MAX_TARGETS"), ("work", "MAX_WORK"), ("branches", "MAX_BRANCHES")):
+            if not 0 <= info[field] <= limits[cap]:
+                err(f"instrument {key}: {field} beyond the grammar's {cap}")
+        if not 0 <= info["duration"] <= co.EFFECT_LIMITS["MAX_DURATION"]:
+            err(f"instrument {key}: duration beyond the effect limit")
+    wand = co.INSTRUMENT_LIMITS["initiate_wand"]
+    for text in co.COMPOSE_EXAMPLES:
+        cost = co.composition_cost(text)
+        if cost["capacity"] > wand["capacity"] or cost["targets"] > wand["targets"] or cost["work"] > wand["work"] \
+                or cost["focus"] > co.FOCUS_MAX or text.count(" then ") > wand["branches"]:
+            err(f"codex example '{text}' does not fit the Initiate's Wand: {cost}")
+    # Every text the compiler can produce, and every name it refers to, exists.
+    keys = set()
+    for path in sorted((root / "compose").glob("*.java")):
+        keys |= set(re.findall(r'Text\.of\("([a-z_.]+)"', path.read_text(encoding="utf-8")))
+    keys |= {f"explain.operation.{kind}" for kind in co.EFFECT_KINDS}
+    keys |= {f"slot.{slot}" for slot in ("delivery", "selection", "operation", "modifier", "termination")}
+    keys |= {f"aspect.{aspect}" for aspect in ("magnitude", "duration", "radius", "range")} | {"on.creature", "on.block"}
+    for key in sorted(keys):
+        if f"compose.{MOD}.{key}" not in lang:
+            err(f"concordance/compose: missing lang compose.{MOD}.{key}")
+    sources = sorted(root.rglob("*.java")) + sorted(CLIENT_JAVA_ROOT.glob("Concordance*.java"))
+    for path in sources:
+        for key in re.findall(r'"(compose\.jugcraft\.[a-z_.]+[a-z_])"', path.read_text(encoding="utf-8")):
+            if key not in lang:
+                err(f"{path.name}: missing lang {key}")
+    # One effect boundary: Concordance spells use only Jugcraft's registered CUSTOM impacts.
+    handlers = set()
+    for path in sorted(root.glob("*.java")):
+        handlers |= set(re.findall(r'registerCustomImpact\(Jugcraft\.id\("([a-z_]+)"\)', path.read_text(encoding="utf-8")))
+    tagged = (load(DATA / MOD / "tags" / "spell" / "concordance.json") or {}).get("values", [])
+    for spell_id in tagged:
+        spell = load(DATA / MOD / "spell" / f"{split(spell_id)[1]}.json")
+        if spell is None:
+            err(f"spell tag {co.SPELL_TAG}: {spell_id} has no spell file")
+            continue
+        for impact in spell.get("impacts", []):
+            action = impact.get("action", {})
+            handler = action.get("custom", {}).get("handler", "")
+            if action.get("type") != "CUSTOM" or split(handler)[0] != MOD or split(handler)[1] not in handlers:
+                err(f"spell {spell_id}: Concordance spells act only through Jugcraft's registered CUSTOM impacts "
+                    f"(found {action.get('type')} {handler})")
+        if not (ASSETS / "textures" / "spell" / f"{split(spell_id)[1]}.png").is_file():
+            err(f"spell {spell_id}: no icon textures/spell/{split(spell_id)[1]}.png")
+
+
+def invocation_signature(text):
+    """What a composition is regardless of its numbers (Java: Plan.signature): per level, the delivery form, the pick
+    and the sorted effect/intent pairs."""
+    co = concordance
+    levels = []
+    for level in text.split(" then "):
+        words = [w.split("+")[0] for w in level.split()]
+        form = co.COMPONENTS[words[0]]["delivery"]["form"]
+        pick = co.COMPONENTS[words[1]]["selection"]["pick"]
+        kinds = sorted(f"{co.COMPONENTS[w]['operation']['effect']}/{co.COMPONENTS[w]['operation']['intent']}"
+                       for w in words if co.COMPONENTS[w]["slot"] == "operation")
+        levels.append(f"{form}/{pick}:{','.join(kinds)}")
+    return " then ".join(levels)
+
+
+def check_invocations(co, root, lang, research):
+    """Roadmap step 10: every invocation is a composition in the shared grammar that fits the Initiate's Wand with
+    each of its tunings; it costs at least what its composition would (mastery taking off at most a quarter) and its
+    cooldown is at least the composition's; its declared work and persistence cover every form; no two do the same
+    thing; the six roles are covered; authored words are used only by invocations and every one is used; and each has
+    its spell, handler, gestures, sounds, particles, icon, codex entry and texts."""
+    def java(name):
+        path = root / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    wand = co.INSTRUMENT_LIMITS["initiate_wand"]
+    role_enum = re.search(r"public enum Role \{(.*?)\n\t\t[a-z]", java("rules/Definitions.java"), re.S)
+    roles_java = set(re.findall(r'^\t\t[A-Z_]+\("([a-z_]+)"\)', role_enum.group(1) if role_enum else "", re.M))
+    if roles_java != set(co.INVOCATION_ROLES):
+        err(f"concordance/rules/Definitions.java: Role ids {sorted(roles_java)} differ from INVOCATION_ROLES")
+    for name, const, value in (("rules/RulesParser.java", "MAX_TUNINGS", co.INVOCATION_MAX_TUNINGS),
+                               ("Tunings.java", "MAX", 16)):
+        if not re.search(rf"\bint {const} = {value};", java(name)):
+            err(f"concordance/{name}: {const} differs from {value}")
+    if not re.search(rf"double MAX_SCALING = {co.INVOCATION_SCALING_MAX};", java("rules/RulesParser.java")):
+        err("concordance/rules/RulesParser.java: MAX_SCALING differs from INVOCATION_SCALING_MAX")
+    if len(co.INVOCATIONS) > 16:
+        err("invocations: more than an instrument's Tunings.MAX can tune")
+    if 'registerCustomImpact(Jugcraft.id("invocation")' not in java("Invocations.java"):
+        err("concordance/Invocations.java: must register the CUSTOM impact jugcraft:invocation")
+    if set(info["role"] for info in co.INVOCATIONS.values()) != set(co.INVOCATION_ROLES):
+        err(f"invocations: roles {sorted(set(i['role'] for i in co.INVOCATIONS.values()))} do not cover all six")
+    used = set()
+    signatures = {}
+    codex_entries = {entry for (category, entry) in co.codex() if category == "invocations"}
+    for key, info in co.INVOCATIONS.items():
+        where = f"invocation {key}"
+        data = load(DATA / MOD / "concordance" / "invocation" / f"{key}.json")
+        if data != co.invocation_json(key, info):
+            err(f"{where}: data file differs from tools/concordance.py (regenerate)")
+        words = [w.split("+")[0] for w in info["composition"].replace(" then ", " ").split()]
+        if any(w not in co.COMPONENTS for w in words):
+            err(f"{where}: unknown words in {info['composition']}")
+            continue
+        used |= set(words)
+        if len(info["tunings"]) > co.INVOCATION_MAX_TUNINGS:
+            err(f"{where}: at most {co.INVOCATION_MAX_TUNINGS} tunings")
+        for tuning in info["tunings"]:
+            component = co.COMPONENTS.get(tuning, {})
+            if component.get("slot") != "modifier" or component.get("authored"):
+                err(f"{where}: tuning {tuning} is not a players' modifier")
+        forms = co.invocation_forms(key)
+        base_text, base, base_numbers = forms[None]
+        least = base["focus"]
+        if not (info["focus"] >= least and info["mastered_focus"] >= least - (least + 3) // 4):
+            err(f"{where}: costs less than its composition ({least} Focus; mastery may take off {(least + 3) // 4})")
+        if round(info["cooldown"] * 20) < base["cooldown"]:
+            err(f"{where}: cooldown {info['cooldown']} s is shorter than its composition's {base['cooldown']} ticks")
+        for tuning, (text, cost, numbers) in forms.items():
+            label = f"{where}{'' if tuning is None else ' + ' + tuning}"
+            if text is None:
+                err(f"{label}: the tuning changes nothing in it")
+                continue
+            if cost["capacity"] > wand["capacity"] or cost["targets"] > wand["targets"] or cost["work"] > wand["work"]:
+                err(f"{label}: does not fit the Initiate's Wand: {cost}")
+            if cost["work"] > info["work"] or co.persistence(numbers) > info["persists"]:
+                err(f"{label}: spends {cost['work']} work and lasts {co.persistence(numbers)} ticks; it declares "
+                    f"{info['work']} and {info['persists']}")
+            if co.persistence(numbers) > wand["duration"]:
+                err(f"{label}: lasts longer than the wand allows")
+            if invocation_signature(text) != invocation_signature(base_text):
+                err(f"{label}: a tuning changed what it does")
+        signature = invocation_signature(base_text)
+        if signature in signatures:
+            err(f"{where}: does what {signatures[signature]} does ({signature})")
+        signatures[signature] = key
+        harmful = [w for w in words if co.COMPONENTS[w]["slot"] == "operation"
+                   and co.COMPONENTS[w]["operation"]["intent"] == "harmful"]
+        if harmful and any(co.COMPONENTS[w].get("selection", {}).get("pick") == "allies" for w in words):
+            err(f"{where}: harms allies")
+        spell = load(DATA / MOD / "spell" / f"{key}.json") or {}
+        if spell != co.spell_json(key):
+            err(f"{where}: spell file differs from tools/concordance.py (regenerate)")
+        handlers = [i.get("action", {}).get("custom", {}).get("handler") for i in spell.get("impacts", [])]
+        if handlers != [f"{MOD}:invocation"]:
+            err(f"{where}: its spell must have the one CUSTOM impact {MOD}:invocation (found {handlers})")
+        if spell.get("range") != float(co.invocation_range(info)):
+            err(f"{where}: spell range differs from its delivery")
+        if info["particle"] not in co.INVOCATION_PARTICLES:
+            err(f"{where}: particle {info['particle']} is not in INVOCATION_PARTICLES")
+        if not spell.get("release", {}).get("animation") or not spell.get("release", {}).get("sound"):
+            err(f"{where}: needs a release gesture and sound")
+        if split(info["research"])[1] not in research or info["stage"] not in ("understood", "mastered"):
+            err(f"{where}: learnt from unknown research or stage")
+        unlocks = (research.get(split(info["research"])[1], {}).get("unlocks", {}).get(info["stage"], {})
+                   .get("invocations", []))
+        if f"{MOD}:{key}" not in unlocks:
+            err(f"{where}: {info['research']} {info['stage']} does not unlock it")
+        if key not in codex_entries:
+            err(f"{where}: no codex entry")
+        for lang_key in (f"message.{MOD}.concordance.fizzle.{key}", f"role.{MOD}.{info['role']}"):
+            if lang_key not in lang:
+                err(f"{where}: missing lang {lang_key}")
+    for key, info in co.COMPONENTS.items():
+        if info.get("authored") and key not in used:
+            err(f"component {key}: authored but no invocation uses it")
+    # Kindle's numbers in the generator come from its data.
+    kindle = co.form_numbers(co.INVOCATIONS["kindle"]["composition"])
+    if kindle["range"] != co.KINDLE_RANGE or kindle["operations"][0]["duration"] != co.KINDLE_MOTE_STEPS * co.MOTE_STEP_TICKS:
+        err("invocation kindle: KINDLE_RANGE or KINDLE_MOTE_STEPS differ from its composition")
+    # Every message key the invocation code names exists.
+    for name in ("Invocations.java", "ConcordanceCommand.java", "ConcordanceSpells.java", "ComposedSpells.java"):
+        for key in re.findall(r'"(message\.jugcraft\.concordance\.[a-z_.]+[a-z_])"', java(name)):
+            if key not in lang:
+                err(f"concordance/{name}: missing lang {key}")
+        for key in re.findall(r'"(tooltip\.jugcraft\.concordance\.[a-z_.]+[a-z_])"', java(name)):
+            if key not in lang:
+                err(f"concordance/{name}: missing lang {key}")
+
+
+def check_game_test_entrypoints():
+    """Every game test class is registered, or its tests silently never run (Fabric finds them only through the
+    gametest source set's fabric.mod.json entrypoints)."""
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    listed = {cls for classes in mod.get("entrypoints", {}).values() for cls in classes}
+    for path in sorted((ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test").glob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        if ("@GameTest" in text or "ClientGameTest" in text) and f"io.github.jimbozoomer.jugcraft.test.{path.stem}" not in listed:
+            err(f"src/gametest/{path.name}: has game tests but is not a fabric-gametest or fabric-client-gametest entrypoint")
+
+
+def check_baselines(root):
+    """Roadmap step 11: the benchmark and the rules it runs are pure Java (the harness and the game test run the same
+    code), and presentation options cannot change server outcomes: no shared class reads the client's display settings,
+    and the settings shared code can see (reduced motion and, since step 27, the visual intensity, both held by
+    concordance/sign/Presentation.java) are read only in animateTick, which runs on the client (check_signs checks the
+    intensity's readers)."""
+    for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
+                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream", "conclave", "progression", "wonder"):
+        for path in sorted((root / package).glob("*.java")):
+            if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
+                err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        if "ConcordanceClientOptions" in text:
+            err(f"{path.relative_to(JAVA_ROOT)}: shared code must not read the client's display settings (ConcordanceClientOptions)")
+        if path == root / "sign" / "Presentation.java":
+            continue  # where the settings are held, not read
+        method = ""
+        for line in text.splitlines():
+            signature = re.match(r"^\t(?:public|protected|private|static)[^=;]*\(", line)
+            if signature:
+                method = line
+            if "reducedMotion" in line and "boolean reducedMotion" not in line and "animateTick" not in method:
+                err(f"{path.relative_to(JAVA_ROOT)}: reducedMotion is a display setting; read it only in animateTick")
+
+
+def check_rituals(co, root, lang, registered, research):
+    """Roadmap step 12: the Java lifecycle and limits mirror tools/concordance_rituals.py; every structure and ritual
+    names things that exist, stays within its limits and is reachable (each offering can be crafted or found, each
+    ritual is unlocked by the research that teaches it); every interruption, fault, role and phase has its words; and
+    the anchor's GeckoLib assets, the participants' gesture and the Fusion built-in pack are all there."""
+    ri = co.rituals
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "ritual/RitualMachine.java": {"STEP_TICKS": ri.STEP_TICKS, "GATHER_TICKS": ri.GATHER_TICKS,
+                                      "PARTICIPANT_MARGIN": ri.PARTICIPANT_MARGIN, "PARTICIPANT_HEIGHT": ri.PARTICIPANT_HEIGHT},
+        "CircleAnchorBlockEntity.java": {"SLOTS": ri.ANCHOR_SLOTS, "CACHE_TICKS": ri.REPORT_CACHE_TICKS},
+        "LeyPylonBlockEntity.java": {"CAPACITY": ri.PYLON_CAPACITY, "POUR": ri.PYLON_POUR, "JE_PER_LEY": ri.JE_PER_LEY,
+                                     "JE_RATE": ri.PYLON_JE_RATE},
+        "ritual/StructurePattern.java": ri.STRUCTURE_LIMITS,
+        "ritual/RitualDefinition.java": {k: v for k, v in ri.RITUAL_LIMITS.items() if k != "MAX_OFFERINGS"},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_rituals.py ({value})")
+    if ri.RITUAL_LIMITS["MAX_OFFERINGS"] != ri.ANCHOR_SLOTS:
+        err("concordance_rituals: a ritual offers at most one item per anchor slot")
+    activity = re.search(r'String ACTIVITY = "([^"]+)";', java("CircleAnchorBlockEntity.java"))
+    practised = {rule.get("activity") for entry in research.values() for block in entry.get("states", {}).values()
+                 for rule in block.get("any", []) if rule.get("type") == "practice"}
+    if not activity or activity.group(1) not in practised:
+        err("CircleAnchorBlockEntity.ACTIVITY is not the practice any research learns from")
+    # Words for every interruption, fault, role and phase the Java names.
+    for enum, prefix in (("Interruption", "interrupted"), ("Problem", "fault"), ("Role", "role"), ("Phase", "phase")):
+        source = java("ritual/RitualMachine.java") + java("ritual/StructureValidator.java") + java("ritual/StructurePattern.java")
+        body = re.search(rf"public enum {enum} \{{(.*?)\n\t\}}", source, re.S)
+        ids = re.findall(r'^\t\t[A-Z_]+\("([a-z_]+)"\)', body.group(1) if body else "", re.M)
+        if not ids:
+            err(f"concordance/ritual: no ids found for {enum}")
+        for value in ids:
+            if f"message.{MOD}.concordance.circle.{prefix}.{value}" not in lang:
+                err(f"ritual: missing lang message.{MOD}.concordance.circle.{prefix}.{value}")
+    # Structures.
+    structures = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "structure").glob("*.json")}
+    limits = ri.STRUCTURE_LIMITS
+    for key, entry in structures.items():
+        if split(entry.get("anchor", ":"))[1] not in registered:
+            err(f"structure {key}: anchor {entry.get('anchor')} is not a Jugcraft block")
+        seen, channels = set(), 0
+        for group in entry.get("parts", []):
+            role = group.get("role")
+            if role not in ("channel", "boundary", "clearance"):
+                err(f"structure {key}: unknown role {role}")
+            block = group.get("block")
+            if (role == "clearance") != (block is None):
+                err(f"structure {key}: a clearance names no block, every other part one")
+            if block and (not tag_exists("block", block[1:]) if block.startswith("#") else
+                          split(block)[0] == MOD and split(block)[1] not in registered):
+                err(f"structure {key}: unknown block {block}")
+            for offset in group.get("at", []):
+                reach = max(abs(v) for v in offset)
+                if not 0 < reach <= limits["MAX_REACH"] or tuple(offset) in seen:
+                    err(f"structure {key}: part at {offset} is outside 1..{limits['MAX_REACH']} or repeated")
+                seen.add(tuple(offset))
+                channels += role == "channel"
+        if not 0 < len(seen) <= limits["MAX_PARTS"] or channels > limits["MAX_CHANNELS"]:
+            err(f"structure {key}: {len(seen)} parts and {channels} channels exceed its limits")
+        if f"structure.{MOD}.{key}" not in lang:
+            err(f"structure {key}: missing lang structure.{MOD}.{key}")
+    # Rituals: references, limits, reachability and the research that unlocks them.
+    rituals = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "ritual").glob("*.json")}
+    recipes = {path.stem for path in (DATA / MOD / "recipe").glob("*.json")}
+    made = {split(r["result"]["transform"]["into"])[1] for r in rituals.values() if "transform" in r.get("result", {})}
+    unlocked = {split(ref)[1] for entry in research.values() for block in entry.get("unlocks", {}).values()
+                for ref in block.get("rituals", [])}
+    lim = ri.RITUAL_LIMITS
+    for key, entry in rituals.items():
+        structure = structures.get(split(entry.get("structure", ":"))[1])
+        if structure is None:
+            err(f"ritual {key}: unknown structure {entry.get('structure')}")
+        study = research.get(split(entry.get("research", ":"))[1])
+        if study is None or entry.get("stage") not in study.get("states", {}):
+            err(f"ritual {key}: unknown research or stage")
+        elif key not in {split(r)[1] for r in study.get("unlocks", {}).get(entry["stage"], {}).get("rituals", [])}:
+            err(f"ritual {key}: its research does not list it among what {entry.get('stage')} unlocks")
+        if key not in unlocked:
+            err(f"ritual {key}: no research unlocks it")
+        for field, low, high in (("participants", 1, lim["MAX_PARTICIPANTS"]), ("focus", 0, lim["MAX_FOCUS"]),
+                                 ("steps", 1, lim["MAX_STEPS"]), ("ley", 0, lim["MAX_LEY"]),
+                                 ("backlash", 0, lim["MAX_BACKLASH"])):
+            if not (isinstance(entry.get(field), int) and low <= entry[field] <= high):
+                err(f"ritual {key}: {field} must be {low}..{high}")
+        if entry.get("focus", 0) > co.FOCUS_MAX:
+            err(f"ritual {key}: costs more Focus than a player can hold")
+        if entry.get("ley", 0) > 0 and structure is not None \
+                and not any(g.get("role") == "channel" for g in structure.get("parts", [])):
+            err(f"ritual {key}: draws Ley Charge from a structure with no channels")
+        offerings = entry.get("offerings", [])
+        if not 0 < len(offerings) <= lim["MAX_OFFERINGS"]:
+            err(f"ritual {key}: 1 to {lim['MAX_OFFERINGS']} offerings")
+        for offering in offerings:
+            ref = offering.get("item", "")
+            if ref.startswith("#"):
+                if not tag_exists("item", ref[1:]):
+                    err(f"ritual {key}: unknown item tag {ref}")
+            elif split(ref)[0] == MOD and (split(ref)[1] not in registered
+                                           or split(ref)[1] not in recipes and split(ref)[1] not in made):
+                err(f"ritual {key}: offering {ref} is not a Jugcraft item with a way to make it")
+        result = entry.get("result", {})
+        if "transform" in result:
+            into = result["transform"].get("into", ":")
+            if split(into)[0] == MOD and split(into)[1] not in registered:
+                err(f"ritual {key}: makes unknown item {into}")
+            if not any(o.get("item") == result["transform"].get("from") and o.get("count") == 1 for o in offerings):
+                err(f"ritual {key}: transforms an item that is not offered once")
+        elif not 0 < len(result.get("effects", [])) <= lim["MAX_GRANTS"]:
+            err(f"ritual {key}: needs a transform or 1 to {lim['MAX_GRANTS']} effects")
+        for grant in result.get("effects", []):
+            operation = grant.get("operation", {})
+            if "scaling" in operation:
+                err(f"ritual {key}: a ritual's effects never scale with Spell Power")
+            if co.EFFECT_KINDS.get(operation.get("effect"), {}).get("on") != "creature":
+                err(f"ritual {key}: effect {operation.get('effect')} does not act on creatures")
+        if f"ritual.{MOD}.{key}" not in lang:
+            err(f"ritual {key}: missing lang ritual.{MOD}.{key}")
+    # Ley Charge comes in only through a losing conversion, and nothing turns it back.
+    conversion = load(DATA / MOD / "concordance" / "conversion" / "radiance_to_ley.json") or {}
+    if conversion.get("from", {}).get("resource") != "essence/radiance" or conversion.get("to", {}).get("resource") != "ley_charge" \
+            or conversion.get("to", {}).get("amount", 0) >= conversion.get("from", {}).get("amount", 0):
+        err("conversion radiance_to_ley must turn Radiance into less Ley Charge")
+    if '"jugcraft:radiance_to_ley"' not in java("LeyPylonBlockEntity.java"):
+        err("LeyPylonBlockEntity.java: must pour through the conversion jugcraft:radiance_to_ley")
+    if "EnergyStorage.SIDED.registerForBlockEntity" not in java("JugcraftConcordance.java") \
+            or "LeyPylonBlock extends BaseEntityBlock implements EnergyConnectable" not in java("LeyPylonBlock.java"):
+        err("ley_pylon: must take electricity through the shared energy interface and connect to cables")
+    # The anchor's GeckoLib assets: model, animations named by the Java, UVs inside the sheet.
+    geo = load(ASSETS / "geckolib" / "models" / "block" / "circle_anchor.geo.json") or {}
+    animations = load(ASSETS / "geckolib" / "animations" / "block" / "circle_anchor.animation.json") or {}
+    names = set(animations.get("animations", {}))
+    for name in re.findall(r'thenLoop\("([^"]+)"\)', java("CircleAnchorBlockEntity.java")):
+        if name not in names:
+            err(f"CircleAnchorBlockEntity.java: animation {name} is not in circle_anchor.animation.json")
+    definition = (geo.get("minecraft:geometry") or [{}])[0]
+    width = definition.get("description", {}).get("texture_width", 0)
+    height = definition.get("description", {}).get("texture_height", 0)
+    bones = {bone["name"] for bone in definition.get("bones", [])}
+    for clip in animations.get("animations", {}).values():
+        for bone in clip.get("bones", {}):
+            if bone not in bones:
+                err(f"circle_anchor.animation.json: animates unknown bone {bone}")
+    for bone in definition.get("bones", []):
+        for cube in bone.get("cubes", []):
+            w, h, d = cube["size"]
+            u, v = cube["uv"]
+            if u + 2 * (w + d) > width or v + d + h > height:
+                err(f"circle_anchor.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+    with Image.open(ASSETS / "textures" / "block" / "circle_anchor.png") as sheet:
+        if sheet.size != (width, height):
+            err("textures/block/circle_anchor.png must be the size the geo model declares")
+    if "GeoBlockRenderer" not in java("CircleClient.java", CLIENT_JAVA_ROOT):
+        err("CircleClient.java: the anchor must be drawn by GeckoLib")
+    # The participants' gesture, and the Fusion pack (loaded only with Fusion).
+    if not (ASSETS / "player_animations" / "circle_channel.json").is_file() \
+            or 'Jugcraft.id("circle_channel")' not in java("CircleClient.java", CLIENT_JAVA_ROOT):
+        err("rituals: the circle_channel gesture must exist and be the one CircleClient plays")
+    pack = RES / "resourcepacks" / "fusion_textures"
+    model = load(pack / "assets" / MOD / "models" / "block" / "warding_stone.json") or {}
+    if load(pack / "pack.mcmeta") is None or model.get("loader") != "fusion:model":
+        err("resourcepacks/fusion_textures: needs pack.mcmeta and the Warding Stone's Fusion model")
+    connected = ASSETS / "textures" / "block" / "warding_stone_connected.png"
+    if not connected.is_file() or (load(connected.with_name(connected.name + ".mcmeta")) or {}).get("fusion", {}).get("layout") != "simple":
+        err("textures/block/warding_stone_connected.png needs its Fusion metadata")
+    if 'isModLoaded("fusion")' not in java("CircleClient.java", CLIENT_JAVA_ROOT):
+        err("CircleClient.java: register the Fusion pack only when Fusion is installed (it is optional)")
+
+
+def check_alchemy(co, root, lang, registered, research):
+    """Roadmap step 13: the Java simulation mirrors tools/concordance_alchemy.py (axes, bands, heat, limits); every
+    ingredient, preparation and property is valid and reachable (vanilla items, or Jugcraft items with recipes); every
+    line the simulation can say has its words; and the crucible's GeckoLib model, animations and animated sheet agree."""
+    al = co.alchemy
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "alchemy/Mixture.java": {"MAX_PARTS": ("int", al.MAX_PARTS), "MAX_OPERATIONS": ("int", al.MAX_OPERATIONS),
+                                 "SEARING_KEEP": ("long", al.SEARING_KEEP), "SEARING_CONTAMINANT": ("long", al.SEARING_CONTAMINANT)},
+        "alchemy/Heat.java": {"AMBIENT": ("int", al.AMBIENT), "RATE": ("int", al.HEAT_RATE)},
+        "alchemy/Assay.java": {"SPOON": ("int", al.SPOON), "GLASS": ("int", al.GLASS), "MASTERED": ("int", al.MASTERED)},
+        "CrucibleBlockEntity.java": {"BUFFER_SLOTS": ("int", al.BUFFER_SLOTS), "STIR_TICKS": ("int", al.STIR_TICKS),
+                                     "AUTOMATION_TICKS": ("int", al.AUTOMATION_TICKS),
+                                     "WATER_PER_BUCKET": ("int", al.WATER_PER_BUCKET)},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, (kind, value) in values.items():
+            if not re.search(rf"\b{kind} {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_alchemy.py ({value})")
+    if not re.search(rf"double MAX_PROPERTY = {al.MAX_PROPERTY};", java("rules/RulesParser.java")):
+        err("concordance/rules/RulesParser.java: MAX_PROPERTY differs from tools/concordance_alchemy.py")
+    axes = re.findall(r'^\t[A-Z_]+\("([a-z_]+)"\)', java("alchemy/Axis.java"), re.M)
+    if axes != al.AXES:
+        err(f"concordance/alchemy/Axis.java: axes {axes} differ from AXES (same order)")
+    bands = {m[0]: (None if m[1] == "Integer.MIN_VALUE" else int(m[1]), int(m[2]))
+             for m in re.findall(r'^\t[A-Z_]+\("([a-z_]+)", ([A-Za-z_.0-9]+), (\d+)\)', java("alchemy/Band.java"), re.M)}
+    if bands != al.BANDS:
+        err(f"concordance/alchemy/Band.java: bands {bands} differ from BANDS")
+    sources = dict(re.findall(r'"(minecraft:[a-z_]+)", (\d+)', java("alchemy/Heat.java")))
+    if {k: int(v) for k, v in sources.items()} != al.HEAT_SOURCES:
+        err("concordance/alchemy/Heat.java: SOURCES differ from HEAT_SOURCES")
+    activity = re.search(r'String ACTIVITY = "([^"]+)";', java("Alchemy.java"))
+    practised = {rule.get("activity") for block in research.get("alembic_arts", {}).get("states", {}).values()
+                 for rule in block.get("any", []) if rule.get("type") == "practice"}
+    if not activity or activity.group(1) not in practised:
+        err("Alchemy.ACTIVITY is not the practice the Alembic Arts learn from")
+    # Data.
+    folder = DATA / MOD / "concordance"
+    ingredients = {p.stem: load(p) or {} for p in (folder / "ingredient").glob("*.json")}
+    preparations = {p.stem: load(p) or {} for p in (folder / "preparation").glob("*.json")}
+    properties = {p.stem: load(p) or {} for p in (folder / "property").glob("*.json")}
+    recipes = {p.stem for p in (DATA / MOD / "recipe").glob("*.json")}
+    items = [entry.get("item", "") for entry in ingredients.values()]
+    if len(items) != len(set(items)):
+        err("ingredients: an item is more than one ingredient")
+    for key, entry in ingredients.items():
+        ref = entry.get("item", ":")
+        if split(ref)[0] == MOD and (split(ref)[1] not in registered or split(ref)[1] not in recipes):
+            err(f"ingredient {key}: {ref} is not a Jugcraft item with a recipe")
+        values = entry.get("properties", {})
+        if not values or set(values) - set(al.AXES) or not all(0 <= v <= al.MAX_PROPERTY for v in values.values()):
+            err(f"ingredient {key}: properties must be axes with 0..{al.MAX_PROPERTY} units")
+        if f"jei.{MOD}.alchemy.{key}" not in lang:
+            err(f"ingredient {key}: missing lang jei.{MOD}.alchemy.{key}")
+    plain = [k for k, e in preparations.items() if "tool" not in e]
+    if len(plain) != 1:
+        err(f"preparations: exactly one must have no tool ({plain})")
+    for key, entry in preparations.items():
+        tool = entry.get("tool")
+        if tool and (split(tool)[1] not in registered or split(tool)[1] not in recipes):
+            err(f"preparation {key}: tool {tool} is not a craftable Jugcraft item")
+        if not (0 <= entry.get("scale", -1) <= 2 and 0 <= entry.get("ready", -1) <= 1):
+            err(f"preparation {key}: scale 0..2, ready 0..1")
+    if set(properties) != set(al.AXES) | {"contaminant"}:
+        err(f"properties: one for each axis and contaminant ({sorted(properties)})")
+    for key, entry in properties.items():
+        if not (1 <= entry.get("max_level", 0) <= 5 and 1 <= entry.get("max_ticks", 0) <= 2400
+                and 1 <= entry.get("ticks_per_unit", 0) <= 2400 and entry.get("threshold", 0) > 0 and entry.get("per_level", 0) > 0):
+            err(f"property {key}: numbers outside the shared effect limits")
+        if not re.fullmatch(r"minecraft:[a-z_]+", entry.get("status", "")):
+            err(f"property {key}: status must be a vanilla effect id")
+        if key == "contaminant" and entry.get("intent") != "harmful":
+            err("property contaminant: must be harmful")
+        # A brew never outlasts the vanilla potion of the same effect at the highest level it can reach (vanilla's
+        # Potions: night vision, fire resistance and water breathing 3600 ticks; regeneration and poison 900, and at
+        # level II 450 and 432). Effects with no vanilla potion (resistance, nausea) keep the shared limit above.
+        vanilla = {("minecraft:night_vision", 1): 3600, ("minecraft:fire_resistance", 1): 3600,
+                   ("minecraft:water_breathing", 1): 3600, ("minecraft:regeneration", 1): 900,
+                   ("minecraft:regeneration", 2): 450, ("minecraft:poison", 1): 900, ("minecraft:poison", 2): 432}
+        status, top = entry.get("status"), entry.get("max_level", 1)
+        bound = vanilla.get((status, top)) if (status, 1) in vanilla else None
+        if (status, 1) in vanilla and bound is None:
+            err(f"property {key}: {status} has no vanilla potion at level {top}")
+        elif bound is not None and entry.get("max_ticks", 0) > bound:
+            err(f"property {key}: {entry.get('max_ticks')} ticks outlasts vanilla's level {top} {status} potion ({bound})")
+    for ref in al.ALCHEMY_SPECIMENS:
+        if ref not in items:
+            err(f"alchemy specimen {ref} is not an ingredient")
+    for item in ("crucible", "mortar", "stirring_rod", "sampling_spoon", "assay_glass", "formula"):
+        if item not in recipes:
+            err(f"alchemy: {item} has no recipe")
+    # Every line the simulation can say has its words.
+    for path in sorted((root / "alchemy").glob("*.java")):
+        for key in re.findall(r'Text\.of\("([a-z_.]+)"', path.read_text(encoding="utf-8")):
+            if f"compose.{MOD}.{key}" not in lang:
+                err(f"concordance/alchemy/{path.name}: missing lang compose.{MOD}.{key}")
+    for band in al.BANDS:
+        if f"compose.{MOD}.band.{band}" not in lang:
+            err(f"alchemy: missing lang compose.{MOD}.band.{band}")
+    for axis in al.AXES:
+        if f"principle.{MOD}.{axis}" not in lang:
+            err(f"alchemy: missing lang principle.{MOD}.{axis}")
+    # The crucible's GeckoLib assets.
+    geo = load(ASSETS / "geckolib" / "models" / "block" / "crucible.geo.json") or {}
+    animations = load(ASSETS / "geckolib" / "animations" / "block" / "crucible.animation.json") or {}
+    names = set(animations.get("animations", {}))
+    for name in re.findall(r'thenLoop\("([^"]+)"\)', java("CrucibleBlockEntity.java")):
+        if name not in names:
+            err(f"CrucibleBlockEntity.java: animation {name} is not in crucible.animation.json")
+    definition = (geo.get("minecraft:geometry") or [{}])[0]
+    width = definition.get("description", {}).get("texture_width", 0)
+    height = definition.get("description", {}).get("texture_height", 0)
+    bones = {bone["name"] for bone in definition.get("bones", [])}
+    for clip in animations.get("animations", {}).values():
+        for bone in clip.get("bones", {}):
+            if bone not in bones:
+                err(f"crucible.animation.json: animates unknown bone {bone}")
+    regions = []
+    for bone in definition.get("bones", []):
+        for cube in bone.get("cubes", []):
+            w, h, d = cube["size"]
+            u, v = cube["uv"]
+            region = (u, v, u + 2 * (w + d), v + d + h, tuple(cube["size"]))
+            if region[2] > width or region[3] > height:
+                err(f"crucible.geo.json: a cube in {bone['name']} maps outside the {width}x{height} frame")
+            regions.append(region)
+    for i, a in enumerate(regions):
+        for b in regions[i + 1:]:
+            if a[:4] != b[:4] and a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                err(f"crucible.geo.json: UV regions {a[:4]} and {b[:4]} overlap")
+    sheet = ASSETS / "textures" / "block" / "crucible.png"
+    with Image.open(sheet) as image:
+        if image.size != (width, height * al.CRUCIBLE_FRAMES):
+            err(f"textures/block/crucible.png must be {al.CRUCIBLE_FRAMES} frames of {width}x{height}")
+    if "animation" not in (load(sheet.with_name("crucible.png.mcmeta")) or {}):
+        err("textures/block/crucible.png needs its animation metadata (GeckoLib animates the liquid's surface)")
+    if "CRUCIBLE_ENTITY" not in java("CircleClient.java", CLIENT_JAVA_ROOT):
+        err("the crucible must be drawn by GeckoLib on the client")
+
+
+def check_geckolib(name, java_text, uvs, sizes, kind="block"):
+    """A GeckoLib block's (or entity's) assets agree: every animation the Java names exists, every animated bone exists,
+    and every cube's box-UV region lies inside the sheet without overlapping another's; the sheet is the size the model
+    says."""
+    geo = load(ASSETS / "geckolib" / "models" / kind / f"{name}.geo.json") or {}
+    animations = load(ASSETS / "geckolib" / "animations" / kind / f"{name}.animation.json") or {}
+    clips = set(animations.get("animations", {}))
+    for clip in re.findall(r'thenLoop\("([^"]+)"\)', java_text):
+        if clip not in clips:
+            err(f"{name}: animation {clip} is not in {name}.animation.json")
+    definition = (geo.get("minecraft:geometry") or [{}])[0]
+    width = definition.get("description", {}).get("texture_width", 0)
+    height = definition.get("description", {}).get("texture_height", 0)
+    bones = {bone["name"] for bone in definition.get("bones", [])}
+    for clip in animations.get("animations", {}).values():
+        for bone in clip.get("bones", {}):
+            if bone not in bones:
+                err(f"{name}.animation.json: animates unknown bone {bone}")
+    regions = []
+    for bone in definition.get("bones", []):
+        for cube in bone.get("cubes", []):
+            w, h, d = cube["size"]
+            u, v = cube["uv"]
+            region = (u, v, u + 2 * (w + d), v + d + h)
+            if region[2] > width or region[3] > height:
+                err(f"{name}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+            regions.append(region)
+    for i, a in enumerate(regions):
+        for b in regions[i + 1:]:
+            if a != b and a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                err(f"{name}.geo.json: UV regions {a} and {b} overlap")
+    sheet = ASSETS / "textures" / kind / f"{name}.png"
+    if not sheet.is_file():
+        err(f"{name}: missing its GeckoLib sheet textures/{kind}/{name}.png")
+    else:
+        with Image.open(sheet) as image:
+            if image.size != (width, height):
+                err(f"textures/{kind}/{name}.png must be {width}x{height}")
+
+
+def check_ecology(co, root, lang, registered, research):
+    """Roadmap step 14: the Java mirrors tools/concordance_ecology.py (factors, sampling bounds, devices); every organism
+    and disturbance names things that exist and can be grown or made; composting never gives back what growing cost (no
+    positive loop); every word the garden says has its text; its icons are their maps; its GeckoLib assets agree."""
+    ec = co.ecology
+    garden = root / "garden"
+    registered = set(registered) | set(co.itemless_blocks())
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "ecology/Habitat.java": {"MAX_NUTRIENTS": ec.MAX_NUTRIENTS},
+        "ecology/Sampler.java": {"RADIUS": ec.SAMPLE_RADIUS, "HEIGHT": ec.SAMPLE_HEIGHT, "MAX_DIVERSITY": ec.MAX_DIVERSITY,
+                                 "MAX_DISTURBANCE": ec.MAX_DISTURBANCE, "FRESH_TICKS": ec.FRESH_TICKS},
+        "ecology/SampleBudget.java": {"PER_TICK": ec.SAMPLES_PER_TICK},
+        "ecology/Mulch.java": {"QUARTERS": ec.MULCH_QUARTERS},
+        "ecology/Organism.java": {"STAGES": ec.STAGES},
+        "garden/Garden.java": {"BONE_MEAL_NUTRIENTS": ec.BONE_MEAL_NUTRIENTS, "AWAKEN_LIMIT": ec.AWAKEN_LIMIT,
+                               "WATER_REACH": ec.WATER_REACH},
+        "garden/VerdantHeartBlockEntity.java": {"BEAT_TICKS": ec.BEAT_TICKS, "CAPACITY": ec.HEART_CAPACITY},
+        "garden/MulchMawBlockEntity.java": {"DIGEST_TICKS": ec.DIGEST_TICKS, "REACH": ec.MAW_REACH},
+        "garden/HabitatGaugeBlockEntity.java": {"GAUGE_TICKS": ec.GAUGE_TICKS},
+        "garden/GleanerBlockEntity.java": {"GLEAN_TICKS": ec.GLEAN_TICKS, "REACH": ec.GLEAN_REACH, "SLOTS": ec.GLEANER_SLOTS,
+                                           "CAPACITY": ec.GLEANER_CAPACITY, "DRAW": ec.GLEANER_DRAW,
+                                           "HEART_REACH": ec.HEART_REACH, "COST": ec.GLEAN_COST},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_ecology.py ({value})")
+    factors = {m[0]: m[1] for m in re.findall(r'^\t[A-Z_]+\("([a-z_]+)", ([A-Za-z_.0-9]+)\)', java("ecology/Factor.java"), re.M)}
+    if list(factors) != list(ec.FACTORS):
+        err(f"concordance/ecology/Factor.java: factors {list(factors)} differ from FACTORS (same order)")
+    if not re.search(r'String ACTIVITY = "' + re.escape(ec.CULTIVATION) + '";', java("garden/Garden.java")):
+        err("Garden.ACTIVITY differs from tools/concordance_ecology.py CULTIVATION")
+    practised = {rule.get("activity") for block in research.get("verdant_husbandry", {}).get("states", {}).values()
+                 for rule in block.get("any", []) if rule.get("type") == "practice"}
+    if ec.CULTIVATION not in practised:
+        err("Verdant Husbandry does not learn from the cultivation practice")
+    # Organisms and disturbances.
+    folder = DATA / MOD / "concordance"
+    organisms = {p.stem: load(p) or {} for p in (folder / "organism").glob("*.json")}
+    disturbances = {p.stem: load(p) or {} for p in (folder / "disturbance").glob("*.json")}
+    recipes = {p.stem for p in (DATA / MOD / "recipe").glob("*.json")}
+    if set(organisms) != set(ec.ORGANISMS):
+        err(f"organisms: {sorted(organisms)} differ from ORGANISMS")
+    mulch = {}
+    for name, (quarters, values) in ec.MULCH.items():
+        for value in values:
+            mulch[value] = quarters
+    for key, entry in organisms.items():
+        block = split(entry.get("block", ":"))[1]
+        if block not in registered:
+            err(f"organism {key}: block {entry.get('block')} is not registered")
+        niche = entry.get("niche", {})
+        for factor, values in niche.items():
+            top = ec.FACTORS.get(factor)
+            if top is None or len(values) != 4 or values != sorted(values) or values[0] < 0 or values[3] > top:
+                err(f"organism {key}: niche.{factor} must be [least, ideal from, ideal to, most] within 0..{top}")
+        floor = niche.get("nutrients", [0])[0]
+        if floor < entry.get("cost", 0):
+            err(f"organism {key}: its nutrient floor ({floor}) is below its cost")
+        if entry.get("role") != "crop":
+            continue
+        item = split(entry.get("item", ":"))[1]
+        if item not in registered or item not in recipes:
+            err(f"organism {key}: {entry.get('item')} is not a Jugcraft item with a recipe (its first seed)")
+        for stage in range(ec.STAGES + 1):
+            if not (ASSETS / "textures" / "block" / f"{key}_stage{stage}.png").is_file():
+                err(f"organism {key}: missing textures/block/{key}_stage{stage}.png")
+        if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
+            err(f"organism {key}: missing its loot table")
+        # Composting a harvest never gives back what regrowing it cost: no positive loop through the Maw.
+        if entry.get("cost", 0) > 0:
+            back = entry.get("produce", 0) * mulch.get(entry.get("item"), 0) + entry.get("chaff", 0) * mulch.get(f"{MOD}:verdant_chaff", 0)
+            spent = (ec.STAGES - entry.get("replant", 0)) * entry.get("cost", 0) * ec.MULCH_QUARTERS
+            if back >= spent:
+                err(f"organism {key}: composting its harvest ({back} quarters) returns at least what regrowing cost ({spent})")
+        if entry.get("item") not in mulch:
+            err(f"organism {key}: its item is not food for a Mulch Maw (#jugcraft:mulch/*)")
+    for key, entry in disturbances.items():
+        if not (1 <= entry.get("value", 0) <= ec.MAX_DISTURBANCE) or not entry.get("blocks"):
+            err(f"disturbance {key}: needs blocks and a value from 1 to {ec.MAX_DISTURBANCE}")
+        for ref in entry.get("blocks", []):
+            ns, path = split(ref.lstrip("#"))
+            if ns == MOD and not ref.startswith("#") and path not in registered:
+                err(f"disturbance {key}: {ref} is not a registered block")
+    for device in ("verdant_bed", "verdant_heart", "mulch_maw", "habitat_gauge", "gleaner"):
+        if device not in recipes:
+            err(f"garden: {device} has no recipe")
+    # Every word the garden says has its text.
+    for path in sorted((root / "ecology").glob("*.java")) + sorted(garden.glob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        for key in re.findall(r'Text\.of\("([a-z_.]+)"', text):
+            if not key.endswith(".") and f"compose.{MOD}.{key}" not in lang:
+                err(f"{path.name}: missing lang compose.{MOD}.{key}")
+        for key in re.findall(r'(?:status|Garden\.status)\("([a-z_]+)"', text):
+            if f"compose.{MOD}.ecology.status.{key}" not in lang:
+                err(f"{path.name}: missing lang compose.{MOD}.ecology.status.{key}")
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(garden\.[a-z_]+)"', text) + re.findall(r'tell\([a-z]+, "(garden\.[a-z_]+)"', text):
+            if f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+    for growth in ("thriving", "tolerating", "stalled"):
+        if f"compose.{MOD}.ecology.growth.{growth}" not in lang:
+            err(f"garden: missing lang compose.{MOD}.ecology.growth.{growth}")
+    for factor in ec.FACTORS:
+        if f"compose.{MOD}.factor.{factor}" not in lang:
+            err(f"garden: missing lang compose.{MOD}.factor.{factor}")
+    # The icons are their maps.
+    import item_icons
+    for icon in ("sunpetal", "dewmoss", "gloamcap", "mendvetch", "verdant_chaff", "verdant_heart", "mulch_maw", "gleaner",
+                 "habitat_gauge"):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"garden: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"garden: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+    for name in ("verdant_heart", "mulch_maw", "gleaner"):
+        uvs, sizes = ec.SIZES[name]
+        entity = {"verdant_heart": "VerdantHeartBlockEntity", "mulch_maw": "MulchMawBlockEntity", "gleaner": "GleanerBlockEntity"}[name]
+        check_geckolib(name, java(f"{entity}.java", garden), uvs, sizes)
+    if not re.search(r"HEART_ENTITY", java("CircleClient.java", CLIENT_JAVA_ROOT)):
+        err("the garden's living devices must be drawn by GeckoLib on the client")
+
+
+def check_celestial(co, root, lang, registered, research):
+    """Roadmap step 15: the Java mirrors tools/concordance_celestial.py (the calendar, the limits, the observatory, the
+    astrolabe and the pulse); every pattern keeps to its limits, gives an allowed effect, costs more to recall than to
+    attune and has its name; Celestial Attunement can be mastered from patterns that keep to no season; the sky's
+    classes read the world's clock and never a client's; every word the sky says has its text; the icons are their maps;
+    the observatory's GeckoLib assets agree, and its sheet is painted only in the owner's telescope's colours."""
+    ce = co.celestial
+    sky = root / "sky"
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "celestial/Calendar.java": {"DAY": ce.DAY, "RECALL_TICKS": ce.RECALL_TICKS, "MAX_FORECAST_DAYS": ce.MAX_FORECAST_DAYS,
+                                    "MAX_ATTUNEMENT_TICKS": ce.MAX_ATTUNEMENT_TICKS},
+        "celestial/CelestialParser.java": {"MAX_RESONANCE": ce.MAX_RESONANCE, "MAX_COST": ce.MAX_COST, "MAX_PERIOD": ce.MAX_PERIOD},
+        "sky/ObservatoryBlockEntity.java": {"CAPACITY": ce.OBSERVATORY_CAPACITY, "GATHER_TICKS": ce.GATHER_TICKS},
+        "sky/AstrolabeItem.java": {"CAPACITY": ce.ASTROLABE_CAPACITY},
+        "sky/Sky.java": {"PULSE_TICKS": ce.PULSE_TICKS, "EFFECT_TICKS": ce.EFFECT_TICKS, "FORECAST_DAYS": ce.FORECAST_DAYS},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_celestial.py ({value})")
+    if not re.search(rf'"amplifier", 0, {ce.MAX_AMPLIFIER}\)', java("celestial/CelestialParser.java")):
+        err(f"CelestialParser: the amplifier's limit differs from MAX_AMPLIFIER ({ce.MAX_AMPLIFIER})")
+    seasons = re.search(r"SEASONS = Set\.of\(([^)]*)\)", java("celestial/Pattern.java"))
+    if not seasons or sorted(re.findall(r'"([a-z_]+)"', seasons.group(1))) != sorted(ce.SEASONS):
+        err("celestial/Pattern.java: SEASONS differs from tools/concordance_celestial.py SEASONS")
+    harvest = (JAVA_ROOT / "agriculture" / "HarvestMoon.java").read_text(encoding="utf-8")
+    if f"long DUSK = {ce.DUSK};" not in harvest or f"long DAWN = {ce.DAWN};" not in harvest:
+        err("the night the patterns keep differs from the Harvest Moon's (agriculture/HarvestMoon.java DUSK and DAWN)")
+    if not re.search(r'String ACTIVITY = "' + re.escape(ce.OBSERVATION) + '";', java("sky/Sky.java")):
+        err("Sky.ACTIVITY differs from tools/concordance_celestial.py OBSERVATION")
+    if "getOverworldClockTime()" not in java("sky/Sky.java"):
+        err("Sky.time must read the overworld's clock (the one the sun and moon follow)")
+    for path in sorted(sky.glob("*.java")) + sorted((root / "celestial").glob("*.java")):
+        if re.search(r"^import net\.minecraft\.client", path.read_text(encoding="utf-8"), re.M):
+            err(f"{path.name}: the sky is decided on the server; it must not read the client's (net.minecraft.client)")
+    practice = [rule for block in research.get("celestial_attunement", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != ce.OBSERVATION:
+        err("Celestial Attunement does not learn from the observation practice")
+    elif sum(1 for info in ce.PATTERNS.values() if not info.get("season")) < practice[0].get("distinct", 1):
+        err("Celestial Attunement cannot be mastered from patterns that keep to no season")
+    # The patterns.
+    folder = DATA / MOD / "concordance" / "pattern"
+    patterns = {p.stem: load(p) or {} for p in folder.glob("*.json")}
+    if set(patterns) != set(ce.PATTERNS):
+        err(f"patterns: {sorted(patterns)} differ from PATTERNS")
+    for key, entry in patterns.items():
+        period, offset = entry.get("period", 0), entry.get("offset", -1)
+        attune = entry.get("attunement", {})
+        if not (1 <= period <= ce.MAX_PERIOD and 0 <= offset < period):
+            err(f"pattern {key}: period must be 1 to {ce.MAX_PERIOD} and its offset within it")
+        if not (0 <= entry.get("from", -1) < entry.get("to", 0) <= ce.DAY):
+            err(f"pattern {key}: its hours must run forward within a day")
+        if not (1 <= entry.get("resonance", 0) <= min(ce.MAX_RESONANCE, ce.OBSERVATORY_CAPACITY)):
+            err(f"pattern {key}: resonance must be 1 to {ce.MAX_RESONANCE} (and fit an observatory)")
+        if attune.get("effect") not in ce.ATTUNEMENT_EFFECTS or not (0 <= attune.get("amplifier", -1) <= ce.MAX_AMPLIFIER):
+            err(f"pattern {key}: its effect must be one of ATTUNEMENT_EFFECTS, amplifier 0 to {ce.MAX_AMPLIFIER}")
+        if not (1 <= attune.get("cost", 0) < attune.get("recall", 0) <= min(ce.MAX_COST, ce.ASTROLABE_CAPACITY)):
+            err(f"pattern {key}: attuning costs at least 1, recalling more, and an astrolabe must hold the recall")
+        if entry.get("season") is not None and entry.get("season") not in ce.SEASONS:
+            err(f"pattern {key}: unknown season {entry.get('season')}")
+        if f"pattern.{MOD}.{key}" not in lang:
+            err(f"pattern {key}: missing lang pattern.{MOD}.{key}")
+    recipes = {p.stem for p in (DATA / MOD / "recipe").glob("*.json")}
+    for thing in ("observatory", "astrolabe"):
+        if thing not in recipes or thing not in registered:
+            err(f"sky: {thing} needs a recipe and a registration")
+    # Every word the sky says has its text.
+    entity = java("ObservatoryBlockEntity.java", sky)
+    priority = re.search(r"PRIORITY = List\.of\(([^)]*)\)", entity)
+    statuses = set(re.findall(r'"([a-z_]+)"', priority.group(1))) if priority else set()
+    if not priority:
+        err("ObservatoryBlockEntity: PRIORITY, the statuses in order, is missing")
+    statuses |= set(re.findall(r'next = "([a-z_]+)"', entity)) | set(re.findall(r'return "([a-z_]+)"', java("Sky.java", sky)))
+    statuses |= set(re.findall(r'\? "([a-z_]+)" : null', java("Sky.java", sky)))
+    for status in sorted(statuses):
+        if f"compose.{MOD}.sky.status.{status}" not in lang:
+            err(f"sky: missing lang compose.{MOD}.sky.status.{status}")
+    for path in sorted(sky.glob("*.java")):
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(sky\.[a-z_]+)"', path.read_text(encoding="utf-8")):
+            if f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+    for phase in range(8):
+        if f"message.{MOD}.concordance.sky.moon.{phase}" not in lang:
+            err(f"sky: missing lang for moon phase {phase}")
+    for season in list(ce.SEASONS) + ["off"]:
+        if f"message.{MOD}.concordance.sky.season.{season}" not in lang:
+            err(f"sky: missing lang for season {season}")
+    # The icons are their maps.
+    import item_icons
+    for icon in ("astrolabe", "observatory"):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"sky: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"sky: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+    uvs, sizes = ce.SIZES["observatory"]
+    check_geckolib("observatory", entity, uvs, sizes)
+    if not re.search(r"OBSERVATORY_ENTITY", java("CircleClient.java", CLIENT_JAVA_ROOT)):
+        err("the observatory must be drawn by GeckoLib on the client")
+    import concordance_celestial_art as art
+    allowed = art.owner_colours() | art.EXTENDED
+    sheet = ASSETS / "textures" / "block" / "observatory.png"
+    if sheet.is_file():
+        with Image.open(sheet) as img:
+            used = {pixel[:3] for _count, pixel in img.convert("RGBA").getcolors(maxcolors=65536) if pixel[3] > 0}
+        if used - allowed:
+            err(f"textures/block/observatory.png: colours not from the owner's telescope: {sorted(used - allowed)[:4]}")
+    # LambDynamicLights (optional): the astrolabe's glow keys on a component the sky registers.
+    light = load(ASSETS / "dynamiclights" / "item" / "astrolabe.json") or {}
+    for component in light.get("match", {}).get("components", {}):
+        if f'"{split(component)[1]}"' not in java("Sky.java", sky):
+            err(f"dynamiclights/item/astrolabe.json: component {component} is not registered in Sky")
+
+
+def check_workers(co, root, lang, registered, research):
+    """Roadmap step 17: the Java mirrors tools/concordance_workers.py (the bond, navigation, parser limits, the roster
+    and the statuses, in order); every worker definition is its table's and has its entity, name and GeckoLib assets;
+    every status a worker can give has its text, and the inactive reasons the brief names are there; mastery comes from
+    each kind's service; the brains keep no saved state and no worker loads a chunk or uses a portal; every word has its
+    text; the icons are their maps."""
+    wk = co.workers
+    spirits = root / "spirits"
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "worker/Bond.java": {"MAX": wk.BOND_MAX, "GAIN": wk.BOND_GAIN, "DAILY_GAIN": wk.BOND_DAILY_GAIN,
+                             "NEGLECT": wk.BOND_NEGLECT, "FIRST": wk.BOND_FIRST, "SECOND": wk.BOND_SECOND},
+        "worker/Navigation.java": {"GIVE_UP": wk.GIVE_UP, "RETRY_TICKS": wk.RETRY_TICKS},
+        "worker/WorkerParser.java": {"MAX_RADIUS": wk.MAX_RADIUS, "MAX_CARRY": wk.MAX_CARRY, "MAX_QUOTA": wk.MAX_QUOTA,
+                                     "MAX_SUPPORT_TICKS": wk.MAX_SUPPORT_TICKS},
+        "spirits/WorkerEntity.java": {"THINK_TICKS": wk.THINK_TICKS},
+        "spirits/WorkerRoster.java": {"MAX_PER_PLAYER": wk.ROSTER_MAX},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_workers.py ({value})")
+    if f"long VISIT_TICKS = {wk.VISIT_TICKS}L;" not in java("HearthlingEntity.java", spirits):
+        err("spirits/HearthlingEntity.java: VISIT_TICKS differs from tools/concordance_workers.py")
+    work = re.search(r"WORK = List\.of\(([^)]*)\)", java("worker/WorkerParser.java"))
+    if not work or re.findall(r'"([a-z_]+)"', work.group(1)) != wk.WORK:
+        err("worker/WorkerParser.java: WORK differs from tools/concordance_workers.py")
+    statuses = re.findall(r'^\t[A-Z_]+\("([a-z_]+)", (?:true|false)\)', java("worker/Status.java"), re.M)
+    if statuses != list(wk.STATUSES):
+        err(f"worker/Status.java: statuses {statuses} differ from STATUSES (same order)")
+    for reason in ("waiting_for_resources", "blocked_by_access", "cannot_navigate", "outside_agreement", "finished"):
+        if reason not in statuses:
+            err(f"worker/Status.java: a worker must be able to say {reason}")
+    for status in statuses:
+        if f"compose.{MOD}.worker.status.{status}" not in lang:
+            err(f"workers: missing lang compose.{MOD}.worker.status.{status}")
+    if not re.search(r'String ACTIVITY = "' + re.escape(wk.SERVICE) + '";', java("Workers.java", spirits)):
+        err("Workers.ACTIVITY differs from tools/concordance_workers.py SERVICE")
+    practice = [rule for block in research.get("binding_arts", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != wk.SERVICE or practice[0].get("distinct", 0) != 3:
+        err("the Binding Arts must be mastered by the service of all three kinds (practice, distinct 3)")
+    # The definitions, their entities and their assets.
+    folder = DATA / MOD / "concordance" / "worker"
+    defined = {p.stem: load(p) or {} for p in folder.glob("*.json")}
+    if set(defined) != set(wk.WORKERS):
+        err(f"concordance/worker: {sorted(defined)} differ from WORKERS")
+    kinds = {info["kind"] for info in wk.WORKERS.values()}
+    if kinds != {"familiar", "spirit", "construct"}:
+        err(f"workers: the three kinds need a definition each, found {sorted(kinds)}")
+    registry = java("Workers.java", spirits)
+    client = java("WorkerClient.java", CLIENT_JAVA_ROOT)
+    classes = {"hearthling": "HearthlingEntity", "gathering_shade": "GatheringShadeEntity", "clockwork_porter": "ClockworkPorterEntity"}
+    for key, info in wk.WORKERS.items():
+        if defined.get(key, {}).get("kind") != info["kind"]:
+            err(f"concordance/worker/{key}.json: differs from WORKERS (run tools/generate_material_data.py)")
+        if f'entity("{key}"' not in registry:
+            err(f"workers: {key} needs its entity type in Workers")
+        if f"entity.{MOD}.{key}" not in lang:
+            err(f"workers: missing lang entity.{MOD}.{key}")
+        if f"Workers.{key.upper()}" not in client:
+            err(f"workers: {key} must be drawn by GeckoLib on the client (WorkerClient)")
+        source = java(f"{classes.get(key, key)}.java", spirits)
+        if f'DEFINITION = "{MOD}:{key}"' not in source:
+            err(f"spirits/{classes.get(key, key)}.java: must read its definition {MOD}:{key}")
+        check_geckolib(key, source, None, None, kind="entity")
+    # The brains keep no saved state; no worker loads a chunk, or follows anyone through a portal.
+    for path in sorted(spirits.glob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"spirits/{path.name}: a worker never {why} ({banned})")
+        # A familiar may hop beside its person in the same level: teleportTo(x, y, z), never the level-taking form.
+        for call in re.findall(r"teleportTo\(([^;]*)\);", text):
+            if call.count(",") != 2:
+                err(f"spirits/{path.name}: a worker only hops within its own level (teleportTo(x, y, z))")
+        if "MemoryModuleType" in text and path.name != "WorkerEntity.java":
+            err(f"spirits/{path.name}: only WorkerEntity talks to the brain; a worker's model never lives in its memories")
+    # Every word has its text.
+    for path in sorted(spirits.glob("*.java")):
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(workers\.[a-z_]+)"', path.read_text(encoding="utf-8")):
+            if not key.endswith(".") and f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+    for kind in sorted(kinds):
+        if f"message.{MOD}.concordance.workers.kind.{kind}" not in lang:
+            err(f"workers: missing lang for the kind {kind}")
+    jade = java("compat/jade/WorkerDataProvider.java", JAVA_ROOT) + java("compat/JugcraftJadeClient.java", CLIENT_JAVA_ROOT)
+    for key in re.findall(r'"tooltip\.jugcraft\.concordance\.(jade\.[a-z_]+)"', jade):
+        if f"tooltip.{MOD}.concordance.{key}" not in lang:
+            err(f"Jade: missing lang tooltip.{MOD}.concordance.{key}")
+    if "WorkerDataProvider" not in java("compat/jade/JugcraftJadePlugin.java", JAVA_ROOT):
+        err("Jade: the worker provider must be registered in JugcraftJadePlugin")
+    for thing in list(wk.ITEMS) + list(wk.BLOCKS):
+        if thing not in registered or not (DATA / MOD / "recipe" / f"{thing}.json").is_file():
+            err(f"workers: {thing} needs a registration and a recipe")
+    import item_icons
+    for icon in list(wk.ITEMS) + list(wk.BLOCKS):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"workers: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"workers: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+
+
+def check_logistics(co, root, lang, registered):
+    """Roadmap step 18: the Java ledger and post numbers equal tools/concordance_logistics.py; the request states are
+    the generator's, in order; every event kind, note and refusal the Java can name has its text; the post has its
+    registration, recipe, assets and icon; and a courier's work moves items only through CourierLedger, whose moves are
+    Transfer API transactions committed with their ledger step."""
+    lg = co.logistics
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    ledger = java("logistics/Logistics.java")
+    for const, value in (("MAX_WANTED", lg.MAX_WANTED), ("MAX_OPEN_PER_PLAYER", lg.MAX_OPEN_PER_PLAYER), ("MAX_OPEN", lg.MAX_OPEN),
+                         ("HISTORY", lg.HISTORY)):
+        if not re.search(rf"\bint {const} = {value};", ledger):
+            err(f"concordance/logistics/Logistics.java: {const} differs from tools/concordance_logistics.py ({value})")
+    for const, value in (("LEASE_TICKS", lg.LEASE_TICKS), ("RETRY_TICKS", lg.RETRY_TICKS)):
+        if f"long {const} = {value}L;" not in ledger:
+            err(f"concordance/logistics/Logistics.java: {const} differs from tools/concordance_logistics.py ({value})")
+    couriers = java("courier/Couriers.java")
+    for const, value in (("SOURCE_RADIUS", lg.SOURCE_RADIUS), ("SHOWN_HISTORY", lg.SHOWN_HISTORY)):
+        if not re.search(rf"\bint {const} = {value};", couriers):
+            err(f"concordance/courier/Couriers.java: {const} differs from tools/concordance_logistics.py ({value})")
+    if not re.search(rf"\bint SLOTS = {lg.POST_SLOTS};", java("courier/CourierPostBlockEntity.java")):
+        err("concordance/courier/CourierPostBlockEntity.java: SLOTS differs from tools/concordance_logistics.py POST_SLOTS")
+    states = re.findall(r'^\t[A-Z_]+\("([a-z_]+)"\)', java("logistics/RequestState.java"), re.M)
+    if states != list(lg.STATES):
+        err(f"concordance/logistics/RequestState.java: states {states} differ from STATES (same order)")
+    for state in states:
+        if f"compose.{MOD}.courier.state.{state}" not in lang:
+            err(f"logistics: missing lang for the state {state}")
+    # Event kinds and notes: every word the ledger and the courier write into a request or its history.
+    for word in set(re.findall(r'"([a-z_]+)"', ledger)):
+        if word not in lg.EVENTS and word not in lg.NOTES:
+            err(f"concordance/logistics/Logistics.java: '{word}' is neither an event in EVENTS nor a note in NOTES")
+    porter = java("spirits/ClockworkPorterEntity.java")
+    for word in set(re.findall(r'release\([^;]*?"([a-z_]+)"', porter + java("courier/CourierLedger.java"))):
+        if word not in lg.NOTES:
+            err(f"logistics: the release note '{word}' has no text in NOTES")
+    for key in lg.EVENTS:
+        if f"message.{MOD}.concordance.courier.event.{key}" not in lang:
+            err(f"logistics: missing lang for the event {key}")
+    for key in lg.NOTES:
+        if f"compose.{MOD}.courier.note.{key}" not in lang:
+            err(f"logistics: missing lang for the note {key}")
+    outcomes = re.search(r"enum Outcome \{([^}]*)\}", ledger)
+    for outcome in (re.findall(r"[A-Z_]+", outcomes.group(1)) if outcomes else []):
+        if outcome != "DONE" and f"message.{MOD}.concordance.courier.refused.{outcome.lower()}" not in lang:
+            err(f"logistics: missing lang for the refusal {outcome.lower()}")
+    for path in sorted((root / "courier").glob("*.java")) + [root / "spirits" / "ClockworkPorterEntity.java", root / "spirits" / "PorterKeyItem.java"]:
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(courier\.[a-z_.]+)"', path.read_text(encoding="utf-8")):
+            if not key.endswith(".") and f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+    # A courier's work moves items only through CourierLedger; CourierLedger moves them only in committed transactions.
+    work = porter.split("courier work (roadmap step 18)", 1)[-1].split("Draws Ley Charge", 1)[0]
+    for move in (".insert(", ".extract(", "removeItem(", "setItem(", "insert(container"):
+        if move in work:
+            err(f"spirits/ClockworkPorterEntity.java: courier work moves items itself ({move}); use CourierLedger")
+    if java("courier/CourierLedger.java").count("transaction.commit()") < 2:
+        err("concordance/courier/CourierLedger.java: pickups and deliveries must commit their transactions with the ledger step")
+    # The post.
+    if "courier_post" not in registered or not (DATA / MOD / "recipe" / "courier_post.json").is_file():
+        err("logistics: courier_post needs a registration and a recipe")
+    for face in ("side", "top", "bottom"):
+        if not (ASSETS / "textures" / "block" / f"courier_post_{face}.png").is_file():
+            err(f"logistics: missing textures/block/courier_post_{face}.png")
+    import item_icons
+    texture = ASSETS / "textures" / "item" / "courier_post.png"
+    if not item_icons.has("courier_post") or not texture.is_file():
+        err("logistics: courier_post needs its map tools/item_icons/courier_post.txt and its texture")
+    else:
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw("courier_post").tobytes() or img.size != (16, 16):
+                err("logistics: textures/item/courier_post.png differs from its map: run tools/generate_textures.py")
+
+
+def check_artifice(co, root, lang, registered, research):
+    """Roadmap step 19: the Java mirrors tools/concordance_artifice.py (qualities, limits, costs, tools); the definitions
+    are the generator's; salvage always gives back less than forging costs; no item is two things at the bench; no ring
+    can add more of an attribute than its cap, whatever is rolled, inscribed and set; every word has its text; rings are
+    Trinkets rings that give their modifiers only through Trinkets (exactly once); the icons are their maps."""
+    ar = co.artifice
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    if not re.search(rf"\bint BOND_CAPACITY = {ar.BOND_CAPACITY};", java("artifice/Forge.java")):
+        err("concordance/artifice/Forge.java: BOND_CAPACITY differs from tools/concordance_artifice.py")
+    qualities = {m[0]: (int(m[1]), int(m[2]), int(m[3])) for m in re.findall(r'^\t[A-Z]+\("([a-z]+)", (-?\d+), (\d+), (\d+)\)',
+                                                                          java("artifice/Quality.java"), re.M)}
+    if qualities != ar.QUALITIES or sum(weight for _b, _a, weight in ar.QUALITIES.values()) != 100:
+        err(f"concordance/artifice/Quality.java: qualities {qualities} differ from QUALITIES (weights must total 100)")
+    for const, value in (("MAX_COST", ar.MAX_COST), ("MAX_CAPACITY", ar.MAX_CAPACITY), ("MAX_SOCKETS", ar.MAX_SOCKETS),
+                         ("MAX_RUNES", ar.MAX_RUNES), ("MAX_PART_COST", ar.MAX_PART_COST)):
+        if not re.search(rf"\bint {const} = {value};", java("artifice/ArtificeParser.java")):
+            err(f"concordance/artifice/ArtificeParser.java: {const} differs from tools/concordance_artifice.py ({value})")
+    smithy = java("smithy/Artificery.java")
+    for const, value in (("FORGE_FOCUS", ar.FORGE_FOCUS), ("REFORGE_FOCUS", ar.REFORGE_FOCUS), ("INSCRIBE_FOCUS", ar.INSCRIBE_FOCUS),
+                         ("BOND_FOCUS", ar.BOND_FOCUS), ("CONFIRM_TICKS", ar.CONFIRM_TICKS), ("WEAR_TICKS", ar.WEAR_TICKS)):
+        if not re.search(rf"\bint {const} = {value};", smithy):
+            err(f"concordance/smithy/Artificery.java: {const} differs from tools/concordance_artifice.py ({value})")
+    tools = {"REFORGE_CATALYST": ar.REFORGE_CATALYST, "UNSOCKET_TOOL": ar.UNSOCKET_TOOL, "SALVAGE_TOOL": ar.SALVAGE_TOOL,
+             "BOND_TOOL": ar.BOND_TOOL}
+    for const, item in tools.items():
+        if f"Item {const} = Items.{split(item)[1].upper()};" not in smithy:
+            err(f"concordance/smithy/Artificery.java: {const} differs from tools/concordance_artifice.py ({item})")
+    if not re.search(r'String ACTIVITY = "' + re.escape(ar.ARTIFICE_PRACTICE) + '";', smithy):
+        err("Artificery.ACTIVITY differs from tools/concordance_artifice.py ARTIFICE_PRACTICE")
+    practice = [rule for block in research.get("runesmithing", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != ar.ARTIFICE_PRACTICE:
+        err("Runesmithing must be mastered by the artifice practice")
+    # The definitions are the generator's.
+    folder = DATA / MOD / "concordance"
+    for kind, table in (("substrate", ar.SUBSTRATES), ("gem", ar.GEMS), ("rune", ar.RUNES), ("affix", ar.AFFIXES)):
+        found = {p.stem for p in (folder / kind).glob("*.json")}
+        if found != set(table):
+            err(f"concordance/{kind}: {sorted(found)} differ from the generator's {sorted(table)}")
+    # No gain, and nothing is two things at the bench.
+    bench_items = {}
+    for key, info in ar.SUBSTRATES.items():
+        if info["salvage"] >= info["cost"]:
+            err(f"substrate {key}: salvage ({info['salvage']}) must give back less than forging costs ({info['cost']})")
+        bench_items.setdefault(info["item"], []).append(f"substrate {key}")
+    for key, info in ar.GEMS.items():
+        bench_items.setdefault(info["item"], []).append(f"gem {key}")
+    for key, info in ar.RUNES.items():
+        bench_items.setdefault(info["item"], []).append(f"rune {key}")
+    for item in tools.values():
+        bench_items.setdefault(item, []).append("a bench tool")
+    for item, uses in bench_items.items():
+        if len(uses) > 1:
+            err(f"artifice: {item} is {' and '.join(uses)} at the bench")
+    # The most of each attribute a ring of each substrate could add.
+    for key, info in ar.SUBSTRATES.items():
+        most = {}
+        best_affix = {}
+        for affix in info["affixes"]:
+            a = ar.AFFIXES[affix]
+            best_affix[a["attribute"]] = max(best_affix.get(a["attribute"], 0.0), a["max"])
+        for attribute, value in best_affix.items():
+            most[attribute] = most.get(attribute, 0.0) + value
+        runes = {}
+        for rune in ar.RUNES.values():
+            if not rune.get("substrates") or key in rune["substrates"]:
+                runes.setdefault(rune["stat"]["attribute"], []).append(rune["stat"]["amount"])
+        for attribute, amounts in runes.items():
+            most[attribute] = most.get(attribute, 0.0) + sum(sorted(amounts, reverse=True)[:info["runes"]])
+        for gem in ar.GEMS.values():
+            attribute = gem["stat"]["attribute"]
+            most[attribute] = most.get(attribute, 0.0) + gem["stat"]["amount"] * info["sockets"]
+        for attribute, value in most.items():
+            if attribute not in ar.ATTRIBUTE_CAPS:
+                err(f"artifice: {attribute} has no cap in ATTRIBUTE_CAPS")
+            elif value > ar.ATTRIBUTE_CAPS[attribute] + 1e-9:
+                err(f"artifice: a {key} ring could add {value} {attribute}, above its cap {ar.ATTRIBUTE_CAPS[attribute]}")
+    # Every word has its text.
+    for word in set(re.findall(r'Result\.no\("([a-z_]+)"\)|Removal\([^;]*"([a-z_]+)"\)', java("artifice/Forge.java"))):
+        for refusal in word:
+            if refusal and f"compose.{MOD}.artifice.refusal.{refusal}" not in lang:
+                err(f"artifice: missing lang for the refusal {refusal}")
+    for refusal in re.findall(r'refuse\(player, "([a-z_]+)"\)', smithy):
+        if f"compose.{MOD}.artifice.refusal.{refusal}" not in lang:
+            err(f"artifice: missing lang for the refusal {refusal}")
+    processes = re.findall(r'^\t\t[A-Z]+\("([a-z]+)", EnumSet', java("artifice/Forge.java"), re.M)
+    if sorted(processes) != sorted(ar.PROCESSES):
+        err(f"artifice: processes {processes} differ from PROCESSES")
+    for key in list(ar.QUALITIES):
+        if f"compose.{MOD}.artifice.quality.{key}" not in lang:
+            err(f"artifice: missing lang for the quality {key}")
+    for table, kind in ((ar.SUBSTRATES, "substrate"), (ar.AFFIXES, "affix"), (ar.GEMS, "gem"), (ar.RUNES, "rune")):
+        for key in table:
+            if f"compose.{MOD}.artifice.{kind}.{key}" not in lang:
+                err(f"artifice: missing lang for the {kind} {key}")
+    for attribute in {a["attribute"] for a in ar.AFFIXES.values()}:
+        if f"compose.{MOD}.artifice.attribute.{attribute.replace(':', '.')}" not in lang:
+            err(f"artifice: missing lang for the attribute {attribute}")
+    for path in sorted((root / "smithy").glob("*.java")):
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(artifice\.[a-z_.]+)"', path.read_text(encoding="utf-8")):
+            if not key.endswith(".") and f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+        for key in re.findall(r'"tooltip\.jugcraft\.concordance\.(artifice\.[a-z_.]+)"', path.read_text(encoding="utf-8")):
+            if f"tooltip.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang tooltip.{MOD}.concordance.{key}")
+    # Rings are Trinkets rings, and their modifiers come only through Trinkets (exactly once on equip and unequip).
+    ring = java("smithy/ResonantRingItem.java")
+    if "implements TrinketCallback" not in ring or "forEachTrinketModifier" not in ring:
+        err("smithy/ResonantRingItem.java: a ring gives its modifiers through Trinkets' TrinketCallback")
+    if "ATTRIBUTE_MODIFIERS" in smithy + ring:
+        err("smithy: a ring must not carry vanilla attribute modifiers too (they would apply in the hand as well)")
+    slot = load(ROOT / "src" / "main" / "resources" / "data" / "trinkets" / "tags" / "item" / "hand" / "ring.json") or {}
+    if rid_value("resonant_ring") not in slot.get("values", []):
+        err("data/trinkets/tags/item/hand/ring.json must list jugcraft:resonant_ring")
+    entities = load(ROOT / "src" / "main" / "resources" / "data" / "trinkets" / "entities" / f"{MOD}.json") or {}
+    if "hand/ring" not in entities.get("slots", []) or "player" not in entities.get("entities", []):
+        err("data/trinkets/entities/jugcraft.json must give players the hand/ring slot")
+    for thing in list(ar.ITEMS) + list(ar.BLOCKS):
+        if thing not in registered:
+            err(f"artifice: {thing} is not registered")
+    if not (DATA / MOD / "recipe" / "artificer_bench.json").is_file():
+        err("artifice: the Artificer's Bench needs a recipe")
+    for face in ("side", "top", "bottom"):
+        if not (ASSETS / "textures" / "block" / f"artificer_bench_{face}.png").is_file():
+            err(f"artifice: missing textures/block/artificer_bench_{face}.png")
+    import item_icons
+    for icon in list(ar.ITEMS) + list(ar.BLOCKS):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"artifice: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"artifice: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+
+
+def check_relics(co, root, lang, registered, research):
+    """Roadmap step 20: the Java mirrors tools/concordance_relics.py (the budgets, limits, contexts and the shrine's
+    numbers); the definitions are the generator's, each relic works somewhere and never carried loose or worn for show,
+    gives only an allowed effect within the limits, and can be made and recharged; nothing inside a container is ever
+    looked at and relic charge never turns back into Ley Charge; every reason, context, mode and message has its text;
+    the shrine's GeckoLib animations are the ones its block entity plays; Jade, Trinkets and the icons agree."""
+    rl = co.relics
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    reliquary = java("reliquary/Reliquary.java")
+    shrine = java("reliquary/ReliquaryShrineBlockEntity.java")
+    constants = {
+        "relic/Relics.java": {"BUDGET": rl.BUDGET, "SHRINE_BUDGET": rl.SHRINE_BUDGET, "BUDGET_TICKS": rl.BUDGET_TICKS,
+                              "CALM_TICKS": rl.CALM_TICKS},
+        "relic/RelicParser.java": {"MAX_CAPACITY": rl.MAX_CAPACITY, "MAX_RANGE": rl.MAX_RANGE, "MIN_INTERVAL": rl.MIN_INTERVAL,
+                                   "MAX_INTERVAL": rl.MAX_INTERVAL, "MAX_DURATION": rl.MAX_DURATION, "MAX_AMPLIFIER": rl.MAX_AMPLIFIER},
+        "reliquary/Reliquary.java": {"CHECK_TICKS": rl.CHECK_TICKS, "CHARGE_PER_LEY": rl.CHARGE_PER_LEY,
+                                     "RECHARGE_PER_SECOND": rl.RECHARGE_PER_SECOND, "PYLON_REACH": rl.PYLON_REACH,
+                                     "MAX_TARGETS": rl.MAX_TARGETS},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_relics.py ({value})")
+    contexts = re.findall(r'^\t[A-Z_]+\("([a-z_]+)"\)', java("relic/Context.java"), re.M)
+    if contexts != list(rl.CONTEXTS):
+        err(f"relic/Context.java: contexts {contexts} differ from CONTEXTS (same order)")
+    ids = re.search(r"RELIC_IDS = List\.of\(([^)]*)\)", reliquary)
+    if not ids or re.findall(r'"([a-z_]+)"', ids.group(1)) != rl.RELIC_IDS:
+        err("reliquary/Reliquary.java: RELIC_IDS differs from tools/concordance_relics.py")
+    if not re.search(r'String ACTIVITY = "' + re.escape(rl.RELIC_PRACTICE) + '";', reliquary):
+        err("Reliquary.ACTIVITY differs from tools/concordance_relics.py RELIC_PRACTICE")
+    if f'String RESEARCH = "{MOD}:relic_lore";' not in reliquary:
+        err("Reliquary.RESEARCH must be jugcraft:relic_lore")
+    practice = [rule for block in research.get("relic_lore", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != rl.RELIC_PRACTICE:
+        err("Relic Lore must be mastered by the relic practice")
+    elif len({c for info in rl.RELICS.values() for m in info["modes"] for c in m["contexts"]}) < practice[0].get("distinct", 1):
+        err("Relic Lore's mastery asks for more different contexts than the relics have")
+    # The definitions are the generator's, and each keeps to the rules.
+    folder = DATA / MOD / "concordance" / "relic"
+    found = {p.stem: load(p) or {} for p in folder.glob("*.json")}
+    if set(found) != set(rl.RELICS):
+        err(f"concordance/relic: {sorted(found)} differ from RELICS")
+    recipes = {p.stem for p in (DATA / MOD / "recipe").glob("*.json")}
+    for key, info in rl.RELICS.items():
+        entry = found.get(key, {})
+        if entry.get("modes") != info["modes"] or entry.get("capacity") != info["capacity"] or entry.get("owned") != info["owned"]:
+            err(f"concordance/relic/{key}.json differs from the generator's: run tools/generate_material_data.py")
+        if key not in rl.RELIC_IDS or key not in registered or key not in recipes:
+            err(f"relic {key}: needs its item id in RELIC_IDS, a registration and a recipe")
+        if not 1 <= info["capacity"] <= rl.MAX_CAPACITY:
+            err(f"relic {key}: capacity must be 1 to {rl.MAX_CAPACITY}")
+        seen = set()
+        for m in info["modes"]:
+            where = set(m["contexts"])
+            if not where or where & {"inventory", "cosmetic"} or not where <= set(rl.CONTEXTS) or where & seen:
+                err(f"relic {key} mode {m['id']}: contexts must be working ones, each in one mode only")
+            seen |= where
+            if m["status"] not in rl.RELIC_EFFECTS or not 0 <= m["amplifier"] <= rl.MAX_AMPLIFIER:
+                err(f"relic {key} mode {m['id']}: its status must be one of RELIC_EFFECTS, amplifier 0 to {rl.MAX_AMPLIFIER}")
+            if not (20 <= m["duration"] <= rl.MAX_DURATION and rl.MIN_INTERVAL <= m["interval"] <= rl.MAX_INTERVAL
+                    and 1 <= m["cost"] <= info["capacity"] and 0 <= m["range"] <= rl.MAX_RANGE):
+                err(f"relic {key} mode {m['id']}: its duration, interval, cost or range is out of bounds")
+            if (m["target"] == "self") != (m["range"] == 0) or (m["target"] == "self" and "installed" in where):
+                err(f"relic {key} mode {m['id']}: a self mode has no range and is never installed; the others need one")
+            if m["interval"] % rl.CHECK_TICKS:
+                err(f"relic {key} mode {m['id']}: its interval should be a whole number of checks ({rl.CHECK_TICKS} ticks)")
+            if f"compose.{MOD}.relic.mode.{m['id']}" not in lang:
+                err(f"relic {key}: missing lang for the mode {m['id']}")
+        if f"tooltip.{MOD}.{key}" not in lang or f"item.{MOD}.{key}" not in lang:
+            err(f"relic {key}: missing its name or tooltip")
+    # Nothing inside a container is ever looked at, and charge never becomes Ley Charge again.
+    for forbidden in ("CONTAINER", "BUNDLE_CONTENTS", "getEnderChestInventory"):
+        if forbidden in reliquary:
+            err(f"reliquary/Reliquary.java: relics are never looked for inside containers ({forbidden})")
+    for path in sorted((root / "reliquary").glob("*.java")):
+        if re.search(r"\.fill\(|\.setLey\(", path.read_text(encoding="utf-8")):
+            err(f"{path.name}: relic charge must never be turned back into Ley Charge")
+    if "Cause.Origin.SHRINE" not in shrine or "Reliquary.give(" not in shrine or "ConcordanceEffects.apply(" not in reliquary:
+        err("reliquary: relics give their effects only through the shared effect boundary (shrines as SHRINE causes)")
+    # Every word has its text.
+    reasons = set(re.findall(r'new Verdict\((?:null|mode), (?:context == Context\.INSTALLED \? "[a-z_]+" : )?"([a-z_]+)"', java("relic/Relics.java")))
+    reasons |= set(re.findall(r'"(cannot_install)"', java("relic/Relics.java")))
+    reasons |= set(re.findall(r'new Outcome\([^;]*?"([a-z_]+)", 0\)', reliquary))
+    reasons |= set(re.findall(r'return "([a-z_]+)";', shrine)) | set(re.findall(r'next = (?:definition == null \? )?"([a-z_]+)"', shrine))
+    reasons -= {"working", "empty", ""}
+    for reason in sorted(reasons | set(rl.REASONS)):
+        if f"compose.{MOD}.relic.reason.{reason}" not in lang:
+            err(f"relics: missing lang for the reason {reason}")
+    if not reasons <= set(rl.REASONS):
+        err(f"relics: reasons {sorted(reasons - set(rl.REASONS))} are not in REASONS")
+    for context in rl.CONTEXTS:
+        if f"compose.{MOD}.relic.context.{context}" not in lang:
+            err(f"relics: missing lang for the context {context}")
+    sources = sorted((root / "reliquary").glob("*.java")) + [JAVA_ROOT / "compat" / "jade" / "ShrineDataProvider.java"]
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "compat" / "JugcraftJadeClient.java"
+    for path in sources + [client]:
+        text = path.read_text(encoding="utf-8") if path.exists() else ""
+        for kind, key in re.findall(r'"(message|tooltip|compose)\.jugcraft\.((?:concordance\.)?(?:relic|jade\.shrine)[a-z_.]*)"', text):
+            if not key.endswith(".") and f"{kind}.{MOD}.{key}" not in lang:
+                err(f"{path.name}: missing lang {kind}.{MOD}.{key}")
+    # The shrine: its GeckoLib animations are the ones it plays; Jade shows it; Trinkets gives the necklace slot.
+    animations = load(ASSETS / "geckolib" / "animations" / "block" / "reliquary_shrine.animation.json") or {}
+    for name in re.findall(r'thenLoop\("([a-z_.]+)"\)', shrine):
+        if name not in animations.get("animations", {}):
+            err(f"reliquary_shrine.animation.json: missing {name}")
+    if not (ASSETS / "geckolib" / "models" / "block" / "reliquary_shrine.geo.json").is_file():
+        err("relics: missing the shrine's GeckoLib model")
+    plugin = (JAVA_ROOT / "compat" / "jade" / "JugcraftJadePlugin.java").read_text(encoding="utf-8")
+    if "ShrineDataProvider.INSTANCE, ReliquaryShrineBlockEntity.class" not in plugin or "ReliquaryShrineBlock.class" not in (
+            client.read_text(encoding="utf-8") if client.exists() else ""):
+        err("Jade: the Reliquary Shrine needs its data provider and its tooltip")
+    if f"config.jade.plugin_{MOD}.reliquary_shrine" not in lang:
+        err("Jade: missing the shrine's config name")
+    for relic, slot in rl.TRINKET_SLOTS.items():
+        group, name = slot.split("/")
+        tag = load(ROOT / "src" / "main" / "resources" / "data" / "trinkets" / "tags" / "item" / group / f"{name}.json") or {}
+        if rid_value(relic) not in tag.get("values", []):
+            err(f"data/trinkets/tags/item/{slot}.json must list {rid_value(relic)}")
+    entities = load(ROOT / "src" / "main" / "resources" / "data" / "trinkets" / "entities" / f"{MOD}_relics.json") or {}
+    if set(rl.TRINKET_SLOTS.values()) - set(entities.get("slots", [])) or "player" not in entities.get("entities", []):
+        err(f"data/trinkets/entities/{MOD}_relics.json must give players {sorted(set(rl.TRINKET_SLOTS.values()))}")
+    if "TrinketsApi.getAttachment(" not in reliquary or "Context.COSMETIC" not in reliquary:
+        err("Reliquary.find must read the Trinkets slots, treating cosmetic ones as worn for show")
+    if "reliquary_shrine" not in registered or "reliquary_shrine" not in recipes:
+        err("relics: the Reliquary Shrine needs a registration and a recipe")
+    equipment = load(ASSETS / "equipment" / "owlsight_circlet.json") or {}
+    worn = ASSETS / "textures" / "entity" / "equipment" / "humanoid" / "owlsight_circlet.png"
+    if not equipment.get("layers", {}).get("humanoid") or not worn.is_file():
+        err("relics: the Owlsight Circlet needs its equipment asset and worn texture")
+    sheet = ASSETS / "textures" / "block" / "reliquary_shrine.png"
+    if not sheet.is_file():
+        err("relics: missing textures/block/reliquary_shrine.png")
+    else:
+        with Image.open(sheet) as img:
+            if img.size != (64, 64):
+                err("relics: the shrine's sheet must be 64x64")
+    import item_icons
+    for icon in rl.RELIC_IDS + ["reliquary_shrine"]:
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"relics: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"relics: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+
+
+def check_equivalence(co, root, lang, registered, research):
+    """Roadmap step 21: the Java mirrors tools/concordance_equivalence.py (the markup, limits, cap, eligibility rules and
+    the scale's numbers); the catalogue and graph on disk are the generator's; Python's own audit finds no unvalued
+    item, no recipe that gains value and no profitable cycle (sources apart), and every round trip through the scale
+    loses; nothing catalogued is excluded or scarce; every reason and message has its text; the icon is its map."""
+    eq = co.equivalence
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    assay = java("equivalence/Assay.java")
+    for const, value in (("FORM_NUMERATOR", eq.FORM_MARKUP.numerator), ("FORM_DENOMINATOR", eq.FORM_MARKUP.denominator)):
+        if not re.search(rf"\blong {const} = {value};", assay):
+            err(f"equivalence/Assay.java: {const} differs from tools/concordance_equivalence.py FORM_MARKUP")
+    if f"long MAX_BALANCE = {eq.MAX_BALANCE:_}L;" not in assay or f"int MAX_BATCH = {eq.MAX_BATCH};" not in assay:
+        err("equivalence/Assay.java: MAX_BALANCE or MAX_BATCH differs from tools/concordance_equivalence.py")
+    if f'String PRIMA = "{eq.PRIMA}";' not in assay:
+        err("equivalence/Assay.java: PRIMA differs from tools/concordance_equivalence.py")
+    parser = java("equivalence/EquivalenceParser.java")
+    for const, value in (("MAX_GRAINS", f"{eq.MAX_GRAINS:_}"), ("MAX_PER", eq.MAX_PER), ("MAX_COUNT", eq.MAX_COUNT)):
+        if not re.search(rf"\bint {const} = {value};", parser):
+            err(f"equivalence/EquivalenceParser.java: {const} differs from tools/concordance_equivalence.py")
+    audit = java("equivalence/CycleAudit.java")
+    if f"int MAX_LENGTH = {eq.MAX_LENGTH};" not in audit or f"int MAX_CYCLES = {eq.MAX_CYCLES:_};" not in audit:
+        err("equivalence/CycleAudit.java: MAX_LENGTH or MAX_CYCLES differs from tools/concordance_equivalence.py")
+    eligibility = java("equivalence/Eligibility.java")
+    if f'String EXCLUDED_TAG = "{eq.EXCLUDED_TAG}";' not in eligibility:
+        err("equivalence/Eligibility.java: EXCLUDED_TAG differs from tools/concordance_equivalence.py")
+    reasons = set(re.findall(r'return "([a-z_]+)";', eligibility)) | {"uncatalogued"}
+    scale = java("assay/Assaying.java")
+    reasons |= set(re.findall(r'refuse\(player, (?:stack|pattern), "([a-z_]+)"\)', scale))
+    for reason in sorted(reasons | set(eq.REASONS)):
+        if f"compose.{MOD}.assay.reason.{reason}" not in lang:
+            err(f"equivalence: missing lang for the reason {reason}")
+    if not reasons <= set(eq.REASONS):
+        err(f"equivalence: reasons {sorted(reasons - set(eq.REASONS))} are not in REASONS")
+    for key in re.findall(r'"message\.jugcraft\.concordance\.(assay\.[a-z_]+)"', scale):
+        if f"message.{MOD}.concordance.{key}" not in lang:
+            err(f"assay/Assaying.java: missing lang message.{MOD}.concordance.{key}")
+    if f"int CONFIRM_TICKS = {eq.CONFIRM_TICKS};" not in scale or f'String ACTIVITY = "{eq.ASSAY_PRACTICE}";' not in scale:
+        err("assay/Assaying.java: CONFIRM_TICKS or ACTIVITY differs from tools/concordance_equivalence.py")
+    if "Overflow.REJECT" not in scale or ".extract(PRIMA, cost, true)" not in scale:
+        err("assay/Assaying.java: the ledger moves all or nothing through the shared Reservoir")
+    practice = [rule for block in research.get("assay", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != eq.ASSAY_PRACTICE:
+        err("Assay must be mastered by the assay practice")
+    elif sum(1 for info in eq.MATERIALS.values() if info[2]) < practice[0].get("distinct", 1):
+        err("Assay's mastery asks for more different materials than can be dissolved")
+    # The catalogue and graph on disk are the generator's.
+    folder = DATA / MOD / "concordance"
+    materials = {p.stem: load(p) or {} for p in (folder / "material").glob("*.json")}
+    expected = {item.split(":")[1]: item for item in eq.MATERIALS}
+    if set(materials) != set(expected):
+        err(f"concordance/material: {sorted(materials)} differ from MATERIALS")
+    for stem, entry in materials.items():
+        item = expected.get(stem)
+        if item and (entry.get("item") != item or entry.get("value") != eq.value(*eq.MATERIALS[item][:2])
+                     or entry.get("dissolve") != eq.MATERIALS[item][2] or entry.get("form") != eq.MATERIALS[item][3]):
+            err(f"concordance/material/{stem}.json differs from the generator's: run tools/generate_material_data.py")
+    transmutations = {p.stem: load(p) or {} for p in (folder / "transmutation").glob("*.json")}
+    if set(transmutations) != set(eq.TRANSMUTATIONS):
+        err(f"concordance/transmutation: {sorted(transmutations)} differ from TRANSMUTATIONS")
+    # Python's own audit: no unvalued item, no gaining recipe, no profitable cycle; every round trip loses.
+    for problem in eq.audit():
+        err(f"equivalence: {problem}")
+    for item, (grains, per, dissolve, form) in eq.MATERIALS.items():
+        if not (1 <= grains <= eq.MAX_GRAINS and 1 <= per <= eq.MAX_PER):
+            err(f"material {item}: its value is out of bounds")
+        if dissolve and form:
+            for n in (1, 7, 64):
+                paid = (grains * n) // per
+                cost = -(-(grains * n * eq.FORM_MARKUP.numerator) // (per * eq.FORM_MARKUP.denominator))
+                if cost <= paid:
+                    err(f"material {item}: forming {n} must cost more than dissolving {n} pays")
+    excluded = set(eq.EXCLUDED)
+    for item in eq.MATERIALS:
+        if item in excluded or item in ("minecraft:diamond", "minecraft:emerald", "minecraft:netherite_ingot", "minecraft:ancient_debris"):
+            err(f"material {item}: it may not be catalogued (excluded or scarce)")
+    tag = load(DATA / MOD / "tags" / "item" / "equivalence" / "excluded.json") or {}
+    if sorted(tag.get("values", [])) != sorted(eq.EXCLUDED):
+        err("tags/item/equivalence/excluded.json differs from EXCLUDED")
+    for thing in eq.EXCLUDED:
+        if thing.startswith(f"{MOD}:") and split(thing)[1] not in registered:
+            err(f"equivalence: the excluded {thing} is not registered")
+    if "assayers_scale" not in registered or not (DATA / MOD / "recipe" / "assayers_scale.json").is_file():
+        err("equivalence: the Assayer's Scale needs a registration and a recipe")
+    model = load(ASSETS / "models" / "block" / "assayers_scale.json") or {}
+    if not model.get("elements") or not (ASSETS / "textures" / "block" / "assayers_scale.png").is_file():
+        err("equivalence: the Assayer's Scale needs its model and texture")
+    import item_icons
+    texture = ASSETS / "textures" / "item" / "assayers_scale.png"
+    if not item_icons.has("assayers_scale") or not texture.is_file():
+        err("equivalence: assayers_scale needs its map tools/item_icons/assayers_scale.txt and its texture")
+    else:
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw("assayers_scale").tobytes() or img.size != (16, 16):
+                err("equivalence: textures/item/assayers_scale.png differs from its map: run tools/generate_textures.py")
+
+
+def check_sympathy(co, root, lang, registered, research):
+    """Roadmap step 22: the Java mirrors tools/concordance_hexes.py (link, curse, ward and dream numbers, the ward
+    categories); the curses on disk are the generator's and each is bounded (a hindrance from CURSE_EFFECTS, level I or
+    II, short pulses, minutes in all, castable through a fresh link, its remedy not its own reagent); hostile effects go
+    through the shared boundary under its multiplayer rules; the dream's escrow is one attachment that never survives a
+    death by copying; every reason, end and message has its text; ward sigils can be made for every category; the
+    censer's and wisp's GeckoLib assets are the ones played and fit their sheets; the icons are their maps.
+    (check_hexes is fall addition 21's cauldron hexes, a different feature.)"""
+    hx = co.hexes
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "hex/Hexes.java": {"MAX_RANGE": hx.MAX_RANGE, "MAX_CURSES": hx.MAX_CURSES, "INVESTIGATE_FOCUS": hx.INVESTIGATE_FOCUS},
+        "hex/Link.java": {"FRESH": hx.LINK_FRESH, "DECAY_TICKS": hx.DECAY_TICKS},
+        "hex/HexParser.java": {"MAX_AMPLIFIER": hx.MAX_AMPLIFIER, "MAX_PULSE_DURATION": hx.MAX_PULSE_DURATION,
+                               "MIN_PULSE_TICKS": hx.MIN_PULSE_TICKS, "MAX_TOTAL_TICKS": f"{hx.MAX_TOTAL_TICKS:_}", "MAX_FOCUS": hx.MAX_FOCUS},
+        "dream/DreamRules.java": {"MAX_TICKS": f"{hx.DREAM_TICKS:_}", "RADIUS": hx.DREAM_RADIUS, "WISPS": hx.DREAM_WISPS,
+                                  "WISP_TICKS": hx.WISP_TICKS, "MAX_CAUGHT": hx.MAX_CAUGHT, "FOCUS": hx.DREAM_FOCUS},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_hexes.py ({value})")
+    if f"long TICKS = {hx.WARD_TICKS:_}L;" not in java("hex/Ward.java"):
+        err("hex/Ward.java: TICKS differs from tools/concordance_hexes.py WARD_TICKS")
+    categories = re.findall(r'^\t[A-Z_]+\("([a-z_]+)"\)', java("hex/WardCategory.java"), re.M)
+    if categories != list(hx.WARDS):
+        err(f"hex/WardCategory.java: categories {categories} differ from WARDS (same order)")
+    sympathy, dreaming = java("sympathy/Sympathy.java"), java("dreaming/Dreaming.java")
+    for text, name, research_id, practice in ((sympathy, "Sympathy", "sympathy", hx.SYMPATHY_PRACTICE),
+                                              (dreaming, "Dreaming", "dreamwalking", hx.DREAM_PRACTICE)):
+        if f'String RESEARCH = "{MOD}:{research_id}";' not in text or f'String ACTIVITY = "{practice}";' not in text:
+            err(f"{name}.java: RESEARCH or ACTIVITY differs from tools/concordance_hexes.py")
+        rules = [rule for block in research.get(research_id, {}).get("states", {}).values()
+                 for rule in block.get("any", []) if rule.get("type") == "practice"]
+        if not rules or rules[0].get("activity") != practice:
+            err(f"{research_id} must be mastered by its practice {practice}")
+    if len(hx.CURSES) < next((rule.get("distinct", 1) for block in research.get("sympathy", {}).get("states", {}).values()
+                              for rule in block.get("any", []) if rule.get("type") == "practice"), 1):
+        err("Sympathy's mastery asks for more different curses than there are")
+    # The curses on disk are the generator's, and each is bounded.
+    folder = DATA / MOD / "concordance" / "curse"
+    found = {p.stem: load(p) or {} for p in folder.glob("*.json")}
+    if set(found) != set(hx.CURSES):
+        err(f"concordance/curse: {sorted(found)} differ from CURSES")
+    reagents = {}
+    for key, info in hx.CURSES.items():
+        entry = found.get(key, {})
+        if any(entry.get(field) != info[field] for field in ("reagent", "status", "amplifier", "pulse_duration", "pulse_ticks",
+                                                               "total_ticks", "strength", "focus", "remedy")):
+            err(f"concordance/curse/{key}.json differs from the generator's: run tools/generate_material_data.py")
+        if info["status"] not in hx.CURSE_EFFECTS or not 0 <= info["amplifier"] <= hx.MAX_AMPLIFIER:
+            err(f"curse {key}: its status must be a hindrance from CURSE_EFFECTS, level I or II")
+        if not (20 <= info["pulse_duration"] <= hx.MAX_PULSE_DURATION and hx.MIN_PULSE_TICKS <= info["pulse_ticks"] <= info["total_ticks"]
+                <= hx.MAX_TOTAL_TICKS):
+            err(f"curse {key}: its pulse or total time is out of bounds")
+        if not (1 <= info["strength"] <= hx.LINK_FRESH and 1 <= info["focus"] <= hx.MAX_FOCUS):
+            err(f"curse {key}: it must be castable through a fresh link, for Focus a player can have")
+        if info["remedy"] == info["reagent"] or info["reagent"] in reagents:
+            err(f"curse {key}: one curse per reagent, and no curse lifted by its own reagent")
+        reagents[info["reagent"]] = key
+        if f"compose.{MOD}.hex.curse.{key}" not in lang:
+            err(f"curse {key}: missing its name")
+    # Hostile effects go through the shared boundary, under its multiplayer rules; links and curses are revalidated.
+    if "ConcordanceEffects.mayHarm(" not in sympathy or "Intent.HARMFUL" not in sympathy or "ConcordanceEffects.apply(" not in sympathy:
+        err("Sympathy: curses pulse only through the shared effect boundary, as harmful, under its multiplayer rules")
+    if sympathy.count("Hexes.pulse(") != 1 or "Hexes.cast(" not in sympathy:
+        err("Sympathy: every cast and every pulse is revalidated by the pure rules")
+    if "ConcordanceEffects.guard(" not in sympathy or "WardCategory.MOVING" not in sympathy:
+        err("Sympathy: the moving ward guards the shared boundary")
+    # The dream's escrow: one attachment, never copied on death; every ending goes through end().
+    expedition = re.search(r'EXPEDITION = AttachmentRegistry[^;]*;', dreaming)
+    if not expedition or "copyOnDeath" in expedition.group(0) or ".persistent(Saved.versioned(\"dream_expedition\", DreamExpedition.CODEC))" not in expedition.group(0):
+        err("Dreaming.EXPEDITION must be one persistent attachment that is not copied on death")
+    for event in ("ServerPlayConnectionEvents.JOIN", "ServerPlayConnectionEvents.DISCONNECT", "ServerLivingEntityEvents.ALLOW_DEATH",
+                  "ServerPlayerEvents.AFTER_RESPAWN"):
+        if event not in dreaming:
+            err(f"Dreaming: a dream must end (or be recovered) on {event}")
+    if "DreamRules.check(now, expedition.until(), here, distance)" not in dreaming:
+        err("Dreaming: the check must end a dream whose dreamer left the body's dimension")
+    if "DreamRules.spent(" not in dreaming:
+        err("Dreaming: a dream never gives back more experience than was entered with (DreamRules.spent)")
+    # Every word has its text.
+    reasons = set(re.findall(r'return "([a-z_]+)";', java("hex/Hexes.java")))
+    for name in ("sympathy/TaglockItem.java", "sympathy/Sympathy.java"):
+        reasons |= set(re.findall(r'(?:reason = |return )"([a-z_]+)";', java(name)))
+    reasons |= set(re.findall(r'compose\.jugcraft\.hex\.reason\.([a-z_]+)"', java("sympathy/ScryingGlassItem.java")))
+    reasons -= {""}
+    for reason in sorted(reasons | set(hx.HEX_REASONS)):
+        if f"compose.{MOD}.hex.reason.{reason}" not in lang:
+            err(f"hexes: missing lang for the reason {reason}")
+    if not reasons <= set(hx.HEX_REASONS):
+        err(f"hexes: reasons {sorted(reasons - set(hx.HEX_REASONS))} are not in HEX_REASONS")
+    dream_reasons = set(re.findall(r'return "([a-z_]+)";', dreaming)) - {""}
+    for reason in sorted(dream_reasons | set(hx.DREAM_REASONS)):
+        if f"compose.{MOD}.dream.reason.{reason}" not in lang:
+            err(f"dreams: missing lang for the reason {reason}")
+    if not dream_reasons <= set(hx.DREAM_REASONS):
+        err(f"dreams: reasons {sorted(dream_reasons - set(hx.DREAM_REASONS))} are not in DREAM_REASONS")
+    ends = re.findall(r'^\t\t[A-Z_]+\("([a-z_]+)"\)', java("dream/DreamRules.java"), re.M)
+    if sorted(ends) != sorted(hx.DREAM_ENDS):
+        err(f"dream/DreamRules.java: ends {ends} differ from DREAM_ENDS")
+    for category in list(hx.WARDS) + ["none"]:
+        if f"compose.{MOD}.hex.ward.{category}" not in lang:
+            err(f"hexes: missing lang for the ward {category}")
+    for path in sorted((root / "sympathy").glob("*.java")) + sorted((root / "dreaming").glob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        for kind, key in re.findall(r'"(message|tooltip|compose)\.jugcraft\.((?:concordance\.)?(?:hex|dream)[a-z_.]*)"', text):
+            if not key.endswith(".") and f"{kind}.{MOD}.{key}" not in lang:
+                err(f"{path.name}: missing lang {kind}.{MOD}.{key}")
+        for key in re.findall(r'"tooltip\.jugcraft\.([a-z_]+)"', text):
+            if f"tooltip.{MOD}.{key}" not in lang:
+                err(f"{path.name}: missing lang tooltip.{MOD}.{key}")
+    if f"entity.{MOD}.dream_wisp" not in lang:
+        err("dreams: missing the dream wisp's name")
+    # What it takes to make and use: everything is registered, made from obtainable things, and every ward has a sigil.
+    recipes = {p.stem: load(p) or {} for p in (DATA / MOD / "recipe").glob("*.json")}
+    for thing in ("taglock", "scrying_glass", "ward_sigil", "dreamglass", "oneiric_censer"):
+        if thing not in registered:
+            err(f"hexes: {thing} is not registered")
+    for thing in ("taglock", "scrying_glass", "oneiric_censer"):
+        if thing not in recipes:
+            err(f"hexes: {thing} needs a recipe")
+    for category in hx.WARDS:
+        result = recipes.get(f"ward_sigil_{category}", {}).get("result", {})
+        if result.get("id") != rid_value("ward_sigil") or result.get("components", {}).get(rid_value("ward")) != category:
+            err(f"hexes: the {category} ward sigil needs its recipe, its result carrying {rid_value('ward')}={category}")
+        if rid_value("dreamglass") not in recipes.get(f"ward_sigil_{category}", {}).get("ingredients", []):
+            err(f"hexes: ward sigils are made with dreamglass (the {category} one is not)")
+    pickaxe = load(DATA / "minecraft" / "tags" / "block" / "mineable" / "pickaxe.json") or {}
+    if rid_value("oneiric_censer") not in pickaxe.get("values", []):
+        err("hexes: the Oneiric Censer is mined with a pickaxe")
+    # GeckoLib: the animations played exist; every cube's UV fits its sheet.
+    import concordance_hex_models as models
+    for kind, name, source in (("block", "oneiric_censer", "dreaming/OneiricCenserBlockEntity.java"),
+                               ("entity", "dream_wisp", "dreaming/DreamWispEntity.java")):
+        geo = load(ASSETS / "geckolib" / "models" / kind / f"{name}.geo.json") or {}
+        animations = load(ASSETS / "geckolib" / "animations" / kind / f"{name}.animation.json") or {}
+        if geo != models.GEO[name]() or animations != models.ANIMATIONS[name]():
+            err(f"hexes: the {name} GeckoLib model or animations differ from tools/concordance_hex_models.py")
+        for clip in re.findall(r'thenLoop\("([a-z_.]+)"\)', java(source)):
+            if clip not in animations.get("animations", {}):
+                err(f"{name}.animation.json: missing {clip}")
+        description = (geo.get("minecraft:geometry") or [{}])[0].get("description", {})
+        width, height = description.get("texture_width", 0), description.get("texture_height", 0)
+        uv, sizes = models.SIZES[name]
+        for cube, (u, v) in uv.items():
+            w, h, d = sizes[cube]
+            if u + 2 * (d + w) > width or v + d + h > height:
+                err(f"hexes: {name}'s {cube} box does not fit its {width}x{height} sheet")
+        sheet = ASSETS / "textures" / kind / f"{name}.png"
+        if not sheet.is_file():
+            err(f"hexes: missing textures/{kind}/{name}.png")
+        else:
+            with Image.open(sheet) as img:
+                if img.size != (width, height):
+                    err(f"hexes: textures/{kind}/{name}.png must be {width}x{height}")
+    import item_icons
+    for icon in ("taglock", "scrying_glass", "ward_sigil", "dreamglass", "oneiric_censer"):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"hexes: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"hexes: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+
+
+def check_conclave(co, root, lang, registered, research):
+    """Roadmap step 23: the Java mirrors tools/concordance_conclave.py (renown, ranks, diminishing returns, obligations and
+    the parser's limits); the commissions and projects on disk are the generator's, each within bounds, asking for
+    practices the Concordance records and traditions the research has; no commission pays in what it asks for; every
+    research requirement names an entry and is met once; every cooperation rule has a solo alternative within a week; a
+    solo player can reach every rank without teaching (the acceptance condition); the Conclave reuses Jugcraft's parties
+    and UseMode and adds no currency; every reason and message has its text; the lectern's model, texture and icon
+    agree."""
+    cc = co.conclave
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    conclave = java("conclave/Conclave.java")
+    if f"long WEEK = {cc.WEEK:_}L;" not in conclave or "long OBLIGATION_TICKS = WEEK;" not in conclave:
+        err("conclave/Conclave.java: WEEK or OBLIGATION_TICKS differs from tools/concordance_conclave.py")
+    for const in ("TEACHING_RENOWN", "TEACHING_PER_LEARNER", "TRADITION_RENOWN"):
+        if not re.search(rf"\bint {const} = {getattr(cc, const)};", conclave):
+            err(f"conclave/Conclave.java: {const} differs from tools/concordance_conclave.py")
+    renown = re.search(r"RESEARCH_RENOWN = Map\.of\(([^)]*)\)", conclave)
+    found = {key: int(value) for key, value in re.findall(r'"([a-z]+)", (\d+)', renown.group(1))} if renown else {}
+    if found != cc.RESEARCH_RENOWN:
+        err("conclave/Conclave.java: RESEARCH_RENOWN differs from tools/concordance_conclave.py")
+    diminishing = re.search(r"DIMINISHING = List\.of\(([^)]*)\)", conclave)
+    if not diminishing or [int(n) for n in re.findall(r"\d+", diminishing.group(1))] != cc.DIMINISHING:
+        err("conclave/Conclave.java: DIMINISHING differs from tools/concordance_conclave.py")
+    ranks = re.findall(r'^\t[A-Z]+\("([a-z]+)", (\d+), (\d+), (\d+), (\d+), (true|false)\)', java("conclave/Rank.java"), re.M)
+    if [(r[0], int(r[1]), int(r[2]), int(r[3]), int(r[4]), r[5] == "true") for r in ranks] != cc.RANKS:
+        err("conclave/Rank.java: the ranks differ from tools/concordance_conclave.py RANKS (same order)")
+    parser = java("conclave/ConclaveParser.java")
+    for const in ("MAX_TIER", "MAX_COUNT", "MAX_RENOWN", "MAX_REWARD", "MAX_STAGES", "MAX_REQUIREMENTS", "MAX_CONTRIBUTORS", "MAX_DAYS",
+                  "MAX_PRACTICE", "MAX_PROJECT_RENOWN"):
+        if not re.search(rf"\bint {const} = {getattr(cc, const)};", parser):
+            err(f"conclave/ConclaveParser.java: {const} differs from tools/concordance_conclave.py")
+    kinds = re.findall(r'^\t[A-Z]+\("([a-z]+)"\)', java("conclave/Kind.java"), re.M)
+    if kinds != cc.KINDS:
+        err(f"conclave/Kind.java: kinds {kinds} differ from KINDS")
+    # The data on disk is the generator's, and each piece keeps to the rules.
+    folder = DATA / MOD / "concordance"
+    commissions = {p.stem: load(p) or {} for p in (folder / "commission").glob("*.json")}
+    projects = {p.stem: load(p) or {} for p in (folder / "project").glob("*.json")}
+    if set(commissions) != set(cc.COMMISSIONS) or set(projects) != set(cc.PROJECTS):
+        err("concordance/commission or concordance/project differ from COMMISSIONS and PROJECTS")
+    for key, info in cc.COMMISSIONS.items():
+        if commissions.get(key) != cc.commission_json(info):
+            err(f"concordance/commission/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    for key, info in cc.PROJECTS.items():
+        if projects.get(key) != cc.project_json(info):
+            err(f"concordance/project/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    traditions = {info.get("tradition") for info in research.values()} - {None}
+    if set(cc.TRADITIONS) != traditions:
+        err(f"conclave: TRADITIONS {sorted(cc.TRADITIONS)} differ from the research entries' traditions {sorted(traditions)}")
+    activities = set()
+    for path in sorted(root.rglob("*.java")):
+        activities |= set(re.findall(r'String ACTIVITY = "([a-z_:]+)";', path.read_text(encoding="utf-8")))
+    for activity in cc.ACTIVITIES:
+        if activity not in activities:
+            err(f"conclave: no Java ACTIVITY records the practice {activity}")
+        if f"compose.{MOD}.conclave.activity.{split(activity)[1]}" not in lang:
+            err(f"conclave: missing lang for the practice {activity}")
+    tiers = set()
+    for key, (name, tradition, tier, ask, renown, reward, count) in cc.COMMISSIONS.items():
+        tiers.add(tier)
+        if tradition not in cc.TRADITIONS or not 1 <= tier <= cc.MAX_TIER or not 1 <= renown <= cc.MAX_RENOWN \
+                or not 1 <= count <= cc.MAX_REWARD:
+            err(f"commission {key}: its tradition, tier, renown or reward is out of bounds")
+        if ask[0] == "deliver" and (ask[1] == reward or not 1 <= ask[2] <= cc.MAX_COUNT):
+            err(f"commission {key}: it may not pay in what it asks for, and asks 1 to {cc.MAX_COUNT}")
+        if ask[0] == "practice" and ask[1] not in cc.ACTIVITIES:
+            err(f"commission {key}: {ask[1]} is not a practice the Conclave knows")
+        if f"compose.{MOD}.conclave.commission.{key}" not in lang:
+            err(f"commission {key}: missing its name")
+    if tiers != set(range(1, cc.MAX_TIER + 1)):
+        err("conclave: every commission tier needs at least one commission")
+    for key, info in cc.PROJECTS.items():
+        if info["tradition"] not in cc.TRADITIONS or not 1 <= len(info["stages"]) <= cc.MAX_STAGES:
+            err(f"project {key}: its tradition or stage count is out of bounds")
+        for stage_id, _name, renown, contributors, days, requirements in info["stages"]:
+            if not (1 <= contributors <= cc.MAX_CONTRIBUTORS and 1 <= days <= cc.MAX_DAYS and 1 <= len(requirements) <= cc.MAX_REQUIREMENTS):
+                err(f"project {key} stage {stage_id}: its cooperation rule or requirements are out of bounds")
+            for requirement_id, kind, target, count in requirements:
+                if kind == "research" and (target not in {f"{MOD}:{r}" for r in research} or count != 1):
+                    err(f"project {key} stage {stage_id}: the research requirement {target} must name an entry, once")
+                if kind == "practice" and target not in cc.ACTIVITIES:
+                    err(f"project {key} stage {stage_id}: {target} is not a practice the Conclave knows")
+            if f"compose.{MOD}.conclave.stage.{key}.{stage_id}" not in lang:
+                err(f"project {key}: missing the name of the stage {stage_id}")
+    # The acceptance condition: a solo player, without teaching, reaches every rank.
+    by_tradition, solo_kinds, reached = cc.solo_route(research)
+    if reached != [rank[0] for rank in cc.RANKS]:
+        err(f"conclave: a solo player reaches only {reached} (renown {sum(by_tradition.values())}, {solo_kinds} kinds)")
+    # Reuse, not replacement: parties and UseMode are Jugcraft's own; renown is never spent and is no currency.
+    starbound = java("starbound/Starbound.java")
+    lectern = java("starbound/ConclaveLecternBlockEntity.java")
+    if "JugcraftParties.partyId(" not in starbound or "JugcraftParties.isLeader(" not in starbound or "UseMode" not in lectern:
+        err("conclave: projects and lecterns use Jugcraft's own parties and the shared UseMode switch")
+    if re.search(r"Jugs\.|\.take\(|renown\(\) -|\bspend\w*\(", starbound + java("conclave/Standing.java")):
+        err("conclave: renown is standing, never spent, and no coin")
+    if "ConcordanceProgress.listen(" not in starbound:
+        err("conclave: research, practice and teaching are heard from ConcordanceProgress")
+    # Every word has its text.
+    reasons = set()
+    for name in ("conclave/Conclave.java", "conclave/Projects.java", "starbound/Starbound.java"):
+        reasons |= set(re.findall(r'(?:return |Award\(0, |Contribution\(0, )"([a-z_]+)"', java(name)))
+        reasons |= set(re.findall(r'refuse\(player, "([a-z_]+)"\)', java(name)))
+    reasons -= {""}
+    for reason in sorted(reasons | set(cc.REASONS)):
+        if f"compose.{MOD}.conclave.reason.{reason}" not in lang:
+            err(f"conclave: missing lang for the reason {reason}")
+    if not reasons <= set(cc.REASONS):
+        err(f"conclave: reasons {sorted(reasons - set(cc.REASONS))} are not in REASONS")
+    for key in re.findall(r'say\((?:player|out), "([a-z_.]+)"', starbound):
+        if not key.endswith(".") and f"message.{MOD}.concordance.conclave.{key}" not in lang:
+            err(f"starbound/Starbound.java: missing lang message.{MOD}.concordance.conclave.{key}")
+    for key in re.findall(r'"message\.jugcraft\.concordance\.(conclave\.[a-z_]+)"', starbound):
+        if f"message.{MOD}.concordance.{key}" not in lang:
+            err(f"starbound/Starbound.java: missing lang message.{MOD}.concordance.{key}")
+    for mode in ("personal", "party"):
+        if f"message.{MOD}.concordance.conclave.mode.{mode}" not in lang:
+            err(f"conclave: missing lang for the lectern's {mode} mode")
+    for rank in cc.RANKS:
+        if f"compose.{MOD}.conclave.rank.{rank[0]}" not in lang:
+            err(f"conclave: missing the name of the rank {rank[0]}")
+    for key in cc.ADVANCEMENTS:
+        if not (DATA / MOD / "advancement" / f"{key}.json").is_file():
+            err(f"conclave: missing the advancement {key}")
+    for key in re.findall(r'award\([^;]*?Jugcraft\.id\("(conclave_[a-z_]+)"', starbound):
+        if not any(advancement.startswith(key) for advancement in cc.ADVANCEMENTS):
+            err(f"starbound/Starbound.java: awards {key}, which has no advancement")
+    # The lectern: registered, made, mined; its model reads only its regions; its texture and icon are drawn.
+    if "conclave_lectern" not in registered or not (DATA / MOD / "recipe" / "conclave_lectern.json").is_file():
+        err("conclave: the Conclave Lectern needs a registration and a recipe")
+    axe = load(DATA / "minecraft" / "tags" / "block" / "mineable" / "axe.json") or {}
+    if rid_value("conclave_lectern") not in axe.get("values", []):
+        err("conclave: the Conclave Lectern is mined with an axe")
+    import concordance_conclave_models as models
+    import model_writer
+    model = load(ASSETS / "models" / "block" / "conclave_lectern.json") or {}
+    expected = models.lectern_model()
+    model_writer.finish_elements(expected["elements"])  # as the generator writes it: no two faces share a plane
+    if model != expected:
+        err("conclave: the lectern's block model differs from tools/concordance_conclave_models.py")
+    texture = ASSETS / "textures" / "block" / "conclave_lectern.png"
+    if not texture.is_file():
+        err("conclave: missing textures/block/conclave_lectern.png")
+    else:
+        with Image.open(texture) as img:
+            if img.size != (16, 16):
+                err("conclave: the lectern's texture must be 16x16")
+    import item_icons
+    icon = ASSETS / "textures" / "item" / "conclave_lectern.png"
+    if not item_icons.has("conclave_lectern") or not icon.is_file():
+        err("conclave: conclave_lectern needs its map tools/item_icons/conclave_lectern.txt and its texture")
+    else:
+        with Image.open(icon) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw("conclave_lectern").tobytes() or img.size != (16, 16):
+                err("conclave: textures/item/conclave_lectern.png differs from its map: run tools/generate_textures.py")
+
+
+def check_progression(co, root, lang, registered, research):
+    """Roadmap step 24: the Java mirrors tools/concordance_progression.py (the parser's limits, the graph's node names);
+    the stages and practice gates on disk are the generator's; the progression graph, followed down to things at hand
+    (specimens, stations, instruments, structures, offerings, devices, encounters and what the world gives), lets one
+    player alone reach every research state, practice, commission, project and stage from a fresh world, without
+    structure loot, without the Nether and without the End, with nothing circular and nothing needing what only a later
+    stage makes, two routes through each middle stage and a recovery route for every finite world material; the
+    record's table of mandatory steps is the graph's; and the graph is what the codex, the spell gates, the equipment
+    gates and recipe visibility are checked against: every codex condition is a reachable research state, each entry
+    opens before the research it introduces begins, every invocation's entry opens exactly when it is learnt, every
+    component and Java gate names a research state the graph has, every recipe-made thing a step needs has a codex
+    recipe page readable before it is needed, and no required step depends on an optional library."""
+    pg = co.progression
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    parser = java("progression/ProgressionParser.java")
+    for const in ("MAX_ROUTES", "MAX_COUNT"):
+        if not re.search(rf"\bint {const} = {getattr(pg, const)};", parser):
+            err(f"progression/ProgressionParser.java: {const} differs from tools/concordance_progression.py")
+    graph_java = java("progression/ProgressionGraph.java")
+    for const, value in (("NOTES", "social:notes"), ("PROJECT", "project:conclave"), ("OATH_RESEARCH", f"{MOD}:first_light")):
+        if f'String {const} = "{value}";' not in graph_java:
+            err(f"progression/ProgressionGraph.java: {const} must be {value} (tools/concordance_progression.py)")
+    # The data on disk is the generator's.
+    folder = DATA / MOD / "concordance"
+    stages = {p.stem: load(p) or {} for p in (folder / "stage").glob("*.json")}
+    practices = {p.stem: load(p) or {} for p in (folder / "practice").glob("*.json")}
+    if set(stages) != set(pg.STAGES) or set(practices) != set(pg.PRACTICES) | set(pg.MILESTONES):
+        err("concordance/stage or concordance/practice differ from STAGES, PRACTICES and MILESTONES")
+    for key, info in pg.STAGES.items():
+        if stages.get(key) != pg.stage_json(info):
+            err(f"concordance/stage/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    for key in pg.PRACTICES:
+        if practices.get(key) != pg.practice_json(key):
+            err(f"concordance/practice/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    for key in pg.MILESTONES:
+        if practices.get(key) != pg.milestone_json(key):
+            err(f"concordance/practice/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    # The graph, down to things at hand.
+    invocations = {p.stem: load(p) or {} for p in (folder / "invocation").glob("*.json")}
+    rituals = {p.stem: load(p) or {} for p in (folder / "ritual").glob("*.json")}
+    at_hand = pg.load_at_hand(DATA)
+    for problem in pg.audit(research, invocations, rituals, at_hand):
+        err(f"progression: {problem}")
+    for dimension in ("nether", "end"):
+        reached = pg.without_dimension(research, invocations, rituals, at_hand, dimension)
+        if reached != sorted(pg.STAGES, key=pg._order):
+            err(f"progression: without the {dimension.title()}, one player reaches only {reached}")
+    # The record shows the graph's mandatory steps, not a copy that could drift.
+    record = (ROOT / "docs" / "features" / "arcane-concordance-progression.md").read_text(encoding="utf-8") \
+        if (ROOT / "docs" / "features" / "arcane-concordance-progression.md").exists() else ""
+    table = re.search(r"<!-- mandatory: generated -->\n(.*?)\n<!-- mandatory: end -->", record, re.S)
+    expected = "\n".join(pg.mandatory_table(pg.mandatory(research, invocations, rituals, at_hand)))
+    if not table or table.group(1).strip() != expected:
+        err("docs/features/arcane-concordance-progression.md: its table of mandatory steps differs from the graph's:\n" + expected)
+    nodes = pg.graph(research, invocations, rituals, at_hand)
+    alone = pg.reachable(nodes, research)
+    def state_of(node_id):
+        # A codex fact's id (jugcraft:concordance/<research>_<state>) as the graph's research node.
+        path = node_id.split(":", 1)[1].removeprefix("concordance/")
+        entry, _, state = path.rpartition("_")
+        return pg.research_node(f"{MOD}:{entry}", state)
+    # Codex navigation: every condition is a reachable research state; each research entry's page opens before it begins.
+    entries = {}
+    base = DATA / MOD / "modonomicon" / "books" / co.BOOK / "entries"
+    for path in sorted(base.rglob("*.json")):
+        entry = load(path) or {}
+        entries[path.relative_to(base).with_suffix("").as_posix()] = entry
+        for condition in [entry.get("condition", {})] + [page.get("condition", {}) for page in entry.get("pages", [])]:
+            if condition.get("type") == "modonomicon:research_node_unlocked":
+                node = state_of(condition.get("node_id", ""))
+                if node not in nodes or node not in alone:
+                    err(f"codex {path.relative_to(base)}: its condition {condition.get('node_id')} is no state one player can reach")
+    def opens(entry, before):
+        """Whether a codex entry is open before {before} is reached (its condition reachable without it)."""
+        condition = entry.get("condition", {})
+        if condition.get("type") != "modonomicon:research_node_unlocked":
+            return True
+        return state_of(condition["node_id"]) in pg.reachable(nodes, research, without={before})
+    for key, info in research.items():
+        first = next((state for state in pg.RESEARCH_STATES if state in info.get("states", {})), None)
+        pages = [entry for name, entry in entries.items() if name.endswith(f"/{key}")]
+        if not pages:
+            err(f"research {key}: no codex entry introduces it")
+        elif first and not any(opens(entry, pg.research_node(f"{MOD}:{key}", first)) for entry in pages):
+            err(f"research {key}: its codex entry opens only after the research has begun")
+    for key, info in invocations.items():
+        entry = entries.get(f"invocations/{key}", {})
+        condition = entry.get("condition", {}).get("node_id", "")
+        if not entry or state_of(condition) != pg.research_node(info.get("research", ""), info.get("stage", "")):
+            err(f"codex invocations/{key}: its entry must open when the invocation is learnt ({info.get('research')} {info.get('stage')})")
+    # Spell gates and equipment gates name states the graph has.
+    for path in sorted((folder / "component").glob("*.json")):
+        requires = (load(path) or {}).get("requires")
+        if requires and pg.research_node(requires.get("research", ""), requires.get("state", "")) not in alone:
+            err(f"component {path.stem}: its gate {requires} is no research state one player can reach")
+    gates = {}
+    for path in sorted(root.rglob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        activity = re.search(r'String ACTIVITY = "([a-z_:]+)";', text)
+        gate = re.search(r'String RESEARCH = "([a-z_]+:[a-z_]+)";', text)
+        if gate and split(gate.group(1))[1] not in research:
+            err(f"{path.relative_to(JAVA_ROOT)}: its gate {gate.group(1)} names no research entry")
+        if activity:
+            gates[split(activity.group(1))[1]] = (path, gate.group(1) if gate else None)
+    for key, (_tradition, gate, _devices, _encounters) in pg.PRACTICES.items():
+        path, java_gate = gates.get(key, (None, None))
+        if path is None:
+            err(f"progression: no Java ACTIVITY records the practice {key}")
+        elif key == "ritual":
+            if any(info.get("research") != rid_value(gate) for info in rituals.values()):
+                err(f"progression: every ritual is taught by {gate}, the ritual practice's gate")
+        elif java_gate != rid_value(gate):
+            err(f"progression: the practice {key} is gated by {java_gate} in {path.name}, not {gate} as PRACTICES says")
+    # Recipe visibility: the codex (Modonomicon, required) shows how to make every recipe-made thing a step needs.
+    shown = {}
+    for name, entry in entries.items():
+        for page in entry.get("pages", []):
+            recipe = page.get("recipe_id_1")
+            if recipe:
+                made = load(DATA / MOD / "recipe" / f"{split(recipe)[1]}.json") or {}
+                result = made.get("result", {})
+                shown.setdefault(result.get("id") if isinstance(result, dict) else result, []).append((entry, page))
+    for key in sorted(alone):
+        item = key[len("item:"):] if key.startswith(f"item:{MOD}:") else None
+        if item is None or item in pg.JUGCRAFT_SOURCES:
+            continue
+        if item not in at_hand["recipes"]:
+            # Made by a ritual, a bench working or a practice: the codex has an entry for it.
+            if not any(name.endswith("/" + split(item)[1]) for name in entries) and item not in pg.PRODUCERS:
+                err(f"progression: {item} is made by no recipe and no codex entry says how")
+            continue
+        without = pg.reachable(nodes, research, without={key})
+        def readable(entry, page):
+            return all(state_of(c["node_id"]) in without for c in (entry.get("condition", {}), page.get("condition", {}))
+                       if c.get("type") == "modonomicon:research_node_unlocked")
+        if not any(readable(entry, page) for entry, page in shown.get(item, [])):
+            err(f"progression: the codex shows no recipe for {item} that can be read before it is needed")
+    # A station or device a step needs is never lost by breaking it: it drops itself.
+    for key in sorted(alone):
+        item = split(key[len("item:"):])[1] if key.startswith(f"item:{MOD}:") else None
+        if item and (ASSETS / "blockstates" / f"{item}.json").is_file():
+            loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{item}.json") or {})
+            if f'"{MOD}:{item}"' not in loot:
+                err(f"progression: {MOD}:{item} is needed by a step, so breaking it must drop it")
+    # No required step depends on an optional library: nothing in an optional adapter records progress.
+    for base_dir in (JAVA_ROOT / "compat", CLIENT_JAVA_ROOT / "compat"):
+        for path in sorted(base_dir.rglob("*.java")) if base_dir.exists() else []:
+            if re.search(r"ConcordanceProgress\.record\(|StageProgress\.milestone\(|Starbound\.(contribute|fulfil|swear)\(",
+                         path.read_text(encoding="utf-8")):
+                err(f"{path.relative_to(ROOT)}: an optional adapter must not be the only way a step is done")
+    stages_java = java("stages/StageProgress.java")
+    if '.then(Commands.literal("stage")' not in stages_java or "copyOnDeath()" not in stages_java:
+        err("stages/StageProgress.java: the stage command (the fallback to the codex) and stages kept through death")
+    if "held.order() >= reached.order()" not in stages_java:
+        err("stages/StageProgress.java: a stage once reached is never lost")
+    # Every word has its text.
+    for key, info in pg.STAGES.items():
+        if f"compose.{MOD}.stage.{key}" not in lang:
+            err(f"progression: missing the name of the stage {key}")
+        for route in info["routes"]:
+            if f"compose.{MOD}.stage.{key}.{route['id']}" not in lang:
+                err(f"progression: missing the text of the route {key}/{route['id']}")
+        if not (DATA / MOD / "advancement" / f"concordance_stage_{key}.json").is_file():
+            err(f"progression: missing the advancement concordance_stage_{key}")
+    for key in re.findall(r'"message\.jugcraft\.concordance\.((?:stage|progression)\.[a-z_]+)"', stages_java):
+        if f"message.{MOD}.concordance.{key}" not in lang:
+            err(f"stages/StageProgress.java: missing lang message.{MOD}.concordance.{key}")
+
+
+def check_spire(co, root, lang, registered, research):
+    """Roadmap step 25: the Java mirrors tools/concordance_spire.py (the parser's limits, the day, the reach, the field's
+    hold, the heart's store and its look, the field kinds); the wonder and its configurations on disk are the
+    generator's; there are at least two configurations and their fields differ; each names research that exists, a
+    practice the Concordance records, a crown built round the heart and a renewable upkeep item; the Kindling is a
+    ritual whose offerings can be had; the heart is registered, made, mined and drops itself, and GeckoLib has its model
+    and the three animations the Java plays; the spire never breaks or replaces a block; the rite and the practices are
+    heard from the circles and the research engine; the Architect stage has the raised spire's route; every word has
+    its text."""
+    sp = co.spire
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    parser = java("wonder/WonderParser.java")
+    for const in ("MAX_PHASES", "MAX_PRACTICES", "MAX_SUSTAIN", "MAX_ATTENDANCE", "MIN_PULSE", "MAX_PULSE", "MAX_RITE_RANGE",
+                  "MAX_RADIUS", "MAX_COUNT", "MAX_UPKEEP", "MAX_LEY", "MAX_REQUIRES"):
+        if not re.search(rf"\bint {const} = {getattr(sp, const)};", parser):
+            err(f"wonder/WonderParser.java: {const} differs from tools/concordance_spire.py")
+    if f"long DAY = {sp.DAY:_}L;" not in java("wonder/Spires.java"):
+        err("wonder/Spires.java: DAY differs from tools/concordance_spire.py")
+    spire_java = java("spire/ConcordSpire.java")
+    heart_java = java("spire/SpireHeartBlockEntity.java")
+    for const, value in (("REACH", sp.REACH), ("HOLD_TICKS", sp.HOLD_TICKS)):
+        if not re.search(rf"\bint {const} = {value};", spire_java):
+            err(f"spire/ConcordSpire.java: {const} differs from tools/concordance_spire.py")
+    for const, value in (("SLOTS", sp.SLOTS), ("CHECK_TICKS", sp.CHECK_TICKS)):
+        if not re.search(rf"\bint {const} = {value};", heart_java):
+            err(f"spire/SpireHeartBlockEntity.java: {const} differs from tools/concordance_spire.py")
+    if f'String WONDER = "{sp.WONDER_ID}";' not in spire_java or f'String MILESTONE = "{sp.MILESTONE}";' not in spire_java:
+        err("spire/ConcordSpire.java: WONDER or MILESTONE differs from tools/concordance_spire.py")
+    kinds = re.findall(r'^\t[A-Z]+\("([a-z]+)"\)', java("wonder/FieldKind.java"), re.M)
+    if kinds != sp.FIELD_KINDS:
+        err(f"wonder/FieldKind.java: kinds {kinds} differ from FIELD_KINDS")
+    # The data on disk is the generator's.
+    folder = DATA / MOD / "concordance"
+    if (load(folder / "wonder" / "concord_spire.json") or {}) != sp.wonder_json():
+        err("concordance/wonder/concord_spire.json differs from the generator's: run tools/generate_material_data.py")
+    configurations = {p.stem: load(p) or {} for p in (folder / "wonder_configuration").glob("*.json")}
+    if set(configurations) != set(sp.CONFIGURATIONS):
+        err("concordance/wonder_configuration differs from CONFIGURATIONS")
+    for key in sp.CONFIGURATIONS:
+        if configurations.get(key) != sp.configuration_json(key):
+            err(f"concordance/wonder_configuration/{key}.json differs from the generator's: run tools/generate_material_data.py")
+    # Multiple configurations, each meaningful and reachable.
+    if len(sp.CONFIGURATIONS) < 2 or len({info["field"]["kind"] for info in sp.CONFIGURATIONS.values()}) < 2:
+        err("spire: a wonder offers at least two configurations whose fields differ")
+    structures = {p.stem: load(p) or {} for p in (folder / "structure").glob("*.json")}
+    traditions = {info.get("tradition") for info in research.values()}
+    pg = co.progression
+    for key, info in sp.CONFIGURATIONS.items():
+        if info["tradition"] not in traditions:
+            err(f"spire configuration {key}: no research belongs to {info['tradition']}")
+        if info["practice"] not in co.conclave.ACTIVITIES:
+            err(f"spire configuration {key}: {info['practice']} is no practice the Concordance records")
+        for requirement in info["requires"]:
+            entry = research.get(split(requirement["research"])[1], {})
+            if requirement["state"] not in entry.get("states", {}):
+                err(f"spire configuration {key}: needs {requirement['research']} {requirement['state']}, which does not exist")
+        crown = structures.get(split(info["crown"])[1], {})
+        if crown.get("anchor") != rid_value("spire_heart"):
+            err(f"spire configuration {key}: its crown {info['crown']} must be built round the Spire Heart")
+        kind = pg.VANILLA_SOURCES.get(info["upkeep"]["item"], ("",))[0]
+        if kind not in ("craftable", "renewable"):
+            err(f"spire configuration {key}: a kept wonder runs on what can be renewed, not {info['upkeep']['item']} ({kind or 'unlisted'})")
+        for kind_key in ("radius", "count"):
+            if not 1 <= info["field"][kind_key] <= getattr(sp, f"MAX_{kind_key.upper()}"):
+                err(f"spire configuration {key}: field {kind_key} out of bounds")
+    for structure in ("spire_foundation", "spire_shaft"):
+        if structures.get(structure, {}).get("anchor") != rid_value("spire_heart"):
+            err(f"spire: structure {structure} must be built round the Spire Heart")
+    kindling = load(folder / "ritual" / "spire_kindling.json") or {}
+    if kindling.get("research") != rid_value("circle_lore") or kindling.get("participants") != 1:
+        err("spire: the Kindling is a ritual one player can complete, taught by Circle Lore")
+    for offering in kindling.get("offerings", []):
+        if pg.VANILLA_SOURCES.get(offering["item"], ("found",))[0] == "found":
+            err(f"spire: the Kindling's offering {offering['item']} cannot be relied on")
+    # The heart: registered, made, mined, dropping itself, drawn by GeckoLib with the animations the Java plays.
+    if "spire_heart" not in registered or not (DATA / MOD / "recipe" / "spire_heart.json").is_file():
+        err("spire: the Spire Heart needs a registration and a recipe")
+    if f'"{rid_value("spire_heart")}"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / "spire_heart.json") or {}):
+        err("spire: a broken Spire Heart drops itself")
+    pickaxe = load(DATA / "minecraft" / "tags" / "block" / "mineable" / "pickaxe.json") or {}
+    if rid_value("spire_heart") not in pickaxe.get("values", []):
+        err("spire: the Spire Heart is mined with a pickaxe")
+    animations = load(ASSETS / "geckolib" / "animations" / "block" / "spire_heart.animation.json") or {}
+    for name in re.findall(r'thenLoop\("(animation\.spire_heart\.[a-z]+)"\)', heart_java):
+        if name not in animations.get("animations", {}):
+            err(f"spire: GeckoLib has no {name}")
+    # The model, its animations and its sheet are the art modules' own; every box's UV fits the sheet.
+    import concordance_spire_art as spire_art
+    import concordance_spire_models as spire_models
+    geo = load(ASSETS / "geckolib" / "models" / "block" / "spire_heart.geo.json") or {}
+    if geo != spire_models.GEO["spire_heart"]() or animations != spire_models.ANIMATIONS["spire_heart"]():
+        err("spire: the Spire Heart's GeckoLib model or animations differ from tools/concordance_spire_models.py")
+    description = (geo.get("minecraft:geometry") or [{}])[0].get("description", {})
+    width, height = description.get("texture_width", 0), description.get("texture_height", 0)
+    uv, sizes = spire_models.SIZES["spire_heart"]
+    for cube, (u, v) in uv.items():
+        w, h, d = sizes[cube]
+        if u + 2 * (d + w) > width or v + d + h > height:
+            err(f"spire: the Spire Heart's {cube} box does not fit its {width}x{height} sheet")
+    import item_icons
+    for kind in ("block", "item"):
+        texture = ASSETS / "textures" / kind / "spire_heart.png"
+        if not texture.is_file():
+            err(f"spire: missing textures/{kind}/spire_heart.png")
+    sheet = ASSETS / "textures" / "block" / "spire_heart.png"
+    if sheet.is_file():
+        with Image.open(sheet) as img:
+            if img.size != (width, height) or img.convert("RGBA").tobytes() != spire_art.heart_sheet().tobytes():
+                err("spire: textures/block/spire_heart.png differs from tools/concordance_spire_art.py: run tools/generate_textures.py")
+    icon = ASSETS / "textures" / "item" / "spire_heart.png"
+    if not item_icons.has("spire_heart"):
+        err("spire: spire_heart needs its map tools/item_icons/spire_heart.txt")
+    elif icon.is_file():
+        with Image.open(icon) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw("spire_heart").tobytes():
+                err("spire: textures/item/spire_heart.png differs from its map: run tools/generate_textures.py")
+    # Nothing is broken or replaced; the rite and practices come from the circles and the research engine.
+    if re.search(r"destroyBlock\(|removeBlock\(", spire_java + heart_java):
+        err("spire: the spire never breaks or removes a block")
+    if "Rituals.listen(" not in spire_java or "Rituals.completed(" not in java("CircleAnchorBlockEntity.java"):
+        err("spire: the Kindling is heard from the circles (Rituals.listen, called when a ritual completes)")
+    if "ConcordanceProgress.listen(" not in spire_java:
+        err("spire: practices are heard from ConcordanceProgress")
+    # The Architect stage has the raised spire's route, through its milestone's gate.
+    routes = [route for route in pg.STAGES["architect"]["routes"] if sp.MILESTONE in route.get("milestones", [])]
+    if not routes or split(sp.MILESTONE)[1] not in pg.MILESTONES:
+        err("spire: the Architect stage needs a route through the raised spire's milestone and its gate")
+    # Every word has its text.
+    for key in re.findall(r'(?:say|tell)\((?:player|out), "([a-z_]+)"', spire_java) + re.findall(r'"message\.jugcraft\.concordance\.spire\.([a-z_]+)"', spire_java):
+        if f"message.{MOD}.concordance.spire.{key}" not in lang:
+            err(f"spire/ConcordSpire.java: missing lang message.{MOD}.concordance.spire.{key}")
+    for key in re.findall(r'refuse\(player, "([a-z_]+)"\)', spire_java) + re.findall(r'return "([a-z_]+)";', spire_java + java("wonder/Spires.java")):
+        if key not in ("active", "unfounded", "raising", "disabled", "unknown", "damaged", "unattended", "unsupplied", "structure",
+                       "practices", "rite", "sustain", "raised", "stage", "research", "founded", "no_spire") and \
+                f"compose.{MOD}.spire.reason.{key}" not in lang:
+            err(f"spire: missing lang for the reason {key}")
+    for key in sp.REASONS:
+        if f"compose.{MOD}.spire.reason.{key}" not in lang:
+            err(f"spire: missing lang for the reason {key}")
+    for key in list(sp.MISSING) + ["nothing"]:
+        if f"compose.{MOD}.spire.missing.{key}" not in lang:
+            err(f"spire: missing lang compose.{MOD}.spire.missing.{key}")
+    for key in sp.DORMANT:
+        if f"compose.{MOD}.spire.dormant.{key}" not in lang:
+            err(f"spire: missing lang compose.{MOD}.spire.dormant.{key}")
+    for key in sp.FIELD_KINDS:
+        if f"compose.{MOD}.spire.field.{key}" not in lang:
+            err(f"spire: missing lang compose.{MOD}.spire.field.{key}")
+    for key in sp.ADVANCEMENTS:
+        if not (DATA / MOD / "advancement" / f"{key}.json").is_file():
+            err(f"spire: missing the advancement {key}")
+
+
+def rid_value(path):
+    return f"{MOD}:{path}"
+
+
+# The most Vitae an hour of offering can give, whatever heals the giver (docs/features/arcane-concordance-vitae.md).
+HOURLY_VITAE_BOUND = 60
+
+
+def check_crimson(co, root, lang, registered, research):
+    """Roadmap step 16: the Java mirrors tools/concordance_crimson.py (exhaustion, efficiency, growth, the chalice,
+    surge and blade numbers); every rite gives no more Vitae than the health it takes and can be made from full health;
+    an hour of offering is bounded whatever heals the giver, and a surge never turns Vitae into more Focus; health is
+    taken in exactly one place; mastery comes from the blade's growth; every word has its text; the icons are their maps;
+    the offering gesture exists and skips players whose arms ArmsMotion poses."""
+    cr = co.crimson
+    def java(name, base=root):
+        path = base / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    constants = {
+        "crimson/Exhaustion.java": {"MAX": cr.EXHAUSTION_MAX, "RECOVERY_TICKS": cr.RECOVERY_TICKS},
+        "crimson/CrimsonParser.java": {"MAX_HEALTH": cr.MAX_HEALTH, "MAX_COOLDOWN": cr.MAX_COOLDOWN},
+        "crimson/Growth.java": {"MAX_SUBJECTS": cr.MAX_SUBJECTS, "DAILY_CAP": cr.DAILY_CAP, "MAX_VIGOR": cr.MAX_VIGOR,
+                                "VIGOR_PER_VITAE": cr.VIGOR_PER_VITAE, "MAX_STAGE": len(cr.STAGES) - 1},
+        "vigil/Vigil.java": {"CHALICE_CAPACITY": cr.CHALICE_CAPACITY, "SURGE_VITAE": cr.SURGE_VITAE, "SURGE_FOCUS": cr.SURGE_FOCUS,
+                             "SURGE_COOLDOWN": cr.SURGE_COOLDOWN, "NOURISH_VITAE": cr.NOURISH_VITAE, "BLOW_VIGOR": cr.BLOW_VIGOR},
+    }
+    for name, values in constants.items():
+        text = java(name)
+        for const, value in values.items():
+            if not re.search(rf"\bint {const} = {value};", text):
+                err(f"concordance/{name}: {const} differs from tools/concordance_crimson.py ({value})")
+    growth = java("crimson/Growth.java")
+    if f"long WINDOW_TICKS = {cr.WINDOW_TICKS}L;" not in growth:
+        err("crimson/Growth.java: WINDOW_TICKS differs from tools/concordance_crimson.py")
+    diminishing = re.search(r"DIMINISHING = List\.of\(([^)]*)\)", growth)
+    if not diminishing or [int(n) for n in re.findall(r"\d+", diminishing.group(1))] != cr.DIMINISHING:
+        err("crimson/Growth.java: DIMINISHING differs from tools/concordance_crimson.py")
+    for name, column in (("TOTAL", 0), ("EACH", 1), ("KINDS", 2)):
+        found = re.search(rf"int\[\] {name} = \{{([^}}]*)\}}", growth)
+        if not found or [int(n) for n in re.findall(r"\d+", found.group(1))] != [stage[column] for stage in cr.STAGES]:
+            err(f"crimson/Growth.java: {name} differs from tools/concordance_crimson.py STAGES")
+    offerings = java("crimson/Offerings.java")
+    for top, percent in cr.EFFICIENCY[:2]:
+        if not re.search(rf"exhaustion <= {top}\) \{{\s*return {percent};", offerings):
+            err(f"crimson/Offerings.java: efficiency up to {top} points differs from EFFICIENCY ({percent}%)")
+    if f"? {cr.EFFICIENCY[2][1]} : 0" not in offerings:
+        err("crimson/Offerings.java: the last efficiency band differs from EFFICIENCY")
+    # The rites, and the hour's bound.
+    folder = DATA / MOD / "concordance" / "offering"
+    rites = {p.stem: load(p) or {} for p in folder.glob("*.json")}
+    if set(rites) != set(cr.RITES):
+        err(f"offering rites: {sorted(rites)} differ from RITES")
+    for key, rite in rites.items():
+        health, vitae, tired, floor = rite.get("health", 0), rite.get("vitae", 0), rite.get("exhaustion", 0), rite.get("floor", 0)
+        if not (1 <= vitae <= health <= cr.MAX_HEALTH) or not (1 <= tired <= cr.EXHAUSTION_MAX) or floor < 1:
+            err(f"offering {key}: needs 1 <= vitae <= health <= {cr.MAX_HEALTH}, exhaustion 1 to {cr.EXHAUSTION_MAX} and a floor")
+        if health + floor > 20:
+            err(f"offering {key}: it could never be made, even from full health (health {health} + floor {floor} > 20)")
+        offerings_an_hour = (cr.EXHAUSTION_MAX + 72000 // cr.RECOVERY_TICKS) // max(1, tired)
+        if offerings_an_hour * vitae > HOURLY_VITAE_BOUND:
+            err(f"offering {key}: an hour could give {offerings_an_hour * vitae} Vitae, above the bound of {HOURLY_VITAE_BOUND}")
+    if cr.SURGE_FOCUS > cr.SURGE_VITAE:
+        err("a Crimson Surge must not give more Focus than the Vitae it costs")
+    vigil = root / "vigil"
+    sets = sum(path.read_text(encoding="utf-8").count(".setHealth(") for path in sorted(vigil.glob("*.java")))
+    if sets != 1:
+        err(f"vigil: health must be taken in exactly one place (the offering), found {sets} setHealth calls")
+    if not re.search(r'String ACTIVITY = "' + re.escape(cr.LIVING_GROWTH) + '";', java("Vigil.java", vigil)):
+        err("Vigil.ACTIVITY differs from tools/concordance_crimson.py LIVING_GROWTH")
+    practice = [rule for block in research.get("crimson_rites", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != cr.LIVING_GROWTH or practice[0].get("distinct", 0) > len(cr.STAGES) - 1:
+        err("Crimson Rites must learn from the blade's growth, with no more stages than the blade has")
+    for thing in ("crimson_chalice", "thornheart_blade"):
+        if thing not in registered or not (DATA / MOD / "recipe" / f"{thing}.json").is_file():
+            err(f"vigil: {thing} needs a registration and a recipe")
+    # Every word has its text.
+    for path in sorted(vigil.glob("*.java")):
+        for key in re.findall(r'"message\.jugcraft\.concordance\.(vigil\.[a-z_]+)"', path.read_text(encoding="utf-8")):
+            if not key.endswith(".") and f"message.{MOD}.concordance.{key}" not in lang:
+                err(f"{path.name}: missing lang message.{MOD}.concordance.{key}")
+    for result in re.findall(r'return "([a-z_]+)";', java("Vigil.java", vigil)):
+        if f"message.{MOD}.concordance.vigil.{result}" not in lang:
+            err(f"Vigil.surge: missing lang message.{MOD}.concordance.vigil.{result}")
+    for stage in range(len(cr.STAGES)):
+        if f"message.{MOD}.concordance.vigil.stage.{stage}" not in lang:
+            err(f"vigil: missing lang for stage {stage}")
+    client = java("VigilClient.java", CLIENT_JAVA_ROOT)
+    for key in re.findall(r'"screen\.jugcraft\.concordance\.(vigil\.[a-z_]+)"', client):
+        if f"screen.{MOD}.concordance.{key}" not in lang:
+            err(f"VigilClient: missing lang screen.{MOD}.concordance.{key}")
+    gesture = re.search(r'GESTURE = Jugcraft\.id\("([a-z_]+)"\)', client)
+    if not gesture or not (ASSETS / "player_animations" / f"{gesture.group(1)}.json").is_file():
+        err("VigilClient: the offering gesture needs its clip in assets/jugcraft/player_animations")
+    if "instanceof ArmItem" not in client:
+        err("VigilClient: the offering gesture must skip players whose arms ArmsMotion poses (ArmItem)")
+    import item_icons
+    for icon in ("crimson_chalice", "thornheart_blade"):
+        texture = ASSETS / "textures" / "item" / f"{icon}.png"
+        if not item_icons.has(icon) or not texture.is_file():
+            err(f"vigil: {icon} needs its map tools/item_icons/{icon}.txt and its texture")
+            continue
+        with Image.open(texture) as img:
+            if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
+                err(f"vigil: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+
+
+def KINDLE_MOTE_STEPS_FIT(co):
+    return 0 < co.KINDLE_MOTE_STEPS <= 15
+
+
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items()) | set(guns.items())
-                  | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks())))
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
+                  | set(guns.items()) | set(concordance.items()) | set(concordance.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
     check_petro()
@@ -7414,6 +10688,13 @@ def main():
     check_guide_books()
     check_handbook(registered)
     check_agriculture()
+    check_kitchen()
+    check_feasts()
+    check_menu()
+    check_rice()
+    check_soil()
+    check_orchard()
+    check_cakes()
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()
@@ -7422,12 +10703,303 @@ def main():
     check_pixel_hollows()
     check_town()
     check_diagonal_connections()
+    check_concordance(registered)
     for path in RES.rglob("*.json"):
         load(path)
     if errors:
         print("\n".join(errors), file=sys.stderr)
         sys.exit(1)
     print(f"PASS: {len(registered)} material IDs, data files and recipe audit. No Minecraft build or game test performed.")
+
+
+def check_journal(co, root, lang):
+    """Roadmap step 26: the Concordance Journal's sections are tools/concordance_journal.py's, in its order, each with a
+    title; every word the journal, the stage report and the journal's screens use has its text (the states, the rule
+    kinds, the milestones); the journal only reads (it records, grants and changes nothing); the GuiLib workspace is
+    reached only when GuiLib is installed, and its stylesheet is shipped; the screens only send the request, which
+    carries nothing."""
+    jn = co.journal
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    journal = text(root / "journal" / "Journal.java")
+    stages = text(root / "stages" / "StageProgress.java")
+    client = text(CLIENT_JAVA_ROOT / "JournalClient.java") + text(CLIENT_JAVA_ROOT / "JournalScreen.java")
+    workspace_path = ROOT / "src" / "client" / "kotlin" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JournalWorkspace.kt"
+    workspace = text(workspace_path)
+    sections = re.findall(r'contribute\("([a-z_]+)"', journal)
+    if sections != list(jn.SECTIONS):
+        err(f"journal/Journal.java: sections {sections} differ from SECTIONS in tools/concordance_journal.py")
+    for key in jn.SECTIONS:
+        if f"journal.{MOD}.section.{key}" not in lang:
+            err(f"journal: missing lang journal.{MOD}.section.{key}")
+    for state in ("none", "encountered", "observed", "understood", "mastered"):
+        if f"journal.{MOD}.state.{state}" not in lang:
+            err(f"journal: missing lang journal.{MOD}.state.{state}")
+    kinds = re.findall(r'^\t\t[A-Z]+\("([a-z]+)"\)', text(root / "rules" / "EvidenceRule.java"), re.M)
+    if not kinds or set(kinds) != set(jn.RULES):
+        err(f"journal: RULES in tools/concordance_journal.py must name every evidence kind {kinds}")
+    for milestone in co.progression.MILESTONES:
+        if f"compose.{MOD}.milestone.{milestone}" not in lang:
+            err(f"journal: missing lang compose.{MOD}.milestone.{milestone}")
+    for source, name in ((journal, "journal/Journal.java"), (stages, "stages/StageProgress.java"), (client, "the journal's screens"),
+                         (workspace, "JournalWorkspace.kt")):
+        for key in re.findall(r'"((?:journal|screen|key)\.jugcraft\.[a-z_.]+|message\.jugcraft\.concordance\.stage\.need\.[a-z_]+)"', source):
+            if not key.endswith(".") and key not in lang:
+                err(f"{name}: missing lang {key}")
+    if re.search(r"ConcordanceProgress\.(record|grant|award|setFocus)\(|StageProgress\.milestone\(|\.put\(", journal):
+        err("journal/Journal.java: the journal only reads; it records, grants and changes nothing")
+    if "RateGate.allow(player, \"journal\"" not in journal:
+        err("journal/Journal.java: the server answers a journal request at most every REQUEST_TICKS (RateGate)")
+    if not re.search(r'isModLoaded\("guilib"\)\)\s*\{\s*JournalWorkspace\.open\(\)', client):
+        err("JournalClient.java: the GuiLib workspace opens only when GuiLib is installed")
+    for path in CLIENT_JAVA_ROOT.rglob("*.java"):
+        if path.name != "JournalClient.java" and "JournalWorkspace" in text(path):
+            err(f"{path.name}: only JournalClient reaches the GuiLib workspace (behind its isModLoaded check)")
+    if '"jugcraft:ui/journal.css"' not in workspace or not (ASSETS / "ui" / "journal.css").is_file():
+        err("journal: the GuiLib workspace's stylesheet assets/jugcraft/ui/journal.css must exist and be the one it opens")
+    request = text(root / "journal" / "JournalRequestPayload.java")
+    if "StreamCodec.unit(" not in request:
+        err("journal/JournalRequestPayload.java: a request carries nothing (the server decides what a player sees)")
+
+
+def check_signs(co, root, lang):
+    """Roadmap step 27: the signs, the visual intensities and the server's limits are tools/concordance_signs.py's, in
+    its order; the warnings' sounds are registered, drawn and subtitled; every server-side Concordance particle goes
+    through a sign (no sendParticles), so each client draws it as its settings allow; the display settings are read only
+    by client code and blocks' animateTick (the server never decides from them); a crucible tells a client only its
+    heat, volume and the spoon's reading; and the setting's words exist."""
+    sg = co.signs
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    sign_java = text(root / "sign" / "Sign.java")
+    presentation = text(root / "sign" / "Presentation.java")
+    signs_java = text(root / "sign" / "Signs.java")
+    found = re.findall(r'^\t([A-Z]+)\("([a-z]+)", Kind\.([A-Z]+), (\d+)\)', sign_java, re.M)
+    expected = [(key, kind.upper(), str(count)) for key, (kind, count) in sg.SIGNS.items()]
+    if [(sid, kind, count) for _, sid, kind, count in found] != expected:
+        err(f"sign/Sign.java: signs {[(sid, kind, count) for _, sid, kind, count in found]} differ from SIGNS in tools/concordance_signs.py")
+    kinds = re.search(r"enum Kind \{([^}]*?);", sign_java, re.S)
+    if not kinds or [k.strip().lower() for k in kinds.group(1).split(",")] != list(sg.KINDS):
+        err("sign/Sign.java: Sign.Kind must list KINDS of tools/concordance_signs.py, in order")
+    intensities = re.findall(r'^\t\t([A-Z]+)\((\d+), (\d+), (\d+)\)', presentation, re.M)
+    if [(name.lower(), (int(a), int(b), int(c))) for name, a, b, c in intensities] != list(sg.INTENSITY.items()):
+        err(f"sign/Presentation.java: intensities {intensities} differ from INTENSITY in tools/concordance_signs.py")
+    for name, value, source in (("FAR", sg.FAR, presentation), ("NEAR", sg.NEAR, presentation),
+                                ("WARNING_FLOOR", sg.WARNING_FLOOR, presentation), ("AMBIENT_SHARE", sg.AMBIENT_SHARE, presentation),
+                                ("PER_TICK", sg.PER_TICK, signs_java), ("WARNING_RESERVE", sg.WARNING_RESERVE, signs_java)):
+        if not re.search(rf"\b{name} = {value}(\.0)?;", source):
+            err(f"sign: {name} must be {value}, as in tools/concordance_signs.py")
+    concordance = text(root / "JugcraftConcordance.java")
+    for event, subtitle in sg.SOUND_EVENTS.items():
+        if f'sound("{event}")' not in concordance:
+            err(f"JugcraftConcordance.java: the warning sound {event} is not registered")
+        if not (ASSETS / "sounds" / "concordance" / (event.split(".", 1)[1] + ".ogg")).is_file():
+            err(f"sign: missing sounds/concordance/{event.split('.', 1)[1]}.ogg (tools/concordance_sounds.py draws it)")
+        if lang.get(f"subtitles.{MOD}.{event}") != subtitle:
+            err(f"sign: the warning sound {event} needs its subtitle")
+    for path in sorted(root.rglob("*.java")):
+        source = text(path)
+        relative = path.relative_to(root).as_posix()
+        if "sendParticles(" in source:
+            err(f"concordance/{relative}: server particles go through a sign (Signs.show), so each client draws them as its settings allow")
+        if "Presentation." in source and not relative.startswith("sign/") and "animateTick" not in source:
+            err(f"concordance/{relative}: the display settings (Presentation) are read only by clients and blocks' animateTick")
+    crucible = text(root / "CrucibleBlockEntity.java")
+    update = re.search(r"getUpdateTag\(HolderLookup\.Provider registries\) \{(.*?)\n\t\}", crucible, re.S)
+    sent = set(re.findall(r'tag\.put\w+\("([a-z_]+)"', update.group(1))) if update else set()
+    if sent != {"temperature", "parts", "taste", "murky"}:
+        err(f"CrucibleBlockEntity.java: a client is told only the heat, the volume and the spoon's reading, not {sorted(sent)}")
+    settings = text(CLIENT_JAVA_ROOT / "ConcordanceSettingsScreen.java")
+    if '"screen.jugcraft.concordance.config.intensity." + value.id()' not in settings:
+        err("ConcordanceSettingsScreen.java: each intensity is named by screen.jugcraft.concordance.config.intensity.<id>")
+    for key in list(sg.CLIENT) + [f"screen.{MOD}.concordance.config.intensity.{name}" for name in sg.INTENSITY]:
+        if key not in lang:
+            err(f"sign: missing lang {key}")
+
+
+# Where Fabric's permission events are asked as questions rather than raised by vanilla: the Concordance's Authority,
+# and the arms, guns and walkers that ask for the actual player's permission (relative to JAVA_ROOT).
+PERMISSION_QUERIES = {
+    "PlayerBlockBreakEvents.BEFORE": {"concordance/Authority.java", "walker/DieselWalker.java"},
+    # GunShots.allowed asks as the shooter before either a bullet or bayonet deals damage.
+    "AttackEntityCallback.EVENT": {"weapons/TwoHanded.java", "guns/GunShots.java"},
+}
+# What each indirect route asks Authority (relative to the concordance package): roadmap step 28's audit.
+AUTHORITY_ROUTES = {
+    "ConcordanceEffects.java": ["Authority.answering(level, behind(context))", "Authority.mayStrike(context.level(), context.actor(), behind(context), target)"],
+    "Illumination.java": ["return Authority.mayChange(level, player, pos);"],
+    "garden/GleanerBlockEntity.java": ["Authority.answering(level, keeper)", "Authority.mayChange(level, answering, pos)"],
+    "spirits/ClockworkPorterEntity.java": ["Authority.answering(level, owner) == null", "Authority.mayChangeFor(level, owner, source)",
+                                           "Authority.mayChangeFor(level, owner, target)",
+                                           "Authority.mayChangeFor(level, request.ticket().requester(), pos)"],
+    "spirits/GatheringShadeEntity.java": ["Authority.answering(level, agreement.holder()) == null"],
+    "spirits/PorterKeyItem.java": ["Authority.mayChange(level, player, pos)"],
+    "spire/ConcordSpire.java": ["Authority.answering(level, state.keeper())", "Authority.mayChange(level, keeper, at)"],
+    "sympathy/Sympathy.java": ["Authority.mayStrike(caster, target)", 'return "not_yours";'],
+    "sympathy/ScryingGlassItem.java": ["Sympathy.allowed(player, target)", "Hexes.MAX_RANGE"],
+    "CircleAnchorBlockEntity.java": ["Authority.present(level, disturber)"],
+    "Alchemy.java": ["harmful(dose) ? Intent.HARMFUL"],
+}
+
+
+def check_authority(root, lang):
+    """Roadmap step 28: an indirect magical action never does what its player could not do by hand. Every route the
+    audit found asks concordance/Authority at the moment of the change; nothing asks with nobody behind it; the stand-in
+    that may answer for an absent owner (Fabric's FakePlayer) is made only in Authority; Fabric's permission events are
+    asked as questions only where Jugcraft already asks them; absent owners' devices wait unless the server says
+    otherwise (the option defaults to false); the Spire Heart gives nothing out through a face; and the new words
+    exist."""
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    authority = text(root / "Authority.java")
+    if 'ABSENT_OPTION = "concordance.absent_owner_authority"' not in authority:
+        err("concordance/Authority.java: the absent-owner option is concordance.absent_owner_authority")
+    if "FakePlayer.get(level, new GameProfile(owner, STAND_IN))" not in authority or "!absentOwnersAct()" not in authority:
+        err("concordance/Authority.java: a stand-in answers for an absent owner only when the server's option allows it")
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        source = text(path)
+        relative = path.relative_to(JAVA_ROOT).as_posix()
+        if "FakePlayer" in source and relative != "concordance/Authority.java":
+            err(f"{relative}: only concordance/Authority makes the stand-in that answers for an absent owner")
+        for event, allowed in PERMISSION_QUERIES.items():
+            if f"{event}.invoker()" in source and relative not in allowed:
+                err(f"{relative}: {event} is asked as a question only in {sorted(allowed)} (add the site there, reviewed)")
+    for path in sorted(root.rglob("*.java")):
+        source = text(path)
+        relative = path.relative_to(root).as_posix()
+        if re.search(r"mayChange\(\s*\w+\s*,\s*null\s*,", source):
+            err(f"concordance/{relative}: a change is asked as the person behind it, never as nobody (Authority)")
+    for relative, needles in AUTHORITY_ROUTES.items():
+        source = text(root / relative)
+        for needle in needles:
+            if needle not in source:
+                err(f"concordance/{relative}: its route must ask Authority as audited ({needle})")
+    config = text(JAVA_ROOT / "config" / "JugcraftConfig.java")
+    if '"concordance.absent_owner_authority", false' not in config:
+        err("JugcraftConfig.java: concordance.absent_owner_authority defaults to false (absent owners' devices wait)")
+    heart = text(root / "spire" / "SpireHeartBlockEntity.java")
+    if "implements WorldlyContainer" not in heart or not re.search(r"canTakeItemThroughFace\([^)]*\) \{\s*return false;", heart):
+        err("spire/SpireHeartBlockEntity.java: the upkeep store takes in through its faces and gives out through none")
+    for key in (f"compose.{MOD}.ecology.status.keeper_away", f"compose.{MOD}.hex.reason.not_yours",
+                f"message.{MOD}.concordance.courier.too_fast", f"message.{MOD}.concordance.workers.key_refused"):
+        if key not in lang:
+            err(f"authority: missing lang {key}")
+
+
+def check_economy(root):
+    """Roadmap step 29: tools/concordance_economy.py models every Concordance conversion and every source that time alone
+    drives. Its figures must be the game's (each anchor is in its Java or data file), the data conversions must all be
+    in it, no cycle of conversions across the systems (every crop's regrow-and-compost loop included, grown by time and
+    hastened by a spire) may come back with as much as it started with, and the record's table must be the model's."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import concordance_economy as ec
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    for name, anchors in ec.ANCHORS.items():
+        for where, needle in anchors:
+            if where.startswith("data:"):
+                if not (DATA / MOD / where[5:]).is_file():
+                    err(f"economy {name}: {where[5:]} is missing")
+            elif needle not in text(root / where):
+                err(f"economy {name}: concordance/{where} no longer says {needle}; update tools/concordance_economy.py")
+    conversions = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "conversion").glob("*.json")}
+    modelled = {key: (amount, made) for key, _, amount, _, made in ec.CONVERSIONS}
+    for key, entry in conversions.items():
+        if modelled.get(key) != (entry.get("from", {}).get("amount"), entry.get("to", {}).get("amount")):
+            err(f"economy: the conversion {key} is not modelled as it is in the data ({modelled.get(key)})")
+    heart = load(DATA / MOD / "concordance" / "organism" / "verdant_heart.json") or {}
+    if (heart.get("cost"), max(heart.get("thriving", 0), heart.get("tolerating", 0))) != (1, 2):
+        err("economy: the Verdant Heart's beat is modelled as 1 nutrient for at most 2 Verdance")
+    if f"MAX = {ec.FOCUS_MAX};" not in text(root / "rules" / "FocusPool.java"):
+        err("economy: FOCUS_MAX is not FocusPool.MAX")
+    if ec.VITAE_AN_HOUR != HOURLY_VITAE_BOUND:
+        err("economy: VITAE_AN_HOUR is not check_crimson's HOURLY_VITAE_BOUND")
+    gaining = ec.gaining_cycles(ec.edges())
+    if gaining:
+        err(f"economy: a cycle of conversions gives back at least what it took, from {gaining}")
+    for name, back, spent in ec.crop_loops():
+        if back >= spent:
+            err(f"economy: the crop loop {name} composts back {back} quarters for {spent} spent")
+    record = text(ROOT / "docs" / "features" / "arcane-concordance-economy.md")
+    table = re.search(r"<!-- economy:start -->\n(.*?)\n<!-- economy:end -->", record, re.S)
+    if not table or table.group(1).strip() != ec.table().strip():
+        err("docs/features/arcane-concordance-economy.md: its table is not tools/concordance_economy.py's (run it and paste)")
+
+
+# Concordance saves whose loads read nothing (never saved), and the bases whose stamp their subclasses inherit.
+UNSAVED_ENTITIES = {"dreaming/DreamWispEntity.java"}
+STAMPING_BASES = ("LivingDeviceBlockEntity", "WorkerEntity")
+# The records whose entries are independent, read entry by entry (an unreadable one kept as written).
+ENTRY_BY_ENTRY = {"spire/SpireRecord.java", "spirits/BoundWills.java", "spirits/WorkerRoster.java", "sky/AstralClaims.java",
+                  "starbound/ConclaveProjects.java"}
+
+
+def check_persistence(root):
+    """Roadmap step 30: every format the Concordance saves in a world carries a version. Each SavedData's codec and each
+    persistent attachment goes through Saved.versioned (which reads saves from before versions and brings older ones
+    forward); each block entity's and creature's save stamps its version (Saved.stamp), directly or through its base;
+    and the records whose entries are independent read entry by entry (Saved.keeping), keeping what they cannot read."""
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    saved = text(root / "Saved.java")
+    for needle in ("public static <A> Codec<A> versioned(", "public static <K, V> Codec<Kept<K, V>> keeping(",
+                   "public static void stamp(ValueOutput output, int version)"):
+        if needle not in saved:
+            err(f"concordance/Saved.java: missing {needle}")
+    for path in sorted(root.rglob("*.java")):
+        source = text(path)
+        relative = path.relative_to(root).as_posix()
+        if re.search(r"extends SavedData\b", source) and not re.search(r"CODEC = Saved\.versioned\(", source):
+            err(f"concordance/{relative}: a SavedData's CODEC goes through Saved.versioned (roadmap step 30)")
+        for match in re.finditer(r"AttachmentRegistry\.<[^;]*?\.persistent\(([^;]*?)\)", source, re.S):
+            if not match.group(1).startswith("Saved.versioned("):
+                err(f"concordance/{relative}: a persistent attachment goes through Saved.versioned ({match.group(1)[:40]})")
+        if re.search(r"void (saveAdditional|addAdditionalSaveData)\(ValueOutput output\)", source) and relative not in UNSAVED_ENTITIES:
+            inherits = any(f"extends {base}" in source for base in STAMPING_BASES)
+            if "Saved.stamp(output, " not in source and not inherits:
+                err(f"concordance/{relative}: its save stamps its version (Saved.stamp) or inherits a base that does")
+            if inherits and "super." not in source.split("ValueOutput output)", 1)[1][:200]:
+                err(f"concordance/{relative}: its save calls its base's, which stamps the version")
+    for relative in ENTRY_BY_ENTRY:
+        if "Saved.keeping(" not in text(root / relative):
+            err(f"concordance/{relative}: its entries are read one by one (Saved.keeping), so one it cannot read is kept")
+
+
+def check_journey():
+    """Roadmap step 31: tools/concordance_journey.py's three routes each reach the Architect stage for one player alone
+    with only their own research, need their own Spire's practice and differ from one another; the first success is the
+    data's; every game test the routes name exists; and the record's routes are the tool's."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import concordance_journey as jr
+    for problem in jr.problems():
+        err(problem)
+    path = ROOT / "docs" / "features" / "arcane-concordance-journey.md"
+    record = path.read_text(encoding="utf-8") if path.exists() else ""
+    block = re.search(r"<!-- journey:start -->\n(.*?)\n<!-- journey:end -->", record, re.S)
+    if not block or block.group(1).strip() != "\n".join(jr.table()).strip():
+        err("docs/features/arcane-concordance-journey.md: its routes are not tools/concordance_journey.py's (run it and paste)")
+    # The client test presses the journal's own key, as a player would.
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JournalClient.java")
+    if "public static KeyMapping key()" not in (client.read_text(encoding="utf-8") if client.exists() else ""):
+        err("client/JournalClient.java: key() gives tests the journal's key")
+
+
+def check_delivery():
+    """Roadmap step 32: tools/concordance_delivery.py's library integration matrix has one row for every library in the
+    lock and none other, agrees with the lock on whether Jugcraft needs each, names only game tests that exist and calls
+    unused only what Jugcraft's code never refers to; the delivery record's matrix and the player guide's tables are the
+    tool's."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import concordance_delivery as dl
+    for problem in dl.problems():
+        err(problem)
+    for name, marker, lines in (("docs/features/arcane-concordance-delivery.md", "matrix", dl.table()),
+                                ("docs/ARCANE_CONCORDANCE_GUIDE.md", "guide", dl.guide_tables())):
+        path = ROOT / name
+        text = path.read_text(encoding="utf-8") if path.exists() else ""
+        block = re.search(rf"<!-- {marker}:start -->\n(.*?)\n<!-- {marker}:end -->", text, re.S)
+        if not block or block.group(1).strip() != "\n".join(lines).strip():
+            err(f"{name}: its {marker} tables are not tools/concordance_delivery.py's (run it and paste)")
 
 
 if __name__ == "__main__":

@@ -57,6 +57,22 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Earthbound armor:** an Earthbinding Template (rooted dirt, four thallite nuggets and four gold nuggets), a thallite piece and a gold ingot at a smithing table bind the piece into its gold-trimmed Earthbound twin, for good, keeping its enchantments, wear and name. Earthbound pieces are **Rooted**: on natural ground (soil, stone, sand or gravel) each takes 7.5% off knockback, 30% for a full set, and with two or more worn Regrowth works on stone, sand and gravel too.
 - Both traits are named in the tooltip and described while Shift is held. Two handbook pages. Arms, the arrow, horse armor and magic come in later slices. Record: [thallite.md](docs/features/thallite.md).
 
+### Unmerged: Pharaoh Armor
+- **Pharaoh Armor, the last of the owner's five new armor tiers:** gold and teal plate with red gems over tan linen, worn as a 3D model in the owner's own design: a nemes headdress whose striped side flaps rise into rounded teal humps above the crown, with the uraeus on the brow over a tan face plate; a broad collar with a red gem, a breastplate framing a teal square and gold-framed teal bracers; a skirt of striped lames dipping in a V; sandal-greaves. Four 16×16 icons of its own.
+- **Beside the others, in other strengths:** defense 4, 9, 6 and 3 (helmet to boots), toughness 3.0, knockback resistance 0.1, durability 451, 656, 615 and 533, enchantability 22. Fire resistant, and repaired with gold ingots.
+- **No recipe or drop yet:** creative tab only, until the owner decides. Record: [pharaoh-armor.md](docs/features/pharaoh-armor.md).
+
+### Unmerged: Sunset Gem Armor
+- **Sunset Gem Armor, the fourth of the owner's new armor tiers:** a set in a sunset gradient, cream at the crown to coral at the feet, worn as a 3D model in the owner's own design: a crown of gem shards trailing sparkles, shard wings rising from the shoulders, a striped breastplate, and a striped skirt with red flaps and shards at the hips.
+- **Beside the others, in other strengths:** defense 3, 8, 7 and 3 (helmet to boots), toughness 3.0, knockback resistance 0.1, durability 528, 768, 720 and 624, enchantability 25: it lasts longest and enchants best of all. Not fire resistant, and repaired with amethyst shards.
+- **No recipe or drop yet:** creative tab only, until the owner decides. Record: [sunset-gem-armor.md](docs/features/sunset-gem-armor.md).
+
+### Unmerged: Hades Armor and the Hades Scythe
+- **Hades Armor, the third of the owner's new armor tiers:** dark slate plate worn as a 3D model in the owner's own design: a narrow helm with a beaked visor and two great horns, layered pauldrons rising toward the outside, a V of bars on the breastplate, a flared plate skirt, and a blood-red tabard from chest to hem.
+- **Beside the other two, in other strengths:** defense 3, 8, 7 and 3 (helmet to boots), toughness 4.0, knockback resistance 0.2, durability 462, 672, 630 and 546, enchantability 12. Fire resistant, and repaired with netherite ingots.
+- **The Hades Scythe,** its weapon: a scythe in the owner's design (a near-black snath, red grip wraps, a diamond pommel and a curved slate blade) that fights as every scythe does and withers what it strikes. It is the first arm of a new line, the owner's armor sets.
+- **No recipe or drop yet:** creative tab only, until the owner decides. Record: [hades-armor.md](docs/features/hades-armor.md).
+
 ### Unmerged: Reforged White Diamond Armor
 - **Reforged White Diamond Armor, the second of the owner's new armor tiers:** an icy white and pale cyan set worn as a 3D model in the owner's own design: a big V crest and rising wing bars over a charcoal face plate, wide winged pauldrons over a lavender-edged V on the chest, a long skirt of tassets in an A over light and lavender stripes, and diamond plates on the toes.
 - **Beside Bloodthorn, in other strengths:** defense 4, 8, 7 and 3 (helmet to boots), toughness 3.0, knockback resistance 0.1, durability 495, 720, 675 and 585, enchantability 20. Not fire resistant, and repaired with diamonds.
@@ -83,6 +99,183 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The Build workflow produces an importable Modrinth `.mrpack` with the original Jugcraft JAR and hashed upstream library downloads, plus standalone release dependency metadata. No startup downloader or third-party JARs are added to Jugcraft.
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
+
+### Unmerged: The Arcane Concordance: ready for review
+- A **player's guide** to the Concordance: your first spell, the controls, Focus, every research entry with how to begin, understand and master it, the stages, the three routes, playing with others and what to do when something goes wrong. Guide: [ARCANE_CONCORDANCE_GUIDE.md](docs/ARCANE_CONCORDANCE_GUIDE.md).
+- For reviewers, one record gathers it all: which libraries the Concordance really uses and what happens without each, what is finished, what is partial and what is still assumed, every known issue and what to do next, and the test results. Record: [arcane-concordance-delivery.md](docs/features/arcane-concordance-delivery.md).
+
+### Unmerged: The Arcane Concordance: three ways to a Spire
+- Three routes from a fresh world to an endgame Spire are laid out and checked: **cultivation** (the garden, its brews and helpers, to a Verdant Spire), **exploration and combat** (the sky, the Crimson Vigil, relics and hexes, with a trip to the Nether, to a Star Spire) and **crafting and infrastructure** (circles, rings, the assay scale and porters, to a Lantern Spire). Each is reachable by one player alone with only its own research.
+- The Initiate's Wand's codex entry has a new **Casting** page: holding an instrument, the use key casts your first invocation and the number keys 2, 3 and on cast the ones after it (they stop changing the hotbar slot while it is held; scroll instead).
+- Nobody has played the routes yet: the playtest plan is in the record, ready to run. Record: [arcane-concordance-journey.md](docs/features/arcane-concordance-journey.md).
+
+### Unmerged: The Arcane Concordance: saves that last
+- Everything the Concordance keeps in a world (spires, workers, Bound Wills, the sky's claims, Conclave projects, courier deliveries, and what it keeps on each player) is now saved with a version, so a later Jugcraft can read and update it. Older saves still load.
+- One entry a record cannot read (from a newer version, or damaged) is kept exactly as it was instead of emptying the whole record.
+- A Conclave project whose definition was removed no longer blocks new projects; it is set aside, contributions and all.
+- Breaking blocks near circles costs less on big worlds: only the circles nearby are checked.
+- Back up your world before moving to an older Jugcraft: it cannot read the new versioned saves. Record: [arcane-concordance-persistence.md](docs/features/arcane-concordance-persistence.md).
+
+### Unmerged: The Arcane Concordance: no free lunch
+- **A Verdant Spire no longer makes nutrients from nothing.** Its field now grows Verdant Bed crops by their own rules: each hastened step costs the bed at least one nutrient, and a hastened Mendvetch fixes none. Before, a spire over Mendvetch could feed Verdant Hearts for free. Vanilla crops still simply grow.
+- **Light is no longer free.** Putting a Kindled Lantern out, or breaking a Lumen Sconce, spends the measure of Radiance it had begun, so relighting or re-placing it is no way round its burning. Lighting and putting out at once still costs nothing.
+- Every Concordance conversion is now checked together, across all its systems, so no chain of them can give back more than it took. The record lists what representative installations take and give in a day. Record: [arcane-concordance-economy.md](docs/features/arcane-concordance-economy.md).
+
+### Unmerged: The Arcane Concordance: magic answers to its player
+- Magic now does nothing for you that you could not do by hand. A spell's light, harvest or harm, a Gleaner, a spire's field, a porter, a courier and a Gathering Shade change only what their player or owner could change themselves: protection mods' claims, towns, spawn protection and the PvP rules apply to them as to that player, checked again every time they act. Monsters may always be fought.
+- **Devices and workers wait while their owner is away** (offline or in another dimension) and say so. A server can let them carry on with `concordance.absent_owner_authority=true`; claims still judge them as their owner.
+- A Porter Key will not bind a container you may not use, and a courier takes only what both its keeper and the asker could. A taglock's link works only for whoever took it, and scrying reaches no further than a curse. Breaking someone's Warding Stone mid-ritual makes the backlash yours, so it follows the PvP rules. A Spire Heart can no longer be drained by a hopper or pipe, only an alembist can stop a crucible's formula, and a brew is judged by what it really does. Record: [arcane-concordance-authority.md](docs/features/arcane-concordance-authority.md).
+
+### Unmerged: The Arcane Concordance: reading the signs
+- The Concordance now shows what really happened, where it happened. Glyphs gather as a ritual begins. A ritual step's Ley Charge travels from each pylon to the anchor, and a spire's from the pylons it drew on. A finished working bursts with light. A **shortage** (grey smoke and sinking ash, with a hollow falling tone) shows at whatever fell short: the dry pylon, a formula without its ingredient, a missed upkeep, a porter waiting for goods. A **danger** (flame and sparks, with a sharp rising warning) shows at a failing containment, a searing stir or a damaged spire. Both warnings have subtitles.
+- A crucible's liquid now stands at its real volume in the colour of its strongest property, muddied when murky, and smokes when searing. A spire shows whether it is being raised, working, lacking or damaged. A finished circle glows until its result is taken, and waiting workers fold their arms or tap a foot.
+- A new **Visual intensity** setting (Full, Reduced, Minimal) limits how much the Concordance draws, and big workshops share one budget. Warnings always show. The codex's Foundations has **Reading the Signs**. Record: [arcane-concordance-presentation.md](docs/features/arcane-concordance-presentation.md).
+
+### Unmerged: The Arcane Concordance: the Concordance Journal
+- Press **J** for your **Concordance Journal**: your Focus and stage, every research entry you have met and what its next state asks, every route to the next stage and what it still needs (in words, not data), and once you know their traditions your Vitae, the sky's forecast, your workers, deliveries, relics, the curses and wards on you, your Conclave standing, your spires and your Prima Materia. **Exact values** (in the journal or the Concordance settings) add the figures behind each line.
+- With GuiLib installed it opens as a workspace with a tab per section; otherwise, or with **Simple journal** chosen, as a plain screen. Both work entirely from the keyboard, and `/jugcraft concordance status` now prints the same research report in words. Record: [arcane-concordance-journal.md](docs/features/arcane-concordance-journal.md).
+
+### Unmerged: The Arcane Concordance: the Concord Spire
+- Masters of the Concordance can raise a **Concord Spire** round a **Spire Heart**: a Lantern Spire that lights the dark round it so nothing hostile spawns, a Verdant Spire that grows the crops round it, or a Star Spire that restores its keepers' Focus and reveals hostile creatures. Each needs its own mastery, practice, crown and upkeep.
+- It is raised in four phases (a foundation of Ley Pylons and Warding Stones, a shaft of dark stone, a crown finished by the new **Kindling** ritual at a nearby circle, then three days of upkeep held) and works only while it is kept: its daily item (couriers can bring it to the heart), Ley Charge from its own pylons, and its tradition's practice every week. Damage, a broken heart, an unloaded chunk or a change of configuration lose nothing, and the heart, `/jugcraft concordance spire` and Jade always say why it rests. Raising one opens a route to the Architect stage. Record: [arcane-concordance-spire.md](docs/features/arcane-concordance-spire.md).
+
+### Unmerged: The Arcane Concordance: stages and the progression graph
+- The Concordance now has five **stages**: Initiate, Practitioner, Adept, Master and Architect. Each is reached by any one of its routes (a specialist's, a generalist's, or one of its own, such as the Adept's Attunement or a Luminary's standing), announced with an advancement and never lost. `/jugcraft concordance stage` shows yours and exactly what each route to the next still needs; the codex's Foundations has The Five Stages.
+- The server builds the whole progression graph from the rules every time they load and logs anything one player could not reach from a fresh world, anything circular and anything needing a later stage (`/jugcraft concordance progression` for operators). The data checks follow it down to every item, structure and world material a step needs, and to the codex, spell and equipment gates. Since amethyst only grows in geodes, the Lampwright's Bench, the Initiate's Wand, the Lumen Sconce and the codex now also take glowstone dust. Record: [arcane-concordance-progression.md](docs/features/arcane-concordance-progression.md).
+
+### Unmerged: The Arcane Concordance: the Starbound Conclave
+- Once you understand First Light, swear the **Starbound Oath** at a **Conclave Lectern** and earn **renown** with the Concordance's traditions: for every research state you reach, the Conclave's weekly **commissions** (goods for deliveries or for practices you carried through), **teaching** others with your notes, and **projects**. No single repeated deed counts for long, and ranks (Aspirant, Fellow, Companion, Luminary, Starbound) need renown in several traditions and kinds of work.
+- From Fellow, begin a **project** for yourself or, as your party's leader, for your party: the Starward Chart or the Concordance Archive. Every member's deliveries, research and practices count; every stage can also be finished alone over a few days; everyone who helped shares the reward and the achievement. A member who contributes nothing for a week is lapsed until they contribute again, and never loses renown. Record: [arcane-concordance-conclave.md](docs/features/arcane-concordance-conclave.md).
+
+### Unmerged: The Arcane Concordance: Sympathy and Dreamwalking
+- Understand **Sympathy** and use a **taglock** on a creature to take a link to it; then, with a cobweb, a rabbit's foot or a fermented spider eye in your other hand, cast the **Curse of Lethargy**, **Misfortune** or **Frailty** through it: a few minutes of slowness, bad luck or weakness, checked again at every pulse. Curses on players follow the server's PvP setting and parties, never cross dimensions and never reach more than 128 blocks.
+- Anyone can fight back: a **scrying glass** names the curses on you, then who cast them, and lifts one with its remedy (sugar, an amethyst shard, blaze powder); **ward sigils** ward you for twenty minutes against linking, cursing, scrying or being pushed.
+- Understand **Dreamwalking** and use an **Oneiric Censer** at night to dream: everything you carry is held for you while you wander near your body with nothing, catching dream wisps for **dreamglass** (which makes ward sigils). However the dream ends (waking, its time, straying, harm, death, leaving or a crash), you get back exactly what you carried, in the same slots, and never more experience than you had. Record: [arcane-concordance-hexes.md](docs/features/arcane-concordance-hexes.md).
+
+### Unmerged: The Arcane Concordance: Assay
+- Understand **Assay** and build an **Assayer's Scale**. Weigh a stack of common matter (stone, soil, sand, wood, the common metals, coal, redstone, lapis, quartz, glass, clay, honey, wheat, sugar cane, string, bone) to learn its exact worth in grains of **Prima Materia**; use the scale again to dissolve it into your ledger. With an empty hand and a material in your other hand, form one more of it. Dissolving rounds down and forming costs a quarter more, rounded up, so every round trip loses.
+- Only plain, catalogued matter is weighed: anything named, filled, enchanted, carrying a creature or magic (research, spells, relics, rings, living equipment) is refused with its reason. Every recipe between catalogued materials is declared and audited so no cycle can create value; the scale stops working if the data or this server's recipes ever would. Record: [arcane-concordance-equivalence.md](docs/features/arcane-concordance-equivalence.md).
+
+### Unmerged: The Arcane Concordance: Relic Lore
+- Understand **Relic Lore** and make four **relics**, each working only where it is meant to: the **Wardlight Lantern** in your off hand reveals hostile creatures, the **Hearthstone** worn in the new necklace slot mends you when you are hurt and calm (and binds to you), the **Stormglass Orb** in your main hand under the open sky quickens your step, and the **Owlsight Circlet** on your head gives night vision in the dark. Carried loose, worn for show, held in the wrong hand or kept in a chest, a relic does nothing, and `/jugcraft concordance relics` says exactly why.
+- A **Reliquary Shrine** holds an installed relic (the Wardlight reveals creatures within 24 blocks; the Hearthstone mends your party) and recharges relics from the Ley Pylons beside it. Your relics pulse at most twice a second together, and two relics giving the same effect never add up. Record: [arcane-concordance-relics.md](docs/features/arcane-concordance-relics.md).
+
+### Unmerged: The Arcane Concordance: Runesmithing
+- Understand **Runesmithing** and build an **Artificer's Bench**: 4 copper, iron or gold ingots (or 1 netherite ingot) and Focus forge a **Resonant Ring** with a rolled quality and random properties, decided before you see them. Wear it in the new ring slot.
+- At the bench, change a ring by what you hold in your other hand: redstone **reforges** its properties (the next roll is fixed, so looking or cancelling never rerolls), rune ingredients **inscribe** runes, gems go in **sockets** and shears take them out again whole, a lead **bonds** it to you, its own ingots **repair** it, and flint **salvages** it (twice to confirm) for some ingots and its gems back. Every step says what it keeps and what it destroys, and a ring never holds more than its capacity. Record: [arcane-concordance-artifice.md](docs/features/arcane-concordance-artifice.md).
+
+### Unmerged: The Arcane Concordance: couriers
+- Build a **Courier Post** among your chests and bind Clockwork Porters to it with a Porter Key. Use the post with an item in hand and a porter fetches a stack of exactly that item (a named or enchanted one is never mistaken for a plain one) from the chests round it into the post's slots, for you or a hopper.
+- Every item on the way is accounted for: two porters never reach for the same items, a full post keeps the rest in transit, a porter broken or unloaded (or a server restart) leaves its cargo waiting at the post for another porter or for you to recover, and cancelling or breaking the post takes it back to its chest. Use the post with an empty hand for its history, or `/jugcraft concordance logistics` for your requests. Record: [arcane-concordance-logistics.md](docs/features/arcane-concordance-logistics.md).
+
+### Unmerged: The Arcane Concordance: familiars, spirits and constructs
+- Once you understand the **Binding Arts**, three helpers answer you, each by its own rules. A **Bonding Charm** binds a **Hearthling** familiar: the longer you spend near it the stronger your bond, and once it is strong enough it mends you when you are badly hurt.
+- A **Spirit Anchor** seals an agreement with a **Gathering Shade**: it gathers dropped items near the anchor through the night, up to its daily quota, and brings them to the anchor for a hopper. Sneak-use the anchor to suspend it; break it to release the spirit.
+- A **Clockwork Porter** carries items between two containers you set with a **Porter Key**, running on Ley Charge from a nearby pylon and mended with copper.
+- Every worker tells you what it is doing or exactly why not (waiting for resources, blocked, cannot find a way, outside its agreement, finished, and more), through Jade, an empty-hand click or `/jugcraft concordance workers`, which also lists workers that are not loaded. None loads chunks or follows anyone through a portal. Record: [arcane-concordance-workers.md](docs/features/arcane-concordance-workers.md).
+
+### Unmerged: The Arcane Concordance: the Crimson Vigil
+- Once you understand **Crimson Rites**, a **Crimson Chalice** turns your health into **Vitae**: 4 health for up to 4 Vitae, never below 8 health. Each offering leaves **exhaustion** that only time clears (no food or potion does), and the more exhausted you are, the less an offering gives, so healing up never resets it. The HUD and `/jugcraft concordance vitae` show your health, Vitae and exhaustion apart.
+- Sneak-use the chalice for a **Crimson Surge**: 6 Vitae become 6 Focus at once, once a minute. The **Thornheart Blade** is a living sword that grows by slaying different enemies, enduring different harms and being fed Vitae; repeating one kill stops counting, and its stages give extra damage while it is fed. Record: [arcane-concordance-vitae.md](docs/features/arcane-concordance-vitae.md).
+
+### Unmerged: The Arcane Concordance: the Starwatchers' sky
+- Once you understand **Celestial Attunement**, read the sky as a calendar. It keeps the world's own clock: the **Full Moon** and **New Moon** come round every 8 days as vanilla's moon does, the **Lantern Star** every third evening, the rare **Echo Comet** every 19 nights, the **Winter Crown** in Jugcraft's winter and the **Harvest Moon** on the Halloween event's Harvest Moon nights. An **Orrery Observatory** or `/jugcraft concordance sky` gives the forecast: what is up, what rises when, and the weather and season each needs.
+- An observatory under the open sky gathers **Astral Resonance** from each pattern once each time it comes round, for its keeper; turning the clock back or forward never pays twice. An **Astrolabe** draws that resonance and attunes you to a risen pattern for its effect while it is up (night vision under the full moon, water breathing at the new moon, haste, speed, fire resistance, or villagers' favour under the Harvest Moon). Masters can **recall** a pattern they have seen when the sky is empty: dearer, shorter, once per occurrence. Record: [arcane-concordance-celestial.md](docs/features/arcane-concordance-celestial.md).
+
+### Unmerged: The Arcane Concordance: the Greenwardens' garden
+- Once you understand **Verdant Husbandry**, grow the Greenwardens' four crops in **Verdant Beds**: the sun-loving **Sunpetal**, the shade-and-water **Dewmoss**, the **Gloamcap** that wants the dark and working magic nearby, and the **Mendvetch** that puts nutrients back into the beds round it. Each grows only where its niche of moisture, light, nutrients, company and magic allows, and says exactly what it lacks ("Light 6: too little, needs at least 11").
+- Every step of growth costs the bed nutrients and dries it. Nutrients come back only from the Mendvetch, the **Mulch Maw** (which turns plant matter into nutrients for the poorest bed), bone meal and fertilizer, so a garden has to be balanced. The sprinkler, fertilizer and the legume bonus work on them as on any Jugcraft crop.
+- Living devices: the **Verdant Heart** beats a thriving garden's nutrients into Verdance and pours it into a Ley Pylon to power your circles; the **Habitat Gauge** turns the habitat into a comparator signal; the **Gleaner** harvests ripe crops into hoppers for a Verdance each. The crops are new alchemy ingredients. Record: [arcane-concordance-ecology.md](docs/features/arcane-concordance-ecology.md).
+
+### Unmerged: The Arcane Concordance: rituals and alchemy
+- **Rituals**: once you understand **Circle Lore**, build a Lesser Circle (a Circle Anchor, four Ley Pylons, eight Warding Stones and open air above) and work a ritual in it. **Adept's Attunement** turns your Initiate's Wand into an **Adept's Wand** that holds larger spells, keeping what is written on it; the two-person **Lumen Vigil**, worked in the dark, shields everyone taking part and lights up the creatures round you. The anchor tells you exactly which part of the circle is missing, wrong, blocked, unpowered or out of reach.
+- Fill Ley Pylons from a Kindled Lantern or from Jugcraft Energy. If a ritual is interrupted (a part broken, a pylon dry, someone leaving, the light rising, the server restarting) nothing is made and your offerings stay in the anchor; only breaking the boundary lashes out. Offerings are used only at the moment the result is made, so nothing can be lost or doubled. Record: [arcane-concordance-rituals.md](docs/features/arcane-concordance-rituals.md).
+- **Experimental alchemy**: once you understand the **Alembic Arts**, brew in an **Alembic Crucible** over a fire. Every ingredient carries measurable properties; heat and stirring decide how much dissolves; a bottle or a bowl takes one part's share as a draught or a salve. A spoon, an Assay Glass and, at mastery, the glass's full reading tell you more and more, down to why a dose does what it does. The same process always makes the same brew, and a written **formula** lets another crucible, fed by hopper and pipe and emptied by a Pneumatic Extractor at its side (the fire stays beneath), repeat it. No brew lasts longer than the vanilla potion of the same effect. Record: [arcane-concordance-alchemy.md](docs/features/arcane-concordance-alchemy.md).
+- Fixed: the invocation release sounds (Dawn Aegis, Revelation, Lance of Dawn, Flashstep, Lanternward) were never registered, so Spell Engine could not play them; they are now, and the data check enforces it.
+- The Concordance's item icons (both wands, the Kindled Lantern, the Research Notes and the codex) are redrawn at 16×16 in the owner's manner, following the item icon rules.
+
+### Unmerged: The Arcane Concordance: invocations
+- **Six invocations, one for each role**: First Light now teaches **Dawn Aegis** (a shell of light that absorbs blows) and **Revelation** (creatures round you glow through walls) alongside Kindle, and at mastery **Lance of Dawn** (a beam of arcane damage that grows with Spell Power), **Flashstep** (a dash the way you face) and **Lanternward** (mends and wards your party). Each has its own gesture, sound, particles and icon, and a counter written in the codex.
+- **Tune** an invocation with one modifier from its short list (`/jugcraft concordance tune`): more reach, strength, time or radius for more Focus, never a different spell.
+- **Combat baselines**: a repeatable benchmark puts seven kits (from an iron-clad fighter with no magic to a geared spellcaster) and each invocation alone through five fights, and the build fails if any early ability makes every fight trivial or if only one kind of kit can win one. Findings: Initiate magic does not outclass iron; it trades damage for reach, shields, mobility and support. Record: [arcane-concordance-baselines.md](docs/features/arcane-concordance-baselines.md).
+- Invocations are written in the same words as your own spells and held to the same limits: none is cheaper or cools down faster than the spell it is made of, and an instrument never grants a spell by itself. Record: [arcane-concordance-invocations.md](docs/features/arcane-concordance-invocations.md).
+
+### Unmerged: The Arcane Concordance: composed spells and shared effects
+- **Compose your own spells**: once First Light is understood, write a spell in a few words (how it leaves you, what it chooses, what it does, how it ends) with `/jugcraft concordance compose check`, and inscribe it on the Initiate's Wand with `compose inscribe`. The game explains what a spell does and costs, or names every problem with it. Sixteen words to start, more at First Light mastered; the codex has a page for each.
+- An inscribed spell is cast from the spell bar like Kindle. The server works it out again on every cast and holds it to the limits it was written with: it never reaches more targets or does more than it said.
+- Behind the scenes, every Concordance effect (Kindle's light included) now goes through one place, with the same friendly-fire, protection, stacking and credit rules whatever delivers it. Record: [arcane-concordance-composition.md](docs/features/arcane-concordance-composition.md).
+
+### Unmerged: The Arcane Concordance: shared notes and typed resources
+- **Research Notes**: write down what you know on paper; another player who reads your notes can understand First Light after observing it once in the dark themselves. Notes never teach mastery, and your own notes teach you nothing.
+- **Lumen Sconce**: a brass lamp-stand that burns Radiance for a steady light 15. Anyone may pour Radiance in from a Kindled Lantern; only its owner can draw it back out. It keeps its Radiance when broken.
+- Behind the scenes, every magical resource now follows one set of rules: typed containers, transfers that never convert, recipes that always lose, and a fixed, fair way to share a short supply. Record: [arcane-concordance-sharing.md](docs/features/arcane-concordance-sharing.md).
+
+### Unmerged: The Arcane Concordance: First Light
+- Jugcraft's magic begins. Sneak-use a luminous specimen (amethyst first) to examine it; in the dark it shows its own glow. Understand **First Light** in the field (three specimens in the dark) or by study at the new **Lampwright's Bench**.
+- With an **Initiate's Wand**, cast **Kindle** through Spell Engine: a steady light where you look, for a minute, paid with **Focus** (20, regenerating), Jugcraft's first magical resource. Practising it in eight places masters it.
+- At the bench, kindle a plain lantern with amethyst into a rechargeable **Kindled Lantern**, then infuse specimens or channel Focus into it. Lit in hand, it lights the way.
+- The *Arcane Concordance* codex (Modonomicon) unlocks its pages with your research. Jade, JEI and LambDynamicLights show the bench, its workings and the lantern's glow when installed. Jugcraft's weapons no longer receive Spell Engine's automatic weapon skills.
+- Record: [arcane-concordance-first-light.md](docs/features/arcane-concordance-first-light.md); the whole plan: [ARCANE_CONCORDANCE.md](docs/ARCANE_CONCORDANCE.md).
+
+### Unmerged: Fruit crops
+- Five fruits in Jugcraft's own art, asked for by the owner before their milkshakes and pies and tarts: **strawberries, blueberries, coffee, plums and bananas**.
+- **Strawberry Plant, Blueberry Bush and Coffee Plant:** bushes on farmland, planted from seeds that short grass, wild plants and the fruit give. Ripe, a right-click picks them and they fruit again.
+- **Plum and banana trees,** grown from a Plum Pit and a Banana Pup as the orchards' trees are; the banana stands on a Banana Stem of its own under drooping fronds.
+- **Wild** in forests, flower fields, taigas, hills and jungles, and in the Orchard, the Tropics and the Rainforest.
+- **Coffee Beans,** roasted from coffee cherries, now go into the Coffee Cake; **Strawberry, Blueberry and Plum Jam** cook into Mason Jars.
+- Details: [docs/features/fruit-crops.md](docs/features/fruit-crops.md).
+
+### Unmerged: Cakes
+- Seven cakes the owner drew, rebuilt from their drawing: **Carrot Cake, Birthday Cake, Ice Cream Cake, Red Velvet Cake, Cheesecake, Coffee Cake and Apple Cake**, with the drawing's carrots, candles, berry jam and apple slices on top.
+- Baked in the **Hearth Oven** as the pies are: **Cake Batter** (wheat, an egg, sugar and milk), a sugar and the cake's own ingredients make a raw cake. Left in too long, it comes out a **Burnt Cake**.
+- Set down whole, facing you, and eaten or cut with a knife into slices a quarter at a time, the front right quarter first, showing the cake's layers inside.
+- Details: [docs/features/cakes.md](docs/features/cakes.md).
+
+### Unmerged: Orchards
+- The sixth slice of the kitchen and cooking expansion: four fruit trees in Jugcraft's own art, as the owner chose (their library has no fruit trees yet).
+- **Pear, peach, lemon and orange trees** grow from their seeds (a peach's pit) on oak trunks, each in its own shape. Like the apple tree, their leaves blossom and then hang with ripe fruit; a right-click picks it and the tree fruits again. A fruit crafts into its seed.
+- **Wild trees:** pears and peaches in the Orchard, lemons and oranges in the Mediterranean Forest and the Subtropics, and all four in vanilla forests, plains, savannas and jungles.
+- **What the fruit makes:** Orange Juice and Lemonade (set down as the menu's drinks are), Peach and Lemon Meringue Pies from the Hearth Oven, and Orange Marmalade, Peach Preserves and Pear Butter in Mason Jars.
+- Details: [docs/features/orchards.md](docs/features/orchards.md).
+
+### Unmerged: Soil, compost and storage
+- The fifth slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **Organic Compost** (dirt, straw, bone meal and rotten flesh) rots through four stages into **Rich Soil**, faster when wet.
+- **Rich Soil** and **Rich Soil Farmland** (a hoe tills it) give whatever grows on them an extra random tick, about twice the pace. The farmland keeps moist as farmland does, is never trampled, and dries back into Rich Soil.
+- **Produce crates** for beetroot, cabbage, carrots, corn, onions, potatoes and tomatoes, and a **Bag of Corn Kernels**, nine to a block. The Pumpkin Crate is unchanged.
+- **Wooden and Bamboo Baskets:** nine-slot storage blocks, open at the top, that take in items dropped into them. The Foraging Basket is unchanged.
+- Details: [docs/features/soil-compost-and-storage.md](docs/features/soil-compost-and-storage.md).
+
+### Unmerged: Rice and wet farming
+- The fourth slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **Rice paddies:** rice, its own seed, plants into still water one block deep over bog soil and grows two blocks tall; picking a ripe plant gives 2-3 rice panicles and leaves the stalks standing. Flooded soil counts as moist farmland, and the plant keeps its water when broken. Rice drops from grass, and **wild rice** grows in swamp and river shallows.
+- **Straw and storage:** the Cutting Board cuts a panicle into two rice and a straw. A Bag of Rice, a Rice Bale and a Straw Bale each hold nine.
+- **Tatami** woven from straw pair into two-block mats as you lay them; Full and Half Tatami Mats lie a pixel thick.
+- **Rice dishes:** cooked, fried and mushroom rice, salmon, cod and kelp rolls and kelp roll slices, each set down as a 3D model like the menu's, and the **Rice Roll Medley**, a platter served a roll at a time.
+- Details: [docs/features/rice-and-wet-farming.md](docs/features/rice-and-wet-farming.md).
+
+### Unmerged: The menu
+- The third slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **55 new items:** drinks (hot cocoa, creamy corn drink, melon juice, glow berry custard, and a milk bottle that clears effects), soups and stews, plated meals and pastas, sandwiches, the hamburger, wraps and tacos, dumplings, ham and smoked ham, corn dogs, a barbecue stick and popsicles, honey and sweet berry cookies, caramel popcorn, boiled corn, cornbread, tortillas and chips, and the doughs and batters they start from. No dish gives more than 3 hunger over its ingredients.
+- **Every dish sets down:** sneak and use it on a block to set it down as a 3D model of the owner's icon, facing you; an empty hand takes it back.
+- **The owner's art:** the Cooking Pot is now the owner's iron pot, and the onion, vegetable and pumpkin soups, cabbage rolls, roasted corn and mulled cider wear the owner's icons (same IDs, recipes and food). Popcorn set down is the owner's popcorn box. Roasted and boiled corn give a corncob back.
+- **Nachos,** a sixth feast, and **Dog Food** and **Horse Feed** for your own tamed wolf or horse.
+- Details: [docs/features/the-menu.md](docs/features/the-menu.md).
+
+### Unmerged: Feasts and food displays
+- The second slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **Five feasts:** Roast Chicken, Honey-Glazed Ham, Shepherd's Pie, Stuffed Pumpkin and the Gleaming Salad (it glows). Placed whole, served four times: a bowl takes a serving away, a hungry player eats one there, and the model is eaten down to leftovers that clear for a bone or seeds. Four servings give about what the ingredients do.
+- **Pies:** the apple pie wears the owner's art (same ID and baking); a new chocolate pie and sweet berry cheesecake bake in the Hearth Oven. Sneak and use vanilla's pumpkin pie on a block to set it down and cut it in four slices that add up to the pie.
+- **Plate, Platter and Serving Tray** to show food on: one thing on a plate, four on a platter or a tray.
+- Details: [docs/features/feasts-and-food-displays.md](docs/features/feasts-and-food-displays.md).
+
+### Unmerged: Farmhouse Kitchen (the stove, skillet, cutting board, knives and cabinets)
+- The first slice of the kitchen and cooking expansion, in the owner's own farming and food textures, copied unchanged from their library.
+- **Kitchen Stove:** lit with flint and steel and put out with a shovel. It heats whatever stands on it (a Cooking Pot, a kettle or a Skillet). With nothing on top, its hob cooks six foods at twice a campfire's pace.
+- **Skillet:** fries up to 16 of one food on any heat source.
+- **Cutting Board** and seven **kitchen knives** (flint to netherite): cut meat, fish, cabbage, pumpkins and cakes into parts that are never worth more than the whole. Every knife, the Carving Knife too, also slices pies, cakes and the roast turkey.
+- **Kitchen cabinets** in eleven woods, and sixteen new foods.
+- The ten-slice plan for the expansion is in [docs/branches/AGRICULTURE.md](docs/branches/AGRICULTURE.md#the-kitchen-and-cooking-expansion-planned). Details: [docs/features/farmhouse-kitchen.md](docs/features/farmhouse-kitchen.md).
 
 ### Unmerged: The fall fair in Minecraft's own look
 - The owner found that nothing in the fall fair looked like Minecraft (its eyes, mouths, brass and bulbs). Every fair texture is now drawn at vanilla's density, 16 texels to a block, and scaled up to its file's size, so models and UVs are unchanged.

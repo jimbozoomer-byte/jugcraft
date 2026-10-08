@@ -137,6 +137,186 @@
       }
     ]
   },
+  "concordance.kindle_gather": {
+    "subtitle": "subtitles.jugcraft.concordance.kindle_gather",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/kindle_gather",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.kindle": {
+    "subtitle": "subtitles.jugcraft.concordance.kindle",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/kindle",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.examine": {
+    "subtitle": "subtitles.jugcraft.concordance.examine",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/examine",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.study_complete": {
+    "subtitle": "subtitles.jugcraft.concordance.study_complete",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/study_complete",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lantern_ignite": {
+    "subtitle": "subtitles.jugcraft.concordance.lantern_ignite",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lantern_ignite",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lantern_snuff": {
+    "subtitle": "subtitles.jugcraft.concordance.lantern_snuff",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lantern_snuff",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.aegis": {
+    "subtitle": "subtitles.jugcraft.concordance.aegis",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/aegis",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.revelation": {
+    "subtitle": "subtitles.jugcraft.concordance.revelation",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/revelation",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lance": {
+    "subtitle": "subtitles.jugcraft.concordance.lance",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lance",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.flash": {
+    "subtitle": "subtitles.jugcraft.concordance.flash",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/flash",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lanternward": {
+    "subtitle": "subtitles.jugcraft.concordance.lanternward",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lanternward",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.circle_start": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_start",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_start",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.circle_step": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_step",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_step",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.circle_complete": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_complete",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_complete",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.circle_break": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_break",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_break",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.crucible_stir": {
+    "subtitle": "subtitles.jugcraft.concordance.crucible_stir",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/crucible_stir",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.crucible_add": {
+    "subtitle": "subtitles.jugcraft.concordance.crucible_add",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/crucible_add",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.crucible_bottle": {
+    "subtitle": "subtitles.jugcraft.concordance.crucible_bottle",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/crucible_bottle",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.sign_shortage": {
+    "subtitle": "subtitles.jugcraft.concordance.sign_shortage",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/sign_shortage",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.sign_danger": {
+    "subtitle": "subtitles.jugcraft.concordance.sign_danger",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/sign_danger",
+        "attenuation_distance": 16
+      }
+    ]
+  },
   "guns.gun_rustle": {
     "subtitle": "subtitles.jugcraft.guns.gun_rustle",
     "sounds": [

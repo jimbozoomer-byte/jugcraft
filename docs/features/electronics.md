@@ -7,6 +7,10 @@ Owner: jimbozoomer-byte
 Target milestone and tier: the high-tech tier after oil and chemistry
 Primary specialty and supported player role: technology; the player who builds factories and automates them
 
+## Owner-requested advanced expansion (7 October 2026)
+
+The [industrial chemical catalog](industrial-chemical-catalog-and-routes.md#a-manageable-advanced-chip-line) selects a first advanced line using one sulfuric/peroxide cleaner, TMAH developer, selective HF oxide etching and one photoresist prepared from resin plus a light-sensitive additive. Wet-processing and lithography are separate connected stations; silane/deposition follows later. One general advanced chip is assembled into speed, efficiency and automation upgrades: speed raises throughput/power draw, efficiency reduces energy per batch, and first automation adds recipe priorities/stock targets before later remote/coordinated controls. A shared purifier supplies electronic-grade sulfuric acid and other demanding reagents, accounting for water conditioning within recipes rather than requiring a separately produced/stored purified-water fluid. Both installed upgrades and larger advanced machines are selected, with independent controls for the first wafer line. Exact precursors, footprints, recipes, caps/curves and costs remain open; the existing lithography route and basic-circuit entry remain available until a reachable transition is designed. These are planning additions, not new test evidence or implemented recipes.
+
 ## Plan
 
 | # | Commit | What it adds |

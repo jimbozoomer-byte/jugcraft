@@ -49,4 +49,7 @@ def build():
                  "ticks": recipe["ticks"]} for recipe in recipes]
         fluid_machines.append({"block": f"{MOD}:{block}", "type": petro.FLUID_MACHINES[block]["recipe_type"],
                                "recipes": rows})
-    return {"machines": machines, "fluid_machines": fluid_machines}
+    import concordance
+    return {"machines": machines, "fluid_machines": fluid_machines, "concordance": concordance.recipe_view(),
+            "concordance_stations": concordance.recipe_stations(),
+            "alchemy_ingredients": concordance.alchemy.recipe_ingredients()}

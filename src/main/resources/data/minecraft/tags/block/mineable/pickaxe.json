@@ -420,6 +420,9 @@
     "jugcraft:bronze_mausoleum_door",
     "jugcraft:grave_vase",
     "jugcraft:cemetery_lamp_post",
+    "jugcraft:kitchen_stove",
+    "jugcraft:skillet",
+    "jugcraft:plate",
     "jugcraft:asphalt",
     "jugcraft:asphalt_slab",
     "jugcraft:asphalt_road_line",
@@ -428,6 +431,17 @@
     "jugcraft:copper_deposit",
     "jugcraft:tin_deposit",
     "jugcraft:glass_tank",
-    "jugcraft:tank_gauge"
+    "jugcraft:tank_gauge",
+    "jugcraft:circle_anchor",
+    "jugcraft:ley_pylon",
+    "jugcraft:warding_stone",
+    "jugcraft:crucible",
+    "jugcraft:observatory",
+    "jugcraft:spirit_anchor",
+    "jugcraft:artificer_bench",
+    "jugcraft:reliquary_shrine",
+    "jugcraft:oneiric_censer",
+    "jugcraft:spire_heart",
+    "jugcraft:lumen_sconce"
   ]
 }
