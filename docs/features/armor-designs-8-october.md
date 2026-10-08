@@ -12,7 +12,7 @@ Primary specialty and supported player role: combat (defense). Everyone who wear
 ## Player experience
 Each set is worn as a 3D model on the knight armor's toolkit ([knight-armor.md](knight-armor.md)), built from the owner's pictures part for part, and has four 16 × 16 icons of its own. The pictures show the front and a little of one side; the backs are drawn in each design's own words. Preview them with `python3 tools/armor_preview.py --set <set>` (`berserker`, `paladin`, `templar`, `sentinel`, `frost_knight`, `wight_king`, `reaper`, `banana`, `scarab`).
 
-### Berserker (`tools/berserker_armor.py`)
+### Berserker (`tools/berserker_armor.py`, `art/armor/berserker.bbmodel`)
 - **Helmet:** an open-faced white cap with a rim round its foot; a lump of red on its crown, a smaller lump on that, the red spilling down over the brow in two drips; on each side a square horn standing straight up from a short foot, a narrower tip at its top and a grey band round its root; under the cap, round the jaw, a thin white frame: a post down each front corner, a bar back along each side of the jaw and a post up from its end, and the chin bar with four teeth standing up from it. The face shows, as drawn.
 - **Chestplate:** a white breastplate keyed in grey, with a red band raised on each side of it, down its front, over the shoulder and down its back; a grey hoop and a red hoop round the waist, the red parted at the middle; stepped pauldrons: a red block on a grey-and-white trim, a raised step and a crown on its outer part and a white ridge along its inner edge; white bracers on the forearms, a flange at each end and two studs on the outer side. The upper arms are bare, as drawn.
 - **Leggings:** a grey-topped red belt with a white buckle; on each leg dark grey mail under four thigh bands, white, red, white, red, each stepping further out down the thigh, the first wrapping the whole thigh up under the belt.
@@ -43,7 +43,7 @@ Reworked twice in the first session at the owner's word ("The frost night looks 
 - **Boots:** a white cuff at the knee, a white greave (its front the owner's texels) with two small frost feathers at the outer ankle, the sabaton and a toe cap.
 - The forearms aside, closed all round.
 
-### Wight King (`tools/wight_king_armor.py`)
+### Wight King (`tools/wight_king_armor.py`, `art/armor/wight_king.bbmodel`)
 The renders show the front and the left side from behind; the right is drawn from the front view, and the back of the helm plain.
 - **Helmet:** a slate helm whose face is a black skull: a raised black mask, a pale brow bar across it, a bar down the nose between the eyes, two cheek plates leaning out at their tops either side of four teeth, and a chin bar; a band round the helm's top, and in it a crown of seven icicles, slate at their feet and paler up them, the front middle one 5 pixels tall over the band, the others shorter and leaning out, two small ones behind; from the helm's top corners behind, two antlers of four bars each, turned on their edge, 16 degrees out at their feet and straighter bar by bar, slate at the foot and pale ice at the tip, 11.3 pixels above the head.
 - **Chestplate:** a slate cuirass; a raised V collar meeting at a cyan gem on the breastbone; two dark straps crossing over the belly with a boss where they cross; a back plate with a spine. On the right shoulder a pauldron with a crown on it and four jagged slate shards out of its top, pale at their tips, two lames hinged out under it; on the left a layered block, a cap on it and a narrower cap on that, a rim round its foot and one shard. Dark mail sleeves (up inside the pauldrons, so the arm never shows under them as it swings), banded vambraces, flared cuffs with a fin swept back from each, and gauntlets.
@@ -59,7 +59,7 @@ Rebuilt at the owner's word (above): 100 parts. Matched to the render again on 8
 - **Boots:** dark wrapped boots, two grey wraps round the shin, a white band round the ankle and a dark toe.
 - Closed all round: no part of the wearer shows, standing, walking or sneaking, from four views.
 
-### Banana (`tools/banana_armor.py`)
+### Banana (`tools/banana_armor.py`, `art/armor/banana.bbmodel`)
 A costume rather than plate, as the owner drew it: a player inside a tall banana.
 - **Helmet:** a tall yellow box round the head, rising 5 pixels above it, with a hole in its front for the face: built of five closed blocks round the hole (the crown above it, the chin below, a cheek either side and the back between the cheeks behind the head), so the wearer's own face shows in game; on its flat top the banana's darker end and the brown stem, its tip bent over a little.
 - **Chestplate:** the banana's middle, a yellow tube round the body as deep as the head's box, two ridges raised down its front and two down its back, its brown speckles painted. The arms are bare, as drawn.
@@ -67,7 +67,7 @@ A costume rather than plate, as the owner drew it: a player inside a tall banana
 - **Boots:** the banana's foot round each shin, darkening at its foot, and on the right the banana's brown end sticking out forward, a nub at its tip. The feet are bare, as drawn.
 - Open by design: the face, the arms and the feet (65 to 137 model px² of the wearer show, from the four views); no other part of the wearer shows.
 
-### Scarab (`tools/scarab_armor.py`)
+### Scarab (`tools/scarab_armor.py`, `art/armor/scarab.bbmodel`)
 The owner's gold-and-lapis Egyptian set, from their render of it worn (from the front, and from behind on the left) and its four icons.
 - **Helmet:** a nemes headcloth striped gold and lapis: the crown over the head, a gold brow band round its foot, the lappets falling either side of the face to below the chin, the cloth down behind the head to the neck, flaring past the crown's sides, with three lapis bands raised round it, and a gold cobra rearing on the brow. The face shows, as drawn.
 - **Chestplate:** a gold cuirass; the broad collar on the chest in three stepped rows of gold and lapis, each narrower and prouder than the one above; two lapis bands down either side of the belly with the gold plate raised between them; a lapis belt; a raised back plate; on each shoulder a square guard striped gold and lapis down to above the elbow, a lapis band raised round it and a gold band round its foot. The forearms are bare, as drawn.

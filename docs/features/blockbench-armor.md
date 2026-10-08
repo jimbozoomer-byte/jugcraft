@@ -32,6 +32,12 @@ build matched part for part but for two lames under each pauldron, which the ren
 so those were taken off. Their paint stays ours: lifting texels from their lit renders, where the figures stand
 differently, came out too noisy to keep.
 
+The rest of the owner's sets of 7 and 8 October (the **Dread Knight**, **Valkyrie**, **Wayfarer**, **Spartan**,
+**Berserker**, **Wight King**, **Banana** and **Scarab**) are Blockbench projects as they were: the owner called the
+first four "fantastic", the Berserker "ok" and the Banana and the Scarab "AWESOME", and the Wight King's render (posed,
+glowing, softened) shows nothing our build lacks clearly enough to change it. So all thirteen of the owner's sets can be
+opened, looked at on a player and edited in Blockbench, and what is saved there is what the game draws.
+
 For the owner, each rebuilt set is a Blockbench project they can open, look at on a player and edit, and what they
 save there is what the game draws.
 
@@ -118,7 +124,10 @@ saved data refers to worn-model keys.
 ## Verification
 Actually run on this branch, 8 October 2026:
 - `python3 tools/bbmodel.py check`: 20 of 20 sets round trip (15 byte for byte, 5 within rounding), both through
-  `entries` and through `load_set`.
+  `entries` and through `load_set`. The eight sets converted unchanged: their worn_models.json entries hold the same
+  quads as before (compared regardless of order), and their atlases are byte for byte the same.
+- `armor_models.py`: the quad budget counts only the faces a project's cube has texels for, and a gap of exactly
+  0.1 px read back from a project passes (1e-9 slack), as it did before the round trip.
 - `python3 tools/armor_models.py`: no problems for any set; the Sentinel 42 parts and 237 quads (it was 96 and 518),
   the Frost Knight 102 parts and 387 quads (it was 139 and 474), the Reaper 100 parts and 553 quads (it was 552), the
   Paladin 79 and 420 and the Templar 76 and 410 (they were 83 and 444, 80 and 434). Its warnings for the Frost Knight
@@ -154,7 +163,9 @@ Not applicable: art only.
 - The owner's own `.bbmodel` files would make every set exact. Committing them under `art/owner-library/` (or sending
   them) lets `tools/bbmodel.py` read them straight in; the rebuilds from renders are close but not their model.
 - Rebuilt so far: the Sentinel, the Frost Knight and the Reaper; the Paladin and the Templar made projects with one
-  change. The other sets of the 7 and 8 October designs are still the toolkit's models.
+  change; the other eight of the owner's sets made projects unchanged (their worn models come out the same quads, in
+  another order). The older sets (the knights, Bloodthorn, White Diamond, Hades, Sunset Gem, Pharaoh) stay toolkit
+  modules.
 - Lit renders: `armor_reference.py` divides what it lifts by Blockbench's shading when a fit says `"lighting":
   "blockbench"`, but where our parts and the owner's do not line up texel for texel (the Paladin's, the Templar's) the
   lifted art is noisy, and the faces no render shows, filled from the face opposite, can carry the wrong side's art.

@@ -12,26 +12,30 @@ Primary specialty and supported player role: combat (defense). Everyone who wear
 ## Player experience
 Each set is worn as a 3D model on the knight armor's toolkit ([knight-armor.md](knight-armor.md)), built from the owner's pictures part for part, and has four 16 × 16 icons of its own. The pictures show only the front (the sheet from a little above and to the left); the backs and sides are drawn in each design's own words. Preview them with `python3 tools/armor_preview.py --set <set>` (`dread_knight`, `valkyrie`, `wayfarer`, `spartan`).
 
-### Dread Knight (`tools/dread_knight_armor.py`)
+Since 8 October 2026 each of the four is a Blockbench project, `art/armor/<set>.bbmodel`, which the owner can open
+and edit; the modules read it ([blockbench-armor.md](blockbench-armor.md)). They were written from these builds
+unchanged.
+
+### Dread Knight (`tools/dread_knight_armor.py`, `art/armor/dread_knight.bbmodel`)
 - **Helmet:** a near-black great helm whose top edge is a crown of light grey merlons (a broad one over the brow and one behind, smaller ones at the corners and the middle of each side, notched dark between); on the front, 0.5 proud, a light brow band, a nasal bar with the owner's faint pink sheen, a post beside each eye and a cheek plate under it, the eye slits black between them; a framed dark window on each side.
 - **Chestplate:** a dark cuirass under a mottled grey muscle plate (the chest's two plates, the stomach's ridges, a dark line down the middle) and a banded back plate; blocky pauldrons in light and dark bands with two small spikes leaning out from each and a flared lame below; the arm banded to a flared cuff, a black band at the elbow.
 - **Leggings:** a black belt with a grey buckle; on each leg a near-black cuisse to the ankle under a skirt of upright strips riveted grey along its foot.
 - **Boots:** a light grey cuff at the knee over a banded greave and a light sabaton, longer at the toe.
 - Closed all round: no part of the wearer shows, standing, walking, sneaking or sneak-walking, from seven views.
 
-### Valkyrie (`tools/valkyrie_armor.py`)
+### Valkyrie (`tools/valkyrie_armor.py`, `art/armor/valkyrie.bbmodel`)
 - **Helmet:** no helm, as drawn: a gold laurel wreath round the head (broad leaves over the brow, swept leaves along the sides, a curled boss at each front corner) and a feathered wing rising from each temple, five feather planks fanned out to a ragged edge in white, pink and lilac, turned so their broad face looks forward and out. The face shows.
 - **Chestplate:** a white muscle cuirass, the chest and the stomach's ridges in mauve and blue-grey; brown straps over the shoulders, buckled gold; red cloth wound three times round each shoulder, its end standing out, and two red streamers hanging behind the arm past the hand; a dark red sleeve on the upper arm; a gold-banded white bracer on the forearm.
 - **Leggings:** a brown belt studded gold; on each leg a skirt of brown leather strips studded gold at their ends, its front strips white linen. The knees are bare, as drawn.
 - **Boots:** a greave round the shin, gold bands round a white band checked blue-grey, and a small feathered wing at its outer side (the owner's screenshot shows it; the sheet does not). The feet are bare, as drawn.
 
-### Wayfarer (`tools/wayfarer_armor.py`)
+### Wayfarer (`tools/wayfarer_armor.py`, `art/armor/wayfarer.bbmodel`)
 - **Helmet:** a deep hood in mottled navy and blue, 1.25 off the head, its face opening framed by a light teal brim and side rims; a lower step on its top so it rounds off. The face shows.
 - **Chestplate:** a cloak: a mantle over the shoulders, two front panels open down the middle over a dark tunic, their inner edges teal, a silver clasp with a teal heart on the left panel, a back panel to the waist, and on each arm the cloak to the elbow (the forearms bare, as drawn). It hangs longer on the right, as drawn: a tail behind each thigh, the right one to the knee, the left one short, on the legs so it follows them.
 - **Leggings:** a short kilt of dark brown leather over the thighs, a row of light studs along its hem, under a brown belt. The knees and shins are bare, as drawn.
 - **Boots:** dark brown boots from mid-shin, a lighter cuff, two pale laces on the front and a winged ankle, white and ice blue with pink tips.
 
-### Spartan (`tools/spartan_armor.py`)
+### Spartan (`tools/spartan_armor.py`, `art/armor/spartan.bbmodel`)
 - **Helmet:** a gold Corinthian helm whose face is cut in a T (a slit across the eyes, a gap down to the chin between the cheek guards), so the face shows through it; a red and orange crest from the brow over the crown, ragged with tufts, its tail falling behind the head in two locks toward the right shoulder.
 - **Chestplate:** a gold muscle cuirass; red cloth over the right shoulder and the upper arm, a sash rising across the chest toward the left of the neck and a cape down the right half of the back, its tail behind the right thigh (on the leg); on the left shoulder a gold pauldron with a bronze scroll on its outer face and a knob standing out at its foot; gold bracers. The upper arms are bare, as drawn.
 - **Leggings:** a brown belt studded gold over a skirt of brown leather strips (pteruges) studded gold at their ends. The knees are bare, as drawn.

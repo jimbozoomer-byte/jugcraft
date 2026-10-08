@@ -14,6 +14,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **The Frost Knight rebuilt to match the owner's front render:** its helm is now the owner's 9×9×9 box with their face copied texel for texel (the eye band turning up at its ends, the nose bar, the grille), crowned with their crystals as measured and coloured, a tall one rising 14 pixels; the round mane of feathers gave way to the compact frost the render shows, a big tuft flaring out on the left and spikes down the right, carrying its texels; an ice cross on the back of the helm; the legs' fronts carry the owner's texels. 102 parts where it had 139.
 - **The Reaper matched to the owner's render again:** its white V clasp sits just under the hood's opening as drawn, and its pouch is the render's big square on the left hip; the robe, its strips and the pouch carry the render's texels.
 - **The Paladin and the Templar as Blockbench projects:** the mail sleeve now shows under each pauldron, as in the owner's renders (two lames there were taken off).
+- **All thirteen of the owner's sets are Blockbench projects:** the Dread Knight, Valkyrie, Wayfarer, Spartan, Berserker, Wight King, Banana and Scarab as they were (they draw the same), alongside the five above.
 - **Matching tools:** the owner's renders are kept under `art/armor/references/`, and `tools/armor_reference.py` fits cameras to them and compares or lifts texels from them. Record: [blockbench-armor.md](docs/features/blockbench-armor.md).
 
 ### World Designer

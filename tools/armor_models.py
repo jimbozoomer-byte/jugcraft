@@ -79,6 +79,7 @@ SET_TARGET = 600
 SKIN_SHELLS = {bone: (0.0, 0.5) if bone == "head" else (0.0, 0.25) for bone in BONES}
 SKIN_GAP = 0.15
 COPLANAR_GAP = 0.1
+EPS = 1e-9          # float slack: a gap of exactly COPLANAR_GAP, read back from a Blockbench project, still passes
 VANILLA_SHELLS = {"chestplate": {"body": 0.5}, "leggings": {b: 1.0 for b in ("body", "right_leg", "left_leg")},
                   "boots": {"right_leg": 0.5, "left_leg": 0.5}}
 # Parts beyond these (body space, standing) may pop out at the screen edge (the entity's cull box): warned, not refused.
@@ -582,9 +583,17 @@ def set_quads(s):
     return out
 
 
+def _drawn_faces(part):
+    """How many faces a part draws: six less those it skips, and for a part with its own texels (from a Blockbench
+    project) only the faces it has texels for."""
+    if part.uvs:
+        return sum(1 for face in dict(part.uvs) if face not in part.skip)
+    return 6 - len(part.skip)
+
+
 def budget(s, quads=None):
     """Over-cap messages: per worn entry, per piece (by its kind) and per set."""
-    quads = quads if quads is not None else {f"{i}_{b}": [None] * sum(6 - len(p.skip) for p in ps)
+    quads = quads if quads is not None else {f"{i}_{b}": [None] * sum(_drawn_faces(p) for p in ps)
                                               for i, bs in s.pieces.items() for b, ps in bs.items()}
     out = []
     for key, qs in quads.items():
@@ -815,7 +824,7 @@ def problems(s):
                 if a.part is b.part or abs(facing) < 1 - 1e-5:
                     continue
                 gap = abs(_dot(a.n, b.pts[0]) - a.d)
-                if gap >= COPLANAR_GAP:
+                if gap >= COPLANAR_GAP - EPS:
                     continue
                 pb = [(_dot(p, a.basis[0]), _dot(p, a.basis[1])) for p in b.pts]
                 if not _overlap(a.poly, pb):
@@ -852,7 +861,7 @@ def problems(s):
                 continue
             if not (a.bone in still and b.bone in still) and not (a.flat and a.axis == 2):
                 continue
-            if abs(_dot(a.n, b.pts[0]) - a.d) >= COPLANAR_GAP:
+            if abs(_dot(a.n, b.pts[0]) - a.d) >= COPLANAR_GAP - EPS:
                 continue
             if _overlap(a.poly, [(_dot(p, a.basis[0]), _dot(p, a.basis[1])) for p in b.pts]):
                 hint = (f" (stop the right leg's at x <= 1.8 or move one out {COPLANAR_GAP} px)"
