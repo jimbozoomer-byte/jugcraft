@@ -2,7 +2,7 @@
 
 Owner-requested on 7 October 2026, implemented by OpenAI Codex (GPT-6) on `peepo-companion` from `bb2974a0`. Extends the existing planner, ghost recipe slots and [Supply/Output transport](companion-jobs.md#supply-and-output). No new recipes, dependency, assets or progression gates.
 
-The current GUI uses the [nine-output Filter editor](companion-kitchen-filters.md): the Work row's F button opens a 3×3 grid, with tooltip **Filter**. Multiple outputs are allowed; an empty grid retains Auto. The earlier single-slot instructions below are superseded by that editor.
+The current GUI uses the [nine-output Filter editor](companion-kitchen-filters.md): the Work row's F button opens a 3Ã—3 grid, with tooltip **Filter**. Multiple outputs are allowed; an empty grid retains Auto. The earlier single-slot instructions below are superseded by that editor.
 
 ## Setup
 

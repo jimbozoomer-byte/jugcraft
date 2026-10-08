@@ -32,7 +32,12 @@ public final class CompanionSeats {
         return true;
     }
     static boolean externalAvailable(PeepoEntity npc,BlockPos pos){return !isReserved(npc.level(),pos) || CLAIMS.get(npc.level()).get(pos).npc.equals(npc.getUUID());}
-    static void reserveExternal(PeepoEntity npc,BlockPos pos,int ticks){CLAIMS.computeIfAbsent(npc.level(),l->new HashMap<>()).put(pos,new Claim(npc.getUUID(),npc.level().getGameTime()+ticks));}
+    static void reserveExternal(PeepoEntity npc,BlockPos pos,int ticks){
+        var claims=CLAIMS.computeIfAbsent(npc.level(),l->new HashMap<>());var current=claims.get(pos);
+        long now=npc.level().getGameTime();
+        if(current==null || !current.npc.equals(npc.getUUID()) || current.expires-now<ticks/2)
+            claims.put(pos.immutable(),new Claim(npc.getUUID(),now+ticks));
+    }
     static void releaseExternal(PeepoEntity npc,BlockPos pos){var map=CLAIMS.get(npc.level());if(map!=null && map.containsKey(pos) && map.get(pos).npc.equals(npc.getUUID()))map.remove(pos);}
     private static boolean fence(BlockState state) { return state.getBlock() instanceof FenceBlock || state.is(BlockTags.FENCES); }
     private static boolean connected(BlockState state,int dx,int dz) {
@@ -186,7 +191,7 @@ public final class CompanionSeats {
             if(!npc.setRestMode(CompanionEnergy.Rest.SITTING))return false;
             mounted=true;npc.setNoGravity(true);npc.setBedExit(BlockPos.containing(entrance()));
             Vec3 at=seatPosition();float yaw=rail()?(float)Math.toDegrees(Math.atan2(-normal.x,normal.z)):facing.toYRot();
-            npc.snapTo(at.x,at.y,at.z,yaw,0);npc.yBodyRot=yaw;npc.setYHeadRot(yaw);npc.setDeltaMovement(Vec3.ZERO);npc.resetFallDistance();npc.getNavigation().stop();return true;
+            CompanionMotion.position(npc,at,yaw);npc.setDeltaMovement(Vec3.ZERO);npc.resetFallDistance();npc.getNavigation().stop();return true;
         }
         public void release(PeepoEntity npc) {
             var claims=CLAIMS.get(level);var claim=claims==null?null:claims.get(pos);

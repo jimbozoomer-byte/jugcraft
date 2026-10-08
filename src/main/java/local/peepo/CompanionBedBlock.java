@@ -44,6 +44,7 @@ public final class CompanionBedBlock extends BaseEntityBlock {
         return matching(below, state.getValue(FACING)) || below.isFaceSturdy(level, pos.below(), Direction.UP);
     }
     @Override protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighbor, RandomSource random) {
+        if(level.getBlockEntity(pos) instanceof CompanionBedEntity bed)bed.invalidateSpace();
         if (!state.canSurvive(level, pos)) return Blocks.AIR.defaultBlockState();
         return state.setValue(STACKED, matching(level.getBlockState(pos.above()), state.getValue(FACING)));
     }

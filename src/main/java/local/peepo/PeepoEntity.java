@@ -28,10 +28,10 @@ public final class PeepoEntity extends PathfinderMob {
     void syncAssignments(String value){if(!level().isClientSide())entityData.set(ASSIGNMENTS,value);}
     private static final EntityDataAccessor<Boolean> BLUSHING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> PUMPKIN = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Integer> EATING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Long> EATING_END = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.LONG);
     private static final EntityDataAccessor<Integer> ENERGY = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> FOOD_BONUS = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> FOOD_TIME = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Long> FOOD_END = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.LONG);
     private static final EntityDataAccessor<Integer> REST = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> WHEEL_RUNNING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> RECOVERING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
@@ -68,6 +68,7 @@ public final class PeepoEntity extends PathfinderMob {
     };
     private void syncBelongings(){
         if(level().isClientSide())return;
+        readiness.clear();
         entityData.set(PUMPKIN,belongings.getItem(8).is(Items.JACK_O_LANTERN));
         if(!isEating())setItemSlot(EquipmentSlot.MAINHAND,belongings.getItem(9).copy());
     }
@@ -81,6 +82,8 @@ public final class PeepoEntity extends PathfinderMob {
         }
     }
     private CompanionRoutine routine;
+    public final CompanionReadiness readiness=new CompanionReadiness(this);
+    final CompanionNavigation navigationMemory=new CompanionNavigation();
     public CompanionTransport transport;
     public final CompanionPreferences preferences=new CompanionPreferences(this);
     public final CompanionReport report=new CompanionReport(this);
@@ -101,23 +104,26 @@ public final class PeepoEntity extends PathfinderMob {
         getNavigation().stop();setSpeed(0);
         var movement=getDeltaMovement();setDeltaMovement(0,movement.y,0);
     }
-    public void resetCompanionRoutine(){if(routine!=null)routine.resetOrders();}
+    public void resetCompanionRoutine(){readiness.clear();if(routine!=null)routine.resetOrders();}
     private boolean companionUnloading;
     boolean isCompanionUnloading(){return companionUnloading;}
     /** Tracking callbacks cannot move an entity between sections while its old section is being removed. */
     void unloadCompanionRoutine(){
         companionUnloading=true;
-        try{social.cancel();resetCompanionRoutine();}finally{settingsMenus.clear();companionUnloading=false;}
+        try{social.cancel();resetCompanionRoutine();}finally{settingsMenus.clear();navigationMemory.clear();companionUnloading=false;}
     }
     boolean isUsingJobAt(net.minecraft.core.BlockPos pos){return routine!=null && routine.atJob(pos);}
     CompanionStatus routineStatus(){return routine==null?CompanionStatus.IDLE:routine.state();}
     CompanionStatus stationStatus(net.minecraft.core.BlockPos pos){return routine==null?null:routine.status(pos);}
     private net.minecraft.core.BlockPos bedExit;
-    public void setBedExit(net.minecraft.core.BlockPos pos) { bedExit = pos; }
+    private long nextBedExit;
+    public void setBedExit(net.minecraft.core.BlockPos pos) { if(!java.util.Objects.equals(bedExit,pos))nextBedExit=0;bedExit = pos; }
     /** Also used after reload, so a companion never becomes stranded in an upper bunk. */
     public void leaveCompanionBed() {
-        if (bedExit == null || level().isClientSide() || companionUnloading) return;
+        if (bedExit == null || level().isClientSide() || companionUnloading || level().getGameTime()<nextBedExit) return;
+        nextBedExit=level().getGameTime()+20;
         for (int radius = 0; radius <= 2; radius++) for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
+            if(radius>0 && Math.max(Math.abs(dx),Math.abs(dz))!=radius)continue;
             var pos = bedExit.offset(dx, 0, dz);
             if (!level().hasChunkAt(pos)) continue;
             var at = net.minecraft.world.phys.Vec3.atBottomCenterOf(pos);
@@ -150,11 +156,21 @@ public final class PeepoEntity extends PathfinderMob {
         if(active)getNavigation().stop();
     }
     private final CompanionEnergy energyStore = new CompanionEnergy(this);
-    public int getEnergy() { return entityData.get(ENERGY); }
+    private int storedEnergy=CompanionEnergy.CAPACITY,foodTicks,eatingTicks;
+    private long nextEnergySync;
+    public int getEnergy() { return level().isClientSide()?entityData.get(ENERGY):storedEnergy; }
     public int getEnergyCapacity() { return CompanionEnergy.CAPACITY; }
-    void setStoredEnergy(int value) { entityData.set(ENERGY,Math.clamp(value,0,CompanionEnergy.CAPACITY)); }
+    void setStoredEnergy(int value) { storedEnergy=Math.clamp(value,0,CompanionEnergy.CAPACITY); }
     public int getFoodRegenBonus() { return entityData.get(FOOD_BONUS); }
-    public int getFoodRegenTicks() { return entityData.get(FOOD_TIME); }
+    public int getFoodRegenTicks() { return level().isClientSide()?(int)Math.clamp(entityData.get(FOOD_END)-level().getGameTime(),0,3800):foodTicks; }
+    private void setFoodTicks(int ticks){foodTicks=ticks;entityData.set(FOOD_END,ticks==0?0L:level().getGameTime()+ticks);}
+    private void setEatingTicks(int ticks){eatingTicks=ticks;entityData.set(EATING_END,ticks==0?0L:level().getGameTime()+ticks);}
+    private void syncEnergy(){
+        long now=level().getGameTime();
+        if(now>=nextEnergySync || storedEnergy==0 || storedEnergy==CompanionEnergy.CAPACITY){
+            entityData.set(ENERGY,storedEnergy);nextEnergySync=now+10;
+        }
+    }
     public CompanionEnergy.Rest getRestMode() { return CompanionEnergy.Rest.values()[entityData.get(REST)]; }
     public int extractEnergy(int requested, net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext transaction) {
         return energyStore.extract(requested,transaction);
@@ -187,15 +203,15 @@ public final class PeepoEntity extends PathfinderMob {
         setStoredEnergy(getEnergy()+getEnergyRegenPerTick());
         updateRecoveryState();
         if(getFoodRegenTicks()>0) {
-            entityData.set(FOOD_TIME,getFoodRegenTicks()-1);
-            if(getFoodRegenTicks()==0)entityData.set(FOOD_BONUS,0);
+            if(--foodTicks==0){setFoodTicks(0);entityData.set(FOOD_BONUS,0);}
         }
+        syncEnergy();
     }
     private void applyMealEnergy(net.minecraft.world.food.FoodProperties food) {
         var meal=CompanionEnergy.meal(food);
         // A weak snack cannot extend a stronger meal; equal/better meals refresh, never stack.
         if(meal.bonusPerTick()>=getFoodRegenBonus() || getFoodRegenTicks()==0) {
-            entityData.set(FOOD_BONUS,meal.bonusPerTick());entityData.set(FOOD_TIME,meal.durationTicks());
+            entityData.set(FOOD_BONUS,meal.bonusPerTick());setFoodTicks(meal.durationTicks());
         }
     }
     public static final int EAT_DURATION = 40;
@@ -211,8 +227,8 @@ public final class PeepoEntity extends PathfinderMob {
     }
     private long nextGreeting;
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);builder.define(ASSIGNMENTS,"[]"); builder.define(BLUSHING, false); builder.define(PUMPKIN, false); builder.define(EATING,0);
-        builder.define(ENERGY,CompanionEnergy.CAPACITY);builder.define(FOOD_BONUS,0);builder.define(FOOD_TIME,0);builder.define(REST,0);
+        super.defineSynchedData(builder);builder.define(ASSIGNMENTS,"[]"); builder.define(BLUSHING, false); builder.define(PUMPKIN, false); builder.define(EATING_END,0L);
+        builder.define(ENERGY,CompanionEnergy.CAPACITY);builder.define(FOOD_BONUS,0);builder.define(FOOD_END,0L);builder.define(REST,0);
         builder.define(WHEEL_RUNNING,false);builder.define(SOCIAL_POSE,0);builder.define(SOCIAL_STARTED,0L);
         builder.define(RECOVERING,false);
         builder.define(WORK_ANIMATION,0);builder.define(WORK_TARGET,net.minecraft.core.BlockPos.ZERO);
@@ -233,9 +249,10 @@ public final class PeepoEntity extends PathfinderMob {
         super.readAdditionalSaveData(input); orders.load(input);assignments.load(input);preferences.load(input);food.load(input); entityData.set(PUMPKIN,input.getBooleanOr("PumpkinCostume",false));
         naturallySpawned = input.getBooleanOr("NaturallySpawned", false);
         setStoredEnergy(input.getIntOr("Energy",CompanionEnergy.CAPACITY));
+        entityData.set(ENERGY,storedEnergy);nextEnergySync=0;
         entityData.set(RECOVERING,input.getBooleanOr("Recovering",false));updateRecoveryState();
         int foodTicks=Math.clamp(input.getIntOr("FoodRegenTicks",0),0,3800);
-        entityData.set(FOOD_TIME,foodTicks);
+        setFoodTicks(foodTicks);
         entityData.set(FOOD_BONUS,foodTicks>0 ? Math.clamp(input.getIntOr("FoodRegenBonus",0),0,32) : 0);
         // Furniture must re-establish a valid seat/bed after loading, never leave a phantom rest state.
         entityData.set(REST,0);
@@ -243,7 +260,7 @@ public final class PeepoEntity extends PathfinderMob {
         if (bedExit != null) setNoGravity(false);
         lunchOrigin=input.read("LunchOrigin",net.minecraft.core.GlobalPos.CODEC).orElse(null);
         int remaining=Math.clamp(input.getIntOr("EatingTicks",0),0,EAT_DURATION);
-        entityData.set(EATING,isEdible(getMainHandItem()) ? remaining : 0);
+        setEatingTicks(isEdible(getMainHandItem()) ? remaining : 0);
         belongings.getItems().replaceAll(stack->ItemStack.EMPTY);
         var saved=input.child("Belongings");
         if(saved.isPresent())net.minecraft.world.ContainerHelper.loadAllItems(saved.get(),belongings.getItems());
@@ -272,7 +289,7 @@ public final class PeepoEntity extends PathfinderMob {
         if (!level().isClientSide() && blushTicks > 0 && --blushTicks == 0) entityData.set(BLUSHING, false);
         if (level() instanceof ServerLevel server && isEating()) {
             getNavigation().stop();
-            if (!isEdible(getMainHandItem())) { entityData.set(EATING,0); lunchOrigin=null;syncBelongings();return; }
+            if (!isEdible(getMainHandItem())) { setEatingTicks(0); lunchOrigin=null;syncBelongings();return; }
             int remaining=getEatingTicks();
             if (remaining%8==0) {
                 double angle=Math.toRadians(yBodyRot);
@@ -281,7 +298,8 @@ public final class PeepoEntity extends PathfinderMob {
                     getX()-Math.sin(angle)*reach,getY()+.42,getZ()+Math.cos(angle)*reach,5,.04,.035,.04,.025);
                 playSound(SoundEvents.GENERIC_EAT.value(),.45F,.95F+random.nextFloat()*.2F);
             }
-            entityData.set(EATING,remaining-1);
+            eatingTicks=remaining-1;
+            if(eatingTicks==0)setEatingTicks(0);
             if (remaining==1) {
                 var eaten=getMainHandItem();
                 var food=eaten.get(DataComponents.FOOD);
@@ -378,7 +396,7 @@ public final class PeepoEntity extends PathfinderMob {
     /** Let an existing meal digest instead of eating every loose item while the reserve fills. */
     public boolean needsAutomaticFood() { return needsFood() && (getHealth()<getMaxHealth() || getFoodRegenTicks()==0); }
     public boolean isEating() { return getEatingTicks()>0; }
-    public int getEatingTicks() { return entityData.get(EATING); }
+    public int getEatingTicks() { return level().isClientSide()?(int)Math.clamp(entityData.get(EATING_END)-level().getGameTime(),0,EAT_DURATION):eatingTicks; }
     void beginLunchMeal(ItemStack stack,net.minecraft.core.GlobalPos source){beginEating(stack);lunchOrigin=source;}
     private void beginEating(ItemStack stack) {
         resetCompanionRoutine();leaveCompanionBed();
@@ -387,7 +405,7 @@ public final class PeepoEntity extends PathfinderMob {
         setRestMode(CompanionEnergy.Rest.NONE);
         setItemSlot(EquipmentSlot.MAINHAND,stack);
         setGuaranteedDrop(EquipmentSlot.MAINHAND);
-        entityData.set(EATING,EAT_DURATION);
+        setEatingTicks(EAT_DURATION);
         getNavigation().stop();
     }
     private final class SettingsPauseGoal extends Goal {
@@ -420,7 +438,8 @@ public final class PeepoEntity extends PathfinderMob {
     }
     private final class FindFoodGoal extends Goal {
         private ItemEntity target;
-        private int repath,elapsed;
+        private int elapsed;
+        private final CompanionNavigation.Progress travel=new CompanionNavigation.Progress();
         private long nextSearch;
         FindFoodGoal() { setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK)); }
         private boolean valid(ItemEntity item) {
@@ -436,13 +455,17 @@ public final class PeepoEntity extends PathfinderMob {
             return target!=null;
         }
         @Override public boolean canContinueToUse() { return needsAutomaticFood() && !isEating() && valid(target) && elapsed<200; }
-        @Override public void start() { repath=0;elapsed=0; }
+        @Override public void start() { travel.reset();elapsed=0; }
         @Override public void stop() { target=null;getNavigation().stop();nextSearch=level().getGameTime()+20; }
         @Override public void tick() {
             elapsed++;
             if (!valid(target)) return;
             getLookControl().setLookAt(target,20,30);
-            if (--repath<=0 && CompanionBudget.path(PeepoEntity.this)) { repath=40;getNavigation().moveTo(getNavigation().createPath(target,0),1.15); }
+            if (travel.needsPath(PeepoEntity.this,target.position()) && CompanionBudget.path(PeepoEntity.this)) {
+                getNavigation().stop();
+                var path=getNavigation().createPath(target,0);getNavigation().moveTo(path,1.15);travel.started(PeepoEntity.this,target.position());
+                if(path==null || !path.canReach())travel.failed(PeepoEntity.this);
+            }
             if (distanceToSqr(target)<.64 && getSensing().hasLineOfSight(target)) {
                 var food=target.getItem();
                 beginEating(food.copyWithCount(1));

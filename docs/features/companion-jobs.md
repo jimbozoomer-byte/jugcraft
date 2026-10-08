@@ -4,6 +4,8 @@ Owner-directed stages 1-4 of the companion roadmap, implemented locally with Ope
 
 ## Player use
 
+Planning caches, paced client updates, rest checks and path reuse are documented in [companion performance](companion-performance.md).
+
 - Shift-right-click your Peepo or Jughead to open its inventory. The Jobs panel retains home, four ordered workstations and their remove/priority buttons. It now includes a separate Lunch row.
 - The companion pauses walking and work while an authorized player has its settings/inventory menu open. It releases its current station safely and waits in place, then resumes its current commands after the last viewer closes the menu. Editing never silently changes Follow/Home/Work to Stay. Multiple viewers share the pause; menu replacement, invalid access/range, death, disconnect and unload cannot leave a saved pause behind. Carried deliveries remain real cargo and resume through the existing transport lifecycle.
 - Select the companion with the Companion Planner, then right-click a lunch crate or the actual lunch cover block to assign its food source. Left-click with the planner, or use the Lunch row's x, to clear it. A lunch source does not consume a workstation slot. Existing loaded/dimension/reach and owner/party checks remain.

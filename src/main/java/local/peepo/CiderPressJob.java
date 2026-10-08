@@ -21,6 +21,7 @@ public final class CiderPressJob implements CompanionJob {
             nextSpace=now+20;checkedHeight=npc.getBbHeight();entrance=null;
             for(var side:Direction.Plane.HORIZONTAL)for(int dy=0;dy>=-1;dy--){
                 var p=Vec3.atBottomCenterOf(stationPosition().relative(side).offset(0,dy,0));
+                if(npc.navigationMemory.failed(npc,stationPosition(),p))continue;
                 var floor=BlockPos.containing(p).below();
                 if(!npc.level().hasChunkAt(floor) || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP))continue;
                 if(!npc.level().noCollision(new AABB(p.x-.24,p.y,p.z-.24,p.x+.24,p.y+npc.getBbHeight(),p.z+.24)))continue;
@@ -33,11 +34,14 @@ public final class CiderPressJob implements CompanionJob {
     private void expire(){if(worker!=null && (press.isRemoved() || occupant()==null || !occupant().isAlive() || press.getLevel().getGameTime()>lease))removed();}
     public void removed(){var p=occupant();if(p!=null)p.setWorkAnimation(WorkAnimation.NONE,stationPosition());worker=null;nextSpace=0;}
     public Kind kind(){return Kind.WORK;}
+    public void approachFailed(PeepoEntity npc){nextSpace=nextClearance=0;entrance=null;}
     public BlockPos stationPosition(){return press.getBlockPos();}
     public Vec3 approachPosition(){return entrance==null?Vec3.atBottomCenterOf(stationPosition()):entrance;}
     public boolean availableTo(PeepoEntity p){expire();return !press.isRemoved() && (worker==null || worker.equals(p.getUUID()));}
     public boolean isOccupant(PeepoEntity p){return worker!=null && worker.equals(p.getUUID()) && entrance!=null && p.position().distanceToSqr(entrance)<.64;}
-    public CompanionStatus workStatus(PeepoEntity p){
+    public CompanionStatus workStatus(PeepoEntity p){return status(p,false);}
+    public CompanionStatus planningFacts(PeepoEntity p){return status(p,true);}
+    private CompanionStatus status(PeepoEntity p,boolean planning){
         if(!availableTo(p))return CompanionStatus.OCCUPIED;
         if(!p.orders.tamed() || !p.assignments.assignedWork(stationPosition()) || !CompanionJobs.permitted(p,stationPosition()))return CompanionStatus.FORBIDDEN;
         if(entrance==null)return CompanionStatus.BLOCKED;
@@ -47,7 +51,7 @@ public final class CiderPressJob implements CompanionJob {
             if(!p.level().hasChunkAt(floor) || !p.level().getBlockState(floor).isFaceSturdy(p.level(),floor,Direction.UP)
                 || !p.level().noCollision(new AABB(entrance.x-.24,entrance.y,entrance.z-.24,entrance.x+.24,entrance.y+p.getBbHeight(),entrance.z+.24))){entrance=null;nextSpace=0;return CompanionStatus.BLOCKED;}
         }
-        return press.companionStatus();
+        return planning?CompanionReadiness.shared(press,press::companionStatus):press.companionStatus();
     }
     public boolean claim(PeepoEntity p){if(workStatus(p)!=CompanionStatus.READY)return false;worker=p.getUUID();lease=p.level().getGameTime()+100;return true;}
     public boolean occupy(PeepoEntity p){

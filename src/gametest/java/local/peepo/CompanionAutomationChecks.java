@@ -184,7 +184,8 @@ final class CompanionAutomationChecks {
         var out=TagValueOutput.createWithContext(ProblemReporter.DISCARDING,l.registryAccess());m.companionPort.save(out);
         var restored=new MachineCompanionPort(m);restored.load(TagValueInput.create(ProblemReporter.DISCARDING,l.registryAccess(),out.buildResult()));
         check(restored.plan().equals(plan.id()),"machine recipe persisted");
-        check(m.companionPort.select(ItemStack.EMPTY) && !m.companionPort.locked(),"clear ghost restores automatic recipe");
+        for(int i=0;i<9;i++)m.companionPort.filter().set(i,ItemStack.EMPTY);
+        check(m.companionPort.select(ItemStack.EMPTY) && !m.companionPort.locked(),"clear filter restores automatic recipe");
         check(!m.companionPort.select(new ItemStack(Items.DIAMOND_SWORD)),"invalid ghost rejected");
     }
     private void cider(ServerLevel l){
@@ -340,7 +341,7 @@ final class CompanionAutomationChecks {
         });
         context.waitForScreen(local.peepo.client.CompanionScreen.class);serverTicks(server,25);
         server.runOnServer(s->{var player=s.getPlayerList().getPlayers().getFirst();check(player.containerMenu instanceof CompanionMenu menu && menu.editing(helper[0]),"settings still open and valid");check(helper[0].position().distanceToSqr(position[0])<.01 && helper[0].getNavigation().isDone(),"settings keeps companion still: "+position[0]+" -> "+helper[0].position());});
-        recipePacket(context,server,47,JugcraftAgriculture.item(PieFilling.values()[0].rawPie()),()->oven[0].selectedPie()!=null);
+        recipePacket(context,server,47,JugcraftAgriculture.item(PieFilling.values()[0].rawPie()),()->!oven[0].filter().empty());
         recipePacket(context,server,48,Items.IRON_INGOT,()->processor[0].companionPort.locked());
         context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,50));
         server.waitFor(s->helper[0].assignments.transportMode(1,true)==1,100);serverTicks(server,3);
@@ -354,7 +355,10 @@ final class CompanionAutomationChecks {
         server.waitFor(s->helper[0].position().distanceToSqr(position[0])>.25,150);
         server.runOnServer(s->cleanup());
     }
-    private void recipePacket(ClientGameTestContext context,TestServerContext server,int slot,Item icon,java.util.function.BooleanSupplier selected){
+    private void recipePacket(ClientGameTestContext context,TestServerContext server,int legacySlot,Item icon,java.util.function.BooleanSupplier selected){
+        int slot=CompanionMenu.FILTER_START;
+        context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,60+legacySlot-46));
+        context.waitFor(c->c.player.containerMenu instanceof CompanionMenu m && m.filterRow()==legacySlot-46,100);
         server.runOnServer(s->s.getPlayerList().getPlayers().getFirst().getInventory().setItem(9,new ItemStack(icon,3)));
         context.waitFor(c->c.player.containerMenu.getSlot(10).getItem().is(icon),100);
         context.runOnClient(c->c.gameMode.handleContainerInput(c.player.containerMenu.containerId,10,0,net.minecraft.world.inventory.ContainerInput.PICKUP,c.player));
@@ -373,6 +377,8 @@ final class CompanionAutomationChecks {
         context.waitFor(c->c.player.containerMenu.getCarried().isEmpty() && c.player.containerMenu.getSlot(10).getItem().getCount()==3,100);
         // Client pickup prediction is immediate; finish its server packet before replacing this fixture slot.
         server.waitFor(s->{var p=s.getPlayerList().getPlayers().getFirst();return p.containerMenu.getCarried().isEmpty() && p.getInventory().getItem(9).is(icon) && p.getInventory().getItem(9).getCount()==3;},100);
+        context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,64));
+        context.waitFor(c->c.player.containerMenu instanceof CompanionMenu m && m.filterRow()<0,100);
     }
     private void kitchen(TestServerContext server,String kind){
         final Container[] destination={null};final PeepoEntity[] helper={null};final Item[] product={null};

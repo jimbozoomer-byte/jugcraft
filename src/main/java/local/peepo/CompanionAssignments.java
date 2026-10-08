@@ -176,7 +176,7 @@ public final class CompanionAssignments {
         return 5;
     }
     boolean gardenContains(BlockPos pos){for(int i=1;i<5;i++)if(targets[i]!=null && targets[i].local(npc.level()) && targets[i].plot.contains(pos))return true;return false;}
-    private void changed(){npc.syncAssignments(encode());}
+    private void changed(){npc.readiness.clear();npc.syncAssignments(encode());}
     public List<BlockPos> loadedStations(){
         var result=new ArrayList<BlockPos>(5);
         for(int i=0;i<5;i++){var t=targets[i];if(t!=null && t.present(npc.level()))result.add(t.at.pos());}
@@ -189,7 +189,7 @@ public final class CompanionAssignments {
         for(int i=1;i<5;i++){
             var t=targets[i];if(t==null || !t.present(npc.level()))continue;
             var job=CompanionJobs.resolve(npc,t.at.pos());
-            if(job==null || !CompanionJobs.permitted(npc,t.at.pos()) || job.workStatus(npc)!=CompanionStatus.READY || !npc.isUsingJobAt(t.at.pos()) && !job.worthStarting(npc))continue;
+            if(job==null || !CompanionJobs.permitted(npc,t.at.pos()) || job.planningStatus(npc)!=CompanionStatus.READY || !npc.isUsingJobAt(t.at.pos()) && !job.worthStarting(npc))continue;
             return job.approachPosition();
         }
         return null;

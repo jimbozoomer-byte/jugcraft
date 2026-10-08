@@ -14,19 +14,27 @@ public final class CompanionBedEntity extends BlockEntity implements CompanionSt
     private long lease;
     private boolean mounted;
     private Vec3 exit;
+    private Vec3 cachedEntrance;
+    private long nextEntrance,nextClearance;
+    private boolean clearance;
+    void invalidateSpace(){cachedEntrance=null;nextEntrance=nextClearance=0;}
     public CompanionBedEntity(BlockPos pos, BlockState state) { super(CompanionBeds.ENTITY, pos, state); }
     private Direction facing() { return getBlockState().getValue(CompanionBedBlock.FACING); }
     private PeepoEntity npc() { return level instanceof ServerLevel s && occupant != null && s.getEntity(occupant) instanceof PeepoEntity p ? p : null; }
     public Vec3 entrance() {
+        if(cachedEntrance!=null && level.getGameTime()<nextEntrance)return cachedEntrance;
         BlockPos bottom = worldPosition;
         while (bottom.getY() > level.getMinY() && CompanionBedBlock.matching(level.getBlockState(bottom.below()), facing())) bottom = bottom.below();
-        return Vec3.atBottomCenterOf(bottom.relative(facing().getOpposite()));
+        nextEntrance=level.getGameTime()+20;
+        return cachedEntrance=Vec3.atBottomCenterOf(bottom.relative(facing().getOpposite()));
     }
     private Vec3 pillow() { return new Vec3(worldPosition.getX() + .5, worldPosition.getY() + .375, worldPosition.getZ() + .5); }
     private boolean clearEntrance() {
+        if(level.getGameTime()<nextClearance)return clearance;
+        nextClearance=level.getGameTime()+20;
         Vec3 entry = entrance();
         BlockPos floor = BlockPos.containing(entry).below();
-        return level.getBlockState(floor).isFaceSturdy(level, floor, Direction.UP)
+        return clearance=level.hasChunkAt(floor) && level.getBlockState(floor).isFaceSturdy(level, floor, Direction.UP)
             && level.noCollision(new AABB(entry.x - .22, entry.y, entry.z - .22, entry.x + .22, worldPosition.getY() + 1.35, entry.z + .22));
     }
     private void expire() {
@@ -42,14 +50,16 @@ public final class CompanionBedEntity extends BlockEntity implements CompanionSt
         return !CompanionSeats.isReserved(level, worldPosition) && !isRemoved() && p.isRestNight() && (occupant == null || occupant.equals(p.getUUID())) && clearEntrance();
     }
     @Override public boolean claim(PeepoEntity p) {
+        if(!mounted)nextClearance=0;
         if (!availableTo(p)) return false;
         occupant = p.getUUID(); lease = level.getGameTime() + 240; exit = entrance(); return true;
     }
     @Override public boolean occupy(PeepoEntity p) {
+        if(!mounted)nextClearance=0;
         if (!availableTo(p) || occupant == null || !p.setRestMode(CompanionEnergy.Rest.SLEEPING)) return false;
         mounted = true; lease = level.getGameTime() + 20;
         Vec3 at = pillow(); float yaw = facing().getOpposite().toYRot();
-        p.snapTo(at.x, at.y, at.z, yaw, 0); p.yBodyRot = yaw; p.setYHeadRot(yaw);
+        CompanionMotion.position(p,at,yaw);
         p.setDeltaMovement(Vec3.ZERO); p.resetFallDistance(); p.getNavigation().stop();
         p.setBedExit(BlockPos.containing(exit));
         return true;

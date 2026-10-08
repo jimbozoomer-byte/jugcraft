@@ -22,6 +22,7 @@ public final class CompanionTransport extends Goal {
     private int cargoSlot=-1;
     private boolean supply,returning,active,porter;
     private Vec3 approach,lastPosition;
+    private final CompanionNavigation.Progress travel=new CompanionNavigation.Progress();
     private long nextSearch,deadline,nextPath;
     private long nextValidity;
     private boolean validRoute;
@@ -187,7 +188,7 @@ public final class CompanionTransport extends Goal {
     @Override public boolean requiresUpdateEveryTick(){return true;}
     @Override public void start(){
         active=true;npc.resetCompanionRoutine();npc.leaveCompanionBed();npc.setRestMode(CompanionEnergy.Rest.NONE);
-        deadline=npc.level().getGameTime()+600;nextPath=nextValidity=0;approach=null;lastPosition=npc.position();
+        deadline=npc.level().getGameTime()+600;nextPath=nextValidity=0;approach=null;travel.reset();lastPosition=npc.position();
     }
     @Override public void stop(){active=false;clearPiePose();npc.getNavigation().stop();approach=null;if(npc.level().getGameTime()>=deadline)nextSearch=npc.level().getGameTime()+200;if(manifest.isEmpty())forget();}
     private CompanionAssignments.Target destination(){return manifest.isEmpty()?(supply?store:workstation):supply && !returning?workstation:store;}
@@ -224,19 +225,26 @@ public final class CompanionTransport extends Goal {
             double r=npc.getBbWidth()/2+.01;
             if(npc.level().noCollision(new AABB(p.x-r,p.y,p.z-r,p.x+r,p.y+npc.getBbHeight(),p.z+r)))points.add(pos);
         }
+        points.removeIf(p->npc.navigationMemory.failed(npc,target.at().pos(),Vec3.atBottomCenterOf(p)));
         points.sort(Comparator.comparingDouble(p->p.distToCenterSqr(npc.position())));
         // Explicit 64-block range; the multi-target overload uses the mob's shorter follow range.
         net.minecraft.world.level.pathfinder.Path path=null;
         for(int i=0;i<Math.min(2,points.size());i++){
             if(!CompanionBudget.path(npc)){status=CompanionStatus.WAITING;return;}
-            path=npc.getNavigation().createPath(points.get(i),0,64);
+            npc.getNavigation().stop();
+            var point=points.get(i);
+            path=npc.getNavigation().createPath(point,0,64);
             if(path!=null && path.canReach())break;
+            npc.navigationMemory.reject(npc,target.at().pos(),Vec3.atBottomCenterOf(point));
         }
         nextPath=npc.level().getGameTime()+40;
-        if(path==null || !path.canReach()){fail(CompanionStatus.BLOCKED);return;}
+        if(path==null || !path.canReach()){
+            if(points.size()>2){nextPath=npc.level().getGameTime()+20;return;}
+            fail(CompanionStatus.BLOCKED);return;
+        }
         approach=Vec3.atBottomCenterOf(path.getTarget());
         if(oven){var facing=targetState.getValue(HearthOvenBlock.FACING);approach=approach.add(-facing.getStepX()*.24,0,-facing.getStepZ()*.24);}
-        npc.getNavigation().moveTo(path,1);
+        npc.getNavigation().moveTo(path,1);travel.started(npc,approach);
     }
     @Override public void tick(){
         if(!allowed() || !travelValid()){fail(CompanionStatus.FORBIDDEN);return;}
@@ -261,7 +269,7 @@ public final class CompanionTransport extends Goal {
         var target=destination();
         if(approach==null || npc.position().distanceToSqr(approach)>.64){
             if(pieAction==WorkAnimation.PIE_LOAD)clearPiePose();
-            if(now>=nextPath)pathTo(target);
+            if(now>=nextPath && (approach==null || travel.needsPath(npc,approach)))pathTo(target);
             if(npc.position().distanceToSqr(lastPosition)>.0001)try(var tx=Transaction.openOuter()){npc.extractEnergy(2,tx);tx.commit();}
             lastPosition=npc.position();return;
         }

@@ -12,7 +12,9 @@ final class FindLunchGoal extends Goal {
     private Vec3 approach;
     private long nextSearch,deadline,failedUntil;
     private BlockPos failed;
-    private int repath,cursor;
+    private int cursor;
+    private final CompanionNavigation.Progress travel=new CompanionNavigation.Progress();
+    private net.minecraft.world.level.pathfinder.Path selectedPath;
     FindLunchGoal(PeepoEntity npc){this.npc=npc;nextSearch=npc.level().getGameTime()+Math.floorMod(npc.getId(),80);setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK));}
     @Override public boolean requiresUpdateEveryTick(){return true;}
     private boolean wantsVisit(){
@@ -57,12 +59,14 @@ final class FindLunchGoal extends Goal {
                     && npc.level().getBlockState(pos.below()).isFaceSturdy(npc.level(),pos.below(),Direction.UP)
                     && npc.level().noCollision(npc,new AABB(at.x-.22,at.y,at.z-.22,at.x+.22,at.y+1,at.z+.22)))points.add(pos);
             }
+            points.removeIf(p->npc.navigationMemory.failed(npc,source.getBlockPos(),Vec3.atBottomCenterOf(p)));
             points.sort(Comparator.comparingDouble(p->p.distToCenterSqr(npc.position())));
             for(var pos:points){
                 if(paths++>=2)break;
                 if(!CompanionBudget.path(npc)){nextSearch=now+1;return false;}
                 var path=npc.getNavigation().createPath(pos,0,bound==null?16:64);
-                if(path!=null && path.canReach()){lunch=source;approach=Vec3.atBottomCenterOf(pos);return true;}
+                if(path!=null && path.canReach()){lunch=source;approach=Vec3.atBottomCenterOf(pos);selectedPath=path;return true;}
+                npc.navigationMemory.reject(npc,source.getBlockPos(),Vec3.atBottomCenterOf(pos));
             }
             failed=source.getBlockPos();failedUntil=now+200;npc.report.lunch(CompanionStatus.BLOCKED);
         }
@@ -70,7 +74,7 @@ final class FindLunchGoal extends Goal {
         return false;
     }
     @Override public boolean canContinueToUse(){return valid() && wantsVisit() && !npc.isEating() && npc.level().getGameTime()<deadline;}
-    @Override public void start(){npc.resetCompanionRoutine();npc.leaveCompanionBed();deadline=npc.level().getGameTime()+600;repath=0;npc.report.lunch(CompanionStatus.FETCHING_FOOD);}
+    @Override public void start(){npc.resetCompanionRoutine();npc.leaveCompanionBed();deadline=npc.level().getGameTime()+600;travel.reset();if(selectedPath!=null){npc.getNavigation().moveTo(selectedPath,1);travel.started(npc,approach);}selectedPath=null;npc.report.lunch(CompanionStatus.FETCHING_FOOD);}
     @Override public void stop(){lunch=null;approach=null;npc.getNavigation().stop();if(npc.report.lunch()==CompanionStatus.FETCHING_FOOD)npc.report.lunch(CompanionStatus.READY);}
     @Override public void tick(){
         if(!valid())return;
@@ -84,12 +88,14 @@ final class FindLunchGoal extends Goal {
             npc.report.lunch(result);
             deadline=0;nextSearch=npc.level().getGameTime()+(result==CompanionStatus.FULL?600:100);return;
         }
-        if(--repath<=0 && CompanionBudget.path(npc)){
-            repath=40;var path=npc.getNavigation().createPath(BlockPos.containing(approach),0,64);
+        if(travel.needsPath(npc,approach) && CompanionBudget.path(npc)){
+            npc.getNavigation().stop();
+            var path=npc.getNavigation().createPath(BlockPos.containing(approach),0,64);
             if(path==null || !path.canReach()){
+                npc.navigationMemory.reject(npc,lunch.getBlockPos(),approach);
                 failed=lunch.getBlockPos();failedUntil=npc.level().getGameTime()+200;npc.report.lunch(CompanionStatus.BLOCKED);deadline=0;return;
             }
-            npc.getNavigation().moveTo(path,1);
+            npc.getNavigation().moveTo(path,1);travel.started(npc,approach);
         }
     }
 }

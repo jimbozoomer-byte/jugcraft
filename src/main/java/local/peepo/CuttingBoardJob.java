@@ -23,6 +23,7 @@ public final class CuttingBoardJob implements CompanionJob {
             nextSpace=now+20;checkedHeight=npc.getBbHeight();entrance=null;
             for(var side:Direction.Plane.HORIZONTAL)for(int dy=0;dy>=-1;dy--){
                 var p=Vec3.atBottomCenterOf(stationPosition().relative(side).offset(0,dy,0));
+                if(npc.navigationMemory.failed(npc,stationPosition(),p))continue;
                 var floor=BlockPos.containing(p).below();
                 if(!npc.level().hasChunkAt(floor) || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP))continue;
                 if(!npc.level().noCollision(new AABB(p.x-.24,p.y,p.z-.24,p.x+.24,p.y+npc.getBbHeight(),p.z+.24)))continue;
@@ -35,6 +36,7 @@ public final class CuttingBoardJob implements CompanionJob {
     private void expire(){if(worker!=null && (press.isRemoved() || occupant()==null || !occupant().isAlive() || press.getLevel().getGameTime()>lease))removed();}
     public void removed(){var p=occupant();if(p!=null)p.setWorkAnimation(WorkAnimation.NONE,stationPosition());worker=null;nextSpace=0;effort=0;}
     public Kind kind(){return Kind.WORK;}
+    public void approachFailed(PeepoEntity npc){nextSpace=nextClearance=0;entrance=null;}
     public BlockPos stationPosition(){return press.getBlockPos();}
     public Vec3 approachPosition(){return entrance==null?Vec3.atBottomCenterOf(stationPosition()):entrance;}
     public boolean availableTo(PeepoEntity p){expire();return !press.isRemoved() && (worker==null || worker.equals(p.getUUID()));}

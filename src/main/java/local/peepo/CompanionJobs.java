@@ -11,6 +11,9 @@ public final class CompanionJobs {
     private static final List<Adapter> ADAPTERS=new ArrayList<>();
     public static void register(Adapter adapter){ADAPTERS.add(Objects.requireNonNull(adapter));}
     public static CompanionJob resolve(PeepoEntity npc,BlockPos pos){
+        return npc.readiness.resolve(pos);
+    }
+    static CompanionJob resolveFresh(PeepoEntity npc,BlockPos pos){
         if(!npc.level().hasChunkAt(pos))return null;
         var garden=npc.garden.job(pos);if(garden!=null)return garden;
         var be=npc.level().getBlockEntity(pos);if(be==null || be.isRemoved())return null;
@@ -34,7 +37,7 @@ public final class CompanionJobs {
         if(!npc.level().hasChunkAt(target.at().pos()))return CompanionStatus.UNLOADED;
         if(!target.present(npc.level()))return CompanionStatus.MISSING;
         if(!permitted(npc,target.at().pos()))return CompanionStatus.FORBIDDEN;
-        var job=resolve(npc,target.at().pos());if(job!=null)return job.workStatus(npc);
+        var job=resolve(npc,target.at().pos());if(job!=null)return npc.readiness.status(job);
         var port=CompanionLogistics.resolve(npc,target);return port==null?CompanionStatus.UNSUPPORTED:port.status();
     }
 }

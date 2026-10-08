@@ -22,7 +22,7 @@ public final class CookingPotJob implements CompanionJob {
     public CookingPotJob(CookingPotBlockEntity pot) { this.pot = pot; }
     public CookingPotJob prepare(PeepoEntity npc) {
         expire();
-        if (worker == null && (entrance == null || npc.level().getGameTime() >= nextEntrance)) {
+        if (worker == null && npc.level().getGameTime() >= nextEntrance) {
             nextEntrance = npc.level().getGameTime() + 20;
             entrance = null;
             nextClearance = 0;
@@ -31,6 +31,7 @@ public final class CookingPotJob implements CompanionJob {
                 var pos = stationPosition().relative(side).offset(0, dy, 0);
                 if (!npc.level().hasChunkAt(pos) || !npc.level().getBlockState(pos.below()).isFaceSturdy(npc.level(), pos.below(), Direction.UP)) continue;
                 var point = Vec3.atBottomCenterOf(pos);
+                if(npc.navigationMemory.failed(npc,stationPosition(),point))continue;
                 // Check the real companion size at both the lower entrance and this side of the rim.
                 if (!clearAt(npc, point) || !clearAt(npc, rimPosition(side))) continue;
                 if (entrance == null || npc.position().distanceToSqr(point) < npc.position().distanceToSqr(entrance)) {
@@ -57,6 +58,7 @@ public final class CookingPotJob implements CompanionJob {
         worker = null; mounted = false; nextEntrance = nextClearance = 0;
     }
     public Kind kind() { return Kind.WORK; }
+    public void approachFailed(PeepoEntity npc){nextEntrance=nextClearance=0;entrance=null;}
     public BlockPos stationPosition() { return pot.getBlockPos(); }
     public Vec3 approachPosition() {
         var npc = mounted ? occupant() : null;
@@ -67,11 +69,13 @@ public final class CookingPotJob implements CompanionJob {
         return worker != null && worker.equals(npc.getUUID()) && npc.level() == pot.getLevel()
             && npc.level().getGameTime() <= lease && (mounted ? stationPosition().distToCenterSqr(npc.position()) < 4 : npc.position().distanceToSqr(approachPosition()) < .81);
     }
-    public CompanionStatus workStatus(PeepoEntity npc) {
+    public CompanionStatus workStatus(PeepoEntity npc) { return status(npc,false); }
+    public CompanionStatus planningFacts(PeepoEntity npc) { return status(npc,true); }
+    private CompanionStatus status(PeepoEntity npc,boolean planning) {
         if (!availableTo(npc)) return CompanionStatus.OCCUPIED;
         if (pot.isLocked() || !npc.orders.tamed() || !npc.assignments.assignedWork(stationPosition()) || !CompanionJobs.permitted(npc, stationPosition())) return CompanionStatus.FORBIDDEN;
         if (entrance == null || !roomFor(npc)) return CompanionStatus.BLOCKED;
-        return pot.cookingStatus();
+        return planning?CompanionReadiness.shared(pot,pot::cookingStatus):pot.cookingStatus();
     }
     private boolean roomFor(PeepoEntity npc) {
         long now=npc.level().getGameTime();

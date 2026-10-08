@@ -71,7 +71,7 @@ public final class WheelBlockEntity extends BlockEntity implements CompanionJob,
         if(!availableTo(p) || occupant==null)return false;
         lease=level.getGameTime()+20;mounted=true;
         var at=point(1,5/16.0,.5);float yaw=facing().getClockWise().toYRot();
-        p.snapTo(at.x,at.y,at.z,yaw,0);p.yBodyRot=yaw;p.setYHeadRot(yaw);p.setDeltaMovement(Vec3.ZERO);p.getNavigation().stop();return true;
+        CompanionMotion.position(p,at,yaw);p.setDeltaMovement(Vec3.ZERO);p.getNavigation().stop();return true;
     }
     public void release(PeepoEntity p){
         if(occupant==null || !occupant.equals(p.getUUID()))return;

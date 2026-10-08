@@ -2,7 +2,15 @@
 
 Owner requested companion-only automated testing on 7 October 2026, superseding the earlier instruction to skip tests. Implemented and run with OpenAI Codex (GPT-6).
 
-## Result
+## Performance revision, 8 October 2026
+
+The [planning, synchronization, rest and navigation changes](companion-performance.md) passed the expanded companion suite: **42 groups, 715 assertions, zero failed groups**, completed at 11:46 local time. The additional four groups check shared readiness reuse, per-companion isolation, live claim validation, same-tick block replacement, exact energy rollback, reduced snapshot frequency, stable meal timestamps, obstructed bunk release, retained progressing paths and alternate entrance selection. World save/reopen and the one-client dedicated reconnect check passed again.
+
+Existing GUI fixtures now open the nine-item Filter editor and exercise its real ghost slots, preserving cursor-item and extraction checks. The cooking fixture uses the current collision rim height. An exploratory run exposed an old slot-count expectation and an ungrounded navigation test entity; both fixtures were corrected before this successful run. A legacy multiplication character in the hearth documentation was normalized to UTF-8 so the repository link check could complete.
+
+The final combined invocation also runs the hearth-only suite and assembles the mod; see the performance record for the complete result and limits. No unrelated gameplay test classes were selected. Current generated evidence lives in `build/companion-performance-final.log` and `build/run/clientGameTest/screenshots/`.
+
+## Earlier result, 7 October 2026
 
 **38 groups passed, 511 assertions, zero failed groups.** The successful expanded run finished on 7 October 2026 at 21:41 local time, on `peepo-companion`, against gameplay base commit `7633a769` plus the test additions recorded here. Gradle completed successfully in 5 minutes 20 seconds. No production gameplay changes were required by this run.
 

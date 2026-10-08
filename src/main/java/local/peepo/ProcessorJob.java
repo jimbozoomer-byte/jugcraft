@@ -55,6 +55,7 @@ public final class ProcessorJob implements CompanionJob {
         return this;
     }
     private void consider(PeepoEntity npc,Vec3 point){
+        if(npc.navigationMemory.failed(npc,stationPosition(),point))return;
         if(!machine.helperPositionAvailable(slot,point) || !clearAt(npc,point))return;
         if(entrance==null || npc.position().distanceToSqr(point)<npc.position().distanceToSqr(entrance))entrance=point;
     }
@@ -90,6 +91,7 @@ public final class ProcessorJob implements CompanionJob {
         worker=null;requested=-1000;nextEntrance=0;machine.resetCompanionEffort();
     }
     public Kind kind(){return Kind.WORK;}
+    public void approachFailed(PeepoEntity npc){nextEntrance=nextClearance=0;entrance=null;}
     public BlockPos stationPosition(){return machine.getBlockPos();}
     public Vec3 approachPosition(){return entrance==null?Vec3.atBottomCenterOf(stationPosition().north()):entrance;}
     public boolean availableTo(PeepoEntity npc){expire();return !machine.isRemoved() && (worker==null || worker.equals(npc.getUUID()));}
@@ -97,12 +99,14 @@ public final class ProcessorJob implements CompanionJob {
         return worker!=null && worker.equals(npc.getUUID()) && npc.isAlive() && npc.level()==machine.getLevel()
             && npc.level().getGameTime()<=lease && entrance!=null && npc.position().distanceToSqr(entrance)<.81;
     }
-    public CompanionStatus workStatus(PeepoEntity npc){
+    public CompanionStatus workStatus(PeepoEntity npc){return status(npc,false);}
+    public CompanionStatus planningFacts(PeepoEntity npc){return status(npc,true);}
+    private CompanionStatus status(PeepoEntity npc,boolean planning){
         if(!availableTo(npc))return CompanionStatus.OCCUPIED;
         if(machine.isLocked() || !npc.orders.tamed() || !npc.assignments.assignedWork(stationPosition())
             || !CompanionJobs.permitted(npc,stationPosition()))return CompanionStatus.FORBIDDEN;
         if(!roomFor(npc))return CompanionStatus.BLOCKED;
-        return machine.companionStatus();
+        return planning?CompanionReadiness.shared(machine,machine::companionStatus):machine.companionStatus();
     }
     public boolean claim(PeepoEntity npc){
         if(workStatus(npc)!=CompanionStatus.READY || !machine.helperPositionAvailable(slot,entrance))return false;

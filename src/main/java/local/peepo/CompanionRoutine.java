@@ -13,6 +13,7 @@ final class CompanionRoutine extends Goal {
     private long nextLeisure,chairUntil,nextSearch,deadline,nextPriority;
     private boolean active;
     private int repath;
+    private final CompanionNavigation.Progress travel=new CompanionNavigation.Progress();
     private CompanionStatus state=CompanionStatus.IDLE;
     private final Map<BlockPos,Long> unreachable=new HashMap<>();
     CompanionRoutine(PeepoEntity npc){this.npc=npc;nextSearch=npc.level().getGameTime()+Math.floorMod(npc.getId(),80);setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK));}
@@ -29,7 +30,7 @@ final class CompanionRoutine extends Goal {
     private boolean useful(CompanionStation s){
         if(!npc.orders.station(s) || !s.availableTo(npc))return false;
         if(s instanceof CompanionJob job)return npc.preferences.canWork() && CompanionJobs.permitted(npc,s.stationPosition())
-            && job.workStatus(npc)==CompanionStatus.READY;
+            && job.planningStatus(npc)==CompanionStatus.READY;
         return switch(s.kind()){
             case CHAIR->needsRest() || npc.level().getGameTime()>=nextLeisure;
             case BED->needsRest() && npc.isRestNight();
@@ -40,13 +41,18 @@ final class CompanionRoutine extends Goal {
     private int rank(CompanionStation s){return s instanceof CompanionJob?0:s.kind()==CompanionStation.Kind.BED?1:2;}
     private int pathRange(){return npc.assignments.workManaged()||npc.assignments.homeManaged()?64:16;}
     private void blocked(BlockPos pos,long now){if(unreachable.size()>=32)unreachable.clear();unreachable.put(pos,now+200);state=CompanionStatus.BLOCKED;}
+    private void rejected(CompanionStation s,long now){
+        npc.navigationMemory.reject(npc,s.stationPosition(),s.approachPosition());
+        s.approachFailed(npc);npc.readiness.clear();blocked(s.stationPosition(),now);
+        if(s instanceof CompanionJob)unreachable.put(s.stationPosition(),now+20);
+    }
     private CompanionStation resolve(BlockPos pos){
         var job=CompanionJobs.resolve(npc,pos);if(job!=null)return job;
         var be=npc.level().getBlockEntity(pos);return be instanceof CompanionStation s?s:AssignedVanillaBed.create(npc,pos);
     }
     private void adopt(CompanionStation s,long now){
         station=s;block=npc.level().getBlockEntity(s.stationPosition());deadline=now+600;chairUntil=now+600;
-        nextPriority=now+100;repath=0;state=CompanionStatus.TRAVELLING;
+        nextPriority=now+100;repath=0;travel.reset();state=CompanionStatus.TRAVELLING;
     }
     private void search(){
         long now=npc.level().getGameTime();if(now<nextSearch)return;
@@ -78,8 +84,8 @@ final class CompanionRoutine extends Goal {
             if(attempts++>=2)break;
             if(!CompanionBudget.path(npc)){nextSearch=now+1;state=CompanionStatus.WAITING;return;}
             var path=npc.getNavigation().createPath(BlockPos.containing(s.approachPosition()),0,pathRange());
-            if(path==null || !path.canReach()){blocked(s.stationPosition(),now);continue;}
-            if(s.claim(npc)){adopt(s,now);npc.getNavigation().moveTo(path,1);repath=40;return;}
+            if(path==null || !path.canReach()){rejected(s,now);continue;}
+            if(s.claim(npc)){adopt(s,now);npc.getNavigation().moveTo(path,1);travel.started(npc,s.approachPosition());repath=40;return;}
         }
         if(needsRest() || now>=nextLeisure){
             var surface=CompanionSeats.find(npc,unreachable);
@@ -94,6 +100,8 @@ final class CompanionRoutine extends Goal {
     @Override public void start(){active=true;}
     private void release(){
         if(station!=null)station.release(npc);
+        npc.readiness.clear();
+        travel.reset();
         station=null;block=null;npc.setWheelRunning(false);npc.setWorkAnimation(WorkAnimation.NONE,npc.blockPosition());npc.setRestMode(CompanionEnergy.Rest.NONE);npc.getNavigation().stop();state=CompanionStatus.IDLE;
     }
     @Override public void stop(){release();active=false;}
@@ -111,8 +119,8 @@ final class CompanionRoutine extends Goal {
             if(attempts++>=2)break;
             if(!CompanionBudget.path(npc)){nextPriority=now+1;return;}
             var path=npc.getNavigation().createPath(BlockPos.containing(job.approachPosition()),0,pathRange());
-            if(path==null || !path.canReach()){blocked(target.at().pos(),now);continue;}
-            if(job.claim(npc)){release();adopt(job,now);return;}
+            if(path==null || !path.canReach()){rejected(job,now);continue;}
+            if(job.claim(npc)){release();adopt(job,now);npc.getNavigation().moveTo(path,1);travel.started(npc,job.approachPosition());repath=40;return;}
         }
     }
     @Override public void tick(){
@@ -128,10 +136,14 @@ final class CompanionRoutine extends Goal {
             if(now>deadline){var pos=station.stationPosition();release();blocked(pos,now);return;}
             if(--repath<=0){
                 if(!station.claim(npc)){release();return;}
+                repath=40;
+            }
+            if(travel.needsPath(npc,target)){
                 if(!CompanionBudget.path(npc)){state=CompanionStatus.WAITING;return;}
-                repath=40;var path=npc.getNavigation().createPath(BlockPos.containing(target),0,pathRange());
-                if(path==null || !path.canReach()){var pos=station.stationPosition();release();blocked(pos,now);return;}
-                npc.getNavigation().moveTo(path,1);
+                npc.getNavigation().stop(); // A stuck route must not be returned by vanilla's same-target path cache.
+                var path=npc.getNavigation().createPath(BlockPos.containing(target),0,pathRange());
+                if(path==null || !path.canReach()){var old=station;rejected(old,now);release();state=CompanionStatus.BLOCKED;return;}
+                npc.getNavigation().moveTo(path,1);travel.started(npc,target);
             }
             return;
         }

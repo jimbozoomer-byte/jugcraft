@@ -25,6 +25,7 @@ public final class CrankJob implements CompanionJob {
             for(Direction side:Direction.Plane.HORIZONTAL)for(int dy=0;dy>=-1;dy--){
                 if(face.getAxis().isHorizontal() && side!=face.getOpposite())continue;
                 var p=Vec3.atBottomCenterOf(stationPosition()).add(side.getStepX()*.58,dy,side.getStepZ()*.58);
+                if(npc.navigationMemory.failed(npc,stationPosition(),p))continue;
                 var floor=BlockPos.containing(p).below();
                 var box=new AABB(p.x-.24,p.y,p.z-.24,p.x+.24,p.y+height+.6-dy,p.z+.24);
                 if(!npc.level().hasChunkAt(floor) || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP)
@@ -38,6 +39,7 @@ public final class CrankJob implements CompanionJob {
     private void expire(){if(worker!=null && (crank.isRemoved() || occupant()==null || !occupant().isAlive() || crank.getLevel().getGameTime()>lease))removed();}
     public void removed(){var p=occupant();if(p!=null)p.setWorkAnimation(WorkAnimation.NONE,stationPosition());worker=null;nextSpace=0;}
     public Kind kind(){return Kind.WORK;}
+    public void approachFailed(PeepoEntity npc){nextSpace=nextCheck=0;entrance=null;}
     public WorkAnimation animation(){return WorkAnimation.CRANK;}
     public BlockPos stationPosition(){return crank.getBlockPos();}
     public Vec3 approachPosition(){return entrance==null?Vec3.atBottomCenterOf(stationPosition()):entrance;}

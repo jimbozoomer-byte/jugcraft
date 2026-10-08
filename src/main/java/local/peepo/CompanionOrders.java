@@ -121,7 +121,7 @@ public final class CompanionOrders {
         home=in.read("CompanionHome",GlobalPos.CODEC).orElse(null);work=in.read("CompanionWork",GlobalPos.CODEC).orElse(null);stay=in.read("CompanionStay",GlobalPos.CODEC).orElse(null);
     }
     public static final class CommandGoal extends Goal {
-        private final PeepoEntity npc;private int repath;
+        private final PeepoEntity npc;private final CompanionNavigation.Progress travel=new CompanionNavigation.Progress();
         public CommandGoal(PeepoEntity npc){this.npc=npc;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK));}
         public boolean requiresUpdateEveryTick(){return true;}
         public boolean canUse(){
@@ -137,13 +137,18 @@ public final class CompanionOrders {
             if(o.mode==Mode.FOLLOW || o.mode==Mode.STAY)return canUse();
             var target=o.target();return target==null || npc.position().distanceToSqr(target)>4;
         }
-        public void start(){npc.resetCompanionRoutine();repath=0;}
+        public void start(){npc.resetCompanionRoutine();travel.reset();}
         public void stop(){npc.getNavigation().stop();}
         public void tick(){
             var o=npc.orders;Vec3 target=o.target();
             double near=o.mode==Mode.FOLLOW?4:o.mode==Mode.STAY?.25:4;
             if(target==null || !npc.level().hasChunkAt(BlockPos.containing(target)) || npc.position().distanceToSqr(target)<=near){npc.getNavigation().stop();return;}
-            if(--repath<=0 && CompanionBudget.path(npc)){repath=40+Math.floorMod(npc.getId(),10);npc.getNavigation().moveTo(npc.getNavigation().createPath(BlockPos.containing(target),0,64),1.05);}
+            if(travel.needsPath(npc,target) && CompanionBudget.path(npc)){
+                npc.getNavigation().stop();
+                var path=npc.getNavigation().createPath(BlockPos.containing(target),0,64);
+                npc.getNavigation().moveTo(path,1.05);travel.started(npc,target);
+                if(path==null || !path.canReach())travel.failed(npc);
+            }
         }
     }
 }

@@ -87,6 +87,7 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
             group("habitat groups and local spawn caps", () -> spawns(server));
             group("seated unload defers movement safely", () -> seatedUnload(server));
             new CompanionAutomationChecks(this::check, this::group, origin.offset(0,0,30)).run(context, server);
+            new CompanionPerformanceChecks(this::check,this::group,origin.offset(0,0,30)).run(context,server);
             save = world.getWorldSave();
         }
         if (savedNpc != null) group("world save and reopen", () -> {
@@ -100,7 +101,7 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
                     check(npc.preferences.carryMeals==4,"preferences lost on disk reload");
                     check(npc.assignments.get(1)!=null,"assignment lost on disk reload");
                     var pot=(CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4));
-                    check(recipeId.equals(pot.selectedRecipe()),"pot recipe lost on disk reload");
+                    check(!pot.filter().empty(),"pot filter lost on disk reload");
                     if(seatedNpc!=null){
                         var seated=(PeepoEntity)s.overworld().getEntity(seatedNpc);
                         check(seated!=null && seated.isAlive(),"seated companion lost during unload");
@@ -188,7 +189,7 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
         check(clone.orders.owner(player) && clone.belongings.getItem(0).getCount()==3,"cargo or owner persistence");
         check(clone.isWearingPumpkin() && clone.getMainHandItem().is(Items.TORCH),"equipment persistence");
         var menu=new CompanionMenu(1,player.getInventory(),npc);
-        check(menu.slots.size()==50 && menu.slots.get(8).getMaxStackSize()==1,"8 cargo + 2 equipment slots");
+        check(menu.slots.size()==59 && menu.slots.get(8).getMaxStackSize()==1,"8 cargo + 2 equipment slots plus filter controls");
         check(!menu.slots.get(8).mayPlace(new ItemStack(Items.STONE)),"costume slot accepts junk");
         check(!menu.clickMenuButton(player,999) && menu.quickMoveStack(player,-1).isEmpty(),"invalid menu input");
         npc.discard();
@@ -321,7 +322,7 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
         });
         context.waitForScreen(CompanionScreen.class);
         context.waitFor(c->c.player.containerMenu.getSlot(0).getItem().getCount()==3,100);
-        check(context.computeOnClient(c->c.player.containerMenu.slots.size()==50),"companion slot sync");
+        check(context.computeOnClient(c->c.player.containerMenu.slots.size()==59),"companion slot sync");
         context.takeScreenshot("peepo_companion_gui");
         context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,40));
         try { server.waitFor(s->((PeepoEntity)s.overworld().getEntity(savedNpc)).preferences.schedule==1,100); }
@@ -331,29 +332,31 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
     }
     private void ghostRecipeGui(ClientGameTestContext context,TestServerContext server){
         server.runOnServer(s->{
-            var pot=(CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4));pot.selectRecipe(null);
+            var pot=(CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4));pot.selectRecipe(null);for(int i=0;i<9;i++)pot.filter().set(i,ItemStack.EMPTY);
             var output=CookingPotRecipe.catalog(s).get(recipeId).output().create().copyWithCount(4);
             s.getPlayerList().getPlayers().getFirst().getInventory().setItem(9,output);
         });
-        context.waitFor(c->c.player.containerMenu.getSlot(10).getItem().getCount()==4 && c.player.containerMenu.getSlot(46).getItem().isEmpty(),100);
+        context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,60));
+        context.waitFor(c->c.player.containerMenu instanceof CompanionMenu m && m.filterRow()==0,100);
+        context.waitFor(c->c.player.containerMenu.getSlot(10).getItem().getCount()==4 && c.player.containerMenu.getSlot(CompanionMenu.FILTER_START).getItem().isEmpty(),100);
         clickSlot(context,10,0,net.minecraft.world.inventory.ContainerInput.PICKUP);
         context.waitFor(c->c.player.containerMenu.getCarried().getCount()==4,100);
-        clickSlot(context,46,0,net.minecraft.world.inventory.ContainerInput.PICKUP);
-        server.waitFor(s->recipeId.equals(((CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4))).selectedRecipe()),100);
-        context.waitFor(c->c.player.containerMenu.getSlot(46).getItem().getCount()==1,100);
+        clickSlot(context,CompanionMenu.FILTER_START,0,net.minecraft.world.inventory.ContainerInput.PICKUP);
+        server.waitFor(s->!((CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4))).filter().empty(),100);
+        context.waitFor(c->c.player.containerMenu.getSlot(CompanionMenu.FILTER_START).getItem().getCount()==1,100);
         check(context.computeOnClient(c->c.player.containerMenu.getCarried().getCount()==4),"ghost consumed cursor item");
-        for(var type:new net.minecraft.world.inventory.ContainerInput[]{net.minecraft.world.inventory.ContainerInput.QUICK_MOVE,net.minecraft.world.inventory.ContainerInput.CLONE,net.minecraft.world.inventory.ContainerInput.THROW,net.minecraft.world.inventory.ContainerInput.SWAP})clickSlot(context,46,0,type);
+        for(var type:new net.minecraft.world.inventory.ContainerInput[]{net.minecraft.world.inventory.ContainerInput.QUICK_MOVE,net.minecraft.world.inventory.ContainerInput.CLONE,net.minecraft.world.inventory.ContainerInput.THROW,net.minecraft.world.inventory.ContainerInput.SWAP})clickSlot(context,CompanionMenu.FILTER_START,0,type);
         server.runOnServer(s->{
             var p=s.getPlayerList().getPlayers().getFirst();var menu=p.containerMenu;
-            check(menu.getCarried().getCount()==4 && menu.getSlot(46).getItem().getCount()==1,"ghost extraction/duplication");
-            check(!menu.getSlot(46).mayPickup(p) && !menu.getSlot(46).mayPlace(new ItemStack(Items.APPLE)),"ghost became storage");
+            check(menu.getCarried().getCount()==4 && menu.getSlot(CompanionMenu.FILTER_START).getItem().getCount()==1,"ghost extraction/duplication");
+            check(!menu.getSlot(CompanionMenu.FILTER_START).mayPickup(p) && !menu.getSlot(CompanionMenu.FILTER_START).mayPlace(new ItemStack(Items.APPLE)),"ghost became storage");
         });
-        context.waitTicks(3);clickSlot(context,46,1,net.minecraft.world.inventory.ContainerInput.PICKUP);
-        server.waitFor(s->((CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4))).selectedRecipe()==null,100);
-        context.waitFor(c->c.player.containerMenu.getSlot(46).getItem().isEmpty(),100);
+        context.waitTicks(3);clickSlot(context,CompanionMenu.FILTER_START,1,net.minecraft.world.inventory.ContainerInput.PICKUP);
+        server.waitFor(s->((CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4))).filter().empty(),100);
+        context.waitFor(c->c.player.containerMenu.getSlot(CompanionMenu.FILTER_START).getItem().isEmpty(),100);
         check(context.computeOnClient(c->c.player.containerMenu.getCarried().getCount()==4),"clearing ghost changed cursor");
-        context.waitTicks(3);clickSlot(context,46,0,net.minecraft.world.inventory.ContainerInput.PICKUP);
-        context.waitFor(c->c.player.containerMenu.getSlot(46).getItem().getCount()==1,100);
+        context.waitTicks(3);clickSlot(context,CompanionMenu.FILTER_START,0,net.minecraft.world.inventory.ContainerInput.PICKUP);
+        context.waitFor(c->c.player.containerMenu.getSlot(CompanionMenu.FILTER_START).getItem().getCount()==1,100);
         clickSlot(context,10,0,net.minecraft.world.inventory.ContainerInput.PICKUP);
         context.waitFor(c->c.player.containerMenu.getCarried().isEmpty() && c.player.containerMenu.getSlot(10).getItem().getCount()==4,100);
         context.takeScreenshot("peepo_companion_ghost_recipe");
@@ -367,7 +370,7 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
             UUID id=server.computeOnServer(s->{
                 var npc=npc(s.overworld(),jughead);npc.orders.tame(s.getPlayerList().getPlayers().getFirst());
                 npc.snapTo(origin.getX()+2.5,origin.getY(),origin.getZ()+4.5,0,0);npc.setNoGravity(false);npc.setOnGround(true);
-                npc.assignments.assign(s.overworld(),origin.offset(0,0,4));npc.setNoAi(false);return npc.getUUID();
+                npc.assignments.assign(s.overworld(),origin.offset(0,0,4));((CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4))).selectRecipe(recipeId);npc.setNoAi(false);return npc.getUUID();
             });
             try { server.waitFor(s->s.overworld().getEntity(id) instanceof PeepoEntity p && p.workAnimation()==WorkAnimation.STIR,600); }
             catch(AssertionError e){throw new AssertionError(server.computeOnServer(s->{
@@ -377,7 +380,7 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
             context.waitFor(c->{for(var e:c.level.entitiesForRendering())if(e.getUUID().equals(id) && e instanceof PeepoEntity p)return p.workAnimation()==WorkAnimation.STIR;return false;},100);
             check(context.computeOnClient(c->{for(var e:c.level.entitiesForRendering())if(e.getUUID().equals(id) && e instanceof PeepoEntity p)return p.workAnimation()==WorkAnimation.STIR;return false;}),"stir pose not synced");
             var standingAt=server.computeOnServer(s->s.overworld().getEntity(id).position());
-            check(Math.abs(standingAt.y-origin.getY()-8.5/16)<1.0E-6,"feet on pot rim surface");
+            check(Math.abs(standingAt.y-origin.getY()-10.0/16-.001)<1.0E-6,"feet on pot rim surface");
             check(Math.abs(Math.max(Math.abs(standingAt.x-origin.getX()-.5),Math.abs(standingAt.z-origin.getZ()-4.5))-5.0/16)<1.0E-6,"standing on pot edge");
             long[] before=server.computeOnServer(s->{
                 var pot=(CookingPotBlockEntity)s.overworld().getBlockEntity(origin.offset(0,0,4));
