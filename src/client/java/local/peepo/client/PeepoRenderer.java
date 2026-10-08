@@ -46,6 +46,8 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.jughead = entity.isJughead();
         state.eating=entity.isEating();
         state.holdingLight=TikiTorch.isHeldLight(entity.getMainHandItem());
+        state.heldLightScale=entity.getMainHandItem().getItem() instanceof net.minecraft.world.item.BlockItem item
+            && item.getBlock() instanceof TikiTorch ? .5F : .35F;
         state.wheelRunning=entity.isWheelRunning();
         state.sleeping=entity.getRestMode()==CompanionEnergy.Rest.SLEEPING;
         state.sitting=entity.getRestMode()==CompanionEnergy.Rest.SITTING;
@@ -193,7 +195,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
                 getParentModel().translateToUprightHand(pose);
                 // Raw item model: remove both arm tilt and third-person item rotation.
                 pose.rotateDegrees(com.mojang.math.Axis.XP,180);
-                pose.scale(.35F,.35F,.35F);
+                pose.scale(state.heldLightScale,state.heldLightScale,state.heldLightScale);
                 pose.translate(0,.25F,0);
             }else{
                 getParentModel().translateToHand(pose);

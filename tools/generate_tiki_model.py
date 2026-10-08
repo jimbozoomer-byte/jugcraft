@@ -8,7 +8,9 @@ def write(path,value):
     path.parent.mkdir(parents=True,exist_ok=True)
     path.write_text(json.dumps(value,indent=2)+'\n')
 def box(lo,hi,texture):
-    return {'from':lo,'to':hi,'faces':{side:{'texture':'#'+texture} for side in ['up','down','north','south','east','west']}}
+    # Full item geometry extends above y=16; implicit UVs would leave the sprite and smear its edges.
+    # Explicit UVs also keep the clipped placed halves and held basket visually consistent.
+    return {'from':lo,'to':hi,'faces':{side:{'texture':'#'+texture,'uv':[0,0,16,16]} for side in ['up','down','north','south','east','west']}}
 # Original pixel-art basket weave: alternating over/under reed strips and fine dark seams.
 im=Image.new('RGB',(16,16))
 for y in range(16):
@@ -25,20 +27,27 @@ for y in range(16):
         im.putpixel((x,y),c)
 tex=A/'textures/block/tiki_weave.png';tex.parent.mkdir(parents=True,exist_ok=True);im.save(tex)
 textures={'particle':'peepo_companion:block/tiki_weave','shaft':'minecraft:block/stripped_oak_log','weave':'peepo_companion:block/tiki_weave','binding':'minecraft:block/oak_planks','cap':'minecraft:block/polished_blackstone','wick':'minecraft:block/black_wool','flame':'minecraft:block/orange_wool','flame_tip':'minecraft:block/yellow_wool'}
-full=[box([7.45,0,7.45],[8.55,6.5,8.55],'shaft'),box([7.2,5.5,7.2],[8.8,6.2,8.8],'binding')]
-# Narrow open supports fan out from the shaft into the basket, leaving visible gaps.
-for y in range(6,18,2):
-    spread=.35+(y-6)*.18
+full=[box([7.2,0,7.2],[8.8,28.9,8.8],'shaft'),box([6.95,11.45,6.95],[9.05,12.15,9.05],'binding')]
+# A continuous straight core supports the burner. The open flare occupies only the last six pixels.
+for y in range(12,18):
+    spread=.65+(y-12)*.23
     for sx in [-1,1]:
         for sz in [-1,1]:
             x,z=8+sx*spread,8+sz*spread
-            full.append(box([x-.34,y,z-.34],[x+.34,y+2,z+.34],'shaft'))
-full += [box([5.4,17.7,5.4],[10.6,18.25,10.6],'binding'),
-    box([5.5,18,5],[10.5,28,11],'weave'),box([5,18,5.5],[11,28,10.5],'weave'),
-    box([4.7,28,4.7],[11.3,28.6,11.3],'cap'),box([5.5,28.6,5.5],[10.5,29.15,10.5],'cap'),
-    box([6.5,29.15,6.5],[9.5,29.65,9.5],'cap'),box([7.55,29.65,7.55],[8.45,30.2,8.45],'wick'),
-    box([7.5,30.2,7.5],[8.5,30.9,8.5],'flame'),box([7.7,30.9,7.7],[8.3,31.5,8.3],'flame_tip'),
-    box([7.85,31.5,7.85],[8.15,31.9,8.15],'flame_tip')]
+            full.append(box([x-.34,y,z-.34],[x+.34,y+1,z+.34],'shaft'))
+full += [box([5.79,17.7,5.79],[10.21,18.25,10.21],'binding'),
+    box([5.875,18,5.45],[10.125,27.5,10.55],'weave'),box([5.45,18,5.875],[10.55,27.5,10.125],'weave'),
+    box([5.195,27.5,5.195],[10.805,28.05,10.805],'cap'),box([5.875,28.05,5.875],[10.125,28.55,10.125],'cap'),
+    box([6.725,28.55,6.725],[9.275,29,9.275],'cap'),box([7.55,29,7.55],[8.45,29.5,8.45],'wick'),
+    # Orange outer tongues and a taller yellow core, all inside the original two-block height.
+    box([7.35,29.45,7.35],[8.65,30.1,8.65],'flame'),
+    box([7.6,30.1,7.6],[8.4,30.9,8.4],'flame_tip'),
+    box([7.25,30.1,7.45],[7.8,30.8,8.05],'flame'),
+    box([7.35,30.8,7.55],[7.7,31.15,7.95],'flame_tip'),
+    box([8.4,30.1,7.85],[8.75,31.2,8.4],'flame'),
+    box([8.45,31.2,7.95],[8.65,31.65,8.25],'flame_tip'),
+    box([7.7,30.9,7.7],[8.3,31.5,8.3],'flame_tip'),
+    box([7.8,31.5,7.8],[8.12,31.95,8.12],'flame_tip')]
 # Clip at the block boundary so each half's geometry stays within its own cell.
 for name,base in [('lower',0),('upper',16)]:
     elements=[]
