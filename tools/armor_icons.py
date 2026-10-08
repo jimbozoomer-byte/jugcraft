@@ -179,8 +179,8 @@ shield and its cross; the spiralled tassets over the cloth; the banded greaves. 
     C c q Q K       the cloth, purple or dark red: "leather_light" to "leather_dark", and "leather_darkest", its outline
     U u x X         the dark mail and belt: "under_light" to "under_dark", and "under_darkest", their outline
 Sentinel (tools/sentinel_armor.py, armor_paint.SENTINEL): the gold bucket helm with its keyhole and the loop on its
-crown; the great pauldron's nested gold chevrons and the flat plates over the black coat, the gorget and its pale
-strip, and the baldric; the black skirt with its gold plate on the left and dark one on the right; the gold boots.
+crown; the great pauldron's bent plate, banded as the owner drew it, and the flat plates over the black coat, the
+gorget and its pale strip, and the baldric; the black skirt with its gold plate on the left and dark one on the right; the gold boots.
     H L M D S V     the gold, cream to brown: "light" to "void" ("O" is its void taken down)
     G g             the palest cream and the deep brown: "gold_light", "gold_dark"
     C c q Q K       the browns: "leather_light" to "leather_dark", and "leather_darkest", their outline

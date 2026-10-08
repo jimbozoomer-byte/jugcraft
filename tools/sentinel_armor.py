@@ -3,7 +3,9 @@ these ones aswell want them done weapons too please": three Blockbench renders, 
 right, from a little to the left, and from behind) as a 3D worn model for jugcraft:sentinel_* (helmet, chestplate,
 leggings, boots), on the toolkit in tools/armor_models.py (shapes) and tools/armor_paint.py (the atlas). Its sword and
 shield are arms of their own (tools/arms_variants.py). Rebuilt in more detail when the owner saw the first one: "the
-Gold Knight / Sentinel is missing very important details and is way to simplified".
+Gold Knight / Sentinel is missing very important details and is way to simplified"; its right pauldron copied again,
+plate for plate and texel for texel, when they saw the second: "the shoulder pauldron on the sentinel doesn't look good
+or match the art I gave you".
 
 What the owner drew, and where it is here (built part for part, as the owner asked: "complex models ... really
 capturing the crazy unique geometry of each armor"):
@@ -15,14 +17,17 @@ capturing the crazy unique geometry of each armor"):
                 loop's two posts and its peaked roof; the ridge and, either side of it, the meander's hook in five
                 raised bars over a dark field
     chestplate  a near-black coat under a gold gorget across the shoulders, a pale strip down its middle ending in a
-                boss; a dark baldric from the left shoulder to the right hip; on the right shoulder a great pauldron of
-                gold plates in nested chevrons pointing out from the arm, on the left a shelf of flat plates; a gold
-                square ring on the right upper arm; a gold bracer on the right forearm; gold bands on the black sleeves
-                and gold gauntlets. Here: the coat; the gorget in two tiers, the strip and the boss; the baldric before
-                and behind; on the right arm the pauldron's cap and three chevrons, each a pair of bars from under the
-                cap out to a point and back, the outer pale, the middle dark, the inner gold, each stepping in; the
-                ring, a frame of four bars round a dark field and a stud; the sleeve, the bracer and its two rims, the
-                gauntlet; on the left the three plates of the shelf, the sleeve, two bands and the gauntlet
+                boss; a dark baldric from the left shoulder to the right hip; on the right shoulder a great pauldron, a
+                thick gold plate bent at the shoulder's outer corner: rising steeply in to a pale hook by the helm and
+                hanging down the outside of the upper arm to a step out at its foot, its ends banded gold outside, a
+                dark groove and pale cream inside, the groove turning the bend like a 7; on the left a shelf of flat
+                plates; a square gold stud with a dark centre on the right upper arm, turned; a gold bracer on the right
+                forearm; gold bands on the black sleeves and gold gauntlets. Here: the coat; the gorget in two tiers,
+                the strip and the boss; the baldric before and behind; on the right arm the pauldron's upper and lower
+                plates, the hook and the step, their ends painted texel for texel from the owner's renders (the second
+                time: "can you just 1:1 copy the pixel art from the source I gave you"); the stud; the sleeve, the
+                bracer and its two rims, the gauntlet; on the left the three plates of the shelf, the sleeve, two bands
+                and the gauntlet
     leggings    the coat's black skirt to the knee, parted at the middle, with a gold plate before and behind the
                 left thigh and a dark one on the right. Here: the belt and its buckle; on each leg the hose, the skirt
                 and a plate before and behind it hinged out from the hip, each with a raised rim round it, gold on the
@@ -34,7 +39,8 @@ Colours: armor_paint.SENTINEL.
 The renders show the front, both sides and the back. The design is not symmetric: the pauldrons differ, only the right
 forearm wears the bracer and only the left thigh's plates are gold, so the arms are built as drawn rather than mirrored.
 Every box is closed: a face is left out only where another box of the same piece and bone covers it (the reliefs' and
-the plates' backs, the cap's foot inside the shells, the sleeve's ends, the greave's foot inside the sabaton).
+the plates' backs, the pauldron's upper plate's end under the hook and the step's inner side on the lower plate, the
+sleeves' feet and the left one's top, the greave's foot inside the sabaton).
 
 Space (tools/armor_models.py): each bone's own space in model pixels; x is the model's LEFT, y is DOWN, z is the BACK
 (the face is at -z).
@@ -45,6 +51,12 @@ from dataclasses import replace
 
 import armor_models as am
 from armor_paint import SENTINEL, P
+
+
+H, L, M, D, S, V = "light", "mid_light", "mid", "dark", "seam", "void"       # the gold, cream to brown
+G, g = "gold_light", "gold_dark"                                            # the palest cream, the deep brown
+C, c, q, Q, K = "leather_light", "leather_mid_light", "leather_mid", "leather_dark", "leather_darkest"   # browns
+U, u, x, X = "under_light", "under_mid", "under_dark", "under_darkest"       # the black cloth
 
 
 def rows(*tones):
@@ -60,14 +72,18 @@ def marks(*rects, symmetric=False):
     return P("marks", rects=list(rects), symmetric=symmetric)
 
 
+TONE = {"H": H, "L": L, "M": M, "D": D, "Q": Q, "S": S, "G": G}
+
+
+def pixmap(*rows):
+    """A face painted texel for texel, one string per texel row and one letter per texel (TONE names them)."""
+    return marks(*[(x, y, 1, 1, TONE[ch]) for y, row in enumerate(rows) for x, ch in enumerate(row)])
+
+
 def plate(tone, strips="h"):
     return P("plate", tone=tone, strips=strips)
 
 
-H, L, M, D, S, V = "light", "mid_light", "mid", "dark", "seam", "void"       # the gold, cream to brown
-G, g = "gold_light", "gold_dark"                                            # the palest cream, the deep brown
-C, c, q, Q, K = "leather_light", "leather_mid_light", "leather_mid", "leather_dark", "leather_darkest"   # browns
-U, u, x, X = "under_light", "under_mid", "under_dark", "under_darkest"       # the black cloth
 
 CLOTH = P("plate", tone=x, strips="v")   # the near-black cloth, in long runs a tone lighter or darker
 
@@ -100,22 +116,28 @@ PAINT = {
     "strip": {"front": [solid(G), marks((0, 0, 1, 99, H), (-1, 0, 1, 99, L))], "*": solid(L)},
     "boss": {"front": P("chevron", corner="o", bands=(H, L), border=None, core=(D, D), outside=H), "top": solid(H),
              "*": solid(M)},
-    # the right pauldron: the cap pale on top; the chevrons pale, dark and gold, each lit along its upper edge
+    # the cap over the left shoulder's plates
     "cap": {"top": [plate(L), marks((0, 0, 99, 1, H), (0, -1, 99, 1, D))], "bottom": solid(S),
             "*": [plate(L), marks((0, 0, 99, 1, H))]},
-    # each chevron's broad faces: a pale rim along both edges, gold between with a brown groove down its length;
-    # its ends (seen from the front and behind) in the chevron's own tone
-    "chevron_pale": {"top": [plate(L), marks((0, 0, 99, 1, G), (0, -1, 99, 1, H), (0, 3, 99, 1, D), (0, -4, 99, 1, D))],
-                     "bottom": [plate(M), marks((0, 0, 99, 1, H), (0, -1, 99, 1, H), (0, 3, 99, 1, Q))],
-                     "*": [solid(H), marks((0, 0, 99, 1, G), (0, -1, 99, 1, L))]},
-    "chevron_dark": {"top": [solid(Q), marks((0, 0, 99, 1, q), (0, -1, 99, 1, q))], "bottom": solid(K),
-                     "*": [solid(Q), marks((0, 0, 99, 1, q), (0, -1, 99, 1, K))]},
-    "chevron_gold": {"top": [plate(M, "v"), marks((0, 0, 99, 1, H), (0, -1, 99, 1, H), (0, 3, 99, 1, D))],
-                     "bottom": solid(D), "*": [plate(M, "v"), marks((0, 0, 99, 1, L), (0, -1, 99, 1, D))]},
+    # the right pauldron, its plates' ends painted texel for texel from the owner's renders (pixmap rows: the outer
+    # edge first on the upper plate and the hook, from the top on the lower plate): a pale cream band inside, a dark
+    # groove, gold outside, the groove turning the bend as a 7 and stopping short of the foot; the outer faces gold
+    # between a pale rim and a dark groove at each edge
+    "pauldron_upper": {"front": pixmap("LLMM", "QQDD", "HHHL"), "back": pixmap("MMLL", "DDQQ", "LHHH"),
+                       "top": [plate(L), marks((0, 0, 99, 1, H), (0, 1, 99, 1, Q), (0, -2, 99, 1, Q), (0, -1, 99, 1, H))],
+                       "bottom": solid(Q), "*": solid(L)},
+    "pauldron_hook": {"front": pixmap("HH", "LL", "LL", "LL", "LL"), "back": pixmap("HH", "LL", "LL", "LL", "LL"),
+                      "top": [solid(H), marks((0, 0, 99, 1, L), (0, -1, 99, 1, L))], "bottom": solid(D),
+                      "*": [solid(L), marks((0, 0, 99, 1, H))]},
+    "pauldron_lower": {"front": pixmap("LQQ", "MQH", "MQL", "MQL", "MLL"),
+                       "back": pixmap("QQL", "HQM", "LQM", "LQM", "LLM"),
+                       "right": pixmap("HLLLLH", "HQMMQH", "HQMMQH", "HQMMQH", "HQMMQH"),
+                       "left": solid(S), "bottom": solid(D), "*": solid(L)},
+    "pauldron_flare": {"right": pixmap("HQMMQH", "HQMMQH"), "top": solid(L), "bottom": solid(D), "*": solid(M)},
+    # the square stud on the upper arm's front: a frame lit from the top right round a dark centre
+    "stud": {"front": pixmap("LHH", "MQH", "MML"), "top": solid(H), "bottom": solid(M), "back": solid(D),
+             "*": solid(L)},
     "baldric": {"front": [solid(u), marks((0, 0, 99, 1, U))], "back": [solid(u), marks((0, 0, 99, 1, U))], "*": solid(x)},
-    "ring": {"front": [solid(H), marks((0, -1, 99, 1, L))], "top": solid(G), "*": solid(L)},
-    "ring_field": {"front": solid(X), "*": solid(x)},
-    "stud": {"front": solid(G), "*": solid(H)},
     "sleeve": {"sides": CLOTH, "ends": solid(X)},
     "band": {"top": solid(H), "bottom": solid(S), "*": [solid(L), marks((0, 0, 99, 1, H), (0, -1, 99, 1, M))]},
     "bracer": {"top": solid(L), "bottom": solid(S),
@@ -206,39 +228,43 @@ def body():
             baldric, baldric_back]
 
 
-def chevron(name, top, vertex, bottom, thick, z_half, paint):
-    """A chevron pointing out from the arm (arm space): a bar from `top` out to `vertex` and one from there back in to
-    `bottom` ((x, y) points), each `thick` across and running z_half before and behind; the lower bar 0.15 shorter
-    each way, so where the two cross at the point their faces never meet."""
-    out = []
-    for part, (p0, p1), half in (("upper", (top, vertex), z_half), ("lower", (vertex, bottom), z_half - 0.15)):
-        dx, dy = p1[0] - p0[0], p1[1] - p0[1]
-        length = math.hypot(dx, dy) + thick / 2
-        out.append(am.box(f"{name}_{part}_right", (p0[0], p0[1] - thick / 2, -half), (length, thick, half * 2),
-                          pivot=(p0[0], p0[1], 0.0), rotation=(0, 0, math.degrees(math.atan2(dy, dx))), paint=paint))
-    return out
+def framed(name, pivot, angle, x, y, z, **options):
+    """A box in a frame turned `angle` degrees about z round `pivot` (an arm-space (x, y) point): x, y and z are its
+    (lo, hi) bounds in that frame."""
+    (x0, x1), (y0, y1), (z0, z1) = x, y, z
+    return am.box(name, (pivot[0] + x0, pivot[1] + y0, z0), (x1 - x0, y1 - y0, z1 - z0),
+                  pivot=(pivot[0], pivot[1], 0.0), rotation=(0, 0, angle), **options)
+
+
+# The right pauldron's two plates, measured off the owner's renders (the arm 20 degrees out there): the upper plate's
+# frame runs up and in along it from the bend's inner corner (y across it, the outer face at -3), the lower plate's runs
+# down it from the inner face (x across it, the outer face at -3). The plates are 3 px thick and meet at the bend: the
+# upper one starts, and the lower one's top ends, at the outer corner where their outer faces cross.
+UPPER = ((-2.6, 0.35), -48.0)
+LOWER = ((-2.45, 1.7), -10.0)
 
 
 def arm_right():
-    """The right arm (arm space: x -3..1, y -2..10, z -2..2, the outer side -x): the pauldron's cap over the shoulder
-    and three chevrons out from under it, the outer pale one reaching furthest, the dark one inside it and the gold one
-    inside that, each 0.15 shorter before and behind than the one outside it; the square ring on the upper arm's
-    front, a frame of four bars round a dark field and a stud; the black sleeve from inside the cap to the gauntlet;
-    the gold bracer on the forearm and its two rims; the gauntlet, to 0.6 below the hand."""
-    chevrons = [*chevron("chevron_0", (-3.9, -4.3), (-6.8, 0.6), (-4.6, 5.8), 1.0, 3.9, PAINT["chevron_pale"]),
-                *chevron("chevron_1", (-3.9, -3.1), (-6.0, 0.6), (-4.3, 4.6), 0.9, 3.6, PAINT["chevron_dark"]),
-                *chevron("chevron_2", (-3.9, -1.9), (-5.0, 0.6), (-4.0, 3.4), 0.9, 3.3, PAINT["chevron_gold"])]
-    ring = [am.span("ring_field_right", (-2.0, 0.8, -2.85), (0.0, 2.6, -2.6), paint=PAINT["ring_field"]),
-            am.span("ring_top_right", (-2.25, 0.6, -3.15), (0.25, 1.05, -2.6), skip="back", paint=PAINT["ring"]),
-            am.span("ring_foot_right", (-2.25, 2.35, -3.15), (0.25, 2.8, -2.6), skip="back", paint=PAINT["ring"]),
-            am.span("ring_side_right", (-2.25, 1.05, -3.15), (-1.8, 2.35, -2.6), skip="back", paint=PAINT["ring"]),
-            am.span("ring_side_inner_right", (-0.2, 1.05, -3.15), (0.25, 2.35, -2.6), skip="back", paint=PAINT["ring"]),
-            am.span("ring_stud_right", (-1.3, 1.45, -3.05), (-0.7, 2.0, -2.85), skip="back", paint=PAINT["stud"])]
-    return [am.span("cap_right", (-4.5, -4.0, -3.45), (1.75, -2.5, 3.45), paint=PAINT["cap"]),
-            am.span("cap_crown_right", (-3.75, -4.75, -2.75), (0.75, -4.0, 2.75), skip="bottom", paint=PAINT["cap"]),
-            *chevrons, *ring,
-            am.span("sleeve_right", (-3.45, -2.75, -2.45), (1.45, 9.0, 2.45), skip=("top", "bottom"),
-                    paint=PAINT["sleeve"]),
+    """The right arm (arm space: x -3..1, y -2..10, z -2..2, the outer side -x): the pauldron as the owner drew it, a
+    bent plate standing out from the shoulder: the upper plate rising steeply in to the neck, the hook at its top end
+    (1.2 prouder than the plate, a pale lip by the helm), the lower plate down the outside of the upper arm leaning in
+    a little toward its foot, and the step out at its foot; the lower plate 0.15 deeper before and behind than the upper,
+    so where they cross at the bend their faces never meet. The square stud on the upper arm's front below the
+    pauldron's inner edge, turned as drawn; the black sleeve from the shoulder to the gauntlet; the gold bracer on the
+    forearm and its two rims; the gauntlet, to 0.6 below the hand."""
+    (up, up_turn), (low, low_turn) = UPPER, LOWER
+    pauldron = [framed("pauldron_upper_right", up, up_turn, (-1.572, 2.428), (-3.0, 0.0), (-2.85, 2.85), skip="left",
+                       paint=PAINT["pauldron_upper"]),
+                framed("pauldron_hook_right", up, up_turn, (2.428, 4.428), (-4.2, 0.0), (-3.0, 3.0),
+                       paint=PAINT["pauldron_hook"]),
+                framed("pauldron_lower_right", low, low_turn, (-3.0, 0.0), (-2.752, 2.248), (-3.0, 3.0),
+                       paint=PAINT["pauldron_lower"]),
+                framed("pauldron_flare_right", low, low_turn, (-4.0, -3.0), (0.248, 2.248), (-3.0, 3.0), skip="left",
+                       paint=PAINT["pauldron_flare"])]
+    stud = am.box("stud_right", (-1.85, 1.15, -3.35), (3.0, 3.0, 0.75), pivot=(-0.35, 2.65, -2.975),
+                  rotation=(0, 0, -20), paint=PAINT["stud"])
+    return [*pauldron, stud,
+            am.span("sleeve_right", (-3.45, -2.75, -2.45), (1.45, 9.0, 2.45), skip="bottom", paint=PAINT["sleeve"]),
             am.span("bracer_right", (-3.8, 5.6, -2.8), (1.8, 8.4, 2.8), paint=PAINT["bracer"]),
             am.span("bracer_rim_top_right", (-4.1, 5.3, -3.25), (2.1, 5.9, 3.25), paint=PAINT["band"]),
             am.span("bracer_rim_foot_right", (-4.1, 8.1, -3.25), (2.1, 8.7, 3.25), paint=PAINT["band"]),
