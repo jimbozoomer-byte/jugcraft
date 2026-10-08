@@ -78,6 +78,8 @@ A line uses the operations it actually needs. Small batches stay practical. Larg
 
 Connections to earlier industries include ceramic linings/insulators, suitable agricultural filter cloth and seals, basic metal vessels and later compatible materials. Essential components need a reachable hand/solo/trade route. These connections must not require every farmer or engineer to complete every specialty.
 
+The [twelfth chemistry batch](industrial-chemistry-and-fuels-plan.md#grid-storage-synthetic-fuels-and-cryogenics-decisions-twelfth-batch) selects mineral-derived bulk vanadium electrolyte supply alongside refinery residue and independently obtainable cobalt stock for reusable synthetic-fuel tooling. Exact mineral identity/source/refining stays open. The following [eight resource/reagent/residue questions](industrial-chemistry-and-fuels-plan.md#resource-reagent-and-residue-questions-pending) propose specific lead/lithium/cobalt/chromium/vanadium feeds and a phosphate-residue construction branch; none of those A/B options is selected yet. Preserve current feeds and the first-acid catalyst bootstrap while specifying additions.
+
 ## Initial refining lines and finished products
 
 ### Alumina and aluminum
