@@ -29,7 +29,15 @@ Bake the owner's pies and tarts and set them out:
 - **Set down whole,** a block wide, its front to whoever set it down: a pie seven texels tall (a crust lid over a body a texel narrower all round), a tart four (a base a texel narrower, under a wall whose rim stands a texel above the filling). A hungry player eats a quarter of it; a knife cuts a quarter off as a **slice** to take away. The front right quarter goes first, as the page shows the strawberry pie and the blueberry tart cut, then the front left, the back left and the back right; the last quarter takes the bake. Only a whole bake can be picked up again.
 - **Inside:** the strawberry pie's and the blueberry tart's insides are the page's own cuts; the other pies and tarts, which the owner drew whole, show the same inside in their own filling's colours (the pork pie's is meat).
 
-In-game screenshots come from CI's client game test (`PieTartClientGameTests`) and are added here once it has run.
+| **The pies,** whole in front and cut behind, from the left: Strawberry, Plum, Banoffee, Whipped Pumpkin and Pork | **The tarts,** whole in front and cut behind, from the left: Blueberry, Sweet Berry, Lemon, Strawberry and Coffee |
+| --- | --- |
+| ![The pies](../images/ingame_square_pies.jpg) | ![The tarts](../images/ingame_tarts.jpg) |
+| **As drawn:** the strawberry pie and the blueberry tart, whole and cut, from above their front right as the page draws them | **Baking:** three Hearth Ovens seen into, from the left a whipped pumpkin pie raw, a blueberry tart baked and a plum pie burnt |
+| ![As drawn](../images/ingame_pies_and_tarts_drawn.jpg) | ![The ovens](../images/ingame_pie_tart_ovens.jpg) |
+| **The items:** the raw bakes, the bakes and the slices, in the page's order | |
+| ![The items](../images/ingame_pie_tart_items.jpg) | |
+
+*In-game screenshots from CI's client game test (`PieTartClientGameTests`, software rendering, small previews; the dark slot at the far left of the drawn view is the dip the camera stands in to look into the ovens).*
 
 ## Connections
 - Existing input producer: Pastry Dough (wheat and an egg) and sugar; strawberries, blueberries, plums, bananas and Coffee Beans (the [fruit crops](fruit-crops.md)), lemons (the [orchards](orchards.md)), sweet berries, pumpkins, eggs, milk and porkchops; the Hearth Oven and its fuel.
@@ -70,6 +78,13 @@ From the owner's own library: each slice's icon is one of their pie slices (`far
 The models face north, the drawing turned half round (`tools/cakes.py` turn), so the quarter the page cuts away is the model's front right. Each quarter is its own boxes, with the bake's inside on its cut faces; the toppings stand on the quarters they lie on and are cut with them (`tools/pie_tart_data.py`). If the owner draws any of this again, their files can replace these under the same IDs.
 
 ## Verification
+CI (8 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `e7f7156` | Build, data audit, game tests, and every client game test class (110: the change adds to the owner's library, a file the selector counts as shared) | Compiled; data audit pass, 1893 IDs; **all 1169 required game tests passed**, the pies' and tarts' among them; **every client class passed**, `PieTartClientGameTests` among them. The screenshots above are from this run |
+| `e94c3e8`, `7d32534` | The same, before the client test hid the HUD and hand | The same results |
+
 Run locally (8 October 2026), on top of `main` at `b533201` (the October 8 integration):
 
 | Check | Result |
@@ -90,7 +105,7 @@ The new game tests (`PieTartGameTests`):
 
 `PieGameTests.pieDataLoads` also loads every raw bake's recipe, every `PieFilling` being checked there. `PieClientGameTests` now keeps to the round pies.
 
-The client game test (`PieTartClientGameTests`, CI job `client`) sets the five pies and the five tarts out on two displays, whole below and cut above, the strawberry pie and the blueberry tart whole and cut at the angle the owner drew them from, three Hearth Ovens with a bake inside (raw, baked, burnt), and a wall of the items in item frames (raw, baked, sliced), and takes five screenshots.
+The client game test (`PieTartClientGameTests`, CI job `client`) hides the HUD and hand, sets the five pies and the five tarts out on two displays in the page's order, whole below and cut above, the strawberry pie and the blueberry tart whole and cut at the angle the owner drew them from, three Hearth Ovens with a bake inside (raw, baked, burnt) seen from eye level with their mouths, and a wall of the items in item frames (raw, baked, sliced), and takes five screenshots.
 
 Not done: play in a real client and a two-client dedicated-server session.
 

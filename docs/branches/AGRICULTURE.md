@@ -1397,6 +1397,10 @@ Five fruits the owner asked for on 8 October 2026 before the milkshakes and the 
 
 Ten pies and tarts the owner drew and shared on 8 October 2026 ("CAKES & BAKES - 3D PIES & TARTS"), rebuilt from their drawing and baked in the Hearth Oven as the pies and cakes are. Details and test evidence: [features/pies-and-tarts.md](../features/pies-and-tarts.md).
 
+| **The pies,** whole in front and cut behind | **As drawn:** the strawberry pie and the blueberry tart, whole and cut |
+| --- | --- |
+| ![The pies](../images/ingame_square_pies.jpg) | ![As drawn](../images/ingame_pies_and_tarts_drawn.jpg) |
+
 - **Strawberry, Plum, Banoffee, Whipped Pumpkin and Pork Pies** and **Blueberry, Sweet Berry, Lemon, Strawberry and Coffee Tarts.** Pastry Dough, a sugar (none in the pork pie) and the bake's own ingredients make a raw pie or tart, from the [fruit crops](#what-exists-now-fruit-crops), the [orchards'](#what-exists-now-orchards) lemons and the farm; the Hearth Oven bakes it, or burns it into a Burnt Pie.
 - **Set down whole,** a block wide and facing whoever set it down: a pie seven texels tall under its crust, a tart four, its rim standing round the filling and the drawing's berries, lemon or cream on top. Eaten, or cut with a knife into slices, a quarter at a time: the front right quarter first, showing the filling inside as the owner's page does.
 
