@@ -4,6 +4,8 @@ Jugcraft's look changes with its tiers, the way real technology did: the early g
 
 ## Shared assets for every content branch
 
+**Owner instruction, 8 October 2026:** use suitable files from the [magic collection](../art/owner-library/MAGIC_ASSETS.md) as supplied. Preserve their authored appearance, palette, resolution, geometry, UVs, animation and sound; do not redraw, recolor or remodel them merely to satisfy the generic rules below. This specific instruction takes precedence for this collection. Necessary rendering/format/namespace repairs belong in runtime copies and should be documented. The library originals stay unchanged. No new per-asset permission request is required.
+
 The owner supplied a [reusable asset collection](../art/owner-library/README.md) on 6 October 2026 and explicitly permits direct use, recoloring/adaptation, or reference when an asset fits the feature. Browse the [complete catalog](../art/owner-library/catalog/README.md) before making new assets. It includes blocks, ores, metals, machinery, guns, planes, sounds, animations, weapons, armor, trees, biomes, farming and food. Its supplied stone sheets are useful for the building and ceramics branch as well as industrial settings.
 
 Keep the originals in the library intact, preserve required sidecars and frame layouts, and record the source path and changes in the feature's provenance. Adapt material palettes to the appropriate branch and tier. A suitable owner-supplied asset may be reused directly; other external references retain their documented source and license rules.

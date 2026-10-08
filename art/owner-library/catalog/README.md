@@ -25,5 +25,8 @@ Every supplied file is listed, including large folders that GitHub's folder view
 | [tile](tile/README.md) | 29 | [Browse](../originals/Blocks/tile) |
 | [Trinket Type Mod](trinket-type-mod/README.md) | 35 | [Browse](../originals/Blocks/Trinket%20Type%20Mod) |
 | [Weapon Smithing](weapon-smithing/README.md) | 11,741 | [Browse](../originals/Blocks/Weapon%20Smithing) |
+| [Magic textures, models, sounds and data](magic/README.md) | 7,909 | [Browse](../originals/Magic) |
 
 The CSV records each path, category, asset type, dimensions, companion file, byte count and SHA-256 checksum. Original bytes, names and relative folders are preserved.
+
+The complete catalog contains **26,947 source files**. The [magic collection's owner instructions](../MAGIC_ASSETS.md) explicitly authorize suitable files to be used as supplied, without mandatory redesigns or another permission request.
