@@ -168,6 +168,19 @@ ARMOR_TIERS = {
     # Spartan: a hoplite's bronze: the heavier helm, tough and steady, middling enchanting; mended with bronze.
     "spartan": {"display": "Spartan", "armor": (43, (3, 7, 8, 4), 18, 3.5, 0.15),
                 "repair": "jugcraft:bronze_ingot", "fire_resistant": False},
+    # The designs the owner sent on 8 October 2026, likewise (docs/features/armor-designs-8-october.md).
+    # Berserker: horned white plate: a point of defense over netherite, steady, middling enchanting; mended with quartz,
+    # white as its plate.
+    "berserker": {"display": "Berserker", "armor": (45, (3, 7, 8, 3), 16, 3.0, 0.15),
+                  "repair": "minecraft:quartz", "fire_resistant": False},
+    # Paladin: the white knight: the heavier helm, long wear and good enchanting, netherite's toughness; mended with
+    # amethyst shards, purple as its cloth.
+    "paladin": {"display": "Paladin", "armor": (47, (3, 6, 8, 4), 22, 3.0, 0.1),
+                "repair": "minecraft:amethyst_shard", "fire_resistant": False},
+    # Templar: the dark knight of the pair: the heavier chest, tough and steady, poorer enchanting; fire resistant,
+    # mended with netherite.
+    "templar": {"display": "Templar", "armor": (43, (3, 7, 9, 3), 14, 3.5, 0.15),
+                "repair": "minecraft:netherite_ingot", "fire_resistant": True},
 }
 
 

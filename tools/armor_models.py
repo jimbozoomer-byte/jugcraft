@@ -94,7 +94,9 @@ SET_MODULES = ("knight_armor",         # the knight armor: the owner's steel des
                "dread_knight_armor",   # Dread Knight: the owner's dark crowned knight
                "valkyrie_armor",       # Valkyrie: the owner's white and gold winged design
                "wayfarer_armor",       # Wayfarer: the owner's blue hooded cloak
-               "spartan_armor")        # Spartan: the owner's gold plumed design
+               "spartan_armor",        # Spartan: the owner's gold plumed design
+               "berserker_armor",      # Berserker: the owner's horned red and white design
+               "crusader_armor")       # Paladin and Templar: the owner's two crusader knights
 
 
 def face_name(name):

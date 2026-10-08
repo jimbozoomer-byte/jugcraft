@@ -163,6 +163,21 @@ pauldron over the gold cuirass; the studded pteruges; the gold greaves over brow
     R r q Q K       the plume's and the cloth's reds: "leather_light" to "leather_dark", and "leather_darkest", their
                     outline
     T t n N         the brown leather: "under_light", "under_mid", "under_dark", and "under_darkest", its outline
+The designs the owner sent on 8 October 2026 (docs/features/armor-designs-8-october.md) likewise:
+Berserker (tools/berserker_armor.py, armor_paint.BERSERKER): the horned cap with its red crest and toothed jaw frame;
+the stepped red pauldrons over the keyed white breastplate; the thigh guards banded white and red; the grey boots with
+red soles.
+    H L M D S V     the white plate, white to dark grey: "light" to "void" ("O" is its void taken down)
+    G g             the brightest whites: "gold_light", "gold_dark"
+    R r q Q K       the reds: "leather_light" to "leather_dark", and "leather_darkest", their outline
+    U u x X         the dark greys of the mail: "under_light" to "under_dark", and "under_darkest", their outline
+Paladin and Templar (tools/crusader_armor.py, armor_paint.PALADIN and armor_paint.TEMPLAR): the great helm, the
+Paladin's with its white H and purple sprig, the Templar's with its gable and crest; the spiralled pauldrons over the
+shield and its cross; the spiralled tassets over the cloth; the banded greaves. One set of symbols for both:
+    H L M D S V     the plate: white to slate on the Paladin, pale to near-black slate on the Templar
+    G g             "gold_light", "gold_dark": the Paladin's blue gems; the Templar's near-whites
+    C c q Q K       the cloth, purple or dark red: "leather_light" to "leather_dark", and "leather_darkest", its outline
+    U u x X         the dark mail and belt: "under_light" to "under_dark", and "under_darkest", their outline
 """
 import os
 
@@ -228,7 +243,22 @@ OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "
                                          "V": "void", "Y": "plume_yellow", "A": "gold_light", "a": "gold_dark",
                                          "R": "leather_light", "r": "leather_mid_light", "q": "leather_mid",
                                          "Q": "leather_dark", "K": "leather_darkest", "T": "under_light",
-                                         "t": "under_mid", "n": "under_dark", "N": "under_darkest"})}
+                                         "t": "under_mid", "n": "under_dark", "N": "under_darkest"}),
+       "berserker": (armor_paint.BERSERKER, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                             "V": "void", "G": "gold_light", "g": "gold_dark", "R": "leather_light",
+                                             "r": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
+                                             "K": "leather_darkest", "U": "under_light", "u": "under_mid",
+                                             "x": "under_dark", "X": "under_darkest"}),
+       "paladin": (armor_paint.PALADIN, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                         "V": "void", "G": "gold_light", "g": "gold_dark", "C": "leather_light",
+                                         "c": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
+                                         "K": "leather_darkest", "U": "under_light", "u": "under_mid",
+                                         "x": "under_dark", "X": "under_darkest"}),
+       "templar": (armor_paint.TEMPLAR, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                         "V": "void", "G": "gold_light", "g": "gold_dark", "C": "leather_light",
+                                         "c": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
+                                         "K": "leather_darkest", "U": "under_light", "u": "under_mid",
+                                         "x": "under_dark", "X": "under_darkest"})}
 
 
 def luma(colour):

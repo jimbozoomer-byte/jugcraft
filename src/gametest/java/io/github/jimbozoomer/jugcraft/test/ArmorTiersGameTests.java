@@ -65,7 +65,16 @@ public class ArmorTiersGameTests {
 					"minecraft:leather", false),
 			// Spartan: the heavier helm, tough and steady, middling enchanting; mended with bronze.
 			new Tier("spartan", new int[] {4, 8, 7, 3}, new int[] {473, 688, 645, 559}, 3.5, 0.15, 18,
-					"jugcraft:bronze_ingot", false));
+					"jugcraft:bronze_ingot", false),
+			// Berserker: a point over netherite, steady, middling enchanting; mended with quartz.
+			new Tier("berserker", new int[] {3, 8, 7, 3}, new int[] {495, 720, 675, 585}, 3.0, 0.15, 16,
+					"minecraft:quartz", false),
+			// Paladin: the heavier helm, long wear and good enchanting; mended with amethyst shards.
+			new Tier("paladin", new int[] {4, 8, 6, 3}, new int[] {517, 752, 705, 611}, 3.0, 0.1, 22,
+					"minecraft:amethyst_shard", false),
+			// Templar: the heavier chest, tough and steady, poorer enchanting; fire resistant.
+			new Tier("templar", new int[] {3, 9, 7, 3}, new int[] {473, 688, 645, 559}, 3.5, 0.15, 14,
+					"minecraft:netherite_ingot", true));
 
 	/** Every tier's four pieces have its numbers, repair, fire resistance, slot, look and tags. */
 	@GameTest

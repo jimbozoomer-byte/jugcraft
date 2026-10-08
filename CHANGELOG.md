@@ -19,6 +19,14 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Earthbound armor:** an Earthbinding Template (rooted dirt, four thallite nuggets and four gold nuggets), a thallite piece and a gold ingot at a smithing table bind the piece into its gold-trimmed Earthbound twin, for good, keeping its enchantments, wear and name. Earthbound pieces are **Rooted**: on natural ground (soil, stone, sand or gravel) each takes 7.5% off knockback, 30% for a full set, and with two or more worn Regrowth works on stone, sand and gravel too.
 - Both traits are named in the tooltip and described while Shift is held. Two handbook pages. Arms, the arrow, horse armor and magic come in later slices. Record: [thallite.md](docs/features/thallite.md).
 
+### Unmerged: Armor designs of 8 October (Berserker, Paladin, Templar)
+- **Three more armor sets from the owner's own designs,** each worn as a detailed 3D model (about 80 parts each) with four 16×16 icons of its own:
+  - **Berserker:** an open white cap with a red crest spilling over the brow, a square horn standing up from each side and a toothed jaw frame; a white keyed breastplate with raised red bands, stepped red pauldrons with white trim, flanged and studded bracers; thigh guards in four bands of white and red stepping out over dark mail; grey boots with red soles.
+  - **Paladin:** a white great helm with a raised H on its visor, a comb and a purple sprig; a shield-shaped breastplate with a raised cross, spiralled square pauldrons with fanning lames, elbow fans, cuffs and gloves; hinged tassets with spiral bosses and blue gems over flaring purple cloth; banded greaves with knee cops and layered sabatons.
+  - **Templar:** the Paladin's build in slate with pale reliefs and dark red cloth: a barred great helm under a pale gable that reaches past its sides, and a pale crest curling up from the crown.
+- **Beside the owner's other sets, in other strengths** (helmet to boots): Berserker 3, 8, 7, 3, mended with quartz; Paladin 4, 8, 6, 3, long wear and good enchanting, mended with amethyst shards; Templar 3, 9, 7, 3, fire resistant, mended with netherite.
+- **No recipe or drop yet:** creative tab (Combat) only, until the owner decides. The names are placeholders. Record: [armor-designs-8-october.md](docs/features/armor-designs-8-october.md).
+
 ### Unmerged: Four armor designs (Dread Knight, Valkyrie, Wayfarer, Spartan)
 - **Four new armor sets from the owner's own designs,** each worn as a 3D model with four 16×16 icons of its own:
   - **Dread Knight:** a near-black great helm crowned with light grey merlons, banded pauldrons with small spikes, a mottled muscle plate, a riveted strip skirt and banded greaves.

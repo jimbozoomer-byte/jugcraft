@@ -22,7 +22,8 @@ Painters (options in brackets):
     plate     a hammered plate: the fill broken into runs of a tone lighter or darker, staggered like brickwork, with
               a lighter top row and darker bottom row [tone, strips "h"/"v", bevel, border]
     chevron   nested L's (or V's) one texel wide about one corner, a light border and a mottled 2x2 core at the far
-              corner [corner "bl"/"br"/"tl"/"tr"/"in"/"out"/"v"/"^", bands, border, core, outside]
+              corner; with corner "o", concentric rings from the edge in, about a mottled core at the middle
+              [corner "bl"/"br"/"tl"/"tr"/"in"/"out"/"v"/"^"/"o", bands, border, core, outside]
     lames     horizontal plates `rows` texels tall, each a lighter top row over darker ones, one tone darker at the
               centre line [rows, tones, centre "middle"/"in"/None]
     leather   leather fill with a light top row [tone, rim]
@@ -36,6 +37,7 @@ Painters (options in brackets):
     marks     rectangles of one tone (eye slits, breaths, holes; "clear" cuts holes in a cutout part)
               [rects (x, y, w, h[, tone]) with negative x/y from the far edge, tone, symmetric]
     solid     one tone [tone];  edge   a plain edge [tone]
+    checker   alternating tones in squares `size` texels across, as mail [tones, size]
     test      the smoke test's face colours, a marker at the texture's top-left and the face's letter
 
 Texture space on each face: row 0 is the top. On the four sides the texture's top is the visual top and texture-left is
@@ -221,6 +223,42 @@ SPARTAN = {
     "leather_dark": (112, 23, 14), "leather_darkest": (80, 15, 27),
     "under_light": (100, 54, 41), "under_mid": (80, 39, 36), "under_dark": (61, 28, 28), "under_darkest": (40, 15, 18),
 }
+# Three more of the owner's designs, sent on 8 October 2026 ("I made these 3"): Blockbench renders, lit (the tops
+# brightest), the horned set on a light ground and the two knights on black; each tone is the render's front-face value
+# lifted toward its lit top, and the knights' darkest steps kept as drawn.
+# Berserker (tools/berserker_armor.py): the metal is the pale stone-grey plate with its grey L-marks; "gold" names the
+# white of its trim stripes; "leather" the reds of the crest, pauldrons and stripes, from a bright red to the dark red of
+# their shade; the under-layer the dark grey mail and boots.
+BERSERKER = {
+    "light": (232, 232, 230), "mid_light": (207, 206, 204), "mid": (180, 178, 176), "dark": (150, 147, 146),
+    "seam": (119, 115, 115), "void": (86, 83, 85),
+    "gold_light": (247, 247, 245), "gold_dark": (224, 223, 221),
+    "leather_light": (226, 46, 20), "leather_mid_light": (200, 33, 11), "leather_mid": (168, 27, 10),
+    "leather_dark": (132, 21, 9), "leather_darkest": (90, 15, 4),
+    "under_light": (122, 121, 121), "under_mid": (94, 93, 95), "under_dark": (70, 69, 73), "under_darkest": (45, 45, 49),
+}
+# Paladin (tools/crusader_armor.py): the metal is the white and silver plate, from white through cool silvers to the
+# blue-black of its bars; "gold" names the blue of the gems on the tassets; "leather" the purple of the underskirt and the
+# plume; the under-layer the near-black mail, its checks the under-layer's two darker steps.
+PALADIN = {
+    "light": (252, 254, 255), "mid_light": (223, 227, 237), "mid": (185, 190, 205), "dark": (140, 146, 162),
+    "seam": (96, 102, 120), "void": (54, 58, 74),
+    "gold_light": (98, 114, 255), "gold_dark": (62, 74, 212),
+    "leather_light": (146, 108, 224), "leather_mid_light": (118, 88, 190), "leather_mid": (96, 70, 154),
+    "leather_dark": (70, 50, 120), "leather_darkest": (42, 30, 84),
+    "under_light": (82, 88, 106), "under_mid": (58, 63, 80), "under_dark": (36, 40, 54), "under_darkest": (16, 20, 30),
+}
+# Templar (tools/crusader_armor.py): the metal is the dark slate plate, from the pale grey of its brow, lines and plume
+# to the blue-black of its bars; "gold" names the near-white of the cross's middle and the plume's lit edge; "leather"
+# the dark red of the underskirt and the cloth at the collar; the under-layer the blackened mail.
+TEMPLAR = {
+    "light": (200, 212, 218), "mid_light": (158, 170, 178), "mid": (122, 131, 144), "dark": (88, 96, 108),
+    "seam": (62, 68, 80), "void": (38, 41, 54),
+    "gold_light": (244, 248, 252), "gold_dark": (212, 221, 227),
+    "leather_light": (152, 38, 44), "leather_mid_light": (122, 27, 33), "leather_mid": (97, 20, 26),
+    "leather_dark": (72, 14, 20), "leather_darkest": (48, 10, 15),
+    "under_light": (66, 72, 86), "under_mid": (48, 52, 64), "under_dark": (32, 35, 46), "under_darkest": (18, 19, 27),
+}
 # The smoke test's face colours (tools/armor_smoke.py): one hue per face, so a render shows which face is where.
 TEST = {**STEEL, "t_top": (230, 230, 90), "t_bottom": (90, 70, 40), "t_right": (220, 70, 70), "t_front": (80, 200, 90),
         "t_left": (70, 110, 230), "t_back": (200, 90, 210), "t_mark": (20, 20, 20), "t_rule": (255, 255, 255)}
@@ -313,6 +351,8 @@ def chevron(g, f, corner="in", bands=("light", "mid", "dark", "mid"), border="li
             if corner in ("v", "^"):
                 up = ih - 1 - y if corner == "v" else y
                 k = up - abs(2 * x - (iw - 1)) // 2   # an even width gets a two-texel point
+            elif corner == "o":
+                k = min(x, y, iw - 1 - x, ih - 1 - y)  # rings from the edge in
             else:
                 dx = x if corner[1] == "l" else iw - 1 - x
                 dy = ih - 1 - y if corner[0] == "b" else y
@@ -472,6 +512,13 @@ def solid(g, f, tone="mid_light"):
     g[:, :] = tone
 
 
+def checker(g, f, tones=("under_dark", "under_mid"), size=1):
+    h, w = g.shape
+    for y in range(h):
+        for x in range(w):
+            g[y, x] = tones[(x // size + y // size) % len(tones)]
+
+
 def edge(g, f, tone="mid_light"):
     g[:, :] = tone
     if g.shape[0] >= 2:
@@ -500,7 +547,7 @@ def test(g, f):
 
 PAINTERS = {"plate": plate, "chevron": chevron, "lames": lames, "leather": leather, "strap": strap, "gold": gold,
             "under": under, "rivets": rivets, "hammer": hammer, "marks": marks, "solid": solid, "edge": edge,
-            "test": test}
+            "checker": checker, "test": test}
 PATTERNED = {"plate", "chevron", "lames"}   # squeezed onto a one-texel edge they read as noise: an edge instead
 
 

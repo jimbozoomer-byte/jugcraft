@@ -96,7 +96,7 @@ public final class JugcraftGear {
 	public static final Map<String, Item> TEMPLATES = new LinkedHashMap<>();
 	/** Armor-only tiers with numbers of their own, each worn as a 3D model (tools/gear.py: ARMOR_TIERS). */
 	public static final List<String> ARMOR_TIERS = List.of("bloodthorn", "reforged_white_diamond", "hades", "sunset_gem", "pharaoh",
-			"dread_knight", "valkyrie", "wayfarer", "spartan");
+			"dread_knight", "valkyrie", "wayfarer", "spartan", "berserker", "paladin", "templar");
 	/** Bloodthorn: a step above netherite (37, 3/6/8/3, 15, 3.0, 0.1) in durability, defense, toughness and knockback. */
 	public static final ArmorMaterial BLOODTHORN_ARMOR = new ArmorMaterial(40, defense(3, 7, 9, 3), 15,
 			SoundEvents.ARMOR_EQUIP_NETHERITE, 3.5F, 0.15F, repairs("bloodthorn"), asset("bloodthorn"));
@@ -131,6 +131,16 @@ public final class JugcraftGear {
 	/** Spartan: the heavier helm, tough and steady, middling enchanting; mended with bronze. */
 	public static final ArmorMaterial SPARTAN_ARMOR = new ArmorMaterial(43, defense(3, 7, 8, 4), 18,
 			SoundEvents.ARMOR_EQUIP_GOLD, 3.5F, 0.15F, repairs("spartan"), asset("spartan"));
+	/** Berserker: a point of defense over netherite, steady, middling enchanting; mended with quartz
+	 * (docs/features/armor-designs-8-october.md, as the two below). */
+	public static final ArmorMaterial BERSERKER_ARMOR = new ArmorMaterial(45, defense(3, 7, 8, 3), 16,
+			SoundEvents.ARMOR_EQUIP_IRON, 3.0F, 0.15F, repairs("berserker"), asset("berserker"));
+	/** Paladin: the heavier helm, long wear and good enchanting, netherite's toughness; mended with amethyst shards. */
+	public static final ArmorMaterial PALADIN_ARMOR = new ArmorMaterial(47, defense(3, 6, 8, 4), 22,
+			SoundEvents.ARMOR_EQUIP_DIAMOND, 3.0F, 0.1F, repairs("paladin"), asset("paladin"));
+	/** Templar: the heavier chest, tough and steady, poorer enchanting; fire resistant. */
+	public static final ArmorMaterial TEMPLAR_ARMOR = new ArmorMaterial(43, defense(3, 7, 9, 3), 14,
+			SoundEvents.ARMOR_EQUIP_NETHERITE, 3.5F, 0.15F, repairs("templar"), asset("templar"));
 
 	/** Scuba gear: leather-like protection, repaired with rubber. */
 	public static final ArmorMaterial SCUBA_ARMOR = new ArmorMaterial(10, defense(1, 1, 2, 1), 10,
@@ -179,6 +189,9 @@ public final class JugcraftGear {
 		armorTier("valkyrie", VALKYRIE_ARMOR, false);
 		armorTier("wayfarer", WAYFARER_ARMOR, false);
 		armorTier("spartan", SPARTAN_ARMOR, false);
+		armorTier("berserker", BERSERKER_ARMOR, false);
+		armorTier("paladin", PALADIN_ARMOR, false);
+		armorTier("templar", TEMPLAR_ARMOR, true);
 		for (String id : STYLE_TEMPLATES) {
 			ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Jugcraft.id(id));
 			TEMPLATES.put(id, Registry.register(BuiltInRegistries.ITEM, key,
