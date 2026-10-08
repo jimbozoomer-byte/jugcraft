@@ -1,5 +1,6 @@
 # The Frost Knight helm (tools/armor_icons.py has the symbols): the crown of ice, tallest in the middle, the white
-# helm with its ice-set band and frost spikes at its sides, the dark mask with its white teeth.
+# helm with its ice-set band and frost spikes at its sides, and its great helm's face: the dark eye slit crossed by
+# the ridge, the cheek band, the breathing vents and the chin.
 .......jj.......
 ......jAIj......
 ...j..jIEj..j...
@@ -7,10 +8,10 @@
 .OjIEOAIEEOIEjO.
 OHOHHHHHHHHHLOHO
 .OHLLGLLGLLGMHO.
-OHOLUUUULUUUMOHO
-.OOLUUUULUUUMOO.
-.OHLHUHUUHUHMMO.
-..OLHLHLLHLHMO..
+OHOLUUUHHUUUMOHO
+.OOLLLLHHLLLMOO.
+.OHLULUHHULUMMO.
+..OLULUHHULUMO..
 ..OMMMMMMMMMDO..
 ...OOOOOOOOOO...
 ................

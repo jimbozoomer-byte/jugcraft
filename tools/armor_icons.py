@@ -185,13 +185,15 @@ strip, and the baldric; the black skirt with its gold plate on the left and dark
     G g             the palest cream and the deep brown: "gold_light", "gold_dark"
     C c q Q K       the browns: "leather_light" to "leather_dark", and "leather_darkest", their outline
     U u x X         the black cloth: "under_light" to "under_dark", and "under_darkest", its outline
-Frost Knight (tools/frost_knight_armor.py, armor_paint.FROST_KNIGHT): the crown of ice over the white helm, its
-frost spikes and its grinning mask; the frost on the right shoulder, the navy pauldron on the left and the navy strap
-over the white cuirass; the white plated legs under the navy belt and its ice gem; the white boots.
+Frost Knight (tools/frost_knight_armor.py, armor_paint.FROST_KNIGHT): the crown of ice over the white great helm, its
+frost spikes and its face, the dark eye slit crossed by the ridge over the breathing vents; the frost on the right
+shoulder, the navy pauldron on the left and the navy strap over the white cuirass; the white legs in stacked lames
+under the navy belt and its ice gem, the knee bands; the white boots.
     H L M D S V     the frosted white, white to slate ("O" is its void taken down)
     G g             the ice's palest and bright cyans: "gold_light", "gold_dark"
     C c q Q K       the navy: "leather_light" to "leather_dark", and "leather_darkest", its outline
-    U u x X         the mask's near-black: "under_light" to "under_dark", and "under_darkest", its outline
+    U u x X         the eye slit's and the vents' near-black: "under_light" to "under_dark", and "under_darkest",
+                    its outline
     A I E F J j     the crown's ice: "ice_light", "ice", "ice_mid", "ice_dark", "ice_deep", and "~ice_deep", its
                     outline
 Wight King (tools/wight_king_armor.py, armor_paint.WIGHT_KING): the antlers and the crown of icicles over the slate

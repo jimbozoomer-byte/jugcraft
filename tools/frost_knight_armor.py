@@ -6,13 +6,16 @@ tools/armor_models.py (shapes) and tools/armor_paint.py (the atlas). Its ice swo
 
 What the owner drew, and where it is here (built part for part, as the owner asked: "complex models ... really
 capturing the crazy unique geometry of each armor"):
-    helmet      a frosted white helm whose face is a skull's grin: a dark mask, a white bar down the nose, white teeth
-                over a white jaw; a band round its brow set with ice; a crown of ice crystals on its brow, one tall in
-                the middle, shorter ones beside it; a mane of jagged white frost sticking out from its sides and back.
-                Here: the helm and the crown band; the mask, the nose bar, four teeth and the jaw bar raised on its
-                front; five crystals, each one to three stacked prisms turned on their edge and tapering, the middle
-                one tallest and the outer ones leaning out; eight frost spikes, four out from each side and up or
-                back, three of them flat blades with narrower tips, and two more blades behind
+    helmet      a frosted white great helm: a band round its brow set with ice; below it a dark eye slit across the
+                face, crossed by a white ridge running from the crown down the brow to the nose; under the slit a white
+                cheek band, then a row of dark breathing slits between white bars, then the chin; a crown of ice
+                crystals on its brow, one tall in the middle, shorter ones beside it; a mane of jagged white frost
+                sticking out from its sides and back. Here: the helm and the crown band; the brow plate over the slit,
+                the cheek band and the chin plate raised on its face, four vent bars between them over the dark slits,
+                the ridge down its middle standing proudest; five crystals, each one to three stacked prisms turned on
+                their edge and tapering, the middle one tallest and the outer ones leaning out; eight frost spikes,
+                four out from each side and up or back, three of them flat blades with narrower tips, and two more
+                blades behind
     chestplate  a white cuirass with raised chest plates, a navy strap from the left shoulder to the right hip front and
                 back; on the left shoulder a navy pauldron trimmed white; on the right a mass of white frost spikes,
                 and a white frost mantle hanging down behind that shoulder, spiked along its edge; the forearms bare.
@@ -20,8 +23,10 @@ capturing the crazy unique geometry of each armor"):
                 left arm the pauldron, its dome and its white trim; on the right the frost's base, six spikes out of
                 it and a flap down the outer arm with two spikes; on the body the mantle, hinged out behind the right
                 shoulder, with three spikes out of its edge and three hanging from its foot
-    leggings    white plated thighs, a navy belt with an ice gem at its buckle. Here: the belt and the gem; on each
-                leg the cuisse, two lames over its front, hinged out, and a knee cop
+    leggings    white plated thighs in stacked lames, a navy belt with an ice gem at its buckle, banded knees. Here:
+                the belt and the gem; on each leg the cuisse; three lames stepping down it, each a plate over the front
+                and one over the outer side, hinged out from their tops; a plate behind the thigh; the knee cop, its
+                band and a wing on its outer side
     boots       chunky white boots. Here: the cuff, the greave, two frost spikes at the outer ankle, the sabaton and
                 the toe cap
 Colours: armor_paint.FROST_KNIGHT; the crown's ice in its own five tones.
@@ -61,7 +66,7 @@ def plate(tone, strips="h"):
 H, L, M, D, S, V = "light", "mid_light", "mid", "dark", "seam", "void"       # the frosted white, white to slate
 G, g = "gold_light", "gold_dark"                                            # the ice's palest and bright cyans
 C, c, q, Q, K = "leather_light", "leather_mid_light", "leather_mid", "leather_dark", "leather_darkest"   # the navy
-U, u, x, X = "under_light", "under_mid", "under_dark", "under_darkest"       # the mask's near-black
+U, u, x, X = "under_light", "under_mid", "under_dark", "under_darkest"       # the eye slit's and vents' black
 I0, I1, I2, I3, I4 = "ice_light", "ice", "ice_mid", "ice_dark", "ice_deep"   # the crown's ice
 
 FROST = plate(L)   # the frosted white: its mottling the plate's runs a tone lighter or darker
@@ -69,15 +74,20 @@ FROST = plate(L)   # the frosted white: its mottling the plate's runs a tone lig
 
 # ---------------------------------------------------------------- paint
 PAINT = {
-    "helm": {"top": [FROST, marks((0, 0, 99, 1, H))], "bottom": solid(S), "*": [FROST, marks((0, -1, 99, 1, D))]},
+    "helm": {"top": [FROST, marks((0, 0, 99, 1, H))], "bottom": solid(S),
+             "front": [FROST, marks((1, 3, 99, 1, X), (1, 5, 99, 2, x), (-1, 3, 1, 4, L), (0, -1, 99, 1, D))],
+             "*": [FROST, marks((0, -1, 99, 1, D))]},
     # the crown band, white with ice set in it every few texels
     "band": {"top": solid(H), "bottom": solid(D),
              "*": [solid(H), marks((0, -1, 99, 1, M), (1, 0, 1, 1, g), (4, 0, 1, 1, g), (7, 0, 1, 1, g),
                                    (1, 1, 1, 1, G), (4, 1, 1, 1, G), (7, 1, 1, 1, G))]},
-    "mask": {"front": [solid(X), marks((0, 0, 99, 1, x))], "*": solid(x)},
-    "nose": {"front": [solid(H), marks((0, -1, 99, 1, M))], "top": solid(H), "*": solid(L)},
-    "tooth": {"front": [solid(H), marks((0, -1, 99, 1, L))], "top": solid(H), "*": solid(M)},
-    "jaw": {"front": [solid(H), marks((0, -1, 99, 1, M))], "top": solid(H), "bottom": solid(D), "*": solid(L)},
+    # the face's reliefs: the brow plate, the cheek band and the chin plate frosted white, the vent bars and the ridge
+    # lit along one edge
+    "visor": {"front": [FROST, marks((0, 0, 99, 1, H), (0, -1, 99, 1, M))], "top": solid(H), "bottom": solid(D),
+              "*": solid(L)},
+    "vent": {"front": [solid(H), marks((-1, 0, 1, 99, M))], "top": solid(H), "bottom": solid(D), "*": solid(L)},
+    "ridge": {"front": [solid(H), marks((0, 0, 1, 99, H), (-1, 0, 1, 99, L))], "top": solid(H), "bottom": solid(M),
+              "*": solid(L)},
     # the ice: each prism lit on its upper faces, deep at its foot
     "ice": {"top": solid(I0), "bottom": solid(I3), "front": [rows(I1, I0), marks((0, 0, 1, 99, I0))],
             "right": [rows(I0, I1), marks((-1, 0, 1, 99, I2))], "left": [rows(I1, I2), marks((0, 0, 1, 99, I0))],
@@ -108,6 +118,11 @@ PAINT = {
     "gem": {"front": [solid(I1), marks((0, 0, 1, 1, I0), (-1, -1, 1, 1, I3))], "top": solid(I0), "*": solid(I2)},
     "cuisse": {"top": solid(H), "bottom": solid(S), "*": [FROST, marks((0, 0, 99, 1, H))]},
     "lame": {"top": solid(H), "bottom": solid(D), "*": [rows(H, L), marks((0, -1, 99, 1, M))]},
+    "lame_side": {"top": solid(H), "bottom": solid(D), "*": [rows(L, M), marks((0, 0, 99, 1, H), (0, -1, 99, 1, D))]},
+    "thigh_back": {"top": solid(H), "bottom": solid(D), "*": [FROST, marks((0, 0, 99, 1, H), (0, -1, 99, 1, M))]},
+    "knee_band": {"top": solid(H), "bottom": solid(D), "*": [solid(H), marks((0, -1, 99, 1, M), (2, 0, 1, 1, g),
+                                                                              (-3, 0, 1, 1, g))]},
+    "wing": {"top": solid(H), "*": [solid(L), marks((0, 0, 1, 99, H), (0, -1, 99, 1, M))]},
     "knee": P("chevron", corner="o", bands=(H, L), border=None, core=(M, D), outside=H),
     "cuff": {"top": solid(H), "bottom": solid(M), "*": [solid(H), marks((0, -1, 99, 1, M))]},
     "greave": {"top": solid(H), "*": [FROST, marks((0, -1, 99, 1, M))]},
@@ -165,12 +180,12 @@ def riding(part, on):
 # ---------------------------------------------------------------- the helmet
 def helmet():
     """The helm, 0.75 clear of the head, its top 0.75 above it, closed underneath 0.65 below; the crown band 0.2 proud
-    round it; on its front the mask 0.4 proud, the nose bar, the teeth and the jaw bar 0.3 to 0.7 proud of that (the
-    nose bar's front 0.05 off the teeth's, which never meet it); the crystals on the brow; the frost spikes, each
-    standing on the helm's side or back and leaning out."""
-    tooth = am.span("tooth_right", (-1.35, -3.0, -5.45), (-0.6, -1.4, -5.15), skip="back", paint=PAINT["tooth"])
-    tooth_outer = am.span("tooth_outer_right", (-3.05, -3.0, -5.45), (-2.3, -1.4, -5.15), skip="back",
-                          paint=PAINT["tooth"])
+    round it; on its face, 0.35 proud, the brow plate over the eye slit, the cheek band under it and the chin plate,
+    and between the cheek band and the chin four vent bars 0.3 proud over the dark breathing slits; the ridge down its
+    middle from the crown band to the vents, 0.55 proud, crossing the slit as the nose bar; the crystals on the brow;
+    the frost spikes, each standing on the helm's side or back and leaning out."""
+    vents = [am.span(f"vent_{i}_right", (x0, -3.75, -5.05), (x0 + 0.7, -2.2, -4.75), skip=("back", "top", "bottom"),
+                     paint=PAINT["vent"]) for i, x0 in enumerate((-3.45, -2.05))]
     side = [*crystal("crystal_side_right", (-2.3, -8.25, -3.6), [(2.5, 1.4), (1.75, 0.7)], lean=8),
             *crystal("crystal_outer_right", (-3.9, -8.25, -3.5), [(1.75, 0.9)], lean=20),
             *flame("spike_0_right", (-4.75, -7.5, -2.75), 3.75, 1.2, out=48, back=5),
@@ -179,10 +194,11 @@ def helmet():
             rod("spike_3_right", (-4.25, -8.75, 1.25), 3.0, 0.6, out=30, back=28, paint=PAINT["spike"])]
     return [am.span("helm", (-4.75, -8.75, -4.75), (4.75, 0.65, 4.75), paint=PAINT["helm"]),
             am.span("band", (-4.95, -8.25, -4.95), (4.95, -6.75, 4.95), paint=PAINT["band"]),
-            am.span("mask", (-3.75, -6.5, -5.15), (3.75, -0.75, -4.75), skip="back", paint=PAINT["mask"]),
-            am.span("nose", (-0.6, -6.75, -5.5), (0.6, -3.5, -5.15), skip="back", paint=PAINT["nose"]),
-            tooth, tooth_outer, *am.mirror_all([tooth, tooth_outer]),
-            am.span("jaw", (-3.75, -1.4, -5.45), (3.75, -0.5, -5.15), skip="back", paint=PAINT["jaw"]),
+            am.span("brow", (-4.25, -6.75, -5.1), (4.25, -5.75, -4.75), skip="back", paint=PAINT["visor"]),
+            am.span("cheek", (-4.25, -4.75, -5.1), (4.25, -3.75, -4.75), skip="back", paint=PAINT["visor"]),
+            *vents, *am.mirror_all(vents),
+            am.span("chin", (-4.25, -2.2, -5.1), (4.25, -0.35, -4.75), skip="back", paint=PAINT["visor"]),
+            am.span("ridge", (-0.45, -8.25, -5.3), (0.45, -2.2, -4.95), skip="back", paint=PAINT["ridge"]),
             *crystal("crystal_crown", (0.0, -8.25, -3.7), [(3.0, 1.8), (2.5, 1.2), (1.75, 0.6)]),
             *side, *am.mirror_all(side),
             *flame("spike_back_right", (-1.75, -6.5, 4.75), 3.5, 1.2, out=18, back=62, side=True),
@@ -254,13 +270,25 @@ def waist():
 
 
 def leg():
-    """The right leg (leg space: x -2..2, y 0..12, z -2..2): the cuisse round the thigh, 0.77 off it, from up under the
-    belt to the knee; two lames over its front, 1.15 to 1.4 off (clear of vanilla leggings' 1.0 shell), hinged out from
-    their tops; the knee cop."""
-    return [am.span("cuisse_right", (-2.77, -0.45, -2.77), (2.77, 6.75, 2.77), paint=PAINT["cuisse"]),
-            am.hinge(am.span("lame_0_right", (-2.45, 0.25, -3.4), (1.65, 2.9, -3.15), paint=PAINT["lame"]), "top", 6),
-            am.hinge(am.span("lame_1_right", (-2.6, 2.6, -3.65), (1.8, 5.25, -3.4), paint=PAINT["lame"]), "top", 9),
-            am.diamond("knee_right", (-0.3, 6.35, -3.2), 2.4, 0.6, pitch=12, paint=PAINT["knee"])]
+    """The right leg (leg space: x -2..2, y 0..12, z -2..2): the cuisse round the thigh, 0.77 off its front, back and
+    inner side and 1.15 off its outer side, from up under the belt to the knee; three lames stepping down it, each a
+    plate over the front, 1.15 and more off (clear of vanilla leggings' 1.0 shell) and each lower one 0.2 further out,
+    and one over the outer side, 0.15 off the cuisse and each lower one 0.15 further out, hinged out from their tops; a
+    plate behind the thigh; the knee cop, the band round the knee under it and a wing on the knee's outer side."""
+    lames = []
+    for i in range(3):   # each lower lame 0.2 further out, and its edges 0.15 in from the one above's
+        y0, out, side, inset = 0.25 + 2.0 * i, 0.2 * i, 0.15 * i, 0.15 * i
+        lames += [am.hinge(am.span(f"lame_{i}_right", (-2.45 - out, y0, -3.4 - out), (1.65 - inset, y0 + 2.4, -3.15 - out),
+                                   paint=PAINT["lame"]), "top", 5 + 2 * i),
+                  am.hinge(am.span(f"lame_side_{i}_right", (-3.55 - side, y0, -2.55 + inset), (-3.3 - side, y0 + 2.4, 1.85 - inset),
+                                   paint=PAINT["lame_side"]), "top", 3 + 1.5 * i)]
+    return [am.span("cuisse_right", (-3.15, -0.45, -2.77), (2.77, 6.75, 2.77), paint=PAINT["cuisse"]),
+            *lames,
+            am.hinge(am.span("thigh_back_right", (-2.45, 0.25, 3.15), (1.65, 5.0, 3.4), paint=PAINT["thigh_back"]),
+                     "top", 4),
+            am.span("knee_band_right", (-3.3, 5.75, -3.15), (3.15, 6.5, 3.15), paint=PAINT["knee_band"]),
+            am.diamond("knee_right", (-0.3, 6.35, -3.45), 2.4, 0.6, pitch=12, paint=PAINT["knee"]),
+            am.hinge(am.span("wing_right", (-3.65, 5.2, -1.6), (-3.4, 7.2, 1.2), paint=PAINT["wing"]), "top", 10)]
 
 
 def boot():
