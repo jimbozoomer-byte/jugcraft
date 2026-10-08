@@ -46,11 +46,13 @@ public final class TransportCrateClientTests implements FabricClientGameTest {
             context.waitTicks(8);
             context.runOnClient(c->{for(var entry:MobTransportCrate.occupants(c.player.getMainHandItem()))check(local.peepo.client.TransportCratePreview.mob(entry)!=null,"every stored mob has a client preview: "+entry.getStringOr("Type",""));});
             context.takeScreenshot("wood_transport_crate_held");
+            holdingViews(context,server,"wood");
             server.runOnServer(s->MobTransportCrate.open(player(s.overworld()),InteractionHand.MAIN_HAND));context.waitForScreen(local.peepo.client.TransportCrateScreen.class);context.waitTicks(8);context.takeScreenshot("wood_transport_crate_menu");
             context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,2));
             server.waitFor(s->MobTransportCrate.count(crate)==3,100);check(true,"client button releases selected mob beside player");
             context.runOnClient(c->c.player.closeContainer());context.waitForScreen(null);
             server.runOnServer(s->fill(s.overworld(),true));context.waitTicks(8);context.takeScreenshot("iron_transport_crate_held");
+            holdingViews(context,server,"iron");
             server.runOnServer(s->MobTransportCrate.open(player(s.overworld()),InteractionHand.MAIN_HAND));context.waitForScreen(local.peepo.client.TransportCrateScreen.class);context.waitTicks(8);context.takeScreenshot("iron_transport_crate_menu");
             server.runOnServer(s->{var p=player(s.overworld());var menu=p.containerMenu;p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(MobTransportCrate.IRON));check(!menu.stillValid(p) && !menu.clickMenuButton(p,0),"replacing held stack invalidates old menu");});
             context.waitForScreen(null);
@@ -79,6 +81,16 @@ public final class TransportCrateClientTests implements FabricClientGameTest {
         var grid=new ArrayList<ItemStack>();for(int i=0;i<9;i++)grid.add(i==4?crate:new ItemStack(Items.IRON_INGOT));
         var input=CraftingInput.of(3,3,grid);check(TransportCrateUpgrade.INSTANCE.matches(input,level),"upgrade shape accepted");crate=TransportCrateUpgrade.INSTANCE.assemble(input);p.setItemInHand(InteractionHand.MAIN_HAND,crate);
         check(crate.is(MobTransportCrate.IRON) && MobTransportCrate.count(crate)==4 && MobTransportCrate.capacity(crate)==8,"filled upgrade keeps all claims");grid.set(0,new ItemStack(Items.DIRT));check(!TransportCrateUpgrade.INSTANCE.matches(CraftingInput.of(3,3,grid),level),"invalid upgrade rejected");
+    }
+    private void holdingViews(ClientGameTestContext context,TestServerContext server,String kind){
+        context.runOnClient(c->{c.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT);c.options.fov().set(45);});
+        context.waitTicks(8);context.takeScreenshot(kind+"_crate_right_hand");
+        server.runOnServer(s->{var p=player(s.overworld());p.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);p.setItemInHand(InteractionHand.OFF_HAND,crate);p.inventoryMenu.broadcastChanges();});
+        context.waitTicks(8);context.takeScreenshot(kind+"_crate_left_hand");
+        context.runOnClient(c->{c.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);c.options.fov().set(70);});
+        context.waitTicks(8);context.takeScreenshot(kind+"_crate_offhand_first_person");
+        server.runOnServer(s->{var p=player(s.overworld());p.setItemInHand(InteractionHand.OFF_HAND,ItemStack.EMPTY);p.setItemInHand(InteractionHand.MAIN_HAND,crate);p.inventoryMenu.broadcastChanges();});
+        context.waitTicks(4);
     }
     private void releaseTests(ServerLevel level){
         var p=player(level);var copied=crate.copy();var at=Vec3.atBottomCenterOf(base.east(3));

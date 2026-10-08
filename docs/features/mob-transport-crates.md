@@ -32,6 +32,8 @@ The rectangular open slat geometry follows the owner's supplied crate photograph
 
 Wood: byte-for-byte owner texture `art/owner-library/originals/Blocks/biomes and tree blocks/origin_oak_planks.png`, imported by `tools/owner_art.py` into `assets/jugcraft/textures/block/transport_crate_wood.png`. Original library files remain untouched. Mob previews use each installed mob's existing renderer and textures. No Mojang texture files are copied.
 
+The owner's second reference informed the iron revision: folded plates wrap all four corners, with top shoes, three rows of fastening tabs and raised rivets on both faces, plus lower perimeter braces. The existing wood and iron textures are reused. Separate flanges meet at edges rather than overlapping coplanar faces. Both crates have explicit left/right first-person and third-person transforms, and small outside handholds (wood or iron); the third-person grip stays outside the storage cavity. The shell and occupant layer share the transforms. This is a baked-model change, with no new animation hooks or server work.
+
 ## Validation
 
 Focused runtime class: `TransportCrateClientTests` (only this class selected, unrelated feature tests not run): **42 assertions passed**, including an actual world save/reopen and release afterward. Covers captures, friendly/hostile eligibility, capacity, other-owner protection, filled upgrade, entity/item/ledger persistence, invalid and blocked releases, identity and companion inventory/settings preservation, duplicate claims, actual client menu button and held-stack invalidation. Explicitly checks that Peepo and Jughead client previews can be created; display-only companion loading skips the server-only transport goal.
@@ -39,3 +41,5 @@ Focused runtime class: `TransportCrateClientTests` (only this class selected, un
 Runtime screenshots of both crates and their menus were inspected. Local evidence: `build/crate-final.log` and `build/transport-crate-evidence/`. Compilation/assembly, repository documentation checks and the owner-art import check passed. The final JAR and complete launcher-managed pack are under `build/libs/` and `build/distributions/`.
 
 Two independent clients and a populated multiplayer server remain manual validation; no existing player worlds are modified by the automated checks.
+
+Carry/corner revision: the focused test also photographs both variants in the right hand, left hand and first-person offhand. Evidence is in `build/crate-corner-grip-final.log` and `build/transport-crate-carry-evidence/`.
