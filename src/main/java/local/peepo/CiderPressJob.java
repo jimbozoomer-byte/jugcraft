@@ -19,8 +19,8 @@ public final class CiderPressJob implements CompanionJob {
         expire();long now=npc.level().getGameTime();
         if(worker==null && (now>=nextSpace || checkedHeight!=npc.getBbHeight())){
             nextSpace=now+20;checkedHeight=npc.getBbHeight();entrance=null;
-            for(var side:Direction.Plane.HORIZONTAL){
-                var p=Vec3.atBottomCenterOf(stationPosition().relative(side));
+            for(var side:Direction.Plane.HORIZONTAL)for(int dy=0;dy>=-1;dy--){
+                var p=Vec3.atBottomCenterOf(stationPosition().relative(side).offset(0,dy,0));
                 var floor=BlockPos.containing(p).below();
                 if(!npc.level().hasChunkAt(floor) || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP))continue;
                 if(!npc.level().noCollision(new AABB(p.x-.24,p.y,p.z-.24,p.x+.24,p.y+npc.getBbHeight(),p.z+.24)))continue;

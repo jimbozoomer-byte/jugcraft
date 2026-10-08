@@ -5,7 +5,6 @@ import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /** A pot owns one short-lived reservation. No ticking worker search or saved entity reference. */
@@ -15,6 +14,7 @@ public final class CookingPotJob implements CompanionJob {
     private long lease, nextEntrance;
     private Vec3 entrance;
     private Direction rimSide = Direction.NORTH;
+    private double rimHeight = WorkAnimation.STIR_HEIGHT;
     private boolean mounted;
     private long nextClearance;
     private float checkedHeight;
@@ -26,11 +26,13 @@ public final class CookingPotJob implements CompanionJob {
             nextEntrance = npc.level().getGameTime() + 20;
             entrance = null;
             nextClearance = 0;
+            updateRimHeight();
             for (var side : Direction.Plane.HORIZONTAL) for (int dy = -1; dy <= 0; dy++) {
                 var pos = stationPosition().relative(side).offset(0, dy, 0);
                 if (!npc.level().hasChunkAt(pos) || !npc.level().getBlockState(pos.below()).isFaceSturdy(npc.level(), pos.below(), Direction.UP)) continue;
                 var point = Vec3.atBottomCenterOf(pos);
-                if (!npc.level().noCollision(new AABB(point.x-.22, point.y, point.z-.22, point.x+.22, point.y+1, point.z+.22))) continue;
+                // Check the real companion size at both the lower entrance and this side of the rim.
+                if (!clearAt(npc, point) || !clearAt(npc, rimPosition(side))) continue;
                 if (entrance == null || npc.position().distanceToSqr(point) < npc.position().distanceToSqr(entrance)) {
                     entrance = point; rimSide = side;
                 }
@@ -52,7 +54,7 @@ public final class CookingPotJob implements CompanionJob {
             npc.setWorkAnimation(WorkAnimation.NONE, stationPosition());
             if (mounted) { npc.setNoGravity(false); npc.setDeltaMovement(Vec3.ZERO); npc.leaveCompanionBed(); }
         }
-        worker = null; mounted = false;
+        worker = null; mounted = false; nextEntrance = nextClearance = 0;
     }
     public Kind kind() { return Kind.WORK; }
     public BlockPos stationPosition() { return pot.getBlockPos(); }
@@ -75,16 +77,31 @@ public final class CookingPotJob implements CompanionJob {
         long now=npc.level().getGameTime();
         if(now<nextClearance && checkedHeight==npc.getBbHeight())return clearance;
         nextClearance=now+20;checkedHeight=npc.getBbHeight();
-        var pos=stationPosition();
-        for(int dx=-1;dx<=1;dx+=2)for(int dz=-1;dz<=1;dz+=2)
-            if(!npc.level().hasChunkAt(pos.offset(dx,0,dz)))return clearance=false;
+        updateRimHeight();
+        if (!mounted) {
+            if (entrance == null || !clearAt(npc, entrance)) return clearance=false;
+            var floor=BlockPos.containing(entrance).below();
+            if(!npc.level().hasChunkAt(floor) || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP))return clearance=false;
+        }
         // Stationary rim position, including Jughead's jug; at most once per second.
-        return clearance=npc.level().noCollision(npc.getBoundingBox().move(rimPosition().subtract(npc.position())));
+        return clearance=clearAt(npc, rimPosition());
     }
-    private Vec3 rimPosition() {
+    private boolean clearAt(PeepoEntity npc, Vec3 point) {
+        var bounds=npc.getBoundingBox().move(point.subtract(npc.position()));
+        for(int x=BlockPos.containing(bounds.minX,0,0).getX();x<=BlockPos.containing(bounds.maxX,0,0).getX();x++)
+            for(int z=BlockPos.containing(0,0,bounds.minZ).getZ();z<=BlockPos.containing(0,0,bounds.maxZ).getZ();z++)
+                if(!npc.level().hasChunkAt(new BlockPos(x,stationPosition().getY(),z)))return false;
+        return npc.level().noCollision(bounds);
+    }
+    private void updateRimHeight() {
+        var shape=pot.getBlockState().getCollisionShape(pot.getLevel(),stationPosition());
+        rimHeight=(shape.isEmpty()?WorkAnimation.STIR_HEIGHT:shape.max(Direction.Axis.Y))+.001;
+    }
+    private Vec3 rimPosition() { return rimPosition(rimSide); }
+    private Vec3 rimPosition(Direction side) {
         var pos=stationPosition();
-        return new Vec3(pos.getX()+.5+rimSide.getStepX()*WorkAnimation.STIR_RADIUS,
-            pos.getY()+WorkAnimation.STIR_HEIGHT,pos.getZ()+.5+rimSide.getStepZ()*WorkAnimation.STIR_RADIUS);
+        return new Vec3(pos.getX()+.5+side.getStepX()*WorkAnimation.STIR_RADIUS,
+            pos.getY()+rimHeight,pos.getZ()+.5+side.getStepZ()*WorkAnimation.STIR_RADIUS);
     }
     public boolean claim(PeepoEntity npc) {
         if (workStatus(npc) != CompanionStatus.READY) return false;

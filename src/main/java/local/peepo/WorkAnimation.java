@@ -27,7 +27,7 @@ public enum WorkAnimation {
             default -> INTERACT;
         };
     }
-    // Centre of the pot's one-pixel-wide rim, at its actual top surface.
-    public static final double STIR_RADIUS=5.0/16, STIR_HEIGHT=8.5/16;
+    // Rim offset and fallback height; the job reads the pot's real collision surface.
+    public static final double STIR_RADIUS=5.0/16, STIR_HEIGHT=10.0/16;
     public static double stirPhase(long tick,float partial){return (Math.floorMod(tick,80)+partial)*Math.PI*2/80;}
 }

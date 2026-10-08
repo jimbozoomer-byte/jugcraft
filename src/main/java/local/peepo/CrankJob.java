@@ -22,11 +22,11 @@ public final class CrankJob implements CompanionJob {
         if(worker==null && (npc.level().getGameTime()>=nextSpace || height!=npc.getBbHeight())){
             nextSpace=npc.level().getGameTime()+20;height=npc.getBbHeight();entrance=null;
             Direction face=crank.getBlockState().getValue(HandCrankBlock.FACING);
-            for(Direction side:Direction.Plane.HORIZONTAL){
+            for(Direction side:Direction.Plane.HORIZONTAL)for(int dy=0;dy>=-1;dy--){
                 if(face.getAxis().isHorizontal() && side!=face.getOpposite())continue;
-                var p=Vec3.atBottomCenterOf(stationPosition()).add(side.getStepX()*.58,0,side.getStepZ()*.58);
+                var p=Vec3.atBottomCenterOf(stationPosition()).add(side.getStepX()*.58,dy,side.getStepZ()*.58);
                 var floor=BlockPos.containing(p).below();
-                var box=new AABB(p.x-.24,p.y,p.z-.24,p.x+.24,p.y+height+.6,p.z+.24);
+                var box=new AABB(p.x-.24,p.y,p.z-.24,p.x+.24,p.y+height+.6-dy,p.z+.24);
                 if(!npc.level().hasChunkAt(floor) || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP)
                     || !npc.level().noCollision(box))continue;
                 if(entrance==null || npc.position().distanceToSqr(p)<npc.position().distanceToSqr(entrance))entrance=p;
@@ -53,7 +53,7 @@ public final class CrankJob implements CompanionJob {
             nextCheck=now+20;
             var floor=BlockPos.containing(entrance).below();
             if(!p.level().hasChunkAt(floor) || !p.level().getBlockState(floor).isFaceSturdy(p.level(),floor,Direction.UP)
-                || !p.level().noCollision(new AABB(entrance.x-.24,entrance.y,entrance.z-.24,entrance.x+.24,entrance.y+p.getBbHeight()+.6,entrance.z+.24))){
+                || !p.level().noCollision(new AABB(entrance.x-.24,entrance.y,entrance.z-.24,entrance.x+.24,stationPosition().getY()+p.getBbHeight()+.6,entrance.z+.24))){
                 entrance=null;nextSpace=0;return CompanionStatus.BLOCKED;
             }
             demand=KineticNetworks.companionDemand((ServerLevel)p.level(),stationPosition(),crank.getBlockState().getValue(HandCrankBlock.FACING),pausedFull);

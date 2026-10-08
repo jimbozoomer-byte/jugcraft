@@ -4,6 +4,14 @@ Owner-requested addition on `peepo-companion`, implemented with OpenAI Codex (GP
 
 The single ghost selector described in the original implementation below has been replaced by the [nine-output Filter editor](companion-kitchen-filters.md). Empty filters now also enable automatic Supply recipe choice; existing choices migrate to the first entry.
 
+## Raised workstation access correction — 8 October 2026
+
+OpenAI Codex (GPT-6) corrected the pot mount after the current pot collision body grew to 10/16 block while the helper still stood at 8.5/16. That overlap reported Path Blocked even when the floor beside a stove was reachable. The stirring position now follows the actual collision surface with a 0.001-block clearance. All eight entrance candidates (four sides at the pot's level or one block below) check the companion's real bounds and their corresponding rim position before selection. A blocked rim side no longer hides another clear side. Existing Jughead headroom, safe-exit recovery, collision checks, one-helper lease and server path budgets remain in effect. Ground support is rechecked while approaching.
+
+Cider Press and Hand Crank operators now also consider the adjacent level one block below; crank clearance includes the extra vertical reach of its jump animation. Cutting Boards, standard processors and ordinary Supply/Output deliveries already consider that lower level. Hearth Oven deliveries retain their front-mouth standing requirement for pie placement. There are no new scans, path requests per candidate, chunk loads, recipes, costs or assets; pot entrance/rim checks remain cached for 20 ticks.
+
+Validation for this correction: assembly/compilation and launcher packaging only; automated and in-game tests were not run. Earlier runtime results below predate this fix. Owner checks: a pot on a lit stove with ingredients, Peepo and Jughead, each approach side, obstructed rim/headroom, a raised press/crank, and release back to the lower entrance.
+
 ## Use
 
 1. Feed a Peepo or Jughead to tame it. Select it with the Companion Planner, then right-click a Cooking Pot to add it to the four ordered workstations. Work mode, priorities, schedules and recovery thresholds apply as they do to wheels.
