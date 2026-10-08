@@ -20,6 +20,7 @@ public final class CompanionOrders {
     private long nextCommand;
     CompanionOrders(PeepoEntity npc){this.npc=npc;}
     public boolean tamed(){return owner!=null;}
+    Player ownerPlayer(){return owner!=null && npc.level() instanceof net.minecraft.server.level.ServerLevel level?level.getServer().getPlayerList().getPlayer(owner):null;}
     public boolean owner(Player p){return p.getUUID().equals(owner);}
     public boolean allowed(Player p){return owner(p) || owner!=null && party && JugcraftParties.sameParty(owner,p.getUUID());}
     public boolean foodAccess(UUID sourceOwner,boolean shared){return owner!=null && (owner.equals(sourceOwner) || shared && JugcraftParties.sameParty(owner,sourceOwner));}
@@ -40,7 +41,7 @@ public final class CompanionOrders {
         long now=npc.level().getGameTime();if(now<nextCommand)return false;nextCommand=now+2;
         if(button>=20 && button<20+CompanionAssignments.COUNT){npc.assignments.clear(button-20);return true;}
         if(button>=30 && button<38)return npc.assignments.moveWork(1+(button-30)/2,button%2==0?-1:1);
-        if(button>=40 && button<=47)return npc.preferences.command(button);
+        if(button>=40 && button<=48)return npc.preferences.command(button);
         if(button>=50 && button<58)return npc.assignments.cycleTransport(1+(button-50)/2,button%2==0);
         if(button<0 || button>8)return false;
         if(button<=4){mode=Mode.values()[button];if(mode==Mode.FOLLOW)follow=p.getUUID();if(mode==Mode.STAY)stay=here();}
@@ -54,6 +55,7 @@ public final class CompanionOrders {
     public void assignmentRemoved(boolean isHome){if(isHome)home=null;apply();}
     public void workReordered(){if(mode==Mode.WORK && !npc.isRecovering())apply();}
     private void apply(){
+        npc.social.cancel();
         npc.resetCompanionRoutine();npc.getNavigation().stop();npc.setRestMode(CompanionEnergy.Rest.NONE);npc.setNoGravity(false);npc.leaveCompanionBed();
         GlobalPos anchor=mode==Mode.HOME?home:mode==Mode.WORK?work:mode==Mode.STAY?stay:null;
         if(npc.assignments.homeManaged() || npc.assignments.workManaged())npc.clearHome();

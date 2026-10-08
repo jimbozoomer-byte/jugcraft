@@ -29,6 +29,7 @@ public final class CompanionTransport extends Goal {
     private CompanionStatus porterState=CompanionStatus.IDLE;
     private final Map<BlockPos,Long> blocked=new HashMap<>();
     public CompanionTransport(PeepoEntity npc){this.npc=npc;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK));}
+    boolean hasPendingDelivery(){return !manifest.isEmpty() || tending!=null;}
     public boolean reserved(int slot){return cargoSlot==slot && (tending!=null || !manifest.isEmpty());}
     public CompanionStatus activity(){return active?status:CompanionStatus.IDLE;}
     public CompanionStatus porterStatus(){return npc.assignments.get(CompanionAssignments.SUPPLY)==null || npc.assignments.get(CompanionAssignments.OUTPUT)==null?CompanionStatus.PORTER_SETUP:porterState;}

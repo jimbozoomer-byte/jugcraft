@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 /** Inventory stays visible while the right panel switches between assignments and routine preferences. */
 public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu> {
-    private final Button[] buttons=new Button[9],remove=new Button[CompanionAssignments.COUNT],moveUp=new Button[5],moveDown=new Button[5],settings=new Button[8];
+    private final Button[] buttons=new Button[9],remove=new Button[CompanionAssignments.COUNT],moveUp=new Button[5],moveDown=new Button[5],settings=new Button[9];
     private final Button[] transport=new Button[8];
     private static final String[] MODES={"Follow","Stay","Home","Work","Porter"};
     private int panel; // Jobs and routine. Transport controls live on each job row.
@@ -37,6 +37,8 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
                 tip(moveUp[i],"Move up: higher work priority");tip(moveDown[i],"Move down: lower work priority");
             }
         }
+        settings[8]=button("Social",100,181,212,18,48);
+        tip(settings[8],"Wave to your owner and have short conversations while standing idle. Work, food, rest and commands take priority.");
         settings[0]=button("Schedule",100,78,212,18,40);
         settings[1]=button("Alerts",100,99,103,18,41);
         settings[2]=button("Food",207,99,105,18,42);
@@ -70,6 +72,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             moveUp[i].active=remove[i].active && i>1 && remove[i-1].active;
             moveDown[i].active=remove[i].active && i<4 && remove[i+1].active;
         }
+        settings[8].setMessage(Component.literal(menu.value(39)==1?"Social: On":"Social: Off"));
         settings[0].setMessage(Component.literal("Schedule: "+CompanionPreferences.SCHEDULES[Math.clamp(menu.value(18),0,2)]));
         settings[1].setMessage(Component.literal(menu.value(23)==1?"Alerts: On":"Alerts: Off"));
         settings[2].setMessage(Component.literal(CompanionPreferences.FOODS[Math.clamp(menu.value(21),0,1)]));

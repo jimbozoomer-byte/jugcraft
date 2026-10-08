@@ -48,6 +48,8 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.sleeping=entity.getRestMode()==CompanionEnergy.Rest.SLEEPING;
         state.sitting=entity.getRestMode()==CompanionEnergy.Rest.SITTING;
         state.work=state.eating || state.sleeping || state.sitting || state.wheelRunning || !entity.isAlive()?WorkAnimation.NONE:entity.workAnimation();
+        state.social=state.eating || state.sleeping || state.sitting || state.wheelRunning || state.work!=WorkAnimation.NONE || !entity.isAlive()?CompanionSocial.NONE:entity.socialPose();
+        state.socialTime=(float)Math.clamp(entity.level().getGameTime()-entity.socialStarted()+partialTick,0,120);
         state.workPhase=(float)WorkAnimation.stirPhase(entity.level().getGameTime(),partialTick);
         if(state.work==WorkAnimation.CRANK){
             var target=entity.workTarget();var level=entity.level();

@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.flag.FeatureFlags;
 
 public final class CompanionMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT=39, RECIPE_START=46;
+    public static final int DATA_COUNT=40, RECIPE_START=46;
     public static final int WIDTH=480, RECIPE_X=416;
     public static MenuType<CompanionMenu> TYPE;
     private final PeepoEntity npc;
@@ -30,6 +30,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
         super(TYPE,id);this.npc=npc;playerInventory=inventory;
         data=npc==null?new SimpleContainerData(DATA_COUNT):new ContainerData(){
             public int get(int i){
+                if(i==39)return npc.preferences.social?1:0;
                 if(i>=31 && i<39)return transportDisplay[i-31];
                 if(i>=29 && i<31)return npc.report.row(i-29+6);
                 if(i>=25 && i<29)return recipeEnabled[i-25];

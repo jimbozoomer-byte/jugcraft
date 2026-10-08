@@ -88,6 +88,21 @@ public final class PeepoModel extends EntityModel<PeepoState> {
         if(s.holdingLight && !s.held.isEmpty() && !s.eating && !s.sleeping && s.work==local.peepo.WorkAnimation.NONE){
             rightArm.xRot=-2.55F;rightArm.yRot=0;rightArm.zRot=.15F;
         }
+        if(s.social!=local.peepo.CompanionSocial.NONE && !s.eating && !s.sleeping && !s.sitting && !s.wheelRunning && s.work==local.peepo.WorkAnimation.NONE){
+            // The free left hand waves; held tools/lights stay in the existing right-hand pose.
+            float t=s.socialTime;
+            if(s.social==local.peepo.CompanionSocial.WAVE){
+                float fade=Math.min(1,Math.min(t/5,(40-t)/5));fade=Math.max(0,fade);
+                leftArm.xRot=-.35F*fade;leftArm.yRot=.2F*fade;
+                leftArm.zRot=Mth.lerp(fade,leftArm.zRot,-2.15F+Mth.sin(t*.65F)*.35F);
+                head.xRot+=Mth.sin(t*.18F)*.045F*fade;
+            }else if(s.social==local.peepo.CompanionSocial.TALK){
+                float gesture=Mth.sin(t*.3F),fade=Math.min(1,Math.min(t/4,(30-t)/4));fade=Math.max(0,fade);
+                leftArm.xRot=(-.8F+gesture*.2F)*fade;leftArm.yRot=.3F*fade;leftArm.zRot=-.25F*fade;
+                if(s.held.isEmpty()){rightArm.xRot=(-.6F-gesture*.18F)*fade;rightArm.yRot=-.25F*fade;rightArm.zRot=.2F*fade;}
+                head.xRot+=Mth.sin(t*.28F)*.07F;
+            }else head.xRot+=Mth.sin(t*.16F)*.045F;
+        }
         if(s.sleeping) {
             head.xRot=head.yRot=0;
             leftLeg.xRot=rightLeg.xRot=0;

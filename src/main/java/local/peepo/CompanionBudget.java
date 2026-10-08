@@ -9,7 +9,7 @@ import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 /** Server-wide admission budgets, shared across dimensions. Queues contain UUIDs, never entities/worlds. */
 public final class CompanionBudget {
     private static final Map<MinecraftServer,CompanionBudget> SERVERS=new WeakHashMap<>();
-    private final Lane searches=new Lane(),paths=new Lane();
+    private final Lane searches=new Lane(),paths=new Lane(),socials=new Lane();
     private static final class Lane {
         final LinkedHashMap<UUID,Integer> waiting=new LinkedHashMap<>();
         int tick=-1,used;long granted,deferred;
@@ -37,9 +37,15 @@ public final class CompanionBudget {
     }
     public static boolean search(PeepoEntity npc){return take(npc,false);}
     public static boolean path(PeepoEntity npc){return take(npc,true);}
+    /** Cosmetic searches have their own small allowance; they cannot consume work/path slots. */
+    public static boolean social(PeepoEntity npc){
+        if(!(npc.level() instanceof ServerLevel level))return false;
+        var server=level.getServer();var budget=SERVERS.computeIfAbsent(server,s->new CompanionBudget());
+        return budget.socials.take(npc.getUUID(),server.getTickCount(),1);
+    }
     public static String statistics(MinecraftServer server){
         var b=SERVERS.get(server);return b==null?"No companion requests":
-            "Searches: "+b.searches.granted+" admitted, "+b.searches.deferred+" deferred; paths: "+b.paths.granted+" admitted, "+b.paths.deferred+" deferred";
+            "Searches: "+b.searches.granted+" admitted, "+b.searches.deferred+" deferred; paths: "+b.paths.granted+" admitted, "+b.paths.deferred+" deferred; social: "+b.socials.granted+" admitted, "+b.socials.deferred+" deferred";
     }
     public static void initialize(){
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents.CHUNK_LOAD.register((level,chunk,generated)->io.github.jimbozoomer.jugcraft.kinetic.KineticNetworks.invalidate(level));
@@ -53,7 +59,7 @@ public final class CompanionBudget {
             if(entity instanceof PeepoEntity npc){
                 npc.unloadCompanionRoutine();
                 var budget=SERVERS.get(level.getServer());
-                if(budget!=null){budget.paths.waiting.remove(npc.getUUID());budget.searches.waiting.remove(npc.getUUID());}
+                if(budget!=null){budget.paths.waiting.remove(npc.getUUID());budget.searches.waiting.remove(npc.getUUID());budget.socials.waiting.remove(npc.getUUID());}
             }
         });
     }

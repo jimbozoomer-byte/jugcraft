@@ -171,6 +171,8 @@ Validation: common/client compilation and assembly, plus launcher packaging only
 
 ## Multiplayer cost and authority
 
+[Greetings and short conversations](companion-social.md) add optional idle social gestures and sounds. Routine has a Social On/Off switch; work, food, rest, transport and commands take priority. Social discovery has its own shared budget and creates no navigation paths.
+
 - `CompanionBudget` is keyed by MinecraftServer and shares separate FIFO admission lanes across all dimensions. It stores UUIDs, not entity/world references, and clears on shutdown. Entity unload releases current stations and removes queued requests.
 - Existing `config/jugcraft.properties` gains `companions.searches_per_tick=4` (clamped 1-32) and `companions.paths_per_tick=8` (clamped 1-64). These are counts of admitted operations, not measured millisecond guarantees. Restart after config changes.
 - The budget gates explicit work/rest/food searches, command and food path requests, seat path attempts, and random strolling. Expired requesters are removed, queues are capped at 4096 per lane, and deferred goals retry rather than interpreting a budget delay as an unreachable path. Vanilla navigation's own internal maintenance and the base entity simulation are not replaced.

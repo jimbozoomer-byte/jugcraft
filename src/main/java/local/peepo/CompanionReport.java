@@ -41,6 +41,7 @@ public final class CompanionReport {
         }
         var old=overall;
         overall=npc.isEating()?CompanionStatus.EATING:npc.getRestMode()!=CompanionEnergy.Rest.NONE?CompanionStatus.RESTING:
+            npc.social.activity()!=CompanionStatus.IDLE?npc.social.activity():
             npc.orders.mode()==0?CompanionStatus.FOLLOWING:npc.orders.mode()==1?CompanionStatus.STAYING:
             lunch()==CompanionStatus.FETCHING_FOOD?CompanionStatus.FETCHING_FOOD:
             npc.transport.activity()!=CompanionStatus.IDLE?npc.transport.activity():npc.isRecovering()?CompanionStatus.RECOVERING:!npc.preferences.onShift()?CompanionStatus.SCHEDULED_REST:npc.routineStatus();

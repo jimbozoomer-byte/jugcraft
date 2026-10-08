@@ -37,6 +37,14 @@ public final class PeepoEntity extends PathfinderMob {
     private static final EntityDataAccessor<Boolean> RECOVERING = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> WORK_ANIMATION = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<net.minecraft.core.BlockPos> WORK_TARGET = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BLOCK_POS);
+    private static final EntityDataAccessor<Integer> SOCIAL_POSE=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Long> SOCIAL_STARTED=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.LONG);
+    public int socialPose(){return entityData.get(SOCIAL_POSE);}
+    public long socialStarted(){return entityData.get(SOCIAL_STARTED);}
+    void setSocialPose(int pose){if(!level().isClientSide() && socialPose()!=pose){entityData.set(SOCIAL_STARTED,level().getGameTime());entityData.set(SOCIAL_POSE,pose);}}
+    boolean socialIdle(){return isAlive() && !isRemoved() && !editingSettings() && !isEating() && !needsAutomaticFood()
+        && !isRecovering() && getRestMode()==CompanionEnergy.Rest.NONE && !isWheelRunning() && workAnimation()==WorkAnimation.NONE
+        && (routine==null || !routine.isActive()) && transport.activity()==CompanionStatus.IDLE && !transport.hasPendingDelivery();}
     private int workAnimationTicks;
     public WorkAnimation workAnimation(){return WorkAnimation.values()[Math.clamp(entityData.get(WORK_ANIMATION),0,WorkAnimation.values().length-1)];}
     public net.minecraft.core.BlockPos workTarget(){return entityData.get(WORK_TARGET);}
@@ -69,12 +77,13 @@ public final class PeepoEntity extends PathfinderMob {
     public final CompanionReport report=new CompanionReport(this);
     public final CompanionFood food=new CompanionFood(this);
     public final CompanionGarden garden=new CompanionGarden(this);
+    public final CompanionSocial social=new CompanionSocial(this);
     public final CompanionOrders orders=new CompanionOrders(this);
     // Runtime menu identities, never saved. Multiple allowed viewers share the same pause.
     private final java.util.Set<CompanionMenu> settingsMenus=new java.util.HashSet<>();
     void openSettings(CompanionMenu menu){
         if(level().isClientSide() || !settingsMenus.add(menu))return;
-        if(settingsMenus.size()==1){resetCompanionRoutine();transport.stop();leaveCompanionBed();}
+        if(settingsMenus.size()==1){social.cancel();resetCompanionRoutine();transport.stop();leaveCompanionBed();}
         holdForSettings();
     }
     void closeSettings(CompanionMenu menu){settingsMenus.remove(menu);}
@@ -89,7 +98,7 @@ public final class PeepoEntity extends PathfinderMob {
     /** Tracking callbacks cannot move an entity between sections while its old section is being removed. */
     void unloadCompanionRoutine(){
         companionUnloading=true;
-        try{resetCompanionRoutine();}finally{settingsMenus.clear();companionUnloading=false;}
+        try{social.cancel();resetCompanionRoutine();}finally{settingsMenus.clear();companionUnloading=false;}
     }
     boolean isUsingJobAt(net.minecraft.core.BlockPos pos){return routine!=null && routine.atJob(pos);}
     CompanionStatus routineStatus(){return routine==null?CompanionStatus.IDLE:routine.state();}
@@ -195,14 +204,14 @@ public final class PeepoEntity extends PathfinderMob {
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);builder.define(ASSIGNMENTS,"[]"); builder.define(BLUSHING, false); builder.define(PUMPKIN, false); builder.define(EATING,0);
         builder.define(ENERGY,CompanionEnergy.CAPACITY);builder.define(FOOD_BONUS,0);builder.define(FOOD_TIME,0);builder.define(REST,0);
-        builder.define(WHEEL_RUNNING,false);
+        builder.define(WHEEL_RUNNING,false);builder.define(SOCIAL_POSE,0);builder.define(SOCIAL_STARTED,0L);
         builder.define(RECOVERING,false);
         builder.define(WORK_ANIMATION,0);builder.define(WORK_TARGET,net.minecraft.core.BlockPos.ZERO);
     }
     public boolean isJughead() { return getType()==PeepoMod.JUGHEAD || getType()==PeepoMod.LEGACY_JUGHEAD; }
     public boolean isWearingPumpkin() { return entityData.get(PUMPKIN); }
     @Override protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output); orders.save(output);assignments.save(output);preferences.save(output);food.save(output);garden.save(output);transport.save(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
+        super.addAdditionalSaveData(output); orders.save(output);assignments.save(output);preferences.save(output);food.save(output);garden.save(output);transport.save(output);social.save(output); output.putBoolean("PumpkinCostume", isWearingPumpkin()); output.putInt("EatingTicks",getEatingTicks());
         if(lunchOrigin!=null)output.store("LunchOrigin",net.minecraft.core.GlobalPos.CODEC,lunchOrigin);
         net.minecraft.world.ContainerHelper.saveAllItems(output.child("Belongings"),belongings.getItems());
         output.putBoolean("NaturallySpawned", naturallySpawned);
@@ -229,7 +238,7 @@ public final class PeepoEntity extends PathfinderMob {
         var saved=input.child("Belongings");
         if(saved.isPresent())net.minecraft.world.ContainerHelper.loadAllItems(saved.get(),belongings.getItems());
         else if(isWearingPumpkin())belongings.getItems().set(8,new ItemStack(Items.JACK_O_LANTERN));
-        garden.load(input);transport.load(input);
+        garden.load(input);transport.load(input);social.load(input);
         syncBelongings();
     }
     public boolean isBlushing() { return entityData.get(BLUSHING); }
@@ -249,7 +258,7 @@ public final class PeepoEntity extends PathfinderMob {
             if(wheelRunningTicks==0 || !isAlive() || getEnergy()==0 || isEating() || getRestMode()!=CompanionEnergy.Rest.NONE)
                 setWheelRunning(false);
         }
-        if(!level().isClientSide()){tickEnergy();food.tick();report.tick();}
+        if(!level().isClientSide()){tickEnergy();food.tick();social.tick();report.tick();}
         if (!level().isClientSide() && blushTicks > 0 && --blushTicks == 0) entityData.set(BLUSHING, false);
         if (level() instanceof ServerLevel server && isEating()) {
             getNavigation().stop();
@@ -303,7 +312,8 @@ public final class PeepoEntity extends PathfinderMob {
         routine=new CompanionRoutine(this);
         goalSelector.addGoal(3,routine);
         goalSelector.addGoal(5, new BudgetedStroll());
-        goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6));
+        goalSelector.addGoal(4,new CompanionSocial.ConversationGoal(this));
+        goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6));
         goalSelector.addGoal(5, new RandomLookAroundGoal(this));
     }
     @Override public boolean canAttack(LivingEntity target) { return false; }
