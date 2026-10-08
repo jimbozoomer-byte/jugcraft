@@ -1,18 +1,18 @@
-# The Reaper skirt: the dark sash over the robe's skirt, the apron's pleats down its front, parted between
-# the legs.
+# The Reaper skirt: the dark sash, and the robe's strips hanging from it to different lengths, parted
+# between the legs.
 ................
-..KKKKKKKKKKKK..
-.KQQQQQQQQQQQQK.
-.KcqqqqqqqqqqQK.
-.KcqQqQqKcqQqQK.
-.KcqQqQqKcqQqQK.
-.KcqQqQqKcqQqQK.
-.KcqQqQqKcqQqQK.
-.KcqQqQqKcqQqQK.
-.KcqQqQqKcqQqQK.
-.KQQQQQQKQQQQQK.
-..KKKKKK.KKKKK..
-................
+..KKKKKKKKKKK...
+.KQQQQQQQQQQQK..
+.KcqQcqKcqQcqK..
+.KcqQcqKcqQcqK..
+.KcqQcqKcqQcqK..
+.KcqQcqKcqQcqK..
+.KcqQcqKcqQcqK..
+.KcqQQqKcqQQqK..
+.KcqKcqKcqKcqK..
+.KQqKcQKQqKcQK..
+.KQK.KQKQK.KQK..
+..K...K.K...K...
 ................
 ................
 ................

@@ -1,16 +1,16 @@
-# The Reaper boots: two dark wrapped boots, a grey wrap round the shin and a white band at the ankle.
+# The Reaper boots: two dark wrapped boots, two grey wraps round the shin and a white band at the ankle.
 ................
 ................
 ...XXXX...XXXX..
-..XxuuuX.XxuuuX.
+..XxuuxX.XxuuxX.
 ..OMMMDO.OMMMDO.
-..XxuuUX.XxuuUX.
-..OxuuuX.OxuuuX.
+..XxuuxX.XxuuxX.
+..OMMMDO.OMMMDO.
+..OxuuxX.OxuuxX.
 .OHLLLDOOHLLLDO.
-XxuuuuuXxuuuuuX.
-XuuuuxxXuuuuxxX.
-.XXXXXX.XXXXXX..
-................
+.XuuuuxxXuuuuxxX
+.XuuuuxxXuuuuxxX
+..XXXXXX.XXXXXX.
 ................
 ................
 ................

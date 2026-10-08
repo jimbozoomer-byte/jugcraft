@@ -70,10 +70,16 @@ public class ArmsVIIClientGameTests implements FabricClientGameTest {
 			// Trophies, and an armor set's arm, held, from the front, by day; then the glowing ones at midnight.
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			for (String held : List.of("glacier_maul", "cinderbrand", "hagthorn", "soulreaver", "dynamo_halberd", "tidebreaker",
-					"hades_scythe", "sentinel_longsword", "frost_knight_greatsword", "wight_king_zweihander")) {
+					"hades_scythe", "sentinel_longsword", "frost_knight_greatsword", "wight_king_zweihander",
+					"reaper_scythe")) {
 				ready(context, server, x + 4, y, z, held);
 				context.takeScreenshot("jugcraft_arms_vii_held_" + held);
 			}
+			// The Reaper's two short scythes, one in each hand, as the owner drew them.
+			server.runCommand("item replace entity @p weapon.offhand with jugcraft:reaper_scythe");
+			ready(context, server, x + 4, y, z, "reaper_scythe");
+			context.takeScreenshot("jugcraft_arms_vii_held_reaper_scythe_pair");
+			server.runCommand("item replace entity @p weapon.offhand with air");
 			// The Sentinel's star shield in the off hand beside the Sentinel's longsword; then, the main hand empty (the
 			// longsword would parry instead), raised.
 			server.runCommand("item replace entity @p weapon.offhand with jugcraft:sentinel_shield");

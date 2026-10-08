@@ -77,6 +77,9 @@ SETS = {
     "frost_knight": {"display": "Frost Knight"},
     # Sent without words the same day, the Wight King's render holds a long sword (armor-designs-8-october.md).
     "wight_king": {"display": "Wight King"},
+    # "He is supposed to be holding 2 short scythe weapons they arent part of the armor" (the owner, 8 October 2026, of
+    # the Reaper's render): its arm is a short scythe, one for each hand.
+    "reaper": {"display": "Reaper"},
 }
 LINES = list(STYLES) + list(BOSSES) + list(SETS)
 
@@ -150,6 +153,7 @@ VARIANTS = [
     ("sentinel_longsword", "longsword", "sentinel", "mark", "Sentinel Longsword"),
     ("frost_knight_greatsword", "greatsword", "frost_knight", "frost", "Frost Knight Greatsword"),
     ("wight_king_zweihander", "zweihander", "wight_king", "drain", "Wight King Zweihander"),
+    ("reaper_scythe", "kama", "reaper", "wither", "Reaper Scythe"),
 ]
 BY_ID = {name: (kind, line, boon, display) for name, kind, line, boon, display in VARIANTS}
 

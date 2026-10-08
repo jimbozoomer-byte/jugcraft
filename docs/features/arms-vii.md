@@ -49,6 +49,7 @@ The arm keeps its enchantments and wear.
 | Sentinel | Sentinel Longsword (longsword), `jugcraft:sentinel_longsword` | **Mark:** a struck foe glows for 4 s, seen through walls (the Runebound arms' boon) |
 | Frost Knight | Frost Knight Greatsword (greatsword), `jugcraft:frost_knight_greatsword` | **Frost:** Slowness II, 3 s (the Yeti King's boon) |
 | Wight King | Wight King Zweihander (zweihander), `jugcraft:wight_king_zweihander` | **Drain:** each hit heals its wielder half a heart (the Soulreaver's boon) |
+| Reaper | Reaper Scythe (kama), `jugcraft:reaper_scythe`, one for each hand | **Wither:** Wither, 3 s (the Hades Scythe's boon) |
 
 A set may also have a shield of its own shape (`SET_SHIELDS`): the Sentinel's four-pointed star, `jugcraft:sentinel_shield`, which blocks as a steel heater shield does. See [The Sentinel's shield](#the-sentinels-shield).
 
@@ -170,6 +171,15 @@ Among the pictures the owner sent on 8 October 2026 without words are two render
 - **The look** (`tools/arms_variants_art.py` `wight_king_zweihander`): a long slate blade, pale along its edges, grooved dark down its middle; a crossguard of three jagged slate shards each side, swept toward the point, a glowing cyan gem at its heart; a dark grip; a slate pommel set with a cyan stone. Materials `WIGHT_SLATE`, `WIGHT_DARK` and `WIGHT_GEM` (glowing), matched to the armor's palette. Icon: a 16×16 map on the greatsword's shape, `tools/arms_icons/wight_king_zweihander.txt`; `check_icon_maps` holds the line's materials strictly, and they pass.
 - **Not verified yet:** nothing has been run in game or in CI; the owner has not seen it. `ArmsVIIClientGameTests` holds it from the front by day with the others.
 
+## The Reaper's arm
+
+Among the pictures the owner sent on 8 October 2026 without words is a render of a hooded reaper with two white crescents about it. They were first built as part of its armor; the owner corrected that: "He is supposed to be holding 2 short scythe weapons they arent part of the armor". The armor is the Reaper ([armor-designs-8-october.md](armor-designs-8-october.md#reaper-toolsreaper_armorpy)); this is its scythe.
+
+- **Tier, inputs, outputs, costs, unlocks:** as the other set arms. `jugcraft:reaper_scythe` is a kama in steel (its quick hooking cuts, its reach and its trait, Clear Brush), epic, lasting twice as long as steel (1,800), with the existing **Wither** boon (Wither, 3 s; a kama's other is the Bogfang's Venom). No recipe and no loot table: creative only. It is one item; the owner's figure holds one in each hand, so a player carries two, the off hand's for show (vanilla strikes with the main hand only).
+- **The tables:** `SETS` gains `reaper` ("Reaper") and `VARIANTS` the scythe, in `tools/arms_variants.py` and `weapons/ArmVariants.java` alike; its tooltip's line reads "Of the Reaper set".
+- **The look** (`tools/arms_variants_art.py` `reaper_scythe`): a crescent of five bone-white links laid round an arc from the head to a point (`REAPER_CENTRE`, `REAPER_RADIUS`, `REAPER_FROM` to `REAPER_TO`), broadest at the head and narrowing, each a white frame round a thinner slate hollow, every other one standing further out as the owner's zig-zag; a short bone-white handle wrapped in slate, a slate collar under the crescent and a slate butt. Materials `REAPER_BONE` (a bone white, warmer than iron's so the two never read alike) and `REAPER_SLATE`, matched to the armor's palette. Icon: a 16×16 map of the crescent on its handle, its links' joints dark, `tools/arms_icons/reaper_scythe.txt`; `check_icon_maps` holds the line's materials strictly, and they pass.
+- **Not verified yet:** nothing has been run in game or in CI. `ArmsVIIClientGameTests` holds it from the front by day with the others, and then one in each hand.
+
 ## Connections
 - **Existing input producer:**
   - steel arms (the steel foundry and the arms' own recipes);
@@ -183,7 +193,7 @@ Among the pictures the owner sent on 8 October 2026 without words are two render
 - **Required vs optional:** all optional.
   - The styles can be crafted solo or traded.
   - The trophies wait for their bosses. Until then they are creative-only, and that is on purpose: [branches/BOSSES.md](../branches/BOSSES.md) is a proposal, and no core progression needs a trophy.
-  - The Hades Scythe, the Sentinel Longsword, the Sentinel Shield, the Frost Knight Greatsword and the Wight King Zweihander wait for the owner to settle how the armor sets are won (a boss's drop or a recipe). Until then they are creative-only on purpose, and nothing needs them.
+  - The Hades Scythe, the Sentinel Longsword, the Sentinel Shield, the Frost Knight Greatsword, the Wight King Zweihander and the Reaper Scythe wait for the owner to settle how the armor sets are won (a boss's drop or a recipe). Until then they are creative-only on purpose, and nothing needs them.
 - **How the specialty stays useful:** a style is a look and a small perk, not a stronger tier. The arms of batches 42 to 55 stay as good.
 
 ## Balance and automation
@@ -198,7 +208,7 @@ Among the pictures the owner sent on 8 October 2026 without words are two render
 ## Multiplayer and persistence
 - **Server authority:** every boon is worked on the server, in `ArmItem.hurtEnemy` and `getAttackDamageBonus`, when the arm strikes. Clients only see the effects and particles.
 - **Saved state:** none beyond ordinary items with stable ids:
-  - the 36 variants: `jugcraft:gilded_longsword` … `jugcraft:leviathans_hook`, then `jugcraft:hades_scythe`, `jugcraft:sentinel_longsword`, `jugcraft:frost_knight_greatsword` and `jugcraft:wight_king_zweihander`, as in `tools/arms_variants.py`;
+  - the 37 variants: `jugcraft:gilded_longsword` … `jugcraft:leviathans_hook`, then `jugcraft:hades_scythe`, `jugcraft:sentinel_longsword`, `jugcraft:frost_knight_greatsword`, `jugcraft:wight_king_zweihander` and `jugcraft:reaper_scythe`, as in `tools/arms_variants.py`;
   - the four patterns: `jugcraft:gilders_pattern`, `ironclad_pattern`, `bonecarvers_pattern`, `runecarvers_pattern`;
   - the armor sets' shield: `jugcraft:sentinel_shield`.
 - **Disabling the `machines` feature** removes the recipes, not the items.

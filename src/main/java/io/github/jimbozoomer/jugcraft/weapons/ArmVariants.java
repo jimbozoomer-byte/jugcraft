@@ -58,7 +58,7 @@ public final class ArmVariants {
 	public static final List<String> STYLES = List.of("gilded", "ironclad", "bonecarved", "runebound");
 
 	/** The owner's armor sets with an arm of their own; any other line that is not a style is a boss. */
-	public static final List<String> SETS = List.of("hades", "sentinel", "frost_knight", "wight_king");
+	public static final List<String> SETS = List.of("hades", "sentinel", "frost_knight", "wight_king", "reaper");
 
 	public static final List<Variant> VARIANTS = List.of(
 			new Variant("gilded_longsword", "longsword", "gilded", null),
@@ -96,7 +96,8 @@ public final class ArmVariants {
 			new Variant("hades_scythe", "scythe", "hades", Boon.WITHER),
 			new Variant("sentinel_longsword", "longsword", "sentinel", Boon.MARK),
 			new Variant("frost_knight_greatsword", "greatsword", "frost_knight", Boon.FROST),
-			new Variant("wight_king_zweihander", "zweihander", "wight_king", Boon.DRAIN));
+			new Variant("wight_king_zweihander", "zweihander", "wight_king", Boon.DRAIN),
+			new Variant("reaper_scythe", "kama", "reaper", Boon.WITHER));
 
 	/**
 	 * An armor set's shield in a shape of its own (tools/arms_variants.py SET_SHIELDS): of line (an armor set of

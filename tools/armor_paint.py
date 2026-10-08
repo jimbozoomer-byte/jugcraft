@@ -300,9 +300,9 @@ WIGHT_KING = {
     "ice_light": (232, 244, 250), "ice": (196, 220, 232), "ice_mid": (160, 190, 205), "ice_dark": (120, 150, 168),
     "ice_deep": (84, 112, 130),
 }
-# Reaper (tools/reaper_armor.py): the metal is the bone-white of its plates and its great crescent, white to the grey of
-# their gaps; "leather" the dark brown of its robe; the under-layer the black inside its hood; "gold" the reddish brown
-# of its pouch. Its hood's greyer browns are four tones of their own, by name.
+# Reaper (tools/reaper_armor.py): the metal is the bone-white of its plates, white to the grey of its shoulder plates and
+# wraps; "leather" the dark brown of its robe; the under-layer the black inside its hood; "gold" the reddish brown of its
+# pouch. Its hood's greyer browns (and its strap's) are four tones of their own, by name.
 REAPER = {
     "light": (214, 216, 202), "mid_light": (182, 184, 171), "mid": (138, 139, 132), "dark": (104, 105, 102),
     "seam": (75, 76, 78), "void": (49, 48, 53),

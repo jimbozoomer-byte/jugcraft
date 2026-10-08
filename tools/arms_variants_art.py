@@ -80,6 +80,10 @@ FROST_ICE = M((10, 58, 120), (32, 136, 214), (64, 184, 240), (120, 224, 252), (1
 WIGHT_SLATE = M((16, 30, 42), (37, 53, 70), (73, 98, 115), (118, 150, 168), (170, 200, 214), (226, 242, 250))
 WIGHT_DARK = M((6, 12, 18), (16, 30, 42), (27, 47, 63), (37, 53, 70), (50, 71, 89), (66, 88, 104), shine=False)
 WIGHT_GEM = M((8, 56, 60), (20, 112, 118), (40, 178, 182), (100, 226, 222), (176, 255, 244), (230, 255, 252), glow=True)
+# The Reaper's (as armor_paint.REAPER): the bone-white of its plates and its scythes' links, and the slate of their
+# hollows and wraps.
+REAPER_BONE = M((58, 54, 44), (102, 97, 84), (142, 136, 116), (186, 180, 156), (220, 214, 190), (244, 240, 222))
+REAPER_SLATE = M((10, 10, 14), (24, 24, 30), (44, 44, 50), (60, 60, 66), (80, 80, 86), (104, 105, 102), shine=False)
 
 # Style(blade, fitting, grip, haft, gem, accent, cloth)
 GILDED = Style(POLISHED, GOLD, ROYAL, px.DARK_WOOD, SAPPHIRE, GOLD, ROYAL)
@@ -99,12 +103,13 @@ SENTINEL = Style(SENTINEL_GOLD, SENTINEL_GOLD, SENTINEL_LEATHER, SENTINEL_LEATHE
                  SENTINEL_LEATHER)
 FROST_KNIGHT = Style(FROST_ICE, FROST_WHITE, FROST_WHITE, FROST_WHITE, FROST_ICE, FROST_ICE, FROST_WHITE)
 WIGHT_KING = Style(WIGHT_SLATE, WIGHT_SLATE, WIGHT_DARK, WIGHT_DARK, WIGHT_GEM, WIGHT_GEM, WIGHT_DARK)
+REAPER = Style(REAPER_BONE, REAPER_SLATE, REAPER_SLATE, REAPER_BONE, REAPER_SLATE, REAPER_BONE, REAPER_SLATE)
 # Each line's materials, by its name in tools/arms_variants.py (a variant's 16x16 icon is coloured from them).
 LINE_STYLES = {"gilded": GILDED, "ironclad": IRONCLAD, "bonecarved": BONECARVED, "runebound": RUNEBOUND,
                "yeti_king": YETI, "cinder_tyrant": CINDER, "mire_hag": HAG, "crypt_lich": LICH,
                "iron_dreadnought": DREADNOUGHT, "werewolf_alpha": WEREWOLF, "storm_roc": ROC,
                "abyssal_leviathan": LEVIATHAN, "hades": HADES, "sentinel": SENTINEL, "frost_knight": FROST_KNIGHT,
-               "wight_king": WIGHT_KING}
+               "wight_king": WIGHT_KING, "reaper": REAPER}
 
 
 # ---------------------------------------------------------------- shared parts
@@ -905,13 +910,62 @@ def wight_king_zweihander():
     return d
 
 
+# The Reaper Scythe's crescent (design units): links laid round an arc about REAPER_CENTRE, REAPER_RADIUS out, from
+# REAPER_FROM degrees (0 along the handle, 90 across it) round to REAPER_TO, broadest at the head and narrowing to the
+# point; every other link stands a little further out, as the owner's chain zig-zags.
+REAPER_CENTRE, REAPER_RADIUS = (9.6, 1.0), 8.0
+REAPER_FROM, REAPER_TO, REAPER_LINKS = 0.0, 150.0, 5
+REAPER_BROAD, REAPER_NARROW, REAPER_ZIGZAG = 4.4, 2.8, 0.6
+
+
+def reaper_link(a0, a1, r_out, width):
+    """A link's corners on the arc: from a0 to a1 degrees, between r_out - width and r_out."""
+    (cs, ct) = REAPER_CENTRE
+    out = []
+    for a, r in ((a0, r_out), (a1, r_out), (a1, r_out - width), (a0, r_out - width)):
+        out.append((cs + math.cos(math.radians(a)) * r, ct + math.sin(math.radians(a)) * r))
+    return out
+
+
+def reaper_scythe():
+    """The Reaper's short scythe, after the owner's design (the figure holds one in each hand): a crescent of bone-white
+    links sweeping out from the head and round to a point, each a white frame round a slate hollow, every other one
+    further out; a short bone-white handle wrapped in slate, a slate collar under the crescent and a slate butt. It is
+    held as a kama is."""
+    st = REAPER
+    d = Design(27, grip=4.5)
+    d.disc(0.9, 0.0, 1.1, REAPER_SLATE, depth=2.2, part="butt")
+    d.strip(0.8, 17.0, 0.85, material=REAPER_BONE, depth=1.8, part="handle")
+    grip(d, 1.6, 9.6, 0.95, st, period=1.4)
+    d.strip(14.8, 17.4, 1.25, material=REAPER_SLATE, depth=2.4, part="collar")
+    step = (REAPER_TO - REAPER_FROM) / REAPER_LINKS
+    for i in range(REAPER_LINKS):
+        a0, a1 = REAPER_FROM + step * i - 1.5, REAPER_FROM + step * (i + 1) + 1.5   # each overlaps the next a little
+        width = REAPER_BROAD + (REAPER_NARROW - REAPER_BROAD) * i / (REAPER_LINKS - 1)
+        r_out = REAPER_RADIUS + (REAPER_ZIGZAG if i % 2 else 0.0)
+        d.poly(reaper_link(a0, a1, r_out, width), REAPER_BONE, depth=1.6, z=i % 2, part=f"link{i}",
+               tone=LIGHT if i % 2 else None)
+        if width > 3.0:
+            d.poly(reaper_link(a0 + 7.0, a1 - 7.0, r_out - 1.05, width - 2.1), REAPER_SLATE, depth=1.0, z=2,
+                   part=f"hollow{i}")
+    # The point, past the last link.
+    a = math.radians(REAPER_TO + 1.0)
+    (cs, ct), r = REAPER_CENTRE, REAPER_RADIUS + (REAPER_ZIGZAG if REAPER_LINKS % 2 else 0.0)
+    tip = (cs + math.cos(a + 0.42) * (r - 0.9), ct + math.sin(a + 0.42) * (r - 0.9))
+    d.poly([(cs + math.cos(a) * r, ct + math.sin(a) * r), tip,
+            (cs + math.cos(a) * (r - REAPER_NARROW), ct + math.sin(a) * (r - REAPER_NARROW))], REAPER_BONE, depth=1.3,
+           part="point", tone=LIGHT)
+    return d
+
+
 DESIGNS = {name: fn for name, fn in globals().items() if callable(fn) and name in (
     "gilded_longsword", "gilded_rapier", "gilded_sabre", "gilded_halberd", "ironclad_zweihander", "ironclad_maul",
     "ironclad_war_pick", "ironclad_battle_axe", "bonecarved_dagger", "bonecarved_flail", "bonecarved_glaive",
     "bonecarved_labrys", "runebound_nodachi", "runebound_moonblade", "runebound_staff", "runebound_war_hammer",
     "glacier_maul", "rimeclaw", "cinderbrand", "magmaw", "hagthorn", "bogfang", "soulreaver", "gravewarden",
     "dynamo_halberd", "piston_hammer", "moonfang", "howler", "stormcaller", "galefeather", "tidebreaker",
-    "leviathans_hook", "hades_scythe", "sentinel_longsword", "frost_knight_greatsword", "wight_king_zweihander")}
+    "leviathans_hook", "hades_scythe", "sentinel_longsword", "frost_knight_greatsword", "wight_king_zweihander",
+    "reaper_scythe")}
 
 
 # ---------------------------------------------------------------- drawing (as tools/arms_art.py draws the kinds)
