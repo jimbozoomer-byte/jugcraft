@@ -36,7 +36,7 @@ public final class AssignmentTool extends Item {
     private static void select(Player player,ItemStack stack,PeepoEntity npc){
         var tag=new CompoundTag();tag.putString("Companion",npc.getUUID().toString());tag.putString("Dimension",npc.level().dimension().identifier().toString());tag.putInt("EntityId",npc.getId());tag.putString("Name",npc.getDisplayName().getString());
         CustomData.set(DataComponents.CUSTOM_DATA,stack,tag);
-        player.sendOverlayMessage(Component.literal("Selected "+npc.getDisplayName().getString()+". Container: right-click Supply, Shift-right-click Output. Bed/work/lunch: right-click. Left-click removes."));
+        player.sendOverlayMessage(Component.literal("Selected "+npc.getDisplayName().getString()+". Right-click containers: Supply (blue) / Output (yellow). Click again to switch. Left-click removes."));
     }
     @Override public Component getName(ItemStack stack){String name=data(stack).getStringOr("Name","");return name.isEmpty()?super.getName(stack):Component.literal("Companion Planner: "+name);}
     @Override public InteractionResult use(Level level,Player player,InteractionHand hand){
@@ -64,7 +64,7 @@ public final class AssignmentTool extends Item {
         if(!npc.orders.allowed(player)){player.sendOverlayMessage(Component.literal("Only the owner or an allowed party member can assign this companion."));return InteractionResult.SUCCESS;}
         if(npc.distanceToSqr(player)>128*128){player.sendOverlayMessage(Component.literal("Move closer to the selected companion."));return InteractionResult.SUCCESS;}
         boolean container=!CompanionAssignments.bed(level,root) && !CompanionAssignments.work(level,root) && !(level.getBlockEntity(root) instanceof LunchBlockEntity);
-        player.sendOverlayMessage(Component.literal(remove?npc.assignments.remove(level,pos):container?npc.assignments.assignContainer(level,root,face,player.isShiftKeyDown()):npc.assignments.assign(level,pos)));
+        player.sendOverlayMessage(Component.literal(remove?npc.assignments.remove(level,pos):container?npc.assignments.cycleContainer(level,root,face):npc.assignments.assign(level,pos)));
         return InteractionResult.SUCCESS;
     }
     public static void initialize(){

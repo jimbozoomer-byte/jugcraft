@@ -23,7 +23,9 @@ public final class AssignmentPreview {
             var camera=context.levelState().cameraRenderState.pos;
             var frames=new ArrayList<Frame>(9);
             frames.add(new Frame(npc.getBoundingBox().inflate(.06).move(-camera.x,-camera.y,-camera.z),0xFF66FF88));
-            for(var target:npc.assignments.view()){
+            var assignments=npc.assignments.view();
+            for(int row=0;row<assignments.size();row++){
+                var target=assignments.get(row);
                 if(target==null || !target.local(mc.level) || !mc.level.hasChunkAt(target.at().pos()) || target.at().pos().distToCenterSqr(mc.player.position())>128*128)continue;
                 BlockPos pos=target.at().pos();AABB box=new AABB(pos);boolean present=target.present(mc.level);
                 if(present){
@@ -31,8 +33,13 @@ public final class AssignmentPreview {
                     if(state.getBlock() instanceof WheelBlock)for(int i=1;i<4;i++)box=box.minmax(new AABB(WheelBlock.partPos(pos,state.getValue(WheelBlock.FACING),i)));
                     else if(state.getBlock() instanceof BedBlock)box=box.minmax(new AABB(pos.relative(state.getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite())));
                     else if(state.getBlock() instanceof MachineBlock machine){var footprint=machine.footprint(state);for(int i=1;i<Math.min(256,footprint.size());i++)box=box.minmax(new AABB(footprint.partPos(pos,state.getValue(MachineBlock.FACING),i)));}
+                    else if(state.getBlock() instanceof net.minecraft.world.level.block.ChestBlock && state.getValue(net.minecraft.world.level.block.ChestBlock.TYPE)!=net.minecraft.world.level.block.state.properties.ChestType.SINGLE){
+                        var other=pos.relative(net.minecraft.world.level.block.ChestBlock.getConnectedDirection(state));
+                        if(mc.level.hasChunkAt(other))box=box.minmax(new AABB(other));
+                    }
                 }
-                frames.add(new Frame(box.inflate(.025).move(-camera.x,-camera.y,-camera.z),present?0xFF55FF66:0xFFFF8844));
+                int color=row==CompanionAssignments.SUPPLY?CompanionAssignments.SUPPLY_COLOR:row==CompanionAssignments.OUTPUT?CompanionAssignments.OUTPUT_COLOR:0xFF55FF66;
+                frames.add(new Frame(box.inflate(.025).move(-camera.x,-camera.y,-camera.z),present?color:0xFFFF8844));
             }
             context.submitNodeCollector().submitCustomGeometry(context.poseStack(),RenderTypes.lines(),(pose,consumer)->{
                 for(var frame:frames)draw(pose,consumer,frame.box,frame.color);

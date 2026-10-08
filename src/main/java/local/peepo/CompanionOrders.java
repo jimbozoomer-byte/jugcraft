@@ -10,7 +10,7 @@ import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 
 /** Persisted, dimension-scoped commands. All mutation and permission checks are server-side. */
 public final class CompanionOrders {
-    public enum Mode { FOLLOW, STAY, HOME, WORK }
+    public enum Mode { FOLLOW, STAY, HOME, WORK, PORTER }
     private final PeepoEntity npc;
     private UUID owner,follow;
     private GlobalPos home,work,stay;
@@ -24,6 +24,7 @@ public final class CompanionOrders {
     public boolean allowed(Player p){return owner(p) || owner!=null && party && JugcraftParties.sameParty(owner,p.getUUID());}
     public boolean foodAccess(UUID sourceOwner,boolean shared){return owner!=null && (owner.equals(sourceOwner) || shared && JugcraftParties.sameParty(owner,sourceOwner));}
     public int mode(){return mode.ordinal();}
+    public boolean porter(){return mode==Mode.PORTER;}
     public int radius(){return radius;}
     public boolean party(){return party;}
     private GlobalPos here(){return GlobalPos.of(npc.level().dimension(),npc.blockPosition());}
@@ -42,8 +43,8 @@ public final class CompanionOrders {
         if(button>=40 && button<=47)return npc.preferences.command(button);
         if(button>=50 && button<58)return npc.assignments.cycleTransport(1+(button-50)/2,button%2==0);
         if(button<0 || button>8)return false;
-        if(button<=3){mode=Mode.values()[button];if(mode==Mode.FOLLOW)follow=p.getUUID();if(mode==Mode.STAY)stay=here();}
-        else switch(button){case 4,5->{return false;}case 6->radius=Math.max(4,radius-4);case 7->radius=Math.min(16,radius+4);case 8->{if(!owner(p))return false;party=!party;}default->{return false;}}
+        if(button<=4){mode=Mode.values()[button];if(mode==Mode.FOLLOW)follow=p.getUUID();if(mode==Mode.STAY)stay=here();}
+        else switch(button){case 5->{return false;}case 6->radius=Math.max(4,radius-4);case 7->radius=Math.min(16,radius+4);case 8->{if(!owner(p))return false;party=!party;}default->{return false;}}
         apply();
         if(button==1){stay=here();npc.setHomeTo(stay.pos(),radius);}
         if(button==2)returningHome=true;
@@ -61,7 +62,7 @@ public final class CompanionOrders {
     private boolean in(GlobalPos center,Vec3 point){return local(center) && center.pos().distToCenterSqr(point)<=radius*radius;}
     public boolean station(CompanionStation s){
         if(!tamed())return true;
-        if(mode!=Mode.HOME && mode!=Mode.WORK)return false;
+        if(mode!=Mode.HOME && mode!=Mode.WORK && mode!=Mode.PORTER)return false;
         if(s instanceof CompanionJob){
             if(mode!=Mode.WORK || !npc.preferences.canWork())return false;
             if(npc.assignments.workManaged())return npc.assignments.assignedWork(s.stationPosition());
@@ -78,7 +79,7 @@ public final class CompanionOrders {
         if(!tamed())return true;
         var lunch=npc.assignments.get(CompanionAssignments.LUNCH);
         boolean nearLunch=lunch!=null && lunch.local(npc.level()) && lunch.at().pos().distToCenterSqr(point)<=radius*radius;
-        return switch(mode){case STAY->npc.position().distanceToSqr(point)<1;case HOME->in(home,point)||nearLunch;case WORK->in(home,point)||nearLunch||(npc.assignments.workManaged()?npc.assignments.foodNear(point,radius):in(work,point));case FOLLOW->{Player p=followPlayer();yield p!=null && p.position().distanceToSqr(point)<64;}};
+        return switch(mode){case STAY->npc.position().distanceToSqr(point)<1;case HOME->in(home,point)||nearLunch;case WORK,PORTER->in(home,point)||nearLunch||(mode==Mode.PORTER || npc.assignments.workManaged()?npc.assignments.foodNear(point,radius):in(work,point));case FOLLOW->{Player p=followPlayer();yield p!=null && p.position().distanceToSqr(point)<64;}};
     }
     private Player followPlayer(){
         if(follow==null)return null;
@@ -87,6 +88,11 @@ public final class CompanionOrders {
     }
     private Vec3 target(){
         if(mode==Mode.FOLLOW){var p=followPlayer();return p==null?null:p.position();}
+        if(mode==Mode.PORTER){
+            if(npc.preferences.canWork())return npc.position();
+            if(npc.assignments.homeManaged()){var rest=npc.assignments.homeApproach();return rest==null?npc.position():rest;}
+            return local(home)?Vec3.atBottomCenterOf(home.pos()):npc.position();
+        }
         if(mode==Mode.HOME && npc.assignments.homeManaged())return npc.assignments.homeApproach();
         if(mode==Mode.WORK && (npc.assignments.workManaged() || !npc.preferences.canWork())){
             Vec3 job=npc.preferences.canWork()?npc.assignments.workApproach():null;
@@ -98,7 +104,7 @@ public final class CompanionOrders {
         return local(pos)?Vec3.atBottomCenterOf(pos.pos()):null;
     }
     public boolean targetAvailable(){Vec3 target=target();return target!=null && npc.level().hasChunkAt(BlockPos.containing(target));}
-    public boolean routineAllowed(){return !tamed() || (mode==Mode.HOME || mode==Mode.WORK) && targetAvailable();}
+    public boolean routineAllowed(){return !tamed() || (mode==Mode.HOME || mode==Mode.WORK || mode==Mode.PORTER) && targetAvailable();}
     public void save(ValueOutput out){
         if(owner==null)return;
         out.putString("CompanionOwner",owner.toString());out.putString("CompanionFollow",(follow==null?owner:follow).toString());
@@ -109,7 +115,7 @@ public final class CompanionOrders {
         try{owner=UUID.fromString(in.getStringOr("CompanionOwner",""));}catch(IllegalArgumentException e){owner=null;}
         if(owner==null)return;
         try{follow=UUID.fromString(in.getStringOr("CompanionFollow",owner.toString()));}catch(IllegalArgumentException e){follow=owner;}
-        mode=Mode.values()[Math.clamp(in.getIntOr("CompanionCommand",2),0,3)];radius=Math.clamp(in.getIntOr("CompanionRadius",8),4,16);party=in.getBooleanOr("CompanionParty",false);
+        mode=Mode.values()[Math.clamp(in.getIntOr("CompanionCommand",2),0,Mode.values().length-1)];radius=Math.clamp(in.getIntOr("CompanionRadius",8),4,16);party=in.getBooleanOr("CompanionParty",false);
         home=in.read("CompanionHome",GlobalPos.CODEC).orElse(null);work=in.read("CompanionWork",GlobalPos.CODEC).orElse(null);stay=in.read("CompanionStay",GlobalPos.CODEC).orElse(null);
     }
     public static final class CommandGoal extends Goal {

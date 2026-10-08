@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Inventory;
 public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu> {
     private final Button[] buttons=new Button[9],remove=new Button[CompanionAssignments.COUNT],moveUp=new Button[5],moveDown=new Button[5],settings=new Button[8];
     private final Button[] transport=new Button[8];
-    private static final String[] MODES={"Follow","Stay","Home","Work"};
+    private static final String[] MODES={"Follow","Stay","Home","Work","Porter"};
     private int panel; // Jobs and routine. Transport controls live on each job row.
     private Button tab;
     public CompanionScreen(CompanionMenu menu,Inventory inventory,Component title){super(menu,inventory,title,CompanionMenu.WIDTH,312);}
@@ -23,7 +23,8 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         super.init();inventoryLabelX=80;inventoryLabelY=218;
         tab=addRenderableWidget(Button.builder(Component.literal("Routine >"),b->{panel=1-panel;updateButtons();}).bounds(leftPos+imageWidth-84,topPos+6,76,16).build());
         for(int i=0;i<8;i++)transport[i]=button("",254+(i%2)*80,CompanionMenu.assignmentY(1+i/2),78,16,50+i);
-        for(int i=0;i<4;i++)buttons[i]=button(MODES[i],100+i*53,34,50,18,i);
+        for(int i=0;i<MODES.length;i++)buttons[i]=button(MODES[i],100+i*53,34,50,18,i);
+        tip(buttons[4],"Move any items from Supply (blue) to Output (yellow). No workstation required. Work mode instead supplies recipes and assists machines.");
         buttons[6]=button("-",100,56,22,18,6);buttons[7]=button("+",125,56,22,18,7);
         buttons[8]=button("Party",210,56,102,18,8);
         tip(buttons[8],"Only the owner can allow party members to give commands.");
@@ -77,7 +78,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         settings[6].active=menu.value(20)>menu.value(19)+10;settings[7].active=menu.value(20)<95;
     }
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mouseX,int mouseY,float delta){
-        for(int i=0;i<4;i++)buttons[i].setMessage(Component.literal(MODES[i]).withColor(menu.value(0)==i?0x80FF80:0xFFFFFF));
+        for(int i=0;i<MODES.length;i++)buttons[i].setMessage(Component.literal(MODES[i]).withColor(menu.value(0)==i?0x80FF80:0xFFFFFF));
         buttons[6].active=menu.value(3)>4;buttons[7].active=menu.value(3)<16;buttons[8].active=menu.value(5)==1;
         buttons[8].setMessage(Component.literal(menu.value(4)==1?"Party: Allowed":"Owner only"));
         updateButtons();
@@ -85,9 +86,10 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         int row=assignmentRow(mouseY-topPos);var npc=npc();
         if(panel==0 && npc!=null && mouseX>=leftPos+100 && mouseX<leftPos+(row>0 && row<5?253:imageWidth-20) && mouseY>=topPos+78 && row>=0 && row<CompanionAssignments.COUNT){
             var target=npc.assignments.view().get(row);
-            String text=target==null?"Use the Companion Planner to select this companion, then right-click a "+(row==0?"bed.":row==5?"lunch crate or lunch cover.":row==6?"container for Supply.":row==7?"container while holding Shift for Output.":"workstation."):
+            String text=target==null?"Use the Companion Planner to select this companion, then right-click a "+(row==0?"bed.":row==5?"lunch crate or lunch cover.":row==6?"container for Supply (blue); click again to switch roles.":row==7?"container for Output (yellow); click again to switch roles.":"workstation."):
                 target.name()+" at "+target.at().pos().toShortString()+" in "+target.at().dimension().identifier()+" - "+CompanionStatus.from(menu.value(CompanionMenu.assignmentData(row))).label;
             if(row>0 && row<5 && target!=null)text+=". Priority "+row+" (top is highest).";
+            if(row==6 || row==7)text+=" Porter moves items from Supply to Output. Work uses these containers for machine recipes.";
             g.setTooltipForNextFrame(font,Component.literal(text),mouseX,mouseY);
         }
         if(panel==0)for(int i=0;i<4;i++){
@@ -118,7 +120,11 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         int x=leftPos,y=topPos;
         g.fill(x,y,x+imageWidth,y+imageHeight,0xFF373737);g.fill(x+1,y+1,x+imageWidth-2,y+imageHeight-2,0xFFFFFFFF);g.fill(x+3,y+3,x+imageWidth-1,y+imageHeight-1,0xFF555555);g.fill(x+4,y+4,x+imageWidth-4,y+imageHeight-4,0xFFC6C6C6);
         for(var slot:menu.slots){if(!slot.isActive())continue;int sx=x+slot.x,sy=y+slot.y;g.fill(sx-1,sy-1,sx+17,sy+17,0xFFFFFFFF);g.fill(sx-1,sy-1,sx+16,sy+16,0xFF373737);g.fill(sx,sy,sx+16,sy+16,0xFF8B8B8B);}
-        if(panel==0)for(int i=0;i<CompanionAssignments.COUNT;i++)g.fill(x+99,y+CompanionMenu.assignmentY(i),x+(i==0 || i>=5?imageWidth-20:252),y+CompanionMenu.assignmentY(i)+14,0xFFDADADA);
+        if(panel==0)for(int i=0;i<CompanionAssignments.COUNT;i++){
+            int rowY=y+CompanionMenu.assignmentY(i);
+            g.fill(x+99,rowY,x+(i==0 || i>=5?imageWidth-20:252),rowY+14,0xFFDADADA);
+            if(i>=CompanionAssignments.SUPPLY)g.fill(x+99,rowY,x+101,rowY+14,i==CompanionAssignments.SUPPLY?CompanionAssignments.SUPPLY_COLOR:CompanionAssignments.OUTPUT_COLOR);
+        }
     }
     @Override protected void extractLabels(GuiGraphicsExtractor g,int mouseX,int mouseY){
         g.text(font,fit(title.getString(),222),8,8,0xFF404040,false);

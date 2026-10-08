@@ -23,6 +23,7 @@ public final class CompanionAssignments {
     }
     private final PeepoEntity npc;
     public static final int LUNCH=5,SUPPLY=6,OUTPUT=7,COUNT=8;
+    public static final int SUPPLY_COLOR=0xFF55AAFF,OUTPUT_COLOR=0xFFFFDD55;
     private final Target[] targets=new Target[COUNT];
     // Two bits per direction: Auto (0), On (1), Off (2). Kept separate from route identity.
     private final int[] transportModes=new int[COUNT];
@@ -77,7 +78,28 @@ public final class CompanionAssignments {
         if(storage==null || (output?!storage.supportsInsertion():!storage.supportsExtraction()))return "This container face is unavailable, locked, or does not support that transfer.";
         for(int i=0;i<COUNT;i++)if(i!=(output?OUTPUT:SUPPLY) && targets[i]!=null && targets[i].at.equals(target.at))return "This container already has another role for this companion.";
         targets[output?OUTPUT:SUPPLY]=target;changed();
-        return (output?"Output":"Supply")+" container assigned: "+target.name();
+        return (output?"Output":"Supply")+" container assigned: "+target.name()+(output?" (yellow).":" (blue).")+" Right-click again to switch role; left-click to remove.";
+    }
+    /** One gesture for both roles. Swap an existing pair only after both new directions validate. */
+    public String cycleContainer(Level level,BlockPos pos,Direction face){
+        var at=GlobalPos.of(level.dimension(),pos);
+        int previous=targets[SUPPLY]!=null && targets[SUPPLY].at.equals(at)?SUPPLY:targets[OUTPUT]!=null && targets[OUTPUT].at.equals(at)?OUTPUT:-1;
+        if(previous<0){
+            boolean output=targets[SUPPLY]!=null && targets[OUTPUT]==null;
+            return assignContainer(level,pos,face,output);
+        }
+        if(!level.hasChunkAt(pos) || pos.distToCenterSqr(npc.position())>64*64)return "Keep a loaded container within 64 blocks of the companion.";
+        int next=previous==SUPPLY?OUTPUT:SUPPLY;
+        var target=new Target(at,BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()),face);
+        var storage=CompanionStorage.find(npc,target);
+        if(storage==null || (next==OUTPUT?!storage.supportsInsertion():!storage.supportsExtraction()))return "This face cannot serve the new role. Existing assignments kept.";
+        var other=targets[next];
+        if(other!=null){
+            var swapped=CompanionStorage.find(npc,other);
+            if(swapped==null || (previous==SUPPLY?!swapped.supportsExtraction():!swapped.supportsInsertion()))return "The other container cannot swap roles. Clear that assignment first.";
+        }
+        targets[next]=target;targets[previous]=other;changed();
+        return target.name()+": "+(next==SUPPLY?"Supply (blue)":"Output (yellow)")+(other==null?".":". The other container swapped roles.")+" Right-click to switch; left-click to remove.";
     }
     public String assign(Level level,BlockPos clicked){
         var pos=canonical(level,clicked);

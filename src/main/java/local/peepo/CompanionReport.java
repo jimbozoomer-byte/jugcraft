@@ -46,6 +46,7 @@ public final class CompanionReport {
             npc.transport.activity()!=CompanionStatus.IDLE?npc.transport.activity():npc.isRecovering()?CompanionStatus.RECOVERING:!npc.preferences.onShift()?CompanionStatus.SCHEDULED_REST:npc.routineStatus();
         if(overall==CompanionStatus.IDLE){
             if(npc.needsAutomaticFood() && lunch().problem())overall=lunch();
+            else if(npc.orders.porter())overall=npc.transport.porterStatus();
             else if(npc.orders.mode()==3)for(int i=1;i<5;i++)if(rows[i]!=CompanionStatus.NONE){overall=rows[i];break;}
         }
         alert|=old!=overall && overall.problem();
