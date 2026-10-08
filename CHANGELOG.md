@@ -46,6 +46,12 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: Cakes
+- Seven cakes the owner drew, rebuilt from their drawing: **Carrot Cake, Birthday Cake, Ice Cream Cake, Red Velvet Cake, Cheesecake, Coffee Cake and Apple Cake**, with the drawing's carrots, candles, berry jam and apple slices on top.
+- Baked in the **Hearth Oven** as the pies are: **Cake Batter** (wheat, an egg, sugar and milk), a sugar and the cake's own ingredients make a raw cake. Left in too long, it comes out a **Burnt Cake**.
+- Set down whole, facing you, and eaten or cut with a knife into slices a quarter at a time, the front right quarter first, showing the cake's layers inside.
+- Details: [docs/features/cakes.md](docs/features/cakes.md).
+
 ### Unmerged: Orchards
 - The sixth slice of the kitchen and cooking expansion: four fruit trees in Jugcraft's own art, as the owner chose (their library has no fruit trees yet).
 - **Pear, peach, lemon and orange trees** grow from their seeds (a peach's pit) on oak trunks, each in its own shape. Like the apple tree, their leaves blossom and then hang with ripe fruit; a right-click picks it and the tree fruits again. A fruit crafts into its seed.

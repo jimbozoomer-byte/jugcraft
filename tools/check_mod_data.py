@@ -23,6 +23,8 @@ import menu
 import rice
 import soil
 import orchard
+import cakes
+import cake_data
 import owner_art
 import werewolf_model
 import midway
@@ -3533,6 +3535,78 @@ def check_soil():
     loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{soil.RICH_FARMLAND['block']}.json") or {})
     if f'"{MOD}:{soil.RICH_SOIL["block"]}"' not in loot:
         err("Rich Soil Farmland must drop Rich Soil")
+
+
+def check_cakes():
+    """The cakes (tools/cakes.py): Java's PieFilling holds them after the pies, as CAKES has them (ID, slice food and sponge
+    colour, in order); CakeBlock's height and quarters match tools/cakes.py and tools/cake_data.py; the cakes, the Burnt
+    Cake and Cake Batter are registered; every cake (and the Burnt Cake) has a model for each slice gone, a blockstate for
+    each slice and facing (turned as the model faces north), its textures (the toppings' too where it has them), words and
+    loot (only while whole); each topping stands inside one quarter but the jam the quarters share; the raw cakes and slices
+    have their words and textures, the raw cakes and the batter their recipes; the drawing they were rebuilt from is kept."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    filling = java.get("PieFilling", "")
+    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6})\)[,;]', filling, re.M)
+    wanted = [(cake.upper(), cake, str(info["food"][0]), str(info["food"][1]), f"{info['color']:06X}") for cake, info in cakes.CAKES.items()]
+    if [(c, i, f, s_, col.upper()) for c, i, f, s_, col in declared] != wanted:
+        err(f"PieFilling.java's cakes {declared} differ from tools/cakes.py CAKES (ID, slice food, colour, in order)")
+    last_pie = max((filling.find(f'"{ag.pie_name(f)}"') for f in ag.PIES["fillings"]), default=-1)
+    if declared and filling.find(f'"{next(iter(cakes.CAKES))}"') < last_pie:
+        err("PieFilling.java must list the cakes after the pies: the Hearth Oven saves a filling by its place")
+    block = java.get("CakeBlock", "")
+    height = re.search(r"\bint HEIGHT = (\d+);", block)
+    if not height or int(height.group(1)) != cakes.HEIGHT:
+        err("CakeBlock.HEIGHT differs from tools/cakes.py HEIGHT")
+    quarters = [tuple(map(int, q)) for q in re.findall(r"\{(\d+), (\d+), (\d+), (\d+)\}", block.split("QUARTERS =", 1)[-1].split(";", 1)[0])]
+    if quarters != [(x0, z0, x1, z1) for (x0, z0), (x1, z1) in cake_data.QUARTERS]:
+        err("CakeBlock.QUARTERS differs from tools/cake_data.py QUARTERS (the order slices are taken)")
+    for call in ("filling.cake ? new CakeBlock(filling, props)", 'registerBlock("burnt_cake", props -> new CakeBlock(null, props)',
+                 f'plain("{cakes.BATTER}"'):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    if 'cake ? "burnt_cake" : "burnt_pie"' not in filling or "pie.burnt()" not in java.get("HearthOvenBlockEntity", ""):
+        err("A cake left in the Hearth Oven must burn into a Burnt Cake (PieFilling.burnt, HearthOvenBlockEntity)")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for cake in cakes.blocks():
+        if f"block.{MOD}.{cake}" not in lang:
+            err(f"{cake} has no words")
+        for bites in range(len(cake_data.QUARTERS)):
+            if not (ASSETS / "models" / "block" / f"{cake_data.model_name(cake, bites)}.json").exists():
+                err(f"{cake} needs its model {cake_data.model_name(cake, bites)}")
+        variants = (load(ASSETS / "blockstates" / f"{cake}.json") or {}).get("variants", {})
+        for bites in range(len(cake_data.QUARTERS)):
+            for facing, turn in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+                variant = variants.get(f"bites={bites},facing={facing}", {})
+                if variant.get("model") != f"{MOD}:block/{cake_data.model_name(cake, bites)}" or variant.get("y", 0) != turn:
+                    err(f"{cake}'s blockstate must show {cake_data.model_name(cake, bites)} turned {turn} for facing={facing}")
+        if '"bites": "0"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{cake}.json") or {}):
+            err(f"{cake} must drop only while whole")
+        textures = ["top", "front", "side", "inside"] + (["toppings"] if cake in cakes.BARS or cake in cakes.CANDLES or cake in cakes.JAM else [])
+        for texture in textures:
+            path = ASSETS / "textures" / "block" / f"{cake}_{texture}.png"
+            if not path.exists():
+                err(f"{cake} needs its texture {cake}_{texture}")
+            elif Image.open(path).size != (16, 16):
+                err(f"{cake}_{texture}.png must be 16 x 16")
+    for cake in cakes.CAKES:
+        for box in cakes.topping_boxes(cake):
+            if cake in cakes.JAM and box == cakes.jam_box(cake):
+                continue
+            lo, hi = cakes.turn(*box)
+            quarter = cake_data.quarter_of(lo, hi)
+            (x0, z0), (x1, z1) = cake_data.QUARTERS[quarter]
+            if not (x0 <= lo[0] and hi[0] <= x1 and z0 <= lo[2] and hi[2] <= z1):
+                err(f"{cake}'s topping at {lo}-{hi} crosses a cut: each topping must stand inside one quarter")
+        for item in (cakes.raw(cake), cakes.slice_item(cake)):
+            if f"item.{MOD}.{item}" not in lang or not (ASSETS / "textures" / "item" / f"{item}.png").exists():
+                err(f"The cakes need the words and texture of {item}")
+        if not (DATA / MOD / "recipe" / f"{cakes.raw(cake)}.json").exists():
+            err(f"{cakes.raw(cake)} needs its recipe")
+    if not (DATA / MOD / "recipe" / f"{cakes.BATTER}.json").exists():
+        err("Cake Batter needs its recipe")
+    if not (ROOT / "art" / "owner-library" / "drawings" / "cakes_and_bakes.png").exists():
+        err("The owner's drawing the cakes are rebuilt from (art/owner-library/drawings/cakes_and_bakes.png) is missing")
 
 
 def check_orchard():
@@ -7899,6 +7973,7 @@ def main():
     check_rice()
     check_soil()
     check_orchard()
+    check_cakes()
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()

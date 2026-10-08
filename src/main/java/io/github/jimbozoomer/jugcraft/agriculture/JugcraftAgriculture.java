@@ -2024,16 +2024,22 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(HearthOvenBlockEntity::new, oven).build());
 		registerItem("hearth_oven", props -> new BlockItem(oven, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		registerItem("pastry_dough", Item::new, new Item.Properties().compostable(COMPOST_MEDIUM), INGREDIENT_TAB);
+		// The cakes the owner drew (tools/cakes.py) are baked the same way, from Cake Batter, and set down as CakeBlocks.
+		plain("cake_batter", COMPOST_MEDIUM);
 		for (PieFilling filling : PieFilling.values()) {
 			registerItem(filling.rawPie(), Item::new, new Item.Properties().stacksTo(16).compostable(COMPOST_MEDIUM_HIGH), FOOD_TAB);
-			Block pie = registerBlock(filling.pie(), props -> new PieBlock(filling, props), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
-					.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+			Block pie = registerBlock(filling.pie(), props -> filling.cake ? new CakeBlock(filling, props) : new PieBlock(filling, props),
+					BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(0.5F).sound(SoundType.WOOL).noOcclusion()
+							.pushReaction(PushReaction.POPPED));
 			registerItem(filling.pie(), props -> new BlockItem(pie, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
 			food(filling.slice(), filling.nutrition, filling.saturation, COMPOST_MEDIUM_HIGH);
 		}
 		Block burnt = registerBlock("burnt_pie", props -> new PieBlock(null, props), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
 				.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
 		registerItem("burnt_pie", props -> new BlockItem(burnt, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
+		Block burntCake = registerBlock("burnt_cake", props -> new CakeBlock(null, props), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem("burnt_cake", props -> new BlockItem(burntCake, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
 
 		// Fall additions 17, the Spirit Board: a candlelit séance spells out a restless spirit's name and the one thing it
 		// wishes for; given it, the spirit is laid to rest.
