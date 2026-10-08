@@ -88,7 +88,7 @@ public class HearthOvenBlockEntity extends BlockEntity {
 			transfers.updateSnapshots(tx); pie = null; baked = 0; return 1;
 		}
 		@Override public boolean isResourceBlank() { return !live() || pie == null || baked < BAKED; }
-		@Override public ItemVariant getResource() { return isResourceBlank() ? ItemVariant.blank() : ItemVariant.of(JugcraftAgriculture.item(baked >= BURNT ? "burnt_pie" : pie.pie())); }
+		@Override public ItemVariant getResource() { return isResourceBlank() ? ItemVariant.blank() : ItemVariant.of(JugcraftAgriculture.item(baked >= BURNT ? pie.burnt() : pie.pie())); }
 		@Override public long getAmount() { return isResourceBlank() ? 0 : 1; }
 		@Override public long getCapacity() { return 1; }
 	};
@@ -109,7 +109,7 @@ public class HearthOvenBlockEntity extends BlockEntity {
 	public int companionNeed(ItemStack stack) {
 		if (!live()) return 0;
 		var filling = rawFilling(stack);
-		if (filling != null) return pie == null && filling == selectedPie ? 1 : 0;
+		if (filling != null) return pie == null && (selectedPie == null || filling == selectedPie) ? 1 : 0;
 		int duration = burnTicks(stack);
 		// Fuel only a real unfinished pie, never continually reheat an empty oven. Coal blocks cannot fit.
 		if (pie == null || baked >= BAKED || duration <= 0 || duration > MAX_BURN || burn >= 600) return 0;
@@ -127,7 +127,7 @@ public class HearthOvenBlockEntity extends BlockEntity {
 	public local.peepo.CompanionStatus companionStatus() {
 		if (!live()) return local.peepo.CompanionStatus.UNLOADED;
 		if (pie != null) return baked >= BAKED ? local.peepo.CompanionStatus.READY : needsTending() ? local.peepo.CompanionStatus.WORKING : local.peepo.CompanionStatus.NO_HEAT;
-		return selectedPie == null ? local.peepo.CompanionStatus.RECIPE_MISSING : local.peepo.CompanionStatus.NO_INPUT;
+		return local.peepo.CompanionStatus.NO_INPUT;
 	}
 
 	public HearthOvenBlockEntity(BlockPos pos, BlockState state) {

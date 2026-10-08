@@ -5,6 +5,8 @@ public final class PeepoState extends LivingEntityRenderState { public final Ite
     public local.peepo.WorkAnimation work=local.peepo.WorkAnimation.NONE;
     public float workPhase;
     public final ItemStackRenderState pie=new ItemStackRenderState();
+    public io.github.jimbozoomer.jugcraft.agriculture.PieFilling rawBake;
+    boolean cake;
     float pieX,pieY,pieZ,pieReach;
     public int social;
     public float socialTime;

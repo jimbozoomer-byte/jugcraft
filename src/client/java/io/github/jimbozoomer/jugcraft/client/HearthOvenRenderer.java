@@ -86,17 +86,22 @@ public class HearthOvenRenderer implements BlockEntityRenderer<HearthOvenBlockEn
 		if (pie == null) {
 			return;
 		}
-		int light = state.lightCoords;
-		int crust = crust(state.baked);
-		boolean burnt = state.baked >= HearthOvenBlockEntity.BURNT;
-		int filling = burnt ? 0xFF1A100A : 0xFF000000 | pie.color;
 		pose.pushPose();
 		pose.translate(0.5F, 0.0F, 0.5F);
 		pose.rotateDegrees(Axis.YP, -RockingChairRenderer.yRotation(state.facing));
 		pose.translate(-0.5F, 0.0F, -0.5F);
+		submitBake(pie, state.baked, pose, collector, state.lightCoords);
+		pose.popPose();
+	}
+
+	/** Shared oven-space geometry: companions use baked=0 for real raw cargo, including cake tins. */
+	public static void submitBake(PieFilling pie, int baked, PoseStack pose, SubmitNodeCollector collector, int light) {
+		int crust = crust(baked);
+		boolean burnt = baked >= HearthOvenBlockEntity.BURNT;
+		int filling = burnt ? 0xFF1A100A : 0xFF000000 | pie.color;
 		if (pie.cake) {
 			int tin = 0xFF8A8C90;
-			int cake = sponge(pie.color, state.baked);
+			int cake = sponge(pie.color, baked);
 			collector.submitCustomGeometry(pose, CRUST, (matrix, buffer) -> {
 				// The cake: a square tin, and the sponge risen a little above its rim.
 				TintedBoxes.box(buffer, matrix, 5.0F, 2.0F, 6.0F, 11.0F, 3.5F, 12.0F, tin, light);
@@ -110,6 +115,5 @@ public class HearthOvenRenderer implements BlockEntityRenderer<HearthOvenBlockEn
 				TintedBoxes.box(buffer, matrix, 7.25F, 3.75F, 8.25F, 8.75F, 3.85F, 9.75F, filling, light);
 			});
 		}
-		pose.popPose();
 	}
 }

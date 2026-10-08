@@ -252,7 +252,7 @@ public final class CompanionTransport extends Goal {
         }
         var visibleCargo=carried();
         if(pieAction!=WorkAnimation.PIE_LOAD && hearthRoute() && !visibleCargo.isEmpty()
-            && (HearthOvenBlockEntity.selectedFilling(visibleCargo)!=null || visibleCargo.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item("burnt_pie"))))
+            && (HearthOvenBlockEntity.selectedFilling(visibleCargo)!=null || (visibleCargo.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item("burnt_pie")) || visibleCargo.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item("burnt_cake")))))
             piePose(WorkAnimation.PIE_CARRY,visibleCargo);
         status=manifest.isEmpty()?(supply || porter?CompanionStatus.FETCHING_SUPPLIES:CompanionStatus.COLLECTING_OUTPUT):returning?CompanionStatus.RETURNING_SUPPLIES:CompanionStatus.DELIVERING;
         if(porter)porterState=status;

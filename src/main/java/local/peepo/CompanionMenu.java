@@ -152,7 +152,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
                 if(button==1 || held.isEmpty())oven.selectPie(null);
                 else {
                     var filling=HearthOvenBlockEntity.selectedFilling(held);
-                    if(filling==null){player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Choose a whole raw or baked Hearth Oven pie."));return;}
+                    if(filling==null){player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Choose a whole raw or baked Hearth Oven pie or cake."));return;}
                     oven.selectPie(filling);
                 }
                 refreshRecipes();broadcastChanges();return;

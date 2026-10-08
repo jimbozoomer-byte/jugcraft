@@ -151,7 +151,7 @@ public final class PeepoHearthClientTests implements FabricClientGameTest {
             try(var tx=Transaction.openOuter()){check(oven.companionInputs().insert(v,64,tx)==1,"only one raw pie accepted "+f);tx.commit();}
             try(var tx=Transaction.openOuter()){check(oven.companionInputs().insert(v,64,tx)==0,"occupied oven rejects another pie "+f);}
             oven.set(600,100,f,HearthOvenBlockEntity.BURNT);
-            try(var tx=Transaction.openOuter()){check(oven.companionOutputs().extract(ItemVariant.of(JugcraftAgriculture.item("burnt_pie")),64,tx)==1,"burnt result "+f);tx.commit();}
+            try(var tx=Transaction.openOuter()){check(oven.companionOutputs().extract(ItemVariant.of(JugcraftAgriculture.item(f.burnt())),64,tx)==1,"burnt result "+f);tx.commit();}
             check(oven.pie()==null,"burnt extraction empties oven "+f);
         }
     }

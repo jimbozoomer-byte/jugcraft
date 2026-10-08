@@ -53,11 +53,12 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.socialTime=(float)Math.clamp(entity.level().getGameTime()-entity.socialStarted()+partialTick,0,120);
         state.workPhase=(float)WorkAnimation.stirPhase(entity.level().getGameTime(),partialTick);
         var shownPie=net.minecraft.world.item.ItemStack.EMPTY;
+        state.rawBake=null;state.cake=false;
         if(state.work.isPie()){
             shownPie=entity.workPie();
-            // Raw pies use their matching placeable geometry, rather than the flat inventory icon.
-            var filling=io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity.rawFilling(shownPie);
-            if(filling!=null)shownPie=new net.minecraft.world.item.ItemStack(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item(filling.pie()));
+            state.rawBake=io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity.rawFilling(shownPie);
+            var filling=io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity.selectedFilling(shownPie);
+            state.cake=filling!=null && filling.cake || shownPie.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item("burnt_cake"));
             state.pieX=0;state.pieY=20.0F;state.pieZ=state.pumpkin?-6.0F:-4.8F;state.pieReach=0;
             if(state.work!=WorkAnimation.PIE_CARRY){
                 state.bodyRot=entity.getYRot();state.yRot=0;state.xRot=0;
@@ -71,7 +72,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
                         if(block.getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlock){
                             var facing=block.getValue(io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlock.FACING);
                             // Same center and shelf height as HearthOvenRenderer's resting pie.
-                            var center=net.minecraft.world.phys.Vec3.atBottomCenterOf(target).add(-facing.getStepX()/16.0,.18,-facing.getStepZ()/16.0);
+                            var center=net.minecraft.world.phys.Vec3.atBottomCenterOf(target).add(-facing.getStepX()/16.0,state.cake?3.375/16.0:.18,-facing.getStepZ()/16.0);
                             var d=center.subtract(entity.getPosition(partialTick));double a=Math.toRadians(entity.getYRot());
                             state.pieX=net.minecraft.util.Mth.lerp(slide,0,(float)((d.x*Math.cos(a)+d.z*Math.sin(a))*16));
                             state.pieY=net.minecraft.util.Mth.lerp(slide,state.pieY,(float)(24-d.y*16));
@@ -173,12 +174,19 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
     private static final class PieLayer extends RenderLayer<PeepoState,PeepoModel>{
         PieLayer(PeepoRenderer renderer){super(renderer);}
         @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
-            if(state.isInvisible || !state.work.isPie() || state.pie.isEmpty())return;
+            if(state.isInvisible || !state.work.isPie() || state.rawBake==null && state.pie.isEmpty())return;
             pose.pushPose();pose.translate(state.pieX/16,state.pieY/16,state.pieZ/16);
-            pose.rotateDegrees(com.mojang.math.Axis.XP,180);pose.scale(.42F,.42F,.42F);
-            // The placeable pie occupies y=0..4 in a centered block model. Center it in both hands.
-            pose.translate(0,.375F,0);
-            state.pie.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,state.outlineColor);pose.popPose();
+            pose.rotateDegrees(com.mojang.math.Axis.XP,180);
+            if(state.rawBake!=null){
+                // Match the oven's raw dough/tin, at its actual size and centered between the hands.
+                pose.translate(-.5,state.cake?-3.375/16.0:-.18,-9.0/16);
+                io.github.jimbozoomer.jugcraft.client.HearthOvenRenderer.submitBake(state.rawBake,0,pose,collector,light);
+            }else{
+                pose.scale(.42F,.42F,.42F);
+                pose.translate(0,state.cake?.21875F:.375F,0);
+                state.pie.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,state.outlineColor);
+            }
+            pose.popPose();
         }
     }
     private static final class FoodLayer extends RenderLayer<PeepoState,PeepoModel> {
