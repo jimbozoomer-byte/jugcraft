@@ -1,11 +1,13 @@
 """Arms VII, batch 56 (docs/features/arms-vii.md): named variants of the arms, each a kind of tools/arms.py KINDS with its
-own look, in two lines:
+own look, in three kinds of line:
 
 - styles, crafted at a smithing table from a steel arm, the style's pattern and a material, which keep the arm's
   enchantments and wear: gilded (takes enchantments as gold does), ironclad (dieselpunk, twice as hard-wearing),
   bonecarved (strikes the undead harder) and runebound (glowing runes that mark a foe);
 - trophies of eight bosses still to be made (docs/branches/BOSSES.md): no recipe; each boss's loot table is ready
-  (loot_table/bosses/<boss>.json) for its encounter to drop one of its two.
+  (loot_table/bosses/<boss>.json) for its encounter to drop one of its two;
+- the arms of the owner's armor sets, each in its set's look (the Hades Armor's scythe): no recipe and, until the owner
+  settles how a set is won, no loot table either; creative only for now. Like a trophy, epic and twice as hard-wearing.
 
 A variant is an ArmItem of its kind (weapons/JugcraftArms.java VARIANTS), so its swing, reach, trait, two-handed blow,
 weapon art and motion are its kind's; its line adds a perk or a boon (BOONS), worked on the server in ArmItem. The
@@ -20,9 +22,10 @@ import arms_mesh
 import arms_variants_art
 
 MOD = "jugcraft"
-FEATURE = "machines"   # every variant starts from a steel arm, or is a trophy of the steel age's bosses
+FEATURE = "machines"   # every variant starts from a steel arm, or is a trophy of the steel age's bosses or a set's arm
 
-# Lines: the four crafted styles, then the bosses whose trophies these are (in docs/branches/BOSSES.md order).
+# Lines: the four crafted styles, then the bosses whose trophies these are (in docs/branches/BOSSES.md order), then the
+# owner's armor sets whose arms these are.
 # A style's pattern is its smithing template: crafted from `pattern_recipe`; `addition` goes in the smithing table's
 # third slot. rarity: the name's colour (vanilla's Rarity).
 STYLES = {
@@ -60,7 +63,13 @@ BOSSES = {
     "storm_roc": {"display": "the Storm Roc"},
     "abyssal_leviathan": {"display": "the Abyssal Leviathan"},
 }
-LINES = list(STYLES) + list(BOSSES)
+# The owner's armor sets with an arm of their own ("I also want the scythe from my Hades Armor set", 7 October 2026).
+# How a set is won (a boss's drop, a recipe) is still the owner's to decide, so a set's arm has neither a recipe nor a
+# loot table yet; its tooltip names its set where a trophy's names its boss.
+SETS = {
+    "hades": {"display": "Hades Armor"},
+}
+LINES = list(STYLES) + list(BOSSES) + list(SETS)
 
 # Boons, worked on the server when the arm strikes (ArmItem.hurtEnemy and getAttackDamageBonus). Each is bounded: an
 # effect of at most 5 s and amplifier at most 1 (refreshed, never stacked, by another hit), a share at most half a blow.
@@ -92,7 +101,7 @@ TIDE = 0.25
 GRAVEBANE = 0.2
 GILDED_ENCHANTABILITY = 22   # gold tools' (steel's is 12)
 IRONCLAD_DURABILITY = 2      # times steel's 900
-TROPHY_DURABILITY = 2        # a boss's trophy, times steel's
+TROPHY_DURABILITY = 2        # a boss's trophy or an armor set's arm, times steel's
 
 # Every variant, in registration order: (id, kind, line, boon or None, name).
 VARIANTS = [
@@ -128,6 +137,7 @@ VARIANTS = [
     ("galefeather", "estoc", "storm_roc", "gale", "Galefeather"),
     ("tidebreaker", "war_fork", "abyssal_leviathan", "tide", "Tidebreaker"),
     ("leviathans_hook", "bill", "abyssal_leviathan", "tide", "Leviathan's Hook"),
+    ("hades_scythe", "scythe", "hades", "wither", "Hades Scythe"),
 ]
 BY_ID = {name: (kind, line, boon, display) for name, kind, line, boon, display in VARIANTS}
 
@@ -151,6 +161,11 @@ def line(name):
 
 def trophies(boss):
     return [name for name, _kind, at, *_ in VARIANTS if at == boss]
+
+
+def set_arms(armor_set):
+    """An armor set's arms (SETS), in registration order."""
+    return [name for name, _kind, at, *_ in VARIANTS if at == armor_set]
 
 
 def textures():
@@ -192,7 +207,7 @@ def trait(text):
 
 def write_all(write, assets, data, lang, condition):
     """Each variant's models and definition, its name and its line's and boon's tooltips; the patterns, their recipes
-    and the styles' smithing recipes; and each boss's trophy loot table."""
+    and the styles' smithing recipes; and each boss's trophy loot table (an armor set's arm has none yet)."""
     models = assets / "models" / "item"
     for style, info in STYLES.items():
         name, text = trait(info["perk"])
@@ -213,6 +228,9 @@ def write_all(write, assets, data, lang, condition):
         write(data / "loot_table" / "bosses" / f"{boss}.json", {
             "type": "minecraft:entity", "random_sequence": f"{MOD}:bosses/{boss}",
             "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{MOD}:{name}"} for name in trophies(boss)]}]})
+    for armor_set, info in SETS.items():
+        # A set's arm names its set where a trophy names its boss. No loot table: how a set is won is not settled.
+        lang[f"tooltip.{MOD}.arms.line.{armor_set}.trait"] = f"Of the {info['display']} set"
     for boon, text in BOONS.items():
         name, text = trait(text)
         lang[f"tooltip.{MOD}.arms.boon.{boon}.trait"] = name

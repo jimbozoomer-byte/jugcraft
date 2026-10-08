@@ -19,6 +19,22 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Earthbound armor:** an Earthbinding Template (rooted dirt, four thallite nuggets and four gold nuggets), a thallite piece and a gold ingot at a smithing table bind the piece into its gold-trimmed Earthbound twin, for good, keeping its enchantments, wear and name. Earthbound pieces are **Rooted**: on natural ground (soil, stone, sand or gravel) each takes 7.5% off knockback, 30% for a full set, and with two or more worn Regrowth works on stone, sand and gravel too.
 - Both traits are named in the tooltip and described while Shift is held. Two handbook pages. Arms, the arrow, horse armor and magic come in later slices. Record: [thallite.md](docs/features/thallite.md).
 
+### Unmerged: Pharaoh Armor
+- **Pharaoh Armor, the last of the owner's five new armor tiers:** gold and teal plate with red gems over tan linen, worn as a 3D model in the owner's own design: a nemes headdress whose striped side flaps rise into rounded teal humps above the crown, with the uraeus on the brow over a tan face plate; a broad collar with a red gem, a breastplate framing a teal square and gold-framed teal bracers; a skirt of striped lames dipping in a V; sandal-greaves. Four 16×16 icons of its own.
+- **Beside the others, in other strengths:** defense 4, 9, 6 and 3 (helmet to boots), toughness 3.0, knockback resistance 0.1, durability 451, 656, 615 and 533, enchantability 22. Fire resistant, and repaired with gold ingots.
+- **No recipe or drop yet:** creative tab only, until the owner decides. Record: [pharaoh-armor.md](docs/features/pharaoh-armor.md).
+
+### Unmerged: Sunset Gem Armor
+- **Sunset Gem Armor, the fourth of the owner's new armor tiers:** a set in a sunset gradient, cream at the crown to coral at the feet, worn as a 3D model in the owner's own design: a crown of gem shards trailing sparkles, shard wings rising from the shoulders, a striped breastplate, and a striped skirt with red flaps and shards at the hips.
+- **Beside the others, in other strengths:** defense 3, 8, 7 and 3 (helmet to boots), toughness 3.0, knockback resistance 0.1, durability 528, 768, 720 and 624, enchantability 25: it lasts longest and enchants best of all. Not fire resistant, and repaired with amethyst shards.
+- **No recipe or drop yet:** creative tab only, until the owner decides. Record: [sunset-gem-armor.md](docs/features/sunset-gem-armor.md).
+
+### Unmerged: Hades Armor and the Hades Scythe
+- **Hades Armor, the third of the owner's new armor tiers:** dark slate plate worn as a 3D model in the owner's own design: a narrow helm with a beaked visor and two great horns, layered pauldrons rising toward the outside, a V of bars on the breastplate, a flared plate skirt, and a blood-red tabard from chest to hem.
+- **Beside the other two, in other strengths:** defense 3, 8, 7 and 3 (helmet to boots), toughness 4.0, knockback resistance 0.2, durability 462, 672, 630 and 546, enchantability 12. Fire resistant, and repaired with netherite ingots.
+- **The Hades Scythe,** its weapon: a scythe in the owner's design (a near-black snath, red grip wraps, a diamond pommel and a curved slate blade) that fights as every scythe does and withers what it strikes. It is the first arm of a new line, the owner's armor sets.
+- **No recipe or drop yet:** creative tab only, until the owner decides. Record: [hades-armor.md](docs/features/hades-armor.md).
+
 ### Unmerged: Reforged White Diamond Armor
 - **Reforged White Diamond Armor, the second of the owner's new armor tiers:** an icy white and pale cyan set worn as a 3D model in the owner's own design: a big V crest and rising wing bars over a charcoal face plate, wide winged pauldrons over a lavender-edged V on the chest, a long skirt of tassets in an A over light and lavender stripes, and diamond plates on the toes.
 - **Beside Bloodthorn, in other strengths:** defense 4, 8, 7 and 3 (helmet to boots), toughness 3.0, knockback resistance 0.1, durability 495, 720, 675 and 585, enchantability 20. Not fire resistant, and repaired with diamonds.

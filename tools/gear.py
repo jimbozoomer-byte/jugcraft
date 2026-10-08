@@ -139,6 +139,18 @@ ARMOR_TIERS = {
     # wear and the best enchanting, but netherite's toughness and no fire resistance; mended with diamonds.
     "reforged_white_diamond": {"display": "Reforged White Diamond", "armor": (45, (3, 7, 8, 4), 20, 3.0, 0.1),
                                "repair": "minecraft:diamond", "fire_resistant": False},
+    # Hades: the underworld's plate, beside the other two in other strengths: the toughest and steadiest, but a point
+    # less defense and the poorest enchanting; fire resistant, mended with netherite.
+    "hades": {"display": "Hades", "armor": (42, (3, 7, 8, 3), 12, 4.0, 0.2),
+              "repair": "minecraft:netherite_ingot", "fire_resistant": True},
+    # Sunset Gem: beside the others in other strengths: the longest wear and the best enchanting of all, but a point
+    # less defense than Bloodthorn's and netherite's toughness; mended with amethyst shards.
+    "sunset_gem": {"display": "Sunset Gem", "armor": (48, (3, 7, 8, 3), 25, 3.0, 0.1),
+                   "repair": "minecraft:amethyst_shard", "fire_resistant": False},
+    # Pharaoh: beside the others in other strengths: the heaviest helm and chest (but leggings like netherite's),
+    # good enchanting, netherite's toughness; fire resistant, as the desert sun asks; mended with gold.
+    "pharaoh": {"display": "Pharaoh", "armor": (41, (3, 6, 9, 4), 22, 3.0, 0.1),
+                "repair": "minecraft:gold_ingot", "fire_resistant": True},
 }
 
 

@@ -9,10 +9,13 @@ tools/arms_pixel.py as a pixel-art icon on the diagonal and a 3D model in the ha
 - the bosses' trophies: ice and white fur (the Yeti King), obsidian and magma (the Cinder Tyrant), blackthorn and
   venom (the Mire Hag), dark iron and soul fire (the Crypt Lich), gunmetal, copper coils and arcs (the Iron
   Dreadnought), silver and wolf fur (the Alpha Werewolf), storm steel, feathers and lightning (the Storm Roc), and
-  sea-green bronze, pearl and a glowing tide line (the Abyssal Leviathan).
+  sea-green bronze, pearl and a glowing tide line (the Abyssal Leviathan);
+- the owner's armor sets' arms, in their set's palette: slate with light edges, a night-dark snath and blood-red wraps
+  (the Hades Armor's scythe, after the owner's own design).
 
 All original; the designs follow their kinds' proportions (tools/arms_art.py), so each is held as its kind is, and
 are kept plain as the studied mods' are: one or two accents an arm, clean silhouettes, no dotted or scattered detail.
+The armor sets' arms follow the owner's designs instead, which are drawn in proportion to their sets.
 """
 import math
 
@@ -56,6 +59,13 @@ BOLT = M((90, 70, 0), (160, 126, 4), (220, 180, 10), (250, 220, 40), (255, 244, 
 SEABRONZE = M((6, 30, 34), (12, 60, 66), (20, 90, 96), (36, 124, 128), (70, 166, 166), (140, 214, 206))
 PEARL = M((90, 86, 100), (150, 146, 160), (196, 192, 206), (226, 222, 234), (242, 240, 248), (255, 255, 255))
 TIDEGLOW = M((4, 40, 44), (8, 80, 84), (16, 126, 128), (40, 180, 176), (110, 230, 218), (210, 255, 248), glow=True)
+# The Hades Armor's palette, from the owner's design: slate plates with light edges, a blue-black snath, soot-black
+# rings and blood-red wraps.
+SLATE = M((26, 27, 38), (46, 47, 62), (72, 73, 92), (102, 104, 126), (142, 144, 164), (198, 200, 216))
+ASHEN = M((42, 42, 50), (66, 66, 76), (112, 112, 122), (150, 150, 160), (190, 190, 198), (228, 228, 234))
+NIGHT = M((12, 12, 20), (24, 24, 36), (34, 35, 52), (48, 50, 72), (66, 69, 98), (82, 86, 118), shine=False)
+SOOT = M((8, 8, 12), (14, 14, 20), (18, 18, 26), (24, 24, 34), (34, 34, 46), (46, 46, 60), shine=False)
+BLOOD = M((44, 8, 14), (70, 14, 22), (96, 22, 32), (138, 30, 42), (176, 48, 56), (204, 78, 82), shine=False)
 
 # Style(blade, fitting, grip, haft, gem, accent, cloth)
 GILDED = Style(POLISHED, GOLD, ROYAL, px.DARK_WOOD, SAPPHIRE, GOLD, ROYAL)
@@ -70,11 +80,12 @@ DREADNOUGHT = Style(GUNSTEEL, px.GUNMETAL, px.RUBBER, px.GUNMETAL, ARC, COPPER, 
 WEREWOLF = Style(SILVER, DARK_IRON, WOLF, px.DARK_WOOD, MOONSTONE, SILVER, WOLF)
 ROC = Style(STORMSTEEL, px.GUNMETAL, px.LEATHER, px.DARK_WOOD, BOLT, BOLT, FEATHER)
 LEVIATHAN = Style(SEABRONZE, SEABRONZE, px.LEATHER, px.DARK_WOOD, PEARL, PEARL, TIDEGLOW)
+HADES = Style(SLATE, ASHEN, BLOOD, NIGHT, BLOOD, SOOT, BLOOD)
 # Each line's materials, by its name in tools/arms_variants.py (a variant's 16x16 icon is coloured from them).
 LINE_STYLES = {"gilded": GILDED, "ironclad": IRONCLAD, "bonecarved": BONECARVED, "runebound": RUNEBOUND,
                "yeti_king": YETI, "cinder_tyrant": CINDER, "mire_hag": HAG, "crypt_lich": LICH,
                "iron_dreadnought": DREADNOUGHT, "werewolf_alpha": WEREWOLF, "storm_roc": ROC,
-               "abyssal_leviathan": LEVIATHAN}
+               "abyssal_leviathan": LEVIATHAN, "hades": HADES}
 
 
 # ---------------------------------------------------------------- shared parts
@@ -709,13 +720,106 @@ def leviathans_hook():
     return d
 
 
+# ---------------------------------------------------------------- the Hades Armor (the owner's armor sets)
+
+
+def hades_stud(d, s, t, r, depth, z=0, part="stud", rise=2, core=2, spike=None):
+    """A block of the Hades Scythe (its head, its pommel) as the owner drew them: a slate diamond `r` texels each way
+    from the texel corner (s, t), its two lower edges trimmed light `rise` rows deep, as the armor's plates are edged,
+    round a bluish core `core` texels each way, raised a little. The trim is the diamond less itself raised `rise` rows,
+    so its edges step a texel at a time. `spike`: (length, drop), a short point out of its back corner, swept `drop`
+    back towards the butt."""
+    left, bottom, top, right = (s, t - r), (s - r, t), (s + r, t), (s, t + r)
+    foot = (s + rise - r, t)
+    inner_left, inner_right = (s + rise / 2.0, t - r + rise / 2.0), (s + rise / 2.0, t + r - rise / 2.0)
+    d.poly([left, bottom, foot, inner_left], ASHEN, depth=depth, z=z, part=f"{part}_trim_left", tone=LIGHT)
+    d.poly([bottom, right, inner_right, foot], ASHEN, depth=depth, z=z, part=f"{part}_trim_right", tone=MID)
+    d.poly([foot, inner_left, top, inner_right], SLATE, depth=depth, z=z, part=part, tone=MID)
+    if core:
+        middle = s + rise / 2.0
+        d.poly([(middle - core, t), (middle, t - core), (middle + core, t), (middle, t + core)], SLATE,
+               depth=depth + 0.4, z=z + 1, part=f"{part}_core", tone=LIGHT)
+    if spike:
+        length, drop = spike
+        d.poly([(s + 1.0, t + r - 1.0), (s - drop, t + r + length), (s - 1.0, t + r - 1.0)], ASHEN, depth=depth - 1.0,
+               z=z - 1, part=f"{part}_spike", tone=MID)
+
+
+def swept(ctrl, breadth, share, taper=3.5, steps=32):
+    """Points along the cubic Bezier `ctrl` ((s, t) each) from its start to its end, taken in towards the inside of its
+    turn (its left, with t to the right and s up) by `share` of a breadth that narrows to nothing at the end."""
+    a, b, c, e = ctrl
+    out = []
+    for i in range(steps + 1):
+        u = i / steps
+        k0, k1, k2, k3 = (1 - u) ** 3, 3 * (1 - u) ** 2 * u, 3 * (1 - u) * u * u, u ** 3
+        j0, j1, j2 = 3 * (1 - u) ** 2, 6 * (1 - u) * u, 3 * u * u
+        s = k0 * a[0] + k1 * b[0] + k2 * c[0] + k3 * e[0]
+        t = k0 * a[1] + k1 * b[1] + k2 * c[1] + k3 * e[1]
+        ds = j0 * (b[0] - a[0]) + j1 * (c[0] - b[0]) + j2 * (e[0] - c[0])
+        dt = j0 * (b[1] - a[1]) + j1 * (c[1] - b[1]) + j2 * (e[1] - c[1])
+        n = math.hypot(ds, dt) or 1.0
+        width = breadth * (1 - u ** taper) * share
+        out.append((s + width * dt / n, t - width * ds / n))
+    return out
+
+
+# The Hades Scythe's blade: its back from the head's upper face, falling away to the left and turning down to the point
+# (control points of a cubic Bezier, in design units), and its breadth, which holds round the turn and narrows over the
+# last third.
+HADES_BLADE = ((50.2, 5.0), (46.1, -2.0), (49.0, -19.0), (30.0, -19.0))
+HADES_BREADTH = 7.0
+
+
+def hades_scythe():
+    """The Hades Armor's scythe, after the owner's design: a long, broad slate blade sweeping out to the left and down
+    to its point, lighter towards the edge and bright along it, from a slate block at the head trimmed light below,
+    with a short back spike; a blue-black snath that leans out to the head near its top, two soot-black rings on it and
+    a collar at the bend; two blood-red wraps between dark bands where the hand holds; and a light-trimmed diamond for
+    a pommel. The blocks, blade and snath are broader than the scythe's, as the owner drew them (the snath a little
+    slimmer than theirs); its length is the scythe's, and it is held as a scythe is."""
+    d = Design(53, grip=13.0)
+    w, bend, (hs, ht), hr = 2.0, 38.5, (47.0, 8.0), 6
+    # The pommel, over the snath's foot.
+    hades_stud(d, 3.5, 0.0, 3.5, depth=4.2, z=1, part="pommel", rise=3, core=1)
+    # The snath: straight from the pommel to the bend, then leaning out to the head.
+    d.strip(4.5, bend, w, material=NIGHT, depth=w * 2.0, part="snath")
+    ds, dt = hs - bend, ht
+    n = math.hypot(ds, dt)
+    us, ut = ds / n, dt / n
+    d.line(bend, 0.0, hs - us * hr * 0.5, ht - ut * hr * 0.5, w * 2.0, NIGHT, depth=w * 2.0, part="neck")
+    d.disc(bend, 0.0, w, NIGHT, depth=w * 2.0, part="neck")
+    # Two blood-red wraps between three dark bands, two texels each, round the hand.
+    for i in range(5):
+        a = 8.0 + 2.0 * i
+        if i % 2:
+            d.strip(a, a + 1.99, w + 0.1, material=BLOOD, depth=w * 2.0 + 0.3, z=1, part=f"wrap{i}")
+        else:
+            d.strip(a, a + 1.99, w + 0.6, material=BLOOD, depth=w * 2.0 + 0.6, z=1, tone=DARK, part=f"band{i}")
+    # Two soot-black rings up the snath, and a collar just past the bend.
+    for s in (22.0, 30.0):
+        d.strip(s, s + 1.99, w + 0.6, material=SOOT, depth=w * 2.0 + 0.6, z=1, part=f"ring{s:g}")
+    cs, ct, half = bend + us * 2.4, ut * 2.4, w + 0.6
+    d.line(cs + ut * half, ct - us * half, cs - ut * half, ct + us * half, 1.5, SOOT, depth=w * 2.0 + 0.6, z=1,
+           part="collar")
+    # The blade: slate along its back, lighter towards the edge, the edge bright (the owner's light edge).
+    back, middle, inner = (swept(HADES_BLADE, HADES_BREADTH, share) for share in (0.0, 0.5, 1.0))
+    edge = swept(HADES_BLADE, HADES_BREADTH, 1.0 - 1.1 / HADES_BREADTH)
+    d.poly(back + inner[::-1], SLATE, depth=1.6, part="blade", tone=MID)
+    d.poly(middle + inner[::-1], SLATE, depth=1.6, z=1, part="blade_face", tone=LIGHT)
+    d.poly(edge + inner[::-1], SLATE, depth=1.6, z=2, part="edge", tone=HIGHLIGHT)
+    # The head, over the blade's root and the snath's top.
+    hades_stud(d, hs, ht, hr, depth=4.6, z=3, part="head", rise=2, core=2, spike=(3.0, 1.5))
+    return d
+
+
 DESIGNS = {name: fn for name, fn in globals().items() if callable(fn) and name in (
     "gilded_longsword", "gilded_rapier", "gilded_sabre", "gilded_halberd", "ironclad_zweihander", "ironclad_maul",
     "ironclad_war_pick", "ironclad_battle_axe", "bonecarved_dagger", "bonecarved_flail", "bonecarved_glaive",
     "bonecarved_labrys", "runebound_nodachi", "runebound_moonblade", "runebound_staff", "runebound_war_hammer",
     "glacier_maul", "rimeclaw", "cinderbrand", "magmaw", "hagthorn", "bogfang", "soulreaver", "gravewarden",
     "dynamo_halberd", "piston_hammer", "moonfang", "howler", "stormcaller", "galefeather", "tidebreaker",
-    "leviathans_hook")}
+    "leviathans_hook", "hades_scythe")}
 
 
 # ---------------------------------------------------------------- drawing (as tools/arms_art.py draws the kinds)
