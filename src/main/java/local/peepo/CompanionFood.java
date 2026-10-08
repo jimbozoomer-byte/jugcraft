@@ -40,7 +40,7 @@ public final class CompanionFood extends SnapshotParticipant<List<ItemStack>> {
     int takeCargo(int slot,ItemStack expected,int amount,TransactionContext tx){
         var held=npc.belongings.getItem(slot);
         if(!ItemStack.isSameItemSameComponents(held,expected) || held.getCount()<amount)return 0;
-        updateSnapshots(tx);npc.belongings.setItem(slot,held.copyWithCount(held.getCount()-amount));return amount;
+        updateSnapshots(tx);npc.garden.consumed(slot,amount,tx);npc.belongings.setItem(slot,held.copyWithCount(held.getCount()-amount));return amount;
     }
     public void tick(){
         long now=npc.level().getGameTime();if(now<nextEat)return;nextEat=now+20;
@@ -48,7 +48,9 @@ public final class CompanionFood extends SnapshotParticipant<List<ItemStack>> {
         int slot=-1,score=Integer.MIN_VALUE;
         for(int i=0;i<8;i++){if(npc.transport.reserved(i))continue;int candidate=npc.preferences.foodScore(npc.belongings.getItem(i));if(candidate>score){score=candidate;slot=i;}}
         if(slot<0)return;
-        var meal=npc.belongings.removeItem(slot,1);npc.beginLunchMeal(meal,null);
+        var meal=npc.belongings.getItem(slot).copyWithCount(1);
+        try(var tx=Transaction.openOuter()){if(takeCargo(slot,meal,1,tx)!=1)return;tx.commit();}
+        npc.beginLunchMeal(meal,null);
     }
     public ItemStack keepRemainder(ItemStack stack){
         int stored;

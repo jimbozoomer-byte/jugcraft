@@ -82,6 +82,20 @@ public final class CompanionTransport extends Goal {
         var port=CompanionLogistics.resolve(npc,work);var storage=CompanionStorage.find(npc,bound);
         if(port==null || storage==null || supplying && port.plan()==null)return false;
         workstation=work;store=bound;supply=supplying;recipe=port.plan();returning=false;
+        if(work.garden() && !supplying){
+            // Harvests are already in cargo: adopt a real stack, even when all eight slots are full.
+            for(int i=0;i<8;i++){
+                var stack=npc.garden.output(i,work);if(stack.isEmpty())continue;
+                int room;
+                try(var tx=Transaction.openOuter()){
+                    room=(int)storage.insert(ItemVariant.of(stack),stack.getCount(),tx);
+                }
+                if(room<=0)continue;
+                cargoSlot=i;manifest=stack.copyWithCount(room);npc.garden.collected(i,room);return true;
+            }
+            return false;
+        }
+        if(emptySlot()<0)return false;
         return !candidate().isEmpty();
     }
     private boolean readyPorter(){
@@ -128,7 +142,7 @@ public final class CompanionTransport extends Goal {
             if(!linked() || carried().isEmpty())forget();
             else return loaded();
         }
-        forget();if(emptySlot()<0){if(npc.orders.porter())porterState=CompanionStatus.FULL;return false;}
+        forget();if(emptySlot()<0 && npc.orders.porter()){porterState=CompanionStatus.FULL;return false;}
         blocked.entrySet().removeIf(e->e.getValue()<=now);
         if(npc.orders.porter()){if(readyPorter())return true;forget();return false;}
         // Rescue/tend an existing hot pie before ordinary job priority. At most four assigned blocks.
@@ -158,6 +172,20 @@ public final class CompanionTransport extends Goal {
     private void pathTo(CompanionAssignments.Target target){
         if(!target.present(npc.level()) || target.at().pos().distToCenterSqr(npc.position())>64*64){fail(CompanionStatus.UNLOADED);return;}
         var points=new ArrayList<BlockPos>(12);
+        if(target.garden()){
+            var floors=new LinkedHashSet<BlockPos>();
+            for(var soil:target.plot())if(CompanionGarden.farmland(npc.level(),soil) && CompanionJobs.permitted(npc,soil)){
+                floors.add(soil);for(var side:Direction.Plane.HORIZONTAL)floors.add(soil.relative(side));
+            }
+            for(var floor:floors){
+                if(!npc.level().hasChunkAt(floor))continue;
+                var state=npc.level().getBlockState(floor);
+                double top=state.getBlock() instanceof net.minecraft.world.level.block.FarmlandBlock?.9375:state.isFaceSturdy(npc.level(),floor,Direction.UP)?1:0;
+                if(top==0)continue;
+                var p=new Vec3(floor.getX()+.5,floor.getY()+top,floor.getZ()+.5);double r=npc.getBbWidth()/2+.01;
+                if(npc.level().noCollision(new AABB(p.x-r,p.y+.001,p.z-r,p.x+r,p.y+npc.getBbHeight(),p.z+r)))points.add(floor.above());
+            }
+        }
         for(var side:Direction.Plane.HORIZONTAL)for(int dy=0;dy>=-1;dy--){
             var pos=target.at().pos().relative(side).offset(0,dy,0);var p=Vec3.atBottomCenterOf(pos);var floor=pos.below();
             if(!npc.level().hasChunkAt(pos) || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP))continue;
@@ -205,7 +233,8 @@ public final class CompanionTransport extends Goal {
             var port=CompanionLogistics.resolve(npc,workstation);
             if(!Objects.equals(recipe,port.plan()) || port.needed(carried())<=0){returning=true;approach=null;nextPath=0;return;}
         }
-        if(target.at().pos().distToCenterSqr(npc.position())>6.25){fail(CompanionStatus.BLOCKED);return;}
+        boolean near=target.garden()?target.plot().stream().anyMatch(p->CompanionGarden.farmland(npc.level(),p) && CompanionJobs.permitted(npc,p) && p.distToCenterSqr(npc.position())<=6.25):target.at().pos().distToCenterSqr(npc.position())<=6.25;
+        if(!near){fail(CompanionStatus.BLOCKED);return;}
         if(manifest.isEmpty())pickup();else deliver();
     }
     private void tendAtWork(){
@@ -254,6 +283,10 @@ public final class CompanionTransport extends Goal {
         if(destination==null){fail(CompanionStatus.FORBIDDEN);return;}
         int amount=stack.getCount();if(supply && !returning)amount=Math.min(amount,port.needed(stack));
         if(amount<=0){returning=true;approach=null;nextPath=0;return;}
+        if(supply && !returning && workstation.garden()){
+            // Pickup already put these seeds into this companion's inventory. Do not insert a second copy.
+            forget();active=false;nextSearch=npc.level().getGameTime()+20;return;
+        }
         int inserted;
         try(var scope=io.github.jimbozoomer.jugcraft.machine.MachineItemAutomation.companionTransfer();var tx=Transaction.openOuter()){
             inserted=(int)destination.insert(ItemVariant.of(stack),amount,tx);
@@ -272,10 +305,11 @@ public final class CompanionTransport extends Goal {
     }
     private static void saveTarget(ValueOutput out,String name,CompanionAssignments.Target t){
         var child=out.child(name);child.store("At",GlobalPos.CODEC,t.at());child.store("Block",Identifier.CODEC,t.block());child.putInt("Face",t.face().ordinal());
+        if(t.garden())child.store("Plot",BlockPos.CODEC.listOf(),t.plot());
     }
     private static CompanionAssignments.Target loadTarget(ValueInput in,String name){
         var c=in.child(name);if(c.isEmpty())return null;var at=c.get().read("At",GlobalPos.CODEC).orElse(null);var id=c.get().read("Block",Identifier.CODEC).orElse(null);
-        return at==null || id==null?null:new CompanionAssignments.Target(at,id,Direction.values()[Math.clamp(c.get().getIntOr("Face",1),0,5)]);
+        return at==null || id==null?null:new CompanionAssignments.Target(at,id,Direction.values()[Math.clamp(c.get().getIntOr("Face",1),0,5)],c.get().read("Plot",BlockPos.CODEC.listOf()).orElse(List.of()));
     }
     public void save(ValueOutput out){
         if(manifest.isEmpty() || workstation==null || store==null)return;

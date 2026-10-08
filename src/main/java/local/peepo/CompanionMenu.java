@@ -158,7 +158,10 @@ public final class CompanionMenu extends AbstractContainerMenu {
             }
             refreshRecipes();broadcastChanges();return;
         }
-        if(stillValid(player))super.clicked(slot,button,type,player);
+        if(stillValid(player)){
+            var before=npc==null?null:npc.food.createSnapshot();
+            try{super.clicked(slot,button,type,player);}finally{if(npc!=null)npc.garden.playerEditedCargo(before);}
+        }
     }
     public PeepoEntity companion(Player player){if(npc!=null)return npc;var entity=player.level().getEntity((data.get(9)&0xffff)|((data.get(10)&0xffff)<<16));return entity instanceof PeepoEntity p?p:null;}
     public int value(int i){return data.get(i);}
@@ -168,6 +171,10 @@ public final class CompanionMenu extends AbstractContainerMenu {
         boolean changed=npc.orders.command(player,id);if(changed){refreshRecipes();broadcastChanges();}return changed;
     }
     @Override public ItemStack quickMoveStack(Player player,int index){
+        var before=npc==null?null:npc.food.createSnapshot();
+        try{return moveCargo(player,index);}finally{if(npc!=null)npc.garden.playerEditedCargo(before);}
+    }
+    private ItemStack moveCargo(Player player,int index){
         if(!stillValid(player) || index<0 || index>=RECIPE_START)return ItemStack.EMPTY;
         var slot=slots.get(index);if(!slot.hasItem())return ItemStack.EMPTY;
         var stack=slot.getItem();var copy=stack.copy();

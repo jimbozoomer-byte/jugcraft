@@ -15,9 +15,12 @@ import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
 
 /** Home, four jobs, lunch, supply and output links. No chunk loads. */
 public final class CompanionAssignments {
-    public record Target(GlobalPos at,Identifier block,Direction face){
+    public record Target(GlobalPos at,Identifier block,Direction face,List<BlockPos> plot){
+        public Target { plot=CompanionGarden.sanitize(at.pos(),plot); }
+        public Target(GlobalPos at,Identifier block,Direction face){this(at,block,face,List.of());}
         public Target(GlobalPos at,Identifier block){this(at,block,Direction.UP);}
-        public String name(){return BuiltInRegistries.BLOCK.getValue(block).getName().getString();}
+        public boolean garden(){return !plot.isEmpty();}
+        public String name(){return garden()?"Garden ("+plot.size()+" blocks)":BuiltInRegistries.BLOCK.getValue(block).getName().getString();}
         public boolean local(Level level){return at.dimension().equals(level.dimension());}
         public boolean present(Level level){return local(level)&&level.hasChunkAt(at.pos())&&BuiltInRegistries.BLOCK.getKey(level.getBlockState(at.pos()).getBlock()).equals(block);}
     }
@@ -63,6 +66,10 @@ public final class CompanionAssignments {
     public boolean workManaged(){return workManaged;}
     public static BlockPos canonical(Level level,BlockPos pos){
         var state=level.getBlockState(pos);
+        if(state.getBlock() instanceof CropBlock && CompanionGarden.farmland(level,pos.below()))return pos.below();
+        if(state.getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.TallCropBlock crop){
+            var soil=crop.bottom(pos,state).below();if(CompanionGarden.farmland(level,soil))return soil;
+        }
         if(state.getBlock() instanceof ChestBlock && state.getValue(ChestBlock.TYPE)==ChestType.RIGHT)return pos.relative(ChestBlock.getConnectedDirection(state));
         if(state.getBlock() instanceof WheelBlock)return WheelBlock.master(pos,state);
         if(state.getBlock() instanceof MachineBlock machine)return machine.masterPos(pos,state);
@@ -70,7 +77,7 @@ public final class CompanionAssignments {
         return pos;
     }
     public static boolean bed(Level level,BlockPos pos){var b=level.getBlockState(pos).getBlock();return b instanceof CompanionBedBlock || b instanceof BedBlock;}
-    public static boolean work(Level level,BlockPos pos){var be=level.getBlockEntity(pos);return be instanceof WheelBlockEntity || be instanceof MachineBlockEntity || be instanceof CookingPotBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CanningKettleBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;}
+    public static boolean work(Level level,BlockPos pos){if(CompanionGarden.farmland(level,pos))return true;var be=level.getBlockEntity(pos);return be instanceof WheelBlockEntity || be instanceof MachineBlockEntity || be instanceof CookingPotBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CanningKettleBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;}
     public String assignContainer(Level level,BlockPos pos,Direction face,boolean output){
         if(!level.hasChunkAt(pos) || pos.distToCenterSqr(npc.position())>64*64)return "Keep a loaded container within 64 blocks of the companion.";
         var target=new Target(GlobalPos.of(level.dimension(),pos),BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()),face);
@@ -107,14 +114,18 @@ public final class CompanionAssignments {
         boolean home=bed(level,pos);
         boolean lunch=level.getBlockEntity(pos) instanceof LunchBlockEntity;
         if(lunch && !((LunchBlockEntity)level.getBlockEntity(pos)).feeds(npc))return "This lunch source is locked or does not allow this companion.";
-        if(!home && !lunch && !work(level,pos))return "Choose a bed, workstation, lunch crate, or lunch cover.";
+        if(!home && !lunch && !work(level,pos))return "Choose farmland, a bed, workstation, lunch crate, or lunch cover.";
         if(pos.distToCenterSqr(npc.position())>64*64)return "Keep assignments within 64 blocks of the companion.";
         var at=GlobalPos.of(level.dimension(),pos);
         for(var t:targets)if(t!=null && t.at.equals(at))return "Already assigned to this companion.";
+        boolean garden=CompanionGarden.farmland(level,pos);
+        if(garden && gardenContains(pos))return "This farmland is already in an assigned garden plot.";
         int slot=0;
         if(lunch)slot=LUNCH;
         else if(!home){slot=1;while(slot<5 && targets[slot]!=null)slot++;if(slot==5)return "All four work slots are full. Left-click an assigned station to remove it.";}
-        targets[slot]=new Target(at,BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()));
+        var plot=garden?CompanionGarden.discover(npc,pos):List.<BlockPos>of();
+        if(garden && plot.isEmpty())return "No accessible farmland here.";
+        targets[slot]=new Target(at,BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()),Direction.UP,plot);
         transportModes[slot]=0;
         if(home)homeManaged=true;if(!lunch)workManaged=true;
         changed();
@@ -124,7 +135,7 @@ public final class CompanionAssignments {
     }
     public String remove(Level level,BlockPos clicked){
         var pos=canonical(level,clicked);var at=GlobalPos.of(level.dimension(),pos);
-        for(int i=0;i<COUNT;i++)if(targets[i]!=null && targets[i].at.equals(at)){clear(i);return i==0?"Home removed.":i==LUNCH?"Lunch source removed.":i==SUPPLY?"Supply removed.":i==OUTPUT?"Output removed.":"Work assignment removed.";}
+        for(int i=0;i<COUNT;i++)if(targets[i]!=null && (targets[i].at.equals(at) || targets[i].local(level) && targets[i].plot.contains(pos))){clear(i);return i==0?"Home removed.":i==LUNCH?"Lunch source removed.":i==SUPPLY?"Supply removed.":i==OUTPUT?"Output removed.":"Work assignment removed.";}
         return "This block is not assigned to the selected companion.";
     }
     public void clear(int slot){
@@ -149,6 +160,7 @@ public final class CompanionAssignments {
         for(int i=1;i<5;i++)if(targets[i]!=null && targets[i].local(npc.level()) && targets[i].at.pos().equals(pos))return i;
         return 5;
     }
+    boolean gardenContains(BlockPos pos){for(int i=1;i<5;i++)if(targets[i]!=null && targets[i].local(npc.level()) && targets[i].plot.contains(pos))return true;return false;}
     private void changed(){npc.syncAssignments(encode());}
     public List<BlockPos> loadedStations(){
         var result=new ArrayList<BlockPos>(5);
@@ -176,7 +188,7 @@ public final class CompanionAssignments {
     }
     public void save(ValueOutput out){
         out.putBoolean("AssignedHomeManaged",homeManaged);out.putBoolean("AssignedWorkManaged",workManaged);
-        for(int i=0;i<COUNT;i++)if(targets[i]!=null){var child=out.child("Assignment"+i);child.store("At",GlobalPos.CODEC,targets[i].at);child.putString("Block",targets[i].block.toString());child.putInt("Face",targets[i].face.ordinal());child.putInt("SupplyMode",transportMode(i,true));child.putInt("OutputMode",transportMode(i,false));}
+        for(int i=0;i<COUNT;i++)if(targets[i]!=null){var child=out.child("Assignment"+i);child.store("At",GlobalPos.CODEC,targets[i].at);child.putString("Block",targets[i].block.toString());child.putInt("Face",targets[i].face.ordinal());child.putInt("SupplyMode",transportMode(i,true));child.putInt("OutputMode",transportMode(i,false));if(targets[i].garden())child.store("Plot",BlockPos.CODEC.listOf(),targets[i].plot);}
     }
     public void load(ValueInput in){
         homeManaged=in.getBooleanOr("AssignedHomeManaged",false);workManaged=in.getBooleanOr("AssignedWorkManaged",false);
@@ -185,14 +197,14 @@ public final class CompanionAssignments {
         for(int i=0;i<COUNT;i++){
             var child=in.child("Assignment"+i);if(child.isEmpty())continue;
             var at=child.get().read("At",GlobalPos.CODEC).orElse(null);var id=Identifier.tryParse(child.get().getStringOr("Block",""));
-            if(at!=null && id!=null)targets[i]=new Target(at,id,Direction.values()[Math.clamp(child.get().getIntOr("Face",Direction.UP.ordinal()),0,5)]);
+            if(at!=null && id!=null)targets[i]=new Target(at,id,Direction.values()[Math.clamp(child.get().getIntOr("Face",Direction.UP.ordinal()),0,5)],i>=1 && i<=4?child.get().read("Plot",BlockPos.CODEC.listOf()).orElse(List.of()):List.of());
             transportModes[i]=Math.clamp(child.get().getIntOr("SupplyMode",0),0,2)|(Math.clamp(child.get().getIntOr("OutputMode",0),0,2)<<2);
         }
         compactWork();changed();
     }
     private String encode(){
         var array=new JsonArray();
-        for(var t:targets){if(t==null){array.add(JsonNull.INSTANCE);continue;}var o=new JsonObject();o.addProperty("d",t.at.dimension().identifier().toString());o.addProperty("p",t.at.pos().asLong());o.addProperty("b",t.block.toString());o.addProperty("f",t.face.ordinal());array.add(o);}
+        for(var t:targets){if(t==null){array.add(JsonNull.INSTANCE);continue;}var o=new JsonObject();o.addProperty("d",t.at.dimension().identifier().toString());o.addProperty("p",t.at.pos().asLong());o.addProperty("b",t.block.toString());o.addProperty("f",t.face.ordinal());if(t.garden()){var cells=new JsonArray();for(var cell:t.plot)cells.add(cell.asLong());o.add("g",cells);}array.add(o);}
         return array.toString();
     }
     public List<Target> view(){
@@ -201,7 +213,8 @@ public final class CompanionAssignments {
         var list=new ArrayList<Target>(Collections.nCopies(COUNT,null));
         try{var array=JsonParser.parseString(data).getAsJsonArray();for(int i=0;i<Math.min(COUNT,array.size());i++)if(array.get(i).isJsonObject()){
             var o=array.get(i).getAsJsonObject();var dim=ResourceKey.create(Registries.DIMENSION,Identifier.parse(o.get("d").getAsString()));
-            list.set(i,new Target(GlobalPos.of(dim,BlockPos.of(o.get("p").getAsLong())),Identifier.parse(o.get("b").getAsString()),Direction.values()[Math.clamp(o.has("f")?o.get("f").getAsInt():Direction.UP.ordinal(),0,5)]));
+            var plot=new ArrayList<BlockPos>();if(o.has("g")){var cells=o.getAsJsonArray("g");for(int j=0;j<Math.min(CompanionGarden.PLOT_LIMIT,cells.size());j++)plot.add(BlockPos.of(cells.get(j).getAsLong()));}
+            list.set(i,new Target(GlobalPos.of(dim,BlockPos.of(o.get("p").getAsLong())),Identifier.parse(o.get("b").getAsString()),Direction.values()[Math.clamp(o.has("f")?o.get("f").getAsInt():Direction.UP.ordinal(),0,5)],plot));
         }}catch(RuntimeException ignored){}clientTargets=Collections.unmodifiableList(list);return clientTargets;
     }
 }

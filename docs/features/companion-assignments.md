@@ -8,7 +8,7 @@ Craft the **Companion Planner** from an iron nugget above three paper, with a st
 
 1. Feed a companion once to tame it. Right-click it with the planner to select it; its name appears on the tool.
 2. Right-click a companion bed/bunk or either half of a vanilla bed to assign home. A new home replaces the previous home.
-3. Right-click up to four Generator Wheels, Hand Cranks, Cider Presses, Jugcraft machines, or cooking pots to assign work. Any part of a supported multi-block machine resolves to its controller. Assigning work switches the command to Work.
+3. Right-click up to four Generator Wheels, Hand Cranks, Cider Presses, Jugcraft machines, cooking pots, or farmland plots to assign work. [Garden assignments](companion-gardens.md) each save up to eight connected soil blocks (four plots / 32 blocks maximum). Any part of a supported multi-block machine resolves to its controller. Assigning work switches the command to Work.
 4. Hold the selected planner to see green frames around that companion and its home/work/lunch assignments, blue for Supply, and yellow for Output. A missing/replaced target is orange. Only loaded targets in the current dimension are drawn.
 5. Left-click an assigned block with the planner to remove its assignment without breaking it. Shift-right-click air to clear the selection. Selecting another companion replaces the selection on that tool only.
 6. Shift-right-click a companion normally to open its inventory/commands. Home, four work rows and separate Lunch, Supply and Output rows show names and coordinates. Hover for full name, dimension and server status. The x buttons also remove assignments, including targets that have been destroyed, unloaded, or left in another dimension.

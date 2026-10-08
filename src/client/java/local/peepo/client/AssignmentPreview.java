@@ -27,6 +27,10 @@ public final class AssignmentPreview {
             for(int row=0;row<assignments.size();row++){
                 var target=assignments.get(row);
                 if(target==null || !target.local(mc.level) || !mc.level.hasChunkAt(target.at().pos()) || target.at().pos().distToCenterSqr(mc.player.position())>128*128)continue;
+                if(target.garden()){
+                    for(var cell:target.plot())if(mc.level.hasChunkAt(cell))frames.add(new Frame(new AABB(cell.getX(),cell.getY()+.89,cell.getZ(),cell.getX()+1,cell.getY()+.98,cell.getZ()+1).inflate(.015).move(-camera.x,-camera.y,-camera.z),CompanionGarden.farmland(mc.level,cell)?0xFF55FF66:0xFFFF8844));
+                    continue;
+                }
                 BlockPos pos=target.at().pos();AABB box=new AABB(pos);boolean present=target.present(mc.level);
                 if(present){
                     var state=mc.level.getBlockState(pos);

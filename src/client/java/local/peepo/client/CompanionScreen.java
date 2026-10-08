@@ -86,9 +86,10 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         int row=assignmentRow(mouseY-topPos);var npc=npc();
         if(panel==0 && npc!=null && mouseX>=leftPos+100 && mouseX<leftPos+(row>0 && row<5?253:imageWidth-20) && mouseY>=topPos+78 && row>=0 && row<CompanionAssignments.COUNT){
             var target=npc.assignments.view().get(row);
-            String text=target==null?"Use the Companion Planner to select this companion, then right-click a "+(row==0?"bed.":row==5?"lunch crate or lunch cover.":row==6?"container for Supply (blue); click again to switch roles.":row==7?"container for Output (yellow); click again to switch roles.":"workstation."):
+            String text=target==null?"Use the Companion Planner to select this companion, then right-click a "+(row==0?"bed.":row==5?"lunch crate or lunch cover.":row==6?"container for Supply (blue); click again to switch roles.":row==7?"container for Output (yellow); click again to switch roles.":"workstation or farmland."):
                 target.name()+" at "+target.at().pos().toShortString()+" in "+target.at().dimension().identifier()+" - "+CompanionStatus.from(menu.value(CompanionMenu.assignmentData(row))).label;
             if(row>0 && row<5 && target!=null)text+=". Priority "+row+" (top is highest).";
+            if(target!=null && target.garden())text+=" Up to 8 connected soil blocks. A hoe in Hand halves work time. Supply brings seeds; Output takes surplus harvests.";
             if(row==6 || row==7)text+=" Porter moves items from Supply to Output. Work uses these containers for machine recipes.";
             g.setTooltipForNextFrame(font,Component.literal(text),mouseX,mouseY);
         }

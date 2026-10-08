@@ -27,6 +27,7 @@ public final class CompanionLogistics {
     public static void register(Adapter adapter){ADAPTERS.add(Objects.requireNonNull(adapter));}
     public static Port resolve(PeepoEntity npc,CompanionAssignments.Target target){
         if(target==null || !target.present(npc.level()) || !npc.assignments.assignedWork(target.at().pos()) || !CompanionJobs.permitted(npc,target.at().pos()))return null;
+        if(target.garden())return npc.garden.port(target);
         var be=npc.level().getBlockEntity(target.at().pos());
         if(be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine
             && machine.kind().supportsCompanionAssistance() && !machine.isLocked())return machine.companionPort;
