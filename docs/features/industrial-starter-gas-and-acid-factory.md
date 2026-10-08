@@ -1,6 +1,6 @@
 # Starter gas and acid factory construction and balance
 
-Status: **owner-selected starter direction and provisional processing baseline**, updated 7 October 2026. The owner answered A to all ten starter-factory questions in the eighth planning batch: smaller steel/basic-circuit variants, the 20-plate Separator, automatic electrical heating, the full first sulfuric-acid chain, a permanent one-nickel/ceramic methane bed, default excess-water draining, one initial cleaning residue, 128/256 JE/t starter generator output, moderate processing times/power budgets, and retained lye with production stopping when full. Other equipment bills, material/solution conversions and exact efficiency/recovery limits remain proposals for review. No gameplay is implemented here.
+Status: **owner-selected starter direction and provisional processing baseline**, updated 7 October 2026. The owner answered A to all ten starter-factory questions in the eighth planning batch: smaller steel/basic-circuit variants, the 20-plate Separator, automatic electrical heating, the full first sulfuric-acid chain, a permanent one-nickel/ceramic methane bed, default excess-water draining, one initial cleaning residue, 128/256 JE/t starter generator output, moderate processing times/power budgets, and retained lye with production stopping when full. The ninth batch selects an independent mineral-derived vanadium contact bed, a retained/recirculating starter acid charge, Chemical Infuser contact conversion, existing sulfur first, coal/coke and a lower-yield/lower-pollution charcoal option, optional later oxygen assistance, combined gas cleanup/separation and a stabilized road/filler use for mixed residue. Exact source/preparation recipes, other equipment bills, material/solution conversions and efficiency/recovery limits remain to specify or review. No gameplay is implemented here.
 
 The factory turns an existing steel workshop and electrical supply into useful hydrogen, methane and ordinary acids. Gas processing remains substantial without requiring aluminum, titanium, advanced chips, PTFE, stainless steel or completion of every specialty. Magnesium and metal expansion follows this delivery milestone. First electricity remains independently reachable.
 
@@ -126,28 +126,42 @@ The owner answered **A to all ten questions** on 7 October 2026. These are selec
 
 The exact other construction bills, fuel energy per mB, upgrade caps, gas/liquid solution representations, contact-catalyst preparation and coal quantities were not separately settled by this batch. Keep them visible as remaining proposals or design work. Normal factory operation still needs no automation chip, routine catalyst replacement or pressure settings.
 
-## Acid catalyst and coal processing questions pending
+## Recorded acid catalyst and coal processing choices ninth batch
 
-The current vanadium-electrolyte recipe consumes sulfuric acid to leach asphalt binder. It cannot alone supply the catalyst required to make first industrial sulfuric acid. A mineral-based vanadium route is a plausible game connection: [USGS identifies vanadium-bearing mineral deposits and petroleum byproducts](https://www.usgs.gov/publications/vanadium). The proposed early non-sulfuric preparation below is a simplified game route whose materials, stages and budgets remain to specify; the source does not establish that recipe. Existing oil-residue electrolyte production remains a later compatible route.
+The owner answered **A to all eight questions** on 7 October 2026. These choices settle the starter supply-chain direction; they are planning selections rather than implemented recipes or tested balance.
 
-The following eight questions are new and **unanswered**. A is the proposed starting direction. Any eventual source remains available through staged solo production or trade; it cannot require aluminum/titanium production, advanced wafers, or its own sulfuric-acid output. A plain mineral feed without mandatory uranium processing is sufficient for this catalyst proposal.
+| # | Owner answer | Selected direction |
+| --- | --- | --- |
+| 1 | A | Named reusable vanadium-oxide/ceramic contact bed from an independent early mineral-preparation route; larger supplies connect to later vanadium industry |
+| 2 | A | One small initial acid charge from the existing reachable recipe or trade, retained and recirculated while the absorber produces additional acid |
+| 3 | A | Chemical Infuser family with the appropriate contact bed for SO2 conversion; players can dedicate separate Infusers to different reactions |
+| 4 | A | Existing obtainable sulfur as the reliable entry feed, with refinery and gas-residue recovery as additional later sources |
+| 5 | A | Coal and coke, plus a separately balanced charcoal alternative with lower gas yield and lower numeric pollution |
+| 6 | A | Carbon feed, water and automatic electrical heating at entry; oxygen-assisted operation is an optional later improvement |
+| 7 | A | One combined cleaning/separation station supplies usable CO/H2 initially; larger specialized equipment follows |
+| 8 | A | One modest stabilized road/filler product from mixed residue through shared construction equipment, with paid binder/processing and more valuable recovery later |
 
-| # | Topic | A | B |
-| --- | --- | --- | --- |
-| 1 | First acid contact catalyst | Named reusable vanadium-oxide/ceramic bed from an independent early mineral-preparation route; larger-scale supplies connect to later vanadium industry | Abstract reusable ceramic contact bed initially, with named vanadium catalyst chemistry later |
-| 2 | Acid absorber startup | One small initial acid charge from the existing reachable recipe or trade, retained and recirculated as the plant grows its output | Simplify startup so the game absorber starts with water and needs no initial acid charge |
-| 3 | SO2 conversion equipment | Reuse the Chemical Infuser family with the appropriate installed contact bed; factories can dedicate separate Infusers to different reactions | Add a dedicated sulfur-oxide Contact Converter from the beginning |
-| 4 | First sulfur supply | Keep existing obtainable sulfur as the reliable entry feed, with refinery/gas-residue recovery as additional later sources | Add a larger sulfide-ore roasting/byproduct chain as a second early sulfur source |
-| 5 | Gasifier carbon feeds | Coal and coke, plus a lower-yield/lower-pollution charcoal alternative with its own balance | Coal and coke initially; charcoal remains in other fired machines |
-| 6 | Gasifier oxygen requirement | Carbon feed + water + automatic electrical heat at entry; oxygen-assisted operation is an optional later improvement | Require oxygen alongside carbon feed, water and automatic electrical heat from the first Gasifier |
-| 7 | First cleanup arrangement | One combined cleaning/separation station before CO/H2 use, with larger specialized equipment later | Separate cleaning and gas-separation stations immediately |
-| 8 | Initial mixed residue usefulness | One modest stabilized road/filler product through shared construction equipment, with paid binder/processing and later useful recovery | Store or deliberately dispose of residue initially; useful products begin with later recovery equipment |
+### Reachable catalyst and acid startup
 
-The charcoal yield/pollution comparison and stabilized residue product are game proposals, not universal real process claims. Neither creates electricity or duplicates the carbon/material feed. One initial residue identity remains selected under either answer to question 8; secondary products must consume that identity once. Residue stabilization must account for removed organics, outputs and numeric pollution without adding landscape/crop damage or routine maintenance. Exact deposit regions, material conversions and product quantities remain future work.
+The current vanadium-electrolyte recipe consumes sulfuric acid to leach asphalt binder, so it cannot alone supply the first contact catalyst. Provide an earlier mineral feed and a preparation route that does not consume this sulfuric-acid output or require aluminum/titanium production, advanced wafers or uranium processing. Preserve staged solo production and trade. [USGS identifies mineral and petroleum vanadium sources](https://www.usgs.gov/publications/vanadium); the selected non-sulfuric game preparation still needs its actual stages, equipment and quantities. Existing oil-residue electrolyte production remains a compatible later route.
+
+The absorber's first carrier-acid charge comes from the existing reachable simple recipe or trade, rather than being granted by constructing the machine. Retain that charge and recirculate it; account for newly produced acid separately so the carrier is neither duplicated nor routinely consumed as upkeep. Its initial amount, working buffer and break/place behavior remain to specify. This bootstrap supports the selected full industrial SO2/SO3/absorption route without a self-output gate.
+
+Use the shared Chemical Infuser family for contact conversion with its own appropriate reusable vanadium bed. Methane uses the separately selected nickel bed. Neither installed capability substitutes for the other; the recipe must validate the required bed and retained inputs/outputs. Catalyst switching/dedicated stations can support factory layouts without adding routine replacement or player pressure settings.
+
+### Gas feed and useful residue
+
+Existing sulfur supplies the first acid line. Additional refinery and gas-residue sulfur recovery can grow that line later; no new sulfide-roasting branch is required for entry. Gasification initially uses its carbon feed, water and paid automatic electrical heat. Do not require an oxygen feed before first CO/H2; optional later oxygen assistance must consume its inputs and account for any carbon burned for heat. Coal/coke and charcoal need separate material/energy/yield/pollution ledgers. The selected charcoal comparison is a game balance direction, not a universal real process claim.
+
+The first station combines cleaning and separation, consumes the dirty mixture once and supplies its accounted CO/H2 and one mixed residue. A small stabilization recipe turns that residue plus a reachable binder into useful road/filler stock through shared construction equipment. Define the binder, any heat/energy, removed organics, final yield and numeric pollution; direct raw-residue placement is not automatically this stabilized product. Later valuable recovery consumes the same residue once. This adds useful construction output without landscape discoloration, crop-health damage, routine filters or catalyst upkeep.
+
+### Remaining specification and following milestone
+
+The selected starter direction is ready for recipe/capability specification. Catalyst mineral/preparation quantities, acid carrier accounting, coal yields/carbon/heat, road binder/yield, station IDs/footprints, other bills, solution units and exact energy/upgrade limits remain engineering and balance work. Numerical proposals stay distinct from owner selections. The next owner batch develops magnesium, aluminum and titanium together in the [metals-processing questions](industrial-chemistry-and-fuels-plan.md#magnesium-aluminum-and-titanium-processing-questions-pending); it does not postpone starter specification or create a mandatory player quest ladder.
 
 ## Implementation and verification requirements
 
-After the selected starter baseline, resolve the pending contact catalyst/absorption entry, coal feed ledger, per-solution composition, concrete machine forms and capability checks. Run construction reachability and integer recipe/unit/energy audits across all supported upgrade combinations, larger-machine settings, gas consumers and heat systems. These must include smallest batches and rounding; checking nominal formulas alone is insufficient.
+Implement the selected independent contact-catalyst/recirculating absorber entry and complete the coal feed ledger, per-solution composition, concrete machine forms and capability checks. Run construction reachability and integer recipe/unit/energy audits across all supported upgrade combinations, larger-machine settings, gas consumers and heat systems. These must include smallest batches and rounding; checking nominal formulas alone is insufficient.
 
 Exercise full-output rollback, deliberate vent/drain policies, incompatible fluids, duplicate pickup/transfer attempts, joined tank ownership, restart persistence and bounded factory behavior on a dedicated server with two clients. Measure survival progression and representative factory performance. Local storage/recipe-priority automation follows the selected chip capability; remote control remains later. The separate [Encyclopedia UI plan](jugcraft-encyclopedia.md) should explain routes and blocked states through inventory/keybind access.
 
