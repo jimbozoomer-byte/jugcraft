@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b) and the hand guns (slice 8)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8) and the service arms (slice 8B)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -9,7 +9,8 @@ Status:
 - **Slice 6** (the guns in use: muzzle flash, spent casings, a zoom when aiming and the hold seen from outside; [below](#slice-6-the-guns-in-use)): implemented on `claude/guns-polish` (#259), stacked on slice 5, awaiting review.
 - **Slice 7** (finishing the attachments: bayonets that stab, and the five guns whose parts use shared textures; [below](#slice-7-bayonets-and-the-shared-texture-guns)): implemented on `claude/guns-attachments-2` (#260), stacked on slice 6, awaiting review.
 - **Slice 7b** (the scopes: the Long Scope, Medium Scope and Reflex Sight; [below](#slice-7b-the-scopes)): implemented on `claude/guns-scopes` (#265), stacked on slice 7, awaiting review.
-- **Slice 8** (the hand guns: the Bulldog Pistol, Marshal Revolver and Sapper Revolver; [below](#slice-8-the-hand-guns)): implemented on `claude/guns-revolvers`, stacked on slice 7b, awaiting review.
+- **Slice 8** (the hand guns: the Bulldog Pistol, Marshal Revolver and Sapper Revolver; [below](#slice-8-the-hand-guns)): implemented on `claude/guns-revolvers` (#268), stacked on slice 7b, awaiting review.
+- **Slice 8B** (the service arms: the Sentry Pistol, Garrison Rifle and Breacher; [below](#slice-8b-the-service-arms)): implemented on `claude/guns-service`, stacked on slice 8, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -449,6 +450,64 @@ The first of the four further gun sets the owner chose on 8 October 2026: three 
 - The revolvers' reloads bring the gun up close to the view, and the arms cover much of the screen while they load (as the Duelling Pistol's do). Play will tell whether the hands want other anchors.
 - The Marshal's cylinder turns 70° for each round and turns back, as the owner's animation has it, rather than a sixth of a turn onward.
 
+## Slice 8B: the service arms
+The second of the four further gun sets: three magazine-fed guns a step up from the iron and brass sets, made of steel, the tier where the mod's machines turn dieselpunk.
+
+| | Sentry Pistol | Garrison Rifle | Breacher |
+|---|---|---|---|
+| The owner's gun | Mak MkII | Stigg | Combat Shotgun |
+| What it is | a steel service pistol, held in one hand | a steel assault rifle with a curved magazine | a pump shotgun fed from a box magazine |
+| Fires | one shot each pull | for as long as the trigger is held | one shot each pull, 8 pellets |
+| Damage | 5 | 4 | 3 a pellet (24 if all land) |
+| Rate | 4 a second (every 5 ticks) | 6.7 a second (every 3 ticks) | 1.25 a second (every 16 ticks: the pump) |
+| Holds | 8 | 30 | 6 |
+| Reload (a magazine) | 2.35 s | 2.65 s | 2.6 s |
+| Spread, hip / aimed | 2° / 0.6° | 3° / 0.6° | 7° / 5° |
+| Range | 64 blocks | 80 | 28 |
+| Round | Light Round | Rifle Round | Buckshot Shell |
+| Takes | the barrel attachments, both magazines, the three stocks | all of those, the light grip, the four bayonets and the three scopes | the same as the Garrison Rifle |
+
+**Crafting** (a crafting table):
+- **Sentry Pistol:** three steel ingots over a lever and a brass ingot.
+- **Garrison Rifle:** three steel ingots over a brass ingot, a lever and planks.
+- **Breacher:** two steel ingots over a brass ingot, a lever and planks.
+
+**What you see:** the owner's animations.
+- **Sentry Pistol:** the bolt snaps back on each shot. To reload, the empty magazine drops out of the grip and the left hand pushes a new one up into it.
+- **Garrison Rifle:** the bolt rides back with each shot. To reload, the left hand pulls the magazine and seats a new one, and the bolt is worked.
+- **Breacher:** each shot is followed by a pump of the fore-end, with the left hand riding it. To reload, the magazine is swapped.
+
+**How the models were built:**
+- **Gun bodies:** each turns about its grip, where the right hand holds it.
+- **Bolts:** the shot moves each gun's bolt part. On the Stigg that is the receiver's two sides and the charging handle. On the Combat Shotgun it is the pump: the fore-end under the barrel and the handle beside the receiver that rides with it.
+- **Magazines:** the reload drops the magazine and brings a new one in on `magazine_2`. Each turns about the point that keeps its top in the well:
+  - the Mak's top;
+  - the Stigg's middle;
+  - the Combat Shotgun's top.
+- **The left hands:**
+  - **Sentry:** its idle hides the left arm. The hand is placed 1.46 s into the reload, at the base of the new magazine as it pushes it up.
+  - **Garrison Rifle:** the hand sits under the handguard. Through the reload it comes within about a pixel of the magazine both where it pulls it and where it seats the new one.
+  - **Breacher:** the hand sits under the pump and rides it through each shot, within 0.2 px.
+- **The left arms:**
+  - **Sentry:** fitted to come up from below the screen through the reload. Its inspect turns the arm so differently that one direction cannot suit both; the reload is favoured.
+  - **The two long guns:** the same as the other two-handed guns.
+- **Sights:** the Stigg's rear sight is its sights part, with the front post on the barrel. The Combat Shotgun's sights are a front post and a ring at the back. Both guns take the three scopes, mounted where those sights stood.
+- **Sounds:** the shots are the library's scrapper shot (Sentry), its scorched rifle shot (Garrison) and the Combat Shotgun's own. None carries another source's tag. The reload cues play the shared events.
+
+**Connections:** steel from the steel foundry (coke and iron, no power needed), brass and a lever. The rounds are as before.
+
+**Balance:** starting numbers.
+- **Sentry:** fewer, harder shots than the Warden Pistol.
+- **Garrison:** the first automatic that fires rifle rounds. It lands about 27 a second while its 30 rounds last, and every one of them is a rifle round.
+- **Breacher:** the Haymaker's punch, with a magazine reload in place of loading a shell at a time.
+
+**Save compatibility:** new items `jugcraft:sentry_pistol`, `garrison_rifle` and `breacher`; nothing saved changes. `guns.enabled=false` gates their recipes.
+
+**Known limits:**
+- The Sentry's left arm points awkwardly at moments of its inspect.
+- The tactical grip the Stigg and Combat Shotgun have parts for is not an attachment yet.
+- The Combat Shotgun's extended-barrel texture (`combat_shotgun_ext_barrel.png`) is not used: its extended barrel part draws on the gun's own texture.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -664,6 +723,75 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | sapper_revolver | `Guns/models/special/trenchur/drum.json` | `4ecbe2b43bfa9686` |
 | sapper_revolver | `Guns/models/special/trenchur/hammer.json` | `7f282421e7442161` |
 | sapper_revolver | `Guns/sounds/item/brass_pistol/fire.ogg` | `4fca376e2ece67b2` |
+| sentry_pistol | `Guns/models/item/mak_mkii.json` | `778a1ffa4d8edcb0` |
+| sentry_pistol | `Guns/item/mak_mkii.png` | `3ad3c11e8c8536d4` |
+| sentry_pistol | `Guns/item/mak_mkii.animation.json` | `348e069b4f2c2ea9` |
+| sentry_pistol | `Guns/models/special/mak_mkii/main.json` | `d1f0838085668b60` |
+| sentry_pistol | `Guns/models/special/mak_mkii/stan_barrel.json` | `334be33051671a7c` |
+| sentry_pistol | `Guns/models/special/mak_mkii/silencer.json` | `e0a1523dd2125508` |
+| sentry_pistol | `Guns/models/special/mak_mkii/advanced_silencer.json` | `8b344b1076efc100` |
+| sentry_pistol | `Guns/models/special/mak_mkii/muzzle_brake.json` | `ad543140f3e045ca` |
+| sentry_pistol | `Guns/models/special/mak_mkii/ext_barrel.json` | `ff50cbcca19985b3` |
+| sentry_pistol | `Guns/models/special/mak_mkii/stock_light.json` | `b544ae0859b827dd` |
+| sentry_pistol | `Guns/models/special/mak_mkii/stock_weighted.json` | `9541e05fcd508c3a` |
+| sentry_pistol | `Guns/models/special/mak_mkii/stock_wooden.json` | `cb89ac77f024bbc5` |
+| sentry_pistol | `Guns/models/special/mak_mkii/bolt.json` | `b6d64068ac7633ea` |
+| sentry_pistol | `Guns/models/special/mak_mkii/stan_mag.json` | `68eec43cf4511460` |
+| sentry_pistol | `Guns/models/special/mak_mkii/ext_mag.json` | `5dfd941f128e67c7` |
+| sentry_pistol | `Guns/models/special/mak_mkii/speed_mag.json` | `e68829e7b2a4157e` |
+| sentry_pistol | `Guns/sounds/item/scrapper/fire.ogg` | `43c9d4ec929bf949` |
+| garrison_rifle | `Guns/models/item/stigg.json` | `4f71c7a1e9c54670` |
+| garrison_rifle | `Guns/item/stigg.png` | `f12b4953835d635e` |
+| garrison_rifle | `Guns/item/stigg.animation.json` | `9cb1d94020b07c0b` |
+| garrison_rifle | `Guns/models/special/stigg/main.json` | `a1ab811dcfd676ef` |
+| garrison_rifle | `Guns/models/special/stigg/stan_barrel.json` | `16ce9ed6b1e65725` |
+| garrison_rifle | `Guns/models/special/stigg/silencer.json` | `6597002d409ef021` |
+| garrison_rifle | `Guns/models/special/stigg/advanced_silencer.json` | `2e0c0ddc5f56fd09` |
+| garrison_rifle | `Guns/models/special/stigg/muzzle_brake.json` | `8c570f6fc62d30f2` |
+| garrison_rifle | `Guns/models/special/stigg/ext_barrel.json` | `1374203582838b9f` |
+| garrison_rifle | `Guns/models/special/stigg/light_stock.json` | `14ed6e823afad363` |
+| garrison_rifle | `Guns/models/special/stigg/heavy_stock.json` | `0fa8203ccafb2bfe` |
+| garrison_rifle | `Guns/models/special/stigg/wooden_stock.json` | `764077024a9dee88` |
+| garrison_rifle | `Guns/models/special/stigg/light_grip.json` | `6b25f349084e3e5d` |
+| garrison_rifle | `Guns/models/special/stigg/iron_bayonet.json` | `2e91ccdf78e54541` |
+| garrison_rifle | `Guns/models/special/stigg/anthralite_bayonet.json` | `e7d0871dc4ed329d` |
+| garrison_rifle | `Guns/models/special/stigg/diamond_bayonet.json` | `78d269ce8bbad1d1` |
+| garrison_rifle | `Guns/models/special/stigg/netherite_bayonet.json` | `6ffcfd0ec3b2db2c` |
+| garrison_rifle | `Guns/models/special/stigg/sights.json` | `b9ca3b99c184a13e` |
+| garrison_rifle | `Guns/models/special/stigg/bolt.json` | `fbcd8d0ef1e6efb8` |
+| garrison_rifle | `Guns/models/special/stigg/stan_mag.json` | `3666313bd2e09241` |
+| garrison_rifle | `Guns/models/special/stigg/ext_mag.json` | `a47fa93c930ec65b` |
+| garrison_rifle | `Guns/models/special/stigg/speed_mag.json` | `0e4af455fd9996c7` |
+| garrison_rifle | `Guns/sounds/item/scorched_rifle/fire.ogg` | `5a52d37065a09a8c` |
+| garrison_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| garrison_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| garrison_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| breacher | `Guns/models/item/combat_shotgun.json` | `2fc142dbd4169607` |
+| breacher | `Guns/item/combat_shotgun.png` | `baaa56e1d903b470` |
+| breacher | `Guns/item/combat_shotgun.animation.json` | `49f830a638325df7` |
+| breacher | `Guns/models/special/combat_shotgun/main.json` | `54405f48c1ca58bd` |
+| breacher | `Guns/models/special/combat_shotgun/stan_barrel.json` | `375d948a4ae30699` |
+| breacher | `Guns/models/special/combat_shotgun/silencer.json` | `093b1c36157e4784` |
+| breacher | `Guns/models/special/combat_shotgun/advanced_silencer.json` | `0ced06857fce8f97` |
+| breacher | `Guns/models/special/combat_shotgun/muzzle_brake.json` | `08060b30cfe228f6` |
+| breacher | `Guns/models/special/combat_shotgun/ext_barrel.json` | `bd6f8273d790a67b` |
+| breacher | `Guns/models/special/combat_shotgun/light_stock.json` | `3ecd41c01242e40a` |
+| breacher | `Guns/models/special/combat_shotgun/heavy_stock.json` | `fb2cfb2e67aff647` |
+| breacher | `Guns/models/special/combat_shotgun/wooden_stock.json` | `4e49d54950d46cf9` |
+| breacher | `Guns/models/special/combat_shotgun/light_grip.json` | `eb60da8774e2ca15` |
+| breacher | `Guns/models/special/combat_shotgun/iron_bayonet.json` | `9d95979a6450a213` |
+| breacher | `Guns/models/special/combat_shotgun/anthralite_bayonet.json` | `06ccaf4a9398da15` |
+| breacher | `Guns/models/special/combat_shotgun/diamond_bayonet.json` | `6da76c11cd9eeceb` |
+| breacher | `Guns/models/special/combat_shotgun/netherite_bayonet.json` | `9d67082048066726` |
+| breacher | `Guns/models/special/combat_shotgun/sights.json` | `8b000ceb82c12040` |
+| breacher | `Guns/models/special/combat_shotgun/bolt.json` | `065f5f326def6331` |
+| breacher | `Guns/models/special/combat_shotgun/stan_mag.json` | `80070bbacb8591fe` |
+| breacher | `Guns/models/special/combat_shotgun/ext_mag.json` | `98853daee63e9562` |
+| breacher | `Guns/models/special/combat_shotgun/speed_mag.json` | `b506b666fbcb2457` |
+| breacher | `Guns/sounds/item/combat_shotgun/fire.ogg` | `155925e837a3d40b` |
+| breacher | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| breacher | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| breacher | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | shared | `Guns/sounds/item/bolt/bolt.ogg` | `1cf1102f6ba52725` |
 | shared | `Guns/sounds/item/bolt_pull/bolt_pull.ogg` | `dbbda8b00abcab8c` |
 | shared | `Guns/sounds/item/bolt_release/bolt_release.ogg` | `7c1096f545d72ec3` |
@@ -1004,15 +1132,31 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - inspected, seen in third person and in the inventory, and held with each set of its attachments fitted.
     - The new guns' screenshots are `jugcraft_guns_bulldog_pistol_*`, `jugcraft_guns_marshal_revolver_*` and `jugcraft_guns_sapper_revolver_*`.
   - The inventory screenshot is now two, `jugcraft_guns_inventory` (the guns and rounds) and `jugcraft_guns_inventory_attachments`: fifteen guns, four rounds and eighteen attachments no longer fit one inventory.
+- **Slice 8B, run locally (8 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's, each hand is where `BUILDS` puts it in its pose, and the scopes' pieces fit the free room of each 128 px atlas.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds.
+  - `python3 tools/check_mod_data.py`: PASS (1872 material IDs).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only.
+  - **Previews:**
+    - first-person views of each gun idle, aimed and mid-reload or mid-pump (approximating the game's hands);
+    - side views of each with a Long Scope, and with a Reflex Sight, Silencer, Extended Magazine and Light Stock fitted.
+- **Slice 8B game tests (written; they run in CI):**
+  - `GunsGameTests` adds `serviceArmsLandAndLoad`:
+    - the Sentry lands its 5, and its magazine reload loads the round it was short in its reload time and not before;
+    - two Garrison shots an interval apart both land;
+    - at close range the Breacher's pellets land together.
+    - "Every gun registered" now counts eighteen guns.
+  - `GunsClientGameTests` takes the three through every gun's steps, with screenshots `jugcraft_guns_sentry_pistol_*`, `jugcraft_guns_garrison_rifle_*` and `jugcraft_guns_breacher_*`.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
-- **Later slices,** each its own pull request: the other three gun sets the owner chose on 8 October 2026 (the dieselpunk service arms, the heavy weapons and the energy weapons; the revolvers are slice 8); the tactical grip and the laser sight.
+- **Later slices,** each its own pull request: the other two gun sets the owner chose on 8 October 2026 (the heavy weapons and the energy weapons; the revolvers are slice 8, the service arms slice 8B); the tactical grip and the laser sight.
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - off-hand guns;

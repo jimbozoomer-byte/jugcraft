@@ -59,6 +59,9 @@ public final class JugcraftGuns {
 		SPECS.put("bulldog_pistol", new GunSpec(11.0F, 1, 10, false, 1, 45, 0, 0, 0, 3.0F, 1.0F, 56, "rifle_round"));
 		SPECS.put("marshal_revolver", new GunSpec(5.0F, 1, 8, false, 6, 0, 11, 25, 11, 2.0F, 0.5F, 72, "light_round"));
 		SPECS.put("sapper_revolver", new GunSpec(4.5F, 1, 6, false, 6, 0, 9, 12, 13, 2.5F, 0.8F, 48, "light_round"));
+		SPECS.put("sentry_pistol", new GunSpec(5.0F, 1, 5, false, 8, 47, 0, 0, 0, 2.0F, 0.6F, 64, "light_round"));
+		SPECS.put("garrison_rifle", new GunSpec(4.0F, 1, 3, true, 30, 53, 0, 0, 0, 3.0F, 0.6F, 80, "rifle_round"));
+		SPECS.put("breacher", new GunSpec(3.0F, 8, 16, false, 6, 52, 0, 0, 0, 7.0F, 5.0F, 28, "buckshot_shell"));
 	}
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
@@ -122,6 +125,16 @@ public final class JugcraftGuns {
 				"long_scope", "medium_scope", "reflex_sight"));
 		ACCEPTS.put("marshal_revolver", List.of("light_stock", "weighted_stock", "wooden_stock"));
 		ACCEPTS.put("sapper_revolver", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel"));
+		ACCEPTS.put("sentry_pistol", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock"));
+		ACCEPTS.put("garrison_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight"));
+		ACCEPTS.put("breacher", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight"));
 	}
 
 	/** The rounds. */

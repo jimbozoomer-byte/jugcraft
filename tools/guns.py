@@ -3,7 +3,8 @@ iron set: the Warden Pistol, Riveter SMG and Haymaker; slice 3, the Longhorn Rif
 slice 4, the black powder guns: the Duelling Pistol, Line Musket and Bellmouth; slice 5, the attachments; slice 6,
 the guns in use: muzzle flash, spent casings, the view narrowed while aiming and the two-handed hold seen from outside;
 slice 7, the bayonets and the attachments drawn on shared textures, then the scopes (the owner's scope models, mounted
-on the guns made to take them); slice 8, the hand guns: the Bulldog Pistol, Marshal Revolver and Sapper Revolver.
+on the guns made to take them); slice 8, the hand guns: the Bulldog Pistol, Marshal Revolver and Sapper Revolver;
+slice 8B, the service arms in steel: the Sentry Pistol, Garrison Rifle and Breacher.
 
 The owner made these guns (inspired by Scorched Guns 2) and supplied, in the owner asset library:
   - a Blockbench Java model of every part (art/owner-library/originals/Blocks/Guns/models/special/<gun>/<part>.json),
@@ -170,6 +171,29 @@ GUNS = {
         "damage": 4.5, "pellets": 1, "interval": 6, "auto": False, "capacity": 6,
         "reload": (9, 12, 13), "spread": (2.5, 0.8), "range": 48, "ammo": "light_round",
     },
+    # Slice 8B: the service arms, a step up in steel (the dieselpunk tier). The Sentry Pistol is held in one hand; the
+    # Garrison Rifle fires for as long as the trigger is held; the Breacher is a pump shotgun fed from a box magazine.
+    "sentry_pistol": {
+        "display": "Sentry Pistol",
+        "source": "mak_mkii",
+        "tooltip": "A steel service pistol: eight hard-hitting shots from a magazine. Fires light rounds.",
+        "damage": 5.0, "pellets": 1, "interval": 5, "auto": False, "capacity": 8,
+        "reload": 47, "spread": (2.0, 0.6), "range": 64, "ammo": "light_round",
+    },
+    "garrison_rifle": {
+        "display": "Garrison Rifle",
+        "source": "stigg",
+        "tooltip": "A steel assault rifle with a curved magazine, firing for as long as the trigger is held. Fires rifle rounds.",
+        "damage": 4.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 30,
+        "reload": 53, "spread": (3.0, 0.6), "range": 80, "ammo": "rifle_round",
+    },
+    "breacher": {
+        "display": "Breacher",
+        "source": "combat_shotgun",
+        "tooltip": "A pump shotgun fed from a box magazine, so quick to reload. Fires buckshot shells.",
+        "damage": 3.0, "pellets": 8, "interval": 16, "auto": False, "capacity": 6,
+        "reload": 52, "spread": (7.0, 5.0), "range": 28, "ammo": "buckshot_shell",
+    },
 }
 
 # The rounds: display name, tooltip, recipe (pattern, key, count). Cheap and early: copper or brass, lead and gunpowder.
@@ -212,6 +236,12 @@ RECIPES = {
                                           "P": "#minecraft:planks"}),
     "sapper_revolver": (["IB", "LP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
                                        "P": "#minecraft:planks"}),
+    # Slice 8B: steel (the coke oven and steel foundry), brass and a lever.
+    "sentry_pistol": (["SSS", " LB"], {"S": "#c:ingots/steel", "L": "minecraft:lever", "B": "#c:ingots/brass"}),
+    "garrison_rifle": (["SSS", "BLP"], {"S": "#c:ingots/steel", "L": "minecraft:lever", "B": "#c:ingots/brass",
+                                        "P": "#minecraft:planks"}),
+    "breacher": (["SS ", "BLP"], {"S": "#c:ingots/steel", "L": "minecraft:lever", "B": "#c:ingots/brass",
+                                  "P": "#minecraft:planks"}),
 }
 
 # How each gun is built from the owner's parts, in the owner's model space (Java item-model pixels: x east, y up,
@@ -462,6 +492,54 @@ BUILDS = {
         "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.3078, -0.9328, -0.1877)},
         "muzzle": (8.0, 3.83, 5.24),
         "sight": (8.0, 5.6, 13.2),
+    },
+    # Slice 8B, the service arms. Each gun body turns about its grip; the shot moves the bolt part; the reload drops
+    # the magazine and brings a new one in on magazine_2 (both carry the magazine part), each turning about the point
+    # that keeps its top in the magazine well (the Mak's top, the Stigg's middle, the Combat Shotgun's top).
+    # The Mak MkII is held in one hand; its idle hides the left arm.
+    "sentry_pistol": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.02, 14.3)),
+            ("gun_body", "gun_body2", ["main", "stan_barrel"], (8.0, 2.02, 14.3)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 5.9, 11.5)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 2.5, 14.45)),
+            ("magazine_2", "gun_body", ["stan_mag"], (8.0, 2.5, 14.45)),
+        ],
+        "hands": {"right": (8.0, 2.02, 14.3), "left": (5.79, -2.31, 13.51)},
+        "hand_pose": {"left": ("reload", "1.4583")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.9195, -0.24, 0.3112)},
+        "muzzle": (8.0, 4.98, 8.6),
+        "sight": (8.0, 6.15, 16.1),
+    },
+    # The Stigg's bolt is the receiver's two sides and the charging handle; its rear sight is the sights part, the front
+    # post is on the barrel.
+    "garrison_rifle": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.64, 15.04)),
+            ("gun_body", "gun_body2", ["main", "stan_barrel", "sights"], (8.0, 2.64, 15.04)),
+            ("bolt", "gun_body", ["bolt"], (8.375, 5.6, 15.1)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 1.34, 10.05)),
+            ("magazine_2", "gun_body", ["stan_mag"], (8.0, 1.34, 10.05)),
+        ],
+        "hands": {"right": (8.0, 2.64, 15.04), "left": (8.0, 2.5, 7.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.3, 0.55),
+        "sight": (8.0, 6.82, 11.4),
+    },
+    # The Combat Shotgun's bolt part is its pump: the fore-end under the barrel and the handle beside the receiver that
+    # rides with it. Its sights are a front post and a ring at the back.
+    "breacher": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.8, 16.05)),
+            ("gun_body", "gun_body2", ["main", "stan_barrel", "sights"], (8.0, 1.8, 16.05)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 3.5, 6.65)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 3.3, 11.61)),
+            ("magazine_2", "gun_body", ["stan_mag"], (8.0, 3.3, 11.61)),
+        ],
+        "hands": {"right": (8.0, 1.8, 16.05), "left": (8.0, 2.3, 6.65)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.05, 3.98),
+        "sight": (8.0, 6.24, 14.475),
     },
 }
 
@@ -845,6 +923,7 @@ ZOOM = {
     "rust_midge": 0.9, "patchwork_carbine": 0.82, "thunderpipe": 0.92, "warden_pistol": 0.9, "riveter_smg": 0.88,
     "haymaker": 0.92, "longhorn_rifle": 0.75, "drover_rifle": 0.8, "coach_gun": 0.9, "duelling_pistol": 0.9,
     "line_musket": 0.82, "bellmouth": 0.92, "bulldog_pistol": 0.9, "marshal_revolver": 0.85, "sapper_revolver": 0.9,
+    "sentry_pistol": 0.9, "garrison_rifle": 0.85, "breacher": 0.92,
 }
 
 
@@ -920,6 +999,9 @@ SHOT_SOUNDS = {
     "bulldog_pistol": "item/heavier_rifle/fire.ogg",
     "marshal_revolver": "item/brass_revolver/fire.ogg",
     "sapper_revolver": "item/brass_pistol/fire.ogg",
+    "sentry_pistol": "item/scrapper/fire.ogg",
+    "garrison_rifle": "item/scorched_rifle/fire.ogg",
+    "breacher": "item/combat_shotgun/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",

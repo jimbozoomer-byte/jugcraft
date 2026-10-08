@@ -39,6 +39,9 @@ public final class GunLooks {
 		LOOKS.put("bulldog_pistol", new Look(false, 0.9F));
 		LOOKS.put("marshal_revolver", new Look(false, 0.85F));
 		LOOKS.put("sapper_revolver", new Look(false, 0.9F));
+		LOOKS.put("sentry_pistol", new Look(false, 0.9F));
+		LOOKS.put("garrison_rifle", new Look(true, 0.85F));
+		LOOKS.put("breacher", new Look(true, 0.92F));
 		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));
