@@ -93,6 +93,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftExosuit.register();
 		JugcraftGrapple.register();
 		io.github.jimbozoomer.jugcraft.weapons.JugcraftArms.register();
+		io.github.jimbozoomer.jugcraft.guns.JugcraftGuns.register();
 		io.github.jimbozoomer.jugcraft.weapons.FieldChemistry.register();
 		io.github.jimbozoomer.jugcraft.chemistry.ConstructionChemistry.register();
 		JugcraftGuide.register();
@@ -111,6 +112,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftSeasons.register();
 		new io.github.jimbozoomer.jugcraft.creatures.scary.ScaryMod().onInitialize();
 		io.github.jimbozoomer.jugcraft.town.JugcraftTown.register();
+		io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance.register();
 		io.github.jimbozoomer.jugcraft.diagonal.DiagonalWalls.register();
 		FeatureEnabledCondition.register();
 		JugcraftWorldgen.register();

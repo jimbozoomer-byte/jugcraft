@@ -1,22 +1,40 @@
 {
-  "source": "Project owner upload, 2026-10-06",
-  "source_files": 16449,
-  "source_bytes": 25339959,
-  "unique_source_contents": 15661,
+  "source": "Project owner uploads, 2026-10-06 and 2026-10-07",
+  "source_files": 19038,
+  "source_bytes": 33851386,
+  "unique_source_contents": 18166,
+  "uploads": [
+    {
+      "date": "2026-10-06",
+      "description": "Original collection",
+      "files": 16449,
+      "bytes": 25339959
+    },
+    {
+      "date": "2026-10-07",
+      "description": "Gun models (Blockbench Java models)",
+      "path": "originals/Blocks/Guns/models",
+      "files": 2589,
+      "bytes": 8511427
+    }
+  ],
   "extensions": {
     ".jpg": 30,
-    ".json": 186,
-    ".mcmeta": 209,
+    ".json": 2765,
+    ".mcmeta": 211,
     ".ogg": 275,
-    ".png": 15749
+    ".png": 15749,
+    ".scmeta": 8
   },
   "kinds": {
     "animated texture": 209,
     "animation JSON": 186,
+    "attachment metadata": 8,
+    "model JSON": 2579,
     "reference sheet": 30,
     "sound": 275,
     "texture": 15540,
-    "texture metadata": 209
+    "texture metadata": 211
   },
   "categories": [
     {
@@ -109,11 +127,11 @@
     },
     {
       "name": "Guns",
-      "files": 1201,
-      "bytes": 14125532,
+      "files": 3790,
+      "bytes": 22636959,
       "catalog": "guns/README.md",
       "source": "originals/Blocks/Guns",
-      "pages": 5
+      "pages": 16
     },
     {
       "name": "pigment_extractor",
@@ -222,5 +240,14 @@
       "sha256": "54ca5c3d78a226f6eeb2419087cb3c3a6867e4d8eb5f43eee1f298f86e87aacc"
     }
   ],
-  "validation_issues": []
+  "validation_issues": [
+    {
+      "path": "originals/Blocks/Guns/models/item/cog_heart.png.mcmeta",
+      "issue": "Texture metadata supplied without its PNG (no cog_heart.png beside it in the models upload). Its frame indices 0-7 fit the 16x128 strip originals/Blocks/Guns/item/cog_heart.png from the 2026-10-06 upload. Its \"interpolate\" value is the string \"true\", not a boolean."
+    },
+    {
+      "path": "originals/Blocks/Guns/models/item/shulker_core.png.mcmeta",
+      "issue": "Texture metadata supplied without its PNG (no shulker_core.png beside it in the models upload). Its frame indices 0-6 fit the 16x112 strip originals/Blocks/Guns/item/shulker_core.png from the 2026-10-06 upload."
+    }
+  ]
 }

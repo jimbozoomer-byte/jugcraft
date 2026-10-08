@@ -37,9 +37,9 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 
 /**
- * A Hearth Oven's fire and its pie. It burns what generators burn, as long ({@link GeneratorFuels}: coal, charcoal, coke),
- * and logs ({@code jugcraft:hearth_oven_wood}), {@value #WOOD_BURN} ticks each, as in a furnace; up to {@value #MAX_BURN}
- * ticks banked.
+ * A Hearth Oven's fire and its pie (or cake, {@link PieFilling}). It burns what generators burn, as long
+ * ({@link GeneratorFuels}: coal, charcoal, coke), and logs ({@code jugcraft:hearth_oven_wood}), {@value #WOOD_BURN} ticks
+ * each, as in a furnace; up to {@value #MAX_BURN} ticks banked.
  * While it burns the oven heats a degree every {@value #HEAT_TICKS} ticks to {@value #MAX_HEAT}; out, it cools a degree
  * every {@value #COOL_TICKS}. A pie bakes only while the oven is at {@value #BAKE_HEAT} or hotter: a point a tick, two when
  * it is at {@value #MAX_HEAT}. At {@value #BAKED} points it is baked; left in until {@value #BURNT} it burns. Clients get
@@ -211,8 +211,8 @@ public class HearthOvenBlockEntity extends BlockEntity {
 	}
 
 	/**
-	 * Takes the pie out to {@code player}: baked, raw (as it went in) or burnt. With no pie, says how hot it is. Returns
-	 * what came out.
+	 * Takes the pie (or cake) out to {@code player}: baked, raw (as it went in) or burnt ({@link PieFilling#burnt}). With no
+	 * pie, says how hot it is. Returns what came out.
 	 */
 	public ItemStack takeOut(Player player) {
 		if (pie == null || level == null) {
@@ -223,7 +223,7 @@ public class HearthOvenBlockEntity extends BlockEntity {
 		}
 		ItemStack out;
 		if (baked >= BURNT) {
-			out = new ItemStack(JugcraftAgriculture.item("burnt_pie"));
+			out = new ItemStack(JugcraftAgriculture.item(pie.burnt()));
 		} else if (baked >= BAKED) {
 			out = new ItemStack(JugcraftAgriculture.item(pie.pie()));
 			if (player instanceof ServerPlayer server) {
@@ -304,7 +304,7 @@ public class HearthOvenBlockEntity extends BlockEntity {
 	@Override
 	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
 		if (level instanceof ServerLevel server && pie != null) {
-			String item = baked >= BURNT ? "burnt_pie" : baked >= BAKED ? pie.pie() : pie.rawPie();
+			String item = baked >= BURNT ? pie.burnt() : baked >= BAKED ? pie.pie() : pie.rawPie();
 			Block.popResource(server, pos, new ItemStack(JugcraftAgriculture.item(item)));
 			pie = null;
 		}

@@ -46,3 +46,11 @@ The six sheets below were also attached by the owner. They are preserved unchang
 ## Import verification
 
 16,449 source files (25,339,959 bytes) were copied and matched against SHA-256 checksums. The six attached previews were also copied byte-for-byte. Images were opened and verified; JSON/animation metadata was parsed; Ogg container signatures and texture-sidecar pairings were checked. See [summary.json](catalog/summary.json) for any supplied-file issues. This is an asset library, not an in-game integration test.
+
+### Gun models (7 October 2026)
+
+On 7 October 2026 the owner uploaded a further archive of gun models with the message: "I have rights for all these". Earlier the same day they said of the Guns folder: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations".
+
+Its `models` folder is kept at [originals/Blocks/Guns/models](originals/Blocks/Guns/models) and listed in the [Guns catalog](catalog/guns/README.md) and the [CSV](catalog/files.csv). It holds Blockbench Java item models of the guns: each gun split per part under `special/<gun>/` (main body, bolt, barrels, magazines, stocks, grips, sights, silencers, bayonets), per-gun item models with display transforms (beside the other item models) under `item/`, and block models under `block/`. All 2,589 files (8,511,427 bytes: 2,579 model JSON files, 8 `.scmeta` attachment metadata files and 2 `.png.mcmeta` texture metadata files) were copied byte-for-byte and matched against SHA-256 checksums, and every one parsed as JSON. The two `.png.mcmeta` files arrived without their PNGs; [summary.json](catalog/summary.json) records them. The upload's two empty `test` folders are not kept, because Git does not store empty folders.
+
+The JSON keeps the original `scguns:` resource namespace in its references, as supplied labels. A feature that imports a model must rewrite those references to `jugcraft:` and rename it to Jugcraft's own name, following the [fan-homage rules](../../LICENSE_POLICY.md#fan-homages). The 45 item models that name the Forge-only `forge:separate_transforms` loader also need that loader replaced for Fabric.

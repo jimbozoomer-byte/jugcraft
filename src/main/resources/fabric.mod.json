@@ -32,6 +32,9 @@
     ],
     "jugcraft:jade_client": [
       "io.github.jimbozoomer.jugcraft.client.compat.JugcraftJadeClient"
+    ],
+    "modmenu": [
+      "io.github.jimbozoomer.jugcraft.client.compat.ConcordanceModMenu"
     ]
   },
   "mixins": [
@@ -42,6 +45,11 @@
       "environment": "client"
     }
   ],
+  "custom": {
+    "modmenu": {
+      "update_checker": false
+    }
+  },
   "depends": {
     "fabricloader": ">=0.19.5",
     "minecraft": "~26.3",

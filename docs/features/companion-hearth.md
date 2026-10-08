@@ -44,6 +44,14 @@ One transient display stack and action start time join the existing synchronized
 
 ## Validation
 
+### Cake compatibility assessment after fork sync
+
+On 8 October 2026 the owner requested syncing fork `origin/main` at `b533201f` and assessing cake support, without tests. The incoming `PieFilling` appends Carrot Cake, Birthday Cake, Ice Cream Cake, Red Velvet Cake, Cheesecake, Coffee Cake and Apple Cake. The current ghost selector, recipe display, raw-input matching, fuel demand, tending and normal baked output already iterate that shared type, so the main workflow can be reused. Supply must contain prepared raw cakes; the companion does not craft Cake Batter or assemble raw cakes from ingredients. Oven capacity remains one bake at a time, shared by pies and cakes.
+
+This was an assessment, not a completed cake integration. Remaining work: change the companion output port's hard-coded `burnt_pie` to the filling's `burnt()` result; recognize `burnt_cake` in the carry display; change pie-only GUI wording; visually check/adjust the taller cake models in the two-handed loading/carrying poses. The existing raw-to-placeable model lookup already maps raw cakes to their baked cake model. No new job type, workstation assignment, inventory or server search is needed. The merged source was compiled without running tests; the earlier results below predate this fork update and do not validate cakes. Assessment and merge: OpenAI Codex (GPT-6).
+
+### Earlier hearth-only regression results
+
 **8 October 2026: 10 groups passed, 115 assertions, zero failed groups.** The final hearth-only run completed successfully in 5 minutes 13 seconds on Minecraft 26.3 / Fabric Loader 0.19.5 / Fabric API 0.161.0+26.3 with the normal pinned development integrations. Gradle selected `PeepoHearthClientTests` alone (1 of 99 client test classes). Shared test sources compile together; no unrelated suites ran. Local evidence: `build/hearth-focused-tests-fixed.log`; the earlier failing run is `build/hearth-focused-tests.log` (generated logs are not committed).
 
 The initial animation implementation was compiled/assembled and packaged without automated or in-game tests, following the owner's instruction at that time. On 8 October 2026 the owner requested hearth-only tests after a companion spawn crash, superseding that restriction for this scope.
