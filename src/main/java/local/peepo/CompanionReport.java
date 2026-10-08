@@ -48,7 +48,10 @@ public final class CompanionReport {
         if(overall==CompanionStatus.IDLE){
             if(npc.needsAutomaticFood() && lunch().problem())overall=lunch();
             else if(npc.orders.porter())overall=npc.transport.porterStatus();
-            else if(npc.orders.mode()==3)for(int i=1;i<5;i++)if(rows[i]!=CompanionStatus.NONE){overall=rows[i];break;}
+            else if(npc.orders.mode()==3){
+                for(int i=1;i<5;i++)if(rows[i]!=CompanionStatus.NONE){overall=rows[i];break;}
+                if(overall==CompanionStatus.IDLE && npc.assignments.supplies.anyRoutes())overall=npc.transport.porterStatus();
+            }
         }
         alert|=old!=overall && overall.problem();
         if(initialized && alert && npc.preferences.alerts && now>=nextAlert){npc.playSound(SoundEvents.NOTE_BLOCK_PLING.value(),.4F,1.35F);nextAlert=now+400;}

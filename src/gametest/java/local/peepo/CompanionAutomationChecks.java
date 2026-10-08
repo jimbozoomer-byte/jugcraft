@@ -115,12 +115,12 @@ final class CompanionAutomationChecks {
         p.assignments.cycleContainer(l,a,Direction.UP);
         check(p.assignments.get(6).at().pos().equals(a) && p.assignments.get(7)==null,"first container must be Supply");
         p.assignments.cycleContainer(l,b,Direction.NORTH);
-        check(p.assignments.get(7).at().pos().equals(b),"second container must be Output");
+        check(p.assignments.get(8).at().pos().equals(b),"second new container fills Supply 2");
         p.assignments.cycleContainer(l,a,Direction.SOUTH);
-        check(p.assignments.get(7).at().pos().equals(a) && p.assignments.get(6).at().pos().equals(b),"click must swap existing pair");
-        check(p.assignments.get(7).face()==Direction.SOUTH && p.assignments.get(6).face()==Direction.NORTH,"swap must retain the correct faces");
+        check(p.assignments.get(7).at().pos().equals(a) && p.assignments.get(6)==null && p.assignments.get(8).at().pos().equals(b),"click switches only selected role");
+        check(p.assignments.get(7).face()==Direction.SOUTH && p.assignments.get(8).face()==Direction.NORTH,"switch retains other container face");
         l.setBlockAndUpdate(b,Blocks.AIR.defaultBlockState());p.assignments.cycleContainer(l,a,Direction.UP);
-        check(p.assignments.get(7).at().pos().equals(a),"invalid partner must reject whole swap");
+        check(p.assignments.get(6).at().pos().equals(a) && p.assignments.get(7)==null,"role switch is independent of unavailable other sources");
         for(int i=0;i<2;i++){var pos=base.offset(i*3,0,5);foodBlock(l,"cooking_pot",pos);p.assignments.assign(l,pos);}
         check(p.assignments.cycleTransport(1,true) && p.assignments.transportMode(1,true)==1,"Auto to On");
         p.assignments.cycleTransport(1,true);check(p.assignments.transportMode(1,true)==2 && p.assignments.transportMode(1,false)==0,"Supply Off independent of Output");
@@ -129,7 +129,7 @@ final class CompanionAutomationChecks {
         p.assignments.clear(1);var saved=copy(p);
         check(saved.assignments.get(1).equals(first) && saved.assignments.transportMode(1,true)==2,"compaction/save must carry mode");
         check(!p.assignments.transportAllowed(first,true) && p.assignments.transportAllowed(first,false),"directional Off gates");
-        p.orders.command(owner,4);check(copy(p).orders.porter(),"Porter mode save");
+        p.assignments.supplies.route(0).enabled=true;check(copy(p).assignments.supplies.route(0).enabled,"explicit porter route save");
     }
     private void automation(ServerLevel l){
         var m=machine(l,MachineKind.ELECTRIC_FURNACE,false);var input=ItemStorage.SIDED.find(l,m.getBlockPos(),Direction.UP);
@@ -274,11 +274,11 @@ final class CompanionAutomationChecks {
         final PeepoEntity[] helper={null};final Container[] source={null},output={null};
         server.runOnServer(s->{var l=s.overworld();reset(l);var p=npc(l,s.getPlayerList().getPlayers().getFirst(),false);helper[0]=p;
             source[0]=chest(l,base.west(4));output[0]=chest(l,base.east(4));var cargo=new ItemStack(Items.DIAMOND,40);cargo.set(DataComponents.CUSTOM_NAME,Component.literal("Porter proof"));source[0].setItem(0,cargo);
-            p.assignments.cycleContainer(l,base.west(4),Direction.UP);p.assignments.cycleContainer(l,base.east(4),Direction.UP);p.orders.command(s.getPlayerList().getPlayers().getFirst(),4);walking(p);
+            p.assignments.cycleContainer(l,base.west(4),Direction.UP);p.assignments.assignContainer(l,base.east(4),Direction.UP,true);p.assignments.supplies.route(0).enabled=true;p.orders.command(s.getPlayerList().getPlayers().getFirst(),3);walking(p);
         });
         server.waitFor(s->helper[0].transport.reserved(0),500);
         server.runOnServer(s->{var p=helper[0];check(count(source[0],Items.DIAMOND)==8 && count(p.belongings,Items.DIAMOND)==32 && count(output[0],Items.DIAMOND)==0,"real stack removed only after walking to Supply");
-            var restored=copy(p);check(restored.transport.reserved(0) && restored.orders.porter() && restored.belongings.getItem(0).getHoverName().getString().equals("Porter proof"),"manifest, mode and item components reload");
+            var restored=copy(p);check(restored.transport.reserved(0) && restored.assignments.supplies.route(0).enabled && restored.orders.mode()==3 && restored.belongings.getItem(0).getHoverName().getString().equals("Porter proof"),"manifest, mode and item components reload");
             for(int i=0;i<output[0].getContainerSize();i++)output[0].setItem(i,new ItemStack(Items.STONE,64));
         });
         server.waitFor(s->helper[0].transport.porterStatus()==CompanionStatus.FULL,600);
@@ -301,7 +301,7 @@ final class CompanionAutomationChecks {
             server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();
                 net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.invoker().interact(p,s.overworld(),InteractionHand.MAIN_HAND,new net.minecraft.world.phys.BlockHitResult(Vec3.atCenterOf(target),Direction.NORTH,target,false));});
         }
-        server.runOnServer(s->{check(helper[0].assignments.get(6).at().pos().equals(base.offset(2,0,1)) && helper[0].assignments.get(7).at().pos().equals(base.offset(-2,0,1)),"same right-click gesture creates and swaps roles");});
+        server.runOnServer(s->{check(helper[0].assignments.get(8).at().pos().equals(base.offset(2,0,1)) && helper[0].assignments.get(7).at().pos().equals(base.offset(-2,0,1)),"same right-click gesture creates sources and switches the selected role");});
         context.waitFor(c->AssignmentTool.selected(c.level,c.player.getMainHandItem()) instanceof PeepoEntity p && p.assignments.view().get(7)!=null,100);
         context.getInput().lookAt(base.above());context.waitTicks(10);context.takeScreenshot("peepo_planner_role_frames");
         server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();var pos=base.offset(-2,0,1);
@@ -313,7 +313,7 @@ final class CompanionAutomationChecks {
         server.runOnServer(s->{var l=s.overworld();reset(l);source[0]=chest(l,base.west(4));output[0]=chest(l,base.east(4));
             source[0].setItem(0,new ItemStack(Items.DIAMOND,64));source[0].setItem(1,new ItemStack(Items.DIAMOND,64));
             for(int i=0;i<2;i++){var p=npc(l,s.getPlayerList().getPlayers().getFirst(),i==1);p.snapTo(base.getX()+.5,base.getY(),base.getZ()+i*2+1.5,0,0);
-                p.assignments.assignContainer(l,base.west(4),Direction.UP,false);p.assignments.assignContainer(l,base.east(4),Direction.UP,true);p.orders.command(s.getPlayerList().getPlayers().getFirst(),4);walking(p);workers.add(p);}
+                p.assignments.assignContainer(l,base.west(4),Direction.UP,false);p.assignments.assignContainer(l,base.east(4),Direction.UP,true);p.assignments.supplies.route(0).enabled=true;p.orders.command(s.getPlayerList().getPlayers().getFirst(),3);walking(p);workers.add(p);}
         });
         server.waitFor(s->{
             int total=count(source[0],Items.DIAMOND)+count(output[0],Items.DIAMOND);for(var p:workers)total+=count(p.belongings,Items.DIAMOND);
@@ -335,7 +335,7 @@ final class CompanionAutomationChecks {
                 else foodBlock(s.overworld(),"cooking_pot",pos);
                 p.assignments.assign(s.overworld(),pos);
             }
-            chest(s.overworld(),base.west(4));chest(s.overworld(),base.east(4));p.assignments.cycleContainer(s.overworld(),base.west(4),Direction.UP);p.assignments.cycleContainer(s.overworld(),base.east(4),Direction.UP);walking(p);
+            chest(s.overworld(),base.west(4));chest(s.overworld(),base.east(4));p.assignments.cycleContainer(s.overworld(),base.west(4),Direction.UP);p.assignments.assignContainer(s.overworld(),base.east(4),Direction.UP,true);walking(p);
             p.getNavigation().moveTo(base.getX()+6.5,base.getY(),base.getZ()+.5,1);
             owner.openMenu(new SimpleMenuProvider((id,inv,player)->new CompanionMenu(id,inv,p),p.getDisplayName()));position[0]=p.position();
         });
@@ -347,8 +347,8 @@ final class CompanionAutomationChecks {
         server.waitFor(s->helper[0].assignments.transportMode(1,true)==1,100);serverTicks(server,3);
         context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,51));
         server.waitFor(s->helper[0].assignments.transportMode(1,false)==1,100);serverTicks(server,3);
-        context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,4));
-        server.waitFor(s->helper[0].orders.porter(),100);context.waitTicks(5);context.takeScreenshot("peepo_porter_jobs_controls");
+        context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,302));
+        server.waitFor(s->helper[0].assignments.supplies.route(0).enabled,100);context.waitTicks(5);context.takeScreenshot("peepo_porter_jobs_controls");
         context.runOnClient(c->c.player.closeContainer());context.waitForScreen(null);
         server.waitFor(s->s.getPlayerList().getPlayers().getFirst().containerMenu instanceof net.minecraft.world.inventory.InventoryMenu,100);
         server.runOnServer(s->{helper[0].getNavigation().moveTo(base.getX()+6.5,base.getY(),base.getZ()+.5,1);});

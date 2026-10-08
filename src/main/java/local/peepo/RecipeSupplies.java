@@ -7,13 +7,14 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 
-/** Snapshot at most 128 extractable source views once per admitted route search. Never used by a ticker. */
+/** Bounded recipe snapshots, up to 128 views per assigned source. Never used by a ticker. */
 public final class RecipeSupplies {
     public record Part(Ingredient ingredient,int count){}
+    static int viewLimit(Storage<ItemVariant> source){return source instanceof CompanionSupplies.SharedStorage shared?shared.viewLimit:128;}
     public static List<ItemStack> available(Storage<ItemVariant> source){
         var result=new ArrayList<ItemStack>();if(source==null)return result;
         try(var tx=Transaction.openOuter()){
-            int views=0;for(var view:source){if(++views>128)break;if(view.isResourceBlank())continue;
+            int views=0;for(var view:source){if(++views>viewLimit(source))break;if(view.isResourceBlank())continue;
                 var variant=view.getResource();long taken=view.extract(variant,Math.min(64,view.getAmount()),tx);
                 if(taken>0)result.add(variant.toStack((int)taken));
             }

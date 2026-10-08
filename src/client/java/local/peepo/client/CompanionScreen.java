@@ -9,12 +9,15 @@ import net.minecraft.world.entity.player.Inventory;
 
 /** Inventory stays visible while the right panel switches between assignments and routine preferences. */
 public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu> {
-    private final Button[] buttons=new Button[9],remove=new Button[CompanionAssignments.COUNT],moveUp=new Button[5],moveDown=new Button[5],settings=new Button[9];
+    private final Button[] buttons=new Button[9],remove=new Button[6],moveUp=new Button[5],moveDown=new Button[5],settings=new Button[9];
     private final Button[] transport=new Button[8],filters=new Button[4];
     private Button filterBack;
-    private static final String[] MODES={"Follow","Stay","Home","Work","Porter"};
+    private static final String[] MODES={"Follow","Stay","Home","Work"};
     private int panel; // Jobs and routine. Transport controls live on each job row.
-    private Button tab;
+    private Button tab,supplyTab;
+    private int supplyView;
+    private final Button[] supplyNav=new Button[3],storageRemove=new Button[8],tools=new Button[4],links=new Button[40],routes=new Button[16],limits=new Button[2];
+    private Button handLock;
     public CompanionScreen(CompanionMenu menu,Inventory inventory,Component title){super(menu,inventory,title,CompanionMenu.WIDTH,312);}
     private Button button(String text,int x,int y,int width,int height,int id){
         return addRenderableWidget(Button.builder(Component.literal(text),b->{if(minecraft!=null && minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,id);}).bounds(leftPos+x,topPos+y,width,height).build());
@@ -22,16 +25,17 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
     private void tip(Button b,String text){b.setTooltip(Tooltip.create(Component.literal(text)));}
     @Override protected void init(){
         super.init();inventoryLabelX=80;inventoryLabelY=218;
-        tab=addRenderableWidget(Button.builder(Component.literal("Routine >"),b->{panel=1-panel;updateButtons();}).bounds(leftPos+imageWidth-84,topPos+6,76,16).build());
+        tab=addRenderableWidget(Button.builder(Component.literal("Routine >"),b->{panel=panel==1?0:1;updateButtons();}).bounds(leftPos+imageWidth-84,topPos+6,76,16).build());
+        supplyTab=addRenderableWidget(Button.builder(Component.literal("Supplies"),b->{panel=panel==2?0:2;updateButtons();}).bounds(leftPos+imageWidth-166,topPos+6,78,16).build());
+        initSupplies();
         for(int i=0;i<4;i++){filters[i]=button("F",CompanionMenu.RECIPE_X,CompanionMenu.assignmentY(i+1),16,16,60+i);tip(filters[i],"Filter");}
         filterBack=button("< Back",373,78,70,18,64);
         for(int i=0;i<8;i++)transport[i]=button("",254+(i%2)*80,CompanionMenu.assignmentY(1+i/2),78,16,50+i);
         for(int i=0;i<MODES.length;i++)buttons[i]=button(MODES[i],100+i*53,34,50,18,i);
-        tip(buttons[4],"Move any items from Supply (blue) to Output (yellow). No workstation required. Work mode instead supplies recipes and assists machines.");
         buttons[6]=button("-",100,56,22,18,6);buttons[7]=button("+",125,56,22,18,7);
         buttons[8]=button("Party",210,56,102,18,8);
         tip(buttons[8],"Only the owner can allow party members to give commands.");
-        for(int i=0;i<CompanionAssignments.COUNT;i++){
+        for(int i=0;i<6;i++){
             remove[i]=button("x",imageWidth-19,CompanionMenu.assignmentY(i)+2,11,12,20+i);
             tip(remove[i],i==0?"Clear home":i==5?"Clear assigned lunch source":i==6?"Clear Supply":i==7?"Clear Output":"Clear work "+i);
             if(i>0 && i<5){
@@ -59,12 +63,13 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
     private PeepoEntity npc(){return minecraft==null || minecraft.player==null?null:menu.companion(minecraft.player);}
     private void updateButtons(){
         boolean filtering=menu.filterRow()>=0;
-        if(filtering)panel=0;
-        menu.showRecipes=panel==0;
-        tab.visible=!filtering;filterBack.visible=filtering;
+        if(filtering)panel=menu.filterRow()>=4?2:0;
+        menu.showRecipes=panel==0 || filtering;
+        tab.visible=supplyTab.visible=!filtering;
+        updateSupplies(filtering);filterBack.visible=filtering;
         for(int i=0;i<4;i++)filters[i].visible=panel==0 && !filtering && menu.value(25+i)>0 && menu.value(25+i)!=4;
         for(var b:buttons)if(b!=null)b.visible=!filtering;
-        tab.setMessage(Component.literal(panel==0?"Routine >":"< Jobs"));
+        tab.setMessage(Component.literal(panel==1?"< Jobs":"Routine"));supplyTab.setMessage(Component.literal(panel==2?"< Jobs":"Supplies"));
         for(var setting:settings)setting.visible=panel==1;
         var npc=npc();
         for(int i=0;i<8;i++){
@@ -74,7 +79,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             String state=switch(reason){case 1->"Disabled by you.";case 2->"External item automation detected; Peepo yields this direction.";case 3->"This station has no companion item transport for this direction.";case 4->"No available, loaded station.";case 5->"No complete allowed recipe is available from the current inputs and Supply.";default->"Peepo may handle this direction when there is work to do.";};
             tip(b,state+" Click to cycle Auto / On / Off. Auto recognizes connected transport and recent machine transfers. On overrides detection; Off stops this direction. Speed assistance is unchanged.");
         }
-        for(int i=0;i<CompanionAssignments.COUNT;i++){remove[i].visible=panel==0 && !filtering;remove[i].active=npc!=null && npc.assignments.view().get(i)!=null;}
+        for(int i=0;i<6;i++){remove[i].visible=panel==0 && !filtering;remove[i].active=npc!=null && npc.assignments.view().get(i)!=null;}
         for(int i=1;i<5;i++){
             moveUp[i].visible=moveDown[i].visible=panel==0 && !filtering;
             moveUp[i].active=remove[i].active && i>1 && remove[i-1].active;
@@ -94,6 +99,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         buttons[8].setMessage(Component.literal(menu.value(4)==1?"Party: Allowed":"Owner only"));
         updateButtons();
         extractBackground(g,mouseX,mouseY,delta);super.extractRenderState(g,mouseX,mouseY,delta);extractTooltip(g,mouseX,mouseY);
+        supplyTooltip(g,mouseX,mouseY);
         int row=assignmentRow(mouseY-topPos);var npc=npc();
         if(panel==0 && menu.filterRow()<0 && npc!=null && mouseX>=leftPos+100 && mouseX<leftPos+(row>0 && row<5?253:imageWidth-20) && mouseY>=topPos+78 && row>=0 && row<CompanionAssignments.COUNT){
             var target=npc.assignments.view().get(row);
@@ -130,8 +136,75 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         }
 
     }
+    private void initSupplies(){
+        String[] names={"Containers","Job links","Porter routes"};
+        for(int i=0;i<3;i++){final int v=i;supplyNav[i]=addRenderableWidget(Button.builder(Component.literal(names[i]),b->{supplyView=v;updateButtons();}).bounds(leftPos+100+i*122,topPos+78,118,16).build());}
+        for(int i=0;i<8;i++)storageRemove[i]=button("x",i<4?268:454,112+(i%4)*20,14,16,100+i);
+        for(int i=0;i<4;i++){tools[i]=button("Tools",231,112+i*20,35,16,110+i);tip(tools[i],"Allow fetching a knife or hoe from this Supply. The old hand item stays in cargo.");}
+        handLock=button("Lock Hand",100,194,182,16,114);tip(handLock,"Prevent automatic tool changes. Keep your torch or preferred tool equipped.");
+        for(int row=0;row<4;row++)for(int side=0;side<2;side++)for(int c=0;c<5;c++){
+            int i=row*10+side*5+c;links[i]=button(c==0?"All":Integer.toString(c),190+side*141+(c==0?0:35+(c-1)*24),113+row*23,c==0?33:22,16,200+i);
+            tip(links[i],c==0?"Use all assigned containers, including newly added ones.":"Choose this container; then toggle additional numbers. Green = included. All restores shared access.");
+        }
+        for(int row=0;row<4;row++){
+            int y=110+row*24;
+            routes[row*4]=button("",132,y,105,18,300+row*4);routes[row*4+1]=button("",246,y,105,18,301+row*4);
+            routes[row*4+2]=button("",355,y,65,18,302+row*4);routes[row*4+3]=button("Filter",424,y,44,18,303+row*4);
+            tip(routes[row*4],"Cycle Supply 1-4. Changing an endpoint turns this route off until you enable it.");
+            tip(routes[row*4+1],"Cycle Output 1-4. Routes run after ready workstation jobs.");
+            tip(routes[row*4+3],"Filter, source reserve and destination stock target");
+        }
+        // Dynamic route IDs are selected from the open filter, never from a client target position.
+        for(int i=0;i<2;i++){final int side=i;limits[i]=addRenderableWidget(Button.builder(Component.literal(""),b->{if(minecraft!=null && minecraft.gameMode!=null && menu.filterRow()>=4)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,320+(menu.filterRow()-4)*2+side);}).bounds(leftPos+105,topPos+110+i*23,125,18).build());}
+    }
+    private void updateSupplies(boolean filtering){
+        boolean visible=panel==2 && !filtering;var npc=npc();
+        for(int i=0;i<3;i++){supplyNav[i].visible=visible;supplyNav[i].active=i!=supplyView;}
+        for(int i=0;i<8;i++){storageRemove[i].visible=visible && supplyView==0;storageRemove[i].active=npc!=null && npc.assignments.view().get(CompanionAssignments.containerSlot(i>=4,i%4))!=null;}
+        for(int i=0;i<4;i++){tools[i].visible=visible && supplyView==0;tools[i].active=storageRemove[i].active;tools[i].setMessage(Component.literal("Tools").withColor((menu.value(41)&(1<<i))!=0?0x80FF80:0xFFFFFF));}
+        handLock.visible=visible && supplyView==0;handLock.setMessage(Component.literal(menu.value(42)==1?"Hand: Locked":"Hand: Auto tools"));
+        for(int i=0;i<40;i++){
+            var b=links[i];b.visible=visible && supplyView==1;b.active=npc!=null && npc.assignments.view().get(1+i/10)!=null;
+            int mask=menu.value(43+i/10*2+(i%10)/5),choice=i%5;boolean selected=choice==0?mask==0:mask==0 || (mask&(1<<(choice-1)))!=0;
+            b.setMessage(Component.literal(choice==0?"All":Integer.toString(choice)).withColor(selected?0x80FF80:0xFFFFFF));
+        }
+        for(int i=0;i<16;i++){
+            var b=routes[i];b.visible=visible && supplyView==2;int row=i/4,part=i%4;
+            if(part<2){int index=menu.value(51+row*4+part);b.setMessage(Component.literal((part==0?"Supply ":"Output ")+(index+1)));
+                var target=npc==null?null:npc.assignments.view().get(CompanionAssignments.containerSlot(part==1,index));
+                tip(b,(target==null?"Not assigned":target.name()+" at "+target.at().pos().toShortString())+". Click to cycle; changing the endpoint disables this route.");}
+            if(part==2)b.setMessage(Component.literal(menu.value(53+row*4)==1?"On":"Off").withColor(menu.value(53+row*4)==1?0x80FF80:0xFFFFFF));
+        }
+        for(int i=0;i<2;i++){limits[i].visible=menu.filterRow()>=4;if(limits[i].visible){int row=menu.filterRow()-4;limits[i].setMessage(Component.literal((i==0?"Leave: ":"Keep: ")+menu.value(i==0?54+row*4:67+row)));}}
+    }
+    private void supplyLabels(GuiGraphicsExtractor g){
+        var npc=npc();
+        if(supplyView==0){
+            g.text(font,"Supply (blue)",101,100,CompanionAssignments.SUPPLY_COLOR,false);g.text(font,"Output (yellow)",287,100,0xFF886600,false);
+            for(int i=0;i<8;i++){
+                var target=npc==null?null:npc.assignments.view().get(CompanionAssignments.containerSlot(i>=4,i%4));
+                String label=(i%4+1)+": "+(target==null?"Not assigned":target.name());
+                g.text(font,fit(label,i<4?127:162),i<4?101:287,116+(i%4)*20,color(CompanionStatus.from(menu.value(71+i))),false);
+            }
+            g.text(font,"Planner: click to switch roles",288,198,0xFF404040,false);
+        }else if(supplyView==1){
+            g.text(font,"Job",101,100,0xFF404040,false);g.text(font,"Supplies",191,100,0xFF404040,false);g.text(font,"Outputs",332,100,0xFF404040,false);
+            for(int i=0;i<4;i++){var t=npc==null?null:npc.assignments.view().get(i+1);g.text(font,fit((i+1)+" "+(t==null?"Unassigned":t.name()),85),101,117+i*23,0xFF404040,false);}
+        }else {
+            g.text(font,"Source",133,98,0xFF404040,false);g.text(font,"Destination",247,98,0xFF404040,false);
+            for(int i=0;i<4;i++)g.text(font,Integer.toString(i+1),109,115+i*24,0xFF404040,false);
+        }
+    }
+    private void supplyTooltip(GuiGraphicsExtractor g,int mx,int my){
+        if(panel!=2 || supplyView!=0 || menu.filterRow()>=0 || npc()==null)return;
+        int x=mx-leftPos,y=my-topPos;if(y<112 || y>=192)return;
+        int index=(y-112)/20;boolean output=x>=287;if(x<(output?287:100) || x>=(output?453:230))return;
+        var t=npc().assignments.view().get(CompanionAssignments.containerSlot(output,index));
+        String text=t==null?"Select this companion with the Planner, then click a container. Click again to switch Supply / Output.":t.name()+" at "+t.at().pos().toShortString()+" in "+t.at().dimension().identifier()+" - "+CompanionStatus.from(menu.value(71+(output?4:0)+index)).label;
+        g.setTooltipForNextFrame(font,Component.literal(text),mx,my);
+    }
     private int assignmentRow(int y){
-        for(int row=0;row<CompanionAssignments.COUNT;row++)if(y>=CompanionMenu.assignmentY(row) && y<CompanionMenu.assignmentY(row)+16)return row;
+        for(int row=0;row<6;row++)if(y>=CompanionMenu.assignmentY(row) && y<CompanionMenu.assignmentY(row)+16)return row;
         return -1;
     }
     private int color(CompanionStatus status){return status.problem()?0xFF994433:status==CompanionStatus.WORKING?0xFF168030:status==CompanionStatus.UNSUPPORTED?0xFF775577:0xFF304030;}
@@ -140,7 +213,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         int x=leftPos,y=topPos;
         g.fill(x,y,x+imageWidth,y+imageHeight,0xFF373737);g.fill(x+1,y+1,x+imageWidth-2,y+imageHeight-2,0xFFFFFFFF);g.fill(x+3,y+3,x+imageWidth-1,y+imageHeight-1,0xFF555555);g.fill(x+4,y+4,x+imageWidth-4,y+imageHeight-4,0xFFC6C6C6);
         for(var slot:menu.slots){if(!slot.isActive())continue;int sx=x+slot.x,sy=y+slot.y;g.fill(sx-1,sy-1,sx+17,sy+17,0xFFFFFFFF);g.fill(sx-1,sy-1,sx+16,sy+16,0xFF373737);g.fill(sx,sy,sx+16,sy+16,0xFF8B8B8B);}
-        if(panel==0 && menu.filterRow()<0)for(int i=0;i<CompanionAssignments.COUNT;i++){
+        if(panel==0 && menu.filterRow()<0)for(int i=0;i<6;i++){
             int rowY=y+CompanionMenu.assignmentY(i);
             g.fill(x+99,rowY,x+(i==0 || i>=5?imageWidth-20:252),rowY+14,0xFFDADADA);
             if(i>=CompanionAssignments.SUPPLY)g.fill(x+99,rowY,x+101,rowY+14,i==CompanionAssignments.SUPPLY?CompanionAssignments.SUPPLY_COLOR:CompanionAssignments.OUTPUT_COLOR);
@@ -154,6 +227,12 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         g.text(font,playerInventoryTitle,inventoryLabelX,inventoryLabelY,0xFF404040,false);
         var status=CompanionStatus.from(menu.value(11));
         g.text(font,fit(status.label,84),8,140,color(status),false);
+        if(menu.filterRow()>=4){
+            g.text(font,"Porter route "+(menu.filterRow()-3)+" filter",105,82,0xFF404040,false);
+            g.text(font,"Leave: minimum source stock per item",105,179,0xFF404040,false);
+            g.text(font,"Keep: destination target (0 = unlimited)",105,191,0xFF404040,false);
+            g.text(font,"Ghost items; right-click clears. Empty = any.",105,203,0xFF404040,false);return;
+        }
         if(menu.filterRow()>=0){
             var companion=npc();var target=companion==null?null:companion.assignments.view().get(menu.filterRow()+1);
             g.text(font,"Filter: "+(target==null?"Workstation":fit(target.name(),200)),105,82,0xFF404040,false);
@@ -161,12 +240,13 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             g.text(font,"Click an item into a slot. Your item stays yours.",105,187,0xFF404040,false);
             g.text(font,"Right-click to clear. Empty filter allows anything.",105,200,0xFF404040,false);return;
         }
+        if(panel==2){supplyLabels(g);return;}
         if(panel==1){
             g.text(font,"Break at: "+menu.value(19)+"%",101,124,0xFF404040,false);
             g.text(font,"Resume at: "+menu.value(20)+"%",101,143,0xFF404040,false);return;
         }
         var npc=npc();
-        for(int i=0;i<CompanionAssignments.COUNT;i++){
+        for(int i=0;i<6;i++){
             var target=npc==null?null:npc.assignments.view().get(i);
             var rowStatus=CompanionStatus.from(menu.value(CompanionMenu.assignmentData(i)));
             String prefix=i==0?"Home":i==5?"Lunch":i==6?"Supply":i==7?"Output":"Work "+i;

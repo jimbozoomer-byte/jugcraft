@@ -1,5 +1,7 @@
 # General porter and simpler container assignments
 
+The current setup is [shared supplies and transport](companion-shared-supplies.md): four Supply/four Output containers, optional job links, tool sources, and filtered porter routes alongside Work. The single-pair instructions below describe the earlier implementation.
+
 Owner-requested on 7 October 2026. Implemented locally by OpenAI Codex (GPT-6) on `peepo-companion`, from `b417f22a`. Reuses the shared companion menu, assignment targets, Fabric inventory transactions, walking transport and search/path budgets. No new assets, recipes, dependencies or progression gates.
 
 ## Setup and planner flow

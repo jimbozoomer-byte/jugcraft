@@ -42,7 +42,7 @@ public final class AssignmentPreview {
                         if(mc.level.hasChunkAt(other))box=box.minmax(new AABB(other));
                     }
                 }
-                int color=row==CompanionAssignments.SUPPLY?CompanionAssignments.SUPPLY_COLOR:row==CompanionAssignments.OUTPUT?CompanionAssignments.OUTPUT_COLOR:0xFF55FF66;
+                int color=CompanionAssignments.supplySlot(row)?CompanionAssignments.SUPPLY_COLOR:row>=CompanionAssignments.SUPPLY?CompanionAssignments.OUTPUT_COLOR:0xFF55FF66;
                 frames.add(new Frame(box.inflate(.025).move(-camera.x,-camera.y,-camera.z),present?color:0xFFFF8844));
             }
             context.submitNodeCollector().submitCustomGeometry(context.poseStack(),RenderTypes.lines(),(pose,consumer)->{

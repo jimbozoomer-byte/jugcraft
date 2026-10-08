@@ -37,7 +37,7 @@ public final class CompanionLogistics {
             public Identifier plan(){return Identifier.fromNamespaceAndPath("jugcraft","hearth_oven");}
             public int needed(ItemStack candidate){
                 int need=oven.companionNeed(candidate);if(need<=0)return 0;
-                var output=CompanionStorage.find(npc,npc.assignments.get(CompanionAssignments.OUTPUT));
+                var output=npc.assignments.supplies.combined(target,true);
                 if(output==null)return 0;
                 var filling=HearthOvenBlockEntity.rawFilling(candidate);
                 if(filling!=null)try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){

@@ -39,12 +39,13 @@ public final class CompanionOrders {
     public boolean command(Player p,int button){
         if(!allowed(p) || p.isSpectator())return false;
         long now=npc.level().getGameTime();if(now<nextCommand)return false;nextCommand=now+2;
-        if(button>=20 && button<20+CompanionAssignments.COUNT){npc.assignments.clear(button-20);return true;}
+        if(button>=20 && button<28){npc.assignments.clear(button-20);return true;}
         if(button>=30 && button<38)return npc.assignments.moveWork(1+(button-30)/2,button%2==0?-1:1);
         if(button>=40 && button<=48)return npc.preferences.command(button);
         if(button>=50 && button<58)return npc.assignments.cycleTransport(1+(button-50)/2,button%2==0);
         if(button<0 || button>8)return false;
-        if(button<=4){mode=Mode.values()[button];if(mode==Mode.FOLLOW)follow=p.getUUID();if(mode==Mode.STAY)stay=here();}
+        if(button==4)return false; // Saved value remains reserved; routes now run under Work.
+        if(button<4){mode=Mode.values()[button];if(mode==Mode.FOLLOW)follow=p.getUUID();if(mode==Mode.STAY)stay=here();}
         else switch(button){case 5->{return false;}case 6->radius=Math.max(4,radius-4);case 7->radius=Math.min(16,radius+4);case 8->{if(!owner(p))return false;party=!party;}default->{return false;}}
         apply();
         if(button==1){stay=here();npc.setHomeTo(stay.pos(),radius);}
@@ -117,7 +118,7 @@ public final class CompanionOrders {
         try{owner=UUID.fromString(in.getStringOr("CompanionOwner",""));}catch(IllegalArgumentException e){owner=null;}
         if(owner==null)return;
         try{follow=UUID.fromString(in.getStringOr("CompanionFollow",owner.toString()));}catch(IllegalArgumentException e){follow=owner;}
-        mode=Mode.values()[Math.clamp(in.getIntOr("CompanionCommand",2),0,Mode.values().length-1)];radius=Math.clamp(in.getIntOr("CompanionRadius",8),4,16);party=in.getBooleanOr("CompanionParty",false);
+        mode=Mode.values()[Math.clamp(in.getIntOr("CompanionCommand",2),0,Mode.values().length-1)];if(mode==Mode.PORTER)mode=Mode.WORK;radius=Math.clamp(in.getIntOr("CompanionRadius",8),4,16);party=in.getBooleanOr("CompanionParty",false);
         home=in.read("CompanionHome",GlobalPos.CODEC).orElse(null);work=in.read("CompanionWork",GlobalPos.CODEC).orElse(null);stay=in.read("CompanionStay",GlobalPos.CODEC).orElse(null);
     }
     public static final class CommandGoal extends Goal {

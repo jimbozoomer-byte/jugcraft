@@ -25,9 +25,12 @@ public final class CompanionAssignments {
         public boolean present(Level level){return local(level)&&level.hasChunkAt(at.pos())&&BuiltInRegistries.BLOCK.getKey(level.getBlockState(at.pos()).getBlock()).equals(block);}
     }
     private final PeepoEntity npc;
-    public static final int LUNCH=5,SUPPLY=6,OUTPUT=7,COUNT=8;
+    public static final int LUNCH=5,SUPPLY=6,OUTPUT=7,COUNT=14;
     public static final int SUPPLY_COLOR=0xFF55AAFF,OUTPUT_COLOR=0xFFFFDD55;
     private final Target[] targets=new Target[COUNT];
+    public final CompanionSupplies supplies;
+    public static int containerSlot(boolean output,int index){return SUPPLY+index*2+(output?1:0);}
+    public static boolean supplySlot(int slot){return slot>=SUPPLY && slot<COUNT && (slot-SUPPLY)%2==0;}
     // Two bits per direction: Auto (0), On (1), Off (2). Kept separate from route identity.
     private final int[] transportModes=new int[COUNT];
     // Kept with the row through reorder/compaction, but outside transport route identity.
@@ -74,7 +77,7 @@ public final class CompanionAssignments {
     }
     private boolean homeManaged,workManaged;
     private String cached="";private List<Target> clientTargets=Collections.nCopies(COUNT,null);
-    CompanionAssignments(PeepoEntity npc){this.npc=npc;}
+    CompanionAssignments(PeepoEntity npc){this.npc=npc;supplies=new CompanionSupplies(npc);}
     public Target get(int slot){return targets[slot];}
     public boolean homeManaged(){return homeManaged;}
     public boolean workManaged(){return workManaged;}
@@ -92,35 +95,30 @@ public final class CompanionAssignments {
     }
     public static boolean bed(Level level,BlockPos pos){var b=level.getBlockState(pos).getBlock();return b instanceof CompanionBedBlock || b instanceof BedBlock;}
     public static boolean work(Level level,BlockPos pos){if(CompanionGarden.farmland(level,pos))return true;var be=level.getBlockEntity(pos);return KitchenCompanionPort.of(be)!=null || be instanceof WheelBlockEntity || be instanceof MachineBlockEntity || be instanceof CookingPotBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CanningKettleBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;}
-    public String assignContainer(Level level,BlockPos pos,Direction face,boolean output){
+    public String assignContainer(Level level,BlockPos clicked,Direction face,boolean output){
+        var pos=canonical(level,clicked);
         if(!level.hasChunkAt(pos) || pos.distToCenterSqr(npc.position())>64*64)return "Keep a loaded container within 64 blocks of the companion.";
         var target=new Target(GlobalPos.of(level.dimension(),pos),BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()),face);
         var storage=CompanionStorage.find(npc,target);
         if(storage==null || (output?!storage.supportsInsertion():!storage.supportsExtraction()))return "This container face is unavailable, locked, or does not support that transfer.";
-        for(int i=0;i<COUNT;i++)if(i!=(output?OUTPUT:SUPPLY) && targets[i]!=null && targets[i].at.equals(target.at))return "This container already has another role for this companion.";
-        targets[output?OUTPUT:SUPPLY]=target;changed();
-        return (output?"Output":"Supply")+" container assigned: "+target.name()+(output?" (yellow).":" (blue).")+" Right-click again to switch role; left-click to remove.";
+        int previous=-1;
+        for(int i=0;i<COUNT;i++)if(targets[i]!=null && targets[i].at.equals(target.at)){
+            if(i<SUPPLY)return "This container already has another role for this companion.";
+            previous=i;
+        }
+        if(previous>=0 && supplySlot(previous)!=output){targets[previous]=target;changed();return "Container face updated.";}
+        int slot=-1;for(int i=0;i<4;i++)if(targets[containerSlot(output,i)]==null){slot=containerSlot(output,i);break;}
+        if(slot<0)return "All four "+(output?"Output":"Supply")+" slots are full. Remove one first; existing links are kept.";
+        if(previous>=0)clear(previous);
+        targets[slot]=target;changed();
+        return (output?"Output":"Supply")+" "+((slot-SUPPLY)/2+1)+" assigned: "+target.name()+(output?" (yellow).":" (blue).")+" Right-click to switch role; left-click to remove.";
     }
-    /** One gesture for both roles. Swap an existing pair only after both new directions validate. */
-    public String cycleContainer(Level level,BlockPos pos,Direction face){
-        var at=GlobalPos.of(level.dimension(),pos);
-        int previous=targets[SUPPLY]!=null && targets[SUPPLY].at.equals(at)?SUPPLY:targets[OUTPUT]!=null && targets[OUTPUT].at.equals(at)?OUTPUT:-1;
-        if(previous<0){
-            boolean output=targets[SUPPLY]!=null && targets[OUTPUT]==null;
-            return assignContainer(level,pos,face,output);
-        }
-        if(!level.hasChunkAt(pos) || pos.distToCenterSqr(npc.position())>64*64)return "Keep a loaded container within 64 blocks of the companion.";
-        int next=previous==SUPPLY?OUTPUT:SUPPLY;
-        var target=new Target(at,BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()),face);
-        var storage=CompanionStorage.find(npc,target);
-        if(storage==null || (next==OUTPUT?!storage.supportsInsertion():!storage.supportsExtraction()))return "This face cannot serve the new role. Existing assignments kept.";
-        var other=targets[next];
-        if(other!=null){
-            var swapped=CompanionStorage.find(npc,other);
-            if(swapped==null || (previous==SUPPLY?!swapped.supportsExtraction():!swapped.supportsInsertion()))return "The other container cannot swap roles. Clear that assignment first.";
-        }
-        targets[next]=target;targets[previous]=other;changed();
-        return target.name()+": "+(next==SUPPLY?"Supply (blue)":"Output (yellow)")+(other==null?".":". The other container swapped roles.")+" Right-click to switch; left-click to remove.";
+    /** New containers fill Supply; the same gesture switches only that container's role. */
+    public String cycleContainer(Level level,BlockPos clicked,Direction face){
+        var pos=canonical(level,clicked);var at=GlobalPos.of(level.dimension(),pos);
+        for(int i=SUPPLY;i<COUNT;i++)if(targets[i]!=null && targets[i].at.equals(at))return assignContainer(level,pos,face,supplySlot(i));
+        for(int i=0;i<4;i++)if(targets[containerSlot(false,i)]==null)return assignContainer(level,pos,face,false);
+        return assignContainer(level,pos,face,true);
     }
     public String assign(Level level,BlockPos clicked){
         var pos=canonical(level,clicked);
@@ -149,24 +147,24 @@ public final class CompanionAssignments {
     }
     public String remove(Level level,BlockPos clicked){
         var pos=canonical(level,clicked);var at=GlobalPos.of(level.dimension(),pos);
-        for(int i=0;i<COUNT;i++)if(targets[i]!=null && (targets[i].at.equals(at) || targets[i].local(level) && targets[i].plot.contains(pos))){clear(i);return i==0?"Home removed.":i==LUNCH?"Lunch source removed.":i==SUPPLY?"Supply removed.":i==OUTPUT?"Output removed.":"Work assignment removed.";}
+        for(int i=0;i<COUNT;i++)if(targets[i]!=null && (targets[i].at.equals(at) || targets[i].local(level) && targets[i].plot.contains(pos))){clear(i);return i==0?"Home removed.":i==LUNCH?"Lunch source removed.":supplySlot(i)?"Supply removed.":i>=SUPPLY?"Output removed.":"Work assignment removed.";}
         return "This block is not assigned to the selected companion.";
     }
     public void clear(int slot){
         if(slot<0 || slot>=COUNT || targets[slot]==null)return;
-        targets[slot]=null;transportModes[slot]=0;gardenSeeds[slot]=null;if(slot>0 && slot<LUNCH)compactWork();changed();if(slot<LUNCH)npc.orders.assignmentRemoved(slot==0);
+        supplies.cleared(slot);targets[slot]=null;transportModes[slot]=0;gardenSeeds[slot]=null;if(slot>0 && slot<LUNCH)compactWork();changed();if(slot<LUNCH)npc.orders.assignmentRemoved(slot==0);
         if(slot==LUNCH)npc.report.lunch(CompanionStatus.READY);
     }
     private void compactWork(){
         int next=1;
-        for(int i=1;i<5;i++)if(targets[i]!=null){targets[next]=targets[i];transportModes[next]=transportModes[i];gardenSeeds[next]=gardenSeeds[i];next++;}
+        for(int i=1;i<5;i++)if(targets[i]!=null){supplies.moveRow(i,next);targets[next]=targets[i];transportModes[next]=transportModes[i];gardenSeeds[next]=gardenSeeds[i];next++;}
         while(next<5){targets[next]=null;transportModes[next]=0;gardenSeeds[next]=null;next++;}
     }
     public boolean moveWork(int slot,int direction){
         if(npc.level().isClientSide() || slot<1 || slot>4 || Math.abs(direction)!=1)return false;
         int other=slot+direction;
         if(other<1 || other>4 || targets[slot]==null || targets[other]==null)return false;
-        var swap=targets[slot];targets[slot]=targets[other];targets[other]=swap;
+        supplies.swapRows(slot,other);var swap=targets[slot];targets[slot]=targets[other];targets[other]=swap;
         int modes=transportModes[slot];transportModes[slot]=transportModes[other];transportModes[other]=modes;
         var seed=gardenSeeds[slot];gardenSeeds[slot]=gardenSeeds[other];gardenSeeds[other]=seed;
         changed();npc.orders.workReordered();return true;
@@ -176,7 +174,7 @@ public final class CompanionAssignments {
         return 5;
     }
     boolean gardenContains(BlockPos pos){for(int i=1;i<5;i++)if(targets[i]!=null && targets[i].local(npc.level()) && targets[i].plot.contains(pos))return true;return false;}
-    private void changed(){npc.readiness.clear();npc.syncAssignments(encode());}
+    void changed(){npc.readiness.clear();npc.syncAssignments(encode());}
     public List<BlockPos> loadedStations(){
         var result=new ArrayList<BlockPos>(5);
         for(int i=0;i<5;i++){var t=targets[i];if(t!=null && t.present(npc.level()))result.add(t.at.pos());}
@@ -202,6 +200,7 @@ public final class CompanionAssignments {
         var vanilla=AssignedVanillaBed.create(npc,pos);return vanilla==null?null:vanilla.approachPosition();
     }
     public void save(ValueOutput out){
+        supplies.save(out);
         out.putBoolean("AssignedHomeManaged",homeManaged);out.putBoolean("AssignedWorkManaged",workManaged);
         for(int i=0;i<COUNT;i++)if(targets[i]!=null){var child=out.child("Assignment"+i);child.store("At",GlobalPos.CODEC,targets[i].at);child.putString("Block",targets[i].block.toString());child.putInt("Face",targets[i].face.ordinal());child.putInt("SupplyMode",transportMode(i,true));child.putInt("OutputMode",transportMode(i,false));if(targets[i].garden())child.store("Plot",BlockPos.CODEC.listOf(),targets[i].plot);if(gardenSeeds[i]!=null)child.store("GardenSeed",Identifier.CODEC,gardenSeeds[i]);}
     }
@@ -220,7 +219,7 @@ public final class CompanionAssignments {
             }
             transportModes[i]=Math.clamp(child.get().getIntOr("SupplyMode",0),0,2)|(Math.clamp(child.get().getIntOr("OutputMode",0),0,2)<<2);
         }
-        compactWork();changed();
+        supplies.load(in);compactWork();changed();
     }
     private String encode(){
         var array=new JsonArray();

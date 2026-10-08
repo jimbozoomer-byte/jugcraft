@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.flag.FeatureFlags;
 
 public final class CompanionMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT=41, RECIPE_START=46, FILTER_START=50;
+    public static final int DATA_COUNT=79, RECIPE_START=46, FILTER_START=50;
     public static final int WIDTH=480, RECIPE_X=416;
     public static MenuType<CompanionMenu> TYPE;
     private final PeepoEntity npc;
@@ -33,6 +33,13 @@ public final class CompanionMenu extends AbstractContainerMenu {
         super(TYPE,id);this.npc=npc;playerInventory=inventory;
         data=npc==null?new SimpleContainerData(DATA_COUNT):new ContainerData(){
             public int get(int i){
+                var supplies=npc.assignments.supplies;
+                if(i>=71)return npc.report.row(CompanionAssignments.containerSlot(i>=75,(i-71)%4));
+                if(i>=67)return supplies.route(i-67).keep;
+                if(i>=51){var r=supplies.route((i-51)/4);return switch((i-51)%4){case 0->r.source;case 1->r.destination;case 2->r.enabled?1:0;default->r.leave;};}
+                if(i>=43)return supplies.mask(1+(i-43)/2,(i-43)%2==1);
+                if(i==42)return supplies.handLocked()?1:0;
+                if(i==41){int mask=0;for(int j=0;j<4;j++)if(supplies.tools(j))mask|=1<<j;return mask;}
                 if(i==40)return filterRow;
                 if(i==39)return npc.preferences.social?1:0;
                 if(i>=31 && i<39)return transportDisplay[i-31];
@@ -108,7 +115,8 @@ public final class CompanionMenu extends AbstractContainerMenu {
             if(garden){var seed=npc.assignments.gardenSeed(target);if(seed!=null)icon=new ItemStack(seed);}
             if(!ItemStack.matches(recipeIcons.getItem(row),icon))recipeIcons.setItem(row,icon);
         }
-        if(filterRow>=0){
+        if(filterRow>=4){for(int i=0;i<9;i++)filterIcons.setItem(i,npc.assignments.supplies.route(filterRow-4).icon(i));}
+        else if(filterRow>=0){
             var target=recipeTarget(filterRow);var station=recipeStation(filterRow);
             var filter=station==null?null:CompanionFilters.get(station);
             if(target==null || !target.equals(filterTarget) || filter==null){filterRow=-1;filterTarget=null;}
@@ -124,6 +132,11 @@ public final class CompanionMenu extends AbstractContainerMenu {
     @Override public void clicked(int slot,int button,ContainerInput type,Player player){
         if(slot>=FILTER_START && slot<FILTER_START+9){
             if(npc==null || !stillValid(player) || type!=ContainerInput.PICKUP || button<0 || button>1 || filterRow<0)return;
+            if(filterRow>=4){
+                long time=npc.level().getGameTime();if(time<nextRecipeEdit)return;nextRecipeEdit=time+2;
+                npc.assignments.supplies.route(filterRow-4).filter(slot-FILTER_START,button==1?ItemStack.EMPTY:getCarried());
+                refreshRecipes();broadcastChanges();return;
+            }
             var target=recipeTarget(filterRow);var station=recipeStation(filterRow);long now=npc.level().getGameTime();
             if(target==null || !target.equals(filterTarget) || station==null || now<nextRecipeEdit)return;nextRecipeEdit=now+2;
             if(!CompanionFilters.set(station,slot-FILTER_START,button==1?ItemStack.EMPTY:getCarried()))player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Choose an output made by this workstation."));
@@ -156,7 +169,30 @@ public final class CompanionMenu extends AbstractContainerMenu {
             else {int row=id-60;var station=recipeStation(row);if(station==null || CompanionFilters.get(station)==null)return false;filterRow=row;filterTarget=recipeTarget(row);}
             refreshRecipes();broadcastChanges();return true;
         }
+        if(id>=320 && id<328 && filterRow==4+(id-320)/2){
+            var r=npc.assignments.supplies.route((id-320)/2);int old=id%2==0?r.leave:r.keep,next=0;
+            for(int n:CompanionSupplies.LIMITS)if(n>old){next=n;break;}
+            if(id%2==0)r.leave=next;else r.keep=next;broadcastChanges();return true;
+        }
         if(filterRow>=0)return false;
+        if(id>=100){
+            long now=npc.level().getGameTime();if(now<nextRecipeEdit)return false;nextRecipeEdit=now+2;
+            var supplies=npc.assignments.supplies;
+            if(id<108)npc.assignments.clear(CompanionAssignments.containerSlot(id>=104,(id-100)%4));
+            else if(id>=110 && id<114)supplies.toggleTools(id-110);
+            else if(id==114)supplies.toggleHandLock();
+            else if(id>=200 && id<240)supplies.link(1+(id-200)/10,(id-200)%10>=5,(id-200)%5);
+            else if(id>=300 && id<316){
+                int row=(id-300)/4;var r=supplies.route(row);
+                switch((id-300)%4){
+                    case 0->{r.source=(r.source+1)%4;r.enabled=false;}
+                    case 1->{r.destination=(r.destination+1)%4;r.enabled=false;}
+                    case 2->{if(!r.enabled && (supplies.endpoint(row,false)==null || supplies.endpoint(row,true)==null))return false;r.enabled=!r.enabled;}
+                    case 3->{filterRow=4+row;filterTarget=null;}
+                }
+            }else return false;
+            npc.readiness.clear();refreshRecipes();broadcastChanges();return true;
+        }
         boolean changed=npc.orders.command(player,id);if(changed){refreshRecipes();broadcastChanges();}return changed;
     }
     @Override public ItemStack quickMoveStack(Player player,int index){

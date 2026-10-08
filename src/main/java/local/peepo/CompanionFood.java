@@ -13,8 +13,8 @@ public final class CompanionFood extends SnapshotParticipant<List<ItemStack>> {
     private final List<ItemStack> returns=new ArrayList<>();
     private long nextEat;
     CompanionFood(PeepoEntity npc){this.npc=npc;}
-    @Override protected List<ItemStack> createSnapshot(){var copy=new ArrayList<ItemStack>(8);for(int i=0;i<8;i++)copy.add(npc.belongings.getItem(i).copy());return copy;}
-    @Override protected void readSnapshot(List<ItemStack> snapshot){for(int i=0;i<8;i++)npc.belongings.setItem(i,snapshot.get(i));}
+    @Override protected List<ItemStack> createSnapshot(){var copy=new ArrayList<ItemStack>(10);for(int i=0;i<10;i++)copy.add(npc.belongings.getItem(i).copy());return copy;}
+    @Override protected void readSnapshot(List<ItemStack> snapshot){for(int i=0;i<snapshot.size();i++)npc.belongings.setItem(i,snapshot.get(i));}
     public int meals(){int count=0;for(int i=0;i<8;i++)if(!npc.transport.reserved(i) && PeepoEntity.isEdible(npc.belongings.getItem(i)))count+=npc.belongings.getItem(i).getCount();return count;}
     public boolean needsSupplies(){return npc.orders.tamed() && meals()<npc.preferences.carryMeals;}
     public boolean hasReturns(){return !returns.isEmpty();}
@@ -41,6 +41,13 @@ public final class CompanionFood extends SnapshotParticipant<List<ItemStack>> {
         var held=npc.belongings.getItem(slot);
         if(!ItemStack.isSameItemSameComponents(held,expected) || held.getCount()<amount)return 0;
         updateSnapshots(tx);npc.garden.consumed(slot,amount,tx);npc.belongings.setItem(slot,held.copyWithCount(held.getCount()-amount));return amount;
+    }
+    boolean equipCargo(int slot,ItemStack expected,TransactionContext tx){
+        if(slot<0 || slot>=8)return false;
+        var stack=npc.belongings.getItem(slot);
+        if(stack.getCount()!=1 || !ItemStack.isSameItemSameComponents(stack,expected))return false;
+        updateSnapshots(tx);var old=npc.belongings.getItem(9).copy();
+        npc.garden.consumed(slot,1,tx);npc.belongings.setItem(9,stack.copy());npc.belongings.setItem(slot,old);return true;
     }
     public void tick(){
         long now=npc.level().getGameTime();if(now<nextEat)return;nextEat=now+20;
