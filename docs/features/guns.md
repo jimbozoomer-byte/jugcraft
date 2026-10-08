@@ -1167,13 +1167,22 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
   - **Previews:**
     - first-person views of each gun idle, aimed and mid-reload or mid-pump (approximating the game's hands);
     - side views of each with a Long Scope, and with a Reflex Sight, Silencer, Extended Magazine and Light Stock fitted.
-- **Slice 8B game tests (written; they run in CI):**
+- **Slice 8B game tests:**
   - `GunsGameTests` adds `serviceArmsLandAndLoad`:
     - the Sentry lands its 5, and its magazine reload loads the round it was short in its reload time and not before;
     - two Garrison shots an interval apart both land;
     - at close range the Breacher's pellets land together.
     - "Every gun registered" now counts eighteen guns.
   - `GunsClientGameTests` takes the three through every gun's steps, with screenshots `jugcraft_guns_sentry_pistol_*`, `jugcraft_guns_garrison_rifle_*` and `jugcraft_guns_breacher_*`.
+- **Slice 8B in CI** ([run 37737317739](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37737317739), on 793fac2a5): every check passed.
+  - `mod`: the build and the server game tests passed, `serviceArmsLandAndLoad` among them.
+  - `client` (shard 1): `GunsClientGameTests` passed. Its log:
+    - **Sentry Pistol:** aimed, the view narrowed to 0.9; fired, 10 flash frames, the husk 847.0 → 842.0 and rounds 8 → 7; reloaded 8, 31 Light Rounds left; 1 casing thrown.
+    - **Garrison Rifle:** aimed, 0.85; fired, 9 flash frames, the husk 842.0 → 838.0 and rounds 30 → 29; reloaded 30, 31 Rifle Rounds left; 1 casing thrown.
+    - **Breacher:** aimed, 0.92; fired, 10 flash frames, the husk 838.0 → 814.0 (all eight pellets) and rounds 6 → 5; reloaded 6, 31 Buckshot Shells left; 1 casing thrown.
+  - **Screenshots:**
+    - Each of the three is held, aimed, fired, reloaded and inspected, seen in third person and fitted with each set of its attachments. Aimed with a stock fitted, the Garrison's and Breacher's stocks fill the lower middle of the screen, below the sights.
+    - **The Garrison Rifle's aimed shot filled the screen with the gun:** its bolt slid back past the eye ([above](#slice-8b-the-service-arms)). 6a9e55b5d holds it 4 px further out aimed.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
