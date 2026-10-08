@@ -16,6 +16,8 @@ Build and test changes on the contributor's PC when tools and access permit. Run
 
 ## Shared owner asset library
 
+**SHOULD use the owner's [magic textures, models, sounds and data](art/owner-library/MAGIC_ASSETS.md) directly when suitable.** The owner authorized this collection on 8 October 2026 and explicitly does not require changes to its designs, names, textures, models or sounds. Do not redraw/recolor/remodel it merely to satisfy older generic art or originality rules, and do not ask for per-asset permission again. Keep the originals intact; make necessary namespace, schema, registration and Fabric compatibility changes in runtime copies. Implement features inside the single Jugcraft mod using existing shared systems. Read the linked guide and catalog before creating replacements.
+
 Before creating or replacing any art, sound or animation, read [art/owner-library/README.md](art/owner-library/README.md) and search its [catalog](art/owner-library/catalog/README.md). The owner explicitly authorizes suitable assets from this supplied collection for direct reuse, recoloring/adaptation, or reference, without another per-asset permission request. This applies across blocks, ores, metals, machines, guns, planes, sounds, animations, weapons, armor, trees, biomes, farming and food; the original folder name `Blocks` does not limit its scope.
 
 Keep the library originals intact. Copy chosen assets into the feature's runtime resources, preserve or adapt accompanying texture/animation metadata, and record the source path plus modifications in the feature's provenance. Match the relevant branch's art direction. This collection-specific authorization does not change the rules for unrelated third-party material in LICENSE_POLICY.md.

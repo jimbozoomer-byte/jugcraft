@@ -1,8 +1,8 @@
 {
-  "source": "Project owner uploads, 2026-10-06 and 2026-10-07",
-  "source_files": 19038,
-  "source_bytes": 33851386,
-  "unique_source_contents": 18166,
+  "source": "Project owner uploads, 2026-10-06, 2026-10-07 and 2026-10-08",
+  "source_files": 26947,
+  "source_bytes": 60250166,
+  "unique_source_contents": 24815,
   "uploads": [
     {
       "date": "2026-10-06",
@@ -16,25 +16,49 @@
       "path": "originals/Blocks/Guns/models",
       "files": 2589,
       "bytes": 8511427
+    },
+    {
+      "date": "2026-10-08",
+      "description": "Magic textures, models, sounds and data",
+      "path": "originals/Magic",
+      "files": 7909,
+      "bytes": 26398780,
+      "archive": "archives/magic-owner-2026-10-08.rar",
+      "archive_sha256": "07a1a1ccc5d540286afcbc30635151b358397cc40a948b2964a905d2d6ee3989"
     }
   ],
   "extensions": {
+    ".bbmodel": 12,
+    ".fsh": 3,
+    ".gif": 3,
     ".jpg": 30,
-    ".json": 2765,
-    ".mcmeta": 211,
-    ".ogg": 275,
-    ".png": 15749,
-    ".scmeta": 8
+    ".json": 7671,
+    ".mcmeta": 364,
+    ".nbt": 7,
+    ".ogg": 354,
+    ".png": 18491,
+    ".properties": 1,
+    ".scmeta": 8,
+    ".vsh": 3
   },
   "kinds": {
-    "animated texture": 209,
-    "animation JSON": 186,
+    "Blockbench project": 12,
+    "JSON data": 2615,
+    "animated image": 3,
+    "animated texture": 361,
+    "animation JSON": 240,
     "attachment metadata": 8,
-    "model JSON": 2579,
+    "blockstate JSON": 315,
+    "fragment shader": 3,
+    "language JSON": 82,
+    "model JSON": 4419,
+    "properties": 1,
     "reference sheet": 30,
-    "sound": 275,
-    "texture": 15540,
-    "texture metadata": 211
+    "sound": 354,
+    "structure NBT": 7,
+    "texture": 18130,
+    "texture metadata": 364,
+    "vertex shader": 3
   },
   "categories": [
     {
@@ -188,6 +212,14 @@
       "catalog": "weapon-smithing/README.md",
       "source": "originals/Blocks/Weapon Smithing",
       "pages": 47
+    },
+    {
+      "name": "Magic",
+      "files": 7909,
+      "bytes": 26398780,
+      "catalog": "magic/README.md",
+      "source": "originals/Magic",
+      "pages": 66
     }
   ],
   "previews": [
@@ -248,6 +280,22 @@
     {
       "path": "originals/Blocks/Guns/models/item/shulker_core.png.mcmeta",
       "issue": "Texture metadata supplied without its PNG (no shulker_core.png beside it in the models upload). Its frame indices 0-6 fit the 16x112 strip originals/Blocks/Guns/item/shulker_core.png from the 2026-10-06 upload."
+    },
+    {
+      "path": "originals/Magic/data/ars_jymbaumental/worldgen/structure/starbuncle_shrine.json",
+      "issue": "Supplied file is not strict JSON: Expecting property name enclosed in double quotes: line 2 column 3 (char 4)"
+    },
+    {
+      "path": "originals/Magic/data/ars_jymbaumental/worldgen/structure_set/starbuncle_shrine.json",
+      "issue": "Supplied file is not strict JSON: Expecting property name enclosed in double quotes: line 2 column 3 (char 4)"
+    },
+    {
+      "path": "originals/Magic/data/ars_jymbaumental/worldgen/template_pool/starbuncle_shrine/shrine.json",
+      "issue": "Supplied file is not strict JSON: Expecting property name enclosed in double quotes: line 2 column 3 (char 4)"
+    },
+    {
+      "path": "originals/Magic/assets/jymbelics/textures/item/arrow_quiver.png.mcmeta",
+      "issue": "Supplied PNG metadata has no adjacent PNG; preserve the original and resolve when importing."
     }
   ]
 }

@@ -6,9 +6,12 @@ It is shared across the whole project: **blocks, ores, metals, machinery, guns a
 
 ## Find assets
 
+**New: [owner magic collection and direct-use instructions](MAGIC_ASSETS.md) (8 October 2026).** Contributors and AI agents SHOULD use suitable files from these 7,909 textures, models, animations, sounds and data resources as supplied. The owner explicitly does not require redesigning, recoloring or renaming them. No repeat per-asset permission request is needed; make necessary technical compatibility changes in runtime copies and keep the source library intact. This collection-specific instruction takes precedence over generic art defaults.
+
 - [Browse every category and file](catalog/README.md).
 - [Download or search the complete CSV inventory](catalog/files.csv): filenames, types, image dimensions, animation sidecars and SHA-256 checksums.
 - [Browse the original collection](originals/Blocks).
+- [Browse the magic originals](originals/Magic), their [paginated catalog](catalog/magic/README.md), or [download the unchanged RAR](archives/magic-owner-2026-10-08.rar).
 - [See counts and verification notes](catalog/summary.json).
 
 Use the category pages for browsing and the CSV for searching across the collection. Texture metadata stays beside its image; sound and animation subfolders keep their supplied structure. Similar or duplicate files stay in place so references and animation pairs are preserved.
@@ -54,3 +57,9 @@ On 7 October 2026 the owner uploaded a further archive of gun models with the me
 Its `models` folder is kept at [originals/Blocks/Guns/models](originals/Blocks/Guns/models) and listed in the [Guns catalog](catalog/guns/README.md) and the [CSV](catalog/files.csv). It holds Blockbench Java item models of the guns: each gun split per part under `special/<gun>/` (main body, bolt, barrels, magazines, stocks, grips, sights, silencers, bayonets), per-gun item models with display transforms (beside the other item models) under `item/`, and block models under `block/`. All 2,589 files (8,511,427 bytes: 2,579 model JSON files, 8 `.scmeta` attachment metadata files and 2 `.png.mcmeta` texture metadata files) were copied byte-for-byte and matched against SHA-256 checksums, and every one parsed as JSON. The two `.png.mcmeta` files arrived without their PNGs; [summary.json](catalog/summary.json) records them. The upload's two empty `test` folders are not kept, because Git does not store empty folders.
 
 The JSON keeps the original `scguns:` resource namespace in its references, as supplied labels. A feature that imports a model must rewrite those references to `jugcraft:` and rename it to Jugcraft's own name, following the [fan-homage rules](../../LICENSE_POLICY.md#fan-homages). The 45 item models that name the Forge-only `forge:separate_transforms` loader also need that loader replaced for Fabric.
+
+### Magic resources (8 October 2026)
+
+The owner supplied **MAGIC ITEMS BLOCKS TEXTURES SOUNDS MODELS I MADE.rar** and explicitly instructed contributors to use its files freely without needing to change them. The original archive and all 7,909 extracted files are preserved with SHA-256 checksums. The [magic guide](MAGIC_ASSETS.md) documents direct use, necessary technical integration steps, and supplied format/companion-file issues. No runtime content is registered by this import.
+
+The combined searchable library now contains **26,947 source files**, excluding the six preview sheets and the preserved archive. The [global CSV](catalog/files.csv) and [summary](catalog/summary.json) include every upload.

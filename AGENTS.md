@@ -22,6 +22,8 @@ Read [CLAUDE.md](CLAUDE.md) and [CONTRIBUTING.md](CONTRIBUTING.md) for the share
 
 Before creating textures, sounds or animations, inspect the [shared owner asset library](art/owner-library/README.md) and its [complete catalog](art/owner-library/catalog/README.md). The owner authorizes suitable files from this collection for direct use, recoloring/adaptation, or reference without another per-asset permission request.
 
+**Use the owner's [magic collection](art/owner-library/MAGIC_ASSETS.md) when suitable.** On 8 October 2026 the owner explicitly instructed contributors and AI agents to use these 7,909 textures, models, sounds and data files freely, as supplied. Do not require redrawing, recoloring, remodeling or renaming merely to make them different. This instruction takes precedence over generic art/originality defaults for this collection. Make necessary technical changes in runtime copies for Jugcraft/Fabric compatibility, preserve the originals, and implement the content within the single Jugcraft mod and its shared systems. No repeat per-asset approval is needed.
+
 The library serves every content branch: blocks, ores, metals, machines, guns, planes/airships, sounds, animations, weapons, armor, trees, biomes, farming and food. It is not restricted to machinery.
 
 Preserve the source library. Copy selected files into the feature's runtime resources, keep required animation sidecars, record the source path and modifications, and follow [ART_DIRECTION.md](docs/ART_DIRECTION.md) plus [LICENSE_POLICY.md](LICENSE_POLICY.md). Test an actual runtime import as part of the feature that uses it.
