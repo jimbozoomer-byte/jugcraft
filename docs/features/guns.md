@@ -1095,6 +1095,16 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
   - **Recipes:** none of the three shares a pattern with another recipe.
   - **Java:** a syntax parse only.
   - **Previews:** side views of the three guns bare and with each scope, drawn from the converted models: each scope stands on the receiver (on the Riveter's rail), and the iron sights are gone.
+- **Slice 7b in CI** ([run 37731926805](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37731926805), on 08c3e8f9c): every check passed.
+  - One client shard first failed in `FlailClientGameTests` (the flail ball sank 0.08 blocks, past the 0.0625 allowed), which this slice does not touch. It passed when re-run; the cause is noted on #265.
+  - **Screenshots:**
+    - Through the Long and Medium Scopes, the owner's reticle and lens rim frame a narrowed view, black at the sides, and the gun is gone.
+    - The Reflex Sight keeps the gun in view, its dot in the middle.
+    - Held, each scope stands on the Longhorn's receiver.
+  - **The test's log**, from the run on #268, which carries this slice:
+    - the Long Scope narrowed the view to 0.3 and drew the view through it for 30 frames;
+    - the Medium Scope narrowed it to 0.5, with 28 frames;
+    - a mouse movement through the Long Scope was scaled to 0.3. The test's window turned the player 0.0°, so the turn itself is not shown.
 - **Slice 7b game tests (written; they run in CI):**
   - `GunsGameTests` adds `scopesFitTheGunsMadeForThem`:
     - the three scope recipes load, and the three guns take each scope;
