@@ -3612,9 +3612,10 @@ def check_cakes():
 def check_orchard():
     """Orchards (tools/orchard.py): Java's OrchardTree, OrchardLeavesBlock and registrations match it; each tree's sapling
     (planted by its seed, which a fruit crafts into), its leaves (a model for each fruit stage), their loot, tags and words;
-    each tree as a feature of oak and its own leaves in the shape TREES gives, a wild patch where its sapling could stand,
-    and the Jugcraft biomes that pick it; every texture Jugcraft draws for it; the juices' recipes and textures. (The pies,
-    preserves, foods and set-down juices are checked with the others: check_pies, check_pantry, the item check, check_menu.)"""
+    each tree as a feature of its trunk (oak, or the banana's own stem) and its own leaves in the shape TREES gives, a wild
+    patch where its sapling could stand, and the Jugcraft biomes that pick it; every texture Jugcraft draws for it; the
+    banana's stem; the juices' recipes and textures. (The pies, preserves, foods and set-down juices are checked with the
+    others: check_pies, check_pantry, the item check, check_menu.)"""
     java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
     main = java.get("JugcraftAgriculture", "")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
@@ -3666,9 +3667,11 @@ def check_orchard():
             err(f"{sapling} must give its {seed} back")
         if not (tagged("block", "leaves", leaves) and tagged("item", "leaves", leaves) and tagged("block", "saplings", sapling)):
             err(f"The {tree} tree's leaves and sapling must be in minecraft:leaves and minecraft:saplings")
-        # The tree: oak logs under its own leaves, in its shape; wild where its sapling could stand; picked by its biomes.
+        # The tree: its trunk under its own leaves, in its shape; wild where its sapling could stand; picked by its biomes.
         feature = load(DATA / MOD / "worldgen" / "feature" / f"{orchard.feature(tree)}.json") or {}
-        if (feature.get("trunk_provider", {}).get("id") != "minecraft:oak_log"
+        placer = f"minecraft:{info['foliage'].get('type', 'blob')}_foliage_placer"
+        if (feature.get("trunk_provider", {}).get("id") != orchard.log(tree)
+                or feature.get("foliage_placer", {}).get("type") != placer
                 or feature.get("foliage_provider", {}).get("id") != f"{MOD}:{leaves}"
                 or feature.get("trunk_placer", {}).get("base_height") != info["trunk"]["base_height"]
                 or feature.get("trunk_placer", {}).get("height_rand_a") != info["trunk"]["height_rand_a"]
@@ -3685,6 +3688,24 @@ def check_orchard():
         for biome, share in info["regions"].items():
             if [f"{MOD}:{orchard.checked(tree)}", share] not in bm.BIOMES[biome]["trees"]["picks"]:
                 err(f"tools/biomes.py {biome} must pick {orchard.checked(tree)} ({share})")
+    # The banana's stem: a pillar block (registered, with its item) that is a log to its fronds and to an axe, but no fuel.
+    stem = orchard.BANANA_STEM["block"]
+    if f'registerBlock("{stem}", RotatedPillarBlock::new' not in main:
+        err(f"JugcraftAgriculture must register {stem} as a RotatedPillarBlock")
+    if any(tree_info.get("log", f"{MOD}:{stem}") != f"{MOD}:{stem}" for tree_info in orchard.TREES.values()):
+        err("tools/orchard.py: a tree's own log must be the banana's stem, the only one registered")
+    state = load(ASSETS / "blockstates" / f"{stem}.json") or {}
+    if set(state.get("variants", {})) != {"axis=x", "axis=y", "axis=z"}:
+        err(f"{stem}: blockstate does not cover every axis")
+    for name in (stem, f"{stem}_top"):
+        if not (ASSETS / "textures" / "block" / f"{name}.png").exists():
+            err(f"Missing texture block/{name}")
+    if (not (ASSETS / "items" / f"{stem}.json").exists() or f"block.{MOD}.{stem}" not in lang
+            or f'"{MOD}:{stem}"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{stem}.json") or {})):
+        err(f"{stem} needs its item, words and loot")
+    if (not tagged("block", "logs", stem) or not tagged("item", "logs", stem) or not tagged("block", "mineable/axe", stem)
+            or tagged("item", "logs_that_burn", stem)):
+        err(f"{stem} must be in minecraft:logs and minecraft:mineable/axe, and not in minecraft:logs_that_burn")
     for name in orchard.DISHES:
         for kind, path in (("item", name), ("block", f"menu/{name}")):
             if not (ASSETS / "textures" / kind / f"{path}.png").exists():

@@ -144,7 +144,7 @@ public final class JugcraftAgriculture {
 			"butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
 			"giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "red_kuri_pumpkin_seeds",
 			"kabocha_pumpkin_seeds", "bottle_gourd_seeds",
-			"ornamental_corn_kernels", "mandrake_root", "rice");
+			"ornamental_corn_kernels", "mandrake_root", "rice", "strawberry_seeds", "blueberry_seeds", "coffee_seeds");
 	/** The chestnut tree's feature (data/jugcraft/worldgen/feature/chestnut.json), grown by its sapling. */
 	public static final ResourceKey<Feature> CHESTNUT_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("chestnut"));
 	public static final TreeGrower CHESTNUT_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_chestnut", WeightedList.of(CHESTNUT_TREE),
@@ -633,6 +633,7 @@ public final class JugcraftAgriculture {
 		wild("wild_turnip");
 		wild("wild_mandrake");
 		Mandrakes.register();
+		registerFruitCrops();
 
 		registerEquipment();
 		registerDecorations();
@@ -2885,9 +2886,14 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * The orchards' fruit trees ({@link OrchardTree}, tools/orchard.py): each one's sapling (planted from its seed) and its
-	 * leaves, which blossom and fruit as the apple tree's do. Their trunks are vanilla oak, so they need no wood of their own.
+	 * leaves, which blossom and fruit as the apple tree's do. Their trunks are vanilla oak, so they need no wood of their own,
+	 * but the banana's: its own stem.
 	 */
 	private static void registerOrchardTrees() {
+		// The banana's stem: a log of its own (in #minecraft:logs, so its fronds stay while it stands; no fuel).
+		Block bananaStem = registerBlock("banana_stem", RotatedPillarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
+				.strength(1.0F).sound(SoundType.BAMBOO_WOOD).ignitedByLava());
+		registerItem("banana_stem", props -> new BlockItem(bananaStem, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		for (OrchardTree tree : OrchardTree.values()) {
 			registerBlock(tree.sapling(), props -> new SaplingBlock(tree.grower, props) {
 			}, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING));
@@ -2918,6 +2924,32 @@ public final class JugcraftAgriculture {
 		preserve("orange_marmalade", 3, 0.4F, null, 0, 0xE0761A);
 		preserve("peach_preserves", 3, 0.4F, null, 0, 0xF09A50);
 		preserve("pear_butter", 4, 0.5F, null, 0, 0xB8923E);
+		food("plum", 4, 0.3F, COMPOST_MEDIUM_HIGH);
+		seeds("plum_pit", "plum_sapling", COMPOST_LOW);
+		food("banana", 4, 0.4F, COMPOST_MEDIUM_HIGH);
+		seeds("banana_pup", "banana_sapling", COMPOST_LOW);
+		preserve("plum_jam", 3, 0.4F, null, 0, 0x6A1E4A);
+	}
+
+	/**
+	 * The fruit crops (tools/fruit_crops.py), in Jugcraft's own art: the strawberry, blueberry and coffee bushes' seeds,
+	 * fruit and wild plants (their blocks are {@link TallCrop}s, registered with the others), the roasted coffee beans and
+	 * the two berry jams. The plum and banana trees are orchard trees ({@link OrchardTree}); their fruit, pits and pups
+	 * are registered with the orchards' ({@link #registerOrchards()}).
+	 */
+	private static void registerFruitCrops() {
+		food("strawberry", 2, 0.3F, COMPOST_MEDIUM);
+		seeds("strawberry_seeds", "strawberry_crop", COMPOST_LOW);
+		food("blueberries", 2, 0.2F, COMPOST_MEDIUM);
+		seeds("blueberry_seeds", "blueberry_crop", COMPOST_LOW);
+		plain("coffee_cherries", COMPOST_MEDIUM);
+		seeds("coffee_seeds", "coffee_crop", COMPOST_LOW);
+		plain("coffee_beans", COMPOST_MEDIUM);
+		wild("wild_strawberries");
+		wild("wild_blueberries");
+		wild("wild_coffee");
+		preserve("strawberry_jam", 3, 0.4F, null, 0, 0xD0203A);
+		preserve("blueberry_jam", 3, 0.4F, null, 0, 0x3A2E7A);
 	}
 
 	/** Wild plant patches (data/jugcraft/worldgen) in the biomes each crop comes from. New chunks only. */
@@ -2954,6 +2986,12 @@ public final class JugcraftAgriculture {
 		wildPatch("peach_tree", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_SAVANNA);
 		wildPatch("lemon_tree", ConventionalBiomeTags.IS_SAVANNA);
 		wildPatch("orange_tree", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_JUNGLE);
+		wildPatch("plum_tree", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_TAIGA);
+		wildPatch("banana_tree", ConventionalBiomeTags.IS_JUNGLE);
+		// The fruit crops' wild bushes (tools/fruit_crops.py WILD).
+		wildPatch("wild_strawberries", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_FLORAL);
+		wildPatch("wild_blueberries", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_HILL);
+		wildPatch("wild_coffee", ConventionalBiomeTags.IS_JUNGLE);
 		// Halloween harvest: heirloom pumpkins and bottle gourds on grass, and mums in flower-rich places.
 		wildPatch("white_pumpkin", ConventionalBiomeTags.IS_BIRCH_FOREST, ConventionalBiomeTags.IS_SNOWY);
 		wildPatch("jarrahdale_pumpkin", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_WINDSWEPT);

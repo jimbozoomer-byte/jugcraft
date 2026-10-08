@@ -4412,6 +4412,81 @@
         {
           "in": [
             [
+              "jugcraft:strawberry_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:strawberry",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:strawberry_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:strawberry_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:blueberry_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:blueberries",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:blueberry_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:blueberry_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:coffee_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:coffee_cherries",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:coffee_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:coffee_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
               "jugcraft:butternut_squash_seeds",
               1
             ]

@@ -10,8 +10,8 @@
   "ingredients": [
     "jugcraft:cake_batter",
     "minecraft:sugar",
-    "minecraft:cocoa_beans",
-    "jugcraft:mulling_spices"
+    "jugcraft:coffee_beans",
+    "minecraft:cocoa_beans"
   ],
   "result": {
     "id": "jugcraft:raw_coffee_cake",

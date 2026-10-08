@@ -19,7 +19,7 @@ Bake the owner's cakes and set them out:
 | Ice Cream Cake | a snowball and cocoa beans |
 | Red Velvet Cake | cocoa beans and a beetroot |
 | Cheesecake | a bucket of milk and sweet berries |
-| Coffee Cake | cocoa beans and Mulling Spices |
+| Coffee Cake | Coffee Beans and cocoa beans |
 | Apple Cake | two apples |
 
 - **Set down whole,** a block wide and nine texels tall, its front to whoever set it down. A hungry player eats a quarter of it; a knife cuts a quarter off as a **slice** to take away. The front right quarter goes first, showing the cake's inside as the owner's INTERIOR drawing does, then the front left, the back left and the back right; the last quarter takes the cake. Only a whole cake can be picked up again.
@@ -28,11 +28,11 @@ Bake the owner's cakes and set them out:
 <!-- Screenshots: added from CI's client game test once it has run. -->
 
 ## Connections
-- Existing input producer: wheat, eggs, sugar and milk for the batter; carrots, apples, beetroot, sweet berries, cocoa, snowballs, candles, pink dye and Mulling Spices (the cider mill's) for the cakes; the Hearth Oven and its fuel.
+- Existing input producer: wheat, eggs, sugar and milk for the batter; carrots, apples, beetroot, sweet berries, cocoa, snowballs, candles, pink dye and Coffee Beans (the [fruit crops'](fruit-crops.md)) for the cakes; the Hearth Oven and its fuel.
 - Existing output consumer: the slices are foods (`c:foods`, `c:foods/cake`); the cakes set out on the feasts' tables, as the pies do.
 - Technology connection: the raw cakes are data recipes, ready for the engineered kitchen (slice 10) to mix.
 - Magic connection: none.
-- Reachable entry path: everything a cake needs is vanilla or grown and made at Discovery tier (the Hearth Oven, Mulling Spices); no circular unlock.
+- Reachable entry path: everything a cake needs is vanilla or grown and made at Discovery tier (the Hearth Oven, coffee from seeds in short grass); no circular unlock.
 - Required vs optional: all optional, food and decoration.
 - How this stays useful without other branches: a cook needs only a farm and an oven.
 
@@ -95,5 +95,5 @@ Not done: play in a real client and a two-client dedicated-server session.
 Food and decoration, for any time of year; the birthday cake's candles are part of its model and do not light.
 
 ## Rollout and open questions
-- The owner's milkshakes and pies and tarts (their other pages) come after the new fruit crops they asked for first. When the coffee crop arrives, the Coffee Cake can take coffee beans for its cocoa.
+- The owner's milkshakes and pies and tarts (their other pages) come after the new fruit crops they asked for first. The [fruit crops](fruit-crops.md) brought coffee, and the Coffee Cake now takes Coffee Beans where it took Mulling Spices.
 - Cakes do not sit on the feasts' platters or the Pantry Shelf; they stand on a table as a block.

@@ -2,8 +2,8 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 
 /**
  * Crops that are picked when ripe and keep standing: tall crops (corn, ornamental corn, sunflower), climbing crops
- * on a trellis (tomato), bushes (pepper, one block tall) and paddy crops (rice). Keep in sync with TALL_CROPS in
- * tools/agriculture.py; the checker compares them.
+ * on a trellis (tomato), bushes (pepper, strawberry, blueberry and coffee, one block tall) and paddy crops (rice).
+ * Keep in sync with TALL_CROPS in tools/agriculture.py; the checker compares them.
  *
  * <p>{@code heights[age]} is how many blocks tall the plant is at each age (0-7). At age 7 it is
  * ripe; picking sets it back to {@code pickReset}, which must be as tall as age 7, so the plant
@@ -17,7 +17,11 @@ public enum TallCrop {
 	TOMATO("tomato_crop", "tomato_seeds", new int[] {1, 1, 1, 2, 2, 2, 2, 2}, "tomato", 2, 4, 5, 1.25F, true, false),
 	PEPPER("pepper_crop", "pepper_seeds", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "pepper", 1, 3, 5, 1.25F, false, false),
 	ORNAMENTAL_CORN("ornamental_corn_crop", "ornamental_corn_kernels", new int[] {1, 1, 1, 2, 2, 3, 3, 3}, "ornamental_corn", 1, 2, 5, 1.5F, false, false),
-	RICE("rice_crop", "rice", new int[] {1, 1, 1, 1, 2, 2, 2, 2}, "rice_panicle", 2, 3, 4, 1.25F, false, true);
+	RICE("rice_crop", "rice", new int[] {1, 1, 1, 1, 2, 2, 2, 2}, "rice_panicle", 2, 3, 4, 1.25F, false, true),
+	// The fruit crops (tools/fruit_crops.py): bushes a block tall, as the pepper.
+	STRAWBERRY("strawberry_crop", "strawberry_seeds", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "strawberry", 1, 3, 5, 1.25F, false, false),
+	BLUEBERRY("blueberry_crop", "blueberry_seeds", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "blueberries", 2, 4, 5, 1.25F, false, false),
+	COFFEE("coffee_crop", "coffee_seeds", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "coffee_cherries", 1, 3, 5, 1.5F, false, false);
 
 	public final String blockId;
 	public final String seedId;

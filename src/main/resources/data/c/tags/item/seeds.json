@@ -28,6 +28,11 @@
     "#c:seeds/peach",
     "#c:seeds/lemon",
     "#c:seeds/orange",
+    "#c:seeds/plum",
+    "#c:seeds/banana",
+    "#c:seeds/strawberry",
+    "#c:seeds/blueberry",
+    "#c:seeds/coffee",
     "jugcraft:acorn"
   ]
 }

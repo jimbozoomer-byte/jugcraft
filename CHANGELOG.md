@@ -46,6 +46,14 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Optional Jade support displays shared machines' energy and processing progress from server data. Fabric Loader is raised to 0.19.5 to satisfy the selected actual artifacts; Minecraft stays 26.3.
 - Actual verification and unperformed playtests are recorded in [framework-foundation.md](docs/features/framework-foundation.md). Publication on Modrinth remains a maintainer release step.
 
+### Unmerged: Fruit crops
+- Five fruits in Jugcraft's own art, asked for by the owner before their milkshakes and pies and tarts: **strawberries, blueberries, coffee, plums and bananas**.
+- **Strawberry Plant, Blueberry Bush and Coffee Plant:** bushes on farmland, planted from seeds that short grass, wild plants and the fruit give. Ripe, a right-click picks them and they fruit again.
+- **Plum and banana trees,** grown from a Plum Pit and a Banana Pup as the orchards' trees are; the banana stands on a Banana Stem of its own under drooping fronds.
+- **Wild** in forests, flower fields, taigas, hills and jungles, and in the Orchard, the Tropics and the Rainforest.
+- **Coffee Beans,** roasted from coffee cherries, now go into the Coffee Cake; **Strawberry, Blueberry and Plum Jam** cook into Mason Jars.
+- Details: [docs/features/fruit-crops.md](docs/features/fruit-crops.md).
+
 ### Unmerged: Cakes
 - Seven cakes the owner drew, rebuilt from their drawing: **Carrot Cake, Birthday Cake, Ice Cream Cake, Red Velvet Cake, Cheesecake, Coffee Cake and Apple Cake**, with the drawing's carrots, candles, berry jam and apple slices on top.
 - Baked in the **Hearth Oven** as the pies are: **Cake Batter** (wheat, an egg, sugar and milk), a sugar and the cake's own ingredients make a raw cake. Left in too long, it comes out a **Burnt Cake**.

@@ -34,7 +34,7 @@ CAKES = {
     "cheesecake": {"display": "Cheesecake", "food": [4, 0.7], "color": 0xF2D896,
                    "with": ["minecraft:milk_bucket", "minecraft:sweet_berries"]},
     "coffee_cake": {"display": "Coffee Cake", "food": [4, 0.6], "color": 0xC88A48,
-                    "with": ["minecraft:cocoa_beans", "jugcraft:mulling_spices"]},
+                    "with": ["jugcraft:coffee_beans", "minecraft:cocoa_beans"]},
     "apple_cake": {"display": "Apple Cake", "food": [4, 0.6], "color": 0x9E5A26,
                    "with": ["minecraft:apple", "minecraft:apple"]},
 }

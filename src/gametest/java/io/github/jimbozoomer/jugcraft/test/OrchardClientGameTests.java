@@ -34,6 +34,8 @@ public class OrchardClientGameTests implements FabricClientGameTest {
 			"orange_seeds", "pear_leaves", "peach_leaves", "lemon_leaves", "orange_leaves", "orange_juice", "lemonade", "raw_peach_pie",
 			"raw_lemon_meringue_pie", "peach_pie_slice", "lemon_meringue_pie_slice", "orange_marmalade", "peach_preserves", "pear_butter");
 	private static final List<String> PRESERVES = List.of("orange_marmalade", "peach_preserves", "pear_butter");
+	/** The slice's own trees; the fruit crops' plum and banana are shown by {@link FruitCropClientGameTests}. */
+	private static final OrchardTree[] TREES = {OrchardTree.PEAR, OrchardTree.PEACH, OrchardTree.LEMON, OrchardTree.ORANGE};
 	/** Items to a row of the wall. */
 	private static final int WALL = 7;
 	/** Blocks between the trees of a row. */
@@ -116,7 +118,7 @@ public class OrchardClientGameTests implements FabricClientGameTest {
 		int y = origin.getY();
 		int z = origin.getZ();
 		// The orchard: a row of ripe trees and, behind it, a row in blossom.
-		OrchardTree[] trees = OrchardTree.values();
+		OrchardTree[] trees = TREES;
 		for (int i = 0; i < trees.length; i++) {
 			grow(level, trees[i], new BlockPos(x + 2 + SPACING * i, y, z + RIPE_ROW), FruitingLeavesBlock.RIPE);
 			grow(level, trees[i], new BlockPos(x + 2 + SPACING * i, y, z + BLOSSOM_ROW), 1);

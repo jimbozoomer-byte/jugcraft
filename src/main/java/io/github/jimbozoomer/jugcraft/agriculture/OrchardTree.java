@@ -10,14 +10,17 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 /**
  * The orchards' fruit trees (the kitchen and cooking expansion's slice 6, tools/orchard.py TREES, in this order): each
  * grows from its seed (planted as {@code <id>_sapling}) into the tree {@code data/jugcraft/worldgen/feature/<id>_tree.json},
- * a vanilla oak trunk under a crown of {@code <id>_leaves} ({@link OrchardLeavesBlock}), whose ripe clusters give
- * {@link #pickMin} to {@link #pickMax} of the fruit {@code <id>}. tools/check_mod_data.py compares this with tools/orchard.py.
+ * a vanilla oak trunk (the banana's is its own stem) under a crown of {@code <id>_leaves} ({@link OrchardLeavesBlock}), whose
+ * ripe clusters give {@link #pickMin} to {@link #pickMax} of the fruit {@code <id>}. tools/check_mod_data.py compares this
+ * with tools/orchard.py.
  */
 public enum OrchardTree {
 	PEAR("pear", "pear_seeds", 1, 3),
 	PEACH("peach", "peach_pit", 1, 3),
 	LEMON("lemon", "lemon_seeds", 1, 3),
-	ORANGE("orange", "orange_seeds", 1, 3);
+	ORANGE("orange", "orange_seeds", 1, 3),
+	PLUM("plum", "plum_pit", 1, 3),
+	BANANA("banana", "banana_pup", 2, 4);
 
 	/** The fruit's ID; the sapling, leaves and tree are named from it. */
 	public final String id;

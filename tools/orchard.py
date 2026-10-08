@@ -26,10 +26,11 @@ FEATURE = "agriculture"
 FRUIT_CHANCE = 10
 
 # The trees, in the order of the OrchardTree enum. fruit: [hunger, saturation modifier]; pick: fruit a ripe cluster gives
-# [min, max]; trunk and foliage: the tree's shape (a straight oak trunk `base_height` tall plus up to `height_rand_a`, and a
-# blob of leaves `radius` across and `height` deep: the pear tall and pointed, the peach low and wide, the citrus small and
-# round); biomes: the vanilla biome tags (ConventionalBiomeTags) a wild patch grows in, one tree in `rarity` chunks; regions:
-# Jugcraft biomes whose trees include it, and how often (tools/biomes.py "picks").
+# [min, max]; trunk and foliage: the tree's shape (a straight trunk `base_height` tall plus up to `height_rand_a`, of oak
+# logs or the tree's own `log`, and a blob of leaves `radius` across and `height` deep, or the foliage `type` vanilla
+# places: the pear tall and pointed, the peach low and wide, the citrus small and round); biomes: the vanilla biome tags
+# (ConventionalBiomeTags) a wild patch grows in, one tree in `rarity` chunks; regions: Jugcraft biomes whose trees include
+# it, and how often (tools/biomes.py "picks").
 TREES = {
     "pear": {"display": "Pear", "seed": "pear_seeds", "seed_display": "Pear Seeds", "food": [4, 0.3], "pick": [1, 3],
              "trunk": {"base_height": 5, "height_rand_a": 1}, "foliage": {"radius": 2, "height": 4},
@@ -43,7 +44,21 @@ TREES = {
     "orange": {"display": "Orange", "seed": "orange_seeds", "seed_display": "Orange Seeds", "food": [4, 0.3], "pick": [1, 3],
                "trunk": {"base_height": 4, "height_rand_a": 1}, "foliage": {"radius": 2, "height": 3},
                "biomes": ["IS_SAVANNA", "IS_JUNGLE"], "rarity": 16, "regions": {"mediterranean_forest": 0.1, "subtropics": 0.15}},
+    # The fruit crops (tools/fruit_crops.py, 8 October 2026): the plum, an oak-trunked tree as the others; and the banana,
+    # a soft green-brown stem of its own (`log`, BANANA_STEM below) under a crown of long fronds that droop and hang
+    # (vanilla's cherry foliage placer, `foliage` "type"), its fruit hanging in bunches among them.
+    "plum": {"display": "Plum", "seed": "plum_pit", "seed_display": "Plum Pit", "food": [4, 0.3], "pick": [1, 3],
+             "trunk": {"base_height": 4, "height_rand_a": 1}, "foliage": {"radius": 2, "height": 3},
+             "biomes": ["IS_FOREST", "IS_TAIGA"], "rarity": 16, "regions": {"orchard": 0.15}},
+    "banana": {"display": "Banana", "seed": "banana_pup", "seed_display": "Banana Pup", "food": [4, 0.4], "pick": [2, 4],
+               "log": "jugcraft:banana_stem", "trunk": {"base_height": 4, "height_rand_a": 2},
+               "foliage": {"type": "cherry", "radius": 3, "height": 4, "wide_bottom_layer_hole_chance": 0.25,
+                           "corner_hole_chance": 0.4, "hanging_leaves_chance": 0.7, "hanging_leaves_extension_chance": 0.3},
+               "biomes": ["IS_JUNGLE"], "rarity": 12, "regions": {"tropics": 0.15, "rainforest": 0.1}},
 }
+# The banana's stem: a log of its own (a pillar, in #minecraft:logs so its fronds count it as their tree, as the TREES.md
+# roster asks; it does not burn as fuel).
+BANANA_STEM = {"block": "banana_stem", "display": "Banana Stem"}
 LEAF_STAGES = ["", "_blossom", "_ripe"]
 
 
@@ -120,14 +135,19 @@ def placed():
 
 
 def blocks():
-    """Each tree's sapling and leaves, and the set-down juices."""
-    return [b for tree in TREES for b in (sapling(tree), leaves(tree))] + list(placed())
+    """Each tree's sapling and leaves, the banana's stem, and the set-down juices."""
+    return [b for tree in TREES for b in (sapling(tree), leaves(tree))] + [BANANA_STEM["block"]] + list(placed())
 
 
 def items():
-    """The slice's block items: the leaves (the saplings are planted from their seeds; the fruit, seeds and juices join
-    tools/agriculture.py ITEMS)."""
-    return [leaves(tree) for tree in TREES]
+    """The slice's block items: the leaves and the banana's stem (the saplings are planted from their seeds; the fruit,
+    seeds and juices join tools/agriculture.py ITEMS)."""
+    return [leaves(tree) for tree in TREES] + [BANANA_STEM["block"]]
+
+
+def log(tree):
+    """The block a tree's trunk is made of."""
+    return TREES[tree].get("log", "minecraft:oak_log")
 
 
 def itemless():

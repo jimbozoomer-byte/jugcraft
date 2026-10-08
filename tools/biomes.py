@@ -148,8 +148,10 @@ RULES = [
 
 # Trees from other features, given a placed feature ("<name>") that checks the given sapling-like block would survive.
 PLACED_TREES = {"chestnut_checked": ("jugcraft:chestnut", "jugcraft:chestnut_sapling"),
-                # The orchards' fruit trees (tools/orchard.py), picked by the Orchard, Mediterranean Forest and Subtropics.
-                **{f"{tree}_checked": (f"jugcraft:{tree}_tree", f"jugcraft:{tree}_sapling") for tree in ("pear", "peach", "lemon", "orange")},
+                # The orchards' fruit trees (tools/orchard.py), picked by the Orchard, Mediterranean Forest, Subtropics,
+                # Tropics and Rainforest.
+                **{f"{tree}_checked": (f"jugcraft:{tree}_tree", f"jugcraft:{tree}_sapling")
+                   for tree in ("pear", "peach", "lemon", "orange", "plum", "banana")},
                 "azalea_tree_checked": ("minecraft:azalea_tree", "minecraft:azalea"),
                 # Huge mushrooms as trees, on soil (where an oak sapling could stand).
                 "huge_red_mushroom_on_soil": ("minecraft:huge_red_mushroom", "minecraft:oak_sapling"),
@@ -844,26 +846,26 @@ BIOMES = {
         "extras": ["peonies", "bushes_dense"],
         "tags": ["minecraft:has_structure/village_plains"],
     },
-    # An orchard: chestnut, pear and peach trees (the agriculture branch's), oaks with bees and flowering azaleas, rose
-    # bushes and daisies.
+    # An orchard: chestnut, pear, peach and plum trees (the agriculture branch's), oaks with bees and flowering azaleas,
+    # rose bushes and daisies.
     "orchard": {
         "display": "Orchard", "base": "plains", "temperature": 0.8, "downfall": 0.5, "seasons": True,
         "effects": {"grass_color": "#8fbd5a", "foliage_color": "#77ad48"},
         "trees": {"count": [2, 3], "default": "jugcraft:chestnut_checked", "picks": [
-            ["minecraft:oak_bees_002", 0.3], ["jugcraft:azalea_tree_checked", 0.15], ["jugcraft:pear_checked", 0.2],
-            ["jugcraft:peach_checked", 0.2]]},
+            ["minecraft:oak_bees_002", 0.2], ["jugcraft:azalea_tree_checked", 0.1], ["jugcraft:pear_checked", 0.2],
+            ["jugcraft:peach_checked", 0.2], ["jugcraft:plum_checked", 0.15]]},
         "extras": ["rose_bushes", "oxeye_daisies"],
         "tags": ["c:is_plains"],
     },
     # ---------------------------------------------------------------- batch 5: big trees and rainforests
-    # A hot, steaming rainforest: tall mahoganies and giant ones, jungle trees and bushes over ferns, orange cosmos and
-    # puddles; only parrots.
+    # A hot, steaming rainforest: tall mahoganies and giant ones, jungle trees and bushes and banana trees over ferns,
+    # orange cosmos and puddles; only parrots.
     "rainforest": {
         "display": "Rainforest", "base": "jungle", "temperature": 0.95, "downfall": 0.95, "seasons": False,
         "effects": {"grass_color": "#3fa82c", "foliage_color": "#2f9a24"},
         "trees": {"count": [24, 28], "default": "jugcraft:mahogany_checked", "picks": [
             ["jugcraft:giant_mahogany_checked", 0.12], ["minecraft:mega_jungle_tree_checked", 0.08],
-            ["minecraft:jungle_tree", 0.15], ["minecraft:jungle_bush", 0.25]]},
+            ["minecraft:jungle_tree", 0.15], ["minecraft:jungle_bush", 0.25], ["jugcraft:banana_checked", 0.1]]},
         "extras": ["ponds", "ferns", "large_ferns", "orange_cosmos"],
         "creatures": [["minecraft:parrot", 40, 1, 2]],
         "tags": ["c:is_tropical", "c:is_wet"],
@@ -880,12 +882,14 @@ BIOMES = {
                       ["minecraft:cow", 8, 4, 4], ["minecraft:parrot", 20, 1, 2]],
         "tags": ["c:is_tropical"],
     },
-    # Bright green islands of palms, flowering azaleas and jungle bushes, hibiscus, hydrangeas and bamboo; parrots.
+    # Bright green islands of palms, flowering azaleas, jungle bushes and banana trees, hibiscus, hydrangeas and bamboo;
+    # parrots.
     "tropics": {
         "display": "Tropics", "base": "sparse_jungle", "temperature": 0.95, "downfall": 0.85, "seasons": False,
         "effects": {"grass_color": "#5fcf3a", "foliage_color": "#4cc02e", "water_color": "#3fc7d8"},
         "trees": {"count": [4, 5], "default": "jugcraft:palm_checked", "picks": [
-            ["jugcraft:small_palm_checked", 0.25], ["minecraft:jungle_bush", 0.2], ["jugcraft:azalea_tree_checked", 0.15]]},
+            ["jugcraft:small_palm_checked", 0.25], ["minecraft:jungle_bush", 0.2], ["jugcraft:azalea_tree_checked", 0.15],
+            ["jugcraft:banana_checked", 0.15]]},
         "extras": ["hibiscus", "hydrangeas", "bamboo_groves"],
         "creatures": [["minecraft:parrot", 30, 1, 2], ["minecraft:chicken", 10, 4, 4], ["minecraft:pig", 10, 4, 4],
                       ["minecraft:sheep", 8, 4, 4]],

@@ -38,8 +38,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * In-game tests for the orchards (the kitchen and cooking expansion's slice 6, tools/orchard.py): each fruit tree grows
- * from its sapling into oak and its own leaves; tree-grown leaves blossom, ripen and are picked for their fruit, placed
+ * In-game tests for the orchards (the kitchen and cooking expansion's slice 6, tools/orchard.py, and the plum and banana
+ * of the fruit crops, tools/fruit_crops.py): each fruit tree grows from its sapling into its trunk (oak, or the banana's
+ * own stem) and its own leaves; tree-grown leaves blossom, ripen and are picked for their fruit, placed
  * leaves never fruit, and ripe leaves broken drop their fruit; a fruit crafts into its seed, which plants the sapling; the
  * juices are drinks; and the recipes, loot tables and wild trees load.
  */
@@ -54,8 +55,13 @@ public class OrchardGameTests {
 
 	// ---------------------------------------------------------------- the trees grow
 
+	/** The block a tree's trunk is made of (tools/orchard.py log): oak, but the banana's own stem. */
+	private static Block trunk(OrchardTree tree) {
+		return tree == OrchardTree.BANANA ? block("banana_stem") : Blocks.OAK_LOG;
+	}
+
 	/**
-	 * A sapling grows into its tree: an oak trunk under a crown of its own leaves, grown by the tree (not persistent) and
+	 * A sapling grows into its tree: its trunk under a crown of its own leaves, grown by the tree (not persistent) and
 	 * bare of fruit. A tree needs more free space above it than the test area has, so the sapling goes on top of whatever
 	 * closes the area above (as the apple tree's test does).
 	 */
@@ -74,7 +80,7 @@ public class OrchardGameTests {
 		boolean grown = tree.grower.growTree(level, level.getChunkSource().getGenerator(), absolute, level.getBlockState(absolute),
 				level.getRandom());
 		helper.assertTrue(grown, "The " + tree.id + " sapling at " + sapling + " should grow into a tree");
-		helper.assertBlockPresent(Blocks.OAK_LOG, sapling);
+		helper.assertBlockPresent(trunk(tree), sapling);
 		int leaves = 0;
 		for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-4, 0, -4), absolute.offset(4, 12, 4))) {
 			BlockState state = level.getBlockState(pos);
@@ -108,7 +114,27 @@ public class OrchardGameTests {
 		growsIntoItsTree(helper, OrchardTree.ORANGE);
 	}
 
+	@GameTest
+	public void plumSaplingGrowsATree(GameTestHelper helper) {
+		growsIntoItsTree(helper, OrchardTree.PLUM);
+	}
+
+	@GameTest
+	public void bananaSaplingGrowsATree(GameTestHelper helper) {
+		growsIntoItsTree(helper, OrchardTree.BANANA);
+	}
+
 	// ---------------------------------------------------------------- the fruit
+
+	/** Where tree {@code i}'s log stands at height {@code y}: two columns of three, so every tree fits the test area. */
+	private static BlockPos column(int i, int y) {
+		return new BlockPos(2 + 4 * (i / 3), y, 1 + 2 * (i % 3));
+	}
+
+	/** Where tree {@code i}'s block goes in a test of single blocks: two rows of four. */
+	private static BlockPos spot(int i, int y) {
+		return new BlockPos(1 + 2 * (i % 4), y, 2 + 3 * (i / 4));
+	}
 
 	/**
 	 * For each tree, leaves the tree grew (over air, by a log) blossom and then ripen on random ticks, and a right-click
@@ -120,10 +146,10 @@ public class OrchardGameTests {
 		OrchardTree[] trees = OrchardTree.values();
 		for (int i = 0; i < trees.length; i++) {
 			OrchardTree tree = trees[i];
-			BlockPos log = new BlockPos(3, 4, 1 + 2 * i);
+			BlockPos log = column(i, 4);
 			BlockPos natural = log.east();
 			BlockPos placed = log.west();
-			helper.setBlock(log, Blocks.OAK_LOG);
+			helper.setBlock(log, trunk(tree));
 			helper.assertTrue(block(tree.leaves()) instanceof OrchardLeavesBlock leavesBlock && leavesBlock.tree() == tree,
 					tree.leaves() + " are the " + tree.id + " tree's leaves");
 			BlockState leaves = block(tree.leaves()).defaultBlockState().setValue(LeavesBlock.DISTANCE, 1);
@@ -145,7 +171,7 @@ public class OrchardGameTests {
 		}
 		helper.succeedWhen(() -> {
 			for (int i = 0; i < trees.length; i++) {
-				helper.assertItemEntityPresent(item(trees[i].id), new BlockPos(4, 4, 1 + 2 * i), 2.0);
+				helper.assertItemEntityPresent(item(trees[i].id), column(i, 4).east(), 2.0);
 			}
 		});
 	}
@@ -155,7 +181,7 @@ public class OrchardGameTests {
 	public void ripeLeavesBrokenDropTheirFruit(GameTestHelper helper) {
 		OrchardTree[] trees = OrchardTree.values();
 		for (int i = 0; i < trees.length; i++) {
-			BlockPos pos = new BlockPos(1 + 2 * i, 3, 3);
+			BlockPos pos = spot(i, 3);
 			helper.setBlock(pos.below(), Blocks.STONE);
 			helper.setBlock(pos, block(trees[i].leaves()).defaultBlockState().setValue(LeavesBlock.DISTANCE, 1)
 					.setValue(LeavesBlock.PERSISTENT, false).setValue(FruitingLeavesBlock.FRUIT, FruitingLeavesBlock.RIPE));
@@ -163,7 +189,7 @@ public class OrchardGameTests {
 		}
 		helper.succeedWhen(() -> {
 			for (int i = 0; i < trees.length; i++) {
-				helper.assertItemEntityPresent(item(trees[i].id), new BlockPos(1 + 2 * i, 3, 3), 1.5);
+				helper.assertItemEntityPresent(item(trees[i].id), spot(i, 3), 1.5);
 			}
 		});
 	}
@@ -179,7 +205,7 @@ public class OrchardGameTests {
 			OrchardTree tree = trees[i];
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(tree.seed))).isPresent(),
 					"A " + tree.id + " crafts into " + tree.seed);
-			BlockPos ground = new BlockPos(1 + 2 * i, 1, 2);
+			BlockPos ground = spot(i, 1);
 			helper.setBlock(ground, Blocks.DIRT);
 			BlockPos absolute = helper.absolutePos(ground);
 			player.setPos(absolute.getX() + 0.5, absolute.getY() + 1, absolute.getZ() + 3.5);

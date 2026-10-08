@@ -9,6 +9,7 @@ Called from agriculture_data.py (assets, loot, tags, worldgen). Formats follow v
 import orchard
 from decor_data import MOD, rid, self_drop
 from festival_data import SHEARS_OR_SILK
+from trees_data import foliage_placer
 
 
 def assets(root, write, lang):
@@ -25,6 +26,18 @@ def assets(root, write, lang):
         write(items / f"{leaves}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{leaves}")}})
         lang[f"block.{MOD}.{sapling}"] = f"{info['display']} Sapling"
         lang[f"block.{MOD}.{leaves}"] = f"{info['display']} Leaves"
+    # The banana's stem: a pillar, as a log is, its rings on its ends.
+    stem = orchard.BANANA_STEM["block"]
+    write(models / f"{stem}.json", {"parent": "minecraft:block/cube_column",
+                                    "textures": {"end": rid(f"block/{stem}_top"), "side": rid(f"block/{stem}")}})
+    write(models / f"{stem}_horizontal.json", {"parent": "minecraft:block/cube_column_horizontal",
+                                               "textures": {"end": rid(f"block/{stem}_top"), "side": rid(f"block/{stem}")}})
+    write(states / f"{stem}.json", {"variants": {
+        "axis=x": {"model": rid(f"block/{stem}_horizontal"), "x": 90, "y": 90},
+        "axis=y": {"model": rid(f"block/{stem}")},
+        "axis=z": {"model": rid(f"block/{stem}_horizontal"), "x": 90}}})
+    write(items / f"{stem}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{stem}")}})
+    lang[f"block.{MOD}.{stem}"] = orchard.BANANA_STEM["display"]
 
 
 def loot(out, write):
@@ -53,6 +66,7 @@ def loot(out, write):
         sapling = self_drop(orchard.sapling(tree))
         sapling["pools"][0]["entries"][0]["name"] = seed
         write(out / f"{orchard.sapling(tree)}.json", sapling)
+    write(out / f"{orchard.BANANA_STEM['block']}.json", self_drop(orchard.BANANA_STEM["block"]))
 
 
 def tags(tags):
@@ -60,25 +74,35 @@ def tags(tags):
         for registry in ("block", "item"):
             tags.add(registry, "minecraft:leaves", rid(orchard.leaves(tree)))
         tags.add("block", "minecraft:saplings", rid(orchard.sapling(tree)))
+    # The banana's stem is a log to its fronds (they stay while it stands) and to an axe, but no fuel.
+    stem = rid(orchard.BANANA_STEM["block"])
+    for registry in ("block", "item"):
+        tags.add(registry, "minecraft:logs", stem)
+    tags.add("block", "minecraft:mineable/axe", stem)
+
+
+def placer(foliage):
+    """A tree's foliage placer (a blob, unless it names another type), its fields in the order the files have always had."""
+    out = foliage_placer({"type": "blob", "offset": 0, **foliage})
+    return {"type": out.pop("type"), **dict(sorted(out.items()))}
 
 
 def worldgen(data, write):
-    """Each tree: a straight oak trunk with a blob crown of its leaves; a wild patch for the vanilla biomes it grows in (one
-    tree in `rarity` chunks, where its sapling could stand); the placement Jugcraft's biomes pick it by
-    (tools/biomes.py PLACED_TREES writes `<tree>_checked`)."""
+    """Each tree: a straight trunk (oak, or its own) with a crown of its leaves (a blob, or the foliage type it names); a
+    wild patch for the vanilla biomes it grows in (one tree in `rarity` chunks, where its sapling could stand); the
+    placement Jugcraft's biomes pick it by (tools/biomes.py PLACED_TREES writes `<tree>_checked`)."""
     folder = data / MOD / "worldgen"
     for tree, info in orchard.TREES.items():
         trunk, foliage = info["trunk"], info["foliage"]
         write(folder / "feature" / f"{orchard.feature(tree)}.json", {
             "type": "minecraft:tree", "below_trunk_provider": "minecraft:soil_beneath_tree", "decorators": [],
-            "foliage_placer": {"type": "minecraft:blob_foliage_placer", "height": foliage["height"], "offset": 0,
-                               "radius": foliage["radius"]},
+            "foliage_placer": placer(foliage),
             "foliage_provider": {"id": rid(orchard.leaves(tree)),
                                  "properties": {"distance": "7", "fruit": "0", "persistent": "false", "waterlogged": "false"}},
             "ignore_vines": True, "minimum_size": {"type": "minecraft:two_layers_feature_size"},
             "trunk_placer": {"type": "minecraft:straight_trunk_placer", "base_height": trunk["base_height"],
                              "height_rand_a": trunk["height_rand_a"], "height_rand_b": 0},
-            "trunk_provider": {"id": "minecraft:oak_log", "properties": {"axis": "y"}}})
+            "trunk_provider": {"id": orchard.log(tree), "properties": {"axis": "y"}}})
         write(folder / "placed_feature" / f"patch_{orchard.feature(tree)}.json", {"feature": rid(orchard.feature(tree)), "placement": [
             {"type": "minecraft:rarity_filter", "chance": info["rarity"]},
             {"type": "minecraft:in_square"},

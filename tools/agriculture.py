@@ -26,6 +26,7 @@ import rice
 import soil
 import orchard
 import cakes
+import fruit_crops
 
 FEATURE = "agriculture"
 
@@ -2789,3 +2790,14 @@ SHAPELESS += orchard.SHAPELESS
 # textures are tools/cake_data.py's and tools/cake_art.py's.
 ITEMS.update(cakes.ITEMS)
 SHAPELESS += cakes.SHAPELESS
+
+# The fruit crops (tools/fruit_crops.py): strawberry, blueberry and coffee bushes (TALL_CROPS, after the others), their wild
+# plants and seeds, coffee beans, and the jams. The plum and banana trees are orchard trees (tools/orchard.py TREES).
+TALL_CROPS.update(fruit_crops.BUSHES)
+WILD_CROPS.update(fruit_crops.WILD)
+GRASS_SEEDS += fruit_crops.GRASS_SEEDS
+ITEMS.update(fruit_crops.ITEMS)
+SHAPELESS += fruit_crops.SHAPELESS
+COOKING.update(fruit_crops.COOKING)
+POT_RECIPES.update(fruit_crops.POT_RECIPES)
+PANTRY["preserves"].update(fruit_crops.PRESERVES)

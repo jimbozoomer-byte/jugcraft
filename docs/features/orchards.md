@@ -106,5 +106,5 @@ Farming and food. The trees grow wild in new chunks only, in the biomes above. T
 
 ## Rollout and open questions
 - The owner's own art for these trees, if they draw it, replaces Jugcraft's under the same IDs.
-- Grapes, hops and berries stay on the roster for a later slice, as do cherry and plum trees.
+- Grapes, hops and raspberries stay on the roster for a later slice, as do cherry trees. Plum and banana trees and blueberries came with the [fruit crops](fruit-crops.md), which add the plum and banana as orchard trees (the banana on its own stem).
 - The Cider Press still presses only apples; pears could make perry in it later. The Fruit Salad is still made with an apple.
