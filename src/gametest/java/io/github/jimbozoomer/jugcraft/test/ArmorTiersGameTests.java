@@ -83,7 +83,10 @@ public class ArmorTiersGameTests {
 					"minecraft:blue_ice", false),
 			// Wight King: the heavier helm, the steadiest of the cold sets, middling enchanting; mended with packed ice.
 			new Tier("wight_king", new int[] {4, 8, 7, 3}, new int[] {495, 720, 675, 585}, 3.0, 0.2, 15,
-					"minecraft:packed_ice", false));
+					"minecraft:packed_ice", false),
+			// Reaper: netherite's defense, good enchanting, less toughness, barely any knockback resistance; mended with bone.
+			new Tier("reaper", new int[] {3, 8, 6, 3}, new int[] {462, 672, 630, 546}, 2.5, 0.05, 24,
+					"minecraft:bone", false));
 
 	/** Every tier's four pieces have its numbers, repair, fire resistance, slot, look and tags. */
 	@GameTest

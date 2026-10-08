@@ -99,7 +99,8 @@ SET_MODULES = ("knight_armor",         # the knight armor: the owner's steel des
                "crusader_armor",       # Paladin and Templar: the owner's two crusader knights
                "sentinel_armor",       # Sentinel: the owner's gold-and-black knight
                "frost_knight_armor",   # Frost Knight: the owner's white knight crowned with ice
-               "wight_king_armor")     # Wight King: the owner's slate knight crowned with icicles and antlers
+               "wight_king_armor",     # Wight King: the owner's slate knight crowned with icicles and antlers
+               "reaper_armor")         # Reaper: the owner's hooded reaper wrapped in a white crescent
 
 
 def face_name(name):

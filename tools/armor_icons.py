@@ -203,6 +203,15 @@ crossed straps; the banded legs under the dark belt and its cyan buckle; the ban
                     their outline
     U u x X         the face's black: "under_light" to "under_dark", and "under_darkest", its outline
     A I E F J j     the icicles' and antlers' ice: "ice_light" to "ice_deep", and "~ice_deep", its outline
+Reaper (tools/reaper_armor.py, armor_paint.REAPER): the hood and the three bars across its black void; the robe with
+its white clasp, its pouch, the white plates and square guards on its arms and the white crescent behind; the skirt
+and its apron of pleats; the dark wrapped boots with white bands.
+    H L M D S V     the bone-white of the plates and the crescent, white to grey ("O" is its void taken down)
+    G g             the pouch's reddish browns: "gold_light", "gold_dark"
+    C c q Q K       the robe's browns: "leather_light" to "leather_dark", and "leather_darkest", its outline (and
+                    the hood's)
+    U u x X         the void's black: "under_light" to "under_dark", and "under_darkest", its outline
+    a b e f         the hood's browns: "hood_light", "hood", "hood_mid", "hood_dark"
 """
 import os
 
@@ -301,7 +310,12 @@ OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "
                                                "c": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
                                                "K": "leather_darkest", "U": "under_light", "u": "under_mid",
                                                "x": "under_dark", "X": "under_darkest", "A": "ice_light", "I": "ice",
-                                               "E": "ice_mid", "F": "ice_dark", "J": "ice_deep", "j": "~ice_deep"})}
+                                               "E": "ice_mid", "F": "ice_dark", "J": "ice_deep", "j": "~ice_deep"}),
+       "reaper": (armor_paint.REAPER, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam", "V": "void",
+                                       "G": "gold_light", "g": "gold_dark", "C": "leather_light", "c": "leather_mid_light",
+                                       "q": "leather_mid", "Q": "leather_dark", "K": "leather_darkest",
+                                       "U": "under_light", "u": "under_mid", "x": "under_dark", "X": "under_darkest",
+                                       "a": "hood_light", "b": "hood", "e": "hood_mid", "f": "hood_dark"})}
 
 
 def luma(colour):

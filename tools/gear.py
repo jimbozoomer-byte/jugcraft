@@ -191,6 +191,10 @@ ARMOR_TIERS = {
     # sets, middling enchanting, netherite's toughness; mended with packed ice.
     "wight_king": {"display": "Wight King", "armor": (45, (3, 7, 8, 4), 15, 3.0, 0.2),
                    "repair": "minecraft:packed_ice", "fire_resistant": False},
+    # Reaper: a robe over bone-white plates: netherite's defense, good enchanting, but less toughness and barely any
+    # knockback resistance; mended with bone.
+    "reaper": {"display": "Reaper", "armor": (42, (3, 6, 8, 3), 24, 2.5, 0.05),
+               "repair": "minecraft:bone", "fire_resistant": False},
 }
 
 

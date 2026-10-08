@@ -300,6 +300,18 @@ WIGHT_KING = {
     "ice_light": (232, 244, 250), "ice": (196, 220, 232), "ice_mid": (160, 190, 205), "ice_dark": (120, 150, 168),
     "ice_deep": (84, 112, 130),
 }
+# Reaper (tools/reaper_armor.py): the metal is the bone-white of its plates and its great crescent, white to the grey of
+# their gaps; "leather" the dark brown of its robe; the under-layer the black inside its hood; "gold" the reddish brown
+# of its pouch. Its hood's greyer browns are four tones of their own, by name.
+REAPER = {
+    "light": (214, 216, 202), "mid_light": (182, 184, 171), "mid": (138, 139, 132), "dark": (104, 105, 102),
+    "seam": (75, 76, 78), "void": (49, 48, 53),
+    "gold_light": (74, 48, 36), "gold_dark": (41, 22, 17),
+    "leather_light": (73, 64, 56), "leather_mid_light": (63, 55, 48), "leather_mid": (53, 44, 37),
+    "leather_dark": (40, 35, 32), "leather_darkest": (24, 18, 17),
+    "under_light": (39, 34, 30), "under_mid": (29, 25, 22), "under_dark": (18, 15, 15), "under_darkest": (8, 7, 8),
+    "hood_light": (82, 78, 72), "hood": (66, 62, 57), "hood_mid": (52, 48, 44), "hood_dark": (39, 35, 32),
+}
 # The smoke test's face colours (tools/armor_smoke.py): one hue per face, so a render shows which face is where.
 TEST = {**STEEL, "t_top": (230, 230, 90), "t_bottom": (90, 70, 40), "t_right": (220, 70, 70), "t_front": (80, 200, 90),
         "t_left": (70, 110, 230), "t_back": (200, 90, 210), "t_mark": (20, 20, 20), "t_rule": (255, 255, 255)}
