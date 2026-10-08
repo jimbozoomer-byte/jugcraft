@@ -9,6 +9,20 @@ final class MachineWorkClip {
     float x,y,z,xRot,zRot,leftX,leftY,leftZ,rightX,rightY,rightZ;
     float bodyPitch,bodyRoll,bodyX,bodyY;
 
+    void chop(float phase,float boardY,float boardZ){
+        // Contact at the loop seam, a slow two-handed lift, then a short forceful downstroke.
+        float t=phase/Mth.TWO_PI;
+        float down=t<.12F?1:t<.70F?1-smooth((t-.12F)/.58F):t<.975F?smooth((t-.70F)/.275F):1;
+        x=-1;z=Math.min(-3.8F,Math.max(-5.0F,boardZ+8.5F));
+        y=Mth.lerp(down,16.8F,boardY-1.25F);xRot=down*Mth.HALF_PI;zRot=0;
+        bodyPitch=-.12F+down*.46F;bodyRoll=0;bodyX=0;bodyY=-.20F+down*.45F;
+        float c=Mth.cos(xRot),s=Mth.sin(xRot);
+        // Stacked hands clasp the actual knife handle; both move with its rotation.
+        leftX=x+.30F;rightX=x-.30F;
+        leftY=y+.45F*c;rightY=y-.45F*c;
+        leftZ=z+.45F*s;rightZ=z-.45F*s;
+    }
+
     void evaluate(WorkAnimation clip,float phase,boolean pumpkin){
         x=0;y=20;z=-4.2F-(pumpkin?.65F:0);xRot=zRot=0;
         bodyPitch=bodyRoll=bodyX=bodyY=0;

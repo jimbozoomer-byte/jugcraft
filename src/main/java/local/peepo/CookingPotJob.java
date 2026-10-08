@@ -27,7 +27,9 @@ public final class CookingPotJob implements CompanionJob {
             entrance = null;
             nextClearance = 0;
             updateRimHeight();
-            for (var side : Direction.Plane.HORIZONTAL) for (int dy = -1; dy <= 0; dy++) {
+            // The fixed pot model's bail lies in the east-west plane (z=7.5..8.5).
+            // Its east/west lugs and uprights must never be used as standing rim positions.
+            for (var side : new Direction[]{Direction.NORTH,Direction.SOUTH}) for (int dy = -1; dy <= 0; dy++) {
                 var pos = stationPosition().relative(side).offset(0, dy, 0);
                 if (!npc.level().hasChunkAt(pos) || !npc.level().getBlockState(pos.below()).isFaceSturdy(npc.level(), pos.below(), Direction.UP)) continue;
                 var point = Vec3.atBottomCenterOf(pos);

@@ -114,8 +114,8 @@ final class CompanionPerformanceChecks {
         server.runOnServer(s->{p[0].snapTo(base.getX()+1.5,base.getY(),base.getZ()+.5,0,0);verify(!tracker.needsPath(p[0],goal[0]),"progressing path unnecessarily rebuilt");});
         server.waitFor(s->s.overworld().getGameTime()-start[0]>=55,90);
         server.runOnServer(s->{verify(tracker.needsPath(p[0],goal[0]),"stuck path never retried");
-            var pos=base.east(4);s.overworld().setBlockAndUpdate(pos,JugcraftAgriculture.block("cutting_board").defaultBlockState());
-            var board=(CuttingBoardBlockEntity)s.overworld().getBlockEntity(pos);var job=board.companionKitchen.job.prepare(p[0]);var first=job.approachPosition();
+            var pos=base.east(4);s.overworld().setBlockAndUpdate(pos,JugcraftAgriculture.block("cooking_pot").defaultBlockState());
+            var pot=(CookingPotBlockEntity)s.overworld().getBlockEntity(pos);var job=pot.companionJob.prepare(p[0]);var first=job.approachPosition();
             p[0].navigationMemory.reject(p[0],pos,first);job.approachFailed(p[0]);job.prepare(p[0]);
             verify(!job.approachPosition().equals(first),"failed entrance selected again instead of another side");
         });

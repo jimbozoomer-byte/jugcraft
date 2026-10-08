@@ -17,6 +17,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         items=context.getItemModelResolver();
         addLayer(new FoodLayer(this));
         addLayer(new HeldLayer(this));
+        addLayer(new KnifeLayer(this));
         addLayer(new PieLayer(this));
         addLayer(new SpoonLayer(this,new StirringSpoonModel(context.bakeLayer(PeepoClient.SPOON))));
         addLayer(new WorkPropsLayer(this,new WorkPropsModel(context.bakeLayer(PeepoClient.WORK_WOOD)),
@@ -126,9 +127,42 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
                 state.toolPose.evaluate(state.work,state.workPhase,state.pumpkin);
             }
         }
+        if(state.work==WorkAnimation.CHOP){
+            var target=entity.workTarget();
+            if(!entity.level().hasChunkAt(target)
+                || !(entity.level().getBlockState(target).getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.CuttingBoardBlock)
+                || !entity.getMainHandItem().is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.KNIVES))state.work=WorkAnimation.NONE;
+            else{
+                state.bodyRot=entity.getYRot();state.yRot=0;state.xRot=0;
+                state.workPhase=WorkAnimation.CHOP.phase(entity.level().getGameTime()-entity.workStarted(),partialTick,0);
+                var delta=net.minecraft.world.phys.Vec3.atBottomCenterOf(target).add(0,1.05/16,0).subtract(entity.getPosition(partialTick));
+                double a=Math.toRadians(entity.getYRot());
+                state.toolPose.chop(state.workPhase,(float)(24-delta.y*16),(float)((delta.x*Math.sin(a)-delta.z*Math.cos(a))*16));
+            }
+        }
+        // NONE retains the native item model dimensions: there is no companion .35 scale.
+        items.updateForLiving(state.knife,state.work==WorkAnimation.CHOP?entity.getMainHandItem():net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.NONE,entity);
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;
         items.updateForLiving(state.held,!state.eating && !state.sleeping && state.work==WorkAnimation.NONE ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,state.holdingLight ? ItemDisplayContext.NONE : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
         items.updateForLiving(state.food,state.eating ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.FIXED,entity);
+    }
+    private static final class KnifeLayer extends RenderLayer<PeepoState,PeepoModel>{
+        KnifeLayer(PeepoRenderer renderer){super(renderer);}
+        @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
+            if(state.isInvisible || state.work!=WorkAnimation.CHOP || state.knife.isEmpty())return;
+            pose.pushPose();knifePose(pose,state.toolPose);
+            state.knife.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,state.outlineColor);pose.popPose();
+        }
+    }
+    static void knifePose(PoseStack pose,MachineWorkClip p){
+        pose.translate(p.x/16,p.y/16,p.z/16);
+        pose.rotateDegrees(com.mojang.math.Axis.XP,p.xRot*net.minecraft.util.Mth.RAD_TO_DEG);
+        pose.rotateDegrees(com.mojang.math.Axis.YP,90);
+        pose.rotateDegrees(com.mojang.math.Axis.ZP,-45);
+        pose.rotateDegrees(com.mojang.math.Axis.XP,180);
+        // The existing diagonal knife sprites have their handle near pixel (4,12).
+        // Move that native grip to the shared hand pivot; never scale the item or a hand bone.
+        pose.translate(.25,.25,0);
     }
     private static final class WorkPropsLayer extends RenderLayer<PeepoState,PeepoModel>{
         private static final Identifier WOOD=io.github.jimbozoomer.jugcraft.Jugcraft.id("textures/block/cider_press_wood.png");

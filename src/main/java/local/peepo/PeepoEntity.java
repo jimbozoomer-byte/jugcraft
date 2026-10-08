@@ -274,7 +274,8 @@ public final class PeepoEntity extends PathfinderMob {
             settingsMenus.removeIf(menu->!menu.editing(this));
             if(editingSettings())holdForSettings();
         }
-        if (!level().isClientSide() && bedExit != null && getRestMode() == CompanionEnergy.Rest.NONE && workAnimation()!=WorkAnimation.STIR) leaveCompanionBed();
+        if (!level().isClientSide() && bedExit != null && getRestMode() == CompanionEnergy.Rest.NONE
+                && workAnimation()!=WorkAnimation.STIR && workAnimation()!=WorkAnimation.CHOP) leaveCompanionBed();
         super.tick();
         if(!level().isClientSide()) {
             if(editingSettings())holdForSettings();
