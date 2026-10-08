@@ -185,10 +185,11 @@ gorget and its pale strip, and the baldric; the black skirt with its gold plate 
     G g             the palest cream and the deep brown: "gold_light", "gold_dark"
     C c q Q K       the browns: "leather_light" to "leather_dark", and "leather_darkest", their outline
     U u x X         the black cloth: "under_light" to "under_dark", and "under_darkest", its outline
-Frost Knight (tools/frost_knight_armor.py, armor_paint.FROST_KNIGHT): the crown of ice over the white great helm, its
-frost spikes and its face, the dark eye slit crossed by the ridge over the breathing vents; the frost on the right
-shoulder, the navy pauldron on the left and the navy strap over the white cuirass; the white legs in stacked lames
-under the navy belt and its ice gem, the knee bands; the white boots.
+Frost Knight (tools/frost_knight_armor.py, armor_paint.FROST_KNIGHT): the crown of ice over the white great helm, the
+mane of frost round it and its face, the dark eye slit turning up at its ends and crossed by the ridge over the
+grille; the frost on the right shoulder hanging down the arm, the navy pauldron on the left with its white curl and
+rim, and the navy strap over the white cuirass; the white legs in stacked lames under the navy belt and its ice gem,
+the knee bands; the white boots, a tuft of frost at each ankle.
     H L M D S V     the frosted white, white to slate ("O" is its void taken down)
     G g             the ice's palest and bright cyans: "gold_light", "gold_dark"
     C c q Q K       the navy: "leather_light" to "leather_dark", and "leather_darkest", its outline

@@ -1,15 +1,16 @@
-# The Frost Knight cuirass: the white frost on the right shoulder, the navy pauldron on the left, the navy strap
-# across the white plate down to the belt and its ice gem.
+# The Frost Knight cuirass: the white frost on the right shoulder, jagged and hanging down the arm; the navy pauldron
+# on the left with a white curl and its white rim; the navy strap across the white plate down to the belt and its ice
+# gem.
 ................
-.OOOO.....KKKK..
-OHHLHO...KCCcqK.
-OHLLMHOOOCccqQK.
-OLMHLLLHHLLccQQK
-OHLLHLLHLLqLMMDO
+.O.OO.....KKKK..
+OHOHHO...KCCcqK.
+OHHLMHOOOKcHHQK.
+OLHLLLLHHLLcHQQK
+OHLLHLLHLLqHHHLO
 OHOLHHLLLqLLOLDO
-.OOLLLLLLqLLMOO.
-...OLLLLqLLLO...
-...OLLLqLLLMO...
+OHOOLLLLLqLLMOO.
+.OHOLLLLqLLLO...
+..OOLLLqLLLMO...
 ...OLLqLLLLMO...
 ...KqqqqGqqqK...
 ....KKKKjKKK....
