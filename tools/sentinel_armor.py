@@ -2,37 +2,45 @@
 these ones aswell want them done weapons too please": three Blockbench renders, from the front and a little to the
 right, from a little to the left, and from behind) as a 3D worn model for jugcraft:sentinel_* (helmet, chestplate,
 leggings, boots), on the toolkit in tools/armor_models.py (shapes) and tools/armor_paint.py (the atlas). Its sword and
-shield are arms of their own (tools/arms_variants.py).
+shield are arms of their own (tools/arms_variants.py). Rebuilt in more detail when the owner saw the first one: "the
+Gold Knight / Sentinel is missing very important details and is way to simplified".
 
 What the owner drew, and where it is here (built part for part, as the owner asked: "complex models ... really
 capturing the crazy unique geometry of each armor"):
-    helmet      a gold bucket helm with a keyhole: a dark window at the eyes framed in pale gold and a dark slit down
-                from it to the chin, rimmed; a loop like a little house on its crown; a pale ridge down its back between
-                two dark hooks of a meander; scratches on its left side. Here: the helm; the window's frame (its top,
-                sides and feet) and the slit's rims raised on its front; the loop's two posts and its peaked roof; the
-                ridge behind
-    chestplate  a near-black coat under a gold mantle across the shoulders; on the right shoulder a great pauldron of
-                gold plates fanning out over the arm, on the left a smaller one of two flat plates; a gold square
-                ring on the right upper arm; gold bands on the black sleeves and gold gauntlets. Here: the coat and the
-                mantle; on the right arm the pauldron's cap and its three shell plates, each hinged further out, the
-                square ring, the sleeve, two bands and the gauntlet; on the left the two plates, the sleeve, the bands
-                and the gauntlet
+    helmet      a gold bucket helm, a pale rim round its top; a keyhole: a dark window at the eyes in a raised pale
+                frame and a dark slit down from it to the chin, rimmed; dark channels down the cheeks; a loop like a
+                little house on its crown; behind, a pale ridge between two hooks of a meander; scratches on its left
+                side. Here: the helm; the rim, four bars round the top; the window's frame (its top, sides and feet)
+                and the slit's rims raised on its front; two ribs down each cheek, the channels between them; the
+                loop's two posts and its peaked roof; the ridge and, either side of it, the meander's hook in five
+                raised bars over a dark field
+    chestplate  a near-black coat under a gold gorget across the shoulders, a pale strip down its middle ending in a
+                boss; a dark baldric from the left shoulder to the right hip; on the right shoulder a great pauldron of
+                gold plates in nested chevrons pointing out from the arm, on the left a shelf of flat plates; a gold
+                square ring on the right upper arm; a gold bracer on the right forearm; gold bands on the black sleeves
+                and gold gauntlets. Here: the coat; the gorget in two tiers, the strip and the boss; the baldric before
+                and behind; on the right arm the pauldron's cap and three chevrons, each a pair of bars from under the
+                cap out to a point and back, the outer pale, the middle dark, the inner gold, each stepping in; the
+                ring, a frame of four bars round a dark field and a stud; the sleeve, the bracer and its two rims, the
+                gauntlet; on the left the three plates of the shelf, the sleeve, two bands and the gauntlet
     leggings    the coat's black skirt to the knee, parted at the middle, with a gold plate before and behind the
-                left thigh and a dark one on the right. Here: the belt; on each leg the hose, the skirt and a plate
-                before and behind it hinged out from the hip, gold on the left, dark iron on the right
-    boots       gold boots with a brown band and a pale toe. Here: the greave, the band round it, the sabaton and the
-                toe cap
+                left thigh and a dark one on the right. Here: the belt and its buckle; on each leg the hose, the skirt
+                and a plate before and behind it hinged out from the hip, each with a raised rim round it, gold on the
+                left, dark iron on the right
+    boots       gold boots, chequered gold and brown at their tops, with a brown band and a pale toe. Here: the cuff,
+                the greave, the band round it, the sabaton, two instep lames and the toe cap
 Colours: armor_paint.SENTINEL.
 
-The renders show the front, both sides and the back. The design is not symmetric: the pauldrons differ and only the left
-thigh's plates are gold, so the left arm and leg are built as drawn rather than mirrored from the right. Every box is
-closed: a face is left out only where another box of the same piece and bone covers it (the reliefs' and the plates'
-backs, the cap's foot inside the shells, the sleeve's ends, the greave's foot inside the sabaton).
+The renders show the front, both sides and the back. The design is not symmetric: the pauldrons differ, only the right
+forearm wears the bracer and only the left thigh's plates are gold, so the arms are built as drawn rather than mirrored.
+Every box is closed: a face is left out only where another box of the same piece and bone covers it (the reliefs' and
+the plates' backs, the cap's foot inside the shells, the sleeve's ends, the greave's foot inside the sabaton).
 
 Space (tools/armor_models.py): each bone's own space in model pixels; x is the model's LEFT, y is DOWN, z is the BACK
 (the face is at -z).
 Preview: python3 tools/armor_preview.py --set sentinel
 """
+import math
 from dataclasses import replace
 
 import armor_models as am
@@ -66,49 +74,70 @@ CLOTH = P("plate", tone=x, strips="v")   # the near-black cloth, in long runs a 
 
 # ---------------------------------------------------------------- paint
 PAINT = {
-    # the helm: gold, its top row pale; on its front the keyhole's window and slit dark; behind, the meander's two
-    # dark hooks either side of the ridge; on its left side the owner's scratches
-    "helm": {"front": [plate(M), marks((0, 0, 99, 1, H), (1, 1, 1, 3, D), (-2, 1, 1, 3, D), (3, 3, 4, 3, X),
-                                       (4, 6, 2, 4, X), (1, 6, 2, 2, D), (-3, 6, 2, 2, D), (0, -1, 99, 1, S))],
-             "back": [plate(M), marks((0, 0, 99, 1, H), (1, 2, 3, 1, g), (1, 2, 1, 3, g), (1, 4, 2, 1, g),
-                                      (1, 6, 1, 3, g), (1, 8, 3, 1, g), (3, 6, 1, 2, g), symmetric=True)],
+    # the helm: gold, its top row pale; on its front the keyhole's window and slit dark, the cheeks' channels brown;
+    # behind, a dark field for the meander's raised bars; on its left side the owner's scratches
+    "helm": {"front": [plate(M), marks((0, 0, 99, 1, H), (3, 3, 4, 3, X), (4, 6, 2, 4, X), (1, 5, 1, 99, Q),
+                                       (-2, 5, 1, 99, Q), (0, -1, 99, 1, S))],
+             "back": [solid(g), marks((0, 0, 99, 1, D), (0, -1, 99, 1, K))],
              "left": [plate(M), marks((0, 0, 99, 1, H), (5, 2, 1, 3, Q), (7, 2, 2, 1, Q), (8, 3, 1, 1, Q),
                                       (7, 4, 2, 1, Q))],
              "top": [plate(L), marks((0, 0, 99, 1, H))], "bottom": solid(V),
              "*": [plate(M), marks((0, 0, 99, 1, H), (2, 3, 2, 2, D), (6, 6, 2, 2, D), (0, -1, 99, 1, S))]},
+    "rim": {"top": solid(G), "bottom": solid(D), "*": [solid(H), marks((0, -1, 99, 1, L))]},
     "frame": {"front": [solid(H), marks((0, 0, 99, 1, G))], "top": solid(G), "bottom": solid(M), "*": solid(L)},
-    "rim": {"front": solid(L), "top": solid(H), "*": solid(M)},
+    "slit_rim": {"front": solid(L), "top": solid(H), "*": solid(M)},
+    "rib": {"front": [solid(L), marks((0, 0, 1, 99, H), (-1, 0, 1, 99, D))], "top": solid(H), "*": solid(M)},
     "loop": {"top": solid(H), "bottom": solid(D), "*": [solid(L), marks((0, 0, 99, 1, H))]},
     "ridge": {"back": [solid(H), marks((0, 0, 99, 1, G))], "*": solid(L)},
-    # the coat: near-black cloth, a darker line down its middle; the mantle: gold rows, a pale top
+    "key": {"back": [solid(L), marks((0, 0, 99, 1, H))], "top": solid(H), "bottom": solid(D), "*": solid(M)},
+    # the coat: near-black cloth, a darker line down its middle; the gorget: gold rows, a pale top
     "coat": {"front": [CLOTH, marks((4, 0, 2, 99, X))], "back": [CLOTH, marks((4, 0, 2, 99, X))],
              "top": solid(x), "bottom": solid(X), "*": CLOTH},
     "mantle": {"top": [solid(H), marks((0, -1, 99, 1, L))], "bottom": solid(S),
                "*": [rows(L, M, L, D), marks((0, 0, 99, 1, H))]},
-    # the right pauldron: the cap pale on top; each shell plate gold with a pale edge and a brown groove
+    "gorget": {"front": [rows(M, L), marks((0, 0, 99, 1, H), (0, -1, 99, 1, D))], "top": solid(H), "bottom": solid(S),
+               "*": solid(M)},
+    "strip": {"front": [solid(G), marks((0, 0, 1, 99, H), (-1, 0, 1, 99, L))], "*": solid(L)},
+    "boss": {"front": P("chevron", corner="o", bands=(H, L), border=None, core=(D, D), outside=H), "top": solid(H),
+             "*": solid(M)},
+    # the right pauldron: the cap pale on top; the chevrons pale, dark and gold, each lit along its upper edge
     "cap": {"top": [plate(L), marks((0, 0, 99, 1, H), (0, -1, 99, 1, D))], "bottom": solid(S),
             "*": [plate(L), marks((0, 0, 99, 1, H))]},
-    "shell": {"top": solid(G), "bottom": solid(S),
-              "*": [plate(M, "v"), marks((0, 0, 99, 1, H), (0, 0, 1, 99, H), (-1, 0, 1, 99, D), (2, 2, 1, 99, Q))]},
-    "baldric": {"front": [solid(u), marks((0, 0, 99, 1, U))], "*": solid(x)},
-    "medallion": {"front": P("chevron", corner="o", bands=(H, L), border=None, core=(X, X), outside=H),
-                  "top": solid(H), "*": solid(M)},
+    # each chevron's broad faces: a pale rim along both edges, gold between with a brown groove down its length;
+    # its ends (seen from the front and behind) in the chevron's own tone
+    "chevron_pale": {"top": [plate(L), marks((0, 0, 99, 1, G), (0, -1, 99, 1, H), (0, 3, 99, 1, D), (0, -4, 99, 1, D))],
+                     "bottom": [plate(M), marks((0, 0, 99, 1, H), (0, -1, 99, 1, H), (0, 3, 99, 1, Q))],
+                     "*": [solid(H), marks((0, 0, 99, 1, G), (0, -1, 99, 1, L))]},
+    "chevron_dark": {"top": [solid(Q), marks((0, 0, 99, 1, q), (0, -1, 99, 1, q))], "bottom": solid(K),
+                     "*": [solid(Q), marks((0, 0, 99, 1, q), (0, -1, 99, 1, K))]},
+    "chevron_gold": {"top": [plate(M, "v"), marks((0, 0, 99, 1, H), (0, -1, 99, 1, H), (0, 3, 99, 1, D))],
+                     "bottom": solid(D), "*": [plate(M, "v"), marks((0, 0, 99, 1, L), (0, -1, 99, 1, D))]},
+    "baldric": {"front": [solid(u), marks((0, 0, 99, 1, U))], "back": [solid(u), marks((0, 0, 99, 1, U))], "*": solid(x)},
+    "ring": {"front": [solid(H), marks((0, -1, 99, 1, L))], "top": solid(G), "*": solid(L)},
+    "ring_field": {"front": solid(X), "*": solid(x)},
+    "stud": {"front": solid(G), "*": solid(H)},
     "sleeve": {"sides": CLOTH, "ends": solid(X)},
     "band": {"top": solid(H), "bottom": solid(S), "*": [solid(L), marks((0, 0, 99, 1, H), (0, -1, 99, 1, M))]},
+    "bracer": {"top": solid(L), "bottom": solid(S),
+               "*": [plate(M), marks((0, 1, 99, 1, D), (0, -2, 99, 1, D), (2, 2, 1, 2, Q), (-3, 2, 1, 2, Q))]},
     "gauntlet": {"top": solid(H), "bottom": solid(V), "*": [rows(L, M, D), marks((0, 0, 99, 1, H))]},
-    # the left pauldron: two flat plates, gold in brown stripes
-    "slab": {"top": [plate(L), marks((0, 0, 99, 1, H))], "bottom": solid(S), "*": rows(L, Q, M, Q)},
-    # the legs: the belt, the hose, the black skirt with its folds; the plates gold on the left, dark iron on the right
+    # the left pauldron: flat plates, gold in brown stripes, a pale edge
+    "slab": {"top": [plate(L), marks((0, 0, 99, 1, H))], "bottom": solid(S), "*": [rows(L, Q, M, Q), marks((0, 0, 99, 1, H))]},
+    # the legs: the belt and buckle, the hose, the black skirt with its folds; the plates gold on the left, dark iron
+    # on the right, each rimmed
     "belt": {"top": solid(x), "bottom": solid(X), "sides": [solid(u), marks((0, 0, 99, 1, L), (0, -1, 99, 1, X))]},
+    "buckle": {"front": [solid(H), marks((1, 1, 1, 1, D))], "top": solid(G), "*": solid(L)},
     "hose": {"sides": CLOTH, "ends": solid(X)},
     "skirt": {"front": [CLOTH, marks((1, 0, 1, 99, X), (-2, 0, 1, 99, u))], "back": [CLOTH, marks((2, 0, 1, 99, X))],
               "top": solid(x), "bottom": solid(X), "*": CLOTH},
-    "plate_gold": {"front": [plate(L), marks((0, 0, 99, 1, H), (0, 0, 1, 99, H), (-1, 0, 1, 99, D), (1, 1, 2, 2, G))],
-                   "back": [plate(M), marks((0, 0, 99, 1, H), (0, 0, 1, 99, H), (-1, 0, 1, 99, D))],
+    "plate_gold": {"front": [plate(L), marks((1, 1, 2, 1, Q), (1, 1, 1, 3, Q), (-3, -2, 2, 1, Q), (-2, -4, 1, 3, Q))],
+                   "back": [plate(M), marks((1, 1, 2, 1, Q), (-2, -4, 1, 3, Q))],
                    "top": solid(H), "bottom": solid(S), "*": solid(M)},
-    "plate_iron": {"front": [rows(U, u), marks((0, 0, 99, 1, U), (0, 0, 1, 99, U), (-1, 0, 1, 99, X))],
-                   "back": [rows(U, u), marks((0, 0, 99, 1, U), (0, 0, 1, 99, U), (-1, 0, 1, 99, X))],
+    "plate_iron": {"front": [rows(U, u), marks((1, 1, 1, 99, X))], "back": [rows(U, u), marks((1, 1, 1, 99, X))],
                    "top": solid(U), "bottom": solid(X), "*": solid(u)},
+    "plate_rim_gold": {"top": solid(G), "bottom": solid(D), "*": [solid(H), marks((0, -1, 99, 1, L))]},
+    "plate_rim_iron": {"top": solid(U), "bottom": solid(X), "*": [solid(U), marks((0, -1, 99, 1, u))]},
+    "cuff": {"top": solid(H), "bottom": solid(S), "*": P("checker", tones=(L, Q), size=1)},
     "greave": {"top": solid(H), "*": [plate(L), marks((0, 0, 99, 1, H), (0, 2, 99, 1, M))]},
     "boot_band": {"top": solid(c), "bottom": solid(K), "*": rows(q, Q)},
     "sabaton": {"top": solid(L), "bottom": solid(V), "*": [plate(M), marks((0, 0, 99, 1, L), (0, -1, 99, 1, S))]},
@@ -119,77 +148,114 @@ PAINT = {
 
 
 # ---------------------------------------------------------------- the helmet
+def key(side):
+    """The meander's hook behind the helm on the model's right (mirrored for the left): five raised bars 0.3 proud of
+    the dark field, meeting end to end, from the outer top round and in to a hook beside the ridge."""
+    bars = [((-4.3, -7.7), (-1.0, -7.0)),    # along the top
+            ((-4.3, -7.0), (-3.75, -2.4)),   # down the outer side
+            ((-3.75, -3.35), (-1.0, -2.4)),  # back along the foot
+            ((-1.7, -5.4), (-1.0, -3.35)),   # up the inner side
+            ((-2.9, -5.4), (-1.7, -4.7))]    # the hook, turning out
+    out = [am.span(f"key_{i}_right", (x0, y0, 5.0), (x1, y1, 5.3), skip="front", paint=PAINT["key"])
+           for i, ((x0, y0), (x1, y1)) in enumerate(bars)]
+    return out if side == "right" else am.mirror_all(out)
+
+
 def helmet():
     """The helm, 1.0 clear of the head's sides, front and back, its top 1.0 above it, closed underneath 0.65 below;
-    the keyhole's frame 0.4 proud of its front and the slit's rims 0.2 proud; the loop on its crown, its roof's left bar
-    0.15 behind the right so the two never share a plane where they cross; the ridge 0.35 proud behind."""
-    frame = [am.span("frame_side_right", (-3.0, -6.25, -5.4), (-2.0, -3.25, -5.0), skip="back", paint=PAINT["frame"]),
-             am.span("frame_foot_right", (-3.0, -3.25, -5.4), (-1.0, -2.25, -5.0), skip="back", paint=PAINT["frame"]),
-             am.span("slit_rim_right", (-2.0, -2.25, -5.2), (-1.0, 0.0, -5.0), skip="back", paint=PAINT["rim"])]
-    post = am.span("post_right", (-2.1, -10.6, -0.7), (-1.35, -9.0, 0.7), skip="bottom", paint=PAINT["loop"])
+    the rim round its top, four bars 0.3 proud and 0.3 above it (the front and back bars the full width, the sides
+    between them); the keyhole's frame 0.4 proud of its front and the slit's rims 0.2 proud; two ribs down each cheek,
+    0.3 proud; the loop on its crown, its roof's left bar 0.15 behind the right so the two never share a plane where
+    they cross; the ridge 0.35 proud behind and the meander's two hooks either side of it."""
+    frame = [am.span("frame_side_right", (-3.0, -6.25, -5.4), (-2.0, -3.4, -5.0), skip="back", paint=PAINT["frame"]),
+             am.span("frame_foot_right", (-3.0, -3.4, -5.4), (-1.0, -2.4, -5.0), skip="back", paint=PAINT["frame"]),
+             am.span("slit_rim_right", (-2.0, -2.4, -5.2), (-1.0, 0.0, -5.0), skip="back", paint=PAINT["slit_rim"]),
+             am.span("rib_outer_right", (-4.45, -5.6, -5.3), (-3.9, 0.5, -5.0), skip="back", paint=PAINT["rib"]),
+             am.span("rib_inner_right", (-3.7, -2.3, -5.3), (-3.1, 0.5, -5.0), skip="back", paint=PAINT["rib"])]
+    post = am.span("post_right", (-2.1, -10.6, -0.7), (-1.35, -9.3, 0.7), skip="bottom", paint=PAINT["loop"])
     roof_right, roof_left = am.chevron("roof", (0.0, -11.45, -0.35), 2.45, 0.75, 0.7, angle=-32.0, paint=PAINT["loop"])
     roof_left = replace(roof_left, origin=(roof_left.origin[0], roof_left.origin[1], roof_left.origin[2] + 0.15))
+    rim_side = am.span("rim_right", (-5.3, -9.3, -4.7), (-4.7, -8.3, 4.7), paint=PAINT["rim"])
     return [am.span("helm", (-5.0, -9.0, -5.0), (5.0, 0.65, 5.0), paint=PAINT["helm"]),
+            am.span("rim_front", (-5.3, -9.3, -5.3), (5.3, -8.3, -4.7), paint=PAINT["rim"]),
+            am.span("rim_back", (-5.3, -9.3, 4.7), (5.3, -8.3, 5.3), paint=PAINT["rim"]),
+            *am.pair(rim_side),
             am.span("frame_top", (-3.0, -7.25, -5.4), (3.0, -6.25, -5.0), skip="back", paint=PAINT["frame"]),
             *frame, *am.mirror_all(frame),
             *am.pair(post), roof_right, roof_left,
-            am.span("ridge", (-0.5, -8.75, 5.0), (0.5, 0.0, 5.35), skip="front", paint=PAINT["ridge"])]
+            am.span("ridge", (-0.5, -8.0, 5.0), (0.5, 0.0, 5.35), skip="front", paint=PAINT["ridge"]),
+            *key("right"), *key("left")]
 
 
 # ---------------------------------------------------------------- the chestplate
 def body():
-    """The coat, 0.65 off the body's sides and 0.95 off its front and back; the mantle across the shoulders, 1.25 off
-    its sides and front and back (0.25 outside the helm's sides, so the two never share a plane as the head turns)."""
-    # the baldric: a strap from the right shoulder down to the left hip, 0.15 proud of the coat's front, its back
-    # against the coat; cut to the coat's front so it never overhangs it
-    baldric = am.box("baldric", (-6.6, 4.25, -3.1), (13.2, 1.5, 0.15), pivot=(0.0, 5.0, -3.1), rotation=(0, 0, 52),
+    """The coat, 0.65 off the body's sides and 0.95 off its front and back; the gorget across the shoulders, 1.25 off
+    its sides and front and back (0.25 outside the helm's sides, so the two never share a plane as the head turns),
+    and its lower tier before the chest, 0.2 prouder; the pale strip down the middle from it, and the boss at its foot;
+    the baldric, a strap from the left shoulder down to the right hip, 0.15 proud of the coat before and behind, cut
+    to the coat so it never overhangs it."""
+    baldric = am.box("baldric", (-6.6, 4.25, -3.1), (13.2, 1.5, 0.15), pivot=(0.0, 5.0, -3.1), rotation=(0, 0, -52),
                      skip="back", paint=PAINT["baldric"])
+    baldric_back = am.box("baldric_back", (-6.6, 4.25, 2.95), (13.2, 1.5, 0.15), pivot=(0.0, 5.0, 2.95),
+                          rotation=(0, 0, -52), skip="front", paint=PAINT["baldric"])
     return [am.span("coat", (-4.65, -0.65, -2.95), (4.65, 10.6, 2.95), paint=PAINT["coat"]),
             am.span("mantle", (-5.25, -0.95, -3.25), (5.25, 1.4, 3.25), paint=PAINT["mantle"]),
-            baldric]
+            am.span("gorget", (-3.6, 1.4, -3.45), (3.6, 2.7, -2.95), skip="back", paint=PAINT["gorget"]),
+            am.span("strip", (-0.75, 2.7, -3.3), (0.75, 6.1, -2.95), skip="back", paint=PAINT["strip"]),
+            am.span("boss", (-1.0, 6.1, -3.55), (1.0, 7.3, -2.95), skip="back", paint=PAINT["boss"]),
+            baldric, baldric_back]
+
+
+def chevron(name, top, vertex, bottom, thick, z_half, paint):
+    """A chevron pointing out from the arm (arm space): a bar from `top` out to `vertex` and one from there back in to
+    `bottom` ((x, y) points), each `thick` across and running z_half before and behind; the lower bar 0.15 shorter
+    each way, so where the two cross at the point their faces never meet."""
+    out = []
+    for part, (p0, p1), half in (("upper", (top, vertex), z_half), ("lower", (vertex, bottom), z_half - 0.15)):
+        dx, dy = p1[0] - p0[0], p1[1] - p0[1]
+        length = math.hypot(dx, dy) + thick / 2
+        out.append(am.box(f"{name}_{part}_right", (p0[0], p0[1] - thick / 2, -half), (length, thick, half * 2),
+                          pivot=(p0[0], p0[1], 0.0), rotation=(0, 0, math.degrees(math.atan2(dy, dx))), paint=paint))
+    return out
 
 
 def arm_right():
-    """The right arm (arm space: x -3..1, y -2..10, z -2..2): the pauldron's cap over the shoulder and three shell
-    plates down its outer side, each further out and further down, hinged out at its foot (6, 10 and 13 degrees); the
-    square ring on the upper arm's front; the black sleeve from inside the cap to the gauntlet; two gold bands on the
-    forearm; the gauntlet, to 0.6 below the hand."""
-    shells = [am.hinge(am.span("shell_0_right", (-5.0, -3.75, -3.3), (-4.25, 2.0, 3.3), paint=PAINT["shell"]),
-                       "top", 6),
-              am.hinge(am.span("shell_1_right", (-5.5, -3.0, -3.05), (-4.75, 3.25, 3.05), paint=PAINT["shell"]),
-                       "top", 10),
-              am.hinge(am.span("shell_2_right", (-6.0, -2.25, -2.75), (-5.25, 4.5, 2.75), paint=PAINT["shell"]),
-                       "top", 13)]
-    # three rivets along the foot of each of the two inner shells, riding their hinges
-    rivets = [replace(r, turns=shell.turns) for shell, (x, y) in zip(shells, ((-5.0, 1.0), (-5.5, 2.25)))
-              for r in am.rivets(f"{shell.name.replace('_right', '')}_rivet_right", (x, y, -2.0), (0.0, 0.0, 2.0), 3,
-                                 size=(0.4, 0.6, 0.6), face="right", paint=PAINT["rivet"])]
+    """The right arm (arm space: x -3..1, y -2..10, z -2..2, the outer side -x): the pauldron's cap over the shoulder
+    and three chevrons out from under it, the outer pale one reaching furthest, the dark one inside it and the gold one
+    inside that, each 0.15 shorter before and behind than the one outside it; the square ring on the upper arm's
+    front, a frame of four bars round a dark field and a stud; the black sleeve from inside the cap to the gauntlet;
+    the gold bracer on the forearm and its two rims; the gauntlet, to 0.6 below the hand."""
+    chevrons = [*chevron("chevron_0", (-3.9, -4.3), (-6.8, 0.6), (-4.6, 5.8), 1.0, 3.9, PAINT["chevron_pale"]),
+                *chevron("chevron_1", (-3.9, -3.1), (-6.0, 0.6), (-4.3, 4.6), 0.9, 3.6, PAINT["chevron_dark"]),
+                *chevron("chevron_2", (-3.9, -1.9), (-5.0, 0.6), (-4.0, 3.4), 0.9, 3.3, PAINT["chevron_gold"])]
+    ring = [am.span("ring_field_right", (-2.0, 0.8, -2.85), (0.0, 2.6, -2.6), paint=PAINT["ring_field"]),
+            am.span("ring_top_right", (-2.25, 0.6, -3.15), (0.25, 1.05, -2.6), skip="back", paint=PAINT["ring"]),
+            am.span("ring_foot_right", (-2.25, 2.35, -3.15), (0.25, 2.8, -2.6), skip="back", paint=PAINT["ring"]),
+            am.span("ring_side_right", (-2.25, 1.05, -3.15), (-1.8, 2.35, -2.6), skip="back", paint=PAINT["ring"]),
+            am.span("ring_side_inner_right", (-0.2, 1.05, -3.15), (0.25, 2.35, -2.6), skip="back", paint=PAINT["ring"]),
+            am.span("ring_stud_right", (-1.3, 1.45, -3.05), (-0.7, 2.0, -2.85), skip="back", paint=PAINT["stud"])]
     return [am.span("cap_right", (-4.5, -4.0, -3.45), (1.75, -2.5, 3.45), paint=PAINT["cap"]),
             am.span("cap_crown_right", (-3.75, -4.75, -2.75), (0.75, -4.0, 2.75), skip="bottom", paint=PAINT["cap"]),
-            *shells, *rivets,
-            am.span("medallion_right", (-2.25, 3.0, -3.1), (0.25, 5.5, -2.6), paint=PAINT["medallion"]),
-            *sleeve_and_hand("right")]
-
-
-def sleeve_and_hand(side):
-    """The black sleeve, 0.45 off the arm, from inside the pauldron (so the shoulder never shows under it); two gold
-    bands, 0.7 off, and the gold gauntlet, 0.9 off its sides and 1.05 off its front and back (their fronts and backs
-    clear of the coat's, the belt's and the skirt's planes)."""
-    out = [am.span("sleeve_right", (-3.45, -2.75, -2.45), (1.45, 9.0, 2.45), skip=("top", "bottom"),
-                   paint=PAINT["sleeve"]),
-           am.span("band_a_right", (-3.7, 5.75, -2.75), (1.7, 6.6, 2.75), paint=PAINT["band"]),
-           am.span("band_b_right", (-3.7, 7.6, -2.75), (1.7, 8.45, 2.75), paint=PAINT["band"]),
-           am.span("gauntlet_right", (-3.9, 8.75, -3.05), (1.9, 10.6, 3.05), paint=PAINT["gauntlet"])]
-    return out if side == "right" else am.mirror_all(out)
+            *chevrons, *ring,
+            am.span("sleeve_right", (-3.45, -2.75, -2.45), (1.45, 9.0, 2.45), skip=("top", "bottom"),
+                    paint=PAINT["sleeve"]),
+            am.span("bracer_right", (-3.8, 5.6, -2.8), (1.8, 8.4, 2.8), paint=PAINT["bracer"]),
+            am.span("bracer_rim_top_right", (-4.1, 5.3, -3.25), (2.1, 5.9, 3.25), paint=PAINT["band"]),
+            am.span("bracer_rim_foot_right", (-4.1, 8.1, -3.25), (2.1, 8.7, 3.25), paint=PAINT["band"]),
+            am.span("gauntlet_right", (-3.9, 8.75, -3.05), (1.9, 10.6, 3.05), paint=PAINT["gauntlet"])]
 
 
 def arm_left():
-    """The left arm (arm space: x -1..3, y -2..10, z -2..2, the outer side +x): a low crown and two flat plates over the
-    shoulder, the lower one reaching further out; the sleeve, bands and gauntlet as the right's."""
+    """The left arm (arm space: x -1..3, y -2..10, z -2..2, the outer side +x): a low crown and three flat plates over the
+    shoulder, each lower one reaching further out; the black sleeve, two gold bands and the gauntlet."""
     return [am.span("slab_crown_left", (-1.0, -4.0, -2.75), (3.75, -3.25, 2.75), skip="bottom", paint=PAINT["cap"]),
             am.span("slab_left", (-1.75, -3.25, -3.65), (4.5, -1.75, 3.65), paint=PAINT["slab"]),
             am.span("slab_low_left", (-1.25, -1.75, -3.45), (4.85, -0.25, 3.45), paint=PAINT["slab"]),
-            *sleeve_and_hand("left")]
+            am.span("slab_lowest_left", (-0.75, -0.25, -3.25), (5.2, 1.0, 3.25), paint=PAINT["slab"]),
+            am.span("sleeve_left", (-1.45, -2.75, -2.45), (3.45, 9.0, 2.45), skip=("top", "bottom"), paint=PAINT["sleeve"]),
+            am.span("band_a_left", (-1.7, 5.75, -2.75), (3.7, 6.6, 2.75), paint=PAINT["band"]),
+            am.span("band_b_left", (-1.7, 7.6, -2.75), (3.7, 8.45, 2.75), paint=PAINT["band"]),
+            am.span("gauntlet_left", (-1.9, 8.75, -3.05), (3.9, 10.6, 3.05), paint=PAINT["gauntlet"])]
 
 
 # ---------------------------------------------------------------- the leggings and boots
@@ -197,30 +263,44 @@ LEFT_OUT = 0.12   # the left leg's parts this much larger, so where the legs mee
 
 
 def waist():
-    """The belt, 0.6 off the body's front and back and 0.45 off its sides."""
-    return [am.span("belt", (-4.45, 10.25, -2.6), (4.45, 12.65, 2.6), paint=PAINT["belt"])]
+    """The belt, 0.6 off the body's front and back and 0.45 off its sides, and its gold buckle before, below the coat
+    and 1.25 off (clear of vanilla leggings' 1.0 shell)."""
+    return [am.span("belt", (-4.45, 10.25, -2.6), (4.45, 12.65, 2.6), paint=PAINT["belt"]),
+            am.span("buckle", (-1.2, 10.75, -3.25), (1.2, 12.35, -2.6), skip="back", paint=PAINT["buckle"])]
 
 
-def leg(plate_paint):
+def thigh_plate(name, z0, z1, paint, rim_paint):
+    """A plate before (z0 < z1 < 0) or behind the thigh, hinged out 8 degrees from the hip, and the raised rim round
+    its face, riding its hinge: the top and foot bars 0.15 in from the plate's edges and 0.2 proud, the sides between
+    them 0.15 further in and 0.35 proud, so no two of them share a plane where they meet."""
+    plate_part = am.hinge(am.span(name, (-2.55, 0.25, z0), (1.45, 6.25, z1), paint=paint), "top", 8)
+    front = z0 < 0
+    rims = []
+    for i, ((x0, y0), (x1, y1), lift) in enumerate((((-2.4, 0.4), (1.3, 0.95), 0.2), ((-2.4, 5.55), (1.3, 6.1), 0.2),
+                                                   ((-2.25, 0.95), (-1.7, 5.55), 0.35), ((0.6, 0.95), (1.15, 5.55), 0.35))):
+        lo, hi = (z0 - lift, z0) if front else (z1, z1 + lift)
+        rims.append(replace(am.span(f"{name}_rim_{i}", (x0, y0, lo), (x1, y1, hi), skip="back" if front else "front",
+                                    paint=rim_paint), turns=plate_part.turns))
+    return [plate_part, *rims]
+
+
+def leg(plate_paint, rim_paint):
     """The right leg (leg space: x -2..2, y 0..12, z -2..2): the hose, 0.45 off the leg from inside the skirt into the
     boot (closed at its foot, which shows when the leggings are worn alone), so the leg never shows between skirt and
-    boot; the skirt round the leg, 0.77 off, from up under the belt to
-    below the knee; a plate before and behind the thigh, 1.15 off (clear of vanilla leggings' 1.0 shell), hinged out
-    8 degrees from the hip."""
+    boot; the skirt round the leg, 0.77 off, from up under the belt to below the knee; a plate before and behind the
+    thigh, 1.15 off (clear of vanilla leggings' 1.0 shell), hinged out 8 degrees from the hip, each rimmed."""
     return [am.span("hose_right", (-2.45, 0.8, -2.45), (2.45, 11.0, 2.45), skip="top", paint=PAINT["hose"]),
             am.span("skirt_right", (-2.77, -0.45, -2.77), (2.77, 7.75, 2.77), paint=PAINT["skirt"]),
-            am.hinge(am.span("plate_front_right", (-2.55, 0.25, -3.45), (1.45, 6.25, -3.15), paint=plate_paint),
-                     "top", 8),
-            am.hinge(am.span("plate_back_right", (-2.55, 0.25, 3.15), (1.45, 6.25, 3.45), paint=plate_paint),
-                     "top", 8)]
+            *thigh_plate("plate_front_right", -3.45, -3.15, plate_paint, rim_paint),
+            *thigh_plate("plate_back_right", 3.15, 3.45, plate_paint, rim_paint)]
 
 
 def boot():
-    """A gold cuff at the greave's top, 1.1 off the leg; the greave from just below the skirt (the hose covers the leg
+    """A cuff chequered gold and brown at the greave's top, 1.1 off the leg, as the owner's; the greave from just below the skirt (the hose covers the leg
     between), 0.75 off (clear of vanilla leggings' 0.5 shell); the brown band round it, 1.0 off; the sabaton, 0.95 off
     and 1.05 behind, closed 0.65 below the foot; two instep lames overlapping toward the toe; the pale toe cap. Where
     the legs overlap, each of these keeps 0.1 or more off the other leg's planes."""
-    out = [am.span("cuff_right", (-3.1, 8.0, -3.1), (3.1, 8.75, 3.1), paint=PAINT["band"]),
+    out = [am.span("cuff_right", (-3.1, 8.0, -3.1), (3.1, 8.75, 3.1), paint=PAINT["cuff"]),
            am.span("greave_right", (-2.75, 8.35, -2.75), (2.75, 11.0, 2.75), skip="bottom", paint=PAINT["greave"]),
            am.span("boot_band_right", (-3.0, 9.0, -3.0), (3.0, 9.85, 3.0), paint=PAINT["boot_band"]),
            am.span("sabaton_right", (-2.95, 11.0, -3.6), (2.95, 12.65, 3.05), paint=PAINT["sabaton"]),
@@ -238,10 +318,11 @@ def left(parts):
 
 def model():
     """{item: {bone: [parts]}} for the four pieces. The left leg's plates are gold, the right's dark iron: the left leg
-    is the right one's mirror with the plates repainted (each under a name of its own, so it has a texture of its own)."""
-    right_leg = leg(PAINT["plate_iron"])
-    left_leg = [replace(p, paint=PAINT["plate_gold"], net="") if p.name.startswith("plate_") else p
-                for p in left(right_leg)]
+    is the right one's mirror with the plates and their rims repainted (each under a name of its own, so it has a
+    texture of its own)."""
+    right_leg = leg(PAINT["plate_iron"], PAINT["plate_rim_iron"])
+    left_leg = [replace(p, paint=PAINT["plate_rim_gold"] if "_rim_" in p.name else PAINT["plate_gold"], net="")
+                if p.name.startswith("plate_") else p for p in left(right_leg)]
     b = boot()
     return {"sentinel_helmet": {"head": helmet()},
             "sentinel_chestplate": {"body": body(), "right_arm": arm_right(), "left_arm": arm_left()},
