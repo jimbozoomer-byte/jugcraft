@@ -1183,6 +1183,9 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
   - **Screenshots:**
     - Each of the three is held, aimed, fired, reloaded and inspected, seen in third person and fitted with each set of its attachments. Aimed with a stock fitted, the Garrison's and Breacher's stocks fill the lower middle of the screen, below the sights.
     - **The Garrison Rifle's aimed shot filled the screen with the gun:** its bolt slid back past the eye ([above](#slice-8b-the-service-arms)). 6a9e55b5d holds it 4 px further out aimed.
+- **The Garrison held further out, in CI** ([run 37740859066](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37740859066), on e26e2d9a8): every check passed.
+  - **Aimed and fired,** the back of the gun sits small under the crosshair with the husk in view, where the shot had filled the screen. With a stock fitted, the stock is smaller too.
+  - **The log** is as before for all three: the Garrison took 4 from the husk and reloaded 30, and the Breacher took 24.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
