@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.gear.JugcraftGear;
 import io.github.jimbozoomer.jugcraft.mixin.AttackStrengthAccessor;
 import io.github.jimbozoomer.jugcraft.weapons.ArmItem;
+import io.github.jimbozoomer.jugcraft.weapons.ArmShieldItem;
 import io.github.jimbozoomer.jugcraft.weapons.ArmVariants;
 import io.github.jimbozoomer.jugcraft.weapons.JugcraftArms;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.BlocksAttacks;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
@@ -42,8 +44,9 @@ import net.minecraft.world.phys.Vec3;
 /**
  * In-game tests for Arms VII (batch 56): every variant is registered as an arm of its kind with its line's perk; each
  * boon does what it says when its arm strikes, as the server works it; each style's smithing recipe and pattern recipe
- * load; each boss's loot table drops one of its two trophies; and an armor set's arm, epic and as hard-wearing as a
- * trophy, has no recipe and no boss table yet (creative only until the owner settles how a set is won). Wielders are
+ * load; each boss's loot table drops one of its two trophies; an armor set's arm, epic and as hard-wearing as a
+ * trophy, has no recipe and no boss table yet (creative only until the owner settles how a set is won); and an armor
+ * set's shield blocks as its base shield does. Wielders are
  * mock players facing south (+z) with a full attack charge; foes are still pigs (living, not undead, so poison and the
  * rest take) or, for Gravebane, husks.
  */
@@ -80,6 +83,33 @@ public class ArmsVIIGameTests {
 			}
 			// Its blow is its kind's in steel.
 			helper.assertTrue(attack(stack) == attack(base), variant.name() + " hits for " + attack(stack) + ", not the steel " + variant.kind() + "'s " + attack(base));
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * An armor set's shield is a shield of its own shape in its set, blocks as the steel shield of its base kind does (its
+	 * delay, axe cooldown and cover; both are built by JugcraftArms.shield from the same numbers), lasts twice as long as
+	 * that shield, as a set's arm does against steel, and is epic.
+	 */
+	@GameTest
+	public void setShieldsBlockAsTheirBase(GameTestHelper helper) {
+		for (ArmVariants.SetShield shield : ArmVariants.SET_SHIELDS) {
+			helper.assertTrue(ArmVariants.SETS.contains(shield.line()), shield.name() + " is of no armor set");
+			Item item = ArmVariants.SHIELDS.get(shield.name());
+			helper.assertTrue(item instanceof ArmShieldItem armShield && armShield.kind().equals(shield.shape())
+					&& shield.line().equals(armShield.line()), shield.name() + " is not a " + shield.shape() + " of the " + shield.line() + " set");
+			ItemStack stack = new ItemStack(item);
+			ItemStack base = new ItemStack(JugcraftArms.KIT.get(ArmVariants.SET_SHIELD_METAL + "_" + shield.base()));
+			BlocksAttacks blocks = stack.get(DataComponents.BLOCKS_ATTACKS);
+			BlocksAttacks baseBlocks = base.get(DataComponents.BLOCKS_ATTACKS);
+			helper.assertTrue(blocks != null && baseBlocks != null && blocks.blockDelaySeconds() == baseBlocks.blockDelaySeconds()
+					&& blocks.disableCooldownScale() == baseBlocks.disableCooldownScale()
+					&& blocks.damageReductions().equals(baseBlocks.damageReductions()),
+					shield.name() + " blocks as " + blocks + ", not as its base " + baseBlocks);
+			helper.assertTrue(stack.getMaxDamage() == base.getMaxDamage() * ArmVariants.TROPHY_DURABILITY,
+					shield.name() + " lasts " + stack.getMaxDamage() + ", not twice its base's " + base.getMaxDamage());
+			helper.assertTrue(stack.get(DataComponents.RARITY) == Rarity.EPIC, shield.name() + " is " + stack.get(DataComponents.RARITY));
 		}
 		helper.succeed();
 	}

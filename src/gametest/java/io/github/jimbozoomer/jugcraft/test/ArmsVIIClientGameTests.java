@@ -19,9 +19,10 @@ import net.minecraft.world.phys.AABB;
 
 /**
  * Client game test for Arms VII (batch 56): every variant and pattern in frames on a wall (their icons) and every
- * variant on racks of armor stands (their 3D models), by daylight; trophies and the Hades Scythe (an armor set's arm)
- * held from the front by day and the glowing ones at midnight; one in first person; and a Glacier Maul's two-handed
- * blow with the real attack key, its frost read back from the server (CI job {@code client}).
+ * variant on racks of armor stands (their 3D models), by daylight; trophies and the armor sets' arms held from the
+ * front by day, the Sentinel's star shield beside its longsword and raised, and the glowing ones at midnight; one in
+ * first person; and a Glacier Maul's two-handed blow with the real attack key, its frost read back from the server (CI
+ * job {@code client}).
  */
 public class ArmsVIIClientGameTests implements FabricClientGameTest {
 	@Override
@@ -73,6 +74,20 @@ public class ArmsVIIClientGameTests implements FabricClientGameTest {
 				ready(context, server, x + 4, y, z, held);
 				context.takeScreenshot("jugcraft_arms_vii_held_" + held);
 			}
+			// The Sentinel's star shield in the off hand beside the Sentinel's longsword; then, the main hand empty (the
+			// longsword would parry instead), raised.
+			server.runCommand("item replace entity @p weapon.offhand with jugcraft:sentinel_shield");
+			ready(context, server, x + 4, y, z, "sentinel_longsword");
+			context.takeScreenshot("jugcraft_arms_vii_held_sentinel_shield");
+			server.runCommand("item replace entity @p weapon.mainhand with air");
+			context.waitTicks(10);
+			context.getInput().holdKey(options -> options.keyUse);
+			context.waitTicks(10);
+			boolean raised = context.computeOnClient(client -> client.player.isBlocking());
+			context.takeScreenshot("jugcraft_arms_vii_sentinel_shield_raised");
+			context.getInput().releaseKey(options -> options.keyUse);
+			server.runCommand("item replace entity @p weapon.offhand with air");
+			check(raised, "The Sentinel's shield did not come up when used");
 			server.runCommand("time set midnight");
 			for (String glowing : List.of("runebound_nodachi", "magmaw", "bogfang")) {
 				ready(context, server, x + 4, y, z, glowing);

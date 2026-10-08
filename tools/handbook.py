@@ -556,21 +556,28 @@ def variant_pages():
 
 
 def set_pages():
-    """The armor sets' arms (tools/arms_variants.py SETS). None drops from a foe yet, so the page says so rather than
-    where to win one."""
+    """The armor sets' arms and shields (tools/arms_variants.py SETS and SET_SHIELDS). None drops from a foe yet, so the
+    page says so rather than where to win one."""
+    import arms
     import arms_variants as av
-    sets = [(info["display"], av.set_arms(armor_set)) for armor_set, info in av.SETS.items() if av.set_arms(armor_set)]
+    sets = [(info["display"], av.set_arms(armor_set) + av.set_shields(armor_set)) for armor_set, info in av.SETS.items()
+            if av.set_arms(armor_set)]
     if not sets:
         return []
 
     def named(name):
+        if name in av.SET_SHIELDS:
+            info = av.SET_SHIELDS[name]
+            return f"{info['display']} (a shield)"
         _kind, _line, boon, display = av.BY_ID[name]
         return f"{display} ({av.trait(av.BOONS[boon])[0]})" if boon else display
+    shields = ", ".join(sorted({f"a {av.SET_SHIELD_METAL} {arms.SHIELD_KINDS[info['base']]['display'].lower()}"
+                                for info in av.SET_SHIELDS.values()}))
     return [{"title": "Arms: Armor Sets", "icon": f"{MOD}:{sets[0][1][0]}", "text": [
-        "Some armor sets have an arm of their own, made in the set's look, with a boon:",
+        "Some armor sets have an arm of their own, made in the set's look, with a boon, and some a shield:",
         ] + [f"{display}: " + " and ".join(named(name) for name in names) + "." for display, names in sets] + [
         "How they are won is still to be settled; until then they are found only in creative. They last twice as long "
-        "as steel, and fight as their kinds do."]}]
+        f"as steel, and fight as their kinds do; a set's shield blocks as {shields} does."]}]
 
 
 def thallite_gear_pages():

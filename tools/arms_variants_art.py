@@ -942,6 +942,23 @@ def head_layout(name, held):
     return grip_model, unit, design(name).grip, arms_art.FLAIL_EYE
 
 
+# ---------------------------------------------------------------- the armor sets' shields (tools/arms_variants.py SET_SHIELDS)
+
+# Each set shield's materials: its face's (gold, dark), its back's (boards, strap, fitting) and its trim's (metal,
+# fitting). The Sentinel's, from the owner's design: a gold star and frame, the recess inside the frame the darkest of
+# its brown leather; dark boards behind, strapped in that leather.
+SET_SHIELD_MATERIALS = {
+    "sentinel_shield": ((SENTINEL_GOLD, SENTINEL_LEATHER), (px.DARK_WOOD, SENTINEL_LEATHER, SENTINEL_GOLD),
+                        (SENTINEL_GOLD, SENTINEL_GOLD)),
+}
+
+
+def set_shield_sprites(name):
+    """A set shield's face, back and trim (tools/arms_kit_art.py set_shield_sprites)."""
+    import arms_kit_art
+    return arms_kit_art.set_shield_sprites(*SET_SHIELD_MATERIALS[name], name)
+
+
 # ---------------------------------------------------------------- the patterns (smithing templates)
 
 # The goggle glass of Steampunk Armor (tools/armor_styles.py: G and g).
