@@ -27,6 +27,11 @@ The third is the **Reaper**: its white V clasp now sits just under the hood's op
 and its pouch is the render's big square on the left hip (it was a small pouch at the waist); the robe, its strips and
 the pouch carry the render's texels.
 
+The **Paladin** and the **Templar** are Blockbench projects too. Held against the owner's four renders, their shared
+build matched part for part but for two lames under each pauldron, which the renders do not show (the mail sleeve does),
+so those were taken off. Their paint stays ours: lifting texels from their lit renders, where the figures stand
+differently, came out too noisy to keep.
+
 For the owner, each rebuilt set is a Blockbench project they can open, look at on a player and edit, and what they
 save there is what the game draws.
 
@@ -103,8 +108,8 @@ saved data refers to worn-model keys.
 ## Dependencies and assets
 - No new runtime dependency. Blockbench is the owner's editor; nothing of it is in the repository or the mod. The file
   format was read from Blockbench 5.2.1's source (GPL-3.0, read only, not copied).
-- New art: the owner's renders (`art/armor/references/`) and the Sentinel's, the Frost Knight's and the Reaper's
-  projects (`art/armor/<set>.bbmodel`), whose texels come from those renders where they show them. The owner's own
+- New art: the owner's renders (`art/armor/references/`) and the sets' projects (`art/armor/<set>.bbmodel`), whose
+  texels come from those renders where they show them (the Sentinel, the Frost Knight, the Reaper). The owner's own
   work.
 - This session could not run Blockbench itself: building it from source was refused by the sandbox as outside code,
   and web.blockbench.net is not reachable from it. So the projects are checked against Blockbench's source, not opened
@@ -115,28 +120,30 @@ Actually run on this branch, 8 October 2026:
 - `python3 tools/bbmodel.py check`: 20 of 20 sets round trip (15 byte for byte, 5 within rounding), both through
   `entries` and through `load_set`.
 - `python3 tools/armor_models.py`: no problems for any set; the Sentinel 42 parts and 237 quads (it was 96 and 518),
-  the Frost Knight 102 parts and 387 quads (it was 139 and 474), the Reaper 100 parts and 553 quads (it was 552). Its warnings for the Frost Knight are the crown and
-  the left frost, as tall and as wide as the owner's (the tall crystal 14.6 px above the head, the frost 12.1 px to the
-  side).
-- A scratch check of the Frost Knight's head poses (head turned up to 75 degrees each way, looking from straight up to
-  straight down, standing and sneaking): no face of the helm within 0.15 px of a parallel face of another piece. Its
-  first run found the narrower helm's right side 0.05 px from the drape's and the right shoulder frost's sides, and its
-  face and back, looking straight down or up, 0.1 px from the belly plate's top and the left pauldron's lower rim; all
-  were moved apart.
+  the Frost Knight 102 parts and 387 quads (it was 139 and 474), the Reaper 100 parts and 553 quads (it was 552), the
+  Paladin 79 and 420 and the Templar 76 and 410 (they were 83 and 444, 80 and 434). Its warnings for the Frost Knight
+  are the crown and the left frost, as tall and as wide as the owner's (the tall crystal 14.6 px above the head, the
+  frost 12.1 px to the side).
+- A scratch check of the head poses (head turned up to 75 degrees each way, looking from straight up to straight down,
+  standing and sneaking), judging faces as `armor_models.py` does on one bone (parallel, overlapping, less than 0.15 px
+  apart and facing the same way, or either way when one is a cut-out): none on the Frost Knight, the Reaper, the
+  Paladin or the Templar. Its first, stricter run also counted faces facing each other. On the Frost Knight it found
+  the narrower helm's right side 0.05 px from the drape's and the right shoulder frost's sides, and its face and back,
+  looking straight down or up, 0.1 px from the belly plate's top and the left pauldron's lower rim; on the Reaper twelve
+  pairs already in the earlier model, all looking straight up or down (the face bars' fronts and the hood's back
+  against the robe folds' tops, the jambs' backs and an inner side against the strap's second step). All were moved
+  apart.
 - `python3 tools/armor_preview.py --set frost_knight --wearer --poses stand,walk,sneak`: as before, only the arms below
   the pauldrons show (1.31 to 52.62 model px², the owner's renders show their model's plain pale blue there). The
-  Reaper: 0.00 model px², as before.
-- The same head-pose check on the Reaper: none. Its first run found twelve pairs, already in the earlier model, all
-  looking straight up or down (the face bars' fronts and the hood's back against the robe folds' tops, the jambs'
-  backs and an inner side against the strap's second step); the folds' tops, the arch's backs, that step and the
-  hood's cloth over the shoulders were moved apart.
+  Reaper, the Paladin and the Templar: 0.00 model px², as before.
 - `python3 tools/armor_smoke.py --no-render`: all checks passed.
-- `python3 tools/generate_material_data.py` and `python3 tools/generate_textures.py`: only the Sentinel's entries and
-  atlas change (the texture generator also rewrote some unrelated plant textures, which are left out of this change).
+- `python3 tools/generate_material_data.py` and `python3 tools/generate_textures.py`: only the changed sets' entries and
+  atlases change (the texture generator also rewrote some unrelated plant textures, which are left out of this change).
 - `python3 tools/check_mod_data.py`: PASS, art check allow-list unchanged (A2 1, H1 3, O1 52).
 - `python3 scripts/check_repository.py` and `python3 tools/check_icon_maps.py`: PASS.
 - Compared with the owner's renders from their fitted cameras (`armor_reference.py compare`): the Sentinel's three,
-  the Frost Knight's front from its helm's and its legs' cameras and, by eye, its back; the Reaper's front.
+  the Frost Knight's front from its helm's and its legs' cameras and, by eye, its back; the Reaper's front; the
+  Paladin's and the Templar's two each.
 
 Not run: opening the projects in Blockbench, the Gradle build, the game and client tests, and any play.
 
@@ -146,8 +153,11 @@ Not applicable: art only.
 ## Rollout and open questions
 - The owner's own `.bbmodel` files would make every set exact. Committing them under `art/owner-library/` (or sending
   them) lets `tools/bbmodel.py` read them straight in; the rebuilds from renders are close but not their model.
-- Rebuilt so far: the Sentinel, the Frost Knight and the Reaper. The other sets of the 7 and 8 October designs are still
-  the toolkit's models.
+- Rebuilt so far: the Sentinel, the Frost Knight and the Reaper; the Paladin and the Templar made projects with one
+  change. The other sets of the 7 and 8 October designs are still the toolkit's models.
+- Lit renders: `armor_reference.py` divides what it lifts by Blockbench's shading when a fit says `"lighting":
+  "blockbench"`, but where our parts and the owner's do not line up texel for texel (the Paladin's, the Templar's) the
+  lifted art is noisy, and the faces no render shows, filled from the face opposite, can carry the wrong side's art.
 - The Frost Knight's render from behind is softer and its figure stands turned, so it was not used to lift texels: the
   back of the helm is painted (the cross on mottled white), and what the front render does not show (the cuirass's
   back, the arms, the drape) keeps the earlier model's shapes and paint. Worn armor is drawn from both sides, so its

@@ -1011,7 +1011,8 @@ def face_corners_image(f, cam, density=1):
 def lift_refined(sets, names, set_index=1, min_visible=0.35, min_px_per_texel=3.0, refine=True, verbose=False,
                  only=None):
     """The set's atlas lifted from the references face by face: each face from the view that sees most of it, its
-    projected corners nudged so the reference's texel cells are flattest, each texel the median of its cell. Returns
+    projected corners nudged so the reference's texel cells are flattest, each texel the median of its cell, divided
+    by the face's brightness when the fit says the render is lit ("lighting": "blockbench"). Returns
     (atlas RGBA float array with alpha 255 where lifted, {face key: (view, flatness, visible fraction)})."""
     views = {}
     for name in names:
@@ -1022,7 +1023,7 @@ def lift_refined(sets, names, set_index=1, min_visible=0.35, min_px_per_texel=3.
         data = json.load(open(fit_path(name)))
         _, care = ref_mask(im, 7.0, data.get("exclude", []))
         fid = np.where(care, fid, -1)        # weapons and effects hide what is behind them
-        views[name] = (im, cam, scene, fid, uu, vv)
+        views[name] = (im, cam, scene, fid, uu, vv, data.get("lighting", "unlit"))
     scene0 = views[names[0]][2]
     th, tw = scene0.atlases[set_index].shape[:2]
     atlas = np.zeros((th, tw, 4), dtype=np.float32)
@@ -1034,7 +1035,7 @@ def lift_refined(sets, names, set_index=1, min_visible=0.35, min_px_per_texel=3.
             continue
         best = None
         for name in names:
-            im, cam, scene, fid, uu, vv = views[name]
+            im, cam, scene, fid, uu, vv, _ = views[name]
             corners, fw, fh, umin, vmin = face_corners_image(scene.faces[fi], cam)
             if fw < 1 or fh < 1:
                 continue
@@ -1056,6 +1057,7 @@ def lift_refined(sets, names, set_index=1, min_visible=0.35, min_px_per_texel=3.
             continue
         _, name, corners, fw, fh, umin, vmin, seen, frac, px = best
         im = views[name][0]
+        shade = light(views[name][2].faces[fi][2], views[name][6])   # a lit render (the fit's "lighting") is undone
         if refine:
             corners2, colours, b, a = refine_face(im, corners, fw, fh, valid=seen, span=px * 0.6, iterations=250)
         else:
@@ -1064,7 +1066,7 @@ def lift_refined(sets, names, set_index=1, min_visible=0.35, min_px_per_texel=3.
             colours = np.median(bilinear(im, apply_h(H, pts)).reshape(fw * fh, -1, 3), axis=1).reshape(fh, fw, 3)
             b = a = 0.0
         region = atlas[vmin:vmin + fh, umin:umin + fw]
-        region[seen, :3] = colours[seen]
+        region[seen, :3] = np.clip(colours[seen] / shade, 0, 255)
         region[seen, 3] = 255
         report[(f[6].name, f[7])] = (name, round(a, 1), round(float(frac), 2))
         if verbose:

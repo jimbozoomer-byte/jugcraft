@@ -14,6 +14,8 @@ in its `note` how it was fitted and what it was used for.
 | --- | --- | --- |
 | [Sentinel](sentinel/) | `front_right`, `front_left`, `back` | 8 October 2026, with "Just made these ones aswell want them done weapons too please" (the sword and the star shield in them are the set's arms, not its armor) |
 | [Frost Knight](frost_knight/) | `front`, `back_left` | 8 October 2026, in the same message (the ice sword and the sparks round it are the set's arm and the scene, not its armor) |
+| [Paladin](paladin/) | `front_right`, `front_right_armed` | 8 October 2026, with the Berserker and the Templar: "I made these 3" (the sword and the shield in the second are not armor) |
+| [Templar](templar/) | `front`, `front_left_armed` | the same day (the clawed axe in the second is not armor) |
 | [Reaper](reaper/) | `front` | 8 October 2026, with the Wight King, the Banana and the Scarab (the two segmented crescents are the Reaper Scythes it holds, not its armor: "He is supposed to be holding 2 short scythe weapons they arent part of the armor") |
 
 The armor built from them is a Blockbench project under [art/armor/](../), one per set: see
