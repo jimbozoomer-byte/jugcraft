@@ -3812,8 +3812,8 @@ def check_milkshakes():
     are checked with the other foods, its set-down dish and balance by check_menu), set down as the glass the page draws:
     its model is tools/milkshake_data.py's (the foot's four bars, the base, the glass and its band, the cream, the fruit
     and the straw leaning back), wearing its one 64 x 64 opaque texture; PlacedDishBlock's MILKSHAKE outline is
-    milkshakes.OUTLINE; its item is its 3D glass; its recipe is a Milk Bottle, a snowball, a sugar and its flavour; every
-    part fits the block; the page they are read off is kept."""
+    milkshakes.OUTLINE; its item is its 3D glass, shown as milkshake_data.DISPLAY says; its recipe is a Milk Bottle, a
+    snowball, a sugar and its flavour; every part fits the block; the page they are read off is kept."""
     java = AGRICULTURE_JAVA.joinpath("PlacedDishBlock.java").read_text(encoding="utf-8") if AGRICULTURE_JAVA.joinpath("PlacedDishBlock.java").exists() else ""
     outline = re.search(r"MILKSHAKE\(Block\.box\(([^)]*)\)\)", java)
     if not outline or [float(v) for v in outline.group(1).split(",")] != [float(v) for v in milkshakes.OUTLINE]:
@@ -3844,8 +3844,10 @@ def check_milkshakes():
             if image.size != (16 * milkshakes.PIXELS, 16 * milkshakes.PIXELS) or image.getextrema()[3][0] < 255:
                 err(f"block/menu/{name}.png must be an opaque {16 * milkshakes.PIXELS} x {16 * milkshakes.PIXELS} texture")
         item = load(ASSETS / "items" / f"{name}.json") or {}
-        if item.get("model", {}).get("model") != f"{MOD}:block/{name}" or (ASSETS / "models" / "item" / f"{name}.json").exists():
-            err(f"{name}'s item must be its 3D glass (block/{name}), with no flat item model")
+        held = load(ASSETS / "models" / "item" / f"{name}.json") or {}
+        if item.get("model", {}).get("model") != f"{MOD}:item/{name}" or held.get("parent") != f"{MOD}:block/{name}" \
+                or held.get("display") != milkshake_data.DISPLAY or set(held) != {"parent", "display"}:
+            err(f"{name}'s item must be its 3D glass (block/{name}), shown as tools/milkshake_data.py DISPLAY says")
         if lang.get(f"item.{MOD}.{name}") != info["display"] or lang.get(f"block.{MOD}.{name}") != info["display"]:
             err(f"{name} needs its words, as an item and set down")
         recipe = load(DATA / MOD / "recipe" / f"{name}.json") or {}

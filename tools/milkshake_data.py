@@ -4,12 +4,23 @@ wears the milkshake's one texture (block/menu/<name>, tools/milkshake_art.py) at
 north and west sides wear the south's and east's.
 
 Called from menu_data.py (the "milkshake" template, as every set-down dish's model is made) and agriculture_data.py
-(each milkshake's item is its 3D glass). Formats follow vanilla Minecraft 26.3's own files.
+(each milkshake's item is its 3D glass, shown as large as the other small 3D props are). Formats follow vanilla
+Minecraft 26.3's own files.
 """
 import milkshakes as ms
 from decor_data import rid
 
 SIDES = ("north", "south", "east", "west")
+# How the glass is held and shown as an item: as the flora's small 3D plants are (tools/flora_art.py PLANT_DISPLAY), near
+# a slot's or an item frame's full size, where a full block's would show the narrow glass at half that.
+DISPLAY = {
+    "gui": {"rotation": [25, 225, 0], "translation": [0, 0, 0], "scale": [0.9, 0.9, 0.9]},
+    "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},
+    "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0.8, 0.8, 0.8]},
+    "head": {"rotation": [0, 0, 0], "translation": [0, 13, 7], "scale": [1, 1, 1]},
+    "thirdperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 2.5, 1.5], "scale": [0.55, 0.55, 0.55]},
+    "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 3, 0], "scale": [0.6, 0.6, 0.6]},
+}
 # Which of a part's two drawn sides each side wears.
 WEARS = {"north": "s", "south": "s", "east": "e", "west": "e"}
 
@@ -67,6 +78,7 @@ def elements(name):
 
 
 def assets(root, write):
-    """Each milkshake's item is its 3D glass (the model menu_data.py writes for it set down)."""
+    """Each milkshake's item is its 3D glass: the model menu_data.py writes for it set down, shown as DISPLAY says."""
     for name in ms.SHAKES:
-        write(root / "items" / f"{name}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{name}")}})
+        write(root / "models" / "item" / f"{name}.json", {"parent": rid(f"block/{name}"), "display": DISPLAY})
+        write(root / "items" / f"{name}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{name}")}})

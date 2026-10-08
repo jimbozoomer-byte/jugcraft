@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:block/pumpkin_milkshake"
+    "model": "jugcraft:item/pumpkin_milkshake"
   }
 }

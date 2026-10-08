@@ -18,8 +18,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Client game test for the owner's milkshakes (tools/milkshakes.py): the seven set down in a row on a counter, facing the
- * camera; the strawberry and banana milkshakes close up from the angle the owner drew them at; and a wall of the
- * milkshakes' items (their 3D glasses) in item frames, with the Milk Bottle they start from. CI job {@code client}.
+ * camera, in the page's order; the strawberry and banana milkshakes close up from the angle the owner drew them at; and
+ * the milkshakes' items (their 3D glasses) in item frames, two rows of four with the Milk Bottle they start from. CI job
+ * {@code client}.
  */
 public class MilkshakeClientGameTests implements FabricClientGameTest {
 	private static final List<String> SHAKES = List.of("strawberry_milkshake", "banana_milkshake", "plum_milkshake", "apple_milkshake",
@@ -30,6 +31,12 @@ public class MilkshakeClientGameTests implements FabricClientGameTest {
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
 				.adjustSettings(creator -> creator.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE)).create()) {
 			singleplayer.getConnection().waitForChunksRender();
+			// Hide the HUD, hand and chat so the screenshots show only the glasses, whatever an earlier test in this client left.
+			context.runOnClient(client -> {
+				if (!client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
 			BlockPos origin = context.computeOnClient(client -> BlockPos.containing(client.player.position()));
 			int x = origin.getX();
 			int y = origin.getY();
@@ -45,17 +52,17 @@ public class MilkshakeClientGameTests implements FabricClientGameTest {
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			List<String> items = new java.util.ArrayList<>(SHAKES);
 			items.add("milk_bottle");
+			// Two rows of four, read from the camera's left as it faces them (north, so east is on its right).
 			for (int i = 0; i < items.size(); i++) {
 				server.runCommand("summon minecraft:item_frame %d %d %d {Facing:3b,Fixed:1b,Item:{id:\"jugcraft:%s\",count:1}}"
-						.formatted(x + 1 + i, y + 2, z + 11, items.get(i)));
+						.formatted(x + 1 + i % 4, y + 3 - i / 4, z + 11, items.get(i)));
 			}
-			// Long enough for the chat's lines from joining the world to fade from the screenshots.
-			context.waitTicks(200);
+			context.waitTicks(10);
 			singleplayer.getConnection().waitForChunksRender();
 
 			shoot(context, singleplayer, x + 3, y + 2, z + 1, 0, 25, "jugcraft_milkshakes");
-			shoot(context, singleplayer, x + 10, y + 2, z + 1, -45, 38, "jugcraft_milkshakes_drawn");
-			shoot(context, singleplayer, x + 4, y + 2, z + 15, 180, 15, "jugcraft_milkshake_items");
+			shoot(context, singleplayer, x + 10, y + 1, z + 2, -45, 32, "jugcraft_milkshakes_drawn");
+			shoot(context, singleplayer, x + 2, y + 1, z + 13, 180, -9, "jugcraft_milkshake_items");
 		}
 	}
 
@@ -88,10 +95,12 @@ public class MilkshakeClientGameTests implements FabricClientGameTest {
 		int x = origin.getX();
 		int y = origin.getY();
 		int z = origin.getZ();
-		// The seven on a counter, facing north towards the camera.
+		// The seven on a counter, facing north towards the camera, in the page's order from its left (it faces south, so west
+		// is on its right).
 		for (int i = 0; i < SHAKES.size(); i++) {
-			set(level, new BlockPos(x + i, y, z + 4), Blocks.SMOOTH_QUARTZ.defaultBlockState());
-			set(level, new BlockPos(x + i, y + 1, z + 4), shake(SHAKES.get(i)));
+			int at = x + SHAKES.size() - 1 - i;
+			set(level, new BlockPos(at, y, z + 4), Blocks.SMOOTH_QUARTZ.defaultBlockState());
+			set(level, new BlockPos(at, y + 1, z + 4), shake(SHAKES.get(i)));
 		}
 		// The strawberry and banana milkshakes, seen from above their front right as the owner drew them (they face north,
 		// so from the north-west), side by side across the view.

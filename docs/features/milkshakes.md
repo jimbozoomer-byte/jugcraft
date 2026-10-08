@@ -23,7 +23,7 @@ Make the owner's milkshakes and set them out:
 | Chocolate Milkshake | cocoa beans and sweet berries (the cherry) |
 
 - **Drunk** as the menu's drinks are, even on a full stomach: five food and **Haste for 30 seconds** (a sugar rush), leaving the glass bottle the milk came in. They stack to 16.
-- **Set down** as the menu's dishes are: a sneaking player sets one down on a block, facing them, as the owner's 3D glass; an empty hand takes it back. In the inventory and in hand, too, a milkshake is its glass.
+- **Set down** as the menu's dishes are: a sneaking player sets one down on a block, facing them, as the owner's 3D glass; an empty hand takes it back. In the inventory, in hand and in an item frame, too, a milkshake is its glass, shown nearly a slot's size.
 
 In-game screenshots come from CI's client game test (`MilkshakeClientGameTests`) and are added here once it has run.
 
@@ -55,7 +55,7 @@ No new dependency.
 
 **Read off the owner's drawing.** The owner's page is kept as [art/owner-library/drawings/milkshakes.png](../../art/owner-library/drawings/milkshakes.png) (an image viewer's two arrow buttons and the owner's red scribble painted over with the page's own grey; see that folder's README). Every glass on it is the same shape (`tools/milkshakes.py`, in texels: six wide, its band six and a half, fifteen and three quarters tall to the top of the straw), fitted to the drawing; for each milkshake a projection fitted once to its cap and fruit puts every face onto the page, where `tools/milkshake_art.py` reads it a quarter texel at a time and then, finding the drawing's own texel grid on each face, as its texels (each the median of what the drawing shows of it), lit back up (the page shades the sides as Minecraft does). What the drawing hides is filled from the same place turned or mirrored, or the nearest texel shown. The glass, the cream, the base, the foot and the straw are read off the strawberry milkshake, which the page draws large; each milkshake's own shake and fruit off its own drawing. No Mojang texture is read.
 
-Each milkshake wears one 64 × 64 texture (four pixels to a texel, so the glass's quarter texels are whole pixels; `docs/ART_DIRECTION.md` allows a packed model texture this size where the art needs the detail). The model is the drawing's own coordinates: a set-down dish faces whoever set it down with its south side, so a milkshake set down looks as drawn, its straw at the back right. As the page draws it, the glass's base stands a texel clear of its foot's bars. If the owner draws any of this again, their files can replace these under the same IDs.
+As an item the glass is shown as the flora's small 3D plants are (`tools/milkshake_data.py` DISPLAY: nine tenths of a slot, eight tenths of an item frame), since a full block's display would show the narrow glass at half that. Each milkshake wears one 64 × 64 texture (four pixels to a texel, so the glass's quarter texels are whole pixels; `docs/ART_DIRECTION.md` allows a packed model texture this size where the art needs the detail). The model is the drawing's own coordinates: a set-down dish faces whoever set it down with its south side, so a milkshake set down looks as drawn, its straw at the back right. As the page draws it, the glass's base stands a texel clear of its foot's bars. If the owner draws any of this again, their files can replace these under the same IDs.
 
 ## Verification
 Run locally (8 October 2026), on top of the pies and tarts (#266):
@@ -63,7 +63,7 @@ Run locally (8 October 2026), on top of the pies and tarts (#266):
 | Check | Result |
 | --- | --- |
 | `python3 scripts/check_repository.py` | Pass |
-| `python3 tools/check_mod_data.py`: also checks the milkshakes' balance with the menu's (at most 3 over their ingredients), that each is a drink set down as the glass, that its model is `tools/milkshake_data.py`'s with the straw leaning as `tools/milkshakes.py` says (by a turn the model format allows), its 64 × 64 opaque texture, its item (its 3D glass, no flat model), its words as an item and set down, its recipe, `PlacedDishBlock`'s `MILKSHAKE` outline, that every part fits the block and the outline, that the texture layout lies on whole pixels, and the owner's page. I checked it fails on a wrong outline | Pass, 1900 IDs |
+| `python3 tools/check_mod_data.py`: also checks the milkshakes' balance with the menu's (at most 3 over their ingredients), that each is a drink set down as the glass, that its model is `tools/milkshake_data.py`'s with the straw leaning as `tools/milkshakes.py` says (by a turn the model format allows), its 64 × 64 opaque texture, its item (its 3D glass, shown as `tools/milkshake_data.py` DISPLAY says, no flat model), its words as an item and set down, its recipe, `PlacedDishBlock`'s `MILKSHAKE` outline, that every part fits the block and the outline, that the texture layout lies on whole pixels, and the owner's page. I checked it fails on a wrong outline | Pass, 1900 IDs |
 | `python3 tools/owner_art.py --check` | Pass |
 | `python3 tools/generate_material_data.py`, then `git status` | Writes this slice's data; it also writes `data/jugcraft/spell_assignments/hades_scythe.json`, which `main` does not have and this branch leaves out |
 | `python3 tools/generate_textures.py` | Writes this slice's textures only |
@@ -78,7 +78,7 @@ The new game tests (`MilkshakeGameTests`):
 
 `MenuGameTests.dishesSetDownAndTakenBack` also sets down every dish of `MenuDishes`, the milkshakes among them, and `MenuClientGameTests` sets them on its table.
 
-The client game test (`MilkshakeClientGameTests`, CI job `client`) sets the seven out on a counter facing the camera, the strawberry and banana milkshakes at the angle the owner drew them from, and a wall of their items (their glasses) with the Milk Bottle, and takes three screenshots.
+The client game test (`MilkshakeClientGameTests`, CI job `client`) hides the HUD and hand, sets the seven out on a counter facing the camera in the page's order, the strawberry and banana milkshakes close up at the angle the owner drew them from, and their items (their glasses) in item frames, two rows of four with the Milk Bottle, and takes three screenshots.
 
 Not done: play in a real client and a two-client dedicated-server session.
 

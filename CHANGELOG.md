@@ -215,7 +215,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
 ### Unmerged: Milkshakes
 - Seven milkshakes the owner drew, each read off their drawing as its own sundae glass: **Strawberry, Banana, Plum, Apple, Blueberry, Pumpkin and Chocolate**, with the fruit on top and a straw through the cream.
 - Made by hand from a **Milk Bottle**, a snowball, a sugar and the flavour. Drunk even when full, for five food and half a minute of Haste, leaving the glass bottle.
-- Set down by sneaking, facing you, as the 3D glass, and taken back with an empty hand. In the inventory, too, a milkshake is its glass.
+- Set down by sneaking, facing you, as the 3D glass, and taken back with an empty hand. In the inventory and in item frames, too, a milkshake is its glass, nearly a slot's size.
 - Details: [docs/features/milkshakes.md](docs/features/milkshakes.md).
 
 ### Unmerged: Pies and tarts
