@@ -6627,5 +6627,268 @@
         }
       ]
     }
+  ],
+  "concordance": {
+    "block": "jugcraft:lampwright_bench",
+    "recipes": [
+      {
+        "kind": "craft",
+        "in": [
+          [
+            "minecraft:lantern",
+            1
+          ],
+          [
+            "minecraft:amethyst_shard",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 8
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "minecraft:amethyst_shard",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 8
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "minecraft:glowstone_dust",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 6
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "jugcraft:glowcap",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 4
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "jugcraft:glimmerbloom",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 3
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "jugcraft:jack_o_lantern_mushroom",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 3
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "minecraft:glow_ink_sac",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 3
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "minecraft:glow_lichen",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 2
+      },
+      {
+        "kind": "infuse",
+        "in": [
+          [
+            "jugcraft:kindled_lantern",
+            1
+          ],
+          [
+            "minecraft:glow_berries",
+            1
+          ]
+        ],
+        "out": [
+          "jugcraft:kindled_lantern",
+          1
+        ],
+        "radiance": 1
+      }
+    ]
+  },
+  "concordance_stations": [
+    {
+      "block": "jugcraft:circle_anchor",
+      "type": "jugcraft:circle_anchor",
+      "recipes": [
+        {
+          "kind": "ritual",
+          "in": [
+            [
+              "jugcraft:initiate_wand",
+              1
+            ],
+            [
+              "minecraft:amethyst_shard",
+              4
+            ],
+            [
+              "minecraft:gold_ingot",
+              2
+            ],
+            [
+              "minecraft:glowstone_dust",
+              4
+            ]
+          ],
+          "out": [
+            "jugcraft:adept_wand",
+            1
+          ],
+          "value": 5
+        }
+      ]
+    }
+  ],
+  "alchemy_ingredients": [
+    {
+      "item": "minecraft:glowstone_dust",
+      "key": "glowstone_dust"
+    },
+    {
+      "item": "minecraft:glow_berries",
+      "key": "glow_berries"
+    },
+    {
+      "item": "minecraft:sweet_berries",
+      "key": "sweet_berries"
+    },
+    {
+      "item": "minecraft:bone_meal",
+      "key": "bone_meal"
+    },
+    {
+      "item": "minecraft:sugar",
+      "key": "sugar"
+    },
+    {
+      "item": "minecraft:magma_cream",
+      "key": "magma_cream"
+    },
+    {
+      "item": "minecraft:snowball",
+      "key": "snowball"
+    },
+    {
+      "item": "minecraft:amethyst_shard",
+      "key": "amethyst_shard"
+    },
+    {
+      "item": "minecraft:dried_kelp",
+      "key": "dried_kelp"
+    },
+    {
+      "item": "minecraft:honeycomb",
+      "key": "honeycomb"
+    },
+    {
+      "item": "minecraft:spider_eye",
+      "key": "spider_eye"
+    },
+    {
+      "item": "jugcraft:sunpetal",
+      "key": "sunpetal"
+    },
+    {
+      "item": "jugcraft:dewmoss",
+      "key": "dewmoss"
+    },
+    {
+      "item": "jugcraft:gloamcap",
+      "key": "gloamcap"
+    },
+    {
+      "item": "jugcraft:mendvetch",
+      "key": "mendvetch"
+    }
   ]
 }

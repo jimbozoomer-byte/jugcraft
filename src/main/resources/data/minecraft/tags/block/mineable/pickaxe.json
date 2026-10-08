@@ -428,6 +428,17 @@
     "jugcraft:copper_deposit",
     "jugcraft:tin_deposit",
     "jugcraft:glass_tank",
-    "jugcraft:tank_gauge"
+    "jugcraft:tank_gauge",
+    "jugcraft:circle_anchor",
+    "jugcraft:ley_pylon",
+    "jugcraft:warding_stone",
+    "jugcraft:crucible",
+    "jugcraft:observatory",
+    "jugcraft:spirit_anchor",
+    "jugcraft:artificer_bench",
+    "jugcraft:reliquary_shrine",
+    "jugcraft:oneiric_censer",
+    "jugcraft:spire_heart",
+    "jugcraft:lumen_sconce"
   ]
 }
