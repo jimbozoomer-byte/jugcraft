@@ -89,7 +89,10 @@ public class ArmorTiersGameTests {
 					"minecraft:bone", false),
 			// Banana: a costume: iron's defense, no toughness or knockback resistance, long wear, the best enchanting.
 			new Tier("banana", new int[] {2, 6, 5, 2}, new int[] {275, 400, 375, 325}, 0.0, 0.0, 30,
-					"minecraft:yellow_wool", false));
+					"minecraft:yellow_wool", false),
+			// Scarab: gold and lapis: netherite's defense with gold's enchanting, less toughness; mended with lapis lazuli.
+			new Tier("scarab", new int[] {3, 8, 6, 3}, new int[] {440, 640, 600, 520}, 2.0, 0.1, 25,
+					"minecraft:lapis_lazuli", false));
 
 	/** Every tier's four pieces have its numbers, repair, fire resistance, slot, look and tags. */
 	@GameTest

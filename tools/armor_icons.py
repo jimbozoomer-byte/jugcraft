@@ -220,6 +220,13 @@ the brown end sticking out on the right.
     C c q Q K       the stem's and the end's browns: "leather_light" to "leather_dark", and "leather_darkest", their
                     outline
     U u x X         inside the hole: "under_light" to "under_dark", and "under_darkest"
+Scarab (tools/scarab_armor.py, armor_paint.SCARAB), the owner's own four icons: the nemes striped gold and lapis with
+its lappets either side of the dark face; the cuirass with its striped shoulders and lapis bands; the kilt banded down
+the legs; the banded boots, their toes turned out.
+    H L M D S V     the gold, pale to brown ("O" is its void taken down)
+    G g             its brightest and its deepest: "gold_light", "gold_dark"
+    C c q Q K       the lapis: "leather_light" to "leather_dark", and "leather_darkest", its outline
+    U u x X         the shadow under the headcloth: "under_light" to "under_dark", and "under_darkest", its outline
 """
 import os
 
@@ -325,6 +332,10 @@ OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "
                                        "U": "under_light", "u": "under_mid", "x": "under_dark", "X": "under_darkest",
                                        "a": "hood_light", "b": "hood", "e": "hood_mid", "f": "hood_dark"}),
        "banana": (armor_paint.BANANA, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam", "V": "void",
+                                       "G": "gold_light", "g": "gold_dark", "C": "leather_light", "c": "leather_mid_light",
+                                       "q": "leather_mid", "Q": "leather_dark", "K": "leather_darkest",
+                                       "U": "under_light", "u": "under_mid", "x": "under_dark", "X": "under_darkest"}),
+       "scarab": (armor_paint.SCARAB, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam", "V": "void",
                                        "G": "gold_light", "g": "gold_dark", "C": "leather_light", "c": "leather_mid_light",
                                        "q": "leather_mid", "Q": "leather_dark", "K": "leather_darkest",
                                        "U": "under_light", "u": "under_mid", "x": "under_dark", "X": "under_darkest"})}

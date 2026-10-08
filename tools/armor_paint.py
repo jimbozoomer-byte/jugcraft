@@ -323,6 +323,17 @@ BANANA = {
     "leather_dark": (56, 33, 8), "leather_darkest": (41, 20, 5),
     "under_light": (150, 114, 34), "under_mid": (126, 94, 26), "under_dark": (100, 74, 20), "under_darkest": (64, 46, 12),
 }
+# Scarab (tools/scarab_armor.py): the owner's gold-and-lapis Egyptian set: the metal is its gold, from the lit yellow to
+# the brown of its shade; "gold" its brightest and its deepest; "leather" the lapis, pale to navy; the under-layer the
+# shadow under the headcloth.
+SCARAB = {
+    "light": (226, 178, 48), "mid_light": (196, 151, 37), "mid": (168, 115, 29), "dark": (139, 72, 21),
+    "seam": (100, 50, 16), "void": (58, 30, 12),
+    "gold_light": (240, 204, 84), "gold_dark": (112, 56, 18),
+    "leather_light": (66, 116, 176), "leather_mid_light": (51, 97, 156), "leather_mid": (42, 76, 128),
+    "leather_dark": (32, 52, 96), "leather_darkest": (18, 28, 58),
+    "under_light": (82, 48, 20), "under_mid": (60, 34, 14), "under_dark": (42, 22, 10), "under_darkest": (24, 13, 9),
+}
 # The smoke test's face colours (tools/armor_smoke.py): one hue per face, so a render shows which face is where.
 TEST = {**STEEL, "t_top": (230, 230, 90), "t_bottom": (90, 70, 40), "t_right": (220, 70, 70), "t_front": (80, 200, 90),
         "t_left": (70, 110, 230), "t_back": (200, 90, 210), "t_mark": (20, 20, 20), "t_rule": (255, 255, 255)}

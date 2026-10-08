@@ -199,6 +199,9 @@ ARMOR_TIERS = {
     # enchanting of all; mended with yellow wool.
     "banana": {"display": "Banana", "armor": (25, (2, 5, 6, 2), 30, 0.0, 0.0),
                "repair": "minecraft:yellow_wool", "fire_resistant": False},
+    # Scarab: gold and lapis: netherite's defense with gold's enchanting, less toughness; mended with lapis lazuli.
+    "scarab": {"display": "Scarab", "armor": (40, (3, 6, 8, 3), 25, 2.0, 0.1),
+               "repair": "minecraft:lapis_lazuli", "fire_resistant": False},
 }
 
 
