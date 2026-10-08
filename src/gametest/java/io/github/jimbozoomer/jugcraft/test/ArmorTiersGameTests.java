@@ -74,7 +74,13 @@ public class ArmorTiersGameTests {
 					"minecraft:amethyst_shard", false),
 			// Templar: the heavier chest, tough and steady, poorer enchanting; fire resistant.
 			new Tier("templar", new int[] {3, 9, 7, 3}, new int[] {473, 688, 645, 559}, 3.5, 0.15, 14,
-					"minecraft:netherite_ingot", true));
+					"minecraft:netherite_ingot", true),
+			// Sentinel: the heavier helm, tough and steady, good enchanting; mended with gold.
+			new Tier("sentinel", new int[] {4, 8, 7, 3}, new int[] {506, 736, 690, 598}, 3.5, 0.15, 20,
+					"minecraft:gold_ingot", false),
+			// Frost Knight: a point over netherite, steady; mended with blue ice.
+			new Tier("frost_knight", new int[] {3, 8, 7, 3}, new int[] {484, 704, 660, 572}, 3.0, 0.15, 18,
+					"minecraft:blue_ice", false));
 
 	/** Every tier's four pieces have its numbers, repair, fire resistance, slot, look and tags. */
 	@GameTest

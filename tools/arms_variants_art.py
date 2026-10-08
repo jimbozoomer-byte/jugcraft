@@ -11,7 +11,8 @@ tools/arms_pixel.py as a pixel-art icon on the diagonal and a 3D model in the ha
   Dreadnought), silver and wolf fur (the Alpha Werewolf), storm steel, feathers and lightning (the Storm Roc), and
   sea-green bronze, pearl and a glowing tide line (the Abyssal Leviathan);
 - the owner's armor sets' arms, in their set's palette: slate with light edges, a night-dark snath and blood-red wraps
-  (the Hades Armor's scythe, after the owner's own design).
+  (the Hades Armor's scythe, after the owner's own design); gold, brown leather and jet (the Sentinel's longsword);
+  frosted white and glowing ice (the Frost Knight's greatsword).
 
 All original; the designs follow their kinds' proportions (tools/arms_art.py), so each is held as its kind is, and
 are kept plain as the studied mods' are: one or two accents an arm, clean silhouettes, no dotted or scattered detail.
@@ -66,6 +67,14 @@ ASHEN = M((42, 42, 50), (66, 66, 76), (112, 112, 122), (150, 150, 160), (190, 19
 NIGHT = M((12, 12, 20), (24, 24, 36), (34, 35, 52), (48, 50, 72), (66, 69, 98), (82, 86, 118), shine=False)
 SOOT = M((8, 8, 12), (14, 14, 20), (18, 18, 26), (24, 24, 34), (34, 34, 46), (46, 46, 60), shine=False)
 BLOOD = M((44, 8, 14), (70, 14, 22), (96, 22, 32), (138, 30, 42), (176, 48, 56), (204, 78, 82), shine=False)
+# The Sentinel's, from the owner's design (as armor_paint.SENTINEL): gold from brown to cream, brown leather, and the
+# near-black of its coat for a stone.
+SENTINEL_GOLD = M((58, 40, 32), (96, 66, 46), (136, 96, 58), (182, 138, 88), (214, 182, 114), (250, 240, 170))
+SENTINEL_LEATHER = M((28, 20, 16), (44, 30, 24), (72, 50, 38), (96, 68, 48), (120, 86, 58), (150, 110, 72), shine=False)
+SENTINEL_JET = M((6, 6, 8), (14, 14, 18), (28, 28, 33), (44, 44, 50), (66, 66, 72), (96, 96, 104))
+# The Frost Knight's (as armor_paint.FROST_KNIGHT): its frosted white, and the ice of its crown, which glows.
+FROST_WHITE = M((40, 42, 62), (96, 98, 128), (172, 172, 194), (204, 202, 220), (228, 230, 240), (250, 252, 255))
+FROST_ICE = M((10, 58, 120), (32, 136, 214), (64, 184, 240), (120, 224, 252), (196, 246, 255), (236, 252, 255), glow=True)
 
 # Style(blade, fitting, grip, haft, gem, accent, cloth)
 GILDED = Style(POLISHED, GOLD, ROYAL, px.DARK_WOOD, SAPPHIRE, GOLD, ROYAL)
@@ -81,11 +90,14 @@ WEREWOLF = Style(SILVER, DARK_IRON, WOLF, px.DARK_WOOD, MOONSTONE, SILVER, WOLF)
 ROC = Style(STORMSTEEL, px.GUNMETAL, px.LEATHER, px.DARK_WOOD, BOLT, BOLT, FEATHER)
 LEVIATHAN = Style(SEABRONZE, SEABRONZE, px.LEATHER, px.DARK_WOOD, PEARL, PEARL, TIDEGLOW)
 HADES = Style(SLATE, ASHEN, BLOOD, NIGHT, BLOOD, SOOT, BLOOD)
+SENTINEL = Style(SENTINEL_GOLD, SENTINEL_GOLD, SENTINEL_LEATHER, SENTINEL_LEATHER, SENTINEL_JET, SENTINEL_GOLD,
+                 SENTINEL_LEATHER)
+FROST_KNIGHT = Style(FROST_ICE, FROST_WHITE, FROST_WHITE, FROST_WHITE, FROST_ICE, FROST_ICE, FROST_WHITE)
 # Each line's materials, by its name in tools/arms_variants.py (a variant's 16x16 icon is coloured from them).
 LINE_STYLES = {"gilded": GILDED, "ironclad": IRONCLAD, "bonecarved": BONECARVED, "runebound": RUNEBOUND,
                "yeti_king": YETI, "cinder_tyrant": CINDER, "mire_hag": HAG, "crypt_lich": LICH,
                "iron_dreadnought": DREADNOUGHT, "werewolf_alpha": WEREWOLF, "storm_roc": ROC,
-               "abyssal_leviathan": LEVIATHAN, "hades": HADES}
+               "abyssal_leviathan": LEVIATHAN, "hades": HADES, "sentinel": SENTINEL, "frost_knight": FROST_KNIGHT}
 
 
 # ---------------------------------------------------------------- shared parts
@@ -813,13 +825,63 @@ def hades_scythe():
     return d
 
 
+def sentinel_longsword():
+    """The Sentinel's sword, after the owner's design: a broad gold blade, its edges pale and a brown groove down its
+    middle, under a square-ended gold crossguard set with a jet square (the square ring on the set's arm), a brown
+    leather grip and a gold pommel with a jet stone. It is held as a longsword is."""
+    st = SENTINEL
+    d = Design(36, grip=5.5)
+    d.disc(1.7, 0.0, 1.7, SENTINEL_GOLD, depth=2.4, part="pommel")
+    d.disc(1.7, 0.0, 0.7, SENTINEL_JET, depth=2.8, z=1, part="pommel_stone")
+    grip(d, 2.8, 8.6, 0.95, st)
+    # The crossguard: a straight bar with square ends a little broader, a jet square in a gold frame at its heart.
+    d.strip(8.6, 10.0, 4.6, material=SENTINEL_GOLD, depth=2.6, part="guard")
+    for side in (1, -1):
+        d.poly([(8.3, side * 3.8), (10.3, side * 3.8), (10.3, side * 5.4), (8.3, side * 5.4)], SENTINEL_GOLD,
+               depth=2.9, z=1, part=f"guard_end{side}", tone=LIGHT)
+    d.strip(8.5, 10.1, 1.1, material=SENTINEL_GOLD, depth=3.0, z=1, tone=HIGHLIGHT, part="guard_frame")
+    d.strip(8.95, 9.65, 0.45, material=SENTINEL_JET, depth=3.2, z=2, part="guard_stone")
+    # The blade: broad gold, pale along its edges, a brown groove down its middle.
+    blade(d, 10.0, 31.5, 1.75, 1.4, st, tip=3.6)
+    d.strip(10.4, 31.0, lambda v: 1.75 + (1.4 - 1.75) * (v - 10.0) / 21.5, lambda v: -(1.75 + (1.4 - 1.75) * (v - 10.0) / 21.5) + 0.55,
+            material=SENTINEL_GOLD, depth=1.1, z=1, tone=HIGHLIGHT, part="edge")
+    d.strip(10.6, 26.0, 0.35, material=SENTINEL_LEATHER, depth=0.8, z=2, part="groove")
+    return d
+
+
+def frost_knight_greatsword():
+    """The Frost Knight's sword, after the owner's design: a long blade of glowing ice, white along its middle; a
+    crossguard of white frost flaring into jagged spikes either side, an ice gem at its heart and a ring of frost
+    spikes up the blade's foot; a white grip and an ice pommel. It is held as a greatsword is."""
+    d = Design(48, grip=7.0)
+    # The pommel: a diamond of ice on a white cap.
+    d.strip(1.0, 3.2, 1.2, material=FROST_WHITE, depth=2.4, part="cap")
+    d.poly([(0.2, 0.0), (1.6, 1.6), (3.0, 0.0), (1.6, -1.6)], FROST_ICE, depth=2.8, z=1, part="pommel")
+    d.strip(3.2, 12.0, 1.05, material=FROST_WHITE, depth=2.0, stripes=(1.6, DARK), part="grip")
+    # The crossguard: a white bar flaring into three jagged spikes each side, swept toward the point.
+    d.strip(12.0, 13.8, 3.2, material=FROST_WHITE, depth=2.8, part="guard")
+    for side in (1, -1):
+        d.poly([(12.0, side * 2.6), (11.0, side * 5.8), (12.9, side * 4.4), (13.4, side * 7.4), (14.2, side * 4.6),
+                (16.4, side * 6.6), (14.6, side * 3.2), (13.8, side * 2.6)], FROST_WHITE, depth=2.6,
+               part=f"frost{side}", tone=LIGHT)
+        # frost creeping up the blade's foot
+        d.poly([(13.8, side * 1.6), (17.2, side * 2.9), (15.6, side * 1.4)], FROST_WHITE, depth=2.0, z=1,
+               part=f"rime{side}", tone=HIGHLIGHT)
+    d.disc(12.9, 0.0, 1.3, FROST_ICE, depth=3.4, z=2, part="gem")
+    # The blade: glowing ice, brightest down its middle.
+    blade(d, 13.8, 42.4, 2.3, 1.8, FROST_KNIGHT, tip=5.0, depth=1.4)
+    d.strip(14.6, 44.0, lambda v: max(0.05, 0.7 - max(0.0, v - 41.0) * 0.2), material=FROST_ICE, depth=1.6, z=1,
+            tone=HIGHLIGHT, part="core")
+    return d
+
+
 DESIGNS = {name: fn for name, fn in globals().items() if callable(fn) and name in (
     "gilded_longsword", "gilded_rapier", "gilded_sabre", "gilded_halberd", "ironclad_zweihander", "ironclad_maul",
     "ironclad_war_pick", "ironclad_battle_axe", "bonecarved_dagger", "bonecarved_flail", "bonecarved_glaive",
     "bonecarved_labrys", "runebound_nodachi", "runebound_moonblade", "runebound_staff", "runebound_war_hammer",
     "glacier_maul", "rimeclaw", "cinderbrand", "magmaw", "hagthorn", "bogfang", "soulreaver", "gravewarden",
     "dynamo_halberd", "piston_hammer", "moonfang", "howler", "stormcaller", "galefeather", "tidebreaker",
-    "leviathans_hook", "hades_scythe")}
+    "leviathans_hook", "hades_scythe", "sentinel_longsword", "frost_knight_greatsword")}
 
 
 # ---------------------------------------------------------------- drawing (as tools/arms_art.py draws the kinds)

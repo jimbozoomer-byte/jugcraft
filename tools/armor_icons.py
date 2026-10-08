@@ -178,6 +178,22 @@ shield and its cross; the spiralled tassets over the cloth; the banded greaves. 
     G g             "gold_light", "gold_dark": the Paladin's blue gems; the Templar's near-whites
     C c q Q K       the cloth, purple or dark red: "leather_light" to "leather_dark", and "leather_darkest", its outline
     U u x X         the dark mail and belt: "under_light" to "under_dark", and "under_darkest", their outline
+Sentinel (tools/sentinel_armor.py, armor_paint.SENTINEL): the gold bucket helm with its keyhole and the loop on its
+crown; the great gold pauldron and the small one over the black coat, the gold mantle, the square ring and the
+baldric; the black skirt with its gold plate on the left and dark one on the right; the gold boots.
+    H L M D S V     the gold, cream to brown: "light" to "void" ("O" is its void taken down)
+    G g             the palest cream and the deep brown: "gold_light", "gold_dark"
+    C c q Q K       the browns: "leather_light" to "leather_dark", and "leather_darkest", their outline
+    U u x X         the black cloth: "under_light" to "under_dark", and "under_darkest", its outline
+Frost Knight (tools/frost_knight_armor.py, armor_paint.FROST_KNIGHT): the crown of ice over the white helm, its
+frost spikes and its grinning mask; the frost on the right shoulder, the navy pauldron on the left and the navy strap
+over the white cuirass; the white plated legs under the navy belt and its ice gem; the white boots.
+    H L M D S V     the frosted white, white to slate ("O" is its void taken down)
+    G g             the ice's palest and bright cyans: "gold_light", "gold_dark"
+    C c q Q K       the navy: "leather_light" to "leather_dark", and "leather_darkest", its outline
+    U u x X         the mask's near-black: "under_light" to "under_dark", and "under_darkest", its outline
+    A I E F J j     the crown's ice: "ice_light", "ice", "ice_mid", "ice_dark", "ice_deep", and "~ice_deep", its
+                    outline
 """
 import os
 
@@ -258,7 +274,19 @@ OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "
                                          "V": "void", "G": "gold_light", "g": "gold_dark", "C": "leather_light",
                                          "c": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
                                          "K": "leather_darkest", "U": "under_light", "u": "under_mid",
-                                         "x": "under_dark", "X": "under_darkest"})}
+                                         "x": "under_dark", "X": "under_darkest"}),
+       "sentinel": (armor_paint.SENTINEL, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                           "V": "void", "G": "gold_light", "g": "gold_dark", "C": "leather_light",
+                                           "c": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
+                                           "K": "leather_darkest", "U": "under_light", "u": "under_mid",
+                                           "x": "under_dark", "X": "under_darkest"}),
+       "frost_knight": (armor_paint.FROST_KNIGHT, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark",
+                                                   "S": "seam", "V": "void", "G": "gold_light", "g": "gold_dark",
+                                                   "C": "leather_light", "c": "leather_mid_light", "q": "leather_mid",
+                                                   "Q": "leather_dark", "K": "leather_darkest", "U": "under_light",
+                                                   "u": "under_mid", "x": "under_dark", "X": "under_darkest",
+                                                   "A": "ice_light", "I": "ice", "E": "ice_mid", "F": "ice_dark",
+                                                   "J": "ice_deep", "j": "~ice_deep"})}
 
 
 def luma(colour):

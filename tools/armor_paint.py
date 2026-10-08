@@ -259,6 +259,33 @@ TEMPLAR = {
     "leather_dark": (72, 14, 20), "leather_darkest": (48, 10, 15),
     "under_light": (66, 72, 86), "under_mid": (48, 52, 64), "under_dark": (32, 35, 46), "under_darkest": (18, 19, 27),
 }
+# Two more the owner sent later on 8 October ("Just made these ones aswell want them done weapons too please"), renders
+# lit from the front, so their lit faces were taken as the texture's colours and their shadowed ones set a ramp's dark end.
+# Sentinel (tools/sentinel_armor.py): the metal is the gold, from the cream of its lit edges through warm golds to the
+# brown of its shadows; "gold" names a still paler cream and a deep brown for the meander behind the helm; "leather" the
+# browns of the helm's engraving and the plates' grooves; the under-layer the near-black cloth of the coat and robe.
+SENTINEL = {
+    "light": (250, 240, 170), "mid_light": (214, 182, 114), "mid": (182, 138, 88), "dark": (136, 96, 58),
+    "seam": (96, 66, 46), "void": (58, 40, 32),
+    "gold_light": (255, 250, 206), "gold_dark": (84, 58, 44),
+    "leather_light": (150, 110, 72), "leather_mid_light": (120, 86, 58), "leather_mid": (96, 68, 48),
+    "leather_dark": (72, 50, 38), "leather_darkest": (44, 30, 24),
+    "under_light": (66, 66, 72), "under_mid": (44, 44, 50), "under_dark": (28, 28, 33), "under_darkest": (14, 14, 18),
+}
+# Frost Knight (tools/frost_knight_armor.py): the metal is the frosted white plate, from white through the lilac greys of
+# its mottling to a cold slate; "gold" names the ice's two cyans, the palest and the bright; "leather" the navy of the
+# strap, the belt and the left pauldron; the under-layer the near-black of the visor. The crown's ice is five tones of its
+# own, by name.
+FROST_KNIGHT = {
+    "light": (250, 252, 255), "mid_light": (228, 230, 240), "mid": (204, 202, 220), "dark": (172, 172, 194),
+    "seam": (132, 134, 160), "void": (84, 88, 116),
+    "gold_light": (196, 246, 255), "gold_dark": (92, 206, 246),
+    "leather_light": (84, 92, 138), "leather_mid_light": (60, 66, 106), "leather_mid": (44, 50, 84),
+    "leather_dark": (30, 34, 62), "leather_darkest": (16, 18, 38),
+    "under_light": (62, 66, 86), "under_mid": (40, 42, 60), "under_dark": (22, 24, 38), "under_darkest": (8, 10, 20),
+    "ice_light": (200, 248, 255), "ice": (120, 224, 252), "ice_mid": (64, 184, 240), "ice_dark": (32, 136, 214),
+    "ice_deep": (22, 92, 172),
+}
 # The smoke test's face colours (tools/armor_smoke.py): one hue per face, so a render shows which face is where.
 TEST = {**STEEL, "t_top": (230, 230, 90), "t_bottom": (90, 70, 40), "t_right": (220, 70, 70), "t_front": (80, 200, 90),
         "t_left": (70, 110, 230), "t_back": (200, 90, 210), "t_mark": (20, 20, 20), "t_rule": (255, 255, 255)}

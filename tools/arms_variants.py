@@ -68,6 +68,10 @@ BOSSES = {
 # loot table yet; its tooltip names its set where a trophy's names its boss.
 SETS = {
     "hades": {"display": "Hades Armor"},
+    # The owner, 8 October 2026, sending the Sentinel and Frost Knight designs: "want them done weapons too please"
+    # (docs/features/armor-designs-8-october.md).
+    "sentinel": {"display": "Sentinel"},
+    "frost_knight": {"display": "Frost Knight"},
 }
 LINES = list(STYLES) + list(BOSSES) + list(SETS)
 
@@ -138,6 +142,8 @@ VARIANTS = [
     ("tidebreaker", "war_fork", "abyssal_leviathan", "tide", "Tidebreaker"),
     ("leviathans_hook", "bill", "abyssal_leviathan", "tide", "Leviathan's Hook"),
     ("hades_scythe", "scythe", "hades", "wither", "Hades Scythe"),
+    ("sentinel_longsword", "longsword", "sentinel", "mark", "Sentinel Longsword"),
+    ("frost_knight_greatsword", "greatsword", "frost_knight", "frost", "Frost Knight Greatsword"),
 ]
 BY_ID = {name: (kind, line, boon, display) for name, kind, line, boon, display in VARIANTS}
 

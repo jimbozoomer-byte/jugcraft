@@ -181,6 +181,12 @@ ARMOR_TIERS = {
     # mended with netherite.
     "templar": {"display": "Templar", "armor": (43, (3, 7, 9, 3), 14, 3.5, 0.15),
                 "repair": "minecraft:netherite_ingot", "fire_resistant": True},
+    # Sentinel: the gold-and-black guard: the heavier helm, tough and steady, good enchanting; mended with gold.
+    "sentinel": {"display": "Sentinel", "armor": (46, (3, 7, 8, 4), 20, 3.5, 0.15),
+                 "repair": "minecraft:gold_ingot", "fire_resistant": False},
+    # Frost Knight: the white knight crowned with ice: a point of defense over netherite, steady; mended with blue ice.
+    "frost_knight": {"display": "Frost Knight", "armor": (44, (3, 7, 8, 3), 18, 3.0, 0.15),
+                     "repair": "minecraft:blue_ice", "fire_resistant": False},
 }
 
 

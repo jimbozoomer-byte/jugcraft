@@ -41,11 +41,13 @@ The arm keeps its enchantments and wear.
 | the Storm Roc | Stormcaller (glaive), Galefeather (estoc) | **Gale:** throws the foe up and back |
 | the Abyssal Leviathan | Tidebreaker (war fork), Leviathan's Hook (bill) | **Tide:** 25% harder against a foe in water or rain |
 
-**An armor set's arm: the Hades Scythe.** The owner, 6 October 2026: "I also want the scythe from my Hades Armor set." The owner's armor sets are a third kind of line beside the styles and the bosses (`SETS` in `tools/arms_variants.py`, `ArmVariants.SETS`). Like a trophy, a set's arm has no recipe, carries epic rarity, lasts twice as long as steel and has a boon. Unlike a trophy, nothing drops it yet. The owner will settle how the sets are won ("They might get dropped by bosses or be craftable for now just make the armor we can figure that out later"), so until then it is creative only. See [The Hades Scythe](#the-hades-scythe) below.
+**An armor set's arm: the Hades Scythe.** The owner, 6 October 2026: "I also want the scythe from my Hades Armor set." The owner's armor sets are a third kind of line beside the styles and the bosses (`SETS` in `tools/arms_variants.py`, `ArmVariants.SETS`). Like a trophy, a set's arm has no recipe, carries epic rarity, lasts twice as long as steel and has a boon. Unlike a trophy, nothing drops it yet. The owner will settle how the sets are won ("They might get dropped by bosses or be craftable for now just make the armor we can figure that out later"), so until then it is creative only. See [The Hades Scythe](#the-hades-scythe) below. Since 8 October 2026 two more of the owner's sets have an arm, drawn from the designs they sent with it ("Just made these ones aswell want them done weapons too please"): see [The Sentinel's and the Frost Knight's arms](#the-sentinels-and-the-frost-knights-arms).
 
 | Armor set | Arm | Boon |
 |---|---|---|
 | Hades Armor | Hades Scythe (scythe), `jugcraft:hades_scythe` | **Wither:** Wither, 3 s (the Gravewarden's boon) |
+| Sentinel | Sentinel Longsword (longsword), `jugcraft:sentinel_longsword` | **Mark:** a struck foe glows for 4 s, seen through walls (the Runebound arms' boon) |
+| Frost Knight | Frost Knight Greatsword (greatsword), `jugcraft:frost_knight_greatsword` | **Frost:** Slowness II, 3 s (the Yeti King's boon) |
 
 **Looks:**
 - Each arm is drawn with the restyle's toolkit: a pixel-art icon on the diagonal and a 3D model in the hand.
@@ -133,6 +135,21 @@ The owner, 6 October 2026, with the design of their Hades Armor set: "I also wan
   - the owner has not seen it;
   - how it matches the Hades Armor in game.
 
+## The Sentinel's and the Frost Knight's arms
+
+The owner, 8 October 2026, sending the designs of two more armor sets, a gold-and-black knight with a sword and a star-shaped shield and a white knight crowned with ice with a glowing ice sword: "Just made these ones aswell want them done weapons too please". The armor is in [armor-designs-8-october.md](armor-designs-8-october.md); this section covers the swords. The renders are references only and are not committed.
+
+- **Tier, inputs, outputs, costs, unlocks:** as the Hades Scythe's. Each is an arm of its kind in steel, with that kind's blow, reach, trait, motion and (for the greatsword) two-handed blow; epic, lasting twice as long as steel (1,800); no recipe and no loot table, so creative only in the Combat tab until the owner settles how the sets are won. They cost nothing and unlock nothing, and nothing needs them.
+  - `jugcraft:sentinel_longsword`: a longsword with the existing **Mark** boon (the struck foe glows for 4 s).
+  - `jugcraft:frost_knight_greatsword`: a greatsword with the existing **Frost** boon (Slowness II, 3 s).
+- **The tables:** `SETS` gains `sentinel` ("Sentinel") and `frost_knight` ("Frost Knight"), and `VARIANTS` the two arms, in `tools/arms_variants.py` and `weapons/ArmVariants.java` alike. The tooltip's line reads "Of the Sentinel set" and "Of the Frost Knight set"; the handbook's "Arms: Armor Sets" page lists them, from the same table.
+- **The look, drawn fresh by code from the owner's designs** (`tools/arms_variants_art.py`):
+  - **Sentinel Longsword:** a broad gold blade, pale along its edge with a brown groove down its middle; a straight gold crossguard with square ends, a jet square in a pale frame at its heart (the square ring on the armor's arm); a brown leather grip; a gold pommel set with jet. Materials `SENTINEL_GOLD`, `SENTINEL_LEATHER` and `SENTINEL_JET`, matched to the armor's palette.
+  - **Frost Knight Greatsword:** a long blade of glowing ice (`FROST_ICE`, a glowing material, so it is lit at full brightness in the hand), brightest down its middle; a crossguard of white frost (`FROST_WHITE`) flaring into three jagged spikes each side, frost creeping up the blade's foot, an ice gem at its heart; a white wrapped grip; an ice diamond for a pommel.
+  - **Icons:** two 16×16 maps, `tools/arms_icons/sentinel_longsword.txt` and `frost_knight_greatsword.txt`, on the longsword's and the greatsword's shapes, so `check_icon_maps` holds both lines' materials strictly. The frost line's two outlines were darkened to pass it (the ice's to 51 luma, the white's to 44).
+- **The shield** in the Sentinel's design is not a variant (variants are swung kinds); it is not built yet.
+- **Not verified yet:** nothing has been run in game or in CI; the owner has not seen them.
+
 ## Connections
 - **Existing input producer:**
   - steel arms (the steel foundry and the arms' own recipes);
@@ -146,7 +163,7 @@ The owner, 6 October 2026, with the design of their Hades Armor set: "I also wan
 - **Required vs optional:** all optional.
   - The styles can be crafted solo or traded.
   - The trophies wait for their bosses. Until then they are creative-only, and that is on purpose: [branches/BOSSES.md](../branches/BOSSES.md) is a proposal, and no core progression needs a trophy.
-  - The Hades Scythe waits for the owner to settle how the armor sets are won (a boss's drop or a recipe). Until then it is creative-only on purpose, and nothing needs it.
+  - The Hades Scythe, the Sentinel Longsword and the Frost Knight Greatsword wait for the owner to settle how the armor sets are won (a boss's drop or a recipe). Until then they are creative-only on purpose, and nothing needs them.
 - **How the specialty stays useful:** a style is a look and a small perk, not a stronger tier. The arms of batches 42 to 55 stay as good.
 
 ## Balance and automation
@@ -161,7 +178,7 @@ The owner, 6 October 2026, with the design of their Hades Armor set: "I also wan
 ## Multiplayer and persistence
 - **Server authority:** every boon is worked on the server, in `ArmItem.hurtEnemy` and `getAttackDamageBonus`, when the arm strikes. Clients only see the effects and particles.
 - **Saved state:** none beyond ordinary items with stable ids:
-  - the 33 variants: `jugcraft:gilded_longsword` … `jugcraft:leviathans_hook`, then `jugcraft:hades_scythe`, as in `tools/arms_variants.py`;
+  - the 35 variants: `jugcraft:gilded_longsword` … `jugcraft:leviathans_hook`, then `jugcraft:hades_scythe`, `jugcraft:sentinel_longsword` and `jugcraft:frost_knight_greatsword`, as in `tools/arms_variants.py`;
   - the four patterns: `jugcraft:gilders_pattern`, `ironclad_pattern`, `bonecarvers_pattern`, `runecarvers_pattern`.
 - **Disabling the `machines` feature** removes the recipes, not the items.
 
@@ -202,6 +219,7 @@ The owner, 6 October 2026, with the design of their Hades Armor set: "I also wan
   - `ArmsVIIGameTests`: every set has an arm; the Hades Scythe's Wither takes on a pig; a set's arm has no recipe and its set no `bosses/` table; the trophy-table test passes over the set line.
   - `TraitDetailsGameTests`: the Hades Scythe's expanded tooltip ends with its set's line, a name only.
   - `ArmsVIIClientGameTests`: the racks hold every variant (a third rack for the 33rd; before, they stopped at 32), and the Hades Scythe is held from the front by day.
+- **The Sentinel's and the Frost Knight's arms (8 October 2026), run locally:** the generators, `check_mod_data.py` (with `check_arms_variants` holding the two new set lines and arms), `check_icon_maps.py` (both maps, the two lines' materials strictly) and `check_repository.py`; results in [armor-designs-8-october.md](armor-designs-8-october.md#verification). `ArmsVIIClientGameTests` also holds both from the front by day, and its frames wall puts the four patterns on the bottom row, since the variants' fifth row now reaches past the third frame. Not run in CI yet.
 - **Not run:**
   - play;
   - two players;

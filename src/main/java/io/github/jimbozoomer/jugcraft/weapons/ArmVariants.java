@@ -56,7 +56,7 @@ public final class ArmVariants {
 	public static final List<String> STYLES = List.of("gilded", "ironclad", "bonecarved", "runebound");
 
 	/** The owner's armor sets with an arm of their own; any other line that is not a style is a boss. */
-	public static final List<String> SETS = List.of("hades");
+	public static final List<String> SETS = List.of("hades", "sentinel", "frost_knight");
 
 	public static final List<Variant> VARIANTS = List.of(
 			new Variant("gilded_longsword", "longsword", "gilded", null),
@@ -91,7 +91,9 @@ public final class ArmVariants {
 			new Variant("galefeather", "estoc", "storm_roc", Boon.GALE),
 			new Variant("tidebreaker", "war_fork", "abyssal_leviathan", Boon.TIDE),
 			new Variant("leviathans_hook", "bill", "abyssal_leviathan", Boon.TIDE),
-			new Variant("hades_scythe", "scythe", "hades", Boon.WITHER));
+			new Variant("hades_scythe", "scythe", "hades", Boon.WITHER),
+			new Variant("sentinel_longsword", "longsword", "sentinel", Boon.MARK),
+			new Variant("frost_knight_greatsword", "greatsword", "frost_knight", Boon.FROST));
 
 	/** The styles' patterns (smithing templates), in STYLES order. */
 	public static final List<String> PATTERN_NAMES = List.of("gilders_pattern", "ironclad_pattern", "bonecarvers_pattern",
