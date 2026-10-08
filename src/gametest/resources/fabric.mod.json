@@ -128,7 +128,15 @@
 			"io.github.jimbozoomer.jugcraft.test.ThalliteGearGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmorTiersGameTests",
 			"io.github.jimbozoomer.jugcraft.test.StyxGameTests",
-			"io.github.jimbozoomer.jugcraft.test.WorldDesignerGameTests"
+			"io.github.jimbozoomer.jugcraft.test.WorldDesignerGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FarmhouseKitchenGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FeastsGameTests",
+			"io.github.jimbozoomer.jugcraft.test.MenuGameTests",
+			"io.github.jimbozoomer.jugcraft.test.RiceGameTests",
+			"io.github.jimbozoomer.jugcraft.test.SoilGameTests",
+			"io.github.jimbozoomer.jugcraft.test.OrchardGameTests",
+			"io.github.jimbozoomer.jugcraft.test.CakeGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FruitCropGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceJournalClientGameTests",
@@ -231,7 +239,15 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmorTiersClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.StyxClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.StyxTownClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.WorldDesignerClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.WorldDesignerClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FarmhouseKitchenClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FeastsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.MenuClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.RiceClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.SoilClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.OrchardClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.CakeClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FruitCropClientGameTests"
 		]
 	},
 	"depends": {

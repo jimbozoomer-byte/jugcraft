@@ -306,6 +306,12 @@ def planks(wood, seed):
 def leaves(name, seed):
     """Vanilla's speckle: one- and two-pixel leaves in four tones, light on top of each clump, with gaps."""
     p, kind = LEAVES[name]
+    return paint_leaves(p, kind, seed)
+
+
+def paint_leaves(p, kind, seed):
+    """Leaves of six tones `p` (dark to light) in the manner `kind` ("leaves", "needles", "blossom" or "fronds"), as
+    leaves() paints each tree's; the orchards' fruit trees (tools/orchard_textures.py) are painted with it too."""
     rng = random.Random(seed)
     c = Canvas()
     for y in range(16):

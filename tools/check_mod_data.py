@@ -17,6 +17,15 @@ import drones
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
                        all_blocks, all_items, feature_of, ore_gens, ore_gen_owners)
 import agriculture as ag
+import kitchen
+import feasts
+import menu
+import rice
+import soil
+import orchard
+import cakes
+import cake_data
+import owner_art
 import werewolf_model
 import midway
 import ferris_wheel
@@ -3035,13 +3044,14 @@ def check_agriculture():
     java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
 
     tall = {name.lower(): {"block": block, "seed": seed, "heights": [int(h) for h in heights.split(",")], "produce": produce,
-                           "pick": [int(low), int(high)], "reset": int(reset), "growth": float(growth), "trellis": trellis == "true"}
-            for name, block, seed, heights, produce, low, high, reset, growth, trellis in re.findall(
-                r'(\w+)\("([a-z_]+)", "([a-z_]+)", new int\[\] \{([\d, ]+)\}, "([a-z_]+)", (\d+), (\d+), (\d+), ([\d.]+)F, (true|false)\)',
+                           "pick": [int(low), int(high)], "reset": int(reset), "growth": float(growth), "trellis": trellis == "true", "paddy": paddy == "true"}
+            for name, block, seed, heights, produce, low, high, reset, growth, trellis, paddy in re.findall(
+                r'(\w+)\("([a-z_]+)", "([a-z_]+)", new int\[\] \{([\d, ]+)\}, "([a-z_]+)", (\d+), (\d+), (\d+), ([\d.]+)F, (true|false), (true|false)\)',
                 java.get("TallCrop", ""))}
     expected = {name: {"block": info["block"], "seed": info["seed"], "heights": info["heights"], "produce": info["pick"]["item"],
                        "pick": [info["pick"]["min"], info["pick"]["max"]], "reset": info["pick_reset"],
-                       "growth": info["growth_time"], "trellis": bool(info.get("trellis"))} for name, info in ag.TALL_CROPS.items()}
+                       "growth": info["growth_time"], "trellis": bool(info.get("trellis")), "paddy": bool(info.get("paddy"))}
+                for name, info in ag.TALL_CROPS.items()}
     if tall != expected:
         err(f"TallCrop.java {tall} != tools/agriculture.py {expected}")
     for name, info in ag.TALL_CROPS.items():
@@ -3072,6 +3082,12 @@ def check_agriculture():
         items[name] = ("seeds", int(n), float(sat), compost.lower(), crop)
     for name, compost in re.findall(r'\bplain\("([a-z_]+)", COMPOST_(\w+)\)', main):
         items[name] = ("plain", None, None, compost.lower(), None)
+    for name, n, sat, compost in re.findall(r'\bcob\("([a-z_]+)", (\d+), ([\d.]+)F, COMPOST_(\w+)\)', main):
+        items[name] = ("cob", int(n), float(sat), compost.lower(), None)
+    for name in re.findall(r'\bmilkBottle\("([a-z_]+)"\)', main):
+        items[name] = ("milk", None, None, None, None)
+    for name in re.findall(r'\bpetFood\("([a-z_]+)", EntityTypes\.', main):
+        items[name] = ("pet", None, None, None, None)
     for name, n, sat in re.findall(r'\bstew\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
         items[name] = ("stew", int(n), float(sat), None, None)
         if ag.ITEMS.get(name, {}).get("stew_effect"):
@@ -3101,6 +3117,7 @@ def check_agriculture():
     for name, info in ag.ITEMS.items():
         food = info.get("food") or [None, None]
         kind = ("stew" if info.get("stew") else "treat" if info.get("treat") else "sweet" if info.get("sweet") else "drink" if info.get("drink")
+                else "cob" if info.get("cob") else "milk" if info.get("milk") else "pet" if info.get("pet")
                 else "seeds" if "plants" in info
                 else "food" if "food" in info else "plain")
         expected[name] = (kind, food[0], food[1], info.get("compost"), info.get("plants"))
@@ -3121,6 +3138,8 @@ def check_agriculture():
     expected["apple_tree"] = ag.CIDER["tree"]["biomes"]
     expected["mums"] = ag.MUM_PATCH["biomes"]
     expected[ag.WOLFSBANE["block"]] = ag.WOLFSBANE["biomes"]
+    expected[rice.WILD_RICE["block"]] = rice.WILD_RICE["biomes"]
+    expected.update({orchard.feature(tree): info["biomes"] for tree, info in orchard.TREES.items()})
     expected.update({name: info["biomes"] for name, info in ag.FORAGING["mushrooms"].items()})
     if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
@@ -3137,8 +3156,9 @@ def check_agriculture():
         plants = info.get("plants")
         if plants and bool(info.get("trellis_seed")) != (plants in ag.trellis_crops()):
             err(f"{name}: a seed is a trellis seed exactly when it plants a climbing crop")
-        if plants and bool(info.get("bog_seed")) != (plants == ag.CRANBERRY["block"]):
-            err(f"{name}: a seed is a bog seed exactly when it plants the cranberry bush")
+        bog = plants == ag.CRANBERRY["block"] or any(crop["block"] == plants and crop.get("paddy") for crop in ag.TALL_CROPS.values())
+        if plants and bool(info.get("bog_seed")) != bog:
+            err(f"{name}: a seed is a bog seed exactly when it plants the cranberry bush or a paddy crop")
     check_festival(java, main)
     check_carving(java, main)
     check_halloween(java, main)
@@ -3230,12 +3250,15 @@ def check_agriculture():
         if recipe.get("type") != f"{MOD}:pot_cooking" or not recipe.get("fabric:load_conditions"):
             err(f"pot_cooking/{result}: wrong type or missing feature switch condition")
 
-    # No recipe loop among agriculture items: every conversion leads away from where it started.
+    # No recipe loop among agriculture items: every conversion leads away from where it started. Unpacking a storage block
+    # (tools/agriculture.py UNPACKING: tools/rice.py's and tools/soil.py's) only gives back what packed it, so it is left out.
     edges = {}
 
     def edge(ref, result):
         edges.setdefault(split(ref.lstrip("#"))[1], set()).add(split(result)[1] if ":" in result else result)
     for recipe in ag.SHAPELESS:
+        if recipe.get("id") in ag.UNPACKING:
+            continue
         for ref in recipe["inputs"]:
             edge(ref, recipe["result"])
     for recipe in ag.SHAPED:
@@ -3246,6 +3269,9 @@ def check_agriculture():
             edge(ref, result)
     for result, info in ag.COOKING.items():
         edges.setdefault(info["input"], set()).add(result)
+    for info in kitchen.CUTTING.values():
+        for result, _count in info["results"]:
+            edge(info["input"], result)
 
     def reaches(start, target, seen):
         for nxt in edges.get(start, ()):
@@ -3255,6 +3281,666 @@ def check_agriculture():
     for start in edges:
         if reaches(start, start, {start}):
             err(f"Agriculture recipes form a loop through {start}")
+
+
+# Vanilla's foods that the kitchen cuts: [hunger, saturation modifier] (the cuts must not outweigh them).
+VANILLA_FOOD = {"porkchop": [3, 0.3], "cooked_porkchop": [8, 0.8], "beef": [3, 0.3], "cooked_beef": [8, 0.8],
+                "chicken": [2, 0.3], "cooked_chicken": [6, 0.6], "mutton": [2, 0.3], "cooked_mutton": [6, 0.8],
+                "cod": [2, 0.1], "cooked_cod": [5, 0.6], "salmon": [2, 0.1], "cooked_salmon": [6, 0.8],
+                "cake": [14, 0.1],  # a cake is seven bites of 2 / 0.1
+                "baked_potato": [5, 0.6], "carrot": [3, 0.6], "bread": [5, 0.6], "honey_bottle": [6, 0.1], "sweet_berries": [2, 0.1],
+                "glow_berries": [2, 0.1], "melon_slice": [2, 0.3], "pumpkin_pie": [8, 0.3]}
+# Vanilla foods the menu cooks with that the kitchen does not cut: [hunger, saturation modifier].
+MENU_VANILLA_FOOD = {"apple": [4, 0.3], "beetroot": [1, 0.6], "potato": [1, 0.3], "rotten_flesh": [4, 0.1], "dried_kelp": [1, 0.3]}
+# A grain counts as the bread vanilla bakes from it: three wheat make a loaf of 5 hunger, and rice counts as wheat does.
+GRAIN = {"minecraft:wheat": 5 / 3, "jugcraft:rice": 5 / 3}
+# A whole that is not food (a pumpkin, an egg) has nothing to outweigh; a cooked cut is held to the cooked whole.
+COOKED_WHOLE = {"porkchop": "cooked_porkchop", "beef": "cooked_beef", "chicken": "cooked_chicken", "mutton": "cooked_mutton",
+                "cod": "cooked_cod", "salmon": "cooked_salmon"}
+
+
+def check_feasts():
+    """Feasts and food displays (tools/feasts.py): FeastDish, FeastBlock, FoodDisplay and the placed pumpkin pie match it;
+    a feast's servings give no more than COOK_BONUS hunger over its ingredients, and a placed pie's slices add up to the
+    vanilla pie; each feast has a model for every serving left, a blockstate for every facing, its recipe, its words, and
+    loot that gives it back only whole and its leftovers only once eaten; each display has its model, blockstate, recipe,
+    words and loot, and the client draws it."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    dishes = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, (\d+), \d+, \d+, \d+\)', java.get("FeastDish", ""), re.M)
+    wanted = [(name, str(info["food"][0]), str(info["food"][1]), str(info["light"])) for name, info in feasts.FEASTS.items()]
+    if [(name, food, sat, light) for _, name, food, sat, light in dishes] != wanted:
+        err("FeastDish.java's feasts (food, light, in order) differ from FEASTS in tools/feasts.py")
+    servings = re.search(r"\bSERVINGS = (\d+);", java.get("FeastBlock", ""))
+    if not servings or any(int(servings.group(1)) != info["servings"] for info in feasts.FEASTS.values()):
+        err("FeastBlock.SERVINGS differs from a feast's servings in tools/feasts.py")
+    for name, info in feasts.FEASTS.items():
+        if f'stew("{info["serving"]}", {info["food"][0]}, {info["food"][1]}F)' not in main:
+            err(f"JugcraftAgriculture must register {info['serving']} as a bowl food of {info['food']}")
+    displays = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", new float\[\]\[\] \{(.*?)\}, ([\d.]+)F, ([\d.]+)F, \d+, \d+\)',
+                          java.get("FoodDisplay", ""), re.M)
+    wanted = [(name, [[float(x), float(z)] for x, z in info["layout"]], info["height"], info["scale"]) for name, info in feasts.DISPLAYS.items()]
+    found = [(name, [[float(v) for v in re.findall(r"[\d.]+", place)] for place in re.findall(r"\{([^{}]*)\}", layout)], float(height),
+              float(scale)) for _, name, layout, height, scale in displays]
+    if found != wanted:
+        err("FoodDisplay.java's displays (layout, height, scale, in order) differ from DISPLAYS in tools/feasts.py")
+    if 'Jugcraft.id("food_display")' not in main:
+        err("JugcraftAgriculture must register the food displays' block entity as jugcraft:food_display")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "ShowcaseRenderer.java")
+    if "FoodDisplayBlock" not in (renderer.read_text(encoding="utf-8") if renderer.exists() else ""):
+        err("ShowcaseRenderer must draw what is on the food displays")
+
+    # Balance: what a feast's servings give against what goes into it (a pumpkin counted as the slices a knife cuts).
+    foods = {name: info["food"] for name, info in ag.ITEMS.items() if "food" in info}
+
+    def hunger(ref):
+        namespace, name = split(ref)
+        if namespace == "minecraft" and name in VANILLA_FOOD:
+            return VANILLA_FOOD[name][0]
+        if namespace == MOD and name in foods:
+            return foods[name][0]
+        cut = next((info for info in kitchen.CUTTING.values() if info["input"] == ref), None)
+        return sum(hunger(f"{MOD}:{part}") * count for part, count in cut["results"]) if cut else 0
+
+    for name, info in feasts.FEASTS.items():
+        given = info["servings"] * info["food"][0]
+        taken = sum(hunger(item) for item in info["inputs"])
+        if given > taken + feasts.COOK_BONUS:
+            err(f"{name}: its servings give {given} hunger from {taken} in ingredients (at most {feasts.COOK_BONUS} more)")
+    for name, info in feasts.PLACED_PIES.items():
+        slices = ag.PIES["slices"]
+        if slices * info["food"][0] != info["whole"][0] or info["food"][1] != info["whole"][1] \
+                or VANILLA_FOOD.get(split(info["item"])[1]) != info["whole"]:
+            err(f"{name}: {slices} slices of {info['food']} must add up to the vanilla pie {info['whole']}")
+        call = rf'new PlacedPieBlock\(Items\.{split(info["item"])[1].upper()},\s*"{info["slice"]}", {info["food"][0]}, {info["food"][1]}F'
+        if not re.search(call, main) or f'food("{info["slice"]}", {info["food"][0]}, {info["food"][1]}F' not in main:
+            err(f"JugcraftAgriculture must register {name} as a PlacedPieBlock of {info['item']} and its slice {info['slice']}")
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"{name} has no words")
+
+    for name, info in feasts.FEASTS.items():
+        for count in range(info["servings"] + 1):
+            if not (ASSETS / "models" / "block" / f"{name}_{count}.json").exists():
+                err(f"{name} needs its model {name}_{count}.json")
+        state = load(ASSETS / "blockstates" / f"{name}.json") or {}
+        if len(state.get("variants", {})) != 4 * (info["servings"] + 1):
+            err(f"{name}'s blockstate needs a variant for every facing and serving left")
+        loot = load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {}
+        text = json.dumps(loot)
+        if f'"servings": "{info["servings"]}"' not in text or (info["leftovers"] and '"servings": "0"' not in text):
+            err(f"{name} must drop itself only whole, and its leftovers once eaten")
+        for path in (DATA / MOD / "recipe" / f"{name}.json", ASSETS / "items" / f"{name}.json", ASSETS / "items" / f"{info['serving']}.json"):
+            if not path.exists():
+                err(f"{name} needs {path.relative_to(ROOT)}")
+        if f"block.{MOD}.{name}" not in lang or f"item.{MOD}.{info['serving']}" not in lang:
+            err(f"{name} and its serving need their words")
+    for name in feasts.DISPLAYS:
+        for path in (ASSETS / "models" / "block" / f"{name}.json", ASSETS / "blockstates" / f"{name}.json", ASSETS / "items" / f"{name}.json",
+                     DATA / MOD / "recipe" / f"{name}.json", DATA / MOD / "loot_table" / "blocks" / f"{name}.json"):
+            if not path.exists():
+                err(f"{name} needs {path.relative_to(ROOT)}")
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"{name} has no words")
+
+
+def check_menu():
+    """The menu (tools/menu.py): MenuDishes, PlacedDishBlock and the pet food match it; no dish gives more than
+    COOK_BONUS hunger over its ingredients; every dish set down has its model, a blockstate for each facing, loot that
+    gives its food back, and words; the corn foods give their cob back; the Cooking Pot wears the owner's pot."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    placed = re.findall(r'new Dish\("([a-z_]+)", DishShape\.([A-Z]+)\)', java.get("MenuDishes", ""))
+    if placed != [(name, model[0].upper()) for name, model in menu.all_placed().items()]:
+        err("MenuDishes.java's dishes (and their shapes, in order) differ from tools/menu.py all_placed()")
+    shapes = set(re.findall(r"^\t\t([A-Z]+)\(Block\.box\(", java.get("PlacedDishBlock", ""), re.M))
+    if shapes != {model[0].upper() for model in menu.all_placed().values()}:
+        err(f"PlacedDishBlock.DishShape {sorted(shapes)} must have exactly the templates tools/menu.py uses")
+    pets = {name: {"animal": animal.lower(), "heal": int(heal), "effects": [[e, int(t)] for e, t in re.findall(r"MobEffects\.(\w+), (\d+)", treats)],
+                   "returns": "minecraft:bowl" if bowl == "true" else None}
+            for name, animal, heal, bowl, treats in re.findall(
+                r'\bpetFood\("([a-z_]+)", EntityTypes\.(\w+), (\d+), (true|false), List\.of\((.*?)\)\);', main, re.S)}
+    if pets != menu.PETS:
+        err(f"JugcraftAgriculture pet food {pets} differs from tools/menu.py PETS")
+    if sorted(name for name, info in ag.ITEMS.items() if info.get("cob")) != sorted(menu.COB_FOODS) or menu.COB not in ag.ITEMS \
+            or f'usingConvertsTo(item("{menu.COB}"))' not in main:
+        err("The corn on the cob foods (tools/menu.py COB_FOODS) must each give the corncob back")
+    if "PlacedDishBlock.setDown" not in main or "PetFoodItem.feed" not in main:
+        err("JugcraftAgriculture must set dishes down and feed pets through the use events")
+
+    # Balance: what a dish gives against its ingredients, each counted as the most it would give: as itself, as what a
+    # furnace makes of it (raw meat, an egg, corn, sugar), as what a board cuts it into (a pumpkin as its slices), as the
+    # bread it would bake (a grain, GRAIN), or, for an ingredient that is not food (a dough, a batter), as what went into it.
+    foods = {name: info["food"][0] for name, info in ag.ITEMS.items() if "food" in info}
+    made = {}
+    for recipe in ag.SHAPELESS:
+        made.setdefault(f"{MOD}:{split(recipe['result'])[1]}", ([*recipe["inputs"]], recipe.get("count", 1)))
+    for result, info in ag.POT_RECIPES.items():
+        made.setdefault(f"{MOD}:{result}", ([ref for ref, n in info["inputs"].items() for _ in range(n)], info.get("count", 1)))
+
+    def full(ref):
+        return ref if ":" in ref else f"{MOD}:{ref}"
+
+    def value(ref, seen=()):
+        ref = full(ref)
+        namespace, name = split(ref)
+        own = (VANILLA_FOOD.get(name, MENU_VANILLA_FOOD.get(name, [0]))[0] if namespace == "minecraft" else foods.get(name, 0))
+        best = max(own, GRAIN.get(ref, 0))
+        if namespace == "minecraft" and name in COOKED_WHOLE:
+            best = max(best, VANILLA_FOOD[COOKED_WHOLE[name]][0])
+        for result, info in ag.COOKING.items():
+            if full(info["input"]) == ref:
+                best = max(best, value(result, seen + (ref,)))
+        cut = next((info for info in kitchen.CUTTING.values() if full(info["input"]) == ref), None)
+        if cut and ref not in seen:
+            best = max(best, sum(value(part, seen + (ref,)) * count for part, count in cut["results"]))
+        if not own and ref not in GRAIN and ref in made and ref not in seen:
+            inputs, count = made[ref]
+            best = max(best, sum(value(i, seen + (ref,)) for i in inputs) / count)
+        return best
+
+    dishes = {**menu.DISHES, **rice.DISHES, **orchard.DISHES}
+    pot = {**menu.POT_RECIPES, **rice.POT_RECIPES}
+    recipes = [(name, [ref for ref, n in info["inputs"].items() for _ in range(n)], info.get("count", 1)) for name, info in pot.items()]
+    recipes += [(name, inputs, count) for name, (inputs, count) in menu.SHAPELESS.items()]
+    recipes += [(recipe["result"], recipe["inputs"], recipe["count"]) for recipe in rice.SHAPELESS + orchard.SHAPELESS
+                if recipe["result"] in dishes]
+    recipes += [(name, [full(info["input"])], 1) for name, info in menu.COOKING.items()]
+    recipes += [(result, [info["input"]], count) for info in kitchen.CUTTING.values() for result, count in info["results"] if result in dishes]
+    for name, inputs, count in recipes:
+        given = foods.get(name, 0) * count
+        taken = sum(value(ref) for ref in inputs)
+        if given > taken + menu.COOK_BONUS:
+            err(f"{name}: {count} give {given} hunger from {taken:g} in ingredients (at most {menu.COOK_BONUS} more)")
+    for name, info in dishes.items():
+        if "food" in info and not any(name == recipe[0] for recipe in recipes):
+            err(f"{name} has no recipe in tools/menu.py, tools/rice.py or tools/orchard.py")
+
+    for name in menu.all_placed():
+        model = load(ASSETS / "models" / "block" / f"{name}.json") or {}
+        if not model.get("elements") or model.get("textures", {}).get("dish") != f"{MOD}:block/menu/{name}":
+            err(f"{name} needs its model, wearing block/menu/{name}")
+        state = load(ASSETS / "blockstates" / f"{name}.json") or {}
+        if set(state.get("variants", {})) != {f"facing={f}" for f in ("north", "south", "east", "west")}:
+            err(f"{name}'s blockstate needs a variant for every facing")
+        loot = load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {}
+        if f'"name": "{MOD}:{name}"' not in json.dumps(loot):
+            err(f"{name} must drop its food when broken")
+        if f"block.{MOD}.{name}" not in lang or f"item.{MOD}.{name}" not in lang:
+            err(f"{name} needs its words, set down and in hand")
+        if name not in ag.ITEMS:
+            err(f"{name} is set down but is no food in tools/agriculture.py ITEMS")
+    pot = load(ASSETS / "models" / "block" / "cooking_pot.json") or {}
+    if any(pot.get("textures", {}).get(key) != f"{MOD}:block/cooking_pot_{key}" for key in ("side", "top", "bottom", "handle", "parts")):
+        err("The Cooking Pot must wear the owner's pot (tools/menu.py COOKING_POT_TEXTURES)")
+
+
+def check_rice():
+    """Rice and wet farming (tools/rice.py): the rice plant is a paddy crop; wild rice, the storage blocks, the tatami, its
+    mats and the roll medley are registered as tools/rice.py says, each with its blockstate, item, loot and words; the
+    storage blocks give back exactly what packed them; the medley serves exactly the rolls it is made of; the board's rice
+    cuts are the kitchen's."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if ag.TALL_CROPS.get("rice") is not rice.CROP or not rice.CROP.get("paddy"):
+        err("tools/agriculture.py TALL_CROPS must hold the rice plant (tools/rice.py CROP) as a paddy crop")
+    paddy = java.get("PaddyCropBlock", "")
+    if "crop.paddy ? new PaddyCropBlock(props, crop)" not in main or "extends TallCropBlock" not in paddy \
+            or "CropGrowth.paddySpeed" not in paddy:
+        err("JugcraftAgriculture must register a paddy crop as a PaddyCropBlock, a tall crop that grows by CropGrowth.paddySpeed")
+    for name, info in rice.CUTTING.items():
+        if kitchen.CUTTING.get(name) != info:
+            err(f"tools/kitchen.py CUTTING[{name}] must be tools/rice.py's cut {info}")
+
+    # Registrations: each block by its class, each with an item.
+    blocks = {rice.WILD_RICE["block"]: "WildRiceBlock::new", "rice_bag": "RiceBagBlock::new", rice.TATAMI["block"]: "TatamiBlock::new",
+              rice.MEDLEY["block"]: "RollMedleyBlock::new"}
+    blocks.update({name: "FullTatamiMatBlock::new" if info["length"] == 2 else "TatamiMatBlock::new"
+                   for name, info in rice.TATAMI_MATS.items()})
+    for name, constructor in blocks.items():
+        if f'registerBlock("{name}", {constructor}' not in main:
+            err(f"JugcraftAgriculture must register {name} with {constructor}")
+    bales = [n for n, i in rice.STORAGE.items() if i["kind"] == "bale"]
+    found = re.search(r'for \(String bale : List\.of\(([^)]*)\)\) \{\s*Block block = registerBlock\(bale, HayBlock::new[^;]*;'
+                      r'\s*registerItem\(bale, ', main)
+    if not found or re.findall(r'"([a-z_]+)"', found.group(1)) != bales:
+        err("JugcraftAgriculture must register the bales of tools/rice.py STORAGE as hay bales, each with its item")
+    if [n for n, i in rice.STORAGE.items() if i["kind"] == "bag"] != ["rice_bag"]:
+        err("tools/rice.py STORAGE has one bag, the rice_bag")
+    for name in rice.items():
+        if name not in bales and f'registerItem("{name}"' not in main:
+            err(f"JugcraftAgriculture must register {name}'s item")
+        for path in (ASSETS / "blockstates" / f"{name}.json", ASSETS / "items" / f"{name}.json",
+                     DATA / MOD / "loot_table" / "blocks" / f"{name}.json"):
+            if not path.exists():
+                err(f"{name} needs {path.relative_to(ROOT)}")
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"{name} has no words")
+    for name in ("rice_panicle", "straw"):
+        if f'plain("{name}", COMPOST_{rice.ITEMS[name]["compost"].upper()})' not in main:
+            err(f"JugcraftAgriculture must register {name} as a plain item")
+
+    # Storage: nine in, the same nine out.
+    for block, info in rice.STORAGE.items():
+        pack = next((r for r in rice.SHAPED if r["id"] == block), None)
+        unpack = next((r for r in rice.SHAPELESS if r["id"] == info["unpack"]), None)
+        item = f"{MOD}:{info['item']}"
+        if (not pack or "".join(pack["pattern"]).count("#") != rice.PACK or pack["key"] != {"#": item} or pack["result"] != block
+                or not unpack or unpack["inputs"] != [f"{MOD}:{block}"] or unpack["result"] != info["item"] or unpack["count"] != rice.PACK):
+            err(f"{block} must pack {rice.PACK} {item} and unpack into the same {rice.PACK}")
+    if sorted(rice.UNPACKING) != sorted(info["unpack"] for info in rice.STORAGE.values()):
+        err("tools/rice.py UNPACKING must name exactly the storage blocks' unpacking recipes")
+    for recipe in rice.SHAPELESS + rice.SHAPED:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").exists():
+            err(f"recipe/{recipe['id']}.json is missing")
+
+    # The tatami pairs, the full mat has its two halves and drops from its foot.
+    sides = ("north", "south", "east", "west")
+    state = load(ASSETS / "blockstates" / f"{rice.TATAMI['block']}.json") or {}
+    if set(state.get("variants", {})) != {f"facing={f},paired={p}" for f in sides for p in ("false", "true")}:
+        err("The tatami's blockstate needs every facing, alone and paired")
+    for name, info in rice.TATAMI_MATS.items():
+        state = load(ASSETS / "blockstates" / f"{name}.json") or {}
+        wanted = ({f"facing={f},part={p}" for f in sides for p in ("foot", "head")} if info["length"] == 2
+                  else {f"facing={f}" for f in sides})
+        if set(state.get("variants", {})) != wanted:
+            err(f"{name}'s blockstate needs a variant for every facing{' and part' if info['length'] == 2 else ''}")
+        loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {})
+        if info["length"] == 2 and '"part": "foot"' not in loot:
+            err(f"{name} must drop once, from its foot")
+
+    # Wild rice: drops from its lower half only, and a patch places it.
+    loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{rice.WILD_RICE['block']}.json") or {})
+    if '"half": "lower"' not in loot or f'"{MOD}:{rice.WILD_RICE["drops"]["item"]}"' not in loot:
+        err("Wild rice must drop its rice once, from its lower half")
+    if not (DATA / MOD / "worldgen" / "placed_feature" / f"patch_{rice.WILD_RICE['block']}.json").exists():
+        err("Wild rice needs its placed feature patch_wild_rice")
+
+    # The medley: Java's pieces are tools/rice.py's, and its recipe holds exactly them (a kelp roll as its slices) on a platter.
+    medley = java.get("RollMedleyBlock", "")
+    pieces = re.search(r"PIECES = List\.of\((.*?)\);", medley, re.S)
+    most = re.search(r"\bMAX = (\d+);", medley)
+    if not pieces or re.findall(r'"([a-z_]+)"', pieces.group(1)) != rice.MEDLEY["pieces"] or not most \
+            or int(most.group(1)) != len(rice.MEDLEY["pieces"]):
+        err("RollMedleyBlock.PIECES and MAX differ from tools/rice.py MEDLEY")
+    recipe = next((r for r in rice.SHAPELESS if r["result"] == rice.MEDLEY["block"]), {"inputs": []})
+    served = []
+    for ref in recipe["inputs"]:
+        cut = next((info for info in rice.CUTTING.values() if info["input"] == ref), None)
+        if split(ref)[1] != rice.MEDLEY["platter"]:
+            served += [part for part, count in cut["results"] for _ in range(count)] if cut else [split(ref)[1]]
+    if sorted(served) != sorted(rice.MEDLEY["pieces"]) or recipe["inputs"].count(f"{MOD}:{rice.MEDLEY['platter']}") != 1:
+        err("The rice roll medley must be made of exactly the rolls it serves, on one platter")
+    name, count = rice.MEDLEY["block"], len(rice.MEDLEY["pieces"])
+    for rolls in range(count + 1):
+        if not (ASSETS / "models" / "block" / f"{name}_{rolls}.json").exists():
+            err(f"{name} needs its model {name}_{rolls}.json")
+    state = load(ASSETS / "blockstates" / f"{name}.json") or {}
+    if set(state.get("variants", {})) != {f"facing={f},rolls={r}" for f in sides for r in range(count + 1)}:
+        err(f"{name}'s blockstate needs a variant for every facing and roll left")
+    loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {})
+    if f'"rolls": "{count}"' not in loot or f'"{MOD}:{rice.MEDLEY["platter"]}"' not in loot or '"minecraft:inverted"' not in loot:
+        err(f"{name} must drop itself only whole, and its platter otherwise")
+
+
+def check_soil():
+    """Soil, compost and storage (tools/soil.py): Java's numbers and registrations match it; Rich Soil counts as dirt and
+    its farmland as farmland; each crate and bag packs and unpacks nine; each block has its blockstate, item (but the
+    farmland), loot and words; the farmland drops Rich Soil."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (\d+);", java.get(source, ""))
+        return int(match.group(1)) if match else None
+
+    expected = {("RichSoilBlock", "BOOST"): soil.BOOST, ("RichFarmlandBlock", "WATER_REACH"): soil.WATER_REACH,
+                ("RichFarmlandBlock", "MAX_MOISTURE"): 7, ("OrganicCompostBlock", "TURN_CHANCE"): soil.COMPOST["turn_chance"],
+                ("OrganicCompostBlock", "LAST_STAGE"): soil.COMPOST["stages"] - 1, ("BasketBlockEntity", "SLOTS"): soil.BASKET_SLOTS,
+                ("BasketBlockEntity", "PICKUP_TICKS"): soil.PICKUP_TICKS}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} must be {value} (tools/soil.py)")
+    if len(soil.COMPOST["textures"]) != soil.COMPOST["stages"]:
+        err("tools/soil.py COMPOST needs a texture for each stage")
+
+    constructors = {soil.RICH_SOIL["block"]: "RichSoilBlock::new", soil.RICH_FARMLAND["block"]: "RichFarmlandBlock::new",
+                    soil.COMPOST["block"]: "OrganicCompostBlock::new"}
+    constructors.update({name: "RiceBagBlock::new" for name in soil.SACKS})
+    for name, constructor in constructors.items():
+        if f'registerBlock("{name}", {constructor}' not in main:
+            err(f"JugcraftAgriculture must register {name} with {constructor}")
+    crates = re.search(r'for \(String crate : List\.of\(([^)]*)\)\) \{\s*Block block = registerBlock\(crate, Block::new', main)
+    if not crates or re.findall(r'"([a-z_]+)"', crates.group(1)) != list(soil.CRATES):
+        err("JugcraftAgriculture must register tools/soil.py CRATES, in order, as plain blocks")
+    baskets = re.search(r'for \(String name : List\.of\(([^)]*)\)\) \{\s*Block basket = registerBlock\(name, BasketBlock::new', main)
+    if not baskets or re.findall(r'"([a-z_]+)"', baskets.group(1)) != list(soil.BASKETS) or 'Jugcraft.id("basket")' not in main:
+        err("JugcraftAgriculture must register tools/soil.py BASKETS as BasketBlocks, with the jugcraft:basket block entity")
+    if f'registerBlock("{soil.RICH_FARMLAND["block"]}"' in main and f'registerItem("{soil.RICH_FARMLAND["block"]}"' in main:
+        err("Rich Soil Farmland has no item: a hoe makes it")
+
+    # Packing: nine in, the same nine out.
+    for block, info in list(soil.CRATES.items()) + list(soil.SACKS.items()):
+        pack = next((r for r in soil.SHAPED if r["id"] == block), None)
+        unpack = next((r for r in soil.SHAPELESS if r["id"] == info["unpack"]), None)
+        if (not pack or "".join(pack["pattern"]).count("#") != soil.PACK or pack["key"] != {"#": info["item"]}
+                or not unpack or unpack["inputs"] != [f"{MOD}:{block}"] or unpack["result"] != info["item"] or unpack["count"] != soil.PACK):
+            err(f"{block} must pack {soil.PACK} {info['item']} and unpack into the same {soil.PACK}")
+    if sorted(soil.UNPACKING) != sorted(info["unpack"] for info in list(soil.CRATES.values()) + list(soil.SACKS.values())):
+        err("tools/soil.py UNPACKING must name exactly the crates' and bags' unpacking recipes")
+    for recipe in soil.SHAPELESS + soil.SHAPED:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").exists():
+            err(f"recipe/{recipe['id']}.json is missing")
+
+    # Tags: rich soil is dirt, its farmland takes crops; tools reach them.
+    def tagged(path, entry):
+        return rid_of(entry) in (load(DATA / "minecraft" / "tags" / "block" / f"{path}.json") or {}).get("values", [])
+    if not tagged("dirt", soil.RICH_SOIL["block"]):
+        err("Rich Soil must be in minecraft:dirt")
+    for tag in ("supports_crops", "grows_crops"):
+        if not tagged(tag, soil.RICH_FARMLAND["block"]):
+            err(f"Rich Soil Farmland must be in minecraft:{tag}")
+    for name in (soil.RICH_SOIL["block"], soil.RICH_FARMLAND["block"], soil.COMPOST["block"]):
+        if not tagged("mineable/shovel", name):
+            err(f"{name} must be mineable with a shovel")
+    for name in (*soil.CRATES, *soil.BASKETS):
+        if not tagged("mineable/axe", name):
+            err(f"{name} must be mineable with an axe")
+
+    for name in soil.blocks():
+        for path in (ASSETS / "blockstates" / f"{name}.json", DATA / MOD / "loot_table" / "blocks" / f"{name}.json"):
+            if not path.exists():
+                err(f"{name} needs {path.relative_to(ROOT)}")
+        if name in soil.items() and not (ASSETS / "items" / f"{name}.json").exists():
+            err(f"{name} needs its item model")
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"{name} has no words")
+    if f"container.{MOD}.basket" not in lang:
+        err("The basket's screen has no title")
+    state = load(ASSETS / "blockstates" / f"{soil.RICH_FARMLAND['block']}.json") or {}
+    if set(state.get("variants", {})) != {f"moisture={m}" for m in range(8)}:
+        err("Rich Soil Farmland's blockstate needs every moisture")
+    state = load(ASSETS / "blockstates" / f"{soil.COMPOST['block']}.json") or {}
+    if set(state.get("variants", {})) != {f"composting={s}" for s in range(soil.COMPOST["stages"])}:
+        err("Organic Compost's blockstate needs every stage")
+    loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{soil.RICH_FARMLAND['block']}.json") or {})
+    if f'"{MOD}:{soil.RICH_SOIL["block"]}"' not in loot:
+        err("Rich Soil Farmland must drop Rich Soil")
+
+
+def check_cakes():
+    """The cakes (tools/cakes.py): Java's PieFilling holds them after the pies, as CAKES has them (ID, slice food and sponge
+    colour, in order); CakeBlock's height and quarters match tools/cakes.py and tools/cake_data.py; the cakes, the Burnt
+    Cake and Cake Batter are registered; every cake (and the Burnt Cake) has a model for each slice gone, a blockstate for
+    each slice and facing (turned as the model faces north), its textures (the toppings' too where it has them), words and
+    loot (only while whole); each topping stands inside one quarter but the jam the quarters share; the raw cakes and slices
+    have their words and textures, the raw cakes and the batter their recipes; the drawing they were rebuilt from is kept."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    filling = java.get("PieFilling", "")
+    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6})\)[,;]', filling, re.M)
+    wanted = [(cake.upper(), cake, str(info["food"][0]), str(info["food"][1]), f"{info['color']:06X}") for cake, info in cakes.CAKES.items()]
+    if [(c, i, f, s_, col.upper()) for c, i, f, s_, col in declared] != wanted:
+        err(f"PieFilling.java's cakes {declared} differ from tools/cakes.py CAKES (ID, slice food, colour, in order)")
+    last_pie = max((filling.find(f'"{ag.pie_name(f)}"') for f in ag.PIES["fillings"]), default=-1)
+    if declared and filling.find(f'"{next(iter(cakes.CAKES))}"') < last_pie:
+        err("PieFilling.java must list the cakes after the pies: the Hearth Oven saves a filling by its place")
+    block = java.get("CakeBlock", "")
+    height = re.search(r"\bint HEIGHT = (\d+);", block)
+    if not height or int(height.group(1)) != cakes.HEIGHT:
+        err("CakeBlock.HEIGHT differs from tools/cakes.py HEIGHT")
+    quarters = [tuple(map(int, q)) for q in re.findall(r"\{(\d+), (\d+), (\d+), (\d+)\}", block.split("QUARTERS =", 1)[-1].split(";", 1)[0])]
+    if quarters != [(x0, z0, x1, z1) for (x0, z0), (x1, z1) in cake_data.QUARTERS]:
+        err("CakeBlock.QUARTERS differs from tools/cake_data.py QUARTERS (the order slices are taken)")
+    for call in ("filling.cake ? new CakeBlock(filling, props)", 'registerBlock("burnt_cake", props -> new CakeBlock(null, props)',
+                 f'plain("{cakes.BATTER}"'):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    if 'cake ? "burnt_cake" : "burnt_pie"' not in filling or "pie.burnt()" not in java.get("HearthOvenBlockEntity", ""):
+        err("A cake left in the Hearth Oven must burn into a Burnt Cake (PieFilling.burnt, HearthOvenBlockEntity)")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for cake in cakes.blocks():
+        if f"block.{MOD}.{cake}" not in lang:
+            err(f"{cake} has no words")
+        for bites in range(len(cake_data.QUARTERS)):
+            if not (ASSETS / "models" / "block" / f"{cake_data.model_name(cake, bites)}.json").exists():
+                err(f"{cake} needs its model {cake_data.model_name(cake, bites)}")
+        variants = (load(ASSETS / "blockstates" / f"{cake}.json") or {}).get("variants", {})
+        for bites in range(len(cake_data.QUARTERS)):
+            for facing, turn in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+                variant = variants.get(f"bites={bites},facing={facing}", {})
+                if variant.get("model") != f"{MOD}:block/{cake_data.model_name(cake, bites)}" or variant.get("y", 0) != turn:
+                    err(f"{cake}'s blockstate must show {cake_data.model_name(cake, bites)} turned {turn} for facing={facing}")
+        if '"bites": "0"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{cake}.json") or {}):
+            err(f"{cake} must drop only while whole")
+        textures = ["top", "front", "side", "inside"] + (["toppings"] if cake in cakes.BARS or cake in cakes.CANDLES or cake in cakes.JAM else [])
+        for texture in textures:
+            path = ASSETS / "textures" / "block" / f"{cake}_{texture}.png"
+            if not path.exists():
+                err(f"{cake} needs its texture {cake}_{texture}")
+            elif Image.open(path).size != (16, 16):
+                err(f"{cake}_{texture}.png must be 16 x 16")
+    for cake in cakes.CAKES:
+        for box in cakes.topping_boxes(cake):
+            if cake in cakes.JAM and box == cakes.jam_box(cake):
+                continue
+            lo, hi = cakes.turn(*box)
+            quarter = cake_data.quarter_of(lo, hi)
+            (x0, z0), (x1, z1) = cake_data.QUARTERS[quarter]
+            if not (x0 <= lo[0] and hi[0] <= x1 and z0 <= lo[2] and hi[2] <= z1):
+                err(f"{cake}'s topping at {lo}-{hi} crosses a cut: each topping must stand inside one quarter")
+        for item in (cakes.raw(cake), cakes.slice_item(cake)):
+            if f"item.{MOD}.{item}" not in lang or not (ASSETS / "textures" / "item" / f"{item}.png").exists():
+                err(f"The cakes need the words and texture of {item}")
+        if not (DATA / MOD / "recipe" / f"{cakes.raw(cake)}.json").exists():
+            err(f"{cakes.raw(cake)} needs its recipe")
+    if not (DATA / MOD / "recipe" / f"{cakes.BATTER}.json").exists():
+        err("Cake Batter needs its recipe")
+    if not (ROOT / "art" / "owner-library" / "drawings" / "cakes_and_bakes.png").exists():
+        err("The owner's drawing the cakes are rebuilt from (art/owner-library/drawings/cakes_and_bakes.png) is missing")
+
+
+def check_orchard():
+    """Orchards (tools/orchard.py): Java's OrchardTree, OrchardLeavesBlock and registrations match it; each tree's sapling
+    (planted by its seed, which a fruit crafts into), its leaves (a model for each fruit stage), their loot, tags and words;
+    each tree as a feature of its trunk (oak, or the banana's own stem) and its own leaves in the shape TREES gives, a wild
+    patch where its sapling could stand, and the Jugcraft biomes that pick it; every texture Jugcraft draws for it; the
+    banana's stem; the juices' recipes and textures. (The pies, preserves, foods and set-down juices are checked with the
+    others: check_pies, check_pantry, the item check, check_menu.)"""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    declared = re.findall(r'^\t([A-Z]+)\("([a-z_]+)", "([a-z_]+)", (\d+), (\d+)\)[,;]', java.get("OrchardTree", ""), re.M)
+    wanted = [(tree.upper(), tree, info["seed"], str(info["pick"][0]), str(info["pick"][1])) for tree, info in orchard.TREES.items()]
+    if declared != wanted:
+        err(f"OrchardTree.java's trees {declared} differ from tools/orchard.py TREES (id, seed, pick, in order)")
+    chance = re.search(r"\bint FRUIT_CHANCE = (\d+);", java.get("OrchardLeavesBlock", ""))
+    if not chance or int(chance.group(1)) != orchard.FRUIT_CHANCE:
+        err("OrchardLeavesBlock.FRUIT_CHANCE differs from tools/orchard.py FRUIT_CHANCE")
+    for call in ("registerOrchardTrees();", "registerOrchards();", "props -> new OrchardLeavesBlock(tree, props)",
+                 "props -> new SaplingBlock(tree.grower, props)", 'Jugcraft.id(id + "_tree")'):
+        if call not in main + java.get("OrchardTree", ""):
+            err(f"The orchards' Java must call {call}")
+
+    def tagged(registry, path, entry):
+        return f"{MOD}:{entry}" in (load(DATA / "minecraft" / "tags" / registry / f"{path}.json") or {}).get("values", [])
+    for tree, info in orchard.TREES.items():
+        sapling, leaves, seed = orchard.sapling(tree), orchard.leaves(tree), info["seed"]
+        if ag.ITEMS.get(seed, {}).get("plants") != sapling or sapling not in ag.planted_blocks():
+            err(f"{seed} must plant {sapling}")
+        recipe = next((r for r in orchard.SHAPELESS if r["id"] == seed), None)
+        if not recipe or recipe["inputs"] != [f"{MOD}:{tree}"] or not (DATA / MOD / "recipe" / f"{seed}.json").exists():
+            err(f"A {tree} must craft into its {seed}")
+        state = load(ASSETS / "blockstates" / f"{leaves}.json") or {}
+        if set(state.get("variants", {})) != {f"fruit={f}" for f in range(len(orchard.LEAF_STAGES))}:
+            err(f"{leaves}: blockstate does not cover every fruit stage")
+        for stage in orchard.LEAF_STAGES:
+            model = load(ASSETS / "models" / "block" / f"{leaves}{stage}.json") or {}
+            if model.get("textures", {}).get("all") != f"{MOD}:block/{leaves}{stage}":
+                err(f"{leaves}{stage} needs its model, wearing block/{leaves}{stage}")
+        for kind, name in (("block", f"{leaves}{stage}") for stage in orchard.LEAF_STAGES):
+            if not (ASSETS / "textures" / kind / f"{name}.png").exists():
+                err(f"Missing texture {kind}/{name}")
+        for kind, name in (("block", sapling), ("item", tree), ("item", seed)):
+            if not (ASSETS / "textures" / kind / f"{name}.png").exists():
+                err(f"Missing texture {kind}/{name}")
+        for path in (ASSETS / "blockstates" / f"{sapling}.json", ASSETS / "models" / "block" / f"{sapling}.json",
+                     ASSETS / "items" / f"{leaves}.json", ASSETS / "items" / f"{tree}.json", ASSETS / "items" / f"{seed}.json"):
+            if not path.exists():
+                err(f"{tree} tree needs {path.relative_to(ROOT)}")
+        for key in (f"block.{MOD}.{sapling}", f"block.{MOD}.{leaves}", f"item.{MOD}.{tree}", f"item.{MOD}.{seed}"):
+            if key not in lang:
+                err(f"Missing words for {key}")
+        loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{leaves}.json") or {})
+        if f'"{MOD}:{seed}"' not in loot or f'"{MOD}:{tree}"' not in loot or '"fruit": "2"' not in loot:
+            err(f"{leaves} must drop its seed now and then, and its {tree}s when ripe")
+        if f'"{MOD}:{seed}"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{sapling}.json") or {}):
+            err(f"{sapling} must give its {seed} back")
+        if not (tagged("block", "leaves", leaves) and tagged("item", "leaves", leaves) and tagged("block", "saplings", sapling)):
+            err(f"The {tree} tree's leaves and sapling must be in minecraft:leaves and minecraft:saplings")
+        # The tree: its trunk under its own leaves, in its shape; wild where its sapling could stand; picked by its biomes.
+        feature = load(DATA / MOD / "worldgen" / "feature" / f"{orchard.feature(tree)}.json") or {}
+        placer = f"minecraft:{info['foliage'].get('type', 'blob')}_foliage_placer"
+        if (feature.get("trunk_provider", {}).get("id") != orchard.log(tree)
+                or feature.get("foliage_placer", {}).get("type") != placer
+                or feature.get("foliage_provider", {}).get("id") != f"{MOD}:{leaves}"
+                or feature.get("trunk_placer", {}).get("base_height") != info["trunk"]["base_height"]
+                or feature.get("trunk_placer", {}).get("height_rand_a") != info["trunk"]["height_rand_a"]
+                or feature.get("foliage_placer", {}).get("radius") != info["foliage"]["radius"]
+                or feature.get("foliage_placer", {}).get("height") != info["foliage"]["height"]):
+            err(f"worldgen/feature/{orchard.feature(tree)}.json differs from tools/orchard.py TREES[{tree!r}]")
+        patch = load(DATA / MOD / "worldgen" / "placed_feature" / f"patch_{orchard.feature(tree)}.json") or {}
+        text = json.dumps(patch)
+        if (patch.get("feature") != f"{MOD}:{orchard.feature(tree)}" or f'"chance": {info["rarity"]}' not in text
+                or f'"state": "{MOD}:{sapling}"' not in text):
+            err(f"patch_{orchard.feature(tree)} must place the {tree} tree, one in {info['rarity']} chunks, where its sapling could stand")
+        if bm.PLACED_TREES.get(orchard.checked(tree)) != (f"{MOD}:{orchard.feature(tree)}", f"{MOD}:{sapling}"):
+            err(f"tools/biomes.py PLACED_TREES must place {orchard.checked(tree)} where the {tree} sapling could stand")
+        for biome, share in info["regions"].items():
+            if [f"{MOD}:{orchard.checked(tree)}", share] not in bm.BIOMES[biome]["trees"]["picks"]:
+                err(f"tools/biomes.py {biome} must pick {orchard.checked(tree)} ({share})")
+    # The banana's stem: a pillar block (registered, with its item) that is a log to its fronds and to an axe, but no fuel.
+    stem = orchard.BANANA_STEM["block"]
+    if f'registerBlock("{stem}", RotatedPillarBlock::new' not in main:
+        err(f"JugcraftAgriculture must register {stem} as a RotatedPillarBlock")
+    if any(tree_info.get("log", f"{MOD}:{stem}") != f"{MOD}:{stem}" for tree_info in orchard.TREES.values()):
+        err("tools/orchard.py: a tree's own log must be the banana's stem, the only one registered")
+    state = load(ASSETS / "blockstates" / f"{stem}.json") or {}
+    if set(state.get("variants", {})) != {"axis=x", "axis=y", "axis=z"}:
+        err(f"{stem}: blockstate does not cover every axis")
+    for name in (stem, f"{stem}_top"):
+        if not (ASSETS / "textures" / "block" / f"{name}.png").exists():
+            err(f"Missing texture block/{name}")
+    if (not (ASSETS / "items" / f"{stem}.json").exists() or f"block.{MOD}.{stem}" not in lang
+            or f'"{MOD}:{stem}"' not in json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{stem}.json") or {})):
+        err(f"{stem} needs its item, words and loot")
+    if (not tagged("block", "logs", stem) or not tagged("item", "logs", stem) or not tagged("block", "mineable/axe", stem)
+            or tagged("item", "logs_that_burn", stem)):
+        err(f"{stem} must be in minecraft:logs and minecraft:mineable/axe, and not in minecraft:logs_that_burn")
+    for name in orchard.DISHES:
+        for kind, path in (("item", name), ("block", f"menu/{name}")):
+            if not (ASSETS / "textures" / kind / f"{path}.png").exists():
+                err(f"Missing texture {kind}/{path}")
+        if not (DATA / MOD / "recipe" / f"{name}.json").exists():
+            err(f"recipe/{name}.json is missing")
+    for preserve in orchard.PRESERVES:
+        if ag.PANTRY["preserves"].get(preserve) != orchard.PRESERVES[preserve] or preserve not in ag.POT_RECIPES:
+            err(f"{preserve} must be a preserve (tools/agriculture.py PANTRY) cooked in the Cooking Pot")
+    for filling, info in orchard.PIES.items():
+        if ag.PIES["fillings"].get(filling) != info:
+            err(f"The {filling} pie must be one of tools/agriculture.py PIES' fillings")
+
+
+def check_kitchen():
+    """The Farmhouse Kitchen: Java's numbers, knives and cabinet woods match tools/kitchen.py; every cutting recipe is
+    written and never a gain, raw or cooked; the knife tag holds every knife; the owner's textures are imported unchanged."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("KitchenStoveBlock", "LIGHT"): kitchen.STOVE["light"], ("KitchenStoveBlock", "BURN"): kitchen.STOVE["burn"],
+                ("KitchenStoveBlockEntity", "SLOTS"): kitchen.STOVE["slots"], ("KitchenStoveBlockEntity", "SPEED"): kitchen.STOVE["speed"],
+                ("SkilletBlockEntity", "CAPACITY"): kitchen.SKILLET["capacity"], ("SkilletBlockEntity", "SPEED"): kitchen.SKILLET["speed"],
+                ("KitchenCabinetBlockEntity", "SLOTS"): kitchen.CABINET_SLOTS, ("JugcraftAgriculture", "KNIFE_DAMAGE"): kitchen.KNIFE_DAMAGE,
+                ("JugcraftAgriculture", "KNIFE_SPEED"): kitchen.KNIFE_SPEED}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} is {number(source, name)}, tools/kitchen.py says {value}")
+    main = java.get("JugcraftAgriculture", "")
+    knives = dict(re.findall(r'\bknife\("([a-z_]+)", (?:ToolMaterial|io\.github\.jimbozoomer\.jugcraft\.gear\.JugcraftGear)\.([A-Z]+)\)', main))
+    if knives != {knife: info["tier"] for knife, info in kitchen.KNIVES.items()}:
+        err(f"JugcraftAgriculture knives {knives} differ from tools/kitchen.py KNIVES")
+    woods = re.search(r"CABINET_WOODS = List\.of\(([^)]*)\)", main)
+    if not woods or re.findall(r'"([a-z_]+)"', woods.group(1)) != list(kitchen.CABINET_WOODS):
+        err("JugcraftAgriculture.CABINET_WOODS differs from tools/kitchen.py CABINET_WOODS")
+    for block in (kitchen.STOVE["block"], kitchen.SKILLET["block"], kitchen.BOARD["block"]):
+        if f'registerBlock("{block}"' not in main:
+            err(f"{block} is not registered in JugcraftAgriculture")
+    if f'Jugcraft.id("{kitchen.CUTTING_TYPE.split(":")[1]}")' not in main or f'"{kitchen.KNIFE_TAG.split(":")[1]}"' not in main:
+        err("JugcraftAgriculture does not register the cutting recipe type or the knives tag of tools/kitchen.py")
+
+    # The knives tag: every kitchen knife and the Carving Knife.
+    tag = load(DATA / MOD / "tags" / "item" / f"{kitchen.KNIFE_TAG.split(':')[1]}.json") or {}
+    if set(tag.get("values", [])) != {f"{MOD}:{knife}" for knife in list(kitchen.KNIVES) + ["carving_knife"]}:
+        err(f"The item tag {kitchen.KNIFE_TAG} should hold every kitchen knife and the Carving Knife")
+
+    # Cutting recipes: one file each, the right type, tool and results, and never more food than the whole.
+    folder = DATA / MOD / "recipe" / "cutting"
+    if sorted(path.stem for path in folder.glob("*.json")) != sorted(kitchen.CUTTING):
+        err("recipe/cutting/ files differ from CUTTING in tools/kitchen.py")
+    foods = {name: info["food"] for name, info in ag.ITEMS.items() if "food" in info}
+
+    def food(ref):
+        namespace, name = split(ref) if ":" in ref else (MOD, ref)
+        return VANILLA_FOOD.get(name) if namespace == "minecraft" else foods.get(name)
+
+    def worth(value, count=1):
+        return count * value[0], count * value[0] * value[1] * 2
+
+    for name, info in kitchen.CUTTING.items():
+        recipe = load(folder / f"{name}.json") or {}
+        results = [{"id": result if ":" in result else f"{MOD}:{result}", **({"count": count} if count != 1 else {})}
+                   for result, count in info["results"]]
+        if (recipe.get("type") != kitchen.CUTTING_TYPE or recipe.get("ingredient") != info["input"]
+                or recipe.get("tool") != f"#{kitchen.KNIFE_TAG}" or recipe.get("results") != results):
+            err(f"cutting/{name}: the file differs from tools/kitchen.py")
+        whole = food(info["input"])
+        if whole is None:
+            continue
+        nutrition = saturation = 0.0
+        cooked_nutrition = cooked_saturation = 0.0
+        for result, count in info["results"]:
+            part = food(result)
+            if part is None:
+                continue
+            nutrition, saturation = nutrition + worth(part, count)[0], saturation + worth(part, count)[1]
+            cooked = next((out for out, cook in ag.COOKING.items() if cook["input"] == result), None)
+            if cooked:
+                cooked_nutrition += worth(food(cooked), count)[0]
+                cooked_saturation += worth(food(cooked), count)[1]
+        if nutrition > worth(whole)[0] or saturation > worth(whole)[1] + 1e-6:
+            err(f"cutting/{name}: the parts ({nutrition:g} hunger, {saturation:.2f} saturation) outweigh the whole {info['input']}")
+        cooked_whole = COOKED_WHOLE.get(split(info["input"])[1])
+        if cooked_nutrition and (not cooked_whole or cooked_nutrition > worth(VANILLA_FOOD[cooked_whole])[0]
+                                 or cooked_saturation > worth(VANILLA_FOOD[cooked_whole])[1] + 1e-6):
+            err(f"cutting/{name}: the cooked parts outweigh {cooked_whole or 'a cooked whole'}")
+
+    # The owner's textures: byte-for-byte copies of the library (and the two recoloured knives).
+    for problem in owner_art.errors():
+        err(problem)
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in kitchen.TEXT:
+        if key not in lang:
+            err(f"Missing lang key {key}")
+    used = "\n".join(java.get(source, "") for source in ("KitchenStoveBlock", "SkilletBlock", "CuttingBoardBlock", "KitchenCabinetBlockEntity"))
+    for key in kitchen.TEXT:
+        if f'"{key}"' not in used:
+            err(f"tools/kitchen.py TEXT {key} is not used by the kitchen's Java")
 
 
 def check_festival(java, main):
@@ -6533,16 +7219,17 @@ def check_pies(java, main):
         found = number(source, name)
         if found is None or abs(found - value) > 1e-9:
             err(f"{source}.{name} = {found} differs from PIES in tools/agriculture.py ({value})")
-    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6})\)', java.get("PieFilling", ""), re.M)
-    wanted = [(f, str(i["food"][0]), str(i["food"][1]), f"{i['color']:06X}") for f, i in pies["fillings"].items()]
-    if [(name, food, sat, color.upper()) for _, name, food, sat, color in declared] != wanted:
-        err("PieFilling.java's fillings (slice food, colour, in order) differ from PIES in tools/agriculture.py")
+    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", "([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6})\)', java.get("PieFilling", ""),
+                          re.M)
+    wanted = [(f, ag.pie_name(f), str(i["food"][0]), str(i["food"][1]), f"{i['color']:06X}") for f, i in pies["fillings"].items()]
+    if [(name, pie, food, sat, color.upper()) for _, name, pie, food, sat, color in declared] != wanted:
+        err("PieFilling.java's fillings (pie, slice food, colour, in order) differ from PIES in tools/agriculture.py")
     for call in ('registerBlock("hearth_oven", HearthOvenBlock::new', 'registerItem("pastry_dough"', "for (PieFilling filling : PieFilling.values())",
                  'registerBlock("burnt_pie", props -> new PieBlock(null, props)'):
         if call not in main:
             err(f"JugcraftAgriculture.java must call {call}")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    pies_blocks = [f"{f}_pie" for f in pies["fillings"]] + [pies["burnt"]]
+    pies_blocks = [ag.pie_name(f) for f in pies["fillings"]] + [pies["burnt"]]
     for block in pies_blocks:
         if f"block.jugcraft.{block}" not in lang:
             err(f"Pie baking has no words for {block}")
@@ -6557,11 +7244,12 @@ def check_pies(java, main):
             if not (ASSETS / "textures" / "block" / f"{texture}.png").exists():
                 err(f"{block} needs its texture {texture}")
     for filling in pies["fillings"]:
-        for item in (f"raw_{filling}_pie", f"{filling}_pie_slice"):
+        pie = ag.pie_name(filling)
+        for item in (f"raw_{pie}", f"{pie}_slice"):
             if f"item.jugcraft.{item}" not in lang or not (ASSETS / "textures" / "item" / f"{item}.png").exists():
                 err(f"Pie baking needs the words and texture of {item}")
-        if not (DATA / "jugcraft" / "recipe" / f"raw_{filling}_pie.json").exists():
-            err(f"raw_{filling}_pie needs its recipe")
+        if not (DATA / "jugcraft" / "recipe" / f"raw_{pie}.json").exists():
+            err(f"raw_{pie} needs its recipe")
     if f'"{pies["wood_tag"].split(":")[1]}"' not in java.get("HearthOvenBlockEntity", ""):
         err("HearthOvenBlockEntity.WOOD must be the tag PIES['wood_tag'] in tools/agriculture.py")
     for path in (DATA / "jugcraft" / "recipe" / "hearth_oven.json", DATA / "jugcraft" / "recipe" / "pastry_dough.json",
@@ -9986,6 +10674,13 @@ def main():
     check_guide_books()
     check_handbook(registered)
     check_agriculture()
+    check_kitchen()
+    check_feasts()
+    check_menu()
+    check_rice()
+    check_soil()
+    check_orchard()
+    check_cakes()
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()

@@ -1511,6 +1511,15 @@ def main():
     import styx
     styx.textures()
 
+    # The feasts and food displays' plate, which the owner's library has no drawing for (tools/feasts_textures.py).
+    import feasts_textures
+    feasts_textures.draw_all(save)
+
+    # Last: the owner's own textures, copied from the shared library as drawn (tools/owner_art.py), so nothing above
+    # draws over them.
+    import owner_art
+    owner_art.write_all()
+
 
 if __name__ == "__main__":
     main()

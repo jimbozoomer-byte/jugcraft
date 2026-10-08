@@ -212,6 +212,66 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The *Arcane Concordance* codex (Modonomicon) unlocks its pages with your research. Jade, JEI and LambDynamicLights show the bench, its workings and the lantern's glow when installed. Jugcraft's weapons no longer receive Spell Engine's automatic weapon skills.
 - Record: [arcane-concordance-first-light.md](docs/features/arcane-concordance-first-light.md); the whole plan: [ARCANE_CONCORDANCE.md](docs/ARCANE_CONCORDANCE.md).
 
+### Unmerged: Fruit crops
+- Five fruits in Jugcraft's own art, asked for by the owner before their milkshakes and pies and tarts: **strawberries, blueberries, coffee, plums and bananas**.
+- **Strawberry Plant, Blueberry Bush and Coffee Plant:** bushes on farmland, planted from seeds that short grass, wild plants and the fruit give. Ripe, a right-click picks them and they fruit again.
+- **Plum and banana trees,** grown from a Plum Pit and a Banana Pup as the orchards' trees are; the banana stands on a Banana Stem of its own under drooping fronds.
+- **Wild** in forests, flower fields, taigas, hills and jungles, and in the Orchard, the Tropics and the Rainforest.
+- **Coffee Beans,** roasted from coffee cherries, now go into the Coffee Cake; **Strawberry, Blueberry and Plum Jam** cook into Mason Jars.
+- Details: [docs/features/fruit-crops.md](docs/features/fruit-crops.md).
+
+### Unmerged: Cakes
+- Seven cakes the owner drew, rebuilt from their drawing: **Carrot Cake, Birthday Cake, Ice Cream Cake, Red Velvet Cake, Cheesecake, Coffee Cake and Apple Cake**, with the drawing's carrots, candles, berry jam and apple slices on top.
+- Baked in the **Hearth Oven** as the pies are: **Cake Batter** (wheat, an egg, sugar and milk), a sugar and the cake's own ingredients make a raw cake. Left in too long, it comes out a **Burnt Cake**.
+- Set down whole, facing you, and eaten or cut with a knife into slices a quarter at a time, the front right quarter first, showing the cake's layers inside.
+- Details: [docs/features/cakes.md](docs/features/cakes.md).
+
+### Unmerged: Orchards
+- The sixth slice of the kitchen and cooking expansion: four fruit trees in Jugcraft's own art, as the owner chose (their library has no fruit trees yet).
+- **Pear, peach, lemon and orange trees** grow from their seeds (a peach's pit) on oak trunks, each in its own shape. Like the apple tree, their leaves blossom and then hang with ripe fruit; a right-click picks it and the tree fruits again. A fruit crafts into its seed.
+- **Wild trees:** pears and peaches in the Orchard, lemons and oranges in the Mediterranean Forest and the Subtropics, and all four in vanilla forests, plains, savannas and jungles.
+- **What the fruit makes:** Orange Juice and Lemonade (set down as the menu's drinks are), Peach and Lemon Meringue Pies from the Hearth Oven, and Orange Marmalade, Peach Preserves and Pear Butter in Mason Jars.
+- Details: [docs/features/orchards.md](docs/features/orchards.md).
+
+### Unmerged: Soil, compost and storage
+- The fifth slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **Organic Compost** (dirt, straw, bone meal and rotten flesh) rots through four stages into **Rich Soil**, faster when wet.
+- **Rich Soil** and **Rich Soil Farmland** (a hoe tills it) give whatever grows on them an extra random tick, about twice the pace. The farmland keeps moist as farmland does, is never trampled, and dries back into Rich Soil.
+- **Produce crates** for beetroot, cabbage, carrots, corn, onions, potatoes and tomatoes, and a **Bag of Corn Kernels**, nine to a block. The Pumpkin Crate is unchanged.
+- **Wooden and Bamboo Baskets:** nine-slot storage blocks, open at the top, that take in items dropped into them. The Foraging Basket is unchanged.
+- Details: [docs/features/soil-compost-and-storage.md](docs/features/soil-compost-and-storage.md).
+
+### Unmerged: Rice and wet farming
+- The fourth slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **Rice paddies:** rice, its own seed, plants into still water one block deep over bog soil and grows two blocks tall; picking a ripe plant gives 2-3 rice panicles and leaves the stalks standing. Flooded soil counts as moist farmland, and the plant keeps its water when broken. Rice drops from grass, and **wild rice** grows in swamp and river shallows.
+- **Straw and storage:** the Cutting Board cuts a panicle into two rice and a straw. A Bag of Rice, a Rice Bale and a Straw Bale each hold nine.
+- **Tatami** woven from straw pair into two-block mats as you lay them; Full and Half Tatami Mats lie a pixel thick.
+- **Rice dishes:** cooked, fried and mushroom rice, salmon, cod and kelp rolls and kelp roll slices, each set down as a 3D model like the menu's, and the **Rice Roll Medley**, a platter served a roll at a time.
+- Details: [docs/features/rice-and-wet-farming.md](docs/features/rice-and-wet-farming.md).
+
+### Unmerged: The menu
+- The third slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **55 new items:** drinks (hot cocoa, creamy corn drink, melon juice, glow berry custard, and a milk bottle that clears effects), soups and stews, plated meals and pastas, sandwiches, the hamburger, wraps and tacos, dumplings, ham and smoked ham, corn dogs, a barbecue stick and popsicles, honey and sweet berry cookies, caramel popcorn, boiled corn, cornbread, tortillas and chips, and the doughs and batters they start from. No dish gives more than 3 hunger over its ingredients.
+- **Every dish sets down:** sneak and use it on a block to set it down as a 3D model of the owner's icon, facing you; an empty hand takes it back.
+- **The owner's art:** the Cooking Pot is now the owner's iron pot, and the onion, vegetable and pumpkin soups, cabbage rolls, roasted corn and mulled cider wear the owner's icons (same IDs, recipes and food). Popcorn set down is the owner's popcorn box. Roasted and boiled corn give a corncob back.
+- **Nachos,** a sixth feast, and **Dog Food** and **Horse Feed** for your own tamed wolf or horse.
+- Details: [docs/features/the-menu.md](docs/features/the-menu.md).
+
+### Unmerged: Feasts and food displays
+- The second slice of the kitchen and cooking expansion, in the owner's own farming and food textures.
+- **Five feasts:** Roast Chicken, Honey-Glazed Ham, Shepherd's Pie, Stuffed Pumpkin and the Gleaming Salad (it glows). Placed whole, served four times: a bowl takes a serving away, a hungry player eats one there, and the model is eaten down to leftovers that clear for a bone or seeds. Four servings give about what the ingredients do.
+- **Pies:** the apple pie wears the owner's art (same ID and baking); a new chocolate pie and sweet berry cheesecake bake in the Hearth Oven. Sneak and use vanilla's pumpkin pie on a block to set it down and cut it in four slices that add up to the pie.
+- **Plate, Platter and Serving Tray** to show food on: one thing on a plate, four on a platter or a tray.
+- Details: [docs/features/feasts-and-food-displays.md](docs/features/feasts-and-food-displays.md).
+
+### Unmerged: Farmhouse Kitchen (the stove, skillet, cutting board, knives and cabinets)
+- The first slice of the kitchen and cooking expansion, in the owner's own farming and food textures, copied unchanged from their library.
+- **Kitchen Stove:** lit with flint and steel and put out with a shovel. It heats whatever stands on it (a Cooking Pot, a kettle or a Skillet). With nothing on top, its hob cooks six foods at twice a campfire's pace.
+- **Skillet:** fries up to 16 of one food on any heat source.
+- **Cutting Board** and seven **kitchen knives** (flint to netherite): cut meat, fish, cabbage, pumpkins and cakes into parts that are never worth more than the whole. Every knife, the Carving Knife too, also slices pies, cakes and the roast turkey.
+- **Kitchen cabinets** in eleven woods, and sixteen new foods.
+- The ten-slice plan for the expansion is in [docs/branches/AGRICULTURE.md](docs/branches/AGRICULTURE.md#the-kitchen-and-cooking-expansion-planned). Details: [docs/features/farmhouse-kitchen.md](docs/features/farmhouse-kitchen.md).
+
 ### Unmerged: The fall fair in Minecraft's own look
 - The owner found that nothing in the fall fair looked like Minecraft (its eyes, mouths, brass and bulbs). Every fair texture is now drawn at vanilla's density, 16 texels to a block, and scaled up to its file's size, so models and UVs are unchanged.
 - **High Striker:** painted planks, a brass rail and bell lit like a gold block, flat glass lamps, a plain scale with ticks and a pixel-star sign. **Ring Toss:** a plank crate banded in red and white, bottles lit like vanilla glass and a striped ring.
