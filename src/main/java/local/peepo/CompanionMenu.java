@@ -59,6 +59,15 @@ public final class CompanionMenu extends AbstractContainerMenu {
             });
         }
         refreshRecipes();
+        if(npc!=null && stillValid(inventory.player))npc.openSettings(this);
+    }
+    /** The exact server menu must still be open; handles disconnects and replaced menus without player scans. */
+    boolean editing(PeepoEntity companion){
+        var player=playerInventory.player;
+        return npc==companion && !player.isRemoved() && player.containerMenu==this && stillValid(player);
+    }
+    @Override public void removed(Player player){
+        try{super.removed(player);}finally{if(npc!=null)npc.closeSettings(this);}
     }
     private net.minecraft.world.level.block.entity.BlockEntity recipeStation(int row){
         if(npc==null || row<0 || row>=4 || !stillValid(playerInventory.player))return null;
@@ -153,7 +162,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
     }
     public PeepoEntity companion(Player player){if(npc!=null)return npc;var entity=player.level().getEntity((data.get(9)&0xffff)|((data.get(10)&0xffff)<<16));return entity instanceof PeepoEntity p?p:null;}
     public int value(int i){return data.get(i);}
-    @Override public boolean stillValid(Player player){return npc==null || npc.isAlive() && npc.level()==player.level() && npc.distanceToSqr(player)<=64 && !player.isSpectator() && npc.orders.allowed(player);}
+    @Override public boolean stillValid(Player player){return npc==null || npc.isAlive() && !npc.isRemoved() && player.isAlive() && npc.level()==player.level() && npc.distanceToSqr(player)<=64 && !player.isSpectator() && npc.orders.allowed(player);}
     @Override public boolean clickMenuButton(Player player,int id){
         if(npc==null || !stillValid(player))return false;
         boolean changed=npc.orders.command(player,id);if(changed){refreshRecipes();broadcastChanges();}return changed;

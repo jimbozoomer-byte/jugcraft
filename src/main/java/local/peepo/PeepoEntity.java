@@ -69,13 +69,26 @@ public final class PeepoEntity extends PathfinderMob {
     public final CompanionReport report=new CompanionReport(this);
     public final CompanionFood food=new CompanionFood(this);
     public final CompanionOrders orders=new CompanionOrders(this);
+    // Runtime menu identities, never saved. Multiple allowed viewers share the same pause.
+    private final java.util.Set<CompanionMenu> settingsMenus=new java.util.HashSet<>();
+    void openSettings(CompanionMenu menu){
+        if(level().isClientSide() || !settingsMenus.add(menu))return;
+        if(settingsMenus.size()==1){resetCompanionRoutine();transport.stop();leaveCompanionBed();}
+        holdForSettings();
+    }
+    void closeSettings(CompanionMenu menu){settingsMenus.remove(menu);}
+    private boolean editingSettings(){return !settingsMenus.isEmpty();}
+    private void holdForSettings(){
+        getNavigation().stop();setSpeed(0);
+        var movement=getDeltaMovement();setDeltaMovement(0,movement.y,0);
+    }
     public void resetCompanionRoutine(){if(routine!=null)routine.resetOrders();}
     private boolean companionUnloading;
     boolean isCompanionUnloading(){return companionUnloading;}
     /** Tracking callbacks cannot move an entity between sections while its old section is being removed. */
     void unloadCompanionRoutine(){
         companionUnloading=true;
-        try{resetCompanionRoutine();}finally{companionUnloading=false;}
+        try{resetCompanionRoutine();}finally{settingsMenus.clear();companionUnloading=false;}
     }
     boolean isUsingJobAt(net.minecraft.core.BlockPos pos){return routine!=null && routine.atJob(pos);}
     CompanionStatus routineStatus(){return routine==null?CompanionStatus.IDLE:routine.state();}
@@ -220,9 +233,14 @@ public final class PeepoEntity extends PathfinderMob {
     }
     public boolean isBlushing() { return entityData.get(BLUSHING); }
     @Override public void tick() {
+        if(!level().isClientSide() && editingSettings()){
+            settingsMenus.removeIf(menu->!menu.editing(this));
+            if(editingSettings())holdForSettings();
+        }
         if (!level().isClientSide() && bedExit != null && getRestMode() == CompanionEnergy.Rest.NONE && workAnimation()!=WorkAnimation.STIR) leaveCompanionBed();
         super.tick();
         if(!level().isClientSide()) {
+            if(editingSettings())holdForSettings();
             if(workAnimationTicks>0)--workAnimationTicks;
             if(workAnimationTicks==0 || !isAlive() || isEating() || getRestMode()!=CompanionEnergy.Rest.NONE)
                 setWorkAnimation(WorkAnimation.NONE,blockPosition());
@@ -273,6 +291,7 @@ public final class PeepoEntity extends PathfinderMob {
             .add(Attributes.FOLLOW_RANGE, 16);
     }
     @Override protected void registerGoals() {
+        goalSelector.addGoal(-1, new SettingsPauseGoal());
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(1, new EatInPlaceGoal());
         goalSelector.addGoal(1, new RestGoal());
@@ -349,6 +368,14 @@ public final class PeepoEntity extends PathfinderMob {
         setGuaranteedDrop(EquipmentSlot.MAINHAND);
         entityData.set(EATING,EAT_DURATION);
         getNavigation().stop();
+    }
+    private final class SettingsPauseGoal extends Goal {
+        SettingsPauseGoal(){setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK));}
+        @Override public boolean canUse(){return editingSettings();}
+        @Override public boolean canContinueToUse(){return editingSettings();}
+        @Override public boolean requiresUpdateEveryTick(){return true;}
+        @Override public void start(){holdForSettings();}
+        @Override public void tick(){holdForSettings();}
     }
     private final class EatInPlaceGoal extends Goal {
         EatInPlaceGoal() { setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK)); }

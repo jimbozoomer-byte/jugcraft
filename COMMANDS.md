@@ -32,6 +32,8 @@ The local branch is now `peepo-companion`. Use the Companion Planner to select a
 
 The planner also binds a separate lunch crate/cover. The companion GUI's Routine tab controls Auto/Day/Night shifts, break/resume energy, carried meals, food preference and optional problem alerts. Operator command `/peepobudget` shows server-wide search/path admissions and deferrals. See [the job-system record](docs/features/companion-jobs.md).
 
+Opening the companion GUI pauses its walking and work until all players editing it close their menus. It then resumes the selected command automatically; no Stay command is needed.
+
 ## Cooking Pot assistance
 
 Assign a Cooking Pot with the planner, then shift-right-click the companion. Left-click the ghost slot beside that workstation with its finished food item; the real item remains on the cursor. Right-click the ghost slot to clear the recipe back to automatic cooking. Hover the ghost item for ingredient counts. The saved workstation plan filters input items. One helper adds 50% cooking speed while spending up to 16 JE/t, with heat and ingredients still required. Leave a reachable approach beside the pot and headroom above its rim for the standing companion and angled spoon; Jughead needs extra jug clearance. Schedules, recovery and workstation priorities still apply. Assigned Supply and Output containers now use that plan for Cooking Pot transport. See [Cooking Pot assistance](docs/features/companion-cooking.md).

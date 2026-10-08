@@ -5,6 +5,7 @@ Owner-directed stages 1-4 of the companion roadmap, implemented locally with Ope
 ## Player use
 
 - Shift-right-click your Peepo or Jughead to open its inventory. The Jobs panel retains home, four ordered workstations and their remove/priority buttons. It now includes a separate Lunch row.
+- The companion pauses walking and work while an authorized player has its settings/inventory menu open. It releases its current station safely and waits in place, then resumes its current commands after the last viewer closes the menu. Editing never silently changes Follow/Home/Work to Stay. Multiple viewers share the pause; menu replacement, invalid access/range, death, disconnect and unload cannot leave a saved pause behind. Carried deliveries remain real cargo and resume through the existing transport lifecycle.
 - Select the companion with the Companion Planner, then right-click a lunch crate or the actual lunch cover block to assign its food source. Left-click with the planner, or use the Lunch row's x, to clear it. A lunch source does not consume a workstation slot. Existing loaded/dimension/reach and owner/party checks remain.
 - Assignment text is colored by server status. Hover a row for its full location, dimension, priority and live status; the detail line also shows the hovered status. The left panel shows the companion's overall activity. Unimplemented machines explicitly report Unsupported job.
 - Use the Routine button to switch the right panel to settings while keeping storage, costume, hand and player inventory accessible.
@@ -19,6 +20,8 @@ Owner-directed stages 1-4 of the companion roadmap, implemented locally with Ope
 Follow and Stay retain their movement restrictions. A lunch assignment is not permission to abandon those orders or access somebody else's storage. An unavailable assigned source does not fall back to another lunch container; unassigned companions keep the bounded nearby-source behavior.
 
 ## Shared productive job contract
+
+The menu pause revision (OpenAI Codex, GPT-6, from `ce52fe43`) tracks only that companion's open server menu instances, removing stale viewers by menu identity and normal validity checks. A higher-priority MOVE/LOOK goal suppresses navigation without setting or persisting NoAI. Horizontal motion stops immediately; gravity, swimming, ongoing eating and energy updates continue. Existing station release/bed exit and porter stop hooks preserve claims and carried inventory. Validation is compilation/assembly and launcher packaging only; no automated or in-game tests were run. Manually check walking/work interruption, changing orders while open, simultaneous viewers, disconnect, permission removal and closing/reopening while carrying cargo.
 
 `CompanionJob` extends the existing station lifecycle and adds cheap readiness/status, a bounded productive work operation, and a worth-starting predicate. `CompanionJobs` resolves a loaded block directly or through explicitly registered adapters. The routine owns navigation, priority, claiming, travel timeouts, renewal and cancellation; the job owns its actual recipe/energy transaction.
 
