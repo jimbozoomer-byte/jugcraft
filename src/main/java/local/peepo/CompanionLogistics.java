@@ -16,6 +16,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity;
 public final class CompanionLogistics {
     public interface Port {
         Identifier plan();
+        default void prepare(Storage<ItemVariant> source){}
         int needed(ItemStack stack);
         Storage<ItemVariant> inputs();
         Storage<ItemVariant> outputs();
@@ -31,8 +32,9 @@ public final class CompanionLogistics {
         var be=npc.level().getBlockEntity(target.at().pos());
         if(be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine
             && machine.kind().supportsCompanionAssistance() && !machine.isLocked())return machine.companionPort;
+        var kitchen=KitchenCompanionPort.of(be);if(kitchen!=null)return kitchen.forCompanion(npc);
         if(be instanceof HearthOvenBlockEntity oven)return new Port(){
-            public Identifier plan(){return Identifier.fromNamespaceAndPath("jugcraft",oven.selectedPie()==null?"hearth_oven":oven.selectedPie().pie());}
+            public Identifier plan(){return Identifier.fromNamespaceAndPath("jugcraft","hearth_oven");}
             public int needed(ItemStack candidate){
                 int need=oven.companionNeed(candidate);if(need<=0)return 0;
                 var output=CompanionStorage.find(npc,npc.assignments.get(CompanionAssignments.OUTPUT));
@@ -62,6 +64,7 @@ public final class CompanionLogistics {
             public Storage<ItemVariant> outputs(){return press.companionOutputs();}
         };
         if(be instanceof CookingPotBlockEntity pot && !pot.isLocked())return new Port(){
+            public void prepare(Storage<ItemVariant> source){pot.prepareCompanionRecipe(source);}
             public Identifier plan(){return pot.supplyPlan().map(p->p.id()).orElse(null);}
             public int needed(ItemStack candidate){
                 var plan=pot.supplyPlan().orElse(null);if(plan==null)return 0;

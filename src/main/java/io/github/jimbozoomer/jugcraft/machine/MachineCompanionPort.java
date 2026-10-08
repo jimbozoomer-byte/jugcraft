@@ -22,6 +22,22 @@ public final class MachineCompanionPort implements CompanionLogistics.Port {
     public static void clearCatalog(){CATALOG.clear();}
     private final MachineBlockEntity machine;
     private Identifier selected;
+    public final local.peepo.CompanionRecipeFilter filter=new local.peepo.CompanionRecipeFilter();
+    public local.peepo.CompanionRecipeFilter filter(){var old=selection();filter.initialize(old==null?ItemStack.EMPTY:old.results.getFirst());return filter;}
+    public boolean acceptsFilter(ItemStack stack){return stack.isEmpty() || catalog().values().stream().anyMatch(p->p.results.stream().anyMatch(s->s.is(stack.getItem())));}
+    public void filterChanged(){selected=null;machine.companionRecipeChanged();}
+    @Override public void prepare(Storage<ItemVariant> source){
+        var allowed=filter();var supplies=local.peepo.RecipeSupplies.available(source);
+        var installed=new ArrayList<ItemStack>();for(int i=0;i<machine.kind().outputSlot();i++)installed.add(machine.getItem(i));
+        var choices=new ArrayList<>(catalog().values());choices.sort(Comparator.comparingInt(p->p.id.equals(selected)?0:1));
+        int inspected=0;for(var p:choices){if(++inspected>256)break;
+            if(p.results.stream().noneMatch(allowed::allows) || allocation(p)==null)continue;
+            if(p.recipe instanceof FluidRecipe fluid && (machine.tanks()==null || !fluid.fluidsMatch(machine.tanks())))continue;
+            var parts=p.parts.stream().map(part->new local.peepo.RecipeSupplies.Part(part.ingredient,part.count)).toList();
+            if(local.peepo.RecipeSupplies.completes(parts,installed,supplies)){select(p.id);return;}
+        }
+        if(installed.stream().allMatch(ItemStack::isEmpty))select((Identifier)null);
+    }
     public MachineCompanionPort(MachineBlockEntity machine){this.machine=machine;}
     private Map<Identifier,Plan> catalog(){
         if(!(machine.getLevel() instanceof ServerLevel level))return Map.of();
@@ -48,8 +64,19 @@ public final class MachineCompanionPort implements CompanionLogistics.Port {
     }
     public boolean selectable(){return !catalog().isEmpty();}
     public Plan selection(){return selected==null?null:catalog().get(selected);}
-    public boolean locked(){return selected!=null;}
-    public Recipe<?> recipe(){var plan=selection();return plan==null?null:plan.recipe;}
+    public boolean locked(){return selected!=null || !filter().empty();}
+    private boolean ready(Plan p){
+        var slots=allocation(p);if(slots==null)return false;
+        for(int i=0;i<slots.length;i++)if(machine.getItem(slots[i]).getCount()<p.parts.get(i).count)return false;
+        return !(p.recipe instanceof FluidRecipe f) || machine.tanks()!=null && f.fluidsMatch(machine.tanks());
+    }
+    public Recipe<?> recipe(){
+        var allowed=filter();var current=selection();
+        if(current!=null && current.results.stream().anyMatch(allowed::allows) && ready(current))return current.recipe;
+        int inspected=0;for(var p:catalog().values()){if(++inspected>256)break;
+            if(p.results.stream().anyMatch(allowed::allows) && ready(p))return p.recipe;
+        }return null;
+    }
     private void select(Identifier id){if(Objects.equals(selected,id))return;selected=id;machine.companionRecipeChanged();}
     public boolean select(ItemStack output){
         if(output.isEmpty()){select((Identifier)null);return true;}
@@ -109,6 +136,6 @@ public final class MachineCompanionPort implements CompanionLogistics.Port {
         }
         return new CombinedStorage<>(outputs);
     }
-    public void save(ValueOutput out){if(selected!=null)out.store("CompanionSupplyRecipe",Identifier.CODEC,selected);}
-    public void load(ValueInput in){selected=in.read("CompanionSupplyRecipe",Identifier.CODEC).orElse(null);}
+    public void save(ValueOutput out){filter().save(out);if(selected!=null)out.store("CompanionSupplyRecipe",Identifier.CODEC,selected);}
+    public void load(ValueInput in){filter.load(in);selected=in.read("CompanionSupplyRecipe",Identifier.CODEC).orElse(null);}
 }

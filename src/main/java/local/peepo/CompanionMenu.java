@@ -11,13 +11,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.flag.FeatureFlags;
 
 public final class CompanionMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT=40, RECIPE_START=46;
+    public static final int DATA_COUNT=41, RECIPE_START=46, FILTER_START=50;
     public static final int WIDTH=480, RECIPE_X=416;
     public static MenuType<CompanionMenu> TYPE;
     private final PeepoEntity npc;
     private final ContainerData data;
     private final Inventory playerInventory;
     private final net.minecraft.world.SimpleContainer recipeIcons=new net.minecraft.world.SimpleContainer(4);
+    private final net.minecraft.world.SimpleContainer filterIcons=new net.minecraft.world.SimpleContainer(9);
+    private int filterRow=-1;
+    private CompanionAssignments.Target filterTarget;
     private final int[] recipeEnabled=new int[4];
     private final int[] transportDisplay=new int[8];
     private long nextRecipeRefresh,nextRecipeEdit;
@@ -30,6 +33,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
         super(TYPE,id);this.npc=npc;playerInventory=inventory;
         data=npc==null?new SimpleContainerData(DATA_COUNT):new ContainerData(){
             public int get(int i){
+                if(i==40)return filterRow;
                 if(i==39)return npc.preferences.social?1:0;
                 if(i>=31 && i<39)return transportDisplay[i-31];
                 if(i>=29 && i<31)return npc.report.row(i-29+6);
@@ -56,9 +60,14 @@ public final class CompanionMenu extends AbstractContainerMenu {
             addSlot(new Slot(recipeIcons,row,RECIPE_X,assignmentY(row+1)){
                 public boolean mayPlace(ItemStack stack){return false;}
                 public boolean mayPickup(Player player){return false;}
-                public boolean isActive(){return showRecipes && value(25+at)>0;}
+                public boolean isActive(){return showRecipes && value(25+at)==4 && filterRow()<0;}
             });
         }
+        for(int i=0;i<9;i++)addSlot(new Slot(filterIcons,i,258+(i%3)*18,105+(i/3)*18){
+            public boolean mayPlace(ItemStack stack){return false;}
+            public boolean mayPickup(Player player){return false;}
+            public boolean isActive(){return showRecipes && filterRow()>=0;}
+        });
         refreshRecipes();
         if(npc!=null && stillValid(inventory.player))npc.openSettings(this);
     }
@@ -81,7 +90,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
     private net.minecraft.world.level.block.entity.BlockEntity recipeStation(int row){
         var target=recipeTarget(row);if(target==null)return null;
         var be=npc.level().getBlockEntity(target.at().pos());
-        return be instanceof HearthOvenBlockEntity || be instanceof CookingPotBlockEntity pot && !pot.isLocked()
+        return KitchenCompanionPort.of(be)!=null || be instanceof HearthOvenBlockEntity || be instanceof CookingPotBlockEntity pot && !pot.isLocked()
             || be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine && !machine.isLocked() && (machine.companionPort.selectable() || machine.companionPort.locked())?be:null;
     }
     private void refreshRecipes(){
@@ -94,37 +103,16 @@ public final class CompanionMenu extends AbstractContainerMenu {
             var oven=station instanceof HearthOvenBlockEntity o?o:null;
             var machine=station instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity m?m:null;
             var target=recipeTarget(row);boolean garden=target!=null && target.garden();
-            recipeEnabled[row]=garden?4:machine!=null?3:oven!=null?2:pot!=null?1:0;
-            var plan=pot==null?null:pot.supplyPlan().orElse(null);var icon=plan==null?ItemStack.EMPTY:plan.output().create().copyWithCount(1);
+            recipeEnabled[row]=garden?4:KitchenCompanionPort.of(station)!=null?5:machine!=null?3:oven!=null?2:pot!=null?1:0;
+            var icon=ItemStack.EMPTY;
             if(garden){var seed=npc.assignments.gardenSeed(target);if(seed!=null)icon=new ItemStack(seed);}
-            if(plan!=null){
-                var lines=new java.util.ArrayList<net.minecraft.network.chat.Component>();
-                lines.add(net.minecraft.network.chat.Component.literal("Ingredients per batch:"));
-                for(var part:plan.ingredients()){
-                    var item=part.ingredient().items().findFirst();
-                    if(item.isPresent())lines.add(net.minecraft.network.chat.Component.literal(part.count()+" x ").append(new ItemStack(item.get()).getHoverName()));
-                }
-                icon.set(net.minecraft.core.component.DataComponents.LORE,new net.minecraft.world.item.component.ItemLore(lines));
-            }
-            if(oven!=null && oven.selectedPie()!=null){
-                icon=new ItemStack(JugcraftAgriculture.item(oven.selectedPie().pie()));
-                var raw=new ItemStack(JugcraftAgriculture.item(oven.selectedPie().rawPie()));
-                icon.set(net.minecraft.core.component.DataComponents.LORE,new net.minecraft.world.item.component.ItemLore(java.util.List.of(
-                    net.minecraft.network.chat.Component.literal("1 x ").append(raw.getHoverName()),
-                    net.minecraft.network.chat.Component.literal("Fuel: logs, charcoal, coal or coke. No coal blocks."))));
-            }
-            if(machine!=null){
-                var machinePlan=machine.companionPort.selection();
-                if(machinePlan!=null){
-                    icon=machinePlan.results().getFirst().copyWithCount(1);
-                    var lines=new java.util.ArrayList<net.minecraft.network.chat.Component>();
-                    lines.add(net.minecraft.network.chat.Component.literal("Ingredients per batch:"));
-                    for(var part:machinePlan.parts())part.ingredient().items().findFirst().ifPresent(item->lines.add(net.minecraft.network.chat.Component.literal(part.count()+" x ").append(new ItemStack(item).getHoverName())));
-                    lines.add(net.minecraft.network.chat.Component.literal("Power and fluids still need their usual connections."));
-                    icon.set(net.minecraft.core.component.DataComponents.LORE,new net.minecraft.world.item.component.ItemLore(lines));
-                }
-            }
             if(!ItemStack.matches(recipeIcons.getItem(row),icon))recipeIcons.setItem(row,icon);
+        }
+        if(filterRow>=0){
+            var target=recipeTarget(filterRow);var station=recipeStation(filterRow);
+            var filter=station==null?null:CompanionFilters.get(station);
+            if(target==null || !target.equals(filterTarget) || filter==null){filterRow=-1;filterTarget=null;}
+            for(int i=0;i<9;i++)filterIcons.setItem(i,filterRow<0?ItemStack.EMPTY:filter.get(i));
         }
         nextRecipeRefresh=npc.level().getGameTime()+10;
     }
@@ -132,7 +120,15 @@ public final class CompanionMenu extends AbstractContainerMenu {
         if(npc!=null && npc.level().getGameTime()>=nextRecipeRefresh)refreshRecipes();
         super.broadcastChanges();
     }
+    public int filterRow(){return npc==null?value(40):filterRow;}
     @Override public void clicked(int slot,int button,ContainerInput type,Player player){
+        if(slot>=FILTER_START && slot<FILTER_START+9){
+            if(npc==null || !stillValid(player) || type!=ContainerInput.PICKUP || button<0 || button>1 || filterRow<0)return;
+            var target=recipeTarget(filterRow);var station=recipeStation(filterRow);long now=npc.level().getGameTime();
+            if(target==null || !target.equals(filterTarget) || station==null || now<nextRecipeEdit)return;nextRecipeEdit=now+2;
+            if(!CompanionFilters.set(station,slot-FILTER_START,button==1?ItemStack.EMPTY:getCarried()))player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Choose an output made by this workstation."));
+            refreshRecipes();broadcastChanges();return;
+        }
         if(slot>=RECIPE_START && slot<RECIPE_START+4){
             // These are display copies, never inventory. Ignore drag, swap, clone, throw and shift-click.
             if(type!=ContainerInput.PICKUP || button<0 || button>1 || npc==null || !stillValid(player))return;
@@ -143,32 +139,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
                 if(!npc.assignments.selectGardenSeed(row+1,button==1?ItemStack.EMPTY:held))player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Choose a supported seed or raw crop for this garden."));
                 refreshRecipes();broadcastChanges();return;
             }
-            var station=recipeStation(row);if(station==null)return;
-            if(station instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine){
-                if(!machine.companionPort.select(button==1?ItemStack.EMPTY:held))player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Choose an item made by this machine's recipe."));
-                refreshRecipes();broadcastChanges();return;
-            }
-            if(station instanceof HearthOvenBlockEntity oven){
-                if(button==1 || held.isEmpty())oven.selectPie(null);
-                else {
-                    var filling=HearthOvenBlockEntity.selectedFilling(held);
-                    if(filling==null){player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Choose a whole raw or baked Hearth Oven pie or cake."));return;}
-                    oven.selectPie(filling);
-                }
-                refreshRecipes();broadcastChanges();return;
-            }
-            var pot=(CookingPotBlockEntity)station;
-            if(button==1 || held.isEmpty())pot.selectRecipe(null);
-            else {
-                var options=io.github.jimbozoomer.jugcraft.agriculture.CookingPotRecipe.catalog(((net.minecraft.server.level.ServerLevel)npc.level()).getServer())
-                    .entrySet().stream().filter(e->e.getValue().output().create().is(held.getItem())).toList();
-                if(options.isEmpty()){
-                    player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("That item is not made by a Cooking Pot."));return;
-                }
-                int selected=-1;for(int i=0;i<options.size();i++)if(options.get(i).getKey().equals(pot.selectedRecipe()))selected=i;
-                pot.selectRecipe(options.get((selected+1)%options.size()).getKey());
-            }
-            refreshRecipes();broadcastChanges();return;
+            return;
         }
         if(stillValid(player)){
             var before=npc==null?null:npc.food.createSnapshot();
@@ -180,6 +151,12 @@ public final class CompanionMenu extends AbstractContainerMenu {
     @Override public boolean stillValid(Player player){return npc==null || npc.isAlive() && !npc.isRemoved() && player.isAlive() && npc.level()==player.level() && npc.distanceToSqr(player)<=64 && !player.isSpectator() && npc.orders.allowed(player);}
     @Override public boolean clickMenuButton(Player player,int id){
         if(npc==null || !stillValid(player))return false;
+        if(id>=60 && id<=64){
+            if(id==64){filterRow=-1;filterTarget=null;}
+            else {int row=id-60;var station=recipeStation(row);if(station==null || CompanionFilters.get(station)==null)return false;filterRow=row;filterTarget=recipeTarget(row);}
+            refreshRecipes();broadcastChanges();return true;
+        }
+        if(filterRow>=0)return false;
         boolean changed=npc.orders.command(player,id);if(changed){refreshRecipes();broadcastChanges();}return changed;
     }
     @Override public ItemStack quickMoveStack(Player player,int index){

@@ -2,6 +2,8 @@
 
 Owner-requested on 7 October 2026, implemented by OpenAI Codex (GPT-6) on `peepo-companion` from `bb2974a0`. Extends the existing planner, ghost recipe slots and [Supply/Output transport](companion-jobs.md#supply-and-output). No new recipes, dependency, assets or progression gates.
 
+The current GUI uses the [nine-output Filter editor](companion-kitchen-filters.md): the Work row's F button opens a 3×3 grid, with tooltip **Filter**. Multiple outputs are allowed; an empty grid retains Auto. The earlier single-slot instructions below are superseded by that editor.
+
 ## Setup
 
 1. Assign a Hearth Oven with the Companion Planner, plus separate Supply and Output containers. Leave a reachable standing space in front of the opening, with its floor at the oven's base level, and one free companion cargo slot. An elevated oven needs a reachable platform in front.

@@ -20,6 +20,7 @@ public final class CompanionJobs {
         if(be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine){
             var job=machine.companionJob(npc);if(job!=null)return job;
         }
+        if(be instanceof io.github.jimbozoomer.jugcraft.agriculture.CuttingBoardBlockEntity board)return board.companionKitchen.job.prepare(npc);
         if(be instanceof CompanionJob job)return job;
         for(var adapter:ADAPTERS){var job=adapter.resolve(npc,be);if(job!=null)return job;}
         return null;

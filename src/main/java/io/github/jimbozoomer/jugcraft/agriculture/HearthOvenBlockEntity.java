@@ -61,6 +61,8 @@ public class HearthOvenBlockEntity extends BlockEntity {
 	private @Nullable PieFilling pie;
 	private int baked;
 	private @Nullable PieFilling selectedPie;
+	public final local.peepo.CompanionRecipeFilter companionFilter = new local.peepo.CompanionRecipeFilter();
+	public local.peepo.CompanionRecipeFilter filter(){companionFilter.initialize(selectedPie==null?ItemStack.EMPTY:new ItemStack(JugcraftAgriculture.item(selectedPie.pie())));return companionFilter;}
 	private UUID tender;
 	private long tenderUntil;
 	private final Transfers transfers = new Transfers();
@@ -100,7 +102,7 @@ public class HearthOvenBlockEntity extends BlockEntity {
 	}
 	private boolean live() { return level != null && !level.isClientSide() && !isRemoved(); }
 	public @Nullable PieFilling selectedPie() { return selectedPie; }
-	public void selectPie(@Nullable PieFilling filling) { selectedPie = filling; changed(true); }
+	public void selectPie(@Nullable PieFilling filling) { selectedPie = filling; for(int i=0;i<9;i++)companionFilter.set(i,ItemStack.EMPTY);companionFilter.set(0,filling==null?ItemStack.EMPTY:new ItemStack(JugcraftAgriculture.item(filling.pie())));changed(true); }
 	public static @Nullable PieFilling selectedFilling(ItemStack stack) {
 		for (var filling : PieFilling.values())
 			if (stack.is(JugcraftAgriculture.item(filling.pie())) || stack.is(JugcraftAgriculture.item(filling.rawPie()))) return filling;
@@ -109,7 +111,7 @@ public class HearthOvenBlockEntity extends BlockEntity {
 	public int companionNeed(ItemStack stack) {
 		if (!live()) return 0;
 		var filling = rawFilling(stack);
-		if (filling != null) return pie == null && (selectedPie == null || filling == selectedPie) ? 1 : 0;
+		if (filling != null) return pie == null && filter().allows(new ItemStack(JugcraftAgriculture.item(filling.pie()))) ? 1 : 0;
 		int duration = burnTicks(stack);
 		// Fuel only a real unfinished pie, never continually reheat an empty oven. Coal blocks cannot fit.
 		if (pie == null || baked >= BAKED || duration <= 0 || duration > MAX_BURN || burn >= 600) return 0;
@@ -313,6 +315,7 @@ public class HearthOvenBlockEntity extends BlockEntity {
 	@Override
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
+		companionFilter.load(input);
 		burn = Math.clamp(input.getIntOr("burn", 0), 0, MAX_BURN);
 		heat = Math.clamp(input.getIntOr("heat", 0), 0, MAX_HEAT);
 		int filling = input.getIntOr("pie", -1);
@@ -327,6 +330,7 @@ public class HearthOvenBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		filter().save(output);
 		output.putInt("burn", burn);
 		output.putInt("heat", heat);
 		output.putInt("pie", pie == null ? -1 : pie.ordinal());

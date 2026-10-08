@@ -2,6 +2,8 @@
 
 Owner-requested addition on `peepo-companion`, implemented with OpenAI Codex (GPT-6). Extends the [shared jobs and budgets](companion-jobs.md), existing Cooking Pot processor, inventory menu and companion model rig. No dependency or platform changes.
 
+The single ghost selector described in the original implementation below has been replaced by the [nine-output Filter editor](companion-kitchen-filters.md). Empty filters now also enable automatic Supply recipe choice; existing choices migrate to the first entry.
+
 ## Use
 
 1. Feed a Peepo or Jughead to tame it. Select it with the Companion Planner, then right-click a Cooking Pot to add it to the four ordered workstations. Work mode, priorities, schedules and recovery thresholds apply as they do to wheels.

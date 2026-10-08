@@ -105,7 +105,9 @@ public final class CompanionTransport extends Goal {
         if(!npc.assignments.transportAllowed(work,supplying))return false;
         var bound=npc.assignments.get(supplying?CompanionAssignments.SUPPLY:CompanionAssignments.OUTPUT);
         var port=CompanionLogistics.resolve(npc,work);var storage=CompanionStorage.find(npc,bound);
-        if(port==null || storage==null || supplying && port.plan()==null)return false;
+        if(port==null || storage==null)return false;
+        if(supplying)port.prepare(storage);
+        if(supplying && port.plan()==null)return false;
         workstation=work;store=bound;supply=supplying;recipe=port.plan();returning=false;
         if(work.garden() && !supplying){
             // Harvests are already in cargo: adopt a real stack, even when all eight slots are full.
