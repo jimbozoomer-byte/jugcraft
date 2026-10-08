@@ -137,6 +137,414 @@
       }
     ]
   },
+  "concordance.kindle_gather": {
+    "subtitle": "subtitles.jugcraft.concordance.kindle_gather",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/kindle_gather",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.kindle": {
+    "subtitle": "subtitles.jugcraft.concordance.kindle",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/kindle",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.examine": {
+    "subtitle": "subtitles.jugcraft.concordance.examine",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/examine",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.study_complete": {
+    "subtitle": "subtitles.jugcraft.concordance.study_complete",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/study_complete",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lantern_ignite": {
+    "subtitle": "subtitles.jugcraft.concordance.lantern_ignite",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lantern_ignite",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lantern_snuff": {
+    "subtitle": "subtitles.jugcraft.concordance.lantern_snuff",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lantern_snuff",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.aegis": {
+    "subtitle": "subtitles.jugcraft.concordance.aegis",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/aegis",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.revelation": {
+    "subtitle": "subtitles.jugcraft.concordance.revelation",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/revelation",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lance": {
+    "subtitle": "subtitles.jugcraft.concordance.lance",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lance",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.flash": {
+    "subtitle": "subtitles.jugcraft.concordance.flash",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/flash",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.lanternward": {
+    "subtitle": "subtitles.jugcraft.concordance.lanternward",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/lanternward",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.circle_start": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_start",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_start",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.circle_step": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_step",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_step",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.circle_complete": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_complete",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_complete",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.circle_break": {
+    "subtitle": "subtitles.jugcraft.concordance.circle_break",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/circle_break",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.crucible_stir": {
+    "subtitle": "subtitles.jugcraft.concordance.crucible_stir",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/crucible_stir",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.crucible_add": {
+    "subtitle": "subtitles.jugcraft.concordance.crucible_add",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/crucible_add",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.crucible_bottle": {
+    "subtitle": "subtitles.jugcraft.concordance.crucible_bottle",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/crucible_bottle",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.sign_shortage": {
+    "subtitle": "subtitles.jugcraft.concordance.sign_shortage",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/sign_shortage",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.sign_danger": {
+    "subtitle": "subtitles.jugcraft.concordance.sign_danger",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/sign_danger",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "guns.gun_rustle": {
+    "subtitle": "subtitles.jugcraft.guns.gun_rustle",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_rustle_gun_rustle"
+      }
+    ]
+  },
+  "guns.rack": {
+    "subtitle": "subtitles.jugcraft.guns.rack",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/rack_rack"
+      }
+    ]
+  },
+  "guns.bolt_release": {
+    "subtitle": "subtitles.jugcraft.guns.bolt_release",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bolt_release_bolt_release"
+      }
+    ]
+  },
+  "guns.bolt": {
+    "subtitle": "subtitles.jugcraft.guns.bolt",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bolt_bolt"
+      }
+    ]
+  },
+  "guns.bolt_pull": {
+    "subtitle": "subtitles.jugcraft.guns.bolt_pull",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bolt_pull_bolt_pull"
+      }
+    ]
+  },
+  "guns.reload_mag_out": {
+    "subtitle": "subtitles.jugcraft.guns.reload_mag_out",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/mag_out_mag_out"
+      }
+    ]
+  },
+  "guns.reload_mag_in": {
+    "subtitle": "subtitles.jugcraft.guns.reload_mag_in",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/mag_in_mag_in"
+      }
+    ]
+  },
+  "guns.slap": {
+    "subtitle": "subtitles.jugcraft.guns.slap",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/slap_slap"
+      }
+    ]
+  },
+  "guns.reload_end": {
+    "subtitle": "subtitles.jugcraft.guns.reload_end",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/reload_end_reload_end"
+      }
+    ]
+  },
+  "guns.shell_in": {
+    "subtitle": "subtitles.jugcraft.guns.shell_in",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_sounds_insert"
+      }
+    ]
+  },
+  "guns.dry_fire": {
+    "subtitle": "subtitles.jugcraft.guns.dry_fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/rusty_gnat_copper_jam"
+      }
+    ]
+  },
+  "guns.lever": {
+    "subtitle": "subtitles.jugcraft.guns.lever",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/lever_lever"
+      }
+    ]
+  },
+  "guns.insert": {
+    "subtitle": "subtitles.jugcraft.guns.insert",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_sounds_insert"
+      }
+    ]
+  },
+  "guns.metal": {
+    "subtitle": "subtitles.jugcraft.guns.metal",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_sounds_metal"
+      }
+    ]
+  },
+  "guns.jam": {
+    "subtitle": "subtitles.jugcraft.guns.jam",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_sounds_metal"
+      }
+    ]
+  },
+  "guns.rust_midge.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/rusty_gnat_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.patchwork_carbine.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/makeshift_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.thunderpipe.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/boomstick_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.warden_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/iron_pistol_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.riveter_smg.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/greaser_smg_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.haymaker.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bruiser_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.longhorn_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/heavy_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.drover_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/cowboy_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.coach_gun.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/brass_shotgun_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.duelling_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/blackpowder_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.line_musket.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/blackpowder_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.bellmouth.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/blackpowder_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

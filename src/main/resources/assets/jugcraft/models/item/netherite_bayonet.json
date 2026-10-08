@@ -1,0 +1,7 @@
+{
+  "credit": "Made with Blockbench",
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "jugcraft:item/guns/attachments/netherite_bayonet"
+  }
+}

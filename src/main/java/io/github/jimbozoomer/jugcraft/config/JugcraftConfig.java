@@ -23,13 +23,18 @@ public final class JugcraftConfig {
 			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "thallite", "aluminum",
 			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
 			"deposits", "explosives", "agriculture", "parties", "drones",
-			"pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections", "raiders");
+			"pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections", "raiders",
+			"concordance", "guns");
 
 	/**
 	 * Other server options, with their defaults. {@code carving.free_draw}: players may carve any face into a
 	 * pumpkin; false allows only the starter faces (for servers that want no free drawing).
+	 * {@code concordance.absent_owner_authority}: a Concordance device or worker whose owner is away (offline or in
+	 * another dimension) still acts, as a stand-in with the owner's identity (Fabric's fake player) that towns, spawn
+	 * protection and protection mods judge as that owner; false (the default) makes it wait for its owner
+	 * (concordance/Authority).
 	 */
-	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true);
+	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true, "concordance.absent_owner_authority", false);
 
 	/**
 	 * Text options, with their defaults.
@@ -93,6 +98,12 @@ public final class JugcraftConfig {
 		return value;
 	}
 
+	/** Changes a server option while the server runs (game tests); the file is not changed. */
+	public static void setOption(String key, boolean value) {
+		option(key);
+		OPTION_VALUES.put(key, value);
+	}
+
 	/** A text option from {@link #TEXT_OPTIONS}, as set in the file (its default before {@link #load}). */
 	public static String textOption(String key) {
 		String value = TEXT_VALUES.get(key);
@@ -135,7 +146,9 @@ public final class JugcraftConfig {
 
 		try (Writer writer = Files.newBufferedWriter(path)) {
 			properties.store(writer, "Jugcraft feature switches (false stops new worldgen and recipes; existing items and blocks stay)"
-					+ " and server options (carving.free_draw=false allows only the starter pumpkin faces; halloween.* sets when"
+					+ " and server options (carving.free_draw=false allows only the starter pumpkin faces;"
+					+ " concordance.absent_owner_authority=true lets Concordance devices act while their owner is away, as a stand-in"
+					+ " that protection judges as that owner; halloween.* sets when"
 					+ " the Halloween event runs: start and end as MM-DD, a timezone, mode auto, on or off, and the Harvest Moon's day;"
 					+ " seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn, winter or off,"
 					+ " hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"

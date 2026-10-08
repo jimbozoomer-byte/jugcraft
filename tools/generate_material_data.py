@@ -30,6 +30,13 @@ GENERATED_DIRS = [
     DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD, PACKS,
     DATA / MOD / "villager_trade", DATA / MOD / "trade_set", DATA / MOD / "tags" / "villager_trade",
     RES / "assets" / "minecraft",
+    # The Arcane Concordance (tools/concordance.py): its rules, spells, Spell Engine opt-outs, codex and client clips.
+    DATA / MOD / "concordance", DATA / MOD / "spell", DATA / MOD / "spell_assignments", DATA / MOD / "modonomicon",
+    ASSETS / "player_animations", ASSETS / "dynamiclights",
+    # Item models/animations belong to tools/guns.py and are committed separately.
+    # Only remove the Concordance block/entity outputs regenerated in this pass.
+    *[ASSETS / "geckolib" / kind / category
+      for kind in ("models", "animations") for category in ("block", "entity")],
 ]
 
 CABLE_ROTATION = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {"y": 270},
@@ -177,6 +184,10 @@ def assets():
     electroplating.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import gas_storage
     gas_storage.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import concordance
+    concordance.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    concordance.advancements(DATA, write, lang)
+    lang.update(concordance.write_data(write, RES))
     import control_electronics
     control_electronics.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import rocketry
@@ -207,6 +218,8 @@ def assets():
     artillery.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import tower_guns
     tower_guns.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import guns
+    guns.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
@@ -957,7 +970,9 @@ def pixel_hollows_assets(lang):
         lang[f"subtitles.{MOD}.{event}"] = subtitle
     import choir_sounds
     import drone_sounds
-    write(ASSETS / "sounds.json", {**drone_sounds.SOUNDS, **ph.SOUNDS, **choir_sounds.SOUNDS})
+    import concordance
+    import guns
+    write(ASSETS / "sounds.json", {**drone_sounds.SOUNDS, **ph.SOUNDS, **choir_sounds.SOUNDS, **concordance.sounds(), **guns.SOUNDS})
 
 
 def petro_assets(lang):
@@ -1437,6 +1452,8 @@ def tags():
     tags.add("block", "minecraft:mineable/shovel", rid(seasons.SNOW_BLOCK))
     import diagonal_connections
     diagonal_connections.tags(tags)
+    import concordance
+    concordance.tags(tags)
     tags.write()
 
 

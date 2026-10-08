@@ -10,6 +10,7 @@
     "ArmsRenderStateMixin",
     "ClientLevelSeasonMixin",
     "DiagonalParticlesMixin",
+    "GunFovMixin",
     "JeiRegistryBootstrapMixin"
   ],
   "injectors": {

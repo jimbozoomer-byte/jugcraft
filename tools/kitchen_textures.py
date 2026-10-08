@@ -312,36 +312,6 @@ def trellis_post():
     return c.img
 
 
-def pot_side():
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, IRON[2] if y % 5 else IRON[3])
-    for x in range(0, 16, 4):
-        c.px(x + 1, 9, IRON[5])
-        c.px(x + 1, 14, IRON[4])
-    for x in range(16):
-        c.px(x, 8, IRON[4])
-    return c.img
-
-
-def pot_rim():
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, IRON[4] if (x + y) % 7 else IRON[5])
-    return c.img
-
-
-def pot_empty():
-    c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            d = math.hypot(x - 7.5, y - 7.5)
-            c.px(x, y, IRON[0] if d < 4 else IRON[1])
-    return c.img
-
-
 def pot_soup():
     c = Canvas()
     bs.fill(c, 0, 0, 15, 15, SOUP_TOMATO[1:3], 77, [3, 1], spread=0.6)
@@ -541,9 +511,7 @@ def kitchen_textures():
         ("block", "tomato_wild"): tomato_wild(),
         ("block", "trellis"): trellis(),
         ("block", "trellis_post"): trellis_post(),
-        ("block", "cooking_pot_side"): pot_side(),
-        ("block", "cooking_pot_rim"): pot_rim(),
-        ("block", "cooking_pot_empty"): pot_empty(),
+        # The pot itself is the owner's (tools/menu.py COOKING_POT_TEXTURES); the soup that shows in it while it cooks is ours.
         ("block", "cooking_pot_soup"): pot_soup(),
         ("item", "tomato"): tomato_item(),
         ("item", "tomato_seeds"): seeds_item([rgb("c9b27a"), rgb("e6d7a4"), rgb("f6eccb")],

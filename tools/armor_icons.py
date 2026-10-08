@@ -1,8 +1,8 @@
 """The 3D armor sets' 16x16 inventory icons: the bronze and steel armor's, the knight armor (tools/knight_armor.py)
-drawn small, and Bloodthorn Armor's and Reforged White Diamond's (tools/bloodthorn_armor.py and
-tools/white_diamond_armor.py, below), in the owner's style for item icons (vanilla's own size, a one-pixel outline in
-each part's darkest tone, never pure black, light from the top left, a few flat tones, chunky parts that read at a
-glance).
+drawn small, and Bloodthorn Armor's, Reforged White Diamond's, Hades Armor's, Sunset Gem's and Pharaoh's
+(tools/bloodthorn_armor.py, tools/white_diamond_armor.py, tools/hades_armor.py, tools/sunset_gem_armor.py and
+tools/pharaoh_armor.py, below), in the owner's style for item icons (vanilla's own size, a one-pixel outline in each
+part's darkest tone, never pure black, light from the top left, a few flat tones, chunky parts that read at a glance).
 
 Each piece is one hand-drawn map, tools/armor_icons/<piece>.txt: 16 lines of 16 symbols, which the owner can edit
 directly (lines starting with # are comments). A map names no colours, only what each pixel is made of, so one map
@@ -67,6 +67,68 @@ Their symbols:
     H L M D S V     the metal, light to dark: "light" (icy white), "mid_light" (pale cyan), "mid" (light cyan), "dark"
                     (light blue), "seam" (blue), "void" (lavender)
     U m u x         the charcoal under-layer: "under_light", "under_mid", "under_dark", "under_darkest" (the face)
+Hades Armor (tools/hades_armor.py) has hades/helmet.txt and so on, coloured from armor_paint.HADES and drawn after the
+owner's renders of each piece on its own (the boots, which the owner's sheet cuts off, after the 3D boots):
+    helmet      the two horns rising from the helm's top corners, lit at their bends; the narrow crown's lit top band
+                over the beak: the blue slate V of the brow falling from its outer corners to the ridge, dark above it,
+                the slits on either side, the ridge below the V's point; at its foot the two cheeks and the chin, the
+                dark collar between them
+    chestplate  two plates a side, the mantle and the fin under it, rising toward the outside; the blue slate V at the
+                collar; the breastplate flaring at the hem round the dark waist, with the blood-red cloth hanging from
+                it
+    leggings    the dark belt between the tops of the tassets, whose inner edges meet in a V; the lower plates flaring
+                down the sides; the blood-red cloth hanging from the V over the dark under-layer, almost to the hem
+    boots       two boots under a lit cuff that overhangs outward, a small blue slate V under it, the toes turned out
+Their symbols:
+    .               transparent
+    O               the outline: the metal's "void" taken down to OUTLINE_LUMA, a dark blue grey
+    H L M D S V     the metal, light to dark (cool greys): "light", "mid_light", "mid", "dark", "seam", "void"
+    B               the blue slate: "gold_light" (the palette's name for it, see armor_paint.HADES)
+    U m u x         the under-layer: "under_light", "under_mid", "under_dark", and "under_darkest", which is both the
+                    eye slits and the under-layer's own outline
+    R k r w         the blood-red cloth: "leather_light", "leather_mid_light", "leather_mid", and "leather_darkest", its
+                    own outline
+Sunset Gem (tools/sunset_gem_armor.py) has sunset_gem/helmet.txt and so on, coloured from armor_paint.SUNSET_GEM and
+drawn after the owner's renders of each piece on its own:
+    helmet      the crown of gem shards, the broad cream spike over the band, a smaller one at each corner and a shard
+                splayed out at each side; the cream brow over the olive face with its yellow nose bar, peach cheek
+                guards round the open chin, the coral jaw
+    chestplate  the wings, cream and yellow crescents rising from the shoulders to their tips, the peach pauldrons under
+                them, the breastplate with the cream U of its collar, in strips yellow and apricot down to coral (no
+                forearms: the owner's chestplate on its own has none)
+    leggings    the belt's red V, the flaps fanning out from it with crimson inner edges and a glint at each hip, the
+                centre panel in strips, the hem with the crimson band and its mauve middle, parted between the legs
+    boots       two chunky boots, a crimson cuff with a mauve middle, a peach strip, coral with crimson blocks, red
+                soles, a shard flaring up from each outer side
+Their symbols:
+    .                   transparent
+    O                   the outline of the gems: the metal's "void" (red) taken down to OUTLINE_LUMA, a deep red brown
+    H L M D S V K Q     the gems, light to dark: "light" (cream), "mid_light" (pale yellow), "mid" (apricot), "dark"
+                        (peach), "seam" (coral), "void" (red), "gold_light" (crimson) and "gold_dark" (mauve)
+    U m u x             the olive under-layer: "under_light", "under_mid", "under_dark", "under_darkest"
+    w                   the olive's own outline, for olive drawn against the edge: "leather_darkest", a dark olive
+                        brown (the olive's darkest tone is far lighter than an icon's outline). None of the four maps
+                        needs it yet: the olive shows only inside the helm's face.
+Pharaoh (tools/pharaoh_armor.py) has pharaoh/helmet.txt and so on, coloured from armor_paint.PHARAOH and drawn after
+the owner's render (its boots, which the render hides under the skirt, after the 3D boots):
+    helmet      the nemes, its cap striped upright in gold and teal under the teal lobes, the gold brow band with the red
+                gem on the uraeus's diamond, the side panels in level stripes; the tan face narrowing between the gold
+                lappets and their dark teal ends to the chin and the short beard
+    chestplate  the gold armlets on the tan shoulders, the collar's teal round its gold ring and the red gem, the
+                breastplate's gold frame round the teal square, the dark waist
+    leggings    the gold belt over the skirt's level bands, gold, teal, gold, tan, gold, teal, dark gold, widening to
+                the dark teal hem, each band darker at the centre line, the halves parted at the foot
+    boots       two sandal-greaves: the gold-rimmed teal cuff, the tan wraps with the framed teal shin plate, the gold
+                strap and sole
+Their symbols:
+    .               transparent
+    O               the outline of the gold and the tan: the metal's "void" (a dark gold-brown) taken down to
+                    OUTLINE_LUMA
+    H L M D         the gold, light to dark: "light", "mid_light", "mid", "dark"
+    A a d e k       the teal, light to dark: "leather_light", "leather_mid_light", "leather_mid", "leather_dark", and
+                    "leather_darkest", the near-black of the bands, which is the teal's own outline
+    T t s n         the tan: "under_light", "under_mid", "under_dark", "under_darkest"
+    R r             the red gems: "gold_light", "gold_dark" (the palette's names for them, see armor_paint.PHARAOH)
 """
 import os
 
@@ -98,7 +160,20 @@ OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "
        "reforged_white_diamond": (armor_paint.WHITE_DIAMOND, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark",
                                                               "S": "seam", "V": "void", "U": "under_light",
                                                               "m": "under_mid", "u": "under_dark",
-                                                              "x": "under_darkest"})}
+                                                              "x": "under_darkest"}),
+       "hades": (armor_paint.HADES, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam", "V": "void",
+                                     "B": "gold_light", "U": "under_light", "m": "under_mid", "u": "under_dark",
+                                     "x": "under_darkest", "R": "leather_light", "k": "leather_mid_light",
+                                     "r": "leather_mid", "w": "leather_darkest"}),
+       "sunset_gem": (armor_paint.SUNSET_GEM, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                               "V": "void", "K": "gold_light", "Q": "gold_dark", "U": "under_light",
+                                               "m": "under_mid", "u": "under_dark", "x": "under_darkest",
+                                               "w": "leather_darkest"}),
+       "pharaoh": (armor_paint.PHARAOH, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "A": "leather_light",
+                                         "a": "leather_mid_light", "d": "leather_mid", "e": "leather_dark",
+                                         "k": "leather_darkest", "T": "under_light", "t": "under_mid",
+                                         "s": "under_dark", "n": "under_darkest", "R": "gold_light",
+                                         "r": "gold_dark"})}
 
 
 def luma(colour):

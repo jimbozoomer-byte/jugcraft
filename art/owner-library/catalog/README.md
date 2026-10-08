@@ -17,7 +17,7 @@ Every supplied file is listed, including large folders that GitHub's folder view
 | [farming and food textures](farming-and-food-textures/README.md) | 421 | [Browse](../originals/Blocks/farming%20and%20food%20textures) |
 | [formulaic_assemblicator](formulaic-assemblicator/README.md) | 6 | [Browse](../originals/Blocks/formulaic_assemblicator) |
 | [General blocks, ores, metals, machinery and items](general-blocks--ores--metals--machinery-and-items/README.md) | 765 | [Browse](../originals/Blocks) |
-| [Guns](guns/README.md) | 1,201 | [Browse](../originals/Blocks/Guns) |
+| [Guns](guns/README.md) | 3,790 | [Browse](../originals/Blocks/Guns) |
 | [pigment_extractor](pigment-extractor/README.md) | 9 | [Browse](../originals/Blocks/pigment_extractor) |
 | [pigment_mixer](pigment-mixer/README.md) | 3 | [Browse](../originals/Blocks/pigment_mixer) |
 | [precision_sawmill](precision-sawmill/README.md) | 16 | [Browse](../originals/Blocks/precision_sawmill) |

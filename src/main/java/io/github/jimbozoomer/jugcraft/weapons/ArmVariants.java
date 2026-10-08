@@ -25,6 +25,9 @@ import net.minecraft.world.item.Rarity;
  * hard-wearing), bonecarved (strikes the undead harder) and runebound (marks what it strikes);</li>
  * <li>the trophies of eight bosses still to be made (docs/branches/BOSSES.md), with no recipe: each boss's loot table
  * (loot_table/bosses/&lt;boss&gt;.json) drops one of its two. They are twice as hard-wearing as steel and carry a boon.</li>
+ * <li>the arms of the owner's armor sets ({@link #SETS}), each in its set's look: the Hades Armor's scythe. Like a
+ * trophy, each has no recipe, is twice as hard-wearing as steel and carries a boon; unlike one, no loot table drops it
+ * yet (how a set is won is still to be decided), so it is creative only for now.</li>
  * </ul>
  *
  * <p>Every boon is worked on the server, when its arm strikes ({@link ArmItem#hurtEnemy}, {@link ArmItem#boonBonus}),
@@ -42,12 +45,18 @@ public final class ArmVariants {
 		FROST, EMBER, VENOM, DRAIN, WITHER, SHOCK, GALE, HOWL, TIDE, GRAVEBANE, MARK
 	}
 
-	/** A variant: its id, its kind (a {@link JugcraftArms.Kind}), its line (a style or a boss) and its boon (or null). */
+	/**
+	 * A variant: its id, its kind (a {@link JugcraftArms.Kind}), its line (a style, a boss or an armor set) and its boon
+	 * (or null).
+	 */
 	public record Variant(String name, String kind, String line, Boon boon) {
 	}
 
-	/** The crafted styles; any other line is a boss. */
+	/** The crafted styles; any other line is a boss or an armor set ({@link #SETS}). */
 	public static final List<String> STYLES = List.of("gilded", "ironclad", "bonecarved", "runebound");
+
+	/** The owner's armor sets with an arm of their own; any other line that is not a style is a boss. */
+	public static final List<String> SETS = List.of("hades");
 
 	public static final List<Variant> VARIANTS = List.of(
 			new Variant("gilded_longsword", "longsword", "gilded", null),
@@ -81,7 +90,8 @@ public final class ArmVariants {
 			new Variant("stormcaller", "glaive", "storm_roc", Boon.GALE),
 			new Variant("galefeather", "estoc", "storm_roc", Boon.GALE),
 			new Variant("tidebreaker", "war_fork", "abyssal_leviathan", Boon.TIDE),
-			new Variant("leviathans_hook", "bill", "abyssal_leviathan", Boon.TIDE));
+			new Variant("leviathans_hook", "bill", "abyssal_leviathan", Boon.TIDE),
+			new Variant("hades_scythe", "scythe", "hades", Boon.WITHER));
 
 	/** The styles' patterns (smithing templates), in STYLES order. */
 	public static final List<String> PATTERN_NAMES = List.of("gilders_pattern", "ironclad_pattern", "bonecarvers_pattern",
@@ -117,7 +127,7 @@ public final class ArmVariants {
 	public static final float GRAVEBANE = 0.2F;
 	/** Gilded arms' enchantability (gold tools'; steel's is 12). */
 	public static final int GILDED_ENCHANTABILITY = 22;
-	/** Ironclad arms and the bosses' trophies last this many times as long as steel. */
+	/** Ironclad arms, and the bosses' trophies and the armor sets' arms, last this many times as long as steel. */
 	public static final int IRONCLAD_DURABILITY = 2;
 	public static final int TROPHY_DURABILITY = 2;
 
@@ -141,6 +151,7 @@ public final class ArmVariants {
 			} else if (variant.line().equals("ironclad")) {
 				properties.durability(JugcraftGear.STEEL.durability() * IRONCLAD_DURABILITY);
 			} else if (!style) {
+				// A boss's trophy or an armor set's arm.
 				properties.durability(JugcraftGear.STEEL.durability() * TROPHY_DURABILITY);
 			}
 			properties.rarity(style ? Rarity.UNCOMMON : Rarity.EPIC);
