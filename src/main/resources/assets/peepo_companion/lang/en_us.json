@@ -49,5 +49,7 @@
   "block.peepo_companion.lunch_crate": "Lunch Crate",
   "block.peepo_companion.lunch_cover": "Lunch Cover",
   "block.peepo_companion.tiki_torch": "Tiki Torch",
-  "item.peepo_companion.companion_planner": "Companion Planner"
+  "item.peepo_companion.companion_planner": "Companion Planner",
+  "item.peepo_companion.mob_transport_crate": "Mob Transport Crate",
+  "item.peepo_companion.iron_mob_transport_crate": "Iron Mob Transport Crate"
 }

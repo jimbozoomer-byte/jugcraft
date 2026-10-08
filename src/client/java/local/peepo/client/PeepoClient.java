@@ -12,6 +12,9 @@ public final class PeepoClient implements ClientModInitializer {
     public static final ModelLayerLocation WORK_METAL = new ModelLayerLocation(PeepoMod.id("work_tools"), "metal");
     @Override public void onInitializeClient() {
         AssignmentPreview.initialize();
+        TransportCrateRenderer.initialize();
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler,client)->TransportCratePreview.clear());
+        net.minecraft.client.gui.screens.MenuScreens.register(local.peepo.TransportCrateMenu.TYPE,TransportCrateScreen::new);
         net.minecraft.client.gui.screens.MenuScreens.register(local.peepo.CompanionMenu.TYPE,CompanionScreen::new);
         net.minecraft.client.gui.screens.MenuScreens.register(local.peepo.GeneratorWheel.MENU,WheelScreen::new);
         net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(local.peepo.GeneratorWheel.ENTITY,WheelRenderer::new);

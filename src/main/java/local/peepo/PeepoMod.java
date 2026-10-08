@@ -41,6 +41,7 @@ public final class PeepoMod implements ModInitializer {
         TikiTorch.initialize();
         CompanionMenu.initialize();
         AssignmentTool.initialize();
+        MobTransportCrate.initialize();
         PeepoSpawns.initialize();
         FabricDefaultAttributeRegistry.register(PEEPO, PeepoEntity.attributes());
         FabricDefaultAttributeRegistry.register(JUGHEAD, PeepoEntity.attributes());

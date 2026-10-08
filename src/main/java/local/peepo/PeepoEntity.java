@@ -265,7 +265,10 @@ public final class PeepoEntity extends PathfinderMob {
         var saved=input.child("Belongings");
         if(saved.isPresent())net.minecraft.world.ContainerHelper.loadAllItems(saved.get(),belongings.getItems());
         else if(isWearingPumpkin())belongings.getItems().set(8,new ItemStack(Items.JACK_O_LANTERN));
-        garden.load(input);transport.load(input);social.load(input);
+        garden.load(input);
+        // Client-only display entities have no AI goals/transport instance.
+        if(transport!=null)transport.load(input);
+        social.load(input);
         syncBelongings();
     }
     public boolean isBlushing() { return entityData.get(BLUSHING); }
