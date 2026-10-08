@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Pipeworks (industrial pipe and tank props)
+- **Twelve multi-block props** in the clean Dieselworks steel, after the owner's own set of grey-box renders: a **Pipe Run** on pedestal stands, a **Capped Pipe Stub**, a **Flanged Pipe**, a four-line **Pipe Rack**, a lattice **Pipe Bridge**, a **Standpipe Frame** with handwheels and gauges, a **Horizontal Tank** on saddles, the tank under a **Tank Walkway** with handrails and a ladder, **Stacked Tanks** in a frame, a **Hooped Pipeline**, a **Ribbed Drum** and a tall **Pipe Overpass**. Placed from one item facing the player, broken as one, with hitboxes that follow the pipes and tanks.
+- Made from steel plates, steel fluid pipes and steel I-beams; never back into metal. Each prop's whole model is also saved as a Blockbench project under `art/pipeworks/`. Game tests and a screenshot scene. Record: [pipeworks.md](docs/features/pipeworks.md).
+
 ### Unmerged: Guns, slice 7 (bayonets and the shared-texture guns)
 - **Four bayonets,** each the owner's art: **Iron**, **Steel** (the owner's anthralite one), **Diamond** and **Netherite** (a smithing upgrade). Under the barrel, in place of a grip. **V stabs** for 4 to 6 damage within reach, every 12 ticks; the server deals the blow. Seven guns take them.
 - **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.

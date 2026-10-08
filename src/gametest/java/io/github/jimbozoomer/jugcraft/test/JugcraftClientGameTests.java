@@ -315,6 +315,18 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_rocketry");
 			server.runCommand("clear @p");
 
+			// Pipeworks, in the same spot: a tank yard of the twelve steel props, the stacked tanks and the tank with its
+			// walkway at the back, pipe runs, a rack, a bridge and the hooped pipeline between them, the drum, the
+			// standpipe frame and the overpass across the front.
+			server.runCommand("kill @e[type=minecraft:item_frame]");
+			server.runCommand("kill @e[type=minecraft:minecart]");
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 26, y, z - 10, x - 10, y + 6, z + 1));
+			server.runOnServer(minecraft -> buildPipeworks(minecraft.overworld(), new BlockPos(x - 24, y, z - 10)));
+			server.runCommand("tp @p %d %d %d 180 12".formatted(x - 18, y + 4, z + 6));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_pipeworks");
+
 			// Dieselworks (batch 45), in the same spot: a riveted wall with portholes and a dome-plate cornice, a
 			// grating catwalk on I-beams and amber cage lamps.
 			server.runCommand("kill @e[type=minecraft:item_frame]");
@@ -1284,6 +1296,38 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			level.setBlock(base.offset(dx, -1, 1), block.apply("polished_marble"), 3);
 			level.setBlock(base.offset(dx, 0, 1), block.apply("polished_marble_stairs"), 3);
 		}
+	}
+
+	/** Sets every block of a Pipeworks prop, its master at {@code master}, facing {@code facing}. */
+	private static void placeProp(ServerLevel level, String id, BlockPos master, Direction facing) {
+		io.github.jimbozoomer.jugcraft.building.PipeworksBlock prop = io.github.jimbozoomer.jugcraft.building.Pipeworks.BLOCKS.get(id);
+		BlockState state = prop.defaultBlockState().setValue(io.github.jimbozoomer.jugcraft.building.PipeworksBlock.FACING, facing);
+		for (int part = 0; part < prop.parts(); part++) {
+			level.setBlock(prop.partPos(master, facing, part), state.setValue(io.github.jimbozoomer.jugcraft.building.PipeworksBlock.PART, part), 3);
+		}
+	}
+
+	/** The Pipeworks yard: every prop facing the camera (north), on a weathered steel plate floor. */
+	private static void buildPipeworks(ServerLevel level, BlockPos base) {
+		BlockState floor = io.github.jimbozoomer.jugcraft.building.Dieselworks.BLOCKS.get("rust_plate").defaultBlockState();
+		for (int dx = -2; dx <= 14; dx++) {
+			for (int dz = 0; dz <= 11; dz++) {
+				level.setBlock(base.offset(dx, -1, dz), floor, 3);
+			}
+		}
+		// A prop's master is its front right block as the camera sees it; the rest reaches to -x and +z (away).
+		placeProp(level, "stacked_tanks", base.offset(13, 0, 0), Direction.NORTH);
+		placeProp(level, "tank_walkway", base.offset(9, 0, 0), Direction.NORTH);
+		placeProp(level, "horizontal_tank", base.offset(5, 0, 0), Direction.NORTH);
+		placeProp(level, "ribbed_drum", base.offset(1, 0, 0), Direction.NORTH);
+		placeProp(level, "pipe_bridge", base.offset(-2, 0, 0), Direction.NORTH);
+		placeProp(level, "pipeline_hoops", base.offset(14, 0, 5), Direction.NORTH);
+		placeProp(level, "pipe_rack", base.offset(12, 0, 6), Direction.NORTH);
+		placeProp(level, "standpipe_frame", base.offset(9, 0, 7), Direction.NORTH);
+		placeProp(level, "pipe_stand_run", base.offset(6, 0, 6), Direction.NORTH);
+		placeProp(level, "flanged_pipe", base.offset(4, 0, 7), Direction.NORTH);
+		placeProp(level, "blind_flange_stub", base.offset(2, 0, 10), Direction.NORTH);
+		placeProp(level, "pipe_overpass", base.offset(0, 0, 6), Direction.NORTH);
 	}
 
 	private static void buildDieselworks(ServerLevel level, BlockPos base) {

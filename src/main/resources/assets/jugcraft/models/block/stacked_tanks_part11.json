@@ -1,0 +1,279 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "dr_red": "jugcraft:block/dr_red",
+    "dw_steel_band": "jugcraft:block/dw_steel_band",
+    "dw_steel_plate": "jugcraft:block/dw_steel_plate",
+    "pw_flange": "jugcraft:block/pw_flange",
+    "pw_steel": "jugcraft:block/pw_steel",
+    "sp_gauge": "jugcraft:block/sp_gauge",
+    "particle": "jugcraft:block/pw_steel"
+  },
+  "elements": [
+    {
+      "from": [
+        6.0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        0.5,
+        16
+      ],
+      "faces": {
+        "west": {
+          "texture": "#pw_steel"
+        },
+        "up": {
+          "texture": "#pw_steel"
+        }
+      }
+    },
+    {
+      "from": [
+        7.0,
+        0.5,
+        0
+      ],
+      "to": [
+        16,
+        4.0,
+        16
+      ],
+      "faces": {
+        "west": {
+          "texture": "#pw_steel"
+        },
+        "up": {
+          "texture": "#pw_steel"
+        },
+        "down": {
+          "texture": "#pw_steel"
+        }
+      }
+    },
+    {
+      "from": [
+        10.0,
+        4.0,
+        0
+      ],
+      "to": [
+        16,
+        6.0,
+        16
+      ],
+      "faces": {
+        "west": {
+          "texture": "#pw_steel"
+        },
+        "up": {
+          "texture": "#pw_steel"
+        },
+        "down": {
+          "texture": "#pw_steel"
+        }
+      }
+    },
+    {
+      "from": [
+        10.0,
+        14.0,
+        0
+      ],
+      "to": [
+        16,
+        16.0,
+        16
+      ],
+      "faces": {
+        "west": {
+          "texture": "#pw_steel"
+        },
+        "up": {
+          "texture": "#pw_steel"
+        },
+        "down": {
+          "texture": "#pw_steel"
+        }
+      }
+    },
+    {
+      "from": [
+        1.0,
+        10.0,
+        0
+      ],
+      "to": [
+        4.0,
+        12.0,
+        16
+      ],
+      "faces": {
+        "east": {
+          "texture": "#dw_steel_plate"
+        },
+        "west": {
+          "texture": "#dw_steel_plate"
+        },
+        "up": {
+          "texture": "#dw_steel_plate"
+        },
+        "down": {
+          "texture": "#dw_steel_plate"
+        }
+      }
+    },
+    {
+      "from": [
+        5.0,
+        10.0,
+        0
+      ],
+      "to": [
+        16,
+        12.5,
+        2.5
+      ],
+      "faces": {
+        "south": {
+          "texture": "#dw_steel_plate"
+        },
+        "west": {
+          "texture": "#dw_steel_plate"
+        },
+        "up": {
+          "texture": "#dw_steel_plate"
+        },
+        "down": {
+          "texture": "#dw_steel_plate"
+        }
+      }
+    },
+    {
+      "from": [
+        5.5,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        0.75,
+        0.75
+      ],
+      "faces": {
+        "south": {
+          "texture": "#dw_steel_band"
+        },
+        "west": {
+          "texture": "#dw_steel_band"
+        },
+        "up": {
+          "texture": "#dw_steel_band"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        0.75,
+        0
+      ],
+      "to": [
+        16,
+        4.5,
+        0.75
+      ],
+      "faces": {
+        "south": {
+          "texture": "#dw_steel_band"
+        },
+        "west": {
+          "texture": "#dw_steel_band"
+        },
+        "up": {
+          "texture": "#dw_steel_band"
+        },
+        "down": {
+          "texture": "#dw_steel_band"
+        }
+      }
+    },
+    {
+      "from": [
+        9.75,
+        4.5,
+        0
+      ],
+      "to": [
+        16,
+        6.5,
+        0.75
+      ],
+      "faces": {
+        "south": {
+          "texture": "#dw_steel_band"
+        },
+        "west": {
+          "texture": "#dw_steel_band"
+        },
+        "up": {
+          "texture": "#dw_steel_band"
+        },
+        "down": {
+          "texture": "#dw_steel_band"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        15.5,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        0.75
+      ],
+      "faces": {
+        "south": {
+          "texture": "#dw_steel_band"
+        },
+        "west": {
+          "texture": "#dw_steel_band"
+        },
+        "down": {
+          "texture": "#dw_steel_band"
+        }
+      }
+    },
+    {
+      "from": [
+        9.75,
+        13.5,
+        0
+      ],
+      "to": [
+        16,
+        15.5,
+        0.75
+      ],
+      "faces": {
+        "south": {
+          "texture": "#dw_steel_band"
+        },
+        "west": {
+          "texture": "#dw_steel_band"
+        },
+        "up": {
+          "texture": "#dw_steel_band"
+        },
+        "down": {
+          "texture": "#dw_steel_band"
+        }
+      }
+    }
+  ]
+}

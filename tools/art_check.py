@@ -853,6 +853,16 @@ DRAWN_TOGETHER = {
 }
 
 
+def _pipeworks_assemblies():
+    """The Pipeworks props' part models at their block offsets (tools/pipeworks.py drawn_together)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import pipeworks
+    return pipeworks.drawn_together()
+
+
+DRAWN_TOGETHER.update(_pipeworks_assemblies())
+
+
 def _halves():
     """(lower, upper) block models of things two blocks tall, drawn one above the other: _lower/_upper, _bottom/_top."""
     base = ASSETS / "models" / "block"

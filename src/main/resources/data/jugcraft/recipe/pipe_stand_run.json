@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "FFF",
+    "S S"
+  ],
+  "key": {
+    "F": "jugcraft:steel_fluid_pipe",
+    "S": "#c:plates/steel"
+  },
+  "result": {
+    "id": "jugcraft:pipe_stand_run",
+    "count": 1
+  }
+}

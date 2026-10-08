@@ -194,6 +194,8 @@ def assets():
     rocketry.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import dieselworks
     dieselworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import pipeworks
+    pipeworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import kaiserworks
     kaiserworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import trenchworks
@@ -1319,6 +1321,9 @@ def tags():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     import dieselworks
     for block in dieselworks.blocks():
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import pipeworks
+    for block in pipeworks.blocks():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     import kaiserworks
     for block in kaiserworks.blocks():
