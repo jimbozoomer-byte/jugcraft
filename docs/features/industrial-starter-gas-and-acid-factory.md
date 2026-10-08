@@ -1,6 +1,6 @@
 # Starter gas and acid factory construction and balance
 
-Status: **draft for owner decisions**, 7 October 2026. The owner selected the starter gas/acid factory as the first industrial-chemistry delivery milestone. The construction quantities, processing rates and energy limits below are new proposals; they are not approved by the preceding seven answer batches and implement no gameplay.
+Status: **owner-selected starter direction and provisional processing baseline**, updated 7 October 2026. The owner answered A to all ten starter-factory questions in the eighth planning batch: smaller steel/basic-circuit variants, the 20-plate Separator, automatic electrical heating, the full first sulfuric-acid chain, a permanent one-nickel/ceramic methane bed, default excess-water draining, one initial cleaning residue, 128/256 JE/t starter generator output, moderate processing times/power budgets, and retained lye with production stopping when full. Other equipment bills, material/solution conversions and exact efficiency/recovery limits remain proposals for review. No gameplay is implemented here.
 
 The factory turns an existing steel workshop and electrical supply into useful hydrogen, methane and ordinary acids. Gas processing remains substantial without requiring aluminum, titanium, advanced chips, PTFE, stainless steel or completion of every specialty. Magnesium and metal expansion follows this delivery milestone. First electricity remains independently reachable.
 
@@ -27,7 +27,7 @@ The existing Fuel Cell pays 128 JE per mB H2. Water electrolysis currently retur
 
 ## Proposed starter equipment and construction
 
-Use starter variants within the shared machine families, with existing larger equipment as later development. These are working roles, not final new registry IDs. An alternative is to revise the existing machines' entry recipes; that choice is pending. Preserve saved IDs and recipe compatibility under either approach.
+The owner selected smaller steel/basic-circuit starter variants within the shared machine families, followed by larger advanced equipment. These are working roles, not final new registry IDs. Preserve existing saved IDs and recipe compatibility when adding the starter variants. The Separator's 20-plate total and permanent methane bed of one nickel ingot plus ordinary fired ceramic pieces are selected construction baselines; the other outer component bills below remain proposals.
 
 The table lists **outer construction ingredients**, not a flattened raw-material bill or a literal crafting-grid layout. Reuse existing component identities and workshop methods. A Steel Tank already contains 8 steel plates and a Tinplate Tank; that Tinplate Tank contains 8 tin plates and glass. A Machine Casing uses existing bronze/zinc supplies. Components must be expanded once when calculating the full cost.
 
@@ -47,7 +47,7 @@ The Separator costs **20 steel plates in total** after expanding its two Steel T
 
 Begin with the Separator, portable tanks and existing power. Add HCl or methane equipment when those outputs are useful; sulfuric-acid production can develop alongside them. A complete coal-to-methane and acid installation is an expansion, rather than a compulsory purchase before the first chemical product. Keep ordinary pipes, hand transfers and normal repeat processing available without an automation chip.
 
-Starter heating is proposed to be included in the electrical recipe budget, with readable warming/working states. The Gasifier still consumes its explicit carbon feed and heat supply. A shared external heat connection is an alternative for stations that already support it; neither choice introduces manual gas pressure management.
+The owner selected automatic heating included in the starter machines' electrical recipe budgets, with readable warming/working states. No separate external heat connection is required for these starter variants. Gasification still consumes its explicit carbon feed; any optional oxygen-assisted heating must debit that feed and fit the paid energy/material budget. Gas pressure remains automatic.
 
 ## Proposed game quantities and reaction units
 
@@ -67,7 +67,7 @@ For these new gas recipes, equal gas mB represent equal reaction amounts. The ex
 | Sulfur oxide conversion | 250 gas mB SO2 + 125 gas mB O2 -> 250 gas mB SO3 | 100 ticks x 128 JE/t = 12,800 JE; independent contact-catalyst supply must be specified |
 | Ordinary sulfuric-acid absorption | 250 gas mB SO3 + 500 liquid mB water -> 500 mB ordinary sulfuric acid | 100 ticks x 96 JE/t = 9,600 JE; acid solution/material accounting required |
 
-The sulfur route preserves the current nominal output of 1,000 mB ordinary acid per 2 sulfur dust while adding accounted oxygen and three meaningful process roles. Its proposed processing budget is 64,000 JE per 1,000 mB acid, before producing oxygen or conditioning feeds. This is a substantial increase over the simplified existing recipe, so the first-route choice needs the owner's answer. Acid concentration and electronic purity remain separate later supply capabilities; they are not granted by these ordinary-acid quantities.
+The sulfur route preserves the current nominal output of 1,000 mB ordinary acid per 2 sulfur dust while adding accounted oxygen and three meaningful process roles. Its proposed processing budget is 64,000 JE per 1,000 mB acid, before producing oxygen or conditioning feeds. The owner selected this full SO2/SO3/absorption chain as the normal first industrial-acid route once its initial catalyst and absorption supplies are independently reachable. The moderate processing times and power budgets are a provisional playtesting baseline; the simplified existing recipe remains available during transition and any necessary bootstrap. Acid concentration and electronic purity remain separate later supply capabilities; they are not granted by these ordinary-acid quantities.
 
 Real contact processing uses catalytic SO2 oxidation and strong-acid absorption. The game's absorption entry simplifies that system; it is not a real preparation procedure. A named vanadium-oxide contact bed would require an independently reachable precursor route, rather than vanadium recovered only using the acid it is meant to produce. The methane nickel bed is not automatically a sulfuric-acid contact catalyst. Preserve the current starter acid route until the new route's catalyst and initial absorption supply are reachable. [EPA process reference](https://www.epa.gov/sites/production/files/2020-09/documents/8.10_sulfuric_acid.pdf).
 
@@ -77,9 +77,9 @@ Rotary conversion must preserve chemical amount and pay a direction-specific ene
 
 ## Proposed generation and upgrade limits
 
-Propose **128 JE/mB H2** and **448 JE/mB methane** as initial burn values. Methane then stores 3.5 times as much electricity in an equal-size gas tank. Proposed starter output is 128 JE/t on H2 and 256 JE/t on methane; larger/upgraded generators can raise output without multiplying energy merely because fuel changes tanks or provenance. Existing Fuel Cell and petroleum consumers require a compatibility audit, not silent removal.
+Propose **128 JE/mB H2** and **448 JE/mB methane** as initial burn values. Methane then stores 3.5 times as much electricity in an equal-size gas tank. The selected starter output is 128 JE/t on H2 and 256 JE/t on methane; larger/upgraded generators can raise output without multiplying energy merely because fuel changes tanks or provenance. Existing Fuel Cell and petroleum consumers require a compatibility audit, not silent removal.
 
-Use two independent limits for electrically produced gas:
+The exact burn values and numerical limits below remain balance proposals; question 8 selected generator output per tick, and question 9 selected the moderate processing baseline rather than separately approving every upgrade/recovery limit. Use two proposed independent limits for electrically produced gas:
 
 - Electrolysis spends at least **256 JE per mB of produced H2**, including all efficiency cards and larger-machine savings. This is a recipe-specific lower limit, not a global restriction on unrelated chemistry. It corresponds to a minimum 128,000 JE for the water batch and 64,000 JE for the proposed brine batch.
 - Total recoverable output, including any generation bonuses, exhaust recovery and useful exported heat, is bounded by **192 JE/mB H2** and **672 JE/mB methane**. These are combined ceilings with 50% headroom above the proposed base electrical burn values, not extra generation entitlements. Any future cross-system heat conversion must fit within the same envelope.
@@ -105,28 +105,49 @@ Use shared portable tanks and pipes, retaining exact fluid identity, amount and 
 
 Before consuming a batch, reserve space for every retained output. Ordinary processing pauses on insufficient inputs, power or output space, and reports the reason. Optional CO2 capture retains the selected default of continuing and venting excess, with an optional stop setting. That permission does not automatically extend to chlorine, acids, lye or other outputs.
 
-The draft proposes recoverable methanation water with an explicit optional drain when its tank fills, rather than silently deleting it. Whether that drain is the default is pending. The same choice for surplus lye is separate. Deliberate disposal records its material removal and any selected numeric pollution consequence; it creates neither a product nor a credit. No routine filter/catalyst replacement, pipe pressure simulation, landscape discoloration or crop-health penalty is added.
+The owner selected recovery of methanation water while storage has room and an explicit drain enabled by default for excess water. The player can disable that drain to retain all water and pause when storage fills. Lye has the opposite selected default: retain it and stop electrolysis when storage is full until the player chooses a disposal route. Neither decision permits automatic chlorine or acid disposal. Deliberate disposal records its material removal and any selected numeric pollution consequence; it creates neither a product nor a credit. No routine filter/catalyst replacement, pipe pressure simulation, landscape discoloration or crop-health penalty is added.
 
-## Owner decision batch pending
+## Recorded starter factory choices eighth batch
 
-Record answers against these ten questions so their meaning survives later planning turns. **A is the proposed initial direction**, not an already selected answer.
+The owner answered **A to all ten questions** on 7 October 2026. These are selected planning directions and a provisional baseline, rather than implementation or gameplay-test results.
+
+| # | Owner answer | Selected direction |
+| --- | --- | --- |
+| 1 | A | Smaller steel/basic-circuit starter machines, then larger advanced versions within the same families |
+| 2 | A | Separator construction totals 20 steel plates after its two Steel Tanks are counted, plus the other selected earlier materials |
+| 3 | A | Automatic electrical heating, included in processing power costs; no separate starter heat supply |
+| 4 | A | Full sulfur oxidation -> SO2 -> SO3 -> acid absorption as the normal first industrial-acid route once independently reachable |
+| 5 | A | One existing nickel ingot plus ordinary fired ceramic pieces for a permanent reusable methane catalyst bed |
+| 6 | A | Collect methanation water while storage has room; default to explicitly draining excess water when full |
+| 7 | A | One mixed cleaning residue initially; useful material recovery can develop later |
+| 8 | A | Starter gas-generator output of 128 JE/t on hydrogen and 256 JE/t on methane |
+| 9 | A | Use the moderate processing times and power budgets above as the first provisional baseline, then tune through playtests |
+| 10 | A | Retain lye and stop electrolysis when storage fills until the player provides storage/use or chooses disposal |
+
+The exact other construction bills, fuel energy per mB, upgrade caps, gas/liquid solution representations, contact-catalyst preparation and coal quantities were not separately settled by this batch. Keep them visible as remaining proposals or design work. Normal factory operation still needs no automation chip, routine catalyst replacement or pressure settings.
+
+## Acid catalyst and coal processing questions pending
+
+The current vanadium-electrolyte recipe consumes sulfuric acid to leach asphalt binder. It cannot alone supply the catalyst required to make first industrial sulfuric acid. A mineral-based vanadium route is a plausible game connection: [USGS identifies vanadium-bearing mineral deposits and petroleum byproducts](https://www.usgs.gov/publications/vanadium). The proposed early non-sulfuric preparation below is a simplified game route whose materials, stages and budgets remain to specify; the source does not establish that recipe. Existing oil-residue electrolyte production remains a later compatible route.
+
+The following eight questions are new and **unanswered**. A is the proposed starting direction. Any eventual source remains available through staged solo production or trade; it cannot require aluminum/titanium production, advanced wafers, or its own sulfuric-acid output. A plain mineral feed without mandatory uranium processing is sufficient for this catalyst proposal.
 
 | # | Topic | A | B |
 | --- | --- | --- | --- |
-| 1 | Entry machine forms | Smaller steel/basic-circuit starter variants, then larger advanced versions in the same families | Give the current larger machines cheaper steel/basic-circuit entry recipes |
-| 2 | First Separator construction cost | Keep the proposed 20 steel plates after its two tanks are counted | Use one Steel Tank, reducing this total to 12 plates and giving less internal storage |
-| 3 | Starter heating | Include heat in the electrical draw with automatic warmup | Supply shared external heat as well as electricity where supported |
-| 4 | First sulfuric-acid production | Make the SO2 -> SO3 -> absorption chain the normal new-factory route once independently reachable | Keep simple sulfur/water production initially; the full chain is a later bulk improvement |
-| 5 | Reusable methane catalyst investment | 1 nickel ingot plus ordinary fired ceramic pieces per permanent bed | A larger nickel investment and precision-finished ceramic support |
-| 6 | Methanation water overflow | Recover it while storage has room; enable water draining by default when full | Stop until the player provides water storage or explicitly enables draining |
-| 7 | First gas-cleaning residues | One mixed residue stream initially; optional later recovery splits useful materials | Separate ash, tar and recoverable sulfur outputs from the beginning |
-| 8 | Starter Gas Generator output | 128 JE/t on hydrogen, 256 JE/t on methane | 256 JE/t on both at first; methane's output advantage begins with upgrades |
-| 9 | Starter processing speed | Use the table's first balance baseline, then adjust through playtests | Roughly halve processing durations with higher draw and the same total JE per batch |
-| 10 | Surplus electrolysis lye | Retain it and stop when storage is full until the player chooses a disposal route | Include an explicit overflow-discard setting enabled by default |
+| 1 | First acid contact catalyst | Named reusable vanadium-oxide/ceramic bed from an independent early mineral-preparation route; larger-scale supplies connect to later vanadium industry | Abstract reusable ceramic contact bed initially, with named vanadium catalyst chemistry later |
+| 2 | Acid absorber startup | One small initial acid charge from the existing reachable recipe or trade, retained and recirculated as the plant grows its output | Simplify startup so the game absorber starts with water and needs no initial acid charge |
+| 3 | SO2 conversion equipment | Reuse the Chemical Infuser family with the appropriate installed contact bed; factories can dedicate separate Infusers to different reactions | Add a dedicated sulfur-oxide Contact Converter from the beginning |
+| 4 | First sulfur supply | Keep existing obtainable sulfur as the reliable entry feed, with refinery/gas-residue recovery as additional later sources | Add a larger sulfide-ore roasting/byproduct chain as a second early sulfur source |
+| 5 | Gasifier carbon feeds | Coal and coke, plus a lower-yield/lower-pollution charcoal alternative with its own balance | Coal and coke initially; charcoal remains in other fired machines |
+| 6 | Gasifier oxygen requirement | Carbon feed + water + automatic electrical heat at entry; oxygen-assisted operation is an optional later improvement | Require oxygen alongside carbon feed, water and automatic electrical heat from the first Gasifier |
+| 7 | First cleanup arrangement | One combined cleaning/separation station before CO/H2 use, with larger specialized equipment later | Separate cleaning and gas-separation stations immediately |
+| 8 | Initial mixed residue usefulness | One modest stabilized road/filler product through shared construction equipment, with paid binder/processing and later useful recovery | Store or deliberately dispose of residue initially; useful products begin with later recovery equipment |
+
+The charcoal yield/pollution comparison and stabilized residue product are game proposals, not universal real process claims. Neither creates electricity or duplicates the carbon/material feed. One initial residue identity remains selected under either answer to question 8; secondary products must consume that identity once. Residue stabilization must account for removed organics, outputs and numeric pollution without adding landscape/crop damage or routine maintenance. Exact deposit regions, material conversions and product quantities remain future work.
 
 ## Implementation and verification requirements
 
-After owner choices, resolve the contact catalyst/absorption entry, coal feed ledger, per-solution composition, concrete machine forms and capability checks. Run construction reachability and integer recipe/unit/energy audits across all supported upgrade combinations, larger-machine settings, gas consumers and heat systems. These must include smallest batches and rounding; checking nominal formulas alone is insufficient.
+After the selected starter baseline, resolve the pending contact catalyst/absorption entry, coal feed ledger, per-solution composition, concrete machine forms and capability checks. Run construction reachability and integer recipe/unit/energy audits across all supported upgrade combinations, larger-machine settings, gas consumers and heat systems. These must include smallest batches and rounding; checking nominal formulas alone is insufficient.
 
 Exercise full-output rollback, deliberate vent/drain policies, incompatible fluids, duplicate pickup/transfer attempts, joined tank ownership, restart persistence and bounded factory behavior on a dedicated server with two clients. Measure survival progression and representative factory performance. Local storage/recipe-priority automation follows the selected chip capability; remote control remains later. The separate [Encyclopedia UI plan](jugcraft-encyclopedia.md) should explain routes and blocked states through inventory/keybind access.
 
