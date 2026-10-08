@@ -1388,6 +1388,10 @@ Seven cakes the owner drew and shared on 8 October 2026 ("CAKES & BAKES - 3D CAK
 
 Five fruits the owner asked for on 8 October 2026 before the milkshakes and the pies and tarts that need them, as crops in Jugcraft's own art (their library has none of these fruits; the owner chose to build them this way). Details and test evidence: [features/fruit-crops.md](../features/fruit-crops.md).
 
+| **The bushes:** strawberries, blueberries and coffee, from planted to ripe | **The trees:** the plum and the banana hung with ripe fruit |
+| --- | --- |
+| ![The bushes](../images/ingame_fruit_bushes.jpg) | ![The trees ripe](../images/ingame_fruit_trees_ripe.jpg) |
+
 - **Strawberry Plant, Blueberry Bush and Coffee Plant:** bushes a block tall on farmland, planted from seeds (from short grass, a wild plant or a fruit); ripe, a right-click picks them and they fruit again, as the pepper does.
 - **Plum and banana trees,** grown from a Plum Pit and a Banana Pup as the [orchards'](#what-exists-now-orchards) are; the banana on a Banana Stem of its own under drooping fronds.
 - **Wild:** strawberries in forests and flower fields, blueberries in taigas and hills, coffee and bananas in jungles, plums in forests and taigas; plums in the Orchard, bananas in the Tropics and the Rainforest.
