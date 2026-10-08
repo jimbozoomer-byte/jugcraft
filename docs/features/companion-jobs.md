@@ -148,6 +148,8 @@ The [Hearth Oven adapter](companion-hearth.md) uses a ghost pie selection, suppl
 
 ### Supply and Output
 
+The [transport controls and standard machine adapter](companion-transport-controls.md) add per-workstation Auto/On/Off for each direction, external item-automation detection, processor output collection and ghost-recipe ingredient supply for supported recipe-based processors. Speed assistance stays independent.
+
 Select a companion with the planner, then **right-click a container for Supply**, or **Shift-right-click it for Output**. The clicked face is saved and its insertion/extraction rules are respected. Existing beds, workstations and lunch sources retain their normal assignment action. Left-click or the GUI x removes the link. Double chests are canonicalized, and locked/protected halves are checked together. A single container cannot have conflicting roles for one companion. Both container links appear beneath Lunch with names, coordinates, status and the existing selection outlines.
 
 The first concrete logistics adapter is the **Cooking Pot**. Select its finished dish in the companion's ghost recipe slot. Supply fetches only the missing ingredients for one recipe batch, respecting Ingredient predicates and counts. Output collects only the pot's result slots, including returned bowls/bottles/buckets. Automatic recipe mode still permits output collection but does not guess a supply recipe. Heat is still required and companions do not supply fuel or replace the heating block.

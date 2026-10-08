@@ -11,13 +11,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.flag.FeatureFlags;
 
 public final class CompanionMenu extends AbstractContainerMenu {
-    public static final int DATA_COUNT=31, RECIPE_START=46;
+    public static final int DATA_COUNT=39, RECIPE_START=46;
     public static MenuType<CompanionMenu> TYPE;
     private final PeepoEntity npc;
     private final ContainerData data;
     private final Inventory playerInventory;
     private final net.minecraft.world.SimpleContainer recipeIcons=new net.minecraft.world.SimpleContainer(4);
     private final int[] recipeEnabled=new int[4];
+    private final int[] transportDisplay=new int[8];
     private long nextRecipeRefresh,nextRecipeEdit;
     public boolean showRecipes=true;
     public static int assignmentY(int row){return row==0?78:row>=5?168+(row-5)*18:94+(row-1)*18;}
@@ -28,6 +29,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
         super(TYPE,id);this.npc=npc;playerInventory=inventory;
         data=npc==null?new SimpleContainerData(DATA_COUNT):new ContainerData(){
             public int get(int i){
+                if(i>=31 && i<39)return transportDisplay[i-31];
                 if(i>=29 && i<31)return npc.report.row(i-29+6);
                 if(i>=25 && i<29)return recipeEnabled[i-25];
                 if(i>=12 && i<18)return npc.report.row(i-12);
@@ -64,15 +66,19 @@ public final class CompanionMenu extends AbstractContainerMenu {
             || !CompanionJobs.permitted(npc,target.at().pos())
             || io.github.jimbozoomer.jugcraft.town.TownProtection.denies(playerInventory.player,npc.level(),target.at().pos()))return null;
         var be=npc.level().getBlockEntity(target.at().pos());
-        return be instanceof HearthOvenBlockEntity || be instanceof CookingPotBlockEntity pot && !pot.isLocked()?be:null;
+        return be instanceof HearthOvenBlockEntity || be instanceof CookingPotBlockEntity pot && !pot.isLocked()
+            || be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine && !machine.isLocked() && (machine.companionPort.selectable() || machine.companionPort.locked())?be:null;
     }
     private void refreshRecipes(){
         if(npc==null)return;
         for(int row=0;row<4;row++){
+            transportDisplay[row*2]=npc.assignments.transportDisplay(row+1,true);
+            transportDisplay[row*2+1]=npc.assignments.transportDisplay(row+1,false);
             var station=recipeStation(row);
             var pot=station instanceof CookingPotBlockEntity p?p:null;
             var oven=station instanceof HearthOvenBlockEntity o?o:null;
-            recipeEnabled[row]=oven!=null?2:pot!=null?1:0;
+            var machine=station instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity m?m:null;
+            recipeEnabled[row]=machine!=null?3:oven!=null?2:pot!=null?1:0;
             var plan=pot==null?null:pot.supplyPlan().orElse(null);var icon=plan==null?ItemStack.EMPTY:plan.output().create().copyWithCount(1);
             if(plan!=null){
                 var lines=new java.util.ArrayList<net.minecraft.network.chat.Component>();
@@ -90,6 +96,17 @@ public final class CompanionMenu extends AbstractContainerMenu {
                     net.minecraft.network.chat.Component.literal("1 x ").append(raw.getHoverName()),
                     net.minecraft.network.chat.Component.literal("Fuel: logs, charcoal, coal or coke. No coal blocks."))));
             }
+            if(machine!=null){
+                var machinePlan=machine.companionPort.selection();
+                if(machinePlan!=null){
+                    icon=machinePlan.results().getFirst().copyWithCount(1);
+                    var lines=new java.util.ArrayList<net.minecraft.network.chat.Component>();
+                    lines.add(net.minecraft.network.chat.Component.literal("Ingredients per batch:"));
+                    for(var part:machinePlan.parts())part.ingredient().items().findFirst().ifPresent(item->lines.add(net.minecraft.network.chat.Component.literal(part.count()+" x ").append(new ItemStack(item).getHoverName())));
+                    lines.add(net.minecraft.network.chat.Component.literal("Power and fluids still need their usual connections."));
+                    icon.set(net.minecraft.core.component.DataComponents.LORE,new net.minecraft.world.item.component.ItemLore(lines));
+                }
+            }
             if(!ItemStack.matches(recipeIcons.getItem(row),icon))recipeIcons.setItem(row,icon);
         }
         nextRecipeRefresh=npc.level().getGameTime()+10;
@@ -105,6 +122,10 @@ public final class CompanionMenu extends AbstractContainerMenu {
             var station=recipeStation(slot-RECIPE_START);long now=npc.level().getGameTime();
             if(station==null || now<nextRecipeEdit)return;nextRecipeEdit=now+2;
             var held=getCarried();
+            if(station instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine){
+                if(!machine.companionPort.select(button==1?ItemStack.EMPTY:held))player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Choose an item made by this machine's recipe."));
+                refreshRecipes();broadcastChanges();return;
+            }
             if(station instanceof HearthOvenBlockEntity oven){
                 if(button==1 || held.isEmpty())oven.selectPie(null);
                 else {

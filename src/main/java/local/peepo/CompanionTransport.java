@@ -56,6 +56,7 @@ public final class CompanionTransport extends Goal {
     private int emptySlot(){for(int i=0;i<8;i++)if(npc.belongings.getItem(i).isEmpty())return i;return -1;}
     /** A loaded hot pie has a deadline. One helper stays until it can take the result into real cargo. */
     private boolean readyTending(CompanionAssignments.Target work,boolean here){
+        if(!npc.assignments.transportAllowed(work,false))return false;
         var port=CompanionLogistics.resolve(npc,work);
         var output=npc.assignments.get(CompanionAssignments.OUTPUT);
         int slot=emptySlot();
@@ -68,6 +69,7 @@ public final class CompanionTransport extends Goal {
         return true;
     }
     private boolean readyRoute(CompanionAssignments.Target work,boolean supplying){
+        if(!npc.assignments.transportAllowed(work,supplying))return false;
         var bound=npc.assignments.get(supplying?CompanionAssignments.SUPPLY:CompanionAssignments.OUTPUT);
         var port=CompanionLogistics.resolve(npc,work);var storage=CompanionStorage.find(npc,bound);
         if(port==null || storage==null || supplying && port.plan()==null)return false;
@@ -76,6 +78,7 @@ public final class CompanionTransport extends Goal {
     }
     /** A bounded, rolled-back capacity probe. Repeated with fresh endpoints at pickup. */
     private ItemStack candidate(){
+        if(!npc.assignments.transportAllowed(workstation,supply))return ItemStack.EMPTY;
         var port=CompanionLogistics.resolve(npc,workstation);var external=CompanionStorage.find(npc,store);
         if(port==null || external==null || supply && !Objects.equals(recipe,port.plan()))return ItemStack.EMPTY;
         var from=supply?external:port.outputs();var to=supply?port.inputs():external;
@@ -87,7 +90,7 @@ public final class CompanionTransport extends Goal {
             var variant=view.getResource();var stack=variant.toStack(1);
             int max=Math.min(32,stack.getMaxStackSize());if(supply)max=Math.min(max,port.needed(stack));
             if(max<=0)continue;
-            try(var tx=Transaction.openOuter()){
+            try(var scope=io.github.jimbozoomer.jugcraft.machine.MachineItemAutomation.companionTransfer();var tx=Transaction.openOuter()){
                 int take=(int)view.extract(variant,max,tx);
                 int room=(int)to.insert(variant,take,tx);
                 if(room>0)return variant.toStack(room);
@@ -154,6 +157,11 @@ public final class CompanionTransport extends Goal {
         long now=npc.level().getGameTime();
         if(tending!=null && (tending.isRemoved() || !tending.claimTender(npc.getUUID()))){fail(CompanionStatus.OCCUPIED);return;}
         if(!manifest.isEmpty() && carried().isEmpty()){forget();active=false;return;}
+        if(!npc.assignments.transportAllowed(workstation,supply)){
+            if(manifest.isEmpty()){forget();active=false;return;}
+            if(supply && !returning){returning=true;approach=null;nextPath=0;}
+            // Already collected outputs finish their delivery; unused supplies return to their source.
+        }
         status=manifest.isEmpty()?(supply?CompanionStatus.FETCHING_SUPPLIES:CompanionStatus.COLLECTING_OUTPUT):returning?CompanionStatus.RETURNING_SUPPLIES:CompanionStatus.DELIVERING;
         var target=destination();
         if(approach==null || npc.position().distanceToSqr(approach)>.64){
@@ -204,7 +212,7 @@ public final class CompanionTransport extends Goal {
         if(selected.isEmpty() || slot<0){fail(CompanionStatus.NO_INPUT);return;}
         var port=CompanionLogistics.resolve(npc,workstation);
         var source=supply?CompanionStorage.find(npc,store):port.outputs();
-        try(var tx=Transaction.openOuter()){
+        try(var scope=io.github.jimbozoomer.jugcraft.machine.MachineItemAutomation.companionTransfer();var tx=Transaction.openOuter()){
             int taken=(int)source.extract(ItemVariant.of(selected),selected.getCount(),tx);
             if(taken<=0){fail(CompanionStatus.NO_INPUT);return;}
             var stack=selected.copyWithCount(taken);
@@ -222,7 +230,7 @@ public final class CompanionTransport extends Goal {
         int amount=stack.getCount();if(supply && !returning)amount=Math.min(amount,port.needed(stack));
         if(amount<=0){returning=true;approach=null;nextPath=0;return;}
         int inserted;
-        try(var tx=Transaction.openOuter()){
+        try(var scope=io.github.jimbozoomer.jugcraft.machine.MachineItemAutomation.companionTransfer();var tx=Transaction.openOuter()){
             inserted=(int)destination.insert(ItemVariant.of(stack),amount,tx);
             if(inserted<=0){fail(CompanionStatus.FULL);return;}
             if(npc.food.takeCargo(cargoSlot,stack,inserted,tx)!=inserted)return;

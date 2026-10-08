@@ -24,6 +24,36 @@ public final class CompanionAssignments {
     private final PeepoEntity npc;
     public static final int LUNCH=5,SUPPLY=6,OUTPUT=7,COUNT=8;
     private final Target[] targets=new Target[COUNT];
+    // Two bits per direction: Auto (0), On (1), Off (2). Kept separate from route identity.
+    private final int[] transportModes=new int[COUNT];
+    public int transportMode(int row,boolean supply){return row>=1 && row<=4?(transportModes[row]>>(supply?0:2))&3:0;}
+    public boolean cycleTransport(int row,boolean supply){
+        if(npc.level().isClientSide() || row<1 || row>4 || targets[row]==null)return false;
+        int shift=supply?0:2;
+        transportModes[row]=(transportModes[row]&~(3<<shift))|((transportMode(row,supply)+1)%3)<<shift;
+        return true;
+    }
+    public boolean transportAllowed(Target target,boolean supply){
+        if(target==null)return false;
+        int row=workPriority(target.at.pos());if(row>4 || !target.equals(targets[row]))return false;
+        int mode=transportMode(row,supply);if(mode==2)return false;if(mode==1)return true;
+        return !target.present(npc.level()) || !(npc.level().getBlockEntity(target.at.pos()) instanceof MachineBlockEntity machine) || !machine.itemAutomation.external(supply);
+    }
+    /** Menu-only status: 0 available, 1 off, 2 external automation, 3 unsupported, 4 unavailable, 5 no recipe. */
+    public int transportDisplay(int row,boolean supply){
+        int mode=transportMode(row,supply);var target=targets[row];int reason=0;
+        if(target==null || !target.present(npc.level()))reason=4;
+        else {
+            var port=CompanionLogistics.resolve(npc,target);
+            if(port==null)reason=3;
+            else if(npc.level().getBlockEntity(target.at.pos()) instanceof MachineBlockEntity machine
+                && (supply?!machine.companionPort.selectable():machine.kind().outputSlot()>=machine.kind().slots))reason=3;
+            else if(mode==2)reason=1;
+            else if(!transportAllowed(target,supply))reason=2;
+            else if(supply && port.plan()==null)reason=5;
+        }
+        return mode|(reason<<2);
+    }
     private boolean homeManaged,workManaged;
     private String cached="";private List<Target> clientTargets=Collections.nCopies(COUNT,null);
     CompanionAssignments(PeepoEntity npc){this.npc=npc;}
@@ -63,6 +93,7 @@ public final class CompanionAssignments {
         if(lunch)slot=LUNCH;
         else if(!home){slot=1;while(slot<5 && targets[slot]!=null)slot++;if(slot==5)return "All four work slots are full. Left-click an assigned station to remove it.";}
         targets[slot]=new Target(at,BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()));
+        transportModes[slot]=0;
         if(home)homeManaged=true;if(!lunch)workManaged=true;
         changed();
         if(lunch){npc.report.lunch(CompanionStatus.READY);return "Lunch source assigned: "+targets[slot].name();}
@@ -76,19 +107,20 @@ public final class CompanionAssignments {
     }
     public void clear(int slot){
         if(slot<0 || slot>=COUNT || targets[slot]==null)return;
-        targets[slot]=null;if(slot>0 && slot<LUNCH)compactWork();changed();if(slot<LUNCH)npc.orders.assignmentRemoved(slot==0);
+        targets[slot]=null;transportModes[slot]=0;if(slot>0 && slot<LUNCH)compactWork();changed();if(slot<LUNCH)npc.orders.assignmentRemoved(slot==0);
         if(slot==LUNCH)npc.report.lunch(CompanionStatus.READY);
     }
     private void compactWork(){
         int next=1;
-        for(int i=1;i<5;i++)if(targets[i]!=null)targets[next++]=targets[i];
-        while(next<5)targets[next++]=null;
+        for(int i=1;i<5;i++)if(targets[i]!=null){targets[next]=targets[i];transportModes[next]=transportModes[i];next++;}
+        while(next<5){targets[next]=null;transportModes[next]=0;next++;}
     }
     public boolean moveWork(int slot,int direction){
         if(npc.level().isClientSide() || slot<1 || slot>4 || Math.abs(direction)!=1)return false;
         int other=slot+direction;
         if(other<1 || other>4 || targets[slot]==null || targets[other]==null)return false;
         var swap=targets[slot];targets[slot]=targets[other];targets[other]=swap;
+        int modes=transportModes[slot];transportModes[slot]=transportModes[other];transportModes[other]=modes;
         changed();npc.orders.workReordered();return true;
     }
     public int workPriority(BlockPos pos){
@@ -122,15 +154,17 @@ public final class CompanionAssignments {
     }
     public void save(ValueOutput out){
         out.putBoolean("AssignedHomeManaged",homeManaged);out.putBoolean("AssignedWorkManaged",workManaged);
-        for(int i=0;i<COUNT;i++)if(targets[i]!=null){var child=out.child("Assignment"+i);child.store("At",GlobalPos.CODEC,targets[i].at);child.putString("Block",targets[i].block.toString());child.putInt("Face",targets[i].face.ordinal());}
+        for(int i=0;i<COUNT;i++)if(targets[i]!=null){var child=out.child("Assignment"+i);child.store("At",GlobalPos.CODEC,targets[i].at);child.putString("Block",targets[i].block.toString());child.putInt("Face",targets[i].face.ordinal());child.putInt("SupplyMode",transportMode(i,true));child.putInt("OutputMode",transportMode(i,false));}
     }
     public void load(ValueInput in){
         homeManaged=in.getBooleanOr("AssignedHomeManaged",false);workManaged=in.getBooleanOr("AssignedWorkManaged",false);
         Arrays.fill(targets,null);
+        Arrays.fill(transportModes,0);
         for(int i=0;i<COUNT;i++){
             var child=in.child("Assignment"+i);if(child.isEmpty())continue;
             var at=child.get().read("At",GlobalPos.CODEC).orElse(null);var id=Identifier.tryParse(child.get().getStringOr("Block",""));
             if(at!=null && id!=null)targets[i]=new Target(at,id,Direction.values()[Math.clamp(child.get().getIntOr("Face",Direction.UP.ordinal()),0,5)]);
+            transportModes[i]=Math.clamp(child.get().getIntOr("SupplyMode",0),0,2)|(Math.clamp(child.get().getIntOr("OutputMode",0),0,2)<<2);
         }
         compactWork();changed();
     }

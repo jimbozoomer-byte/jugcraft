@@ -10,8 +10,9 @@ import net.minecraft.world.entity.player.Inventory;
 /** Inventory stays visible while the right panel switches between assignments and routine preferences. */
 public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu> {
     private final Button[] buttons=new Button[9],remove=new Button[CompanionAssignments.COUNT],moveUp=new Button[5],moveDown=new Button[5],settings=new Button[8];
+    private final Button[] transport=new Button[8];
     private static final String[] MODES={"Follow","Stay","Home","Work"};
-    private boolean routineTab;
+    private int panel; // Jobs, transport, routine. Inventory and slot indices stay fixed.
     private Button tab;
     public CompanionScreen(CompanionMenu menu,Inventory inventory,Component title){super(menu,inventory,title,320,312);}
     private Button button(String text,int x,int y,int width,int height,int id){
@@ -20,7 +21,8 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
     private void tip(Button b,String text){b.setTooltip(Tooltip.create(Component.literal(text)));}
     @Override protected void init(){
         super.init();inventoryLabelX=80;inventoryLabelY=218;
-        tab=addRenderableWidget(Button.builder(Component.literal("Routine >"),b->{routineTab=!routineTab;updateButtons();}).bounds(leftPos+236,topPos+6,76,16).build());
+        tab=addRenderableWidget(Button.builder(Component.literal("Transport >"),b->{panel=(panel+1)%3;updateButtons();}).bounds(leftPos+236,topPos+6,76,16).build());
+        for(int i=0;i<8;i++)transport[i]=button("",100+(i%2)*108,92+(i/2)*32,104,18,50+i);
         for(int i=0;i<4;i++)buttons[i]=button(MODES[i],100+i*53,34,50,18,i);
         buttons[6]=button("-",100,56,22,18,6);buttons[7]=button("+",125,56,22,18,7);
         buttons[8]=button("Party",210,56,102,18,8);
@@ -50,13 +52,20 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
     }
     private PeepoEntity npc(){return minecraft==null || minecraft.player==null?null:menu.companion(minecraft.player);}
     private void updateButtons(){
-        menu.showRecipes=!routineTab;
-        tab.setMessage(Component.literal(routineTab?"< Jobs":"Routine >"));
-        for(var setting:settings)setting.visible=routineTab;
+        menu.showRecipes=panel==0;
+        tab.setMessage(Component.literal(panel==0?"Transport >":panel==1?"Routine >":"< Jobs"));
+        for(var setting:settings)setting.visible=panel==2;
         var npc=npc();
-        for(int i=0;i<CompanionAssignments.COUNT;i++){remove[i].visible=!routineTab;remove[i].active=npc!=null && npc.assignments.view().get(i)!=null;}
+        for(int i=0;i<8;i++){
+            int value=menu.value(31+i),mode=Math.min(2,value&3),reason=value>>2;
+            var b=transport[i];b.visible=panel==1;b.active=npc!=null && npc.assignments.view().get(1+i/2)!=null && reason!=3;
+            b.setMessage(Component.literal((i%2==0?"Supply: ":"Output: ")+new String[]{"Auto","On","Off"}[mode]).withColor(reason==2?0xFFCC66:reason==1?0xAAAAAA:0xFFFFFF));
+            String state=switch(reason){case 1->"Disabled by you.";case 2->"External item automation detected; Peepo yields this direction.";case 3->"This station has no companion item transport for this direction.";case 4->"No available, loaded station.";case 5->"Choose a ghost recipe in Jobs before supplying ingredients.";default->"Peepo may handle this direction when there is work to do.";};
+            tip(b,state+" Click to cycle Auto / On / Off. Auto recognizes connected transport and recent machine transfers. On overrides detection; Off stops this direction. Speed assistance is unchanged.");
+        }
+        for(int i=0;i<CompanionAssignments.COUNT;i++){remove[i].visible=panel==0;remove[i].active=npc!=null && npc.assignments.view().get(i)!=null;}
         for(int i=1;i<5;i++){
-            moveUp[i].visible=moveDown[i].visible=!routineTab;
+            moveUp[i].visible=moveDown[i].visible=panel==0;
             moveUp[i].active=remove[i].active && i>1 && remove[i-1].active;
             moveDown[i].active=remove[i].active && i<4 && remove[i+1].active;
         }
@@ -74,14 +83,14 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         updateButtons();
         extractBackground(g,mouseX,mouseY,delta);super.extractRenderState(g,mouseX,mouseY,delta);extractTooltip(g,mouseX,mouseY);
         int row=assignmentRow(mouseY-topPos);var npc=npc();
-        if(!routineTab && npc!=null && mouseX>=leftPos+100 && mouseX<leftPos+253 && mouseY>=topPos+78 && row>=0 && row<CompanionAssignments.COUNT){
+        if(panel==0 && npc!=null && mouseX>=leftPos+100 && mouseX<leftPos+253 && mouseY>=topPos+78 && row>=0 && row<CompanionAssignments.COUNT){
             var target=npc.assignments.view().get(row);
             String text=target==null?"Use the Companion Planner to select this companion, then right-click a "+(row==0?"bed.":row==5?"lunch crate or lunch cover.":row==6?"container for Supply.":row==7?"container while holding Shift for Output.":"workstation."):
                 target.name()+" at "+target.at().pos().toShortString()+" in "+target.at().dimension().identifier()+" - "+CompanionStatus.from(menu.value(CompanionMenu.assignmentData(row))).label;
             if(row>0 && row<5 && target!=null)text+=". Priority "+row+" (top is highest).";
             g.setTooltipForNextFrame(font,Component.literal(text),mouseX,mouseY);
         }
-        if(!routineTab)for(int i=0;i<4;i++){
+        if(panel==0)for(int i=0;i<4;i++){
             var slot=menu.getSlot(CompanionMenu.RECIPE_START+i);
             if(slot.isActive() && mouseX>=leftPos+slot.x && mouseX<leftPos+slot.x+16 && mouseY>=topPos+slot.y && mouseY<topPos+slot.y+16){
                 var lines=new java.util.ArrayList<Component>();
@@ -89,8 +98,8 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
                     lines.add(slot.getItem().getHoverName());
                     var lore=slot.getItem().get(net.minecraft.core.component.DataComponents.LORE);
                     if(lore!=null)lines.addAll(lore.lines());
-                }else lines.add(Component.literal(menu.value(25+i)==2?"Choose a pie to enable supplies.":"Recipe: automatic"));
-                lines.add(Component.literal("Click with the finished food to set a ghost recipe."));
+                }else lines.add(Component.literal(menu.value(25+i)==2?"Choose a pie to enable supplies.":"Choose a recipe to enable supplies."));
+                lines.add(Component.literal("Click with a finished item to set a ghost recipe."));
                 lines.add(Component.literal("Your item stays on the cursor. Right-click to clear."));
                 if(menu.value(25+i)==2)lines.add(Component.literal("Clearing stops new pies; an existing pie can still finish."));
                 else lines.add(Component.literal("Click the same output again to cycle matching recipes."));
@@ -109,7 +118,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         int x=leftPos,y=topPos;
         g.fill(x,y,x+320,y+312,0xFF373737);g.fill(x+1,y+1,x+318,y+310,0xFFFFFFFF);g.fill(x+3,y+3,x+319,y+311,0xFF555555);g.fill(x+4,y+4,x+316,y+308,0xFFC6C6C6);
         for(var slot:menu.slots){if(!slot.isActive())continue;int sx=x+slot.x,sy=y+slot.y;g.fill(sx-1,sy-1,sx+17,sy+17,0xFFFFFFFF);g.fill(sx-1,sy-1,sx+16,sy+16,0xFF373737);g.fill(sx,sy,sx+16,sy+16,0xFF8B8B8B);}
-        if(!routineTab)for(int i=0;i<CompanionAssignments.COUNT;i++)g.fill(x+99,y+CompanionMenu.assignmentY(i),x+(i==0 || i>=5?300:252),y+CompanionMenu.assignmentY(i)+14,0xFFDADADA);
+        if(panel==0)for(int i=0;i<CompanionAssignments.COUNT;i++)g.fill(x+99,y+CompanionMenu.assignmentY(i),x+(i==0 || i>=5?300:252),y+CompanionMenu.assignmentY(i)+14,0xFFDADADA);
     }
     @Override protected void extractLabels(GuiGraphicsExtractor g,int mouseX,int mouseY){
         g.text(font,fit(title.getString(),222),8,8,0xFF404040,false);
@@ -119,11 +128,18 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         g.text(font,playerInventoryTitle,inventoryLabelX,inventoryLabelY,0xFF404040,false);
         var status=CompanionStatus.from(menu.value(11));
         g.text(font,fit(status.label,84),8,140,color(status),false);
-        if(routineTab){
+        if(panel==2){
             g.text(font,"Break at: "+menu.value(19)+"%",101,124,0xFF404040,false);
             g.text(font,"Resume at: "+menu.value(20)+"%",101,143,0xFF404040,false);return;
         }
         var npc=npc();
+        if(panel==1){
+            for(int i=0;i<4;i++){
+                var target=npc==null?null:npc.assignments.view().get(i+1);
+                g.text(font,fit("Work "+(i+1)+": "+(target==null?"Not assigned":target.name()),211),101,80+i*32,0xFF404040,false);
+            }
+            g.text(font,"Hover for transport status",101,209,0xFF404040,false);return;
+        }
         for(int i=0;i<CompanionAssignments.COUNT;i++){
             var target=npc==null?null:npc.assignments.view().get(i);
             var rowStatus=CompanionStatus.from(menu.value(CompanionMenu.assignmentData(i)));

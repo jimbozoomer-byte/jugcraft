@@ -86,6 +86,8 @@ import org.jspecify.annotations.Nullable;
  * All logic runs on the server; clients only see synced {@link ContainerData}.
  */
 public class MachineBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, ExtendedMenuProvider<BlockPos>, KineticConsumer {
+	public final MachineItemAutomation itemAutomation = new MachineItemAutomation(this);
+	public final MachineCompanionPort companionPort = new MachineCompanionPort(this);
 	// Container data is synced to clients as 16-bit values, so energy and capacity (which exceed
 	// 32,767) are split into low and high halves; see MachineMenu#energy and #capacity.
 	public static final int DATA_ENERGY_LOW = 0;
@@ -269,6 +271,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 
 	public SideConfig sides() {
 		return sides;
+	}
+	public void companionRecipeChanged() {
+		progress = 0;
+		resetCompanionEffort();
+		setChanged();
 	}
 
 	/** A side-configuration button on the machine's screen (see {@link SideConfig#click}). */
@@ -627,7 +634,9 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				if (!sides.mode(side, facing).output() || MachineBlock.machineAt(level, neighbor, level.getBlockState(neighbor)) == this) {
 					continue;
 				}
-				budget -= ItemNetworks.push(level, partPos, side, output, budget, self);
+				long moved = ItemNetworks.push(level, partPos, side, output, budget, self);
+				itemAutomation.outputMoved(moved);
+				budget -= moved;
 				if (budget <= 0) {
 					return;
 				}
@@ -953,7 +962,10 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	private boolean tickFluidProcessor(ServerLevel level, BlockPos pos, BlockState state) {
 		pushFluids(level, pos, state);
 		List<ItemStack> inputs = items.subList(0, kind.outputSlot());
-		Optional<FluidRecipe> found = FluidRecipes.find(level.getServer(), kind, inputs, tanks);
+		Optional<FluidRecipe> found = companionPort.locked()
+				? companionPort.recipe() instanceof FluidRecipe selected && selected.itemsMatch(inputs) && selected.fluidsMatch(tanks)
+						? Optional.of(selected) : Optional.empty()
+				: FluidRecipes.find(level.getServer(), kind, inputs, tanks);
 		if (found.isEmpty() || !found.get().fluidResultsFit(tanks) || !itemResultsFit(found.get())) {
 			processorStatus(found.isEmpty() ? local.peepo.CompanionStatus.NO_INPUT : local.peepo.CompanionStatus.FULL);
 			if (progress != 0) {
@@ -1835,6 +1847,19 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	private static final int[] TAKE_ONE = {1};
 
 	private Optional<Result> findResult(ServerLevel level) {
+		if (companionPort.locked()) {
+			var selected = companionPort.recipe();
+			if (selected instanceof MultiMachineRecipe multi) {
+				int[] take = multi.take(new MachineInput(items.subList(0, kind.outputSlot())));
+				return take == null ? Optional.empty() : Optional.of(new Result(multi.output().create(), multi.time(), take));
+			}
+			var input = new SingleRecipeInput(items.get(0));
+			if (selected instanceof MachineRecipe single && single.matches(input, level))
+				return Optional.of(new Result(single.output().create(), single.time(), TAKE_ONE, single.byproducts()));
+			if (selected instanceof net.minecraft.world.item.crafting.SmeltingRecipe smelting && smelting.matches(input, level))
+				return Optional.of(new Result(smelting.assemble(input), MachineKind.ELECTRIC_FURNACE_TICKS, TAKE_ONE));
+			return Optional.empty();
+		}
 		if (kind.isMultiInput()) {
 			List<ItemStack> inputs = items.subList(0, kind.outputSlot());
 			return MachineRecipes.findMulti(level, kind, inputs).map(match -> new Result(
@@ -2052,6 +2077,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		super.loadAdditional(input);
 		items = NonNullList.withSize(kind.containerSize(), ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(input, items);
+		companionPort.load(input);
 		progress = input.getInt("progress").orElse(0);
 		assistedArgonTicks = Math.clamp(input.getIntOr("CompanionArgonTicks", 0), 0, MachineKind.ASU_ARGON_INTERVAL - 1);
 		maxProgress = input.getInt("max_progress").orElse(0);
@@ -2074,6 +2100,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
 		ContainerHelper.saveAllItems(output, items);
+		companionPort.save(output);
 		output.putLong("energy", energy.getAmount());
 		output.putInt("progress", progress);
 		if (kind == MachineKind.AIR_SEPARATION_UNIT) output.putInt("CompanionArgonTicks", assistedArgonTicks);

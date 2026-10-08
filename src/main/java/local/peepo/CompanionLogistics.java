@@ -28,6 +28,8 @@ public final class CompanionLogistics {
     public static Port resolve(PeepoEntity npc,CompanionAssignments.Target target){
         if(target==null || !target.present(npc.level()) || !npc.assignments.assignedWork(target.at().pos()) || !CompanionJobs.permitted(npc,target.at().pos()))return null;
         var be=npc.level().getBlockEntity(target.at().pos());
+        if(be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine
+            && machine.kind().supportsCompanionAssistance() && !machine.isLocked())return machine.companionPort;
         if(be instanceof HearthOvenBlockEntity oven)return new Port(){
             public Identifier plan(){return Identifier.fromNamespaceAndPath("jugcraft",oven.selectedPie()==null?"hearth_oven":oven.selectedPie().pie());}
             public int needed(ItemStack candidate){

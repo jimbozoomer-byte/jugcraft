@@ -40,6 +40,7 @@ public final class CompanionOrders {
         if(button>=20 && button<20+CompanionAssignments.COUNT){npc.assignments.clear(button-20);return true;}
         if(button>=30 && button<38)return npc.assignments.moveWork(1+(button-30)/2,button%2==0?-1:1);
         if(button>=40 && button<=47)return npc.preferences.command(button);
+        if(button>=50 && button<58)return npc.assignments.cycleTransport(1+(button-50)/2,button%2==0);
         if(button<0 || button>8)return false;
         if(button<=3){mode=Mode.values()[button];if(mode==Mode.FOLLOW)follow=p.getUUID();if(mode==Mode.STAY)stay=here();}
         else switch(button){case 4,5->{return false;}case 6->radius=Math.max(4,radius-4);case 7->radius=Math.min(16,radius+4);case 8->{if(!owner(p))return false;party=!party;}default->{return false;}}
