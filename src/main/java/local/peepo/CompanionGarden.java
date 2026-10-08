@@ -34,6 +34,22 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
     private static final Map<Level,LinkedHashMap<BlockPos,Lease>> LEASES=new WeakHashMap<>();
     CompanionGarden(PeepoEntity npc){this.npc=npc;Arrays.fill(harvest,ItemStack.EMPTY);}
 
+    /** Normalize only supported seeds/raw produce; never preserve cursor components or grant an item. */
+    public static Item selectionSeed(ItemStack icon){
+        if(icon.isEmpty())return null;
+        if(seedItem(icon))return icon.getItem();
+        if(icon.is(Items.WHEAT))return Items.WHEAT_SEEDS;
+        if(icon.is(Items.BEETROOT))return Items.BEETROOT_SEEDS;
+        for(var kind:TallCrop.values())if(icon.is(JugcraftAgriculture.item(kind.produceId)))return JugcraftAgriculture.item(kind.seedId);
+        for(var entry:Map.of("flax","flax_seeds","cabbage","cabbage_seeds","oats","oat_seeds","barley","barley_seeds").entrySet()){
+            var item=net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("jugcraft",entry.getKey()));
+            if(item!=null && icon.is(item))return JugcraftAgriculture.item(entry.getValue());
+        }
+        return null;
+    }
+    void selectionChanged(BlockPos anchor){npc.resetCompanionRoutine();jobs.remove(anchor);}
+    private boolean accepts(CompanionAssignments.Target target,ItemStack seed){var selected=npc.assignments.gardenSeed(target);return selected==null || seed.is(selected);}
+
     public static boolean farmland(Level level,BlockPos pos){return level.hasChunkAt(pos) && level.getBlockState(pos).getBlock() instanceof FarmlandBlock;}
     /** Bound both the result and exploration; edges are horizontal, never diagonal or across missing chunks. */
     static List<BlockPos> discover(PeepoEntity npc,BlockPos anchor){
@@ -84,7 +100,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
         if(planted==null || (!(planted.getBlock() instanceof TallCropBlock tall && tall.crop().trellis) && !npc.level().getBlockState(pos).isAir()))return null;
         return planted.canSurvive(npc.level(),pos)?planted:null;
     }
-    private int seedSlot(BlockPos pos){for(int i=0;i<8;i++)if(!npc.transport.reserved(i) && planting(npc.belongings.getItem(i),pos)!=null)return i;return -1;}
+    private int seedSlot(CompanionAssignments.Target target,BlockPos pos){for(int i=0;i<8;i++)if(!npc.transport.reserved(i) && accepts(target,npc.belongings.getItem(i)) && planting(npc.belongings.getItem(i),pos)!=null)return i;return -1;}
     private static boolean seedItem(ItemStack stack){
         if(stack.getItem() instanceof BlockItem item && item.getBlock() instanceof CropBlock)return true;
         for(var kind:TallCrop.values())if(stack.is(JugcraftAgriculture.item(kind.seedId)))return true;
@@ -93,7 +109,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
     private static Item seedFor(CropBlock crop){return crop instanceof JugcraftCropBlock jug?jug.seed():crop.asItem();}
     private int seedReserve(ItemStack stack){
         if(!seedItem(stack))return 0;
-        int cells=0;for(int row=1;row<=4;row++){var t=npc.assignments.get(row);if(t!=null && t.garden() && t.local(npc.level()))cells+=t.plot().size();}
+        int cells=0;for(int row=1;row<=4;row++){var t=npc.assignments.get(row);if(t!=null && t.garden() && t.local(npc.level()) && accepts(t,stack))cells+=t.plot().size();}
         return cells;
     }
     private int availableCount(ItemStack stack){int count=0;for(int i=0;i<8;i++)if(!npc.transport.reserved(i) && ItemStack.isSameItemSameComponents(stack,npc.belongings.getItem(i)))count+=npc.belongings.getItem(i).getCount();return count;}
@@ -147,15 +163,16 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
 
     /** The porter fetches seeds into its real cargo, then acknowledges them on arrival at the plot. */
     CompanionLogistics.Port port(CompanionAssignments.Target target){return new CompanionLogistics.Port(){
-        public Identifier plan(){return PLAN;}
+        public Identifier plan(){var seed=npc.assignments.gardenSeed(target);return seed==null?PLAN:net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(seed);}
         public int needed(ItemStack candidate){
-            if(!enabled() || !seedItem(candidate))return 0;
+            if(!enabled() || !seedItem(candidate) || !accepts(target,candidate))return 0;
             int holes=0,carried=0;
             var compatible=new ArrayList<BlockPos>(PLOT_LIMIT);
             for(var soil:target.plot())if(accessible(soil) && planting(candidate,soil.above())!=null){holes++;compatible.add(soil.above());}
             if(holes==0)return 0;
             for(int i=0;i<8;i++)if(!npc.transport.reserved(i)){
                 var stack=npc.belongings.getItem(i);
+                if(!accepts(target,stack))continue;
                 for(var pos:compatible)if(planting(stack,pos)!=null){carried+=stack.getCount();break;}
             }
             return Math.max(0,holes-carried);
@@ -220,7 +237,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
                 var state=npc.level().getBlockState(cell.above());
                 if(!ripe(state)){
                     if(!state.isAir() && !(state.getBlock() instanceof TrellisBlock))continue;
-                    if(seedSlot(cell.above())<0){status=CompanionStatus.NO_SEEDS;continue;}
+                    if(seedSlot(target,cell.above())<0){status=CompanionStatus.NO_SEEDS;continue;}
                 }
                 var point=standing(cell);if(point==null){status=CompanionStatus.BLOCKED;continue;}
                 soil=cell;expected=state;approach=point;
@@ -269,18 +286,23 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
             var server=(ServerLevel)npc.level();
             if(expected.getBlock() instanceof TallCropBlock tall){
                 var kind=tall.crop();int height=kind.height(TallCropBlock.MAX_AGE);
+                boolean sameCrop=accepts(target,new ItemStack(JugcraftAgriculture.item(kind.seedId)));
+                var previous=new ArrayList<BlockState>(height);
                 for(int section=0;section<height;section++){
                     var part=pos.above(section);if(!CompanionJobs.permitted(npc,part))return CompanionStatus.FORBIDDEN;
                     var state=server.getBlockState(part);
                     if(!state.is(tall) || state.getValue(TallCropBlock.SECTION)!=section || !TallCropBlock.isRipe(state))return CompanionStatus.IDLE;
+                    previous.add(state);
                 }
                 var produce=new ItemStack(JugcraftAgriculture.item(kind.produceId),kind.pickMin+server.getRandom().nextInt(kind.pickMax-kind.pickMin+1));
                 try(var tx=Transaction.openOuter()){
                     if(!storeHarvest(produce,target.at(),tx))return CompanionStatus.FULL;
                     for(int section=height-1;section>=0;section--){
-                        var part=pos.above(section);var before=server.getBlockState(part);
-                        if(!server.setBlock(part,before.setValue(TallCropBlock.AGE,kind.pickReset),Block.UPDATE_CLIENTS)){
-                            for(int restore=height-1;restore>section;restore--){var p=pos.above(restore);server.setBlock(p,server.getBlockState(p).setValue(TallCropBlock.AGE,TallCropBlock.MAX_AGE),Block.UPDATE_CLIENTS);}
+                        var part=pos.above(section);var before=previous.get(section);
+                        // Retire a different crop only when ripe; keep player-built trellises intact.
+                        var after=sameCrop?before.setValue(TallCropBlock.AGE,kind.pickReset):kind.trellis?JugcraftAgriculture.block("trellis").defaultBlockState():Blocks.AIR.defaultBlockState();
+                        if(!server.setBlock(part,after,Block.UPDATE_CLIENTS)){
+                            for(int restore=height-1;restore>section;restore--)server.setBlock(pos.above(restore),previous.get(restore),Block.UPDATE_CLIENTS);
                             return CompanionStatus.BLOCKED;
                         }
                     }
@@ -288,9 +310,10 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
                 }
             }else if(expected.getBlock() instanceof CropBlock crop){
                 var drops=Block.getDrops(expected,server,pos,null,npc,ItemStack.EMPTY);Item seed=seedFor(crop);boolean replant=false;
-                for(var drop:drops)if(!replant && drop.is(seed)){drop.shrink(1);replant=true;}
+                boolean sameCrop=accepts(target,new ItemStack(seed));
+                for(var drop:drops)if(sameCrop && !replant && drop.is(seed)){drop.shrink(1);replant=true;}
                 try(var tx=Transaction.openOuter()){
-                    if(!replant)for(int i=0;i<8;i++)if(!npc.transport.reserved(i) && npc.belongings.getItem(i).is(seed)){
+                    if(sameCrop && !replant)for(int i=0;i<8;i++)if(!npc.transport.reserved(i) && npc.belongings.getItem(i).is(seed)){
                         var stack=npc.belongings.getItem(i);replant=npc.food.takeCargo(i,stack,1,tx)==1;break;
                     }
                     for(var drop:drops)if(!storeHarvest(drop,target.at(),tx))return CompanionStatus.FULL;
@@ -298,7 +321,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
                     tx.commit();
                 }
             }else{
-                int slot=seedSlot(pos);if(slot<0)return CompanionStatus.NO_SEEDS;
+                int slot=seedSlot(target,pos);if(slot<0)return CompanionStatus.NO_SEEDS;
                 var seed=npc.belongings.getItem(slot);var planted=planting(seed,pos);if(planted==null)return CompanionStatus.NO_SEEDS;
                 try(var tx=Transaction.openOuter()){
                     if(npc.food.takeCargo(slot,seed,1,tx)!=1)return CompanionStatus.NO_SEEDS;

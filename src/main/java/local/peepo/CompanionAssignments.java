@@ -30,6 +30,20 @@ public final class CompanionAssignments {
     private final Target[] targets=new Target[COUNT];
     // Two bits per direction: Auto (0), On (1), Off (2). Kept separate from route identity.
     private final int[] transportModes=new int[COUNT];
+    // Kept with the row through reorder/compaction, but outside transport route identity.
+    private final Identifier[] gardenSeeds=new Identifier[COUNT];
+    public net.minecraft.world.item.Item gardenSeed(Target target){
+        if(target==null || !target.garden())return null;
+        int row=workPriority(target.at.pos());
+        return row<5 && target.equals(targets[row]) && gardenSeeds[row]!=null?BuiltInRegistries.ITEM.getValue(gardenSeeds[row]):null;
+    }
+    public boolean selectGardenSeed(int row,net.minecraft.world.item.ItemStack icon){
+        if(npc.level().isClientSide() || row<1 || row>4 || targets[row]==null || !targets[row].garden() || !targets[row].present(npc.level()) || !CompanionJobs.permitted(npc,targets[row].at.pos()))return false;
+        var seed=icon.isEmpty()?null:CompanionGarden.selectionSeed(icon);
+        if(!icon.isEmpty() && seed==null)return false;
+        gardenSeeds[row]=seed==null?null:BuiltInRegistries.ITEM.getKey(seed);
+        npc.garden.selectionChanged(targets[row].at.pos());return true;
+    }
     public int transportMode(int row,boolean supply){return row>=1 && row<=4?(transportModes[row]>>(supply?0:2))&3:0;}
     public boolean cycleTransport(int row,boolean supply){
         if(npc.level().isClientSide() || row<1 || row>4 || targets[row]==null)return false;
@@ -126,7 +140,7 @@ public final class CompanionAssignments {
         var plot=garden?CompanionGarden.discover(npc,pos):List.<BlockPos>of();
         if(garden && plot.isEmpty())return "No accessible farmland here.";
         targets[slot]=new Target(at,BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()),Direction.UP,plot);
-        transportModes[slot]=0;
+        transportModes[slot]=0;gardenSeeds[slot]=null;
         if(home)homeManaged=true;if(!lunch)workManaged=true;
         changed();
         if(lunch){npc.report.lunch(CompanionStatus.READY);return "Lunch source assigned: "+targets[slot].name();}
@@ -140,13 +154,13 @@ public final class CompanionAssignments {
     }
     public void clear(int slot){
         if(slot<0 || slot>=COUNT || targets[slot]==null)return;
-        targets[slot]=null;transportModes[slot]=0;if(slot>0 && slot<LUNCH)compactWork();changed();if(slot<LUNCH)npc.orders.assignmentRemoved(slot==0);
+        targets[slot]=null;transportModes[slot]=0;gardenSeeds[slot]=null;if(slot>0 && slot<LUNCH)compactWork();changed();if(slot<LUNCH)npc.orders.assignmentRemoved(slot==0);
         if(slot==LUNCH)npc.report.lunch(CompanionStatus.READY);
     }
     private void compactWork(){
         int next=1;
-        for(int i=1;i<5;i++)if(targets[i]!=null){targets[next]=targets[i];transportModes[next]=transportModes[i];next++;}
-        while(next<5){targets[next]=null;transportModes[next]=0;next++;}
+        for(int i=1;i<5;i++)if(targets[i]!=null){targets[next]=targets[i];transportModes[next]=transportModes[i];gardenSeeds[next]=gardenSeeds[i];next++;}
+        while(next<5){targets[next]=null;transportModes[next]=0;gardenSeeds[next]=null;next++;}
     }
     public boolean moveWork(int slot,int direction){
         if(npc.level().isClientSide() || slot<1 || slot>4 || Math.abs(direction)!=1)return false;
@@ -154,6 +168,7 @@ public final class CompanionAssignments {
         if(other<1 || other>4 || targets[slot]==null || targets[other]==null)return false;
         var swap=targets[slot];targets[slot]=targets[other];targets[other]=swap;
         int modes=transportModes[slot];transportModes[slot]=transportModes[other];transportModes[other]=modes;
+        var seed=gardenSeeds[slot];gardenSeeds[slot]=gardenSeeds[other];gardenSeeds[other]=seed;
         changed();npc.orders.workReordered();return true;
     }
     public int workPriority(BlockPos pos){
@@ -188,16 +203,21 @@ public final class CompanionAssignments {
     }
     public void save(ValueOutput out){
         out.putBoolean("AssignedHomeManaged",homeManaged);out.putBoolean("AssignedWorkManaged",workManaged);
-        for(int i=0;i<COUNT;i++)if(targets[i]!=null){var child=out.child("Assignment"+i);child.store("At",GlobalPos.CODEC,targets[i].at);child.putString("Block",targets[i].block.toString());child.putInt("Face",targets[i].face.ordinal());child.putInt("SupplyMode",transportMode(i,true));child.putInt("OutputMode",transportMode(i,false));if(targets[i].garden())child.store("Plot",BlockPos.CODEC.listOf(),targets[i].plot);}
+        for(int i=0;i<COUNT;i++)if(targets[i]!=null){var child=out.child("Assignment"+i);child.store("At",GlobalPos.CODEC,targets[i].at);child.putString("Block",targets[i].block.toString());child.putInt("Face",targets[i].face.ordinal());child.putInt("SupplyMode",transportMode(i,true));child.putInt("OutputMode",transportMode(i,false));if(targets[i].garden())child.store("Plot",BlockPos.CODEC.listOf(),targets[i].plot);if(gardenSeeds[i]!=null)child.store("GardenSeed",Identifier.CODEC,gardenSeeds[i]);}
     }
     public void load(ValueInput in){
         homeManaged=in.getBooleanOr("AssignedHomeManaged",false);workManaged=in.getBooleanOr("AssignedWorkManaged",false);
         Arrays.fill(targets,null);
-        Arrays.fill(transportModes,0);
+        Arrays.fill(transportModes,0);Arrays.fill(gardenSeeds,null);
         for(int i=0;i<COUNT;i++){
             var child=in.child("Assignment"+i);if(child.isEmpty())continue;
             var at=child.get().read("At",GlobalPos.CODEC).orElse(null);var id=Identifier.tryParse(child.get().getStringOr("Block",""));
             if(at!=null && id!=null)targets[i]=new Target(at,id,Direction.values()[Math.clamp(child.get().getIntOr("Face",Direction.UP.ordinal()),0,5)],i>=1 && i<=4?child.get().read("Plot",BlockPos.CODEC.listOf()).orElse(List.of()):List.of());
+            var savedSeed=child.get().read("GardenSeed",Identifier.CODEC).orElse(null);
+            if(targets[i]!=null && targets[i].garden() && savedSeed!=null){
+                var item=BuiltInRegistries.ITEM.getValue(savedSeed);
+                if(item!=null && CompanionGarden.selectionSeed(new net.minecraft.world.item.ItemStack(item))==item)gardenSeeds[i]=savedSeed;
+            }
             transportModes[i]=Math.clamp(child.get().getIntOr("SupplyMode",0),0,2)|(Math.clamp(child.get().getIntOr("OutputMode",0),0,2)<<2);
         }
         compactWork();changed();

@@ -69,12 +69,16 @@ public final class CompanionMenu extends AbstractContainerMenu {
     @Override public void removed(Player player){
         try{super.removed(player);}finally{if(npc!=null)npc.closeSettings(this);}
     }
-    private net.minecraft.world.level.block.entity.BlockEntity recipeStation(int row){
+    private CompanionAssignments.Target recipeTarget(int row){
         if(npc==null || row<0 || row>=4 || !stillValid(playerInventory.player))return null;
         var target=npc.assignments.get(row+1);
         if(target==null || !target.present(npc.level()) || target.at().pos().distToCenterSqr(npc.position())>64*64
             || !CompanionJobs.permitted(npc,target.at().pos())
             || io.github.jimbozoomer.jugcraft.town.TownProtection.denies(playerInventory.player,npc.level(),target.at().pos()))return null;
+        return target;
+    }
+    private net.minecraft.world.level.block.entity.BlockEntity recipeStation(int row){
+        var target=recipeTarget(row);if(target==null)return null;
         var be=npc.level().getBlockEntity(target.at().pos());
         return be instanceof HearthOvenBlockEntity || be instanceof CookingPotBlockEntity pot && !pot.isLocked()
             || be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine && !machine.isLocked() && (machine.companionPort.selectable() || machine.companionPort.locked())?be:null;
@@ -88,8 +92,10 @@ public final class CompanionMenu extends AbstractContainerMenu {
             var pot=station instanceof CookingPotBlockEntity p?p:null;
             var oven=station instanceof HearthOvenBlockEntity o?o:null;
             var machine=station instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity m?m:null;
-            recipeEnabled[row]=machine!=null?3:oven!=null?2:pot!=null?1:0;
+            var target=recipeTarget(row);boolean garden=target!=null && target.garden();
+            recipeEnabled[row]=garden?4:machine!=null?3:oven!=null?2:pot!=null?1:0;
             var plan=pot==null?null:pot.supplyPlan().orElse(null);var icon=plan==null?ItemStack.EMPTY:plan.output().create().copyWithCount(1);
+            if(garden){var seed=npc.assignments.gardenSeed(target);if(seed!=null)icon=new ItemStack(seed);}
             if(plan!=null){
                 var lines=new java.util.ArrayList<net.minecraft.network.chat.Component>();
                 lines.add(net.minecraft.network.chat.Component.literal("Ingredients per batch:"));
@@ -129,9 +135,14 @@ public final class CompanionMenu extends AbstractContainerMenu {
         if(slot>=RECIPE_START && slot<RECIPE_START+4){
             // These are display copies, never inventory. Ignore drag, swap, clone, throw and shift-click.
             if(type!=ContainerInput.PICKUP || button<0 || button>1 || npc==null || !stillValid(player))return;
-            var station=recipeStation(slot-RECIPE_START);long now=npc.level().getGameTime();
-            if(station==null || now<nextRecipeEdit)return;nextRecipeEdit=now+2;
+            int row=slot-RECIPE_START;var target=recipeTarget(row);long now=npc.level().getGameTime();
+            if(target==null || now<nextRecipeEdit)return;nextRecipeEdit=now+2;
             var held=getCarried();
+            if(target.garden()){
+                if(!npc.assignments.selectGardenSeed(row+1,button==1?ItemStack.EMPTY:held))player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Choose a supported seed or raw crop for this garden."));
+                refreshRecipes();broadcastChanges();return;
+            }
+            var station=recipeStation(row);if(station==null)return;
             if(station instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine){
                 if(!machine.companionPort.select(button==1?ItemStack.EMPTY:held))player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Choose an item made by this machine's recipe."));
                 refreshRecipes();broadcastChanges();return;

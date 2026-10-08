@@ -97,6 +97,14 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             var slot=menu.getSlot(CompanionMenu.RECIPE_START+i);
             if(slot.isActive() && mouseX>=leftPos+slot.x && mouseX<leftPos+slot.x+16 && mouseY>=topPos+slot.y && mouseY<topPos+slot.y+16){
                 var lines=new java.util.ArrayList<Component>();
+                if(menu.value(25+i)==4){
+                    lines.add(slot.hasItem()?Component.literal("Plant: ").append(slot.getItem().getHoverName()):Component.literal("Automatic planting"));
+                    lines.add(Component.literal("Click with a seed or raw crop to choose this plot's crop."));
+                    lines.add(Component.literal("Your item stays on the cursor. Right-click to restore Auto."));
+                    lines.add(Component.literal("Supply brings matching seeds. Existing crops finish growing first."));
+                    lines.add(Component.literal("Tomatoes need trellises; remove trellises for other crops."));
+                    g.setTooltipForNextFrame(font,lines,java.util.Optional.empty(),mouseX,mouseY);continue;
+                }
                 if(slot.hasItem()){
                     lines.add(slot.getItem().getHoverName());
                     var lore=slot.getItem().get(net.minecraft.core.component.DataComponents.LORE);
