@@ -81,6 +81,15 @@ Owner-requested 7 October 2026. Independent briefs: [industrial chemistry and fu
 - [ ] Deliver industrial fertilizers, refining and polymers before the new optional chemical drinks, preservatives, adhesives and medicine; preserve independently useful earlier agriculture, food and adhesive routes.
 - [ ] Document actual machine roles, recipes, consumer links and optional paths in the Encyclopedia; audit reachability, gas/element units, energy loops, pollution, bounded factory work and persistence before gameplay delivery.
 
+## Pipeworks props: put them to use
+
+Owner-requested 8 October 2026. The owner modelled a set of industrial pipe runs, racks, bridges, tanks and drums and had them rebuilt as the twelve [Pipeworks](features/pipeworks.md) props (blocks `pipe_stand_run`, `blind_flange_stub`, `flanged_pipe`, `pipe_rack`, `pipe_bridge`, `standpipe_frame`, `horizontal_tank`, `tank_walkway`, `stacked_tanks`, `pipeline_hoops`, `ribbed_drum`, `pipe_overpass`; models in `tools/pipeworks_models.py`, Blockbench projects in `art/pipeworks/`). They are decoration today. **The owner wants the technology branches to find ways to use them**, not leave them as scenery:
+
+- [ ] Survey the factory, petrochemistry, chemistry, logistics and power branches for places a Pipeworks prop can stand in for, or extend, a machine's structure: tank farms for the fluid tanks and gas holder, pipe bridges and overpasses carrying fluid or steam lines between stations, the standpipe frame as a valve station, the ribbed drum and stacked tanks as bulk storage.
+- [ ] Decide which props should carry fluid, steam or gas (joining the fluid pipe network through their open ends) and which should hold a volume (a horizontal tank or stacked tanks as real storage), with capacities and tiers that fit the existing tanks and pipes; record each in its feature brief.
+- [ ] Give multi-block machines that grow in later batches their pipework from this set rather than new one-off models, so a refinery yard reads as one family; add sizes and lengths the branches need (the owner's render also has a second stacked pair and a longer culvert).
+- [ ] Keep the props placeable as plain decoration too, with the same IDs, so a world built before any of them work is unchanged.
+
 ## Reference gallery
 
 All ten original owner-attached UI screenshots are preserved unchanged. They are documentation/design references, not Jugcraft runtime textures. Descriptions and individual file links are in the [independent feature brief](features/jugcraft-encyclopedia.md#visual-references-and-provenance); provenance and integrity metadata are in [the manifest](images/jugcraft-encyclopedia/reference-manifest.json).
