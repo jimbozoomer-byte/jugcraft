@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Armor in Blockbench, and the Sentinel rebuilt from the owner's renders
+- **Blockbench projects for the armor sets:** `tools/bbmodel.py` writes any 3D armor set as a Blockbench project and reads one back into the game's worn models and atlas. A set can now *be* a project (`art/armor/<set>.bbmodel`): the owner opens it in Blockbench, edits it there, and what they save is what the game draws. Every set round-trips exactly (`python3 tools/bbmodel.py check`).
+- **The Sentinel rebuilt to match the owner's three renders:** its helm is now the owner's 9×9×9 box with their keyhole and meander art copied texel for texel; its right pauldron is their bent plate measured off the front and back views; its boots rise in teeth like a crown; the coat, gorget and thigh plates follow the renders. The texture is drawn two texels to a pixel, as the owner's is. 42 parts where it had 96, and no part of the wearer shows.
+- **Matching tools:** the owner's renders are kept under `art/armor/references/`, and `tools/armor_reference.py` fits cameras to them and compares or lifts texels from them. Record: [blockbench-armor.md](docs/features/blockbench-armor.md).
+
 ### World Designer
 - An offline browser map editor sculpts terrain, paints installed biomes, places spawn and one Jugcraft walled city, and pins native village/structure start chunks.
 - `/jugcraft design export` supplies the editor and live mod catalog. Its exported datapack adds the **Jugcraft Designed** preset for new worlds; existing generated chunks are not edited.

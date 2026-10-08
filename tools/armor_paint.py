@@ -701,11 +701,13 @@ def sources(s):
 
 
 def paint_grid(s):
-    """(grid of tone names, mask of face texels) for the whole atlas."""
+    """(grid of tone names, mask of face texels) for the whole atlas (a set with an atlas of its own paints none)."""
     nets, (width, height) = am.layout(s)
     grid = np.full((height, width), None, dtype=object)
     mask = np.zeros((height, width), dtype=bool)
     for key, (item, bone, part) in sources(s).items():
+        if part.uvs:
+            continue
         u, v, w, h, d = nets[key]
         dirs = _directions(part, s.density)
         inward = _inward(bone, part)
@@ -721,7 +723,9 @@ def paint_grid(s):
 
 def paint_atlas(s):
     """The set's atlas as an RGBA image. Texels round the faces copy their neighbour, so sampling at a face's very edge
-    never picks up another part's colour."""
+    never picks up another part's colour. A set with an atlas of its own (a Blockbench project's) gives that."""
+    if s.image is not None:
+        return s.image.convert("RGBA")
     grid, mask = paint_grid(s)
     height, width = grid.shape
     rgba = np.zeros((height, width, 4), dtype=np.uint8)
@@ -755,6 +759,14 @@ def atlas_problems(s, image):
     out = []
     for item, bone, part in s.parts():
         if part.cutout:
+            continue
+        if part.uvs:
+            for name, corners in part.uvs:
+                us, vs = [c[0] for c in corners], [c[1] for c in corners]
+                x0, x1 = int(min(us) + 1e-6), int(-(-max(us) // 1))
+                y0, y1 = int(min(vs) + 1e-6), int(-(-max(vs) // 1))
+                if (alpha[y0:y1, x0:x1] < 255).any():
+                    out.append(f"{s.name}: {part.name} {name} face has see-through texels")
             continue
         u, v, w, h, d = nets[part.key]
         for name, (u0, v0, u1, v1) in am.face_rects(w, h, d).items():

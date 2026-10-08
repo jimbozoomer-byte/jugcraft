@@ -189,7 +189,9 @@ class Part:
     rotation; it may be any size and stick out anywhere. paint says what tools/armor_paint.py draws on it: one spec for
     the whole box or a dict per face (see armor_paint). skip lists faces not drawn (pressed against another plate,
     inside the body). net names another part whose texture region this one shows (mirrored copies share it); mirror
-    draws the region mirrored, as vanilla's mirror flag. cutout lets the paint leave see-through texels."""
+    draws the region mirrored, as vanilla's mirror flag. cutout lets the paint leave see-through texels. uvs, when
+    given, are the part's own texels instead of a net: ((face, ((u, v) x 4)), ...) in atlas texels on the face's
+    corners in part_faces' order, faces left out not drawn (a part read from a Blockbench project, tools/bbmodel.py)."""
     name: str
     origin: tuple
     size: tuple
@@ -202,6 +204,7 @@ class Part:
     skip: frozenset = frozenset()
     net: str = ""
     cutout: bool = False
+    uvs: tuple = ()
 
     def __post_init__(self):
         if not self.name or "/" in self.name:
@@ -412,7 +415,9 @@ def rivets(name, start, step, count, size=(0.75, 0.75, 0.5), face="front", paint
 @dataclass
 class ArmorSet:
     """One look: the worn models of its items, one atlas texture and one palette. pieces maps an item id path
-    ("steel_helmet") to {bone: [Part]}; any piece may put parts on any bone. Part names are unique in the set."""
+    ("steel_helmet") to {bone: [Part]}; any piece may put parts on any bone. Part names are unique in the set.
+    image: an atlas of its own (a PIL image, as a Blockbench project carries it) instead of one armor_paint paints;
+    its parts then give their texels (Part.uvs) and atlas_size is the image's size."""
     name: str
     palette: dict
     pieces: dict
@@ -420,6 +425,8 @@ class ArmorSet:
     density: int = 1
     pad: int = 1
     texture: str = field(default="")
+    image: object = None
+    atlas_size: tuple = ()
 
     def __post_init__(self):
         if not self.texture:
@@ -464,6 +471,10 @@ def check(s):
         if part.name in names:
             raise ValueError(f"{s.name}: part name {part.name!r} is used twice")
         names.add(part.name)
+        if part.uvs:
+            if not s.atlas_size:
+                raise ValueError(f"{s.name}: {part.name} gives its own texels, but the set has no atlas_size")
+            continue
         size = net_size(part, s.density)
         if nets.setdefault(part.key, size) != size:
             raise ValueError(f"{s.name}: {part.name} shares net {part.key} but its size is {size}, not {nets[part.key]}")
@@ -487,6 +498,10 @@ def layout(s):
             x, y, row = 0, y + row, 0
         out[key] = (x, y, w, h, d)
         x, row = x + nw, max(row, nh)
+    if s.atlas_size:
+        if out:
+            raise ValueError(f"{s.name}: an atlas of its own (atlas_size) holds no packed nets")
+        return out, tuple(s.atlas_size)
     height = 1
     while height < y + row:
         height *= 2
@@ -500,7 +515,9 @@ _CORNERS = {"top": (6, 5, 1, 2), "bottom": (3, 4, 8, 7), "right": (1, 5, 8, 4), 
 
 
 def part_faces(part, density=1):
-    """The part's drawn faces in bone space: [(face, 4 points, 4 (u, v) texel coordinates in its net, normal)]."""
+    """The part's drawn faces in bone space: [(face, 4 points, 4 (u, v) texel coordinates in its net, normal)]. A part
+    with texels of its own (uvs) gives them, in atlas texels."""
+    own = dict(part.uvs)
     w, h, d = net_size(part, density)
     rects = face_rects(w, h, d)
     g = part.inflate
@@ -513,13 +530,13 @@ def part_faces(part, density=1):
     r, t = transform(part)
     out = []
     for face in FACES:
-        if face in part.skip:
+        if face in part.skip or (part.uvs and face not in own):
             continue
         u1, v1, u2, v2 = rects[face]
         if face == "bottom":
             v1, v2 = v2, v1
         pts = [c[i] for i in _CORNERS[face]]
-        uvs = [(u2, v1), (u1, v1), (u1, v2), (u2, v2)]
+        uvs = list(own[face]) if part.uvs else [(u2, v1), (u1, v1), (u1, v2), (u2, v2)]
         normal = NORMALS[face]
         if part.mirror:
             pts, uvs = pts[::-1], uvs[::-1]
@@ -558,7 +575,8 @@ def set_quads(s):
     out = {}
     for item, bones in s.pieces.items():
         for bone, parts in bones.items():
-            out[f"{item}_{bone}"] = [q for p in parts for q in part_quads(p, nets[p.key], atlas, s.texture, s.density)]
+            out[f"{item}_{bone}"] = [q for p in parts for q in part_quads(p, nets.get(p.key, (0, 0)), atlas, s.texture,
+                                                                         s.density)]
     for message in budget(s, out):
         raise ValueError(message)
     return out
