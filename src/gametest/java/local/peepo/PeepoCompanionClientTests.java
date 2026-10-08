@@ -86,6 +86,7 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
             group("automatic ground food pickup and eating", () -> groundFood(server));
             group("habitat groups and local spawn caps", () -> spawns(server));
             group("seated unload defers movement safely", () -> seatedUnload(server));
+            new CompanionAutomationChecks(this::check, this::group, origin.offset(0,0,30)).run(context, server);
             save = world.getWorldSave();
         }
         if (savedNpc != null) group("world save and reopen", () -> {

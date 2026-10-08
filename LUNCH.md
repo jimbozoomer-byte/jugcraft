@@ -13,7 +13,7 @@ Lunch Crates and Lunch Covers supply food to tamed Peepo and Jughead. Both are i
 
 Covers use Fabric's sided item-storage API, including vanilla containers and modded containers exposing that API. They honor extraction/insertion restrictions on the covered face and reject vanilla locked containers (including adjacent locked chest halves). Containers without compatible exposed storage cannot accept a cover. Third-party permission/claim systems require their own automation integration; a cover is not a universal permission adapter.
 
-There are no ticking lunch block entities and no forced chunk loads. The shared station index caches loaded-chunk positions for 80 ticks. Each hungry companion searches every 80–99 ticks, probes at most four candidate inventories (up to 128 storage views each), and attempts at most two paths per search. Candidates rotate across searches. Extremely large inventories should keep food in their first 128 exposed views. Newly placed sources can take several seconds to be discovered.
+There are no ticking lunch block entities and no forced chunk loads. The shared station index caches loaded-chunk positions for 80 ticks. Each hungry companion searches every 80â€“99 ticks, probes at most four candidate inventories (up to 128 storage views each), and attempts at most two paths per search. Candidates rotate across searches. Extremely large inventories should keep food in their first 128 exposed views. Newly placed sources can take several seconds to be discovered.
 
 ## Manual check
 

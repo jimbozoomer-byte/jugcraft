@@ -4,7 +4,9 @@ Owner requested companion-only automated testing on 7 October 2026, superseding 
 
 ## Result
 
-**19 groups passed, 143 assertions, zero failed groups.** The successful run finished on 7 October 2026 at 14:09 local time, on `peepo-companion`, against base commit `c9fb3d14` plus the standing cooking animation change.
+**38 groups passed, 511 assertions, zero failed groups.** The successful expanded run finished on 7 October 2026 at 21:41 local time, on `peepo-companion`, against gameplay base commit `7633a769` plus the test additions recorded here. Gradle completed successfully in 5 minutes 20 seconds. No production gameplay changes were required by this run.
+
+The original 19-group / 143-assertion suite also passed unchanged at 21:14 before expansion. The repository structure/documentation-link check passed after correcting three legacy Windows-encoded en dashes to UTF-8 in companion documentation; the wording is unchanged.
 
 Runtime: Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, Java 25.0.4.1+1, with the repository's normal development integrations. Tests used newly generated, disposable flat worlds. No player saves were opened. Only `PeepoCompanionClientTests` executed; unrelated test classes share the compilation source set but their suites did not run.
 
@@ -36,6 +38,28 @@ The equivalent Gradle command is `./gradlew runClientGameTest -PclientTests=Peep
 
 Runtime screenshots of the companion GUI, ghost recipe slot, ordinary pot and both stirring variants were inspected. Local evidence is under `build/peepo-rim-evidence/`; Gradle's disposable run files are under `build/run/clientGameTest/`. These generated logs, images and worlds are not committed.
 
+The expanded run's log and screenshots are preserved in `build/peepo-automation-evidence/`, with the complete console log also at `build/peepo-new-features-final.log`. The new planner screenshot confirms blue Supply, yellow Output and the selected companion's green frame. The expanded GUI screenshot shows the custom Jughead name, four jobs, inline transport buttons and separate hearth/furnace recipe ghosts without overlapping controls.
+
+## Added automation coverage
+
+The focused suite also runs `CompanionAutomationChecks` and `CompanionClipChecks`; these helpers are not separate test entry points. They use the same disposable world and the real server/client runtime.
+
+- All 36 supported processor kinds expose the expected helper count and work clip. Actual compact and full-size electric furnaces exercise autonomous helper approach, exclusive worker slots, 1.5x combined progress, normal electricity payment for extra production, and 16 JE/t for the compact helper or 8 JE/t per large-machine helper. This is representative production coverage, not a recipe test for every processor.
+- Machine item ports detect committed insertions and view extractions, ignore aborted and nested-aborted transactions, exclude companion transfers, and follow changed side configuration without reacquiring the port. Input and output hopper detection are separate. Auto disables only the observed direction; On overrides it; Off blocks it.
+- A multi-ingredient alloy recipe accepts exactly one batch and rejects unrelated items. Output collection cannot extract input ingredients. Recipe selection saves, restores, clears, and rejects invalid outputs.
+- Supply and Output modes follow workstation reordering, removal compaction and serialization. Planner role changes preserve clicked faces, swap an existing pair, and reject an invalid opposite endpoint without partially changing assignments.
+- Real planner event handlers select the owned companion, use the same right-click gesture for both container roles, swap them, and consume left-click removal without breaking the container. Client assignment synchronization and rendered role frames are captured.
+- A porter physically picks up a maximum 32-item stack, retains cargo when Output becomes full, and resumes to deliver the complete source quantity with its custom item components. Serialization preserves the carried manifest and Porter mode. Two active porters compete for one source; every sampled server state retains exactly the original total across source, cargo and destination.
+- Disabling Supply during a trip returns the already-collected ingredient to its source without inserting it into the processor or duplicating it.
+- The companion menu holds a moving companion in place while open, accepts the Porter and independent Supply/Output command packets, and releases movement after closing. Whole-pie and standard-machine ghost slots set, clear and reselect recipes through actual inventory packets without consuming cursor items.
+- Both rigs, with and without the pumpkin costume, exercise the valve, lever, mallet, wrench and crank clips over eight phases. Arms and bodies move, transforms remain finite, and returning to idle resets arm scale. These are pose assertions, not visual approval of every tool from every camera angle.
+- The crank pays for accepted kinetic power exactly once per tick, pauses for a full flywheel, stays paused at 95%, resumes below 90%, and yields to a player operating the crank.
+- Cider input capacity, transactional apple/bottle conversion and output rollback preserve quantities. A real companion supplies apples and bottles, operates the press and delivers cider.
+- Canning checks transactional water filling, returned buckets, required heat, jar freshness components, spoiled-input refusal, and protection of unfinished jars. A real companion supplies the kettle and delivers sealed jars and the empty bucket.
+- Hearth checks selected raw pies, transactional input/output, bounded log fuel, oversized-fuel rejection, one tender, and destination-capacity checks before starting a pie. A real companion fetches a raw pie and logs, tends the oven and delivers the baked result before it burns.
+
+Test fixtures use a synchronized player teleport (server-only `snapTo` does not move the connected client), the furnace recipe that actually matches iron ore, and logs from the hearth's wood tag. GUI fixtures wait for server confirmation of item-return packets before replacing an inventory slot, and use server ticks for command cooldowns. Earlier exploratory failures from those fixtures are retained in the local logs; they were not production-code fixes.
+
 ## Earlier regression retained
 
 Releasing a seated companion from Fabric's entity-unload callback could teleport it into another entity section while Minecraft was removing its old tracking entry. This produced `IllegalStateException: Entity is already tracked!` during shutdown and prevented a clean save close.
@@ -44,4 +68,4 @@ Unload now releases the routine with movement deferred. Bed, seat and cooking sa
 
 ## Limits
 
-This is not a two-player concurrency or multiplayer-capacity certification. Large populations across dimensions, representative machine loads, every biome, survival crafting, external furniture/diagonal-fence integrations, optional dependencies absent, and dynamic-light/shader appearance remain outside this run. The GUI tests validate data and button packets; they do not automate every mouse interaction or every GUI scale. Existing Blockbench exports were not regenerated.
+This is not a two-player concurrency or multiplayer-capacity certification. Two porters share one route in the integration world; the dedicated reconnect test has one real client. Large populations across dimensions, large factory loads, every machine/recipe combination, every biome, survival crafting, external furniture/diagonal-fence integrations, optional dependencies absent, and dynamic-light/shader appearance remain outside this run. The GUI tests validate data and button packets; they do not automate every mouse interaction or every GUI scale. Carried porter serialization is checked in memory; a disk restart during an active haul remains a manual case. Existing Blockbench exports were not regenerated.
