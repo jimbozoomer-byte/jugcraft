@@ -194,6 +194,15 @@ over the white cuirass; the white plated legs under the navy belt and its ice ge
     U u x X         the mask's near-black: "under_light" to "under_dark", and "under_darkest", its outline
     A I E F J j     the crown's ice: "ice_light", "ice", "ice_mid", "ice_dark", "ice_deep", and "~ice_deep", its
                     outline
+Wight King (tools/wight_king_armor.py, armor_paint.WIGHT_KING): the antlers and the crown of icicles over the slate
+helm and its black skull's face; the jagged right shoulder, the layered left one, the collar's cyan gem and the
+crossed straps; the banded legs under the dark belt and its cyan buckle; the banded boots.
+    H L M D S V     the slate, pale to deep ("O" is its void taken down)
+    G g             the gems' cyans: "gold_light", "gold_dark"
+    C c q Q K       the dark slate of the straps and belt: "leather_light" to "leather_dark", and "leather_darkest",
+                    their outline
+    U u x X         the face's black: "under_light" to "under_dark", and "under_darkest", its outline
+    A I E F J j     the icicles' and antlers' ice: "ice_light" to "ice_deep", and "~ice_deep", its outline
 """
 import os
 
@@ -286,7 +295,13 @@ OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "
                                                    "Q": "leather_dark", "K": "leather_darkest", "U": "under_light",
                                                    "u": "under_mid", "x": "under_dark", "X": "under_darkest",
                                                    "A": "ice_light", "I": "ice", "E": "ice_mid", "F": "ice_dark",
-                                                   "J": "ice_deep", "j": "~ice_deep"})}
+                                                   "J": "ice_deep", "j": "~ice_deep"}),
+       "wight_king": (armor_paint.WIGHT_KING, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                               "V": "void", "G": "gold_light", "g": "gold_dark", "C": "leather_light",
+                                               "c": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
+                                               "K": "leather_darkest", "U": "under_light", "u": "under_mid",
+                                               "x": "under_dark", "X": "under_darkest", "A": "ice_light", "I": "ice",
+                                               "E": "ice_mid", "F": "ice_dark", "J": "ice_deep", "j": "~ice_deep"})}
 
 
 def luma(colour):

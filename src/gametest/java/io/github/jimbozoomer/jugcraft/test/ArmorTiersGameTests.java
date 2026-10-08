@@ -80,7 +80,10 @@ public class ArmorTiersGameTests {
 					"minecraft:gold_ingot", false),
 			// Frost Knight: a point over netherite, steady; mended with blue ice.
 			new Tier("frost_knight", new int[] {3, 8, 7, 3}, new int[] {484, 704, 660, 572}, 3.0, 0.15, 18,
-					"minecraft:blue_ice", false));
+					"minecraft:blue_ice", false),
+			// Wight King: the heavier helm, the steadiest of the cold sets, middling enchanting; mended with packed ice.
+			new Tier("wight_king", new int[] {4, 8, 7, 3}, new int[] {495, 720, 675, 585}, 3.0, 0.2, 15,
+					"minecraft:packed_ice", false));
 
 	/** Every tier's four pieces have its numbers, repair, fire resistance, slot, look and tags. */
 	@GameTest

@@ -70,7 +70,7 @@ public class ArmsVIIClientGameTests implements FabricClientGameTest {
 			// Trophies, and an armor set's arm, held, from the front, by day; then the glowing ones at midnight.
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			for (String held : List.of("glacier_maul", "cinderbrand", "hagthorn", "soulreaver", "dynamo_halberd", "tidebreaker",
-					"hades_scythe", "sentinel_longsword", "frost_knight_greatsword")) {
+					"hades_scythe", "sentinel_longsword", "frost_knight_greatsword", "wight_king_zweihander")) {
 				ready(context, server, x + 4, y, z, held);
 				context.takeScreenshot("jugcraft_arms_vii_held_" + held);
 			}

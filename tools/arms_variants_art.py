@@ -75,6 +75,11 @@ SENTINEL_JET = M((6, 6, 8), (14, 14, 18), (28, 28, 33), (44, 44, 50), (66, 66, 7
 # The Frost Knight's (as armor_paint.FROST_KNIGHT): its frosted white, and the ice of its crown, which glows.
 FROST_WHITE = M((40, 42, 62), (96, 98, 128), (172, 172, 194), (204, 202, 220), (228, 230, 240), (250, 252, 255))
 FROST_ICE = M((10, 58, 120), (32, 136, 214), (64, 184, 240), (120, 224, 252), (196, 246, 255), (236, 252, 255), glow=True)
+# The Wight King's (as armor_paint.WIGHT_KING): its slate, pale ice to deep; the dark slate of its straps; the cyan of
+# its gems, which glows.
+WIGHT_SLATE = M((16, 30, 42), (37, 53, 70), (73, 98, 115), (118, 150, 168), (170, 200, 214), (226, 242, 250))
+WIGHT_DARK = M((6, 12, 18), (16, 30, 42), (27, 47, 63), (37, 53, 70), (50, 71, 89), (66, 88, 104), shine=False)
+WIGHT_GEM = M((8, 56, 60), (20, 112, 118), (40, 178, 182), (100, 226, 222), (176, 255, 244), (230, 255, 252), glow=True)
 
 # Style(blade, fitting, grip, haft, gem, accent, cloth)
 GILDED = Style(POLISHED, GOLD, ROYAL, px.DARK_WOOD, SAPPHIRE, GOLD, ROYAL)
@@ -93,11 +98,13 @@ HADES = Style(SLATE, ASHEN, BLOOD, NIGHT, BLOOD, SOOT, BLOOD)
 SENTINEL = Style(SENTINEL_GOLD, SENTINEL_GOLD, SENTINEL_LEATHER, SENTINEL_LEATHER, SENTINEL_JET, SENTINEL_GOLD,
                  SENTINEL_LEATHER)
 FROST_KNIGHT = Style(FROST_ICE, FROST_WHITE, FROST_WHITE, FROST_WHITE, FROST_ICE, FROST_ICE, FROST_WHITE)
+WIGHT_KING = Style(WIGHT_SLATE, WIGHT_SLATE, WIGHT_DARK, WIGHT_DARK, WIGHT_GEM, WIGHT_GEM, WIGHT_DARK)
 # Each line's materials, by its name in tools/arms_variants.py (a variant's 16x16 icon is coloured from them).
 LINE_STYLES = {"gilded": GILDED, "ironclad": IRONCLAD, "bonecarved": BONECARVED, "runebound": RUNEBOUND,
                "yeti_king": YETI, "cinder_tyrant": CINDER, "mire_hag": HAG, "crypt_lich": LICH,
                "iron_dreadnought": DREADNOUGHT, "werewolf_alpha": WEREWOLF, "storm_roc": ROC,
-               "abyssal_leviathan": LEVIATHAN, "hades": HADES, "sentinel": SENTINEL, "frost_knight": FROST_KNIGHT}
+               "abyssal_leviathan": LEVIATHAN, "hades": HADES, "sentinel": SENTINEL, "frost_knight": FROST_KNIGHT,
+               "wight_king": WIGHT_KING}
 
 
 # ---------------------------------------------------------------- shared parts
@@ -875,13 +882,36 @@ def frost_knight_greatsword():
     return d
 
 
+def wight_king_zweihander():
+    """The Wight King's sword, after the owner's design: a long slate blade, pale along its edges and grooved dark down
+    its middle; a crossguard of jagged slate shards swept toward the point either side, a cyan gem at its heart; a dark
+    grip and a slate pommel set with a cyan stone. It is held as a zweihander is."""
+    st = WIGHT_KING
+    d = Design(59, grip=9.0)
+    d.disc(1.8, 0.0, 1.8, WIGHT_SLATE, depth=2.6, part="pommel")
+    d.disc(1.8, 0.0, 0.8, WIGHT_GEM, depth=3.0, z=1, part="pommel_stone")
+    grip(d, 3.6, 15.5, 1.1, st)
+    # The crossguard: a slate bar flaring into three jagged shards each side, swept toward the point.
+    d.strip(15.5, 17.3, 3.4, material=WIGHT_SLATE, depth=2.8, part="guard")
+    for side in (1, -1):
+        d.poly([(15.5, side * 3.0), (14.4, side * 6.2), (16.1, side * 4.8), (16.6, side * 7.8), (17.4, side * 5.0),
+                (19.8, side * 6.4), (17.3, side * 3.0)], WIGHT_SLATE, depth=2.6, part=f"shard{side}", tone=LIGHT)
+    d.disc(16.4, 0.0, 1.2, WIGHT_GEM, depth=3.4, z=2, part="gem")
+    # The blade: long slate, pale along its edges, a dark groove down its middle.
+    blade(d, 17.3, 54.0, 2.6, 2.0, st, tip=5.0)
+    d.strip(17.8, 53.5, lambda v: 2.6 + (2.0 - 2.6) * (v - 17.3) / 36.7, lambda v: -(2.6 + (2.0 - 2.6) * (v - 17.3) / 36.7) + 0.6,
+            material=WIGHT_SLATE, depth=1.1, z=1, tone=HIGHLIGHT, part="edge")
+    d.strip(18.3, 47.0, 0.4, material=WIGHT_DARK, depth=0.8, z=2, part="groove")
+    return d
+
+
 DESIGNS = {name: fn for name, fn in globals().items() if callable(fn) and name in (
     "gilded_longsword", "gilded_rapier", "gilded_sabre", "gilded_halberd", "ironclad_zweihander", "ironclad_maul",
     "ironclad_war_pick", "ironclad_battle_axe", "bonecarved_dagger", "bonecarved_flail", "bonecarved_glaive",
     "bonecarved_labrys", "runebound_nodachi", "runebound_moonblade", "runebound_staff", "runebound_war_hammer",
     "glacier_maul", "rimeclaw", "cinderbrand", "magmaw", "hagthorn", "bogfang", "soulreaver", "gravewarden",
     "dynamo_halberd", "piston_hammer", "moonfang", "howler", "stormcaller", "galefeather", "tidebreaker",
-    "leviathans_hook", "hades_scythe", "sentinel_longsword", "frost_knight_greatsword")}
+    "leviathans_hook", "hades_scythe", "sentinel_longsword", "frost_knight_greatsword", "wight_king_zweihander")}
 
 
 # ---------------------------------------------------------------- drawing (as tools/arms_art.py draws the kinds)

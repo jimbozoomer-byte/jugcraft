@@ -286,6 +286,20 @@ FROST_KNIGHT = {
     "ice_light": (200, 248, 255), "ice": (120, 224, 252), "ice_mid": (64, 184, 240), "ice_dark": (32, 136, 214),
     "ice_deep": (22, 92, 172),
 }
+# Wight King (tools/wight_king_armor.py): the slate-blue plate of the owner's knight crowned with icicles and antlers,
+# from pale ice to deep slate; "gold" names the cyan of its gems, the palest and the deep; "leather" the dark slate of
+# its straps, belt and the gaps between its bands; the under-layer the black of its face. Its icicles and antlers are
+# five tones of their own, by name, paling to their tips.
+WIGHT_KING = {
+    "light": (178, 206, 218), "mid_light": (133, 163, 178), "mid": (95, 121, 138), "dark": (73, 98, 115),
+    "seam": (53, 78, 94), "void": (37, 53, 70),
+    "gold_light": (176, 255, 244), "gold_dark": (40, 178, 182),
+    "leather_light": (50, 71, 89), "leather_mid_light": (37, 53, 70), "leather_mid": (27, 47, 63),
+    "leather_dark": (18, 34, 47), "leather_darkest": (10, 22, 32),
+    "under_light": (24, 38, 50), "under_mid": (14, 28, 39), "under_dark": (8, 18, 27), "under_darkest": (4, 10, 16),
+    "ice_light": (232, 244, 250), "ice": (196, 220, 232), "ice_mid": (160, 190, 205), "ice_dark": (120, 150, 168),
+    "ice_deep": (84, 112, 130),
+}
 # The smoke test's face colours (tools/armor_smoke.py): one hue per face, so a render shows which face is where.
 TEST = {**STEEL, "t_top": (230, 230, 90), "t_bottom": (90, 70, 40), "t_right": (220, 70, 70), "t_front": (80, 200, 90),
         "t_left": (70, 110, 230), "t_back": (200, 90, 210), "t_mark": (20, 20, 20), "t_rule": (255, 255, 255)}

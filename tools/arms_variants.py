@@ -75,6 +75,8 @@ SETS = {
     # (docs/features/armor-designs-8-october.md).
     "sentinel": {"display": "Sentinel"},
     "frost_knight": {"display": "Frost Knight"},
+    # Sent without words the same day, the Wight King's render holds a long sword (armor-designs-8-october.md).
+    "wight_king": {"display": "Wight King"},
 }
 LINES = list(STYLES) + list(BOSSES) + list(SETS)
 
@@ -147,6 +149,7 @@ VARIANTS = [
     ("hades_scythe", "scythe", "hades", "wither", "Hades Scythe"),
     ("sentinel_longsword", "longsword", "sentinel", "mark", "Sentinel Longsword"),
     ("frost_knight_greatsword", "greatsword", "frost_knight", "frost", "Frost Knight Greatsword"),
+    ("wight_king_zweihander", "zweihander", "wight_king", "drain", "Wight King Zweihander"),
 ]
 BY_ID = {name: (kind, line, boon, display) for name, kind, line, boon, display in VARIANTS}
 

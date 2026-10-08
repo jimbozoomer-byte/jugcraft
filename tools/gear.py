@@ -187,6 +187,10 @@ ARMOR_TIERS = {
     # Frost Knight: the white knight crowned with ice: a point of defense over netherite, steady; mended with blue ice.
     "frost_knight": {"display": "Frost Knight", "armor": (44, (3, 7, 8, 3), 18, 3.0, 0.15),
                      "repair": "minecraft:blue_ice", "fire_resistant": False},
+    # Wight King: the slate knight crowned with icicles and antlers: the heavier helm and the steadiest of the cold
+    # sets, middling enchanting, netherite's toughness; mended with packed ice.
+    "wight_king": {"display": "Wight King", "armor": (45, (3, 7, 8, 4), 15, 3.0, 0.2),
+                   "repair": "minecraft:packed_ice", "fire_resistant": False},
 }
 
 
