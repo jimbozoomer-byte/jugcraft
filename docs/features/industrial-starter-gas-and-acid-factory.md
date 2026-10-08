@@ -157,7 +157,7 @@ The first station combines cleaning and separation, consumes the dirty mixture o
 
 ### Remaining specification and following milestone
 
-The selected starter direction is ready for recipe/capability specification. Catalyst mineral/preparation quantities, acid carrier accounting, coal yields/carbon/heat, road binder/yield, station IDs/footprints, other bills, solution units and exact energy/upgrade limits remain engineering and balance work. Numerical proposals stay distinct from owner selections. The next owner batch develops magnesium, aluminum and titanium together in the [metals-processing questions](industrial-chemistry-and-fuels-plan.md#magnesium-aluminum-and-titanium-processing-questions-pending); it does not postpone starter specification or create a mandatory player quest ladder.
+The selected starter direction is ready for recipe/capability specification. Catalyst mineral/preparation quantities, acid carrier accounting, coal yields/carbon/heat, road binder/yield, station IDs/footprints, other bills, solution units and exact energy/upgrade limits remain engineering and balance work. Numerical proposals stay distinct from owner selections. The [tenth owner batch](industrial-chemistry-and-fuels-plan.md#magnesium-aluminum-and-titanium-processing-decisions-tenth-batch), recorded 8 October 2026, now selects the following magnesium/aluminum/titanium process directions, including seawater pumping from beach or ocean biomes. Exact metal recipes remain to specify. This follow-up does not postpone starter specification or create a mandatory player quest ladder.
 
 ## Implementation and verification requirements
 
