@@ -1450,6 +1450,18 @@ def check_guns():
     for ammo, size in guns.FLASH_SIZE.items():
         if f'"{ammo}", {size}F' not in looks:
             err(f"GunLooks.FLASH_SIZES differs from tools/guns.py FLASH_SIZE for {ammo} ({size})")
+    # Slice 7: each scope's zoom and view.
+    quoted = lambda name: f'"{name}"' if name else "null"
+    for kind, att in guns.ATTACHMENTS.items():
+        if att.get("mount"):
+            view = att["view"]
+            line = (f'OPTICS.put("{kind}", new Optic({att["zoom"]}F, {quoted(view.get("reticle"))}, '
+                    f'{quoted(view.get("vignette"))}, {quoted(view.get("dot"))}));')
+            if line not in looks:
+                err(f"GunLooks.OPTICS differs from tools/guns.py for {kind}: expected {line}")
+    if (f"Codec.STRING.listOf(0, {len(guns.SLOTS)})" not in java
+            or f"ByteBufCodecs.list({len(guns.SLOTS)})" not in java):
+        err(f"JugcraftGuns.FITTED must hold one attachment a slot: {len(guns.SLOTS)} at most")
     hide = re.search(r"HIDE_FLASH = List\.of\(([^)]*)\)", looks)
     hiding = [kind for kind, att in guns.ATTACHMENTS.items() if att.get("hides_flash")]
     if not hide or re.findall(r'"([a-z_]+)"', hide.group(1)) != hiding:
@@ -1465,6 +1477,8 @@ def check_guns():
     client_mixins = load(ROOT / "src" / "client" / "resources" / f"{MOD}.client.mixins.json") or {}
     if "GunFovMixin" not in client_mixins.get("client", []):
         err(f"{MOD}.client.mixins.json does not list GunFovMixin (no zoom aimed down the sights)")
+    if "GunMouseMixin" not in client_mixins.get("client", []):
+        err(f"{MOD}.client.mixins.json does not list GunMouseMixin (the mouse would not slow through a scope)")
     mixin_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin" / "client"
     for mixin, call in (("ArmsRenderStateMixin", "GunPose.extract"), ("ArmsHumanoidModelMixin", "GunPose.apply")):
         if call not in (mixin_dir / f"{mixin}.java").read_text(encoding="utf-8"):

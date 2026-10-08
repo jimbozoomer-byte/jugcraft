@@ -1,7 +1,9 @@
 """Guns (docs/features/guns.md): slice 1, the owner's Rust Midge, Patchwork Carbine and Thunderpipe; slice 2, the
 iron set: the Warden Pistol, Riveter SMG and Haymaker; slice 3, the Longhorn Rifle, Drover Rifle and Coach Gun;
 slice 4, the black powder guns: the Duelling Pistol, Line Musket and Bellmouth; slice 5, the attachments; slice 6,
-the guns in use: muzzle flash, spent casings, the view narrowed while aiming and the two-handed hold seen from outside.
+the guns in use: muzzle flash, spent casings, the view narrowed while aiming and the two-handed hold seen from outside;
+slice 7, the bayonets and the attachments drawn on shared textures, then the scopes (the owner's scope models, mounted
+on the guns made to take them).
 
 The owner made these guns (inspired by Scorched Guns 2) and supplied, in the owner asset library:
   - a Blockbench Java model of every part (art/owner-library/originals/Blocks/Guns/models/special/<gun>/<part>.json),
@@ -10,7 +12,9 @@ The owner made these guns (inspired by Scorched Guns 2) and supplied, in the own
     reload, or reload_start / reload_loop / reload_stop for a gun loaded a shell at a time),
   - the sounds (.../Guns/sounds/item/...),
   - casing art (.../Guns/item/<casing>.png) and muzzle flash frames
-    (art/owner-library/originals/Blocks/Big Cannons and Mounted Guns/textures/muzzleflash*.png).
+    (art/owner-library/originals/Blocks/Big Cannons and Mounted Guns/textures/muzzleflash*.png),
+  - the attachments' item models (.../Guns/models/item/<attachment>.json), and the reticles and lens vignettes the
+    scope models draw (.../Guns/effect/<name>.png, uploaded 8 October 2026).
 The animations were made for GeckoLib models that were not supplied, so this module rebuilds those models from the
 parts: one GeckoLib bone per animated part (gun_body, bolt, barrels, magazine ...), cube for cube and face for face,
 plus the bones the animations move the player's arms by. GeckoLib then plays the owner's animations unchanged.
@@ -416,6 +420,11 @@ PROPS = {
 #   texture  ...its one texture, copied to textures/item/guns/attachments/<texture>.png (ATTACHMENT_TEXTURES)
 #   hides_flash  a can over the muzzle: a shot through it shows no muzzle flash (slice 6)
 #   stab     a bayonet's stab, in half hearts (slice 7); 0 for the rest
+#   mount    a scope (slice 7): the owner made no part of it for each gun, so its own item model is mounted on the guns
+#            the owner made to take one (optic_part(); "parts" is unused)
+#   zoom     a scope's: the field of view is multiplied by this at full aim, in place of the gun's own ZOOM
+#   view     a scope's view through it, aimed (client/guns/GunScope): "reticle" and "vignette" fill the screen, the
+#            gun put away; or a reflex sight's "dot" on the middle of the screen, over the gun
 # The numbers are starting points for the owner.
 ATTACHMENTS = {
     "silencer": {
@@ -499,19 +508,45 @@ ATTACHMENTS = {
         "stab": 6.0, "model": "netherite_bayonet", "texture": "netherite_bayonet",
         "tooltip": "A netherite blade under the muzzle. Stab with it up close.",
     },
+    # The scopes, on the optic slot: they take the place of the gun's iron sights (the owner's "sights" part; their
+    # "no_sights" part, a rail on the Riveter, shows with the scope). A scope steadies the aim and narrows the view;
+    # the two magnifying ones are clumsy from the hip.
+    "long_scope": {
+        "display": "Long Scope", "slot": "optic", "mount": True, "parts": [], "replaces": True,
+        "effects": {"aim_spread": 0.5, "hip_spread": 1.25}, "model": "long_scope", "texture": "long_scope",
+        "zoom": 0.3, "view": {"reticle": "long_scope_reticle2", "vignette": "scope_vignette"},
+        "tooltip": "A long blackened-steel scope: a far closer view down the sights, clumsy from the hip.",
+    },
+    "medium_scope": {
+        "display": "Medium Scope", "slot": "optic", "mount": True, "parts": [], "replaces": True,
+        "effects": {"aim_spread": 0.7, "hip_spread": 1.1}, "model": "medium_scope", "texture": "medium_scope",
+        "zoom": 0.5, "view": {"reticle": "long_scope_reticle2", "vignette": "scope_vignette"},
+        "tooltip": "A short scope: a closer view down the sights, a little clumsy from the hip.",
+    },
+    "reflex_sight": {
+        "display": "Reflex Sight", "slot": "optic", "mount": True, "parts": [], "replaces": True,
+        "effects": {"aim_spread": 0.85}, "model": "reflex_sight", "texture": "reflex_sight",
+        "zoom": 0.85, "view": {"dot": "red_dot_reticle"},
+        "tooltip": "A glass window with a red dot on it: quick to aim through, no magnification to speak of.",
+    },
 }
 # The order the effects are listed in (and GunAttachment's fields).
 EFFECTS = ("damage", "range", "hip_spread", "aim_spread", "capacity", "reload", "kick", "volume")
 # Each slot's standard parts: an attachment rides the bone that holds one (the gun body when the gun has none), and one
 # that "replaces" takes its place.
-SLOTS = {"barrel": ("stan_barrel", "barrel"), "magazine": ("stan_mag",), "stock": ("stan_grip",), "grip": ()}
+SLOTS = {"barrel": ("stan_barrel", "barrel"), "magazine": ("stan_mag",), "stock": ("stan_grip",), "grip": (),
+         "optic": ("sights",)}
+# The reticles and lens vignettes the scopes' item models draw and their views show (the owner's, Guns/effect/<name>.png,
+# copied to textures/item/guns/optics/<name>.png).
+OPTIC_TEXTURES = ("long_scope_reticle2", "scope_vignette", "scope_vignette_circle", "red_dot_reticle")
 # The attachments' textures: the owner's (Guns/item/<file>.png), copied under Jugcraft names.
 ATTACHMENT_TEXTURES = {
     "muzzle_devices": "greaser_smg_barrels", "baffled_silencer": "advanced_silencer", "extended_barrel": "extended_barrel",
     "extended_magazine": "extended_mag", "speed_magazine": "carabine", "light_stock": "light_stock",
     "weighted_stock": "greaser_smg_stocks", "wooden_stock": "musket_stocks", "grips": "carabine_grips",
     "iron_bayonet": "iron_bayonet", "steel_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
-    "netherite_bayonet": "netherite_bayonet",
+    "netherite_bayonet": "netherite_bayonet", "long_scope": "long_scope_texture", "medium_scope": "medium_scope",
+    "reflex_sight": "relex_sight",
 }
 # Attachment recipes, from the same early metal and wood as the guns.
 ATTACHMENT_RECIPES = {
@@ -530,15 +565,23 @@ ATTACHMENT_RECIPES = {
     "iron_bayonet": (["I", "N"], {"I": "minecraft:iron_ingot", "N": "minecraft:iron_nugget"}),
     "steel_bayonet": (["S", "N"], {"S": "#c:ingots/steel", "N": "minecraft:iron_nugget"}),
     "diamond_bayonet": (["D", "N"], {"D": "minecraft:diamond", "N": "minecraft:iron_nugget"}),
+    # Glass in a brass tube; the long scope is a spyglass in a brass mount; the reflex sight's dot is a glint of
+    # redstone behind a pane on an iron foot.
+    "long_scope": (["BSB"], {"B": "#c:ingots/brass", "S": "minecraft:spyglass"}),
+    "medium_scope": (["BGB"], {"B": "#c:ingots/brass", "G": "minecraft:glass_pane"}),
+    "reflex_sight": (["G", "R", "N"], {"G": "minecraft:glass_pane", "R": "minecraft:redstone", "N": "minecraft:iron_nugget"}),
 }
 # The Netherite Bayonet is a Diamond Bayonet upgraded at a smithing table, as netherite tools are.
 NETHERITE_UPGRADES = {"netherite_bayonet": "diamond_bayonet"}
 
 
 def attachment_part(gun, kind):
-    """The owner's part file this gun shows the attachment with, or None: the first of its "parts" the gun has, if
-    every face draws on a texture in the library (the gun's own or, since slice 7, one the owner shares between guns,
-    merged into the gun's atlas by atlas_layout())."""
+    """The part entry this gun shows the attachment with, or None. A scope's is its own item model mounted on the gun
+    ("%<kind>", optic_part()), on a gun the owner made to take one (takes_optics()). Any other attachment's is the
+    first of its "parts" the gun has, if every face draws on a texture in the library (the gun's own or, since slice 7,
+    one the owner shares between guns, merged into the gun's atlas by atlas_layout())."""
+    if ATTACHMENTS[kind].get("mount"):
+        return f"%{kind}" if takes_optics(gun) else None
     for name in ATTACHMENTS[kind]["parts"]:
         if (LIBRARY / "models" / "special" / GUNS[gun]["source"] / f"{name}.json").exists():
             faces = [face for element in load_part(gun, name).get("elements", []) for face in element.get("faces", {}).values()]
@@ -549,6 +592,115 @@ def attachment_part(gun, kind):
 def fits(gun):
     """The attachments this gun takes, in ATTACHMENTS order (JugcraftGuns.ACCEPTS)."""
     return [kind for kind in ATTACHMENTS if attachment_part(gun, kind)]
+
+
+def takes_optics(gun):
+    """Whether the owner made the gun to take a scope: among its parts are iron sights and a "no_sights" stand-in (what
+    shows under a scope: nothing, or a rail), and its bones carry the sights, so a scope can take their place."""
+    folder = LIBRARY / "models" / "special" / GUNS[gun]["source"]
+    return ((folder / "sights.json").exists() and (folder / "no_sights.json").exists()
+            and any("sights" in parts for _, _, parts, _ in BUILDS[gun]["bones"]))
+
+
+def attachment_parts(gun, kind):
+    """The part entries the attachment's bone holds on this gun: its part, and with a scope the gun's "no_sights" part
+    where it has one (the Riveter's rail)."""
+    part = attachment_part(gun, kind)
+    if ATTACHMENTS[kind].get("mount") and load_part(gun, "no_sights").get("elements"):
+        return [part, "no_sights"]
+    return [part]
+
+
+# Where a scope stands on a gun, in owner space, where optic_mount()'s reading of the parts would not do.
+MOUNTS = {}
+
+
+def optic_mount(gun):
+    """Where a scope's foot stands on the gun, in owner space: on the centre line, on top of the gun's "no_sights" rail
+    where it has one, otherwise where the iron sights stand on the receiver; midway along either."""
+    if gun in MOUNTS:
+        return MOUNTS[gun]
+    rail = part_elements(gun, "no_sights")
+    elements = rail or part_elements(gun, "sights")
+    ys = [v for e in elements for v in (e["from"][1], e["to"][1])]
+    zs = [v for e in elements for v in (e["from"][2], e["to"][2])]
+    return (8.0, max(ys) if rail else min(ys), (min(zs) + max(zs)) / 2.0)
+
+
+def turned_corners(element):
+    """The element's eight corners in owner space, turned as vanilla turns it (about its origin, right-handed)."""
+    lo, hi = element["from"], element["to"]
+    corners = [(x, y, z) for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])]
+    rotation = element.get("rotation")
+    if not rotation or not rotation.get("angle"):
+        return corners
+    a = math.radians(rotation["angle"])
+    c, s = math.cos(a), math.sin(a)
+    ox, oy, oz = rotation.get("origin", [8, 8, 8])
+    out = []
+    for x, y, z in corners:
+        x, y, z = x - ox, y - oy, z - oz
+        x, y, z = {"x": (x, y * c - z * s, y * s + z * c), "y": (z * s + x * c, y, z * c - x * s),
+                   "z": (x * c - y * s, x * s + y * c, z)}[rotation["axis"]]
+        out.append((x + ox, y + oy, z + oz))
+    return out
+
+
+def optic_elements(kind):
+    """The scope's item model elements that draw only on library textures: the body, not the lens planes that draw on
+    its reticle and vignette (the scope's view shows those, GunScope; a gun's atlas has no room for them)."""
+    data = json.loads((LIBRARY / "models" / "item" / f"{ATTACHMENTS[kind]['model']}.json").read_text())
+    textures = data.get("textures", {})
+    kept = []
+    for element in data.get("elements", []):
+        faces = list(element.get("faces", {}).values())
+        for face in faces:
+            face["_texture"] = face_texture(textures, face.get("texture", ""))
+        if faces and all(texture_file(face["_texture"]) for face in faces):
+            kept.append(element)
+    return textures, kept
+
+
+def optic_foot(kind):
+    """The point of the scope that stands on a gun, in its own model's space: on the centre line at the bottom of its
+    mount (its lowest corner), midway along the elements that reach down to it."""
+    _, elements = optic_elements(kind)
+    low = {id(e): min(p[1] for p in turned_corners(e)) for e in elements}
+    bottom = min(low.values())
+    feet = [e for e in elements if low[id(e)] <= bottom + 0.25]
+    zs = [p[2] for e in feet for p in turned_corners(e)]
+    return (8.0, bottom, (min(zs) + max(zs)) / 2.0)
+
+
+def mount_offset(gun, kind):
+    """How far the scope's model moves to stand on the gun."""
+    return tuple(rnd(m - f) for m, f in zip(optic_mount(gun), optic_foot(kind)))
+
+
+def optic_part(gun, kind):
+    """The scope as a part of this gun: its body's elements (optic_elements()) moved so its foot stands on the gun's
+    mount."""
+    textures, elements = optic_elements(kind)
+    d = mount_offset(gun, kind)
+    moved = []
+    for element in elements:
+        element = dict(element, **{"from": [rnd(v + o) for v, o in zip(element["from"], d)],
+                                   "to": [rnd(v + o) for v, o in zip(element["to"], d)]})
+        if element.get("rotation"):
+            origin = element["rotation"].get("origin", [8, 8, 8])
+            element["rotation"] = dict(element["rotation"], origin=[rnd(v + o) for v, o in zip(origin, d)])
+        moved.append(element)
+    return {"textures": textures, "elements": moved}
+
+
+def optic_sight(gun, kind):
+    """Where aiming through the scope puts the middle of the screen (its "sight_<kind>" locator), in owner space: on
+    the scope's line of sight (the owner's .scmeta camera height) at its eyepiece (the back of its body)."""
+    meta = json.loads((LIBRARY / "models" / "item" / f"{ATTACHMENTS[kind]['model']}.scmeta").read_text())
+    camera = meta["scguns:scope"]["camera"]
+    d = mount_offset(gun, kind)
+    back = max(p[2] for e in optic_elements(kind)[1] for p in turned_corners(e))
+    return (rnd(camera[0] + d[0]), rnd(camera[1] + d[1]), rnd(back + d[2]))
 
 
 def effective_bones(gun):
@@ -574,7 +726,7 @@ def effective_bones(gun):
             if own and slot in replaced:
                 parts = [p for p in parts if p not in standard]
                 children.append((f"std_{slot}{suffix}", name, own, pivot))
-            children += [(f"att_{kind}{suffix}", name, [attachment_part(gun, kind)], pivot)
+            children += [(f"att_{kind}{suffix}", name, attachment_parts(gun, kind), pivot)
                          for kind in kinds if ATTACHMENTS[kind]["slot"] == slot]
         out.append((name, parent, parts, pivot))
         out += children
@@ -582,10 +734,14 @@ def effective_bones(gun):
 
 
 def attachment_model(kind):
-    """The owner's item model for the attachment, its texture renamed to the Jugcraft copy."""
+    """The owner's item model for the attachment, its textures renamed to the Jugcraft copies: its own, and a scope's
+    reticle and lens vignette (OPTIC_TEXTURES)."""
     model = json.loads((LIBRARY / "models" / "item" / f"{ATTACHMENTS[kind]['model']}.json").read_text())
     texture = f"{MOD}:item/guns/attachments/{ATTACHMENTS[kind]['texture']}"
-    model["textures"] = {key: texture for key in model["textures"]}
+    effect = "scguns:effect/"
+    model["textures"] = {key: f"{MOD}:item/guns/optics/{value.removeprefix(effect)}"
+                         if value.startswith(effect) and key != "particle" else texture
+                         for key, value in model["textures"].items()}
     return model
 
 
@@ -813,7 +969,10 @@ def base_model(gun):
 # ------------------------------------------------------------------ converting the parts
 
 def load_part(gun, part):
-    """The owner's part file, each face noting the texture it draws from ("_texture": a texture id)."""
+    """The owner's part file, each face noting the texture it draws from ("_texture": a texture id). A scope's
+    "%<kind>" is its item model mounted on the gun (optic_part())."""
+    if part.startswith("%"):
+        return optic_part(gun, part[1:])
     data = json.loads((LIBRARY / "models" / "special" / GUNS[gun]["source"] / f"{part_file(part)}.json").read_text())
     textures = data.get("textures", {})
     for element in data.get("elements", []):
@@ -866,21 +1025,23 @@ def atlas_layout(gun):
     the owner shares between guns (bayonets, stocks, grips), those packed into room the own texture leaves free:
     blocks that are clear and that no face's UVs or prop reaches (own_footprint()), largest first, on an 8-pixel grid.
     A square atlas, grown from the own texture's size to 128 at most (tools/check_mod_data.py's texture rule) only
-    when they do not fit. Returns ((width, height), {texture id: (x, y, width, height)})."""
-    from PIL import Image
-    sizes = {}
-    for texture in gun_textures(gun):
-        with Image.open(texture_file(texture)) as image:
-            sizes[texture] = image.size
+    when they do not fit.
+    The textures its scopes draw on come after, piece by piece (they would not fit whole): each rect of pixels their
+    faces use (scope_islands()), a pixel apart, into what room is left, largest first.
+    Returns ((width, height), {texture id: placement}): a placement is (x, y, width, height) for a whole texture, or
+    for a scope's texture {pixel rect: (x, y, width, height)}, the texture placed so that that rect lands where it was
+    packed (face_placement())."""
+    islands = scope_islands(gun)
+    sizes = {texture: texture_size(texture) for texture in gun_textures(gun)}
     own = own_texture(gun)
     ow, oh = sizes[own]
     place = {own: (0, 0, ow, oh)}
-    others = sorted((t for t in sizes if t != own), key=lambda t: (-sizes[t][0] * sizes[t][1], t))
-    if not others:
-        return (ow, oh), place
+    others = sorted((t for t in sizes if t != own and t not in islands), key=lambda t: (-sizes[t][0] * sizes[t][1], t))
     used = own_footprint(gun)
     side = max(ow, oh)
-    while side <= 128:
+    while others:
+        if side > 128:
+            raise ValueError(f"{gun}: its shared textures do not fit a 128 x 128 atlas")
         taken = {}
         for texture in others:
             w, h = sizes[texture]
@@ -892,9 +1053,81 @@ def atlas_layout(gun):
                 break
             taken[texture] = (*spot, w, h)
         else:
-            return (side, side), {**place, **taken}
+            place.update(taken)
+            break
         side *= 2
-    raise ValueError(f"{gun}: its shared textures do not fit a 128 x 128 atlas")
+    if islands:
+        place.update(pack_islands(gun, side, place, used, islands, sizes))
+    return (side, side) if len(place) > 1 else (ow, oh), place
+
+
+def texture_size(texture):
+    """(width, height) of a library texture."""
+    from PIL import Image
+    with Image.open(texture_file(texture)) as image:
+        return image.size
+
+
+def island_rect(data, face, lo, hi, size):
+    """The pixels (x0, y0, x1, y1) a face draws on its texture of this size: whole pixels, at least one each way."""
+    u0, v0, u1, v1 = data.get("uv") or default_uv(face, lo, hi)
+    x0, x1 = sorted((u0 * size[0] / 16, u1 * size[0] / 16))
+    y0, y1 = sorted((v0 * size[1] / 16, v1 * size[1] / 16))
+    x0, y0 = math.floor(x0 + 1e-6), math.floor(y0 + 1e-6)
+    return x0, y0, max(math.ceil(x1 - 1e-6), x0 + 1), max(math.ceil(y1 - 1e-6), y0 + 1)
+
+
+def scope_islands(gun):
+    """{texture id: the pixel rects the faces of the gun's mounted scopes draw on it}."""
+    found = {}
+    for _, _, parts, _ in effective_bones(gun):
+        for part in parts:
+            if not part.startswith("%"):
+                continue
+            for element in part_elements(gun, part):
+                lo = [min(a, b) for a, b in zip(element["from"], element["to"])]
+                hi = [max(a, b) for a, b in zip(element["from"], element["to"])]
+                for face, data in element.get("faces", {}).items():
+                    size = texture_size(data["_texture"])
+                    found.setdefault(data["_texture"], set()).add(island_rect(data, face, lo, hi, size))
+    return found
+
+
+def pack_islands(gun, side, place, used, islands, sizes):
+    """Packs each scope texture's rects into the side x side atlas where nothing is (the own texture's footprint and
+    the whole textures placed), a pixel apart, largest first; returns their placements (atlas_layout())."""
+    import numpy as np
+    free = np.ones((side, side), bool)
+    free[:used.shape[0], :used.shape[1]] &= ~used
+    for texture, (x, y, w, h) in place.items():
+        if texture != own_texture(gun):
+            free[y:y + h, x:x + w] = False
+    out = {}
+    order = sorted(((t, r) for t, rects in islands.items() for r in rects),
+                   key=lambda tr: (-(tr[1][2] - tr[1][0]) * (tr[1][3] - tr[1][1]), tr[0], tr[1]))
+    for texture, (x0, y0, x1, y1) in order:
+        w, h = x1 - x0 + 2, y1 - y0 + 2
+        taken = np.zeros((side + 1, side + 1), np.int32)
+        taken[1:, 1:] = (~free).astype(np.int32).cumsum(0).cumsum(1)
+        sums = taken[h:, w:] - taken[:-h, w:] - taken[h:, :-w] + taken[:-h, :-w]
+        spots = np.argwhere(sums == 0)
+        if not len(spots):
+            raise ValueError(f"{gun}: its scopes' textures do not fit its {side} x {side} atlas")
+        y, x = (int(v) for v in spots[0])
+        free[y:y + h, x:x + w] = False
+        tw, th = sizes[texture]
+        out.setdefault(texture, {})[(x0, y0, x1, y1)] = (x + 1 - x0, y + 1 - y0, tw, th)
+    return out
+
+
+def face_placement(place, data, face, lo, hi):
+    """Where the texture a face draws on sits in the gun's atlas, for to_atlas(): its whole placement or, for a scope's
+    texture packed piece by piece, the placement that lands this face's own pixels where they were packed."""
+    placement = place[data["_texture"]]
+    if isinstance(placement, dict):
+        _, _, w, h = next(iter(placement.values()))
+        return placement[island_rect(data, face, lo, hi, (w, h))]
+    return placement
 
 
 def own_footprint(gun):
@@ -947,12 +1180,18 @@ def compose_atlas(gun):
     if len(place) == 1:
         return own
     atlas = Image.new("RGBA", size, (0, 0, 0, 0))
-    for texture, (x, y, _, _) in place.items():
+    for texture, placement in place.items():
         if texture == own_texture(gun):
-            atlas.paste(own, (x, y))
+            atlas.paste(own, placement[:2])
+            continue
+        with Image.open(texture_file(texture)) as image:
+            source = image.convert("RGBA")
+        if isinstance(placement, dict):
+            # A scope's texture, piece by piece: each rect where atlas_layout() packed it.
+            for (x0, y0, x1, y1), (x, y, _, _) in placement.items():
+                atlas.paste(source.crop((x0, y0, x1, y1)), (x + x0, y + y0))
         else:
-            with Image.open(texture_file(texture)) as image:
-                atlas.paste(image.convert("RGBA"), (x, y))
+            atlas.paste(source, placement[:2])
     return atlas
 
 
@@ -1086,7 +1325,8 @@ def element_cube(element, layout):
         if data is None:
             continue
         uv = data.get("uv") or default_uv(face, lo, hi)
-        corners = to_atlas(java_corner_uvs(face, uv, int(data.get("rotation", 0)) % 360), place[data["_texture"]], size_px)
+        corners = to_atlas(java_corner_uvs(face, uv, int(data.get("rotation", 0)) % 360),
+                           face_placement(place, data, face, lo, hi), size_px)
         faces[face] = gecko_face(face, corners, size_px)
     cube["uv"] = faces
     return cube
@@ -1179,6 +1419,9 @@ def build_geo(gun):
         if name.startswith("att_") and kind in ATTACHMENTS and ATTACHMENTS[kind]["slot"] == "barrel":
             # The flash of a gun with this barrel attachment fitted comes from here (GunFlashLayer).
             bone["locators"] = {f"muzzle_{kind}": geo_point(barrel_front(gun, kind))}
+        if name.startswith("att_") and kind in ATTACHMENTS and ATTACHMENTS[kind].get("mount"):
+            # Aiming through the scope puts this in the middle of the screen (GunRenderer), in place of "sight".
+            bone["locators"] = {f"sight_{kind}": geo_point(optic_sight(gun, kind))}
         bones.append(bone)
     for side in ("right", "left"):
         parent = build.get("arm_parents", {}).get(side, "gun_body")
@@ -1238,7 +1481,8 @@ def java_faces(element, layout):
         if zero_face([b - a for a, b in zip(lo, hi)], face):
             continue  # GeckoLib drops these edge-on faces, and they draw nothing in vanilla either
         uv = data.get("uv") or default_uv(face, lo, hi)
-        corners = to_atlas(java_corner_uvs(face, uv, int(data.get("rotation", 0)) % 360), place[data["_texture"]], size_px)
+        corners = to_atlas(java_corner_uvs(face, uv, int(data.get("rotation", 0)) % 360),
+                           face_placement(place, data, face, lo, hi), size_px)
         out.append((face, [(tuple((lo, hi)[s][k] for k, s in enumerate(pick)), uv) for pick, uv in corners.items()]))
     return out
 
@@ -1330,6 +1574,8 @@ def check():
         for kind in fits(gun):
             if ATTACHMENTS[kind]["slot"] == "barrel" and f"muzzle_{kind}" not in bones.get(f"att_{kind}", {}).get("locators", {}):
                 problems.append(f"{gun}: the {kind} bone has no muzzle_{kind} locator for the flash")
+            if ATTACHMENTS[kind].get("mount") and f"sight_{kind}" not in bones.get(f"att_{kind}", {}).get("locators", {}):
+                problems.append(f"{gun}: the {kind} bone has no sight_{kind} locator to aim through")
         # The props' atlas corners must stay clear of every part's faces, the attachments' included.
         for prop_name, prop in PROPS.get(gun, {}).items():
             tu, tv = prop["texture_at"]
@@ -1350,9 +1596,25 @@ def check():
         size, place = atlas_layout(gun)
         used = own_footprint(gun)
         ow, oh = place[own_texture(gun)][2:]
-        for texture, (x, y, w, h) in place.items():
-            if texture != own_texture(gun) and used[y:min(y + h, oh), x:min(x + w, ow)].any():
-                problems.append(f"{gun}: {texture} is packed over pixels the gun's own texture uses")
+        # Each texture placed, whole or (a scope's) rect by rect, inside the atlas, off the own texture's pixels and
+        # off every other.
+        cover = [[0] * size[0] for _ in range(size[1])]
+        for texture, placement in place.items():
+            if texture == own_texture(gun):
+                continue
+            rects = ([(x + x0, y + y0, x1 - x0, y1 - y0) for (x0, y0, x1, y1), (x, y, _, _) in placement.items()]
+                     if isinstance(placement, dict) else [placement])
+            for x, y, w, h in rects:
+                if x < 0 or y < 0 or x + w > size[0] or y + h > size[1]:
+                    problems.append(f"{gun}: {texture} is packed outside its atlas")
+                    continue
+                if used[y:min(y + h, oh), x:min(x + w, ow)].any():
+                    problems.append(f"{gun}: {texture} is packed over pixels the gun's own texture uses")
+                for row in range(y, y + h):
+                    for col in range(x, x + w):
+                        cover[row][col] += 1
+        if any(n > 1 for row in cover for n in row):
+            problems.append(f"{gun}: textures are packed over each other in its atlas")
         if size[0] != size[1] or size[0] > 128:
             problems.append(f"{gun}: its atlas is {size}, not a square of 128 or less")
         texture = ASSETS / "textures" / "item" / "guns" / f"{gun}.png"
@@ -1372,12 +1634,25 @@ def check():
         if (kind not in ATTACHMENT_RECIPES and kind not in NETHERITE_UPGRADES) or att["texture"] not in ATTACHMENT_TEXTURES:
             problems.append(f"attachment {kind}: no recipe or no texture")
         source = json.loads((LIBRARY / "models" / "item" / f"{att['model']}.json").read_text())
-        if len({v for k, v in source["textures"].items() if k != "particle"}) != 1:
-            problems.append(f"attachment {kind}: the owner's model {att['model']} draws on more than one texture")
+        effect = "scguns:effect/"
+        own = {v for k, v in source["textures"].items() if k != "particle" and not v.startswith(effect)}
+        lenses = {v.removeprefix(effect) for v in source["textures"].values() if v.startswith(effect)}
+        if len(own) != 1 or (lenses and not att.get("mount")) or not lenses <= set(OPTIC_TEXTURES):
+            problems.append(f"attachment {kind}: the owner's model {att['model']} draws on more than its own texture "
+                            "(and a scope's lens textures)")
+        if att.get("mount"):
+            view = att["view"]
+            if not 0.1 <= att["zoom"] <= 1.0 or att["slot"] != "optic" or not set(view.values()) <= set(OPTIC_TEXTURES) \
+                    or set(view) not in ({"reticle", "vignette"}, {"dot"}):
+                problems.append(f"scope {kind}: its zoom, slot or view is not one the guns can show")
     for name, source in ATTACHMENT_TEXTURES.items():
         target = ASSETS / "textures" / "item" / "guns" / "attachments" / f"{name}.png"
         if not target.exists() or target.read_bytes() != (LIBRARY / "item" / f"{source}.png").read_bytes():
             problems.append(f"attachment texture {name}: not the library's {source}.png unchanged")
+    for name in OPTIC_TEXTURES:
+        target = ASSETS / "textures" / "item" / "guns" / "optics" / f"{name}.png"
+        if not target.exists() or target.read_bytes() != (LIBRARY / "effect" / f"{name}.png").read_bytes():
+            problems.append(f"scope texture {name}: not the library's effect/{name}.png unchanged")
     # Slice 6: the look in use.
     if set(ZOOM) != set(GUNS) or not all(0.5 <= z <= 1.0 for z in ZOOM.values()):
         problems.append("ZOOM must give every gun a zoom between 0.5 and 1")
@@ -1501,6 +1776,10 @@ def write_files():
         target = ASSETS / "textures" / "item" / "guns" / "attachments" / f"{name}.png"
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(LIBRARY / "item" / f"{source}.png", target)
+    for name in OPTIC_TEXTURES:
+        target = ASSETS / "textures" / "item" / "guns" / "optics" / f"{name}.png"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(LIBRARY / "effect" / f"{name}.png", target)
     for ammo, casing in CASINGS.items():
         target = ASSETS / "textures" / "particle" / f"{ammo}_casing.png"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -1523,14 +1802,17 @@ def provenance():
         src = spec["source"]
         paths = [f"models/item/{src}.json", f"item/{src}.png", f"item/{src}.animation.json"]
         for _, _, parts, _ in effective_bones(gun):
-            paths += [f"models/special/{src}/{part_file(p)}.json" for p in parts if not p.startswith("@")]
+            paths += [f"models/special/{src}/{part_file(p)}.json" for p in parts if not p.startswith(("@", "%"))]
         paths.append(f"sounds/{SHOT_SOUNDS[gun]}")
         # The shared textures its attachments draw on, merged into its atlas (slice 7).
         paths += [str(texture_file(t).relative_to(LIBRARY)) for t in atlas_layout(gun)[1] if t != own_texture(gun)]
         rows += [(gun, p) for p in dict.fromkeys(paths)]  # a part on two bones (a spare magazine) counts once
     rows += [("shared", f"sounds/{p}") for p in sorted(set(EVENT_SOUNDS.values()))]
     rows += [(kind, f"models/item/{att['model']}.json") for kind, att in ATTACHMENTS.items()]
+    # A scope's .scmeta gives the height of its line of sight (optic_sight()).
+    rows += [(kind, f"models/item/{att['model']}.scmeta") for kind, att in ATTACHMENTS.items() if att.get("mount")]
     rows += [(name, f"item/{source}.png") for name, source in ATTACHMENT_TEXTURES.items()]
+    rows += [(name, f"effect/{name}.png") for name in OPTIC_TEXTURES]
     rows += [(f"{ammo}_casing", f"item/{casing}.png") for ammo, casing in CASINGS.items()]
     rows = [(owner, LIBRARY / path) for owner, path in rows]
     rows += [(f"flash_{n}", FLASH_SOURCE / f"{frame}.png") for n, frame in enumerate(FLASH_FRAMES)]

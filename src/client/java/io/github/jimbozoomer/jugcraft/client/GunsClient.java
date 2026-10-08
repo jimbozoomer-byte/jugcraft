@@ -9,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.client.guns.GunAnimations;
 import io.github.jimbozoomer.jugcraft.client.guns.GunCasingParticle;
 import io.github.jimbozoomer.jugcraft.client.guns.GunEffects;
 import io.github.jimbozoomer.jugcraft.client.guns.GunRenderer;
+import io.github.jimbozoomer.jugcraft.client.guns.GunScope;
 import io.github.jimbozoomer.jugcraft.client.guns.GunView;
 import io.github.jimbozoomer.jugcraft.guns.GunActionPayload;
 import io.github.jimbozoomer.jugcraft.guns.GunHooks;
@@ -54,6 +55,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Other players' guns are animated from the server's {@link GunActionPayload}.</li>
  * <li>Every shot, the player's own and others', shows its muzzle flash and black powder's smoke ({@link GunEffects}).</li>
  * <li>V stabs with a fitted bayonet (slice 7): the thrust and its swish at once, the blow from the server.</li>
+ * <li>Aiming through a fitted scope shows the view through it, or a reflex sight's dot ({@link GunScope}).</li>
  * </ul>
  */
 public final class GunsClient {
@@ -99,6 +101,7 @@ public final class GunsClient {
 		ClientTickEvents.END_CLIENT_TICK.register(GunsClient::tick);
 		ClientPlayNetworking.registerGlobalReceiver(GunActionPayload.TYPE, (payload, context) -> receive(payload));
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, Jugcraft.id("gun_ammo"), GunsClient::hud);
+		GunScope.register();
 		JugcraftGuns.CASINGS.values().forEach(casing -> ParticleProviderRegistry.getInstance().register(casing, GunCasingParticle::provider));
 	}
 

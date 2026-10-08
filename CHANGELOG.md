@@ -8,10 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 7b (the scopes)
+- **Three scopes,** each the owner's model and art, on a new optic slot in place of the iron sights: the **Long Scope** (a spyglass in brass), the **Medium Scope** and the **Reflex Sight**. The Longhorn Rifle, Drover Rifle and Riveter SMG take them, the guns the owner made to take one.
+- **Aimed through one,** in first person: the Long and Medium Scopes fill the screen with the owner's reticle and lens rim, narrow the view to 30% and 50% and slow the mouse to match; the Reflex Sight keeps the gun in view and puts its red dot on the middle of the screen. Scopes steady the aim; the two magnifying ones are clumsier from the hip.
+- The owner's 8 October reticle and lens textures are in the owner library, with the owner's word on them. One new client mixin (the mouse's turn; Fabric has no event for it). A gun can now save five attachments, one a slot. Record: [guns.md, slice 7b](docs/features/guns.md#slice-7b-the-scopes).
+
 ### Unmerged: Guns, slice 7 (bayonets and the shared-texture guns)
 - **Four bayonets,** each the owner's art: **Iron**, **Steel** (the owner's anthralite one), **Diamond** and **Netherite** (a smithing upgrade). Under the barrel, in place of a grip. **V stabs** for 4 to 6 damage within reach, every 12 ticks; the server deals the blow. Seven guns take them.
 - **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.
-- Scopes wait for the owner's reticle textures. Record: [guns.md, slice 7](docs/features/guns.md#slice-7-bayonets-and-the-shared-texture-guns).
+- Scopes came next (slice 7b). Record: [guns.md, slice 7](docs/features/guns.md#slice-7-bayonets-and-the-shared-texture-guns).
 
 ### Unmerged: Guns, slice 6 (the guns in use)
 - **Muzzle flash:** each shot shows one of the owner's flash frames at the muzzle (or at a fitted muzzle brake or extended barrel), seen by everyone near; a silencer hides it, and black powder also blows a white cloud.

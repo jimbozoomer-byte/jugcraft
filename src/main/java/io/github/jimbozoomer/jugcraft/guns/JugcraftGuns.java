@@ -77,10 +77,13 @@ public final class JugcraftGuns {
 		ATTACHMENTS.put("steel_bayonet", new GunAttachment("grip", false, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 5.0F));
 		ATTACHMENTS.put("diamond_bayonet", new GunAttachment("grip", false, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 5.0F));
 		ATTACHMENTS.put("netherite_bayonet", new GunAttachment("grip", false, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 6.0F));
+		ATTACHMENTS.put("long_scope", new GunAttachment("optic", true, 1.0F, 1.0F, 1.25F, 0.5F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F));
+		ATTACHMENTS.put("medium_scope", new GunAttachment("optic", true, 1.0F, 1.0F, 1.1F, 0.7F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F));
+		ATTACHMENTS.put("reflex_sight", new GunAttachment("optic", true, 1.0F, 1.0F, 1.0F, 0.85F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F));
 	}
 
-	/** The attachment slots: a gun takes one attachment in each (tools/guns.py SLOTS). */
-	public static final List<String> SLOTS = List.of("barrel", "magazine", "stock", "grip");
+	/** The attachment slots: a gun takes one attachment in each (tools/guns.py SLOTS); "optic" holds a scope. */
+	public static final List<String> SLOTS = List.of("barrel", "magazine", "stock", "grip", "optic");
 	/** The attachments each gun takes: those the owner made a part of that gun for (tools/guns.py fits()). */
 	public static final Map<String, List<String>> ACCEPTS = new LinkedHashMap<>();
 
@@ -96,13 +99,15 @@ public final class JugcraftGuns {
 		ACCEPTS.put("warden_pistol", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"extended_magazine", "speed_magazine"));
 		ACCEPTS.put("riveter_smg", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
-				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock"));
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "long_scope",
+				"medium_scope", "reflex_sight"));
 		ACCEPTS.put("haymaker", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel"));
 		ACCEPTS.put("longhorn_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip", "iron_bayonet",
-				"steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
+				"steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
 		ACCEPTS.put("drover_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
-				"light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
+				"light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope",
+				"medium_scope", "reflex_sight"));
 		ACCEPTS.put("coach_gun", List.of("light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
 				"netherite_bayonet"));
 		ACCEPTS.put("duelling_pistol", List.of("light_stock", "weighted_stock", "wooden_stock"));
@@ -132,7 +137,7 @@ public final class JugcraftGuns {
 	public static final ResourceKey<DamageType> BULLET = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("bullet"));
 	/** Rounds loaded in a gun. */
 	public static DataComponentType<Integer> LOADED;
-	/** The attachments fitted to a gun, oldest first; one a slot, so four at most. */
+	/** The attachments fitted to a gun, oldest first; one a slot, so five at most. */
 	public static DataComponentType<List<String>> FITTED;
 	public static RecipeSerializer<GunAttachmentRecipe> ATTACHMENT_SERIALIZER;
 	public static RecipeSerializer<GunAttachmentRemovalRecipe> ATTACHMENT_REMOVAL_SERIALIZER;
@@ -145,8 +150,8 @@ public final class JugcraftGuns {
 				DataComponentType.<Integer>builder().persistent(Codec.intRange(0, 64)).networkSynchronized(ByteBufCodecs.VAR_INT)
 						.build());
 		FITTED = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("attachments"),
-				DataComponentType.<List<String>>builder().persistent(Codec.STRING.listOf(0, 4))
-						.networkSynchronized(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list(4))).build());
+				DataComponentType.<List<String>>builder().persistent(Codec.STRING.listOf(0, 5))
+						.networkSynchronized(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list(5))).build());
 		ATTACHMENT_SERIALIZER = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Jugcraft.id("gun_attachment"),
 				GunAttachmentRecipe.SERIALIZER);
 		ATTACHMENT_REMOVAL_SERIALIZER = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Jugcraft.id("gun_attachment_removal"),

@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7) and the guns in use (slice 6)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6) and the scopes (slice 7b)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -7,7 +7,8 @@ Status:
 - **Slice 4** (the black powder guns: the Duelling Pistol, Line Musket and Bellmouth, and the Paper Cartridge; [below](#slice-4-the-black-powder-guns)): implemented on `claude/guns-powder` (#255), stacked on slice 3, awaiting review.
 - **Slice 5** (the attachments: silencers, a muzzle brake, an extended barrel, magazines, stocks and grips; [below](#slice-5-the-attachments)): implemented on `claude/guns-attachments` (#256), stacked on slice 4, awaiting review.
 - **Slice 6** (the guns in use: muzzle flash, spent casings, a zoom when aiming and the hold seen from outside; [below](#slice-6-the-guns-in-use)): implemented on `claude/guns-polish` (#259), stacked on slice 5, awaiting review.
-- **Slice 7** (finishing the attachments: bayonets that stab, and the five guns whose parts use shared textures; [below](#slice-7-bayonets-and-the-shared-texture-guns)): implemented on `claude/guns-attachments-2`, stacked on slice 6, awaiting review. Scopes wait for the owner (see there).
+- **Slice 7** (finishing the attachments: bayonets that stab, and the five guns whose parts use shared textures; [below](#slice-7-bayonets-and-the-shared-texture-guns)): implemented on `claude/guns-attachments-2` (#260), stacked on slice 6, awaiting review.
+- **Slice 7b** (the scopes: the Long Scope, Medium Scope and Reflex Sight; [below](#slice-7b-the-scopes)): implemented on `claude/guns-scopes`, stacked on slice 7, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -17,6 +18,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the eight sounds that carry other sources' tags: "I have the rights";
 - the next guns ("Ok lets do more!!!"): all four sets offered, the iron set, the lever rifles, the black powder guns and the attachments, each in its own slice; names: "Propose names".
 - what next ("ok what next"): all four offered, each its own pull request: gun polish (this slice 6), finishing the attachments, more guns, and the flaky tests.
+- the scopes: on 8 October 2026, with the reticles and lens rims uploaded ("heres reticles and vignette"), asked what the scopes should use, they answered that they made those files and to use them (see [Dependencies and assets](#dependencies-and-assets)); and asked what next ("What next?"), they chose all four further gun sets offered, each its own slice.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -222,7 +224,7 @@ The silencers and the muzzle brake sit at the muzzle in front of the barrel; the
 | Haymaker | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel | – | – | – |
 | Longhorn Rifle | Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel | – | Light Stock, Weighted Stock, Wooden Stock | Light Grip, Vertical Grip |
 
-The Drover Rifle, the Coach Gun and the muzzle-loaders took none in slice 5: the owner drew their attachments on textures shared between guns (`carabine_grips`, `flintlock_stocks`, `musket_bayonets` and others), and a GeckoLib model draws from one texture. Slice 7 packs those into each gun's atlas and adds the bayonets ([below](#slice-7-bayonets-and-the-shared-texture-guns)); the tactical grip and scopes wait for a later slice.
+The Drover Rifle, the Coach Gun and the muzzle-loaders took none in slice 5: the owner drew their attachments on textures shared between guns (`carabine_grips`, `flintlock_stocks`, `musket_bayonets` and others), and a GeckoLib model draws from one texture. Slice 7 packs those into each gun's atlas and adds the bayonets ([below](#slice-7-bayonets-and-the-shared-texture-guns)), and slice 7b the scopes ([below](#slice-7b-the-scopes)); the tactical grip waits for a later slice.
 
 **Fitting and taking off** (a crafting table, or the 2 × 2 grid):
 - A gun and an attachment it takes, alone in the grid, give the gun with the attachment fitted. The rounds loaded stay. An attachment the gun wore in that slot comes off and stays in the grid where the new one lay.
@@ -350,12 +352,44 @@ Slice 7 finishes the attachments the owner modelled for these twelve guns, excep
 **Balance:** a bayonet stab is weaker than a sword of its metal (a sword is 6 to 8), and a stab every 12 ticks. It is a last resort, not a melee weapon.
 
 **Known limits:**
-- **No scopes:**
-  - The owner's scope models (reflex sight, medium and long scopes, laser sight) draw their lenses with reticle and vignette textures (`scguns:effect/...`). Those are not in the library.
-  - Where a scope sits on each gun is not in the library either (Scorched Guns keeps it in gun data).
-  - Scopes need those textures from the owner, or ones drawn here; and a mount point set on each gun.
+- **No scopes in this slice:** the owner's scope models draw their lenses with reticle and vignette textures (`scguns:effect/...`) that were not in the library then, and where a scope sits on each gun is not in the library either (Scorched Guns keeps it in gun data). They came next, in [slice 7b](#slice-7b-the-scopes).
 - **The tactical grip:** the Drover's and Coach Gun's `tact_grip` parts are not an item yet.
 - **The thrust is code, not an animation:** the owner may want to animate a stab.
+
+## Slice 7b: the scopes
+The owner's three scopes, on a fifth attachment slot, "optic". A scope takes the place of the gun's iron sights.
+
+| Scope | Aimed through it (first person) | Spread | Crafting |
+|---|---|---|---|
+| Long Scope | the view through the scope fills the screen; the view narrows to 30% | aimed −50%, from the hip +25% | a spyglass between two brass ingots |
+| Medium Scope | the same, narrowing to 50% | aimed −30%, from the hip +10% | a glass pane between two brass ingots |
+| Reflex Sight | the gun stays in view, its window on the middle of the screen with the red dot on it; the view narrows to 85% | aimed −15% | a glass pane over redstone over an iron nugget |
+
+- **Which guns:** the Longhorn Rifle, Drover Rifle and Riveter SMG. These are the guns the owner made to take one: their parts include iron sights and a `no_sights` stand-in (nothing on the rifles, a rail on the Riveter). The owner's revolvers have them too.
+- **On the gun:** the owner made no scope part for each gun, so each scope's own item model is mounted on it.
+  - Its mount's foot stands on the centre line, on the receiver where the iron sights stood, midway along them, or on the Riveter's rail (`optic_mount()`, `optic_foot()`; `MOUNTS` overrides a gun).
+  - The iron sights hide (the slot's standard part); the Riveter's rail shows under the scope.
+  - Its lens planes (the reticle and the lens rim) stay off the gun model, so from outside the tube is open.
+  - The scope textures (64 px) would not fit a gun's 128 px atlas whole. They are packed piece by piece instead: each rect of pixels a scope's faces use, a pixel apart, into the room left (`scope_islands()`, `pack_islands()`). The rest of each atlas is unchanged, the Drover's shared textures included.
+- **Aiming:** the scope's eyepiece slides onto the middle of the screen: its `sight_<scope>` locator, at the height of the owner's `.scmeta` camera. Near full aim (90%, `GunScope`):
+  - a magnifying scope fills the screen with the view through it, as a spyglass does: the owner's reticle and lens rim on a square as tall as the screen, black beside it. The gun drops out of sight meanwhile;
+  - a reflex sight puts its red dot on the middle of the screen, over the gun;
+  - either way the crosshair is left out.
+- **Zoom and the mouse:** in first person a scope's zoom takes the place of the gun's own (`GunView`). The mouse turns the player as much more slowly, as vanilla slows it for a spyglass (`GunMouseMixin`, which scales the mouse's gathered movement just before vanilla turns the player by it; Fabric API has no event for it).
+- **Others see** the scope on the gun, in third person and in the inventory, like any attachment.
+
+**Connections:** brass (copper and zinc), glass and redstone; the Long Scope takes a spyglass (amethyst and copper), so it comes a little later.
+
+**Balance:** a choice, not an upgrade: the two magnifying scopes are clumsier from the hip, and the optic slot holds one. Starting numbers for the owner.
+
+**Save compatibility:** new items `jugcraft:long_scope`, `medium_scope` and `reflex_sight`. The attachments component now holds up to five ids (one a slot); saved guns with up to four load as before. `guns.enabled=false` gates the three new recipes.
+
+**Known limits:**
+- The view through a scope is drawn flat over the screen, not through the lens of the model. Scorched Guns can draw the world a second time into the lens; that doubles the drawing, so it is left out.
+- The owner's finer reticle `long_scope_reticle.png` is not used: both scope models name `long_scope_reticle2`.
+- The laser sight (also in the library) is not an item yet.
+- With the HUD hidden (F1) there is no view through the scope, though the gun still drops away.
+- Where each scope sits was read from the gun's parts, not given by the owner.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
@@ -704,8 +738,36 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
 | steel_bayonet | `Guns/item/anthralite_bayonet.png` | `a9d69f394988fc4f` |
 | diamond_bayonet | `Guns/item/diamond_bayonet.png` | `2262785d6c0da5d0` |
 | netherite_bayonet | `Guns/item/netherite_bayonet.png` | `f7a49396eac13816` |
+| riveter_smg | `Guns/models/special/greaser_smg/no_sights.json` | `d2c1b829eee2515b` |
+| riveter_smg | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| riveter_smg | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| riveter_smg | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| longhorn_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| longhorn_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| longhorn_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| drover_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| drover_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| drover_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| long_scope | `Guns/models/item/long_scope.json` | `bae03e351ad5a43a` |
+| medium_scope | `Guns/models/item/medium_scope.json` | `1b6f5f95ac5d8401` |
+| reflex_sight | `Guns/models/item/reflex_sight.json` | `0c08e5f6e11cff90` |
+| long_scope | `Guns/models/item/long_scope.scmeta` | `6e82f87ecc2adc09` |
+| medium_scope | `Guns/models/item/medium_scope.scmeta` | `6e82f87ecc2adc09` |
+| reflex_sight | `Guns/models/item/reflex_sight.scmeta` | `bbd4957a6b334df6` |
+| long_scope | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| medium_scope | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| reflex_sight | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| long_scope_reticle2 | `Guns/effect/long_scope_reticle2.png` | `03fd80678ffafd2f` |
+| scope_vignette | `Guns/effect/scope_vignette.png` | `bb5e4a463e62511e` |
+| scope_vignette_circle | `Guns/effect/scope_vignette_circle.png` | `87e34da0197d0647` |
+| red_dot_reticle | `Guns/effect/red_dot_reticle.png` | `8ebc215134886a8f` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
+- **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
+  - `red_dot_reticle.png`'s editing history shows it saved inside a Just Enough Guns mod source folder in February 2024;
+  - `muzzle_flash.png` (not used here) was made in Photoshop in 2021.
+
+  Shown this and asked what the scopes should use, the owner answered that they made these files and to use them. Asked the same day whether the "Big Cannons and Mounted Guns" folder is theirs (slice 6's flash frames come from it, and it holds a `wariumlogo.png`), they confirmed it is. The [library README](../../art/owner-library/README.md#effect-textures-8-october-2026) records both.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
 - **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's shell, the Longhorn's cartridge, the muzzle-loaders' balls, ramrods and flashes).
 
@@ -805,15 +867,37 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - the Netherite Bayonet's smithing recipe loads;
     - "Every gun registered" checks the fifteen attachments.
   - `GunsClientGameTests` adds a third fitted set (Muzzle Brake, Wooden Stock, Iron Bayonet) on every gun that takes attachments (now all twelve), and a Steel Bayonet stab with the V key that hurts the husk.
+- **Slice 7b, run locally (8 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three scopes' bodies re-bakes to the owner's, moved onto each gun and drawn through its packed atlas pieces. Each atlas holds every piece where the layout says, on no pixel the gun's own texture uses and on no other piece. Only the Longhorn's, Drover's and Riveter's models and atlases changed.
+  - `python3 tools/generate_material_data.py`: wrote the scopes' items, item models (their lenses on the owner's reticle and rim textures), recipes and names.
+  - `python3 tools/check_mod_data.py`: PASS (1579 material IDs). `check_guns` now also checks `GunLooks.OPTICS`, the five-attachment cap and `GunMouseMixin`.
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Recipes:** none of the three shares a pattern with another recipe.
+  - **Java:** a syntax parse only.
+  - **Previews:** side views of the three guns bare and with each scope, drawn from the converted models: each scope stands on the receiver (on the Riveter's rail), and the iron sights are gone.
+- **Slice 7b game tests (written; they run in CI):**
+  - `GunsGameTests` adds `scopesFitTheGunsMadeForThem`:
+    - the three scope recipes load, and the three guns take each scope;
+    - a Long Scope on the Longhorn halves its aimed spread and adds a quarter to its hip spread;
+    - a Medium Scope takes the Long Scope's place, which stays in the grid;
+    - a Reflex Sight fits beside a Silencer, Extended Magazine and Wooden Stock on the Riveter;
+    - the Patchwork Carbine takes none;
+    - an attachment in each of the five slots saves.
+    - "Every gun registered" checks the eighteen attachments.
+  - `GunsClientGameTests` aims through each scope on the Longhorn at the husk:
+    - the field of view narrows by the scope's zoom (0.3, 0.5, 0.85);
+    - the view through the scope (Long, Medium) or the reflex dot is drawn;
+    - through the Long Scope, a mouse movement turns the player more slowly, where the test's window lets the mouse turn the player at all (the log says which).
+    - Screenshots `jugcraft_guns_<scope>` and `jugcraft_guns_<scope>_aimed`.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
-- **Later slices,** each its own pull request: the tactical grip and scopes (scopes wait for the owner's reticle and vignette textures, or leave to draw them here).
+- **Later slices,** each its own pull request: the four further gun sets the owner chose on 8 October 2026 (the revolvers, the dieselpunk service arms, the heavy weapons and the energy weapons); the tactical grip and the laser sight.
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - off-hand guns;

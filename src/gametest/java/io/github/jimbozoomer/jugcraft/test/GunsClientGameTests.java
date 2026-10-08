@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.GunsClient;
 import io.github.jimbozoomer.jugcraft.client.guns.GunEffects;
 import io.github.jimbozoomer.jugcraft.client.guns.GunPose;
+import io.github.jimbozoomer.jugcraft.client.guns.GunScope;
 import io.github.jimbozoomer.jugcraft.client.guns.GunView;
 import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
@@ -13,6 +14,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -37,8 +39,9 @@ import net.minecraft.world.phys.AABB;
  * client seeing a fitted magazine's capacity; each gun held in third person and shown in the inventory with the
  * attachments. Slice 6: each gun narrows the view aimed, shows a muzzle flash fired and throws the spent casings its
  * animations cue; in third person the player is posed holding it, and fires it. Slice 7: a third set of attachments
- * with a bayonet (and the guns whose parts use shared textures), and a stab with the stab key that hurts the husk.
- * Screenshots jugcraft_guns_* (CI job {@code client}).
+ * with a bayonet (and the guns whose parts use shared textures), and a stab with the stab key that hurts the husk; and the
+ * scopes, each aimed through on the Longhorn Rifle (the view through it or the reflex dot, the narrowed view, the slower
+ * mouse). Screenshots jugcraft_guns_* (CI job {@code client}).
  */
 public class GunsClientGameTests implements FabricClientGameTest {
 	@Override
@@ -198,6 +201,51 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			Jugcraft.LOGGER.info("[guns] the client sees a Rust Midge with an Extended Magazine hold {} rounds", seen);
 			if (seen != 30) {
 				throw new AssertionError("The client sees the Extended Magazine's Rust Midge hold " + seen + " rounds, not 30");
+			}
+
+			// Slice 7, the scopes, each on the Longhorn Rifle aimed at the husk: through the Long and Medium Scopes the view
+			// through the scope fills the screen and the view narrows by the scope's zoom; the Reflex Sight keeps the gun in
+			// view and shows its dot. Through the Long Scope the mouse turns the player more slowly.
+			Map<String, Float> zooms = Map.of("long_scope", 0.3F, "medium_scope", 0.5F, "reflex_sight", 0.85F);
+			for (String scope : List.of("long_scope", "medium_scope", "reflex_sight")) {
+				server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
+				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:longhorn_rifle[jugcraft:loaded_rounds=1,jugcraft:attachments=%s]"
+						.formatted(snbt(List.of(scope))));
+				context.waitTicks(20);
+				context.takeScreenshot("jugcraft_guns_" + scope);
+				long views = context.computeOnClient(client -> GunScope.views());
+				long dots = context.computeOnClient(client -> GunScope.dots());
+				context.getInput().holdKey(options -> options.keyUse);
+				context.waitTicks(10);
+				context.takeScreenshot("jugcraft_guns_" + scope + "_aimed");
+				float fovIn = context.computeOnClient(client -> GunView.lastFovIn());
+				float fovOut = context.computeOnClient(client -> GunView.lastFovOut());
+				long viewed = context.computeOnClient(client -> GunScope.views()) - views;
+				long dotted = context.computeOnClient(client -> GunScope.dots()) - dots;
+				Jugcraft.LOGGER.info("[guns] aimed through the {}: field of view modifier {} -> {}; {} frames of the view through it, {} of the dot",
+						scope, fovIn, fovOut, viewed, dotted);
+				if (Math.abs(fovOut - fovIn * zooms.get(scope)) > 0.01F) {
+					throw new AssertionError("Aimed through the " + scope + " the view did not narrow by its zoom " + zooms.get(scope) + ": "
+							+ fovIn + " -> " + fovOut);
+				}
+				if (scope.equals("reflex_sight") ? dotted <= 0 || viewed > 0 : viewed <= 0) {
+					throw new AssertionError("Aimed through the " + scope + ", " + viewed + " frames of the view through a scope and "
+							+ dotted + " of the reflex dot were drawn");
+				}
+				if (scope.equals("long_scope")) {
+					float yaw = context.computeOnClient(client -> client.player.getYRot());
+					context.computeOnClient(client -> GunView.lowestTurnScale());
+					context.getInput().moveCursor(60.0, 0.0);
+					context.waitTicks(2);
+					float turned = context.computeOnClient(client -> client.player.getYRot()) - yaw;
+					double scale = context.computeOnClient(client -> GunView.lowestTurnScale());
+					Jugcraft.LOGGER.info("[guns] the mouse moved through the Long Scope: the player turned {} degrees, turn scale {}", turned, scale);
+					if (Math.abs(turned) > 1.0E-4F && scale > 0.99) {
+						throw new AssertionError("Through the Long Scope the mouse turned the player at full speed (GunMouseMixin)");
+					}
+				}
+				context.getInput().releaseKey(options -> options.keyUse);
+				context.waitTicks(5);
 			}
 
 			// Seen from outside (slice 6): the gun arm raised along the look, the other across to the fore-end for a gun held
