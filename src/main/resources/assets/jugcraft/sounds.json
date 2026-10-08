@@ -545,6 +545,33 @@
       }
     ]
   },
+  "guns.bulldog_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/heavier_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.marshal_revolver.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/brass_revolver_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.sapper_revolver.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/brass_pistol_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

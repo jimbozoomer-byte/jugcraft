@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6) and the scopes (slice 7b)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b) and the hand guns (slice 8)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -8,7 +8,8 @@ Status:
 - **Slice 5** (the attachments: silencers, a muzzle brake, an extended barrel, magazines, stocks and grips; [below](#slice-5-the-attachments)): implemented on `claude/guns-attachments` (#256), stacked on slice 4, awaiting review.
 - **Slice 6** (the guns in use: muzzle flash, spent casings, a zoom when aiming and the hold seen from outside; [below](#slice-6-the-guns-in-use)): implemented on `claude/guns-polish` (#259), stacked on slice 5, awaiting review.
 - **Slice 7** (finishing the attachments: bayonets that stab, and the five guns whose parts use shared textures; [below](#slice-7-bayonets-and-the-shared-texture-guns)): implemented on `claude/guns-attachments-2` (#260), stacked on slice 6, awaiting review.
-- **Slice 7b** (the scopes: the Long Scope, Medium Scope and Reflex Sight; [below](#slice-7b-the-scopes)): implemented on `claude/guns-scopes`, stacked on slice 7, awaiting review.
+- **Slice 7b** (the scopes: the Long Scope, Medium Scope and Reflex Sight; [below](#slice-7b-the-scopes)): implemented on `claude/guns-scopes` (#265), stacked on slice 7, awaiting review.
+- **Slice 8** (the hand guns: the Bulldog Pistol, Marshal Revolver and Sapper Revolver; [below](#slice-8-the-hand-guns)): implemented on `claude/guns-revolvers`, stacked on slice 7b, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -365,7 +366,7 @@ The owner's three scopes, on a fifth attachment slot, "optic". A scope takes the
 | Medium Scope | the same, narrowing to 50% | aimed −30%, from the hip +10% | a glass pane between two brass ingots |
 | Reflex Sight | the gun stays in view, its window on the middle of the screen with the red dot on it; the view narrows to 85% | aimed −15% | a glass pane over redstone over an iron nugget |
 
-- **Which guns:** the Longhorn Rifle, Drover Rifle and Riveter SMG. These are the guns the owner made to take one: their parts include iron sights and a `no_sights` stand-in (nothing on the rifles, a rail on the Riveter). The owner's revolvers have them too.
+- **Which guns:** the Longhorn Rifle, Drover Rifle and Riveter SMG. These are the guns the owner made to take one: their parts include iron sights and a `no_sights` stand-in (nothing on the rifles, a rail on the Riveter). The owner's Brawler has them too: the Bulldog Pistol (slice 8) takes all three.
 - **On the gun:** the owner made no scope part for each gun, so each scope's own item model is mounted on it.
   - Its mount's foot stands on the centre line, on the receiver where the iron sights stood, midway along them, or on the Riveter's rail (`optic_mount()`, `optic_foot()`; `MOUNTS` overrides a gun).
   - The iron sights hide (the slot's standard part); the Riveter's rail shows under the scope.
@@ -390,6 +391,63 @@ The owner's three scopes, on a fifth attachment slot, "optic". A scope takes the
 - The laser sight (also in the library) is not an item yet.
 - With the HUD hidden (F1) there is no view through the scope, though the gun still drops away.
 - Where each scope sits was read from the gun's parts, not given by the owner.
+
+## Slice 8: the hand guns
+The first of the four further gun sets the owner chose on 8 October 2026: three guns held in one hand. One breaks open for a single heavy round; two are six-shot revolvers that load a round at a time.
+
+| | Bulldog Pistol | Marshal Revolver | Sapper Revolver |
+|---|---|---|---|
+| The owner's gun | Brawler | Longarm | Trenchur |
+| What it is | a hand cannon that breaks open to load its one round | a long-barrelled revolver, loaded through a gate | a short revolver whose cylinder swings out to load |
+| Fires | one shot | one shot each pull | one shot each pull |
+| Damage | 11 | 5 | 4.5 |
+| Rate | one shot, then the reload | 2.5 a second (every 8 ticks) | 3.3 a second (every 6 ticks) |
+| Holds | 1 | 6 | 6 |
+| Reload | 2.25 s | 0.55 s, then 1.25 s a round, then 0.55 s | 0.45 s, then 0.6 s a round, then 0.65 s |
+| Spread, hip / aimed | 3° / 1° | 2° / 0.5° | 2.5° / 0.8° |
+| Range | 56 blocks | 72 | 48 |
+| Round | Rifle Round | Light Round | Light Round |
+| Takes | the two silencers, the muzzle brake, the extended barrel and the three scopes | the three stocks | the two silencers, the muzzle brake and the extended barrel |
+
+**Crafting** (a crafting table):
+- **Bulldog Pistol:** two iron ingots and a brass ingot over planks.
+- **Marshal Revolver:** two iron ingots and a brass ingot over a brass ingot, a lever and planks.
+- **Sapper Revolver:** an iron ingot and a brass ingot over a lever and planks.
+
+**What you see:** the owner's animations.
+- **Bulldog Pistol:** the hammer snaps forward on the shot. To reload, the barrel tips down on its hinge, the spent case is thrown, and the left hand brings a rifle round up and drops it into the breech before the barrel snaps shut.
+- **Marshal Revolver:** the gun turns its gate side up, and the left hand loads a round at a time while the cylinder turns.
+- **Sapper Revolver:** the cylinder swings out to the left on its crane. The left hand loads a round at a time, a spent case dropping out each time, and the cylinder swings back.
+
+**How the models were built:**
+- **The Bulldog's hammer** is the main part's ninth element, a flat plate, on the `bolt` bone; the shot drives it forward.
+- **The Bulldog's barrel** (its `stan_barrel` part) turns on the `barrel` bone about a hinge at the front of the frame's lug, where the opened barrel stands just clear of the frame. Its reload also names an `extended_barrel` bone, which it never moves: that bone is empty, and a fitted Extended Barrel rides the barrel bone.
+- **The Bulldog's round** had no part. It is drawn here as a box on the `shell` bone (a brass case with a lead tip, in an empty corner of the atlas), resting where the reload's offsets bring it into the opened breech, bullet first: its middle is a pixel down the bore as it shrinks away, 1.54 s in.
+- **The Marshal's cylinder** is the six elements of its main part that the owner grouped as the magazine, on the `cylinder_magazine` bone, turning about its own axis. Its `magazine` bone is left empty: the reload's last step swings that bone back as if the cylinder had swung out, which the Longarm's never does. Its hammer is the main part's last element, turning about its foot.
+- **The Sapper's cylinder** (its `drum` part) swings out on the `magazine` bone about the crane's hinge, below and to the left of it, and its hammer part turns about its foot.
+- **The left hands,** hidden by each idle, are placed for a reload keyframe:
+  - the Bulldog's 1.17 s in, holding the round, set back toward the shoulder so the round shows past the fingers;
+  - the Marshal's at the gate behind the cylinder, on the right, 0.42 s into each round;
+  - the Sapper's behind the swung-out cylinder's outer chamber, 0.29 s into each round.
+- **The left arms** are aimed to come up from below the screen for the whole time they show, fitted over every frame of the reload (and the revolvers' inspect), not just the keyframe. The right arms are as before.
+- **Sounds:**
+  - **Shots:** the Bulldog fires the library's heavier rifle shot, the Marshal the brass revolver's and the Sapper the brass pistol's. The library's plain revolver and pistol shots carry other sources' tags, so they are not used.
+  - **Reloads:** their cues play the shared events.
+  - **`stop_mag_tracking`,** a cue in the revolvers' reloads, shows nothing.
+
+**Connections:** iron, brass (copper and zinc) and a lever; the rounds as before.
+
+**Balance:** starting numbers.
+- **Bulldog:** 11 in one shot is the hardest one-handed hit so far, but every shot costs a 2.25 s reload and a rifle round.
+- **Marshal:** six aimed shots of 5 at long range.
+- **Sapper:** six quicker, looser shots of 4.5, and a quicker reload.
+
+**Save compatibility:** new items `jugcraft:bulldog_pistol`, `marshal_revolver` and `sapper_revolver`; nothing saved changes. `guns.enabled=false` gates their recipes as it does the others'.
+
+**Known limits:**
+- The Bulldog's hinge, its round's rest and the three left hands were fitted to the owner's animations in a first-person preview; the owner did not give them.
+- The revolvers' reloads bring the gun up close to the view, and the arms cover much of the screen while they load (as the Duelling Pistol's do). Play will tell whether the hands want other anchors.
+- The Marshal's cylinder turns 70° for each round and turns back, as the owner's animation has it, rather than a sixth of a turn onward.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
@@ -572,6 +630,40 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | bellmouth | `Guns/models/special/blunderbuss/main.json` | `611befd4a9d8e37d` |
 | bellmouth | `Guns/models/special/blunderbuss/hammer.json` | `9365a5b0b9c90007` |
 | bellmouth | `Guns/sounds/item/blackpowder/fire.ogg` | `a3d3d49a332d034f` |
+| bulldog_pistol | `Guns/models/item/brawler.json` | `19bb23c2931a096b` |
+| bulldog_pistol | `Guns/item/brawler.png` | `dbe617e6c29df0fa` |
+| bulldog_pistol | `Guns/item/brawler.animation.json` | `53db80f081bad631` |
+| bulldog_pistol | `Guns/models/special/brawler/main.json` | `a87efb54a5dfa9a6` |
+| bulldog_pistol | `Guns/models/special/brawler/sights.json` | `1ea6c6e568000c20` |
+| bulldog_pistol | `Guns/models/special/brawler/stan_barrel.json` | `cca50cc97edb2156` |
+| bulldog_pistol | `Guns/models/special/brawler/silencer.json` | `5b7dc75b7263886e` |
+| bulldog_pistol | `Guns/models/special/brawler/advanced_silencer.json` | `5696639c4c522be6` |
+| bulldog_pistol | `Guns/models/special/brawler/muzzle_brake.json` | `95806dbe499f4ecc` |
+| bulldog_pistol | `Guns/models/special/brawler/ext_barrel.json` | `dc2ffd8c37523ffa` |
+| bulldog_pistol | `Guns/sounds/item/heavier_rifle/fire.ogg` | `4e17f5a1b2891ee7` |
+| bulldog_pistol | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| bulldog_pistol | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| bulldog_pistol | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| marshal_revolver | `Guns/models/item/longarm.json` | `4016ba18bfc6ea41` |
+| marshal_revolver | `Guns/item/longarm.png` | `5d18c5e07c4d9c51` |
+| marshal_revolver | `Guns/item/longarm.animation.json` | `5f674f97668f4171` |
+| marshal_revolver | `Guns/models/special/longarm/main.json` | `c8e1be01ce6db4a1` |
+| marshal_revolver | `Guns/models/special/longarm/light_stock.json` | `b7b6c99e1eabb3e9` |
+| marshal_revolver | `Guns/models/special/longarm/heavy_stock.json` | `5802184529940e27` |
+| marshal_revolver | `Guns/models/special/longarm/wooden_stock.json` | `024b6e752bbda387` |
+| marshal_revolver | `Guns/sounds/item/brass_revolver/fire.ogg` | `9ede81f3520dfd5c` |
+| sapper_revolver | `Guns/models/item/trenchur.json` | `15a8d9614307f216` |
+| sapper_revolver | `Guns/item/trenchur.png` | `0f63212b8c65910f` |
+| sapper_revolver | `Guns/item/trenchur.animation.json` | `b544565c99687f16` |
+| sapper_revolver | `Guns/models/special/trenchur/main.json` | `0c3466c9a365bde5` |
+| sapper_revolver | `Guns/models/special/trenchur/stan_barrel.json` | `c363f55f825e192c` |
+| sapper_revolver | `Guns/models/special/trenchur/silencer.json` | `ea896d0260bd5c99` |
+| sapper_revolver | `Guns/models/special/trenchur/advanced_silencer.json` | `93a7f63f689826a8` |
+| sapper_revolver | `Guns/models/special/trenchur/muzzle_brake.json` | `51079aa07d948cdc` |
+| sapper_revolver | `Guns/models/special/trenchur/ext_barrel.json` | `e7a17c0c04695cb5` |
+| sapper_revolver | `Guns/models/special/trenchur/drum.json` | `4ecbe2b43bfa9686` |
+| sapper_revolver | `Guns/models/special/trenchur/hammer.json` | `7f282421e7442161` |
+| sapper_revolver | `Guns/sounds/item/brass_pistol/fire.ogg` | `4fca376e2ece67b2` |
 | shared | `Guns/sounds/item/bolt/bolt.ogg` | `1cf1102f6ba52725` |
 | shared | `Guns/sounds/item/bolt_pull/bolt_pull.ogg` | `dbbda8b00abcab8c` |
 | shared | `Guns/sounds/item/bolt_release/bolt_release.ogg` | `7c1096f545d72ec3` |
@@ -889,15 +981,38 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - the view through the scope (Long, Medium) or the reflex dot is drawn;
     - through the Long Scope, a mouse movement turns the player more slowly, where the test's window lets the mouse turn the player at all (the log says which).
     - Screenshots `jugcraft_guns_<scope>` and `jugcraft_guns_<scope>_aimed`.
+- **Slice 8, run locally (8 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's. Each hand is where `BUILDS` puts it in its pose, with each shoulder locator 10 px below it. The Bulldog's atlas grew to 128 px to hold the scopes' pieces.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds.
+  - `python3 tools/check_mod_data.py`: PASS (1869 material IDs).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only.
+  - **Previews,** approximating the game's first-person hands: each gun's reload, frame by frame. Side views of the Bulldog's reload, in the gun's own frame, show:
+    - the opened barrel standing just clear of the frame;
+    - the round going into the breech bullet first;
+    - each left arm coming up from below the screen while it shows.
+- **Slice 8 game tests (written; they run in CI):**
+  - `GunsGameTests` adds `handGunsLandAndLoad`:
+    - the Bulldog lands its 11 and spends its round, does not fire empty, and loads one rifle round in its reload time and not before;
+    - the Marshal lands its 5 and loads a round at a time: the two rounds there are, and no more;
+    - the Sapper lands its 4.5.
+    - "Every gun registered" now counts fifteen guns.
+  - `GunsClientGameTests` already takes every gun through its steps:
+    - held and aimed;
+    - fired at the husk, with a muzzle flash;
+    - reloaded part way and done, throwing casings where the animations cue them;
+    - inspected, seen in third person and in the inventory, and held with each set of its attachments fitted.
+    - The new guns' screenshots are `jugcraft_guns_bulldog_pistol_*`, `jugcraft_guns_marshal_revolver_*` and `jugcraft_guns_sapper_revolver_*`.
+  - The inventory screenshot is now two, `jugcraft_guns_inventory` (the guns and rounds) and `jugcraft_guns_inventory_attachments`: fifteen guns, four rounds and eighteen attachments no longer fit one inventory.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
-- **Later slices,** each its own pull request: the four further gun sets the owner chose on 8 October 2026 (the revolvers, the dieselpunk service arms, the heavy weapons and the energy weapons); the tactical grip and the laser sight.
+- **Later slices,** each its own pull request: the other three gun sets the owner chose on 8 October 2026 (the dieselpunk service arms, the heavy weapons and the energy weapons; the revolvers are slice 8); the tactical grip and the laser sight.
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - off-hand guns;

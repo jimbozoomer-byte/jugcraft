@@ -56,6 +56,9 @@ public final class JugcraftGuns {
 		SPECS.put("duelling_pistol", new GunSpec(9.0F, 1, 20, false, 1, 74, 0, 0, 0, 4.0F, 2.0F, 32, "paper_cartridge"));
 		SPECS.put("line_musket", new GunSpec(14.0F, 1, 8, false, 1, 78, 0, 0, 0, 2.5F, 0.75F, 64, "paper_cartridge"));
 		SPECS.put("bellmouth", new GunSpec(2.5F, 10, 10, false, 1, 78, 0, 0, 0, 12.0F, 9.0F, 20, "paper_cartridge"));
+		SPECS.put("bulldog_pistol", new GunSpec(11.0F, 1, 10, false, 1, 45, 0, 0, 0, 3.0F, 1.0F, 56, "rifle_round"));
+		SPECS.put("marshal_revolver", new GunSpec(5.0F, 1, 8, false, 6, 0, 11, 25, 11, 2.0F, 0.5F, 72, "light_round"));
+		SPECS.put("sapper_revolver", new GunSpec(4.5F, 1, 6, false, 6, 0, 9, 12, 13, 2.5F, 0.8F, 48, "light_round"));
 	}
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
@@ -115,6 +118,10 @@ public final class JugcraftGuns {
 				"vertical_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
 		ACCEPTS.put("bellmouth", List.of("light_grip", "vertical_grip", "iron_bayonet", "steel_bayonet",
 				"diamond_bayonet", "netherite_bayonet"));
+		ACCEPTS.put("bulldog_pistol", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"long_scope", "medium_scope", "reflex_sight"));
+		ACCEPTS.put("marshal_revolver", List.of("light_stock", "weighted_stock", "wooden_stock"));
+		ACCEPTS.put("sapper_revolver", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel"));
 	}
 
 	/** The rounds. */
