@@ -29,10 +29,14 @@ import net.minecraft.world.phys.Vec3;
  * still pig for its damage and comes down as itself, worn by a throw; the chakram cuts two pigs in line on its way out
  * and again on its way back, and is caught into its thrower's inventory; the harpoon hauls its pig towards the thrower;
  * the francisca knocks a raised shield down; and a creative throw leaves the thrower's arm in hand and nothing behind.
- * Throwers face south (+z) and aim at their foe's middle.
+ * Throwers face south (+z) and aim so that their throw's arc comes to their foe's middle.
  */
 public class ArmsVIIIGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
+	/** A thrown thing keeps this share of its speed a tick in air (ThrowableProjectile's). */
+	private static final double AIR_INERTIA = 0.99;
+	/** A thrown thing leaves this far below its thrower's eye (ThrowableItemProjectile's). */
+	private static final double BELOW_EYE = 0.1;
 
 	/** Every thrown arm is a ThrownArmItem with its kind's thrown numbers in its metal. */
 	@GameTest
@@ -165,7 +169,12 @@ public class ArmsVIIIGameTests {
 		stack.getItem().releaseUsing(stack, thrower.level(), thrower, stack.getUseDuration(thrower) - thrown.wind());
 	}
 
-	/** A mock player holding `arm`, at `pos`, aiming at `target`'s middle. */
+	/**
+	 * A mock player holding `arm`, at `pos`, aiming so that the arm's throw comes to `target`'s middle. Aimed straight
+	 * at the middle, a throw drops below it: the steel harpoon came to its pig 8 blocks off only a tenth of a block
+	 * above the floor, and a throw's spread (up to a degree) then put it in the floor short of the pig about one throw
+	 * in forty.
+	 */
 	private static ServerPlayer thrower(GameTestHelper helper, String arm, BlockPos pos, Mob target, GameType mode) {
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		player.setGameMode(mode);
@@ -174,9 +183,46 @@ public class ArmsVIIIGameTests {
 		Vec3 aim = target.getBoundingBox().getCenter().subtract(player.getEyePosition());
 		player.setYRot(0.0F);
 		player.setYHeadRot(0.0F);
-		player.setXRot((float) Math.toDegrees(Math.atan2(-aim.y, Math.sqrt(aim.x * aim.x + aim.z * aim.z))));
+		JugcraftArms.Thrown thrown = ((ThrownArmItem) JugcraftArms.ITEMS.get(arm)).thrown();
+		player.setXRot(pitch(thrown, Math.sqrt(aim.x * aim.x + aim.z * aim.z), aim.y + BELOW_EYE));
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftArms.ITEMS.get(arm)));
 		return player;
+	}
+
+	/** The pitch (down is positive) at which `thrown` is `rise` above where it left the hand when it is `run` blocks out. */
+	private static float pitch(JugcraftArms.Thrown thrown, double run, double rise) {
+		double low = -45.0;
+		double high = 45.0;
+		for (int step = 0; step < 40; step++) {
+			double mid = (low + high) / 2.0;
+			if (height(thrown, mid, run) > rise) {
+				low = mid;
+			} else {
+				high = mid;
+			}
+		}
+		return (float) ((low + high) / 2.0);
+	}
+
+	/**
+	 * How far above where it left the hand a throw at `pitch` is when it is `run` blocks out, flown as ThrowableProjectile
+	 * flies it in air: a tick at a time, its gravity, then the air's drag, then the move.
+	 */
+	private static double height(JugcraftArms.Thrown thrown, double pitch, double run) {
+		double out = thrown.speed() * Math.cos(Math.toRadians(pitch));
+		double up = -thrown.speed() * Math.sin(Math.toRadians(pitch));
+		double across = 0.0;
+		double above = 0.0;
+		for (int tick = 0; tick < 200; tick++) {
+			up = (up - thrown.gravity()) * AIR_INERTIA;
+			out *= AIR_INERTIA;
+			if (across + out >= run) {
+				return above + up * (run - across) / out;
+			}
+			across += out;
+			above += up;
+		}
+		return above;
 	}
 
 	/** Where a mob is, relative to the test's origin, for a failure message. */
