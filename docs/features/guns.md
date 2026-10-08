@@ -492,6 +492,11 @@ The second of the four further gun sets: three magazine-fed guns a step up from 
   - **Sentry:** fitted to come up from below the screen through the reload. Its inspect turns the arm so differently that one direction cannot suit both; the reload is favoured.
   - **The two long guns:** the same as the other two-handed guns.
 - **Sights:** the Stigg's rear sight is its sights part, with the front post on the barrel. The Combat Shotgun's sights are a front post and a ring at the back. Both guns take the three scopes, mounted where those sights stood.
+- **Aimed, the Garrison Rifle is held further out:**
+  - Its receiver runs back under the line of sight to just short of the eye. Each shot slides the bolt 2.6 px back and the whole gun 1.4 px.
+  - Aimed at the hip's depth, the bolt came past the eye, and an aimed shot filled the screen with the gun ([CI, below](#verification)).
+  - Aimed, it is now held 4 px further out (`eye_relief` in `BUILDS`, `GunLooks.EYE_RELIEF`). In a preview of the shot, that keeps all of it at least 3.5 px from the eye.
+  - The hip view is the owner's.
 - **Sounds:** the shots are the library's scrapper shot (Sentry), its scorched rifle shot (Garrison) and the Combat Shotgun's own. None carries another source's tag. The reload cues play the shared events.
 
 **Connections:** steel from the steel foundry (coke and iron, no power needed), brass and a lever. The rounds are as before.

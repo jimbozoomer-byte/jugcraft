@@ -21,6 +21,12 @@ public final class GunLooks {
 	static final List<String> HIDE_FLASH = List.of("silencer", "baffled_silencer");
 	/** The scopes (slice 7), by name: how far each narrows the view and what aiming through it shows. */
 	static final Map<String, Optic> OPTICS = new HashMap<>();
+	/**
+	 * How much further from the eye a gun is held aimed than at the hip, in sixteenths of a block (tools/guns.py BUILDS
+	 * "eye_relief"); a gun not listed is aimed at its hip's depth. The Garrison Rifle's bolt slides back along its line
+	 * of sight as it fires, and at the hip's depth it came past the eye: aimed, each shot filled the screen.
+	 */
+	static final Map<String, Float> EYE_RELIEF = Map.of("garrison_rifle", 4.0F);
 	private static final Look DEFAULT = new Look(true, 1.0F);
 
 	static {

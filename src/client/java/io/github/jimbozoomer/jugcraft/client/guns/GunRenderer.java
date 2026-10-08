@@ -35,6 +35,9 @@ import org.joml.Vector3f;
  * <p>
  * Slice 7: aiming slides a fitted scope's eyepiece onto the middle of the screen ("sight_&lt;scope&gt;", in place of
  * "sight"); when the view through a magnifying scope fills the screen ({@link GunScope}) the gun drops out of sight.
+ * <p>
+ * Slice 8B: a gun whose moving parts would reach the eye aimed at the hip's depth is held further out as it is aimed
+ * ({@link GunLooks#EYE_RELIEF}).
  */
 public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	/** The entity holding the gun (for where its sounds play). */
@@ -52,9 +55,12 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	private static final float THRUST_DROP = 0.06F;
 	/** A slot's attachment bones, and a second set where the slot is on two bones (the Warden Pistol's spare magazine). */
 	private static final List<String> SETS = List.of("", "_2");
+	/** How much further out this gun is held at full aim than at the hip (blocks; {@link GunLooks#EYE_RELIEF}). */
+	private final float eyeRelief;
 
 	public GunRenderer(GunItem gun) {
 		super(new DefaultedItemGeoModel<GunItem>(Jugcraft.id(gun.name())).withAltTexture(Jugcraft.id("guns/" + gun.name())));
+		eyeRelief = GunLooks.EYE_RELIEF.getOrDefault(gun.name(), 0.0F) / 16.0F;
 		withRenderLayer(new GunArmsLayer(this));
 		withRenderLayer(new GunFlashLayer(this));
 	}
@@ -133,6 +139,8 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 				Vector3f at = pose.transformPosition(new Vector3f(sight.offsetX() / 16.0F, sight.offsetY() / 16.0F, sight.offsetZ() / 16.0F));
 				poseStack.last().pose().translateLocal(-at.x() * view.aim(), -at.y() * view.aim(), 0.0F);
 			}
+			// Held further out, straight ahead (in view space), so its sight stays on the crosshair.
+			poseStack.last().pose().translateLocal(0.0F, 0.0F, -eyeRelief * view.aim());
 		}
 		if (view != null && view.thrust() > 0) {
 			// A bayonet stab drives the gun forward and a little down, and back (in view space).

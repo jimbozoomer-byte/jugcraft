@@ -14,6 +14,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
   - the **Garrison Rifle** (Stigg), an assault rifle that fires rifle rounds for as long as the trigger is held;
   - the **Breacher** (Combat Shotgun), a pump shotgun fed from a box magazine.
 - **Attachments:** all three take the barrel attachments, both magazines and the stocks. The two long guns also take the light grip, the bayonets and the scopes.
+- **Aimed,** the Garrison Rifle is held a little further out than at the hip, so its bolt clears the eye as it fires.
 - Record: [guns.md, slice 8B](docs/features/guns.md#slice-8b-the-service-arms).
 
 ### Unmerged: Guns, slice 8 (the hand guns)

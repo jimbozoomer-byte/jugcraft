@@ -258,6 +258,9 @@ RECIPES = {
 # first-person preview of the idle pose, or of the "hand_pose"; docs/features/guns.md). The model carries each as a
 # "<side>_shoulder" locator ARM_REACH pixels from the pivot, and the renderer turns the player's arm from -y onto it.
 # "muzzle" and "sight": the locators the shot's smoke and aiming down the sights use.
+# "eye_relief" (optional): how much further from the eye the gun is held aimed than at the hip, in sixteenths of a
+# block (client/guns/GunLooks.EYE_RELIEF). Aiming slides the sight onto the middle of the screen at the hip's depth; a
+# gun whose moving parts slide back along the line of sight as it fires can reach the eye there.
 BUILDS = {
     "rust_midge": {
         "bones": [
@@ -512,7 +515,9 @@ BUILDS = {
         "sight": (8.0, 6.15, 16.1),
     },
     # The Stigg's bolt is the receiver's two sides and the charging handle; its rear sight is the sights part, the front
-    # post is on the barrel.
+    # post is on the barrel. Its receiver runs back under the line of sight to just short of the eye, and each shot slides
+    # the bolt 2.6 px back and the gun 1.4 px: at the hip's depth, aimed, the bolt came past the eye and the shot filled
+    # the screen (CI, 8 October 2026). Held 4 px further out aimed, the nearest of it stays 3.5 px from the eye.
     "garrison_rifle": {
         "bones": [
             ("gun_body2", None, [], (8.0, 2.64, 15.04)),
@@ -525,6 +530,7 @@ BUILDS = {
         "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
         "muzzle": (8.0, 5.3, 0.55),
         "sight": (8.0, 6.82, 11.4),
+        "eye_relief": 4.0,
     },
     # The Combat Shotgun's bolt part is its pump: the fore-end under the barrel and the handle beside the receiver that
     # rides with it. Its sights are a front post and a ring at the back.
@@ -1840,6 +1846,8 @@ def check():
     # Slice 6: the look in use.
     if set(ZOOM) != set(GUNS) or not all(0.5 <= z <= 1.0 for z in ZOOM.values()):
         problems.append("ZOOM must give every gun a zoom between 0.5 and 1")
+    if not all(0.0 < build.get("eye_relief", 1.0) <= 8.0 for build in BUILDS.values()):
+        problems.append("A gun's eye_relief must be more than 0 and at most 8")
     if not set(CASINGS) <= set(AMMO) or set(FLASH_SIZE) != set(AMMO):
         problems.append("CASINGS must name rounds, and FLASH_SIZE every round")
     for ammo, casing in CASINGS.items():
