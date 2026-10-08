@@ -16,6 +16,13 @@ their renders; its right pauldron is the owner's bent plate, measured off their 
 short gold boots whose tops rise in teeth; its coat, gorget and thigh plates follow the renders. Every texel the
 renders show was lifted from them.
 
+The second is the **Frost Knight**: its helm is the owner's 9 × 9 × 9 box with their face copied texel for texel from
+their front render (the eye band turning up at its ends, the nose bar, the grille), crowned with their crystals as
+measured there and coloured as they painted them, the tall one rising 14 pixels above the helm; its frost is the compact
+frost the render shows, a big tuft flaring out on the left of the helm and spikes down its right, carrying the render's
+texels, where the earlier model had a round mane of feathers; the ice cross is on the back of the helm; the fronts of
+its legs carry the owner's texels.
+
 For the owner, each rebuilt set is a Blockbench project they can open, look at on a player and edit, and what they
 save there is what the game draws.
 
@@ -39,10 +46,20 @@ save there is what the game draws.
   view that sees it best, its projected corners nudged until the render's texel cells are flat colours (pixel art),
   each texel the median of its cell. Faces no render shows are filled from the face opposite. Weapons and effects in
   front of the armor are left out.
+- **A camera per region** when the owner's figure stands differently from ours: `<view>@<region>.fit.json` beside a
+  render is a camera of its own for that region (`front@head`, `front@legs`), fitted to it alone, for the same image.
+  The Frost Knight's head and legs are not where our pose puts them in the owner's front render; its helm's camera was
+  fitted to the four corners of the helm's 9 × 9 face (`fit`, from points), its legs' to their outline (`fit_region`,
+  whose figure is what is brighter than the fit's `thresh`, 40 for a render on a dark blue ground).
+- **Frost as the render shows it:** what the owner's front render shows round the Frost Knight's helm are cut-out
+  sheets facing the front, each texel opaque where at least 40% of its cell in the render is frost, so a thin spike
+  across two texels keeps one, and coloured as the render's frost there. The crystals' texels, partly hidden in the
+  render behind the gable, were read off it cell by cell and continued down where it hides them.
 - **What the renders taught:** the Sentinel's texture is drawn two texels to a model pixel (its keyhole slit is two
   texels wide), so its atlas has density 2; its helm is a plain box with the detail painted on (the previous model had
   raised frames and ribs the renders do not have); the figure holds its sword with the right arm 10 degrees forward,
-  not 21.
+  not 21. The Frost Knight's helm is likewise a 9 × 9 × 9 box with its face painted (one texel a pixel), and its crown
+  is far taller than the earlier model's: the tall crystal rises 14 pixels above the helm.
 
 ### Editing a set in Blockbench
 1. Open `art/armor/<set>.bbmodel` in Blockbench (5.x). Hide the grey `player` with its eye icon to see the armor alone.
@@ -82,8 +99,9 @@ saved data refers to worn-model keys.
 ## Dependencies and assets
 - No new runtime dependency. Blockbench is the owner's editor; nothing of it is in the repository or the mod. The file
   format was read from Blockbench 5.2.1's source (GPL-3.0, read only, not copied).
-- New art: the owner's renders (`art/armor/references/`) and the Sentinel's project (`art/armor/sentinel.bbmodel`),
-  whose texels come from those renders. The owner's own work.
+- New art: the owner's renders (`art/armor/references/`) and the Sentinel's and the Frost Knight's projects
+  (`art/armor/sentinel.bbmodel`, `art/armor/frost_knight.bbmodel`), whose texels come from those renders where they
+  show them. The owner's own work.
 - This session could not run Blockbench itself: building it from source was refused by the sandbox as outside code,
   and web.blockbench.net is not reachable from it. So the projects are checked against Blockbench's source, not opened
   in it.
@@ -92,13 +110,24 @@ saved data refers to worn-model keys.
 Actually run on this branch, 8 October 2026:
 - `python3 tools/bbmodel.py check`: 20 of 20 sets round trip (15 byte for byte, 5 within rounding), both through
   `entries` and through `load_set`.
-- `python3 tools/armor_models.py`: no problems for any set; the Sentinel 42 parts and 237 quads (it was 96 and 518).
+- `python3 tools/armor_models.py`: no problems for any set; the Sentinel 42 parts and 237 quads (it was 96 and 518),
+  the Frost Knight 102 parts and 387 quads (it was 139 and 474). Its warnings for the Frost Knight are the crown and
+  the left frost, as tall and as wide as the owner's (the tall crystal 14.6 px above the head, the frost 12.1 px to the
+  side).
+- A scratch check of the Frost Knight's head poses (head turned up to 75 degrees each way, looking from straight up to
+  straight down, standing and sneaking): no face of the helm within 0.15 px of a parallel face of another piece. Its
+  first run found the narrower helm's right side 0.05 px from the drape's and the right shoulder frost's sides, and its
+  face and back, looking straight down or up, 0.1 px from the belly plate's top and the left pauldron's lower rim; all
+  were moved apart.
+- `python3 tools/armor_preview.py --set frost_knight --wearer --poses stand,walk,sneak`: as before, only the arms below
+  the pauldrons show (1.31 to 52.62 model px², the owner's renders show their model's plain pale blue there).
 - `python3 tools/armor_smoke.py --no-render`: all checks passed.
 - `python3 tools/generate_material_data.py` and `python3 tools/generate_textures.py`: only the Sentinel's entries and
   atlas change (the texture generator also rewrote some unrelated plant textures, which are left out of this change).
 - `python3 tools/check_mod_data.py`: PASS, art check allow-list unchanged (A2 1, H1 3, O1 52).
 - `python3 scripts/check_repository.py` and `python3 tools/check_icon_maps.py`: PASS.
-- Compared with the owner's three renders from their fitted cameras (`armor_reference.py compare`).
+- Compared with the owner's renders from their fitted cameras (`armor_reference.py compare`): the Sentinel's three,
+  the Frost Knight's front from its helm's and its legs' cameras and, by eye, its back.
 
 Not run: opening the projects in Blockbench, the Gradle build, the game and client tests, and any play.
 
@@ -108,6 +137,11 @@ Not applicable: art only.
 ## Rollout and open questions
 - The owner's own `.bbmodel` files would make every set exact. Committing them under `art/owner-library/` (or sending
   them) lets `tools/bbmodel.py` read them straight in; the rebuilds from renders are close but not their model.
-- Rebuilt so far: the Sentinel. The other sets of the 7 and 8 October designs are still the toolkit's models.
+- Rebuilt so far: the Sentinel and the Frost Knight. The other sets of the 7 and 8 October designs are still the
+  toolkit's models.
+- The Frost Knight's render from behind is softer and its figure stands turned, so it was not used to lift texels: the
+  back of the helm is painted (the cross on mottled white), and what the front render does not show (the cuirass's
+  back, the arms, the drape) keeps the earlier model's shapes and paint. Worn armor is drawn from both sides, so its
+  frost sheets show from behind as well, mirrored, where the owner's Blockbench view hides them.
 - Faces no render shows are filled from the faces opposite, so the inside of an arm can repeat its outside.
 - Reversible: the previous Sentinel module is in Git history; restoring it and regenerating brings the old model back.

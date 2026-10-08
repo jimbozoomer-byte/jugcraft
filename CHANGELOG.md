@@ -8,9 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
-### Unmerged: Armor in Blockbench, and the Sentinel rebuilt from the owner's renders
+### Unmerged: Armor in Blockbench, and the Sentinel and the Frost Knight rebuilt from the owner's renders
 - **Blockbench projects for the armor sets:** `tools/bbmodel.py` writes any 3D armor set as a Blockbench project and reads one back into the game's worn models and atlas. A set can now *be* a project (`art/armor/<set>.bbmodel`): the owner opens it in Blockbench, edits it there, and what they save is what the game draws. Every set round-trips exactly (`python3 tools/bbmodel.py check`).
 - **The Sentinel rebuilt to match the owner's three renders:** its helm is now the owner's 9×9×9 box with their keyhole and meander art copied texel for texel; its right pauldron is their bent plate measured off the front and back views; its boots rise in teeth like a crown; the coat, gorget and thigh plates follow the renders. The texture is drawn two texels to a pixel, as the owner's is. 42 parts where it had 96, and no part of the wearer shows.
+- **The Frost Knight rebuilt to match the owner's front render:** its helm is now the owner's 9×9×9 box with their face copied texel for texel (the eye band turning up at its ends, the nose bar, the grille), crowned with their crystals as measured and coloured, a tall one rising 14 pixels; the round mane of feathers gave way to the compact frost the render shows, a big tuft flaring out on the left and spikes down the right, carrying its texels; an ice cross on the back of the helm; the legs' fronts carry the owner's texels. 102 parts where it had 139.
 - **Matching tools:** the owner's renders are kept under `art/armor/references/`, and `tools/armor_reference.py` fits cameras to them and compares or lifts texels from them. Record: [blockbench-armor.md](docs/features/blockbench-armor.md).
 
 ### World Designer

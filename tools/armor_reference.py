@@ -46,8 +46,9 @@ def fit_path(name):
 
 # ---------------------------------------------------------------- images
 def ref(name):
-    """A reference image ("<set>/<view>") as an RGB float array."""
-    return np.asarray(Image.open(REFS / f"{name}.png").convert("RGB")).astype(np.float32)
+    """A reference image ("<set>/<view>") as an RGB float array. "<set>/<view>@<region>" names the same image with a
+    camera of its own, fitted to one region of the figure (its legs, say) where the owner's pose differs from ours."""
+    return np.asarray(Image.open(REFS / f"{name.split('@')[0]}.png").convert("RGB")).astype(np.float32)
 
 
 def zoom(image, box, factor=4, step=10, path=None, marks=(), grid=0.35):
@@ -504,7 +505,7 @@ def compare_crops(sets, views, path, factor=3, lighting="blockbench", atlases=No
     return path
 
 
-def lift_views(sets, names, lighting="unlit", inner=0.25, items=None, min_count=2, order=None):
+def lift_views(sets, names, lighting="unlit", inner=0.25, items=None, min_count=2):
     """Each atlas texel's colour lifted from the references `names` (fitted cameras). Every face takes its texels
     from one view, the one that sees the face largest (most texel-centre pixels), so a face never mixes two views'
     slightly different alignments; texels that view does not see come from the next best. Returns ({atlas index:
@@ -553,193 +554,6 @@ def lift_views(sets, names, lighting="unlit", inner=0.25, items=None, min_count=
                 rgba[ty, tx, :3] = np.clip(sumc / c, 0, 255)
                 rgba[ty, tx, 3] = 255
                 cnt[ty, tx] = c
-    return out, scene0
-
-
-# ---------------------------------------------------------------- silhouettes
-def ref_mask(image, thresh=7.0, exclude=(), size=None):
-    """(model mask, care mask) of a dark-background reference: pixels brighter than thresh are the model; care is
-    False inside the exclude polygons (weapons, effects), which the fit ignores."""
-    lum = image.max(axis=2)
-    mask = lum > thresh
-    care = np.ones(mask.shape, dtype=bool)
-    if exclude:
-        canvas = Image.new("L", (mask.shape[1], mask.shape[0]), 0)
-        d = ImageDraw.Draw(canvas)
-        for poly in exclude:
-            d.polygon([tuple(p) for p in poly], fill=255)
-        care = np.asarray(canvas) == 0
-    return mask, care
-
-
-def silhouette(scene, cam, size, scale=0.5, skip=None):
-    """Our model's silhouette (every face filled) at `scale` of the image size, as a bool array."""
-    w, h = int(size[0] * scale), int(size[1] * scale)
-    canvas = Image.new("L", (w, h), 0)
-    d = ImageDraw.Draw(canvas)
-    for f in scene.faces:
-        if skip and skip(f):
-            continue
-        px, py, _ = project(f[0], cam)
-        d.polygon([(x * scale, y * scale) for x, y in zip(px, py)], fill=255)
-    return np.asarray(canvas) > 0
-
-
-def iou(scene_for, cam, pose, mask, care, scale=0.5, skip=None):
-    scene = scene_for(pose)
-    ours = silhouette(scene, cam, (mask.shape[1], mask.shape[0]), scale, skip)
-    h, w = ours.shape
-    m = np.asarray(Image.fromarray(mask.astype(np.uint8) * 255).resize((w, h), Image.NEAREST)) > 0
-    c = np.asarray(Image.fromarray(care.astype(np.uint8) * 255).resize((w, h), Image.NEAREST)) > 0
-    inter = (ours & m & c).sum()
-    union = ((ours | m) & c).sum()
-    return inter / max(1, union)
-
-
-def nelder_mead(fn, x0, steps, iterations=400, tol=1e-6):
-    n = len(x0)
-    pts = [np.array(x0, dtype=float)]
-    for i in range(n):
-        p = np.array(x0, dtype=float)
-        p[i] += steps[i]
-        pts.append(p)
-    vals = [fn(p) for p in pts]
-    for _ in range(iterations):
-        order = np.argsort(vals)
-        pts = [pts[i] for i in order]
-        vals = [vals[i] for i in order]
-        if abs(vals[-1] - vals[0]) < tol:
-            break
-        centroid = np.mean(pts[:-1], axis=0)
-        xr = centroid + (centroid - pts[-1])
-        fr = fn(xr)
-        if fr < vals[0]:
-            xe = centroid + 2 * (centroid - pts[-1])
-            fe = fn(xe)
-            pts[-1], vals[-1] = (xe, fe) if fe < fr else (xr, fr)
-        elif fr < vals[-2]:
-            pts[-1], vals[-1] = xr, fr
-        else:
-            xc = centroid + 0.5 * (pts[-1] - centroid)
-            fc = fn(xc)
-            if fc < vals[-1]:
-                pts[-1], vals[-1] = xc, fc
-            else:
-                for i in range(1, len(pts)):
-                    pts[i] = pts[0] + 0.5 * (pts[i] - pts[0])
-                    vals[i] = fn(pts[i])
-    best = int(np.argmin(vals))
-    return pts[best], vals[best]
-
-
-def fit_silhouette(sets, image, cam, pose, free, exclude=(), thresh=7.0, scale=0.4, iterations=400, steps=None,
-                   items=None, rounds=2):
-    """Camera and pose keys in `free` fitted to the reference's silhouette (IoU, ignoring `exclude`)."""
-    mask, care = ref_mask(image, thresh, exclude)
-    cam, pose = dict(cam), {k: list(v) for k, v in pose.items()}
-    default_steps = {"az": 4.0, "el": 4.0, "dist": 10.0, "f": 60.0, "cx": 8.0, "cy": 8.0, "tx": 1.0, "ty": 1.0}
-    steps = steps or [default_steps.get(n, 8.0) for n in free]
-    cache = {}
-
-    def scene_for(p):
-        k = json.dumps(p, sort_keys=True)
-        if k not in cache:
-            if len(cache) > 64:
-                cache.clear()
-            cache[k] = Scene(sets, {b: tuple(v) for b, v in p.items()}, body=True, items=items)
-        return cache[k]
-
-    def unpack(x):
-        c, p = dict(cam), {k: list(v) for k, v in pose.items()}
-        for name, value in zip(free, x):
-            if "." in name:
-                bone, axis = name.split(".")
-                p.setdefault(bone, [0.0, 0.0, 0.0])["xyz".index(axis)] = float(value)
-            else:
-                c[name] = float(value)
-        return c, p
-
-    def cost(x):
-        c, p = unpack(x)
-        return -iou(scene_for, c, p, mask, care, scale)
-
-    x = [pose.setdefault(n.split(".")[0], [0.0, 0.0, 0.0])["xyz".index(n.split(".")[1])] if "." in n else cam[n]
-         for n in free]
-    best = None
-    for r in range(rounds):
-        x, val = nelder_mead(cost, x, [s / (2 ** r) for s in steps], iterations)
-        best = val
-    c, p = unpack(x)
-    return c, {k: tuple(v) for k, v in p.items()}, -best
-
-
-def load_fit(name):
-    """(camera, pose) fitted to a reference; a camera being tried (refine_camera) stands in for the saved one."""
-    data = json.load(open(fit_path(name)))
-    cam = dict(_CAM_OVERRIDE.get(name, data["cam"]))
-    return cam, {k: tuple(v) for k, v in data["pose"].items()}
-
-
-def compare_crops(sets, views, path, factor=3, lighting="blockbench", atlases=None, items=None, edges=True):
-    """For each view (ref name, crop box): the reference crop, our render crop and the two blended with our silhouette
-    edges, enlarged `factor` times, one row per view."""
-    rows = []
-    for name, box in views:
-        im = ref(name)
-        cam, pose = load_fit(name)
-        scene = Scene(sets, pose, atlases=atlases, items=items)
-        col, dep, fid, uu, vv = rasterize(scene, cam, (im.shape[1], im.shape[0]), lighting, (2, 2, 2))
-        x0, y0, x1, y1 = box
-        mix = im.copy()
-        mask = fid >= 0
-        mix[mask] = im[mask] * 0.5 + col[mask] * 0.5
-        if edges:
-            edge = (mask ^ np.roll(mask, 1, 0)) | (mask ^ np.roll(mask, 1, 1))
-            mix[edge] = (255, 0, 255)
-        tiles = [im[y0:y1, x0:x1], col[y0:y1, x0:x1], mix[y0:y1, x0:x1]]
-        row = [Image.fromarray(np.clip(t, 0, 255).astype(np.uint8)).resize(((x1 - x0) * factor, (y1 - y0) * factor),
-                                                                           Image.NEAREST) for t in tiles]
-        rows.append(row)
-    W = sum(t.width for t in rows[0]) + 4 * 4
-    H = sum(r[0].height for r in rows) + 4 * (len(rows) + 1)
-    out = Image.new("RGB", (max(W, max(sum(t.width for t in r) + 16 for r in rows)), H), (40, 40, 46))
-    y = 4
-    for r in rows:
-        x = 4
-        for t in r:
-            out.paste(t, (x, y))
-            x += t.width + 4
-        y += r[0].height + 4
-    out.save(path)
-    return path
-
-
-def lift_views(sets, names, lighting="unlit", inner=0.25, items=None, min_count=2):
-    """Each atlas texel's colour lifted from the references `names` (fitted cameras), taken from the view that sees
-    it largest (most pixels near its centre). Returns ({atlas index: RGBA array (alpha 0 where no view sees it)},
-    scene of the first view, {atlas index: count of the chosen view})."""
-    best = {}
-    scene0 = None
-    for name in names:
-        im = ref(name)
-        cam, pose = load_fit(name)
-        scene = Scene(sets, pose, items=items)
-        scene0 = scene0 or scene
-        col, dep, fid, uu, vv = rasterize(scene, cam, (im.shape[1], im.shape[0]), "unlit", (0, 0, 0))
-        got = lift(scene, im, fid, uu, vv, lighting, inner)
-        for ai, (s, c) in got.items():
-            if ai not in best:
-                best[ai] = (np.zeros_like(s), np.zeros_like(c))
-            bs, bc = best[ai]
-            better = c > bc
-            bs[better] = s[better] / c[better][:, None]
-            bc[better] = c[better]
-    out = {}
-    for ai, (s, c) in best.items():
-        rgba = np.zeros(s.shape[:2] + (4,), dtype=np.float32)
-        rgba[..., :3] = np.clip(s, 0, 255)
-        rgba[..., 3] = np.where(c >= min_count, 255, 0)
-        out[ai] = (rgba, c)
     return out, scene0
 
 
@@ -1049,17 +863,17 @@ def refine_camera(name, trusted, sets=None, iou_weight=0.0, keys=("az", "el", "d
     return cam, before, -val
 
 
-
-
 def fit_region(name, sets, region, parts, keys=("az", "el", "dist", "f", "cx", "cy"), iterations=400, rounds=3,
                save=True, pose_keys=()):
     """A view's camera (and optionally pose entries such as "head.y") fitted to the reference's silhouette inside a
-    window `region` (x0, y0, x1, y1) where only `parts` (names) of our model show: full-resolution IoU there."""
+    window `region` (x0, y0, x1, y1) where only `parts` (names) of our model show: full-resolution IoU there. The
+    reference's figure is what is brighter than the fit's "thresh" (7 unless the fit file says otherwise: a render on
+    a dark blue ground needs more)."""
     data = json.load(open(fit_path(name)))
     cam0, pose0 = dict(data["cam"]), {k: list(v) for k, v in data["pose"].items()}
     im = ref(name)
     x0, y0, x1, y1 = region
-    ref_m = (im.max(axis=2) > 7)[y0:y1, x0:x1]
+    ref_m = (im.max(axis=2) > data.get("thresh", 7.0))[y0:y1, x0:x1]
 
     def ours(cam, pose):
         scene = Scene(sets, {k: tuple(v) for k, v in pose.items()}, body=False)
