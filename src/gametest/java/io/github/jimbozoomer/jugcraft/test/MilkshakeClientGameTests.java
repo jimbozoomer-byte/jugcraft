@@ -49,7 +49,8 @@ public class MilkshakeClientGameTests implements FabricClientGameTest {
 				server.runCommand("summon minecraft:item_frame %d %d %d {Facing:3b,Fixed:1b,Item:{id:\"jugcraft:%s\",count:1}}"
 						.formatted(x + 1 + i, y + 2, z + 11, items.get(i)));
 			}
-			context.waitTicks(20);
+			// Long enough for the chat's lines from joining the world to fade from the screenshots.
+			context.waitTicks(200);
 			singleplayer.getConnection().waitForChunksRender();
 
 			shoot(context, singleplayer, x + 3, y + 2, z + 1, 0, 25, "jugcraft_milkshakes");
