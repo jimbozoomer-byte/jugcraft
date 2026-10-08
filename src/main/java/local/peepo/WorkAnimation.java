@@ -3,10 +3,12 @@ package local.peepo;
 /** Only action changes are synchronized. Motion phases are evaluated on the client. */
 public enum WorkAnimation {
     // Append actions: the ordinal is an entity-data wire ID.
-    NONE(80), INTERACT(80), STIR(80), VALVE(100), LEVER(64), MALLET(48), WRENCH(64), CRANK(60);
+    NONE(80), INTERACT(80), STIR(80), VALVE(100), LEVER(64), MALLET(48), WRENCH(64), CRANK(60),
+    PIE_LOAD(20), PIE_WAIT(80), PIE_TAKE(20), PIE_CARRY(80);
     private final int period;
     WorkAnimation(int period){this.period=period;}
     public boolean hasTool(){return this==VALVE || this==LEVER || this==MALLET || this==WRENCH;}
+    public boolean isPie(){return this==PIE_LOAD || this==PIE_WAIT || this==PIE_TAKE || this==PIE_CARRY;}
     public float phase(long tick,float partial,int seed){
         return (float)((Math.floorMod(tick+Math.floorMod(seed,period),period)+partial)*Math.PI*2/period);
     }

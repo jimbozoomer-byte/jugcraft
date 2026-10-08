@@ -10,6 +10,8 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.*;
 import net.minecraft.world.phys.*;
+import io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity;
 
 /** One physical stack per trip, carried in existing cargo. No remote inventory-to-inventory transfers. */
 public final class CompanionTransport extends Goal {
@@ -25,6 +27,9 @@ public final class CompanionTransport extends Goal {
     private boolean validRoute;
     private io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity tending;
     private long tendingStarted;
+    private WorkAnimation pieAction=WorkAnimation.NONE;
+    private long pieActionStarted;
+    private static final int PIE_ACTION_TICKS=20;
     private CompanionStatus status=CompanionStatus.IDLE;
     private CompanionStatus porterState=CompanionStatus.IDLE;
     private final Map<BlockPos,Long> blocked=new HashMap<>();
@@ -61,7 +66,26 @@ public final class CompanionTransport extends Goal {
         return validRoute && linked();
     }
     private void releaseTending(){if(tending!=null){tending.releaseTender(npc.getUUID());tending=null;npc.setWorkAnimation(WorkAnimation.NONE,npc.blockPosition());}}
-    private void forget(){releaseTending();manifest=ItemStack.EMPTY;cargoSlot=-1;workstation=store=null;recipe=null;returning=porter=false;approach=null;}
+    private boolean hearthRoute(){return !porter && workstation!=null && workstation.block().equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("hearth_oven"));}
+    private void clearPiePose(){
+        pieAction=WorkAnimation.NONE;npc.setWorkPie(ItemStack.EMPTY);
+        if(npc.workAnimation().isPie())npc.setWorkAnimation(WorkAnimation.NONE,npc.blockPosition());
+    }
+    private void faceOven(){
+        var pos=workstation.at().pos();float yaw=(float)Math.toDegrees(Math.atan2(-(pos.getX()+.5-npc.getX()),pos.getZ()+.5-npc.getZ()));
+        npc.setYRot(yaw);npc.yBodyRot=yaw;npc.setYHeadRot(yaw);
+    }
+    private void piePose(WorkAnimation action,ItemStack stack){
+        npc.setWorkAnimation(action,workstation.at().pos());npc.setWorkPie(stack);
+    }
+    /** The load commits after this reach; collection commits before the pull so a ready pie cannot burn during it. */
+    private boolean animatePie(WorkAnimation action,ItemStack stack){
+        long now=npc.level().getGameTime();
+        if(pieAction!=action){pieAction=action;pieActionStarted=now;}
+        faceOven();piePose(action,stack);npc.getNavigation().stop();
+        return now-pieActionStarted>=PIE_ACTION_TICKS;
+    }
+    private void forget(){releaseTending();clearPiePose();manifest=ItemStack.EMPTY;cargoSlot=-1;workstation=store=null;recipe=null;returning=porter=false;approach=null;}
     private int emptySlot(){for(int i=0;i<8;i++)if(npc.belongings.getItem(i).isEmpty())return i;return -1;}
     /** A loaded hot pie has a deadline. One helper stays until it can take the result into real cargo. */
     private boolean readyTending(CompanionAssignments.Target work,boolean here){
@@ -163,9 +187,10 @@ public final class CompanionTransport extends Goal {
         active=true;npc.resetCompanionRoutine();npc.leaveCompanionBed();npc.setRestMode(CompanionEnergy.Rest.NONE);
         deadline=npc.level().getGameTime()+600;nextPath=nextValidity=0;approach=null;lastPosition=npc.position();
     }
-    @Override public void stop(){active=false;npc.getNavigation().stop();approach=null;if(npc.level().getGameTime()>=deadline)nextSearch=npc.level().getGameTime()+200;if(manifest.isEmpty())forget();}
+    @Override public void stop(){active=false;clearPiePose();npc.getNavigation().stop();approach=null;if(npc.level().getGameTime()>=deadline)nextSearch=npc.level().getGameTime()+200;if(manifest.isEmpty())forget();}
     private CompanionAssignments.Target destination(){return manifest.isEmpty()?(supply?store:workstation):supply && !returning?workstation:store;}
     private void fail(CompanionStatus why){
+        clearPiePose();
         if(porter)porterState=why;
         status=why;active=false;nextSearch=npc.level().getGameTime()+200;
         if(workstation!=null){if(blocked.size()>=8)blocked.clear();blocked.put(workstation.at().pos(),nextSearch);}
@@ -173,6 +198,8 @@ public final class CompanionTransport extends Goal {
     private void pathTo(CompanionAssignments.Target target){
         if(!target.present(npc.level()) || target.at().pos().distToCenterSqr(npc.position())>64*64){fail(CompanionStatus.UNLOADED);return;}
         var points=new ArrayList<BlockPos>(12);
+        var targetState=npc.level().getBlockState(target.at().pos());
+        boolean oven=targetState.getBlock() instanceof HearthOvenBlock;
         if(target.garden()){
             var floors=new LinkedHashSet<BlockPos>();
             for(var soil:target.plot())if(CompanionGarden.farmland(npc.level(),soil) && CompanionJobs.permitted(npc,soil)){
@@ -188,6 +215,8 @@ public final class CompanionTransport extends Goal {
             }
         }
         for(var side:Direction.Plane.HORIZONTAL)for(int dy=0;dy>=-1;dy--){
+            // The pie must enter the mouth, with a standing surface at the oven's level.
+            if(oven && (side!=targetState.getValue(HearthOvenBlock.FACING) || dy!=0))continue;
             var pos=target.at().pos().relative(side).offset(0,dy,0);var p=Vec3.atBottomCenterOf(pos);var floor=pos.below();
             if(!npc.level().hasChunkAt(pos) || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP))continue;
             double r=npc.getBbWidth()/2+.01;
@@ -203,7 +232,9 @@ public final class CompanionTransport extends Goal {
         }
         nextPath=npc.level().getGameTime()+40;
         if(path==null || !path.canReach()){fail(CompanionStatus.BLOCKED);return;}
-        approach=Vec3.atBottomCenterOf(path.getTarget());npc.getNavigation().moveTo(path,1);
+        approach=Vec3.atBottomCenterOf(path.getTarget());
+        if(oven){var facing=targetState.getValue(HearthOvenBlock.FACING);approach=approach.add(-facing.getStepX()*.24,0,-facing.getStepZ()*.24);}
+        npc.getNavigation().moveTo(path,1);
     }
     @Override public void tick(){
         if(!allowed() || !travelValid()){fail(CompanionStatus.FORBIDDEN);return;}
@@ -212,18 +243,31 @@ public final class CompanionTransport extends Goal {
         if(!manifest.isEmpty() && carried().isEmpty()){forget();active=false;return;}
         if(!porter && !npc.assignments.transportAllowed(workstation,supply)){
             if(manifest.isEmpty()){forget();active=false;return;}
-            if(supply && !returning){returning=true;approach=null;nextPath=0;}
+            if(supply && !returning){clearPiePose();returning=true;approach=null;nextPath=0;}
             // Already collected outputs finish their delivery; unused supplies return to their source.
         }
+        if(pieAction==WorkAnimation.PIE_TAKE){
+            if(!animatePie(WorkAnimation.PIE_TAKE,carried()))return;
+            clearPiePose();approach=null;nextPath=0;
+        }
+        var visibleCargo=carried();
+        if(pieAction!=WorkAnimation.PIE_LOAD && hearthRoute() && !visibleCargo.isEmpty()
+            && (HearthOvenBlockEntity.selectedFilling(visibleCargo)!=null || visibleCargo.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item("burnt_pie"))))
+            piePose(WorkAnimation.PIE_CARRY,visibleCargo);
         status=manifest.isEmpty()?(supply || porter?CompanionStatus.FETCHING_SUPPLIES:CompanionStatus.COLLECTING_OUTPUT):returning?CompanionStatus.RETURNING_SUPPLIES:CompanionStatus.DELIVERING;
         if(porter)porterState=status;
         var target=destination();
         if(approach==null || npc.position().distanceToSqr(approach)>.64){
+            if(pieAction==WorkAnimation.PIE_LOAD)clearPiePose();
             if(now>=nextPath)pathTo(target);
             if(npc.position().distanceToSqr(lastPosition)>.0001)try(var tx=Transaction.openOuter()){npc.extractEnergy(2,tx);tx.commit();}
             lastPosition=npc.position();return;
         }
         npc.getNavigation().stop();
+        if(hearthRoute() && target.equals(workstation) && npc.position().distanceToSqr(approach)>.0225){
+            if(pieAction==WorkAnimation.PIE_LOAD)clearPiePose();
+            npc.getMoveControl().setWantedPosition(approach.x,approach.y,approach.z,.7);return;
+        }
         if(tending!=null){
             if(target.at().pos().distToCenterSqr(npc.position())>6.25){fail(CompanionStatus.BLOCKED);return;}
             tendAtWork();return;
@@ -232,10 +276,13 @@ public final class CompanionTransport extends Goal {
         if(!loaded()){fail(CompanionStatus.FORBIDDEN);return;}
         if(supply && !manifest.isEmpty() && !returning){
             var port=CompanionLogistics.resolve(npc,workstation);
-            if(!Objects.equals(recipe,port.plan()) || port.needed(carried())<=0){returning=true;approach=null;nextPath=0;return;}
+            if(!Objects.equals(recipe,port.plan()) || port.needed(carried())<=0){clearPiePose();returning=true;approach=null;nextPath=0;return;}
         }
         boolean near=target.garden()?target.plot().stream().anyMatch(p->CompanionGarden.farmland(npc.level(),p) && CompanionJobs.permitted(npc,p) && p.distToCenterSqr(npc.position())<=6.25):target.at().pos().distToCenterSqr(npc.position())<=6.25;
         if(!near){fail(CompanionStatus.BLOCKED);return;}
+        if(hearthRoute() && supply && !returning && HearthOvenBlockEntity.rawFilling(carried())!=null){
+            if(!animatePie(WorkAnimation.PIE_LOAD,carried()))return;
+        }
         if(manifest.isEmpty())pickup();else deliver();
     }
     private void tendAtWork(){
@@ -243,9 +290,7 @@ public final class CompanionTransport extends Goal {
         if(!tending.needsTending()){forget();active=false;nextSearch=now+20;return;}
         if(tendingStarted==0){tendingStarted=now;deadline=now+800;}
         status=CompanionStatus.WORKING;
-        var pos=workstation.at().pos();
-        float yaw=(float)Math.toDegrees(Math.atan2(-(pos.getX()+.5-npc.getX()),pos.getZ()+.5-npc.getZ()));
-        npc.setYRot(yaw);npc.yBodyRot=yaw;npc.setYHeadRot(yaw);npc.setWorkAnimation(WorkAnimation.INTERACT,pos);
+        faceOven();piePose(WorkAnimation.PIE_WAIT,ItemStack.EMPTY);
         var outputs=tending.companionOutputs();
         for(var view:outputs){
             if(view.isResourceBlank() || view.getAmount()==0)continue;
@@ -259,7 +304,7 @@ public final class CompanionTransport extends Goal {
                 if(npc.extractEnergy(16,tx)<=0){fail(CompanionStatus.RECOVERING);return;}
                 tx.commit();cargoSlot=slot;manifest=stack.copy();
             }
-            releaseTending();approach=null;nextPath=0;deadline=now+600;return;
+            releaseTending();animatePie(WorkAnimation.PIE_TAKE,carried());approach=null;nextPath=0;deadline=now+600;return;
         }
     }
     private void pickup(){
@@ -277,6 +322,7 @@ public final class CompanionTransport extends Goal {
             tx.commit();cargoSlot=slot;manifest=stack.copy();
         }
         approach=null;nextPath=0;deadline=npc.level().getGameTime()+600;
+        if(hearthRoute() && !supply)animatePie(WorkAnimation.PIE_TAKE,carried());
     }
     private void deliver(){
         var stack=carried();var port=porter?null:CompanionLogistics.resolve(npc,workstation);
@@ -296,6 +342,7 @@ public final class CompanionTransport extends Goal {
             tx.commit();
         }
         manifest.shrink(inserted);
+        clearPiePose();
         if(manifest.isEmpty()){
             if(porter)porterState=CompanionStatus.READY;
             if(supply && !returning && readyTending(workstation,true))return;

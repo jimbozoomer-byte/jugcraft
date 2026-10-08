@@ -14,6 +14,22 @@ final class CompanionWorkPose {
         left.yRot=.28F;right.yRot=-.28F;left.zRot=right.zRot=0;
         head.yRot=0;head.xRot=.12F+lift*.08F;
     }
+    static void pie(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg,ModelPart[] torso){
+        head.yRot=0;head.xRot=.16F+Mth.sin(s.ageInTicks*.06F)*.025F;
+        if(s.work==local.peepo.WorkAnimation.PIE_WAIT){
+            // Rest both hands low while watching the opening, rather than repeatedly working an empty surface.
+            left.xRot=right.xRot=-.45F;left.yRot=.3F;right.yRot=-.3F;
+            left.zRot=right.zRot=0;leftLeg.xRot=rightLeg.xRot=0;return;
+        }
+        float lean=s.pieReach*2.4F;
+        for(var part:torso)part.z-=lean;
+        left.x=s.pumpkin?2.9F:2.3F;right.x=-left.x;left.y=right.y=19.2F;
+        left.z=right.z=(s.pumpkin?-2.6F:-1.4F)-lean;
+        // Hands push/catch at the mouth; the pie slides the last short distance along the shelf.
+        float gripZ=Math.max(s.pieZ,left.z-3.8F);
+        reach(left,s.pieX+2.5F,s.pieY+.7F,gripZ);reach(right,s.pieX-2.5F,s.pieY+.7F,gripZ);
+        if(s.work!=local.peepo.WorkAnimation.PIE_CARRY)leftLeg.xRot=rightLeg.xRot=0;
+    }
     static void stir(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg){
         grip(s,left,1);grip(s,right,-1);
         head.yRot=0;head.xRot=.18F;

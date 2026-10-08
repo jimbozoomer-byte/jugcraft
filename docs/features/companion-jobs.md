@@ -147,7 +147,7 @@ The [Canning Kettle adapter](companion-canning.md) fills water from a real bucke
 
 ### Hearth Oven
 
-The [Hearth Oven adapter](companion-hearth.md) uses a ghost pie selection, supplies prepared raw pies and valid fuel, tends the hot oven with the general interaction clip and takes baked pies into physical cargo before Output delivery. Hot-pie tending takes precedence over ordinary supply priority. Fuel is only requested for an actual pie, and normal burn rules remain. Moving costs up to 2 JE/t and collection costs up to 16 JE once per pie; waiting has no continuous energy drain.
+The [Hearth Oven adapter](companion-hearth.md) uses a ghost pie selection, supplies prepared raw pies and valid fuel, and approaches the front opening to load, wait, remove and carry pies with dedicated poses using the existing placeable pie models. Hot-pie tending takes precedence over ordinary supply priority. The oven holds one pie total; fuel is only requested for an actual pie, and normal burn rules remain. Moving costs up to 2 JE/t and collection costs up to 16 JE once per pie; waiting has no continuous energy drain.
 
 ### Supply and Output
 

@@ -4,6 +4,8 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 public final class PeepoState extends LivingEntityRenderState { public final ItemStackRenderState held = new ItemStackRenderState(); public final ItemStackRenderState food = new ItemStackRenderState(); public boolean holdingLight; public boolean sitting; public boolean sleeping; public boolean eating; public boolean wheelRunning; public float eatingTime; public boolean blushing; public boolean pumpkin; public boolean jughead;
     public local.peepo.WorkAnimation work=local.peepo.WorkAnimation.NONE;
     public float workPhase;
+    public final ItemStackRenderState pie=new ItemStackRenderState();
+    float pieX,pieY,pieZ,pieReach;
     public int social;
     public float socialTime;
     final MachineWorkClip toolPose=new MachineWorkClip();
