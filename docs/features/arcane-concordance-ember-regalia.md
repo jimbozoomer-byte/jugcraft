@@ -231,13 +231,16 @@ CI (the Build workflow, dispatched on this branch):
 - Run 37980438983 (commit `043a810a`, with the light set) compiled. Both server jobs ran 1177 game tests, and 1176
   passed, the five `ConcordanceEmberGearGameTests` among them. The one failure, in both, was
   `ConcordanceBaselineGameTests.baselinesHoldOnTheLoadedRules`: it still counted seven kits. The table it logged
-  showed the model gap described under Balance (the hearthbinder losing three encounters). Client shards 0 and 2
-  passed; shard 1, which runs `ConcordanceEmberGearClientGameTests`, was still running when this was written.
-- The fix (eight kits; helpful statuses in the model): not yet run in CI.
+  showed the model gap described under Balance (the hearthbinder losing three encounters). All three client shards
+  passed, `ConcordanceEmberGearClientGameTests` among them (shard 1: 29.5 s, its twelve screenshots taken). Shard 1
+  took 28 min 54 s of its job's 30: Guns, Styx and Armor Tiers, which `tools/select_client_tests.py` had put at 13 to
+  28 s from their length, took 261, 221 and 123 s and had all landed in that job. They and Arms and ArmsMotion now have
+  measured weights, so a full run shares them out (about 24 minutes a job by the estimates).
+- The fix (eight kits; helpful statuses in the model; the weights): not yet run in CI.
 
 Not yet run: a person looking at the screenshots (the worn model, the sleeves following a zombie's raised arms and a
-sneaking player, the glint, the small stand showing nothing); listening to the owner's recordings in game; a
-two-client server.
+sneaking player, the glint, the small stand showing nothing); the Spell Focus and Bracelet slot icons in the Trinkets
+screen (no client test opens it); listening to the owner's recordings in game; a two-client server.
 
 ## World and event applicability
 

@@ -40,11 +40,18 @@ CODE_DIRS = (ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java")
 
 # Rough seconds each class takes on a CI runner, to share them out evenly; others are estimated from their length.
 # Estimates from the client jobs' logs of October 2026, not measurements per class: with the biome tour at 600, its
-# job took 22 minutes and the others 15 and 14.
+# job took 22 minutes and the others 15 and 14. Guns, Styx, Arms and ArmorTiers are measured, from run 37980438983's
+# logs (261, 221, 125 and 123 s; their length put them at 13 to 28), after three of them in one job took it to 29 of
+# its 30 minutes; ArmsMotion is its 87 screenshots at those classes' pace (about 2 s a shot), where its length gave 14.
 WEIGHTS = {
     "BiomeClientGameTests": 900,
+    "GunsClientGameTests": 260,
+    "StyxClientGameTests": 220,
     "AlpineClientGameTests": 180,
     "JugcraftClientGameTests": 180,
+    "ArmsMotionClientGameTests": 170,
+    "ArmsClientGameTests": 125,
+    "ArmorTiersClientGameTests": 125,
     "TownClientGameTests": 120,
     "GuideScreenshotGameTests": 120,
     "SeasonClientGameTests": 90,
