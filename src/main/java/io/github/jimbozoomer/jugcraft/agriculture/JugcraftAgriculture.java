@@ -3073,7 +3073,7 @@ public final class JugcraftAgriculture {
 					BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_DANDELION));
 			Block bundle = registerBlock(herb + "_bundle", HerbBundleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
 					.strength(0.2F).sound(SoundType.GRASS).noCollision().noOcclusion().randomTicks().ignitedByLava()
-					.pushReaction(PushReaction.DESTROY));
+					.pushReaction(PushReaction.POPPED));
 			registerItem(herb + "_bundle", props -> new BlockItem(bundle, props), new Item.Properties().useBlockDescriptionPrefix()
 					.compostable(COMPOST_MEDIUM), BUILDING_TAB);
 			FlammableBlockRegistry.getDefaultInstance().add(bundle, 60, 100);
