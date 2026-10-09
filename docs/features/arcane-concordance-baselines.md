@@ -227,8 +227,9 @@ compare changes against, not predictions of every fight.
   statuses landed in the model, and it was identical row for row to the harness's over the same data. The game test
   failed only on its roster count, which still said seven kits. With the count at eight and helpful statuses in the
   model, `Step11Harness` over the generated data finds acceptance holding and the benchmark deterministic; the variants
-  of the fire kit in Findings are the same code with the fire Spell Power changed. CI on the fix is recorded in the
-  [regalia](arcane-concordance-ember-regalia.md) record.
+  of the fire kit in Findings are the same code with the fire Spell Power changed. CI run 37986172795 (commit
+  `2da07f9c`): **"All 1177 required tests passed"**, and the tables the game test logged are identical, row for row, to
+  the harness's above.
 
 Not yet run: any client, a two-client dedicated server, a fight in a real world against these encounters, a trinket.
 

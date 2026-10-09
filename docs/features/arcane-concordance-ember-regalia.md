@@ -211,7 +211,8 @@ Run here (no game):
   item, the renderer not posing the bones, the client hook not set, the blow igniting directly, Sunfire allowed, a
   Nether ingredient, a renamed armour bone, a drawn Hearthflare cue, a slot without the owner's icon, a renamed display
   name, a piece missing from its armour tag, the benchmark's ceiling, a light piece registered in the medium set, the
-  light set's protection, its repair tag, a light piece missing from its armour tag) were each reported, and a changed
+  light set's protection, its repair tag, a light piece missing from its armour tag) were each reported, as was an
+  eighteenth added with the review fixes (the bangle's blow counting beyond the weapon's reach), and a changed
   byte in an imported icon was reported by `tools/owner_art.py --check`; the clean tree passes.
 - `python3 scripts/check_repository.py` and `python3 tools/check_icon_maps.py` pass (the icon check's eleven warnings are
   older and about other items).
@@ -243,7 +244,13 @@ CI (the Build workflow, dispatched on this branch):
   took 28 min 54 s of its job's 30: Guns, Styx and Armor Tiers, which `tools/select_client_tests.py` had put at 13 to
   28 s from their length, took 261, 221 and 123 s and had all landed in that job. They and Arms and ArmsMotion now have
   measured weights, so a full run shares them out (about 24 minutes a job by the estimates).
-- The fix (eight kits; helpful statuses in the model; the weights): not yet run in CI.
+- Run 37986172795 (commit `2da07f9c`: eight kits, helpful statuses in the model, the weights): **every job passed**.
+  Both server jobs: **"All 1177 required tests passed"**, and the baseline tables the server logged are identical, row
+  for row, to `Step11Harness`'s over the generated data. The three client shards passed in 27:01, 25:14 and 21:20 (the
+  slowest had been 28:54); the slowest is still within 3 minutes of its job's limit, so the client tests' total time is
+  a watch item.
+- The review fixes (the bangle's reach, the renderer checks, the Trinkets slot access, the centred row): not yet run in
+  CI.
 
 Not yet run: a person looking at the screenshots (the worn model, the sleeves following a zombie's raised arms and a
 sneaking player, the glint, the small stand showing nothing); the Spell Focus and Bracelet slot icons in the Trinkets
