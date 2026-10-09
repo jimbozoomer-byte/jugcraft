@@ -8,6 +8,26 @@ final class MachineWorkClip {
     static final float VALVE_RADIUS=2.6F, VALVE_Y=19.6F, LEVER_GRIP=-3.4F, WRENCH_GRIP=2.25F;
     float x,y,z,xRot,zRot,leftX,leftY,leftZ,rightX,rightY,rightZ;
     float bodyPitch,bodyRoll,bodyX,bodyY;
+    static final float HOE_REACH=11.313708F;
+
+    void harvest(float phase,float groundY,float cropZ){
+        float t=Mth.clamp(phase/Mth.TWO_PI,0,1);
+        float lift=smooth(Math.min(1,t/.55F));
+        float strike=smooth(Mth.clamp((t-.65F)/.30F,0,1));
+        x=0;zRot=0;
+        // Native diagonal hoe: lift its head behind the brow, then drive it down into the crop.
+        xRot=Mth.lerp(strike,Mth.lerp(lift,.65F,-.55F),2.30F);
+        float contactY=groundY+HOE_REACH*Mth.cos(2.30F);
+        float contactZ=cropZ+HOE_REACH*Mth.sin(2.30F);
+        y=Mth.lerp(strike,Mth.lerp(lift,19.4F,15.8F),contactY);
+        z=Mth.lerp(strike,-3.4F,contactZ);
+        bodyPitch=Mth.lerp(strike,Mth.lerp(lift,.08F,-.22F),.56F);
+        bodyRoll=0;bodyX=0;bodyY=Mth.lerp(strike,-lift*.25F,.65F);
+        float c=Mth.cos(xRot),s=Mth.sin(xRot);
+        leftX=.22F;rightX=-.22F;
+        leftY=y+.65F*c;rightY=y-.65F*c;
+        leftZ=z+.65F*s;rightZ=z-.65F*s;
+    }
 
     void chop(float phase,float boardY,float boardZ){
         // Contact at the loop seam, a slow two-handed lift, then a short forceful downstroke.

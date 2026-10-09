@@ -150,7 +150,7 @@ final class CompanionRoutine extends Goal {
         npc.getNavigation().stop();if(!station.occupy(npc)){release();return;}
         if(station instanceof CompanionJob job){
             npc.setRestMode(CompanionEnergy.Rest.NONE);state=job.work(npc);
-            if(state!=CompanionStatus.WORKING)release();else npc.setWorkAnimation(job.animation(),job.stationPosition());
+            if(state!=CompanionStatus.WORKING)release();else npc.setWorkAnimation(job.animation(),job.animationTarget());
         }else{
             npc.setRestMode(station.kind()==CompanionStation.Kind.BED?CompanionEnergy.Rest.SLEEPING:CompanionEnergy.Rest.SITTING);state=CompanionStatus.RESTING;
         }

@@ -199,6 +199,8 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
         private CompanionStatus status=CompanionStatus.IDLE;
         Job(CompanionAssignments.Target target){this.target=target;}
         public Kind kind(){return Kind.WORK;}
+        public WorkAnimation animation(){return hoe() && expected!=null && ripe(expected)?progress>0?WorkAnimation.HARVEST:WorkAnimation.NONE:WorkAnimation.INTERACT;}
+        public BlockPos animationTarget(){return soil==null?stationPosition():soil;}
         public BlockPos stationPosition(){return target.at().pos();}
         public Vec3 approachPosition(){return approach==null?Vec3.atBottomCenterOf(stationPosition().above()):approach;}
         private boolean assigned(){int row=npc.assignments.workPriority(stationPosition());return row<5 && target.equals(npc.assignments.get(row)) && target.present(npc.level());}
@@ -208,7 +210,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
             var options=new ArrayList<Vec3>(5);
             // Prefer a path beside tall crops; collision checks also accommodate ordinary farmland's 15/16 height.
             for(var side:Direction.Plane.HORIZONTAL){var floor=cell.relative(side);addStanding(options,floor);}
-            addStanding(options,cell);
+            if(options.isEmpty() || !hoe() || !ripe(npc.level().getBlockState(cell.above())))addStanding(options,cell);
             return options.stream().min(Comparator.comparingDouble(npc.position()::distanceToSqr)).orElse(null);
         }
         private void addStanding(List<Vec3> points,BlockPos floor){
@@ -269,6 +271,11 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
             var cropPos=soil.above();
             if(cropPos.distToCenterSqr(npc.position())>6.25)return CompanionStatus.BLOCKED;
             boolean tool=hoe();
+            // Finish the last fraction of the approach before lifting a full-size hoe.
+            if(tool && ripe(expected) && progress==0 && npc.position().distanceToSqr(approachPosition())>.0225){
+                var at=approachPosition();npc.getMoveControl().setWantedPosition(at.x,at.y,at.z,.7);
+                return CompanionStatus.WORKING;
+            }
             try(var tx=Transaction.openOuter()){
                 if(npc.extractEnergy(ENERGY_PER_TICK,tx)!=ENERGY_PER_TICK)return CompanionStatus.RECOVERING;
                 tx.commit();

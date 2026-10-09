@@ -3,6 +3,7 @@ package local.peepo;
 /** A productive station. The job owns its costs/atomic processing; the routine owns travel and cancellation. */
 public interface CompanionJob extends CompanionStation {
     default WorkAnimation animation(){return WorkAnimation.INTERACT;}
+    default net.minecraft.core.BlockPos animationTarget(){return stationPosition();}
     /** Cheap loaded-state query. Never search for workers or perform recipes here. */
     CompanionStatus workStatus(PeepoEntity npc);
     /** Reusable status for scheduler/UI reads, never for an actual work operation. */

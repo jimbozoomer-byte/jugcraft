@@ -67,6 +67,10 @@ final class CompanionWorkPose {
         reach(left,p.leftX,p.leftY,p.leftZ);reach(right,p.rightX,p.rightY,p.rightZ);
         leftLeg.xRot=rightLeg.xRot=0;
         leftLeg.yRot=rightLeg.yRot=leftLeg.zRot=rightLeg.zRot=0;
+        if(s.work==local.peepo.WorkAnimation.HARVEST){
+            float brace=Math.max(0,p.bodyPitch);
+            leftLeg.xRot=brace*.35F;rightLeg.xRot=-brace*.20F;
+        }
     }
     private static void lean(ModelPart part,MachineWorkClip pose){
         // The rig's parts have different pivots (some at y=9.6). Rotate all around the hips,
