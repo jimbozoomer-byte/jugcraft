@@ -577,6 +577,8 @@ Three more of the owner's guns, each firing something other than a bullet or fir
   - GeckoLib runs a face's u the other way on a box's east face than on its west, and its v the other way on the top than on the bottom. So the flame's faces each get their own block of the atlas corner.
   - It shows only while a shot moves it, as the other props do.
 - **The arms:** fitted in a first-person preview so that, idle, they leave the screen in the same directions as the service arms' do.
+  - **By the eye:** an arm that comes within a tenth of a block of the eye is left out for those frames (`GunArmsLayer`, for every gun), as vanilla leaves out a thrown item just leaving the eye.
+  - **Why:** the owner's animations were made for another mod's arms, and a few bring a hand so near the eye that the arm running from it toward its shoulder reaches the camera. In a later CI run ([run 37996214844](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37996214844), 9 October 2026), the Lobber's pump brought its left sleeve to the camera at the moment of the shot, and the sleeve filled the left half of the screen. Sweeping the preview over every gun's animations finds a few such moments in the earlier slices too, such as the Garrison Rifle's and Patchwork Carbine's inspections and the Marshal Revolver's reload.
 - **Sights:**
   - **Trench Lobber:** aiming looks through the leaf sight.
   - **Stoker:** aiming looks over the top of its body, near the front.
@@ -1494,7 +1496,13 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - **The Thresher's left hand and forearm filled the right half of the screen** in first person (held, aimed and fired), from the carry handle by the eye.
     - **Seen from outside, the Thresher pointed at the sky** (its transform's 68.25° tilt, [above](#slice-8c-the-heavy-weapons)).
     - **The Stoker is held close,** as the owner's transform holds it.
-  - **The fix, in the next push:** the Thresher's left hand holds the front plate (a first-person preview of it idle, firing and through its reload and inspection leaves the view clear), and its holder's arms hang lower by the tilt.
+  - **The fix** (24f52c601): the Thresher's left hand holds the front plate (a first-person preview of it idle, firing and through its reload and inspection leaves the view clear), and its holder's arms hang lower by the tilt.
+- **The fix in CI** ([run 37992650952](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37992650952), on 24f52c601): every check passed.
+  - `optional integrations absent` passed on its one re-run. Its first attempt failed a biome test this slice does not touch: four mossy maples laid no moss carpet. The pull request's comment of 9 October has the cause, vanilla's `attached_to_logs` decorator, whose rolls depend on where the test is placed, and a proposed patch for the biome tests.
+  - **Screenshots** (`client` shard 2):
+    - In first person the Thresher sits at the lower right, held, aimed, fired, mid-reload and inspected; no hand covers the view.
+    - Seen from outside, it is carried at the hip with its barrels toward the camera, the way its holder looks, not at the sky.
+- **Arms by the eye** ([above](#slice-8c-the-heavy-weapons)): a syntax parse only; its CI run is the push that adds it.
 - **Slice 8D, run locally (9 October 2026):**
   - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's, and each hand is where `BUILDS` puts it in its pose. The cell's corner of the Linesman's atlas is clear, the Linesman's stocks' pixels pack beside its own texture, and the Energy Cell's art is the owner's, unchanged. No other gun's atlas changed with the packing.
   - `python3 tools/generate_material_data.py`: wrote the three guns' and the Energy Cell's items, item models, recipes (each on the guns and machines switches), names, shot sounds, and the zap damage type with its tags.
@@ -1517,7 +1525,7 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
   - `GunsClientGameTests` takes the three through every gun's steps with two full Energy Cells:
     - it checks that each shot is drawn (`GunTracePayload`);
     - it checks that the reload drew the spent rounds' charge from the cells and left both cells;
-    - screenshots `jugcraft_guns_beam_pistol_*`, `jugcraft_guns_stormlock_rifle_*` and `jugcraft_guns_linesman_*`; the inventory shot shows a charged cell and a spent one.
+    - screenshots `jugcraft_guns_beam_pistol_*`, `jugcraft_guns_stormlock_rifle_*` and `jugcraft_guns_linesman_*`; the inventory shot holds a charged cell and a spent one.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
