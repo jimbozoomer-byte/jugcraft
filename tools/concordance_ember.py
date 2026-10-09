@@ -12,12 +12,22 @@ What Ember adds to the shared effects is small (Java: concordance/ember): an alt
 kindles a hearth instead of putting out fire, and the Smoulder status keeps a creature alight while it lasts (vanilla
 burning: water, rain, Fire Resistance and fire immunity all answer it). Nothing here places fire in the world.
 
-Part 2 (the owner's art: the talismans, a bangle, three armour sets and a primer) follows in its own change.
+Part 2 (docs/features/arcane-concordance-ember-regalia.md) is the Hearthbinder's regalia, made from the owner's own fire
+art (art/owner-library/originals/Magic, imported as supplied by tools/owner_art.py from OWNER_FILES below): the Lesser
+Focus of Fire and the Focus of Fire (fire Spell Power, worn in a Spell Focus slot), the Fire Bangle (a Hearthbinder's
+melee blows leave the creature smouldering; worn in a Bracelet slot), and the Pyromancer's Hat, Robes, Leggings and Boots
+(leather's protection and half a point of fire Spell Power each, worn as the owner's GeckoLib model). The two Trinkets
+slots are the owner's own (their Curios data and slot icons, ported). Hearthflare's release is the owner's "pyro"
+recordings. Java: concordance/ember/EmberGear.java and the client's EmberClient.
 
 tools/concordance.py merges these tables into its own. Numbers the Java repeats are checked by tools/check_mod_data.py.
 """
+import json
+from pathlib import Path
 
 MOD = "jugcraft"
+# The owner's magic collection (art/owner-library/MAGIC_ASSETS.md): read here, never written.
+MAGIC = Path(__file__).resolve().parents[1] / "art" / "owner-library" / "originals" / "Magic"
 
 
 def rid(path):
@@ -191,14 +201,137 @@ SOUND_EVENTS = {
     "concordance.cinderbolt": "Cinder flies",
     "concordance.hearthflare": "Fire bursts",
 }
+# Events played from the owner's recordings instead of a cue drawn by tools/concordance_sounds.py: event -> its sound
+# files under assets/jugcraft/sounds/ (copied by tools/owner_art.py, OWNER_FILES). Hearthflare's release is the owner's
+# four "pyro" fire roars, as their own fire_family_2 event plays them (ars_jimbaux/sounds.json).
+SOUND_FILES = {"concordance.hearthflare": [f"concordance/pyro_{n}" for n in range(1, 5)]}
 
-ITEMS = {}
+# ------------------------------------------------------------------------------- part 2: the Hearthbinder's regalia
+
+# Fire Spell Power (Spell Power's spell_power:fire attribute), in points above the school's base. Cinderbolt and
+# Hearthflare add half a point of damage for each whole point (floor(0.5 x points): two points make one more damage).
+# The most a player wears with the default slots is a Focus of Fire and the whole Pyromancer's set: +6, as much as the
+# best arcane Resonant Ring a player can forge (tools/concordance_artifice.py: 2 + 1 + 3), so Cinderbolt deals at most 6
+# and Hearthflare 7. Java: ember/EmberGear.java.
+LESSER_FOCUS_POWER = 2.0
+FOCUS_POWER = 4.0
+ROBE_PIECE_POWER = 0.5  # all four pieces: +2, one more damage; fewer than four add none (whole points only)
+# The Fire Bangle's blow: a Hearthbinder's melee hit leaves the creature smouldering this long (Arms' Ember boon on a
+# weapon sets a struck creature alight for the same three seconds).
+BANGLE_SMOULDER_TICKS = 60
+
+# The Pyromancer's set: leather's protection (1/3/2/1, 7 in all), a little longer-lasting (wool and gold), leather's
+# enchantability; repaired with wool. Durability is vanilla's per-slot base times PYROMANCERS_DURABILITY.
+ARMOR = {"pyromancers_hat": "helmet", "pyromancers_robes": "chestplate", "pyromancers_leggings": "leggings",
+         "pyromancers_boots": "boots"}
+PYROMANCERS_DEFENSE = {"helmet": 1, "chestplate": 3, "leggings": 2, "boots": 1}
+PYROMANCERS_DURABILITY = 10
+PYROMANCERS_ENCHANTABILITY = 15
+PYROMANCERS_REPAIR_TAG = rid("repairs_pyromancers_gear")
+# The GeckoLib model the set is worn as (assets/jugcraft/geckolib/models/armor/<name>.geo.json, textures/armor/<name>.png)
+# and its equipment asset id (no equipment JSON: GeckoLib draws the pieces, so vanilla draws no flat layer).
+PYROMANCERS_MODEL = "pyromancers"
+# The model's bones GeckoLib poses to the wearer (GeoArmorRenderer.getBoneNameForSegment), and the slim sleeves the
+# client hides (vanilla draws the same sleeves for both arm widths).
+ARMOR_BONES = ["armorHead", "armorBody", "armorRightArm", "armorLeftArm", "armorRightLeg", "armorLeftLeg",
+               "armorRightBoot", "armorLeftBoot"]
+SLIM_BONES = ["armorRightArmSlim", "armorLeftArmSlim"]
+
+# The owner's two slots, ported from their Curios data to Trinkets slots players get (data/trinkets/slots/<group>/<slot>
+# .json): an_focus ("Spell Focus", one) and bracelet (two, the bangle's). Each draws the owner's own slot icon.
+TRINKET_SLOTS = {
+    "chest/spell_focus": {"name": "Spell Focus", "amount": 1, "icon": "spell_focus",
+                          "source": "data/ars_jymbaumental/curios/slots/an_focus.json"},
+    "hand/bracelet": {"name": "Bracelet", "amount": 2, "icon": "bracelet",
+                      "source": "data/ars_jymbaumental/curios/slots/bracelet.json"},
+}
+TRINKETS = {"lesser_fire_focus": "chest/spell_focus", "fire_focus": "chest/spell_focus", "fire_bangle": "hand/bracelet"}
+FIRE_POWER = {"lesser_fire_focus": LESSER_FOCUS_POWER, "fire_focus": FOCUS_POWER,
+              **{piece: ROBE_PIECE_POWER for piece in ARMOR}}
+
+# Each item's owner id (the owner's file names under assets/ars_jymbaumental) and display name (the owner's, from their
+# lang file: only these names are taken from it; the tooltips are Jugcraft's own).
+OWNER_ITEMS = {
+    "lesser_fire_focus": "lesser_fire_focus", "fire_focus": "fire_focus", "fire_bangle": "fire_bangle",
+    "pyromancers_hat": "fire_hat", "pyromancers_robes": "fire_robes", "pyromancers_leggings": "fire_leggings",
+    "pyromancers_boots": "fire_boots",
+}
+OWNER_LANG = "assets/ars_jymbaumental/lang/en_us.json"
+
+ITEMS = {
+    "lesser_fire_focus": {
+        "name": "Lesser Focus of Fire",
+        "tooltip": f"Worn in the Spell Focus slot: +{LESSER_FOCUS_POWER:g} fire Spell Power, so Cinderbolt and Hearthflare "
+                   "burn hotter. It holds no Focus."},
+    "fire_focus": {
+        "name": "Focus of Fire",
+        "tooltip": f"Worn in the Spell Focus slot: +{FOCUS_POWER:g} fire Spell Power, so Cinderbolt and Hearthflare burn "
+                   "hotter. It holds no Focus."},
+    "fire_bangle": {
+        "name": "Fire Bangle",
+        "tooltip": f"Worn in a Bracelet slot: once you understand Hearthbinding, your melee blows leave the creature "
+                   f"smouldering for {BANGLE_SMOULDER_TICKS // 20} seconds."},
+    "pyromancers_hat": {"name": "Pyromancer's Hat"},
+    "pyromancers_robes": {"name": "Pyromancer's Robes"},
+    "pyromancers_leggings": {"name": "Pyromancer's Leggings"},
+    "pyromancers_boots": {"name": "Pyromancer's Boots"},
+}
+for _piece in ARMOR:
+    ITEMS[_piece]["tooltip"] = ("The Pyromancer's regalia: half a point of fire Spell Power. The whole set of four adds a "
+                                "point to Cinderbolt and Hearthflare.")
 BLOCKS = {}
+
+# Shaped crafting from Overworld materials (any time: the regalia's power matters only to Hearthbinding's invocations,
+# and the bangle's blow needs Hearthbinding understood). The owner's own recipes use another mod's machines and Nether
+# or End items, so they are not imported.
+RECIPES = {
+    "lesser_fire_focus": {"pattern": ["SGS", "CAC", " G "],
+                          "key": {"S": "minecraft:string", "G": "minecraft:gold_ingot", "C": "#minecraft:coals",
+                                  "A": "minecraft:amethyst_shard"}},
+    "fire_focus": {"pattern": [" D ", "GLG", " D "],
+                   "key": {"D": "minecraft:diamond", "G": "minecraft:gold_ingot", "L": rid("lesser_fire_focus")}},
+    "fire_bangle": {"pattern": ["GCG", "G G", " A "],
+                    "key": {"G": "minecraft:gold_ingot", "C": "#minecraft:coals", "A": "minecraft:amethyst_shard"}},
+    "pyromancers_hat": {"pattern": ["WGW", "W W"], "key": {"W": "#minecraft:wool", "G": "minecraft:gold_ingot"}},
+    "pyromancers_robes": {"pattern": ["W W", "WGW", "WWW"], "key": {"W": "#minecraft:wool", "G": "minecraft:gold_ingot"}},
+    "pyromancers_leggings": {"pattern": ["WGW", "W W", "W W"], "key": {"W": "#minecraft:wool", "G": "minecraft:gold_ingot"}},
+    "pyromancers_boots": {"pattern": ["W W", "G G"], "key": {"W": "#minecraft:wool", "G": "minecraft:gold_ingot"}},
+}
+
+# Every owner file this slice uses, copied as supplied by tools/owner_art.py: runtime path under assets/jugcraft ->
+# path under originals/Magic. The only changes are the names (Jugcraft ids) and, for the geo model's JSON, its line ends
+# (LF, as Git stores the mod's text).
+OWNER_FILES = {
+    **{f"textures/item/{item}.png": f"assets/ars_jymbaumental/textures/item/{owner}.png" for item, owner in OWNER_ITEMS.items()},
+    f"textures/armor/{PYROMANCERS_MODEL}.png": "assets/ars_jymbaumental/textures/armor/medium_armor_fire.png",
+    f"geckolib/models/armor/{PYROMANCERS_MODEL}.geo.json": "assets/ars_jymbaumental/geo/medium_armor_e.geo.json",
+    **{f"textures/gui/sprites/container/slots/{info['icon']}.png": f"assets/curios/textures/slot/{owner}.png"
+       for info, owner in ((TRINKET_SLOTS["chest/spell_focus"], "an_focus_slot"), (TRINKET_SLOTS["hand/bracelet"], "bangle_slot"))},
+    **{f"sounds/{name}.ogg": f"assets/ars_jimbaux/sounds/{name.split('/')[1]}.ogg"
+       for names in SOUND_FILES.values() for name in names},
+}
+
+
+def owner_lang():
+    """The owner's language file, read for the regalia's display names only."""
+    return json.loads((MAGIC / OWNER_LANG).read_text(encoding="utf-8-sig"))
+
+
+def owner_model(item):
+    """The owner's item model for `item`, with its texture renamed to the Jugcraft copy. It must be the plain generated
+    model the owner supplied; anything else stops the generator (a changed library file is a decision, not a merge)."""
+    owner = OWNER_ITEMS[item]
+    model = json.loads((MAGIC / "assets" / "ars_jymbaumental" / "models" / "item" / f"{owner}.json").read_text(encoding="utf-8-sig"))
+    if model != {"parent": "minecraft:item/generated", "textures": {"layer0": f"ars_jymbaumental:item/{owner}"}}:
+        raise SystemExit(f"tools/concordance_ember.py: the owner's model for {owner} is not the plain generated model expected")
+    return {"parent": model["parent"], "textures": {"layer0": rid(f"item/{item}")}}
 
 
 def lang_entries(lang):
     lang[f"effect.{MOD}.smoulder"] = "Smoulder"
     lang[f"tag.item.{MOD}.ember_specimens"] = "Things That Hold Fire"
+    for slot, info in TRINKET_SLOTS.items():
+        lang[f"trinkets.slot.{slot.replace('/', '.')}"] = info["name"]
 
 
 def _hearth_list():
@@ -241,6 +374,37 @@ def codex():
                  "claims, protected towns and spawn protection refuse it. It never places fire."),
             ],
         },
+        ("hearth", "regalia"): {
+            "name": "A Hearthbinder's Regalia", "x": 4, "y": 0, "icon": rid("fire_focus"), "condition": None,
+            "description": "Fire Spell Power, worn",
+            "pages": [
+                ("text", "A Hearthbinder's Regalia",
+                 "The Hearthbinders' gear gives **fire Spell Power**. Cinderbolt and Hearthflare add half a point of "
+                 "damage for each whole point of it: two points make one more. Wear a **focus** in the Spell Focus "
+                 "slot and the **Pyromancer's** set as armour; the most is "
+                 f"+{FOCUS_POWER + 4 * ROBE_PIECE_POWER:g}, so Cinderbolt deals 6 and Hearthflare 7. The **Fire "
+                 "Bangle** goes in a Bracelet slot. None of it holds Focus: Focus is yours alone."),
+                ("crafting_recipe", "Lesser Focus of Fire",
+                 f"+{LESSER_FOCUS_POWER:g} fire Spell Power while worn in the Spell Focus slot. One focus at a time.",
+                 rid("lesser_fire_focus")),
+                ("crafting_recipe", "Focus of Fire",
+                 f"The lesser focus set with diamonds: +{FOCUS_POWER:g} fire Spell Power in the Spell Focus slot.",
+                 rid("fire_focus")),
+                ("crafting_recipe", "Fire Bangle",
+                 "Once you understand Hearthbinding, your melee blows leave the creature smouldering for "
+                 f"{BANGLE_SMOULDER_TICKS // 20} seconds, wherever you may harm it. It gives no Spell Power, and a "
+                 "second bangle adds nothing.", rid("fire_bangle")),
+                ("crafting_recipe", "Pyromancer's Hat",
+                 "Leather's protection and half a point of fire Spell Power. Only the whole set of four raises fire "
+                 "damage, by one.", rid("pyromancers_hat")),
+                ("crafting_recipe", "Pyromancer's Robes", "Leather's protection and half a point of fire Spell Power.",
+                 rid("pyromancers_robes")),
+                ("crafting_recipe", "Pyromancer's Leggings", "Leather's protection and half a point of fire Spell Power.",
+                 rid("pyromancers_leggings")),
+                ("crafting_recipe", "Pyromancer's Boots", "Leather's protection and half a point of fire Spell Power. "
+                 "Spell Power's own enchantments cannot be put on the regalia.", rid("pyromancers_boots")),
+            ],
+        },
     }
 
 
@@ -255,6 +419,25 @@ def tags(tags):
 
 def write_all(write, assets, data, lang, condition, self_drop):
     lang_entries(lang)
+    # The regalia: the owner's item models (their texture renamed to the Jugcraft copy) and the item definitions.
+    for item in ITEMS:
+        write(assets / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
+        write(assets / "models" / "item" / f"{item}.json", owner_model(item))
+    for item, recipe in RECIPES.items():
+        write(data / "recipe" / f"{item}.json", {
+            "fabric:load_conditions": condition("concordance"), "type": "minecraft:crafting_shaped", "category": "equipment",
+            "pattern": recipe["pattern"], "key": recipe["key"], "result": {"id": rid(item), "count": 1}})
+    write(data / "tags" / "item" / f"{PYROMANCERS_REPAIR_TAG.split(':')[1]}.json", {"values": ["#minecraft:wool"]})
+    # The owner's two slots as Trinkets slots (their icons are the owner's, tools/owner_art.py), the items each takes, and
+    # players' having them.
+    trinkets = data.parent / "trinkets"
+    for slot, info in TRINKET_SLOTS.items():
+        group, name = slot.split("/")
+        write(trinkets / "slots" / group / f"{name}.json", {"icon": rid(f"container/slots/{info['icon']}"),
+                                                            "amount": info["amount"], "validator_predicates": ["trinkets:default"]})
+        write(trinkets / "tags" / "item" / group / f"{name}.json",
+              {"replace": False, "values": [rid(item) for item, worn in TRINKETS.items() if worn == slot]})
+    write(trinkets / "entities" / f"{MOD}_ember.json", {"entities": ["player"], "slots": sorted(TRINKET_SLOTS)})
 
 
 def write_data(write, data):

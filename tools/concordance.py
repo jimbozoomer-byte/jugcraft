@@ -1458,8 +1458,11 @@ SOUND_EVENTS.update(ember.SOUND_EVENTS)
 
 
 def sounds():
+    """Each event plays its drawn cue (tools/concordance_sounds.py), or the owner's recordings it is given instead
+    (tools/concordance_ember.py SOUND_FILES), one picked at random."""
     return {event: {"subtitle": f"subtitles.{MOD}.{event}",
-                    "sounds": [{"name": f"{MOD}:concordance/{event.split('.', 1)[1]}", "attenuation_distance": 16}]}
+                    "sounds": [{"name": f"{MOD}:{name}", "attenuation_distance": 16}
+                               for name in ember.SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
             for event in SOUND_EVENTS}
 
 

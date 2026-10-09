@@ -354,6 +354,10 @@ def write_all(write, assets, data, lang, condition):
     by_tag["head_armor"].append(f"{MOD}:gas_mask")  # batch 31, tools/field_chemistry.py
     by_tag["chest_armor"].append(f"{MOD}:scuba_tank")
     by_tag["foot_armor"].append(f"{MOD}:free_runners")
+    # The Pyromancer's set (tools/concordance_ember.py): armor of its slot, so it enchants and equips as any armor.
+    import concordance_ember
+    for item, piece in concordance_ember.ARMOR.items():
+        by_tag[ITEM_TAGS[piece]].append(f"{MOD}:{item}")
     by_tag["swords"].append(f"{MOD}:power_katana")
     # Fall addition 23's silver dagger is a sword too. It is added here, not by tools/werewolf_data.py's tags, because
     # the shared tag writer replaces a whole file and would drop every sword above.

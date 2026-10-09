@@ -111,9 +111,17 @@ The game test fails the build unless all of these hold (`Baselines.report`):
 3. **The utility character keeps meaningful survival options.** The Initiate wins the isolated encounter, and Dawn
    Aegis lets it last 20.4 seconds beside the unkillable brute against 11.5 without it.
 4. **Spell Power changes only what scales with it.** The geared striker's Lance deals 7 to the plain striker's 5; its
-   shield is the same.
+   shield is the same. Since Ember part 2 ([regalia](arcane-concordance-ember-regalia.md)) the same holds for fire: the
+   geared hearthbinder's Cinderbolt and Hearthflare deal more than the plain ones (6 and 7 against 3 and 4), and its
+   Hearthguard does not change.
 
 ## Findings
+
+- **The geared hearthbinder (Ember part 2).** "Geared hearthbinder (+6 fire, Pyromancer's)" wears the most the
+  Hearthbinder's regalia gives with the default slots (a Focus of Fire and the whole Pyromancer's set: leather's
+  protection), with a wooden sword and Hearthguard, Cinderbolt and Hearthflare mastered. Its numbers in the table above
+  are added from CI's run once it has run. The model has no on-hit statuses, so the Fire Bangle's blow is not in it, and
+  it counts Smoulder as control (a slow), not as burning damage.
 
 - **Initiate magic does not outclass iron.** The Fighter, with no magic at all, wins all five encounters and has the
   highest sustained output (9.15 a second). Casters trade sustained damage for reach, mobility, shields and support.
@@ -140,8 +148,8 @@ The game test fails the build unless all of these hold (`Baselines.report`):
   damage type bypassing armour (calibration).
 - **Jugcraft**: the compiled plans, the cost and cooldown floor, the effect boundary (absorption, healing, a push).
 - **Armour**: vanilla armour on a husk, calibrated against the model's formula.
-- **Not exercised**: Trinkets (Jugcraft adds no trinket item; Spell Power reads attribute modifiers from any source,
-  which is how a trinket would contribute, but no test equips one); Jugcraft's weapon affixes and Spell Engine's weapon
+- **Not exercised**: Trinkets (the characters carry their Spell Power as numbers; a worn Resonant Ring's and an Ember
+  focus's modifiers are tested by their own game tests); Jugcraft's weapon affixes and Spell Engine's weapon
   skills (Jugcraft's weapons opt out of Spell Engine's automatic skills); triggered effects beyond a composition's
   `then` branch (modelled here; its server behaviour is tested with step 8); offerings (there are none yet).
 - **SmartBrainLib**: not used. The encounters are controlled scenarios in the model, where scripted foes are

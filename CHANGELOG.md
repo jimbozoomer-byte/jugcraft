@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Arcane Concordance, Ember part 2 (the Hearthbinder's regalia, from the owner's fire art)
+- **Lesser Focus of Fire and Focus of Fire,** the owner's own: worn in a new **Spell Focus** slot, +2 and +4 fire Spell Power, so Cinderbolt and Hearthflare burn hotter.
+- **Fire Bangle:** worn in one of two new **Bracelet** slots; once you understand Hearthbinding, your melee blows leave the creature smouldering for 3 seconds, wherever you may harm it.
+- **The Pyromancer's Hat, Robes, Leggings and Boots:** leather's protection and half a point of fire Spell Power each, worn as the owner's 3D model (Jugcraft's first GeckoLib armour). At most the regalia gives +6 fire: Cinderbolt 6, Hearthflare 7. Spell Power's Sunfire cannot be put on the set.
+- Hearthflare now plays the owner's fire recordings. Every file is the owner's, copied as supplied, with its source and checksum recorded. The light and heavy fire sets, the Caster Tome and the fire familiar wait for later slices. Record: [arcane-concordance-ember-regalia.md](docs/features/arcane-concordance-ember-regalia.md).
+
 ### Unmerged: Arcane Concordance, Ember part 1 (Hearthbinding and four fire spells)
 - **A new research entry, Hearthbinding** (the Hearthbinders' Principle, Ember): examine coal, charcoal, a torch or other things that hold fire once First Light is understood; study one at the Lampwright's Bench. Mastered by lighting three kinds of hearth with Hearthspark.
 - **Four fire invocations,** cast with any Concordance instrument: **Hearthspark** lights an unlit campfire, candle or candle cake up to 16 blocks away (never placing fire); **Hearthguard** gives 30 s of Fire Resistance; **Cinderbolt** deals fire damage that grows with fire Spell Power and leaves the target **smouldering**; **Hearthflare** (mastered) bursts round you. Every one obeys claims, towns, spawn protection and the PvP rules.

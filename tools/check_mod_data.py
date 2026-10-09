@@ -8874,6 +8874,158 @@ def check_ember(co, root, lang, research):
     for key in (f"effect.{MOD}.smoulder", f"message.{MOD}.concordance.examine.heat", f"tag.item.{MOD}.ember_specimens"):
         if key not in lang:
             err(f"Ember: missing lang {key}")
+    check_ember_regalia(co, root, lang)
+
+
+def check_ember_regalia(co, root, lang):
+    """Ember, part 2 (tools/concordance_ember.py, docs/features/arcane-concordance-ember-regalia.md): the Java mirrors the
+    regalia's numbers and ids; the foci carry their Spell Power only through Trinkets; the bangle's blow goes through the
+    effect boundary and Spell Power's attribute enchantments are refused on the set; the client wires GeckoLib and poses
+    the bones before hiding the slim sleeves; every item is the owner's model and icon with the owner's name; every
+    recipe is made of Overworld things; the owner's two slots are given to players; the owner's GeckoLib model has the
+    bones and fits its sheet; and the owner's recordings, not a drawn cue, play Hearthflare."""
+    em = co.ember
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    gear, trinket, armor = (text(root / "ember" / name) for name in ("EmberGear.java", "EmberTrinketItem.java", "EmberArmorItem.java"))
+    client, renderer = text(CLIENT_JAVA_ROOT / "EmberClient.java"), text(CLIENT_JAVA_ROOT / "ember" / "EmberArmorRenderer.java")
+    numbers = {"LESSER_FOCUS_POWER": ("double", em.LESSER_FOCUS_POWER), "FOCUS_POWER": ("double", em.FOCUS_POWER),
+               "ROBE_PIECE_POWER": ("double", em.ROBE_PIECE_POWER), "BANGLE_SMOULDER_TICKS": ("int", em.BANGLE_SMOULDER_TICKS),
+               "PYROMANCERS_DURABILITY": ("int", em.PYROMANCERS_DURABILITY),
+               "PYROMANCERS_ENCHANTABILITY": ("int", em.PYROMANCERS_ENCHANTABILITY)}
+    for name, (kind, value) in numbers.items():
+        if not re.search(rf"\b{kind} {name} = {value};", gear):
+            err(f"concordance/ember/EmberGear.java: {name} differs from tools/concordance_ember.py ({value})")
+    defense = {"BOOTS": em.PYROMANCERS_DEFENSE["boots"], "LEGGINGS": em.PYROMANCERS_DEFENSE["leggings"],
+               "CHESTPLATE": em.PYROMANCERS_DEFENSE["chestplate"], "HELMET": em.PYROMANCERS_DEFENSE["helmet"]}
+    for piece, value in defense.items():
+        if f"ArmorType.{piece}, {value}" not in gear:
+            err(f"concordance/ember/EmberGear.java: the set's {piece.lower()} protection differs from PYROMANCERS_DEFENSE ({value})")
+    if (f'Jugcraft.id("{em.PYROMANCERS_REPAIR_TAG.split(":")[1]}")' not in gear
+            or f'Jugcraft.id("{em.PYROMANCERS_MODEL}")' not in gear):
+        err("concordance/ember/EmberGear.java: the repair tag or equipment asset differs from tools/concordance_ember.py")
+    geared = re.search(r"double GEARED_FIRE_POWER = ([0-9.]+);", text(root / "balance" / "Baselines.java"))
+    if not geared or float(geared.group(1)) != em.FOCUS_POWER + len(em.ARMOR) * em.ROBE_PIECE_POWER:
+        err("concordance/balance/Baselines.java: GEARED_FIRE_POWER is not a Focus of Fire and the whole Pyromancer's set")
+    # The ids EmberGear registers are the generator's items, the trinkets as trinkets and the pieces as armour.
+    trinkets = set(re.findall(r'\bitem\("([a-z_]+)"', gear))
+    pieces = set(re.findall(r'\barmor\("([a-z_]+)"', gear))
+    if trinkets != set(em.TRINKETS) or pieces != set(em.ARMOR):
+        err(f"concordance/ember/EmberGear.java registers {sorted(trinkets)} and {sorted(pieces)}, not TRINKETS and ARMOR")
+    for match in re.finditer(r'\bitem\("([a-z_]+)",[^;]*;', gear):
+        if ".attributes(" in match.group(0) or "ATTRIBUTE_MODIFIERS" in match.group(0):
+            err(f"concordance/ember/EmberGear.java: {match.group(1)} carries attribute modifiers on the item (they would count in "
+                "the hand); a worn piece's Spell Power is Trinkets'")
+    if ("implements TrinketCallback" not in trinket or "forEachTrinketModifier" not in trinket or "ATTRIBUTE_MODIFIERS" in trinket
+            or "Ember.SCHOOL" not in trinket):
+        err("concordance/ember/EmberTrinketItem.java: a focus's fire must be a Trinkets modifier in Ember's school, never the item's own")
+    if "implements GeoItem" not in armor or "EmberHooks.armor.apply(this)" not in armor:
+        err("concordance/ember/EmberArmorItem.java: the set must be a GeoItem drawn through EmberHooks")
+    if "EmberHooks.armor = " not in client or "EmberClient.register();" not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("client: EmberClient must set EmberHooks.armor, and ConcordanceClient must call it (a worn piece fails without it)")
+    posed = renderer.find("super.adjustModelBonesForRender(")
+    if posed < 0 or any(f'"{bone}"' not in renderer for bone in em.SLIM_BONES) or "skipRender(true)" not in renderer[posed:]:
+        err("client/ember/EmberArmorRenderer.java: adjustModelBonesForRender must call super first (it poses the bones to the "
+            "wearer) and then hide the slim sleeves")
+    if ("ConcordanceEffects.apply(" not in gear or "REQUIRES_MATCHING_ATTRIBUTE" not in gear or "EnchantmentEvents.ALLOW_ENCHANTING" not in gear
+            or any(call in gear for call in ("igniteForSeconds", "igniteForTicks", "addEffect(", "setRemainingFireTicks", "sendParticles"))):
+        err("concordance/ember/EmberGear.java: the bangle's blow must go through ConcordanceEffects.apply only, and Spell Power's "
+            "attribute enchantments must be refused on the set")
+    # Each item: the owner's model (texture renamed), an imported icon, the owner's name and Jugcraft's tooltip.
+    owner_lang = em.owner_lang()
+    for item, owner in em.OWNER_ITEMS.items():
+        if load(ASSETS / "items" / f"{item}.json") != {"model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}}:
+            err(f"assets/{MOD}/items/{item}.json: not the item's own model")
+        if load(ASSETS / "models" / "item" / f"{item}.json") != em.owner_model(item):
+            err(f"assets/{MOD}/models/item/{item}.json: not the owner's {owner} model with its texture renamed")
+        if f"textures/item/{item}.png" not in em.OWNER_FILES:
+            err(f"{item}: its icon is not one of the owner's files (OWNER_FILES)")
+        if lang.get(f"item.{MOD}.{item}") != owner_lang.get(f"item.ars_jymbaumental.{owner}") or f"tooltip.{MOD}.{item}" not in lang:
+            err(f"{item}: its name must be the owner's ({owner_lang.get(f'item.ars_jymbaumental.{owner}')}) and it needs a tooltip")
+    if set(em.OWNER_ITEMS) != set(em.ITEMS) or set(em.ITEMS) != set(em.TRINKETS) | set(em.ARMOR):
+        err("tools/concordance_ember.py: ITEMS, OWNER_ITEMS, TRINKETS and ARMOR must name the same items")
+    excluded = set(co.equivalence.EXCLUDED)
+    for item in em.ITEMS:
+        if f"{MOD}:{item}" not in excluded:
+            err(f"{item}: the Concordance's magical things are never weighed (tools/concordance_equivalence.py EXCLUDED)")
+    # Recipes: Ember's own items, or things the Overworld gives (the progression graph's sources with no dimension).
+    progression = co.progression
+    for item, recipe in em.RECIPES.items():
+        data = load(DATA / MOD / "recipe" / f"{item}.json") or {}
+        if data.get("fabric:load_conditions") != [{"condition": f"{MOD}:feature_enabled", "feature": "concordance"}]:
+            err(f"recipe {item}: it must load with the Concordance")
+        for ref in data.get("key", {}).values():
+            ref = ref if isinstance(ref, str) else ""
+            ok = (ref.startswith(f"{MOD}:") and split(ref)[1] in em.ITEMS
+                  or ref in progression.VANILLA_SOURCES and not progression.VANILLA_SOURCES[ref][3]
+                  or ref.startswith("#") and ref[1:] in progression.VANILLA_TAGS)
+            if not ok:
+                err(f"recipe {item}: {ref} is not Ember's own or had in the Overworld (tools/concordance_progression.py)")
+    for item in em.ITEMS:
+        if item not in em.RECIPES:
+            err(f"{item} has no recipe")
+    # The owner's two slots: defined, given to players, holding their items, named and drawn with the owner's icons.
+    entities = load(DATA / "trinkets" / "entities" / f"{MOD}_ember.json") or {}
+    if entities.get("entities") != ["player"] or set(entities.get("slots", [])) != set(em.TRINKET_SLOTS):
+        err(f"data/trinkets/entities/{MOD}_ember.json must give players the owner's slots {sorted(em.TRINKET_SLOTS)}")
+    for slot, info in em.TRINKET_SLOTS.items():
+        group, name = slot.split("/")
+        definition = load(DATA / "trinkets" / "slots" / group / f"{name}.json") or {}
+        if definition.get("amount") != info["amount"] or definition.get("icon") != f"{MOD}:container/slots/{info['icon']}":
+            err(f"data/trinkets/slots/{slot}.json: amount {info['amount']} and the owner's icon")
+        if f"textures/gui/sprites/container/slots/{info['icon']}.png" not in em.OWNER_FILES:
+            err(f"slot {slot}: its icon is not the owner's (OWNER_FILES)")
+        held = set((load(DATA / "trinkets" / "tags" / "item" / group / f"{name}.json") or {}).get("values", []))
+        if held != {f"{MOD}:{item}" for item, worn in em.TRINKETS.items() if worn == slot}:
+            err(f"data/trinkets/tags/item/{slot}.json holds {sorted(held)}")
+        if f"trinkets.slot.{group}.{name}" not in lang:
+            err(f"slot {slot}: missing lang trinkets.slot.{group}.{name}")
+    for item, piece in em.ARMOR.items():
+        tag = {"helmet": "head_armor", "chestplate": "chest_armor", "leggings": "leg_armor", "boots": "foot_armor"}[piece]
+        if f"{MOD}:{item}" not in (load(DATA / "minecraft" / "tags" / "item" / f"{tag}.json") or {}).get("values", []):
+            err(f"{item} is not in #minecraft:{tag}")
+    # The owner's GeckoLib model: format, sheet size, the bones the renderer poses and hides, every face on the sheet.
+    model_path = ASSETS / "geckolib" / "models" / "armor" / f"{em.PYROMANCERS_MODEL}.geo.json"
+    geo = load(model_path) or {}
+    definition = (geo.get("minecraft:geometry") or [{}])[0]
+    width = definition.get("description", {}).get("texture_width", 0)
+    height = definition.get("description", {}).get("texture_height", 0)
+    sheet = ASSETS / "textures" / "armor" / f"{em.PYROMANCERS_MODEL}.png"
+    size = Image.open(sheet).size if sheet.exists() else (0, 0)
+    if geo.get("format_version") != "1.12.0" or (width, height) != size:
+        err(f"{model_path.name}: format 1.12.0 and a {size[0]}x{size[1]} sheet (it declares {width}x{height})")
+    bones = {bone.get("name") for bone in definition.get("bones", [])}
+    for bone in em.ARMOR_BONES + em.SLIM_BONES:
+        if bone not in bones:
+            err(f"{model_path.name}: no bone {bone}")
+    for bone in definition.get("bones", []):
+        for cube in bone.get("cubes", []):
+            uv = cube.get("uv")
+            if isinstance(uv, dict):  # per-face UVs
+                rects = [(face, *f.get("uv", (0, 0)), *f.get("uv_size", (0, 0))) for face, f in uv.items()]
+            else:  # box UV: the cube's net from its corner
+                w, h, d = cube.get("size", (0, 0, 0))
+                rects = [("box", *(uv or (0, 0)), 2 * (w + d), d + h)]
+            for face, u, v, du, dv in rects:
+                if not (0 <= min(u, u + du) and max(u, u + du) <= width and 0 <= min(v, v + dv) and max(v, v + dv) <= height):
+                    err(f"{model_path.name}: {bone.get('name')}'s {face} face maps outside its {width}x{height} sheet")
+    if (ASSETS / "equipment" / f"{em.PYROMANCERS_MODEL}.json").exists():
+        err(f"assets/{MOD}/equipment/{em.PYROMANCERS_MODEL}.json: GeckoLib draws the set; a flat layer would be drawn under it")
+    # Sounds: the owner's recordings play their events, and no cue is drawn for them any more.
+    played = load(ASSETS / "sounds.json") or {}
+    cues = set(re.findall(r'^\s+"([a-z_]+)": \(', text(ROOT / "tools" / "concordance_sounds.py"), re.M))
+    for event, names in em.SOUND_FILES.items():
+        if [sound.get("name") for sound in played.get(event, {}).get("sounds", [])] != [f"{MOD}:{name}" for name in names]:
+            err(f"sounds.json: {event} must play the owner's {names}")
+        if event.split(".", 1)[1] in cues:
+            err(f"tools/concordance_sounds.py still draws {event}, which plays the owner's recordings")
+        for name in names:
+            if not (ASSETS / "sounds" / f"{name}.ogg").exists():
+                err(f"sounds/{name}.ogg is missing: run tools/owner_art.py")
+    import concordance_ember_art
+    drawn = {f"textures/{kind}/{name}.png" for kind, name in concordance_ember_art.textures()}
+    if drawn & set(em.OWNER_FILES):
+        err(f"tools/concordance_ember_art.py draws over imported owner files: {sorted(drawn & set(em.OWNER_FILES))}")
 
 
 def check_alchemy(co, root, lang, registered, research):

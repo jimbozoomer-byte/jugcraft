@@ -35,7 +35,8 @@ import org.jspecify.annotations.Nullable;
  * <li>the Smoulder status keeps a creature alight while it lasts ({@link SmoulderEffect});</li>
  * <li>the hearthkeeping practice: each kind of hearth a player kindles counts once towards mastering Hearthbinding.</li>
  * </ul>
- * Fire is never placed: nothing here can spread to the world.
+ * Fire is never placed: nothing here can spread to the world. Part 2, the Hearthbinder's regalia made from the owner's
+ * fire art (the foci, the Fire Bangle and the Pyromancer's set), is {@link EmberGear}.
  */
 public final class Ember {
 	/** The practice Hearthbinding is mastered by (tools/concordance_ember.py HEARTHKEEPING). */
@@ -53,6 +54,7 @@ public final class Ember {
 
 	public static void register() {
 		SMOULDER = Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, Jugcraft.id("smoulder"), new SmoulderEffect());
+		EmberGear.register();
 	}
 
 	/** Whether an effect is Ember's alteration: it kindles a hearth instead of putting out fire. */

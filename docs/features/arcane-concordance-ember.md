@@ -57,7 +57,7 @@ Combat (a fire bolt and a burst), defense (Fire Resistance) and utility (lightin
 - Output consumer: players and creatures through the shared effect boundary; vanilla campfires, candles and candle
   cakes (lit campfires cook food and signal with smoke).
 - Technology connection: lighting the hearths the kitchen and smokehouse use; fire Spell Power from any equipment that
-  grants it (part 2's armour will).
+  grants it (part 2's regalia does: [record](arcane-concordance-ember-regalia.md)).
 - Magic connection: the first non-Radiance invocations; the same research, notes, practice, stage and Conclave rules
   as every entry (the Conclave now counts the Hearthbinders as one of its traditions); fire Spell Power scales Cinderbolt
   and Hearthflare like arcane Spell Power scales the Lance.
@@ -98,9 +98,11 @@ No new dependency. Framework use: **Spell Engine** (four new spells in the fire 
 Power scales the two damage invocations), **Modonomicon** (the Hearth category and four invocation pages).
 
 Original assets, drawn by code: the four spell icons and the Smoulder status icon (`tools/concordance_ember_art.py`,
-32x32 on the shared violet ground; 18x18 for the status), and five sounds synthesised by `tools/concordance_sounds.py`
-(`ember_gather`, `hearthspark`, `hearthguard`, `cinderbolt`, `hearthflare`: crackle, breaths of flame and warm low tones
-in the Concordance's key). No owner-library file is used in this part.
+32x32 on the shared violet ground; 18x18 for the status), and four sounds synthesised by `tools/concordance_sounds.py`
+(`ember_gather`, `hearthspark`, `hearthguard`, `cinderbolt`: crackle, breaths of flame and warm low tones in the
+Concordance's key). Hearthflare's release was synthesised too; since part 2 it plays the owner's four "pyro" fire
+recordings instead, and the drawn cue is gone. Part 2 searched the owner's library for the rest; why the drawn icons and
+cues stay is in [its record](arcane-concordance-ember-regalia.md#dependencies-and-assets).
 
 ## Verification
 
@@ -140,6 +142,7 @@ No worldgen, creatures, loot or seasons.
 - Save compatibility: additive.
 - The spell bar: invocations sort by id, so a player who knows Ember's invocations gets them among First Light's on the
   number keys (the use key still casts Dawn Aegis). This is the open spell-order question from #250.
-- **Part 2** (needs the owner's supplied art, `art/owner-library/MAGIC_ASSETS.md`): the Lesser and greater fire focus as
-  trinkets (fire Spell Power, cheaper Ember invocations), a fire bangle, three fire armour weights carrying fire Spell
-  Power, and a primer; then the fire familiar, turret and devices in later slices.
+- **Part 2**, the Hearthbinder's regalia from the owner's fire art, is [its own record](arcane-concordance-ember-regalia.md):
+  the two foci (fire Spell Power), the Fire Bangle, and the Pyromancer's set. What it defers (the light and heavy sets,
+  the Caster Tome, cheaper invocations) and the later slices (the Flarecannon, turret, relay and devices) are listed
+  there.

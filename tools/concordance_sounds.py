@@ -1,7 +1,8 @@
 """Original sounds for the Arcane Concordance (tools/concordance.py), synthesised here (no recorded or third-party audio).
 
-Eleven short mono cues, one per entry in concordance.SOUND_EVENTS (tools/generate_material_data.py writes their
-sounds.json entries, "jugcraft:concordance/<name>"; this script only draws the .ogg files):
+Short mono cues, one per entry in concordance.SOUND_EVENTS except those that play the owner's recordings instead
+(tools/generate_material_data.py writes their sounds.json entries, "jugcraft:concordance/<name>"; this script only draws
+the .ogg files):
 
 - kindle_gather (0.6 s, Kindle's cast, KINDLE_CAST_SECONDS long): light gathering, a few detuned sine partials that
   rise together from F#5 to A5 under a slow swell, the upper partials arriving last;
@@ -35,9 +36,9 @@ pops through a band-pass) over warm low tones in the same D and A, and breaths o
 - hearthguard (0.9 s, Hearthguard): a soft whoomp of warm air, low noise swelling round a held D3 and A3, crackle
   beneath;
 - cinderbolt (0.45 s, Cinderbolt): a flame's rush, noise swept up from 400 Hz to 2.5 kHz with a burst of crackle and a
-  low thump as it lands (no bell, unlike the lance);
-- hearthflare (0.8 s, Hearthflare): a burst, a low thump gliding down from 120 to 55 Hz under a roar whose band falls
-  from 3 kHz to 500 Hz, embers scattering after.
+  low thump as it lands (no bell, unlike the lance).
+Hearthflare's release is not drawn here: it plays the owner's own fire recordings (tools/concordance_ember.py
+SOUND_FILES, copied by tools/owner_art.py).
 Run from anywhere:  python3 tools/concordance_sounds.py [cue ...]  (with names, only those cues are written)
 """
 import os
@@ -449,20 +450,6 @@ def cinderbolt(seed):
     return (0.55 * rush + 0.4 * pops + 0.9 * thump) * fade(n, 0.001, 0.06)
 
 
-def hearthflare(seed):
-    """A burst of fire: a low thump gliding from 120 to 55 Hz under a roar whose band falls from 3 kHz to 500 Hz,
-    embers scattering after."""
-    n = samples(0.8)
-    t = times(n)
-    rng = np.random.default_rng(seed)
-    thump = np.sin(2 * np.pi * np.cumsum(glide(t, 120.0, 55.0, 0.25)) / RATE) * strike(n, 0.004, 0.16)
-    centre = 500 + 2500 * np.exp(-t / 0.2)
-    bp, lp = band(rng.normal(size=n), centre, q=0.9)
-    roar = (bp / rms(bp) + 0.5 * lp / rms(lp)) * np.clip(t / 0.03, 0, 1) * np.exp(-np.maximum(t - 0.03, 0) / 0.22)
-    pops = crackle(n, rng, 30 + 300 * np.exp(-(t - 0.25) ** 2 / 0.02), centre=2800.0)
-    return (1.0 * thump + 0.6 * roar + 0.35 * pops) * fade(n, 0.001, 0.12)
-
-
 # name -> (signal, peak). Names follow concordance.SOUND_EVENTS ("concordance.<name>").
 def cues():
     return {
@@ -490,7 +477,6 @@ def cues():
         "hearthspark": (hearthspark(seed=83), PEAK * 0.9),
         "hearthguard": (hearthguard(seed=89), PEAK * 0.85),
         "cinderbolt": (cinderbolt(seed=97), PEAK),
-        "hearthflare": (hearthflare(seed=101), PEAK),
     }
 
 
@@ -507,7 +493,8 @@ def write(name, signal, peak):
 
 def main():
     drawn = cues()
-    expected = {event.split(".", 1)[1] for event in concordance.SOUND_EVENTS}
+    # Every event has a drawn cue, except those that play the owner's recordings instead.
+    expected = {event.split(".", 1)[1] for event in concordance.SOUND_EVENTS if event not in concordance.ember.SOUND_FILES}
     if set(drawn) != expected:
         sys.exit(f"concordance.SOUND_EVENTS and this script disagree: {sorted(expected ^ set(drawn))}")
     # Name cues to draw only those (an ffmpeg build other than the one that drew the rest may not encode them alike).

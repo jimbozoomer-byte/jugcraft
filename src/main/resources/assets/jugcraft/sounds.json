@@ -357,7 +357,19 @@
     "subtitle": "subtitles.jugcraft.concordance.hearthflare",
     "sounds": [
       {
-        "name": "jugcraft:concordance/hearthflare",
+        "name": "jugcraft:concordance/pyro_1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:concordance/pyro_2",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:concordance/pyro_3",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:concordance/pyro_4",
         "attenuation_distance": 16
       }
     ]

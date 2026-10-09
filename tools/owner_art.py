@@ -1,5 +1,8 @@
 """Imports the owner's own textures from the shared library (art/owner-library/originals/Blocks, docs: art/owner-library/
-README.md) into the mod's resources, and checks the imported files still match their sources.
+README.md) into the mod's resources, and checks the imported files still match their sources. Since Ember part 2 it also
+imports files from the owner's magic collection (art/owner-library/originals/Magic, art/owner-library/MAGIC_ASSETS.md):
+textures, a GeckoLib model and sounds, each a byte-for-byte copy under a Jugcraft name (a model's JSON with its line ends
+made LF), listed in tools/concordance_ember.py OWNER_FILES.
 
 On 7 October 2026 the owner asked for their farming and food textures to be used ("I have already made a ton of custom
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte
@@ -10,9 +13,11 @@ icons listed in a feature's COMPOSED table (a serving the owner drew no icon for
 whole-dish icon heaped in it). No generator draws over these files: tools/generate_textures.py runs this
 import last, and tools/check_mod_data.py fails if a runtime copy differs from what this import would write.
 
-    python3 tools/owner_art.py           write every import (generate_textures.py also does)
-    python3 tools/owner_art.py --check   report differences only
+    python3 tools/owner_art.py                write every import (generate_textures.py also does)
+    python3 tools/owner_art.py --check        report differences only
+    python3 tools/owner_art.py --provenance   the magic imports' sources and SHA-256, for the feature record
 """
+import hashlib
 import io
 import os
 import sys
@@ -24,6 +29,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 import arms_pixel  # noqa: E402
+import concordance_ember  # noqa: E402
 import feasts  # noqa: E402
 import kitchen  # noqa: E402
 import menu  # noqa: E402
@@ -33,6 +39,8 @@ import soil  # noqa: E402
 LIBRARY = os.path.join(ROOT, "art", "owner-library", "originals", "Blocks")
 FOOD = "farming and food textures"
 TEXTURES = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft", "textures")
+MAGIC = os.path.join(ROOT, "art", "owner-library", "originals", "Magic")
+ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft")
 
 
 def imports():
@@ -42,6 +50,11 @@ def imports():
         for target, source in table.items():
             out.append((target, f"{FOOD}/{source}"))
     return out
+
+
+def magic_imports():
+    """(runtime path under assets/jugcraft, library path under Magic/) for every copied magic-collection file."""
+    return sorted(concordance_ember.OWNER_FILES.items())
 
 
 def recolourings():
@@ -116,7 +129,21 @@ def expected():
         files[_target(target)] = _png_bytes(recolour(Image.open(_source(source)), ramp))
     for target, spec in compositions():
         files[_target(target)] = _png_bytes(compose(spec))
+    for target, source in magic_imports():
+        with open(os.path.join(MAGIC, source), "rb") as handle:
+            data = handle.read()
+        # Text (a model's JSON) is stored with LF like the mod's other resources; images and sounds are copied as they are.
+        files[os.path.join(ASSETS, target)] = data.replace(b"\r\n", b"\n") if target.endswith((".json", ".mcmeta")) else data
     return files
+
+
+def provenance():
+    """(runtime path, library path, SHA-256 of the library file) for every magic-collection import."""
+    out = []
+    for target, source in magic_imports():
+        with open(os.path.join(MAGIC, source), "rb") as handle:
+            out.append((target, f"originals/Magic/{source}", hashlib.sha256(handle.read()).hexdigest()))
+    return out
 
 
 def write_all():
@@ -132,7 +159,7 @@ def errors():
     for path, data in expected().items():
         rel = os.path.relpath(path, ROOT)
         if not os.path.isfile(path):
-            out.append(f"{rel} is missing: run tools/owner_art.py (the owner's texture library import)")
+            out.append(f"{rel} is missing: run tools/owner_art.py (the owner's library import)")
             continue
         with open(path, "rb") as handle:
             if handle.read() != data:
@@ -142,9 +169,13 @@ def errors():
 
 
 if __name__ == "__main__":
+    if "--provenance" in sys.argv:
+        for target, source, digest in provenance():
+            print(f"| `{target}` | `{source}` | `{digest}` |")
+        sys.exit(0)
     if "--check" in sys.argv:
         problems = errors()
-        print("\n".join(problems) or "Every imported owner texture matches its source.")
+        print("\n".join(problems) or "Every imported owner file matches its source.")
         sys.exit(1 if problems else 0)
     write_all()
     print(f"Wrote {len(expected())} files from the owner's library.")
