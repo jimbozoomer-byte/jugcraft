@@ -62,6 +62,10 @@ def cube(name, item, index, texture_index):
 
 
 def _keyframe(channel, time, values, index):
+    # Blockbench's animation rotations about x and y run the other way from Minecraft's (it saves them negated), so
+    # a rotation keyframe is written negated on those axes to turn the part the way the game would.
+    if channel == "rotation":
+        values = (-values[0], -values[1], values[2])
     return {"channel": channel, "data_points": [{"x": str(round(values[0], 3)), "y": str(round(values[1], 3)),
                                                   "z": str(round(values[2], 3))}],
             "uuid": _uuid("keyframe", channel, time, index), "time": round(time, 4), "color": -1,
