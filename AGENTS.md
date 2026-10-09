@@ -2,6 +2,8 @@
 
 Read [CLAUDE.md](CLAUDE.md), [CONTRIBUTING.md](CONTRIBUTING.md), and the relevant feature record before making changes. State the actual AI tool/model used. Direct owner instructions take precedence over repository defaults.
 
+The owner's 9 October asset-integration authorization is recorded at the top of [CLAUDE.md](CLAUDE.md). It covers using the supplied art/model/audio/data library in Jugcraft, including the same bounded work delegated to workflows or subagents, while excluding execution of library programs. For Claude permission errors, use [CLAUDE_ASSET_PERMISSIONS.md](docs/CLAUDE_ASSET_PERMISSIONS.md): project `autoMode` settings are ignored, and repo documentation does not override a runtime denial.
+
 ## Approved frameworks and installation
 
 For authored terrain, biome maps or settlement placement, read [World Designer](docs/WORLD_DESIGNER.md) and its [feature record](docs/features/world-designer.md). Extend the shared offline editor/model and serialized generation codecs. Reuse the existing town builder. Do not create a global active-design singleton, silently rewrite generated chunks, or claim native structure pins control exact building layouts.
