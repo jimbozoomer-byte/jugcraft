@@ -17,6 +17,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -34,25 +35,28 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.AABB;
 
 /**
- * Client game test for Ember's regalia (docs/features/arcane-concordance-ember-regalia.md): the Pyromancer's set worn as
- * the owner's GeckoLib model, and the foci in the real Trinkets slot.
+ * Client game test for Ember's regalia (docs/features/arcane-concordance-ember-regalia.md): the two fire sets worn as the
+ * owner's GeckoLib model, and the foci in the real Trinkets slot.
  * <ul>
- * <li>First the client checks that GeckoLib has a renderer for each piece and loaded the owner's model with every bone
- * the renderer poses (and the slim sleeves it hides).</li>
- * <li>A row by day, left to right from the front: vanilla iron on an armour stand (the control), the set on a stand, the
- * set with Protection IV (its glint), the set on a zombie (arms raised: the sleeves must follow them), and the set on a
- * small stand (which should show nothing). The server checks what each wears first. The row turns to face the camera,
- * then three-quarter, side and back; each view is shot whole, then the two stands in the set close up.</li>
+ * <li>First the client checks that GeckoLib has a renderer for each piece of both sets, that it loaded the owner's model
+ * with every bone the renderer poses (and the slim sleeves it hides), and that both sets' textures are there.</li>
+ * <li>A row by day, left to right from the front: vanilla iron on an armour stand (the control), the Pyromaniac's (light)
+ * set and the Pyromancer's (medium) set on stands (the owner's light texture is the medium sheet, so they should look
+ * alike), the Pyromancer's with Protection IV (its glint), the Pyromancer's on a zombie (arms raised: the sleeves must
+ * follow them), and on a small stand (which should show nothing). The server checks what each wears first. The row turns
+ * to face the camera, then three-quarter, side and back; each view is shot whole, then the light and medium stands close
+ * up.</li>
  * <li>The player in the set, standing and sneaking with the real sneak key, from the front and behind. On the real,
  * ticking player the server then puts a Focus of Fire in the Spell Focus slot: with the set that is 6 fire Spell Power
  * above the base; with the lesser focus instead, 4.</li>
- * <li>The seven icons in frames on a wall.</li>
+ * <li>The eleven icons in frames on a wall: the foci, bangle and light set above, the medium set below.</li>
  * </ul>
  * The shots are for people to look at; nothing here judges a picture. The HUD is hidden whatever state an earlier test
  * left it in, and put back at the end.
  */
 public class ConcordanceEmberGearClientGameTests implements FabricClientGameTest {
 	private static final String[] PIECES = {"pyromancers_hat", "pyromancers_robes", "pyromancers_leggings", "pyromancers_boots"};
+	private static final String[] LIGHT = {"pyromaniacs_hood", "pyromaniacs_tunic", "pyromaniacs_pants", "pyromaniacs_shoes"};
 	private static final String[] IRON = {"iron_helmet", "iron_chestplate", "iron_leggings", "iron_boots"};
 	private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 	/** The equipment keys in a summon command, and the item replace slots after "armor.", for each piece. */
@@ -60,20 +64,22 @@ public class ConcordanceEmberGearClientGameTests implements FabricClientGameTest
 	/** The bones GeckoLib poses to the wearer, and the slim sleeves the renderer hides. */
 	private static final List<String> BONES = List.of("armorHead", "armorBody", "armorRightArm", "armorLeftArm", "armorRightLeg",
 			"armorLeftLeg", "armorRightBoot", "armorLeftBoot", "armorRightArmSlim", "armorLeftArmSlim");
-	/** The row, west to east (left to right from the front). */
-	private static final String[] WEARERS = {"armor_stand", "armor_stand", "armor_stand", "zombie", "armor_stand"};
-	private static final boolean[] IN_SET = {false, true, true, true, true};
-	private static final int ENCHANTED = 2;
-	private static final int SMALL = 4;
-	private static final int SET = 1;
+	/** The row, west to east (left to right from the front), and what each wears. */
+	private static final String[] WEARERS = {"armor_stand", "armor_stand", "armor_stand", "armor_stand", "zombie", "armor_stand"};
+	private static final String[][] WORN = {IRON, LIGHT, PIECES, PIECES, PIECES, PIECES};
+	private static final int LIGHT_STAND = 1;
+	private static final int SET = 2;
+	private static final int ENCHANTED = 3;
+	private static final int SMALL = 5;
 	private static final double SPACING = 2.5;
 	private static final double ROW_Z = -5.5;
 	private static final double ROW_CAMERA = 6.0;
 	private static final double PAIR_CAMERA = 2.6;
 	private static final int[] TURNS = {0, -45, 90, 180};
 	private static final String[] VIEWS = {"front", "three_quarter", "side", "back"};
-	private static final String[] ICONS = {"lesser_fire_focus", "fire_focus", "fire_bangle", "pyromancers_hat", "pyromancers_robes",
-			"pyromancers_leggings", "pyromancers_boots"};
+	/** The icons, above (the foci, the bangle and the light set) and below (the medium set). */
+	private static final String[] ICONS_ABOVE = {"lesser_fire_focus", "fire_focus", "fire_bangle", "pyromaniacs_hood", "pyromaniacs_tunic",
+			"pyromaniacs_pants", "pyromaniacs_shoes"};
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -97,13 +103,13 @@ public class ConcordanceEmberGearClientGameTests implements FabricClientGameTest
 			setHudHidden(context, true);
 
 			// GeckoLib draws each piece, from the owner's model with every bone the renderer needs.
-			String missing = context.computeOnClient(client -> unreadModel());
+			String missing = context.computeOnClient(client -> unreadModel(client));
 			Jugcraft.LOGGER.info("[ember regalia client] GeckoLib renderer and model: {}", missing.isEmpty() ? "present" : missing);
 			check(missing.isEmpty(), "The Pyromancer's set cannot be drawn: " + missing);
 
 			double rowZ = z + ROW_Z;
 			for (int i = 0; i < WEARERS.length; i++) {
-				summon(server, WEARERS[i], wearerX(x, i), y, rowZ, IN_SET[i] ? PIECES : IRON, i == SMALL);
+				summon(server, WEARERS[i], wearerX(x, i), y, rowZ, WORN[i], i == SMALL);
 			}
 			context.waitTicks(5);
 			double enchantedX = wearerX(x, ENCHANTED);
@@ -116,7 +122,7 @@ public class ConcordanceEmberGearClientGameTests implements FabricClientGameTest
 			check(wrong.isEmpty(), "The row is not dressed as the shots need: " + wrong);
 
 			String box = "x=%d,y=%d,z=%d,dx=17,dy=4,dz=5".formatted(x - 8, y - 1, z - 8);
-			double pairX = (wearerX(x, SET) + wearerX(x, ENCHANTED)) / 2;
+			double pairX = (wearerX(x, LIGHT_STAND) + wearerX(x, SET)) / 2;
 			for (int view = 0; view < VIEWS.length; view++) {
 				server.runCommand("execute as @e[type=!minecraft:player,%s] at @s run tp @s ~ ~ ~ %d 0".formatted(box, TURNS[view]));
 				shoot(context, singleplayer, x + 0.5, y, rowZ + ROW_CAMERA, 6, "jugcraft_ember_regalia_" + VIEWS[view]);
@@ -156,28 +162,39 @@ public class ConcordanceEmberGearClientGameTests implements FabricClientGameTest
 			check(withLesser == 4.0, "The set and a Lesser Focus of Fire should give 4, not " + withLesser);
 			server.computeOnServer(minecraft -> wear(minecraft, ItemStack.EMPTY));
 
-			// The seven icons in frames on a wall, left to right.
+			// The eleven icons in frames on a wall: seven above, the medium set below.
 			server.runCommand("fill %d %d %d %d %d %d minecraft:spruce_planks".formatted(x - 2, y, z - 12, x + 6, y + 3, z - 12));
-			for (int i = 0; i < ICONS.length; i++) {
-				frame(server, x - 1 + i, y + 2, z - 11, ICONS[i]);
+			for (int i = 0; i < ICONS_ABOVE.length; i++) {
+				frame(server, x - 1 + i, y + 2, z - 11, ICONS_ABOVE[i]);
+			}
+			for (int i = 0; i < PIECES.length; i++) {
+				frame(server, x + 1 + i, y + 1, z - 11, PIECES[i]);
 			}
 			context.waitTicks(20);
+			int icons = ICONS_ABOVE.length + PIECES.length;
 			int frames = server.computeOnServer(minecraft -> minecraft.overworld().getEntitiesOfClass(Entity.class,
 					new AABB(x - 2, y, z - 12, x + 7, y + 4, z - 10), entity -> type(entity).equals("item_frame")).size());
-			check(frames == ICONS.length, frames + " item frames on the wall, not " + ICONS.length);
-			shoot(context, singleplayer, x + 2.0, y, z - 8.5, -9, "jugcraft_ember_regalia_icons");
+			check(frames == icons, frames + " item frames on the wall, not " + icons);
+			shoot(context, singleplayer, x + 2.5, y, z - 6.5, -9, "jugcraft_ember_regalia_icons");
 			setHudHidden(context, hudWasHidden);
 		}
 	}
 
-	/** What GeckoLib lacks to draw the set, or an empty string: a renderer for each piece, the model, its bones. */
-	private static String unreadModel() {
+	/** What GeckoLib lacks to draw the sets, or an empty string: a renderer for each piece, the model, its bones, the textures. */
+	private static String unreadModel(Minecraft client) {
 		List<String> wrong = new ArrayList<>();
-		for (int p = 0; p < PIECES.length; p++) {
-			ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id(PIECES[p])));
-			GeoRenderProvider provider = GeoRenderProvider.of(stack);
-			if (provider == null || provider == GeoRenderProvider.DEFAULT || provider.getGeoArmorRenderer(stack, SLOTS[p]) == null) {
-				wrong.add(PIECES[p] + " has no GeckoLib armour renderer");
+		for (String[] set : List.of(LIGHT, PIECES)) {
+			for (int p = 0; p < set.length; p++) {
+				ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id(set[p])));
+				GeoRenderProvider provider = GeoRenderProvider.of(stack);
+				if (provider == null || provider == GeoRenderProvider.DEFAULT || provider.getGeoArmorRenderer(stack, SLOTS[p]) == null) {
+					wrong.add(set[p] + " has no GeckoLib armour renderer");
+				}
+			}
+		}
+		for (String texture : List.of("pyromaniacs", "pyromancers")) {
+			if (client.getResourceManager().getResource(Jugcraft.id("textures/armor/" + texture + ".png")).isEmpty()) {
+				wrong.add("there is no textures/armor/" + texture + ".png");
 			}
 		}
 		BakedGeoModel model = GeckoLibResources.getBakedModels().getModel(Jugcraft.id("armor/pyromancers"));
@@ -215,7 +232,7 @@ public class ConcordanceEmberGearClientGameTests implements FabricClientGameTest
 		return x + 0.5 + SPACING * (i - WEARERS.length / 2);
 	}
 
-	/** Summons a {@code wearer} (an armour stand with arms, maybe small, or a zombie standing still) facing south. */
+	/** Summons a {@code wearer} (an armour stand with arms, maybe small, or a zombie standing still) facing south, in {@code pieces}. */
 	private static void summon(TestServerContext server, String wearer, double x, int y, double z, String[] pieces, boolean small) {
 		StringBuilder equipment = new StringBuilder();
 		for (int p = 0; p < pieces.length; p++) {
@@ -256,8 +273,8 @@ public class ConcordanceEmberGearClientGameTests implements FabricClientGameTest
 			}
 			for (int p = 0; p < PIECES.length; p++) {
 				ItemStack stack = wearer.getItemBySlot(SLOTS[p]);
-				Item expected = BuiltInRegistries.ITEM.getValue(IN_SET[i] ? Jugcraft.id(PIECES[p])
-						: Identifier.withDefaultNamespace(IRON[p]));
+				String worn = WORN[i][p];
+				Item expected = BuiltInRegistries.ITEM.getValue(worn.startsWith("iron_") ? Identifier.withDefaultNamespace(worn) : Jugcraft.id(worn));
 				if (stack.getItem() != expected) {
 					wrong.add("wearer " + (i + 1) + " wears " + BuiltInRegistries.ITEM.getKey(stack.getItem()) + " on its " + KEYS[p]);
 				}

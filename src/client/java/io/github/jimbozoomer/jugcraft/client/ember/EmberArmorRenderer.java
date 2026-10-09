@@ -17,9 +17,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The Pyromancer's set as worn: GeckoLib's armour renderer over the owner's model and texture
- * (assets/jugcraft/geckolib/models/armor/pyromancers.geo.json, textures/armor/pyromancers.png, imported as supplied),
- * one renderer for the four pieces. GeckoLib poses the model's armour bones to the wearer each frame; on top of that:
+ * A fire set as worn: GeckoLib's armour renderer over the owner's model (assets/jugcraft/geckolib/models/armor/
+ * &lt;model&gt;.geo.json) and the set's texture (textures/armor/&lt;set&gt;.png), both imported as supplied, one renderer for
+ * a set's four pieces. GeckoLib poses the model's armour bones to the wearer each frame; on top of that:
  * <ul>
  * <li>the slim-armed sleeves are hidden: the model carries both widths, one over the other, and vanilla armour draws the
  * same sleeves for every wearer;</li>
@@ -29,19 +29,18 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 public final class EmberArmorRenderer extends GeoArmorRenderer<EmberArmorItem, HumanoidRenderState> {
-	/** The owner's model and texture, by GeckoLib's defaulted paths under "armor". */
-	public static final Identifier MODEL = Jugcraft.id("pyromancers");
 	/** The bones of the narrower sleeves (the owner's model has both). */
 	public static final List<String> SLIM_SLEEVES = List.of("armorRightArmSlim", "armorLeftArmSlim");
 
-	public EmberArmorRenderer() {
-		super(new DefaultedGeoModel<EmberArmorItem>(MODEL) {
+	/** A renderer for {@code set}'s pieces: its texture, worn on the owner's {@code model} (GeckoLib's paths under "armor"). */
+	public EmberArmorRenderer(String set, String model) {
+		super(new DefaultedGeoModel<EmberArmorItem>(Jugcraft.id(set)) {
 			@Override
 			protected String subtype() {
 				return "armor";
 			}
-		});
-		withRenderLayer(new Glint(this, MODEL.withPath("textures/armor/" + MODEL.getPath() + ".png")));
+		}.withAltModel(Jugcraft.id(model)));
+		withRenderLayer(new Glint(this, Jugcraft.id("textures/armor/" + set + ".png")));
 	}
 
 	@Override

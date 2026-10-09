@@ -15,16 +15,30 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 
 /**
- * A piece of the Pyromancer's set ({@link EmberGear}): leather's protection and half a point of fire Spell Power, worn
- * as the owner's GeckoLib model (assets/jugcraft/geckolib/models/armor/pyromancers.geo.json and textures/armor/
- * pyromancers.png, imported as supplied), which the client's renderer draws through {@link EmberHooks}. It has no
- * animations: GeckoLib poses its bones to the wearer as vanilla armour moves.
+ * A piece of a fire set ({@link EmberGear}: the Pyromaniac's or the Pyromancer's): half a point of fire Spell Power, worn
+ * as the owner's GeckoLib model (assets/jugcraft/geckolib/models/armor/{@link #model()}.geo.json) with its set's texture
+ * (textures/armor/{@link #set()}.png), both imported as supplied, which the client's renderer draws through
+ * {@link EmberHooks}. It has no animations: GeckoLib poses its bones to the wearer as vanilla armour moves.
  */
 public class EmberArmorItem extends Item implements GeoItem {
 	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+	private final String set;
+	private final String model;
 
-	public EmberArmorItem(Properties properties) {
+	public EmberArmorItem(Properties properties, String set, String model) {
 		super(properties);
+		this.set = set;
+		this.model = model;
+	}
+
+	/** The set it belongs to: its equipment asset and its worn texture's name. */
+	public String set() {
+		return set;
+	}
+
+	/** The GeckoLib model it is worn as. */
+	public String model() {
+		return model;
 	}
 
 	@Override

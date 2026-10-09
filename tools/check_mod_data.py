@@ -8891,22 +8891,28 @@ def check_ember_regalia(co, root, lang):
     client, renderer = text(CLIENT_JAVA_ROOT / "EmberClient.java"), text(CLIENT_JAVA_ROOT / "ember" / "EmberArmorRenderer.java")
     numbers = {"LESSER_FOCUS_POWER": ("double", em.LESSER_FOCUS_POWER), "FOCUS_POWER": ("double", em.FOCUS_POWER),
                "ROBE_PIECE_POWER": ("double", em.ROBE_PIECE_POWER), "BANGLE_SMOULDER_TICKS": ("int", em.BANGLE_SMOULDER_TICKS),
-               "PYROMANCERS_DURABILITY": ("int", em.PYROMANCERS_DURABILITY),
-               "PYROMANCERS_ENCHANTABILITY": ("int", em.PYROMANCERS_ENCHANTABILITY)}
+               "ARMOR_ENCHANTABILITY": ("int", em.ARMOR_ENCHANTABILITY),
+               **{f"{name.upper()}_DURABILITY": ("int", armour["durability"]) for name, armour in em.ARMOR_SETS.items()}}
     for name, (kind, value) in numbers.items():
         if not re.search(rf"\b{kind} {name} = {value};", gear):
             err(f"concordance/ember/EmberGear.java: {name} differs from tools/concordance_ember.py ({value})")
-    defense = {"BOOTS": em.PYROMANCERS_DEFENSE["boots"], "LEGGINGS": em.PYROMANCERS_DEFENSE["leggings"],
-               "CHESTPLATE": em.PYROMANCERS_DEFENSE["chestplate"], "HELMET": em.PYROMANCERS_DEFENSE["helmet"]}
-    for piece, value in defense.items():
-        if f"ArmorType.{piece}, {value}" not in gear:
-            err(f"concordance/ember/EmberGear.java: the set's {piece.lower()} protection differs from PYROMANCERS_DEFENSE ({value})")
-    if (f'Jugcraft.id("{em.PYROMANCERS_REPAIR_TAG.split(":")[1]}")' not in gear
-            or f'Jugcraft.id("{em.PYROMANCERS_MODEL}")' not in gear):
-        err("concordance/ember/EmberGear.java: the repair tag or equipment asset differs from tools/concordance_ember.py")
+    models = {armour["model"] for armour in em.ARMOR_SETS.values()}
+    if len(models) != 1 or f'String ARMOR_MODEL = "{next(iter(models))}";' not in gear:
+        err("concordance/ember/EmberGear.java: ARMOR_MODEL is not the model tools/concordance_ember.py wears the sets as")
+    for name, armour in em.ARMOR_SETS.items():
+        d = armour["defense"]
+        made = f'material("{name}", {name.upper()}_DURABILITY, {d["helmet"]}, {d["chestplate"]}, {d["leggings"]}, {d["boots"]})'
+        if made not in gear:
+            err(f"concordance/ember/EmberGear.java: the {name} material differs from ARMOR_SETS (expected {made})")
+        for item in armour["pieces"]:
+            if not re.search(rf'\barmor\("{item}", "{name}", {name.upper()}_ARMOR, ', gear):
+                err(f"concordance/ember/EmberGear.java: {item} is not registered as a {name} piece")
+    if ('Jugcraft.id("repairs_" + set + "_gear")' not in gear or "ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id(set))" not in gear
+            or any(em.repair_tag(name) != f"{MOD}:repairs_{name}_gear" for name in em.ARMOR_SETS)):
+        err("concordance/ember/EmberGear.java: each set's repair tag and equipment asset must be named after the set")
     geared = re.search(r"double GEARED_FIRE_POWER = ([0-9.]+);", text(root / "balance" / "Baselines.java"))
-    if not geared or float(geared.group(1)) != em.FOCUS_POWER + len(em.ARMOR) * em.ROBE_PIECE_POWER:
-        err("concordance/balance/Baselines.java: GEARED_FIRE_POWER is not a Focus of Fire and the whole Pyromancer's set")
+    if not geared or float(geared.group(1)) != em.FOCUS_POWER + 4 * em.ROBE_PIECE_POWER:
+        err("concordance/balance/Baselines.java: GEARED_FIRE_POWER is not a Focus of Fire and a whole fire set")
     # The ids EmberGear registers are the generator's items, the trinkets as trinkets and the pieces as armour.
     trinkets = set(re.findall(r'\bitem\("([a-z_]+)"', gear))
     pieces = set(re.findall(r'\barmor\("([a-z_]+)"', gear))
@@ -8984,16 +8990,23 @@ def check_ember_regalia(co, root, lang):
         tag = {"helmet": "head_armor", "chestplate": "chest_armor", "leggings": "leg_armor", "boots": "foot_armor"}[piece]
         if f"{MOD}:{item}" not in (load(DATA / "minecraft" / "tags" / "item" / f"{tag}.json") or {}).get("values", []):
             err(f"{item} is not in #minecraft:{tag}")
-    # The owner's GeckoLib model: format, sheet size, the bones the renderer poses and hides, every face on the sheet.
-    model_path = ASSETS / "geckolib" / "models" / "armor" / f"{em.PYROMANCERS_MODEL}.geo.json"
+    for name in em.ARMOR_SETS:
+        if (load(DATA / MOD / "tags" / "item" / f"repairs_{name}_gear.json") or {}).get("values") != ["#minecraft:wool"]:
+            err(f"data/{MOD}/tags/item/repairs_{name}_gear.json must hold wool")
+        if f"textures/armor/{name}.png" not in em.OWNER_FILES:
+            err(f"the {name} set's worn texture is not one of the owner's files (OWNER_FILES)")
+    # The owner's GeckoLib model: format, the sheet size every set worn on it has, the bones the renderer poses and hides,
+    # every face on the sheet.
+    model_path = ASSETS / "geckolib" / "models" / "armor" / f"{next(iter(models))}.geo.json"
     geo = load(model_path) or {}
     definition = (geo.get("minecraft:geometry") or [{}])[0]
     width = definition.get("description", {}).get("texture_width", 0)
     height = definition.get("description", {}).get("texture_height", 0)
-    sheet = ASSETS / "textures" / "armor" / f"{em.PYROMANCERS_MODEL}.png"
-    size = Image.open(sheet).size if sheet.exists() else (0, 0)
-    if geo.get("format_version") != "1.12.0" or (width, height) != size:
-        err(f"{model_path.name}: format 1.12.0 and a {size[0]}x{size[1]} sheet (it declares {width}x{height})")
+    for name in em.ARMOR_SETS:
+        sheet = ASSETS / "textures" / "armor" / f"{name}.png"
+        size = Image.open(sheet).size if sheet.exists() else (0, 0)
+        if geo.get("format_version") != "1.12.0" or (width, height) != size:
+            err(f"{model_path.name}: format 1.12.0 and {name}'s {size[0]}x{size[1]} sheet (it declares {width}x{height})")
     bones = {bone.get("name") for bone in definition.get("bones", [])}
     for bone in em.ARMOR_BONES + em.SLIM_BONES:
         if bone not in bones:
@@ -9009,8 +9022,9 @@ def check_ember_regalia(co, root, lang):
             for face, u, v, du, dv in rects:
                 if not (0 <= min(u, u + du) and max(u, u + du) <= width and 0 <= min(v, v + dv) and max(v, v + dv) <= height):
                     err(f"{model_path.name}: {bone.get('name')}'s {face} face maps outside its {width}x{height} sheet")
-    if (ASSETS / "equipment" / f"{em.PYROMANCERS_MODEL}.json").exists():
-        err(f"assets/{MOD}/equipment/{em.PYROMANCERS_MODEL}.json: GeckoLib draws the set; a flat layer would be drawn under it")
+    for name in em.ARMOR_SETS:
+        if (ASSETS / "equipment" / f"{name}.json").exists():
+            err(f"assets/{MOD}/equipment/{name}.json: GeckoLib draws the set; a flat layer would be drawn under it")
     # Sounds: the owner's recordings play their events, and no cue is drawn for them any more.
     played = load(ASSETS / "sounds.json") or {}
     cues = set(re.findall(r'^\s+"([a-z_]+)": \(', text(ROOT / "tools" / "concordance_sounds.py"), re.M))

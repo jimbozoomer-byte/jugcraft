@@ -9,16 +9,16 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.Nullable;
 
 /**
- * Ember on the client: the Pyromancer's set's GeckoLib renderer, handed to GeckoLib through {@link EmberHooks} (as the
- * guns' are, GunsClient). One renderer draws all four pieces; it is made the first time a piece is drawn.
+ * Ember on the client: the fire sets' GeckoLib renderers, handed to GeckoLib through {@link EmberHooks} (as the guns' are,
+ * GunsClient). One renderer draws a set's four pieces; it is made the first time one of them is drawn.
  */
 final class EmberClient {
 	/** Each piece's GeoRenderProvider, made once. */
 	private static final Map<EmberArmorItem, GeoRenderProvider> PROVIDERS = new HashMap<>();
-	private static @Nullable EmberArmorRenderer renderer;
+	/** Each set's renderer, by set. */
+	private static final Map<String, EmberArmorRenderer> RENDERERS = new HashMap<>();
 
 	private EmberClient() {
 	}
@@ -27,10 +27,7 @@ final class EmberClient {
 		EmberHooks.armor = item -> PROVIDERS.computeIfAbsent(item, key -> new GeoRenderProvider() {
 			@Override
 			public GeoArmorRenderer<?, ?> getGeoArmorRenderer(ItemStack stack, EquipmentSlot slot) {
-				if (renderer == null) {
-					renderer = new EmberArmorRenderer();
-				}
-				return renderer;
+				return RENDERERS.computeIfAbsent(key.set(), set -> new EmberArmorRenderer(set, key.model()));
 			}
 		});
 	}

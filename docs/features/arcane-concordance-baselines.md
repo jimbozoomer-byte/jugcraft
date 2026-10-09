@@ -118,10 +118,10 @@ The game test fails the build unless all of these hold (`Baselines.report`):
 ## Findings
 
 - **The geared hearthbinder (Ember part 2).** "Geared hearthbinder (+6 fire, Pyromancer's)" wears the most the
-  Hearthbinder's regalia gives with the default slots (a Focus of Fire and the whole Pyromancer's set: leather's
-  protection), with a wooden sword and Hearthguard, Cinderbolt and Hearthflare mastered. Its numbers in the table above
-  are added from CI's run once it has run. The model has no on-hit statuses, so the Fire Bangle's blow is not in it, and
-  it counts Smoulder as control (a slow), not as burning damage.
+  Hearthbinder's regalia gives with the default slots (a Focus of Fire and four pieces of a fire set, here the
+  Pyromancer's, with leather's protection), with a wooden sword and Hearthguard, Cinderbolt and Hearthflare mastered.
+  Its numbers in the table above are added from CI's run once it has run. The model has no on-hit statuses, so the Fire
+  Bangle's blow is not in it, and it counts Smoulder as control (a slow), not as burning damage.
 
 - **Initiate magic does not outclass iron.** The Fighter, with no magic at all, wins all five encounters and has the
   highest sustained output (9.15 a second). Casters trade sustained damage for reach, mobility, shields and support.

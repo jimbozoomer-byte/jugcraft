@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.item.v1.EnchantingContext;
 import net.minecraft.core.BlockPos;
@@ -57,22 +58,28 @@ import net.spell_engine.internals.target.SpellTarget;
 import net.spell_power.api.SpellSchools;
 
 /**
- * Ember, part 2: the Hearthbinder's regalia (docs/features/arcane-concordance-ember-regalia.md). The seven items are made
- * and worn as designed (the owner's two slots, leather's protection, half a point of fire on each piece); the foci give
+ * Ember, part 2: the Hearthbinder's regalia (docs/features/arcane-concordance-ember-regalia.md). The eleven items are made
+ * and worn as designed (the owner's two slots, two fire sets, half a point of fire on each piece); the foci give
  * fire Spell Power through Trinkets; the regalia at its most raises Cinderbolt from 3 to 6, and fewer than four pieces add
  * nothing; the Fire Bangle's blow leaves a Hearthbinder's target smouldering only on their own melee hit, only where they
- * may harm it; and Spell Power's attribute enchantments are refused on the set.
+ * may harm it; and Spell Power's attribute enchantments are refused on the sets.
  */
 public class ConcordanceEmberGearGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
 	private static final String HEARTHBINDING = "jugcraft:hearthbinding";
 	private static final UUID NEIGHBOUR = UUID.fromString("00000000-0000-0000-0000-00000000e3b2");
+	/** The Pyromancer's (medium) pieces, head to feet. */
 	private static final List<String> PIECES = List.of("pyromancers_hat", "pyromancers_robes", "pyromancers_leggings", "pyromancers_boots");
+	/** The Pyromaniac's (light) pieces, head to feet. */
+	private static final List<String> LIGHT = List.of("pyromaniacs_hood", "pyromaniacs_tunic", "pyromaniacs_pants", "pyromaniacs_shoes");
+	private static final List<String> SETS = List.of("pyromaniacs", "pyromancers");
+	private static final Map<String, List<String>> SET_PIECES = Map.of("pyromaniacs", LIGHT, "pyromancers", PIECES);
 	private static final List<EquipmentSlot> SLOTS = List.of(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET);
 	private static final List<String> SLOT_TAGS = List.of("head", "chest", "leg", "foot");
-	private static final int[] DEFENSE = {1, 3, 2, 1};
-	/** Vanilla's per-slot base durability (11, 16, 15, 13) times the set's 10. */
-	private static final int[] DURABILITY = {110, 160, 150, 130};
+	private static final Map<String, int[]> DEFENSE = Map.of("pyromaniacs", new int[] {1, 2, 1, 1}, "pyromancers", new int[] {1, 3, 2, 1});
+	/** Vanilla's per-slot base durability (11, 16, 15, 13) times each set's 7 and 10. */
+	private static final Map<String, int[]> DURABILITY = Map.of("pyromaniacs", new int[] {77, 112, 105, 91},
+			"pyromancers", new int[] {110, 160, 150, 130});
 	/** Ticks to wait out vanilla's hurt immunity (a second hit within 10 ticks counts only for what it exceeds). */
 	private static final int HURT_IMMUNITY_TICKS = 12;
 
@@ -117,6 +124,11 @@ public class ConcordanceEmberGearGameTests {
 		return BuiltInRegistries.ITEM.getValue(Jugcraft.id(id));
 	}
 
+	/** A vanilla item by its id (as ArmorTiersGameTests looks them up: not every item has an Items constant in 26.3). */
+	private static Item vanilla(String path) {
+		return BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(path));
+	}
+
 	private static boolean in(ItemStack stack, String tag) {
 		return stack.is(TagKey.create(Registries.ITEM, Identifier.parse(tag)));
 	}
@@ -142,11 +154,11 @@ public class ConcordanceEmberGearGameTests {
 		return seen;
 	}
 
-	/** The seven items: registered, one to a stack, fire resistant; the owner's two slots; the set's numbers and tags. */
+	/** The eleven items: registered, one to a stack, fire resistant; the owner's two slots; each set's numbers and tags. */
 	@GameTest(maxTicks = 20)
 	public void theRegaliaIsMadeAndWornAsDesigned(GameTestHelper helper) {
 		List<String> wrong = new ArrayList<>();
-		Object netherite = new ItemStack(Items.NETHERITE_HELMET).get(DataComponents.DAMAGE_RESISTANT);
+		Object netherite = new ItemStack(vanilla("netherite_helmet")).get(DataComponents.DAMAGE_RESISTANT);
 		Map<String, Item> fields = Map.of("lesser_fire_focus", EmberGear.LESSER_FIRE_FOCUS, "fire_focus", EmberGear.FIRE_FOCUS,
 				"fire_bangle", EmberGear.FIRE_BANGLE);
 		for (String id : List.of("lesser_fire_focus", "fire_focus", "fire_bangle")) {
@@ -182,49 +194,55 @@ public class ConcordanceEmberGearGameTests {
 		if (TrinketsApi.getAttachment(player).getInventory("chest/necklace") == null) {
 			wrong.add("players lost the necklace slot the Hearthstone is worn in");
 		}
-		TagKey<Item> repairs = TagKey.create(Registries.ITEM, Jugcraft.id("repairs_pyromancers_gear"));
-		if (!new ItemStack(Items.WHITE_WOOL).is(repairs) || new ItemStack(Items.IRON_INGOT).is(repairs)) {
-			wrong.add("#jugcraft:repairs_pyromancers_gear is not wool");
-		}
-		for (int p = 0; p < PIECES.size(); p++) {
-			String id = PIECES.get(p);
-			ItemStack stack = new ItemStack(item(id));
-			if (stack.isEmpty() || !(stack.getItem() instanceof EmberArmorItem) || stack.getItem() != EmberGear.ARMOR.get(id)) {
-				wrong.add(id + " is not registered as EmberGear's armour");
-				continue;
+		for (String set : SETS) {
+			TagKey<Item> repairs = TagKey.create(Registries.ITEM, Jugcraft.id("repairs_" + set + "_gear"));
+			if (!new ItemStack(vanilla("white_wool")).is(repairs) || new ItemStack(Items.IRON_INGOT).is(repairs)) {
+				wrong.add("#jugcraft:repairs_" + set + "_gear is not wool");
 			}
-			var equippable = stack.get(DataComponents.EQUIPPABLE);
-			if (equippable == null || equippable.slot() != SLOTS.get(p)
-					|| !equippable.assetId().equals(Optional.of(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id("pyromancers"))))) {
-				wrong.add(id + " is not worn in " + SLOTS.get(p) + " as jugcraft:pyromancers: " + equippable);
-			}
-			if (amount(stack, "minecraft:armor") != DEFENSE[p] || amount(stack, "minecraft:armor_toughness") != 0.0
-					|| amount(stack, "minecraft:knockback_resistance") != 0.0) {
-				wrong.add(id + " does not have leather's protection " + DEFENSE[p] + ": " + amount(stack, "minecraft:armor"));
-			}
-			String group = EquipmentSlotGroup.bySlot(SLOTS.get(p)).getSerializedName();
-			if (!fireModifiers(stack).equals(List.of(group + "=" + EmberGear.ROBE_PIECE_POWER))) {
-				wrong.add(id + " does not give half a point of fire in its own slot: " + fireModifiers(stack));
-			}
-			if (stack.getMaxDamage() != DURABILITY[p]) {
-				wrong.add(id + " lasts " + stack.getMaxDamage() + ", not " + DURABILITY[p]);
-			}
-			var enchantable = stack.get(DataComponents.ENCHANTABLE);
-			if (enchantable == null || enchantable.value() != EmberGear.PYROMANCERS_ENCHANTABILITY) {
-				wrong.add(id + " is not enchantable at " + EmberGear.PYROMANCERS_ENCHANTABILITY);
-			}
-			var repairableType = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(Identifier.withDefaultNamespace("repairable"));
-			Object repairable = repairableType == null ? null : stack.get(repairableType);
-			if (repairable == null || !String.valueOf(repairable).contains("jugcraft:repairs_pyromancers_gear")) {
-				wrong.add(id + " is not repaired with #jugcraft:repairs_pyromancers_gear: " + repairable);
-			}
-			if (!netherite.equals(stack.get(DataComponents.DAMAGE_RESISTANT))) {
-				wrong.add(id + " does not resist fire");
-			}
-			for (String tag : List.of(SLOT_TAGS.get(p) + "_armor", "enchantable/armor", "enchantable/" + SLOT_TAGS.get(p) + "_armor",
-					"enchantable/durability", "enchantable/equippable")) {
-				if (!in(stack, "minecraft:" + tag)) {
-					wrong.add(id + " is not in #minecraft:" + tag);
+			for (int p = 0; p < SLOTS.size(); p++) {
+				String id = SET_PIECES.get(set).get(p);
+				ItemStack stack = new ItemStack(item(id));
+				if (stack.isEmpty() || !(stack.getItem() instanceof EmberArmorItem piece) || stack.getItem() != EmberGear.ARMOR.get(id)) {
+					wrong.add(id + " is not registered as EmberGear's armour");
+					continue;
+				}
+				if (!piece.set().equals(set) || !piece.model().equals(EmberGear.ARMOR_MODEL)) {
+					wrong.add(id + " is worn as " + piece.set() + " on " + piece.model() + ", not " + set + " on " + EmberGear.ARMOR_MODEL);
+				}
+				var equippable = stack.get(DataComponents.EQUIPPABLE);
+				if (equippable == null || equippable.slot() != SLOTS.get(p)
+						|| !equippable.assetId().equals(Optional.of(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id(set))))) {
+					wrong.add(id + " is not worn in " + SLOTS.get(p) + " as jugcraft:" + set + ": " + equippable);
+				}
+				int defense = DEFENSE.get(set)[p];
+				if (amount(stack, "minecraft:armor") != defense || amount(stack, "minecraft:armor_toughness") != 0.0
+						|| amount(stack, "minecraft:knockback_resistance") != 0.0) {
+					wrong.add(id + " does not have its protection " + defense + ": " + amount(stack, "minecraft:armor"));
+				}
+				String group = EquipmentSlotGroup.bySlot(SLOTS.get(p)).getSerializedName();
+				if (!fireModifiers(stack).equals(List.of(group + "=" + EmberGear.ROBE_PIECE_POWER))) {
+					wrong.add(id + " does not give half a point of fire in its own slot: " + fireModifiers(stack));
+				}
+				if (stack.getMaxDamage() != DURABILITY.get(set)[p]) {
+					wrong.add(id + " lasts " + stack.getMaxDamage() + ", not " + DURABILITY.get(set)[p]);
+				}
+				var enchantable = stack.get(DataComponents.ENCHANTABLE);
+				if (enchantable == null || enchantable.value() != EmberGear.ARMOR_ENCHANTABILITY) {
+					wrong.add(id + " is not enchantable at " + EmberGear.ARMOR_ENCHANTABILITY);
+				}
+				var repairableType = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(Identifier.withDefaultNamespace("repairable"));
+				Object repairable = repairableType == null ? null : stack.get(repairableType);
+				if (repairable == null || !String.valueOf(repairable).contains("jugcraft:repairs_" + set + "_gear")) {
+					wrong.add(id + " is not repaired with #jugcraft:repairs_" + set + "_gear: " + repairable);
+				}
+				if (!netherite.equals(stack.get(DataComponents.DAMAGE_RESISTANT))) {
+					wrong.add(id + " does not resist fire");
+				}
+				for (String tag : List.of(SLOT_TAGS.get(p) + "_armor", "enchantable/armor", "enchantable/" + SLOT_TAGS.get(p) + "_armor",
+						"enchantable/durability", "enchantable/equippable")) {
+					if (!in(stack, "minecraft:" + tag)) {
+						wrong.add(id + " is not in #minecraft:" + tag);
+					}
 				}
 			}
 		}
@@ -341,13 +359,13 @@ public class ConcordanceEmberGearGameTests {
 		helper.succeed();
 	}
 
-	/** Spell Power's attribute enchantments (Sunfire) are refused on the Pyromancer's set; ordinary armour enchantments are not. */
+	/** Spell Power's attribute enchantments (Sunfire) are refused on both fire sets; ordinary armour enchantments are not. */
 	@GameTest(maxTicks = 20)
 	public void spellPowerEnchantmentsAreRefusedOnTheSet(GameTestHelper helper) {
 		var enchantments = helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 		Holder<Enchantment> sunfire = enchantments.getOrThrow(ResourceKey.create(Registries.ENCHANTMENT, Identifier.parse("spell_power:sunfire")));
 		Holder<Enchantment> protection = enchantments.getOrThrow(ResourceKey.create(Registries.ENCHANTMENT, Identifier.withDefaultNamespace("protection")));
-		for (String id : PIECES) {
+		for (String id : Stream.concat(LIGHT.stream(), PIECES.stream()).toList()) {
 			ItemStack piece = new ItemStack(item(id));
 			for (EnchantingContext context : EnchantingContext.values()) {
 				helper.assertTrue(!piece.canBeEnchantedWith(sunfire, context), id + " takes Sunfire (" + context + ")");

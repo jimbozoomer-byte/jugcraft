@@ -42,12 +42,12 @@ MATRIX = {
     "geckolib": (
         "Animated blocks and creatures driven by the status the server sends: Circle Anchor, Alembic Crucible (with "
         "its liquid at its volume), Verdant Heart, Mulch Maw, Gleaner, Orrery Observatory, Reliquary Shrine, Spire "
-        "Heart, Oneiric Censer; Hearthling, Gathering Shade, Clockwork Porter and dream wisps; the Pyromancer's set "
-        "worn as the owner's armour model (Jugcraft's first GeckoLib armour)",
+        "Heart, Oneiric Censer; Hearthling, Gathering Shade, Clockwork Porter and dream wisps; the two fire sets "
+        "worn as the owner's armour model, each in its own texture (Jugcraft's first GeckoLib armour)",
         "required",
         ["ConcordancePresentationClientGameTests", "aPorterShowsOnceWhatItLacks", "ConcordanceEmberGearClientGameTests"],
-        "Seen only in CI's small screenshot previews; frame cost of a large installation not measured; the set's glint "
-        "is a Jugcraft layer, and vanilla trims are not drawn on it"),
+        "Seen only in CI's small screenshot previews; frame cost of a large installation not measured; the sets' glint "
+        "is a Jugcraft layer, and vanilla trims are not drawn on them"),
     "player-animation-library": (
         "Original cast and release gestures for the invocations; the circle participants' channelling gesture; the "
         "Vigil's offering gesture, sent by the server when an offering is made",
@@ -90,7 +90,7 @@ MATRIX = {
     "spell-power": (
         "Schools name each Principle's damage type, so resistances apply once; the Lance scales with arcane Spell "
         "Power, Cinderbolt and Hearthflare with fire; Resonant Rings can carry arcane Spell Power, the Ember foci and "
-        "the Pyromancer's set fire; Spell Power's attribute enchantments are refused on the set",
+        "the two fire sets fire; Spell Power's attribute enchantments are refused on the sets",
         "required",
         ["lanceStrikesAndScalesWithSpellPower", "everyStatisticIsARealAttribute", "cinderboltBurnsAndGrowsWithFireSpellPower",
          "theRegaliaRaisesTheFireToItsCeiling", "spellPowerEnchantmentsAreRefusedOnTheSet"],

@@ -5,7 +5,7 @@ Proposal issue: none; the owner asked for their supplied magic content to be bui
 authorized it at the top of [CLAUDE.md](../../CLAUDE.md). This part follows [Ember, part 1](arcane-concordance-ember.md).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Practitioner stage, beside part 1. The regalia's power matters only to Hearthbinding's
-invocations; the Pyromancer's set is also plain leather-grade armour for anyone.
+invocations; the two fire sets are also plain cloth and leather-grade armour for anyone.
 Primary specialty and supported player role: the Hearthbinders; casters who fight with fire, in light armour.
 
 ## Player experience
@@ -16,37 +16,45 @@ Primary specialty and supported player role: the Hearthbinders; casters who figh
 - **Fire Bangle**: worn in one of the two new **Bracelet** slots. Once you understand Hearthbinding, your own melee blows
   leave the creature **smouldering** for 3 seconds, wherever you may harm it. It gives no Spell Power, and a second
   bangle adds nothing.
-- **Pyromancer's Hat, Robes, Leggings and Boots**: leather's protection (7 in all), a little longer-lasting, repaired
-  with wool, fire resistant as items. Each gives half a point of fire Spell Power; only the whole set of four adds a point
-  of damage. Worn, they are the owner's own 3D model.
-- At its most (a Focus of Fire and the whole set) the regalia gives **+6 fire Spell Power: Cinderbolt deals 6, Hearthflare
-  7**. Spell Power's own attribute enchantments (Sunfire and its kind) cannot be put on the set.
+- Two fire sets, each piece half a point of fire Spell Power (only four pieces together add a point of damage), repaired
+  with wool, fire resistant as items, worn as the owner's own 3D model:
+  - **Pyromaniac's Hood, Tunic, Pants and Shoes** (light): cloth, a little less protection than leather (5 in all), made
+    of wool alone. Worn with the owner's light fire texture.
+  - **Pyromancer's Hat, Robes, Leggings and Boots** (medium): wool and gold, leather's protection (7 in all), longer-lasting.
+    Worn with the owner's medium fire texture.
+  The owner's light fire texture is the medium sheet, byte for byte, so the two sets look alike when worn; their icons are
+  the owner's own for each piece.
+- At its most (a Focus of Fire and four pieces) the regalia gives **+6 fire Spell Power: Cinderbolt deals 6, Hearthflare
+  7**. Spell Power's own attribute enchantments (Sunfire and its kind) cannot be put on either set.
 - A new codex entry, **A Hearthbinder's Regalia** (Hearth category), shows each recipe and explains the numbers.
 - **Hearthflare now sounds with the owner's four fire recordings**, one picked at random.
 
 ## How it works
 
-- Data (`tools/concordance_ember.py`, part 2 section): the seven items, their recipes, the owner's two slots as Trinkets
-  slots (`data/trinkets/slots/chest/spell_focus.json`, `hand/bracelet.json`, the item tags and
-  `data/trinkets/entities/jugcraft_ember.json`), the repair tag, the codex entry and the Hearthflare sound list.
-  `tools/gear.py` puts the set in `#minecraft:head_armor` and its kin (one writer per file); `tools/concordance_equivalence.py`
-  excludes the seven from the Assayer's Scale.
-- Java (`concordance/ember`): `EmberGear` registers the items, the armour material and two listeners. The foci are
+- Data (`tools/concordance_ember.py`, part 2 section): the eleven items, their recipes, the two fire sets (`ARMOR_SETS`),
+  the owner's two slots as Trinkets slots (`data/trinkets/slots/chest/spell_focus.json`, `hand/bracelet.json`, the item tags
+  and `data/trinkets/entities/jugcraft_ember.json`), a repair tag for each set, the codex entry and the Hearthflare sound
+  list. `tools/gear.py` puts the sets in `#minecraft:head_armor` and its kin (one writer per file);
+  `tools/concordance_equivalence.py` excludes the eleven from the Assayer's Scale.
+- Java (`concordance/ember`): `EmberGear` registers the items, the two sets' armour materials and two listeners. The foci are
   `EmberTrinketItem`s, whose fire Spell Power is a Trinkets callback modifier (as the Resonant Ring's), so it counts only
-  worn in a slot that applies effects, never in the hand. The set is `EmberArmorItem`s (GeckoLib `GeoItem`s), each with
-  a vanilla `spell_power:fire` modifier in its own slot. The bangle's blow is a `ServerLivingEntityEvents.AFTER_DAMAGE`
+  worn in a slot that applies effects, never in the hand. The sets are `EmberArmorItem`s (GeckoLib `GeoItem`s), each with
+  a vanilla `spell_power:fire` modifier in its own slot, and each knowing its set (its texture and equipment asset) and the
+  model it is worn as (`EmberGear.ARMOR_MODEL`, the owner's medium model, for both). The bangle's blow is a `ServerLivingEntityEvents.AFTER_DAMAGE`
   listener: a player's own melee hit (vanilla's player-attack damage, dealt in person, not mounted), with the bangle worn
   and Hearthbinding understood, applies Smoulder through `ConcordanceEffects.apply`. An
   `EnchantmentEvents.ALLOW_ENCHANTING` listener refuses `#spell_power:requires_matching_attribute` enchantments on the
-  set.
-- Client: `EmberClient` hands GeckoLib one `EmberArmorRenderer` (through `EmberHooks`, as the guns do). GeckoLib poses the
+  sets.
+- Client: `EmberClient` hands GeckoLib one `EmberArmorRenderer` for each set (through `EmberHooks`, as the guns do): the
+  set's texture on the owner's model (GeckoLib's `withAltModel`). GeckoLib poses the
   model's armour bones to the wearer; the renderer then hides the slim sleeves (vanilla draws the same sleeves for every
   arm width), draws nothing on babies and small armour stands, and adds vanilla's armour glint on an enchanted piece.
 - Nothing ticks: Spell Power is Trinkets' and vanilla's attribute modifiers; the blow is a damage event.
 
 ## Connections
 
-- Input producer: Overworld gold, amethyst, coal or charcoal, string, diamonds and wool (crafting table).
+- Input producer: Overworld gold, amethyst, coal or charcoal, string, diamonds and wool (crafting table). The light set
+  needs wool alone.
 - Output consumer: Cinderbolt and Hearthflare (fire Spell Power, part 1); creatures through the shared effect boundary
   (the bangle's Smoulder); the step 11 combat benchmark.
 - Technology connection: none needed; the gear is crafted, repaired and enchanted as vanilla gear.
@@ -68,20 +76,23 @@ Primary specialty and supported player role: the Hearthbinders; casters who figh
   | nothing | 0 | 3 | 4 |
   | Lesser Focus of Fire | 2 | 4 | 5 |
   | Focus of Fire | 4 | 5 | 6 |
-  | the whole Pyromancer's set | 2 | 4 | 5 |
+  | four pieces of either set | 2 | 4 | 5 |
   | Focus of Fire and three pieces | 5.5 | 5 | 6 |
   | Focus of Fire and the whole set (the most) | 6 | 6 | 7 |
 
 - **The ceiling, +6, is the best arcane Resonant Ring a player can forge** (affix 2, rune 1, gems 3:
   `tools/concordance_artifice.py`, checked by `check_mod_data`). Cinderbolt stays below the Lance (base 3 against 5).
   The bangle gives no Spell Power, so the two Bracelet slots add nothing to it.
-- **Sunfire is refused on the set.** Spell Power lets its attribute enchantments onto any item that carries one of their
-  attributes; on the set, Sunfire V on four pieces would multiply the regalia's fire (and an arcane ring's) by 1.6, to
-  Cinderbolt 9. `EmberGear` refuses that tag on the set; ordinary armour enchantments still apply.
+- **Sunfire is refused on the sets.** Spell Power lets its attribute enchantments onto any item that carries one of their
+  attributes; on a set, Sunfire V on four pieces would multiply the regalia's fire (and an arcane ring's) by 1.6, to
+  Cinderbolt 9. `EmberGear` refuses that tag on both sets; ordinary armour enchantments still apply.
+- **The two sets give the same fire.** The light set is the cheap one (wool alone, less protection, ×7 durability); the
+  medium set costs five gold for leather's protection and ×10 durability. Pieces mix freely: any four add the point.
 - **Partial sets.** Half points are lost to the rounding, so fewer than four pieces add no damage; the codex and the
   tooltips say so, and `theRegaliaRaisesTheFireToItsCeiling` checks it (three pieces: 5.5, Cinderbolt 5).
-- **Armour.** Leather's 1/3/2/1 (7) at ten times vanilla's base durability (leather: five), leather's enchantability;
-  below chain (12) and iron (15), so it does not undercut fighters' armour.
+- **Armour.** The light set 1/2/1/1 (5) at seven times vanilla's base durability; the medium set leather's 1/3/2/1 (7) at
+  ten times (leather: five); both leather's enchantability. Both are below chain (12) and iron (15), so neither undercuts
+  fighters' armour.
 - **The bangle's blow** is 3 seconds of Smoulder (about 3 damage at vanilla's burning pace, refreshed, never faster), the
   same as the Arms Ember boon on a weapon (`weapons/ArmVariants`) and less than the brazier's Ignite trait (4 s). It costs
   no Focus, as weapon boons cost nothing; it needs Hearthbinding understood, and water, rain, Fire Resistance and fire
@@ -108,8 +119,8 @@ Primary specialty and supported player role: the Hearthbinders; casters who figh
 ## Dependencies and assets
 
 No new dependency. Framework use: **Trinkets Updated** (two slots given by data; the foci's callback modifiers; the
-bangle read on the server), **Spell Power** (the fire attribute; its enchantment tag refused on the set), **GeckoLib**
-(the set's armour renderer: Jugcraft's first GeckoLib armour), **Fabric API** (the damage and enchanting events),
+bangle read on the server), **Spell Power** (the fire attribute; its enchantment tag refused on the sets), **GeckoLib**
+(the sets' armour renderer: Jugcraft's first GeckoLib armour), **Fabric API** (the damage and enchanting events),
 **Modonomicon** (the codex entry).
 
 **Provenance.** Every file below is from the owner's magic collection (`art/owner-library/originals/Magic`, supplied
@@ -132,6 +143,7 @@ They are byte-for-byte copies under Jugcraft names (the model's JSON with its li
 | `sounds/concordance/pyro_3.ogg` | `originals/Magic/assets/ars_jimbaux/sounds/pyro_3.ogg` | `ebdfb5c1b15bfa406dd731e6e1177c5025994c856ecf52e1464a9b07eb824769` |
 | `sounds/concordance/pyro_4.ogg` | `originals/Magic/assets/ars_jimbaux/sounds/pyro_4.ogg` | `72beff23321a75cdd5e36a813d292633ab09d2de17f8291fd00ba97be90dedbf` |
 | `textures/armor/pyromancers.png` | `originals/Magic/assets/ars_jymbaumental/textures/armor/medium_armor_fire.png` | `79206b3ff67aab7418da0db5913f5c11a73cdade1ad04ebe487a879d05f63169` |
+| `textures/armor/pyromaniacs.png` | `originals/Magic/assets/ars_jymbaumental/textures/armor/light_armor_fire.png` | `79206b3ff67aab7418da0db5913f5c11a73cdade1ad04ebe487a879d05f63169` |
 | `textures/gui/sprites/container/slots/bracelet.png` | `originals/Magic/assets/curios/textures/slot/bangle_slot.png` | `feacac923ed1d401bb156632be60df8afd5e084d72c9575ea04ad264312762b2` |
 | `textures/gui/sprites/container/slots/spell_focus.png` | `originals/Magic/assets/curios/textures/slot/an_focus_slot.png` | `26d6888eb48dbbdd0ab57d00bf5318f480ce97982849b9743ce44f7135ba4440` |
 | `textures/item/fire_bangle.png` | `originals/Magic/assets/ars_jymbaumental/textures/item/fire_bangle.png` | `52f4ff0b6f348557e3887a9c083de397e163c074a3b322c0364e3d65c6a6f987` |
@@ -141,11 +153,15 @@ They are byte-for-byte copies under Jugcraft names (the model's JSON with its li
 | `textures/item/pyromancers_hat.png` | `originals/Magic/assets/ars_jymbaumental/textures/item/fire_hat.png` | `cfa17fc8717ea415fc8bb7c802a8880e5f5e6b3a290f43b83094cd498a57d1ca` |
 | `textures/item/pyromancers_leggings.png` | `originals/Magic/assets/ars_jymbaumental/textures/item/fire_leggings.png` | `f9f98a196c763443c13f3995463ba2e733bea870761c22f9b8a74d66ab820237` |
 | `textures/item/pyromancers_robes.png` | `originals/Magic/assets/ars_jymbaumental/textures/item/fire_robes.png` | `3092b3092e05ccf6547fc083a2d513d953ef54ebccbc4af09287b1d97b21ae8b` |
+| `textures/item/pyromaniacs_hood.png` | `originals/Magic/assets/ars_jymbaumental/textures/item/fire_hood.png` | `2ac52a3e61c3a082e746756dd4b71cdf97d7cbf4a30a84ca549b426edd2aff8c` |
+| `textures/item/pyromaniacs_pants.png` | `originals/Magic/assets/ars_jymbaumental/textures/item/fire_pants.png` | `52d9e7f19ea94a9955dd73cd89f7e6dc6549c629329f3ff98fc5a68c3c813c9e` |
+| `textures/item/pyromaniacs_shoes.png` | `originals/Magic/assets/ars_jymbaumental/textures/item/fire_shoes.png` | `06a9993cc122c51a2d66834262e4836ca8cb13d24189d709ff5191872527975d` |
+| `textures/item/pyromaniacs_tunic.png` | `originals/Magic/assets/ars_jymbaumental/textures/item/fire_tunic.png` | `0c4eac28494a9797628595ba90461d9979d41ddae53529cab92dcdd6b33d3789` |
 
 Also taken from the owner's files, as data rather than copies:
-- the seven item models (`models/item/<id>.json`), each the owner's plain generated model with its texture renamed,
+- the eleven item models (`models/item/<id>.json`), each the owner's plain generated model with its texture renamed,
   generated from the library file each run;
-- the seven display names, from `assets/ars_jymbaumental/lang/en_us.json`. Only these names are taken: the tooltips,
+- the eleven display names, from `assets/ars_jymbaumental/lang/en_us.json`. Only these names are taken: the tooltips,
   codex text and recipes are Jugcraft's, and every other string in that file (guide pages, the owner's behaviour notes,
   supporter text) is left out;
 - the two slots, ported from the owner's Curios data (`data/ars_jymbaumental/curios/slots/an_focus.json`, one slot
@@ -154,9 +170,17 @@ Also taken from the owner's files, as data rather than copies:
 - Hearthflare's sound list: the owner's `fire_family_2` event plays these four files (`assets/ars_jimbaux/sounds.json`).
 
 Ids renamed: the owner's `fire_hat`, `fire_robes`, `fire_leggings` and `fire_boots` are `pyromancers_hat`,
-`pyromancers_robes`, `pyromancers_leggings` and `pyromancers_boots` here, because the owner's naming gives `fire_helmet`
-and `fire_leggings_heavy` to the heavy set and Jugcraft's ids cannot be renamed after release. The display names are the
-owner's.
+`pyromancers_robes`, `pyromancers_leggings` and `pyromancers_boots` here, and `fire_hood`, `fire_tunic`, `fire_pants` and
+`fire_shoes` are `pyromaniacs_hood`, `pyromaniacs_tunic`, `pyromaniacs_pants` and `pyromaniacs_shoes`, because the
+owner's naming gives `fire_helmet` and `fire_leggings_heavy` to the heavy set and Jugcraft's ids cannot be renamed after
+release. The display names are the owner's.
+
+The light set's worn texture: at the owner's request ("use my light armor texture for the light set too"), it is the
+owner's `light_armor_fire.png`, imported as `textures/armor/pyromaniacs.png`. That file is the medium sheet byte for byte,
+and like the owner's air, earth and water light textures it is laid out for the medium model (measured: the medium model
+draws 71% of its faces from opaque pixels on each of them, the owner's light model `light_armor_e.geo.json` 21%, since it
+declares a 64x64 sheet). So the light set is worn on the medium model, where the texture fits; the light model is not
+imported.
 
 Part 1's art: the library has no invocation-style spell icons (its fire glyphs are component tiles: Ignite, Flare, Burst,
 Conflagrate) and no fire ward, so the four drawn spell icons stay; the owner's 18x18 `hellfire.png` is their icon for a
@@ -172,24 +196,26 @@ Run here (no game):
   foci's modifiers only through Trinkets; the blow through the effect boundary only; the Sunfire refusal; the
   renderer posing before hiding; each item's model, icon and name; Overworld recipes; the slots; the model's bones and
   UVs; the sounds; the drawn and imported files kept apart).
-- `check_ember_regalia` was mutation-tested: thirteen injected faults (a Java power constant, modifiers on a trinket
+- `check_ember_regalia` was mutation-tested: seventeen injected faults (a Java power constant, modifiers on a trinket
   item, the renderer not posing the bones, the client hook not set, the blow igniting directly, Sunfire allowed, a
   Nether ingredient, a renamed armour bone, a drawn Hearthflare cue, a slot without the owner's icon, a renamed display
-  name, a piece missing from its armour tag, the benchmark's ceiling) were each reported, and a changed byte in an
-  imported icon was reported by `tools/owner_art.py --check`; the clean tree passes.
+  name, a piece missing from its armour tag, the benchmark's ceiling, a light piece registered in the medium set, the
+  light set's protection, its repair tag, a light piece missing from its armour tag) were each reported, and a changed
+  byte in an imported icon was reported by `tools/owner_art.py --check`; the clean tree passes.
 - `python3 scripts/check_repository.py` and `python3 tools/check_icon_maps.py` pass (the icon check's eleven warnings are
   older and about other items).
 - The provenance point below was re-checked from the files: 166 differing pixels of 8,192; the top half equal to the
   medium sheet; the Blockbench project's embedded `firenando_magma.png` pixel-identical to the library's.
 
 Game tests added (they run in CI's Build workflow; results are recorded below once it has run):
-- `ConcordanceEmberGearGameTests` (server): the seven items, slots and the set's numbers and tags; the foci's Trinkets
-  modifiers; the regalia raising Cinderbolt to 6, and three pieces adding nothing; the bangle's blow and its five
-  refusals (before Hearthbinding, not a melee hit, a claimed creature, from the saddle, bangle off); Sunfire refused on
-  the set and Protection accepted.
-- `ConcordanceEmberGearClientGameTests` (client): GeckoLib's renderer and the owner's model with every bone; screenshots
-  of the set on stands, enchanted, on a zombie and on a small stand, in four views; the player standing and sneaking;
-  the real Trinkets slot on the ticking player (Focus of Fire and the set: 6; the lesser focus: 4); the seven icons.
+- `ConcordanceEmberGearGameTests` (server): the eleven items, slots and both sets' numbers, tags, sets and model; the
+  foci's Trinkets modifiers; the regalia raising Cinderbolt to 6, and three pieces adding nothing; the bangle's blow and
+  its five refusals (before Hearthbinding, not a melee hit, a claimed creature, from the saddle, bangle off); Sunfire
+  refused on both sets and Protection accepted.
+- `ConcordanceEmberGearClientGameTests` (client): GeckoLib's renderer for all eight pieces, the owner's model with every
+  bone, both sets' textures; screenshots of the light and medium sets on stands side by side, the medium set enchanted,
+  on a zombie and on a small stand, in four views; the player standing and sneaking; the real Trinkets slot on the
+  ticking player (Focus of Fire and the set: 6; the lesser focus: 4); the eleven icons.
 - `ConcordanceBaselineGameTests`: the new character through the acceptance rules.
 
 Not yet run: any CI run for this part; a person looking at the screenshots (the worn model, the sleeves following a
@@ -202,16 +228,16 @@ No worldgen, creatures, loot or seasons.
 
 ## Rollout and open questions
 
-- New stable ids: items `jugcraft:lesser_fire_focus`, `fire_focus`, `fire_bangle`, `pyromancers_hat`, `pyromancers_robes`,
-  `pyromancers_leggings`, `pyromancers_boots`; equipment asset `jugcraft:pyromancers`; GeckoLib model
-  `jugcraft:armor/pyromancers`; tag `jugcraft:repairs_pyromancers_gear`; Trinkets slots `chest/spell_focus` and
+- New stable ids: items `jugcraft:lesser_fire_focus`, `fire_focus`, `fire_bangle`, `pyromaniacs_hood`, `pyromaniacs_tunic`,
+  `pyromaniacs_pants`, `pyromaniacs_shoes`, `pyromancers_hat`, `pyromancers_robes`, `pyromancers_leggings`,
+  `pyromancers_boots`; equipment assets `jugcraft:pyromaniacs` and `jugcraft:pyromancers`; GeckoLib model
+  `jugcraft:armor/pyromancers`; tags `jugcraft:repairs_pyromaniacs_gear` and `jugcraft:repairs_pyromancers_gear`; Trinkets
+  slots `chest/spell_focus` and
   `hand/bracelet` (`data/trinkets/entities/jugcraft_ember.json`); codex entry `hearth/regalia`; sound files
   `jugcraft:concordance/pyro_1` to `pyro_4`. Save compatibility: additive.
 - **Deferred, each for a concrete reason:**
-  - **Pyromaniac's (light) set:** the owner's `light_armor_fire.png` is byte for byte the medium sheet, laid out for
-    the medium model; the light model (`light_armor_e.geo.json`) declares a 64x64 sheet and on this one would draw
-    mostly empty pixels. It needs the owner's light texture, or the owner's choice to wear the light items as the medium
-    model.
+  - **The owner's light model** (`light_armor_e.geo.json`): no light-layout fire texture exists for it (see the light
+    set's texture above). A light-layout fire sheet from the owner would let the light set wear its own shape.
   - **Netherguard's (heavy) set:** one file-specific point (raised once, per PROVENANCE.md): rows 64-127 of
     `textures/armor/heavy_armor_fire.png` differ in 166 of 8,192 pixels from `textures/entity/firenando_magma.png`,
     and that PNG is pixel-identical to a texture embedded in `geo/fire_golem.bbmodel`, a Blockbench project dated
@@ -220,7 +246,7 @@ No worldgen, creatures, loot or seasons.
     the helm's pivot (y 20 to 24 in the runtime copy, so it turns with the head).
   - **Caster Tome of Fire:** a tome that casts one fixed invocation needs a new instrument gate, and the owner's tome
     stores mana, which the Focus rules forbid.
-  - **The foci's cheaper invocations and the set's fire ward:** the cost floor leaves almost no room (mastered
+  - **The foci's cheaper invocations and the sets' fire ward:** the cost floor leaves almost no room (mastered
     Hearthspark is at it), and Fabric API has no damage-reduction event (it would need a mixin).
   - **Worn foci and bangles** are not drawn on the body (the library has no worn model for them).
 - Later slices (the owner's files mapped, not imported): the Flarecannon familiar and its charm, the fire turret, fire

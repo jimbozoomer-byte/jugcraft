@@ -220,22 +220,43 @@ ROBE_PIECE_POWER = 0.5  # all four pieces: +2, one more damage; fewer than four 
 # weapon sets a struck creature alight for the same three seconds).
 BANGLE_SMOULDER_TICKS = 60
 
-# The Pyromancer's set: leather's protection (1/3/2/1, 7 in all), a little longer-lasting (wool and gold), leather's
-# enchantability; repaired with wool. Durability is vanilla's per-slot base times PYROMANCERS_DURABILITY.
-ARMOR = {"pyromancers_hat": "helmet", "pyromancers_robes": "chestplate", "pyromancers_leggings": "leggings",
-         "pyromancers_boots": "boots"}
-PYROMANCERS_DEFENSE = {"helmet": 1, "chestplate": 3, "leggings": 2, "boots": 1}
-PYROMANCERS_DURABILITY = 10
-PYROMANCERS_ENCHANTABILITY = 15
-PYROMANCERS_REPAIR_TAG = rid("repairs_pyromancers_gear")
-# The GeckoLib model the set is worn as (assets/jugcraft/geckolib/models/armor/<name>.geo.json, textures/armor/<name>.png)
-# and its equipment asset id (no equipment JSON: GeckoLib draws the pieces, so vanilla draws no flat layer).
-PYROMANCERS_MODEL = "pyromancers"
+# The two fire sets, each its own items, protection and worn texture; each piece gives ROBE_PIECE_POWER fire Spell Power
+# in its slot, so a whole set (or any four pieces) adds a point of damage. Durability is vanilla's per-slot base times
+# "durability"; both have leather's enchantability and are repaired with wool.
+# - the Pyromaniac's (light): cloth only, a little less protection than leather (1/2/1/1, 5);
+# - the Pyromancer's (medium): wool and gold, leather's protection (1/3/2/1, 7), longer-lasting.
+# Both are worn as the owner's medium model, "pyromancers" (assets/jugcraft/geckolib/models/armor/<model>.geo.json): the
+# owner's light fire texture is drawn for that model (it is the medium sheet, byte for byte, as their air, earth and water
+# light textures are laid out for it too), so the light set wears it there. Each set's texture is textures/armor/<set>.png
+# and its equipment asset jugcraft:<set> (no equipment JSON: GeckoLib draws the pieces, so vanilla draws no flat layer).
+ARMOR_SETS = {
+    "pyromaniacs": {"name": "Pyromaniac's",
+                    "pieces": {"pyromaniacs_hood": "helmet", "pyromaniacs_tunic": "chestplate", "pyromaniacs_pants": "leggings",
+                               "pyromaniacs_shoes": "boots"},
+                    "defense": {"helmet": 1, "chestplate": 2, "leggings": 1, "boots": 1}, "durability": 7,
+                    "model": "pyromancers", "texture": "assets/ars_jymbaumental/textures/armor/light_armor_fire.png"},
+    "pyromancers": {"name": "Pyromancer's",
+                    "pieces": {"pyromancers_hat": "helmet", "pyromancers_robes": "chestplate", "pyromancers_leggings": "leggings",
+                               "pyromancers_boots": "boots"},
+                    "defense": {"helmet": 1, "chestplate": 3, "leggings": 2, "boots": 1}, "durability": 10,
+                    "model": "pyromancers", "texture": "assets/ars_jymbaumental/textures/armor/medium_armor_fire.png"},
+}
+ARMOR_ENCHANTABILITY = 15
+# Every piece of both sets: item -> armour piece.
+ARMOR = {item: piece for armour in ARMOR_SETS.values() for item, piece in armour["pieces"].items()}
+SET_OF = {item: name for name, armour in ARMOR_SETS.items() for item in armour["pieces"]}
+# The owner's models the sets are worn as: model -> its file under originals/Magic.
+ARMOR_MODELS = {"pyromancers": "assets/ars_jymbaumental/geo/medium_armor_e.geo.json"}
 # The model's bones GeckoLib poses to the wearer (GeoArmorRenderer.getBoneNameForSegment), and the slim sleeves the
 # client hides (vanilla draws the same sleeves for both arm widths).
 ARMOR_BONES = ["armorHead", "armorBody", "armorRightArm", "armorLeftArm", "armorRightLeg", "armorLeftLeg",
                "armorRightBoot", "armorLeftBoot"]
 SLIM_BONES = ["armorRightArmSlim", "armorLeftArmSlim"]
+
+
+def repair_tag(armour_set):
+    return rid(f"repairs_{armour_set}_gear")
+
 
 # The owner's two slots, ported from their Curios data to Trinkets slots players get (data/trinkets/slots/<group>/<slot>
 # .json): an_focus ("Spell Focus", one) and bracelet (two, the bangle's). Each draws the owner's own slot icon.
@@ -253,6 +274,8 @@ FIRE_POWER = {"lesser_fire_focus": LESSER_FOCUS_POWER, "fire_focus": FOCUS_POWER
 # lang file: only these names are taken from it; the tooltips are Jugcraft's own).
 OWNER_ITEMS = {
     "lesser_fire_focus": "lesser_fire_focus", "fire_focus": "fire_focus", "fire_bangle": "fire_bangle",
+    "pyromaniacs_hood": "fire_hood", "pyromaniacs_tunic": "fire_tunic", "pyromaniacs_pants": "fire_pants",
+    "pyromaniacs_shoes": "fire_shoes",
     "pyromancers_hat": "fire_hat", "pyromancers_robes": "fire_robes", "pyromancers_leggings": "fire_leggings",
     "pyromancers_boots": "fire_boots",
 }
@@ -271,19 +294,26 @@ ITEMS = {
         "name": "Fire Bangle",
         "tooltip": f"Worn in a Bracelet slot: once you understand Hearthbinding, your melee blows leave the creature "
                    f"smouldering for {BANGLE_SMOULDER_TICKS // 20} seconds."},
+    "pyromaniacs_hood": {"name": "Pyromaniac's Hood"},
+    "pyromaniacs_tunic": {"name": "Pyromaniac's Tunic"},
+    "pyromaniacs_pants": {"name": "Pyromaniac's Pants"},
+    "pyromaniacs_shoes": {"name": "Pyromaniac's Shoes"},
     "pyromancers_hat": {"name": "Pyromancer's Hat"},
     "pyromancers_robes": {"name": "Pyromancer's Robes"},
     "pyromancers_leggings": {"name": "Pyromancer's Leggings"},
     "pyromancers_boots": {"name": "Pyromancer's Boots"},
 }
-for _piece in ARMOR:
-    ITEMS[_piece]["tooltip"] = ("The Pyromancer's regalia: half a point of fire Spell Power. The whole set of four adds a "
-                                "point to Cinderbolt and Hearthflare.")
+for _piece, _set in SET_OF.items():
+    ITEMS[_piece]["tooltip"] = (f"The {ARMOR_SETS[_set]['name']} regalia: half a point of fire Spell Power. Four pieces "
+                                "together add a point to Cinderbolt and Hearthflare.")
 BLOCKS = {}
 
 # Shaped crafting from Overworld materials (any time: the regalia's power matters only to Hearthbinding's invocations,
 # and the bangle's blow needs Hearthbinding understood). The owner's own recipes use another mod's machines and Nether
-# or End items, so they are not imported.
+# or End items, so they are not imported. The light set is cloth (wool in leather armour's shapes); the medium set is
+# wool and gold.
+_WOOL = {"W": "#minecraft:wool"}
+_WOOL_GOLD = {"W": "#minecraft:wool", "G": "minecraft:gold_ingot"}
 RECIPES = {
     "lesser_fire_focus": {"pattern": ["SGS", "CAC", " G "],
                           "key": {"S": "minecraft:string", "G": "minecraft:gold_ingot", "C": "#minecraft:coals",
@@ -292,10 +322,14 @@ RECIPES = {
                    "key": {"D": "minecraft:diamond", "G": "minecraft:gold_ingot", "L": rid("lesser_fire_focus")}},
     "fire_bangle": {"pattern": ["GCG", "G G", " A "],
                     "key": {"G": "minecraft:gold_ingot", "C": "#minecraft:coals", "A": "minecraft:amethyst_shard"}},
-    "pyromancers_hat": {"pattern": ["WGW", "W W"], "key": {"W": "#minecraft:wool", "G": "minecraft:gold_ingot"}},
-    "pyromancers_robes": {"pattern": ["W W", "WGW", "WWW"], "key": {"W": "#minecraft:wool", "G": "minecraft:gold_ingot"}},
-    "pyromancers_leggings": {"pattern": ["WGW", "W W", "W W"], "key": {"W": "#minecraft:wool", "G": "minecraft:gold_ingot"}},
-    "pyromancers_boots": {"pattern": ["W W", "G G"], "key": {"W": "#minecraft:wool", "G": "minecraft:gold_ingot"}},
+    "pyromaniacs_hood": {"pattern": ["WWW", "W W"], "key": _WOOL},
+    "pyromaniacs_tunic": {"pattern": ["W W", "WWW", "WWW"], "key": _WOOL},
+    "pyromaniacs_pants": {"pattern": ["WWW", "W W", "W W"], "key": _WOOL},
+    "pyromaniacs_shoes": {"pattern": ["W W", "W W"], "key": _WOOL},
+    "pyromancers_hat": {"pattern": ["WGW", "W W"], "key": _WOOL_GOLD},
+    "pyromancers_robes": {"pattern": ["W W", "WGW", "WWW"], "key": _WOOL_GOLD},
+    "pyromancers_leggings": {"pattern": ["WGW", "W W", "W W"], "key": _WOOL_GOLD},
+    "pyromancers_boots": {"pattern": ["W W", "G G"], "key": _WOOL_GOLD},
 }
 
 # Every owner file this slice uses, copied as supplied by tools/owner_art.py: runtime path under assets/jugcraft ->
@@ -303,8 +337,8 @@ RECIPES = {
 # (LF, as Git stores the mod's text).
 OWNER_FILES = {
     **{f"textures/item/{item}.png": f"assets/ars_jymbaumental/textures/item/{owner}.png" for item, owner in OWNER_ITEMS.items()},
-    f"textures/armor/{PYROMANCERS_MODEL}.png": "assets/ars_jymbaumental/textures/armor/medium_armor_fire.png",
-    f"geckolib/models/armor/{PYROMANCERS_MODEL}.geo.json": "assets/ars_jymbaumental/geo/medium_armor_e.geo.json",
+    **{f"textures/armor/{name}.png": armour["texture"] for name, armour in ARMOR_SETS.items()},
+    **{f"geckolib/models/armor/{model}.geo.json": source for model, source in ARMOR_MODELS.items()},
     **{f"textures/gui/sprites/container/slots/{info['icon']}.png": f"assets/curios/textures/slot/{owner}.png"
        for info, owner in ((TRINKET_SLOTS["chest/spell_focus"], "an_focus_slot"), (TRINKET_SLOTS["hand/bracelet"], "bangle_slot"))},
     **{f"sounds/{name}.ogg": f"assets/ars_jimbaux/sounds/{name.split('/')[1]}.ogg"
@@ -381,7 +415,7 @@ def codex():
                 ("text", "A Hearthbinder's Regalia",
                  "The Hearthbinders' gear gives **fire Spell Power**. Cinderbolt and Hearthflare add half a point of "
                  "damage for each whole point of it: two points make one more. Wear a **focus** in the Spell Focus "
-                 "slot and the **Pyromancer's** set as armour; the most is "
+                 "slot and a fire set as armour; the most is "
                  f"+{FOCUS_POWER + 4 * ROBE_PIECE_POWER:g}, so Cinderbolt deals 6 and Hearthflare 7. The **Fire "
                  "Bangle** goes in a Bracelet slot. None of it holds Focus: Focus is yours alone."),
                 ("crafting_recipe", "Lesser Focus of Fire",
@@ -394,15 +428,14 @@ def codex():
                  "Once you understand Hearthbinding, your melee blows leave the creature smouldering for "
                  f"{BANGLE_SMOULDER_TICKS // 20} seconds, wherever you may harm it. It gives no Spell Power, and a "
                  "second bangle adds nothing.", rid("fire_bangle")),
-                ("crafting_recipe", "Pyromancer's Hat",
-                 "Leather's protection and half a point of fire Spell Power. Only the whole set of four raises fire "
-                 "damage, by one.", rid("pyromancers_hat")),
-                ("crafting_recipe", "Pyromancer's Robes", "Leather's protection and half a point of fire Spell Power.",
-                 rid("pyromancers_robes")),
-                ("crafting_recipe", "Pyromancer's Leggings", "Leather's protection and half a point of fire Spell Power.",
-                 rid("pyromancers_leggings")),
-                ("crafting_recipe", "Pyromancer's Boots", "Leather's protection and half a point of fire Spell Power. "
-                 "Spell Power's own enchantments cannot be put on the regalia.", rid("pyromancers_boots")),
+                ("text", "Two Fire Sets",
+                 "Each piece of either set gives half a point of fire Spell Power, so only four pieces together raise "
+                 "fire damage, by one. The **Pyromaniac's** set is cloth: a little less protection than leather. The "
+                 "**Pyromancer's** set, wool and gold, has leather's protection and lasts longer. Spell Power's own "
+                 "enchantments cannot be put on either."),
+                *[("crafting_recipe", ITEMS[item]["name"], f"{ARMOR_SETS[SET_OF[item]]['name']} set: "
+                   f"{sum(ARMOR_SETS[SET_OF[item]]['defense'].values())} protection for the whole set.", rid(item))
+                  for item in ARMOR],
             ],
         },
     }
@@ -427,7 +460,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
         write(data / "recipe" / f"{item}.json", {
             "fabric:load_conditions": condition("concordance"), "type": "minecraft:crafting_shaped", "category": "equipment",
             "pattern": recipe["pattern"], "key": recipe["key"], "result": {"id": rid(item), "count": 1}})
-    write(data / "tags" / "item" / f"{PYROMANCERS_REPAIR_TAG.split(':')[1]}.json", {"values": ["#minecraft:wool"]})
+    for armour_set in ARMOR_SETS:
+        write(data / "tags" / "item" / f"{repair_tag(armour_set).split(':')[1]}.json", {"values": ["#minecraft:wool"]})
     # The owner's two slots as Trinkets slots (their icons are the owner's, tools/owner_art.py), the items each takes, and
     # players' having them.
     trinkets = data.parent / "trinkets"

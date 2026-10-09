@@ -42,7 +42,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
-import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.spell_power.api.SpellPowerTags;
 
@@ -54,9 +53,10 @@ import net.spell_power.api.SpellPowerTags;
  * ({@link EmberTrinketItem}), which Cinderbolt and Hearthflare scale with;</li>
  * <li>the Fire Bangle, worn in a Bracelet slot: a Hearthbinder's melee blows leave the creature smouldering
  * ({@link #afterDamage}), through the shared effect boundary, so PvP, parties, claims and tolerance all apply;</li>
- * <li>the Pyromancer's Hat, Robes, Leggings and Boots: leather's protection and half a point of fire Spell Power each,
- * worn as the owner's GeckoLib model ({@link EmberArmorItem}). Spell Power's own attribute enchantments (Sunfire and its
- * kind) are refused on them, so the regalia's fire stays at most {@link #FOCUS_POWER} plus the set's.</li>
+ * <li>two fire sets, the Pyromaniac's (light: hood, tunic, pants, shoes; cloth) and the Pyromancer's (medium: hat, robes,
+ * leggings, boots; leather's protection), half a point of fire Spell Power a piece, worn as the owner's GeckoLib model
+ * ({@link EmberArmorItem}) with each set's own texture. Spell Power's own attribute enchantments (Sunfire and its kind)
+ * are refused on them, so the regalia's fire stays at most {@link #FOCUS_POWER} plus a set's.</li>
  * </ul>
  * Nothing here ticks: the Spell Power is Trinkets' and vanilla's attribute modifiers, and the blow is a damage event.
  */
@@ -64,21 +64,24 @@ public final class EmberGear {
 	/** Fire Spell Power, in points above the school's base (tools/concordance_ember.py). */
 	public static final double LESSER_FOCUS_POWER = 2.0;
 	public static final double FOCUS_POWER = 4.0;
-	/** Each Pyromancer's piece; the whole set gives two points, one more damage. */
+	/** Each piece of a fire set; four pieces give two points, one more damage. */
 	public static final double ROBE_PIECE_POWER = 0.5;
 	/** The Fire Bangle's blow: Smoulder for this long. */
 	public static final int BANGLE_SMOULDER_TICKS = 60;
-	/** The Pyromancer's set: vanilla's per-slot base durability times this, and its enchantability (leather's). */
+	/** Vanilla's per-slot base durability times these: the Pyromaniac's (light, cloth) and the Pyromancer's (medium). */
+	public static final int PYROMANIACS_DURABILITY = 7;
 	public static final int PYROMANCERS_DURABILITY = 10;
-	public static final int PYROMANCERS_ENCHANTABILITY = 15;
-	public static final TagKey<Item> REPAIRS_PYROMANCERS = TagKey.create(Registries.ITEM, Jugcraft.id("repairs_pyromancers_gear"));
-	/** The set's equipment asset: GeckoLib draws the pieces, so it has no equipment JSON and vanilla draws no flat layer. */
-	public static final ResourceKey<EquipmentAsset> PYROMANCERS_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID,
-			Jugcraft.id("pyromancers"));
-	/** Leather's protection (1/3/2/1), a little longer-lasting, repaired with wool. */
-	public static final ArmorMaterial PYROMANCERS_ARMOR = new ArmorMaterial(PYROMANCERS_DURABILITY,
-			Map.of(ArmorType.BOOTS, 1, ArmorType.LEGGINGS, 2, ArmorType.CHESTPLATE, 3, ArmorType.HELMET, 1, ArmorType.BODY, 3),
-			PYROMANCERS_ENCHANTABILITY, SoundEvents.ARMOR_EQUIP_LEATHER, 0.0F, 0.0F, REPAIRS_PYROMANCERS, PYROMANCERS_ASSET);
+	/** Both sets' enchantability (leather's). */
+	public static final int ARMOR_ENCHANTABILITY = 15;
+	/**
+	 * The GeckoLib model both sets are worn as: the owner's medium model. Their light fire texture is drawn for it (it is the
+	 * medium sheet, byte for byte), so the light set wears it there, with its own texture.
+	 */
+	public static final String ARMOR_MODEL = "pyromancers";
+	/** The Pyromaniac's: a little less protection than leather (1/2/1/1), repaired with wool. */
+	public static final ArmorMaterial PYROMANIACS_ARMOR = material("pyromaniacs", PYROMANIACS_DURABILITY, 1, 2, 1, 1);
+	/** The Pyromancer's: leather's protection (1/3/2/1), a little longer-lasting, repaired with wool. */
+	public static final ArmorMaterial PYROMANCERS_ARMOR = material("pyromancers", PYROMANCERS_DURABILITY, 1, 3, 2, 1);
 	/** What the bangle's blow gives: Smoulder, harmful, as Cinderbolt's word does. */
 	static final EffectSpec SMOULDER_ON_HIT = new EffectSpec(EffectKind.STATUS, Intent.HARMFUL, 0, BANGLE_SMOULDER_TICKS,
 			"jugcraft:smoulder", Stacking.STRONGEST, null);
@@ -86,7 +89,7 @@ public final class EmberGear {
 	public static Item LESSER_FIRE_FOCUS;
 	public static Item FIRE_FOCUS;
 	public static Item FIRE_BANGLE;
-	/** The Pyromancer's set by id, hat to boots. */
+	/** Both fire sets' pieces by id, the Pyromaniac's then the Pyromancer's, head to feet. */
 	public static final Map<String, Item> ARMOR = new LinkedHashMap<>();
 
 	private EmberGear() {
@@ -101,13 +104,17 @@ public final class EmberGear {
 				new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON).fireResistant());
 		Holder<Attribute> fire = BuiltInRegistries.ATTRIBUTE.get(Identifier.parse(Ember.SCHOOL))
 				.orElseThrow(() -> new IllegalStateException("Spell Power's fire attribute is not registered: " + Ember.SCHOOL));
-		armor("pyromancers_hat", ArmorType.HELMET, EquipmentSlotGroup.HEAD, fire);
-		armor("pyromancers_robes", ArmorType.CHESTPLATE, EquipmentSlotGroup.CHEST, fire);
-		armor("pyromancers_leggings", ArmorType.LEGGINGS, EquipmentSlotGroup.LEGS, fire);
-		armor("pyromancers_boots", ArmorType.BOOTS, EquipmentSlotGroup.FEET, fire);
+		armor("pyromaniacs_hood", "pyromaniacs", PYROMANIACS_ARMOR, ArmorType.HELMET, EquipmentSlotGroup.HEAD, fire);
+		armor("pyromaniacs_tunic", "pyromaniacs", PYROMANIACS_ARMOR, ArmorType.CHESTPLATE, EquipmentSlotGroup.CHEST, fire);
+		armor("pyromaniacs_pants", "pyromaniacs", PYROMANIACS_ARMOR, ArmorType.LEGGINGS, EquipmentSlotGroup.LEGS, fire);
+		armor("pyromaniacs_shoes", "pyromaniacs", PYROMANIACS_ARMOR, ArmorType.BOOTS, EquipmentSlotGroup.FEET, fire);
+		armor("pyromancers_hat", "pyromancers", PYROMANCERS_ARMOR, ArmorType.HELMET, EquipmentSlotGroup.HEAD, fire);
+		armor("pyromancers_robes", "pyromancers", PYROMANCERS_ARMOR, ArmorType.CHESTPLATE, EquipmentSlotGroup.CHEST, fire);
+		armor("pyromancers_leggings", "pyromancers", PYROMANCERS_ARMOR, ArmorType.LEGGINGS, EquipmentSlotGroup.LEGS, fire);
+		armor("pyromancers_boots", "pyromancers", PYROMANCERS_ARMOR, ArmorType.BOOTS, EquipmentSlotGroup.FEET, fire);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(EmberGear::afterDamage);
-		// Spell Power's attribute enchantments (Sunfire and its kind) would multiply the set's fire, and an arcane ring's,
-		// past the regalia's ceiling: refuse them on the set. Spell Power itself only ever refuses, never forces, so this
+		// Spell Power's attribute enchantments (Sunfire and its kind) would multiply a set's fire, and an arcane ring's,
+		// past the regalia's ceiling: refuse them on the sets. Spell Power itself only ever refuses, never forces, so this
 		// holds whichever listener runs first.
 		EnchantmentEvents.ALLOW_ENCHANTING.register((enchantment, target, context) -> target.getItem() instanceof EmberArmorItem
 				&& enchantment.is(SpellPowerTags.Enchantments.REQUIRES_MATCHING_ATTRIBUTE) ? TriState.FALSE : TriState.DEFAULT);
@@ -119,11 +126,20 @@ public final class EmberGear {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> ARMOR.values().forEach(output::accept));
 	}
 
-	private static void armor(String id, ArmorType type, EquipmentSlotGroup group, Holder<Attribute> fire) {
-		Item.Properties properties = new Item.Properties().humanoidArmor(PYROMANCERS_ARMOR, type);
-		properties.attributes(PYROMANCERS_ARMOR.createAttributes(type).withModifierAdded(fire,
+	/** A fire set's material: its durability and protection (helmet, chestplate, leggings, boots), its tag and asset. */
+	private static ArmorMaterial material(String set, int durability, int helmet, int chestplate, int leggings, int boots) {
+		return new ArmorMaterial(durability, Map.of(ArmorType.BOOTS, boots, ArmorType.LEGGINGS, leggings, ArmorType.CHESTPLATE,
+				chestplate, ArmorType.HELMET, helmet, ArmorType.BODY, chestplate), ARMOR_ENCHANTABILITY, SoundEvents.ARMOR_EQUIP_LEATHER,
+				0.0F, 0.0F, TagKey.create(Registries.ITEM, Jugcraft.id("repairs_" + set + "_gear")),
+				ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id(set)));
+	}
+
+	private static void armor(String id, String set, ArmorMaterial material, ArmorType type, EquipmentSlotGroup group,
+			Holder<Attribute> fire) {
+		Item.Properties properties = new Item.Properties().humanoidArmor(material, type);
+		properties.attributes(material.createAttributes(type).withModifierAdded(fire,
 				new AttributeModifier(Jugcraft.id(id + "_fire"), ROBE_PIECE_POWER, AttributeModifier.Operation.ADD_VALUE), group));
-		ARMOR.put(id, item(id, EmberArmorItem::new, properties.fireResistant()));
+		ARMOR.put(id, item(id, piece -> new EmberArmorItem(piece, set, ARMOR_MODEL), properties.fireResistant()));
 	}
 
 	private static Item item(String id, Function<Item.Properties, Item> factory, Item.Properties properties) {
