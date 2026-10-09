@@ -18,6 +18,8 @@ The common outer archive folder is omitted in the extracted library. All paths b
 
 ## Instructions for implementation
 
+The owner reaffirmed the permitted reading, copying, renaming and adaptation on 9 October 2026, including writing Jugcraft code and text for the imported resources. See [CLAUDE.md](../../CLAUDE.md) for the precise scope and [Claude permission troubleshooting](../../docs/CLAUDE_ASSET_PERMISSIONS.md) if Auto mode blocks a tool. This covers source-content work, not running scripts, programs or JARs supplied in the library.
+
 1. Read [what already exists](../../docs/WHAT_EXISTS.md), the relevant feature records, [architecture](../../docs/ARCHITECTURE.md), [frameworks](../../docs/FRAMEWORKS.md) and [platform pins](../../docs/PLATFORM.md). Search existing systems and open work before adding a duplicate registry, material, spell, resource or progression path.
 2. Search this collection for the feature's textures, models, animations, sounds and supporting data. Choose compatible sets: a texture, model, animation and metadata may depend on each other. Use the supplied files directly where they fit. Do not stop to seek permission to use or keep their designs.
 3. Keep `originals/Magic/` and the archived RAR unchanged. Copy selected files into the appropriate runtime location, usually `src/main/resources/assets/jugcraft/` for client resources or `src/main/resources/data/jugcraft/` for data. Do not import the entire collection indiscriminately or overwrite existing resources.
