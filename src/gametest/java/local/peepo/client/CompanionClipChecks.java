@@ -19,8 +19,8 @@ public final class CompanionClipChecks {
                     check.accept(hand.distance(left?p.leftX:p.rightX,left?p.leftY:p.rightY,left?p.leftZ:p.rightZ)<.001F,"both hands follow hoe handle");
                 }
                 var body=root.getChild("body");bodies.add(body.y+":"+body.z+":"+body.xRot);
-                var pose=new com.mojang.blaze3d.vertex.PoseStack();PeepoRenderer.knifePose(pose,p);
-                check.accept(pose.last().pose().getScale(new org.joml.Vector3f()).distance(1,1,1)<.00001F,"hoe retains native size");
+                var pose=new com.mojang.blaze3d.vertex.PoseStack();PeepoRenderer.hoePose(pose,p);
+                check.accept(pose.last().pose().getScale(new org.joml.Vector3f()).distance(.65F,.65F,.65F)<.00001F,"hoe uses reduced size independently of arm stretch");
                 if(tick==38){var tip=pose.last().pose().transformPosition(new org.joml.Vector3f(.25F,.25F,0));
                     check.accept(Math.abs(tip.y-25F/16)<.001F && Math.abs(tip.z+1)<.001F,"hoe head reaches farmland at contact");
                     check.accept(body.xRot>.5F && root.getChild("left_leg").xRot>0,"torso and braced legs follow through");

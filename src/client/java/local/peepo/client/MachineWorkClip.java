@@ -8,7 +8,7 @@ final class MachineWorkClip {
     static final float VALVE_RADIUS=2.6F, VALVE_Y=19.6F, LEVER_GRIP=-3.4F, WRENCH_GRIP=2.25F;
     float x,y,z,xRot,zRot,leftX,leftY,leftZ,rightX,rightY,rightZ;
     float bodyPitch,bodyRoll,bodyX,bodyY;
-    static final float HOE_REACH=11.313708F;
+    static final float HOE_SCALE=.65F, HOE_REACH=11.313708F*HOE_SCALE;
 
     void harvest(float phase,float groundY,float cropZ){
         float t=Mth.clamp(phase/Mth.TWO_PI,0,1);
@@ -25,8 +25,8 @@ final class MachineWorkClip {
         bodyRoll=0;bodyX=0;bodyY=Mth.lerp(strike,-lift*.25F,.65F);
         float c=Mth.cos(xRot),s=Mth.sin(xRot);
         leftX=.22F;rightX=-.22F;
-        leftY=y+.65F*c;rightY=y-.65F*c;
-        leftZ=z+.65F*s;rightZ=z-.65F*s;
+        leftY=y+.65F*HOE_SCALE*c;rightY=y-.65F*HOE_SCALE*c;
+        leftZ=z+.65F*HOE_SCALE*s;rightZ=z-.65F*HOE_SCALE*s;
     }
 
     void chop(float phase,float boardY,float boardZ){

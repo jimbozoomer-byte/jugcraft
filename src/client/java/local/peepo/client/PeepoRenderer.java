@@ -158,7 +158,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
                 state.toolPose.harvest(state.workPhase,(float)(24-delta.y*16),(float)((delta.x*Math.sin(a)-delta.z*Math.cos(a))*16));
             }
         }
-        // NONE retains the native item model dimensions: there is no companion .35 scale.
+        // NONE supplies the original item model; the harvesting layer applies its own hoe scale.
         items.updateForLiving(state.knife,state.work==WorkAnimation.CHOP?entity.getMainHandItem():net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.NONE,entity);
         items.updateForLiving(state.hoe,state.work==WorkAnimation.HARVEST?entity.getMainHandItem():net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.NONE,entity);
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;
@@ -177,18 +177,26 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         HoeLayer(PeepoRenderer renderer){super(renderer);}
         @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
             if(state.isInvisible || state.work!=WorkAnimation.HARVEST || state.hoe.isEmpty())return;
-            pose.pushPose();knifePose(pose,state.toolPose);
+            pose.pushPose();hoePose(pose,state.toolPose);
             state.hoe.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,state.outlineColor);pose.popPose();
         }
     }
     static void knifePose(PoseStack pose,MachineWorkClip p){
+        workItemPose(pose,p,1,90);
+    }
+    static void hoePose(PoseStack pose,MachineWorkClip p){
+        // Reverse the blade around the handle: the working edge leads the downstroke.
+        workItemPose(pose,p,MachineWorkClip.HOE_SCALE,-90);
+    }
+    private static void workItemPose(PoseStack pose,MachineWorkClip p,float scale,float facing){
         pose.translate(p.x/16,p.y/16,p.z/16);
         pose.rotateDegrees(com.mojang.math.Axis.XP,p.xRot*net.minecraft.util.Mth.RAD_TO_DEG);
-        pose.rotateDegrees(com.mojang.math.Axis.YP,90);
+        pose.scale(scale,scale,scale);
+        pose.rotateDegrees(com.mojang.math.Axis.YP,facing);
         pose.rotateDegrees(com.mojang.math.Axis.ZP,-45);
         pose.rotateDegrees(com.mojang.math.Axis.XP,180);
         // Diagonal knife/hoe sprites have their handle near pixel (4,12).
-        // Move that native grip to the shared hand pivot; never scale the item or a hand bone.
+        // Scale around this grip, keeping the item anchored to the shared hand pivot.
         pose.translate(.25,.25,0);
     }
     private static final class WorkPropsLayer extends RenderLayer<PeepoState,PeepoModel>{
