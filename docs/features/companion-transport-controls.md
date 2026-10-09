@@ -1,5 +1,7 @@
 # Companion transport controls and standard machine item ports
 
+For current player controls and setup, use the [Peepo and Jughead player guide](../PEEPO_COMPANION_GUIDE.md). This feature record retains implementation history; earlier single-container, Porter-command and single-recipe-slot descriptions have been superseded.
+
 Owner-requested on 7 October 2026. Implemented by OpenAI Codex (GPT-6), on `peepo-companion` from `7bfec15a`. Extends the existing vanilla-style companion menu, Fabric transfers, planner and walking porter job. No new dependencies, assets, registrations, recipes or progression gates.
 
 ## Player setup

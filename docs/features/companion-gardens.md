@@ -1,5 +1,7 @@
 # Companion garden work
 
+For current player controls and setup, use the [Peepo and Jughead player guide](../PEEPO_COMPANION_GUIDE.md). This feature record retains implementation history; earlier single-container, Porter-command and single-recipe-slot descriptions have been superseded.
+
 Owner-requested on 7 October 2026, implemented locally with **OpenAI Codex (GPT-6)** on `peepo-companion`, from `2d03b7c7`. This extends the existing assignment, job, cargo and porter systems; no new dependency, inventory, item ID or art asset is introduced.
 
 ## Setting up a garden

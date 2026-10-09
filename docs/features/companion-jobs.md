@@ -1,5 +1,7 @@
 # Companion jobs, budgets, status, lunch and schedules
 
+For current player controls and setup, use the [Peepo and Jughead player guide](../PEEPO_COMPANION_GUIDE.md). This feature record retains implementation history; earlier single-container, Porter-command and single-recipe-slot descriptions have been superseded.
+
 Owner-directed stages 1-4 of the companion roadmap, implemented locally with OpenAI Codex (GPT-6) on `peepo-companion`. This extends the existing wheel, inventory, planner and rest behavior. [Cooking Pot assistance and recipe plans](companion-cooking.md) and the processor helper teams below extend that shared job system.
 
 ## Player use

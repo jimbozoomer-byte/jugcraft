@@ -1,5 +1,7 @@
 # General porter and simpler container assignments
 
+For current player controls and setup, use the [Peepo and Jughead player guide](../PEEPO_COMPANION_GUIDE.md). This feature record retains implementation history; earlier single-container, Porter-command and single-recipe-slot descriptions have been superseded.
+
 The current setup is [shared supplies and transport](companion-shared-supplies.md): four Supply/four Output containers, optional job links, tool sources, and filtered porter routes alongside Work. The single-pair instructions below describe the earlier implementation.
 
 Owner-requested on 7 October 2026. Implemented locally by OpenAI Codex (GPT-6) on `peepo-companion`, from `b417f22a`. Reuses the shared companion menu, assignment targets, Fabric inventory transactions, walking transport and search/path budgets. No new assets, recipes, dependencies or progression gates.

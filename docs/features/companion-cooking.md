@@ -1,5 +1,7 @@
 # Companion Cooking Pot assistance and recipe plans
 
+For current player controls and setup, use the [Peepo and Jughead player guide](../PEEPO_COMPANION_GUIDE.md). This feature record retains implementation history; earlier single-container, Porter-command and single-recipe-slot descriptions have been superseded.
+
 Owner-requested addition on `peepo-companion`, implemented with OpenAI Codex (GPT-6). Extends the [shared jobs and budgets](companion-jobs.md), existing Cooking Pot processor, inventory menu and companion model rig. No dependency or platform changes.
 
 The single ghost selector described in the original implementation below has been replaced by the [nine-output Filter editor](companion-kitchen-filters.md). Empty filters now also enable automatic Supply recipe choice; existing choices migrate to the first entry.

@@ -1,5 +1,7 @@
 # Companion Planner and explicit assignments
 
+For current player controls and setup, use the [Peepo and Jughead player guide](../PEEPO_COMPANION_GUIDE.md). This feature record retains implementation history; earlier single-container, Porter-command and single-recipe-slot descriptions have been superseded.
+
 Implemented locally with OpenAI Codex (GPT-6), at the owner's request, on branch `peepo-companion` (renamed from `codex/peepo-wheel`). This is one home **plus four workstations**, as clarified by the owner.
 
 ## Use
