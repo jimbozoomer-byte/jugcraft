@@ -14,7 +14,7 @@ Game tests run in the Build workflow too. The `mod` job's `./gradlew build` runs
   - The job's log says why each file picked what it did.
 - **`main` (after each merge) and a manual run of the Build workflow run every class.** Run it on a branch from the Actions tab ("Run workflow") to test a pull request in full.
 
-Three client jobs share the chosen classes out by their rough running time (`./gradlew runClientGameTest -PclientTests=<Class,Class,...>`). A job with nothing to run passes at once. The `client` job passes only when the choice and all three jobs pass.
+Four client jobs share the chosen classes out by their rough running time (`./gradlew runClientGameTest -PclientTests=<Class,Class,...>`). A job with nothing to run passes at once. The `client` job passes only when the choice and all four jobs pass.
 
 Locally:
 - `./gradlew runClientGameTest` runs every class.
