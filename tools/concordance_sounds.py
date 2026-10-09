@@ -25,6 +25,19 @@ from a seeded generator and the encoder runs bit-exact with no metadata, so a re
 ffmpeg build. Writes assets/jugcraft/sounds/concordance/*.ogg (needs numpy and ffmpeg with libvorbis). The later
 steps' cues (circles, the crucible, and step 27's two warnings, sign_shortage and sign_danger) are described where
 they are drawn.
+
+Ember's cues (tools/concordance_ember.py, the Hearthbinders' invocations) share a fire's voice: crackle (sparse random
+pops through a band-pass) over warm low tones in the same D and A, and breaths of noise that open as a flame catches:
+
+- ember_gather (0.6 s, their cast): embers waking, crackle thickening over a low D3 and A3 swell;
+- hearthspark (0.5 s, Hearthspark): a sharp spark, a quick breath of flame opening from 700 Hz to 3 kHz, and a warm
+  D3 as the hearth catches;
+- hearthguard (0.9 s, Hearthguard): a soft whoomp of warm air, low noise swelling round a held D3 and A3, crackle
+  beneath;
+- cinderbolt (0.45 s, Cinderbolt): a flame's rush, noise swept up from 400 Hz to 2.5 kHz with a burst of crackle and a
+  low thump as it lands (no bell, unlike the lance);
+- hearthflare (0.8 s, Hearthflare): a burst, a low thump gliding down from 120 to 55 Hz under a roar whose band falls
+  from 3 kHz to 500 Hz, embers scattering after.
 Run from anywhere:  python3 tools/concordance_sounds.py [cue ...]  (with names, only those cues are written)
 """
 import os
@@ -364,6 +377,92 @@ def crucible_bottle():
     return tone * np.sin(np.pi * np.clip(t / 0.6, 0, 1)) ** 2 * fade(n, 0.005, 0.06)
 
 
+def crackle(n, rng, density, centre=2600.0, q=1.3):
+    """Fire's crackle: sparse random pops (density per second, one number or one per sample) through a band-pass."""
+    rate = np.broadcast_to(np.asarray(density, dtype=float), (n,)) / RATE
+    hits = rng.random(n) < rate
+    pops = np.zeros(n)
+    count = int(hits.sum())
+    pops[hits] = rng.uniform(0.3, 1.0, count) * rng.choice([-1.0, 1.0], count)
+    bp, _ = band(pops, np.full(n, centre), q=q)
+    peak = np.max(np.abs(bp))
+    return bp / peak if peak > 0 else bp
+
+
+def warm(t, *partials):
+    """A warm low tone: (Hz, strength) partials with their first few soft harmonics."""
+    return sum(amp * sum(level * np.sin(2 * np.pi * hz * k * t + 0.3 * k) for k, level in ((1, 1.0), (2, 0.4), (3, 0.15)))
+               for hz, amp in partials)
+
+
+def ember_gather(seed):
+    """Embers waking: crackle thickening from a few pops to many over a low D3 and A3 swell."""
+    n = samples(0.6)
+    t = times(n)
+    rng = np.random.default_rng(seed)
+    pops = crackle(n, rng, 20 + 260 * (t / 0.6) ** 1.5)
+    low = warm(t, (D3, 1.0), (A3, 0.5))
+    low = low / rms(low) * np.clip(t / 0.5, 0, 1) ** 2
+    return (0.6 * pops + 0.5 * low) * fade(n, 0.01, 0.08)
+
+
+def hearthspark(seed):
+    """A spark, a quick breath of flame opening from 700 Hz to 3 kHz, and the warm D3 of a hearth catching."""
+    n = samples(0.5)
+    t = times(n)
+    rng = np.random.default_rng(seed)
+    spark, _ = band(rng.normal(size=n), np.full(n, 5200.0), q=2.0)
+    spark = spark / rms(spark) * strike(n, 0.001, 0.012)
+    centre = np.where(t < 0.1, 700 + 2300 * (t / 0.1), 600 + 2400 * np.exp(-(t - 0.1) / 0.07))
+    bp, lp = band(rng.normal(size=n), centre, q=1.0)
+    breath = (bp / rms(bp) + 0.35 * lp / rms(lp)) * np.clip(t / 0.06, 0, 1) * np.exp(-np.maximum(t - 0.06, 0) / 0.1)
+    low = warm(t, (D3, 1.0))
+    low = low / rms(low) * np.clip((t - 0.05) / 0.1, 0, 1) ** 2 * np.exp(-np.maximum(t - 0.15, 0) / 0.2)
+    pops = crackle(n, rng, 90 * np.exp(-t / 0.25))
+    return (0.5 * spark + 0.6 * breath + 0.8 * low + 0.35 * pops) * fade(n, 0.0005, 0.08)
+
+
+def hearthguard(seed):
+    """Fire banks round you: a soft whoomp of warm air, low noise swelling round a held D3 and A3, crackle beneath."""
+    n = samples(0.9)
+    t = times(n)
+    rng = np.random.default_rng(seed)
+    centre = 220 + 380 * np.clip(t / 0.25, 0, 1)
+    _, lp = band(rng.normal(size=n), centre, q=0.7)
+    whoomp = lp / rms(lp) * np.clip(t / 0.15, 0, 1) ** 1.5 * np.exp(-np.maximum(t - 0.15, 0) / 0.18)
+    held = warm(t, (D3, 1.0), (A3, 0.6))
+    held = held / rms(held) * np.clip((t - 0.08) / 0.2, 0, 1) ** 1.5 * np.exp(-np.maximum(t - 0.35, 0) / 0.3)
+    pops = crackle(n, rng, 70, centre=2200.0)
+    return (0.7 * whoomp + 0.8 * held + 0.25 * pops) * fade(n, 0.005, 0.12)
+
+
+def cinderbolt(seed):
+    """A flame's rush: noise swept up from 400 Hz to 2.5 kHz with a burst of crackle, and a low thump as it lands."""
+    n = samples(0.45)
+    t = times(n)
+    rng = np.random.default_rng(seed)
+    centre = 400 * (2500 / 400) ** np.clip(t / 0.18, 0, 1)
+    bp, lp = band(rng.normal(size=n), centre, q=1.1)
+    rush = (bp / rms(bp) + 0.4 * lp / rms(lp)) * np.sin(np.pi * np.clip(t / 0.24, 0, 1)) ** 1.5
+    pops = crackle(n, rng, 400 * np.exp(-t / 0.12), centre=3200.0)
+    thump = np.sin(2 * np.pi * np.cumsum(glide(t - 0.16, 110.0, 60.0, 0.12)) / RATE) * strike(n, 0.004, 0.07, at=0.16)
+    return (0.55 * rush + 0.4 * pops + 0.9 * thump) * fade(n, 0.001, 0.06)
+
+
+def hearthflare(seed):
+    """A burst of fire: a low thump gliding from 120 to 55 Hz under a roar whose band falls from 3 kHz to 500 Hz,
+    embers scattering after."""
+    n = samples(0.8)
+    t = times(n)
+    rng = np.random.default_rng(seed)
+    thump = np.sin(2 * np.pi * np.cumsum(glide(t, 120.0, 55.0, 0.25)) / RATE) * strike(n, 0.004, 0.16)
+    centre = 500 + 2500 * np.exp(-t / 0.2)
+    bp, lp = band(rng.normal(size=n), centre, q=0.9)
+    roar = (bp / rms(bp) + 0.5 * lp / rms(lp)) * np.clip(t / 0.03, 0, 1) * np.exp(-np.maximum(t - 0.03, 0) / 0.22)
+    pops = crackle(n, rng, 30 + 300 * np.exp(-(t - 0.25) ** 2 / 0.02), centre=2800.0)
+    return (1.0 * thump + 0.6 * roar + 0.35 * pops) * fade(n, 0.001, 0.12)
+
+
 # name -> (signal, peak). Names follow concordance.SOUND_EVENTS ("concordance.<name>").
 def cues():
     return {
@@ -387,6 +486,11 @@ def cues():
         "crucible_bottle": (crucible_bottle(), PEAK * 0.6),
         "sign_shortage": (sign_shortage(seed=71), PEAK * 0.6),
         "sign_danger": (sign_danger(seed=73), PEAK * 0.8),
+        "ember_gather": (ember_gather(seed=79), PEAK * 0.7),
+        "hearthspark": (hearthspark(seed=83), PEAK * 0.9),
+        "hearthguard": (hearthguard(seed=89), PEAK * 0.85),
+        "cinderbolt": (cinderbolt(seed=97), PEAK),
+        "hearthflare": (hearthflare(seed=101), PEAK),
     }
 
 

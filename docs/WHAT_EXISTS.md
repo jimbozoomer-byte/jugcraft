@@ -294,13 +294,14 @@ Magic, milestones 1 to 6. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCAN
 [arcane-concordance-baselines.md](features/arcane-concordance-baselines.md),
 [arcane-concordance-rituals.md](features/arcane-concordance-rituals.md),
 [arcane-concordance-alchemy.md](features/arcane-concordance-alchemy.md),
-[arcane-concordance-ecology.md](features/arcane-concordance-ecology.md).
+[arcane-concordance-ecology.md](features/arcane-concordance-ecology.md),
+[arcane-concordance-ember.md](features/arcane-concordance-ember.md).
 
 | ID / part | Class / data | What |
 | --- | --- | --- |
 | rules | `concordance/rules/` (pure Java), `ConcordanceData` (reload listener); `data/jugcraft/concordance/{research,invocation,working}/` | research states and evidence, invocations, bench workings; malformed data is reported and left out |
 | player state | attachments `jugcraft:concordance_knowledge`, `jugcraft:concordance_focus` (`ConcordanceProgress`) | knowledge and Focus, saved, kept through death, synced to their owner only |
-| examining | `concordance/Examination` | sneak-use a `#jugcraft:concordance_specimens` item (luminous, circle and alchemy specimens) |
+| examining | `concordance/Examination` | sneak-use a `#jugcraft:concordance_specimens` item (luminous, circle, alchemy, ember and the later entries' specimens) |
 | `jugcraft:lampwright_bench` | `LampwrightBenchBlock`, `...BlockEntity`, `...Menu`, `BenchStatus`; client `LampwrightBenchScreen` | study (100 ticks), kindle, infuse and channel workings, all checked on the server |
 | `jugcraft:initiate_wand` | `InitiateWandItem`; `data/jugcraft/spell_assignments/initiate_wand.json` | the first instrument (`#jugcraft:concordance_instruments`) |
 | invocations | `data/jugcraft/concordance/invocation/`, `data/jugcraft/spell/{kindle,aegis,revelation,lance,flashstep,lanternward}.json`; `Invocations` (impact `jugcraft:invocation`), `ConcordanceSpells` (Spell Engine bridge, settlement) | Kindle (utility), Dawn Aegis (defense), Revelation (investigation), Lance of Dawn (damage), Flashstep (movement), Lanternward (support); compositions compiled under the wand's limits |
@@ -343,6 +344,7 @@ Magic, milestones 1 to 6. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCAN
 | `jugcraft:warding_stone` | `WardingStoneBlock`; tag `#jugcraft:concordance/ritual_boundary`; built-in pack `jugcraft:fusion_textures` (with Fusion) | a circle's boundary |
 | `jugcraft:adept_wand` | `InitiateWandItem`; instrument `data/jugcraft/concordance/instrument/adept_wand.json` | the second instrument (capacity 12, 8 targets, 72 work, two branches), made only by Adept's Attunement |
 | alchemy | `concordance/alchemy/` (pure Java: `Axis`, `Vector`, `Band`, `Heat`, `Mixture`, `Operation`, `Outcome`, `Formula`, `Assay`, `AlchemyCatalog`); `data/jugcraft/concordance/{ingredient,preparation,property}/`; `Alchemy` | eleven ingredients on six axes, two preparations, seven properties; a deterministic mixture in thousandths |
+| Ember | `concordance/ember/` (`Ember`, `SmoulderEffect`); `tools/concordance_ember.py`; research `data/jugcraft/concordance/research/hearthbinding.json`; spells `data/jugcraft/spell/{hearthspark,hearthguard,cinderbolt,hearthflare}.json` | Hearthbinding, mastered by the `jugcraft:hearthkeeping` practice (three kinds of hearth kindled); invocations Hearthspark (kindles a campfire, candle or candle cake), Hearthguard (Fire Resistance), Cinderbolt (fire damage and Smoulder), Hearthflare (a burst round the caster); status `jugcraft:smoulder` (vanilla burning while it lasts); an alteration in the fire school kindles instead of putting out fire |
 | `jugcraft:crucible` | `CrucibleBlock`, `CrucibleBlockEntity` (GeckoLib, `WorldlyContainer`, water `FluidStorage`) | heat from beneath, stirring, bottling, sampling; follows a written formula from its buffer and tank |
 | alchemy items | `MortarItem`, `AlchemyItem`, `BrewItem`; components `jugcraft:reagent` (`Reagent`), `jugcraft:brew` (`Brew`), `jugcraft:formula` | `mortar`, `stirring_rod`, `sampling_spoon`, `assay_glass`, `formula`, `reagent`, `draught`, `salve` |
 

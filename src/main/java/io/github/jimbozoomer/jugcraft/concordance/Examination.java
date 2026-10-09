@@ -84,6 +84,9 @@ public final class Examination {
 			if (stack.is(JugcraftConcordance.ALCHEMY_SPECIMENS) && !stack.is(JugcraftConcordance.LUMINOUS)) {
 				// The Alembic Arts learn from what a thing is made of.
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.examine.substance", name));
+			} else if (stack.is(JugcraftConcordance.EMBER_SPECIMENS) && !stack.is(JugcraftConcordance.LUMINOUS)) {
+				// Hearthbinding learns from the fire a thing holds.
+				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.examine.heat", name));
 			} else if (!stack.is(JugcraftConcordance.LUMINOUS)) {
 				// Circle Lore learns from how a thing is made, not from its light.
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.examine.form", name));

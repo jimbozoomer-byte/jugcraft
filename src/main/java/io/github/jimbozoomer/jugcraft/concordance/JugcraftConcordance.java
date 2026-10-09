@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.concordance;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.ember.Ember;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
@@ -64,6 +65,8 @@ public final class JugcraftConcordance {
 	public static final TagKey<Item> CIRCLE_SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("circle_specimens"));
 	/** The Alembic Arts' specimens: alchemical ingredients to examine (tools/concordance_alchemy.py). */
 	public static final TagKey<Item> ALCHEMY_SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("alchemy_specimens"));
+	/** Hearthbinding's specimens: fuels and things that hold fire (tools/concordance_ember.py). */
+	public static final TagKey<Item> EMBER_SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("ember_specimens"));
 	/** What casts Concordance invocations from the main hand. */
 	public static final TagKey<Item> INSTRUMENTS = TagKey.create(Registries.ITEM, Jugcraft.id("concordance_instruments"));
 
@@ -170,8 +173,10 @@ public final class JugcraftConcordance {
 		STUDY_COMPLETE_SOUND = sound("concordance.study_complete");
 		LANTERN_IGNITE_SOUND = sound("concordance.lantern_ignite");
 		LANTERN_SNUFF_SOUND = sound("concordance.lantern_snuff");
-		// The invocations' release sounds: Spell Engine looks each up in the sound registry when a cast is released.
-		for (String release : List.of("aegis", "revelation", "lance", "flash", "lanternward")) {
+		// The invocations' release sounds, and Ember's cast sound (tools/concordance_ember.py): Spell Engine looks each up
+		// in the sound registry when a cast starts or is released.
+		for (String release : List.of("aegis", "revelation", "lance", "flash", "lanternward", "ember_gather", "hearthspark",
+				"hearthguard", "cinderbolt", "hearthflare")) {
 			sound("concordance." + release);
 		}
 		CIRCLE_START_SOUND = sound("concordance.circle_start");
@@ -281,6 +286,7 @@ public final class JugcraftConcordance {
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ConcordanceProgress.relearn(handler.player));
 
 		Examination.register();
+		Ember.register();
 		RateGate.register();
 		ConcordanceSpells.register();
 		Invocations.register();

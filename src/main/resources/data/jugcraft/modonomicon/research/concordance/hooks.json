@@ -286,5 +286,29 @@
     "trigger_type": "modonomicon:advancement",
     "trigger_target": "jugcraft:concordance_dreamwalking_mastered",
     "fact_id": "jugcraft:concordance/dreamwalking_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_encountered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_hearthbinding_encountered",
+    "fact_id": "jugcraft:concordance/hearthbinding_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_observed_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_hearthbinding_observed",
+    "fact_id": "jugcraft:concordance/hearthbinding_observed"
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_understood_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_hearthbinding_understood",
+    "fact_id": "jugcraft:concordance/hearthbinding_understood"
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_mastered_hook",
+    "trigger_type": "modonomicon:advancement",
+    "trigger_target": "jugcraft:concordance_hearthbinding_mastered",
+    "fact_id": "jugcraft:concordance/hearthbinding_mastered"
   }
 ]

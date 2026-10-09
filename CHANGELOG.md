@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Arcane Concordance, Ember part 1 (Hearthbinding and four fire spells)
+- **A new research entry, Hearthbinding** (the Hearthbinders' Principle, Ember): examine coal, charcoal, a torch or other things that hold fire once First Light is understood; study one at the Lampwright's Bench. Mastered by lighting three kinds of hearth with Hearthspark.
+- **Four fire invocations,** cast with any Concordance instrument: **Hearthspark** lights an unlit campfire, candle or candle cake up to 16 blocks away (never placing fire); **Hearthguard** gives 30 s of Fire Resistance; **Cinderbolt** deals fire damage that grows with fire Spell Power and leaves the target **smouldering**; **Hearthflare** (mastered) bursts round you. Every one obeys claims, towns, spawn protection and the PvP rules.
+- **Smoulder,** a new status: the creature burns at vanilla's pace while it lasts; water, rain, Fire Resistance and milk answer it.
+- Original spell icons, a status icon and five synthesised sounds; a new Hearth codex category. Record: [arcane-concordance-ember.md](docs/features/arcane-concordance-ember.md).
+
 ### Unmerged: Guns, slice 7 (bayonets and the shared-texture guns)
 - **Four bayonets,** each the owner's art: **Iron**, **Steel** (the owner's anthralite one), **Diamond** and **Netherite** (a smithing upgrade). Under the barrel, in place of a grip. **V stabs** for 4 to 6 damage within reach, every 12 ticks; the server deals the blow. Seven guns take them.
 - **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.

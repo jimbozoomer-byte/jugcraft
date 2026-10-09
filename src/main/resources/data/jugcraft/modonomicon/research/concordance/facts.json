@@ -142,5 +142,17 @@
   },
   {
     "id": "jugcraft:concordance/dreamwalking_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_observed"
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_understood"
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_mastered"
   }
 ]

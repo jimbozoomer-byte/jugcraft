@@ -4,9 +4,10 @@ Jugcraft's magic: a practice learned by observing the world, studied at workstat
 is not a mana bar. This document is the contract every Concordance feature builds on: who owns which state, how
 content loads, the vocabulary, which library does what, and where each of the 32 roadmap steps stands.
 
-Status: the 32 roadmap steps are implemented on two unmerged branches: steps 1 to 25 on `claude/awesome-davinci-iwv3b9`,
-26 to 32 on `claude/concordance-steps-26-32`. Section 7 gives each step's status and record. Step 31's player journey is
-checked by machine, but no person has played it yet. Where to start:
+Status: the 32 roadmap steps are on `main` (merged through #263 on 8 October 2026). Section 7 gives each step's status
+and record. Step 31's player journey is checked by machine, but no person has played it yet. After step 32, Ember's
+first part (Hearthbinding and four fire invocations) is on `claude/awesome-davinci-iwv3b9`: see its
+[record](features/arcane-concordance-ember.md). Where to start:
 - the [delivery record](features/arcane-concordance-delivery.md) indexes the evidence, the library integration matrix
   and what remains;
 - players start with [the guide](ARCANE_CONCORDANCE_GUIDE.md).
@@ -108,7 +109,7 @@ Specialties a player can follow without mastering the rest ([CONTENT_BRANCHES.md
 | Tradition | Principles | Practice | Roadmap step |
 |---|---|---|---|
 | Lampwrights | Radiance | illumination, lanterns and revelation | 5 (implemented) |
-| Hearthbinders | Ember | controlled heat for kilns, forges and cooking | 10 |
+| Hearthbinders | Ember | controlled heat for kilns, forges and cooking | 10; part 1 implemented ([Ember](features/arcane-concordance-ember.md)) |
 | Rimekeepers | Rime | preservation, cooling and barriers | 10 |
 | Stormcallers | Tempest | charging, weather instruments and swift movement | 10 |
 | Stratawrights | Strata | soil care, shaping and mineral sensing | 10 |

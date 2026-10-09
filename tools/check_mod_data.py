@@ -8350,6 +8350,7 @@ def check_concordance(registered):
             err(f"dynamiclights/item/kindled_lantern.json: component {component} is not registered in JugcraftConcordance")
     check_composition(co, root, lang, registered, research)
     check_invocations(co, root, lang, research)
+    check_ember(co, root, lang, research)
     check_baselines(root)
     check_rituals(co, root, lang, registered, research)
     check_alchemy(co, root, lang, registered, research)
@@ -8833,6 +8834,46 @@ def check_rituals(co, root, lang, registered, research):
         err("textures/block/warding_stone_connected.png needs its Fusion metadata")
     if 'isModLoaded("fusion")' not in java("CircleClient.java", CLIENT_JAVA_ROOT):
         err("CircleClient.java: register the Fusion pack only when Fusion is installed (it is optional)")
+
+
+def check_ember(co, root, lang, research):
+    """Ember, part 1 (tools/concordance_ember.py): the Java mirrors its numbers, ids and kinds of hearth; the kindling word
+    is an alteration in Ember's school; Hearthbinding is mastered by the hearthkeeping practice, which the Overworld's
+    hearths alone can complete; Ember's invocations are Hearthbinding's; and every word it adds has its lang."""
+    em = co.ember
+    def java(name):
+        path = root / "ember" / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    ember, smoulder = java("Ember.java"), java("SmoulderEffect.java")
+    if not re.search(rf"\bint FIRE_TICKS = {em.SMOULDER_FIRE_TICKS};", smoulder):
+        err("concordance/ember/SmoulderEffect.java: FIRE_TICKS differs from tools/concordance_ember.py")
+    if f"0x{em.SMOULDER_COLOUR:06X}" not in smoulder:
+        err("concordance/ember/SmoulderEffect.java: its colour differs from SMOULDER_COLOUR")
+    kindling = em.COMPONENTS["kindling"]["operation"]
+    if kindling.get("effect") != "alteration" or kindling.get("school") != co.PRINCIPLES["ember"]["school"]:
+        err("component kindling: it must be an alteration in Ember's school")
+    if f'String SCHOOL = "{kindling.get("school")}";' not in ember:
+        err("concordance/ember/Ember.java: SCHOOL differs from the kindling word's school")
+    if f'String ACTIVITY = "{em.HEARTHKEEPING}";' not in ember or f'Jugcraft.id("{split(em.SMOULDER)[1]}")' not in ember:
+        err("concordance/ember/Ember.java: ACTIVITY or the Smoulder id differs from tools/concordance_ember.py")
+    body = ember[ember.find("public static @Nullable String hearth("):]
+    body = body[:body.find("\n\t}\n")]
+    kinds = set(re.findall(r'return "([a-z_]+)"', body)) | set(re.findall(r'\? "([a-z_]+)"', body))
+    if kinds != set(em.HEARTHS):
+        err(f"concordance/ember/Ember.java: hearth() names {sorted(kinds)}, not HEARTHS {sorted(em.HEARTHS)}")
+    overworld = [kind for kind in em.HEARTHS if kind != "soul_campfire"]
+    if not 1 <= em.HEARTH_MASTERY <= len(overworld):
+        err("Hearthbinding's mastery asks for more kinds of hearth than the Overworld has")
+    practice = [rule for block in research.get("hearthbinding", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != em.HEARTHKEEPING or practice[0].get("distinct") != em.HEARTH_MASTERY:
+        err("Hearthbinding must be mastered by the hearthkeeping practice, HEARTH_MASTERY kinds of hearth")
+    for key, info in em.INVOCATIONS.items():
+        if info["principle"] != "ember" or info["research"] != f"{MOD}:hearthbinding":
+            err(f"invocation {key}: Ember's invocations are Hearthbinding's")
+    for key in (f"effect.{MOD}.smoulder", f"message.{MOD}.concordance.examine.heat", f"tag.item.{MOD}.ember_specimens"):
+        if key not in lang:
+            err(f"Ember: missing lang {key}")
 
 
 def check_alchemy(co, root, lang, registered, research):
