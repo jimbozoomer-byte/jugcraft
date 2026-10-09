@@ -21,6 +21,12 @@ public final class GunLooks {
 	static final List<String> HIDE_FLASH = List.of("silencer", "baffled_silencer");
 	/** The scopes (slice 7), by name: how far each narrows the view and what aiming through it shows. */
 	static final Map<String, Optic> OPTICS = new HashMap<>();
+	/**
+	 * How much further from the eye a gun is held aimed than at the hip, in sixteenths of a block (tools/guns.py BUILDS
+	 * "eye_relief"); a gun not listed is aimed at its hip's depth. The Garrison Rifle's bolt slides back along its line
+	 * of sight as it fires, and at the hip's depth it came past the eye: aimed, each shot filled the screen.
+	 */
+	static final Map<String, Float> EYE_RELIEF = Map.of("garrison_rifle", 4.0F);
 	private static final Look DEFAULT = new Look(true, 1.0F);
 
 	static {
@@ -39,6 +45,9 @@ public final class GunLooks {
 		LOOKS.put("bulldog_pistol", new Look(false, 0.9F));
 		LOOKS.put("marshal_revolver", new Look(false, 0.85F));
 		LOOKS.put("sapper_revolver", new Look(false, 0.9F));
+		LOOKS.put("sentry_pistol", new Look(false, 0.9F));
+		LOOKS.put("garrison_rifle", new Look(true, 0.85F));
+		LOOKS.put("breacher", new Look(true, 0.92F));
 		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));

@@ -1469,6 +1469,10 @@ def check_guns():
     for ammo, size in guns.FLASH_SIZE.items():
         if f'"{ammo}", {size}F' not in looks:
             err(f"GunLooks.FLASH_SIZES differs from tools/guns.py FLASH_SIZE for {ammo} ({size})")
+    # Slice 8B: the guns held further out aimed.
+    reliefs = ", ".join(f'"{gun}", {build["eye_relief"]}F' for gun, build in guns.BUILDS.items() if "eye_relief" in build)
+    if f"EYE_RELIEF = Map.of({reliefs});" not in looks:
+        err(f"GunLooks.EYE_RELIEF differs from tools/guns.py BUILDS eye_relief: expected Map.of({reliefs})")
     # Slice 7: each scope's zoom and view.
     quoted = lambda name: f'"{name}"' if name else "null"
     for kind, att in guns.ATTACHMENTS.items():

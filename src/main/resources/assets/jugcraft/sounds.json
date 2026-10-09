@@ -572,6 +572,33 @@
       }
     ]
   },
+  "guns.sentry_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/scrapper_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.garrison_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/scorched_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.breacher.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/combat_shotgun_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [
