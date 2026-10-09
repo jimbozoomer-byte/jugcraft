@@ -1,7 +1,7 @@
-"""The Howitzer Walker (docs/features/howitzer-walker.md), after the owner's own render of 9 October 2026: a tall
-two-legged artillery walker, a riveted olive hull carrying a big howitzer in an open cradle, three headlamps, bumper
-rails round every edge, grab hoops on the roof, and reverse-jointed legs on coil-sprung shock absorbers over broad
-hinged feet.
+"""The Howitzer Walker model, after the owner's own render of 9 October 2026: a tall two-legged artillery walker, a
+riveted olive hull carrying a big howitzer in an open cradle, three headlamps, bumper rails round every edge, grab
+hoops on the roof, and reverse-jointed legs on coil-sprung shock absorbers over broad hinged feet. A model only, by the
+owner's choice (9 October 2026: "I just want you to model stuff, don't implement"): no entity, recipe or renderer yet.
 
 - Hull: a riveted olive box notched at its front top left, where the gun's cradle lies; round bumper rails along
   every edge; a big pivot axle with hubs under its nose and an A-arm linkage on its right down to the hip; dark
@@ -14,49 +14,31 @@ hinged feet.
 - Waist: a riveted plate over the hips with an amber indicator, a centre block, and big hip hubs either side.
 - Legs: a hip drum, a broad flat thigh plate angled back under its armour plate, a knee drum, a shin angled forward
   under a shin guard, a chrome shock absorber in a coil spring behind the thigh, an ankle housing and a broad foot
-  with a hinge strip, a heel in front and an upturned toe plate reaching back under the knee.
+  with a hinge strip, an upturned toe plate in front and a heel behind.
+- The blast: a cartoon star burst and three smoke puffs at the muzzle, for the "shoot" clip.
 
-The pilot walks it as the Diesel Walker, holds use to fire the howitzer (Heavy Shells, lobbed where they look) and
-presses attack to stomp. Exported as quads (assets/jugcraft/howitzer_walker_quads.json) for
-client/HowitzerWalkerRenderer, which swings the legs at the hips and pitches and recoils the gun on its trunnion. Units
-are pixels, the walker facing +z with the ground at y = 0. The whole walker is also saved as a Blockbench project
-(art/howitzer_walker/howitzer_walker.bbmodel). tools/check_mod_data.py keeps the joints and numbers the same as the Java.
+Units are pixels, the walker facing +z with the ground at y = 0. The whole walker is saved as a Blockbench project
+(art/howitzer_walker/howitzer_walker.bbmodel): every box in groups with their joints as origins (the shins under the
+thighs, the gun under the hull with the burst and puffs at its muzzle), the textures embedded, and two animation clips
+sampled from the curves below: "walk" (a floaty, bouncy stride) and "shoot" (recoil, a rocking hull, the burst and the
+puffs). `python tools/howitzer_walker.py --bbmodel --preview out.png` rewrites the project and renders previews.
 """
 import json
 import math
 from pathlib import Path
 
 import clean_metal
-import item_icons
 from steampunk_models import box, cyl
-from zeppelin import tiled_quads
 
 MOD = "jugcraft"
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "art" / "howitzer_walker"
 
-# The howitzer: ticks between shots and the shell's speed (a long, high lob). The stomp: damage, how hard it throws,
-# its reach in blocks round the feet and ticks between stomps. Movement and fuel are the Diesel Walker's.
-CANNON_COOLDOWN = 60
-CANNON_SPEED = 2.8
-STOMP_DAMAGE = 10
-STOMP_KNOCKBACK = 1.2
-STOMP_REACH = 2.5
-STOMP_COOLDOWN = 30
-HEALTH = 100
-WIDTH = 2.4
-HEIGHT = 5.2
-
-ITEMS = {"howitzer_walker": "Howitzer Walker"}
-TOOLTIPS = {"howitzer_walker": "A tall two-legged artillery walker with a howitzer on its back. Walk with the movement "
-                               "keys, hold use to fire the howitzer (Heavy Shells) and press attack to stomp. Refuel "
-                               "with a diesel or kerosene bucket."}
-
 PLATE, DARK, LEG = "hw_plate", "hw_plate_dark", "hw_leg"
 FLASH, FLASH_RIM, SMOKE = "hw_flash", "hw_flash_rim", "hw_smoke"
 GUNMETAL, CHROME, BORE, LAMP = "dp_gunmetal", "dp_chrome", "aw_bore", "aw_lamp"
 
-# Joints, in pixels: the hips and the gun's trunnion. Keep in sync with client/HowitzerWalkerParts.
+# Joints, in pixels: the hips and the gun's trunnion.
 HIPS = {"left": (11, 42, 0), "right": (-11, 42, 0)}
 TRUNNION = (-7, 70, 4)
 # The gun's rest pitch, degrees about x (negative is up), and how far it recoils along its barrel, in pixels.
@@ -65,7 +47,7 @@ RECOIL_STROKE = 6
 # The leg's lengths and angles: the thigh back and the shin forward, degrees about x (vanilla's 22.5 steps).
 THIGH, SHIN = 22, 20
 THIGH_ANGLE, SHIN_ANGLE = 22.5, -22.5
-# The animation (client/HowitzerWalkerParts draws it; the Blockbench project's "walk" and "shoot" clips sample it).
+# The animation (the Blockbench project's "walk" and "shoot" clips sample these curves; a renderer would draw the same).
 # Walking: the legs swing at the hips and tuck at the knees; the hull bounces on them, squashing as it lands and
 # stretching as it rises, swaying side to side, the gun wobbling a beat behind. Firing: the gun slams back and runs
 # out past its rest with a wobble, the hull rocks back and squats, a cartoon star burst pops at the muzzle and smoke
@@ -231,12 +213,13 @@ def shin():
     m.append(box((-3.5, -SHIN + 1, 2.5), (3.5, -3, 3.7), {"*": LEG, "south": PLATE}, ("x", SHIN_ANGLE, [0, 0, 0])))
     m += cyl("x", ay, az, 3, -4, 4, GUNMETAL, DARK)
     m.append(box((-3.5, ay, az - 3.5), (3.5, ay + 4, az + 3.5), GUNMETAL))
-    # The foot reaches back under the knee (the owner's correction of 9 October 2026): its toe plate turns up at -z.
+    # The foot points forward (+z, the way the gun faces: the owner's correction of 9 October 2026), its toe plate
+    # turning up at the front and its heel behind the ankle.
     foot = ay - 3.2
-    m.append(box((-6, foot, -8), (6, foot + 3.5, 7), {"*": LEG, "up": DARK}))
-    m.append(box((-5, foot + 0.5, -13), (5, foot + 3, -8), LEG, ("x", 22.5, [0, foot + 0.5, -8])))
-    m.append(box((-5, foot, 7), (5, foot + 2.5, 10), LEG))
-    m.append(box((-6.2, foot + 3, -4), (6.2, foot + 4.5, 2), GUNMETAL))
+    m.append(box((-6, foot, -7), (6, foot + 3.5, 9), {"*": LEG, "up": DARK}))
+    m.append(box((-5, foot + 0.5, 9), (5, foot + 3, 14), LEG, ("x", -22.5, [0, foot + 0.5, 9])))
+    m.append(box((-5, foot, -10), (5, foot + 2.5, -7), LEG))
+    m.append(box((-6.2, foot + 3, -1), (6.2, foot + 4.5, 5), GUNMETAL))
     return m
 
 
@@ -268,13 +251,9 @@ def puff():
 
 
 def parts():
-    return {"howitzer_walker_hull": hull(), "howitzer_walker_lamps": lamps(), "howitzer_walker_gun": gun(),
-            "howitzer_walker_thigh": thigh(), "howitzer_walker_shin": shin(), "howitzer_walker_flash": flash(),
-            "howitzer_walker_puff": puff()}
-
-
-def export():
-    return {name: tiled_quads(elements) for name, elements in parts().items()}
+    """The moving parts, each from its joint."""
+    return {"hull": hull(), "lamps": lamps(), "gun": gun(), "thigh": thigh(), "shin": shin(), "flash": flash(),
+            "puff": puff()}
 
 
 def shifted(item, offset, pose=None):
@@ -318,7 +297,7 @@ def groups():
     return out
 
 
-# ------------------------------------------------------------------ animation curves (in ticks; HowitzerWalkerParts draws the same)
+# ------------------------------------------------------------------ animation curves (in ticks)
 
 def recoil(t):
     """How far back the gun is, as a share of RECOIL_STROKE: a slam back, then it runs out past its rest and wobbles."""
@@ -429,28 +408,6 @@ def write_bbmodel(folder=ART):
                                    draw=lambda name: TEXTURES[name](), animations=animations())
 
 
-# ------------------------------------------------------------------ data
-
-def write_all(write, assets, data, lang, condition):
-    for item, name in ITEMS.items():
-        lang[f"item.{MOD}.{item}"] = name
-        write(assets / "models" / "item" / f"{item}.json",
-              {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/{item}"}})
-        write(assets / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}})
-    for key, text in TOOLTIPS.items():
-        lang[f"tooltip.{MOD}.{key}"] = text
-    lang[f"entity.{MOD}.howitzer_walker"] = "Howitzer Walker"
-    (assets / "howitzer_walker_quads.json").write_text(json.dumps(export(), separators=(",", ":")) + "\n", encoding="utf-8")
-    # An upgrade of the Armoured Walker: more steel plate, a steel block for the howitzer and pistons for the springs.
-    write(data / "recipe" / "howitzer_walker.json", {
-        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped", "category": "misc",
-        "pattern": ["SBS", "PWP", "R R"],
-        "key": {"S": "#c:plates/steel", "B": f"{MOD}:steel_block", "P": f"{MOD}:riveted_rust_plate", "W": f"{MOD}:armoured_walker",
-                "R": "minecraft:piston"},
-        "result": {"id": f"{MOD}:howitzer_walker", "count": 1}})
-    write_bbmodel()
-
-
 # ------------------------------------------------------------------ art (the clean style, tools/clean_metal.py)
 
 OLIVE = [(40, 44, 34), (56, 62, 46), (74, 82, 62), (92, 100, 78), (112, 120, 96), (136, 144, 118)]
@@ -495,7 +452,6 @@ TEXTURES = {PLATE: lambda: riveted(OLIVE), DARK: lambda: plain(DARK_OLIVE), LEG:
 def draw_all(save):
     for name, draw in TEXTURES.items():
         save(draw(), "block", name)
-    save(item_icons.draw("howitzer_walker"), "item", "howitzer_walker")
 
 
 if __name__ == "__main__":

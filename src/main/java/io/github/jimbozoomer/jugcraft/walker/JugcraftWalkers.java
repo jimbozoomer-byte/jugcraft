@@ -29,8 +29,6 @@ public final class JugcraftWalkers {
 	public static Item DIESEL_WALKER_ITEM;
 	public static EntityType<ArmouredWalker> ARMOURED_WALKER;
 	public static Item ARMOURED_WALKER_ITEM;
-	public static EntityType<HowitzerWalker> HOWITZER_WALKER;
-	public static Item HOWITZER_WALKER_ITEM;
 
 	private JugcraftWalkers() {
 	}
@@ -52,15 +50,6 @@ public final class JugcraftWalkers {
 		ARMOURED_WALKER_ITEM = Registry.register(BuiltInRegistries.ITEM, armouredItemKey,
 				new DieselWalkerItem(new Item.Properties().setId(armouredItemKey).stacksTo(1), () -> ARMOURED_WALKER,
 						"tooltip.jugcraft.armoured_walker"));
-		// The Howitzer Walker: the Diesel Walker's controls with a howitzer on trunnions and a stomp.
-		ResourceKey<EntityType<?>> howitzerKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("howitzer_walker"));
-		HOWITZER_WALKER = Registry.register(BuiltInRegistries.ENTITY_TYPE, howitzerKey, EntityType.Builder
-				.<HowitzerWalker>of(HowitzerWalker::new, MobCategory.MISC).sized(HowitzerWalker.WIDTH, HowitzerWalker.HEIGHT).noLootTable()
-				.clientTrackingRange(10).updateInterval(1).build(howitzerKey));
-		ResourceKey<Item> howitzerItemKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("howitzer_walker"));
-		HOWITZER_WALKER_ITEM = Registry.register(BuiltInRegistries.ITEM, howitzerItemKey,
-				new DieselWalkerItem(new Item.Properties().setId(howitzerItemKey).stacksTo(1), () -> HOWITZER_WALKER,
-						"tooltip.jugcraft.howitzer_walker"));
 
 		PayloadTypeRegistry.serverboundPlay().register(WalkerInputPayload.TYPE, WalkerInputPayload.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(WalkerInputPayload.TYPE, (payload, context) -> {
@@ -77,7 +66,6 @@ public final class JugcraftWalkers {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			output.accept(DIESEL_WALKER_ITEM);
 			output.accept(ARMOURED_WALKER_ITEM);
-			output.accept(HOWITZER_WALKER_ITEM);
 		});
 	}
 

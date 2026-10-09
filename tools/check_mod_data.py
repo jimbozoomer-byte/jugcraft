@@ -66,7 +66,6 @@ import bunkerworks
 import fire_control
 import raiders
 import armoured_walker
-import howitzer_walker
 import gear
 import arms
 import arms_variants
@@ -362,7 +361,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in howitzer_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
             or path in guns.items() or path in concordance.items() or path in concordance.blocks():
         return {}
     if path in arms.items():
@@ -603,7 +602,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(howitzer_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
                                                     + guns.items() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         if registry == "entity_type":
@@ -837,37 +836,6 @@ def check_armoured_walker():
     for part in armoured_walker.parts():
         if not quads.get(part):
             err(f"armoured_walker_quads.json lacks {part}: run tools/generate_material_data.py")
-
-
-def check_howitzer_walker():
-    """walker/HowitzerWalker.java against tools/howitzer_walker.py: the howitzer, stomp, toughness and size, the muzzle,
-    and the joints its renderer draws the parts at."""
-    java = (JAVA_ROOT / "walker" / "HowitzerWalker.java").read_text(encoding="utf-8")
-    for const in ("CANNON_COOLDOWN", "CANNON_SPEED", "STOMP_DAMAGE", "STOMP_KNOCKBACK", "STOMP_REACH", "STOMP_COOLDOWN",
-                  "HEALTH", "WIDTH", "HEIGHT"):
-        value = getattr(howitzer_walker, const)
-        literal = f"{value}F" if const in ("WIDTH", "HEIGHT") else str(value)
-        if f" {const} = {literal};" not in java:
-            err(f"HowitzerWalker.{const} differs from tools/howitzer_walker.py ({literal})")
-    mx, my, mz = howitzer_walker.MUZZLE
-    if f"MUZZLE_PIXELS = new Vec3({mx:g}, {my:g}, {mz:g});" not in java:
-        err(f"HowitzerWalker.MUZZLE_PIXELS differs from tools/howitzer_walker.py ({mx}, {my}, {mz})")
-    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
-    text = (client / "HowitzerWalkerParts.java").read_text(encoding="utf-8") if (client / "HowitzerWalkerParts.java").is_file() else ""
-    for joint in [*howitzer_walker.HIPS.values(), howitzer_walker.KNEE, howitzer_walker.TRUNNION, howitzer_walker.BARREL_END]:
-        if "{" + ", ".join(str(v) for v in joint) + "}" not in text:
-            err(f"HowitzerWalkerParts.java lacks the joint {joint} from tools/howitzer_walker.py")
-    for const in ("ELEVATION", "RECOIL_STROKE"):
-        if f"{const} = {getattr(howitzer_walker, const)};" not in text:
-            err(f"HowitzerWalkerParts.java lacks {const} = {getattr(howitzer_walker, const)} from tools/howitzer_walker.py")
-    for const in ("STRIDE_RATE", "LEG_SWING", "KNEE_BEND", "BOB", "SQUASH", "ROLL", "PITCH", "GUN_WOBBLE", "RECOIL_TICKS",
-                  "KICK", "SQUAT", "FLASH_TICKS", "PUFF_TICKS"):
-        if f"{const} = {getattr(howitzer_walker, const)}F;" not in text:
-            err(f"HowitzerWalkerParts.java lacks {const} = {getattr(howitzer_walker, const)}F from tools/howitzer_walker.py")
-    quads = load(ASSETS / "howitzer_walker_quads.json") or {}
-    for part in howitzer_walker.parts():
-        if not quads.get(part):
-            err(f"howitzer_walker_quads.json lacks {part}: run tools/generate_material_data.py")
 
 
 def check_artillery():
@@ -10644,7 +10612,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(howitzer_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
                   | set(guns.items()) | set(concordance.items()) | set(concordance.blocks()))
     check_assets(sorted(registered))
@@ -10683,7 +10651,6 @@ def main():
     check_zeppelin()
     check_walker()
     check_armoured_walker()
-    check_howitzer_walker()
     check_landship()
     check_artillery()
     check_tower_guns()
