@@ -34,6 +34,7 @@ against the server:
 | Armour reduces blows (vanilla's formula), not spells (Spell Power's damage bypasses armour) | Minecraft, Spell Power's damage types | `armourReducesBlowsButNotTheLance`: a husk in an iron chestplate |
 | Absorption takes damage first; a hit within 10 ticks of another counts only for what it exceeds it by | Minecraft | `absorptionAndHurtImmunityMatchTheModel`: hits of 6, 4 and 9 on a shielded villager |
 | A push of 1 block a tick carries a creature 5.5 blocks on flat ground | Minecraft's movement physics, measured | `aPushCarriesAsFarAsTheModelSays`: Flashstep's push of 1.2 carried a pig 7.05 blocks in CI; the test keeps the model's 6.6 within 30% of what the server does |
+| A helpful status lands on the character by its stacking rule; one that changes nothing fails, at no cost (since Ember part 2) | `Stacking`, the rule `ConcordanceEffects` applies; `Invocations` charges nothing when nothing takes effect | `hearthguardBanksTheFire` (Ember part 1): 30 s of Fire Resistance on its caster for 5 Focus |
 | A sword strike knocks a foe back 0.8 blocks and sweeps 1 damage to others in reach | Minecraft (approximation) | not calibrated |
 
 **Encounters** (each at most a minute): an **isolated target** (a brute: 20 health, 2 armour, 2.3 blocks a second, 3
@@ -44,15 +45,17 @@ armour, 4 damage a second once you come within 4 blocks; won when the archer fal
 brutes from 12, 16 and 20 blocks going for a 20-health objective where the character stands; won if it still stands
 after a minute).
 
-**Characters.** Seven kits, each a different approach with different equipment (vanilla numbers: iron sword 6 every
+**Characters.** Eight kits, each a different approach with different equipment (vanilla numbers: iron sword 6 every
 0.65 s, wooden sword 4, fist 1 every 0.25 s; armour leather 7, chain 12, iron 15): the **Fighter** (iron armour and
 sword, no magic); the **Initiate** (First Light understood: Dawn Aegis, Kindle, Revelation; leather, wooden sword);
 the **Striker** (mastered: Dawn Aegis, Flashstep, Lance; no armour, wooden sword); the **geared striker** (the same
 with iron armour and +4 arcane Spell Power from equipment); the **Warden** (Lanternward and Lance; chain); the
 **Skirmisher** (Flashstep and the Lance tuned with Extend; leather, iron sword); the **Composer** (Dawn Aegis and the
-inscribed `ray struck sear then here creatures dazzle`; leather). Then one bare-handed, unarmoured character per
-invocation, and the Initiate without Dawn Aegis. Kindle and Revelation have no combat effect, so the model never casts
-them; they are there because the Initiate carries them.
+inscribed `ray struck sear then here creatures dazzle`; leather); since Ember part 2, the **geared hearthbinder**
+(Hearthbinding mastered: Hearthguard, Cinderbolt and Hearthflare, with +6 fire Spell Power, the most the
+[regalia](arcane-concordance-ember-regalia.md) gives; the Pyromancer's set, as leather; wooden sword). Then one
+bare-handed, unarmoured character per invocation, and the Initiate without Dawn Aegis. Kindle and Revelation have no
+combat effect, so the model never casts them; they are there because the Initiate carries them.
 
 **Measures.** Sustained output (damage a second over a minute against a dummy within reach), burst (damage in the
 first 5 seconds, Focus full), survivability (seconds lasted, at most 60, beside a brute that cannot be killed),
@@ -63,7 +66,8 @@ fire from an archer that cannot be killed; Lanternward gives every party member 
 ## Results
 
 From the generated data (`Step11Harness`, the standalone harness); the game test computes the same tables from the
-server's loaded rules and spells.
+server's loaded rules and spells. Since Ember part 1 they include its four invocations; since Ember part 2, the geared
+hearthbinder, and helpful statuses land in the model (see Findings).
 
 | Character | Isolated target | Clustered group | Mobile opponent | Protected target | Objective defense |
 |---|---|---|---|---|---|
@@ -74,8 +78,13 @@ server's loaded rules and spells.
 | Warden | won 6.9 s, 20 HP | won 11.4 s, 14 HP | won 7.0 s, 20 HP | won 15.6 s, 13 HP | lost 11.7 s |
 | Skirmisher | won 4.7 s, 20 HP | won 12.4 s, 11 HP | won 3.1 s, 17 HP | won 13.5 s, 6 HP | won 10.6 s, 20 HP |
 | Composer | won 6.1 s, 20 HP | won 10.9 s, 20 HP | won 4.3 s, 20 HP | won 12.9 s, 8 HP | lost 10.1 s |
+| Geared hearthbinder (+6 fire, Pyromancer's) | won 6.7 s, 18 HP | won 8.2 s, 11 HP | won 5.6 s, 17 HP | won 16.5 s, 3 HP | won 12.6 s, 20 HP |
 | Only jugcraft:aegis | lost 11.8 s | lost 6.7 s | won 49.8 s, 12 HP | lost 10.0 s | lost 8.8 s |
+| Only jugcraft:cinderbolt | won 10.6 s, 8 HP | lost 10.9 s | won 10.6 s, 12 HP | lost 12.1 s | lost 9.1 s |
 | Only jugcraft:flashstep | lost 9.3 s | lost 8.4 s | won 40.4 s, 4 HP | lost 6.6 s | lost 8.8 s |
+| Only jugcraft:hearthflare | lost 8.7 s | lost 8.4 s | lost 35.6 s | lost 6.4 s | lost 8.5 s |
+| Only jugcraft:hearthguard | lost 8.1 s | lost 7.8 s | lost 39.5 s | lost 7.2 s | lost 8.8 s |
+| Only jugcraft:hearthspark | lost 9.3 s | lost 8.4 s | won 40.4 s, 4 HP | lost 6.6 s | lost 8.8 s |
 | Only jugcraft:kindle | lost 9.3 s | lost 8.4 s | won 40.4 s, 4 HP | lost 6.6 s | lost 8.8 s |
 | Only jugcraft:lance | won 8.1 s, 11 HP | lost 7.2 s | won 5.6 s, 16 HP | lost 13.6 s | lost 9.0 s |
 | Only jugcraft:lanternward | lost 10.4 s | lost 10.1 s | won 15.7 s, 20 HP | lost 9.6 s | lost 8.8 s |
@@ -91,8 +100,13 @@ server's loaded rules and spells.
 | Warden | 5.95 | 25.7 | 16.4 | 0.0 | 0.0 | 1.25 | 21.1 |
 | Skirmisher | 8.57 | 35.5 | 17.4 | 105.6 | 0.0 | 1.00 | 0.0 |
 | Composer | 5.91 | 27.7 | 19.1 | 0.0 | 2.3 | 0.50 | 0.0 |
+| Geared hearthbinder (+6 fire, Pyromancer's) | 6.13 | 30.8 | 9.2 | 0.0 | 4.5 | 1.45 | 0.0 |
 | Only jugcraft:aegis | 1.88 | 9.4 | 9.9 | 0.0 | 0.0 | 0.00 | 0.0 |
+| Only jugcraft:cinderbolt | 2.05 | 11.6 | 6.5 | 0.0 | 4.1 | 0.60 | 0.0 |
 | Only jugcraft:flashstep | 1.88 | 9.4 | 7.5 | 105.6 | 0.0 | 0.00 | 0.0 |
+| Only jugcraft:hearthflare | 2.04 | 11.5 | 6.8 | 0.0 | 2.7 | 0.67 | 0.0 |
+| Only jugcraft:hearthguard | 1.88 | 9.4 | 6.6 | 0.0 | 0.0 | 0.00 | 0.0 |
+| Only jugcraft:hearthspark | 1.88 | 9.4 | 7.5 | 0.0 | 0.0 | 0.00 | 0.0 |
 | Only jugcraft:kindle | 1.88 | 9.4 | 7.5 | 0.0 | 0.0 | 0.00 | 0.0 |
 | Only jugcraft:lance | 2.50 | 15.6 | 6.5 | 0.0 | 0.0 | 1.25 | 0.0 |
 | Only jugcraft:lanternward | 1.88 | 9.4 | 8.5 | 0.0 | 0.0 | 0.00 | 14.0 |
@@ -104,8 +118,8 @@ server's loaded rules and spells.
 The game test fails the build unless all of these hold (`Baselines.report`):
 
 1. **No early ability trivializes the encounters.** No character with a single invocation wins every encounter (the
-   strongest, the Lance, wins two of five), and no character wins every encounter all but unharmed (losing at most a
-   heart in each).
+   strongest, the Lance and Cinderbolt, win two of five), and no character wins every encounter all but unharmed
+   (losing at most a heart in each).
 2. **Several approaches succeed without identical equipment.** Every encounter is won by characters whose armour or
    weapon differ.
 3. **The utility character keeps meaningful survival options.** The Initiate wins the isolated encounter, and Dawn
@@ -117,20 +131,31 @@ The game test fails the build unless all of these hold (`Baselines.report`):
 
 ## Findings
 
-- **The geared hearthbinder (Ember part 2).** "Geared hearthbinder (+6 fire, Pyromancer's)" wears the most the
-  Hearthbinder's regalia gives with the default slots (a Focus of Fire and four pieces of a fire set, here the
-  Pyromancer's, with leather's protection), with a wooden sword and Hearthguard, Cinderbolt and Hearthflare mastered.
-  Its numbers in the table above are added from CI's run once it has run. The model has no on-hit statuses, so the Fire
-  Bangle's blow is not in it, and it counts Smoulder as control (a slow), not as burning damage.
+- **The geared hearthbinder (Ember part 2).** With the regalia at its most (a Focus of Fire and four pieces of a fire
+  set: +6 fire) the Hearthbinder's mastered kit wins all five encounters, losing health in all but objective defense
+  (18, 11, 17, 3 and 20 health left). The gear is what carries it there. Run the same way, the kit with no fire gear
+  wins three (it loses the protected target and objective defense), with a Lesser Focus of Fire (+2) four, and with a
+  Focus of Fire (+4) all five; the whole regalia then wins the clustered group and the runner sooner (8.2 s against 9.5,
+  5.6 against 8.1) and nearly doubles damage per Focus (0.74 at the base, 1.45). Like the geared striker it is a geared
+  kit that wins every encounter, though not unharmed in all of them. The model has no on-hit statuses, so the Fire
+  Bangle's blow is not in it, and it counts Smoulder as control (a slow: 4.5 foe-seconds a minute), not as burning
+  damage.
+- **Helpful statuses now land in the model.** Adding the geared hearthbinder showed that the model could not apply
+  Hearthguard's Fire Resistance. It took the cast for a refusal (no Focus, no cooldown) and, the shield coming first in
+  its priority, began it again every tick while a foe was close, so the character never struck: in CI's first run with
+  the character (run 37980438983) it lost three encounters, and Hearthguard alone dealt nothing. On the server the ward
+  lands. The model now applies a helpful status by its stacking rule, as `ConcordanceEffects` does (a recast that
+  changes nothing fails, at no cost); Fire Resistance wards against nothing these foes deal, so it changes nothing else.
+  Only the hearthbinder's row and Hearthguard alone's changed.
 
 - **Initiate magic does not outclass iron.** The Fighter, with no magic at all, wins all five encounters and has the
   highest sustained output (9.15 a second). Casters trade sustained damage for reach, mobility, shields and support.
-- **No single invocation carries a fight.** Alone and bare-handed, the Lance wins the isolated and mobile encounters;
-  every other invocation wins only against the runner, slowly.
+- **No single invocation carries a fight.** Alone and bare-handed, the Lance and Cinderbolt win the isolated and mobile
+  encounters; Hearthflare and Hearthguard win none; every other invocation wins only against the runner, slowly.
 - **Objective defense is where Initiate casters fall short.** The Striker, Warden, Composer and Initiate lose it: none
-  of them can stop three brutes reaching the objective. The Skirmisher (an iron sword) and the geared striker win it.
-  No invocation provides control yet; the composed `dazzle` is the only control (2.3 foe-seconds a minute), so area
-  control is the gap later traditions should fill.
+  of them can stop three brutes reaching the objective. The Skirmisher (an iron sword), the geared striker and the
+  geared hearthbinder win it. At step 11 no invocation gave control and the composed `dazzle` was the only control (2.3
+  foe-seconds a minute); since Ember part 1, Smoulder's slow gives Cinderbolt 4.1 and Hearthflare 2.7.
 - **Gear matters as it should.** +4 arcane Spell Power raises the Lance's damage per Focus from 1.25 to 1.75; with
   iron armour the geared striker lasts far longer beside the brute (32.5 s against 19.2). It wins every encounter
   and comes closest to trivializing them (17 health left in the protected encounter, a point above the line): a watch
@@ -198,11 +223,17 @@ compare changes against, not predictions of every fight.
   starts, with the same OpenGL startup crash as on the framework foundation branch.
 - Earlier run 37527119459 passed 860 of 861: the armour calibration's zombie, standing diagonally behind the husk,
   knocked it off the Lance's line (the blow itself matched the model); the zombie now stands straight behind it.
+- Ember part 2: CI run 37980438983 (commit `043a810a`) computed the table with the geared hearthbinder, before helpful
+  statuses landed in the model, and it was identical row for row to the harness's over the same data. The game test
+  failed only on its roster count, which still said seven kits. With the count at eight and helpful statuses in the
+  model, `Step11Harness` over the generated data finds acceptance holding and the benchmark deterministic; the variants
+  of the fire kit in Findings are the same code with the fire Spell Power changed. CI on the fix is recorded in the
+  [regalia](arcane-concordance-ember-regalia.md) record.
 
 Not yet run: any client, a two-client dedicated server, a fight in a real world against these encounters, a trinket.
 
 ## Rollout and open questions
 
 - No new stable ids, data or items. New code only (`concordance/balance`, tests, a checker rule).
-- Open: control invocations (the gap above); equipment with Spell Power (the geared striker's +4 is an attribute
-  modifier, not an item yet); Trinkets slots once there is a trinket to wear.
+- Open: area control beyond Smoulder's slow (the gap above); arcane equipment with Spell Power (the geared striker's +4
+  is an attribute modifier, not an item yet; fire's is the regalia's items since Ember part 2).

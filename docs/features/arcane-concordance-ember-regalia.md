@@ -100,8 +100,13 @@ Primary specialty and supported player role: the Hearthbinders; casters who figh
 - **No conversion loops:** no recipe makes a material, and nothing turns back into its inputs.
 - **Benchmark.** A new step 11 character, "Geared hearthbinder (+6 fire, Pyromancer's)" (leather, wooden sword,
   Hearthguard, Cinderbolt and Hearthflare mastered at +6 fire), must pass the acceptance rules, and rule 4 now also
-  requires its Cinderbolt and Hearthflare to exceed the plain ones and its Hearthguard to be unchanged. The model has no
-  on-hit statuses, so the bangle's blow is not in it, and it counts Smoulder as control rather than damage.
+  requires its Cinderbolt and Hearthflare to exceed the plain ones and its Hearthguard to be unchanged. It wins all five
+  encounters, with 18, 11, 17, 3 and 20 health left; like the geared striker, not unharmed in all of them. The same kit
+  with no fire gear wins three, with a Lesser Focus four, with a Focus of Fire all five; the whole regalia nearly
+  doubles its damage per Focus (0.74 to 1.45). The model has no on-hit statuses, so the bangle's blow is not in it, and
+  it counts Smoulder as control rather than damage. Adding the character found a gap in the model, which could not apply
+  Hearthguard's Fire Resistance and so kept beginning the cast instead of fighting; helpful statuses now land in the
+  model by their stacking rule, as on the server ([baselines](arcane-concordance-baselines.md#findings)).
 
 ## Multiplayer and persistence
 
@@ -217,10 +222,22 @@ Game tests added (they run in CI's Build workflow; results are recorded below on
   on a zombie and on a small stand, in four views; the player standing and sneaking; the real Trinkets slot on the
   ticking player (Focus of Fire and the set: 6; the lesser focus: 4); the eleven icons.
 - `ConcordanceBaselineGameTests`: the new character through the acceptance rules.
+- `Step11Harness`, run here over the generated data: the benchmark with the new character and helpful statuses in the
+  model; acceptance holds and two runs give the same tables.
 
-Not yet run: any CI run for this part; a person looking at the screenshots (the worn model, the sleeves following a
-zombie's raised arms and a sneaking player, the glint, the small stand showing nothing); listening to the owner's
-recordings in game; a two-client server.
+CI (the Build workflow, dispatched on this branch):
+- Run 37977238174 (commit `f52a86b0`) did not compile the server test: `Items.WHITE_WOOL` does not exist in 26.3. The
+  test now looks the wool and the netherite helmet up by id.
+- Run 37980438983 (commit `043a810a`, with the light set) compiled. Both server jobs ran 1177 game tests, and 1176
+  passed, the five `ConcordanceEmberGearGameTests` among them. The one failure, in both, was
+  `ConcordanceBaselineGameTests.baselinesHoldOnTheLoadedRules`: it still counted seven kits. The table it logged
+  showed the model gap described under Balance (the hearthbinder losing three encounters). Client shards 0 and 2
+  passed; shard 1, which runs `ConcordanceEmberGearClientGameTests`, was still running when this was written.
+- The fix (eight kits; helpful statuses in the model): not yet run in CI.
+
+Not yet run: a person looking at the screenshots (the worn model, the sleeves following a zombie's raised arms and a
+sneaking player, the glint, the small stand showing nothing); listening to the owner's recordings in game; a
+two-client server.
 
 ## World and event applicability
 
