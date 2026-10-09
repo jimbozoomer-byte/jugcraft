@@ -575,6 +575,8 @@ Three more of the owner's guns, each firing something other than a bullet or fir
   - GeckoLib runs a face's u the other way on a box's east face than on its west, and its v the other way on the top than on the bottom. So the flame's faces each get their own block of the atlas corner.
   - It shows only while a shot moves it, as the other props do.
 - **The arms:** fitted in a first-person preview so that, idle, they leave the screen in the same directions as the service arms' do.
+  - **By the eye:** an arm that comes within a tenth of a block of the eye is left out for those frames (`GunArmsLayer`, for every gun), as vanilla leaves out a thrown item just leaving the eye.
+  - **Why:** the owner's animations were made for another mod's arms, and a few bring a hand so near the eye that the arm running from it toward its shoulder reaches the camera. In a later CI run ([run 37996214844](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37996214844), 9 October 2026), the Lobber's pump brought its left sleeve to the camera at the moment of the shot, and the sleeve filled the left half of the screen. Sweeping the preview over every gun's animations finds a few such moments in the earlier slices too, such as the Garrison Rifle's and Patchwork Carbine's inspections and the Marshal Revolver's reload.
 - **Sights:**
   - **Trench Lobber:** aiming looks through the leaf sight.
   - **Stoker:** aiming looks over the top of its body, near the front.
@@ -1357,6 +1359,7 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
   - **Screenshots** (`client` shard 2):
     - In first person the Thresher sits at the lower right, held, aimed, fired, mid-reload and inspected; no hand covers the view.
     - Seen from outside, it is carried at the hip with its barrels toward the camera, the way its holder looks, not at the sky.
+- **Arms by the eye** ([above](#slice-8c-the-heavy-weapons)): a syntax parse only; its CI run is the push that adds it.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
