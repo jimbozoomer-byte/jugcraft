@@ -2,6 +2,8 @@
 
 The owner authorized this rule on 9 October 2026 so contributors can implement the supplied assets in Jugcraft. The standing content-use authorization is at the top of [CLAUDE.md](../CLAUDE.md); the [magic guide](../art/owner-library/MAGIC_ASSETS.md) explains how to preserve originals and integrate runtime copies. Permission to use a file is separate from permission to run a tool or executable.
 
+The [owner's provenance clarification](../art/owner-library/PROVENANCE.md) addresses remaining original-mod names, credits and supporter text. Those labels alone should not halt implementation or restart the same permission discussion. The rule preserves source provenance and addresses concrete issues at the affected file; it does not instruct Claude to bypass a runtime denial.
+
 ## Shared repository configuration
 
 [.claude/settings.json](../.claude/settings.json) permits `Read(/art/owner-library/**)` when Claude Code starts at the repository root and the workspace is trusted. Its scope is reading this library. The authoritative project authorization in `CLAUDE.md` also explains copying, adaptation and implementation.
