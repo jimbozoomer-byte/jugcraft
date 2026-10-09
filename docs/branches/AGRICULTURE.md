@@ -1436,6 +1436,10 @@ Slice 7, part a: the owner's own art for Jugcraft's garden crops, chosen on 9 Oc
 
 Slice 7, part b: new vegetables, kitchen herbs and spices in Jugcraft's own art (the owner's library has none), chosen on 9 October 2026 with part a. Details and test evidence: [features/vegetables-herbs-and-spices.md](../features/vegetables-herbs-and-spices.md).
 
+| **Herbs:** drying bundles, Planter Boxes, stages and pots | **Spices:** the vines, ginger, mustard, saffron and a cinnamon tree |
+| --- | --- |
+| ![The herbs](../images/ingame_herbs.jpg) | ![The spice crops and the cinnamon tree](../images/ingame_spices.jpg) |
+
 - **Vegetables:** lettuce, spinach, radishes and peas (peas fix nitrogen), cucumbers on a trellis, eggplant and zucchini bushes; a Green Salad, Pea Soup, Roasted Eggplant and Grilled Zucchini; the menu's Ratatouille now cooked from eggplant and zucchini.
 - **Herbs:** basil, mint, rosemary, thyme, parsley, sage, dill and chives, planted from a sprig and cut back when grown; potted in flower pots; hung in bundles to dry into Dried Herbs; grown anywhere in a **Planter Box** that holds its own water. Herb dishes, Mint Tea and Dill Pickles.
 - **Spices:** black pepper and vanilla vines on trellises, ginger, mustard and the saffron crocus; the **Cinnamon Tree**, whose bark an axe peels off as Cinnamon; Paprika ground from a dried chili with the Mortar and Pestle; a **Spice Rack** to show eight spices; Gingerbread Cookies, Chicken Curry, Saffron Rice and Vanilla Custard.

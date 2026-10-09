@@ -87,6 +87,16 @@ Primary specialty and supported player role: farming. It supports cooks (new dis
 | Swamps | mint, ginger |
 | Taigas | chives |
 
+| **Vegetables:** cucumbers climbing their trellises at the back, then the eggplant and zucchini bushes, then lettuce, spinach, radishes and peas, every age from left to right | **Herbs:** bundles hung from a beam, fresh and dried by turns; each herb grown in a Planter Box; rosemary and thyme through their stages; the eight herbs potted |
+| --- | --- |
+| ![The vegetables at every age](../images/ingame_vegetables.jpg) | ![The herbs](../images/ingame_herbs.jpg) |
+| **Spices:** the black pepper and vanilla vines on their trellises, ginger, mustard (yellow) and the saffron crocus (purple) at every age, and a grown Cinnamon Tree | **Spice Racks:** one full and one part full, against a wall |
+| ![The spice crops and the cinnamon tree](../images/ingame_spices.jpg) | ![Two spice racks](../images/ingame_spice_racks.jpg) |
+| **Wild plants:** the twenty wild vegetables, herbs and spices | **The wall:** the 48 new items in item frames |
+| ![The wild plants](../images/ingame_vegetables_herbs_spices_wild.jpg) | ![The items](../images/ingame_vegetables_herbs_spices_items.jpg) |
+
+*In-game screenshots from CI's client game test (`VegetablesHerbsSpicesClientGameTests`, software rendering, small previews).*
+
 ## Connections
 - **Existing input producers:**
   - Short grass (the vegetables' seeds) and the wild plants.
@@ -182,6 +192,14 @@ No Mojang texture is read, traced or recoloured.
 **Generated data.** The models, blockstates, loot, tags, recipes and worldgen come from `tools/agriculture_data.py`, with `tools/herb_data.py` and `tools/spice_data.py` for the potted herbs, bundles, Planter Box, cinnamon tree and Spice Rack.
 
 ## Verification
+CI (9 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `a77b0a6` | Build | **Did not compile:** `PushReaction.DESTROY` does not exist in 26.3 (the herb bundles' push reaction); it is `POPPED`, as the rest of the mod uses |
+| `922135a` | Build, data audit, game tests, client game tests | Compiled; **all 1198 required game tests passed** (the 13 new ones among them, and `grassDropsJugcraftSeeds` counting the new seeds); the client test passed, but its first cameras stood too far off and the drying beam hid the herbs |
+| `f8aa291` | The same, with the client test's cameras moved and a spice rack close-up | **All pass:** all 1198 required game tests and every client shard. The screenshots above are from this commit. |
+
 Run locally (9 October 2026):
 
 | Check | Result |
