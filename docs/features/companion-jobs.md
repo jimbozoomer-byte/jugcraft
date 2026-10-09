@@ -39,50 +39,60 @@ Use the Companion Planner to assign the same machine to each tamed companion. Cl
 
 ### Companion reserve drain and animation suggestions
 
-These numbers are **per Peepo/Jughead**, in JE per productive server tick. At 20 TPS, 8 JE/t is 160 JE/s and 16 JE/t is 320 JE/s. Both large-machine helpers together drain 16 JE/t, matching the total effort of a single small-machine helper. Food regeneration can offset the net drain; passive regeneration stays suppressed while working. No effort is charged during a blocked, unpowered or idle production step. A final smaller reserve can be exhausted, and the existing recovery threshold ends the job.
+These numbers are **per Peepo/Jughead**, in reserve JE per productive server tick, using the machine defaults. At 20 TPS, multiply by 20 for JE/s. Machine-based effort rates replaced the original flat 8/16-JE rates on 9 October 2026, implemented with OpenAI Codex (GPT-6). Both large-machine helpers together pay the same effort as a compact copy's one +50% helper. Food regeneration can offset the net drain; passive regeneration stays suppressed while working. No effort is charged during a blocked, unpowered or idle production step. A final smaller reserve can be exhausted, and the existing recovery threshold ends the job.
 
-The table describes full-size placed machines. **Compact legacy copies override their row to one helper at 16 JE/t.** The Arc Furnace uses two even though only its controller is a block entity.
+The table describes full-size placed machines. **Compact legacy copies use one helper at twice their two-helper row's rate.** The Arc Furnace uses two even though only its controller is a block entity. Recipe overrides can replace these defaults as described below.
 
 | Machine | Maximum helpers | JE/t per helper | Active clips (first / second helper) | Future specialized idea (not implemented) |
 | --- | ---: | ---: | --- | --- |
-| Electric Furnace | 2 | 8 | Lever / wrench | Slide a tray with tongs; adjust the control dial |
-| Crusher | 2 | 8 | Mallet / lever | Feed the hopper with a little shovel; pull a lever |
-| Arc Furnace Controller | 2 | 8 | Lever / wrench | Long tongs at the hatch; a second helper checks the controls |
-| Alloy Smelter | 2 | 8 | Lever / wrench | Tongs at the loading hatch; turn the pour-control handwheel |
-| Metal Press | 2 | 8 | Mallet / lever | Pull the press lever; arrange parts on the feed tray |
-| Wire Drawer | 2 | 8 | Lever / wrench | Turn a crank; guide wire onto a spool |
-| Circuit Assembler | 2 | 8 | Wrench / lever | Solder a component; inspect it with a magnifier |
-| Pulverizer | 2 | 8 | Mallet / lever | Scoop feed into a chute; work a crank |
-| Ore Washer | 2 | 8 | Valve / wrench | Swish a sieve basket; scrub with a small brush |
-| Sieve | 2 | 8 | Mallet / lever | Rock a screening tray side to side |
-| Sawmill | 2 | 8 | Lever / wrench | Guide a board along the feed table; turn a feed wheel |
-| Coke Oven | 2 | 8 | Lever / wrench | Shovel coal; work a long poker |
-| Steel Foundry | 2 | 8 | Lever / wrench | Work the bellows/control lever; steady a long ladle |
-| Ore Drill | 2 | 8 | Lever / wrench | Brace and turn the feed crank; check a gauge |
-| Deposit Drill | 2 | 8 | Lever / wrench | Adjust a lever; tighten a fitting with a wrench |
-| Cobblestone Generator | 1 | 16 | Mallet | Tap and clear the output chute with a small hammer |
-| Tree Farm | 1 | 16 | Lever | Prune a sapling; tend the seedling tray |
-| Auto-Crafter | 1 | 16 | Wrench | Pick, place and tap parts on a small work surface |
-| Crop Harvester | 2 | 8 | Lever / wrench | Sort the collection tray; adjust the cutting-height lever |
-| Hydroponic Bay | 2 | 8 | Valve / wrench | Water seedlings; inspect leaves |
-| Electroplating Bath | 2 | 8 | Valve / wrench | Raise and lower a parts rack |
-| Rocket Workshop | 2 | 8 | Wrench / lever | Turn a wrench; inspect a panel |
-| Pumpjack | 2 | 8 | Valve / wrench | Operate the stroke lever; grease a bearing |
-| Fracking Rig | 2 | 8 | Valve / wrench | Turn a pressure valve; watch the gauge |
-| Air Separation Unit | 2 | 8 | Valve / wrench | Turn a cold-box valve; wipe a frosted gauge |
-| Distillation Tower | 2 | 8 | Valve / wrench | Turn a valve; read a temperature gauge |
-| Catalytic Cracker | 2 | 8 | Valve / wrench | Work a pump lever; adjust a valve |
-| Settling Plant | 2 | 8 | Valve / wrench | Rake the settling tray; brush the filter |
-| Polymerization Reactor | 2 | 8 | Valve / wrench | Work the mixing control; collect a scoop of pellets |
-| Electrolytic Cell | 2 | 8 | Valve / wrench | Raise an electrode rack; adjust the controls |
-| Chemical Reactor | 2 | 8 | Valve / wrench | Work a mixing lever; check the sight glass |
-| Synthesis Converter | 2 | 8 | Valve / wrench | Lean into a large handwheel; check pressure |
-| Hydrotreater | 2 | 8 | Valve / wrench | Turn a valve; inspect a pipe fitting |
-| Lithography Station | 2 | 8 | Wrench / lever | Adjust a lens; inspect a wafer |
-| Ammonia Chiller | 2 | 8 | Valve / wrench | Wipe frost; turn the coolant valve |
-| Cryogenic Liquefier | 1 | 16 | Valve | Turn an insulated valve; watch the gauge |
+| Electric Furnace | 2 | 2 | Lever / wrench | Slide a tray with tongs; adjust the control dial |
+| Crusher | 2 | 4 | Mallet / lever | Feed the hopper with a little shovel; pull a lever |
+| Arc Furnace Controller | 2 | 6 | Lever / wrench | Long tongs at the hatch; a second helper checks the controls |
+| Alloy Smelter | 2 | 4 | Lever / wrench | Tongs at the loading hatch; turn the pour-control handwheel |
+| Metal Press | 2 | 4 | Mallet / lever | Pull the press lever; arrange parts on the feed tray |
+| Wire Drawer | 2 | 2 | Lever / wrench | Turn a crank; guide wire onto a spool |
+| Circuit Assembler | 2 | 6 | Wrench / lever | Solder a component; inspect it with a magnifier |
+| Pulverizer | 2 | 4 | Mallet / lever | Scoop feed into a chute; work a crank |
+| Ore Washer | 2 | 4 | Valve / wrench | Swish a sieve basket; scrub with a small brush |
+| Sieve | 2 | 2 | Mallet / lever | Rock a screening tray side to side |
+| Sawmill | 2 | 2 | Lever / wrench | Guide a board along the feed table; turn a feed wheel |
+| Coke Oven | 2 | 4 | Lever / wrench | Shovel coal; work a long poker |
+| Steel Foundry | 2 | 6 | Lever / wrench | Work the bellows/control lever; steady a long ladle |
+| Ore Drill | 2 | 6 | Lever / wrench | Brace and turn the feed crank; check a gauge |
+| Deposit Drill | 2 | 4 | Lever / wrench | Adjust a lever; tighten a fitting with a wrench |
+| Cobblestone Generator | 1 | 4 | Mallet | Tap and clear the output chute with a small hammer |
+| Tree Farm | 1 | 8 | Lever | Prune a sapling; tend the seedling tray |
+| Auto-Crafter | 1 | 4 | Wrench | Pick, place and tap parts on a small work surface |
+| Crop Harvester | 2 | 4 | Lever / wrench | Sort the collection tray; adjust the cutting-height lever |
+| Hydroponic Bay | 2 | 2 | Valve / wrench | Water seedlings; inspect leaves |
+| Electroplating Bath | 2 | 6 | Valve / wrench | Raise and lower a parts rack |
+| Rocket Workshop | 2 | 6 | Wrench / lever | Turn a wrench; inspect a panel |
+| Pumpjack | 2 | 6 | Valve / wrench | Operate the stroke lever; grease a bearing |
+| Fracking Rig | 2 | 16 | Valve / wrench | Turn a pressure valve; watch the gauge |
+| Air Separation Unit | 2 | 6 | Valve / wrench | Turn a cold-box valve; wipe a frosted gauge |
+| Distillation Tower | 2 | 10 | Valve / wrench | Turn a valve; read a temperature gauge |
+| Catalytic Cracker | 2 | 16 | Valve / wrench | Work a pump lever; adjust a valve |
+| Settling Plant | 2 | 6 | Valve / wrench | Rake the settling tray; brush the filter |
+| Polymerization Reactor | 2 | 10 | Valve / wrench | Work the mixing control; collect a scoop of pellets |
+| Electrolytic Cell | 2 | 16 | Valve / wrench | Raise an electrode rack; adjust the controls |
+| Chemical Reactor | 2 | 10 | Valve / wrench | Work a mixing lever; check the sight glass |
+| Synthesis Converter | 2 | 10 | Valve / wrench | Lean into a large handwheel; check pressure |
+| Hydrotreater | 2 | 10 | Valve / wrench | Turn a valve; inspect a pipe fitting |
+| Lithography Station | 2 | 16 | Wrench / lever | Adjust a lens; inspect a wafer |
+| Ammonia Chiller | 2 | 4 | Valve / wrench | Wipe frost; turn the coolant valve |
+| Cryogenic Liquefier | 1 | 20 | Valve | Turn an insulated valve; watch the gauge |
 
 The Cooking Pot remains one helper, +50%, up to 16 JE/t (320 JE/s). The Generator Wheel remains one runner extracting up to 64 JE/t (1,280 JE/s), depending on available buffer space. These rates apply equally to Peepo and Jughead.
+
+### Machine effort balance and recipe overrides
+
+Effort uses the machine's **base** electrical tier, not its upgraded electricity draw. Rates per +25% contribution are 2 JE/t for base draw up to 12 JE/t, 4 for up to 24, 6 for up to 64, 10 for up to 128, and 16 above that. A lone +50% compact-machine helper pays twice that rate. A two-slot machine with only one helper pays only its +25% share. Unpowered hot-work exceptions are Coke Oven at 4 and Steel Foundry at 6 JE/t per +25%. Thus default team effort ranges from 4 to 32 JE/t and a single helper can never be charged more than 32 JE/t through this hook. Machine upgrades cannot inflate/reduce the effort rate, though faster completion changes total working time. Recipe duration contributes only through actual productive time; it is not multiplied into the rate again.
+
+Single-input machine recipes, multi-input machine recipes and fluid recipes accept optional integer `companion_effort_per_quarter` from **0 to 16**. Omitted or zero means the machine default; 1-16 explicitly sets reserve JE per productive tick for one +25% contribution. For example, adding `"companion_effort_per_quarter": 10` to an arc-smelting recipe makes each of its two helpers spend 10 JE/t rather than the default 6, without changing processing speed or machine electricity. Existing recipes intentionally keep their defaults until a specific recipe needs different balancing. Vanilla smelting/crafting recipes and special fixed-cycle machines use their machine default; their foreign recipe formats are not modified.
+
+Both automatic and filtered recipe selection carry the value from the already matched recipe into the existing paid-production hook. Fluid recipes do likewise. There is no extra recipe search, world scan, global ticker, persistent cache, or per-tick packet. The recipe codecs synchronize the optional value with the other recipe data; client and server must use the same updated mod build. Existing recipe JSON, constructors and saved worlds remain compatible, and data reload replaces recipe objects normally. Recipe overrides are validated on JSON decode and capped again before charging. Machine electricity, speed bonuses, inputs/outputs, partial final-reserve behavior, resting, food, cooking-pot work, crank/wheel generation and transport costs are unchanged.
+
+Validation for this balance revision: `compileJava`, `compileClientJava` and `assemble` succeeded, and the local companion pack was rebuilt. No automated tests or gameplay runs were performed, per the owner. The existing processor reserve-cost expectation was updated for the new furnace rate but not run. Multiplayer balance and recipe reload behavior still require in-game review.
 
 ### Reusable work clips
 

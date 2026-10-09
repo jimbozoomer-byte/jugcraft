@@ -855,7 +855,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			tank -= kind.boostPerTick();
 			steps++;
 		}
-		advanceProcessor(level, result.get(), steps + companionBonus(use, maxProgress - progress - steps));
+		advanceProcessor(level, result.get(), steps + companionBonus(use, maxProgress - progress - steps, result.get().companionEffort()));
 		return true;
 	}
 
@@ -935,6 +935,10 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	 * Extra steps pay the normal electrical cost. All recipe/structure/fluid/output checks precede this hook.
 	 */
 	private int companionBonus(long use, int roomForSteps) {
+		return companionBonus(use, roomForSteps, 0);
+	}
+
+	private int companionBonus(long use, int roomForSteps, int recipeEffort) {
 		if (companionJobs.length == 0) return 0;
 		long now = level.getGameTime();
 		if (lastProcessorTick == now) return 0;
@@ -945,7 +949,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		if (roomForSteps <= 0) { resetCompanionEffort(); return 0; }
 		if (now - lastContributed > 1) assistQuarters = 0;
 		int quarters = 0;
-		for (var job : companionJobs) quarters += job.contribute(now);
+		int effort = MachineCompanionEffort.perQuarter(kind, recipeEffort);
+		for (var job : companionJobs) quarters += job.contribute(now, effort);
 		if (quarters == 0) { resetCompanionEffort(); return 0; }
 		lastContributed = now;
 		assistQuarters += quarters;
@@ -983,7 +988,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false; // Keeps progress; resumes when power returns.
 		}
 		energy.setAmount(energy.getAmount() - kind.usePerTick);
-		if ((progress += 1 + companionBonus(kind.usePerTick, maxProgress - progress - 1)) >= maxProgress) {
+		if ((progress += 1 + companionBonus(kind.usePerTick, maxProgress - progress - 1, recipe.companionEffort())) >= maxProgress) {
 			progress = 0;
 			for (int slot = 0; slot < recipe.items().size(); slot++) {
 				items.get(slot).shrink(recipe.items().get(slot).count());
@@ -1838,9 +1843,9 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	 * A matched recipe: what it makes, how long it takes, how many items it takes from each input slot
 	 * and what else it may make.
 	 */
-	private record Result(ItemStack stack, int ticks, int[] take, List<MachineRecipe.Byproduct> byproducts) {
+	private record Result(ItemStack stack, int ticks, int[] take, List<MachineRecipe.Byproduct> byproducts, int companionEffort) {
 		Result(ItemStack stack, int ticks, int[] take) {
-			this(stack, ticks, take, List.of());
+			this(stack, ticks, take, List.of(), 0);
 		}
 	}
 
@@ -1851,11 +1856,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			var selected = companionPort.recipe();
 			if (selected instanceof MultiMachineRecipe multi) {
 				int[] take = multi.take(new MachineInput(items.subList(0, kind.outputSlot())));
-				return take == null ? Optional.empty() : Optional.of(new Result(multi.output().create(), multi.time(), take));
+				return take == null ? Optional.empty() : Optional.of(new Result(multi.output().create(), multi.time(), take, List.of(), multi.companionEffort()));
 			}
 			var input = new SingleRecipeInput(items.get(0));
 			if (selected instanceof MachineRecipe single && single.matches(input, level))
-				return Optional.of(new Result(single.output().create(), single.time(), TAKE_ONE, single.byproducts()));
+				return Optional.of(new Result(single.output().create(), single.time(), TAKE_ONE, single.byproducts(), single.companionEffort()));
 			if (selected instanceof net.minecraft.world.item.crafting.SmeltingRecipe smelting && smelting.matches(input, level))
 				return Optional.of(new Result(smelting.assemble(input), MachineKind.ELECTRIC_FURNACE_TICKS, TAKE_ONE));
 			return Optional.empty();
@@ -1863,7 +1868,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		if (kind.isMultiInput()) {
 			List<ItemStack> inputs = items.subList(0, kind.outputSlot());
 			return MachineRecipes.findMulti(level, kind, inputs).map(match -> new Result(
-					match.recipe().output().create(), match.recipe().time(), match.take()));
+					match.recipe().output().create(), match.recipe().time(), match.take(), List.of(), match.recipe().companionEffort()));
 		}
 		ItemStack input = items.get(0);
 		if (input.isEmpty()) {
@@ -1875,7 +1880,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 					.map(holder -> new Result(holder.value().assemble(recipeInput), MachineKind.ELECTRIC_FURNACE_TICKS, TAKE_ONE));
 		}
 		return MachineRecipes.find(level, kind, input)
-				.map(recipe -> new Result(recipe.output().create(), recipe.time(), TAKE_ONE, recipe.byproducts()));
+				.map(recipe -> new Result(recipe.output().create(), recipe.time(), TAKE_ONE, recipe.byproducts(), recipe.companionEffort()));
 	}
 
 	/** Whether every byproduct this operation might make has room, so none is ever lost. */

@@ -40,7 +40,7 @@ Special workflows without a supported item recipe plan (such as Auto Crafter pat
 
 ## Multiplayer, energy and saves
 
-Transport continues using the shared companion search/path budgets, four explicit workstation links, bounded inventory probes, movement deadlines and failure backoff. At most one real cargo stack travels per trip. Work costs are unchanged: transport movement up to 2 JE/t; standard assistance 8 JE/t per helper on two-helper machines or 16 JE/t for a single compact helper. Inputs come from the assigned Supply inventory and outputs go to the assigned Output inventory; all normal production costs remain on the machine. No new currency or progression bypass.
+Transport continues using the shared companion search/path budgets, four explicit workstation links, bounded inventory probes, movement deadlines and failure backoff. At most one real cargo stack travels per trip. This transport change retained its original movement cost; subsequent machine assistance uses the [machine-based effort rates and optional recipe overrides](companion-jobs.md#machine-effort-balance-and-recipe-overrides). Inputs come from the assigned Supply inventory and outputs go to the assigned Output inventory; all normal production costs remain on the machine. No new currency or progression bypass.
 
 Server menu validity, owner/party permissions, reach and command cooldown validate the new buttons. Ghost edits also check loaded targets, range, locks and town restrictions. Transport rechecks access, inventory capacity and recipe needs at mutations. Detection cannot authorize access or perform transfers itself.
 

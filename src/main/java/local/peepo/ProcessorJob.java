@@ -133,7 +133,7 @@ public final class ProcessorJob implements CompanionJob {
         return machine.companionStatus()==CompanionStatus.READY?CompanionStatus.WORKING:machine.companionStatus();
     }
     /** Called at most once per productive machine tick, after all recipe/resource gates pass. */
-    public int contribute(long now){
+    public int contribute(long now,int effortPerQuarter){
         expire();
         var npc=occupant();
         if(npc==null || lastSpent==now || requested<now-1 || requested>now || !isOccupant(npc)
@@ -142,7 +142,8 @@ public final class ProcessorJob implements CompanionJob {
             || machine.isLocked() || !CompanionJobs.permitted(npc,stationPosition()))return 0;
         int quarters=machine.companionHelperCount()==2?1:2;
         try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){
-            if(npc.extractEnergy(quarters*8,tx)<=0)return 0;
+            if(npc.extractEnergy(quarters*Math.clamp(effortPerQuarter,1,
+                    io.github.jimbozoomer.jugcraft.machine.MachineCompanionEffort.MAX_PER_QUARTER),tx)<=0)return 0;
             tx.commit();
         }
         lastSpent=now;return quarters;

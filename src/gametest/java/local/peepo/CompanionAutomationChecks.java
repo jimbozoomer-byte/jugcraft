@@ -248,7 +248,7 @@ final class CompanionAutomationChecks {
         server.runOnServer(s->{var m=machine[0];long ticks=s.overworld().getGameTime()-initial[0];long progress=m.processingProgress()-initial[1];
             check(Math.abs(progress-ticks*1.5)<=2,"actual processor speed: "+progress+" in "+ticks+" ticks");
             check(initial[2]-m.energyFor(null).getAmount()==progress*10,"bonus production must pay normal machine electricity");
-            for(int i=0;i<helpers.size();i++)check(Math.abs(initial[3+i]-helpers.get(i).getEnergy()-ticks*(full?8:16))<=16,"helper reserve cost "+i);
+            for(int i=0;i<helpers.size();i++)check(Math.abs(initial[3+i]-helpers.get(i).getEnergy()-ticks*(full?2:4))<=4,"furnace helper reserve cost "+i);
             m.setItem(0,ItemStack.EMPTY);int energy=helpers.getFirst().getEnergy();m.serverTick(s.overworld(),m.getBlockPos(),m.getBlockState());check(helpers.getFirst().getEnergy()==energy,"no input means no helper charge");});
         server.waitFor(s->helpers.stream().allMatch(p->p.workAnimation()==WorkAnimation.NONE),30);
         server.runOnServer(s->{check(helpers.stream().allMatch(p->p.isUsingJobAt(machine[0].getBlockPos())),"brief missing input keeps helper sessions");machine[0].setItem(0,new ItemStack(Items.IRON_ORE,64));});
