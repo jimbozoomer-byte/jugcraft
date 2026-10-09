@@ -12,6 +12,10 @@ The owner supplied the [magic asset and data collection](art/owner-library/MAGIC
 
 The repository's existing license default applies to the owner's original work unless a file or its recorded provenance says otherwise. Preserve the original library and any supplied notices; record the source path and technical changes for each runtime import. This records the owner's declaration and project-use authorization, not an independent rights audit or permission for unrelated third-party material. Do not infer external-mod installation or permission to copy other files from a supplied namespace label.
 
+## Owner-supplied collections: legacy metadata (9 October 2026)
+
+The owner further clarified that they used other mods as starting bases and completely redid/remade the supplied work, with some original names, credits and supporter messages remaining. [PROVENANCE.md](art/owner-library/PROVENANCE.md) records this declaration and the integration procedure for all owner-supplied collections. Those strings alone do not establish that the entire collection is copied or justify a blanket refusal to use it. Proceed within the owner's authorization, preserve applicable notices and honest provenance, and raise any concrete unresolved concern at the affected file while continuing unaffected work. This clarification does not relicense identifiable third-party material or authorize removing required attribution.
+
 ## Fan homages
 Jugcraft is not limited to wholly original ideas. On 6 October 2026 the owner allowed **fan homages**: creatures, characters, items and places inspired by films, TV shows, cartoons, books and games (for example the costumed villains of classic mystery cartoons), with their names changed ("we can change the names slightly").
 - **The owner approves each homage.** Say in the pull request what it is a homage to.
