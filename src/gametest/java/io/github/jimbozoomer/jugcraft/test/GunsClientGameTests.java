@@ -274,6 +274,7 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				throw new AssertionError("In third person the player was never posed holding a gun (GunPose)");
 			}
 
+			// The icons, in two inventories (they no longer fit one): the guns and rounds, then the attachments.
 			server.runCommand("clear @p");
 			for (String gun : JugcraftGuns.SPECS.keySet()) {
 				server.runCommand("give @p jugcraft:" + gun);
@@ -281,15 +282,21 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			for (String round : JugcraftGuns.AMMO) {
 				server.runCommand("give @p jugcraft:%s 16".formatted(round));
 			}
-			for (String attachment : JugcraftGuns.ATTACHMENTS.keySet()) {
-				server.runCommand("give @p jugcraft:" + attachment);
-			}
 			server.runCommand("give @p jugcraft:patchwork_carbine[jugcraft:attachments=%s]".formatted(
 					snbt(List.of("baffled_silencer", "extended_magazine", "wooden_stock", "vertical_grip"))));
 			context.waitTicks(10);
 			context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
 			context.waitTicks(10);
 			context.takeScreenshot("jugcraft_guns_inventory");
+			context.setScreen(() -> null);
+			server.runCommand("clear @p");
+			for (String attachment : JugcraftGuns.ATTACHMENTS.keySet()) {
+				server.runCommand("give @p jugcraft:" + attachment);
+			}
+			context.waitTicks(10);
+			context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
+			context.waitTicks(10);
+			context.takeScreenshot("jugcraft_guns_inventory_attachments");
 			context.setScreen(() -> null);
 			setHudHidden(context, hudWasHidden);
 		}

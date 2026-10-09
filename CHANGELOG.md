@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 8 (the hand guns)
+- **Three one-handed guns,** each the owner's model, art and animations:
+  - the **Bulldog Pistol** (the owner's Brawler), a hand cannon that breaks open to load one rifle round and hits for 11;
+  - the **Marshal Revolver** (Longarm), a long six-shooter loaded through its gate a round at a time;
+  - the **Sapper Revolver** (Trenchur), whose cylinder swings out to load a round at a time.
+- **Attachments:** the Bulldog takes the silencers, muzzle brake, extended barrel and the three scopes; the Marshal the three stocks; the Sapper the barrel attachments.
+- **Reloads:** the left hand carries the Bulldog's round into the opened breech, and spent cases fly where the animations throw them.
+- Record: [guns.md, slice 8](docs/features/guns.md#slice-8-the-hand-guns).
+
 ### Unmerged: Guns, slice 7b (the scopes)
 - **Three scopes,** each the owner's model and art, on a new optic slot in place of the iron sights: the **Long Scope** (a spyglass in brass), the **Medium Scope** and the **Reflex Sight**. The Longhorn Rifle, Drover Rifle and Riveter SMG take them, the guns the owner made to take one.
 - **Aimed through one,** in first person: the Long and Medium Scopes fill the screen with the owner's reticle and lens rim, narrow the view to 30% and 50% and slow the mouse to match; the Reflex Sight keeps the gun in view and puts its red dot on the middle of the screen. Scopes steady the aim; the two magnifying ones are clumsier from the hip.

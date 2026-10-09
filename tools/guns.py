@@ -3,7 +3,7 @@ iron set: the Warden Pistol, Riveter SMG and Haymaker; slice 3, the Longhorn Rif
 slice 4, the black powder guns: the Duelling Pistol, Line Musket and Bellmouth; slice 5, the attachments; slice 6,
 the guns in use: muzzle flash, spent casings, the view narrowed while aiming and the two-handed hold seen from outside;
 slice 7, the bayonets and the attachments drawn on shared textures, then the scopes (the owner's scope models, mounted
-on the guns made to take them).
+on the guns made to take them); slice 8, the hand guns: the Bulldog Pistol, Marshal Revolver and Sapper Revolver.
 
 The owner made these guns (inspired by Scorched Guns 2) and supplied, in the owner asset library:
   - a Blockbench Java model of every part (art/owner-library/originals/Blocks/Guns/models/special/<gun>/<part>.json),
@@ -147,6 +147,29 @@ GUNS = {
         "damage": 2.5, "pellets": 10, "interval": 10, "auto": False, "capacity": 1,
         "reload": 78, "spread": (12.0, 9.0), "range": 20, "ammo": "paper_cartridge",
     },
+    # Slice 8: a hand cannon and two revolvers, each held in one hand. The Bulldog breaks open to load its one heavy
+    # round; the Marshal loads through its gate a round at a time; the Sapper's cylinder swings out to load.
+    "bulldog_pistol": {
+        "display": "Bulldog Pistol",
+        "source": "brawler",
+        "tooltip": "A one-handed hand cannon that breaks open to load its one heavy round. Fires rifle rounds.",
+        "damage": 11.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 1,
+        "reload": 45, "spread": (3.0, 1.0), "range": 56, "ammo": "rifle_round",
+    },
+    "marshal_revolver": {
+        "display": "Marshal Revolver",
+        "source": "longarm",
+        "tooltip": "A long-barrelled revolver, loaded through its gate a round at a time. Fires light rounds.",
+        "damage": 5.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 6,
+        "reload": (11, 25, 11), "spread": (2.0, 0.5), "range": 72, "ammo": "light_round",
+    },
+    "sapper_revolver": {
+        "display": "Sapper Revolver",
+        "source": "trenchur",
+        "tooltip": "A short revolver whose cylinder swings out to load a round at a time. Fires light rounds.",
+        "damage": 4.5, "pellets": 1, "interval": 6, "auto": False, "capacity": 6,
+        "reload": (9, 12, 13), "spread": (2.5, 0.8), "range": 48, "ammo": "light_round",
+    },
 }
 
 # The rounds: display name, tooltip, recipe (pattern, key, count). Cheap and early: copper or brass, lead and gunpowder.
@@ -183,6 +206,12 @@ RECIPES = {
     "line_musket": (["III", "FPP"], {"I": "minecraft:iron_ingot", "F": "minecraft:flint", "P": "#minecraft:planks"}),
     "bellmouth": (["CII", "FPP"], {"C": "minecraft:copper_ingot", "I": "minecraft:iron_ingot", "F": "minecraft:flint",
                                   "P": "#minecraft:planks"}),
+    # Slice 8: iron and brass, a lever for the revolvers' lockwork, a wooden grip.
+    "bulldog_pistol": (["IIB", " P "], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "P": "#minecraft:planks"}),
+    "marshal_revolver": (["IIB", "BLP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
+                                          "P": "#minecraft:planks"}),
+    "sapper_revolver": (["IB", "LP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
+                                       "P": "#minecraft:planks"}),
 }
 
 # How each gun is built from the owner's parts, in the owner's model space (Java item-model pixels: x east, y up,
@@ -373,6 +402,67 @@ BUILDS = {
         "muzzle": (8.0, 3.66, 1.8),
         "sight": (8.0, 5.45, 12.41),
     },
+    # Slice 8, the revolvers' set. All three are held in one hand: the idle hides the left arm, whose hand point is
+    # given for a reload keyframe ("hand_pose"). Each left arm's direction keeps it coming up from below the screen
+    # through every frame it shows (the reloads, and the revolvers' inspect), not only at that keyframe.
+    # The Brawler: its hammer is the main part's 9th element, a flat plate riding the bolt bone that the shot drives
+    # forward; its barrel tips about the hinge at the front of the lug beneath it to load, where it stands just clear of
+    # the frame; the reload carries a cartridge in on the shell bone (PROPS), resting where the reload's offsets bring
+    # its middle a pixel down the opened bore as it shrinks away (1.54 s). The left hand holds that round 1.17 s in,
+    # 2.5 px back from it toward the shoulder, so the round shows past the fingers. The reload also names an
+    # "extended_barrel" bone, which it never moves: it is empty, and a fitted Extended Barrel rides the barrel bone.
+    "bulldog_pistol": {
+        "bones": [
+            ("gun_body", None, ["main-#9", "sights"], (8.0, 2.85, 15.0)),
+            ("bolt", "gun_body", ["main#9"], (8.0, 4.13, 13.73)),
+            ("barrel", "gun_body", ["stan_barrel"], (8.0, 4.3, 5.05)),
+            ("extended_barrel", "barrel", [], (8.0, 4.3, 5.05)),
+            ("shell", "gun_body", ["@shell"], (7.98, 9.8, 8.25)),
+        ],
+        "hands": {"right": (8.0, 2.85, 15.0), "left": (6.24, 7.42, 5.55)},
+        "hand_pose": {"left": ("reload", "1.1667")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.6858, -0.3212, 0.653)},
+        "muzzle": (8.0, 4.8, 3.71),
+        "sight": (8.0, 6.17, 12.25),
+    },
+    # The Longarm loads through a gate: its cylinder (the main part's elements the owner named "magazine") turns a
+    # chamber for each round on the cylinder_magazine bone, about its own axis. Its "magazine" bone is empty: the
+    # closing animation swings it as if the cylinder swung out, which this one does not. Its hammer is the main
+    # part's last element, turning about its foot. The left hand loads at the gate, on the right behind the cylinder.
+    "marshal_revolver": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.45, 14.58)),
+            ("gun_body", "gun_body2", ["main-#24,25,26,27,28,29,30"], (8.0, 2.45, 14.58)),
+            ("cylinder_magazine", "gun_body", ["main#24,25,26,27,28,29"], (7.97735, 4.4, 10.76618)),
+            ("magazine", "gun_body", [], (7.97735, 4.4, 10.76618)),
+            ("hammer", "gun_body", ["main#30"], (8.0, 3.84, 13.75)),
+            ("seal", "gun_body", [], (8.0, 4.4, 10.77)),
+            ("shell", "gun_body", [], (8.0, 4.4, 10.77)),
+        ],
+        "hands": {"right": (8.0, 2.45, 14.58), "left": (9.5, 4.1, 12.2)},
+        "hand_pose": {"left": ("reload_loop", "0.4167")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.3752, -0.911, 0.171)},
+        "muzzle": (8.0, 4.78, 3.65),
+        "sight": (8.0, 5.85, 12.3),
+    },
+    # The Trenchur's cylinder (its drum part) swings out to the left on the magazine bone, about the crane's hinge
+    # below and left of it, to load a round at a time; its hammer turns about its foot. The left hand loads behind the
+    # swung-out cylinder's outer chamber.
+    "sapper_revolver": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel"], (8.0, 1.73, 14.73)),
+            ("magazine", "gun_body", ["drum"], (7.0, 2.6, 11.6)),
+            ("hammer", "gun_body", ["hammer"], (8.0, 3.42, 14.08)),
+            ("bolt", "gun_body", [], (8.0, 3.83, 12.0)),
+            ("seal", "gun_body", [], (8.0, 3.83, 11.6)),
+            ("shell", "gun_body", [], (8.0, 3.83, 11.6)),
+        ],
+        "hands": {"right": (8.0, 1.73, 14.73), "left": (5.4, 3.8, 13.4)},
+        "hand_pose": {"left": ("reload_loop", "0.2857")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.3078, -0.9328, -0.1877)},
+        "muzzle": (8.0, 3.83, 5.24),
+        "sight": (8.0, 5.6, 13.2),
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -398,6 +488,8 @@ PROPS = {
         "ball": {"kind": "ball", "from": (7.5, 2.42, 13.8), "size": (1.0, 1.0, 1.0), "texture_at": (34, 61)},
         "ram": {"kind": "rod", "from": (7.75, 2.67, 2.05), "size": (0.5, 0.5, 12.0), "texture_at": (52, 50)},
     },
+    "bulldog_pistol": {"shell": {"kind": "cartridge", "from": (7.48, 9.3, 6.75), "size": (1.0, 1.0, 3.0),
+                                 "texture_at": (56, 0)}},
     "bellmouth": {
         "ball": {"kind": "ball", "from": (6.86, 2.57, 7.27), "size": (1.0, 1.0, 1.0), "texture_at": (34, 61)},
         "ram": {"kind": "rod", "from": (7.75, 2.41, 5.3), "size": (0.5, 0.5, 10.0), "texture_at": (52, 50)},
@@ -752,7 +844,7 @@ def attachment_model(kind):
 ZOOM = {
     "rust_midge": 0.9, "patchwork_carbine": 0.82, "thunderpipe": 0.92, "warden_pistol": 0.9, "riveter_smg": 0.88,
     "haymaker": 0.92, "longhorn_rifle": 0.75, "drover_rifle": 0.8, "coach_gun": 0.9, "duelling_pistol": 0.9,
-    "line_musket": 0.82, "bellmouth": 0.92,
+    "line_musket": 0.82, "bellmouth": 0.92, "bulldog_pistol": 0.9, "marshal_revolver": 0.85, "sapper_revolver": 0.9,
 }
 
 
@@ -771,7 +863,7 @@ CASINGS = {"light_round": "small_copper_casing", "rifle_round": "large_brass_cas
 # The animations' particle cues: GunAnimations ejects a casing at EJECT_CUE; the others mark points in a reload that
 # the server's timing already covers, and show nothing.
 EJECT_CUE = "eject_casing"
-QUIET_CUES = ("loaded", "end_reload", "loop_end", "reload_end")
+QUIET_CUES = ("loaded", "end_reload", "loop_end", "reload_end", "stop_mag_tracking")
 # The muzzle flash: the owner's four flash frames, copied to textures/item/guns/flash/flash_<n>.png; each shot shows
 # one, turned at random about the barrel. A silencer hides it ("hides_flash").
 FLASH_FRAMES = ["muzzleflash", "muzzleflash2", "muzzleflash3", "muzzleflash4"]
@@ -825,6 +917,9 @@ SHOT_SOUNDS = {
     "duelling_pistol": "item/blackpowder/fire.ogg",
     "line_musket": "item/blackpowder/fire.ogg",
     "bellmouth": "item/blackpowder/fire.ogg",
+    "bulldog_pistol": "item/heavier_rifle/fire.ogg",
+    "marshal_revolver": "item/brass_revolver/fire.ogg",
+    "sapper_revolver": "item/brass_pistol/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -1027,7 +1122,8 @@ def atlas_layout(gun):
     A square atlas, grown from the own texture's size to 128 at most (tools/check_mod_data.py's texture rule) only
     when they do not fit.
     The textures its scopes draw on come after, piece by piece (they would not fit whole): each rect of pixels their
-    faces use (scope_islands()), a pixel apart, into what room is left, largest first.
+    faces use (scope_islands()), a pixel apart, into what room is left, largest first, the atlas growing to 128 if
+    they need the room.
     Returns ((width, height), {texture id: placement}): a placement is (x, y, width, height) for a whole texture, or
     for a scope's texture {pixel rect: (x, y, width, height)}, the texture placed so that that rect lands where it was
     packed (face_placement())."""
@@ -1056,8 +1152,14 @@ def atlas_layout(gun):
             place.update(taken)
             break
         side *= 2
-    if islands:
-        place.update(pack_islands(gun, side, place, used, islands, sizes))
+    while islands:
+        try:
+            place.update(pack_islands(gun, side, place, used, islands, sizes))
+            break
+        except ValueError:
+            if side >= 128:
+                raise
+            side *= 2  # what is placed stays where it is in the bigger atlas
     return (side, side) if len(place) > 1 else (ow, oh), place
 
 

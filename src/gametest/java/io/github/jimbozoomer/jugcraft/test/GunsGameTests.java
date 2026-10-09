@@ -42,7 +42,8 @@ import net.minecraft.world.phys.Vec3;
  * loads one round per shell's time, and a shot or a switch of item cuts it short; a shotgun's pellets land together;
  * bullets count as projectiles; the iron set's pistol and SMG land their damage, and the Haymaker loads only the shells
  * there are; the lever rifles land theirs and load a round at a time, and the Coach Gun's pellets land together; a
- * muzzle-loader lands its one heavy shot and reloads a paper cartridge, and the Bellmouth's balls land together.
+ * muzzle-loader lands its one heavy shot and reloads a paper cartridge, and the Bellmouth's balls land together; the
+ * hand guns of slice 8 land theirs, the Bulldog loads its one round in its reload time and the Marshal a round at a time.
  * Attachments (slice 5) fit and come off in a crafting grid, change a gun's numbers, and the server fires and loads by
  * them; the scopes (slice 7) fit the guns the owner made to take one. Shooters face south (+z) and aim at their
  * target's middle.
@@ -59,7 +60,7 @@ public class GunsGameTests {
 			helper.assertTrue(JugcraftGuns.ammo(spec) != null, name + " fires " + spec.ammo() + ", which is not registered");
 			helper.assertTrue(new ItemStack(JugcraftGuns.GUNS.get(name)).getMaxStackSize() == 1, name + " stacks");
 		});
-		helper.assertTrue(JugcraftGuns.GUNS.size() == 12 && JugcraftGuns.ROUNDS.size() == 4, "Not twelve guns and four rounds");
+		helper.assertTrue(JugcraftGuns.GUNS.size() == 15 && JugcraftGuns.ROUNDS.size() == 4, "Not fifteen guns and four rounds");
 		helper.assertTrue(JugcraftGuns.ATTACHMENT_ITEMS.keySet().equals(JugcraftGuns.ATTACHMENTS.keySet())
 				&& JugcraftGuns.ATTACHMENTS.size() == 18, "Not eighteen attachments, each with its item");
 		JugcraftGuns.ACCEPTS.forEach((gun, takes) -> helper.assertTrue(JugcraftGuns.GUNS.containsKey(gun)
@@ -391,6 +392,61 @@ public class GunsGameTests {
 		helper.assertTrue(taken >= spec.damage() * (spec.pellets() - 3),
 				"At close range the balls took only " + taken + " (one ball is " + spec.damage() + ")");
 		helper.succeed();
+	}
+
+	/**
+	 * Slice 8's hand guns each land one shot's damage: the Bulldog Pistol fires its one rifle round and takes its reload
+	 * to load another, and not before; the Marshal Revolver loads a round at a time, only the rounds there are; then the
+	 * Sapper Revolver lands its shot.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 160)
+	public void handGunsLandAndLoad(GameTestHelper helper) {
+		floor(helper);
+		Mob pig = pig(helper, new BlockPos(1, 2, 8));
+		pig.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0);
+		pig.setHealth(200.0F);
+		GunSpec bulldog = JugcraftGuns.SPECS.get("bulldog_pistol");
+		GunSpec marshal = JugcraftGuns.SPECS.get("marshal_revolver");
+		GunSpec sapper = JugcraftGuns.SPECS.get("sapper_revolver");
+		ServerPlayer shooter = shooter(helper, "bulldog_pistol", 1, pig, GameType.SURVIVAL);
+		shooter.getInventory().add(new ItemStack(JugcraftGuns.ROUNDS.get("rifle_round"), 3));
+		helper.assertTrue(GunShots.fire(shooter), "The loaded Bulldog did not fire");
+		helper.assertTrue(Math.abs(200.0F - pig.getHealth() - bulldog.damage()) < 1.0E-3F,
+				"The Bulldog took " + (200.0F - pig.getHealth()) + ", not " + bulldog.damage());
+		helper.assertFalse(GunShots.fire(shooter), "The empty Bulldog fired again");
+		helper.assertTrue(!bulldog.byShell() && GunShots.reload(shooter), "The Bulldog's reload did not start");
+		helper.runAfterDelay(bulldog.reload() - 2, () -> helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == 0,
+				"The Bulldog loaded before its reload time was up"));
+		int marshalAt = bulldog.reload() + 2;
+		helper.runAfterDelay(marshalAt, () -> {
+			helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == 1, "The Bulldog is not loaded after its reload");
+			helper.assertTrue(GunShots.count(shooter.getInventory(), JugcraftGuns.ROUNDS.get("rifle_round")) == 2,
+					"The Bulldog's reload did not take one rifle round");
+			ItemStack stack = new ItemStack(JugcraftGuns.GUNS.get("marshal_revolver"));
+			GunItem.setLoaded(stack, 1);
+			shooter.setItemInHand(InteractionHand.MAIN_HAND, stack);
+			helper.assertTrue(GunShots.fire(shooter), "The loaded Marshal did not fire");
+			float expected = bulldog.damage() + marshal.damage();
+			helper.assertTrue(Math.abs(200.0F - pig.getHealth() - expected) < 1.0E-3F,
+					"After the Marshal the pig had lost " + (200.0F - pig.getHealth()) + ", not " + expected);
+			shooter.getInventory().add(new ItemStack(JugcraftGuns.ROUNDS.get("light_round"), 2));
+			helper.assertTrue(marshal.byShell() && GunShots.reload(shooter), "The Marshal's round-at-a-time reload did not start");
+			helper.runAfterDelay(marshal.shellStart() + marshal.shellEach() + 1, () -> helper.assertTrue(
+					GunItem.loaded(shooter.getMainHandItem()) == 1, "One round's time in, not one round loaded"));
+		});
+		int sapperAt = marshalAt + marshal.reloadTicks(2) + 4;
+		helper.runAfterDelay(sapperAt, () -> {
+			helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == 2, "The Marshal did not load the two rounds there were");
+			helper.assertFalse(GunShots.reloading(shooter), "The Marshal is still reloading with no rounds left");
+			ItemStack stack = new ItemStack(JugcraftGuns.GUNS.get("sapper_revolver"));
+			GunItem.setLoaded(stack, 1);
+			shooter.setItemInHand(InteractionHand.MAIN_HAND, stack);
+			helper.assertTrue(GunShots.fire(shooter), "The loaded Sapper did not fire");
+			float expected = bulldog.damage() + marshal.damage() + sapper.damage();
+			helper.assertTrue(Math.abs(200.0F - pig.getHealth() - expected) < 1.0E-3F,
+					"After the Sapper the pig had lost " + (200.0F - pig.getHealth()) + ", not " + expected);
+			helper.succeed();
+		});
 	}
 
 	/** A bullet is a projectile (Projectile Protection guards against it). */
