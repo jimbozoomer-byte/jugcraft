@@ -16,7 +16,13 @@ Grow five new fruits:
 - **Coffee:** Coffee Cherries roast into **Coffee Beans** in a furnace, smoker or campfire. The **Coffee Cake** now takes coffee beans where it took Mulling Spices, and the owner's coffee tart will.
 - **Jams:** **Strawberry Jam**, **Blueberry Jam** and **Plum Jam**, cooked into a Mason Jar in the Cooking Pot, sealed in the Canning Kettle and set out on a Pantry Shelf as the other preserves are.
 
-<!-- Screenshots: added from CI's client game test once it has run. -->
+| **The bushes:** the Strawberry Plant, Blueberry Bush and Coffee Plant in rows on farmland, from planted (left) to ripe (right) | **Ripe:** the plum (left) and the banana (right) grown from their saplings and hung with fruit, the wild bushes before them |
+| --- | --- |
+| ![The bushes](../images/ingame_fruit_bushes.jpg) | ![The trees ripe](../images/ingame_fruit_trees_ripe.jpg) |
+| **In blossom:** the same two trees grown again, seen from the other side: the banana (left) and the plum, white with blossom (right) | **The wall:** the crops' items in item frames |
+| ![The trees in blossom](../images/ingame_fruit_trees_blossom.jpg) | ![The items](../images/ingame_fruit_items.jpg) |
+
+*In-game screenshots from CI's client game test (`FruitCropClientGameTests`, software rendering, small previews; the chat at the bottom is the test world's start-up messages).*
 
 ## Connections
 - Existing input producer: short grass and wild plants for the seeds, wild trees for the pit and pup; farmland and water, bone meal; sugar and Mason Jars for the jams.
@@ -60,7 +66,11 @@ No new dependency.
 The banana follows the [tree roster's](../branches/TREES.md#banana) banana where it can: a `banana_stem` of its own in `#minecraft:logs` (so its fronds stay while it stands) but not `#minecraft:logs_that_burn`, under vanilla's cherry foliage shape so the fronds droop and hang. Unlike the roster's, it is built as an orchard tree, so it fruits on its own leaves (`banana_leaves`) as the other fruit trees do instead of a separate bunch block, and its sapling is planted from a Banana Pup.
 
 ## Verification
-CI: not yet run on this branch (see the pull request).
+CI (8 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `9a378f1` | Build, data audit, game tests, and the client game test classes the change picks (`FruitCropClientGameTests` and `OrchardClientGameTests`) | Compiled; data audit pass, 1767 IDs; **all 962 required game tests passed**, the fruit crops' among them; **both client classes passed**. The screenshots above are from this run |
 
 Run locally (8 October 2026):
 
