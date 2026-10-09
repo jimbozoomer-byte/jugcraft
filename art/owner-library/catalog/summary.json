@@ -304,6 +304,14 @@
     {
       "path": "originals/Magic/assets/jymbelics/textures/item/arrow_quiver.png.mcmeta",
       "issue": "Supplied PNG metadata has no adjacent PNG; preserve the original and resolve when importing."
+    },
+    {
+      "path": "originals/Blocks/Guns/effect/red_dot_reticle.png",
+      "issue": "Embedded Photoshop history (XMP) records the file being opened and saved inside a Just Enough Guns mod source folder (assets/jeg/textures/effect/) on 2024-02-03. Asked about it on 2026-10-08, the owner answered that they made these files."
+    },
+    {
+      "path": "originals/Blocks/Guns/effect/muzzle_flash.png",
+      "issue": "Embedded Photoshop metadata (XMP) records the file as created in Adobe Photoshop CC 2019 on 2021-02-12. Asked about the upload on 2026-10-08, the owner answered that they made these files."
     }
   ]
 }
