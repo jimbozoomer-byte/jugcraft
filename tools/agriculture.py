@@ -26,6 +26,7 @@ import rice
 import soil
 import orchard
 import cakes
+import pies_and_tarts
 import fruit_crops
 
 FEATURE = "agriculture"
@@ -2636,7 +2637,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks())
 
 
 def all_items():
@@ -2647,7 +2648,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS])
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS] + pies_and_tarts.items())
 
 
 def owns(entry_id):
@@ -2790,6 +2791,10 @@ SHAPELESS += orchard.SHAPELESS
 # textures are tools/cake_data.py's and tools/cake_art.py's.
 ITEMS.update(cakes.ITEMS)
 SHAPELESS += cakes.SHAPELESS
+
+# The owner's square pies and tarts (tools/pies_and_tarts.py), baked in the Hearth Oven after the cakes (PieFilling); their
+# blocks, models and textures are tools/pie_tart_data.py's and tools/pie_tart_art.py's.
+SHAPELESS += pies_and_tarts.SHAPELESS
 
 # The fruit crops (tools/fruit_crops.py): strawberry, blueberry and coffee bushes (TALL_CROPS, after the others), their wild
 # plants and seeds, coffee beans, and the jams. The plum and banana trees are orchard trees (tools/orchard.py TREES).

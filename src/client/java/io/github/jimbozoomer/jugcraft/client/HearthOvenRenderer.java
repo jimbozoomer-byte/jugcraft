@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.agriculture.CakeBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.PieFilling;
@@ -101,6 +102,16 @@ public class HearthOvenRenderer implements BlockEntityRenderer<HearthOvenBlockEn
 				// The cake: a square tin, and the sponge risen a little above its rim.
 				TintedBoxes.box(buffer, matrix, 5.0F, 2.0F, 6.0F, 11.0F, 3.5F, 12.0F, tin, light);
 				TintedBoxes.box(buffer, matrix, 5.5F, 3.5F, 6.5F, 10.5F, 4.75F, 11.5F, cake, light);
+			});
+		} else if (pie.height > 0) {
+			int tin = 0xFF8A8C90;
+			float top = 3.0F + 1.75F * pie.height / CakeBlock.HEIGHT;
+			collector.submitCustomGeometry(pose, CRUST, (matrix, buffer) -> {
+				// One of the owner's square pies and tarts: a square tin, its crust standing a little above the rim (a pie's
+				// higher than a tart's) round its filling.
+				TintedBoxes.box(buffer, matrix, 5.0F, 2.0F, 6.0F, 11.0F, 3.0F, 12.0F, tin, light);
+				TintedBoxes.box(buffer, matrix, 5.25F, 3.0F, 6.25F, 10.75F, top, 11.75F, crust, light);
+				TintedBoxes.box(buffer, matrix, 6.0F, top, 7.0F, 10.0F, top + 0.1F, 11.0F, filling, light);
 			});
 		} else {
 			collector.submitCustomGeometry(pose, CRUST, (matrix, buffer) -> {

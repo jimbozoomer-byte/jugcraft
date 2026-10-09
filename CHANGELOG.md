@@ -235,6 +235,12 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The *Arcane Concordance* codex (Modonomicon) unlocks its pages with your research. Jade, JEI and LambDynamicLights show the bench, its workings and the lantern's glow when installed. Jugcraft's weapons no longer receive Spell Engine's automatic weapon skills.
 - Record: [arcane-concordance-first-light.md](docs/features/arcane-concordance-first-light.md); the whole plan: [ARCANE_CONCORDANCE.md](docs/ARCANE_CONCORDANCE.md).
 
+### Unmerged: Pies and tarts
+- Ten pies and tarts the owner drew, rebuilt from their drawing: **Strawberry, Plum, Banoffee, Whipped Pumpkin and Pork Pies** and **Blueberry, Sweet Berry, Lemon, Strawberry and Coffee Tarts**, with the drawing's lattices, cream, berries and lemon on top.
+- Baked in the **Hearth Oven** as the pies are: Pastry Dough, a sugar (none in the pork pie) and the bake's own ingredients make a raw pie or tart. Left in too long, it comes out a **Burnt Pie**.
+- Set down whole, facing you, and eaten or cut with a knife into slices a quarter at a time, the front right quarter first, showing the filling inside. A pie stands seven texels tall, a tart four.
+- Details: [docs/features/pies-and-tarts.md](docs/features/pies-and-tarts.md).
+
 ### Unmerged: Fruit crops
 - Five fruits in Jugcraft's own art, asked for by the owner before their milkshakes and pies and tarts: **strawberries, blueberries, coffee, plums and bananas**.
 - **Strawberry Plant, Blueberry Bush and Coffee Plant:** bushes on farmland, planted from seeds that short grass, wild plants and the fruit give. Ripe, a right-click picks them and they fruit again.

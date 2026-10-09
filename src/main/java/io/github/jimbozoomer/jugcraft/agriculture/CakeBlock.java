@@ -22,36 +22,49 @@ import org.jspecify.annotations.Nullable;
  * A cake (tools/cakes.py) set down: a block wide and {@value #HEIGHT} texels tall, its front to whoever set it down. It is
  * eaten, or cut with a knife, a quarter at a time as a pie is ({@link PieBlock}): the front right quarter first, as the
  * owner's INTERIOR drawing shows the cake cut, then the front left, the back left and the back right. Only a whole cake can
- * be picked up again. A burnt cake (no filling) is eaten as a burnt pie is.
+ * be picked up again. A burnt cake (no filling) is eaten as a burnt pie is. The owner's square pies and tarts
+ * (tools/pies_and_tarts.py) are set down the same way, each its own {@link #height} tall.
  */
 public class CakeBlock extends PieBlock {
+	/** A cake's height in texels. */
 	public static final int HEIGHT = 9;
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 	/** The quarters of a cake facing north (x0, z0, x1, z1), in the order they are taken: the front right (the north-west), the front left, the back left, the back right. */
 	static final int[][] QUARTERS = {{0, 0, 8, 8}, {8, 0, 16, 8}, {8, 8, 16, 16}, {0, 8, 8, 16}};
-	private static final Map<Direction, VoxelShape[]> SHAPES = new EnumMap<>(Direction.class);
+	/** How tall it stands, in texels. */
+	public final int height;
+	private final Map<Direction, VoxelShape[]> shapes = new EnumMap<>(Direction.class);
 
-	static {
+	/** A cake, {@value #HEIGHT} texels tall. */
+	public CakeBlock(@Nullable PieFilling filling, Properties properties) {
+		this(filling, HEIGHT, properties);
+	}
+
+	/** A cake or a square pie or tart, {@code height} texels tall. */
+	public CakeBlock(@Nullable PieFilling filling, int height, Properties properties) {
+		super(filling, properties);
+		this.height = height;
 		for (Direction facing : Direction.Plane.HORIZONTAL) {
-			VoxelShape[] shapes = new VoxelShape[SLICES];
+			VoxelShape[] byBites = new VoxelShape[SLICES];
 			for (int bites = 0; bites < SLICES; bites++) {
 				VoxelShape shape = Shapes.empty();
 				for (int quarter = bites; quarter < SLICES; quarter++) {
-					shape = Shapes.or(shape, quarter(quarter, facing));
+					shape = Shapes.or(shape, quarter(quarter, facing, height));
 				}
-				shapes[bites] = shape.optimize();
+				byBites[bites] = shape.optimize();
 			}
-			SHAPES.put(facing, shapes);
+			shapes.put(facing, byBites);
 		}
-	}
-
-	public CakeBlock(@Nullable PieFilling filling, Properties properties) {
-		super(filling, properties);
 		registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH));
 	}
 
-	/** Quarter {@code index} of a cake facing {@code facing}: the north-facing quarter turned clockwise, as the blockstate turns the model. */
+	/** Quarter {@code index} of a cake facing {@code facing}, {@value #HEIGHT} texels tall. */
 	public static VoxelShape quarter(int index, Direction facing) {
+		return quarter(index, facing, HEIGHT);
+	}
+
+	/** Quarter {@code index} of a bake {@code height} texels tall facing {@code facing}: the north-facing quarter turned clockwise, as the blockstate turns the model. */
+	public static VoxelShape quarter(int index, Direction facing, int height) {
 		int[] q = QUARTERS[index];
 		int x0 = q[0], z0 = q[1], x1 = q[2], z1 = q[3];
 		int turns = switch (facing) {
@@ -67,12 +80,12 @@ public class CakeBlock extends PieBlock {
 			z0 = nz0;
 			z1 = nz1;
 		}
-		return Block.box(x0, 0, z0, x1, HEIGHT, z1);
+		return Block.box(x0, 0, z0, x1, height, z1);
 	}
 
 	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-		return SHAPES.get(state.getValue(FACING))[state.getValue(BITES)];
+		return shapes.get(state.getValue(FACING))[state.getValue(BITES)];
 	}
 
 	/** Set down with its front to the player. */
