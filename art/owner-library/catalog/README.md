@@ -30,3 +30,5 @@ Every supplied file is listed, including large folders that GitHub's folder view
 The CSV records each path, category, asset type, dimensions, companion file, byte count and SHA-256 checksum. Original bytes, names and relative folders are preserved.
 
 The complete catalog contains **26,947 source files**. The [magic collection's owner instructions](../MAGIC_ASSETS.md) explicitly authorize suitable files to be used as supplied, without mandatory redesigns or another permission request.
+
+For old credit, author or supporter text, see the [metadata field inventory](legacy-metadata.csv) and [owner provenance clarification](../PROVENANCE.md). The inventory locates fields; it does not determine ownership or mark every credit as obsolete.
