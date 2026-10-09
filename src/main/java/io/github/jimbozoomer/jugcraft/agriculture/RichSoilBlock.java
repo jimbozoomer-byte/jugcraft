@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -55,10 +56,28 @@ public class RichSoilBlock extends Block {
 		boost(level, pos, random);
 	}
 
-	/** A hoe tills it into Rich Soil Farmland, as dirt into farmland: only with air above. */
+	/**
+	 * A hoe tills it into Rich Soil Farmland, as dirt into farmland: only with air above. A brown or red mushroom used on
+	 * its top plants that mushroom's colony ({@link MushroomColonyBlock}) there; sneaking places the mushroom as usual.
+	 */
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 			BlockHitResult hit) {
+		MushroomColonyBlock colony = JugcraftAgriculture.colony(stack.getItem());
+		if (colony != null) {
+			BlockPos above = pos.above();
+			if (hit.getDirection() != Direction.UP || !level.getBlockState(above).isAir() || !player.mayBuild()
+					|| !level.mayInteract(player, above)) {
+				return super.useItemOn(stack, state, level, pos, player, hand, hit);
+			}
+			if (!level.isClientSide()) {
+				level.setBlock(above, colony.defaultBlockState(), Block.UPDATE_ALL);
+				level.playSound(null, above, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
+				level.gameEvent(player, GameEvent.BLOCK_PLACE, above);
+				stack.consume(1, player);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (!stack.is(ItemTags.HOES) || !level.getBlockState(pos.above()).isAir()) {
 			return super.useItemOn(stack, state, level, pos, player, hand, hit);
 		}

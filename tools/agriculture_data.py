@@ -72,6 +72,7 @@ import orchard_data
 import cake_data
 import pie_tart_data
 import milkshake_data
+import garden_data
 import milkshakes
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -150,23 +151,33 @@ def assets(root, write, lang):
     for info in TALL_CROPS.values():
         block = info["block"]
         variants = {}
-        for age, textures in enumerate(info["textures"]):
+        overripe = info.get("overripe")
+        for age, textures in enumerate(info["textures"] + ([overripe["textures"]] if overripe else [])):
             for texture in textures:
                 if info.get("trellis"):
                     write(root / "models" / "block" / f"{texture}.json", {"parent": rid("block/trellis_crop"), "textures": {
                         "crop": rid(f"block/{texture}"), "trellis": rid("block/trellis"), "post": rid("block/trellis_post")}})
                 else:
                     crop_model(texture)
+        for age, textures in enumerate(info["textures"]):
             for section in range(TALL_SECTIONS):
                 # Sections above the plant's height never exist; they reuse its top model.
-                variants[f"age={age},section={section}"] = {"model": rid(f"block/{textures[min(section, len(textures) - 1)]}")}
+                model = {"model": rid(f"block/{textures[min(section, len(textures) - 1)]}")}
+                if not overripe:
+                    variants[f"age={age},section={section}"] = model
+                    continue
+                # A vine that can go over (tools/garden.py OVERRIPE) only does once ripe; it shows withered then.
+                gone = overripe["textures"]
+                variants[f"age={age},{overripe['property']}=false,section={section}"] = model
+                variants[f"age={age},{overripe['property']}=true,section={section}"] = (
+                    {"model": rid(f"block/{gone[min(section, len(gone) - 1)]}")} if age == 7 else model)
         write(root / "blockstates" / f"{block}.json", {"variants": variants})
         lang[f"block.{MOD}.{block}"] = info["display"]
 
     for crop, info in CROPS.items():
         if info.get("sculpted"):
             # The mandrake: its crop, wild plant and root are sculpted (tools/flora_data.py).
-            wild = next(w for w, winfo in WILD_CROPS.items() if winfo["crop"] == crop)
+            wild = next(w for w, winfo in WILD_CROPS.items() if winfo.get("crop") == crop)
             flora_data.mandrake_assets(root, write, info["block"], wild, info["seed"], info["stages"])
             lang[f"block.{MOD}.{info['block']}"] = info["display"]
             continue
@@ -287,6 +298,7 @@ def assets(root, write, lang):
     cake_data.assets(root, write, lang)
     pie_tart_data.assets(root, write, lang)
     milkshake_data.assets(root, write)
+    garden_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -336,9 +348,15 @@ def loot(data, write):
         block, pick = info["block"], info["pick"]
         # Only the bottom section has loot, so a broken plant drops once: its seed back, plus the
         # same harvest as picking if it was ripe.
+        overripe = info.get("overripe")
+        ripe = {overripe["property"]: "false"} if overripe else {}
         pools = [pool(entry(info["seed"]), condition=match_block(block, section=0)),
                  pool(entry(pick["item"], uniform(pick["min"], pick["max"]), FORTUNE_UNIFORM),
-                      condition=match_block(block, section=0, age=7))]
+                      condition=match_block(block, section=0, age=7, **ripe))]
+        if overripe:
+            # A vine gone over (tools/garden.py OVERRIPE) gives rotten tomatoes instead, as many.
+            pools.append(pool(entry(overripe["item"], uniform(pick["min"], pick["max"]), FORTUNE_UNIFORM),
+                              condition=match_block(block, section=0, age=7, **{overripe["property"]: "true"})))
         if info["seed"] in [TALL_CROPS[c]["seed"] for c in STALKS["crops"]]:
             # A plant three blocks tall (picked or not) gives dry stalks for corn shocks.
             pools.append(pool(entry(STALKS["item"], uniform(STALKS["min"], STALKS["max"])), condition={
@@ -360,7 +378,8 @@ def loot(data, write):
                 pool({"type": "minecraft:alternatives", "children": [entry(produce, condition=ripe), entry(seed)]}),
                 pool(entry(seed, FORTUNE_BINOMIAL), condition=ripe)))
     for wild, info in WILD_CROPS.items():
-        seed = TALL_CROPS[info["crop"]]["seed"] if info["crop"] in TALL_CROPS else CROPS[info["crop"]]["seed"]
+        # What the plant gives: its own `seed` (a vanilla crop's: tools/garden.py WILD), or its crop's planting item.
+        seed = info.get("seed") or (TALL_CROPS[info["crop"]]["seed"] if info["crop"] in TALL_CROPS else CROPS[info["crop"]]["seed"])
         pools = [pool({"type": "minecraft:alternatives", "children": [
             entry(wild, condition="minecraft:tool/can_shear"),
             entry(seed, uniform(1, 2), {"type": "minecraft:explosion_decay"}),
@@ -432,6 +451,7 @@ def loot(data, write):
     rice_data.loot(out, write)
     soil_data.loot(out, write)
     orchard_data.loot(out, write)
+    garden_data.loot(out, write)
     cake_data.loot(out, write)
     pie_tart_data.loot(out, write)
 

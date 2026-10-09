@@ -29,6 +29,7 @@ import pie_tart_data
 import pies_and_tarts
 import milkshake_data
 import milkshakes
+import garden
 import owner_art
 import werewolf_model
 import midway
@@ -3106,6 +3107,8 @@ def check_agriculture():
         items[name] = ("plain", None, None, compost.lower(), None)
     for name, n, sat, compost in re.findall(r'\bcob\("([a-z_]+)", (\d+), ([\d.]+)F, COMPOST_(\w+)\)', main):
         items[name] = ("cob", int(n), float(sat), compost.lower(), None)
+    for name, compost in re.findall(r'\bthrown\("([a-z_]+)", COMPOST_(\w+)\)', main):
+        items[name] = ("thrown", None, None, compost.lower(), None)
     for name in re.findall(r'\bmilkBottle\("([a-z_]+)"\)', main):
         items[name] = ("milk", None, None, None, None)
     for name in re.findall(r'\bpetFood\("([a-z_]+)", EntityTypes\.', main):
@@ -3140,6 +3143,7 @@ def check_agriculture():
         food = info.get("food") or [None, None]
         kind = ("stew" if info.get("stew") else "treat" if info.get("treat") else "sweet" if info.get("sweet") else "drink" if info.get("drink")
                 else "cob" if info.get("cob") else "milk" if info.get("milk") else "pet" if info.get("pet")
+                else "thrown" if info.get("thrown")
                 else "seeds" if "plants" in info
                 else "food" if "food" in info else "plain")
         expected[name] = (kind, food[0], food[1], info.get("compost"), info.get("plants"))
@@ -3238,7 +3242,11 @@ def check_agriculture():
     # Every crop state has a model, and every seed plants a real crop.
     for info in ag.TALL_CROPS.values():
         variants = set((load(ASSETS / "blockstates" / f"{info['block']}.json") or {}).get("variants", {}))
-        if variants != {f"age={a},section={s}" for a in range(8) for s in range(ag.TALL_SECTIONS)}:
+        # A vine that goes over (tools/garden.py OVERRIPE) has its over-ripe state too.
+        gone = info.get("overripe")
+        expected = ({f"age={a},{gone['property']}={v},section={s}" for a in range(8) for v in ("false", "true")
+                     for s in range(ag.TALL_SECTIONS)} if gone else {f"age={a},section={s}" for a in range(8) for s in range(ag.TALL_SECTIONS)})
+        if variants != expected:
             err(f"{info['block']}: blockstate does not cover every age and section")
     for info in ag.CROPS.values():
         variants = set((load(ASSETS / "blockstates" / f"{info['block']}.json") or {}).get("variants", {}))
@@ -3691,6 +3699,98 @@ def check_soil():
     loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{soil.RICH_FARMLAND['block']}.json") or {})
     if f'"{MOD}:{soil.RICH_SOIL["block"]}"' not in loot:
         err("Rich Soil Farmland must drop Rich Soil")
+
+
+def check_garden():
+    """Garden crops in the owner's art (tools/garden.py): the tomato vine that goes over, the Rotten Tomato, the mushroom
+    colonies and the wild carrots, potatoes and beetroots match the Java; the vine's over-ripe state and the colonies have
+    their models, blockstates, loot and words; the wild plants give their vanilla seed; ornamental corn's ears change colour."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    client = (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8")
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)F?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    # The tomato vine that goes over.
+    over, tomato = garden.OVERRIPE, ag.TALL_CROPS["tomato"]
+    vine = java.get("TomatoVineBlock", "")
+    if (number("TomatoVineBlock", "OVERRIPE_CHANCE") != over["chance"] or f'BooleanProperty.create("{over["property"]}")' not in vine
+            or f'ROTTEN = "{over["item"]}"' not in vine):
+        err("TomatoVineBlock differs from tools/garden.py OVERRIPE")
+    if "crop == TallCrop.TOMATO ? new TomatoVineBlock(props, crop)" not in main or tomato.get("overripe") != over:
+        err("The tomato must be registered as a TomatoVineBlock, going over as tools/garden.py OVERRIPE says")
+    variants = (load(ASSETS / "blockstates" / f"{tomato['block']}.json") or {}).get("variants", {})
+    for section in range(ag.TALL_SECTIONS):
+        withered = over["textures"][min(section, len(over["textures"]) - 1)]
+        if variants.get(f"age=7,{over['property']}=true,section={section}", {}).get("model") != rid_of(f"block/{withered}"):
+            err(f"The over-ripe tomato vine's section {section} must show {withered}")
+    loot = load(DATA / MOD / "loot_table" / "blocks" / f"{tomato['block']}.json") or {}
+    pools = json.dumps(loot.get("pools", []))
+    if rid_of(over["item"]) not in pools or rid_of(tomato["pick"]["item"]) not in pools:
+        err(f"{tomato['block']} must drop tomatoes when ripe and rotten tomatoes when gone over")
+
+    # The Rotten Tomato: thrown as a snowball, rendered as its item, named.
+    rotten, item = garden.ROTTEN_TOMATO, java.get("RottenTomatoItem", "")
+    thrown = re.search(r"void thrown\(([^}]*)\}", main)
+    if (number("RottenTomatoItem", "SPEED") != rotten["speed"] or "ID = TomatoVineBlock.ROTTEN;" not in item
+            or not thrown or f"stacksTo({rotten['stack']})" not in thrown.group(1)):
+        err("RottenTomatoItem or JugcraftAgriculture.thrown differs from tools/garden.py ROTTEN_TOMATO")
+    if "ROTTEN_TOMATO = entity(RottenTomatoItem.ID" not in main or "JugcraftAgriculture.ROTTEN_TOMATO, ThrownItemRenderer::new" not in client:
+        err("The thrown Rotten Tomato must be registered as an entity and rendered as its item")
+    for key, text in garden.TEXT.items():
+        if lang.get(key) != text:
+            err(f"en_us.json {key} must be {text!r} (tools/garden.py TEXT)")
+
+    # The mushroom colonies.
+    colony = garden.COLONY
+    expected = {"MAX_AGE": colony["stages"] - 1, "MAX_LIGHT": colony["max_light"], "GROWTH": colony["growth"],
+                "PICK_MIN": colony["pick"]["min"], "PICK_MAX": colony["pick"]["max"], "PICK_RESET": colony["pick_reset"]}
+    for name, value in expected.items():
+        if number("MushroomColonyBlock", name) != value:
+            err(f"MushroomColonyBlock.{name} must be {value} (tools/garden.py COLONY)")
+    registered = re.findall(r'\bcolony\("([a-z_]+)", Blocks\.(\w+), Items\.(\w+)\)', main)
+    wanted = [(name, info["mushroom"].split(":")[1].upper(), info["mushroom"].split(":")[1].upper()) for name, info in garden.COLONIES.items()]
+    if registered != wanted:
+        err(f"JugcraftAgriculture colonies {registered} differ from tools/garden.py COLONIES")
+    if "JugcraftAgriculture.colony(stack.getItem())" not in java.get("RichSoilBlock", ""):
+        err("A mushroom used on Rich Soil must plant its colony")
+    for name, info in garden.COLONIES.items():
+        state = (load(ASSETS / "blockstates" / f"{name}.json") or {}).get("variants", {})
+        if set(state) != {f"age={a}" for a in range(colony["stages"])}:
+            err(f"{name}: blockstate needs each of its {colony['stages']} stages")
+        for stage in range(colony["stages"]):
+            texture = garden.colony_texture(name, stage)
+            model = load(ASSETS / "models" / "block" / f"{texture}.json") or {}
+            if model.get("parent") != "minecraft:block/cross" or model.get("textures", {}).get("cross") != rid_of(f"block/{texture}"):
+                err(f"{texture}: must be a cross of the owner's stage")
+        drops = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {})
+        if drops.count(f'"{info["mushroom"]}"') != 2 or f'"age": "{colony["stages"] - 1}"' not in drops:
+            err(f"{name} must give back its mushroom, and grown, {colony['pick']['min']}-{colony['pick']['max']} more")
+        if lang.get(f"block.{MOD}.{name}") != info["display"]:
+            err(f"{name} has no words")
+        if name in ag.all_items():
+            err(f"{name} has no item: a mushroom plants it")
+
+    # The wild carrots, potatoes and beetroots give their vanilla crop's planting item.
+    for name, info in garden.WILD.items():
+        if ag.WILD_CROPS.get(name) != info:
+            err(f"tools/agriculture.py WILD_CROPS must hold tools/garden.py WILD {name}")
+        drops = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{name}.json") or {})
+        if f'"{info["seed"]}"' not in drops:
+            err(f"{name} must give {info['seed']}")
+    for name, texture in garden.WILD_ART.items():
+        if ag.WILD_CROPS[name]["texture"] != texture:
+            err(f"{name} must wear the owner's {texture}")
+
+    # Ornamental corn's ears: the owner's ripe corn has the golden tones the recolouring swaps.
+    for source in garden.ORNAMENTAL_EARS.values():
+        image = Image.open(owner_art._source(f"{owner_art.FOOD}/{source}")).convert("RGBA")
+        pixels = (image.getpixel((x, y)) for x in range(image.width) for y in range(image.height))
+        if not any(pixel[3] and pixel[:3] in garden.EAR_TONES for pixel in pixels):
+            err(f"The owner's {source} has none of tools/garden.py EAR_TONES: ornamental corn's ears would not change colour")
 
 
 def check_cakes():
@@ -10816,6 +10916,7 @@ def main():
     check_rice()
     check_soil()
     check_orchard()
+    check_garden()
     check_cakes()
     check_pies_and_tarts()
     check_milkshakes()
