@@ -71,6 +71,8 @@ import soil_data
 import orchard_data
 import cake_data
 import pie_tart_data
+import milkshake_data
+import milkshakes
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
                          HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, STALKS, WILD_BONUS, crop_blocks)
@@ -240,8 +242,9 @@ def assets(root, write, lang):
 
     sculpted_seeds = {info["seed"] for info in CROPS.values() if info.get("sculpted")}
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
-        if item in sculpted_seeds:
-            # Drawn as a sculpted model by flora_data.mandrake_assets above.
+        if item in sculpted_seeds or item in milkshakes.SHAKES:
+            # Drawn as a sculpted model by flora_data.mandrake_assets above, or a milkshake's 3D glass
+            # (milkshake_data.assets below).
             lang[f"item.{MOD}.{item}"] = info["display"]
             continue
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -283,6 +286,7 @@ def assets(root, write, lang):
     orchard_data.assets(root, write, lang)
     cake_data.assets(root, write, lang)
     pie_tart_data.assets(root, write, lang)
+    milkshake_data.assets(root, write)
 
 
 # ---------------------------------------------------------------- loot tables

@@ -113,6 +113,6 @@ Not done: play in a real client and a two-client dedicated-server session.
 Food and decoration, for any time of year. The Whipped Pumpkin Pie is not seasonal.
 
 ## Rollout and open questions
-- The owner's milkshakes (their other page) come next.
+- The owner's [milkshakes](milkshakes.md) (their other page) are built too.
 - The page labels the golden tart "PORK PIE"; the owner named it the Lemon Tart. The pumpkin pie is named the **Whipped Pumpkin Pie**, after the cream on its top, as "Pumpkin Pie" is vanilla's; the owner can rename it.
 - Pies and tarts do not sit on the feasts' platters or the Pantry Shelf; they stand on a table as a block.

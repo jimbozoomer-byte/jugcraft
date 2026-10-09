@@ -27,6 +27,8 @@ import cakes
 import cake_data
 import pie_tart_data
 import pies_and_tarts
+import milkshake_data
+import milkshakes
 import owner_art
 import werewolf_model
 import midway
@@ -3460,11 +3462,11 @@ def check_menu():
             best = max(best, sum(value(i, seen + (ref,)) for i in inputs) / count)
         return best
 
-    dishes = {**menu.DISHES, **rice.DISHES, **orchard.DISHES}
+    dishes = {**menu.DISHES, **rice.DISHES, **orchard.DISHES, **milkshakes.DISHES}
     pot = {**menu.POT_RECIPES, **rice.POT_RECIPES}
     recipes = [(name, [ref for ref, n in info["inputs"].items() for _ in range(n)], info.get("count", 1)) for name, info in pot.items()]
     recipes += [(name, inputs, count) for name, (inputs, count) in menu.SHAPELESS.items()]
-    recipes += [(recipe["result"], recipe["inputs"], recipe["count"]) for recipe in rice.SHAPELESS + orchard.SHAPELESS
+    recipes += [(recipe["result"], recipe["inputs"], recipe["count"]) for recipe in rice.SHAPELESS + orchard.SHAPELESS + milkshakes.SHAPELESS
                 if recipe["result"] in dishes]
     recipes += [(name, [full(info["input"])], 1) for name, info in menu.COOKING.items()]
     recipes += [(result, [info["input"]], count) for info in kitchen.CUTTING.values() for result, count in info["results"] if result in dishes]
@@ -3475,7 +3477,7 @@ def check_menu():
             err(f"{name}: {count} give {given} hunger from {taken:g} in ingredients (at most {menu.COOK_BONUS} more)")
     for name, info in dishes.items():
         if "food" in info and not any(name == recipe[0] for recipe in recipes):
-            err(f"{name} has no recipe in tools/menu.py, tools/rice.py or tools/orchard.py")
+            err(f"{name} has no recipe in tools/menu.py, tools/rice.py, tools/orchard.py or tools/milkshakes.py")
 
     for name in menu.all_placed():
         model = load(ASSETS / "models" / "block" / f"{name}.json") or {}
@@ -3821,6 +3823,60 @@ def check_pies_and_tarts():
             err(f"{pies_and_tarts.raw(bake)}'s recipe must take {inputs}")
     if not (ROOT / "art" / "owner-library" / "drawings" / "pies_and_tarts.png").exists():
         err("The owner's drawing the pies and tarts are rebuilt from (art/owner-library/drawings/pies_and_tarts.png) is missing")
+
+
+def check_milkshakes():
+    """The owner's milkshakes (tools/milkshakes.py): each a drink of tools/menu.py's kind (Java's drink() registrations
+    are checked with the other foods, its set-down dish and balance by check_menu), set down as the glass the page draws:
+    its model is tools/milkshake_data.py's (the foot's four bars, the base, the glass and its band, the cream, the fruit
+    and the straw leaning back), wearing its one 64 x 64 opaque texture; PlacedDishBlock's MILKSHAKE outline is
+    milkshakes.OUTLINE; its item is its 3D glass, shown as milkshake_data.DISPLAY says; its recipe is a Milk Bottle, a
+    snowball, a sugar and its flavour; every part fits the block; the page they are read off is kept."""
+    java = AGRICULTURE_JAVA.joinpath("PlacedDishBlock.java").read_text(encoding="utf-8") if AGRICULTURE_JAVA.joinpath("PlacedDishBlock.java").exists() else ""
+    outline = re.search(r"MILKSHAKE\(Block\.box\(([^)]*)\)\)", java)
+    if not outline or [float(v) for v in outline.group(1).split(",")] != [float(v) for v in milkshakes.OUTLINE]:
+        err("PlacedDishBlock.DishShape.MILKSHAKE must be the box tools/milkshakes.py OUTLINE gives")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    boxes = [milkshakes.PLATE, milkshakes.BODY, milkshakes.BAND, milkshakes.CAP, milkshakes.FRUIT] + milkshakes.FOOT["bars"]
+    for lo, hi in boxes + [(milkshakes.STRAW["from"], milkshakes.STRAW["to"])]:
+        if not all(0 <= lo[i] < hi[i] <= 16 for i in range(3)):
+            err(f"The milkshake glass's part {lo}-{hi} must fit inside the block")
+    x0, y0, z0, x1, y1, z1 = milkshakes.OUTLINE
+    if any(lo[0] < x0 or lo[1] < y0 or lo[2] < z0 or hi[0] > x1 or hi[1] > y1 or hi[2] > z1 for lo, hi in boxes):
+        err("tools/milkshakes.py OUTLINE must hold every part of the glass")
+    for key, (u0, v0, u1, v1) in milkshakes.LAYOUT.items():
+        if not (0 <= u0 < u1 <= 16 and 0 <= v0 < v1 <= 16) or any(round(c * milkshakes.PIXELS) != c * milkshakes.PIXELS for c in (u0, v0, u1, v1)):
+            err(f"tools/milkshakes.py LAYOUT {key} must lie on whole pixels of the 64 x 64 texture")
+    for name, info in milkshakes.SHAKES.items():
+        model = load(ASSETS / "models" / "block" / f"{name}.json") or {}
+        if model.get("elements") != milkshake_data.elements(name):
+            err(f"{name}'s model must be the glass tools/milkshake_data.py builds")
+        straw = (model.get("elements") or [{}])[-1].get("rotation", {})
+        if (straw.get("axis"), straw.get("angle")) != (milkshakes.STRAW["axis"], milkshakes.STRAW["angle"]) or straw.get("angle") not in (-45, -22.5, 0, 22.5, 45):
+            err(f"{name}'s straw must lean as tools/milkshakes.py STRAW says, by a turn the model format allows")
+        texture = ASSETS / "textures" / "block" / "menu" / f"{name}.png"
+        if not texture.exists():
+            err(f"{name} needs its texture block/menu/{name}")
+        else:
+            image = Image.open(texture).convert("RGBA")
+            if image.size != (16 * milkshakes.PIXELS, 16 * milkshakes.PIXELS) or image.getextrema()[3][0] < 255:
+                err(f"block/menu/{name}.png must be an opaque {16 * milkshakes.PIXELS} x {16 * milkshakes.PIXELS} texture")
+        item = load(ASSETS / "items" / f"{name}.json") or {}
+        held = load(ASSETS / "models" / "item" / f"{name}.json") or {}
+        if item.get("model", {}).get("model") != f"{MOD}:item/{name}" or held.get("parent") != f"{MOD}:block/{name}" \
+                or held.get("display") != milkshake_data.DISPLAY or set(held) != {"parent", "display"}:
+            err(f"{name}'s item must be its 3D glass (block/{name}), shown as tools/milkshake_data.py DISPLAY says")
+        if lang.get(f"item.{MOD}.{name}") != info["display"] or lang.get(f"block.{MOD}.{name}") != info["display"]:
+            err(f"{name} needs its words, as an item and set down")
+        recipe = load(DATA / MOD / "recipe" / f"{name}.json") or {}
+        inputs = [milkshakes.MILK, "minecraft:snowball", "minecraft:sugar"] + info["with"]
+        if sorted(json.dumps(i, sort_keys=True) for i in recipe.get("ingredients", [])) != sorted(json.dumps(i) for i in inputs) \
+                or recipe.get("result", {}).get("id") != f"{MOD}:{name}":
+            err(f"{name}'s recipe must be {inputs}")
+        if menu.all_placed().get(name) != ["milkshake"] or ag.ITEMS.get(name, {}).get("drink") != milkshakes.EFFECT:
+            err(f"{name} must be a drink set down as the milkshake glass")
+    if not (ROOT / "art" / "owner-library" / "drawings" / "milkshakes.png").exists():
+        err("The owner's drawing the milkshakes are read off (art/owner-library/drawings/milkshakes.png) is missing")
 
 
 def check_orchard():
@@ -10762,6 +10818,7 @@ def main():
     check_orchard()
     check_cakes()
     check_pies_and_tarts()
+    check_milkshakes()
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()

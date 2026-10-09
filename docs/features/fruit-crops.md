@@ -26,7 +26,7 @@ Grow five new fruits:
 
 ## Connections
 - Existing input producer: short grass and wild plants for the seeds, wild trees for the pit and pup; farmland and water, bone meal; sugar and Mason Jars for the jams.
-- Existing output consumer: the fruit are foods (`c:foods/berry`, `c:foods/fruit`) and crops (`c:crops/<crop>`), the seeds `c:seeds/<crop>`, for other mods' recipes; the jams join the pantry (`PreserveJarItem`, the Canning Kettle and Pantry Shelf); the coffee beans go into the Coffee Cake; the hydroponic bay grows the three bushes' seeds as it grows the other crops'. The owner's [pies and tarts](pies-and-tarts.md) take the fruit and the coffee beans, and their milkshakes will.
+- Existing output consumer: the fruit are foods (`c:foods/berry`, `c:foods/fruit`) and crops (`c:crops/<crop>`), the seeds `c:seeds/<crop>`, for other mods' recipes; the jams join the pantry (`PreserveJarItem`, the Canning Kettle and Pantry Shelf); the coffee beans go into the Coffee Cake; the hydroponic bay grows the three bushes' seeds as it grows the other crops'. The owner's [pies and tarts](pies-and-tarts.md) take the fruit and the coffee beans, and their [milkshakes](milkshakes.md) the fruit.
 - Technology connection: the bushes are tall crops, so the hydroponic bay grows them (two fruit and one or two seeds a harvest, as every crop); the jams and the coffee are data recipes, ready for the engineered kitchen (slice 10).
 - Magic connection: none.
 - Reachable entry path: short grass anywhere gives the bushes' seeds; wild plants and trees give the rest; a traded fruit starts a farm. No circular unlock: nothing grown here is needed to reach it.
@@ -101,6 +101,6 @@ Not done: play in a real client and a two-client dedicated-server session.
 Farming and food. The plants grow wild in new chunks only, in the biomes above. The trees' leaves are evergreen, as the orchards' are. Nothing is seasonal.
 
 ## Rollout and open questions
-- Next: the owner's [pies and tarts](pies-and-tarts.md) (built: strawberry, blueberry, plum, banana and coffee each go into one), then their milkshakes, from these fruits.
+- The owner's [pies and tarts](pies-and-tarts.md) (strawberry, blueberry, plum, banana and coffee each go into one) and [milkshakes](milkshakes.md) (strawberry, banana, plum and blueberry) are built from these fruits.
 - The tree roster's Lush Grassland bananas, its banana bunch block and cherry trees stay for the trees branch.
 - The owner's own art for any of these, if they draw it, replaces Jugcraft's under the same IDs.
