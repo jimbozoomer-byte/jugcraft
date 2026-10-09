@@ -68,6 +68,11 @@ public final class EmberGear {
 	public static final double ROBE_PIECE_POWER = 0.5;
 	/** The Fire Bangle's blow: Smoulder for this long. */
 	public static final int BANGLE_SMOULDER_TICKS = 60;
+	/**
+	 * Blocks beyond the reach of the weapon in hand (from the eye to the creature's hitbox, as vanilla measures a melee
+	 * hit) that a blow may land and still count: a Shock arc's second foe or a weapon skill landing farther off does not.
+	 */
+	public static final double BANGLE_REACH_MARGIN = 1.0;
 	/** Vanilla's per-slot base durability times these: the Pyromaniac's (light, cloth) and the Pyromancer's (medium). */
 	public static final int PYROMANIACS_DURABILITY = 7;
 	public static final int PYROMANCERS_DURABILITY = 10;
@@ -149,12 +154,15 @@ public final class EmberGear {
 
 	/**
 	 * The Fire Bangle's blow. After a player's own melee hit (vanilla's player-attack damage, dealt by the player in
-	 * person: not an arrow, a spell, a mount's or a machine's blow), if they wear a bangle where it works and understand
-	 * Hearthbinding, the creature smoulders, wherever the shared effect boundary lets them harm it. Cheapest checks first.
+	 * person, within reach of the weapon in hand: their blows, its sweep and Spell Engine's melee weapon skills; not an
+	 * arrow, a spell of a school, a mount's or a machine's blow, nor a Shock arc or a skill landing beyond that reach), if
+	 * they wear a bangle where it works and understand Hearthbinding, the creature smoulders, wherever the shared effect
+	 * boundary lets them harm it. Cheapest checks first.
 	 */
 	private static void afterDamage(LivingEntity target, DamageSource source, float baseDamage, float damage, boolean blocked) {
 		if (damage <= 0.0F || blocked || !(target.level() instanceof ServerLevel level) || !source.is(DamageTypes.PLAYER_ATTACK)
 				|| !(source.getEntity() instanceof ServerPlayer player) || source.getDirectEntity() != player || player.isPassenger()
+				|| !player.isWithinAttackRange(player.getMainHandItem(), target.getBoundingBox(), BANGLE_REACH_MARGIN)
 				|| !JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE) || !wearsBangle(player)
 				|| !ConcordanceProgress.knowledge(player).state(Ember.RESEARCH).atLeast(ResearchState.UNDERSTOOD)) {
 			return;

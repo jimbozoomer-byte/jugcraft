@@ -1,6 +1,0 @@
-{
-  "parent": "jugcraft:item/arms_quarterstaff",
-  "textures": {
-    "tex": "jugcraft:item/steel_quarterstaff_model"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/inner_stairs",
-  "textures": {
-    "bottom": "jugcraft:block/tungsten_steel_frame",
-    "top": "jugcraft:block/tungsten_steel_frame",
-    "side": "jugcraft:block/tungsten_steel_frame"
-  }
-}

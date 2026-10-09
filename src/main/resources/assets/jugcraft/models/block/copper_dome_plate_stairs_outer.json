@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/outer_stairs",
-  "textures": {
-    "bottom": "jugcraft:block/dr_dome",
-    "top": "jugcraft:block/dr_dome",
-    "side": "jugcraft:block/dr_dome"
-  }
-}

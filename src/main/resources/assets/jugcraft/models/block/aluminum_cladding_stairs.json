@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/stairs",
-  "textures": {
-    "bottom": "jugcraft:block/aluminum_cladding",
-    "top": "jugcraft:block/aluminum_cladding",
-    "side": "jugcraft:block/aluminum_cladding"
-  }
-}

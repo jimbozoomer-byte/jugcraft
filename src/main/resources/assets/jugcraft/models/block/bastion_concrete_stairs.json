@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/stairs",
-  "textures": {
-    "bottom": "jugcraft:block/fw_bastion",
-    "top": "jugcraft:block/fw_bastion",
-    "side": "jugcraft:block/fw_bastion"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab_top",
-  "textures": {
-    "bottom": "jugcraft:block/hazard_plating",
-    "top": "jugcraft:block/hazard_plating",
-    "side": "jugcraft:block/hazard_plating"
-  }
-}

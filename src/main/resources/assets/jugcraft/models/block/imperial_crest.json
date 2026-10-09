@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "jugcraft:block/ik_crest",
-    "side": "jugcraft:block/ik_gilt_trim",
-    "top": "jugcraft:block/ik_gilt_trim"
-  }
-}

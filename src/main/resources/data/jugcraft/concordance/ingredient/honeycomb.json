@@ -1,8 +1,0 @@
-{
-  "schema": 1,
-  "item": "minecraft:honeycomb",
-  "properties": {
-    "tide": 0.6,
-    "verdance": 0.4
-  }
-}

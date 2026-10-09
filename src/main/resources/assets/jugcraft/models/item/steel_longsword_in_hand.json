@@ -1,6 +1,0 @@
-{
-  "parent": "jugcraft:item/arms_longsword",
-  "textures": {
-    "tex": "jugcraft:item/steel_longsword_model"
-  }
-}

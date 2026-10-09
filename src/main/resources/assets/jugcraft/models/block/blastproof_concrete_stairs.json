@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/stairs",
-  "textures": {
-    "bottom": "jugcraft:block/blastproof_concrete",
-    "top": "jugcraft:block/blastproof_concrete",
-    "side": "jugcraft:block/blastproof_concrete"
-  }
-}

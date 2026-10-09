@@ -1,8 +1,0 @@
-{
-  "parent": "jugcraft:block/family_mausoleum_53",
-  "textures": {
-    "particle": "jugcraft:block/gy_marble_worn_upper",
-    "stone": "jugcraft:block/gy_marble_worn_upper",
-    "top": "jugcraft:block/gy_marble_worn_upper"
-  }
-}

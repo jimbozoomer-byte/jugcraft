@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/crop",
-  "textures": {
-    "crop": "jugcraft:block/gloamcap_stage3"
-  }
-}

@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "jugcraft:block/lemon_leaves_blossom"
-  }
-}

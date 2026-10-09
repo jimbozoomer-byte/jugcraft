@@ -1,6 +1,0 @@
-{
-  "parent": "jugcraft:item/arms_kusarigama",
-  "textures": {
-    "tex": "jugcraft:item/steel_kusarigama_model"
-  }
-}

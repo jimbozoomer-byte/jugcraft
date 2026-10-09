@@ -1,6 +1,0 @@
-{
-  "parent": "jugcraft:item/arms_harpoon",
-  "textures": {
-    "tex": "jugcraft:item/steel_harpoon_model"
-  }
-}

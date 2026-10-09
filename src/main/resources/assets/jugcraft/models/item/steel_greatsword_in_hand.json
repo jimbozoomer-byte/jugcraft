@@ -1,6 +1,0 @@
-{
-  "parent": "jugcraft:item/arms_greatsword",
-  "textures": {
-    "tex": "jugcraft:item/steel_greatsword_model"
-  }
-}

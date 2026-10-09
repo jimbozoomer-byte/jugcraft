@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.test;
 import com.geckolib.animatable.client.GeoRenderProvider;
 import com.geckolib.cache.GeckoLibResources;
 import com.geckolib.cache.model.BakedGeoModel;
+import com.geckolib.renderer.GeoArmorRenderer;
 import eu.pb4.trinkets.api.TrinketsApi;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.Invocations;
@@ -10,8 +11,10 @@ import io.github.jimbozoomer.jugcraft.concordance.ember.Ember;
 import io.github.jimbozoomer.jugcraft.concordance.ember.EmberGear;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
@@ -19,6 +22,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -38,8 +42,9 @@ import net.minecraft.world.phys.AABB;
  * Client game test for Ember's regalia (docs/features/arcane-concordance-ember-regalia.md): the two fire sets worn as the
  * owner's GeckoLib model, and the foci in the real Trinkets slot.
  * <ul>
- * <li>First the client checks that GeckoLib has a renderer for each piece of both sets, that it loaded the owner's model
- * with every bone the renderer poses (and the slim sleeves it hides), and that both sets' textures are there.</li>
+ * <li>First the client checks that GeckoLib has a renderer for each piece of both sets, one for each set, wearing the
+ * owner's model with that set's own texture; that it loaded the model with every bone the renderer poses (and the slim
+ * sleeves it hides); and that both sets' textures are there.</li>
  * <li>A row by day, left to right from the front: vanilla iron on an armour stand (the control), the Pyromaniac's (light)
  * set and the Pyromancer's (medium) set on stands (the owner's light texture is the medium sheet, so they should look
  * alike), the Pyromancer's with Protection IV (its glint), the Pyromancer's on a zombie (arms raised: the sleeves must
@@ -105,7 +110,7 @@ public class ConcordanceEmberGearClientGameTests implements FabricClientGameTest
 			// GeckoLib draws each piece, from the owner's model with every bone the renderer needs.
 			String missing = context.computeOnClient(client -> unreadModel(client));
 			Jugcraft.LOGGER.info("[ember regalia client] GeckoLib renderer and model: {}", missing.isEmpty() ? "present" : missing);
-			check(missing.isEmpty(), "The Pyromancer's set cannot be drawn: " + missing);
+			check(missing.isEmpty(), "The fire sets cannot be drawn: " + missing);
 
 			double rowZ = z + ROW_Z;
 			for (int i = 0; i < WEARERS.length; i++) {
@@ -122,10 +127,11 @@ public class ConcordanceEmberGearClientGameTests implements FabricClientGameTest
 			check(wrong.isEmpty(), "The row is not dressed as the shots need: " + wrong);
 
 			String box = "x=%d,y=%d,z=%d,dx=17,dy=4,dz=5".formatted(x - 8, y - 1, z - 8);
-			double pairX = (wearerX(x, LIGHT_STAND) + wearerX(x, SET)) / 2;
+			double rowX = (wearerX(x, 0) + wearerX(x, WEARERS.length - 1)) / 2;
+		double pairX = (wearerX(x, LIGHT_STAND) + wearerX(x, SET)) / 2;
 			for (int view = 0; view < VIEWS.length; view++) {
 				server.runCommand("execute as @e[type=!minecraft:player,%s] at @s run tp @s ~ ~ ~ %d 0".formatted(box, TURNS[view]));
-				shoot(context, singleplayer, x + 0.5, y, rowZ + ROW_CAMERA, 6, "jugcraft_ember_regalia_" + VIEWS[view]);
+				shoot(context, singleplayer, rowX, y, rowZ + ROW_CAMERA, 6, "jugcraft_ember_regalia_" + VIEWS[view]);
 				shoot(context, singleplayer, pairX, y, rowZ + PAIR_CAMERA, 10, "jugcraft_ember_regalia_pair_" + VIEWS[view]);
 			}
 			server.runCommand("kill @e[type=!minecraft:player,%s]".formatted(box));
@@ -180,26 +186,50 @@ public class ConcordanceEmberGearClientGameTests implements FabricClientGameTest
 		}
 	}
 
-	/** What GeckoLib lacks to draw the sets, or an empty string: a renderer for each piece, the model, its bones, the textures. */
+	/**
+	 * What GeckoLib lacks to draw the sets, or an empty string: a renderer for each piece, the same one for a set's four
+	 * pieces and another for the other set, each wearing the owner's model with its set's own texture (named here, not
+	 * asked of the item); the model and its bones; the textures.
+	 */
 	private static String unreadModel(Minecraft client) {
 		List<String> wrong = new ArrayList<>();
-		for (String[] set : List.of(LIGHT, PIECES)) {
-			for (int p = 0; p < set.length; p++) {
-				ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id(set[p])));
+		Identifier modelId = Jugcraft.id("armor/" + EmberGear.ARMOR_MODEL);
+		Map<String, GeoArmorRenderer<?, ?>> bySet = new HashMap<>();
+		for (Map.Entry<String, String[]> set : Map.of("pyromaniacs", LIGHT, "pyromancers", PIECES).entrySet()) {
+			Identifier texture = Jugcraft.id("textures/armor/" + set.getKey() + ".png");
+			String[] pieces = set.getValue();
+			for (int p = 0; p < pieces.length; p++) {
+				ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id(pieces[p])));
 				GeoRenderProvider provider = GeoRenderProvider.of(stack);
-				if (provider == null || provider == GeoRenderProvider.DEFAULT || provider.getGeoArmorRenderer(stack, SLOTS[p]) == null) {
-					wrong.add(set[p] + " has no GeckoLib armour renderer");
+				GeoArmorRenderer<?, ?> renderer = provider == null || provider == GeoRenderProvider.DEFAULT ? null
+						: provider.getGeoArmorRenderer(stack, SLOTS[p]);
+				if (renderer == null) {
+					wrong.add(pieces[p] + " has no GeckoLib armour renderer");
+					continue;
+				}
+				HumanoidRenderState state = new HumanoidRenderState();
+				Identifier worn = renderer.getGeoModel().getModelResource(state);
+				Identifier painted = renderer.getGeoModel().getTextureResource(state);
+				if (!worn.equals(modelId) || !painted.equals(texture)) {
+					wrong.add(pieces[p] + " is drawn as " + worn + " in " + painted + ", not " + modelId + " in " + texture);
+				}
+				GeoArmorRenderer<?, ?> first = bySet.putIfAbsent(set.getKey(), renderer);
+				if (first != null && first != renderer) {
+					wrong.add(pieces[p] + " has a renderer of its own, not its set's");
 				}
 			}
+		}
+		if (bySet.get("pyromaniacs") != null && bySet.get("pyromaniacs") == bySet.get("pyromancers")) {
+			wrong.add("the two sets share one renderer, so one texture would be drawn on both");
 		}
 		for (String texture : List.of("pyromaniacs", "pyromancers")) {
 			if (client.getResourceManager().getResource(Jugcraft.id("textures/armor/" + texture + ".png")).isEmpty()) {
 				wrong.add("there is no textures/armor/" + texture + ".png");
 			}
 		}
-		BakedGeoModel model = GeckoLibResources.getBakedModels().getModel(Jugcraft.id("armor/pyromancers"));
+		BakedGeoModel model = GeckoLibResources.getBakedModels().getModel(modelId);
 		if (model == null || model.isMissingno()) {
-			wrong.add("the owner's model jugcraft:armor/pyromancers did not load");
+			wrong.add("the owner's model " + modelId + " did not load");
 		} else {
 			for (String bone : BONES) {
 				if (model.getBone(bone).isEmpty()) {

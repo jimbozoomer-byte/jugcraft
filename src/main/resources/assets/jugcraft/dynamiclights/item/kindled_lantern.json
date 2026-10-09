@@ -1,9 +1,0 @@
-{
-  "match": {
-    "items": "jugcraft:kindled_lantern",
-    "components": {
-      "jugcraft:lantern_lit": {}
-    }
-  },
-  "luminance": 12
-}

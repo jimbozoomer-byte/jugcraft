@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/stairs",
-  "textures": {
-    "bottom": "jugcraft:block/ik_gilt_trim",
-    "top": "jugcraft:block/ik_gilt_trim",
-    "side": "jugcraft:block/ik_gilt_trim"
-  }
-}

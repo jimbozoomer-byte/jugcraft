@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab",
-  "textures": {
-    "bottom": "jugcraft:block/dw_steel_plate_riveted",
-    "top": "jugcraft:block/dw_steel_plate_riveted",
-    "side": "jugcraft:block/dw_steel_plate_riveted"
-  }
-}

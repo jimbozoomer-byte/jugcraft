@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "jugcraft:item/duelling_pistol",
-    "model": {
-      "type": "geckolib:geckolib"
-    }
-  }
-}

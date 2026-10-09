@@ -1,6 +1,0 @@
-{
-  "parent": "jugcraft:item/arms_bill",
-  "textures": {
-    "tex": "jugcraft:item/steel_bill_model"
-  }
-}

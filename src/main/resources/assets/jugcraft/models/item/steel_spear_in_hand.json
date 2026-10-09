@@ -1,6 +1,0 @@
-{
-  "parent": "jugcraft:item/arms_spear",
-  "textures": {
-    "tex": "jugcraft:item/steel_spear_model"
-  }
-}

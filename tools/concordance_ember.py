@@ -15,8 +15,10 @@ burning: water, rain, Fire Resistance and fire immunity all answer it). Nothing 
 Part 2 (docs/features/arcane-concordance-ember-regalia.md) is the Hearthbinder's regalia, made from the owner's own fire
 art (art/owner-library/originals/Magic, imported as supplied by tools/owner_art.py from OWNER_FILES below): the Lesser
 Focus of Fire and the Focus of Fire (fire Spell Power, worn in a Spell Focus slot), the Fire Bangle (a Hearthbinder's
-melee blows leave the creature smouldering; worn in a Bracelet slot), and the Pyromancer's Hat, Robes, Leggings and Boots
-(leather's protection and half a point of fire Spell Power each, worn as the owner's GeckoLib model). The two Trinkets
+melee blows leave the creature smouldering; worn in a Bracelet slot), and two fire sets, half a point of fire Spell Power
+a piece, both worn as the owner's medium GeckoLib model in their own textures: the Pyromaniac's Hood, Tunic, Pants and
+Shoes (light: cloth, in the owner's light fire texture) and the Pyromancer's Hat, Robes, Leggings and Boots (medium:
+leather's protection). The two Trinkets
 slots are the owner's own (their Curios data and slot icons, ported). Hearthflare's release is the owner's "pyro"
 recordings. Java: concordance/ember/EmberGear.java and the client's EmberClient.
 
@@ -219,6 +221,9 @@ ROBE_PIECE_POWER = 0.5  # all four pieces: +2, one more damage; fewer than four 
 # The Fire Bangle's blow: a Hearthbinder's melee hit leaves the creature smouldering this long (Arms' Ember boon on a
 # weapon sets a struck creature alight for the same three seconds).
 BANGLE_SMOULDER_TICKS = 60
+# ...and only within this many blocks beyond the reach of the weapon in hand (eye to the creature's hitbox, as vanilla
+# measures a melee hit), so a Shock arc's second foe or a weapon skill landing farther off is not set smouldering.
+BANGLE_REACH_MARGIN = 1.0
 
 # The two fire sets, each its own items, protection and worn texture; each piece gives ROBE_PIECE_POWER fire Spell Power
 # in its slot, so a whole set (or any four pieces) adds a point of damage. Durability is vanilla's per-slot base times

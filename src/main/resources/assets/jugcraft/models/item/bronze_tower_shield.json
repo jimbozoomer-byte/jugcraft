@@ -1,8 +1,0 @@
-{
-  "parent": "jugcraft:item/arms_tower_shield",
-  "textures": {
-    "face": "jugcraft:item/bronze_tower_shield_face",
-    "back": "jugcraft:item/bronze_tower_shield_back",
-    "trim": "jugcraft:item/bronze_tower_shield_trim"
-  }
-}

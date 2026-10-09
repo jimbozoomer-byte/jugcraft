@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/outer_stairs",
-  "textures": {
-    "bottom": "jugcraft:block/ik_lacquer",
-    "top": "jugcraft:block/ik_lacquer",
-    "side": "jugcraft:block/ik_lacquer"
-  }
-}

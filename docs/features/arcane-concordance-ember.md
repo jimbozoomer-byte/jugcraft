@@ -143,6 +143,6 @@ No worldgen, creatures, loot or seasons.
 - The spell bar: invocations sort by id, so a player who knows Ember's invocations gets them among First Light's on the
   number keys (the use key still casts Dawn Aegis). This is the open spell-order question from #250.
 - **Part 2**, the Hearthbinder's regalia from the owner's fire art, is [its own record](arcane-concordance-ember-regalia.md):
-  the two foci (fire Spell Power), the Fire Bangle, and the Pyromancer's set. What it defers (the light and heavy sets,
-  the Caster Tome, cheaper invocations) and the later slices (the Flarecannon, turret, relay and devices) are listed
-  there.
+  the two foci (fire Spell Power), the Fire Bangle, and the Pyromaniac's (light) and Pyromancer's (medium) sets. What it
+  defers (the owner's light model, the heavy set, the Caster Tome, cheaper invocations) and the later slices (the
+  Flarecannon, turret, relay and devices) are listed there.

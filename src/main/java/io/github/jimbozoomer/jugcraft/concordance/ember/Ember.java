@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
  * <li>the hearthkeeping practice: each kind of hearth a player kindles counts once towards mastering Hearthbinding.</li>
  * </ul>
  * Fire is never placed: nothing here can spread to the world. Part 2, the Hearthbinder's regalia made from the owner's
- * fire art (the foci, the Fire Bangle and the Pyromancer's set), is {@link EmberGear}.
+ * fire art (the foci, the Fire Bangle and two fire sets, the Pyromaniac's and the Pyromancer's), is {@link EmberGear}.
  */
 public final class Ember {
 	/** The practice Hearthbinding is mastered by (tools/concordance_ember.py HEARTHKEEPING). */

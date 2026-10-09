@@ -8891,6 +8891,7 @@ def check_ember_regalia(co, root, lang):
     client, renderer = text(CLIENT_JAVA_ROOT / "EmberClient.java"), text(CLIENT_JAVA_ROOT / "ember" / "EmberArmorRenderer.java")
     numbers = {"LESSER_FOCUS_POWER": ("double", em.LESSER_FOCUS_POWER), "FOCUS_POWER": ("double", em.FOCUS_POWER),
                "ROBE_PIECE_POWER": ("double", em.ROBE_PIECE_POWER), "BANGLE_SMOULDER_TICKS": ("int", em.BANGLE_SMOULDER_TICKS),
+               "BANGLE_REACH_MARGIN": ("double", em.BANGLE_REACH_MARGIN),
                "ARMOR_ENCHANTABILITY": ("int", em.ARMOR_ENCHANTABILITY),
                **{f"{name.upper()}_DURABILITY": ("int", armour["durability"]) for name, armour in em.ARMOR_SETS.items()}}
     for name, (kind, value) in numbers.items():
@@ -8933,6 +8934,9 @@ def check_ember_regalia(co, root, lang):
     if posed < 0 or any(f'"{bone}"' not in renderer for bone in em.SLIM_BONES) or "skipRender(true)" not in renderer[posed:]:
         err("client/ember/EmberArmorRenderer.java: adjustModelBonesForRender must call super first (it poses the bones to the "
             "wearer) and then hide the slim sleeves")
+    if "player.isWithinAttackRange(player.getMainHandItem(), target.getBoundingBox(), BANGLE_REACH_MARGIN)" not in gear:
+        err("concordance/ember/EmberGear.java: the bangle's blow must count only within reach of the weapon in hand "
+            "(BANGLE_REACH_MARGIN), so a Shock arc's second foe or a far weapon skill is not set smouldering")
     if ("ConcordanceEffects.apply(" not in gear or "REQUIRES_MATCHING_ATTRIBUTE" not in gear or "EnchantmentEvents.ALLOW_ENCHANTING" not in gear
             or any(call in gear for call in ("igniteForSeconds", "igniteForTicks", "addEffect(", "setRemainingFireTicks", "sendParticles"))):
         err("concordance/ember/EmberGear.java: the bangle's blow must go through ConcordanceEffects.apply only, and Spell Power's "

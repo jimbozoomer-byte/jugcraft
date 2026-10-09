@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/cube_bottom_top",
-  "textures": {
-    "top": "jugcraft:block/spirit_anchor_top",
-    "side": "jugcraft:block/spirit_anchor_side",
-    "bottom": "jugcraft:block/spirit_anchor_top"
-  }
-}

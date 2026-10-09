@@ -1,6 +1,0 @@
-{
-  "parent": "jugcraft:item/arms_katana",
-  "textures": {
-    "tex": "jugcraft:item/bronze_katana_model"
-  }
-}

@@ -1,6 +1,0 @@
-{
-  "parent": "jugcraft:item/arms_war_hammer",
-  "textures": {
-    "tex": "jugcraft:item/bronze_war_hammer_model"
-  }
-}

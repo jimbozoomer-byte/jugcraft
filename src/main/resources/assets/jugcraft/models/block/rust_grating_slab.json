@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab",
-  "textures": {
-    "bottom": "jugcraft:block/dw_grating",
-    "top": "jugcraft:block/dw_grating",
-    "side": "jugcraft:block/dw_grating"
-  }
-}

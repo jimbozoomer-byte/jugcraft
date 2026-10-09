@@ -1,6 +1,0 @@
-{
-  "parent": "jugcraft:item/arms_battleblade",
-  "textures": {
-    "tex": "jugcraft:item/steel_battleblade_model"
-  }
-}

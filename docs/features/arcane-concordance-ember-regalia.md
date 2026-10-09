@@ -14,8 +14,8 @@ Primary specialty and supported player role: the Hearthbinders; casters who figh
   Cinderbolt and Hearthflare add half a point of damage for each whole point, so the lesser focus adds 1 and the focus 2.
   A focus holds no Focus (the resource): Focus is a player's own.
 - **Fire Bangle**: worn in one of the two new **Bracelet** slots. Once you understand Hearthbinding, your own melee blows
-  leave the creature **smouldering** for 3 seconds, wherever you may harm it. It gives no Spell Power, and a second
-  bangle adds nothing.
+  (within reach of the weapon in your hand) leave the creature **smouldering** for 3 seconds, wherever you may harm it.
+  It gives no Spell Power, and a second bangle adds nothing.
 - Two fire sets, each piece half a point of fire Spell Power (only four pieces together add a point of damage), repaired
   with wool, fire resistant as items, worn as the owner's own 3D model:
   - **Pyromaniac's Hood, Tunic, Pants and Shoes** (light): cloth, a little less protection than leather (5 in all), made
@@ -41,8 +41,10 @@ Primary specialty and supported player role: the Hearthbinders; casters who figh
   worn in a slot that applies effects, never in the hand. The sets are `EmberArmorItem`s (GeckoLib `GeoItem`s), each with
   a vanilla `spell_power:fire` modifier in its own slot, and each knowing its set (its texture and equipment asset) and the
   model it is worn as (`EmberGear.ARMOR_MODEL`, the owner's medium model, for both). The bangle's blow is a `ServerLivingEntityEvents.AFTER_DAMAGE`
-  listener: a player's own melee hit (vanilla's player-attack damage, dealt in person, not mounted), with the bangle worn
-  and Hearthbinding understood, applies Smoulder through `ConcordanceEffects.apply`. An
+  listener: a player's own melee hit (vanilla's player-attack damage, dealt in person, not mounted, landing within
+  `BANGLE_REACH_MARGIN` (a block) of the reach of the weapon in hand: their blows, its sweep and Spell Engine's melee
+  weapon skills, but not a Shock arc's second foe or a skill landing farther off), with the bangle worn and Hearthbinding
+  understood, applies Smoulder through `ConcordanceEffects.apply`. An
   `EnchantmentEvents.ALLOW_ENCHANTING` listener refuses `#spell_power:requires_matching_attribute` enchantments on the
   sets.
 - Client: `EmberClient` hands GeckoLib one `EmberArmorRenderer` for each set (through `EmberHooks`, as the guns do): the
@@ -84,8 +86,9 @@ Primary specialty and supported player role: the Hearthbinders; casters who figh
   `tools/concordance_artifice.py`, checked by `check_mod_data`). Cinderbolt stays below the Lance (base 3 against 5).
   The bangle gives no Spell Power, so the two Bracelet slots add nothing to it.
 - **Sunfire is refused on the sets.** Spell Power lets its attribute enchantments onto any item that carries one of their
-  attributes; on a set, Sunfire V on four pieces would multiply the regalia's fire (and an arcane ring's) by 1.6, to
-  Cinderbolt 9. `EmberGear` refuses that tag on both sets; ordinary armour enchantments still apply.
+  attributes; on a set, Sunfire V on four pieces would multiply fire Spell Power (and an arcane ring's arcane) by 1.6:
+  (1 + 6) x 1.6 = 11.2, which is 10.2 above the base, so Cinderbolt 8 and Hearthflare 9 instead of 6 and 7. `EmberGear`
+  refuses that tag on both sets; ordinary armour enchantments still apply.
 - **The two sets give the same fire.** The light set is the cheap one (wool alone, less protection, ×7 durability); the
   medium set costs five gold for leather's protection and ×10 durability. Pieces mix freely: any four add the point.
 - **Partial sets.** Half points are lost to the rounding, so fewer than four pieces add no damage; the codex and the
@@ -115,8 +118,11 @@ Primary specialty and supported player role: the Hearthbinders; casters who figh
   so PvP off, parties, claims (`Authority.mayStrike`), creative and spectator players, tolerance tags and the feature
   switch all refuse it. No packets or client claims are added.
 - Failure behaviour: no Smoulder before Hearthbinding is understood, for a bangle in a cosmetic slot or taken off, for a
-  mounted, ranged, spell, blocked or zero-damage blow, or where the wearer may not harm the creature. A focus in the hand
-  or a cosmetic slot gives nothing. Any worn trinket refuses a dream expedition ("accessories", unchanged).
+  mounted, ranged, spell (of a school), blocked or zero-damage blow, for one landing more than a block beyond the reach
+  of the weapon in hand (a Shock arc's second foe, a far weapon skill), or where the wearer may not harm the creature. A
+  focus in the hand or a cosmetic slot gives nothing. Armour trims: the smithing table accepts them on both sets (the
+  pieces are in `#minecraft:<slot>_armor`, which `#minecraft:trimmable_armor` includes) and spends the template and
+  material, but neither the worn GeckoLib model nor the icon draws them; only the tooltip shows the trim. Any worn trinket refuses a dream expedition ("accessories", unchanged).
 - Persistence: vanilla item stacks; Trinkets saves its slots. No new saved data. Save compatibility: additive.
 - Disable behaviour: with `concordance.enabled=false` the recipes do not load and the blow does nothing; the items, slots
   and their Spell Power stay registered (Ember's invocations are refused then, so the power does nothing).
@@ -214,11 +220,12 @@ Run here (no game):
 
 Game tests added (they run in CI's Build workflow; results are recorded below once it has run):
 - `ConcordanceEmberGearGameTests` (server): the eleven items, slots and both sets' numbers, tags, sets and model; the
-  foci's Trinkets modifiers; the regalia raising Cinderbolt to 6, and three pieces adding nothing; the bangle's blow and
-  its five refusals (before Hearthbinding, not a melee hit, a claimed creature, from the saddle, bangle off); Sunfire
+  foci's Trinkets modifiers, asked through the wearer's own slots as Trinkets asks; the regalia raising Cinderbolt to 6,
+  and three pieces adding nothing; the bangle's blow and its six refusals (before Hearthbinding, not a melee hit, a
+  claimed creature, beyond the weapon's reach, from the saddle, bangle off); Sunfire
   refused on both sets and Protection accepted.
-- `ConcordanceEmberGearClientGameTests` (client): GeckoLib's renderer for all eight pieces, the owner's model with every
-  bone, both sets' textures; screenshots of the light and medium sets on stands side by side, the medium set enchanted,
+- `ConcordanceEmberGearClientGameTests` (client): GeckoLib's renderer for all eight pieces, one for each set, each
+  wearing the owner's model in its set's own texture; the model with every bone, both sets' textures; screenshots of the light and medium sets on stands side by side, the medium set enchanted,
   on a zombie and on a small stand, in four views; the player standing and sneaking; the real Trinkets slot on the
   ticking player (Focus of Fire and the set: 6; the lesser focus: 4); the eleven icons.
 - `ConcordanceBaselineGameTests`: the new character through the acceptance rules.
@@ -269,5 +276,7 @@ No worldgen, creatures, loot or seasons.
   - **The foci's cheaper invocations and the sets' fire ward:** the cost floor leaves almost no room (mastered
     Hearthspark is at it), and Fabric API has no damage-reduction event (it would need a mixin).
   - **Worn foci and bangles** are not drawn on the body (the library has no worn model for them).
+  - **Armour trims on the sets** are kept on the item but not drawn (see Failure behaviour): GeckoLib's armour renderer
+    has no trim layer, and the owner's model has no trim texture to draw.
 - Later slices (the owner's files mapped, not imported): the Flarecannon familiar and its charm, the fire turret, fire
   relay, Magmatic Current Elevator, the Magic Burn status, the fire mage, and the fire slime and mermaid skins.

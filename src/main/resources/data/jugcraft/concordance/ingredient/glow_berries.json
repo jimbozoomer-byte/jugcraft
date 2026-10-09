@@ -1,8 +1,0 @@
-{
-  "schema": 1,
-  "item": "minecraft:glow_berries",
-  "properties": {
-    "radiance": 0.6,
-    "verdance": 0.6
-  }
-}

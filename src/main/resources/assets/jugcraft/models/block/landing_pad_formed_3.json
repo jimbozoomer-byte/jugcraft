@@ -1,7 +1,0 @@
-{
-  "parent": "jugcraft:block/pad_plate",
-  "textures": {
-    "top": "jugcraft:block/landing_pad_formed_3",
-    "side": "jugcraft:block/landing_pad_side"
-  }
-}

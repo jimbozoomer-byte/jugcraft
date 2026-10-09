@@ -1,9 +1,0 @@
-{
-  "match": {
-    "items": "jugcraft:astrolabe",
-    "components": {
-      "jugcraft:resonant": {}
-    }
-  },
-  "luminance": 6
-}

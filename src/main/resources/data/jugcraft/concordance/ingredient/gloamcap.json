@@ -1,9 +1,0 @@
-{
-  "schema": 1,
-  "item": "jugcraft:gloamcap",
-  "properties": {
-    "hollow": 0.9,
-    "rime": 0.4
-  },
-  "contaminant": 0.1
-}

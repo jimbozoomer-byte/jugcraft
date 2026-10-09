@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import eu.pb4.trinkets.api.SlotAttributes;
+import eu.pb4.trinkets.api.TrinketSlotAccess;
 import eu.pb4.trinkets.api.TrinketsApi;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -146,10 +148,19 @@ public class ConcordanceEmberGearGameTests {
 				.mapToDouble(entry -> entry.modifier().amount()).sum();
 	}
 
-	/** What a worn piece of the regalia gives in a Trinkets slot ("attribute=amount"), asked as Trinkets asks it. */
-	private static List<String> trinketModifiers(ItemStack stack, ServerPlayer wearer, String slot) {
+	/** The wearer's own Trinkets slot {@code index} of slot type {@code type} (e.g. "chest/spell_focus"). */
+	private static TrinketSlotAccess slot(ServerPlayer wearer, String type, int index) {
+		return TrinketsApi.getAttachment(wearer).getInventory(type).getOrCreateSlotAccess(index);
+	}
+
+	/**
+	 * What a piece of the regalia gives worn in a Trinkets slot ("attribute=amount@id"), asked as Trinkets asks it: with
+	 * the wearer's own slot and the identifier Trinkets gives that slot.
+	 */
+	private static List<String> trinketModifiers(ItemStack stack, ServerPlayer wearer, String type, int index) {
 		List<String> seen = new ArrayList<>();
-		((EmberTrinketItem) stack.getItem()).forEachTrinketModifier(stack, null, wearer, Identifier.parse("trinkets:" + slot),
+		TrinketSlotAccess access = slot(wearer, type, index);
+		((EmberTrinketItem) stack.getItem()).forEachTrinketModifier(stack, access, wearer, SlotAttributes.getIdentifier(access),
 				(attribute, modifier) -> seen.add(attribute.getRegisteredName() + "=" + modifier.amount() + "@" + modifier.id()));
 		return seen;
 	}
@@ -256,15 +267,15 @@ public class ConcordanceEmberGearGameTests {
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		ItemStack lesser = new ItemStack(EmberGear.LESSER_FIRE_FOCUS);
 		ItemStack focus = new ItemStack(EmberGear.FIRE_FOCUS);
-		List<String> lesserWorn = trinketModifiers(lesser, player, "chest/spell_focus/0");
-		List<String> focusWorn = trinketModifiers(focus, player, "chest/spell_focus/0");
+		List<String> lesserWorn = trinketModifiers(lesser, player, "chest/spell_focus", 0);
+		List<String> focusWorn = trinketModifiers(focus, player, "chest/spell_focus", 0);
 		helper.assertTrue(lesserWorn.size() == 1 && lesserWorn.getFirst().startsWith(Ember.SCHOOL + "=" + EmberGear.LESSER_FOCUS_POWER + "@"),
 				"The Lesser Focus of Fire gives 2 fire Spell Power: " + lesserWorn);
 		helper.assertTrue(focusWorn.size() == 1 && focusWorn.getFirst().startsWith(Ember.SCHOOL + "=" + EmberGear.FOCUS_POWER + "@"),
 				"The Focus of Fire gives 4: " + focusWorn);
-		helper.assertTrue(!trinketModifiers(focus, player, "chest/spell_focus/1").equals(focusWorn),
+		helper.assertTrue(!trinketModifiers(focus, player, "chest/spell_focus", 1).equals(focusWorn),
 				"Each slot's modifier has its own id, so two worn foci would not replace each other");
-		helper.assertTrue(trinketModifiers(new ItemStack(EmberGear.FIRE_BANGLE), player, "hand/bracelet/0").isEmpty(),
+		helper.assertTrue(trinketModifiers(new ItemStack(EmberGear.FIRE_BANGLE), player, "hand/bracelet", 0).isEmpty(),
 				"The Fire Bangle gives no Spell Power");
 		helper.succeed();
 	}
@@ -281,7 +292,8 @@ public class ConcordanceEmberGearGameTests {
 		learn(player, ResearchState.UNDERSTOOD);
 		AttributeInstance fire = player.getAttribute(SpellSchools.getSchool(Ember.SCHOOL).attributeEntry);
 		ItemStack focus = new ItemStack(EmberGear.FIRE_FOCUS);
-		((EmberTrinketItem) focus.getItem()).forEachTrinketModifier(focus, null, player, Identifier.parse("trinkets:chest/spell_focus/0"),
+		TrinketSlotAccess worn = slot(player, "chest/spell_focus", 0);
+		((EmberTrinketItem) focus.getItem()).forEachTrinketModifier(focus, worn, player, SlotAttributes.getIdentifier(worn),
 				(attribute, modifier) -> fire.addTransientModifier(modifier));
 		List<AttributeModifier> pieces = new ArrayList<>();
 		for (String id : PIECES) {
@@ -315,18 +327,22 @@ public class ConcordanceEmberGearGameTests {
 
 	/**
 	 * The Fire Bangle's blow: a Hearthbinder's own melee hit leaves the creature smouldering for 3 seconds. Not before
-	 * Hearthbinding is understood, not from a blow that is not the player's own melee hit, not from the saddle, not on a
-	 * creature claimed by someone else, and not once the bangle is taken off; and it costs no Focus.
+	 * Hearthbinding is understood, not from a blow that is not the player's own melee hit, not on a creature claimed by
+	 * someone else, not where the blow lands beyond the reach of the weapon in hand (as a Shock arc's second foe may), not
+	 * from the saddle, and not once the bangle is taken off; and it costs no Focus.
 	 */
 	@GameTest(maxTicks = 40)
 	public void theBangleLeavesAHearthbindersBlowSmouldering(GameTestHelper helper) {
 		floor(helper);
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = player(helper, new BlockPos(3, 2, 1));
+		// Within a bare hand's reach of the player (at most 2.8 blocks from the eye to the hitbox; the reach is 3).
 		List<Mob> villagers = new ArrayList<>();
 		for (int i = 0; i < 6; i++) {
-			villagers.add(helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(1 + i, 2, 4)));
+			villagers.add(helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(1 + i, 2, 2)));
 		}
+		// Out of reach: about 6.8 blocks from the eye to the hitbox.
+		Mob far = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(7, 2, 7));
 		var bracelets = TrinketsApi.getAttachment(player).getInventory("hand/bracelet");
 		helper.assertTrue(bracelets != null, "Players have the Bracelet slots");
 		bracelets.setItem(0, new ItemStack(EmberGear.FIRE_BANGLE));
@@ -347,7 +363,10 @@ public class ConcordanceEmberGearGameTests {
 			villagers.get(3).hurtServer(level, level.damageSources().playerAttack(player), 1.0F);
 			helper.assertTrue(!villagers.get(3).hasEffect(Ember.SMOULDER), "A neighbour's claimed creature is not set smouldering");
 		}
-		Mob mount = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(3, 2, 2));
+		far.hurtServer(level, level.damageSources().playerAttack(player), 1.0F);
+		helper.assertTrue(far.getHealth() < far.getMaxHealth() && !far.hasEffect(Ember.SMOULDER),
+				"A blow landing beyond the reach of the weapon in hand (a Shock arc's second foe) does not burn");
+		Mob mount = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(3, 2, 0));
 		helper.assertTrue(player.startRiding(mount, true, true), "The player could not mount");
 		villagers.get(4).hurtServer(level, level.damageSources().playerAttack(player), 1.0F);
 		helper.assertTrue(!villagers.get(4).hasEffect(Ember.SMOULDER), "From the saddle the blow does not burn");

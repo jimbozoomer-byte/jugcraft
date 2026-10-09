@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/outer_stairs",
-  "textures": {
-    "bottom": "jugcraft:block/steel_armor_plate",
-    "top": "jugcraft:block/steel_armor_plate",
-    "side": "jugcraft:block/steel_armor_plate"
-  }
-}

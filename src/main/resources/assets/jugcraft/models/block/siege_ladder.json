@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/ladder",
-  "textures": {
-    "texture": "jugcraft:block/rd_ladder",
-    "particle": "jugcraft:block/rd_ladder"
-  }
-}
