@@ -73,8 +73,9 @@ def view(p, yaw=35.0, pitch=28.0):
     """Orthographic three-quarter view: returns (sx, sy, depth)."""
     ya, pa = math.radians(yaw), math.radians(pitch)
     x, y, z = p
-    xr = x * math.cos(ya) - z * math.sin(ya)
-    zr = x * math.sin(ya) + z * math.cos(ya)
+    # The world turned by yaw about y, the camera then looking down -z with x to its right (a true view, not a mirror).
+    xr = x * math.cos(ya) + z * math.sin(ya)
+    zr = -x * math.sin(ya) + z * math.cos(ya)
     yr = y * math.cos(pa) - zr * math.sin(pa)
     depth = y * math.sin(pa) + zr * math.cos(pa)
     return xr, -yr, depth
