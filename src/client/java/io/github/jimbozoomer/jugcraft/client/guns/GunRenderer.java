@@ -32,6 +32,9 @@ import org.joml.Vector3f;
  * they were made.
  * <p>
  * Slice 6: just after a shot, a gun in someone's hand shows its muzzle flash ({@link GunFlashLayer}).
+ * <p>
+ * Slice 7: aiming slides a fitted scope's eyepiece onto the middle of the screen ("sight_&lt;scope&gt;", in place of
+ * "sight"); when the view through a magnifying scope fills the screen ({@link GunScope}) the gun drops out of sight.
  */
 public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	/** The entity holding the gun (for where its sounds play). */
@@ -42,6 +45,8 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	public static final DataTicket<Fitted> FITTED = DataTicket.create("jugcraft_gun_attachments", Fitted.class);
 	/** A muzzle flash to draw: the shot was moments ago and nothing fitted hides it. */
 	public static final DataTicket<Flash> FLASH = DataTicket.create("jugcraft_gun_flash", Flash.class);
+	/** How far the gun drops, out of sight, while the view through its scope fills the screen (blocks). */
+	private static final float PUT_AWAY = 1.5F;
 	/** How far a bayonet stab drives the gun forward, and down, on screen at full thrust (blocks). */
 	private static final float THRUST_REACH = 0.35F;
 	private static final float THRUST_DROP = 0.06F;
@@ -73,8 +78,10 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 		Minecraft client = Minecraft.getInstance();
 		if (data.renderPerspective().firstPerson() && owner instanceof AbstractClientPlayer player && player == client.player) {
 			boolean slim = player.getSkin().model() == PlayerModelType.SLIM;
+			String optic = GunItem.inSlot(data.itemStack(), "optic");
 			state.addGeckolibData(VIEW, new View(player.getSkin().body().texturePath(), slim, GunView.aim(partialTick),
-					GunEffects.thrust(player.getId(), player.level().getGameTime(), partialTick)));
+					GunEffects.thrust(player.getId(), player.level().getGameTime(), partialTick), optic == null ? "sight" : "sight_" + optic,
+					GunScope.viewing(partialTick)));
 		}
 	}
 
@@ -119,7 +126,7 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 		PoseStack poseStack = info.poseStack();
 		View view = info.getGeckolibData(VIEW);
 		if (view != null && view.aim() > 0) {
-			GeoLocator sight = info.model().getLocator("sight").orElse(null);
+			GeoLocator sight = info.model().getLocator(view.sight()).or(() -> info.model().getLocator("sight")).orElse(null);
 			if (sight != null) {
 				// Where the sight is on screen now, then the move that puts it on the crosshair (in view space).
 				Matrix4f pose = new Matrix4f(poseStack.last().pose()).translate(0.5F, 0.0F, 0.5F);
@@ -131,16 +138,23 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 			// A bayonet stab drives the gun forward and a little down, and back (in view space).
 			poseStack.last().pose().translateLocal(0.0F, -THRUST_DROP * view.thrust(), -THRUST_REACH * view.thrust());
 		}
+		if (view != null && view.putAway()) {
+			// The view through the scope fills the screen; the gun would only stand in it.
+			poseStack.last().pose().translateLocal(0.0F, -PUT_AWAY, 0.0F);
+		}
 		poseStack.translate(0.5F, 0.0F, 0.5F);
 	}
 
 	/**
-	 * @param skin   the player's skin texture
-	 * @param slim   whether their arms are three pixels wide
-	 * @param aim    how far into aiming down the sights (0 to 1)
-	 * @param thrust how far into a bayonet stab's thrust (0 to 1; {@link GunEffects#thrust})
+	 * @param skin    the player's skin texture
+	 * @param slim    whether their arms are three pixels wide
+	 * @param aim     how far into aiming down the sights (0 to 1)
+	 * @param thrust  how far into a bayonet stab's thrust (0 to 1; {@link GunEffects#thrust})
+	 * @param sight   the locator aiming puts on the middle of the screen: "sight", or a fitted scope's "sight_&lt;scope&gt;"
+	 * @param putAway whether the view through a scope fills the screen, so the gun is out of sight ({@link GunScope})
 	 */
-	public record View(net.minecraft.resources.Identifier skin, boolean slim, float aim, float thrust) {
+	public record View(net.minecraft.resources.Identifier skin, boolean slim, float aim, float thrust, String sight,
+			boolean putAway) {
 	}
 
 	/** @param attachments the attachments fitted to the gun drawn ({@link GunItem#attachments}) */

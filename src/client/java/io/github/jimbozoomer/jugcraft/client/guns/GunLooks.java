@@ -1,12 +1,15 @@
 package io.github.jimbozoomer.jugcraft.client.guns;
 
+import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 /**
- * How each gun looks in use, on the client only (tools/guns.py: ZOOM, two_handed(), FLASH_SIZE and the attachments'
- * "hides_flash"; check_guns in tools/check_mod_data.py keeps them the same).
+ * How each gun looks in use, on the client only (tools/guns.py: ZOOM, two_handed(), FLASH_SIZE, the attachments'
+ * "hides_flash" and the scopes' "zoom" and "view"; check_guns in tools/check_mod_data.py keeps them the same).
  */
 public final class GunLooks {
 	/** Each gun's look, by name. */
@@ -16,6 +19,8 @@ public final class GunLooks {
 			"paper_cartridge", 10.0F);
 	/** The attachments that hide the flash: cans over the muzzle. */
 	static final List<String> HIDE_FLASH = List.of("silencer", "baffled_silencer");
+	/** The scopes (slice 7), by name: how far each narrows the view and what aiming through it shows. */
+	static final Map<String, Optic> OPTICS = new HashMap<>();
 	private static final Look DEFAULT = new Look(true, 1.0F);
 
 	static {
@@ -31,6 +36,9 @@ public final class GunLooks {
 		LOOKS.put("duelling_pistol", new Look(false, 0.9F));
 		LOOKS.put("line_musket", new Look(true, 0.82F));
 		LOOKS.put("bellmouth", new Look(true, 0.92F));
+		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
+		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
+		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));
 	}
 
 	private GunLooks() {
@@ -41,10 +49,31 @@ public final class GunLooks {
 		return LOOKS.getOrDefault(gun, DEFAULT);
 	}
 
+	/** The scope fitted to this gun, or null. */
+	public static @Nullable Optic optic(ItemStack stack) {
+		String fitted = GunItem.inSlot(stack, "optic");
+		return fitted == null ? null : OPTICS.get(fitted);
+	}
+
 	/**
 	 * @param twoHanded held in both hands: seen from outside, both arms come up to it ({@link GunPose})
 	 * @param zoom      the field of view is multiplied by this aimed down the sights (GunFovMixin)
 	 */
 	public record Look(boolean twoHanded, float zoom) {
+	}
+
+	/**
+	 * A scope's look ({@link GunScope}); its textures are the owner's, in textures/item/guns/optics/.
+	 *
+	 * @param zoom     aimed through it in first person, the field of view is multiplied by this, in place of the gun's own
+	 * @param reticle  the reticle that fills the screen aimed through it, the gun put away; or null
+	 * @param vignette the dark rim of the lens, drawn over the reticle; or null
+	 * @param dot      a reflex sight's dot, on the middle of the screen over the gun; or null
+	 */
+	public record Optic(float zoom, @Nullable String reticle, @Nullable String vignette, @Nullable String dot) {
+		/** Whether aiming through it fills the screen with the view through the scope (and puts the gun away). */
+		public boolean fillsView() {
+			return reticle != null;
+		}
 	}
 }

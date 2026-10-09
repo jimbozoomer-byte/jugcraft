@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.mojang.serialization.JsonOps;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
@@ -43,7 +44,8 @@ import net.minecraft.world.phys.Vec3;
  * there are; the lever rifles land theirs and load a round at a time, and the Coach Gun's pellets land together; a
  * muzzle-loader lands its one heavy shot and reloads a paper cartridge, and the Bellmouth's balls land together.
  * Attachments (slice 5) fit and come off in a crafting grid, change a gun's numbers, and the server fires and loads by
- * them. Shooters face south (+z) and aim at their target's middle.
+ * them; the scopes (slice 7) fit the guns the owner made to take one. Shooters face south (+z) and aim at their
+ * target's middle.
  */
 public class GunsGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
@@ -59,7 +61,7 @@ public class GunsGameTests {
 		});
 		helper.assertTrue(JugcraftGuns.GUNS.size() == 12 && JugcraftGuns.ROUNDS.size() == 4, "Not twelve guns and four rounds");
 		helper.assertTrue(JugcraftGuns.ATTACHMENT_ITEMS.keySet().equals(JugcraftGuns.ATTACHMENTS.keySet())
-				&& JugcraftGuns.ATTACHMENTS.size() == 15, "Not fifteen attachments, each with its item");
+				&& JugcraftGuns.ATTACHMENTS.size() == 18, "Not eighteen attachments, each with its item");
 		JugcraftGuns.ACCEPTS.forEach((gun, takes) -> helper.assertTrue(JugcraftGuns.GUNS.containsKey(gun)
 				&& JugcraftGuns.ATTACHMENTS.keySet().containsAll(takes), gun + " takes an unknown attachment"));
 		helper.succeed();
@@ -542,6 +544,49 @@ public class GunsGameTests {
 		}
 		helper.assertTrue(helper.getLevel().recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id("netherite_bayonet")))
 				.isPresent(), "The Netherite Bayonet's smithing recipe does not load");
+		helper.succeed();
+	}
+
+	/**
+	 * Slice 7, the scopes: the guns the owner made to take one take each of the three in the optic slot, which changes the
+	 * spread by the scope's numbers; a second scope takes the first one's place (the first stays in the grid); a scope fits
+	 * beside an attachment in every other slot the gun has; a gun the owner made no sights for takes none. A gun keeps an
+	 * attachment a slot in its save, five at most.
+	 */
+	@GameTest
+	public void scopesFitTheGunsMadeForThem(GameTestHelper helper) {
+		for (String scope : List.of("long_scope", "medium_scope", "reflex_sight")) {
+			helper.assertTrue(helper.getLevel().recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(scope))).isPresent(),
+					"The " + scope + " recipe does not load");
+			for (String gun : List.of("longhorn_rifle", "drover_rifle", "riveter_smg")) {
+				helper.assertTrue(JugcraftGuns.ACCEPTS.get(gun).contains(scope), "The " + gun + " does not take a " + scope);
+			}
+		}
+		GunSpec longhorn = JugcraftGuns.SPECS.get("longhorn_rifle");
+		Crafted scoped = craft(helper, new ItemStack(JugcraftGuns.GUNS.get("longhorn_rifle")), attachment("long_scope"));
+		GunSpec spec = GunItem.spec(scoped.result());
+		helper.assertTrue(GunItem.attachments(scoped.result()).equals(List.of("long_scope")), "The Long Scope did not fit the Longhorn Rifle");
+		helper.assertTrue(Math.abs(spec.aimSpread() - longhorn.aimSpread() * 0.5F) < 1.0E-4F
+				&& Math.abs(spec.hipSpread() - longhorn.hipSpread() * 1.25F) < 1.0E-4F,
+				"With the Long Scope: spread " + spec.hipSpread() + " from the hip, " + spec.aimSpread() + " aimed");
+		Crafted swapped = craft(helper, scoped.result(), attachment("medium_scope"));
+		helper.assertTrue(GunItem.attachments(swapped.result()).equals(List.of("medium_scope"))
+				&& swapped.left().get(1).is(JugcraftGuns.ATTACHMENT_ITEMS.get("long_scope")),
+				"The Medium Scope did not take the Long Scope's place, leaving it in the grid: " + GunItem.attachments(swapped.result()));
+
+		ItemStack riveter = new ItemStack(JugcraftGuns.GUNS.get("riveter_smg"));
+		for (String other : List.of("silencer", "extended_magazine", "wooden_stock", "reflex_sight")) {
+			riveter = craft(helper, riveter, attachment(other)).result();
+		}
+		helper.assertTrue(GunItem.attachments(riveter).equals(List.of("silencer", "extended_magazine", "wooden_stock", "reflex_sight")),
+				"The Reflex Sight did not fit beside the Riveter SMG's other attachments: " + GunItem.attachments(riveter));
+		helper.assertFalse(RecipeManager.createCheck(RecipeType.CRAFTING)
+				.getRecipeFor(grid(new ItemStack(JugcraftGuns.GUNS.get("patchwork_carbine")), attachment("long_scope")), helper.getLevel())
+				.isPresent(), "The Patchwork Carbine, made with no sights to swap, took a scope");
+
+		List<String> fullSet = List.of("silencer", "extended_magazine", "wooden_stock", "light_grip", "long_scope");
+		helper.assertTrue(JugcraftGuns.FITTED.codecOrThrow().encodeStart(JsonOps.INSTANCE, fullSet).isSuccess(),
+				"A gun cannot keep an attachment in each of the five slots in its save");
 		helper.succeed();
 	}
 
