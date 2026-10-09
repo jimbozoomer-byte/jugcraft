@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.client.guns.GunEffects;
 import io.github.jimbozoomer.jugcraft.client.guns.GunPose;
 import io.github.jimbozoomer.jugcraft.client.guns.GunScope;
 import io.github.jimbozoomer.jugcraft.client.guns.GunView;
+import io.github.jimbozoomer.jugcraft.guns.EnergyCellItem;
 import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
 import io.github.jimbozoomer.jugcraft.guns.GunSpec;
@@ -82,12 +83,18 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				String round = BuiltInRegistries.ITEM.getKey(ammo).toString();
 				int capacity = spec.capacity();
 				int spinUp = JugcraftGuns.spinUp(JugcraftGuns.GUNS.get(gun));
+				// Slice 8D: an energy weapon loads each round's charge from Energy Cells.
+				int charge = JugcraftGuns.charge(JugcraftGuns.GUNS.get(gun));
 				// Each gun starts from the same aim: every shot kicks the view up, and twelve guns' kicks would lift it
 				// over the husk.
 				server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
 				server.runCommand("clear @p");
 				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:%s[jugcraft:loaded_rounds=%d]".formatted(gun, capacity));
-				server.runCommand("give @p %s 32".formatted(round));
+				if (charge > 0) {
+					server.runCommand("give @p %s[jugcraft:energy=%dL] 2".formatted(round, EnergyCellItem.CAPACITY));
+				} else {
+					server.runCommand("give @p %s 32".formatted(round));
+				}
 				context.waitTicks(30);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_held");
 
@@ -106,6 +113,7 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				float before = health(server, x, y, z);
 				long flashes = context.computeOnClient(client -> GunEffects.flashes());
 				long ejected = context.computeOnClient(client -> GunEffects.ejected());
+				long traces = context.computeOnClient(client -> GunEffects.traced());
 				// The shot, with its flash (it shows for two ticks). A rotary gun's trigger is held while its barrels spin
 				// up, then a shot or two, and let go.
 				if (spinUp > 0) {
@@ -123,6 +131,14 @@ public class GunsClientGameTests implements FabricClientGameTest {
 					throw new AssertionError("The " + gun + " showed no muzzle flash when fired");
 				}
 				context.waitTicks(11);
+				if (charge > 0) {
+					// Slice 8D: the server says where the shot went, and the client draws it.
+					long drawn = context.computeOnClient(client -> GunEffects.traced()) - traces;
+					Jugcraft.LOGGER.info("[guns] {} fired: {} beam or arc drawn", gun, drawn);
+					if (drawn <= 0) {
+						throw new AssertionError("The " + gun + "'s shot was not drawn (GunTracePayload)");
+					}
+				}
 				context.getInput().releaseKey(options -> options.keyUse);
 				context.waitTicks(5);
 				float after = health(server, x, y, z);
@@ -140,13 +156,24 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				context.takeScreenshot("jugcraft_guns_" + gun + "_reloading");
 				context.waitTicks(ticks);
 				int reloaded = server.computeOnServer(minecraft -> GunItem.loaded(player(minecraft).getMainHandItem()));
-				int left = server.computeOnServer(minecraft -> GunShots.count(player(minecraft).getInventory(), ammo));
-				// An item of blaze powder loads four bursts: a reload takes whole items (slice 8C).
-				int taken = (spent + JugcraftGuns.perItem(spec) - 1) / JugcraftGuns.perItem(spec);
-				Jugcraft.LOGGER.info("[guns] {} reloaded: {} rounds loaded, {} {} left", gun, reloaded, left, round);
-				if (reloaded != capacity || left != 32 - taken) {
-					throw new AssertionError("The " + gun + " reload did not load the " + spent + " rounds spent from the inventory: "
-							+ reloaded + " loaded, " + left + " left");
+				if (charge > 0) {
+					// Slice 8D: the reload drew the rounds' charge from the cells and left them.
+					long cells = server.computeOnServer(minecraft -> GunShots.charged(player(minecraft).getInventory(), ammo));
+					int kept = server.computeOnServer(minecraft -> GunShots.count(player(minecraft).getInventory(), ammo));
+					Jugcraft.LOGGER.info("[guns] {} reloaded: {} rounds loaded, {} JE left in its {} cells", gun, reloaded, cells, kept);
+					if (reloaded != capacity || cells != 2L * EnergyCellItem.CAPACITY - (long) spent * charge || kept != 2) {
+						throw new AssertionError("The " + gun + " reload did not draw the " + spent + " rounds' charge from its cells: "
+								+ reloaded + " loaded, " + cells + " JE in " + kept + " cells left");
+					}
+				} else {
+					int left = server.computeOnServer(minecraft -> GunShots.count(player(minecraft).getInventory(), ammo));
+					// An item of blaze powder loads four bursts: a reload takes whole items (slice 8C).
+					int taken = (spent + JugcraftGuns.perItem(spec) - 1) / JugcraftGuns.perItem(spec);
+					Jugcraft.LOGGER.info("[guns] {} reloaded: {} rounds loaded, {} {} left", gun, reloaded, left, round);
+					if (reloaded != capacity || left != 32 - taken) {
+						throw new AssertionError("The " + gun + " reload did not load the " + spent + " rounds spent from the inventory: "
+								+ reloaded + " loaded, " + left + " left");
+					}
 				}
 
 				// The owner's animations cue a spent casing (or, for a paper cartridge, a puff from the lock) on the shot or the
@@ -300,6 +327,9 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			for (String round : JugcraftGuns.AMMO) {
 				server.runCommand("give @p jugcraft:%s 16".formatted(round));
 			}
+			// Slice 8D: an Energy Cell charged, glowing, and one spent.
+			server.runCommand("give @p jugcraft:energy_cell[jugcraft:energy=%dL]".formatted(EnergyCellItem.CAPACITY));
+			server.runCommand("give @p jugcraft:energy_cell");
 			server.runCommand("give @p jugcraft:patchwork_carbine[jugcraft:attachments=%s]".formatted(
 					snbt(List.of("baffled_silencer", "extended_magazine", "wooden_stock", "vertical_grip"))));
 			context.waitTicks(10);

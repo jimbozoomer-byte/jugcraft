@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B) and the heavy weapons (slice 8C)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -12,6 +12,7 @@ Status:
 - **Slice 8** (the hand guns: the Bulldog Pistol, Marshal Revolver and Sapper Revolver; [below](#slice-8-the-hand-guns)): implemented on `claude/guns-revolvers` (#268), stacked on slice 7b, awaiting review.
 - **Slice 8B** (the service arms: the Sentry Pistol, Garrison Rifle and Breacher; [below](#slice-8b-the-service-arms)): implemented on `claude/guns-service`, stacked on slice 8, awaiting review.
 - **Slice 8C** (the heavy weapons: the Trench Lobber, Thresher and Stoker; [below](#slice-8c-the-heavy-weapons)): implemented on `claude/guns-heavy`, on the integration branch that holds slices 7b to 8B, awaiting review.
+- **Slice 8D** (the energy weapons: the Beam Pistol, Stormlock Rifle and Linesman, and the Energy Cell they run on; [below](#slice-8d-the-energy-weapons)): implemented on `claude/guns-energy`, stacked on slice 8C, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -23,6 +24,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - what next ("ok what next"): all four offered, each its own pull request: gun polish (this slice 6), finishing the attachments, more guns, and the flaky tests.
 - the scopes: on 8 October 2026, with the reticles and lens rims uploaded ("heres reticles and vignette"), asked what the scopes should use, they answered that they made those files and to use them (see [Dependencies and assets](#dependencies-and-assets)); and asked what next ("What next?"), they chose all four further gun sets offered, each its own slice.
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
+- the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -608,10 +610,107 @@ Three more of the owner's guns, each firing something other than a bullet or fir
 - **Flame:** the flame is lit by the world's light like the rest of the gun, so at night it is darker than a flame should be.
 - **Not played:** none of it has been played yet. The jet's reach and width, the spin-up and the kick of ten shots a second want play to set.
 
+## Slice 8D: the energy weapons
+Three more of the owner's guns, past steel, that run on charge from the energy system.
+
+| | Beam Pistol | Stormlock Rifle | Linesman |
+|---|---|---|---|
+| The owner's gun | Raygun | Teslock Rifle | Arc Worker |
+| What it is | a ray pistol held in one hand, that breaks open to load | a coil rifle loaded a charge at a time, with a lever under its grip | a short-range arc thrower loaded a cell at a time |
+| Fires | a beam through every creature in its line, to the first block | a bolt that leaps from its mark to two more creatures close by | arcs that find the creatures in front of it and leap between them, for as long as the trigger is held |
+| Damage | 6 to each creature in the beam | 9 to its mark, then 5.4 and 3.24 | 4 to its mark, then 2.4 and 1.44 |
+| Rate | 2.5 a second (every 8 ticks) | about 1.4 a second (every 14 ticks) | 3.3 a second (every 6 ticks) |
+| Holds | 8 shots | 5 charges | 6 charges |
+| Reload | 2.4 s, broken open | 0.9 s to open, 0.85 s a charge, 1 s to close | 0.4 s to open, 0.65 s a cell, 0.6 s to close |
+| Spread, hip / aimed | 1.5° / 0.5° | 2° / 0.5°, the cone its arc seeks in | 15° / 10°, the cone its arc seeks in |
+| Range | 48 blocks | 64 blocks | 12 blocks |
+| Charge a round | 400 JE | 750 JE | 250 JE |
+| Takes | the three stocks | both grips, the four bayonets and the three scopes | the three stocks and the three scopes |
+
+**The Energy Cell** (`jugcraft:energy_cell`), their ammunition:
+- **Charge:** it holds 10,000 JE, twice or three times that with capacity modules, and stacks alone, as the powered tools do. Its bar shows its charge in amber, and its tooltip the JE.
+- **Charging:** hang it on a Charging Station (steel tier). It fills at the station's rate: up to 512 JE a tick, 256 on copper cable, so 20 to 40 s.
+- **Looks:** charged, it is the owner's glowing cell (`energy_cell.png`, its three frames run by an `.mcmeta`); spent, the owner's empty cell (`empty_cell.png`).
+- **Reloading:** a reload pools the charge of every cell in the inventory and draws each round's charge from them in inventory order; the cells stay. A full cell is 25 of the Beam Pistol's shots, 13 of the Stormlock's charges, 40 of the Linesman's. With every cell spent a reload does not start, and says so ("Your Energy Cells are spent. Fill them at a Charging Station."). The gun's counter shows the shots its cells hold.
+- **Only the guns draw on it.** It is not the portable battery `docs/MACHINE_ROADMAP.md` plans.
+
+**Crafting** (a crafting table; the recipes need both the guns and the machines switches, since without the Charging Station a cell never fills):
+- **Energy Cell:** two from a copper cable over two glass panes either side of a redstone, over a brass ingot.
+- **Beam Pistol:** two steel ingots and an amethyst shard (its lens) over an advanced circuit and a brass ingot.
+- **Stormlock Rifle:** two steel ingots, a lightning rod (its forked emitter), copper cable (its coil), an advanced circuit, a brass ingot and planks (its stock).
+- **Linesman:** a lightning rod, two steel ingots, two copper cables, an advanced circuit and two brass ingots.
+
+**How they fire** (the server decides, `guns/GunShots`):
+- **Beam:** from the eye along the look, strayed by the spread, to the first block within range. Every creature in its line that the shooter may strike (the same allies, mounts and protection rules as a bullet) takes the damage; it passes through them all.
+- **Arc:**
+  - It leaps to the creature nearest the aim: within range, at most the spread off the look and with no block between it and the eye. Of two equally near the aim, it takes the nearer.
+  - From each creature it strikes, it leaps to the nearest other within 4 blocks with no block between them, at most twice. Each takes 60% of the damage before it.
+  - Finding none, it strikes the first block along the look, harmlessly.
+  - Other code is asked whether the shooter may strike a creature (`AttackEntityCallback`) only for the creatures the arc would strike, in turn.
+- **Damage type** `jugcraft:zap`, tagged:
+  - `minecraft:no_knockback`: the Linesman's quick arcs keep their mark in reach;
+  - `minecraft:bypasses_cooldown`: each shot counts, as each bullet does.
+
+  It is neither a projectile nor fire: Protection guards against it, Projectile and Fire Protection do not.
+- **Blocks:** neither a beam nor an arc touches a block.
+
+**What you see:** the owner's animations.
+- **Beam Pistol:** each shot jolts it. To reload, the left hand tips the barrel down on its hinge, to 140°, a new cell goes in and the barrel snaps shut.
+- **Stormlock Rifle:** to reload, a latch flips up off the cylinder, the cylinder turns a charge at a time, and the lever under the grip is worked down and back to close it.
+- **Linesman:** each loop of its reload brings a cell in from the left hand and down into the lower battery tube; its bolt slides back and closes.
+- **The shots:**
+  - Every client that sees the shooter, the shooter's own too, is told where the shot went (`GunTracePayload`).
+  - A beam is cyan light from the muzzle to its end; an arc is electric sparks jagging from the muzzle to each creature it leapt to.
+  - The muzzle flash is the owner's frames tinted cyan-white, and the Beam Pistol's and Linesman's casing cues vent sparks.
+- **Sounds:** the library's ray gun shot (Beam Pistol), its shock shot (Stormlock) and its short laser shot (Linesman). The charges going in play the insert sound.
+
+**How the models were built:**
+- **Beam Pistol:**
+  - **Barrel:** the main part's 4th to 9th elements: the bore, its rings, the rod and the emitter's plates. It hinges at the bottom of its back end.
+  - **Shell bone:** empty; the owner's animations keep it at scale 0.
+  - **Left hand:** held in one hand, so its hand point is where it takes the barrel, 0.29 s into the reload.
+  - **Aiming:** the coil at its back stands out either side of it, between its sight and the eye, so aimed it is held 4 px further out (`"eye_relief"`).
+- **Stormlock Rifle:**
+  - **Cylinder:** the owner's `mag`, four elements, turns about the bore.
+  - **Latch:** two elements, hinged at its front, flips up. Hinged at its back, it swung down into the body.
+  - **Lever:** the loop under the grip, the owner's `lever`, turns about its front. The right hand holds the wrist through the loop.
+  - **Sights:** the owner's sights part, which a scope replaces.
+- **Linesman:**
+  - **Bolt:** the owner's `Bolt` (capital B), the block over its battery tubes.
+  - **Cell:** the reload's cell is a prop, 1.5 × 1.5 × 3 px: a steel cap, the green glass and a copper cap, in the owner's cell art's colours. It rests behind the lower tube's mouth, which the loop's last move puts it in as it shrinks away.
+- **Shared textures:**
+  - The Beam Pistol's stocks draw on `raygun_stocks.png`, packed whole into its atlas.
+  - The Linesman's stocks draw on the Rust Midge's whole 128 px atlas, which can never sit beside its own. `tools/guns.py` packs just the pixels those stocks use, as it does a scope's.
+- **The arms:** fitted in a first-person preview so that they leave the screen as the other guns' do.
+
+**Connections:**
+- **The energy system:** the Energy Cell is a `Chargeable` item (`jugcraft:energy`, in JE), filled at the Charging Station from any generator, battery bank and cable network. There is no second power system.
+- **Parts:** steel from the steel foundry; advanced circuits from the circuit assembler; copper cable.
+- **Vanilla:** amethyst, lightning rods, redstone and glass.
+
+**Balance:** starting numbers.
+- **The trade:** the energy weapons hurt less a shot than the steel guns, but need no rounds crafted: a cell refills for the cost of the power. Their shots also do what bullets do not: a beam hits every creature in a line, and an arc finds its mark and spreads.
+- **Beam Pistol:** 15 damage a second to one creature, more through a line.
+- **Stormlock Rifle:** about 13 a second to one creature; 17.6 a shot across three.
+- **Linesman:** about 13 a second to one creature, 26 across three, close in and without fine aim.
+- **Power:**
+  - A full cell is 10,000 JE: 25 Beam Pistol shots, 13 Stormlock charges or 40 Linesman charges.
+  - A Battery Box (400,000 JE) fills forty cells.
+  - For comparison, the power bow's shot is 500 JE and the power katana's blow 1,000.
+
+**Save compatibility:** new items `jugcraft:beam_pistol`, `stormlock_rifle`, `linesman` and `energy_cell`, and the damage type `jugcraft:zap`. The cell's charge is the shared `jugcraft:energy` component. Nothing saved changes. `guns.enabled=false` or `machines.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **Particles:** a beam or arc is drawn from about where the muzzle is (ahead of the eye, a little right and down), not from the model's muzzle locator, so in first person it starts a little off the gun.
+- **Charging:** cells charge one at a time, on the station's cradle.
+- **The Beam Pistol's coil** stands out either side of its back in first person, as the owner's model has it.
+- **Not played:** none of it has been played yet. The arcs' reach, their seeking cones and the JE costs want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
 - **Technology connection:** the rounds are made from the mod's lead and brass; the guns from early metals.
+- **Energy connection (slice 8D):** the energy weapons' Energy Cells fill at the Charging Station, from the machines' energy system (JE). Their recipes need the machines switch, and their parts (steel, advanced circuits, copper cable) come from the machines' tree, so they come after the steel tier.
 - **Magic connection:** none yet.
 - **Reachable entry path:**
   - copper and iron need only mining and smelting; gunpowder comes from creepers;
@@ -648,7 +747,11 @@ Three more of the owner's guns, each firing something other than a bullet or fir
 - **Others' animations:** the server tells the clients that see the shooter (not the shooter's own) with `GunActionPayload`, and they play the shot or reload on that gun.
 - **Spin-up (slice 8C):** the Thresher's client sends `GunSpinPayload` (no data) each tick its trigger is held. The server keeps, per player, when the run began and its last word, and refuses the Thresher's shots until the run is 15 ticks old (2 forgiven for uneven packets). A gap of more than 4 ticks ends the run. A client that claims to hold the trigger gains nothing it could not by holding it; the run's age, the rounds and the rate are the server's.
 - **Grenades and flame (slice 8C):** the server spawns the Lobber's Grenade from its own copy of the player's position and look, and works out the Stoker's jet the same way, with the same ally and protection checks as a bullet.
-- **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). Its attachments are another, `jugcraft:attachments` (a list of up to four attachment ids, oldest first; an id no longer known is ignored). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
+- **Energy weapons (slice 8D):**
+  - The server draws a reload's charge from its own copy of the player's cells.
+  - It works out the beam and the arcs from its copy of the player's position and look, with the same ally and protection checks as a bullet. An arc asks other code about the creatures it would strike, in turn, and no others.
+  - `GunTracePayload` (the shooter's id, the kind of shot and up to three points) tells the clients that see the shooter, and the shooter's own, where the shot went. It is used only to draw the shot.
+- **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). An Energy Cell's charge is the shared `jugcraft:energy` component (slice 8D). Its attachments are another, `jugcraft:attachments` (a list of up to four attachment ids, oldest first; an id no longer known is ignored). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
 - **Attachments and authority:** attachments are fitted only by the crafting recipes, which the server runs. The server reads a gun's numbers from its own copy of the stack (`GunItem.spec(stack)`), for the shot, the trigger rate, the reload and the rounds it may load; the client uses the same numbers only to predict.
 - **Disconnect:** clears that player's trigger credit, reload and spin.
 - **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns', rounds' and attachments' recipes (twenty-nine with slice 5: sixteen guns and rounds, eleven attachments, and the fitting and removal recipes). Items and the attachments component stay registered, so saved guns, rounds and attachments survive with it off.
@@ -659,6 +762,7 @@ Three more of the owner's guns, each firing something other than a bullet or fir
 - **Config:** the `guns` feature switch (`JugcraftConfig.FEATURES`, `tools/materials.py`).
 - **Damage type:** `jugcraft:bullet`, tagged `minecraft:is_projectile` (Projectile Protection works against it) and `minecraft:bypasses_cooldown` (each shot counts). Slice 8C adds `jugcraft:flame`, tagged `minecraft:is_fire`, `minecraft:no_knockback` and `minecraft:bypasses_cooldown`. The field chemistry branch's thermite and chlorine share the first two tag files, so `tools/guns.py` writes those files with their entries included (`field_chemistry.damage_type_tags()`).
 - **Grenades (slice 8C):** the Trench Lobber fires the field chemistry branch's Grenade through its `GrenadeEntity` and `Warhead`, as the grenade launcher does.
+- **Energy (slice 8D):** the Energy Cell is the tools' `Chargeable`: the `jugcraft:energy` component, the capacity modules, the Charging Station, the amber charge bar and the JE tooltip line (`PoweredToolItem`). Slice 8D's damage type, `jugcraft:zap`, joins `minecraft:no_knockback` and `minecraft:bypasses_cooldown`.
 - **Sounds:** in `sounds.json`, through `tools/generate_material_data.py`.
 - **Icons:** the item-icon maps (`tools/item_icons/`, `docs/ITEM_ICONS.md`) for the rounds.
 - **Keys:** Jugcraft's key category, beside the party key.
@@ -926,6 +1030,45 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | stoker | `Guns/models/special/kiln_gun/wooden_stock.json` | `1cbfee18215b6665` |
 | stoker | `Guns/sounds/item/flamethrower/fire_2.ogg` | `d0c649ff0323c3ef` |
 | stoker | `Guns/item/spitfire_flame.png` | `c81c31bd15a64d7c` |
+| beam_pistol | `Guns/models/item/raygun.json` | `eabb17b32f05d0bf` |
+| beam_pistol | `Guns/item/raygun.png` | `26f663da7ee4f261` |
+| beam_pistol | `Guns/item/raygun.animation.json` | `aec8a6d829deb6cb` |
+| beam_pistol | `Guns/models/special/raygun/main.json` | `0361d1c522be9303` |
+| beam_pistol | `Guns/models/special/raygun/light_stock.json` | `79d7b701e5136212` |
+| beam_pistol | `Guns/models/special/raygun/heavy_stock.json` | `00db5395f7e929c9` |
+| beam_pistol | `Guns/models/special/raygun/wooden_stock.json` | `b7c28931765d8969` |
+| beam_pistol | `Guns/sounds/item/raygun/fire.ogg` | `7ef2b258e9b23920` |
+| beam_pistol | `Guns/item/raygun_stocks.png` | `9f743802b4b7a394` |
+| stormlock_rifle | `Guns/models/item/teslock_rifle.json` | `b2d5f0e911d1f60c` |
+| stormlock_rifle | `Guns/item/teslock_rifle.png` | `94abf372c6030f27` |
+| stormlock_rifle | `Guns/item/teslock_rifle.animation.json` | `3a767e17c45cb9ed` |
+| stormlock_rifle | `Guns/models/special/teslock_rifle/main.json` | `6220540eb08c9387` |
+| stormlock_rifle | `Guns/models/special/teslock_rifle/light_grip.json` | `d397719510cf667b` |
+| stormlock_rifle | `Guns/models/special/teslock_rifle/vert_grip.json` | `889d65938098d2a9` |
+| stormlock_rifle | `Guns/models/special/teslock_rifle/iron_bayonet.json` | `be5714d02ea3b11b` |
+| stormlock_rifle | `Guns/models/special/teslock_rifle/anthralite_bayonet.json` | `495f6a6b8aa2aa5f` |
+| stormlock_rifle | `Guns/models/special/teslock_rifle/diamond_bayonet.json` | `c807a0c5d4b15866` |
+| stormlock_rifle | `Guns/models/special/teslock_rifle/netherite_bayonet.json` | `7959a433f4e968e1` |
+| stormlock_rifle | `Guns/models/special/teslock_rifle/sights.json` | `1259d32391b33f5b` |
+| stormlock_rifle | `Guns/sounds/item/shock/fire.ogg` | `cfa59666eb34df2c` |
+| stormlock_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| stormlock_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| stormlock_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| linesman | `Guns/models/item/arc_worker.json` | `f090a626888a1427` |
+| linesman | `Guns/item/arc_worker.png` | `7d99a59b4d3b339e` |
+| linesman | `Guns/item/arc_worker.animation.json` | `7a55c3895bb318db` |
+| linesman | `Guns/models/special/arc_worker/main.json` | `9069cacf981c68a4` |
+| linesman | `Guns/models/special/arc_worker/light_stock.json` | `d53252f4c667df9d` |
+| linesman | `Guns/models/special/arc_worker/heavy_stock.json` | `967629ff9f95c264` |
+| linesman | `Guns/models/special/arc_worker/wooden_stock.json` | `115a9b4ef3d03ee0` |
+| linesman | `Guns/models/special/arc_worker/sights.json` | `081b859a198fba2a` |
+| linesman | `Guns/sounds/item/laser/fire.ogg` | `9ce6c4df8b513390` |
+| linesman | `Guns/item/rusty_gnat.png` | `2cf1804a29b889d8` |
+| linesman | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| linesman | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| linesman | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| energy_cell | `Guns/item/energy_cell.png` | `857c3e9d98c18f97` |
+| energy_cell_empty | `Guns/item/empty_cell.png` | `b06623e4de7b9b8f` |
 | shared | `Guns/sounds/item/bolt/bolt.ogg` | `1cf1102f6ba52725` |
 | shared | `Guns/sounds/item/bolt_pull/bolt_pull.ogg` | `dbbda8b00abcab8c` |
 | shared | `Guns/sounds/item/bolt_release/bolt_release.ogg` | `7c1096f545d72ec3` |
@@ -1352,15 +1495,39 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - **Seen from outside, the Thresher pointed at the sky** (its transform's 68.25° tilt, [above](#slice-8c-the-heavy-weapons)).
     - **The Stoker is held close,** as the owner's transform holds it.
   - **The fix, in the next push:** the Thresher's left hand holds the front plate (a first-person preview of it idle, firing and through its reload and inspection leaves the view clear), and its holder's arms hang lower by the tilt.
+- **Slice 8D, run locally (9 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's, and each hand is where `BUILDS` puts it in its pose. The cell's corner of the Linesman's atlas is clear, the Linesman's stocks' pixels pack beside its own texture, and the Energy Cell's art is the owner's, unchanged. No other gun's atlas changed with the packing.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' and the Energy Cell's items, item models, recipes (each on the guns and machines switches), names, shot sounds, and the zap damage type with its tags.
+  - `python3 tools/check_mod_data.py`: PASS (1916 material IDs), now checking `JugcraftGuns.CHARGE`, the arcs' numbers, the Energy Cell's capacity, `GunLooks.FLASH_TINTS` and the new names.
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only.
+  - **Previews:**
+    - first-person views of each gun idle, aimed and through its reload (approximating the game's hands), which placed the arms, and the Beam Pistol's sight and its 4 px of eye relief;
+    - side views of the Beam Pistol's barrel breaking open, the Stormlock's latch, cylinder and lever, and the Linesman's cell going in (which moved the latch's hinge to its front);
+    - each gun with its attachments.
+- **Slice 8D game tests (written; they run in CI):**
+  - `EnergyGunsGameTests`:
+    - `energyWeaponsRunOnCells`: the three load from the Energy Cell, a chargeable item, each round its charge, a magazine's worth within a cell; the Beam Pistol fires a beam, the others arcs; a zap pushes nothing back, counts each shot, and is neither a projectile nor fire.
+    - `reloadsDrawChargeFromCells`: cells of 1,000 and 10,000 JE are 27 rounds; they fill an empty Beam Pistol and are left at 0 and 7,800 JE, still in their slots. On spent cells the Stormlock's reload does not start; a cell of 1,500 JE then loads two of its charges and is spent.
+    - `beamPassesThroughCreatures`: the beam takes its damage from both pigs in its line and stops at a wall, the pig behind it untouched; the shot spends a round.
+    - `arcLeapsBetweenCreatures`: the arc takes 9 from its mark, then 5.4 and 3.24 from the pigs two and three blocks on; the pig nine blocks away is untouched.
+    - `linesmanFindsCreaturesInItsCone`: the Linesman's arc strikes the pig eight degrees off its aim; a pig out of its cone is untouched.
+    - `chargingStationFillsACell`: a Charging Station fills an Energy Cell on its cradle.
+  - "Every gun registered" now counts twenty-four guns.
+  - `GunsClientGameTests` takes the three through every gun's steps with two full Energy Cells:
+    - it checks that each shot is drawn (`GunTracePayload`);
+    - it checks that the reload drew the spent rounds' charge from the cells and left both cells;
+    - screenshots `jugcraft_guns_beam_pistol_*`, `jugcraft_guns_stormlock_rifle_*` and `jugcraft_guns_linesman_*`; the inventory shot shows a charged cell and a spent one.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
-- **Later slices,** each its own pull request: the energy weapons, the last of the gun sets the owner chose on 8 October 2026 (the revolvers are slice 8, the service arms slice 8B, the heavy weapons slice 8C), which charge from the energy system; the chemical grenades in the Trench Lobber; the tactical grip and the laser sight.
+- **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
+- **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; the tactical grip and the laser sight; a rack that charges several Energy Cells at once.
 - **Aimed, the gun hand covers the sights:** in the CI screenshots of 8 October, the right fist sits over the lower middle of the screen when aiming, on the one-handed guns and some long ones. The arm runs back toward the camera from the grip drawn at the middle of the view. This is a polish item for a pull request of its own.
 - **Not yet:**
   - the jam the Gnat's sound suggests;

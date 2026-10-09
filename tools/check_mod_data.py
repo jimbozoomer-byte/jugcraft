@@ -1442,6 +1442,16 @@ def check_guns():
     per_item = ", ".join(f'"{ammo}", {n}' for ammo, n in guns.OTHER_AMMO.items() if n != 1)
     if f"PER_ITEM = Map.of({per_item});" not in java:
         err(f"JugcraftGuns.PER_ITEM differs from tools/guns.py OTHER_AMMO: expected Map.of({per_item})")
+    # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
+    charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
+    if f"CHARGE = Map.of({charges});" not in java:
+        err(f"JugcraftGuns.CHARGE differs from tools/guns.py GUNS charge: expected Map.of({charges})")
+    for line in (f"ARC_HOPS = {guns.ARC_HOPS};", f"ARC_REACH = {guns.ARC_REACH};", f"ARC_SHARE = {guns.ARC_SHARE}F;"):
+        if line not in java:
+            err(f"JugcraftGuns differs from tools/guns.py: expected {line}")
+    cell = (JAVA_ROOT / "guns" / "EnergyCellItem.java").read_text(encoding="utf-8")
+    if f"CAPACITY = {guns.CELL_CAPACITY:_};" not in cell or "implements Chargeable" not in cell:
+        err(f"EnergyCellItem must be Chargeable, holding tools/guns.py CELL_CAPACITY ({guns.CELL_CAPACITY:_} JE)")
     events = re.search(r"SOUND_EVENTS = List\.of\(([^)]*)\)", java)
     shared = [name.removeprefix("guns.") for name in guns.sound_events() if name.count(".") == 1]
     if not events or re.findall(r'"([a-z_]+)"', events.group(1)) != shared:
@@ -1464,6 +1474,7 @@ def check_guns():
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in [f"key.{MOD}.reload", f"key.{MOD}.inspect", f"hud.{MOD}.guns.ammo", f"hud.{MOD}.guns.reloading",
                 f"message.{MOD}.guns.no_ammo", f"death.attack.{MOD}.bullet", f"death.attack.{MOD}.flame", f"tooltip.{MOD}.guns.fits",
+                f"message.{MOD}.guns.no_charge", f"hud.{MOD}.guns.in_cells", f"death.attack.{MOD}.zap", f"tooltip.{MOD}.guns.charge",
                 f"tooltip.{MOD}.guns.fitting", f"tooltip.{MOD}.guns.fitted", f"tooltip.{MOD}.guns.stab", f"key.{MOD}.stab"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
                 f"tooltip.{MOD}.guns.slot.{slot}" for slot in guns.SLOTS] + [f"tooltip.{MOD}.guns.effect.{e}" for e in guns.EFFECTS]:
         if key not in lang:
@@ -1488,6 +1499,9 @@ def check_guns():
     if f"EYE_RELIEF = Map.of({reliefs});" not in looks:
         err(f"GunLooks.EYE_RELIEF differs from tools/guns.py BUILDS eye_relief: expected Map.of({reliefs})")
     # Slice 8C: the guns carried lower seen from outside, by their own third-person tilt.
+    tints = ", ".join(f'"{ammo}", 0x{tint:06X}' for ammo, tint in guns.FLASH_TINT.items())
+    if f"FLASH_TINTS = Map.of({tints});" not in looks:
+        err(f"GunLooks.FLASH_TINTS differs from tools/guns.py FLASH_TINT: expected Map.of({tints})")
     tilts = ", ".join(f'"{gun}", {guns.tilt(gun)}F' for gun in guns.GUNS if guns.tilt(gun))
     if f"TILT = Map.of({tilts});" not in looks:
         err(f"GunLooks.TILT differs from tools/guns.py tilt(): expected Map.of({tilts})")

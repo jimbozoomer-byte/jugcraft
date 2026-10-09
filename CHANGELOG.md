@@ -8,6 +8,16 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 8D (the energy weapons)
+- **Three energy weapons** past steel, each the owner's model, art and animations, running on charge from the energy system:
+  - the **Beam Pistol** (the owner's Raygun), held in one hand. Its beam passes through every creature in its line; it breaks open to load;
+  - the **Stormlock Rifle** (Teslock Rifle). Its bolt leaps from its mark to two more creatures close by, each taking a share of the damage; it is loaded a charge at a time;
+  - the **Linesman** (Arc Worker), a short-range arc thrower. Its arcs find the creatures in front of it without fine aim and leap between them.
+- **The Energy Cell** is their ammunition: a chargeable item (10,000 JE), filled at the Charging Station. A reload draws each round's charge from the cells in the inventory and leaves them; the counter shows the shots the cells hold. The recipes need the machines switch as well as the guns'.
+- **Their damage** is a new type, `jugcraft:zap`: it pushes nothing back and counts every shot. Each client draws a beam of cyan light, or an arc of sparks, where the server says the shot went.
+- **Attachments:** the Beam Pistol takes the stocks; the Stormlock the grips, bayonets and scopes; the Linesman the stocks and scopes.
+- Record: [guns.md, slice 8D](docs/features/guns.md#slice-8d-the-energy-weapons).
+
 ### Unmerged: Guns, slice 8C (the heavy weapons)
 - **Three heavy weapons** in steel, each the owner's model, art and animations:
   - the **Trench Lobber** (the owner's Hammer GL), a pump-action grenade launcher. It lobs the field chemistry branch's Grenade, which bursts where it lands and breaks no block;
