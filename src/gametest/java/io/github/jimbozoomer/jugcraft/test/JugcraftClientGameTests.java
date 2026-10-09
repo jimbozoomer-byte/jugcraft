@@ -619,6 +619,11 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 						io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.ARMOURED_WALKER, overworld);
 				walker.snapTo(x - 167.5, y, z - 6.5, -20.0F, 0.0F);
 				overworld.addFreshEntity(walker);
+				// The Howitzer Walker (the owner's model of 9 October 2026) behind it on the right, its gun raised.
+				io.github.jimbozoomer.jugcraft.walker.HowitzerWalker howitzer = new io.github.jimbozoomer.jugcraft.walker.HowitzerWalker(
+						io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.HOWITZER_WALKER, overworld);
+				howitzer.snapTo(x - 173.5, y, z - 9.5, 25.0F, 0.0F);
+				overworld.addFreshEntity(howitzer);
 			});
 			server.runCommand("tp @p %d %d %d 200 2".formatted(x - 170, y + 3, z + 2));
 			context.waitTicks(30);
