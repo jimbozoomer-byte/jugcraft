@@ -20,8 +20,8 @@ owner's choice (9 October 2026: "I just want you to model stuff, don't implement
 Units are pixels, the walker facing +z with the ground at y = 0. The whole walker is saved as a Blockbench project
 (art/howitzer_walker/howitzer_walker.bbmodel): every box in groups with their joints as origins (the shins under the
 thighs, the gun under the hull with the burst and puffs at its muzzle), the textures embedded, and two animation clips
-sampled from the curves below: "walk" (a floaty, bouncy stride) and "shoot" (recoil, a rocking hull, the burst and the
-puffs). `python tools/howitzer_walker.py --bbmodel --preview out.png` rewrites the project and renders previews.
+sampled from the curves below: "walk" (a floaty, bouncy stride), "shoot" (recoil, a rocking hull, the burst and the
+puffs) and "jump" (a crouch, a stretch off the ground, a tucked hop and a squashy, bouncy landing). `python tools/howitzer_walker.py --bbmodel --preview out.png` rewrites the project and renders previews.
 """
 import json
 import math
@@ -357,6 +357,35 @@ def walk_pose(phase, gait=1.0):
     return legs, hull_pose, GUN_WOBBLE * gait * math.sin(2 * phase + 1.0)
 
 
+JUMP_TICKS = 30
+
+
+def jump_pose(t):
+    """The jump at tick t: a crouch, a stretch off the ground, a tucked hop, a deep squashy landing and a bouncy
+    settle. Returns (rise px, drop px, stretch, hull pitch, gun pitch, thigh angle, shin angle); the hips and the
+    hull rise together, and the legs fold so the feet stay about where they were as the hips drop."""
+    def smooth(u):
+        u = max(0.0, min(1.0, u))
+        return u * u * (3 - 2 * u)
+    if t < 6:                       # crouch
+        c = smooth(t / 6)
+        return 0, 6 * c, -0.10 * c, 3 * c, -4 * c, 15 * c, 25 * c
+    if t < 9:                       # launch: stretch up off the ground
+        u = (t - 6) / 3
+        return 0, 6 * (1 - u), 0.12 * u, -8 * u, 8 * u, 15 - 25 * u, 25 - 40 * u
+    if t < 20:                      # in the air: a parabola, the legs tucked, nose up then over the top
+        u = (t - 9) / 11
+        rise = 30 * (1 - (2 * u - 1) ** 2)
+        tuck = smooth(u * 2.5) * (1 - smooth((u - 0.7) / 0.3))
+        return rise, 0, 0.04 * (1 - abs(2 * u - 1)), -8 + 14 * u, 8 - 14 * u, -10 + 35 * tuck, -15 + 60 * tuck
+    if t < 24:                      # landing: a deep squash
+        u = math.sin(math.pi * (t - 20) / 4)
+        return 0, 8 * u, -0.15 * u, -4 * u, -6 * u, 20 * u, 32 * u
+    u = (t - 24) / (JUMP_TICKS - 24)   # settle: a damped bounce back to rest
+    w = math.exp(-u * 3) * math.cos(u * 6) * (1 - u)
+    return 0, 2 * w, 0.05 * w, 2 * w, -3 * w, 5 * w, 8 * w
+
+
 def animations():
     """The Blockbench project's clips, sampled from the curves above: "walk" (one stride a second, looping) and
     "shoot" (two seconds, once)."""
@@ -397,10 +426,29 @@ def animations():
         shoot["puff"]["scale"].append((time, (ps, ps, ps)))
         shoot["puff"]["position"].append((time, (0, up, forward)))
 
+    jump = {name: {"rotation": [], "position": [], "scale": []} for name in
+            ("hull", "lamps", "gun", "thigh_left", "thigh_right", "shin_left", "shin_right", "flash", "puff")}
+    for i in range(JUMP_TICKS + 1):
+        t = i
+        time = i / 20
+        rise, drop, stretch, pitch, gun_pitch, thigh, shin = jump_pose(t)
+        for name in ("hull", "lamps"):
+            jump[name]["position"].append((time, (0, rise - drop, 0)))
+            jump[name]["rotation"].append((time, (pitch, 0, 0)))
+            jump[name]["scale"].append((time, (1 - stretch / 2, 1 + stretch, 1 - stretch / 2)))
+        jump["gun"]["rotation"].append((time, (gun_pitch, 0, 0)))
+        for side in ("left", "right"):
+            jump[f"thigh_{side}"]["position"].append((time, (0, rise - drop, 0)))
+            jump[f"thigh_{side}"]["rotation"].append((time, (thigh, 0, 0)))
+            jump[f"shin_{side}"]["rotation"].append((time, (shin, 0, 0)))
+    for name in ("flash", "puff"):
+        jump[name]["scale"].append((0, (0, 0, 0)))
+
     def clean(tracks):
         return {g: {c: k for c, k in ch.items() if k} for g, ch in tracks.items()}
     return [blockbench_export.animation("walk", 1.0, clean(walk), loop=True),
-            blockbench_export.animation("shoot", 2.0, clean(shoot), loop=False)]
+            blockbench_export.animation("shoot", 2.0, clean(shoot), loop=False),
+            blockbench_export.animation("jump", JUMP_TICKS / 20, clean(jump), loop=False)]
 
 
 def write_bbmodel(folder=ART):
