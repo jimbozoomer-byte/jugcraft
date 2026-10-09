@@ -27,6 +27,13 @@ public final class GunLooks {
 	 * of sight as it fires, and at the hip's depth it came past the eye: aimed, each shot filled the screen.
 	 */
 	static final Map<String, Float> EYE_RELIEF = Map.of("garrison_rifle", 4.0F);
+	/**
+	 * How far the owner's third-person transform tilts a gun up off the arm that holds it, in degrees (tools/guns.py
+	 * tilt(): the x rotation of its "thirdperson_righthand"); a gun not listed has none. The Gattaler's is made for an
+	 * arm hanging at the hip, so seen from outside its holder's arms hang that much lower ({@link GunPose}) and the gun
+	 * still points along the look: raised like a rifle, its barrels pointed at the sky.
+	 */
+	static final Map<String, Float> TILT = Map.of("thresher", 68.25F);
 	private static final Look DEFAULT = new Look(true, 1.0F);
 
 	static {
@@ -62,6 +69,11 @@ public final class GunLooks {
 	/** The gun's look; a gun not listed is held in both hands and does not zoom. */
 	public static Look of(String gun) {
 		return LOOKS.getOrDefault(gun, DEFAULT);
+	}
+
+	/** How far the gun's third-person transform tilts it up off the arm, in degrees ({@link #TILT}), or null for none. */
+	public static @Nullable Float tilt(String gun) {
+		return TILT.get(gun);
 	}
 
 	/** The scope fitted to this gun, or null. */

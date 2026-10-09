@@ -551,6 +551,7 @@ Three more of the owner's guns, each firing something other than a bullet or fir
 **What you see:** the owner's animations.
 - **Trench Lobber:** each shot is followed by a pump of the fore-grip, with the left hand riding it, and the leaf sight rattles. To reload, the magazine drops out and is seated again.
 - **Thresher:** the barrels spin from the moment the trigger is pulled, speeding up over the spin-up and running down over 1.5 s after it is let go. The spin comes from code, since no animation moves them. Each shot jolts the gun. To reload, the drum on its left side comes off and a new one goes on, and the carry handle is worked forward like a lever.
+  - **Seen from outside,** it is carried at the hip. The owner's third-person transform tilts it 68.25° up off the arm, made for an arm hanging low; raised along the look as other guns are, it pointed at the sky. So its holder's arms hang that much lower (`GunLooks.TILT`, which `tools/check_mod_data.py` checks against the owner's transform through `tools/guns.py tilt()`), and it points along the look.
 - **Stoker:** each burst throws flames along the look to about its reach, and a jet of the owner's pilot flame leaves the nozzle and shrinks away. To reload, its drum turns and a fuel can comes out of its left side and goes back.
 
 **How the models were built:**
@@ -562,7 +563,7 @@ Three more of the owner's guns, each firing something other than a bullet or fir
 - **Thresher:**
   - The barrels turn about the bore's middle.
   - The carry handle on top is the owner's `grip`: the reload works it forward about its feet on the body's sides.
-  - The left hand holds the carry handle. The reload's offsets take it straight to the drum on the left side, which places it there.
+  - The left hand holds the left side of the front plate, by the barrels' root. The owner's animations rest it on the carry handle, and their reload takes it from there straight to the drum. But the owner's display carries the gun at the hip with its back by the eye, and on the handle the hand and forearm filled the screen (the first push's CI shots, [below](#verification)). From the front plate the same moves keep it below the gun.
   - The right hand holds the rear grip low.
 - **Stoker:**
   - The two tubes and their collar are the `barrel` group. They hinge up for a shell-at-a-time reload the Stoker does not use, since it loads by the can.
@@ -602,7 +603,8 @@ Three more of the owner's guns, each firing something other than a bullet or fir
 
 **Known limits:**
 - **Grenades:** the Lobber fires frag Grenades only. The chemical grenades stay for throwing and the grenade launcher: a gun's magazine holds one kind of round.
-- **Arms:** the Thresher's left hand on its carry handle is close to the eye in the owner's display, so it is large on the screen.
+- **Arms:** the Thresher's left hand holds the front plate, not the carry handle the owner's animations rest it on (by the eye at the hip, there it filled the screen). So in the reload it drops toward the drum without taking it, and the handle is worked forward without it.
+- **The Stoker is held close:** the owner's first-person transform holds its back by the eye, so it fills the lower right of the screen. It is left as the owner made it.
 - **Flame:** the flame is lit by the world's light like the rest of the gun, so at night it is darker than a flame should be.
 - **Not played:** none of it has been played yet. The jet's reach and width, the spin-up and the kick of ten shots a second want play to set.
 
@@ -1337,6 +1339,19 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - it holds the Thresher's trigger through its spin-up;
     - it allows the Thresher more than one round spent, and counts a reload's items by the rounds each loads.
     - Screenshots: `jugcraft_guns_trench_lobber_*`, `jugcraft_guns_thresher_*` and `jugcraft_guns_stoker_*`.
+- **Slice 8C in CI** ([run 37989013678](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37989013678), on e9f53d806): every check passed.
+  - `mod`: the build and the server game tests passed, the five `HeavyGunsGameTests` among them.
+  - `client` (shard 2): `GunsClientGameTests` passed. Its log:
+    - **Trench Lobber:** aimed, the view narrowed to 0.9; fired, 5 flash frames, the husk 833.5 → 821.3 (the Grenade's burst) and rounds 6 → 5; reloaded 6, 31 Grenades left.
+    - **Thresher:** aimed, 0.95; held through its spin-up and fired, 10 flash frames, the husk 821.3 → 815.3 and rounds 60 → 58 (two shots in the moment the trigger was held); reloaded 60, 30 Rifle Rounds left.
+    - **Stoker:** aimed, 0.95; fired, 6 flash frames, the husk 815.3 → 813.3 and bursts 32 → 31; reloaded 32, 31 blaze powder left. Its animations' casing cue puffed smoke once, as it has no casing.
+  - **Screenshots:**
+    - The Lobber is held, aimed, fired, reloaded and inspected as the owner's animations show it. With the Extended Magazine fitted, its count reads 1 / 9.
+    - The Stoker points at the husk seen from outside.
+    - **The Thresher's left hand and forearm filled the right half of the screen** in first person (held, aimed and fired), from the carry handle by the eye.
+    - **Seen from outside, the Thresher pointed at the sky** (its transform's 68.25° tilt, [above](#slice-8c-the-heavy-weapons)).
+    - **The Stoker is held close,** as the owner's transform holds it.
+  - **The fix, in the next push:** the Thresher's left hand holds the front plate (a first-person preview of it idle, firing and through its reload and inspection leaves the view clear), and its holder's arms hang lower by the tilt.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability

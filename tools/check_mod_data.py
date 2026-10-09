@@ -1487,6 +1487,10 @@ def check_guns():
     reliefs = ", ".join(f'"{gun}", {build["eye_relief"]}F' for gun, build in guns.BUILDS.items() if "eye_relief" in build)
     if f"EYE_RELIEF = Map.of({reliefs});" not in looks:
         err(f"GunLooks.EYE_RELIEF differs from tools/guns.py BUILDS eye_relief: expected Map.of({reliefs})")
+    # Slice 8C: the guns carried lower seen from outside, by their own third-person tilt.
+    tilts = ", ".join(f'"{gun}", {guns.tilt(gun)}F' for gun in guns.GUNS if guns.tilt(gun))
+    if f"TILT = Map.of({tilts});" not in looks:
+        err(f"GunLooks.TILT differs from tools/guns.py tilt(): expected Map.of({tilts})")
     # Slice 7: each scope's zoom and view.
     quoted = lambda name: f'"{name}"' if name else "null"
     for kind, att in guns.ATTACHMENTS.items():

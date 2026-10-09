@@ -621,11 +621,13 @@ BUILDS = {
         "sight": (8.0, 8.6, 9.5),
     },
     # The Gattaler's barrels turn about their middle, spun from code (client/guns/GunRenderer: no animation moves
-    # them). The right hand holds the rear grip low and the left the carry handle on top; the reload ends with that
-    # handle worked forward like a lever (the owner's "grip"), about its feet on the body's sides, and in between the
-    # left hand drops to the drum on the left side as it comes off and goes back (it turns about its middle). The
-    # owner's display carries it at the hip with its back by the eye, so it has no sights: sliding any point of it onto
-    # the middle of the screen brought the grip across the eye (first-person preview).
+    # them). The right hand holds the rear grip low and the left the front plate's left side, by the barrels' root; the
+    # reload ends with the carry handle on top worked forward like a lever (the owner's "grip"), about its feet on the
+    # body's sides, and in between the left hand drops toward the drum on the left side as it comes off and goes back
+    # (it turns about its middle). The owner's animations rest the left hand on the carry handle, but the owner's
+    # display carries the gun at the hip with its back by the eye, and there the hand and its forearm filled the
+    # screen (PR #278's in-game shots); from the front plate the same moves keep below the gun. For the same reason
+    # it has no sights: sliding any point of it onto the middle of the screen brought the grip across the eye.
     "thresher": {
         "bones": [
             ("gun_body2", None, [], (8.0, 9.0, 16.4)),
@@ -634,7 +636,7 @@ BUILDS = {
             ("magazine", "gun_body", ["main#17,18,19,20"], (4.75, 4.16, 13.2)),
             ("barrels", "gun_body", ["barrels"], (8.0, 8.0, 3.25)),
         ],
-        "hands": {"right": (8.0, 9.0, 16.4), "left": (8.0, 12.3, 12.1)},
+        "hands": {"right": (8.0, 9.0, 16.4), "left": (5.5, 7.0, 9.8)},
         "arms": {"right": (-0.0946, -0.1812, 0.9789), "left": (0.2172, -0.6757, 0.7044)},
         "muzzle": (8.0, 8.0, -3.0),
         "sight": None,
@@ -1068,6 +1070,14 @@ def two_handed(gun):
     "hand_pose"; seen from outside (client/guns/GunPose), a two-handed gun brings both arms up, a one-handed one the
     gun arm only."""
     return "hand_pose" not in BUILDS[gun]
+
+
+def tilt(gun):
+    """How far the owner's third-person transform tilts the gun up off the arm, in degrees (the x rotation of its
+    "thirdperson_righthand"; 0 for most). Seen from outside, the holder's arms hang that much lower than raised along
+    the look (client/guns/GunLooks.TILT, GunPose), so the gun still points where they look: the Gattaler's is made for
+    an arm at the hip, and raised like a rifle it pointed at the sky (PR #278's in-game shots)."""
+    return float(base_model(gun)["display"]["thirdperson_righthand"].get("rotation", [0, 0, 0])[0])
 
 
 # The spent case a round leaves where the owner's animations eject one (their "eject_casing" particle cue, mostly at
@@ -2043,6 +2053,12 @@ def check():
     for name, mounts in ((g, b.get("mounts", {})) for g, b in BUILDS.items()):
         if not set(mounts) <= set(SLOTS) or not set(mounts.values()) <= {bone for bone, _, _, _ in BUILDS[name]["bones"]}:
             problems.append(f"{name}: its mounts name a slot or a bone it lacks")
+    for gun in GUNS:
+        # The arms hang lower by the tilt in either hand (GunPose); a turn about another axis they could not take up.
+        display = base_model(gun)["display"]
+        turns = [display.get(f"thirdperson_{hand}", {}).get("rotation", [0, 0, 0]) for hand in ("righthand", "lefthand")]
+        if turns[0] != turns[1] or any(turns[0][1:]):
+            problems.append(f"{gun}: its third-person transforms turn it other than tilting it, the same in both hands")
     for ammo, casing in CASINGS.items():
         target = ASSETS / "textures" / "particle" / f"{ammo}_casing.png"
         if not target.exists() or target.read_bytes() != (LIBRARY / "item" / f"{casing}.png").read_bytes():
