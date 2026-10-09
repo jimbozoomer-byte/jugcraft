@@ -8,6 +8,8 @@ public final class PeepoState extends LivingEntityRenderState { public final Ite
     public final ItemStackRenderState pie=new ItemStackRenderState();
     public final ItemStackRenderState knife=new ItemStackRenderState();
     public final ItemStackRenderState hoe=new ItemStackRenderState();
+    public final ItemStackRenderState animalTool=new ItemStackRenderState();
+    float bucketX,bucketY,bucketZ;
     public io.github.jimbozoomer.jugcraft.agriculture.PieFilling rawBake;
     boolean cake;
     float pieX,pieY,pieZ,pieReach;

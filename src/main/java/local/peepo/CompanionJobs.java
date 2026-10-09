@@ -15,6 +15,7 @@ public final class CompanionJobs {
     }
     static CompanionJob resolveFresh(PeepoEntity npc,BlockPos pos){
         if(!npc.level().hasChunkAt(pos))return null;
+        var livestock=npc.livestock.job(pos);if(livestock!=null)return livestock;
         var garden=npc.garden.job(pos);if(garden!=null)return garden;
         var be=npc.level().getBlockEntity(pos);if(be==null || be.isRemoved())return null;
         if(be instanceof io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity crank)return crank.companionJob.prepare(npc);

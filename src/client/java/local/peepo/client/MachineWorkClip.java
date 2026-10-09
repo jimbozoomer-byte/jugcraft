@@ -10,6 +10,15 @@ final class MachineWorkClip {
     float bodyPitch,bodyRoll,bodyX,bodyY;
     static final float HOE_SCALE=.65F, HOE_REACH=11.313708F*HOE_SCALE;
 
+    void shear(float phase,float flankY,float flankZ){
+        // Move the real shears over a small patch of fleece; two hands share its handles.
+        float snip=Mth.sin(phase*4),sweep=Mth.sin(phase);
+        x=sweep*1.15F;y=flankY+Mth.cos(phase)*.7F;z=flankZ+2.3F;
+        xRot=1.2F+snip*.14F;zRot=0;
+        bodyPitch=.10F+Math.max(0,snip)*.10F;bodyRoll=sweep*.06F;bodyX=sweep*.25F;bodyY=0;
+        leftX=x+.55F;rightX=x-.55F;leftY=rightY=y;leftZ=rightZ=z;
+    }
+
     void harvest(float phase,float groundY,float cropZ){
         float t=Mth.clamp(phase/Mth.TWO_PI,0,1);
         float lift=smooth(Math.min(1,t/.55F));

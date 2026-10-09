@@ -33,6 +33,8 @@ The existing per-station exclusive reservations remain the authority. Travel ren
 
 ## Processor assistance and helper teams
 
+Animal work uses the same four assignment slots: [anchored shearing and milking jobs](companion-livestock.md), with Supply/Output, temporary animal holding and companion-operated pen gates.
+
 Owner-requested on 7 October 2026, implemented with OpenAI Codex (GPT-6), against base commit `4bc09ffd`. The four-machine pilot is now expanded to all **36 processing machine types** in `MachineBlockEntity`: standard item recipes, fluid recipes, special crafting/plating, mining, farming and continuous pumping/separation. Electrical generators, kinetic engines, batteries and tanks have no processing-speed job and remain unsupported. The Generator Wheel and Cooking Pot retain their separate existing jobs.
 
 Use the Companion Planner to assign the same machine to each tamed companion. Clicking any linked machine part resolves to its controller. Each companion still has its own four-job list, priority, schedule, meals and recovery settings. Full multiblock machines (including the Arc Furnace's casing structure) have **two helper positions**, each adding up to **25% of ordinary processing speed**; one worker gives 25%, two give 50%. A physically single-block machine, including an old compact copy, has one position adding up to 50%. Provide separate reachable standing spaces at the front/sides and sufficient headroom for Jughead. Workers face the machine and use the reusable valve, lever, mallet or wrench clips described below. Each helper position has a complementary role; the older machine-specific ideas remain future options.

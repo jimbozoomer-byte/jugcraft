@@ -95,7 +95,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
         return target;
     }
     private net.minecraft.world.level.block.entity.BlockEntity recipeStation(int row){
-        var target=recipeTarget(row);if(target==null)return null;
+        var target=recipeTarget(row);if(target==null || target.livestock())return null;
         var be=npc.level().getBlockEntity(target.at().pos());
         return KitchenCompanionPort.of(be)!=null || be instanceof HearthOvenBlockEntity || be instanceof CookingPotBlockEntity pot && !pot.isLocked()
             || be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine && !machine.isLocked() && (machine.companionPort.selectable() || machine.companionPort.locked())?be:null;

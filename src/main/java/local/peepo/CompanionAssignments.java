@@ -20,9 +20,13 @@ public final class CompanionAssignments {
         public Target(GlobalPos at,Identifier block,Direction face){this(at,block,face,List.of());}
         public Target(GlobalPos at,Identifier block){this(at,block,Direction.UP);}
         public boolean garden(){return !plot.isEmpty();}
-        public String name(){return garden()?"Garden ("+plot.size()+" blocks)":BuiltInRegistries.BLOCK.getValue(block).getName().getString();}
+        public boolean shearing(){return block.equals(CompanionLivestock.SHEARING);}
+        public boolean milking(){return block.equals(CompanionLivestock.MILKING);}
+        public boolean livestock(){return shearing() || milking();}
+        public boolean carriesProduce(){return garden() || livestock();}
+        public String name(){return shearing()?"Shearing (8-block radius)":milking()?"Milking (8-block radius)":garden()?"Garden ("+plot.size()+" blocks)":BuiltInRegistries.BLOCK.getValue(block).getName().getString();}
         public boolean local(Level level){return at.dimension().equals(level.dimension());}
-        public boolean present(Level level){return local(level)&&level.hasChunkAt(at.pos())&&BuiltInRegistries.BLOCK.getKey(level.getBlockState(at.pos()).getBlock()).equals(block);}
+        public boolean present(Level level){return local(level)&&level.hasChunkAt(at.pos())&&(livestock() || BuiltInRegistries.BLOCK.getKey(level.getBlockState(at.pos()).getBlock()).equals(block));}
     }
     private final PeepoEntity npc;
     public static final int LUNCH=5,SUPPLY=6,OUTPUT=7,COUNT=14;
@@ -67,7 +71,7 @@ public final class CompanionAssignments {
         else {
             var port=CompanionLogistics.resolve(npc,target);
             if(port==null)reason=3;
-            else if(npc.level().getBlockEntity(target.at.pos()) instanceof MachineBlockEntity machine
+            else if(!target.livestock() && npc.level().getBlockEntity(target.at.pos()) instanceof MachineBlockEntity machine
                 && (supply?!machine.companionPort.selectable():machine.kind().outputSlot()>=machine.kind().slots))reason=3;
             else if(mode==2)reason=1;
             else if(!transportAllowed(target,supply))reason=2;
@@ -145,8 +149,22 @@ public final class CompanionAssignments {
         npc.orders.assigned(home,at);
         return (home?"Home assigned: ":"Work "+slot+" assigned: ")+targets[slot].name()+(home || CompanionJobs.resolve(npc,pos)!=null || CompanionLogistics.resolve(npc,targets[slot])!=null?"":" (work behavior not implemented yet)");
     }
+    public String assignAnimal(net.minecraft.world.entity.animal.Animal animal){
+        var level=npc.level();var pos=animal.getOnPos();
+        if(!level.hasChunkAt(pos) || pos.distToCenterSqr(npc.position())>64*64 || !CompanionJobs.permitted(npc,pos)
+            || !CompanionJobs.permitted(npc,animal.blockPosition()))return "Choose an accessible animal within 64 blocks of the companion.";
+        var id=CompanionLivestock.assignmentType(animal);if(id==null)return "Choose a sheep or cow.";
+        var at=GlobalPos.of(level.dimension(),pos);
+        for(var t:targets)if(t!=null && t.at.equals(at))return "This point already has an assignment. Select an animal on another block.";
+        int slot=1;while(slot<5 && targets[slot]!=null)slot++;
+        if(slot==5)return "All four work slots are full. Remove a job first.";
+        targets[slot]=new Target(at,id);transportModes[slot]=0;gardenSeeds[slot]=null;workManaged=true;
+        changed();npc.orders.assigned(false,at);
+        return "Work "+slot+" assigned: "+targets[slot].name()+". Supply "+(targets[slot].shearing()?"shears in Hand or a Tools supply.":"empty buckets in cargo or Supply.");
+    }
     public String remove(Level level,BlockPos clicked){
         var pos=canonical(level,clicked);var at=GlobalPos.of(level.dimension(),pos);
+        for(int i=1;i<5;i++)if(targets[i]!=null && targets[i].livestock() && targets[i].local(level) && targets[i].at.pos().equals(clicked)){clear(i);return "Animal work assignment removed.";}
         for(int i=0;i<COUNT;i++)if(targets[i]!=null && (targets[i].at.equals(at) || targets[i].local(level) && targets[i].plot.contains(pos))){clear(i);return i==0?"Home removed.":i==LUNCH?"Lunch source removed.":supplySlot(i)?"Supply removed.":i>=SUPPLY?"Output removed.":"Work assignment removed.";}
         return "This block is not assigned to the selected companion.";
     }

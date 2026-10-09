@@ -39,6 +39,9 @@ public final class PeepoEntity extends PathfinderMob {
     private static final EntityDataAccessor<net.minecraft.core.BlockPos> WORK_TARGET = SynchedEntityData.defineId(PeepoEntity.class, EntityDataSerializers.BLOCK_POS);
     private static final EntityDataAccessor<Long> WORK_STARTED=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.LONG);
     private static final EntityDataAccessor<ItemStack> WORK_PIE=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.ITEM_STACK);
+    private static final EntityDataAccessor<Integer> WORK_ANIMAL=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.INT);
+    public int workAnimal(){return entityData.get(WORK_ANIMAL);}
+    void setWorkAnimal(int id){if(!level().isClientSide())entityData.set(WORK_ANIMAL,id);}
     public long workStarted(){return entityData.get(WORK_STARTED);}
     public ItemStack workPie(){return entityData.get(WORK_PIE);}
     void setWorkPie(ItemStack stack){
@@ -60,6 +63,7 @@ public final class PeepoEntity extends PathfinderMob {
         if(!isAlive() || isEating() || getRestMode()!=CompanionEnergy.Rest.NONE)action=WorkAnimation.NONE;
         if(action!=workAnimation())entityData.set(WORK_STARTED,level().getGameTime());
         if(!action.isPie())setWorkPie(ItemStack.EMPTY);
+        if(action!=WorkAnimation.SHEAR && action!=WorkAnimation.MILK)setWorkAnimal(-1);
         if(action!=WorkAnimation.NONE)entityData.set(WORK_TARGET,target.immutable());
         entityData.set(WORK_ANIMATION,action.ordinal());workAnimationTicks=action==WorkAnimation.NONE?0:5;
     }
@@ -89,6 +93,7 @@ public final class PeepoEntity extends PathfinderMob {
     public final CompanionReport report=new CompanionReport(this);
     public final CompanionFood food=new CompanionFood(this);
     public final CompanionGarden garden=new CompanionGarden(this);
+    public final CompanionLivestock livestock=new CompanionLivestock(this);
     public final CompanionSocial social=new CompanionSocial(this);
     public final CompanionOrders orders=new CompanionOrders(this);
     // Runtime menu identities, never saved. Multiple allowed viewers share the same pause.
@@ -233,7 +238,7 @@ public final class PeepoEntity extends PathfinderMob {
         builder.define(WHEEL_RUNNING,false);builder.define(SOCIAL_POSE,0);builder.define(SOCIAL_STARTED,0L);
         builder.define(RECOVERING,false);
         builder.define(WORK_ANIMATION,0);builder.define(WORK_TARGET,net.minecraft.core.BlockPos.ZERO);
-        builder.define(WORK_STARTED,0L);builder.define(WORK_PIE,ItemStack.EMPTY);
+        builder.define(WORK_STARTED,0L);builder.define(WORK_PIE,ItemStack.EMPTY);builder.define(WORK_ANIMAL,-1);
     }
     public boolean isJughead() { return getType()==PeepoMod.JUGHEAD || getType()==PeepoMod.LEGACY_JUGHEAD; }
     public boolean isWearingPumpkin() { return entityData.get(PUMPKIN); }
@@ -273,7 +278,9 @@ public final class PeepoEntity extends PathfinderMob {
         syncBelongings();
     }
     public boolean isBlushing() { return entityData.get(BLUSHING); }
+    @Override protected net.minecraft.world.entity.ai.navigation.PathNavigation createNavigation(Level level){return new CompanionGroundNavigation(this,level);}
     @Override public void tick() {
+        if(!level().isClientSide())CompanionGates.beforeMove(this);
         if(!level().isClientSide() && editingSettings()){
             settingsMenus.removeIf(menu->!menu.editing(this));
             if(editingSettings())holdForSettings();

@@ -20,7 +20,7 @@ import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.*;
 import net.minecraft.world.phys.*;
 
-/** Saved, bounded garden plots. All produce lives in the existing eight cargo slots. */
+/** Saved garden plots and shared garden/livestock produce provenance in the existing eight cargo slots. */
 public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.Snapshot> {
     public static final int PLOT_LIMIT=8, WORK_TICKS=80, HOE_TICKS=40, ENERGY_PER_TICK=4;
     private static final Identifier PLAN=PeepoMod.id("garden");
@@ -133,7 +133,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
     @Override protected Snapshot createSnapshot(){return new Snapshot(Arrays.stream(harvest).map(ItemStack::copy).toList(),new ArrayList<>(Arrays.asList(origins)));}
     @Override protected void readSnapshot(Snapshot saved){for(int i=0;i<8;i++){harvest[i]=saved.stacks.get(i);origins[i]=saved.origins.get(i);}}
     /** Only combine harvests with other marked harvests, leaving player-provided stacks alone. */
-    private boolean storeHarvest(ItemStack stack,GlobalPos origin,TransactionContext tx){
+    boolean storeHarvest(ItemStack stack,GlobalPos origin,TransactionContext tx){
         if(stack.isEmpty())return true;updateSnapshots(tx);int remaining=stack.getCount();
         for(int pass=0;pass<2;pass++)for(int i=0;i<8 && remaining>0;i++){
             if(npc.transport.reserved(i))continue;

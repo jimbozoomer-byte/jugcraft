@@ -19,6 +19,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         addLayer(new HeldLayer(this));
         addLayer(new KnifeLayer(this));
         addLayer(new HoeLayer(this));
+        addLayer(new AnimalWorkLayer(this));
         addLayer(new PieLayer(this));
         addLayer(new SpoonLayer(this,new StirringSpoonModel(context.bakeLayer(PeepoClient.SPOON))));
         addLayer(new WorkPropsLayer(this,new WorkPropsModel(context.bakeLayer(PeepoClient.WORK_WOOD)),
@@ -158,6 +159,21 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
                 state.toolPose.harvest(state.workPhase,(float)(24-delta.y*16),(float)((delta.x*Math.sin(a)-delta.z*Math.cos(a))*16));
             }
         }
+        if(state.work==WorkAnimation.SHEAR || state.work==WorkAnimation.MILK){
+            var animal=entity.level().getEntity(entity.workAnimal());
+            if(!(animal instanceof net.minecraft.world.entity.animal.Animal) || !animal.isAlive())state.work=WorkAnimation.NONE;
+            else{
+                state.bodyRot=entity.getYRot();state.yRot=0;state.xRot=0;
+                float elapsed=(float)Math.max(0,entity.level().getGameTime()-entity.workStarted()+partialTick);
+                state.workPhase=elapsed*net.minecraft.util.Mth.TWO_PI/CompanionLivestock.WORK_TICKS;
+                var delta=animal.getPosition(partialTick).subtract(entity.getPosition(partialTick));double yaw=Math.toRadians(entity.getYRot());
+                state.bucketX=(float)((delta.x*Math.cos(yaw)+delta.z*Math.sin(yaw))*16);
+                state.bucketZ=(float)((delta.x*Math.sin(yaw)-delta.z*Math.cos(yaw))*16);
+                state.bucketY=(float)(24-(delta.y+.16)*16);
+                if(state.work==WorkAnimation.SHEAR)state.toolPose.shear(state.workPhase,(float)(24-(delta.y+animal.getBbHeight()*.46)*16),state.bucketZ+animal.getBbWidth()*8);
+            }
+        }
+        items.updateForLiving(state.animalTool,state.work==WorkAnimation.SHEAR?entity.getMainHandItem():state.work==WorkAnimation.MILK?new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BUCKET):net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.NONE,entity);
         // NONE supplies the original item model; the harvesting layer applies its own hoe scale.
         items.updateForLiving(state.knife,state.work==WorkAnimation.CHOP?entity.getMainHandItem():net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.NONE,entity);
         items.updateForLiving(state.hoe,state.work==WorkAnimation.HARVEST?entity.getMainHandItem():net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.NONE,entity);
@@ -179,6 +195,16 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
             if(state.isInvisible || state.work!=WorkAnimation.HARVEST || state.hoe.isEmpty())return;
             pose.pushPose();hoePose(pose,state.toolPose);
             state.hoe.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,state.outlineColor);pose.popPose();
+        }
+    }
+    private static final class AnimalWorkLayer extends RenderLayer<PeepoState,PeepoModel>{
+        AnimalWorkLayer(PeepoRenderer renderer){super(renderer);}
+        @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
+            if(state.isInvisible || state.animalTool.isEmpty())return;
+            pose.pushPose();
+            if(state.work==WorkAnimation.SHEAR)workItemPose(pose,state.toolPose,.45F,90);
+            else {pose.translate(state.bucketX/16,state.bucketY/16,state.bucketZ/16);pose.rotateDegrees(com.mojang.math.Axis.XP,180);pose.scale(.4F,.4F,.4F);}
+            state.animalTool.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,state.outlineColor);pose.popPose();
         }
     }
     static void knifePose(PoseStack pose,MachineWorkClip p){

@@ -107,6 +107,8 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
                 target.name()+" at "+target.at().pos().toShortString()+" in "+target.at().dimension().identifier()+" - "+CompanionStatus.from(menu.value(CompanionMenu.assignmentData(row))).label;
             if(row>0 && row<5 && target!=null)text+=". Priority "+row+" (top is highest).";
             if(target!=null && target.garden())text+=" Up to 8 connected soil blocks. A hoe in Hand halves work time. Supply brings seeds; Output takes surplus harvests.";
+            if(target!=null && target.shearing())text+=" Adult woolly sheep within 8 blocks. Give shears in Hand or a Tools supply; Output receives wool.";
+            if(target!=null && target.milking())text+=" Adult cows within 8 blocks. Supply brings empty buckets; Output receives milk. Each cow rests one minute between milkings.";
             if(row==6 || row==7)text+=" Porter moves items from Supply to Output. Work uses these containers for machine recipes.";
             g.setTooltipForNextFrame(font,Component.literal(text),mouseX,mouseY);
         }

@@ -165,7 +165,7 @@ public final class CompanionTransport extends Goal {
         if(port==null || storage==null)return false;
         if(supplying && port.plan()==null)return false;
         tooling=porter=false;route=-1;workstation=work;store=bound;supply=supplying;recipe=port.plan();returning=false;
-        if(work.garden() && !supplying){
+        if(work.carriesProduce() && !supplying){
             // Harvests already occupy real slots. Probe their combined destination capacity once.
             try(var tx=Transaction.openOuter()){
                 for(int i=0;i<8;i++){
@@ -295,9 +295,9 @@ public final class CompanionTransport extends Goal {
         var points=new ArrayList<BlockPos>(12);
         var targetState=npc.level().getBlockState(target.at().pos());
         boolean oven=targetState.getBlock() instanceof HearthOvenBlock;
-        if(target.garden()){
+        if(target.carriesProduce()){
             var floors=new LinkedHashSet<BlockPos>();
-            for(var soil:target.plot())if(CompanionGarden.farmland(npc.level(),soil) && CompanionJobs.permitted(npc,soil)){
+            for(var soil:target.livestock()?List.of(target.at().pos()):target.plot())if((target.livestock() || CompanionGarden.farmland(npc.level(),soil)) && CompanionJobs.permitted(npc,soil)){
                 floors.add(soil);for(var side:Direction.Plane.HORIZONTAL)floors.add(soil.relative(side));
             }
             for(var floor:floors){
@@ -424,7 +424,7 @@ public final class CompanionTransport extends Goal {
         }
     }
     private void pickup(){
-        if(!tooling && !workstation.garden()){pickupBatch();return;}
+        if(!tooling && !workstation.carriesProduce()){pickupBatch();return;}
         var selected=candidate();int slot=emptySlot();
         if(selected.isEmpty() || slot<0){fail(slot<0?CompanionStatus.FULL:porter?porterState:CompanionStatus.NO_INPUT);return;}
         var port=porter || tooling?null:CompanionLogistics.resolve(npc,workstation);
@@ -473,9 +473,9 @@ public final class CompanionTransport extends Goal {
         if(porter && amount<=0){fail(CompanionStatus.FULL);return;}
         if(supply && !returning)amount=Math.min(amount,port.needed(stack));
         if(amount<=0){deferUnused();return;}
-        if(supply && !returning && workstation.garden()){
+        if(supply && !returning && workstation.carriesProduce()){
             // Pickup already put these seeds into this companion's inventory. Do not insert a second copy.
-            npc.garden.inputsChanged(workstation.at().pos());beginHandoff();return;
+            npc.garden.inputsChanged(workstation.at().pos());npc.livestock.inputsChanged(workstation.at().pos());beginHandoff();return;
         }
         int inserted;
         try(var scope=io.github.jimbozoomer.jugcraft.machine.MachineItemAutomation.companionTransfer();var tx=Transaction.openOuter()){
@@ -508,14 +508,15 @@ public final class CompanionTransport extends Goal {
     }
     private boolean toolFits(CompanionAssignments.Target work,ItemStack stack){
         if(stack.isEmpty() || stack.isDamageableItem() && stack.getDamageValue()>=stack.getMaxDamage())return false;
-        return work.garden()?stack.is(net.minecraft.tags.ItemTags.HOES):work.block().equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("cutting_board")) && stack.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.KNIVES);
+        return work.shearing()?stack.is(net.minecraft.world.item.Items.SHEARS):work.garden()?stack.is(net.minecraft.tags.ItemTags.HOES):work.block().equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("cutting_board")) && stack.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.KNIVES);
     }
     private boolean needsTool(CompanionAssignments.Target work){
         return !npc.assignments.supplies.handLocked() && work.present(npc.level()) && CompanionJobs.permitted(npc,work.at().pos())
-            && (work.garden() || work.block().equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("cutting_board"))) && !toolFits(work,npc.belongings.getItem(9));
+            && (work.garden() || work.shearing() || work.block().equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("cutting_board"))) && !toolFits(work,npc.belongings.getItem(9));
     }
     private boolean readyTool(CompanionAssignments.Target work){
         if(!npc.assignments.supplies.anyTools() || !needsTool(work))return false;
+        if(work.shearing() && !npc.livestock.hasReadyAnimal(work))return false;
         // Do not swap back and forth between tools for idle/lower-priority jobs.
         if(work.garden()){
             var job=CompanionJobs.resolve(npc,work.at().pos());if(job==null || job.planningStatus(npc)!=CompanionStatus.READY)return false;
@@ -551,7 +552,7 @@ public final class CompanionTransport extends Goal {
         return ItemStack.EMPTY;
     }
     private java.util.function.Predicate<ItemStack> toolUsefulness(CompanionAssignments.Target work){
-        if(work.garden())return tool->true;
+        if(work.garden() || work.shearing())return tool->true;
         if(!(npc.level().getBlockEntity(work.at().pos()) instanceof io.github.jimbozoomer.jugcraft.agriculture.CuttingBoardBlockEntity board)
             || !(npc.level() instanceof net.minecraft.server.level.ServerLevel level))return tool->false;
         // One rolled-back input snapshot per search, not one full scan for every knife in storage.
@@ -573,6 +574,7 @@ public final class CompanionTransport extends Goal {
             tx.commit();
         }
         if(workstation.garden())npc.garden.inputsChanged(workstation.at().pos());
+        if(workstation.livestock())npc.livestock.inputsChanged(workstation.at().pos());
         beginHandoff();
     }
     private static void saveTarget(ValueOutput out,String name,CompanionAssignments.Target t){

@@ -36,7 +36,7 @@ public final class AssignmentTool extends Item {
     private static void select(Player player,ItemStack stack,PeepoEntity npc){
         var tag=new CompoundTag();tag.putString("Companion",npc.getUUID().toString());tag.putString("Dimension",npc.level().dimension().identifier().toString());tag.putInt("EntityId",npc.getId());tag.putString("Name",npc.getDisplayName().getString());
         CustomData.set(DataComponents.CUSTOM_DATA,stack,tag);
-        player.sendOverlayMessage(Component.literal("Selected "+npc.getDisplayName().getString()+". Right-click containers: Supply (blue) / Output (yellow). Click again to switch. Left-click removes."));
+        player.sendOverlayMessage(Component.literal("Selected "+npc.getDisplayName().getString()+". Click a sheep/cow for animal work. Containers cycle Supply (blue) / Output (yellow). Left-click removes."));
     }
     @Override public Component getName(ItemStack stack){String name=data(stack).getStringOr("Name","");return name.isEmpty()?super.getName(stack):Component.literal("Companion Planner: "+name);}
     @Override public InteractionResult use(Level level,Player player,InteractionHand hand){
@@ -71,7 +71,17 @@ public final class AssignmentTool extends Item {
         var id=PeepoMod.id("companion_planner");ITEM=Registry.register(BuiltInRegistries.ITEM,id,new AssignmentTool(new Item.Properties().setId(ResourceKey.create(Registries.ITEM,id)).stacksTo(1)));
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(e->e.accept(ITEM));
         UseEntityCallback.EVENT.register((player,level,hand,entity,hit)->{
-            var stack=player.getItemInHand(hand);if(!stack.is(ITEM) || !(entity instanceof PeepoEntity npc))return InteractionResult.PASS;
+            var stack=player.getItemInHand(hand);if(!stack.is(ITEM))return InteractionResult.PASS;
+            if(entity instanceof net.minecraft.world.entity.animal.Animal animal && CompanionLivestock.assignmentType(animal)!=null){
+                if(level.isClientSide() || player.isSpectator())return InteractionResult.SUCCESS;
+                if(player.getCooldowns().isOnCooldown(stack))return InteractionResult.SUCCESS;
+                player.getCooldowns().addCooldown(stack,5);
+                if(player.distanceToSqr(animal)>36 || !level.mayInteract(player,animal.blockPosition()) || TownProtection.denies(player,level,animal.blockPosition()))return InteractionResult.FAIL;
+                var selected=selected(level,stack);
+                player.sendOverlayMessage(Component.literal(selected==null?"Select a loaded companion first.":!selected.orders.allowed(player)?"You cannot assign this companion.":selected.distanceToSqr(player)>128*128?"Move closer to the companion.":selected.assignments.assignAnimal(animal)));
+                return InteractionResult.SUCCESS;
+            }
+            if(!(entity instanceof PeepoEntity npc))return InteractionResult.PASS;
             if(!level.isClientSide() && !player.isSpectator() && player.distanceToSqr(npc)<=36){
                 if(npc.orders.allowed(player))select(player,stack,npc);else player.sendOverlayMessage(Component.literal(npc.orders.tamed()?"This companion belongs to another player.":"Feed this companion once to tame it first."));
             }
