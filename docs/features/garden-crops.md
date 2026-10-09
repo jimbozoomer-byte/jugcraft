@@ -18,6 +18,14 @@ Primary specialty and supported player role: farming; supports cooks (the same c
 - **The Garden Salad** keeps its recipe and name; its icon is the owner's mixed salad. The cabbage, onion, tomato and corn items and their seeds are the owner's too.
 - **Mushroom colonies.** Use a brown or red mushroom on the top of **Rich Soil** to plant a **Brown or Red Mushroom Colony** (sneak to place a plain mushroom instead). It grows through the owner's four stages, from a single cap to a cluster, but only in the shade, as mushrooms spread: where the light is 12 or less (a cellar, a cave, a roofed shed), never under the open sky. Bone meal grows it a stage anywhere. Grown, **shears or a knife** pick two or three mushrooms and it goes back to its second stage to grow again. Broken, it gives back its mushroom, and grown, two or three more. It also stands on mycelium, podzol and nylium.
 
+| **Corn:** corn at every age, left to right, the owner's sprout to the ripe stalk three blocks tall, and ripe ornamental corn beside it | **The kitchen garden:** tomatoes climbing their trellises (one vine gone over, at the right), cabbages and onions at every age |
+| --- | --- |
+| ![Corn at every age](../images/ingame_garden_corn.jpg) | ![Tomatoes, cabbages and onions](../images/ingame_garden_vegetables.jpg) |
+| **Wild plants and colonies:** the seven wild plants in the owner's art, and the brown and red mushroom colonies at every stage on Rich Soil | **The wall:** the crops, seeds, the Garden Salad and a Rotten Tomato in item frames |
+| ![Wild plants and mushroom colonies](../images/ingame_garden_wild.jpg) | ![The items](../images/ingame_garden_items.jpg) |
+
+*In-game screenshots from CI's client game test (`GardenClientGameTests`, software rendering, small previews).*
+
 ## Connections
 - Existing input producer: the crops' own seeds (short grass, the wild plants, the produce); vanilla's brown and red mushrooms (caves, swamps, dark forests, mushroom fields) and the [soil slice's](soil-compost-and-storage.md) Rich Soil for the colonies; farmland, trellises, water and bone meal.
 - Existing output consumer: unchanged for the four crops (the Cooking Pot's soups and salads, the menu, the feasts, the corn maze, popcorn and roasted corn); the wild roots give vanilla's carrots, potatoes and beetroot seeds, which every vanilla and Jugcraft recipe takes; the colonies' mushrooms go into vanilla's mushroom stew, suspicious stew and fermented spider eyes and the Cooking Pot's mushroom barley soup and mushroom rice; rotten tomatoes go on the compost (vanilla's composter, so towards bone meal).
@@ -61,7 +69,12 @@ One adaptation: **ornamental corn's ripe stage** (`ornamental_corn_crop_stage7`,
 Removed: Jugcraft's own drawings of these crops, their items, the wild corn and wild tomato, and ornamental corn's ripe middle (28 block textures and 26 models no longer used, and the code that drew them in `tools/crop_textures.py`, `tools/kitchen_textures.py` and `tools/halloween_textures.py`). No Mojang texture is read, traced or recoloured.
 
 ## Verification
-CI results are added here when the run on this branch finishes.
+CI (9 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `d1a9419` | Build, data audit, game tests, client game tests | Compiled; **all 1185 required game tests passed** (`GardenGameTests` among them, and the crops' existing tests); the client shard with `GardenClientGameTests` passed and took the screenshots above. Two failures not this branch's, both red on its base `integration/oct9-ready-prs` (`0ddeb86`) too: the client shard that runs the most classes finished its tests (`BUILD SUCCESSFUL in 29m 19s`) but went past the job's 30-minute limit and was cancelled, so the `client` summary failed; and in the job without the optional integrations, `ArmsVIIIGameTests.javelinStrikesAndComesDown` failed, the javelin passing through its pig without striking, a test that fails now and then on the base as well |
+
 
 Run locally (9 October 2026):
 

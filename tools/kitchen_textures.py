@@ -8,8 +8,8 @@ way and shown inside the trellis model.
 import math
 import random
 
-from crop_textures import (Canvas, rgb, broad_leaf, stalk, outline, seeds_item, LEAF, DRY, STALK, WOOD,
-                           BLUE_GREEN, BEAN, KERNEL)
+from crop_textures import (Canvas, rgb, broad_leaf, stalk, outline, seeds_item, LEAF, DRY, WOOD,
+                           BEAN, KERNEL)
 import block_style as bs
 
 TOMATO_LEAF = [rgb("1d3d17"), rgb("27511d"), rgb("336a25"), rgb("43822e"), rgb("5a9b3c"), rgb("7db55a")]
@@ -101,17 +101,6 @@ def bulb(c, cx, cy, width, height, palette):
     c.px(cx, cy - height - 1, palette[1])
 
 
-def onion_stage(stage):
-    c = Canvas()
-    tube_leaves(c, (3, 5, 6, 6)[stage], (5, 9, 12, 11)[stage], BLUE_GREEN, bend=2.2, seed=10 + stage)
-    if stage == 3:
-        # Leaves flop over as the bulb swells at the soil.
-        for x in range(9, 14):
-            c.px(x, 8 + (x - 9) // 2, DRY[2])
-        bulb(c, 7.5, 15, 3, 2, ONION)
-    return c.img
-
-
 def garlic_stage(stage):
     c = Canvas()
     tube_leaves(c, (3, 5, 6, 6)[stage], (5, 9, 12, 12)[stage], LEAF, bend=2.4, seed=20 + stage)
@@ -126,37 +115,6 @@ def garlic_stage(stage):
 
 
 # ---------------------------------------------------------------- cabbage
-
-def cabbage_leaf(c, x, y, size, palette=CABBAGE):
-    for dy in range(-size, size + 1):
-        for dx in range(-size - 1, size + 2):
-            if dx * dx / (size + 1.2) ** 2 + dy * dy / (size + 0.3) ** 2 <= 1:
-                c.px(x + dx, y + dy, palette[3 if dy < 0 else 2])
-    c.line(x, y + size, x, y - size, palette[5])
-
-
-def cabbage_stage(stage):
-    c = Canvas()
-    if stage == 0:
-        stalk(c, 7, 12, palette=STALK)
-        cabbage_leaf(c, 5, 11, 1)
-        cabbage_leaf(c, 10, 11, 1)
-        return c.img
-    # Wide outer leaves low on the ground...
-    for x, y in ((3, 12), (12, 12), (7, 13)):
-        cabbage_leaf(c, x, y, 2 if stage > 1 else 1, [CABBAGE[0], CABBAGE[1], CABBAGE[1], CABBAGE[2], CABBAGE[3], CABBAGE[4]])
-    # ...and a round head forming in the middle.
-    radius = (0, 2, 3, 4)[stage]
-    cy = 13 - radius
-    for dy in range(-radius, radius + 1):
-        for dx in range(-radius - 1, radius + 2):
-            if dx * dx / (radius + 1) ** 2 + dy * dy / radius ** 2 <= 1:
-                c.px(7.5 + dx, cy + dy, CABBAGE[5 if dx + dy < -radius else 4 if dx < 0 else 3])
-    if stage == 3:
-        for i in range(-2, 3):
-            c.px(7.5 + i, cy + abs(i) - 1, CABBAGE[2])
-    return c.img
-
 
 # ---------------------------------------------------------------- oats and barley
 

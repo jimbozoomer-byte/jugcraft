@@ -1423,6 +1423,10 @@ Seven milkshakes the owner drew and shared on 8 October 2026 ("CAKES & BAKES - 3
 
 Slice 7, part a: the owner's own art for Jugcraft's garden crops, chosen on 9 October 2026 ("go with the recommendations"), with what their drawings add. Details and test evidence: [features/garden-crops.md](../features/garden-crops.md).
 
+| **Corn:** the owner's corn at every age, and ripe ornamental corn | **Wild plants and colonies:** the seven wild plants, and mushroom colonies on Rich Soil |
+| --- | --- |
+| ![Corn at every age](../images/ingame_garden_corn.jpg) | ![Wild plants and mushroom colonies](../images/ingame_garden_wild.jpg) |
+
 - **The cabbage, onion, tomato and corn** grow through the owner's stages: eight for the cabbage, the budding and then fruiting tomato vine in its trellis, and their corn, still three blocks tall, its ears ripening gold (flint-coloured on ornamental corn). How they grow and what they give is unchanged; the Garden Salad is drawn as their mixed salad.
 - **Tomatoes go over:** a ripe vine left unpicked turns over-ripe in time and gives **Rotten Tomatoes** instead, to throw like snowballs (a splat, no harm) or compost.
 - **Wild Carrots, Potatoes and Beetroots** in plains, flower fields, taigas, hills and swamps give vanilla's crops; the wild cabbage, onion, tomato and corn wear the owner's art.
