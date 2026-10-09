@@ -1503,7 +1503,10 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
   - **Screenshots** (`client` shard 2):
     - In first person the Thresher sits at the lower right, held, aimed, fired, mid-reload and inspected; no hand covers the view.
     - Seen from outside, it is carried at the hip with its barrels toward the camera, the way its holder looks, not at the sky.
-- **Arms by the eye** ([above](#slice-8c-the-heavy-weapons)): a syntax parse only; its CI run is the push that adds it.
+- **Arms by the eye** ([run 37999611685](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37999611685), on afea6a3d8): every check passed.
+  - `mod` passed on its one re-run. Its first attempt failed the thrown arms' javelin test, which this change does not touch; the 8C pull request's comment of 9 October has what is known of it.
+  - Every gun's shots and reloads look as before. The Lobber's left sleeve shows at the lower left of its fired frame.
+  - In slice 8D's next run (below), the Beam Pistol's mid-reload view, which its left arm had filled, is clear.
 - **Slice 8D, run locally (9 October 2026):**
   - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's, and each hand is where `BUILDS` puts it in its pose. The cell's corner of the Linesman's atlas is clear, the Linesman's stocks' pixels pack beside its own texture, and the Energy Cell's art is the owner's, unchanged. No other gun's atlas changed with the packing.
   - `python3 tools/generate_material_data.py`: wrote the three guns' and the Energy Cell's items, item models, recipes (each on the guns and machines switches), names, shot sounds, and the zap damage type with its tags.
@@ -1539,9 +1542,13 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - Mid-reload, the Stormlock's left hand comes up to the middle of the view as it loads a round, and the Linesman's holds the gun's side. Each gun is inspected as the owner's animations show it, and the counter then reads 49, 25 and 79 shots left in the cells.
     - The inventory shows a charged Energy Cell with its bar; the tooltip covers the rest of that row.
     - The beam and the arcs do not show in the fired shots, which are taken the moment the shot leaves; the client counted each one drawn.
-    - **Mid-reload, the Beam Pistol's view was filled** edge to edge with one brown, the player skin's colour in shade, with the gun drawn in front. Most likely the camera was inside the left arm's box. The arm safeguard (slice 8C's `GunArmsLayer`, [above](#slice-8c-the-heavy-weapons)) leaves out an arm that near the eye; the next run's screenshot will show whether that was it.
-    - **The Stormlock's fired shot** shows no gun, no crosshair and no icon in its hotbar slot, for that one frame. Its flash count (10 frames) and its other shots show it drawn. Not explained yet: the next run will show whether it comes again.
+    - **Mid-reload, the Beam Pistol's view was filled** edge to edge with one brown, the player skin's colour in shade, with the gun drawn in front: the camera was inside the left arm's box. The next run shows it gone (below).
+    - **The Stormlock's fired shot** shows no gun, no crosshair and no icon in its hotbar slot, for that one frame. Its flash count (10 frames) and its other shots show it drawn. The next run did not show it again (below); its cause is not known.
     - **Aimed:** as with the other guns, the gun's back sits below the crosshair. The Beam Pistol's body rises over the middle of the target, and the Linesman's broad back fills the lower middle of the view; both are noted as known limits.
+- **The next run** ([run 37999913579](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37999913579), on d0cd56890, with slice 8C's arm safeguard merged): every check passed. Its log gives the same damage, charge and traces as above.
+  - Mid-reload, the Beam Pistol's view is clear: the scene, the gun and its right hand. The left arm, which had held the camera, is left out for those frames.
+  - The Stormlock's fired frame shows the gun, the crosshair and its icon in the hotbar.
+  - The Trench Lobber's left sleeve shows at the lower left of its fired frame, not over half the view.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
