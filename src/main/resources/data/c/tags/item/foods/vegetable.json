@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:corn",
+    "jugcraft:sweet_potato",
+    "jugcraft:tomato",
+    "jugcraft:pepper",
+    "jugcraft:cabbage",
+    "jugcraft:turnip",
+    "jugcraft:cabbage_leaf",
+    "jugcraft:pumpkin_slice",
+    "jugcraft:butternut_squash",
+    "jugcraft:acorn_squash"
+  ]
+}

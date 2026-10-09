@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:tin_ore",
+    "jugcraft:zinc_ore",
+    "jugcraft:lead_ore",
+    "jugcraft:silver_ore",
+    "jugcraft:nickel_ore",
+    "jugcraft:tungsten_ore",
+    "jugcraft:uranium_ore",
+    "jugcraft:titanium_ore",
+    "jugcraft:thallite_ore",
+    "jugcraft:salt_ore",
+    "jugcraft:phosphate_ore",
+    "jugcraft:lepidolite_ore",
+    "jugcraft:monazite_ore"
+  ]
+}
