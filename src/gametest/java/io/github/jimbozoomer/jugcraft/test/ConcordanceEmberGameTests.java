@@ -309,6 +309,10 @@ public class ConcordanceEmberGameTests {
 	public void smoulderAnswersToWaterAndFireResistance(GameTestHelper helper) {
 		floor(helper);
 		BlockPos pool = new BlockPos(2, 2, 2);
+		// A one-block pool walled in, so the water cannot spread to the other villager.
+		for (BlockPos wall : List.of(pool.north(), pool.south(), pool.east(), pool.west())) {
+			helper.setBlock(wall, Blocks.STONE);
+		}
 		helper.setBlock(pool, Blocks.WATER);
 		Mob soaked = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, pool);
 		Mob warded = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(5, 2, 5));
