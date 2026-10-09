@@ -372,12 +372,12 @@ def jump_pose(t):
         return 0, 6 * c, -0.10 * c, 3 * c, -4 * c, 15 * c, 25 * c
     if t < 9:                       # launch: stretch up off the ground
         u = (t - 6) / 3
-        return 0, 6 * (1 - u), 0.12 * u, -8 * u, 8 * u, 15 - 25 * u, 25 - 40 * u
+        return 0, 6 * (1 - u), 0.12 * u, -8 * u, 8 * u, 15 - 21 * u, 25 - 33 * u
     if t < 20:                      # in the air: a parabola, the legs tucked, nose up then over the top
         u = (t - 9) / 11
         rise = 30 * (1 - (2 * u - 1) ** 2)
         tuck = smooth(u * 2.5) * (1 - smooth((u - 0.7) / 0.3))
-        return rise, 0, 0.04 * (1 - abs(2 * u - 1)), -8 + 14 * u, 8 - 14 * u, -10 + 35 * tuck, -15 + 60 * tuck
+        return rise, 0, 0.04 * (1 - abs(2 * u - 1)), -8 + 14 * u, 8 - 14 * u, -6 + 14 * tuck, -8 + 24 * tuck
     if t < 24:                      # landing: a deep squash
         u = math.sin(math.pi * (t - 20) / 4)
         return 0, 8 * u, -0.15 * u, -4 * u, -6 * u, 20 * u, 32 * u
