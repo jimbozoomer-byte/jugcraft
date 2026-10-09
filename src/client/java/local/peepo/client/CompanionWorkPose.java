@@ -43,16 +43,23 @@ final class CompanionWorkPose {
         reach(arm,gripX(s)+side*.35F,GRIP_Y,gripZ(s));
     }
     static void crank(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg,ModelPart[] torso){
-        float lift=Math.max(0,17.0F-s.crankY),sway=s.crankX*.7F;
-        // The entity stays on its safe approach point. Only the client rig jumps and hangs.
-        for(var part:torso){part.y-=lift;part.x+=sway;}
-        leftLeg.y-=lift;rightLeg.y-=lift;leftLeg.x+=sway;rightLeg.x+=sway;
+        float lift=Math.max(0,17.0F-s.crankY),hang=Mth.clamp(lift/2,0,1);
+        float push=Mth.clamp((s.crankY-16)/4,0,1),pitch=.22F*push-.12F*hang;
+        float sway=s.crankX*.7F,bodyY=-lift+.25F*push,bodyZ=s.crankZ+5.5F;
+        // Track the handle from beside the rotor: rise on the upper arc, then lean into
+        // the downward push. The server entity remains at its checked standing position.
+        head.yRot=0;head.xRot=-.12F*hang+.1F*push;
+        for(var part:torso){lean(part,pitch,0,sway,bodyY);part.z+=bodyZ;}
+        leftLeg.y+=bodyY;rightLeg.y+=bodyY;leftLeg.x+=sway;rightLeg.x+=sway;
+        leftLeg.z+=bodyZ;rightLeg.z+=bodyZ;
         float kick=Mth.sin(s.workPhase)*.35F;
-        leftLeg.xRot=lift>0?.4F+kick:0;rightLeg.xRot=lift>0?.4F-kick:0;
+        leftLeg.xRot=hang*(.4F+kick)+push*.18F;rightLeg.xRot=hang*(.4F-kick)-push*.18F;
         leftLeg.yRot=rightLeg.yRot=leftLeg.zRot=rightLeg.zRot=0;
-        left.x=sway+2.3F;right.x=sway-2.3F;left.y=right.y=19.2F-lift;left.z=right.z=-1.4F;
+        left.x=s.pumpkin?2.9F:2.3F;right.x=-left.x;
+        left.y=right.y=19.2F;left.z=right.z=s.pumpkin?-2.6F:-1.4F;
+        lean(left,pitch,0,sway,bodyY);lean(right,pitch,0,sway,bodyY);
+        left.z+=bodyZ;right.z+=bodyZ;
         reach(left,s.crankX+.32F,s.crankY,s.crankZ);reach(right,s.crankX-.32F,s.crankY,s.crankZ);
-        head.yRot=0;head.xRot=-.12F;
     }
     static void tool(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg,ModelPart[] torso){
         var p=s.toolPose;
@@ -73,14 +80,17 @@ final class CompanionWorkPose {
         }
     }
     private static void lean(ModelPart part,MachineWorkClip pose){
+        lean(part,pose.bodyPitch,pose.bodyRoll,pose.bodyX,pose.bodyY);
+    }
+    private static void lean(ModelPart part,float pitch,float roll,float bodyX,float bodyY){
         // The rig's parts have different pivots (some at y=9.6). Rotate all around the hips,
         // so head, shirt, bare torso, shorts and costume move together with the feet braced.
-        float dy=part.y-22.5F,cosX=Mth.cos(pose.bodyPitch),sinX=Mth.sin(pose.bodyPitch);
+        float dy=part.y-22.5F,cosX=Mth.cos(pitch),sinX=Mth.sin(pitch);
         float y=dy*cosX-part.z*sinX,z=dy*sinX+part.z*cosX;
-        float cosZ=Mth.cos(pose.bodyRoll),sinZ=Mth.sin(pose.bodyRoll);
+        float cosZ=Mth.cos(roll),sinZ=Mth.sin(roll);
         float x=part.x*cosZ-y*sinZ;
-        part.y=22.5F+part.x*sinZ+y*cosZ+pose.bodyY;part.x=x+pose.bodyX;part.z=z;
-        part.xRot+=pose.bodyPitch;part.zRot+=pose.bodyRoll;
+        part.y=22.5F+part.x*sinZ+y*cosZ+bodyY;part.x=x+bodyX;part.z=z;
+        part.xRot+=pitch;part.zRot+=roll;
     }
     private static void reach(ModelPart arm,float x,float y,float z){
         float dx=x-arm.x,dy=y-arm.y,dz=z-arm.z;

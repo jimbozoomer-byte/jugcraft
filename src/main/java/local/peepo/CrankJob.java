@@ -23,8 +23,12 @@ public final class CrankJob implements CompanionJob {
             nextSpace=npc.level().getGameTime()+20;height=npc.getBbHeight();entrance=null;
             Direction face=crank.getBlockState().getValue(HandCrankBlock.FACING);
             for(Direction side:Direction.Plane.HORIZONTAL)for(int dy=0;dy>=-1;dy--){
-                if(face.getAxis().isHorizontal() && side!=face.getOpposite())continue;
-                var p=Vec3.atBottomCenterOf(stationPosition()).add(side.getStepX()*.58,dy,side.getStepZ()*.58);
+                // Right as seen looking into the exposed handle. Align with the handle's
+                // axial center, so the operator faces across its orbit instead of into the shaft.
+                if(face.getAxis().isHorizontal() && side!=face.getClockWise())continue;
+                var handle=handleCenter();
+                var p=new Vec3(handle.x,stationPosition().getY()+dy,handle.z)
+                    .add(side.getStepX()*.75,0,side.getStepZ()*.75);
                 if(npc.navigationMemory.failed(npc,stationPosition(),p))continue;
                 var floor=BlockPos.containing(p).below();
                 var box=new AABB(p.x-.24,p.y,p.z-.24,p.x+.24,p.y+height+.6-dy,p.z+.24);
@@ -64,9 +68,14 @@ public final class CrankJob implements CompanionJob {
         return demand==2?CompanionStatus.FULL:demand==0?CompanionStatus.NO_INPUT:CompanionStatus.READY;
     }
     public boolean claim(PeepoEntity p){if(workStatus(p)!=CompanionStatus.READY)return false;worker=p.getUUID();lease=p.level().getGameTime()+100;return true;}
+    private Vec3 handleCenter(){
+        var outward=crank.getBlockState().getValue(HandCrankBlock.FACING).getOpposite();
+        return Vec3.atCenterOf(stationPosition()).add(outward.getStepX()*3.5/16,0,outward.getStepZ()*3.5/16);
+    }
     public boolean occupy(PeepoEntity p){
         if(!isOccupant(p))return false;lease=p.level().getGameTime()+100;
-        double dx=stationPosition().getX()+.5-entrance.x,dz=stationPosition().getZ()+.5-entrance.z;
+        var handle=handleCenter();
+        double dx=handle.x-entrance.x,dz=handle.z-entrance.z;
         float yaw=(float)Math.toDegrees(Math.atan2(-dx,dz));
         if(p.position().distanceToSqr(entrance)>1.0E-6)p.snapTo(entrance.x,entrance.y,entrance.z,yaw,0);
         p.setYRot(yaw);p.yBodyRot=yaw;p.setYHeadRot(yaw);return true;
