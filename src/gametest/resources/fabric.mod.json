@@ -144,6 +144,7 @@
 			"local.peepo.PeepoKitchenAnimationClientTests",
 			"local.peepo.PeepoSuppliesClientTests",
 			"local.peepo.PeepoDeliveryClientTests",
+			"local.peepo.PeepoWorkSessionClientTests",
 			"local.peepo.PeepoHarvestClientTests",
             "local.peepo.TransportCrateClientTests",
             "local.peepo.TikiTorchClientTests",

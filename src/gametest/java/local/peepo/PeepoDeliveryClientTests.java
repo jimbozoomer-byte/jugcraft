@@ -58,6 +58,7 @@ public final class PeepoDeliveryClientTests implements FabricClientGameTest {
             server.runCommand("time set noon");server.runCommand("weather clear");
             server.runCommand(String.format(Locale.ROOT,"tp @a %.1f %d %.1f",base.getX()+.5,base.getY(),base.getZ()-5.5));
             server.runOnServer(s->planning(s.overworld()));
+            foodBreak(server);
             for(boolean jughead:new boolean[]{false,true})porter(server,jughead);
             contention(server);
             garden(server);
@@ -139,6 +140,25 @@ public final class PeepoDeliveryClientTests implements FabricClientGameTest {
         });
         s.waitFor(v->count(output,baked)>=1,1800);
         s.runOnServer(v->check(count(output,baked)==1,"cold oven bakes and delivers mixed batch"));
+        s.waitFor(v->{
+            if(count(source,raw)==0)return true;
+            if(npc.transport.activity()==CompanionStatus.IDLE)throw new AssertionError("oven cycle became idle before fetching the next available pie");
+            return false;
+        },600);
+        s.waitFor(v->count(output,baked)==2,1600);
+        s.runOnServer(v->check(count(source,raw)==0,"second pie follows the first without a wandering handoff"));
+    }
+    private void foodBreak(TestServerContext s){
+        s.runOnServer(v->{reset(v.overworld(),false);
+            for(int i=0;i<9;i++)source.setItem(i,new ItemStack(Items.DIAMOND,64));
+            npc.setHealth(npc.getMaxHealth()/2);npc.assignments.supplies.route(0).enabled=true;npc.setNoAi(false);
+        });
+        picked(s,8);
+        s.runOnServer(v->v.overworld().addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(v.overworld(),base.getX()+4.5,base.getY()+.1,base.getZ()+.5,new ItemStack(Items.COOKED_BEEF))));
+        try{s.waitFor(v->npc.isEating(),500);}catch(AssertionError e){throw new AssertionError(s.computeOnServer(v->"meal: position="+npc.position()+", status="+npc.transport.activity()+", hungry="+npc.needsAutomaticFood()+", output="+count(output,Items.DIAMOND)+", source="+count(source,Items.DIAMOND)),e);}
+        s.runOnServer(v->{check(count(output,Items.DIAMOND)==512,"needed meal waits for the current cargo to unload");
+            check(count(source,Items.DIAMOND)==64,"needed meal interrupts the chain before the next porter pickup");
+        });
     }
     private void garden(TestServerContext s){
         s.runOnServer(v->{var l=v.overworld();reset(l,false);

@@ -113,6 +113,7 @@ public final class PeepoEntity extends PathfinderMob {
         try{social.cancel();resetCompanionRoutine();}finally{settingsMenus.clear();navigationMemory.clear();companionUnloading=false;}
     }
     boolean isUsingJobAt(net.minecraft.core.BlockPos pos){return routine!=null && routine.atJob(pos);}
+    boolean deferJobTransport(net.minecraft.core.BlockPos pos){return routine!=null && routine.deferTransport(pos);}
     CompanionStatus routineStatus(){return routine==null?CompanionStatus.IDLE:routine.state();}
     CompanionStatus stationStatus(net.minecraft.core.BlockPos pos){return routine==null?null:routine.status(pos);}
     private net.minecraft.core.BlockPos bedExit;

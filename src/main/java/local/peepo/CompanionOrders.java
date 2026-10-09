@@ -82,7 +82,7 @@ public final class CompanionOrders {
         if(!tamed())return true;
         var lunch=npc.assignments.get(CompanionAssignments.LUNCH);
         boolean nearLunch=lunch!=null && lunch.local(npc.level()) && lunch.at().pos().distToCenterSqr(point)<=radius*radius;
-        return switch(mode){case STAY->npc.position().distanceToSqr(point)<1;case HOME->in(home,point)||nearLunch;case WORK,PORTER->in(home,point)||nearLunch||(mode==Mode.PORTER || npc.assignments.workManaged()?npc.assignments.foodNear(point,radius):in(work,point));case FOLLOW->{Player p=followPlayer();yield p!=null && p.position().distanceToSqr(point)<64;}};
+        return switch(mode){case STAY->npc.position().distanceToSqr(point)<1;case HOME->in(home,point)||nearLunch;case WORK,PORTER->in(home,point)||nearLunch||(mode==Mode.PORTER || npc.assignments.workManaged() || npc.assignments.supplies.anyRoutes()?npc.assignments.foodNear(point,radius):in(work,point));case FOLLOW->{Player p=followPlayer();yield p!=null && p.position().distanceToSqr(point)<64;}};
     }
     private Player followPlayer(){
         if(follow==null)return null;

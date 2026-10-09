@@ -48,6 +48,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
         return null;
     }
     void selectionChanged(BlockPos anchor){npc.resetCompanionRoutine();jobs.remove(anchor);}
+    void inputsChanged(BlockPos anchor){var job=jobs.get(anchor);if(job!=null)job.nextScan=0;npc.readiness.clear();}
     private boolean accepts(CompanionAssignments.Target target,ItemStack seed){var selected=npc.assignments.gardenSeed(target);return selected==null || seed.is(selected);}
 
     public static boolean farmland(Level level,BlockPos pos){return level.hasChunkAt(pos) && level.getBlockState(pos).getBlock() instanceof FarmlandBlock;}
@@ -284,8 +285,11 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
             npc.setYRot(yaw);npc.yBodyRot=yaw;npc.setYHeadRot(yaw);
             if(++progress<(tool?HOE_TICKS:WORK_TICKS))return CompanionStatus.WORKING;
             status=finish(cropPos);
-            nextScan=npc.level().getGameTime()+(status==CompanionStatus.FULL?200:20);
+            nextScan=npc.level().getGameTime()+(status==CompanionStatus.FULL?200:1);
             if(status==CompanionStatus.IDLE && tool){var held=npc.belongings.getItem(9);held.hurtAndBreak(1,npc,EquipmentSlot.MAINHAND);npc.belongings.setChanged();}
+            // Release only this cell. The routine keeps the plot session and selects the next
+            // live cell under the shared search budget; no stale crop actions are queued.
+            release(npc);
             return status;
         }
         private CompanionStatus finish(BlockPos pos){

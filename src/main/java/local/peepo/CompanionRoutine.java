@@ -11,6 +11,7 @@ final class CompanionRoutine extends Goal {
     private CompanionStation station;
     private BlockEntity block;
     private long nextLeisure,chairUntil,nextSearch,deadline,nextPriority;
+    private long handoffUntil,sessionUntil;
     private boolean active;
     private int repath;
     private final CompanionNavigation.Progress travel=new CompanionNavigation.Progress();
@@ -20,6 +21,15 @@ final class CompanionRoutine extends Goal {
     void resetOrders(){release();active=false;nextSearch=0;}
     boolean isActive(){return active;}
     boolean atJob(BlockPos pos){return station instanceof CompanionJob && station.stationPosition().equals(pos);}
+    /** Let a productive session finish before ordinary same/lower-priority hauling, at most 20 seconds. */
+    boolean deferTransport(BlockPos pos){
+        if(!active || !(station instanceof CompanionJob) || npc.level().getGameTime()>=sessionUntil
+            || !npc.preferences.canWork() || !npc.orders.station(station))return false;
+        if(state!=CompanionStatus.WORKING && state!=CompanionStatus.TRAVELLING && state!=CompanionStatus.IDLE && state!=CompanionStatus.WAITING)return false;
+        int free=0;for(int i=0;i<8;i++)if(npc.belongings.getItem(i).isEmpty())free++;
+        if(free<=1)return false;
+        return npc.assignments.workPriority(pos)>=npc.assignments.workPriority(station.stationPosition());
+    }
     CompanionStatus state(){return state;}
     CompanionStatus status(BlockPos pos){
         if(unreachable.getOrDefault(pos,0L)>npc.level().getGameTime())return CompanionStatus.BLOCKED;
@@ -53,6 +63,7 @@ final class CompanionRoutine extends Goal {
     private void adopt(CompanionStation s,long now){
         station=s;block=npc.level().getBlockEntity(s.stationPosition());deadline=now+600;chairUntil=now+600;
         nextPriority=now+100;repath=0;travel.reset();state=CompanionStatus.TRAVELLING;
+        handoffUntil=0;sessionUntil=now+400;
     }
     private void search(){
         long now=npc.level().getGameTime();if(now<nextSearch)return;
@@ -102,13 +113,27 @@ final class CompanionRoutine extends Goal {
         if(station!=null)station.release(npc);
         npc.readiness.clear();
         travel.reset();
+        handoffUntil=0;
         station=null;block=null;npc.setWheelRunning(false);npc.setWorkAnimation(WorkAnimation.NONE,npc.blockPosition());npc.setRestMode(CompanionEnergy.Rest.NONE);npc.getNavigation().stop();state=CompanionStatus.IDLE;
     }
     @Override public void stop(){release();active=false;}
+    /** Keep movement ownership across a short recipe/budget handoff, never across a real failure. */
+    private boolean hold(CompanionStatus status,long now){
+        if(status!=CompanionStatus.IDLE && status!=CompanionStatus.WAITING && status!=CompanionStatus.NO_INPUT
+            && status!=CompanionStatus.NO_POWER && status!=CompanionStatus.NO_HEAT)return false;
+        if(handoffUntil==0){
+            handoffUntil=now+40;
+            if(status==CompanionStatus.NO_INPUT || status==CompanionStatus.NO_HEAT)npc.transport.workChanged();
+        }
+        if(now>=handoffUntil)return false;
+        state=status;npc.getNavigation().stop();npc.setWorkAnimation(WorkAnimation.NONE,npc.blockPosition());
+        return true;
+    }
     private void reconsiderWork(){
-        if(!(station instanceof CompanionJob) || !npc.assignments.workManaged())return;
+        if(station==null || !npc.assignments.workManaged() || !npc.preferences.canWork())return;
         long now=npc.level().getGameTime();if(now<nextPriority)return;
-        int priority=npc.assignments.workPriority(station.stationPosition());
+        // Optional idle rest must not hide newly ready work; recovery/off-shift rest stays protected.
+        int priority=station instanceof CompanionJob?npc.assignments.workPriority(station.stationPosition()):5;
         if(priority<=1){nextPriority=now+100;return;}
         if(!CompanionBudget.search(npc))return;
         nextPriority=now+80+Math.floorMod(npc.getId(),20);
@@ -116,6 +141,9 @@ final class CompanionRoutine extends Goal {
         for(int i=1;i<priority;i++){
             var target=npc.assignments.get(i);if(target==null || !target.present(npc.level()) || unreachable.getOrDefault(target.at().pos(),0L)>now)continue;
             var job=CompanionJobs.resolve(npc,target.at().pos());if(job==null || !candidate(job))continue;
+            // Ground navigation cannot plan a reliable route from a mounted seat/pot.
+            // Dismount first, then use the normal budgeted search from the safe exit.
+            if(!(station instanceof CompanionJob) || npc.isNoGravity()){release();nextSearch=now;return;}
             if(attempts++>=2)break;
             if(!CompanionBudget.path(npc)){nextPriority=now+1;return;}
             var path=npc.getNavigation().createPath(BlockPos.containing(job.approachPosition()),0,pathRange());
@@ -126,7 +154,17 @@ final class CompanionRoutine extends Goal {
     @Override public void tick(){
         long now=npc.level().getGameTime();
         if(station!=null && station.kind()==CompanionStation.Kind.CHAIR && !npc.isRecovering() && npc.preferences.onShift() && now>=chairUntil){nextLeisure=now+600;release();}
-        if(station!=null && (!npc.level().hasChunkAt(station.stationPosition()) || block!=null && (block.isRemoved() || npc.level().getBlockEntity(block.getBlockPos())!=block) || !useful(station)))release();
+        if(station!=null && (!npc.level().hasChunkAt(station.stationPosition()) || block!=null && (block.isRemoved() || npc.level().getBlockEntity(block.getBlockPos())!=block)))release();
+        if(station instanceof CompanionJob job){
+            if(!npc.preferences.canWork() || !npc.orders.station(station) || !station.availableTo(npc) || !CompanionJobs.permitted(npc,station.stationPosition()))release();
+            else {
+                var readiness=job.planningStatus(npc);
+                if(readiness!=CompanionStatus.READY){
+                    if(hold(readiness,now)){reconsiderWork();return;}
+                    npc.transport.workChanged();release();nextSearch=now;
+                }else if(handoffUntil!=0){handoffUntil=0;deadline=now+600;repath=0;travel.reset();}
+            }
+        }else if(station!=null && !useful(station))release();
         if(station==null)search();
         reconsiderWork();
         if(station==null){npc.getNavigation().stop();return;}
@@ -150,7 +188,8 @@ final class CompanionRoutine extends Goal {
         npc.getNavigation().stop();if(!station.occupy(npc)){release();return;}
         if(station instanceof CompanionJob job){
             npc.setRestMode(CompanionEnergy.Rest.NONE);state=job.work(npc);
-            if(state!=CompanionStatus.WORKING)release();else npc.setWorkAnimation(job.animation(),job.animationTarget());
+            if(state!=CompanionStatus.WORKING){if(!hold(state,now)){npc.transport.workChanged();release();nextSearch=now;}}
+            else npc.setWorkAnimation(job.animation(),job.animationTarget());
         }else{
             npc.setRestMode(station.kind()==CompanionStation.Kind.BED?CompanionEnergy.Rest.SLEEPING:CompanionEnergy.Rest.SITTING);state=CompanionStatus.RESTING;
         }

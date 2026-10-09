@@ -249,7 +249,11 @@ final class CompanionAutomationChecks {
             check(Math.abs(progress-ticks*1.5)<=2,"actual processor speed: "+progress+" in "+ticks+" ticks");
             check(initial[2]-m.energyFor(null).getAmount()==progress*10,"bonus production must pay normal machine electricity");
             for(int i=0;i<helpers.size();i++)check(Math.abs(initial[3+i]-helpers.get(i).getEnergy()-ticks*(full?8:16))<=16,"helper reserve cost "+i);
-            m.setItem(0,ItemStack.EMPTY);int energy=helpers.getFirst().getEnergy();m.serverTick(s.overworld(),m.getBlockPos(),m.getBlockState());check(helpers.getFirst().getEnergy()==energy,"no input means no helper charge");cleanup();});
+            m.setItem(0,ItemStack.EMPTY);int energy=helpers.getFirst().getEnergy();m.serverTick(s.overworld(),m.getBlockPos(),m.getBlockState());check(helpers.getFirst().getEnergy()==energy,"no input means no helper charge");});
+        server.waitFor(s->helpers.stream().allMatch(p->p.workAnimation()==WorkAnimation.NONE),30);
+        server.runOnServer(s->{check(helpers.stream().allMatch(p->p.isUsingJobAt(machine[0].getBlockPos())),"brief missing input keeps helper sessions");machine[0].setItem(0,new ItemStack(Items.IRON_ORE,64));});
+        server.waitFor(s->helpers.stream().allMatch(p->p.workAnimation().hasTool()),30);
+        server.runOnServer(s->{check(helpers.stream().allMatch(p->p.isUsingJobAt(machine[0].getBlockPos())),"helpers resume after refill without leaving");cleanup();});
     }
     private void crank(TestServerContext server){
         final PeepoEntity[] helper={null};final HandCrankBlockEntity[] crank={null};final FlywheelBlockEntity[] wheel={null};
@@ -379,6 +383,13 @@ final class CompanionAutomationChecks {
         server.waitFor(s->{var p=s.getPlayerList().getPlayers().getFirst();return p.containerMenu.getCarried().isEmpty() && p.getInventory().getItem(9).is(icon) && p.getInventory().getItem(9).getCount()==3;},100);
         context.runOnClient(c->c.gameMode.handleInventoryButtonClick(c.player.containerMenu.containerId,64));
         context.waitFor(c->c.player.containerMenu instanceof CompanionMenu m && m.filterRow()<0,100);
+    }
+    void workSessionRegressions(TestServerContext server){
+        group.accept("compact processor session",()->processor(server,false));
+        group.accept("two-helper processor session",()->processor(server,true));
+        group.accept("crank full-flywheel stop and restart",()->crank(server));
+        for(var kind:List.of("electric_furnace","cider_press","canning_kettle"))
+            group.accept("continued "+kind+" supply/work/output",()->kitchen(server,kind));
     }
     private void kitchen(TestServerContext server,String kind){
         final Container[] destination={null};final PeepoEntity[] helper={null};final Item[] product={null};
