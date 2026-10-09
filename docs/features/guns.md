@@ -1351,7 +1351,12 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - **The Thresher's left hand and forearm filled the right half of the screen** in first person (held, aimed and fired), from the carry handle by the eye.
     - **Seen from outside, the Thresher pointed at the sky** (its transform's 68.25° tilt, [above](#slice-8c-the-heavy-weapons)).
     - **The Stoker is held close,** as the owner's transform holds it.
-  - **The fix, in the next push:** the Thresher's left hand holds the front plate (a first-person preview of it idle, firing and through its reload and inspection leaves the view clear), and its holder's arms hang lower by the tilt.
+  - **The fix** (24f52c601): the Thresher's left hand holds the front plate (a first-person preview of it idle, firing and through its reload and inspection leaves the view clear), and its holder's arms hang lower by the tilt.
+- **The fix in CI** ([run 37992650952](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37992650952), on 24f52c601): every check passed.
+  - `optional integrations absent` passed on its one re-run. Its first attempt failed a biome test this slice does not touch: four mossy maples laid no moss carpet. The pull request's comment of 9 October has the cause, vanilla's `attached_to_logs` decorator, whose rolls depend on where the test is placed, and a proposed patch for the biome tests.
+  - **Screenshots** (`client` shard 2):
+    - In first person the Thresher sits at the lower right, held, aimed, fired, mid-reload and inspected; no hand covers the view.
+    - Seen from outside, it is carried at the hip with its barrels toward the camera, the way its holder looks, not at the sky.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
