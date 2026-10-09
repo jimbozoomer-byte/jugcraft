@@ -114,8 +114,17 @@ in the Concordance's key). No owner-library file is used in this part.
   fire Spell Power; Smoulder goes out in water and does no harm through Fire Resistance; Hearthguard gives 30 s of Fire
   Resistance for 5 Focus; Hearthflare deals 4 and Smoulder to two villagers 2 blocks away, nothing to one 4 blocks off or
   to the caster, for 6 Focus. `ConcordanceInvocationGameTests` now counts First Light's six invocations among all.
-- Not yet run: CI for this branch (recorded here when it has run), any client (the spell icons, the codex pages, the
-  flames on a smouldering creature, the sounds), and a two-client server.
+- `check_ember` was mutation-tested: six injected faults (Smoulder's fire ticks and colour, Ember's school, activity and
+  kinds of hearth, and a mastery the Overworld cannot complete) were each reported, and the clean tree passes.
+- CI, run 37927184181 (Build, dispatched on this branch, commit `4dcdd583`): **every job passed**. `mod` passed with
+  **"All 1172 required tests passed"** (the eight Ember tests among them), `optional integrations absent` passed, and
+  the three client test shards passed (none of the client tests looks at an Ember spell yet). The step 11 combat
+  benchmark now includes the four Ember invocations, and its acceptance checks pass. The first run, 37926260705 on
+  `9a0fab5a`, compiled and failed two tests in both server jobs: an older composition test that counted every loaded
+  component (23, before Hearthbinding's five), and the Smoulder test, whose one-block pool spread across the floor to
+  the other villager. Both are fixed.
+- Not yet run: any client (the spell icons, the codex pages, the flames on a smouldering creature, the sounds), and a
+  two-client server.
 
 ## World and event applicability
 
