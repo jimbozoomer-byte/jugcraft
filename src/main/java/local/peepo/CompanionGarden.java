@@ -220,7 +220,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
             if(state.getBlock() instanceof FarmlandBlock)top=.9375;
             else if(state.isFaceSturdy(npc.level(),floor,Direction.UP))top=1;else return;
             var at=new Vec3(floor.getX()+.5,floor.getY()+top,floor.getZ()+.5);double r=npc.getBbWidth()/2+.02;
-            if(npc.level().noCollision(new AABB(at.x-r,at.y+.001,at.z-r,at.x+r,at.y+npc.getBbHeight(),at.z+r)))points.add(new Vec3(at.x,floor.getY()+1,at.z));
+            if(CompanionHazards.safeAt(npc,at) && npc.level().noCollision(new AABB(at.x-r,at.y+.001,at.z-r,at.x+r,at.y+npc.getBbHeight(),at.z+r)))points.add(new Vec3(at.x,floor.getY()+1,at.z));
         }
         private boolean current(){return soil!=null && accessible(soil) && npc.level().getBlockState(soil.above()).equals(expected);}
         public CompanionStatus workStatus(PeepoEntity other){

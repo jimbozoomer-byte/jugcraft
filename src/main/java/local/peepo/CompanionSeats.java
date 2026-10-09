@@ -153,7 +153,7 @@ public final class CompanionSeats {
             Vec3 entry=entrance(),at=seatPosition();BlockPos floor=BlockPos.containing(entry).below();
             if(!level.hasChunkAt(floor) || !level.hasChunkAt(BlockPos.containing(entry).above()))return false;
             validSpace=level.getBlockState(floor).isFaceSturdy(level,floor,Direction.UP)
-                && level.noCollision(npc,new AABB(entry.x-.22,entry.y,entry.z-.22,entry.x+.22,entry.y+1,entry.z+.22))
+                && CompanionHazards.safeAt(npc,entry) && CompanionHazards.safeAt(npc,at) && level.noCollision(npc,new AABB(entry.x-.22,entry.y,entry.z-.22,entry.x+.22,entry.y+1,entry.z+.22))
                 && headroom(npc,new AABB(at.x-.19,at.y+.11,at.z-.19,at.x+.19,at.y+npc.getBbHeight(),at.z+.19));
             return validSpace;
         }

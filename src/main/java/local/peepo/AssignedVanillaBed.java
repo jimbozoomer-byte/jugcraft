@@ -23,7 +23,7 @@ final class AssignedVanillaBed implements CompanionStation {
         for(Direction side:new Direction[]{facing.getClockWise(),facing.getCounterClockWise(),facing.getOpposite()}){
             var p=foot.relative(side);var at=Vec3.atBottomCenterOf(p);
             if(level.hasChunkAt(p) && level.getBlockState(p.below()).isFaceSturdy(level,p.below(),Direction.UP)
-                && level.noCollision(npc,new AABB(at.x-.22,at.y,at.z-.22,at.x+.22,at.y+1,at.z+.22)))return new AssignedVanillaBed(npc,pos,facing,at);
+                && CompanionHazards.safeAt(npc,at) && level.noCollision(npc,new AABB(at.x-.22,at.y,at.z-.22,at.x+.22,at.y+1,at.z+.22)))return new AssignedVanillaBed(npc,pos,facing,at);
         }
         return null;
     }

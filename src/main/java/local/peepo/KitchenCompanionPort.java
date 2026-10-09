@@ -41,8 +41,8 @@ public final class KitchenCompanionPort extends SnapshotParticipant<KitchenCompa
         }return false;
     }
     private CuttingRecipe cutting(PeepoEntity npc,ItemStack item){
-        if(!(block.getLevel() instanceof ServerLevel level) || !npc.getMainHandItem().is(JugcraftAgriculture.KNIVES))return null;
-        var r=CuttingRecipe.find(level.getServer(),item,npc.getMainHandItem()).orElse(null);
+        if(!(block.getLevel() instanceof ServerLevel level) || !npc.assignedHand().is(JugcraftAgriculture.KNIVES))return null;
+        var r=CuttingRecipe.find(level.getServer(),item,npc.assignedHand()).orElse(null);
         return r!=null && !r.results().isEmpty() && r.results().stream().anyMatch(t->filter.allows(t.create()))?r:null;
     }
     public CompanionLogistics.Port forCompanion(PeepoEntity npc){return new CompanionLogistics.Port(){
@@ -74,10 +74,10 @@ public final class KitchenCompanionPort extends SnapshotParticipant<KitchenCompa
     public CompanionStatus kitchenStatus(PeepoEntity npc){
         if(!live())return CompanionStatus.MISSING;
         if(block instanceof CuttingBoardBlockEntity b){
-            if(!npc.getMainHandItem().is(JugcraftAgriculture.KNIVES))return CompanionStatus.NO_TOOL;
+            if(!npc.assignedHand().is(JugcraftAgriculture.KNIVES))return CompanionStatus.NO_TOOL;
             long now=block.getLevel().getGameTime();
-            if(now<nextStatus && filterRevision==filter.revision() && ItemStack.matches(statusInput,b.item()) && ItemStack.matches(statusKnife,npc.getMainHandItem()))return boardStatus;
-            nextStatus=now+20;filterRevision=filter.revision();statusInput=b.item().copy();statusKnife=npc.getMainHandItem().copy();
+            if(now<nextStatus && filterRevision==filter.revision() && ItemStack.matches(statusInput,b.item()) && ItemStack.matches(statusKnife,npc.assignedHand()))return boardStatus;
+            nextStatus=now+20;filterRevision=filter.revision();statusInput=b.item().copy();statusKnife=npc.assignedHand().copy();
             var r=cutting(npc,b.item());boardStatus=r==null?CompanionStatus.NO_INPUT:fits(r.cut())?CompanionStatus.READY:CompanionStatus.FULL;return boardStatus;
         }
         if(block instanceof SkilletBlockEntity s)return !s.fried().isEmpty()?CompanionStatus.READY:!CookingPotBlockEntity.isHeated(block.getLevel(),block.getBlockPos())?CompanionStatus.NO_HEAT:s.raw().isEmpty()?CompanionStatus.NO_INPUT:CompanionStatus.WORKING;

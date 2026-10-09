@@ -24,7 +24,7 @@ public final class CiderPressJob implements CompanionJob {
                 if(npc.navigationMemory.failed(npc,stationPosition(),p))continue;
                 var floor=BlockPos.containing(p).below();
                 if(!npc.level().hasChunkAt(floor) || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP))continue;
-                if(!npc.level().noCollision(new AABB(p.x-.24,p.y,p.z-.24,p.x+.24,p.y+npc.getBbHeight(),p.z+.24)))continue;
+                if(!CompanionHazards.safeAt(npc,p) || !npc.level().noCollision(new AABB(p.x-.24,p.y,p.z-.24,p.x+.24,p.y+npc.getBbHeight(),p.z+.24)))continue;
                 if(entrance==null || npc.position().distanceToSqr(p)<npc.position().distanceToSqr(entrance))entrance=p;
             }
         }
@@ -49,7 +49,7 @@ public final class CiderPressJob implements CompanionJob {
             nextClearance=p.level().getGameTime()+20;
             var floor=BlockPos.containing(entrance).below();
             if(!p.level().hasChunkAt(floor) || !p.level().getBlockState(floor).isFaceSturdy(p.level(),floor,Direction.UP)
-                || !p.level().noCollision(new AABB(entrance.x-.24,entrance.y,entrance.z-.24,entrance.x+.24,entrance.y+p.getBbHeight(),entrance.z+.24))){entrance=null;nextSpace=0;return CompanionStatus.BLOCKED;}
+                || !CompanionHazards.safeAt(p,entrance) || !p.level().noCollision(new AABB(entrance.x-.24,entrance.y,entrance.z-.24,entrance.x+.24,entrance.y+p.getBbHeight(),entrance.z+.24))){entrance=null;nextSpace=0;return CompanionStatus.BLOCKED;}
         }
         return planning?CompanionReadiness.shared(press,press::companionStatus):press.companionStatus();
     }

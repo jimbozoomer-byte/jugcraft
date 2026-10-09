@@ -97,7 +97,7 @@ public final class CookingPotJob implements CompanionJob {
         for(int x=BlockPos.containing(bounds.minX,0,0).getX();x<=BlockPos.containing(bounds.maxX,0,0).getX();x++)
             for(int z=BlockPos.containing(0,0,bounds.minZ).getZ();z<=BlockPos.containing(0,0,bounds.maxZ).getZ();z++)
                 if(!npc.level().hasChunkAt(new BlockPos(x,stationPosition().getY(),z)))return false;
-        return npc.level().noCollision(bounds);
+        return CompanionHazards.safeAt(npc,point) && npc.level().noCollision(bounds);
     }
     private void updateRimHeight() {
         var shape=pot.getBlockState().getCollisionShape(pot.getLevel(),stationPosition());

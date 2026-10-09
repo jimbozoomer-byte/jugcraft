@@ -33,7 +33,7 @@ public final class CrankJob implements CompanionJob {
                 var floor=BlockPos.containing(p).below();
                 var box=new AABB(p.x-.24,p.y,p.z-.24,p.x+.24,p.y+height+.6-dy,p.z+.24);
                 if(!npc.level().hasChunkAt(floor) || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP)
-                    || !npc.level().noCollision(box))continue;
+                    || !CompanionHazards.safeAt(npc,p) || !npc.level().noCollision(box))continue;
                 if(entrance==null || npc.position().distanceToSqr(p)<npc.position().distanceToSqr(entrance))entrance=p;
             }
         }
@@ -59,7 +59,7 @@ public final class CrankJob implements CompanionJob {
             nextCheck=now+20;
             var floor=BlockPos.containing(entrance).below();
             if(!p.level().hasChunkAt(floor) || !p.level().getBlockState(floor).isFaceSturdy(p.level(),floor,Direction.UP)
-                || !p.level().noCollision(new AABB(entrance.x-.24,entrance.y,entrance.z-.24,entrance.x+.24,stationPosition().getY()+p.getBbHeight()+.6,entrance.z+.24))){
+                || !CompanionHazards.safeAt(p,entrance) || !p.level().noCollision(new AABB(entrance.x-.24,entrance.y,entrance.z-.24,entrance.x+.24,stationPosition().getY()+p.getBbHeight()+.6,entrance.z+.24))){
                 entrance=null;nextSpace=0;return CompanionStatus.BLOCKED;
             }
             demand=KineticNetworks.companionDemand((ServerLevel)p.level(),stationPosition(),crank.getBlockState().getValue(HandCrankBlock.FACING),pausedFull);

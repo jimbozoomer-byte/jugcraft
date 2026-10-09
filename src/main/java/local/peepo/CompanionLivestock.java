@@ -96,7 +96,7 @@ public final class CompanionLivestock {
                 var floor=BlockPos.containing(p).below();double r=npc.getBbWidth()/2+.015;
                 if(!npc.level().hasChunkAt(floor) || !CompanionJobs.permitted(npc,BlockPos.containing(p))
                     || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP)
-                    || npc.navigationMemory.failed(npc,stationPosition(),p)
+                    || !CompanionHazards.safeAt(npc,p) || npc.navigationMemory.failed(npc,stationPosition(),p)
                     || !npc.level().noCollision(npc,new AABB(p.x-r,p.y+.01,p.z-r,p.x+r,p.y+npc.getBbHeight(),p.z+r)))continue;
                 if(best==null || npc.position().distanceToSqr(p)<npc.position().distanceToSqr(best))best=p;
             }

@@ -57,7 +57,7 @@ final class FindLunchGoal extends Goal {
                 var pos=source.sourcePos().relative(d).offset(0,dy,0);var at=Vec3.atBottomCenterOf(pos);
                 if(npc.level().hasChunkAt(pos) && npc.orders.food(at)
                     && npc.level().getBlockState(pos.below()).isFaceSturdy(npc.level(),pos.below(),Direction.UP)
-                    && npc.level().noCollision(npc,new AABB(at.x-.22,at.y,at.z-.22,at.x+.22,at.y+1,at.z+.22)))points.add(pos);
+                    && CompanionHazards.safeAt(npc,at) && npc.level().noCollision(npc,new AABB(at.x-.22,at.y,at.z-.22,at.x+.22,at.y+1,at.z+.22)))points.add(pos);
             }
             points.removeIf(p->npc.navigationMemory.failed(npc,source.getBlockPos(),Vec3.atBottomCenterOf(p)));
             points.sort(Comparator.comparingDouble(p->p.distToCenterSqr(npc.position())));

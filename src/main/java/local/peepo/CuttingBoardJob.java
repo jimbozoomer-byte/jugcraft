@@ -43,7 +43,7 @@ public final class CuttingBoardJob implements CompanionJob {
         var bounds=p.getBoundingBox().move(at.subtract(p.position()));
         for(int dx:new int[]{-1,1})for(int dz:new int[]{-1,1})
             if(!p.level().hasChunkAt(BlockPos.containing(at.x+dx*p.getBbWidth()/2,at.y,at.z+dz*p.getBbWidth()/2)))return false;
-        return p.level().noCollision(bounds);
+        return CompanionHazards.safeAt(p,at) && p.level().noCollision(bounds);
     }
     private boolean clearEntry(PeepoEntity p,Vec3 at){
         var floor=BlockPos.containing(at).below();

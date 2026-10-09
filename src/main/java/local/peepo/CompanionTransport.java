@@ -306,7 +306,7 @@ public final class CompanionTransport extends Goal {
                 double top=state.getBlock() instanceof net.minecraft.world.level.block.FarmlandBlock?.9375:state.isFaceSturdy(npc.level(),floor,Direction.UP)?1:0;
                 if(top==0)continue;
                 var p=new Vec3(floor.getX()+.5,floor.getY()+top,floor.getZ()+.5);double r=npc.getBbWidth()/2+.01;
-                if(npc.level().noCollision(new AABB(p.x-r,p.y+.001,p.z-r,p.x+r,p.y+npc.getBbHeight(),p.z+r)))points.add(floor.above());
+                if(CompanionHazards.safeAt(npc,p) && npc.level().noCollision(new AABB(p.x-r,p.y+.001,p.z-r,p.x+r,p.y+npc.getBbHeight(),p.z+r)))points.add(floor.above());
             }
         }
         for(var side:Direction.Plane.HORIZONTAL)for(int dy=0;dy>=-1;dy--){
@@ -315,7 +315,7 @@ public final class CompanionTransport extends Goal {
             var pos=target.at().pos().relative(side).offset(0,dy,0);var p=Vec3.atBottomCenterOf(pos);var floor=pos.below();
             if(!npc.level().hasChunkAt(pos) || !npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP))continue;
             double r=npc.getBbWidth()/2+.01;
-            if(npc.level().noCollision(new AABB(p.x-r,p.y,p.z-r,p.x+r,p.y+npc.getBbHeight(),p.z+r)))points.add(pos);
+            if(CompanionHazards.safeAt(npc,p) && npc.level().noCollision(new AABB(p.x-r,p.y,p.z-r,p.x+r,p.y+npc.getBbHeight(),p.z+r)))points.add(pos);
         }
         points.removeIf(p->npc.navigationMemory.failed(npc,target.at().pos(),Vec3.atBottomCenterOf(p)));
         points.sort(Comparator.comparingDouble(p->p.distToCenterSqr(npc.position())));
@@ -372,6 +372,9 @@ public final class CompanionTransport extends Goal {
         status=manifest.isEmpty()?(supply || porter?CompanionStatus.FETCHING_SUPPLIES:CompanionStatus.COLLECTING_OUTPUT):returning?CompanionStatus.RETURNING_SUPPLIES:CompanionStatus.DELIVERING;
         if(porter)porterState=status;
         var target=destination();
+        if(approach!=null && !CompanionHazards.safeAt(npc,approach)){
+            npc.getNavigation().stop();fail(CompanionStatus.BLOCKED);return;
+        }
         if(approach==null || npc.position().distanceToSqr(approach)>.64){
             if(pieAction==WorkAnimation.PIE_LOAD)clearPiePose();
             if(now>=nextPath && (approach==null || travel.needsPath(npc,approach)))pathTo(target);

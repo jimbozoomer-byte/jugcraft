@@ -66,7 +66,7 @@ public final class ProcessorJob implements CompanionJob {
         for(int dx=-1;dx<=1;dx+=2)for(int dz=-1;dz<=1;dz+=2)
             if(!npc.level().hasChunkAt(BlockPos.containing(point.x+dx*radius,point.y,point.z+dz*radius)))return false;
         return npc.level().hasChunkAt(floor) && npc.level().getBlockState(floor).isFaceSturdy(npc.level(),floor,Direction.UP)
-            && npc.level().noCollision(bounds);
+            && CompanionHazards.safeAt(npc,point) && npc.level().noCollision(bounds);
     }
     private boolean roomFor(PeepoEntity npc) {
         if(entrance==null)return false;

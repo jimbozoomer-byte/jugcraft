@@ -74,7 +74,26 @@ public final class PeepoEntity extends PathfinderMob {
         if(level().isClientSide())return;
         readiness.clear();
         entityData.set(PUMPKIN,belongings.getItem(8).is(Items.JACK_O_LANTERN));
-        if(!isEating())setItemSlot(EquipmentSlot.MAINHAND,belongings.getItem(9).copy());
+        syncHeldItem();
+    }
+    /** The Hand slot owns the item even while it is stowed; equipment is only its active copy. */
+    public ItemStack assignedHand(){return belongings.getItem(9);}
+    private void syncHeldItem(){
+        if(level().isClientSide() || isEating())return;
+        var item=assignedHand();var action=workAnimation();
+        boolean usingTool=switch(action){
+            case HARVEST -> item.is(net.minecraft.tags.ItemTags.HOES);
+            case CHOP -> item.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.KNIVES);
+            case SHEAR -> item.is(Items.SHEARS);
+            default -> false;
+        };
+        boolean tool=item.has(DataComponents.TOOL) || item.is(net.minecraft.tags.ItemTags.HOES) || item.is(Items.SHEARS)
+            || item.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.KNIVES)
+            || item.getItem() instanceof io.github.jimbozoomer.jugcraft.logistics.BrassWrenchItem
+            || item.is(Items.FLINT_AND_STEEL) || item.is(Items.FISHING_ROD) || item.is(Items.BRUSH);
+        boolean busy=!isAlive() || editingSettings() || getRestMode()!=CompanionEnergy.Rest.NONE || isWheelRunning() || socialPose()!=0;
+        var shown=busy || (!usingTool && (tool || action!=WorkAnimation.NONE))?ItemStack.EMPTY:item;
+        if(!ItemStack.matches(getMainHandItem(),shown))setItemSlot(EquipmentSlot.MAINHAND,shown.copy());
     }
     @Override protected void dropCustomDeathLoot(ServerLevel server,DamageSource source,boolean playerKill){
         // The displayed hand is a copy; only the inventory owns the equipped item.
@@ -134,6 +153,7 @@ public final class PeepoEntity extends PathfinderMob {
             if (!level().hasChunkAt(pos)) continue;
             var at = net.minecraft.world.phys.Vec3.atBottomCenterOf(pos);
             if (level().getBlockState(pos.below()).isFaceSturdy(level(), pos.below(), net.minecraft.core.Direction.UP)
+                && CompanionHazards.safeAt(this,at)
                 && level().noCollision(new net.minecraft.world.phys.AABB(at.x - .22, at.y, at.z - .22, at.x + .22, at.y + 1, at.z + .22))) {
                 snapTo(at.x, at.y, at.z, getYRot(), 0); setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO); resetFallDistance(); bedExit = null; return;
             }
@@ -297,7 +317,7 @@ public final class PeepoEntity extends PathfinderMob {
             if(wheelRunningTicks==0 || !isAlive() || getEnergy()==0 || isEating() || getRestMode()!=CompanionEnergy.Rest.NONE)
                 setWheelRunning(false);
         }
-        if(!level().isClientSide()){tickEnergy();food.tick();social.tick();report.tick();}
+        if(!level().isClientSide()){tickEnergy();food.tick();social.tick();report.tick();syncHeldItem();}
         if (!level().isClientSide() && blushTicks > 0 && --blushTicks == 0) entityData.set(BLUSHING, false);
         if (level() instanceof ServerLevel server && isEating()) {
             getNavigation().stop();
@@ -318,7 +338,7 @@ public final class PeepoEntity extends PathfinderMob {
                 heal(Math.max(1,food.nutrition()));
                 applyMealEnergy(food);
                 var remainder=eaten.get(DataComponents.USE_REMAINDER);
-                setItemSlot(EquipmentSlot.MAINHAND,belongings.getItem(9).copy());
+                syncHeldItem();
                 if(remainder!=null){
                     var leftover=remainder.convertInto().create();
                     if(lunchOrigin!=null && lunchOrigin.dimension().equals(level().dimension())
@@ -335,6 +355,9 @@ public final class PeepoEntity extends PathfinderMob {
     }
     public PeepoEntity(EntityType<? extends PeepoEntity> type, Level level) {
         super(type, level); setPersistenceRequired();
+        for(var danger:new net.minecraft.world.level.pathfinder.PathType[]{net.minecraft.world.level.pathfinder.PathType.FIRE,
+            net.minecraft.world.level.pathfinder.PathType.DAMAGING,net.minecraft.world.level.pathfinder.PathType.LAVA,
+            net.minecraft.world.level.pathfinder.PathType.POWDER_SNOW,net.minecraft.world.level.pathfinder.PathType.DAMAGE_CAUTIOUS})setPathfindingMalus(danger,-1);
     }
     public static AttributeSupplier.Builder attributes() {
         return createMobAttributes().add(Attributes.MAX_HEALTH, 20).add(Attributes.MOVEMENT_SPEED, .20)

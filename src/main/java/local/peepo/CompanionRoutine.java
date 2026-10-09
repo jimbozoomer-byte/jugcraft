@@ -47,7 +47,7 @@ final class CompanionRoutine extends Goal {
             default->false;
         };
     }
-    private boolean candidate(CompanionStation s){return useful(s) && (!(s instanceof CompanionJob job) || job.worthStarting(npc));}
+    private boolean candidate(CompanionStation s){return useful(s) && CompanionHazards.safeAt(npc,s.approachPosition()) && (!(s instanceof CompanionJob job) || job.worthStarting(npc));}
     private int rank(CompanionStation s){return s instanceof CompanionJob?0:s.kind()==CompanionStation.Kind.BED?1:2;}
     private int pathRange(){return npc.assignments.workManaged()||npc.assignments.homeManaged()?64:16;}
     private void blocked(BlockPos pos,long now){if(unreachable.size()>=32)unreachable.clear();unreachable.put(pos,now+200);state=CompanionStatus.BLOCKED;}
@@ -185,6 +185,7 @@ final class CompanionRoutine extends Goal {
             }
             return;
         }
+        if(!CompanionHazards.safeAt(npc,target)){var old=station;rejected(old,now);release();state=CompanionStatus.BLOCKED;return;}
         npc.getNavigation().stop();if(!station.occupy(npc)){release();return;}
         if(station instanceof CompanionJob job){
             npc.setRestMode(CompanionEnergy.Rest.NONE);state=job.work(npc);
