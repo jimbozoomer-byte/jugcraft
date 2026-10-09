@@ -218,6 +218,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CIDER_PRESS_ENTITY, CiderPressRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CANNING_KETTLE_ENTITY, CanningKettleRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PANTRY_SHELF_ENTITY, PantryShelfRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPICE_RACK_ENTITY, SpiceRackRenderer::new);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.FOG, FogParticle::provider);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.SPOOKY_SPARK, SpookySparkParticle::provider);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOW_LAUNCHER_ENTITY, ShowLauncherRenderer::new);

@@ -73,6 +73,8 @@ import cake_data
 import pie_tart_data
 import milkshake_data
 import garden_data
+import herb_data
+import spice_data
 import milkshakes
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -299,6 +301,8 @@ def assets(root, write, lang):
     pie_tart_data.assets(root, write, lang)
     milkshake_data.assets(root, write)
     garden_data.assets(root, write, lang)
+    herb_data.assets(root, write, lang)
+    spice_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -452,6 +456,8 @@ def loot(data, write):
     soil_data.loot(out, write)
     orchard_data.loot(out, write)
     garden_data.loot(out, write)
+    herb_data.loot(out, write)
+    spice_data.loot(out, write)
     cake_data.loot(out, write)
     pie_tart_data.loot(out, write)
 
@@ -594,6 +600,8 @@ def tags(tags):
     orchard_data.tags(tags)
     cake_data.tags(tags)
     pie_tart_data.tags(tags)
+    herb_data.tags(tags)
+    spice_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen
@@ -612,6 +620,7 @@ def worldgen(data, write):
     werewolf_data.worldgen(data, write)
     rice_data.worldgen(data, write)
     orchard_data.worldgen(data, write)
+    spice_data.worldgen(data, write)
     spread = WILD_PATCH["spread_xz"]
     for wild in WILD_CROPS:
         write(data / MOD / "worldgen" / "feature" / f"{wild}.json",

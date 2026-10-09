@@ -4262,6 +4262,161 @@
         {
           "in": [
             [
+              "jugcraft:lettuce_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:lettuce",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:lettuce_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:lettuce_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:spinach_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:spinach",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:spinach_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:spinach_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:radish",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:radish",
+            3
+          ],
+          "extra": [
+            [
+              "jugcraft:radish",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:peas",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:peas",
+            3
+          ],
+          "extra": [
+            [
+              "jugcraft:peas",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:ginger",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:ginger",
+            3
+          ],
+          "extra": [
+            [
+              "jugcraft:ginger",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:mustard_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:mustard_seeds",
+            3
+          ],
+          "extra": [
+            [
+              "jugcraft:mustard_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:crocus_bulb",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:saffron",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:crocus_bulb",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:crocus_bulb",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
               "jugcraft:corn_kernels",
               1
             ]
@@ -4478,6 +4633,331 @@
             ],
             [
               "jugcraft:coffee_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:cucumber_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cucumber",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:cucumber_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:cucumber_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:eggplant_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:eggplant",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:eggplant_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:eggplant_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:zucchini_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:zucchini",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:zucchini_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:zucchini_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:basil",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:basil",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:basil",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:basil",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:mint",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:mint",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:mint",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:mint",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:rosemary",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:rosemary",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:rosemary",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:rosemary",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:thyme",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:thyme",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:thyme",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:thyme",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:parsley",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:parsley",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:parsley",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:parsley",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:sage",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:sage",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:sage",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:sage",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:dill",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:dill",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:dill",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:dill",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:chives",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:chives",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:chives",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:chives",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:peppercorns",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:peppercorns",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:peppercorns",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:peppercorns",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:vanilla_pods",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:vanilla_pods",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:vanilla_pods",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:vanilla_pods",
               1,
               0.5
             ]

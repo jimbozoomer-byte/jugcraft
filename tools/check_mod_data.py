@@ -30,6 +30,9 @@ import pies_and_tarts
 import milkshake_data
 import milkshakes
 import garden
+import vegetables
+import herbs
+import spices
 import owner_art
 import werewolf_model
 import midway
@@ -3166,6 +3169,7 @@ def check_agriculture():
     expected[ag.WOLFSBANE["block"]] = ag.WOLFSBANE["biomes"]
     expected[rice.WILD_RICE["block"]] = rice.WILD_RICE["biomes"]
     expected.update({orchard.feature(tree): info["biomes"] for tree, info in orchard.TREES.items()})
+    expected[f"{spices.CINNAMON['tree']}_tree"] = spices.CINNAMON["biomes"]
     expected.update({name: info["biomes"] for name, info in ag.FORAGING["mushrooms"].items()})
     if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
@@ -3471,12 +3475,23 @@ def check_menu():
         return best
 
     dishes = {**menu.DISHES, **rice.DISHES, **orchard.DISHES, **milkshakes.DISHES}
-    pot = {**menu.POT_RECIPES, **rice.POT_RECIPES}
+    # The vegetables', herbs' and spices' dishes (slice 7b): whatever their tables cook, craft or roast into food.
+    garden = (vegetables, herbs, spices)
+    garden_items = {name: info for module in garden for name, info in module.ITEMS.items()}
+    pot = {**menu.POT_RECIPES, **rice.POT_RECIPES, **{name: info for module in garden for name, info in module.POT_RECIPES.items()}}
     recipes = [(name, [ref for ref, n in info["inputs"].items() for _ in range(n)], info.get("count", 1)) for name, info in pot.items()]
     recipes += [(name, inputs, count) for name, (inputs, count) in menu.SHAPELESS.items()]
     recipes += [(recipe["result"], recipe["inputs"], recipe["count"]) for recipe in rice.SHAPELESS + orchard.SHAPELESS + milkshakes.SHAPELESS
                 if recipe["result"] in dishes]
+    recipes += [(recipe["result"], recipe["inputs"], recipe["count"]) for module in garden for recipe in module.SHAPELESS
+                if "food" in garden_items.get(recipe["result"], {})]
     recipes += [(name, [full(info["input"])], 1) for name, info in menu.COOKING.items()]
+    # A roasted vegetable against the raw one (value() would count the raw one as what it roasts into).
+    for module in garden:
+        for name, info in getattr(module, "COOKING", {}).items():
+            raw = foods.get(split(full(info["input"]))[1], 0)
+            if "food" in garden_items.get(name, {}) and foods.get(name, 0) > raw + menu.COOK_BONUS:
+                err(f"{name}: gives {foods[name]} hunger, roasted from {info['input']} worth {raw} (at most {menu.COOK_BONUS} more)")
     recipes += [(result, [info["input"]], count) for info in kitchen.CUTTING.values() for result, count in info["results"] if result in dishes]
     for name, inputs, count in recipes:
         given = foods.get(name, 0) * count
@@ -3699,6 +3714,128 @@ def check_soil():
     loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{soil.RICH_FARMLAND['block']}.json") or {})
     if f'"{MOD}:{soil.RICH_SOIL["block"]}"' not in loot:
         err("Rich Soil Farmland must drop Rich Soil")
+
+
+def check_vegetables_herbs_spices():
+    """Garden crops, herbs and spices, part b (tools/vegetables.py, herbs.py, spices.py): the planter box, herb bundles,
+    potted herbs, cinnamon tree, spice rack and spice grinding match the Java; their blocks have models, blockstates, loot,
+    tags and words; Ratatouille is cooked from tools/vegetables.py's ingredients."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+    main = java.get("JugcraftAgriculture", "")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    client = (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8")
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)F?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    def string(source, name):
+        match = re.search(rf'\b{name} = "([a-z_]+)";', java.get(source, ""))
+        return match.group(1) if match else None
+
+    def tagged(registry, tag, entry):
+        namespace, path = split(tag)
+        return f"{MOD}:{entry}" in ((load(DATA / namespace / "tags" / registry / f"{path}.json") or {}).get("values", []))
+
+    # The herbs: Java's list, each a pot, a bundle and words.
+    listed = re.search(r"List<String> HERBS = List\.of\(([^)]*)\)", main)
+    if not listed or re.findall(r'"([a-z_]+)"', listed.group(1)) != list(herbs.HERBS):
+        err("JugcraftAgriculture.HERBS differs from tools/herbs.py HERBS")
+    bundle_loot_ok = True
+    for herb in herbs.HERBS:
+        pot, bundle = herbs.potted(herb), herbs.bundle(herb)
+        if (load(ASSETS / "models" / "block" / f"{pot}.json") or {}).get("textures", {}).get("plant") != \
+                f"{MOD}:block/{herbs.stage_texture(herb, 3)}":
+            err(f"{pot} must show the grown herb")
+        loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{pot}.json") or {})
+        if '"minecraft:flower_pot"' not in loot or f'"{MOD}:{herb}"' not in loot:
+            err(f"{pot} must give back its pot and a sprig of {herb}")
+        state = load(ASSETS / "blockstates" / f"{bundle}.json") or {}
+        if set(state.get("variants", {})) != {"dried=false", "dried=true"}:
+            err(f"{bundle}'s blockstate needs a fresh and a dried look")
+        loot = load(DATA / MOD / "loot_table" / "blocks" / f"{bundle}.json") or {}
+        text = json.dumps(loot)
+        if (f'"{MOD}:{herbs.BUNDLE["dried"]}"' not in text or f'"count": {herbs.BUNDLE["sprigs"]}' not in text
+                or f'"{MOD}:{bundle}"' not in text):
+            bundle_loot_ok = False
+        for key in (f"block.{MOD}.{pot}", f"block.{MOD}.{bundle}"):
+            if key not in lang:
+                err(f"{key} has no words")
+        recipe = next((r for r in herbs.SHAPELESS if r["result"] == bundle), None)
+        if not recipe or recipe["inputs"].count(f"{MOD}:{herb}") != herbs.BUNDLE["sprigs"]:
+            err(f"{bundle} must be tied from {herbs.BUNDLE['sprigs']} sprigs, as many as it dries into")
+    if not bundle_loot_ok:
+        err(f"A herb bundle must give itself fresh and {herbs.BUNDLE['sprigs']} {herbs.BUNDLE['dried']} dried")
+    if number("HerbBundleBlock", "DRY_CHANCE") != herbs.BUNDLE["dry_chance"]:
+        err("HerbBundleBlock.DRY_CHANCE differs from tools/herbs.py BUNDLE")
+
+    # The planter box: always moist, taken by crops as farmland.
+    planter = herbs.PLANTER["block"]
+    if number("PlanterBoxBlock", "MOISTURE_LEVEL") != 7:
+        err("PlanterBoxBlock must always be moist (moisture 7), as watered farmland")
+    for tag in ("minecraft:supports_crops", "minecraft:grows_crops"):
+        if not tagged("block", tag, planter):
+            err(f"{planter} must be in {tag}")
+    state = load(ASSETS / "blockstates" / f"{planter}.json") or {}
+    if set(state.get("variants", {})) != {f"moisture={m}" for m in range(8)}:
+        err(f"{planter}'s blockstate needs every moisture")
+
+    # The cinnamon tree.
+    cinnamon = spices.CINNAMON
+    if (number("CinnamonLogBlock", "BARK_MIN"), number("CinnamonLogBlock", "BARK_MAX")) != tuple(cinnamon["bark"]) \
+            or string("CinnamonLogBlock", "BARK") != cinnamon["bark_item"]:
+        err("CinnamonLogBlock's bark differs from tools/spices.py CINNAMON")
+    if f'new CinnamonLogBlock(props, "{cinnamon["stripped"]}")' not in main:
+        err(f"{cinnamon['log']} must strip into {cinnamon['stripped']}")
+    feature = load(DATA / MOD / "worldgen" / "feature" / f"{cinnamon['tree']}_tree.json") or {}
+    trunk = feature.get("trunk_placer", {})
+    if (feature.get("trunk_provider", {}).get("id") != f"{MOD}:{cinnamon['log']}"
+            or feature.get("foliage_provider", {}).get("id") != f"{MOD}:{cinnamon['leaves']}"
+            or (trunk.get("base_height"), trunk.get("height_rand_a")) != (cinnamon["trunk"], cinnamon["trunk_extra"])):
+        err("worldgen/feature/cinnamon_tree.json differs from tools/spices.py CINNAMON")
+    for log in (cinnamon["log"], cinnamon["stripped"]):
+        if not tagged("block", "minecraft:logs_that_burn", log):
+            err(f"{log} must be a log (minecraft:logs_that_burn), or its tree's leaves decay under it")
+        recipe = next((r for r in spices.SHAPELESS if r["inputs"] == [f"{MOD}:{log}"]), None)
+        if not recipe or recipe["result"] != "minecraft:jungle_planks" or recipe["count"] != cinnamon["planks"]:
+            err(f"{log} must saw into {cinnamon['planks']} jungle planks")
+    for name in cinnamon["displays"]:
+        if f"block.{MOD}.{name}" not in lang:
+            err(f"block.{MOD}.{name} has no words")
+
+    # The spice rack.
+    rack = spices.RACK
+    if number("SpiceRackBlockEntity", "SLOTS") != rack["slots"] or \
+            f'TagKey.create(Registries.ITEM, Jugcraft.id("{split(rack["tag"])[1]}"))' not in java.get("SpiceRackBlockEntity", ""):
+        err("SpiceRackBlockEntity differs from tools/spices.py RACK")
+    spots = re.search(r"SPOTS = \{(.*?)\};", (CLIENT_JAVA_ROOT / "SpiceRackRenderer.java").read_text(encoding="utf-8"), re.S)
+    if not spots or len(re.findall(r"\{[^{}]*\}", spots.group(1))) != rack["slots"]:
+        err(f"SpiceRackRenderer needs a spot for each of the rack's {rack['slots']} slots")
+    if "SPICE_RACK_ENTITY, SpiceRackRenderer::new" not in client:
+        err("JugcraftClient must draw the spice rack's spices")
+    for key in (f"block.{MOD}.{rack['block']}", f"message.{MOD}.{rack['block']}.full", f"message.{MOD}.{rack['block']}.empty"):
+        if key not in lang:
+            err(f"{key} has no words")
+    spice_tag = (load(DATA / MOD / "tags" / "item" / f"{split(rack['tag'])[1]}.json") or {}).get("values", [])
+    expected = sorted(f"{MOD}:{name}" for module in (vegetables, herbs, spices) for name, info in module.ITEMS.items()
+                      if rack["tag"] in info.get("tags", []))
+    if sorted(spice_tag) != expected:
+        err(f"{rack['tag']} {sorted(spice_tag)} differs from the spices tools/herbs.py and spices.py tag {expected}")
+
+    # Paprika, ground with the Concordance's mortar.
+    grind = spices.GRIND
+    if (string("SpiceGrinding", "INPUT"), string("SpiceGrinding", "RESULT"), number("SpiceGrinding", "COUNT")) != \
+            (grind["input"], grind["result"], grind["count"]):
+        err("SpiceGrinding differs from tools/spices.py GRIND")
+    mortar = (ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "concordance" / "MortarItem.java")
+    if "SpiceGrinding.grinds(other)" not in (mortar.read_text(encoding="utf-8") if mortar.is_file() else ""):
+        err(f"The Mortar and Pestle ({MOD}:{grind['tool']}) must grind {grind['input']} into {grind['result']}")
+
+    # Ratatouille is cooked from what tools/vegetables.py says.
+    ratatouille = load(DATA / MOD / "recipe" / "pot_cooking" / "ratatouille.json") or {}
+    cooked = {entry["ingredient"]: entry.get("count", 1) for entry in ratatouille.get("ingredients", [])}
+    if cooked != vegetables.RATATOUILLE:
+        err(f"pot_cooking/ratatouille.json {cooked} differs from tools/vegetables.py RATATOUILLE")
 
 
 def check_garden():
@@ -10917,6 +11054,7 @@ def main():
     check_soil()
     check_orchard()
     check_garden()
+    check_vegetables_herbs_spices()
     check_cakes()
     check_pies_and_tarts()
     check_milkshakes()

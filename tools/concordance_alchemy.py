@@ -133,7 +133,7 @@ PROPERTIES = {
 ITEMS = {
     "mortar": {"name": "Mortar and Pestle",
                "tooltip": "Hold an ingredient in your other hand and use this to grind one: ground, it dissolves "
-                          "faster but loses a little."},
+                          "faster but loses a little. A Dried Chili grinds into Paprika."},
     "stirring_rod": {"name": "Stirring Rod", "tooltip": "Use it on an Alembic Crucible to stir the mixture once."},
     "sampling_spoon": {"name": "Sampling Spoon",
                        "tooltip": "Use it on an Alembic Crucible: how hot, how much, and what it tastes of."},
