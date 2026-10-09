@@ -213,13 +213,14 @@ def shin():
     m.append(box((-3.5, -SHIN + 1, 2.5), (3.5, -3, 3.7), {"*": LEG, "south": PLATE}, ("x", SHIN_ANGLE, [0, 0, 0])))
     m += cyl("x", ay, az, 3, -4, 4, GUNMETAL, DARK)
     m.append(box((-3.5, ay, az - 3.5), (3.5, ay + 4, az + 3.5), GUNMETAL))
-    # The foot points forward (+z, the way the gun faces: the owner's correction of 9 October 2026), its toe plate
-    # turning up at the front and its heel behind the ankle.
+    # The foot reaches forward from the ankle (the way the gun faces), as the owner set it in Blockbench on 9 October
+    # 2026: a long plate from the ankle forward, its toe plate turning up at the front, a short heel behind the ankle
+    # and the hinge strip across the plate.
     foot = ay - 3.2
-    m.append(box((-6, foot, -7), (6, foot + 3.5, 9), {"*": LEG, "up": DARK}))
-    m.append(box((-5, foot + 0.5, 9), (5, foot + 3, 14), LEG, ("x", -22.5, [0, foot + 0.5, 9])))
-    m.append(box((-5, foot, -10), (5, foot + 2.5, -7), LEG))
-    m.append(box((-6.2, foot + 3, -1), (6.2, foot + 4.5, 5), GUNMETAL))
+    m.append(box((-6, foot, az), (6, foot + 3.5, az + 16), {"*": LEG, "up": DARK}))
+    m.append(box((-5, foot + 0.5, az + 16), (5, foot + 3, az + 21), LEG, ("x", -22.5, [0, foot + 0.5, az + 16])))
+    m.append(box((-5, foot, az - 4), (5, foot + 2.5, az), LEG))
+    m.append(box((-6.2, foot + 3, az + 5), (6.2, foot + 4.5, az + 11), GUNMETAL))
     return m
 
 
