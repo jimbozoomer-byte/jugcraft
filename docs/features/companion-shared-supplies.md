@@ -18,7 +18,7 @@ Jobs can plan a complete recipe with ingredients split across all permitted Supp
 
 Tools travel in real cargo to the assigned workstation before being equipped. The previous hand item moves into that cargo slot in the same transaction. A suitable tool already in cargo can be reused, avoiding repeated collection. Missing/broken tools can be replaced while an appropriate Tools source remains assigned and accessible. Idle cutting boards do not fetch a knife unless an allowed cutting recipe has an actual input on the board or in Supply. Locked hands retain torches/preferred tools; all eight cargo slots full with no reusable tool means waiting for space.
 
-Transport retains its existing maximum 32 items per trip, 64-block navigation/endpoint range, up-to-2-JE/t walking cost, normal off-wheel regeneration, and actual workstation/tool durability costs. No new energy currency or inventory expansion. Supplies connect existing farms/material producers to kitchens/machines; Outputs feed player storage and downstream production.
+Transport now uses the [batch delivery](companion-batch-deliveries.md) rules: up to eight available cargo slots at normal item stack sizes, with walking cost scaled to the load. The 64-block navigation/endpoint range, normal off-wheel regeneration, and actual workstation/tool durability costs remain. No new energy currency or inventory expansion. Supplies connect existing farms/material producers to kitchens/machines; Outputs feed player storage and downstream production.
 
 ## Server behavior and persistence
 

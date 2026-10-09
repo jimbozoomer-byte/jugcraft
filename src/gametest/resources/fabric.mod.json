@@ -143,6 +143,7 @@
 			"local.peepo.PeepoHearthClientTests",
 			"local.peepo.PeepoKitchenAnimationClientTests",
 			"local.peepo.PeepoSuppliesClientTests",
+			"local.peepo.PeepoDeliveryClientTests",
             "local.peepo.TransportCrateClientTests",
             "local.peepo.TikiTorchClientTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceJournalClientGameTests",

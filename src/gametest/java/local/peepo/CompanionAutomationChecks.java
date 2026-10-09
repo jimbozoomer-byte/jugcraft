@@ -277,12 +277,12 @@ final class CompanionAutomationChecks {
             p.assignments.cycleContainer(l,base.west(4),Direction.UP);p.assignments.assignContainer(l,base.east(4),Direction.UP,true);p.assignments.supplies.route(0).enabled=true;p.orders.command(s.getPlayerList().getPlayers().getFirst(),3);walking(p);
         });
         server.waitFor(s->helper[0].transport.reserved(0),500);
-        server.runOnServer(s->{var p=helper[0];check(count(source[0],Items.DIAMOND)==8 && count(p.belongings,Items.DIAMOND)==32 && count(output[0],Items.DIAMOND)==0,"real stack removed only after walking to Supply");
+        server.runOnServer(s->{var p=helper[0];check(count(source[0],Items.DIAMOND)==0 && count(p.belongings,Items.DIAMOND)==40 && count(output[0],Items.DIAMOND)==0,"real batch removed only after walking to Supply");
             var restored=copy(p);check(restored.transport.reserved(0) && restored.assignments.supplies.route(0).enabled && restored.orders.mode()==3 && restored.belongings.getItem(0).getHoverName().getString().equals("Porter proof"),"manifest, mode and item components reload");
             for(int i=0;i<output[0].getContainerSize();i++)output[0].setItem(i,new ItemStack(Items.STONE,64));
         });
         server.waitFor(s->helper[0].transport.porterStatus()==CompanionStatus.FULL,600);
-        server.runOnServer(s->{check(count(helper[0].belongings,Items.DIAMOND)==32,"full destination retains physical cargo");output[0].clearContent();});
+        server.runOnServer(s->{check(count(helper[0].belongings,Items.DIAMOND)==40,"full destination retains physical cargo");output[0].clearContent();});
         server.waitFor(s->count(output[0],Items.DIAMOND)==40,1200);
         server.runOnServer(s->{check(count(source[0],Items.DIAMOND)==0 && count(helper[0].belongings,Items.DIAMOND)==0,"porter conservation across multiple trips");check(output[0].getItem(0).getHoverName().getString().equals("Porter proof"),"delivered custom components");cleanup();});
     }

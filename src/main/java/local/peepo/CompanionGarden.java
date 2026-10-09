@@ -119,7 +119,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
         if(!target.at().equals(origins[slot]))return ItemStack.EMPTY;
         var held=npc.belongings.getItem(slot);var mark=harvest[slot];
         if(mark.isEmpty() || !ItemStack.isSameItemSameComponents(held,mark))return ItemStack.EMPTY;
-        int n=Math.min(32,Math.min(held.getCount(),mark.getCount()));
+        int n=Math.min(held.getCount(),mark.getCount());
         n=Math.min(n,Math.max(0,availableCount(held)-seedReserve(held)));
         return n>0?held.copyWithCount(n):ItemStack.EMPTY;
     }

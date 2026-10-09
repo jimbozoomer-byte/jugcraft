@@ -16,13 +16,13 @@ Supply/Output have distinct blue/yellow world frames and matching GUI row marker
 
 ## Porter behavior
 
-Porter repeatedly moves any extractable items from Supply to Output, **up to 32 items per trip**, limited by stack size and available destination capacity. It needs no workstation, recipe or work-assignment slot. It uses the existing eight-slot inventory and walks between endpoints; no items teleport between containers. Item components are preserved, and both pickup into cargo and delivery out of cargo are atomic Fabric transactions.
+Porter repeatedly moves extractable items from Supply to Output. The original 32-item limit is superseded by [batch deliveries](companion-batch-deliveries.md), which fill available cargo slots and scale energy cost with the load. It needs no workstation, recipe or work-assignment slot. It uses the existing eight-slot inventory and walks between endpoints; no items teleport between containers. Item components are preserved, and both pickup into cargo and delivery out of cargo are atomic Fabric transactions.
 
 The companion probes output capacity before pickup. Empty Supply or full Output causes waiting/retry. If Output fills after pickup, the real stack stays in cargo until delivery succeeds. Reserved cargo cannot become an automatic meal or be overwritten by lunch stocking. Player inventory edits remain allowed; removing the carried stack invalidates its manifest instead of recreating items.
 
 **Work** still means assisting assigned machines and using their recipe-specific Supply/Output routes. **Porter** is a separate command so an ordinary helper never starts draining raw ingredients into the finished-products chest merely because its machine is idle. Workstations and per-job Auto/On/Off settings remain saved. Porter does not perform new machine jobs or use their direction toggles. A previously collected stack may finish its valid route after switching between Work and Porter; empty trips and new job selection follow the new command. Follow, Stay and Home pause transport.
 
-Schedules, energy recovery, food/lunch, sleeping/seated rest and the settings-menu pause still apply. Walking uses the existing up-to-2-JE/t transport drain and normal off-wheel regeneration. A porter without transferable items can idle/rest; it does not claim productive machines. Returning to Work restores the existing assignment priorities.
+Schedules, energy recovery, food/lunch, sleeping/seated rest and the settings-menu pause still apply. Walking now uses the load-scaled drain described in [batch deliveries](companion-batch-deliveries.md), with existing regeneration rules. A porter without transferable items can idle/rest; it does not claim productive machines. Returning to Work restores the existing assignment priorities.
 
 Changing/removing/swapping an endpoint invalidates old route identities. Items already carried stay in the inventory; they are not silently sent backward along a newly swapped route. Save/reload preserves valid carried deliveries, without creating a duplicate stack. A route cannot use the same physical double chest for both endpoints, including two separate chests that are joined after assignment.
 
@@ -32,7 +32,7 @@ This first general porter supports one Supply/Output pair, not loose ground-item
 
 Planner edits keep ownership/party, reach, dimension, loaded-chunk, interaction, town and cooldown validation. The saved clicked face remains authoritative. The new role-switch path validates the opposite container before swapping; it never creates duplicate roles for one block. Container locks and both halves of double chests are checked again through the existing storage adapter at transfer time.
 
-Porter shares the existing transport goal, one-stack manifest, staggered 80–99 tick searches, server search/path budgets, ten-tick travel-validity cache, bounded probes, 40-tick repaths, deadlines and failure backoff. Inventory mutations recheck endpoints immediately. No new global inventory scans, worker scans, chunk tickets or independent per-tick logistics loop.
+Porter shares the existing transport goal, now with a bounded eight-slot manifest, staggered 80–99 tick searches, server search/path budgets, ten-tick travel-validity cache, bounded probes, 40-tick repaths, deadlines and failure backoff. Inventory mutations recheck endpoints immediately. No new global inventory scans, worker scans, chunk tickets or independent per-tick logistics loop.
 
 `PORTER` appends command value 4; earlier Follow/Stay/Home/Work values remain unchanged. An optional `Transport.Porter` flag defaults false for older saved deliveries. Source is stored in the existing transport `Work` field for direct routes; Output uses `Store`. Existing targets, entity IDs, menu data count and inventory indices remain stable. Update client/server together. No additional resources or currency; this is an alternate use of existing tamed companions, energy, meals and storage.
 

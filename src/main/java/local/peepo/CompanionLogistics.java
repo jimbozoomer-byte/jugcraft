@@ -18,6 +18,7 @@ public final class CompanionLogistics {
         Identifier plan();
         default void prepare(Storage<ItemVariant> source){}
         int needed(ItemStack stack);
+        default int needed(ItemStack stack,net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext tx){return needed(stack);}
         Storage<ItemVariant> inputs();
         Storage<ItemVariant> outputs();
         /** Status for logistics-only stations that process without a resident helper. */
@@ -36,11 +37,14 @@ public final class CompanionLogistics {
         if(be instanceof HearthOvenBlockEntity oven)return new Port(){
             public Identifier plan(){return Identifier.fromNamespaceAndPath("jugcraft","hearth_oven");}
             public int needed(ItemStack candidate){
+                return needed(candidate,null);
+            }
+            public int needed(ItemStack candidate,net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext parent){
                 int need=oven.companionNeed(candidate);if(need<=0)return 0;
                 var output=npc.assignments.supplies.combined(target,true);
                 if(output==null)return 0;
                 var filling=HearthOvenBlockEntity.rawFilling(candidate);
-                if(filling!=null)try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()){
+                if(filling!=null)try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openNested(parent)){
                     var pie=ItemVariant.of(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item(filling.pie()));
                     if(output.insert(pie,1,tx)!=1)return 0;
                 }
