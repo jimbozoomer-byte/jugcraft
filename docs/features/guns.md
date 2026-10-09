@@ -706,6 +706,7 @@ Three more of the owner's guns, past steel, that run on charge from the energy s
 - **Particles:** a beam or arc is drawn from about where the muzzle is (ahead of the eye, a little right and down), not from the model's muzzle locator, so in first person it starts a little off the gun.
 - **Charging:** cells charge one at a time, on the station's cradle.
 - **The Beam Pistol's coil** stands out either side of its back in first person, as the owner's model has it.
+- **Aimed** (the CI screenshots of 9 October): the Beam Pistol's back rises a little past the crosshair, over the target's middle, and the Linesman's broad back fills the lower middle of the view. It is the shared aiming polish item ([below](#rollout-and-open-questions)), larger on these two.
 - **Not played:** none of it has been played yet. The arcs' reach, their seeking cones and the JE costs want play to set.
 
 ## Connections
@@ -1513,7 +1514,7 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - first-person views of each gun idle, aimed and through its reload (approximating the game's hands), which placed the arms, and the Beam Pistol's sight and its 4 px of eye relief;
     - side views of the Beam Pistol's barrel breaking open, the Stormlock's latch, cylinder and lever, and the Linesman's cell going in (which moved the latch's hinge to its front);
     - each gun with its attachments.
-- **Slice 8D game tests (written; they run in CI):**
+- **Slice 8D game tests** (their CI run is below):
   - `EnergyGunsGameTests`:
     - `energyWeaponsRunOnCells`: the three load from the Energy Cell, a chargeable item, each round its charge, a magazine's worth within a cell; the Beam Pistol fires a beam, the others arcs; a zap pushes nothing back, counts each shot, and is neither a projectile nor fire.
     - `reloadsDrawChargeFromCells`: cells of 1,000 and 10,000 JE are 27 rounds; they fill an empty Beam Pistol and are left at 0 and 7,800 JE, still in their slots. On spent cells the Stormlock's reload does not start; a cell of 1,500 JE then loads two of its charges and is spent.
@@ -1526,6 +1527,21 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - it checks that each shot is drawn (`GunTracePayload`);
     - it checks that the reload drew the spent rounds' charge from the cells and left both cells;
     - screenshots `jugcraft_guns_beam_pistol_*`, `jugcraft_guns_stormlock_rifle_*` and `jugcraft_guns_linesman_*`; the inventory shot holds a charged cell and a spent one.
+- **Slice 8D in CI** ([run 37996214844](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37996214844), on 6d97724a3): every check passed.
+  - `mod` and `optional integrations absent`: the build and the server game tests passed. There are 1186 now, 1180 before; the six `EnergyGunsGameTests` are the new ones.
+  - `client` (shard 2): `GunsClientGameTests` passed. Its log:
+    - **Beam Pistol:** aimed, the view narrowed to 0.9; fired, 9 flash frames and its beam drawn, the husk 801.2 → 795.2 and rounds 8 → 7; reloaded 8, its two cells left at 19,600 JE of 20,000 (one round's 400).
+    - **Stormlock Rifle:** aimed, 0.8; fired, 10 flash frames and its arc drawn, the husk 795.2 → 786.2 and rounds 5 → 4; reloaded 5, 19,250 JE left (one round's 750).
+    - **Linesman:** aimed, 0.95; fired, 10 flash frames and its arc drawn, the husk 786.2 → 782.2 and rounds 6 → 5; reloaded 6, 19,750 JE left (one round's 250).
+  - **Screenshots:**
+    - Held, each gun sits at the lower right, and the counter reads the shots in the cells: 50, 26 and 80 from two full cells.
+    - Seen from outside, each shot's flash is the cyan-white of `FLASH_TINT`.
+    - Mid-reload, the Stormlock's left hand comes up to the middle of the view as it loads a round, and the Linesman's holds the gun's side. Each gun is inspected as the owner's animations show it, and the counter then reads 49, 25 and 79 shots left in the cells.
+    - The inventory shows a charged Energy Cell with its bar; the tooltip covers the rest of that row.
+    - The beam and the arcs do not show in the fired shots, which are taken the moment the shot leaves; the client counted each one drawn.
+    - **Mid-reload, the Beam Pistol's view was filled** edge to edge with one brown, the player skin's colour in shade, with the gun drawn in front. Most likely the camera was inside the left arm's box. The arm safeguard (slice 8C's `GunArmsLayer`, [above](#slice-8c-the-heavy-weapons)) leaves out an arm that near the eye; the next run's screenshot will show whether that was it.
+    - **The Stormlock's fired shot** shows no gun, no crosshair and no icon in its hotbar slot, for that one frame. Its flash count (10 frames) and its other shots show it drawn. Not explained yet: the next run will show whether it comes again.
+    - **Aimed:** as with the other guns, the gun's back sits below the crosshair. The Beam Pistol's body rises over the middle of the target, and the Linesman's broad back fills the lower middle of the view; both are noted as known limits.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
