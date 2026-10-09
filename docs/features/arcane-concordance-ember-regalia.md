@@ -249,8 +249,11 @@ CI (the Build workflow, dispatched on this branch):
   for row, to `Step11Harness`'s over the generated data. The three client shards passed in 27:01, 25:14 and 21:20 (the
   slowest had been 28:54); the slowest is still within 3 minutes of its job's limit, so the client tests' total time is
   a watch item.
-- The review fixes (the bangle's reach, the renderer checks, the Trinkets slot access, the centred row): not yet run in
-  CI.
+- Run 37989465048 (commit `0a1eb90e`, with the review fixes: the bangle's reach, the renderer checks, the Trinkets slot
+  access, the centred row): **every job passed**. Both server jobs: **"All 1177 required tests passed"**, the bangle's
+  new beyond-reach case and the slot-access focus tests among them. The three client shards passed, the per-set
+  renderer check among them, in 28:40, 26:28 and 20:19; the slowest job took 29:32 of its 30 minutes, so the client
+  tests now run in four jobs (see `tools/select_client_tests.py` and `docs/TESTING.md`).
 
 Not yet run: a person looking at the screenshots (the worn model, the sleeves following a zombie's raised arms and a
 sneaking player, the glint, the small stand showing nothing); the Spell Focus and Bracelet slot icons in the Trinkets
