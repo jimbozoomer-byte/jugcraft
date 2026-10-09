@@ -26,9 +26,9 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 /**
  * Client game test for garden crops, herbs and spices, part b (tools/vegetables.py, herbs.py, spices.py): the vegetables at
  * every age (the cucumber on its trellis, the eggplant and zucchini bushes, lettuce, spinach, radishes and peas); the herbs
- * grown in Planter Boxes, two of them through their stages, potted, and hung in bundles fresh and dried; the black pepper
- * and vanilla vines, ginger, mustard and the saffron crocus at every age, a grown Cinnamon Tree and two Spice Racks; the
- * twenty wild plants; then a wall of the new items in item frames. CI job {@code client}.
+ * hung in bundles fresh and dried, grown in Planter Boxes, two of them through their stages, and potted; the black pepper
+ * and vanilla vines, ginger, mustard and the saffron crocus at every age and a grown Cinnamon Tree; two Spice Racks close
+ * up; the twenty wild plants; then a wall of the new items in item frames. CI job {@code client}.
  */
 public class VegetablesHerbsSpicesClientGameTests implements FabricClientGameTest {
 	private static final List<String> ITEMS = List.of("lettuce", "lettuce_seeds", "spinach", "spinach_seeds", "radish", "peas", "cucumber",
@@ -80,9 +80,10 @@ public class VegetablesHerbsSpicesClientGameTests implements FabricClientGameTes
 			context.waitTicks(20);
 			singleplayer.getConnection().waitForChunksRender();
 
-			shoot(context, singleplayer, x + 4, y + 4, z + 15, 180, 28, "jugcraft_vegetables");
-			shoot(context, singleplayer, x + 23, y + 3, z + 13, 180, 18, "jugcraft_herbs");
-			shoot(context, singleplayer, x + 41, y + 5, z + 15, 180, 22, "jugcraft_spices");
+			shoot(context, singleplayer, x + 3, y + 3, z + 12, 180, 25, "jugcraft_vegetables");
+			shoot(context, singleplayer, x + 22, y + 3, z + 10, 180, 22, "jugcraft_herbs");
+			shoot(context, singleplayer, x + 41, y + 4, z + 13, 180, 25, "jugcraft_spices");
+			shoot(context, singleplayer, x + 34, y + 2, z + 11, 180, 32, "jugcraft_spice_racks");
 			shoot(context, singleplayer, x + 56, y + 3, z + 10, 180, 30, "jugcraft_vegetables_herbs_spices_wild");
 			shoot(context, singleplayer, x + 68, y + 3, z + 18, 180, -2, "jugcraft_vegetables_herbs_spices_items");
 		}
@@ -163,24 +164,23 @@ public class VegetablesHerbsSpicesClientGameTests implements FabricClientGameTes
 			crop(level, new BlockPos(x + age, y, z + 8), "pea_crop", age);
 		}
 
-		// The herbs: grown in a row of Planter Boxes at the back; rosemary and thyme through their stages; a row of pots; and
-		// the bundles hung from a beam, fresh and dried by turns.
+		// The herbs, from the back: the bundles hung from a beam, fresh and dried by turns; each herb grown in a Planter Box;
+		// rosemary and thyme through their stages; and a row of potted herbs at the front.
 		for (int i = 0; i < HERBS.length; i++) {
-			BlockPos box = new BlockPos(x + 19 + i, y, z);
+			String herb = HERBS[i].produceId;
+			set(level, new BlockPos(x + 19 + i, y + 3, z - 1), Blocks.STRIPPED_OAK_LOG.defaultBlockState()
+					.setValue(BlockStateProperties.AXIS, Direction.Axis.X));
+			set(level, new BlockPos(x + 19 + i, y + 2, z - 1), block(herb + "_bundle").defaultBlockState().setValue(HerbBundleBlock.DRIED, i % 2 == 1));
+			BlockPos box = new BlockPos(x + 19 + i, y, z + 1);
 			set(level, box, block("planter_box").defaultBlockState());
 			tall(level, box.above(), HERBS[i], TallCropBlock.MAX_AGE, false);
 			int age = 1 + 2 * (i % 4);
-			tall(level, new BlockPos(x + 19 + i, y, z + 2), i < 4 ? TallCrop.ROSEMARY : TallCrop.THYME, age, true);
-			set(level, new BlockPos(x + 19 + i, y, z + 4), Blocks.SPRUCE_PLANKS.defaultBlockState());
-			String herb = HERBS[i].produceId;
-			set(level, new BlockPos(x + 19 + i, y + 1, z + 4), block("potted_" + herb).defaultBlockState());
-			set(level, new BlockPos(x + 19 + i, y + 3, z + 7), Blocks.STRIPPED_OAK_LOG.defaultBlockState()
-					.setValue(BlockStateProperties.AXIS, Direction.Axis.X));
-			set(level, new BlockPos(x + 19 + i, y + 2, z + 7), block(herb + "_bundle").defaultBlockState().setValue(HerbBundleBlock.DRIED, i % 2 == 1));
+			tall(level, new BlockPos(x + 19 + i, y, z + 3), i < 4 ? TallCrop.ROSEMARY : TallCrop.THYME, age, true);
+			set(level, new BlockPos(x + 19 + i, y, z + 5), block("potted_" + herb).defaultBlockState());
 		}
 		for (int dy = 0; dy <= 2; dy++) {
-			set(level, new BlockPos(x + 18, y + dy, z + 7), Blocks.STRIPPED_OAK_LOG.defaultBlockState());
-			set(level, new BlockPos(x + 27, y + dy, z + 7), Blocks.STRIPPED_OAK_LOG.defaultBlockState());
+			set(level, new BlockPos(x + 18, y + dy, z - 1), Blocks.STRIPPED_OAK_LOG.defaultBlockState());
+			set(level, new BlockPos(x + 27, y + dy, z - 1), Blocks.STRIPPED_OAK_LOG.defaultBlockState());
 		}
 
 		// The spices: the black pepper and vanilla vines at the back, ginger, mustard and saffron before them, a grown cinnamon

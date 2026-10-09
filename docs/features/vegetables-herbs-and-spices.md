@@ -218,12 +218,13 @@ The new game tests (`VegetablesHerbsSpicesGameTests`):
 
 `AgricultureGameTests.grassDropsJugcraftSeeds` now counts the seven new seeds.
 
-The client game test (`VegetablesHerbsSpicesClientGameTests`, CI job `client`) takes five screenshots:
+The client game test (`VegetablesHerbsSpicesClientGameTests`, CI job `client`) takes six screenshots:
 1. The vegetables at every age.
-2. The herbs in Planter Boxes, through their stages, potted, and hung in bundles fresh and dried.
-3. The spice vines and crops at every age, a grown cinnamon tree and two filled spice racks.
-4. The twenty wild plants.
-5. A wall of the 48 new items.
+2. The herbs hung in bundles fresh and dried, grown in Planter Boxes, through their stages, and potted.
+3. The spice vines and crops at every age, and a grown cinnamon tree.
+4. Two Spice Racks close up, one full and one part full.
+5. The twenty wild plants.
+6. A wall of the 48 new items.
 
 Not done: play in a real client, and a two-client dedicated-server session.
 
