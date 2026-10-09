@@ -15,16 +15,12 @@ Textures (16 x 16, drawn here in the Dieselworks steel palette, tools/dieselwork
   pw_flange  dark flange steel with raised bolt heads on a four-pixel lattice, so any flange face shows bolts
   pw_tread   tread plate: raised lozenges on a four-pixel lattice, for walkways and floors
 """
-import base64
-import io
 import json
 import sys
-import uuid
 from pathlib import Path
 
 import clean_metal
-import model_writer
-from dieselworks import STEEL, LIT, RIVET, shaped
+from dieselworks import STEEL, shaped
 from model_writer import FACING_Y, PART_STATES, rid, scaled_elements, split_model, texture_names
 from pipeworks_models import MODELS, PROPS, cells, footprint
 
@@ -193,66 +189,18 @@ def write_all(write, assets, data, lang, condition, self_drop):
 
 # ------------------------------------------------------------------ Blockbench projects
 
-def _uuid(*parts):
-    return str(uuid.uuid5(uuid.NAMESPACE_URL, "jugcraft:pipeworks:" + ":".join(str(p) for p in parts)))
-
-
-def _texture_entry(name, index):
-    path = ROOT / "src" / "main" / "resources" / "assets" / MOD / "textures" / "block" / f"{name}.png"
-    if path.exists():
-        source = "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode("ascii")
-    else:
-        buffer = io.BytesIO()
-        TEXTURES[name]().save(buffer, format="PNG")
-        source = "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")
-    return {"path": "", "name": f"{name}.png", "folder": "block", "namespace": MOD, "id": str(index), "particle": index == 0,
-            "render_mode": "default", "visible": True, "mode": "bitmap", "saved": False, "uuid": _uuid("texture", name),
-            "source": source}
-
-
 def bbmodel(name):
     """A Blockbench project of the whole prop: one cube an element, in structure space, with the game's UVs."""
-    elements = MODELS[name]
-    names = texture_names(elements)
-    index = {t: i for i, t in enumerate(names)}
-    cubes, outliner = [], []
-    for number, item in enumerate(elements):
-        frm, to, texture, options = model_writer.unpack(item)
-        rotation = options.get("rotation")
-        spec = model_writer.element(frm, to, texture, rotation=rotation)
-        faces = {}
-        for face, entry in spec["faces"].items():
-            tex = entry["texture"].lstrip("#")
-            uv = entry.get("uv") or model_writer.fit_uv(model_writer.auto_uv(face, spec["from"], spec["to"]))
-            faces[face] = {"uv": [round(v, 4) for v in uv], "texture": index[tex]}
-        cube = {"name": f"{name}_{number}", "box_uv": False, "rescale": bool(rotation and len(rotation) > 3 and rotation[3]),
-                "locked": False, "render_order": "default", "allow_mirror_modeling": True,
-                "from": spec["from"], "to": spec["to"], "autouv": 0, "color": number % 8,
-                "origin": [round(v, 4) for v in rotation[2]] if rotation else [0, 0, 0],
-                "faces": faces, "type": "cube", "uuid": _uuid(name, number)}
-        if rotation:
-            axis = "xyz".index(rotation[0])
-            turn = [0, 0, 0]
-            turn[axis] = rotation[1]
-            cube["rotation"] = turn
-        cubes.append(cube)
-        outliner.append(cube["uuid"])
-    w, h, d = PROPS[name][1]
-    return {"meta": {"format_version": "4.10", "model_format": "free", "box_uv": False},
-            "name": name, "model_identifier": "", "visible_box": [1, 1, 0],
-            "variable_placeholders": "", "variable_placeholder_buttons": [], "timeline_setups": [],
-            "unhandled_root_fields": {}, "resolution": {"width": 16, "height": 16},
-            "elements": cubes,
-            "outliner": [{"name": name, "origin": [0, 0, 0], "color": 0, "uuid": _uuid("group", name), "export": True,
-                          "mirror_uv": False, "isOpen": True, "locked": False, "visibility": True, "autouv": 0,
-                          "children": outliner}],
-            "textures": [_texture_entry(t, i) for i, t in enumerate(names)]}
+    import blockbench_export
+    return blockbench_export.project(name, [(name, (0, 0, 0), None, MODELS[name])], draw=lambda t: TEXTURES[t]())
 
 
 def write_bbmodels(folder=ART):
     folder.mkdir(parents=True, exist_ok=True)
     for name in PROPS:
-        (folder / f"{name}.bbmodel").write_text(json.dumps(bbmodel(name), separators=(",", ":")) + "\n", encoding="utf-8")
+        import blockbench_export
+        blockbench_export.write(folder / f"{name}.bbmodel", name, [(name, (0, 0, 0), None, MODELS[name])],
+                                draw=lambda t: TEXTURES[t]())
 
 
 if __name__ == "__main__":
