@@ -50,7 +50,7 @@ import net.minecraft.world.phys.Vec3;
  * target's middle.
  */
 public class GunsGameTests {
-	private static final String ARENA = "jugcraft-test:arms_arena";
+	static final String ARENA = "jugcraft-test:arms_arena";
 
 	/** Every gun and round is registered, each gun as a GunItem with its numbers, and every gun's round exists. */
 	@GameTest
@@ -61,7 +61,7 @@ public class GunsGameTests {
 			helper.assertTrue(JugcraftGuns.ammo(spec) != null, name + " fires " + spec.ammo() + ", which is not registered");
 			helper.assertTrue(new ItemStack(JugcraftGuns.GUNS.get(name)).getMaxStackSize() == 1, name + " stacks");
 		});
-		helper.assertTrue(JugcraftGuns.GUNS.size() == 18 && JugcraftGuns.ROUNDS.size() == 4, "Not eighteen guns and four rounds");
+		helper.assertTrue(JugcraftGuns.GUNS.size() == 21 && JugcraftGuns.ROUNDS.size() == 4, "Not twenty-one guns and four rounds");
 		helper.assertTrue(JugcraftGuns.ATTACHMENT_ITEMS.keySet().equals(JugcraftGuns.ATTACHMENTS.keySet())
 				&& JugcraftGuns.ATTACHMENTS.size() == 18, "Not eighteen attachments, each with its item");
 		JugcraftGuns.ACCEPTS.forEach((gun, takes) -> helper.assertTrue(JugcraftGuns.GUNS.containsKey(gun)
@@ -721,7 +721,8 @@ public class GunsGameTests {
 	}
 
 	/** A mock player holding a gun with this many rounds loaded, at the arena's (1, 2, 1), aimed at the target's middle. */
-	private static ServerPlayer shooter(GameTestHelper helper, String gun, int loaded, Mob target, GameType mode) {
+	/** A player at (1, 2, 1) facing south, aimed at the target's middle, with this gun loaded in the main hand. */
+	static ServerPlayer shooter(GameTestHelper helper, String gun, int loaded, Mob target, GameType mode) {
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		player.setGameMode(mode);
 		BlockPos at = helper.absolutePos(new BlockPos(1, 2, 1));
@@ -736,7 +737,8 @@ public class GunsGameTests {
 		return player;
 	}
 
-	private static void floor(GameTestHelper helper) {
+	/** A stone floor at y 1 over the arena, clear air above it. */
+	static void floor(GameTestHelper helper) {
 		for (int x = 0; x <= 15; x++) {
 			for (int z = 0; z <= 15; z++) {
 				helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
@@ -751,7 +753,7 @@ public class GunsGameTests {
 	 * A pig that cannot walk off or be knocked back: a hit pushes a creature away (and up, once it stands on the
 	 * ground), so a later shot along the first aim could pass under it.
 	 */
-	private static Mob pig(GameTestHelper helper, BlockPos pos) {
+	static Mob pig(GameTestHelper helper, BlockPos pos) {
 		@SuppressWarnings("unchecked")
 		EntityType<Mob> type = (EntityType<Mob>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("pig"));
 		Mob pig = helper.spawnWithNoFreeWill(type, pos);

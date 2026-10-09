@@ -14,9 +14,9 @@ import org.jspecify.annotations.Nullable;
 public final class GunLooks {
 	/** Each gun's look, by name. */
 	static final Map<String, Look> LOOKS = new HashMap<>();
-	/** How big a shot's muzzle flash is, across, in the gun model's pixels, by the round it fires. */
+	/** How big a shot's muzzle flash is, across, in the gun model's pixels, by the round it fires (or grenade or fuel). */
 	static final Map<String, Float> FLASH_SIZES = Map.of("light_round", 5.0F, "rifle_round", 7.0F, "buckshot_shell", 8.0F,
-			"paper_cartridge", 10.0F);
+			"paper_cartridge", 10.0F, "grenade", 9.0F, "minecraft:blaze_powder", 8.0F);
 	/** The attachments that hide the flash: cans over the muzzle. */
 	static final List<String> HIDE_FLASH = List.of("silencer", "baffled_silencer");
 	/** The scopes (slice 7), by name: how far each narrows the view and what aiming through it shows. */
@@ -48,6 +48,9 @@ public final class GunLooks {
 		LOOKS.put("sentry_pistol", new Look(false, 0.9F));
 		LOOKS.put("garrison_rifle", new Look(true, 0.85F));
 		LOOKS.put("breacher", new Look(true, 0.92F));
+		LOOKS.put("trench_lobber", new Look(true, 0.9F));
+		LOOKS.put("thresher", new Look(true, 0.95F));
+		LOOKS.put("stoker", new Look(true, 0.95F));
 		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));

@@ -3,7 +3,8 @@ package io.github.jimbozoomer.jugcraft.guns;
 /**
  * One gun's numbers (tools/guns.py GUNS; check_guns in tools/check_mod_data.py keeps them the same).
  *
- * @param damage      per bullet (per pellet for a shotgun), in half hearts
+ * @param damage      per bullet (per pellet for a shotgun), in half hearts; a grenade's burst at its centre, a burst of
+ *                    flame's on each creature in it (slice 8C, {@link JugcraftGuns#SHOTS})
  * @param pellets     bullets a shot
  * @param interval    ticks between shots: the fastest a trigger can be pulled, or the automatic rate
  * @param auto        fires while the button is held
@@ -15,7 +16,8 @@ package io.github.jimbozoomer.jugcraft.guns;
  * @param hipSpread   degrees a bullet strays from the aim, fired from the hip
  * @param aimSpread   the same, aimed down the sights
  * @param range       blocks
- * @param ammo        the round it fires (a jugcraft item id)
+ * @param ammo        the round it fires: a jugcraft item path, or another mod's or vanilla's full item id
+ *                    ({@link JugcraftGuns#ammo})
  */
 public record GunSpec(float damage, int pellets, int interval, boolean auto, int capacity, int reload, int shellStart,
 		int shellEach, int shellFinish, float hipSpread, float aimSpread, int range, String ammo) {

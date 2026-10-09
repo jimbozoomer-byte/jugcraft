@@ -8,6 +8,7 @@ import io.github.jimbozoomer.jugcraft.client.guns.GunScope;
 import io.github.jimbozoomer.jugcraft.client.guns.GunView;
 import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
+import io.github.jimbozoomer.jugcraft.guns.GunSpec;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +30,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -41,7 +43,9 @@ import net.minecraft.world.phys.AABB;
  * animations cue; in third person the player is posed holding it, and fires it. Slice 7: a third set of attachments
  * with a bayonet (and the guns whose parts use shared textures), and a stab with the stab key that hurts the husk; and the
  * scopes, each aimed through on the Longhorn Rifle (the view through it or the reflex dot, the narrowed view, the slower
- * mouse). Screenshots jugcraft_guns_* (CI job {@code client}).
+ * mouse). Slice 8C: the heavy weapons fire their own ammunition (grenades, blaze powder) the same way, and the
+ * Thresher's trigger is held until its barrels have spun up and it fires. Screenshots jugcraft_guns_* (CI job
+ * {@code client}).
  */
 public class GunsClientGameTests implements FabricClientGameTest {
 	@Override
@@ -72,14 +76,18 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			setHudHidden(context, false);
 
 			for (String gun : JugcraftGuns.SPECS.keySet()) {
-				String round = JugcraftGuns.SPECS.get(gun).ammo();
-				int capacity = JugcraftGuns.SPECS.get(gun).capacity();
+				GunSpec spec = JugcraftGuns.SPECS.get(gun);
+				// Slice 8C: a round, a grenade or blaze powder, by its item id.
+				Item ammo = JugcraftGuns.ammo(spec);
+				String round = BuiltInRegistries.ITEM.getKey(ammo).toString();
+				int capacity = spec.capacity();
+				int spinUp = JugcraftGuns.spinUp(JugcraftGuns.GUNS.get(gun));
 				// Each gun starts from the same aim: every shot kicks the view up, and twelve guns' kicks would lift it
 				// over the husk.
 				server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
 				server.runCommand("clear @p");
 				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:%s[jugcraft:loaded_rounds=%d]".formatted(gun, capacity));
-				server.runCommand("give @p jugcraft:%s 32".formatted(round));
+				server.runCommand("give @p %s 32".formatted(round));
 				context.waitTicks(30);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_held");
 
@@ -98,9 +106,17 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				float before = health(server, x, y, z);
 				long flashes = context.computeOnClient(client -> GunEffects.flashes());
 				long ejected = context.computeOnClient(client -> GunEffects.ejected());
-				// The shot, with its flash (it shows for two ticks).
-				context.getInput().pressKey(options -> options.keyAttack);
-				context.takeScreenshot("jugcraft_guns_" + gun + "_fired");
+				// The shot, with its flash (it shows for two ticks). A rotary gun's trigger is held while its barrels spin
+				// up, then a shot or two, and let go.
+				if (spinUp > 0) {
+					context.getInput().holdKey(options -> options.keyAttack);
+					context.waitTicks(spinUp + 2);
+					context.takeScreenshot("jugcraft_guns_" + gun + "_fired");
+					context.getInput().releaseKey(options -> options.keyAttack);
+				} else {
+					context.getInput().pressKey(options -> options.keyAttack);
+					context.takeScreenshot("jugcraft_guns_" + gun + "_fired");
+				}
 				long flashed = context.computeOnClient(client -> GunEffects.flashes()) - flashes;
 				Jugcraft.LOGGER.info("[guns] {} fired: {} muzzle flash frames drawn", gun, flashed);
 				if (flashed <= 0) {
@@ -111,24 +127,26 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				context.waitTicks(5);
 				float after = health(server, x, y, z);
 				int loaded = server.computeOnServer(minecraft -> GunItem.loaded(player(minecraft).getMainHandItem()));
+				int spent = capacity - loaded;
 				Jugcraft.LOGGER.info("[guns] {} fired at a husk: health {} -> {}, rounds {} -> {}", gun, before, after, capacity, loaded);
-				if (after >= before || loaded != capacity - 1) {
-					throw new AssertionError("The " + gun + " did not hit the husk and spend a round: health " + before + " -> " + after
-							+ ", rounds " + capacity + " -> " + loaded);
+				if (after >= before || spent < 1 || spinUp == 0 && spent != 1) {
+					throw new AssertionError("The " + gun + " did not hit the husk and spend " + (spinUp > 0 ? "rounds" : "a round")
+							+ ": health " + before + " -> " + after + ", rounds " + capacity + " -> " + loaded);
 				}
 
 				context.getInput().pressKey(options -> GunsClient.reloadKey());
-				int ticks = JugcraftGuns.SPECS.get(gun).reloadTicks(1);
+				int ticks = spec.reloadTicks(spent);
 				context.waitTicks(Math.max(5, ticks / 2));
 				context.takeScreenshot("jugcraft_guns_" + gun + "_reloading");
 				context.waitTicks(ticks);
 				int reloaded = server.computeOnServer(minecraft -> GunItem.loaded(player(minecraft).getMainHandItem()));
-				int left = server.computeOnServer(minecraft -> GunShots.count(player(minecraft).getInventory(),
-						BuiltInRegistries.ITEM.getValue(Jugcraft.id(round))));
+				int left = server.computeOnServer(minecraft -> GunShots.count(player(minecraft).getInventory(), ammo));
+				// An item of blaze powder loads four bursts: a reload takes whole items (slice 8C).
+				int taken = (spent + JugcraftGuns.perItem(spec) - 1) / JugcraftGuns.perItem(spec);
 				Jugcraft.LOGGER.info("[guns] {} reloaded: {} rounds loaded, {} {} left", gun, reloaded, left, round);
-				if (reloaded != capacity || left != 31) {
-					throw new AssertionError("The " + gun + " reload did not load the one round from the inventory: " + reloaded
-							+ " loaded, " + left + " left");
+				if (reloaded != capacity || left != 32 - taken) {
+					throw new AssertionError("The " + gun + " reload did not load the " + spent + " rounds spent from the inventory: "
+							+ reloaded + " loaded, " + left + " left");
 				}
 
 				// The owner's animations cue a spent casing (or, for a paper cartridge, a puff from the lock) on the shot or the

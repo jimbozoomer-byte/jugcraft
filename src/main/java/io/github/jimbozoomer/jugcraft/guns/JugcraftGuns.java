@@ -34,6 +34,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  * <li>A gun holds its loaded rounds in {@link #LOADED}; reloading takes rounds from the inventory.</li>
  * <li>Shots are hitscan: each bullet (or pellet) follows the shooter's look, strayed by the gun's spread, to the first
  * block or creature within range.</li>
+ * <li>Slice 8C, the heavy weapons: the Trench Lobber lobs a Grenade a shot, the Stoker's shots are bursts of flame
+ * ({@link #SHOTS}); the Thresher's barrels spin up before it fires ({@link #SPIN_UP}).</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.</li>
  * </ul>
@@ -62,7 +64,25 @@ public final class JugcraftGuns {
 		SPECS.put("sentry_pistol", new GunSpec(5.0F, 1, 5, false, 8, 47, 0, 0, 0, 2.0F, 0.6F, 64, "light_round"));
 		SPECS.put("garrison_rifle", new GunSpec(4.0F, 1, 3, true, 30, 53, 0, 0, 0, 3.0F, 0.6F, 80, "rifle_round"));
 		SPECS.put("breacher", new GunSpec(3.0F, 8, 16, false, 6, 52, 0, 0, 0, 7.0F, 5.0F, 28, "buckshot_shell"));
+		SPECS.put("trench_lobber", new GunSpec(16.0F, 1, 14, false, 6, 53, 0, 0, 0, 3.0F, 1.0F, 24, "grenade"));
+		SPECS.put("thresher", new GunSpec(3.0F, 1, 2, true, 60, 78, 0, 0, 0, 4.0F, 2.0F, 64, "rifle_round"));
+		SPECS.put("stoker", new GunSpec(2.0F, 1, 4, true, 32, 61, 0, 0, 0, 10.0F, 6.0F, 8, "minecraft:blaze_powder"));
 	}
+
+	/**
+	 * What the slice 8C guns fire, where it is not bullets (tools/guns.py GUNS "shot"): {@link #GRENADE}, a Grenade lobbed
+	 * from the muzzle; {@link #FLAME}, a short jet of flame ({@link GunShots}).
+	 */
+	public static final Map<String, String> SHOTS = Map.of("trench_lobber", "grenade", "stoker", "flame");
+	public static final String GRENADE = "grenade";
+	public static final String FLAME = "flame";
+	/** Ticks the trigger is held, the barrels spinning up, before the gun fires (tools/guns.py GUNS "spin_up"). */
+	public static final Map<String, Integer> SPIN_UP = Map.of("thresher", 15);
+	/**
+	 * Rounds one item of ammunition loads, where it is not one (tools/guns.py OTHER_AMMO): a blaze powder fuels four of
+	 * the Stoker's bursts.
+	 */
+	public static final Map<String, Integer> PER_ITEM = Map.of("minecraft:blaze_powder", 4);
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
@@ -135,14 +155,17 @@ public final class JugcraftGuns {
 				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
 				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
 				"reflex_sight"));
+		ACCEPTS.put("trench_lobber", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
+				"wooden_stock", "long_scope", "medium_scope", "reflex_sight"));
+		ACCEPTS.put("stoker", List.of("light_stock", "weighted_stock", "wooden_stock"));
 	}
 
 	/** The rounds. */
 	public static final List<String> AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "paper_cartridge");
 	/** The sound events the animations and the guns play (assets/jugcraft/sounds.json, written by tools/guns.py). */
 	public static final List<String> SOUND_EVENTS = List.of("bolt", "bolt_pull", "bolt_release", "dry_fire",
-			"gun_rustle", "insert", "jam", "lever", "metal", "rack", "reload_end", "reload_mag_in", "reload_mag_out",
-			"shell_in", "slap");
+			"gun_rustle", "insert", "jam", "lever", "metal", "pump", "pump_half", "rack", "reload_end", "reload_mag_in",
+			"reload_mag_out", "shell_in", "slap");
 	/** The rounds that leave a spent case, each with its particle jugcraft:&lt;round&gt;_casing (tools/guns.py CASINGS). */
 	public static final List<String> CASING_AMMO = List.of("light_round", "rifle_round", "buckshot_shell");
 	/** Walking speed while aiming down the sights (vanilla's using an item is 0.2). */
@@ -155,6 +178,8 @@ public final class JugcraftGuns {
 	/** Each round's spent case, a particle the client throws from the gun (client/guns/GunEffects). */
 	public static final Map<String, SimpleParticleType> CASINGS = new LinkedHashMap<>();
 	public static final ResourceKey<DamageType> BULLET = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("bullet"));
+	/** The Stoker's flame: fire, so what fire spares it spares (slice 8C). */
+	public static final ResourceKey<DamageType> FLAME_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("flame"));
 	/** Rounds loaded in a gun. */
 	public static DataComponentType<Integer> LOADED;
 	/** The attachments fitted to a gun, oldest first; one a slot, so five at most. */
@@ -214,8 +239,30 @@ public final class JugcraftGuns {
 		return event;
 	}
 
-	/** The round a gun fires. */
+	/**
+	 * The round a gun fires: one of the rounds here, or another item (slice 8C: the field chemistry branch's Grenade,
+	 * jugcraft:grenade, and blaze powder), named by its path in this mod or by its full id.
+	 */
 	public static Item ammo(GunSpec spec) {
-		return ROUNDS.get(spec.ammo());
+		Item round = ROUNDS.get(spec.ammo());
+		if (round != null) {
+			return round;
+		}
+		return BuiltInRegistries.ITEM.getValue(spec.ammo().contains(":") ? Identifier.parse(spec.ammo()) : Jugcraft.id(spec.ammo()));
+	}
+
+	/** Rounds one item of the gun's ammunition loads ({@link #PER_ITEM}). */
+	public static int perItem(GunSpec spec) {
+		return PER_ITEM.getOrDefault(spec.ammo(), 1);
+	}
+
+	/** What the gun fires: "bullet", {@link #GRENADE} or {@link #FLAME} ({@link #SHOTS}). */
+	public static String shot(GunItem gun) {
+		return SHOTS.getOrDefault(gun.name(), "bullet");
+	}
+
+	/** Ticks this gun's barrels spin up before it fires; 0 for a gun without ({@link #SPIN_UP}). */
+	public static int spinUp(GunItem gun) {
+		return SPIN_UP.getOrDefault(gun.name(), 0);
 	}
 }

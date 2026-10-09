@@ -437,6 +437,22 @@
       }
     ]
   },
+  "guns.pump": {
+    "subtitle": "subtitles.jugcraft.guns.pump",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_sounds_pump"
+      }
+    ]
+  },
+  "guns.pump_half": {
+    "subtitle": "subtitles.jugcraft.guns.pump_half",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_sounds_pump_half"
+      }
+    ]
+  },
   "guns.rust_midge.fire": {
     "subtitle": "subtitles.jugcraft.guns.fire",
     "sounds": [
@@ -595,6 +611,33 @@
     "sounds": [
       {
         "name": "jugcraft:guns/combat_shotgun_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.trench_lobber.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/grenade_launcher_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.thresher.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/new_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.stoker.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/flamethrower_fire_2",
         "attenuation_distance": 64
       }
     ]

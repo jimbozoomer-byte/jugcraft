@@ -38,6 +38,9 @@ import org.joml.Vector3f;
  * <p>
  * Slice 8B: a gun whose moving parts would reach the eye aimed at the hip's depth is held further out as it is aimed
  * ({@link GunLooks#EYE_RELIEF}).
+ * <p>
+ * Slice 8C: a rotary gun's barrels turn as its holder spins them ({@link GunEffects#barrelTurn}); a flame gun's jet of
+ * flame is a prop its shot moves. A gun without sights (the Thresher) is not slid over when aimed.
  */
 public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	/** The entity holding the gun (for where its sounds play). */
@@ -48,6 +51,8 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	public static final DataTicket<Fitted> FITTED = DataTicket.create("jugcraft_gun_attachments", Fitted.class);
 	/** A muzzle flash to draw: the shot was moments ago and nothing fitted hides it. */
 	public static final DataTicket<Flash> FLASH = DataTicket.create("jugcraft_gun_flash", Flash.class);
+	/** How far a rotary gun's barrels have turned (radians, slice 8C). */
+	public static final DataTicket<Float> BARREL_TURN = DataTicket.create("jugcraft_gun_barrel_turn", Float.class);
 	/** How far the gun drops, out of sight, while the view through its scope fills the screen (blocks). */
 	private static final float PUT_AWAY = 1.5F;
 	/** How far a bayonet stab drives the gun forward, and down, on screen at full thrust (blocks). */
@@ -72,6 +77,10 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 		Entity owner = data.itemOwner() instanceof Entity entity ? entity : null;
 		if (owner != null) {
 			state.addGeckolibData(OWNER, owner.getId());
+			int spinUp = JugcraftGuns.spinUp(gun);
+			if (spinUp > 0) {
+				state.addGeckolibData(BARREL_TURN, GunEffects.barrelTurn(owner.getId(), owner.level().getGameTime(), partialTick, spinUp));
+			}
 			float age = GunEffects.flashAge(owner.getId(), owner.level().getGameTime(), partialTick);
 			if (age >= 0.0F && inHand(data.renderPerspective()) && fitted.stream().noneMatch(GunLooks.HIDE_FLASH::contains)) {
 				// From the muzzle, or from the front of a barrel attachment that lengthens it.
@@ -97,8 +106,8 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 				|| context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND || context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
 	}
 
-	/** The props the animations move on bones of their own (tools/guns.py PROPS). */
-	private static final List<String> PROPS = List.of("shell", "ball", "ram", "flash");
+	/** The props the animations move on bones of their own (tools/guns.py PROPS); slice 8C's jet of flame. */
+	private static final List<String> PROPS = List.of("shell", "ball", "ram", "flash", "flame");
 
 	/**
 	 * A prop (a shell, a ball, a ramrod, a priming flash) rests out of place: an animation's offsets bring it where it
@@ -106,12 +115,17 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	 * while an animation moves it.
 	 * <p>
 	 * Each attachment's bone ("att_&lt;id&gt;") shows only while it is fitted, and a slot's standard part
-	 * ("std_&lt;slot&gt;") only while nothing fitted replaces it.
+	 * ("std_&lt;slot&gt;") only while nothing fitted replaces it. A rotary gun's barrels turn about their middle, which
+	 * runs along the bore (slice 8C).
 	 */
 	@Override
 	public void adjustModelBonesForRender(RenderPassInfo<GeoRenderState> info, BoneSnapshots snapshots) {
 		for (String prop : PROPS) {
 			snapshots.ifPresent(prop, bone -> bone.skipRender(!bone.hasTranslation()));
+		}
+		Float turn = info.getGeckolibData(BARREL_TURN);
+		if (turn != null) {
+			snapshots.ifPresent("barrels", bone -> bone.setRotZ(turn));
 		}
 		Fitted fitted = info.getGeckolibData(FITTED);
 		List<String> on = fitted == null ? List.of() : fitted.attachments();
