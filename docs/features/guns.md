@@ -3583,12 +3583,25 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 tools/check_mod_data.py`: PASS (2168 material IDs), with `check_guns` (the numbers, attachments, the one-handed guns, sound aliases, looks and `JugcraftGuns.INCENDIARY` against tools/guns.py).
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
-- **Slice 11B game tests (not yet run; they run in CI):**
+- **Slice 11B game tests (all passed in CI, below):**
   - `NetherGunsGameTests`, now for all six Nether guns:
     - `netherGunsAreRegistered`: each is registered with its numbers, its recipe loads, and it fires bullets that set what they hit alight, as no other gun's do. The Ashfall Pistol is a pistol held in one hand, of eight light rounds; the Goldbristle Carbine a carbine of twelve rifle rounds, one a pull; the Crackling a shotgun of six pellets and five shells loaded a shell at a time. The Goldbristle Carbine takes all that slice 11A's take, and the magazines; the Ashfall Pistol only the stocks, the scopes and the Laser Sight; the Crackling only the stocks, the grips and the bayonets.
     - `secondNetherGunsFireAndLoad`: as `netherGunsFireAndLoad`, for slice 11B's three.
     - `secondNetherGunsSetWhatTheyHitAlight`: as `netherGunsSetWhatTheyHitAlight`, for slice 11B's three, beside an Undertone Rifle.
   - `GunsGameTests` counts 54 guns; `DualGunsGameTests` the fourteen held in one hand; `TacticalAttachmentsGameTests` the twenty-one that take the Tactical Grip.
+- **Slice 11B in CI** ([run 38092224778](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38092224778), on 4aba95d34): every check passed.
+  - **Server game tests:** 1314 in each job, slice 11A's 1312 and this slice's two. All passed, `NetherGunsGameTests` among them.
+  - **Client game tests:** the changed files chose the same eight classes as slice 11A's, and all eight passed. In `GunsClientGameTests` each new gun, in its turn:
+    - held and aimed, its arms drawn at full size and then half, the view narrowed to 0.9 (Ashfall Pistol), 0.85 (Goldbristle Carbine) and 0.9 (Crackling);
+    - fired at the husk, each spending one round, with 6 frames of flash: the Ashfall Pistol took it from 433.92 to 427.92 (6), the Goldbristle Carbine 7, and the Crackling 24 (all six pellets);
+    - reloaded from the inventory, 31 rounds left each time; the Ashfall Pistol and the Goldbristle Carbine threw 3 casings each, the Crackling none, as its animations cue none;
+    - with each set of attachments it takes, held and aimed, the stocks left out aimed (in 35 to 37 frames, none held).
+  - **The fire in play:** the husk lost 3 more health after each Nether gun's shot before the next gun fired: after the Tusker's, the Cinder Repeater's, the Bastion Rifle's (the last gun in slice 11A's run, so its fire showed only now), the Ashfall Pistol's and the Goldbristle Carbine's. The Crackling fired last. After the Reverb's shot, before them, it lost none.
+  - **Screenshots:**
+    - **Held:** each at the lower right pointing at the husk, its name over the hotbar: the Ashfall Pistol in the right hand alone, the Goldbristle Carbine with its magazine out to the left and the left hand under it, the Crackling with the left hand under its pump.
+    - **Aimed:** the Ashfall Pistol's notch and the Goldbristle Carbine's ring on the husk over the crimson backs of their receivers; the Crackling's posts on the husk over its narrow back and the right hand, as the Sledge's in the same run.
+    - **Reloading:** the Ashfall Pistol and the Goldbristle Carbine tipped in their reloads, the husk burning behind both. The Crackling's left arm comes up across the middle of the view with its shell, as the Sledge's does in the same run.
+    - **Inspection, attachments and third person:** each turned over in the hand; each with the stocks; the Goldbristle Carbine with its barrel devices, magazines, bayonet and grips, the Crackling with its grips and bayonet, the pistol and the carbine with the Laser Sight. Seen from outside, the Ashfall Pistol is raised in one hand and the others in both, each flashing as it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
