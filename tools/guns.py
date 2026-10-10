@@ -6,7 +6,7 @@ slice 7, the bayonets and the attachments drawn on shared textures, then the sco
 on the guns made to take them); slice 8, the hand guns: the Bulldog Pistol, Marshal Revolver and Sapper Revolver;
 slice 8B, the service arms in steel: the Sentry Pistol, Garrison Rifle and Breacher; slice 8C, the heavy weapons: the
 Trench Lobber, Thresher and Stoker; slice 8D, the energy weapons on Energy Cells: the Beam Pistol, Stormlock Rifle and
-Linesman.
+Linesman; slice 9A, the marksman rifles: the Picket Rifle, Ranger Rifle and Kestrel Rifle.
 
 The owner made these guns (inspired by Scorched Guns 2) and supplied, in the owner asset library:
   - a Blockbench Java model of every part (art/owner-library/originals/Blocks/Guns/models/special/<gun>/<part>.json),
@@ -261,6 +261,32 @@ GUNS = {
         "damage": 4.0, "pellets": 1, "interval": 6, "auto": True, "capacity": 6,
         "reload": (8, 13, 12), "spread": (15.0, 10.0), "range": 12, "ammo": "energy_cell", "shot": "arc", "charge": 250,
     },
+    # Slice 9A: the marksman rifles, in steel. Semi-automatic, one shot each pull: the steadiest aimed and the farthest
+    # reaching of the guns. The Picket Rifle looks through a peep sight; the Ranger Rifle hits hardest, its handle
+    # lifted and its bolt drawn back to change a magazine; the Kestrel Rifle is loaded from the top with a clip of
+    # eight and takes a scope.
+    "picket_rifle": {
+        "display": "Picket Rifle",
+        "source": "m3_marksman",
+        "tooltip": "A steel marksman's rifle with a peep sight: one steady shot each pull, true at long range. Fires rifle "
+                   "rounds.",
+        "damage": 8.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 10,
+        "reload": 43, "spread": (2.0, 0.1), "range": 128, "ammo": "rifle_round",
+    },
+    "ranger_rifle": {
+        "display": "Ranger Rifle",
+        "source": "mk43_rifle",
+        "tooltip": "A heavy semi-automatic rifle: ten hard-hitting shots from a magazine. Fires rifle rounds.",
+        "damage": 10.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 10,
+        "reload": 45, "spread": (2.5, 0.15), "range": 120, "ammo": "rifle_round",
+    },
+    "kestrel_rifle": {
+        "display": "Kestrel Rifle",
+        "source": "whistler",
+        "tooltip": "A copper-bright rifle loaded from the top with a clip of eight. Takes a scope. Fires rifle rounds.",
+        "damage": 9.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 8,
+        "reload": 55, "spread": (2.0, 0.15), "range": 128, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -355,6 +381,12 @@ RECIPES = {
                                                "P": "#minecraft:planks", "B": "#c:ingots/brass"}),
     "linesman": (["LSS", "CAB", " CB"], {"L": "minecraft:lightning_rod", "S": "#c:ingots/steel", "C": "jugcraft:copper_cable",
                                         "A": "jugcraft:advanced_circuit", "B": "#c:ingots/brass"}),
+    # Slice 9A: a long steel barrel and a lever for the trigger each; the Picket all steel, the Ranger with a wooden
+    # stock under it, the Kestrel copper-bright.
+    "picket_rifle": (["SSS", "SLB"], {"S": "#c:ingots/steel", "L": "minecraft:lever", "B": "#c:ingots/brass"}),
+    "ranger_rifle": (["SSS", "BLP", " P "], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever",
+                                            "P": "#minecraft:planks"}),
+    "kestrel_rifle": (["SSS", "CLC"], {"S": "#c:ingots/steel", "C": "minecraft:copper_ingot", "L": "minecraft:lever"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -776,6 +808,63 @@ BUILDS = {
         "muzzle": (8.0, 4.34, 1.27),
         "sight": (8.0, 5.6, 13.8),
     },
+    # Slice 9A, the marksman rifles; each gun body turns about the grip in the right hand. The M3 Marksman's bolt part is
+    # its charging handle, on the right of the receiver, which each shot drives back; its reload swings the magazine
+    # down and back out of the well, about its top. Its rear sight is a peep (the sights part's ring, on a rail); the
+    # front post is on the barrel.
+    "picket_rifle": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "sights"], (8.0, 2.09, 15.19)),
+            ("bolt", "gun_body", ["bolt"], (9.28, 5.03, 11.34)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 3.02, 10.71)),
+        ],
+        "hands": {"right": (8.0, 2.09, 15.19), "left": (8.0, 2.8, 7.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.02, -0.04),
+        "sight": (8.0, 7.03, 14.7),
+        "eye_relief": 2.0,
+    },
+    # The MK43's handle (the main part's 31st to 34th elements: a bar along the right of the top cover, on a leg at its
+    # front) rides its bolt bone, which is otherwise empty: each shot drives the handle back, and the reload first lifts
+    # it about the foot of its leg, then draws it back. Its rear notch and front post are the main part's. Its "seal"
+    # and "Flames" bones are empty: the charm that sways on each shot and the flames at the muzzle are not among the
+    # owner's parts. magazine_2 stays hidden (scale 0) in the owner's reload.
+    "ranger_rifle": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.09, 15.29)),
+            ("gun_body", "gun_body2", ["main-#30,31,32,33", "stan_grip"], (8.0, 2.09, 15.29)),
+            ("bolt", "gun_body", [], (8.75, 5.1, 11.38)),
+            ("Handle", "bolt", ["main#30,31,32,33"], (8.75, 5.1, 11.38)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 2.83, 10.61)),
+            ("magazine_2", "gun_body", [], (8.0, 2.83, 10.61)),
+            ("seal", "gun_body", [], (8.0, 6.0, 15.0)),
+            ("Flames", "gun_body", [], (8.0, 4.84, -0.1)),
+            ("Flames2", "gun_body", [], (8.0, 4.84, -0.1)),
+            ("Flames3", "gun_body", [], (8.0, 4.84, -0.1)),
+            ("Flames4", "gun_body", [], (8.0, 4.84, -0.1)),
+            ("Flames5", "gun_body", [], (8.0, 4.84, -0.1)),
+            ("Flames6", "gun_body", [], (8.0, 4.84, -0.1)),
+        ],
+        "hands": {"right": (8.0, 2.09, 15.29), "left": (8.0, 1.75, 6.8)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 4.84, -0.1),
+        "sight": (8.0, 6.1, 11.62),
+        "eye_relief": 2.0,
+    },
+    # The Whistler's bolt (the main part's elements the owner named "bolt": the carrier along the right of the receiver
+    # and its handle) slides back for the clip to go in from the top, turning a little about its own axis as it is
+    # caught, and runs home after. Its rear sight is a peep (the sights part); the front post is the main part's.
+    "kestrel_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-@bolt", "stan_barrel", "sights", "stan_grip"], (8.0, 1.96, 14.77)),
+            ("bolt", "gun_body", ["main@bolt"], (7.92, 5.33, 10.75)),
+        ],
+        "hands": {"right": (8.0, 1.96, 14.77), "left": (8.0, 1.95, 7.5)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.3, -3.45),
+        "sight": (8.0, 6.38, 12.62),
+        "eye_relief": 2.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -1183,6 +1272,8 @@ ZOOM = {
     "trench_lobber": 0.9, "thresher": 0.95, "stoker": 0.95,
     # The energy weapons: the Stormlock is a rifle; the Linesman's arcs find their own way, close in.
     "beam_pistol": 0.9, "stormlock_rifle": 0.8, "linesman": 0.95,
+    # The marksman rifles narrow it the most of any iron sights.
+    "picket_rifle": 0.7, "ranger_rifle": 0.75, "kestrel_rifle": 0.7,
 }
 
 
@@ -1291,6 +1382,11 @@ SHOT_SOUNDS = {
     "beam_pistol": "item/raygun/fire.ogg",
     "stormlock_rifle": "item/shock/fire.ogg",
     "linesman": "item/laser/fire.ogg",
+    # Slice 9A: the library's sniper, old rifle and iron rifle shots. Its revolver shot carries the same sound pack's
+    # copyright tags as the machine gun's, so it is not used either.
+    "picket_rifle": "item/scorched_sniper/fire.ogg",
+    "ranger_rifle": "item/old_rifle/fire.ogg",
+    "kestrel_rifle": "item/iron_rifle/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -1486,16 +1582,29 @@ def base_model(gun):
 
 # ------------------------------------------------------------------ converting the parts
 
+# Owner parts that stand off the gun they were made for, moved into place here, in pixels (the library's files are
+# unchanged; the move is checked like the rest, face for face). The Whistler's light stock (slice 9A) stands 3.15 px
+# behind and 0.9 px above its place: its wrist block and collars are its wooden and weighted stocks' own, which meet the
+# grip, moved by just that, so fitted it floated behind the gun.
+PART_SHIFTS = {("whistler", "light_stock"): (0.0, -0.9, -3.15)}
+
+
 def load_part(gun, part):
-    """The owner's part file, each face noting the texture it draws from ("_texture": a texture id). A scope's
-    "%<kind>" is its item model mounted on the gun (optic_part())."""
+    """The owner's part file, each face noting the texture it draws from ("_texture": a texture id), moved by its
+    PART_SHIFTS entry if it has one. A scope's "%<kind>" is its item model mounted on the gun (optic_part())."""
     if part.startswith("%"):
         return optic_part(gun, part[1:])
     data = json.loads((LIBRARY / "models" / "special" / GUNS[gun]["source"] / f"{part_file(part)}.json").read_text())
     textures = data.get("textures", {})
+    shift = PART_SHIFTS.get((GUNS[gun]["source"], part_file(part)))
     for element in data.get("elements", []):
         for face in element.get("faces", {}).values():
             face["_texture"] = face_texture(textures, face.get("texture", ""))
+        if shift:
+            element["from"] = [v + d for v, d in zip(element["from"], shift)]
+            element["to"] = [v + d for v, d in zip(element["to"], shift)]
+            if element.get("rotation"):
+                element["rotation"]["origin"] = [v + d for v, d in zip(element["rotation"].get("origin", [8, 8, 8]), shift)]
     return data
 
 
