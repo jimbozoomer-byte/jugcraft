@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D) and the marksman rifles (slice 9A)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -13,6 +13,7 @@ Status:
 - **Slice 8B** (the service arms: the Sentry Pistol, Garrison Rifle and Breacher; [below](#slice-8b-the-service-arms)): implemented on `claude/guns-service`, stacked on slice 8, awaiting review.
 - **Slice 8C** (the heavy weapons: the Trench Lobber, Thresher and Stoker; [below](#slice-8c-the-heavy-weapons)): implemented on `claude/guns-heavy`, on the integration branch that holds slices 7b to 8B, awaiting review.
 - **Slice 8D** (the energy weapons: the Beam Pistol, Stormlock Rifle and Linesman, and the Energy Cell they run on; [below](#slice-8d-the-energy-weapons)): implemented on `claude/guns-energy`, stacked on slice 8C, awaiting review.
+- **Slice 9A** (the marksman rifles: the Picket Rifle, Ranger Rifle and Kestrel Rifle; [below](#slice-9a-the-marksman-rifles)): implemented on `claude/guns-marksman` (#285), stacked on slice 8D, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -25,6 +26,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the scopes: on 8 October 2026, with the reticles and lens rims uploaded ("heres reticles and vignette"), asked what the scopes should use, they answered that they made those files and to use them (see [Dependencies and assets](#dependencies-and-assets)); and asked what next ("What next?"), they chose all four further gun sets offered, each its own slice.
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
+- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -709,6 +711,72 @@ Three more of the owner's guns, past steel, that run on charge from the energy s
 - **Aimed** (the CI screenshots of 9 October): the Beam Pistol's back rises a little past the crosshair, over the target's middle, and the Linesman's broad back fills the lower middle of the view. It is the shared aiming polish item ([below](#rollout-and-open-questions)), larger on these two.
 - **Not played:** none of it has been played yet. The arcs' reach, their seeking cones and the JE costs want play to set.
 
+## Slice 9A: the marksman rifles
+The first of the four gun sets the owner chose on 10 October 2026: three semi-automatic rifles in steel, the steadiest aimed and the farthest reaching of the guns.
+
+| | Picket Rifle | Ranger Rifle | Kestrel Rifle |
+|---|---|---|---|
+| The owner's gun | M3 Marksman | MK43 Rifle | Whistler |
+| What it is | a steel marksman's rifle with a peep sight on a short rail | a heavy semi-automatic rifle, its handle lifted and drawn back to reload | a copper-bright rifle loaded from the top with a clip |
+| Fires | one shot each pull | one shot each pull | one shot each pull |
+| Damage | 8 | 10 | 9 |
+| Rate | 2.5 a second (every 8 ticks) | 2 a second (every 10 ticks) | 2.2 a second (every 9 ticks) |
+| Holds | 10 | 10 | 8, a clip |
+| Reload | 2.15 s, a magazine | 2.25 s, a magazine | 2.75 s, a clip |
+| Spread, hip / aimed | 2° / 0.1° | 2.5° / 0.15° | 2° / 0.15° |
+| Range | 128 blocks | 120 | 128 |
+| The view aimed | narrowed to 0.7 | 0.75 | 0.7 |
+| Round | Rifle Round | Rifle Round | Rifle Round |
+| Takes | the barrel attachments, both magazines, the light grip and the four bayonets | both magazines, the three stocks, the light grip and the four bayonets | the barrel attachments, the three stocks, the light grip, the four bayonets and the three scopes |
+
+**Crafting** (a crafting table):
+- **Picket Rifle:** three steel ingots over a steel ingot, a lever and a brass ingot.
+- **Ranger Rifle:** three steel ingots over a brass ingot, a lever and planks, with planks under the lever for its stock.
+- **Kestrel Rifle:** three steel ingots over a lever between two copper ingots.
+
+**What you see:** the owner's animations.
+- **Picket Rifle:** its charging handle, on the right of the receiver, snaps back with each shot. To reload, the left hand swings the magazine down and back out of the well and seats a new one, and the handle is worked.
+- **Ranger Rifle:** the handle along the right of its top cover rides back with each shot. To reload, the gun is rolled over, the handle is lifted upright and drawn back, the magazine is changed, and the handle is slammed home.
+- **Kestrel Rifle:** each shot kicks it back and rolls it a little. To reload, the bolt is drawn back and held, a clip goes in from the top, and the bolt runs home. It throws no casings: its animations cue none.
+- **Sounds:** the library's sniper shot (Picket), its old rifle shot (Ranger) and its iron rifle shot (Kestrel). None carries a tag naming another source. The library's revolver shot carries the same sound pack's copyright tags as its machine gun shot (Magic Sound Effects), so it is not used either. The reload cues play the shared events.
+
+**How the models were built:**
+- **Gun bodies:** each turns about its grip, where the right hand holds it: the middle of the grip, as on the Garrison Rifle.
+- **Picket Rifle:**
+  - **Bolt:** the owner's bolt part, the charging handle.
+  - **Magazine:** turns about its top, in the well.
+  - **Sights:** a peep, the sights part's ring at the back of its rail; the front post is on the barrel. The owner made it no stand-in for its sights (no `no_sights` part), so it takes no scope.
+- **Ranger Rifle:**
+  - **Handle:** the main part's 31st to 34th elements, a bar along the right of the top cover on a leg at its front. It turns about the foot of the leg and rides the bolt bone, which holds nothing else: the shot slides the bolt back, and the reload lifts the handle, then draws the bolt.
+  - **Sights:** the main part's notch on the top cover and post on the rib. Like the Picket, it takes no scope.
+  - **Empty bones:** its animations also move a `seal` (a charm that sways with each shot, as on the revolvers) and six `Flames` at the muzzle. Neither is among the owner's parts, so their bones are empty and the shot shows the shared muzzle flash. Its `magazine_2` stays hidden (scale 0) in the owner's reload.
+- **Kestrel Rifle:**
+  - **Bolt:** the main part's elements the owner named `bolt`: the carrier along the right of the receiver and its handle. It turns a little about its own axis as it is caught back.
+  - **Sights:** a peep (the sights part), which a scope replaces, mounted where the peep stood, and a post (the main part's).
+  - **Light stock:** the owner's light stock for the Whistler stands 3.15 px behind its place and 0.9 px above it. Its wrist block and collars are the same as its wooden and weighted stocks', which meet the grip, moved by exactly that, so fitted it floated behind the gun. `tools/guns.py` moves it into place as it reads it (`PART_SHIFTS`). The library's file is unchanged, and the moved part is checked face for face like the rest.
+- **The hands:** the right on each grip's middle; the left half a pixel under the fore-end, as on the Garrison Rifle. The arms run as the other rifles' do. Checked in first-person and side previews, idle, firing and through each reload.
+- **Aimed, each is held 2 px further out** (`"eye_relief"`):
+  - Each shot kicks the gun back toward the eye (the Picket 1.4 px, the Kestrel 1.6), and the Ranger's handle slides 2.6 px back beside its sights.
+  - In a preview of the aimed shot at the hip's depth, the back of each came within about 2 px of the eye (the near plane is 0.8 px) and filled the bottom of the view. Held 2 px further out, the nearest of each is about 4 px away and the sights stay large; at 4 px further the gun shrank behind the right arm.
+
+**Connections:**
+- **Parts:** steel from the steel foundry, brass, copper, a lever and planks, as the service arms take. Rifle Rounds as before.
+- **Their place:** the long-range rifles of the steel tier. The Longhorn and Drover Rifles (iron and brass, worked between shots) reach 120 and 100 blocks; these reach 120 to 128, aim tighter, and need no working.
+
+**Balance:** starting numbers.
+- **Damage:** each lands about 20 a second, as the Patchwork Carbine does (6 every 6 ticks), but in fewer, harder shots, of which armour turns aside a smaller share.
+- **Against the Garrison Rifle:** it lands more a second up close (about 27). The marksman rifles are for reach and precision: aimed, a shot strays at most 0.26 blocks at 100 blocks.
+- **Between them:** the Ranger hits hardest; the Kestrel's clip of eight reloads slowest, and only it takes a scope; the Picket aims steadiest.
+
+**Save compatibility:** new items `jugcraft:picket_rifle`, `ranger_rifle` and `kestrel_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The tactical grip** these three have parts for is not an attachment yet. It is a pull request of its own, with the laser sight.
+- **Aimed,** as on the other rifles, the gun's back sits below the crosshair and the right fist over the lower middle of the view. The aiming polish is a pull request of its own.
+- **The Ranger's seal and flames** move in the owner's animations, but no part holds them, so nothing shows.
+- **The Kestrel throws no casings;** its animations cue none.
+- **Not played:** none of it has been played yet.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -796,7 +864,7 @@ The owner supplied each gun's parts as Blockbench Java item models (`Guns/models
      - Carbine: right (8, 1.2, 16.0), left (8, 2.8, 7.0);
      - Thunderpipe: right (8, 1.6, 17.0), left (8, 2.8, 9.5).
    - **Gun body:** turns about the right hand's grip.
-3. **Copies the files unchanged:** the atlases (the Thunderpipe's with the shell added), the animations (byte for byte) and the sounds.
+3. **Copies the files unchanged:** the atlases (the Thunderpipe's with the shell added), the animations (byte for byte) and the sounds. One part is moved as it is read: the Whistler's light stock, which stands off the gun ([slice 9A](#slice-9a-the-marksman-rifles)).
 4. **Checks the result:** it re-bakes every model the way GeckoLib 5.5.7 does (`GeometryCube`, `VertexSet`, `GeometryQuadUvs`) and compares each face with the owner's. Run `python3 tools/guns.py --check`; `tools/check_mod_data.py` runs it too. It was shown to fail on a flipped UV, a moved cube and a turned face.
 
 The animations' sound cues map to the library's sounds as follows:
@@ -1070,6 +1138,66 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | linesman | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
 | linesman | `Guns/item/medium_scope.png` | `543abecf859783be` |
 | linesman | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| picket_rifle | `Guns/models/item/m3_marksman.json` | `f1ef00294618bcae` |
+| picket_rifle | `Guns/item/m3_marksman.png` | `e6b9eeea82ab582f` |
+| picket_rifle | `Guns/item/m3_marksman.animation.json` | `f0f6a67bff8f16fc` |
+| picket_rifle | `Guns/models/special/m3_marksman/main.json` | `bc1536e41a3a27e5` |
+| picket_rifle | `Guns/models/special/m3_marksman/sights.json` | `320b7c64b684e96e` |
+| picket_rifle | `Guns/models/special/m3_marksman/stan_barrel.json` | `12fbfc809cdbe14b` |
+| picket_rifle | `Guns/models/special/m3_marksman/silencer.json` | `f27123c5f0c5a0a6` |
+| picket_rifle | `Guns/models/special/m3_marksman/advanced_silencer.json` | `501113b1269f5c68` |
+| picket_rifle | `Guns/models/special/m3_marksman/muzzle_brake.json` | `6198ae0cffe6a423` |
+| picket_rifle | `Guns/models/special/m3_marksman/ext_barrel.json` | `678b3435899b5732` |
+| picket_rifle | `Guns/models/special/m3_marksman/light_grip.json` | `971e71cb000e969c` |
+| picket_rifle | `Guns/models/special/m3_marksman/iron_bayonet.json` | `3293c99f3298ae80` |
+| picket_rifle | `Guns/models/special/m3_marksman/anthralite_bayonet.json` | `12278c61768c133e` |
+| picket_rifle | `Guns/models/special/m3_marksman/diamond_bayonet.json` | `4359c1879a8e3d51` |
+| picket_rifle | `Guns/models/special/m3_marksman/netherite_bayonet.json` | `f01bc97fd08ab627` |
+| picket_rifle | `Guns/models/special/m3_marksman/bolt.json` | `3d478b65457e46a8` |
+| picket_rifle | `Guns/models/special/m3_marksman/stan_mag.json` | `081781046abbecc1` |
+| picket_rifle | `Guns/models/special/m3_marksman/ext_mag.json` | `8a316d79e6dde6db` |
+| picket_rifle | `Guns/models/special/m3_marksman/speed_mag.json` | `31f5efe58b2b3fde` |
+| picket_rifle | `Guns/sounds/item/scorched_sniper/fire.ogg` | `624b2460a3e39921` |
+| ranger_rifle | `Guns/models/item/mk43_rifle.json` | `9f0fab0f05b8e4b9` |
+| ranger_rifle | `Guns/item/mk43_rifle.png` | `a1efff906c69b334` |
+| ranger_rifle | `Guns/item/mk43_rifle.animation.json` | `ad6f9a10e4df7239` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/main.json` | `8869a43484de682c` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/stan_grip.json` | `2a7f8b93a13f60ee` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/light_stock.json` | `bdb3c4a8f7635e16` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/heavy_stock.json` | `ad00c61472bdeea6` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/wooden_stock.json` | `c0702e6b06587c69` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/light_grip.json` | `38b1c261cb0c90a6` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/iron_bayonet.json` | `c9546fa642585d41` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/anthralite_bayonet.json` | `89888802a4497956` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/diamond_bayonet.json` | `d237ac7c7346f824` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/netherite_bayonet.json` | `a557f14d54843273` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/stan_mag.json` | `1359bb99b00c9fcb` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/ext_mag.json` | `fa205c62f65939db` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/speed_mag.json` | `6ed2ab4c57c04991` |
+| ranger_rifle | `Guns/sounds/item/old_rifle/fire.ogg` | `d684ae9a09c9c12c` |
+| kestrel_rifle | `Guns/models/item/whistler.json` | `8429cd08e20c88a6` |
+| kestrel_rifle | `Guns/item/whistler.png` | `4a1bd233c0f81437` |
+| kestrel_rifle | `Guns/item/whistler.animation.json` | `67236a76ed1956fb` |
+| kestrel_rifle | `Guns/models/special/whistler/main.json` | `d2a3f7ccbdc663b7` |
+| kestrel_rifle | `Guns/models/special/whistler/stan_barrel.json` | `d68f47a93d0589f6` |
+| kestrel_rifle | `Guns/models/special/whistler/silencer.json` | `7c05a2a52319be72` |
+| kestrel_rifle | `Guns/models/special/whistler/advanced_silencer.json` | `f6910e527d37fc08` |
+| kestrel_rifle | `Guns/models/special/whistler/muzzle_brake.json` | `c7d031c9f079eedb` |
+| kestrel_rifle | `Guns/models/special/whistler/ext_barrel.json` | `4ba3a81e66aabc42` |
+| kestrel_rifle | `Guns/models/special/whistler/stan_grip.json` | `42ddd6a3b3a48b15` |
+| kestrel_rifle | `Guns/models/special/whistler/light_stock.json` | `9af6c40abcb41953` |
+| kestrel_rifle | `Guns/models/special/whistler/heavy_stock.json` | `024f49e889212619` |
+| kestrel_rifle | `Guns/models/special/whistler/wooden_stock.json` | `e741af78fd941719` |
+| kestrel_rifle | `Guns/models/special/whistler/light_grip.json` | `5a158e12bdfe7e06` |
+| kestrel_rifle | `Guns/models/special/whistler/iron_bayonet.json` | `733ccc838333d852` |
+| kestrel_rifle | `Guns/models/special/whistler/anthralite_bayonet.json` | `351b26e635adb2ec` |
+| kestrel_rifle | `Guns/models/special/whistler/diamond_bayonet.json` | `803dcc3cd2cfaafb` |
+| kestrel_rifle | `Guns/models/special/whistler/netherite_bayonet.json` | `c4c4bc3a0e4fbf77` |
+| kestrel_rifle | `Guns/models/special/whistler/sights.json` | `8b88d550996656f4` |
+| kestrel_rifle | `Guns/sounds/item/iron_rifle/fire.ogg` | `e4a92914502ffd1c` |
+| kestrel_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| kestrel_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| kestrel_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | energy_cell | `Guns/item/energy_cell.png` | `857c3e9d98c18f97` |
 | energy_cell_empty | `Guns/item/empty_cell.png` | `b06623e4de7b9b8f` |
 | shared | `Guns/sounds/item/bolt/bolt.ogg` | `1cf1102f6ba52725` |
@@ -1403,7 +1531,7 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - Screenshots `jugcraft_guns_<scope>` and `jugcraft_guns_<scope>_aimed`.
 - **Slice 8, run locally (8 October 2026):**
   - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's. Each hand is where `BUILDS` puts it in its pose, with each shoulder locator 10 px below it. The Bulldog's atlas grew to 128 px to hold the scopes' pieces.
-  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds; run again after the last change, it changed nothing more.
   - `python3 tools/check_mod_data.py`: PASS (1869 material IDs).
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only.
@@ -1437,7 +1565,7 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - Both inventory screenshots are drawn.
 - **Slice 8B, run locally (8 October 2026):**
   - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's, each hand is where `BUILDS` puts it in its pose, and the scopes' pieces fit the free room of each 128 px atlas.
-  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds; run again after the last change, it changed nothing more.
   - `python3 tools/check_mod_data.py`: PASS (1872 material IDs).
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only.
@@ -1549,16 +1677,45 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
   - Mid-reload, the Beam Pistol's view is clear: the scene, the gun and its right hand. The left arm, which had held the camera, is left out for those frames.
   - The Stormlock's fired frame shows the gun, the crosshair and its icon in the hotbar.
   - The Trench Lobber's left sleeve shows at the lower left of its fired frame, not over half the view.
+- **Slice 9A, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three guns' parts, their attachments' included, re-bakes to the owner's; each hand is where `BUILDS` puts it in its pose; every bone the owner's animations move exists.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds; run again after the last change, it changed nothing more.
+  - `python3 tools/check_mod_data.py`: PASS (1919 material IDs), with `check_guns` (the three guns' numbers, attachments, looks and eye relief in Java).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews:**
+    - first-person views of each gun idle, aimed, fired from the hip and aimed, mid-reload and mid-inspection (approximating the game's hands), which set the 2 px of eye relief;
+    - side views of each reload: the Picket's and Ranger's magazines leaving and seating, the Ranger's handle lifted, drawn back and slammed home, and the Kestrel's bolt held back;
+    - the nearest point of each gun to the eye through its aimed shot, at 0, 2 and 4 px of relief.
+- **Slice 9A game tests (written; they run in CI):**
+  - `MarksmanGunsGameTests`:
+    - `marksmanRiflesAimTrue`: the three are registered with their numbers, fire one bullet a pull from Rifle Rounds, and, aimed, stray no more than the Longhorn Rifle and reach at least as far; each recipe loads; the Kestrel takes the three scopes, the Picket and the Ranger none.
+    - `marksmanRiflesLandAndLoad`: a shot from each lands its damage on a pig and spends a round; the Ranger's magazine reload loads the round it lacked after its reload time and not before; the empty Kestrel is loaded with a clip of eight from the inventory after its own.
+  - "Every gun registered" now counts twenty-seven guns.
+  - `GunsClientGameTests` takes the three through every gun's steps: drawn, aimed, fired at the husk, reloaded, inspected, fitted with each attachment set it takes, and held in third person. Screenshots `jugcraft_guns_picket_rifle_*`, `jugcraft_guns_ranger_rifle_*` and `jugcraft_guns_kestrel_rifle_*`.
+- **Slice 9A in CI** ([run 38031106724](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38031106724), on 0e7ea642a): every check passed.
+  - `mod` and `optional integrations absent`: the build and the server game tests passed. There are 1188 now, 1186 before; the two `MarksmanGunsGameTests` are the new ones.
+  - `client` (the guns' shard): `GunsClientGameTests` passed. Its log:
+    - **Picket Rifle:** aimed, the view narrowed to 0.7; fired, 6 flash frames, the husk 784.8 → 776.8 and rounds 10 → 9; reloaded 10, 31 Rifle Rounds left; 3 casings thrown.
+    - **Ranger Rifle:** aimed, 0.75; fired, 6 flash frames, the husk 776.8 → 766.8 and rounds 10 → 9; reloaded 10, 31 left; 3 casings.
+    - **Kestrel Rifle:** aimed, 0.7; fired, 6 flash frames, the husk 766.8 → 757.8 and rounds 8 → 7; reloaded 8, 31 left; no casings, as its animations cue none.
+  - **Screenshots:**
+    - Held, each rifle sits at the lower right in the owner's textures, the Ranger's handle along the right of its top cover.
+    - Aimed, the Picket's and Kestrel's peep sights and the Ranger's rear sight sit on the crosshair over the husk, the Ranger's handle up and to the right of it. As on the other rifles, the gun's back and the right fist fill the lower middle of the view.
+    - Mid-reload, each rifle is rolled toward the left hand as the owner's animations show it, the Ranger's handle lifted at the top of the view. Each is inspected as the owner's animations show it; partway through, the right sleeve swings near the camera at the lower right.
+    - Fitted, the counters read 1 / 15 with the Extended Magazine on the Picket and the Ranger, and the fitted rifles keep their sights on the crosshair aimed.
+    - Seen from outside, each is raised along the look, and its flash shows at the muzzle when it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
-- **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; the tactical grip and the laser sight; a rack that charges several Energy Cells at once.
+- **The gun sets the owner chose on 10 October 2026,** each its own pull request: the marksman rifles (slice 9A), then the automatic weapons, the second energy weapons and the pump shotguns.
+- **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; the tactical grip and the laser sight; the aiming polish (below); a rack that charges several Energy Cells at once. The owner chose the first three on 10 October 2026.
 - **Aimed, the gun hand covers the sights:** in the CI screenshots of 8 October, the right fist sits over the lower middle of the screen when aiming, on the one-handed guns and some long ones. The arm runs back toward the camera from the grip drawn at the middle of the view. This is a polish item for a pull request of its own.
 - **Not yet:**
   - the jam the Gnat's sound suggests;

@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 9A (the marksman rifles)
+- **Three marksman rifles** in steel, each the owner's model, art and animations, semi-automatic and the steadiest aimed and farthest reaching of the guns:
+  - the **Picket Rifle** (the owner's M3 Marksman), with a peep sight: 8 a shot, 10 rounds, 0.1° aimed, 128 blocks;
+  - the **Ranger Rifle** (MK43 Rifle), the hardest-hitting: 10 a shot, 10 rounds. Its handle is lifted and drawn back to reload;
+  - the **Kestrel Rifle** (Whistler), loaded from the top with a clip of eight: 9 a shot, 128 blocks. It alone takes a scope.
+- **Attachments:** the Picket takes the barrel attachments, both magazines, the light grip and the bayonets; the Ranger both magazines, the stocks, the light grip and the bayonets; the Kestrel the barrel attachments, the stocks, the light grip, the bayonets and the scopes.
+- **Aimed,** each is held 2 px further out, so its kick and the Ranger's handle stay clear of the eye.
+- Record: [guns.md, slice 9A](docs/features/guns.md#slice-9a-the-marksman-rifles).
+
 ### Unmerged: Guns, slice 8D (the energy weapons)
 - **Three energy weapons** past steel, each the owner's model, art and animations, running on charge from the energy system:
   - the **Beam Pistol** (the owner's Raygun), held in one hand. Its beam passes through every creature in its line; it breaks open to load;

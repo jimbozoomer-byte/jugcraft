@@ -669,6 +669,33 @@
       }
     ]
   },
+  "guns.picket_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/scorched_sniper_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.ranger_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/old_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.kestrel_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/iron_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

@@ -30,9 +30,11 @@ public final class GunLooks {
 	 * How much further from the eye a gun is held aimed than at the hip, in sixteenths of a block (tools/guns.py BUILDS
 	 * "eye_relief"); a gun not listed is aimed at its hip's depth. The Garrison Rifle's bolt slides back along its line
 	 * of sight as it fires, and at the hip's depth it came past the eye: aimed, each shot filled the screen. The Beam
-	 * Pistol's coil (slice 8D) stands out either side of its back, between its sight and the eye.
+	 * Pistol's coil (slice 8D) stands out either side of its back, between its sight and the eye. The marksman rifles
+	 * (slice 9A) kick back toward the eye with each shot, and the Ranger's handle slides back beside its sights: at the
+	 * hip's depth their backs came within two pixels of the eye and filled the bottom of the view.
 	 */
-	static final Map<String, Float> EYE_RELIEF = Map.of("garrison_rifle", 4.0F, "beam_pistol", 4.0F);
+	static final Map<String, Float> EYE_RELIEF = Map.of("garrison_rifle", 4.0F, "beam_pistol", 4.0F, "picket_rifle", 2.0F, "ranger_rifle", 2.0F, "kestrel_rifle", 2.0F);
 	/**
 	 * How far the owner's third-person transform tilts a gun up off the arm that holds it, in degrees (tools/guns.py
 	 * tilt(): the x rotation of its "thirdperson_righthand"); a gun not listed has none. The Gattaler's is made for an
@@ -67,6 +69,9 @@ public final class GunLooks {
 		LOOKS.put("beam_pistol", new Look(false, 0.9F));
 		LOOKS.put("stormlock_rifle", new Look(true, 0.8F));
 		LOOKS.put("linesman", new Look(true, 0.95F));
+		LOOKS.put("picket_rifle", new Look(true, 0.7F));
+		LOOKS.put("ranger_rifle", new Look(true, 0.75F));
+		LOOKS.put("kestrel_rifle", new Look(true, 0.7F));
 		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));

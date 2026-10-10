@@ -42,6 +42,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  * <li>Slice 8D, the energy weapons: the Beam Pistol's beam passes through every creature in its line, the Stormlock's and
  * Linesman's arcs leap between creatures ({@link #SHOTS}). They run on charge from the energy system: a reload draws each
  * round's {@link #CHARGE} from the Energy Cells in the inventory, which the Charging Station fills.</li>
+ * <li>Slice 9A, the marksman rifles: semi-automatic rifles in steel, the steadiest aimed and the farthest reaching (the
+ * Picket, Ranger and Kestrel Rifles); bullets like the rest.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.</li>
  * </ul>
@@ -76,6 +78,9 @@ public final class JugcraftGuns {
 		SPECS.put("beam_pistol", new GunSpec(6.0F, 1, 8, false, 8, 48, 0, 0, 0, 1.5F, 0.5F, 48, "energy_cell"));
 		SPECS.put("stormlock_rifle", new GunSpec(9.0F, 1, 14, false, 5, 0, 18, 17, 20, 2.0F, 0.5F, 64, "energy_cell"));
 		SPECS.put("linesman", new GunSpec(4.0F, 1, 6, true, 6, 0, 8, 13, 12, 15.0F, 10.0F, 12, "energy_cell"));
+		SPECS.put("picket_rifle", new GunSpec(8.0F, 1, 8, false, 10, 43, 0, 0, 0, 2.0F, 0.1F, 128, "rifle_round"));
+		SPECS.put("ranger_rifle", new GunSpec(10.0F, 1, 10, false, 10, 45, 0, 0, 0, 2.5F, 0.15F, 120, "rifle_round"));
+		SPECS.put("kestrel_rifle", new GunSpec(9.0F, 1, 9, false, 8, 55, 0, 0, 0, 2.0F, 0.15F, 128, "rifle_round"));
 	}
 
 	/**
@@ -187,6 +192,14 @@ public final class JugcraftGuns {
 				"netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
 		ACCEPTS.put("linesman", List.of("light_stock", "weighted_stock", "wooden_stock", "long_scope", "medium_scope",
 				"reflex_sight"));
+		ACCEPTS.put("picket_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
+				"netherite_bayonet"));
+		ACCEPTS.put("ranger_rifle", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
+				"wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
+		ACCEPTS.put("kestrel_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet",
+				"diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
 	}
 
 	/** The rounds. */
