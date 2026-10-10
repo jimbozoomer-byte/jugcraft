@@ -155,7 +155,8 @@ effect are the owner's; the numbers are Jugcraft's.
   - The element reads that attachment on the wearer, as it reads their armour, each time Trinkets draws them, so armour
     put on or off, or a wearer's new choice arriving, shows on the next frame. A wearer whose choice has not arrived (just
     after they join, until their client's message lands) shows their belt and boots.
-  - What that test counts as covering though it should not: the Rocket Pack and the Scuba Tank (chest; straps, with
+  - What that test counts as covering though it hardly does (the owner keeps it so, 10 October 2026: "They can hide them
+    its ok"): the Rocket Pack and the Scuba Tank (chest; straps, with
     most of the waist bare) hide the belt; so, when nothing else covers the waist, do six of Jugcraft's 3D pieces, drawn
     in 3D only, that stop short of the strap (the bronze, steel, Reforged White Diamond and Sunset Gem chestplates end at
     or above it, and the Sentinel and Banana leggings have no waist piece); and Wool Socks hide the boots (the socks
@@ -575,8 +576,7 @@ No worldgen, creatures, loot or seasons.
   the left boot, as read from the icon (if it is the right, `WORN_MIRRORED` changes to the left leg); and, for part 1c,
   whether a player should also be able to hide everyone else's belts and boots on their own screen (the first version
   of the switch did that; the owner asked for the choice to be seen by other players, and it now hides the player's
-  own, for everyone), and whether the pieces the armour test misjudges should stop hiding them: the Rocket Pack, Scuba
-  Tank and Wool Socks (an item tag could exempt them), and the six 3D pieces that stop short of the waist (the
-  generator could work out from `worn_models.json` which pieces reach the strap).
+  own, for everyone). Decided: the pieces the armour test misjudges (the Rocket Pack, Scuba Tank and Wool Socks, and the
+  six 3D pieces that stop short of the waist) keep hiding them.
 - Skipped: `researching_table` (removed from the base mod; Relic Lore and Artifice cover it), `relic_experience_bottle`
   (levelling), `blank_rune` (a model with no texture), `witch_hat` (its id is taken by Jugcraft's own Witch Hat).
