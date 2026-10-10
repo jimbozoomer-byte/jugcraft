@@ -9,6 +9,7 @@
 	"entrypoints": {
 		"fabric-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.FrameworkGameTests",
+			"io.github.jimbozoomer.jugcraft.test.LairGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceSharingGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceResourceGameTests",
