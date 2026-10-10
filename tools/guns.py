@@ -393,9 +393,9 @@ CELL_TOOLTIP = "Charge for the energy guns. Fill it at a Charging Station; a rel
 CELL_CAPACITY = 10_000
 CELL_ART = {"energy_cell": "energy_cell", "energy_cell_empty": "empty_cell"}
 CELL_ANIMATION = {"animation": {"frametime": 6}}
-# Two cells from copper cable, glass and redstone, capped in brass.
+# One unstackable cell from copper cable, glass and redstone, capped in brass.
 CELL_RECIPE = ([" C ", "GRG", " B "], {"C": "jugcraft:copper_cable", "G": "minecraft:glass_pane", "R": "minecraft:redstone",
-                                       "B": "#c:ingots/brass"}, 2)
+                                       "B": "#c:ingots/brass"}, 1)
 # Ammunition that is not one of AMMO's rounds (slice 8C), each with the rounds one item loads
 # (JugcraftGuns.PER_ITEM): the field chemistry branch's Grenade (jugcraft:grenade), a grenade a round; and blaze
 # powder, four bursts of the Stoker's flame. A reload that tops a gun up takes a whole item; what of it does not fit is
@@ -1581,6 +1581,8 @@ def attachment_model(kind):
     model["textures"] = {key: f"{MOD}:item/guns/optics/{value.removeprefix(effect)}"
                          if value.startswith(effect) and key != "particle" else more.get(value, texture)
                          for key, value in model["textures"].items()}
+    # Some supplied models omit the particle alias; use their existing runtime texture.
+    model["textures"].setdefault("particle", texture)
     if "model_elements" in att:
         model["elements"] = [model["elements"][i] for i in att["model_elements"]]
     return model
