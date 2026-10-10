@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 10G (two guns at once)
+- **A pistol in each hand:** with a one-handed gun in each hand (thirteen of the guns: the pistols, revolvers, the Haymaker, the Bronco SMG, the Spikedriver and the Culverin), left click fires the main hand's and right click the other's, a press a shot, held for an automatic. Each keeps its own rate, magazine, sound and flash; neither is aimed, and each strays half as far again from the hip.
+- G reloads the main gun, or the other when the main one is full; one gun reloads at a time. Each gun's counter shows on its own side of the hotbar. Seen from outside both arms are raised; in first person the other hand's gun has its own arm, drawn mirrored. The one-handed guns say in their tooltips that they pair.
+- The shot, reload, action and trace payloads now carry the hand.
+- Record: [guns.md, slice 10G](docs/features/guns.md#slice-10g-two-guns-at-once).
+
 ### Unmerged: Guns, slice 10F (enemies with guns)
 - **A new raider, the Raider Gunner,** who carries one of the owner's service arms (the Sentry Pistol, Garrison Rifle or Breacher) and fires it: the gun's own bullets at half their damage, in bursts, with the gun's magazine and reload time. Its bullets pass through raiders.
 - Gunners march in raids in place of some of the grunts (parties are as large as before), and one holds each raider camp. While the guns are switched off, grunts come in their places.

@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E) and enemies with guns (slice 10F)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F) and two guns at once (slice 10G)
 
 Status:
 - **Slices 1 to 9G are in `main`:** the last of them, 8C to 9G, with #277 on 10 October 2026. The lines below say where each was built.
@@ -27,6 +27,7 @@ Status:
 - **Slice 10D** (the sculk guns: the Undertone Rifle, Murmur SMG and Reverb; [below](#slice-10d-the-sculk-guns)): implemented on `claude/guns-sculk`, stacked on slice 10C, awaiting review.
 - **Slice 10E** (the Cell Rack, which charges six Energy Cells at once; [below](#slice-10e-the-cell-rack)): implemented on `claude/guns-cell-rack`, stacked on slice 10D, awaiting review.
 - **Slice 10F** (enemies with guns: the Raider Gunner, who carries and fires the service arms; [below](#slice-10f-enemies-with-guns)): implemented on `claude/guns-raider-gunners`, stacked on slice 10E, awaiting review.
+- **Slice 10G** (two guns at once: a one-handed gun in each hand, both fired; [below](#slice-10g-two-guns-at-once)): implemented on `claude/guns-dual-pistols`, stacked on slice 10F, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -40,7 +41,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
 - the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, the second, the aiming polish, slice 9F, and the third, the Lobber's grenades, slice 9G.
-- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B, the double-barrels slice 10C and the sculk guns slice 10D; the Energy Cell rack is slice 10E and the enemies with guns slice 10F.
+- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B, the double-barrels slice 10C and the sculk guns slice 10D; the Energy Cell rack is slice 10E, the enemies with guns slice 10F and the dual pistols slice 10G.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1507,6 +1508,63 @@ The gunner has 20 health, 2 armour and the grenadier's pace (0.28).
 - **The owner's gun-mob art:** the owner's library holds textures and sounds for Scorched Guns 2-style gun mobs: the Blunderer, Dissident, Hornlin, Cog Knight and others. It does not hold their models, so they could not be built here. With the models, they could carry the guns by the same code.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 10G: two guns at once
+The third of the systems the owner chose on 10 October 2026 ("Dual pistols", offered as "A pistol in each hand."): a one-handed gun in each hand, and both fire.
+
+**Which guns:** the thirteen held in one hand, those whose owner's idle hides the left arm (`tools/guns.py` `one_handed()`, `JugcraftGuns.ONE_HANDED`).
+- **The guns:** the Warden Pistol, Haymaker, Duelling Pistol, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Beam Pistol, Rattler Pistol, Bronco SMG, Spikedriver, Caisson Pistol and Culverin.
+- **Pairs:** any two, alike or not. Each says in its tooltip that it pairs.
+- **Not these:** a gun held in both hands beside one in the other hand is no pair. The other gun stays as before: carried, not fired.
+
+**Using them:**
+- **The triggers:** left click fires the main hand's gun, as ever. Right click fires the other's: a press for a shot, held for an automatic (the Rattler Pistol, the Bronco SMG).
+- **Each gun its own:** each keeps its own rate, magazine, sound, animations, flash and casings.
+- **No aiming:** right click is the other trigger, so neither gun is aimed down its sights. From the hip each strays half as far again as one gun alone (`DUAL_SPREAD`, 1.5).
+- **Reloading:** G reloads the main hand's gun, or the other's when the main one is full or has nothing to load. An empty gun's trigger reloads that gun.
+- **One reload at a time:** while a magazine is out, neither gun fires. A shot of either cuts a shell-at-a-time reload short.
+- **The other keys:** H inspects both; V stabs with the main gun's bayonet.
+- **The counters:** each gun's counter is on its own side of the hotbar, the other hand's beyond the off-hand slot.
+- **Laser Sight:** both guns point along the look, so one dot shows if either has a Laser Sight.
+- **Doors and villagers:** a right click that opens a door or talks to a villager does that and fires nothing, as with any item in hand.
+
+| | One Sentry Pistol | Two Sentry Pistols |
+|---|---|---|
+| From the hip, strays up to | 2° | 3° each |
+| A magazine, every shot landing | 8 shots, 40 damage | 16 shots, 80 |
+| At the triggers' fastest | 20 a second, for 2 s | 40 a second, for 2 s |
+| Then | 2.35 s of reloading | 4.7 s: one gun after the other |
+| Over a magazine and its reload | about 9 a second | about 12 |
+
+The Garrison Rifle, for comparison, does about 17 a second over its 30 rounds and their reload, aimed.
+
+**What you see:**
+- **First person:** each gun in its own hand, each with that hand's arm. A gun drawn in a left hand is the same model as in the right, not its mirror image. So its grip hand's arm is drawn as the left arm, running out to the left shoulder: the right hand's way to its shoulder, mirrored across the gun.
+- **From outside:** both arms raised along the look, each with its gun.
+
+**How it works:**
+- **`GunItem.dual`:** whether a creature holds a one-handed gun in each hand.
+- **`GunItem.use`:** with two guns it neither aims nor counts the click as used, so neither gun dips out of view and back. On the client, the click that reaches the other hand pulls its trigger (`GunHooks.offTrigger`, `GunsClient`).
+- **The server** (`GunShots.fire` and `reload`, by hand): the trigger and reload payloads say which hand. It fires or reloads the other hand's gun only while the player holds two one-handed guns. Each hand has its own trigger credit, so each gun keeps its own rate. A player reloads one gun at a time, and the other hand's reload stops once the guns are no longer two.
+- **Other clients:** `GunActionPayload` and `GunTracePayload` say which hand's gun, so they play the right gun's shot and draw an energy pistol's beam from its side.
+- **Its numbers:** `ONE_HANDED` and `DUAL_SPREAD` are in `tools/guns.py`; `tools/check_mod_data.py` checks `JugcraftGuns` against them.
+
+**Connections:** the one-handed guns of slices 2 to 10C, with their rounds. No new item, recipe or round.
+
+**Balance:**
+- **More shots, less aim:** two guns fire twice as fast as one, but neither can be aimed, and each strays half as far again.
+- **Reloads:** they reload one after the other, so over a magazine and its reload two pistols do about a third more than one. In a short fight they do twice as much.
+- **Cost:** two guns to craft, and twice the rounds a second.
+- **Against the rifles:** a rifle aimed still does more over time, and from further off.
+
+**Save compatibility:** nothing new is saved: a gun in either hand is the same item as before. The payloads changed (they carry the hand), so a client and a server must be the same build, as with any change to the mod.
+
+**Known limits:**
+- **No mirror image:** a gun in the left hand is the same model as in the right, so its ejection port faces the same way. Its casings fly out to its own side.
+- **The left arms are worked out:** they are mirrored from the right hand's by a rule, not placed by hand. In the CI screenshots the left hand holds its pistol from below, its arm rising from the bottom left of the screen, as the right hand's does on the right.
+- **Left-handed players:** their main gun is drawn in the left hand, so its arms are now mirrored too; before, they ran in across the screen. No screenshot shows a left-handed player.
+- **Reloading both:** that takes two presses of G, or each empty gun's trigger.
+- **Not played:** none of it has been played yet.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -1530,19 +1588,19 @@ The gunner has 20 health, 2 armour and the grenadier's pace (0.28).
   - a rifle round costs a quarter of a brass nugget, a lead nugget and a gunpowder;
   - a buckshot shell a quarter of each, plus paper.
 - **Metal accounting:** rounds and guns hold no metal units (`tools/check_mod_data.py`). Nothing turns them back into metal, so there is no conversion loop.
-- **Server-side rate:** each player has a trigger credit refilling at one shot per interval, banking up to two (`GunShots.BURST`). A late packet does not lose a shot, and a fast client gains none.
+- **Server-side rate:** each player has a trigger credit refilling at one shot per interval, banking up to two (`GunShots.BURST`); with two guns, one for each hand (slice 10G). A late packet does not lose a shot, and a fast client gains none.
 - **Charging (slices 8D and 10E):** the Charging Station and the Cell Rack put into a cell exactly the JE they take from cables. Nothing is lost or gained, so charging is no loop.
 - **Starting numbers,** not tuned in play. The owner may want higher-tier guns to outclass these clearly.
 
 ## Multiplayer and persistence
-- **Server authority:** the client only asks, with `GunShotPayload` (one per shot, no data) and `GunReloadPayload` (none). The server (`guns/GunShots`):
-  - checks the gun in the main hand, that the player is alive and not a spectator, the loaded rounds and the trigger credit;
+- **Server authority:** the client only asks, with `GunShotPayload` (one per shot) and `GunReloadPayload`, each saying only which hand's gun (slice 10G). The server (`guns/GunShots`):
+  - checks the gun in that hand (the other hand's only beside a one-handed gun in the main hand, slice 10G), that the player is alive and not a spectator, the loaded rounds and the trigger credit;
   - computes every bullet from the player's server-side position and look;
   - spends rounds, takes them from the inventory and deals the damage.
 - **Ally and protection checks:** a bullet skips allies, the player's own mount and marker stands. It skips anything other code refuses through `AttackEntityCallback`, such as the walled town's protection.
 - **Prediction:** the client plays the shot, sound and kick at once for responsiveness. A refused shot is only a sound. The counter allows for shots not yet answered and writes them off after half a second.
 - **Reloads:**
-  - A reload is held on the server per player and stops if the gun leaves the main hand.
+  - A reload is held on the server per player, one gun at a time, and stops if the gun leaves its hand.
   - A magazine loads at the end of its time.
   - A shell-at-a-time reload loads one shell after each shell's time, and a shot cuts it short.
   - The player's own client times its animation from the same numbers.
@@ -1556,7 +1614,7 @@ The gunner has 20 health, 2 armour and the grenadier's pace (0.28).
   - `GunTracePayload` (the shooter's id, the kind of shot and up to three points) tells the clients that see the shooter, and the shooter's own, where the shot went. It is used only to draw the shot.
 - **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). An Energy Cell's charge is the shared `jugcraft:energy` component (slice 8D). Its attachments are another, `jugcraft:attachments` (a list of up to four attachment ids, oldest first; an id no longer known is ignored). The Trench Lobber's and the Bullfrog's kind of grenade is `jugcraft:loaded_grenade` (slice 9G: an item id, absent for the frag Grenade; one no longer known is read as the frag Grenade). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
 - **Attachments and authority:** attachments are fitted only by the crafting recipes, which the server runs. The server reads a gun's numbers from its own copy of the stack (`GunItem.spec(stack)`), for the shot, the trigger rate, the reload and the rounds it may load; the client uses the same numbers only to predict.
-- **Disconnect:** clears that player's trigger credit, reload and spin.
+- **Disconnect:** clears that player's trigger credits, reload and spin.
 - **The Cell Rack (slice 10E):**
   - A cell goes in or comes out only on the server, through the game's own block use: the server checks the player can reach the block before the rack is asked. The client only swings the arm.
   - The server picks the cradle from the point used and its own copy of the rack's cells, and takes the cell from the player's own hand, one at a time.
@@ -1564,6 +1622,7 @@ The gunner has 20 health, 2 armour and the grenadier's pace (0.28).
   - Hoppers move cells by the container rules above, on the server.
   - It saves its buffer and its cells; a cell keeps its charge as the shared `jugcraft:energy` component.
   - Each tick, a rack looks at its six cradles and charges up to six cells; it loads no chunks.
+- **Two guns at once (slice 10G):** the server fires or reloads the other hand's gun only while the player holds a one-handed gun in each hand, with a trigger credit for each hand; one reload at a time. The action and trace payloads say which hand's gun, only to play and draw it.
 - **Raider gunners (slice 10F):** the server alone works out a gunner's shots, from its own position toward its target, with the same bullet code as a player's. The clients that see it are told of each shot and reload (`GunActionPayload`, the gunner's id), only to play them. A gunner's magazine count lives in its AI and is not saved; one loaded from a save starts with a full magazine.
 - **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns', rounds' and attachments' recipes (twenty-nine with slice 5: sixteen guns and rounds, eleven attachments, and the fitting and removal recipes). Items and the attachments component stay registered, so saved guns, rounds and attachments survive with it off.
 
@@ -3143,6 +3202,41 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - **Server game tests:** 1301 in each job, slice 10E's 1296 and this slice's five. All passed, `RaiderGunnerGameTests` among them, and the raid test with its new party.
   - **Client game tests:** the changed files chose `GunsClientGameTests`, `JugcraftClientGameTests`, `LairClientGameTests` and `SpindleLoftClientGameTests`, and all four passed. In `GunsClientGameTests` the three gunners were posed holding their guns for 324 frames.
   - **Screenshot** `jugcraft_guns_raider_gunners`: the three gunners stand before the brick wall facing the player, in grey-green greatcoats with the brass rounds across the chest, field caps and goggles. The left one holds the Sentry Pistol raised in one hand, the middle one the Garrison Rifle at the chest in both hands, the right one the Breacher in both hands, its long barrel running out toward the player.
+- **Slice 10G, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every gun's files came out unchanged.
+  - `python3 tools/generate_material_data.py`: wrote the one-handed guns' tooltip line.
+  - `python3 tools/check_mod_data.py`: PASS (2162 material IDs), with `check_guns` (`JugcraftGuns.ONE_HANDED` and `DUAL_SPREAD` against tools/guns.py, and the tooltip's name).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+- **Slice 10G game tests (all passed in CI, below):**
+  - `DualGunsGameTests`:
+    - `oneHandedGunsPair`: the thirteen one-handed guns are guns; a Sentry Pistol is one-handed, a Garrison Rifle and a stick are not; a pistol in each hand is two guns at once, a rifle and a pistol are not, and nor is a pistol in the other hand alone.
+    - `twoGunsAreNotAimed`: with a gun in each hand, using either hand's gun aims neither; with one pistol, it aims.
+    - `bothGunsFireEachAtItsRate`: a Sentry Pistol and a Warden Pistol each fire two shots in one tick and are refused a third, every shot landing, each gun spending its own two rounds.
+    - `otherHandFiresOnlyBesideAOneHandedGun`: a pistol in the other hand neither fires nor reloads beside a rifle, nor fires alone; beside a pistol it fires, landing its shot.
+    - `oneGunReloadsAtATime`: while the main gun's magazine is out the other gun neither fires nor begins its reload; once the first is full the other reloads in its own time, both from the same Light Rounds.
+    - `eitherGunsShotCutsAShellReloadShort`: a shot of the other gun cuts the Marshal Revolver's round-at-a-time reload short.
+    - `otherGunsReloadStopsWithoutTwoGuns`: the other gun's reload stops when a stick takes the main gun's place; nothing is loaded or taken.
+    - `otherHandsBeamPistolFires`: a Beam Pistol in the other hand fires its beam, landing its damage.
+  - `GunsClientGameTests`, through the keys:
+    - with a Sentry Pistol and a Warden Pistol, left click fires the first; right click, held, fires the second once and aims neither;
+    - G pressed twice reloads the main gun, then the other;
+    - right click held fires a Rattler Pistol in the other hand again and again;
+    - seen from outside, both arms are raised;
+    - screenshots: `jugcraft_guns_dual_held`, `_main_fired`, `_other_fired`, `_reloading`, `_third_person` and `_third_person_back`.
+- **Slice 10G in CI** ([run 38083220287](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38083220287), on 0a5aa9392: the slice, with slice 10F's branch merged in): every check passed.
+  - **Server game tests:** 1309 in each job, slice 10F's 1301 and this slice's eight. All passed, `DualGunsGameTests` among them.
+  - **Client game tests:** the changed files chose `GunsClientGameTests` alone, and it passed. Its two-gun step logged:
+    - left click, then right click held: rounds 8 to 7 and 12 to 11, 13 frames of flash, the husk from 45.5 to 36.5 health (the Sentry Pistol's 5 and the Warden Pistol's 4), and neither gun aimed;
+    - G pressed twice: both guns full again (8 and 12), 30 of the 32 Light Rounds left;
+    - right click held for 15 ticks with a Rattler Pistol in the other hand: 20 rounds to 14, six shots;
+    - in third person, the player posed with a gun in each hand for 400 frames.
+  - **Screenshots:**
+    - `jugcraft_guns_dual_held`: a pistol in each hand at the bottom of the screen, the Warden Pistol on the left and the Sentry Pistol on the right, each in its own hand. Each gun's counter is on its own side of the hotbar: 12 / 12 on the left beyond the off-hand slot, 8 / 8 on the right.
+    - `_main_fired`: the Sentry Pistol's flash, its counter at 7 / 8.
+    - `_other_fired`: taken in the tick right click went down, before the shot, so the Warden Pistol's counter still reads 12 / 12. The counts logged above show the shot.
+    - `_reloading`: the Sentry Pistol tipped in its reload, its counter reading "Reloading", the Warden Pistol's at 11 / 12.
+    - `_third_person` and `_third_person_back`: the player from in front, both arms raised with a gun in each hand at the chest, and from behind.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -3153,11 +3247,10 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
-- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A), the coil and plasma guns (slice 10B), the double-barrels (slice 10C) and the sculk guns (slice 10D); a rack that charges several Energy Cells at once (slice 10E), enemies with guns (slice 10F) and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
+- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A), the coil and plasma guns (slice 10B), the double-barrels (slice 10C) and the sculk guns (slice 10D); a rack that charges several Energy Cells at once (slice 10E), enemies with guns (slice 10F) and pistols in both hands (slice 10G). The three follow-ups of the first round are slices 9E, 9F and 9G.
 - **Aimed, the gun hand covered the sights** in the CI screenshots from 8 October, and a fitted stock came up under the eye: slice 9F draws the arms at half size aimed and leaves a fitted stock out ([above](#slice-9f-the-aiming-polish)).
 - **Not yet:**
   - the jam the Gnat's sound suggests;
-  - off-hand guns (pistols in both hands, chosen on 10 October 2026, a later pull request);
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the guns beyond these sets.
 - **Balance:** the numbers are starting points for the owner to set.

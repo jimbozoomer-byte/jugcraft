@@ -87,6 +87,10 @@ import org.jspecify.annotations.Nullable;
  * <li>Slice 10A: a rocket gun fires a High-Explosive Rocket from the eye along the look, at the gun's rocket speed; it
  * flies straight and bursts where it hits or at the end of the gun's range, as the rocket launcher's rockets burst,
  * hurting living things only ({@link #rocket}).</li>
+ * <li>Slice 10G, two guns at once: while the player holds a one-handed gun in each hand ({@link GunItem#dual}), the
+ * other hand's gun fires and reloads too, each gun at its own rate (a trigger credit for each hand), from the hip and
+ * strayed {@link JugcraftGuns#DUAL_SPREAD} times as far. One gun reloads at a time: while a magazine is out neither
+ * fires, and a shot of either cuts a shell-at-a-time reload short.</li>
  * </ul>
  */
 public final class GunShots {
@@ -109,6 +113,8 @@ public final class GunShots {
 	private static final float STAB_KNOCKBACK = 0.4F;
 
 	private static final Map<UUID, Trigger> TRIGGERS = new HashMap<>();
+	/** The other hand's trigger credit (slice 10G, two guns at once). */
+	private static final Map<UUID, Trigger> OFF_TRIGGERS = new HashMap<>();
 	private static final Map<UUID, Reload> RELOADS = new LinkedHashMap<>();
 	/** Each player's last stab (game time). */
 	private static final Map<UUID, Long> STABS = new HashMap<>();
@@ -125,8 +131,8 @@ public final class GunShots {
 		PayloadTypeRegistry.serverboundPlay().register(GunSpinPayload.TYPE, GunSpinPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(GunActionPayload.TYPE, GunActionPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(GunTracePayload.TYPE, GunTracePayload.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(GunShotPayload.TYPE, (payload, context) -> fire(context.player()));
-		ServerPlayNetworking.registerGlobalReceiver(GunReloadPayload.TYPE, (payload, context) -> reload(context.player()));
+		ServerPlayNetworking.registerGlobalReceiver(GunShotPayload.TYPE, (payload, context) -> fire(context.player(), payload.hand()));
+		ServerPlayNetworking.registerGlobalReceiver(GunReloadPayload.TYPE, (payload, context) -> reload(context.player(), payload.hand()));
 		ServerPlayNetworking.registerGlobalReceiver(GunStabPayload.TYPE, (payload, context) -> stab(context.player()));
 		ServerPlayNetworking.registerGlobalReceiver(GunSpinPayload.TYPE, (payload, context) -> spin(context.player()));
 		ServerTickEvents.END_SERVER_TICK.register(GunShots::tick);
@@ -140,19 +146,28 @@ public final class GunShots {
 
 	/** Pulls the trigger of the gun in the player's main hand; whether it fired. */
 	public static boolean fire(ServerPlayer player) {
-		ItemStack stack = player.getMainHandItem();
-		if (!(stack.getItem() instanceof GunItem gun) || !player.isAlive() || player.isSpectator()) {
+		return fire(player, InteractionHand.MAIN_HAND);
+	}
+
+	/**
+	 * Pulls the trigger of the gun in this hand; whether it fired. The other hand's gun fires only while the player holds a
+	 * one-handed gun in each hand (slice 10G, {@link GunItem#dual}).
+	 */
+	public static boolean fire(ServerPlayer player, InteractionHand hand) {
+		ItemStack stack = player.getItemInHand(hand);
+		if (!(stack.getItem() instanceof GunItem gun) || !player.isAlive() || player.isSpectator()
+				|| hand == InteractionHand.OFF_HAND && !GunItem.dual(player)) {
 			return false;
 		}
 		GunSpec spec = GunItem.spec(stack);
 		ServerLevel level = (ServerLevel) player.level();
 		Reload loading = RELOADS.get(player.getUUID());
 		if (loading != null) {
-			if (!spec.byShell()) {
-				return false; // the magazine is out
+			if (!loading.spec.byShell()) {
+				return false; // a magazine is out (slice 10G: of either gun; a reload takes both hands)
 			}
 			RELOADS.remove(player.getUUID());
-			announce(player, GunActionPayload.STOP, 0);
+			announce(player, GunActionPayload.STOP, 0, loading.hand);
 		}
 		boolean free = player.hasInfiniteMaterials();
 		int loaded = GunItem.loaded(stack);
@@ -163,16 +178,17 @@ public final class GunShots {
 		if (spinUp > 0 && !spunUp(player, spinUp, level.getGameTime())) {
 			return false; // the barrels are not up to speed
 		}
-		if (!spend(player, spec, level.getGameTime())) {
+		if (!spend(player, hand, spec, level.getGameTime())) {
 			return false;
 		}
 		boolean aiming = GunItem.aiming(player, stack);
-		float spread = aiming ? spec.aimSpread() : spec.hipSpread();
+		// Slice 10G: two guns at once are fired from the hip, each straying further than one gun alone.
+		float spread = aiming ? spec.aimSpread() : spec.hipSpread() * (GunItem.dual(player) ? JugcraftGuns.DUAL_SPREAD : 1.0F);
 		switch (JugcraftGuns.shot(gun)) {
 			case JugcraftGuns.GRENADE -> lob(level, player, stack, spec, spread);
 			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
-			case JugcraftGuns.BEAM -> beam(level, player, spec, spread);
-			case JugcraftGuns.ARC -> arc(level, player, spec, spread);
+			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand);
+			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand);
 			case JugcraftGuns.ROCKET -> rocket(level, player, gun, spec, spread);
 			default -> shoot(level, player, spec, spread);
 		}
@@ -185,7 +201,7 @@ public final class GunShots {
 		// The shooter's client plays its own shot; everyone else hears it here.
 		level.playSound(player, eye.x, eye.y, eye.z, JugcraftGuns.sound("guns." + gun.name() + ".fire"), SoundSource.PLAYERS,
 				GunItem.volume(stack), 0.95F + player.getRandom().nextFloat() * 0.1F);
-		announce(player, aiming ? GunActionPayload.AIM_SHOOT : GunActionPayload.SHOOT, 0);
+		announce(player, aiming ? GunActionPayload.AIM_SHOOT : GunActionPayload.SHOOT, 0, hand);
 		return true;
 	}
 
@@ -266,9 +282,17 @@ public final class GunShots {
 
 	/** Starts reloading the gun in the player's main hand; whether it started. */
 	public static boolean reload(ServerPlayer player) {
-		ItemStack stack = player.getMainHandItem();
+		return reload(player, InteractionHand.MAIN_HAND);
+	}
+
+	/**
+	 * Starts reloading the gun in this hand; whether it started. One gun reloads at a time, and the other hand's only while
+	 * the player holds a one-handed gun in each hand (slice 10G, {@link GunItem#dual}).
+	 */
+	public static boolean reload(ServerPlayer player, InteractionHand hand) {
+		ItemStack stack = player.getItemInHand(hand);
 		if (!(stack.getItem() instanceof GunItem gun) || !player.isAlive() || player.isSpectator()
-				|| RELOADS.containsKey(player.getUUID())) {
+				|| RELOADS.containsKey(player.getUUID()) || hand == InteractionHand.OFF_HAND && !GunItem.dual(player)) {
 			return false;
 		}
 		GunSpec spec = GunItem.spec(stack);
@@ -284,8 +308,8 @@ public final class GunShots {
 					: Component.translatable("message.jugcraft.guns.no_ammo", Component.translatable(ammo.getDescriptionId())));
 			return false;
 		}
-		RELOADS.put(player.getUUID(), new Reload(stack, spec, ((ServerLevel) player.level()).getGameTime(), rounds, ammo));
-		announce(player, GunActionPayload.RELOAD, rounds);
+		RELOADS.put(player.getUUID(), new Reload(stack, hand, spec, ((ServerLevel) player.level()).getGameTime(), rounds, ammo));
+		announce(player, GunActionPayload.RELOAD, rounds, hand);
 		return true;
 	}
 
@@ -295,10 +319,12 @@ public final class GunShots {
 			Map.Entry<UUID, Reload> entry = it.next();
 			ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
 			Reload reload = entry.getValue();
-			if (player == null || !player.isAlive() || player.getMainHandItem() != reload.stack) {
+			// It stops when the gun leaves its hand, or (slice 10G) the other hand's gun when there are no longer two.
+			if (player == null || !player.isAlive() || player.getItemInHand(reload.hand) != reload.stack
+					|| reload.hand == InteractionHand.OFF_HAND && !GunItem.dual(player)) {
 				it.remove();
 				if (player != null) {
-					announce(player, GunActionPayload.STOP, 0);
+					announce(player, GunActionPayload.STOP, 0, reload.hand);
 				}
 				continue;
 			}
@@ -466,9 +492,10 @@ public final class GunShots {
 		return taken;
 	}
 
-	/** Spends a shot of the player's trigger credit, if they have one (see the class comment). */
-	private static boolean spend(ServerPlayer player, GunSpec spec, long now) {
-		Trigger trigger = TRIGGERS.computeIfAbsent(player.getUUID(), id -> new Trigger(now));
+	/** Spends a shot of the player's trigger credit for this hand, if they have one (see the class comment). */
+	private static boolean spend(ServerPlayer player, InteractionHand hand, GunSpec spec, long now) {
+		Map<UUID, Trigger> triggers = hand == InteractionHand.OFF_HAND ? OFF_TRIGGERS : TRIGGERS;
+		Trigger trigger = triggers.computeIfAbsent(player.getUUID(), id -> new Trigger(now));
 		trigger.credit = Math.min(BURST, trigger.credit + Math.max(0, now - trigger.last) / (double) spec.interval());
 		trigger.last = now;
 		if (trigger.credit < 1.0) {
@@ -600,7 +627,7 @@ public final class GunShots {
 	 * in its line that the shooter may strike takes the shot's damage ({@link JugcraftGuns#ZAP_DAMAGE}); it passes through
 	 * them all. No block is touched.
 	 */
-	private static void beam(ServerLevel level, ServerPlayer player, GunSpec spec, float spread) {
+	private static void beam(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 direction = stray(player.getLookAngle(), spread, player.getRandom());
 		Vec3 end = eye.add(direction.scale(spec.range()));
@@ -615,7 +642,7 @@ public final class GunShots {
 				foe.hurtServer(level, source, spec.damage());
 			}
 		}
-		trace(player, GunTracePayload.BEAM, List.of(end));
+		trace(player, GunTracePayload.BEAM, List.of(end), hand);
 	}
 
 	/**
@@ -625,7 +652,7 @@ public final class GunShots {
 	 * block between them, at most {@link JugcraftGuns#ARC_HOPS} times, each taking {@link JugcraftGuns#ARC_SHARE} of the
 	 * damage before it. Finding none, it strikes the first block along the look within range, harmlessly.
 	 */
-	private static void arc(ServerLevel level, ServerPlayer player, GunSpec spec, float spread) {
+	private static void arc(ServerLevel level, ServerPlayer player, GunSpec spec, float spread, InteractionHand hand) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
 		double reach = spec.range();
@@ -650,7 +677,7 @@ public final class GunShots {
 			Vec3 end = eye.add(look.scale(reach));
 			BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 			points.add(block.getType() != HitResult.Type.MISS ? block.getLocation() : end);
-			trace(player, GunTracePayload.ARC, points);
+			trace(player, GunTracePayload.ARC, points, hand);
 			return;
 		}
 		DamageSource source = zap(level, player);
@@ -662,7 +689,7 @@ public final class GunShots {
 			foe.hurtServer(level, source, damage);
 			damage *= JugcraftGuns.ARC_SHARE;
 		}
-		trace(player, GunTracePayload.ARC, points);
+		trace(player, GunTracePayload.ARC, points, hand);
 	}
 
 	/**
@@ -695,9 +722,12 @@ public final class GunShots {
 				player);
 	}
 
-	/** Tells the shooter's client and every client that sees them where an energy weapon's shot went (slice 8D). */
-	private static void trace(ServerPlayer player, int kind, List<Vec3> points) {
-		GunTracePayload payload = new GunTracePayload(player.getId(), kind, List.copyOf(points));
+	/**
+	 * Tells the shooter's client and every client that sees them where an energy weapon's shot went (slice 8D), and from
+	 * which hand's gun (slice 10G).
+	 */
+	private static void trace(ServerPlayer player, int kind, List<Vec3> points, InteractionHand hand) {
+		GunTracePayload payload = new GunTracePayload(player.getId(), kind, List.copyOf(points), hand == InteractionHand.OFF_HAND);
 		Set<ServerPlayer> watchers = new LinkedHashSet<>(PlayerLookup.tracking(player));
 		watchers.add(player);
 		for (ServerPlayer watcher : watchers) {
@@ -745,7 +775,12 @@ public final class GunShots {
 
 	/** Tells the clients that see this player (not the player's own, which has played it already). */
 	private static void announce(ServerPlayer player, int action, int rounds) {
-		GunActionPayload payload = new GunActionPayload(player.getId(), action, rounds);
+		announce(player, action, rounds, InteractionHand.MAIN_HAND);
+	}
+
+	/** The same, of the gun in this hand (slice 10G). */
+	private static void announce(ServerPlayer player, int action, int rounds, InteractionHand hand) {
+		GunActionPayload payload = new GunActionPayload(player.getId(), action, rounds, hand);
 		for (ServerPlayer watcher : PlayerLookup.tracking(player)) {
 			if (watcher != player && ServerPlayNetworking.canSend(watcher, GunActionPayload.TYPE)) {
 				ServerPlayNetworking.send(watcher, payload);
@@ -755,6 +790,7 @@ public final class GunShots {
 
 	private static void forget(ServerPlayer player) {
 		TRIGGERS.remove(player.getUUID());
+		OFF_TRIGGERS.remove(player.getUUID());
 		RELOADS.remove(player.getUUID());
 		STABS.remove(player.getUUID());
 		SPINS.remove(player.getUUID());
@@ -782,6 +818,8 @@ public final class GunShots {
 
 	private static final class Reload {
 		final ItemStack stack;
+		/** The hand the gun is in (slice 10G: the other hand's, with a gun in each). */
+		final InteractionHand hand;
 		final GunSpec spec;
 		final long start;
 		/** What it loads (slice 9G: a grenade gun's kind of grenade). */
@@ -789,8 +827,9 @@ public final class GunShots {
 		int rounds;
 		int done;
 
-		Reload(ItemStack stack, GunSpec spec, long start, int rounds, Item ammo) {
+		Reload(ItemStack stack, InteractionHand hand, GunSpec spec, long start, int rounds, Item ammo) {
 			this.stack = stack;
+			this.hand = hand;
 			this.spec = spec;
 			this.start = start;
 			this.rounds = rounds;

@@ -2306,6 +2306,20 @@ MOB_DROP = 0.085
 MOB_ROUNDS = (0, 3)
 
 
+# ------------------------------------------------------------------ two guns at once (slice 10G)
+
+# A player may hold a one-handed gun (two_handed() false: the pistols, revolvers, the Haymaker, the Bronco SMG, the
+# Spikedriver and the Culverin) in each hand; left click fires the main hand's, right click the other's, and neither is
+# aimed down its sights (JugcraftGuns.ONE_HANDED). From the hip, each of two guns strays DUAL_SPREAD times as far as one
+# gun held alone does.
+DUAL_SPREAD = 1.5
+
+
+def one_handed():
+    """The guns a player may hold two of, one in each hand (slice 10G): those held in one hand."""
+    return [gun for gun in GUNS if not two_handed(gun)]
+
+
 def cell_rack_model():
     """The Cell Rack in the electric look of the power gear (the Charging Station's textures): a graphite plinth edged
     with high-voltage stripes, a back panel with vented sides, framing posts either side, two shelves each with a
@@ -2457,6 +2471,8 @@ def write_all(write, assets, data, lang, condition):
     # Slice 9G: a grenade gun loads any grenade, one kind at a time (GunShots.reloadAmmo).
     lang[f"message.{MOD}.guns.no_grenades"] = "No grenades to load."
     lang[f"tooltip.{MOD}.guns.loaded_grenade"] = "Loaded with %s"
+    # Slice 10G: the one-handed guns say they pair (JugcraftGuns.ONE_HANDED).
+    lang[f"tooltip.{MOD}.guns.one_handed"] = "One-handed: with one in each hand, left click fires this one, right click the other"
     for name, info in DAMAGE_TYPES.items():
         body = {"message_id": f"{MOD}.{name}", "exhaustion": 0.1, "scaling": "when_caused_by_living_non_player"}
         if info["effects"]:
