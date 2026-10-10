@@ -3023,6 +3023,21 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `sculkGunsFireAndLoad`: side by side, each fires its last round at a pig three blocks off: the rifle's and the machine gun's shot takes one round's damage, the Reverb's pellets land together. Each then loads from the inventory: the magazines have nothing in halfway through their reload and are full as it ends; the Reverb has one shell in after its first shell's time and both after its reload; two rounds are left each time.
   - "Every gun registered" now counts forty-eight guns, and slice 9E's `tacticalAttachmentsFitTheirGuns` counts the Reverb among the guns with the owner's tactical grip parts.
   - `GunsClientGameTests` takes the three new guns through its steps as it takes every gun: held, aimed, fired at the husk, reloaded from the inventory, inspected, with each set of attachments they take, seen from outside, and in the inventory.
+- **Slice 10D in CI** ([run 38076348750](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38076348750), on 2c33aa609: the slice with slice 10C's CI record merged in): every check passed.
+  - **Server game tests:** 1291 in each job, slice 10C's 1289 and this slice's two. All passed, `SculkGunsGameTests` among them.
+  - **`GunsClientGameTests`** (the client job's first shard). Each of the three guns went through its steps:
+    - its arms drawn at full size held and half size aimed;
+    - aimed, the view narrowed to 0.82 (Undertone Rifle), 0.9 (Murmur SMG) and 0.9 (Reverb);
+    - fired at the husk, each spending a round: the Undertone Rifle took it from 523.29 to 514.29 (its 9), the Murmur SMG to 511.29 (its 3) and the Reverb to 483.29 (eight of its ten pellets, 28), with 8 flash frames each;
+    - reloaded from the inventory: twelve Rifle Rounds into the Undertone Rifle, twenty-four Light Rounds into the Murmur SMG and two Buckshot Shells into the Reverb, 31 left each time;
+    - where their animations cue a casing, the Undertone Rifle threw one through its shot and reload, the Murmur SMG three and the Reverb three;
+    - with each set of attachments it takes, held and aimed: the Undertone Rifle's three stocks, each left out aimed (in 44, 44 and 43 frames, none held), and the Laser Sight; the Murmur SMG's Extended Magazine (its counter read 1 / 36), Speed Magazine and Laser Sight; the Reverb's Light Grip, and its Tactical Grip with the Laser Sight.
+  - **Screenshots** (the guns' own fifteen, eighteen with attachments and six from outside):
+    - **Undertone Rifle:** held at the lower right, pointing at the husk. Aimed, the back of its receiver stands under the crosshair, its peep ring just above around the husk's head, the tendrils fanned out to either side. Reloading, the gun is tipped and rolled, the left arm reaching up under it. Inspected, it is turned to show its glowing cells.
+    - **Murmur SMG:** held at the right. Aimed, its back stands under the crosshair, the peep ring above at the husk's head. Reloading, the gun is tipped up, the left arm under it and its crystal glowing in its window. Inspected, it is turned to show its side.
+    - **Reverb:** held at the right. Aimed, its back stands under the crosshair, the husk's head in the notch between its rear posts, thin tendrils to either side and the right hand below. Reloading, the gun is rolled to one side, its barrels turned aside, the left arm reaching up to it. Inspected, it is turned to show its side.
+    - **With attachments:** aimed, no stock comes up under the eye. With the Laser Sight, aimed, its box stands just right of the crosshair, over the husk's side, as on every gun that takes it.
+    - **From outside:** each is held at the chest in both hands; fired, a flash shows at its muzzle.
 - **Slice 10E, run locally (10 October 2026):**
   - `python3 tools/guns.py`: PASS. Every gun's files came out unchanged.
   - `python3 tools/generate_material_data.py`: wrote the Cell Rack's block models (lit and not), blockstates, item, loot table, recipe and names, and put it in the pickaxe's tag.
