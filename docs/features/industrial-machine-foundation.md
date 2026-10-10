@@ -116,8 +116,8 @@ None new. The test forms are registered by the test mod (`jugcraft-test`), never
 
 ## Verification
 
-- `python tools/check_mod_data.py`: passed locally.
-- **Server game tests** (`IndustrialFoundationGameTests`): written for CI's build job, 13 tests:
+- `python tools/check_mod_data.py` and `python scripts/check_repository.py`: passed locally.
+- **Server game tests** (`IndustrialFoundationGameTests`), 14 tests:
   - descriptors check themselves: sizes, part numbering, rotation in all four orientations, and 15 kinds of invalid form refused;
   - placing with the item names the blocked clearance or part and places nothing, then fills exactly the rig's eight parts;
   - in every orientation only the port faces answer the fluid, item and energy lookups; the water port refuses lava;
@@ -132,9 +132,19 @@ None new. The test forms are registered by the test mod (`jugcraft-test`), never
   - a blocked clearance or a wrong part unforms the machine without losing work;
   - breaking mid-batch drops the escrowed coal and the bed once, and makes no charcoal;
   - the Chemical Reactor never runs the form-only test recipes and its save is unchanged, and an old one-in/one-out tank save migrates into a three-in/two-out layout by role.
-- **Client game test** (`IndustrialFoundationClientGameTests`): written for CI's client job. It opens the rig's screen while a batch runs, then with an unused input named, and takes `jugcraft_form_screen` and `jugcraft_form_screen_unused_input`.
+- **Client game test** (`IndustrialFoundationClientGameTests`): it opens the rig's screen while a batch runs, then with an unused input named, and takes `jugcraft_form_screen` and `jugcraft_form_screen_unused_input`.
 
-None of these has run yet at the time of writing; see the pull request for CI's results. No survival playtest, two-client test or performance measurement has been done.
+### Results
+
+- **Run [38084951488](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38084951488) (commit 529eb001): one new test failed.** Everything compiled. `aToolIsNeededAndHeldWhileItWorks` found the bed could be taken out at the screen while its batch ran. Inside the socket slot, the captured socket number was named `index`, which there means `Slot`'s own field (the slot's place in the menu), so the lock checked the wrong bit. Renamed in commit 72d91e4b. The same run also hit the intermittent `ArmsVIIIGameTests.javelinStrikesAndComesDown` failure that main has too; commit 6687b0ed carries PR #303's fix for it unchanged.
+- **Run [38085442031](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38085442031) (commit 6687b0ed): green.**
+  - The build and both server game test jobs passed, "All 1292 required tests passed", these 14 among them. The javelin test now runs five times and must pass all five.
+  - All four client shards passed. Shard 2 ran `IndustrialFoundationClientGameTests` and took both screenshots:
+    - `jugcraft_form_screen`: Form Test Rig, "Processing", 40%, power 29.3k of 30k, batches 1/1, the bed in its socket and an efficiency card beside it.
+    - `jugcraft_form_screen_unused_input`: "Waiting for input" and "Water tank: nothing here uses Lava", 0%, batches 0/1.
+  - The terminal clips its longest state ("Waiting for inpu") and its power label crowds the number. Nothing shipped uses this screen yet; the first real form's change fixes both.
+
+No survival playtest, two-client test or performance measurement has been done.
 
 ## World and event applicability
 
@@ -147,10 +157,8 @@ Not applicable: infrastructure inside machines, with no world generation, creatu
   - its construction recipe (the selected 20-plate total);
   - capability tags for the water and brine electrolysis recipes;
   - the selected output policies: methanation water drains when full; lye is kept and stops the machine.
-- **For the owner:**
-  - Keep warming as a free label inside the paid work, as now, or make a cold start cost extra warm-up energy?
-  - Is a short status line on the original machines' screens wanted too? Not done here.
 - **Known limits:**
+  - The original one-model machines' screens are unchanged; only forms show the eight states.
   - No JEI/EMI category or Jade readout for form-only recipes yet.
   - Companions do not work forms.
   - The comparator reads the share of lanes running.
