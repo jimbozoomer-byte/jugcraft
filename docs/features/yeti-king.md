@@ -1,6 +1,6 @@
 # The Yeti King
 
-Status: implemented in source. CI is to build it and run its game tests and client game test (below). This is part 2 of boss 3 in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the boss of the Glacier Hall, his kin and his thrown and fallen things, and his loot. It is built on part 1, the hall and the Frost Horn that opens it ([glacier-hall.md](glacier-hall.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 3 in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the boss of the Glacier Hall, his kin and his thrown and fallen things, and his loot. It is built on part 1, the hall and the Frost Horn that opens it ([glacier-hall.md](glacier-hall.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 10 October 2026 the owner asked for the next boss "exact same way you did the spider but adjusted for that character", and chose a new boss built from start to finish; the Yeti King is the owner's own example in [branches/BOSSES.md](../branches/BOSSES.md).
 Owner: @jimbozoomer-byte
 
@@ -166,6 +166,31 @@ No Mojang texture is read, traced or copied.
 
 ## Verification
 
+![The Yeti King slumped asleep on his throne under the ivory tusks, the dais's tiers of blue ice below him](../images/ingame_yeti_king_throne.jpg)
+![Woken, he stands up on his throne, his arms out](../images/ingame_yeti_king_wakes.jpg)
+![Maul Swipe: on the glare ice in the lake's middle he swings an arm through a white arc](../images/ingame_yeti_king_maul_swipe.jpg)
+![Boulder Throw: he heaves a block of ice up over his head](../images/ingame_yeti_king_boulder_throw.jpg)
+![Ground Slam: he leaps high beside an ice column](../images/ingame_yeti_king_ground_slam.jpg)
+![From above: a wide round of the lake's drift snow blasted bare to glare ice where he came down, he in its middle, the columns and his dais beyond](../images/ingame_yeti_king_slam_ice.jpg)
+![Frost Breath: hunched on the glare ice, he breathes a cloud of frost across it](../images/ingame_yeti_king_frost_breath.jpg)
+![Avalanche Charge: he charges on all fours across the glare ice, snow flying about him](../images/ingame_yeti_king_charge.jpg)
+![The King's Roar: back on his dais before the throne, his arms raised](../images/ingame_yeti_king_roar.jpg)
+![His kin: a whelp just out, in a den in the hall's side, among the den's old bones and the white pelts on its floor](../images/ingame_yeti_king_kin.jpg)
+![Icicle Fall: icicles falling one above another before the hall's wall, their shadows on the glare ice, and he roaring beside them](../images/ingame_yeti_king_icicle_fall.jpg)
+![Glacial Spikes: shards of ice bursting up from the glare ice before him, a whelp beyond](../images/ingame_yeti_king_glacial_spikes.jpg)
+![The Fury of the Peaks: he stands on the glare ice facing the camera, blue fire rising from his crown, the throne beyond](../images/ingame_yeti_king_fury.jpg)
+![After his fall: Grey Mist standing over the glare ice in the lake's middle, the drift snow round it, the empty throne beyond](../images/ingame_yeti_king_defeated.jpg)
+
+*The client game test's pictures (CI, commit `bd610bd`; the Glacial Spikes from `f2cd4aa`, whose run caught the spikes as they burst): waiting and waking; the Hunt's Maul Swipe, Boulder Throw and Ground Slam, the glare ice his slam bared, his Frost Breath and his Avalanche Charge; the King's Roar and his kin in a den; the Blizzard's Icicle Fall and Glacial Spikes; the Fury of the Peaks; and after his fall. Each attack is frozen mid-move. The test client renders at 480x270.*
+
+CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `d6a30b6` | Build | **Failed to compile:** his knockback set `hurtMarked`, a field 26.3 does not have. Nothing else ran |
+| `f2cd4aa` | Build, data audit, every server game test with and without the optional integrations, and every client test class (his test arena is a new structure file, which the selection counts as shared) | His knockback now sends the player's motion packet, as the spider's spool does. **All pass but one:** his nine game tests in both server jobs, and `YetiKingClientGameTests` (his whole fight) with every other client class. `mod` failed 1 of its 1292 required tests: Arms VIII's javelin test, which on `main` too now and then flies its javelin through its pig (pull request 303); `optional integrations absent` passed it on the same commit. The Fury's picture was taken too close, and the falling icicles were lost among the vault's own |
+| `bd610bd` | The same, with pull request 303's fix for the javelin ported (`294651b`), and those two pictures re-aimed | **All pass:** all 1293 required game tests (the fix's new test among them), and every client test class. The pictures above are from this commit, but for the Glacial Spikes |
+
 Run locally (10 October 2026):
 
 | Check | Result |
@@ -174,7 +199,7 @@ Run locally (10 October 2026):
 | `python3 tools/check_mod_data.py`: now also checks (`check_yeti`) his Java numbers, attacks and his things' numbers against `tools/yeti_king.py`; that where his fight looks for the hall's parts (`GlacierHall.java`: the lake, its centre and radius, the columns, the top step, the throne, the roar's place and the dens) is where `tools/glacier_hall.py` builds them, and that his throne, the place he roars from, where he lands and the dens' mouths are clear in the template and stand on its floor; that the block he hurls leaves from where his model holds it; his registrations, names and renderers; the GeckoLib models, every clip the Java plays, sheet sizes, glowmask and controllers' bones; the loot table and his trophies against Arms VII's; recipes, costume tags, advancement and messages; and that nothing of his loads chunks or changes dimension. Ten deliberate changes to his Java, one at a time, each failed it | Pass, 2159 IDs |
 | `python3 tools/check_icon_maps.py` on the three new maps | Pass; the new `yeti_fur` material passes the palette rules |
 | `python3 tools/generate_material_data.py` and `tools/generate_textures.py`, then `git status` | Write this part's data and textures only (the PNGs they re-encoded with identical pixels were reverted) |
-| `./gradlew build`, game tests and client game tests | Not run locally (the Fabric Maven is out of reach here); to be run by CI |
+| `./gradlew build`, game tests and client game tests | Not run locally (the Fabric Maven is out of reach here); run by CI |
 
 The first audit run found the west den's mouth holding a pelt, a carpet; the check now lets a carpet stand where his kin come out.
 
@@ -199,7 +224,7 @@ The client game test (`YetiKingClientGameTests`, CI job `client`) runs his fight
 7. when he falls (with a patch of his lake bare and his kin about), the player has Yeti Fur, one trophy (a first kill) and Abominable, the snow has drifted back, his kin are gone, and Grey Mist stands in the lake's middle;
 8. a fresh instance opened in his slot has none of the old instance's Grey Mist.
 
-Along the way it takes a picture of each part of the fight.
+Along the way it takes a picture of each part of the fight (above).
 
 Not run: the two-client dedicated-server playtest, and play by hand. No test yet times his attacks against real players, measures how long a fight lasts, or tries sliding on his glare ice, his charge or his blocks of ice on a moving player.
 
