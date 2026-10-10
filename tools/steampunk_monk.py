@@ -66,11 +66,20 @@ def head():
         m += cyl("z", x, 6.6, 1.6, 4.3, 5.6, BRASS, GLASS)
         m += cyl("z", x, 6.6, 1.1, 5.6, 5.8, GLASS)
     m.append(box((-0.6, 6.1, 4.4), (0.6, 7.1, 5.2), BRASS_DARK))
-    # The kasa: woven straw tiers rising to a point, a brass rim, four brass ribs and a finial, tilted forward.
-    tilt = ("x", 4, [0, 9.4, 0])
+    return m
+
+
+HAT = (0, 9.4, 0)   # the crown of the head, from NECK: the kasa hangs from here
+
+
+def hat():
+    """The kasa: woven straw tiers rising to a point, a brass rim and a finial, tilted a little forward. From HAT,
+    its own joint, so it can bob behind the head."""
+    m = []
+    tilt = ("x", 4, [0, 0, 0])
     # A shallow cone: ten straw tiers each less than a pixel tall, from the brim to a point.
     tiers = []
-    y = 9.6
+    y = 0.2
     for i in range(10):
         r = 11.5 - 1.1 * i
         h = 0.7 + 0.08 * i
@@ -78,8 +87,8 @@ def head():
         y += h
     for i, (r, y0, y1) in enumerate(tiers):
         m += _turned(cyl("y", 0, 0, r, y0, y1, STRAW if i % 2 == 0 else STRAW_DARK), tilt)
-    m += _turned(cyl("y", 0, 0, 12, 9.2, 9.9, BRASS), tilt)
-    m += _turned(cyl("y", 0, 0, 11.2, 9.9, 10.2, BRASS_DARK), tilt)
+    m += _turned(cyl("y", 0, 0, 12, -0.2, 0.5, BRASS), tilt)
+    m += _turned(cyl("y", 0, 0, 11.2, 0.5, 0.8, BRASS_DARK), tilt)
     top = y
     m += _turned(cyl("y", 0, 0, 0.9, top, top + 1.4, BRASS), tilt)
     m += _turned(cyl("y", 0, 0, 1.3, top + 1.4, top + 2.4, BRASS), tilt)
@@ -243,37 +252,47 @@ def add(*points):
     return [sum(p[k] for p in points) for k in range(3)]
 
 
-def groups():
+def groups(with_staff=False):
+    """The monk's groups at their joints with their rest rotations; the staff only when asked (it is its own
+    project, art/steampunk_monk/shakujo.bbmodel, so it can be an item in the hand later)."""
+    crown = add(NECK, HAT)
     out = [("body", HIP, None, [shifted(i, HIP) for i in body()]),
-           ("head", NECK, REST.get("head"), [shifted(i, NECK) for i in head()], "body")]
+           ("head", NECK, REST.get("head"), [shifted(i, NECK) for i in head()], "body"),
+           ("hat", crown, None, [shifted(i, crown) for i in hat()], "head")]
     for name, joint in SHOULDERS.items():
         side = 1 if "left" in name else -1
         out.append((name, joint, REST.get(name), [shifted(i, joint) for i in arm(side)], "body"))
-    hand = add(SHOULDERS["right_arm"], HAND)
-    out.append(("staff", hand, REST.get("staff"), [shifted(i, hand) for i in staff()], "right_arm"))
+    if with_staff:
+        hand = add(SHOULDERS["right_arm"], HAND)
+        out.append(("staff", hand, REST.get("staff"), [shifted(i, hand) for i in staff()], "right_arm"))
     for name, joint in LEGS.items():
         out.append((name, joint, None, [shifted(i, joint) for i in leg()]))
     return out
 
 
-def posed():
-    """Every box in world pixels at the rest pose, for a preview."""
-    tree = {g[0]: g for g in groups()}
-    parents = {g[0]: (g[4] if len(g) > 4 else None) for g in groups()}
+def posed(pose=None, with_staff=True):
+    """Every box in world pixels, at the rest pose or at `pose` ({group: (rx, ry, rz, dx, dy, dz)}, absolute), for
+    a preview."""
+    pose = pose or {}
+    parts = groups(with_staff)
+    tree = {g[0]: g for g in parts}
+    parents = {g[0]: (g[4] if len(g) > 4 else None) for g in parts}
 
     def chain(name):
         turns = []
         while name:
             g = tree[name]
-            rx, ry, rz = g[2] or (0, 0, 0)
+            rx, ry, rz, dx, dy, dz = pose.get(name, tuple(g[2] or (0, 0, 0)) + (0, 0, 0))
             for axis, angle in (("z", rz), ("y", ry), ("x", rx)):
                 if angle:
                     turns.append((axis, angle, list(g[1])))
+            if dx or dy or dz:
+                turns.append(("move", (dx, dy, dz)))
             name = parents[name]
         return turns
 
     out = []
-    for g in groups():
+    for g in parts:
         turns = chain(g[0])
         for item in g[3]:
             frm, to, texture = item[:3]
@@ -283,10 +302,105 @@ def posed():
     return out
 
 
-def write_bbmodel(folder=ART):
+# ------------------------------------------------------------------ animation curves (ticks)
+
+def with_rest(pose):
+    """A pose (changes per group) laid over the rest rotations: absolute angles."""
+    out = {}
+    for g in groups(True):
+        base = tuple(g[2] or (0, 0, 0)) + (0, 0, 0)
+        delta = pose.get(g[0], (0, 0, 0, 0, 0, 0))
+        out[g[0]] = tuple(base[i] + delta[i] for i in range(6))
+    return out
+
+
+def idle_pose(t, period=48):
+    """Breathing, a slow look about, the hat settling a beat behind the head, the free hand's fingers at rest."""
+    p = 2 * math.pi * t / period
+    return with_rest({"body": (0, 0, 0, 0, 0.6 * math.sin(p), 0),
+                      "head": (1.5 * math.sin(p + 0.4), 5 * math.sin(p / 2), 0, 0, 0, 0),
+                      "hat": (-2 * math.sin(p - 0.5), 0, 1.5 * math.sin(p / 2 - 0.6), 0, 0.4 * math.sin(2 * p - 0.9), 0),
+                      "left_arm": (2 * math.sin(p + 0.8), 0, 1.5 * math.sin(p), 0, 0, 0),
+                      "right_arm": (2 * math.sin(p + 0.2), 0, 0, 0, 0, 0)})
+
+
+def walk_pose(t, period=16):
+    """A cartoony bouncy stride: big leg swings with a hop at each step, the body squashing as it lands and
+    stretching as it rises, swaying and nodding, the free arm swinging, the staff hand steadier, and the kasa
+    bobbing and tilting a beat behind the head."""
+    p = 2 * math.pi * t / period
+    hop = max(0.0, math.sin(2 * p))
+    stretch = 0.07 * math.sin(2 * p)
+    pose = {"body": (3 * math.sin(2 * p + 0.3), 0, 3.5 * math.sin(p), 0, 2.6 * hop, 0),
+            "head": (-4 * math.sin(2 * p), 3 * math.sin(p), -2.5 * math.sin(p), 0, 0, 0),
+            "hat": (-7 * math.sin(2 * p - 0.9), 0, 3 * math.sin(p - 0.7), 0, 1.4 * math.sin(2 * p - 1.2), 0),
+            "left_leg": (32 * math.sin(p), 0, 0, 0, 0, 0),
+            "right_leg": (-32 * math.sin(p), 0, 0, 0, 0, 0),
+            "left_arm": (-30 * math.sin(p), 0, 4 * math.sin(2 * p), 0, 0, 0),
+            "right_arm": (8 * math.sin(p), 0, 0, 0, 0, 0)}
+    return with_rest(pose), (1 - stretch / 2, 1 + stretch, 1 - stretch / 2)
+
+
+ATTACK_TICKS = 24
+
+
+def attack_pose(t):
+    """The staff strike: the staff hand hauled up and back with the body coiling and the hat tipping back, then
+    snapped down and forward in a stamping blow, a squash on the hit, and a springy recovery."""
+    def smooth(u):
+        u = max(0.0, min(1.0, u))
+        return u * u * (3 - 2 * u)
+    if t < 7:
+        u = smooth(t / 7)
+        arm, twist, lean, hat_tip, squash, free = -25 - 135 * u, 22 * u, -8 * u, 10 * u, 0.04 * u, -18 + 40 * u
+    elif t < 10:
+        u = smooth((t - 7) / 3)
+        arm, twist, lean, hat_tip, squash, free = -160 + 175 * u, 22 - 44 * u, -8 + 24 * u, 10 - 24 * u, 0.04 - 0.16 * u, 22 - 50 * u
+    elif t < 15:
+        u = (t - 10) / 5
+        arm, twist, lean, hat_tip, squash, free = 15 + 3 * math.sin(u * 7) * (1 - u), -22 + 6 * u, 16 - 4 * u, -14 + 6 * u, -0.12 * (1 - u), -28 + 4 * u
+    else:
+        u = smooth((t - 15) / (ATTACK_TICKS - 15))
+        w = math.exp(-u * 3) * math.cos(u * 7)
+        arm, twist, lean, hat_tip, squash, free = 15 - 40 * u, -16 + 16 * u, 12 - 12 * u, -8 * (1 - u) * w, 0.05 * w * (1 - u), -24 + 6 * u
+    pose = {"body": (lean, twist, 0, 0, 0, 0), "head": (4 - lean / 2, -8 - twist / 2, 0, 0, 0, 0),
+            "hat": (hat_tip, 0, 0, 0, 0, 0), "right_arm": (arm, 0, -35, 0, 0, 0), "staff": (25, 0, 35, 0, 0, 0),
+            "left_arm": (free, 0, 8, 0, 0, 0), "left_leg": (-lean / 2, 0, 0, 0, 0, 0), "right_leg": (lean / 2, 0, 0, 0, 0, 0)}
+    return pose, (1 - squash / 2, 1 + squash, 1 - squash / 2)
+
+
+def animations():
     import blockbench_export
-    return blockbench_export.write(folder / "steampunk_monk.bbmodel", "steampunk_monk", groups(),
-                                   draw=lambda name: TEXTURES[name]())
+    names = [g[0] for g in groups(False)]
+
+    def clip(name, length, frames, poses, loop):
+        tracks = {n: {"rotation": [], "position": [], "scale": []} for n in names}
+        for i in range(frames + 1):
+            time = round(length * i / frames, 4)
+            pose, scale = poses(i, frames)
+            for n in names:
+                rx, ry, rz, dx, dy, dz = pose.get(n, (0, 0, 0, 0, 0, 0))
+                rest = tuple(dict((g[0], g[2] or (0, 0, 0)) for g in groups(False)).get(n, (0, 0, 0)))
+                tracks[n]["rotation"].append((time, (rx - rest[0], ry - rest[1], rz - rest[2])))
+                tracks[n]["position"].append((time, (dx, dy, dz)))
+            tracks["body"]["scale"].append((time, scale))
+        tracks = {g: {c: k for c, k in ch.items() if any(v != (0, 0, 0) and v != (1, 1, 1) for _, v in k)}
+                  for g, ch in tracks.items()}
+        return blockbench_export.animation(name, length, tracks, loop=loop)
+
+    return [clip("idle", 2.4, 24, lambda i, n: (idle_pose(48 * i / n), (1, 1, 1)), True),
+            clip("walk", 0.8, 16, lambda i, n: walk_pose(16 * i / n), True),
+            clip("attack", 1.2, 24, lambda i, n: attack_pose(ATTACK_TICKS * i / n), False)]
+
+
+def write_bbmodel(folder=ART):
+    """The monk (no staff) with his clips, and the shakujo as its own project with its grip at the origin."""
+    import blockbench_export
+    monk = blockbench_export.write(folder / "steampunk_monk.bbmodel", "steampunk_monk", groups(False),
+                                   draw=lambda name: TEXTURES[name](), animations=animations())
+    blockbench_export.write(folder / "shakujo.bbmodel", "shakujo", [("shakujo", (0, 0, 0), None, staff())],
+                            draw=lambda name: TEXTURES[name]())
+    return monk
 
 
 # ------------------------------------------------------------------ art (flat, clean)
@@ -360,4 +474,15 @@ if __name__ == "__main__":
         out = sys.argv[-1]
         for yaw, suffix in ((30, "front_left"), (-30, "front_right"), (90, "side"), (-150, "back")):
             box_preview.render(posed(), scale=5, yaw=yaw, pitch=12, draw=draw).save(out.replace(".png", f"_{suffix}.png"))
+        from PIL import Image
+        frames = []
+        for poses in ([walk_pose(t)[0] for t in (0, 4, 8, 12)], [attack_pose(t)[0] for t in (5, 9, 12, 20)]):
+            for pose in poses:
+                frames.append(box_preview.render(posed(pose), scale=4, yaw=-30, pitch=12, draw=draw))
+        w = max(f.width for f in frames)
+        h = max(f.height for f in frames)
+        sheet = Image.new("RGB", (4 * (w + 8), 2 * (h + 8)), (236, 238, 242))
+        for i, f in enumerate(frames):
+            sheet.paste(f, ((i % 4) * (w + 8) + (w - f.width) // 2, (i // 4) * (h + 8) + h - f.height))
+        sheet.save(out.replace(".png", "_frames.png"))
         print(out)
