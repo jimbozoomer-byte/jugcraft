@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G) and the launchers (slice 10A)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A) and coil and plasma (slice 10B)
 
 Status:
 - **Slices 1 to 9G are in `main`:** the last of them, 8C to 9G, with #277 on 10 October 2026. The lines below say where each was built.
@@ -22,6 +22,7 @@ Status:
 - **Slice 9F** (the aiming polish: the hands and the fitted stocks kept off the sights; [below](#slice-9f-the-aiming-polish)): implemented on `claude/guns-aiming` (#291), stacked on slice 9E, awaiting review.
 - **Slice 9G** (the Trench Lobber's grenades: it loads the chemical grenades too; [below](#slice-9g-the-trench-lobbers-grenades)): implemented on `claude/guns-lobber-grenades`, stacked on slice 9F, awaiting review.
 - **Slice 10A** (the launchers: the Earthmover, Skylark Rifle and Bullfrog; [below](#slice-10a-the-launchers)): implemented on `claude/guns-launchers`, based on `main`, awaiting review.
+- **Slice 10B** (coil and plasma: the Solenoid Rifle, Votive Rifle and Glowmouth; [below](#slice-10b-coil-and-plasma)): implemented on `claude/guns-coil-plasma`, stacked on slice 10A, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -35,7 +36,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
 - the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, the second, the aiming polish, slice 9F, and the third, the Lobber's grenades, slice 9G.
-- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A.
+- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1160,6 +1161,84 @@ The reload times are the owner's animations'.
 - **The Bullfrog's barrel** slides in its reload and swings in its draw, as the owner's animations have it. Its grenade sits in the muzzle's mouth, hidden from the shooter by the barrel.
 - **Not played:** none of it has been played yet. The rocket speeds, the ranges and the Bullfrog's reload want play to set.
 
+## Slice 10B: coil and plasma
+The second of the gun sets the owner chose on 10 October 2026 ("Coil and plasma", offered as the Gauss Rifle, Plasgun and Plasmabuss "running on the Energy Cells like the other energy weapons"): three more energy weapons, on slice 8D's Energy Cells and shots.
+
+| | Solenoid Rifle | Votive Rifle | Glowmouth |
+|---|---|---|---|
+| The owner's gun | Gauss Rifle | Plasgun | Plasmabuss |
+| What it is | a coil rifle, rings along its barrel and a glowing battery on its left | a plasma rifle, a wax seal and its parchment hanging from its flank | a plasma blunderbuss, a glowing canister either side of its chamber and a crank on top |
+| Fires | a beam through every creature in its line, to the first block | a short beam through every creature in its line, for as long as the trigger is held | a bolt that leaps from its mark to two more creatures close by |
+| Damage | 14 to each creature in the beam | 3 to each creature in the beam | 10 to its mark, then 6 and 3.6 |
+| Rate | 1.25 a second (every 16 ticks) | 6.7 a second (every 3 ticks) | 1 a second (every 20 ticks) |
+| Holds | 5 charges | 30 | 4 |
+| Reload | 2.6 s: the magazine | 2.5 s: the magazine | 0.4 s, then 0.65 s a charge, then 0.9 s |
+| Spread, hip / aimed | 1.5° / 0.15° | 3° / 1° | 12° / 9°, the cone its arc seeks in |
+| Range | 128 blocks, the farthest of the energy weapons | 48 | 14 |
+| The view aimed | narrowed to 0.75 | 0.85 | 0.95 |
+| Charge a round | 1,100 JE | 200 JE | 750 JE |
+| Takes | both magazines, the three stocks, the light and tactical grips, the bayonets, the three scopes and the Laser Sight | the same | nothing |
+
+The reload times are the owner's animations'.
+
+**Crafting** (a crafting table; as the other energy weapons', the recipes need both the guns and the machines switches):
+- **Solenoid Rifle:** two copper cables (its rings) and a steel ingot over a steel ingot, an advanced circuit and a brass ingot.
+- **Votive Rifle:** three steel ingots over a glass pane (its windows), an advanced circuit and a brass ingot.
+- **Glowmouth:** a copper ingot (its bell) and two steel ingots over planks (its stock), an advanced circuit and a brass ingot.
+
+**How they fire:** as slice 8D's (above): the beam passes through every creature in its line that the shooter may strike and stops at the first block; the arc leaps from the creature nearest the aim within the cone to the nearest within 4 blocks, twice, each taking 60% of the damage before it. Neither touches a block. Each shot is `jugcraft:zap` damage.
+
+**What you see:** the owner's animations.
+- **Solenoid Rifle:** each shot kicks it back, drives the knob in the slot on its right side back and slides the battery on its left out and back. To reload, the gun is lifted and tipped up toward the face, the battery slides out, the magazine swings down and away to the left and a new one comes up into the well; the knob is racked and the battery slides home.
+- **Votive Rifle:** each shot drives the plate along the top of its receiver back and swings the seal. To reload, the gun is rolled to the right, the vent on the chamber's left lifts out, the plate is drawn back and held, the magazine swings down and out of the well and a new one is slapped home; then the plate is let go and the vent drops back.
+- **Glowmouth:** each shot kicks it and jolts its crank. To reload, the gun is rolled to the left; for each charge the left hand brings an Energy Cell up from the lower left and pushes it into the left side of the chamber, where it shrinks away; then the left hand pulls the crank back and over, 106°, and returns it.
+- **Sparks:** where the animations cue a casing, they vent sparks, as slice 8D's do.
+- **Sounds:** the library's gauss shot (Solenoid Rifle), its nerve pinch shot, short and sharp (Votive Rifle), and its second plasma shot (Glowmouth). None names another source: none of the three carries a tag. The Glowmouth's charges go in with the insert sound, as the Stormlock's do.
+
+**How the models were built:**
+- **Solenoid Rifle:**
+  - **Battery:** the owner's capital-B `Battery` bone: the battery on the receiver's left, a block and a glowing plate on an arm (the main part's 13th to 15th and 18th elements), which the shots and the reload slide out to the left.
+  - **Bolt:** the knob in the slot on the right of the receiver (the 23rd element).
+  - **Magazines:** its own, under the receiver, and the Extended and Speed Magazines (the owner's `ext_mag` and `speed_mag` parts).
+  - **Sights:** the owner's ring on the back of the receiver, a peep, and the post on the muzzle.
+  - **Texture:** its glowing plate's own texture is three frames, one above the other; the gun takes the first (`FRAMED`), so it glows but does not flicker.
+  - **The atlas:** its stocks, grips and bayonets draw on textures it shares with other guns, packed whole into its atlas beside its own. That left the scopes' textures, packed piece by piece, too little room. So for this gun alone pieces of a scope's texture within a pixel of each other go in together, each pair joined wherever that takes no more room (`joined_rects()`, tried only when a gun's pieces do not fit one by one). Every other gun's atlas came out the same as before.
+  - **Empty bones:** `magazine_2`, `default_mag` and `scriptures`, which its animations move but no part of it fits.
+  - **Aiming:** held 1 px further out (`"eye_relief"`): through the aimed shot its kick brought the back of its receiver within a pixel of the eye.
+- **Votive Rifle:**
+  - **Bolt:** the plate along the top of its receiver (the main part's 7th element).
+  - **Vent:** the louvre on the left of its chamber (the 22nd), which the reload lifts out and back.
+  - **Seal:** the owner's `Seal` group, a wax seal and the parchment hanging from it (the 26th and 27th elements, drawn on the owner's `seal_2` texture), on the `scriptures` bone, which swings it about the seal.
+  - **Magazines:** its own, swung down and back out of the well about its top, and the Extended and Speed Magazines.
+  - **Sights:** the channel between the two rails on the back of its receiver, and the post on the muzzle.
+  - **Texture:** its glowing windows' own texture is three frames; the gun takes the first.
+  - **Aiming:** held 2 px further out: through the aimed shot the end of its long grip reached the eye.
+- **Glowmouth:**
+  - **One part:** the owner's gun is a single part of 55 elements.
+  - **Crank:** the owner's group so named (the main part's 52nd to 55th elements), the lever on top of the back of its chamber, pulled back about its axle.
+  - **Charge:** the loop's shell bone carries an Energy Cell (`PROPS`), drawn as the Linesman's: 1.5 × 1.5 × 3 px, a grey cap on a green body. It rests where the loop's last carry brings it into the left side of the chamber and shrinks to nothing there. It shows only while the reload moves it.
+  - **Sights:** the notch between the two posts on top of the chamber's back (the 29th and 30th elements); there is no front post, and the aim runs over the muzzle's bell.
+  - **Aiming:** held 3 px further out: through the aimed shot the end of its long grip came 0.74 px past the eye.
+- **Checked** in first-person and side previews: idle, aimed, fired, through each reload, draw and inspection; the Solenoid and Votive Rifles with each scope, the Laser Sight, each stock, both grips, a bayonet and both magazines; the Glowmouth's charge through its loop and its crank through the reload's end; and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:**
+- **The energy system:** Energy Cells, filled at the Charging Station, as slice 8D's.
+- **Parts:** steel from the steel foundry, advanced circuits from the circuit assembler, copper cable, glass, copper, planks and brass.
+- **Their place:** past steel, with slices 8D's and 9C's.
+
+**Balance:** starting numbers.
+- **Power:** like the other energy weapons, about 0.013 to 0.015 damage to one creature a JE: a full cell (10,000 JE) is 9 Solenoid shots, 50 of the Votive Rifle's (seven and a half seconds of fire) or 13 of the Glowmouth's.
+- **Solenoid Rifle:** 17.5 damage a second to each creature in its line, a little over the Spikedriver's 15, in heavier shots that stray the least of the energy weapons' and reach twice as far; 70 to each creature over a magazine.
+- **Votive Rifle:** 20 a second to each creature in its line, for 4.5 s a magazine, within 48 blocks: more than the Seam Cutter's 15 a second and three times its reach, at the same damage a JE.
+- **Glowmouth:** 10 a second to one creature, 19.6 across three, for four shots; over a magazine and its 3.9 s reload, about 5 a second to one. Its arc seeks nearly as wide as the Linesman's (12° from the hip, against 15°) and hits far harder, more slowly.
+
+**Save compatibility:** new items `jugcraft:solenoid_rifle`, `votive_rifle` and `glowmouth`; nothing saved changes. `guns.enabled=false` or `machines.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Solenoid Rifle's reload** lifts the gun toward the face while the left hand changes the magazine beneath it. In the previews the left arm covers a quarter to a half of the view from 0.5 to 1.7 s into the reload; at the frames measured the same way, the Picket, Kestrel and Garrison Rifles' reloads cover a fifth at most. A search over the arm's direction, still running down to the shoulder, found at best about a seventh less, so the usual direction stayed.
+- **The glowing parts do not flicker:** the owner's three-frame textures for the Solenoid's plate and the Votive's windows show their first frame.
+- **Not played:** none of it has been played yet. The cones, the JE costs and the Solenoid's reach want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -2001,6 +2080,64 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | bullfrog | `Guns/models/special/blooper/tact_grip.json` | `8302ff80288cf592` |
 | bullfrog | `Guns/models/special/blooper/barrel.json` | `08657d0212eccb9d` |
 | bullfrog | `Guns/sounds/item/airgun/fire_2.ogg` | `bea9865e81d9d5ff` |
+| solenoid_rifle | `Guns/models/item/gauss_rifle.json` | `ca192fcb75dd02db` |
+| solenoid_rifle | `Guns/item/gauss_rifle.png` | `45d0f3d19d57ccc2` |
+| solenoid_rifle | `Guns/item/gauss_rifle.animation.json` | `269a3f8f592f4172` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/main.json` | `37ddce9d5c71b48b` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/light_stock.json` | `a059da7598e902e7` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/heavy_stock.json` | `de18c99c52451169` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/wooden_stock.json` | `dcecc9a6ea92be9b` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/light_grip.json` | `717af25a4f9e5ba4` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/iron_bayonet.json` | `d2a90a9b1c229e44` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/anthralite_bayonet.json` | `4100a6a9ab09d68a` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/diamond_bayonet.json` | `c40a994f9cb54ad9` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/netherite_bayonet.json` | `df8eaee8d97302e1` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/tact_grip.json` | `3263cbf2152a6f58` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/sights.json` | `27cb11fef333465a` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/stan_mag.json` | `c4b6d297e01e3fab` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/ext_mag.json` | `450dc32ae44bea38` |
+| solenoid_rifle | `Guns/models/special/gauss_rifle/speed_mag.json` | `b2f0c4c8a8c7b85d` |
+| solenoid_rifle | `Guns/sounds/item/gauss/fire.ogg` | `1361b447db689391` |
+| solenoid_rifle | `Guns/item/cogloader_stocks.png` | `05014df66161cc85` |
+| solenoid_rifle | `Guns/item/cogloader_grips.png` | `3d9f4d6c23da68dd` |
+| solenoid_rifle | `Guns/item/makeshift_rifle_bayonets.png` | `dfc93f5032504095` |
+| solenoid_rifle | `Guns/item/gauss_rifle_animated.png` | `15c409a7cdb43ae8` |
+| solenoid_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| solenoid_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| solenoid_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| solenoid_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| solenoid_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| votive_rifle | `Guns/models/item/plasgun.json` | `a964b6376649e083` |
+| votive_rifle | `Guns/item/plasgun.png` | `956bb37c4b331cc0` |
+| votive_rifle | `Guns/item/plasgun.animation.json` | `81583df6b14c36e3` |
+| votive_rifle | `Guns/models/special/plasgun/main.json` | `7209fb38ea4d9e61` |
+| votive_rifle | `Guns/models/special/plasgun/light_stock.json` | `364acdc1dcb692fe` |
+| votive_rifle | `Guns/models/special/plasgun/heavy_stock.json` | `5d71023b9fffa627` |
+| votive_rifle | `Guns/models/special/plasgun/wooden_stock.json` | `4fe343c79b826c72` |
+| votive_rifle | `Guns/models/special/plasgun/light_grip.json` | `790a818404c1685c` |
+| votive_rifle | `Guns/models/special/plasgun/iron_bayonet.json` | `ce37cf8b8868b130` |
+| votive_rifle | `Guns/models/special/plasgun/anthralite_bayonet.json` | `fa012df8c358d732` |
+| votive_rifle | `Guns/models/special/plasgun/diamond_bayonet.json` | `1c89f3de5501f255` |
+| votive_rifle | `Guns/models/special/plasgun/netherite_bayonet.json` | `43a2563fccc04d17` |
+| votive_rifle | `Guns/models/special/plasgun/tact_grip.json` | `f06dbf59fd6f3eb4` |
+| votive_rifle | `Guns/models/special/plasgun/sights.json` | `b29d1f9da73c1c98` |
+| votive_rifle | `Guns/models/special/plasgun/stan_mag.json` | `2561195014969f7a` |
+| votive_rifle | `Guns/models/special/plasgun/ext_mag.json` | `10dc25d7222d8d47` |
+| votive_rifle | `Guns/models/special/plasgun/speed_mag.json` | `a823ca7ad785abd3` |
+| votive_rifle | `Guns/sounds/item/nervepinch/fire.ogg` | `ee6701ec0f70a3fc` |
+| votive_rifle | `Guns/item/makeshift_rifle_bayonets.png` | `dfc93f5032504095` |
+| votive_rifle | `Guns/item/plasgun_animated.png` | `d900da41c28da7a5` |
+| votive_rifle | `Guns/item/seal_2.png` | `be02ff1786425224` |
+| votive_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| votive_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| votive_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| votive_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| votive_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| glowmouth | `Guns/models/item/plasmabuss.json` | `6b552335e0fd40a1` |
+| glowmouth | `Guns/item/plasmabuss.png` | `20af21e557f3ad13` |
+| glowmouth | `Guns/item/plasmabuss.animation.json` | `dcf2bbd800298a90` |
+| glowmouth | `Guns/models/special/plasmabuss/main.json` | `7b398da45de8edf4` |
+| glowmouth | `Guns/sounds/item/plasma/fire_2.ogg` | `ef0c65b09e2ccb1f` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -2009,7 +2146,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 
   Shown this and asked what the scopes should use, the owner answered that they made these files and to use them. Asked the same day whether the "Big Cannons and Mounted Guns" folder is theirs (slice 6's flash frames come from it, and it holds a `wariumlogo.png`), they confirmed it is. The [library README](../../art/owner-library/README.md#effect-textures-8-october-2026) records both.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
-- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, the muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
+- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, the muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can, the Linesman's and the Glowmouth's cells, the Skylark Rifle's rocket and the Bullfrog's grenade). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
 
 ## Verification
 - **Run locally (7 October 2026):**
@@ -2498,17 +2635,38 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `earthmoverLoadsHighExplosiveRockets`: with only homing rockets an empty Earthmover does not start a reload; with six High-Explosive Rockets it loads four once its reload's time is up, not before, and leaves two.
   - "Every gun registered" now counts thirty-nine guns. Slice 9E's `tacticalAttachmentsFitTheirGuns` counts the launchers among the guns with the owner's tactical grip parts, and the Earthmover among those the Laser Sight does not fit. Slice 9G's `onlyTheLobberTakesGrenades` is now `onlyTheGrenadeGunsTakeGrenades`: the Lobber and the Bullfrog.
   - `GunsClientGameTests` takes the three new guns through its steps as it takes every gun: held, aimed, fired at the husk, reloaded from the inventory, inspected, with each set of attachments they take, seen from outside, and in the inventory.
+- **Slice 10B, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's, the attachments' included; the Solenoid's and the Votive's glowing textures are the first frames of the owner's three; every other gun's files came out unchanged, its atlas included.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and tooltips, and their shots' sounds.
+  - `python3 tools/check_mod_data.py`: PASS (2155 material IDs), with `check_guns` (the three guns' numbers, shots, charges and attachments in Java, and their looks, eye relief and sounds on the client).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews** (first person, approximating the game's hands, and from the side):
+    - each gun idle, aimed, fired, through each reload, draw and inspection;
+    - the Solenoid and Votive Rifles each with four sets of attachments, together every scope, the Laser Sight, each stock, both grips, two bayonets and both magazines;
+    - the Glowmouth's charge through its loop, and its crank through the reload's end;
+    - the nearest point of each gun to the eye through its aimed shot, with no eye relief and with theirs: the Solenoid's 0.93 px and 1.93 px, the Votive's -0.03 px and 1.97 px, the Glowmouth's -0.74 px and 2.26 px;
+    - how much of the view the left arm covers through the Solenoid's reload, against three other rifles' (above), and the left arm's direction against others through it (`armfit.py`).
+- **Slice 10B game tests (written; they run in CI):**
+  - `CoilPlasmaGunsGameTests`:
+    - `coilAndPlasmaRunOnCells`: each is registered with its numbers, loads a magazine's charge from one Energy Cell, and its recipe loads. The Solenoid and Votive Rifles fire beams and the Glowmouth an arc; only the Votive fires while the trigger is held, and only the Glowmouth is loaded a charge at a time. No other energy weapon reaches as far as the Solenoid. The two rifles take their fifteen attachments; the Glowmouth takes none.
+    - `solenoidDrivesThroughItsLine`: a Solenoid shot takes 14 from each of two pigs in its line and stops at a wall, sparing the pig behind it, and spends a charge; emptied, it then loads five charges from a full cell after its reload's time, and the cell keeps the rest (4,500 JE).
+    - `votiveRifleBurnsWhileHeld`: two shots at once and a third an interval later, each through both pigs in its line, spending three charges.
+    - `glowmouthLoadsAChargeAtATime`: from a cell of 2,000 JE an empty Glowmouth holds one charge halfway through loading its second, then two, and leaves 500 JE.
+    - `glowmouthArcLeapsFromWideOfItsAim`: its arc finds the pig a block off its aim six blocks out, strikes it for 10 and leaps for 6 to the pig two blocks beside it; the pig far off to the side is untouched.
+  - "Every gun registered" now counts forty-two guns, and slice 9E's `tacticalAttachmentsFitTheirGuns` counts the Solenoid and Votive Rifles among the guns with the owner's tactical grip parts.
+  - `GunsClientGameTests` takes the three new guns through its steps as it takes every gun: held, aimed, fired at the husk (each shot drawn, `GunTracePayload`), reloaded from Energy Cells, inspected, with each set of attachments they take, seen from outside, and in the inventory.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
-- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A); the coil and plasma guns, the double-barrels and the sculk guns; a rack that charges several Energy Cells at once, enemies with guns and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
+- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A) and the coil and plasma guns (slice 10B); the double-barrels and the sculk guns; a rack that charges several Energy Cells at once, enemies with guns and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
 - **Aimed, the gun hand covered the sights** in the CI screenshots from 8 October, and a fitted stock came up under the eye: slice 9F draws the arms at half size aimed and leaves a fitted stock out ([above](#slice-9f-the-aiming-polish)).
 - **Not yet:**
   - the jam the Gnat's sound suggests;
