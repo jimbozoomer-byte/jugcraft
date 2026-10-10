@@ -1,6 +1,6 @@
 # Vesperine, the Last Reaper
 
-Status: implemented in source. CI builds it; the game tests and the client game test are below. This is part 2 of boss 1 in the [Witching Season plan](witching-season.md#boss-1-vesperine-the-last-reaper-in-the-hollow-acre): the boss of the Hollow Acre, her skulls and servants, and her loot. It is built on part 1, the lairs and the Last Rites ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest the plan asks for is still to do.
+Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 1 in the [Witching Season plan](witching-season.md#boss-1-vesperine-the-last-reaper-in-the-hollow-acre): the boss of the Hollow Acre, her skulls and servants, and her loot. It is built on part 1, the lairs and the Last Rites ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest the plan asks for is still to do.
 Proposal issue: none. The owner approved the Witching Season plan on 4 October 2026, and on 10 October 2026 asked: "Do the bosses".
 Owner: @jimbozoomer-byte
 
@@ -187,6 +187,7 @@ CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
 | `ceb13bf` | Adds `VesperineGameTests` and `VesperineClientGameTests` | `VesperineClientGameTests` **passed**: her whole fight in a real Hollow Acre. **3 server game tests failed**, all from the shared test world: a woken reaper kept fighting after its test passed, and reapers took other tests' players as foes (her health rescaled for a party, the arc turned away from its target, never left alone) |
 | `1e7955e` | Each test sends its reaper away and the self-acting ones stand high above the grid, each at its own height; the pictures aimed at her | `VesperineClientGameTests` **passed**; the pictures above are from this commit. **1 server game test failed**, the Reaping Arc's: a new player cannot be hurt until its client has loaded the world (at most 60 ticks), and a mock player has no client, so the arc at tick 42 struck nobody |
 | `feb97f3` | The arc's players wait out their loading first (in creative, where she ignores them); every test sends its reaper away even when it fails; this record | **All pass:** all 1176 required game tests, with and without the optional integrations, and the client tests chosen for it (`ArmsVIIClientGameTests`, `LairClientGameTests`, `VesperineClientGameTests`) |
+| `d9f619d` | A fresh instance clears the Grey Mist a fallen reaper left in its slot (the client test opens one to check); the audit of `HollowAcre.java`'s positions | **All pass:** all 1176 required game tests, with and without the optional integrations, the data audit, and the same three client tests |
 
 Run locally (10 October 2026):
 
