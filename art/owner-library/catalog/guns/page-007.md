@@ -6,6 +6,24 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 
 | File | Type | Image size | Metadata / texture |
 |---|---|---|---|
+| [Guns/models/item/carapice.json](../../originals/Blocks/Guns/models/item/carapice.json) | model JSON | — | — |
+| [Guns/models/item/ceremonial_cod.json](../../originals/Blocks/Guns/models/item/ceremonial_cod.json) | model JSON | — | — |
+| [Guns/models/item/charged_amethyst_relay.json](../../originals/Blocks/Guns/models/item/charged_amethyst_relay.json) | model JSON | — | — |
+| [Guns/models/item/charged_amethyst_shard.json](../../originals/Blocks/Guns/models/item/charged_amethyst_shard.json) | model JSON | — | — |
+| [Guns/models/item/chiseled_anthralite_block.json](../../originals/Blocks/Guns/models/item/chiseled_anthralite_block.json) | model JSON | — | — |
+| [Guns/models/item/chiseled_asgharian_bricks.json](../../originals/Blocks/Guns/models/item/chiseled_asgharian_bricks.json) | model JSON | — | — |
+| [Guns/models/item/chiseled_diamond_steel_block.json](../../originals/Blocks/Guns/models/item/chiseled_diamond_steel_block.json) | model JSON | — | — |
+| [Guns/models/item/chiseled_treated_brass_block.json](../../originals/Blocks/Guns/models/item/chiseled_treated_brass_block.json) | model JSON | — | — |
+| [Guns/models/item/chiseled_treated_iron_block.json](../../originals/Blocks/Guns/models/item/chiseled_treated_iron_block.json) | model JSON | — | — |
+| [Guns/models/item/choke_bomb.json](../../originals/Blocks/Guns/models/item/choke_bomb.json) | model JSON | — | — |
+| [Guns/models/item/choke_bomb_2d.json](../../originals/Blocks/Guns/models/item/choke_bomb_2d.json) | model JSON | — | — |
+| [Guns/models/item/choke_bomb_3d.json](../../originals/Blocks/Guns/models/item/choke_bomb_3d.json) | model JSON | — | — |
+| [Guns/models/item/clump_anthralite.json](../../originals/Blocks/Guns/models/item/clump_anthralite.json) | model JSON | — | — |
+| [Guns/models/item/cog_heart.json](../../originals/Blocks/Guns/models/item/cog_heart.json) | model JSON | — | — |
+| [Guns/models/item/cog_heart.png.mcmeta](../../originals/Blocks/Guns/models/item/cog_heart.png.mcmeta) | texture metadata | — | — |
+| [Guns/models/item/cog_knight_boots.json](../../originals/Blocks/Guns/models/item/cog_knight_boots.json) | model JSON | — | — |
+| [Guns/models/item/cog_knight_chestplate.json](../../originals/Blocks/Guns/models/item/cog_knight_chestplate.json) | model JSON | — | — |
+| [Guns/models/item/cog_knight_helmet.json](../../originals/Blocks/Guns/models/item/cog_knight_helmet.json) | model JSON | — | — |
 | [Guns/models/item/cog_knight_leggings.json](../../originals/Blocks/Guns/models/item/cog_knight_leggings.json) | model JSON | — | — |
 | [Guns/models/item/cog_knight_spawn_egg.json](../../originals/Blocks/Guns/models/item/cog_knight_spawn_egg.json) | model JSON | — | — |
 | [Guns/models/item/cog_locator.json](../../originals/Blocks/Guns/models/item/cog_locator.json) | model JSON | — | — |
@@ -238,21 +256,3 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/models/item/howler.json](../../originals/Blocks/Guns/models/item/howler.json) | model JSON | — | — |
 | [Guns/models/item/howler_conversion.json](../../originals/Blocks/Guns/models/item/howler_conversion.json) | model JSON | — | — |
 | [Guns/models/item/hullbreaker.json](../../originals/Blocks/Guns/models/item/hullbreaker.json) | model JSON | — | — |
-| [Guns/models/item/hyperbaria.json](../../originals/Blocks/Guns/models/item/hyperbaria.json) | model JSON | — | — |
-| [Guns/models/item/i_see_no_blank_mold.json](../../originals/Blocks/Guns/models/item/i_see_no_blank_mold.json) | model JSON | — | — |
-| [Guns/models/item/i_see_no_bullet_mold.json](../../originals/Blocks/Guns/models/item/i_see_no_bullet_mold.json) | model JSON | — | — |
-| [Guns/models/item/i_see_no_disc_mold.json](../../originals/Blocks/Guns/models/item/i_see_no_disc_mold.json) | model JSON | — | — |
-| [Guns/models/item/i_see_no_gun_parts_mold.json](../../originals/Blocks/Guns/models/item/i_see_no_gun_parts_mold.json) | model JSON | — | — |
-| [Guns/models/item/i_see_no_large_casing_mold.json](../../originals/Blocks/Guns/models/item/i_see_no_large_casing_mold.json) | model JSON | — | — |
-| [Guns/models/item/i_see_no_medium_casing_mold.json](../../originals/Blocks/Guns/models/item/i_see_no_medium_casing_mold.json) | model JSON | — | — |
-| [Guns/models/item/i_see_no_small_casing_mold.json](../../originals/Blocks/Guns/models/item/i_see_no_small_casing_mold.json) | model JSON | — | — |
-| [Guns/models/item/inertial.json](../../originals/Blocks/Guns/models/item/inertial.json) | model JSON | — | — |
-| [Guns/models/item/inquisitor.json](../../originals/Blocks/Guns/models/item/inquisitor.json) | model JSON | — | — |
-| [Guns/models/item/iron_bayonet.json](../../originals/Blocks/Guns/models/item/iron_bayonet.json) | model JSON | — | — |
-| [Guns/models/item/iron_blueprint.json](../../originals/Blocks/Guns/models/item/iron_blueprint.json) | model JSON | — | — |
-| [Guns/models/item/iron_flare.json](../../originals/Blocks/Guns/models/item/iron_flare.json) | model JSON | — | — |
-| [Guns/models/item/iron_gun_frame.json](../../originals/Blocks/Guns/models/item/iron_gun_frame.json) | model JSON | — | — |
-| [Guns/models/item/iron_javelin.json](../../originals/Blocks/Guns/models/item/iron_javelin.json) | model JSON | — | — |
-| [Guns/models/item/iron_mask.json](../../originals/Blocks/Guns/models/item/iron_mask.json) | model JSON | — | — |
-| [Guns/models/item/iron_spear.json](../../originals/Blocks/Guns/models/item/iron_spear.json) | model JSON | — | — |
-| [Guns/models/item/jackhammer.json](../../originals/Blocks/Guns/models/item/jackhammer.json) | model JSON | — | — |

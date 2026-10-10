@@ -1,10 +1,12 @@
 # Guns
 
-3,790 supplied files.
+3,808 supplied files.
 
 [Library guide](../../README.md) · [Original folder](../../originals/Blocks/Guns)
 
-The [models](../../originals/Blocks/Guns/models) folder (added 7 October 2026, files 1090–3678) holds Blockbench Java item models of the guns: each gun split per part under `special/<gun>/` (main body, bolt, barrels, magazines, stocks, grips, sights, silencers, bayonets), per-gun item models with display transforms (beside the other item models) under `item/`, and block models under `block/`. Its references keep the supplied `scguns:` namespace; see the [library guide](../../README.md#gun-models-7-october-2026) before importing one.
+The [models](../../originals/Blocks/Guns/models) folder (added 7 October 2026, files 1108–3696) holds Blockbench Java item models of the guns: each gun split per part under `special/<gun>/` (main body, bolt, barrels, magazines, stocks, grips, sights, silencers, bayonets), per-gun item models with display transforms (beside the other item models) under `item/`, and block models under `block/`. Its references keep the supplied `scguns:` namespace; see the [library guide](../../README.md#gun-models-7-october-2026) before importing one.
+
+The [effect](../../originals/Blocks/Guns/effect) folder (added 8 October 2026, files 354–371) holds the scope reticles and lens vignettes the scope models draw (`effect/...`), and muzzle flash frames; see the [library guide](../../README.md#effect-textures-8-october-2026).
 
 - [Files 1–250](page-001.md)
 - [Files 251–500](page-002.md)
@@ -21,4 +23,4 @@ The [models](../../originals/Blocks/Guns/models) folder (added 7 October 2026, f
 - [Files 3001–3250](page-013.md)
 - [Files 3251–3500](page-014.md)
 - [Files 3501–3750](page-015.md)
-- [Files 3751–3790](page-016.md)
+- [Files 3751–3808](page-016.md)

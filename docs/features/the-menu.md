@@ -65,7 +65,7 @@ Cook a menu and lay it out:
   | Pasta with Meatballs | Cooking Pot | bowl, raw pasta, 2 minced beef, tomato (11) | 1 | 12 / 0.8 | 12 |
   | Pasta with Mutton Chop | Cooking Pot | bowl, raw pasta, 2 mutton chops, tomato (9) | 1 | 12 / 0.8 | 12 |
   | Squid Ink Pasta | Cooking Pot | bowl, raw pasta, ink sac, cod slice, salmon slice, tomato (8) | 1 | 10 / 0.8 | 10 |
-  | Ratatouille | Cooking Pot | bowl, tomato, pepper, onion, beetroot, garlic (6) | 1 | 8 / 0.6 | 8 |
+  | Ratatouille | Cooking Pot | bowl, tomato, pepper, onion, eggplant, zucchini (9); beetroot and garlic until the eggplant and zucchini grew ([vegetables-herbs-and-spices.md](vegetables-herbs-and-spices.md)) | 1 | 8 / 0.6 | 8 |
   | Cornbread Stuffing | Cooking Pot | bowl, cornbread, onion, brown mushroom, carrot (9) | 1 | 9 / 0.7 | 9 |
   | Dumplings | Cooking Pot | wheat dough, minced beef, cabbage leaf, onion (5) | 2 | 4 / 0.6 | 8 |
   | Boiled Corn | Cooking Pot | corn (5) | 1 | 5 / 0.6 | 5 |

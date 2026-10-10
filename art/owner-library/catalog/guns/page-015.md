@@ -6,6 +6,24 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 
 | File | Type | Image size | Metadata / texture |
 |---|---|---|---|
+| [Guns/models/special/triquetra/wooden_stock.json](../../originals/Blocks/Guns/models/special/triquetra/wooden_stock.json) | model JSON | — | — |
+| [Guns/models/special/trotters/advanced_silencer.json](../../originals/Blocks/Guns/models/special/trotters/advanced_silencer.json) | model JSON | — | — |
+| [Guns/models/special/trotters/anthralite_bayonet.json](../../originals/Blocks/Guns/models/special/trotters/anthralite_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/trotters/bolt.json](../../originals/Blocks/Guns/models/special/trotters/bolt.json) | model JSON | — | — |
+| [Guns/models/special/trotters/diamond_bayonet.json](../../originals/Blocks/Guns/models/special/trotters/diamond_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/trotters/ext_barrel.json](../../originals/Blocks/Guns/models/special/trotters/ext_barrel.json) | model JSON | — | — |
+| [Guns/models/special/trotters/heavy_stock.json](../../originals/Blocks/Guns/models/special/trotters/heavy_stock.json) | model JSON | — | — |
+| [Guns/models/special/trotters/iron_bayonet.json](../../originals/Blocks/Guns/models/special/trotters/iron_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/trotters/light_grip.json](../../originals/Blocks/Guns/models/special/trotters/light_grip.json) | model JSON | — | — |
+| [Guns/models/special/trotters/light_stock.json](../../originals/Blocks/Guns/models/special/trotters/light_stock.json) | model JSON | — | — |
+| [Guns/models/special/trotters/main.json](../../originals/Blocks/Guns/models/special/trotters/main.json) | model JSON | — | — |
+| [Guns/models/special/trotters/muzzle_brake.json](../../originals/Blocks/Guns/models/special/trotters/muzzle_brake.json) | model JSON | — | — |
+| [Guns/models/special/trotters/netherite_bayonet.json](../../originals/Blocks/Guns/models/special/trotters/netherite_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/trotters/no_sights.json](../../originals/Blocks/Guns/models/special/trotters/no_sights.json) | model JSON | — | — |
+| [Guns/models/special/trotters/sights.json](../../originals/Blocks/Guns/models/special/trotters/sights.json) | model JSON | — | — |
+| [Guns/models/special/trotters/silencer.json](../../originals/Blocks/Guns/models/special/trotters/silencer.json) | model JSON | — | — |
+| [Guns/models/special/trotters/stan_barrel.json](../../originals/Blocks/Guns/models/special/trotters/stan_barrel.json) | model JSON | — | — |
+| [Guns/models/special/trotters/stan_grip.json](../../originals/Blocks/Guns/models/special/trotters/stan_grip.json) | model JSON | — | — |
 | [Guns/models/special/trotters/tact_grip.json](../../originals/Blocks/Guns/models/special/trotters/tact_grip.json) | model JSON | — | — |
 | [Guns/models/special/trotters/wooden_stock.json](../../originals/Blocks/Guns/models/special/trotters/wooden_stock.json) | model JSON | — | — |
 | [Guns/models/special/truant/anthralite_bayonet.json](../../originals/Blocks/Guns/models/special/truant/anthralite_bayonet.json) | model JSON | — | — |
@@ -238,21 +256,3 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/sounds/item/gun_sounds/insert.ogg](../../originals/Blocks/Guns/sounds/item/gun_sounds/insert.ogg) | sound | — | — |
 | [Guns/sounds/item/gun_sounds/metal.ogg](../../originals/Blocks/Guns/sounds/item/gun_sounds/metal.ogg) | sound | — | — |
 | [Guns/sounds/item/gun_sounds/pump.ogg](../../originals/Blocks/Guns/sounds/item/gun_sounds/pump.ogg) | sound | — | — |
-| [Guns/sounds/item/gun_sounds/pump_half.ogg](../../originals/Blocks/Guns/sounds/item/gun_sounds/pump_half.ogg) | sound | — | — |
-| [Guns/sounds/item/gyrojet/fire.ogg](../../originals/Blocks/Guns/sounds/item/gyrojet/fire.ogg) | sound | — | — |
-| [Guns/sounds/item/heavier_rifle/fire.ogg](../../originals/Blocks/Guns/sounds/item/heavier_rifle/fire.ogg) | sound | — | — |
-| [Guns/sounds/item/heavy_rifle/fire.ogg](../../originals/Blocks/Guns/sounds/item/heavy_rifle/fire.ogg) | sound | — | — |
-| [Guns/sounds/item/heavy_rifle_2/fire.ogg](../../originals/Blocks/Guns/sounds/item/heavy_rifle_2/fire.ogg) | sound | — | — |
-| [Guns/sounds/item/iron_pistol/fire.ogg](../../originals/Blocks/Guns/sounds/item/iron_pistol/fire.ogg) | sound | — | — |
-| [Guns/sounds/item/iron_rifle/enchanted_fire.ogg](../../originals/Blocks/Guns/sounds/item/iron_rifle/enchanted_fire.ogg) | sound | — | — |
-| [Guns/sounds/item/iron_rifle/fire.ogg](../../originals/Blocks/Guns/sounds/item/iron_rifle/fire.ogg) | sound | — | — |
-| [Guns/sounds/item/jetpack/fire.ogg](../../originals/Blocks/Guns/sounds/item/jetpack/fire.ogg) | sound | — | — |
-| [Guns/sounds/item/jetpack/loop.ogg](../../originals/Blocks/Guns/sounds/item/jetpack/loop.ogg) | sound | — | — |
-| [Guns/sounds/item/laser/fire.ogg](../../originals/Blocks/Guns/sounds/item/laser/fire.ogg) | sound | — | — |
-| [Guns/sounds/item/laser/fire_2.ogg](../../originals/Blocks/Guns/sounds/item/laser/fire_2.ogg) | sound | — | — |
-| [Guns/sounds/item/laser/reload.ogg](../../originals/Blocks/Guns/sounds/item/laser/reload.ogg) | sound | — | — |
-| [Guns/sounds/item/lever/lever.ogg](../../originals/Blocks/Guns/sounds/item/lever/lever.ogg) | sound | — | — |
-| [Guns/sounds/item/machine_gun/fire.ogg](../../originals/Blocks/Guns/sounds/item/machine_gun/fire.ogg) | sound | — | — |
-| [Guns/sounds/item/mag_in/mag_in.ogg](../../originals/Blocks/Guns/sounds/item/mag_in/mag_in.ogg) | sound | — | — |
-| [Guns/sounds/item/mag_out/mag_out.ogg](../../originals/Blocks/Guns/sounds/item/mag_out/mag_out.ogg) | sound | — | — |
-| [Guns/sounds/item/makeshift_rifle/cock.ogg](../../originals/Blocks/Guns/sounds/item/makeshift_rifle/cock.ogg) | sound | — | — |

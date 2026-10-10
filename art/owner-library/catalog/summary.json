@@ -1,8 +1,8 @@
 {
   "source": "Project owner uploads, 2026-10-06, 2026-10-07 and 2026-10-08",
-  "source_files": 26947,
-  "source_bytes": 60250166,
-  "unique_source_contents": 24815,
+  "source_files": 26965,
+  "source_bytes": 60269357,
+  "unique_source_contents": 24833,
   "uploads": [
     {
       "date": "2026-10-06",
@@ -25,9 +25,17 @@
       "bytes": 26398780,
       "archive": "archives/magic-owner-2026-10-08.rar",
       "archive_sha256": "07a1a1ccc5d540286afcbc30635151b358397cc40a948b2964a905d2d6ee3989"
+    },
+    {
+      "date": "2026-10-08",
+      "description": "Scope reticles, lens vignettes and muzzle flash frames (effect textures)",
+      "path": "originals/Blocks/Guns/effect",
+      "files": 18,
+      "bytes": 19191
     }
   ],
   "extensions": {
+    "": 1,
     ".bbmodel": 12,
     ".fsh": 3,
     ".gif": 3,
@@ -36,7 +44,7 @@
     ".mcmeta": 364,
     ".nbt": 7,
     ".ogg": 354,
-    ".png": 18491,
+    ".png": 18508,
     ".properties": 1,
     ".scmeta": 8,
     ".vsh": 3
@@ -56,7 +64,7 @@
     "reference sheet": 30,
     "sound": 354,
     "structure NBT": 7,
-    "texture": 18130,
+    "texture": 18148,
     "texture metadata": 364,
     "vertex shader": 3
   },
@@ -151,8 +159,8 @@
     },
     {
       "name": "Guns",
-      "files": 3790,
-      "bytes": 22636959,
+      "files": 3808,
+      "bytes": 22656150,
       "catalog": "guns/README.md",
       "source": "originals/Blocks/Guns",
       "pages": 16
@@ -215,8 +223,8 @@
     },
     {
       "name": "Magic",
-      "files": 7909,
-      "bytes": 26398780,
+      "files": 0,
+      "bytes": 0,
       "catalog": "magic/README.md",
       "source": "originals/Magic",
       "pages": 66
@@ -296,6 +304,14 @@
     {
       "path": "originals/Magic/assets/jymbelics/textures/item/arrow_quiver.png.mcmeta",
       "issue": "Supplied PNG metadata has no adjacent PNG; preserve the original and resolve when importing."
+    },
+    {
+      "path": "originals/Blocks/Guns/effect/red_dot_reticle.png",
+      "issue": "Embedded Photoshop history (XMP) records the file being opened and saved inside a Just Enough Guns mod source folder (assets/jeg/textures/effect/) on 2024-02-03. Asked about it on 2026-10-08, the owner answered that they made these files."
+    },
+    {
+      "path": "originals/Blocks/Guns/effect/muzzle_flash.png",
+      "issue": "Embedded Photoshop metadata (XMP) records the file as created in Adobe Photoshop CC 2019 on 2021-02-12. Asked about the upload on 2026-10-08, the owner answered that they made these files."
     }
   ]
 }

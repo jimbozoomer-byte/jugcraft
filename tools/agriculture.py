@@ -19,6 +19,9 @@ import decor17
 import decor18
 import decor19
 import decor20
+import lairs
+import tatterlace
+import vesperine
 import kitchen
 import feasts
 import menu
@@ -26,7 +29,13 @@ import rice
 import soil
 import orchard
 import cakes
+import pies_and_tarts
+import milkshakes
 import fruit_crops
+import garden
+import vegetables
+import herbs
+import spices
 
 FEATURE = "agriculture"
 
@@ -42,14 +51,8 @@ TALL_CROPS = {
         "pick": {"item": "corn", "min": 2, "max": 3}, "pick_reset": 5,
         # Grows this many times slower than wheat: a 3-block plant is a bigger investment.
         "growth_time": 1.5,
-        "textures": [
-            ["corn_sprout"], ["corn_seedling"], ["corn_young"],
-            ["corn_stalk", "corn_young_top"],
-            ["corn_stalk", "corn_leafy_top"],
-            ["corn_stalk", "corn_stalk_middle", "corn_top"],
-            ["corn_stalk", "corn_middle_silk", "corn_tassel"],
-            ["corn_stalk_ripe", "corn_middle_ears", "corn_tassel_ripe"],
-        ],
+        # The owner's corn, three blocks tall from age 5 (tools/garden.py).
+        "textures": garden.CORN_TEXTURES,
     },
     "sunflower": {
         "block": "sunflower_crop", "display": "Sunflower Crop", "seed": "sunflower_seeds",
@@ -74,14 +77,8 @@ TALL_CROPS["tomato"] = {
     "heights": [1, 1, 1, 2, 2, 2, 2, 2],
     "pick": {"item": "tomato", "min": 2, "max": 4}, "pick_reset": 5,
     "growth_time": 1.25, "trellis": True,
-    "textures": [
-        ["tomato_sprout"], ["tomato_seedling"], ["tomato_young"],
-        ["tomato_vine", "tomato_climbing_top"],
-        ["tomato_vine", "tomato_leafy_top"],
-        ["tomato_vine_flowers", "tomato_flowering_top"],
-        ["tomato_vine_green", "tomato_green_top"],
-        ["tomato_vine_ripe", "tomato_ripe_top"],
-    ],
+    # The owner's budding and fruiting vines (tools/garden.py); a ripe vine left too long goes over (OVERRIPE).
+    "textures": garden.TOMATO_TEXTURES, "overripe": garden.OVERRIPE,
 }
 TALL_CROPS["pepper"] = {
     "block": "pepper_crop", "display": "Pepper Plant", "seed": "pepper_seeds",
@@ -98,14 +95,8 @@ TALL_CROPS["ornamental_corn"] = {
     "heights": [1, 1, 1, 2, 2, 3, 3, 3],
     "pick": {"item": "ornamental_corn", "min": 1, "max": 2}, "pick_reset": 5,
     "growth_time": 1.5,
-    "textures": [
-        ["corn_sprout"], ["corn_seedling"], ["corn_young"],
-        ["corn_stalk", "corn_young_top"],
-        ["corn_stalk", "corn_leafy_top"],
-        ["corn_stalk", "corn_stalk_middle", "corn_top"],
-        ["corn_stalk", "corn_middle_silk", "corn_tassel"],
-        ["corn_stalk_ripe", "ornamental_corn_middle_ears", "corn_tassel_ripe"],
-    ],
+    # Corn's stages, its ripe ears in flint corn's colours (tools/garden.py ORNAMENTAL_EARS).
+    "textures": garden.ORNAMENTAL_TEXTURES,
 }
 # Breaking a corn plant three blocks tall (age 5 or more, so also after picking) drops dry stalks for
 # Corn Shocks, from its bottom block only.
@@ -129,7 +120,7 @@ CROPS = {
     "garlic": {"block": "garlic_crop", "display": "Garlic Crop", "seed": "garlic", "produce": "garlic",
                "legume": False, "stages": [0, 0, 1, 1, 2, 2, 2, 3], "loot": "root"},
     "cabbage": {"block": "cabbage_crop", "display": "Cabbage Crop", "seed": "cabbage_seeds", "produce": "cabbage",
-                "legume": False, "stages": [0, 0, 1, 1, 2, 2, 2, 3], "loot": "grain"},
+                "legume": False, "stages": garden.CABBAGE_STAGES, "loot": "grain"},
     "oats": {"block": "oat_crop", "display": "Oat Crop", "seed": "oat_seeds", "produce": "oats",
              "legume": False, "stages": [0, 0, 1, 1, 2, 2, 2, 3], "loot": "grain"},
     "barley": {"block": "barley_crop", "display": "Barley Crop", "seed": "barley_seeds", "produce": "barley",
@@ -143,10 +134,10 @@ CROPS = {
 }
 
 # Wild plants: the natural entry point. Found in patches on grass in fitting biomes (new chunks
-# only); breaking one gives 1-2 of its crop's planting item. Shears take the plant itself.
-# texture: which crop texture the plant reuses. biomes: Fabric ConventionalBiomeTags fields.
+# only); breaking one gives 1-2 of its crop's planting item (or `seed`, for a vanilla crop's: tools/garden.py WILD).
+# Shears take the plant itself. texture: the plant's texture. biomes: Fabric ConventionalBiomeTags fields.
 WILD_CROPS = {
-    "wild_corn": {"display": "Wild Corn", "crop": "corn", "texture": "corn_wild",
+    "wild_corn": {"display": "Wild Corn", "crop": "corn", "texture": garden.WILD_ART["wild_corn"],
                   "biomes": ["IS_PLAINS", "IS_SAVANNA"]},
     "wild_sunflower": {"display": "Wild Sunflower", "crop": "sunflower", "texture": "sunflower_wild",
                        "biomes": ["IS_PLAINS"]},
@@ -156,15 +147,15 @@ WILD_CROPS = {
                           "biomes": ["IS_SAVANNA", "IS_JUNGLE"]},
     "wild_flax": {"display": "Wild Flax", "crop": "flax", "texture": "flax_stage2",
                   "biomes": ["IS_PLAINS", "IS_FLORAL"]},
-    "wild_tomato": {"display": "Wild Tomato", "crop": "tomato", "texture": "tomato_wild",
+    "wild_tomato": {"display": "Wild Tomato", "crop": "tomato", "texture": garden.WILD_ART["wild_tomato"],
                     "biomes": ["IS_JUNGLE", "IS_SAVANNA"]},
     "wild_pepper": {"display": "Wild Pepper", "crop": "pepper", "texture": "pepper_stage5",
                     "biomes": ["IS_SAVANNA", "IS_BADLANDS"]},
-    "wild_onion": {"display": "Wild Onion", "crop": "onion", "texture": "onion_stage3",
+    "wild_onion": {"display": "Wild Onion", "crop": "onion", "texture": garden.WILD_ART["wild_onion"],
                    "biomes": ["IS_PLAINS", "IS_HILL"]},
     "wild_garlic": {"display": "Wild Garlic", "crop": "garlic", "texture": "garlic_stage3",
                     "biomes": ["IS_FOREST", "IS_TAIGA"]},
-    "wild_cabbage": {"display": "Wild Cabbage", "crop": "cabbage", "texture": "cabbage_stage2",
+    "wild_cabbage": {"display": "Wild Cabbage", "crop": "cabbage", "texture": garden.WILD_ART["wild_cabbage"],
                      "biomes": ["IS_WINDSWEPT", "IS_HILL"]},
     "wild_oats": {"display": "Wild Oats", "crop": "oats", "texture": "oat_stage2",
                   "biomes": ["IS_PLAINS", "IS_TAIGA"]},
@@ -2625,7 +2616,8 @@ def planted_blocks():
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
-            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless() + list(feasts.PLACED_PIES) + menu.blocks() + rice.itemless() + soil.itemless() + orchard.itemless())
+            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless() + list(feasts.PLACED_PIES) + menu.blocks() + rice.itemless() + soil.itemless() + orchard.itemless() + garden.itemless()
+            + herbs.itemless() + lairs.itemless_blocks())
 
 
 def all_blocks():
@@ -2636,7 +2628,8 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks() + milkshakes.blocks() + garden.blocks()
+            + herbs.blocks() + spices.blocks() + lairs.blocks() + vesperine.blocks())
 
 
 def all_items():
@@ -2647,7 +2640,8 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS])
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS] + pies_and_tarts.items() + garden.items()
+            + herbs.items() + spices.items() + lairs.items() + vesperine.items() + tatterlace.items())
 
 
 def owns(entry_id):
@@ -2680,6 +2674,9 @@ def textures():
             continue
         out += [f"{info['block'].removesuffix('_crop')}_stage{n}" for n in sorted(set(info["stages"]))]
     out += [w["texture"] for w in WILD_CROPS.values() if w["texture"] not in out]
+    out += [n for n in garden.OVERRIPE["textures"] if n not in out]
+    out += [garden.colony_texture(c, s) for c in garden.COLONIES for s in range(garden.COLONY["stages"])]
+    out += [n for n in herbs.textures() + spices.textures() if n not in out]
     out += [f"{gourd}_{part}" for gourd in GOURDS for part in ("side", "top")] + STEM_TEXTURES + CRANBERRY["stages"]
     return out + EQUIPMENT_TEXTURES + TREE_TEXTURES + DECOR_TEXTURES + halloween_textures() + graveyard.textures() + plants.textures()
 
@@ -2791,6 +2788,15 @@ SHAPELESS += orchard.SHAPELESS
 ITEMS.update(cakes.ITEMS)
 SHAPELESS += cakes.SHAPELESS
 
+# The owner's square pies and tarts (tools/pies_and_tarts.py), baked in the Hearth Oven after the cakes (PieFilling); their
+# blocks, models and textures are tools/pie_tart_data.py's and tools/pie_tart_art.py's.
+SHAPELESS += pies_and_tarts.SHAPELESS
+
+# The owner's milkshakes (tools/milkshakes.py): drinks of the menu's kind, set down as their 3D glass (menu.all_placed());
+# their models and textures are tools/milkshake_data.py's and tools/milkshake_art.py's.
+ITEMS.update(milkshakes.ITEMS)
+SHAPELESS += milkshakes.SHAPELESS
+
 # The fruit crops (tools/fruit_crops.py): strawberry, blueberry and coffee bushes (TALL_CROPS, after the others), their wild
 # plants and seeds, coffee beans, and the jams. The plum and banana trees are orchard trees (tools/orchard.py TREES).
 TALL_CROPS.update(fruit_crops.BUSHES)
@@ -2801,3 +2807,28 @@ SHAPELESS += fruit_crops.SHAPELESS
 COOKING.update(fruit_crops.COOKING)
 POT_RECIPES.update(fruit_crops.POT_RECIPES)
 PANTRY["preserves"].update(fruit_crops.PRESERVES)
+
+# Garden crops in the owner's art (tools/garden.py, slice 7a): the cabbage, onion, tomato and corn above wear their stages; the
+# wild carrots, potatoes and beetroots join the wild plants after the fruit crops', and the rotten tomato the items.
+WILD_CROPS.update(garden.WILD)
+ITEMS.update(garden.ITEMS)
+
+# Garden crops, herbs and spices, part b (slice 7b; tools/vegetables.py, herbs.py and spices.py), in Jugcraft's own art:
+# lettuce, spinach, radishes, peas, ginger, mustard and saffron among the low crops; the cucumber, eggplant and zucchini, the
+# eight herbs, and the black pepper and vanilla vines among the tall crops, after the fruit crops'; their wild plants,
+# seeds, dishes and the dill pickles. The planter box, herb bundles, potted herbs, the cinnamon tree and the spice rack
+# are tools/herb_data.py's and tools/spice_data.py's.
+CROPS.update(vegetables.CROPS)
+CROPS.update(spices.CROPS)
+for _module in (vegetables, herbs, spices):
+    TALL_CROPS.update(_module.TALL_CROPS)
+    WILD_CROPS.update(_module.WILD)
+    ITEMS.update(_module.ITEMS)
+    SHAPELESS += _module.SHAPELESS
+    POT_RECIPES.update(_module.POT_RECIPES)
+GRASS_SEEDS += vegetables.GRASS_SEEDS
+SHAPED += herbs.SHAPED + spices.SHAPED
+COOKING.update(vegetables.COOKING)
+COOKING.update(spices.COOKING)
+POT_RECIPES.update(herbs.PRESERVE_RECIPES)
+PANTRY["preserves"].update(herbs.PRESERVES)

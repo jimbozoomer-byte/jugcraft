@@ -5,7 +5,8 @@
     8
   ],
   "textures": {
-    "2": "jugcraft:item/guns/attachments/extended_barrel"
+    "2": "jugcraft:item/guns/attachments/extended_barrel",
+    "particle": "jugcraft:item/guns/attachments/extended_barrel"
   },
   "elements": [
     {

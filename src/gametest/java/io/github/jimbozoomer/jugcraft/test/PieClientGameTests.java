@@ -44,15 +44,16 @@ public class PieClientGameTests implements FabricClientGameTest {
 			context.waitTicks(10);
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			List<String> items = new ArrayList<>(List.of("pastry_dough"));
-			// The pies only: the cakes have their own (CakeClientGameTests).
+			// The round pies only: the cakes and the square pies and tarts have their own (CakeClientGameTests,
+			// PieTartClientGameTests).
 			for (PieFilling filling : PieFilling.values()) {
-				if (!filling.cake) {
+				if (filling.height == 0) {
 					items.add(filling.rawPie());
 				}
 			}
 			items.add("hearth_oven");
 			for (PieFilling filling : PieFilling.values()) {
-				if (!filling.cake) {
+				if (filling.height == 0) {
 					items.add(filling.slice());
 				}
 			}

@@ -6,6 +6,24 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 
 | File | Type | Image size | Metadata / texture |
 |---|---|---|---|
+| [Guns/models/special/railworker/stan_mag.json](../../originals/Blocks/Guns/models/special/railworker/stan_mag.json) | model JSON | — | — |
+| [Guns/models/special/railworker/wooden_stock.json](../../originals/Blocks/Guns/models/special/railworker/wooden_stock.json) | model JSON | — | — |
+| [Guns/models/special/rat_king_and_queen/advanced_silencer.json](../../originals/Blocks/Guns/models/special/rat_king_and_queen/advanced_silencer.json) | model JSON | — | — |
+| [Guns/models/special/rat_king_and_queen/ext_barrel.json](../../originals/Blocks/Guns/models/special/rat_king_and_queen/ext_barrel.json) | model JSON | — | — |
+| [Guns/models/special/rat_king_and_queen/ext_mag.json](../../originals/Blocks/Guns/models/special/rat_king_and_queen/ext_mag.json) | model JSON | — | — |
+| [Guns/models/special/rat_king_and_queen/main.json](../../originals/Blocks/Guns/models/special/rat_king_and_queen/main.json) | model JSON | — | — |
+| [Guns/models/special/rat_king_and_queen/muzzle_brake.json](../../originals/Blocks/Guns/models/special/rat_king_and_queen/muzzle_brake.json) | model JSON | — | — |
+| [Guns/models/special/rat_king_and_queen/receiver_1.json](../../originals/Blocks/Guns/models/special/rat_king_and_queen/receiver_1.json) | model JSON | — | — |
+| [Guns/models/special/rat_king_and_queen/receiver_2.json](../../originals/Blocks/Guns/models/special/rat_king_and_queen/receiver_2.json) | model JSON | — | — |
+| [Guns/models/special/rat_king_and_queen/silencer.json](../../originals/Blocks/Guns/models/special/rat_king_and_queen/silencer.json) | model JSON | — | — |
+| [Guns/models/special/rat_king_and_queen/speed_mag.json](../../originals/Blocks/Guns/models/special/rat_king_and_queen/speed_mag.json) | model JSON | — | — |
+| [Guns/models/special/rat_king_and_queen/stan_barrel.json](../../originals/Blocks/Guns/models/special/rat_king_and_queen/stan_barrel.json) | model JSON | — | — |
+| [Guns/models/special/rat_king_and_queen/stan_mag.json](../../originals/Blocks/Guns/models/special/rat_king_and_queen/stan_mag.json) | model JSON | — | — |
+| [Guns/models/special/raygun/heavy_stock.json](../../originals/Blocks/Guns/models/special/raygun/heavy_stock.json) | model JSON | — | — |
+| [Guns/models/special/raygun/light_stock.json](../../originals/Blocks/Guns/models/special/raygun/light_stock.json) | model JSON | — | — |
+| [Guns/models/special/raygun/main.json](../../originals/Blocks/Guns/models/special/raygun/main.json) | model JSON | — | — |
+| [Guns/models/special/raygun/wooden_stock.json](../../originals/Blocks/Guns/models/special/raygun/wooden_stock.json) | model JSON | — | — |
+| [Guns/models/special/red_raydar/anthralite_bayonet.json](../../originals/Blocks/Guns/models/special/red_raydar/anthralite_bayonet.json) | model JSON | — | — |
 | [Guns/models/special/red_raydar/diamond_bayonet.json](../../originals/Blocks/Guns/models/special/red_raydar/diamond_bayonet.json) | model JSON | — | — |
 | [Guns/models/special/red_raydar/heavy_stock.json](../../originals/Blocks/Guns/models/special/red_raydar/heavy_stock.json) | model JSON | — | — |
 | [Guns/models/special/red_raydar/iron_bayonet.json](../../originals/Blocks/Guns/models/special/red_raydar/iron_bayonet.json) | model JSON | — | — |
@@ -238,21 +256,3 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/models/special/triquetra/sights.json](../../originals/Blocks/Guns/models/special/triquetra/sights.json) | model JSON | — | — |
 | [Guns/models/special/triquetra/stan_grip.json](../../originals/Blocks/Guns/models/special/triquetra/stan_grip.json) | model JSON | — | — |
 | [Guns/models/special/triquetra/stan_mag.json](../../originals/Blocks/Guns/models/special/triquetra/stan_mag.json) | model JSON | — | — |
-| [Guns/models/special/triquetra/wooden_stock.json](../../originals/Blocks/Guns/models/special/triquetra/wooden_stock.json) | model JSON | — | — |
-| [Guns/models/special/trotters/advanced_silencer.json](../../originals/Blocks/Guns/models/special/trotters/advanced_silencer.json) | model JSON | — | — |
-| [Guns/models/special/trotters/anthralite_bayonet.json](../../originals/Blocks/Guns/models/special/trotters/anthralite_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/trotters/bolt.json](../../originals/Blocks/Guns/models/special/trotters/bolt.json) | model JSON | — | — |
-| [Guns/models/special/trotters/diamond_bayonet.json](../../originals/Blocks/Guns/models/special/trotters/diamond_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/trotters/ext_barrel.json](../../originals/Blocks/Guns/models/special/trotters/ext_barrel.json) | model JSON | — | — |
-| [Guns/models/special/trotters/heavy_stock.json](../../originals/Blocks/Guns/models/special/trotters/heavy_stock.json) | model JSON | — | — |
-| [Guns/models/special/trotters/iron_bayonet.json](../../originals/Blocks/Guns/models/special/trotters/iron_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/trotters/light_grip.json](../../originals/Blocks/Guns/models/special/trotters/light_grip.json) | model JSON | — | — |
-| [Guns/models/special/trotters/light_stock.json](../../originals/Blocks/Guns/models/special/trotters/light_stock.json) | model JSON | — | — |
-| [Guns/models/special/trotters/main.json](../../originals/Blocks/Guns/models/special/trotters/main.json) | model JSON | — | — |
-| [Guns/models/special/trotters/muzzle_brake.json](../../originals/Blocks/Guns/models/special/trotters/muzzle_brake.json) | model JSON | — | — |
-| [Guns/models/special/trotters/netherite_bayonet.json](../../originals/Blocks/Guns/models/special/trotters/netherite_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/trotters/no_sights.json](../../originals/Blocks/Guns/models/special/trotters/no_sights.json) | model JSON | — | — |
-| [Guns/models/special/trotters/sights.json](../../originals/Blocks/Guns/models/special/trotters/sights.json) | model JSON | — | — |
-| [Guns/models/special/trotters/silencer.json](../../originals/Blocks/Guns/models/special/trotters/silencer.json) | model JSON | — | — |
-| [Guns/models/special/trotters/stan_barrel.json](../../originals/Blocks/Guns/models/special/trotters/stan_barrel.json) | model JSON | — | — |
-| [Guns/models/special/trotters/stan_grip.json](../../originals/Blocks/Guns/models/special/trotters/stan_grip.json) | model JSON | — | — |

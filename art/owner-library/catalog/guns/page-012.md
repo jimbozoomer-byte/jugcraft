@@ -6,6 +6,24 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 
 | File | Type | Image size | Metadata / texture |
 |---|---|---|---|
+| [Guns/models/special/jackhammer/anthralite_bayonet.json](../../originals/Blocks/Guns/models/special/jackhammer/anthralite_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/bolt.json](../../originals/Blocks/Guns/models/special/jackhammer/bolt.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/diamond_bayonet.json](../../originals/Blocks/Guns/models/special/jackhammer/diamond_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/ext_barrel.json](../../originals/Blocks/Guns/models/special/jackhammer/ext_barrel.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/ext_mag.json](../../originals/Blocks/Guns/models/special/jackhammer/ext_mag.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/heavy_stock.json](../../originals/Blocks/Guns/models/special/jackhammer/heavy_stock.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/iron_bayonet.json](../../originals/Blocks/Guns/models/special/jackhammer/iron_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/light_grip.json](../../originals/Blocks/Guns/models/special/jackhammer/light_grip.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/light_stock.json](../../originals/Blocks/Guns/models/special/jackhammer/light_stock.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/main.json](../../originals/Blocks/Guns/models/special/jackhammer/main.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/muzzle_brake.json](../../originals/Blocks/Guns/models/special/jackhammer/muzzle_brake.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/netherite_bayonet.json](../../originals/Blocks/Guns/models/special/jackhammer/netherite_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/silencer.json](../../originals/Blocks/Guns/models/special/jackhammer/silencer.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/speed_mag.json](../../originals/Blocks/Guns/models/special/jackhammer/speed_mag.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/stan_barrel.json](../../originals/Blocks/Guns/models/special/jackhammer/stan_barrel.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/stan_grip.json](../../originals/Blocks/Guns/models/special/jackhammer/stan_grip.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/stan_mag.json](../../originals/Blocks/Guns/models/special/jackhammer/stan_mag.json) | model JSON | — | — |
+| [Guns/models/special/jackhammer/tact_grip.json](../../originals/Blocks/Guns/models/special/jackhammer/tact_grip.json) | model JSON | — | — |
 | [Guns/models/special/jackhammer/wooden_stock.json](../../originals/Blocks/Guns/models/special/jackhammer/wooden_stock.json) | model JSON | — | — |
 | [Guns/models/special/jr_wristbreaker/advanced_silencer.json](../../originals/Blocks/Guns/models/special/jr_wristbreaker/advanced_silencer.json) | model JSON | — | — |
 | [Guns/models/special/jr_wristbreaker/bolt.json](../../originals/Blocks/Guns/models/special/jr_wristbreaker/bolt.json) | model JSON | — | — |
@@ -238,21 +256,3 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/models/special/makeshift_rifle/stock_weighted.json](../../originals/Blocks/Guns/models/special/makeshift_rifle/stock_weighted.json) | model JSON | — | — |
 | [Guns/models/special/makeshift_rifle/stock_wooden.json](../../originals/Blocks/Guns/models/special/makeshift_rifle/stock_wooden.json) | model JSON | — | — |
 | [Guns/models/special/makeshift_rifle/vertical_grip.json](../../originals/Blocks/Guns/models/special/makeshift_rifle/vertical_grip.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/advanced_silencer.json](../../originals/Blocks/Guns/models/special/mangalitsa/advanced_silencer.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/anthralite_bayonet.json](../../originals/Blocks/Guns/models/special/mangalitsa/anthralite_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/bolt.json](../../originals/Blocks/Guns/models/special/mangalitsa/bolt.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/diamond_bayonet.json](../../originals/Blocks/Guns/models/special/mangalitsa/diamond_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/ext_barrel.json](../../originals/Blocks/Guns/models/special/mangalitsa/ext_barrel.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/heavy_stock.json](../../originals/Blocks/Guns/models/special/mangalitsa/heavy_stock.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/iron_bayonet.json](../../originals/Blocks/Guns/models/special/mangalitsa/iron_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/light_grip.json](../../originals/Blocks/Guns/models/special/mangalitsa/light_grip.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/light_stock.json](../../originals/Blocks/Guns/models/special/mangalitsa/light_stock.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/main.json](../../originals/Blocks/Guns/models/special/mangalitsa/main.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/muzzle_brake.json](../../originals/Blocks/Guns/models/special/mangalitsa/muzzle_brake.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/netherite_bayonet.json](../../originals/Blocks/Guns/models/special/mangalitsa/netherite_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/no_sights.json](../../originals/Blocks/Guns/models/special/mangalitsa/no_sights.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/sights.json](../../originals/Blocks/Guns/models/special/mangalitsa/sights.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/silencer.json](../../originals/Blocks/Guns/models/special/mangalitsa/silencer.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/stan_barrel.json](../../originals/Blocks/Guns/models/special/mangalitsa/stan_barrel.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/stan_grip.json](../../originals/Blocks/Guns/models/special/mangalitsa/stan_grip.json) | model JSON | — | — |
-| [Guns/models/special/mangalitsa/tact_grip.json](../../originals/Blocks/Guns/models/special/mangalitsa/tact_grip.json) | model JSON | — | — |

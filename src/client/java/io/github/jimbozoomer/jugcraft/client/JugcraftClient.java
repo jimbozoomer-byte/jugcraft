@@ -58,6 +58,10 @@ public final class JugcraftClient implements ClientModInitializer {
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_ANCHOR_ENTITY, ZiplineRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.COMBAT_ROCKET, ThrownItemRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.lair.JugcraftLairs.MIST_GATE,
+				net.minecraft.client.renderer.entity.NoopRenderer::new);
+		VesperineClient.register();
+		TatterlaceClient.register();
 		BlockEntityRendererRegistry.register(JugcraftMachines.MACHINE_ENTITY, WindTurbineRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.BELT_PULLEY_ENTITY, BeltRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.SHAFT_ENTITY, KineticRotorRenderer::new);
@@ -218,6 +222,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CIDER_PRESS_ENTITY, CiderPressRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CANNING_KETTLE_ENTITY, CanningKettleRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PANTRY_SHELF_ENTITY, PantryShelfRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPICE_RACK_ENTITY, SpiceRackRenderer::new);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.FOG, FogParticle::provider);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.SPOOKY_SPARK, SpookySparkParticle::provider);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOW_LAUNCHER_ENTITY, ShowLauncherRenderer::new);
@@ -262,6 +267,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.BOWLING_PUMPKIN, BowlingPumpkinRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.TOILET_PAPER_ROLL, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.TOSS_RING, ThrownItemRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.ROTTEN_TOMATO, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.FERRIS_WHEEL, FerrisWheelRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.PINATA, PinataRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.HOT_AIR_BALLOON, HotAirBalloonRenderer::new);

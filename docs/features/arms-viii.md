@@ -80,6 +80,10 @@ Four new kinds of arm in bronze and steel. Each fights in the hand like any arm,
     - its shots show the javelin wound back over the shoulder and let go, the francisca raised in first person, the javelin come down by the struck pig, and the chakram on its way out. The four in flight are drawn, but small at that distance.
   - **36506e23 and 0570f0d0, with main (#184 and #192) merged in:** the server tests failed once, on both commits. The chakram took 8 from the near pig and only 4 from the far one: its way back missed the far pig. The hit cooldown was ruled out: the field the return pass resets is the one 26.3's `LivingEntity.hurtServer` checks. Each cut knocks its pig back, which can carry it off the walk or out of the chakram's way back. 39f1f6c3 holds the test's pigs still (knockback resistance 1), clears the corridor the chakram flies along, and names where the pigs ended up if it fails.
   - **39f1f6c3: all green.** The build, all 777 server tests (the chakram took both pigs from 10 to 2) and the three client shards passed.
+  - **The harpoon test, now and then:** it failed on #268 ([run 37737290079](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37737290079)), which doesn't touch the thrown arms: "The harpoon took 0.0, not 6.0 (come down at 1.57 2.00 8.93)".
+    - Aimed straight at its pig's middle, the harpoon's arc came to the pig only a tenth of a block above the floor. The throw's spread (up to about a degree) then put it into the floor just short of the pig.
+    - A simulation of the flight gives that landing for a spread of 0.016 down, and a miss in about one throw in forty.
+    - 0379ba3d2 has the tests' thrower aim so that the arm's own arc comes to the foe's middle. In the simulation, none of 200,000 throws then misses, for any of the four throw tests.
 - **Not run:** play; two players; how the throws feel against real mobs; the harpoon underwater (only its code path, which undoes water's drag).
 
 ## World and event applicability

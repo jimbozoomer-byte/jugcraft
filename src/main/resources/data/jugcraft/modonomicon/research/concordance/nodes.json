@@ -286,5 +286,29 @@
     "required_facts": [
       "jugcraft:concordance/dreamwalking_mastered"
     ]
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_encountered",
+    "required_facts": [
+      "jugcraft:concordance/hearthbinding_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_observed",
+    "required_facts": [
+      "jugcraft:concordance/hearthbinding_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_understood",
+    "required_facts": [
+      "jugcraft:concordance/hearthbinding_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/hearthbinding_mastered",
+    "required_facts": [
+      "jugcraft:concordance/hearthbinding_mastered"
+    ]
   }
 ]

@@ -6,6 +6,24 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 
 | File | Type | Image size | Metadata / texture |
 |---|---|---|---|
+| [Guns/models/special/auvtomag/no_sights.json](../../originals/Blocks/Guns/models/special/auvtomag/no_sights.json) | model JSON | — | — |
+| [Guns/models/special/auvtomag/receiver.json](../../originals/Blocks/Guns/models/special/auvtomag/receiver.json) | model JSON | — | — |
+| [Guns/models/special/auvtomag/sights.json](../../originals/Blocks/Guns/models/special/auvtomag/sights.json) | model JSON | — | — |
+| [Guns/models/special/auvtomag/silencer.json](../../originals/Blocks/Guns/models/special/auvtomag/silencer.json) | model JSON | — | — |
+| [Guns/models/special/auvtomag/speed_mag.json](../../originals/Blocks/Guns/models/special/auvtomag/speed_mag.json) | model JSON | — | — |
+| [Guns/models/special/auvtomag/stan_barrel.json](../../originals/Blocks/Guns/models/special/auvtomag/stan_barrel.json) | model JSON | — | — |
+| [Guns/models/special/auvtomag/stan_mag.json](../../originals/Blocks/Guns/models/special/auvtomag/stan_mag.json) | model JSON | — | — |
+| [Guns/models/special/basic_turret/auto_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/auto_turret_top.json) | model JSON | — | — |
+| [Guns/models/special/basic_turret/basic_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/basic_turret_top.json) | model JSON | — | — |
+| [Guns/models/special/basic_turret/enemy_turret.json](../../originals/Blocks/Guns/models/special/basic_turret/enemy_turret.json) | model JSON | — | — |
+| [Guns/models/special/basic_turret/enemy_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/enemy_turret_top.json) | model JSON | — | — |
+| [Guns/models/special/basic_turret/flame_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/flame_turret_top.json) | model JSON | — | — |
+| [Guns/models/special/basic_turret/shotgun_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/shotgun_turret_top.json) | model JSON | — | — |
+| [Guns/models/special/basic_turret/sniper_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/sniper_turret_top.json) | model JSON | — | — |
+| [Guns/models/special/basker/heavy_stock.json](../../originals/Blocks/Guns/models/special/basker/heavy_stock.json) | model JSON | — | — |
+| [Guns/models/special/basker/light_stock.json](../../originals/Blocks/Guns/models/special/basker/light_stock.json) | model JSON | — | — |
+| [Guns/models/special/basker/main.json](../../originals/Blocks/Guns/models/special/basker/main.json) | model JSON | — | — |
+| [Guns/models/special/basker/wooden_stock.json](../../originals/Blocks/Guns/models/special/basker/wooden_stock.json) | model JSON | — | — |
 | [Guns/models/special/big_bore/hammer.json](../../originals/Blocks/Guns/models/special/big_bore/hammer.json) | model JSON | — | — |
 | [Guns/models/special/big_bore/main.json](../../originals/Blocks/Guns/models/special/big_bore/main.json) | model JSON | — | — |
 | [Guns/models/special/big_bore/no_sights.json](../../originals/Blocks/Guns/models/special/big_bore/no_sights.json) | model JSON | — | — |
@@ -238,21 +256,3 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/models/special/echoes_2/main.json](../../originals/Blocks/Guns/models/special/echoes_2/main.json) | model JSON | — | — |
 | [Guns/models/special/echoes_2/no_sights.json](../../originals/Blocks/Guns/models/special/echoes_2/no_sights.json) | model JSON | — | — |
 | [Guns/models/special/echoes_2/sights.json](../../originals/Blocks/Guns/models/special/echoes_2/sights.json) | model JSON | — | — |
-| [Guns/models/special/echoes_2/tact_grip.json](../../originals/Blocks/Guns/models/special/echoes_2/tact_grip.json) | model JSON | — | — |
-| [Guns/models/special/fencer_carabine/anthralite_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_carabine/anthralite_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/fencer_carabine/diamond_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_carabine/diamond_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/fencer_carabine/hammer.json](../../originals/Blocks/Guns/models/special/fencer_carabine/hammer.json) | model JSON | — | — |
-| [Guns/models/special/fencer_carabine/iron_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_carabine/iron_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/fencer_carabine/light_grip.json](../../originals/Blocks/Guns/models/special/fencer_carabine/light_grip.json) | model JSON | — | — |
-| [Guns/models/special/fencer_carabine/main.json](../../originals/Blocks/Guns/models/special/fencer_carabine/main.json) | model JSON | — | — |
-| [Guns/models/special/fencer_carabine/netherite_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_carabine/netherite_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/fencer_carabine/tact_grip.json](../../originals/Blocks/Guns/models/special/fencer_carabine/tact_grip.json) | model JSON | — | — |
-| [Guns/models/special/fencer_thumper/anthralite_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_thumper/anthralite_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/fencer_thumper/diamond_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_thumper/diamond_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/fencer_thumper/hammer.json](../../originals/Blocks/Guns/models/special/fencer_thumper/hammer.json) | model JSON | — | — |
-| [Guns/models/special/fencer_thumper/iron_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_thumper/iron_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/fencer_thumper/light_grip.json](../../originals/Blocks/Guns/models/special/fencer_thumper/light_grip.json) | model JSON | — | — |
-| [Guns/models/special/fencer_thumper/main.json](../../originals/Blocks/Guns/models/special/fencer_thumper/main.json) | model JSON | — | — |
-| [Guns/models/special/fencer_thumper/netherite_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_thumper/netherite_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/fencer_thumper/vert_grip.json](../../originals/Blocks/Guns/models/special/fencer_thumper/vert_grip.json) | model JSON | — | — |
-| [Guns/models/special/flame.json](../../originals/Blocks/Guns/models/special/flame.json) | model JSON | — | — |

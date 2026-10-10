@@ -1,7 +1,8 @@
 {
   "credit": "Made with Blockbench",
   "textures": {
-    "2": "jugcraft:item/guns/attachments/wooden_stock"
+    "2": "jugcraft:item/guns/attachments/wooden_stock",
+    "particle": "jugcraft:item/guns/attachments/wooden_stock"
   },
   "elements": [
     {

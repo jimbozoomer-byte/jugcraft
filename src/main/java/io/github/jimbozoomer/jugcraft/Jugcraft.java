@@ -98,6 +98,9 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.chemistry.ConstructionChemistry.register();
 		JugcraftGuide.register();
 		JugcraftAgriculture.register();
+		io.github.jimbozoomer.jugcraft.lair.JugcraftLairs.register();
+		io.github.jimbozoomer.jugcraft.lair.vesperine.JugcraftVesperine.register();
+		io.github.jimbozoomer.jugcraft.lair.tatterlace.JugcraftTatterlace.register();
 		io.github.jimbozoomer.jugcraft.styx.JugcraftStyx.register();
 		JugcraftDrones.register();
 		io.github.jimbozoomer.jugcraft.tower.JugcraftTower.register();

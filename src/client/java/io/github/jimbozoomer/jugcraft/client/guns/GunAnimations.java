@@ -32,13 +32,22 @@ public final class GunAnimations {
 	private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
 	/** Animation sound keyframes that play another event's sound (tools/guns.py EVENT_SOUNDS: "rustle" is a rustle). */
 	public static final Map<String, String> SOUND_ALIASES = Map.of("rustle", "gun_rustle");
-	/** The same, per gun: the shell-at-a-time guns' loops push a shell or a round, not a magazine. */
-	public static final Map<String, Map<String, String>> GUN_SOUND_ALIASES = Map.of(
-			"thunderpipe", Map.of("reload_mag_in", "shell_in"),
-			"haymaker", Map.of("reload_mag_in", "shell_in"),
-			"longhorn_rifle", Map.of("reload_mag_in", "shell_in"),
-			"drover_rifle", Map.of("reload_mag_in", "shell_in"),
-			"coach_gun", Map.of("reload_mag_in", "shell_in"));
+	/**
+	 * The same, per gun: the shell-at-a-time guns' loops push a shell or a round, not a magazine; the Squall Rifle's
+	 * canister clanks, it is no ramrod (slice 9B), and so does the Throttle's bulb as it is twisted shut (slice 9D).
+	 */
+	public static final Map<String, Map<String, String>> GUN_SOUND_ALIASES = Map.ofEntries(
+			Map.entry("thunderpipe", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("haymaker", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("longhorn_rifle", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("drover_rifle", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("coach_gun", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("stormlock_rifle", Map.of("reload_mag_in", "insert")),
+			Map.entry("linesman", Map.of("reload_mag_in", "insert")),
+			Map.entry("squall_rifle", Map.of("metal", "clank")),
+			Map.entry("sledge", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("highwayman", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("throttle", Map.of("reload_mag_in", "shell_in", "metal", "clank")));
 
 	private GunAnimations() {
 	}

@@ -151,8 +151,9 @@ POT_RECIPES = {
                                           "jugcraft:tomato": 1}, "time": 300},
     "squid_ink_pasta": {"inputs": {"minecraft:bowl": 1, "jugcraft:raw_pasta": 1, "minecraft:ink_sac": 1, "jugcraft:cod_slice": 1,
                                    "jugcraft:salmon_slice": 1, "jugcraft:tomato": 1}, "time": 300},
+    # Cooked from what a ratatouille is made of since the eggplant and zucchini grow (tools/vegetables.py RATATOUILLE).
     "ratatouille": {"inputs": {"minecraft:bowl": 1, "jugcraft:tomato": 1, "jugcraft:pepper": 1, "jugcraft:onion": 1,
-                               "minecraft:beetroot": 1, "jugcraft:garlic": 1}, "time": 300},
+                               "jugcraft:eggplant": 1, "jugcraft:zucchini": 1}, "time": 300},
     "cornbread_stuffing": {"inputs": {"minecraft:bowl": 1, "jugcraft:cornbread": 1, "jugcraft:onion": 1, "minecraft:brown_mushroom": 1,
                                       "minecraft:carrot": 1}, "time": 200},
     "dumplings": {"inputs": {"jugcraft:wheat_dough": 1, "jugcraft:minced_beef": 1, "jugcraft:cabbage_leaf": 1, "jugcraft:onion": 1},
@@ -260,7 +261,8 @@ def items():
 
 def all_placed():
     """Every dish that sets down: the menu's, then the rice slice's (tools/rice.py), then the orchards' juices
-    (tools/orchard.py); MenuDishes.PLACED in this order."""
+    (tools/orchard.py), then the owner's milkshakes (tools/milkshakes.py); MenuDishes.PLACED in this order."""
+    import milkshakes
     import orchard
     import rice
-    return {**placed(), **rice.placed(), **orchard.placed()}
+    return {**placed(), **rice.placed(), **orchard.placed(), **milkshakes.placed()}

@@ -37,6 +37,12 @@ public final class Baselines {
 	public static final double UNHARMED = Benchmark.PLAYER_HEALTH - 2.0;
 	/** The arcane Spell Power above the base that the geared striker's equipment gives (a +4 item, or two +2). */
 	public static final double GEARED_POWER = 4.0;
+	/**
+	 * The fire Spell Power above the base of the most the Hearthbinder's regalia gives with the default slots: a Focus of
+	 * Fire and the whole Pyromancer's set (concordance/ember/EmberGear: 4 + 4 x 0.5).
+	 */
+	public static final double GEARED_FIRE_POWER = 6.0;
+	private static final String FIRE = "spell_power:fire";
 
 	private Baselines() {
 	}
@@ -77,6 +83,11 @@ public final class Baselines {
 		 * none) and their arcane Spell Power above the base; null if it does not fit the instrument.
 		 */
 		public @Nullable Ability invocation(String id, @Nullable String tuning, ResearchState reached, double arcaneAboveBase) {
+			return invocation(id, tuning, reached, "spell_power:arcane", arcaneAboveBase);
+		}
+
+		/** The same, with {@code aboveBase} points of Spell Power in {@code school} (and none in any other). */
+		public @Nullable Ability invocation(String id, @Nullable String tuning, ResearchState reached, String school, double aboveBase) {
 			Definitions.Invocation invocation = rules.invocation(id);
 			Authored form = invocation == null ? null : rules.authored(id, instrument);
 			Plan plan = form == null ? null : form.plan(tuning);
@@ -85,7 +96,7 @@ public final class Baselines {
 				return null;
 			}
 			int focus = invocation.cost(reached) + (tuning == null ? 0 : form.tuningFocus(tuning));
-			Plan scaled = plan.scaled(school -> school.equals("spell_power:arcane") ? arcaneAboveBase : 0.0);
+			Plan scaled = plan.scaled(scaling -> scaling.equals(school) ? aboveBase : 0.0);
 			return Ability.of(tuning == null ? id : id + "+" + tuning, invocation.role(), scaled, focus, timing.castTicks(), timing.cooldownTicks());
 		}
 
@@ -133,7 +144,13 @@ public final class Baselines {
 							invocation("jugcraft:flashstep", null, mastered, 0.0), invocation("jugcraft:lance", "jugcraft:extend", mastered, 0.0))),
 					new Character("Composer", Armour.LEATHER, Weapon.WOODEN_SWORD, all(
 							invocation("jugcraft:aegis", null, mastered, 0.0),
-							composed("ray struck sear then here creatures dazzle", Definitions.Role.DAMAGE)))));
+							composed("ray struck sear then here creatures dazzle", Definitions.Role.DAMAGE))),
+					// The Hearthbinder's regalia at its most: a Focus of Fire and the Pyromancer's set (leather's protection).
+					// The Fire Bangle's blow is not modelled (the model's strikes have no on-hit status).
+					new Character("Geared hearthbinder (+6 fire, Pyromancer's)", Armour.LEATHER, Weapon.WOODEN_SWORD, all(
+							invocation("jugcraft:hearthguard", null, mastered, FIRE, GEARED_FIRE_POWER),
+							invocation("jugcraft:cinderbolt", null, mastered, FIRE, GEARED_FIRE_POWER),
+							invocation("jugcraft:hearthflare", null, mastered, FIRE, GEARED_FIRE_POWER)))));
 			for (Definitions.Invocation invocation : rules.invocations().values()) {
 				Ability alone = invocation(invocation.id(), null, invocation.state(), 0.0);
 				if (alone != null) {
@@ -238,7 +255,8 @@ public final class Baselines {
 	 * <li>the utility character keeps meaningful survival options: it wins the isolated encounter, and Dawn Aegis lets
 	 * it last longer beside the unkillable brute than the same kit without it;</li>
 	 * <li>Spell Power changes only what scales with it: the geared striker's Lance deals more than the plain
-	 * striker's, and its shield does not.</li>
+	 * striker's, and its shield does not; the geared hearthbinder's Cinderbolt and Hearthflare deal more than the plain
+	 * ones, and its Hearthguard does not change.</li>
 	 * </ol>
 	 */
 	public static Report report(Source source) {
@@ -289,6 +307,17 @@ public final class Baselines {
 			failures.add("Spell Power should raise the Lance only: Lance " + lance(striker) + " -> " + lance(geared) + ", Aegis " + shield(striker)
 					+ " -> " + shield(geared));
 		}
+		// The same for fire: the regalia raises Cinderbolt and Hearthflare, never Hearthguard.
+		Character hearthbinder = named(roster, "Geared hearthbinder (+6 fire, Pyromancer's)");
+		for (String id : List.of("jugcraft:cinderbolt", "jugcraft:hearthflare")) {
+			if (magnitude(hearthbinder, id) <= magnitude(named(roster, "Only " + id), id)) {
+				failures.add("Fire Spell Power should raise " + id + ": " + magnitude(named(roster, "Only " + id), id) + " -> "
+						+ magnitude(hearthbinder, id));
+			}
+		}
+		if (magnitude(hearthbinder, "jugcraft:hearthguard") != magnitude(named(roster, "Only jugcraft:hearthguard"), "jugcraft:hearthguard")) {
+			failures.add("Fire Spell Power should not change Hearthguard");
+		}
 		return new Report(encounters, outcomes, measures, failures);
 	}
 
@@ -299,6 +328,12 @@ public final class Baselines {
 	private static int lance(Character character) {
 		return character.abilities().stream().filter(a -> a.id().startsWith("jugcraft:lance")).findFirst().orElseThrow().plan().root()
 				.steps().getFirst().effect().magnitude();
+	}
+
+	/** The first step's magnitude of {@code character}'s invocation {@code id}. */
+	private static int magnitude(Character character, String id) {
+		return character.abilities().stream().filter(a -> a.id().equals(id)).findFirst().orElseThrow().plan().root().steps().getFirst()
+				.effect().magnitude();
 	}
 
 	private static int shield(Character character) {

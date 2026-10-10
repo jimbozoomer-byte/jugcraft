@@ -6,6 +6,24 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 
 | File | Type | Image size | Metadata / texture |
 |---|---|---|---|
+| [Guns/models/block/lightning_rod_connector.json](../../originals/Blocks/Guns/models/block/lightning_rod_connector.json) | model JSON | — | — |
+| [Guns/models/block/lightning_rod_connector_on.json](../../originals/Blocks/Guns/models/block/lightning_rod_connector_on.json) | model JSON | — | — |
+| [Guns/models/block/lime_niter_glass_opaque.json](../../originals/Blocks/Guns/models/block/lime_niter_glass_opaque.json) | model JSON | — | — |
+| [Guns/models/block/macerator.json](../../originals/Blocks/Guns/models/block/macerator.json) | model JSON | — | — |
+| [Guns/models/block/macerator_on.json](../../originals/Blocks/Guns/models/block/macerator_on.json) | model JSON | — | — |
+| [Guns/models/block/macerator_wheels_on.json](../../originals/Blocks/Guns/models/block/macerator_wheels_on.json) | model JSON | — | — |
+| [Guns/models/block/magenta_niter_glass_opaque.json](../../originals/Blocks/Guns/models/block/magenta_niter_glass_opaque.json) | model JSON | — | — |
+| [Guns/models/block/mechanical_press_full.json](../../originals/Blocks/Guns/models/block/mechanical_press_full.json) | model JSON | — | — |
+| [Guns/models/block/mechanical_press_off.json](../../originals/Blocks/Guns/models/block/mechanical_press_off.json) | model JSON | — | — |
+| [Guns/models/block/mechanical_press_on.json](../../originals/Blocks/Guns/models/block/mechanical_press_on.json) | model JSON | — | — |
+| [Guns/models/block/mine_unit.json](../../originals/Blocks/Guns/models/block/mine_unit.json) | model JSON | — | — |
+| [Guns/models/block/mine_unit_primed.json](../../originals/Blocks/Guns/models/block/mine_unit_primed.json) | model JSON | — | — |
+| [Guns/models/block/mob_trap.json](../../originals/Blocks/Guns/models/block/mob_trap.json) | model JSON | — | — |
+| [Guns/models/block/mossy_asgharian_bricks.json](../../originals/Blocks/Guns/models/block/mossy_asgharian_bricks.json) | model JSON | — | — |
+| [Guns/models/block/mossy_asgharian_tiles.json](../../originals/Blocks/Guns/models/block/mossy_asgharian_tiles.json) | model JSON | — | — |
+| [Guns/models/block/nether_sulfur_ore.json](../../originals/Blocks/Guns/models/block/nether_sulfur_ore.json) | model JSON | — | — |
+| [Guns/models/block/niter_block.json](../../originals/Blocks/Guns/models/block/niter_block.json) | model JSON | — | — |
+| [Guns/models/block/niter_glass_opaque.json](../../originals/Blocks/Guns/models/block/niter_glass_opaque.json) | model JSON | — | — |
 | [Guns/models/block/niter_height10.json](../../originals/Blocks/Guns/models/block/niter_height10.json) | model JSON | — | — |
 | [Guns/models/block/niter_height12.json](../../originals/Blocks/Guns/models/block/niter_height12.json) | model JSON | — | — |
 | [Guns/models/block/niter_height14.json](../../originals/Blocks/Guns/models/block/niter_height14.json) | model JSON | — | — |
@@ -238,21 +256,3 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/models/item/callwell.json](../../originals/Blocks/Guns/models/item/callwell.json) | model JSON | — | — |
 | [Guns/models/item/callwell_conversion.json](../../originals/Blocks/Guns/models/item/callwell_conversion.json) | model JSON | — | — |
 | [Guns/models/item/callwell_terminal.json](../../originals/Blocks/Guns/models/item/callwell_terminal.json) | model JSON | — | — |
-| [Guns/models/item/carapice.json](../../originals/Blocks/Guns/models/item/carapice.json) | model JSON | — | — |
-| [Guns/models/item/ceremonial_cod.json](../../originals/Blocks/Guns/models/item/ceremonial_cod.json) | model JSON | — | — |
-| [Guns/models/item/charged_amethyst_relay.json](../../originals/Blocks/Guns/models/item/charged_amethyst_relay.json) | model JSON | — | — |
-| [Guns/models/item/charged_amethyst_shard.json](../../originals/Blocks/Guns/models/item/charged_amethyst_shard.json) | model JSON | — | — |
-| [Guns/models/item/chiseled_anthralite_block.json](../../originals/Blocks/Guns/models/item/chiseled_anthralite_block.json) | model JSON | — | — |
-| [Guns/models/item/chiseled_asgharian_bricks.json](../../originals/Blocks/Guns/models/item/chiseled_asgharian_bricks.json) | model JSON | — | — |
-| [Guns/models/item/chiseled_diamond_steel_block.json](../../originals/Blocks/Guns/models/item/chiseled_diamond_steel_block.json) | model JSON | — | — |
-| [Guns/models/item/chiseled_treated_brass_block.json](../../originals/Blocks/Guns/models/item/chiseled_treated_brass_block.json) | model JSON | — | — |
-| [Guns/models/item/chiseled_treated_iron_block.json](../../originals/Blocks/Guns/models/item/chiseled_treated_iron_block.json) | model JSON | — | — |
-| [Guns/models/item/choke_bomb.json](../../originals/Blocks/Guns/models/item/choke_bomb.json) | model JSON | — | — |
-| [Guns/models/item/choke_bomb_2d.json](../../originals/Blocks/Guns/models/item/choke_bomb_2d.json) | model JSON | — | — |
-| [Guns/models/item/choke_bomb_3d.json](../../originals/Blocks/Guns/models/item/choke_bomb_3d.json) | model JSON | — | — |
-| [Guns/models/item/clump_anthralite.json](../../originals/Blocks/Guns/models/item/clump_anthralite.json) | model JSON | — | — |
-| [Guns/models/item/cog_heart.json](../../originals/Blocks/Guns/models/item/cog_heart.json) | model JSON | — | — |
-| [Guns/models/item/cog_heart.png.mcmeta](../../originals/Blocks/Guns/models/item/cog_heart.png.mcmeta) | texture metadata | — | — |
-| [Guns/models/item/cog_knight_boots.json](../../originals/Blocks/Guns/models/item/cog_knight_boots.json) | model JSON | — | — |
-| [Guns/models/item/cog_knight_chestplate.json](../../originals/Blocks/Guns/models/item/cog_knight_chestplate.json) | model JSON | — | — |
-| [Guns/models/item/cog_knight_helmet.json](../../originals/Blocks/Guns/models/item/cog_knight_helmet.json) | model JSON | — | — |

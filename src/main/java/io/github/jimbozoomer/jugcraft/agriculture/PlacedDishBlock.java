@@ -46,7 +46,9 @@ public class PlacedDishBlock extends Block {
 		STACK(Block.box(3.0, 0.0, 3.0, 13.0, 6.0, 13.0)),
 		FLAT(Block.box(1.0, 0.0, 1.0, 15.0, 1.0, 15.0)),
 		STAND(Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0)),
-		BOX(Block.box(3.0, 0.0, 3.0, 13.0, 13.5, 13.0));
+		BOX(Block.box(3.0, 0.0, 3.0, 13.0, 13.5, 13.0)),
+		/** The owner's milkshake glass, round its band and up to the top of its straw. */
+		MILKSHAKE(Block.box(4.75, 0.0, 4.75, 11.25, 15.75, 11.25));
 
 		final VoxelShape shape;
 
