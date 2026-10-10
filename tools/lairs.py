@@ -21,6 +21,7 @@ EMPTY_SECONDS = 30    # an instance nobody has been inside for this long closes 
 EDGE_DAMAGE = 4.0     # the mist's toll for flying or falling off, never below half a heart (1 health)
 
 # The lair-only blocks: unbreakable fixtures, in the wither_immune and dragon_immune tags, with no item and no drops.
+# The Hollow Acre's, the exit (every lair's), then the Spindle Loft's (docs/features/spindle-loft.md).
 LAIR_BLOCKS = {
     "blighted_soil": "Blighted Soil",
     "black_wheat": "Black Wheat",
@@ -28,7 +29,23 @@ LAIR_BLOCKS = {
     "lair_brazier": "Soul Brazier",
     "lair_moon": "Harvest Moon",
     "lair_exit": "Grey Mist",
+    "doily_lace": "Doily Lace",
+    "spool_wood": "Spool Wood",
+    "spool_thread": "Spool Thread",
+    "pincushion": "Pincushion",
+    "pincushion_seam": "Pincushion Seam",
+    "pincushion_leaf": "Pincushion Leaf",
+    "needle_steel": "Needle Steel",
+    "pin_shaft": "Pin",
+    "measuring_tape": "Measuring Tape",
+    "thimble_metal": "Thimble",
+    "taut_thread": "Taut Thread",
+    "grimy_skylight": "Grimy Skylight",
 }
+# The colours of the Spindle Loft's thread: its four spools', and the white of the threads between them.
+THREAD_COLOURS = ("green", "blue", "beige", "red", "white")
+# The doily's four lace patterns, in rings: a solid band, an open mesh, a flower and the scalloped edge.
+LACE_PATTERNS = 4
 # Fixtures a player in a lair may use (everything else is refused): the exits, and the braziers Vesperine's fight lights.
 FIXTURES = ("lair_exit", "lair_brazier")
 
@@ -46,9 +63,16 @@ MOURNING_FLOWERS = ["jugcraft:black_rose", "jugcraft:funeral_lily", "jugcraft:sp
 # Any candle the séance counts, and the Chandlery's pillar candles.
 RITE_CANDLES = ["#jugcraft:seance_candles", "jugcraft:black_pillar_candle", "jugcraft:ivory_pillar_candle"]
 
+# A prick of the finger (the Spindle Loft's ritual): a Cursed Spindle used on a Spinning Wheel in the Overworld at
+# night. The wheel spins wild and stays the gate for lairs.gate_seconds; whoever goes in wakes in the loft half-blind.
+SPINDLE = {
+    "waking_ticks": 40,        # Blindness on waking on the pincushion
+}
+
 ITEMS = {
     "mourning_wreath": "Mourning Wreath",
     "death_knell": "Death Knell",
+    "cursed_spindle": "Cursed Spindle",
 }
 GATE = {"entity": "mist_gate", "display": "Mist Gate", "width": 1.6, "height": 2.6}
 
@@ -58,21 +82,39 @@ RECIPES = {
     # A handbell: a gold bell, an iron clapper, a bone handle. Not used up by ringing.
     "death_knell": {"pattern": ["G", "N", "B"], "key": {"G": "minecraft:gold_ingot", "N": "minecraft:iron_nugget",
                                                        "B": "minecraft:bone"}},
+    # A spindle: thread and two spider eyes over a gold whorl set with amethyst, on a stick between two more threads.
+    # Used up by its ritual.
+    "cursed_spindle": {"pattern": ["ESE", "GAG", "STS"], "key": {
+        "E": "minecraft:spider_eye", "S": "minecraft:string", "G": "minecraft:gold_ingot",
+        "A": "minecraft:amethyst_shard", "T": "minecraft:stick"}},
 }
 
+# Each lair's dimension: a void with its own biome; fixed time, no weather, no beds or respawn anchors. Its sky, fog and
+# light colours, its music, and the motes drifting in its air; and what a player is told on coming in.
 LAIRS = {
     "hollow_acre": {
         "display": "The Hollow Acre",
-        # The dimension: a void with its own biome; fixed at midnight, no weather, no beds or respawn anchors.
-        "sky": "#0b0910", "fog": "#3a2a44", "water_fog": "#1d1622",
+        "enter": "You step through the mist into %s",
+        "sky": "#0b0910", "fog": "#3a2a44", "water_fog": "#1d1622", "water": "#3f3150",
+        "ambient_light_color": "#2a2030", "sky_light_color": "#3a3050",
         "music": "minecraft:music.nether.soul_sand_valley",
         "ambient_light": 0.15,
+        "motes": ("minecraft:white_ash", 0.006),
+    },
+    "spindle_loft": {
+        "display": "The Spindle Loft",
+        "enter": "You prick your finger, fall asleep and wake in %s",
+        "sky": "#0d0a08", "fog": "#3b3024", "water_fog": "#1e1913", "water": "#3d342a",
+        "ambient_light_color": "#3a2e22", "sky_light_color": "#4a3c2c",
+        "music": "minecraft:music.overworld.deep_dark",
+        "ambient_light": 0.2,
+        "motes": ("minecraft:white_ash", 0.004),
     },
 }
 
 
 def blocks():
-    """Every block the lairs register: the lair-only blocks and the Mourning Wreath."""
+    """Every block the lairs register: the lair-only blocks and the Mourning Wreath (the Cursed Spindle is an item)."""
     return list(LAIR_BLOCKS) + ["mourning_wreath"]
 
 

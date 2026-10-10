@@ -7726,20 +7726,26 @@ def check_model_uvs():
 
 
 def check_lairs():
-    """The lairs (tools/lairs.py, tools/hollow_acre.py, docs/features/hollow-acre.md): the Java's numbers are the tables',
-    every lair has its dimension, dimension type, biome (no spawns) and template, the rites' blocks, items, recipes and
-    tags are there, every server option has its default, and every message the Java sends has its words."""
+    """The lairs (tools/lairs.py, tools/hollow_acre.py, tools/spindle_loft.py, docs/features/hollow-acre.md,
+    docs/features/spindle-loft.md): the Java's numbers are the tables' and the layouts', every lair has its dimension,
+    dimension type, biome (no spawns), template and words for coming in, the rituals' blocks, items, recipes and tags are
+    there, the Spindle Loft's lace patterns and thread colours are the tables', every server option has its default, and
+    every message the Java sends has its words."""
     import hollow_acre as ha
     import lairs as la
+    import spindle_loft as sl
     folder = JAVA_ROOT / "lair"
     lair = (folder / "Lair.java").read_text(encoding="utf-8")
-    ax, ay, az, yaw = ha.ARRIVAL
-    (cx, cz) = ha.ISLAND["centre"]
-    mx, my, mz = ha.MOON
-    expected = (f'HOLLOW_ACRE("hollow_acre", {ha.SIZE[0]}, {ha.SIZE[1]}, {ha.SIZE[2]}, new Vec3({ax}, {float(ay)}, {az}), {yaw}F, '
-                f'{cx}, {cz}, {ha.BOUNDS}, {ha.FLOOR}, new BlockPos({mx}, {my}, {mz}), {ha.MOON_RADIUS})')
-    if expected not in lair:
-        err(f"Lair.java's HOLLOW_ACRE differs from tools/hollow_acre.py: expected {expected}")
+    # Each lair's line in Lair.java, from its layout: size, arrival and its facing, centre, bounds, floor and moon.
+    for name, layout, centre, moon in (("hollow_acre", ha, ha.ISLAND["centre"], (ha.MOON, ha.MOON_RADIUS)),
+                                       ("spindle_loft", sl, sl.CENTRE, None)):
+        ax, ay, az, yaw = layout.ARRIVAL
+        sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
+        expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
+                    f'{float(ay)}, {float(az)}), {yaw}F, {float(centre[0])}, {float(centre[1])}, {layout.BOUNDS}, '
+                    f'{layout.FLOOR}, {sky})')
+        if expected not in lair:
+            err(f"Lair.java's {name.upper()} differs from its layout: expected {expected}")
     for name, value in (("SPACING", la.SPACING), ("BASE_Y", la.BASE_Y)):
         if f"int {name} = {value};" not in lair:
             err(f"Lair.java's {name} is not tools/lairs.py's {value}")
@@ -7765,9 +7771,17 @@ def check_lairs():
     for block in la.LAIR_BLOCKS:
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
-    for name in ("mourning_wreath", "death_knell", la.GATE["entity"]):
+    for name in ("mourning_wreath", "death_knell", "cursed_spindle", la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
+    spindle = (folder / "SpindleRite.java").read_text(encoding="utf-8")
+    if f"int WAKING_TICKS = {la.SPINDLE['waking_ticks']};" not in spindle:
+        err(f"SpindleRite.WAKING_TICKS is not tools/lairs.py SPINDLE waking_ticks ({la.SPINDLE['waking_ticks']})")
+    if f"int PATTERNS = {la.LACE_PATTERNS};" not in (folder / "DoilyLaceBlock.java").read_text(encoding="utf-8"):
+        err(f"DoilyLaceBlock.PATTERNS is not tools/lairs.py LACE_PATTERNS ({la.LACE_PATTERNS})")
+    colours = re.search(r"enum ThreadColour[^{]*\{\s*([A-Z_, ]+);", (folder / "ThreadColour.java").read_text(encoding="utf-8"))
+    if not colours or [c.strip().lower() for c in colours.group(1).split(",")] != list(la.THREAD_COLOURS):
+        err(f"ThreadColour's values are not tools/lairs.py THREAD_COLOURS {la.THREAD_COLOURS}")
     for name in la.FIXTURES:
         values = (load(DATA / MOD / "tags" / "block" / "lair_fixtures.json") or {}).get("values", [])
         if f"{MOD}:{name}" not in values:
@@ -7805,6 +7819,8 @@ def check_lairs():
     for name in la.LAIRS:
         if f"lair.{MOD}.{name}" not in lang:
             err(f"No name for the lair {name}")
+        if f"message.{MOD}.lair.enter.{name}" not in lang:
+            err(f"No words for coming into the lair {name} (message.{MOD}.lair.enter.{name})")
 
 
 def java_number(source, name, value):

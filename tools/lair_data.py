@@ -1,6 +1,7 @@
-"""JSON resources for the lairs (tools/lairs.py, docs/features/hollow-acre.md): the lair-only blocks, the Last Rites'
-Mourning Wreath and Death Knell, the Mist Gate's name, the lairs' messages, and each lair's dimension (its dimension
-type, level stem and biome) and structure template (tools/hollow_acre.py).
+"""JSON resources for the lairs (tools/lairs.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md): the
+lair-only blocks, the Last Rites' Mourning Wreath and Death Knell, the Cursed Spindle, the Mist Gate's name, the lairs'
+messages, and each lair's dimension (its dimension type, level stem and biome) and structure template
+(tools/hollow_acre.py, tools/spindle_loft.py).
 
 Called from tools/agriculture_data.py (assets, loot, recipes, tags, worldgen). Formats follow vanilla 26.3's own files:
 the dimension type copies the shape of vanilla's End (logged from the running game by LairGameTests), the level stem a
@@ -8,7 +9,12 @@ flat generator with no layers, and the biome vanilla's void with no spawns.
 """
 from decor_data import MOD, HORIZONTAL, rid, self_drop
 import hollow_acre
-from lairs import (FIXTURES, GATE, ITEMS, LAIR_BLOCKS, LAIRS, MOURNING_FLOWERS, RECIPES, RITE_CANDLES)
+import spindle_loft
+from lairs import (FIXTURES, GATE, ITEMS, LACE_PATTERNS, LAIR_BLOCKS, LAIRS, MOURNING_FLOWERS, RECIPES, RITE_CANDLES,
+                   THREAD_COLOURS)
+
+# Each lair's template, by the lair's id.
+TEMPLATES = {"hollow_acre": hollow_acre, "spindle_loft": spindle_loft}
 
 
 def cube(lo, hi, faces, texture, cull=None, shade=True, uvs=None):
@@ -74,6 +80,67 @@ def wreath():
                 "east": {"texture": "#wreath", "uv": [7, 0, 8, 16]}, "west": {"texture": "#wreath", "uv": [8, 0, 9, 16]}}}]}
 
 
+def lace(pattern):
+    """Doily Lace: a two-pixel sheet of lace lying at the bottom of the block, cut out, seen from above and below."""
+    texture = rid(f"block/doily_lace_{pattern}")
+    edge = {"texture": "#lace", "uv": [0, 0, 16, 2]}
+    return {"parent": "minecraft:block/block", "textures": {"particle": texture, "lace": texture},
+            "elements": [{"from": [0, 0, 0], "to": [16, 2, 16], "faces": {
+                "up": {"texture": "#lace"}, "down": {"texture": "#lace"},
+                "north": edge, "south": edge, "east": edge, "west": edge}}]}
+
+
+def plate(texture, back, y0):
+    """A one-pixel plate across the block at height y0 (pixels): the measuring tape, at the bottom or halfway up."""
+    edge = {"texture": "#tape", "uv": [0, 0, 16, 1]}
+    return {"parent": "minecraft:block/block", "textures": {"particle": texture, "tape": texture, "back": back},
+            "elements": [{"from": [0, y0, 0], "to": [16, y0 + 1, 16], "faces": {
+                "up": {"texture": "#tape"}, "down": {"texture": "#back"},
+                "north": edge, "south": edge, "east": edge, "west": edge}}]}
+
+
+def rod(texture, half):
+    """A rod up the middle of the block, `half` pixels each side of its centre (a pin's shaft, a taut thread)."""
+    lo, hi = 8 - half, 8 + half
+    side = {"texture": "#rod", "uv": [lo, 0, hi, 16]}
+    end = {"texture": "#rod", "uv": [lo, lo, hi, hi]}
+    return {"parent": "minecraft:block/block", "textures": {"particle": texture, "rod": texture},
+            "elements": [{"from": [lo, 0, lo], "to": [hi, 16, hi], "faces": {
+                "north": side, "south": side, "east": side, "west": side, "up": end, "down": end}}]}
+
+
+def spindle_loft_assets(models, states, write, simple):
+    """The Spindle Loft's lair-only blocks (tools/spindle_loft.py)."""
+    def cube(name, texture=None):
+        return {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{texture or name}")}}
+
+    for p in range(LACE_PATTERNS):
+        write(models / f"doily_lace_{p}.json", lace(p))
+    write(states / "doily_lace.json", {"variants": {
+        f"pattern={p}": {"model": rid(f"block/doily_lace_{p}")} for p in range(LACE_PATTERNS)}})
+    for name in ("spool_wood", "pincushion", "pincushion_seam", "pincushion_leaf", "needle_steel", "thimble_metal",
+                 "grimy_skylight"):
+        simple(name, cube(name))
+    for colour in THREAD_COLOURS:
+        write(models / f"spool_thread_{colour}.json", cube(f"spool_thread_{colour}"))
+        write(models / f"taut_thread_{colour}.json", rod(rid(f"block/spool_thread_{colour}"), 1))
+    write(states / "spool_thread.json", {"variants": {
+        f"colour={c}": {"model": rid(f"block/spool_thread_{c}")} for c in THREAD_COLOURS}})
+    # A taut thread is drawn upright and turned onto its axis.
+    turns = {"y": {}, "z": {"x": 90}, "x": {"x": 90, "y": 90}}
+    write(states / "taut_thread.json", {"variants": {
+        f"axis={a},colour={c}": {"model": rid(f"block/taut_thread_{c}"), **turns[a]} for a in "xyz" for c in THREAD_COLOURS}})
+    write(models / "pin_shaft.json", rod(rid("block/pin_shaft"), 2))
+    write(states / "pin_shaft.json", {"variants": {"": {"model": rid("block/pin_shaft")}}})
+    for mark in range(4):
+        texture, back = rid(f"block/measuring_tape_{mark}"), rid("block/measuring_tape_back")
+        write(models / f"measuring_tape_{mark}.json", plate(texture, back, 0))
+        write(models / f"measuring_tape_{mark}_upper.json", plate(texture, back, 8))
+    write(states / "measuring_tape.json", {"variants": {
+        f"half={h},mark={m}": {"model": rid(f"block/measuring_tape_{m}" + ("_upper" if h == "upper" else ""))}
+        for h in ("lower", "upper") for m in range(4)}})
+
+
 def assets(root, write, lang):
     models, states, items = root / "models" / "block", root / "blockstates", root / "items"
 
@@ -96,6 +163,7 @@ def assets(root, write, lang):
     write(models / "lair_exit.json", mist("x"))
     write(states / "lair_exit.json", {"variants": {"axis=x": {"model": rid("block/lair_exit")},
                                                    "axis=z": {"model": rid("block/lair_exit"), "y": 90}}})
+    spindle_loft_assets(models, states, write, simple)
     for name, display in LAIR_BLOCKS.items():
         lang[f"block.{MOD}.{name}"] = display
 
@@ -109,12 +177,15 @@ def assets(root, write, lang):
         write(items / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
     lang[f"block.{MOD}.mourning_wreath"] = ITEMS["mourning_wreath"]
     lang[f"item.{MOD}.death_knell"] = ITEMS["death_knell"]
+    lang[f"item.{MOD}.cursed_spindle"] = ITEMS["cursed_spindle"]
     lang[f"tooltip.{MOD}.death_knell"] = "Rung at a grave at night, among lit candles, with a wreath laid on it"
+    lang[f"tooltip.{MOD}.cursed_spindle"] = "Used on a Spinning Wheel at night: prick your finger, and wake in the Spindle Loft"
     lang[f"tooltip.{MOD}.mourning_wreath"] = "Lay it on a grave for the Last Rites"
     lang[f"entity.{MOD}.{GATE['entity']}"] = GATE["display"]
 
     for lair, info in LAIRS.items():
         lang[f"lair.{MOD}.{lair}"] = info["display"]
+        lang[f"message.{MOD}.lair.enter.{lair}"] = info["enter"]
     lang.update({
         f"message.{MOD}.lair.rite.no_grave": "The knell rings out over no grave",
         f"message.{MOD}.lair.rite.not_overworld": "The Last Rites are said only in the Overworld",
@@ -128,7 +199,11 @@ def assets(root, write, lang):
         f"message.{MOD}.lair.party_full": "%s is full",
         f"message.{MOD}.lair.gate_closed": "The mist has closed",
         f"message.{MOD}.lair.already_inside": "You are already in a lair",
-        f"message.{MOD}.lair.enter": "You step through the mist into %s",
+        f"message.{MOD}.lair.spindle.not_overworld": "The spindle brings sleep only in the Overworld",
+        f"message.{MOD}.lair.spindle.not_night": "It is too early for sleep",
+        f"message.{MOD}.lair.spindle.off_season": "The Cursed Spindle opens the Spindle Loft only in the Halloween season",
+        f"message.{MOD}.lair.spindle.spinning": "The wheel is already spinning: use it with an empty hand to follow",
+        f"message.{MOD}.lair.spindle.opened": "The wheel spins wild, and its thread winds round you",
         f"message.{MOD}.lair.leave": "You step back out of the mist",
         f"message.{MOD}.lair.left_behind": "Anything left lying in a lair is lost when it closes",
         f"message.{MOD}.lair.closed": "The lair has closed; you are back where you were",
@@ -190,10 +265,10 @@ def dimension_type(info):
             "minecraft:gameplay/straw_bed_rule": never,
             "minecraft:gameplay/respawn_anchor_works": False,
             "minecraft:gameplay/can_start_raid": False,
-            "minecraft:visual/ambient_light_color": "#2a2030",
+            "minecraft:visual/ambient_light_color": info["ambient_light_color"],
             "minecraft:visual/fog_color": info["fog"],
             "minecraft:visual/sky_color": info["sky"],
-            "minecraft:visual/sky_light_color": "#3a3050",
+            "minecraft:visual/sky_light_color": info["sky_light_color"],
             "minecraft:visual/sky_light_factor": 0.0,
         },
         "timelines": [],
@@ -201,7 +276,7 @@ def dimension_type(info):
 
 
 def biome(info):
-    """No spawns, nothing generated, drifting ash; the sky and fog of the dimension (a biome's would win)."""
+    """No spawns, nothing generated, drifting motes (ash, dust); the sky and fog of the dimension (a biome's would win)."""
     return {
         "has_precipitation": False, "temperature": 0.5, "downfall": 0.0,
         "attributes": {
@@ -210,9 +285,9 @@ def biome(info):
             "minecraft:visual/sky_color": info["sky"],
             "minecraft:visual/fog_color": info["fog"],
             "minecraft:visual/water_fog_color": info["water_fog"],
-            "minecraft:visual/ambient_particles": [{"particle": {"type": "minecraft:white_ash"}, "probability": 0.006}],
+            "minecraft:visual/ambient_particles": [{"particle": {"type": info["motes"][0]}, "probability": info["motes"][1]}],
         },
-        "effects": {"water_color": "#3f3150"},
+        "effects": {"water_color": info["water"]},
         "carvers": [],
         "features": [],
     }
@@ -225,4 +300,5 @@ def worldgen(data, write):
         write(data / MOD / "dimension" / f"{lair}.json", {"type": rid(lair), "generator": {
             "type": "minecraft:flat", "settings": {"layers": [{"height": 1, "block": "minecraft:air"}], "lakes": False,
                                                    "features": False, "biome": rid(lair)}}})
-    hollow_acre.write(data / MOD / "structure" / f"{hollow_acre.TEMPLATE}.nbt")
+    for module in TEMPLATES.values():
+        module.write(data / MOD / "structure" / f"{module.TEMPLATE}.nbt")

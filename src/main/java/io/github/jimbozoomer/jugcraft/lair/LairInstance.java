@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -23,9 +24,11 @@ public final class LairInstance {
 	long emptySince = -1L;
 	/** Set when the lair's boss has fallen: the instance closes once everyone has left. */
 	boolean ended;
-	/** The gate open at the ritual's site, and until when. */
+	/** The gate open at the ritual's site (an entity, the Last Rites' mist), and until when the gate is open. */
 	@Nullable UUID gate;
 	long gateUntil;
+	/** Where the ritual was performed, when its gate is a block there (the Cursed Spindle's wheel). */
+	@Nullable GlobalPos site;
 	boolean open = true;
 
 	LairInstance(Lair lair, int slot, long opened) {
@@ -57,6 +60,15 @@ public final class LairInstance {
 
 	public boolean ended() {
 		return ended;
+	}
+
+	public @Nullable GlobalPos site() {
+		return site;
+	}
+
+	/** The game time until which the ritual's gate is open. */
+	public long gateUntil() {
+		return gateUntil;
 	}
 
 	public Set<UUID> members() {
