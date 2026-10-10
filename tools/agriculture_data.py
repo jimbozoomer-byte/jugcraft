@@ -54,6 +54,7 @@ import leaf_blower_data
 import decor15_data
 import decor16_data
 import decor17_data
+import lair_data
 import decor18_data
 import decor19_data
 import decor20_data
@@ -289,6 +290,7 @@ def assets(root, write, lang):
     decor18_data.assets(root, write, lang)
     decor19_data.assets(root, write, lang)
     decor20_data.assets(root, write, lang)
+    lair_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
     kitchen_data.assets(root, write, lang)
@@ -440,6 +442,7 @@ def loot(data, write):
     decor18_data.loot(out, write)
     decor19_data.loot(out, write)
     decor20_data.loot(out, write)
+    lair_data.loot(out, write)
     ferris_wheel_data.loot(out, write)
     hot_air_balloon_data.loot(out, write)
     theremin_data.loot(out, write)
@@ -518,6 +521,7 @@ def recipes(out, write):
     decor3_data.recipes(out, write, conditions)
     graveyard_data.recipes(out, write, conditions)
     decor18_data.recipes(out, write, conditions)
+    lair_data.recipes(out, write, conditions)
     kitchen_data.recipes(out, write, conditions)
 
 
@@ -555,6 +559,7 @@ def tags(tags):
     decor18_data.tags(tags)
     decor19_data.tags(tags)
     decor20_data.tags(tags)
+    lair_data.tags(tags)
     ferris_wheel_data.tags(tags)
     hot_air_balloon_data.tags(tags)
     regatta_data.tags(tags)
@@ -620,26 +625,5 @@ def worldgen(data, write):
     werewolf_data.worldgen(data, write)
     rice_data.worldgen(data, write)
     orchard_data.worldgen(data, write)
-    spice_data.worldgen(data, write)
-    spread = WILD_PATCH["spread_xz"]
-    for wild in WILD_CROPS:
-        write(data / MOD / "worldgen" / "feature" / f"{wild}.json",
-              {"type": "minecraft:simple_block", "to_place": {"id": rid(wild)}})
-        write(data / MOD / "worldgen" / "placed_feature" / f"patch_{wild}.json", {
-            "feature": rid(wild),
-            "placement": [
-                {"type": "minecraft:rarity_filter", "chance": WILD_PATCH["rarity"]},
-                {"type": "minecraft:in_square"},
-                {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"},
-                {"type": "minecraft:biome"},
-                {"type": "minecraft:count", "count": WILD_PATCH["tries"]},
-                {"type": "minecraft:offset",
-                 "x": {"type": "minecraft:trapezoid", "max": spread, "min": -spread, "plateau": 0},
-                 "y": {"type": "minecraft:trapezoid", "max": WILD_PATCH["spread_y"], "min": -WILD_PATCH["spread_y"], "plateau": 0},
-                 "z": {"type": "minecraft:trapezoid", "max": spread, "min": -spread, "plateau": 0}},
-                {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
-                    {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
-                    {"type": "minecraft:matching_blocks", "blocks": "minecraft:grass_block", "offset": [0, -1, 0]},
-                ]}},
-            ],
-        })
+
+    lair_data.worldgen(data, write)

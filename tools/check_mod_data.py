@@ -325,7 +325,7 @@ def item_units(ref):
         return {}  # vanilla tags used here (logs, planks), Jugcraft logs and heirloom pumpkins hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
-        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path in ("fermentable", "grave_flowers") \
+        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path in ("fermentable", "grave_flowers", "mourning_flowers") \
                 or ns == MOD and form == "concordance":
             return {}  # ... and the Concordance's own item tags (luminous matter) hold no metal
         if form not in UNITS or not metal:
@@ -8122,13 +8122,99 @@ def check_model_uvs():
             for side, face in element.get("faces", {}).items():
                 texture = face.get("texture", "")
                 for _ in range(4):
+                    if isinstance(texture, dict):  # {"sprite": ..., "force_translucent": true}
+                        texture = texture.get("sprite", "")
                     if texture.startswith("#"):
                         texture = textures.get(texture[1:], "")
+                if isinstance(texture, dict):
+                    texture = texture.get("sprite", "")
                 if not texture or not translucent(texture):
                     continue
                 uv = face.get("uv") or default_uv(side, element["from"], element["to"])
                 if min(uv) < 0 or max(uv) > 16:
                     err(f"{path.relative_to(ROOT)}: the {side} face reads {list(uv)} outside its see-through texture {texture}; pin its uv")
+
+
+def check_lairs():
+    """The lairs (tools/lairs.py, tools/hollow_acre.py, docs/features/hollow-acre.md): the Java's numbers are the tables',
+    every lair has its dimension, dimension type, biome (no spawns) and template, the rites' blocks, items, recipes and
+    tags are there, every server option has its default, and every message the Java sends has its words."""
+    import hollow_acre as ha
+    import lairs as la
+    folder = JAVA_ROOT / "lair"
+    lair = (folder / "Lair.java").read_text(encoding="utf-8")
+    ax, ay, az, yaw = ha.ARRIVAL
+    (cx, cz) = ha.ISLAND["centre"]
+    mx, my, mz = ha.MOON
+    expected = (f'HOLLOW_ACRE("hollow_acre", {ha.SIZE[0]}, {ha.SIZE[1]}, {ha.SIZE[2]}, new Vec3({ax}, {float(ay)}, {az}), {yaw}F, '
+                f'{cx}, {cz}, {ha.BOUNDS}, {ha.FLOOR}, new BlockPos({mx}, {my}, {mz}), {ha.MOON_RADIUS})')
+    if expected not in lair:
+        err(f"Lair.java's HOLLOW_ACRE differs from tools/hollow_acre.py: expected {expected}")
+    for name, value in (("SPACING", la.SPACING), ("BASE_Y", la.BASE_Y)):
+        if f"int {name} = {value};" not in lair:
+            err(f"Lair.java's {name} is not tools/lairs.py's {value}")
+    lairs_java = (folder / "Lairs.java").read_text(encoding="utf-8")
+    for name, value in (("CHECK_TICKS", la.CHECK_TICKS), ("EMPTY_SECONDS", la.EMPTY_SECONDS)):
+        if f"int {name} = {value};" not in lairs_java:
+            err(f"Lairs.java's {name} is not tools/lairs.py's {value}")
+    if f"float EDGE_DAMAGE = {la.EDGE_DAMAGE}F;" not in lairs_java:
+        err(f"Lairs.java's EDGE_DAMAGE is not tools/lairs.py's {la.EDGE_DAMAGE}")
+    for option, (low, high) in la.LIMITS.items():
+        if f'number("{option}", {la.OPTIONS[option]}, {low}, {high})' not in lairs_java:
+            err(f"Lairs.java does not read {option} with default {la.OPTIONS[option]} kept within {low} to {high}")
+    rites = (folder / "LastRites.java").read_text(encoding="utf-8")
+    for name, key in (("GRAVE_RANGE", "grave_range"), ("CANDLE_RANGE", "candle_range"), ("CANDLES", "candles"),
+                      ("WREATH_RANGE", "wreath_range"), ("KNELL_COOLDOWN", "knell_cooldown")):
+        if f"int {name} = {la.RITE[key]};" not in rites:
+            err(f"LastRites.java's {name} is not tools/lairs.py RITE {key} ({la.RITE[key]})")
+    config = CONFIG.read_text(encoding="utf-8")
+    for option, default in la.OPTIONS.items():
+        if f'Map.entry("{option}", "{default}")' not in config:
+            err(f"JugcraftConfig.TEXT_OPTIONS lacks {option} (default {default})")
+    registry = (folder / "JugcraftLairs.java").read_text(encoding="utf-8")
+    for block in la.LAIR_BLOCKS:
+        if f'fixture("{block}",' not in registry:
+            err(f"JugcraftLairs does not register the lair block {block}")
+    for name in ("mourning_wreath", "death_knell", la.GATE["entity"]):
+        if f'Jugcraft.id("{name}")' not in registry:
+            err(f"JugcraftLairs does not register {name}")
+    for name in la.FIXTURES:
+        values = (load(DATA / MOD / "tags" / "block" / "lair_fixtures.json") or {}).get("values", [])
+        if f"{MOD}:{name}" not in values:
+            err(f"#jugcraft:lair_fixtures lacks {name}")
+    for item in la.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{item}.json").is_file():
+            err(f"No recipe for {item}")
+    for tag, values in (("block/wither_immune", la.LAIR_BLOCKS), ("block/dragon_immune", la.LAIR_BLOCKS)):
+        listed = (load(DATA / "minecraft" / "tags" / f"{tag}.json") or {}).get("values", [])
+        for block in values:
+            if f"{MOD}:{block}" not in listed:
+                err(f"#minecraft:{tag.split('/')[1]} lacks the lair block {block}")
+    for name in la.LAIRS:
+        stem = load(DATA / MOD / "dimension" / f"{name}.json") or {}
+        if stem.get("type") != f"{MOD}:{name}" or stem.get("generator", {}).get("settings", {}).get("biome") != f"{MOD}:{name}":
+            err(f"data/jugcraft/dimension/{name}.json does not use its own dimension type and biome")
+        kind = load(DATA / MOD / "dimension_type" / f"{name}.json") or {}
+        rules = kind.get("attributes", {})
+        if not kind.get("has_fixed_time") or rules.get("minecraft:gameplay/bed_rule", {}).get("can_sleep") != "never" \
+                or rules.get("minecraft:gameplay/respawn_anchor_works") is not False:
+            err(f"The {name} dimension type must have a fixed time, no sleeping and no respawn anchors")
+        biome = load(DATA / MOD / "worldgen" / "biome" / f"{name}.json") or {}
+        spawns = biome.get("attributes", {}).get("minecraft:gameplay/natural_mob_spawns", {}).get("argument", {})
+        if spawns.get("spawns_by_category"):
+            err(f"The {name} biome must spawn nothing")
+        if not (DATA / MOD / "structure" / "lair" / f"{name}.nbt").is_file():
+            err(f"No structure template for {name}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for path in sorted(folder.glob("*.java")):
+        for key in re.findall(r'"((?:message|commands|tooltip|lair)\.jugcraft\.[a-z_.]+)"', path.read_text(encoding="utf-8")):
+            if key.endswith("."):
+                continue
+            if key not in lang:
+                err(f"{path.name} sends {key}, which has no words in en_us.json")
+    for name in la.LAIRS:
+        if f"lair.{MOD}.{name}" not in lang:
+            err(f"No name for the lair {name}")
 
 
 def check_material_sets():
@@ -11098,6 +11184,7 @@ def main():
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()
+    check_lairs()
     check_material_sets()
     check_art()
     check_pixel_hollows()

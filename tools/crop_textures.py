@@ -792,6 +792,8 @@ def crop_textures():
     out.update(laboratory_textures())
     from decor20_data import textures as pumpkin_night_textures  # and Pumpkin Night
     out.update(pumpkin_night_textures())
+    from lair_textures import lair_textures  # and the lairs' blocks, the Mourning Wreath and the Death Knell
+    out.update(lair_textures())
     from orchard_textures import orchard_textures  # and the orchards' fruit trees
     out.update(orchard_textures())
     from cake_art import cake_textures  # and the cakes, rebuilt from the owner's drawing of them
