@@ -170,4 +170,3 @@ A chunk is not complete if its central path is a stub, its only acquisition is c
 At the boundary, stop and ask for the owner's input as requested. Retain a short resumable handoff so the next agent can continue without rereading every conversation.
 
 [Research basis](11-research-notes-and-sources.md)
-

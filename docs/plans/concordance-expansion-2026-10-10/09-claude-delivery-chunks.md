@@ -315,4 +315,3 @@ Stop dependent work sooner only for a real unresolved product decision, missing 
 Never call a chunk complete because a response is long, the budget is low, a model was generated, or tests compile. Completion is the promised player outcome plus honest evidence.
 
 [Next: validation and check-in templates](10-validation-and-checkins.md)
-

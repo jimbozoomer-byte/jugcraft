@@ -162,4 +162,3 @@ Use existing editor tests, WorldDesignerGameTests and WorldDesignerClientGameTes
 The first editor expansion should be modest but complete: precise capabilities in the catalog, a magic-site layer, an actual generated entrance, and designed-world/lair compatibility evidence. Then exact TownBuilder placement. Roads and building lots follow. A full editable 3D city, arbitrary schematic import and live terraforming remain later projects with separate scope.
 
 [Next: interfaces, animation and assets](08-interfaces-animation-and-assets.md)
-

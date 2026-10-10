@@ -90,4 +90,3 @@ COMPLETION
 A chunk is complete when its promised player experience works, relevant validation is recorded, documentation is accurate and the owner can review a concrete result. A placeholder UI, rendered model, creative-only item or passing compiler does not by itself satisfy that standard.
 
 No public server needs to be running for development. Use isolated local/staging tests where available. Mark two-account human tests unverified if unavailable; do not pretend a one-client automated test substitutes for them. Publication/deployment follows the current owner authorization and repository release rules.
-

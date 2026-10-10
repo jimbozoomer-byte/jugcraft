@@ -200,4 +200,3 @@ Deliver the checkpoint from chapter 10 with exact commit, evidence, limitations 
 - Unit 5 if needed: combined fixes and evidence.
 
 These are review boundaries, not repeated permission questions. Finish the authorized chunk's player experience.
-

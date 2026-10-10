@@ -194,4 +194,3 @@ A boss is complete when it has survival entry, reachable preparation, a readable
 Test solo and four players, then the supported configured cap. Include melee, conventional ranged, caster and support. Inspect attack timing against current guns and mobility items. Record actual completion times and failed mechanics. No claim of “balanced” until the human playtest exists.
 
 [Next: expanded encounter roster](05-new-boss-compendium.md)
-

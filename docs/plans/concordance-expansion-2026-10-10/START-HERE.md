@@ -56,4 +56,3 @@ Each chunk contains several reviewable units. It is not a single enormous unrevi
 The industrial choices already recorded are preserved, including automatic gas pressure, no routine machine maintenance and pollution-driven raiders without crop or biome damage. No need to decide those again.
 
 These questions are recommendations for the next step, not hidden approvals already recorded in the plan.
-

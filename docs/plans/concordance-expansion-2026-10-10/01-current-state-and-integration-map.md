@@ -172,4 +172,3 @@ Source inspection and prior repository evidence are not fresh runtime proof. Thi
 The known open contributions at audit were PR299 (launchers), PR300 (Yeti lair), PR301 (coil/plasma weapons). Refresh them before rebalance. A new high-damage gun can change encounter timings even if magic code is unchanged.
 
 [Next: progression and spellcraft](02-magic-progression-and-spellcraft.md)
-

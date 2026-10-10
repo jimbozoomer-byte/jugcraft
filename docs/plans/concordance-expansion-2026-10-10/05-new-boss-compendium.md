@@ -245,4 +245,3 @@ Tide assists a mooring, Rime stabilizes a short marked footing, Strata braces, V
 8. Revisit the rest at the end of each chunk. Do not turn this ordered menu into a requirement to implement everything at once.
 
 [Next: technology and economy](06-technology-and-economy.md)
-

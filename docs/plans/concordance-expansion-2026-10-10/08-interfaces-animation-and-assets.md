@@ -181,4 +181,3 @@ A useful review bundle contains:
 Screenshots of a browser mockup are design evidence, not Minecraft implementation evidence. Automated client showrooms are rendering evidence; they are not a two-person combat playtest.
 
 [Next: Claude implementation chunks](09-claude-delivery-chunks.md)
-

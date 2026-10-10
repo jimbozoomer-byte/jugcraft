@@ -261,4 +261,3 @@ The newer material-accounting reference was inspected; the older predecessor was
 This research inspected selected source files and official documentation. It did not play every reference project, evaluate every branch, audit their entire codebases or verify that all features work in their latest releases. New encounter designs, costs, interface layouts and delivery chunks are original proposals inferred from the observed patterns and Jugcraft's direction.
 
 [Return to owner overview](START-HERE.md)
-

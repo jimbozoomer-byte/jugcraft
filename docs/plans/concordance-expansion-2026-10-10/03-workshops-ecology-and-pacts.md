@@ -217,4 +217,3 @@ First proposed form: senses and short movement utility with a managed appetite t
 A werewolf encounter can reveal a transformation story without automatically infecting victorious players. The boss, wearable costume and player specialty are different features.
 
 [Next: existing encounters](04-existing-bosses-and-shared-encounters.md)
-

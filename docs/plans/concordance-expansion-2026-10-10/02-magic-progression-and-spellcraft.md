@@ -187,4 +187,3 @@ Measure:
 Initial acceptance: each tradition demonstrates a distinct useful action; a crafted non-boss loadout can complete the relevant normal encounter; no two effects generate net resources by feeding one another; no support loadout becomes unable to qualify for shared rewards.
 
 [Next: workshops, ecology and pacts](03-workshops-ecology-and-pacts.md)
-

@@ -182,4 +182,3 @@ Demonstrate four independent journeys: manual magician, early industrialist, gar
 Use a modest reproducible load: a few stations, one circle, two workers and one active processing chain; then an agreed larger workload. Record tick cost, inventory correctness and network traffic. Numbers in this chapter are specifications or arithmetic, not performance measurements.
 
 [Next: worlds and editor](07-world-designer-and-realms.md)
-

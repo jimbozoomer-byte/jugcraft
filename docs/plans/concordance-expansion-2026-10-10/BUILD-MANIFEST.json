@@ -16,68 +16,68 @@
   "files": [
     {
       "name": "01-current-state-and-integration-map.md",
-      "bytes": 15166,
-      "sha256": "d735b9d8551bb5667e47c977912c5b41ace66d448d570e50a60c14a4bc7dcd14"
+      "bytes": 15165,
+      "sha256": "81b8c6e7d868183e1cd0195f44bc93d639d06bd095d88721c76e25ff3ff55ed4"
     },
     {
       "name": "02-magic-progression-and-spellcraft.md",
-      "bytes": 16995,
-      "sha256": "ae4b68fc5a5afc926a375d3cbdb804d79d28cfdd405638da3d8e182dbdeb6a57"
+      "bytes": 16994,
+      "sha256": "d382c3bce319dd1be055e74b7363f4ef268c5b08fafde2c34e0b457a04d0f044"
     },
     {
       "name": "03-workshops-ecology-and-pacts.md",
-      "bytes": 18075,
-      "sha256": "afa5ccffadbddad699c3000ec788ad8990f8ffde0312e63964faa6a2d9d14ffb"
+      "bytes": 18074,
+      "sha256": "dcbdc374ce57709692850172010f65795ee76aa62c13f42472e180587869fce7"
     },
     {
       "name": "04-existing-bosses-and-shared-encounters.md",
-      "bytes": 15316,
-      "sha256": "013b310ff9790dc0a88a56e5c8bf9e2bd7b51bba080fe4e2aeff83f2db82af6c"
+      "bytes": 15315,
+      "sha256": "64414d4f2e6220a83f0ba9cfbde21daaa348607f9cd7ef88530aec2b57dacdeb"
     },
     {
       "name": "05-new-boss-compendium.md",
-      "bytes": 24593,
-      "sha256": "92e548ca4d742e28317a41d89cb8138df25a49f2a8185a7576f93010745a80b8"
+      "bytes": 24592,
+      "sha256": "c4a407988d086359ff68cb135856c938ec13bfc786d907efcc3f910cf17cccd5"
     },
     {
       "name": "06-technology-and-economy.md",
-      "bytes": 14202,
-      "sha256": "6cf1af42669e32e714633df7883169c4693447c61584c5317270bc9d6b9254c9"
+      "bytes": 14201,
+      "sha256": "95460a7058134fbe85c049abf0664950803955de8f3ce2675d57408753a9fdee"
     },
     {
       "name": "07-world-designer-and-realms.md",
-      "bytes": 10445,
-      "sha256": "bc9e03fcb5e0ce8396b2536b44a23e480b6ed8f7c6c51c05c2c7bc7b2e513f37"
+      "bytes": 10444,
+      "sha256": "05714a1f524015d66a648956ac7ce78d56c0b6803e772e747890f9fcc590876c"
     },
     {
       "name": "08-interfaces-animation-and-assets.md",
-      "bytes": 12862,
-      "sha256": "2a1c75887eb41ac6e70fa48a71dff4e73558c7b2b0938beb1141c801c83baea2"
+      "bytes": 12861,
+      "sha256": "542b4552f83035b85bdb4f73441ccae3353de467a5cd169a12a347cf3780a9dc"
     },
     {
       "name": "09-claude-delivery-chunks.md",
-      "bytes": 21811,
-      "sha256": "396a2c7d39421a3f117d7e321229e133ae65a085c13ede1218ad8165603786b7"
+      "bytes": 21810,
+      "sha256": "6613b0cb477af6cbd4bcde063837d645cd99d7bc8b37673fc3135a51326bca11"
     },
     {
       "name": "10-validation-and-checkins.md",
-      "bytes": 10621,
-      "sha256": "942bdec3059b0818ab7f042113d6e3305daae796839e929dc70364014ec14f6a"
+      "bytes": 10620,
+      "sha256": "28a1d2d68712c700f0fb7a3665e710b6a606bc5229956311401285b79b545e51"
     },
     {
       "name": "11-research-notes-and-sources.md",
-      "bytes": 24443,
-      "sha256": "eee601701903a6bf20ccd2efcd1aba0af1031f69b2d913bf964645516a0dac68"
+      "bytes": 24442,
+      "sha256": "688494ba7fddba0de9528e235820e52830ed38598840228452bd38acda5499f4"
     },
     {
       "name": "12-detailed-first-chunk-tickets.md",
-      "bytes": 11911,
-      "sha256": "e83a7a9e5a8d3823d299dfa0082de2295c3dc29720225d1a44cedf5ef5c6afcc"
+      "bytes": 11910,
+      "sha256": "f6104cd812919a0ce841d5ff063c971a0dd94983042e156a64ac7503dc23a26c"
     },
     {
       "name": "CLAUDE-MASTER-PROMPT.txt",
-      "bytes": 7568,
-      "sha256": "531b63d34be90b5fc2af40b1928278063c445b8f1994f215183548a721e64e67"
+      "bytes": 7567,
+      "sha256": "ecf96b1270f862fd71f2c89b93d911348ff5cc363095201387a33d1ef3e50651"
     },
     {
       "name": "Jugcraft-Magic-Expansion-Plan.txt",
@@ -91,8 +91,8 @@
     },
     {
       "name": "START-HERE.md",
-      "bytes": 5060,
-      "sha256": "67072e152039b7018754e6fd1c41d87f83eb3c75ed94bc6b7e418cdf7dd11cae"
+      "bytes": 5059,
+      "sha256": "eff30752f513f2fbf80fb94fedec6d6a50cff695a52143fa86365b3b51b4e597"
     }
   ],
   "publication": {
