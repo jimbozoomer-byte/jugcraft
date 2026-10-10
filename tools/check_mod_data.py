@@ -8734,6 +8734,217 @@ def check_tatterlace():
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
 
+def check_yeti():
+    """The Yeti King (tools/yeti_king.py, docs/features/yeti-king.md): every number the Java uses is the table's; his
+    attacks are the table's; where his fight looks for the Glacier Hall's parts (GlacierHall.java) is where
+    tools/glacier_hall.py builds them, and the places he leaps to, roars from and calls his kin out of are clear in the
+    template, on its floor; the block he hurls leaves from where his model holds it; every entity is registered, named
+    and drawn; each GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions inside
+    the sheet without overlapping, its sheet (and its glowmask if it is drawn with a glow layer, and none if not)
+    TEXTURE_SCALE times the size the model declares and cut out; no bone is animated by both of his controllers; his loot
+    table is the table's and his trophies are Arms VII's; his recipes, tags and advancement are there; every message he
+    sends has its words; and nothing of his loads a chunk or leaves its dimension."""
+    import arms_variants
+    import glacier_hall as gh
+    import yeti_king as yk
+    import yeti_king_models as ym
+    folder = JAVA_ROOT / "lair" / "yeti"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/yeti: no Java")
+        return
+    for cls, table in (("YetiKingEntity", yk.YETI_KING), ("YetiWhelpEntity", yk.WHELP), ("HurledBoulderEntity", yk.BOULDER),
+                       ("FallingIcicleEntity", yk.ICICLE), ("GlacialSpikeEntity", yk.SPIKE), ("YetiMitten", yk.MITTEN)):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/yeti_king.py's {value}")
+    boss = sources.get("YetiKingEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, hunt, blizzard, fury) in yk.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(hunt).lower()}, {str(blizzard).lower()}, {str(fury).lower()})")
+        if expected not in boss:
+            err(f"YetiKingEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"YetiKingEntity does not scale as every lair boss does ({call})")
+    if yk.ATTACKS["FROST_BREATH"][6:] != (True, False, False):
+        err("tools/yeti_king.py: Frost Breath is the Hunt's alone (the King's Roar ends it)")
+    # Where his fight looks for the Glacier Hall's parts is where tools/glacier_hall.py builds them.
+    hall = re.sub(r"\s+", " ", sources.get("GlacierHall", ""))
+    for name, value in (("LAKE", gh.LAKE), ("LAKE_X", gh.LAKE_CENTRE[0]), ("LAKE_Z", gh.LAKE_CENTRE[1]),
+                        ("LAKE_RADIUS", gh.LAKE_RADIUS), ("COLUMN_RADIUS", gh.COLUMN_RADIUS),
+                        ("COLUMN_FOOT", gh.COLUMN_FOOT), ("STEP_TOP", gh.STEP_TOP), ("THRONE_X", gh.DAIS_CENTRE[0]),
+                        ("THRONE_Z", gh.DAIS_CENTRE[1]), ("SEAT_TOP", gh.STEP_TOP + 1)):
+        if not java_number(hall, name, value):
+            err(f"GlacierHall.{name} is not {value} (tools/glacier_hall.py)")
+    columns = ", ".join("new double[] {{{}, {}}}".format(*c) for c in gh.COLUMNS)
+    if f"COLUMNS = List.of({columns});" not in hall:
+        err(f"GlacierHall.COLUMNS are not tools/glacier_hall.py's: {columns}")
+    found = re.search(r"\bROAR_Z = ([0-9.]+);", hall)
+    dens = re.findall(r"new double\[\] \{([0-9.]+), ([0-9.]+)\}", hall.split("DENS = ", 1)[-1].split(";", 1)[0])
+    blocks = gh.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    solid = lambda pos: name(pos) not in (None, "minecraft:light")
+    def clear(x, y, z, label, floor=True, height=4, half=1):
+        """Room for him (or a whelp) standing at (x, y, z) in the template, on its floor (a pelt, a carpet, is no
+        obstacle)."""
+        cx, cz = int(x // 1), int(z // 1)
+        for dx in range(-half, half + 1):
+            for dz in range(-half, half + 1):
+                for dy in range(height):
+                    pos = (cx + dx, int(y) + dy, cz + dz)
+                    if solid(pos) and not name(pos).endswith("_carpet"):
+                        err(f"GlacierHall: {label} at ({x}, {y}, {z}) is not clear: {name((cx + dx, int(y) + dy, cz + dz))} "
+                            f"at {(cx + dx, int(y) + dy, cz + dz)}")
+                        return
+        if floor and not solid((cx, int(y) - 1, cz)):
+            err(f"GlacierHall: {label} at ({x}, {y}, {z}) stands on nothing")
+    seat = (int(gh.DAIS_CENTRE[0]), gh.STEP_TOP, int(gh.DAIS_CENTRE[1]))
+    if not solid(seat):
+        err(f"GlacierHall: no throne seat under him at {seat}")
+    if found is None:
+        err("GlacierHall.ROAR_Z is missing")
+    else:
+        clear(gh.DAIS_CENTRE[0], gh.STEP_TOP, float(found.group(1)), "where he roars from")
+    clear(gh.LAKE_CENTRE[0], gh.LAKE + 1, gh.LAKE_CENTRE[1] - gh.LAKE_RADIUS + 4.0, "where he lands from his dais")
+    if len(dens) != len(gh.DENS):
+        err(f"GlacierHall.DENS: {len(dens)} dens, tools/glacier_hall.py builds {len(gh.DENS)}")
+    for x, z in dens:
+        if not any(abs(float(x) - cx) <= 1.0 and abs(float(z) - cz) <= 1.0 for (cx, _, cz), _ in gh.DENS.values()):
+            err(f"GlacierHall.DENS: ({x}, {z}) is not at a den of tools/glacier_hall.py DENS")
+        clear(float(x), gh.LAKE + 1, float(z), "a den his kin come out of", height=2, half=0)
+    # The block he hurls leaves from where his model holds it over his head.
+    if yk.BOULDER["HELD"] != (ym.HELD_Y - 8) / 16:
+        err(f"tools/yeti_king.py BOULDER HELD must be where tools/yeti_king_models.py holds it, {(ym.HELD_Y - 8) / 16}")
+    loot_java = sources.get("YetiKingLoot", "")
+    if f'ADVANCEMENT = "{yk.ADVANCEMENT["key"]}";' not in loot_java:
+        err("YetiKingLoot's advancement differs from tools/yeti_king.py")
+    registry = sources.get("JugcraftYeti", "")
+    client = (CLIENT_JAVA_ROOT / "YetiKingClient.java").read_text(encoding="utf-8")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for entity in yk.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftYeti does not register the {entity} entity")
+        if f"entity.{MOD}.{entity}" not in lang:
+            err(f"No name for the {entity} entity")
+        if f"JugcraftYeti.{entity.upper()}," not in client:
+            err(f"YetiKingClient draws no {entity}")
+    for item in yk.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftYeti does not register {item}")
+    # The GeckoLib bodies.
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    # His body's clips are named from a prefix (YetiKingEntity's BODY table).
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("yeti_king", set()).add(f"animation.yeti_king.{clip}")
+    for clip in ym.CLIPS["yeti_king"]:
+        clips_named.setdefault("yeti_king", set()).add(f"animation.yeti_king.{clip}")
+    for entity, body in yk.GECKO.items():
+        geo = load(ASSETS / "geckolib" / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(ASSETS / "geckolib" / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in ym.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        # A body with a glow layer has a glowmask; one without has none (it would be a texture nothing draws).
+        glows = entity in yk.GLOWING
+        start = client.find(f"register(JugcraftYeti.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        if start >= 0 and ("AutoGlowingGeoLayer" in client[start:end if end >= 0 else len(client)]) != glows:
+            err(f"YetiKingClient: the {entity}'s glow layer must match tools/yeti_king.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * ym.TEXTURE_SCALE, height * ym.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {width * ym.TEXTURE_SCALE}x{height * ym.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: the body's clips never key the crown's fire, nor the crown's a body bone.
+    owned = {bone: controller for controller, bones in ym.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in ym.ANIMATIONS["yeti_king"]()["animations"].items():
+        controller = "crown" if clip_name.split(".")[-1].startswith("crown_") else "body"
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"yeti_king: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    # His loot, and his trophies: Arms VII's, as his bosses/yeti_king table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "yeti_king.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/yeti_king.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"yeti_fur": yk.FUR, **{item: yk.TROPHY_CHANCE for item in yk.TROPHIES}, **yk.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/yeti_king.json gives {found_loot}, not tools/yeti_king.py's {expected}")
+    if tuple(arms_variants.trophies("yeti_king")) != tuple(yk.TROPHIES):
+        err(f"tools/yeti_king.py TROPHIES {yk.TROPHIES} are not Arms VII's: {arms_variants.trophies('yeti_king')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "yeti_king.json") or {}
+    held = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held != [f"{MOD}:{item}" for item in yk.TROPHIES]:
+        err(f"loot_table/bosses/yeti_king.json holds {held}, not his trophies {yk.TROPHIES}")
+    for table_id in ("entities/yeti_king", "bosses/yeti_king"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"YetiKingLoot must roll loot_table/{table_id}.json")
+    for key in yk.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in yk.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{yk.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{yk.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
     committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
@@ -12263,6 +12474,7 @@ def main():
     check_lairs()
     check_vesperine()
     check_tatterlace()
+    check_yeti()
     check_material_sets()
     check_art()
     check_pixel_hollows()

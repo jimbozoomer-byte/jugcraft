@@ -36,6 +36,21 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.
 - Scopes wait for the owner's reticle textures. Record: [guns.md, slice 7](docs/features/guns.md#slice-7-bayonets-and-the-shared-texture-guns).
 
+### Unmerged: The Yeti King (boss 3, part 2)
+- **The Yeti King**, a great white ape of the glacier with a crown of blue ice, waits slumped on his throne in the Glacier Hall and leaps down onto the frozen lake when a player steps onto it. He has 420 health, scaled up for a party.
+- **His rule, the snow is his:** his Ground Slam blasts the lake's drift snow bare to slick glare ice round where he lands, for 12 seconds before it drifts back; never the trampled snow round the columns, at the ramp's foot or before his dais.
+- **Phase 1, the Hunt:** Maul Swipe, Boulder Throw, Ground Slam, Frost Breath and the Avalanche Charge. Charge him into an ice column and he reels for 3 seconds, taking a third more damage.
+- **At half health, the King's Roar:** he roars from his dais, a blizzard chills everyone near and two Yeti Whelps climb out of the dens. Then come Icicle Fall, Glacial Spikes and Kin Call.
+- **Below a fifth, the Fury of the Peaks:** his crown blazes and his eyes burn blue, his cooldowns are a third shorter, his slam bares a wider ring and a charge that misses the columns is followed by another.
+- **Left alone for 10 seconds** he climbs back onto his throne, healed, and the snow drifts back.
+- **His loot is each participant's own:**
+  - Yeti Fur, which makes a cheaper Frost Horn or two white wool;
+  - one of Arms VII's two Yeti King trophies, the **Glacier Maul** or the **Rimeclaw**, with their Frost boon, certain on a first kill;
+  - the Yeti Mitten, which keeps its wearer from freezing from the offhand;
+  - the Yeti King's Crown, a costume;
+  - shared experience and the advancement Abominable.
+- When he falls, the snow drifts back over his lake and Grey Mist opens in its middle. Animated with GeckoLib. Record: [yeti-king.md](docs/features/yeti-king.md).
+
 ### Unmerged: The Glacier Hall and the Frost Horn (boss 3, the Yeti King, part 1)
 - **The Frost Horn** (a goat horn, two gold ingots, two leather and two snow blocks) opens the Glacier Hall:
   - blow it at night in the Overworld, standing on snow or ice. A roar answers, the snow at your feet splits, and you fall through and land on the hall's ledge with frost on your skin. The horn is used up;

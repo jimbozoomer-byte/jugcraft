@@ -59,6 +59,10 @@ CRIMSON_CLOTH = Material((34, 6, 12), (62, 12, 22), (100, 22, 38), (134, 32, 50)
 # not a metal, so it does not shine.
 HORN = Material((48, 40, 30), (80, 68, 50), (112, 94, 68), (158, 138, 102), (200, 180, 140), (234, 220, 186),
                 shine=False)
+# The Yeti King's white fur (tools/item_icons/yeti_fur.txt and yeti_mitten.txt): white with blue-grey shadows, as his
+# body is painted (tools/yeti_king_art.py FUR). Fur, so it does not shine.
+YETI_FUR = Material((40, 50, 76), (70, 84, 114), (112, 136, 184), (174, 198, 234), (216, 230, 250), (246, 250, 255),
+                    shine=False)
 PAPER = Material((80, 64, 40), (124, 104, 74), (170, 152, 116), (214, 200, 166), (236, 226, 198), (250, 246, 230),
                  shine=False)
 # The Greenwardens' garden (roadmap step 14; tools/item_icons/: the four crops, Verdant Chaff and the living devices).
@@ -99,8 +103,8 @@ MATERIALS = {
     "amethyst": AMETHYST, "paper": PAPER, "smoked_glass": SMOKED_GLASS,
     # Vesperine's loot
     "shade": SHADE, "crimson_cloth": CRIMSON_CLOTH,
-    # the Glacier Hall's
-    "horn": HORN,
+    # the Glacier Hall's, and the Yeti King's loot
+    "horn": HORN, "yeti_fur": YETI_FUR,
 }
 
 # Materials meant to be vanilla's own metal: the distance test against copper, iron and gold is skipped for them.
