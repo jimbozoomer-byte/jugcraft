@@ -151,6 +151,15 @@
 			"io.github.jimbozoomer.jugcraft.test.VegetablesHerbsSpicesGameTests"
 		],
 		"fabric-client-gametest": [
+			"local.peepo.PeepoCompanionClientTests",
+			"local.peepo.PeepoHearthClientTests",
+			"local.peepo.PeepoKitchenAnimationClientTests",
+			"local.peepo.PeepoSuppliesClientTests",
+			"local.peepo.PeepoDeliveryClientTests",
+			"local.peepo.PeepoWorkSessionClientTests",
+			"local.peepo.PeepoHarvestClientTests",
+            "local.peepo.TransportCrateClientTests",
+            "local.peepo.TikiTorchClientTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceJournalClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordancePresentationClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceJourneyClientGameTests",

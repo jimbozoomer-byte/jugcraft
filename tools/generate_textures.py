@@ -1515,6 +1515,9 @@ def main():
     import feasts_textures
     feasts_textures.draw_all(save)
 
+    import transport_crates
+    transport_crates.main()
+
     # Last: the owner's own textures, copied from the shared library as drawn (tools/owner_art.py), so nothing above
     # draws over them.
     import owner_art

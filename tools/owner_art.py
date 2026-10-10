@@ -40,6 +40,7 @@ TEXTURES = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft", 
 def imports():
     """(runtime path under textures/ without .png, library path under Blocks/ without .png) for every copied texture."""
     out = []
+    out.append(("block/transport_crate_wood", "biomes and tree blocks/origin_oak_planks"))
     for table in (kitchen.TEXTURES, feasts.TEXTURES, menu.TEXTURES, rice.TEXTURES, soil.TEXTURES, garden.TEXTURES):
         for target, source in table.items():
             out.append((target, f"{FOOD}/{source}"))

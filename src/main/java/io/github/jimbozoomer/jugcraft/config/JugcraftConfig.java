@@ -63,7 +63,8 @@ public final class JugcraftConfig {
 	 * {@code raiders.walkers} and {@code raiders.blimps} ({@code on} or {@code off}) let walkers and blimps join them.</li>
 	 * </ul>
 	 */
-	public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
+    public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
+            Map.entry("companions.paths_per_tick", "8"), Map.entry("companions.searches_per_tick", "4"),
 			Map.entry("halloween.start", "10-20"), Map.entry("halloween.end", "11-03"), Map.entry("halloween.timezone", "UTC"),
 			Map.entry("halloween.mode", "auto"), Map.entry("halloween.harvest_moon", "10-31"),
 			Map.entry("seasons.mode", "auto"), Map.entry("seasons.hemisphere", "north"), Map.entry("seasons.timezone", "UTC"),

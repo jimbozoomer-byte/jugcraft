@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.machine.MachineInput;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
+import io.github.jimbozoomer.jugcraft.machine.MachineCompanionEffort;
 import java.util.List;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -70,9 +71,15 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	private final List<FluidAmount> fluidResults;
 	private final List<ItemStackTemplate> results;
 	private final int time;
+	private final int companionEffort;
 
 	public FluidRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, List<ItemPart> items, List<FluidAmount> fluids,
 			List<FluidAmount> fluidResults, List<ItemStackTemplate> results, int time) {
+		this(machine, commonInfo, items, fluids, fluidResults, results, time, 0);
+	}
+
+	public FluidRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, List<ItemPart> items, List<FluidAmount> fluids,
+			List<FluidAmount> fluidResults, List<ItemStackTemplate> results, int time, int companionEffort) {
 		this.machine = machine;
 		this.commonInfo = commonInfo;
 		this.items = List.copyOf(items);
@@ -80,6 +87,7 @@ public class FluidRecipe implements Recipe<MachineInput> {
 		this.fluidResults = List.copyOf(fluidResults);
 		this.results = List.copyOf(results);
 		this.time = time;
+		this.companionEffort = Math.clamp(companionEffort, 0, MachineCompanionEffort.MAX_PER_QUARTER);
 	}
 
 	public MachineKind machine() {
@@ -105,6 +113,8 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	public int time() {
 		return time;
 	}
+
+	public int companionEffort() { return companionEffort; }
 
 	/** Whether the item inputs hold this recipe's ingredients, each in its own slot, in order. */
 	public boolean itemsMatch(List<ItemStack> inputs) {
@@ -199,9 +209,10 @@ public class FluidRecipe implements Recipe<MachineInput> {
 				FluidAmount.CODEC.listOf().optionalFieldOf("fluids", List.of()).forGetter(FluidRecipe::fluids),
 				FluidAmount.CODEC.listOf().optionalFieldOf("fluid_results", List.of()).forGetter(FluidRecipe::fluidResults),
 				ItemStackTemplate.CODEC.listOf().optionalFieldOf("results", List.of()).forGetter(FluidRecipe::results),
-				ExtraCodecs.POSITIVE_INT.optionalFieldOf("time", 200).forGetter(FluidRecipe::time)
-		).apply(i, (info, items, fluids, fluidResults, results, time) ->
-				new FluidRecipe(machine, info, items, fluids, fluidResults, results, time)));
+				ExtraCodecs.POSITIVE_INT.optionalFieldOf("time", 200).forGetter(FluidRecipe::time),
+				MachineCompanionEffort.CODEC.optionalFieldOf("companion_effort_per_quarter", 0).forGetter(FluidRecipe::companionEffort)
+		).apply(i, (info, items, fluids, fluidResults, results, time, effort) ->
+				new FluidRecipe(machine, info, items, fluids, fluidResults, results, time, effort)));
 		StreamCodec<RegistryFriendlyByteBuf, FluidRecipe> stream = StreamCodec.composite(
 				Recipe.CommonInfo.STREAM_CODEC, recipe -> recipe.commonInfo,
 				ItemPart.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::items,
@@ -209,8 +220,9 @@ public class FluidRecipe implements Recipe<MachineInput> {
 				FluidAmount.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::fluidResults,
 				ItemStackTemplate.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::results,
 				ByteBufCodecs.VAR_INT, FluidRecipe::time,
-				(info, items, fluids, fluidResults, results, time) ->
-						new FluidRecipe(machine, info, items, fluids, fluidResults, results, time));
+				ByteBufCodecs.VAR_INT, FluidRecipe::companionEffort,
+				(info, items, fluids, fluidResults, results, time, effort) ->
+						new FluidRecipe(machine, info, items, fluids, fluidResults, results, time, effort));
 		return new RecipeSerializer<>(codec, stream);
 	}
 }
