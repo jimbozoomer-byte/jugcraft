@@ -13,7 +13,7 @@ Updated 10 October 2026 for [integration PR #277](https://github.com/jimbozoomer
 | Armor and weapons | Thirteen owner armor sets in Blockbench projects with runtime integration, improved Sentinel/Frost Knight/Reaper/Paladin/Templar presentation, four matching weapons and Sentinel Shield | #273; acquisition and visual review limits below |
 | Fire magic | Hearthbinding research; Hearthspark, Hearthguard, Cinderbolt and Hearthflare; Smoulder; fire foci, Fire Bangle, Pyromaniac and Pyromancer armor using the supplied assets | #295; [fire spells](features/arcane-concordance-ember.md), [fire equipment](features/arcane-concordance-ember-regalia.md) |
 | Wearable magic | Leather Belt, Angelic Feather, Kraken Shell, Infernal Claws, Angelheart Vial, Phoenix Down, Amphibian Boot and Ice Breaker; belt and boot rendered on the wearer | #295; [Wayfaring](features/arcane-concordance-trinkets.md) |
-| Integration and tests | Projectile aiming and village-test setup fixes; four client-test shards with 60-minute limits; companion test discovery; shared-code selection fallback; isolated, repeated javelin validation; preserved wild-crop/spice generation and shared weapon/armor registrations | #271–272, #283 and #277 integration commits |
+| Integration and tests | Projectile aiming and village-test setup fixes; four client-test shards with 60-minute limits; companion test discovery; shared-code selection fallback; isolated, repeated javelin validation; preserved wild-crop/spice generation, shared enchantment tags, weapon/armor registrations and complete boss-test flooring | #271–272, #283 and #277 integration commits |
 | Industrial planning | Owner-selected metals, polymer/electronics, grid-storage, fuel and cryogenics directions are recorded together | #264 and planning updates in #295; **documentation, not new factory gameplay** |
 
 This combines 28 source PRs (#264–273 and #278–295) through #277. Source PRs can show as merged into the integration branch before #277 reaches `main`; that alone does not make them available in a main build.
@@ -47,22 +47,11 @@ See [the source/API map](WHAT_EXISTS.md), [technology guide](TECH_TREE.md), [Con
 
 Detailed scope: [owner TODO](TODO.md), [roadmap and Ars Goetia](ROADMAP.md), [multiplayer tests](TESTING.md#dedicated-server-and-two-clients).
 
-## Decisions still needed from the owner
+## Owner decisions and approved next routes
 
-Eight industrial questions remain explicitly unanswered in the [planning record](features/industrial-chemistry-and-fuels-plan.md#resource-reagent-and-residue-questions-pending). Their suggested A choices have **not** been silently selected:
+The newest #264 update records all eight answers in [industrial batch 13](features/industrial-chemistry-and-fuels-plan.md#resource-reagent-and-residue-decisions-thirteenth-batch): galena; spodumene first and lithium brines later; separate primary cobalt ore; chromite concentrate; vanadium-bearing iron feed; a short powered peroxide game recipe; novolac/DNQ photoresist; and paid gypsum-residue preparation for construction. These are selected game directions, not implemented recipes. The [connected production map](features/industrial-chemical-catalog-and-routes.md) groups the proposed implementation work.
 
-| Decision | Choices |
-| --- | --- |
-| Lead | Named galena processing, or generic lead ore first |
-| Lithium | Hard-rock spodumene first, or natural brines first |
-| Cobalt | Coproduct from selected nickel feeds, or separate ore |
-| Chromium | Named chromite concentrate, or generic chromium-bearing ore initially |
-| Vanadium | Coproduct from selected iron feed, or separate mineral source |
-| Peroxide | Short powered game recipe, or longer catalytic game chain |
-| Photoresist | Named resin/additive pair, or generic game ingredient names |
-| Phosphate residue | Process into construction ingredients, or defer that use |
-
-The Encyclopedia also needs quest/reward policy and visual direction. These decisions do not block the completed content above from being tested and integrated.
+The Encyclopedia still needs quest/reward policy and visual direction. The new equipment needs owner visual review and survival acquisition choices where its feature record says creative-only. Those decisions do not block the completed content above from being tested and integrated.
 
 ## Verification and scope
 

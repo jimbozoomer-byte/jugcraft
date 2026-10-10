@@ -88,8 +88,11 @@ public class TatterlaceGameTests {
 	private static BlockPos lifted(GameTestHelper helper, int height) {
 		ServerLevel level = helper.getLevel();
 		BlockPos centre = helper.absolutePos(CENTRE).above(height);
-		for (int x = -8; x <= 8; x++) {
-			for (int z = -8; z <= 8; z++) {
+		// Egg sacs lie near the doily's rim. Support the entire encounter, not just its centre,
+		// so the brood cannot fall out of this elevated fixture as soon as it hatches.
+		int radius = (int) Math.ceil(SpindleLoft.DOILY_RADIUS) + 2;
+		for (int x = -radius; x <= radius; x++) {
+			for (int z = -radius; z <= radius; z++) {
 				level.setBlockAndUpdate(centre.offset(x, -1, z), Blocks.STONE.defaultBlockState());
 			}
 		}

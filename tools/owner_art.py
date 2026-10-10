@@ -176,13 +176,27 @@ def write_all():
 def errors():
     """Every imported file that is missing or differs from its source (or its recolouring)."""
     out = []
+    adapted = {_target(target) for target, *_ in recolourings()}
+    adapted.update(_target(target) for target, _ in compositions())
+    adapted.update(_target(target) for target in garden.ORNAMENTAL_EARS)
     for path, data in expected().items():
         rel = os.path.relpath(path, ROOT)
         if not os.path.isfile(path):
             out.append(f"{rel} is missing: run tools/owner_art.py (the owner's library import)")
             continue
         with open(path, "rb") as handle:
-            if handle.read() != data:
+            actual = handle.read()
+            same = actual == data
+            if not same and path in adapted:
+                # Derived PNG compression differs across Pillow/zlib platforms. Keep
+                # every pixel exact; direct imports still require byte-for-byte identity.
+                try:
+                    original = Image.open(io.BytesIO(data)).convert("RGBA")
+                    current = Image.open(io.BytesIO(actual)).convert("RGBA")
+                    same = original.size == current.size and original.tobytes() == current.tobytes()
+                except (OSError, ValueError):
+                    same = False
+            if not same:
                 out.append(f"{rel} differs from the owner's library file it is imported from; the owner's art is kept as "
                            "drawn (tools/owner_art.py)")
     return out

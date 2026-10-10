@@ -58,6 +58,7 @@ public class ArmsVIIIGameTests {
 	public void javelinStrikesAndComesDown(GameTestHelper helper) {
 		floor(helper);
 		Mob pig = pig(helper, new BlockPos(1, 2, 7));
+		pig.setNoAi(true);
 		ServerPlayer thrower = thrower(helper, "steel_javelin", new BlockPos(1, 2, 1), pig, GameType.SURVIVAL);
 		JugcraftArms.Thrown thrown = JugcraftArms.thrown("javelin", "steel");
 		release(thrower, thrown);
@@ -278,7 +279,6 @@ public class ArmsVIIIGameTests {
 		@SuppressWarnings("unchecked")
 		EntityType<Mob> type = (EntityType<Mob>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("pig"));
 		Mob pig = helper.spawnWithNoFreeWill(type, pos);
-		pig.setNoAi(true);
 		pig.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.0);
 		return pig;
 	}
