@@ -16,7 +16,7 @@ Status:
 - **Slice 9A** (the marksman rifles: the Picket Rifle, Ranger Rifle and Kestrel Rifle; [below](#slice-9a-the-marksman-rifles)): implemented on `claude/guns-marksman` (#285), stacked on slice 8D, awaiting review.
 - **Slice 9B** (the automatic weapons: the Rattler Pistol, Bronco SMG and Squall Rifle; [below](#slice-9b-the-automatic-weapons)): implemented on `claude/guns-automatic` (#286), stacked on slice 9A, awaiting review.
 - **Slice 9C** (the second energy weapons: the Spikedriver, Seam Cutter and Caisson Pistol; [below](#slice-9c-the-second-energy-weapons)): implemented on `claude/guns-energy-2` (#287), stacked on slice 9B, awaiting review.
-- **Slice 9D** (the pump shotguns: the Sledge, Highwayman and Throttle; [below](#slice-9d-the-pump-shotguns)): implemented on `claude/guns-pump`, stacked on slice 9C, awaiting review.
+- **Slice 9D** (the pump shotguns: the Sledge, Highwayman and Throttle; [below](#slice-9d-the-pump-shotguns)): implemented on `claude/guns-pump` (#289), stacked on slice 9C, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -2122,6 +2122,18 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - `highwaymanKeepsItsPelletsTogether`: aimed at pigs thirteen blocks off, standing a block up so that no pellet strays into the floor first, all eight of the Highwayman's pellets land (its 2.5° cone is narrower than the pig there), and fewer of the Sledge's (6°).
   - "Every gun registered" now counts thirty-six guns.
   - `GunsClientGameTests` takes the three through every gun's steps; screenshots `jugcraft_guns_sledge_*`, `jugcraft_guns_highwayman_*` and `jugcraft_guns_throttle_*`.
+- **Slice 9D in CI** ([run 38036998697](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38036998697), on 631cc3a84): every check passed.
+  - **Server game tests** (`mod`, `optional integrations absent`): 1197 passed, 1194 before; the three new ones are `PumpGunsGameTests`.
+  - **`GunsClientGameTests`** took the three guns through every step:
+    - **Sledge:** aimed, the view narrowed to 0.9; fired, 8 flash frames, the husk 728.49 → 704.49 (6 of its 8 pellets) and shells 4 → 3; reloaded 4, 31 Buckshot Shells left; no hulls, as its animations cue none.
+    - **Highwayman:** aimed, 0.8; fired, 7 flash frames, the husk 704.49 → 680.49 (all 8 pellets) and shells 7 → 6; reloaded 7; no hulls.
+    - **Throttle:** aimed, 0.88; fired, 8 flash frames, the husk 680.49 → 659.49 (7 pellets) and shells 6 → 5; reloaded 6; 1 hull thrown.
+  - **Screenshots:**
+    - Held, each sits at the lower right in the owner's textures: the Sledge with its red fore-end, the Highwayman long and dark, the Throttle with its sight ring standing up.
+    - Aimed, each gun's back sits on the crosshair over the husk, the right fist below it (the aiming polish item).
+    - Mid-reload, the Sledge's left hand and sleeve fill the left half of the view across the crosshair as it pushes a shell in (the known limit above); the Highwayman's left hand comes in large at the right; the Throttle is tipped up to the right.
+    - Fitted, the counters read 1 / 4, 1 / 7 and 1 / 6. Aimed with the Light or the Weighted Stock, the Sledge's and the Highwayman's stocks come up under the eye as a dark block across the bottom of the view, as the Weighted Stock does on the Riveter SMG and the Garrison Rifle (run 38034553601): an item for the aiming polish pull request.
+    - Seen from outside, each is raised along the look, and its flash shows at the muzzle when it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -2133,7 +2145,7 @@ Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns 
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
 - **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; the tactical grip and the laser sight; the aiming polish (below); a rack that charges several Energy Cells at once. The owner chose the first three on 10 October 2026.
-- **Aimed, the gun hand covers the sights:** in the CI screenshots of 8 October, the right fist sits over the lower middle of the screen when aiming, on the one-handed guns and some long ones. The arm runs back toward the camera from the grip drawn at the middle of the view. This is a polish item for a pull request of its own.
+- **Aimed, the gun hand covers the sights:** in the CI screenshots of 8 October, the right fist sits over the lower middle of the screen when aiming, on the one-handed guns and some long ones. The arm runs back toward the camera from the grip drawn at the middle of the view. This is a polish item for a pull request of its own. So is a fitted stock that comes up under the eye when aiming (the Weighted Stock on the Riveter SMG and the Garrison Rifle, the Light and Weighted Stocks on the Sledge and the Highwayman).
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - off-hand guns;
