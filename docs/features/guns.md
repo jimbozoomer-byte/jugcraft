@@ -3139,6 +3139,10 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `raiderGunnersGunDropsEmpty`: killed by a player (its drop chance made certain for the test), a gunner drops its Sentry Pistol with nothing loaded, and no rounds but up to three Light Rounds.
   - `raidIsWonWhenEveryRaiderFalls` (the raiders' test) counts a level 1 party of two grunts, a gunner, a grenadier and an officer.
   - `GunsClientGameTests`: three gunners, one with each arm, stand four blocks off facing the player with nothing in hand; the test checks that the gun hold posed them, and takes the screenshot `jugcraft_guns_raider_gunners`.
+- **Slice 10F in CI** ([run 38080939471](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38080939471), on f3a8a3b7e: the slice, with slice 10E's test fix merged in): every check passed.
+  - **Server game tests:** 1301 in each job, slice 10E's 1296 and this slice's five. All passed, `RaiderGunnerGameTests` among them, and the raid test with its new party.
+  - **Client game tests:** the changed files chose `GunsClientGameTests`, `JugcraftClientGameTests`, `LairClientGameTests` and `SpindleLoftClientGameTests`, and all four passed. In `GunsClientGameTests` the three gunners were posed holding their guns for 324 frames.
+  - **Screenshot** `jugcraft_guns_raider_gunners`: the three gunners stand before the brick wall facing the player, in grey-green greatcoats with the brass rounds across the chest, field caps and goggles. The left one holds the Sentry Pistol raised in one hand, the middle one the Garrison Rifle at the chest in both hands, the right one the Breacher in both hands, its long barrel running out toward the player.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
