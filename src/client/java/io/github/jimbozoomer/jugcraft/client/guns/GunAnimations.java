@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -84,7 +85,7 @@ public final class GunAnimations {
 		controller.setParticleKeyframeHandler(event -> {
 			Integer owner = event.renderState().getGeckolibData(GunRenderer.OWNER);
 			if (owner != null && EJECT_CUE.equals(event.keyframeData().getEffect())) {
-				GunEffects.eject(gun, owner);
+				GunEffects.eject(gun, owner, event.renderState().getGeckolibData(GunRenderer.LEFT));
 			}
 		});
 		registrar.add(controller);
@@ -101,7 +102,12 @@ public final class GunAnimations {
 
 	/** Plays this gun animation on the gun in this entity's main hand (on this client only). */
 	public static void trigger(LivingEntity holder, String animation) {
-		ItemStack stack = holder.getMainHandItem();
+		trigger(holder, InteractionHand.MAIN_HAND, animation);
+	}
+
+	/** Plays this gun animation on the gun in this hand of this entity (slice 10G: a gun in each hand; this client only). */
+	public static void trigger(LivingEntity holder, InteractionHand hand, String animation) {
+		ItemStack stack = holder.getItemInHand(hand);
 		if (stack.getItem() instanceof GunItem gun) {
 			long id = GeoItem.getId(stack);
 			AnimatableManager<GunItem> manager = gun.getAnimatableInstanceCache().getManagerForId(id);

@@ -1460,6 +1460,12 @@ def check_guns():
     per_item = ", ".join(f'"{ammo}", {n}' for ammo, n in guns.OTHER_AMMO.items() if n != 1)
     if f"PER_ITEM = Map.of({per_item});" not in java:
         err(f"JugcraftGuns.PER_ITEM differs from tools/guns.py OTHER_AMMO: expected Map.of({per_item})")
+    # Slice 10G: the guns a player may hold two of, one in each hand, and how much further each strays.
+    one_handed = ", ".join(f'"{gun}"' for gun in guns.one_handed())
+    if f"ONE_HANDED = Set.of({one_handed});" not in java:
+        err(f"JugcraftGuns.ONE_HANDED differs from tools/guns.py one_handed(): expected Set.of({one_handed})")
+    if f"DUAL_SPREAD = {guns.DUAL_SPREAD}F;" not in java:
+        err(f"JugcraftGuns.DUAL_SPREAD differs from tools/guns.py: expected {guns.DUAL_SPREAD}F")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
     charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
     if f"CHARGE = Map.of({charges});" not in java:
@@ -1519,7 +1525,7 @@ def check_guns():
                 f"message.{MOD}.guns.no_ammo", f"death.attack.{MOD}.bullet", f"death.attack.{MOD}.flame", f"tooltip.{MOD}.guns.fits",
                 f"message.{MOD}.guns.no_charge", f"hud.{MOD}.guns.in_cells", f"death.attack.{MOD}.zap", f"tooltip.{MOD}.guns.charge",
                 f"tooltip.{MOD}.guns.fitting", f"tooltip.{MOD}.guns.fitted", f"tooltip.{MOD}.guns.stab", f"key.{MOD}.stab",
-                f"message.{MOD}.guns.no_grenades", f"tooltip.{MOD}.guns.loaded_grenade"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
+                f"message.{MOD}.guns.no_grenades", f"tooltip.{MOD}.guns.loaded_grenade", f"tooltip.{MOD}.guns.one_handed"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
                 f"tooltip.{MOD}.guns.slot.{slot}" for slot in guns.SLOTS] + [f"tooltip.{MOD}.guns.effect.{e}" for e in guns.EFFECTS]:
         if key not in lang:
             err(f"Missing name {key}")

@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.weapons.GrenadeItem;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
@@ -69,6 +70,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * paper cartridges, as the slice 4 muzzle-loaders are.</li>
  * <li>Slice 10D, the sculk guns, on the rounds the other guns fire: the Undertone Rifle, one hard shot a pull; the
  * Murmur SMG, ten shots a second; and the Reverb, a double-barrel loaded a shell at a time.</li>
+ * <li>Slice 10G, two guns at once: with a one-handed gun in each hand ({@link #ONE_HANDED}), left click fires the main
+ * hand's and right click the other's; neither is aimed, and each strays further from the hip ({@link #DUAL_SPREAD}).</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -166,6 +169,13 @@ public final class JugcraftGuns {
 	 * the Stoker's bursts.
 	 */
 	public static final Map<String, Integer> PER_ITEM = Map.of("minecraft:blaze_powder", 4);
+	/**
+	 * Slice 10G, two guns at once: the guns held in one hand (tools/guns.py one_handed()), of which a player may hold one
+	 * in each hand and fire both ({@link GunItem#dual}).
+	 */
+	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin");
+	/** Slice 10G: how much further each of two guns strays from the hip than one held alone (tools/guns.py DUAL_SPREAD). */
+	public static final float DUAL_SPREAD = 1.5F;
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
