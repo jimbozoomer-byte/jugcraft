@@ -2,9 +2,11 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.GunsClient;
+import io.github.jimbozoomer.jugcraft.client.guns.GunArmsLayer;
 import io.github.jimbozoomer.jugcraft.client.guns.GunEffects;
 import io.github.jimbozoomer.jugcraft.client.guns.GunLaser;
 import io.github.jimbozoomer.jugcraft.client.guns.GunPose;
+import io.github.jimbozoomer.jugcraft.client.guns.GunRenderer;
 import io.github.jimbozoomer.jugcraft.client.guns.GunScope;
 import io.github.jimbozoomer.jugcraft.client.guns.GunView;
 import io.github.jimbozoomer.jugcraft.guns.EnergyCellItem;
@@ -46,7 +48,8 @@ import net.minecraft.world.phys.AABB;
  * with a bayonet (and the guns whose parts use shared textures), and a stab with the stab key that hurts the husk; and the
  * scopes, each aimed through on the Longhorn Rifle (the view through it or the reflex dot, the narrowed view, the slower
  * mouse). Slice 8C: the heavy weapons fire their own ammunition (grenades, blaze powder) the same way, and the
- * Thresher's trigger is held until its barrels have spun up and it fires. Screenshots jugcraft_guns_* (CI job
+ * Thresher's trigger is held until its barrels have spun up and it fires. Slice 9F: aimed down its sights, each gun's
+ * arms are drawn at half their size, and a fitted stock is left out. Screenshots jugcraft_guns_* (CI job
  * {@code client}).
  */
 public class GunsClientGameTests implements FabricClientGameTest {
@@ -98,11 +101,21 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				}
 				context.waitTicks(30);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_held");
+				float heldSize = context.computeOnClient(client -> GunArmsLayer.lastSize());
 
 				// Aimed (the aimed spread keeps the shot on the husk), then fired down the sights.
 				context.getInput().holdKey(options -> options.keyUse);
 				context.waitTicks(10);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_aimed");
+				// Slice 9F: aimed down its sights, the arms are drawn at half their size; a gun without sights (it stays at
+				// the hip) keeps them as they are.
+				float aimedSize = context.computeOnClient(client -> GunArmsLayer.lastSize());
+				boolean sighted = sighted(context, gun);
+				Jugcraft.LOGGER.info("[guns] {} arms drawn at size {} held and {} aimed (sights: {})", gun, heldSize, aimedSize, sighted);
+				if (Math.abs(heldSize - 1.0F) > 1.0E-3F || Math.abs(aimedSize - (sighted ? 0.5F : 1.0F)) > 1.0E-3F) {
+					throw new AssertionError("The " + gun + "'s arms were drawn at size " + heldSize + " held and " + aimedSize
+							+ " aimed, not 1 and " + (sighted ? "0.5" : "1"));
+				}
 				// Slice 6: aimed, the view narrows by the gun's zoom (GunFovMixin hands vanilla's modifier to GunView).
 				float fovIn = context.computeOnClient(client -> GunView.lastFovIn());
 				float fovOut = context.computeOnClient(client -> GunView.lastFovOut());
@@ -221,11 +234,24 @@ public class GunsClientGameTests implements FabricClientGameTest {
 					server.runCommand("item replace entity @p weapon.mainhand with jugcraft:%s[jugcraft:loaded_rounds=1,jugcraft:attachments=%s]"
 							.formatted(gun, snbt(fitted)));
 					context.waitTicks(20);
+					long stowed = context.computeOnClient(client -> GunRenderer.stowed());
 					context.takeScreenshot("jugcraft_guns_" + gun + "_fitted_" + (set + 1));
+					long stowedHeld = context.computeOnClient(client -> GunRenderer.stowed()) - stowed;
 					context.getInput().holdKey(options -> options.keyUse);
 					context.waitTicks(10);
 					context.takeScreenshot("jugcraft_guns_" + gun + "_fitted_" + (set + 1) + "_aimed");
+					// Slice 9F: a fitted stock is drawn at the hip and left out aimed down the gun's sights.
+					long stowedAimed = context.computeOnClient(client -> GunRenderer.stowed()) - stowed - stowedHeld;
 					context.getInput().releaseKey(options -> options.keyUse);
+					boolean stocked = fitted.stream().anyMatch(name -> JugcraftGuns.ATTACHMENTS.get(name).slot().equals("stock"));
+					if (stocked) {
+						Jugcraft.LOGGER.info("[guns] {} with {}: the stock left out in {} frames held and {} aimed", gun, fitted, stowedHeld,
+								stowedAimed);
+					}
+					if (stowedHeld != 0 || (stowedAimed > 0) != (stocked && sighted(context, gun))) {
+						throw new AssertionError("The " + gun + " with " + fitted + ": its stock was left out in " + stowedHeld
+								+ " frames held and " + stowedAimed + " aimed");
+					}
 					context.waitTicks(5);
 				}
 			}
@@ -375,6 +401,18 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				client.gui.hud.toggle();
 			}
 		});
+	}
+
+	/** Whether the gun's model has sights, which aiming slides onto the middle of the screen (slice 9F). */
+	private static boolean sighted(ClientGameTestContext context, String gun) {
+		return context.computeOnClient(client -> client.getResourceManager()
+				.getResource(Jugcraft.id("geckolib/models/item/" + gun + ".geo.json")).map(resource -> {
+					try (InputStream in = resource.open()) {
+						return new String(in.readAllBytes(), StandardCharsets.UTF_8).contains("\"sight\"");
+					} catch (IOException e) {
+						return false;
+					}
+				}).orElse(false));
 	}
 
 	/** A list of attachment ids as SNBT, for an item component in a command. */

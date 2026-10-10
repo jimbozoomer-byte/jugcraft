@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D) and the tactical grip and laser sight (slice 9E)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E) and the aiming polish (slice 9F)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -17,7 +17,8 @@ Status:
 - **Slice 9B** (the automatic weapons: the Rattler Pistol, Bronco SMG and Squall Rifle; [below](#slice-9b-the-automatic-weapons)): implemented on `claude/guns-automatic` (#286), stacked on slice 9A, awaiting review.
 - **Slice 9C** (the second energy weapons: the Spikedriver, Seam Cutter and Caisson Pistol; [below](#slice-9c-the-second-energy-weapons)): implemented on `claude/guns-energy-2` (#287), stacked on slice 9B, awaiting review.
 - **Slice 9D** (the pump shotguns: the Sledge, Highwayman and Throttle; [below](#slice-9d-the-pump-shotguns)): implemented on `claude/guns-pump` (#289), stacked on slice 9C, awaiting review.
-- **Slice 9E** (the Tactical Grip and the Laser Sight; [below](#slice-9e-the-tactical-grip-and-the-laser-sight)): implemented on `claude/guns-tactical`, stacked on slice 9D, awaiting review.
+- **Slice 9E** (the Tactical Grip and the Laser Sight; [below](#slice-9e-the-tactical-grip-and-the-laser-sight)): implemented on `claude/guns-tactical` (#290), stacked on slice 9D, awaiting review.
+- **Slice 9F** (the aiming polish: the hands and the fitted stocks kept off the sights; [below](#slice-9f-the-aiming-polish)): implemented on `claude/guns-aiming`, stacked on slice 9E, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -30,7 +31,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the scopes: on 8 October 2026, with the reticles and lens rims uploaded ("heres reticles and vignette"), asked what the scopes should use, they answered that they made those files and to use them (see [Dependencies and assets](#dependencies-and-assets)); and asked what next ("What next?"), they chose all four further gun sets offered, each its own slice.
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
-- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, and the first follow-up, the tactical grip and the laser sight, slice 9E.
+- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, and the second, the aiming polish, slice 9F.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1022,6 +1023,34 @@ The first of the smaller follow-ups the owner chose on 10 October 2026 ("Tactica
 - **The dot is a particle:** it can trail the aim by up to a tick, and it glows at full brightness in the dark.
 - **No beam through the air:** the owner's short beam shows on the gun; nothing is drawn between it and the dot.
 - **Aimed, the housing stands beside the crosshair:** the eye looks along the laser's left side, on the owner's line of sight, so its dark housing and red front fill the view just right of the crosshair and hide part of a target there (CI run 38038657220).
+- **Not played:** none of it has been played yet.
+
+## Slice 9F: the aiming polish
+The second of the follow-ups the owner chose on 10 October 2026 ("Aiming polish"): aimed down a gun's sights, the hands and the fitted stocks are kept off them.
+
+**What was wrong:** in the CI screenshots of each slice since 8 October (the latest, run 38036998697), aiming down the sights showed:
+- **the right fist** over the lower middle of the screen, on nearly every gun with sights. On the Longhorn Rifle, Drover Rifle, Duelling Pistol, Line Musket and Bellmouth it covered half the screen.
+- **the Light and Weighted Stocks** coming up under the crosshair as a block. The CI screenshots show it on the Rust Midge, Riveter SMG, Garrison Rifle, Sledge and Highwayman, and previews without the fist in front on the Sentry Pistol, Linesman and Breacher too. The Garrison Rifle's Light Stock reached the crosshair itself.
+
+**Why:**
+- **The fist:** aiming slides the gun until its sight is on the middle of the screen, at the hip's depth (and its eye relief). That brings the grip under the eye, from a fifth of a block from it (the Coach Gun) to three quarters (the Rattler Pistol). The arms run mostly downward from the grips, but the fist itself, the player model's at four pixels across, fills that much of the view so near.
+- **More eye relief does not cure it:** pushing the gun further out shrinks the fist but brings it nearer the middle of the view (previews at 4, 8 and 12 pixels more).
+- **The stocks:** the attachment stocks stand about as high as the gun's back, so held where the hip view holds them they rise to just under the sight line. The guns' own stocks, drawn aimed, run out of the bottom of the view as a rifle's stock does.
+
+**What changes** (`client/guns/GunArmsLayer`, `GunRenderer`):
+- **The arms** shrink about the hands as the aim comes in, to half their size at full aim (`GunArmsLayer.AIMED_SIZE`). The hand still holds the grip and the arm still runs toward its shoulder; the fist now sits at the bottom of the gun, below its sights. A gun without sights (the Thresher, the Seam Cutter), which stays at the hip, keeps its arms as they are.
+- **A fitted stock** is left out of the player's own view once they are halfway into aiming (`GunRenderer.SHOULDERED`). Aimed, a stock is set against the shoulder, under and behind the eye. The guns' own stocks stay, and a stock that replaces one of a gun's own parts leaves that part out still.
+
+**Unchanged:** the view from the hip, the guns' models, animations and sights, their eye relief, the view from outside and what other players see, and everything on the server.
+
+**Server authority:** none involved; it changes only how the player's own client draws their gun.
+
+**Save compatibility:** nothing saved and no ids.
+
+**Known limits:**
+- **The change is seen during the aim:** the arms shrink over the aim's ease (four ticks, a fifth of a second), and a fitted stock disappears halfway through it and comes back halfway out.
+- **Half size** was chosen from previews, not play. At the hip the arms stay the player model's own size, so they are drawn at two sizes.
+- **One aimed screenshot not explained:** in the first CI run, the Riveter SMG with its second set of attachments showed both arms out of place aimed ("Slice 9F in CI" below). Its other aimed shots and every other gun's did not.
 - **Not played:** none of it has been played yet.
 
 ## Connections
@@ -2240,6 +2269,31 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - **Screenshots:**
     - Held, the Laser Sight stands on each gun's top as a dark housing with its red front and blue light. The Tactical Grip is under the fore-end, behind the left hand.
     - Aimed, the eye looks along the laser's left side. Its housing fills the view just right of the crosshair and hides part of the husk (the known limit above).
+- **Slice 9F, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS (nothing in it changed).
+  - `python3 tools/check_mod_data.py`: PASS (1930 material IDs).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews** (first person, approximating the game's hands), set beside the CI screenshots of run 38036998697, which the full-size arms reproduced:
+    - every gun with sights aimed, its arms at full size and at half size, and four of them at three fifths;
+    - on four guns, the right arm left out instead, which showed the left arm as large;
+    - on three guns, the arms pointed instead at a body's shoulders, at where the shoulders were at the hip, and straight down, all of which left the fist as large;
+    - on three guns, 4, 8 and 12 pixels more eye relief;
+    - the three stocks on each of the 22 guns that take them, aimed, drawn and left out;
+    - the ease at 0, ¼, ½, ¾ and full aim;
+    - the aimed shots of the Longhorn Rifle, Drover Rifle, Highwayman and Sledge, whose hands work a lever, a bolt and a pump.
+- **Slice 9F game tests (written; they run in CI):** `GunsClientGameTests`:
+  - each gun's arms are drawn at their full size held and at half size aimed, the Thresher's and the Seam Cutter's at full size both ways;
+  - with each set of attachments that has a stock, the stock is drawn held and left out aimed (counted frames; logged).
+- **Slice 9F in CI** ([run 38040183992](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38040183992), on 030e8230a): every check passed.
+  - **Server game tests** (`mod`, `optional integrations absent`): 1199 passed, as before; the slice adds none.
+  - **`GunsClientGameTests`**, the one client class the job ran (the only one this slice changes):
+    - The 34 guns with sights drew their arms at size 1 held and 0.5 aimed; the Thresher and the Seam Cutter, which have none, at 1 both ways.
+    - The 66 sets of attachments with a stock, on the 22 guns that take one: each stock was drawn in every frame held (left out in none) and left out in 37 to 44 frames aimed.
+  - **Screenshots** (each gun's own aimed shot and all 115 aimed shots with attachments):
+    - Aimed, each gun's back sits on the crosshair with its fist small below it, and no stock comes up under the eye. On the Linesman, the arm that filled the lower left of the view in slice 9E's run no longer shows.
+    - The Stoker's and the Trench Lobber's own bodies still fill the lower middle aimed, as they did in slice 9E's run: they are the guns' parts, not the arms.
+    - **Not explained:** the Riveter SMG with its second set (Extended Barrel, Speed Magazine, Weighted Stock), aimed (`0208_jugcraft_guns_riveter_smg_fitted_2_aimed`), shows both arms in a pose its other aimed shots do not: the right arm lies across the lower right of the view and the left arm stands beside the gun. The gun itself is where it is in the others, and its stock was left out (40 frames). In slice 9E's run the stock covered that part of the view. In the previews at half size, no frame of the Riveter's animations (idle, draw, shoot, aimed shot, reload, inspect), nor its model with none, puts the arms there with the gun at rest. The nearest are the inspect's arms about a second in, where the gun is turned. The test neither inspects nor reloads there.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -2250,8 +2304,8 @@ Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns 
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
-- **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; the aiming polish (below); a rack that charges several Energy Cells at once. The owner chose the first two on 10 October 2026, with the tactical grip and the laser sight (slice 9E).
-- **Aimed, the gun hand covers the sights:** in the CI screenshots of 8 October, the right fist sits over the lower middle of the screen when aiming, on the one-handed guns and some long ones. The arm runs back toward the camera from the grip drawn at the middle of the view. This is a polish item for a pull request of its own. So is a fitted stock that comes up under the eye when aiming (the Weighted Stock on the Riveter SMG and the Garrison Rifle, the Light and Weighted Stocks on the Sledge and the Highwayman).
+- **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; a rack that charges several Energy Cells at once. The owner chose the first on 10 October 2026, with the tactical grip and the laser sight (slice 9E) and the aiming polish (slice 9F).
+- **Aimed, the gun hand covered the sights** in the CI screenshots from 8 October, and a fitted stock came up under the eye: slice 9F draws the arms at half size aimed and leaves a fitted stock out ([above](#slice-9f-the-aiming-polish)).
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - off-hand guns;
