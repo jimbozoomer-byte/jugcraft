@@ -66,15 +66,17 @@ def body():
     m += cyl("z", 0, 1, 9, 12, 20, HIDE)
     m += cyl("z", 0, 0.5, 7.2, 20, 23.5, HIDE)
     m += cyl("z", 0, -1, 5, 23.5, 25.5, SHADE)
-    m += cyl("z", 0, 1, 8, -20, -14, HIDE)
-    m += cyl("z", 0, 0.5, 6.2, -24, -20, HIDE)
-    m += cyl("z", 0, -0.5, 4, -26.5, -24, SHADE)
-    m += cyl("z", 0, -3.5, 7.4, -12, 10, SHADE)
-    m.append(box((-6, 7.2, -24), (6, 10, -12), HIDE, ("x", -22.5, [0, 10, -12])))
+    # The rump: the barrel carried back, then rounds that shrink and drop toward the dock.
+    m += cyl("z", 0, 0.5, 8, -20, -14, HIDE)
+    m += cyl("z", 0, 0, 7, -23, -20, HIDE)
+    m += cyl("z", 0, -1, 5.5, -25, -23, HIDE)
+    m += cyl("z", 0, -2, 3.5, -26.5, -25, SHADE)
+    m += cyl("z", 0, -3.2, 7, -10, 8, SHADE)
     m.append(box((-4.5, 8.5, 5), (4.5, 12, 13), HIDE, ("x", -22.5, [0, 12, 13])))
-    for x in (-9.3, 8.2):
-        m.append(box((x, -5, 9), (x + 1.1, 6, 19), HIDE, ("x", -22.5, [x, 6, 19])))
-        m.append(box((x, -4, -21), (x + 1.1, 7, -9), HIDE, ("x", 22.5, [x, 7, -9])))
+    # Round shoulder and haunch muscles standing proud of the barrel on each side.
+    for x0, x1 in ((-9.6, -8.4), (8.4, 9.6)):
+        m += cyl("x", 1, 13, 5.5, x0, x1, HIDE)
+        m += cyl("x", 1.5, -16, 6, x0, x1, HIDE)
     m.append(box((-3.5, 11.9, 6), (3.5, 12.3, 12), BLAZE, ("x", -22.5, [0, 12, 13])))
     return m
 
