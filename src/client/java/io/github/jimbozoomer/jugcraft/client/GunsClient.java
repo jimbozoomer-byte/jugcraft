@@ -8,6 +8,8 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.guns.GunAnimations;
 import io.github.jimbozoomer.jugcraft.client.guns.GunCasingParticle;
 import io.github.jimbozoomer.jugcraft.client.guns.GunEffects;
+import io.github.jimbozoomer.jugcraft.client.guns.GunLaser;
+import io.github.jimbozoomer.jugcraft.client.guns.GunLaserParticle;
 import io.github.jimbozoomer.jugcraft.client.guns.GunRenderer;
 import io.github.jimbozoomer.jugcraft.client.guns.GunScope;
 import io.github.jimbozoomer.jugcraft.client.guns.GunView;
@@ -113,6 +115,8 @@ public final class GunsClient {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, Jugcraft.id("gun_ammo"), GunsClient::hud);
 		GunScope.register();
 		JugcraftGuns.CASINGS.values().forEach(casing -> ParticleProviderRegistry.getInstance().register(casing, GunCasingParticle::provider));
+		ParticleProviderRegistry.getInstance().register(JugcraftGuns.LASER_DOT, GunLaserParticle::provider);
+		ClientTickEvents.END_CLIENT_TICK.register(GunLaser::tick);
 	}
 
 	/** The reload key (for the client game tests). */

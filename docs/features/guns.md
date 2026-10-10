@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D) and the tactical grip and laser sight (slice 9E)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -17,6 +17,7 @@ Status:
 - **Slice 9B** (the automatic weapons: the Rattler Pistol, Bronco SMG and Squall Rifle; [below](#slice-9b-the-automatic-weapons)): implemented on `claude/guns-automatic` (#286), stacked on slice 9A, awaiting review.
 - **Slice 9C** (the second energy weapons: the Spikedriver, Seam Cutter and Caisson Pistol; [below](#slice-9c-the-second-energy-weapons)): implemented on `claude/guns-energy-2` (#287), stacked on slice 9B, awaiting review.
 - **Slice 9D** (the pump shotguns: the Sledge, Highwayman and Throttle; [below](#slice-9d-the-pump-shotguns)): implemented on `claude/guns-pump` (#289), stacked on slice 9C, awaiting review.
+- **Slice 9E** (the Tactical Grip and the Laser Sight; [below](#slice-9e-the-tactical-grip-and-the-laser-sight)): implemented on `claude/guns-tactical`, stacked on slice 9D, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -29,7 +30,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the scopes: on 8 October 2026, with the reticles and lens rims uploaded ("heres reticles and vignette"), asked what the scopes should use, they answered that they made those files and to use them (see [Dependencies and assets](#dependencies-and-assets)); and asked what next ("What next?"), they chose all four further gun sets offered, each its own slice.
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
-- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D.
+- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, and the first follow-up, the tactical grip and the laser sight, slice 9E.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -988,6 +989,40 @@ Each fires Buckshot Shells (slice 1). The reload times are the owner's animation
 - **The tactical grip parts** the Killer 23 and the Turnpike carry (`tact_grip`) wait for the tactical grip attachment, a later pull request.
 - **Not played:** none of it has been played yet. The spreads and the Sledge's damage want play to set.
 
+## Slice 9E: the tactical grip and the laser sight
+The first of the smaller follow-ups the owner chose on 10 October 2026 ("Tactical grip + laser"): two attachments from the owner's art.
+
+| | Tactical Grip | Laser Sight |
+|---|---|---|
+| The owner's art | the tactical grip parts (`tact_grip`) ten of these guns carry; the Vertical Grip's item model | the laser sight: its item model, line of sight and textures, its short beam included |
+| Slot | under the barrel, as the other grips and the bayonets | the scopes' slot |
+| What it does | 90% of the spread from the hip, 80% of the kick | 70% of the spread from the hip; a red dot where the gun points; aimed, the view narrowed to 0.9 and its dot on the middle of the screen |
+| Fits | the Drover Rifle, Coach Gun, Garrison Rifle, Breacher, Picket, Ranger and Kestrel Rifles, Squall Rifle, Sledge and Highwayman | the twelve guns that take the scopes, but for the Breacher and the Trench Lobber |
+| Crafting | an iron ingot over leather | an iron ingot, a redstone torch (its emitter) and an amethyst shard (its lens) |
+
+**The Tactical Grip:** the owner made a `tact_grip` part for ten of these guns, a stubby vertical grip under the fore-end in each gun's own colours (the Drover Rifle's and the Coach Gun's on the shared grips texture). The library has no item model for it on its own. The Drover Rifle's is the Vertical Grip's grip, collar and end cap without its rail clamp, the same pieces of the same texture, so the attachment's item is the owner's Vertical Grip model with only those three pieces (`"model_elements"`). It sits between the Light Grip (80% of the spread from the hip) and the Vertical Grip (65% of the kick), doing a little of each.
+
+**The Laser Sight:**
+- **On the gun:** it stands where the iron sights were, as the scopes do: a dark housing a pixel right of the gun's middle, a blue light at its back, and the owner's short red beam out of its front (the elements on its `laser` texture, a second texture its item model draws on: `"more_textures"`).
+- **Aimed:** the eye looks along its left side, on the owner's line of sight (its `.scmeta`), and its dot shows on the middle of the screen as the Reflex Sight's does.
+- **The dot:** while a gun with a Laser Sight is held, at the hip or aimed, the client draws a red dot each tick where the look first meets a block or a creature within the gun's range (`client/guns/GunLaser`). That is where an unstrayed shot lands, since every shot leaves the eye along the look. Other players see it too, from any player within 64 blocks.
+- **How the dot is drawn:** it is the owner's red dot (the Reflex Sight's), a particle at full brightness that lasts two ticks, so it follows the aim without a trail. It grows with distance, to stay a few pixels across on the screen, and shows whatever the particle setting.
+
+**Not on the Breacher or the Trench Lobber:** the pieces of a scope's texture that its faces use are packed into the spare room of each gun's atlas. The Breacher's atlas, holding three scopes' pieces already, has no room left for the Laser Sight's. Nor has the Trench Lobber's, and its grenades arc below a straight laser anyway. The laser's pieces are packed after the scopes', so adding it moved none of the pieces already placed: every gun's model keeps every bone it had, and the new pieces are in free room.
+
+**Server authority:** the attachments change only the numbers the server already reads from the gun's own stack (`GunItem.spec`) and the kick. The dot is drawn on the client only and changes nothing.
+
+**Connections:** iron, leather, a redstone torch and an amethyst shard; the guns that take them run from the iron tier to the steel tier.
+
+**Balance:** starting numbers. The Laser Sight's 70% is the most any attachment narrows the spread from the hip (the Light Grip's is 80%), and it does nothing aimed, where the scopes help.
+
+**Save compatibility:** new items `jugcraft:tactical_grip` and `laser_sight`, and the particle `jugcraft:laser_dot`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The dot is a particle:** it can trail the aim by up to a tick, and it glows at full brightness in the dark.
+- **No beam through the air:** the owner's short beam shows on the gun; nothing is drawn between it and the dot.
+- **Not played:** none of it has been played yet.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -1053,7 +1088,7 @@ Each fires Buckshot Shells (slice 1). The reload times are the owner's animation
   - GeckoLib owns everything a gun does: the gun's parts and, in first person, the arms that hold it.
   - In third person (slice 6), `GunPose` raises the arms through the same two hooks that pose ArmsMotion's: `ArmsRenderStateMixin` and `ArmsHumanoidModelMixin`.
   - The off hand plays no part: guns fire from the main hand only.
-- **Particles:** the casings are registered as the Fog Machine's fog is (`FabricParticleTypes.simple()`, a provider on the client).
+- **Particles:** the casings are registered as the Fog Machine's fog is (`FabricParticleTypes.simple()`, a provider on the client), and so is the Laser Sight's dot (slice 9E), which shows whatever the particle setting (`simple(true)`).
 
 ## How the owner's models became GeckoLib models
 The owner supplied each gun's parts as Blockbench Java item models (`Guns/models/special/<gun>/<part>.json`) and Bedrock animations made for GeckoLib models that were not in the upload. `tools/guns.py`:
@@ -1732,6 +1767,51 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
 | scope_vignette_circle | `Guns/effect/scope_vignette_circle.png` | `87e34da0197d0647` |
 | red_dot_reticle | `Guns/effect/red_dot_reticle.png` | `8ebc215134886a8f` |
 
+Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures merged into their atlases; the Tactical Grip's item model (the Vertical Grip's, three of its pieces); the Laser Sight's item model, line of sight and textures (copied to `textures/item/guns/attachments/laser_sight.png` and `laser_beam.png`); and the laser's dot (copied to `textures/particle/laser_dot.png`):
+
+| Gun or attachment | Library file | SHA-256 (first 16) |
+|---|---|---|
+| riveter_smg | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| riveter_smg | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| longhorn_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| longhorn_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| drover_rifle | `Guns/models/special/winnie/tact_grip.json` | `2f9009485f2da067` |
+| drover_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| drover_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| coach_gun | `Guns/models/special/callwell/tact_grip.json` | `ffe6dbf7c158aee8` |
+| bulldog_pistol | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| bulldog_pistol | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| garrison_rifle | `Guns/models/special/stigg/tact_grip.json` | `952c182314f713c3` |
+| garrison_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| garrison_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| breacher | `Guns/models/special/combat_shotgun/tact_grip.json` | `204b2902815848f7` |
+| stormlock_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| stormlock_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| linesman | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| linesman | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| picket_rifle | `Guns/models/special/m3_marksman/tact_grip.json` | `d6df0ef5e64587d3` |
+| ranger_rifle | `Guns/models/special/mk43_rifle/tact_grip.json` | `0f7a7b95848ac428` |
+| kestrel_rifle | `Guns/models/special/whistler/tact_grip.json` | `fc22f38e2c00920e` |
+| kestrel_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| kestrel_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| rattler_pistol | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| rattler_pistol | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| squall_rifle | `Guns/models/special/gale/tact_grip.json` | `bae35e1c5165671e` |
+| squall_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| squall_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| sledge | `Guns/models/special/killer_23/tact_grip.json` | `26b9feb1a4af5396` |
+| highwayman | `Guns/models/special/turnpike/tact_grip.json` | `f70142850dae3798` |
+| highwayman | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| highwayman | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| throttle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| throttle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| tactical_grip | `Guns/models/item/vertical_grip.json` | `31667ebc84eaa55d` |
+| laser_sight | `Guns/models/item/laser_sight.json` | `f35a59647a131853` |
+| laser_sight | `Guns/models/item/laser_sight.scmeta` | `bbd4957a6b334df6` |
+| laser_sight | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| laser_beam | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| laser_dot | `Guns/effect/red_dot_reticle.png` | `8ebc215134886a8f` |
+
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
   - `red_dot_reticle.png`'s editing history shows it saved inside a Just Enough Guns mod source folder in February 2024;
@@ -1739,7 +1819,7 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
 
   Shown this and asked what the scopes should use, the owner answered that they made these files and to use them. Asked the same day whether the "Big Cannons and Mounted Guns" folder is theirs (slice 6's flash frames come from it, and it holds a `wariumlogo.png`), they confirmed it is. The [library README](../../art/owner-library/README.md#effect-textures-8-october-2026) records both.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
-- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's shell, the Longhorn's cartridge, the muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
+- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, the muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
 
 ## Verification
 - **Run locally (7 October 2026):**
@@ -2134,17 +2214,32 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - Mid-reload, the Sledge's left hand and sleeve fill the left half of the view across the crosshair as it pushes a shell in (the known limit above); the Highwayman's left hand comes in large at the right; the Throttle is tipped up to the right.
     - Fitted, the counters read 1 / 4, 1 / 7 and 1 / 6. Aimed with the Light or the Weighted Stock, the Sledge's and the Highwayman's stocks come up under the eye as a dark block across the bottom of the view, as the Weighted Stock does on the Riveter SMG and the Garrison Rifle (run 38034553601): an item for the aiming polish pull request.
     - Seen from outside, each is raised along the look, and its flash shows at the muzzle when it fires.
+- **Slice 9E, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the ten guns' tactical grip parts and of the twelve guns' Laser Sights re-bakes to the owner's; every bone the guns had is as it was (the laser's pieces are packed after the scopes'); the dot's texture is the owner's red dot unchanged.
+  - `python3 tools/generate_material_data.py`: wrote the two attachments' items, item models, recipes and names, and the dot's particle.
+  - `python3 tools/check_mod_data.py`: PASS (1930 material IDs), with `check_guns` (the attachments' numbers, the guns that take them, and the Laser Sight's zoom and dot in Java).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews:** each tactical grip on its gun from the side; the Laser Sight on the guns from the side and in first person, held and aimed; the Breacher's atlas with and without the beam, and the room left in it.
+- **Slice 9E game tests (written; they run in CI):**
+  - `TacticalAttachmentsGameTests`:
+    - `tacticalAttachmentsFitTheirGuns`: both recipes load; the Tactical Grip fits the ten guns with the owner's tactical grip parts and no other, the Laser Sight every gun that takes the scopes but the Breacher and the Trench Lobber.
+    - `tacticalAttachmentsSteadyTheGun`: on a Kestrel Rifle the Tactical Grip leaves 90% of the spread from the hip and 80% of the kick, and the Laser Sight beside it 70% of that spread again, the aimed spread as it was; a Long Scope takes the Laser Sight's place, leaving it in the grid; the Breacher takes no Laser Sight, nor the Patchwork Carbine a Tactical Grip.
+  - "Every gun registered" now counts twenty attachments.
+  - `GunsClientGameTests`:
+    - a fourth set of attachments, the Tactical Grip and the Laser Sight, on each gun that takes either, held and aimed (screenshots `jugcraft_guns_<gun>_fitted_4*`); a set a gun takes none of is skipped;
+    - the Laser Sight on the Longhorn Rifle: held, it draws its dots, the last where the gun points (logged, with its distance from the eye); aimed, the view narrows to 0.9 and its dot shows on the middle of the screen (screenshots `jugcraft_guns_laser_sight*`).
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
-- **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; the tactical grip and the laser sight; the aiming polish (below); a rack that charges several Energy Cells at once. The owner chose the first three on 10 October 2026.
+- **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; the aiming polish (below); a rack that charges several Energy Cells at once. The owner chose the first two on 10 October 2026, with the tactical grip and the laser sight (slice 9E).
 - **Aimed, the gun hand covers the sights:** in the CI screenshots of 8 October, the right fist sits over the lower middle of the screen when aiming, on the one-handed guns and some long ones. The arm runs back toward the camera from the grip drawn at the middle of the view. This is a polish item for a pull request of its own. So is a fitted stock that comes up under the eye when aiming (the Weighted Stock on the Riveter SMG and the Garrison Rifle, the Light and Weighted Stocks on the Sledge and the Highwayman).
 - **Not yet:**
   - the jam the Gnat's sound suggests;

@@ -1336,6 +1336,26 @@ ATTACHMENTS = {
         "zoom": 0.85, "view": {"dot": "red_dot_reticle"},
         "tooltip": "A glass window with a red dot on it: quick to aim through, no magnification to speak of.",
     },
+    # Slice 9E: the owner's tactical grips (their "tact_grip" parts) and laser sight. The Tactical Grip's item is the
+    # owner's Vertical Grip model with only the three pieces the tactical grip parts share with it ("model_elements":
+    # the grip, its collar and its end cap, without the rail clamp). The Laser Sight stands on the gun as a scope does,
+    # with the owner's short beam out of its front; held, it marks where the gun points with a red dot
+    # (client/guns/GunLaser), and aimed, its dot is on the middle of the screen as the Reflex Sight's. "not_on": the
+    # guns that do not take it although they take scopes. The Breacher's atlas, holding three scopes' pieces, has no
+    # room left for its pieces. The Trench Lobber's has none either, and its grenades arc below a straight laser.
+    "tactical_grip": {
+        "display": "Tactical Grip", "slot": "grip", "parts": ["tact_grip"], "replaces": False,
+        "effects": {"hip_spread": 0.9, "kick": 0.8}, "model": "vertical_grip", "model_elements": [1, 3, 4],
+        "texture": "grips",
+        "tooltip": "A stubby grip under the fore-end: a little steadier from the hip, and a little less kick.",
+    },
+    "laser_sight": {
+        "display": "Laser Sight", "slot": "optic", "mount": True, "parts": [], "replaces": True,
+        "effects": {"hip_spread": 0.7}, "model": "laser_sight", "texture": "laser_sight",
+        "more_textures": {"scguns:item/laser": "laser_beam"}, "not_on": ["breacher", "trench_lobber"],
+        "zoom": 0.9, "view": {"dot": "red_dot_reticle"},
+        "tooltip": "A laser on the gun's top: a red dot marks where it points, so it is much steadier from the hip.",
+    },
 }
 # The order the effects are listed in (and GunAttachment's fields).
 EFFECTS = ("damage", "range", "hip_spread", "aim_spread", "capacity", "reload", "kick", "volume")
@@ -1353,7 +1373,7 @@ ATTACHMENT_TEXTURES = {
     "weighted_stock": "greaser_smg_stocks", "wooden_stock": "musket_stocks", "grips": "carabine_grips",
     "iron_bayonet": "iron_bayonet", "steel_bayonet": "anthralite_bayonet", "diamond_bayonet": "diamond_bayonet",
     "netherite_bayonet": "netherite_bayonet", "long_scope": "long_scope_texture", "medium_scope": "medium_scope",
-    "reflex_sight": "relex_sight",
+    "reflex_sight": "relex_sight", "laser_sight": "laser_sight", "laser_beam": "laser",
 }
 # Attachment recipes, from the same early metal and wood as the guns.
 ATTACHMENT_RECIPES = {
@@ -1377,6 +1397,10 @@ ATTACHMENT_RECIPES = {
     "long_scope": (["BSB"], {"B": "#c:ingots/brass", "S": "minecraft:spyglass"}),
     "medium_scope": (["BGB"], {"B": "#c:ingots/brass", "G": "minecraft:glass_pane"}),
     "reflex_sight": (["G", "R", "N"], {"G": "minecraft:glass_pane", "R": "minecraft:redstone", "N": "minecraft:iron_nugget"}),
+    # Slice 9E: a stubby iron grip wrapped in leather; an iron housing, a redstone torch for the emitter and an
+    # amethyst shard for its lens.
+    "tactical_grip": (["I", "L"], {"I": "minecraft:iron_ingot", "L": "minecraft:leather"}),
+    "laser_sight": (["ITM"], {"I": "minecraft:iron_ingot", "T": "minecraft:redstone_torch", "M": "minecraft:amethyst_shard"}),
 }
 # The Netherite Bayonet is a Diamond Bayonet upgraded at a smithing table, as netherite tools are.
 NETHERITE_UPGRADES = {"netherite_bayonet": "diamond_bayonet"}
@@ -1388,7 +1412,7 @@ def attachment_part(gun, kind):
     first of its "parts" the gun has, if every face draws on a texture in the library (the gun's own or, since slice 7,
     one the owner shares between guns, merged into the gun's atlas by atlas_layout())."""
     if ATTACHMENTS[kind].get("mount"):
-        return f"%{kind}" if takes_optics(gun) else None
+        return f"%{kind}" if takes_optics(gun) and gun not in ATTACHMENTS[kind].get("not_on", ()) else None
     for name in ATTACHMENTS[kind]["parts"]:
         if (LIBRARY / "models" / "special" / GUNS[gun]["source"] / f"{name}.json").exists():
             faces = [face for element in load_part(gun, name).get("elements", []) for face in element.get("faces", {}).values()]
@@ -1545,14 +1569,19 @@ def effective_bones(gun):
 
 
 def attachment_model(kind):
-    """The owner's item model for the attachment, its textures renamed to the Jugcraft copies: its own, and a scope's
-    reticle and lens vignette (OPTIC_TEXTURES)."""
-    model = json.loads((LIBRARY / "models" / "item" / f"{ATTACHMENTS[kind]['model']}.json").read_text())
-    texture = f"{MOD}:item/guns/attachments/{ATTACHMENTS[kind]['texture']}"
+    """The owner's item model for the attachment, its textures renamed to the Jugcraft copies: its own, a scope's
+    reticle and lens vignette (OPTIC_TEXTURES), and any second texture of its own ("more_textures": the Laser Sight's
+    beam). "model_elements" keeps only those of the model's elements (the Tactical Grip's, of the Vertical Grip's)."""
+    att = ATTACHMENTS[kind]
+    model = json.loads((LIBRARY / "models" / "item" / f"{att['model']}.json").read_text())
+    texture = f"{MOD}:item/guns/attachments/{att['texture']}"
     effect = "scguns:effect/"
+    more = {value: f"{MOD}:item/guns/attachments/{name}" for value, name in att.get("more_textures", {}).items()}
     model["textures"] = {key: f"{MOD}:item/guns/optics/{value.removeprefix(effect)}"
-                         if value.startswith(effect) and key != "particle" else texture
+                         if value.startswith(effect) and key != "particle" else more.get(value, texture)
                          for key, value in model["textures"].items()}
+    if "model_elements" in att:
+        model["elements"] = [model["elements"][i] for i in att["model_elements"]]
     return model
 
 
@@ -1600,6 +1629,9 @@ def tilt(gun):
 # (Guns/item/<file>.png) is copied to textures/particle/<round>_casing.png for the particle jugcraft:<round>_casing
 # (JugcraftGuns.CASINGS). A paper cartridge leaves no case: its cue puffs smoke from the lock instead.
 CASINGS = {"light_round": "small_copper_casing", "rifle_round": "large_brass_casing", "buckshot_shell": "shotgun_shell"}
+# The Laser Sight's dot (slice 9E), the particle jugcraft:laser_dot (JugcraftGuns.LASER_DOT, client/guns/GunLaser): the
+# owner's red dot (Guns/effect/red_dot_reticle.png, the Reflex Sight's), copied to textures/particle/laser_dot.png.
+LASER_DOT = "red_dot_reticle"
 # The animations' particle cues: GunAnimations ejects a casing at EJECT_CUE; the others mark points in a reload that
 # the server's timing already covers, and show nothing.
 EJECT_CUE = "eject_casing"
@@ -1863,6 +1895,7 @@ def write_all(write, assets, data, lang, condition):
     # The spent casings' particles (JugcraftGuns.CASINGS); their textures are the owner's, copied by write_files().
     for ammo in CASINGS:
         write(assets / "particles" / f"{ammo}_casing.json", {"textures": [f"{MOD}:{ammo}_casing"]})
+    write(assets / "particles" / "laser_dot.json", {"textures": [f"{MOD}:laser_dot"]})
     lang[f"key.{MOD}.reload"] = "Reload gun"
     lang[f"key.{MOD}.inspect"] = "Inspect gun"
     lang[f"tooltip.{MOD}.guns.ammo"] = "Loaded: %s / %s"
@@ -2009,15 +2042,23 @@ def atlas_layout(gun):
             place.update(taken)
             break
         side *= 2
-    while islands:
-        try:
-            place.update(pack_islands(gun, side, place, used, islands, sizes))
-            break
-        except ValueError:
-            if side >= 128:
-                raise
-            side *= 2  # what is placed stays where it is in the bigger atlas
+    # The Laser Sight's textures (slice 9E) are packed after the rest, so that adding it moved none of the pieces the
+    # scopes before it had placed.
+    for group in ({t: r for t, r in islands.items() if t not in PACK_LATER},
+                  {t: r for t, r in islands.items() if t in PACK_LATER}):
+        while group:
+            try:
+                place.update(pack_islands(gun, side, place, used, group, sizes))
+                break
+            except ValueError:
+                if side >= 128:
+                    raise
+                side *= 2  # what is placed stays where it is in the bigger atlas
     return (side, side) if len(place) > 1 else (ow, oh), place
+
+
+# Scope textures packed piece by piece after all the others (atlas_layout()).
+PACK_LATER = {"scguns:item/laser_sight", "scguns:item/laser"}
 
 
 def texture_size(texture):
@@ -2057,13 +2098,20 @@ def scope_islands(gun):
 
 
 def pack_islands(gun, side, place, used, islands, sizes):
-    """Packs each scope texture's rects into the side x side atlas where nothing is (the own texture's footprint and
-    the whole textures placed), a pixel apart, largest first; returns their placements (atlas_layout())."""
+    """Packs each scope texture's rects into the side x side atlas where nothing is (the own texture's footprint, the
+    whole textures placed and the pieces packed before, each with the pixel round it), a pixel apart, largest first;
+    returns their placements (atlas_layout())."""
     import numpy as np
     free = np.ones((side, side), bool)
     free[:used.shape[0], :used.shape[1]] &= ~used
-    for texture, (x, y, w, h) in place.items():
-        if texture != own_texture(gun):
+    for texture, placement in place.items():
+        if texture == own_texture(gun):
+            continue
+        if isinstance(placement, dict):
+            for (x0, y0, x1, y1), (px, py, _, _) in placement.items():
+                free[max(py + y0 - 1, 0):py + y1 + 1, max(px + x0 - 1, 0):px + x1 + 1] = False
+        else:
+            x, y, w, h = placement
             free[y:y + h, x:x + w] = False
     out = {}
     order = sorted(((t, r) for t, rects in islands.items() for r in rects),
@@ -2613,9 +2661,13 @@ def check():
         effect = "scguns:effect/"
         own = {v for k, v in source["textures"].items() if k != "particle" and not v.startswith(effect)}
         lenses = {v.removeprefix(effect) for v in source["textures"].values() if v.startswith(effect)}
-        if len(own) != 1 or (lenses and not att.get("mount")) or not lenses <= set(OPTIC_TEXTURES):
+        more = att.get("more_textures", {})
+        if len(own - set(more)) != 1 or not set(more) <= own or not set(more.values()) <= set(ATTACHMENT_TEXTURES) \
+                or (lenses and not att.get("mount")) or not lenses <= set(OPTIC_TEXTURES):
             problems.append(f"attachment {kind}: the owner's model {att['model']} draws on more than its own texture "
-                            "(and a scope's lens textures)")
+                            "(and a scope's lens textures, and those named in its more_textures)")
+        if not all(0 <= i < len(source["elements"]) for i in att.get("model_elements", [])):
+            problems.append(f"attachment {kind}: its model_elements are not among {att['model']}'s elements")
         if att.get("mount"):
             view = att["view"]
             if not 0.1 <= att["zoom"] <= 1.0 or att["slot"] != "optic" or not set(view.values()) <= set(OPTIC_TEXTURES) \
@@ -2671,6 +2723,9 @@ def check():
         target = ASSETS / "textures" / "particle" / f"{ammo}_casing.png"
         if not target.exists() or target.read_bytes() != (LIBRARY / "item" / f"{casing}.png").read_bytes():
             problems.append(f"casing {ammo}: {target.relative_to(ROOT)} is not the library's {casing}.png unchanged")
+    target = ASSETS / "textures" / "particle" / "laser_dot.png"
+    if not target.exists() or target.read_bytes() != (LIBRARY / "effect" / f"{LASER_DOT}.png").read_bytes():
+        problems.append(f"the laser dot: {target.relative_to(ROOT)} is not the library's {LASER_DOT}.png unchanged")
     for n, frame in enumerate(FLASH_FRAMES):
         target = ASSETS / "textures" / "item" / "guns" / "flash" / f"flash_{n}.png"
         if not target.exists() or target.read_bytes() != (FLASH_SOURCE / f"{frame}.png").read_bytes():
@@ -2833,6 +2888,7 @@ def write_files():
         target = ASSETS / "textures" / "particle" / f"{ammo}_casing.png"
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(LIBRARY / "item" / f"{casing}.png", target)
+    shutil.copyfile(LIBRARY / "effect" / f"{LASER_DOT}.png", ASSETS / "textures" / "particle" / "laser_dot.png")
     for n, frame in enumerate(FLASH_FRAMES):
         target = ASSETS / "textures" / "item" / "guns" / "flash" / f"flash_{n}.png"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -2870,6 +2926,7 @@ def provenance():
     rows += [(name, f"item/{source}.png") for name, source in ATTACHMENT_TEXTURES.items()]
     rows += [(name, f"effect/{name}.png") for name in OPTIC_TEXTURES]
     rows += [(f"{ammo}_casing", f"item/{casing}.png") for ammo, casing in CASINGS.items()]
+    rows.append(("laser_dot", f"effect/{LASER_DOT}.png"))
     rows += [(name, f"item/{source}.png") for name, source in CELL_ART.items()]
     rows = [(owner, LIBRARY / path) for owner, path in rows]
     rows += [(f"flash_{n}", FLASH_SOURCE / f"{frame}.png") for n, frame in enumerate(FLASH_FRAMES)]

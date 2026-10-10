@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.GunsClient;
 import io.github.jimbozoomer.jugcraft.client.guns.GunEffects;
+import io.github.jimbozoomer.jugcraft.client.guns.GunLaser;
 import io.github.jimbozoomer.jugcraft.client.guns.GunPose;
 import io.github.jimbozoomer.jugcraft.client.guns.GunScope;
 import io.github.jimbozoomer.jugcraft.client.guns.GunView;
@@ -206,13 +207,17 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_guns_thunderpipe_shell");
 			context.waitTicks(40);
 
-			// Attachments: each gun that takes any, with one of each slot it has from two sets, held and aimed.
+			// Attachments: each gun that takes any, with one of each slot it has from each set it takes any of, held and
+			// aimed. The fourth set is slice 9E's Tactical Grip and Laser Sight.
 			List<List<String>> sets = List.of(List.of("silencer", "extended_magazine", "light_stock", "light_grip"),
 					List.of("extended_barrel", "speed_magazine", "weighted_stock", "vertical_grip"),
-					List.of("muzzle_brake", "wooden_stock", "iron_bayonet"));
+					List.of("muzzle_brake", "wooden_stock", "iron_bayonet"), List.of("tactical_grip", "laser_sight"));
 			for (String gun : JugcraftGuns.ACCEPTS.keySet()) {
 				for (int set = 0; set < sets.size(); set++) {
 					List<String> fitted = sets.get(set).stream().filter(JugcraftGuns.ACCEPTS.get(gun)::contains).toList();
+					if (fitted.isEmpty()) {
+						continue;
+					}
 					server.runCommand("item replace entity @p weapon.mainhand with jugcraft:%s[jugcraft:loaded_rounds=1,jugcraft:attachments=%s]"
 							.formatted(gun, snbt(fitted)));
 					context.waitTicks(20);
@@ -250,14 +255,27 @@ public class GunsClientGameTests implements FabricClientGameTest {
 
 			// Slice 7, the scopes, each on the Longhorn Rifle aimed at the husk: through the Long and Medium Scopes the view
 			// through the scope fills the screen and the view narrows by the scope's zoom; the Reflex Sight keeps the gun in
-			// view and shows its dot. Through the Long Scope the mouse turns the player more slowly.
-			Map<String, Float> zooms = Map.of("long_scope", 0.3F, "medium_scope", 0.5F, "reflex_sight", 0.85F);
-			for (String scope : List.of("long_scope", "medium_scope", "reflex_sight")) {
+			// view and shows its dot. Through the Long Scope the mouse turns the player more slowly. Slice 9E's Laser Sight
+			// shows its dot aimed as the Reflex Sight does, and held, draws its red dot where the gun points.
+			Map<String, Float> zooms = Map.of("long_scope", 0.3F, "medium_scope", 0.5F, "reflex_sight", 0.85F, "laser_sight", 0.9F);
+			for (String scope : List.of("long_scope", "medium_scope", "reflex_sight", "laser_sight")) {
 				server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
+				long lasered = context.computeOnClient(client -> GunLaser.dots());
 				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:longhorn_rifle[jugcraft:loaded_rounds=1,jugcraft:attachments=%s]"
 						.formatted(snbt(List.of(scope))));
 				context.waitTicks(20);
 				context.takeScreenshot("jugcraft_guns_" + scope);
+				long laserDots = context.computeOnClient(client -> GunLaser.dots()) - lasered;
+				if (scope.equals("laser_sight")) {
+					double toDot = context.computeOnClient(client -> GunLaser.lastOwn() == null ? -1.0
+							: GunLaser.lastOwn().distanceTo(client.player.getEyePosition()));
+					Jugcraft.LOGGER.info("[guns] the Laser Sight held: {} dots drawn in 20 ticks, the last {} blocks from the eye", laserDots, toDot);
+					if (laserDots <= 0 || toDot <= 0.0) {
+						throw new AssertionError("The Laser Sight drew " + laserDots + " dots where the gun points (the last " + toDot + " blocks off)");
+					}
+				} else if (laserDots > 0) {
+					throw new AssertionError("The " + scope + " drew " + laserDots + " laser dots");
+				}
 				long views = context.computeOnClient(client -> GunScope.views());
 				long dots = context.computeOnClient(client -> GunScope.dots());
 				context.getInput().holdKey(options -> options.keyUse);
@@ -273,7 +291,7 @@ public class GunsClientGameTests implements FabricClientGameTest {
 					throw new AssertionError("Aimed through the " + scope + " the view did not narrow by its zoom " + zooms.get(scope) + ": "
 							+ fovIn + " -> " + fovOut);
 				}
-				if (scope.equals("reflex_sight") ? dotted <= 0 || viewed > 0 : viewed <= 0) {
+				if (scope.equals("reflex_sight") || scope.equals("laser_sight") ? dotted <= 0 || viewed > 0 : viewed <= 0) {
 					throw new AssertionError("Aimed through the " + scope + ", " + viewed + " frames of the view through a scope and "
 							+ dotted + " of the reflex dot were drawn");
 				}

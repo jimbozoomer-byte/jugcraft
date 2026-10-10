@@ -51,7 +51,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  * <li>Slice 9D, the pump shotguns, loaded a shell at a time: the heavy Sledge, the long Highwayman (worked by its bolt,
  * not a pump) and the quick Throttle; pellets like the other shotguns.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
- * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.</li>
+ * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
+ * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
  * </ul>
  * The numbers are tools/guns.py's GUNS; tools/check_mod_data.py keeps the two the same.
  */
@@ -150,6 +151,8 @@ public final class JugcraftGuns {
 		ATTACHMENTS.put("long_scope", new GunAttachment("optic", true, 1.0F, 1.0F, 1.25F, 0.5F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F));
 		ATTACHMENTS.put("medium_scope", new GunAttachment("optic", true, 1.0F, 1.0F, 1.1F, 0.7F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F));
 		ATTACHMENTS.put("reflex_sight", new GunAttachment("optic", true, 1.0F, 1.0F, 1.0F, 0.85F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F));
+		ATTACHMENTS.put("tactical_grip", new GunAttachment("grip", false, 1.0F, 1.0F, 0.9F, 1.0F, 1.0F, 1.0F, 0.8F, 1.0F, 0.0F));
+		ATTACHMENTS.put("laser_sight", new GunAttachment("optic", true, 1.0F, 1.0F, 0.7F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F));
 	}
 
 	/** The attachment slots: a gun takes one attachment in each (tools/guns.py SLOTS); "optic" holds a scope. */
@@ -170,23 +173,24 @@ public final class JugcraftGuns {
 				"extended_magazine", "speed_magazine"));
 		ACCEPTS.put("riveter_smg", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "long_scope",
-				"medium_scope", "reflex_sight"));
+				"medium_scope", "reflex_sight", "laser_sight"));
 		ACCEPTS.put("haymaker", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel"));
 		ACCEPTS.put("longhorn_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip", "iron_bayonet",
-				"steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
+				"steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight",
+				"laser_sight"));
 		ACCEPTS.put("drover_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope",
-				"medium_scope", "reflex_sight"));
+				"medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
 		ACCEPTS.put("coach_gun", List.of("light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
-				"netherite_bayonet"));
+				"netherite_bayonet", "tactical_grip"));
 		ACCEPTS.put("duelling_pistol", List.of("light_stock", "weighted_stock", "wooden_stock"));
 		ACCEPTS.put("line_musket", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip",
 				"vertical_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
 		ACCEPTS.put("bellmouth", List.of("light_grip", "vertical_grip", "iron_bayonet", "steel_bayonet",
 				"diamond_bayonet", "netherite_bayonet"));
 		ACCEPTS.put("bulldog_pistol", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
-				"long_scope", "medium_scope", "reflex_sight"));
+				"long_scope", "medium_scope", "reflex_sight", "laser_sight"));
 		ACCEPTS.put("marshal_revolver", List.of("light_stock", "weighted_stock", "wooden_stock"));
 		ACCEPTS.put("sapper_revolver", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel"));
 		ACCEPTS.put("sentry_pistol", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
@@ -194,42 +198,46 @@ public final class JugcraftGuns {
 		ACCEPTS.put("garrison_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
 				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
-				"reflex_sight"));
+				"reflex_sight", "tactical_grip", "laser_sight"));
 		ACCEPTS.put("breacher", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
 				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
-				"reflex_sight"));
+				"reflex_sight", "tactical_grip"));
 		ACCEPTS.put("trench_lobber", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
 				"wooden_stock", "long_scope", "medium_scope", "reflex_sight"));
 		ACCEPTS.put("stoker", List.of("light_stock", "weighted_stock", "wooden_stock"));
 		ACCEPTS.put("beam_pistol", List.of("light_stock", "weighted_stock", "wooden_stock"));
-		ACCEPTS.put("stormlock_rifle", List.of("light_grip", "vertical_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
-				"netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
+		ACCEPTS.put("stormlock_rifle", List.of("light_grip", "vertical_grip", "iron_bayonet", "steel_bayonet",
+				"diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "laser_sight"));
 		ACCEPTS.put("linesman", List.of("light_stock", "weighted_stock", "wooden_stock", "long_scope", "medium_scope",
-				"reflex_sight"));
+				"reflex_sight", "laser_sight"));
 		ACCEPTS.put("picket_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"extended_magazine", "speed_magazine", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
-				"netherite_bayonet"));
+				"netherite_bayonet", "tactical_grip"));
 		ACCEPTS.put("ranger_rifle", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
-				"wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet"));
+				"wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet",
+				"tactical_grip"));
 		ACCEPTS.put("kestrel_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet",
-				"diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
+				"diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip",
+				"laser_sight"));
 		ACCEPTS.put("rattler_pistol", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
-				"extended_magazine", "speed_magazine", "long_scope", "medium_scope", "reflex_sight"));
+				"extended_magazine", "speed_magazine", "long_scope", "medium_scope", "reflex_sight", "laser_sight"));
 		ACCEPTS.put("bronco_smg", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"extended_magazine", "speed_magazine"));
-		ACCEPTS.put("squall_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet",
-				"steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
+		ACCEPTS.put("squall_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "tactical_grip", "laser_sight"));
 		ACCEPTS.put("spikedriver", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock"));
 		ACCEPTS.put("sledge", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_stock",
 				"weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
-				"netherite_bayonet"));
-		ACCEPTS.put("highwayman", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_stock",
-				"weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
-				"netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
+				"netherite_bayonet", "tactical_grip"));
+		ACCEPTS.put("highwayman", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet",
+				"diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip",
+				"laser_sight"));
 		ACCEPTS.put("throttle", List.of("light_stock", "weighted_stock", "wooden_stock", "long_scope", "medium_scope",
-				"reflex_sight"));
+				"reflex_sight", "laser_sight"));
 	}
 
 	/** The rounds. */
@@ -249,6 +257,13 @@ public final class JugcraftGuns {
 	public static final Map<String, Item> ATTACHMENT_ITEMS = new LinkedHashMap<>();
 	/** Each round's spent case, a particle the client throws from the gun (client/guns/GunEffects). */
 	public static final Map<String, SimpleParticleType> CASINGS = new LinkedHashMap<>();
+	/** The Laser Sight's fitted name (slice 9E). */
+	public static final String LASER_SIGHT = "laser_sight";
+	/**
+	 * The Laser Sight's dot (slice 9E): a particle the client draws where a gun with a Laser Sight points
+	 * (client/guns/GunLaser), shown whatever the particle setting.
+	 */
+	public static SimpleParticleType LASER_DOT;
 	public static final ResourceKey<DamageType> BULLET = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("bullet"));
 	/** The Stoker's flame: fire, so what fire spares it spares (slice 8C). */
 	public static final ResourceKey<DamageType> FLAME_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("flame"));
@@ -292,6 +307,7 @@ public final class JugcraftGuns {
 			CASINGS.put(round, Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id(round + "_casing"),
 					FabricParticleTypes.simple()));
 		}
+		LASER_DOT = Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id("laser_dot"), FabricParticleTypes.simple(true));
 		SPECS.forEach((name, spec) -> GUNS.put(name, (GunItem) JugcraftRegistry.item(name, properties -> new GunItem(name, spec,
 				properties.stacksTo(1).rarity(Rarity.UNCOMMON).component(LOADED, 0)
 						.component(DataComponents.USE_EFFECTS, new UseEffects(false, true, AIM_SPEED))))));
