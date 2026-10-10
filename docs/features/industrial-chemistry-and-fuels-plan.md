@@ -413,6 +413,8 @@ Use authoritative server state, existing access rules and stable IDs. Preserve c
 
 ## Delivery and remaining decisions
 
+The owner-requested [machine models, textures and dimensions](industrial-machine-models-and-textures.md) specify the unbuilt industrial forms across the connected plans: 79 machine/module briefs, including seven later roadmap candidates, plus 23 larger variants. All proposed envelopes use width × depth × height with each dimension between 2 and 6 blocks; several plants reach 6×6×6. Detailed geometry, palette/UV treatment, motion and port layouts are art proposals. Final registration, construction, multiblock formation and gameplay implementation remain separate work.
+
 ### Connected production map
 
 The following map connects owner-selected feeds, shared processing and useful finished products. It is a planning map: quantities, station IDs, construction receipts and operating statistics remain to specify. Each row can support an independently useful specialty; the map does not require every player to complete every row.
