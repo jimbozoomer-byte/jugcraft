@@ -2092,6 +2092,19 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - `caissonArcSeeksWider`: with a pig a block to the side six blocks ahead, the Stormlock's arc finds nothing; the Caisson Pistol's strikes that pig and leaps to the one beside it, which takes 60%, and leaves the pig far off to the side alone.
   - "Every gun registered" now counts thirty-three guns.
   - `GunsClientGameTests` takes the three through every gun's steps; screenshots `jugcraft_guns_spikedriver_*`, `jugcraft_guns_seam_cutter_*` and `jugcraft_guns_caisson_pistol_*`.
+- **Slice 9C in CI** ([run 38034553601](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38034553601), on fdab3382d): every check passed.
+  - **Server game tests** (`mod`, `optional integrations absent`): 1194 passed, 1190 before; the four new ones are `SecondEnergyGunsGameTests`.
+  - **`GunsClientGameTests`** took the three guns through every step:
+    - **Spikedriver:** aimed, the view narrowed to 0.85; fired, 6 flash frames and its beam drawn, the husk 737.98 → 725.98 and charges 6 → 5; reloaded 6, 19,200 JE left in its two cells; 1 burst of sparks.
+    - **Seam Cutter:** aimed, 0.95; fired, 5 flash frames and its beam drawn, the husk 725.98 → 724.48 and charges 60 → 59; reloaded 60, 19,900 JE left; no sparks, as its animations cue none.
+    - **Caisson Pistol:** aimed, 0.9; fired, 6 flash frames and its arc drawn, the husk 724.48 → 719.48 and charges 10 → 9; reloaded 10, 19,700 JE left; 3 bursts of sparks.
+  - **Screenshots:**
+    - Held, each sits at the lower right in the owner's textures: the Spikedriver dark steel with the rings standing up on its back, the Seam Cutter copper-bright at the hip with the left hand on its core, the Caisson Pistol with its tall tank upright. The counters show the shots left in the cells: 25, 200 and 66.
+    - Aimed, the Spikedriver's and the Caisson Pistol's backs sit on the crosshair over the husk, the right fist and forearm below them (the aiming polish item); the Caisson's tank rises above the crosshair. The Seam Cutter, with no sights, stays at the hip in the narrowed view.
+    - Mid-reload, the Spikedriver is lifted to the right with the left hand at its side and the Seam Cutter tipped up. The Caisson Pistol's left hand comes in large across the middle of the view, above the gun, as the tank is changed.
+    - Mid-inspection, the Caisson Pistol's sleeve covers the right third of the view, as the previews showed.
+    - Fitted, the Spikedriver's counter reads 1 / 9 with the Extended Magazine and 1 / 6 with the Speed Magazine and with a stock alone; aimed, it keeps its back on the crosshair.
+    - Seen from outside, the Spikedriver and the Caisson Pistol are raised along the look and the Seam Cutter is carried low at the hip; each flashes at the muzzle when it fires.
 - **Slice 9D, run locally (10 October 2026):**
   - `python3 tools/guns.py`: PASS. Every face of the three guns' parts, their attachments' included, re-bakes to the owner's; each hand is where `BUILDS` puts it; every bone the owner's animations move exists; the Highwayman's shell is drawn into an empty corner of its atlas copy.
   - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds.
