@@ -81,6 +81,15 @@ Owner-requested 7 October 2026. Independent briefs: [industrial chemistry and fu
 - [ ] Deliver industrial fertilizers, refining and polymers before the new optional chemical drinks, preservatives, adhesives and medicine; preserve independently useful earlier agriculture, food and adhesive routes.
 - [ ] Document actual machine roles, recipes, consumer links and optional paths in the Encyclopedia; audit reachability, gas/element units, energy loops, pollution, bounded factory work and persistence before gameplay delivery.
 
+## Monkey King: make him a boss
+
+Owner-requested 10 October 2026. The Monkey King (Sun Wukong) is modelled and animated but not implemented: `tools/monkey_king.py` builds the Blockbench projects `art/monkey_king/monkey_king.bbmodel` (the king, bones `body > kilt, head, tail, left_arm, right_arm`, `left_leg`, `right_leg`, with the clips `idle`, `walk`, `jump`, `roar`, `attack_smash`, `attack_sweep`, `attack_thrust`) and `art/monkey_king/ruyi_staff_large.bbmodel` (his staff, grip at the origin, to be parented to the right hand), plus 22 textures of his own; see [art/monkey_king/README.md](../art/monkey_king/README.md). He is three times the Monkey Monk's scale (about 150 pixels to the feather tips). **The owner wants him made into a boss later**:
+
+- [ ] Register a `jugcraft:monkey_king` boss entity on the server (GeckoLib per [FRAMEWORKS.md](FRAMEWORKS.md)) using the model, textures and clips as exported; keep the ID stable from the first release.
+- [ ] Give him a move set from the clips: `attack_thrust` as the quick poke, `attack_sweep` as a knockback whirlwind that hits everyone in reach, `attack_smash` as a ground slam with a shockwave, `jump` as the cloud-somersault gap closer, `roar` as the phase-change taunt; `idle` and `walk` for the rest. Validate every hit on the server (reach, cooldown, line of sight).
+- [ ] Decide where he lives and what he guards (a mountain realm or cave arena from the realms/caves branches), his health and tier, and the drops (the ruyi staff as a weapon is the natural reward); record tier, costs, unlocks and failure behaviour in `docs/features/monkey_king.md` before any of it ships.
+- [ ] Two-client dedicated-server playtest of every attack before release.
+
 ## Reference gallery
 
 All ten original owner-attached UI screenshots are preserved unchanged. They are documentation/design references, not Jugcraft runtime textures. Descriptions and individual file links are in the [independent feature brief](features/jugcraft-encyclopedia.md#visual-references-and-provenance); provenance and integrity metadata are in [the manifest](images/jugcraft-encyclopedia/reference-manifest.json).
