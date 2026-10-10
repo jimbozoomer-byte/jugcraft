@@ -149,7 +149,8 @@
 			"io.github.jimbozoomer.jugcraft.test.PieTartGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MilkshakeGameTests",
 			"io.github.jimbozoomer.jugcraft.test.GardenGameTests",
-			"io.github.jimbozoomer.jugcraft.test.VegetablesHerbsSpicesGameTests"
+			"io.github.jimbozoomer.jugcraft.test.VegetablesHerbsSpicesGameTests",
+			"io.github.jimbozoomer.jugcraft.test.VesperineGameTests"
 		],
 		"fabric-client-gametest": [
 			"local.peepo.PeepoCompanionClientTests",
@@ -159,8 +160,8 @@
 			"local.peepo.PeepoDeliveryClientTests",
 			"local.peepo.PeepoWorkSessionClientTests",
 			"local.peepo.PeepoHarvestClientTests",
-            "local.peepo.TransportCrateClientTests",
-            "local.peepo.TikiTorchClientTests",
+			"local.peepo.TransportCrateClientTests",
+			"local.peepo.TikiTorchClientTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceJournalClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordancePresentationClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceJourneyClientGameTests",
@@ -274,7 +275,8 @@
 			"io.github.jimbozoomer.jugcraft.test.MilkshakeClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.GardenClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.VegetablesHerbsSpicesClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.LairClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.LairClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.VesperineClientGameTests"
 		]
 	},
 	"depends": {

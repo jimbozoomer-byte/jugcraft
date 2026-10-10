@@ -8217,6 +8217,181 @@ def check_lairs():
             err(f"No name for the lair {name}")
 
 
+def java_number(source, name, value):
+    """Whether `source` declares `name` = `value` as an int, float (F) or double constant."""
+    if isinstance(value, int) and not isinstance(value, bool):
+        return re.search(rf"\bint {name} = {value};", source) is not None
+    return re.search(rf"\b(?:float|double) {name} = {float(value)}F?;", source) is not None
+
+
+def check_vesperine():
+    """Vesperine, the Last Reaper (tools/vesperine.py, docs/features/vesperine.md): every number the Java uses is the
+    table's; her attacks are the table's; where her fight looks for the Hollow Acre's parts (HollowAcre.java) is where
+    tools/hollow_acre.py builds them; her settings are read with their defaults and ranges; every entity is
+    registered, named and drawn; each GeckoLib body has its model, clips (every clip the Java names) and sheet, its
+    box-UV regions inside the sheet without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model
+    declares and cut out (no half-transparent pixel); no bone is animated by two of her controllers; her loot table is
+    the table's; her recipes, tags and advancement are there; every message she sends has its words; and nothing of
+    hers loads a chunk or leaves its dimension."""
+    import vesperine as vs
+    import vesperine_models as vm
+    folder = JAVA_ROOT / "lair" / "vesperine"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/vesperine: no Java")
+        return
+    for cls, table in (("VesperineEntity", vs.VESPERINE), ("ReaperSkullEntity", vs.SKULL), ("GriefBoltEntity", vs.BOLT),
+                       ("ThrownScytheEntity", vs.SCYTHE), ("GraveThrallEntity", vs.THRALL),
+                       ("HarvestSoulEntity", vs.SOUL), ("ReapingCrescentEntity", vs.CRESCENT)):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/vesperine.py's {value}")
+    boon = (JAVA_ROOT / "weapons" / "HarvestBoon.java").read_text(encoding="utf-8")
+    for name, value in vs.HARVEST.items():
+        if not java_number(boon, name, value):
+            err(f"HarvestBoon.{name} is not tools/vesperine.py's {value}")
+    boss = sources.get("VesperineEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, reaping, moon) in vs.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(reaping).lower()}, {str(moon).lower()})")
+        if expected not in boss:
+            err(f"VesperineEntity.Attack: expected {expected}")
+    # Where her fight looks for the Hollow Acre's parts (HollowAcre.java) is where tools/hollow_acre.py builds them.
+    import hollow_acre as ha
+    acre = re.sub(r"\s+", " ", sources.get("HollowAcre", ""))
+    for name, value in (("ARENA_X", ha.ARENA_CENTRE[0]), ("ARENA_Z", ha.ARENA_CENTRE[1]), ("FLOOR", ha.SURFACE + 1),
+                        ("ARENA_RADIUS", ha.ARENA_RADIUS), ("FIELD_NORTH", ha.FIELD[0]), ("FIELD_SOUTH", ha.FIELD[1]),
+                        ("PATH_WEST", ha.PATH[0]), ("PATH_EAST", ha.PATH[1])):
+        if not java_number(acre, name, value):
+            err(f"HollowAcre.{name} is not tools/hollow_acre.py's {value}")
+    if "THRONE = new BlockPos({}, {}, {});".format(*ha.THRONE) not in acre:
+        err(f"HollowAcre.THRONE is not tools/hollow_acre.py's {ha.THRONE}")
+    if "WARDS = List.of({});".format(", ".join("new BlockPos({}, {}, {})".format(*ward) for ward in ha.WARDS)) not in acre:
+        err(f"HollowAcre.WARDS are not tools/hollow_acre.py's {ha.WARDS}")
+    loot_java = sources.get("VesperineLoot", "")
+    if f'ADVANCEMENT = "{vs.ADVANCEMENT["key"]}";' not in loot_java or \
+            f"EVENT_HOOD_CHANCE = {vs.EVENT_HOOD_CHANCE}F;" not in loot_java:
+        err("VesperineLoot's advancement or event hood chance differs from tools/vesperine.py")
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    for option, default in vs.OPTIONS.items():
+        if f'Map.entry("{option}", "{default}")' not in config:
+            err(f"JugcraftConfig.TEXT_OPTIONS lacks {option} (default {default})")
+    for option, (low, high) in vs.LIMITS.items():
+        if f'Lairs.decimal("{option}", {float(vs.OPTIONS[option])}, {low}, {high})' not in boss:
+            err(f"VesperineEntity does not read {option} with default {vs.OPTIONS[option]} kept within {low} to {high}")
+    registry = sources.get("JugcraftVesperine", "")
+    client = (CLIENT_JAVA_ROOT / "VesperineClient.java").read_text(encoding="utf-8")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for entity in vs.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftVesperine does not register the {entity} entity")
+        if f"entity.{MOD}.{entity}" not in lang:
+            err(f"No name for the {entity} entity")
+        if f"JugcraftVesperine.{entity.upper()}," not in client:
+            err(f"VesperineClient draws no {entity}")
+    for item in vs.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftVesperine does not register {item}")
+    # The GeckoLib bodies.
+    clips_named = {}
+    for cls, text in sources.items():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.)"|"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            name = clip[1] or None
+            if name:
+                clips_named.setdefault(name.split(".")[1], set()).add(name)
+    for clip in vm.CLIPS["vesperine"]:
+        clips_named.setdefault("vesperine", set()).add(f"animation.vesperine.{clip}")
+    for entity, body in vs.GECKO.items():
+        geo = load(ASSETS / "geckolib" / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(ASSETS / "geckolib" / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in vm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        for name in (entity, f"{entity}_glowmask"):
+            sheet = ASSETS / "textures" / "entity" / f"{name}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * vm.TEXTURE_SCALE, height * vm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name}.png must be {width * vm.TEXTURE_SCALE}x{height * vm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name}.png has half-transparent pixels (it is drawn cut out)")
+    # Her controllers own their bones: the body's clips never key the halo's or the scythe's, nor theirs the body's.
+    clips = vm.ANIMATIONS["vesperine"]()["animations"]
+    owned = {bone: controller for controller, bones in vm.CONTROLLERS.items() for bone in bones}
+    for name, clip in clips.items():
+        short = name.split(".")[-1]
+        controller = "halo" if short.startswith("halo_") else "scythe" if short in ("armed", "unarmed") else "body"
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"vesperine: {name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    # Her loot.
+    table = load(DATA / MOD / "loot_table" / "entities" / "vesperine.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/vesperine.json must be a gift table (rolled for each participant)")
+    found = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"reaper_shade": vs.SHADE, **vs.CHANCES}
+    if found != expected:
+        err(f"loot_table/entities/vesperine.json gives {found}, not tools/vesperine.py's {expected}")
+    if f'Jugcraft.id("entities/vesperine")' not in loot_java:
+        err("VesperineLoot must roll loot_table/entities/vesperine.json")
+    for key in vs.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in ("reaper_hood", "dirge_skull", "requiem_skull"):
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{vs.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{vs.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
     committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
@@ -11185,6 +11360,7 @@ def main():
     check_advancements(registered)
     check_model_uvs()
     check_lairs()
+    check_vesperine()
     check_material_sets()
     check_art()
     check_pixel_hollows()

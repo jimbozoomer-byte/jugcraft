@@ -9,6 +9,22 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
 
+### Unmerged: Vesperine, the Last Reaper (boss 1, part 2)
+- **Vesperine** waits on the Bone Throne of every Hollow Acre and rises when a player steps into the Mown Circle. She has 400 health, scaled up for a party.
+- **Her skulls, Dirge and Requiem**, halve every blow she takes while both live. They fire homing Grief Bolts that a player can strike back.
+- **Phase 1:** the Reaping Arc, the Harvest Lunge, the Scythe Throw (unarmed, she takes a quarter more) and the Grave Call's thralls.
+- **At half health, the Last Toll** turns the moon red and re-forms her skulls. Then come the Twin Beam, Crop Circles and the Shadow Step.
+- **At a quarter, Death's Harvest:** souls stream from the black wheat to heal her until they are struck down or the four ward braziers are lit again, then she slams down.
+- **Left alone for 10 seconds** she returns to her throne, healed.
+- **Her loot is each participant's own:**
+  - Reaper's Shade, which makes the Shade Wreath (a cheaper Mourning Wreath) and the Reaper's Hood;
+  - the **Vesper Scythe**, an Arms VII trophy with the Harvest boon, certain on a first kill;
+  - the Dirge and Requiem skull trophies, which glow and are worn as costumes;
+  - the Reaper's Hood;
+  - shared experience and the advancement The Last Harvest.
+- When she falls, Grey Mist opens in the circle.
+- Settings: `lairs.boss_health`, `lairs.boss_damage`, `lairs.event_loot`. Animated with GeckoLib, which was already pinned. Record: [vesperine.md](docs/features/vesperine.md).
+
 ### Unmerged: The Hollow Acre: the lairs and the Last Rites (boss 1, part 1)
 - **The Last Rites** open the Hollow Acre:
   - at night, at any Jugcraft headstone in the Overworld, with four lit candles round it and a **Mourning Wreath** (four mourning flowers round a vine) laid on it;

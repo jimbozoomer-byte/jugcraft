@@ -49,6 +49,12 @@ RED_PAINT = Material((52, 14, 12), (90, 22, 18), (132, 30, 24), (180, 48, 36), (
 AMETHYST = Material((44, 20, 64), (70, 36, 100), (98, 54, 140), (140, 88, 190), (186, 138, 228), (228, 198, 250))
 # Smoked glass, the unlit Kindled Lantern's dark panes: a blue-violet dark glass, so that it never reads as iron.
 SMOKED_GLASS = Material((14, 14, 28), (28, 28, 50), (44, 46, 80), (66, 70, 112), (104, 110, 160), (168, 176, 222))
+# Reaper's Shade, Vesperine's night-black cloth (tools/item_icons/: the Reaper's Shade and the Reaper's Hood): a black
+# with a violet cast, its light and highlight carrying the read as lacquer's do. A cloth, so it does not shine.
+SHADE = Material((18, 12, 26), (34, 24, 48), (52, 40, 72), (72, 56, 98), (100, 80, 134), (150, 126, 196), shine=False)
+# Her robe's crimson lining (the Reaper's Hood's): a deep cloth red, darker and duller than garnet.
+CRIMSON_CLOTH = Material((34, 6, 12), (62, 12, 22), (100, 22, 38), (134, 32, 50), (170, 48, 64), (206, 84, 96),
+                         shine=False)
 PAPER = Material((80, 64, 40), (124, 104, 74), (170, 152, 116), (214, 200, 166), (236, 226, 198), (250, 246, 230),
                  shine=False)
 # The Greenwardens' garden (roadmap step 14; tools/item_icons/: the four crops, Verdant Chaff and the living devices).
@@ -87,6 +93,8 @@ MATERIALS = {
     "lacquer": LACQUER,
     # the Arcane Concordance's
     "amethyst": AMETHYST, "paper": PAPER, "smoked_glass": SMOKED_GLASS,
+    # Vesperine's loot
+    "shade": SHADE, "crimson_cloth": CRIMSON_CLOTH,
 }
 
 # Materials meant to be vanilla's own metal: the distance test against copper, iron and gold is skipped for them.

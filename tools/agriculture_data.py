@@ -55,6 +55,7 @@ import decor15_data
 import decor16_data
 import decor17_data
 import lair_data
+import vesperine_data
 import decor18_data
 import decor19_data
 import decor20_data
@@ -291,6 +292,7 @@ def assets(root, write, lang):
     decor19_data.assets(root, write, lang)
     decor20_data.assets(root, write, lang)
     lair_data.assets(root, write, lang)
+    vesperine_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
     kitchen_data.assets(root, write, lang)
@@ -443,6 +445,7 @@ def loot(data, write):
     decor19_data.loot(out, write)
     decor20_data.loot(out, write)
     lair_data.loot(out, write)
+    vesperine_data.loot(out, write)
     ferris_wheel_data.loot(out, write)
     hot_air_balloon_data.loot(out, write)
     theremin_data.loot(out, write)
@@ -522,6 +525,7 @@ def recipes(out, write):
     graveyard_data.recipes(out, write, conditions)
     decor18_data.recipes(out, write, conditions)
     lair_data.recipes(out, write, conditions)
+    vesperine_data.recipes(out, write, conditions)
     kitchen_data.recipes(out, write, conditions)
 
 
@@ -560,6 +564,7 @@ def tags(tags):
     decor19_data.tags(tags)
     decor20_data.tags(tags)
     lair_data.tags(tags)
+    vesperine_data.tags(tags)
     ferris_wheel_data.tags(tags)
     hot_air_balloon_data.tags(tags)
     regatta_data.tags(tags)
@@ -613,6 +618,7 @@ def tags(tags):
 
 def advancements(data, write):
     regatta_data.advancements(data, write)
+    vesperine_data.advancements(data, write)
 
 
 def worldgen(data, write):

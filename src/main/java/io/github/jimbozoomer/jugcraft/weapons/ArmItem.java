@@ -265,6 +265,7 @@ public class ArmItem extends Item {
 				level.sendParticles(ParticleTypes.SMOKE, target.getX(), y, target.getZ(), 6, 0.3, 0.4, 0.3, 0.02);
 			}
 			case SHOCK -> shock(level, target, attacker);
+			case HARVEST -> HarvestBoon.struck(level, target, attacker);
 			case GALE -> {
 				target.knockback(ArmVariants.GALE_KNOCKBACK, attacker.getX() - target.getX(), attacker.getZ() - target.getZ(),
 						level.damageSources().mobAttack(attacker), 0.0F);

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -61,6 +62,8 @@ public final class Lairs {
 	public static final float EDGE_DAMAGE = 4.0F;
 	public static final int MAX_INSTANCES = 32;
 	private static final Map<Lair, LairInstance[]> INSTANCES = new EnumMap<>(Lair.class);
+	/** What each lair calls up as an instance is placed (its boss). */
+	private static final Map<Lair, List<BiConsumer<ServerLevel, LairInstance>>> PLACED = new EnumMap<>(Lair.class);
 	public static AttachmentType<LairVisit> VISIT;
 	public static AttachmentType<GraveGoods> GRAVE_GOODS;
 
@@ -115,6 +118,21 @@ public final class Lairs {
 		} catch (NumberFormatException e) {
 			return fallback;
 		}
+	}
+
+	/** A decimal setting, kept between {@code min} and {@code max} ({@code fallback} when it does not read). */
+	public static double decimal(String option, double fallback, double min, double max) {
+		try {
+			double value = Double.parseDouble(JugcraftConfig.textOption(option).trim());
+			return Double.isFinite(value) ? Math.clamp(value, min, max) : fallback;
+		} catch (NumberFormatException e) {
+			return fallback;
+		}
+	}
+
+	/** Calls {@code hook} for each instance of {@code lair} as it is placed (a boss seats itself). */
+	public static void onPlaced(Lair lair, BiConsumer<ServerLevel, LairInstance> hook) {
+		PLACED.computeIfAbsent(lair, l -> new ArrayList<>()).add(hook);
 	}
 
 	// ---------------------------------------------------------------- instances
@@ -177,6 +195,9 @@ public final class Lairs {
 					return null;
 				}
 				slots[slot] = instance;
+				for (BiConsumer<ServerLevel, LairInstance> hook : PLACED.getOrDefault(lair, List.of())) {
+					hook.accept(level, instance);
+				}
 				return instance;
 			}
 		}
