@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The Sun Monk (boss model)
+- **Sun Monk model:** a server boss made from the owner's picture (10 October 2026) at Minecraft player proportions: a white hood with a black face slot under a great square plank hat, a purple robe with a flared folded skirt, gold-cuffed sleeves with tassels, a gold sash, socks and red sandals, a sun-headed staff in the right hand and a great golden throwing star in the left. A model only, by the owner's choice.
+- **Three clips** in the Blockbench project (`art/sun_monk/`): a hovering idle with the star turning, a gliding walk, and an attack that sweeps the staff overhead while the star spins up and is thrust out. Record: [sun-monk.md](docs/features/sun-monk.md).
+
 ### Unmerged: Guns, slice 7 (bayonets and the shared-texture guns)
 - **Four bayonets,** each the owner's art: **Iron**, **Steel** (the owner's anthralite one), **Diamond** and **Netherite** (a smithing upgrade). Under the barrel, in place of a grip. **V stabs** for 4 to 6 damage within reach, every 12 ticks; the server deals the blow. Seven guns take them.
 - **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.
