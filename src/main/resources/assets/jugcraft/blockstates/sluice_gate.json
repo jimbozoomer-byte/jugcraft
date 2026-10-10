@@ -9,6 +9,9 @@
     "facing=north,flow=filling,part=frame": {
       "model": "jugcraft:block/sluice_frame"
     },
+    "facing=north,flow=choked,part=frame": {
+      "model": "jugcraft:block/sluice_frame"
+    },
     "facing=east,flow=ready,part=frame": {
       "model": "jugcraft:block/sluice_frame"
     },
@@ -16,6 +19,9 @@
       "model": "jugcraft:block/sluice_frame"
     },
     "facing=east,flow=filling,part=frame": {
+      "model": "jugcraft:block/sluice_frame"
+    },
+    "facing=east,flow=choked,part=frame": {
       "model": "jugcraft:block/sluice_frame"
     },
     "facing=south,flow=ready,part=frame": {
@@ -27,6 +33,9 @@
     "facing=south,flow=filling,part=frame": {
       "model": "jugcraft:block/sluice_frame"
     },
+    "facing=south,flow=choked,part=frame": {
+      "model": "jugcraft:block/sluice_frame"
+    },
     "facing=west,flow=ready,part=frame": {
       "model": "jugcraft:block/sluice_frame"
     },
@@ -34,6 +43,9 @@
       "model": "jugcraft:block/sluice_frame"
     },
     "facing=west,flow=filling,part=frame": {
+      "model": "jugcraft:block/sluice_frame"
+    },
+    "facing=west,flow=choked,part=frame": {
       "model": "jugcraft:block/sluice_frame"
     },
     "facing=north,flow=ready,part=panel": {
@@ -45,6 +57,9 @@
     "facing=north,flow=filling,part=panel": {
       "model": "jugcraft:block/sluice_panel"
     },
+    "facing=north,flow=choked,part=panel": {
+      "model": "jugcraft:block/sluice_panel_choked"
+    },
     "facing=east,flow=ready,part=panel": {
       "model": "jugcraft:block/sluice_panel",
       "y": 90
@@ -55,6 +70,10 @@
     },
     "facing=east,flow=filling,part=panel": {
       "model": "jugcraft:block/sluice_panel",
+      "y": 90
+    },
+    "facing=east,flow=choked,part=panel": {
+      "model": "jugcraft:block/sluice_panel_choked",
       "y": 90
     },
     "facing=south,flow=ready,part=panel": {
@@ -69,6 +88,10 @@
       "model": "jugcraft:block/sluice_panel",
       "y": 180
     },
+    "facing=south,flow=choked,part=panel": {
+      "model": "jugcraft:block/sluice_panel_choked",
+      "y": 180
+    },
     "facing=west,flow=ready,part=panel": {
       "model": "jugcraft:block/sluice_panel",
       "y": 270
@@ -81,6 +104,10 @@
       "model": "jugcraft:block/sluice_panel",
       "y": 270
     },
+    "facing=west,flow=choked,part=panel": {
+      "model": "jugcraft:block/sluice_panel_choked",
+      "y": 270
+    },
     "facing=north,flow=ready,part=wheel": {
       "model": "jugcraft:block/sluice_wheel"
     },
@@ -88,6 +115,9 @@
       "model": "jugcraft:block/sluice_wheel_turned"
     },
     "facing=north,flow=filling,part=wheel": {
+      "model": "jugcraft:block/sluice_wheel"
+    },
+    "facing=north,flow=choked,part=wheel": {
       "model": "jugcraft:block/sluice_wheel"
     },
     "facing=east,flow=ready,part=wheel": {
@@ -99,6 +129,10 @@
       "y": 90
     },
     "facing=east,flow=filling,part=wheel": {
+      "model": "jugcraft:block/sluice_wheel",
+      "y": 90
+    },
+    "facing=east,flow=choked,part=wheel": {
       "model": "jugcraft:block/sluice_wheel",
       "y": 90
     },
@@ -114,6 +148,10 @@
       "model": "jugcraft:block/sluice_wheel",
       "y": 180
     },
+    "facing=south,flow=choked,part=wheel": {
+      "model": "jugcraft:block/sluice_wheel",
+      "y": 180
+    },
     "facing=west,flow=ready,part=wheel": {
       "model": "jugcraft:block/sluice_wheel",
       "y": 270
@@ -123,6 +161,10 @@
       "y": 270
     },
     "facing=west,flow=filling,part=wheel": {
+      "model": "jugcraft:block/sluice_wheel",
+      "y": 270
+    },
+    "facing=west,flow=choked,part=wheel": {
       "model": "jugcraft:block/sluice_wheel",
       "y": 270
     }

@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.lair;
 
+import io.github.jimbozoomer.jugcraft.lair.tyrant.SalamanderCharm;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -21,7 +22,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * Molten Slag, the Cinder Kiln's (docs/features/cinder-kiln.md): the forge's pool, the slag falling over the forge's lip,
  * the heat channel and the crucible. It glows, and whoever stands in it burns, sneaking or not: {@value #DAMAGE} hot-floor
  * damage, as a magma block deals, and burning for {@value #BURN_SECONDS} seconds. A fire-immune creature, anyone under
- * Fire Resistance, and a player who cannot be hurt stand in it unharmed. Feet sink into it a little: it is
+ * Fire Resistance or holding a Salamander Charm, and a player who cannot be hurt stand in it unharmed. Feet sink into it a little: it is
  * {@value #TOP} pixels high underfoot, though it is drawn as a whole block.
  */
 public class MoltenSlagBlock extends Block {
@@ -57,9 +58,12 @@ public class MoltenSlagBlock extends Block {
 		return true;
 	}
 
-	/** Whether the slag harms {@code living}: not a fire-immune creature, nor anyone under Fire Resistance or unhurtable. */
+	/**
+	 * Whether the slag harms {@code living}: not a fire-immune creature, nor anyone under Fire Resistance, holding a
+	 * Salamander Charm ({@link SalamanderCharm}) or unhurtable.
+	 */
 	public static boolean harms(LivingEntity living) {
-		if (living.fireImmune() || living.hasEffect(MobEffects.FIRE_RESISTANCE)) {
+		if (living.fireImmune() || living.hasEffect(MobEffects.FIRE_RESISTANCE) || SalamanderCharm.warded(living)) {
 			return false;
 		}
 		return !(living instanceof Player player) || !player.getAbilities().invulnerable;

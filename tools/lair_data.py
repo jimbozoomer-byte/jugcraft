@@ -226,6 +226,16 @@ def sluice_panel(open_):
                 "north": {"texture": "#water"}, "south": {"texture": "#water"}}}]}
 
 
+def sluice_choked():
+    """A sluice gate's panel choked with slag (the Cinder Tyrant's Eruption): the shut plate, and over each of its
+    faces the slag forced through its seams and oozing from under it, cut out and drawn glowing."""
+    shut = sluice_panel(False)
+    shut["textures"]["slag"] = rid("block/sluice_slag")
+    shut["elements"].append({"from": [0, 0, -0.05], "to": [16, 16, 16.05], "shade": False, "light_emission": 15, "faces": {
+        "north": {"texture": "#slag"}, "south": {"texture": "#slag"}}})
+    return shut
+
+
 def sluice_wheel(turned):
     """A sluice gate's wheel, drawn facing north on the post south of it: an iron shaft from the post, a hub, and the
     wheel's spoked rim (cut out) between them; turned an eighth while the sluice is open."""
@@ -253,13 +263,15 @@ def cinder_kiln_assets(models, states, write, simple):
     write(models / "sluice_frame.json", {"parent": "minecraft:block/cube_all", "textures": {"all": rid("block/sluice_frame")}})
     write(models / "sluice_panel.json", sluice_panel(False))
     write(models / "sluice_panel_open.json", sluice_panel(True))
+    write(models / "sluice_panel_choked.json", sluice_choked())
     write(models / "sluice_wheel.json", sluice_wheel(False))
     write(models / "sluice_wheel_turned.json", sluice_wheel(True))
     variants = {}
     for part in SLUICE_PARTS:
         for facing, turn in FACING_TURNS.items():
             for flow in SLUICE_FLOWS:
-                model = {"frame": "sluice_frame", "panel": "sluice_panel_open" if flow == "open" else "sluice_panel",
+                panel = {"open": "sluice_panel_open", "choked": "sluice_panel_choked"}.get(flow, "sluice_panel")
+                model = {"frame": "sluice_frame", "panel": panel,
                          "wheel": "sluice_wheel_turned" if flow == "open" else "sluice_wheel"}[part]
                 variant = {"model": rid(f"block/{model}")}
                 if turn and part != "frame":
@@ -349,6 +361,7 @@ def assets(root, write, lang):
         f"message.{MOD}.lair.seal.opened": "The magma cracks open, and a vent of sparks and smoke rises from it",
         f"message.{MOD}.lair.sluice.open": "The sluice is already open",
         f"message.{MOD}.lair.sluice.filling": "The sluice is filling again",
+        f"message.{MOD}.lair.sluice.choked": "Slag chokes the sluice: it will not turn",
         f"message.{MOD}.lair.leave": "You step back out of the mist",
         f"message.{MOD}.lair.left_behind": "Anything left lying in a lair is lost when it closes",
         f"message.{MOD}.lair.closed": "The lair has closed; you are back where you were",

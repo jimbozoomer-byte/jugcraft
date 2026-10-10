@@ -560,7 +560,7 @@ Two more arms and a war kit in bronze and steel. Shot for shot the longbow and a
 
 ### Arms VII (batch 56): variant arms, crafted styles and boss trophies
 
-35 named arms, each a variant of a kind above that fights as its kind does, in steel. Sixteen are crafted at a smithing table: a style's pattern, a steel arm of the kind and the style's material, keeping its enchantments and wear. Sixteen are trophies of eight bosses ([branches/BOSSES.md](branches/BOSSES.md)): no recipe, each boss's loot table ready. The Yeti King's two drop from him ([features/yeti-king.md](features/yeti-king.md)); the other fourteen are creative only until their bosses are made. Two are the trophies of the Witching Season's bosses and drop from them: the Vesper Scythe, Vesperine's ([features/vesperine.md](features/vesperine.md)), and the Needle Rapier, Madame Tatterlace's ([features/tatterlace.md](features/tatterlace.md)). One, the Hades Scythe, is the Hades Armor set's arm: no recipe and no loot table yet, creative only until the owner settles how the sets are won. No variant deals as much a second as a netherite sword.
+35 named arms, each a variant of a kind above that fights as its kind does, in steel. Sixteen are crafted at a smithing table: a style's pattern, a steel arm of the kind and the style's material, keeping its enchantments and wear. Sixteen are trophies of eight bosses ([branches/BOSSES.md](branches/BOSSES.md)): no recipe, each boss's loot table ready. The Yeti King's two drop from him ([features/yeti-king.md](features/yeti-king.md)) and the Cinder Tyrant's from him ([features/cinder-tyrant.md](features/cinder-tyrant.md)); the other twelve are creative only until their bosses are made. Two are the trophies of the Witching Season's bosses and drop from them: the Vesper Scythe, Vesperine's ([features/vesperine.md](features/vesperine.md)), and the Needle Rapier, Madame Tatterlace's ([features/tatterlace.md](features/tatterlace.md)). One, the Hades Scythe, is the Hades Armor set's arm: no recipe and no loot table yet, creative only until the owner settles how the sets are won. No variant deals as much a second as a netherite sword.
 
 | Line | Arms | Perk or boon | Made from |
 | --- | --- | --- | --- |
@@ -569,7 +569,7 @@ Two more arms and a war kit in bronze and steel. Shot for shot the longbow and a
 | Bonecarved | dagger, flail, glaive, labrys | Gravebane: 20% harder against the undead | Bonecarver's Pattern (bone, flint, leather, paper) + bone block |
 | Runebound | nodachi, moonblade, staff, war hammer | Mark: a struck foe glows for 4 s | Runecarver's Pattern (amethyst, ectoplasm, paper) + ectoplasm |
 | The Yeti King | Glacier Maul, Rimeclaw | Frost: Slowness II, 3 s | his loot (15% for one of the two; one certain on a first kill) |
-| The Cinder Tyrant | Cinderbrand, Magmaw | Ember: alight 3 s | trophy |
+| The Cinder Tyrant | Cinderbrand, Magmaw | Ember: alight 3 s | his loot (15% for one of the two; one certain on a first kill) |
 | The Mire Hag | Hagthorn, Bogfang | Venom: Poison, 4 s | trophy |
 | The Crypt Lich | Soulreaver, Gravewarden | Drain: heals half a heart a hit; Wither, 3 s | trophy |
 | The Iron Dreadnought | Dynamo Halberd, Piston Hammer | Shock: arcs to a foe within 4 blocks for 30% of the blow | trophy |
