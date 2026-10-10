@@ -8,6 +8,33 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Arcane Concordance, Wayfaring part 1b (the belt and boot drawn on the body)
+- **The Leather Belt and the Amphibian Boot now show when worn,** as the owner drew them: a leather strap round the waist with a gold buckle in front, and on each foot a green boot with a white cuff, a grey toe cap and a fin on the heel. You see them in third person and on the inventory's figure; other players should see them too (not yet tried with two clients). The charms and the Ice Breaker (the owner drew no worn sheet for it) are not drawn.
+- The owner's two worn sheets are imported byte for byte, with their sources and checksums recorded; the boxes are fitted to them (the sheets came without geometry) and kept off the skin's layers and vanilla armour by the same gaps as Jugcraft's 3D armour, so they should not flicker against them up close (armour, drawn a little toward the camera, shows through them from far off). Trinkets' data-driven renderer draws them: no Java. Record: [arcane-concordance-trinkets.md](docs/features/arcane-concordance-trinkets.md).
+
+### Unmerged: Arcane Concordance, Wayfaring (the owner's belt, boots and charms; trinkets part 1)
+- **Eight worn things from the owner's relic and reliquary art,** put on once you understand Relic Lore: the **Leather Belt** (a second **Charm** slot), the **Angelic Feather**, **Kraken Shell** and **Infernal Claws** (a fall's, drowning's or fire's harm taken from your food instead of your health, half a food point a point, when your food bar can pay; the feather also jumps a little higher), the **Angelheart Vial** (a death save on 2 hearts, used up) and the **Phoenix Down** (a death save at full health; it becomes an Angelic Feather), and on your feet the **Amphibian Boot** (faster swimming, longer breath) and the **Ice Breaker** (a little knockback resistance, and a hard landing throws back and slows the hostile creatures round you).
+- Two new Trinkets slots with the owner's icons, **Charm** and **Feet** (two), and Trinkets' Belt slot. Two of a kind never add up. A death save never answers the void, a held totem or a death in a dream.
+- The kinetic belt that links pulleys is now called the **Drive Belt** (its id is unchanged), so the two belts are told apart.
+- The icons and slot icons are the owner's files byte for byte (the three animation sidecars with their line ends made LF), with their sources and checksums recorded; the item models and names are taken from the owner's files. Record: [arcane-concordance-trinkets.md](docs/features/arcane-concordance-trinkets.md).
+
+### Unmerged: Arcane Concordance, Ember part 2 (the Hearthbinder's regalia, from the owner's fire art)
+- **Lesser Focus of Fire and Focus of Fire,** the owner's own: worn in a new **Spell Focus** slot, +2 and +4 fire Spell Power, so Cinderbolt and Hearthflare burn hotter.
+- **Fire Bangle:** worn in one of two new **Bracelet** slots; once you understand Hearthbinding, your melee blows leave the creature smouldering for 3 seconds, wherever you may harm it.
+- **Two fire sets, worn as the owner's 3D model** (Jugcraft's first GeckoLib armour), half a point of fire Spell Power a piece: the **Pyromaniac's Hood, Tunic, Pants and Shoes** (cloth, wool alone, in the owner's light fire texture) and the **Pyromancer's Hat, Robes, Leggings and Boots** (wool and gold, leather's protection). At most the regalia gives +6 fire: Cinderbolt 6, Hearthflare 7. Spell Power's Sunfire cannot be put on either set.
+- Hearthflare now plays the owner's fire recordings. Every file is the owner's, copied as supplied, with its source and checksum recorded. The heavy fire set, the Caster Tome and the fire familiar wait for later slices. Record: [arcane-concordance-ember-regalia.md](docs/features/arcane-concordance-ember-regalia.md).
+- **Combat baselines:** a geared Hearthbinder (+6 fire) joins the benchmark and wins all five fights; the same spells with no fire gear win three. The benchmark now lets Hearthguard's Fire Resistance land as it does in game; before, it kept restarting the cast instead of fighting. Record: [arcane-concordance-baselines.md](docs/features/arcane-concordance-baselines.md).
+
+### Unmerged: Arcane Concordance, Ember part 1 (Hearthbinding and four fire spells)
+- **A new research entry, Hearthbinding** (the Hearthbinders' Principle, Ember): examine coal, charcoal, a torch or other things that hold fire once First Light is understood; study one at the Lampwright's Bench. Mastered by lighting three kinds of hearth with Hearthspark.
+- **Four fire invocations,** cast with any Concordance instrument: **Hearthspark** lights an unlit campfire, candle or candle cake up to 16 blocks away (never placing fire); **Hearthguard** gives 30 s of Fire Resistance; **Cinderbolt** deals fire damage that grows with fire Spell Power and leaves the target **smouldering**; **Hearthflare** (mastered) bursts round you. Every one obeys claims, towns, spawn protection and the PvP rules.
+- **Smoulder,** a new status: the creature burns at vanilla's pace while it lasts; water, rain, Fire Resistance and milk answer it.
+- Original spell icons, a status icon and five synthesised sounds; a new Hearth codex category. Record: [arcane-concordance-ember.md](docs/features/arcane-concordance-ember.md).
+
+### Unmerged: Guns, slice 7 (bayonets and the shared-texture guns)
+- **Four bayonets,** each the owner's art: **Iron**, **Steel** (the owner's anthralite one), **Diamond** and **Netherite** (a smithing upgrade). Under the barrel, in place of a grip. **V stabs** for 4 to 6 damage within reach, every 12 ticks; the server deals the blow. Seven guns take them.
+- **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.
+- Scopes wait for the owner's reticle textures. Record: [guns.md, slice 7](docs/features/guns.md#slice-7-bayonets-and-the-shared-texture-guns).
 
 ### Unmerged: Madame Tatterlace (boss 2, part 2)
 - **Madame Tatterlace**, a great spider seamstress, waits sewing on the white silk over the Spindle Loft's doily and lowers herself onto it when a player steps onto the lace. She has 360 health, scaled up for a party.

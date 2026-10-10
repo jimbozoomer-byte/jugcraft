@@ -1183,7 +1183,7 @@
           "title": "Belt Pulley",
           "icon": "jugcraft:belt_pulley",
           "text": [
-            "A shaft with a grooved wheel. Use a Leather Belt on two pulleys with the same axis (level with each other along it, up to 16 blocks apart) and the second turns with the first: power jumps gaps and walls."
+            "A shaft with a grooved wheel. Use a Drive Belt on two pulleys with the same axis (level with each other along it, up to 16 blocks apart) and the second turns with the first: power jumps gaps and walls."
           ],
           "craft": {
             "grid": [
@@ -1202,7 +1202,7 @@
           }
         },
         {
-          "title": "Leather Belt",
+          "title": "Drive Belt",
           "icon": "jugcraft:belt",
           "text": [
             "Links two belt pulleys: use it on one, then on the other. Breaking a pulley drops the belt."

@@ -136,7 +136,7 @@ TOOLS = {"brass_wrench": "Brass Wrench", "engineers_handbook": "Engineer's Handb
          # Mining & prospecting: a vague 3x3-chunk ore survey (prospecting/OreSurvey).
          "prospector": "Geo-Resonance Prospector",
          # Kinetic: links two belt pulleys.
-         "belt": "Leather Belt"}
+         "belt": "Drive Belt"}
 # Kinetic power (kinetic/): rotation in KE per tick, carried by shafts and gearboxes. Models: tools/kinetic_models.py.
 # "axis": placed like a log; "facing": six directions; "horizontal": four.
 KINETIC_BLOCKS = {

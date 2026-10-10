@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Instrument;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Plan;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
+import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
@@ -243,7 +244,7 @@ public final class ComposedSpells {
 					applied |= result.applied();
 				}
 			} else {
-				for (BlockPos pos : blocks(level, node, impact, step.effect().kind())) {
+				for (BlockPos pos : blocks(level, node, impact, step.effect())) {
 					ConcordanceEffects.Result result = ConcordanceEffects.apply(context, step.effect(), pos);
 					seen.add(result);
 					applied |= result.applied();
@@ -287,7 +288,8 @@ public final class ComposedSpells {
 	 * The blocks a node's selection chooses for an operation: the one it struck, or the nearest ones (ties by
 	 * position) the operation can act on, lights at least two blocks apart.
 	 */
-	static List<BlockPos> blocks(ServerLevel level, Plan.Node node, Impact impact, EffectKind kind) {
+	static List<BlockPos> blocks(ServerLevel level, Plan.Node node, Impact impact, EffectSpec effect) {
+		EffectKind kind = effect.kind();
 		if (node.pick() == Component.Pick.STRUCK) {
 			return List.of(kind == EffectKind.ILLUMINATION ? impact.open() : impact.block());
 		}
@@ -298,7 +300,7 @@ public final class ComposedSpells {
 		int r = node.radius();
 		List<BlockPos> candidates = new ArrayList<>();
 		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
-			if (pos.distSqr(center) <= (double) r * r && level.isLoaded(pos) && ConcordanceEffects.accepts(level, kind, pos)) {
+			if (pos.distSqr(center) <= (double) r * r && level.isLoaded(pos) && ConcordanceEffects.accepts(level, effect, pos)) {
 				candidates.add(pos.immutable());
 			}
 		}

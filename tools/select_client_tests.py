@@ -44,11 +44,20 @@ CODE_DIRS = (ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java")
 
 # Rough seconds each class takes on a CI runner, to share them out evenly; others are estimated from their length.
 # Estimates from the client jobs' logs of October 2026, not measurements per class: with the biome tour at 600, its
-# job took 22 minutes and the others 15 and 14.
+# job took 22 minutes and the others 15 and 14. Biome, Guns, Styx, Arms and ArmorTiers are measured, from run
+# 37980438983's logs (565, 261, 221, 125 and 123 s; their length put the last four at 13 to 28), after three of them in
+# one job took it to 29 of its 30 minutes; ArmsMotion is its 87 screenshots at those classes' pace (about 2 s a shot),
+# where its length gave 14. Classes estimated from their length ran up to three times longer than that, so with three
+# jobs one still reached 29:32 (run 37989465048); the client tests now share four jobs.
 WEIGHTS = {
-    "BiomeClientGameTests": 900,
+    "BiomeClientGameTests": 570,
+    "GunsClientGameTests": 260,
+    "StyxClientGameTests": 220,
     "AlpineClientGameTests": 180,
     "JugcraftClientGameTests": 180,
+    "ArmsMotionClientGameTests": 170,
+    "ArmsClientGameTests": 125,
+    "ArmorTiersClientGameTests": 125,
     "TownClientGameTests": 120,
     "GuideScreenshotGameTests": 120,
     "SeasonClientGameTests": 90,
@@ -299,7 +308,7 @@ def main():
     parser.add_argument("--base", help="compare against this revision (a pull request's base)")
     parser.add_argument("--head", default="HEAD")
     parser.add_argument("--all", action="store_true", help="run every class")
-    parser.add_argument("--shards", type=int, default=3)
+    parser.add_argument("--shards", type=int, default=4)
     parser.add_argument("--github-output", help="append shard0..shardN-1 (comma-separated classes) to this file")
     args = parser.parse_args()
 

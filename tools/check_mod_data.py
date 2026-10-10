@@ -9273,6 +9273,8 @@ def check_concordance(registered):
             err(f"dynamiclights/item/kindled_lantern.json: component {component} is not registered in JugcraftConcordance")
     check_composition(co, root, lang, registered, research)
     check_invocations(co, root, lang, research)
+    check_ember(co, root, lang, research)
+    check_wayfaring(co, root, lang)
     check_baselines(root)
     check_rituals(co, root, lang, registered, research)
     check_alchemy(co, root, lang, registered, research)
@@ -9756,6 +9758,563 @@ def check_rituals(co, root, lang, registered, research):
         err("textures/block/warding_stone_connected.png needs its Fusion metadata")
     if 'isModLoaded("fusion")' not in java("CircleClient.java", CLIENT_JAVA_ROOT):
         err("CircleClient.java: register the Fusion pack only when Fusion is installed (it is optional)")
+
+
+def check_ember(co, root, lang, research):
+    """Ember, part 1 (tools/concordance_ember.py): the Java mirrors its numbers, ids and kinds of hearth; the kindling word
+    is an alteration in Ember's school; Hearthbinding is mastered by the hearthkeeping practice, which the Overworld's
+    hearths alone can complete; Ember's invocations are Hearthbinding's; and every word it adds has its lang."""
+    em = co.ember
+    def java(name):
+        path = root / "ember" / name
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    ember, smoulder = java("Ember.java"), java("SmoulderEffect.java")
+    if not re.search(rf"\bint FIRE_TICKS = {em.SMOULDER_FIRE_TICKS};", smoulder):
+        err("concordance/ember/SmoulderEffect.java: FIRE_TICKS differs from tools/concordance_ember.py")
+    if f"0x{em.SMOULDER_COLOUR:06X}" not in smoulder:
+        err("concordance/ember/SmoulderEffect.java: its colour differs from SMOULDER_COLOUR")
+    kindling = em.COMPONENTS["kindling"]["operation"]
+    if kindling.get("effect") != "alteration" or kindling.get("school") != co.PRINCIPLES["ember"]["school"]:
+        err("component kindling: it must be an alteration in Ember's school")
+    if f'String SCHOOL = "{kindling.get("school")}";' not in ember:
+        err("concordance/ember/Ember.java: SCHOOL differs from the kindling word's school")
+    if f'String ACTIVITY = "{em.HEARTHKEEPING}";' not in ember or f'Jugcraft.id("{split(em.SMOULDER)[1]}")' not in ember:
+        err("concordance/ember/Ember.java: ACTIVITY or the Smoulder id differs from tools/concordance_ember.py")
+    body = ember[ember.find("public static @Nullable String hearth("):]
+    body = body[:body.find("\n\t}\n")]
+    kinds = set(re.findall(r'return "([a-z_]+)"', body)) | set(re.findall(r'\? "([a-z_]+)"', body))
+    if kinds != set(em.HEARTHS):
+        err(f"concordance/ember/Ember.java: hearth() names {sorted(kinds)}, not HEARTHS {sorted(em.HEARTHS)}")
+    overworld = [kind for kind in em.HEARTHS if kind != "soul_campfire"]
+    if not 1 <= em.HEARTH_MASTERY <= len(overworld):
+        err("Hearthbinding's mastery asks for more kinds of hearth than the Overworld has")
+    practice = [rule for block in research.get("hearthbinding", {}).get("states", {}).values()
+                for rule in block.get("any", []) if rule.get("type") == "practice"]
+    if not practice or practice[0].get("activity") != em.HEARTHKEEPING or practice[0].get("distinct") != em.HEARTH_MASTERY:
+        err("Hearthbinding must be mastered by the hearthkeeping practice, HEARTH_MASTERY kinds of hearth")
+    for key, info in em.INVOCATIONS.items():
+        if info["principle"] != "ember" or info["research"] != f"{MOD}:hearthbinding":
+            err(f"invocation {key}: Ember's invocations are Hearthbinding's")
+    for key in (f"effect.{MOD}.smoulder", f"message.{MOD}.concordance.examine.heat", f"tag.item.{MOD}.ember_specimens"):
+        if key not in lang:
+            err(f"Ember: missing lang {key}")
+    check_ember_regalia(co, root, lang)
+
+
+def check_ember_regalia(co, root, lang):
+    """Ember, part 2 (tools/concordance_ember.py, docs/features/arcane-concordance-ember-regalia.md): the Java mirrors the
+    regalia's numbers and ids; the foci carry their Spell Power only through Trinkets; the bangle's blow goes through the
+    effect boundary and Spell Power's attribute enchantments are refused on the set; the client wires GeckoLib and poses
+    the bones before hiding the slim sleeves; every item is the owner's model and icon with the owner's name; every
+    recipe is made of Overworld things; the owner's two slots are given to players; the owner's GeckoLib model has the
+    bones and fits its sheet; and the owner's recordings, not a drawn cue, play Hearthflare."""
+    em = co.ember
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    gear, trinket, armor = (text(root / "ember" / name) for name in ("EmberGear.java", "EmberTrinketItem.java", "EmberArmorItem.java"))
+    client, renderer = text(CLIENT_JAVA_ROOT / "EmberClient.java"), text(CLIENT_JAVA_ROOT / "ember" / "EmberArmorRenderer.java")
+    numbers = {"LESSER_FOCUS_POWER": ("double", em.LESSER_FOCUS_POWER), "FOCUS_POWER": ("double", em.FOCUS_POWER),
+               "ROBE_PIECE_POWER": ("double", em.ROBE_PIECE_POWER), "BANGLE_SMOULDER_TICKS": ("int", em.BANGLE_SMOULDER_TICKS),
+               "BANGLE_REACH_MARGIN": ("double", em.BANGLE_REACH_MARGIN),
+               "ARMOR_ENCHANTABILITY": ("int", em.ARMOR_ENCHANTABILITY),
+               **{f"{name.upper()}_DURABILITY": ("int", armour["durability"]) for name, armour in em.ARMOR_SETS.items()}}
+    for name, (kind, value) in numbers.items():
+        if not re.search(rf"\b{kind} {name} = {value};", gear):
+            err(f"concordance/ember/EmberGear.java: {name} differs from tools/concordance_ember.py ({value})")
+    models = {armour["model"] for armour in em.ARMOR_SETS.values()}
+    if len(models) != 1 or f'String ARMOR_MODEL = "{next(iter(models))}";' not in gear:
+        err("concordance/ember/EmberGear.java: ARMOR_MODEL is not the model tools/concordance_ember.py wears the sets as")
+    for name, armour in em.ARMOR_SETS.items():
+        d = armour["defense"]
+        made = f'material("{name}", {name.upper()}_DURABILITY, {d["helmet"]}, {d["chestplate"]}, {d["leggings"]}, {d["boots"]})'
+        if made not in gear:
+            err(f"concordance/ember/EmberGear.java: the {name} material differs from ARMOR_SETS (expected {made})")
+        for item in armour["pieces"]:
+            if not re.search(rf'\barmor\("{item}", "{name}", {name.upper()}_ARMOR, ', gear):
+                err(f"concordance/ember/EmberGear.java: {item} is not registered as a {name} piece")
+    if ('Jugcraft.id("repairs_" + set + "_gear")' not in gear or "ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id(set))" not in gear
+            or any(em.repair_tag(name) != f"{MOD}:repairs_{name}_gear" for name in em.ARMOR_SETS)):
+        err("concordance/ember/EmberGear.java: each set's repair tag and equipment asset must be named after the set")
+    geared = re.search(r"double GEARED_FIRE_POWER = ([0-9.]+);", text(root / "balance" / "Baselines.java"))
+    if not geared or float(geared.group(1)) != em.FOCUS_POWER + 4 * em.ROBE_PIECE_POWER:
+        err("concordance/balance/Baselines.java: GEARED_FIRE_POWER is not a Focus of Fire and a whole fire set")
+    # The ids EmberGear registers are the generator's items, the trinkets as trinkets and the pieces as armour.
+    trinkets = set(re.findall(r'\bitem\("([a-z_]+)"', gear))
+    pieces = set(re.findall(r'\barmor\("([a-z_]+)"', gear))
+    if trinkets != set(em.TRINKETS) or pieces != set(em.ARMOR):
+        err(f"concordance/ember/EmberGear.java registers {sorted(trinkets)} and {sorted(pieces)}, not TRINKETS and ARMOR")
+    for match in re.finditer(r'\bitem\("([a-z_]+)",[^;]*;', gear):
+        if ".attributes(" in match.group(0) or "ATTRIBUTE_MODIFIERS" in match.group(0):
+            err(f"concordance/ember/EmberGear.java: {match.group(1)} carries attribute modifiers on the item (they would count in "
+                "the hand); a worn piece's Spell Power is Trinkets'")
+    if ("implements TrinketCallback" not in trinket or "forEachTrinketModifier" not in trinket or "ATTRIBUTE_MODIFIERS" in trinket
+            or "Ember.SCHOOL" not in trinket):
+        err("concordance/ember/EmberTrinketItem.java: a focus's fire must be a Trinkets modifier in Ember's school, never the item's own")
+    if "implements GeoItem" not in armor or "EmberHooks.armor.apply(this)" not in armor:
+        err("concordance/ember/EmberArmorItem.java: the set must be a GeoItem drawn through EmberHooks")
+    if "EmberHooks.armor = " not in client or "EmberClient.register();" not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("client: EmberClient must set EmberHooks.armor, and ConcordanceClient must call it (a worn piece fails without it)")
+    posed = renderer.find("super.adjustModelBonesForRender(")
+    if posed < 0 or any(f'"{bone}"' not in renderer for bone in em.SLIM_BONES) or "skipRender(true)" not in renderer[posed:]:
+        err("client/ember/EmberArmorRenderer.java: adjustModelBonesForRender must call super first (it poses the bones to the "
+            "wearer) and then hide the slim sleeves")
+    if "player.isWithinAttackRange(player.getMainHandItem(), target.getBoundingBox(), BANGLE_REACH_MARGIN)" not in gear:
+        err("concordance/ember/EmberGear.java: the bangle's blow must count only within reach of the weapon in hand "
+            "(BANGLE_REACH_MARGIN), so a Shock arc's second foe or a far weapon skill is not set smouldering")
+    if ("ConcordanceEffects.apply(" not in gear or "REQUIRES_MATCHING_ATTRIBUTE" not in gear or "EnchantmentEvents.ALLOW_ENCHANTING" not in gear
+            or any(call in gear for call in ("igniteForSeconds", "igniteForTicks", "addEffect(", "setRemainingFireTicks", "sendParticles"))):
+        err("concordance/ember/EmberGear.java: the bangle's blow must go through ConcordanceEffects.apply only, and Spell Power's "
+            "attribute enchantments must be refused on the set")
+    # Each item: the owner's model (texture renamed), an imported icon, the owner's name and Jugcraft's tooltip.
+    owner_lang = em.owner_lang()
+    for item, owner in em.OWNER_ITEMS.items():
+        if load(ASSETS / "items" / f"{item}.json") != {"model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}}:
+            err(f"assets/{MOD}/items/{item}.json: not the item's own model")
+        if load(ASSETS / "models" / "item" / f"{item}.json") != em.owner_model(item):
+            err(f"assets/{MOD}/models/item/{item}.json: not the owner's {owner} model with its texture renamed")
+        if f"textures/item/{item}.png" not in em.OWNER_FILES:
+            err(f"{item}: its icon is not one of the owner's files (OWNER_FILES)")
+        if lang.get(f"item.{MOD}.{item}") != owner_lang.get(f"item.ars_jymbaumental.{owner}") or f"tooltip.{MOD}.{item}" not in lang:
+            err(f"{item}: its name must be the owner's ({owner_lang.get(f'item.ars_jymbaumental.{owner}')}) and it needs a tooltip")
+    if set(em.OWNER_ITEMS) != set(em.ITEMS) or set(em.ITEMS) != set(em.TRINKETS) | set(em.ARMOR):
+        err("tools/concordance_ember.py: ITEMS, OWNER_ITEMS, TRINKETS and ARMOR must name the same items")
+    excluded = set(co.equivalence.EXCLUDED)
+    for item in em.ITEMS:
+        if f"{MOD}:{item}" not in excluded:
+            err(f"{item}: the Concordance's magical things are never weighed (tools/concordance_equivalence.py EXCLUDED)")
+    # Recipes: Ember's own items, or things the Overworld gives (the progression graph's sources with no dimension).
+    progression = co.progression
+    for item, recipe in em.RECIPES.items():
+        data = load(DATA / MOD / "recipe" / f"{item}.json") or {}
+        if data.get("fabric:load_conditions") != [{"condition": f"{MOD}:feature_enabled", "feature": "concordance"}]:
+            err(f"recipe {item}: it must load with the Concordance")
+        for ref in data.get("key", {}).values():
+            ref = ref if isinstance(ref, str) else ""
+            ok = (ref.startswith(f"{MOD}:") and split(ref)[1] in em.ITEMS
+                  or ref in progression.VANILLA_SOURCES and not progression.VANILLA_SOURCES[ref][3]
+                  or ref.startswith("#") and ref[1:] in progression.VANILLA_TAGS)
+            if not ok:
+                err(f"recipe {item}: {ref} is not Ember's own or had in the Overworld (tools/concordance_progression.py)")
+    for item in em.ITEMS:
+        if item not in em.RECIPES:
+            err(f"{item} has no recipe")
+    # The owner's two slots: defined, given to players, holding their items, named and drawn with the owner's icons.
+    entities = load(DATA / "trinkets" / "entities" / f"{MOD}_ember.json") or {}
+    if entities.get("entities") != ["player"] or set(entities.get("slots", [])) != set(em.TRINKET_SLOTS):
+        err(f"data/trinkets/entities/{MOD}_ember.json must give players the owner's slots {sorted(em.TRINKET_SLOTS)}")
+    for slot, info in em.TRINKET_SLOTS.items():
+        group, name = slot.split("/")
+        definition = load(DATA / "trinkets" / "slots" / group / f"{name}.json") or {}
+        if definition.get("amount") != info["amount"] or definition.get("icon") != f"{MOD}:container/slots/{info['icon']}":
+            err(f"data/trinkets/slots/{slot}.json: amount {info['amount']} and the owner's icon")
+        if f"textures/gui/sprites/container/slots/{info['icon']}.png" not in em.OWNER_FILES:
+            err(f"slot {slot}: its icon is not the owner's (OWNER_FILES)")
+        held = set((load(DATA / "trinkets" / "tags" / "item" / group / f"{name}.json") or {}).get("values", []))
+        if held != {f"{MOD}:{item}" for item, worn in em.TRINKETS.items() if worn == slot}:
+            err(f"data/trinkets/tags/item/{slot}.json holds {sorted(held)}")
+        if f"trinkets.slot.{group}.{name}" not in lang:
+            err(f"slot {slot}: missing lang trinkets.slot.{group}.{name}")
+    for item, piece in em.ARMOR.items():
+        tag = {"helmet": "head_armor", "chestplate": "chest_armor", "leggings": "leg_armor", "boots": "foot_armor"}[piece]
+        if f"{MOD}:{item}" not in (load(DATA / "minecraft" / "tags" / "item" / f"{tag}.json") or {}).get("values", []):
+            err(f"{item} is not in #minecraft:{tag}")
+    for name in em.ARMOR_SETS:
+        if (load(DATA / MOD / "tags" / "item" / f"repairs_{name}_gear.json") or {}).get("values") != ["#minecraft:wool"]:
+            err(f"data/{MOD}/tags/item/repairs_{name}_gear.json must hold wool")
+        if f"textures/armor/{name}.png" not in em.OWNER_FILES:
+            err(f"the {name} set's worn texture is not one of the owner's files (OWNER_FILES)")
+    # The owner's GeckoLib model: format, the sheet size every set worn on it has, the bones the renderer poses and hides,
+    # every face on the sheet.
+    model_path = ASSETS / "geckolib" / "models" / "armor" / f"{next(iter(models))}.geo.json"
+    geo = load(model_path) or {}
+    definition = (geo.get("minecraft:geometry") or [{}])[0]
+    width = definition.get("description", {}).get("texture_width", 0)
+    height = definition.get("description", {}).get("texture_height", 0)
+    for name in em.ARMOR_SETS:
+        sheet = ASSETS / "textures" / "armor" / f"{name}.png"
+        size = Image.open(sheet).size if sheet.exists() else (0, 0)
+        if geo.get("format_version") != "1.12.0" or (width, height) != size:
+            err(f"{model_path.name}: format 1.12.0 and {name}'s {size[0]}x{size[1]} sheet (it declares {width}x{height})")
+    bones = {bone.get("name") for bone in definition.get("bones", [])}
+    for bone in em.ARMOR_BONES + em.SLIM_BONES:
+        if bone not in bones:
+            err(f"{model_path.name}: no bone {bone}")
+    for bone in definition.get("bones", []):
+        for cube in bone.get("cubes", []):
+            uv = cube.get("uv")
+            if isinstance(uv, dict):  # per-face UVs
+                rects = [(face, *f.get("uv", (0, 0)), *f.get("uv_size", (0, 0))) for face, f in uv.items()]
+            else:  # box UV: the cube's net from its corner
+                w, h, d = cube.get("size", (0, 0, 0))
+                rects = [("box", *(uv or (0, 0)), 2 * (w + d), d + h)]
+            for face, u, v, du, dv in rects:
+                if not (0 <= min(u, u + du) and max(u, u + du) <= width and 0 <= min(v, v + dv) and max(v, v + dv) <= height):
+                    err(f"{model_path.name}: {bone.get('name')}'s {face} face maps outside its {width}x{height} sheet")
+    for name in em.ARMOR_SETS:
+        if (ASSETS / "equipment" / f"{name}.json").exists():
+            err(f"assets/{MOD}/equipment/{name}.json: GeckoLib draws the set; a flat layer would be drawn under it")
+    # Sounds: the owner's recordings play their events, and no cue is drawn for them any more.
+    played = load(ASSETS / "sounds.json") or {}
+    cues = set(re.findall(r'^\s+"([a-z_]+)": \(', text(ROOT / "tools" / "concordance_sounds.py"), re.M))
+    for event, names in em.SOUND_FILES.items():
+        if [sound.get("name") for sound in played.get(event, {}).get("sounds", [])] != [f"{MOD}:{name}" for name in names]:
+            err(f"sounds.json: {event} must play the owner's {names}")
+        if event.split(".", 1)[1] in cues:
+            err(f"tools/concordance_sounds.py still draws {event}, which plays the owner's recordings")
+        for name in names:
+            if not (ASSETS / "sounds" / f"{name}.ogg").exists():
+                err(f"sounds/{name}.ogg is missing: run tools/owner_art.py")
+    import concordance_ember_art
+    drawn = {f"textures/{kind}/{name}.png" for kind, name in concordance_ember_art.textures()}
+    if drawn & set(em.OWNER_FILES):
+        err(f"tools/concordance_ember_art.py draws over imported owner files: {sorted(drawn & set(em.OWNER_FILES))}")
+
+
+
+def check_wayfaring(co, root, lang):
+    """The trinkets slice, part 1 (tools/concordance_trinkets.py, docs/features/arcane-concordance-trinkets.md): the Java
+    mirrors its numbers, slots, modifiers and absorbed harm; the worn items give attributes only as Trinkets modifiers
+    named by their kind (so two of a kind never add up) and only Relic Lore lets them be put on; the belt keeps its added
+    charm; the death saves run before Dreaming's listener and decline the void, a held totem and a dream; the wave goes
+    through the effect boundary only; every item is the owner's model and icon with the owner's name and an Overworld
+    recipe; the slots are given to players with the owner's icons and no cosmetic copies; no two items share a name; and
+    part 1b's belt and boot are drawn on the wearer as check_wayfaring_worn says."""
+    tr = co.trinkets
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    way, worn = text(root / "trinket" / "Wayfaring.java"), text(root / "trinket" / "WornTrinketItem.java")
+    numbers = {"CHARM_SLOTS": ("int", tr.CHARM_SLOTS), "BELT_CHARM_SLOTS": ("int", tr.BELT_CHARM_SLOTS),
+               "ABSORB_EXHAUSTION": ("float", f"{tr.ABSORB_EXHAUSTION}F"), "ABSORB_COOLDOWN_TICKS": ("int", tr.ABSORB_COOLDOWN_TICKS),
+               "FEATHER_JUMP": ("double", tr.FEATHER_JUMP),
+               "AMPHIBIAN_SWIM": ("double", tr.AMPHIBIAN_SWIM), "AMPHIBIAN_OXYGEN": ("double", tr.AMPHIBIAN_OXYGEN),
+               "ICE_BREAKER_KNOCKBACK": ("double", tr.ICE_BREAKER_KNOCKBACK), "WAVE_RADIUS": ("double", tr.WAVE_RADIUS),
+               "WAVE_RADIUS_PER_HARM": ("double", tr.WAVE_RADIUS_PER_HARM), "WAVE_MAX_RADIUS": ("double", tr.WAVE_MAX_RADIUS),
+               "WAVE_TARGETS": ("int", tr.WAVE_TARGETS), "WAVE_DAMAGE": ("int", tr.WAVE_DAMAGE), "WAVE_PUSH": ("int", tr.WAVE_PUSH),
+               "WAVE_SLOW_TICKS": ("int", tr.WAVE_SLOW_TICKS), "VIAL_HEALTH": ("float", f"{tr.VIAL_HEALTH}F"),
+               "VIAL_REGENERATION_TICKS": ("int", tr.VIAL_REGENERATION_TICKS),
+               "PHOENIX_REGENERATION_TICKS": ("int", tr.PHOENIX_REGENERATION_TICKS),
+               "PHOENIX_FIRE_RESISTANCE_TICKS": ("int", tr.PHOENIX_FIRE_RESISTANCE_TICKS),
+               "BELT_SLOT": ("String", f'"{tr.BELT_SLOT}"'), "CHARM_SLOT": ("String", f'"{tr.CHARM_SLOT}"'),
+               "FEET_SLOT": ("String", f'"{tr.FEET_SLOT}"')}
+    for name, (kind, value) in numbers.items():
+        if not re.search(rf"\b{kind} {name} = {re.escape(str(value))};", way):
+            err(f"concordance/trinket/Wayfaring.java: {name} differs from tools/concordance_trinkets.py ({value})")
+    if 'String SLOT_COUNT = "trinkets:slot_count/" + CHARM_SLOT;' not in way or tr.SLOT_COUNT != "trinkets:slot_count/" + tr.CHARM_SLOT:
+        err("concordance/trinket/Wayfaring.java: SLOT_COUNT must be Trinkets' count attribute for the Charm slot")
+    for item, types in tr.ABSORBS.items():
+        if f'"{item}", List.of({", ".join(chr(34) + t + chr(34) for t in types)})' not in way:
+            err(f"concordance/trinket/Wayfaring.java: ABSORBS for {item} differs from tools/concordance_trinkets.py ({types})")
+    if len(re.findall(r'^\t\t\t"[a-z_]+", List\.of\(', way, re.M)) != len(tr.ABSORBS):
+        err("concordance/trinket/Wayfaring.java: ABSORBS names other charms than tools/concordance_trinkets.py")
+    # Each registration: the item, the kind its modifiers are named after, and the modifiers (attribute -> constant).
+    constants = {"SLOT_COUNT": tr.SLOT_COUNT, "BELT_CHARM_SLOTS": tr.BELT_CHARM_SLOTS, "FEATHER_JUMP": tr.FEATHER_JUMP,
+                 "AMPHIBIAN_SWIM": tr.AMPHIBIAN_SWIM, "AMPHIBIAN_OXYGEN": tr.AMPHIBIAN_OXYGEN,
+                 "ICE_BREAKER_KNOCKBACK": tr.ICE_BREAKER_KNOCKBACK}
+    registered = {}
+    for match in re.finditer(r'\bitem\("([a-z_]+)", "([a-z_]+)", Map\.of\((.*?)\), Rarity\.', way, re.S):
+        args = [arg.strip() for arg in re.split(r",\s*", match.group(3).replace("\n", " ")) if arg.strip()]
+        modifiers = {}
+        for attribute, value in zip(args[0::2], args[1::2]):
+            attribute = attribute.strip('"') if attribute.startswith('"') else constants.get(attribute, attribute)
+            modifiers[attribute] = constants.get(value.replace("(double)", "").strip(), value)
+        registered[match.group(1)] = (match.group(2), modifiers)
+    if set(registered) != set(tr.TRINKETS):
+        err(f"concordance/trinket/Wayfaring.java registers {sorted(registered)}, not TRINKETS")
+    for item, (kind, modifiers) in registered.items():
+        if kind != tr.KIND.get(item) or modifiers != tr.MODIFIERS.get(item, {}):
+            err(f"concordance/trinket/Wayfaring.java: {item} is registered as {kind} {modifiers}, not {tr.KIND.get(item)} "
+                f"{tr.MODIFIERS.get(item, {})} (tools/concordance_trinkets.py)")
+    if tr.KIND["phoenix_down"] != "angelic_feather" or tr.MODIFIERS.get("phoenix_down") != tr.MODIFIERS.get("angelic_feather"):
+        err("tools/concordance_trinkets.py: worn, the Phoenix Down is an Angelic Feather as well (its kind and modifiers)")
+    if ("implements TrinketCallback" not in worn or "forEachTrinketModifier" not in worn or "ATTRIBUTE_MODIFIERS" in worn
+            or 'Jugcraft.id("wayfaring/" + kind + "/" + attribute.getPath())' not in worn or "slotIdentifier.withSuffix" in worn):
+        err("concordance/trinket/WornTrinketItem.java: a worn item's attributes must be Trinkets modifiers named by its kind "
+            "(never by slot: two of a kind would add up), never the item's own")
+    if "return entity instanceof Player player && Reliquary.knows(player);" not in worn:
+        err("concordance/trinket/WornTrinketItem.java: only someone who understands Relic Lore may put one on (canEquip)")
+    if ("holdsAddedCharm(entity)" not in worn or "slot.get() == stack" not in worn
+            or "TrinketCallback.super.canUnequip(stack, slot, entity)" not in worn):
+        err("concordance/trinket/WornTrinketItem.java: the worn belt (not a cosmetic one) keeps its added charm (canUnequip), "
+            "and Curse of Binding still holds")
+    if "slot.cosmetic() ? TrinketDropRule.KEEP" not in worn:
+        err("concordance/trinket/WornTrinketItem.java: a cosmetic copy stays through death (Trinkets would drop it and keep it)")
+    absorb = way[way.find("public static boolean absorb("):way.find("private static boolean allowDamage(")]
+    if ("ABSORB_COOLDOWN_TICKS" not in absorb or "if (points > food.getFoodLevel())" not in absorb
+            or "causeFoodExhaustion(exhaustion - points * 4.0F)" not in absorb or "TAKEN.put(" not in absorb):
+        err("concordance/trinket/Wayfaring.java: a charm takes only a blow the food bar can pay for (whole points from the "
+            "bar, the rest as exhaustion, which vanilla caps), and keeps vanilla's hurt cooldown, which its blows never start")
+    if "return !(entity instanceof ServerPlayer player) || !absorb(player, source, amount);" not in way:
+        err("concordance/trinket/Wayfaring.java: ALLOW_DAMAGE must refuse a blow only when absorb() took it")
+    if ".attributes(" in way or "ATTRIBUTE_MODIFIERS" in way:
+        err("concordance/trinket/Wayfaring.java: a worn item carries no attribute modifiers of its own (they would count in the hand)")
+    if "SlotAttributes.createAttributeForSlot(CHARM_SLOT)" not in way:
+        err("concordance/trinket/Wayfaring.java: the Charm slot's count attribute must be registered at start-up")
+    if ("ALLOW_DEATH.addPhaseOrdering(SAVE_PHASE, Event.DEFAULT_PHASE)" not in way or "ALLOW_DEATH.register(SAVE_PHASE," not in way
+            or re.search(r"ALLOW_DEATH\.register\((?!SAVE_PHASE)", way)):
+        err("concordance/trinket/Wayfaring.java: the death saves must run in SAVE_PHASE, before Dreaming's default-phase listener")
+    save = way[way.find("public static boolean save("):way.find("private static boolean holdsTotem(")]
+    for guard in ("DamageTypeTags.BYPASSES_INVULNERABILITY", "Dreaming.dreaming(player)", "holdsTotem(player)", "Reliquary.knows(player)",
+                  "Reliquary.enabled()"):
+        if guard not in save:
+            err(f"concordance/trinket/Wayfaring.java: a death save must decline unless {guard} allows it")
+    if "DataComponents.DEATH_PROTECTION" not in way:
+        err("concordance/trinket/Wayfaring.java: a held totem answers before a vial (DataComponents.DEATH_PROTECTION)")
+    if ("ConcordanceEffects.apply(" not in way or "instanceof Enemy" not in way or "source.is(DamageTypes.FALL)" not in way
+            or any(call in way for call in ("hurtServer(", "addEffect(", ".push(", "setDeltaMovement(", "igniteFor"))):
+        err("concordance/trinket/Wayfaring.java: the wave (after a plain fall, at hostile creatures) and the saves' statuses "
+            "must go through ConcordanceEffects.apply only")
+    # Each item: the owner's model (texture renamed), an imported icon (and sidecar), the owner's name, a tooltip.
+    for item in tr.OWNER_ITEMS:
+        if load(ASSETS / "items" / f"{item}.json") != {"model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}}:
+            err(f"assets/{MOD}/items/{item}.json: not the item's own model")
+        if load(ASSETS / "models" / "item" / f"{item}.json") != tr.owner_model(item):
+            err(f"assets/{MOD}/models/item/{item}.json: not the owner's {tr.OWNER_ITEMS[item]} model with its texture renamed")
+        if f"textures/item/{item}.png" not in tr.OWNER_FILES:
+            err(f"{item}: its icon is not one of the owner's files (OWNER_FILES)")
+        if (item in tr.ANIMATED) != (f"textures/item/{item}.png.mcmeta" in tr.OWNER_FILES):
+            err(f"{item}: its animation sidecar must be imported exactly when the owner's icon is a strip (ANIMATED)")
+        if lang.get(f"item.{MOD}.{item}") != tr.owner_name(item) or f"tooltip.{MOD}.{item}" not in lang:
+            err(f"{item}: its name must be the owner's ({tr.owner_name(item)}) and it needs a tooltip")
+    if not set(tr.OWNER_ITEMS) == set(tr.ITEMS) == set(tr.TRINKETS) or not set(tr.MODIFIERS) <= set(tr.ITEMS):
+        err("tools/concordance_trinkets.py: ITEMS, OWNER_ITEMS and TRINKETS must name the same items")
+    if not set(tr.ABSORBS) <= {item for item, slot in tr.TRINKETS.items() if slot == tr.CHARM_SLOT}:
+        err("tools/concordance_trinkets.py: only charms absorb harm")
+    excluded = set(co.equivalence.EXCLUDED)
+    for item in tr.ITEMS:
+        if f"{MOD}:{item}" not in excluded:
+            err(f"{item}: the Concordance's magical things are never weighed (tools/concordance_equivalence.py EXCLUDED)")
+    # Recipes: the slice's own items, or things the Overworld gives.
+    progression = co.progression
+    for item in tr.ITEMS:
+        data = load(DATA / MOD / "recipe" / f"{item}.json") or {}
+        if item not in tr.RECIPES and item not in tr.SHAPELESS:
+            err(f"{item} has no recipe")
+        if data.get("fabric:load_conditions") != [{"condition": f"{MOD}:feature_enabled", "feature": "concordance"}]:
+            err(f"recipe {item}: it must load with the Concordance")
+        for ref in list(data.get("key", {}).values()) + list(data.get("ingredients", [])):
+            ref = ref if isinstance(ref, str) else ""
+            ok = (ref.startswith(f"{MOD}:") and split(ref)[1] in tr.ITEMS and split(ref)[1] != item
+                  or ref in progression.VANILLA_SOURCES and not progression.VANILLA_SOURCES[ref][3])
+            if not ok:
+                err(f"recipe {item}: {ref} is not the slice's own or had in the Overworld (tools/concordance_progression.py)")
+    # The slots: the belt slot is Trinkets' own (left as it defines it); the charm and feet slots are Jugcraft's.
+    entities = load(DATA / "trinkets" / "entities" / f"{MOD}_wayfaring.json") or {}
+    if entities.get("entities") != ["player"] or set(entities.get("slots", [])) != set(tr.GRANTED_SLOTS):
+        err(f"data/trinkets/entities/{MOD}_wayfaring.json must give players {sorted(tr.GRANTED_SLOTS)}")
+    group, name = tr.BELT_SLOT.split("/")
+    if (DATA / "trinkets" / "slots" / group / f"{name}.json").exists():
+        err(f"data/trinkets/slots/{tr.BELT_SLOT}.json: the belt slot is Trinkets' own; redefining it would make its icon "
+            "depend on data-pack order")
+    owned = {**tr.OWNER_FILES, **tr.OWNER_BLOCKS_FILES}
+    for slot, info in tr.TRINKET_SLOTS.items():
+        group, name = slot.split("/")
+        definition = load(DATA / "trinkets" / "slots" / group / f"{name}.json") or {}
+        if (definition.get("amount") != info["amount"] or definition.get("icon") != f"{MOD}:container/slots/{info['icon']}"
+                or definition.get("cosmetic_slots") is not False):
+            err(f"data/trinkets/slots/{slot}.json: amount {info['amount']}, the owner's icon, and no cosmetic slots")
+        if f"textures/gui/sprites/container/slots/{info['icon']}.png" not in owned:
+            err(f"slot {slot}: its icon is not the owner's (OWNER_FILES, OWNER_BLOCKS_FILES)")
+        if lang.get(f"trinkets.slot.{group}.{name}") != info["name"]:
+            err(f"slot {slot}: lang trinkets.slot.{group}.{name} must be {info['name']}")
+    for slot in tr.GRANTED_SLOTS:
+        group, name = slot.split("/")
+        held = set((load(DATA / "trinkets" / "tags" / "item" / group / f"{name}.json") or {}).get("values", []))
+        if held != {f"{MOD}:{item}" for item, worn_in in tr.TRINKETS.items() if worn_in == slot}:
+            err(f"data/trinkets/tags/item/{slot}.json holds {sorted(held)}")
+    # Two items with one English name cannot be told apart (the kinetic belt is the Drive Belt for this reason).
+    names = {}
+    for key, value in lang.items():
+        if key.startswith(f"item.{MOD}.") and key.count(".") == 2:
+            names.setdefault(value, []).append(key)
+    for value, keys in names.items():
+        if len(keys) > 1:
+            err(f"lang: {', '.join(sorted(keys))} share the name {value}")
+    check_wayfaring_worn(co)
+
+
+def _worn_faces(model, anchor_y):
+    """The faces of a worn block model (tools/concordance_trinkets.py worn_model) on its part, in the player model's pixels
+    (x to the wearer's left, y down, z to their back), for a model anchored at (0, anchor_y, 0) on the part: (axis, the
+    way it faces along it, its plane, its extent on the other two axes in order)."""
+    out = []
+    top = 8 + anchor_y
+    for element in model["elements"]:
+        (fx, fy, fz), (tx, ty, tz) = element["from"], element["to"]
+        lo, hi = (fx - 8, top - ty, 8 - tz), (tx - 8, top - fy, 8 - fz)
+        for face in element["faces"]:
+            k, sign = {"west": (0, -1), "east": (0, 1), "up": (1, -1), "down": (1, 1), "south": (2, -1), "north": (2, 1)}[face]
+            out.append((k, sign, hi[k] if sign > 0 else lo[k], [(lo[j], hi[j]) for j in range(3) if j != k]))
+    return out
+
+
+def _item_tag(tag, seen=None):
+    """The items an item tag ("ns:path") holds in this repository's own data, nested tags followed; what vanilla or
+    another mod adds to it is not seen."""
+    seen = set() if seen is None else seen
+    if tag in seen:
+        return set()
+    seen.add(tag)
+    ns, _, path = tag.partition(":")
+    file = RES / "data" / ns / "tags" / "item" / f"{path}.json"
+    data = load(file) if file.is_file() else None
+    items = set()
+    for entry in data.get("values", []) if isinstance(data, dict) else []:
+        value = entry.get("id") if isinstance(entry, dict) else entry
+        if isinstance(value, str):
+            items |= _item_tag(value[1:], seen) if value.startswith("#") else {value}
+    return items
+
+
+def check_wayfaring_worn(co):
+    """Wayfaring part 1b (tools/concordance_trinkets.py WORN, docs/features/arcane-concordance-trinkets.md): the Leather
+    Belt and Amphibian Boot drawn on the wearer by Trinkets' data-driven renderer. Each worn sheet is the owner's, imported
+    as supplied into the items atlas, one frame of the size WORN gives, and every worn sheet the owner drew for the slice's
+    items is drawn; the boxes' nets lie on their sheet apart from each other, read no half-clear texel (cutout draws them
+    solid) and between them read every opaque texel the owner drew; the models and render definitions are the generator's,
+    anchored where Trinkets attaches them, and no two faces of a model facing the same way share a plane (model_writer
+    would have moved one; a box set on another's face lies back to back with it, which the generator's comments answer
+    for); every face over its part's box keeps off the skin, its outer layer and vanilla armour's shells as armor_models
+    keeps 3D armour (the soles by model_writer's nudge only), and two models' faces stay that nudge apart where they
+    overlap standing (the two boots between the legs); no other definition draws a Wayfaring item; and no Java renderer
+    replaces a definition (Trinkets uses a registered renderer instead of the data for that item). Jugcraft's own 3D
+    armour (worn_models.json) is not compared: it is drawn toward the camera, over what it meets (the feature record's
+    limits)."""
+    import armor_models
+    import model_writer
+    tr = co.trinkets
+    for item, (ns, owner) in tr.OWNER_ITEMS.items():
+        if (tr.MAGIC / "assets" / ns / "textures" / "models" / "items" / f"{owner}.png").is_file() and item not in tr.WORN:
+            err(f"{item}: the owner drew a worn sheet for it ({ns}/textures/models/items/{owner}.png), but WORN does not draw it")
+    for item, info in tr.WORN.items():
+        ns, owner = tr.OWNER_ITEMS[item]
+        runtime = f"textures/item/{item}_worn.png"
+        if tr.OWNER_FILES.get(runtime) != f"assets/{ns}/textures/models/items/{owner}.png":
+            err(f"{item}: its worn sheet must be the owner's {ns}/textures/models/items/{owner}.png, imported as {runtime} "
+                "(OWNER_FILES)")
+            continue
+        png = ASSETS / runtime
+        if not png.is_file() or png.with_name(png.name + ".mcmeta").exists():
+            err(f"{runtime} is missing (run tools/owner_art.py), or has an animation sidecar (a worn sheet is one frame)")
+            continue
+        with Image.open(png) as image:
+            sheet = image.convert("RGBA")
+        size = info["sheet"]
+        if sheet.size != (size, size):
+            err(f"{runtime} is {sheet.size[0]}x{sheet.size[1]}, not the {size}x{size} WORN gives")
+            continue
+        alpha = sheet.getchannel("A")
+        read = {}
+        for name, (u, v), dims, _corner in info["boxes"]:
+            if not all(isinstance(c, int) and c >= -size for c in (u, v, *dims)) or min(dims) < 0:
+                err(f"{item}: the {name}'s net corner and size are whole texels ({(u, v)}, {dims})")
+                continue
+            for face, (u0, v0, u1, v1) in tr.worn_net(u, v, *dims).items():
+                x0, x1, y0, y1 = min(u0, u1), max(u0, u1), min(v0, v1), max(v0, v1)
+                if x0 < 0 or y0 < 0 or x1 > size or y1 > size:
+                    err(f"{item}: the {name}'s {face} face reads {[u0, v0, u1, v1]}, outside its {size}x{size} sheet")
+                    continue
+                if any(alpha.crop((x0, y0, x1, y1)).histogram()[1:255]):
+                    err(f"{item}: the {name}'s {face} face reads half-clear texels, which cutout draws solid")
+                for x in range(x0, x1):
+                    for y in range(y0, y1):
+                        if (x, y) in read:
+                            err(f"{item}: the {name}'s {face} face and the {read[x, y]} read the same texel ({x}, {y})")
+                        read[x, y] = f"{name}'s {face} face"
+        unread = [(x, y) for x in range(size) for y in range(size) if alpha.getpixel((x, y)) == 255 and (x, y) not in read]
+        if unread:
+            err(f"{item}: {len(unread)} opaque texels of its sheet lie in no box's net, e.g. {unread[0]}: the boxes no longer "
+                "fit the owner's sheet")
+    # The models and render definitions, as the generator writes them.
+    faces = {}
+    for model, (item, part) in tr.worn_models().items():
+        if part not in armor_models.BASE:
+            err(f"{model}: {part} is not a part of the player model")
+            continue
+        # Where Trinkets anchors the model (ModelAttachementImpl: the part's own box's middle plus half its size times
+        # the offset, up and front negated) must be the part's bottom middle, where worn_model and the soles take it to be.
+        (blo, bhi) = armor_models.BASE[part]
+        anchor = [(blo[k] + bhi[k]) / 2 + s * (bhi[k] - blo[k]) / 2 * tr.WORN_OFFSET[k] for k, s in enumerate((1, -1, -1))]
+        if anchor != [0, bhi[1], 0] or tr.WORN_ANCHOR_Y != bhi[1]:
+            err(f"{model}: Trinkets anchors it at {anchor} on the {part} (offset {tr.WORN_OFFSET}), not at the part's "
+                f"bottom middle [0, {bhi[1]}, 0] where WORN_ANCHOR_Y ({tr.WORN_ANCHOR_Y}) places its boxes")
+        expected = tr.worn_model(item, part)
+        drawn = json.loads(json.dumps(expected))
+        model_writer.finish_elements(drawn["elements"])
+        if drawn != expected:
+            err(f"{model}: two of its faces facing the same way share a plane (model_writer moves one when it is written); "
+                "fit the boxes apart")
+        if load(ASSETS / "models" / "item" / f"{model}.json") != drawn:
+            err(f"assets/{MOD}/models/item/{model}.json differs from tools/concordance_trinkets.py (run the generator)")
+        faces[model] = (item, part, _worn_faces(expected, tr.WORN_ANCHOR_Y))
+        # The skin and vanilla armour under the part, as armor_models keeps 3D armour off them: a face over the part's box
+        # (grown by the shell in question) stands armor_models.SKIN_GAP off the skin and its outer layer, and
+        # model_writer's nudge off vanilla armour's shells; a boot's sole (a leg's downward face) only the nudge off
+        # each, so as little of it is buried as can be.
+        skin, armour = armor_models.SKIN_SHELLS[part], (0.5, 1.0)
+        for k, sign, plane, rect in faces[model][2]:
+            others = [j for j in range(3) if j != k]
+            out = sign * (plane - (bhi[k] if sign > 0 else blo[k]))
+            sole = part.endswith("_leg") and k == 1 and sign > 0
+            for shell in skin + armour:
+                margin = max(skin) if shell in skin else shell
+                if not all(rect[i][0] < bhi[j] + margin and rect[i][1] > blo[j] - margin for i, j in enumerate(others)):
+                    continue
+                need = model_writer.COPLANAR_NUDGE if sole or shell in armour else armor_models.SKIN_GAP
+                if abs(out - shell) < need - 1e-6:
+                    err(f"{model}: a face {out:.2f} px out from the {part}'s box lies within {need} px of the "
+                        f"{shell} px shell (the skin, its outer layer or vanilla armour) and would flicker")
+    # Worn on parts that never move apart standing (the body and legs; armor_models.PIVOTS), two models' faces facing the
+    # same way never share a plane where they overlap, on one part or two: the boots overlap between the legs.
+    still = [(model, [(k, sign, plane + armor_models.PIVOTS[part][k],
+                       [(lo + armor_models.PIVOTS[part][j], hi + armor_models.PIVOTS[part][j])
+                        for j, (lo, hi) in zip([j for j in range(3) if j != k], rect)])
+                      for k, sign, plane, rect in found])
+             for model, (item, part, found) in faces.items() if part in ("body", "right_leg", "left_leg")]
+    for i, (a, faces_a) in enumerate(still):
+        for b, faces_b in still[i + 1:]:
+            for k, sign, plane, rect in faces_a:
+                for k2, sign2, plane2, rect2 in faces_b:
+                    if (k, sign) == (k2, sign2) and abs(plane - plane2) < model_writer.COPLANAR_NUDGE - 1e-6 and all(
+                            r[0] < r2[1] and r2[0] < r[1] for r, r2 in zip(rect, rect2)):
+                        err(f"{a} and {b}: faces {abs(plane - plane2):.2f} px apart where they overlap standing (need "
+                            f"{model_writer.COPLANAR_NUDGE}); they would flicker")
+    # Each WORN item's render definition is the generator's, and no other definition, in any namespace or folder (Trinkets
+    # reads every trinkets/ folder through), draws one of the slice's items, by its id or a tag holding it.
+    for item in tr.WORN:
+        if load(ASSETS / "trinkets" / f"{item}.json") != tr.worn_render(item):
+            err(f"assets/{MOD}/trinkets/{item}.json differs from tools/concordance_trinkets.py worn_render (run the generator)")
+    wayfaring = {f"{MOD}:{item}" for item in tr.TRINKETS}
+    for path in sorted(RES.glob("assets/*/trinkets/**/*.json")):
+        name = path.relative_to(ROOT)
+        data = load(path)
+        if not isinstance(data, dict):
+            err(f"{name}: a Trinkets render definition is a JSON object")
+            continue
+        targets = data.get("target", [])
+        drawn = set()
+        for target in targets if isinstance(targets, list) else [targets]:
+            if not isinstance(target, str):
+                err(f"{name}: its target {target!r} is not an item id or a #tag")
+            elif target.startswith("#"):
+                drawn |= _item_tag(target[1:]) & wayfaring
+            elif target in wayfaring:
+                drawn.add(target)
+        for target in sorted(drawn):
+            item = target.split(":", 1)[1]
+            if item not in tr.WORN:
+                err(f"{name} draws {target}, which WORN does not (add it to WORN)")
+            elif path != ASSETS / "trinkets" / f"{item}.json":
+                err(f"{name}: a second render definition draws {target} (its own is assets/{MOD}/trinkets/{item}.json)")
+    if tr.WORN_GROW < armor_models.SKIN_GAP or tr.WORN_LEFT_STEP < model_writer.COPLANAR_NUDGE:
+        err(f"tools/concordance_trinkets.py: WORN_GROW must be at least armor_models.SKIN_GAP ({armor_models.SKIN_GAP}), so the "
+            "belt and boots clear vanilla leggings and boots, and WORN_LEFT_STEP at least model_writer.COPLANAR_NUDGE "
+            f"({model_writer.COPLANAR_NUDGE}), so the two boots never share a plane")
+    # A Java renderer registered for an item replaces its render definition (TrinketRenderLayer.extract).
+    for path in sorted(CLIENT_JAVA_ROOT.rglob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        for call in re.findall(r"TrinketRendererRegistry\.registerRenderer\(([^,;]+)", text):
+            if any(item.upper() in call for item in tr.WORN):
+                err(f"{path.relative_to(ROOT)}: a Java renderer for {call.strip()} would replace its render definition")
 
 
 def check_alchemy(co, root, lang, registered, research):

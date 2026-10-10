@@ -27,7 +27,10 @@ public enum EffectKind {
 	PROTECTION("protection", On.CREATURE, 1),
 	/** Making a creature glow, visible through walls. */
 	DETECTION("detection", On.CREATURE, 1),
-	/** A limited, listed change to the world: putting out fire. */
+	/**
+	 * A limited, listed change to the world: putting out fire; or, in Ember's school ({@code spell_power:fire}),
+	 * kindling an unlit campfire, candle or candle cake (concordance/ember/Ember.java). It never places fire.
+	 */
 	ALTERATION("alteration", On.BLOCK, 3);
 
 	/** What an operation acts on. */
