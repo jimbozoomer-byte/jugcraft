@@ -315,6 +315,14 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The *Arcane Concordance* codex (Modonomicon) unlocks its pages with your research. Jade, JEI and LambDynamicLights show the bench, its workings and the lantern's glow when installed. Jugcraft's weapons no longer receive Spell Engine's automatic weapon skills.
 - Record: [arcane-concordance-first-light.md](docs/features/arcane-concordance-first-light.md); the whole plan: [ARCANE_CONCORDANCE.md](docs/ARCANE_CONCORDANCE.md).
 
+### Unmerged: Garden crops
+- Jugcraft's **cabbage, onion, tomato and corn** now grow through the owner's own drawings: eight cabbage stages, a budding then fruiting tomato vine in its trellis, and the owner's corn, still three blocks tall. Ornamental corn ripens with flint-coloured ears. The Garden Salad is drawn as the owner's mixed salad.
+- A ripe tomato vine left unpicked **goes over** in time and gives **Rotten Tomatoes**: throw them like snowballs (a red splat, no harm) or compost them.
+- **Wild Carrots, Wild Potatoes and Wild Beetroots** grow in plains, flower fields, taigas, hills and swamps and give vanilla's crops; the wild cabbage, onion, tomato and corn wear the owner's art.
+- **Mushroom colonies:** use a brown or red mushroom on Rich Soil to plant one. It grows in the shade (light 12 or less); shears or a knife pick two or three mushrooms from a grown colony, and it grows again.
+- Saves: tomato vines gain an `overripe` state, `false` for vines saved before. No ID is renamed.
+- Details: [docs/features/garden-crops.md](docs/features/garden-crops.md).
+
 ### Unmerged: Milkshakes
 - Seven milkshakes the owner drew, each read off their drawing as its own sundae glass: **Strawberry, Banana, Plum, Apple, Blueberry, Pumpkin and Chocolate**, with the fruit on top and a straw through the cream.
 - Made by hand from a **Milk Bottle**, a snowball, a sugar and the flavour. Drunk even when full, for five food and half a minute of Haste, leaving the glass bottle.

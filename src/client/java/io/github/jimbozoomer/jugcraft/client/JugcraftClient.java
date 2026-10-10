@@ -262,6 +262,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.BOWLING_PUMPKIN, BowlingPumpkinRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.TOILET_PAPER_ROLL, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.TOSS_RING, ThrownItemRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.ROTTEN_TOMATO, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.FERRIS_WHEEL, FerrisWheelRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.PINATA, PinataRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.HOT_AIR_BALLOON, HotAirBalloonRenderer::new);

@@ -186,6 +186,8 @@ public final class JugcraftAgriculture {
 	public static final Map<TallCrop, TallCropBlock> TALL_CROPS = new EnumMap<>(TallCrop.class);
 	private static final Map<String, Block> BLOCKS = new LinkedHashMap<>();
 	private static final Map<String, Item> ITEMS = new LinkedHashMap<>();
+	/** The mushroom colonies, by the mushroom that plants them (garden crops, tools/garden.py COLONIES). */
+	private static final Map<Item, MushroomColonyBlock> COLONIES = new LinkedHashMap<>();
 	private static final List<Item> SEEDS_TAB = new ArrayList<>();
 	private static final List<Item> FOOD_TAB = new ArrayList<>();
 	private static final List<Item> INGREDIENT_TAB = new ArrayList<>();
@@ -359,6 +361,8 @@ public final class JugcraftAgriculture {
 	public static EntityType<Squirrel> SQUIRREL;
 	public static EntityType<Pumpkling> PUMPKLING;
 	public static EntityType<TossRing> TOSS_RING;
+	/** A thrown Rotten Tomato (garden crops, tools/garden.py ROTTEN_TOMATO). */
+	public static EntityType<RottenTomato> ROTTEN_TOMATO;
 	public static BlockEntityType<HighStrikerBlockEntity> HIGH_STRIKER_ENTITY;
 	public static EntityType<FerrisWheel> FERRIS_WHEEL;
 	public static BlockEntityType<FerrisWheelBlockEntity> FERRIS_WHEEL_BOOTH;
@@ -453,7 +457,8 @@ public final class JugcraftAgriculture {
 				properties = properties.strength(0.2F);
 			}
 			TALL_CROPS.put(crop, (TallCropBlock) registerBlock(crop.blockId,
-					props -> crop.paddy ? new PaddyCropBlock(props, crop) : new TallCropBlock(props, crop), properties));
+					props -> crop.paddy ? new PaddyCropBlock(props, crop)
+							: crop == TallCrop.TOMATO ? new TomatoVineBlock(props, crop) : new TallCropBlock(props, crop), properties));
 		}
 		crop("bean_crop", "beans", true);
 		crop("sweet_potato_crop", "sweet_potato", false);
@@ -634,6 +639,7 @@ public final class JugcraftAgriculture {
 		wild("wild_mandrake");
 		Mandrakes.register();
 		registerFruitCrops();
+		registerGarden();
 
 		registerEquipment();
 		registerDecorations();
@@ -2969,6 +2975,34 @@ public final class JugcraftAgriculture {
 		preserve("blueberry_jam", 3, 0.4F, null, 0, 0x3A2E7A);
 	}
 
+	/**
+	 * Garden crops in the owner's art (tools/garden.py, slice 7a): the Rotten Tomato, thrown or composted, and its entity;
+	 * the wild carrots, potatoes and beetroots; and the brown and red mushroom colonies, which have no item (a mushroom
+	 * plants one on Rich Soil, {@link RichSoilBlock}). The tomato vine that goes over is registered with the other tall
+	 * crops ({@link TomatoVineBlock}).
+	 */
+	private static void registerGarden() {
+		thrown("rotten_tomato", COMPOST_MEDIUM_HIGH);
+		ROTTEN_TOMATO = entity(RottenTomatoItem.ID, EntityType.Builder.<RottenTomato>of(RottenTomato::new, MobCategory.MISC).noLootTable()
+				.sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10));
+		wild("wild_carrots");
+		wild("wild_potatoes");
+		wild("wild_beetroots");
+		colony("brown_mushroom_colony", Blocks.BROWN_MUSHROOM, Items.BROWN_MUSHROOM);
+		colony("red_mushroom_colony", Blocks.RED_MUSHROOM, Items.RED_MUSHROOM);
+	}
+
+	/** The colony {@code mushroom} plants on Rich Soil, or null if it plants none. */
+	public static @Nullable MushroomColonyBlock colony(Item mushroom) {
+		return COLONIES.get(mushroom);
+	}
+
+	/** A mushroom colony with the properties of the mushroom it grows (no item: the mushroom plants it). */
+	private static void colony(String id, Block mushroom, Item item) {
+		COLONIES.put(item, (MushroomColonyBlock) registerBlock(id, props -> new MushroomColonyBlock(props, item),
+				BlockBehaviour.Properties.ofFullCopy(mushroom)));
+	}
+
 	/** Wild plant patches (data/jugcraft/worldgen) in the biomes each crop comes from. New chunks only. */
 	private static void registerWorldgen() {
 		if (!JugcraftConfig.isFeatureEnabled(FEATURE)) {
@@ -3009,6 +3043,10 @@ public final class JugcraftAgriculture {
 		wildPatch("wild_strawberries", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_FLORAL);
 		wildPatch("wild_blueberries", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_HILL);
 		wildPatch("wild_coffee", ConventionalBiomeTags.IS_JUNGLE);
+		// The garden crops' wild plants (tools/garden.py WILD).
+		wildPatch("wild_carrots", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
+		wildPatch("wild_potatoes", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_HILL);
+		wildPatch("wild_beetroots", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_SWAMP);
 		// Halloween harvest: heirloom pumpkins and bottle gourds on grass, and mums in flower-rich places.
 		wildPatch("white_pumpkin", ConventionalBiomeTags.IS_BIRCH_FOREST, ConventionalBiomeTags.IS_SNOWY);
 		wildPatch("jarrahdale_pumpkin", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_WINDSWEPT);
@@ -3189,6 +3227,11 @@ public final class JugcraftAgriculture {
 	private static void petFood(String id, EntityType<?> animal, int heal, boolean bowl, List<PetFoodItem.Treat> treats) {
 		registerItem(id, props -> new PetFoodItem(props, animal, heal, bowl, treats), new Item.Properties().stacksTo(bowl ? 16 : 64),
 				FOOD_TAB);
+	}
+
+	/** An item thrown like a snowball (the garden crops' Rotten Tomato), in stacks of 16. */
+	private static void thrown(String id, ResourceKey<ContextIntProvider> compost) {
+		registerItem(id, RottenTomatoItem::new, new Item.Properties().stacksTo(16).compostable(compost), INGREDIENT_TAB);
 	}
 
 	private static void sickle(String id, int radius, int durability) {

@@ -7,7 +7,8 @@ copy of its library file, with its .png.mcmeta animation sidecar when it has one
 the mod's text files). The only changes are the recolourings listed in a feature's RECOLOURED table (the bronze and
 steel knives: the owner's iron knife with its blade's tones swapped for the approved bronze and steel ramps) and the
 icons listed in a feature's COMPOSED table (a serving the owner drew no icon for: their bowl with a window of their
-whole-dish icon heaped in it). No generator draws over these files: tools/generate_textures.py runs this
+whole-dish icon heaped in it), and ornamental corn's ripe stage (tools/garden.py ORNAMENTAL_EARS: their ripe corn with its
+ears in flint corn's colours). No generator draws over these files: tools/generate_textures.py runs this
 import last, and tools/check_mod_data.py fails if a runtime copy differs from what this import would write.
 
     python3 tools/owner_art.py           write every import (generate_textures.py also does)
@@ -25,6 +26,7 @@ sys.path.insert(0, HERE)
 
 import arms_pixel  # noqa: E402
 import feasts  # noqa: E402
+import garden  # noqa: E402
 import kitchen  # noqa: E402
 import menu  # noqa: E402
 import rice  # noqa: E402
@@ -38,7 +40,7 @@ TEXTURES = os.path.join(ROOT, "src", "main", "resources", "assets", "jugcraft", 
 def imports():
     """(runtime path under textures/ without .png, library path under Blocks/ without .png) for every copied texture."""
     out = []
-    for table in (kitchen.TEXTURES, feasts.TEXTURES, menu.TEXTURES, rice.TEXTURES, soil.TEXTURES):
+    for table in (kitchen.TEXTURES, feasts.TEXTURES, menu.TEXTURES, rice.TEXTURES, soil.TEXTURES, garden.TEXTURES):
         for target, source in table.items():
             out.append((target, f"{FOOD}/{source}"))
     return out
@@ -116,6 +118,9 @@ def expected():
         files[_target(target)] = _png_bytes(recolour(Image.open(_source(source)), ramp))
     for target, spec in compositions():
         files[_target(target)] = _png_bytes(compose(spec))
+    for target, source in garden.ORNAMENTAL_EARS.items():
+        # Ornamental corn's ripe stage: the owner's ripe corn, its ears in flint corn's colours (tools/garden.py).
+        files[_target(target)] = _png_bytes(garden.flint_ears(Image.open(_source(f"{FOOD}/{source}"))))
     return files
 
 

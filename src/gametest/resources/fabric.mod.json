@@ -146,7 +146,8 @@
 			"io.github.jimbozoomer.jugcraft.test.CakeGameTests",
 			"io.github.jimbozoomer.jugcraft.test.FruitCropGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PieTartGameTests",
-			"io.github.jimbozoomer.jugcraft.test.MilkshakeGameTests"
+			"io.github.jimbozoomer.jugcraft.test.MilkshakeGameTests",
+			"io.github.jimbozoomer.jugcraft.test.GardenGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceJournalClientGameTests",
@@ -259,7 +260,8 @@
 			"io.github.jimbozoomer.jugcraft.test.CakeClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.FruitCropClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PieTartClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.MilkshakeClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.MilkshakeClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.GardenClientGameTests"
 		]
 	},
 	"depends": {

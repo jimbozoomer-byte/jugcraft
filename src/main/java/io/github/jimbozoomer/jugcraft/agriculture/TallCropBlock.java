@@ -10,6 +10,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -243,10 +244,15 @@ public class TallCropBlock extends VegetationBlock implements BonemealableBlock 
 		}
 		RandomSource random = level.getRandom();
 		int count = crop.pickMin + random.nextInt(crop.pickMax - crop.pickMin + 1);
-		Block.popResource(level, dropPos, new ItemStack(JugcraftAgriculture.item(crop.produceId), count));
+		Block.popResource(level, dropPos, new ItemStack(produce(state), count));
 		setAge(level, bottom, crop.pickReset);
 		level.playSound(null, dropPos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, 0.8F + random.nextFloat() * 0.4F);
 		return true;
+	}
+
+	/** What picking the ripe plant whose bottom is {@code bottom} gives: its produce ({@link TomatoVineBlock} may differ). */
+	protected Item produce(BlockState bottom) {
+		return JugcraftAgriculture.item(crop.produceId);
 	}
 
 	/** Bone meal on an unripe plant and sickles are item actions; anything else in hand may pick. */
