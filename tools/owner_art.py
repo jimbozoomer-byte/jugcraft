@@ -3,8 +3,8 @@ README.md) into the mod's resources, and checks the imported files still match t
 imports files from the owner's magic collection (art/owner-library/originals/Magic, art/owner-library/MAGIC_ASSETS.md):
 textures, a GeckoLib model and sounds, each a byte-for-byte copy under a Jugcraft name (a model's JSON with its line ends
 made LF), listed in tools/concordance_ember.py OWNER_FILES. The trinkets slice (tools/concordance_trinkets.py) adds its
-icons, their animation sidecars and two slot icons the same way: OWNER_FILES from the magic collection and
-OWNER_BLOCKS_FILES from the Blocks folder's Trinket Type Mod.
+icons, their animation sidecars, two slot icons and (part 1b) the Leather Belt's and Amphibian Boot's worn sheets the
+same way: OWNER_FILES from the magic collection and OWNER_BLOCKS_FILES from the Blocks folder's Trinket Type Mod.
 
 On 7 October 2026 the owner asked for their farming and food textures to be used ("I have already made a ton of custom
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte

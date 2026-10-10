@@ -1,4 +1,4 @@
-# Arcane Concordance: Wayfaring (the owner's belt, boots and charms; trinkets part 1)
+# Arcane Concordance: Wayfaring (the owner's belt, boots and charms; trinkets parts 1 and 1b)
 
 Status: implemented on branch `claude/awesome-davinci-iwv3b9`; see Verification for what has run.
 Proposal issue: none; the owner asked for their supplied magic content to be built into Jugcraft (9 October 2026), named
@@ -35,6 +35,11 @@ effect are the owner's; the numbers are Jugcraft's.
 - A death save does not answer the void or `/kill` (harm that passes through invulnerability), a totem held in either
   hand (the totem answers, as vanilla's), or a death in a dream (the dream ends as it would).
 - A codex entry, **Belts, Charms and Boots** (Relics category), shows every recipe and says all of this.
+- **Worn, the Leather Belt and the Amphibian Boot show on the body** (part 1b), as the owner drew them: a brown leather
+  strap round the waist with a gold buckle in front, and on each foot a green boot with a white cuff, a grey toe cap and
+  a fin on the heel. Other players should see them too (not yet tried with two clients), and so does the figure in the
+  inventory; you do not, in first person. The charms are not drawn, nor is the Ice Breaker (the owner drew no worn sheet
+  for it).
 - The kinetic belt that links two pulleys (`jugcraft:belt`, unchanged) is now called the **Drive Belt** in English, so
   the two belts are told apart.
 
@@ -68,8 +73,44 @@ effect are the owner's; the numbers are Jugcraft's.
     throw and Slowness, at `Enemy` creatures only (the boundary lets anyone fight them, whatever claims say; its
     tolerance tags keep the Ender Dragon, Wither, Warden and Elder Guardian from being thrown or slowed, though the
     harm lands), and the saves' statuses on the wearer. What shows is the shared signs (`Signs.show`).
-- Client: nothing new. Trinkets draws the slots with the owner's icons (GUI sprites under
+- Client: no Java. Trinkets draws the slots with the owner's icons (GUI sprites under
   `textures/gui/sprites/container/slots/`); the items are the owner's plain generated models.
+- Part 1b, drawn on the body by Trinkets' data-driven renderer:
+  - The owner drew a worn sheet for the belt and for the boot (`jymbelics/textures/models/items/`), each a box-UV net
+    (vanilla's `ModelPart` cube layout) with no geometry. `tools/concordance_trinkets.py` `WORN` fits boxes to them: the
+    belt a 9 × 2 × 5 strap round the torso's bottom rows and a 4 × 3 × 1 buckle on its front; the boot a
+    6 × 7 × 6 boot a pixel round the foot, a 6 × 3 × 2 toe cap, a 6 × 1 × 6 cuff (an open ring: the sheet leaves its top
+    and bottom empty) and a 3 × 5 fin on the heel, its fronds pointing back, drawn as its two sides each lifted 0.05 px
+    along its own normal (`DecorDraw.TWO_SIDED_LIFT`: 26.3's cutout types may not cull, and a reversed twin on one
+    plane would fight; the two halves are one silhouette, so the nearer hides the other). Between them the nets
+    read every opaque texel of both sheets; the belt sheet's one faint texel (alpha 38, at 28, 6) lies in no net and is
+    never drawn.
+  - The generator writes a block model for each (`models/item/leather_belt_worn.json`,
+    `amphibian_boot_worn_left.json` and `amphibian_boot_worn_right.json`), every face reading its net's rectangle of
+    the sheet, and a render definition for each item (`assets/jugcraft/trinkets/<item>.json`) whose `model` elements
+    attach the belt to the player model's `body` at the bottom of the torso (offset `[0, -1, 0]`) and the boot to each
+    leg at its sole. One block-model unit is one pixel of the player model, and Trinkets turns south to the wearer's
+    front and east to their left.
+  - The sheets are read from the items atlas (`textures/item/<item>_worn.png`, imported as supplied); Trinkets bakes its
+    models from the block and item atlases and adds no atlas of its own.
+  - Each box stands 0.15 px further out than fitted (vanilla's `CubeDeformation`; `armor_models.SKIN_GAP`), because the
+    fitted belt lies exactly where vanilla leggings draw the body (0.5 px out) and the fitted boot where vanilla boots
+    draw the legs (1.0 px out): sharing those planes, they would flicker. A box set on another's face (the buckle, toe,
+    cuff and fin) moves out with that face instead, so no two faces of a model share a plane (the generator's
+    `model_writer.finish_elements` leaves them as fitted). The toe's top stays where the owner put it, on the line where
+    the boot's front ends, so it hides none of the row above. The two boots overlap between the legs, as vanilla's do,
+    so the left one stands a further 0.1 px out (its toe's top 0.1 px lower) and is drawn in front there.
+  - `check_wayfaring_worn` holds the models to the rules `armor_models` keeps 3D armour to, computed from the faces: a
+    face over the body stands 0.15 px off the skin and its outer layer (so the belt's underside is 0.15 px inside the
+    torso) and 0.1 px off vanilla armour's shells (0.5 and 1.0 px out), and the two boots' faces stay 0.1 px apart
+    where they overlap. The soles are the one exception, kept only 0.1 px off each: the right 0.15 px below the foot
+    (between the skin and the pants layer), the left 0.35 px (past it), so as little of the owner's bottom row is
+    buried in the ground as those gaps allow (0.15 px off would bury a third to a half of it).
+  - The sheet is the left boot: the owner's icon shows it from its outer side, toe to the left, with the fin's bright
+    half outward, which the sheet puts on the boot's left side. The right boot is its mirror image (vanilla's `mirror`),
+    so both show the bright half outward.
+  - Faces the owner left empty (the toe's back, the cuff's top and bottom) are drawn as vanilla draws a whole box: they
+    show nothing.
 - Nothing ticks: the attributes are Trinkets modifiers and the rest answers damage events.
 
 ## Connections
@@ -111,6 +152,9 @@ effect are the owner's; the numbers are Jugcraft's.
 
 - Server authority: Trinkets applies the modifiers on the server; the absorption, saves and wave are decided on the server
   from damage events. The client's `canEquip` reads only its own synced research, as the server does. No packets.
+- Part 1b is drawn on each client from the worn stacks Trinkets already sends to everyone tracking the wearer; Jugcraft
+  sends nothing. With Trinkets' cosmetic slots on (a server setting, off by default), a cosmetic Leather Belt is drawn
+  in place of the worn one, as Trinkets draws cosmetics; the Feet slot has no cosmetic copies.
 - Failure behaviour:
   - before Relic Lore: cannot be put on (an item put on by other means, such as a command, gives its attributes but
     answers no damage event);
@@ -135,8 +179,9 @@ effect are the owner's; the numbers are Jugcraft's.
 ## Dependencies and assets
 
 No new dependency. Framework use: **Trinkets Updated** (three slots given by data, one defined by Trinkets; the
-callback modifiers, including a slot-count attribute; `canEquip`/`canUnequip`), **Fabric API** (the three damage events
-and an event phase), **Modonomicon** (the codex entry).
+callback modifiers, including a slot-count attribute; `canEquip`/`canUnequip`; part 1b: its data-driven renderer, render
+definitions under `assets/jugcraft/trinkets/` with `model` elements), **Fabric API** (the three damage events and an
+event phase), **Modonomicon** (the codex entry).
 
 **Provenance.** The files below are from the owner's library (`art/owner-library/originals`): the magic collection
 (supplied 8 October 2026, [MAGIC_ASSETS.md](../../art/owner-library/MAGIC_ASSETS.md); folders `jymbelics` and
@@ -148,8 +193,9 @@ declaration, which is not an independent rights audit. The project uses the file
 ([LICENSE_POLICY.md](../../LICENSE_POLICY.md), owner-supplied collections). The source folders' names are kept here as
 labels; nothing in the game uses them. Read for notices: the five `jymbaquary` icons carry Photoshop 23.1 XMP packets
 (created 23 January 2022), the Leather Belt and Ice Breaker strips Photoshop 22.1 packets (October 2021 and April 2022),
-the Amphibian Boot and both slot icons only colour chunks; none names an author or rights, and
-`catalog/legacy-metadata.csv` has no row for them. They are byte-for-byte copies under Jugcraft names (an animation
+the Amphibian Boot and both slot icons only colour chunks; the Leather Belt's worn sheet carries nothing beyond its
+image data, and the Amphibian Boot's worn sheet an empty `eXIf` chunk (a TIFF header with no entries); none names an
+author or rights, and `catalog/legacy-metadata.csv` has no row for them. They are byte-for-byte copies under Jugcraft names (an animation
 sidecar with its line ends made LF), written by `tools/owner_art.py` from `tools/concordance_trinkets.py` `OWNER_FILES`
 and `OWNER_BLOCKS_FILES` and checked byte for byte by `check_mod_data`. `python3 tools/owner_art.py --provenance trinkets`
 prints this table:
@@ -159,6 +205,7 @@ prints this table:
 | `textures/gui/sprites/container/slots/feet.png` | `originals/Magic/assets/jymbelics/textures/slot/empty_feet_slot.png` | `f15fb69d3d0fd147f48457560eb5f8bf58529dde17318a5ac3e3f509fbc0c551` |
 | `textures/item/amphibian_boot.png` | `originals/Magic/assets/jymbelics/textures/item/amphibian_boot.png` | `0bb844a015db5be3274df912fdbe3bb6d5d3a017611f1e05ee186f85301b2b40` |
 | `textures/item/amphibian_boot.png.mcmeta` | `originals/Magic/assets/jymbelics/textures/item/amphibian_boot.png.mcmeta` | `39092f18e788de94796dbcf85e8ccf5a2b22ada0ba7c0ea3d902b6b5d1f1618b` |
+| `textures/item/amphibian_boot_worn.png` | `originals/Magic/assets/jymbelics/textures/models/items/amphibian_boot.png` | `b49a953815d18cd271bab28042f7eba1197542edf4fa7f6f330bb7b758bb3808` |
 | `textures/item/angelheart_vial.png` | `originals/Magic/assets/jymbaquary/textures/item/angelheart_vial.png` | `d8bfd161cf04c3c17b52206293773d6cce3cbe2638333f3e1698b22c8eba1b78` |
 | `textures/item/angelic_feather.png` | `originals/Magic/assets/jymbaquary/textures/item/angelic_feather.png` | `3fb19d8705af7c911642b814290ebf20cb8b1faa79cc4286b477864a75f78827` |
 | `textures/item/ice_breaker.png` | `originals/Magic/assets/jymbelics/textures/item/ice_breaker.png` | `099c1a26b62e134470276ded1fb1e20a68eabd4cf2aaf434979170e4cd8c8f0c` |
@@ -167,6 +214,7 @@ prints this table:
 | `textures/item/kraken_shell.png` | `originals/Magic/assets/jymbaquary/textures/item/kraken_shell.png` | `02b8741b3f6a0ea5d8a0096a0250074158a61cacee41b68ae5bb11abefd68ede` |
 | `textures/item/leather_belt.png` | `originals/Magic/assets/jymbelics/textures/item/leather_belt.png` | `b0c028bbb6f45e6f0e8493abec416b12d67960d29e83871d5d3d2d7026febaf2` |
 | `textures/item/leather_belt.png.mcmeta` | `originals/Magic/assets/jymbelics/textures/item/leather_belt.png.mcmeta` | `f14cc62fbcf862476d19facd33cb4fa569616b597497eb8c5b110028edd0521c` |
+| `textures/item/leather_belt_worn.png` | `originals/Magic/assets/jymbelics/textures/models/items/leather_belt.png` | `c4ecad15566e4bf996d74f0e9edf3c2a132734a6a27015b4a056d28e058704f3` |
 | `textures/item/phoenix_down.png` | `originals/Magic/assets/jymbaquary/textures/item/phoenix_down.png` | `c35cf03feb47ee12c3b26ce7aa5c435a5f98be38bd648b2fb17037afd7d3f4c2` |
 | `textures/gui/sprites/container/slots/charm.png` | `originals/Blocks/Trinket Type Mod/slot/empty_charm_slot.png` | `9862b3a181dff7ae5cb791bf093239613a7cfe9e30d729c5ec9ac80185a9fd72` |
 
@@ -181,13 +229,18 @@ Also taken from the owner's files, as data rather than copies:
   feather's effects; swimming and breath; knockback resistance and a landing shockwave; a belt adding charm slots);
 - the Feet slot (two, named "Feet": `data/jymbelics/curios/slots/feet.json`) and the charm slot (one, more from belts),
   ported to Trinkets slots in the feet and legs groups;
+- the boxes the belt and boot are drawn with (part 1b), fitted to the nets of the owner's worn sheets, which came with
+  no geometry; the changes made for the game, none to a texel: the boxes stand 0.15 px further out than fitted (0.25 px
+  for the left boot), the toe's top stays at its fitted height (the left's 0.1 px lower), the soles lie 0.15 and 0.35 px
+  below the feet, the right boot is drawn mirrored, and each part's model is anchored where Trinkets attaches it (How it
+  works, above);
 - the Phoenix Down recipe (`data/jymbaquary/recipe/phoenix_down.json`: three vials and a feather, shapeless), its ids
   renamed. The owner's other recipes use the base mod's own ingredients (mob drops and essences it adds), so Overworld
   recipes are used instead.
 
 Not imported, and why: the owner's chest-loot additions for the feather and vial (progression never relies on loot), the
-Leather Belt's and Amphibian Boot's worn sheets (no geometry exists for them yet; see Rollout), the other 161 items of
-the two folders (later parts, below).
+other worn sheets beside the belt's and boot's in `jymbelics/textures/models/items/` (for items this slice does not
+have), the other 161 items of the two folders (later parts, below).
 
 ## Verification
 
@@ -201,6 +254,22 @@ Local (this branch, before CI):
 - `python3 tools/owner_art.py --check` (every imported file matches its source), `python3 scripts/check_repository.py`
   and `python3 tools/check_icon_maps.py`: PASS (the icon check's 11 warnings are older items').
 - No Minecraft jar here: compilation and the game tests run only in CI.
+
+Part 1b, local (before CI):
+- `python3 tools/owner_art.py` (wrote the two worn sheets) and `python3 tools/generate_material_data.py` (the models and
+  render definitions); run again, it changed nothing (CI's "generated JSON is up to date" step).
+- `python3 tools/check_mod_data.py`: PASS, with `check_wayfaring_worn` and the art check (4,540 models, the three new
+  ones among them). Mutation test of `check_wayfaring_worn`, through the function itself: 20 deliberate breakages, each
+  caught by the rule meant for it (among them each sole on the pants layer, on vanilla leggings or 0.05 px off, the
+  belt's underside back at the torso's bottom, growth below the gaps, the two boots' faces 0.05 px apart or sharing
+  planes, a stray render definition for the Ice Breaker or a charm, a hand-edited model or definition, a worn sheet
+  given an animation, a texel's shift of a net, and a Java renderer for the boot); every file restored after.
+- `python3 tools/owner_art.py --check` (every imported file matches its source), `python3 tools/check_icon_maps.py`,
+  `python3 scripts/check_repository.py` and `python3 tools/concordance_delivery.py`: PASS.
+- Orthographic previews of the generated models on a grey body (the part 1b design's preview script, not the game):
+  the strap with its buckle in front, the boots as the icon draws them. Before writing anything, three reviewers checked
+  the design against Trinkets' source: one confirmed the orientation, one re-derived every face's texels by its own
+  code, one emulated CI's Python steps.
 
 CI:
 - Run 38009567435 (commit `fc441fff`): everything compiled. Both server jobs: 1,183 of 1,184 tests passed; the one
@@ -238,11 +307,19 @@ Tests:
   wave reaches a zombie and not a villager or one beyond a light fall's radius, harms but does not slow an Elder
   Guardian, does nothing after an ender pearl or before Relic Lore, and reaches at most twelve.
 - Client, `ConcordanceWayfaringClientGameTests`, on the real ticking player: the belt's second Charm slot on the server
-  and the client; the worn attributes each present once; the slot gone again without the belt; screenshots of the eight
-  icons and the inventory, for a person to look at.
+  and the client; the worn attributes each present once; what Trinkets needs to draw part 1b: no Java renderer in the
+  way, the belt's and boot's render definitions loaded with an element for each part and none of them empty, the worn
+  models among the client's resources, the worn sheets in the items atlas and no definition for the Ice Breaker (a
+  model that failed to load would be baked as the game's missing-model cube, which these checks cannot tell apart: only
+  the shots show the owner's models); then the player wearing them from the front and from behind (whole and closer),
+  from each quarter, over iron leggings and boots, over an iron chestplate, and sneaking; the slot gone again without
+  the belt; screenshots of the eight icons and the inventory. The screenshots are for a person to look at; nothing
+  judges a picture.
 
 Not yet run: a person looking at the screenshots, the Trinkets screen opened by hand (the slot icons and the grey slot
-names before Relic Lore), a real fall, drowning or burning in survival, and a two-client dedicated server.
+names before Relic Lore), a real fall, drowning or burning in survival, and a two-client dedicated server (where the
+other player should see the belt and boots). Part 1b in a client without Sodium (CI's client jobs run with it), and
+under armour other than iron leggings and boots.
 
 ## World and event applicability
 
@@ -254,7 +331,10 @@ No worldgen, creatures, loot or seasons.
   `phoenix_down`, `amphibian_boot`, `ice_breaker`; Trinkets slots `legs/charm` and `feet/boots`
   (`data/trinkets/entities/jugcraft_wayfaring.json`, which also gives players Trinkets' `legs/belt`); modifier ids
   `jugcraft:wayfaring/<kind>/<attribute>`; codex entry `relics/wayfaring`. Save compatibility: additive. The kinetic
-  belt's English name changed (Leather Belt to Drive Belt); its id did not.
+  belt's English name changed (Leather Belt to Drive Belt); its id did not. Part 1b adds resources only, none saved:
+  models `jugcraft:item/leather_belt_worn`, `amphibian_boot_worn_left` and `amphibian_boot_worn_right`, textures
+  `jugcraft:item/leather_belt_worn` and `amphibian_boot_worn`, and Trinkets render definitions `jugcraft:leather_belt` and
+  `jugcraft:amphibian_boot`.
 - **Simplified from the owner's text, for a concrete reason:**
   - the Ice Breaker's faster falling: a gravity modifier would also shorten every jump (and undo the feather's), so it
     is left out;
@@ -262,13 +342,22 @@ No worldgen, creatures, loot or seasons.
     mixin or a per-tick check;
   - the Phoenix Down's "variety of buffs": two (Regeneration II and Fire Resistance);
   - the base mods' relic levelling and experience: Relic Lore's mastery already stands for it.
-- **Deferred:** drawing the belt and boots on the body (part 1b: the owner's worn sheets for the belt and boot exist, but
-  no geometry; Trinkets' data-driven renderer can attach a model once one is fitted); the other worn relics (parts 2, 3
+- **Deferred:** the Ice Breaker on the body (the owner drew no worn sheet for it; `check_wayfaring_worn` fails once one
+  appears in the library and is not drawn); the charms on the body (no worn sheets); the other worn relics (parts 2, 3
   and 5); the held relics and staves (parts 4a and 4b, after the Ars-based core).
+- **Part 1b's limits** (drawn by Trinkets, no Java): only in third person (and the inventory's figure); a chestplate
+  covers the strap and only the buckle's front shows through it; on an invisible wearer the belt and boots still show,
+  as vanilla armour does (Trinkets does not check invisibility, and a render definition cannot); seen from below, a
+  skin whose pants layer has its underside drawn shows it over the right sole, which lies 0.1 px above it; other mods'
+  3D armour may cross or hide them (not checked); between the legs the left boot is drawn over the right, as one of
+  vanilla's boots is.
 - **For the owner to decide** (nothing above waits on them): whether the guns in the Reliquary folder become one more
   gun line; whether narrow mixins are approved for the relics that need them (walking on water or lava, slippery
   ground, Riptide without rain, a chorus fruit's teleport, barter results, mob neutrality, healing hooks, the backstab
-  bonus); names and designs for the 12 unnamed legacy icons; and the terms of `jymbelics/sounds/ricochet.ogg`, whose tags
-  name a sound-effects publisher (it matters only for a later part's Shadow Glaive).
+  bonus); names and designs for the 12 unnamed legacy icons; the terms of `jymbelics/sounds/ricochet.ogg`, whose tags
+  name a sound-effects publisher (it matters only for a later part's Shadow Glaive); and, for part 1b, whether the belt
+  should vanish under a chestplate instead of its buckle showing through (that needs a small Java renderer, which can see
+  the armour), and whether the sheet is the left boot, as read from the icon (if it is the right, `WORN_MIRRORED` changes
+  to the left leg).
 - Skipped: `researching_table` (removed from the base mod; Relic Lore and Artifice cover it), `relic_experience_bottle`
   (levelling), `blank_rune` (a model with no texture), `witch_hat` (its id is taken by Jugcraft's own Witch Hat).

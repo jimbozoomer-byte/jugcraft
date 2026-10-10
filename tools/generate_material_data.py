@@ -33,6 +33,8 @@ GENERATED_DIRS = [
     # The Arcane Concordance (tools/concordance.py): its rules, spells, Spell Engine opt-outs, codex and client clips.
     DATA / MOD / "concordance", DATA / MOD / "spell", DATA / MOD / "spell_assignments", DATA / MOD / "modonomicon",
     ASSETS / "player_animations", ASSETS / "dynamiclights",
+    # Trinkets' render definitions for the worn belt and boot (tools/concordance_trinkets.py WORN, Wayfaring part 1b).
+    ASSETS / "trinkets",
     # Item models/animations belong to tools/guns.py and are committed separately.
     # Only remove the Concordance block/entity outputs regenerated in this pass.
     *[ASSETS / "geckolib" / kind / category

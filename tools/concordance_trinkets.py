@@ -21,6 +21,11 @@ English name and the kind of effect the owner's own text gives it; the code, num
 Nothing here ticks, holds Focus or charge, or needs a mixin: the attributes are Trinkets modifiers, and the rest answers
 three Fabric damage events (Java: concordance/trinket/Wayfaring.java). tools/concordance.py merges these tables into its
 own; numbers the Java repeats are checked by tools/check_mod_data.py.
+
+Part 1b draws the Leather Belt and the Amphibian Boot on the wearer. The owner drew a worn sheet for each (a box-UV net,
+supplied without its geometry); the sheets are imported as supplied (OWNER_FILES), WORN below fits boxes to them, and
+write_worn writes their block models and Trinkets' render definitions (assets/jugcraft/trinkets/<item>.json), which
+Trinkets' data-driven renderer draws in third person. No Java. The Ice Breaker has no worn sheet, so it is not drawn.
 """
 import json
 from pathlib import Path
@@ -185,6 +190,64 @@ RECIPES = {
 # The owner's shapeless Phoenix Down recipe (data/jymbaquary/recipe/phoenix_down.json), its ids renamed.
 SHAPELESS = {"phoenix_down": [rid("angelheart_vial")] * 3 + [rid("angelic_feather")]}
 
+# Part 1b: what is drawn on the wearer. Each worn sheet (assets/jymbelics/textures/models/items/<owner id>.png, imported
+# as textures/item/<item>_worn.png) is a box-UV net, laid out as vanilla's ModelPart cube lays one out; the owner supplied
+# no geometry, so each box below is fitted to its sheet: (name, its net's corner on the sheet in texels, its size in
+# pixels across, up and front to back, its low corner on the model part in the player model's pixels: x to the wearer's
+# left, y down from the part's top, z to their back). A size of 0 across is a plane drawn on both sides. The belt sheet's
+# one faint texel (28, 6) lies in no net, so it is never drawn. "sheet" is the sheet's size; "parts" the model drawn on
+# each model part (Trinkets' model_part names: the player model's).
+WORN = {
+    # On the body: the strap round the torso's bottom rows, half a pixel out, its underside armor_models.SKIN_GAP inside
+    # the torso once grown (so it is never near the skin's outer layer); the buckle on its front, half a pixel past the
+    # strap above and below.
+    "leather_belt": {"sheet": 32, "parts": {"body": "leather_belt_worn"}, "boxes": [
+        ("band", (0, 0), (9, 2, 5), (-4.5, 9.7, -2.5)),
+        ("buckle", (0, 7), (4, 3, 1), (-2, 9.2, -3.5)),
+    ]},
+    # On each leg: the boot a pixel round the foot, the toe cap in front of it, the cuff (an open ring: the sheet leaves its
+    # top and bottom empty) on top, and the fin on the heel, its narrow end on the boot and its three fronds pointing back.
+    "amphibian_boot": {"sheet": 64, "parts": {"right_leg": "amphibian_boot_worn_right", "left_leg": "amphibian_boot_worn_left"},
+                       "boxes": [
+        ("boot", (0, 9), (6, 7, 6), (-3, 5, -3)),
+        ("toe", (18, 9), (6, 3, 2), (-3, 9, -5)),
+        ("cuff", (0, 1), (6, 1, 6), (-3, 4, -3)),
+        ("fin", (0, -1), (0, 5, 3), (0, 5, 3)),
+    ]},
+}
+# The model parts whose model is drawn mirrored (vanilla's mirror flag), so the two boots are a pair. The sheet is the
+# left boot: the owner's icon shows the boot from its outer side with the toe to the left (a left boot), and its fronds
+# are the bright half of the fin's net, the half the sheet puts on the boot's left (+x) side. So the right boot is the
+# mirror image, its bright side out as well (vanilla's humanoid model mirrors the other leg).
+WORN_MIRRORED = {"right_leg"}
+# How far each box stands beyond its fitted size (pixels), as vanilla's CubeDeformation grows a box: by
+# armor_models.SKIN_GAP, so its sides stand clear of vanilla leggings (0.5 out, where the fitted belt lies) and boots
+# (1.0 out, where the fitted boot lies). A box set on another's face moves out with that face instead of growing into
+# it, and a plane only moves, so no two of a model's faces share a plane. The left leg's model stands a step further
+# out, so where the two boots overlap between the legs one is in front of the other.
+WORN_GROW = 0.15
+WORN_LEFT_STEP = 0.1
+# Faces that keep their fitted plane instead of growing, named as on the part ("top" is up): the toe's top meets the line
+# where the boot's front ends (the sheet leaves the front clear below it, for the toe), so a grown toe would cover the
+# bottom of the row above. On the left leg such a face sits a step in, so the two toes' tops never share a plane.
+WORN_KEPT = {("amphibian_boot", "toe"): ("top",)}
+# How far below its leg each boot's sole lies (pixels): on the right between the skin's underside (0) and its outer
+# layer's (the pants, 0.25), on the left past the pants; each at least model_writer.COPLANAR_NUDGE from the skin, the
+# pants, vanilla leggings (0.5) and the other sole, so none flickers, while burying as little of the owner's bottom row
+# under the ground as those clearances allow (both past the pants by armor_models.SKIN_GAP would bury a third to a half
+# of it).
+WORN_SOLE = {"right_leg": 0.15, "left_leg": 0.35}
+# A plane (the fin) is drawn as its two sides, each lifted this far (px) along its own normal, as DecorDraw.TWO_SIDED_LIFT
+# lifts them: 26.3's cutout types may not cull back faces (docs/ART_DIRECTION.md, two-sided planes), and a reversed twin
+# on one plane would fight. The fin's two halves are one silhouette seen from either side, so the nearer always hides
+# the other.
+WORN_PLANE_LIFT = 0.05
+# Where each model is anchored on its part (Trinkets' offset, in halves of the part's size from its middle): the bottom of
+# the torso and the sole of each leg, both 12 pixels below the part's top. A point (x, y, z) on the part is then
+# (8 + x, 20 - y, 8 - z) in the model: Trinkets draws it with up up, south to the wearer's front and east to their left.
+WORN_OFFSET = [0, -1, 0]
+WORN_ANCHOR_Y = 12
+
 # Every owner file this slice uses, copied as supplied by tools/owner_art.py: runtime path under assets/jugcraft -> path
 # under originals/Magic (or, for OWNER_BLOCKS_FILES, under originals/Blocks). The only changes are the names and, for an
 # animation sidecar, its line ends (LF, as Git stores the mod's text).
@@ -193,6 +256,9 @@ OWNER_FILES = {
     **{f"textures/item/{item}.png.mcmeta": f"assets/{OWNER_ITEMS[item][0]}/textures/item/{OWNER_ITEMS[item][1]}.png.mcmeta"
        for item in ANIMATED},
     f"textures/gui/sprites/container/slots/{TRINKET_SLOTS[FEET_SLOT]['icon']}.png": "assets/jymbelics/textures/slot/empty_feet_slot.png",
+    # Part 1b: the worn sheets, in the items atlas (Trinkets bakes its models from the block and item atlases).
+    **{f"textures/item/{item}_worn.png": f"assets/{OWNER_ITEMS[item][0]}/textures/models/items/{OWNER_ITEMS[item][1]}.png"
+       for item in WORN},
 }
 OWNER_BLOCKS_FILES = {
     f"textures/gui/sprites/container/slots/{TRINKET_SLOTS[CHARM_SLOT]['icon']}.png": "Trinket Type Mod/slot/empty_charm_slot.png",
@@ -219,6 +285,123 @@ def owner_model(item):
     if not plain:
         raise SystemExit(f"tools/concordance_trinkets.py: the owner's model for {ns}:{owner} is not the plain generated model expected")
     return {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}}
+
+
+def worn_net(u, v, w, h, d):
+    """The faces of a box-UV net with its corner at (u, v), for a box w x h x d (texels), as vanilla's ModelPart cube lays it
+    out: each face's [u0, v0, u1, v1] on the sheet, named as the block model face Trinkets turns toward the same side of the
+    wearer (south to their front, east to their left) and read the same way round (the bottom from its back edge, as
+    vanilla reads it). A plane keeps only its two sides."""
+    faces = {"north": [u + 2 * d + w, v + d, u + 2 * d + 2 * w, v + d + h], "east": [u + d + w, v + d, u + 2 * d + w, v + d + h],
+             "south": [u + d, v + d, u + d + w, v + d + h], "west": [u, v + d, u + d, v + d + h],
+             "up": [u + d, v, u + d + w, v + d], "down": [u + d + w, v + d, u + d + 2 * w, v]}
+    return {face: rect for face, rect in faces.items() if rect[0] != rect[2] and rect[1] != rect[3]}
+
+
+def mirror_net(net):
+    """A net drawn mirrored, as vanilla's mirror flag draws it: the two sides change places and every face reads right to
+    left."""
+    return {{"east": "west", "west": "east"}.get(face, face): [rect[2], rect[1], rect[0], rect[3]] for face, rect in net.items()}
+
+
+# Each face of a box on the part: its axis and whether it is the box's low (-1) or high (+1) side.
+_PART_FACES = {"right": (0, -1), "left": (0, 1), "top": (1, -1), "bottom": (1, 1), "front": (2, -1), "back": (2, 1)}
+
+
+def worn_boxes(item, part):
+    """(name, net, low corner, high corner) of each of `item`'s boxes on `part`, in the player model's pixels. Each grows by
+    WORN_GROW on every side (on the left leg a WORN_LEFT_STEP more), as vanilla's CubeDeformation grows a box, except: a box
+    set on an earlier box's face (in the fitted layout) keeps its size across that face and moves out with it; a plane only
+    moves with its seat; a WORN_KEPT face stays on its fitted plane (on the left leg a step in); and a face on a leg's
+    bottom (the sole) lies WORN_SOLE below it."""
+    left = part == "left_leg"
+    grow = WORN_GROW + (WORN_LEFT_STEP if left else 0.0)
+    out, fitted = [], []
+    for name, (u, v), size, corner in WORN[item]["boxes"]:
+        lo, hi = [float(c) for c in corner], [float(corner[k] + size[k]) for k in range(3)]
+        seat = {}
+        for index, (flo, fhi) in enumerate(fitted):
+            for k in range(3):
+                if all(lo[j] < fhi[j] and flo[j] < hi[j] for j in range(3) if j != k):
+                    if lo[k] == fhi[k]:
+                        seat[k] = (index, 1)
+                    elif hi[k] == flo[k]:
+                        seat[k] = (index, -1)
+        fitted.append((list(lo), list(hi)))
+        on_sole = part in WORN_SOLE and hi[1] == WORN_ANCHOR_Y
+        for k in range(3):
+            if k in seat:
+                index, side = seat[k]
+                face = out[index][3][k] if side > 0 else out[index][2][k]
+                lo[k], hi[k] = (face, face + size[k]) if side > 0 else (face - size[k], face)
+            elif 0 not in size:
+                lo[k], hi[k] = lo[k] - grow, hi[k] + grow
+        for face in WORN_KEPT.get((item, name), ()):
+            k, side = _PART_FACES[face]
+            step = WORN_LEFT_STEP if left else 0.0
+            if side < 0:
+                lo[k] = corner[k] + step
+            else:
+                hi[k] = corner[k] + size[k] - step
+        if on_sole:
+            hi[1] = WORN_ANCHOR_Y + WORN_SOLE[part]
+        out.append((name, worn_net(u, v, *size), lo, hi))
+    return out
+
+
+def _num(value):
+    value = round(value, 4)
+    return int(value) if value == int(value) else value
+
+
+# Each block model face's axis and the way it faces along it.
+_FACING = {"east": (0, 1), "west": (0, -1), "up": (1, 1), "down": (1, -1), "south": (2, 1), "north": (2, -1)}
+
+
+def worn_model(item, part):
+    """The block model Trinkets draws on `part`: `item`'s boxes there (worn_boxes; their nets mirrored on a WORN_MIRRORED
+    part) at (8 + x, 20 - y, 8 - z) for a point (x, y, z) on the part, every face reading its net's rectangle of the owner's
+    sheet (in sixteenths of the sheet). Faces the owner left empty are drawn too, as vanilla draws a whole box: they show
+    nothing. A plane is two one-sided elements, each lifted WORN_PLANE_LIFT along its face's normal."""
+    scale = 16 / WORN[item]["sheet"]
+    sheet = rid(f"item/{item}_worn")
+    mirrored = part in WORN_MIRRORED
+    elements = []
+    for _name, net, lo, hi in worn_boxes(item, part):
+        top = 8 + WORN_ANCHOR_Y
+        frm, to = [8 + lo[0], top - hi[1], 8 - hi[2]], [8 + hi[0], top - lo[1], 8 - lo[2]]
+        faces = {face: {"uv": [_num(c * scale) for c in rect], "texture": "#sheet"}
+                 for face, rect in (mirror_net(net) if mirrored else net).items()}
+        sides = [{face: spec} for face, spec in faces.items()] if any(frm[k] == to[k] for k in range(3)) else [faces]
+        for side in sides:
+            lift = [0.0, 0.0, 0.0]
+            if len(sides) > 1:
+                axis, sign = _FACING[next(iter(side))]
+                lift[axis] = sign * WORN_PLANE_LIFT
+            elements.append({"from": [_num(frm[k] + lift[k]) for k in range(3)],
+                             "to": [_num(to[k] + lift[k]) for k in range(3)], "faces": side})
+    return {"textures": {"sheet": sheet, "particle": sheet}, "elements": elements}
+
+
+def worn_models():
+    """{model name: (item, part)} for every worn model."""
+    return {model: (item, part) for item, info in WORN.items() for part, model in info["parts"].items()}
+
+
+def worn_render(item):
+    """Trinkets' render definition for `item`: its model on each part, anchored at WORN_OFFSET (one block-model unit is
+    one pixel of the player model)."""
+    return {"target": rid(item), "render": [
+        {"type": "minecraft:model", "model_part": part, "offset": WORN_OFFSET, "model": rid(f"item/{model}")}
+        for part, model in WORN[item]["parts"].items()]}
+
+
+def write_worn(write, assets):
+    """Part 1b's files: each worn model, and the render definition that attaches it."""
+    for model, (item, part) in worn_models().items():
+        write(assets / "models" / "item" / f"{model}.json", worn_model(item, part))
+    for item in WORN:
+        write(assets / "trinkets" / f"{item}.json", worn_render(item))
 
 
 def lang_entries(lang):
@@ -296,6 +479,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
         write(trinkets / "tags" / "item" / group / f"{name}.json",
               {"replace": False, "values": [rid(item) for item, worn in TRINKETS.items() if worn == slot]})
     write(trinkets / "entities" / f"{MOD}_wayfaring.json", {"entities": ["player"], "slots": sorted(GRANTED_SLOTS)})
+    write_worn(write, assets)
 
 
 def write_data(write, data):

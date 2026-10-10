@@ -1,6 +1,9 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import eu.pb4.trinkets.api.TrinketsApi;
+import eu.pb4.trinkets.api.client.TrinketRendererRegistry;
+import eu.pb4.trinkets.api.client.renderer.element.TrinketRenderElement;
+import eu.pb4.trinkets.impl.client.render.ClientTrinketsManager;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.trinket.Wayfaring;
 import java.util.ArrayList;
@@ -11,17 +14,20 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 
@@ -31,6 +37,12 @@ import net.minecraft.world.phys.AABB;
  * <ul>
  * <li>a worn Leather Belt gives a second Charm slot, on the server and, synced, on the client; a charm goes in it;</li>
  * <li>the worn feather, boot and Ice Breaker give their attributes under their own names, and once;</li>
+ * <li>part 1b: Trinkets has what it needs to draw the Leather Belt and the Amphibian Boot on the body (no Java renderer in
+ * the way; each render definition loaded, with one element for each part it draws on, none of them empty; the worn models
+ * among the client's resources; the owner's worn sheets in the items atlas; nothing for the Ice Breaker, which has no
+ * worn sheet). Whether they look right only the shots show: the player wearing them from the front and from behind,
+ * whole, closer and from each quarter, over iron leggings and boots, over a chestplate, and sneaking, for people to look
+ * at;</li>
  * <li>with the second charm taken out first, the belt comes off, the slot goes, and nothing falls to the ground;</li>
  * <li>the eight icons in frames on a wall (three of them the owner's animated strips), and the inventory, for people to
  * look at.</li>
@@ -93,6 +105,13 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 			String given = server.computeOnServer(minecraft -> given(minecraft));
 			Jugcraft.LOGGER.info("[wayfaring client] attributes worn: {}", given.isEmpty() ? "as designed" : given);
 			check(given.isEmpty(), "The worn items' attributes are not as designed: " + given);
+
+			// Part 1b: the belt and boot drawn on the player, who wears both (and the Ice Breaker, which is not drawn).
+			String undrawn = context.computeOnClient(client -> undrawn(client));
+			Jugcraft.LOGGER.info("[wayfaring client] worn models: {}", undrawn.isEmpty()
+					? "definitions resolved to non-empty elements, models present, sheets stitched" : undrawn);
+			check(undrawn.isEmpty(), "Trinkets cannot draw the belt and boot on the body: " + undrawn);
+			wornShots(context, singleplayer, x, y, z);
 
 			// Off in order: the second charm, then the belt. The slot goes and nothing is dropped.
 			server.runOnServer(minecraft -> TrinketsApi.getAttachment(player(minecraft)).getInventory(Wayfaring.CHARM_SLOT)
@@ -165,6 +184,107 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 			});
 		});
 		return String.join("; ", wrong);
+	}
+
+	/**
+	 * What keeps Trinkets from drawing the belt and boot on the body, or "": a Java renderer for either (Trinkets would use
+	 * it instead of the data); a render definition not loaded or not matched to its item, or without one element for each
+	 * part (the belt the body, the boot each leg), or with an element that baked no quads (Trinkets' no-op); a worn model
+	 * missing from the client's resources (the game would bake its missing-model cube instead, which this cannot tell
+	 * apart: only the shots show the models are the owner's); a worn sheet missing from the items atlas; or a definition
+	 * for the Ice Breaker, which has no worn sheet.
+	 */
+	private static String undrawn(Minecraft client) {
+		List<String> wrong = new ArrayList<>();
+		var atlas = client.getAtlasManager().getAtlasOrThrow(AtlasIds.ITEMS);
+		Map<Item, List<String>> models = Map.of(Wayfaring.LEATHER_BELT, List.of("leather_belt_worn"),
+				Wayfaring.AMPHIBIAN_BOOT, List.of("amphibian_boot_worn_right", "amphibian_boot_worn_left"));
+		models.forEach((item, names) -> {
+			String id = BuiltInRegistries.ITEM.getKey(item).getPath();
+			if (TrinketRendererRegistry.hasRenderer(item)) {
+				wrong.add(id + " has a Java renderer, which Trinkets uses instead of its render definition");
+			}
+			List<TrinketRenderElement.Baked> baked = ClientTrinketsManager.INSTANCE.getResolved(new ItemStack(item));
+			if (baked.size() != names.size() || baked.contains(TrinketRenderElement.Baked.NO_OP)) {
+				wrong.add(id + " resolves to " + baked.size() + " drawn elements, not " + names.size()
+						+ (baked.contains(TrinketRenderElement.Baked.NO_OP) ? ", one of them baked from a model with no quads" : ""));
+			}
+			for (String name : names) {
+				if (client.getResourceManager().getResource(Jugcraft.id("models/item/" + name + ".json")).isEmpty()) {
+					wrong.add("the worn model " + name + " is missing from the client's resources");
+				}
+			}
+			Identifier sheet = Jugcraft.id("item/" + id + "_worn");
+			if (atlas.getSprite(sheet) == atlas.missingSprite()) {
+				wrong.add(sheet + " is not in the items atlas");
+			}
+		});
+		if (!ClientTrinketsManager.INSTANCE.getResolved(new ItemStack(Wayfaring.ICE_BREAKER)).isEmpty()) {
+			wrong.add("the Ice Breaker has a render definition, but no worn sheet to draw");
+		}
+		return String.join("; ", wrong);
+	}
+
+	/**
+	 * The player wearing the belt and the boot, from the front and from behind: whole (field of view 70, looking level), then
+	 * closer (50, the camera above, looking down 20 degrees, so the feet stay in the picture), then from each quarter (the
+	 * view turned 45 degrees, which shows the boots' sides and fins), then over iron leggings and boots (the belt and boot
+	 * stand clear of both and should show unbroken over them) and over an iron chestplate too (which hides the strap; the
+	 * buckle stands out through it), then sneaking from behind. Standing still, a player's body turns only once the head is
+	 * more than 50 degrees past it, so the player first takes a step north to face the way they look; every later turn is
+	 * the view's alone. The camera is put back to first person at 70 after.
+	 */
+	private static void wornShots(ClientGameTestContext context, TestSingleplayerContext singleplayer, int x, int y, int z) {
+		TestServerContext server = singleplayer.getServer();
+		server.runCommand(String.format(Locale.ROOT, "tp @p %.2f %d %.2f 180 0", x + 0.5, y, z - 2.5));
+		context.waitTicks(10);
+		context.getInput().holdKey(options -> options.keyUp);
+		context.waitTicks(3);
+		context.getInput().releaseKey(options -> options.keyUp);
+		context.waitTicks(30);
+		singleplayer.getConnection().waitForChunksRender();
+		look(context, server, CameraType.THIRD_PERSON_FRONT, 70, 180, 0, "jugcraft_wayfaring_worn_front");
+		look(context, server, CameraType.THIRD_PERSON_BACK, 70, 180, 0, "jugcraft_wayfaring_worn_back");
+		// The front camera sits opposite the look: looking up 20 degrees puts it above, looking down at the player.
+		look(context, server, CameraType.THIRD_PERSON_FRONT, 50, 180, -20, "jugcraft_wayfaring_worn_front_close");
+		look(context, server, CameraType.THIRD_PERSON_BACK, 50, 180, 20, "jugcraft_wayfaring_worn_back_close");
+		// Facing north, a view turned to 135 (north-west) puts the front camera at the wearer's left and the back camera at
+		// their right; 225 (north-east) the other way round.
+		look(context, server, CameraType.THIRD_PERSON_FRONT, 50, 135, -20, "jugcraft_wayfaring_worn_front_left");
+		look(context, server, CameraType.THIRD_PERSON_FRONT, 50, 225, -20, "jugcraft_wayfaring_worn_front_right");
+		look(context, server, CameraType.THIRD_PERSON_BACK, 50, 135, 20, "jugcraft_wayfaring_worn_back_right");
+		look(context, server, CameraType.THIRD_PERSON_BACK, 50, 225, 20, "jugcraft_wayfaring_worn_back_left");
+		server.runCommand("item replace entity @p armor.legs with minecraft:iron_leggings");
+		server.runCommand("item replace entity @p armor.feet with minecraft:iron_boots");
+		look(context, server, CameraType.THIRD_PERSON_FRONT, 50, 180, -20, "jugcraft_wayfaring_worn_over_armour");
+		server.runCommand("item replace entity @p armor.chest with minecraft:iron_chestplate");
+		look(context, server, CameraType.THIRD_PERSON_FRONT, 50, 180, -20, "jugcraft_wayfaring_worn_over_chestplate");
+		server.runCommand("item replace entity @p armor.chest with minecraft:air");
+		look(context, server, CameraType.THIRD_PERSON_BACK, 50, 180, 20, "jugcraft_wayfaring_worn_over_armour_back");
+		server.runCommand("item replace entity @p armor.legs with minecraft:air");
+		server.runCommand("item replace entity @p armor.feet with minecraft:air");
+		context.getInput().holdKey(options -> options.keyShift);
+		context.waitTicks(15);
+		boolean sneaking = context.computeOnClient(client -> client.player.isShiftKeyDown());
+		context.takeScreenshot("jugcraft_wayfaring_worn_sneaking_back");
+		context.getInput().releaseKey(options -> options.keyShift);
+		context.runOnClient(client -> {
+			client.options.setCameraType(CameraType.FIRST_PERSON);
+			client.options.fov().set(70);
+		});
+		check(sneaking, "The player was not sneaking for the sneaking shot");
+	}
+
+	/** Turns the player's view (not their place, so their body stays as it is) and takes a shot with that camera. */
+	private static void look(ClientGameTestContext context, TestServerContext server, CameraType camera, int fov, int yaw, int pitch,
+			String name) {
+		server.runCommand("execute as @p at @s run tp @s ~ ~ ~ " + yaw + " " + pitch);
+		context.runOnClient(client -> {
+			client.options.setCameraType(camera);
+			client.options.fov().set(fov);
+		});
+		context.waitTicks(10);
+		context.takeScreenshot(name);
 	}
 
 	private static void frame(TestServerContext server, int x, int y, int z, String item) {

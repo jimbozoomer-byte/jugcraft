@@ -9054,7 +9054,8 @@ def check_wayfaring(co, root, lang):
     named by their kind (so two of a kind never add up) and only Relic Lore lets them be put on; the belt keeps its added
     charm; the death saves run before Dreaming's listener and decline the void, a held totem and a dream; the wave goes
     through the effect boundary only; every item is the owner's model and icon with the owner's name and an Overworld
-    recipe; the slots are given to players with the owner's icons and no cosmetic copies; and no two items share a name."""
+    recipe; the slots are given to players with the owner's icons and no cosmetic copies; no two items share a name; and
+    part 1b's belt and boot are drawn on the wearer as check_wayfaring_worn says."""
     tr = co.trinkets
     def text(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""
@@ -9205,6 +9206,145 @@ def check_wayfaring(co, root, lang):
     for value, keys in names.items():
         if len(keys) > 1:
             err(f"lang: {', '.join(sorted(keys))} share the name {value}")
+    check_wayfaring_worn(co)
+
+
+def _worn_faces(model):
+    """The faces of a worn block model (tools/concordance_trinkets.py worn_model) on its part, in the player model's pixels
+    (x to the wearer's left, y down, z to their back): (axis, the way it faces along it, its plane, its extent on the
+    other two axes in order)."""
+    out = []
+    for element in model["elements"]:
+        (fx, fy, fz), (tx, ty, tz) = element["from"], element["to"]
+        lo, hi = (fx - 8, 20 - ty, 8 - tz), (tx - 8, 20 - fy, 8 - fz)
+        for face in element["faces"]:
+            k, sign = {"west": (0, -1), "east": (0, 1), "up": (1, -1), "down": (1, 1), "south": (2, -1), "north": (2, 1)}[face]
+            out.append((k, sign, hi[k] if sign > 0 else lo[k], [(lo[j], hi[j]) for j in range(3) if j != k]))
+    return out
+
+
+def check_wayfaring_worn(co):
+    """Wayfaring part 1b (tools/concordance_trinkets.py WORN, docs/features/arcane-concordance-trinkets.md): the Leather
+    Belt and Amphibian Boot drawn on the wearer by Trinkets' data-driven renderer. Each worn sheet is the owner's, imported
+    as supplied into the items atlas, one frame of the size WORN gives, and every worn sheet the owner drew for the slice's
+    items is drawn; the boxes' nets lie on their sheet apart from each other, read no half-clear texel (cutout draws them
+    solid) and between them read every opaque texel the owner drew; the models and render definitions are the generator's,
+    which shares no plane between two faces of a model (model_writer would have moved one); every face over its part's box
+    keeps off the skin, its outer layer and vanilla armour's shells as armor_models keeps 3D armour (the soles by
+    model_writer's nudge only), and the two boots' faces stay that nudge apart where they overlap; no other definition
+    draws a Wayfaring item; and no Java renderer replaces a definition (Trinkets uses a registered renderer instead of
+    the data for that item)."""
+    import armor_models
+    import model_writer
+    tr = co.trinkets
+    for item, (ns, owner) in tr.OWNER_ITEMS.items():
+        if (tr.MAGIC / "assets" / ns / "textures" / "models" / "items" / f"{owner}.png").is_file() and item not in tr.WORN:
+            err(f"{item}: the owner drew a worn sheet for it ({ns}/textures/models/items/{owner}.png), but WORN does not draw it")
+    for item, info in tr.WORN.items():
+        ns, owner = tr.OWNER_ITEMS[item]
+        runtime = f"textures/item/{item}_worn.png"
+        if tr.OWNER_FILES.get(runtime) != f"assets/{ns}/textures/models/items/{owner}.png":
+            err(f"{item}: its worn sheet must be the owner's {ns}/textures/models/items/{owner}.png, imported as {runtime} "
+                "(OWNER_FILES)")
+            continue
+        png = ASSETS / runtime
+        if not png.is_file() or png.with_name(png.name + ".mcmeta").exists():
+            err(f"{runtime} is missing (run tools/owner_art.py), or has an animation sidecar (a worn sheet is one frame)")
+            continue
+        with Image.open(png) as image:
+            sheet = image.convert("RGBA")
+        size = info["sheet"]
+        if sheet.size != (size, size):
+            err(f"{runtime} is {sheet.size[0]}x{sheet.size[1]}, not the {size}x{size} WORN gives")
+            continue
+        alpha = sheet.getchannel("A")
+        read = {}
+        for name, (u, v), dims, _corner in info["boxes"]:
+            if not all(isinstance(c, int) and c >= -size for c in (u, v, *dims)) or min(dims) < 0:
+                err(f"{item}: the {name}'s net corner and size are whole texels ({(u, v)}, {dims})")
+                continue
+            for face, (u0, v0, u1, v1) in tr.worn_net(u, v, *dims).items():
+                x0, x1, y0, y1 = min(u0, u1), max(u0, u1), min(v0, v1), max(v0, v1)
+                if x0 < 0 or y0 < 0 or x1 > size or y1 > size:
+                    err(f"{item}: the {name}'s {face} face reads {[u0, v0, u1, v1]}, outside its {size}x{size} sheet")
+                    continue
+                if any(alpha.crop((x0, y0, x1, y1)).histogram()[1:255]):
+                    err(f"{item}: the {name}'s {face} face reads half-clear texels, which cutout draws solid")
+                for x in range(x0, x1):
+                    for y in range(y0, y1):
+                        if (x, y) in read:
+                            err(f"{item}: the {name}'s {face} face and the {read[x, y]} read the same texel ({x}, {y})")
+                        read[x, y] = f"{name}'s {face} face"
+        unread = [(x, y) for x in range(size) for y in range(size) if alpha.getpixel((x, y)) == 255 and (x, y) not in read]
+        if unread:
+            err(f"{item}: {len(unread)} opaque texels of its sheet lie in no box's net, e.g. {unread[0]}: the boxes no longer "
+                "fit the owner's sheet")
+    # The models and render definitions, as the generator writes them.
+    faces = {}
+    for model, (item, part) in tr.worn_models().items():
+        if part not in armor_models.BASE:
+            err(f"{model}: {part} is not a part of the player model")
+            continue
+        expected = tr.worn_model(item, part)
+        drawn = json.loads(json.dumps(expected))
+        model_writer.finish_elements(drawn["elements"])
+        if drawn != expected:
+            err(f"{model}: two of its faces share a plane (model_writer moves one when it is written); fit the boxes apart")
+        if load(ASSETS / "models" / "item" / f"{model}.json") != drawn:
+            err(f"assets/{MOD}/models/item/{model}.json differs from tools/concordance_trinkets.py (run the generator)")
+        faces[model] = (item, part, _worn_faces(expected))
+        # The skin and vanilla armour under the part, as armor_models keeps 3D armour off them: a face over the part's box
+        # stands armor_models.SKIN_GAP off the skin and its outer layer, and model_writer's nudge off vanilla armour's
+        # shells; a boot's sole (a leg's downward face) only the nudge off each, so as little of it is buried as can be.
+        (blo, bhi), skin, armour = armor_models.BASE[part], armor_models.SKIN_SHELLS[part], (0.5, 1.0)
+        for k, sign, plane, rect in faces[model][2]:
+            others = [j for j in range(3) if j != k]
+            if not all(rect[i][0] < bhi[j] + max(skin) and rect[i][1] > blo[j] - max(skin) for i, j in enumerate(others)):
+                continue
+            out = sign * (plane - (bhi[k] if sign > 0 else blo[k]))
+            sole = part.endswith("_leg") and k == 1 and sign > 0
+            for shell in skin + armour:
+                need = model_writer.COPLANAR_NUDGE if sole or shell in armour else armor_models.SKIN_GAP
+                if abs(out - shell) < need - 1e-6:
+                    err(f"{model}: a face {out:.2f} px out from the {part}'s box lies within {need} px of the "
+                        f"{shell} px shell (the skin, its outer layer or vanilla armour) and would flicker")
+    # Worn on parts that never move apart standing (the body and legs; armor_models.PIVOTS), two models' faces facing the
+    # same way never share a plane where they overlap: the boots overlap between the legs.
+    still = [(model, item, part, [(k, sign, plane + armor_models.PIVOTS[part][k],
+                                   [(lo + armor_models.PIVOTS[part][j], hi + armor_models.PIVOTS[part][j])
+                                    for j, (lo, hi) in zip([j for j in range(3) if j != k], rect)])
+                                  for k, sign, plane, rect in found])
+             for model, (item, part, found) in faces.items() if part in ("body", "right_leg", "left_leg")]
+    for i, (a, _item_a, part_a, faces_a) in enumerate(still):
+        for b, _item_b, part_b, faces_b in still[i + 1:]:
+            if part_a == part_b:
+                continue
+            for k, sign, plane, rect in faces_a:
+                for k2, sign2, plane2, rect2 in faces_b:
+                    if (k, sign) == (k2, sign2) and abs(plane - plane2) < model_writer.COPLANAR_NUDGE - 1e-6 and all(
+                            r[0] < r2[1] and r2[0] < r[1] for r, r2 in zip(rect, rect2)):
+                        err(f"{a} and {b}: faces {abs(plane - plane2):.2f} px apart where they overlap standing (need "
+                            f"{model_writer.COPLANAR_NUDGE}); they would flicker")
+    # Each WORN item's render definition is the generator's; no other definition draws one of the slice's items.
+    for item in tr.WORN:
+        if load(ASSETS / "trinkets" / f"{item}.json") != tr.worn_render(item):
+            err(f"assets/{MOD}/trinkets/{item}.json differs from tools/concordance_trinkets.py worn_render (run the generator)")
+    for path in sorted((ASSETS / "trinkets").glob("*.json")):
+        targets = load(path).get("target")
+        targets = targets if isinstance(targets, list) else [targets]
+        stray = [t for t in targets if t in {f"{MOD}:{item}" for item in tr.TRINKETS} and t != f"{MOD}:{path.stem}"]
+        if stray or (path.stem in tr.TRINKETS and path.stem not in tr.WORN):
+            err(f"assets/{MOD}/trinkets/{path.name} draws {stray or path.stem}, which WORN does not (add it to WORN)")
+    if tr.WORN_GROW < armor_models.SKIN_GAP or tr.WORN_LEFT_STEP < model_writer.COPLANAR_NUDGE:
+        err(f"tools/concordance_trinkets.py: WORN_GROW must be at least armor_models.SKIN_GAP ({armor_models.SKIN_GAP}), so the "
+            "belt and boots clear vanilla leggings and boots, and WORN_LEFT_STEP at least model_writer.COPLANAR_NUDGE "
+            f"({model_writer.COPLANAR_NUDGE}), so the two boots never share a plane")
+    # A Java renderer registered for an item replaces its render definition (TrinketRenderLayer.extract).
+    for path in sorted(CLIENT_JAVA_ROOT.rglob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        for call in re.findall(r"TrinketRendererRegistry\.registerRenderer\(([^,;]+)", text):
+            if any(item.upper() in call for item in tr.WORN):
+                err(f"{path.relative_to(ROOT)}: a Java renderer for {call.strip()} would replace its render definition")
 
 
 def check_alchemy(co, root, lang, registered, research):
