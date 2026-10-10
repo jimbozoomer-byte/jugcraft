@@ -32,6 +32,10 @@ SHOULDERS = {"left_arm": (10.8, 22.5, 0.5), "right_arm": (-10.8, 22.5, 0.5)}
 LEGS = {"left_leg": (3.6, 10, 0), "right_leg": (-3.6, 10, 0)}
 HAND = (0, -12.5, 0)      # from the shoulder: the top of the fist, where the grip meets the guard
 SKIRT = (0, 11.5, 0)
+# The rest pose: the sword hand held out and down before the chest, the wrist cocked so the blade stands up beside
+# the helm, leaning a little out; the grip shows two pixels above the fist before the guard, so the blade's root
+# stands clear of the cuff.
+REST = {"right_arm": (-45, 0, -30, 0, 0, 0), "sword": (60, 0, 25, 0, 0, 0), "left_arm": (0, 0, 8, 0, 0, 0)}
 
 
 def rotated(elements, rotation):
@@ -239,16 +243,22 @@ def add(*points):
     return [sum(p[k] for p in points) for k in range(3)]
 
 
+def rest_rotation(name):
+    """A group's rest rotation (REST below): the held pose the model stands in with no clip playing."""
+    pose = REST.get(name)
+    return tuple(pose[:3]) if pose else None
+
+
 def groups():
-    """The Blockbench project's groups, each at its joint, the children under their parents."""
+    """The Blockbench project's groups, each at its joint with its rest rotation, the children under their parents."""
     out = [("body", HIP, None, [shifted(i, HIP) for i in body()]),
            ("head", NECK, None, [shifted(i, NECK) for i in head()], "body"),
            ("skirt", SKIRT, None, [shifted(i, SKIRT) for i in skirt()], "body")]
     for name, joint in SHOULDERS.items():
         side = 1 if "left" in name else -1
-        out.append((name, joint, None, [shifted(i, joint) for i in arm(side)], "body"))
+        out.append((name, joint, rest_rotation(name), [shifted(i, joint) for i in arm(side)], "body"))
     hand = add(SHOULDERS["right_arm"], HAND)
-    out.append(("sword", hand, None, [shifted(i, hand) for i in sword()], "right_arm"))
+    out.append(("sword", hand, rest_rotation("sword"), [shifted(i, hand) for i in sword()], "right_arm"))
     for name, joint in LEGS.items():
         out.append((name, joint, None, [shifted(i, joint) for i in leg()]))
     return out
@@ -289,11 +299,6 @@ def posed(pose=None):
 # ------------------------------------------------------------------ animation curves (ticks)
 
 # The rest pose: the sword hand up before the chest, the blade rising back over the shoulder, as in the picture.
-# The rest pose: the sword hand held out and down before the chest, the wrist cocked so the blade stands up beside
-# the helm, leaning a little out; the grip shows two pixels above the fist before the guard, so the blade's root
-# stands clear of the cuff.
-REST = {"right_arm": (-45, 0, -30, 0, 0, 0), "sword": (60, 0, 25, 0, 0, 0), "left_arm": (0, 0, 8, 0, 0, 0)}
-
 
 def with_rest(pose):
     out = dict(REST)
@@ -369,7 +374,8 @@ def animations():
             pose = poses(i, frames)
             for n in names:
                 rx, ry, rz, dx, dy, dz = pose.get(n, (0, 0, 0, 0, 0, 0))
-                tracks[n]["rotation"].append((time, (rx, ry, rz)))
+                rest = REST.get(n, (0, 0, 0, 0, 0, 0))
+                tracks[n]["rotation"].append((time, (rx - rest[0], ry - rest[1], rz - rest[2])))
                 tracks[n]["position"].append((time, (dx, dy, dz)))
         tracks = {g: {c: k for c, k in ch.items() if any(v != (0, 0, 0) for _, v in k)} for g, ch in tracks.items()}
         return blockbench_export.animation(name, length, tracks, loop=loop)
