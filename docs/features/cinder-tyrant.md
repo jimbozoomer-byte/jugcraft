@@ -1,6 +1,6 @@
 # The Cinder Tyrant
 
-Status: implemented in source. CI's results go here when it has run (below). This is part 2 of boss 4 in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Cinder Kiln, his Cinderlings and his spat and fallen things, and his loot. It is built on part 1, the kiln and the Kiln Seal that opens it ([cinder-kiln.md](cinder-kiln.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 4 in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Cinder Kiln, his Cinderlings and his spat and fallen things, and his loot. It is built on part 1, the kiln and the Kiln Seal that opens it ([cinder-kiln.md](cinder-kiln.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 10 October 2026 the owner asked for "the next boss same way" as the Yeti King, and for the order he was made in to be saved as the plan for every boss (the playbook); the Cinder Tyrant is the next of the first eight in [branches/BOSSES.md](../branches/BOSSES.md).
 Owner: @jimbozoomer-byte
 
@@ -185,7 +185,30 @@ No Mojang texture is read, traced or copied.
 
 ## Verification
 
-CI: not yet run; its results and the client test's pictures go here when it has.
+![Sunk: the crucible under the forge mouth, its slag glowing in a rim of kiln brick, and in its middle the dark spikes of his crest over the slag](../images/ingame_cinder_tyrant_sunk.jpg)
+![Waking: he rises out of the crucible's slag, his jaws open and glowing, his crest along his back](../images/ingame_cinder_tyrant_wakes.jpg)
+![Tail Sweep: coiled sideways in the bowl, he swings his tail round, two white arcs of the sweep about him](../images/ingame_cinder_tyrant_tail_sweep.jpg)
+![Ember Spit: in profile on the cracked basalt, his crest raised, gobs of magma leaving his jaws toward glowing marks on the floor](../images/ingame_cinder_tyrant_ember_spit.jpg)
+![Body Slam: he is high in the air over the bowl, and a ring of fire burns on the floor where he will land](../images/ingame_cinder_tyrant_body_slam.jpg)
+![Kiln Breath: in profile, his jaws glowing, he breathes a spreading sector of flame across the floor before him](../images/ingame_cinder_tyrant_kiln_breath.jpg)
+![Mantle Shed: a Cinderling, a little salamander of glowing slag, crawls out beside his head, flames on his plates](../images/ingame_cinder_tyrant_cinderlings.jpg)
+![Quenched: come down in the south sluice's flooded trough, his seams dark, steam bursting round him](../images/ingame_cinder_tyrant_quenched.jpg)
+![The Eruption: he stands on the forge's lip over the slag fall, the crucible's slag in front](../images/ingame_cinder_tyrant_eruption.jpg)
+![The surge: the heat channel's slag spilled wide over its banks below the forge, the crucible's rim in front, he on the lip above](../images/ingame_cinder_tyrant_surge.jpg)
+![The west sluice choked: a glowing crust of slag across its panels, its trough dry before it](../images/ingame_cinder_tyrant_choked_sluice.jpg)
+![Cinder Rain: glowing cinders falling from the vent toward marks on the floor, he beside them](../images/ingame_cinder_tyrant_cinder_rain.jpg)
+![Lava Wave: seen from above, a ring of molten slag rolling out from him across the bowl](../images/ingame_cinder_tyrant_lava_wave.jpg)
+![The Molten Heart: seen from above his back, his cores glowing in his seams, fire burning on the floor all round](../images/ingame_cinder_tyrant_molten_heart.jpg)
+![After his fall: Grey Mist standing in the bowl's middle, the crucible beyond it under the forge mouth](../images/ingame_cinder_tyrant_defeated.jpg)
+
+*The client game test's pictures (CI, commit `cc43a8e`): sunk and waking; the Kiln's Tail Sweep, Ember Spit, Body Slam, Kiln Breath and Mantle Shed; quenched in the south sluice's trough; the Eruption on the forge's lip, the surge and the west sluice choked; the Cinder Rain and the Lava Wave; the Molten Heart; and after his fall. Each attack is frozen mid-move. The test client renders at 480x270, and the kiln is dark: some of these are hard to read at that size.*
+
+CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `738fd70` | Build | **The game tests failed to compile:** his heat test set `Entity.invulnerableTime`, which is private in 26.3, to strike him twice in one tick. The main and client code built. Nothing else ran |
+| `cc43a8e` | Build, data audit, every server game test with and without the optional integrations, and every client test class (his arena is a new structure file, which the selection counts as shared) | The test now waits out his hurt cooldown between blows. **All pass:** all 1313 required game tests (his fourteen among them), `optional integrations absent`, and every client test class in five jobs of 15 to 28 minutes, `CinderTyrantClientGameTests` (his whole fight) among them. The pictures above are from this commit |
 
 Run locally (10 October 2026):
 
