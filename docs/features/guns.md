@@ -2332,6 +2332,16 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `lobberKeepsToItsKind`: an empty Lobber that last held thermite grenades, frag Grenades ahead of thermite grenades in the inventory, loads thermite.
   - `lobberLobsTheKindItHolds`: a Lobber of chlorine grenades lobs a chlorine grenade of the shooter's at a pig seven blocks off; a chlorine cloud hangs where it lands, and it hurts the pig.
   - Slice 8C's `lobberLobsAGrenade` and `reloadsTakeAmmunitionByTheItem` still load and fire frag Grenades.
+- **Slice 9G in CI** ([run 38042577642](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38042577642), on 48b38825d): every check passed.
+  - **Server game tests** (`mod`, `optional integrations absent`): 1204 passed, 1199 before; the five new ones are `LobberGrenadesGameTests`, which compiled and passed in both jobs.
+  - **`GunsClientGameTests`**, the one client class the job ran (it covers `GunsClient`, which this slice changes). The Trench Lobber's steps went as in slice 9F's run, with frag Grenades:
+    - aimed, the view narrowed to 0.9; fired, 6 flash frames, and the husk 825.5 → 812.79 from the Grenade's burst, rounds 6 → 5;
+    - reloaded, 6 rounds from the inventory, 31 Grenades left;
+    - with its three sets of attachments, each stock was drawn held and left out aimed (35 or 36 frames).
+  - **Screenshots:**
+    - The counter's second line names the grenade the next reload would load: "32 Grenade" held, aimed and fired, "Reloading" mid-reload, "31 Grenade" after it, and "0 Grenade" with the attachment sets, whose test leaves no grenades in the inventory.
+    - Fired aimed, the screenshot caught the left sleeve across the lower left corner of the view as the shot works the pump; in slice 9F's run it was small beside the gun. The frame differs from run to run, and this slice changes nothing about how the gun or the arms are drawn.
+  - **Not covered by CI:** no client test loads a chemical grenade, so the counter and the tooltip naming one, and a chemical grenade lobbed from the Lobber, were not seen on a client (the server tests check the loading and the chlorine cloud).
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
