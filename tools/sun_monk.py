@@ -25,13 +25,13 @@ PLANKS, PLANK_DARK, WHITE, BLACK, ROBE, ROBE_LIGHT, GOLD, GOLD_DARK, SHAFT, SOCK
     "sm_planks", "sm_plank_dark", "sm_white", "sm_black", "sm_robe", "sm_robe_light", "sm_gold", "sm_gold_dark",
     "sm_shaft", "sm_sock", "sm_sandal", "sm_skin")
 
-# Joints, in pixels.
+# Joints, in pixels: the Minecraft figure's (a 12-pixel body on 12-pixel legs, the head at 24), the hood and hat above.
 HIP = (0, 12, 0)
 NECK = (0, 24, 0)
 SHOULDERS = {"left_arm": (6, 22, 0), "right_arm": (-6, 22, 0)}
 LEGS = {"left_leg": (2, 12, 0), "right_leg": (-2, 12, 0)}
-HAND = (0, -14, 0)
-SKIRT = (0, 13, 0)
+HAND = (0, -13, 0)
+SKIRT = (0, 12, 0)
 # The rest pose: both arms a little forward, the left out to the side so the star stands clear of the body; the staff
 # and star are modelled in front of the fists, so neither cuts into the robe.
 REST = {"right_arm": (-60, 0, -6, 0, 0, 0), "left_arm": (-10, 0, 20, 0, 0, 0), "staff": (0, 0, 0, 0, 0, 0),
@@ -46,52 +46,55 @@ def rest_rotation(name):
 # ------------------------------------------------------------------ parts (each from its joint)
 
 def body():
-    """The robe's torso with the white hood's cape over the shoulders, the gold sash with its knot, and the robe's
-    overlapping front panels."""
+    """The robe's torso: the lighter chest panel inside a dark V collar, gold trim down the front, the gold sash at
+    the waist with its hanging ends."""
     m = []
     m.append(box((-4, -12, -2), (4, 0, 2), ROBE))
-    m.append(box((-4.2, -4, -2.2), (4.2, -1, 2.2), ROBE_LIGHT))
-    m.append(box((-0.3, -12, 2), (0.3, -1, 2.3), ROBE_LIGHT))
-    m.append(box((-4.4, -7, -2.4), (4.4, -5, 2.4), GOLD))
-    m.append(box((-1.5, -7.5, 2.4), (1.5, -4.5, 3.2), GOLD_DARK))
-    m.append(box((-1, -11, 2.5), (0, -7.5, 3), GOLD))
-    m.append(box((0.3, -10, 2.5), (1.3, -7.5, 3), GOLD))
-    m.append(box((-5.2, -5, -3.2), (5.2, 0.6, 3.2), WHITE))
-    m.append(box((-5.6, -7.5, -3.6), (5.6, -5, 3.6), WHITE))
-    m.append(box((-3, -9, 2.8), (3, -7.5, 3.4), WHITE))
+    m.append(box((-3, -9, 2), (3, -1.5, 2.3), ROBE_LIGHT))
+    m.append(box((-3.2, -2.5, 2.3), (-0.4, 0, 2.6), ROBE))
+    m.append(box((0.4, -2.5, 2.3), (3.2, 0, 2.6), ROBE))
+    m.append(box((-0.5, -9, 2.3), (0.5, 0, 2.7), GOLD))
+    m.append(box((-4.3, -12, -2.3), (4.3, -9, 2.3), GOLD))
+    m.append(box((-4.5, -11.4, -2.5), (4.5, -10.4, 2.5), GOLD_DARK))
+    m.append(box((-1.4, -12.5, 2.3), (1.4, -9, 2.9), GOLD_DARK))
     return m
 
 
 def head():
-    """The white hood over the head with the black face slot, and the great square plank hat with its dark rim and
-    bands, set a little askew."""
+    """The white hood: a box taller and wider than the head that comes down over the shoulders, the black face slot
+    in it (wide at the brow, narrowing down), and the great square plank hat with its dark rim and bands, resting on
+    the hood with a slight twist."""
     m = []
-    m.append(box((-4.4, -0.5, -4.4), (4.4, 8.4, 4.4), WHITE))
-    m.append(box((-2.6, 1.5, 4.4), (2.6, 4.5, 4.7), BLACK))
-    m.append(box((-1.6, 4.5, 4.4), (1.6, 6.5, 4.7), BLACK))
-    m.append(box((-0.6, 6.5, 4.4), (0.6, 7.3, 4.7), BLACK))
-    m.append(box((-12.5, 7.6, -12.5), (12.5, 8.6, 12.5), PLANK_DARK, ("y", 8, [0, 8, 0])))
-    m.append(box((-12, 8.6, -12), (12, 12.4, 12), PLANKS, ("y", 8, [0, 8, 0])))
-    for x0, x1 in ((-12.2, -11.4), (11.4, 12.2)):
-        m.append(box((x0, 8.4, -12.2), (x1, 12.6, 12.2), PLANK_DARK, ("y", 8, [0, 8, 0])))
-    for z0, z1 in ((-12.2, -11.4), (11.4, 12.2)):
-        m.append(box((-12.2, 8.4, z0), (12.2, 12.6, z1), PLANK_DARK, ("y", 8, [0, 8, 0])))
-    for z in (-4, 4):
-        m.append(box((-11.6, 12.4, z - 0.4), (11.6, 12.7, z + 0.4), PLANK_DARK, ("y", 8, [0, 8, 0])))
+    m.append(box((-5, -3, -5), (5, 9, 5), WHITE))
+    m.append(box((-5.5, -3.5, -5.5), (5.5, -0.5, 5.5), WHITE))
+    m.append(box((-3.2, 2.5, 5), (3.2, 6, 5.3), BLACK))
+    m.append(box((-2.2, 0.5, 5), (2.2, 2.5, 5.3), BLACK))
+    m.append(box((-1.2, -0.5, 5), (1.2, 0.5, 5.3), BLACK))
+    turn = ("y", 6, [0, 9, 0])
+    m.append(box((-11, 8.8, -11), (11, 9.6, 11), PLANK_DARK, turn))
+    m.append(box((-11, 9.6, -11), (11, 13.6, 11), PLANKS, turn))
+    for x0, x1 in ((-11.3, -10.3), (10.3, 11.3)):
+        m.append(box((x0, 9.3, -11.3), (x1, 13.9, 11.3), PLANK_DARK, turn))
+    for z0, z1 in ((-11.3, -10.3), (10.3, 11.3)):
+        m.append(box((-11.3, 9.3, z0), (11.3, 13.9, z1), PLANK_DARK, turn))
+    for z in (-3.7, 3.7):
+        m.append(box((-10.5, 13.6, z - 0.5), (10.5, 13.9, z + 0.5), PLANK_DARK, turn))
     return m
 
 
 def arm(side):
-    """A wide robe sleeve, its gold cuff with a dark band and three hanging tassels, and the hand."""
+    """A long wide robe sleeve hanging past the hand, a gold cuff with a dark band at its mouth, gold trim down its
+    outer edge, three tassels, and the hand showing below."""
     m = []
     m.append(box((-2, -12, -2), (2, 0.5, 2), ROBE))
-    m.append(box((-3.6, -8, -3.6), (3.6, 0.5, 3.6), ROBE))
-    m.append(box((-4.1, -11, -4.1), (4.1, -8, 4.1), GOLD))
-    m.append(box((-4.3, -9.2, -4.3), (4.3, -8.4, 4.3), GOLD_DARK))
+    m.append(box((-3.6, -10, -3.6), (3.6, 0.5, 3.6), ROBE))
+    m.append(box((side * 3.6 - (0.6 if side > 0 else 0), -9.5, -2), (side * 3.6 + (0 if side > 0 else 0.6), -0.5, 2), GOLD))
+    m.append(box((-4.1, -13, -4.1), (4.1, -10, 4.1), GOLD))
+    m.append(box((-4.3, -11.6, -4.3), (4.3, -10.8, 4.3), GOLD_DARK))
     for z in (-3, 0, 3):
-        m.append(box((side * 4.1 - (0.5 if side > 0 else 0), -16, z - 0.5), (side * 4.1 + (0 if side > 0 else 0.5), -11, z + 0.5), GOLD))
-        m.append(box((side * 4.1 - (0.6 if side > 0 else 0), -17, z - 0.6), (side * 4.1 + (0 if side > 0 else 0.6), -16, z + 0.6), GOLD_DARK))
-    m.append(box((-2, -15, -2), (2, -11, 2), SKIN))
+        m.append(box((side * 4.1 - (0.6 if side > 0 else 0), -18, z - 0.5), (side * 4.1 + (0 if side > 0 else 0.6), -13, z + 0.5), GOLD))
+        m.append(box((side * 4.1 - (0.7 if side > 0 else 0), -19.2, z - 0.6), (side * 4.1 + (0 if side > 0 else 0.7), -18, z + 0.6), GOLD_DARK))
+    m.append(box((-2, -16, -2), (2, -13, 2), SKIN))
     return m
 
 
@@ -100,8 +103,8 @@ def staff():
     eight short ones between them."""
     m = []
     zc = 5.3  # the staff runs down in front of the fist, clear of the robe
-    m.append(box((-0.7, -14, zc - 0.7), (0.7, 4, zc + 0.7), SHAFT))
-    m += cyl("y", 0, zc, 1.2, -16, -14, GOLD)
+    m.append(box((-0.7, -12, zc - 0.7), (0.7, 4, zc + 0.7), SHAFT))
+    m += cyl("y", 0, zc, 1.2, -14, -12, GOLD)
     m += cyl("y", 0, zc, 1.0, 4, 6, GOLD_DARK)
     m += cyl("z", 0, 10, 3.2, zc - 0.8, zc + 0.8, GOLD_DARK)
     m += cyl("z", 0, 10, 2, zc - 1.0, zc + 1.0, GOLD)
@@ -133,29 +136,36 @@ def star():
 
 
 def skirt():
-    """The robe's flared skirt in three tiers down to the sandals, lighter folds standing proud all round, and the
-    hem's split at the front."""
+    """The robe's skirt from the waist to the knees: three flaring tiers, lighter folds standing proud all round, a
+    split at the front, and a fringe of darker hanging lappets at the hem."""
     m = []
-    m.append(box((-4.8, -6, -2.8), (4.8, 0.5, 2.8), ROBE))
-    m.append(box((-5.8, -11, -3.8), (5.8, -6, 3.8), ROBE))
-    m.append(box((-6.8, -12.5, -4.8), (6.8, -11, 4.8), ROBE_LIGHT))
-    for x, z0, z1 in ((-5.3, -2, 2), (5.3, -2, 2)):
-        m.append(box((x - 0.3, -11.5, z0), (x + 0.3, -1, z1), ROBE_LIGHT))
-    for z in (-3.5, 3.5):
-        for x in (-3.5, 0, 3.5):
-            m.append(box((x - 0.7, -11.6, z - 0.3 - 0.3 * (z > 0)), (x + 0.7, -3, z + 0.3 + 0.3 * (z < 0)), ROBE_LIGHT))
-    m.append(box((-0.4, -12.5, 3.6), (0.4, -6, 5.1), ROBE_LIGHT))
+    m.append(box((-4.6, -2.5, -2.6), (4.6, 0.5, 2.6), ROBE))
+    m.append(box((-5.4, -5, -3.2), (5.4, -2.5, 3.2), ROBE))
+    m.append(box((-6.2, -6, -3.8), (6.2, -5, 3.8), ROBE))
+    for x in (-5.8, 5.8):
+        m.append(box((x - 0.3, -5.8, -2.2), (x + 0.3, -1, 2.2), ROBE_LIGHT))
+    for x in (-3.4, 0, 3.4):
+        m.append(box((x - 0.7, -5.9, 3.8), (x + 0.7, -1.5, 4.2), ROBE_LIGHT))
+        m.append(box((x - 0.7, -5.9, -4.2), (x + 0.7, -1.5, -3.8), ROBE_LIGHT))
+    m.append(box((-0.4, -6, 3.8), (0.4, -3, 4.4), ROBE_LIGHT))
+    # The ragged hem ends above the shins, so the socks and sandals show.
+    n = 14
+    for i in range(n):
+        a = 2 * math.pi * i / n
+        cx, cz = 6.0 * math.sin(a), 3.6 * math.cos(a)
+        length = 1.2 if i % 2 else 2.2
+        m.append(box((cx - 1, -6 - length, cz - 0.9), (cx + 1, -5.6, cz + 0.9), ROBE))
     return m
 
 
 def leg():
-    """A white sock in a red sandal with a strap and a dark sole."""
+    """A white sock with the robe's hem above it, in a red sandal with a strap and a dark sole."""
     m = []
-    m.append(box((-2, -7, -2), (2, 0.5, 2), ROBE))
-    m.append(box((-2.1, -11, -2.1), (2.1, -7, 2.1), SOCK))
-    m.append(box((-2.5, -12, -2.7), (2.5, -10.8, 3.2), SANDAL))
-    m.append(box((-2.3, -11.2, 0.5), (2.3, -10.5, 1.3), SANDAL))
-    m.append(box((-2.6, -12.2, -2.8), (2.6, -11.6, 3.3), BLACK))
+    m.append(box((-2, -5, -2), (2, 0.5, 2), ROBE))
+    m.append(box((-2.1, -10.5, -2.1), (2.1, -5, 2.1), SOCK))
+    m.append(box((-2.5, -11.6, -2.6), (2.5, -10.4, 3.2), SANDAL))
+    m.append(box((-2.3, -10.8, 0.4), (2.3, -10, 1.4), SANDAL))
+    m.append(box((-2.6, -12, -2.7), (2.6, -11.5, 3.3), BLACK))
     return m
 
 
