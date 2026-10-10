@@ -1,6 +1,6 @@
 # The Glacier Hall, and the Frost Horn
 
-Status: implemented in source; CI is to build it and run its game tests and client game test (below). Part 1 of boss 3, the Yeti King, in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the Glacier Hall, a third lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Yeti King and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI builds it and its game tests and client game test pass (below). Part 1 of boss 3, the Yeti King, in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the Glacier Hall, a third lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Yeti King and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 10 October 2026 the owner chose to "build a new boss" the way Madame Tatterlace was built ("lair, summoning, fight, loot, tests and pictures"); the Yeti King is the owner's own example in the bosses brainstorm.
 
 Target milestone and tier: Specialization tier (dungeon expeditions), as the Witching Season's lairs are. The horn takes Discovery-tier things: a goat horn, gold, leather and snow.
@@ -97,6 +97,23 @@ New IDs (all under `jugcraft`):
 Nothing is renamed.
 
 ## Verification
+
+![The whirl of snow where the Frost Horn was blown, on a snowfield at midnight](../images/ingame_glacier_whirl.jpg)
+![The view from the arrival ledge: icicles hanging from the vault, the four ice columns, the lake of snow, and the throne under its ivory tusks at the far end](../images/ingame_glacier_arrival.jpg)
+![The lake from the ramp's foot: drift snow, the glare ice in the middle, two columns and the throne beyond](../images/ingame_glacier_lake.jpg)
+![The dais's three tiers of ice, the throne on top, its ivory tusks curving over it and the frozen hoard to either side](../images/ingame_glacier_throne.jpg)
+![Looking up into the vault from the lake: icicles hanging between the columns](../images/ingame_glacier_vault.jpg)
+![An ice column's flared foot on its ring of trampled snow, the glare ice beside it and the dais beyond](../images/ingame_glacier_column.jpg)
+![The trampled path from the lake to the west den, old bones and white pelts on the den's floor](../images/ingame_glacier_den.jpg)
+![The arch beside the arrival ledge, filled with Grey Mist](../images/ingame_glacier_exit.jpg)
+
+*The client game test's pictures (CI, commit `ccdaca8`): the whirl where the horn was blown at midnight, then in the hall the view from the ledge, the lake from the ramp's foot, the throne, the vault, an ice column, the west den and the Grey Mist's arch. The test client renders at 480x270.*
+
+CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `ccdaca8` | Build, data audit, game tests, client game tests (main merged in) | **All pass:** all 1283 required game tests and `GlacierHallClientGameTests`. The pictures above are from this commit |
 
 Run locally:
 
