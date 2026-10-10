@@ -13,14 +13,20 @@ Grow five new fruits:
 - **Two trees,** grown from their seed as the [orchards'](orchards.md) are: the **Plum**, an oak-trunked tree that blossoms white and hangs with purple plums, and the **Banana**, a soft green-brown **Banana Stem** of its own under a crown of bright fronds that droop and hang, flowering purple and then hung with yellow bunches. A right-click picks the ripe fruit (one to three plums, two to four bananas) and the leaves fruit again. A plum crafts into its **Plum Pit**; a banana into a **Banana Pup** (the sucker a banana plant grows from).
 - **Seeds:** breaking short grass now and then gives Strawberry, Blueberry or Coffee Seeds, as the other crops' seeds; a strawberry, blueberries or coffee cherries craft into their seeds.
 - **Wild:** Wild Strawberries in forests and flower fields, Wild Blueberries in taigas and hills, Wild Coffee in jungles, broken for one or two seeds (or, with shears, the plant itself); plum trees in forests and taigas and in the Orchard, banana trees in jungles and in the Tropics and the Rainforest.
-- **Coffee:** Coffee Cherries roast into **Coffee Beans** in a furnace, smoker or campfire. The **Coffee Cake** now takes coffee beans where it took Mulling Spices, and the owner's coffee tart will.
+- **Coffee:** Coffee Cherries roast into **Coffee Beans** in a furnace, smoker or campfire. The **Coffee Cake** now takes coffee beans where it took Mulling Spices, and so does the owner's [Coffee Tart](pies-and-tarts.md).
 - **Jams:** **Strawberry Jam**, **Blueberry Jam** and **Plum Jam**, cooked into a Mason Jar in the Cooking Pot, sealed in the Canning Kettle and set out on a Pantry Shelf as the other preserves are.
 
-<!-- Screenshots: added from CI's client game test once it has run. -->
+| **The bushes:** the Strawberry Plant, Blueberry Bush and Coffee Plant in rows on farmland, from planted (left) to ripe (right) | **Ripe:** the plum (left) and the banana (right) grown from their saplings and hung with fruit, the wild bushes before them |
+| --- | --- |
+| ![The bushes](../images/ingame_fruit_bushes.jpg) | ![The trees ripe](../images/ingame_fruit_trees_ripe.jpg) |
+| **In blossom:** the same two trees grown again, seen from the other side: the banana (left) and the plum, white with blossom (right) | **The wall:** the crops' items in item frames |
+| ![The trees in blossom](../images/ingame_fruit_trees_blossom.jpg) | ![The items](../images/ingame_fruit_items.jpg) |
+
+*In-game screenshots from CI's client game test (`FruitCropClientGameTests`, software rendering, small previews; the chat at the bottom is the test world's start-up messages).*
 
 ## Connections
 - Existing input producer: short grass and wild plants for the seeds, wild trees for the pit and pup; farmland and water, bone meal; sugar and Mason Jars for the jams.
-- Existing output consumer: the fruit are foods (`c:foods/berry`, `c:foods/fruit`) and crops (`c:crops/<crop>`), the seeds `c:seeds/<crop>`, for other mods' recipes; the jams join the pantry (`PreserveJarItem`, the Canning Kettle and Pantry Shelf); the coffee beans go into the Coffee Cake; the hydroponic bay grows the three bushes' seeds as it grows the other crops'. The owner's pies, tarts and milkshakes are the next consumers.
+- Existing output consumer: the fruit are foods (`c:foods/berry`, `c:foods/fruit`) and crops (`c:crops/<crop>`), the seeds `c:seeds/<crop>`, for other mods' recipes; the jams join the pantry (`PreserveJarItem`, the Canning Kettle and Pantry Shelf); the coffee beans go into the Coffee Cake; the hydroponic bay grows the three bushes' seeds as it grows the other crops'. The owner's [pies and tarts](pies-and-tarts.md) take the fruit and the coffee beans, and their [milkshakes](milkshakes.md) the fruit.
 - Technology connection: the bushes are tall crops, so the hydroponic bay grows them (two fruit and one or two seeds a harvest, as every crop); the jams and the coffee are data recipes, ready for the engineered kitchen (slice 10).
 - Magic connection: none.
 - Reachable entry path: short grass anywhere gives the bushes' seeds; wild plants and trees give the rest; a traded fruit starts a farm. No circular unlock: nothing grown here is needed to reach it.
@@ -60,7 +66,11 @@ No new dependency.
 The banana follows the [tree roster's](../branches/TREES.md#banana) banana where it can: a `banana_stem` of its own in `#minecraft:logs` (so its fronds stay while it stands) but not `#minecraft:logs_that_burn`, under vanilla's cherry foliage shape so the fronds droop and hang. Unlike the roster's, it is built as an orchard tree, so it fruits on its own leaves (`banana_leaves`) as the other fruit trees do instead of a separate bunch block, and its sapling is planted from a Banana Pup.
 
 ## Verification
-CI: not yet run on this branch (see the pull request).
+CI (8 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `9a378f1` | Build, data audit, game tests, and the client game test classes the change picks (`FruitCropClientGameTests` and `OrchardClientGameTests`) | Compiled; data audit pass, 1767 IDs; **all 962 required game tests passed**, the fruit crops' among them; **both client classes passed**. The screenshots above are from this run |
 
 Run locally (8 October 2026):
 
@@ -91,6 +101,6 @@ Not done: play in a real client and a two-client dedicated-server session.
 Farming and food. The plants grow wild in new chunks only, in the biomes above. The trees' leaves are evergreen, as the orchards' are. Nothing is seasonal.
 
 ## Rollout and open questions
-- Next: the owner's pies and tarts, then their milkshakes, from these fruits.
+- The owner's [pies and tarts](pies-and-tarts.md) (strawberry, blueberry, plum, banana and coffee each go into one) and [milkshakes](milkshakes.md) (strawberry, banana, plum and blueberry) are built from these fruits.
 - The tree roster's Lush Grassland bananas, its banana bunch block and cherry trees stay for the trees branch.
 - The owner's own art for any of these, if they draw it, replaces Jugcraft's under the same IDs.

@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
+import io.github.jimbozoomer.jugcraft.agriculture.SpiceGrinding;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Preparation;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
@@ -20,7 +21,8 @@ import net.minecraft.world.level.Level;
 /**
  * The Mortar and Pestle (roadmap step 13): used with an alchemical ingredient in the other hand, grinds one into a
  * reagent of the preparation made with this tool (data: the preparation whose tool is {@code jugcraft:mortar}). Anyone
- * may grind; the crucible decides who may use what comes of it.
+ * may grind; the crucible decides who may use what comes of it. The kitchen grinds its spices with it too: a Dried Chili
+ * in the other hand becomes Paprika ({@link SpiceGrinding}).
  */
 public class MortarItem extends Item {
 	public static final String TOOL = "jugcraft:mortar";
@@ -38,6 +40,9 @@ public class MortarItem extends Item {
 		if (!(player instanceof ServerPlayer server)) {
 			return InteractionResult.SUCCESS;
 		}
+		if (SpiceGrinding.grinds(other)) {
+			return grindSpice(level, server, other);
+		}
 		Preparation ground = Alchemy.catalog().madeWith(TOOL);
 		String item = ConcordanceProgress.itemId(other);
 		if (other.isEmpty() || other.has(JugcraftConcordance.REAGENT) || ground == null || Alchemy.catalog().ingredient(item) == null) {
@@ -52,6 +57,19 @@ public class MortarItem extends Item {
 		ItemStack reagent = new ItemStack(JugcraftConcordance.REAGENT_ITEM);
 		reagent.set(JugcraftConcordance.REAGENT, new Reagent(item, ground.id()));
 		server.getInventory().placeItemBackInInventory(reagent, Prediction.SERVER_ONLY);
+		server.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.ground", name));
+		level.playSound(null, server.blockPosition(), SoundEvents.GRINDSTONE_USE, SoundSource.PLAYERS, 0.5F, 1.4F);
+		return InteractionResult.SUCCESS;
+	}
+
+	/** The kitchen's use of the same mortar: a Dried Chili in the other hand is ground into Paprika ({@link SpiceGrinding}). */
+	private static InteractionResult grindSpice(Level level, ServerPlayer server, ItemStack other) {
+		if (!RateGate.allow(server, "mortar", 8)) {
+			return InteractionResult.FAIL;
+		}
+		Component name = other.getHoverName();
+		other.shrink(1);
+		server.getInventory().placeItemBackInInventory(SpiceGrinding.result(), Prediction.SERVER_ONLY);
 		server.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.ground", name));
 		level.playSound(null, server.blockPosition(), SoundEvents.GRINDSTONE_USE, SoundSource.PLAYERS, 0.5F, 1.4F);
 		return InteractionResult.SUCCESS;

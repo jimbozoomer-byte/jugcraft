@@ -35,6 +35,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  * on or comes off.
  */
 public class KitchenStoveBlockEntity extends BlockEntity {
+	public final local.peepo.KitchenCompanionPort companionKitchen = new local.peepo.KitchenCompanionPort(this);
 	public static final int SLOTS = 6;
 	public static final int SPEED = 2;
 	private static final RecipeManager.CachedCheck<SingleRecipeInput, CampfireCookingRecipe> RECIPES =
@@ -54,6 +55,18 @@ public class KitchenStoveBlockEntity extends BlockEntity {
 	private final NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
 	private final int[] progress = new int[SLOTS];
 	private final int[] time = new int[SLOTS];
+	private final boolean[] companionLoaded = new boolean[SLOTS];
+	public int companionRoom(){int free=0;for(var s:items)if(s.isEmpty())free++;return free;}
+	public int companionInsert(ItemStack stack,int maximum){
+		if(!(level instanceof ServerLevel server))return 0;var r=recipe(server,stack).orElse(null);if(r==null)return 0;
+		int moved=0;for(int i=0;i<SLOTS && moved<maximum;i++)if(items.get(i).isEmpty()){
+			items.set(i,stack.copyWithCount(1));progress[i]=0;time[i]=Math.max(1,r.value().cookingTime()/SPEED);companionLoaded[i]=true;moved++;
+		}return moved;
+	}
+	private record CompanionSnapshot(List<ItemStack> items,int[] progress,int[] time,boolean[] managed){}
+	public Object companionSnapshot(){return new CompanionSnapshot(items.stream().map(ItemStack::copy).toList(),progress.clone(),time.clone(),companionLoaded.clone());}
+	public void companionRestore(Object value){var s=(CompanionSnapshot)value;for(int i=0;i<SLOTS;i++){items.set(i,s.items.get(i).copy());progress[i]=s.progress[i];time[i]=s.time[i];companionLoaded[i]=s.managed[i];}}
+
 
 	public KitchenStoveBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.KITCHEN_STOVE_ENTITY, pos, state);
@@ -87,6 +100,7 @@ public class KitchenStoveBlockEntity extends BlockEntity {
 			return Placed.FULL;
 		}
 		items.set(slot, stack.copyWithCount(1));
+		companionLoaded[slot]=false;
 		progress[slot] = 0;
 		time[slot] = Math.max(1, recipe.get().value().cookingTime() / SPEED);
 		stack.consume(1, player);
@@ -105,9 +119,13 @@ public class KitchenStoveBlockEntity extends BlockEntity {
 			if (food.isEmpty() || ++progress[slot] < time[slot]) {
 				continue;
 			}
+			if(companionLoaded[slot] && progress[slot]>time[slot] && level.getGameTime()%20!=0)continue;
 			SingleRecipeInput input = new SingleRecipeInput(food);
 			ItemStack cooked = recipe(level, food).map(holder -> holder.value().assemble(input)).orElse(food);
-			Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, cooked);
+			if(companionLoaded[slot]){
+				if(!companionKitchen.finish(cooked)){progress[slot]=time[slot]+1;continue;}
+			}else Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, cooked);
+			companionLoaded[slot]=false;
 			items.set(slot, ItemStack.EMPTY);
 			done = true;
 		}
@@ -125,6 +143,7 @@ public class KitchenStoveBlockEntity extends BlockEntity {
 
 	@Override
 	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		companionKitchen.drop();
 		if (level != null) {
 			for (ItemStack stack : items) {
 				Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
@@ -136,6 +155,8 @@ public class KitchenStoveBlockEntity extends BlockEntity {
 	@Override
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
+		companionKitchen.load(input);
+		for(int i=0;i<SLOTS;i++)companionLoaded[i]=input.getBooleanOr("companionHob"+i,false);
 		items.clear();
 		for (Pan pan : input.read("hob", Pan.CODEC.listOf()).orElse(List.of())) {
 			if (pan.slot() >= 0 && pan.slot() < SLOTS) {
@@ -149,6 +170,8 @@ public class KitchenStoveBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		companionKitchen.save(output);
+		for(int i=0;i<SLOTS;i++)output.putBoolean("companionHob"+i,companionLoaded[i]);
 		List<Pan> hob = new ArrayList<>();
 		for (int slot = 0; slot < SLOTS; slot++) {
 			if (!items.get(slot).isEmpty()) {

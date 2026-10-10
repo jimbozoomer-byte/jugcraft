@@ -2,17 +2,24 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.GunsClient;
+import io.github.jimbozoomer.jugcraft.client.guns.GunArmsLayer;
 import io.github.jimbozoomer.jugcraft.client.guns.GunEffects;
+import io.github.jimbozoomer.jugcraft.client.guns.GunLaser;
 import io.github.jimbozoomer.jugcraft.client.guns.GunPose;
+import io.github.jimbozoomer.jugcraft.client.guns.GunRenderer;
+import io.github.jimbozoomer.jugcraft.client.guns.GunScope;
 import io.github.jimbozoomer.jugcraft.client.guns.GunView;
+import io.github.jimbozoomer.jugcraft.guns.EnergyCellItem;
 import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
+import io.github.jimbozoomer.jugcraft.guns.GunSpec;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -27,6 +34,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -37,8 +45,12 @@ import net.minecraft.world.phys.AABB;
  * client seeing a fitted magazine's capacity; each gun held in third person and shown in the inventory with the
  * attachments. Slice 6: each gun narrows the view aimed, shows a muzzle flash fired and throws the spent casings its
  * animations cue; in third person the player is posed holding it, and fires it. Slice 7: a third set of attachments
- * with a bayonet (and the guns whose parts use shared textures), and a stab with the stab key that hurts the husk.
- * Screenshots jugcraft_guns_* (CI job {@code client}).
+ * with a bayonet (and the guns whose parts use shared textures), and a stab with the stab key that hurts the husk; and the
+ * scopes, each aimed through on the Longhorn Rifle (the view through it or the reflex dot, the narrowed view, the slower
+ * mouse). Slice 8C: the heavy weapons fire their own ammunition (grenades, blaze powder) the same way, and the
+ * Thresher's trigger is held until its barrels have spun up and it fires. Slice 9F: aimed down its sights, each gun's
+ * arms are drawn at half their size, and a fitted stock is left out. Screenshots jugcraft_guns_* (CI job
+ * {@code client}).
  */
 public class GunsClientGameTests implements FabricClientGameTest {
 	@Override
@@ -69,21 +81,41 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			setHudHidden(context, false);
 
 			for (String gun : JugcraftGuns.SPECS.keySet()) {
-				String round = JugcraftGuns.SPECS.get(gun).ammo();
-				int capacity = JugcraftGuns.SPECS.get(gun).capacity();
+				GunSpec spec = JugcraftGuns.SPECS.get(gun);
+				// Slice 8C: a round, a grenade or blaze powder, by its item id.
+				Item ammo = JugcraftGuns.ammo(spec);
+				String round = BuiltInRegistries.ITEM.getKey(ammo).toString();
+				int capacity = spec.capacity();
+				int spinUp = JugcraftGuns.spinUp(JugcraftGuns.GUNS.get(gun));
+				// Slice 8D: an energy weapon loads each round's charge from Energy Cells.
+				int charge = JugcraftGuns.charge(JugcraftGuns.GUNS.get(gun));
 				// Each gun starts from the same aim: every shot kicks the view up, and twelve guns' kicks would lift it
 				// over the husk.
 				server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
 				server.runCommand("clear @p");
 				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:%s[jugcraft:loaded_rounds=%d]".formatted(gun, capacity));
-				server.runCommand("give @p jugcraft:%s 32".formatted(round));
+				if (charge > 0) {
+					server.runCommand("give @p %s[jugcraft:energy=%dL] 2".formatted(round, EnergyCellItem.CAPACITY));
+				} else {
+					server.runCommand("give @p %s 32".formatted(round));
+				}
 				context.waitTicks(30);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_held");
+				float heldSize = context.computeOnClient(client -> GunArmsLayer.lastSize());
 
 				// Aimed (the aimed spread keeps the shot on the husk), then fired down the sights.
 				context.getInput().holdKey(options -> options.keyUse);
 				context.waitTicks(10);
 				context.takeScreenshot("jugcraft_guns_" + gun + "_aimed");
+				// Slice 9F: aimed down its sights, the arms are drawn at half their size; a gun without sights (it stays at
+				// the hip) keeps them as they are.
+				float aimedSize = context.computeOnClient(client -> GunArmsLayer.lastSize());
+				boolean sighted = sighted(context, gun);
+				Jugcraft.LOGGER.info("[guns] {} arms drawn at size {} held and {} aimed (sights: {})", gun, heldSize, aimedSize, sighted);
+				if (Math.abs(heldSize - 1.0F) > 1.0E-3F || Math.abs(aimedSize - (sighted ? 0.5F : 1.0F)) > 1.0E-3F) {
+					throw new AssertionError("The " + gun + "'s arms were drawn at size " + heldSize + " held and " + aimedSize
+							+ " aimed, not 1 and " + (sighted ? "0.5" : "1"));
+				}
 				// Slice 6: aimed, the view narrows by the gun's zoom (GunFovMixin hands vanilla's modifier to GunView).
 				float fovIn = context.computeOnClient(client -> GunView.lastFovIn());
 				float fovOut = context.computeOnClient(client -> GunView.lastFovOut());
@@ -95,37 +127,67 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				float before = health(server, x, y, z);
 				long flashes = context.computeOnClient(client -> GunEffects.flashes());
 				long ejected = context.computeOnClient(client -> GunEffects.ejected());
-				// The shot, with its flash (it shows for two ticks).
-				context.getInput().pressKey(options -> options.keyAttack);
-				context.takeScreenshot("jugcraft_guns_" + gun + "_fired");
+				long traces = context.computeOnClient(client -> GunEffects.traced());
+				// The shot, with its flash (it shows for two ticks). A rotary gun's trigger is held while its barrels spin
+				// up, then a shot or two, and let go.
+				if (spinUp > 0) {
+					context.getInput().holdKey(options -> options.keyAttack);
+					context.waitTicks(spinUp + 2);
+					context.takeScreenshot("jugcraft_guns_" + gun + "_fired");
+					context.getInput().releaseKey(options -> options.keyAttack);
+				} else {
+					context.getInput().pressKey(options -> options.keyAttack);
+					context.takeScreenshot("jugcraft_guns_" + gun + "_fired");
+				}
 				long flashed = context.computeOnClient(client -> GunEffects.flashes()) - flashes;
 				Jugcraft.LOGGER.info("[guns] {} fired: {} muzzle flash frames drawn", gun, flashed);
 				if (flashed <= 0) {
 					throw new AssertionError("The " + gun + " showed no muzzle flash when fired");
 				}
 				context.waitTicks(11);
+				if (charge > 0) {
+					// Slice 8D: the server says where the shot went, and the client draws it.
+					long drawn = context.computeOnClient(client -> GunEffects.traced()) - traces;
+					Jugcraft.LOGGER.info("[guns] {} fired: {} beam or arc drawn", gun, drawn);
+					if (drawn <= 0) {
+						throw new AssertionError("The " + gun + "'s shot was not drawn (GunTracePayload)");
+					}
+				}
 				context.getInput().releaseKey(options -> options.keyUse);
 				context.waitTicks(5);
 				float after = health(server, x, y, z);
 				int loaded = server.computeOnServer(minecraft -> GunItem.loaded(player(minecraft).getMainHandItem()));
+				int spent = capacity - loaded;
 				Jugcraft.LOGGER.info("[guns] {} fired at a husk: health {} -> {}, rounds {} -> {}", gun, before, after, capacity, loaded);
-				if (after >= before || loaded != capacity - 1) {
-					throw new AssertionError("The " + gun + " did not hit the husk and spend a round: health " + before + " -> " + after
-							+ ", rounds " + capacity + " -> " + loaded);
+				if (after >= before || spent < 1 || spinUp == 0 && spent != 1) {
+					throw new AssertionError("The " + gun + " did not hit the husk and spend " + (spinUp > 0 ? "rounds" : "a round")
+							+ ": health " + before + " -> " + after + ", rounds " + capacity + " -> " + loaded);
 				}
 
 				context.getInput().pressKey(options -> GunsClient.reloadKey());
-				int ticks = JugcraftGuns.SPECS.get(gun).reloadTicks(1);
+				int ticks = spec.reloadTicks(spent);
 				context.waitTicks(Math.max(5, ticks / 2));
 				context.takeScreenshot("jugcraft_guns_" + gun + "_reloading");
 				context.waitTicks(ticks);
 				int reloaded = server.computeOnServer(minecraft -> GunItem.loaded(player(minecraft).getMainHandItem()));
-				int left = server.computeOnServer(minecraft -> GunShots.count(player(minecraft).getInventory(),
-						BuiltInRegistries.ITEM.getValue(Jugcraft.id(round))));
-				Jugcraft.LOGGER.info("[guns] {} reloaded: {} rounds loaded, {} {} left", gun, reloaded, left, round);
-				if (reloaded != capacity || left != 31) {
-					throw new AssertionError("The " + gun + " reload did not load the one round from the inventory: " + reloaded
-							+ " loaded, " + left + " left");
+				if (charge > 0) {
+					// Slice 8D: the reload drew the rounds' charge from the cells and left them.
+					long cells = server.computeOnServer(minecraft -> GunShots.charged(player(minecraft).getInventory(), ammo));
+					int kept = server.computeOnServer(minecraft -> GunShots.count(player(minecraft).getInventory(), ammo));
+					Jugcraft.LOGGER.info("[guns] {} reloaded: {} rounds loaded, {} JE left in its {} cells", gun, reloaded, cells, kept);
+					if (reloaded != capacity || cells != 2L * EnergyCellItem.CAPACITY - (long) spent * charge || kept != 2) {
+						throw new AssertionError("The " + gun + " reload did not draw the " + spent + " rounds' charge from its cells: "
+								+ reloaded + " loaded, " + cells + " JE in " + kept + " cells left");
+					}
+				} else {
+					int left = server.computeOnServer(minecraft -> GunShots.count(player(minecraft).getInventory(), ammo));
+					// An item of blaze powder loads four bursts: a reload takes whole items (slice 8C).
+					int taken = (spent + JugcraftGuns.perItem(spec) - 1) / JugcraftGuns.perItem(spec);
+					Jugcraft.LOGGER.info("[guns] {} reloaded: {} rounds loaded, {} {} left", gun, reloaded, left, round);
+					if (reloaded != capacity || left != 32 - taken) {
+						throw new AssertionError("The " + gun + " reload did not load the " + spent + " rounds spent from the inventory: "
+								+ reloaded + " loaded, " + left + " left");
+					}
 				}
 
 				// The owner's animations cue a spent casing (or, for a paper cartridge, a puff from the lock) on the shot or the
@@ -158,21 +220,38 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_guns_thunderpipe_shell");
 			context.waitTicks(40);
 
-			// Attachments: each gun that takes any, with one of each slot it has from two sets, held and aimed.
+			// Attachments: each gun that takes any, with one of each slot it has from each set it takes any of, held and
+			// aimed. The fourth set is slice 9E's Tactical Grip and Laser Sight.
 			List<List<String>> sets = List.of(List.of("silencer", "extended_magazine", "light_stock", "light_grip"),
 					List.of("extended_barrel", "speed_magazine", "weighted_stock", "vertical_grip"),
-					List.of("muzzle_brake", "wooden_stock", "iron_bayonet"));
+					List.of("muzzle_brake", "wooden_stock", "iron_bayonet"), List.of("tactical_grip", "laser_sight"));
 			for (String gun : JugcraftGuns.ACCEPTS.keySet()) {
 				for (int set = 0; set < sets.size(); set++) {
 					List<String> fitted = sets.get(set).stream().filter(JugcraftGuns.ACCEPTS.get(gun)::contains).toList();
+					if (fitted.isEmpty()) {
+						continue;
+					}
 					server.runCommand("item replace entity @p weapon.mainhand with jugcraft:%s[jugcraft:loaded_rounds=1,jugcraft:attachments=%s]"
 							.formatted(gun, snbt(fitted)));
 					context.waitTicks(20);
+					long stowed = context.computeOnClient(client -> GunRenderer.stowed());
 					context.takeScreenshot("jugcraft_guns_" + gun + "_fitted_" + (set + 1));
+					long stowedHeld = context.computeOnClient(client -> GunRenderer.stowed()) - stowed;
 					context.getInput().holdKey(options -> options.keyUse);
 					context.waitTicks(10);
 					context.takeScreenshot("jugcraft_guns_" + gun + "_fitted_" + (set + 1) + "_aimed");
+					// Slice 9F: a fitted stock is drawn at the hip and left out aimed down the gun's sights.
+					long stowedAimed = context.computeOnClient(client -> GunRenderer.stowed()) - stowed - stowedHeld;
 					context.getInput().releaseKey(options -> options.keyUse);
+					boolean stocked = fitted.stream().anyMatch(name -> JugcraftGuns.ATTACHMENTS.get(name).slot().equals("stock"));
+					if (stocked) {
+						Jugcraft.LOGGER.info("[guns] {} with {}: the stock left out in {} frames held and {} aimed", gun, fitted, stowedHeld,
+								stowedAimed);
+					}
+					if (stowedHeld != 0 || (stowedAimed > 0) != (stocked && sighted(context, gun))) {
+						throw new AssertionError("The " + gun + " with " + fitted + ": its stock was left out in " + stowedHeld
+								+ " frames held and " + stowedAimed + " aimed");
+					}
 					context.waitTicks(5);
 				}
 			}
@@ -198,6 +277,64 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			Jugcraft.LOGGER.info("[guns] the client sees a Rust Midge with an Extended Magazine hold {} rounds", seen);
 			if (seen != 30) {
 				throw new AssertionError("The client sees the Extended Magazine's Rust Midge hold " + seen + " rounds, not 30");
+			}
+
+			// Slice 7, the scopes, each on the Longhorn Rifle aimed at the husk: through the Long and Medium Scopes the view
+			// through the scope fills the screen and the view narrows by the scope's zoom; the Reflex Sight keeps the gun in
+			// view and shows its dot. Through the Long Scope the mouse turns the player more slowly. Slice 9E's Laser Sight
+			// shows its dot aimed as the Reflex Sight does, and held, draws its red dot where the gun points.
+			Map<String, Float> zooms = Map.of("long_scope", 0.3F, "medium_scope", 0.5F, "reflex_sight", 0.85F, "laser_sight", 0.9F);
+			for (String scope : List.of("long_scope", "medium_scope", "reflex_sight", "laser_sight")) {
+				server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
+				long lasered = context.computeOnClient(client -> GunLaser.dots());
+				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:longhorn_rifle[jugcraft:loaded_rounds=1,jugcraft:attachments=%s]"
+						.formatted(snbt(List.of(scope))));
+				context.waitTicks(20);
+				context.takeScreenshot("jugcraft_guns_" + scope);
+				long laserDots = context.computeOnClient(client -> GunLaser.dots()) - lasered;
+				if (scope.equals("laser_sight")) {
+					double toDot = context.computeOnClient(client -> GunLaser.lastOwn() == null ? -1.0
+							: GunLaser.lastOwn().distanceTo(client.player.getEyePosition()));
+					Jugcraft.LOGGER.info("[guns] the Laser Sight held: {} dots drawn in 20 ticks, the last {} blocks from the eye", laserDots, toDot);
+					if (laserDots <= 0 || toDot <= 0.0) {
+						throw new AssertionError("The Laser Sight drew " + laserDots + " dots where the gun points (the last " + toDot + " blocks off)");
+					}
+				} else if (laserDots > 0) {
+					throw new AssertionError("The " + scope + " drew " + laserDots + " laser dots");
+				}
+				long views = context.computeOnClient(client -> GunScope.views());
+				long dots = context.computeOnClient(client -> GunScope.dots());
+				context.getInput().holdKey(options -> options.keyUse);
+				context.waitTicks(10);
+				context.takeScreenshot("jugcraft_guns_" + scope + "_aimed");
+				float fovIn = context.computeOnClient(client -> GunView.lastFovIn());
+				float fovOut = context.computeOnClient(client -> GunView.lastFovOut());
+				long viewed = context.computeOnClient(client -> GunScope.views()) - views;
+				long dotted = context.computeOnClient(client -> GunScope.dots()) - dots;
+				Jugcraft.LOGGER.info("[guns] aimed through the {}: field of view modifier {} -> {}; {} frames of the view through it, {} of the dot",
+						scope, fovIn, fovOut, viewed, dotted);
+				if (Math.abs(fovOut - fovIn * zooms.get(scope)) > 0.01F) {
+					throw new AssertionError("Aimed through the " + scope + " the view did not narrow by its zoom " + zooms.get(scope) + ": "
+							+ fovIn + " -> " + fovOut);
+				}
+				if (scope.equals("reflex_sight") || scope.equals("laser_sight") ? dotted <= 0 || viewed > 0 : viewed <= 0) {
+					throw new AssertionError("Aimed through the " + scope + ", " + viewed + " frames of the view through a scope and "
+							+ dotted + " of the reflex dot were drawn");
+				}
+				if (scope.equals("long_scope")) {
+					float yaw = context.computeOnClient(client -> client.player.getYRot());
+					context.computeOnClient(client -> GunView.lowestTurnScale());
+					context.getInput().moveCursor(60.0, 0.0);
+					context.waitTicks(2);
+					float turned = context.computeOnClient(client -> client.player.getYRot()) - yaw;
+					double scale = context.computeOnClient(client -> GunView.lowestTurnScale());
+					Jugcraft.LOGGER.info("[guns] the mouse moved through the Long Scope: the player turned {} degrees, turn scale {}", turned, scale);
+					if (Math.abs(turned) > 1.0E-4F && scale > 0.99) {
+						throw new AssertionError("Through the Long Scope the mouse turned the player at full speed (GunMouseMixin)");
+					}
+				}
+				context.getInput().releaseKey(options -> options.keyUse);
+				context.waitTicks(5);
 			}
 
 			// Seen from outside (slice 6): the gun arm raised along the look, the other across to the fore-end for a gun held
@@ -226,6 +363,7 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				throw new AssertionError("In third person the player was never posed holding a gun (GunPose)");
 			}
 
+			// The icons, in two inventories (they no longer fit one): the guns and rounds, then the attachments.
 			server.runCommand("clear @p");
 			for (String gun : JugcraftGuns.SPECS.keySet()) {
 				server.runCommand("give @p jugcraft:" + gun);
@@ -233,15 +371,24 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			for (String round : JugcraftGuns.AMMO) {
 				server.runCommand("give @p jugcraft:%s 16".formatted(round));
 			}
-			for (String attachment : JugcraftGuns.ATTACHMENTS.keySet()) {
-				server.runCommand("give @p jugcraft:" + attachment);
-			}
+			// Slice 8D: an Energy Cell charged, glowing, and one spent.
+			server.runCommand("give @p jugcraft:energy_cell[jugcraft:energy=%dL]".formatted(EnergyCellItem.CAPACITY));
+			server.runCommand("give @p jugcraft:energy_cell");
 			server.runCommand("give @p jugcraft:patchwork_carbine[jugcraft:attachments=%s]".formatted(
 					snbt(List.of("baffled_silencer", "extended_magazine", "wooden_stock", "vertical_grip"))));
 			context.waitTicks(10);
 			context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
 			context.waitTicks(10);
 			context.takeScreenshot("jugcraft_guns_inventory");
+			context.setScreen(() -> null);
+			server.runCommand("clear @p");
+			for (String attachment : JugcraftGuns.ATTACHMENTS.keySet()) {
+				server.runCommand("give @p jugcraft:" + attachment);
+			}
+			context.waitTicks(10);
+			context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
+			context.waitTicks(10);
+			context.takeScreenshot("jugcraft_guns_inventory_attachments");
 			context.setScreen(() -> null);
 			setHudHidden(context, hudWasHidden);
 		}
@@ -254,6 +401,18 @@ public class GunsClientGameTests implements FabricClientGameTest {
 				client.gui.hud.toggle();
 			}
 		});
+	}
+
+	/** Whether the gun's model has sights, which aiming slides onto the middle of the screen (slice 9F). */
+	private static boolean sighted(ClientGameTestContext context, String gun) {
+		return context.computeOnClient(client -> client.getResourceManager()
+				.getResource(Jugcraft.id("geckolib/models/item/" + gun + ".geo.json")).map(resource -> {
+					try (InputStream in = resource.open()) {
+						return new String(in.readAllBytes(), StandardCharsets.UTF_8).contains("\"sight\"");
+					} catch (IOException e) {
+						return false;
+					}
+				}).orElse(false));
 	}
 
 	/** A list of attachment ids as SNBT, for an item component in a command. */

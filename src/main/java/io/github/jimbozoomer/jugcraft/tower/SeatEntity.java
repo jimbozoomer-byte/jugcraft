@@ -30,6 +30,7 @@ public class SeatEntity extends Entity {
 
 	/** Seats {@code player} on the chair at {@code pos}, facing the way the chair faces. False if it is taken. */
 	public static boolean sit(Level level, BlockPos pos, Player player, Direction facing) {
+		if (local.peepo.CompanionSeats.isReserved(level,pos)) return false;
 		if (player.isPassenger() || player.isShiftKeyDown()) {
 			return false;
 		}

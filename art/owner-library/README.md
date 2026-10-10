@@ -64,4 +64,19 @@ The JSON keeps the original `scguns:` resource namespace in its references, as s
 
 The owner supplied **MAGIC ITEMS BLOCKS TEXTURES SOUNDS MODELS I MADE.rar** and explicitly instructed contributors to use its files freely without needing to change them. The original archive and all 7,909 extracted files are preserved with SHA-256 checksums. The [magic guide](MAGIC_ASSETS.md) documents direct use, necessary technical integration steps, and supplied format/companion-file issues. No runtime content is registered by this import.
 
-The combined searchable library now contains **26,947 source files**, excluding the six preview sheets and the preserved archive. The [global CSV](catalog/files.csv) and [summary](catalog/summary.json) include every upload.
+The combined searchable library now contains **26,965 source files**, excluding the six preview sheets and the preserved archive. The [global CSV](catalog/files.csv) and [summary](catalog/summary.json) include every upload.
+
+### Effect textures (8 October 2026)
+
+On 8 October 2026 the owner uploaded two archives with the message "heres reticles and vignette":
+- **`effect`:** 18 PNG textures, kept at [originals/Blocks/Guns/effect](originals/Blocks/Guns/effect) and listed in the [Guns catalog](catalog/guns/README.md) and the [CSV](catalog/files.csv).
+  - The reticles and lens vignettes the scope models name: `effect/red_dot_reticle`, `long_scope_reticle2`, `scope_vignette` and `scope_vignette_circle`.
+  - A second long-scope reticle (`long_scope_reticle`) and 13 muzzle flash frames.
+  - All 18 files (19,191 bytes) were copied byte-for-byte and matched against SHA-256 checksums.
+- **`crosshair`:** the 20 crosshair textures, byte-identical to the [crosshair](originals/Blocks/Guns/crosshair) folder of the 6 October upload. Nothing changed.
+
+Two of the effect files carry embedded Photoshop metadata (XMP), which [summary.json](catalog/summary.json) records:
+- `red_dot_reticle.png`: its editing history shows it saved inside a Just Enough Guns mod source folder (`assets/jeg/textures/effect/`) on 3 February 2024.
+- `muzzle_flash.png`: created in Photoshop CC 2019 on 12 February 2021.
+
+Shown this and asked what the scopes should use, the owner answered that they made these files and to use them. Asked the same day about the "Big Cannons and Mounted Guns" folder, whose muzzle flash frames the guns use, they confirmed it is theirs. (It holds a file named `wariumlogo.png`; Warium is also the name of another weapons mod.)

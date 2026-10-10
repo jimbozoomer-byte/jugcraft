@@ -4,7 +4,7 @@ package io.github.jimbozoomer.jugcraft.guns;
  * One attachment's slot and what it does to a gun (tools/guns.py ATTACHMENTS; check_guns in tools/check_mod_data.py
  * keeps them the same). Each number multiplies the gun's own; 1 leaves it be.
  *
- * @param slot      barrel, magazine, stock or grip: a gun takes one attachment a slot
+ * @param slot      barrel, magazine, stock, grip or optic (a scope): a gun takes one attachment a slot
  * @param replaces  it takes the place of the slot's standard part on the model (GunRenderer hides that part)
  * @param damage    per bullet
  * @param range     blocks

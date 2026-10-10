@@ -1388,14 +1388,66 @@ Seven cakes the owner drew and shared on 8 October 2026 ("CAKES & BAKES - 3D CAK
 
 Five fruits the owner asked for on 8 October 2026 before the milkshakes and the pies and tarts that need them, as crops in Jugcraft's own art (their library has none of these fruits; the owner chose to build them this way). Details and test evidence: [features/fruit-crops.md](../features/fruit-crops.md).
 
+| **The bushes:** strawberries, blueberries and coffee, from planted to ripe | **The trees:** the plum and the banana hung with ripe fruit |
+| --- | --- |
+| ![The bushes](../images/ingame_fruit_bushes.jpg) | ![The trees ripe](../images/ingame_fruit_trees_ripe.jpg) |
+
 - **Strawberry Plant, Blueberry Bush and Coffee Plant:** bushes a block tall on farmland, planted from seeds (from short grass, a wild plant or a fruit); ripe, a right-click picks them and they fruit again, as the pepper does.
 - **Plum and banana trees,** grown from a Plum Pit and a Banana Pup as the [orchards'](#what-exists-now-orchards) are; the banana on a Banana Stem of its own under drooping fronds.
 - **Wild:** strawberries in forests and flower fields, blueberries in taigas and hills, coffee and bananas in jungles, plums in forests and taigas; plums in the Orchard, bananas in the Tropics and the Rainforest.
 - **Coffee Beans** roasted from coffee cherries (the Coffee Cake now takes them); **Strawberry, Blueberry and Plum Jam** in Mason Jars.
 
+## What exists now: pies and tarts
+
+Ten pies and tarts the owner drew and shared on 8 October 2026 ("CAKES & BAKES - 3D PIES & TARTS"), rebuilt from their drawing and baked in the Hearth Oven as the pies and cakes are. Details and test evidence: [features/pies-and-tarts.md](../features/pies-and-tarts.md).
+
+| **The pies,** whole in front and cut behind | **As drawn:** the strawberry pie and the blueberry tart, whole and cut |
+| --- | --- |
+| ![The pies](../images/ingame_square_pies.jpg) | ![As drawn](../images/ingame_pies_and_tarts_drawn.jpg) |
+
+- **Strawberry, Plum, Banoffee, Whipped Pumpkin and Pork Pies** and **Blueberry, Sweet Berry, Lemon, Strawberry and Coffee Tarts.** Pastry Dough, a sugar (none in the pork pie) and the bake's own ingredients make a raw pie or tart, from the [fruit crops](#what-exists-now-fruit-crops), the [orchards'](#what-exists-now-orchards) lemons and the farm; the Hearth Oven bakes it, or burns it into a Burnt Pie.
+- **Set down whole,** a block wide and facing whoever set it down: a pie seven texels tall under its crust, a tart four, its rim standing round the filling and the drawing's berries, lemon or cream on top. Eaten, or cut with a knife into slices, a quarter at a time: the front right quarter first, showing the filling inside as the owner's page does.
+
+## What exists now: milkshakes
+
+Seven milkshakes the owner drew and shared on 8 October 2026 ("CAKES & BAKES - 3D MILKSHAKE"), each read off their drawing as its own sundae glass. Details and test evidence: [features/milkshakes.md](../features/milkshakes.md).
+
+| **The seven** on a counter | **As drawn:** the strawberry and banana milkshakes |
+| --- | --- |
+| ![The milkshakes](../images/ingame_milkshakes.jpg) | ![As drawn](../images/ingame_milkshakes_drawn.jpg) |
+
+- **Strawberry, Banana, Plum, Apple, Blueberry, Pumpkin and Chocolate Milkshakes,** made by hand from a Milk Bottle, a snowball, a sugar and the flavour (the [fruit crops'](#what-exists-now-fruit-crops) strawberries, blueberries, plums and bananas among them). Drunk even when full, for five food and half a minute of Haste, leaving the bottle.
+- **Set down** by a sneaking player as the owner's glass: a foot of glass bars, the shake between the glass's posts, cream, the fruit on top and a leaning straw. An empty hand takes it back.
+
+## What exists now: garden crops
+
+Slice 7, part a: the owner's own art for Jugcraft's garden crops, chosen on 9 October 2026 ("go with the recommendations"), with what their drawings add. Details and test evidence: [features/garden-crops.md](../features/garden-crops.md).
+
+| **Corn:** the owner's corn at every age, and ripe ornamental corn | **Wild plants and colonies:** the seven wild plants, and mushroom colonies on Rich Soil |
+| --- | --- |
+| ![Corn at every age](../images/ingame_garden_corn.jpg) | ![Wild plants and mushroom colonies](../images/ingame_garden_wild.jpg) |
+
+- **The cabbage, onion, tomato and corn** grow through the owner's stages: eight for the cabbage, the budding and then fruiting tomato vine in its trellis, and their corn, still three blocks tall, its ears ripening gold (flint-coloured on ornamental corn). How they grow and what they give is unchanged; the Garden Salad is drawn as their mixed salad.
+- **Tomatoes go over:** a ripe vine left unpicked turns over-ripe in time and gives **Rotten Tomatoes** instead, to throw like snowballs (a splat, no harm) or compost.
+- **Wild Carrots, Potatoes and Beetroots** in plains, flower fields, taigas, hills and swamps give vanilla's crops; the wild cabbage, onion, tomato and corn wear the owner's art.
+- **Mushroom colonies:** a brown or red mushroom used on Rich Soil plants a colony that grows only in the shade; shears or a knife pick two or three mushrooms from a grown one, and it grows again.
+
+## What exists now: vegetables, herbs and spices
+
+Slice 7, part b: new vegetables, kitchen herbs and spices in Jugcraft's own art (the owner's library has none), chosen on 9 October 2026 with part a. Details and test evidence: [features/vegetables-herbs-and-spices.md](../features/vegetables-herbs-and-spices.md).
+
+| **Herbs:** drying bundles, Planter Boxes, stages and pots | **Spices:** the vines, ginger, mustard, saffron and a cinnamon tree |
+| --- | --- |
+| ![The herbs](../images/ingame_herbs.jpg) | ![The spice crops and the cinnamon tree](../images/ingame_spices.jpg) |
+
+- **Vegetables:** lettuce, spinach, radishes and peas (peas fix nitrogen), cucumbers on a trellis, eggplant and zucchini bushes; a Green Salad, Pea Soup, Roasted Eggplant and Grilled Zucchini; the menu's Ratatouille now cooked from eggplant and zucchini.
+- **Herbs:** basil, mint, rosemary, thyme, parsley, sage, dill and chives, planted from a sprig and cut back when grown; potted in flower pots; hung in bundles to dry into Dried Herbs; grown anywhere in a **Planter Box** that holds its own water. Herb dishes, Mint Tea and Dill Pickles.
+- **Spices:** black pepper and vanilla vines on trellises, ginger, mustard and the saffron crocus; the **Cinnamon Tree**, whose bark an axe peels off as Cinnamon; Paprika ground from a dried chili with the Mortar and Pestle; a **Spice Rack** to show eight spices; Gingerbread Cookies, Chicken Curry, Saffron Rice and Vanilla Custard.
+- Every crop grows wild; the vegetables' seeds also drop from short grass.
+
 ## The kitchen and cooking expansion (planned)
 
-On 7 October 2026 the owner asked for "lots more crops, plants, food, cooking devices, preparation systems", with "lots and lots of the food to be very decorative and displayable", drawn from the farming and food textures in their own library ([art/owner-library](../../art/owner-library/README.md)). The plan is ten slices, each its own pull request; the owner chose the Farmhouse Kitchen first, then feasts and food displays. Where a slice meets something Jugcraft already has (its cabbage, onion, corn and tomato crops, the Cooking Pot, the apple pie), the owner decides one by one, seeing both looks side by side. Slices 1 to 6 are built; for slice 2 the owner gave the apple pie their art and let vanilla's pumpkin pie be set down in their art, for slice 3 they gave their art to the Cooking Pot, three soups, the cabbage rolls, roasted corn, mulled cider and set-down popcorn, for slice 5 they made their baskets storage blocks of their own and kept their produce crates separate from the Pumpkin Crate, and for slice 6, with no fruit trees in their library, they chose Jugcraft's own art and four trees: pear, peach, lemon and orange. On 8 October 2026 they shared pages of their own drawings: [seven cakes](#what-exists-now-cakes), built first from their drawing, then the new [fruit crops](#what-exists-now-fruit-crops) (strawberries, blueberries, bananas, plums and coffee) they asked for before their milkshakes and pies and tarts, which come next.
+On 7 October 2026 the owner asked for "lots more crops, plants, food, cooking devices, preparation systems", with "lots and lots of the food to be very decorative and displayable", drawn from the farming and food textures in their own library ([art/owner-library](../../art/owner-library/README.md)). The plan is ten slices, each its own pull request; the owner chose the Farmhouse Kitchen first, then feasts and food displays. Where a slice meets something Jugcraft already has (its cabbage, onion, corn and tomato crops, the Cooking Pot, the apple pie), the owner decides one by one, seeing both looks side by side. Slices 1 to 6 are built; for slice 2 the owner gave the apple pie their art and let vanilla's pumpkin pie be set down in their art, for slice 3 they gave their art to the Cooking Pot, three soups, the cabbage rolls, roasted corn, mulled cider and set-down popcorn, for slice 5 they made their baskets storage blocks of their own and kept their produce crates separate from the Pumpkin Crate, and for slice 6, with no fruit trees in their library, they chose Jugcraft's own art and four trees: pear, peach, lemon and orange. On 8 October 2026 they shared pages of their own drawings: [seven cakes](#what-exists-now-cakes), built first from their drawing, then the new [fruit crops](#what-exists-now-fruit-crops) (strawberries, blueberries, bananas, plums and coffee) they asked for before their milkshakes and pies and tarts, then [ten pies and tarts](#what-exists-now-pies-and-tarts) and [seven milkshakes](#what-exists-now-milkshakes) from their drawings. For slice 7, shown where it meets Jugcraft's crops, they chose on 9 October 2026 to have their own [garden crops](#what-exists-now-garden-crops) art for Jugcraft's cabbage, onion, tomato and corn, their wild plants, rotten tomatoes and mushroom colonies first (part a), then new [vegetables, herbs and spices](#what-exists-now-vegetables-herbs-and-spices) in Jugcraft's own art (part b).
 
 | Slice | What it adds | Ties to the roster above |
 | --- | --- | --- |
@@ -1405,7 +1457,7 @@ On 7 October 2026 the owner asked for "lots more crops, plants, food, cooking de
 | **4. Rice and wet farming** ✅ | Rice paddies, wild rice, straw, rice and straw storage, tatami, and the owner's rice dishes and roll medley | Roster slice 7 |
 | **5. Soil, compost and storage** ✅ | Organic compost, rich soil and its farmland, produce crates, the kernel bag, and storage baskets | Uses the rice slice's straw |
 | **6. Orchards** ✅ | Pear, peach, lemon and orange trees, juices, pies and preserves (grapes and berries wait) | Roster slice 4 |
-| **7. Garden crops, herbs and spices** | More vegetables, herbs and spices | — |
+| **7. Garden crops, herbs and spices** (parts a ✅ and b ✅) | Part a: the owner's art for the cabbage, onion, tomato and corn, their wild plants, rotten tomatoes and mushroom colonies. Part b: more vegetables, herbs and spices | Roster slice 2's crops |
 | **8. Mill, dairy and bakery** | Flour, butter, cheese, bread and pastry | Farm equipment below |
 | **9. Preserving and curing** | Jams, pickles, smoking and curing | The preserves pantry |
 | **10. Engineered dieselpunk kitchen** | Powered stoves, mixers and slicers that automate the earlier slices | The engineering branch |

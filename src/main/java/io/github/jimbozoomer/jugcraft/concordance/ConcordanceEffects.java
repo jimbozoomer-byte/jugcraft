@@ -8,6 +8,7 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Stacking;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Tolerance;
+import io.github.jimbozoomer.jugcraft.concordance.ember.Ember;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
@@ -218,7 +219,7 @@ public final class ConcordanceEffects {
 		BlockState state = level.getBlockState(pos);
 		boolean allowed = spec.kind() == EffectKind.INTERACTION ? context.actor() instanceof Player actor && mayUse(level, actor, pos, state)
 				: Authority.mayChange(level, answering, pos);
-		if (!accepts(level, spec.kind(), pos)) {
+		if (!accepts(level, spec, pos)) {
 			return Result.NOTHING;
 		}
 		if (!allowed) {
@@ -243,6 +244,9 @@ public final class ConcordanceEffects {
 				yield Result.APPLIED;
 			}
 			case ALTERATION -> {
+				if (Ember.kindles(spec)) {
+					yield Ember.kindle(level, person, pos) ? Result.APPLIED : Result.NOTHING;
+				}
 				level.removeBlock(pos, false);
 				level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 1.4F);
 				yield Result.APPLIED;
@@ -257,15 +261,16 @@ public final class ConcordanceEffects {
 
 	/**
 	 * Whether a block operation has something to act on at {@code pos}: open air for light, a listed block to use, a
-	 * ripe crop or listed plant to gather, fire to put out. Selections use this to choose blocks.
+	 * ripe crop or listed plant to gather, fire to put out (or, for Ember's alteration, an unlit hearth to kindle).
+	 * Selections use this to choose blocks.
 	 */
-	public static boolean accepts(ServerLevel level, EffectKind kind, BlockPos pos) {
+	public static boolean accepts(ServerLevel level, EffectSpec spec, BlockPos pos) {
 		BlockState state = level.getBlockState(pos);
-		return switch (kind) {
+		return switch (spec.kind()) {
 			case ILLUMINATION -> Illumination.open(state);
 			case INTERACTION -> state.is(INTERACTABLE);
 			case HARVESTING -> state.getBlock() instanceof CropBlock crop ? crop.isMaxAge(state) : state.is(HARVESTABLE);
-			case ALTERATION -> state.is(BlockTags.FIRE);
+			case ALTERATION -> Ember.kindles(spec) ? Ember.kindleable(state) : state.is(BlockTags.FIRE);
 			default -> false;
 		};
 	}

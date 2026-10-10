@@ -2,7 +2,8 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 
 /**
  * Crops that are picked when ripe and keep standing: tall crops (corn, ornamental corn, sunflower), climbing crops
- * on a trellis (tomato), bushes (pepper, strawberry, blueberry and coffee, one block tall) and paddy crops (rice).
+ * on a trellis (tomato, cucumber, black pepper, vanilla), bushes (pepper, strawberry, blueberry, coffee, eggplant and
+ * zucchini, one block tall), the kitchen herbs (a block tall) and paddy crops (rice).
  * Keep in sync with TALL_CROPS in tools/agriculture.py; the checker compares them.
  *
  * <p>{@code heights[age]} is how many blocks tall the plant is at each age (0-7). At age 7 it is
@@ -21,7 +22,22 @@ public enum TallCrop {
 	// The fruit crops (tools/fruit_crops.py): bushes a block tall, as the pepper.
 	STRAWBERRY("strawberry_crop", "strawberry_seeds", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "strawberry", 1, 3, 5, 1.25F, false, false),
 	BLUEBERRY("blueberry_crop", "blueberry_seeds", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "blueberries", 2, 4, 5, 1.25F, false, false),
-	COFFEE("coffee_crop", "coffee_seeds", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "coffee_cherries", 1, 3, 5, 1.5F, false, false);
+	COFFEE("coffee_crop", "coffee_seeds", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "coffee_cherries", 1, 3, 5, 1.5F, false, false),
+	// Garden crops, herbs and spices, part b (tools/vegetables.py, herbs.py, spices.py): the cucumber on its trellis, the
+	// eggplant and zucchini bushes; the eight herbs, a block tall, cut back to age 4; the black pepper and vanilla vines.
+	CUCUMBER("cucumber_crop", "cucumber_seeds", new int[] {1, 1, 1, 2, 2, 2, 2, 2}, "cucumber", 2, 4, 5, 1.25F, true, false),
+	EGGPLANT("eggplant_crop", "eggplant_seeds", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "eggplant", 1, 3, 5, 1.25F, false, false),
+	ZUCCHINI("zucchini_crop", "zucchini_seeds", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "zucchini", 1, 3, 5, 1.25F, false, false),
+	BASIL("basil_crop", "basil", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "basil", 1, 3, 4, 1.0F, false, false),
+	MINT("mint_crop", "mint", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "mint", 1, 3, 4, 1.0F, false, false),
+	ROSEMARY("rosemary_crop", "rosemary", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "rosemary", 1, 3, 4, 1.0F, false, false),
+	THYME("thyme_crop", "thyme", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "thyme", 1, 3, 4, 1.0F, false, false),
+	PARSLEY("parsley_crop", "parsley", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "parsley", 1, 3, 4, 1.0F, false, false),
+	SAGE("sage_crop", "sage", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "sage", 1, 3, 4, 1.0F, false, false),
+	DILL("dill_crop", "dill", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "dill", 1, 3, 4, 1.0F, false, false),
+	CHIVES("chives_crop", "chives", new int[] {1, 1, 1, 1, 1, 1, 1, 1}, "chives", 1, 3, 4, 1.0F, false, false),
+	PEPPERCORN("peppercorn_crop", "peppercorns", new int[] {1, 1, 1, 2, 2, 2, 2, 2}, "peppercorns", 2, 4, 5, 1.5F, true, false),
+	VANILLA("vanilla_crop", "vanilla_pods", new int[] {1, 1, 1, 2, 2, 2, 2, 2}, "vanilla_pods", 1, 2, 5, 1.5F, true, false);
 
 	public final String blockId;
 	public final String seedId;

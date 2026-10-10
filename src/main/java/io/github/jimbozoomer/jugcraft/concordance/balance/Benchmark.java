@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Plan;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Stacking;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import java.util.ArrayList;
@@ -234,6 +235,8 @@ public final class Benchmark {
 		double health = PLAYER_HEALTH;
 		double absorption;
 		int absorptionTicks;
+		/** The helpful statuses on the character, by status: amplifier and ticks left. */
+		final Map<String, int[]> statuses = new LinkedHashMap<>();
 		double focus = FocusPool.MAX;
 		int focusClock;
 		int swing;
@@ -498,6 +501,22 @@ public final class Benchmark {
 				state.healed += state.health - before;
 				return state.health > before;
 			}
+			case STATUS -> {
+				// It lands by its stacking rule, as on the server (a recast that changes nothing fails, at no cost). The
+				// one helpful status, Hearthguard's Fire Resistance, wards against nothing these foes deal, so it changes
+				// nothing else here.
+				String status = effect.status();
+				if (status == null) {
+					return false;
+				}
+				int[] has = state.statuses.getOrDefault(status, new int[] {0, 0});
+				Stacking.Result combined = effect.stacking().combine(has[0], has[1], effect.magnitude(), effect.duration());
+				if (!combined.changed()) {
+					return false;
+				}
+				state.statuses.put(status, new int[] {combined.amplifier(), combined.ticks()});
+				return true;
+			}
 			case MOVEMENT -> {
 				// Carried forward the way the caster faces: here, away from the foes.
 				double reach = effect.magnitude() / 10.0 * PUSH_REACH;
@@ -654,6 +673,7 @@ public final class Benchmark {
 		if (state.absorptionTicks > 0 && --state.absorptionTicks == 0) {
 			state.absorption = 0.0;
 		}
+		state.statuses.values().removeIf(status -> --status[1] <= 0);
 		if (++state.focusClock >= FocusPool.REGEN_TICKS) {
 			state.focusClock = 0;
 			state.focus = Math.min(FocusPool.MAX, state.focus + 1);

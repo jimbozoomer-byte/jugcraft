@@ -6,6 +6,24 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 
 | File | Type | Image size | Metadata / texture |
 |---|---|---|---|
+| [Guns/models/item/shell_catcher_turret_module.json](../../originals/Blocks/Guns/models/item/shell_catcher_turret_module.json) | model JSON | — | — |
+| [Guns/models/item/shellurker.json](../../originals/Blocks/Guns/models/item/shellurker.json) | model JSON | — | — |
+| [Guns/models/item/sheol.json](../../originals/Blocks/Guns/models/item/sheol.json) | model JSON | — | — |
+| [Guns/models/item/sheol_dust.json](../../originals/Blocks/Guns/models/item/sheol_dust.json) | model JSON | — | — |
+| [Guns/models/item/shock_absorber.json](../../originals/Blocks/Guns/models/item/shock_absorber.json) | model JSON | — | — |
+| [Guns/models/item/shock_cell.json](../../originals/Blocks/Guns/models/item/shock_cell.json) | model JSON | — | — |
+| [Guns/models/item/shock_cell_2d.json](../../originals/Blocks/Guns/models/item/shock_cell_2d.json) | model JSON | — | — |
+| [Guns/models/item/shock_coil.json](../../originals/Blocks/Guns/models/item/shock_coil.json) | model JSON | — | — |
+| [Guns/models/item/shotball.json](../../originals/Blocks/Guns/models/item/shotball.json) | model JSON | — | — |
+| [Guns/models/item/shotball_2d.json](../../originals/Blocks/Guns/models/item/shotball_2d.json) | model JSON | — | — |
+| [Guns/models/item/shotball_3d.json](../../originals/Blocks/Guns/models/item/shotball_3d.json) | model JSON | — | — |
+| [Guns/models/item/shotgun_ammo_box.json](../../originals/Blocks/Guns/models/item/shotgun_ammo_box.json) | model JSON | — | — |
+| [Guns/models/item/shotgun_ammo_box_0.json](../../originals/Blocks/Guns/models/item/shotgun_ammo_box_0.json) | model JSON | — | — |
+| [Guns/models/item/shotgun_ammo_box_1.json](../../originals/Blocks/Guns/models/item/shotgun_ammo_box_1.json) | model JSON | — | — |
+| [Guns/models/item/shotgun_ammo_box_2.json](../../originals/Blocks/Guns/models/item/shotgun_ammo_box_2.json) | model JSON | — | — |
+| [Guns/models/item/shotgun_ammo_box_3.json](../../originals/Blocks/Guns/models/item/shotgun_ammo_box_3.json) | model JSON | — | — |
+| [Guns/models/item/shotgun_shell.json](../../originals/Blocks/Guns/models/item/shotgun_shell.json) | model JSON | — | — |
+| [Guns/models/item/shotgun_shell_2d.json](../../originals/Blocks/Guns/models/item/shotgun_shell_2d.json) | model JSON | — | — |
 | [Guns/models/item/shotgun_shell_3d.json](../../originals/Blocks/Guns/models/item/shotgun_shell_3d.json) | model JSON | — | — |
 | [Guns/models/item/shotgun_turret.json](../../originals/Blocks/Guns/models/item/shotgun_turret.json) | model JSON | — | — |
 | [Guns/models/item/shulker_casing.json](../../originals/Blocks/Guns/models/item/shulker_casing.json) | model JSON | — | — |
@@ -238,21 +256,3 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/models/special/auvtomag/ext_mag.json](../../originals/Blocks/Guns/models/special/auvtomag/ext_mag.json) | model JSON | — | — |
 | [Guns/models/special/auvtomag/main.json](../../originals/Blocks/Guns/models/special/auvtomag/main.json) | model JSON | — | — |
 | [Guns/models/special/auvtomag/muzzle_brake.json](../../originals/Blocks/Guns/models/special/auvtomag/muzzle_brake.json) | model JSON | — | — |
-| [Guns/models/special/auvtomag/no_sights.json](../../originals/Blocks/Guns/models/special/auvtomag/no_sights.json) | model JSON | — | — |
-| [Guns/models/special/auvtomag/receiver.json](../../originals/Blocks/Guns/models/special/auvtomag/receiver.json) | model JSON | — | — |
-| [Guns/models/special/auvtomag/sights.json](../../originals/Blocks/Guns/models/special/auvtomag/sights.json) | model JSON | — | — |
-| [Guns/models/special/auvtomag/silencer.json](../../originals/Blocks/Guns/models/special/auvtomag/silencer.json) | model JSON | — | — |
-| [Guns/models/special/auvtomag/speed_mag.json](../../originals/Blocks/Guns/models/special/auvtomag/speed_mag.json) | model JSON | — | — |
-| [Guns/models/special/auvtomag/stan_barrel.json](../../originals/Blocks/Guns/models/special/auvtomag/stan_barrel.json) | model JSON | — | — |
-| [Guns/models/special/auvtomag/stan_mag.json](../../originals/Blocks/Guns/models/special/auvtomag/stan_mag.json) | model JSON | — | — |
-| [Guns/models/special/basic_turret/auto_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/auto_turret_top.json) | model JSON | — | — |
-| [Guns/models/special/basic_turret/basic_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/basic_turret_top.json) | model JSON | — | — |
-| [Guns/models/special/basic_turret/enemy_turret.json](../../originals/Blocks/Guns/models/special/basic_turret/enemy_turret.json) | model JSON | — | — |
-| [Guns/models/special/basic_turret/enemy_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/enemy_turret_top.json) | model JSON | — | — |
-| [Guns/models/special/basic_turret/flame_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/flame_turret_top.json) | model JSON | — | — |
-| [Guns/models/special/basic_turret/shotgun_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/shotgun_turret_top.json) | model JSON | — | — |
-| [Guns/models/special/basic_turret/sniper_turret_top.json](../../originals/Blocks/Guns/models/special/basic_turret/sniper_turret_top.json) | model JSON | — | — |
-| [Guns/models/special/basker/heavy_stock.json](../../originals/Blocks/Guns/models/special/basker/heavy_stock.json) | model JSON | — | — |
-| [Guns/models/special/basker/light_stock.json](../../originals/Blocks/Guns/models/special/basker/light_stock.json) | model JSON | — | — |
-| [Guns/models/special/basker/main.json](../../originals/Blocks/Guns/models/special/basker/main.json) | model JSON | — | — |
-| [Guns/models/special/basker/wooden_stock.json](../../originals/Blocks/Guns/models/special/basker/wooden_stock.json) | model JSON | — | — |

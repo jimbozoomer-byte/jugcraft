@@ -20,10 +20,10 @@
       "ingredient": "jugcraft:onion"
     },
     {
-      "ingredient": "minecraft:beetroot"
+      "ingredient": "jugcraft:eggplant"
     },
     {
-      "ingredient": "jugcraft:garlic"
+      "ingredient": "jugcraft:zucchini"
     }
   ],
   "result": {

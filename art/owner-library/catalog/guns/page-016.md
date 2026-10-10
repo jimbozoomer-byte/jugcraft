@@ -6,6 +6,24 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 
 | File | Type | Image size | Metadata / texture |
 |---|---|---|---|
+| [Guns/sounds/item/gun_sounds/pump_half.ogg](../../originals/Blocks/Guns/sounds/item/gun_sounds/pump_half.ogg) | sound | — | — |
+| [Guns/sounds/item/gyrojet/fire.ogg](../../originals/Blocks/Guns/sounds/item/gyrojet/fire.ogg) | sound | — | — |
+| [Guns/sounds/item/heavier_rifle/fire.ogg](../../originals/Blocks/Guns/sounds/item/heavier_rifle/fire.ogg) | sound | — | — |
+| [Guns/sounds/item/heavy_rifle/fire.ogg](../../originals/Blocks/Guns/sounds/item/heavy_rifle/fire.ogg) | sound | — | — |
+| [Guns/sounds/item/heavy_rifle_2/fire.ogg](../../originals/Blocks/Guns/sounds/item/heavy_rifle_2/fire.ogg) | sound | — | — |
+| [Guns/sounds/item/iron_pistol/fire.ogg](../../originals/Blocks/Guns/sounds/item/iron_pistol/fire.ogg) | sound | — | — |
+| [Guns/sounds/item/iron_rifle/enchanted_fire.ogg](../../originals/Blocks/Guns/sounds/item/iron_rifle/enchanted_fire.ogg) | sound | — | — |
+| [Guns/sounds/item/iron_rifle/fire.ogg](../../originals/Blocks/Guns/sounds/item/iron_rifle/fire.ogg) | sound | — | — |
+| [Guns/sounds/item/jetpack/fire.ogg](../../originals/Blocks/Guns/sounds/item/jetpack/fire.ogg) | sound | — | — |
+| [Guns/sounds/item/jetpack/loop.ogg](../../originals/Blocks/Guns/sounds/item/jetpack/loop.ogg) | sound | — | — |
+| [Guns/sounds/item/laser/fire.ogg](../../originals/Blocks/Guns/sounds/item/laser/fire.ogg) | sound | — | — |
+| [Guns/sounds/item/laser/fire_2.ogg](../../originals/Blocks/Guns/sounds/item/laser/fire_2.ogg) | sound | — | — |
+| [Guns/sounds/item/laser/reload.ogg](../../originals/Blocks/Guns/sounds/item/laser/reload.ogg) | sound | — | — |
+| [Guns/sounds/item/lever/lever.ogg](../../originals/Blocks/Guns/sounds/item/lever/lever.ogg) | sound | — | — |
+| [Guns/sounds/item/machine_gun/fire.ogg](../../originals/Blocks/Guns/sounds/item/machine_gun/fire.ogg) | sound | — | — |
+| [Guns/sounds/item/mag_in/mag_in.ogg](../../originals/Blocks/Guns/sounds/item/mag_in/mag_in.ogg) | sound | — | — |
+| [Guns/sounds/item/mag_out/mag_out.ogg](../../originals/Blocks/Guns/sounds/item/mag_out/mag_out.ogg) | sound | — | — |
+| [Guns/sounds/item/makeshift_rifle/cock.ogg](../../originals/Blocks/Guns/sounds/item/makeshift_rifle/cock.ogg) | sound | — | — |
 | [Guns/sounds/item/makeshift_rifle/enchanted_fire.ogg](../../originals/Blocks/Guns/sounds/item/makeshift_rifle/enchanted_fire.ogg) | sound | — | — |
 | [Guns/sounds/item/makeshift_rifle/fire.ogg](../../originals/Blocks/Guns/sounds/item/makeshift_rifle/fire.ogg) | sound | — | — |
 | [Guns/sounds/item/makeshift_rifle/silenced_fire.ogg](../../originals/Blocks/Guns/sounds/item/makeshift_rifle/silenced_fire.ogg) | sound | — | — |

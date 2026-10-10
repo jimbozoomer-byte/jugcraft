@@ -147,7 +147,13 @@ def popcorn_box(name):
             box((6, 12.5, 6), (9, 13.5, 9), {"up": popcorn, **around((1, 7, 2.5, 7.5))})]
 
 
-TEMPLATES = {"bowl": bowl, "plate": plate, "stack": stack, "flat": flat, "stand": stand, "box": popcorn_box}
+def milkshake(name):
+    """The owner's milkshake glass (tools/milkshake_data.py), on its own 64 x 64 texture."""
+    import milkshake_data
+    return milkshake_data.elements(name)
+
+
+TEMPLATES = {"bowl": bowl, "plate": plate, "stack": stack, "flat": flat, "stand": stand, "box": popcorn_box, "milkshake": milkshake}
 
 
 def dish_model(name):

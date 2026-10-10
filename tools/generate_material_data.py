@@ -27,12 +27,16 @@ PACKS = RES / "resourcepacks"
 GENERATED_DIRS = [
     DATA / MOD / "advancement", ASSETS / "blockstates", ASSETS / "items", ASSETS / "models", ASSETS / "lang", ASSETS / "handbook",
     DATA / MOD / "loot_table", DATA / MOD / "recipe", DATA / MOD / "worldgen",
+    # The lairs' dimensions and templates (tools/lair_data.py).
+    DATA / MOD / "dimension", DATA / MOD / "dimension_type", DATA / MOD / "structure" / "lair",
     DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD, PACKS,
     DATA / MOD / "villager_trade", DATA / MOD / "trade_set", DATA / MOD / "tags" / "villager_trade",
     RES / "assets" / "minecraft",
     # The Arcane Concordance (tools/concordance.py): its rules, spells, Spell Engine opt-outs, codex and client clips.
     DATA / MOD / "concordance", DATA / MOD / "spell", DATA / MOD / "spell_assignments", DATA / MOD / "modonomicon",
     ASSETS / "player_animations", ASSETS / "dynamiclights",
+    # Trinkets' render definitions for the worn belt and boot (tools/concordance_trinkets.py WORN, Wayfaring part 1b).
+    ASSETS / "trinkets",
     # Item models/animations belong to tools/guns.py and are committed separately.
     # Only remove the Concordance block/entity outputs regenerated in this pass.
     *[ASSETS / "geckolib" / kind / category
@@ -1454,6 +1458,13 @@ def tags():
     diagonal_connections.tags(tags)
     import concordance
     concordance.tags(tags)
+    # Companion resources live in their own namespace, but this shared vanilla
+    # tag is regenerated here. Keep their wooden blocks in the source of truth.
+    for colour in ("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
+                   "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"):
+        tags.add("block", "minecraft:mineable/axe", f"peepo_companion:{colour}_companion_bed")
+    for block in ("wooden_stool", "lunch_crate", "lunch_cover"):
+        tags.add("block", "minecraft:mineable/axe", f"peepo_companion:{block}")
     tags.write()
 
 

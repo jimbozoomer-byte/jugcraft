@@ -299,7 +299,7 @@ A second, mechanical power system measured in **KE** (kinetic energy) per tick. 
 | Brass Gearbox | Passes rotation out of all six sides | Branches and turns lines; power is shared evenly. | brass plates, bronze gears, iron shaft |
 | Dynamo | KE → JE at 75%, 128/t | Pushes JE into cables on every side. | copper, redstone, iron shaft |
 | Belt Pulley | A shaft that can hold a belt | Carries rotation along its axis like a shaft, and to the pulley it is belted to. | planks, iron shaft |
-| Leather Belt | Links two pulleys | Use on one pulley, then another: same axis, level along it, up to 16 blocks apart. Breaking a pulley drops the belt. | leather, string |
+| Drive Belt | Links two pulleys | Use on one pulley, then another: same axis, level along it, up to 16 blocks apart. Breaking a pulley drops the belt. | leather, string |
 | Electric Motor | JE → KE at 75%, up to 96 KE/t | Takes JE from cables and drives the block it faces. | iron plates, copper wire, iron shaft, copper cable |
 | Magnet Dynamo | KE → JE at 95%, 512/t | The dynamo with rare-earth magnets; pushes JE into cables on every side. Cyan-banded. | aluminum plates, 4 neodymium magnets, dynamo, aluminum cable |
 | Magnet Motor | JE → KE at 95%, up to 384 KE/t | Takes up to 1,024 JE/t and drives the block it faces. With a magnet dynamo it still loses a tenth each round. | aluminum plates, 4 neodymium magnets, electric motor, aluminum cable |
@@ -560,7 +560,7 @@ Two more arms and a war kit in bronze and steel. Shot for shot the longbow and a
 
 ### Arms VII (batch 56): variant arms, crafted styles and boss trophies
 
-33 named arms, each a variant of a kind above that fights as its kind does, in steel. Sixteen are crafted at a smithing table: a style's pattern, a steel arm of the kind and the style's material, keeping its enchantments and wear. Sixteen are trophies of eight bosses still to be made ([branches/BOSSES.md](branches/BOSSES.md)): no recipe, each boss's loot table ready; creative only until then. One, the Hades Scythe, is the Hades Armor set's arm: no recipe and no loot table yet, creative only until the owner settles how the sets are won. No variant deals as much a second as a netherite sword.
+35 named arms, each a variant of a kind above that fights as its kind does, in steel. Sixteen are crafted at a smithing table: a style's pattern, a steel arm of the kind and the style's material, keeping its enchantments and wear. Sixteen are trophies of eight bosses still to be made ([branches/BOSSES.md](branches/BOSSES.md)): no recipe, each boss's loot table ready; creative only until then. Two are the trophies of the Witching Season's bosses and drop from them: the Vesper Scythe, Vesperine's ([features/vesperine.md](features/vesperine.md)), and the Needle Rapier, Madame Tatterlace's ([features/tatterlace.md](features/tatterlace.md)). One, the Hades Scythe, is the Hades Armor set's arm: no recipe and no loot table yet, creative only until the owner settles how the sets are won. No variant deals as much a second as a netherite sword.
 
 | Line | Arms | Perk or boon | Made from |
 | --- | --- | --- | --- |
@@ -576,6 +576,8 @@ Two more arms and a war kit in bronze and steel. Shot for shot the longbow and a
 | The Alpha Werewolf | Moonfang, Howler | Howl: Weakness, 3 s | trophy |
 | The Storm Roc | Stormcaller, Galefeather | Gale: throws the foe up and back | trophy |
 | The Abyssal Leviathan | Tidebreaker, Leviathan's Hook | Tide: 25% harder against a foe in water or rain | trophy |
+| Vesperine, the Last Reaper | Vesper Scythe | Harvest: a kill heals two hearts (once every 5 s); every fifth kill charges a pale crescent (12 blocks, 8 damage) | her loot (15%; certain on a first kill) |
+| Madame Tatterlace | Needle Rapier | Stitch: three hits on one foe within 4 s slow it (Slowness II, 2 s) | her loot (15%; certain on a first kill) |
 | Hades Armor (an armor set) | Hades Scythe | Wither: Wither, 3 s | the set's arm (creative only for now) |
 
 Trophies and the set's arm last twice as long as steel. Glowing parts (runes, magma, venom, soul fire, sparks) are lit in the dark.
@@ -747,7 +749,7 @@ Item logistics moves finished goods around without hoppers everywhere. Like powe
 | Pneumatic Extractor | Pulls from the inventory it faces and pushes out of its other five sides into pipes or inventories; a redstone signal pauses it | 16 items every 8 ticks | 4 brass plates, hopper, item pipe |
 | High-Pressure Extractor | The same, four times as fast (steel tier) | 32 items every 4 ticks | 4 steel plates, piston, pneumatic extractor |
 | Item Sorter | Accepts items from pipes on any side but its front, and passes only items that match its 9-slot filter into the inventory it faces | An empty filter matches nothing | 5 brass plates, comparator, hopper, 2 item pipes |
-| Conveyor | Carries items the way it faces while rotation drives it; loaded by pipes, hoppers, machines or dropped items; unloads into the conveyor or inventory ahead, or onto the ground | 2.5 blocks/s, 4 stacks per conveyor; 1 KE per conveyor per tick for the whole joined run (up to 64) | 3 leather belts, 2 iron plates, iron shaft → 6 |
+| Conveyor | Carries items the way it faces while rotation drives it; loaded by pipes, hoppers, machines or dropped items; unloads into the conveyor or inventory ahead, or onto the ground | 2.5 blocks/s, 4 stacks per conveyor; 1 KE per conveyor per tick for the whole joined run (up to 64) | 3 drive belts, 2 iron plates, iron shaft → 6 |
 | Conveyor Slope | Carries items one block up or down; use with an empty hand to switch | As the conveyor | 2 conveyors, iron plate → 2 |
 | Conveyor Splitter | A conveyor that sends items left, straight on and right in turn | As the conveyor | conveyor, 2 bronze gears, brass plate |
 | Brass Wrench | Right-click turns a machine, extractor or sorter; sneak + right-click dismantles a Jugcraft block, dropping it and its contents | Multi-block machines cannot be turned | 4 brass ingots |
@@ -847,7 +849,7 @@ The content (`assets/jugcraft/handbook/en_us.json`) is **generated by `tools/han
 - speed and efficiency upgrades, the "high" redstone mode, comparator output and upgrade-slot isolation;
 - cable tiers setting a network's rate, and the high-pressure extractor.
 
-**Client game tests** (`JugcraftClientGameTests`) start a real game client with software rendering in CI (three `client (shard n of 3)` jobs share the test classes out; the `client` job passes when all three do). They:
+**Client game tests** (`JugcraftClientGameTests`) start a real game client with software rendering in CI (four `client (shard n of 4)` jobs share the test classes out; the `client` job passes when all four do). They:
 
 - build a showroom of every machine;
 - open a machine screen and the handbook;

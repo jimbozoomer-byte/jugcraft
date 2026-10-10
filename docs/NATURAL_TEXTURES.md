@@ -147,6 +147,8 @@ The trees the biomes still need, with their proposed shapes and colours, are pla
    - add the tree to `WoodClientGameTests` so CI grows it and shoots it in game, beside the others;
    - compare it with the owner's painting.
 
+A tree whose logs are no wood set (no planks: the [cinnamon tree's](features/vegetables-herbs-and-spices.md)) puts its logs in `LOGS` in `tools/wood_style.py` instead: the stripped side's colour and the bark, drawn as every wood's log, end and stripped log are.
+
 ## Checklist
 - [ ] 16×16, drawn by code from a fixed seed; nothing copied or recoloured from Mojang.
 - [ ] One base colour a material, from the owner's paintings, stepped into a lightness ramp; within vanilla's range.

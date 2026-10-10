@@ -117,6 +117,7 @@ public class CuttingBoardBlock extends BaseEntityBlock {
 	/** An empty hand takes back what lies on the board. */
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		if (!level.isClientSide() && level.getBlockEntity(pos) instanceof CuttingBoardBlockEntity ready && ready.companionKitchen.handOver(player))return InteractionResult.SUCCESS;
 		if (!(level.getBlockEntity(pos) instanceof CuttingBoardBlockEntity board) || board.item().isEmpty()) {
 			return InteractionResult.PASS;
 		}
