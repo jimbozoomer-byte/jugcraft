@@ -154,23 +154,23 @@ def sword():
     jewel below it; above the fist a two-tier gilt crossguard with curled ends, a ricasso, and a long blade with a
     fuller, bevelled edges and a tapered point."""
     m = []
-    m.append(box((-0.9, -6.5, -0.9), (0.9, 0, 0.9), GRIP))
-    for y in (-5.6, -3.6, -1.6):
+    m.append(box((-0.9, -6.5, -0.9), (0.9, 2, 0.9), GRIP))
+    for y in (-5.6, -3.6, -1.6, 0.6):
         m.append(box((-1.05, y, -1.05), (1.05, y + 0.8, 1.05), BELT))
     m += cyl("y", 0, 0, 1.7, -8.8, -6.5, GOLD)
     m.append(box((-0.6, -8.3, 1.6), (0.6, -7.1, 2.0), RED))
-    m.append(box((-4.2, 0, -0.8), (4.2, 1.2, 0.8), GOLD))
-    m.append(box((-3.2, 1.2, -0.6), (3.2, 2, 0.6), GOLD))
+    m.append(box((-4.2, 2, -0.8), (4.2, 3.2, 0.8), GOLD))
+    m.append(box((-3.2, 3.2, -0.6), (3.2, 4, 0.6), GOLD))
     for x0, x1 in ((-5.1, -4.2), (4.2, 5.1)):
-        m.append(box((x0, -0.6, -0.7), (x1, 0.4, 0.7), GOLD))
-    m.append(box((-1.2, 2, -0.9), (1.2, 5.5, 0.9), STEEL_DARK))
-    m.append(box((-1.6, 5.5, -0.45), (1.6, 39, 0.45), STEEL))
+        m.append(box((x0, 1.4, -0.7), (x1, 2.4, 0.7), GOLD))
+    m.append(box((-1.2, 4, -0.9), (1.2, 7.5, 0.9), STEEL_DARK))
+    m.append(box((-1.6, 7.5, -0.45), (1.6, 41, 0.45), STEEL))
     for x0, x1 in ((-1.7, -1.3), (1.3, 1.7)):
-        m.append(box((x0, 5.5, -0.3), (x1, 39, 0.3), STEEL_DARK))
-    m.append(box((-0.4, 6.5, -0.55), (0.4, 33, 0.55), STEEL_DARK))
-    m.append(box((-1.1, 39, -0.4), (1.1, 42.5, 0.4), STEEL))
-    m.append(box((-0.6, 42.5, -0.35), (0.6, 45, 0.35), STEEL))
-    m.append(box((-0.25, 45, -0.25), (0.25, 46.5, 0.25), STEEL_DARK))
+        m.append(box((x0, 7.5, -0.3), (x1, 41, 0.3), STEEL_DARK))
+    m.append(box((-0.4, 8.5, -0.55), (0.4, 35, 0.55), STEEL_DARK))
+    m.append(box((-1.1, 41, -0.4), (1.1, 44.5, 0.4), STEEL))
+    m.append(box((-0.6, 44.5, -0.35), (0.6, 47, 0.35), STEEL))
+    m.append(box((-0.25, 47, -0.25), (0.25, 48.5, 0.25), STEEL_DARK))
     return m
 
 
@@ -289,7 +289,10 @@ def posed(pose=None):
 # ------------------------------------------------------------------ animation curves (ticks)
 
 # The rest pose: the sword hand up before the chest, the blade rising back over the shoulder, as in the picture.
-REST = {"right_arm": (-60, 0, -30, 0, 0, 0), "sword": (24, 0, 25, 0, 0, 0), "left_arm": (0, 0, 8, 0, 0, 0)}
+# The rest pose: the sword hand held out and down before the chest, the wrist cocked so the blade stands up beside
+# the helm, leaning a little out; the grip shows two pixels above the fist before the guard, so the blade's root
+# stands clear of the cuff.
+REST = {"right_arm": (-45, 0, -30, 0, 0, 0), "sword": (60, 0, 25, 0, 0, 0), "left_arm": (0, 0, 8, 0, 0, 0)}
 
 
 def with_rest(pose):
@@ -335,8 +338,8 @@ def attack_pose(t):
     # past upright), then comes round to point down the arm at the end of the cut.
     if t < 8:                      # wind up: the arm goes up and back, the body turns away
         u = smooth(t / 8)
-        arm, twist, lean = -60 - 110 * u, 25 * u, -8 * u
-        sword = -arm - 40
+        arm, twist, lean = -45 - 125 * u, 25 * u, -8 * u
+        sword = 60 * (1 - u) + (-arm - 40) * u
     elif t < 12:                   # the cut: fast, the body turning into it
         u = smooth((t - 8) / 4)
         arm, twist, lean = -170 + 190 * u, 25 - 50 * u, -8 + 22 * u
@@ -345,10 +348,10 @@ def attack_pose(t):
         u = (t - 12) / 6
         arm, twist, lean = 20 + 4 * math.sin(u * 6) * (1 - u), -25 + 5 * u, 14 - 4 * u
         sword = -arm + 15
-    else:                          # back to the shoulder
+    else:                          # back to the rest
         u = smooth((t - 18) / (ATTACK_TICKS - 18))
-        arm, twist, lean = 20 - 80 * u, -20 + 20 * u, 10 - 10 * u
-        sword = -arm + 15 - 51 * u
+        arm, twist, lean = 20 - 65 * u, -20 + 20 * u, 10 - 10 * u
+        sword = (-arm + 15) * (1 - u) + 60 * u
     return {"body": (lean, twist, 0, 0, 0, 0), "head": (-lean / 2, -twist / 2, 0, 0, 0, 0),
             "right_arm": (arm, 0, -30 + 12 * min(1.0, max(0.0, (t - 2) / 6)) * (1 if t < 18 else max(0.0, 1 - (t - 18) / 12)), 0, 0, 0), "sword": (sword, 0, 25 * (1 - min(1.0, max(0.0, (t - 2) / 6)) * (1 if t < 18 else max(0.0, 1 - (t - 18) / 12))), 0, 0, 0),
             "left_arm": (-arm / 4, 0, 10, 0, 0, 0), "skirt": (lean / 2, 0, 0, 0, 0, 0),
