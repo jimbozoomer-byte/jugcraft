@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: CI: longer client jobs, fewer client tests on pull requests
+- **Each client test job may now run for 60 minutes** (was 30). Running every class takes a job 20 to 30 minutes, so the busiest job was being cancelled at the limit after its tests had passed.
+- **A pull request runs fewer client tests.** Changing a registry most tests use (`JugcraftAgriculture`, `Jugcraft`) runs only the tests for what its changed lines name. The art sources in `art/`, the optional resource packs, unit tests and `.claude/` run none. A change no longer runs every class just because it picks half of them.
+- `main` and a manual run of the Build workflow still run every class. Rules: [TESTING.md](docs/TESTING.md#current-foundation).
+
 ### Unmerged: Guns, slice 7 (bayonets and the shared-texture guns)
 - **Four bayonets,** each the owner's art: **Iron**, **Steel** (the owner's anthralite one), **Diamond** and **Netherite** (a smithing upgrade). Under the barrel, in place of a grip. **V stabs** for 4 to 6 damage within reach, every 12 ticks; the server deals the blow. Seven guns take them.
 - **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.
