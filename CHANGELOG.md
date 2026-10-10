@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 10D (the sculk guns)
+- **Three new guns** from the owner's sculk-teal models and animations, each with sculk tendrils that sway as it is handled: the **Undertone Rifle**, one hard shot a pull from a magazine of twelve rifle rounds; the **Murmur SMG**, ten light rounds a second while the trigger is held; and the **Reverb**, a double-barrel of ten-pellet buckshot whose barrels turn aside to take a shell at a time.
+- Each is made from steel, a lever, sculk and an echo shard from the deep dark's ancient cities. Each takes the scopes and the Laser Sight; the Undertone Rifle the stocks, the Murmur SMG the magazines, the Reverb the light and tactical grips.
+- Record: [guns.md, slice 10D](docs/features/guns.md#slice-10d-the-sculk-guns).
+
 ### Unmerged: Guns, slice 10C (the double-barrels)
 - **Three new guns** from the owner's models and animations, each firing a spread of pellets and loaded all at once: the **Mule**, a sawn-off double-barrel that breaks open to load both shells; the **Fowler**, a double-barrelled flintlock with a ball rammed down each barrel; and the **Culverin**, a stubby hand cannon fired one-handed.
 - The Mule fires Buckshot Shells, the Fowler and the Culverin Paper Cartridges. The Fowler takes the grips and the bayonets; the others take nothing.

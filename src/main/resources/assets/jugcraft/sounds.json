@@ -923,6 +923,33 @@
       }
     ]
   },
+  "guns.undertone_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/sculk_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.murmur_smg.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/beam_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.reverb.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/shulker_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

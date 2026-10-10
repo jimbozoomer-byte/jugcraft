@@ -59,6 +59,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  * <li>Slice 10C, the double-barrels, each firing a spread of pellets: the Mule breaks open to load both its buckshot
  * shells at once; the Fowler, a double flintlock, and the Culverin, a hand cannon, are loaded down their muzzles with
  * paper cartridges, as the slice 4 muzzle-loaders are.</li>
+ * <li>Slice 10D, the sculk guns, on the rounds the other guns fire: the Undertone Rifle, one hard shot a pull; the
+ * Murmur SMG, ten shots a second; and the Reverb, a double-barrel loaded a shell at a time.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -115,6 +117,9 @@ public final class JugcraftGuns {
 		SPECS.put("mule", new GunSpec(2.5F, 10, 8, false, 2, 35, 0, 0, 0, 9.0F, 7.0F, 24, "buckshot_shell"));
 		SPECS.put("fowler", new GunSpec(3.0F, 8, 10, false, 2, 97, 0, 0, 0, 8.0F, 5.0F, 28, "paper_cartridge"));
 		SPECS.put("culverin", new GunSpec(5.0F, 5, 20, false, 1, 74, 0, 0, 0, 9.0F, 7.0F, 18, "paper_cartridge"));
+		SPECS.put("undertone_rifle", new GunSpec(9.0F, 1, 7, false, 12, 48, 0, 0, 0, 2.5F, 0.3F, 96, "rifle_round"));
+		SPECS.put("murmur_smg", new GunSpec(3.0F, 1, 2, true, 24, 48, 0, 0, 0, 3.5F, 1.5F, 48, "light_round"));
+		SPECS.put("reverb", new GunSpec(3.5F, 10, 8, false, 2, 0, 16, 17, 19, 7.0F, 5.0F, 32, "buckshot_shell"));
 	}
 
 	/**
@@ -277,6 +282,11 @@ public final class JugcraftGuns {
 				"long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
 		ACCEPTS.put("fowler", List.of("light_grip", "vertical_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
 				"netherite_bayonet"));
+		ACCEPTS.put("undertone_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "long_scope", "medium_scope",
+				"reflex_sight", "laser_sight"));
+		ACCEPTS.put("murmur_smg", List.of("extended_magazine", "speed_magazine", "long_scope", "medium_scope", "reflex_sight",
+				"laser_sight"));
+		ACCEPTS.put("reverb", List.of("light_grip", "long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
 	}
 
 	/** The rounds. */
