@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -21,7 +22,8 @@ import net.minecraft.world.entity.player.Player;
  * The arms motion hooks call this: {@link #extract} as a player's render state is filled (ArmsRenderStateMixin) and
  * {@link #apply} after vanilla poses the model (ArmsHumanoidModelMixin); armor posed from the same state follows. The
  * pose is one of four shared values and the tilt the gun's own, so nothing is allocated per frame (a bayonet's thrust,
- * slice 7, only while it lasts). Players only, and not while swimming, gliding or asleep.
+ * slice 7, only while it lasts). Players, and (slice 10F) mobs holding a gun, such as the raider gunners; not while
+ * swimming, gliding or asleep.
  */
 public final class GunPose {
 	/** The hold on a player's render state: null when they hold no gun. */
@@ -44,7 +46,8 @@ public final class GunPose {
 	public static void extract(LivingEntity entity, ArmedEntityRenderState state, float partialTick) {
 		Hold hold = null;
 		Float tilt = null;
-		if (entity instanceof Player && entity.getMainHandItem().getItem() instanceof GunItem gun && !entity.isVisuallySwimming()
+		if ((entity instanceof Player || entity instanceof Mob) && entity.getMainHandItem().getItem() instanceof GunItem gun
+				&& !entity.isVisuallySwimming()
 				&& !entity.isFallFlying() && !entity.isSleeping()) {
 			// The other hand busy with something of its own (eating, a shield) keeps to it.
 			boolean otherBusy = entity.isUsingItem() && entity.getUsedItemHand() == InteractionHand.OFF_HAND;

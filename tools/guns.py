@@ -2287,6 +2287,25 @@ RACK_CELL_MIDDLE = 2.75
 RACK_LIT = ("el_screen", "el_screen_on")
 
 
+# ------------------------------------------------------------------ guns in mobs' hands (slice 10F)
+
+# The raider gunners (tools/raiders.py, raiders/RaiderInfantry) carry the service arms and fire them as guns/MobGuns
+# does. MOB_ARMS: (gun, how many in ten carry it, how near they close to fire it in blocks): the pistol from middle
+# distance, the rifle from further off, the shotgun from close by.
+MOB_ARMS = [("sentry_pistol", 4, 16), ("garrison_rifle", 3, 24), ("breacher", 3, 8)]
+# A mob's shot does MOB_DAMAGE of the gun's damage a pellet (the bullet damage type then scales with the difficulty
+# against players, as a monster's attack does); an automatic gun fires MOB_BURST shots at its interval, any other one,
+# and then the mob waits MOB_PAUSE ticks. A gun not in MOB_ARMS is fired from MOB_REACH blocks (or its range).
+MOB_DAMAGE = 0.5
+MOB_BURST = 3
+MOB_PAUSE = 30
+MOB_REACH = 16
+# The chance a gunner's gun drops to a player's kill (vanilla's for a mob's equipment; Looting adds to it), empty, and
+# the rounds of its gun's ammunition it drops to one (tools/raiders.py writes its loot table).
+MOB_DROP = 0.085
+MOB_ROUNDS = (0, 3)
+
+
 def cell_rack_model():
     """The Cell Rack in the electric look of the power gear (the Charging Station's textures): a graphite plinth edged
     with high-voltage stripes, a back panel with vented sides, framing posts either side, two shelves each with a

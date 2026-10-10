@@ -14,6 +14,7 @@ import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
 import io.github.jimbozoomer.jugcraft.guns.GunSpec;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
+import io.github.jimbozoomer.jugcraft.guns.MobGuns;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -361,6 +362,26 @@ public class GunsClientGameTests implements FabricClientGameTest {
 			Jugcraft.LOGGER.info("[guns] in third person the player was posed holding a gun for {} frames", posedFrames);
 			if (posedFrames <= 0) {
 				throw new AssertionError("In third person the player was never posed holding a gun (GunPose)");
+			}
+
+			// Slice 10F: three raider gunners, one with each of the service arms they carry, four blocks off and facing the
+			// player, each posed holding its gun as a player holds one. The player's hands are empty, so only theirs pose.
+			server.runCommand("clear @p");
+			long unposed = context.computeOnClient(client -> GunPose.posed());
+			for (int i = 0; i < MobGuns.ARMS.size(); i++) {
+				String tag = "jugcraft_gunner_" + i;
+				server.runCommand(String.format(Locale.ROOT, "summon jugcraft:raider_gunner %.1f %d %.1f {NoAI:1b,PersistenceRequired:1b,"
+						+ "Rotation:[0f,0f],Tags:[\"%s\"]}", x - 1.5 + 2 * i, y, z - 3.5, tag));
+				server.runCommand("item replace entity @e[tag=%s] weapon.mainhand with jugcraft:%s".formatted(tag, MobGuns.ARMS.get(i).gun()));
+			}
+			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 5", x + 0.5, y, z + 0.5));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_guns_raider_gunners");
+			long gunnerFrames = context.computeOnClient(client -> GunPose.posed()) - unposed;
+			Jugcraft.LOGGER.info("[guns] the raider gunners were posed holding their guns for {} frames", gunnerFrames);
+			server.runCommand("kill @e[type=jugcraft:raider_gunner]");
+			if (gunnerFrames <= 0) {
+				throw new AssertionError("The raider gunners were never posed holding their guns (GunPose)");
 			}
 
 			// The icons, in two inventories (they no longer fit one): the guns and rounds, then the attachments.

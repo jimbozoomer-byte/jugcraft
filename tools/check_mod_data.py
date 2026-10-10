@@ -1147,7 +1147,7 @@ def check_raiders():
         err(f"RaiderCamps.SPAWN_CLEARANCE differs from tools/raiders.py CAMP_SPAWN_CLEARANCE ({raiders.CAMP_SPAWN_CLEARANCE})")
     if f" RAID_CHANCE = {raiders.RAID_CHANCE}F;" not in raids:
         err(f"RaiderRaids.RAID_CHANCE differs from tools/raiders.py ({raiders.RAID_CHANCE})")
-    order = ["raider_grunt", "raider_grenadier", "raider_officer", "raider_blimp", "raider_walker"]
+    order = ["raider_grunt", "raider_grenadier", "raider_officer", "raider_blimp", "raider_walker", "raider_gunner"]
     table = ", ".join("{" + ", ".join(str(raiders.party(level)[k]) for k in order) + "}" for level in range(1, raiders.MAX_LEVEL + 1))
     if f"PARTY = {{{table}}};" not in raids:
         err(f"RaiderRaids.PARTY differs from party() in tools/raiders.py ({table})")
@@ -1470,6 +1470,19 @@ def check_guns():
     cell = (JAVA_ROOT / "guns" / "EnergyCellItem.java").read_text(encoding="utf-8")
     if f"CAPACITY = {guns.CELL_CAPACITY:_};" not in cell or "implements Chargeable" not in cell:
         err(f"EnergyCellItem must be Chargeable, holding tools/guns.py CELL_CAPACITY ({guns.CELL_CAPACITY:_} JE)")
+    # Slice 10F: guns in mobs' hands (guns/MobGuns), the raider gunners' arms and how they fire them.
+    mob = (JAVA_ROOT / "guns" / "MobGuns.java").read_text(encoding="utf-8")
+    arms = ", ".join(f'new Arm("{gun}", {weight}, {reach})' for gun, weight, reach in guns.MOB_ARMS)
+    arms_java = re.search(r"ARMS = List\.of\(([^;]*)\);", mob)
+    if not arms_java or " ".join(arms_java.group(1).split()) != arms:
+        err(f"MobGuns.ARMS differs from tools/guns.py MOB_ARMS: expected {arms}")
+    for line in (f"DAMAGE = {guns.MOB_DAMAGE}F;", f"BURST = {guns.MOB_BURST};", f"PAUSE = {guns.MOB_PAUSE};",
+                 f"DROP = {guns.MOB_DROP}F;", f"REACH = {guns.MOB_REACH};"):
+        if line not in mob:
+            err(f"MobGuns differs from tools/guns.py: expected {line}")
+    for gun, _, _ in guns.MOB_ARMS:
+        if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet":
+            err(f"tools/guns.py MOB_ARMS names {gun}, which is not a gun that fires bullets")
     # Slice 10E: the Cell Rack's cradles, where tools/guns.py builds them, as the block picks them and as the renderer
     # stands the cells in them.
     columns = ", ".join(f"{x}" for x in guns.RACK_COLUMNS)
