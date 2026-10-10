@@ -2931,6 +2931,21 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `doubleBarrelsFireBothBarrelsAndLoad`: side by side, each fires at a pig three blocks off: its pellets land together and a round is spent; the Mule and the Fowler then fire their second barrel. Each then loads from the inventory: halfway through its reload nothing is in yet, and as it ends every round is, two left in the inventory.
   - "Every gun registered" now counts forty-five guns.
   - `GunsClientGameTests` takes the three new guns through its steps as it takes every gun: held, aimed, fired at the husk, reloaded from the inventory, inspected, the Fowler with each set of attachments it takes, seen from outside, and in the inventory.
+- **Slice 10C in CI** ([run 38074671680](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38074671680), on a81a06fa7): every check passed.
+  - **Server game tests:** 1289 in each job, slice 10B's 1287 and this slice's two. All passed, `DoubleBarrelGunsGameTests` among them.
+  - **`GunsClientGameTests`** (the client job's first shard). Each of the three guns went through its steps:
+    - its arms drawn at full size held and half size aimed;
+    - aimed, the view narrowed to 0.92 (Mule), 0.88 (Fowler) and 0.94 (Culverin);
+    - fired at the husk, each spending a round: the Mule took it from 588.57 to 571.07 (seven of its ten pellets), the Fowler to 547.07 (all eight balls) and the Culverin to 527.07 (four of its five), with 6, 7 and 6 flash frames;
+    - reloaded from the inventory: two Buckshot Shells into the Mule, two Paper Cartridges into the Fowler and one into the Culverin, 31 left each time;
+    - where their animations cue a casing, the Mule threw spent shells (three through the shot and reload), the Fowler puffed smoke from its lock once and the Culverin three times;
+    - the Fowler with each set of attachments it takes (the Light Grip, the Vertical Grip, the Iron Bayonet), held and aimed.
+  - **Screenshots** (the guns' own fifteen, the Fowler's six with attachments and the six from outside):
+    - **Mule:** held at the lower right, pointing at the husk. Aimed, the back of its frame stands under the crosshair on the husk, its wooden grip below. Reloading, it has sunk out of the view, the left hand coming up at the bottom (see the known limits). Inspected, the left arm fills the right of the view.
+    - **Fowler:** held at the right. Aimed, the back of its barrels and the rib stand under the crosshair, the brass hammer to the right. Fired, a cloud of smoke wraps the gun's back and the priming flash shows above the lock. Reloading, the gun is tipped up and the left hand reaches over the muzzles. Inspected, it is turned to show its side.
+    - **Culverin:** held in the right hand, pointing at the husk. Aimed, its breech stands under the crosshair. Fired, smoke and the flash. Reloading, the gun is tipped up and the left arm comes down from the top right with the ball. Inspected, it is turned to show its cock.
+    - **With attachments:** the grips sit under the fore-end, behind the left hand, and the bayonet does not show from the hip or aimed, as on the Bellmouth and the Line Musket with theirs in the same run.
+    - **From outside:** the Mule and the Fowler are held at the chest in both hands; the Culverin in the right hand, the left arm at the side. Fired, the Fowler and the Culverin wrap themselves in smoke.
 - **Slice 10D, run locally (10 October 2026):**
   - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's, their attachments' included, less the tendrils' edges that have no area; every other gun's files came out unchanged, its atlas included.
   - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and tooltips, and their shots' sounds.
