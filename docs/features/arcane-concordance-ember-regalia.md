@@ -135,8 +135,8 @@ bangle read on the server), **Spell Power** (the fire attribute; its enchantment
 **Modonomicon** (the codex entry).
 
 **Provenance.** Every file below is from the owner's magic collection (`art/owner-library/originals/Magic`, supplied
-8 October 2026, [MAGIC_ASSETS.md](../../art/owner-library/MAGIC_ASSETS.md)). The owner states they made this work
-"using other Minecraft mods as a base" and then "completely redid and remade all the stuff"
+8 October 2026, [MAGIC_ASSETS.md](../../art/owner-library/MAGIC_ASSETS.md)). The owner says they used other Minecraft
+mods as a starting base and then "completely redid and remade all the stuff"
 ([PROVENANCE.md](../../art/owner-library/PROVENANCE.md)); this record repeats that declaration, which is not an
 independent rights audit. The project uses the files under the owner's project-use authorization
 ([LICENSE_POLICY.md](../../LICENSE_POLICY.md), owner-supplied collections). The source folders' names (`ars_jymbaumental`,

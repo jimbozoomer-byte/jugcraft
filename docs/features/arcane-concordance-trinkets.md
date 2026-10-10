@@ -140,10 +140,11 @@ and an event phase), **Modonomicon** (the codex entry).
 
 **Provenance.** The files below are from the owner's library (`art/owner-library/originals`): the magic collection
 (supplied 8 October 2026, [MAGIC_ASSETS.md](../../art/owner-library/MAGIC_ASSETS.md); folders `jymbelics` and
-`jymbaquary`) and, for the charm slot icon, the Blocks folder's `Trinket Type Mod`. The owner states they made this work
-"using other Minecraft mods as a base" (a relics mod and a reliquary mod) and then "completely redid and remade all the
-stuff" ([PROVENANCE.md](../../art/owner-library/PROVENANCE.md)); this record repeats that declaration, which is not an
-independent rights audit. The project uses the files under the owner's project-use authorization
+`jymbaquary`) and, for the charm slot icon, the Blocks folder's `Trinket Type Mod`. The owner says they used other
+Minecraft mods as a starting base and then "completely redid and remade all the stuff"
+([PROVENANCE.md](../../art/owner-library/PROVENANCE.md)); the base mods here are, by Jugcraft's reading of the folders
+and the owner's name for this slice ("Relics/Reliquary"), a relics mod and a reliquary mod. This record repeats that
+declaration, which is not an independent rights audit. The project uses the files under the owner's project-use authorization
 ([LICENSE_POLICY.md](../../LICENSE_POLICY.md), owner-supplied collections). The source folders' names are kept here as
 labels; nothing in the game uses them. Read for notices: the five `jymbaquary` icons carry Photoshop 23.1 XMP packets
 (created 23 January 2022), the Leather Belt and Ice Breaker strips Photoshop 22.1 packets (October 2021 and April 2022),
@@ -243,8 +244,10 @@ No worldgen, creatures, loot or seasons.
   `jugcraft:wayfaring/<kind>/<attribute>`; codex entry `relics/wayfaring`. Save compatibility: additive. The kinetic
   belt's English name changed (Leather Belt to Drive Belt); its id did not.
 - **Simplified from the owner's text, for a concrete reason:**
-  - the Ice Breaker's faster falling and grip on ice, and the Amphibian Boot's speed in the rain: no event or attribute
-    gives them without a mixin or a per-tick check;
+  - the Ice Breaker's faster falling: a gravity modifier would also shorten every jump (and undo the feather's), so it
+    is left out;
+  - the Ice Breaker's grip on ice and the Amphibian Boot's speed in the rain: no event or attribute gives them without a
+    mixin or a per-tick check;
   - the Phoenix Down's "variety of buffs": two (Regeneration II and Fire Resistance);
   - the base mods' relic levelling and experience: Relic Lore's mastery already stands for it.
 - **Deferred:** drawing the belt and boots on the body (part 1b: the owner's worn sheets for the belt and boot exist, but

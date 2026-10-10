@@ -166,7 +166,7 @@ public class ConcordanceWayfaringGameTests {
 
 	/**
 	 * Only someone who understands Relic Lore can put one on; each gives exactly the generator's modifiers, named by its
-	 * kind, so two of a kind (or a Phoenix Down beside a feather) give them once; and a cosmetic belt slot never counts.
+	 * kind, so two of a kind (or a Phoenix Down beside a feather) give them once.
 	 */
 	@GameTest(maxTicks = 20)
 	public void onlyRelicLoreWearsThemAndTwoOfAKindNeverAddUp(GameTestHelper helper) {
