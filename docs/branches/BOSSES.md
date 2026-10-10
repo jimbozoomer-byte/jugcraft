@@ -1,6 +1,6 @@
 # Bosses branch (brainstorm)
 
-Status: **a brainstorm; the first boss is being built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time. Everything here is a proposal for the owner to pick from, change or drop.
+Status: **a brainstorm; the first boss is being built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
 
 ## Rules every boss follows
 
@@ -125,5 +125,5 @@ He follows the rules every boss follows (above): his hall is his arena and reset
 ## Next steps (the owner's choice)
 
 1. Pick the first boss to build. The Yeti King is the owner's own example, and its biomes are built: he is being built first (above).
-2. Write its feature record (template: [features/TEMPLATE.md](../features/TEMPLATE.md)) with the arena, attacks, scaling, reset and loot rules above.
+2. Build it by [the boss playbook](BOSS_PLAYBOOK.md): its plan here, then its lair and summoning, then the boss and its loot, each with a feature record (template: [features/TEMPLATE.md](../features/TEMPLATE.md)) giving the arena, attacks, scaling, reset and loot rules above.
 3. Have its death roll `bosses/<boss>.json` for each player who fought, as the trophies expect.
