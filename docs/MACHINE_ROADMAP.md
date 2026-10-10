@@ -50,6 +50,8 @@ The [starter gas/acid construction and balance record](features/industrial-start
 
 The owner-requested [industrial machine art specification](features/industrial-machine-models-and-textures.md), dated 10 October 2026, covers unbuilt workshop, agriculture, refining, chemistry, precision, storage and recovery forms. Its 79 detailed machine/module briefs and 23 larger variants use proposed **width × depth × height envelopes from 2 to 6 blocks per axis**, including several 6×6×6 plants. Existing runtime bodies remain distinct from their proposed future forms; later roadmap candidates are clearly labeled. These are modeling/texture briefs, not implemented blocks.
 
+The [factory implementation plan](features/industrial-factory-implementation-plan.md) adds nine proposed delivery packages, shared operating profiles, construction/handling rules and a connected supply map. Its [production lines and layouts](features/industrial-production-lines-and-factory-layouts.md) provide 36 routes and eight factory examples; these are substantial planning defaults to review before runtime implementation.
+
 ## Design rules for new machines
 1. **Each machine is a consumer for something that already exists.** Name the materials it uses, and what uses its output.
 2. **Shared systems come before the machines that need them.** Fluids and item logistics each get one interface, like the energy API, instead of every machine inventing its own.
