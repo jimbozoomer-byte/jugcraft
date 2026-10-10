@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.guns.EnergyCellItem;
@@ -11,10 +12,12 @@ import io.github.jimbozoomer.jugcraft.tools.Chargeable;
 import io.github.jimbozoomer.jugcraft.tools.ChargingStationBlock;
 import io.github.jimbozoomer.jugcraft.tools.ChargingStationBlockEntity;
 import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
+import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,6 +27,9 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -38,6 +44,26 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
  * on pillars, level with the shooter's eye. Shooters face south (+z).
  */
 public class EnergyGunsGameTests {
+	/** Craft the actual survival recipe: rechargeable cells must never form an oversized result stack. */
+	@GameTest
+	public void cellRecipeMakesOneEmptyUnstackableCell(GameTestHelper helper) {
+		var level = helper.getLevel();
+		ItemStack cable = new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("copper_cable")));
+		ItemStack brass = new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("brass_ingot")));
+		CraftingInput input = CraftingInput.of(3, 3, List.of(
+				ItemStack.EMPTY, cable, ItemStack.EMPTY,
+				new ItemStack(Items.GLASS_PANE), new ItemStack(Items.REDSTONE), new ItemStack(Items.GLASS_PANE),
+				ItemStack.EMPTY, brass, ItemStack.EMPTY));
+		ItemStack made = level.recipeAccess().getRecipeFor(RecipeType.CRAFTING, input, level)
+				.orElseThrow(() -> helper.assertionException("The Energy Cell's survival recipe is missing"))
+				.value().assemble(input);
+		helper.assertTrue(made.is(JugcraftGuns.ENERGY_CELL) && made.getCount() == 1 && made.getMaxStackSize() == 1,
+				"The Energy Cell recipe must make one unstackable cell, got " + made);
+		helper.assertTrue(Chargeable.energy(made) == 0 && Chargeable.capacity(made) == EnergyCellItem.CAPACITY,
+				"A newly crafted cell must be empty and retain its rechargeable capacity");
+		helper.succeed();
+	}
+
 	/**
 	 * The energy weapons load from the Energy Cell, a chargeable item, each round its charge: the Beam Pistol fires a
 	 * beam, the other two arcs; their damage pushes nothing back, counts each shot, and is neither a projectile nor fire.

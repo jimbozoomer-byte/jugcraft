@@ -6809,7 +6809,7 @@ def check_decor13(java):
 
 def check_decor14(java):
     """Costumes: Java matches tools/agriculture.py (the outfits, the trunk's slots and how long its lid stays open), every
-    outfit has an equipment asset without layers, boxes in costumes.json on body parts and motions the client knows,
+    outfit omits its flat equipment asset, has boxes in costumes.json on body parts and motions the client knows,
     inside textures that exist, and is a trick-or-treat costume and a costume hat; the trunk's block states have models
     and its messages their words."""
     import decor14_data
@@ -6827,6 +6827,8 @@ def check_decor14(java):
     motions = set(re.findall(r'case "([a-z_]+)" -> ', layer.read_text(encoding="utf-8") if layer.exists() else ""))
     if not set(decor14_data.MOTIONS) <= motions:
         err(f"CostumeLayer doesn't know the motions {sorted(set(decor14_data.MOTIONS) - motions)}")
+    if (ASSETS / "equipment" / "ghost_sheet.json").exists():
+        err("ghost_sheet: omit the flat equipment asset; GhostSheetLayer draws it")
     costumes = load(ASSETS / "costumes.json") or {}
     if set(costumes) != set(ag.OUTFITS):
         err("costumes.json doesn't hold exactly the outfits")
@@ -6846,8 +6848,8 @@ def check_decor14(java):
                 u, v, w, h, d = b[6:11]
                 if u + 2 * (d + w) > width or v + d + h > height:
                     err(f"{name}: a box's faces run off its texture")
-        if (load(ASSETS / "equipment" / f"{name}.json") or {}).get("layers") != {}:
-            err(f"{name}: its equipment asset must have no layers (CostumeLayer draws it)")
+        if (ASSETS / "equipment" / f"{name}.json").exists():
+            err(f"{name}: omit the flat equipment asset; CostumeLayer draws it and an empty layer map is invalid")
         for tag, values in tags.items():
             if rid_of(name) not in values:
                 err(f"{name} is not in {tag}")
