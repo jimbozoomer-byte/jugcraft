@@ -10,6 +10,7 @@
 		"fabric-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.FrameworkGameTests",
 			"io.github.jimbozoomer.jugcraft.test.LairGameTests",
+			"io.github.jimbozoomer.jugcraft.test.VesperineGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceSharingGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceResourceGameTests",
@@ -249,7 +250,8 @@
 			"io.github.jimbozoomer.jugcraft.test.OrchardClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CakeClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.FruitCropClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.LairClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.LairClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.VesperineClientGameTests"
 		]
 	},
 	"depends": {
