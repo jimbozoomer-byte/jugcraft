@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The boss playbook (how a boss is built)
+- **[docs/branches/BOSS_PLAYBOOK.md](docs/branches/BOSS_PLAYBOOK.md)** writes down, at the owner's request, the order the Yeti King was built in, as the plan for building every boss.
+- Each boss is two pull requests: its lair and the summoning that opens it, then the boss, his adds and his loot. The steps run from the survey and the plan to the numbers, model, art, data, Java, audit, tests and record, then CI and the pictures. Each step names the files the Yeti King made at it.
+- It also records what the Yeti King taught: checking every API against 26.3 before CI, porting an open fix for a flaky test, and aiming the cameras from where the boss is. It carries the planning pack's shared lair contract and what "done" means for a boss. Docs only.
+
 ### Unmerged: Arms VIII fix (a thrown arm no longer flies through a foe it stops just short of)
 - **A thrown arm strikes a foe it ends a tick just short of.** Before, it sometimes flew through. From a flight's third tick, the sweep that finds what a thrown thing hits widens each box it looks for, but finds only the boxes it enters. An arm that ended a tick inside the next tick's widening, short of the foe itself, started that tick inside the box and flew on. Now each tick but the first starts by striking a foe whose widened box the arm is already inside.
 - This made the steel javelin's game test fail now and then, on `main` and on pull requests that do not touch the thrown arms. A new test sets a javelin going slowly at a still pig to end a tick 0.02 short of it, and it must strike. Record: [arms-viii.md](docs/features/arms-viii.md).
