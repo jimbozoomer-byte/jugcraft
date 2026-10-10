@@ -1,24 +1,28 @@
 #!/usr/bin/env python3
 """Choose which client game test classes a change needs, and share them out between CI's client jobs.
 
-The client game tests start a real game and photograph showrooms, which takes CI about 15 to 25 minutes for every
-class. Most pull requests change a few blocks, so a pull request runs only the classes that show what it changed;
-main, a manual run and a pull request labelled "full-client-tests" run them all (docs/TESTING.md).
+The client game tests start a real game and photograph showrooms, which takes each of CI's three client jobs 20 to 30
+minutes when every class runs. Most pull requests change a few blocks, so a pull request runs only the classes that
+show what it changed; main and a manual run of the Build workflow run them all (docs/TESTING.md).
 
 How a changed file picks classes (src/gametest/resources/fabric.mod.json lists the classes):
 - a client test class itself, or one newly listed: that class;
 - docs, Markdown, the generators and checks in tools/ and scripts/ (their output is committed and judged below),
-  data under src/main/resources/data, the language file and server-only game tests: nothing;
+  the art sources in art/ (what the game loads is copied into the assets and judged there), data under
+  src/main/resources/data, the language file, the optional resource packs no client test turns on, unit tests,
+  server-only game tests and Claude's settings: nothing;
 - a Java class under src/main or src/client that only gained code (a feature registering itself in a registry, one
   more entry in a list): the classes matching the names and IDs it gained; comments do not count;
 - a Java class whose existing code changed: every class that shows it (names it, or whose IDs match it with "Block",
   "Renderer" and similar endings taken off: "GiantBeatingHeartRenderer" -> giant_beating_heart) or shows a Jugcraft
   class that uses it ("CrewedGun" -> the classes showing the Siege Mortar, Flak Gun and tower guns); a class no test
   shows picks nothing, as the mod job's server game tests still run;
+- a Java class that a quarter of the classes or more show (a registry such as JugcraftAgriculture or Jugcraft, which
+  most tests use to reach their blocks): the classes matching the names and IDs on the lines it lost or gained, as
+  for a class only gaining code, since what changed is what those lines name;
 - a model, blockstate, texture or other asset: every class naming its ID, or an ID it starts with
   ("ready_rack_0" -> ready_rack);
-- anything else (build files, the workflow, mixins, the test mod's helpers), or a change that picks half the classes
-  or more: every class.
+- anything else (build files, the workflow, mixins, the test mod's helpers): every class.
 
 A test "names" an ID when its source has it as a string ("pipe_organ", "jugcraft:pipe_organ") or a constant
 (PIPE_ORGAN), or when a Jugcraft class it uses that few tests use (a feature's own list, not a shared registry) has it.
@@ -51,6 +55,7 @@ WEIGHTS = {
     "JugcraftServerClientGameTests": 90,
 }
 HUB = 5  # a class this many test classes name is a shared registry, not one feature
+WIDE = 4  # a changed class shown by this share of the classes (a quarter) or more is picked by its changed lines
 ENDINGS = ("BlockEntityRenderer", "BlockEntity", "Renderer", "Block", "Item", "Entity", "Model", "Screen", "Menu",
            "Blocks", "Items")
 # Files that change nothing a client test shows.
@@ -59,8 +64,12 @@ NOTHING = (
     re.compile(r"\.md$"),
     re.compile(r"^tools/"),
     re.compile(r"^scripts/"),
+    re.compile(r"^art/"),
+    re.compile(r"^\.claude/"),
     re.compile(r"^src/main/resources/data/"),
     re.compile(r"^src/main/resources/assets/jugcraft/lang/"),
+    re.compile(r"^src/main/resources/resourcepacks/"),
+    re.compile(r"^src/test/"),
     re.compile(r"^project-status\.json$"),
     re.compile(r"^LICENSE"),
     re.compile(r"^\.github/(?!workflows/build\.yml$)"),
@@ -171,6 +180,27 @@ def added_only(base, head, path):
     return None if removed else gained
 
 
+def changed_code(base, head, path):
+    """The code lines a file lost and gained; comments do not count."""
+    lines = []
+    for line in git("diff", "-U0", base, head, "--", path).splitlines():
+        if line.startswith(("---", "+++")) or not line.startswith(("-", "+")):
+            continue
+        text = line[1:].strip()
+        if text and not text.startswith(("*", "//", "/*")):
+            lines.append(text)
+    return lines
+
+
+def by_names(lines, tests):
+    """The classes naming the Jugcraft classes and IDs these code lines name (a registry many tests use aside)."""
+    classes, ids = names_in("\n".join(lines))
+    classes = {c for c in classes if sum(c in info["classes"] for info in tests.values()) < HUB}
+    ids |= {snake(c) for c in classes}
+    return {t for t, info in tests.items()
+            if classes & info["classes"] or any(match_id(i, info["ids"]) for i in ids)}
+
+
 def select(changed, tests, newly_listed, base=None, head=None):
     """(classes, reasons): the classes the changed files need, or None for every class."""
     chosen, reasons = set(), []
@@ -193,16 +223,19 @@ def select(changed, tests, newly_listed, base=None, head=None):
             existed = base and path in existing
             added = added_only(base, head, path) if existed else None
             if added is not None:
-                classes, ids = names_in("\n".join(added))
-                classes = {c for c in classes if sum(c in info["classes"] for info in tests.values()) < HUB}
-                ids |= {snake(c) for c in classes}
-                hits = {t for t, info in tests.items()
-                        if classes & info["classes"] or any(match_id(i, info["ids"]) for i in ids)}
+                hits = by_names(added, tests)
             else:
                 hits = showing(name, tests)
                 for user in users.get(name, ()):
                     if sum(user in info["classes"] for info in tests.values()) < HUB:  # not a registry many tests use
                         hits |= showing(user, tests)
+                if existed and len(hits) * WIDE >= len(tests):
+                    shown = len(hits)
+                    hits = by_names(changed_code(base, head, path), tests)
+                    reasons.append(f"{path}: {shown} classes show {name}; "
+                                   f"the names on its changed lines pick {len(hits)}")
+                    chosen |= hits
+                    continue
             if not hits:
                 reasons.append(f"{path}: no client test shows {name}")
             chosen |= hits
@@ -220,8 +253,6 @@ def select(changed, tests, newly_listed, base=None, head=None):
         everything = everything or f"{path}: shared file"
     if everything:
         return None, [everything]
-    if len(chosen) * 2 >= len(tests):
-        return None, [f"{len(chosen)} of {len(tests)} classes changed"]
     return chosen, reasons
 
 
