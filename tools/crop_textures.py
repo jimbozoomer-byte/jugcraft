@@ -950,6 +950,8 @@ def crop_textures():
     out.update(lair_textures())
     from vesperine_art import vesperine_textures  # and Vesperine, her skulls, thralls and scythe, and her loot
     out.update(vesperine_textures())
+    from tatterlace_art import tatterlace_textures  # and Madame Tatterlace, her thimbles, spools, egg sacs and brood, and her loot
+    out.update(tatterlace_textures())
     from orchard_textures import orchard_textures  # and the orchards' fruit trees
     out.update(orchard_textures())
     from cake_art import cake_textures  # and the cakes, rebuilt from the owner's drawing of them

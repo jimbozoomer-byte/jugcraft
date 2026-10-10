@@ -233,4 +233,4 @@ Known limits:
 - on Peaceful there is no fight;
 - the Harvest boon's kill count is lost on a restart.
 
-Boss 2, Madame Tatterlace in the Spindle Loft, comes next, on the same lair framework.
+Boss 2, Madame Tatterlace in the Spindle Loft, is built on the same lair framework ([tatterlace.md](tatterlace.md)). What the two bosses share (who may fight one, its health for a party, and the `lairs.boss_health` and `lairs.boss_damage` settings) is now `lair/LairBosses.java`, which Vesperine uses unchanged.

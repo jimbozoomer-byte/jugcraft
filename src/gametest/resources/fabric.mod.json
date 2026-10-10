@@ -12,6 +12,7 @@
 			"io.github.jimbozoomer.jugcraft.test.LairGameTests",
 			"io.github.jimbozoomer.jugcraft.test.VesperineGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SpindleLoftGameTests",
+			"io.github.jimbozoomer.jugcraft.test.TatterlaceGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceSharingGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceResourceGameTests",
@@ -253,7 +254,8 @@
 			"io.github.jimbozoomer.jugcraft.test.FruitCropClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.LairClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.VesperineClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.SpindleLoftClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.SpindleLoftClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.TatterlaceClientGameTests"
 		]
 	},
 	"depends": {

@@ -560,7 +560,7 @@ Two more arms and a war kit in bronze and steel. Shot for shot the longbow and a
 
 ### Arms VII (batch 56): variant arms, crafted styles and boss trophies
 
-34 named arms, each a variant of a kind above that fights as its kind does, in steel. Sixteen are crafted at a smithing table: a style's pattern, a steel arm of the kind and the style's material, keeping its enchantments and wear. Sixteen are trophies of eight bosses still to be made ([branches/BOSSES.md](branches/BOSSES.md)): no recipe, each boss's loot table ready; creative only until then. One, the Vesper Scythe, is the trophy of Vesperine, the Last Reaper, and drops from her ([features/vesperine.md](features/vesperine.md)). One, the Hades Scythe, is the Hades Armor set's arm: no recipe and no loot table yet, creative only until the owner settles how the sets are won. No variant deals as much a second as a netherite sword.
+35 named arms, each a variant of a kind above that fights as its kind does, in steel. Sixteen are crafted at a smithing table: a style's pattern, a steel arm of the kind and the style's material, keeping its enchantments and wear. Sixteen are trophies of eight bosses still to be made ([branches/BOSSES.md](branches/BOSSES.md)): no recipe, each boss's loot table ready; creative only until then. Two are the trophies of the Witching Season's bosses and drop from them: the Vesper Scythe, Vesperine's ([features/vesperine.md](features/vesperine.md)), and the Needle Rapier, Madame Tatterlace's ([features/tatterlace.md](features/tatterlace.md)). One, the Hades Scythe, is the Hades Armor set's arm: no recipe and no loot table yet, creative only until the owner settles how the sets are won. No variant deals as much a second as a netherite sword.
 
 | Line | Arms | Perk or boon | Made from |
 | --- | --- | --- | --- |
@@ -577,6 +577,7 @@ Two more arms and a war kit in bronze and steel. Shot for shot the longbow and a
 | The Storm Roc | Stormcaller, Galefeather | Gale: throws the foe up and back | trophy |
 | The Abyssal Leviathan | Tidebreaker, Leviathan's Hook | Tide: 25% harder against a foe in water or rain | trophy |
 | Vesperine, the Last Reaper | Vesper Scythe | Harvest: a kill heals two hearts (once every 5 s); every fifth kill charges a pale crescent (12 blocks, 8 damage) | her loot (15%; certain on a first kill) |
+| Madame Tatterlace | Needle Rapier | Stitch: three hits on one foe within 4 s slow it (Slowness II, 2 s) | her loot (15%; certain on a first kill) |
 | Hades Armor (an armor set) | Hades Scythe | Wither: Wither, 3 s | the set's arm (creative only for now) |
 
 Trophies and the set's arm last twice as long as steel. Glowing parts (runes, magma, venom, soul fire, sparks) are lit in the dark.

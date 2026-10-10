@@ -56,7 +56,7 @@ Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-t
 - **Waking blind.** You wake blind for two seconds (`tools/lairs.py` SPINDLE), as from sleep.
 - **The wheel is the gate.** No gate entity is needed: the wheel is the gate while it spins, and the instance remembers where it is.
 - **Lairs without a moon.** The framework now takes a lair with no moon (the loft is indoors), runs a lair's hooks as an instance closes (the wheel calms), and says a lair's own words on coming in ("You step through the mist into the Hollow Acre"; "You prick your finger, fall asleep and wake in the Spindle Loft").
-- **Gossamer Silk** in the next spindle (two gold nuggets in place of one gold ingot) comes with Tatterlace's loot in part 2.
+- **Gossamer Silk** in the next spindle (two gold nuggets in place of one gold ingot) comes with Tatterlace's loot in part 2 ([tatterlace.md](tatterlace.md)).
 
 ## Connections
 
@@ -65,7 +65,7 @@ Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-t
   - gold and an amethyst shard;
   - spider eyes and string, from spiders;
   - a stick.
-- **Outputs:** the way into the Spindle Loft, where Madame Tatterlace will wait (part 2).
+- **Outputs:** the way into the Spindle Loft, where Madame Tatterlace waits (part 2, [tatterlace.md](tatterlace.md)).
 - **The furnishings:** the loft is furnished from Jugcraft's own Spider's Larder (batch 19): silk cocoons, egg sac clusters and silk spool stacks.
 
 ## Balance and automation
@@ -164,4 +164,4 @@ The plan's open questions keep their defaults:
 - Grave Goods on death;
 - four players and eight instances.
 
-Part 2, Madame Tatterlace, adds the fight on the doily (her unravelling floor uses the lace and the safe ring round each spool), her loot, and Gossamer Silk in the spindle.
+Part 2, Madame Tatterlace ([tatterlace.md](tatterlace.md)), adds the fight on the doily (her unravelling floor uses the lace and the safe ring round each spool), her loot, and Gossamer Silk in the spindle.

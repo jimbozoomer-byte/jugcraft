@@ -9,6 +9,7 @@ import com.geckolib.animation.object.LoopType;
 import com.geckolib.util.GeckoLibUtil;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
+import io.github.jimbozoomer.jugcraft.lair.LairBosses;
 import io.github.jimbozoomer.jugcraft.lair.LairBrazierBlock;
 import io.github.jimbozoomer.jugcraft.lair.LairExitBlock;
 import io.github.jimbozoomer.jugcraft.lair.LairInstance;
@@ -339,19 +340,19 @@ public class VesperineEntity extends Monster implements GeoEntity {
 		return instance;
 	}
 
-	/** Damage she deals: the attack's own, times {@code lairs.boss_damage}. */
+	/** Damage she deals: the attack's own, times {@code lairs.boss_damage} ({@link LairBosses}). */
 	public static float damage(float base) {
-		return (float) (base * Lairs.decimal("lairs.boss_damage", 1.0, 0.25, 4.0));
+		return LairBosses.damage(base);
 	}
 
 	/** Her health (and her skulls') for a party of {@code players}: half as much again for each beyond the first, at most 2.5 times. */
 	public static double partyScale(int players) {
-		return Math.min(PARTY_MAX, 1.0 + PARTY_STEP * Math.max(0, players - 1)) * Lairs.decimal("lairs.boss_health", 1.0, 0.25, 4.0);
+		return LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX);
 	}
 
 	/** Whoever may fight her: alive, not a spectator, not invulnerable (creative). */
 	public static boolean eligible(Player player) {
-		return player.isAlive() && !player.isSpectator() && !player.getAbilities().invulnerable;
+		return LairBosses.eligible(player);
 	}
 
 	// ---------------------------------------------------------------- the server's tick
