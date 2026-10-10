@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 9E (the tactical grip and the laser sight)
+- **Two attachments** from the owner's art:
+  - the **Tactical Grip**, the owner's tactical grip parts on ten guns: a stubby grip under the fore-end, a little steadier from the hip (90% of the spread) and with a little less kick (80%);
+  - the **Laser Sight**, the owner's laser on the scopes' rail of twelve guns: much steadier from the hip (70% of the spread), and a red dot where the gun points, which other players see too. Aimed, its dot shows on the middle of the screen.
+- Record: [guns.md, slice 9E](docs/features/guns.md#slice-9e-the-tactical-grip-and-the-laser-sight).
+
 ### Unmerged: Guns, slice 9D (the pump shotguns)
 - **Three steel shotguns** loaded a shell at a time, each the owner's model, art and animations, firing eight pellets a shot from Buckshot Shells:
   - the **Sledge** (the owner's Killer 23), a heavy pump shotgun with a bird's-head grip: 4 a pellet, four shells, 24 blocks;

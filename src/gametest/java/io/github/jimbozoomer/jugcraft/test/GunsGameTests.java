@@ -63,7 +63,7 @@ public class GunsGameTests {
 		});
 		helper.assertTrue(JugcraftGuns.GUNS.size() == 36 && JugcraftGuns.ROUNDS.size() == 4, "Not thirty-six guns and four rounds");
 		helper.assertTrue(JugcraftGuns.ATTACHMENT_ITEMS.keySet().equals(JugcraftGuns.ATTACHMENTS.keySet())
-				&& JugcraftGuns.ATTACHMENTS.size() == 18, "Not eighteen attachments, each with its item");
+				&& JugcraftGuns.ATTACHMENTS.size() == 20, "Not twenty attachments, each with its item");
 		JugcraftGuns.ACCEPTS.forEach((gun, takes) -> helper.assertTrue(JugcraftGuns.GUNS.containsKey(gun)
 				&& JugcraftGuns.ATTACHMENTS.keySet().containsAll(takes), gun + " takes an unknown attachment"));
 		helper.succeed();

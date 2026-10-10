@@ -89,6 +89,7 @@ public final class GunLooks {
 		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));
+		OPTICS.put("laser_sight", new Optic(0.9F, null, null, "red_dot_reticle"));
 	}
 
 	private GunLooks() {
