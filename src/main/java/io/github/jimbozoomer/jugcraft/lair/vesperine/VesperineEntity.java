@@ -1083,7 +1083,7 @@ public class VesperineEntity extends Monster implements GeoEntity {
 	/** Turns her lair's moon red (or pale again). */
 	private void moon(ServerLevel level, boolean red) {
 		LairInstance open = lairInstance(level);
-		if (open == null) {
+		if (open == null || open.lair.moon == null) {
 			return;
 		}
 		BlockPos centre = open.origin().offset(open.lair.moon);

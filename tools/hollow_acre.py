@@ -16,19 +16,16 @@ top soil at SURFACE):
 The moon is not in the template: Lairs places it, MOON_RADIUS across, north of the island (MOON), so the fight can turn
 it red.
 
-Format: 26.3's, as tools/retro_game_shop.py's (palette entries {"id", "properties"}, DataVersion 26.3's). Jugcraft
-blocks' states are checked against their blockstate files as the template is written; vanilla blocks use only
-properties they have had for years. Deterministic: the same file every run.
+Format: tools/lair_layout.py's (26.3's). Jugcraft blocks' states are checked against their blockstate files as the
+template is written; vanilla blocks use only properties they have had for years. Deterministic: the same file every run.
 """
 import json
 import math
-from pathlib import Path
 
-from retro_game_shop import DATA_VERSION, nbt_bytes
 import graveyard
+import lair_layout
+from lair_layout import ROOT, block, hash01 as _hash
 
-ROOT = Path(__file__).resolve().parents[1]
-BLOCKSTATES = ROOT / "src" / "main" / "resources" / "assets" / "jugcraft" / "blockstates"
 BUILDINGS = ROOT / "src" / "main" / "resources" / "jugcraft" / "graveyard_buildings.json"
 TEMPLATE = "lair/hollow_acre"
 
@@ -58,35 +55,6 @@ BRAZIERS = WARDS + [(10, SURFACE + 1, 36), (53, SURFACE + 1, 36), (27, SURFACE +
 
 # ---------------------------------------------------------------- states
 
-def _jugcraft_properties(block):
-    """The properties and values a Jugcraft block's blockstate file uses."""
-    data = json.loads((BLOCKSTATES / f"{block}.json").read_text(encoding="utf-8"))
-    found = {}
-    if "variants" in data:
-        for key in data["variants"]:
-            for pair in filter(None, key.split(",")):
-                name, value = pair.split("=")
-                found.setdefault(name, set()).add(value)
-    for part in data.get("multipart", []):
-        for when in [part.get("when", {})] + part.get("when", {}).get("OR", []):
-            for name, value in when.items():
-                if name not in ("OR", "AND"):
-                    found.setdefault(name, set()).update(str(value).split("|"))
-    return found
-
-
-def block(name, **properties):
-    """A palette entry. Jugcraft blocks are checked against their blockstate files, so a renamed property fails here."""
-    props = {key: str(value).lower() for key, value in properties.items()}
-    if name.startswith("jugcraft:") and name[9:] not in LAIR_ONLY:
-        known = _jugcraft_properties(name[9:])
-        for key, value in props.items():
-            if key not in known or value not in known[key]:
-                raise ValueError(f"{name}: no {key}={value} in its blockstate ({sorted(known)})")
-    return name, tuple(sorted(props.items()))
-
-
-LAIR_ONLY = {"blighted_soil", "black_wheat", "mown_stubble", "lair_brazier", "lair_moon", "lair_exit"}
 SOIL = block("jugcraft:blighted_soil")
 WHEAT = block("jugcraft:black_wheat")
 STUBBLE = block("jugcraft:mown_stubble")
@@ -106,16 +74,6 @@ GLASS_RED = block("minecraft:red_stained_glass")
 GLASS_PURPLE = block("minecraft:purple_stained_glass")
 COBWEB = block("minecraft:cobweb")
 DEAD_BUSH = block("minecraft:dead_bush")
-
-
-def _hash(*values):
-    """A deterministic 0..1 for a position and a salt."""
-    h = 2166136261
-    for v in values:
-        h = ((h ^ (int(v) & 0xFFFFFFFF)) * 16777619) & 0xFFFFFFFF
-    h ^= h >> 13
-    h = (h * 1274126177) & 0xFFFFFFFF
-    return (h ^ (h >> 16)) / 0xFFFFFFFF
 
 
 # ---------------------------------------------------------------- the island
@@ -306,21 +264,11 @@ def lych_gate(put):
 
 
 def template():
-    blocks = build()
-    palette = sorted(set(blocks.values()))
-    index = {state: i for i, state in enumerate(palette)}
-    return {
-        "DataVersion": DATA_VERSION,
-        "size": list(SIZE),
-        "palette": [{"id": name, **({"properties": dict(props)} if props else {})} for name, props in palette],
-        "blocks": [{"pos": list(pos), "state": index[blocks[pos]]} for pos in sorted(blocks)],
-        "entities": [],
-    }
+    return lair_layout.template(build(), SIZE)
 
 
 def write(path):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(nbt_bytes(template()))
+    lair_layout.write(path, template())
 
 
 if __name__ == "__main__":

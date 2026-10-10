@@ -64,6 +64,8 @@ public final class Lairs {
 	private static final Map<Lair, LairInstance[]> INSTANCES = new EnumMap<>(Lair.class);
 	/** What each lair calls up as an instance is placed (its boss). */
 	private static final Map<Lair, List<BiConsumer<ServerLevel, LairInstance>>> PLACED = new EnumMap<>(Lair.class);
+	/** What each lair puts right as an instance closes (the Cursed Spindle's wheel stops spinning wild). */
+	private static final Map<Lair, List<BiConsumer<MinecraftServer, LairInstance>>> CLOSED = new EnumMap<>(Lair.class);
 	public static AttachmentType<LairVisit> VISIT;
 	public static AttachmentType<GraveGoods> GRAVE_GOODS;
 
@@ -133,6 +135,11 @@ public final class Lairs {
 	/** Calls {@code hook} for each instance of {@code lair} as it is placed (a boss seats itself). */
 	public static void onPlaced(Lair lair, BiConsumer<ServerLevel, LairInstance> hook) {
 		PLACED.computeIfAbsent(lair, l -> new ArrayList<>()).add(hook);
+	}
+
+	/** Calls {@code hook} for each instance of {@code lair} as it closes (its ritual's gate shuts). */
+	public static void onClosed(Lair lair, BiConsumer<MinecraftServer, LairInstance> hook) {
+		CLOSED.computeIfAbsent(lair, l -> new ArrayList<>()).add(hook);
 	}
 
 	// ---------------------------------------------------------------- instances
@@ -222,7 +229,8 @@ public final class Lairs {
 
 	/**
 	 * Puts the lair's template into the instance's slot, as it was made: anything left lying there (items, a straggling
-	 * creature) is cleared first, and the moon hung north of the island. Shapes are taken as the template has them.
+	 * creature) is cleared first, and the moon hung north of the island (in a lair that has one). Shapes are taken as the
+	 * template has them.
 	 */
 	static boolean place(ServerLevel level, LairInstance instance) {
 		Lair lair = instance.lair;
@@ -236,6 +244,9 @@ public final class Lairs {
 		}
 		StructurePlaceSettings settings = new StructurePlaceSettings().setKnownShape(true);
 		template.placeInWorld(level, origin, origin, settings, level.getRandom(), Block.UPDATE_CLIENTS);
+		if (lair.moon == null) {
+			return true;
+		}
 		BlockState moon = JugcraftLairs.LAIR_MOON.defaultBlockState();
 		BlockPos centre = origin.offset(lair.moon);
 		int r = lair.moonRadius;
@@ -269,6 +280,9 @@ public final class Lairs {
 			if (instance.gate != null && any.getEntity(instance.gate) instanceof MistGateEntity gate) {
 				gate.discard();
 			}
+		}
+		for (BiConsumer<MinecraftServer, LairInstance> hook : CLOSED.getOrDefault(instance.lair, List.of())) {
+			hook.accept(server, instance);
 		}
 	}
 
@@ -304,7 +318,7 @@ public final class Lairs {
 		player.teleportTo(level, at.x, at.y, at.z, Set.of(), instance.lair.arrivalYaw, 0.0F, true);
 		player.resetFallDistance();
 		restrict(player);
-		player.sendSystemMessage(Component.translatable("message.jugcraft.lair.enter", name));
+		player.sendSystemMessage(Component.translatable("message.jugcraft.lair.enter." + instance.lair.id, name));
 		return true;
 	}
 

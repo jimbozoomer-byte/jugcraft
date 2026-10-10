@@ -9,6 +9,19 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
 
+### Unmerged: The Spindle Loft and the Cursed Spindle (boss 2, part 1)
+- **The Cursed Spindle** (two gold ingots, an amethyst shard, two spider eyes, three string and a stick) opens the Spindle Loft:
+  - use it on a **Spinning Wheel** at night in the Overworld. You prick your finger, fall asleep and wake on the loft's pincushion, blind for a moment. The spindle is used up;
+  - for 60 seconds the wheel spins wild, and anyone who uses it with an empty hand follows;
+  - by day, out of season, on a wheel already spinning or with every loft taken, it says why and is kept.
+- **The Spindle Loft** is a colossal sewing room's attic seen at a spider's size:
+  - a tomato pincushion stuck with pins taller than a house, where you arrive, with Grey Mist in a needle's eye beside you as the way home;
+  - a measuring tape sloping down to a lace doily 41 blocks across, hung over darkness between four giant thread spools;
+  - a thimble and the blades of a pair of shears beside the doily;
+  - threads up to the rafters, a grimy skylight, and the Spider's Larder's cocoons and egg sacs.
+- Twelve lair-only blocks: unbreakable, no items, no drops.
+- The lair framework now takes a second lair: a lair with no moon, hooks run as an instance closes, and words for coming into each lair. Record: [spindle-loft.md](docs/features/spindle-loft.md).
+
 ### Unmerged: Vesperine, the Last Reaper (boss 1, part 2)
 - **Vesperine** waits on the Bone Throne of every Hollow Acre and rises when a player steps into the Mown Circle. She has 400 health, scaled up for a party.
 - **Her skulls, Dirge and Requiem**, halve every blow she takes while both live. They fire homing Grief Bolts that a player can strike back.
