@@ -424,6 +424,11 @@ def write_all(write, assets, data, lang, condition):
     import arms_variants  # batch 56: each variant joins its kind's tags
     for tag, values in arms_variants.item_tags().items():
         by_tag.setdefault(tag, []).extend(values)
+    # One writer owns shared vanilla equipment tags. The later kitchen tag pass
+    # must not replace every mace, shield and variant with only its knives.
+    from kitchen import KNIVES
+    for tag in ("enchantable/melee_weapon", "enchantable/durability"):
+        by_tag.setdefault(tag, []).extend(f"{MOD}:{knife}" for knife in KNIVES)
     for tag, values in by_tag.items():
         write(tags / f"{tag}.json", {"replace": False, "values": values})
     for tier, info in GEAR_TIERS.items():

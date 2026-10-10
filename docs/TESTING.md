@@ -10,7 +10,7 @@ Game tests run in the Build workflow too. The `mod` job's `./gradlew build` runs
   - Docs, Markdown, `tools/` and `scripts/`, the art sources in `art/`, data, the language file, the optional resource packs, unit tests and `.claude/` pick nothing. The generators' output is committed and judged as the files it writes.
   - A model, blockstate or texture picks the classes that name its ID.
   - A Java class picks the classes that show it, and the classes that show the Jugcraft classes using it. A class only gaining code picks by the names and IDs it gained, such as a registry registering a new feature.
-  - A class that a quarter of the classes or more show, such as the registries `JugcraftAgriculture` and `Jugcraft`, picks by the names and IDs on the lines it lost or gained. Changing a registry's corn line runs the corn tests, not every test that reaches a block through it.
+  - A class that a quarter of the classes or more show, such as the registries `JugcraftAgriculture` and `Jugcraft`, picks by the names and IDs on the lines it lost or gained. Changing a registry's corn line selects the corn tests. If changed lines identify no feature, retain the known consumer tests instead of selecting zero.
   - Build files, the workflow, mixins and the test mod's helpers run every class.
   - The job's log says why each file picked what it did.
 - **`main` (after each merge) and a manual run of the Build workflow run every class.** Run it on a branch from the Actions tab ("Run workflow") to test a pull request in full.

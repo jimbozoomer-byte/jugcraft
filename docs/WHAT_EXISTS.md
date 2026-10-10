@@ -10,15 +10,13 @@ A map of everything built so far, written for AI agents and contributors who nee
 
 The [framework foundation](features/framework-foundation.md) provides pinned animation, spellcasting, UI, texture, and creature libraries. Consult its individual verification status; being on the classpath is not a claim that existing content uses the library. The optional Jade adapter adds server-backed energy and progress text for the shared machine implementation.
 
-> **Status.** Everything here compiles and loads in CI. Where a feature has an automated game test, that test passes on a headless server. Nothing has been play-tested in a client or on a dedicated server with two players yet.
->
-> This document describes `main` after PRs #4–#36 (the conveyors and powered tools of #38 and #40 are not described here yet), plus the Agriculture branch's Fall Harvest, Kitchen Garden, Festival Crops, pumpkin carving, Halloween harvest, the pumpkin regatta and trick-or-treating, the Halloween festivities, Halloween nights, the thirty Halloween decorations, and more Halloween: the haunted house inside, the mad scientist and monsters, the yard and porch, lighting and glow, party games, night events, treats, and costumes; and the fall additions: the chandlery, the cider mill, the preserves pantry, crows and working scarecrows, spooky fireworks, the sky lantern festival, the Harvest Feast Table, the corn maze, ghost hunting, and face paint; and the more fall additions: the candy kitchen, autumn foraging, the Bat House, the Hay Golem, knitting, pie baking, the Spirit Board, wild turkeys, the theremin and the Día de Muertos ofrenda; and the graveyard pack's headstones, monuments, buildings and grounds, its flora, the churchyard's ornaments, the haunted house's props, the Witch's Workshop, the Crypt and the Ossuary, the Laboratory, the Larder and the Dining Room, and Pumpkin Night; and, of the even more fall additions, hex brews, the flying broomstick, full-moon werewolves, squirrels and acorns, and the Pumpkling. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
+> **Status.** This is a source/API reference that has grown across many feature branches. Use [the implementation status](INTEGRATION_STATUS.md) for the current integration scope, remaining work and verification boundaries. Automated server and rendered-client tests exist; a public-server readiness claim still requires representative multiplayer and load testing. Historical branch descriptions below are not a guarantee that every feature is finished.
 
 ## Quick facts
 
 | | |
 | --- | --- |
-| Platform | Minecraft Java 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Loom 1.17, JDK 25 (pins in [PLATFORM.md](PLATFORM.md); do not change them without a platform PR) |
+| Platform | Minecraft Java 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, Loom 1.17, JDK 25 (pins in [PLATFORM.md](PLATFORM.md); do not change them without a platform PR) |
 | Mod ID / namespace | `jugcraft` (`Jugcraft.MOD_ID`, `Jugcraft.id(path)`) |
 | Java package | `io.github.jimbozoomer.jugcraft` |
 | Mappings | Mojang names (e.g. `Identifier`, `BlockEntity`, `AbstractContainerMenu`) |

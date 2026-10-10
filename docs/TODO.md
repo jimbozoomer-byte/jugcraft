@@ -2,6 +2,15 @@
 
 This list tracks concrete owner-requested follow-ups. An unchecked task is planned work, not implemented gameplay. See the [roadmap](ROADMAP.md) for the wider delivery direction and [existing-content map](WHAT_EXISTS.md) for current source. Feature details and dependencies belong in their linked briefs.
 
+See the [organized implementation and next-work index](INTEGRATION_STATUS.md) for the current integration and priorities.
+
+## Ars Goetia summoning and pacts
+
+- [ ] Implement a shared summoning and pact system for all 72 Ars Goetia spirits, including Stolas.
+- [ ] Begin with Stolas connected to Styx, botany, astronomy and minerals; expand through shared definitions and server-authoritative costs, permissions and persistence.
+
+This is future gameplay, as recorded in the [roadmap](ROADMAP.md#owner-requested-todo-ars-goetia-summoning-and-pacts).
+
 ## Jugcraft Encyclopedia
 
 Owner-requested 6 October 2026. Independent feature brief: [Jugcraft Encyclopedia](features/jugcraft-encyclopedia.md). All ten supplied screenshots are included in the [reference gallery](#reference-gallery) below and archived in the [reference folder](images/jugcraft-encyclopedia/README.md).

@@ -2,7 +2,7 @@
 
 A community-built Minecraft Java 26.3 + Fabric experience about factories, magical workshops, cozy homes, and dangerous frontiers.
 
-**Status: early development.** The Minecraft 26.3 + Fabric mod compiles in CI and contains the base materials, electricity and first machines, but it has not been play-tested yet. Feature proposals and documentation contributions are welcome.
+**Status: active alpha development.** Jugcraft includes factories, magic, agriculture, world content and automated server/client tests. See the [implementation status and next-work checklist](docs/INTEGRATION_STATUS.md) for the current integration, outstanding playtests and owner decisions.
 
 ## The vision
 

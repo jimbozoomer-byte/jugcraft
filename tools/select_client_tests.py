@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Choose which client game test classes a change needs, and share them out between CI's client jobs.
 
-The client game tests start a real game and photograph showrooms, which takes each of CI's three client jobs 20 to 30
+The client game tests start a real game and photograph showrooms, which takes each of CI's four client jobs 20 to 30
 minutes when every class runs. Most pull requests change a few blocks, so a pull request runs only the classes that
 show what it changed; main and a manual run of the Build workflow run them all (docs/TESTING.md).
 

@@ -637,5 +637,27 @@ def worldgen(data, write):
     werewolf_data.worldgen(data, write)
     rice_data.worldgen(data, write)
     orchard_data.worldgen(data, write)
-
+    spice_data.worldgen(data, write)
+    spread = WILD_PATCH["spread_xz"]
+    for wild in WILD_CROPS:
+        write(data / MOD / "worldgen" / "feature" / f"{wild}.json",
+              {"type": "minecraft:simple_block", "to_place": {"id": rid(wild)}})
+        write(data / MOD / "worldgen" / "placed_feature" / f"patch_{wild}.json", {
+            "feature": rid(wild),
+            "placement": [
+                {"type": "minecraft:rarity_filter", "chance": WILD_PATCH["rarity"]},
+                {"type": "minecraft:in_square"},
+                {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"},
+                {"type": "minecraft:biome"},
+                {"type": "minecraft:count", "count": WILD_PATCH["tries"]},
+                {"type": "minecraft:offset",
+                 "x": {"type": "minecraft:trapezoid", "max": spread, "min": -spread, "plateau": 0},
+                 "y": {"type": "minecraft:trapezoid", "max": WILD_PATCH["spread_y"], "min": -WILD_PATCH["spread_y"], "plateau": 0},
+                 "z": {"type": "minecraft:trapezoid", "max": spread, "min": -spread, "plateau": 0}},
+                {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
+                    {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+                    {"type": "minecraft:matching_blocks", "blocks": "minecraft:grass_block", "offset": [0, -1, 0]},
+                ]}},
+            ],
+        })
     lair_data.worldgen(data, write)

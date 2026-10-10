@@ -603,6 +603,14 @@ DIAGONAL_WALLS = {dg.DIAGONAL_WALL.format(name) for _, name in dg.all_walls()}
 
 
 def check_tags():
+    # Shared generation must retain both kitchen tools and combat equipment.
+    from kitchen import KNIVES
+    for tag in ("enchantable/melee_weapon", "enchantable/durability"):
+        actual = set((load(DATA / "minecraft" / "tags" / "item" / f"{tag}.json") or {}).get("values", []))
+        expected = set(arms.item_tags().get(tag, [])) | set(arms_variants.item_tags().get(tag, []))
+        expected.update(f"{MOD}:{knife}" for knife in KNIVES)
+        if missing := expected - actual:
+            err(f"{tag}: shared equipment entries were overwritten: {sorted(missing)}")
     for path in sorted(DATA.rglob("tags/*/**/*.json")):
         registry = path.relative_to(DATA).parts[2]
         known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
@@ -3220,6 +3228,11 @@ def check_agriculture():
         err(f"JugcraftAgriculture.java sickles {sickles} differ from tools/agriculture.py")
     if re.findall(r'\bwild\("([a-z_]+)"\)', main) != list(ag.WILD_CROPS):
         err("JugcraftAgriculture.java wild plants differ from tools/agriculture.py")
+    for wild in ag.WILD_CROPS:
+        feature = DATA / MOD / "worldgen" / "feature" / f"{wild}.json"
+        patch = DATA / MOD / "worldgen" / "placed_feature" / f"patch_{wild}.json"
+        if not feature.is_file() or not patch.is_file():
+            err(f"{wild}: registered wild crop must retain its generated feature and placed patch")
     patches = {name: re.findall(r"ConventionalBiomeTags\.(\w+)", biomes)
                for name, biomes in re.findall(r'wildPatch\("([a-z_]+)", ([^;]*)\);', main)}
     expected = {name: info["biomes"] for name, info in ag.WILD_CROPS.items()}
