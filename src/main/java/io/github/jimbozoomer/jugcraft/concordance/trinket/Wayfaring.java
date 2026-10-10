@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -37,6 +38,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
@@ -45,6 +47,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -62,8 +65,8 @@ import org.jspecify.annotations.Nullable;
  * <li>The Angelheart Vial and the Phoenix Down answer a blow that would kill ({@link #save}), before a dream ends for it
  * and before a held totem's turn.</li>
  * <li>The Amphibian Boot and the Ice Breaker are worn on the feet; a fall that hurts an Ice Breaker's wearer sends a wave
- * through the ground ({@link #wave}), through the shared effect boundary, so PvP, parties, claims and tolerance all
- * apply.</li>
+ * through the ground ({@link #wave}) at hostile creatures only, through the shared effect boundary (which lets anyone
+ * fight them; its tolerance tags still make a few immune).</li>
  * </ul>
  * Nothing here ticks: the attributes are Trinkets modifiers, and the rest answers three damage events. With the
  * Concordance switched off the items, slots and modifiers stay, but nothing answers the events.
@@ -76,8 +79,13 @@ public final class Wayfaring {
 	/** Charm slots without a belt, and how many a worn Leather Belt adds. */
 	public static final int CHARM_SLOTS = 1;
 	public static final int BELT_CHARM_SLOTS = 1;
-	/** Exhaustion each point of harm a charm takes from food costs (vanilla: 4 is one point of saturation or food). */
+	/** Exhaustion each point of harm a charm takes from food costs (vanilla: 4 is one point of food). */
 	public static final float ABSORB_EXHAUSTION = 2.0F;
+	/**
+	 * Ticks after a charm takes a blow in which a further blow costs only what it is bigger by: vanilla's hurt cooldown,
+	 * which a blow the charm takes never starts (fire and hot floors try to hurt every tick).
+	 */
+	public static final int ABSORB_COOLDOWN_TICKS = 10;
 	/** Attribute modifiers while worn (added values). */
 	public static final double FEATHER_JUMP = 0.03;
 	public static final double AMPHIBIAN_SWIM = 0.5;
@@ -121,6 +129,14 @@ public final class Wayfaring {
 			EffectSpec.of(EffectKind.MOVEMENT, Intent.HARMFUL, WAVE_PUSH, 0),
 			new EffectSpec(EffectKind.STATUS, Intent.HARMFUL, 0, WAVE_SLOW_TICKS, "minecraft:slowness", Stacking.STRONGEST, null));
 	private static final Map<String, List<ResourceKey<DamageType>>> ABSORBED = new LinkedHashMap<>();
+	/** Vanilla's tag of harm its hurt cooldown lets through (named by id: the 26.3 constant is not used elsewhere here). */
+	private static final TagKey<DamageType> BYPASSES_COOLDOWN = TagKey.create(Registries.DAMAGE_TYPE,
+			Identifier.withDefaultNamespace("bypasses_cooldown"));
+	/** The last blow each player's charm took, for the cooldown (server thread only; forgotten with the player). */
+	private static final Map<ServerPlayer, Taken> TAKEN = new WeakHashMap<>();
+
+	private record Taken(long tick, float amount) {
+	}
 
 	/** The Charm slot count attribute (trinkets:slot_count/legs/charm). */
 	public static Holder<Attribute> CHARM_SLOT_COUNT;
@@ -188,9 +204,9 @@ public final class Wayfaring {
 	}
 
 	/**
-	 * Whether a worn charm takes this harm from {@code player}'s food instead: falling for the feather (and the down),
-	 * drowning for the shell, fire but not lava for the claws. Only while the food bar is not empty, and only once Relic
-	 * Lore is understood. The harm is paid in exhaustion, point for point.
+	 * Whether a worn charm covers this harm to {@code player}: falling for the feather (and the down), drowning for the
+	 * shell, fire but not lava for the claws. Only while the food bar is not empty, and only once Relic Lore is
+	 * understood. Whether the bar can pay for a blow is {@link #absorb}'s to say.
 	 */
 	public static boolean absorbs(ServerPlayer player, DamageSource source) {
 		if (player.getFoodData().getFoodLevel() <= 0 || !Reliquary.enabled() || !Reliquary.knows(player)) {
@@ -204,12 +220,35 @@ public final class Wayfaring {
 		return false;
 	}
 
-	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
-		if (amount <= 0.0F || !(entity instanceof ServerPlayer player) || !absorbs(player, source)) {
-			return true;
+	/**
+	 * Takes a blow of {@code amount} harm (before armour) from {@code player}'s food instead of their health, if a worn
+	 * charm covers it and the food bar can pay: {@link #ABSORB_EXHAUSTION} a point, whole food points straight from the
+	 * bar and the rest as exhaustion. Within {@link #ABSORB_COOLDOWN_TICKS} of a blow it took, a blow costs only what it is
+	 * bigger by, as vanilla's hurt cooldown would let through. A blow the bar cannot pay for lands in full. Returns whether
+	 * the blow was taken.
+	 */
+	public static boolean absorb(ServerPlayer player, DamageSource source, float amount) {
+		if (amount <= 0.0F || !absorbs(player, source)) {
+			return false;
 		}
-		player.causeFoodExhaustion(amount * ABSORB_EXHAUSTION);
-		return false;
+		long now = player.level().getGameTime();
+		Taken last = TAKEN.get(player);
+		boolean cooling = last != null && now >= last.tick() && now - last.tick() < ABSORB_COOLDOWN_TICKS
+				&& !source.is(BYPASSES_COOLDOWN);
+		float exhaustion = (cooling ? Math.max(0.0F, amount - last.amount()) : amount) * ABSORB_EXHAUSTION;
+		int points = (int) (exhaustion / 4.0F);
+		FoodData food = player.getFoodData();
+		if (points > food.getFoodLevel()) {
+			return false;
+		}
+		food.setFoodLevel(food.getFoodLevel() - points);
+		player.causeFoodExhaustion(exhaustion - points * 4.0F);
+		TAKEN.put(player, cooling ? new Taken(last.tick(), Math.max(amount, last.amount())) : new Taken(now, amount));
+		return true;
+	}
+
+	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
+		return !(entity instanceof ServerPlayer player) || !absorb(player, source, amount);
 	}
 
 	/**

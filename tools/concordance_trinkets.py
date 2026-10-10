@@ -43,9 +43,13 @@ BELT_CHARM_SLOTS = 1
 # The owner's feet slot holds two.
 FEET_SLOTS = 2
 # Exhaustion each point of harm a charm takes from food instead of health costs (vanilla: 4 exhaustion is one point of
-# saturation or food). A 10-block fall's 7 harm costs 3.5 points; standing in fire, about one a second. Nothing is taken
-# while the food bar is empty: the harm then lands as it would.
+# food): half a food point a point of harm, before armour. Whole points come straight off the food bar, the rest as
+# exhaustion (which saturation pays first). A 10-block fall's 7 harm costs 3.5 points. A blow the bar cannot pay for
+# lands in full. A blow the charm takes never starts vanilla's hurt cooldown, so the charm keeps its own: within
+# ABSORB_COOLDOWN_TICKS of a blow it took, a blow costs only what it is bigger by (fire and hot floors try to hurt every
+# tick; standing in fire costs about a point a second, as often as it would land).
 ABSORB_EXHAUSTION = 2.0
+ABSORB_COOLDOWN_TICKS = 10
 # Attribute modifiers (added values) while worn where Trinkets applies effects. Jump strength: the feather's jump from
 # about 1.25 blocks to 1.42, still short of a fence. Oxygen bonus: one more chance in two of keeping a breath.
 FEATHER_JUMP = 0.03
@@ -124,7 +128,7 @@ ABSORBS = {
     "infernal_claws": ["minecraft:in_fire", "minecraft:on_fire", "minecraft:campfire", "minecraft:hot_floor"],
 }
 
-_FOOD = f"while you have food, at {ABSORB_EXHAUSTION / 4:g} food or saturation a point"
+_FOOD = f"while your food bar can pay, {ABSORB_EXHAUSTION / 4:g} food a point"
 ITEMS = {
     "leather_belt": {
         "name": "Leather Belt",
@@ -235,8 +239,9 @@ def codex():
                 ("crafting_recipe", "Leather Belt",
                  "One more Charm slot. Take the second charm off before the belt.", rid("leather_belt")),
                 ("crafting_recipe", "Angelic Feather",
-                 f"A fall's harm comes from your food instead of your health, at {ABSORB_EXHAUSTION / 4:g} food or "
-                 "saturation a point, and you jump a little higher. With an empty food bar the fall hurts as ever.",
+                 f"A fall's harm comes from your food instead of your health, at {ABSORB_EXHAUSTION / 4:g} food a point "
+                 "(blows in quick succession are paid once), and you jump a little higher. A fall your food bar cannot "
+                 "pay for hurts as ever.",
                  rid("angelic_feather")),
                 ("crafting_recipe", "Kraken Shell", "The same for drowning.", rid("kraken_shell")),
                 ("crafting_recipe", "Infernal Claws", "The same for fire and hot floors, not lava.", rid("infernal_claws")),
@@ -249,12 +254,14 @@ def codex():
                  f"at full health, healing and proof against fire for {PHOENIX_REGENERATION_TICKS // 20} seconds, and "
                  "the down becomes an Angelic Feather where it was worn. Until then it is a feather as well. A vial "
                  "worn beside it answers first."),
+                ("crafting_recipe", "Phoenix Down", "Three Angelheart Vials and an Angelic Feather.", rid("phoenix_down")),
                 ("crafting_recipe", "Amphibian Boot", "You swim faster, and your air lasts about twice as long.",
                  rid("amphibian_boot")),
                 ("crafting_recipe", "Ice Breaker",
                  f"A little knockback resistance. A fall that hurts you sends a wave through the ground: up to "
                  f"{WAVE_TARGETS} hostile creatures within {WAVE_RADIUS:g} blocks (more for a harder fall, at most "
-                 f"{WAVE_MAX_RADIUS:g}) are harmed, thrown back and slowed, wherever you may harm them.",
+                 f"{WAVE_MAX_RADIUS:g}) are harmed, thrown back and slowed. The few foes no magic touches, such as the "
+                 "Warden, are spared.",
                  rid("ice_breaker")),
             ],
         },

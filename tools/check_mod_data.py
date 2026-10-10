@@ -9060,7 +9060,8 @@ def check_wayfaring(co, root, lang):
         return path.read_text(encoding="utf-8") if path.exists() else ""
     way, worn = text(root / "trinket" / "Wayfaring.java"), text(root / "trinket" / "WornTrinketItem.java")
     numbers = {"CHARM_SLOTS": ("int", tr.CHARM_SLOTS), "BELT_CHARM_SLOTS": ("int", tr.BELT_CHARM_SLOTS),
-               "ABSORB_EXHAUSTION": ("float", f"{tr.ABSORB_EXHAUSTION}F"), "FEATHER_JUMP": ("double", tr.FEATHER_JUMP),
+               "ABSORB_EXHAUSTION": ("float", f"{tr.ABSORB_EXHAUSTION}F"), "ABSORB_COOLDOWN_TICKS": ("int", tr.ABSORB_COOLDOWN_TICKS),
+               "FEATHER_JUMP": ("double", tr.FEATHER_JUMP),
                "AMPHIBIAN_SWIM": ("double", tr.AMPHIBIAN_SWIM), "AMPHIBIAN_OXYGEN": ("double", tr.AMPHIBIAN_OXYGEN),
                "ICE_BREAKER_KNOCKBACK": ("double", tr.ICE_BREAKER_KNOCKBACK), "WAVE_RADIUS": ("double", tr.WAVE_RADIUS),
                "WAVE_RADIUS_PER_HARM": ("double", tr.WAVE_RADIUS_PER_HARM), "WAVE_MAX_RADIUS": ("double", tr.WAVE_MAX_RADIUS),
@@ -9107,8 +9108,19 @@ def check_wayfaring(co, root, lang):
             "(never by slot: two of a kind would add up), never the item's own")
     if "return entity instanceof Player player && Reliquary.knows(player);" not in worn:
         err("concordance/trinket/WornTrinketItem.java: only someone who understands Relic Lore may put one on (canEquip)")
-    if "holdsAddedCharm(entity)" not in worn or "TrinketCallback.super.canUnequip(stack, slot, entity)" not in worn:
-        err("concordance/trinket/WornTrinketItem.java: a belt keeps its added charm (canUnequip), and Curse of Binding still holds")
+    if ("holdsAddedCharm(entity)" not in worn or "slot.get() == stack" not in worn
+            or "TrinketCallback.super.canUnequip(stack, slot, entity)" not in worn):
+        err("concordance/trinket/WornTrinketItem.java: the worn belt (not a cosmetic one) keeps its added charm (canUnequip), "
+            "and Curse of Binding still holds")
+    if "slot.cosmetic() ? TrinketDropRule.KEEP" not in worn:
+        err("concordance/trinket/WornTrinketItem.java: a cosmetic copy stays through death (Trinkets would drop it and keep it)")
+    absorb = way[way.find("public static boolean absorb("):way.find("private static boolean allowDamage(")]
+    if ("ABSORB_COOLDOWN_TICKS" not in absorb or "if (points > food.getFoodLevel())" not in absorb
+            or "causeFoodExhaustion(exhaustion - points * 4.0F)" not in absorb or "TAKEN.put(" not in absorb):
+        err("concordance/trinket/Wayfaring.java: a charm takes only a blow the food bar can pay for (whole points from the "
+            "bar, the rest as exhaustion, which vanilla caps), and keeps vanilla's hurt cooldown, which its blows never start")
+    if "return !(entity instanceof ServerPlayer player) || !absorb(player, source, amount);" not in way:
+        err("concordance/trinket/Wayfaring.java: ALLOW_DAMAGE must refuse a blow only when absorb() took it")
     if ".attributes(" in way or "ATTRIBUTE_MODIFIERS" in way:
         err("concordance/trinket/Wayfaring.java: a worn item carries no attribute modifiers of its own (they would count in the hand)")
     if "SlotAttributes.createAttributeForSlot(CHARM_SLOT)" not in way:

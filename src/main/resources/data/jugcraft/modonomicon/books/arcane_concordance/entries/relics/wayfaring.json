@@ -69,15 +69,22 @@
       "type": "modonomicon:crafting_recipe",
       "id": "p7",
       "title1": "book.jugcraft.arcane_concordance.relics.wayfaring.p7.title",
-      "recipe_id_1": "jugcraft:amphibian_boot",
+      "recipe_id_1": "jugcraft:phoenix_down",
       "text": "book.jugcraft.arcane_concordance.relics.wayfaring.p7.text"
     },
     {
       "type": "modonomicon:crafting_recipe",
       "id": "p8",
       "title1": "book.jugcraft.arcane_concordance.relics.wayfaring.p8.title",
-      "recipe_id_1": "jugcraft:ice_breaker",
+      "recipe_id_1": "jugcraft:amphibian_boot",
       "text": "book.jugcraft.arcane_concordance.relics.wayfaring.p8.text"
+    },
+    {
+      "type": "modonomicon:crafting_recipe",
+      "id": "p9",
+      "title1": "book.jugcraft.arcane_concordance.relics.wayfaring.p9.title",
+      "recipe_id_1": "jugcraft:ice_breaker",
+      "text": "book.jugcraft.arcane_concordance.relics.wayfaring.p9.text"
     }
   ]
 }

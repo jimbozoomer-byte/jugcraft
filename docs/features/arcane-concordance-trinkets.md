@@ -22,13 +22,13 @@ effect are the owner's; the numbers are Jugcraft's.
 | Item | Worn in | What it does |
 |---|---|---|
 | **Leather Belt** | Belt | One more Charm slot. It cannot be taken off while that slot holds a charm. |
-| **Angelic Feather** | Charm | A fall's harm comes from your food instead of your health (half a point of food or saturation for each point of harm) while your food bar is not empty; and you jump a little higher (about 1.42 blocks instead of 1.25, still short of a fence). |
+| **Angelic Feather** | Charm | A fall's harm comes from your food instead of your health (half a food point for each point of harm, before armour) when your food bar can pay for it; and you jump a little higher (about 1.42 blocks instead of 1.25, still short of a fence). |
 | **Kraken Shell** | Charm | The same for drowning. |
 | **Infernal Claws** | Charm | The same for fire, burning and hot floors (magma blocks); not lava. |
 | **Angelheart Vial** | Charm | A blow that would kill you leaves you on 2 hearts with Regeneration II for 5 seconds. The vial is used up. |
 | **Phoenix Down** | Charm | A blow that would kill you leaves you at full health with Regeneration II and Fire Resistance for 10 seconds, and the down becomes an Angelic Feather where it was worn. Until then it is a feather as well (its fall and jump). |
 | **Amphibian Boot** | Feet | You swim faster (water movement +0.5, half of Depth Strider's most), and your air lasts about twice as long. |
-| **Ice Breaker** | Feet | +0.1 knockback resistance. A fall that hurts you sends a wave through the ground: the nearest hostile creatures (up to 12) within 3 blocks, a block more for each 4 points of harm (at most 6), take 2 damage, are thrown back and are slowed for 2 seconds, wherever you may harm them. |
+| **Ice Breaker** | Feet | +0.1 knockback resistance. A fall that hurts you sends a wave through the ground: the nearest hostile creatures (up to 12) within 3 blocks, a block more for each 4 points of harm (at most 6), take 2 damage, are thrown back and are slowed for 2 seconds (not the few the Concordance cannot touch, such as the Warden). |
 
 - Two of a kind never add up: a second feather, boot or Ice Breaker adds nothing, and a feather and a Phoenix Down jump as
   one. A second vial waits its turn for the next death; a vial worn beside a Phoenix Down answers first.
@@ -55,15 +55,19 @@ effect are the owner's; the numbers are Jugcraft's.
   - `Wayfaring` registers the items, the Charm slot's count attribute (`SlotAttributes.createAttributeForSlot`; the belt's
     modifier is +1 on it) and three listeners:
     - `ALLOW_DAMAGE`: a worn feather or down (plain fall damage), shell (drowning) or claws (`in_fire`, `on_fire`,
-      `campfire`, `hot_floor`) refuses the harm and charges the wearer `2 × harm` exhaustion, if the food bar is not
-      empty and Relic Lore is understood.
+      `campfire`, `hot_floor`) refuses the harm if Relic Lore is understood and the food bar can pay `2 × harm`
+      exhaustion: whole food points come straight off the bar (vanilla caps exhaustion at 40, so a big blow could not
+      be charged as exhaustion), the rest as exhaustion. A blow the charm refuses never starts vanilla's hurt cooldown
+      (that comes later in `hurtServer`), and fire and hot floors try to hurt every tick, so the charm keeps its own:
+      within 10 ticks of a blow it took, a blow costs only what it is bigger by (`Wayfaring.absorb`).
     - `ALLOW_DEATH`, in its own phase ordered before the default one: the death saves. Dreaming's listener runs in the
       default phase and ends an open dream as a death; only before it can a save see the dream and decline.
     - `AFTER_DAMAGE`: after a plain fall (`minecraft:fall`, not an ender pearl's landing) that hurt the wearer, on foot,
       the Ice Breaker's wave.
   - Everything the slice does to a creature goes through `ConcordanceEffects.apply` as an item's effect: the wave's harm,
-    throw and Slowness (so PvP, parties, claims, protected creatures and tolerance tags apply; only `Enemy` creatures are
-    chosen) and the saves' statuses on the wearer. What shows is the shared signs (`Signs.show`).
+    throw and Slowness, at `Enemy` creatures only (the boundary lets anyone fight them, whatever claims say; its
+    tolerance tags make the Ender Dragon, Wither, Warden and Elder Guardian immune), and the saves' statuses on the
+    wearer. What shows is the shared signs (`Signs.show`).
 - Client: nothing new. Trinkets draws the slots with the owner's icons (GUI sprites under
   `textures/gui/sprites/container/slots/`); the items are the owner's plain generated models.
 - Nothing ticks: the attributes are Trinkets modifiers and the rest answers damage events.
@@ -89,9 +93,10 @@ effect are the owner's; the numbers are Jugcraft's.
 
 - **Units.** Harm in health points; exhaustion as vanilla counts it (4 is a point of saturation or food); attributes as
   vanilla's added values; ticks.
-- **The charms' protection is paid in food**, point for point at half a food point per point of harm, and stops when the
-  bar is empty. A 10-block fall (7 harm) costs 3.5 points; standing in fire about a point a second; drowning about one
-  a second. The Free Runners and the charged Exosuit boots already prevent fall harm outright, from an armour slot.
+- **The charms' protection is paid in food**, at half a food point per point of harm before armour, and only for a blow
+  the bar can pay for in full (otherwise it lands, costing nothing). A 10-block fall (7 harm) costs 3.5 points;
+  standing in fire about a point a second (one blow every half second, as vanilla's hurt cooldown lets them land);
+  drowning about one a second. On Peaceful the food bar refills by itself, so there the charms cost nothing. The Free Runners and the charged Exosuit boots already prevent fall harm outright, from an armour slot.
 - **Death saves against the totem.** A Totem of Undying cannot be crafted; the vial can, so it does less: 2 hearts and 5
   seconds of Regeneration II (about 2 more hearts), against the totem's 1 health with 45 seconds of Regeneration II, 5 of
   Absorption II and 40 of Fire Resistance. Each costs a golden apple (8 gold). The Phoenix Down (3 vials) rises at full
@@ -109,11 +114,14 @@ effect are the owner's; the numbers are Jugcraft's.
 - Failure behaviour:
   - before Relic Lore: cannot be put on (an item put on by other means, such as a command, gives its attributes but
     answers no damage event);
-  - held, loose, in a container or (if a server enables them) in a cosmetic belt slot: nothing;
-  - the charms with an empty food bar: the harm lands; the claws against lava: the harm lands;
+  - held, loose or in a container: nothing. In a cosmetic belt slot (if a server enables Trinkets' cosmetic slots): no
+    Charm slot, and it stays with its wearer through death (Trinkets would otherwise drop a cosmetic stack and keep it
+    too); it can always be taken off;
+  - the charms against a blow the food bar cannot pay for, or with an empty bar: the harm lands; the claws against lava:
+    the harm lands;
   - the saves against the void, `/kill`, a held totem or a death in a dream: no save, nothing spent;
-  - the wave after an ender pearl, a fall that did no harm, from the saddle, or against a creature the wearer may not
-    harm (a villager, a claimed or protected creature): nothing;
+  - the wave after an ender pearl, a fall that did no harm, or from the saddle; on a creature that is not hostile (a
+    villager, an animal, another player) or one immune to the Concordance: nothing;
   - the belt with its added charm: stays on; were its slot to go another way (a command), Trinkets drops the charm at
     the wearer's feet.
 - Persistence: vanilla item stacks; Trinkets saves its slots and the belt's slot-count modifier (as a persistent
@@ -183,24 +191,39 @@ the two folders (later parts, below).
 ## Verification
 
 Local (this branch, before CI):
-- `python3 tools/check_mod_data.py`: PASS, with the new `check_wayfaring`. Mutation test: 25 deliberate breakages, each
+- `python3 tools/check_mod_data.py`: PASS, with the new `check_wayfaring`. Mutation test: 32 deliberate breakages, each
   caught (among them a changed number, the save moved to the default phase or stripped of its dream or void guard, the
   claws taking lava, the Phoenix Down named apart from the feather, a modifier named by slot, an open `canEquip` or belt,
-  a cosmetic charm slot, Trinkets' belt slot redefined, a Nether ingredient, an unconditioned recipe, a renamed item, and
-  the two belts sharing a name); every file restored after.
+  a cosmetic charm slot, Trinkets' belt slot redefined, a Nether ingredient, an unconditioned recipe, a renamed item, the
+  two belts sharing a name, the charm's cooldown or payment check removed, and a cosmetic belt locked on or dropped);
+  every file restored after.
 - `python3 tools/owner_art.py --check` (every imported file matches its source), `python3 scripts/check_repository.py`
   and `python3 tools/check_icon_maps.py`: PASS (the icon check's 11 warnings are older items').
 - No Minecraft jar here: compilation and the game tests run only in CI.
 
-Tests (in CI, not yet run):
+CI:
+- Run 38009567435 (commit `fc441fff`): everything compiled. Both server jobs: 1,183 of 1,184 tests passed; the one
+  failure was this slice's test expecting a claimed zombie to be spared by the wave, which the boundary's rule never
+  does (anyone may fight monsters), so the test now checks an immune foe instead. The client tests passed in all four
+  jobs; `ConcordanceWayfaringClientGameTests` ran in the fourth and logged "Charm slots with the belt: 2 on the server, 2
+  on the client" and "attributes worn: as designed", and saved `jugcraft_wayfaring_inventory` and
+  `jugcraft_wayfaring_icons`.
+- The review that followed (five reviewers, each finding checked by a second) also found: the charms charged food for
+  every tick of fire (a refused blow never starts vanilla's hurt cooldown) and took any blow for at most ten food
+  points (vanilla caps exhaustion), both fixed as described under How it works; a cosmetic belt could be locked on and
+  would be duplicated on death, both fixed; the Phoenix Down's recipe page and three docs still calling the drive belt
+  a leather belt, fixed.
+
+Tests:
 - Server, `ConcordanceWayfaringGameTests`: the items and slots as designed (sizes, the owner's icons, no cosmetic copies,
   tags, every attribute present, never weighed, the two belts' names); only Relic Lore puts them on and two of a kind
   never add up (each item's modifiers from two slots, a feather and a down jumping once); the belt keeps its charm; the
   charms take their own harm from food and nothing else (not lava, not held, not with an empty bar, not before Relic
-  Lore); the vial, then the down, answer death through the real event, and the void, a held totem and Relic Lore not
+  Lore); a blow costs half a food point a point of harm, a second within the hurt cooldown only what it is bigger by,
+  and one the bar cannot pay for lands; the vial, then the down, answer death through the real event, and the void, a held totem and Relic Lore not
   understood do not; a vial put on during a dream does not answer a death in it, and the dream ends as a death; the
-  wave reaches a zombie and not a villager, a claimed zombie, one beyond a light fall's radius, nor after an ender
-  pearl or before Relic Lore, and at most twelve.
+  wave reaches a zombie and not a villager, an Elder Guardian (immune), one beyond a light fall's radius, nor after an
+  ender pearl or before Relic Lore, and at most twelve.
 - Client, `ConcordanceWayfaringClientGameTests`, on the real ticking player: the belt's second Charm slot on the server
   and the client; the worn attributes each present once; the slot gone again without the belt; screenshots of the eight
   icons and the inventory, for a person to look at.

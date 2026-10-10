@@ -18,7 +18,6 @@ import io.github.jimbozoomer.jugcraft.concordance.trinket.WornTrinketItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -54,7 +53,6 @@ import net.minecraft.world.level.block.Blocks;
  */
 public class ConcordanceWayfaringGameTests {
 	private static final BlockPos STAND = new BlockPos(3, 2, 3);
-	private static final UUID NEIGHBOUR = UUID.fromString("00000000-0000-0000-0000-00000000a7f1");
 	private static final List<String> CHARMS = List.of("angelic_feather", "kraken_shell", "infernal_claws", "angelheart_vial", "phoenix_down");
 	private static final List<String> FEET = List.of("amphibian_boot", "ice_breaker");
 
@@ -287,6 +285,36 @@ public class ConcordanceWayfaringGameTests {
 	}
 
 	/**
+	 * What a charm's blow costs, through the real event: half a food point a point of harm (a 6-harm fall, 3 points);
+	 * within vanilla's hurt cooldown a further blow costs only what it is bigger by (so fire trying to hurt every tick is
+	 * paid as often as it would land); a blow the bar cannot pay for lands in full and costs nothing.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aCharmsBlowIsPaidInFood(GameTestHelper helper) {
+		var sources = helper.getLevel().damageSources();
+		ServerPlayer player = wayfarer(helper, true);
+		inventory(player, Wayfaring.CHARM_SLOT).setItem(0, new ItemStack(Wayfaring.ANGELIC_FEATHER));
+		player.getFoodData().setFoodLevel(20);
+		helper.assertTrue(!ServerLivingEntityEvents.ALLOW_DAMAGE.invoker().allowDamage(player, sources.fall(), 6.0F)
+				&& player.getFoodData().getFoodLevel() == 17, "A 6-harm fall costs 3 food points: " + player.getFoodData().getFoodLevel());
+		helper.assertTrue(!ServerLivingEntityEvents.ALLOW_DAMAGE.invoker().allowDamage(player, sources.fall(), 4.0F)
+				&& player.getFoodData().getFoodLevel() == 17, "A smaller blow within the hurt cooldown costs nothing");
+		helper.assertTrue(!ServerLivingEntityEvents.ALLOW_DAMAGE.invoker().allowDamage(player, sources.fall(), 10.0F)
+				&& player.getFoodData().getFoodLevel() == 15, "A bigger one costs what it is bigger by (4 harm, 2 points): "
+						+ player.getFoodData().getFoodLevel());
+		ServerPlayer hungry = wayfarer(helper, true);
+		inventory(hungry, Wayfaring.CHARM_SLOT).setItem(0, new ItemStack(Wayfaring.ANGELIC_FEATHER));
+		hungry.getFoodData().setFoodLevel(2);
+		helper.assertTrue(ServerLivingEntityEvents.ALLOW_DAMAGE.invoker().allowDamage(hungry, sources.fall(), 10.0F)
+				&& hungry.getFoodData().getFoodLevel() == 2, "A fall the bar cannot pay for (5 points of 2) lands in full, costing no food");
+		helper.assertTrue(!ServerLivingEntityEvents.ALLOW_DAMAGE.invoker().allowDamage(hungry, sources.fall(), 4.0F)
+				&& hungry.getFoodData().getFoodLevel() == 0, "One it can pay for (2 points of 2) is taken");
+		inventory(player, Wayfaring.CHARM_SLOT).setItem(0, ItemStack.EMPTY);
+		inventory(hungry, Wayfaring.CHARM_SLOT).setItem(0, ItemStack.EMPTY);
+		helper.succeed();
+	}
+
+	/**
 	 * Death saves, through the real event: a worn vial leaves the wearer on a little health with Regeneration II and is
 	 * used up; the Phoenix Down rises at full health with Regeneration II and Fire Resistance and becomes an Angelic
 	 * Feather in its slot; a vial answers before a down; and neither answers the void, a held totem, or Relic Lore not
@@ -366,7 +394,8 @@ public class ConcordanceWayfaringGameTests {
 	/**
 	 * The Ice Breaker: a plain fall that hurts its wearer harms, throws back and slows the nearest hostile creatures
 	 * within its radius (wider for a harder fall), at most twelve, and nothing else: not a villager, not one beyond the
-	 * radius, not a neighbour's claimed creature; nor after an ender pearl's landing, nor before Relic Lore.
+	 * radius, not a foe the Concordance cannot touch (the Elder Guardian, in the boundary's immune tag); nor after an ender
+	 * pearl's landing, nor before Relic Lore. (Claims never shelter hostile creatures: the boundary lets anyone fight them.)
 	 */
 	@GameTest(maxTicks = 40)
 	public void theIceBreakersWaveThrowsBackFoes(GameTestHelper helper) {
@@ -376,11 +405,10 @@ public class ConcordanceWayfaringGameTests {
 		inventory(player, Wayfaring.FEET_SLOT).setItem(1, new ItemStack(Wayfaring.ICE_BREAKER));
 		Mob near = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(5, 2, 3));
 		Mob villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(3, 2, 5));
-		Mob claimed = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(1, 2, 3));
+		Mob immune = helper.spawnWithNoFreeWill(EntityTypes.ELDER_GUARDIAN, new BlockPos(1, 2, 3));
 		// About 4.2 blocks off: within a hard fall's wave (8 harm: 5 blocks), beyond a light one's (1 harm: 3.25 blocks).
 		Mob far = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(6, 2, 6));
-		try (TestClaims claims = TestClaims.open()) {
-			claims.creature(claimed, NEIGHBOUR);
+		{
 			ServerLivingEntityEvents.AFTER_DAMAGE.invoker().afterDamage(player, source(level, DamageTypes.ENDER_PEARL), 5.0F, 5.0F, false);
 			helper.assertTrue(near.getHealth() == near.getMaxHealth(), "An ender pearl's landing sends no wave");
 			ServerLivingEntityEvents.AFTER_DAMAGE.invoker().afterDamage(player, level.damageSources().fall(), 1.0F, 1.0F, false);
@@ -390,8 +418,8 @@ public class ConcordanceWayfaringGameTests {
 			helper.assertTrue(far.getHealth() == far.getMaxHealth(), "A light fall's wave stops short of a zombie four blocks off");
 			helper.assertTrue(villager.getHealth() == villager.getMaxHealth() && !villager.hasEffect(MobEffects.SLOWNESS),
 					"A villager is not a foe");
-			helper.assertTrue(claimed.getHealth() == claimed.getMaxHealth() && !claimed.hasEffect(MobEffects.SLOWNESS),
-					"A neighbour's claimed creature is spared");
+			helper.assertTrue(immune.getHealth() == immune.getMaxHealth() && !immune.hasEffect(MobEffects.SLOWNESS),
+					"An Elder Guardian (immune to the Concordance) is untouched");
 			ServerLivingEntityEvents.AFTER_DAMAGE.invoker().afterDamage(player, level.damageSources().fall(), 8.0F, 8.0F, false);
 			helper.assertTrue(far.getHealth() < far.getMaxHealth(), "A hard fall's wave reaches it");
 		}

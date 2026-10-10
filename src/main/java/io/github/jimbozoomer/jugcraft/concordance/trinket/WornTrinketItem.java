@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.concordance.trinket;
 
+import eu.pb4.trinkets.api.TrinketDropRule;
 import eu.pb4.trinkets.api.TrinketSlotAccess;
 import eu.pb4.trinkets.api.TrinketsApi;
 import eu.pb4.trinkets.api.callback.TrinketCallback;
@@ -74,10 +75,20 @@ public class WornTrinketItem extends Item implements TrinketCallback {
 
 	@Override
 	public boolean canUnequip(ItemStack stack, TrinketSlotAccess slot, LivingEntity entity) {
-		if (!slot.cosmetic() && stack.is(Wayfaring.LEATHER_BELT) && holdsAddedCharm(entity)) {
+		// Only the belt actually worn holds the slot: Trinkets asks about a cosmetic stack with the worn slot's access.
+		if (!slot.cosmetic() && slot.get() == stack && stack.is(Wayfaring.LEATHER_BELT) && holdsAddedCharm(entity)) {
 			return false;
 		}
 		return TrinketCallback.super.canUnequip(stack, slot, entity);
+	}
+
+	/**
+	 * Worn for show (a cosmetic slot, where a server enables them), it stays with its wearer through death: Trinkets drops
+	 * a cosmetic stack on death but leaves it in its slot, so the respawned player would have it too.
+	 */
+	@Override
+	public TrinketDropRule getDropRule(ItemStack stack, TrinketSlotAccess slot, LivingEntity entity) {
+		return slot.cosmetic() ? TrinketDropRule.KEEP : TrinketCallback.super.getDropRule(stack, slot, entity);
 	}
 
 	/** Whether a Charm slot beyond those a player has without a belt holds something. */
