@@ -6,6 +6,7 @@ import com.geckolib.renderer.GeoItemRenderer;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.guns.GunAnimations;
+import io.github.jimbozoomer.jugcraft.client.guns.CellRackRenderer;
 import io.github.jimbozoomer.jugcraft.client.guns.GunCasingParticle;
 import io.github.jimbozoomer.jugcraft.client.guns.GunEffects;
 import io.github.jimbozoomer.jugcraft.client.guns.GunLaser;
@@ -28,6 +29,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback;
@@ -118,6 +120,8 @@ public final class GunsClient {
 		JugcraftGuns.CASINGS.values().forEach(casing -> ParticleProviderRegistry.getInstance().register(casing, GunCasingParticle::provider));
 		ParticleProviderRegistry.getInstance().register(JugcraftGuns.LASER_DOT, GunLaserParticle::provider);
 		ClientTickEvents.END_CLIENT_TICK.register(GunLaser::tick);
+		// Slice 10E: the cells standing in a Cell Rack.
+		BlockEntityRendererRegistry.register(JugcraftGuns.CELL_RACK_ENTITY, CellRackRenderer::new);
 	}
 
 	/** The reload key (for the client game tests). */

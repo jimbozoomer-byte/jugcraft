@@ -209,7 +209,7 @@ def check_assets(registered):
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
                   + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
-                  + concordance.blocks()):
+                  + concordance.blocks() + guns.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -231,7 +231,7 @@ def check_assets(registered):
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
                         + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
-                        + concordance.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + concordance.blocks() + guns.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -370,7 +370,7 @@ def item_units(ref):
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
             or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
-            or path in guns.items() or path in concordance.items() or path in concordance.blocks():
+            or path in guns.items() or path in guns.blocks() or path in concordance.items() or path in concordance.blocks():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -620,7 +620,7 @@ def check_tags():
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
-                                                    + guns.items() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
+                                                    + guns.items() + guns.blocks() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         if registry == "entity_type":
             # These entity IDs have no same-named item. Derive them from actual registrations.
             scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
@@ -1470,6 +1470,17 @@ def check_guns():
     cell = (JAVA_ROOT / "guns" / "EnergyCellItem.java").read_text(encoding="utf-8")
     if f"CAPACITY = {guns.CELL_CAPACITY:_};" not in cell or "implements Chargeable" not in cell:
         err(f"EnergyCellItem must be Chargeable, holding tools/guns.py CELL_CAPACITY ({guns.CELL_CAPACITY:_} JE)")
+    # Slice 10E: the Cell Rack's cradles, where tools/guns.py builds them, as the block picks them and as the renderer
+    # stands the cells in them.
+    columns = ", ".join(f"{x}" for x in guns.RACK_COLUMNS)
+    if f"COLUMNS = {{{columns}}};" not in (JAVA_ROOT / "guns" / "CellRackBlock.java").read_text(encoding="utf-8"):
+        err(f"CellRackBlock.COLUMNS differs from tools/guns.py RACK_COLUMNS: expected {{{columns}}}")
+    rack_renderer = (CLIENT_JAVA_ROOT / "guns" / "CellRackRenderer.java").read_text(encoding="utf-8")
+    rows = ", ".join(f"{top + guns.RACK_CELL_MIDDLE}F" for top in guns.RACK_SHELVES)
+    for line in ("COLUMNS = {" + ", ".join(f"{x}F" for x in guns.RACK_COLUMNS) + "};", f"ROWS = {{{rows}}};",
+                 f"DEPTH = {guns.RACK_DEPTH}F;"):
+        if line not in rack_renderer:
+            err(f"CellRackRenderer differs from tools/guns.py RACK_COLUMNS, RACK_SHELVES and RACK_DEPTH: expected {line}")
     events = re.search(r"SOUND_EVENTS = List\.of\(([^)]*)\)", java)
     shared = [name.removeprefix("guns.") for name in guns.sound_events() if name.count(".") == 1]
     if not events or re.findall(r'"([a-z_]+)"', events.group(1)) != shared:
@@ -12115,7 +12126,7 @@ def main():
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
-                  | set(guns.items()) | set(concordance.items()) | set(concordance.blocks()))
+                  | set(guns.items()) | set(guns.blocks()) | set(concordance.items()) | set(concordance.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
     check_petro()

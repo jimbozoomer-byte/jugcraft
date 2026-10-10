@@ -2214,6 +2214,10 @@ def items():
     return list(GUNS) + list(AMMO) + [CELL] + list(ATTACHMENTS)
 
 
+def blocks():
+    return [RACK]
+
+
 def switches(condition, gun):
     """A gun recipe's load conditions: the guns' switch and any its RECIPE_SWITCHES add, each its own condition (all
     must hold)."""
@@ -2258,6 +2262,90 @@ DAMAGE_TYPES = {
     "zap": {"effects": None, "tags": ("no_knockback", "bypasses_cooldown"),
             "death": ("%1$s was zapped by %2$s", "%1$s was zapped by %2$s using %3$s", "%1$s was zapped while fighting %2$s")},
 }
+
+
+# ------------------------------------------------------------------ the Cell Rack (slice 10E)
+
+# A block of six cradles, two shelves of three, that charges the Energy Cells standing in it at once from cables
+# (guns/CellRackBlock, CellRackBlockEntity; the cells are drawn by client/guns/CellRackRenderer at the cradles here).
+RACK = "cell_rack"
+RACK_DISPLAY = "Cell Rack"
+# Steel plates for its frame, copper cable for its contacts, an advanced circuit to share the charge out and a battery
+# box for its buffer: the Charging Station's parts, a steel plate in place of its lamp. Its recipe needs the machines
+# too, as the Energy Cell's does (it charges from cables).
+RACK_RECIPE = (["SWS", "SAS", "SBS"], {"S": "#c:plates/steel", "W": f"{MOD}:copper_cable", "A": f"{MOD}:advanced_circuit",
+                                       "B": f"{MOD}:battery_box"})
+# The cradles' columns (left to right seen from the front), the tops of the two shelves and how far back the cells
+# stand, in pixels of the north-facing model; CellRackBlock.COLUMNS and CellRackRenderer use the same.
+RACK_COLUMNS = (12.5, 8.0, 3.5)
+RACK_SHELVES = (2.5, 9.5)
+RACK_DEPTH = 8.5
+# How far above its shelf the middle of a cell's icon stands (CellRackRenderer.ROWS): its foot half a pixel down in its
+# cup, a pixel tall.
+RACK_CELL_MIDDLE = 2.75
+# Its screen lights while it charges, as the Charging Station's does.
+RACK_LIT = ("el_screen", "el_screen_on")
+
+
+def cell_rack_model():
+    """The Cell Rack in the electric look of the power gear (the Charging Station's textures): a graphite plinth edged
+    with high-voltage stripes, a back panel with vented sides, framing posts either side, two shelves each with a
+    glowing strip along its front and three cradles, each a cup the cell's foot stands in and contacts on the back
+    panel behind it, a status screen on the cap that lights while it charges, and power ports on its back and sides
+    for cables. Faces north (the cells stand on the z = 0 side)."""
+    from steampunk_models import box
+    m = [box((0, 0, 0), (16, 1.5, 16), {"*": "el_frame", "north": "el_hazard"}),
+         box((1, 1.5, 10), (15, 15, 15), {"*": "el_casing", "east": "el_vent", "west": "el_vent"}),
+         box((0.5, 15, 9), (15.5, 16, 15.5), {"*": "el_frame", "up": "el_seams"}),
+         box((4, 15.125, 8.5), (12, 15.875, 9), {"*": "el_frame", "north": "el_screen!"}),
+         box((0, 1.5, 1), (1, 15, 10), "el_frame"),
+         box((15, 1.5, 1), (16, 15, 10), "el_frame")]
+    for top in RACK_SHELVES:
+        if top > 2.5:
+            m.append(box((1, top - 1, 1.5), (15, top, 10), "el_frame"))
+        m.append(box((1.5, top - 0.75, 1.25), (14.5, top - 0.25, 1.5), "el_glow"))
+        for x in RACK_COLUMNS:
+            m.append(box((x - 2, top, RACK_DEPTH - 1.5), (x + 2, top + 1, RACK_DEPTH + 1.5), "el_casing"))
+            m.append(box((x - 1.25, top + 1, 9.5), (x + 1.25, top + 4.5, 10), {"*": "el_frame", "north": "el_port!"}))
+    m.append(box((1, 1.5, 1.5), (15, 2.5, 10), "el_frame"))
+    m.append(box((6, 4, 15), (10, 8, 15.75), {"*": "el_frame", "south": "el_port!"}))
+    m.append(box((0.25, 4, 11), (1, 8, 14), {"*": "el_frame", "west": "el_port!"}))
+    m.append(box((15, 4, 11), (15.75, 8, 14), {"*": "el_frame", "east": "el_port!"}))
+    return m
+
+
+def write_cell_rack(write, assets, data, lang, condition):
+    """The Cell Rack's models (lit and not, turned to each facing), item, loot table, recipe and names."""
+    import model_writer
+    lang[f"block.{MOD}.{RACK}"] = RACK_DISPLAY
+    lang[f"message.{MOD}.{RACK}"] = "Cell Rack: %s / %s JE"
+    lang[f"message.{MOD}.{RACK}.cell"] = "%s: %s / %s JE"
+    elements = cell_rack_model()
+    textures = {name: f"{MOD}:block/{name}" for name in model_writer.texture_names(elements)}
+    textures["particle"] = f"{MOD}:block/el_frame"
+    part = model_writer.split_model(RACK, elements, [(0, 0, 0)])[0]
+    write(assets / "models" / "block" / f"{RACK}.json", {"parent": "minecraft:block/block", "textures": textures,
+                                                         "elements": part})
+    lit_from, lit_to = RACK_LIT
+    write(assets / "models" / "block" / f"{RACK}_lit.json",
+          {"parent": f"{MOD}:block/{RACK}", "textures": {lit_from: f"{MOD}:block/{lit_to}"}})
+    variants = {}
+    for facing, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        for lit in (False, True):
+            variant = {"model": f"{MOD}:block/{RACK}{'_lit' if lit else ''}"}
+            if y:
+                variant["y"] = y
+            variants[f"facing={facing},lit={str(lit).lower()}"] = variant
+    write(assets / "blockstates" / f"{RACK}.json", {"variants": variants})
+    write(assets / "items" / f"{RACK}.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:block/{RACK}"}})
+    write(data / "loot_table" / "blocks" / f"{RACK}.json", {
+        "type": "minecraft:block", "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{MOD}:{RACK}"}],
+                                              "condition": {"type": "minecraft:survives_explosion"}}],
+        "random_sequence": f"{MOD}:blocks/{RACK}"})
+    pattern, key = RACK_RECIPE
+    write(data / "recipe" / f"{RACK}.json", {
+        "fabric:load_conditions": condition("guns") + condition("machines"), "type": "minecraft:crafting_shaped",
+        "category": "misc", "pattern": pattern, "key": key, "result": {"id": f"{MOD}:{RACK}"}})
 
 
 def write_all(write, assets, data, lang, condition):
@@ -2321,6 +2409,7 @@ def write_all(write, assets, data, lang, condition):
     # the grid); a gun and shears take its last attachment off (GunAttachmentRecipe).
     for recipe in ("gun_attachment", "gun_attachment_removal"):
         write(data / "recipe" / f"{recipe}.json", {"fabric:load_conditions": condition("guns"), "type": f"{MOD}:{recipe}"})
+    write_cell_rack(write, assets, data, lang, condition)
     for slot in SLOTS:
         # The grip slot also takes the bayonets (slice 7): it is everything under the barrel.
         lang[f"tooltip.{MOD}.guns.slot.{slot}"] = "Under-barrel attachment" if slot == "grip" else f"{slot.capitalize()} attachment"

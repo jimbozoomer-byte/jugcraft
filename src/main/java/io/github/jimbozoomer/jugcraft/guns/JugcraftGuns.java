@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.guns;
 
 import com.mojang.serialization.Codec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.materials.JugcraftRegistry;
 import io.github.jimbozoomer.jugcraft.tools.Chargeable;
 import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
@@ -10,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
@@ -22,12 +24,18 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 
 /**
  * Guns (docs/features/guns.md): the owner's guns, built from the owner's models and played with the owner's animations
@@ -330,6 +338,9 @@ public final class JugcraftGuns {
 	 */
 	public static DataComponentType<String> LOADED_GRENADE;
 	public static RecipeSerializer<GunAttachmentRecipe> ATTACHMENT_SERIALIZER;
+	/** The Cell Rack (slice 10E): six cradles that charge the Energy Cells standing in them at once, from cables. */
+	public static Block CELL_RACK;
+	public static BlockEntityType<CellRackBlockEntity> CELL_RACK_ENTITY;
 	public static RecipeSerializer<GunAttachmentRemovalRecipe> ATTACHMENT_REMOVAL_SERIALIZER;
 
 	private JugcraftGuns() {
@@ -359,6 +370,19 @@ public final class JugcraftGuns {
 		}
 		ENERGY_CELL = JugcraftRegistry.item("energy_cell", properties -> new EnergyCellItem(properties.stacksTo(1)
 				.rarity(Rarity.UNCOMMON).component(JugcraftTools.ENERGY, 0L)));
+		ResourceKey<Block> rackKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("cell_rack"));
+		CELL_RACK = Registry.register(BuiltInRegistries.BLOCK, rackKey, new CellRackBlock(BlockBehaviour.Properties
+				.ofFullCopy(Blocks.IRON_BLOCK).strength(3.0F).sound(SoundType.METAL).noOcclusion()
+				.lightLevel(state -> state.getValue(CellRackBlock.LIT) ? 5 : 0).setId(rackKey)));
+		ResourceKey<Item> rackItem = ResourceKey.create(Registries.ITEM, Jugcraft.id("cell_rack"));
+		Registry.register(BuiltInRegistries.ITEM, rackItem,
+				new BlockItem(CELL_RACK, new Item.Properties().setId(rackItem).useBlockDescriptionPrefix()));
+		CELL_RACK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("cell_rack"),
+				FabricBlockEntityTypeBuilder.create(CellRackBlockEntity::new, CELL_RACK).build());
+		// Cables reach the rack from any side.
+		EnergyStorage.SIDED.registerForBlocks((level, pos, state, entity, side) ->
+				entity instanceof CellRackBlockEntity rack ? rack.energy : null, CELL_RACK);
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(CELL_RACK));
 		for (String round : CASING_AMMO) {
 			CASINGS.put(round, Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id(round + "_casing"),
 					FabricParticleTypes.simple()));
