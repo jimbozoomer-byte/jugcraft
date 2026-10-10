@@ -15,17 +15,32 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * The player's arms in their own first-person view of a gun, drawn at the gun model's right_arm and left_arm bones
  * (tools/guns.py places them; the owner's animations move them). Each bone's pivot is the hand; the arm runs from it
  * toward the bone's "&lt;side&gt;_shoulder" locator (down, back and out from the gun), twelve pixels with the fist two
  * past the pivot. The arms are the player model's own (the skin's arm and sleeve, wide or slim).
+ * <p>
+ * The owner's animations were made for another mod's arms, and a few bring a hand so near the eye that an arm running
+ * from it toward its shoulder comes within a hand's breadth of the camera, or holds it: drawn, the arm's sleeve or its
+ * inside fills the screen (the Trench Lobber's pump, in a CI screenshot of 9 October 2026).
+ * An arm that close is left out for those frames, as vanilla leaves out a thrown item just leaving the eye.
  */
 final class GunArmsLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderData, GeoRenderState> {
 	/** The player model's arm runs from y -2 (shoulder) to 10 (fist); this puts the fist 2 px past the bone's pivot. */
 	private static final float FIST = 8.0F;
+	/** The player model's arm box, in pixels: from y -2 to 10 and z -2 to 2, its sleeve a quarter pixel bigger all round. */
+	private static final float SHOULDER_END = -2.0F;
+	private static final float FIST_END = 10.0F;
+	private static final float HALF_DEPTH = 2.0F;
+	private static final float SLEEVE = 0.25F;
+	/** An arm nearer the eye than this, in blocks, is left out (first person; the camera is at the view's origin). */
+	static final float NEAR_EYE = 0.1F;
 	private static ModelPart[] arms;
 	private static ModelPart[] slimArms;
 
@@ -66,6 +81,11 @@ final class GunArmsLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderD
 				}
 			}
 		}
+		// Here the arm's box runs about the bone's axis: half its width (wide 2, slim 1.5) across x and z.
+		if (byTheEye(poseStack.last().pose(), view.slim() ? 1.5F : 2.0F)) {
+			poseStack.popPose();
+			return;
+		}
 		poseStack.translate((right ? centre : -centre) / 16.0F, -FIST / 16.0F, 0.0F);
 		int light = pass.packedLight();
 		tasks.submitCustomGeometry(poseStack, RenderTypes.entityTranslucent(view.skin()), (pose, buffer) -> {
@@ -74,6 +94,21 @@ final class GunArmsLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderD
 			part.render(local, buffer, light, OverlayTexture.NO_OVERLAY);
 		});
 		poseStack.popPose();
+	}
+
+	/**
+	 * Whether the arm's box, sleeve and all, comes within {@link #NEAR_EYE} of the eye, in this pose: the arm's own frame,
+	 * centred on the bone's axis with its shoulder end toward -y, before it is moved along it to put the fist past the hand.
+	 * An arm an animation squashes to nothing (to hide it) draws nothing whichever way this answers.
+	 */
+	static boolean byTheEye(Matrix4f pose, float halfWidth) {
+		Vector3f eye = new Matrix4f(pose).invert().transformPosition(new Vector3f());
+		float across = halfWidth + SLEEVE;
+		float deep = HALF_DEPTH + SLEEVE;
+		Vector3f nearest = new Vector3f(Mth.clamp(eye.x() * 16.0F, -across, across),
+				Mth.clamp(eye.y() * 16.0F, SHOULDER_END - FIST - SLEEVE, FIST_END - FIST + SLEEVE),
+				Mth.clamp(eye.z() * 16.0F, -deep, deep)).div(16.0F);
+		return pose.transformPosition(nearest).length() < NEAR_EYE;
 	}
 
 	/** The player model's right and left arm (with their sleeves), posed at the origin. */

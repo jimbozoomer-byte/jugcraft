@@ -14,9 +14,9 @@ import org.jspecify.annotations.Nullable;
 public final class GunLooks {
 	/** Each gun's look, by name. */
 	static final Map<String, Look> LOOKS = new HashMap<>();
-	/** How big a shot's muzzle flash is, across, in the gun model's pixels, by the round it fires. */
+	/** How big a shot's muzzle flash is, across, in the gun model's pixels, by the round it fires (or grenade or fuel). */
 	static final Map<String, Float> FLASH_SIZES = Map.of("light_round", 5.0F, "rifle_round", 7.0F, "buckshot_shell", 8.0F,
-			"paper_cartridge", 10.0F);
+			"paper_cartridge", 10.0F, "grenade", 9.0F, "minecraft:blaze_powder", 8.0F);
 	/** The attachments that hide the flash: cans over the muzzle. */
 	static final List<String> HIDE_FLASH = List.of("silencer", "baffled_silencer");
 	/** The scopes (slice 7), by name: how far each narrows the view and what aiming through it shows. */
@@ -27,6 +27,13 @@ public final class GunLooks {
 	 * of sight as it fires, and at the hip's depth it came past the eye: aimed, each shot filled the screen.
 	 */
 	static final Map<String, Float> EYE_RELIEF = Map.of("garrison_rifle", 4.0F);
+	/**
+	 * How far the owner's third-person transform tilts a gun up off the arm that holds it, in degrees (tools/guns.py
+	 * tilt(): the x rotation of its "thirdperson_righthand"); a gun not listed has none. The Gattaler's is made for an
+	 * arm hanging at the hip, so seen from outside its holder's arms hang that much lower ({@link GunPose}) and the gun
+	 * still points along the look: raised like a rifle, its barrels pointed at the sky.
+	 */
+	static final Map<String, Float> TILT = Map.of("thresher", 68.25F);
 	private static final Look DEFAULT = new Look(true, 1.0F);
 
 	static {
@@ -48,6 +55,9 @@ public final class GunLooks {
 		LOOKS.put("sentry_pistol", new Look(false, 0.9F));
 		LOOKS.put("garrison_rifle", new Look(true, 0.85F));
 		LOOKS.put("breacher", new Look(true, 0.92F));
+		LOOKS.put("trench_lobber", new Look(true, 0.9F));
+		LOOKS.put("thresher", new Look(true, 0.95F));
+		LOOKS.put("stoker", new Look(true, 0.95F));
 		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));
@@ -59,6 +69,11 @@ public final class GunLooks {
 	/** The gun's look; a gun not listed is held in both hands and does not zoom. */
 	public static Look of(String gun) {
 		return LOOKS.getOrDefault(gun, DEFAULT);
+	}
+
+	/** How far the gun's third-person transform tilts it up off the arm, in degrees ({@link #TILT}), or null for none. */
+	public static @Nullable Float tilt(String gun) {
+		return TILT.get(gun);
 	}
 
 	/** The scope fitted to this gun, or null. */

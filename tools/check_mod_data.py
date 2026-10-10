@@ -1432,6 +1432,16 @@ def check_guns():
     listed = re.search(r"AMMO = List\.of\(([^)]*)\)", java)
     if not listed or re.findall(r'"([a-z_]+)"', listed.group(1)) != list(guns.AMMO):
         err(f"JugcraftGuns.AMMO differs from tools/guns.py {list(guns.AMMO)}")
+    # Slice 8C: what the heavy weapons fire, their spin-up and the ammunition an item of which loads several rounds.
+    shots = ", ".join(f'"{gun}", "{spec["shot"]}"' for gun, spec in guns.GUNS.items() if spec.get("shot", "bullet") != "bullet")
+    if f"SHOTS = Map.of({shots});" not in java:
+        err(f"JugcraftGuns.SHOTS differs from tools/guns.py GUNS shot: expected Map.of({shots})")
+    spins = ", ".join(f'"{gun}", {spec["spin_up"]}' for gun, spec in guns.GUNS.items() if spec.get("spin_up"))
+    if f"SPIN_UP = Map.of({spins});" not in java:
+        err(f"JugcraftGuns.SPIN_UP differs from tools/guns.py GUNS spin_up: expected Map.of({spins})")
+    per_item = ", ".join(f'"{ammo}", {n}' for ammo, n in guns.OTHER_AMMO.items() if n != 1)
+    if f"PER_ITEM = Map.of({per_item});" not in java:
+        err(f"JugcraftGuns.PER_ITEM differs from tools/guns.py OTHER_AMMO: expected Map.of({per_item})")
     events = re.search(r"SOUND_EVENTS = List\.of\(([^)]*)\)", java)
     shared = [name.removeprefix("guns.") for name in guns.sound_events() if name.count(".") == 1]
     if not events or re.findall(r'"([a-z_]+)"', events.group(1)) != shared:
@@ -1453,7 +1463,7 @@ def check_guns():
                 err(f"GunAnimations.GUN_SOUND_ALIASES does not play {sound} for {gun}'s {event} (tools/guns.py)")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in [f"key.{MOD}.reload", f"key.{MOD}.inspect", f"hud.{MOD}.guns.ammo", f"hud.{MOD}.guns.reloading",
-                f"message.{MOD}.guns.no_ammo", f"death.attack.{MOD}.bullet", f"tooltip.{MOD}.guns.fits",
+                f"message.{MOD}.guns.no_ammo", f"death.attack.{MOD}.bullet", f"death.attack.{MOD}.flame", f"tooltip.{MOD}.guns.fits",
                 f"tooltip.{MOD}.guns.fitting", f"tooltip.{MOD}.guns.fitted", f"tooltip.{MOD}.guns.stab", f"key.{MOD}.stab"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
                 f"tooltip.{MOD}.guns.slot.{slot}" for slot in guns.SLOTS] + [f"tooltip.{MOD}.guns.effect.{e}" for e in guns.EFFECTS]:
         if key not in lang:
@@ -1477,6 +1487,10 @@ def check_guns():
     reliefs = ", ".join(f'"{gun}", {build["eye_relief"]}F' for gun, build in guns.BUILDS.items() if "eye_relief" in build)
     if f"EYE_RELIEF = Map.of({reliefs});" not in looks:
         err(f"GunLooks.EYE_RELIEF differs from tools/guns.py BUILDS eye_relief: expected Map.of({reliefs})")
+    # Slice 8C: the guns carried lower seen from outside, by their own third-person tilt.
+    tilts = ", ".join(f'"{gun}", {guns.tilt(gun)}F' for gun in guns.GUNS if guns.tilt(gun))
+    if f"TILT = Map.of({tilts});" not in looks:
+        err(f"GunLooks.TILT differs from tools/guns.py tilt(): expected Map.of({tilts})")
     # Slice 7: each scope's zoom and view.
     quoted = lambda name: f'"{name}"' if name else "null"
     for kind, att in guns.ATTACHMENTS.items():
@@ -1499,6 +1513,12 @@ def check_guns():
     for ammo in guns.CASINGS:
         if load(ASSETS / "particles" / f"{ammo}_casing.json") != {"textures": [f"{MOD}:{ammo}_casing"]}:
             err(f"particles/{ammo}_casing.json does not draw textures/particle/{ammo}_casing.png")
+    # A prop on a bone of its own name shows only while an animation moves it (GunRenderer.PROPS).
+    renderer = (client_guns / "GunRenderer.java").read_text(encoding="utf-8")
+    shown = re.search(r"PROPS = List\.of\(([^)]*)\)", renderer)
+    own_bones = {name for gun in guns.PROPS for name, _, parts, _ in guns.BUILDS[gun]["bones"] if f"@{name}" in parts}
+    if not shown or not own_bones <= set(re.findall(r'"([a-z_]+)"', shown.group(1))):
+        err(f"GunRenderer.PROPS does not list every prop bone of tools/guns.py PROPS: {sorted(own_bones)}")
     if f'EJECT_CUE = "{guns.EJECT_CUE}";' not in animations:
         err(f"GunAnimations.EJECT_CUE differs from tools/guns.py ({guns.EJECT_CUE})")
     client_mixins = load(ROOT / "src" / "client" / "resources" / f"{MOD}.client.mixins.json") or {}

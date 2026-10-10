@@ -194,7 +194,48 @@ GUNS = {
         "damage": 3.0, "pellets": 8, "interval": 16, "auto": False, "capacity": 6,
         "reload": 52, "spread": (7.0, 5.0), "range": 28, "ammo": "buckshot_shell",
     },
+    # Slice 8C: the heavy weapons, in steel. Each fires something other than a bullet, or fires it differently:
+    #   shot     "grenade": each shot lobs a Grenade (the field chemistry branch's frag grenade) that bursts where it
+    #            lands and never breaks blocks; "damage" is the burst at its centre, "range" how far a level shot
+    #            carries and the spread how far the grenade strays. "flame": each shot is a burst of a short jet of
+    #            flame that singes and sets alight every creature in it, never a block; "damage" is each burst's, on
+    #            each creature in the jet, "range" its reach and the spread the jet's half width. Bullets otherwise.
+    #   spin_up  ticks the trigger must be held, the barrels spinning up, before the first shot (the server keeps
+    #            count); a gap in the holding spins them down.
+    # Their ammunition is not one of AMMO's rounds: the Grenade, and blaze powder (OTHER_AMMO).
+    "trench_lobber": {
+        "display": "Trench Lobber",
+        "source": "hammer_gl",
+        "tooltip": "A pump-action grenade launcher fed from a box magazine. Each shot lobs a grenade that bursts where "
+                   "it lands; it never breaks blocks. Fires grenades.",
+        "damage": 16.0, "pellets": 1, "interval": 14, "auto": False, "capacity": 6,
+        "reload": 53, "spread": (3.0, 1.0), "range": 24, "ammo": "grenade", "shot": "grenade",
+    },
+    "thresher": {
+        "display": "Thresher",
+        "source": "gattaler",
+        "tooltip": "A drum-fed rotary gun. Hold the trigger: the barrels spin up, then it fires for as long as it is "
+                   "held. Fires rifle rounds.",
+        "damage": 3.0, "pellets": 1, "interval": 2, "auto": True, "capacity": 60,
+        "reload": 78, "spread": (4.0, 2.0), "range": 64, "ammo": "rifle_round", "spin_up": 15,
+    },
+    "stoker": {
+        "display": "Stoker",
+        "source": "kiln_gun",
+        "tooltip": "A flamethrower that burns blaze powder: a short jet that sets creatures alight and never a block. "
+                   "Each blaze powder is four bursts.",
+        "damage": 2.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 32,
+        "reload": 61, "spread": (10.0, 6.0), "range": 8, "ammo": "minecraft:blaze_powder", "shot": "flame",
+    },
 }
+
+# What a gun fires: bullets, or a slice 8C gun's "shot".
+SHOTS = ("bullet", "grenade", "flame")
+# Ammunition that is not one of AMMO's rounds (slice 8C), each with the rounds one item loads
+# (JugcraftGuns.PER_ITEM): the field chemistry branch's Grenade (jugcraft:grenade), a grenade a round; and blaze
+# powder, four bursts of the Stoker's flame. A reload that tops a gun up takes a whole item; what of it does not fit is
+# lost (docs/features/guns.md, slice 8C).
+OTHER_AMMO = {"grenade": 1, "minecraft:blaze_powder": 4}
 
 # The rounds: display name, tooltip, recipe (pattern, key, count). Cheap and early: copper or brass, lead and gunpowder.
 AMMO = {
@@ -242,6 +283,14 @@ RECIPES = {
                                         "P": "#minecraft:planks"}),
     "breacher": (["SS ", "BLP"], {"S": "#c:ingots/steel", "L": "minecraft:lever", "B": "#c:ingots/brass",
                                   "P": "#minecraft:planks"}),
+    # Slice 8C: more steel, and each a heavy part: the Lobber's wide tube, the Thresher's piston to turn its barrels,
+    # the Stoker's igniter (flint and steel) and fuel tank (a bucket).
+    "trench_lobber": (["SSS", "SBS", " LP"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever",
+                                             "P": "#minecraft:planks"}),
+    "thresher": (["SSS", "SPS", "BLB"], {"S": "#c:ingots/steel", "P": "minecraft:piston", "B": "#c:ingots/brass",
+                                        "L": "minecraft:lever"}),
+    "stoker": (["SSF", "BLK"], {"S": "#c:ingots/steel", "F": "minecraft:flint_and_steel", "B": "#c:ingots/brass",
+                                "L": "minecraft:lever", "K": "minecraft:bucket"}),
 }
 
 # How each gun is built from the owner's parts, in the owner's model space (Java item-model pixels: x east, y up,
@@ -257,10 +306,14 @@ RECIPES = {
 # big slabs; these run each arm down, back and out, so it rises from the bottom of the screen to the gun (chosen in a
 # first-person preview of the idle pose, or of the "hand_pose"; docs/features/guns.md). The model carries each as a
 # "<side>_shoulder" locator ARM_REACH pixels from the pivot, and the renderer turns the player's arm from -y onto it.
-# "muzzle" and "sight": the locators the shot's smoke and aiming down the sights use.
+# "muzzle" and "sight": the locators the shot's smoke and aiming down the sights use. A gun with no sights to aim
+# down ("sight" None: the Thresher, carried at the hip with its back by the eye) is not slid over when aimed; aiming it
+# only steadies it (its aimed spread) and narrows the view (ZOOM).
 # "eye_relief" (optional): how much further from the eye the gun is held aimed than at the hip, in sixteenths of a
 # block (client/guns/GunLooks.EYE_RELIEF). Aiming slides the sight onto the middle of the screen at the hip's depth; a
 # gun whose moving parts slide back along the line of sight as it fires can reach the eye there.
+# "mounts" (optional): the bone a slot's attachments ride, where it is not the bone holding the slot's standard part
+# (effective_bones()): the Trench Lobber's leaf sight flaps with each shot, and a scope in its place should not.
 BUILDS = {
     "rust_midge": {
         "bones": [
@@ -547,13 +600,79 @@ BUILDS = {
         "muzzle": (8.0, 5.05, 3.98),
         "sight": (8.0, 6.24, 14.475),
     },
+    # Slice 8C, the heavy weapons. The owner named the parts' pieces (the Hammer GL's "bolt", the Kiln Gun's "barrel"
+    # group, the Gattaler's "Drum" group); each gun body turns about the grip in the right hand.
+    # The Hammer GL's bolt is its pump: a sleeve on the rod under the barrel with a fore-grip angled down to the left,
+    # which the shot slides back and rolls about the rod. Its leaf sight flips about its hinge with each shot; the
+    # reload drops the magazine and seats it again (magazine_2 stays hidden, at scale 0, in the owner's reload).
+    "trench_lobber": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 3.5, 16.9)),
+            ("gun_body", "gun_body2", ["main@gun_body"], (8.0, 3.5, 16.9)),
+            ("bolt", "gun_body", ["main@bolt"], (8.0, 3.08, 2.75)),
+            ("sights", "gun_body", ["sights"], (8.0, 7.55, 9.51)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 6.4, 10.27)),
+            ("magazine_2", "gun_body", [], (8.0, 6.4, 10.27)),
+        ],
+        "mounts": {"optic": "gun_body"},
+        "hands": {"right": (8.0, 3.5, 16.9), "left": (6.3, 1.6, 2.7)},
+        "arms": {"right": (-0.2722, -0.2158, 0.9377), "left": (-0.4794, -0.3003, 0.8246)},
+        "muzzle": (8.0, 5.77, -2.55),
+        "sight": (8.0, 8.6, 9.5),
+    },
+    # The Gattaler's barrels turn about their middle, spun from code (client/guns/GunRenderer: no animation moves
+    # them). The right hand holds the rear grip low and the left the front plate's left side, by the barrels' root; the
+    # reload ends with the carry handle on top worked forward like a lever (the owner's "grip"), about its feet on the
+    # body's sides, and in between the left hand drops toward the drum on the left side as it comes off and goes back
+    # (it turns about its middle). The owner's animations rest the left hand on the carry handle, but the owner's
+    # display carries the gun at the hip with its back by the eye, and there the hand and its forearm filled the
+    # screen (PR #278's in-game shots); from the front plate the same moves keep below the gun. For the same reason
+    # it has no sights: sliding any point of it onto the middle of the screen brought the grip across the eye.
+    "thresher": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 9.0, 16.4)),
+            ("gun_body", "gun_body2", ["main-#2,3,4,5,15,17,18,19,20"], (8.0, 9.0, 16.4)),
+            ("grip", "gun_body", ["main#2,3,4,5,15"], (8.0, 9.28, 10.88)),
+            ("magazine", "gun_body", ["main#17,18,19,20"], (4.75, 4.16, 13.2)),
+            ("barrels", "gun_body", ["barrels"], (8.0, 8.0, 3.25)),
+        ],
+        "hands": {"right": (8.0, 9.0, 16.4), "left": (5.5, 7.0, 9.8)},
+        "arms": {"right": (-0.0946, -0.1812, 0.9789), "left": (0.2172, -0.6757, 0.7044)},
+        "muzzle": (8.0, 8.0, -3.0),
+        "sight": None,
+    },
+    # The Kiln Gun's "barrel" group (its two tubes and their collar) hinges up at the back for its shell-at-a-time
+    # reload, which the Stoker does not use (it loads by the can). Its wide drum (the owner's cylinder_magazine) turns a
+    # little about its middle to let the fuel can out and back. The owner's parts have no can, so the magazine bone
+    # carries one (PROPS), inside the drum, out of sight until the reload pulls it. Each shot's jet of flame is the
+    # "flame" bone: the shot slides it 5.5 px back to the nozzle at twice its size, then out and shrinking.
+    "stoker": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 3.9, 7.7)),
+            ("gun_body", "gun_body2", ["main-#22,23,24,25,26,27,28,29,30,31,32,33,34,35,36"], (8.0, 3.9, 7.7)),
+            ("barrel", "gun_body", ["main#23,24,25,26,27,28,29,30,31,32,33,34,35,36"], (8.0, 4.7, 3.9)),
+            ("cylinder_magazine", "gun_body", ["main#22"], (8.0, 8.575, 5.4)),
+            ("magazine", "gun_body", ["@canister"], (8.0, 8.575, 5.4)),
+            ("flame", "gun_body", ["@flame"], (8.0, 8.45, -13.6)),
+            ("bolt", "gun_body", [], (8.0, 3.9, 7.7)),
+        ],
+        "hands": {"right": (8.0, 3.9, 7.7), "left": (8.0, 5.2, -2.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 8.45, -8.1),
+        "sight": (8.0, 11.7, 5.0),
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
 # a muzzle-loader's ball and ramrod and its priming flash. Each is one box drawn here into a free corner of the gun's
-# atlas copy (the corner must be empty); the renderer shows it only while an animation moves it (GunRenderer).
+# atlas copy (the corner must be empty); the renderer shows it only while an animation moves it (GunRenderer), but
+# for a prop on a bone of another name (the Stoker's can, on its magazine bone), which rests out of sight.
 #   kind "buckshot": a red paper hull with crimp lines and a brass head; "cartridge": a brass case with a lead tip;
-#   "ball": a lead ball; "rod": an iron ramrod with a brass tip; "flash": a burst of priming fire.
+#   "ball": a lead ball; "rod": an iron ramrod with a brass tip; "flash": a burst of priming fire; "canister": a brass
+#   can with steel ends; "flame": the owner's pilot flame (Guns/item/spitfire_flame.png, its first frame) on the four
+#   long faces, its tip forward, the ends left open (flame_faces()).
+# The Stoker's flame rests 5.5 px ahead of the nozzle, its back end at the flame bone's pivot, so a shot's first
+# offset (5.5 px back, at twice the size) puts it on the nozzle; its can rests inside the drum the reload turns.
 # The Thunderpipe's 2 x 2 x 5 px shell rests at the breech it ends in (x 9, y 4.17, z 12.4..17.4) less the loop's last
 # offset (render -0.278, -0.25, -7.515), so the loop slides it home. A muzzle-loader's ball rests where the reload's
 # first hold puts it at the muzzle; its ramrod where the reload's farthest reach puts the rod's back end at the muzzle,
@@ -579,7 +698,14 @@ PROPS = {
         "ram": {"kind": "rod", "from": (7.75, 2.41, 5.3), "size": (0.5, 0.5, 10.0), "texture_at": (52, 50)},
         "flash": {"kind": "flash", "from": (8.5, 4.4, 12.7), "size": (1.0, 1.0, 1.0), "texture_at": (43, 58)},
     },
+    "stoker": {
+        "flame": {"kind": "flame", "from": (6.0, 6.45, -21.6), "size": (4.0, 4.0, 8.0), "texture_at": (120, 112)},
+        "canister": {"kind": "canister", "from": (6.5, 7.075, 4.1), "size": (3.0, 3.0, 2.6), "texture_at": (120, 103)},
+    },
 }
+# The owner's pilot flame (Guns/item/spitfire_flame.png): three 8 x 8 frames, one above the other; the first frame's
+# flame is 4 px wide (columns 2 to 5) and 8 tall, its tip at the top.
+FLAME_SOURCE = LIBRARY / "item" / "spitfire_flame.png"
 
 # ------------------------------------------------------------------ the attachments (slice 5)
 
@@ -885,25 +1011,29 @@ def effective_bones(gun):
     it rides the barrel or magazine as the animations move it; where an attachment replaces the standard part, the part
     moves to a "std_<slot>" bone of its own. A slot on two bones (the Warden Pistol's magazine and the spare its reload
     brings in) gets a second set suffixed "_2". The renderer shows the fitted attachments' bones and hides the standard
-    parts they replace (GunRenderer)."""
+    parts they replace (GunRenderer). A slot the gun's "mounts" names a bone for hangs its attachments there instead
+    (the Trench Lobber's scopes ride its body, not the leaf sight that flaps)."""
     kinds = fits(gun)
     bones = BUILDS[gun]["bones"]
     anchors = {slot: [name for name, _, parts, _ in bones if set(parts) & set(standard)] or ["gun_body"]
                for slot, standard in SLOTS.items()}
+    mounts = {slot: [BUILDS[gun].get("mounts", {})[slot]] if slot in BUILDS[gun].get("mounts", {}) else anchors[slot]
+              for slot in SLOTS}
     replaced = {ATTACHMENTS[kind]["slot"] for kind in kinds if ATTACHMENTS[kind]["replaces"]}
     out = []
     for name, parent, parts, pivot in bones:
         children = []
         for slot, standard in SLOTS.items():
-            if name not in anchors[slot]:
-                continue
-            suffix = "" if anchors[slot].index(name) == 0 else f"_{anchors[slot].index(name) + 1}"
-            own = [p for p in parts if p in standard]
-            if own and slot in replaced:
-                parts = [p for p in parts if p not in standard]
-                children.append((f"std_{slot}{suffix}", name, own, pivot))
-            children += [(f"att_{kind}{suffix}", name, attachment_parts(gun, kind), pivot)
-                         for kind in kinds if ATTACHMENTS[kind]["slot"] == slot]
+            if name in anchors[slot]:
+                suffix = "" if anchors[slot].index(name) == 0 else f"_{anchors[slot].index(name) + 1}"
+                own = [p for p in parts if p in standard]
+                if own and slot in replaced:
+                    parts = [p for p in parts if p not in standard]
+                    children.append((f"std_{slot}{suffix}", name, own, pivot))
+            if name in mounts[slot]:
+                suffix = "" if mounts[slot].index(name) == 0 else f"_{mounts[slot].index(name) + 1}"
+                children += [(f"att_{kind}{suffix}", name, attachment_parts(gun, kind), pivot)
+                             for kind in kinds if ATTACHMENTS[kind]["slot"] == slot]
         out.append((name, parent, parts, pivot))
         out += children
     return out
@@ -930,6 +1060,8 @@ ZOOM = {
     "haymaker": 0.92, "longhorn_rifle": 0.75, "drover_rifle": 0.8, "coach_gun": 0.9, "duelling_pistol": 0.9,
     "line_musket": 0.82, "bellmouth": 0.92, "bulldog_pistol": 0.9, "marshal_revolver": 0.85, "sapper_revolver": 0.9,
     "sentry_pistol": 0.9, "garrison_rifle": 0.85, "breacher": 0.92,
+    # The heavy weapons are fired from the hip as much as aimed: they narrow the view least.
+    "trench_lobber": 0.9, "thresher": 0.95, "stoker": 0.95,
 }
 
 
@@ -938,6 +1070,14 @@ def two_handed(gun):
     "hand_pose"; seen from outside (client/guns/GunPose), a two-handed gun brings both arms up, a one-handed one the
     gun arm only."""
     return "hand_pose" not in BUILDS[gun]
+
+
+def tilt(gun):
+    """How far the owner's third-person transform tilts the gun up off the arm, in degrees (the x rotation of its
+    "thirdperson_righthand"; 0 for most). Seen from outside, the holder's arms hang that much lower than raised along
+    the look (client/guns/GunLooks.TILT, GunPose), so the gun still points where they look: the Gattaler's is made for
+    an arm at the hip, and raised like a rifle it pointed at the sky (PR #278's in-game shots)."""
+    return float(base_model(gun)["display"]["thirdperson_righthand"].get("rotation", [0, 0, 0])[0])
 
 
 # The spent case a round leaves where the owner's animations eject one (their "eject_casing" particle cue, mostly at
@@ -953,8 +1093,10 @@ QUIET_CUES = ("loaded", "end_reload", "loop_end", "reload_end", "stop_mag_tracki
 # one, turned at random about the barrel. A silencer hides it ("hides_flash").
 FLASH_FRAMES = ["muzzleflash", "muzzleflash2", "muzzleflash3", "muzzleflash4"]
 FLASH_SOURCE = BLOCKS / "Big Cannons and Mounted Guns" / "textures"
-# How big the flash is, across, in the gun model's pixels, by the round: black powder flares widest.
-FLASH_SIZE = {"light_round": 5.0, "rifle_round": 7.0, "buckshot_shell": 8.0, "paper_cartridge": 10.0}
+# How big the flash is, across, in the gun model's pixels, by the round: black powder flares widest. A grenade's
+# launch and a burst of flame (slice 8C) flash about as wide as buckshot.
+FLASH_SIZE = {"light_round": 5.0, "rifle_round": 7.0, "buckshot_shell": 8.0, "paper_cartridge": 10.0, "grenade": 9.0,
+              "minecraft:blaze_powder": 8.0}
 
 
 def barrel_front(gun, kind):
@@ -984,6 +1126,9 @@ EVENT_SOUNDS = {
     "insert": "item/gun_sounds/insert.ogg",
     "metal": "item/gun_sounds/metal.ogg",
     "jam": "item/gun_sounds/metal.ogg",
+    # Slice 8C: the Trench Lobber's pump, worked in full after each shot and by halves around its reload.
+    "pump": "item/gun_sounds/pump.ogg",
+    "pump_half": "item/gun_sounds/pump_half.ogg",
 }
 # The shell-at-a-time guns' reload_loop names "reload_mag_in"; they push a shell or a round, so they play the insert.
 EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"reload_mag_in": "shell_in"},
@@ -1008,6 +1153,12 @@ SHOT_SOUNDS = {
     "sentry_pistol": "item/scrapper/fire.ogg",
     "garrison_rifle": "item/scorched_rifle/fire.ogg",
     "breacher": "item/combat_shotgun/fire.ogg",
+    # Slice 8C. The library's machine gun and second heavy rifle shots carry another sound pack's copyright tag, so
+    # the Thresher fires the new rifle shot: short and sharp, for ten shots a second. The Stoker's is the short burst
+    # of the two flamethrower sounds.
+    "trench_lobber": "item/grenade_launcher/fire.ogg",
+    "thresher": "item/new_rifle/fire.ogg",
+    "stoker": "item/flamethrower/fire_2.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -1026,6 +1177,8 @@ SUBTITLES = {
     "insert": "Charge goes in",
     "metal": "Ramrod rings",
     "jam": "Ramrod rams home",
+    "pump": "Pump racks",
+    "pump_half": "Pump slides",
 }
 
 
@@ -1052,6 +1205,21 @@ for _name, _path in EVENT_SOUNDS.items():
 for _gun, _path in SHOT_SOUNDS.items():
     SOUNDS[f"guns.{_gun}.fire"] = {"subtitle": f"subtitles.{MOD}.guns.fire",
                                    "sounds": [{"name": f"{MOD}:guns/{sound_file(_path)}", "attenuation_distance": 64}]}
+
+
+# The guns' damage types (data/jugcraft/damage_type/<name>.json): their effects, the vanilla tags they join and their
+# death messages (plain, with the killer's named item, while fighting). Both come faster than the half second a
+# creature is shielded after a hit, so each shot or burst counts (bypasses_cooldown). A bullet is a projectile
+# (Projectile Protection guards against it). The Stoker's flame (slice 8C) is fire: fire protection, fire resistance
+# and fireproof creatures shrug it off, it burns as fire does, and it pushes nothing back.
+DAMAGE_TYPES = {
+    "bullet": {"effects": None, "tags": ("is_projectile", "bypasses_cooldown"),
+               "death": ("%1$s was shot by %2$s", "%1$s was shot by %2$s using %3$s",
+                         "%1$s was shot while fighting %2$s")},
+    "flame": {"effects": "burning", "tags": ("is_fire", "no_knockback", "bypasses_cooldown"),
+              "death": ("%1$s was burnt to a crisp by %2$s", "%1$s was burnt to a crisp by %2$s using %3$s",
+                        "%1$s was burnt to a crisp while fighting %2$s")},
+}
 
 
 def write_all(write, assets, data, lang, condition):
@@ -1121,17 +1289,24 @@ def write_all(write, assets, data, lang, condition):
     lang[f"hud.{MOD}.guns.ammo"] = "%s / %s"
     lang[f"hud.{MOD}.guns.reloading"] = "Reloading"
     lang[f"message.{MOD}.guns.no_ammo"] = "No %s to load."
-    lang[f"death.attack.{MOD}.bullet"] = "%1$s was shot by %2$s"
-    lang[f"death.attack.{MOD}.bullet.item"] = "%1$s was shot by %2$s using %3$s"
-    lang[f"death.attack.{MOD}.bullet.player"] = "%1$s was shot while fighting %2$s"
-    # A bullet is a projectile: Projectile Protection guards against it.
-    write(data / "damage_type" / "bullet.json",
-          {"message_id": f"{MOD}.bullet", "exhaustion": 0.1, "scaling": "when_caused_by_living_non_player"})
-    write(data.parent / "minecraft" / "tags" / "damage_type" / "is_projectile.json",
-          {"replace": False, "values": [f"{MOD}:bullet"]})
-    # Guns fire faster than the half second a creature is shielded after a hit: each shot counts.
-    write(data.parent / "minecraft" / "tags" / "damage_type" / "bypasses_cooldown.json",
-          {"replace": False, "values": [f"{MOD}:bullet"]})
+    for name, info in DAMAGE_TYPES.items():
+        body = {"message_id": f"{MOD}.{name}", "exhaustion": 0.1, "scaling": "when_caused_by_living_non_player"}
+        if info["effects"]:
+            body["effects"] = info["effects"]
+        write(data / "damage_type" / f"{name}.json", body)
+        for suffix, text in zip(("", ".item", ".player"), info["death"]):
+            lang[f"death.attack.{MOD}.{name}{suffix}"] = text
+    # Each vanilla tag file holds every entry of the mod's: the field chemistry branch's damage types join some of the
+    # same tags (thermite is fire too), so its entries are written here with the guns'.
+    import field_chemistry
+    tags = {tag: list(values) for tag, values in field_chemistry.damage_type_tags().items()}
+    mine = {}
+    for name, info in DAMAGE_TYPES.items():
+        for tag in info["tags"]:
+            mine.setdefault(tag, []).append(f"{MOD}:{name}")
+    for tag, values in mine.items():
+        write(data.parent / "minecraft" / "tags" / "damage_type" / f"{tag}.json",
+              {"replace": False, "values": tags.get(tag, []) + values})
 
 
 def draw_all(save):
@@ -1533,11 +1708,24 @@ def prop_cube(gun, name):
     sx, sy, sz = prop["size"]
     w, h, d = prop_dims(prop)
     tu, tv = prop["texture_at"]
+    origin = [rnd(8.0 - (x + sx)), rnd(y), rnd(z - 8.0)]
+    if prop["kind"] == "flame":
+        return {"origin": origin, "size": [sx, sy, sz], "uv": flame_faces(tu, tv, w, h, d)}
     # One texture block per face (prop_block): the ends side by side, the sides below them, the top and bottom below.
-    return {"origin": [rnd(8.0 - (x + sx)), rnd(y), rnd(z - 8.0)], "size": [sx, sy, sz], "uv": {
+    return {"origin": origin, "size": [sx, sy, sz], "uv": {
         "north": {"uv": [tu, tv], "uv_size": [w, h]}, "south": {"uv": [tu + w, tv], "uv_size": [w, h]},
         "east": {"uv": [tu, tv + h], "uv_size": [d, h]}, "west": {"uv": [tu, tv + h], "uv_size": [d, h]},
         "up": {"uv": [tu, tv + 2 * h], "uv_size": [w, d]}, "down": {"uv": [tu + w, tv + 2 * h], "uv_size": [w, d]}}}
+
+
+def flame_faces(tu, tv, w, h, d):
+    """A flame prop's four long faces, each its own block of the prop's corner (the same w x h x d block as
+    prop_block), so the flame's tip can point forward on each: GeckoLib runs u from front to back on the west face but
+    back to front on the east, and v from back to front on the top but front to back on the bottom (GECKO_CORNERS).
+    The west face's block is first, then the east's below it; the top's and the bottom's side by side below those.
+    The ends are left off: the flame is open at both."""
+    return {"west": {"uv": [tu, tv], "uv_size": [d, h]}, "east": {"uv": [tu, tv + h], "uv_size": [d, h]},
+            "up": {"uv": [tu, tv + 2 * h], "uv_size": [w, d]}, "down": {"uv": [tu + w, tv + 2 * h], "uv_size": [w, d]}}
 
 
 def prop_block(prop):
@@ -1601,7 +1789,7 @@ def build_geo(gun):
                 cubes.append(element_cube(element, layout))
         if cubes:
             bone["cubes"] = cubes
-        if name == "gun_body":
+        if name == "gun_body" and build["sight"] is not None:
             bone["locators"] = {"sight": geo_point(build["sight"])}
         if name in ("barrels",) or (name == "gun_body" and not any(b[0] == "barrels" for b in build["bones"])):
             bone["locators"] = {**bone.get("locators", {}), "muzzle": geo_point(build["muzzle"])}
@@ -1848,8 +2036,29 @@ def check():
         problems.append("ZOOM must give every gun a zoom between 0.5 and 1")
     if not all(0.0 < build.get("eye_relief", 1.0) <= 8.0 for build in BUILDS.values()):
         problems.append("A gun's eye_relief must be more than 0 and at most 8")
-    if not set(CASINGS) <= set(AMMO) or set(FLASH_SIZE) != set(AMMO):
-        problems.append("CASINGS must name rounds, and FLASH_SIZE every round")
+    if not set(CASINGS) <= set(AMMO) or set(FLASH_SIZE) != set(AMMO) | set(OTHER_AMMO):
+        problems.append("CASINGS must name rounds, and FLASH_SIZE every round and the other ammunition")
+    # Slice 8C: what each gun fires, and with what.
+    for gun, spec in GUNS.items():
+        if spec.get("shot", "bullet") not in SHOTS or spec["ammo"] not in set(AMMO) | set(OTHER_AMMO):
+            problems.append(f"{gun}: its shot or its ammunition is not one the guns know")
+        if spec.get("spin_up", 0) and not (0 < spec["spin_up"] <= 40 and spec["auto"]):
+            problems.append(f"{gun}: a spin-up is for an automatic gun, and at most 40 ticks")
+        if spec["capacity"] * max((ATTACHMENTS[k]["effects"].get("capacity", 1.0) for k in fits(gun)), default=1.0) > 64:
+            problems.append(f"{gun}: its capacity, with a fitted magazine, is more than a gun holds (64)")
+        if spec.get("shot") == "flame" and spec["pellets"] != 1:
+            problems.append(f"{gun}: a flame is one jet a shot")
+    if not all(isinstance(n, int) and n >= 1 for n in OTHER_AMMO.values()):
+        problems.append("OTHER_AMMO: each item loads a whole number of rounds, at least one")
+    for name, mounts in ((g, b.get("mounts", {})) for g, b in BUILDS.items()):
+        if not set(mounts) <= set(SLOTS) or not set(mounts.values()) <= {bone for bone, _, _, _ in BUILDS[name]["bones"]}:
+            problems.append(f"{name}: its mounts name a slot or a bone it lacks")
+    for gun in GUNS:
+        # The arms hang lower by the tilt in either hand (GunPose); a turn about another axis they could not take up.
+        display = base_model(gun)["display"]
+        turns = [display.get(f"thirdperson_{hand}", {}).get("rotation", [0, 0, 0]) for hand in ("righthand", "lefthand")]
+        if turns[0] != turns[1] or any(turns[0][1:]):
+            problems.append(f"{gun}: its third-person transforms turn it other than tilting it, the same in both hands")
     for ammo, casing in CASINGS.items():
         target = ASSETS / "textures" / "particle" / f"{ammo}_casing.png"
         if not target.exists() or target.read_bytes() != (LIBRARY / "item" / f"{casing}.png").read_bytes():
@@ -1879,7 +2088,28 @@ def draw_props(atlas, gun):
         bw, bh = prop_block(prop)
         if any(atlas.getpixel((tu + x, tv + y))[3] for x in range(max(bw, 8)) for y in range(bh)):
             raise ValueError(f"{gun}: the atlas is not empty at {tu},{tv} for its {name}")
-        {"buckshot": draw_buckshot, "cartridge": draw_cartridge}.get(prop["kind"], draw_plain)(atlas, prop)
+        {"buckshot": draw_buckshot, "cartridge": draw_cartridge, "flame": draw_flame}.get(prop["kind"], draw_plain)(atlas, prop)
+    return atlas
+
+
+def draw_flame(atlas, prop):
+    """The owner's pilot flame (FLAME_SOURCE's first frame, 4 x 8 px, tip at the top) laid along each long face of the
+    prop, its tip at the front (flame_faces() places the four blocks; the prop is 4 x 4 x 8 px). Its clear pixels stay
+    clear, so the flame keeps its shape."""
+    from PIL import Image
+    tu, tv = prop["texture_at"]
+    w, h, d = prop_dims(prop)
+    source = Image.open(FLAME_SOURCE).convert("RGBA")
+    flame = [[source.getpixel((2 + col, row)) for col in range(4)] for row in range(8)]  # flame[row from tip][col]
+    if (w, h, d) != (4, 4, 8):
+        raise ValueError("a flame prop is 4 x 4 x 8 px, the owner's flame laid along it")
+    for along in range(d):  # 0 at the front (the tip)
+        for across in range(4):
+            pixel = flame[along][across]
+            atlas.putpixel((tu + along, tv + across), pixel)                  # west: u from the front
+            atlas.putpixel((tu + d - 1 - along, tv + h + across), pixel)      # east: u from the back
+            atlas.putpixel((tu + across, tv + 2 * h + d - 1 - along), pixel)  # top: v from the back
+            atlas.putpixel((tu + w + across, tv + 2 * h + along), pixel)      # bottom: v from the front
     return atlas
 
 
@@ -1926,6 +2156,9 @@ PLAIN = {
     "rod": (((214, 170, 72, 255), (150, 112, 44, 255)), ((122, 124, 132, 255), (86, 88, 96, 255)),
             ((122, 124, 132, 255), (86, 88, 96, 255))),
     "flash": (((255, 226, 110, 255), (246, 150, 52, 255)),) * 3,
+    # A fuel can: steel ends, a brass body.
+    "canister": (((150, 154, 162, 255), (104, 108, 116, 255)), ((214, 170, 72, 255), (150, 112, 44, 255)),
+                 ((150, 154, 162, 255), (104, 108, 116, 255))),
 }
 
 
@@ -1999,6 +2232,9 @@ def provenance():
         # The shared textures its attachments draw on, merged into its atlas (slice 7).
         paths += [str(texture_file(t).relative_to(LIBRARY)) for t in atlas_layout(gun)[1] if t != own_texture(gun)]
         rows += [(gun, p) for p in dict.fromkeys(paths)]  # a part on two bones (a spare magazine) counts once
+        # A flame prop's pixels are the owner's pilot flame (slice 8C).
+        if any(prop["kind"] == "flame" for prop in PROPS.get(gun, {}).values()):
+            rows.append((gun, str(FLAME_SOURCE.relative_to(LIBRARY))))
     rows += [("shared", f"sounds/{p}") for p in sorted(set(EVENT_SOUNDS.values()))]
     rows += [(kind, f"models/item/{att['model']}.json") for kind, att in ATTACHMENTS.items()]
     # A scope's .scmeta gives the height of its line of sight (optic_sight()).

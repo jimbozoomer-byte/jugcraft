@@ -8,6 +8,16 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 8C (the heavy weapons)
+- **Three heavy weapons** in steel, each the owner's model, art and animations:
+  - the **Trench Lobber** (the owner's Hammer GL), a pump-action grenade launcher. It lobs the field chemistry branch's Grenade, which bursts where it lands and breaks no block;
+  - the **Thresher** (Gattaler), a drum-fed rotary gun. Its barrels spin up for ¾ s with the trigger held, then it fires ten rifle rounds a second; the server counts the spin-up;
+  - the **Stoker** (Kiln Gun), a flamethrower that burns blaze powder, four bursts a powder. It sets creatures in its short jet alight and never a block.
+- **The flame** is a new damage type, `jugcraft:flame`. It is fire, so fireproof creatures and fire resistance shrug it off, and it pushes nothing back.
+- **Attachments:** the Trench Lobber takes both magazines, the stocks and the scopes; the Stoker takes the stocks.
+- **Arms by the eye:** in first person, an arm that an animation brings within a tenth of a block of the eye is left out for those frames, on every gun, rather than filling the screen.
+- Record: [guns.md, slice 8C](docs/features/guns.md#slice-8c-the-heavy-weapons).
+
 ### Unmerged: Guns, slice 8B (the service arms)
 - **Three steel guns** at the steel tier, where the machines turn dieselpunk. Each is the owner's model, art and animations:
   - the **Sentry Pistol** (the owner's Mak MkII), eight hard-hitting shots;

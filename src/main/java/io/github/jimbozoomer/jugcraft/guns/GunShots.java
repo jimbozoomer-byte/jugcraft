@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.guns;
 
+import io.github.jimbozoomer.jugcraft.weapons.GrenadeEntity;
+import io.github.jimbozoomer.jugcraft.weapons.GrenadeLauncherItem;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -30,6 +32,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
@@ -54,6 +57,13 @@ import net.minecraft.world.phys.Vec3;
  * pellets on one creature land as one hit.</li>
  * <li>A gun with a bayonet fitted stabs (slice 7, {@link #stab}): a melee blow within the player's reach, at most once
  * every {@link #STAB_TICKS}.</li>
+ * <li>Slice 8C, the heavy weapons ({@link JugcraftGuns#SHOTS}). A grenade gun lobs a Grenade from the eye along the
+ * look, as the grenade launcher does; it bursts where it lands and breaks no block ({@link #lob}). A flame gun's burst
+ * singes and sets alight every creature in a short cone ahead that the shooter may strike and the eye can see; it sets
+ * no block alight ({@link #burn}). A gun whose barrels spin up fires only once its trigger has been held, the client
+ * saying so each tick ({@link #spin}), for {@link JugcraftGuns#SPIN_UP} ticks unbroken; the server counts them.</li>
+ * <li>An item of some ammunition loads more than one round ({@link JugcraftGuns#PER_ITEM}: a blaze powder is four of
+ * the Stoker's bursts). A reload takes whole items; what of the last one does not fit is lost.</li>
  * </ul>
  */
 public final class GunShots {
@@ -63,6 +73,15 @@ public final class GunShots {
 	private static final double HIT_MARGIN = 0.15;
 	/** Ticks between two bayonet stabs (slice 7). */
 	public static final int STAB_TICKS = 12;
+	/**
+	 * Ticks without word from the client after which a gun's barrels have stopped spinning (slice 8C): the client says
+	 * so every tick the trigger is held, so a gap this long means it was let go (a late packet or two do not count).
+	 */
+	static final int SPIN_GAP = 4;
+	/** Ticks of a spin-up the server forgives, for packets that come unevenly. */
+	static final int SPIN_SLACK = 2;
+	/** Seconds a burst of flame sets a creature alight for (slice 8C; a fire aspect sword's first level is 4). */
+	public static final int BURN_SECONDS = 4;
 	/** How hard a stab pushes its foe back (a sword's knockback is 0.4, and more for a sprinting strike). */
 	private static final float STAB_KNOCKBACK = 0.4F;
 
@@ -70,6 +89,8 @@ public final class GunShots {
 	private static final Map<UUID, Reload> RELOADS = new LinkedHashMap<>();
 	/** Each player's last stab (game time). */
 	private static final Map<UUID, Long> STABS = new HashMap<>();
+	/** Each player's spinning barrels (slice 8C). */
+	private static final Map<UUID, Spin> SPINS = new HashMap<>();
 
 	private GunShots() {
 	}
@@ -78,10 +99,12 @@ public final class GunShots {
 		PayloadTypeRegistry.serverboundPlay().register(GunShotPayload.TYPE, GunShotPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(GunReloadPayload.TYPE, GunReloadPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(GunStabPayload.TYPE, GunStabPayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(GunSpinPayload.TYPE, GunSpinPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(GunActionPayload.TYPE, GunActionPayload.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(GunShotPayload.TYPE, (payload, context) -> fire(context.player()));
 		ServerPlayNetworking.registerGlobalReceiver(GunReloadPayload.TYPE, (payload, context) -> reload(context.player()));
 		ServerPlayNetworking.registerGlobalReceiver(GunStabPayload.TYPE, (payload, context) -> stab(context.player()));
+		ServerPlayNetworking.registerGlobalReceiver(GunSpinPayload.TYPE, (payload, context) -> spin(context.player()));
 		ServerTickEvents.END_SERVER_TICK.register(GunShots::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.getPlayer()));
 	}
@@ -112,11 +135,20 @@ public final class GunShots {
 		if (loaded <= 0 && !free) {
 			return false;
 		}
+		int spinUp = JugcraftGuns.spinUp(gun);
+		if (spinUp > 0 && !spunUp(player, spinUp, level.getGameTime())) {
+			return false; // the barrels are not up to speed
+		}
 		if (!spend(player, spec, level.getGameTime())) {
 			return false;
 		}
 		boolean aiming = GunItem.aiming(player, stack);
-		shoot(level, player, spec, aiming ? spec.aimSpread() : spec.hipSpread());
+		float spread = aiming ? spec.aimSpread() : spec.hipSpread();
+		switch (JugcraftGuns.shot(gun)) {
+			case JugcraftGuns.GRENADE -> lob(level, player, spec, spread);
+			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
+			default -> shoot(level, player, spec, spread);
+		}
 		if (!free) {
 			GunItem.setLoaded(stack, loaded - 1);
 		}
@@ -179,6 +211,32 @@ public final class GunShots {
 		return true;
 	}
 
+	/**
+	 * The player is holding the trigger of the gun in their main hand (slice 8C, {@link GunSpinPayload}): if its barrels
+	 * spin up, they turn on. A new spin, after a gap of {@link #SPIN_GAP} ticks or more, starts the count again and is
+	 * shown to the players who see this one.
+	 */
+	public static void spin(ServerPlayer player) {
+		ItemStack stack = player.getMainHandItem();
+		if (!(stack.getItem() instanceof GunItem gun) || JugcraftGuns.spinUp(gun) <= 0 || !player.isAlive() || player.isSpectator()) {
+			return;
+		}
+		long now = ((ServerLevel) player.level()).getGameTime();
+		Spin spin = SPINS.get(player.getUUID());
+		if (spin == null || now - spin.last > SPIN_GAP || now < spin.last) {
+			spin = new Spin(now);
+			SPINS.put(player.getUUID(), spin);
+			announce(player, GunActionPayload.SPIN, 0);
+		}
+		spin.last = now;
+	}
+
+	/** Whether this player's barrels have spun for this many ticks unbroken, up to now. */
+	public static boolean spunUp(ServerPlayer player, int ticks, long now) {
+		Spin spin = SPINS.get(player.getUUID());
+		return spin != null && now - spin.last <= SPIN_GAP && now - spin.since >= ticks - SPIN_SLACK;
+	}
+
 	/** Starts reloading the gun in the player's main hand; whether it started. */
 	public static boolean reload(ServerPlayer player) {
 		ItemStack stack = player.getMainHandItem();
@@ -191,7 +249,8 @@ public final class GunShots {
 		if (room <= 0) {
 			return false;
 		}
-		int rounds = player.hasInfiniteMaterials() ? room : Math.min(room, count(player.getInventory(), JugcraftGuns.ammo(spec)));
+		int rounds = player.hasInfiniteMaterials() ? room
+				: Math.min(room, count(player.getInventory(), JugcraftGuns.ammo(spec)) * JugcraftGuns.perItem(spec));
 		if (rounds <= 0) {
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.guns.no_ammo",
 					Component.translatable(JugcraftGuns.ammo(spec).getDescriptionId())));
@@ -236,7 +295,10 @@ public final class GunShots {
 		}
 	}
 
-	/** Moves up to this many rounds from the inventory into the gun (any it has room for, free in creative). */
+	/**
+	 * Moves up to this many rounds from the inventory into the gun (any it has room for, free in creative). Ammunition an
+	 * item of which loads several rounds is taken whole: the last item's rounds that do not fit are lost.
+	 */
 	private static int load(ServerPlayer player, ItemStack stack, GunSpec spec, int wanted) {
 		int room = spec.capacity() - GunItem.loaded(stack);
 		int rounds = Math.min(wanted, room);
@@ -244,7 +306,8 @@ public final class GunShots {
 			return 0;
 		}
 		if (!player.hasInfiniteMaterials()) {
-			rounds = take(player.getInventory(), JugcraftGuns.ammo(spec), rounds);
+			int per = JugcraftGuns.perItem(spec);
+			rounds = Math.min(rounds, take(player.getInventory(), JugcraftGuns.ammo(spec), (rounds + per - 1) / per) * per);
 		}
 		GunItem.setLoaded(stack, GunItem.loaded(stack) + rounds);
 		return rounds;
@@ -329,8 +392,63 @@ public final class GunShots {
 		// Guns fire faster than the half second a creature is shielded after a hit; the bullet damage type is tagged
 		// minecraft:bypasses_cooldown, so each shot counts.
 		hits.forEach((target, damage) -> target.hurtServer(level, source, damage));
-		Vec3 muzzle = eye.add(look.scale(0.9)).add(0.0, -0.15, 0.0);
+		smoke(level, player);
+	}
+
+	/** A shot's puff of smoke at the muzzle. */
+	private static void smoke(ServerLevel level, ServerPlayer player) {
+		Vec3 muzzle = player.getEyePosition().add(player.getLookAngle().scale(0.9)).add(0.0, -0.15, 0.0);
 		level.sendParticles(ParticleTypes.SMOKE, muzzle.x, muzzle.y, muzzle.z, 2, 0.03, 0.03, 0.03, 0.01);
+	}
+
+	/**
+	 * Lobs one of the gun's grenades (slice 8C): a Grenade from the eye along the look, as fast as the grenade launcher
+	 * throws one and strayed by about the gun's spread in degrees. It bursts where it lands ({@link GrenadeEntity}),
+	 * hurting the living things near it, and breaks no block.
+	 */
+	private static void lob(ServerLevel level, ServerPlayer player, GunSpec spec, float spread) {
+		Projectile.spawnProjectileFromRotation(GrenadeEntity::new, level, new ItemStack(JugcraftGuns.ammo(spec)), player, 0.0F,
+				GrenadeLauncherItem.LAUNCH_SPEED, spread);
+		smoke(level, player);
+	}
+
+	/**
+	 * A burst of flame (slice 8C): every creature the shooter may strike, within the gun's range, inside the jet (the
+	 * part of it nearest the jet's middle no more than the spread off the look) and with no block between it and the
+	 * eye, takes the burst's damage as fire ({@link JugcraftGuns#FLAME_DAMAGE}: what fire spares, it spares) and burns
+	 * for {@link #BURN_SECONDS}. No block is set alight.
+	 */
+	private static void burn(ServerLevel level, ServerPlayer player, GunSpec spec, float spread) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getLookAngle();
+		double reach = spec.range();
+		double cone = Math.cos(Math.toRadians(spread));
+		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
+				.getOrThrow(JugcraftGuns.FLAME_DAMAGE), player, player);
+		for (LivingEntity foe : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, eye).inflate(reach),
+				candidate -> target(player, candidate))) {
+			Vec3 at = nearest(foe.getBoundingBox().inflate(HIT_MARGIN), eye, look, reach);
+			Vec3 to = at.subtract(eye);
+			double distance = to.length();
+			if (distance > reach || distance > 1.0E-6 && to.dot(look) < cone * distance) {
+				continue;
+			}
+			BlockHitResult block = level.clip(new ClipContext(eye, at, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+			if (block.getType() != HitResult.Type.MISS || !allowed(player, level, foe)) {
+				continue;
+			}
+			if (foe.hurtServer(level, source, spec.damage())) {
+				foe.igniteForSeconds(BURN_SECONDS);
+			}
+		}
+	}
+
+	/** The point of this box nearest the jet's middle: the box's point nearest to where the jet passes its centre. */
+	static Vec3 nearest(AABB box, Vec3 eye, Vec3 look, double reach) {
+		double along = Mth.clamp(box.getCenter().subtract(eye).dot(look), 0.0, reach);
+		Vec3 onJet = eye.add(look.scale(along));
+		return new Vec3(Mth.clamp(onJet.x, box.minX, box.maxX), Mth.clamp(onJet.y, box.minY, box.maxY),
+				Mth.clamp(onJet.z, box.minZ, box.maxZ));
 	}
 
 	/** A direction at most {@code degrees} off {@code look}, evenly over the cone's face. */
@@ -375,6 +493,7 @@ public final class GunShots {
 		TRIGGERS.remove(player.getUUID());
 		RELOADS.remove(player.getUUID());
 		STABS.remove(player.getUUID());
+		SPINS.remove(player.getUUID());
 	}
 
 	private static final class Trigger {
@@ -382,6 +501,17 @@ public final class GunShots {
 		long last;
 
 		Trigger(long now) {
+			last = now;
+		}
+	}
+
+	/** A run of spinning (slice 8C): when it began and when the client last said the trigger was held. */
+	private static final class Spin {
+		final long since;
+		long last;
+
+		Spin(long now) {
+			since = now;
 			last = now;
 		}
 	}

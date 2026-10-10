@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8) and the service arms (slice 8B)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B) and the heavy weapons (slice 8C)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -11,6 +11,7 @@ Status:
 - **Slice 7b** (the scopes: the Long Scope, Medium Scope and Reflex Sight; [below](#slice-7b-the-scopes)): implemented on `claude/guns-scopes` (#265), stacked on slice 7, awaiting review.
 - **Slice 8** (the hand guns: the Bulldog Pistol, Marshal Revolver and Sapper Revolver; [below](#slice-8-the-hand-guns)): implemented on `claude/guns-revolvers` (#268), stacked on slice 7b, awaiting review.
 - **Slice 8B** (the service arms: the Sentry Pistol, Garrison Rifle and Breacher; [below](#slice-8b-the-service-arms)): implemented on `claude/guns-service`, stacked on slice 8, awaiting review.
+- **Slice 8C** (the heavy weapons: the Trench Lobber, Thresher and Stoker; [below](#slice-8c-the-heavy-weapons)): implemented on `claude/guns-heavy`, on the integration branch that holds slices 7b to 8B, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -21,6 +22,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the next guns ("Ok lets do more!!!"): all four sets offered, the iron set, the lever rifles, the black powder guns and the attachments, each in its own slice; names: "Propose names".
 - what next ("ok what next"): all four offered, each its own pull request: gun polish (this slice 6), finishing the attachments, more guns, and the flaky tests.
 - the scopes: on 8 October 2026, with the reticles and lens rims uploaded ("heres reticles and vignette"), asked what the scopes should use, they answered that they made those files and to use them (see [Dependencies and assets](#dependencies-and-assets)); and asked what next ("What next?"), they chose all four further gun sets offered, each its own slice.
+- the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -513,6 +515,101 @@ The second of the four further gun sets: three magazine-fed guns a step up from 
 - The tactical grip the Stigg and Combat Shotgun have parts for is not an attachment yet.
 - The Combat Shotgun's extended-barrel texture (`combat_shotgun_ext_barrel.png`) is not used: its extended barrel part draws on the gun's own texture.
 
+## Slice 8C: the heavy weapons
+Three more of the owner's guns, each firing something other than a bullet or firing it differently, in steel.
+
+| | Trench Lobber | Thresher | Stoker |
+|---|---|---|---|
+| The owner's gun | Hammer GL | Gattaler | Kiln Gun |
+| What it is | a pump-action grenade launcher fed from a box magazine | a drum-fed rotary gun | a flamethrower |
+| Fires | one Grenade each pull: the field chemistry branch's frag grenade | rifle rounds, for as long as the trigger is held, once its barrels have spun up | a burst of flame, for as long as the trigger is held |
+| Damage | the Grenade's burst: 16 at its centre, less out to 4 blocks; it breaks no block | 3 | 2 a burst to each creature in the jet, and it sets them alight for 4 s |
+| Rate | about 1.4 a second (every 14 ticks: the pump) | 10 a second (every 2 ticks), after ¾ s (15 ticks) of spin-up | 5 bursts a second (every 4 ticks) |
+| Holds | 6 grenades | 60 rounds | 32 bursts of fuel |
+| Reload (a magazine) | 2.65 s | 3.9 s | 3.05 s |
+| Spread, hip / aimed | 3° / 1° (the grenade strays by about this) | 4° / 2° | the jet's half width: 10° / 6° |
+| Range | a level shot carries about 24 blocks | 64 blocks | 8 blocks |
+| Ammunition | Grenade (`jugcraft:grenade`) | Rifle Round | blaze powder: each is four bursts |
+| Takes | both magazines, the three stocks and the three scopes | nothing | the three stocks |
+
+**Crafting** (a crafting table):
+- **Trench Lobber:** five steel ingots in a ring around a brass ingot, over a lever and planks.
+- **Thresher:** five steel ingots around a piston (to turn the barrels), over two brass ingots and a lever.
+- **Stoker:** two steel ingots and a flint and steel (the igniter) over a brass ingot, a lever and a bucket (the fuel tank).
+
+**How they fire** (the server decides, `guns/GunShots`):
+- **Trench Lobber:** each shot lobs a Grenade from the eye along the look, as fast as the grenade launcher throws one (2.5 blocks a tick), strayed by about the spread. It flies as a thrown grenade does and bursts where it hits, hurting living things within 4 blocks, the shooter too if they stand that close, as with the launcher. It never breaks a block.
+- **Thresher:** the client says, each tick the trigger is held, that the barrels are turning (`GunSpinPayload`). The server counts the ticks itself: a shot is refused until they have turned for the spin-up, 15 ticks less 2 for packets that come unevenly, unbroken. A gap of more than 4 ticks with no word, the trigger let go, starts the count again. Players who see the gunner see the barrels spin up (`GunActionPayload.SPIN`).
+- **Stoker:** each burst reaches every creature the shooter may strike (the same allies, mounts and protection rules as a bullet) that is within 8 blocks, inside the jet (the part of it nearest the jet's middle at most the spread off the look) and with no block between it and the eye. Each takes the burst's damage as fire and burns for 4 s. The damage type `jugcraft:flame` is tagged:
+  - `minecraft:is_fire`: fire-proof creatures, fire resistance and Fire Protection guard against it;
+  - `minecraft:no_knockback`: the jet does not push its target out of reach;
+  - `minecraft:bypasses_cooldown`: each burst counts, as each bullet does.
+
+  The flame sets no block alight.
+- **Ammunition:** the Grenade is the field chemistry branch's frag grenade. Blaze powder fuels four bursts. A reload takes whole items, so topping up a Stoker one burst short takes a whole powder and the other three bursts are lost.
+
+**What you see:** the owner's animations.
+- **Trench Lobber:** each shot is followed by a pump of the fore-grip, with the left hand riding it, and the leaf sight rattles. To reload, the magazine drops out and is seated again.
+- **Thresher:** the barrels spin from the moment the trigger is pulled, speeding up over the spin-up and running down over 1.5 s after it is let go. The spin comes from code, since no animation moves them. Each shot jolts the gun. To reload, the drum on its left side comes off and a new one goes on, and the carry handle is worked forward like a lever.
+  - **Seen from outside,** it is carried at the hip. The owner's third-person transform tilts it 68.25° up off the arm, made for an arm hanging low; raised along the look as other guns are, it pointed at the sky. So its holder's arms hang that much lower (`GunLooks.TILT`, which `tools/check_mod_data.py` checks against the owner's transform through `tools/guns.py tilt()`), and it points along the look.
+- **Stoker:** each burst throws flames along the look to about its reach, and a jet of the owner's pilot flame leaves the nozzle and shrinks away. To reload, its drum turns and a fuel can comes out of its left side and goes back.
+
+**How the models were built:**
+- **Bone names:** the owner named the parts' pieces: the Hammer GL's `bolt`, the Kiln Gun's `barrel` group and the Gattaler's `Drum` group. Each gun body turns about its grip in the right hand.
+- **Trench Lobber:**
+  - The bolt is its pump: a sleeve on the rod under the barrel, with a fore-grip angled down to the left. Each shot slides it back and rolls it about the rod.
+  - The leaf sight flips about its hinge.
+  - Its scopes ride the gun body, not the flapping sight, through a new `"mounts"` entry in `BUILDS`.
+- **Thresher:**
+  - The barrels turn about the bore's middle.
+  - The carry handle on top is the owner's `grip`: the reload works it forward about its feet on the body's sides.
+  - The left hand holds the left side of the front plate, by the barrels' root. The owner's animations rest it on the carry handle, and their reload takes it from there straight to the drum. But the owner's display carries the gun at the hip with its back by the eye, and on the handle the hand and forearm filled the screen (the first push's CI shots, [below](#verification)). From the front plate the same moves keep it below the gun.
+  - The right hand holds the rear grip low.
+- **Stoker:**
+  - The two tubes and their collar are the `barrel` group. They hinge up for a shell-at-a-time reload the Stoker does not use, since it loads by the can.
+  - The wide drum is the owner's `cylinder_magazine`.
+  - The owner's parts have no can, so the magazine bone carries one: a brass can with steel ends, 3 × 3 × 2.6 px, drawn into a free corner of the atlas. It rests inside the drum, out of sight, until the reload pulls it out.
+- **The flame:**
+  - The shoot animation moves a `flame` bone 5.5 px back at twice its size and then out, shrinking.
+  - It carries a 4 × 4 × 8 px box at the nozzle, its back end at the bone's pivot. The four long faces show the owner's pilot flame (`spitfire_flame.png`, its first frame), each with the tip forward; the ends are open.
+  - GeckoLib runs a face's u the other way on a box's east face than on its west, and its v the other way on the top than on the bottom. So the flame's faces each get their own block of the atlas corner.
+  - It shows only while a shot moves it, as the other props do.
+- **The arms:** fitted in a first-person preview so that, idle, they leave the screen in the same directions as the service arms' do.
+  - **By the eye:** an arm that comes within a tenth of a block of the eye is left out for those frames (`GunArmsLayer`, for every gun), as vanilla leaves out a thrown item just leaving the eye.
+  - **Why:** the owner's animations were made for another mod's arms, and a few bring a hand so near the eye that the arm running from it toward its shoulder reaches the camera. In a later CI run ([run 37996214844](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37996214844), 9 October 2026), the Lobber's pump brought its left sleeve to the camera at the moment of the shot, and the sleeve filled the left half of the screen. Sweeping the preview over every gun's animations finds a few such moments in the earlier slices too, such as the Garrison Rifle's and Patchwork Carbine's inspections and the Marshal Revolver's reload.
+- **Sights:**
+  - **Trench Lobber:** aiming looks through the leaf sight.
+  - **Stoker:** aiming looks over the top of its body, near the front.
+  - **Thresher:** none. The owner's display carries it at the hip, its back by the eye. In the preview, sliding any point of it onto the middle of the screen brought the grip across the eye. Aimed, it is steadier (half the spread) and the view narrows a little, but it is not moved (`"sight": None`).
+- **Sounds:**
+  - **Shots:** the library's grenade launcher shot (Lobber), the new rifle shot (Thresher) and the short flamethrower burst (Stoker).
+  - **Not used:** the library's machine gun and second heavy rifle shots both carry another sound pack's copyright tags (Magic Sound Effects, "Real Guns Sound Pack 2"), so neither is used. The grenade launcher shot's tags name an artist (`ARTIST=Cameron`, FL Studio 20); the new rifle and flamethrower sounds carry only a date or editor tag.
+  - **New shared events:** the Lobber's pump (`pump`, `pump_half`).
+- **Not used from the owner's files:** the Kiln Gun's shell-at-a-time reload animations (the Stoker loads by the can) and the `flame.json` model in the library. That model credits another author and draws vanilla's fire texture.
+
+**Connections:**
+- **Steel:** from the steel foundry.
+- **Grenades:** from the field chemistry branch (`PetroItems.GRENADE`).
+- **Blaze powder:** from the Nether's blazes.
+- **Other parts:** a piston, flint and steel, and a bucket from vanilla.
+
+**Balance:** starting numbers.
+- **Trench Lobber:** an area weapon. Its burst is the Grenade's, so it is no stronger than a thrown grenade, only further and faster to aim.
+- **Thresher:** the most rounds a second of any gun, about 30 damage a second, at the cost of the spin-up and of rifle rounds.
+- **Stoker:**
+  - **Damage:** about 10 a second to everything in its short cone, and fire.
+  - **Fuel:** a powder is four bursts (0.8 s), so a full tank is 8 powders, about 4 blaze rods, for 6.4 s of flame.
+  - **Fireproof foes:** Nether creatures that are fireproof shrug it off.
+
+**Save compatibility:** new items `jugcraft:trench_lobber`, `thresher` and `stoker`; the damage type `jugcraft:flame`; nothing saved changes. `guns.enabled=false` gates their recipes.
+
+**Known limits:**
+- **Grenades:** the Lobber fires frag Grenades only. The chemical grenades stay for throwing and the grenade launcher: a gun's magazine holds one kind of round.
+- **Arms:** the Thresher's left hand holds the front plate, not the carry handle the owner's animations rest it on (by the eye at the hip, there it filled the screen). So in the reload it drops toward the drum without taking it, and the handle is worked forward without it.
+- **The Stoker is held close:** the owner's first-person transform holds its back by the eye, so it fills the lower right of the screen. It is left as the owner made it.
+- **Flame:** the flame is lit by the world's light like the rest of the gun, so at night it is darker than a flame should be.
+- **Not played:** none of it has been played yet. The jet's reach and width, the spin-up and the kick of ten shots a second want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -551,16 +648,19 @@ The second of the four further gun sets: three magazine-fed guns a step up from 
   - A shell-at-a-time reload loads one shell after each shell's time, and a shot cuts it short.
   - The player's own client times its animation from the same numbers.
 - **Others' animations:** the server tells the clients that see the shooter (not the shooter's own) with `GunActionPayload`, and they play the shot or reload on that gun.
+- **Spin-up (slice 8C):** the Thresher's client sends `GunSpinPayload` (no data) each tick its trigger is held. The server keeps, per player, when the run began and its last word, and refuses the Thresher's shots until the run is 15 ticks old (2 forgiven for uneven packets). A gap of more than 4 ticks ends the run. A client that claims to hold the trigger gains nothing it could not by holding it; the run's age, the rounds and the rate are the server's.
+- **Grenades and flame (slice 8C):** the server spawns the Lobber's Grenade from its own copy of the player's position and look, and works out the Stoker's jet the same way, with the same ally and protection checks as a bullet.
 - **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). Its attachments are another, `jugcraft:attachments` (a list of up to four attachment ids, oldest first; an id no longer known is ignored). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
 - **Attachments and authority:** attachments are fitted only by the crafting recipes, which the server runs. The server reads a gun's numbers from its own copy of the stack (`GunItem.spec(stack)`), for the shot, the trigger rate, the reload and the rounds it may load; the client uses the same numbers only to predict.
-- **Disconnect:** clears that player's trigger credit and reload.
+- **Disconnect:** clears that player's trigger credit, reload and spin.
 - **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns', rounds' and attachments' recipes (twenty-nine with slice 5: sixteen guns and rounds, eleven attachments, and the fitting and removal recipes). Items and the attachments component stay registered, so saved guns, rounds and attachments survive with it off.
 
 ## The shared parts it uses
 - **Items:** `JugcraftRegistry.item` for every gun, round and attachment; the Combat tab.
 - **Recipes:** two special crafting recipes, `jugcraft:gun_attachment` and `jugcraft:gun_attachment_removal`, built as the Skeleton Key's copying is (`CustomRecipe`).
 - **Config:** the `guns` feature switch (`JugcraftConfig.FEATURES`, `tools/materials.py`).
-- **Damage type:** `jugcraft:bullet`, tagged `minecraft:is_projectile` (Projectile Protection works against it) and `minecraft:bypasses_cooldown` (each shot counts).
+- **Damage type:** `jugcraft:bullet`, tagged `minecraft:is_projectile` (Projectile Protection works against it) and `minecraft:bypasses_cooldown` (each shot counts). Slice 8C adds `jugcraft:flame`, tagged `minecraft:is_fire`, `minecraft:no_knockback` and `minecraft:bypasses_cooldown`. The field chemistry branch's thermite and chlorine share the first two tag files, so `tools/guns.py` writes those files with their entries included (`field_chemistry.damage_type_tags()`).
+- **Grenades (slice 8C):** the Trench Lobber fires the field chemistry branch's Grenade through its `GrenadeEntity` and `Warhead`, as the grenade launcher does.
 - **Sounds:** in `sounds.json`, through `tools/generate_material_data.py`.
 - **Icons:** the item-icon maps (`tools/item_icons/`, `docs/ITEM_ICONS.md`) for the rounds.
 - **Keys:** Jugcraft's key category, beside the party key.
@@ -797,6 +897,37 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | breacher | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
 | breacher | `Guns/item/medium_scope.png` | `543abecf859783be` |
 | breacher | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| trench_lobber | `Guns/models/item/hammer_gl.json` | `afdff981c85abed1` |
+| trench_lobber | `Guns/item/hammer_gl.png` | `da0d14786f55c8d9` |
+| trench_lobber | `Guns/item/hammer_gl.animation.json` | `a85d5ec884878b42` |
+| trench_lobber | `Guns/models/special/hammer_gl/main.json` | `638ea51d2be8758e` |
+| trench_lobber | `Guns/models/special/hammer_gl/light_stock.json` | `78b44846f3ceb5a8` |
+| trench_lobber | `Guns/models/special/hammer_gl/heavy_stock.json` | `8f4e53429bc119ab` |
+| trench_lobber | `Guns/models/special/hammer_gl/wooden_stock.json` | `42eeb43c691d99ab` |
+| trench_lobber | `Guns/models/special/hammer_gl/no_sights.json` | `e14b796ec52bbc48` |
+| trench_lobber | `Guns/models/special/hammer_gl/sights.json` | `6eca3a9cad91aef5` |
+| trench_lobber | `Guns/models/special/hammer_gl/stan_mag.json` | `bc851c25650d2420` |
+| trench_lobber | `Guns/models/special/hammer_gl/ext_mag.json` | `c98c1814f402f6c1` |
+| trench_lobber | `Guns/models/special/hammer_gl/speed_mag.json` | `6d43f3ab4e7c2184` |
+| trench_lobber | `Guns/sounds/item/grenade_launcher/fire.ogg` | `447fa85801d894e8` |
+| trench_lobber | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| trench_lobber | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| trench_lobber | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| thresher | `Guns/models/item/gattaler.json` | `de8a948136fcce8c` |
+| thresher | `Guns/item/gattaler.png` | `334c1948cabbb708` |
+| thresher | `Guns/item/gattaler.animation.json` | `044717fa8ec7bc5c` |
+| thresher | `Guns/models/special/gattaler/main.json` | `2ce0defa34b2e442` |
+| thresher | `Guns/models/special/gattaler/barrels.json` | `552e7b0b2839b0ac` |
+| thresher | `Guns/sounds/item/new_rifle/fire.ogg` | `267e176ad9bae07a` |
+| stoker | `Guns/models/item/kiln_gun.json` | `591967b76e526e0b` |
+| stoker | `Guns/item/kiln_gun.png` | `0534a10b7b6bf764` |
+| stoker | `Guns/item/kiln_gun.animation.json` | `c3c8cbe2a44ed3c9` |
+| stoker | `Guns/models/special/kiln_gun/main.json` | `98b35b85d243be27` |
+| stoker | `Guns/models/special/kiln_gun/light_stock.json` | `b757939fe8d38015` |
+| stoker | `Guns/models/special/kiln_gun/heavy_stock.json` | `9782a4f888836168` |
+| stoker | `Guns/models/special/kiln_gun/wooden_stock.json` | `1cbfee18215b6665` |
+| stoker | `Guns/sounds/item/flamethrower/fire_2.ogg` | `d0c649ff0323c3ef` |
+| stoker | `Guns/item/spitfire_flame.png` | `c81c31bd15a64d7c` |
 | shared | `Guns/sounds/item/bolt/bolt.ogg` | `1cf1102f6ba52725` |
 | shared | `Guns/sounds/item/bolt_pull/bolt_pull.ogg` | `dbbda8b00abcab8c` |
 | shared | `Guns/sounds/item/bolt_release/bolt_release.ogg` | `7c1096f545d72ec3` |
@@ -806,6 +937,8 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | shared | `Guns/sounds/item/mag_in/mag_in.ogg` | `9595cc14d1209f85` |
 | shared | `Guns/sounds/item/mag_out/mag_out.ogg` | `5f805eaadc8fd476` |
 | shared | `Guns/sounds/item/gun_sounds/metal.ogg` | `3c48586e2406bdea` |
+| shared | `Guns/sounds/item/gun_sounds/pump.ogg` | `6cc42f310726dff5` |
+| shared | `Guns/sounds/item/gun_sounds/pump_half.ogg` | `df22da6f35b95faa` |
 | shared | `Guns/sounds/item/rack/rack.ogg` | `aa98a804ed7809ab` |
 | shared | `Guns/sounds/item/reload_end/reload_end.ogg` | `c1db5357e55ed953` |
 | shared | `Guns/sounds/item/rusty_gnat/copper_jam.ogg` | `d1b93136045c83cc` |
@@ -994,7 +1127,7 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
 
   Shown this and asked what the scopes should use, the owner answered that they made these files and to use them. Asked the same day whether the "Big Cannons and Mounted Guns" folder is theirs (slice 6's flash frames come from it, and it holds a `wariumlogo.png`), they confirmed it is. The [library README](../../art/owner-library/README.md#effect-textures-8-october-2026) records both.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
-- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's shell, the Longhorn's cartridge, the muzzle-loaders' balls, ramrods and flashes).
+- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's shell, the Longhorn's cartridge, the muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
 
 ## Verification
 - **Run locally (7 October 2026):**
@@ -1186,15 +1319,56 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
 - **The Garrison held further out, in CI** ([run 37740859066](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37740859066), on e26e2d9a8): every check passed.
   - **Aimed and fired,** the back of the gun sits small under the crosshair with the husk in view, where the shot had filled the screen. With a stock fitted, the stock is smaller too.
   - **The log** is as before for all three: the Garrison took 4 from the husk and reloaded 30, and the Breacher took 24.
+- **Slice 8C, run locally (9 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's, each hand is where `BUILDS` puts it in its pose, and the fuel can's and flame's corners of the Stoker's atlas are clear of every part.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names, shot sounds, the pump sounds and the flame damage type with its tags.
+  - `python3 tools/check_mod_data.py`: PASS (1912 material IDs), now checking `JugcraftGuns.SHOTS`, `SPIN_UP` and `PER_ITEM`, the flame's death message and that `GunRenderer` hides every prop bone.
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only.
+  - **Previews:**
+    - first-person views of each gun idle, aimed, firing and part way through its reload (approximating the game's hands), which placed the arms and sights;
+    - side views of the Stoker's flame through a shot and its can out mid-reload.
+- **Slice 8C game tests (written; they run in CI):**
+  - `HeavyGunsGameTests`:
+    - `heavyWeaponsFireTheirOwnAmmunition`: the Lobber fires Grenades, the Stoker blaze powder at four bursts a powder, the Thresher rifle rounds; the flame is fire, counts each burst and does not knock back.
+    - `lobberLobsAGrenade`: a shot spends a grenade and lobs the shooter's Grenade, which bursts on the pig seven blocks off; the shooter is unhurt and the floor whole.
+    - `thresherSpinsUpBeforeItFires`: refused at once and half way through the spin-up, fired once spun up, refused again after the trigger is let go.
+    - `stokerSetsCreaturesAlightNotBlocks`: the pig in the jet takes the burst and burns; one beside the shooter and one past the reach are untouched; no fire block anywhere.
+    - `reloadsTakeAmmunitionByTheItem`: three powders load twelve bursts; a top-up one burst short takes one whole powder; the Lobber loads the two grenades there are.
+  - "Every gun registered" now counts twenty-one guns.
+  - `GunsClientGameTests` takes the three through every gun's steps:
+    - it gives each gun's ammunition by its item id (a Grenade, blaze powder);
+    - it holds the Thresher's trigger through its spin-up;
+    - it allows the Thresher more than one round spent, and counts a reload's items by the rounds each loads.
+    - Screenshots: `jugcraft_guns_trench_lobber_*`, `jugcraft_guns_thresher_*` and `jugcraft_guns_stoker_*`.
+- **Slice 8C in CI** ([run 37989013678](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37989013678), on e9f53d806): every check passed.
+  - `mod`: the build and the server game tests passed, the five `HeavyGunsGameTests` among them.
+  - `client` (shard 2): `GunsClientGameTests` passed. Its log:
+    - **Trench Lobber:** aimed, the view narrowed to 0.9; fired, 5 flash frames, the husk 833.5 → 821.3 (the Grenade's burst) and rounds 6 → 5; reloaded 6, 31 Grenades left.
+    - **Thresher:** aimed, 0.95; held through its spin-up and fired, 10 flash frames, the husk 821.3 → 815.3 and rounds 60 → 58 (two shots in the moment the trigger was held); reloaded 60, 30 Rifle Rounds left.
+    - **Stoker:** aimed, 0.95; fired, 6 flash frames, the husk 815.3 → 813.3 and bursts 32 → 31; reloaded 32, 31 blaze powder left. Its animations' casing cue puffed smoke once, as it has no casing.
+  - **Screenshots:**
+    - The Lobber is held, aimed, fired, reloaded and inspected as the owner's animations show it. With the Extended Magazine fitted, its count reads 1 / 9.
+    - The Stoker points at the husk seen from outside.
+    - **The Thresher's left hand and forearm filled the right half of the screen** in first person (held, aimed and fired), from the carry handle by the eye.
+    - **Seen from outside, the Thresher pointed at the sky** (its transform's 68.25° tilt, [above](#slice-8c-the-heavy-weapons)).
+    - **The Stoker is held close,** as the owner's transform holds it.
+  - **The fix** (24f52c601): the Thresher's left hand holds the front plate (a first-person preview of it idle, firing and through its reload and inspection leaves the view clear), and its holder's arms hang lower by the tilt.
+- **The fix in CI** ([run 37992650952](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37992650952), on 24f52c601): every check passed.
+  - `optional integrations absent` passed on its one re-run. Its first attempt failed a biome test this slice does not touch: four mossy maples laid no moss carpet. The pull request's comment of 9 October has the cause, vanilla's `attached_to_logs` decorator, whose rolls depend on where the test is placed, and a proposed patch for the biome tests.
+  - **Screenshots** (`client` shard 2):
+    - In first person the Thresher sits at the lower right, held, aimed, fired, mid-reload and inspected; no hand covers the view.
+    - Seen from outside, it is carried at the hip with its barrels toward the camera, the way its holder looks, not at the sky.
+- **Arms by the eye** ([above](#slice-8c-the-heavy-weapons)): a syntax parse only; its CI run is the push that adds it.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
-- **Later slices,** each its own pull request: the other two gun sets the owner chose on 8 October 2026 (the heavy weapons and the energy weapons; the revolvers are slice 8, the service arms slice 8B); the tactical grip and the laser sight.
+- **Later slices,** each its own pull request: the energy weapons, the last of the gun sets the owner chose on 8 October 2026 (the revolvers are slice 8, the service arms slice 8B, the heavy weapons slice 8C), which charge from the energy system; the chemical grenades in the Trench Lobber; the tactical grip and the laser sight.
 - **Aimed, the gun hand covers the sights:** in the CI screenshots of 8 October, the right fist sits over the lower middle of the screen when aiming, on the one-handed guns and some long ones. The arm runs back toward the camera from the grip drawn at the middle of the view. This is a polish item for a pull request of its own.
 - **Not yet:**
   - the jam the Gnat's sound suggests;

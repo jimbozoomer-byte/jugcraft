@@ -7,9 +7,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
- * Server to client: the player with this entity id fired, began to reload or stabbed with the gun in their hand, so the
- * clients that see them play its animation (the shooter's own client has already played it). {@code rounds} is how many shells a
- * shell-at-a-time reload loads.
+ * Server to client: the player with this entity id fired, began to reload, stabbed with the gun in their hand or set its
+ * barrels spinning, so the clients that see them play its animation (the shooter's own client has already played it).
+ * {@code rounds} is how many shells a shell-at-a-time reload loads.
  */
 public record GunActionPayload(int entity, int action, int rounds) implements CustomPacketPayload {
 	public static final int SHOOT = 0;
@@ -18,6 +18,8 @@ public record GunActionPayload(int entity, int action, int rounds) implements Cu
 	public static final int STOP = 3;
 	/** A bayonet stab (slice 7). */
 	public static final int STAB = 4;
+	/** The trigger of a gun whose barrels spin up was pulled: they begin to turn (slice 8C). */
+	public static final int SPIN = 5;
 	public static final Type<GunActionPayload> TYPE = new Type<>(Jugcraft.id("gun_action"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, GunActionPayload> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, GunActionPayload::entity,
