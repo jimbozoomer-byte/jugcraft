@@ -1476,7 +1476,8 @@ def check_guns():
     for key in [f"key.{MOD}.reload", f"key.{MOD}.inspect", f"hud.{MOD}.guns.ammo", f"hud.{MOD}.guns.reloading",
                 f"message.{MOD}.guns.no_ammo", f"death.attack.{MOD}.bullet", f"death.attack.{MOD}.flame", f"tooltip.{MOD}.guns.fits",
                 f"message.{MOD}.guns.no_charge", f"hud.{MOD}.guns.in_cells", f"death.attack.{MOD}.zap", f"tooltip.{MOD}.guns.charge",
-                f"tooltip.{MOD}.guns.fitting", f"tooltip.{MOD}.guns.fitted", f"tooltip.{MOD}.guns.stab", f"key.{MOD}.stab"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
+                f"tooltip.{MOD}.guns.fitting", f"tooltip.{MOD}.guns.fitted", f"tooltip.{MOD}.guns.stab", f"key.{MOD}.stab",
+                f"message.{MOD}.guns.no_grenades", f"tooltip.{MOD}.guns.loaded_grenade"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
                 f"tooltip.{MOD}.guns.slot.{slot}" for slot in guns.SLOTS] + [f"tooltip.{MOD}.guns.effect.{e}" for e in guns.EFFECTS]:
         if key not in lang:
             err(f"Missing name {key}")

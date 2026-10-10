@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.materials.JugcraftRegistry;
 import io.github.jimbozoomer.jugcraft.tools.Chargeable;
 import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
+import io.github.jimbozoomer.jugcraft.weapons.GrenadeItem;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -275,6 +276,11 @@ public final class JugcraftGuns {
 	public static DataComponentType<Integer> LOADED;
 	/** The attachments fitted to a gun, oldest first; one a slot, so five at most. */
 	public static DataComponentType<List<String>> FITTED;
+	/**
+	 * The grenade a grenade gun's magazine holds, by item id (slice 9G); absent for the frag Grenade, so a gun that has
+	 * only ever held those carries nothing new.
+	 */
+	public static DataComponentType<String> LOADED_GRENADE;
 	public static RecipeSerializer<GunAttachmentRecipe> ATTACHMENT_SERIALIZER;
 	public static RecipeSerializer<GunAttachmentRemovalRecipe> ATTACHMENT_REMOVAL_SERIALIZER;
 
@@ -288,6 +294,8 @@ public final class JugcraftGuns {
 		FITTED = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("attachments"),
 				DataComponentType.<List<String>>builder().persistent(Codec.STRING.listOf(0, 5))
 						.networkSynchronized(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list(5))).build());
+		LOADED_GRENADE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("loaded_grenade"),
+				DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 		ATTACHMENT_SERIALIZER = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Jugcraft.id("gun_attachment"),
 				GunAttachmentRecipe.SERIALIZER);
 		ATTACHMENT_REMOVAL_SERIALIZER = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Jugcraft.id("gun_attachment_removal"),
@@ -347,6 +355,35 @@ public final class JugcraftGuns {
 			return round;
 		}
 		return BuiltInRegistries.ITEM.getValue(spec.ammo().contains(":") ? Identifier.parse(spec.ammo()) : Jugcraft.id(spec.ammo()));
+	}
+
+	/** Whether this gun's rounds are grenades, of any kind (slice 9G: the Trench Lobber). */
+	public static boolean takesGrenades(GunSpec spec) {
+		return ammo(spec) instanceof GrenadeItem;
+	}
+
+	/**
+	 * The round in this gun's magazine. A grenade gun's is the grenade it was last loaded with (slice 9G): the frag
+	 * Grenade if it has never held another, or if the one it held is no longer known. Any other gun's is its ammunition.
+	 */
+	public static Item loadedAmmo(ItemStack stack, GunSpec spec) {
+		Item ammo = ammo(spec);
+		String kind = stack.get(LOADED_GRENADE);
+		if (kind == null || !(ammo instanceof GrenadeItem)) {
+			return ammo;
+		}
+		Identifier id = Identifier.tryParse(kind);
+		Item grenade = id == null ? null : BuiltInRegistries.ITEM.getValue(id);
+		return grenade instanceof GrenadeItem ? grenade : ammo;
+	}
+
+	/** Records the grenade a grenade gun's magazine now holds (slice 9G); the frag Grenade is recorded as none. */
+	public static void setLoadedAmmo(ItemStack stack, GunSpec spec, Item round) {
+		if (round == ammo(spec)) {
+			stack.remove(LOADED_GRENADE);
+		} else {
+			stack.set(LOADED_GRENADE, BuiltInRegistries.ITEM.getKey(round).toString());
+		}
 	}
 
 	/** Rounds one item of the gun's ammunition loads ({@link #PER_ITEM}). */

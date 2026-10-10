@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 9G (the Trench Lobber's grenades)
+- **The Trench Lobber loads any grenade:** the frag Grenade, and the chlorine, smoke and thermite grenades and the flashbang, one kind a magazine. A reload takes the grenade in the other hand first, else more of the kind it holds, else the first grenade in the inventory; changing kind puts the old grenades back in the inventory.
+- The counter shows the grenade the next reload would load, and the gun's tooltip the one it holds. Lobbers saved before keep their frag Grenades.
+- Record: [guns.md, slice 9G](docs/features/guns.md#slice-9g-the-trench-lobbers-grenades).
+
 ### Unmerged: Guns, slice 9F (the aiming polish)
 - **Aimed down a gun's sights, the view stays clear:**
   - the arms shrink to half their size as the aim comes in, so the fist sits small at the bottom of the gun instead of covering the lower middle of the screen (half of it on the long guns);

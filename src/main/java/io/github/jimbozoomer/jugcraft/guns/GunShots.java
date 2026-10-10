@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.guns;
 
 import io.github.jimbozoomer.jugcraft.tools.Chargeable;
 import io.github.jimbozoomer.jugcraft.weapons.GrenadeEntity;
+import io.github.jimbozoomer.jugcraft.weapons.GrenadeItem;
 import io.github.jimbozoomer.jugcraft.weapons.GrenadeLauncherItem;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Prediction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -37,6 +39,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -75,6 +78,9 @@ import org.jspecify.annotations.Nullable;
  * creature in its line to the first block ({@link #beam}); an arc leaps to the creature nearest the aim within the
  * spread, then on from creature to creature ({@link #arc}). Neither breaks or lights a block. Every client that sees the
  * shooter is told where the shot went ({@link GunTracePayload}), to draw it.</li>
+ * <li>Slice 9G: a grenade gun loads any grenade, one kind at a time ({@link #reloadAmmo}): the one in the other hand,
+ * else the kind it holds while the inventory has one, else the first grenade in the inventory. A reload of another
+ * kind first puts what the magazine held back in the inventory ({@link #load}). It lobs the kind it holds.</li>
  * </ul>
  */
 public final class GunShots {
@@ -157,7 +163,7 @@ public final class GunShots {
 		boolean aiming = GunItem.aiming(player, stack);
 		float spread = aiming ? spec.aimSpread() : spec.hipSpread();
 		switch (JugcraftGuns.shot(gun)) {
-			case JugcraftGuns.GRENADE -> lob(level, player, spec, spread);
+			case JugcraftGuns.GRENADE -> lob(level, player, stack, spec, spread);
 			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
 			case JugcraftGuns.BEAM -> beam(level, player, spec, spread);
 			case JugcraftGuns.ARC -> arc(level, player, spec, spread);
@@ -259,17 +265,19 @@ public final class GunShots {
 			return false;
 		}
 		GunSpec spec = GunItem.spec(stack);
-		int room = spec.capacity() - GunItem.loaded(stack);
+		Item ammo = reloadAmmo(player, stack, spec);
+		int room = room(stack, spec, ammo, GunItem.loaded(stack));
 		if (room <= 0) {
 			return false;
 		}
-		int rounds = player.hasInfiniteMaterials() ? room : Math.min(room, stocked(player.getInventory(), gun, spec));
+		int rounds = player.hasInfiniteMaterials() ? room : Math.min(room, stocked(player.getInventory(), gun, spec, ammo));
 		if (rounds <= 0) {
 			player.sendOverlayMessage(JugcraftGuns.charge(gun) > 0 ? Component.translatable("message.jugcraft.guns.no_charge")
-					: Component.translatable("message.jugcraft.guns.no_ammo", Component.translatable(JugcraftGuns.ammo(spec).getDescriptionId())));
+					: JugcraftGuns.takesGrenades(spec) ? Component.translatable("message.jugcraft.guns.no_grenades")
+					: Component.translatable("message.jugcraft.guns.no_ammo", Component.translatable(ammo.getDescriptionId())));
 			return false;
 		}
-		RELOADS.put(player.getUUID(), new Reload(stack, spec, ((ServerLevel) player.level()).getGameTime(), rounds));
+		RELOADS.put(player.getUUID(), new Reload(stack, spec, ((ServerLevel) player.level()).getGameTime(), rounds, ammo));
 		announce(player, GunActionPayload.RELOAD, rounds);
 		return true;
 	}
@@ -292,7 +300,7 @@ public final class GunShots {
 			if (spec.byShell()) {
 				// One shell lands at the end of each shell's time; the gun closes after the last.
 				while (reload.done < reload.rounds && elapsed >= spec.shellStart() + (long) spec.shellEach() * (reload.done + 1)) {
-					if (load(player, reload.stack, spec, 1) == 0) {
+					if (load(player, reload.stack, spec, 1, reload.ammo) == 0) {
 						reload.rounds = reload.done; // ran out (or the gun is full)
 						break;
 					}
@@ -302,18 +310,28 @@ public final class GunShots {
 					it.remove();
 				}
 			} else if (elapsed >= spec.reload()) {
-				load(player, reload.stack, spec, reload.rounds);
+				load(player, reload.stack, spec, reload.rounds, reload.ammo);
 				it.remove();
 			}
 		}
 	}
 
 	/**
-	 * Moves up to this many rounds from the inventory into the gun (any it has room for, free in creative). Ammunition an
-	 * item of which loads several rounds is taken whole: the last item's rounds that do not fit are lost. An energy
-	 * weapon's rounds are its cells' charge, drawn round by round (slice 8D).
+	 * Moves up to this many rounds of this ammunition from the inventory into the gun (any it has room for, free in
+	 * creative). Ammunition an item of which loads several rounds is taken whole: the last item's rounds that do not fit
+	 * are lost. An energy weapon's rounds are its cells' charge, drawn round by round (slice 8D). A grenade gun loading
+	 * another kind of grenade than it holds first empties its magazine into the inventory (slice 9G; what does not fit
+	 * drops at the player's feet, and in creative it is simply emptied).
 	 */
-	private static int load(ServerPlayer player, ItemStack stack, GunSpec spec, int wanted) {
+	private static int load(ServerPlayer player, ItemStack stack, GunSpec spec, int wanted, Item ammo) {
+		if (ammo != JugcraftGuns.loadedAmmo(stack, spec)) {
+			int held = GunItem.loaded(stack);
+			if (held > 0 && !player.hasInfiniteMaterials()) {
+				player.getInventory().placeItemBackInInventory(new ItemStack(JugcraftGuns.loadedAmmo(stack, spec), held), Prediction.SERVER_ONLY);
+			}
+			GunItem.setLoaded(stack, 0);
+			JugcraftGuns.setLoadedAmmo(stack, spec, ammo);
+		}
 		int room = spec.capacity() - GunItem.loaded(stack);
 		int rounds = Math.min(wanted, room);
 		if (rounds <= 0) {
@@ -322,15 +340,49 @@ public final class GunShots {
 		if (!player.hasInfiniteMaterials()) {
 			int charge = JugcraftGuns.charge((GunItem) stack.getItem());
 			if (charge > 0) {
-				rounds = (int) Math.min(rounds, charged(player.getInventory(), JugcraftGuns.ammo(spec)) / charge);
-				draw(player.getInventory(), JugcraftGuns.ammo(spec), (long) rounds * charge);
+				rounds = (int) Math.min(rounds, charged(player.getInventory(), ammo) / charge);
+				draw(player.getInventory(), ammo, (long) rounds * charge);
 			} else {
 				int per = JugcraftGuns.perItem(spec);
-				rounds = Math.min(rounds, take(player.getInventory(), JugcraftGuns.ammo(spec), (rounds + per - 1) / per) * per);
+				rounds = Math.min(rounds, take(player.getInventory(), ammo, (rounds + per - 1) / per) * per);
 			}
 		}
 		GunItem.setLoaded(stack, GunItem.loaded(stack) + rounds);
 		return rounds;
+	}
+
+	/**
+	 * The ammunition a reload of this gun loads. A grenade gun takes any grenade (slice 9G): the one in the other hand;
+	 * else the kind its magazine holds, while the inventory has one; else the first grenade in the inventory; and with
+	 * none at all, the kind it holds. Any other gun takes its own ammunition. The client chooses the same, for its reload
+	 * and its counter.
+	 */
+	public static Item reloadAmmo(Player player, ItemStack stack, GunSpec spec) {
+		Item held = JugcraftGuns.loadedAmmo(stack, spec);
+		if (!JugcraftGuns.takesGrenades(spec)) {
+			return held;
+		}
+		if (player.getOffhandItem().getItem() instanceof GrenadeItem other) {
+			return other;
+		}
+		Inventory inventory = player.getInventory();
+		if (count(inventory, held) > 0) {
+			return held;
+		}
+		for (int i = 0; i < inventory.getContainerSize(); i++) {
+			if (inventory.getItem(i).getItem() instanceof GrenadeItem grenade) {
+				return grenade;
+			}
+		}
+		return held;
+	}
+
+	/**
+	 * Rounds a reload of this ammunition has room for, with this many loaded: all the magazine holds if it is another
+	 * kind than the gun holds (slice 9G), which the reload puts back in the inventory first.
+	 */
+	public static int room(ItemStack stack, GunSpec spec, Item ammo, int loaded) {
+		return spec.capacity() - (ammo == JugcraftGuns.loadedAmmo(stack, spec) ? loaded : 0);
 	}
 
 	/**
@@ -339,11 +391,16 @@ public final class GunShots {
 	 * {@link JugcraftGuns#CHARGE}. The client counts the same for its reload and its counter.
 	 */
 	public static int stocked(Inventory inventory, GunItem gun, GunSpec spec) {
+		return stocked(inventory, gun, spec, JugcraftGuns.ammo(spec));
+	}
+
+	/** The same, of this ammunition (slice 9G: the grenade a grenade gun's reload loads, {@link #reloadAmmo}). */
+	public static int stocked(Inventory inventory, GunItem gun, GunSpec spec, Item ammo) {
 		int charge = JugcraftGuns.charge(gun);
 		if (charge > 0) {
-			return (int) Math.min(Integer.MAX_VALUE, charged(inventory, JugcraftGuns.ammo(spec)) / charge);
+			return (int) Math.min(Integer.MAX_VALUE, charged(inventory, ammo) / charge);
 		}
-		return count(inventory, JugcraftGuns.ammo(spec)) * JugcraftGuns.perItem(spec);
+		return count(inventory, ammo) * JugcraftGuns.perItem(spec);
 	}
 
 	/** The JE the inventory's stacks of this chargeable item hold together (a cell stacks alone). */
@@ -463,13 +520,13 @@ public final class GunShots {
 	}
 
 	/**
-	 * Lobs one of the gun's grenades (slice 8C): a Grenade from the eye along the look, as fast as the grenade launcher
-	 * throws one and strayed by about the gun's spread in degrees. It bursts where it lands ({@link GrenadeEntity}),
-	 * hurting the living things near it, and breaks no block.
+	 * Lobs one of the gun's grenades (slice 8C): a grenade from the eye along the look, as fast as the grenade launcher
+	 * throws one and strayed by about the gun's spread in degrees. It goes off where it lands as its kind does
+	 * ({@link GrenadeEntity}; slice 9G: the kind the magazine holds), and breaks no block.
 	 */
-	private static void lob(ServerLevel level, ServerPlayer player, GunSpec spec, float spread) {
-		Projectile.spawnProjectileFromRotation(GrenadeEntity::new, level, new ItemStack(JugcraftGuns.ammo(spec)), player, 0.0F,
-				GrenadeLauncherItem.LAUNCH_SPEED, spread);
+	private static void lob(ServerLevel level, ServerPlayer player, ItemStack stack, GunSpec spec, float spread) {
+		Projectile.spawnProjectileFromRotation(GrenadeEntity::new, level, new ItemStack(JugcraftGuns.loadedAmmo(stack, spec)), player,
+				0.0F, GrenadeLauncherItem.LAUNCH_SPEED, spread);
 		smoke(level, player);
 	}
 
@@ -693,14 +750,17 @@ public final class GunShots {
 		final ItemStack stack;
 		final GunSpec spec;
 		final long start;
+		/** What it loads (slice 9G: a grenade gun's kind of grenade). */
+		final Item ammo;
 		int rounds;
 		int done;
 
-		Reload(ItemStack stack, GunSpec spec, long start, int rounds) {
+		Reload(ItemStack stack, GunSpec spec, long start, int rounds, Item ammo) {
 			this.stack = stack;
 			this.spec = spec;
 			this.start = start;
 			this.rounds = rounds;
+			this.ammo = ammo;
 		}
 	}
 }
