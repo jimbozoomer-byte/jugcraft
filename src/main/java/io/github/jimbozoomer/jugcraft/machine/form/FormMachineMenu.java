@@ -79,16 +79,17 @@ public class FormMachineMenu extends AbstractContainerMenu {
 			});
 		}
 		for (int socket = 0; socket < form.sockets().size(); socket++) {
-			int index = socket;
+			// Not "index": inside the slot that name is Slot's own field (its place in the menu), not the socket.
+			int number = socket;
 			addSlot(new Slot(container, form.firstSocketSlot() + socket, toolX(socket), toolY(socket)) {
 				@Override
 				public boolean mayPlace(ItemStack stack) {
-					return form.sockets().get(index).accepts(stack) && !locked(index);
+					return form.sockets().get(number).accepts(stack) && !locked(number);
 				}
 
 				@Override
 				public boolean mayPickup(Player player) {
-					return !locked(index);
+					return !locked(number);
 				}
 
 				@Override
