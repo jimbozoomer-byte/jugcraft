@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -479,29 +480,38 @@ public final class GunShots {
 
 	/** Fires every pellet of one shot and deals what hit. */
 	private static void shoot(ServerLevel level, ServerPlayer player, GunSpec spec, float spread) {
-		Vec3 eye = player.getEyePosition();
-		Vec3 look = player.getLookAngle();
-		RandomSource random = player.getRandom();
+		bullets(level, player, player.getEyePosition(), player.getLookAngle(), spec, spread, spec.damage(),
+				candidate -> target(player, candidate), candidate -> allowed(player, level, candidate));
+	}
+
+	/**
+	 * Fires every pellet of one shot from {@code eye} along {@code look}, strayed by {@code spread}, each to the first
+	 * block or creature in the gun's range that {@code hittable} lets it strike (others are passed through), and deals
+	 * {@code damage} a pellet to each creature it hits that {@code allowed} lets the shooter strike; a shotgun's pellets
+	 * on one creature land as one hit. A player's shots and, slice 10F, a raider gunner's ({@link MobGuns}) fire this way.
+	 */
+	static void bullets(ServerLevel level, LivingEntity shooter, Vec3 eye, Vec3 look, GunSpec spec, float spread, float damage,
+			Predicate<LivingEntity> hittable, Predicate<LivingEntity> allowed) {
+		RandomSource random = shooter.getRandom();
 		Map<LivingEntity, Float> hits = new LinkedHashMap<>();
 		for (int i = 0; i < spec.pellets(); i++) {
 			Vec3 direction = stray(look, spread, random);
 			Vec3 end = eye.add(direction.scale(spec.range()));
-			BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+			BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter));
 			if (block.getType() != HitResult.Type.MISS) {
 				end = block.getLocation();
 			}
 			LivingEntity target = null;
 			double nearest = Double.MAX_VALUE;
-			for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(1.0),
-					candidate -> target(player, candidate))) {
+			for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(1.0), hittable)) {
 				var clip = candidate.getBoundingBox().inflate(HIT_MARGIN).clip(eye, end);
 				if (clip.isPresent() && clip.get().distanceToSqr(eye) < nearest) {
 					nearest = clip.get().distanceToSqr(eye);
 					target = candidate;
 				}
 			}
-			if (target != null && allowed(player, level, target)) {
-				hits.merge(target, spec.damage(), Float::sum);
+			if (target != null && allowed.test(target)) {
+				hits.merge(target, damage, Float::sum);
 				Vec3 at = eye.add(direction.scale(Math.sqrt(nearest)));
 				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 2, 0.05, 0.05, 0.05, 0.1);
 			} else if (block.getType() != HitResult.Type.MISS) {
@@ -512,16 +522,20 @@ public final class GunShots {
 			}
 		}
 		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
-				.getOrThrow(JugcraftGuns.BULLET), player, player);
+				.getOrThrow(JugcraftGuns.BULLET), shooter, shooter);
 		// Guns fire faster than the half second a creature is shielded after a hit; the bullet damage type is tagged
 		// minecraft:bypasses_cooldown, so each shot counts.
-		hits.forEach((target, damage) -> target.hurtServer(level, source, damage));
-		smoke(level, player);
+		hits.forEach((target, dealt) -> target.hurtServer(level, source, dealt));
+		smoke(level, eye, look);
 	}
 
 	/** A shot's puff of smoke at the muzzle. */
 	private static void smoke(ServerLevel level, ServerPlayer player) {
-		Vec3 muzzle = player.getEyePosition().add(player.getLookAngle().scale(0.9)).add(0.0, -0.15, 0.0);
+		smoke(level, player.getEyePosition(), player.getLookAngle());
+	}
+
+	private static void smoke(ServerLevel level, Vec3 eye, Vec3 look) {
+		Vec3 muzzle = eye.add(look.scale(0.9)).add(0.0, -0.15, 0.0);
 		level.sendParticles(ParticleTypes.SMOKE, muzzle.x, muzzle.y, muzzle.z, 2, 0.03, 0.03, 0.03, 0.01);
 	}
 

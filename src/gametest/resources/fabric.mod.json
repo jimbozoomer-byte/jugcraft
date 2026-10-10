@@ -140,6 +140,7 @@
 			"io.github.jimbozoomer.jugcraft.test.DoubleBarrelGunsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SculkGunsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CellRackGameTests",
+			"io.github.jimbozoomer.jugcraft.test.RaiderGunnerGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ThalliteGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ThalliteGearGameTests",

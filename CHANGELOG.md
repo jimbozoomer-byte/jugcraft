@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 10F (enemies with guns)
+- **A new raider, the Raider Gunner,** who carries one of the owner's service arms (the Sentry Pistol, Garrison Rifle or Breacher) and fires it: the gun's own bullets at half their damage, in bursts, with the gun's magazine and reload time. Its bullets pass through raiders.
+- Gunners march in raids in place of some of the grunts (parties are as large as before), and one holds each raider camp. While the guns are switched off, grunts come in their places.
+- A player's kill may win its gun (8.5%, empty) and a few of its rounds. Mobs holding a gun are now posed holding it as players are.
+- The raiders' record: the party table, the camp's garrison, the gunner's loot, and the level 5 party's size (14, not 15).
+- Record: [guns.md, slice 10F](docs/features/guns.md#slice-10f-enemies-with-guns); [raiders.md](docs/features/raiders.md).
+
 ### Unmerged: Guns, slice 10E (the Cell Rack)
 - **A new block, the Cell Rack:** two shelves of three cradles that charge every Energy Cell standing in them at once from cables, sharing up to 1,024 JE a tick evenly, no more than the Charging Station's 512 to one cell. Stand a cell in the cradle you point at, take one out with an empty hand; hoppers above or beside it put cells in, and a hopper below takes out only full ones.
 - Made from the Charging Station's parts, a steel plate in place of its lamp; it needs the guns and machines switches, as the Energy Cell does. It is drawn in the power gear's electric look, the cells standing upright in it.

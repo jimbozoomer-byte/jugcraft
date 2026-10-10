@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D) and the Cell Rack (slice 10E)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E) and enemies with guns (slice 10F)
 
 Status:
 - **Slices 1 to 9G are in `main`:** the last of them, 8C to 9G, with #277 on 10 October 2026. The lines below say where each was built.
@@ -26,6 +26,7 @@ Status:
 - **Slice 10C** (the double-barrels: the Mule, Fowler and Culverin; [below](#slice-10c-the-double-barrels)): implemented on `claude/guns-double-barrels`, stacked on slice 10B, awaiting review.
 - **Slice 10D** (the sculk guns: the Undertone Rifle, Murmur SMG and Reverb; [below](#slice-10d-the-sculk-guns)): implemented on `claude/guns-sculk`, stacked on slice 10C, awaiting review.
 - **Slice 10E** (the Cell Rack, which charges six Energy Cells at once; [below](#slice-10e-the-cell-rack)): implemented on `claude/guns-cell-rack`, stacked on slice 10D, awaiting review.
+- **Slice 10F** (enemies with guns: the Raider Gunner, who carries and fires the service arms; [below](#slice-10f-enemies-with-guns)): implemented on `claude/guns-raider-gunners`, stacked on slice 10E, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -39,7 +40,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
 - the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, the second, the aiming polish, slice 9F, and the third, the Lobber's grenades, slice 9G.
-- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B, the double-barrels slice 10C and the sculk guns slice 10D; the Energy Cell rack is slice 10E.
+- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B, the double-barrels slice 10C and the sculk guns slice 10D; the Energy Cell rack is slice 10E and the enemies with guns slice 10F.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1442,6 +1443,70 @@ The first of the systems the owner chose on 10 October 2026 to go with the gun s
 - **No comparator output** and no charge shown on the block itself; the screen only says whether it is charging.
 - **Not played:** none of it has been played yet.
 
+## Slice 10F: enemies with guns
+The second of the systems the owner chose on 10 October 2026 to go with the gun sets ("Enemies with guns", offered as "Mobs that carry and fire your guns and can drop them."): the **Raider Gunner**, a fourth kind of raider infantry ([raiders.md](raiders.md)), who carries one of the owner's service arms (slice 8B) and fires it.
+
+| | Sentry Pistol | Garrison Rifle | Breacher |
+|---|---|---|---|
+| Carried by | 4 gunners in 10 | 3 in 10 | 3 in 10 |
+| Fired from | up to 16 blocks | 24 | 8 |
+| A shot | 2.5, half the gun's 5 | bursts of three, 2 a round (the gun's 4) | 8 pellets of 1.5 (12 if all land) |
+| Between shots | 1.55 s | 0.2 s in a burst, 1.55 s after it | 1.55 s |
+| Magazine and reload | 8, then 2.35 s | 30, then 2.65 s | 6, then 2.6 s |
+| Over a magazine and its reload, every shot landing | about 1.4 a second | 2.7 | 6 at point blank |
+
+The gunner has 20 health, 2 armour and the grenadier's pace (0.28).
+
+**Where they come from:**
+- **Raids:** gunners march in place of some of the grunts: one at raid levels 1 and 2, two at 3 and 4, three at 5. Each party is as large as before ([raiders.md](raiders.md#raids)).
+- **Camps:** one of the two grunts holding a raider camp is now a gunner.
+- **Summoned:** `/summon jugcraft:raider_gunner`; a summoned one belongs to no raid and despawns like any monster.
+- **The guns switched off** (`guns.enabled=false`): grunts come in the gunners' places, so no gun can be won this way. Gunners already in the world stay.
+
+**How it fights:**
+- **Its quarry:** as every raider's: players and the town's folk, and whatever hurts it.
+- **Closing in:** it goes after its target until it can see it from within its gun's reach, then stands and fires.
+- **A shot:** from its eye at the middle of its target, strayed by the gun's spread from the hip, through the players' bullet code (`GunShots.bullets`). Each bullet goes to the first block or creature in the gun's range.
+- **Its rate:** the Garrison Rifle fires bursts of three at its own interval; the pistol and the shotgun fire one shot. After each, the gunner waits 30 ticks.
+- **Its magazine:** it counts its rounds, and when they run out it reloads for the gun's own reload time. It needs no rounds of its own.
+- **Its side:** its bullets pass through raiders, as raiders' grenades do, and through marker stands and whatever it rides. Anything else in the way is hit.
+- **Difficulty:** the bullet damage type scales against players as any monster's attack does. Easy halves a hit and adds one (at most the whole hit); Hard adds half. Against creatures, a hit is as above.
+
+**What it drops** (to a player's kill):
+- **Its gun,** about one time in twelve: 8.5%, vanilla's chance for a mob's equipment, more with Looting. Nothing is loaded in it.
+- **Rounds:** 0 to 3 of its gun's ammunition: Light Rounds, Rifle Rounds or Buckshot Shells. The loot table picks them by the gun in its hand (`jugcraft:entities/raider_gunner`).
+
+**What you see:**
+- **The gunner:** a grey-green greatcoat, a belt of brass rounds across the chest, a soft field cap and goggles. It is drawn by `tools/raiders.py` beside the other uniforms.
+- **The gun:** held raised along its look as a player holds one (slice 6's hold, now given to any mob holding a gun): the rifle and the shotgun in both hands, the pistol in one.
+- **Its shots:** the clients that see it play the gun's shot and reload animations and its flash, as they do for another player. Everyone near hears the gun's own sound.
+
+**How it works:**
+- **`guns/MobGuns`:** the arms (`ARMS`), the share of damage, the burst, the pause and the drop chance, and the AI goal (`FireGoal`) that fires and reloads. It fires through the bullet code the players' shots now share with it, and tells the clients that see the gunner what its gun does (`GunActionPayload`).
+- **`raiders/RaiderInfantry`:** the gunner's role. It carries a gun picked by the arms' weights. The gun gets its animation id on the server as it is picked, since a mob's equipment is not ticked as an inventory's is.
+- **Its numbers:** in `tools/guns.py` (`MOB_*`). `tools/check_mod_data.py` checks `MobGuns` against them, and that each arm fires bullets. The gunner's stats and the raids' party table are checked against `tools/raiders.py`, as the other raiders' are.
+
+**Connections:**
+- **The raiders** (batch 57): a fourth kind of infantry, in raids and camps.
+- **The guns:** the service arms (slice 8B) and their rounds. The fight is a second way to them, rare beside crafting.
+- **Defences:** as against every raider: the tower guns, the sentries and the town's guards.
+
+**Balance:**
+- **The gunners' rate:** at half the guns' damage, in bursts and with reloads, the pistol and the rifle do less a second than a grunt's blows (at least 5 a hit, once a second). The shotgun does about as much only at point blank; it closes to 8 blocks, where its pellets spread.
+- **No new raiders:** a raid's party is as large as before; raids still come at most once every few days.
+- **The drops:** a gun one time in twelve, empty. Rounds only to a player's kill. Nothing converts back.
+
+**Save compatibility:**
+- A new entity, `jugcraft:raider_gunner`. Its gun is saved with it as any mob's equipment is. Nothing saved before changes.
+- A raid saved in the middle keeps its members.
+- **Going back** to a build from before this slice: that build does not know the gunner. How it loads a world holding one was not tested, so back the world up first.
+
+**Known limits:**
+- **Bullet guns only:** gunners fire only guns that fire bullets. The beam, arc, flame, grenade and rocket guns stay the players' alone.
+- **No tactics:** they stand and fire once they see their target within reach. They do not take cover, flank or strafe.
+- **The owner's gun-mob art:** the owner's library holds textures and sounds for Scorched Guns 2-style gun mobs: the Blunderer, Dissident, Hornlin, Cog Knight and others. It does not hold their models, so they could not be built here. With the models, they could carry the guns by the same code.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -1499,6 +1564,7 @@ The first of the systems the owner chose on 10 October 2026 to go with the gun s
   - Hoppers move cells by the container rules above, on the server.
   - It saves its buffer and its cells; a cell keeps its charge as the shared `jugcraft:energy` component.
   - Each tick, a rack looks at its six cradles and charges up to six cells; it loads no chunks.
+- **Raider gunners (slice 10F):** the server alone works out a gunner's shots, from its own position toward its target, with the same bullet code as a player's. The clients that see it are told of each shot and reload (`GunActionPayload`, the gunner's id), only to play them. A gunner's magazine count lives in its AI and is not saved; one loaded from a save starts with a full magazine.
 - **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns', rounds' and attachments' recipes (twenty-nine with slice 5: sixteen guns and rounds, eleven attachments, and the fitting and removal recipes). Items and the attachments component stay registered, so saved guns, rounds and attachments survive with it off.
 
 ## The shared parts it uses
@@ -3052,21 +3118,38 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `playersStandCellsInTheirCradles`: a player, through the server's block use, stands a cell in the upper right cradle, then the next beside it when that is full, a cell from the hand each time; with an empty hand, pointing at the lower left, they take the nearest cell, the upper middle one, into their inventory.
     - `hoppersLoadCellsAndTakeFullOnes`: a hopper above holding a stick and two cells stands the cells in the first two cradles and keeps the stick; a hopper below takes the full cell and leaves the half-charged one.
     - `cellRackKeepsAndDropsItsCells`: saved and loaded, it keeps its buffer and each cell's charge; broken, it drops itself and both cells, each with its charge.
+- **Slice 10F, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every gun's files came out unchanged.
+  - `python3 tools/generate_material_data.py`: wrote the gunner's name and its loot table.
+  - The raider uniforms (`tools/raiders.py`): the gunner's drawn; the other three came out byte for byte as before.
+  - `python3 tools/check_mod_data.py`: PASS (2162 material IDs), with `check_guns` (`MobGuns` against tools/guns.py, and each arm a gun that fires bullets) and `check_raiders` (the gunner's stats and the party table against tools/raiders.py).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews:** the four raider uniforms from the front, the gunner's beside the others.
+- **Slice 10F game tests (written; they run in CI):**
+  - `RaiderGunnerGameTests`:
+    - `raiderGunnersAreRegistered`: the gunner is registered with its gunfire and carries one of the arms; a hundred gunners carry all three between them; at every raid level the gunners take the places of grunts, so the party is as large as before; and its loot table loads.
+    - `raiderGunnerShootsWhatItHunts`: a gunner with a Garrison Rifle shoots the pig it hunts, nine blocks off; the pig loses whole hits of half the rifle's damage, and the gunner's magazine goes down.
+    - `raiderGunnersSpareRaiders`: a gunner with a Sentry Pistol hits the pig past a grunt standing in the line of fire, and the grunt is not hurt.
+    - `raiderGunnerReloadsWhenEmpty`: a gunner with a Breacher fires its six shells at the pig, then reloads an empty magazine.
+    - `raiderGunnersGunDropsEmpty`: killed by a player (its drop chance made certain for the test), a gunner drops its Sentry Pistol with nothing loaded, and no rounds but up to three Light Rounds.
+  - `raidIsWonWhenEveryRaiderFalls` (the raiders' test) counts a level 1 party of two grunts, a gunner, a grenadier and an officer.
+  - `GunsClientGameTests`: three gunners, one with each arm, stand four blocks off facing the player with nothing in hand; the test checks that the gun hold posed them, and takes the screenshot `jugcraft_guns_raider_gunners`.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
-Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come only from crafting (and the creative tab).
+Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). Slice 10F's raider gunners, in raids and raider camps, may also drop their service arms and rounds.
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
-- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A), the coil and plasma guns (slice 10B), the double-barrels (slice 10C) and the sculk guns (slice 10D); a rack that charges several Energy Cells at once (slice 10E), enemies with guns and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
+- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A), the coil and plasma guns (slice 10B), the double-barrels (slice 10C) and the sculk guns (slice 10D); a rack that charges several Energy Cells at once (slice 10E), enemies with guns (slice 10F) and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
 - **Aimed, the gun hand covered the sights** in the CI screenshots from 8 October, and a fitted stock came up under the eye: slice 9F draws the arms at half size aimed and leaves a fitted stock out ([above](#slice-9f-the-aiming-polish)).
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - off-hand guns (pistols in both hands, chosen on 10 October 2026, a later pull request);
-  - mob use (chosen on 10 October 2026, a later pull request);
+  - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the guns beyond these sets.
 - **Balance:** the numbers are starting points for the owner to set.
