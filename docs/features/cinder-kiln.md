@@ -1,6 +1,6 @@
 # The Cinder Kiln, and the Kiln Seal
 
-Status: implemented in source; CI passes (below), and its client test's pictures are in the record. Part 1 of boss 4, the Cinder Tyrant, in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Cinder Kiln, a fourth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Cinder Tyrant and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI passes (below), and its client test's pictures are in the record. Part 1 of boss 4, the Cinder Tyrant, in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Cinder Kiln, a fourth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Cinder Tyrant and his loot are part 2, in their own pull request ([cinder-tyrant.md](cinder-tyrant.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 10 October 2026 the owner asked to "do the next boss same way" as the Yeti King; the Cinder Tyrant is the next of the first eight in the bosses brainstorm, and the planning pack's "Kiln Beneath the Mountain" ([chapter 05](../plans/concordance-expansion-2026-10-10/05-new-boss-compendium.md)).
 
 Target milestone and tier: Specialization tier (dungeon expeditions), as the other lairs are. The seal takes what a player has once they reach the Nether: obsidian, blaze powder, gold and a magma block.
@@ -40,7 +40,8 @@ A kiln hollowed out of a volcano's roots, 72 blocks across, 46 high and 80 long.
   - Then the gate closes and the trough drains, and the gate fills again for 20 seconds. Turned meanwhile, it only says "The sluice is already open" or "The sluice is filling again".
   - A ready gate seeps water at its foot.
   - Standing in a flooded trough puts out the burning, with a hiss of steam.
-  - The flooded troughs are where the Tyrant's Body Slam will quench him (part 2).
+  - The flooded troughs are where the Tyrant's Body Slam quenches him ([cinder-tyrant.md](cinder-tyrant.md)).
+  - In his Eruption one gate at a time is **choked** with slag: a glowing crust over its panels, embers at its foot, and turned, it says "Slag chokes the sluice: it will not turn". The choke moves from gate to gate, and every gate is clear again when the fight ends. Part 2 added this fourth state of the gate.
 - **The shelves:** four raised shelves of smooth basalt, rimmed with polished basalt, round the bowl (north-west, north-east, south-west and south-east), a step up. The slag never reaches them.
 - **The light:** hidden light blocks, and the slag's own glow.
 

@@ -35,8 +35,9 @@ import org.jspecify.annotations.Nullable;
  * any player in the kiln may turn a gate by using any block of it. A gate that is {@link Flow#READY ready} opens: its
  * panels rise, and the trough of {@link TroughStoneBlock trough stone} running from under it floods for
  * {@value #FLOOD_TICKS} ticks. Then it closes, the trough drains, and it {@link Flow#FILLING fills} again for
- * {@value #REFILL_TICKS} ticks before it can be turned again; turned meanwhile, it only says so. Everything happens on the
- * server, on the block ticks the gate schedules.
+ * {@value #REFILL_TICKS} ticks before it can be turned again; turned meanwhile, it only says so. In the Cinder Tyrant's
+ * Eruption one gate at a time is {@link Flow#CHOKED choked} with slag and will not turn at all ({@link #choke}). Everything
+ * happens on the server, on the block ticks the gate schedules.
  *
  * <p>A gate's blocks are found by walking from the one used through the blocks of the gate touching it (at most
  * {@value #GATE_BLOCKS}), its trough by walking from under the gate along the trough stone touching it (at most
@@ -53,9 +54,9 @@ public class SluiceGateBlock extends Block {
 		}
 	}
 
-	/** Where a gate is in its turn (tools/lairs.py SLUICE_FLOWS): ready to open, open, or filling again. */
+	/** Where a gate is in its turn (tools/lairs.py SLUICE_FLOWS): ready to open, open, filling again, or choked with slag. */
 	public enum Flow implements StringRepresentable {
-		READY, OPEN, FILLING;
+		READY, OPEN, FILLING, CHOKED;
 
 		@Override
 		public String getSerializedName() {
@@ -65,7 +66,7 @@ public class SluiceGateBlock extends Block {
 
 	/** What turning a gate did. */
 	public enum Turn {
-		OPENED, ALREADY_OPEN, FILLING, NOT_A_GATE
+		OPENED, ALREADY_OPEN, FILLING, CHOKED, NOT_A_GATE
 	}
 
 	public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
@@ -121,10 +122,17 @@ public class SluiceGateBlock extends Block {
 		Flow flow = state.getValue(FLOW);
 		if (flow != Flow.READY) {
 			if (player != null) {
-				player.sendOverlayMessage(Component.translatable(flow == Flow.OPEN ? "message.jugcraft.lair.sluice.open"
-						: "message.jugcraft.lair.sluice.filling"));
+				player.sendOverlayMessage(Component.translatable(switch (flow) {
+					case OPEN -> "message.jugcraft.lair.sluice.open";
+					case CHOKED -> "message.jugcraft.lair.sluice.choked";
+					default -> "message.jugcraft.lair.sluice.filling";
+				}));
 			}
-			return flow == Flow.OPEN ? Turn.ALREADY_OPEN : Turn.FILLING;
+			return switch (flow) {
+				case OPEN -> Turn.ALREADY_OPEN;
+				case CHOKED -> Turn.CHOKED;
+				default -> Turn.FILLING;
+			};
 		}
 		Set<BlockPos> gate = gate(level, pos);
 		set(level, gate, Flow.OPEN);
@@ -153,9 +161,42 @@ public class SluiceGateBlock extends Block {
 				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0F, 0.7F);
 			}
 			default -> {
-				// A tick left over from an earlier instance of the kiln, or a gate already ready: nothing to do.
+				// A tick left over from an earlier instance of the kiln, or from before the gate was choked or reset, or a
+				// gate already ready: nothing to do.
 			}
 		}
+	}
+
+	/**
+	 * Chokes the gate {@code pos} is part of with slag, or clears it ready to turn (the Cinder Tyrant's Eruption). A gate
+	 * choked while open closes at once and its trough drains. Returns whether the gate changed.
+	 */
+	public static boolean choke(ServerLevel level, BlockPos pos, boolean choked) {
+		BlockState state = level.getBlockState(pos);
+		if (!(state.getBlock() instanceof SluiceGateBlock)) {
+			return false;
+		}
+		Flow flow = state.getValue(FLOW);
+		if (choked == (flow == Flow.CHOKED)) {
+			return false;
+		}
+		Set<BlockPos> gate = gate(level, pos);
+		if (choked && flow == Flow.OPEN) {
+			flood(level, trough(level, gate), false);
+		}
+		set(level, gate, choked ? Flow.CHOKED : Flow.READY);
+		level.playSound(null, pos, choked ? SoundEvents.FIRECHARGE_USE : SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, 0.6F);
+		return true;
+	}
+
+	/** Sets the gate {@code pos} is part of ready to turn and drains its trough (a fight that ends or resets). */
+	public static void reset(ServerLevel level, BlockPos pos) {
+		if (!(level.getBlockState(pos).getBlock() instanceof SluiceGateBlock)) {
+			return;
+		}
+		Set<BlockPos> gate = gate(level, pos);
+		flood(level, trough(level, gate), false);
+		set(level, gate, Flow.READY);
 	}
 
 	/** The blocks of the gate {@code pos} is part of, touching one another (at most {@value #GATE_BLOCKS}). */
@@ -233,6 +274,11 @@ public class SluiceGateBlock extends Block {
 			// A ready gate holds back its stream: water seeps from under it.
 			level.addParticle(ParticleTypes.DRIPPING_WATER, x + (random.nextDouble() - 0.5) * 0.8, pos.getY() + 0.2,
 					z + (random.nextDouble() - 0.5) * 0.8, 0.0, 0.0, 0.0);
+		} else if (state.getValue(FLOW) == Flow.CHOKED && random.nextInt(4) == 0) {
+			// Slag oozing from its seams, smoking.
+			level.addParticle(random.nextInt(3) == 0 ? ParticleTypes.LAVA : ParticleTypes.FLAME,
+					x + (random.nextDouble() - 0.5) * 0.8, pos.getY() + random.nextDouble(), z + (random.nextDouble() - 0.5) * 0.8,
+					0.0, 0.0, 0.0);
 		}
 	}
 }

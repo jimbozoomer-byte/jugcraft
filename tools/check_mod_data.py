@@ -9156,6 +9156,283 @@ def check_yeti():
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
 
+def check_cinder_tyrant():
+    """The Cinder Tyrant (tools/cinder_tyrant.py, docs/features/cinder-tyrant.md): every number the Java uses is the
+    table's; his attacks are the table's, and his rule holds (blows on him do less than their damage while he is hot,
+    more while quenched; a sluice's flood outlasts a Body Slam's wind-up and flight, so a turned sluice can catch one);
+    where his fight looks for the Cinder Kiln's parts (CinderKiln.java) is where tools/cinder_kiln.py builds them, the
+    sluices' wheels are the gates' own, and the places he waits sunk, crawls out to, roars from and sets his Cinderlings
+    and the Grey Mist on are as the kiln is built (sunk in the crucible's slag with only his crest over it, the rest clear
+    and on the floor); his gobs leave from where his model's jaws meet; every entity is registered, named and drawn;
+    each GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions inside the sheet
+    without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model declares and cut out; no bone is
+    animated by both of his controllers; his loot table is the table's and his trophies are Arms VII's; his recipes,
+    tags and advancement are there; every message he sends has its words; and nothing of his loads a chunk or leaves
+    its dimension."""
+    import math
+    import arms_variants
+    import cinder_kiln as ck
+    import cinder_tyrant as ct
+    import cinder_tyrant_models as cm
+    import lairs as la
+    folder = JAVA_ROOT / "lair" / "tyrant"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/tyrant: no Java")
+        return
+    for cls, table in (("CinderTyrantEntity", ct.CINDER_TYRANT), ("CinderlingEntity", ct.CINDERLING),
+                       ("MagmaGobEntity", ct.GOB), ("FallingCinderEntity", ct.CINDER)):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/cinder_tyrant.py's {value}")
+    boss = sources.get("CinderTyrantEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, kiln, eruption, heart) in ct.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(kiln).lower()}, {str(eruption).lower()}, {str(heart).lower()})")
+        if expected not in boss:
+            err(f"CinderTyrantEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"CinderTyrantEntity does not scale as every lair boss does ({call})")
+    t = ct.CINDER_TYRANT
+    if not t["HOT_TAKEN"] < 1.0 < t["QUENCH_TAKEN"]:
+        err("tools/cinder_tyrant.py: blows must do less than their damage on him hot (HOT_TAKEN), more quenched (QUENCH_TAKEN)")
+    if not 0.0 < t["HEART_AT"] < t["ERUPT_AT"] < 1.0:
+        err("tools/cinder_tyrant.py: the Molten Heart (HEART_AT) must come after the Eruption (ERUPT_AT)")
+    slam = ct.ATTACKS["BODY_SLAM"]
+    if la.SLUICE["flood_ticks"] <= slam[0] + slam[1]:
+        err("A sluice's flood must outlast a Body Slam's wind-up and flight, or no slam can be caught in a trough")
+    for attack, phases in ((name, row[6:]) for name, row in ct.ATTACKS.items()):
+        kiln_only_not = attack in ("CINDER_RAIN", "LAVA_WAVE")
+        if phases != ((not kiln_only_not), True, True):
+            err(f"tools/cinder_tyrant.py: {attack} is used in "
+                f"{'the Eruption and the Molten Heart' if kiln_only_not else 'every phase'}, not {phases}")
+    if cm.MOUTH_Z != -16 * ct.GOB["MOUTH_AHEAD"] or cm.MOUTH_Y != 16 * ct.GOB["MOUTH_UP"]:
+        err("tools/cinder_tyrant.py GOB MOUTH_AHEAD and MOUTH_UP must be where tools/cinder_tyrant_models.py's jaws "
+            f"meet: {-cm.MOUTH_Z / 16} and {cm.MOUTH_Y / 16}")
+    # Where his fight looks for the Cinder Kiln's parts is where tools/cinder_kiln.py builds them.
+    kiln = re.sub(r"\s+", " ", sources.get("CinderKiln", ""))
+    for name, value in (("BOWL", ck.BOWL), ("BOWL_X", ck.BOWL_CENTRE[0]), ("BOWL_Z", ck.BOWL_CENTRE[1]),
+                        ("BOWL_RADIUS", ck.BOWL_RADIUS), ("CRUCIBLE_X", ck.CRUCIBLE["centre"][0]),
+                        ("CRUCIBLE_Z", ck.CRUCIBLE["centre"][1]), ("CRUCIBLE_RADIUS", ck.CRUCIBLE["radius"]),
+                        ("CRUCIBLE_DEPTH", ck.CRUCIBLE["depth"]), ("RUN_WEST", ck.RUN[0]), ("RUN_EAST", ck.RUN[1]),
+                        ("CHANNEL_NORTH", ck.CHANNEL[0]), ("CHANNEL_SOUTH", ck.CHANNEL[1]), ("LIP", ck.LIP),
+                        ("SHELF_HALF", ck.SHELF_HALF)):
+        if not java_number(kiln, name, value):
+            err(f"CinderKiln.{name} is not {value} (tools/cinder_kiln.py)")
+    shelves = ", ".join("new double[] {{{}, {}}}".format(*s) for s in ck.SHELVES)
+    if f"SHELVES = List.of({shelves});" not in kiln:
+        err(f"CinderKiln.SHELVES are not tools/cinder_kiln.py's: {shelves}")
+    wheels = {sluice: pos for pos, (sluice, part) in ck.sluice_blocks().items() if part == "wheel"}
+    expected_wheels = ", ".join("new BlockPos({}, {}, {})".format(*wheels[s]) for s in ("west", "east", "south"))
+    if f"WHEELS = List.of({expected_wheels});" not in kiln:
+        err(f"CinderKiln.WHEELS must be the sluices' wheels, west, east and south: {expected_wheels}")
+    numbers = {}
+    for name in ("LIP_Z", "SUNK_Y", "SUNK_Z", "OUT_Z"):
+        found = re.search(rf"\bdouble {name} = (-?[0-9.]+);", kiln)
+        if found is None:
+            err(f"CinderKiln.{name} is missing")
+            return
+        numbers[name] = float(found.group(1))
+    blocks = ck.build()
+    cavern = ck.cavern()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    free = lambda pos: pos in cavern and name(pos) in (None, "minecraft:light")
+    def clear(x, y, z, label, half=1, height=3, floors=("jugcraft:cracked_basalt", "minecraft:basalt")):
+        """Room for him (half 1, three high) or a Cinderling (half 0, one high) standing at (x, y, z) in the template,
+        on a floor of `floors`."""
+        cx, cz = math.floor(x), math.floor(z)
+        for dx in range(-half, half + 1):
+            for dz in range(-half, half + 1):
+                for dy in range(height):
+                    pos = (cx + dx, int(y) + dy, cz + dz)
+                    if not free(pos):
+                        err(f"CinderKiln: {label} at ({x}, {y}, {z}) is not clear: {name(pos)} at {pos}")
+                        return
+                under = (cx + dx, int(y) - 1, cz + dz)
+                if name(under) not in floors:
+                    err(f"CinderKiln: {label} at ({x}, {y}, {z}) does not stand on {floors}: {name(under)} at {under}")
+                    return
+    lip_rows = range(ck.FORGE["lip"][0] + 1, ck.FORGE["lip"][1])
+    if math.floor(numbers["LIP_Z"]) not in lip_rows:
+        err(f"CinderKiln.LIP_Z {numbers['LIP_Z']} is not on the forge's lip, inside rows {ck.FORGE['lip']}")
+    clear(ck.CRUCIBLE["centre"][0], ck.LIP + 1, numbers["LIP_Z"], "where he roars from on the lip",
+          floors=("jugcraft:molten_slag", "jugcraft:kiln_brick"))
+    clear(ck.CRUCIBLE["centre"][0], ck.BOWL + 1, numbers["OUT_Z"], "where he crawls out to")
+    for west in (True, False):
+        x = ck.RUN[0] - 1.5 if west else ck.RUN[1] + 2.5
+        clear(x, ck.BOWL + 1, (ck.CHANNEL[0] + ck.CHANNEL[1]) / 2.0, "a bank a Cinderling crawls out on", half=0, height=1)
+    if f"RUN_WEST - 1.5 : RUN_EAST + 2.5, BOWL + 1, (CHANNEL_NORTH + CHANNEL_SOUTH) / 2.0" not in kiln:
+        err("CinderKiln.bank: the banks are not where the audit looks for them (a block and a half from either side of the "
+            "channel, halfway along)")
+    for x, z in ((ck.BOWL_CENTRE[0] - 1, ck.BOWL_CENTRE[1]), ck.BOWL_CENTRE):
+        clear(x, ck.BOWL + 1, z, "the Grey Mist he leaves", half=0, height=2, floors=("jugcraft:cracked_basalt",))
+    # Sunk, his feet and body are in the crucible's slag (its pool, never its rim or the basalt under), his back under its
+    # surface (it is drawn a whole block high) and his crest over it.
+    sx, sz = ck.CRUCIBLE["centre"][0], numbers["SUNK_Z"]
+    geo = load(ASSETS / "geckolib" / "models" / "entity" / "cinder_tyrant.geo.json") or {}
+    cubes = [cube for bone in (geo.get("minecraft:geometry") or [{}])[0].get("bones", []) for cube in bone.get("cubes", [])]
+    if cubes:
+        lo_x = min(c["origin"][0] for c in cubes) / 16
+        hi_x = max(c["origin"][0] + c["size"][0] for c in cubes) / 16
+        lo_z = min(c["origin"][2] for c in cubes) / 16
+        hi_z = max(c["origin"][2] + c["size"][2] for c in cubes) / 16
+        # Sunk he faces south: his model's -z (his jaws) is the world's +z.
+        for x, z in ((sx + lo_x, sz - hi_z), (sx + hi_x, sz - hi_z), (sx + lo_x, sz - lo_z), (sx + hi_x, sz - lo_z)):
+            if math.hypot(x - ck.CRUCIBLE["centre"][0], z - ck.CRUCIBLE["centre"][1]) > ck.CRUCIBLE["radius"]:
+                err(f"Sunk, the Cinder Tyrant reaches ({x:.2f}, {z:.2f}), outside the crucible's pool")
+    feet = (math.floor(sx), math.floor(numbers["SUNK_Y"]), math.floor(sz))
+    if name(feet) != "jugcraft:molten_slag" or not ck.BOWL - ck.CRUCIBLE["depth"] < numbers["SUNK_Y"] < ck.BOWL:
+        err(f"Sunk at y {numbers['SUNK_Y']}, the Cinder Tyrant's feet are not in the crucible's slag ({name(feet)})")
+    if not numbers["SUNK_Y"] + cm.BACK_TOP / 16 < ck.BOWL + 14 / 16 < ck.BOWL + 1 < numbers["SUNK_Y"] + cm.CREST_TOP / 16:
+        err("Sunk, the Cinder Tyrant's back must be under the slag and his crest over it "
+            f"(back {numbers['SUNK_Y'] + cm.BACK_TOP / 16}, crest {numbers['SUNK_Y'] + cm.CREST_TOP / 16}, "
+            f"slag {ck.BOWL + 1})")
+    loot_java = sources.get("CinderTyrantLoot", "")
+    if f'ADVANCEMENT = "{ct.ADVANCEMENT["key"]}";' not in loot_java:
+        err("CinderTyrantLoot's advancement differs from tools/cinder_tyrant.py")
+    registry = sources.get("JugcraftTyrant", "")
+    client = (CLIENT_JAVA_ROOT / "CinderTyrantClient.java").read_text(encoding="utf-8")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for entity in ct.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftTyrant does not register the {entity} entity")
+        if f"entity.{MOD}.{entity}" not in lang:
+            err(f"No name for the {entity} entity")
+        if f"JugcraftTyrant.{entity.upper()}," not in client:
+            err(f"CinderTyrantClient draws no {entity}")
+    for item in ct.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftTyrant does not register {item}")
+    if "Lairs.onPlaced(Lair.CINDER_KILN, CinderTyrantEntity::summon)" not in registry:
+        err("JugcraftTyrant must sink the Cinder Tyrant in every Cinder Kiln as it is placed")
+    # The GeckoLib bodies.
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    # His body's clips are named from a prefix (CinderTyrantEntity's BODY table).
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("cinder_tyrant", set()).add(f"animation.cinder_tyrant.{clip}")
+    for entity, body in ct.GECKO.items():
+        geo = load(ASSETS / "geckolib" / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(ASSETS / "geckolib" / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in cm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        # A body with a glow layer has a glowmask; one without has none (it would be a texture nothing draws).
+        glows = entity in ct.GLOWING
+        start = client.find(f"register(JugcraftTyrant.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        if start < 0 or ("AutoGlowingGeoLayer" in client[start:end if end >= 0 else len(client)]) != glows:
+            err(f"CinderTyrantClient: the {entity}'s glow layer must match tools/cinder_tyrant.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * cm.TEXTURE_SCALE, height * cm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {width * cm.TEXTURE_SCALE}x{height * cm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: the body's clips never key his seams or his heart, nor the heat's a body bone.
+    owned = {bone: controller for controller, bones in cm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in cm.ANIMATIONS["cinder_tyrant"]()["animations"].items():
+        controller = "heat" if clip_name.split(".")[-1].startswith("heat_") else "body"
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"cinder_tyrant: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in cm.CONTROLLERS:
+        if f'new AnimationController<CinderTyrantEntity>("{controller}"' not in boss:
+            err(f"CinderTyrantEntity has no {controller} controller for tools/cinder_tyrant_models.py CONTROLLERS")
+    # His loot, and his trophies: Arms VII's, as his bosses/cinder_tyrant table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "cinder_tyrant.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/cinder_tyrant.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"tyrant_scale": ct.SCALES, **{item: ct.TROPHY_CHANCE for item in ct.TROPHIES}, **ct.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/cinder_tyrant.json gives {found_loot}, not tools/cinder_tyrant.py's {expected}")
+    if tuple(arms_variants.trophies("cinder_tyrant")) != tuple(ct.TROPHIES):
+        err(f"tools/cinder_tyrant.py TROPHIES {ct.TROPHIES} are not Arms VII's: {arms_variants.trophies('cinder_tyrant')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "cinder_tyrant.json") or {}
+    held = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held != [f"{MOD}:{item}" for item in ct.TROPHIES]:
+        err(f"loot_table/bosses/cinder_tyrant.json holds {held}, not his trophies {ct.TROPHIES}")
+    for table_id in ("entities/cinder_tyrant", "bosses/cinder_tyrant"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"CinderTyrantLoot must roll loot_table/{table_id}.json")
+    for trophy in ct.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftTyrant must find the {trophy} (Arms VII registers it)")
+    for key in ct.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in ct.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{ct.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{ct.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    for key in ct.MESSAGES:
+        if f'"message.jugcraft.cinder_tyrant.{key}"' not in boss + loot_java:
+            err(f"tools/cinder_tyrant.py MESSAGES has {key}, which the Java never sends")
+    # The Salamander Charm wards off hot ground, decided on the server: the kiln's slag asks it, and so does the damage.
+    charm = sources.get("SalamanderCharm", "")
+    if "DamageTypes.HOT_FLOOR" not in charm or "ServerLivingEntityEvents.ALLOW_DAMAGE" not in charm:
+        err("SalamanderCharm must turn aside hot-floor damage on the server (ServerLivingEntityEvents.ALLOW_DAMAGE)")
+    slag = (JAVA_ROOT / "lair" / "MoltenSlagBlock.java").read_text(encoding="utf-8")
+    if "SalamanderCharm.warded(living)" not in slag:
+        err("MoltenSlagBlock must spare whoever holds a Salamander Charm")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
     committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
@@ -12686,6 +12963,7 @@ def main():
     check_vesperine()
     check_tatterlace()
     check_yeti()
+    check_cinder_tyrant()
     check_material_sets()
     check_art()
     check_pixel_hollows()

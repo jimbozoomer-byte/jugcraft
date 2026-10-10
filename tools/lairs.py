@@ -74,7 +74,7 @@ SLAG = {"damage": 1.0, "burn_seconds": 3}
 # trough stone touching it: at most gate_blocks and trough_blocks of each.
 SLUICE = {"flood_ticks": 200, "refill_ticks": 400, "gate_blocks": 40, "trough_blocks": 96}
 SLUICE_PARTS = ("frame", "panel", "wheel")
-SLUICE_FLOWS = ("ready", "open", "filling")
+SLUICE_FLOWS = ("ready", "open", "filling", "choked")   # choked: by the Cinder Tyrant's slag
 # Fixtures a player in a lair may use (everything else is refused): the exits, the braziers Vesperine's fight lights, and
 # the Cinder Kiln's sluice gates.
 FIXTURES = ("lair_exit", "lair_brazier", "sluice_gate")

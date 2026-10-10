@@ -234,6 +234,23 @@ def sluice_panel():
     return img
 
 
+def sluice_slag():
+    """Slag choking a gate, cut out over its panel: forced through the seams under its two ribs, beading along them,
+    and oozing from under its foot in tongues of different lengths; bright where it is thickest."""
+    img = new()
+    for y in (6, 13):
+        for x in range(16):
+            img.putpixel((x, y), SLAG[4] if x % 3 else SLAG[5])
+    for x in range(1, 16, 4):
+        for y in (7, 14):
+            img.putpixel((x, y), SLAG[3])
+    for x in range(16):
+        tongue = (3, 1, 2, 4, 1, 2, 3, 1, 4, 2, 1, 3, 2, 1, 3, 2)[x]
+        for y in range(16 - tongue, 16):
+            img.putpixel((x, y), SLAG[5] if y == 15 else SLAG[4] if y > 15 - tongue + 1 else SLAG[3])
+    return img
+
+
 def sluice_water():
     """Water gushing from an open gate, see-through: pale streaks running down it over blue, a white foam band at the
     top where it spills from under the raised panel."""
@@ -284,6 +301,7 @@ def cinder_kiln_textures():
         ("block", "sluice_frame"): sluice_frame(),
         ("block", "sluice_panel"): sluice_panel(),
         ("block", "sluice_water"): sluice_water(),
+        ("block", "sluice_slag"): sluice_slag(),
         ("block", "sluice_wheel"): sluice_wheel(),
         ("item", "kiln_seal"): item_icons.draw("kiln_seal"),
     }
