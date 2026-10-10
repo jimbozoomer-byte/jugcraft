@@ -84,6 +84,9 @@ Four new kinds of arm in bronze and steel. Each fights in the hand like any arm,
     - Aimed straight at its pig's middle, the harpoon's arc came to the pig only a tenth of a block above the floor. The throw's spread (up to about a degree) then put it into the floor just short of the pig.
     - A simulation of the flight gives that landing for a spread of 0.016 down, and a miss in about one throw in forty.
     - 0379ba3d2 has the tests' thrower aim so that the arm's own arc comes to the foe's middle. In the simulation, none of 200,000 throws then misses, for any of the four throw tests.
+  - **The javelin test, now and then:** with the aimed throw it still failed twice, on 9 October in a `mod` job (the javelin came down at z 10.11) and on #290 ([run 38038657220](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38038657220)): "The pig is not struck yet (come down at 1.52 2.00 10.03)".
+    - Both times the javelin flew its usual arc through the pig's place and came down two and a half blocks past it, with the pig unhurt. The simulation above rules out the throw's spread, and nothing refuses the strike for a pig. So the pig was most likely no longer where it was put: a pig with no will of its own is still pushed and knocked about, and the test runs in a batch of fifty.
+    - The test now holds its pig still: knockback resistance 1, and if it is moved before it is struck, it is put back and the move is logged ("the pig was moved to …"). A failure now says where the pig was.
 - **Not run:** play; two players; how the throws feel against real mobs; the harpoon underwater (only its code path, which undoes water's drag).
 
 ## World and event applicability

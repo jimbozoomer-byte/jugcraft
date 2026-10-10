@@ -35,6 +35,8 @@ public class ArmsVIIIGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
 	/** A thrown thing keeps this share of its speed a tick in air (ThrowableProjectile's). */
 	private static final double AIR_INERTIA = 0.99;
+	/** How far, in blocks, a target may be moved from where it was put before the javelin test puts it back. */
+	private static final double MOVED = 0.01;
 	/** A thrown thing leaves this far below its thrower's eye (ThrowableItemProjectile's). */
 	private static final double BELOW_EYE = 0.1;
 
@@ -50,18 +52,33 @@ public class ArmsVIIIGameTests {
 		helper.succeed();
 	}
 
-	/** A steel javelin, thrown at a still pig: the pig takes its damage, and the javelin comes down, worn by one. */
+	/**
+	 * A steel javelin, thrown at a still pig: the pig takes its damage, and the javelin comes down, worn by one.
+	 * <p>
+	 * The pig is held where it stands until it is struck. Twice (9 and 10 October 2026) the javelin flew its arc through
+	 * the pig's place and came down two and a half blocks past it with the pig unhurt, as if the pig were no longer there.
+	 * A pig with no will of its own is still pushed and knocked about, and in a batch of fifty tests something nearby can
+	 * do it. A pig moved is logged and put back, and a failure says where the pig was.
+	 */
 	@GameTest(structure = ARENA, maxTicks = 60)
 	public void javelinStrikesAndComesDown(GameTestHelper helper) {
 		floor(helper);
 		Mob pig = pig(helper, new BlockPos(1, 2, 7));
+		pig.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0);
+		Vec3 spot = pig.position();
 		ServerPlayer thrower = thrower(helper, "steel_javelin", new BlockPos(1, 2, 1), pig, GameType.SURVIVAL);
 		JugcraftArms.Thrown thrown = JugcraftArms.thrown("javelin", "steel");
 		release(thrower, thrown);
 		helper.assertTrue(thrower.getMainHandItem().isEmpty(), "The javelin is still in hand after the throw");
 		float max = pig.getMaxHealth();
 		helper.succeedWhen(() -> {
-			helper.assertTrue(pig.getHealth() < max, "The pig is not struck yet (" + flight(helper, "steel_javelin") + ")");
+			if (pig.getHealth() >= max && pig.position().distanceToSqr(spot) > MOVED * MOVED) {
+				Jugcraft.LOGGER.info("[arms viii] javelin: the pig was moved to {} before it was struck; put back", where(helper, pig));
+				pig.snapTo(spot.x, spot.y, spot.z, pig.getYRot(), pig.getXRot());
+				pig.setDeltaMovement(Vec3.ZERO);
+			}
+			helper.assertTrue(pig.getHealth() < max,
+					"The pig is not struck yet (" + flight(helper, "steel_javelin") + "; the pig at " + where(helper, pig) + ")");
 			helper.assertTrue(Math.abs(max - pig.getHealth() - thrown.damage()) < 1.0E-3F,
 					"The javelin took " + (max - pig.getHealth()) + " from the pig, not " + thrown.damage());
 			List<ItemEntity> landed = items(helper, "steel_javelin");
