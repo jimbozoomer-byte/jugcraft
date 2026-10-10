@@ -1023,6 +1023,7 @@ The first of the smaller follow-ups the owner chose on 10 October 2026 ("Tactica
 **Known limits:**
 - **The dot is a particle:** it can trail the aim by up to a tick, and it glows at full brightness in the dark.
 - **No beam through the air:** the owner's short beam shows on the gun; nothing is drawn between it and the dot.
+- **Aimed, the housing stands beside the crosshair:** the eye looks along the laser's left side, on the owner's line of sight, so its dark housing and red front fill the view just right of the crosshair and hide part of a target there (CI run 38038657220).
 - **Not played:** none of it has been played yet.
 
 ## Slice 9F: the aiming polish
@@ -1050,6 +1051,7 @@ The second of the follow-ups the owner chose on 10 October 2026 ("Aiming polish"
 **Known limits:**
 - **The change is seen during the aim:** the arms shrink over the aim's ease (four ticks, a fifth of a second), and a fitted stock disappears halfway through it and comes back halfway out.
 - **Half size** was chosen from previews, not play. At the hip the arms stay the player model's own size, so they are drawn at two sizes.
+- **One aimed screenshot not explained:** in the first CI run, the Riveter SMG with its second set of attachments showed both arms out of place aimed ("Slice 9F in CI" below). Its other aimed shots and every other gun's did not.
 - **Not played:** none of it has been played yet.
 
 ## Slice 9G: the Trench Lobber's grenades
@@ -2282,6 +2284,16 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `GunsClientGameTests`:
     - a fourth set of attachments, the Tactical Grip and the Laser Sight, on each gun that takes either, held and aimed (screenshots `jugcraft_guns_<gun>_fitted_4*`); a set a gun takes none of is skipped;
     - the Laser Sight on the Longhorn Rifle: held, it draws its dots, the last where the gun points (logged, with its distance from the eye); aimed, the view narrows to 0.9 and its dot shows on the middle of the screen (screenshots `jugcraft_guns_laser_sight*`).
+- **Slice 9E in CI** ([run 38038657220](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38038657220), on 815a60bb8): every check passed, the `optional integrations absent` job on its one re-run.
+  - **Server game tests** (`mod`, `optional integrations absent`): 1199 passed, 1197 before; the two new ones are `TacticalAttachmentsGameTests`.
+  - **The re-run:** the job's first attempt failed on one test this slice does not touch, `ArmsVIIIGameTests.javelinStrikesAndComesDown`. The javelin flew on its arc and came down three blocks past its pig, as it had once before on 9 October. The test passed in the same run's `mod` job and on the re-run. The pull request's comment has the details.
+  - **`GunsClientGameTests`:**
+    - Held on the Longhorn Rifle, the Laser Sight drew 20 dots in 20 ticks, the last 6.69 blocks from the eye, on the husk seven blocks off.
+    - Aimed, the view narrowed to 0.9 and its dot was drawn (27 frames), with no view through a scope. The Long Scope, Medium Scope and Reflex Sight drew no laser dots.
+    - The fourth set, the Tactical Grip and the Laser Sight, went on each of the 17 guns that take either, held and aimed.
+  - **Screenshots:**
+    - Held, the Laser Sight stands on each gun's top as a dark housing with its red front and blue light. The Tactical Grip is under the fore-end, behind the left hand.
+    - Aimed, the eye looks along the laser's left side. Its housing fills the view just right of the crosshair and hides part of the husk (the known limit above).
 - **Slice 9F, run locally (10 October 2026):**
   - `python3 tools/guns.py`: PASS (nothing in it changed).
   - `python3 tools/check_mod_data.py`: PASS (1930 material IDs).
@@ -2298,6 +2310,15 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 - **Slice 9F game tests (written; they run in CI):** `GunsClientGameTests`:
   - each gun's arms are drawn at their full size held and at half size aimed, the Thresher's and the Seam Cutter's at full size both ways;
   - with each set of attachments that has a stock, the stock is drawn held and left out aimed (counted frames; logged).
+- **Slice 9F in CI** ([run 38040183992](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38040183992), on 030e8230a): every check passed.
+  - **Server game tests** (`mod`, `optional integrations absent`): 1199 passed, as before; the slice adds none.
+  - **`GunsClientGameTests`**, the one client class the job ran (the only one this slice changes):
+    - The 34 guns with sights drew their arms at size 1 held and 0.5 aimed; the Thresher and the Seam Cutter, which have none, at 1 both ways.
+    - The 66 sets of attachments with a stock, on the 22 guns that take one: each stock was drawn in every frame held (left out in none) and left out in 37 to 44 frames aimed.
+  - **Screenshots** (each gun's own aimed shot and all 115 aimed shots with attachments):
+    - Aimed, each gun's back sits on the crosshair with its fist small below it, and no stock comes up under the eye. On the Linesman, the arm that filled the lower left of the view in slice 9E's run no longer shows.
+    - The Stoker's and the Trench Lobber's own bodies still fill the lower middle aimed, as they did in slice 9E's run: they are the guns' parts, not the arms.
+    - **Not explained:** the Riveter SMG with its second set (Extended Barrel, Speed Magazine, Weighted Stock), aimed (`0208_jugcraft_guns_riveter_smg_fitted_2_aimed`), shows both arms in a pose its other aimed shots do not: the right arm lies across the lower right of the view and the left arm stands beside the gun. The gun itself is where it is in the others, and its stock was left out (40 frames). In slice 9E's run the stock covered that part of the view. In the previews at half size, no frame of the Riveter's animations (idle, draw, shoot, aimed shot, reload, inspect), nor its model with none, puts the arms there with the gun at rest. The nearest are the inspect's arms about a second in, where the gun is turned. The test neither inspects nor reloads there.
 - **Slice 9G, run locally (10 October 2026):**
   - `python3 tools/guns.py`: PASS.
   - `python3 tools/generate_material_data.py`: wrote the Lobber's new tooltip, and the names of the reload's "No grenades to load." and the tooltip's "Loaded with" line.
