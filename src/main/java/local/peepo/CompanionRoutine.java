@@ -11,7 +11,7 @@ final class CompanionRoutine extends Goal {
     private CompanionStation station;
     private BlockEntity block;
     private long nextLeisure,chairUntil,nextSearch,deadline,nextPriority;
-    private long handoffUntil,sessionUntil;
+    private long handoffUntil,sessionUntil,resumeUntil;
     private boolean active;
     private int repath;
     private final CompanionNavigation.Progress travel=new CompanionNavigation.Progress();
@@ -63,7 +63,7 @@ final class CompanionRoutine extends Goal {
     private void adopt(CompanionStation s,long now){
         station=s;block=npc.level().getBlockEntity(s.stationPosition());deadline=now+600;chairUntil=now+600;
         nextPriority=now+100;repath=0;travel.reset();state=CompanionStatus.TRAVELLING;
-        handoffUntil=0;sessionUntil=now+400;
+        handoffUntil=0;resumeUntil=0;sessionUntil=now+400;
     }
     private void search(){
         long now=npc.level().getGameTime();if(now<nextSearch)return;
@@ -107,13 +107,15 @@ final class CompanionRoutine extends Goal {
         if(!npc.orders.routineAllowed() || npc.isEating() || npc.isWheelRunning() || npc.getRestMode()!=CompanionEnergy.Rest.NONE)return false;
         search();return station!=null || npc.isRecovering() || !npc.preferences.onShift();
     }
-    @Override public boolean canContinueToUse(){return npc.orders.routineAllowed() && !npc.isEating() && (station!=null || npc.isRecovering() || !npc.preferences.onShift());}
+    @Override public boolean canContinueToUse(){return npc.orders.routineAllowed() && !npc.isEating()
+        && (station!=null || npc.isRecovering() || !npc.preferences.onShift()
+            || resumeUntil>npc.level().getGameTime() && npc.preferences.canWork());}
     @Override public void start(){active=true;}
     private void release(){
         if(station!=null)station.release(npc);
         npc.readiness.clear();
         travel.reset();
-        handoffUntil=0;
+        handoffUntil=0;resumeUntil=0;
         station=null;block=null;npc.setWheelRunning(false);npc.setWorkAnimation(WorkAnimation.NONE,npc.blockPosition());npc.setRestMode(CompanionEnergy.Rest.NONE);npc.getNavigation().stop();state=CompanionStatus.IDLE;
     }
     @Override public void stop(){release();active=false;}
@@ -142,8 +144,11 @@ final class CompanionRoutine extends Goal {
             var target=npc.assignments.get(i);if(target==null || !target.present(npc.level()) || unreachable.getOrDefault(target.at().pos(),0L)>now)continue;
             var job=CompanionJobs.resolve(npc,target.at().pos());if(job==null || !candidate(job))continue;
             // Ground navigation cannot plan a reliable route from a mounted seat/pot.
-            // Dismount first, then use the normal budgeted search from the safe exit.
-            if(!(station instanceof CompanionJob) || npc.isNoGravity()){release();nextSearch=now;return;}
+            // Keep MOVE ownership until grounded at the safe exit. Releasing the
+            // goal here lets a stroll win while navigation still rejects the airborne start.
+            if(!(station instanceof CompanionJob) || npc.isNoGravity()){
+                release();resumeUntil=now+40;nextSearch=now;state=CompanionStatus.WAITING;return;
+            }
             if(attempts++>=2)break;
             if(!CompanionBudget.path(npc)){nextPriority=now+1;return;}
             var path=npc.getNavigation().createPath(BlockPos.containing(job.approachPosition()),0,pathRange());
@@ -165,6 +170,10 @@ final class CompanionRoutine extends Goal {
                 }else if(handoffUntil!=0){handoffUntil=0;deadline=now+600;repath=0;travel.reset();}
             }
         }else if(station!=null && !useful(station))release();
+        if(station==null && resumeUntil!=0){
+            if(now>=resumeUntil || !npc.preferences.canWork()){release();return;}
+            if(!npc.onGround()){npc.getNavigation().stop();state=CompanionStatus.WAITING;return;}
+        }
         if(station==null)search();
         reconsiderWork();
         if(station==null){npc.getNavigation().stop();return;}

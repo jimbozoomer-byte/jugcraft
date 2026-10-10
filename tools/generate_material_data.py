@@ -1454,6 +1454,13 @@ def tags():
     diagonal_connections.tags(tags)
     import concordance
     concordance.tags(tags)
+    # Companion resources live in their own namespace, but this shared vanilla
+    # tag is regenerated here. Keep their wooden blocks in the source of truth.
+    for colour in ("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
+                   "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"):
+        tags.add("block", "minecraft:mineable/axe", f"peepo_companion:{colour}_companion_bed")
+    for block in ("wooden_stool", "lunch_crate", "lunch_cover"):
+        tags.add("block", "minecraft:mineable/axe", f"peepo_companion:{block}")
     tags.write()
 
 
