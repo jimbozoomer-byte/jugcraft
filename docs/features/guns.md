@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B) and the second energy weapons (slice 9C)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -15,7 +15,8 @@ Status:
 - **Slice 8D** (the energy weapons: the Beam Pistol, Stormlock Rifle and Linesman, and the Energy Cell they run on; [below](#slice-8d-the-energy-weapons)): implemented on `claude/guns-energy`, stacked on slice 8C, awaiting review.
 - **Slice 9A** (the marksman rifles: the Picket Rifle, Ranger Rifle and Kestrel Rifle; [below](#slice-9a-the-marksman-rifles)): implemented on `claude/guns-marksman` (#285), stacked on slice 8D, awaiting review.
 - **Slice 9B** (the automatic weapons: the Rattler Pistol, Bronco SMG and Squall Rifle; [below](#slice-9b-the-automatic-weapons)): implemented on `claude/guns-automatic` (#286), stacked on slice 9A, awaiting review.
-- **Slice 9C** (the second energy weapons: the Spikedriver, Seam Cutter and Caisson Pistol; [below](#slice-9c-the-second-energy-weapons)): implemented on `claude/guns-energy-2`, stacked on slice 9B, awaiting review.
+- **Slice 9C** (the second energy weapons: the Spikedriver, Seam Cutter and Caisson Pistol; [below](#slice-9c-the-second-energy-weapons)): implemented on `claude/guns-energy-2` (#287), stacked on slice 9B, awaiting review.
+- **Slice 9D** (the pump shotguns: the Sledge, Highwayman and Throttle; [below](#slice-9d-the-pump-shotguns)): implemented on `claude/guns-pump`, stacked on slice 9C, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -28,7 +29,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the scopes: on 8 October 2026, with the reticles and lens rims uploaded ("heres reticles and vignette"), asked what the scopes should use, they answered that they made those files and to use them (see [Dependencies and assets](#dependencies-and-assets)); and asked what next ("What next?"), they chose all four further gun sets offered, each its own slice.
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
-- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C.
+- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -917,6 +918,76 @@ The third of the gun sets the owner chose on 10 October 2026: three more energy 
 - **The Caisson Pistol's inspection** brings the left hand to its bolt near the eye, and in the preview the left sleeve covers the right third of the view for about a second and a half. A search over the arm's direction found none that keeps it much smaller.
 - **Not played:** none of it has been played yet. The cones, the JE costs and the Seam Cutter's rate want play to set.
 
+## Slice 9D: the pump shotguns
+The fourth of the gun sets the owner chose on 10 October 2026: three steel shotguns loaded a shell at a time and worked after every shot. The Sledge and the Throttle are pumps. The owner's Turnpike, the set's long gun, is worked by the bolt on its right side instead: its animations never pump it.
+
+| | Sledge | Highwayman | Throttle |
+|---|---|---|---|
+| The owner's gun | Killer 23 | Turnpike | Venturi |
+| What it is | a heavy pump shotgun with a bird's-head grip and a wooden fore-end | a long shotgun worked by a bolt on its right side, with a ring sight | a short pump shotgun on a pistol grip, its fore-end on rods and a bulb under its muzzle |
+| Damage | 4 a pellet, eight pellets: 32 a shot | 3 a pellet: 24 a shot | 3 a pellet: 24 a shot |
+| Rate | 1 a second (every 20 ticks) | 1 a second (every 20 ticks) | 1.25 a second (every 16 ticks) |
+| Holds | 4 shells | 7 | 6 |
+| Reload, a shell at a time | 0.4 s to open, 0.7 s a shell, 0.7 s to close: 3.9 s for four | 0.9 s, 0.65 s a shell, 0.8 s: 6.25 s for seven | 0.5 s, 0.65 s a shell, 1.1 s: 5.5 s for six |
+| Spread, hip / aimed | 8° / 6° | 6° / 2.5° | 6.5° / 4.5° |
+| Range | 24 blocks | 40 | 28 |
+| The view aimed | narrowed to 0.9 | 0.8 | 0.88 |
+| Takes | the barrel attachments, the three stocks, the light grip and the bayonets | the same, and the three scopes | the three stocks (in its pistol grip's place) and the three scopes |
+
+Each fires Buckshot Shells (slice 1). The reload times are the owner's animations' (their opening, each loop and their closing).
+
+**Crafting** (a crafting table; the guns switch):
+- **Sledge:** three steel ingots over a steel ingot, a lever and planks: four steel for its heavy barrel and frame, the lever for its action and the planks for its fore-end.
+- **Highwayman:** three steel ingots over planks, a lever and a brass ingot (its long barrel's fittings).
+- **Throttle:** two steel ingots and a copper ingot (its bulb) over planks, a lever and a brass ingot.
+
+**How they fire:** as the other shotguns: each pellet strays within the spread to the first creature or block in its path, and a creature takes the damage of every pellet that lands on it at once (`jugcraft:bullet`, which counts every shot). A shot cuts a reload short and fires what is loaded.
+
+**What you see:** the owner's animations.
+- **Sledge:** with each shot the left hand pumps the wooden fore-end back and forward. To reload, the pump is drawn back and held open, the left hand pushes each shell in, and the pump is closed.
+- **Highwayman:** each shot drives the bolt on the right of the receiver back and home as the right hand comes forward off the grip. To reload, the right hand draws the bolt back and holds it open, the left hand brings each shell up into the port under the receiver, and the bolt is closed.
+- **Throttle:** with each shot the left hand pumps the fore-end on its rods back and forward, the bulb rocks and a spent hull flies out (and one more as the reload ends, where the owner's animation cues it). To reload, the bulb under the muzzle is twisted open, the left hand loads each shell under the receiver, and the bulb is twisted shut with a clank and the pump closed.
+- **Sounds:** the library's other take of the scrap rifle's shot (its `enchanted_fire`, for the Sledge), its other take of the Thunderpipe's (the Highwayman) and its plasma shotgun's blast (the Throttle). None names another source: the Sledge's carries no tags, the Highwayman's only the program it was made in (`Software=FL Studio 20`), the Throttle's one empty tag. Each shell goes in with the insert sound, as on the other shotguns, and the Throttle's bulb shuts with the Squall Rifle's clank (`GunAnimations.GUN_SOUND_ALIASES`).
+
+**How the models were built:**
+- **Sledge:**
+  - **Pump:** the owner's bolt part, the wooden fore-end under the barrel and a stud on the receiver's left side, which ride back 2 px with each shot.
+  - **Sights:** none of its parts is a sight. Its rear notch is the pair of posts on top of the receiver's front (the main part's 16th and 17th elements), its front post on the barrel's muzzle.
+  - **Empty bones:** its shell bone stays at scale 0 in the owner's animations. It and the magazine bone hold nothing, nor do the scriptures and no_sights bones that only its inspection moves.
+  - **Aiming:** held 6 px further out (`"eye_relief"`): through the aimed shot its kick otherwise brought the top of its grip 1.9 px behind the eye.
+- **Highwayman:**
+  - **Bolt:** the owner's bolt part, the bolt in the port on the right of the receiver and its handle. Its fore-end is part of the main part and stays put.
+  - **Shell:** the reload's shell bone carries a Buckshot Shell in (`PROPS`): a 1 × 1 × 3 px red hull with a brass head, which the left hand brings up through the port under the receiver, where it shrinks into the gun. It shows only while the reload moves it.
+  - **Sights:** a ring on top of the receiver's front and a post ahead of it. A scope takes the ring's place (its no_sights part is empty).
+  - **Aiming:** held 6 px further out: its kick otherwise brought the top of its grip 2 px behind the eye.
+- **Throttle:**
+  - **Pump:** the owner's bolt part, the fore-end on the rods under the barrel.
+  - **Bulb:** the main part's 17th to 19th, 25th and 26th elements, on the owner's magazine bone, twisted 25° about its own axis before the shells go in and back after.
+  - **Stocks:** a stock takes the place of its pistol grip (the owner's `stan_grip`), as on the Thunderpipe.
+  - **Sights:** a ring on top of the receiver's front and a post at the muzzle. A scope takes the ring's place.
+  - **Aiming:** held 2 px further out: the top of its grip came within 1.2 px of the eye through the aimed shot.
+- **Checked** in first-person and side previews: idle, aimed, fired, through each reload and inspection, each gun with each attachment, the Highwayman's shell through its loading, and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:**
+- **Rounds:** Buckshot Shells (slice 1), from lead, brass, gunpowder and paper.
+- **Parts:** steel from the steel foundry, a lever, planks, brass and copper.
+- **Their place:** the steel tier, with slice 8B's Breacher and slice 9A's rifles.
+
+**Balance:** starting numbers.
+- **A shot, every pellet landing:** the Sledge 32, the Highwayman and the Throttle 24, as the Haymaker, Coach Gun and Breacher; the Thunderpipe 20.
+- **A second, while the tube lasts:** the Sledge 32, the Throttle 30 (as the Breacher), the Highwayman 24. The double barrels fire their two shells faster (the Thunderpipe 50, the Coach Gun 60) and are empty sooner.
+- **The trade-offs:** the Sledge hits hardest but holds four and reaches 24 blocks; the Highwayman holds the most, reaches furthest and keeps its pellets together aimed, but does the least a second and reloads longest; the Throttle fires quickest.
+- Nothing converts back, so there is no loop.
+
+**Save compatibility:** new items `jugcraft:sledge`, `highwayman` and `throttle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Sledge's reload** brings the left hand up past the middle of the view as it pushes each shell in (about 7.7 px from the eye), as on the older shell-loaders.
+- **The Highwayman's right hand** comes forward off the grip as each shot works the bolt, but in this rig it stops below and behind the bolt's handle. The arm models the owner's animations were made for would show where it was meant to reach.
+- **The Throttle's bulb** is twisted open before the shells go in, but they go in under the receiver, as the owner's animations have it.
+- **The tactical grip parts** the Killer 23 and the Turnpike carry (`tact_grip`) wait for the tactical grip attachment, a later pull request.
+- **Not played:** none of it has been played yet. The spreads and the Sledge's damage want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -1411,6 +1482,62 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | caisson_pistol | `Guns/models/special/hyperbaria/main.json` | `5b79a0290ad9e960` |
 | caisson_pistol | `Guns/models/special/hyperbaria/bolt.json` | `5eca6988a624610e` |
 | caisson_pistol | `Guns/sounds/item/plasma/fire.ogg` | `fef225846fbbfe9a` |
+| sledge | `Guns/models/item/killer_23.json` | `09b5baef810a83a2` |
+| sledge | `Guns/item/killer_23.png` | `ce9268d08cf92ec4` |
+| sledge | `Guns/item/killer_23.animation.json` | `4d9b1ce6014ba4a4` |
+| sledge | `Guns/models/special/killer_23/main.json` | `1bf423412a7ce963` |
+| sledge | `Guns/models/special/killer_23/stan_barrel.json` | `d0d9e338bc8be7db` |
+| sledge | `Guns/models/special/killer_23/silencer.json` | `8df2d926fea81707` |
+| sledge | `Guns/models/special/killer_23/advanced_silencer.json` | `b0b93c10a6d8dadc` |
+| sledge | `Guns/models/special/killer_23/muzzle_brake.json` | `61595f40c72658ec` |
+| sledge | `Guns/models/special/killer_23/ext_barrel.json` | `69f7a7c1b9e651c2` |
+| sledge | `Guns/models/special/killer_23/light_stock.json` | `262f8bcc7481281f` |
+| sledge | `Guns/models/special/killer_23/heavy_stock.json` | `25b9ab892b6bd0d4` |
+| sledge | `Guns/models/special/killer_23/wooden_stock.json` | `9cb0e34b8be28ba8` |
+| sledge | `Guns/models/special/killer_23/light_grip.json` | `a6da77b8b5fcde5a` |
+| sledge | `Guns/models/special/killer_23/iron_bayonet.json` | `643202f095c61508` |
+| sledge | `Guns/models/special/killer_23/anthralite_bayonet.json` | `0bbcc0ff58811bb9` |
+| sledge | `Guns/models/special/killer_23/diamond_bayonet.json` | `d66dd08f49626ebb` |
+| sledge | `Guns/models/special/killer_23/netherite_bayonet.json` | `d26d8286e2e1c9d2` |
+| sledge | `Guns/models/special/killer_23/bolt.json` | `5f7a031fa371e34e` |
+| sledge | `Guns/sounds/item/makeshift_rifle/enchanted_fire.ogg` | `e40d4c4627d61011` |
+| highwayman | `Guns/models/item/turnpike.json` | `09b5baef810a83a2` |
+| highwayman | `Guns/item/turnpike.png` | `63e9b3911c1b9cd4` |
+| highwayman | `Guns/item/turnpike.animation.json` | `78706c1f096e7dfe` |
+| highwayman | `Guns/models/special/turnpike/main.json` | `1fd72a5ebe338f7b` |
+| highwayman | `Guns/models/special/turnpike/stan_barrel.json` | `7914706e051168e5` |
+| highwayman | `Guns/models/special/turnpike/silencer.json` | `f4c1c5a5bacb7d7e` |
+| highwayman | `Guns/models/special/turnpike/advanced_silencer.json` | `727f8bda385304b7` |
+| highwayman | `Guns/models/special/turnpike/muzzle_brake.json` | `9eba81a037491c05` |
+| highwayman | `Guns/models/special/turnpike/ext_barrel.json` | `b3f54959959ae705` |
+| highwayman | `Guns/models/special/turnpike/light_stock.json` | `848c245a1c716f68` |
+| highwayman | `Guns/models/special/turnpike/heavy_stock.json` | `e8058d26c949f966` |
+| highwayman | `Guns/models/special/turnpike/wooden_stock.json` | `a943065e49b05c51` |
+| highwayman | `Guns/models/special/turnpike/light_grip.json` | `dc2e8c9153f8f8a7` |
+| highwayman | `Guns/models/special/turnpike/iron_bayonet.json` | `49299e9d33758f66` |
+| highwayman | `Guns/models/special/turnpike/anthralite_bayonet.json` | `e053b5945d2a8e32` |
+| highwayman | `Guns/models/special/turnpike/diamond_bayonet.json` | `f69220679380377d` |
+| highwayman | `Guns/models/special/turnpike/netherite_bayonet.json` | `62b06b54184abf96` |
+| highwayman | `Guns/models/special/turnpike/sights.json` | `d69f11270dbdffbe` |
+| highwayman | `Guns/models/special/turnpike/bolt.json` | `33eecd726a57a504` |
+| highwayman | `Guns/sounds/item/boomstick/enchanted_fire.ogg` | `32dec23df85f1862` |
+| highwayman | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| highwayman | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| highwayman | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| throttle | `Guns/models/item/venturi.json` | `8d0478b0b34a0da8` |
+| throttle | `Guns/item/venturi.png` | `905b853f1d100147` |
+| throttle | `Guns/item/venturi.animation.json` | `47f32a37b3699805` |
+| throttle | `Guns/models/special/venturi/main.json` | `994bdd0d8fbcfb06` |
+| throttle | `Guns/models/special/venturi/stan_grip.json` | `38d8f2992379adc3` |
+| throttle | `Guns/models/special/venturi/light_stock.json` | `293184dd354446fd` |
+| throttle | `Guns/models/special/venturi/heavy_stock.json` | `240d02923eef20a2` |
+| throttle | `Guns/models/special/venturi/wooden_stock.json` | `6d3cca4fe24a984a` |
+| throttle | `Guns/models/special/venturi/sights.json` | `3358a59f3ad5ba95` |
+| throttle | `Guns/models/special/venturi/bolt.json` | `bae989b521fabc11` |
+| throttle | `Guns/sounds/item/plasma_shotgun/fire.ogg` | `70022fd04919c03f` |
+| throttle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| throttle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| throttle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | energy_cell | `Guns/item/energy_cell.png` | `857c3e9d98c18f97` |
 | energy_cell_empty | `Guns/item/empty_cell.png` | `b06623e4de7b9b8f` |
 | shared | `Guns/sounds/item/bolt/bolt.ogg` | `1cf1102f6ba52725` |
@@ -1965,16 +2092,33 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - `caissonArcSeeksWider`: with a pig a block to the side six blocks ahead, the Stormlock's arc finds nothing; the Caisson Pistol's strikes that pig and leaps to the one beside it, which takes 60%, and leaves the pig far off to the side alone.
   - "Every gun registered" now counts thirty-three guns.
   - `GunsClientGameTests` takes the three through every gun's steps; screenshots `jugcraft_guns_spikedriver_*`, `jugcraft_guns_seam_cutter_*` and `jugcraft_guns_caisson_pistol_*`.
+- **Slice 9D, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three guns' parts, their attachments' included, re-bakes to the owner's; each hand is where `BUILDS` puts it; every bone the owner's animations move exists; the Highwayman's shell is drawn into an empty corner of its atlas copy.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds.
+  - `python3 tools/check_mod_data.py`: PASS (1928 material IDs), with `check_guns` (the three guns' numbers, attachments, looks, eye relief and sound aliases in Java). `GunLooks.EYE_RELIEF` and `GunAnimations.GUN_SOUND_ALIASES` grew past `Map.of`'s ten pairs and are now `Map.ofEntries`; the check reads each gun's sound aliases as one map, as the Throttle has two.
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews:**
+    - first-person views of each gun idle, aimed, fired from the hip and aimed, mid-reload and mid-inspection;
+    - side views of each gun with each of its attachments, of the Sledge's and the Throttle's reloads, of the Highwayman's shot working its bolt and of its shell carried in through its loop;
+    - the nearest point of each gun to the eye through its aimed shot, at 0 to 6 px of relief, and which part it is (the top of the grip on all three).
+- **Slice 9D game tests (written; they run in CI):**
+  - `PumpGunsGameTests`:
+    - `pumpShotgunsAreRegistered`: the three are registered with their numbers, fire eight pellets a shot from Buckshot Shells a pull at a time and load a shell at a time; each recipe loads; the Sledge hits hardest, the Highwayman holds the most, reaches furthest and aims steadiest, the Throttle fires quickest; the Highwayman and the Throttle take the scopes, the Sledge none; the Throttle takes only the stocks and scopes, the others the barrel attachments, the light grip and the bayonets too.
+    - `pumpShotgunsLandAndLoad`: side by side, each fires its one shell at a pig three blocks off, the pellets landing together and the shell spent; then each loads its full tube from the inventory, the first shell after its opening and one shell's time, every shell after its whole reload, and no more than the tube holds.
+    - `highwaymanKeepsItsPelletsTogether`: aimed at pigs thirteen blocks off, standing a block up so that no pellet strays into the floor first, all eight of the Highwayman's pellets land (its 2.5° cone is narrower than the pig there), and fewer of the Sledge's (6°).
+  - "Every gun registered" now counts thirty-six guns.
+  - `GunsClientGameTests` takes the three through every gun's steps; screenshots `jugcraft_guns_sledge_*`, `jugcraft_guns_highwayman_*` and `jugcraft_guns_throttle_*`.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
-- **The gun sets the owner chose on 10 October 2026,** each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B) and the second energy weapons (slice 9C), then the pump shotguns.
+- **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
 - **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; the tactical grip and the laser sight; the aiming polish (below); a rack that charges several Energy Cells at once. The owner chose the first three on 10 October 2026.
 - **Aimed, the gun hand covers the sights:** in the CI screenshots of 8 October, the right fist sits over the lower middle of the screen when aiming, on the one-handed guns and some long ones. The arm runs back toward the camera from the grip drawn at the middle of the view. This is a polish item for a pull request of its own.
 - **Not yet:**

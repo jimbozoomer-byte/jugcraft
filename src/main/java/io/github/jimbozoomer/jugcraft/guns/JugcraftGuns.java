@@ -48,6 +48,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  * firing for as long as the trigger is held.</li>
  * <li>Slice 9C, the second energy weapons, on the same cells and shots as slice 8D's: the Spikedriver's heavy beam and the
  * Seam Cutter's short one, held on, and the Caisson Pistol's arc.</li>
+ * <li>Slice 9D, the pump shotguns, loaded a shell at a time: the heavy Sledge, the long Highwayman (worked by its bolt,
+ * not a pump) and the quick Throttle; pellets like the other shotguns.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.</li>
  * </ul>
@@ -91,6 +93,9 @@ public final class JugcraftGuns {
 		SPECS.put("spikedriver", new GunSpec(12.0F, 1, 16, false, 6, 67, 0, 0, 0, 1.5F, 0.3F, 64, "energy_cell"));
 		SPECS.put("seam_cutter", new GunSpec(1.5F, 1, 2, true, 60, 60, 0, 0, 0, 2.0F, 1.0F, 16, "energy_cell"));
 		SPECS.put("caisson_pistol", new GunSpec(5.0F, 1, 8, false, 10, 57, 0, 0, 0, 6.0F, 3.0F, 24, "energy_cell"));
+		SPECS.put("sledge", new GunSpec(4.0F, 8, 20, false, 4, 0, 8, 14, 14, 8.0F, 6.0F, 24, "buckshot_shell"));
+		SPECS.put("highwayman", new GunSpec(3.0F, 8, 20, false, 7, 0, 18, 13, 16, 6.0F, 2.5F, 40, "buckshot_shell"));
+		SPECS.put("throttle", new GunSpec(3.0F, 8, 16, false, 6, 0, 10, 13, 22, 6.5F, 4.5F, 28, "buckshot_shell"));
 	}
 
 	/**
@@ -217,6 +222,14 @@ public final class JugcraftGuns {
 		ACCEPTS.put("squall_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet",
 				"steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
 		ACCEPTS.put("spikedriver", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock"));
+		ACCEPTS.put("sledge", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_stock",
+				"weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
+				"netherite_bayonet"));
+		ACCEPTS.put("highwayman", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_stock",
+				"weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
+				"netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
+		ACCEPTS.put("throttle", List.of("light_stock", "weighted_stock", "wooden_stock", "long_scope", "medium_scope",
+				"reflex_sight"));
 	}
 
 	/** The rounds. */

@@ -342,6 +342,34 @@ GUNS = {
         "damage": 5.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 10,
         "reload": 57, "spread": (6.0, 3.0), "range": 24, "ammo": "energy_cell", "shot": "arc", "charge": 300,
     },
+    # Slice 9D: the pump shotguns, in steel, each loaded a shell at a time and worked after every shot: the Sledge and
+    # the Throttle by their pumps, the Highwayman by its bolt. The Sledge hits hardest a shot from its short tube; the
+    # Highwayman reaches furthest, holds the most and takes a scope; the Throttle cycles quickest, its loading bulb
+    # twisted open under its barrel.
+    "sledge": {
+        "display": "Sledge",
+        "source": "killer_23",
+        "tooltip": "A heavy pump shotgun with a bird's-head grip: eight heavy pellets a shot, four shells in its tube. "
+                   "Loaded a shell at a time. Fires buckshot shells.",
+        "damage": 4.0, "pellets": 8, "interval": 20, "auto": False, "capacity": 4,
+        "reload": (8, 14, 14), "spread": (8.0, 6.0), "range": 24, "ammo": "buckshot_shell",
+    },
+    "highwayman": {
+        "display": "Highwayman",
+        "source": "turnpike",
+        "tooltip": "A long shotgun with a sight, its bolt worked after every shot: aimed, its pellets keep together "
+                   "further than most. Takes a scope. Loaded a shell at a time. Fires buckshot shells.",
+        "damage": 3.0, "pellets": 8, "interval": 20, "auto": False, "capacity": 7,
+        "reload": (18, 13, 16), "spread": (6.0, 2.5), "range": 40, "ammo": "buckshot_shell",
+    },
+    "throttle": {
+        "display": "Throttle",
+        "source": "venturi",
+        "tooltip": "A quick pump shotgun: the bulb under its barrel is twisted open before it is loaded, a shell at a "
+                   "time. Fires buckshot shells.",
+        "damage": 3.0, "pellets": 8, "interval": 16, "auto": False, "capacity": 6,
+        "reload": (10, 13, 22), "spread": (6.5, 4.5), "range": 28, "ammo": "buckshot_shell",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -459,6 +487,13 @@ RECIPES = {
                                      "A": "jugcraft:advanced_circuit", "B": "#c:ingots/brass"}),
     "caisson_pistol": (["LSS", " AB"], {"L": "minecraft:lightning_rod", "S": "#c:ingots/steel",
                                        "A": "jugcraft:advanced_circuit", "B": "#c:ingots/brass"}),
+    # Slice 9D: steel, a lever and planks for the fore-end each; four steel ingots for the Sledge's heavy barrel and
+    # frame, brass for the Highwayman's long barrel's fittings, a copper ingot for the Throttle's bulb.
+    "sledge": (["SSS", "SLP"], {"S": "#c:ingots/steel", "L": "minecraft:lever", "P": "#minecraft:planks"}),
+    "highwayman": (["SSS", "PLB"], {"S": "#c:ingots/steel", "P": "#minecraft:planks", "L": "minecraft:lever",
+                                    "B": "#c:ingots/brass"}),
+    "throttle": (["SSC", "PLB"], {"S": "#c:ingots/steel", "C": "minecraft:copper_ingot", "P": "#minecraft:planks",
+                                  "L": "minecraft:lever", "B": "#c:ingots/brass"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -1060,6 +1095,71 @@ BUILDS = {
         "muzzle": (7.95, 5.0, 3.7),
         "sight": (7.0, 6.14, 10.02),
     },
+    # Slice 9D, the pump shotguns; each gun body turns about the grip in the right hand, and each is loaded a shell at
+    # a time. The Killer 23's bolt part is its pump: the wooden fore-end under the barrel and a stud on the receiver's
+    # left side, which each shot slides back under the left hand and the reload holds open. It has no sights part: its
+    # rear notch is the pair of posts on top of the receiver's front (the main part's 16th and 17th elements), its
+    # front post on the standard barrel's muzzle. Its shell bone stays at scale 0 in the owner's animations; it and the
+    # magazine bone hold nothing, nor do the scriptures and no_sights bones only its inspection moves. Aimed, it is
+    # held 6 px further out: through the aimed shot its kick otherwise brought the top of its grip 1.9 px behind the
+    # eye.
+    "sledge": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel"], (8.0, 2.31, 17.65)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 3.2, 5.5)),
+            ("shell", "gun_body", [], (8.0, 3.2, 12.0)),
+            ("magazine", "gun_body", [], (8.0, 3.2, 8.0)),
+            ("scriptures", "gun_body", [], (8.0, 6.0, 12.0)),
+            ("no_sights", "gun_body", [], (8.0, 6.3, 9.5)),
+        ],
+        "hands": {"right": (8.0, 2.31, 17.65), "left": (8.0, 2.0, 4.0)},
+        "arms": {"right": (-0.2948, -0.1586, 0.9423), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.1, -1.22),
+        "sight": (8.0, 6.45, 9.1),
+        "eye_relief": 6.0,
+    },
+    # The Turnpike is worked by its bolt (the bolt part: the bolt in the port on the receiver's right side and its
+    # handle), which each shot drives back and home as the right hand comes off the grip, and the reload holds open;
+    # its fore-end is the main part's, and stays put. The reload carries a shell in on the shell bone (PROPS) from the
+    # left hand, up through the port under the receiver. Its sights are a ring on top of the receiver's front and a
+    # post ahead of it; a scope takes the ring's place (its no_sights part is empty). Its magazine bone, and the
+    # scriptures and no_sights bones only its inspection moves, hold nothing. Aimed, it is held 6 px further out: its
+    # kick otherwise brought the top of its grip 2 px behind the eye.
+    "highwayman": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "sights"], (8.0, 2.44, 18.33)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 5.35, 12.43)),
+            ("shell", "gun_body", ["@shell"], (8.707, 3.342, 10.878)),
+            ("magazine", "gun_body", [], (8.0, 3.2, 8.0)),
+            ("scriptures", "gun_body", [], (8.0, 6.0, 12.0)),
+            ("no_sights", "gun_body", [], (8.0, 6.45, 10.9)),
+        ],
+        "hands": {"right": (8.0, 2.44, 18.33), "left": (8.0, 2.2, 8.2)},
+        "arms": {"right": (-0.2948, -0.1586, 0.9423), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.1, -2.79),
+        "sight": (8.0, 6.45, 10.9),
+        "eye_relief": 6.0,
+    },
+    # The Venturi's bolt part is its pump, the fore-end on the rods under the barrel, which each shot slides back under
+    # the left hand. The bulb at the front of the rods (the main part's 17th to 19th, 25th and 26th elements) is the
+    # owner's magazine: the reload twists it 25 degrees open about its own axis before the left hand loads the shells
+    # under the receiver, and shut after with a clank; each shot rocks it. Its magazine_2 bone is empty. Its sights are
+    # a ring on top of the receiver's front and a post at the muzzle; a scope takes the ring's place, and a stock that
+    # of its pistol grip. Aimed, it is held 2 px further out (the top of its grip came within 1.2 px of the eye
+    # through the aimed shot).
+    "throttle": {
+        "bones": [
+            ("gun_body", None, ["main-#16,17,18,24,25", "sights", "stan_grip"], (8.0, 2.06, 16.03)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 2.8, 6.8)),
+            ("magazine", "gun_body", ["main#16,17,18,24,25"], (8.0, 2.75, 2.75)),
+            ("magazine_2", "gun_body", [], (8.0, 2.75, 2.75)),
+        ],
+        "hands": {"right": (8.0, 2.06, 16.03), "left": (8.0, 2.0, 6.8)},
+        "arms": {"right": (-0.2948, -0.2563, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.05, -0.27),
+        "sight": (8.0, 6.25, 11.6),
+        "eye_relief": 2.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -1105,6 +1205,8 @@ PROPS = {
     # so the loop's last offset (half a pixel left, a third down and 2.7 px forward) puts it in the tube's mouth and
     # its shrinking draws it in.
     "linesman": {"cell": {"kind": "cell", "from": (7.73, 0.81, 12.6), "size": (1.5, 1.5, 3.0), "texture_at": (56, 0)}},
+    "highwayman": {"shell": {"kind": "buckshot", "from": (8.207, 2.842, 10.878), "size": (1.0, 1.0, 3.0),
+                             "texture_at": (120, 123)}},
 }
 # The owner's pilot flame (Guns/item/spitfire_flame.png): three 8 x 8 frames, one above the other; the first frame's
 # flame is 4 px wide (columns 2 to 5) and 8 tall, its tip at the top.
@@ -1473,6 +1575,8 @@ ZOOM = {
     "rattler_pistol": 0.9, "bronco_smg": 0.9, "squall_rifle": 0.85,
     # The second energy weapons (slice 9C): the rail pistol reaches furthest; the cutting laser's beam is short.
     "spikedriver": 0.85, "seam_cutter": 0.95, "caisson_pistol": 0.9,
+    # The pump shotguns (slice 9D): the Highwayman, made to be aimed, narrows it most.
+    "sledge": 0.9, "highwayman": 0.8, "throttle": 0.88,
 }
 
 
@@ -1554,7 +1658,10 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    # The energy weapons loaded a charge at a time (slice 8D) play the charge going in.
                    "stormlock_rifle": {"reload_mag_in": "insert"}, "linesman": {"reload_mag_in": "insert"},
                    # The Squall Rifle's reload names "metal" for its canister: it clanks, it is no ramrod (slice 9B).
-                   "squall_rifle": {"metal": "clank"}}
+                   "squall_rifle": {"metal": "clank"},
+                   # The pump shotguns (slice 9D) push a shell; the Throttle's bulb clanks shut.
+                   "sledge": {"reload_mag_in": "shell_in"}, "highwayman": {"reload_mag_in": "shell_in"},
+                   "throttle": {"reload_mag_in": "shell_in", "metal": "clank"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -1599,6 +1706,11 @@ SHOT_SOUNDS = {
     "spikedriver": "item/rail/fire.ogg",
     "seam_cutter": "item/laser/fire_2.ogg",
     "caisson_pistol": "item/plasma/fire.ogg",
+    # Slice 9D: the library's other takes of the scrap rifle's and the Thunderpipe's shots ("enchanted"), and its
+    # plasma shotgun's blast.
+    "sledge": "item/makeshift_rifle/enchanted_fire.ogg",
+    "highwayman": "item/boomstick/enchanted_fire.ogg",
+    "throttle": "item/plasma_shotgun/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -2620,20 +2732,23 @@ def draw_flame(atlas, prop):
 
 
 def draw_buckshot(atlas, prop):
-    """A 2 x 2 x 5 red paper hull with darker crimp lines and a brass head."""
+    """A red paper hull with darker crimp lines and a brass head over the back two fifths of its length (the
+    Thunderpipe's is 2 x 2 x 5 px, the Highwayman's 1 x 1 x 3)."""
     tu, tv = prop["texture_at"]
+    w, h, d = prop_dims(prop)
+    head = d - max(1, round(d * 0.4))  # the brass head's first pixel along the length
     red, red_dark, brass, brass_dark = (178, 44, 36, 255), (122, 28, 26, 255), (214, 170, 72, 255), (150, 112, 44, 255)
-    for x in range(2):
-        for y in range(2):
+    for x in range(w):
+        for y in range(h):
             atlas.putpixel((tu + x, tv + y), red_dark if (x + y) % 2 else red)      # north: the crimped end
-            atlas.putpixel((tu + 2 + x, tv + y), brass if (x + y) % 2 else brass_dark)  # south: the brass head
-    for x in range(5):
-        for y in range(2):  # east and west: hull, brass at the back two pixels
-            atlas.putpixel((tu + x, tv + 2 + y), (brass if y == 0 else brass_dark) if x >= 3 else
+            atlas.putpixel((tu + w + x, tv + y), brass if (x + y) % 2 else brass_dark)  # south: the brass head
+    for x in range(d):
+        for y in range(h):  # east and west: hull, then the brass head
+            atlas.putpixel((tu + x, tv + h + y), (brass if y == 0 else brass_dark) if x >= head else
                            (red if y == 0 else red_dark))
-    for z in range(5):
-        for x in range(4):  # up (u 0-1) and down (u 2-3): hull, brass at the back
-            atlas.putpixel((tu + x, tv + 4 + z), (brass if x % 2 == 0 else brass_dark) if z >= 3 else
+    for z in range(d):
+        for x in range(2 * w):  # up (the first w columns) and down (the next w): hull, then the brass head
+            atlas.putpixel((tu + x, tv + 2 * h + z), (brass if x % 2 == 0 else brass_dark) if z >= head else
                            (red if x % 2 == 0 else red_dark))
     return atlas
 
