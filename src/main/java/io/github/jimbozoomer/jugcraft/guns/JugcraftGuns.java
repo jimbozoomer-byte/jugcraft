@@ -54,6 +54,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  * <li>Slice 10A, the launchers: the Earthmover and the Skylark Rifle fire the rocketry branch's High-Explosive Rockets as
  * rockets ({@link #SHOTS}, {@link #ROCKET_SPEED}), each bursting where it hits or at the end of the gun's range; the
  * Bullfrog lobs grenades as the Trench Lobber does, one a reload.</li>
+ * <li>Slice 10B, coil and plasma, on the same cells and shots as slice 8D's: the Solenoid Rifle's heavy beam, the
+ * farthest-reaching, the Votive Rifle's short bolts, held on, and the Glowmouth's arc, loaded a charge at a time.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -104,6 +106,9 @@ public final class JugcraftGuns {
 		SPECS.put("earthmover", new GunSpec(24.0F, 1, 20, false, 4, 61, 0, 0, 0, 2.5F, 1.0F, 72, "he_rocket"));
 		SPECS.put("skylark_rifle", new GunSpec(24.0F, 1, 20, false, 1, 48, 0, 0, 0, 1.5F, 0.25F, 135, "he_rocket"));
 		SPECS.put("bullfrog", new GunSpec(16.0F, 1, 20, false, 1, 45, 0, 0, 0, 3.0F, 1.5F, 20, "grenade"));
+		SPECS.put("solenoid_rifle", new GunSpec(14.0F, 1, 16, false, 5, 52, 0, 0, 0, 1.5F, 0.15F, 128, "energy_cell"));
+		SPECS.put("votive_rifle", new GunSpec(3.0F, 1, 3, true, 30, 50, 0, 0, 0, 3.0F, 1.0F, 48, "energy_cell"));
+		SPECS.put("glowmouth", new GunSpec(10.0F, 1, 20, false, 4, 0, 8, 13, 18, 12.0F, 9.0F, 14, "energy_cell"));
 	}
 
 	/**
@@ -112,7 +117,7 @@ public final class JugcraftGuns {
 	 * line; {@link #ARC}, a bolt that leaps from creature to creature; {@link #ROCKET} (slice 10A), a High-Explosive Rocket
 	 * ({@link GunShots}).
 	 */
-	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"));
+	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"), Map.entry("solenoid_rifle", "beam"), Map.entry("votive_rifle", "beam"), Map.entry("glowmouth", "arc"));
 	public static final String GRENADE = "grenade";
 	public static final String FLAME = "flame";
 	public static final String BEAM = "beam";
@@ -127,7 +132,7 @@ public final class JugcraftGuns {
 	 * Slice 8D: the JE each round of an energy weapon draws from the Energy Cells in the inventory as it loads
 	 * (tools/guns.py GUNS "charge"); a gun not listed loads rounds of its ammunition.
 	 */
-	public static final Map<String, Integer> CHARGE = Map.of("beam_pistol", 400, "stormlock_rifle", 750, "linesman", 250, "spikedriver", 800, "seam_cutter", 100, "caisson_pistol", 300);
+	public static final Map<String, Integer> CHARGE = Map.of("beam_pistol", 400, "stormlock_rifle", 750, "linesman", 250, "spikedriver", 800, "seam_cutter", 100, "caisson_pistol", 300, "solenoid_rifle", 1100, "votive_rifle", 200, "glowmouth", 750);
 	/**
 	 * An arc leaps on from its first creature to at most {@link #ARC_HOPS} more, each the nearest within {@link #ARC_REACH}
 	 * blocks of the last, each taking {@link #ARC_SHARE} of the damage before it (tools/guns.py).
@@ -258,6 +263,12 @@ public final class JugcraftGuns {
 				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "tactical_grip"));
 		ACCEPTS.put("bullfrog", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet",
 				"steel_bayonet", "diamond_bayonet", "netherite_bayonet", "tactical_grip"));
+		ACCEPTS.put("solenoid_rifle", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
+				"wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet",
+				"long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("votive_rifle", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
+				"wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet",
+				"long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
 	}
 
 	/** The rounds. */

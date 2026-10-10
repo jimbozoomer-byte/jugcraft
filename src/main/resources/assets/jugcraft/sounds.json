@@ -869,6 +869,33 @@
       }
     ]
   },
+  "guns.solenoid_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gauss_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.votive_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/nervepinch_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.glowmouth.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/plasma_fire_2",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

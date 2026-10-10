@@ -402,6 +402,34 @@ GUNS = {
         "damage": 16.0, "pellets": 1, "interval": 20, "auto": False, "capacity": 1,
         "reload": 45, "spread": (3.0, 1.5), "range": 20, "ammo": "grenade", "shot": "grenade",
     },
+    # Slice 10B: coil and plasma, on Energy Cells and slice 8D's shots like the other energy weapons. The Solenoid Rifle
+    # throws a heavy slug down the rings along its barrel, a beam, the farthest-reaching of them; the Votive Rifle
+    # fires plasma for as long as the trigger is held; the Glowmouth, a plasma blunderbuss loaded a charge at a time,
+    # looses an arc that seeks wide and close.
+    "solenoid_rifle": {
+        "display": "Solenoid Rifle",
+        "source": "gauss_rifle",
+        "tooltip": "A gauss rifle: the rings along its barrel throw a heavy slug through every creature in its line. "
+                   "Runs on Energy Cells.",
+        "damage": 14.0, "pellets": 1, "interval": 16, "auto": False, "capacity": 5,
+        "reload": 52, "spread": (1.5, 0.15), "range": 128, "ammo": "energy_cell", "shot": "beam", "charge": 1100,
+    },
+    "votive_rifle": {
+        "display": "Votive Rifle",
+        "source": "plasgun",
+        "tooltip": "A plasma rifle with a wax seal on its flank. Hold the trigger: each bolt burns through every creature "
+                   "in its line. Runs on Energy Cells.",
+        "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 30,
+        "reload": 50, "spread": (3.0, 1.0), "range": 48, "ammo": "energy_cell", "shot": "beam", "charge": 200,
+    },
+    "glowmouth": {
+        "display": "Glowmouth",
+        "source": "plasmabuss",
+        "tooltip": "A plasma blunderbuss loaded a charge at a time: its burst leaps from the creature nearest the aim to "
+                   "two more close by. Runs on Energy Cells.",
+        "damage": 10.0, "pellets": 1, "interval": 20, "auto": False, "capacity": 4,
+        "reload": (8, 13, 18), "spread": (12.0, 9.0), "range": 14, "ammo": "energy_cell", "shot": "arc", "charge": 750,
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -535,6 +563,14 @@ RECIPES = {
                                        "T": "minecraft:tripwire_hook"}),
     "bullfrog": (["ICC", "PL "], {"I": "minecraft:iron_ingot", "C": "minecraft:copper_ingot", "P": "#minecraft:planks",
                                   "L": "minecraft:lever"}),
+    # Slice 10B: steel and an advanced circuit each, as the energy weapons are; copper cable wound into the Solenoid
+    # Rifle's rings, glass for the Votive Rifle's windows, copper for the Glowmouth's bell and planks for its stock.
+    "solenoid_rifle": (["CCS", "SAB"], {"C": "jugcraft:copper_cable", "S": "#c:ingots/steel", "A": "jugcraft:advanced_circuit",
+                                        "B": "#c:ingots/brass"}),
+    "votive_rifle": (["SSS", "GAB"], {"S": "#c:ingots/steel", "G": "minecraft:glass_pane", "A": "jugcraft:advanced_circuit",
+                                      "B": "#c:ingots/brass"}),
+    "glowmouth": (["CSS", "PAB"], {"C": "minecraft:copper_ingot", "S": "#c:ingots/steel", "P": "#minecraft:planks",
+                                   "A": "jugcraft:advanced_circuit", "B": "#c:ingots/brass"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -1264,6 +1300,66 @@ BUILDS = {
         "muzzle": (8.0, 3.62, 1.4),
         "sight": (8.0, 5.55, 13.65),
     },
+    # Slice 10B, coil and plasma; each gun body turns about the grip in the right hand. The Gauss Rifle's "Battery"
+    # (the owner's capital B: the battery on the receiver's left, a block and a glowing plate on an arm, the main part's
+    # 13th to 15th and 18th elements) slides out to the left with each shot and through the reload, and back; its bolt
+    # (the 23rd, the knob in the slot on the right) is drawn back as each shot fires and as the reload ends. Its
+    # magazine is the standard one under the receiver; magazine_2, default_mag and scriptures hold nothing. Its sight
+    # is the owner's ring on the back of the receiver, its front post on the muzzle.
+    "solenoid_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-#12,13,14,17,22", "sights"], (8.0, 1.8, 15.2)),
+            ("bolt", "gun_body", ["main#22"], (9.13, 4.83, 10.4)),
+            ("Battery", "gun_body", ["main#12,13,14,17"], (6.5, 5.0, 11.75)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 1.5, 9.9)),
+            ("magazine_2", "gun_body", [], (8.0, 1.5, 9.9)),
+            ("default_mag", "gun_body", [], (8.0, 1.5, 9.9)),
+            ("scriptures", "gun_body", [], (8.0, 6.0, 12.0)),
+        ],
+        "hands": {"right": (8.0, 1.8, 15.2), "left": (8.0, 1.8, 6.6)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.0, -1.5),
+        "sight": (8.0, 6.5, 14.14),
+        "eye_relief": 1.0,
+    },
+    # The Plasgun's bolt is the plate along the top of its receiver (the main part's 7th element), driven back with
+    # each shot and held back through the reload; its vent (the 22nd, the louvre on the chamber's left) lifts out
+    # through the reload; its scriptures are the owner's "Seal" group (the 26th and 27th: a wax seal and the parchment
+    # hanging from it), swinging about the seal. The reload swings the standard magazine down and back out of the
+    # well, about its top. Its rear sight is the channel between the owner's two rails on the back of the receiver,
+    # its front post on the muzzle.
+    "votive_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-#6,21,25,26", "sights"], (8.0, 2.3, 16.0)),
+            ("bolt", "gun_body", ["main#6"], (8.0, 5.99, 13.46)),
+            ("vent", "gun_body", ["main#21"], (6.75, 3.89, 10.75)),
+            ("scriptures", "gun_body", ["main#25,26"], (6.88, 4.15, 8.25)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 3.0, 10.75)),
+            ("magazine_2", "gun_body", [], (8.0, 3.0, 10.75)),
+        ],
+        "hands": {"right": (8.0, 2.3, 16.0), "left": (8.0, 2.6, 7.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.05, -0.04),
+        "sight": (8.0, 6.36, 14.3),
+        "eye_relief": 2.0,
+    },
+    # The Plasmabuss is one part. Its crank (the owner's group so named: the main part's 52nd to 55th elements, the
+    # lever on top of the back of its chamber) is pulled back and over about its axle as the reload ends; each loop of
+    # the reload carries a charge (PROPS) in from the left to the side of its chamber. Its sight is the notch between
+    # the two posts on top of the chamber's back (the 29th and 30th); there is no front post, the aim runs over the
+    # muzzle's bell.
+    "glowmouth": {
+        "bones": [
+            ("gun_body", None, ["main-#51,52,53,54"], (8.0, 2.4, 16.0)),
+            ("crank", "gun_body", ["main#51,52,53,54"], (8.0, 3.75, 13.5)),
+            ("shell", "gun_body", ["@cell"], (7.42, 2.28, 10.07)),
+        ],
+        "hands": {"right": (8.0, 2.4, 16.0), "left": (8.0, 1.0, 7.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 3.8, -0.46),
+        "sight": (8.0, 6.07, 10.74),
+        "eye_relief": 3.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -1318,6 +1414,10 @@ PROPS = {
                                  "texture_at": (120, 0)}},
     "bullfrog": {"grenade": {"kind": "grenade", "from": (7.3, 2.92, 4.95), "size": (1.4, 1.4, 3.0),
                              "texture_at": (120, 0)}},
+    # Slice 10B: the Glowmouth's charge, an Energy Cell as the Linesman's is. It rests where the loop's last carry
+    # (0.4167 s) brings it into the left side of the chamber, its middle at the shell bone's pivot, and shrinks to
+    # nothing there.
+    "glowmouth": {"cell": {"kind": "cell", "from": (6.67, 1.53, 8.57), "size": (1.5, 1.5, 3.0), "texture_at": (120, 0)}},
 }
 # The owner's pilot flame (Guns/item/spitfire_flame.png): three 8 x 8 frames, one above the other; the first frame's
 # flame is 4 px wide (columns 2 to 5) and 8 tall, its tip at the top.
@@ -1721,6 +1821,8 @@ ZOOM = {
     "sledge": 0.9, "highwayman": 0.8, "throttle": 0.88,
     # The launchers (slice 10A): the Skylark Rifle reaches furthest; the Bullfrog lobs its grenades close.
     "earthmover": 0.85, "skylark_rifle": 0.8, "bullfrog": 0.92,
+    # Coil and plasma (slice 10B): the Solenoid Rifle reaches furthest; the Glowmouth's arc seeks close.
+    "solenoid_rifle": 0.75, "votive_rifle": 0.85, "glowmouth": 0.95,
 }
 
 
@@ -1814,7 +1916,9 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    # The launchers (slice 10A): the Earthmover's drum clanks as it twists free and home; the Skylark
                    # Rifle and the Bullfrog push a round in.
                    "earthmover": {"metal": "clank"}, "skylark_rifle": {"reload_mag_in": "shell_in"},
-                   "bullfrog": {"reload_mag_in": "shell_in"}}
+                   "bullfrog": {"reload_mag_in": "shell_in"},
+                   # The Glowmouth (slice 10B) is loaded a charge at a time, as the Stormlock Rifle is.
+                   "glowmouth": {"reload_mag_in": "insert"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -1869,6 +1973,11 @@ SHOT_SOUNDS = {
     "earthmover": "item/bazooka/fire.ogg",
     "skylark_rifle": "item/rocket_rifle/fire.ogg",
     "bullfrog": "item/airgun/fire_2.ogg",
+    # Slice 10B: the library's gauss shot; its short nerve pinch shot, for the Votive Rifle's quick bolts; and its
+    # second plasma shot.
+    "solenoid_rifle": "item/gauss/fire.ogg",
+    "votive_rifle": "item/nervepinch/fire.ogg",
+    "glowmouth": "item/plasma/fire_2.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -2175,15 +2284,39 @@ def atlas_layout(gun):
     # scopes before it had placed.
     for group in ({t: r for t, r in islands.items() if t not in PACK_LATER},
                   {t: r for t, r in islands.items() if t in PACK_LATER}):
+        joined = False
         while group:
             try:
                 place.update(pack_islands(gun, side, place, used, group, sizes))
                 break
             except ValueError:
-                if side >= 128:
+                if side < 128:
+                    side *= 2  # what is placed stays where it is in the bigger atlas
+                elif not joined:
+                    # Slice 10B: the Solenoid Rifle's stocks, grips and bayonets draw on shared textures, which leave
+                    # its scopes' pieces too little room one by one; pieces close together then go in as one.
+                    group, joined = {t: joined_rects(rects) for t, rects in group.items()}, True
+                else:
                     raise
-                side *= 2  # what is placed stays where it is in the bigger atlas
     return (side, side) if len(place) > 1 else (ow, oh), place
+
+
+def joined_rects(rects):
+    """Pixel rects (x0, y0, x1, y1) of one texture, any two within a pixel of each other joined into the rect round
+    both wherever that takes no more room, the pixel round each included (atlas_layout()'s last try)."""
+    def room(r):
+        return (r[2] - r[0] + 2) * (r[3] - r[1] + 2)
+    rects = sorted(rects)
+    while True:
+        pair = next(((a, b) for i, a in enumerate(rects) for b in rects[i + 1:]
+                     if a[0] <= b[2] + 1 and b[0] <= a[2] + 1 and a[1] <= b[3] + 1 and b[1] <= a[3] + 1
+                     and room((min(a[0], b[0]), min(a[1], b[1]), max(a[2], b[2]), max(a[3], b[3])))
+                     <= room(a) + room(b)), None)
+        if pair is None:
+            return set(rects)
+        a, b = pair
+        rects = sorted([r for r in rects if r not in pair]
+                       + [(min(a[0], b[0]), min(a[1], b[1]), max(a[2], b[2]), max(a[3], b[3]))])
 
 
 # Scope textures packed piece by piece after all the others (atlas_layout()).
@@ -2191,8 +2324,11 @@ PACK_LATER = {"scguns:item/laser_sight", "scguns:item/laser"}
 
 
 # Library textures that are an animation's frames, one above the other (slice 10A: the Skylark Rifle's two, its flame
-# flickering in a corner none of its parts draw on). A gun draws on the first frame, the top square.
-FRAMED = {"scguns:item/rocket_rifle"}
+# flickering in a corner none of its parts draw on). A gun draws on the first frame, the top square: the frames' UVs
+# are a frame's, as the game reads an animated texture's.
+FRAMED = {"scguns:item/rocket_rifle",
+          # Slice 10B: the Solenoid Rifle's and the Votive Rifle's glowing parts, three frames each.
+          "scguns:item/gauss_rifle_animated", "scguns:item/plasgun_animated"}
 
 
 def texture_size(texture):
@@ -2280,7 +2416,12 @@ def face_placement(place, data, face, lo, hi):
     placement = place[data["_texture"]]
     if isinstance(placement, dict):
         _, _, w, h = next(iter(placement.values()))
-        return placement[island_rect(data, face, lo, hi, (w, h))]
+        rect = island_rect(data, face, lo, hi, (w, h))
+        if rect in placement:
+            return placement[rect]
+        # The rect it was joined into (joined_rects()).
+        return next(p for r, p in sorted(placement.items())
+                    if r[0] <= rect[0] and r[1] <= rect[1] and rect[2] <= r[2] and rect[3] <= r[3])
     return placement
 
 

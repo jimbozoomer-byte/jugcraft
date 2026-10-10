@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 10B (coil and plasma)
+- **Three new energy weapons** from the owner's models and animations, on the Energy Cells: the **Solenoid Rifle**, a coil rifle whose heavy beam passes through every creature in its line and reaches the farthest of the energy weapons; the **Votive Rifle**, a plasma rifle that burns for as long as the trigger is held; and the **Glowmouth**, a plasma blunderbuss loaded a charge at a time, whose arc leaps from its mark to two more creatures close by.
+- The two rifles take magazines, stocks, grips, bayonets, the scopes and the Laser Sight; the Glowmouth takes nothing.
+- Record: [guns.md, slice 10B](docs/features/guns.md#slice-10b-coil-and-plasma).
+
 ### Unmerged: Guns, slice 10A (the launchers)
 - **Three new guns** from the owner's models and animations: the **Earthmover**, a shoulder rocket launcher with a drum of four rockets; the **Skylark Rifle**, a break-open rifle that fires one rocket at a time, faster and further; and the **Bullfrog**, a stubby grenade launcher loaded a grenade at a time.
 - The rocket guns fire the rocketry branch's High-Explosive Rockets, which burst where they hit, or at the end of the gun's range, as the Rocket Launcher's do; they hurt living things only and break no block. The Bullfrog loads any grenade, as the Trench Lobber does.
