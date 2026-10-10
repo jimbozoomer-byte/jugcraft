@@ -1552,7 +1552,7 @@ def check_guns():
     renderer = (client_guns / "GunRenderer.java").read_text(encoding="utf-8")
     shown = re.search(r"PROPS = List\.of\(([^)]*)\)", renderer)
     own_bones = {name for gun in guns.PROPS for name, _, parts, _ in guns.BUILDS[gun]["bones"] if f"@{name}" in parts}
-    if not shown or not own_bones <= set(re.findall(r'"([a-z_]+)"', shown.group(1))):
+    if not shown or not own_bones <= set(re.findall(r'"([a-z0-9_]+)"', shown.group(1))):
         err(f"GunRenderer.PROPS does not list every prop bone of tools/guns.py PROPS: {sorted(own_bones)}")
     if f'EJECT_CUE = "{guns.EJECT_CUE}";' not in animations:
         err(f"GunAnimations.EJECT_CUE differs from tools/guns.py ({guns.EJECT_CUE})")

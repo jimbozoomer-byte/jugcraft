@@ -430,6 +430,34 @@ GUNS = {
         "damage": 10.0, "pellets": 1, "interval": 20, "auto": False, "capacity": 4,
         "reload": (8, 13, 18), "spread": (12.0, 9.0), "range": 14, "ammo": "energy_cell", "shot": "arc", "charge": 750,
     },
+    # Slice 10C: the double-barrels. The Mule breaks open to load both its shells at once; the Fowler, a double
+    # flintlock, has a ball rammed down each barrel in turn; the Culverin is a stubby hand cannon loaded down its muzzle.
+    # Each fires a spread of pellets. The Mule's quick reload is the owner's animation's, so its pellets are the
+    # Bellmouth's, not heavier: over its two shots and reload it still deals the most a second of the shotguns.
+    "mule": {
+        "display": "Mule",
+        "source": "super_shotgun",
+        "tooltip": "A sawn-off double-barrel that breaks open to load both shells at once. Ten pellets a barrel. Fires "
+                   "buckshot shells.",
+        "damage": 2.5, "pellets": 10, "interval": 8, "auto": False, "capacity": 2,
+        "reload": 35, "spread": (9.0, 7.0), "range": 24, "ammo": "buckshot_shell",
+    },
+    "fowler": {
+        "display": "Fowler",
+        "source": "doublet",
+        "tooltip": "A double-barrelled flintlock, a ball rammed down each barrel. Eight balls a shot, two shots, then a "
+                   "long reload. Fires paper cartridges.",
+        "damage": 3.0, "pellets": 8, "interval": 10, "auto": False, "capacity": 2,
+        "reload": 97, "spread": (8.0, 5.0), "range": 28, "ammo": "paper_cartridge",
+    },
+    "culverin": {
+        "display": "Culverin",
+        "source": "handcannon",
+        "tooltip": "A stubby hand cannon, fired one-handed and loaded down its muzzle: a fist of heavy balls at close "
+                   "range, then a long reload. Fires paper cartridges.",
+        "damage": 5.0, "pellets": 5, "interval": 20, "auto": False, "capacity": 1,
+        "reload": 74, "spread": (9.0, 7.0), "range": 18, "ammo": "paper_cartridge",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -571,6 +599,12 @@ RECIPES = {
                                       "B": "#c:ingots/brass"}),
     "glowmouth": (["CSS", "PAB"], {"C": "minecraft:copper_ingot", "S": "#c:ingots/steel", "P": "#minecraft:planks",
                                    "A": "jugcraft:advanced_circuit", "B": "#c:ingots/brass"}),
+    # Slice 10C: iron for the barrels, as the Coach Gun's and the muzzle-loaders' are; the Mule's lever and brass, as
+    # the Coach Gun's, and flint for the Fowler's and the Culverin's locks.
+    "mule": (["IIB", "ILP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
+                              "P": "#minecraft:planks"}),
+    "fowler": (["III", "IFP"], {"I": "minecraft:iron_ingot", "F": "minecraft:flint", "P": "#minecraft:planks"}),
+    "culverin": (["II", "FP"], {"I": "minecraft:iron_ingot", "F": "minecraft:flint", "P": "#minecraft:planks"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -1360,6 +1394,71 @@ BUILDS = {
         "sight": (8.0, 6.07, 10.74),
         "eye_relief": 3.0,
     },
+    # Slice 10C, the double-barrels. The Super Shotgun breaks open: its barrels, fore-end and top rib, and the strap
+    # under the fore-end (the main part's 1st, 7th, 12th to 16th elements), ride the barrel bone, which tips them down
+    # about the hinge at the frame's front; the frame, the fences round the breech and the stock stay.
+    "mule": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.2, 14.6)),
+            ("gun_body", "gun_body2", ["main-#0,6,11,12,13,14,15"], (8.0, 2.2, 14.6)),
+            ("barrel", "gun_body", ["main#0,6,11,12,13,14,15"], (8.0, 2.59, 9.93)),
+            ("bolt", "gun_body", [], (8.0, 3.86, 10.35)),
+            ("shell", "gun_body", [], (8.0, 3.86, 10.35)),
+        ],
+        "hands": {"right": (8.0, 2.2, 14.6), "left": (8.0, 1.3, 6.5)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 3.86, -2.82),
+        "sight": (8.0, 5.4, 10.6),
+        "eye_relief": 2.5,
+    },
+    # The Doublet is a double flintlock with the Blunderbuss's hammer (the owner's same hammer part, on the lock's
+    # right side, turning about its foot as the Bellmouth's does). Its reload drops a ball into each muzzle (ball,
+    # ball2), then rams the left barrel and the right: the ramrod (ram) rides a bone (ram2) that shifts it over to the
+    # right barrel between the two. The balls, the ramrod and the priming flash had no parts (PROPS); the rod lies
+    # along the fore-stock between rammings. Its left arm hangs from a "left_arm2" bone the reload slides back, as the
+    # Bellmouth's does. Its sight runs over the raised rib between the barrels, clear of the muzzles' rings.
+    "fowler": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.1, 15.0)),
+            ("gun_body", "gun_body2", ["main"], (8.0, 2.1, 15.0)),
+            ("hammer", "gun_body", ["hammer"], (8.96, 3.6, 15.0)),
+            ("bolt", "gun_body", [], (8.0, 3.6, 12.0)),
+            ("flash", "gun_body", ["@flash"], (9.0, 4.9, 13.2)),
+            ("ball", "gun_body", ["@ball"], (6.4, 3.0, 7.3)),
+            ("ball2", "gun_body", ["@ball2"], (8.4, 3.0, 7.3)),
+            ("ram2", "gun_body", [], (8.1, 2.0, 9.5)),
+            ("ram", "ram2", ["@ram"], (8.1, 2.0, 9.5)),
+            ("left_arm2", "gun_body", [], (8.0, 1.3, 7.0)),
+        ],
+        "hands": {"right": (8.0, 2.1, 15.0), "left": (8.0, 1.3, 7.0)},
+        "arm_parents": {"left": "left_arm2"},
+        "arms": {"right": (-0.2762, -0.2276, 0.9338), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 3.6, 2.1),
+        "sight": (8.0, 5.45, 11.5),
+        "eye_relief": 3.0,
+    },
+    # The Handcannon is held in one hand, as the Duelling Pistol is: its idle hides the left arm, whose hand point is
+    # at the muzzle, holding the ball, 0.71 s into the reload. Its cock and the jaw on it (the main part's 15th and
+    # 16th elements, on the lock's right side) turn about the cock's lowest corner; its ramrod is the owner's own, the
+    # rod under the barrel (the 13th element), drawn out, raised to the bore and rammed home. The ball and the priming
+    # flash had no parts (PROPS). Its sight is the notch between the two posts on top of the breech, raised to clear
+    # the barrel's top edge and the muzzle's swell, which stand higher.
+    "culverin": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.6, 14.4)),
+            ("gun_body", "gun_body2", ["main-#12,14,15"], (8.0, 1.6, 14.4)),
+            ("hammer", "gun_body", ["main#14,15"], (8.955, 2.404, 11.785)),
+            ("bolt", "gun_body", [], (8.0, 3.853, 11.0)),
+            ("ram", "gun_body", ["main#12"], (8.0, 1.851, 7.144)),
+            ("ball", "gun_body", ["@ball"], (8.0, 3.55, 8.5)),
+            ("flash", "gun_body", ["@flash"], (8.9, 4.5, 11.0)),
+        ],
+        "hands": {"right": (8.0, 1.6, 14.4), "left": (8.0, 3.85, 2.9)},
+        "hand_pose": {"left": ("reload", "0.7083")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.8586, -0.4957, -0.1305)},
+        "muzzle": (8.0, 3.853, 2.77),
+        "sight": (8.0, 5.55, 12.73),
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -1418,6 +1517,16 @@ PROPS = {
     # (0.4167 s) brings it into the left side of the chamber, its middle at the shell bone's pivot, and shrinks to
     # nothing there.
     "glowmouth": {"cell": {"kind": "cell", "from": (6.67, 1.53, 8.57), "size": (1.5, 1.5, 3.0), "texture_at": (120, 0)}},
+    "fowler": {
+        "ball": {"kind": "ball", "from": (5.9, 2.5, 6.8), "size": (1.0, 1.0, 1.0), "texture_at": (120, 120)},
+        "ball2": {"kind": "ball", "from": (7.9, 2.5, 6.8), "size": (1.0, 1.0, 1.0), "texture_at": (112, 120)},
+        "ram": {"kind": "rod", "from": (7.85, 1.75, 5.0), "size": (0.5, 0.5, 9.0), "texture_at": (96, 104)},
+        "flash": {"kind": "flash", "from": (8.5, 4.4, 12.7), "size": (1.0, 1.0, 1.0), "texture_at": (104, 120)},
+    },
+    "culverin": {
+        "ball": {"kind": "ball", "from": (7.5, 3.05, 8.0), "size": (1.0, 1.0, 1.0), "texture_at": (56, 56)},
+        "flash": {"kind": "flash", "from": (8.4, 4.0, 10.5), "size": (1.0, 1.0, 1.0), "texture_at": (48, 56)},
+    },
 }
 # The owner's pilot flame (Guns/item/spitfire_flame.png): three 8 x 8 frames, one above the other; the first frame's
 # flame is 4 px wide (columns 2 to 5) and 8 tall, its tip at the top.
@@ -1823,6 +1932,8 @@ ZOOM = {
     "earthmover": 0.85, "skylark_rifle": 0.8, "bullfrog": 0.92,
     # Coil and plasma (slice 10B): the Solenoid Rifle reaches furthest; the Glowmouth's arc seeks close.
     "solenoid_rifle": 0.75, "votive_rifle": 0.85, "glowmouth": 0.95,
+    # The double-barrels (slice 10C): shotguns, the Fowler a long gun, the Culverin a hand cannon fired close.
+    "mule": 0.92, "fowler": 0.88, "culverin": 0.94,
 }
 
 
@@ -1918,7 +2029,9 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    "earthmover": {"metal": "clank"}, "skylark_rifle": {"reload_mag_in": "shell_in"},
                    "bullfrog": {"reload_mag_in": "shell_in"},
                    # The Glowmouth (slice 10B) is loaded a charge at a time, as the Stormlock Rifle is.
-                   "glowmouth": {"reload_mag_in": "insert"}}
+                   "glowmouth": {"reload_mag_in": "insert"},
+                   # The Mule (slice 10C) pushes its shells in, as the Coach Gun does.
+                   "mule": {"reload_mag_in": "shell_in"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -1978,6 +2091,11 @@ SHOT_SOUNDS = {
     "solenoid_rifle": "item/gauss/fire.ogg",
     "votive_rifle": "item/nervepinch/fire.ogg",
     "glowmouth": "item/plasma/fire_2.ogg",
+    # Slice 10C: the library's shotgun blast, as the Thunderpipe fires; the flintlocks' black powder shot; and its cannon
+    # shot, unused till now, for the Culverin.
+    "mule": "item/boomstick/fire.ogg",
+    "fowler": "item/blackpowder/fire.ogg",
+    "culverin": "item/cannon/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -2265,7 +2383,11 @@ def atlas_layout(gun):
     side = max(ow, oh)
     while others:
         if side > 128:
-            raise ValueError(f"{gun}: its shared textures do not fit a 128 x 128 atlas")
+            # Slice 10C: the Doublet's own texture is as big as the largest atlas, so the textures its hammer and
+            # grips share with other guns cannot sit beside it whole; they go in piece by piece, as the scopes' do.
+            side = 128
+            islands.update(texture_islands(gun, lambda part, texture: texture in others))
+            break
         taken = {}
         for texture in others:
             w, h = sizes[texture]
@@ -2360,6 +2482,12 @@ def scope_islands(gun):
     """{texture id: the pixel rects the gun's faces draw on it}, for the textures packed piece by piece: those its
     mounted scopes draw on, and any other shared texture as big as the largest atlas, which could never sit whole beside
     the gun's own (slice 8D: the Arc Worker's stocks draw on the Rust Midge's whole 128 px atlas)."""
+    return texture_islands(gun, lambda part, texture: part.startswith("%") or (
+        texture != own_texture(gun) and texture_size(texture) == (128, 128)))
+
+
+def texture_islands(gun, chosen):
+    """{texture id: the pixel rects the gun's faces draw on it}, for the textures chosen(part, texture) picks."""
     found = {}
     for _, _, parts, _ in effective_bones(gun):
         for part in parts:
@@ -2370,7 +2498,7 @@ def scope_islands(gun):
                 hi = [max(a, b) for a, b in zip(element["from"], element["to"])]
                 for face, data in element.get("faces", {}).items():
                     texture = data["_texture"]
-                    if not part.startswith("%") and (texture == own_texture(gun) or texture_size(texture) != (128, 128)):
+                    if not chosen(part, texture):
                         continue
                     found.setdefault(texture, set()).add(island_rect(data, face, lo, hi, texture_size(texture)))
     return found

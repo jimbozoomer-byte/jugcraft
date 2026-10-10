@@ -133,8 +133,11 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 				|| context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND || context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
 	}
 
-	/** The props the animations move on bones of their own (tools/guns.py PROPS); slice 8C's jet of flame. */
-	private static final List<String> PROPS = List.of("shell", "ball", "ram", "flash", "flame");
+	/**
+	 * The props the animations move on bones of their own (tools/guns.py PROPS); slice 8C's jet of flame, and the
+	 * Fowler's second ball (slice 10C), one rammed down each barrel.
+	 */
+	private static final List<String> PROPS = List.of("shell", "ball", "ball2", "ram", "flash", "flame");
 
 	/**
 	 * A prop (a shell, a ball, a ramrod, a priming flash) rests out of place: an animation's offsets bring it where it
