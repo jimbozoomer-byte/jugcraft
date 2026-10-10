@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 9C (the second energy weapons)
+- **Three more energy weapons,** each the owner's model, art and animations, running on Energy Cells as slice 8D's do:
+  - the **Spikedriver** (the owner's Railworker), a rail pistol held in one hand: a heavy beam, 12 to every creature in its line, out to 64 blocks; six charges of 800 JE. To reload, its side magazine is changed and the lever on its side swung back to charge the rails;
+  - the **Seam Cutter** (CR4K Mining Laser), a cutting laser carried at the hip: a short beam, 1.5 to every creature in its line ten times a second, out to 16 blocks, for as long as the trigger is held; 60 charges of 100 JE. Its core is drawn out of its side to change. It cuts no blocks;
+  - the **Caisson Pistol** (Hyperbaria), a pressure pistol held in one hand: a bolt of 5 that seeks 6° off the aim, out to 24 blocks, and leaps to two more creatures close by; ten charges of 300 JE. The tall tank on top is changed to reload.
+- **Attachments:** the Spikedriver takes both magazines (the first energy weapon to: the Extended Magazine holds nine charges) and the three stocks; the others nothing.
+- **Seen from outside,** the Seam Cutter is carried at the hip, as the Thresher is.
+- Record: [guns.md, slice 9C](docs/features/guns.md#slice-9c-the-second-energy-weapons).
+
 ### Unmerged: Guns, slice 9B (the automatic weapons)
 - **Three automatic weapons** in steel, each the owner's model, art and animations, firing Light Rounds for as long as the trigger is held:
   - the **Rattler Pistol** (the owner's Auvtomag), a machine pistol held in one hand: 3 a shot, 20 rounds. It takes a scope, which rides its slide;

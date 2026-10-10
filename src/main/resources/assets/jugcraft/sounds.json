@@ -731,6 +731,33 @@
       }
     ]
   },
+  "guns.spikedriver.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/rail_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.seam_cutter.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/laser_fire_2",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.caisson_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/plasma_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

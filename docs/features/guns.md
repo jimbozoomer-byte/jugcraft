@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A) and the automatic weapons (slice 9B)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B) and the second energy weapons (slice 9C)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -15,6 +15,7 @@ Status:
 - **Slice 8D** (the energy weapons: the Beam Pistol, Stormlock Rifle and Linesman, and the Energy Cell they run on; [below](#slice-8d-the-energy-weapons)): implemented on `claude/guns-energy`, stacked on slice 8C, awaiting review.
 - **Slice 9A** (the marksman rifles: the Picket Rifle, Ranger Rifle and Kestrel Rifle; [below](#slice-9a-the-marksman-rifles)): implemented on `claude/guns-marksman` (#285), stacked on slice 8D, awaiting review.
 - **Slice 9B** (the automatic weapons: the Rattler Pistol, Bronco SMG and Squall Rifle; [below](#slice-9b-the-automatic-weapons)): implemented on `claude/guns-automatic` (#286), stacked on slice 9A, awaiting review.
+- **Slice 9C** (the second energy weapons: the Spikedriver, Seam Cutter and Caisson Pistol; [below](#slice-9c-the-second-energy-weapons)): implemented on `claude/guns-energy-2` (#287), stacked on slice 9B, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -27,7 +28,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the scopes: on 8 October 2026, with the reticles and lens rims uploaded ("heres reticles and vignette"), asked what the scopes should use, they answered that they made those files and to use them (see [Dependencies and assets](#dependencies-and-assets)); and asked what next ("What next?"), they chose all four further gun sets offered, each its own slice.
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
-- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B.
+- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -842,6 +843,80 @@ The second of the gun sets the owner chose on 10 October 2026: three steel guns 
 - **The Squall's needle** is a tenth of a pixel wide, so its jump is hard to see.
 - **Not played:** none of it has been played yet.
 
+## Slice 9C: the second energy weapons
+The third of the gun sets the owner chose on 10 October 2026: three more energy weapons, on slice 8D's Energy Cells and shots.
+
+| | Spikedriver | Seam Cutter | Caisson Pistol |
+|---|---|---|---|
+| The owner's gun | Railworker | CR4K Mining Laser | Hyperbaria |
+| What it is | a rail pistol held in one hand, its magazine and a lever on its left side | a cutting laser carried at the hip, its core standing out of its left side | a pressure pistol held in one hand, a tall tank on top |
+| Fires | a beam through every creature in its line, to the first block | a short beam through every creature in its line, for as long as the trigger is held | a bolt that leaps from its mark to two more creatures close by |
+| Damage | 12 to each creature in the beam | 1.5 to each creature in the beam | 5 to its mark, then 3 and 1.8 |
+| Rate | 1.25 a second (every 16 ticks) | 10 a second (every 2 ticks) | 2.5 a second (every 8 ticks) |
+| Holds | 6 charges | 60 | 10 |
+| Reload | 3.35 s: a magazine, then the lever | 3 s: the core | 2.85 s: the tank |
+| Spread, hip / aimed | 1.5° / 0.3° | 2° / 1°, from the hip (no sights) | 6° / 3°, the cone its arc seeks in |
+| Range | 64 blocks | 16 | 24 |
+| The view aimed | narrowed to 0.85 | 0.95 | 0.9 |
+| Charge a round | 800 JE | 100 JE | 300 JE |
+| Takes | both magazines and the three stocks | nothing | nothing |
+
+**Crafting** (a crafting table; as slice 8D's, the recipes need both the guns and the machines switches):
+- **Spikedriver:** three steel ingots over a copper cable (its rails), an advanced circuit and a brass ingot.
+- **Seam Cutter:** two copper ingots (its copper body) and an amethyst shard (its lens) over a steel ingot, an advanced circuit and a brass ingot.
+- **Caisson Pistol:** a lightning rod (its arc's emitter) and two steel ingots over an advanced circuit and a brass ingot.
+
+**How they fire:** as slice 8D's (above): the beam passes through every creature in its line that the shooter may strike and stops at the first block; the arc leaps from the creature nearest the aim within the cone to the nearest within 4 blocks, twice, each taking 60% of the damage before it. Neither touches a block. Each shot is `jugcraft:zap` damage, which pushes nothing back and counts every shot, so each of the Seam Cutter's ten a second lands.
+
+**What you see:** the owner's animations.
+- **Spikedriver:** each shot drives the rings at the back of its right side back and the tip of its muzzle recoils. To reload, the magazine swings down and out of its left side and a new one swings in under the left hand; then the left hand takes the lever on its left side and swings it back and round, 145°, to charge the rails, and returns it.
+- **Seam Cutter:** each shot jolts it at the hip. To reload, its core is drawn out of its left side and drops away as the left hand lets go below, a new one goes in, and the carry handle on top is flicked forward like a lever.
+- **Caisson Pistol:** each shot drives its bolt back. To reload, the tall tank is lifted off and tossed away to the left and a new one comes down into place, and the left hand draws the bolt back.
+- **Sparks:** where the Spikedriver's and the Caisson's animations cue a casing, they vent sparks, as slice 8D's do; the Seam Cutter's cue none.
+- **Sounds:** the library's rail shot (Spikedriver), its second laser shot (Seam Cutter) and its plasma shot (Caisson Pistol). None names another source: the rail and plasma shots carry no tags, the laser shot only a container's format tag (`isommp42`).
+
+**How the models were built:**
+- **Spikedriver:**
+  - **Lever:** the frame standing out of its left side (the main part's 34th, 35th and 37th to 43rd elements), swung back about its back end. The left hand's moves in the reload take it from the magazine to the lever's free end and back with it.
+  - **Bolt:** the two rings standing up at the back of its right side (the 2nd and 3rd elements), which ride back with each shot. They are flat plates the owner textured on their backs only, facing the eye.
+  - **Tip:** the tip of its muzzle (the 29th element), which recoils.
+  - **gun_body2 and gun_body3:** empty, about the grip: they carry the whole gun as the lever is worked.
+  - **Magazines:** its own, and the Extended and Speed Magazines (the owner's `ext_mag` and `speed_mag` parts), on its left side. It is the first energy weapon to take a magazine: the Extended Magazine holds nine charges.
+  - **Left hand:** held in one hand, its idle hides the left arm. The hand point is on the new magazine as it is held in, 1.25 s into the reload.
+  - **Aiming:** it has no sights; aimed, it is looked along over the top of its back. Its back came within 2.6 px of the eye through the aimed shot, so it is held 2 px further out (`"eye_relief"`).
+- **Seam Cutter:**
+  - **Held as the Thresher is:** the owner's third-person transform tilts it 72.75° up off the arm, made, as the Gattaler's, for an arm hanging at the hip; seen from outside, its holder's arms hang that much lower (`GunLooks.TILT`).
+  - **Right hand:** on the slanted grip behind its copper body (the main part's 3rd element).
+  - **Core:** the brown cylinder standing out of its left side (the 1st and 44th to 49th elements), where the left hand holds it; the reload draws it out to the left about its inner end.
+  - **Carry handle:** the handle above the grip (the 4th and 9th), the owner's `grip`, flicked forward about its foot, as on the Thresher.
+  - **No sights:** its handle stands between the eye and its sight posts, so, as the Thresher's, aiming it only steadies it and narrows the view.
+  - **The arms:** the owner's idle turns this gun's arm bones otherwise than the other guns', so each arm's way to the shoulder is turned to leave the screen as theirs do.
+- **Caisson Pistol:**
+  - **Tank:** the owner's `mag` (the main part's elements so named), about the middle of its foot.
+  - **Bolt:** the owner's bolt part, along the top of its back. The small element named `bolt` at the foot of its grip is a copy of the bolt's knob, a pommel, and stays with the body.
+  - **gun_body2:** empty, about the grip; it holds the gun 0.7 px forward throughout, as the owner's animations do, and rolls it as the bolt is worked.
+  - **Left hand:** held in one hand. The hand point is on the bolt drawn back, 2.375 s into the reload.
+  - **Sight:** the small ring at the left of the tank's foot. Aimed, its back stays 4.6 px from the eye, so it needs no eye relief.
+- **Checked** in first-person and side previews: idle, aimed, fired, through each reload and inspection, and the Spikedriver with each attachment.
+
+**Connections:**
+- **The energy system:** Energy Cells, filled at the Charging Station, as slice 8D's.
+- **Parts:** steel from the steel foundry, advanced circuits from the circuit assembler, copper cable, copper, amethyst, a lightning rod and brass.
+- **Their place:** past steel, with slice 8D's.
+
+**Balance:** starting numbers.
+- **Power:** like slice 8D's, about 0.015 damage to one creature a JE: a full cell (10,000 JE) is 12 Spikedriver shots, 100 of the Seam Cutter's (ten seconds of fire) or 33 of the Caisson Pistol's.
+- **Spikedriver:** 15 damage a second to each creature in its line, as the Beam Pistol, in harder, slower shots that stray less and reach further.
+- **Seam Cutter:** 15 a second to each creature in its line, for six seconds a magazine, within 16 blocks.
+- **Caisson Pistol:** 12.5 a second to one creature, 24.5 across three. Its arc seeks wider and nearer (6° from the hip, 24 blocks) than the Stormlock's (2°, 64), narrower and further than the Linesman's (15°, 12).
+
+**Save compatibility:** new items `jugcraft:spikedriver`, `seam_cutter` and `caisson_pistol`; nothing saved changes. `guns.enabled=false` or `machines.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Seam Cutter cuts no blocks.** The owner's gun is a mining laser, but no beam touches a block (slice 8D's rule). Mining with it would want its own design: protected land, drops and tool tiers.
+- **The Caisson Pistol's inspection** brings the left hand to its bolt near the eye, and in the preview the left sleeve covers the right third of the view for about a second and a half. A search over the arm's direction found none that keeps it much smaller.
+- **Not played:** none of it has been played yet. The cones, the JE costs and the Seam Cutter's rate want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -1314,6 +1389,28 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | squall_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
 | squall_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
 | squall_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| spikedriver | `Guns/models/item/railworker.json` | `979cbe87514a0ff6` |
+| spikedriver | `Guns/item/railworker.png` | `258bbe596771c65f` |
+| spikedriver | `Guns/item/railworker.animation.json` | `1ce55851ba0cf1e0` |
+| spikedriver | `Guns/models/special/railworker/main.json` | `4d06672e81efe1b0` |
+| spikedriver | `Guns/models/special/railworker/light_stock.json` | `11e8cd7f765a62ed` |
+| spikedriver | `Guns/models/special/railworker/heavy_stock.json` | `2b247b9edd81a27d` |
+| spikedriver | `Guns/models/special/railworker/wooden_stock.json` | `2f1b2250c77e4cae` |
+| spikedriver | `Guns/models/special/railworker/stan_mag.json` | `82496e671ec161be` |
+| spikedriver | `Guns/models/special/railworker/ext_mag.json` | `8277666b3144da76` |
+| spikedriver | `Guns/models/special/railworker/speed_mag.json` | `eb2efdd181bca11c` |
+| spikedriver | `Guns/sounds/item/rail/fire.ogg` | `cf761effacf65fe0` |
+| seam_cutter | `Guns/models/item/cr4k_mining_laser.json` | `54082c197dd1a56b` |
+| seam_cutter | `Guns/item/cr4k_mining_laser.png` | `25b7f19e590ed7e4` |
+| seam_cutter | `Guns/item/cr4k_mining_laser.animation.json` | `0d19d1770fe55c8d` |
+| seam_cutter | `Guns/models/special/cr4k_mining_laser/main.json` | `3e1a7de18359a849` |
+| seam_cutter | `Guns/sounds/item/laser/fire_2.ogg` | `a585dc4d697303f0` |
+| caisson_pistol | `Guns/models/item/hyperbaria.json` | `76d8d5a55a2bdee2` |
+| caisson_pistol | `Guns/item/hyperbaria.png` | `9553bf873ddd3f9b` |
+| caisson_pistol | `Guns/item/hyperbaria.animation.json` | `4292c3320858a0a2` |
+| caisson_pistol | `Guns/models/special/hyperbaria/main.json` | `5b79a0290ad9e960` |
+| caisson_pistol | `Guns/models/special/hyperbaria/bolt.json` | `5eca6988a624610e` |
+| caisson_pistol | `Guns/sounds/item/plasma/fire.ogg` | `fef225846fbbfe9a` |
 | energy_cell | `Guns/item/energy_cell.png` | `857c3e9d98c18f97` |
 | energy_cell_empty | `Guns/item/empty_cell.png` | `b06623e4de7b9b8f` |
 | shared | `Guns/sounds/item/bolt/bolt.ogg` | `1cf1102f6ba52725` |
@@ -1849,16 +1946,48 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - Mid-reload, the Rattler and the Bronco are lifted toward the upper right and the right forearm fills that side, as the previews showed. Partway through the inspection, the Bronco is turned toward the camera and fills the middle of the view for a moment.
     - Fitted, the counters read 1 / 30 with the Extended Magazine on the Rattler and 1 / 38 on the Bronco, and the fitted guns keep their backs on the crosshair aimed.
     - Seen from outside, each is raised along the look, and its flash shows at the muzzle when it fires.
+- **Slice 9C, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three guns' parts, the Spikedriver's magazines and stocks included, re-bakes to the owner's; each hand is where `BUILDS` puts it in its pose; every bone the owner's animations move exists.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds.
+  - `python3 tools/check_mod_data.py`: PASS (1925 material IDs), with `check_guns` (the three guns' numbers, shots, charge, attachments, looks, eye relief and the Seam Cutter's tilt in Java).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews:**
+    - first-person views of each gun idle, aimed, fired from the hip and aimed, mid-reload and mid-inspection;
+    - side views of the Spikedriver's lever pull with the left hand, its magazine leaving, its shot and each attachment; of the Seam Cutter's core leaving, its carry handle and its arms; and of the Caisson Pistol's tank leaving and returning and its bolt drawn back;
+    - the nearest point of the Spikedriver and the Caisson Pistol to the eye through their aimed shots, at 0, 2 and 4 px of relief (the Spikedriver also at 6);
+    - the left arm's coverage of the view through the one-handed guns' reloads and inspections, against a search over its direction.
+- **Slice 9C game tests (written; they run in CI):**
+  - `SecondEnergyGunsGameTests`:
+    - `secondEnergyWeaponsRunOnCells`: the three are registered with their numbers and load a magazine's charge from at most one Energy Cell; each recipe loads; the Spikedriver and the Seam Cutter fire beams, the Caisson Pistol an arc; only the Seam Cutter fires while the trigger is held; the Spikedriver takes both magazines and the three stocks, the other two nothing.
+    - `spikedriverDrivesThroughItsLine`: a shot passes through two pigs, 12 to each, stops at a wall before a third, and spends a charge; with an Extended Magazine an empty Spikedriver loads nine charges, not before the magazine's longer reload is up, drawing 7,200 JE from a full cell and leaving the cell.
+    - `seamCutterBurnsWhileHeld`: two shots at once and a third an interval later, each burning through both pigs in its line and spending a charge.
+    - `caissonArcSeeksWider`: with a pig a block to the side six blocks ahead, the Stormlock's arc finds nothing; the Caisson Pistol's strikes that pig and leaps to the one beside it, which takes 60%, and leaves the pig far off to the side alone.
+  - "Every gun registered" now counts thirty-three guns.
+  - `GunsClientGameTests` takes the three through every gun's steps; screenshots `jugcraft_guns_spikedriver_*`, `jugcraft_guns_seam_cutter_*` and `jugcraft_guns_caisson_pistol_*`.
+- **Slice 9C in CI** ([run 38034553601](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38034553601), on fdab3382d): every check passed.
+  - **Server game tests** (`mod`, `optional integrations absent`): 1194 passed, 1190 before; the four new ones are `SecondEnergyGunsGameTests`.
+  - **`GunsClientGameTests`** took the three guns through every step:
+    - **Spikedriver:** aimed, the view narrowed to 0.85; fired, 6 flash frames and its beam drawn, the husk 737.98 → 725.98 and charges 6 → 5; reloaded 6, 19,200 JE left in its two cells; 1 burst of sparks.
+    - **Seam Cutter:** aimed, 0.95; fired, 5 flash frames and its beam drawn, the husk 725.98 → 724.48 and charges 60 → 59; reloaded 60, 19,900 JE left; no sparks, as its animations cue none.
+    - **Caisson Pistol:** aimed, 0.9; fired, 6 flash frames and its arc drawn, the husk 724.48 → 719.48 and charges 10 → 9; reloaded 10, 19,700 JE left; 3 bursts of sparks.
+  - **Screenshots:**
+    - Held, each sits at the lower right in the owner's textures: the Spikedriver dark steel with the rings standing up on its back, the Seam Cutter copper-bright at the hip with the left hand on its core, the Caisson Pistol with its tall tank upright. The counters show the shots left in the cells: 25, 200 and 66.
+    - Aimed, the Spikedriver's and the Caisson Pistol's backs sit on the crosshair over the husk, the right fist and forearm below them (the aiming polish item); the Caisson's tank rises above the crosshair. The Seam Cutter, with no sights, stays at the hip in the narrowed view.
+    - Mid-reload, the Spikedriver is lifted to the right with the left hand at its side and the Seam Cutter tipped up. The Caisson Pistol's left hand comes in large across the middle of the view, above the gun, as the tank is changed.
+    - Mid-inspection, the Caisson Pistol's sleeve covers the right third of the view, as the previews showed.
+    - Fitted, the Spikedriver's counter reads 1 / 9 with the Extended Magazine and 1 / 6 with the Speed Magazine and with a stock alone; aimed, it keeps its back on the crosshair.
+    - Seen from outside, the Spikedriver and the Caisson Pistol are raised along the look and the Seam Cutter is carried low at the hip; each flashes at the muzzle when it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
-- **The gun sets the owner chose on 10 October 2026,** each its own pull request: the marksman rifles (slice 9A) and the automatic weapons (slice 9B), then the second energy weapons and the pump shotguns.
+- **The gun sets the owner chose on 10 October 2026,** each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B) and the second energy weapons (slice 9C), then the pump shotguns.
 - **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; the tactical grip and the laser sight; the aiming polish (below); a rack that charges several Energy Cells at once. The owner chose the first three on 10 October 2026.
 - **Aimed, the gun hand covers the sights:** in the CI screenshots of 8 October, the right fist sits over the lower middle of the screen when aiming, on the one-handed guns and some long ones. The arm runs back toward the camera from the grip drawn at the middle of the view. This is a polish item for a pull request of its own.
 - **Not yet:**
