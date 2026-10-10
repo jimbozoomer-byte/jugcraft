@@ -3052,6 +3052,10 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `playersStandCellsInTheirCradles`: a player, through the server's block use, stands a cell in the upper right cradle, then the next beside it when that is full, a cell from the hand each time; with an empty hand, pointing at the lower left, they take the nearest cell, the upper middle one, into their inventory.
     - `hoppersLoadCellsAndTakeFullOnes`: a hopper above holding a stick and two cells stands the cells in the first two cradles and keeps the stick; a hopper below takes the full cell and leaves the half-charged one.
     - `cellRackKeepsAndDropsItsCells`: saved and loaded, it keeps its buffer and each cell's charge; broken, it drops itself and both cells, each with its charge.
+- **Slice 10E in CI** ([run 38080528309](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38080528309), on 773951609: the slice, slice 10D's CI record merged in, and a fix to one of its tests): every check passed.
+  - **Server game tests:** 1296 in each job, slice 10D's 1291 and this slice's five. All passed, `CellRackGameTests` among them.
+  - **The first run** ([run 38079033583](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38079033583), on 2a8fc5985) compiled, and 1295 of the 1296 passed in each job. `hoppersLoadCellsAndTakeFullOnes` failed: it put two Energy Cells in one hopper slot, but cells stack to one, so the hopper held only one. 773951609 gives each cell its own slot, and has the hand test hold one cell at a time.
+  - **Client game tests:** the changed files chose `GunsClientGameTests` and `PeepoCompanionClientTests`, and both passed. Neither has a step for the rack, so no screenshot shows it.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
