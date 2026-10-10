@@ -320,7 +320,9 @@ def groups(with_staff=False):
     return out
 
 
-def posed(with_staff=True):
+def posed(pose=None, with_staff=True):
+    """Every box in world pixels at the rest pose, or at `pose` ({group: (rx, ry, rz, dx, dy, dz)}, absolute)."""
+    pose = pose or {}
     parts = groups(with_staff)
     tree = {g[0]: g for g in parts}
     parents = {g[0]: (g[4] if len(g) > 4 else None) for g in parts}
@@ -329,10 +331,12 @@ def posed(with_staff=True):
         turns = []
         while name:
             g = tree[name]
-            rx, ry, rz = g[2] or (0, 0, 0)
+            rx, ry, rz, dx, dy, dz = pose.get(name, tuple(g[2] or (0, 0, 0)) + (0, 0, 0))
             for axis, angle in (("z", rz), ("y", ry), ("x", rx)):
                 if angle:
                     turns.append((axis, angle, list(g[1])))
+            if dx or dy or dz:
+                turns.append(("move", (dx, dy, dz)))
             name = parents[name]
         return turns
 
@@ -347,10 +351,221 @@ def posed(with_staff=True):
     return out
 
 
+# ------------------------------------------------------------------ animation curves (ticks): a heavy, smooth boss
+
+def smooth(u):
+    u = max(0.0, min(1.0, u))
+    return u * u * (3 - 2 * u)
+
+
+def with_rest(pose):
+    out = {}
+    for g in groups(True):
+        base = tuple(g[2] or (0, 0, 0)) + (0, 0, 0)
+        delta = pose.get(g[0], (0, 0, 0, 0, 0, 0))
+        out[g[0]] = tuple(base[i] + delta[i] for i in range(6))
+    return out
+
+
+def idle_pose(t, period=80):
+    """A slow, heavy breath: the chest swelling, the head surveying from side to side, the tail curling and
+    uncurling behind, the free hand flexing, the staff hand planted."""
+    p = 2 * math.pi * t / period
+    breath = 0.012 * (0.5 - 0.5 * math.cos(p))
+    return with_rest({"body": (1.2 * math.sin(p), 0, 0, 0, 1.0 * math.sin(p), 0),
+                      "head": (2 * math.sin(p + 0.6), 14 * math.sin(p / 2 + 0.4), 1.5 * math.sin(p + 1.2), 0, 0, 0),
+                      "tail": (10 * math.sin(p - 0.9), 14 * math.sin(p / 2 - 0.5), 0, 0, 0, 0),
+                      "left_arm": (5 * math.sin(p + 0.8), 0, 4 * math.sin(p), 0, 0, 0),
+                      "right_arm": (1.2 * math.sin(p + 0.3), 0, 0, 0, 0, 0)}), (1 + breath, 1 + breath / 2, 1 + breath)
+
+
+def walk_pose(t, period=32):
+    """A heavy, swaggering stride: long leg swings, the body dropping into each step and rolling side to side, the
+    staff carried along, the free arm swinging wide, the tail lashing a beat behind, the head riding level."""
+    p = 2 * math.pi * t / period
+    drop = -2.2 * (0.5 - 0.5 * math.cos(2 * p + 0.6))
+    squash = 0.025 * (0.5 - 0.5 * math.cos(2 * p + 0.6))
+    pose = {"body": (5, 6 * math.sin(p), 4 * math.sin(p), 0, drop, 0),
+            "head": (-4, -4 * math.sin(p), -3 * math.sin(p), 0, 0, 0),
+            "tail": (8 * math.sin(2 * p - 1.2), 20 * math.sin(p - 1.0), 0, 0, 0, 0),
+            "left_leg": (32 * math.sin(p), 0, 0, 0, drop, 0),
+            "right_leg": (-32 * math.sin(p), 0, 0, 0, drop, 0),
+            "left_arm": (-30 * math.sin(p - 0.3), 0, 4 * math.sin(2 * p), 0, 0, 0),
+            "right_arm": (10 * math.sin(p - 0.3), 0, 0, 0, 0, 0)}
+    return with_rest(pose), (1 + squash, 1 - squash * 2, 1 + squash)
+
+
+JUMP_TICKS = 50
+
+
+def jump_pose(t):
+    """The cloud somersault: a deep crouch, a high leap with a full forward flip tucked tight, a hang, and a heavy
+    landing that squashes and settles."""
+    if t < 10:
+        c = smooth(t / 10)
+        rise, crouch, stretch, legs, arm, tail, flip = 0, 7 * c, -0.07 * c, 20 * c, -12 * c, -14 * c, 0
+    elif t < 14:
+        u = smooth((t - 10) / 4)
+        rise, crouch, stretch, legs, arm, tail, flip = 8 * u, 7 * (1 - u), -0.07 + 0.15 * u, 20 - 40 * u, -12 - 70 * u, -14 + 30 * u, 0
+    elif t < 36:
+        u = (t - 14) / 22
+        rise = 8 + 34 * math.sin(math.pi * u)
+        tuck = smooth(u * 2.5) * (1 - smooth((u - 0.65) / 0.35))
+        flip = 360 * smooth(u)
+        rise, crouch, stretch, legs, arm, tail, flip = rise, 0, 0.08 * (1 - abs(2 * u - 1)) * (1 - tuck), -20 - 60 * tuck, -82 - 20 * tuck, 16 + 30 * tuck, flip
+    elif t < 41:
+        u = smooth((t - 36) / 5)
+        rise, crouch, stretch, legs, arm, tail, flip = 0, 8 * u, -0.12 * u, -8 + 24 * u, -50 + 32 * u, 22 - 36 * u, 360
+    else:
+        u = (t - 41) / (JUMP_TICKS - 41)
+        w = math.exp(-u * 2.5) * math.cos(u * 5)
+        rise, crouch, stretch, legs, arm, tail, flip = 0, 8 * w * (1 - u), -0.12 * w * (1 - u), 16 * w * (1 - u), -18 * w * (1 - u), -14 * w * (1 - u), 360
+    pose = {"body": (crouch * 2 + flip, 0, 0, 0, rise - crouch, 0),
+            "head": (-crouch * 1.5 - 10 * (flip > 0 and flip < 360), 0, 0, 0, 0, 0),
+            "tail": (tail, 0, 0, 0, 0, 0),
+            "left_leg": (legs + flip, 0, 0, 0, rise - crouch, 0),
+            "right_leg": (legs * 0.8 + flip, 0, 0, 0, rise - crouch, 0),
+            "left_arm": (arm, 0, 12 - arm / 6, 0, 0, 0),
+            "right_arm": (arm / 3, 0, 0, 0, 0, 0)}
+    return with_rest(pose), (1 - stretch / 2, 1 + stretch, 1 - stretch / 2)
+
+
+ROAR_TICKS = 50
+
+
+def roar_pose(t):
+    """The challenge: the staff thrust up to the sky, the free fist beating the chest three times as the head
+    throws back and the chest swells, then a settle."""
+    if t < 12:
+        u = smooth(t / 12)
+        staff, head, lean, fist, swell, tail = -24 - 100 * u, 8 - 30 * u, -12 * u, -12 - 50 * u, 0.06 * u, 30 * u
+    elif t < 36:
+        u = (t - 12) / 24
+        beat = abs(math.sin(3 * math.pi * u))
+        staff, head, lean, fist, swell, tail = -124 - 6 * math.sin(2 * math.pi * u), -22 - 5 * beat, -12 - 3 * beat, -62 + 30 * beat, 0.06 + 0.03 * beat, 30 + 10 * math.sin(6 * math.pi * u)
+    else:
+        u = smooth((t - 36) / (ROAR_TICKS - 36))
+        staff, head, lean, fist, swell, tail = -124 + 100 * u, -22 + 30 * u, -12 + 12 * u, -62 + 50 * u, 0.06 * (1 - u), 30 * (1 - u)
+    pose = {"body": (lean, 0, 0, 0, 0, 0), "head": (head, -5, 0, 0, 0, 0), "tail": (tail, 0, 0, 0, 0, 0),
+            "right_arm": (staff, 0, -16, 0, 0, 0), "staff": (24, 0, 16, 0, 0, 0),
+            "left_arm": (fist, 0, 12 + (fist + 12) * 0.5, 0, 0, 0),
+            "left_leg": (-lean / 2, 0, 0, 0, 0, 0), "right_leg": (-lean / 2, 0, 0, 0, 0, 0)}
+    return pose, (1 + swell, 1 + swell / 2, 1 + swell)
+
+
+SMASH_TICKS = 44
+
+
+def smash_pose(t):
+    """The mountain-splitter: both hands haul the staff high overhead as the body arches back and the tail rises,
+    a hang at the top, then the slam straight down with the body folding over it and a heavy squash, and a slow
+    straightening up."""
+    if t < 16:
+        u = smooth(t / 16)
+        staff, free, lean, dip, tail, squash = -24 - 150 * u, -12 - 150 * u, -16 * u, 0, 36 * u, 0
+    elif t < 22:
+        u = smooth((t - 16) / 6)
+        staff, free, lean, dip, tail, squash = -174 + 79 * u, -162 + 100 * u, -16 + 61 * u, 8 * u, 36 - 70 * u, 0.09 * u
+    elif t < 30:
+        u = (t - 22) / 8
+        w = 1 - 0.3 * math.sin(math.pi * u)
+        staff, free, lean, dip, tail, squash = -95, -62, 45, 8 * w, -34, 0.09 * w
+    else:
+        u = smooth((t - 30) / (SMASH_TICKS - 30))
+        staff, free, lean, dip, tail, squash = -95 + 71 * u, -62 + 50 * u, 45 - 45 * u, 8 * (1 - u), -34 + 34 * u, 0.09 * (1 - u)
+    pose = {"body": (lean, 0, 0, 0, -dip, 0), "head": (8 - lean / 3, 0, 0, 0, 0, 0), "tail": (tail, 0, 0, 0, 0, 0),
+            "right_arm": (staff, 0, -16 + (staff + 24) * 0.09, 0, 0, 0), "staff": (24, 0, 16, 0, 0, 0),
+            "left_arm": (free, 0, 12 - (free + 12) * 0.09, 0, 0, 0),
+            "left_leg": (-lean / 2.5, 0, 0, 0, -dip, 0), "right_leg": (-lean / 2.5, 0, 0, 0, -dip, 0)}
+    return pose, (1 + squash, 1 - squash * 1.6, 1 + squash)
+
+
+SWEEP_TICKS = 44
+
+
+def sweep_pose(t):
+    """The whirlwind: the staff swung out level and the whole king spinning twice on the spot, the free arm flung
+    wide, the tail streaming, legs crossing underneath, then a dizzy settle."""
+    if t < 10:
+        u = smooth(t / 10)
+        spin, staff, free, lean, tail, rise = -40 * u, -24 - 50 * u, -12 - 60 * u, -6 * u, 20 * u, 0
+    elif t < 34:
+        u = (t - 10) / 24
+        spin = -40 + 760 * smooth(u) if u < 1 else 720
+        rise = 4 * math.sin(2 * math.pi * u) ** 2
+        staff, free, lean, tail = -74 - 10 * math.sin(2 * math.pi * u), -72, -6 + 4 * math.sin(4 * math.pi * u), 20 + 15 * math.sin(4 * math.pi * u)
+    else:
+        u = smooth((t - 34) / (SWEEP_TICKS - 34))
+        spin, staff, free, lean, tail, rise = 720 + 10 * math.sin(math.pi * u), -74 + 50 * u, -72 + 60 * u, -6 + 6 * u, 20 - 20 * u, 0
+    legs = 12 * math.sin(math.radians(spin))
+    pose = {"body": (lean, spin, 0, 0, rise, 0), "head": (8 - lean, -5 + 10 * math.sin(math.radians(spin / 2)), 0, 0, 0, 0),
+            "tail": (tail, 0, 0, 0, 0, 0),
+            "right_arm": (staff, 0, -16 - 60 * smooth((t - 4) / 8) * (1 - smooth((t - 34) / 10)), 0, 0, 0),
+            "staff": (24, 0, 16, 0, 0, 0),
+            "left_arm": (free, 0, 12 + 50 * smooth((t - 4) / 8) * (1 - smooth((t - 34) / 10)), 0, 0, 0),
+            "left_leg": (legs, spin, 0, 0, rise, 0), "right_leg": (-legs, spin, 0, 0, rise, 0)}
+    return pose, (1, 1, 1)
+
+
+THRUST_TICKS = 30
+
+
+def thrust_pose(t):
+    """The staff lunge: a coil back onto the rear foot with the staff drawn to the hip, then the lunge forward on the
+    front foot, the staff driven straight ahead at full reach, a hold, and the recovery."""
+    if t < 10:
+        u = smooth(t / 10)
+        staff, twist, lean, step, shift, free = -24 + 40 * u, 30 * u, -8 * u, -14 * u, -4 * u, -12 - 40 * u
+    elif t < 15:
+        u = smooth((t - 10) / 5)
+        staff, twist, lean, step, shift, free = 16 - 116 * u, 30 - 60 * u, -8 + 26 * u, -14 + 44 * u, -4 + 12 * u, -52 + 70 * u
+    elif t < 21:
+        u = (t - 15) / 6
+        staff, twist, lean, step, shift, free = -100 - 4 * math.sin(math.pi * u), -30, 18, 30, 8, 18
+    else:
+        u = smooth((t - 21) / (THRUST_TICKS - 21))
+        staff, twist, lean, step, shift, free = -100 + 76 * u, -30 + 30 * u, 18 - 18 * u, 30 - 30 * u, 8 - 8 * u, 18 - 30 * u
+    pose = {"body": (lean, twist, 0, 0, 0, shift), "head": (8 - lean / 2, -5 - twist, 0, 0, 0, 0),
+            "tail": (10 - lean, -twist, 0, 0, 0, 0),
+            "right_arm": (staff, -twist / 2, -16 + (staff + 24) * 0.16, 0, 0, 0), "staff": (24, 0, 16, 0, 0, 0),
+            "left_arm": (free, 0, 12, 0, 0, 0),
+            "left_leg": (-step, 0, 0, 0, 0, shift), "right_leg": (step * 0.6, 0, 0, 0, 0, shift)}
+    return pose, (1, 1, 1)
+
+
+def animations():
+    import blockbench_export
+    rests = {g[0]: tuple(g[2] or (0, 0, 0)) for g in groups(False)}
+    names = list(rests)
+
+    def clip(name, length, frames, poses, loop):
+        tracks = {n: {"rotation": [], "position": [], "scale": []} for n in names}
+        for i in range(frames + 1):
+            time = round(length * i / frames, 4)
+            pose, scale = poses(i, frames)
+            for n in names:
+                rx, ry, rz, dx, dy, dz = pose.get(n, rests[n] + (0, 0, 0))
+                rest = rests[n]
+                tracks[n]["rotation"].append((time, (rx - rest[0], ry - rest[1], rz - rest[2])))
+                tracks[n]["position"].append((time, (dx, dy, dz)))
+            tracks["body"]["scale"].append((time, scale))
+        tracks = {g: {c: k for c, k in ch.items() if any(v != (0, 0, 0) and v != (1, 1, 1) for _, v in k)}
+                  for g, ch in tracks.items()}
+        return blockbench_export.animation(name, length, tracks, loop=loop)
+
+    return [clip("idle", 4.0, 40, lambda i, n: idle_pose(80 * i / n), True),
+            clip("walk", 1.6, 32, lambda i, n: walk_pose(32 * i / n), True),
+            clip("jump", 2.5, 50, lambda i, n: jump_pose(JUMP_TICKS * i / n), False),
+            clip("roar", 2.5, 50, lambda i, n: roar_pose(ROAR_TICKS * i / n), False),
+            clip("attack_smash", 2.2, 44, lambda i, n: smash_pose(SMASH_TICKS * i / n), False),
+            clip("attack_sweep", 2.2, 44, lambda i, n: sweep_pose(SWEEP_TICKS * i / n), False),
+            clip("attack_thrust", 1.5, 30, lambda i, n: thrust_pose(THRUST_TICKS * i / n), False)]
+
+
 def write_bbmodel(folder=ART):
     import blockbench_export
     king = blockbench_export.write(folder / "monkey_king.bbmodel", "monkey_king", groups(False),
-                                   draw=lambda name: TEXTURES[name]())
+                                   draw=lambda name: TEXTURES[name](), animations=animations())
     blockbench_export.write(folder / "ruyi_staff_large.bbmodel", "ruyi_staff_large",
                             [("ruyi_staff_large", (0, 0, 0), None, staff())], draw=lambda name: TEXTURES[name]())
     return king
@@ -461,4 +676,15 @@ if __name__ == "__main__":
         out = sys.argv[-1]
         for yaw, suffix in ((30, "front_left"), (-30, "front_right"), (90, "side"), (-150, "back")):
             box_preview.render(posed(), scale=3, yaw=yaw, pitch=10, draw=draw).save(out.replace(".png", f"_{suffix}.png"))
+        from PIL import Image
+        rows = ([walk_pose(t)[0] for t in (0, 8, 16, 24)], [jump_pose(t)[0] for t in (8, 18, 25, 32)],
+                [roar_pose(t)[0] for t in (12, 16, 24, 40)], [smash_pose(t)[0] for t in (16, 20, 24, 38)],
+                [sweep_pose(t)[0] for t in (10, 16, 22, 28)], [thrust_pose(t)[0] for t in (10, 13, 18, 26)])
+        frames = [box_preview.render(posed(pose), scale=2, yaw=-30, pitch=12, draw=draw) for row in rows for pose in row]
+        w = max(f.width for f in frames)
+        h = max(f.height for f in frames)
+        sheet = Image.new("RGB", (4 * (w + 8), len(rows) * (h + 8)), (236, 238, 242))
+        for i, f in enumerate(frames):
+            sheet.paste(f, ((i % 4) * (w + 8) + (w - f.width) // 2, (i // 4) * (h + 8) + h - f.height))
+        sheet.save(out.replace(".png", "_frames.png"))
         print(out)
