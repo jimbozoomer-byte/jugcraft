@@ -174,12 +174,27 @@ No Mojang texture is read, traced or copied.
 
 ## Verification
 
+![Madame Tatterlace waiting on the white silk over the doily, sewing, her red and gold headdress, gold cuffs and needle catching the light, the green and blue spools below her](../images/ingame_tatterlace_waiting.jpg)
+![Woken, she lowers herself on her thread over the middle of the doily, legs spread, the shears beyond](../images/ingame_tatterlace_descending.jpg)
+![Needlepoint: on the lace she rears with her needle drawn back, the blue spool and the thimble behind her](../images/ingame_tatterlace_needlepoint.jpg)
+![Spool Roll: a spool of her red thread rolling at the player across the doily from in front of her](../images/ingame_tatterlace_spool_roll.jpg)
+![Taking In the Seams: from past the rim, a silk-white egg sac on the lace in front with one of her kicked spools beside it, and she climbing into the threads in the middle](../images/ingame_tatterlace_taking_in.jpg)
+![Pin Rain: she hangs from her thread above the doily while pins strike sparks from the lace round where the player stood](../images/ingame_tatterlace_pin_rain.jpg)
+![Unravel: a whole ring of the doily round its centre gone, the dark showing through it, she hanging above](../images/ingame_tatterlace_unravel.jpg)
+![Drop Strike: she lies open on the lace where she dropped, legs splayed](../images/ingame_tatterlace_drop_strike.jpg)
+![Brood: from past the rim, where a spiderling has just come out of an egg sac (both small at this size), and she in the threads beyond](../images/ingame_tatterlace_brood.jpg)
+![Frenzied Stitching: her cuffs glowing red as she stabs, close up on the lace](../images/ingame_tatterlace_frenzy.jpg)
+![After her fall: Grey Mist standing in the middle of the whole doily, the shears and spools beyond](../images/ingame_tatterlace_defeated.jpg)
+
+*The client game test's pictures (CI, commit `4e59bd5`): waiting; coming down; Needlepoint and the Spool Roll; Taking In the Seams; Pin Rain, Unravel and the Drop Strike; her Brood; Frenzied Stitching; and after her fall. Each attack is frozen as it lands. The test also takes the Thimble Toss and the Lace Snare, whose thimble and cobweb outline are too small to read at the test client's 480x270, so they are left out here.*
+
 CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
 
 | Commit | What ran | Result |
 | --- | --- | --- |
 | `7551d9a` | Build, data audit, every server game test with and without the optional integrations, and the client tests chosen for it (`TatterlaceClientGameTests`, `VesperineClientGameTests`, `ArmsVIIClientGameTests`) | Compiled on the first try. **All pass:** all 1192 required game tests, her ten among them, and the three client tests: her whole fight in a real Spindle Loft. Her egg sacs and spiderlings were too far from the camera to show in its pictures |
 | `3b10b79` | Four of the pictures from closer | **All pass**, as above. The sacs and a spiderling now show, but small, among the spools' barrels |
+| `4e59bd5` | The egg sacs and her brood shot from past the doily's rim, over them | **All pass**, as above; the pictures above are from this commit |
 
 Run locally (10 October 2026):
 
