@@ -56,6 +56,8 @@ public class CinderTyrantGameTests {
 	 * a test that hurts one waits this long first.
 	 */
 	private static final int LOADING_TICKS = 80;
+	/** A creature hurt shrugs off a blow no harder than the last for 10 ticks after (vanilla's); a test waits this long between blows. */
+	private static final int HURT_COOLDOWN = 12;
 
 	/** The origin of a kiln laid out from the arena's corner, a block under it: its crucible's floor on the arena's. */
 	private static BlockPos origin(GameTestHelper helper) {
@@ -185,30 +187,31 @@ public class CinderTyrantGameTests {
 			float before = tyrant.getHealth();
 			tyrant.hurtServer(level, level.damageSources().magic(), 10.0F);
 			float hot = before - tyrant.getHealth();
-			tyrant.invulnerableTime = 0;
 			boolean fireproof = !tyrant.hurtServer(level, level.damageSources().hotFloor(), 10.0F);
 			tyrant.quench(level);
 			boolean quenched = tyrant.heat() == CinderTyrantEntity.Heat.QUENCHED && tyrant.quenchedTicks() == CinderTyrantEntity.QUENCH_TICKS;
 			boolean slow = tyrant.speed() == CinderTyrantEntity.SPEED * CinderTyrantEntity.QUENCH_SPEED;
-			tyrant.invulnerableTime = 0;
-			before = tyrant.getHealth();
-			tyrant.hurtServer(level, level.damageSources().magic(), 10.0F);
-			float cold = before - tyrant.getHealth();
-			helper.runAfterDelay(CinderTyrantEntity.QUENCH_TICKS + 5, () -> {
-				CinderTyrantEntity.Heat flaring = tyrant.heat();
-				helper.runAfterDelay(CinderTyrantEntity.REHEAT_TICKS, () -> {
-					ending(level, tyrant, () -> {
-						helper.assertTrue(Math.abs(hot - 10.0 * CinderTyrantEntity.HOT_TAKEN) < 0.01, "Hot, he took " + hot + " of 10, not half");
-						helper.assertTrue(fireproof, "Fire harmed him");
-						helper.assertTrue(quenched, "He was not quenched");
-						helper.assertTrue(slow, "Quenched, he does not crawl at half his pace");
-						helper.assertTrue(Math.abs(cold - 10.0 * CinderTyrantEntity.QUENCH_TAKEN) < 0.01, "Quenched, he took " + cold + " of 10, not a quarter more");
-						helper.assertTrue(flaring == CinderTyrantEntity.Heat.REHEATING, "After his quench his seams did not flare back: " + flaring);
-						helper.assertTrue(tyrant.heat() == CinderTyrantEntity.Heat.HOT && tyrant.taken() == CinderTyrantEntity.HOT_TAKEN,
-								"He is not hot again: " + tyrant.heat());
-						helper.assertTrue(tyrant.speed() == CinderTyrantEntity.SPEED, "Hot again, he does not crawl at his pace");
+			// The next blow waits out his hurt cooldown: a blow within it does only what it adds to the last.
+			helper.runAfterDelay(HURT_COOLDOWN, () -> {
+				float warm = tyrant.getHealth();
+				tyrant.hurtServer(level, level.damageSources().magic(), 10.0F);
+				float cold = warm - tyrant.getHealth();
+				helper.runAfterDelay(CinderTyrantEntity.QUENCH_TICKS + 5 - HURT_COOLDOWN, () -> {
+					CinderTyrantEntity.Heat flaring = tyrant.heat();
+					helper.runAfterDelay(CinderTyrantEntity.REHEAT_TICKS, () -> {
+						ending(level, tyrant, () -> {
+							helper.assertTrue(Math.abs(hot - 10.0 * CinderTyrantEntity.HOT_TAKEN) < 0.01, "Hot, he took " + hot + " of 10, not half");
+							helper.assertTrue(fireproof, "Fire harmed him");
+							helper.assertTrue(quenched, "He was not quenched");
+							helper.assertTrue(slow, "Quenched, he does not crawl at half his pace");
+							helper.assertTrue(Math.abs(cold - 10.0 * CinderTyrantEntity.QUENCH_TAKEN) < 0.01, "Quenched, he took " + cold + " of 10, not a quarter more");
+							helper.assertTrue(flaring == CinderTyrantEntity.Heat.REHEATING, "After his quench his seams did not flare back: " + flaring);
+							helper.assertTrue(tyrant.heat() == CinderTyrantEntity.Heat.HOT && tyrant.taken() == CinderTyrantEntity.HOT_TAKEN,
+									"He is not hot again: " + tyrant.heat());
+							helper.assertTrue(tyrant.speed() == CinderTyrantEntity.SPEED, "Hot again, he does not crawl at his pace");
+						});
+						helper.succeed();
 					});
-					helper.succeed();
 				});
 			});
 		});
