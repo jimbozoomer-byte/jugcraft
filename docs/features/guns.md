@@ -14,7 +14,7 @@ Status:
 - **Slice 8C** (the heavy weapons: the Trench Lobber, Thresher and Stoker; [below](#slice-8c-the-heavy-weapons)): implemented on `claude/guns-heavy`, on the integration branch that holds slices 7b to 8B, awaiting review.
 - **Slice 8D** (the energy weapons: the Beam Pistol, Stormlock Rifle and Linesman, and the Energy Cell they run on; [below](#slice-8d-the-energy-weapons)): implemented on `claude/guns-energy`, stacked on slice 8C, awaiting review.
 - **Slice 9A** (the marksman rifles: the Picket Rifle, Ranger Rifle and Kestrel Rifle; [below](#slice-9a-the-marksman-rifles)): implemented on `claude/guns-marksman` (#285), stacked on slice 8D, awaiting review.
-- **Slice 9B** (the automatic weapons: the Rattler Pistol, Bronco SMG and Squall Rifle; [below](#slice-9b-the-automatic-weapons)): implemented on `claude/guns-automatic`, stacked on slice 9A, awaiting review.
+- **Slice 9B** (the automatic weapons: the Rattler Pistol, Bronco SMG and Squall Rifle; [below](#slice-9b-the-automatic-weapons)): implemented on `claude/guns-automatic` (#286), stacked on slice 9A, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -1809,6 +1809,18 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - `marksmanRiflesLandAndLoad`: a shot from each lands its damage on a pig and spends a round; the Ranger's magazine reload loads the round it lacked after its reload time and not before; the empty Kestrel is loaded with a clip of eight from the inventory after its own.
   - "Every gun registered" now counts twenty-seven guns.
   - `GunsClientGameTests` takes the three through every gun's steps: drawn, aimed, fired at the husk, reloaded, inspected, fitted with each attachment set it takes, and held in third person. Screenshots `jugcraft_guns_picket_rifle_*`, `jugcraft_guns_ranger_rifle_*` and `jugcraft_guns_kestrel_rifle_*`.
+- **Slice 9A in CI** ([run 38031106724](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38031106724), on 0e7ea642a): every check passed.
+  - `mod` and `optional integrations absent`: the build and the server game tests passed. There are 1188 now, 1186 before; the two `MarksmanGunsGameTests` are the new ones.
+  - `client` (the guns' shard): `GunsClientGameTests` passed. Its log:
+    - **Picket Rifle:** aimed, the view narrowed to 0.7; fired, 6 flash frames, the husk 784.8 → 776.8 and rounds 10 → 9; reloaded 10, 31 Rifle Rounds left; 3 casings thrown.
+    - **Ranger Rifle:** aimed, 0.75; fired, 6 flash frames, the husk 776.8 → 766.8 and rounds 10 → 9; reloaded 10, 31 left; 3 casings.
+    - **Kestrel Rifle:** aimed, 0.7; fired, 6 flash frames, the husk 766.8 → 757.8 and rounds 8 → 7; reloaded 8, 31 left; no casings, as its animations cue none.
+  - **Screenshots:**
+    - Held, each rifle sits at the lower right in the owner's textures, the Ranger's handle along the right of its top cover.
+    - Aimed, the Picket's and Kestrel's peep sights and the Ranger's rear sight sit on the crosshair over the husk, the Ranger's handle up and to the right of it. As on the other rifles, the gun's back and the right fist fill the lower middle of the view.
+    - Mid-reload, each rifle is rolled toward the left hand as the owner's animations show it, the Ranger's handle lifted at the top of the view. Each is inspected as the owner's animations show it; partway through, the right sleeve swings near the camera at the lower right.
+    - Fitted, the counters read 1 / 15 with the Extended Magazine on the Picket and the Ranger, and the fitted rifles keep their sights on the crosshair aimed.
+    - Seen from outside, each is raised along the look, and its flash shows at the muzzle when it fires.
 - **Slice 9B, run locally (10 October 2026):**
   - `python3 tools/guns.py`: PASS. Every face of the three guns' parts, their attachments' included, re-bakes to the owner's; each hand is where `BUILDS` puts it in its pose; every bone the owner's animations move exists.
   - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds, and the `clank` event.
@@ -1825,6 +1837,18 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - `automaticWeaponsLandAndLoad`: each fires two shots at once and a third one interval later, all landing on a pig and spending a round each; the empty Squall's canister reload loads forty rounds from the inventory after its reload time and not before.
   - "Every gun registered" now counts thirty guns.
   - `GunsClientGameTests` takes the three through every gun's steps; screenshots `jugcraft_guns_rattler_pistol_*`, `jugcraft_guns_bronco_smg_*` and `jugcraft_guns_squall_rifle_*`.
+- **Slice 9B in CI** ([run 38032059311](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38032059311), on 6f41efbe8): every check passed.
+  - `mod` and `optional integrations absent`: the build and the server game tests passed. There are 1190 now, 1188 before; the two `AutomaticGunsGameTests` are the new ones.
+  - `client` (the guns' shard): `GunsClientGameTests` passed. Its log:
+    - **Rattler Pistol:** aimed, the view narrowed to 0.9; fired, 7 flash frames, the husk 755.4 → 752.4 and rounds 20 → 19; reloaded 20, 31 Light Rounds left; 1 casing thrown.
+    - **Bronco SMG:** aimed, 0.9; fired, 6 flash frames, the husk 752.4 → 748.9 and rounds 25 → 24; reloaded 25, 31 left; no casings, as its animations cue none.
+    - **Squall Rifle:** aimed, 0.85; fired, 6 flash frames, the husk 748.9 → 746.4 and rounds 40 → 39; reloaded 40, 31 left; no casings, as its animations cue none.
+  - **Screenshots:**
+    - Held, each sits at the lower right in the owner's textures: the Rattler dark steel, the Bronco and the Squall copper-bright.
+    - Aimed, each gun's back sits on the crosshair over the husk. As on the other one-handed guns, the Rattler's and the Bronco's right fist and forearm fill the lower middle of the view below it; so does the Squall's.
+    - Mid-reload, the Rattler and the Bronco are lifted toward the upper right and the right forearm fills that side, as the previews showed. Partway through the inspection, the Bronco is turned toward the camera and fills the middle of the view for a moment.
+    - Fitted, the counters read 1 / 30 with the Extended Magazine on the Rattler and 1 / 38 on the Bronco, and the fitted guns keep their backs on the crosshair aimed.
+    - Seen from outside, each is raised along the look, and its flash shows at the muzzle when it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
