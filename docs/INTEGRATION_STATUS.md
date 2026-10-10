@@ -1,6 +1,6 @@
 # Jugcraft implementation and remaining work
 
-Updated 10 October 2026 for [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PR's current GitHub state determines whether this combined work has reached `main`.
+Updated 10 October 2026 for [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277) and [follow-up PR #298](https://github.com/jimbozoomer-byte/jugcraft/pull/298). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PRs' current GitHub states determine which combined work has reached `main`.
 
 ## Included in this integration
 
@@ -14,9 +14,9 @@ Updated 10 October 2026 for [integration PR #277](https://github.com/jimbozoomer
 | Fire magic | Hearthbinding research; Hearthspark, Hearthguard, Cinderbolt and Hearthflare; Smoulder; fire foci, Fire Bangle, Pyromaniac and Pyromancer armor using the supplied assets | #295; [fire spells](features/arcane-concordance-ember.md), [fire equipment](features/arcane-concordance-ember-regalia.md) |
 | Wearable magic | Leather Belt, Angelic Feather, Kraken Shell, Infernal Claws, Angelheart Vial, Phoenix Down, Amphibian Boot and Ice Breaker; belt and boot rendered on the wearer | #295; [Wayfaring](features/arcane-concordance-trinkets.md) |
 | Integration and tests | Projectile aiming and village-test setup fixes; four client-test shards with 60-minute limits; companion test discovery; shared-code selection fallback; isolated, repeated javelin validation; preserved wild-crop/spice generation, shared enchantment tags, weapon/armor registrations, complete boss-test flooring and ticking area, fresh local test worlds, Windows Blockbench checks, giant-pumpkin identity persistence, valid single-cell crafting output and costume/attachment resource-load corrections | #271–272, #283 and #277 integration commits |
-| Industrial planning | Owner-selected metals, polymer/electronics, grid-storage, fuel and cryogenics directions are recorded together | #264 and planning updates in #295; **documentation, not new factory gameplay** |
+| Industrial planning | Owner-selected metals, polymer/electronics, grid-storage, fuel and cryogenics directions; 79 machine/module art briefs and 23 larger-variant specifications | #264, planning updates in #295 and #297; [machine art specifications](features/industrial-machine-models-and-textures.md); **documentation, not implemented models or new factory gameplay** |
 
-This combines 28 source PRs (#264–273 and #278–295) through #277. Source PRs can show as merged into the integration branch before #277 reaches `main`; that alone does not make them available in a main build.
+This combines 28 source PRs (#264–273 and #278–295) through #277, plus the later documentation PR #297 through #298: **29 source PRs in total**, alongside integration fixes. A source PR can show as merged into an integration branch before its parent PR reaches `main`; that alone does not make it available in a main build.
 
 ## Existing foundation retained
 
