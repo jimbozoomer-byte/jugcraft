@@ -56,6 +56,9 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  * Bullfrog lobs grenades as the Trench Lobber does, one a reload.</li>
  * <li>Slice 10B, coil and plasma, on the same cells and shots as slice 8D's: the Solenoid Rifle's heavy beam, the
  * farthest-reaching, the Votive Rifle's short bolts, held on, and the Glowmouth's arc, loaded a charge at a time.</li>
+ * <li>Slice 10C, the double-barrels, each firing a spread of pellets: the Mule breaks open to load both its buckshot
+ * shells at once; the Fowler, a double flintlock, and the Culverin, a hand cannon, are loaded down their muzzles with
+ * paper cartridges, as the slice 4 muzzle-loaders are.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -109,6 +112,9 @@ public final class JugcraftGuns {
 		SPECS.put("solenoid_rifle", new GunSpec(14.0F, 1, 16, false, 5, 52, 0, 0, 0, 1.5F, 0.15F, 128, "energy_cell"));
 		SPECS.put("votive_rifle", new GunSpec(3.0F, 1, 3, true, 30, 50, 0, 0, 0, 3.0F, 1.0F, 48, "energy_cell"));
 		SPECS.put("glowmouth", new GunSpec(10.0F, 1, 20, false, 4, 0, 8, 13, 18, 12.0F, 9.0F, 14, "energy_cell"));
+		SPECS.put("mule", new GunSpec(2.5F, 10, 8, false, 2, 35, 0, 0, 0, 9.0F, 7.0F, 24, "buckshot_shell"));
+		SPECS.put("fowler", new GunSpec(3.0F, 8, 10, false, 2, 97, 0, 0, 0, 8.0F, 5.0F, 28, "paper_cartridge"));
+		SPECS.put("culverin", new GunSpec(5.0F, 5, 20, false, 1, 74, 0, 0, 0, 9.0F, 7.0F, 18, "paper_cartridge"));
 	}
 
 	/**
@@ -269,6 +275,8 @@ public final class JugcraftGuns {
 		ACCEPTS.put("votive_rifle", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
 				"wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet",
 				"long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("fowler", List.of("light_grip", "vertical_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
+				"netherite_bayonet"));
 	}
 
 	/** The rounds. */

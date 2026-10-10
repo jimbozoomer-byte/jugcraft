@@ -896,6 +896,33 @@
       }
     ]
   },
+  "guns.mule.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/boomstick_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.fowler.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/blackpowder_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.culverin.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/cannon_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

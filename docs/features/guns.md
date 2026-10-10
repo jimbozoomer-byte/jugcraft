@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A) and coil and plasma (slice 10B)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B) and the double-barrels (slice 10C)
 
 Status:
 - **Slices 1 to 9G are in `main`:** the last of them, 8C to 9G, with #277 on 10 October 2026. The lines below say where each was built.
@@ -23,6 +23,7 @@ Status:
 - **Slice 9G** (the Trench Lobber's grenades: it loads the chemical grenades too; [below](#slice-9g-the-trench-lobbers-grenades)): implemented on `claude/guns-lobber-grenades`, stacked on slice 9F, awaiting review.
 - **Slice 10A** (the launchers: the Earthmover, Skylark Rifle and Bullfrog; [below](#slice-10a-the-launchers)): implemented on `claude/guns-launchers`, based on `main`, awaiting review.
 - **Slice 10B** (coil and plasma: the Solenoid Rifle, Votive Rifle and Glowmouth; [below](#slice-10b-coil-and-plasma)): implemented on `claude/guns-coil-plasma`, stacked on slice 10A, awaiting review.
+- **Slice 10C** (the double-barrels: the Mule, Fowler and Culverin; [below](#slice-10c-the-double-barrels)): implemented on `claude/guns-double-barrels`, stacked on slice 10B, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -36,7 +37,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
 - the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, the second, the aiming polish, slice 9F, and the third, the Lobber's grenades, slice 9G.
-- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B.
+- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B and the double-barrels slice 10C.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1239,6 +1240,81 @@ The reload times are the owner's animations'.
 - **The glowing parts do not flicker:** the owner's three-frame textures for the Solenoid's plate and the Votive's windows show their first frame.
 - **Not played:** none of it has been played yet. The cones, the JE costs and the Solenoid's reach want play to set.
 
+## Slice 10C: the double-barrels
+The third of the gun sets the owner chose on 10 October 2026 ("Double-barrels", offered as the Super Shotgun, Doublet and Handcannon, "heavy shotguns using the existing pellet shots"): three guns that fire a spread of pellets, each loaded all at once.
+
+| | Mule | Fowler | Culverin |
+|---|---|---|---|
+| The owner's gun | Super Shotgun | Doublet | Handcannon |
+| What it is | a sawn-off double-barrel with a wooden pistol grip, which breaks open to load | a double-barrelled flintlock, with the Blunderbuss's hammer on its lock | a stubby iron barrel on a wooden pistol stock, fired one-handed |
+| Fires | 10 pellets a barrel | 8 balls a barrel | 5 heavy balls |
+| Damage | 2.5 a pellet (25 if all land) | 3 a ball (24) | 5 a ball (25) |
+| Rate | the second barrel 0.4 s after the first | 0.5 s after the first | one shot |
+| Holds | 2 | 2 | 1 |
+| Reload | 1.75 s: both shells at once | 4.85 s: a ball rammed down each barrel | 3.7 s |
+| Spread, hip / aimed | 9° / 7° | 8° / 5° | 9° / 7° |
+| Range | 24 blocks | 28 | 18 |
+| The view aimed | narrowed to 0.92 | 0.88 | 0.94 |
+| Round | Buckshot Shell | Paper Cartridge | Paper Cartridge |
+| Takes | nothing | the Light and Vertical Grips and the four bayonets | nothing |
+
+The reload times are the owner's animations'.
+
+**Crafting** (a crafting table; the guns switch, as every gun):
+- **Mule:** two iron ingots and a brass ingot over an iron ingot, a lever and planks (the Coach Gun's materials, with an iron ingot more).
+- **Fowler:** three iron ingots over an iron ingot, a flint and planks.
+- **Culverin:** two iron ingots over a flint and planks.
+
+**How they fire:** as the other pellet guns: each pellet goes from the eye along the look, strayed by the spread, to the first creature or block in its way, and each round loads at the end of the reload. Nothing new is worked out on the server.
+
+**What you see:** the owner's animations.
+- **Mule:** each shot kicks it back and up. To reload, the gun is tipped and its barrels drop open about the hinge, 72.5°, by 0.46 s; the left hand comes in to them, and at about 1.2 s they snap shut. Drawn, it snaps shut; inspected, it is broken open and closed again.
+- **Fowler:** each shot drops the hammer, and a flash of priming fire jumps from the pan, as on the Bellmouth. To reload, the gun is tipped up, a ball drops into each muzzle (by 0.8 s), and the ramrod is drawn out from under the barrels and rams the left barrel (at 2.3 s), then the right (at 3.25 s), and is put back.
+- **Culverin:** held in the right hand alone. Each shot drops the cock and a flash jumps from the pan. To reload, the gun is tipped up, the left hand comes up with the ball to the muzzle (0.7 s), and the gun's own ramrod is drawn from under the barrel, raised to the bore and rammed home.
+- **Spent rounds:** the Mule throws a spent shell with each shot; the Fowler and the Culverin puff smoke from the lock and leave a cloud before the muzzle, as slice 4's muzzle-loaders do.
+- **Sounds:** the library's shotgun blast (the Mule, as the Thunderpipe fires), its black powder shot (the Fowler, as slice 4's flintlocks fire) and its cannon shot, unused till now (the Culverin). The reloads cue the shared reload sounds; the Mule's shells go in with the shell sound, as the Coach Gun's do. The cannon shot carries no tag.
+
+**How the models were built:**
+- **Mule:**
+  - **Breaking open:** its barrels, fore-end and top rib, and the strap under the fore-end (the main part's 1st, 7th and 12th to 16th elements) ride the `barrel` bone, which tips them down about the hinge at the frame's front. The frame, the fences round the breech and the grip stay.
+  - **Empty bones:** `bolt`, and `shell`, which the reload keeps shrunk to nothing: no shells are seen going in.
+  - **Sights:** the top of the frame over the breech, behind the top rib.
+  - **Aiming:** held 2.5 px further out (`"eye_relief"`): through the aimed shot its kick brought the back of its grip 0.53 px past the eye.
+- **Fowler:**
+  - **Hammer:** the owner's own `hammer` part for it, on the lock's right side, drawn on the Blunderbuss's texture and turning about its foot as the Bellmouth's does.
+  - **Balls, ramrod and flash:** the reload drops a ball into each muzzle (`ball` and `ball2`) and moves the ramrod (`ram`) on a bone (`ram2`) that shifts it from the left barrel to the right between the two rammings. None had a part, so each is one box drawn in an empty corner of its atlas copy, as slice 4's are: two 1 px lead balls, a half-pixel iron ramrod with a brass tip, 9 px long, and a 1 px priming flash at the pan. Each shows only while an animation moves it; the renderer now knows the second ball (`GunRenderer.PROPS`).
+  - **The left arm** hangs from a `left_arm2` bone, which the reload slides back, as the Bellmouth's does.
+  - **Sights:** over the raised rib between the barrels, clear of the muzzles' rings.
+  - **The atlas:** its own texture is as big as the largest atlas, so the textures its hammer and grips share with other guns (the Blunderbuss's, and the Musket's grips') could not sit beside it whole. They go in piece by piece, as the scopes' do (`texture_islands()`, tried only when a gun's shared textures do not fit whole). Its bayonets draw on its own texture. Every other gun's atlas came out the same as before.
+  - **Aiming:** held 3 px further out: through the aimed shot its butt plate came 0.82 px past the eye.
+- **Culverin:**
+  - **One-handed:** as the Duelling Pistol, its idle hides the left arm, whose hand is placed at the muzzle, holding the ball, 0.71 s into the reload.
+  - **Cock:** the cock and the jaw on it (the main part's 15th and 16th elements), on the lock's right side, turning about the cock's lowest corner.
+  - **Ramrod:** the owner's own, the rod under the barrel (the 13th element), on the `ram` bone.
+  - **Ball and flash:** drawn here, as the Fowler's: a 1 px lead ball and a 1 px priming flash.
+  - **Sights:** the notch between the two posts on top of the breech, raised to clear the barrel's top edge and the muzzle's swell, which stand higher.
+  - **Aiming:** through the aimed shot its back stays 1.95 px from the eye, so it needs no eye relief.
+- **Checked** in first-person and side previews: idle, aimed, fired, through each reload, draw and inspection; the Mule's barrels through the break; the Fowler's balls into both muzzles and the ramrod down each barrel, and the Fowler with its grips and bayonets, held, aimed, fired, reloading and inspected; the Culverin's ball, ramrod and left arm; and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:**
+- **Rounds:** the Buckshot Shell (slice 1) and the Paper Cartridge (slice 4); nothing new.
+- **Parts:** iron, brass, flint, a lever and planks.
+- **Their place:** with the iron guns. The Mule beside the Coach Gun; the Fowler and the Culverin beside slice 4's flintlocks.
+
+**Balance:** starting numbers, at point blank with every pellet landing.
+- **Mule:** 25 a shot, the Bellmouth's pellets, two shots 0.4 s apart and both shells back in 1.75 s: 50 every 2.15 s, about 23 a second. That is the most of the shotguns (the Coach Gun's is about 16, the Sledge's about 19), for a wider spread than the Coach Gun's (9° against 6°) and less reach (24 blocks against 32). Its pellets are no heavier than the Bellmouth's because its reload is the owner's quick one.
+- **Fowler:** 24 a shot, two shots, then 4.85 s: about 9 a second, against the Bellmouth's 6.4, reaching 28 blocks against 20 with a tighter spread, for more iron.
+- **Culverin:** the Bellmouth's 25 a shot in five heavy balls, in one hand, every 3.7 s: about 7 a second. Its spread is tighter than the Bellmouth's (9° against 12°), its reach shorter (18 blocks against 20).
+- **A round:** each spends one, as every pellet gun does; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:mule`, `fowler` and `culverin`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Mule's shells are not seen going in:** the owner's model has none, and its reload keeps the bone for them shrunk to nothing.
+- **The Mule sinks to the bottom of the view** while it is open, about 0.5 to 1.2 s into its reload: only the back of its frame shows, the left hand coming in beside it, as the Coach Gun does while it loads.
+- **The Culverin's left arm** comes over the top middle of the view about 0.7 s into its reload, bringing the ball to the muzzle. Of the directions that still run to the shoulder, the one it takes covered the least in the previews, about three-quarters of the usual direction's cover.
+- **Not played:** none of it has been played yet. The spreads and the Mule's damage want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -2138,6 +2214,30 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | glowmouth | `Guns/item/plasmabuss.animation.json` | `dcf2bbd800298a90` |
 | glowmouth | `Guns/models/special/plasmabuss/main.json` | `7b398da45de8edf4` |
 | glowmouth | `Guns/sounds/item/plasma/fire_2.ogg` | `ef0c65b09e2ccb1f` |
+| mule | `Guns/models/item/super_shotgun.json` | `7f978eed05bab99c` |
+| mule | `Guns/item/super_shotgun.png` | `679f1595d8f6ff61` |
+| mule | `Guns/item/super_shotgun.animation.json` | `1778b2045baa4997` |
+| mule | `Guns/models/special/super_shotgun/main.json` | `3ce941a1af568f73` |
+| mule | `Guns/sounds/item/boomstick/fire.ogg` | `17a57973db433feb` |
+| fowler | `Guns/models/item/doublet.json` | `7d99e9a7cedc85b3` |
+| fowler | `Guns/item/doublet.png` | `07e6674d971b999e` |
+| fowler | `Guns/item/doublet.animation.json` | `2737ae5d5a0e6d41` |
+| fowler | `Guns/models/special/doublet/main.json` | `f2b13d3341de47db` |
+| fowler | `Guns/models/special/doublet/light_grip.json` | `9b57e017c6ec6be9` |
+| fowler | `Guns/models/special/doublet/vert_grip.json` | `1c12cccb8864994d` |
+| fowler | `Guns/models/special/doublet/iron_bayonet.json` | `bc96735d037135d5` |
+| fowler | `Guns/models/special/doublet/anthralite_bayonet.json` | `94b4ab18302ddd6c` |
+| fowler | `Guns/models/special/doublet/diamond_bayonet.json` | `600b360323f7f871` |
+| fowler | `Guns/models/special/doublet/netherite_bayonet.json` | `280a23d8ab84e284` |
+| fowler | `Guns/models/special/doublet/hammer.json` | `9365a5b0b9c90007` |
+| fowler | `Guns/sounds/item/blackpowder/fire.ogg` | `a3d3d49a332d034f` |
+| fowler | `Guns/item/musket_grips.png` | `7f451a500ba89baa` |
+| fowler | `Guns/item/blunderbuss.png` | `4e90eca70ba48802` |
+| culverin | `Guns/models/item/handcannon.json` | `c318d0a476bd45e9` |
+| culverin | `Guns/item/handcannon.png` | `f1665e75eb347c25` |
+| culverin | `Guns/item/handcannon.animation.json` | `7a7de8cc1d0ad440` |
+| culverin | `Guns/models/special/handcannon/main.json` | `92eb04b64a051f0e` |
+| culverin | `Guns/sounds/item/cannon/fire.ogg` | `c114b809e9f48ac7` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -2146,7 +2246,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 
   Shown this and asked what the scopes should use, the owner answered that they made these files and to use them. Asked the same day whether the "Big Cannons and Mounted Guns" folder is theirs (slice 6's flash frames come from it, and it holds a `wariumlogo.png`), they confirmed it is. The [library README](../../art/owner-library/README.md#effect-textures-8-october-2026) records both.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
-- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, the muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can, the Linesman's and the Glowmouth's cells, the Skylark Rifle's rocket and the Bullfrog's grenade). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
+- **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, slice 4's muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can, the Linesman's and the Glowmouth's cells, the Skylark Rifle's rocket, the Bullfrog's grenade, the Fowler's balls, ramrod and flash, and the Culverin's ball and flash). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
 
 ## Verification
 - **Run locally (7 October 2026):**
@@ -2689,17 +2789,50 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - **From outside:** each is held at the chest; fired, a flash shows at the muzzle.
     - **With attachments:** aimed, no fitted stock comes up under the eye. With the Laser Sight, aimed, its box stands just right of the crosshair, over the husk's side, as on every gun that takes it.
 - **Slice 10B in CI, second run** ([run 38070317842](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38070317842), on e5c264d25, with the javelin fix ported): every check passed. All 1287 server game tests passed in each job, the javelin test's five throws among them, and the four client shards passed.
+- **Slice 10C, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's, the Fowler's grips and bayonets included; every other gun's files came out unchanged, its atlas included.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and tooltips, and their shots' sounds.
+  - `python3 tools/check_mod_data.py`: PASS (2158 material IDs), with `check_guns` (the three guns' numbers and attachments in Java, and their looks, eye relief, props and sounds on the client). Its check that the renderer knows every prop bone read only names without digits; it now reads the Fowler's `ball2`.
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews** (first person, approximating the game's hands, and from the side):
+    - each gun idle, aimed, fired, through each reload, draw and inspection;
+    - the Mule's barrels through the break, the Fowler's two balls and its ramrod down each barrel, and the Culverin's ball, ramrod and left arm through its reload;
+    - the Fowler with its grips and bayonets, from the side and held, aimed, fired, reloading and inspected;
+    - the nearest point of each gun to the eye through its aimed shot, with no eye relief and with theirs: the Mule's -0.53 px and 1.97 px, the Fowler's -0.82 px and 2.18 px, the Culverin's 1.95 px (it needs none);
+    - the Culverin's left arm through its reload, for how much of the view it covers, against other directions that still run to the shoulder (`armfit_down.py`; see the known limits).
+- **Slice 10C game tests (written; they run in CI):**
+  - `DoubleBarrelGunsGameTests`:
+    - `doubleBarrelsAreRegistered`: each is registered with its numbers, fires a spread of pellets a pull of the trigger at a time, loads all at once, and its recipe loads. The Mule holds two Buckshot Shells, the Fowler two Paper Cartridges and the Culverin one. The Mule loads fastest; the Fowler reaches furthest and takes longest to load; the Culverin's balls hit hardest and reach least far. The Fowler takes the grips and the bayonets; the Mule and the Culverin take nothing.
+    - `doubleBarrelsFireBothBarrelsAndLoad`: side by side, each fires at a pig three blocks off: its pellets land together and a round is spent; the Mule and the Fowler then fire their second barrel. Each then loads from the inventory: halfway through its reload nothing is in yet, and as it ends every round is, two left in the inventory.
+  - "Every gun registered" now counts forty-five guns.
+  - `GunsClientGameTests` takes the three new guns through its steps as it takes every gun: held, aimed, fired at the husk, reloaded from the inventory, inspected, the Fowler with each set of attachments it takes, seen from outside, and in the inventory.
+- **Slice 10C in CI** ([run 38074671680](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38074671680), on a81a06fa7): every check passed.
+  - **Server game tests:** 1289 in each job, slice 10B's 1287 and this slice's two. All passed, `DoubleBarrelGunsGameTests` among them.
+  - **`GunsClientGameTests`** (the client job's first shard). Each of the three guns went through its steps:
+    - its arms drawn at full size held and half size aimed;
+    - aimed, the view narrowed to 0.92 (Mule), 0.88 (Fowler) and 0.94 (Culverin);
+    - fired at the husk, each spending a round: the Mule took it from 588.57 to 571.07 (seven of its ten pellets), the Fowler to 547.07 (all eight balls) and the Culverin to 527.07 (four of its five), with 6, 7 and 6 flash frames;
+    - reloaded from the inventory: two Buckshot Shells into the Mule, two Paper Cartridges into the Fowler and one into the Culverin, 31 left each time;
+    - where their animations cue a casing, the Mule threw spent shells (three through the shot and reload), the Fowler puffed smoke from its lock once and the Culverin three times;
+    - the Fowler with each set of attachments it takes (the Light Grip, the Vertical Grip, the Iron Bayonet), held and aimed.
+  - **Screenshots** (the guns' own fifteen, the Fowler's six with attachments and the six from outside):
+    - **Mule:** held at the lower right, pointing at the husk. Aimed, the back of its frame stands under the crosshair on the husk, its wooden grip below. Reloading, it has sunk out of the view, the left hand coming up at the bottom (see the known limits). Inspected, the left arm fills the right of the view.
+    - **Fowler:** held at the right. Aimed, the back of its barrels and the rib stand under the crosshair, the brass hammer to the right. Fired, a cloud of smoke wraps the gun's back and the priming flash shows above the lock. Reloading, the gun is tipped up and the left hand reaches over the muzzles. Inspected, it is turned to show its side.
+    - **Culverin:** held in the right hand, pointing at the husk. Aimed, its breech stands under the crosshair. Fired, smoke and the flash. Reloading, the gun is tipped up and the left arm comes down from the top right with the ball. Inspected, it is turned to show its cock.
+    - **With attachments:** the grips sit under the fore-end, behind the left hand, and the bayonet does not show from the hip or aimed, as on the Bellmouth and the Line Musket with theirs in the same run.
+    - **From outside:** the Mule and the Fowler are held at the chest in both hands; the Culverin in the right hand, the left arm at the side. Fired, the Fowler and the Culverin wrap themselves in smoke.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
-- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A) and the coil and plasma guns (slice 10B); the double-barrels and the sculk guns; a rack that charges several Energy Cells at once, enemies with guns and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
+- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A), the coil and plasma guns (slice 10B) and the double-barrels (slice 10C); the sculk guns; a rack that charges several Energy Cells at once, enemies with guns and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
 - **Aimed, the gun hand covered the sights** in the CI screenshots from 8 October, and a fitted stock came up under the eye: slice 9F draws the arms at half size aimed and leaves a fitted stock out ([above](#slice-9f-the-aiming-polish)).
 - **Not yet:**
   - the jam the Gnat's sound suggests;

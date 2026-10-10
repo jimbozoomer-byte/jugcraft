@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 10C (the double-barrels)
+- **Three new guns** from the owner's models and animations, each firing a spread of pellets and loaded all at once: the **Mule**, a sawn-off double-barrel that breaks open to load both shells; the **Fowler**, a double-barrelled flintlock with a ball rammed down each barrel; and the **Culverin**, a stubby hand cannon fired one-handed.
+- The Mule fires Buckshot Shells, the Fowler and the Culverin Paper Cartridges. The Fowler takes the grips and the bayonets; the others take nothing.
+- Record: [guns.md, slice 10C](docs/features/guns.md#slice-10c-the-double-barrels).
+
 ### Unmerged: Guns, slice 10B (coil and plasma)
 - **Three new energy weapons** from the owner's models and animations, on the Energy Cells: the **Solenoid Rifle**, a coil rifle whose heavy beam passes through every creature in its line and reaches the farthest of the energy weapons; the **Votive Rifle**, a plasma rifle that burns for as long as the trigger is held; and the **Glowmouth**, a plasma blunderbuss loaded a charge at a time, whose arc leaps from its mark to two more creatures close by.
 - The two rifles take magazines, stocks, grips, bayonets, the scopes and the Laser Sight; the Glowmouth takes nothing.

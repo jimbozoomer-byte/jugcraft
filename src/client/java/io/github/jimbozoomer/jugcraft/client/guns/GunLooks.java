@@ -39,9 +39,10 @@ public final class GunLooks {
 	 * and the Highwayman's grips came two pixels past the eye, and the Throttle's within one and a quarter. The Skylark
 	 * Rifle's kick (slice 10A) brought the back of its receiver to the near plane. Of coil and plasma (slice 10B), the
 	 * Solenoid Rifle's kick brought its back within a pixel of the eye, the Votive Rifle's the end of its long grip to the
-	 * eye, and the Glowmouth's past it.
+	 * eye, and the Glowmouth's past it. Of the double-barrels (slice 10C), the Mule's kick brought the back of its grip
+	 * past the eye, and the Fowler's its butt plate.
 	 */
-	static final Map<String, Float> EYE_RELIEF = Map.ofEntries(Map.entry("garrison_rifle", 4.0F), Map.entry("beam_pistol", 4.0F), Map.entry("picket_rifle", 2.0F), Map.entry("ranger_rifle", 2.0F), Map.entry("kestrel_rifle", 2.0F), Map.entry("rattler_pistol", 4.0F), Map.entry("bronco_smg", 4.0F), Map.entry("squall_rifle", 3.0F), Map.entry("spikedriver", 2.0F), Map.entry("sledge", 6.0F), Map.entry("highwayman", 6.0F), Map.entry("throttle", 2.0F), Map.entry("skylark_rifle", 3.0F), Map.entry("solenoid_rifle", 1.0F), Map.entry("votive_rifle", 2.0F), Map.entry("glowmouth", 3.0F));
+	static final Map<String, Float> EYE_RELIEF = Map.ofEntries(Map.entry("garrison_rifle", 4.0F), Map.entry("beam_pistol", 4.0F), Map.entry("picket_rifle", 2.0F), Map.entry("ranger_rifle", 2.0F), Map.entry("kestrel_rifle", 2.0F), Map.entry("rattler_pistol", 4.0F), Map.entry("bronco_smg", 4.0F), Map.entry("squall_rifle", 3.0F), Map.entry("spikedriver", 2.0F), Map.entry("sledge", 6.0F), Map.entry("highwayman", 6.0F), Map.entry("throttle", 2.0F), Map.entry("skylark_rifle", 3.0F), Map.entry("solenoid_rifle", 1.0F), Map.entry("votive_rifle", 2.0F), Map.entry("glowmouth", 3.0F), Map.entry("mule", 2.5F), Map.entry("fowler", 3.0F));
 	/**
 	 * How far the owner's third-person transform tilts a gun up off the arm that holds it, in degrees (tools/guns.py
 	 * tilt(): the x rotation of its "thirdperson_righthand"); a gun not listed has none. The Gattaler's is made for an
@@ -95,6 +96,9 @@ public final class GunLooks {
 		LOOKS.put("solenoid_rifle", new Look(true, 0.75F));
 		LOOKS.put("votive_rifle", new Look(true, 0.85F));
 		LOOKS.put("glowmouth", new Look(true, 0.95F));
+		LOOKS.put("mule", new Look(true, 0.92F));
+		LOOKS.put("fowler", new Look(true, 0.88F));
+		LOOKS.put("culverin", new Look(false, 0.94F));
 		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));
