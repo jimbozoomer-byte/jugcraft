@@ -10,6 +10,7 @@ import eu.pb4.trinkets.impl.client.render.ClientTrinketsManager;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.ConcordanceClientOptions;
 import io.github.jimbozoomer.jugcraft.concordance.trinket.Wayfaring;
+import io.github.jimbozoomer.jugcraft.concordance.trinket.WornDisplay;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,9 +47,11 @@ import net.minecraft.world.phys.AABB;
  * the way; each render definition loaded and, run as Trinkets runs it, drawing the belt's model on the body and the boot's
  * on each leg; the worn models among the client's resources; the owner's worn sheets in the items atlas; nothing for the
  * Ice Breaker, which has no worn sheet). Then, as the owner asked, the belt is hidden under an iron chestplate and under
- * iron leggings, the boots under iron boots, and both while the Show worn trinkets setting is off. Whether they look
- * right only the shots show: the player wearing them from the front and from behind, whole, closer and from each quarter,
- * under a chestplate, under boots, with the setting off, and sneaking, for people to look at;</li>
+ * iron leggings, the boots under iron boots, and both while the player's Show my worn trinkets setting is off: turned as
+ * the settings screen turns it, the choice goes to the server, which keeps it on the player and sends it back to this
+ * client as it sends it to everyone who sees them, and the drawing follows what came back. Whether they look right only
+ * the shots show: the player wearing them from the front and from behind, whole, closer and from each quarter, under a
+ * chestplate, under boots, with the setting off, and sneaking, for people to look at;</li>
  * <li>with the second charm taken out first, the belt comes off, the slot goes, and nothing falls to the ground;</li>
  * <li>the eight icons in frames on a wall (three of them the owner's animated strips), and the inventory, for people to
  * look at.</li>
@@ -113,9 +116,10 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 			check(given.isEmpty(), "The worn items' attributes are not as designed: " + given);
 
 			// Part 1b: the belt and boot drawn on the player, who wears both (and the Ice Breaker, which is not drawn), unless
-			// armour covers them or the setting is off. The setting is on whatever this client had, and put back after.
+			// armour covers them or the player has hidden them. The setting is on whatever this client had, and put back after.
 			boolean shownBefore = context.computeOnClient(client -> ConcordanceClientOptions.wornTrinkets());
-			context.runOnClient(client -> ConcordanceClientOptions.setWornTrinkets(true));
+			String unchosen = choose(context, server, true);
+			check(unchosen.isEmpty(), "Show my worn trinkets: " + unchosen);
 			try {
 				String undrawn = context.computeOnClient(client -> undrawn(client));
 				Jugcraft.LOGGER.info("[wayfaring client] worn models: {}", undrawn.isEmpty()
@@ -127,7 +131,7 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 				check(misHidden.isEmpty(), "The belt and boots are not hidden as designed: " + misHidden);
 				wornShots(context, singleplayer, x, y, z);
 			} finally {
-				context.runOnClient(client -> ConcordanceClientOptions.setWornTrinkets(shownBefore));
+				choose(context, server, shownBefore);
 			}
 
 			// Off in order: the second charm, then the belt. The slot goes and nothing is dropped.
@@ -250,9 +254,9 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 
 	/**
 	 * What differs from the hiding the owner asked for, or "": what the belt and the boot would draw on the player (drawnParts)
-	 * bare, under an iron chestplate, iron leggings and iron boots one at a time, with the Show worn trinkets setting off,
-	 * and with it on again. The belt is hidden under the chestplate and the leggings, the boots under the boots, and both
-	 * with the setting off.
+	 * bare, under an iron chestplate, iron leggings and iron boots one at a time, with the Show my worn trinkets setting
+	 * off, and with it on again. The belt is hidden under the chestplate and the leggings, the boots under the boots, and
+	 * both with the setting off, once the server has the choice and its answer has come back (choose).
 	 */
 	private static String misHidden(ClientGameTestContext context, TestServerContext server) {
 		List<String> wrong = new ArrayList<>();
@@ -273,7 +277,10 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 		if (armour != null) {
 			server.runCommand("item replace entity @p " + armour);
 		}
-		context.runOnClient(client -> ConcordanceClientOptions.setWornTrinkets(shown));
+		String unchosen = choose(context, server, shown);
+		if (!unchosen.isEmpty()) {
+			wrong.add(state + ": " + unchosen);
+		}
 		context.waitTicks(5);
 		List<String> drawnBelt = context.computeOnClient(client -> drawnParts(client, Wayfaring.BELT_SLOT));
 		List<String> drawnBoots = context.computeOnClient(client -> drawnParts(client, Wayfaring.FEET_SLOT));
@@ -284,6 +291,28 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 		if (armour != null) {
 			server.runCommand("item replace entity @p " + armour.substring(0, armour.indexOf(' ')) + " with minecraft:air");
 		}
+	}
+
+	/**
+	 * Turns this player's Show my worn trinkets setting as the settings screen does (which sends the choice to the server),
+	 * then waits, at most 100 ticks, until the server's player and this client's agree with it (the server holds a change
+	 * that comes within WornDisplay.CHANGE_TICKS of the last until its tick, then sends it to this client as to everyone
+	 * who sees the player); "" once they do, or what each has.
+	 */
+	private static String choose(ClientGameTestContext context, TestServerContext server, boolean shown) {
+		context.runOnClient(client -> ConcordanceClientOptions.setWornTrinkets(shown));
+		boolean onServer = !shown;
+		boolean onClient = !shown;
+		for (int waited = 0; waited <= 100; waited++) {
+			onServer = server.computeOnServer(minecraft -> WornDisplay.hidden(player(minecraft)));
+			onClient = context.computeOnClient(client -> WornDisplay.hidden(client.player));
+			if (onServer == !shown && onClient == !shown) {
+				return "";
+			}
+			context.waitTicks(1);
+		}
+		return "chose to " + (shown ? "show" : "hide") + " them, but after 100 ticks the server has them " + (onServer ? "hidden" : "shown")
+				+ " and this client " + (onClient ? "hidden" : "shown");
 	}
 
 	/**
@@ -318,7 +347,7 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 	 * The player wearing the belt and the boot, from the front and from behind: whole (field of view 70, looking level), then
 	 * closer (50, the camera above, looking down 20 degrees, so the feet stay in the picture), then from each quarter (the
 	 * view turned 45 degrees, which shows the boots' sides and fins), then under an iron chestplate (no belt), under iron
-	 * boots (no boots) and with the Show worn trinkets setting off (neither), then sneaking from behind. Standing still, a
+	 * boots (no boots) and with the Show my worn trinkets setting off (neither), then sneaking from behind. Standing still, a
 	 * player's body turns only once the head is
 	 * more than 50 degrees past it, and a teleport turns only the head, so the body is set facing north on the client; the
 	 * later turns, 45 degrees at most, are the view's alone. The creative guide every creative player is given would be in
@@ -353,12 +382,11 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 		server.runCommand("item replace entity @p armor.feet with minecraft:iron_boots");
 		look(context, server, CameraType.THIRD_PERSON_FRONT, 50, 180, -20, "jugcraft_wayfaring_worn_under_boots");
 		server.runCommand("item replace entity @p armor.feet with minecraft:air");
-		context.runOnClient(client -> ConcordanceClientOptions.setWornTrinkets(false));
+		String hidden = choose(context, server, false);
 		look(context, server, CameraType.THIRD_PERSON_FRONT, 50, 180, -20, "jugcraft_wayfaring_worn_setting_off");
-		context.runOnClient(client -> {
-			ConcordanceClientOptions.setWornTrinkets(true);
-			client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
-		});
+		String shown = choose(context, server, true);
+		check(hidden.isEmpty() && shown.isEmpty(), "Show my worn trinkets, for the shots: " + hidden + shown);
+		context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 		server.runCommand("execute as @p at @s run tp @s ~ ~ ~ 180 20");
 		context.getInput().holdKey(options -> options.keyShift);
 		context.waitTicks(15);

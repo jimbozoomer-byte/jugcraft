@@ -10,8 +10,8 @@ No numbered release yet. Entries on feature branches remain proposed until their
 
 ### Unmerged: Arcane Concordance, Wayfaring part 1c (the belt and boots hidden under armour, and a setting)
 - **Armour hides the worn belt and boots,** as the owner asked: the belt under a chestplate or leggings, the boots under boots. An elytra hides nothing. They come back as soon as the armour comes off.
-- **A new setting, Show worn trinkets** (Concordance settings, on by default), turns them off on your computer, on you and on everyone else. It changes only what you see; other players choose for themselves.
-- A small client-side render element does both, inside the same render definitions; nothing is sent to the server. Record: [arcane-concordance-trinkets.md](docs/features/arcane-concordance-trinkets.md).
+- **A new setting, Show my worn trinkets** (Concordance settings, on by default), hides your own belt and boots, and everyone who sees you sees your choice; you see theirs.
+- A small render element does both, inside the same render definitions. Your client sends the setting to the server when you join a world and whenever you save it; the server keeps it on you (not saved: it is sent again each time you join), shows it to everyone who sees you and takes a change at most twice a second. Record: [arcane-concordance-trinkets.md](docs/features/arcane-concordance-trinkets.md).
 
 ### Unmerged: Arcane Concordance, Wayfaring part 1b (the belt and boot drawn on the body)
 - **The Leather Belt and the Amphibian Boot now show when worn,** as the owner drew them: a leather strap round the waist with a gold buckle in front, and on each foot a green boot with a white cuff, a grey toe cap and a fin on the heel. You see them in third person and on the inventory's figure; other players should see them too (not yet tried with two clients). The charms and the Ice Breaker (the owner drew no worn sheet for it) are not drawn.

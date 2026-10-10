@@ -28,7 +28,8 @@ write_worn writes their block models and Trinkets' render definitions (assets/ju
 Trinkets' data-driven renderer draws in third person. The Ice Breaker has no worn sheet, so it is not drawn. Each
 definition wraps its models in Jugcraft's own render element, jugcraft:unless_covered (client:
 trinket/UnlessCoveredTrinketElement.java), so the belt is hidden under a chestplate or leggings and the boots under boots
-(WORN_COVERED_BY), and both while the player's "Show worn trinkets" setting is off.
+(WORN_COVERED_BY), and both on a wearer whose "Show my worn trinkets" setting is off (their client tells the server, which
+tells everyone who sees them: concordance/trinket/WornDisplay.java).
 """
 import json
 from pathlib import Path
@@ -258,12 +259,12 @@ WORN_ANCHOR_Y = 12
 WORN_COVERED_BY = {"leather_belt": ["chest", "legs"], "amphibian_boot": ["feet"]}
 # Jugcraft's render element that draws its own elements only while those slots are bare and the player's setting is on.
 WORN_ELEMENT = rid("unless_covered")
-# The client setting's words (ConcordanceClientOptions, ConcordanceSettingsScreen).
+# The client setting's words (ConcordanceClientOptions, ConcordanceSettingsScreen). Each player's choice is their own
+# and everyone who sees them sees it (WornDisplay).
 CLIENT = {
-    "screen.jugcraft.concordance.config.worn_trinkets": "Show worn trinkets",
-    "screen.jugcraft.concordance.config.worn_trinkets.tooltip": "Draw the belts and boots of Wayfaring on players: on you in "
-        "third person and on the inventory's figure, and on everyone else. Armour worn over them always hides them. This "
-        "computer only; other players choose for themselves.",
+    "screen.jugcraft.concordance.config.worn_trinkets": "Show my worn trinkets",
+    "screen.jugcraft.concordance.config.worn_trinkets.tooltip": "Draw your Wayfaring belt and boots on you. Everyone who "
+        "sees you sees your choice, and each player chooses for themselves. Armour worn over them always hides them.",
 }
 
 # Every owner file this slice uses, copied as supplied by tools/owner_art.py: runtime path under assets/jugcraft -> path
@@ -438,7 +439,8 @@ def codex():
                  "Once you understand **Relic Lore**, you can wear these: a belt in the Belt slot, a charm in a Charm "
                  f"slot (a Leather Belt gives a second) and up to {FEET_SLOTS} on your feet. They hold no Focus or charge "
                  "and need no pylon. Two of a kind never add up; a second vial only waits its turn. The belt and the "
-                 "boots show on you unless armour covers them, and the Concordance settings can hide them."),
+                 "boots show on you unless armour covers them, and the Concordance settings can hide them from "
+                 "everyone."),
                 ("crafting_recipe", "Leather Belt",
                  "One more Charm slot. Take the second charm off before the belt.", rid("leather_belt")),
                 ("crafting_recipe", "Angelic Feather",

@@ -44,9 +44,9 @@ effect are the owner's; the numbers are Jugcraft's.
   for it).
 - **Armour worn over them hides them** (part 1c, as the owner asked): a chestplate or leggings hide the belt, and boots
   hide the boots. An elytra hides neither, and leggings leave the boots showing over them, as vanilla's boots are drawn
-  over leggings. **Show worn trinkets**, a switch in the Concordance settings (from Mod Menu, or the Concordance settings
-  key in Controls, unbound at first), hides both on every player this computer draws; it is on at first. It changes only
-  what this computer shows: each player chooses for their own screen.
+  over leggings. **Show my worn trinkets**, a switch in the Concordance settings (from Mod Menu, or the Concordance
+  settings key in Controls, unbound at first), hides your own belt and boots, and everyone who sees you sees your choice,
+  as with vanilla's cape and skin layers; you see theirs. It is on at first.
 - The kinetic belt that links two pulleys (`jugcraft:belt`, unchanged) is now called the **Drive Belt** in English, so
   the two belts are told apart.
 
@@ -81,8 +81,8 @@ effect are the owner's; the numbers are Jugcraft's.
     tolerance tags keep the Ender Dragon, Wither, Warden and Elder Guardian from being thrown or slowed, though the
     harm lands), and the saves' statuses on the wearer. What shows is the shared signs (`Signs.show`).
 - Client: Trinkets draws the slots with the owner's icons (GUI sprites under `textures/gui/sprites/container/slots/`);
-  the items are the owner's plain generated models. The slice's only client Java is part 1c's render element and the
-  line that registers it (below).
+  the items are the owner's plain generated models. The slice's only client Java is part 1c's: its render element, and
+  sending the player's choice whether their belt and boots show (below).
 - Part 1b, drawn on the body by Trinkets' data-driven renderer:
   - The owner drew a worn sheet for the belt and for the boot (`jymbelics/textures/models/items/`), each a box-UV net
     (vanilla's `ModelPart` cube layout) with no geometry. `tools/concordance_trinkets.py` `WORN` fits boxes to them: the
@@ -123,11 +123,11 @@ effect are the owner's; the numbers are Jugcraft's.
     so both show the bright half outward.
   - Faces the owner left empty (the toe's back, the cuff's top and bottom) are drawn as vanilla draws a whole box: they
     show nothing.
-- Part 1c, hidden under armour and by a setting:
+- Part 1c, hidden under armour and by each wearer's own choice:
   - `client/trinket/UnlessCoveredTrinketElement` is a Trinkets render element of Jugcraft's own, `jugcraft:unless_covered`,
     which `WayfaringClient` adds to Trinkets' element types (`TrinketRenderElements.ID_MAPPER`) when the client starts,
-    before any resources load. It holds other elements (`then`) and draws them only while the player's setting is on and
-    none of the armour slots it names (`armour`) holds armour drawn on the body. It passes its elements' models on to
+    before any resources load. It holds other elements (`then`) and draws them only while the wearer has not hidden them
+    and none of the armour slots it names (`armour`) holds armour drawn on the body. It passes its elements' models on to
     Trinkets, which otherwise asks only the top-level element, so they are baked.
   - Each render definition is now one such element round its `model` elements, written by the generator with the slots
     from `WORN_COVERED_BY`: the chest and legs for the belt (a chestplate alone would leave the buckle standing out
@@ -140,12 +140,24 @@ effect are the owner's; the numbers are Jugcraft's.
     (Jugcraft's 3D sets and Ember's GeckoLib sets name one too), except a glider (an elytra is drawn as wings, off the
     waist).
   - The setting is `concordance.worn_trinkets` in `config/jugcraft-client.properties` (`true` at first), turned in the
-    Concordance settings screen (Cloth Config) with the others there. The element reads it each time too, so armour put
-    on or off, or the setting turned, shows on the next frame. The server never sees it.
+    Concordance settings screen (Cloth Config) with the others there. The client sends it to the server
+    (`WornDisplayPayload`, `jugcraft:worn_trinkets_shown`, a single true or false) when it joins a world and each time the
+    settings are saved, and only to a server that takes it.
+  - The server (`concordance/trinket/WornDisplay`) takes a choice only for the player who sent it. One that changes
+    nothing is dropped. A change is made at once if the player's last was at least 10 ticks ago (the Concordance's
+    `RateGate`); one that comes sooner waits for its tick, and a newer choice replaces it, so the last one sent always
+    lands while a client sending as fast as it can makes no more traffic than a player using the switch. It keeps the
+    choice on the player as a Fabric data attachment, `jugcraft:worn_trinkets_hidden` (there only while hidden), which
+    Fabric sends to that player and to every client that can see them, and to any that comes to see them later. It is
+    kept through death (`copyOnDeath`) and not saved: the client sends the choice again whenever it joins.
+  - The element reads that attachment on the wearer, as it reads their armour, each time Trinkets draws them, so armour
+    put on or off, or a wearer's new choice arriving, shows on the next frame. A wearer whose choice has not arrived (just
+    after they join, until their client's message lands) shows their belt and boots.
   - What that test counts as armour though it hardly covers the waist or the feet: the Rocket Pack and the Scuba Tank
     (chest; straps, with most of the waist bare) hide the belt, and Wool Socks hide the boots. Armour from other mods
     drawn only by a Fabric armour renderer, with no equipment asset, does not hide them.
-- Nothing ticks: the attributes are Trinkets modifiers and the rest answers damage events.
+- Nothing ticks but `WornDisplay`, which looks each tick at choices waiting for their tick and does nothing while none
+  waits: the attributes are Trinkets modifiers and the rest answers damage events.
 
 ## Connections
 
@@ -185,16 +197,20 @@ effect are the owner's; the numbers are Jugcraft's.
 ## Multiplayer and persistence
 
 - Server authority: Trinkets applies the modifiers on the server; the absorption, saves and wave are decided on the server
-  from damage events. The client's `canEquip` reads only its own synced research, as the server does. No packets.
+  from damage events. The client's `canEquip` reads only its own synced research, as the server does. Part 1c's one
+  packet is a player's own choice whether their belt and boots show: the server takes it only for its sender, at most
+  one change every 10 ticks, and it decides nothing but that drawing.
 - Part 1b is drawn on each client from the worn stacks Trinkets already sends to everyone tracking the wearer; Jugcraft
   sends nothing. With Trinkets' cosmetic slots on (a server setting, off by default), a cosmetic Leather Belt is drawn
   in place of the worn one, as Trinkets draws cosmetics; the Feet slot has no cosmetic copies. Trinkets sends a wearer's
   cosmetic stacks to other players only when they change (a player coming into view is sent the worn stacks only), so
   until then they see the worn belt, or none. With Trinkets' equipment hiding on (also a server setting, off by
-  default), a wearer can hide the belt and the boots.
-- Part 1c is decided on each client too, from the armour that client already sees on the wearer and from its own
-  setting. The setting hides the belt and boots on every player that client draws, and on no one else's screen; the
-  wearer's own choice, which everyone sees, is Trinkets' equipment hiding above.
+  default), a wearer can also hide them that way, slot by slot.
+- Part 1c is decided on each client from the armour that client already sees on the wearer and from the wearer's own
+  choice, which the server sends to everyone who sees them (and to anyone who comes to see them later), so every screen
+  shows a wearer the same way. A player who hides theirs sees them hidden too (in third person and on the inventory's
+  figure). The choice lasts through death and through changing dimension, and is sent again on every join; until it
+  arrives (a moment after joining) the belt and boots show.
 - Failure behaviour:
   - before Relic Lore: cannot be put on (an item put on by other means, such as a command, gives its attributes but
     answers no damage event);
@@ -207,10 +223,14 @@ effect are the owner's; the numbers are Jugcraft's.
   - the wave after an ender pearl, a fall that did no harm, or from the saddle; on a creature that is not hostile (a
     villager, an animal, another player): nothing; on the Ender Dragon, Wither, Warden or Elder Guardian: the harm only;
   - the belt with its added charm: stays on; were its slot to go another way (a command), Trinkets drops the charm at
-    the wearer's feet.
+    the wearer's feet;
+  - the worn trinkets choice: a change within 10 ticks of the last waits for its tick, and only the newest lands; one
+    sent for nothing new is dropped; a choice waiting when its player leaves is forgotten (their client sends its setting
+    again on joining); a client on a server without Jugcraft sends nothing.
 - Persistence: vanilla item stacks; Trinkets saves its slots and the belt's slot-count modifier (as a persistent
   modifier named `jugcraft:wayfaring/leather_belt/slot_count/legs/charm`, which must never change: a renamed one would
-  leave a Charm slot behind). No new saved data. Save compatibility: additive.
+  leave a Charm slot behind). No new saved data: part 1c's choice is kept on the player while they play and sent again
+  on each join, never saved. Save compatibility: additive.
 - Disable behaviour: with `concordance.enabled=false` the recipes do not load and nothing answers the damage events; the
   items, slots and attributes stay registered.
 - Dreams: any worn trinket still refuses a dream ("accessories", unchanged). A pre-existing gap, not changed here:
@@ -221,8 +241,9 @@ effect are the owner's; the numbers are Jugcraft's.
 No new dependency. Framework use: **Trinkets Updated** (three slots given by data, one defined by Trinkets; the
 callback modifiers, including a slot-count attribute; `canEquip`/`canUnequip`; part 1b: its data-driven renderer, render
 definitions under `assets/jugcraft/trinkets/` with `model` elements; part 1c: a render element type of Jugcraft's own,
-added to its element registry), **Fabric API** (the three damage events and an event phase), **Modonomicon** (the codex
-entry), **Cloth Config** (part 1c: the setting's switch, on the existing Concordance settings screen).
+added to its element registry), **Fabric API** (the three damage events and an event phase; part 1c: a payload from
+the client and a data attachment Fabric sends to everyone who sees the wearer), **Modonomicon** (the codex entry),
+**Cloth Config** (part 1c: the setting's switch, on the existing Concordance settings screen).
 
 **Provenance.** The files below are from the owner's library (`art/owner-library/originals`): the magic collection
 (supplied 8 October 2026, [MAGIC_ASSETS.md](../../art/owner-library/MAGIC_ASSETS.md); folders `jymbelics` and
@@ -380,6 +401,24 @@ once #277 had merged parts 1 and 1b):
 - Jugcraft's 3D armour (`tools/armor_models.py`) compared with the worn models by script, for the one pairing part 1c
   still draws together, leggings under the boots (Under armour, below).
 
+Part 1c, the choice made each wearer's own and seen by everyone (the owner, 10 October 2026: "I want other players to
+see it too"; local, before CI):
+- `python3 tools/generate_material_data.py` wrote the setting's new words and the codex line; run again, it changed
+  nothing.
+- `python3 tools/check_mod_data.py`: PASS, with `check_wayfaring_worn`'s rules changed and added: the element reads the
+  wearer's choice (`WornDisplay.hidden`) and never this computer's setting; the client sends the setting on joining and
+  on each save, and only to a server that takes it; the attachment is sent to everyone who sees the wearer, kept
+  through death and not saved; the receiver takes a choice only for its sender, rate-limited both where a change is
+  made at once and where a waiting one lands, and forgets a waiting choice when its player leaves; `Wayfaring`
+  registers it. Mutation test: the 43 breakages before (one now the element ignoring the wearer's choice) and 14 more,
+  57 in all, each caught by the rule meant for it (among the new: the element reading this computer's setting instead;
+  the client not sending on joining, sending without asking whether the server takes it, or sending something else;
+  the attachment sent to the wearer only, lost at death or saved; the receiver choosing for another player; either
+  rate limit gone; a waiting choice never forgotten; `WornDisplay` never registered; either of the setting's saves not
+  sending); every file restored after.
+- `python3 tools/owner_art.py --check`, `python3 tools/check_icon_maps.py`, `python3 scripts/check_repository.py` and
+  `python3 tools/concordance_delivery.py`: PASS.
+
 Tests:
 - Server, `ConcordanceWayfaringGameTests`: the items and slots as designed (sizes, the owner's icons, no cosmetic copies,
   tags, every attribute present, never weighed, the two belts' names); only Relic Lore puts them on and two of a kind
@@ -389,7 +428,10 @@ Tests:
   and one the bar cannot pay for lands; the vial, then the down, answer death through the real event, and the void, a held totem and Relic Lore not
   understood do not; a vial put on during a dream does not answer a death in it, and the dream ends as a death; the
   wave reaches a zombie and not a villager or one beyond a light fall's radius, harms but does not slow an Elder
-  Guardian, does nothing after an ender pearl or before Relic Lore, and reaches at most twelve.
+  Guardian, does nothing after an ender pearl or before Relic Lore, and reaches at most twelve; and (part 1c) each
+  wearer's choice as the server takes it: hidden and shown again, a choice that changes nothing dropped, a change within
+  10 ticks of the last waiting for its tick and replaced by a newer one, the newest landing, and the choice's
+  attachment sent to clients, kept through death and not saved.
 - Client, `ConcordanceWayfaringClientGameTests`, on the real ticking player: the belt's second Charm slot on the server
   and the client; the worn attributes each present once; what Trinkets needs to draw part 1b: no Java renderer in the
   way, the belt's and boot's render definitions loaded and, run as Trinkets runs them (with the real player, against a
@@ -397,19 +439,24 @@ Tests:
   each leg, the worn models among the client's resources, the worn sheets in the items atlas and no definition for the
   Ice Breaker (a model that failed to load would be baked as the game's missing-model cube, which these checks cannot
   tell apart: only the shots show the owner's models); part 1c, the same way, with the setting turned on first, whatever
-  this client had, and put back after: the belt and boots drawn bare, the belt hidden under an iron chestplate and under iron
-  leggings with the boots still drawn, the boots hidden under iron boots with the belt still drawn, both hidden with
-  the setting off and both drawn again with it on; then, the hand emptied and the body set facing north, the player
+  this client had, and put back after: the belt and boots drawn bare, the belt hidden under an iron chestplate and under
+  iron leggings with the boots still drawn, the boots hidden under iron boots with the belt still drawn, both hidden
+  with the setting off and both drawn again with it on. Each turn of the setting is made as the settings screen makes
+  it, which sends it to the server, and checked once the server's player and this client's agree with it: what this
+  client draws follows the choice as it came back from the server, as it goes to everyone who sees the player. Then,
+  the hand emptied and the body set facing north, the player
   wearing them from the front and from behind (whole and closer), from each quarter, under an iron chestplate, under
   iron boots, with the setting off, and sneaking; the slot gone again without the belt; screenshots of the eight icons
   and the inventory. The screenshots are for a person to look at; nothing judges a picture.
 
 Not yet run: a person looking at the screenshots (part 1b's included), the Trinkets screen opened by hand (the slot
 icons and the grey slot names before Relic Lore), a real fall, drowning or burning in survival, and a two-client
-dedicated server (where the other player should see the belt and boots, hidden under the armour they wear and by each
-client's own setting). Part 1b in a client without Sodium (CI's client jobs run with it). Part 1c under armour other
-than vanilla iron (Jugcraft's 3D sets, Ember's GeckoLib sets, the Rocket Pack, Scuba Tank and Wool Socks), and its
-switch turned by hand on the settings screen (the test turns the setting in code).
+dedicated server (where the other player should see the belt and boots, hidden under the armour they wear and when
+they have chosen to hide them: CI has one client, so no test sees another player's choice arrive, though Fabric sends it
+to every client the same way it sends it back to its own). Part 1b in a client without Sodium (CI's client jobs run
+with it). Part 1c under armour other than vanilla iron (Jugcraft's 3D sets, Ember's GeckoLib sets, the Rocket Pack,
+Scuba Tank and Wool Socks), its switch turned by hand on the settings screen (the test turns the setting in code, as
+the screen's save does), and the choice through a death, a change of dimension and a rejoin.
 
 ## World and event applicability
 
@@ -425,7 +472,8 @@ No worldgen, creatures, loot or seasons.
   models `jugcraft:item/leather_belt_worn`, `amphibian_boot_worn_left` and `amphibian_boot_worn_right`, textures
   `jugcraft:item/leather_belt_worn` and `amphibian_boot_worn`, and Trinkets render definitions `jugcraft:leather_belt` and
   `jugcraft:amphibian_boot`. Part 1c adds the render element type `jugcraft:unless_covered` (client only, named by those
-  two definitions) and the client setting `concordance.worn_trinkets`; nothing saved in a world.
+  two definitions), the client setting `concordance.worn_trinkets`, the payload `jugcraft:worn_trinkets_shown` and the
+  player attachment `jugcraft:worn_trinkets_hidden` (sent to clients, never saved); nothing saved in a world.
 - **Simplified from the owner's text, for a concrete reason:**
   - the Ice Breaker's faster falling: a gravity modifier would also shorten every jump (and undo the feather's), so it
     is left out;
@@ -460,8 +508,9 @@ No worldgen, creatures, loot or seasons.
   bonus); names and designs for the 12 unnamed legacy icons; the terms of `jymbelics/sounds/ricochet.ogg`, whose tags
   name a sound-effects publisher (it matters only for a later part's Shadow Glaive); for part 1b, whether the sheet is
   the left boot, as read from the icon (if it is the right, `WORN_MIRRORED` changes to the left leg); and, for part 1c,
-  whether a wearer should also be able to hide their own belt and boots from everyone (Trinkets' equipment hiding does
-  that once a server turns it on; a Jugcraft switch would need a synced setting), and whether the Rocket Pack, Scuba
-  Tank and Wool Socks should stop hiding them (an item tag could exempt them).
+  whether a player should also be able to hide everyone else's belts and boots on their own screen (the first version
+  of the switch did that; the owner asked for the choice to be seen by other players, and it now hides the player's
+  own, for everyone), and whether the Rocket Pack, Scuba Tank and Wool Socks should stop hiding them (an item tag could
+  exempt them).
 - Skipped: `researching_table` (removed from the base mod; Relic Lore and Artifice cover it), `relic_experience_bottle`
   (levelling), `blank_rune` (a model with no texture), `witch_hat` (its id is taken by Jugcraft's own Witch Hat).
