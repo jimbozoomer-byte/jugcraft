@@ -123,14 +123,15 @@ public class CellRackGameTests {
 		player.setGameMode(GameType.SURVIVAL);
 		BlockPos front = helper.absolutePos(RACK.north());
 		player.setPos(front.getX() + 0.5, front.getY(), front.getZ() + 0.5);
-		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftGuns.ENERGY_CELL, 2));
-		// The upper shelf's right-hand cradle, seen from the front.
+		// Energy Cells stack to one: a cell in the hand, used on the upper shelf's right-hand cradle, seen from the front.
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftGuns.ENERGY_CELL));
 		helper.assertTrue(use(helper, player, 3.5, 12.0).consumesAction() && !rack.getItem(5).isEmpty(),
 				"A cell used on the upper right stands in that cradle");
-		helper.assertTrue(player.getMainHandItem().getCount() == 1, "Standing a cell in its cradle takes one from the hand");
+		helper.assertTrue(player.getMainHandItem().isEmpty(), "Standing the cell in its cradle takes it from the hand");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftGuns.ENERGY_CELL));
 		helper.assertTrue(use(helper, player, 3.5, 12.0).consumesAction() && !rack.getItem(4).isEmpty(),
 				"With that cradle full, the next stands beside it");
-		helper.assertTrue(player.getMainHandItem().isEmpty(), "Both cells left the hand");
+		helper.assertTrue(player.getMainHandItem().isEmpty(), "The second cell left the hand");
 		// The lower shelf's left-hand cradle: the nearest cell to it is the upper middle one.
 		helper.assertTrue(use(helper, player, 12.5, 4.0).consumesAction() && rack.getItem(4).isEmpty() && !rack.getItem(5).isEmpty(),
 				"An empty hand takes the cell nearest where it points");
@@ -148,12 +149,15 @@ public class CellRackGameTests {
 		helper.setBlock(RACK.below(), Blocks.HOPPER);
 		HopperBlockEntity above = (HopperBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(RACK.above()));
 		HopperBlockEntity below = (HopperBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(RACK.below()));
+		// Energy Cells stack to one, so each goes in a slot of its own.
 		above.setItem(0, new ItemStack(Items.STICK));
-		above.setItem(1, new ItemStack(JugcraftGuns.ENERGY_CELL, 2));
+		above.setItem(1, new ItemStack(JugcraftGuns.ENERGY_CELL));
+		above.setItem(2, new ItemStack(JugcraftGuns.ENERGY_CELL));
 		helper.runAfterDelay(40, () -> {
 			helper.assertTrue(rack.getItem(0).is(JugcraftGuns.ENERGY_CELL) && rack.getItem(1).is(JugcraftGuns.ENERGY_CELL),
 					"The hopper above stood its two cells in the rack");
-			helper.assertTrue(above.getItem(0).is(Items.STICK) && above.getItem(1).isEmpty(), "The hopper above put in only its cells");
+			helper.assertTrue(above.getItem(0).is(Items.STICK) && above.getItem(1).isEmpty() && above.getItem(2).isEmpty(),
+					"The hopper above put in only its cells");
 			helper.assertTrue(rack.getItem(4).isEmpty() && rack.getItem(5).is(JugcraftGuns.ENERGY_CELL),
 					"The hopper below took the full cell and left the half-charged one");
 			helper.assertTrue(below.countItem(JugcraftGuns.ENERGY_CELL) == 1 && Chargeable.energy(below.getItem(0)) == EnergyCellItem.CAPACITY,
