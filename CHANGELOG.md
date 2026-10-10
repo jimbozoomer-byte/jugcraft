@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The Twin-Horned Steed (model)
+- **Twin-Horned Steed model:** a dark boss steed made from the owner's picture (10 October 2026): a grey horse with a white blaze, a mane of long slab strips, a branching tail, bandaged lower legs, two long splayed horns, glowing eyes and rune glyphs floating about its head. A model only, by the owner's choice: no entity or data yet.
+- **Four clips** in the Blockbench project (`art/twin_horn_steed/`): idle, walk (a trot), gallop, and a rearing charge with the runes flaring. Record: [twin-horn-steed.md](docs/features/twin-horn-steed.md).
+
 ### Unmerged: Guns, slice 7 (bayonets and the shared-texture guns)
 - **Four bayonets,** each the owner's art: **Iron**, **Steel** (the owner's anthralite one), **Diamond** and **Netherite** (a smithing upgrade). Under the barrel, in place of a grip. **V stabs** for 4 to 6 damage within reach, every 12 ticks; the server deals the blow. Seven guns take them.
 - **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.
