@@ -260,8 +260,8 @@ def codex():
                 ("crafting_recipe", "Ice Breaker",
                  f"A little knockback resistance. A fall that hurts you sends a wave through the ground: up to "
                  f"{WAVE_TARGETS} hostile creatures within {WAVE_RADIUS:g} blocks (more for a harder fall, at most "
-                 f"{WAVE_MAX_RADIUS:g}) are harmed, thrown back and slowed. The few foes no magic touches, such as the "
-                 "Warden, are spared.",
+                 f"{WAVE_MAX_RADIUS:g}) are harmed, thrown back and slowed. A few great foes, such as the Warden, take the "
+                 "harm but are neither thrown nor slowed.",
                  rid("ice_breaker")),
             ],
         },

@@ -394,8 +394,9 @@ public class ConcordanceWayfaringGameTests {
 	/**
 	 * The Ice Breaker: a plain fall that hurts its wearer harms, throws back and slows the nearest hostile creatures
 	 * within its radius (wider for a harder fall), at most twelve, and nothing else: not a villager, not one beyond the
-	 * radius, not a foe the Concordance cannot touch (the Elder Guardian, in the boundary's immune tag); nor after an ender
-	 * pearl's landing, nor before Relic Lore. (Claims never shelter hostile creatures: the boundary lets anyone fight them.)
+	 * radius; a great foe in the boundary's immune tag (the Elder Guardian) takes the harm but is not slowed; nothing after
+	 * an ender pearl's landing, nor before Relic Lore. (Claims never shelter hostile creatures: the boundary lets anyone
+	 * fight them.)
 	 */
 	@GameTest(maxTicks = 40)
 	public void theIceBreakersWaveThrowsBackFoes(GameTestHelper helper) {
@@ -418,8 +419,9 @@ public class ConcordanceWayfaringGameTests {
 			helper.assertTrue(far.getHealth() == far.getMaxHealth(), "A light fall's wave stops short of a zombie four blocks off");
 			helper.assertTrue(villager.getHealth() == villager.getMaxHealth() && !villager.hasEffect(MobEffects.SLOWNESS),
 					"A villager is not a foe");
-			helper.assertTrue(immune.getHealth() == immune.getMaxHealth() && !immune.hasEffect(MobEffects.SLOWNESS),
-					"An Elder Guardian (immune to the Concordance) is untouched");
+			// The boundary's tolerance governs harmful control only (Tolerance.governs): the harm lands, the slowing does not.
+			helper.assertTrue(immune.getHealth() < immune.getMaxHealth() && !immune.hasEffect(MobEffects.SLOWNESS),
+					"An Elder Guardian (immune to the Concordance's control) takes the harm but is not slowed: " + immune.getHealth());
 			ServerLivingEntityEvents.AFTER_DAMAGE.invoker().afterDamage(player, level.damageSources().fall(), 8.0F, 8.0F, false);
 			helper.assertTrue(far.getHealth() < far.getMaxHealth(), "A hard fall's wave reaches it");
 		}

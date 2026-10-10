@@ -28,7 +28,7 @@ effect are the owner's; the numbers are Jugcraft's.
 | **Angelheart Vial** | Charm | A blow that would kill you leaves you on 2 hearts with Regeneration II for 5 seconds. The vial is used up. |
 | **Phoenix Down** | Charm | A blow that would kill you leaves you at full health with Regeneration II and Fire Resistance for 10 seconds, and the down becomes an Angelic Feather where it was worn. Until then it is a feather as well (its fall and jump). |
 | **Amphibian Boot** | Feet | You swim faster (water movement +0.5, half of Depth Strider's most), and your air lasts about twice as long. |
-| **Ice Breaker** | Feet | +0.1 knockback resistance. A fall that hurts you sends a wave through the ground: the nearest hostile creatures (up to 12) within 3 blocks, a block more for each 4 points of harm (at most 6), take 2 damage, are thrown back and are slowed for 2 seconds (not the few the Concordance cannot touch, such as the Warden). |
+| **Ice Breaker** | Feet | +0.1 knockback resistance. A fall that hurts you sends a wave through the ground: the nearest hostile creatures (up to 12) within 3 blocks, a block more for each 4 points of harm (at most 6), take 2 damage, are thrown back and are slowed for 2 seconds (the Ender Dragon, Wither, Warden and Elder Guardian take the harm but are neither thrown nor slowed). |
 
 - Two of a kind never add up: a second feather, boot or Ice Breaker adds nothing, and a feather and a Phoenix Down jump as
   one. A second vial waits its turn for the next death; a vial worn beside a Phoenix Down answers first.
@@ -66,8 +66,8 @@ effect are the owner's; the numbers are Jugcraft's.
       the Ice Breaker's wave.
   - Everything the slice does to a creature goes through `ConcordanceEffects.apply` as an item's effect: the wave's harm,
     throw and Slowness, at `Enemy` creatures only (the boundary lets anyone fight them, whatever claims say; its
-    tolerance tags make the Ender Dragon, Wither, Warden and Elder Guardian immune), and the saves' statuses on the
-    wearer. What shows is the shared signs (`Signs.show`).
+    tolerance tags keep the Ender Dragon, Wither, Warden and Elder Guardian from being thrown or slowed, though the
+    harm lands), and the saves' statuses on the wearer. What shows is the shared signs (`Signs.show`).
 - Client: nothing new. Trinkets draws the slots with the owner's icons (GUI sprites under
   `textures/gui/sprites/container/slots/`); the items are the owner's plain generated models.
 - Nothing ticks: the attributes are Trinkets modifiers and the rest answers damage events.
@@ -121,7 +121,7 @@ effect are the owner's; the numbers are Jugcraft's.
     the harm lands;
   - the saves against the void, `/kill`, a held totem or a death in a dream: no save, nothing spent;
   - the wave after an ender pearl, a fall that did no harm, or from the saddle; on a creature that is not hostile (a
-    villager, an animal, another player) or one immune to the Concordance: nothing;
+    villager, an animal, another player): nothing; on the Ender Dragon, Wither, Warden or Elder Guardian: the harm only;
   - the belt with its added charm: stays on; were its slot to go another way (a command), Trinkets drops the charm at
     the wearer's feet.
 - Persistence: vanilla item stacks; Trinkets saves its slots and the belt's slot-count modifier (as a persistent
@@ -214,6 +214,12 @@ CI:
   points (vanilla caps exhaustion), both fixed as described under How it works; a cosmetic belt could be locked on and
   would be duplicated on death, both fixed; the Phoenix Down's recipe page and three docs still calling the drive belt
   a leather belt, fixed.
+- Run 38012291924 (commit `fdcd3f3c`, the review fixes): the new food-cost test passed; both server jobs failed on one
+  case only, again a wrong expectation of this slice's test: it took the boundary's immune tag to spare the Elder
+  Guardian from the wave, but tolerance governs only harmful control (throws and statuses), so the harm lands and only
+  the slowing is refused. The test now checks exactly that, and the docs say so. One client job also failed, in an Arms
+  VIII test this change does not touch (a thrown javelin came down without striking its pig; the same test passed in
+  the run before, and nothing it uses changed); the next run repeats it.
 
 Tests:
 - Server, `ConcordanceWayfaringGameTests`: the items and slots as designed (sizes, the owner's icons, no cosmetic copies,
@@ -223,8 +229,8 @@ Tests:
   Lore); a blow costs half a food point a point of harm, a second within the hurt cooldown only what it is bigger by,
   and one the bar cannot pay for lands; the vial, then the down, answer death through the real event, and the void, a held totem and Relic Lore not
   understood do not; a vial put on during a dream does not answer a death in it, and the dream ends as a death; the
-  wave reaches a zombie and not a villager, an Elder Guardian (immune), one beyond a light fall's radius, nor after an
-  ender pearl or before Relic Lore, and at most twelve.
+  wave reaches a zombie and not a villager or one beyond a light fall's radius, harms but does not slow an Elder
+  Guardian, does nothing after an ender pearl or before Relic Lore, and reaches at most twelve.
 - Client, `ConcordanceWayfaringClientGameTests`, on the real ticking player: the belt's second Charm slot on the server
   and the client; the worn attributes each present once; the slot gone again without the belt; screenshots of the eight
   icons and the inventory, for a person to look at.

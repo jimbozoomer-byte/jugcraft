@@ -66,7 +66,7 @@ import org.jspecify.annotations.Nullable;
  * and before a held totem's turn.</li>
  * <li>The Amphibian Boot and the Ice Breaker are worn on the feet; a fall that hurts an Ice Breaker's wearer sends a wave
  * through the ground ({@link #wave}) at hostile creatures only, through the shared effect boundary (which lets anyone
- * fight them; its tolerance tags still make a few immune).</li>
+ * fight them; its tolerance tags still keep a few great foes from being thrown or slowed).</li>
  * </ul>
  * Nothing here ticks: the attributes are Trinkets modifiers, and the rest answers three damage events. With the
  * Concordance switched off the items, slots and modifiers stay, but nothing answers the events.
