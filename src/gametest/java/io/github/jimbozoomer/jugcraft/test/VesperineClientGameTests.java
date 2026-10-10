@@ -38,6 +38,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public class VesperineClientGameTests implements FabricClientGameTest {
 	private static final Lair ACRE = Lair.HOLLOW_ACRE;
+	/** A standing player's eyes over their feet, where the camera looks from. */
+	private static final double EYE = 1.62;
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -73,29 +75,35 @@ public class VesperineClientGameTests implements FabricClientGameTest {
 						"She is not on her throne but at " + vesperine.position());
 				check(vesperine.skullsAlive(lair(minecraft)) == 2, "Dirge and Requiem are not with her");
 			});
-			shoot(context, singleplayer, acre, o.getX() + 31.5, o.getY() + HollowAcre.FLOOR + 2.0, o.getZ() + 19.5, 180, 8, false,
-					"jugcraft_vesperine_seated");
+			Vec3 seat = Vec3.atBottomCenterOf(o.offset(HollowAcre.THRONE));
+			Vec3 throneCamera = new Vec3(seat.x, o.getY() + HollowAcre.FLOOR + 1.0, seat.z + 6.5);
+			shoot(context, singleplayer, acre, throneCamera.x, throneCamera.y, throneCamera.z, aimYaw(throneCamera, seat.add(0.0, 1.6, 0.0)),
+					aimPitch(throneCamera, seat.add(0.0, 1.6, 0.0)), false, "jugcraft_vesperine_seated");
 
-			// Stepping into the Mown Circle wakes her: she rises with her bar showing.
+			// Stepping into the Mown Circle wakes her: the player, in survival where the camera stood (inside the circle),
+			// and she rises; caught as she leaves the throne.
 			server.runCommand("gamemode survival @a");
 			server.runCommand("effect give @a minecraft:resistance infinite 4 true");
 			server.runCommand("effect give @a minecraft:saturation infinite 0 true");
-			server.runCommand(String.format(Locale.ROOT, "execute in %s run tp @a %.1f %.1f %.1f 180 0", acre, centre.x, centre.y + 1, centre.z + 6));
 			context.waitTicks(20);
+			server.runCommand("tick freeze");
 			server.runOnServer(minecraft -> check(vesperine(minecraft).phase() != VesperineEntity.Phase.SEATED,
 					"Stepping into the circle did not wake her"));
+			shoot(context, singleplayer, acre, throneCamera.x, throneCamera.y, throneCamera.z, aimYaw(throneCamera, seat.add(0.0, 2.0, 0.0)),
+					aimPitch(throneCamera, seat.add(0.0, 2.0, 0.0)), true, "jugcraft_vesperine_risen");
+			server.runCommand("tick unfreeze");
+			server.runCommand(String.format(Locale.ROOT, "execute in %s run tp @a %.1f %.1f %.1f 180 0", acre, centre.x, centre.y + 1, centre.z + 6));
 			context.waitTicks(VesperineEntity.RISE_TICKS + 5);
 
-			// Her attacks, each caught as it lands.
-			pose(context, server, centre, (vesperine, level, player) -> { }, 2);
-			shot(context, singleplayer, acre, centre, 0.0, 7.0, 180, 8, "jugcraft_vesperine_risen");
+			// Her attacks, each caught as it lands: she in the middle of the circle facing south, the player five blocks in
+			// front of her; the camera then stands where it shows the attack best, turned towards the point named.
 			pose(context, server, centre, (vesperine, level, player) -> vesperine.begin(level, VesperineEntity.Attack.REAPING_ARC, player), 10);
-			shot(context, singleplayer, acre, centre, -4.5, 5.5, 140, 8, "jugcraft_vesperine_reaping_arc");
+			shot(context, singleplayer, acre, centre, -3.0, 1.0, 4.5, 0.0, 1.8, 0.0, "jugcraft_vesperine_reaping_arc");
 			pose(context, server, centre, (vesperine, level, player) -> vesperine.begin(level, VesperineEntity.Attack.SCYTHE_THROW, player), 22);
-			shot(context, singleplayer, acre, centre, 7.0, 3.0, 110, 12, "jugcraft_vesperine_scythe_throw");
+			shot(context, singleplayer, acre, centre, 6.5, 1.5, 3.0, 0.0, 1.5, 3.0, "jugcraft_vesperine_scythe_throw");
 			pose(context, server, centre, (vesperine, level, player) -> vesperine.begin(level, VesperineEntity.Attack.GRAVE_CALL, player),
 					VesperineEntity.Attack.GRAVE_CALL.windup + 12);
-			shot(context, singleplayer, acre, centre, 3.0, 9.0, 165, 14, "jugcraft_vesperine_grave_call");
+			shot(context, singleplayer, acre, centre, 4.0, 2.0, 11.0, 0.0, 1.0, 3.5, "jugcraft_vesperine_grave_call");
 
 			// The Last Toll: she rises, the moon turns red, the skulls re-form.
 			pose(context, server, centre, (vesperine, level, player) -> vesperine.startToll(level), 40);
@@ -105,12 +113,12 @@ public class VesperineClientGameTests implements FabricClientGameTest {
 				check(moon.is(JugcraftLairs.LAIR_MOON) && moon.getValue(LairMoonBlock.RED), "The moon did not turn red");
 				check(vesperine(minecraft).skullsAlive(lair(minecraft)) == 2, "The skulls did not re-form");
 			});
-			shot(context, singleplayer, acre, centre, 0.0, 11.0, 180, -22, "jugcraft_vesperine_last_toll");
+			shot(context, singleplayer, acre, centre, 0.0, 0.5, 9.0, 0.0, 7.0, 0.0, "jugcraft_vesperine_last_toll");
 			server.runCommand("tick unfreeze");
 			context.waitTicks(VesperineEntity.TOLL_TICKS);
 			pose(context, server, centre, (vesperine, level, player) -> vesperine.begin(level, VesperineEntity.Attack.TWIN_BEAM, player),
 					VesperineEntity.Attack.TWIN_BEAM.windup + 12);
-			shot(context, singleplayer, acre, centre, -6.0, 8.0, 150, 16, "jugcraft_vesperine_twin_beam");
+			shot(context, singleplayer, acre, centre, -1.0, 4.0, 13.0, 2.5, 1.0, 3.0, "jugcraft_vesperine_twin_beam");
 
 			// Death's Harvest: the wards go out and souls stream from the black wheat; lighting the four wards ends it.
 			pose(context, server, centre, (vesperine, level, player) -> {
@@ -118,7 +126,7 @@ public class VesperineClientGameTests implements FabricClientGameTest {
 				vesperine.startHarvest(level);
 			}, 50);
 			server.runCommand("effect clear @a minecraft:darkness");
-			shot(context, singleplayer, acre, centre, 0.0, 14.0, 180, -30, "jugcraft_vesperine_deaths_harvest");
+			shot(context, singleplayer, acre, centre, 8.0, 1.0, 12.0, 0.0, 8.0, 0.0, "jugcraft_vesperine_deaths_harvest");
 			server.runCommand("tick unfreeze");
 			server.runOnServer(minecraft -> {
 				ServerLevel level = lair(minecraft);
@@ -154,7 +162,10 @@ public class VesperineClientGameTests implements FabricClientGameTest {
 				check(level.getEntitiesOfClass(VesperineEntity.class, island()).stream().noneMatch(VesperineEntity::isAlive),
 						"She is still there");
 			});
-			shoot(context, singleplayer, acre, centre.x + 0.5, centre.y + 2.5, centre.z + 7.0, 180, 10, false, "jugcraft_vesperine_defeated");
+			Vec3 mistCamera = new Vec3(centre.x, centre.y + 0.5, centre.z + 6.0);
+			Vec3 mist = new Vec3(centre.x, centre.y + 2.5, centre.z);
+			shoot(context, singleplayer, acre, mistCamera.x, mistCamera.y, mistCamera.z, aimYaw(mistCamera, mist), aimPitch(mistCamera, mist), false,
+					"jugcraft_vesperine_defeated");
 			System.out.println("[vesperine] client game test: her fight passed end to end");
 			server.runOnServer(minecraft -> Lairs.reset());
 		}
@@ -168,7 +179,8 @@ public class VesperineClientGameTests implements FabricClientGameTest {
 	/**
 	 * Unfreezes the world, puts her in the middle of the circle facing south and the player five blocks in front of her
 	 * (so her attacks land in view), does what {@code posing} asks, waits {@code ticks} for the pose and freezes the
-	 * world on it.
+	 * world on it. Every pose waits at least 10 ticks: the client learns where she was put only on the server's next
+	 * updates, and a frozen world sends none.
 	 */
 	private static void pose(ClientGameTestContext context, TestServerContext server, Vec3 centre, Posing posing, int ticks) {
 		server.runCommand("tick unfreeze");
@@ -182,14 +194,30 @@ public class VesperineClientGameTests implements FabricClientGameTest {
 			vesperine.setYHeadRot(0.0F);
 			posing.pose(vesperine, level, player(minecraft));
 		});
-		context.waitTicks(ticks);
+		context.waitTicks(Math.max(10, ticks));
 		server.runCommand("tick freeze");
 	}
 
-	/** A picture of her from ({@code dx}, {@code dz}) off the circle's middle, 2.5 blocks up, looking along yaw and pitch. */
+	/**
+	 * A picture from ({@code dx}, {@code up}, {@code dz}) off the circle's middle (the camera's feet), turned to look at
+	 * ({@code ax}, {@code ay}, {@code az}) off it.
+	 */
 	private static void shot(ClientGameTestContext context, TestSingleplayerContext singleplayer, String dimension, Vec3 centre, double dx,
-			double dz, int yaw, int pitch, String name) {
-		shoot(context, singleplayer, dimension, centre.x + 0.5 + dx, centre.y + 2.5, centre.z + dz, yaw, pitch, true, name);
+			double up, double dz, double ax, double ay, double az, String name) {
+		Vec3 camera = centre.add(dx, up, dz);
+		Vec3 at = centre.add(ax, ay, az);
+		shoot(context, singleplayer, dimension, camera.x, camera.y, camera.z, aimYaw(camera, at), aimPitch(camera, at), true, name);
+	}
+
+	/** The yaw that turns a player standing at {@code feet} towards {@code at}. */
+	private static int aimYaw(Vec3 feet, Vec3 at) {
+		return (int) Math.round(Math.toDegrees(Math.atan2(-(at.x - feet.x), at.z - feet.z)));
+	}
+
+	/** The pitch that turns the eyes of a player standing at {@code feet} towards {@code at} (down is positive). */
+	private static int aimPitch(Vec3 feet, Vec3 at) {
+		double flat = Math.hypot(at.x - feet.x, at.z - feet.z);
+		return (int) Math.round(Math.toDegrees(-Math.atan2(at.y - (feet.y + EYE), flat)));
 	}
 
 	private static ServerPlayer player(MinecraftServer minecraft) {
