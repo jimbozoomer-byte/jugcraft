@@ -22,7 +22,7 @@ Primary specialty and supported player role: adventuring, with knitting (the whe
    - when every instance of the loft is taken.
 6. Any other use of the wheel works it as ever: wool, the treadle, unravelling knitwear.
 
-When the instance closes, the wheel calms at once if its chunk is loaded; otherwise it stops when its time is up.
+When the instance closes, the gate shuts at once. The wheel calms then if its chunk is loaded, or else as soon as its chunk is loaded again; at the latest it stops when its time is up.
 
 ### The Spindle Loft
 
@@ -81,7 +81,7 @@ Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-t
   - the wheel's wild spin is told to clients but never saved, since a restart shuts the gate with the instance;
   - the instance remembers its wheel only while the server runs;
   - a player's visit and Grave Goods are saved with the player, as for every lair.
-- **Chunks:** no chunk is force-loaded. The gate's glyphs and chime show only where the wheel's chunk is loaded, at most once a fifth of a second for each open instance (at most `lairs.instances`).
+- **Chunks:** no chunk is force-loaded. The gate's glyphs and chime show only where the wheel's chunk is loaded, at most once a fifth of a second for each open instance (at most `lairs.instances`). A wheel whose loft closed while its chunk was unloaded is remembered until its chunk is loaded or its time is up, at most 32 wheels at once, and checked as often.
 - **Griefing:** nobody is pulled in. A second spindle on a spinning wheel is refused and kept. Nothing in the loft can be changed.
 - **Still to do:** the two-client dedicated-server playtest.
 
@@ -129,7 +129,7 @@ The client game test (`SpindleLoftClientGameTests`, CI job `client`) runs the ri
 1. the spindle used on the wheel at midnight opens an instance in the loft's own dimension. It places the loft (the leaf under the arrival, the needle's eye, the doily, a spool, the tape), uses up the spindle, makes the wheel the gate, spinning wild, and wakes the player on the pincushion, blind and unable to build;
 2. the needle's eye can be used, and a block cannot be placed on the doily; falling through the doily throws the player back to the pincushion for the mist's toll;
 3. leaving takes the player back to where they stood. A second spindle on the spinning wheel is refused and kept, and an empty hand on the wheel takes the player back into the same loft;
-4. when the instance closes, the player goes home and the wheel calms: an empty hand works it again.
+4. when the instance closes, the player goes home and the gate shuts at once. The wheel calms within a second, though its chunk may have unloaded while the player was away, and an empty hand works it again.
 
 Then it takes eight pictures: the wheel spinning wild at midnight, and in the loft the view from the pincushion, the doily from above, the spools and threads, the needle's eye, the thimble, the shears and the cushion from the doily.
 

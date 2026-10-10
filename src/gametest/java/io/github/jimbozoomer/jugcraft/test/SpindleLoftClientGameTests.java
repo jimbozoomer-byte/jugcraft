@@ -217,14 +217,21 @@ public class SpindleLoftClientGameTests implements FabricClientGameTest {
 		});
 		context.waitTicks(40);
 
-		// 4. Closed, the wheel calms and is a wheel again.
+		// 4. Closed, the gate shuts at once and the wheel calms (if its chunk was unloaded while the player was away, once the
+		// player is home and it is loaded again), and is a wheel again.
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = player(minecraft);
 			ServerLevel overworld = minecraft.overworld();
 			Lairs.close(minecraft, first.get());
 			check(player.level() == overworld, "Closing the loft did not send the player home");
+			check(SpindleRite.gate(overworld, wheel) == null, "The wheel is still a gate");
+		});
+		context.waitTicks(20);
+		server.runOnServer(minecraft -> {
+			ServerPlayer player = player(minecraft);
+			ServerLevel overworld = minecraft.overworld();
 			SpinningWheelBlockEntity entity = (SpinningWheelBlockEntity) overworld.getBlockEntity(wheel);
-			check(!entity.isWild(overworld.getGameTime()) && SpindleRite.gate(overworld, wheel) == null, "The wheel is still a gate");
+			check(!entity.isWild(overworld.getGameTime()), "The wheel still spins wild after the loft closed");
 			player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 			check(SpindleRite.useBlock(player, overworld, InteractionHand.MAIN_HAND, hit(wheel)) == InteractionResult.PASS,
 					"An empty hand on the calm wheel was taken by the rite");

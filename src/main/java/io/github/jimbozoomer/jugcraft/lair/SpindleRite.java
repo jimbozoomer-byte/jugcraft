@@ -4,6 +4,9 @@ import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
 import io.github.jimbozoomer.jugcraft.agriculture.SpinningWheelBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.SpinningWheelBlockEntity;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import java.util.HashMap;
+import java.util.Map;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;
@@ -36,6 +39,12 @@ import org.jspecify.annotations.Nullable;
  */
 public final class SpindleRite {
 	public static final int WAKING_TICKS = 40;
+	/**
+	 * Wheels whose loft closed while their chunk was not loaded, each with the game time it stops spinning wild by itself:
+	 * each calms when its chunk is loaded again before then. At most {@value Lairs#MAX_INSTANCES}; a wheel left out stops
+	 * when its time is up.
+	 */
+	private static final Map<GlobalPos, Long> UNCALMED = new HashMap<>();
 
 	private SpindleRite() {
 	}
@@ -52,6 +61,7 @@ public final class SpindleRite {
 	static void register() {
 		UseBlockCallback.EVENT.register(SpindleRite::useBlock);
 		ServerTickEvents.END_SERVER_TICK.register(SpindleRite::tick);
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> UNCALMED.clear());
 		Lairs.onClosed(Lair.SPINDLE_LOFT, SpindleRite::calm);
 	}
 
@@ -170,12 +180,16 @@ public final class SpindleRite {
 
 	/**
 	 * Five times a second, each open gate (at most {@code lairs.instances}) shows itself where its chunk is loaded: glyphs
-	 * drawn into the wheel, and now and then a chime.
+	 * drawn into the wheel, and now and then a chime. A wheel whose loft closed while its chunk was not loaded calms here
+	 * once it is.
 	 */
 	private static void tick(MinecraftServer server) {
 		int tick = server.getTickCount();
 		if (tick % 4 != 0) {
 			return;
+		}
+		if (!UNCALMED.isEmpty()) {
+			UNCALMED.entrySet().removeIf(wheel -> calm(server, wheel.getKey(), wheel.getValue()));
 		}
 		for (LairInstance instance : Lairs.open(Lair.SPINDLE_LOFT)) {
 			GlobalPos site = instance.site;
@@ -192,12 +206,32 @@ public final class SpindleRite {
 		}
 	}
 
-	/** An instance has closed: its wheel, if its chunk is loaded, stops spinning wild. */
+	/**
+	 * An instance has closed: its wheel stops spinning wild, at once if its chunk is loaded, or else when the chunk is loaded
+	 * again (before the wheel would stop by itself).
+	 */
 	static void calm(MinecraftServer server, LairInstance instance) {
 		GlobalPos site = instance.site;
-		ServerLevel level = site == null ? null : server.getLevel(site.dimension());
-		if (level != null && level.isLoaded(site.pos()) && level.getBlockEntity(site.pos()) instanceof SpinningWheelBlockEntity wheel) {
+		if (site != null && !calm(server, site, instance.gateUntil) && UNCALMED.size() < Lairs.MAX_INSTANCES) {
+			UNCALMED.put(site, instance.gateUntil);
+		}
+	}
+
+	/**
+	 * Calms the wheel at {@code site}, which would stop by itself at {@code until}, if its chunk is loaded and it is not the
+	 * gate of a loft opened since. Returns false only while its chunk is not loaded and its time is not up.
+	 */
+	private static boolean calm(MinecraftServer server, GlobalPos site, long until) {
+		ServerLevel level = server.getLevel(site.dimension());
+		if (level == null || level.getGameTime() >= until) {
+			return true;
+		}
+		if (!level.isLoaded(site.pos())) {
+			return false;
+		}
+		if (gate(level, site.pos()) == null && level.getBlockEntity(site.pos()) instanceof SpinningWheelBlockEntity wheel) {
 			wheel.calm();
 		}
+		return true;
 	}
 }
