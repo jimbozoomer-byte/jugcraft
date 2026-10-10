@@ -6,7 +6,8 @@ own look, in three kinds of line:
   bonecarved (strikes the undead harder) and runebound (glowing runes that mark a foe);
 - trophies of eight bosses still to be made (docs/branches/BOSSES.md): no recipe; each boss's loot table is ready
   (loot_table/bosses/<boss>.json) for its encounter to drop one of its two; and of Vesperine, the Last Reaper
-  (docs/features/vesperine.md), whose Vesper Scythe she drops (VesperineLoot; her trophy table lists it as theirs do);
+  (docs/features/vesperine.md), whose Vesper Scythe she drops (VesperineLoot; her trophy table lists it as theirs do),
+  and of Madame Tatterlace (docs/features/tatterlace.md), whose Needle Rapier she drops (TatterlaceLoot);
 - the arms of the owner's armor sets, each in its set's look (the Hades Armor's scythe): no recipe and, until the owner
   settles how a set is won, no loot table either; creative only for now. Like a trophy, epic and twice as hard-wearing.
 
@@ -65,6 +66,8 @@ BOSSES = {
     "abyssal_leviathan": {"display": "the Abyssal Leviathan"},
     # The Witching Season's first boss (docs/features/witching-season.md), fought in the Hollow Acre.
     "vesperine": {"display": "Vesperine, the Last Reaper"},
+    # Its second (docs/features/tatterlace.md), fought in the Spindle Loft.
+    "tatterlace": {"display": "Madame Tatterlace"},
 }
 # The owner's armor sets with an arm of their own ("I also want the scythe from my Hades Armor set", 7 October 2026).
 # How a set is won (a boss's drop, a recipe) is still the owner's to decide, so a set's arm has neither a recipe nor a
@@ -90,6 +93,7 @@ BOONS = {
     "mark": "Mark: a hit makes the foe glow, seen through walls (4 s).",
     "harvest": "Harvest: a kill heals you two hearts (once every 5 s), and every fifth kill charges your next blow to loose "
                "a pale crescent.",
+    "stitch": "Stitch: three hits on one foe within 4 s stitch it, slowing it (Slowness II, 2 s).",
 }
 FROST = (60, 1)        # Slowness: ticks, amplifier
 EMBER_SECONDS = 3
@@ -143,6 +147,7 @@ VARIANTS = [
     ("tidebreaker", "war_fork", "abyssal_leviathan", "tide", "Tidebreaker"),
     ("leviathans_hook", "bill", "abyssal_leviathan", "tide", "Leviathan's Hook"),
     ("vesper_scythe", "scythe", "vesperine", "harvest", "Vesper Scythe"),
+    ("needle_rapier", "rapier", "tatterlace", "stitch", "Needle Rapier"),
     ("hades_scythe", "scythe", "hades", "wither", "Hades Scythe"),
 ]
 BY_ID = {name: (kind, line, boon, display) for name, kind, line, boon, display in VARIANTS}

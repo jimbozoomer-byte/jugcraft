@@ -8292,9 +8292,13 @@ def check_vesperine():
     for option, default in vs.OPTIONS.items():
         if f'Map.entry("{option}", "{default}")' not in config:
             err(f"JugcraftConfig.TEXT_OPTIONS lacks {option} (default {default})")
+    shared = (JAVA_ROOT / "lair" / "LairBosses.java").read_text(encoding="utf-8")
     for option, (low, high) in vs.LIMITS.items():
-        if f'Lairs.decimal("{option}", {float(vs.OPTIONS[option])}, {low}, {high})' not in boss:
-            err(f"VesperineEntity does not read {option} with default {vs.OPTIONS[option]} kept within {low} to {high}")
+        if f'Lairs.decimal("{option}", {float(vs.OPTIONS[option])}, {low}, {high})' not in shared:
+            err(f"LairBosses does not read {option} with default {vs.OPTIONS[option]} kept within {low} to {high}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)", "LairBosses.eligible(player)"):
+        if call not in boss:
+            err(f"VesperineEntity does not scale and choose foes as every lair boss does ({call})")
     registry = sources.get("JugcraftVesperine", "")
     client = (CLIENT_JAVA_ROOT / "VesperineClient.java").read_text(encoding="utf-8")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
@@ -8407,6 +8411,214 @@ def check_vesperine():
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
 
+
+
+def check_tatterlace():
+    """Madame Tatterlace (tools/tatterlace.py, docs/features/tatterlace.md): every number the Java uses is the table's; her
+    attacks are the table's; where her fight looks for the Spindle Loft's parts (SpindleLoft.java) is where
+    tools/spindle_loft.py builds them, and its lace rule finds every lace cell of the template with its pattern; her heights
+    meet the white silk (her perch on its thread, her dragline up to it); she spits as many egg sacs as there are places
+    for them; every entity is registered, named and drawn; each GeckoLib body has its model, clips (every clip the Java
+    names) and sheet, its box-UV regions inside the sheet without overlapping, its sheet (and its glowmask if it is drawn
+    with a glow layer, and none if not) TEXTURE_SCALE times the size the model declares and cut out; no bone is animated by both of her controllers; her loot table is the
+    table's; her recipes, tags and advancement are there; the Stitch boon is bounded; every message she sends has its
+    words; and nothing of hers loads a chunk or leaves its dimension."""
+    import math
+    import spindle_loft as sl
+    import tatterlace as tt
+    import tatterlace_models as tm
+    folder = JAVA_ROOT / "lair" / "tatterlace"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/tatterlace: no Java")
+        return
+    for cls, table in (("TatterlaceEntity", tt.TATTERLACE), ("TossedThimbleEntity", tt.THIMBLE),
+                       ("BindingThreadEntity", tt.THREAD), ("LaceSnareEntity", tt.SNARE), ("RollingSpoolEntity", tt.SPOOL),
+                       ("SpiderlingEntity", tt.SPIDERLING), ("TatterEggSacEntity", tt.EGG_SAC),
+                       ("GoldenThimble", tt.GOLDEN_THIMBLE)):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/tatterlace.py's {value}")
+    boon = (JAVA_ROOT / "weapons" / "StitchBoon.java").read_text(encoding="utf-8")
+    for name, value in tt.STITCH.items():
+        if not java_number(boon, name, value):
+            err(f"StitchBoon.{name} is not tools/tatterlace.py's {value}")
+    if tt.STITCH["SLOW_TICKS"] > 100 or tt.STITCH["SLOW_AMPLIFIER"] > 1:
+        err("tools/tatterlace.py: the Stitch boon lasts over 5 s or above amplifier 1, as no boon may")
+    boss = sources.get("TatterlaceEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, fitting, final, frenzy) in tt.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(fitting).lower()}, {str(final).lower()}, {str(frenzy).lower()})")
+        if expected not in boss:
+            err(f"TatterlaceEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"TatterlaceEntity does not scale as every lair boss does ({call})")
+    # Where her fight looks for the Spindle Loft's parts is where tools/spindle_loft.py builds them.
+    loft = re.sub(r"\s+", " ", sources.get("SpindleLoft", ""))
+    for name, value in (("LACE", sl.LACE), ("DOILY_X", sl.DOILY[0]), ("DOILY_Z", sl.DOILY[1]), ("DOILY_RADIUS", sl.DOILY_RADIUS),
+                        ("BARREL", sl.BARREL), ("SAFE_RING", sl.SAFE_RING), ("WEB", sl.SPOOL_TOP + 4),
+                        ("TAPE_WEST", sl.TAPE["x"][0]), ("TAPE_EAST", sl.TAPE["x"][1]), ("TAPE_FOOT", sl.TAPE["foot"]),
+                        ("SAC_RADIUS", tt.SAC_RADIUS)):
+        if not java_number(loft, name, value):
+            err(f"SpindleLoft.{name} is not {value} (tools/spindle_loft.py, tools/tatterlace.py)")
+    spools = ", ".join("new double[] {{{}, {}}}".format(*sl.SPOOLS[c]) for c in ("green", "blue", "beige", "red"))
+    if f"SPOOLS = List.of({spools});" not in loft:
+        err(f"SpindleLoft.SPOOLS are not tools/spindle_loft.py's spools (green, blue, beige, red): {spools}")
+    rings = ", ".join(str(limit) for limit, _ in sl.RINGS)
+    patterns = ", ".join(str(pattern) for _, pattern in sl.RINGS)
+    if f"RINGS = {{{rings}}};" not in loft or f"PATTERNS = {{{patterns}}};" not in loft:
+        err(f"SpindleLoft.RINGS and PATTERNS are not tools/spindle_loft.py's RINGS {sl.RINGS}")
+    if "SAC_ANGLES = List.of({});".format(", ".join(str(a) for a in tt.SAC_ANGLES)) not in loft:
+        err(f"SpindleLoft.SAC_ANGLES are not tools/tatterlace.py's {tt.SAC_ANGLES}")
+    # SpindleLoft.lace, as tools/spindle_loft.py builds the doily: every lace cell of the template has the pattern the rule
+    # gives it, and every cell the rule calls lace is lace in the template or holds another of its blocks (the thimble).
+    blocks = sl.build()
+    def rule(x, z):
+        r = math.hypot(x + 0.5 - sl.DOILY[0], z + 0.5 - sl.DOILY[1])
+        near = min(math.hypot(x + 0.5 - sx, z + 0.5 - sz) for sx, sz in sl.SPOOLS.values())
+        if r > sl.DOILY_RADIUS or near <= sl.BARREL:
+            return -1
+        return 0 if near <= sl.BARREL + sl.SAFE_RING else sl.lace_pattern(r)
+    reach = int(sl.DOILY_RADIUS) + 2
+    for x in range(int(sl.DOILY[0]) - reach, int(sl.DOILY[0]) + reach + 1):
+        for z in range(int(sl.DOILY[1]) - reach, int(sl.DOILY[1]) + reach + 1):
+            state = blocks.get((x, sl.LACE, z))
+            lace = state is not None and state[0] == f"{MOD}:doily_lace"
+            pattern = rule(x, z)
+            if lace and pattern != int(dict(state[1]).get("pattern", -1)):
+                err(f"SpindleLoft.lace: the template's lace at ({x}, {z}) is pattern {dict(state[1]).get('pattern')}, the rule says {pattern}")
+            elif not lace and pattern >= 0 and state is None:
+                err(f"SpindleLoft.lace: the rule puts lace at ({x}, {z}), where the template has none")
+    # Her heights meet the white silk: her perch on its thread's top, her dragline up to its middle.
+    web = sl.SPOOL_TOP + 4 - sl.LACE
+    if tt.TATTERLACE["PERCH"] != web + 9 / 16:
+        err(f"tools/tatterlace.py PERCH must be the silk's top, {web + 9 / 16} over the lace")
+    if tt.TATTERLACE["HANG"] + (tm.DRAGLINE_Y + 48) / 16 != web + 0.5:
+        err("tools/tatterlace.py HANG: her dragline (tools/tatterlace_models.py) must reach the white silk's middle")
+    if tt.ATTACKS["UNRAVEL"][0] != tt.TATTERLACE["FRAY_TICKS"] or tt.ATTACKS["DROP_STRIKE"][2] != tt.TATTERLACE["DROP_OPEN_TICKS"]:
+        err("tools/tatterlace.py: Unravel's wind-up must be FRAY_TICKS, and Drop Strike's recovery DROP_OPEN_TICKS")
+    if tt.TATTERLACE["EGG_SACS"] != len(tt.SAC_ANGLES):
+        err(f"tools/tatterlace.py: EGG_SACS is {tt.TATTERLACE['EGG_SACS']}, but there are {len(tt.SAC_ANGLES)} places for them")
+    loot_java = sources.get("TatterlaceLoot", "")
+    if f'ADVANCEMENT = "{tt.ADVANCEMENT["key"]}";' not in loot_java or \
+            f"EVENT_HEADDRESS_CHANCE = {tt.EVENT_HEADDRESS_CHANCE}F;" not in loot_java:
+        err("TatterlaceLoot's advancement or event headdress chance differs from tools/tatterlace.py")
+    registry = sources.get("JugcraftTatterlace", "")
+    client = (CLIENT_JAVA_ROOT / "TatterlaceClient.java").read_text(encoding="utf-8")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for entity in tt.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftTatterlace does not register the {entity} entity")
+        if f"entity.{MOD}.{entity}" not in lang:
+            err(f"No name for the {entity} entity")
+        if f"JugcraftTatterlace.{entity.upper()}," not in client:
+            err(f"TatterlaceClient draws no {entity}")
+    for item in tt.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftTatterlace does not register {item}")
+    # The GeckoLib bodies.
+    clips_named = {}
+    for text in sources.values():
+        for name in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(name.split(".")[1], set()).add(name)
+    for clip in tm.CLIPS["tatterlace"]:
+        clips_named.setdefault("tatterlace", set()).add(f"animation.tatterlace.{clip}")
+    for entity, body in tt.GECKO.items():
+        geo = load(ASSETS / "geckolib" / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(ASSETS / "geckolib" / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in tm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        # A body with a glow layer has a glowmask; one without has none (it would be a texture nothing draws).
+        glows = entity in tt.GLOWING
+        start = client.find(f"register(JugcraftTatterlace.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        if start >= 0 and ("AutoGlowingGeoLayer" in client[start:end if end >= 0 else len(client)]) != glows:
+            err(f"TatterlaceClient: the {entity}'s glow layer must match tools/tatterlace.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * tm.TEXTURE_SCALE, height * tm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name}.png must be {width * tm.TEXTURE_SCALE}x{height * tm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name}.png has half-transparent pixels (it is drawn cut out)")
+    # Her controllers own their bones: the body's clips never key a cuff, nor the cuffs' a body bone.
+    owned = {bone: controller for controller, bones in tm.CONTROLLERS.items() for bone in bones}
+    for name, clip in tm.ANIMATIONS["tatterlace"]()["animations"].items():
+        controller = "cuffs" if name.split(".")[-1].startswith("cuffs_") else "body"
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"tatterlace: {name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    # Her loot.
+    table = load(DATA / MOD / "loot_table" / "entities" / "tatterlace.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/tatterlace.json must be a gift table (rolled for each participant)")
+    found = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"gossamer_silk": tt.SILK, **tt.CHANCES}
+    if found != expected:
+        err(f"loot_table/entities/tatterlace.json gives {found}, not tools/tatterlace.py's {expected}")
+    if 'Jugcraft.id("entities/tatterlace")' not in loot_java:
+        err("TatterlaceLoot must roll loot_table/entities/tatterlace.json")
+    for key in tt.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in tt.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{tt.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{tt.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    for cls, text in list(sources.items()) + [("StitchBoon", boon)]:
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
 
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
@@ -11377,6 +11589,7 @@ def main():
     check_model_uvs()
     check_lairs()
     check_vesperine()
+    check_tatterlace()
     check_material_sets()
     check_art()
     check_pixel_hollows()

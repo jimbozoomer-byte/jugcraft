@@ -11,7 +11,7 @@ Target milestone and tier: steel age (the machines feature), on [arms.md](arms.m
 Primary specialty and supported player role: fighting; smithing for crafters; trophies for a future boss branch ([branches/BOSSES.md](../branches/BOSSES.md)).
 
 ## Player experience
-34 named arms, each a variant of an existing kind with its own look and a perk or boon, in three kinds of line: crafted styles, boss trophies and, since 7 October 2026, an armor set's arm. All are in the creative Combat tab. Every one fights as its kind does: the same swing, reach, trait, two-handed blow, weapon art and motion.
+35 named arms, each a variant of an existing kind with its own look and a perk or boon, in three kinds of line: crafted styles, boss trophies and, since 7 October 2026, an armor set's arm. All are in the creative Combat tab. Every one fights as its kind does: the same swing, reach, trait, two-handed blow, weapon art and motion.
 
 **Crafted styles: 16 arms in four styles.** Each is made at a smithing table from:
 - the style's pattern (a smithing template, crafted);
@@ -53,11 +53,16 @@ The arm keeps its enchantments and wear.
 
 Its line is hers (`BOSSES["vesperine"]`, "Trophy of Vesperine, the Last Reaper"), drawn in a new moon-steel style. See [vesperine.md](vesperine.md).
 
+**A second trophy with its boss: the Needle Rapier (10 October 2026).** Madame Tatterlace, the second Witching Season boss, drops a tenth boss's trophy: the **Needle Rapier** (rapier), `jugcraft:needle_rapier`. It comes from her loot, 15% a kill and certain on a player's first, and has a new boon:
+- **Stitch:** three hits on the same foe within 4 seconds stitch it, Slowness II for 2 seconds, and the count starts again.
+
+Its line is hers (`BOSSES["tatterlace"]`, "Trophy of Madame Tatterlace"), drawn in a new needle-steel style: a long needle for a blade, its eye just above the hilt; a gold swept hilt and knuckle bow with an amethyst at its heart; a red velvet grip; and a gold thimble for a pommel. See [tatterlace.md](tatterlace.md).
+
 **Looks:**
 - Each arm is drawn with the restyle's toolkit: a pixel-art icon on the diagonal and a 3D model in the hand.
 - Glowing parts are lit at full brightness in the hand, so they show in the dark: runes, magma, venom, soul fire, charged coils and lightning.
 - Tooltips name the kind's trait or art, the boon (in aqua) and the line (in purple: the style's perk, "Trophy of …" for a boss's arm, or "Of the Hades Armor set" for a set's).
-- **The Runebound arms are smooth 3D models in the hand** (see [Runebound meshes](#runebound-meshes) below); the other 30 keep the restyle's pixel look.
+- **The Runebound arms are smooth 3D models in the hand** (see [Runebound meshes](#runebound-meshes) below); the other 31 keep the restyle's pixel look.
 - **Second pass (the owner: "dont overcomplicate them"):** each design was checked against the studied mods at 8× and kept to one or two accents.
   - **Gilded:** the rapier and sabre use the base arms' plainer hilts in gold. The halberd uses the larger halberd head, with a gold hook and one sapphire, and no chasing or tassels.
   - **Ironclad:** no bolt grids.
@@ -167,7 +172,7 @@ The owner, 6 October 2026, with the design of their Hades Armor set: "I also wan
 ## Multiplayer and persistence
 - **Server authority:** every boon is worked on the server, in `ArmItem.hurtEnemy` and `getAttackDamageBonus`, when the arm strikes. Clients only see the effects and particles.
 - **Saved state:** none beyond ordinary items with stable ids:
-  - the 33 variants: `jugcraft:gilded_longsword` … `jugcraft:leviathans_hook`, then `jugcraft:hades_scythe`, as in `tools/arms_variants.py`;
+  - the 35 variants: `jugcraft:gilded_longsword` … `jugcraft:leviathans_hook`, the bosses' `jugcraft:vesper_scythe` and `jugcraft:needle_rapier`, then `jugcraft:hades_scythe`, as in `tools/arms_variants.py`;
   - the four patterns: `jugcraft:gilders_pattern`, `ironclad_pattern`, `bonecarvers_pattern`, `runecarvers_pattern`.
 - **Disabling the `machines` feature** removes the recipes, not the items.
 

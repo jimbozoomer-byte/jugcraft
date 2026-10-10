@@ -9,7 +9,8 @@ tools/arms_pixel.py as a pixel-art icon on the diagonal and a 3D model in the ha
 - the bosses' trophies: ice and white fur (the Yeti King), obsidian and magma (the Cinder Tyrant), blackthorn and
   venom (the Mire Hag), dark iron and soul fire (the Crypt Lich), gunmetal, copper coils and arcs (the Iron
   Dreadnought), silver and wolf fur (the Alpha Werewolf), storm steel, feathers and lightning (the Storm Roc), and
-  sea-green bronze, pearl and a glowing tide line (the Abyssal Leviathan);
+  sea-green bronze, pearl and a glowing tide line (the Abyssal Leviathan); and the Witching Season's: moon-pale steel,
+  silver and crimson (Vesperine), and needle steel, gold, red velvet and her amethyst (Madame Tatterlace);
 - the owner's armor sets' arms, in their set's palette: slate with light edges, a night-dark snath and blood-red wraps
   (the Hades Armor's scythe, after the owner's own design).
 
@@ -69,6 +70,11 @@ BLOOD = M((44, 8, 14), (70, 14, 22), (96, 22, 32), (138, 30, 42), (176, 48, 56),
 # Vesperine's (docs/features/vesperine.md): a moon-pale blade with a cool violet cast, on a violet-black snath bound in
 # silver, a crimson wrap where the hand holds.
 MOON = M((42, 34, 70), (82, 72, 128), (126, 114, 180), (170, 160, 220), (208, 200, 244), (246, 244, 255))
+# Madame Tatterlace's (docs/features/tatterlace.md): a needle's blue-cast polished steel, her gold, the red velvet of her
+# headdress and the amethyst at her brow.
+NEEDLE = M((22, 30, 48), (52, 66, 92), (90, 108, 138), (132, 152, 182), (180, 196, 222), (232, 240, 252))
+VELVET = M((40, 6, 14), (72, 12, 24), (104, 20, 36), (140, 30, 48), (176, 50, 66), (206, 84, 96), shine=False)
+AMETHYST = M((40, 16, 62), (70, 32, 104), (104, 54, 150), (146, 92, 196), (190, 144, 232), (232, 204, 252))
 
 # Style(blade, fitting, grip, haft, gem, accent, cloth)
 GILDED = Style(POLISHED, GOLD, ROYAL, px.DARK_WOOD, SAPPHIRE, GOLD, ROYAL)
@@ -85,11 +91,12 @@ ROC = Style(STORMSTEEL, px.GUNMETAL, px.LEATHER, px.DARK_WOOD, BOLT, BOLT, FEATH
 LEVIATHAN = Style(SEABRONZE, SEABRONZE, px.LEATHER, px.DARK_WOOD, PEARL, PEARL, TIDEGLOW)
 HADES = Style(SLATE, ASHEN, BLOOD, NIGHT, BLOOD, SOOT, BLOOD)
 VESPER = Style(MOON, SILVER, BLOOD, OBSIDIAN, MOONSTONE, MOONSTONE, BLOOD)
+TATTER = Style(NEEDLE, GOLD, VELVET, px.DARK_WOOD, AMETHYST, VELVET, VELVET)
 # Each line's materials, by its name in tools/arms_variants.py (a variant's 16x16 icon is coloured from them).
 LINE_STYLES = {"gilded": GILDED, "ironclad": IRONCLAD, "bonecarved": BONECARVED, "runebound": RUNEBOUND,
                "yeti_king": YETI, "cinder_tyrant": CINDER, "mire_hag": HAG, "crypt_lich": LICH,
                "iron_dreadnought": DREADNOUGHT, "werewolf_alpha": WEREWOLF, "storm_roc": ROC,
-               "abyssal_leviathan": LEVIATHAN, "vesperine": VESPER, "hades": HADES}
+               "abyssal_leviathan": LEVIATHAN, "vesperine": VESPER, "tatterlace": TATTER, "hades": HADES}
 
 
 # ---------------------------------------------------------------- shared parts
@@ -836,13 +843,36 @@ def vesper_scythe():
     return d
 
 
+# ---------------------------------------------------------------- Madame Tatterlace's (docs/features/tatterlace.md)
+
+
+def needle_rapier():
+    """Madame Tatterlace's needle, her trophy: a rapier's length and hold, its blade a long needle of polished steel,
+    slimmer than the rapier's and drawn out to a fine point, its eye just above the hilt; her gold for the swept hilt and
+    knuckle bow, an amethyst at its heart, a red velvet grip and a gold thimble for a pommel."""
+    st = TATTER
+    d = Design(34, grip=5.0)
+    # The thimble: a gold cap, its open end towards the grip.
+    d.strip(0.4, 2.4, 1.3, 1.1, material=st.fitting, depth=2.6)
+    d.strip(0.2, 0.7, 1.5, material=st.fitting, depth=2.8, tone=DARK, z=1)
+    grip(d, 2.4, 7.8, 0.85, st, period=1.6)
+    guard(d, 8.5, 3.4, st, thick=1.0, curl=1.0)
+    d.line(8.2, -3.6, 2.8, -3.6, 0.8, st.fitting, depth=1.6)
+    d.line(2.8, -3.6, 1.6, -1.2, 0.8, st.fitting, depth=1.6)
+    blade(d, 9.0, 27.0, 0.6, 0.35, st, tip=6.5, ridge=False)
+    # The needle's eye: a dark slot through the blade above the hilt.
+    d.strip(10.4, 12.8, 0.2, material=st.blade, depth=1.1, tone=OUT_DARK, z=2)
+    gem(d, 8.5, 0.0, 0.6, st)
+    return d
+
+
 DESIGNS = {name: fn for name, fn in globals().items() if callable(fn) and name in (
     "gilded_longsword", "gilded_rapier", "gilded_sabre", "gilded_halberd", "ironclad_zweihander", "ironclad_maul",
     "ironclad_war_pick", "ironclad_battle_axe", "bonecarved_dagger", "bonecarved_flail", "bonecarved_glaive",
     "bonecarved_labrys", "runebound_nodachi", "runebound_moonblade", "runebound_staff", "runebound_war_hammer",
     "glacier_maul", "rimeclaw", "cinderbrand", "magmaw", "hagthorn", "bogfang", "soulreaver", "gravewarden",
     "dynamo_halberd", "piston_hammer", "moonfang", "howler", "stormcaller", "galefeather", "tidebreaker",
-    "leviathans_hook", "vesper_scythe", "hades_scythe")}
+    "leviathans_hook", "vesper_scythe", "needle_rapier", "hades_scythe")}
 
 
 # ---------------------------------------------------------------- drawing (as tools/arms_art.py draws the kinds)

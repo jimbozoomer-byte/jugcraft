@@ -9,6 +9,22 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
 
+### Unmerged: Madame Tatterlace (boss 2, part 2)
+- **Madame Tatterlace**, a great spider seamstress, waits sewing on the white silk over the Spindle Loft's doily and lowers herself onto it when a player steps onto the lace. She has 360 health, scaled up for a party.
+- **Her rule, the floor is her work:** she unravels rings and wedges of the doily, which drop away into the dark and are knitted back 12 seconds later; never the band round a spool or the tape's foot.
+- **Phase 1, the Fitting:** Needlepoint, Thimble Toss, the Binding Thread (strike it to snap it), the Lace Snare and the Spool Roll.
+- **At half health, Taking In the Seams:** she climbs into the threads and spits six egg sacs round the doily. Then come Pin Rain, Unravel, the Drop Strike (she lies open on the lace after it) and her Brood of spiderlings.
+- **Below a fifth, Frenzied Stitching:** her cuffs glow red, her cooldowns are a third shorter and she unravels two segments at once.
+- **Left alone for 10 seconds** she knits her doily whole and goes back to her sewing, healed.
+- **Her loot is each participant's own:**
+  - Gossamer Silk, which makes a cheaper Cursed Spindle or three string;
+  - the **Needle Rapier**, an Arms VII trophy with the Stitch boon, certain on a first kill;
+  - the Golden Thimble, which turns a projectile aside every 15 seconds from the offhand;
+  - Tatterlace's Headdress, a costume;
+  - shared experience and the advancement Unravelled.
+- When she falls, her doily is whole again and Grey Mist opens in its middle.
+- What every lair boss shares (who may fight one, party health, the damage and health settings) is now one class for both bosses. Animated with GeckoLib. Record: [tatterlace.md](docs/features/tatterlace.md).
+
 ### Unmerged: The Spindle Loft and the Cursed Spindle (boss 2, part 1)
 - **The Cursed Spindle** (two gold ingots, an amethyst shard, two spider eyes, three string and a stick) opens the Spindle Loft:
   - use it on a **Spinning Wheel** at night in the Overworld. You prick your finger, fall asleep and wake on the loft's pincushion, blind for a moment. The spindle is used up;

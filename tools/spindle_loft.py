@@ -80,10 +80,14 @@ def roof_height(x):
     return ROOF_TOP - abs(x - RIDGE)
 
 
+# The doily's rings from its centre out, each its outer radius and pattern: a flower medallion, a band, mesh, a band, a
+# ring of flowers, a band and mesh; past the last, the scalloped edge (0 band, 1 mesh, 2 flower, 3 edge).
+RINGS = ((2.5, 2), (4.5, 0), (9.5, 1), (11.5, 0), (15.5, 2), (17.5, 0), (19.5, 1))
+
+
 def lace_pattern(r):
-    """The doily's rings from its centre out: a flower medallion, a band, mesh, a band, a ring of flowers, a band, mesh
-    and the scalloped edge (0 band, 1 mesh, 2 flower, 3 edge)."""
-    for limit, pattern in ((2.5, 2), (4.5, 0), (9.5, 1), (11.5, 0), (15.5, 2), (17.5, 0), (19.5, 1)):
+    """The pattern of the doily's ring r blocks from its centre (RINGS)."""
+    for limit, pattern in RINGS:
         if r < limit:
             return pattern
     return 3
