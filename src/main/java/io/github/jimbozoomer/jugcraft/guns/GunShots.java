@@ -91,6 +91,8 @@ import org.jspecify.annotations.Nullable;
  * other hand's gun fires and reloads too, each gun at its own rate (a trigger credit for each hand), from the hip and
  * strayed {@link JugcraftGuns#DUAL_SPREAD} times as far. One gun reloads at a time: while a magazine is out neither
  * fires, and a shot of either cuts a shell-at-a-time reload short.</li>
+ * <li>Slice 11A, the Nether guns ({@link JugcraftGuns#INCENDIARY}): each creature their bullets hurt is set alight for
+ * {@link #BURN_SECONDS}, as a burst of flame sets it alight. No block is set alight.</li>
  * </ul>
  */
 public final class GunShots {
@@ -107,7 +109,10 @@ public final class GunShots {
 	static final int SPIN_GAP = 4;
 	/** Ticks of a spin-up the server forgives, for packets that come unevenly. */
 	static final int SPIN_SLACK = 2;
-	/** Seconds a burst of flame sets a creature alight for (slice 8C; a fire aspect sword's first level is 4). */
+	/**
+	 * Seconds a burst of flame sets a creature alight for (slice 8C; a fire aspect sword's first level is 4), and a Nether
+	 * gun's bullet (slice 11A).
+	 */
 	public static final int BURN_SECONDS = 4;
 	/** How hard a stab pushes its foe back (a sword's knockback is 0.4, and more for a sprinting strike). */
 	private static final float STAB_KNOCKBACK = 0.4F;
@@ -190,7 +195,7 @@ public final class GunShots {
 			case JugcraftGuns.BEAM -> beam(level, player, spec, spread, hand);
 			case JugcraftGuns.ARC -> arc(level, player, spec, spread, hand);
 			case JugcraftGuns.ROCKET -> rocket(level, player, gun, spec, spread);
-			default -> shoot(level, player, spec, spread);
+			default -> shoot(level, player, gun, spec, spread);
 		}
 		if (!free) {
 			GunItem.setLoaded(stack, loaded - 1);
@@ -506,8 +511,8 @@ public final class GunShots {
 	}
 
 	/** Fires every pellet of one shot and deals what hit. */
-	private static void shoot(ServerLevel level, ServerPlayer player, GunSpec spec, float spread) {
-		bullets(level, player, player.getEyePosition(), player.getLookAngle(), spec, spread, spec.damage(),
+	private static void shoot(ServerLevel level, ServerPlayer player, GunItem gun, GunSpec spec, float spread) {
+		bullets(level, player, player.getEyePosition(), player.getLookAngle(), spec, spread, spec.damage(), JugcraftGuns.ignites(gun),
 				candidate -> target(player, candidate), candidate -> allowed(player, level, candidate));
 	}
 
@@ -516,9 +521,10 @@ public final class GunShots {
 	 * block or creature in the gun's range that {@code hittable} lets it strike (others are passed through), and deals
 	 * {@code damage} a pellet to each creature it hits that {@code allowed} lets the shooter strike; a shotgun's pellets
 	 * on one creature land as one hit. A player's shots and, slice 10F, a raider gunner's ({@link MobGuns}) fire this way.
+	 * When {@code ignites} (slice 11A, a Nether gun), each creature the hit hurts is set alight for {@link #BURN_SECONDS}.
 	 */
 	static void bullets(ServerLevel level, LivingEntity shooter, Vec3 eye, Vec3 look, GunSpec spec, float spread, float damage,
-			Predicate<LivingEntity> hittable, Predicate<LivingEntity> allowed) {
+			boolean ignites, Predicate<LivingEntity> hittable, Predicate<LivingEntity> allowed) {
 		RandomSource random = shooter.getRandom();
 		Map<LivingEntity, Float> hits = new LinkedHashMap<>();
 		for (int i = 0; i < spec.pellets(); i++) {
@@ -552,7 +558,11 @@ public final class GunShots {
 				.getOrThrow(JugcraftGuns.BULLET), shooter, shooter);
 		// Guns fire faster than the half second a creature is shielded after a hit; the bullet damage type is tagged
 		// minecraft:bypasses_cooldown, so each shot counts.
-		hits.forEach((target, dealt) -> target.hurtServer(level, source, dealt));
+		hits.forEach((target, dealt) -> {
+			if (target.hurtServer(level, source, dealt) && ignites) {
+				target.igniteForSeconds(BURN_SECONDS);
+			}
+		});
 		smoke(level, eye, look);
 	}
 

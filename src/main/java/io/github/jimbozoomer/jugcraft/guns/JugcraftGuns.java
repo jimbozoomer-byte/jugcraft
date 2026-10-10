@@ -72,6 +72,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * Murmur SMG, ten shots a second; and the Reverb, a double-barrel loaded a shell at a time.</li>
  * <li>Slice 10G, two guns at once: with a one-handed gun in each hand ({@link #ONE_HANDED}), left click fires the main
  * hand's and right click the other's; neither is aimed, and each strays further from the hip ({@link #DUAL_SPREAD}).</li>
+ * <li>Slice 11A, the Nether guns, on the rounds the other guns fire: the Tusker, a pump shotgun loaded a shell at a
+ * time; the Cinder Repeater, an automatic; and the Bastion Rifle, loaded a round at a time through its trapdoor. Their
+ * shots set what they hit alight ({@link #INCENDIARY}).</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -131,6 +134,9 @@ public final class JugcraftGuns {
 		SPECS.put("undertone_rifle", new GunSpec(9.0F, 1, 7, false, 12, 48, 0, 0, 0, 2.5F, 0.3F, 96, "rifle_round"));
 		SPECS.put("murmur_smg", new GunSpec(3.0F, 1, 2, true, 24, 48, 0, 0, 0, 3.5F, 1.5F, 48, "light_round"));
 		SPECS.put("reverb", new GunSpec(3.5F, 10, 8, false, 2, 0, 16, 17, 19, 7.0F, 5.0F, 32, "buckshot_shell"));
+		SPECS.put("tusker", new GunSpec(3.0F, 8, 14, false, 6, 0, 12, 12, 13, 6.5F, 4.5F, 28, "buckshot_shell"));
+		SPECS.put("cinder_repeater", new GunSpec(3.5F, 1, 3, true, 20, 48, 0, 0, 0, 3.0F, 1.2F, 48, "light_round"));
+		SPECS.put("bastion_rifle", new GunSpec(14.0F, 1, 18, false, 5, 0, 15, 13, 16, 2.0F, 0.15F, 112, "rifle_round"));
 	}
 
 	/**
@@ -176,6 +182,11 @@ public final class JugcraftGuns {
 	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin");
 	/** Slice 10G: how much further each of two guns strays from the hip than one held alone (tools/guns.py DUAL_SPREAD). */
 	public static final float DUAL_SPREAD = 1.5F;
+	/**
+	 * Slice 11A, the Nether guns: the guns whose bullets set each creature they hurt alight, for
+	 * {@link GunShots#BURN_SECONDS} as the Stoker's flame does (tools/guns.py INCENDIARY).
+	 */
+	public static final Set<String> INCENDIARY = Set.of("tusker", "cinder_repeater", "bastion_rifle");
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
@@ -305,6 +316,17 @@ public final class JugcraftGuns {
 		ACCEPTS.put("murmur_smg", List.of("extended_magazine", "speed_magazine", "long_scope", "medium_scope", "reflex_sight",
 				"laser_sight"));
 		ACCEPTS.put("reverb", List.of("light_grip", "long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("tusker", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_stock",
+				"weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
+				"netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("cinder_repeater", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("bastion_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet",
+				"diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip",
+				"laser_sight"));
 	}
 
 	/** The rounds. */
@@ -486,6 +508,11 @@ public final class JugcraftGuns {
 	/** Ticks this gun's barrels spin up before it fires; 0 for a gun without ({@link #SPIN_UP}). */
 	public static int spinUp(GunItem gun) {
 		return SPIN_UP.getOrDefault(gun.name(), 0);
+	}
+
+	/** Whether this gun's bullets set what they hurt alight (slice 11A, {@link #INCENDIARY}). */
+	public static boolean ignites(GunItem gun) {
+		return INCENDIARY.contains(gun.name());
 	}
 
 	/** JE a round of this energy weapon draws from Energy Cells (slice 8D, {@link #CHARGE}); 0 for a gun that loads rounds. */

@@ -1466,6 +1466,16 @@ def check_guns():
         err(f"JugcraftGuns.ONE_HANDED differs from tools/guns.py one_handed(): expected Set.of({one_handed})")
     if f"DUAL_SPREAD = {guns.DUAL_SPREAD}F;" not in java:
         err(f"JugcraftGuns.DUAL_SPREAD differs from tools/guns.py: expected {guns.DUAL_SPREAD}F")
+    # Slice 11A: the Nether guns, whose bullets set what they hurt alight, and for how long.
+    incendiary = ", ".join(f'"{gun}"' for gun in guns.INCENDIARY)
+    if f"INCENDIARY = Set.of({incendiary});" not in java:
+        err(f"JugcraftGuns.INCENDIARY differs from tools/guns.py: expected Set.of({incendiary})")
+    for gun in guns.INCENDIARY:
+        if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet":
+            err(f"tools/guns.py INCENDIARY names {gun}, which is not a gun that fires bullets")
+    shots_java = (JAVA_ROOT / "guns" / "GunShots.java").read_text(encoding="utf-8")
+    if f"BURN_SECONDS = {guns.BURN_SECONDS};" not in shots_java:
+        err(f"GunShots.BURN_SECONDS differs from tools/guns.py: expected {guns.BURN_SECONDS}")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
     charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
     if f"CHARGE = Map.of({charges});" not in java:

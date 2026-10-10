@@ -484,6 +484,32 @@ GUNS = {
         "damage": 3.5, "pellets": 10, "interval": 8, "auto": False, "capacity": 2,
         "reload": (16, 17, 19), "spread": (7.0, 5.0), "range": 32, "ammo": "buckshot_shell",
     },
+    # Slice 11A: the Nether guns, forged in the piglins' crimson, blackstone and gold: a pump shotgun, a repeater and a
+    # trapdoor rifle, on the rounds the other guns fire. Their shots set what they hit alight (INCENDIARY).
+    "tusker": {
+        "display": "Tusker",
+        "source": "mangalitsa",
+        "tooltip": "A Nether-forged pump shotgun, its pump worked after every shot: eight pellets that set what they hit "
+                   "alight. Loaded a shell at a time. Fires buckshot shells.",
+        "damage": 3.0, "pellets": 8, "interval": 14, "auto": False, "capacity": 6,
+        "reload": (12, 12, 13), "spread": (6.5, 4.5), "range": 28, "ammo": "buckshot_shell",
+    },
+    "cinder_repeater": {
+        "display": "Cinder Repeater",
+        "source": "vulcanic_repeater",
+        "tooltip": "A Nether-forged repeater, firing for as long as the trigger is held; its shots set what they hit "
+                   "alight. Fires light rounds.",
+        "damage": 3.5, "pellets": 1, "interval": 3, "auto": True, "capacity": 20,
+        "reload": 48, "spread": (3.0, 1.2), "range": 48, "ammo": "light_round",
+    },
+    "bastion_rifle": {
+        "display": "Bastion Rifle",
+        "source": "trotters",
+        "tooltip": "A Nether-forged rifle whose trapdoor breech flips open after every shot: a heavy round that sets what "
+                   "it hits alight. Loaded a round at a time. Fires rifle rounds.",
+        "damage": 14.0, "pellets": 1, "interval": 18, "auto": False, "capacity": 5,
+        "reload": (15, 13, 16), "spread": (2.0, 0.15), "range": 112, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -638,6 +664,13 @@ RECIPES = {
                                     "K": "minecraft:sculk"}),
     "reverb": (["SS ", "ELK"], {"S": "#c:ingots/steel", "E": "minecraft:echo_shard", "L": "minecraft:lever",
                                 "K": "minecraft:sculk"}),
+    # Slice 11A: steel and a lever, as the other steel guns; gold and gilded blackstone from the piglins' bastions.
+    "tusker": (["SS ", "GLB"], {"S": "#c:ingots/steel", "G": "minecraft:gold_ingot", "L": "minecraft:lever",
+                                "B": "minecraft:gilded_blackstone"}),
+    "cinder_repeater": (["SSG", " LB"], {"S": "#c:ingots/steel", "G": "minecraft:gold_ingot", "L": "minecraft:lever",
+                                         "B": "minecraft:gilded_blackstone"}),
+    "bastion_rifle": (["SSS", "GLB"], {"S": "#c:ingots/steel", "G": "minecraft:gold_ingot", "L": "minecraft:lever",
+                                       "B": "minecraft:gilded_blackstone"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -1541,6 +1574,55 @@ BUILDS = {
         "sight": (8.0, 5.95, 13.6),
         "eye_relief": 1.0,
     },
+    # Slice 11A, the Nether guns. The Mangalitsa's pump is its bolt part, the fore-end under its barrel, which each shot
+    # slides back under the left hand.
+    "tusker": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "sights", "stan_grip"], (8.0, 2.3, 15.5)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 2.375, 5.15)),
+        ],
+        "hands": {"right": (8.0, 2.3, 15.5), "left": (8.0, 1.4, 5.2)},
+        "arms": {"right": (-0.2948, -0.1586, 0.9423), "left": (-0.0795, -0.6036, 0.7934)},
+        "muzzle": (8.0, 4.5, -3.1),
+        "sight": (8.0, 6.37, 14.73),
+        "eye_relief": 1.0,
+    },
+    # The Vulcanic Repeater's bolt is the rib along its top (the main part's 29th element); its seal the gold diamond
+    # with the glowing stone on its side (the 27th and 28th), which each shot rocks.
+    "cinder_repeater": {
+        "bones": [
+            ("gun_body", None, ["main-#26,27,28", "stan_barrel", "sights", "stan_grip"], (8.0, 1.6, 15.6)),
+            ("bolt", "gun_body", ["main#28"], (8.0, 5.18, 13.62)),
+            ("seal", "gun_body", ["main#26,27"], (8.0, 3.775, 13.775)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 0.05, 11.45)),
+            ("magazine_2", "gun_body", [], (8.0, 0.05, 11.45)),
+        ],
+        "hands": {"right": (8.0, 1.6, 15.6), "left": (8.0, 1.8, 9.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.1913, -0.3314, 0.9239)},
+        "muzzle": (8.0, 3.648, 2.7),
+        "sight": (8.0, 5.57, 15.23),
+        "eye_relief": 1.0,
+    },
+    # The Trotters' trapdoor is the lid on top of its receiver (the main part's 9th element), hinged along its left
+    # edge; each shot flips it open to throw the case out, and the reload holds it open while a round at a time goes in
+    # (the shell bone, PROPS). Its bolt part is the bolt and its handle on the right. The whole gun rides gun_body2,
+    # which each shot pushes forward as the bolt is worked. Its magazine bone holds nothing. The main part's 27th
+    # element, the same box as its 1st with no texture on any face, is left out.
+    "bastion_rifle": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.4, 17.6)),
+            ("gun_body", "gun_body2", ["main-#8,26", "stan_barrel", "sights", "stan_grip"], (8.0, 2.4, 17.6)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 5.35, 12.43)),
+            ("trapdoor", "gun_body", ["main#8"], (7.259, 5.875, 14.4)),
+            ("shell", "gun_body", ["@shell"], (8.707, 6.042, 15.278)),
+            ("magazine", "gun_body", [], (8.0, 3.0, 12.0)),
+        ],
+        "hands": {"right": (8.0, 2.4, 17.6), "left": (8.0, 2.3, 8.0)},
+        "arms": {"right": (-0.2948, -0.1586, 0.9423), "left": (0.9577, -0.2566, 0.1305)},
+        "muzzle": (8.0, 4.92, -4.1),
+        "sight": (8.0, 6.75, 12.4),
+        "eye_relief": 6.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -1609,6 +1691,10 @@ PROPS = {
         "ball": {"kind": "ball", "from": (7.5, 3.05, 8.0), "size": (1.0, 1.0, 1.0), "texture_at": (56, 56)},
         "flash": {"kind": "flash", "from": (8.4, 4.0, 10.5), "size": (1.0, 1.0, 1.0), "texture_at": (48, 56)},
     },
+    # Slice 11A: the Bastion Rifle's round rests where the loop's last carry (0.2917 s) brings it into the breech under
+    # the open trapdoor, and shrinks to nothing there.
+    "bastion_rifle": {"shell": {"kind": "cartridge", "from": (8.207, 5.542, 13.778), "size": (1.0, 1.0, 3.0),
+                                "texture_at": (120, 120)}},
 }
 # The owner's pilot flame (Guns/item/spitfire_flame.png): three 8 x 8 frames, one above the other; the first frame's
 # flame is 4 px wide (columns 2 to 5) and 8 tall, its tip at the top.
@@ -2018,6 +2104,8 @@ ZOOM = {
     "mule": 0.92, "fowler": 0.88, "culverin": 0.94,
     # The sculk guns (slice 10D): a rifle, a machine gun and a double-barrel.
     "undertone_rifle": 0.82, "murmur_smg": 0.9, "reverb": 0.9,
+    # The Nether guns (slice 11A): a shotgun, a repeater and a rifle.
+    "tusker": 0.9, "cinder_repeater": 0.88, "bastion_rifle": 0.8,
 }
 
 
@@ -2117,7 +2205,9 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    # The Mule (slice 10C) pushes its shells in, as the Coach Gun does.
                    "mule": {"reload_mag_in": "shell_in"},
                    # The Reverb (slice 10D) pushes a shell in at a time.
-                   "reverb": {"reload_mag_in": "shell_in"}}
+                   "reverb": {"reload_mag_in": "shell_in"},
+                   # Of the Nether guns (slice 11A), the Tusker pushes a shell in at a time, the Bastion Rifle a round.
+                   "tusker": {"reload_mag_in": "shell_in"}, "bastion_rifle": {"reload_mag_in": "shell_in"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -2186,6 +2276,11 @@ SHOT_SOUNDS = {
     "undertone_rifle": "item/sculk/fire.ogg",
     "murmur_smg": "item/beam/fire.ogg",
     "reverb": "item/shulker/fire.ogg",
+    # Slice 11A: the Haymaker's shotgun blast; the library's other Rust Midge shot, unused till now; the Bulldog
+    # Pistol's heavy rifle shot.
+    "tusker": "item/bruiser/fire.ogg",
+    "cinder_repeater": "item/rusty_gnat/enchanted_fire.ogg",
+    "bastion_rifle": "item/heavier_rifle/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -2318,6 +2413,15 @@ DUAL_SPREAD = 1.5
 def one_handed():
     """The guns a player may hold two of, one in each hand (slice 10G): those held in one hand."""
     return [gun for gun in GUNS if not two_handed(gun)]
+
+
+# ------------------------------------------------------------------ the Nether guns' fire (slice 11A)
+
+# Each creature a Nether gun's bullet or pellets hurt is set alight for BURN_SECONDS, as the Stoker's flame sets it
+# alight (slice 8C, GunShots.BURN_SECONDS): fire's own damage, one a second, which fireproof creatures shrug off and
+# water puts out. No block is set alight (JugcraftGuns.INCENDIARY).
+INCENDIARY = ("tusker", "cinder_repeater", "bastion_rifle")
+BURN_SECONDS = 4
 
 
 def cell_rack_model():
@@ -2628,9 +2732,26 @@ def atlas_layout(gun):
         side *= 2
     # The Laser Sight's textures (slice 9E) are packed after the rest, so that adding it moved none of the pieces the
     # scopes before it had placed.
-    for group in ({t: r for t, r in islands.items() if t not in PACK_LATER},
-                  {t: r for t, r in islands.items() if t in PACK_LATER}):
-        joined = False
+    groups = ({t: r for t, r in islands.items() if t not in PACK_LATER},
+              {t: r for t, r in islands.items() if t in PACK_LATER})
+    try:
+        side, place = pack_groups(gun, side, place, used, groups, sizes, False)
+    except ValueError:
+        # Slice 11A: the Tusker's own texture leaves the scopes' pieces, one by one, room enough, but then too little
+        # for the Laser Sight's even joined; there every group's pieces close together go in as one from the first.
+        side, place = pack_groups(gun, side, place, used, groups, sizes, True)
+    return (side, side) if len(place) > 1 else (ow, oh), place
+
+
+def pack_groups(gun, side, place, used, groups, sizes, joined_first):
+    """Packs the groups of scope pieces in turn (atlas_layout()), each one by one, or joined (joined_rects()) when one
+    by one they do not fit or `joined_first` says so; the atlas grows to 128 if they need the room. Returns the side and
+    the placements, the given ones with the pieces'."""
+    place = dict(place)
+    for group in groups:
+        joined = joined_first
+        if joined:
+            group = {t: joined_rects(rects) for t, rects in group.items()}
         while group:
             try:
                 place.update(pack_islands(gun, side, place, used, group, sizes))
@@ -2644,7 +2765,7 @@ def atlas_layout(gun):
                     group, joined = {t: joined_rects(rects) for t, rects in group.items()}, True
                 else:
                     raise
-    return (side, side) if len(place) > 1 else (ow, oh), place
+    return side, place
 
 
 def joined_rects(rects):
@@ -2676,7 +2797,9 @@ FRAMED = {"scguns:item/rocket_rifle",
           # Slice 10B: the Solenoid Rifle's and the Votive Rifle's glowing parts, three frames each.
           "scguns:item/gauss_rifle_animated", "scguns:item/plasgun_animated",
           # Slice 10D: the sculk guns' glowing parts (three frames) and their tendrils (sixteen).
-          "scguns:item/sculk_resonator_animated", "scguns:item/sculk_resonator_tendril", "scguns:item/echoes_2_animated"}
+          "scguns:item/sculk_resonator_animated", "scguns:item/sculk_resonator_tendril", "scguns:item/echoes_2_animated",
+          # Slice 11A: the Cinder Repeater's glowing stone, three frames (the Pyroclastic Flow's).
+          "scguns:item/pyroclastic_flow_animated"}
 
 
 def texture_size(texture):

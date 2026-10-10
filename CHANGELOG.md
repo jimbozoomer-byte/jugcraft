@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 11A (the Nether guns)
+- **Three new guns** from the owner's crimson, blackstone and gold models and animations, whose bullets set what they hit alight for four seconds (never a block): the **Tusker**, a pump shotgun of eight pellets loaded a shell at a time; the **Cinder Repeater**, an automatic firing light rounds from a magazine of twenty; and the **Bastion Rifle**, a heavy rifle whose trapdoor breech flips open after every shot, loaded a round at a time.
+- Each is made from steel, a lever, gold and gilded blackstone from the Nether's bastion remnants. Each takes the stocks, grips, barrel attachments, bayonets, scopes and the Laser Sight; the Cinder Repeater the magazines too.
+- Record: [guns.md, slice 11A](docs/features/guns.md#slice-11a-the-nether-guns).
+
 ### Unmerged: Guns, slice 10G (two guns at once)
 - **A pistol in each hand:** with a one-handed gun in each hand (thirteen of the guns: the pistols, revolvers, the Haymaker, the Bronco SMG, the Spikedriver and the Culverin), left click fires the main hand's and right click the other's, a press a shot, held for an automatic. Each keeps its own rate, magazine, sound and flash; neither is aimed, and each strays half as far again from the hip.
 - G reloads the main gun, or the other when the main one is full; one gun reloads at a time. Each gun's counter shows on its own side of the hotbar. Seen from outside both arms are raised; in first person the other hand's gun has its own arm, drawn mirrored. The one-handed guns say in their tooltips that they pair.
