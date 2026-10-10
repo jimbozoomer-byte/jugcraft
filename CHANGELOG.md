@@ -36,6 +36,18 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.
 - Scopes wait for the owner's reticle textures. Record: [guns.md, slice 7](docs/features/guns.md#slice-7-bayonets-and-the-shared-texture-guns).
 
+### Unmerged: The Glacier Hall and the Frost Horn (boss 3, the Yeti King, part 1)
+- **The Frost Horn** (a goat horn, two gold ingots, two leather and two snow blocks) opens the Glacier Hall:
+  - blow it at night in the Overworld, standing on snow or ice. A roar answers, the snow at your feet splits, and you fall through and land on the hall's ledge with frost on your skin. The horn is used up;
+  - for 60 seconds a whirl of white mist stays open in the snow, and anyone who uses it follows;
+  - by day, off the snow, outside the Overworld, where a whirl is already open or with every hall taken, it says why and is kept. It works all year: the Yeti King is no Witching Season boss.
+- **The Glacier Hall** is a vast cavern in the heart of a glacier:
+  - a ledge high in the south wall under a snow-choked crevasse, where you land, with Grey Mist in an arch of blue ice beside you as the way home;
+  - a snow ramp down to a frozen lake 41 blocks across, crusted with drift snow, scoured to slick glare ice at its shore and middle, with trampled snow round four great ice columns;
+  - the King's throne of ice on a dais of blue ice steps, under an arch of two mammoth tusks, with his frozen hoard heaped about it;
+  - two dens in the side walls, giant icicles on the vault and a crack open to the pale sky.
+- Six lair-only blocks: unbreakable, no items, no drops. The Mist Gate draws a whirl of snow for the hall. Record: [glacier-hall.md](docs/features/glacier-hall.md).
+
 ### Unmerged: Madame Tatterlace (boss 2, part 2)
 - **Madame Tatterlace**, a great spider seamstress, waits sewing on the white silk over the Spindle Loft's doily and lowers herself onto it when a player steps onto the lace. She has 360 health, scaled up for a party.
 - **Her rule, the floor is her work:** she unravels rings and wedges of the doily, which drop away into the dark and are knitted back 12 seconds later; never the band round a spool or the tape's foot.

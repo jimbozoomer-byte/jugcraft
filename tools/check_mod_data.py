@@ -8173,11 +8173,13 @@ def check_model_uvs():
 
 
 def check_lairs():
-    """The lairs (tools/lairs.py, tools/hollow_acre.py, tools/spindle_loft.py, docs/features/hollow-acre.md,
-    docs/features/spindle-loft.md): the Java's numbers are the tables' and the layouts', every lair has its dimension,
-    dimension type, biome (no spawns), template and words for coming in, the rituals' blocks, items, recipes and tags are
-    there, the Spindle Loft's lace patterns and thread colours are the tables', every server option has its default, and
-    every message the Java sends has its words."""
+    """The lairs (tools/lairs.py, tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py,
+    docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md): the Java's numbers are
+    the tables' and the layouts', every lair has its dimension, dimension type, biome (no spawns), template and words for
+    coming in, the rituals' blocks, items, recipes and tags are there, the Spindle Loft's lace patterns and thread colours
+    and the Glacier Hall's icicle parts and snow heights are the tables', every server option has its default, every
+    message the Java sends has its words, and the Glacier Hall is laid out as its record says (check_glacier_hall)."""
+    import glacier_hall as gh
     import hollow_acre as ha
     import lairs as la
     import spindle_loft as sl
@@ -8185,7 +8187,7 @@ def check_lairs():
     lair = (folder / "Lair.java").read_text(encoding="utf-8")
     # Each lair's line in Lair.java, from its layout: size, arrival and its facing, centre, bounds, floor and moon.
     for name, layout, centre, moon in (("hollow_acre", ha, ha.ISLAND["centre"], (ha.MOON, ha.MOON_RADIUS)),
-                                       ("spindle_loft", sl, sl.CENTRE, None)):
+                                       ("spindle_loft", sl, sl.CENTRE, None), ("glacier_hall", gh, gh.CENTRE, None)):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -8218,9 +8220,25 @@ def check_lairs():
     for block in la.LAIR_BLOCKS:
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
-    for name in ("mourning_wreath", "death_knell", "cursed_spindle", la.GATE["entity"]):
+    for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
+    if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
+        err(f"JugcraftLairs.GLARE_FRICTION is not tools/lairs.py GLARE_FRICTION ({la.GLARE_FRICTION})")
+    horn = (folder / "FrostHornRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("FROST_TICKS", "frost_ticks")):
+        if f"int {name} = {la.HORN[key]};" not in horn:
+            err(f"FrostHornRite.{name} is not tools/lairs.py HORN {key} ({la.HORN[key]})")
+    parts = re.search(r"enum Part implements StringRepresentable \{\s*([A-Z_, ]+);",
+                      (folder / "GiantIcicleBlock.java").read_text(encoding="utf-8"))
+    if not parts or tuple(p.strip().lower() for p in parts.group(1).split(",")) != la.ICICLE_PARTS:
+        err(f"GiantIcicleBlock.Part is not tools/lairs.py ICICLE_PARTS {la.ICICLE_PARTS}")
+    low, high = la.TRAMPLED_HEIGHTS[0], la.TRAMPLED_HEIGHTS[-1]
+    if f'IntegerProperty.create("height", {low}, {high})' not in (folder / "TrampledSnowBlock.java").read_text(encoding="utf-8"):
+        err(f"TrampledSnowBlock.HEIGHT is not tools/lairs.py TRAMPLED_HEIGHTS {la.TRAMPLED_HEIGHTS}")
+    ground = (load(DATA / MOD / "tags" / "block" / "frost_horn_ground.json") or {}).get("values", [])
+    if sorted(ground) != sorted(la.HORN_GROUND):
+        err(f"#jugcraft:frost_horn_ground is not tools/lairs.py HORN_GROUND: {ground}")
     spindle = (folder / "SpindleRite.java").read_text(encoding="utf-8")
     if f"int WAKING_TICKS = {la.SPINDLE['waking_ticks']};" not in spindle:
         err(f"SpindleRite.WAKING_TICKS is not tools/lairs.py SPINDLE waking_ticks ({la.SPINDLE['waking_ticks']})")
@@ -8268,6 +8286,63 @@ def check_lairs():
             err(f"No name for the lair {name}")
         if f"message.{MOD}.lair.enter.{name}" not in lang:
             err(f"No words for coming into the lair {name} (message.{MOD}.lair.enter.{name})")
+    check_glacier_hall(gh)
+
+
+def check_glacier_hall(gh):
+    """The Glacier Hall as tools/glacier_hall.py builds it is the hall its record describes (docs/features/glacier-hall.md):
+    the arrival stands on trampled snow with room overhead; the Grey Mist hangs in its arch; the snow ramp falls half a
+    block a block from the ledge to the lake, with headroom all the way; the lake is drift snow, glare ice and trampled
+    snow, trampled round every column, and nothing a fight needs is missing from it; no icicle hangs lower than its
+    clearance; and nothing in it melts (no vanilla ice or snow layers, which the hidden lights would melt)."""
+    import math
+    blocks = gh.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    solid = lambda pos: name(pos) not in (None, "minecraft:light")
+    ax, ay, az, _ = gh.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) != "jugcraft:trampled_snow" or solid(feet) \
+            or solid((feet[0], feet[1] + 1, feet[2])):
+        err(f"The Glacier Hall's arrival at {feet} does not stand on trampled snow with room overhead")
+    for pos in gh.exit_mist():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist in the Glacier Hall's arch at {pos}")
+    last = None
+    for z in range(gh.RAMP["foot"], gh.RAMP["top"] + 1):
+        h = gh.ramp_height(z)
+        for x in range(gh.RAMP["x"][0], gh.RAMP["x"][1] + 1):
+            y = int(h)
+            under = (x, y - 1, z) if h == y else (x, y, z)
+            if h > gh.LAKE + 1 and name(under) != "jugcraft:trampled_snow":
+                err(f"The Glacier Hall's snow ramp has no trampled snow at {under} (row {z}, height {h})")
+            if any(solid((x, y + dy + (0 if h == y else 1), z)) for dy in range(2)):
+                err(f"The Glacier Hall's snow ramp has no headroom over row {z}, column {x}")
+        if last is not None and abs(h - last) > 0.5:
+            err(f"The Glacier Hall's snow ramp steps {abs(h - last)} between rows {z - 1} and {z}")
+        last = h
+    lake = {}
+    for x in range(gh.SIZE[0]):
+        for z in range(gh.SIZE[2]):
+            if gh.lake_radius(x, z) <= gh.LAKE_RADIUS:
+                lake[(x, z)] = name((x, gh.LAKE, z))
+    allowed = {"jugcraft:drift_snow", "jugcraft:glare_ice", "jugcraft:trampled_snow", "minecraft:packed_ice", "minecraft:blue_ice"}
+    stray = sorted({kind for kind in lake.values() if kind not in allowed}, key=str)
+    if stray:
+        err(f"The Glacier Hall's lake has {stray} in it")
+    if list(lake.values()).count("jugcraft:drift_snow") < len(lake) // 2:
+        err("Less than half the Glacier Hall's lake is drift snow, which the King bares")
+    for sx, sz in gh.COLUMNS:
+        ring = gh.COLUMN_RADIUS + gh.COLUMN_FOOT + gh.COLUMN_RING
+        for (x, z), kind in lake.items():
+            if kind == "jugcraft:drift_snow" and math.hypot(x + 0.5 - sx, z + 0.5 - sz) <= ring:
+                err(f"Drift snow at {(x, z)} inside the trampled ring of the column at {(sx, sz)}")
+                break
+    icicles = [pos for pos, state in blocks.items() if state[0] == "jugcraft:giant_icicle"]
+    if not icicles or min(y for _, y, _ in icicles) < gh.ICICLE_CLEARANCE:
+        err(f"The Glacier Hall's icicles hang lower than {gh.ICICLE_CLEARANCE}, or there are none")
+    melts = {"minecraft:ice", "minecraft:snow", "minecraft:frosted_ice"} & {state[0] for state in blocks.values()}
+    if melts:
+        err(f"The Glacier Hall has {sorted(melts)}, which its hidden lights would melt")
 
 
 def java_number(source, name, value):
