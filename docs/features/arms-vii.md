@@ -11,7 +11,7 @@ Target milestone and tier: steel age (the machines feature), on [arms.md](arms.m
 Primary specialty and supported player role: fighting; smithing for crafters; trophies for a future boss branch ([branches/BOSSES.md](../branches/BOSSES.md)).
 
 ## Player experience
-33 named arms, each a variant of an existing kind with its own look and a perk or boon, in three kinds of line: crafted styles, boss trophies and, since 7 October 2026, an armor set's arm. All are in the creative Combat tab. Every one fights as its kind does: the same swing, reach, trait, two-handed blow, weapon art and motion.
+34 named arms, each a variant of an existing kind with its own look and a perk or boon, in three kinds of line: crafted styles, boss trophies and, since 7 October 2026, an armor set's arm. All are in the creative Combat tab. Every one fights as its kind does: the same swing, reach, trait, two-handed blow, weapon art and motion.
 
 **Crafted styles: 16 arms in four styles.** Each is made at a smithing table from:
 - the style's pattern (a smithing template, crafted);
@@ -47,11 +47,17 @@ The arm keeps its enchantments and wear.
 |---|---|---|
 | Hades Armor | Hades Scythe (scythe), `jugcraft:hades_scythe` | **Wither:** Wither, 3 s (the Gravewarden's boon) |
 
+**A trophy with its boss: the Vesper Scythe (10 October 2026).** Vesperine, the Last Reaper, the first Witching Season boss, drops a ninth boss's trophy: the **Vesper Scythe** (scythe), `jugcraft:vesper_scythe`. It comes from her loot, 15% a kill and certain on a player's first, and has a new boon:
+- **Harvest:** a kill heals you two hearts, at most once every 5 seconds;
+- every fifth kill charges your next blow to loose a pale crescent, 12 blocks, 8 damage to each foe it passes.
+
+Its line is hers (`BOSSES["vesperine"]`, "Trophy of Vesperine, the Last Reaper"), drawn in a new moon-steel style. See [vesperine.md](vesperine.md).
+
 **Looks:**
 - Each arm is drawn with the restyle's toolkit: a pixel-art icon on the diagonal and a 3D model in the hand.
 - Glowing parts are lit at full brightness in the hand, so they show in the dark: runes, magma, venom, soul fire, charged coils and lightning.
 - Tooltips name the kind's trait or art, the boon (in aqua) and the line (in purple: the style's perk, "Trophy of …" for a boss's arm, or "Of the Hades Armor set" for a set's).
-- **The Runebound arms are smooth 3D models in the hand** (see [Runebound meshes](#runebound-meshes) below); the other 29 keep the restyle's pixel look.
+- **The Runebound arms are smooth 3D models in the hand** (see [Runebound meshes](#runebound-meshes) below); the other 30 keep the restyle's pixel look.
 - **Second pass (the owner: "dont overcomplicate them"):** each design was checked against the studied mods at 8× and kept to one or two accents.
   - **Gilded:** the rapier and sabre use the base arms' plainer hilts in gold. The halberd uses the larger halberd head, with a gold hook and one sapphire, and no chasing or tassels.
   - **Ironclad:** no bolt grids.

@@ -78,6 +78,21 @@ public class VesperineGameTests {
 		return origin;
 	}
 
+	/**
+	 * A new player cannot be hurt until its client has loaded the world, or for 60 ticks; a mock player has no client,
+	 * so a test that hurts one waits this long first.
+	 */
+	private static final int LOADING_TICKS = 80;
+
+	/** Checks {@code body}, then sends her away whether it passed or failed, so a failed test leaves no reaper fighting on. */
+	private static void ending(ServerLevel level, VesperineEntity vesperine, Runnable body) {
+		try {
+			body.run();
+		} finally {
+			dismiss(level, vesperine);
+		}
+	}
+
 	/** Sends her away, so she fights no other test's players; her skulls and thralls follow. */
 	private static void dismiss(ServerLevel level, VesperineEntity vesperine) {
 		for (ReaperSkullEntity skull : vesperine.skulls(level)) {
@@ -101,16 +116,17 @@ public class VesperineGameTests {
 		ServerLevel level = helper.getLevel();
 		VesperineEntity vesperine = seated(helper);
 		ServerPlayer player = player(helper, 4.5, 7.5);
-		helper.assertTrue(vesperine.phase() == VesperineEntity.Phase.SEATED, "She waits seated");
-		helper.assertTrue(vesperine.skullsAlive(level) == 2, "Dirge and Requiem are with her");
-		helper.assertFalse(vesperine.hurtServer(level, level.damageSources().playerAttack(player), 10.0F), "A seated reaper takes no harm");
-		// Waking sets her health for the players near her arena, so it may grow; the blow takes none of it.
-		helper.assertTrue(vesperine.getHealth() == vesperine.getMaxHealth(), "She rises at full health");
-		helper.assertTrue(vesperine.phase() == VesperineEntity.Phase.RISING, "The blow wakes her: she rises");
-		for (ReaperSkullEntity skull : vesperine.skulls(level)) {
-			helper.assertTrue(skull.position().distanceTo(vesperine.shoulder(skull.left())) < 0.5, "A skull floats at her shoulder");
-		}
-		dismiss(level, vesperine);
+		ending(level, vesperine, () -> {
+			helper.assertTrue(vesperine.phase() == VesperineEntity.Phase.SEATED, "She waits seated");
+			helper.assertTrue(vesperine.skullsAlive(level) == 2, "Dirge and Requiem are with her");
+			helper.assertFalse(vesperine.hurtServer(level, level.damageSources().playerAttack(player), 10.0F), "A seated reaper takes no harm");
+			// Waking sets her health for the players near her arena, so it may grow; the blow takes none of it.
+			helper.assertTrue(vesperine.getHealth() == vesperine.getMaxHealth(), "She rises at full health");
+			helper.assertTrue(vesperine.phase() == VesperineEntity.Phase.RISING, "The blow wakes her: she rises");
+			for (ReaperSkullEntity skull : vesperine.skulls(level)) {
+				helper.assertTrue(skull.position().distanceTo(vesperine.shoulder(skull.left())) < 0.5, "A skull floats at her shoulder");
+			}
+		});
 		helper.succeed();
 	}
 
@@ -119,37 +135,50 @@ public class VesperineGameTests {
 	public void herSkullsGuardHer(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		VesperineEntity vesperine = seated(helper, lifted(helper, 60));
-		helper.assertTrue(vesperine.guards() == 2 && vesperine.taken(10.0F) == 5.0F, "Both skulls: half damage");
-		helper.assertTrue(VesperineEntity.partyScale(1) == 1.0 && VesperineEntity.partyScale(2) == 1.5
-				&& VesperineEntity.partyScale(4) == 2.5 && VesperineEntity.partyScale(9) == 2.5, "Her health scales with the party, at most 2.5 times");
-		helper.assertTrue(VesperineEntity.slamDamage(0.0) == 16.0F && VesperineEntity.slamDamage(5.0) == 8.0F
-				&& VesperineEntity.slamDamage(10.0) == 0.0F, "The slam falls off to nothing at 10 blocks");
+		boolean halved = vesperine.guards() == 2 && vesperine.taken(10.0F) == 5.0F;
 		vesperine.skulls(level).getFirst().discard();
 		helper.runAfterDelay(3, () -> {
-			helper.assertTrue(vesperine.guards() == 1, "One skull left");
-			helper.assertTrue(vesperine.taken(10.0F) == 10.0F, "One skull: she takes the whole blow");
-			dismiss(level, vesperine);
+			ending(level, vesperine, () -> {
+				helper.assertTrue(halved, "Both skulls: half damage");
+				helper.assertTrue(VesperineEntity.partyScale(1) == 1.0 && VesperineEntity.partyScale(2) == 1.5
+						&& VesperineEntity.partyScale(4) == 2.5 && VesperineEntity.partyScale(9) == 2.5, "Her health scales with the party, at most 2.5 times");
+				helper.assertTrue(VesperineEntity.slamDamage(0.0) == 16.0F && VesperineEntity.slamDamage(5.0) == 8.0F
+						&& VesperineEntity.slamDamage(10.0) == 0.0F, "The slam falls off to nothing at 10 blocks");
+				helper.assertTrue(vesperine.guards() == 1, "One skull left");
+				helper.assertTrue(vesperine.taken(10.0F) == 10.0F, "One skull: she takes the whole blow");
+			});
 			helper.succeed();
 		});
 	}
 
-	/** The Reaping Arc strikes a player in front of her (14 damage and Wither) and not one directly behind. */
-	@GameTest(maxTicks = 80)
+	/**
+	 * The Reaping Arc strikes a player in front of her (14 damage and Wither) and not one directly behind. The two wait
+	 * out their loading in creative, where she pays them no heed, before she wakes.
+	 */
+	@GameTest(maxTicks = 180)
 	public void theReapingArcStrikesInFrontNotBehind(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		BlockPos origin = lifted(helper, 110);
 		VesperineEntity vesperine = seated(helper, origin);
 		ServerPlayer front = player(helper, origin, 4.5, 7.0);
 		ServerPlayer behind = player(helper, origin, 4.5, 2.0);
-		vesperine.wake(level);
-		helper.runAfterDelay(VesperineEntity.RISE_TICKS + 2, () -> {
-			vesperine.setYRot(0.0F);  // facing south, towards the one in front
-			int hit = vesperine.reapingArc(level);
-			helper.assertTrue(hit == 1, "The arc struck " + hit + " players, not 1");
-			helper.assertTrue(front.getHealth() < front.getMaxHealth() && front.hasEffect(MobEffects.WITHER), "The one in front is reaped and withers");
-			helper.assertTrue(behind.getHealth() == behind.getMaxHealth(), "The one behind her is spared");
-			dismiss(level, vesperine);
-			helper.succeed();
+		front.setGameMode(GameType.CREATIVE);
+		behind.setGameMode(GameType.CREATIVE);
+		helper.runAfterDelay(LOADING_TICKS, () -> {
+			front.setGameMode(GameType.SURVIVAL);
+			behind.setGameMode(GameType.SURVIVAL);
+			vesperine.wake(level);
+			helper.runAfterDelay(VesperineEntity.RISE_TICKS + 2, () -> {
+				ending(level, vesperine, () -> {
+					vesperine.setYRot(0.0F);  // facing south, towards the one in front
+					int hit = vesperine.reapingArc(level);
+					helper.assertTrue(hit == 1, "The arc struck " + hit + " players, not 1");
+					helper.assertTrue(front.getHealth() < front.getMaxHealth() && front.hasEffect(MobEffects.WITHER),
+							"The one in front is reaped and withers");
+					helper.assertTrue(behind.getHealth() == behind.getMaxHealth(), "The one behind her is spared");
+				});
+				helper.succeed();
+			});
 		});
 	}
 
@@ -161,12 +190,13 @@ public class VesperineGameTests {
 		ServerPlayer player = player(helper, 4.5, 7.5);
 		ReaperSkullEntity skull = vesperine.skulls(level).getFirst();
 		GriefBoltEntity bolt = GriefBoltEntity.loose(level, skull, player);
-		helper.assertFalse(bolt.reflected(), "A loosed bolt flies at the player");
-		helper.assertTrue(bolt.hurtServer(level, level.damageSources().playerAttack(player), 1.0F), "A player's blow turns it");
-		helper.assertTrue(bolt.reflected(), "It flies back");
-		helper.assertFalse(bolt.hurtServer(level, level.damageSources().playerAttack(player), 1.0F), "It turns only once");
-		bolt.discard();
-		dismiss(level, vesperine);
+		ending(level, vesperine, () -> {
+			helper.assertFalse(bolt.reflected(), "A loosed bolt flies at the player");
+			helper.assertTrue(bolt.hurtServer(level, level.damageSources().playerAttack(player), 1.0F), "A player's blow turns it");
+			helper.assertTrue(bolt.reflected(), "It flies back");
+			helper.assertFalse(bolt.hurtServer(level, level.damageSources().playerAttack(player), 1.0F), "It turns only once");
+			bolt.discard();
+		});
 		helper.succeed();
 	}
 
@@ -183,15 +213,28 @@ public class VesperineGameTests {
 			vesperine.begin(level, VesperineEntity.Attack.GRAVE_CALL, player);
 			helper.runAfterDelay(VesperineEntity.Attack.GRAVE_CALL.windup + 4, () -> {
 				List<UUID> thralls = vesperine.thralls();
-				helper.assertTrue(thralls.size() == VesperineEntity.CALL_THRALLS, thralls.size() + " thralls rose, not " + VesperineEntity.CALL_THRALLS);
 				List<ReaperSkullEntity> skulls = vesperine.skulls(level);
+				if (thralls.size() != VesperineEntity.CALL_THRALLS) {
+					dismiss(level, vesperine);
+				}
+				helper.assertTrue(thralls.size() == VesperineEntity.CALL_THRALLS, thralls.size() + " thralls rose, not " + VesperineEntity.CALL_THRALLS);
 				vesperine.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
 				helper.runAfterDelay(3, () -> {
-					for (UUID id : thralls) {
-						helper.assertTrue(!(level.getEntity(id) instanceof GraveThrallEntity thrall) || !thrall.isAlive(), "A thrall outlived her");
-					}
-					for (ReaperSkullEntity skull : skulls) {
-						helper.assertTrue(skull.isRemoved() || !skull.isAlive(), "A skull outlived her");
+					try {
+						for (UUID id : thralls) {
+							helper.assertTrue(!(level.getEntity(id) instanceof GraveThrallEntity thrall) || !thrall.isAlive(), "A thrall outlived her");
+						}
+						for (ReaperSkullEntity skull : skulls) {
+							helper.assertTrue(skull.isRemoved() || !skull.isAlive(), "A skull outlived her");
+						}
+					} finally {
+						// Checked first, so this sends away only what wrongly outlived her.
+						for (UUID id : thralls) {
+							if (level.getEntity(id) instanceof GraveThrallEntity thrall) {
+								thrall.discard();
+							}
+						}
+						skulls.forEach(ReaperSkullEntity::discard);
 					}
 					helper.succeed();
 				});
@@ -209,10 +252,11 @@ public class VesperineGameTests {
 		helper.runAfterDelay(VesperineEntity.RISE_TICKS + 2, () -> {
 			vesperine.setHealth(vesperine.getMaxHealth() * 0.6F);
 			helper.runAfterDelay(VesperineEntity.ABANDON_TICKS + 10, () -> {
-				helper.assertTrue(vesperine.phase() == VesperineEntity.Phase.SEATED, "With nobody to fight she sits again, not " + vesperine.phase());
-				helper.assertTrue(vesperine.getHealth() == vesperine.getMaxHealth(), "She is healed");
-				helper.assertTrue(vesperine.position().distanceTo(seat) < 0.5, "She is back on her seat");
-				dismiss(level, vesperine);
+				ending(level, vesperine, () -> {
+					helper.assertTrue(vesperine.phase() == VesperineEntity.Phase.SEATED, "With nobody to fight she sits again, not " + vesperine.phase());
+					helper.assertTrue(vesperine.getHealth() == vesperine.getMaxHealth(), "She is healed");
+					helper.assertTrue(vesperine.position().distanceTo(seat) < 0.5, "She is back on her seat");
+				});
 				helper.succeed();
 			});
 		});
@@ -232,23 +276,24 @@ public class VesperineGameTests {
 		ServerPlayer bystander = player(helper, 2.5, 7.5);
 		vesperine.took(first, 10.0F);
 		vesperine.took(second, 4.0F);
-		List<ServerPlayer> participants = vesperine.participants(level);
-		helper.assertTrue(participants.contains(first) && participants.contains(second), "Both who struck her take part");
-		helper.assertFalse(participants.contains(bystander), "A bystander who never struck her does not");
-		helper.assertTrue(VesperineLoot.firstKill(first), "A newcomer has not yet won The Last Harvest");
-		List<ItemStack> loot = VesperineLoot.roll(level, vesperine, first);
-		int shades = loot.stream().filter(stack -> stack.is(JugcraftVesperine.REAPER_SHADE)).mapToInt(ItemStack::getCount).sum();
-		helper.assertTrue(shades >= 3 && shades <= 6, shades + " Reaper's Shade, not 3 to 6");
-		helper.assertTrue(loot.stream().anyMatch(stack -> stack.is(item("vesper_scythe"))), "A first kill always brings the Vesper Scythe");
-		VesperineLoot.reward(level, vesperine, participants);
-		for (ServerPlayer player : List.of(first, second)) {
-			helper.assertTrue(player.getInventory().countItem(JugcraftVesperine.REAPER_SHADE) >= 3, "Each participant's loot went into their own inventory");
-			helper.assertTrue(player.getInventory().countItem(item("vesper_scythe")) == 1, "Each first kill brought its own Vesper Scythe");
-			helper.assertFalse(VesperineLoot.firstKill(player), "The Last Harvest is theirs now");
-		}
-		helper.assertTrue(bystander.getInventory().countItem(JugcraftVesperine.REAPER_SHADE) == 0, "The bystander got nothing");
-		helper.assertTrue(VesperineLoot.firstKill(bystander), "The bystander has not won The Last Harvest");
-		dismiss(level, vesperine);
+		ending(level, vesperine, () -> {
+			List<ServerPlayer> participants = vesperine.participants(level);
+			helper.assertTrue(participants.contains(first) && participants.contains(second), "Both who struck her take part");
+			helper.assertFalse(participants.contains(bystander), "A bystander who never struck her does not");
+			helper.assertTrue(VesperineLoot.firstKill(first), "A newcomer has not yet won The Last Harvest");
+			List<ItemStack> loot = VesperineLoot.roll(level, vesperine, first);
+			int shades = loot.stream().filter(stack -> stack.is(JugcraftVesperine.REAPER_SHADE)).mapToInt(ItemStack::getCount).sum();
+			helper.assertTrue(shades >= 3 && shades <= 6, shades + " Reaper's Shade, not 3 to 6");
+			helper.assertTrue(loot.stream().anyMatch(stack -> stack.is(item("vesper_scythe"))), "A first kill always brings the Vesper Scythe");
+			VesperineLoot.reward(level, vesperine, participants);
+			for (ServerPlayer player : List.of(first, second)) {
+				helper.assertTrue(player.getInventory().countItem(JugcraftVesperine.REAPER_SHADE) >= 3, "Each participant's loot went into their own inventory");
+				helper.assertTrue(player.getInventory().countItem(item("vesper_scythe")) == 1, "Each first kill brought its own Vesper Scythe");
+				helper.assertFalse(VesperineLoot.firstKill(player), "The Last Harvest is theirs now");
+			}
+			helper.assertTrue(bystander.getInventory().countItem(JugcraftVesperine.REAPER_SHADE) == 0, "The bystander got nothing");
+			helper.assertTrue(VesperineLoot.firstKill(bystander), "The bystander has not won The Last Harvest");
+		});
 		helper.succeed();
 	}
 

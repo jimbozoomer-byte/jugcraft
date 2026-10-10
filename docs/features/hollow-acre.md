@@ -1,6 +1,6 @@
 # The Hollow Acre: the lairs, and the Last Rites
 
-Status: implemented in source; CI builds it and its game tests and client game test pass (below). Part 1 of boss 1 in the [Witching Season plan](witching-season.md#the-lairs-shared-rules): the shared lair framework, the Hollow Acre and the ritual that opens it. Vesperine, the Last Reaper, and her loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest the plan asks for is still to do.
+Status: implemented in source; CI builds it and its game tests and client game test pass (below). Part 1 of boss 1 in the [Witching Season plan](witching-season.md#the-lairs-shared-rules): the shared lair framework, the Hollow Acre and the ritual that opens it. Vesperine, the Last Reaper, and her loot are part 2, in their own pull request ([vesperine.md](vesperine.md)). It has not been played by hand, and the two-client dedicated-server playtest the plan asks for is still to do.
 Proposal issue: none. The owner approved the Witching Season plan on 4 October 2026, and on 10 October 2026 asked: "Do the bosses".
 
 Target milestone and tier: Specialization tier (dungeon expeditions), as the plan sets it. The ritual takes Discovery-tier things: a headstone, candles, mourning flowers, a vine, a gold ingot, an iron nugget and a bone.
