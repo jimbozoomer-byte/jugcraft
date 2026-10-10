@@ -21,7 +21,7 @@ def pal(*hexes):
 EARTH = pal("17121a", "211a24", "2b222e", "362b38", "453646")
 ASH = pal("5a5060", "7a7080", "9c94a0")
 WHEAT = pal("0d0b0f", "18141b", "241e28", "332a37", "463a4a")
-EAR = pal("2a2530", "3e3846", "585063", "766c80")
+EAR = pal("17131c", "231d2b", "302839", "4a3d5a")  # near-black, a violet sheen at the tip
 STUBBLE = pal("3a2a1c", "5a4229", "7a5c38", "9a7a4c", "b89a66")
 STONE = pal("1c1a20", "28252d", "353139", "444049", "57525c")
 IRON = pal("101012", "1c1c20", "2a2a30", "3a3a42", "50505a")

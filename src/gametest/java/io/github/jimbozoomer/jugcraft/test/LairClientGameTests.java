@@ -99,10 +99,10 @@ public class LairClientGameTests implements FabricClientGameTest {
 			BlockPos o = ACRE.origin(0);
 			String acre = ACRE.dimension.identifier().toString();
 			shoot(context, singleplayer, acre, o.getX() + 32.0, o.getY() + 18, o.getZ() + 67.5, 180, 8, "jugcraft_hollow_acre_arrival");
-			shoot(context, singleplayer, acre, o.getX() + 32.0, o.getY() + 30, o.getZ() + 64.5, 180, 24, "jugcraft_hollow_acre_arena");
+			shoot(context, singleplayer, acre, o.getX() + 32.0, o.getY() + 42, o.getZ() + 63.5, 180, 40, "jugcraft_hollow_acre_arena");
 			shoot(context, singleplayer, acre, o.getX() + 31.5, o.getY() + 19, o.getZ() + 27.5, 180, 6, "jugcraft_hollow_acre_chapel");
 			shoot(context, singleplayer, acre, o.getX() + 32.0, o.getY() + 18, o.getZ() + 63.5, 0, 4, "jugcraft_hollow_acre_gate");
-			shoot(context, singleplayer, acre, o.getX() + 84.0, o.getY() + 26, o.getZ() + 104.0, 145, 14, "jugcraft_hollow_acre_island");
+			shoot(context, singleplayer, acre, o.getX() + 80.0, o.getY() + 22, o.getZ() + 70.0, 121, 12, "jugcraft_hollow_acre_island");
 			server.runOnServer(minecraft -> Lairs.reset());
 		}
 	}
