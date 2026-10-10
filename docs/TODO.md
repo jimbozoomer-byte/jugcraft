@@ -52,7 +52,15 @@ Owner-requested 10 October 2026. Independent art specification: [industrial mach
 - [ ] Reuse or recolour suitable owner-library art with exact source/transform provenance and preserved animation metadata. Finish backs, undersides, interior surfaces and UVs.
 - [ ] Define actual multiblock occupancy, entry parts, placement/formation and moving-group bounds alongside independently reachable construction recipes. Keep shared processing roles rather than compulsory duplicate machines for every product.
 - [x] Build the shared form foundation, package 1 of the [factory implementation plan (PR #302)](https://github.com/jimbozoomer-byte/jugcraft/pull/302): validated 2–6-block envelopes with structure/clearance/access positions, placement that names obstructions, port-only transfers, protected tool sockets, eight-state status, durable batch escrow with reserved outputs, entry/expanded/bulk lanes and legacy tank-layout migration. See [industrial machine foundation](features/industrial-machine-foundation.md); tested on test-mod forms only.
-- [ ] Package 2: register the first real forms (Electrolytic Separator first), with their models, construction recipes, recipe capability tags and selected output policies; teach the model generator to slice form models.
+- [x] Package 2, first slice: the Electrolytic Separator, the first real form, with its sliced model from the art brief, the selected 20-plate construction, capability recipes for water and brine at the selected baseline, and lye kept with brine stopping when full. See [Electrolytic Separator](features/industrial-electrolytic-separator.md).
+- [ ] Package 2, the rest of the starter gas and acid factory:
+  - the Chemical Infuser: HCl, and methanation with its nickel bed and the selected water drain;
+  - the Chemical Oxidizer and contact conversion, for the sulfuric acid chain;
+  - the shared Gas Generator;
+  - the Coal Gasifier with Gas Cleanup and Separation;
+  - portable handling.
+
+  Enforce the electrolysis energy floor before any expanded or bulk Separator.
 - [ ] Inspect every completed form from all sides in-game, including idle/running states, module arrangements and lighting; verify bounds, placement and persistence. The current brief provides descriptions only.
 
 ## Industrial chemistry, gas fuels and advanced materials

@@ -54,9 +54,9 @@ public class LargeMachineBlock extends MachineBlock implements WorldlyContainerH
 	}
 
 	/**
-	 * The property numbering this block's parts: {@link #PART} here, a larger one for industrial forms (see
-	 * {@link io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlock}). It must return a static constant: the block
-	 * state definition is built while the block is still being constructed.
+	 * The property numbering this block's parts: {@link #PART} here, each industrial form's own (see
+	 * {@link io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlock}). The block state definition is built while
+	 * the block is still being constructed, so it must not depend on fields a subclass has yet to set.
 	 */
 	protected IntegerProperty partProperty() {
 		return PART;

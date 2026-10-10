@@ -33,20 +33,36 @@ import org.jspecify.annotations.Nullable;
  * conveyors and hoppers reach the machine only through the form's ports.
  */
 public class FormMachineBlock extends LargeMachineBlock {
-	/** Which structural block of the form this is; 0 is the controller. Big enough for a filled 6x6x6 envelope. */
-	public static final IntegerProperty FORM_PART = IntegerProperty.create("part", 0, MachineForm.MAX_POSITIONS - 1);
+	/** A block's part property while its block state definition is built (see {@link #numbering}). */
+	private static final ThreadLocal<IntegerProperty> BUILDING = new ThreadLocal<>();
 
+	/**
+	 * Which structural block of the form this is; 0 is the controller. Each form numbers only its own blocks, so a
+	 * twelve-block machine has twelve part values, not one for every position a 6x6x6 envelope could hold.
+	 */
+	private final IntegerProperty part;
 	private final MachineForm form;
 	private @Nullable BlockEntityType<FormMachineBlockEntity> entityType;
 
 	public FormMachineBlock(Properties properties, MachineForm form) {
-		super(properties, form.family());
+		super(numbering(properties, form), form.family());
+		this.part = BUILDING.get();
+		BUILDING.remove();
 		this.form = form;
 	}
 
+	/**
+	 * The block state definition is built inside the superclass constructor, before this block's own fields are set,
+	 * so the form's part property waits here until the constructor can keep it.
+	 */
+	private static Properties numbering(Properties properties, MachineForm form) {
+		BUILDING.set(IntegerProperty.create("part", 0, form.footprint().size() - 1));
+		return properties;
+	}
+
 	@Override
-	protected IntegerProperty partProperty() {
-		return FORM_PART;
+	public IntegerProperty partProperty() {
+		return part != null ? part : BUILDING.get();
 	}
 
 	public MachineForm form() {

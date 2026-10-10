@@ -384,6 +384,16 @@ def machine_page(block):
     return block_page(block, MACHINES[block]["display"])
 
 
+def form_page(form):
+    """An industrial form's page (tools/industrial_forms.py): its text and construction recipe."""
+    import industrial_forms
+    info = industrial_forms.FORMS[form]
+    pattern, key = info["recipe"]
+    grid = [item_for(key[ch]) if ch != " " else None for row in pattern for ch in row.ljust(3)]
+    return {"title": info["display"], "icon": f"{MOD}:{form}", "text": list(industrial_forms.HANDBOOK[form]),
+            "craft": {"grid": grid, "result": f"{MOD}:{form}", "count": 1}}
+
+
 def arms_pages():
     """Batch 42: the arms, three pages: swords, maces and hammers, polearms. Batch 45 (Arms II): two more."""
     import arms
@@ -967,6 +977,7 @@ def build():
                 "Dissolve salt in water to make brine (chemical reactor), then split it in the electrolytic cell into "
                 "chlorine, hydrogen and lye. Gases live only in tanks, pipes and gas cylinders."]},
             machine_page("electrolytic_cell"),
+            form_page("electrolytic_separator"),
             machine_page("chemical_reactor"),
             machine_page("fuel_cell"),
             machine_page("electroplating_bath"),

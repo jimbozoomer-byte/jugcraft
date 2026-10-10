@@ -63,6 +63,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftDeposits.register();
 		JugcraftMachines.register();
 		io.github.jimbozoomer.jugcraft.machine.form.JugcraftForms.register();
+		io.github.jimbozoomer.jugcraft.machine.form.IndustrialForms.register();
 		JugcraftFluids.register();
 		PetroFluids.register();
 		PetroItems.register();

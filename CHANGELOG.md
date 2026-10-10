@@ -8,6 +8,17 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Industrial factory package 2, part 1 (the Electrolytic Separator)
+- **The Electrolytic Separator**, the first big industrial machine: two wide, two deep and three tall, from the owner's art brief. A tall olive cell housing stands between two white collection towers, with its control box, bus connection, lye return and outlet collars.
+- **Built from steel and copper**: 4 steel plates, 2 Steel Tanks, copper cable, a basic circuit and a Machine Casing, 20 steel plates in all. It needs none of the Electrolytic Cell's aluminum or advanced circuit, so hydrogen and chlorine come earlier.
+- **What it splits**, at 256 JE/t:
+  - a bucket of water gives 500 mB of hydrogen and 250 mB of oxygen in 40 s;
+  - a bucket of brine gives 250 mB of hydrogen, 250 mB of chlorine and 500 mB of lye in 20 s.
+- **Ports where the model shows them**: water or brine in low at the back; hydrogen, oxygen or chlorine, and lye out at their collars on the front; power at the bus connection.
+- **It keeps its lye**: a full lye tank stops brine while water still runs, and the screen says "Lye tank is full".
+- The Electrolytic Cell keeps its own recipes. JEI shows the Separator's recipes in their own category, and the Engineer's Handbook has its page.
+- **Machine forms**: each now numbers only its own blocks (12 for the Separator). The formed-machine screen wraps a long state and fits its power line. Record: [industrial-electrolytic-separator.md](docs/features/industrial-electrolytic-separator.md).
+
 ### Unmerged: Industrial factory package 1 (the shared machine foundation)
 - **The groundwork for the industrial factory's big machines** (package 1 of the owner's roadmap in PR #302); nothing new to craft yet. A machine **form** describes one installation within 2 to 6 blocks on each axis: its parts, the clearance its moving parts need, its open access space, its ports, its tool sockets and what it can process. Placing one checks every position first and names whatever is in the way; breaking any part removes it all and drops it once.
 - **Pipes, cables, conveyors and hoppers reach a form only at its ports.** Tool sockets (catalyst beds, patterns, molds) are never reachable from outside, and a tool cannot be taken out while a batch needs it.

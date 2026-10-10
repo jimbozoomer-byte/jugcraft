@@ -57,6 +57,7 @@ import construction
 import hydroponics
 import electroplating
 import gas_storage
+import industrial_forms
 import concordance
 import control_electronics
 import rocketry
@@ -209,7 +210,7 @@ def check_assets(registered):
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
                   + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
-                  + concordance.blocks()):
+                  + concordance.blocks() + industrial_forms.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -231,7 +232,7 @@ def check_assets(registered):
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
                         + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
-                        + concordance.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + concordance.blocks() + industrial_forms.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -370,7 +371,7 @@ def item_units(ref):
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
             or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
-            or path in guns.items() or path in concordance.items() or path in concordance.blocks():
+            or path in guns.items() or path in concordance.items() or path in concordance.blocks() or path in industrial_forms.blocks():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -538,11 +539,12 @@ def check_fluid_recipes(registered):
             err(f"MachineKind.recipeType() has no \"{spec['recipe_type']}\" for {machine}")
         if spec["recipe_type"] in RECIPE_TYPES.values():
             err(f"Fluid recipe type {spec['recipe_type']} is also an item machine's")
-    expected = sum(len(r) for r in petro.FLUID_RECIPES.values()) + sum(len(r) for r in drones.DRONE_FLUID_RECIPES.values())
+    expected = (sum(len(r) for r in petro.FLUID_RECIPES.values()) + sum(len(r) for r in drones.DRONE_FLUID_RECIPES.values())
+                + sum(len(r) for r in industrial_forms.FORM_RECIPES.values()))
     types = {spec["recipe_type"] for spec in petro.FLUID_MACHINES.values() if spec["recipe_type"]}
     files = [p for p in (DATA / MOD / "recipe").glob("*/*.json") if p.parent.name in types]
     if len(files) != expected:
-        err(f"{len(files)} fluid recipe files, but tools/petro.py and tools/drones.py define {expected}")
+        err(f"{len(files)} fluid recipe files, but tools/petro.py, tools/drones.py and tools/industrial_forms.py define {expected}")
     for machine, recipes in petro.FLUID_RECIPES.items():
         spec = petro.FLUID_MACHINES[machine]
         for recipe in recipes:
@@ -2833,6 +2835,83 @@ def check_machines(registered):
                 err(f"{machine}: MachineKind.boostPerTick() does not give {stats['boost_per_tick']}")
     if set(MACHINES) != set(re.findall(r'\("([a-z_]+)", [\d_]+,', kinds)):
         err("MachineKind.java and tools/machines.py list different machines")
+
+
+def check_industrial_forms():
+    """Industrial forms (tools/industrial_forms.py, IndustrialForms.java): Java builds each form exactly as the tools
+    describe it; its blockstate covers every facing, light and part; its recipes name a capability it offers, fit its
+    tanks and make no fluid from nothing; and the Separator's construction costs the owner's 20 steel plates."""
+    java = (JAVA_ROOT / "machine" / "form" / "IndustrialForms.java").read_text(encoding="utf-8")
+    profiles = {name: int(mb.replace("_", "")) for name, mb in re.findall(
+        r"(\w+)\(\d+, ([\d_]+), \d+\)", (JAVA_ROOT / "machine" / "form" / "OperatingProfile.java").read_text(encoding="utf-8"))}
+    constants = dict(re.findall(r'public static final String (\w+) = "([^"]+)";', java))
+    view = load(ASSETS / "recipe_view.json") or {}
+    viewed = {machine["block"] for machine in view.get("fluid_machines", [])}
+    for form, info in industrial_forms.FORMS.items():
+        match = re.search(r'MachineForm\.builder\(Jugcraft\.id\("' + form + r'"\),\s*MachineKind\.(\w+)\)(.*?)\.build\(\);', java, re.S)
+        if not match:
+            err(f"IndustrialForms.java does not build the form {form}")
+            continue
+        family, body = match.group(1), match.group(2)
+        found = {
+            "family": family.lower(),
+            "layers": [re.findall(r'"([^"]*)"', layer) for layer in re.findall(r"\.layer\(([^)]*)\)", body)],
+            "profile": (re.findall(r"\.profile\(OperatingProfile\.(\w+)\)", body) or ["ENTRY"])[0],
+            "input_tanks": re.findall(r'\.inputTank\("(\w+)"\)', body),
+            "output_tanks": re.findall(r'\.outputTank\("(\w+)"\)', body),
+            "capabilities": [constants.get(c, c.strip('"')) for c in re.findall(r"\.capability\(([^)]+)\)", body)],
+            "upgrades": ".upgrades()" in body,
+            "warmup": int((re.findall(r"\.warmup\((\d+)\)", body) or ["0"])[0]),
+            "ports": [(name, kind, int(target) if target.lstrip("-").isdigit() else target, int(column), int(row), int(layer), side)
+                      for name, kind, target, column, row, layer, side in re.findall(
+                          r'\.port\("(\w+)", FormPort\.Kind\.(\w+), ([\w.-]+), (\d+), (\d+), (\d+), FormSide\.(\w+)\)', body)],
+        }
+        for key, value in found.items():
+            if info[key] != value:
+                err(f"{form}: {key} is {value} in IndustrialForms.java but {info[key]} in tools/industrial_forms.py")
+        if profiles.get(info["profile"]) != info["tank_mb"]:
+            err(f"{form}: the {info['profile']} profile's tanks hold {profiles.get(info['profile'])} mB, not {info['tank_mb']}")
+        parts = len(industrial_forms.footprint(info["layers"]))
+        state = load(ASSETS / "blockstates" / f"{form}.json") or {}
+        expected = {f"facing={facing},lit={lit},part={part}" for facing in ("north", "east", "south", "west")
+                    for lit in ("false", "true") for part in range(parts)}
+        if set(state.get("variants", {})) != expected:
+            err(f"{form}: its blockstate must cover exactly 4 facings x 2 lights x {parts} parts")
+        if f"{MOD}:{form}" not in viewed:
+            err(f"{form}: no JEI category in recipe_view.json")
+        tanks = info["input_tanks"] + info["output_tanks"]
+        fluids = {f"{MOD}:{f}" for f in list(petro.FLUIDS) + list(petro.GASES)} | {"minecraft:water", "minecraft:lava"}
+        for recipe in industrial_forms.FORM_RECIPES.get(form, []):
+            label = f"{form} recipe {recipe['name']}"
+            if recipe["capability"] not in info["capabilities"]:
+                err(f"{label}: needs {recipe['capability']}, which the form does not offer")
+            if not (DATA / MOD / "recipe" / petro.FLUID_MACHINES[info["family"]]["recipe_type"] / f"{recipe['name']}.json").is_file():
+                err(f"{label}: no recipe file")
+            if len(recipe.get("fluids", [])) > len(info["input_tanks"]) or len(recipe.get("fluid_results", [])) > len(info["output_tanks"]):
+                err(f"{label}: more fluids than the form has tanks")
+            for fluid, mb in recipe.get("fluids", []) + [(r[0], r[1]) for r in recipe.get("fluid_results", [])]:
+                if fluid not in fluids:
+                    err(f"{label}: unknown fluid {fluid}")
+                if mb > info["tank_mb"]:
+                    err(f"{label}: {mb} mB of {fluid} is more than a {info['tank_mb']} mB tank")
+            targets = [petro.result_tank(i, r) for i, r in enumerate(recipe.get("fluid_results", []))]
+            if len(set(targets)) != len(targets) or any(t >= len(info["output_tanks"]) for t in targets):
+                err(f"{label}: its results need distinct output tanks the form has")
+            if sum(r[1] for r in recipe.get("fluid_results", [])) > sum(mb for _, mb in recipe.get("fluids", [])):
+                err(f"{label}: makes more fluid than it takes")
+            if recipe["ticks"] <= 0:
+                err(f"{label}: takes no time")
+        if len(tanks) != len(set(tanks)):
+            err(f"{form}: two tanks share a role")
+    # The Separator's construction: the owner's selected 20 steel plates, counting the Steel Tanks' own.
+    pattern, key = industrial_forms.FORMS["electrolytic_separator"]["recipe"]
+    tank = load(DATA / MOD / "recipe" / "steel_tank.json") or {}
+    plates_per_tank = sum(row.count(ch) for row in tank.get("pattern", []) for ch, ref in tank.get("key", {}).items()
+                          if ref == "#c:plates/steel")
+    plates = (sum(row.count(ch) for row in pattern for ch, ref in key.items() if ref == "#c:plates/steel")
+              + plates_per_tank * sum(row.count(ch) for row in pattern for ch, ref in key.items() if ref == f"{MOD}:steel_tank"))
+    if plates != 20:
+        err(f"The Electrolytic Separator costs {plates} steel plates, not the owner's selected 20")
 
 
 def check_large_machines():
@@ -12111,7 +12190,7 @@ def main():
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
-                  | set(guns.items()) | set(concordance.items()) | set(concordance.blocks()))
+                  | set(guns.items()) | set(concordance.items()) | set(concordance.blocks()) | set(industrial_forms.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
     check_petro()
@@ -12119,6 +12198,7 @@ def main():
     check_recipes(registered)
     check_machine_recipe_files(registered)
     check_fluid_recipes(registered)
+    check_industrial_forms()
     check_tags()
     check_worldgen()
     check_java()
