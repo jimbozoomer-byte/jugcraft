@@ -458,6 +458,32 @@ GUNS = {
         "damage": 5.0, "pellets": 5, "interval": 20, "auto": False, "capacity": 1,
         "reload": 74, "spread": (9.0, 7.0), "range": 18, "ammo": "paper_cartridge",
     },
+    # Slice 10D: the sculk guns, grown from the deep dark: a rifle, a machine gun and a double-barrel, each with sculk
+    # tendrils that sway as it is handled, on the rounds the other guns fire.
+    "undertone_rifle": {
+        "display": "Undertone Rifle",
+        "source": "sculk_resonator",
+        "tooltip": "A sculk-grown rifle, its tendrils swaying as it is handled: one hard shot each pull from a magazine of "
+                   "twelve. Fires rifle rounds.",
+        "damage": 9.0, "pellets": 1, "interval": 7, "auto": False, "capacity": 12,
+        "reload": 48, "spread": (2.5, 0.3), "range": 96, "ammo": "rifle_round",
+    },
+    "murmur_smg": {
+        "display": "Murmur SMG",
+        "source": "whispers",
+        "tooltip": "A sculk-grown machine gun: ten shots a second for as long as the trigger is held, from a magazine "
+                   "that empties as fast. Fires light rounds.",
+        "damage": 3.0, "pellets": 1, "interval": 2, "auto": True, "capacity": 24,
+        "reload": 48, "spread": (3.5, 1.5), "range": 48, "ammo": "light_round",
+    },
+    "reverb": {
+        "display": "Reverb",
+        "source": "echoes_2",
+        "tooltip": "A sculk-grown double-barrel whose barrels turn aside to take a shell at a time. Ten pellets a barrel. "
+                   "Fires buckshot shells.",
+        "damage": 3.5, "pellets": 10, "interval": 8, "auto": False, "capacity": 2,
+        "reload": (16, 17, 19), "spread": (7.0, 5.0), "range": 32, "ammo": "buckshot_shell",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -605,6 +631,13 @@ RECIPES = {
                               "P": "#minecraft:planks"}),
     "fowler": (["III", "IFP"], {"I": "minecraft:iron_ingot", "F": "minecraft:flint", "P": "#minecraft:planks"}),
     "culverin": (["II", "FP"], {"I": "minecraft:iron_ingot", "F": "minecraft:flint", "P": "#minecraft:planks"}),
+    # Slice 10D: steel and a lever, as the other steel guns; an echo shard and sculk from the deep dark for each.
+    "undertone_rifle": (["SSS", "ELK"], {"S": "#c:ingots/steel", "E": "minecraft:echo_shard", "L": "minecraft:lever",
+                                         "K": "minecraft:sculk"}),
+    "murmur_smg": (["SSE", " LK"], {"S": "#c:ingots/steel", "E": "minecraft:echo_shard", "L": "minecraft:lever",
+                                    "K": "minecraft:sculk"}),
+    "reverb": (["SS ", "ELK"], {"S": "#c:ingots/steel", "E": "minecraft:echo_shard", "L": "minecraft:lever",
+                                "K": "minecraft:sculk"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -1459,6 +1492,55 @@ BUILDS = {
         "muzzle": (8.0, 3.853, 2.77),
         "sight": (8.0, 5.55, 12.73),
     },
+    # Slice 10D, the sculk guns. Each has the owner's sculk tendrils, flat planes on its receiver or barrel, which its
+    # animations sway on the "seal" bone; its bolt is the rib along its top, which each shot drives back. The Sculk
+    # Resonator's magazine is the flat plate under its well (the main part's 44th element); the Whispers' its own
+    # part. Their sight is the owner's ring on the back of the receiver, a peep, over the post on the barrel; the Echoes
+    # 2's the notch between the two posts on the back of its receiver.
+    "undertone_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-#7,36,37,38,39,43", "sights"], (8.0, 2.12, 14.3)),
+            ("bolt", "gun_body", ["main#7"], (8.0, 5.625, 9.1)),
+            ("seal", "gun_body", ["main#36,37,38,39"], (8.0, 5.06, 12.725)),
+            ("magazine", "gun_body", ["main#43"], (8.0, 2.5, 9.35)),
+            ("magazine_2", "gun_body", [], (8.0, 2.5, 9.35)),
+        ],
+        "hands": {"right": (8.0, 2.12, 14.3), "left": (8.0, 1.0, 5.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 4.04, -0.9),
+        "sight": (8.0, 5.85, 15.18),
+        "eye_relief": 2.0,
+    },
+    "murmur_smg": {
+        "bones": [
+            ("gun_body", None, ["main-#2,23,24", "sights"], (8.0, 2.12, 14.3)),
+            ("bolt", "gun_body", ["main#2"], (8.0, 5.625, 10.5)),
+            ("seal", "gun_body", ["main#23,24"], (8.0, 4.06, 3.725)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 2.5, 9.0)),
+            ("magazine_2", "gun_body", [], (8.0, 2.5, 9.0)),
+        ],
+        "hands": {"right": (8.0, 2.12, 14.3), "left": (8.0, 1.0, 9.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 4.04, 1.1),
+        "sight": (8.0, 5.85, 15.18),
+        "eye_relief": 1.0,
+    },
+    # The Echoes 2's barrels (its own part) turn about their bore as its reload takes a shell at a time.
+    "reverb": {
+        "bones": [
+            ("gun_body", None, ["main-#3,23,24,25,26", "sights"], (8.0, 2.7, 14.7)),
+            ("barrels", "gun_body", ["barrels"], (8.0, 4.54, 2.92)),
+            ("bolt", "gun_body", ["main#3"], (8.0, 5.625, 11.1)),
+            ("seal", "gun_body", ["main#23,24,25,26"], (8.0, 4.31, 10.05)),
+            ("magazine", "gun_body", [], (8.0, 2.0, 9.0)),
+            ("magazine_2", "gun_body", [], (8.0, 2.0, 9.0)),
+        ],
+        "hands": {"right": (8.0, 2.7, 14.7), "left": (8.0, 1.5, 5.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 4.54, -1.53),
+        "sight": (8.0, 5.95, 13.6),
+        "eye_relief": 1.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -1934,6 +2016,8 @@ ZOOM = {
     "solenoid_rifle": 0.75, "votive_rifle": 0.85, "glowmouth": 0.95,
     # The double-barrels (slice 10C): shotguns, the Fowler a long gun, the Culverin a hand cannon fired close.
     "mule": 0.92, "fowler": 0.88, "culverin": 0.94,
+    # The sculk guns (slice 10D): a rifle, a machine gun and a double-barrel.
+    "undertone_rifle": 0.82, "murmur_smg": 0.9, "reverb": 0.9,
 }
 
 
@@ -2031,7 +2115,9 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    # The Glowmouth (slice 10B) is loaded a charge at a time, as the Stormlock Rifle is.
                    "glowmouth": {"reload_mag_in": "insert"},
                    # The Mule (slice 10C) pushes its shells in, as the Coach Gun does.
-                   "mule": {"reload_mag_in": "shell_in"}}
+                   "mule": {"reload_mag_in": "shell_in"},
+                   # The Reverb (slice 10D) pushes a shell in at a time.
+                   "reverb": {"reload_mag_in": "shell_in"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -2096,6 +2182,10 @@ SHOT_SOUNDS = {
     "mule": "item/boomstick/fire.ogg",
     "fowler": "item/blackpowder/fire.ogg",
     "culverin": "item/cannon/fire.ogg",
+    # Slice 10D: the library's sculk shot, unused till now; its soft beam shot, for the Murmur; and its shulker shot.
+    "undertone_rifle": "item/sculk/fire.ogg",
+    "murmur_smg": "item/beam/fire.ogg",
+    "reverb": "item/shulker/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -2312,14 +2402,24 @@ def load_part(gun, part):
     textures = data.get("textures", {})
     shift = PART_SHIFTS.get((GUNS[gun]["source"], part_file(part)))
     for element in data.get("elements", []):
-        for face in element.get("faces", {}).values():
+        size = [t - f for f, t in zip(element["from"], element["to"])]
+        for direction, face in list(element.get("faces", {}).items()):
             face["_texture"] = face_texture(textures, face.get("texture", ""))
+            if face["_texture"] is None and flat_face(direction, size):
+                del element["faces"][direction]
         if shift:
             element["from"] = [v + d for v, d in zip(element["from"], shift)]
             element["to"] = [v + d for v, d in zip(element["to"], shift)]
             if element.get("rotation"):
                 element["rotation"]["origin"] = [v + d for v, d in zip(element["rotation"].get("origin", [8, 8, 8]), shift)]
     return data
+
+
+def flat_face(direction, size):
+    """Whether the face of a box of this size has no area: an edge of a flat plane. The owner leaves those untextured
+    ("#missing") on the sculk guns' tendrils (slice 10D); they draw nothing, so they are dropped."""
+    across = {"north": (0, 1), "south": (0, 1), "east": (2, 1), "west": (2, 1), "up": (0, 2), "down": (0, 2)}[direction]
+    return any(abs(size[axis]) < 1e-6 for axis in across)
 
 
 def face_texture(textures, ref):
@@ -2450,7 +2550,9 @@ PACK_LATER = {"scguns:item/laser_sight", "scguns:item/laser"}
 # are a frame's, as the game reads an animated texture's.
 FRAMED = {"scguns:item/rocket_rifle",
           # Slice 10B: the Solenoid Rifle's and the Votive Rifle's glowing parts, three frames each.
-          "scguns:item/gauss_rifle_animated", "scguns:item/plasgun_animated"}
+          "scguns:item/gauss_rifle_animated", "scguns:item/plasgun_animated",
+          # Slice 10D: the sculk guns' glowing parts (three frames) and their tendrils (sixteen).
+          "scguns:item/sculk_resonator_animated", "scguns:item/sculk_resonator_tendril", "scguns:item/echoes_2_animated"}
 
 
 def texture_size(texture):

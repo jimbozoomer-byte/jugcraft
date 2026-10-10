@@ -37,7 +37,7 @@ public final class GunAnimations {
 	 * canister clanks, it is no ramrod (slice 9B), and so does the Throttle's bulb as it is twisted shut (slice 9D), and
 	 * the Earthmover's drum as it twists free and home; the Skylark Rifle and the Bullfrog push a round in (slice 10A); the
 	 * Glowmouth is loaded a charge at a time, as the Stormlock Rifle is (slice 10B); the Mule pushes its shells in, as the
-	 * Coach Gun does (slice 10C).
+	 * Coach Gun does (slice 10C), and the Reverb a shell at a time (slice 10D).
 	 */
 	public static final Map<String, Map<String, String>> GUN_SOUND_ALIASES = Map.ofEntries(
 			Map.entry("thunderpipe", Map.of("reload_mag_in", "shell_in")),
@@ -55,7 +55,8 @@ public final class GunAnimations {
 			Map.entry("skylark_rifle", Map.of("reload_mag_in", "shell_in")),
 			Map.entry("bullfrog", Map.of("reload_mag_in", "shell_in")),
 			Map.entry("glowmouth", Map.of("reload_mag_in", "insert")),
-			Map.entry("mule", Map.of("reload_mag_in", "shell_in")));
+			Map.entry("mule", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("reverb", Map.of("reload_mag_in", "shell_in")));
 
 	private GunAnimations() {
 	}

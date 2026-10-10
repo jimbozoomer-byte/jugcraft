@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B) and the double-barrels (slice 10C)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C) and the sculk guns (slice 10D)
 
 Status:
 - **Slices 1 to 9G are in `main`:** the last of them, 8C to 9G, with #277 on 10 October 2026. The lines below say where each was built.
@@ -24,6 +24,7 @@ Status:
 - **Slice 10A** (the launchers: the Earthmover, Skylark Rifle and Bullfrog; [below](#slice-10a-the-launchers)): implemented on `claude/guns-launchers`, based on `main`, awaiting review.
 - **Slice 10B** (coil and plasma: the Solenoid Rifle, Votive Rifle and Glowmouth; [below](#slice-10b-coil-and-plasma)): implemented on `claude/guns-coil-plasma`, stacked on slice 10A, awaiting review.
 - **Slice 10C** (the double-barrels: the Mule, Fowler and Culverin; [below](#slice-10c-the-double-barrels)): implemented on `claude/guns-double-barrels`, stacked on slice 10B, awaiting review.
+- **Slice 10D** (the sculk guns: the Undertone Rifle, Murmur SMG and Reverb; [below](#slice-10d-the-sculk-guns)): implemented on `claude/guns-sculk`, stacked on slice 10C, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -37,7 +38,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
 - the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, the second, the aiming polish, slice 9F, and the third, the Lobber's grenades, slice 9G.
-- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B and the double-barrels slice 10C.
+- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B, the double-barrels slice 10C and the sculk guns slice 10D.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1315,6 +1316,81 @@ The reload times are the owner's animations'.
 - **The Culverin's left arm** comes over the top middle of the view about 0.7 s into its reload, bringing the ball to the muzzle. Of the directions that still run to the shoulder, the one it takes covered the least in the previews, about three-quarters of the usual direction's cover.
 - **Not played:** none of it has been played yet. The spreads and the Mule's damage want play to set.
 
+## Slice 10D: the sculk guns
+The fourth of the gun sets the owner chose on 10 October 2026 ("Sculk guns", offered as the Sculk Resonator, Whispers and Echoes 2, "the teal sculk-coloured set"): three guns grown from the deep dark, on the rounds the other guns fire.
+
+| | Undertone Rifle | Murmur SMG | Reverb |
+|---|---|---|---|
+| The owner's gun | Sculk Resonator | Whispers | Echoes 2 |
+| What it is | a sculk-grown rifle: glowing cells under its barrel, tendrils on its receiver | a sculk-grown machine gun: a glowing crystal in a window of its receiver, tendrils hanging under its barrel | a sculk-grown double-barrel whose barrels turn about their bore to load, tendrils on its receiver |
+| Fires | one shot each pull | for as long as the trigger is held | 10 pellets a barrel |
+| Damage | 9 | 3 | 3.5 a pellet (35 if all land) |
+| Rate | 2.9 a second (every 7 ticks) | 10 a second (every 2 ticks), as fast as any gun | the second barrel 0.4 s after the first |
+| Holds | 12 | 24 | 2 |
+| Reload | 2.4 s: the magazine | 2.4 s: the magazine | 0.8 s, then 0.85 s a shell, then 0.95 s |
+| Spread, hip / aimed | 2.5° / 0.3° | 3.5° / 1.5° | 7° / 5° |
+| Range | 96 blocks | 48 | 32 |
+| The view aimed | narrowed to 0.82 | 0.9 | 0.9 |
+| Round | Rifle Round | Light Round | Buckshot Shell |
+| Takes | the three stocks, the three scopes and the Laser Sight | both magazines, the scopes and the Laser Sight | the Light Grip and the Tactical Grip, the scopes and the Laser Sight |
+
+The reload times are the owner's animations'.
+
+**Crafting** (a crafting table; the guns switch, as every gun). Each takes steel and a lever, as the other steel guns, and an echo shard and sculk from the deep dark:
+- **Undertone Rifle:** three steel ingots over an echo shard, a lever and sculk.
+- **Murmur SMG:** two steel ingots and an echo shard over a lever and sculk.
+- **Reverb:** two steel ingots over an echo shard, a lever and sculk.
+
+**How they fire:** as the other bullet guns: each bullet or pellet goes from the eye along the look, strayed by the spread, to the first creature or block in its way. A magazine loads at the end of its reload, the Reverb a shell after each shell's time. Nothing new is worked out on the server.
+
+**What you see:** the owner's animations. The Sculk Resonator's and the Whispers' are the same but for where the left hand rests.
+- **Undertone Rifle and Murmur SMG:** each shot kicks the gun back, drives the rib along its top back and sways its tendrils. To reload, the gun is tipped and rolled; the magazine is drawn down and back out of the well and a new one pushed home; then the rib is let go. The tendrils sway all through it.
+- **Reverb:** each shot kicks it back and drives its rib back. To reload, the gun is rolled to one side and its barrels turn 67° about their bore; each shell goes in with a nudge of the barrels; then they turn back and the gun comes level.
+- **Spent rounds:** each throws a spent case with each shot, as the other guns firing its round do.
+- **Sounds:** the library's sculk shot, unused till now (the Undertone Rifle), its soft beam shot (the Murmur SMG) and its shulker shot (the Reverb). None names another source: the sculk shot's one tag names its encoder, the beam shot's its container, and the shulker shot's the online video editor it was saved from and its encoder. The Reverb's shells go in with the shell sound, as the Coach Gun's do.
+
+**How the models were built:**
+- **Tendrils:** the owner's flat planes, drawn on the tendril texture (its first of sixteen frames), on the `seal` bone the animations sway. The owner left their edges, which have no area, untextured (`#missing`); those faces are dropped (`flat_face()`).
+- **Glowing parts:** the Undertone Rifle's cells and the Murmur SMG's crystal draw on the Sculk Resonator's glowing texture, the Reverb's crystal on its own; each texture is three frames, and the guns take the first (`FRAMED`), so they glow but do not flicker.
+- **Undertone Rifle:**
+  - **Bolt:** the rib along its top (the main part's 8th element).
+  - **Tendrils:** the four on its receiver (the 37th to 40th), swaying about their middle.
+  - **Magazine:** the flat plate under its well (the 44th), drawn down and out with each reload.
+  - **Sights:** the owner's ring on the back of its receiver, a peep, over the post at the front of its barrel.
+  - **Aiming:** held 2 px further out (`"eye_relief"`): through the aimed shot the back of its bolt came to 0.76 px from the eye, inside the near plane (0.8 px).
+- **Murmur SMG:**
+  - **Bolt:** the rib along its top (the 3rd element).
+  - **Tendrils:** the two hanging under its barrel (the 24th and 25th), swinging fore and aft about their tops.
+  - **Magazine:** its own part, and the Extended and Speed Magazines in its place.
+  - **Sights:** the same ring as the Undertone Rifle's.
+  - **Aiming:** held 1 px further out: through the aimed shot its back came within 1.61 px of the eye.
+- **Reverb:**
+  - **Barrels:** its own part, two barrels with a rib between, a breech block and a muzzle collar, turning about their bore.
+  - **Bolt:** the rib along its top (the 4th element).
+  - **Tendrils:** the four on its receiver (the 24th to 27th).
+  - **Empty bones:** `magazine` and `magazine_2`, which its shots hold still but no part of it fits.
+  - **Sights:** the notch between the two posts on the back of its receiver.
+  - **Aiming:** held 1 px further out: through the aimed shot its back came within 1.61 px of the eye.
+- **The atlases:** the Sculk Resonator's and the Echoes 2's own textures fill only part of their 128-pixel squares, so the textures they share sit whole beside them; the Whispers' atlas grows from 64 to 128 to hold them. Every other gun's atlas came out the same as before.
+- **Checked** in first-person and side previews: idle, aimed (the arms at half size), fired, through each reload, draw and inspection; each gun's bolt, tendrils and magazine or barrels through their animations; each with every attachment it takes; and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:**
+- **Rounds:** the Rifle Round, the Light Round and the Buckshot Shell; nothing new.
+- **Parts:** steel and a lever, as the steel guns; an echo shard, from the deep dark's ancient cities, and sculk.
+- **Their place:** past steel, a reward for reaching the deep dark.
+
+**Balance:** starting numbers, at point blank with every shot landing.
+- **Undertone Rifle:** 9 a shot, 2.9 a second, for twelve shots; over a magazine and its 2.4 s reload, about 17 a second, as the Garrison Rifle's (17) and more than the Picket Rifle's (14) or the Kestrel Rifle's (12). In return its aimed spread is wider than the marksman rifles' (0.3° against 0.1° to 0.15°) and its reach shorter (96 blocks against 120 to 128).
+- **Murmur SMG:** 30 a second while it fires, for 2.4 s; over a magazine and its reload, about 15 a second, as the Squall Rifle's (15) and the Bronco SMG's (14), above the Riveter SMG's (11). It spends its rounds as fast as any gun.
+- **Reverb:** 35 a shot, the hardest of the shotguns' (the Sledge's is 32), two shots 0.4 s apart and 3.45 s to load both: about 18 a second, as the Sledge's (19), holding two shells to its four.
+- **A round:** each spends one a shot; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:undertone_rifle`, `murmur_smg` and `reverb`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The glowing parts and the tendrils do not move on their own:** the owner's frames would make them pulse and curl; the guns take the first frame of each.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -2238,6 +2314,54 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | culverin | `Guns/item/handcannon.animation.json` | `7a7de8cc1d0ad440` |
 | culverin | `Guns/models/special/handcannon/main.json` | `92eb04b64a051f0e` |
 | culverin | `Guns/sounds/item/cannon/fire.ogg` | `c114b809e9f48ac7` |
+| undertone_rifle | `Guns/models/item/sculk_resonator.json` | `3ff2ed331d9b94cf` |
+| undertone_rifle | `Guns/item/sculk_resonator.png` | `b35a6aa19f5dfd45` |
+| undertone_rifle | `Guns/item/sculk_resonator.animation.json` | `7a566d034cd616af` |
+| undertone_rifle | `Guns/models/special/sculk_resonator/main.json` | `7a460590a0d01cf2` |
+| undertone_rifle | `Guns/models/special/sculk_resonator/light_stock.json` | `1ac9d3a81f761a60` |
+| undertone_rifle | `Guns/models/special/sculk_resonator/heavy_stock.json` | `3caa4bedab27b9d0` |
+| undertone_rifle | `Guns/models/special/sculk_resonator/wooden_stock.json` | `17403340deb4cb05` |
+| undertone_rifle | `Guns/models/special/sculk_resonator/sights.json` | `b175689484aba3e4` |
+| undertone_rifle | `Guns/sounds/item/sculk/fire.ogg` | `85de3c45c216ac33` |
+| undertone_rifle | `Guns/item/sculk_resonator_animated.png` | `47928bb64fe10405` |
+| undertone_rifle | `Guns/item/sculk_resonator_tendril.png` | `f0308d7adf219ff3` |
+| undertone_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| undertone_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| undertone_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| undertone_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| undertone_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| murmur_smg | `Guns/models/item/whispers.json` | `7c251587fa6a6125` |
+| murmur_smg | `Guns/item/whispers.png` | `14baed2c3daccc19` |
+| murmur_smg | `Guns/item/whispers.animation.json` | `1a4e7aebfcdfdc63` |
+| murmur_smg | `Guns/models/special/whispers/main.json` | `e851766e1fc12454` |
+| murmur_smg | `Guns/models/special/whispers/sights.json` | `c8a9167f4d564c60` |
+| murmur_smg | `Guns/models/special/whispers/stan_mag.json` | `a9a77dbdc2ce0c57` |
+| murmur_smg | `Guns/models/special/whispers/ext_mag.json` | `a89afb7374464cda` |
+| murmur_smg | `Guns/models/special/whispers/speed_mag.json` | `4fd06a95c053fec6` |
+| murmur_smg | `Guns/sounds/item/beam/fire.ogg` | `d91dc843b166ee89` |
+| murmur_smg | `Guns/item/sculk_resonator_animated.png` | `47928bb64fe10405` |
+| murmur_smg | `Guns/item/sculk_resonator_tendril.png` | `f0308d7adf219ff3` |
+| murmur_smg | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| murmur_smg | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| murmur_smg | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| murmur_smg | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| murmur_smg | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| reverb | `Guns/models/item/echoes_2.json` | `e4787c9ac8b6fbb0` |
+| reverb | `Guns/item/echoes_2.png` | `2e641f85ab279f05` |
+| reverb | `Guns/item/echoes_2.animation.json` | `e5de14b2c8b5892a` |
+| reverb | `Guns/models/special/echoes_2/main.json` | `b7d6622f3bd8607f` |
+| reverb | `Guns/models/special/echoes_2/light_grip.json` | `850d49db9a890b0f` |
+| reverb | `Guns/models/special/echoes_2/tact_grip.json` | `9047010470b9de13` |
+| reverb | `Guns/models/special/echoes_2/sights.json` | `4e78164816f69ed2` |
+| reverb | `Guns/models/special/echoes_2/barrels.json` | `3eb29916c81c2f11` |
+| reverb | `Guns/sounds/item/shulker/fire.ogg` | `6c116009b62adfb6` |
+| reverb | `Guns/item/echoes_2_animated.png` | `6676d701518c7e77` |
+| reverb | `Guns/item/sculk_resonator_tendril.png` | `f0308d7adf219ff3` |
+| reverb | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| reverb | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| reverb | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| reverb | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| reverb | `Guns/item/laser.png` | `aac5f06e892e350a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -2822,17 +2946,49 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - **Culverin:** held in the right hand, pointing at the husk. Aimed, its breech stands under the crosshair. Fired, smoke and the flash. Reloading, the gun is tipped up and the left arm comes down from the top right with the ball. Inspected, it is turned to show its cock.
     - **With attachments:** the grips sit under the fore-end, behind the left hand, and the bayonet does not show from the hip or aimed, as on the Bellmouth and the Line Musket with theirs in the same run.
     - **From outside:** the Mule and the Fowler are held at the chest in both hands; the Culverin in the right hand, the left arm at the side. Fired, the Fowler and the Culverin wrap themselves in smoke.
+- **Slice 10D, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three guns' parts re-bakes to the owner's, their attachments' included, less the tendrils' edges that have no area; every other gun's files came out unchanged, its atlas included.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and tooltips, and their shots' sounds.
+  - `python3 tools/check_mod_data.py`: PASS (2161 material IDs), with `check_guns` (the three guns' numbers and attachments in Java, and their looks, eye relief and sounds on the client).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews** (first person, approximating the game's hands, and from the side and front):
+    - each gun idle, aimed (the arms at half size), fired, through each reload, draw and inspection;
+    - each gun's bolt, tendrils and magazine through its shot and reload, and the Reverb's barrels turning;
+    - the Undertone Rifle with each stock, scope and the Laser Sight; the Murmur SMG with both magazines, a scope and the Laser Sight; the Reverb with both grips, a scope and the Laser Sight;
+    - the nearest point of each gun to the eye through its aimed shot, with no eye relief: the Undertone Rifle's 0.76 px, the Murmur SMG's and the Reverb's 1.61 px; with theirs, 2.76 px and 2.61 px.
+- **Slice 10D game tests (written; they run in CI):**
+  - `SculkGunsGameTests`:
+    - `sculkGunsAreRegistered`: each is registered with its numbers, fires bullets, and its recipe loads. The Undertone Rifle fires one rifle round a pull from twelve; the Murmur SMG fires light rounds while the trigger is held, as often as any gun; the Reverb fires ten pellets a barrel from two buckshot shells loaded a shell at a time. Each takes its stocks, magazines or grips, the scopes and the Laser Sight.
+    - `sculkGunsFireAndLoad`: side by side, each fires its last round at a pig three blocks off: the rifle's and the machine gun's shot takes one round's damage, the Reverb's pellets land together. Each then loads from the inventory: the magazines have nothing in halfway through their reload and are full as it ends; the Reverb has one shell in after its first shell's time and both after its reload; two rounds are left each time.
+  - "Every gun registered" now counts forty-eight guns, and slice 9E's `tacticalAttachmentsFitTheirGuns` counts the Reverb among the guns with the owner's tactical grip parts.
+  - `GunsClientGameTests` takes the three new guns through its steps as it takes every gun: held, aimed, fired at the husk, reloaded from the inventory, inspected, with each set of attachments they take, seen from outside, and in the inventory.
+- **Slice 10D in CI** ([run 38076348750](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38076348750), on 2c33aa609: the slice with slice 10C's CI record merged in): every check passed.
+  - **Server game tests:** 1291 in each job, slice 10C's 1289 and this slice's two. All passed, `SculkGunsGameTests` among them.
+  - **`GunsClientGameTests`** (the client job's first shard). Each of the three guns went through its steps:
+    - its arms drawn at full size held and half size aimed;
+    - aimed, the view narrowed to 0.82 (Undertone Rifle), 0.9 (Murmur SMG) and 0.9 (Reverb);
+    - fired at the husk, each spending a round: the Undertone Rifle took it from 523.29 to 514.29 (its 9), the Murmur SMG to 511.29 (its 3) and the Reverb to 483.29 (eight of its ten pellets, 28), with 8 flash frames each;
+    - reloaded from the inventory: twelve Rifle Rounds into the Undertone Rifle, twenty-four Light Rounds into the Murmur SMG and two Buckshot Shells into the Reverb, 31 left each time;
+    - where their animations cue a casing, the Undertone Rifle threw one through its shot and reload, the Murmur SMG three and the Reverb three;
+    - with each set of attachments it takes, held and aimed: the Undertone Rifle's three stocks, each left out aimed (in 44, 44 and 43 frames, none held), and the Laser Sight; the Murmur SMG's Extended Magazine (its counter read 1 / 36), Speed Magazine and Laser Sight; the Reverb's Light Grip, and its Tactical Grip with the Laser Sight.
+  - **Screenshots** (the guns' own fifteen, eighteen with attachments and six from outside):
+    - **Undertone Rifle:** held at the lower right, pointing at the husk. Aimed, the back of its receiver stands under the crosshair, its peep ring just above around the husk's head, the tendrils fanned out to either side. Reloading, the gun is tipped and rolled, the left arm reaching up under it. Inspected, it is turned to show its glowing cells.
+    - **Murmur SMG:** held at the right. Aimed, its back stands under the crosshair, the peep ring above at the husk's head. Reloading, the gun is tipped up, the left arm under it and its crystal glowing in its window. Inspected, it is turned to show its side.
+    - **Reverb:** held at the right. Aimed, its back stands under the crosshair, the husk's head in the notch between its rear posts, thin tendrils to either side and the right hand below. Reloading, the gun is rolled to one side, its barrels turned aside, the left arm reaching up to it. Inspected, it is turned to show its side.
+    - **With attachments:** aimed, no stock comes up under the eye. With the Laser Sight, aimed, its box stands just right of the crosshair, over the husk's side, as on every gun that takes it.
+    - **From outside:** each is held at the chest in both hands; fired, a flash shows at its muzzle.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
-- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A), the coil and plasma guns (slice 10B) and the double-barrels (slice 10C); the sculk guns; a rack that charges several Energy Cells at once, enemies with guns and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
+- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A), the coil and plasma guns (slice 10B), the double-barrels (slice 10C) and the sculk guns (slice 10D); a rack that charges several Energy Cells at once, enemies with guns and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
 - **Aimed, the gun hand covered the sights** in the CI screenshots from 8 October, and a fitted stock came up under the eye: slice 9F draws the arms at half size aimed and leaves a fitted stock out ([above](#slice-9f-the-aiming-polish)).
 - **Not yet:**
   - the jam the Gnat's sound suggests;

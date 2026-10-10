@@ -23,15 +23,18 @@ import net.minecraft.world.item.crafting.RecipeType;
  * what they change. The Laser Sight's dot is drawn on the client only (GunsClientGameTests).
  */
 public class TacticalAttachmentsGameTests {
-	/** The guns the owner made tactical grip parts for (slice 10A's launchers and slice 10B's rifles among them). */
+	/**
+	 * The guns the owner made tactical grip parts for (slice 10A's launchers, slice 10B's rifles and slice 10D's Reverb
+	 * among them).
+	 */
 	static final List<String> GRIPPED = List.of("drover_rifle", "coach_gun", "garrison_rifle", "breacher", "picket_rifle",
 			"ranger_rifle", "kestrel_rifle", "squall_rifle", "sledge", "highwayman", "earthmover", "skylark_rifle", "bullfrog",
-			"solenoid_rifle", "votive_rifle");
+			"solenoid_rifle", "votive_rifle", "reverb");
 	/** The guns that take the scopes but not the Laser Sight (tools/guns.py ATTACHMENTS laser_sight "not_on"). */
 	static final List<String> NO_LASER = List.of("breacher", "trench_lobber", "earthmover");
 
 	/**
-	 * Both recipes load. The Tactical Grip fits the fifteen guns the owner made tactical grip parts for and no other.
+	 * Both recipes load. The Tactical Grip fits the sixteen guns the owner made tactical grip parts for and no other.
 	 * The Laser Sight fits every gun that takes the scopes but the Breacher, the Trench Lobber and the Earthmover.
 	 */
 	@GameTest
