@@ -198,19 +198,20 @@ GUNS = {
         "reload": 52, "spread": (7.0, 5.0), "range": 28, "ammo": "buckshot_shell",
     },
     # Slice 8C: the heavy weapons, in steel. Each fires something other than a bullet, or fires it differently:
-    #   shot     "grenade": each shot lobs a Grenade (the field chemistry branch's frag grenade) that bursts where it
-    #            lands and never breaks blocks; "damage" is the burst at its centre, "range" how far a level shot
+    #   shot     "grenade": each shot lobs a grenade that goes off where it lands and never breaks blocks: the field
+    #            chemistry branch's frag Grenade, or (slice 9G) whichever of its grenades the magazine was loaded with
+    #            (GunShots.reloadAmmo); "damage" is the frag burst at its centre, "range" how far a level shot
     #            carries and the spread how far the grenade strays. "flame": each shot is a burst of a short jet of
     #            flame that singes and sets alight every creature in it, never a block; "damage" is each burst's, on
     #            each creature in the jet, "range" its reach and the spread the jet's half width. Bullets otherwise.
     #   spin_up  ticks the trigger must be held, the barrels spinning up, before the first shot (the server keeps
     #            count); a gap in the holding spins them down.
-    # Their ammunition is not one of AMMO's rounds: the Grenade, and blaze powder (OTHER_AMMO).
+    # Their ammunition is not one of AMMO's rounds: the Grenade (or any grenade, slice 9G), and blaze powder (OTHER_AMMO).
     "trench_lobber": {
         "display": "Trench Lobber",
         "source": "hammer_gl",
-        "tooltip": "A pump-action grenade launcher fed from a box magazine. Each shot lobs a grenade that bursts where "
-                   "it lands; it never breaks blocks. Fires grenades.",
+        "tooltip": "A pump-action grenade launcher fed from a box magazine. Each shot lobs a grenade that goes off where "
+                   "it lands; it never breaks blocks. Loads any grenade, the one in the other hand first.",
         "damage": 16.0, "pellets": 1, "interval": 14, "auto": False, "capacity": 6,
         "reload": 53, "spread": (3.0, 1.0), "range": 24, "ammo": "grenade", "shot": "grenade",
     },
@@ -1903,6 +1904,9 @@ def write_all(write, assets, data, lang, condition):
     lang[f"hud.{MOD}.guns.ammo"] = "%s / %s"
     lang[f"hud.{MOD}.guns.reloading"] = "Reloading"
     lang[f"message.{MOD}.guns.no_ammo"] = "No %s to load."
+    # Slice 9G: a grenade gun loads any grenade, one kind at a time (GunShots.reloadAmmo).
+    lang[f"message.{MOD}.guns.no_grenades"] = "No grenades to load."
+    lang[f"tooltip.{MOD}.guns.loaded_grenade"] = "Loaded with %s"
     for name, info in DAMAGE_TYPES.items():
         body = {"message_id": f"{MOD}.{name}", "exhaustion": 0.1, "scaling": "when_caused_by_living_non_player"}
         if info["effects"]:

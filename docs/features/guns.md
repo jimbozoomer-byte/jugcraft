@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E) and the aiming polish (slice 9F)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F) and the Trench Lobber's grenades (slice 9G)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -18,7 +18,8 @@ Status:
 - **Slice 9C** (the second energy weapons: the Spikedriver, Seam Cutter and Caisson Pistol; [below](#slice-9c-the-second-energy-weapons)): implemented on `claude/guns-energy-2` (#287), stacked on slice 9B, awaiting review.
 - **Slice 9D** (the pump shotguns: the Sledge, Highwayman and Throttle; [below](#slice-9d-the-pump-shotguns)): implemented on `claude/guns-pump` (#289), stacked on slice 9C, awaiting review.
 - **Slice 9E** (the Tactical Grip and the Laser Sight; [below](#slice-9e-the-tactical-grip-and-the-laser-sight)): implemented on `claude/guns-tactical` (#290), stacked on slice 9D, awaiting review.
-- **Slice 9F** (the aiming polish: the hands and the fitted stocks kept off the sights; [below](#slice-9f-the-aiming-polish)): implemented on `claude/guns-aiming`, stacked on slice 9E, awaiting review.
+- **Slice 9F** (the aiming polish: the hands and the fitted stocks kept off the sights; [below](#slice-9f-the-aiming-polish)): implemented on `claude/guns-aiming` (#291), stacked on slice 9E, awaiting review.
+- **Slice 9G** (the Trench Lobber's grenades: it loads the chemical grenades too; [below](#slice-9g-the-trench-lobbers-grenades)): implemented on `claude/guns-lobber-grenades`, stacked on slice 9F, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -31,7 +32,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the scopes: on 8 October 2026, with the reticles and lens rims uploaded ("heres reticles and vignette"), asked what the scopes should use, they answered that they made those files and to use them (see [Dependencies and assets](#dependencies-and-assets)); and asked what next ("What next?"), they chose all four further gun sets offered, each its own slice.
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
-- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, and the second, the aiming polish, slice 9F.
+- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, the second, the aiming polish, slice 9F, and the third, the Lobber's grenades, slice 9G.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -613,7 +614,7 @@ Three more of the owner's guns, each firing something other than a bullet or fir
 **Save compatibility:** new items `jugcraft:trench_lobber`, `thresher` and `stoker`; the damage type `jugcraft:flame`; nothing saved changes. `guns.enabled=false` gates their recipes.
 
 **Known limits:**
-- **Grenades:** the Lobber fires frag Grenades only. The chemical grenades stay for throwing and the grenade launcher: a gun's magazine holds one kind of round.
+- **Grenades:** the Lobber fired frag Grenades only. Since slice 9G it loads the chemical grenades too, one kind a magazine ([below](#slice-9g-the-trench-lobbers-grenades)).
 - **Arms:** the Thresher's left hand holds the front plate, not the carry handle the owner's animations rest it on (by the eye at the hip, there it filled the screen). So in the reload it drops toward the drum without taking it, and the handle is worked forward without it.
 - **The Stoker is held close:** the owner's first-person transform holds its back by the eye, so it fills the lower right of the screen. It is left as the owner made it.
 - **Flame:** the flame is lit by the world's light like the rest of the gun, so at night it is darker than a flame should be.
@@ -1053,6 +1054,30 @@ The second of the follow-ups the owner chose on 10 October 2026 ("Aiming polish"
 - **One aimed screenshot not explained:** in the first CI run, the Riveter SMG with its second set of attachments showed both arms out of place aimed ("Slice 9F in CI" below). Its other aimed shots and every other gun's did not.
 - **Not played:** none of it has been played yet.
 
+## Slice 9G: the Trench Lobber's grenades
+The third of the follow-ups the owner chose on 10 October 2026 ("Lobber gas grenades", offered as "Let the Trench Lobber load the chemical grenades from the field chemistry branch as well as the frag Grenade").
+
+**What it does:** the Trench Lobber loads any grenade: the frag Grenade, and the field chemistry branch's chlorine, smoke and thermite grenades and flashbang. Each shot lobs the kind loaded, which goes off where it lands as it does thrown or from the grenade launcher: a burst, a chlorine cloud, a smoke screen, a pool of thermite or a flash ([field chemistry](field-chemistry.md)). None breaks a block.
+
+**One kind a magazine**, as a gun's magazine holds one kind of round (`GunShots.reloadAmmo`). A reload loads:
+1. the grenade in the other hand, if there is one, as the grenade launcher takes it first;
+2. else more of the kind the Lobber holds, while the inventory has any, so that a top-up keeps its kind whatever comes first in the inventory;
+3. else the first grenade in the inventory.
+
+A reload of another kind than the Lobber holds first puts the grenades it held back in the inventory (any that do not fit drop at the player's feet), then fills the magazine with the new kind.
+
+**What the player sees:** the counter's second line names the grenade the next reload would load and how many of it are to hand. The gun's tooltip names the grenade it holds. With no grenade at all, a reload says "No grenades to load."
+
+**Server authority:** the server chooses the kind from its own copy of the player's hands and inventory when the reload starts. When it ends, the server puts the old grenades back and takes the new ones, and each shot lobs the kind its copy of the gun holds. The client chooses the same way only to play the reload and fill the counter.
+
+**Save compatibility:** the kind is a new component on the gun, `jugcraft:loaded_grenade`, an item id. A Lobber that has only held frag Grenades carries none, so a Lobber saved before this slice holds frag Grenades as before; one naming an item no longer known, or one that is not a grenade, holds frag Grenades too. The component is the slice's only new registration: no new items or recipes. A build from before this slice does not know the component; how it loads a Lobber saved with one was not tested, so back the world up before going back to one.
+
+**Balance:** each grenade does what it does thrown or launched, so the Lobber is no stronger with them than the grenade launcher, only quicker: six grenades a magazine, one every 0.7 s against the launcher's 1.5 s.
+
+**Known limits:**
+- **One kind a magazine:** a magazine of mixed grenades is not possible; changing kind changes all of them.
+- **Not played:** none of it has been played yet.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -1098,7 +1123,7 @@ The second of the follow-ups the owner chose on 10 October 2026 ("Aiming polish"
   - The server draws a reload's charge from its own copy of the player's cells.
   - It works out the beam and the arcs from its copy of the player's position and look, with the same ally and protection checks as a bullet. An arc asks other code about the creatures it would strike, in turn, and no others.
   - `GunTracePayload` (the shooter's id, the kind of shot and up to three points) tells the clients that see the shooter, and the shooter's own, where the shot went. It is used only to draw the shot.
-- **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). An Energy Cell's charge is the shared `jugcraft:energy` component (slice 8D). Its attachments are another, `jugcraft:attachments` (a list of up to four attachment ids, oldest first; an id no longer known is ignored). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
+- **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). An Energy Cell's charge is the shared `jugcraft:energy` component (slice 8D). Its attachments are another, `jugcraft:attachments` (a list of up to four attachment ids, oldest first; an id no longer known is ignored). The Trench Lobber's kind of grenade is `jugcraft:loaded_grenade` (slice 9G: an item id, absent for the frag Grenade; one no longer known is read as the frag Grenade). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
 - **Attachments and authority:** attachments are fitted only by the crafting recipes, which the server runs. The server reads a gun's numbers from its own copy of the stack (`GunItem.spec(stack)`), for the shot, the trigger rate, the reload and the rounds it may load; the client uses the same numbers only to predict.
 - **Disconnect:** clears that player's trigger credit, reload and spin.
 - **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns', rounds' and attachments' recipes (twenty-nine with slice 5: sixteen guns and rounds, eleven attachments, and the fitting and removal recipes). Items and the attachments component stay registered, so saved guns, rounds and attachments survive with it off.
@@ -2294,6 +2319,29 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - Aimed, each gun's back sits on the crosshair with its fist small below it, and no stock comes up under the eye. On the Linesman, the arm that filled the lower left of the view in slice 9E's run no longer shows.
     - The Stoker's and the Trench Lobber's own bodies still fill the lower middle aimed, as they did in slice 9E's run: they are the guns' parts, not the arms.
     - **Not explained:** the Riveter SMG with its second set (Extended Barrel, Speed Magazine, Weighted Stock), aimed (`0208_jugcraft_guns_riveter_smg_fitted_2_aimed`), shows both arms in a pose its other aimed shots do not: the right arm lies across the lower right of the view and the left arm stands beside the gun. The gun itself is where it is in the others, and its stock was left out (40 frames). In slice 9E's run the stock covered that part of the view. In the previews at half size, no frame of the Riveter's animations (idle, draw, shoot, aimed shot, reload, inspect), nor its model with none, puts the arms there with the gun at rest. The nearest are the inspect's arms about a second in, where the gun is turned. The test neither inspects nor reloads there.
+- **Slice 9G, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS.
+  - `python3 tools/generate_material_data.py`: wrote the Lobber's new tooltip, and the names of the reload's "No grenades to load." and the tooltip's "Loaded with" line.
+  - `python3 tools/check_mod_data.py`: PASS (1930 material IDs), with both names required.
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+- **Slice 9G game tests (written; they run in CI):** `LobberGrenadesGameTests`:
+  - `onlyTheLobberTakesGrenades`: of the guns, only the Lobber takes grenades. A new Lobber holds frag Grenades and records no kind; one recorded as chlorine holds chlorine; one recorded as an unknown item or as stone holds frag Grenades.
+  - `lobberLoadsTheGrenadeInTheOtherHand`: an empty Lobber, frag Grenades in the inventory and three chlorine grenades in the other hand, loads the three chlorine grenades and leaves the frag Grenades.
+  - `lobberSwapsOneKindForAnother`: a Lobber of two frag Grenades, smoke grenades in the other hand, puts the two back and loads six smoke grenades. Then, with one smoke grenade in it and only frag Grenades to hand, it loads those and puts the smoke grenade back.
+  - `lobberKeepsToItsKind`: an empty Lobber that last held thermite grenades, frag Grenades ahead of thermite grenades in the inventory, loads thermite.
+  - `lobberLobsTheKindItHolds`: a Lobber of chlorine grenades lobs a chlorine grenade of the shooter's at a pig seven blocks off; a chlorine cloud hangs where it lands, and it hurts the pig.
+  - Slice 8C's `lobberLobsAGrenade` and `reloadsTakeAmmunitionByTheItem` still load and fire frag Grenades.
+- **Slice 9G in CI** ([run 38042577642](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38042577642), on 48b38825d): every check passed.
+  - **Server game tests** (`mod`, `optional integrations absent`): 1204 passed, 1199 before; the five new ones are `LobberGrenadesGameTests`, which compiled and passed in both jobs.
+  - **`GunsClientGameTests`**, the one client class the job ran (it covers `GunsClient`, which this slice changes). The Trench Lobber's steps went as in slice 9F's run, with frag Grenades:
+    - aimed, the view narrowed to 0.9; fired, 6 flash frames, and the husk 825.5 → 812.79 from the Grenade's burst, rounds 6 → 5;
+    - reloaded, 6 rounds from the inventory, 31 Grenades left;
+    - with its three sets of attachments, each stock was drawn held and left out aimed (35 or 36 frames).
+  - **Screenshots:**
+    - The counter's second line names the grenade the next reload would load: "32 Grenade" held, aimed and fired, "Reloading" mid-reload, "31 Grenade" after it, and "0 Grenade" with the attachment sets, whose test leaves no grenades in the inventory.
+    - Fired aimed, the screenshot caught the left sleeve across the lower left corner of the view as the shot works the pump; in slice 9F's run it was small beside the gun. The frame differs from run to run, and this slice changes nothing about how the gun or the arms are drawn.
+  - **Not covered by CI:** no client test loads a chemical grenade, so the counter and the tooltip naming one, and a chemical grenade lobbed from the Lobber, were not seen on a client (the server tests check the loading and the chlorine cloud).
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
@@ -2304,7 +2352,7 @@ Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns 
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
-- **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; a rack that charges several Energy Cells at once. The owner chose the first on 10 October 2026, with the tactical grip and the laser sight (slice 9E) and the aiming polish (slice 9F).
+- **Later slices,** each its own pull request: a rack that charges several Energy Cells at once. The three follow-ups the owner chose on 10 October 2026 are slices 9E, 9F and 9G.
 - **Aimed, the gun hand covered the sights** in the CI screenshots from 8 October, and a fitted stock came up under the eye: slice 9F draws the arms at half size aimed and leaves a fitted stock out ([above](#slice-9f-the-aiming-polish)).
 - **Not yet:**
   - the jam the Gnat's sound suggests;

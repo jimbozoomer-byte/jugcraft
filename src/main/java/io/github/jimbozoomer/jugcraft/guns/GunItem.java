@@ -228,6 +228,11 @@ public class GunItem extends Item implements GeoItem {
 		GunSpec fitted = spec(stack);
 		tooltip.accept(Component.translatable("tooltip.jugcraft.guns.ammo", loaded(stack), fitted.capacity())
 				.withStyle(ChatFormatting.GOLD));
+		if (JugcraftGuns.takesGrenades(fitted) && loaded(stack) > 0) {
+			// Slice 9G: which grenade a grenade gun holds.
+			tooltip.accept(Component.translatable("tooltip.jugcraft.guns.loaded_grenade",
+					Component.translatable(JugcraftGuns.loadedAmmo(stack, fitted).getDescriptionId())).withStyle(ChatFormatting.GOLD));
+		}
 		tooltip.accept(Component.translatable("tooltip.jugcraft.guns.stats", String.format(Locale.ROOT, "%.1f", fitted.damage()),
 				fitted.pellets(), String.format(Locale.ROOT, "%.1f", 20.0F / fitted.interval()), fitted.range())
 				.withStyle(ChatFormatting.BLUE));

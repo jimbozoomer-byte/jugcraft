@@ -41,6 +41,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
@@ -277,8 +278,10 @@ public final class GunsClient {
 		}
 		long now = client.level.getGameTime();
 		GunSpec spec = GunItem.spec(stack);
-		int room = spec.capacity() - predicted(stack);
-		int rounds = player.hasInfiniteMaterials() ? room : Math.min(room, GunShots.stocked(player.getInventory(), gun, spec));
+		// Slice 9G: the ammunition the server's reload will choose (a grenade gun's kind of grenade).
+		Item ammo = GunShots.reloadAmmo(player, stack, spec);
+		int room = GunShots.room(stack, spec, ammo, predicted(stack));
+		int rounds = player.hasInfiniteMaterials() ? room : Math.min(room, GunShots.stocked(player.getInventory(), gun, spec, ammo));
 		if (now < reloadingUntil || room <= 0) {
 			return;
 		}
@@ -331,7 +334,8 @@ public final class GunsClient {
 
 	/**
 	 * The counter above the hotbar's right end: loaded / capacity, and the rounds to hand (or "Reloading"); for an energy
-	 * weapon, the shots its Energy Cells' charge holds.
+	 * weapon, the shots its Energy Cells' charge holds; for a grenade gun, the grenades of the kind its reload would load
+	 * (slice 9G).
 	 */
 	private static void hud(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		Minecraft client = Minecraft.getInstance();
@@ -345,10 +349,10 @@ public final class GunsClient {
 		// The rounds loaded less the shots the server has not answered yet (each answer settles one).
 		int loaded = Math.max(0, predicted(stack));
 		Component count = Component.translatable("hud.jugcraft.guns.ammo", loaded, spec.capacity());
+		Item toLoad = GunShots.reloadAmmo(player, stack, spec);
 		Component below = client.level.getGameTime() < reloadingUntil ? Component.translatable("hud.jugcraft.guns.reloading")
 				: JugcraftGuns.charge(gun) > 0 ? Component.translatable("hud.jugcraft.guns.in_cells", GunShots.stocked(player.getInventory(), gun, spec))
-				: Component.literal(GunShots.count(player.getInventory(), JugcraftGuns.ammo(spec)) + " ")
-						.append(Component.translatable(JugcraftGuns.ammo(spec).getDescriptionId()));
+				: Component.literal(GunShots.count(player.getInventory(), toLoad) + " ").append(Component.translatable(toLoad.getDescriptionId()));
 		int right = graphics.guiWidth() / 2 + 91 + 8;
 		int bottom = graphics.guiHeight() - 22;
 		graphics.text(client.font, count, right, bottom, loaded == 0 ? 0xFFFF5555 : 0xFFFFFFFF, true);
