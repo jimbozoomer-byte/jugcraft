@@ -1560,7 +1560,7 @@ The Garrison Rifle, for comparison, does about 17 a second over its 30 rounds an
 
 **Known limits:**
 - **No mirror image:** a gun in the left hand is the same model as in the right, so its ejection port faces the same way. Its casings fly out to its own side.
-- **The left arms are worked out:** they are mirrored from the right hand's by a rule, not placed by hand. The CI screenshots show them.
+- **The left arms are worked out:** they are mirrored from the right hand's by a rule, not placed by hand. In the CI screenshots the left hand holds its pistol from below, its arm rising from the bottom left of the screen, as the right hand's does on the right.
 - **Left-handed players:** their main gun is drawn in the left hand, so its arms are now mirrored too; before, they ran in across the screen. No screenshot shows a left-handed player.
 - **Reloading both:** that takes two presses of G, or each empty gun's trigger.
 - **Not played:** none of it has been played yet.
@@ -3208,7 +3208,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 tools/check_mod_data.py`: PASS (2162 material IDs), with `check_guns` (`JugcraftGuns.ONE_HANDED` and `DUAL_SPREAD` against tools/guns.py, and the tooltip's name).
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
-- **Slice 10G game tests (written; they run in CI):**
+- **Slice 10G game tests (all passed in CI, below):**
   - `DualGunsGameTests`:
     - `oneHandedGunsPair`: the thirteen one-handed guns are guns; a Sentry Pistol is one-handed, a Garrison Rifle and a stick are not; a pistol in each hand is two guns at once, a rifle and a pistol are not, and nor is a pistol in the other hand alone.
     - `twoGunsAreNotAimed`: with a gun in each hand, using either hand's gun aims neither; with one pistol, it aims.
@@ -3224,6 +3224,19 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - right click held fires a Rattler Pistol in the other hand again and again;
     - seen from outside, both arms are raised;
     - screenshots: `jugcraft_guns_dual_held`, `_main_fired`, `_other_fired`, `_reloading`, `_third_person` and `_third_person_back`.
+- **Slice 10G in CI** ([run 38083220287](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38083220287), on 0a5aa9392: the slice, with slice 10F's branch merged in): every check passed.
+  - **Server game tests:** 1309 in each job, slice 10F's 1301 and this slice's eight. All passed, `DualGunsGameTests` among them.
+  - **Client game tests:** the changed files chose `GunsClientGameTests` alone, and it passed. Its two-gun step logged:
+    - left click, then right click held: rounds 8 to 7 and 12 to 11, 13 frames of flash, the husk from 45.5 to 36.5 health (the Sentry Pistol's 5 and the Warden Pistol's 4), and neither gun aimed;
+    - G pressed twice: both guns full again (8 and 12), 30 of the 32 Light Rounds left;
+    - right click held for 15 ticks with a Rattler Pistol in the other hand: 20 rounds to 14, six shots;
+    - in third person, the player posed with a gun in each hand for 400 frames.
+  - **Screenshots:**
+    - `jugcraft_guns_dual_held`: a pistol in each hand at the bottom of the screen, the Warden Pistol on the left and the Sentry Pistol on the right, each in its own hand. Each gun's counter is on its own side of the hotbar: 12 / 12 on the left beyond the off-hand slot, 8 / 8 on the right.
+    - `_main_fired`: the Sentry Pistol's flash, its counter at 7 / 8.
+    - `_other_fired`: taken in the tick right click went down, before the shot, so the Warden Pistol's counter still reads 12 / 12. The counts logged above show the shot.
+    - `_reloading`: the Sentry Pistol tipped in its reload, its counter reading "Reloading", the Warden Pistol's at 11 / 12.
+    - `_third_person` and `_third_person_back`: the player from in front, both arms raised with a gun in each hand at the chest, and from behind.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
