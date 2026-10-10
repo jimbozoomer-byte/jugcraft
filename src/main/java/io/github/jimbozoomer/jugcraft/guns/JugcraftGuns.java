@@ -3,6 +3,8 @@ package io.github.jimbozoomer.jugcraft.guns;
 import com.mojang.serialization.Codec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.materials.JugcraftRegistry;
+import io.github.jimbozoomer.jugcraft.tools.Chargeable;
+import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -36,6 +39,9 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  * block or creature within range.</li>
  * <li>Slice 8C, the heavy weapons: the Trench Lobber lobs a Grenade a shot, the Stoker's shots are bursts of flame
  * ({@link #SHOTS}); the Thresher's barrels spin up before it fires ({@link #SPIN_UP}).</li>
+ * <li>Slice 8D, the energy weapons: the Beam Pistol's beam passes through every creature in its line, the Stormlock's and
+ * Linesman's arcs leap between creatures ({@link #SHOTS}). They run on charge from the energy system: a reload draws each
+ * round's {@link #CHARGE} from the Energy Cells in the inventory, which the Charging Station fills.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.</li>
  * </ul>
@@ -67,15 +73,33 @@ public final class JugcraftGuns {
 		SPECS.put("trench_lobber", new GunSpec(16.0F, 1, 14, false, 6, 53, 0, 0, 0, 3.0F, 1.0F, 24, "grenade"));
 		SPECS.put("thresher", new GunSpec(3.0F, 1, 2, true, 60, 78, 0, 0, 0, 4.0F, 2.0F, 64, "rifle_round"));
 		SPECS.put("stoker", new GunSpec(2.0F, 1, 4, true, 32, 61, 0, 0, 0, 10.0F, 6.0F, 8, "minecraft:blaze_powder"));
+		SPECS.put("beam_pistol", new GunSpec(6.0F, 1, 8, false, 8, 48, 0, 0, 0, 1.5F, 0.5F, 48, "energy_cell"));
+		SPECS.put("stormlock_rifle", new GunSpec(9.0F, 1, 14, false, 5, 0, 18, 17, 20, 2.0F, 0.5F, 64, "energy_cell"));
+		SPECS.put("linesman", new GunSpec(4.0F, 1, 6, true, 6, 0, 8, 13, 12, 15.0F, 10.0F, 12, "energy_cell"));
 	}
 
 	/**
-	 * What the slice 8C guns fire, where it is not bullets (tools/guns.py GUNS "shot"): {@link #GRENADE}, a Grenade lobbed
-	 * from the muzzle; {@link #FLAME}, a short jet of flame ({@link GunShots}).
+	 * What the slice 8C and 8D guns fire, where it is not bullets (tools/guns.py GUNS "shot"): {@link #GRENADE}, a Grenade
+	 * lobbed from the muzzle; {@link #FLAME}, a short jet of flame; {@link #BEAM}, a beam through every creature in its
+	 * line; {@link #ARC}, a bolt that leaps from creature to creature ({@link GunShots}).
 	 */
-	public static final Map<String, String> SHOTS = Map.of("trench_lobber", "grenade", "stoker", "flame");
+	public static final Map<String, String> SHOTS = Map.of("trench_lobber", "grenade", "stoker", "flame", "beam_pistol", "beam", "stormlock_rifle", "arc", "linesman", "arc");
 	public static final String GRENADE = "grenade";
 	public static final String FLAME = "flame";
+	public static final String BEAM = "beam";
+	public static final String ARC = "arc";
+	/**
+	 * Slice 8D: the JE each round of an energy weapon draws from the Energy Cells in the inventory as it loads
+	 * (tools/guns.py GUNS "charge"); a gun not listed loads rounds of its ammunition.
+	 */
+	public static final Map<String, Integer> CHARGE = Map.of("beam_pistol", 400, "stormlock_rifle", 750, "linesman", 250);
+	/**
+	 * An arc leaps on from its first creature to at most {@link #ARC_HOPS} more, each the nearest within {@link #ARC_REACH}
+	 * blocks of the last, each taking {@link #ARC_SHARE} of the damage before it (tools/guns.py).
+	 */
+	public static final int ARC_HOPS = 2;
+	public static final double ARC_REACH = 4.0;
+	public static final float ARC_SHARE = 0.6F;
 	/** Ticks the trigger is held, the barrels spinning up, before the gun fires (tools/guns.py GUNS "spin_up"). */
 	public static final Map<String, Integer> SPIN_UP = Map.of("thresher", 15);
 	/**
@@ -158,6 +182,11 @@ public final class JugcraftGuns {
 		ACCEPTS.put("trench_lobber", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
 				"wooden_stock", "long_scope", "medium_scope", "reflex_sight"));
 		ACCEPTS.put("stoker", List.of("light_stock", "weighted_stock", "wooden_stock"));
+		ACCEPTS.put("beam_pistol", List.of("light_stock", "weighted_stock", "wooden_stock"));
+		ACCEPTS.put("stormlock_rifle", List.of("light_grip", "vertical_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
+				"netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
+		ACCEPTS.put("linesman", List.of("light_stock", "weighted_stock", "wooden_stock", "long_scope", "medium_scope",
+				"reflex_sight"));
 	}
 
 	/** The rounds. */
@@ -180,6 +209,10 @@ public final class JugcraftGuns {
 	public static final ResourceKey<DamageType> BULLET = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("bullet"));
 	/** The Stoker's flame: fire, so what fire spares it spares (slice 8C). */
 	public static final ResourceKey<DamageType> FLAME_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("flame"));
+	/** The energy weapons' beams and arcs (slice 8D): neither projectile nor fire, and they push nothing back. */
+	public static final ResourceKey<DamageType> ZAP_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Jugcraft.id("zap"));
+	/** The energy weapons' ammunition (slice 8D): charge, filled at the Charging Station. */
+	public static Item ENERGY_CELL;
 	/** Rounds loaded in a gun. */
 	public static DataComponentType<Integer> LOADED;
 	/** The attachments fitted to a gun, oldest first; one a slot, so five at most. */
@@ -210,6 +243,8 @@ public final class JugcraftGuns {
 		for (String round : AMMO) {
 			ROUNDS.put(round, JugcraftRegistry.item(round, AmmoItem::new));
 		}
+		ENERGY_CELL = JugcraftRegistry.item("energy_cell", properties -> new EnergyCellItem(properties.stacksTo(1)
+				.rarity(Rarity.UNCOMMON).component(JugcraftTools.ENERGY, 0L)));
 		for (String round : CASING_AMMO) {
 			CASINGS.put(round, Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id(round + "_casing"),
 					FabricParticleTypes.simple()));
@@ -222,6 +257,10 @@ public final class JugcraftGuns {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			GUNS.values().forEach(output::accept);
 			ROUNDS.values().forEach(output::accept);
+			// A cell full, as the creative tab gives the powered tools.
+			ItemStack cell = new ItemStack(ENERGY_CELL);
+			Chargeable.setEnergy(cell, Chargeable.capacity(cell));
+			output.accept(cell);
 			ATTACHMENT_ITEMS.values().forEach(output::accept);
 		});
 		GunShots.register();
@@ -264,5 +303,10 @@ public final class JugcraftGuns {
 	/** Ticks this gun's barrels spin up before it fires; 0 for a gun without ({@link #SPIN_UP}). */
 	public static int spinUp(GunItem gun) {
 		return SPIN_UP.getOrDefault(gun.name(), 0);
+	}
+
+	/** JE a round of this energy weapon draws from Energy Cells (slice 8D, {@link #CHARGE}); 0 for a gun that loads rounds. */
+	public static int charge(GunItem gun) {
+		return CHARGE.getOrDefault(gun.name(), 0);
 	}
 }

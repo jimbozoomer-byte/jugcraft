@@ -642,6 +642,33 @@
       }
     ]
   },
+  "guns.beam_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/raygun_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.stormlock_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/shock_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.linesman.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/laser_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

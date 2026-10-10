@@ -1,11 +1,13 @@
 package io.github.jimbozoomer.jugcraft.client.guns;
 
 import io.github.jimbozoomer.jugcraft.guns.GunItem;
+import io.github.jimbozoomer.jugcraft.guns.GunTracePayload;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.RandomSource;
@@ -27,6 +29,9 @@ import net.minecraft.world.phys.Vec3;
  * with their arms ({@link #thrust});</li>
  * <li>slice 8C: a flame gun's burst, a spray of flames along the look to the gun's reach; and a rotary gun's barrels,
  * spinning up while the trigger is held and running down after ({@link #barrelTurn}).</li>
+ * <li>slice 8D: an energy weapon's shot, where the server says it went ({@link #trace}): a beam of cyan light from the
+ * muzzle to its end, or an arc of sparks jagging from the muzzle to each creature it leapt to. Its casing cue vents
+ * sparks.</li>
  * </ul>
  */
 public final class GunEffects {
@@ -54,6 +59,15 @@ public final class GunEffects {
 	/** Flashes drawn and casings (or puffs) thrown, counted for the client game tests. */
 	private static long flashes;
 	private static long ejected;
+	/** Energy weapon shots drawn (slice 8D), counted for the client game tests. */
+	private static long traced;
+	/** A beam's light: the Beam Pistol's cyan rings. */
+	private static final DustParticleOptions BEAM_LIGHT = new DustParticleOptions(0x5FE8F2, 0.9F);
+	/** Blocks between two motes of a beam, and between two sparks of an arc. */
+	private static final double BEAM_STEP = 0.3;
+	private static final double ARC_STEP = 0.25;
+	/** The most motes or sparks one stretch of a shot is drawn with. */
+	private static final int MOST_MOTES = 200;
 
 	private GunEffects() {
 	}
@@ -107,6 +121,76 @@ public final class GunEffects {
 					random.nextGaussian() * width * 0.5).normalize().scale(speed * (0.7 + random.nextFloat() * 0.5));
 			level.addParticle(i % 4 == 0 ? ParticleTypes.SMOKE : ParticleTypes.FLAME, nozzle.x, nozzle.y, nozzle.z, way.x, way.y, way.z);
 		}
+	}
+
+	/**
+	 * An energy weapon's shot, as the server tells it (slice 8D): from the shooter's muzzle to each point in turn, a beam
+	 * of light, or an arc of sparks that jags about the straight line.
+	 */
+	public static void trace(GunTracePayload payload) {
+		ClientLevel level = Minecraft.getInstance().level;
+		if (level == null || payload.points().isEmpty() || !(level.getEntity(payload.shooter()) instanceof LivingEntity shooter)) {
+			return;
+		}
+		traced++;
+		RandomSource random = shooter.getRandom();
+		Vec3 from = muzzle(shooter);
+		for (Vec3 to : payload.points()) {
+			if (payload.kind() == GunTracePayload.BEAM) {
+				motes(level, from, to);
+			} else {
+				sparks(level, from, to, random);
+			}
+			from = to;
+		}
+	}
+
+	/** A beam's light along this stretch. */
+	private static void motes(ClientLevel level, Vec3 from, Vec3 to) {
+		Vec3 way = to.subtract(from);
+		int count = (int) Math.min(MOST_MOTES, Math.ceil(way.length() / BEAM_STEP));
+		for (int i = 0; i <= count; i++) {
+			Vec3 at = from.add(way.scale(count == 0 ? 0.0 : i / (double) count));
+			level.addParticle(BEAM_LIGHT, at.x, at.y, at.z, 0.0, 0.0, 0.0);
+		}
+	}
+
+	/** An arc along this stretch: sparks along a line jagged at a few points, fewer as it nears its ends. */
+	private static void sparks(ClientLevel level, Vec3 from, Vec3 to, RandomSource random) {
+		Vec3 way = to.subtract(from);
+		double length = way.length();
+		int bends = Math.max(2, (int) Math.min(8, length / 1.5));
+		Vec3 last = from;
+		for (int bend = 1; bend <= bends; bend++) {
+			double along = bend / (double) bends;
+			double swing = bend == bends ? 0.0 : Math.min(0.4, length * 0.06);
+			Vec3 next = from.add(way.scale(along)).add(random.nextGaussian() * swing, random.nextGaussian() * swing,
+					random.nextGaussian() * swing);
+			Vec3 piece = next.subtract(last);
+			int count = (int) Math.min(MOST_MOTES / bends, Math.ceil(piece.length() / ARC_STEP));
+			for (int i = 0; i <= count; i++) {
+				Vec3 at = last.add(piece.scale(count == 0 ? 0.0 : i / (double) count));
+				level.addParticle(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 0.0, 0.0, 0.0);
+			}
+			last = next;
+		}
+	}
+
+	/** About where the shooter's muzzle is: ahead of the eye, a little right (the gun hand's side) and down. */
+	private static Vec3 muzzle(LivingEntity shooter) {
+		Vec3 eye = shooter.getEyePosition();
+		Vec3 look = shooter.getLookAngle();
+		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
+		right = right.lengthSqr() < 1.0E-6 ? new Vec3(1.0, 0.0, 0.0) : right.normalize();
+		if (shooter.getMainArm() == HumanoidArm.LEFT) {
+			right = right.scale(-1.0);
+		}
+		return eye.add(look.scale(0.9)).add(right.scale(0.2)).add(0.0, -0.2, 0.0);
+	}
+
+	/** Energy weapon shots drawn so far (for the client game tests). */
+	public static long traced() {
+		return traced;
 	}
 
 	/** This entity's rotary gun's trigger is held, now: its barrels are driven for this tick (slice 8C). */
@@ -223,8 +307,10 @@ public final class GunEffects {
 		ejected++;
 		SimpleParticleType casing = JugcraftGuns.CASINGS.get(gun.spec().ammo());
 		if (casing == null) {
-			level.addParticle(ParticleTypes.SMOKE, port.x, port.y + 0.1, port.z, 0.0, 0.03, 0.0);
-			level.addParticle(ParticleTypes.SMOKE, port.x, port.y + 0.15, port.z, 0.0, 0.04, 0.0);
+			// No case: a muzzle-loader's lock puffs smoke; an energy weapon (slice 8D) vents sparks.
+			SimpleParticleType puff = JugcraftGuns.charge(gun) > 0 ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.SMOKE;
+			level.addParticle(puff, port.x, port.y + 0.1, port.z, 0.0, 0.03, 0.0);
+			level.addParticle(puff, port.x, port.y + 0.15, port.z, 0.0, 0.04, 0.0);
 			return;
 		}
 		Vec3 moving = holder.getDeltaMovement();

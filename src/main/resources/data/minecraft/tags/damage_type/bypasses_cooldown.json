@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "jugcraft:bullet",
-    "jugcraft:flame"
+    "jugcraft:flame",
+    "jugcraft:zap"
   ]
 }

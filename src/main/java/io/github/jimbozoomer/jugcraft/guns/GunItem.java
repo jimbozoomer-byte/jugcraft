@@ -231,6 +231,12 @@ public class GunItem extends Item implements GeoItem {
 		tooltip.accept(Component.translatable("tooltip.jugcraft.guns.stats", String.format(Locale.ROOT, "%.1f", fitted.damage()),
 				fitted.pellets(), String.format(Locale.ROOT, "%.1f", 20.0F / fitted.interval()), fitted.range())
 				.withStyle(ChatFormatting.BLUE));
+		int charge = JugcraftGuns.charge(this);
+		if (charge > 0) {
+			// Slice 8D: an energy weapon's rounds are charge from Energy Cells.
+			tooltip.accept(Component.translatable("tooltip.jugcraft.guns.charge", String.format(Locale.ROOT, "%,d", charge))
+					.withStyle(ChatFormatting.AQUA));
+		}
 		List<String> attachments = attachments(stack);
 		if (!attachments.isEmpty()) {
 			MutableComponent names = Component.empty();

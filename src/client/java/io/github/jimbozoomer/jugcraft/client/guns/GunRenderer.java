@@ -87,7 +87,8 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 				String locator = fitted.stream().filter(name -> JugcraftGuns.ATTACHMENTS.get(name).slot().equals("barrel")).findFirst()
 						.map(name -> "muzzle_" + name).orElse("muzzle");
 				state.addGeckolibData(FLASH, new Flash(age, GunEffects.lastShot(owner.getId()),
-						GunLooks.FLASH_SIZES.getOrDefault(gun.spec().ammo(), 6.0F), locator));
+						GunLooks.FLASH_SIZES.getOrDefault(gun.spec().ammo(), 6.0F), GunLooks.FLASH_TINTS.getOrDefault(gun.spec().ammo(), 0xFFFFFF),
+						locator));
 			}
 		}
 		Minecraft client = Minecraft.getInstance();
@@ -187,8 +188,9 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	 * @param age     ticks since the shot
 	 * @param shot    the shot's game time (picks the frame and its turn)
 	 * @param size    across, in the model's pixels ({@link GunLooks#FLASH_SIZES})
+	 * @param tint    the colour multiplied into the owner's frames, RGB ({@link GunLooks#FLASH_TINTS}; white for none)
 	 * @param locator where it comes out: "muzzle", or "muzzle_&lt;attachment&gt;" for a barrel attachment
 	 */
-	public record Flash(float age, long shot, float size, String locator) {
+	public record Flash(float age, long shot, float size, int tint, String locator) {
 	}
 }

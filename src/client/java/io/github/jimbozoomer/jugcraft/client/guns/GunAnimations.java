@@ -38,7 +38,9 @@ public final class GunAnimations {
 			"haymaker", Map.of("reload_mag_in", "shell_in"),
 			"longhorn_rifle", Map.of("reload_mag_in", "shell_in"),
 			"drover_rifle", Map.of("reload_mag_in", "shell_in"),
-			"coach_gun", Map.of("reload_mag_in", "shell_in"));
+			"coach_gun", Map.of("reload_mag_in", "shell_in"),
+			"stormlock_rifle", Map.of("reload_mag_in", "insert"),
+			"linesman", Map.of("reload_mag_in", "insert"));
 
 	private GunAnimations() {
 	}

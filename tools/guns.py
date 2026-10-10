@@ -4,7 +4,9 @@ slice 4, the black powder guns: the Duelling Pistol, Line Musket and Bellmouth; 
 the guns in use: muzzle flash, spent casings, the view narrowed while aiming and the two-handed hold seen from outside;
 slice 7, the bayonets and the attachments drawn on shared textures, then the scopes (the owner's scope models, mounted
 on the guns made to take them); slice 8, the hand guns: the Bulldog Pistol, Marshal Revolver and Sapper Revolver;
-slice 8B, the service arms in steel: the Sentry Pistol, Garrison Rifle and Breacher.
+slice 8B, the service arms in steel: the Sentry Pistol, Garrison Rifle and Breacher; slice 8C, the heavy weapons: the
+Trench Lobber, Thresher and Stoker; slice 8D, the energy weapons on Energy Cells: the Beam Pistol, Stormlock Rifle and
+Linesman.
 
 The owner made these guns (inspired by Scorched Guns 2) and supplied, in the owner asset library:
   - a Blockbench Java model of every part (art/owner-library/originals/Blocks/Guns/models/special/<gun>/<part>.json),
@@ -227,10 +229,63 @@ GUNS = {
         "damage": 2.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 32,
         "reload": 61, "spread": (10.0, 6.0), "range": 8, "ammo": "minecraft:blaze_powder", "shot": "flame",
     },
+    # Slice 8D: the energy weapons, past steel (advanced circuits). Each runs on charge from the energy system: its
+    # ammunition is the Energy Cell (CELL), which the Charging Station fills, and a reload draws each round's "charge"
+    # (JE) from the cells in the inventory, leaving the cells to be charged again (JugcraftGuns.CHARGE).
+    #   shot "beam": a straight beam to the first block in range, through every creature in its line; each takes
+    #        "damage". "arc": a bolt that leaps to the creature nearest the aim within the spread (degrees off the
+    #        look, from the hip and aimed) and range, then on to up to ARC_HOPS more, each the nearest within
+    #        ARC_REACH blocks of the last, each taking ARC_SHARE of the damage before it.
+    #   Both deal jugcraft:zap (DAMAGE_TYPES).
+    "beam_pistol": {
+        "display": "Beam Pistol",
+        "source": "raygun",
+        "tooltip": "A ray pistol held in one hand: its beam passes through every creature in its line. Breaks open to "
+                   "load. Runs on Energy Cells.",
+        "damage": 6.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 8,
+        "reload": 48, "spread": (1.5, 0.5), "range": 48, "ammo": "energy_cell", "shot": "beam", "charge": 400,
+    },
+    "stormlock_rifle": {
+        "display": "Stormlock Rifle",
+        "source": "teslock_rifle",
+        "tooltip": "A coil rifle whose bolt leaps from its mark to two more creatures close by. Loaded a charge at a "
+                   "time. Runs on Energy Cells.",
+        "damage": 9.0, "pellets": 1, "interval": 14, "auto": False, "capacity": 5,
+        "reload": (18, 17, 20), "spread": (2.0, 0.5), "range": 64, "ammo": "energy_cell", "shot": "arc", "charge": 750,
+    },
+    "linesman": {
+        "display": "Linesman",
+        "source": "arc_worker",
+        "tooltip": "A short-range arc thrower. Hold the trigger: its arcs find the creatures in front of it and leap "
+                   "between them. Loaded a cell at a time. Runs on Energy Cells.",
+        "damage": 4.0, "pellets": 1, "interval": 6, "auto": True, "capacity": 6,
+        "reload": (8, 13, 12), "spread": (15.0, 10.0), "range": 12, "ammo": "energy_cell", "shot": "arc", "charge": 250,
+    },
 }
 
-# What a gun fires: bullets, or a slice 8C gun's "shot".
-SHOTS = ("bullet", "grenade", "flame")
+# What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
+SHOTS = ("bullet", "grenade", "flame", "beam", "arc")
+# An arc (slice 8D) leaps on from its first creature to at most this many more, each the nearest within this many
+# blocks of the last that the shooter may strike and that it can reach in a straight line, each taking this share of
+# the damage before it (JugcraftGuns.ARC_HOPS, ARC_REACH, ARC_SHARE).
+ARC_HOPS = 2
+ARC_REACH = 4.0
+ARC_SHARE = 0.6
+# The energy weapons' ammunition (slice 8D): the Energy Cell (guns/EnergyCellItem), a chargeable item like the powered
+# tools (the jugcraft:energy charge, in JE; ToolUpgrades' capacity modules fit it), filled at the Charging Station. It
+# holds energy, not a shot: a reload pools the cells' charge, takes each round's "charge" from them in inventory order
+# and leaves the cells, to be charged again. The guns alone draw on it; the portable battery docs/MACHINE_ROADMAP.md
+# plans is another thing. Its art is the owner's (Guns/item/energy_cell.png, a three-frame glow that CELL_ANIMATION
+# runs; empty_cell.png when it is spent).
+CELL = "energy_cell"
+CELL_DISPLAY = "Energy Cell"
+CELL_TOOLTIP = "Charge for the energy guns. Fill it at a Charging Station; a reload draws on it and leaves it."
+CELL_CAPACITY = 10_000
+CELL_ART = {"energy_cell": "energy_cell", "energy_cell_empty": "empty_cell"}
+CELL_ANIMATION = {"animation": {"frametime": 6}}
+# Two cells from copper cable, glass and redstone, capped in brass.
+CELL_RECIPE = ([" C ", "GRG", " B "], {"C": "jugcraft:copper_cable", "G": "minecraft:glass_pane", "R": "minecraft:redstone",
+                                       "B": "#c:ingots/brass"}, 2)
 # Ammunition that is not one of AMMO's rounds (slice 8C), each with the rounds one item loads
 # (JugcraftGuns.PER_ITEM): the field chemistry branch's Grenade (jugcraft:grenade), a grenade a round; and blaze
 # powder, four bursts of the Stoker's flame. A reload that tops a gun up takes a whole item; what of it does not fit is
@@ -291,7 +346,19 @@ RECIPES = {
                                         "L": "minecraft:lever"}),
     "stoker": (["SSF", "BLK"], {"S": "#c:ingots/steel", "F": "minecraft:flint_and_steel", "B": "#c:ingots/brass",
                                 "L": "minecraft:lever", "K": "minecraft:bucket"}),
+    # Slice 8D: steel and an advanced circuit each (the circuit assembler's), with the Beam Pistol's amethyst lens and
+    # the arc guns' lightning rods for emitters and copper cable for their coils.
+    "beam_pistol": (["SSM", " AB"], {"S": "#c:ingots/steel", "M": "minecraft:amethyst_shard", "A": "jugcraft:advanced_circuit",
+                                    "B": "#c:ingots/brass"}),
+    "stormlock_rifle": ([" SL", "CAS", "PB "], {"S": "#c:ingots/steel", "L": "minecraft:lightning_rod",
+                                               "C": "jugcraft:copper_cable", "A": "jugcraft:advanced_circuit",
+                                               "P": "#minecraft:planks", "B": "#c:ingots/brass"}),
+    "linesman": (["LSS", "CAB", " CB"], {"L": "minecraft:lightning_rod", "S": "#c:ingots/steel", "C": "jugcraft:copper_cable",
+                                        "A": "jugcraft:advanced_circuit", "B": "#c:ingots/brass"}),
 }
+# The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
+# and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
+RECIPE_SWITCHES = {gun: ("machines",) for gun, spec in GUNS.items() if spec["ammo"] == CELL}
 
 # How each gun is built from the owner's parts, in the owner's model space (Java item-model pixels: x east, y up,
 # z south; the muzzle points north, -z). Each bone: (name, parent, [parts], pivot). The pivots are where the
@@ -661,6 +728,54 @@ BUILDS = {
         "muzzle": (8.0, 8.45, -8.1),
         "sight": (8.0, 11.7, 5.0),
     },
+    # Slice 8D, the energy weapons. The Raygun is held in one hand: its idle hides the left arm, whose hand point is
+    # given for the reload's moment it takes the barrel. Its barrel (the main part's 4th to 9th elements: the bore, its
+    # rings, the rod and the emitter's plates) breaks open upward about the hinge at the bottom of its back end, to
+    # 140 degrees; its shell bone is empty (the owner's animations keep it at scale 0).
+    "beam_pistol": {
+        "bones": [
+            ("gun_body", None, ["main-#3,4,5,6,7,8"], (8.0, 2.0, 14.3)),
+            ("barrel", "gun_body", ["main#3,4,5,6,7,8"], (8.0, 3.45, 11.35)),
+            ("shell", "gun_body", [], (8.0, 4.4, 11.35)),
+        ],
+        "hands": {"right": (8.0, 2.0, 14.3), "left": (8.0, 2.2, 8.6)},
+        "hand_pose": {"left": ("reload", "0.2917")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.6341, -0.6949, 0.3391)},
+        "muzzle": (8.0, 4.45, 3.8),
+        "sight": (8.0, 7.0, 18.3),
+        "eye_relief": 4.0,
+    },
+    # The Teslock's cylinder (the main part's 26th, 27th, 35th and 36th elements, the owner's "mag") turns about the
+    # bore's line to take each charge, its latch (the 7th and 8th) swinging up off it first; the loop under the grip
+    # (the 40th) is a lever, worked down and back to close it. Its bolt and shell bones are empty.
+    "stormlock_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-#6,7,25,26,34,35,39", "sights"], (8.0, 2.6, 15.0)),
+            ("mag", "gun_body", ["main#25,26,34,35"], (7.95, 4.255, 10.37)),
+            ("latch", "gun_body", ["main#6,7"], (8.5, 4.74, 5.86)),
+            ("lever", "gun_body", ["main#39"], (7.95, 2.68, 12.37)),
+            ("bolt", "gun_body", [], (7.95, 4.26, 12.4)),
+            ("shell", "gun_body", [], (7.95, 4.26, 10.37)),
+        ],
+        "hands": {"right": (8.0, 1.9, 14.8), "left": (8.0, 2.4, 5.0)},
+        "arms": {"right": (-0.2759, -0.2436, 0.9298), "left": (0.7169, -0.5901, 0.3712)},
+        "muzzle": (7.95, 4.26, -4.61),
+        "sight": (7.95, 5.6, 12.66),
+    },
+    # The Arc Worker's "Bolt" (the owner's capital B; the main part's 29th element, the block over its battery tubes)
+    # slides back half a pixel to open and closes after; each loop of its reload carries a cell (PROPS) in from the
+    # left hand and down into the lower tube's back end, shrinking away as it goes in.
+    "linesman": {
+        "bones": [
+            ("gun_body", None, ["main-#28", "sights"], (8.0, 1.4, 15.7)),
+            ("Bolt", "gun_body", ["main#28"], (8.0, 3.15, 10.75)),
+            ("shell", "gun_body", ["@cell"], (8.48, 1.56, 12.6)),
+        ],
+        "hands": {"right": (8.0, 1.4, 15.7), "left": (8.0, 0.0, 6.6)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 4.34, 1.27),
+        "sight": (8.0, 5.6, 13.8),
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -702,6 +817,10 @@ PROPS = {
         "flame": {"kind": "flame", "from": (6.0, 6.45, -21.6), "size": (4.0, 4.0, 8.0), "texture_at": (120, 112)},
         "canister": {"kind": "canister", "from": (6.5, 7.075, 4.1), "size": (3.0, 3.0, 2.6), "texture_at": (120, 103)},
     },
+    # Slice 8D: the Linesman's cell rests behind its lower tube's back end, its front end at the shell bone's pivot,
+    # so the loop's last offset (half a pixel left, a third down and 2.7 px forward) puts it in the tube's mouth and
+    # its shrinking draws it in.
+    "linesman": {"cell": {"kind": "cell", "from": (7.73, 0.81, 12.6), "size": (1.5, 1.5, 3.0), "texture_at": (56, 0)}},
 }
 # The owner's pilot flame (Guns/item/spitfire_flame.png): three 8 x 8 frames, one above the other; the first frame's
 # flame is 4 px wide (columns 2 to 5) and 8 tall, its tip at the top.
@@ -1062,6 +1181,8 @@ ZOOM = {
     "sentry_pistol": 0.9, "garrison_rifle": 0.85, "breacher": 0.92,
     # The heavy weapons are fired from the hip as much as aimed: they narrow the view least.
     "trench_lobber": 0.9, "thresher": 0.95, "stoker": 0.95,
+    # The energy weapons: the Stormlock is a rifle; the Linesman's arcs find their own way, close in.
+    "beam_pistol": 0.9, "stormlock_rifle": 0.8, "linesman": 0.95,
 }
 
 
@@ -1094,9 +1215,13 @@ QUIET_CUES = ("loaded", "end_reload", "loop_end", "reload_end", "stop_mag_tracki
 FLASH_FRAMES = ["muzzleflash", "muzzleflash2", "muzzleflash3", "muzzleflash4"]
 FLASH_SOURCE = BLOCKS / "Big Cannons and Mounted Guns" / "textures"
 # How big the flash is, across, in the gun model's pixels, by the round: black powder flares widest. A grenade's
-# launch and a burst of flame (slice 8C) flash about as wide as buckshot.
+# launch and a burst of flame (slice 8C) flash about as wide as buckshot; an energy weapon's discharge (slice 8D) as a
+# light round's.
 FLASH_SIZE = {"light_round": 5.0, "rifle_round": 7.0, "buckshot_shell": 8.0, "paper_cartridge": 10.0, "grenade": 9.0,
-              "minecraft:blaze_powder": 8.0}
+              "minecraft:blaze_powder": 8.0, "energy_cell": 6.0}
+# The flash's tint, by the round, where it is not the owner's frames' own white-gold (client/guns/GunLooks
+# FLASH_TINTS, multiplied into the frames): an energy weapon's discharge is cyan-white.
+FLASH_TINT = {"energy_cell": 0x9FF4FF}
 
 
 def barrel_front(gun, kind):
@@ -1133,7 +1258,9 @@ EVENT_SOUNDS = {
 # The shell-at-a-time guns' reload_loop names "reload_mag_in"; they push a shell or a round, so they play the insert.
 EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"reload_mag_in": "shell_in"},
                    "longhorn_rifle": {"reload_mag_in": "shell_in"}, "drover_rifle": {"reload_mag_in": "shell_in"},
-                   "coach_gun": {"reload_mag_in": "shell_in"}}
+                   "coach_gun": {"reload_mag_in": "shell_in"},
+                   # The energy weapons loaded a charge at a time (slice 8D) play the charge going in.
+                   "stormlock_rifle": {"reload_mag_in": "insert"}, "linesman": {"reload_mag_in": "insert"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -1159,6 +1286,11 @@ SHOT_SOUNDS = {
     "trench_lobber": "item/grenade_launcher/fire.ogg",
     "thresher": "item/new_rifle/fire.ogg",
     "stoker": "item/flamethrower/fire_2.ogg",
+    # Slice 8D: the library's ray gun shot, its shock shot for the Stormlock's bolt and its short laser shot for the
+    # Linesman's quick arcs.
+    "beam_pistol": "item/raygun/fire.ogg",
+    "stormlock_rifle": "item/shock/fire.ogg",
+    "linesman": "item/laser/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -1183,7 +1315,13 @@ SUBTITLES = {
 
 
 def items():
-    return list(GUNS) + list(AMMO) + list(ATTACHMENTS)
+    return list(GUNS) + list(AMMO) + [CELL] + list(ATTACHMENTS)
+
+
+def switches(condition, gun):
+    """A gun recipe's load conditions: the guns' switch and any its RECIPE_SWITCHES add, each its own condition (all
+    must hold)."""
+    return [c for switch in ("guns", *RECIPE_SWITCHES.get(gun, ())) for c in condition(switch)]
 
 
 def sound_events():
@@ -1219,6 +1357,10 @@ DAMAGE_TYPES = {
     "flame": {"effects": "burning", "tags": ("is_fire", "no_knockback", "bypasses_cooldown"),
               "death": ("%1$s was burnt to a crisp by %2$s", "%1$s was burnt to a crisp by %2$s using %3$s",
                         "%1$s was burnt to a crisp while fighting %2$s")},
+    # The energy weapons' beams and arcs (slice 8D): no projectile and no fire, and they push nothing back, so an arc
+    # gun's quick shots keep their mark in reach.
+    "zap": {"effects": None, "tags": ("no_knockback", "bypasses_cooldown"),
+            "death": ("%1$s was zapped by %2$s", "%1$s was zapped by %2$s using %3$s", "%1$s was zapped while fighting %2$s")},
 }
 
 
@@ -1235,8 +1377,26 @@ def write_all(write, assets, data, lang, condition):
             "type": "minecraft:special", "base": f"{MOD}:item/{gun}", "model": {"type": "geckolib:geckolib"}}})
         pattern, key = RECIPES[gun]
         write(data / "recipe" / f"{gun}.json", {
-            "fabric:load_conditions": condition("guns"), "type": "minecraft:crafting_shaped",
+            "fabric:load_conditions": switches(condition, gun), "type": "minecraft:crafting_shaped",
             "category": "equipment", "pattern": pattern, "key": key, "result": {"id": f"{MOD}:{gun}"}})
+    # Slice 8D: the Energy Cell. Charged, it glows (the owner's three frames, run by an .mcmeta); spent, it shows the
+    # owner's empty cell: its jugcraft:energy charge is 0, the item's default, when spent.
+    lang[f"item.{MOD}.{CELL}"] = CELL_DISPLAY
+    lang[f"tooltip.{MOD}.guns.{CELL}"] = CELL_TOOLTIP
+    for model in CELL_ART:
+        write(assets / "models" / "item" / f"{model}.json",
+              {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/{model}"}})
+    write(assets / "items" / f"{CELL}.json", {"model": {
+        "type": "minecraft:condition", "property": "minecraft:has_component", "component": f"{MOD}:energy",
+        "ignore_default": True, "on_true": {"type": "minecraft:model", "model": f"{MOD}:item/{CELL}"},
+        "on_false": {"type": "minecraft:model", "model": f"{MOD}:item/{CELL}_empty"}}})
+    pattern, key, count = CELL_RECIPE
+    write(data / "recipe" / f"{CELL}.json", {
+        "fabric:load_conditions": condition("guns") + condition("machines"), "type": "minecraft:crafting_shaped",
+        "category": "equipment", "pattern": pattern, "key": key, "result": {"id": f"{MOD}:{CELL}", "count": count}})
+    lang[f"hud.{MOD}.guns.in_cells"] = "%s shots in cells"
+    lang[f"message.{MOD}.guns.no_charge"] = "Your Energy Cells are spent. Fill them at a Charging Station."
+    lang[f"tooltip.{MOD}.guns.charge"] = "Each round: %s JE from your Energy Cells"
     for ammo, (display, tooltip, (pattern, key, count)) in AMMO.items():
         lang[f"item.{MOD}.{ammo}"] = display
         lang[f"tooltip.{MOD}.guns.{ammo}"] = tooltip
@@ -1443,18 +1603,22 @@ def island_rect(data, face, lo, hi, size):
 
 
 def scope_islands(gun):
-    """{texture id: the pixel rects the faces of the gun's mounted scopes draw on it}."""
+    """{texture id: the pixel rects the gun's faces draw on it}, for the textures packed piece by piece: those its
+    mounted scopes draw on, and any other shared texture as big as the largest atlas, which could never sit whole beside
+    the gun's own (slice 8D: the Arc Worker's stocks draw on the Rust Midge's whole 128 px atlas)."""
     found = {}
     for _, _, parts, _ in effective_bones(gun):
         for part in parts:
-            if not part.startswith("%"):
+            if part.startswith("@"):
                 continue
             for element in part_elements(gun, part):
                 lo = [min(a, b) for a, b in zip(element["from"], element["to"])]
                 hi = [max(a, b) for a, b in zip(element["from"], element["to"])]
                 for face, data in element.get("faces", {}).items():
-                    size = texture_size(data["_texture"])
-                    found.setdefault(data["_texture"], set()).add(island_rect(data, face, lo, hi, size))
+                    texture = data["_texture"]
+                    if not part.startswith("%") and (texture == own_texture(gun) or texture_size(texture) != (128, 128)):
+                        continue
+                    found.setdefault(texture, set()).add(island_rect(data, face, lo, hi, texture_size(texture)))
     return found
 
 
@@ -2036,12 +2200,22 @@ def check():
         problems.append("ZOOM must give every gun a zoom between 0.5 and 1")
     if not all(0.0 < build.get("eye_relief", 1.0) <= 8.0 for build in BUILDS.values()):
         problems.append("A gun's eye_relief must be more than 0 and at most 8")
-    if not set(CASINGS) <= set(AMMO) or set(FLASH_SIZE) != set(AMMO) | set(OTHER_AMMO):
-        problems.append("CASINGS must name rounds, and FLASH_SIZE every round and the other ammunition")
+    if not set(CASINGS) <= set(AMMO) or set(FLASH_SIZE) != set(AMMO) | set(OTHER_AMMO) | {CELL}:
+        problems.append("CASINGS must name rounds, and FLASH_SIZE every round, the other ammunition and the cell")
+    if not set(FLASH_TINT) <= set(FLASH_SIZE) or not all(0 <= tint <= 0xFFFFFF for tint in FLASH_TINT.values()):
+        problems.append("FLASH_TINT must tint known ammunition, each an RGB colour")
     # Slice 8C: what each gun fires, and with what.
     for gun, spec in GUNS.items():
-        if spec.get("shot", "bullet") not in SHOTS or spec["ammo"] not in set(AMMO) | set(OTHER_AMMO):
+        if spec.get("shot", "bullet") not in SHOTS or spec["ammo"] not in set(AMMO) | set(OTHER_AMMO) | {CELL}:
             problems.append(f"{gun}: its shot or its ammunition is not one the guns know")
+        # Slice 8D: a gun on Energy Cells draws a whole number of JE a round, and a cell fills its magazine at least once.
+        charge = spec.get("charge", 0)
+        if (spec["ammo"] == CELL) != (charge > 0) or charge and not (isinstance(charge, int) and
+                                                                     charge * spec["capacity"] <= CELL_CAPACITY):
+            problems.append(f"{gun}: a gun on Energy Cells, and only one, draws a whole JE charge a round, a magazine's "
+                            "worth within one cell")
+        if spec.get("shot") in ("beam", "arc") and spec["pellets"] != 1:
+            problems.append(f"{gun}: a beam or an arc is one a shot")
         if spec.get("spin_up", 0) and not (0 < spec["spin_up"] <= 40 and spec["auto"]):
             problems.append(f"{gun}: a spin-up is for an automatic gun, and at most 40 ticks")
         if spec["capacity"] * max((ATTACHMENTS[k]["effects"].get("capacity", 1.0) for k in fits(gun)), default=1.0) > 64:
@@ -2071,6 +2245,16 @@ def check():
         target = ASSETS / "sounds" / "guns" / f"{sound_file(path)}.ogg"
         if not target.exists() or target.read_bytes() != (LIBRARY / "sounds" / path).read_bytes():
             problems.append(f"sound {name}: {target.relative_to(ROOT)} is not the library file unchanged")
+    # Slice 8D: the Energy Cell's art is the owner's, unchanged, the charged cell's frames run by our .mcmeta.
+    for name, source in CELL_ART.items():
+        target = ASSETS / "textures" / "item" / f"{name}.png"
+        if not target.exists() or target.read_bytes() != (LIBRARY / "item" / f"{source}.png").read_bytes():
+            problems.append(f"{name}: {target.relative_to(ROOT)} is not the library's {source}.png unchanged")
+    meta = ASSETS / "textures" / "item" / f"{CELL}.png.mcmeta"
+    if not meta.exists() or json.loads(meta.read_text()) != CELL_ANIMATION:
+        problems.append(f"{meta.relative_to(ROOT)} must run the cell's frames (CELL_ANIMATION)")
+    if not (0 < ARC_HOPS <= 4 and 0.0 < ARC_REACH <= 8.0 and 0.0 < ARC_SHARE < 1.0):
+        problems.append("An arc leaps on at most four times, at most 8 blocks, each hop weaker")
     return problems
 
 
@@ -2159,6 +2343,9 @@ PLAIN = {
     # A fuel can: steel ends, a brass body.
     "canister": (((150, 154, 162, 255), (104, 108, 116, 255)), ((214, 170, 72, 255), (150, 112, 44, 255)),
                  ((150, 154, 162, 255), (104, 108, 116, 255))),
+    # An Energy Cell (slice 8D), in the owner's cell art's colours: a steel cap, the green glass, a copper cap.
+    "cell": (((120, 111, 107, 255), (74, 70, 68, 255)), ((74, 144, 53, 255), (49, 86, 24, 255)),
+             ((88, 72, 61, 255), (57, 50, 45, 255))),
 }
 
 
@@ -2217,6 +2404,10 @@ def write_files():
         target = ASSETS / "sounds" / "guns" / f"{sound_file(path)}.ogg"
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(LIBRARY / "sounds" / path, target)
+    # The Energy Cell's art (slice 8D): the owner's, unchanged; the charged cell's three frames run by our .mcmeta.
+    for name, source in CELL_ART.items():
+        shutil.copyfile(LIBRARY / "item" / f"{source}.png", ASSETS / "textures" / "item" / f"{name}.png")
+    dump(ASSETS / "textures" / "item" / f"{CELL}.png.mcmeta", CELL_ANIMATION)
 
 
 def provenance():
@@ -2242,6 +2433,7 @@ def provenance():
     rows += [(name, f"item/{source}.png") for name, source in ATTACHMENT_TEXTURES.items()]
     rows += [(name, f"effect/{name}.png") for name in OPTIC_TEXTURES]
     rows += [(f"{ammo}_casing", f"item/{casing}.png") for ammo, casing in CASINGS.items()]
+    rows += [(name, f"item/{source}.png") for name, source in CELL_ART.items()]
     rows = [(owner, LIBRARY / path) for owner, path in rows]
     rows += [(f"flash_{n}", FLASH_SOURCE / f"{frame}.png") for n, frame in enumerate(FLASH_FRAMES)]
     return [(owner, path.relative_to(BLOCKS).as_posix(), hashlib.sha256(path.read_bytes()).hexdigest())

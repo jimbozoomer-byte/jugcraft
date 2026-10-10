@@ -1,11 +1,16 @@
 package io.github.jimbozoomer.jugcraft.guns;
 
+import io.github.jimbozoomer.jugcraft.tools.Chargeable;
 import io.github.jimbozoomer.jugcraft.weapons.GrenadeEntity;
 import io.github.jimbozoomer.jugcraft.weapons.GrenadeLauncherItem;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
@@ -41,6 +46,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The server's half of the guns: it alone fires, spends and loads rounds and deals damage. The client only asks
@@ -64,6 +70,11 @@ import net.minecraft.world.phys.Vec3;
  * saying so each tick ({@link #spin}), for {@link JugcraftGuns#SPIN_UP} ticks unbroken; the server counts them.</li>
  * <li>An item of some ammunition loads more than one round ({@link JugcraftGuns#PER_ITEM}: a blaze powder is four of
  * the Stoker's bursts). A reload takes whole items; what of the last one does not fit is lost.</li>
+ * <li>Slice 8D, the energy weapons. A reload draws each round's {@link JugcraftGuns#CHARGE} in JE from the Energy Cells
+ * in the inventory, pooled, in inventory order, and leaves the cells ({@link #stocked}). A beam passes through every
+ * creature in its line to the first block ({@link #beam}); an arc leaps to the creature nearest the aim within the
+ * spread, then on from creature to creature ({@link #arc}). Neither breaks or lights a block. Every client that sees the
+ * shooter is told where the shot went ({@link GunTracePayload}), to draw it.</li>
  * </ul>
  */
 public final class GunShots {
@@ -101,6 +112,7 @@ public final class GunShots {
 		PayloadTypeRegistry.serverboundPlay().register(GunStabPayload.TYPE, GunStabPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(GunSpinPayload.TYPE, GunSpinPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(GunActionPayload.TYPE, GunActionPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(GunTracePayload.TYPE, GunTracePayload.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(GunShotPayload.TYPE, (payload, context) -> fire(context.player()));
 		ServerPlayNetworking.registerGlobalReceiver(GunReloadPayload.TYPE, (payload, context) -> reload(context.player()));
 		ServerPlayNetworking.registerGlobalReceiver(GunStabPayload.TYPE, (payload, context) -> stab(context.player()));
@@ -147,6 +159,8 @@ public final class GunShots {
 		switch (JugcraftGuns.shot(gun)) {
 			case JugcraftGuns.GRENADE -> lob(level, player, spec, spread);
 			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
+			case JugcraftGuns.BEAM -> beam(level, player, spec, spread);
+			case JugcraftGuns.ARC -> arc(level, player, spec, spread);
 			default -> shoot(level, player, spec, spread);
 		}
 		if (!free) {
@@ -249,11 +263,10 @@ public final class GunShots {
 		if (room <= 0) {
 			return false;
 		}
-		int rounds = player.hasInfiniteMaterials() ? room
-				: Math.min(room, count(player.getInventory(), JugcraftGuns.ammo(spec)) * JugcraftGuns.perItem(spec));
+		int rounds = player.hasInfiniteMaterials() ? room : Math.min(room, stocked(player.getInventory(), gun, spec));
 		if (rounds <= 0) {
-			player.sendOverlayMessage(Component.translatable("message.jugcraft.guns.no_ammo",
-					Component.translatable(JugcraftGuns.ammo(spec).getDescriptionId())));
+			player.sendOverlayMessage(JugcraftGuns.charge(gun) > 0 ? Component.translatable("message.jugcraft.guns.no_charge")
+					: Component.translatable("message.jugcraft.guns.no_ammo", Component.translatable(JugcraftGuns.ammo(spec).getDescriptionId())));
 			return false;
 		}
 		RELOADS.put(player.getUUID(), new Reload(stack, spec, ((ServerLevel) player.level()).getGameTime(), rounds));
@@ -297,7 +310,8 @@ public final class GunShots {
 
 	/**
 	 * Moves up to this many rounds from the inventory into the gun (any it has room for, free in creative). Ammunition an
-	 * item of which loads several rounds is taken whole: the last item's rounds that do not fit are lost.
+	 * item of which loads several rounds is taken whole: the last item's rounds that do not fit are lost. An energy
+	 * weapon's rounds are its cells' charge, drawn round by round (slice 8D).
 	 */
 	private static int load(ServerPlayer player, ItemStack stack, GunSpec spec, int wanted) {
 		int room = spec.capacity() - GunItem.loaded(stack);
@@ -306,11 +320,58 @@ public final class GunShots {
 			return 0;
 		}
 		if (!player.hasInfiniteMaterials()) {
-			int per = JugcraftGuns.perItem(spec);
-			rounds = Math.min(rounds, take(player.getInventory(), JugcraftGuns.ammo(spec), (rounds + per - 1) / per) * per);
+			int charge = JugcraftGuns.charge((GunItem) stack.getItem());
+			if (charge > 0) {
+				rounds = (int) Math.min(rounds, charged(player.getInventory(), JugcraftGuns.ammo(spec)) / charge);
+				draw(player.getInventory(), JugcraftGuns.ammo(spec), (long) rounds * charge);
+			} else {
+				int per = JugcraftGuns.perItem(spec);
+				rounds = Math.min(rounds, take(player.getInventory(), JugcraftGuns.ammo(spec), (rounds + per - 1) / per) * per);
+			}
 		}
 		GunItem.setLoaded(stack, GunItem.loaded(stack) + rounds);
 		return rounds;
+	}
+
+	/**
+	 * Rounds the inventory holds for this gun: its ammunition's items, each loading {@link JugcraftGuns#perItem} rounds;
+	 * or for an energy weapon (slice 8D), its Energy Cells' charge, pooled, in whole rounds of its
+	 * {@link JugcraftGuns#CHARGE}. The client counts the same for its reload and its counter.
+	 */
+	public static int stocked(Inventory inventory, GunItem gun, GunSpec spec) {
+		int charge = JugcraftGuns.charge(gun);
+		if (charge > 0) {
+			return (int) Math.min(Integer.MAX_VALUE, charged(inventory, JugcraftGuns.ammo(spec)) / charge);
+		}
+		return count(inventory, JugcraftGuns.ammo(spec)) * JugcraftGuns.perItem(spec);
+	}
+
+	/** The JE the inventory's stacks of this chargeable item hold together (a cell stacks alone). */
+	public static long charged(Inventory inventory, Item item) {
+		long total = 0;
+		for (int i = 0; i < inventory.getContainerSize(); i++) {
+			ItemStack stack = inventory.getItem(i);
+			if (stack.is(item)) {
+				total += Chargeable.energy(stack);
+			}
+		}
+		return total;
+	}
+
+	/** Draws this much JE from the inventory's stacks of this chargeable item, emptying each in turn. */
+	private static void draw(Inventory inventory, Item item, long wanted) {
+		long left = wanted;
+		for (int i = 0; i < inventory.getContainerSize() && left > 0; i++) {
+			ItemStack stack = inventory.getItem(i);
+			if (stack.is(item)) {
+				long taken = Math.min(left, Chargeable.energy(stack));
+				Chargeable.setEnergy(stack, Chargeable.energy(stack) - taken);
+				left -= taken;
+			}
+		}
+		if (left < wanted) {
+			inventory.setChanged();
+		}
 	}
 
 	/** How many of this item the inventory holds. */
@@ -439,6 +500,118 @@ public final class GunShots {
 			}
 			if (foe.hurtServer(level, source, spec.damage())) {
 				foe.igniteForSeconds(BURN_SECONDS);
+			}
+		}
+	}
+
+	/**
+	 * A beam (slice 8D): from the eye along the look, strayed by the spread, to the first block within range. Every creature
+	 * in its line that the shooter may strike takes the shot's damage ({@link JugcraftGuns#ZAP_DAMAGE}); it passes through
+	 * them all. No block is touched.
+	 */
+	private static void beam(ServerLevel level, ServerPlayer player, GunSpec spec, float spread) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 direction = stray(player.getLookAngle(), spread, player.getRandom());
+		Vec3 end = eye.add(direction.scale(spec.range()));
+		BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		if (block.getType() != HitResult.Type.MISS) {
+			end = block.getLocation();
+		}
+		DamageSource source = zap(level, player);
+		for (LivingEntity foe : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(1.0),
+				candidate -> target(player, candidate))) {
+			if (foe.getBoundingBox().inflate(HIT_MARGIN).clip(eye, end).isPresent() && allowed(player, level, foe)) {
+				foe.hurtServer(level, source, spec.damage());
+			}
+		}
+		trace(player, GunTracePayload.BEAM, List.of(end));
+	}
+
+	/**
+	 * An arc (slice 8D): it leaps to the creature nearest the aim that the shooter may strike, within the gun's range and
+	 * at most the spread off the look, with no block between it and the eye (the nearer of two equally near the aim).
+	 * From each creature it strikes it leaps on to the nearest other within {@link JugcraftGuns#ARC_REACH} blocks with no
+	 * block between them, at most {@link JugcraftGuns#ARC_HOPS} times, each taking {@link JugcraftGuns#ARC_SHARE} of the
+	 * damage before it. Finding none, it strikes the first block along the look within range, harmlessly.
+	 */
+	private static void arc(ServerLevel level, ServerPlayer player, GunSpec spec, float spread) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getLookAngle();
+		double reach = spec.range();
+		// The creatures in the cone, nearest the aim first (to a thousandth of a degree; then the nearer); the first that
+		// other code lets the shooter strike is the mark (asked in turn, so no other is asked about).
+		List<Map.Entry<LivingEntity, double[]>> cone = new ArrayList<>();
+		for (LivingEntity foe : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, eye).inflate(reach),
+				candidate -> target(player, candidate))) {
+			Vec3 at = nearest(foe.getBoundingBox().inflate(HIT_MARGIN), eye, look, reach);
+			Vec3 to = at.subtract(eye);
+			double distance = to.length();
+			double angle = distance < 1.0E-6 ? 0.0 : Math.toDegrees(Math.acos(Mth.clamp(to.dot(look) / distance, -1.0, 1.0)));
+			if (distance <= reach && angle <= spread && clear(level, player, eye, at)) {
+				cone.add(Map.entry(foe, new double[] {Math.round(angle * 1000.0), distance}));
+			}
+		}
+		cone.sort((a, b) -> a.getValue()[0] != b.getValue()[0] ? Double.compare(a.getValue()[0], b.getValue()[0])
+				: Double.compare(a.getValue()[1], b.getValue()[1]));
+		LivingEntity mark = cone.stream().map(Map.Entry::getKey).filter(foe -> allowed(player, level, foe)).findFirst().orElse(null);
+		List<Vec3> points = new ArrayList<>();
+		if (mark == null) {
+			Vec3 end = eye.add(look.scale(reach));
+			BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+			points.add(block.getType() != HitResult.Type.MISS ? block.getLocation() : end);
+			trace(player, GunTracePayload.ARC, points);
+			return;
+		}
+		DamageSource source = zap(level, player);
+		Set<LivingEntity> struck = new LinkedHashSet<>();
+		float damage = spec.damage();
+		for (LivingEntity foe = mark; foe != null; foe = struck.size() > JugcraftGuns.ARC_HOPS ? null : leap(level, player, foe, struck)) {
+			struck.add(foe);
+			points.add(foe.getBoundingBox().getCenter());
+			foe.hurtServer(level, source, damage);
+			damage *= JugcraftGuns.ARC_SHARE;
+		}
+		trace(player, GunTracePayload.ARC, points);
+	}
+
+	/**
+	 * The creature an arc leaps to from this one: the nearest other within reach, centre to centre, with no block between
+	 * them, that the shooter may strike (asked nearest first).
+	 */
+	private static @Nullable LivingEntity leap(ServerLevel level, ServerPlayer player, LivingEntity from, Set<LivingEntity> struck) {
+		Vec3 centre = from.getBoundingBox().getCenter();
+		double reach = JugcraftGuns.ARC_REACH * JugcraftGuns.ARC_REACH;
+		List<LivingEntity> near = new ArrayList<>(level.getEntitiesOfClass(LivingEntity.class,
+				from.getBoundingBox().inflate(JugcraftGuns.ARC_REACH), candidate -> target(player, candidate) && !struck.contains(candidate)
+						&& candidate.getBoundingBox().getCenter().distanceToSqr(centre) <= reach));
+		near.sort((a, b) -> Double.compare(a.getBoundingBox().getCenter().distanceToSqr(centre), b.getBoundingBox().getCenter().distanceToSqr(centre)));
+		for (LivingEntity foe : near) {
+			if (clear(level, player, centre, foe.getBoundingBox().getCenter()) && allowed(player, level, foe)) {
+				return foe;
+			}
+		}
+		return null;
+	}
+
+	/** Whether no block stands between these two points. */
+	private static boolean clear(ServerLevel level, ServerPlayer player, Vec3 from, Vec3 to) {
+		return level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.MISS;
+	}
+
+	/** The energy weapons' damage, dealt by this player (slice 8D). */
+	private static DamageSource zap(ServerLevel level, ServerPlayer player) {
+		return new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(JugcraftGuns.ZAP_DAMAGE), player,
+				player);
+	}
+
+	/** Tells the shooter's client and every client that sees them where an energy weapon's shot went (slice 8D). */
+	private static void trace(ServerPlayer player, int kind, List<Vec3> points) {
+		GunTracePayload payload = new GunTracePayload(player.getId(), kind, List.copyOf(points));
+		Set<ServerPlayer> watchers = new LinkedHashSet<>(PlayerLookup.tracking(player));
+		watchers.add(player);
+		for (ServerPlayer watcher : watchers) {
+			if (ServerPlayNetworking.canSend(watcher, GunTracePayload.TYPE)) {
+				ServerPlayNetworking.send(watcher, payload);
 			}
 		}
 	}
