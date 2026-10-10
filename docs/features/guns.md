@@ -2498,6 +2498,21 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `earthmoverLoadsHighExplosiveRockets`: with only homing rockets an empty Earthmover does not start a reload; with six High-Explosive Rockets it loads four once its reload's time is up, not before, and leaves two.
   - "Every gun registered" now counts thirty-nine guns. Slice 9E's `tacticalAttachmentsFitTheirGuns` counts the launchers among the guns with the owner's tactical grip parts, and the Earthmover among those the Laser Sight does not fit. Slice 9G's `onlyTheLobberTakesGrenades` is now `onlyTheGrenadeGunsTakeGrenades`: the Lobber and the Bullfrog.
   - `GunsClientGameTests` takes the three new guns through its steps as it takes every gun: held, aimed, fired at the husk, reloaded from the inventory, inspected, with each set of attachments they take, seen from outside, and in the inventory.
+- **Slice 10A in CI** ([run 38065020714](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38065020714), on 963f4451e merged into `main` at 4b36d2254): every check passed.
+  - **Server game tests** (`mod`, `optional integrations absent`): 1283 passed in each. `main`'s own run of 4b36d2254 ran 1278, so the five more are `LaunchersGameTests`, which compiled and passed in both jobs. That run of `main` failed the javelin test (`javelin_strikes_and_comes_down`) in `optional integrations absent`; here it passed. It is not this slice's test.
+  - **`GunsClientGameTests`** (the client job's first shard; it covers `GunsClient`, which this slice changes). Each of the three guns went through its steps:
+    - its arms drawn at full size held and half size aimed;
+    - aimed, the view narrowed to 0.85 (Earthmover), 0.8 (Skylark Rifle) and 0.92 (Bullfrog);
+    - fired at the husk, each spending a round: the Earthmover's rocket burst took the husk from 663.8 to 644.51, the Skylark Rifle's from 644.51 to 625.14 and the Bullfrog's grenade from 625.14 to 612.19 (6, 7 and 6 flash frames);
+    - reloaded from the inventory: four High-Explosive Rockets into the Earthmover and one into the Skylark Rifle, 31 left each time, and one Grenade into the Bullfrog, 31 left;
+    - where their animations cue a casing, the Earthmover and the Skylark Rifle puffed smoke, once each; the Bullfrog's animations cue none;
+    - with each set of attachments they take; the Skylark Rifle's and the Bullfrog's stocks were drawn held and left out aimed (36 or 37 frames).
+  - **Screenshots** (the guns' own fifteen, the 22 with attachments and the six from outside):
+    - **Earthmover:** held, the tube's back fills the right half of the view below the crosshair, the drum's front beside it; aimed, its sight stands on the husk at the crosshair and the tube still fills the right half; reloading, the launcher lies rolled over across the bottom right; inspected, its drum is turned toward the eye.
+    - **Skylark Rifle:** held at the right of the view; aimed, the back of its receiver stands under the crosshair, its own wooden grip running down from it, and the husk shows above; reloading, the left hand is up by the opened gun with a grey steel shape in it, the rocket.
+    - **Bullfrog:** held at the lower right, its leaf sight standing up; aimed, the leaf sight frames the husk on the crosshair; reloading, the left arm crosses the lower middle of the view as the barrel is racked.
+    - **From outside:** the Earthmover is held on the shoulder, and fired, its backblast flares behind the tube as the flash shows at the muzzle; the Skylark Rifle and the Bullfrog are held at the chest.
+    - **With attachments:** aimed, no fitted stock comes up under the eye.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
