@@ -51,6 +51,8 @@ Owner-requested 10 October 2026. Independent art specification: [industrial mach
 - [ ] Turn the briefs into detailed models and textures in focused implementation work, preserving the familiar family appearance in larger variants and the specified 2–6-block envelopes.
 - [ ] Reuse or recolour suitable owner-library art with exact source/transform provenance and preserved animation metadata. Finish backs, undersides, interior surfaces and UVs.
 - [ ] Define actual multiblock occupancy, entry parts, placement/formation and moving-group bounds alongside independently reachable construction recipes. Keep shared processing roles rather than compulsory duplicate machines for every product.
+- [x] Build the shared form foundation, package 1 of the [factory implementation plan (PR #302)](https://github.com/jimbozoomer-byte/jugcraft/pull/302): validated 2–6-block envelopes with structure/clearance/access positions, placement that names obstructions, port-only transfers, protected tool sockets, eight-state status, durable batch escrow with reserved outputs, entry/expanded/bulk lanes and legacy tank-layout migration. See [industrial machine foundation](features/industrial-machine-foundation.md); tested on test-mod forms only.
+- [ ] Package 2: register the first real forms (Electrolytic Separator first), with their models, construction recipes, recipe capability tags and selected output policies; teach the model generator to slice form models.
 - [ ] Inspect every completed form from all sides in-game, including idle/running states, module arrangements and lighting; verify bounds, placement and persistence. The current brief provides descriptions only.
 
 ## Industrial chemistry, gas fuels and advanced materials
