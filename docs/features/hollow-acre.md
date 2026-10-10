@@ -1,6 +1,6 @@
 # The Hollow Acre: the lairs, and the Last Rites
 
-Status: in progress. Part 1 of boss 1 in the [Witching Season plan](witching-season.md#the-lairs-shared-rules): the shared lair framework, the Hollow Acre and the ritual that opens it. Vesperine, the Last Reaper, and her loot are part 2, in their own pull request. CI builds this part and runs its game tests (below). It has not been played by hand. The two-client dedicated-server playtest the plan asks for is still to do.
+Status: implemented in source; CI builds it and its game tests and client game test pass (below). Part 1 of boss 1 in the [Witching Season plan](witching-season.md#the-lairs-shared-rules): the shared lair framework, the Hollow Acre and the ritual that opens it. Vesperine, the Last Reaper, and her loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest the plan asks for is still to do.
 Proposal issue: none. The owner approved the Witching Season plan on 4 October 2026, and on 10 October 2026 asked: "Do the bosses".
 
 Target milestone and tier: Specialization tier (dungeon expeditions), as the plan sets it. The ritual takes Discovery-tier things: a headstone, candles, mourning flowers, a vine, a gold ingot, an iron nugget and a bone.
@@ -109,7 +109,54 @@ No Mojang texture is read, traced or copied.
 
 ## Verification
 
-To be filled in from CI.
+![The Last Rites: a Gothic headstone at midnight, four blocks of lit candles round it and the wreath before it, the gate of grey mist rising over it](../images/ingame_lairs_last_rites.jpg)
+![The Hollow Acre from the arrival point: the soul-soil path north between the black wheat and its headstones, witchlight stakes, the chapel far off](../images/ingame_lairs_arrival.jpg)
+![The Mown Circle from above its south edge: the cut stubble inside its soul-soil ring, the soul braziers round it, the chapel beyond](../images/ingame_lairs_arena.jpg)
+![The bone chapel from the circle: the broken rose window, ossuary walls, candelabra and soul braziers either side of the Bone Throne, the harvest moon behind](../images/ingame_lairs_chapel.jpg)
+![The lych gate from inside, its opening filled with Grey Mist](../images/ingame_lairs_gate.jpg)
+![The Hollow Acre from off its south-east edge: a floating island of black earth, its underside hanging over the void](../images/ingame_lairs_island.jpg)
+
+*The client game test's pictures (CI, commit `64dbaa9`): the Last Rites, the arrival point, the Mown Circle, the bone chapel, the lych gate and the island. The test client renders at 480x270.*
+
+CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `08a456a` | A temporary game test that logged vanilla 26.3's End dimension type, level stem and biome | Their formats, which `tools/lair_data.py` now writes |
+| `356a690` | Build, data audit, game tests, client game tests | **Did not compile:** five names that 26.3 does not have (`ServerEntityWorldChangeEvents`, `ServerLevel.getStructureManager()`, `ServerPlayer.drop(ItemStack, boolean)`, `PushReaction.BLOCK`) |
+| `51aad82` | The same, with 26.3's names | Compiled; **2 of 1168 game tests failed**, `hollowAcreDimensionLoads` and `lairsEndToEnd`: a game-test server builds its world from the flat preset alone, so it has no lair dimension. `LairClientGameTests` passed |
+| `95f8019` | The framework tested end to end in the client game test's real world instead | **All pass:** 1168 game tests and `LairClientGameTests`. The pictures showed the black wheat pale grey, and the arena and island pictures badly placed |
+| `a9ca0b9` | Darker wheat ears; the arena and island pictures moved | All pass. The camera still fell before two pictures: the client's own flying flag did not last through the teleports |
+| `64dbaa9` | The server keeps the camera flying | **All pass:** all 1168 required game tests and `LairClientGameTests`. The pictures above are from this commit |
+
+Run locally (10 October 2026):
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py`: also checks `Lair.HOLLOW_ACRE` against `tools/hollow_acre.py` (size, arrival, centre, bounds, floor, moon), the lairs' constants and settings against `tools/lairs.py` and `JugcraftConfig`, the registrations, the fixtures tag, the recipes, the wither- and dragon-immune tags, the dimension, dimension type, biome and template files, and that every message the lair code sends has its words | Pass, 1871 IDs |
+| `python3 tools/generate_material_data.py`, then `git status` | Writes this part's data only |
+| `./gradlew build`, game tests and client game tests | Not run locally (the Fabric Maven is out of reach here); run by CI |
+
+The game tests (`LairGameTests`) show what a game-test server can:
+1. the Hollow Acre's dimension type and biome load from their files;
+2. its template loads in the running game, at the size `Lair.HOLLOW_ACRE` gives, with its blocks (the lych gate, the exit, the Bone Throne, the soil, the braziers, the wheat, the headstones) and the game's data version;
+3. the Last Rites' checks in order: no grave within reach, not by day, too few lit candles (a block of candles counts each), no wreath, then every step done; nothing changes;
+4. rites done in full when no instance can open: the knell says the lairs are full, the wreath stays, nobody moves and no gate opens.
+
+The client game test (`LairClientGameTests`, CI job `client`) runs the framework from end to end in a real world, with its one player in survival:
+1. the knell rung at the prepared grave opens an instance in the Hollow Acre's own dimension (from y 0, no ceiling), places the island (throne, Grey Mist, ward brazier, moon), takes the wreath, opens a gate over the grave and takes the ringer to the arrival point, unable to build;
+2. placing a block, emptying a bucket and using a block are refused; ender pearls and the lair's exit are not;
+3. flying off the island throws the player back for 4 damage; falling off at 2 health leaves half a heart;
+4. dying there gathers the drops (3 diamonds, 7 experience) as Grave Goods and ends the visit; respawned outside, the player gets them all back;
+5. the gate takes the player back in; leaving puts them back exactly where they stood, facing the same way, able to build;
+6. a full party lets nobody else in;
+7. an instance empty for 30 seconds closes, and its gate with it; after a restart, a player found in a closed instance is sent home;
+8. no more instances open than `lairs.instances` allows, and a closed one's slot is free again.
+
+Then it takes the six pictures above.
+
+Not run: the two-client dedicated-server playtest the plan asks for, and play by hand.
 
 ## World and event applicability
 
