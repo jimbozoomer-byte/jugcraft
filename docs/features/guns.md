@@ -1647,6 +1647,7 @@ The reload times and the rates are the owner's animations': the Tusker's pump an
 - **The glowing stone does not pulse:** the owner's frames would make it flicker; the gun takes the first.
 - **In the Nether** most creatures are fireproof (blazes, ghasts, striders, magma cubes, wither skeletons, zombified piglins), so there the fire seldom counts; piglins and hoglins do burn.
 - **The Bastion Rifle's loading arm** crosses the view for a moment with each round.
+- **Aimed, the Bastion Rifle's bolt** (a diamond under the sight) and its handle show just under the crosshair, across the lower part of what it aims at.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
 ## Connections
@@ -3415,12 +3416,25 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 tools/check_mod_data.py`: PASS (2165 material IDs), with `check_guns` (the numbers, attachments, sound aliases and looks against tools/guns.py, and now `JugcraftGuns.INCENDIARY` and `GunShots.BURN_SECONDS`).
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
-- **Slice 11A game tests (written; they run in CI):**
+- **Slice 11A game tests (all passed in CI, below):**
   - `NetherGunsGameTests`:
     - `netherGunsAreRegistered`: each is registered with its numbers, its recipe loads, and it fires bullets that set what they hit alight, as no other gun's do; the Tusker is a shotgun of eight pellets and six shells loaded a shell at a time, the Cinder Repeater an automatic of twenty light rounds, the Bastion Rifle a rifle of five rounds loaded a round at a time; each takes the stocks, grips, barrels, bayonets and scopes, the Cinder Repeater the magazines too.
     - `netherGunsFireAndLoad`: each fires its last round at a pig three blocks off, the Tusker's pellets landing together and the others' one shot taking one round's damage; then each loads from the inventory in its own time, a magazine at a time or a round at a time, two rounds left over.
     - `netherGunsSetWhatTheyHitAlight`: each Nether gun's shot sets its pig alight and the fire hurts it again within two seconds; an Undertone Rifle's shot leaves its pig unlit and hurts it no more; no block catches fire.
   - `GunsGameTests` counts 51 guns; `TacticalAttachmentsGameTests` the nineteen that take the Tactical Grip.
+- **Slice 11A in CI** ([run 38086867951](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38086867951), on 38a4d0a99): every check passed.
+  - **Server game tests:** 1312 in each job, slice 10G's 1309 and this slice's three. All passed, `NetherGunsGameTests` among them.
+  - **Client game tests:** the changed files chose eight classes (`ArmorSetsClientGameTests`, `ArmorTiersClientGameTests`, `ArmsVIIClientGameTests`, `ArmsVIIIClientGameTests`, `BlueprintClientGameTests`, `GunsClientGameTests`, `KnightArmorClientGameTests` and `MaterialSetsClientGameTests`), and all eight passed. In `GunsClientGameTests` each new gun, in its turn:
+    - held and aimed, its arms drawn at full size and then half, the view narrowed to 0.9 (Tusker), 0.88 (Cinder Repeater) and 0.8 (Bastion Rifle);
+    - fired at the husk, each spending one round: the Tusker took it from 465.59 to 441.59 (all eight pellets, 24), the Cinder Repeater 3.5 and the Bastion Rifle 14, with 5 or 6 frames of flash;
+    - reloaded from the inventory, 31 rounds left each time, throwing 1, 3 and 1 casings;
+    - with each set of attachments it takes, held and aimed, the stocks left out aimed (in 34 or 35 frames, none held).
+  - **The fire in play:** the husk lost 3 more health between the Tusker's shot and the Cinder Repeater's, and again before the Bastion Rifle's, as it did after the Stoker's burst; after the guns before them it lost none.
+  - **Screenshots:**
+    - **Held:** each at the lower right pointing at the husk, its name over the hotbar: the Tusker with the left hand on its pump, the Cinder Repeater with the left hand under it, the Bastion Rifle with its ladder sight standing up from the receiver.
+    - **Aimed:** the Tusker's peep ring and the Cinder Repeater's ring on the husk over the crimson backs of their receivers; the Bastion Rifle's ladder over the husk, with its bolt, a gold-lit diamond, and the bolt's handle just under the crosshair.
+    - **Reloading:** the Tusker tipped to take a shell and the Cinder Repeater rolled with its magazine out, the husk burning behind both. The Bastion Rifle's left arm comes up across the view to the breech with its round.
+    - **Inspection, attachments and third person:** each turned over in the hand; each with its stocks, barrel devices, bayonet, Tactical Grip and Laser Sight; and held in both hands seen from outside, flashing as it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
