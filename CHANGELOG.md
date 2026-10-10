@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Arcane Concordance, Wayfaring part 1c (the belt and boots hidden under armour, and a setting)
+- **Armour hides the worn belt and boots,** as the owner asked: the belt under a chestplate or leggings, the boots under boots. An elytra hides nothing. They come back as soon as the armour comes off.
+- **A new setting, Show worn trinkets** (Concordance settings, on by default), turns them off on your computer, on you and on everyone else. It changes only what you see; other players choose for themselves.
+- A small client-side render element does both, inside the same render definitions; nothing is sent to the server. Record: [arcane-concordance-trinkets.md](docs/features/arcane-concordance-trinkets.md).
+
 ### Unmerged: Arcane Concordance, Wayfaring part 1b (the belt and boot drawn on the body)
 - **The Leather Belt and the Amphibian Boot now show when worn,** as the owner drew them: a leather strap round the waist with a gold buckle in front, and on each foot a green boot with a white cuff, a grey toe cap and a fin on the heel. You see them in third person and on the inventory's figure; other players should see them too (not yet tried with two clients). The charms and the Ice Breaker (the owner drew no worn sheet for it) are not drawn.
 - The owner's two worn sheets are imported byte for byte, with their sources and checksums recorded; the boxes are fitted to them (the sheets came without geometry) and kept off the skin's layers and vanilla armour by the same gaps as Jugcraft's 3D armour, so they should not flicker against them up close (armour, drawn a little toward the camera, shows through them from far off). Trinkets' data-driven renderer draws them: no Java. Record: [arcane-concordance-trinkets.md](docs/features/arcane-concordance-trinkets.md).

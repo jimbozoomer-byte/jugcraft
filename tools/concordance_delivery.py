@@ -101,7 +101,8 @@ MATRIX = {
         "and a focus's modifiers through Trinkets' callback; relics and the bangle read from the slots on the server; "
         "Wayfaring's Belt, Charm and Feet slots, with named callback modifiers, a slot-count attribute and Relic Lore's "
         "canEquip; the Leather Belt and Amphibian Boot drawn on the wearer by Trinkets' data-driven renderer (a render "
-        "definition and block models from the owner's worn sheets)",
+        "definition and block models from the owner's worn sheets), through Jugcraft's own render element, which hides "
+        "them under armour and while the player's setting is off",
         "required",
         ["relicsAreFoundInTrinketSlots", "gemsRunesAndBondsKeepTheirRules", "theFociGiveFireSpellPowerThroughTrinkets",
          "theBangleLeavesAHearthbindersBlowSmouldering", "ConcordanceEmberGearClientGameTests",
@@ -109,8 +110,8 @@ MATRIX = {
         "Cosmetic slots count as worn for show only; of the worn things only the belt and boot are drawn on the body, "
         "in third person only, and seen so far only in CI's client screenshots"),
     "cloth-config": (
-        "The Concordance settings screen: the Focus line, reduced motion, exact values, the simple journal and "
-        "visual intensity",
+        "The Concordance settings screen: the Focus line, reduced motion, exact values, the simple journal, visual "
+        "intensity and whether worn trinkets are shown",
         "required",
         [],
         "No test opens the screen; the settings it writes are read by client code only"),

@@ -10142,7 +10142,7 @@ def check_wayfaring(co, root, lang):
     for value, keys in names.items():
         if len(keys) > 1:
             err(f"lang: {', '.join(sorted(keys))} share the name {value}")
-    check_wayfaring_worn(co)
+    check_wayfaring_worn(co, lang)
 
 
 def _worn_faces(model, anchor_y):
@@ -10178,7 +10178,7 @@ def _item_tag(tag, seen=None):
     return items
 
 
-def check_wayfaring_worn(co):
+def check_wayfaring_worn(co, lang):
     """Wayfaring part 1b (tools/concordance_trinkets.py WORN, docs/features/arcane-concordance-trinkets.md): the Leather
     Belt and Amphibian Boot drawn on the wearer by Trinkets' data-driven renderer. Each worn sheet is the owner's, imported
     as supplied into the items atlas, one frame of the size WORN gives, and every worn sheet the owner drew for the slice's
@@ -10189,9 +10189,12 @@ def check_wayfaring_worn(co):
     for); every face over its part's box keeps off the skin, its outer layer and vanilla armour's shells as armor_models
     keeps 3D armour (the soles by model_writer's nudge only), and two models' faces stay that nudge apart where they
     overlap standing (the two boots between the legs); no other definition draws a Wayfaring item; and no Java renderer
-    replaces a definition (Trinkets uses a registered renderer instead of the data for that item). Jugcraft's own 3D
-    armour (worn_models.json) is not compared: it is drawn toward the camera, over what it meets (the feature record's
-    limits)."""
+    replaces a definition (Trinkets uses a registered renderer instead of the data for that item). Every definition wraps
+    its models in Jugcraft's jugcraft:unless_covered element (registered by the client before resources load), which
+    hides them under WORN_COVERED_BY's armour and while the player's "Show worn trinkets" setting is off: the element reads
+    the setting and the wearer's armour, the setting is saved and on the settings screen, on by default, and has its words.
+    Jugcraft's own 3D armour (worn_models.json) is not compared: it is drawn toward the camera, over what it meets (the
+    feature record's limits)."""
     import armor_models
     import model_writer
     tr = co.trinkets
@@ -10328,6 +10331,43 @@ def check_wayfaring_worn(co):
         for call in re.findall(r"TrinketRendererRegistry\.registerRenderer\(([^,;]+)", text):
             if any(item.upper() in call for item in tr.WORN):
                 err(f"{path.relative_to(ROOT)}: a Java renderer for {call.strip()} would replace its render definition")
+    # Hidden under armour, and by the player's setting (the owner, 10 October 2026): every WORN item names the armour slots
+    # that hide it, and the element its definition uses is the one the client registers, which does what it says.
+    if set(tr.WORN_COVERED_BY) != set(tr.WORN):
+        err(f"tools/concordance_trinkets.py: WORN_COVERED_BY covers {sorted(tr.WORN_COVERED_BY)}, not WORN's {sorted(tr.WORN)}")
+    for item, slots in tr.WORN_COVERED_BY.items():
+        if not slots or len(set(slots)) != len(slots) or not set(slots) <= {"head", "chest", "legs", "feet"}:
+            err(f"tools/concordance_trinkets.py: WORN_COVERED_BY[{item!r}] must name armour slots (head, chest, legs, feet), "
+                f"each once, not {slots}")
+    element = CLIENT_JAVA_ROOT / "trinket" / "UnlessCoveredTrinketElement.java"
+    wayfaring_client = CLIENT_JAVA_ROOT / "WayfaringClient.java"
+    element_text = element.read_text(encoding="utf-8") if element.is_file() else ""
+    if tr.WORN_ELEMENT != f"{MOD}:unless_covered" or 'TYPE = Jugcraft.id("unless_covered")' not in element_text:
+        err(f"{element.relative_to(ROOT)}: the element must be {MOD}:unless_covered, the type WORN_ELEMENT names "
+            f"({tr.WORN_ELEMENT})")
+    for needle, why in (("ConcordanceClientOptions.wornTrinkets()", "read the player's Show worn trinkets setting"),
+                        ("getItemBySlot(", "read the wearer's own armour (the render state's is not filled yet)"),
+                        ("DataComponents.EQUIPPABLE", "count only armour drawn on the body (an equippable with an asset)"),
+                        ("DataComponents.GLIDER", "not count a glider (an elytra) as covering"),
+                        ("element.resolveDependencies(resolver)", "hand its held models on to be baked")):
+        if needle not in element_text:
+            err(f"{element.relative_to(ROOT)} must {why} ({needle})")
+    registered = wayfaring_client.read_text(encoding="utf-8") if wayfaring_client.is_file() else ""
+    if "TrinketRenderElements.ID_MAPPER.put(UnlessCoveredTrinketElement.TYPE, UnlessCoveredTrinketElement.CODEC)" not in registered:
+        err(f"{wayfaring_client.relative_to(ROOT)} must register the element with Trinkets (TrinketRenderElements.ID_MAPPER)")
+    if "WayfaringClient.register();" not in (CLIENT_JAVA_ROOT / "ConcordanceClient.java").read_text(encoding="utf-8"):
+        err("ConcordanceClient.register() must call WayfaringClient.register(), or no render definition decodes")
+    options = (CLIENT_JAVA_ROOT / "ConcordanceClientOptions.java").read_text(encoding="utf-8")
+    screen = (CLIENT_JAVA_ROOT / "ConcordanceSettingsScreen.java").read_text(encoding="utf-8")
+    if ('properties.getProperty("concordance.worn_trinkets", "true")' not in options
+            or 'properties.setProperty("concordance.worn_trinkets"' not in options):
+        err("ConcordanceClientOptions must load concordance.worn_trinkets (on by default) and save it")
+    toggle = re.search(r'config\.worn_trinkets"\), values\[(\d)\]\)\s*\.setDefaultValue\(true\)', screen)
+    if not toggle or f"values[{toggle.group(1)}], intensity[0])" not in screen:
+        err("ConcordanceSettingsScreen must offer Show worn trinkets (on by default) and save it")
+    for key in tr.CLIENT:
+        if key not in lang:
+            err(f"lang: {key} is missing (tools/concordance_trinkets.py CLIENT)")
 
 
 def check_alchemy(co, root, lang, registered, research):

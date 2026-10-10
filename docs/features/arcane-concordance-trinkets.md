@@ -1,6 +1,8 @@
-# Arcane Concordance: Wayfaring (the owner's belt, boots and charms; trinkets parts 1 and 1b)
+# Arcane Concordance: Wayfaring (the owner's belt, boots and charms; trinkets parts 1, 1b and 1c)
 
-Status: implemented on branch `claude/awesome-davinci-iwv3b9`; see Verification for what has run.
+Status: parts 1 and 1b merged to main ([#295](https://github.com/jimbozoomer-byte/jugcraft/pull/295), integrated by
+[#277](https://github.com/jimbozoomer-byte/jugcraft/pull/277)); part 1c implemented on branch
+`claude/awesome-davinci-iwv3b9`. See Verification for what has run.
 Proposal issue: none; the owner asked for their supplied magic content to be built into Jugcraft (9 October 2026), named
 this slice ("the trinkets (Relics/Reliquary)") as the one after the fire school, and authorized it at the top of
 [CLAUDE.md](../../CLAUDE.md).
@@ -40,6 +42,11 @@ effect are the owner's; the numbers are Jugcraft's.
   a fin on the heel. Other players should see them too (not yet tried with two clients), and so does the figure in the
   inventory; you do not, in first person. The charms are not drawn, nor is the Ice Breaker (the owner drew no worn sheet
   for it).
+- **Armour worn over them hides them** (part 1c, as the owner asked): a chestplate or leggings hide the belt, and boots
+  hide the boots. An elytra hides neither, and leggings leave the boots showing over them, as vanilla's boots are drawn
+  over leggings. **Show worn trinkets**, a switch in the Concordance settings (from Mod Menu, or the Concordance settings
+  key in Controls, unbound at first), hides both on every player this computer draws; it is on at first. It changes only
+  what this computer shows: each player chooses for their own screen.
 - The kinetic belt that links two pulleys (`jugcraft:belt`, unchanged) is now called the **Drive Belt** in English, so
   the two belts are told apart.
 
@@ -73,8 +80,9 @@ effect are the owner's; the numbers are Jugcraft's.
     throw and Slowness, at `Enemy` creatures only (the boundary lets anyone fight them, whatever claims say; its
     tolerance tags keep the Ender Dragon, Wither, Warden and Elder Guardian from being thrown or slowed, though the
     harm lands), and the saves' statuses on the wearer. What shows is the shared signs (`Signs.show`).
-- Client: no Java. Trinkets draws the slots with the owner's icons (GUI sprites under
-  `textures/gui/sprites/container/slots/`); the items are the owner's plain generated models.
+- Client: Trinkets draws the slots with the owner's icons (GUI sprites under `textures/gui/sprites/container/slots/`);
+  the items are the owner's plain generated models. The slice's only client Java is part 1c's render element and the
+  line that registers it (below).
 - Part 1b, drawn on the body by Trinkets' data-driven renderer:
   - The owner drew a worn sheet for the belt and for the boot (`jymbelics/textures/models/items/`), each a box-UV net
     (vanilla's `ModelPart` cube layout) with no geometry. `tools/concordance_trinkets.py` `WORN` fits boxes to them: the
@@ -115,6 +123,28 @@ effect are the owner's; the numbers are Jugcraft's.
     so both show the bright half outward.
   - Faces the owner left empty (the toe's back, the cuff's top and bottom) are drawn as vanilla draws a whole box: they
     show nothing.
+- Part 1c, hidden under armour and by a setting:
+  - `client/trinket/UnlessCoveredTrinketElement` is a Trinkets render element of Jugcraft's own, `jugcraft:unless_covered`,
+    which `WayfaringClient` adds to Trinkets' element types (`TrinketRenderElements.ID_MAPPER`) when the client starts,
+    before any resources load. It holds other elements (`then`) and draws them only while the player's setting is on and
+    none of the armour slots it names (`armour`) holds armour drawn on the body. It passes its elements' models on to
+    Trinkets, which otherwise asks only the top-level element, so they are baked.
+  - Each render definition is now one such element round its `model` elements, written by the generator with the slots
+    from `WORN_COVERED_BY`: the chest and legs for the belt (a chestplate alone would leave the buckle standing out
+    through it), the feet for the boots. Leggings do not hide the boots, which are worn over them, as vanilla draws its
+    boots over leggings.
+  - Trinkets runs a definition's elements each time it takes a wearer's render state: each frame, for every player drawn
+    and for the inventory's figure, with the wearer itself. The element reads the armour from the wearer
+    (`getItemBySlot`), not from the render state, which is given its armour only after Trinkets has run. Armour drawn on
+    the body there is what vanilla's armour layer asks for: an item equippable in that slot that names an equipment asset
+    (Jugcraft's 3D sets and Ember's GeckoLib sets name one too), except a glider (an elytra is drawn as wings, off the
+    waist).
+  - The setting is `concordance.worn_trinkets` in `config/jugcraft-client.properties` (`true` at first), turned in the
+    Concordance settings screen (Cloth Config) with the others there. The element reads it each time too, so armour put
+    on or off, or the setting turned, shows on the next frame. The server never sees it.
+  - What that test counts as armour though it hardly covers the waist or the feet: the Rocket Pack and the Scuba Tank
+    (chest; straps, with most of the waist bare) hide the belt, and Wool Socks hide the boots. Armour from other mods
+    drawn only by a Fabric armour renderer, with no equipment asset, does not hide them.
 - Nothing ticks: the attributes are Trinkets modifiers and the rest answers damage events.
 
 ## Connections
@@ -162,6 +192,9 @@ effect are the owner's; the numbers are Jugcraft's.
   cosmetic stacks to other players only when they change (a player coming into view is sent the worn stacks only), so
   until then they see the worn belt, or none. With Trinkets' equipment hiding on (also a server setting, off by
   default), a wearer can hide the belt and the boots.
+- Part 1c is decided on each client too, from the armour that client already sees on the wearer and from its own
+  setting. The setting hides the belt and boots on every player that client draws, and on no one else's screen; the
+  wearer's own choice, which everyone sees, is Trinkets' equipment hiding above.
 - Failure behaviour:
   - before Relic Lore: cannot be put on (an item put on by other means, such as a command, gives its attributes but
     answers no damage event);
@@ -187,8 +220,9 @@ effect are the owner's; the numbers are Jugcraft's.
 
 No new dependency. Framework use: **Trinkets Updated** (three slots given by data, one defined by Trinkets; the
 callback modifiers, including a slot-count attribute; `canEquip`/`canUnequip`; part 1b: its data-driven renderer, render
-definitions under `assets/jugcraft/trinkets/` with `model` elements), **Fabric API** (the three damage events and an
-event phase), **Modonomicon** (the codex entry).
+definitions under `assets/jugcraft/trinkets/` with `model` elements; part 1c: a render element type of Jugcraft's own,
+added to its element registry), **Fabric API** (the three damage events and an event phase), **Modonomicon** (the codex
+entry), **Cloth Config** (part 1c: the setting's switch, on the existing Concordance settings screen).
 
 **Provenance.** The files below are from the owner's library (`art/owner-library/originals`): the magic collection
 (supplied 8 October 2026, [MAGIC_ASSETS.md](../../art/owner-library/MAGIC_ASSETS.md); folders `jymbelics` and
@@ -328,6 +362,24 @@ CI:
   behind, the boots from every quarter with their fins behind, over iron leggings and boots, and the buckle through the
   chestplate.
 
+Part 1c, local (before CI; run on the branch, then again after the branch was restarted from main at `2bc6e94f`,
+once #277 had merged parts 1 and 1b):
+- `python3 tools/generate_material_data.py` wrote the wrapped render definitions and the setting's words; run again, it
+  changed nothing.
+- `python3 tools/check_mod_data.py`: PASS, with `check_wayfaring_worn`'s new rules: `WORN_COVERED_BY` names exactly the
+  drawn items, each with distinct armour slots; the definitions use Jugcraft's element; the element reads the setting
+  and the wearer's armour, asks for an equipment asset and no glider, and passes its models on; `WayfaringClient`
+  registers it and is called; the setting loads and saves with `true` at first, its switch defaults on and is saved;
+  its words are in the language file. Mutation test of `check_wayfaring_worn`, through the function itself: part 1b's
+  30 breakages and 13 more, each caught by the rule meant for it (`WORN_COVERED_BY` leaving out the boot, naming a hand
+  or naming a slot twice; another element id; the element not checking gliders, ignoring the setting or not passing its
+  models on; the element not registered, or `WayfaringClient` never called; the setting off at first; the switch off by
+  default or never saved; the setting's words missing); every file restored after.
+- `python3 tools/owner_art.py --check`, `python3 tools/check_icon_maps.py`, `python3 scripts/check_repository.py` and
+  `python3 tools/concordance_delivery.py`: PASS.
+- Jugcraft's 3D armour (`tools/armor_models.py`) compared with the worn models by script, for the one pairing part 1c
+  still draws together, leggings under the boots (Under armour, below).
+
 Tests:
 - Server, `ConcordanceWayfaringGameTests`: the items and slots as designed (sizes, the owner's icons, no cosmetic copies,
   tags, every attribute present, never weighed, the two belts' names); only Relic Lore puts them on and two of a kind
@@ -340,21 +392,24 @@ Tests:
   Guardian, does nothing after an ender pearl or before Relic Lore, and reaches at most twelve.
 - Client, `ConcordanceWayfaringClientGameTests`, on the real ticking player: the belt's second Charm slot on the server
   and the client; the worn attributes each present once; what Trinkets needs to draw part 1b: no Java renderer in the
-  way, the belt's and boot's render definitions loaded with as many elements as parts (`check_wayfaring_worn` holds
-  which parts) and none of them empty, the worn models among the client's resources, the worn sheets in the items atlas
-  and no definition for the Ice Breaker (a
-  model that failed to load would be baked as the game's missing-model cube, which these checks cannot tell apart: only
-  the shots show the owner's models); then, the hand emptied and the body set facing north, the player wearing them
-  from the front and from behind (whole and closer), from each quarter, over iron leggings and boots, over an iron
-  chestplate, and sneaking; the slot gone again without
-  the belt; screenshots of the eight icons and the inventory. The screenshots are for a person to look at; nothing
-  judges a picture.
+  way, the belt's and boot's render definitions loaded and, run as Trinkets runs them (with the real player, against a
+  stand-in that records where each model would be attached), drawing the belt's model on the body and the boot's on
+  each leg, the worn models among the client's resources, the worn sheets in the items atlas and no definition for the
+  Ice Breaker (a model that failed to load would be baked as the game's missing-model cube, which these checks cannot
+  tell apart: only the shots show the owner's models); part 1c, the same way, with the setting turned on first, whatever
+  this client had, and put back after: the belt and boots drawn bare, the belt hidden under an iron chestplate and under iron
+  leggings with the boots still drawn, the boots hidden under iron boots with the belt still drawn, both hidden with
+  the setting off and both drawn again with it on; then, the hand emptied and the body set facing north, the player
+  wearing them from the front and from behind (whole and closer), from each quarter, under an iron chestplate, under
+  iron boots, with the setting off, and sneaking; the slot gone again without the belt; screenshots of the eight icons
+  and the inventory. The screenshots are for a person to look at; nothing judges a picture.
 
 Not yet run: a person looking at the screenshots (part 1b's included), the Trinkets screen opened by hand (the slot
 icons and the grey slot names before Relic Lore), a real fall, drowning or burning in survival, and a two-client
-dedicated server (where the other player should see the belt and boots). Part 1b in a client without Sodium (CI's
-client jobs run with it), and under armour other than vanilla iron leggings, boots and chestplate (Jugcraft's 3D sets
-and Ember's GeckoLib sets included).
+dedicated server (where the other player should see the belt and boots, hidden under the armour they wear and by each
+client's own setting). Part 1b in a client without Sodium (CI's client jobs run with it). Part 1c under armour other
+than vanilla iron (Jugcraft's 3D sets, Ember's GeckoLib sets, the Rocket Pack, Scuba Tank and Wool Socks), and its
+switch turned by hand on the settings screen (the test turns the setting in code).
 
 ## World and event applicability
 
@@ -369,7 +424,8 @@ No worldgen, creatures, loot or seasons.
   belt's English name changed (Leather Belt to Drive Belt); its id did not. Part 1b adds resources only, none saved:
   models `jugcraft:item/leather_belt_worn`, `amphibian_boot_worn_left` and `amphibian_boot_worn_right`, textures
   `jugcraft:item/leather_belt_worn` and `amphibian_boot_worn`, and Trinkets render definitions `jugcraft:leather_belt` and
-  `jugcraft:amphibian_boot`.
+  `jugcraft:amphibian_boot`. Part 1c adds the render element type `jugcraft:unless_covered` (client only, named by those
+  two definitions) and the client setting `concordance.worn_trinkets`; nothing saved in a world.
 - **Simplified from the owner's text, for a concrete reason:**
   - the Ice Breaker's faster falling: a gravity modifier would also shorten every jump (and undo the feather's), so it
     is left out;
@@ -380,27 +436,32 @@ No worldgen, creatures, loot or seasons.
 - **Deferred:** the Ice Breaker on the body (the owner drew no worn sheet for it; `check_wayfaring_worn` fails once one
   appears in the library and is not drawn); the charms on the body (no worn sheets); the other worn relics (parts 2, 3
   and 5); the held relics and staves (parts 4a and 4b, after the Ars-based core).
-- **Part 1b's limits** (drawn by Trinkets, no Java): only in third person (and the inventory's figure); a chestplate
-  covers the strap and only the buckle's front shows through it; on an invisible wearer the belt and boots still show,
-  as vanilla armour does (Trinkets does not check invisibility, and a render definition cannot); seen from below, a
-  skin whose pants layer has its underside drawn shows it over the right sole, which lies 0.1 px above it; between the
-  legs the left boot is drawn over the right, as one of vanilla's boots is.
-- **Part 1b under armour.** Armour is drawn a little toward the camera (1/4096 of its distance; Spell Engine's copy of
+- **Part 1b's limits** (drawn by Trinkets): only in third person (and the inventory's figure); on an invisible wearer
+  the belt and boots still show, as vanilla armour does (Trinkets does not check invisibility, and part 1c's element
+  does not either, to match armour); seen from below, a skin whose pants layer has its underside drawn shows it over the
+  right sole, which lies 0.1 px above it; between the legs the left boot is drawn over the right, as one of vanilla's
+  boots is.
+- **Under armour** (part 1c). Armour is drawn a little toward the camera (1/4096 of its distance; Spell Engine's copy of
   vanilla's armour render type shows the setting, inferred for vanilla's own), and the belt and boots, drawn as items,
-  are not. Where their faces stand just outside armour's, the armour shows through, flickering where they meet, from
-  about 256 blocks per pixel of the gap: about 38 blocks for vanilla leggings and boots (0.15 px), and 8 to 19 blocks
-  for some of Jugcraft's 3D armour (`worn_models.json`), whose faces lie 0.03 to 0.075 px inside the boots' or the
-  belt's: the Bloodthorn boots and chestplate, and at the buckle the Hades chestplate and the steel and bronze leggings.
-  Where a 3D piece's face lies on or just outside theirs (the Hades and Pharaoh boots, the knight boots' straps, the
-  Sunset Gem chestplate) or round them (three leggings' waist boxes enclose the strap), the armour covers them.
-  `check_wayfaring_worn` does not compare them with Jugcraft's 3D armour, Ember's GeckoLib sets or other mods' armour.
+  are not, so armour whose faces lie just inside theirs shows through, flickering, from about 256 blocks per pixel of
+  the gap. Part 1b had that over vanilla leggings and boots (from about 38 blocks) and over some of Jugcraft's 3D
+  armour (from 8 to 19 blocks: the Bloodthorn boots and chestplate, and at the buckle the Hades chestplate and the steel
+  and bronze leggings). All of that armour now hides what it met. The one pairing still drawn together is leggings
+  under the boots: vanilla leggings lie 0.65 px inside them (from about 166 blocks). Jugcraft's 3D leggings were
+  compared by a one-off script, only where their faces lie square to the leg (it skips tilted plates): none of those
+  lies less than 0.38 px inside a boot's face (the steel and bronze leggings' low front plates, which the toe cap pokes
+  through: from about 97 blocks); some stand outside the boots and cover them there (the Pharaoh lames, the Bloodthorn
+  tassets, the Sunset Gem hems); and the steel, bronze, Pharaoh and Hades leggings' linings or skirts reach 0.05 to
+  0.35 px below the soles (in the ground while standing). `check_wayfaring_worn` does not compare the worn models with
+  Jugcraft's 3D armour, Ember's GeckoLib sets or other mods' armour.
 - **For the owner to decide** (nothing above waits on them): whether the guns in the Reliquary folder become one more
   gun line; whether narrow mixins are approved for the relics that need them (walking on water or lava, slippery
   ground, Riptide without rain, a chorus fruit's teleport, barter results, mob neutrality, healing hooks, the backstab
   bonus); names and designs for the 12 unnamed legacy icons; the terms of `jymbelics/sounds/ricochet.ogg`, whose tags
-  name a sound-effects publisher (it matters only for a later part's Shadow Glaive); and, for part 1b, whether the belt
-  and boots should give way to armour (a small Java renderer, which can see the armour, could leave the belt off under a
-  chestplate instead of its buckle showing through, and either off under Jugcraft's 3D armour), and whether the sheet is
-  the left boot, as read from the icon (if it is the right, `WORN_MIRRORED` changes to the left leg).
+  name a sound-effects publisher (it matters only for a later part's Shadow Glaive); for part 1b, whether the sheet is
+  the left boot, as read from the icon (if it is the right, `WORN_MIRRORED` changes to the left leg); and, for part 1c,
+  whether a wearer should also be able to hide their own belt and boots from everyone (Trinkets' equipment hiding does
+  that once a server turns it on; a Jugcraft switch would need a synced setting), and whether the Rocket Pack, Scuba
+  Tank and Wool Socks should stop hiding them (an item tag could exempt them).
 - Skipped: `researching_table` (removed from the base mod; Relic Lore and Artifice cover it), `relic_experience_bottle`
   (levelling), `blank_rune` (a model with no texture), `witch_hat` (its id is taken by Jugcraft's own Witch Hat).
