@@ -66,7 +66,7 @@ When she falls:
 - her thralls crumble, her skulls crumble, her souls fade and her thrown scythe is gone;
 - each participant gets their loot (below) and The Last Harvest;
 - "Vesperine, the Last Reaper, has fallen", the moon pales, and a gate of **Grey Mist** two blocks wide and two high opens in the middle of the circle. It takes players home, as the lych gate's mist does;
-- the instance is ended, and it closes once everyone has left.
+- the instance is ended, and it closes once everyone has left. The mist stays until then; the next instance in that slot clears it as she takes her throne again.
 
 ### Left alone
 
@@ -186,13 +186,14 @@ CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
 | `56f283e` | Build, data audit, server tests without optional integrations, the chosen client tests | Compiled on the first try; the server tests without optional integrations passed; the client tests chosen for it passed (`LairClientGameTests` and `ArmsVIIClientGameTests`). The full `mod` job was cancelled by the next push |
 | `ceb13bf` | Adds `VesperineGameTests` and `VesperineClientGameTests` | `VesperineClientGameTests` **passed**: her whole fight in a real Hollow Acre. **3 server game tests failed**, all from the shared test world: a woken reaper kept fighting after its test passed, and reapers took other tests' players as foes (her health rescaled for a party, the arc turned away from its target, never left alone) |
 | `1e7955e` | Each test sends its reaper away and the self-acting ones stand high above the grid, each at its own height; the pictures aimed at her | `VesperineClientGameTests` **passed**; the pictures above are from this commit. **1 server game test failed**, the Reaping Arc's: a new player cannot be hurt until its client has loaded the world (at most 60 ticks), and a mock player has no client, so the arc at tick 42 struck nobody |
+| `feb97f3` | The arc's players wait out their loading first (in creative, where she ignores them); every test sends its reaper away even when it fails; this record | **All pass:** all 1176 required game tests, with and without the optional integrations, and the client tests chosen for it (`ArmsVIIClientGameTests`, `LairClientGameTests`, `VesperineClientGameTests`) |
 
 Run locally (10 October 2026):
 
 | Check | Result |
 | --- | --- |
 | `python3 scripts/check_repository.py` | Pass |
-| `python3 tools/check_mod_data.py`: also checks her Java numbers, attacks, loot constants and settings against `tools/vesperine.py`; her registrations, names and renderers; the GeckoLib models, clips, UV regions, sheet sizes and controllers' bones; the loot table, recipes, costume tags, advancement and messages; and that nothing of hers loads chunks or changes dimension | Pass, 1876 IDs |
+| `python3 tools/check_mod_data.py`: also checks her Java numbers, attacks, loot constants and settings against `tools/vesperine.py`; that where her fight looks for the Hollow Acre's parts (`HollowAcre.java`: the circle, the throne, the wards, the field and the path) is where `tools/hollow_acre.py` builds them (five deliberate changes to `HollowAcre.java`, one at a time, each failed it); her registrations, names and renderers; the GeckoLib models, clips, UV regions, sheet sizes and controllers' bones; the loot table, recipes, costume tags, advancement and messages; and that nothing of hers loads chunks or changes dimension | Pass, 1876 IDs |
 | `python3 tools/generate_material_data.py`, then `git status` | Writes this part's data only |
 | `./gradlew build`, game tests and client game tests | Not run locally (the Fabric Maven is out of reach here); run by CI |
 
@@ -211,7 +212,8 @@ The client game test (`VesperineClientGameTests`, CI job `client`) runs her figh
 2. stepping into the Mown Circle wakes her;
 3. the Last Toll turns the moon red and re-forms the skulls;
 4. Death's Harvest puts the four wards out, and lighting all four ends it;
-5. when she falls, the player has Reaper's Shade and the Vesper Scythe (a first kill) and The Last Harvest, the moon is pale, Grey Mist stands in the circle, and she is gone.
+5. when she falls, the player has Reaper's Shade and the Vesper Scythe (a first kill) and The Last Harvest, the moon is pale, Grey Mist stands in the circle, and she is gone;
+6. a fresh instance opened in her slot has none of the old instance's Grey Mist.
 
 Along the way it takes a picture of each part of the fight.
 

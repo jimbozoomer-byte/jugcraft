@@ -50,6 +50,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -256,11 +257,17 @@ public class VesperineEntity extends Monster implements GeoEntity {
 
 	/**
 	 * Seats her on the throne of {@code instance}'s Hollow Acre, facing the circle, with her skulls at her shoulders.
-	 * Called as the instance is placed.
+	 * Called as the instance is placed. Placing the template puts back only its own blocks, so the Grey Mist a fallen
+	 * reaper opened in this slot before still stands where the template has none: it goes first.
 	 */
 	public static VesperineEntity summon(ServerLevel level, LairInstance instance) {
 		BlockPos origin = instance.origin();
 		Vec3 arena = new Vec3(origin.getX() + HollowAcre.ARENA_X, origin.getY() + HollowAcre.FLOOR, origin.getZ() + HollowAcre.ARENA_Z);
+		for (BlockPos at : exitCells(arena)) {
+			if (level.getBlockState(at).is(JugcraftLairs.LAIR_EXIT)) {
+				level.setBlock(at, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+		}
 		BlockPos throne = origin.offset(HollowAcre.THRONE);
 		Vec3 seat = new Vec3(throne.getX() + 0.5, throne.getY() + 0.3, throne.getZ() + 0.5);
 		return summon(level, seat, 0.0F, arena, instance);
@@ -1252,14 +1259,19 @@ public class VesperineEntity extends Monster implements GeoEntity {
 		LairInstance open = lairInstance(level);
 		if (open != null) {
 			Lairs.end(open);
-			BlockPos centre = BlockPos.containing(anchor.x, anchor.y, anchor.z);
 			BlockState mist = JugcraftLairs.LAIR_EXIT.defaultBlockState().setValue(LairExitBlock.AXIS, Direction.Axis.X);
-			for (BlockPos at : new BlockPos[] {centre.west(), centre, centre.west().above(), centre.above()}) {
+			for (BlockPos at : exitCells(anchor)) {
 				level.setBlock(at, mist, Block.UPDATE_ALL);
 			}
 		}
 		bossBar.setVisible(false);
 		tell(level, "message.jugcraft.vesperine.defeated");
+	}
+
+	/** Where the Grey Mist opens when she falls: two blocks wide and two high in the middle of her arena. */
+	public static List<BlockPos> exitCells(Vec3 arena) {
+		BlockPos centre = BlockPos.containing(arena.x, arena.y, arena.z);
+		return List.of(centre.west(), centre, centre.west().above(), centre.above());
 	}
 
 	/** Tells everyone near her arena. */

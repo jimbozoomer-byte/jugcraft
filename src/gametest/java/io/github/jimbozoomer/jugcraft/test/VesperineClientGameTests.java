@@ -33,8 +33,9 @@ import net.minecraft.world.phys.Vec3;
  * game-test server's world, it has the lair dimension. Her fight from end to end, with the one player in survival
  * (shielded by Resistance, so it can watch every attack): she waits on her throne, stepping into the Mown Circle wakes
  * her, the Last Toll turns the moon red, Death's Harvest puts out the wards and lighting them all ends it, and when she
- * falls the player has their loot and The Last Harvest, the moon is pale and Grey Mist stands in the circle. Along the
- * way, pictures of each part of the fight, the world frozen for each so the pose holds. CI job {@code client}.
+ * falls the player has their loot and The Last Harvest, the moon is pale and Grey Mist stands in the circle, and a
+ * fresh instance in her slot no longer has it. Along the way, pictures of each part of the fight, the world frozen for
+ * each so the pose holds. CI job {@code client}.
  */
 public class VesperineClientGameTests implements FabricClientGameTest {
 	private static final Lair ACRE = Lair.HOLLOW_ACRE;
@@ -166,6 +167,18 @@ public class VesperineClientGameTests implements FabricClientGameTest {
 			Vec3 mist = new Vec3(centre.x, centre.y + 2.5, centre.z);
 			shoot(context, singleplayer, acre, mistCamera.x, mistCamera.y, mistCamera.z, aimYaw(mistCamera, mist), aimPitch(mistCamera, mist), false,
 					"jugcraft_vesperine_defeated");
+			// A fresh instance in her slot is placed anew: the Grey Mist she left is gone with the old one.
+			server.runOnServer(minecraft -> {
+				LairInstance used = Lairs.instance(ACRE, 0);
+				check(used != null, "Her instance is not open");
+				Lairs.close(minecraft, used);
+				LairInstance fresh = Lairs.open(minecraft, ACRE);
+				check(fresh != null && fresh.slot == 0, "No fresh instance opened in her slot");
+				ServerLevel level = lair(minecraft);
+				for (BlockPos at : VesperineEntity.exitCells(centre)) {
+					check(!level.getBlockState(at).is(JugcraftLairs.LAIR_EXIT), "Her Grey Mist outlived her instance at " + at);
+				}
+			});
 			System.out.println("[vesperine] client game test: her fight passed end to end");
 			server.runOnServer(minecraft -> Lairs.reset());
 		}

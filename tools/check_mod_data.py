@@ -7816,7 +7816,8 @@ def java_number(source, name, value):
 
 def check_vesperine():
     """Vesperine, the Last Reaper (tools/vesperine.py, docs/features/vesperine.md): every number the Java uses is the
-    table's; her attacks are the table's; her settings are read with their defaults and ranges; every entity is
+    table's; her attacks are the table's; where her fight looks for the Hollow Acre's parts (HollowAcre.java) is where
+    tools/hollow_acre.py builds them; her settings are read with their defaults and ranges; every entity is
     registered, named and drawn; each GeckoLib body has its model, clips (every clip the Java names) and sheet, its
     box-UV regions inside the sheet without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model
     declares and cut out (no half-transparent pixel); no bone is animated by two of her controllers; her loot table is
@@ -7845,6 +7846,18 @@ def check_vesperine():
                     f"{str(reaping).lower()}, {str(moon).lower()})")
         if expected not in boss:
             err(f"VesperineEntity.Attack: expected {expected}")
+    # Where her fight looks for the Hollow Acre's parts (HollowAcre.java) is where tools/hollow_acre.py builds them.
+    import hollow_acre as ha
+    acre = re.sub(r"\s+", " ", sources.get("HollowAcre", ""))
+    for name, value in (("ARENA_X", ha.ARENA_CENTRE[0]), ("ARENA_Z", ha.ARENA_CENTRE[1]), ("FLOOR", ha.SURFACE + 1),
+                        ("ARENA_RADIUS", ha.ARENA_RADIUS), ("FIELD_NORTH", ha.FIELD[0]), ("FIELD_SOUTH", ha.FIELD[1]),
+                        ("PATH_WEST", ha.PATH[0]), ("PATH_EAST", ha.PATH[1])):
+        if not java_number(acre, name, value):
+            err(f"HollowAcre.{name} is not tools/hollow_acre.py's {value}")
+    if "THRONE = new BlockPos({}, {}, {});".format(*ha.THRONE) not in acre:
+        err(f"HollowAcre.THRONE is not tools/hollow_acre.py's {ha.THRONE}")
+    if "WARDS = List.of({});".format(", ".join("new BlockPos({}, {}, {})".format(*ward) for ward in ha.WARDS)) not in acre:
+        err(f"HollowAcre.WARDS are not tools/hollow_acre.py's {ha.WARDS}")
     loot_java = sources.get("VesperineLoot", "")
     if f'ADVANCEMENT = "{vs.ADVANCEMENT["key"]}";' not in loot_java or \
             f"EVENT_HOOD_CHANCE = {vs.EVENT_HOOD_CHANCE}F;" not in loot_java:
