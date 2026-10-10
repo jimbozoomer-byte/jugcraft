@@ -51,6 +51,9 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  * Seam Cutter's short one, held on, and the Caisson Pistol's arc.</li>
  * <li>Slice 9D, the pump shotguns, loaded a shell at a time: the heavy Sledge, the long Highwayman (worked by its bolt,
  * not a pump) and the quick Throttle; pellets like the other shotguns.</li>
+ * <li>Slice 10A, the launchers: the Earthmover and the Skylark Rifle fire the rocketry branch's High-Explosive Rockets as
+ * rockets ({@link #SHOTS}, {@link #ROCKET_SPEED}), each bursting where it hits or at the end of the gun's range; the
+ * Bullfrog lobs grenades as the Trench Lobber does, one a reload.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -98,18 +101,28 @@ public final class JugcraftGuns {
 		SPECS.put("sledge", new GunSpec(4.0F, 8, 20, false, 4, 0, 8, 14, 14, 8.0F, 6.0F, 24, "buckshot_shell"));
 		SPECS.put("highwayman", new GunSpec(3.0F, 8, 20, false, 7, 0, 18, 13, 16, 6.0F, 2.5F, 40, "buckshot_shell"));
 		SPECS.put("throttle", new GunSpec(3.0F, 8, 16, false, 6, 0, 10, 13, 22, 6.5F, 4.5F, 28, "buckshot_shell"));
+		SPECS.put("earthmover", new GunSpec(24.0F, 1, 20, false, 4, 61, 0, 0, 0, 2.5F, 1.0F, 72, "he_rocket"));
+		SPECS.put("skylark_rifle", new GunSpec(24.0F, 1, 20, false, 1, 48, 0, 0, 0, 1.5F, 0.25F, 135, "he_rocket"));
+		SPECS.put("bullfrog", new GunSpec(16.0F, 1, 20, false, 1, 45, 0, 0, 0, 3.0F, 1.5F, 20, "grenade"));
 	}
 
 	/**
 	 * What the slice 8C and 8D guns fire, where it is not bullets (tools/guns.py GUNS "shot"): {@link #GRENADE}, a Grenade
 	 * lobbed from the muzzle; {@link #FLAME}, a short jet of flame; {@link #BEAM}, a beam through every creature in its
-	 * line; {@link #ARC}, a bolt that leaps from creature to creature ({@link GunShots}).
+	 * line; {@link #ARC}, a bolt that leaps from creature to creature; {@link #ROCKET} (slice 10A), a High-Explosive Rocket
+	 * ({@link GunShots}).
 	 */
-	public static final Map<String, String> SHOTS = Map.of("trench_lobber", "grenade", "stoker", "flame", "beam_pistol", "beam", "stormlock_rifle", "arc", "linesman", "arc", "spikedriver", "beam", "seam_cutter", "beam", "caisson_pistol", "arc");
+	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"));
 	public static final String GRENADE = "grenade";
 	public static final String FLAME = "flame";
 	public static final String BEAM = "beam";
 	public static final String ARC = "arc";
+	public static final String ROCKET = "rocket";
+	/**
+	 * Slice 10A: how fast a rocket gun's rockets fly, in blocks a tick (tools/guns.py GUNS "rocket_speed"); each bursts
+	 * at the end of the gun's range if it has hit nothing by then.
+	 */
+	public static final Map<String, Float> ROCKET_SPEED = Map.of("earthmover", 3.0F, "skylark_rifle", 4.5F);
 	/**
 	 * Slice 8D: the JE each round of an energy weapon draws from the Energy Cells in the inventory as it loads
 	 * (tools/guns.py GUNS "charge"); a gun not listed loads rounds of its ammunition.
@@ -239,6 +252,12 @@ public final class JugcraftGuns {
 				"laser_sight"));
 		ACCEPTS.put("throttle", List.of("light_stock", "weighted_stock", "wooden_stock", "long_scope", "medium_scope",
 				"reflex_sight", "laser_sight"));
+		ACCEPTS.put("earthmover", List.of("light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
+				"netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip"));
+		ACCEPTS.put("skylark_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "tactical_grip"));
+		ACCEPTS.put("bullfrog", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet",
+				"steel_bayonet", "diamond_bayonet", "netherite_bayonet", "tactical_grip"));
 	}
 
 	/** The rounds. */
@@ -391,9 +410,14 @@ public final class JugcraftGuns {
 		return PER_ITEM.getOrDefault(spec.ammo(), 1);
 	}
 
-	/** What the gun fires: "bullet", {@link #GRENADE} or {@link #FLAME} ({@link #SHOTS}). */
+	/** What the gun fires: "bullet", or another of {@link #SHOTS}' kinds. */
 	public static String shot(GunItem gun) {
 		return SHOTS.getOrDefault(gun.name(), "bullet");
+	}
+
+	/** Blocks a tick this rocket gun's rockets fly (slice 10A, {@link #ROCKET_SPEED}); 0 for any other gun. */
+	public static float rocketSpeed(GunItem gun) {
+		return ROCKET_SPEED.getOrDefault(gun.name(), 0.0F);
 	}
 
 	/** Ticks this gun's barrels spin up before it fires; 0 for a gun without ({@link #SPIN_UP}). */

@@ -371,10 +371,41 @@ GUNS = {
         "damage": 3.0, "pellets": 8, "interval": 16, "auto": False, "capacity": 6,
         "reload": (10, 13, 22), "spread": (6.5, 4.5), "range": 28, "ammo": "buckshot_shell",
     },
+    # Slice 10A: the launchers.
+    #   shot          "rocket": each shot fires a High-Explosive Rocket (jugcraft:he_rocket, the rocketry branch's, the
+    #                 Rocket Launcher's), straight and untouched by gravity, at "rocket_speed" blocks a tick; it bursts
+    #                 where it hits, or at the end of "range" (its fuse: the range over the speed, in ticks), as the
+    #                 Rocket Launcher's do, hurting living things only. "damage" is that burst's at its centre.
+    # The Earthmover's drum holds four rockets; the Skylark Rifle holds one and fires it faster and steadier. The Bullfrog
+    # lobs a grenade, one a reload, any kind (slice 9G), as the Trench Lobber does.
+    "earthmover": {
+        "display": "Earthmover",
+        "source": "dozier_rl",
+        "tooltip": "A shoulder rocket launcher with a revolving drum of four rockets. Each bursts where it hits, or at "
+                   "the end of its range; none breaks a block. Fires high-explosive rockets.",
+        "damage": 24.0, "pellets": 1, "interval": 20, "auto": False, "capacity": 4,
+        "reload": 61, "spread": (2.5, 1.0), "range": 72, "ammo": "he_rocket", "shot": "rocket", "rocket_speed": 3.0,
+    },
+    "skylark_rifle": {
+        "display": "Skylark Rifle",
+        "source": "rocket_rifle",
+        "tooltip": "A rifle that fires one rocket at a time, fast and flat. It bursts where it hits, or at the end of its "
+                   "range; it never breaks a block. Fires high-explosive rockets.",
+        "damage": 24.0, "pellets": 1, "interval": 20, "auto": False, "capacity": 1,
+        "reload": 48, "spread": (1.5, 0.25), "range": 135, "ammo": "he_rocket", "shot": "rocket", "rocket_speed": 4.5,
+    },
+    "bullfrog": {
+        "display": "Bullfrog",
+        "source": "blooper",
+        "tooltip": "A stubby grenade launcher with a sliding barrel, loaded a grenade at a time. Each shot lobs it to go "
+                   "off where it lands; it never breaks a block. Loads any grenade, the one in the other hand first.",
+        "damage": 16.0, "pellets": 1, "interval": 20, "auto": False, "capacity": 1,
+        "reload": 45, "spread": (3.0, 1.5), "range": 20, "ammo": "grenade", "shot": "grenade",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
-SHOTS = ("bullet", "grenade", "flame", "beam", "arc")
+SHOTS = ("bullet", "grenade", "flame", "beam", "arc", "rocket")
 # An arc (slice 8D) leaps on from its first creature to at most this many more, each the nearest within this many
 # blocks of the last that the shooter may strike and that it can reach in a straight line, each taking this share of
 # the damage before it (JugcraftGuns.ARC_HOPS, ARC_REACH, ARC_SHARE).
@@ -400,7 +431,9 @@ CELL_RECIPE = ([" C ", "GRG", " B "], {"C": "jugcraft:copper_cable", "G": "minec
 # (JugcraftGuns.PER_ITEM): the field chemistry branch's Grenade (jugcraft:grenade), a grenade a round; and blaze
 # powder, four bursts of the Stoker's flame. A reload that tops a gun up takes a whole item; what of it does not fit is
 # lost (docs/features/guns.md, slice 8C).
-OTHER_AMMO = {"grenade": 1, "minecraft:blaze_powder": 4}
+OTHER_AMMO = {"grenade": 1, "minecraft:blaze_powder": 4,
+              # Slice 10A: the rocketry branch's High-Explosive Rocket (jugcraft:he_rocket), a rocket a round.
+              "he_rocket": 1}
 
 # The rounds: display name, tooltip, recipe (pattern, key, count). Cheap and early: copper or brass, lead and gunpowder.
 AMMO = {
@@ -495,10 +528,19 @@ RECIPES = {
                                     "B": "#c:ingots/brass"}),
     "throttle": (["SSC", "PLB"], {"S": "#c:ingots/steel", "C": "minecraft:copper_ingot", "P": "#minecraft:planks",
                                   "L": "minecraft:lever", "B": "#c:ingots/brass"}),
+    # Slice 10A: the rocket guns in steel plate, as the Rocket Launcher is, a tripwire hook for the trigger; copper for
+    # the Earthmover's drum, planks and a lever for the Skylark's stock and breech. The Bullfrog is iron and copper.
+    "earthmover": (["PPP", "CTC"], {"P": "#c:plates/steel", "C": "minecraft:copper_ingot", "T": "minecraft:tripwire_hook"}),
+    "skylark_rifle": (["PPP", "WLT"], {"P": "#c:plates/steel", "W": "#minecraft:planks", "L": "minecraft:lever",
+                                       "T": "minecraft:tripwire_hook"}),
+    "bullfrog": (["ICC", "PL "], {"I": "minecraft:iron_ingot", "C": "minecraft:copper_ingot", "P": "#minecraft:planks",
+                                  "L": "minecraft:lever"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
 RECIPE_SWITCHES = {gun: ("machines",) for gun, spec in GUNS.items() if spec["ammo"] == CELL}
+# The rocket guns (slice 10A) too: their High-Explosive Rockets come from the rocket workshop, a machine.
+RECIPE_SWITCHES.update({gun: ("machines",) for gun, spec in GUNS.items() if spec.get("shot") == "rocket"})
 
 # How each gun is built from the owner's parts, in the owner's model space (Java item-model pixels: x east, y up,
 # z south; the muzzle points north, -z). Each bone: (name, parent, [parts], pivot). The pivots are where the
@@ -1161,6 +1203,67 @@ BUILDS = {
         "sight": (8.0, 6.25, 11.6),
         "eye_relief": 2.0,
     },
+    # Slice 10A, the launchers. The Dozier RL is carried on the shoulder: its owner display holds the tube past the
+    # right of the head, the grip at the hip guns' depth. Its drum (the owner's drum part) is its magazine: the reload
+    # twists it free (cylinder_magazine, about the drum's middle), pulls it out to the left and down, and brings a full
+    # one back to twist home. The fire part is the backblast, on the flame bone: the shot puts it out behind the tube
+    # at twice its size, shrinking back; it turns about its middle, so it starts at the tube's back end (the renderer
+    # shows it only while a shot moves it). Its sight is a frame with a centre dot on a bracket off the left side, and
+    # a scope stands on the rail there (MOUNTS). Its bolt bone, which only the draw names, holds nothing.
+    "earthmover": {
+        "bones": [
+            ("gun_body", None, ["main", "sights"], (8.0, 2.9, 9.1)),
+            ("cylinder_magazine", "gun_body", [], (8.0, 8.0, 5.0)),
+            ("magazine", "cylinder_magazine", ["drum"], (8.0, 8.0, 5.0)),
+            ("flame", "gun_body", ["fire"], (7.95, 6.47, 18.25)),
+            ("bolt", "gun_body", [], (8.0, 6.6, 12.0)),
+        ],
+        "hands": {"right": (8.0, 2.9, 9.1), "left": (8.0, 3.2, 3.0)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 6.6, -4.3),
+        "sight": (4.875, 7.975, 9.0),
+    },
+    # The Rocket Rifle breaks open: its barrel (the main part's elements the owner named "barrel": the tube, its front
+    # post and the fore-end under it) hinges down about the bottom of the receiver's front, and the reload carries a
+    # rocket in on the shell bone (PROPS) from the left hand and slides it nose first into the breech. Its grips and
+    # bayonets ride the barrel ("mounts"). Its sights are the notch on the back of the receiver and the post at the
+    # muzzle. Its flame bone, which only the shot's scale moves, holds nothing. Aimed, it is held 3 px further out:
+    # through the aimed shot its kick otherwise brought the back of its receiver to the near plane.
+    "skylark_rifle": {
+        "bones": [
+            ("gun_body", None, ["main@gun_body", "stan_grip"], (8.0, 1.2, 15.5)),
+            ("barrel", "gun_body", ["main@barrel"], (8.0, 2.45, 10.43)),
+            ("shell", "gun_body", ["@rocket"], (8.77, 6.95, 13.68)),
+            ("flame", "gun_body", [], (7.89, 4.39, 0.43)),
+        ],
+        "mounts": {"grip": "barrel"},
+        "hands": {"right": (8.0, 1.2, 15.5), "left": (8.0, 2.3, 6.5)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (7.89, 4.39, 0.4),
+        "sight": (8.0, 6.05, 14.2),
+        "eye_relief": 3.0,
+    },
+    # The Blooper's barrel (the owner's barrel part) slides: each shot drives it back along its rod and home
+    # (standard_barrel), and the reload, the gun brought in and tipped up, racks it back under the left hand
+    # (barrels), which then holds the muzzle while a grenade (the shell bone, PROPS) is seated in its mouth. The draw
+    # swings it up shut about the bottom of the receiver's front (barrel), as the Rocket Rifle's does. Its leaf sight
+    # (the main part's elements the owner named "sights") flaps with each shot about its foot; the aim looks through
+    # its ring.
+    "bullfrog": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.5, 15.6)),
+            ("gun_body", "gun_body2", ["main@gun_body", "stan_grip"], (8.0, 1.5, 15.6)),
+            ("sights", "gun_body", ["main@sights"], (8.0, 4.92, 13.65)),
+            ("barrel", "gun_body", [], (8.0, 1.7, 10.9)),
+            ("barrels", "barrel", [], (8.0, 3.62, 5.91)),
+            ("standard_barrel", "barrels", ["barrel"], (8.0, 3.62, 5.91)),
+            ("shell", "standard_barrel", ["@grenade"], (8.0, 3.62, 6.45)),
+        ],
+        "hands": {"right": (8.0, 1.5, 15.6), "left": (8.0, 0.9, 8.9)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 3.62, 1.4),
+        "sight": (8.0, 5.55, 13.65),
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -1208,6 +1311,13 @@ PROPS = {
     "linesman": {"cell": {"kind": "cell", "from": (7.73, 0.81, 12.6), "size": (1.5, 1.5, 3.0), "texture_at": (56, 0)}},
     "highwayman": {"shell": {"kind": "buckshot", "from": (8.207, 2.842, 10.878), "size": (1.0, 1.0, 3.0),
                              "texture_at": (120, 123)}},
+    # Slice 10A: the Skylark Rifle's rocket rests where the reload's offsets, scaled and turned, bring its nose to the
+    # opened breech as the reload's carry ends (it shrinks to nothing as it slides in); the Bullfrog's grenade rests in
+    # the barrel, where the reload's offset brings it into the muzzle's mouth.
+    "skylark_rifle": {"rocket": {"kind": "rocket", "from": (8.02, 6.2, 11.18), "size": (1.5, 1.5, 5.0),
+                                 "texture_at": (120, 0)}},
+    "bullfrog": {"grenade": {"kind": "grenade", "from": (7.3, 2.92, 4.95), "size": (1.4, 1.4, 3.0),
+                             "texture_at": (120, 0)}},
 }
 # The owner's pilot flame (Guns/item/spitfire_flame.png): three 8 x 8 frames, one above the other; the first frame's
 # flame is 4 px wide (columns 2 to 5) and 8 tall, its tip at the top.
@@ -1343,7 +1453,8 @@ ATTACHMENTS = {
     # with the owner's short beam out of its front; held, it marks where the gun points with a red dot
     # (client/guns/GunLaser), and aimed, its dot is on the middle of the screen as the Reflex Sight's. "not_on": the
     # guns that do not take it although they take scopes. The Breacher's atlas, holding three scopes' pieces, has no
-    # room left for its pieces. The Trench Lobber's has none either, and its grenades arc below a straight laser.
+    # room left for its pieces. The Trench Lobber's has none either, and its grenades arc below a straight laser. On
+    # the Earthmover's rail, off the left side of its body (slice 10A), its housing would run into the drum.
     "tactical_grip": {
         "display": "Tactical Grip", "slot": "grip", "parts": ["tact_grip"], "replaces": False,
         "effects": {"hip_spread": 0.9, "kick": 0.8}, "model": "vertical_grip", "model_elements": [1, 3, 4],
@@ -1353,7 +1464,7 @@ ATTACHMENTS = {
     "laser_sight": {
         "display": "Laser Sight", "slot": "optic", "mount": True, "parts": [], "replaces": True,
         "effects": {"hip_spread": 0.7}, "model": "laser_sight", "texture": "laser_sight",
-        "more_textures": {"scguns:item/laser": "laser_beam"}, "not_on": ["breacher", "trench_lobber"],
+        "more_textures": {"scguns:item/laser": "laser_beam"}, "not_on": ["breacher", "trench_lobber", "earthmover"],
         "zoom": 0.9, "view": {"dot": "red_dot_reticle"},
         "tooltip": "A laser on the gun's top: a red dot marks where it points, so it is much steadier from the hip.",
     },
@@ -1443,8 +1554,9 @@ def attachment_parts(gun, kind):
     return [part]
 
 
-# Where a scope stands on a gun, in owner space, where optic_mount()'s reading of the parts would not do.
-MOUNTS = {}
+# Where a scope stands on a gun, in owner space, where optic_mount()'s reading of the parts would not do: the
+# Earthmover's sight and the rail under it stand off the left side of its body (slice 10A), so a scope stands there too.
+MOUNTS = {"earthmover": (4.875, 7.45, 9.675)}
 
 
 def optic_mount(gun):
@@ -1607,6 +1719,8 @@ ZOOM = {
     "spikedriver": 0.85, "seam_cutter": 0.95, "caisson_pistol": 0.9,
     # The pump shotguns (slice 9D): the Highwayman, made to be aimed, narrows it most.
     "sledge": 0.9, "highwayman": 0.8, "throttle": 0.88,
+    # The launchers (slice 10A): the Skylark Rifle reaches furthest; the Bullfrog lobs its grenades close.
+    "earthmover": 0.85, "skylark_rifle": 0.8, "bullfrog": 0.92,
 }
 
 
@@ -1645,7 +1759,9 @@ FLASH_SOURCE = BLOCKS / "Big Cannons and Mounted Guns" / "textures"
 # launch and a burst of flame (slice 8C) flash about as wide as buckshot; an energy weapon's discharge (slice 8D) as a
 # light round's.
 FLASH_SIZE = {"light_round": 5.0, "rifle_round": 7.0, "buckshot_shell": 8.0, "paper_cartridge": 10.0, "grenade": 9.0,
-              "minecraft:blaze_powder": 8.0, "energy_cell": 6.0}
+              "minecraft:blaze_powder": 8.0, "energy_cell": 6.0,
+              # Slice 10A: a rocket's launch flares as wide as black powder.
+              "he_rocket": 10.0}
 # The flash's tint, by the round, where it is not the owner's frames' own white-gold (client/guns/GunLooks
 # FLASH_TINTS, multiplied into the frames): an energy weapon's discharge is cyan-white.
 FLASH_TINT = {"energy_cell": 0x9FF4FF}
@@ -1694,7 +1810,11 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    "squall_rifle": {"metal": "clank"},
                    # The pump shotguns (slice 9D) push a shell; the Throttle's bulb clanks shut.
                    "sledge": {"reload_mag_in": "shell_in"}, "highwayman": {"reload_mag_in": "shell_in"},
-                   "throttle": {"reload_mag_in": "shell_in", "metal": "clank"}}
+                   "throttle": {"reload_mag_in": "shell_in", "metal": "clank"},
+                   # The launchers (slice 10A): the Earthmover's drum clanks as it twists free and home; the Skylark
+                   # Rifle and the Bullfrog push a round in.
+                   "earthmover": {"metal": "clank"}, "skylark_rifle": {"reload_mag_in": "shell_in"},
+                   "bullfrog": {"reload_mag_in": "shell_in"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -1744,6 +1864,11 @@ SHOT_SOUNDS = {
     "sledge": "item/makeshift_rifle/enchanted_fire.ogg",
     "highwayman": "item/boomstick/enchanted_fire.ogg",
     "throttle": "item/plasma_shotgun/fire.ogg",
+    # Slice 10A: the library's bazooka and rocket rifle shots, and its second air gun shot, a hollow thump for the
+    # Bullfrog's grenade.
+    "earthmover": "item/bazooka/fire.ogg",
+    "skylark_rifle": "item/rocket_rifle/fire.ogg",
+    "bullfrog": "item/airgun/fire_2.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -2065,11 +2190,25 @@ def atlas_layout(gun):
 PACK_LATER = {"scguns:item/laser_sight", "scguns:item/laser"}
 
 
+# Library textures that are an animation's frames, one above the other (slice 10A: the Skylark Rifle's two, its flame
+# flickering in a corner none of its parts draw on). A gun draws on the first frame, the top square.
+FRAMED = {"scguns:item/rocket_rifle"}
+
+
 def texture_size(texture):
-    """(width, height) of a library texture."""
+    """(width, height) of a library texture (its first frame's, for one FRAMED)."""
     from PIL import Image
     with Image.open(texture_file(texture)) as image:
-        return image.size
+        width, height = image.size
+    return (width, width) if texture in FRAMED else (width, height)
+
+
+def library_image(texture):
+    """A library texture in RGBA (its first frame, for one FRAMED)."""
+    from PIL import Image
+    with Image.open(texture_file(texture)) as image:
+        rgba = image.convert("RGBA")
+    return rgba.crop((0, 0, rgba.width, rgba.width)) if texture in FRAMED else rgba
 
 
 def island_rect(data, face, lo, hi, size):
@@ -2149,8 +2288,7 @@ def own_footprint(gun):
     """Which pixels of the gun's own texture are in use: drawn on, under any face's UVs, or a prop's block."""
     import numpy as np
     from PIL import Image
-    with Image.open(LIBRARY / "item" / f"{GUNS[gun]['source']}.png") as image:
-        rgba = np.asarray(image.convert("RGBA"))
+    rgba = np.asarray(library_image(own_texture(gun)))
     used = rgba[:, :, 3] > 0
     height, width = used.shape
     for _, _, parts, _ in effective_bones(gun):
@@ -2186,10 +2324,9 @@ def compose_atlas(gun):
     its attachments draw on, placed by atlas_layout(); None when it is the owner's file unchanged."""
     from PIL import Image
     size, place = atlas_layout(gun)
-    if gun not in PROPS and len(place) == 1:
+    if gun not in PROPS and len(place) == 1 and own_texture(gun) not in FRAMED:
         return None
-    with Image.open(LIBRARY / "item" / f"{GUNS[gun]['source']}.png") as image:
-        own = image.convert("RGBA")
+    own = library_image(own_texture(gun))
     if gun in PROPS:
         own = draw_props(own, gun)
     if len(place) == 1:
@@ -2199,8 +2336,7 @@ def compose_atlas(gun):
         if texture == own_texture(gun):
             atlas.paste(own, placement[:2])
             continue
-        with Image.open(texture_file(texture)) as image:
-            source = image.convert("RGBA")
+        source = library_image(texture)
         if isinstance(placement, dict):
             # A scope's texture, piece by piece: each rect where atlas_layout() packed it.
             for (x0, y0, x1, y1), (x, y, _, _) in placement.items():
@@ -2352,6 +2488,13 @@ def prop_dims(prop):
     return tuple(max(1, int(round(v))) for v in prop["size"])
 
 
+# The props with a front and a back drawn the same way round on every face (slice 10A: a rocket's red nose, a grenade
+# round's steel cap). GeckoLib runs the east face's u and the top's v from back to front (GECKO_CORNERS), so those two
+# faces get blocks of their own, drawn back to front (draw_oriented()). The older props share one block among their
+# four long faces, so their east face and top show it the other way round.
+ORIENTED = ("rocket", "grenade")
+
+
 def prop_cube(gun, name):
     prop = PROPS[gun][name]
     x, y, z = prop["from"]
@@ -2361,6 +2504,12 @@ def prop_cube(gun, name):
     origin = [rnd(8.0 - (x + sx)), rnd(y), rnd(z - 8.0)]
     if prop["kind"] == "flame":
         return {"origin": origin, "size": [sx, sy, sz], "uv": flame_faces(tu, tv, w, h, d)}
+    if prop["kind"] in ORIENTED:
+        # The ends side by side, then the west face, the east face, and the top and bottom side by side.
+        return {"origin": origin, "size": [sx, sy, sz], "uv": {
+            "north": {"uv": [tu, tv], "uv_size": [w, h]}, "south": {"uv": [tu + w, tv], "uv_size": [w, h]},
+            "west": {"uv": [tu, tv + h], "uv_size": [d, h]}, "east": {"uv": [tu, tv + 2 * h], "uv_size": [d, h]},
+            "up": {"uv": [tu, tv + 3 * h], "uv_size": [w, d]}, "down": {"uv": [tu + w, tv + 3 * h], "uv_size": [w, d]}}}
     # One texture block per face (prop_block): the ends side by side, the sides below them, the top and bottom below.
     return {"origin": origin, "size": [sx, sy, sz], "uv": {
         "north": {"uv": [tu, tv], "uv_size": [w, h]}, "south": {"uv": [tu + w, tv], "uv_size": [w, h]},
@@ -2381,7 +2530,7 @@ def flame_faces(tu, tv, w, h, d):
 def prop_block(prop):
     """The atlas block (width, height) a prop's faces take."""
     w, h, d = prop_dims(prop)
-    return max(2 * w, d), 2 * h + d
+    return (max(2 * w, d), 3 * h + d) if prop["kind"] in ORIENTED else (max(2 * w, d), 2 * h + d)
 
 
 def key_value(channel, time=None):
@@ -2712,6 +2861,12 @@ def check():
             problems.append(f"{gun}: its capacity, with a fitted magazine, is more than a gun holds (64)")
         if spec.get("shot") == "flame" and spec["pellets"] != 1:
             problems.append(f"{gun}: a flame is one jet a shot")
+        # Slice 10A: a rocket gun, and only one, fires a High-Explosive Rocket a shot at its own speed.
+        rocket = spec.get("shot") == "rocket"
+        if rocket != ("rocket_speed" in spec) or rocket and not (
+                spec["ammo"] == "he_rocket" and spec["pellets"] == 1 and 0.5 <= spec["rocket_speed"] <= 8.0):
+            problems.append(f"{gun}: a rocket gun, and only one, fires a High-Explosive Rocket a shot, at 0.5 to 8 blocks "
+                            "a tick (rocket_speed)")
     if not all(isinstance(n, int) and n >= 1 for n in OTHER_AMMO.values()):
         problems.append("OTHER_AMMO: each item loads a whole number of rounds, at least one")
     for name, mounts in ((g, b.get("mounts", {})) for g, b in BUILDS.items()):
@@ -2765,7 +2920,8 @@ def draw_props(atlas, gun):
         bw, bh = prop_block(prop)
         if any(atlas.getpixel((tu + x, tv + y))[3] for x in range(max(bw, 8)) for y in range(bh)):
             raise ValueError(f"{gun}: the atlas is not empty at {tu},{tv} for its {name}")
-        {"buckshot": draw_buckshot, "cartridge": draw_cartridge, "flame": draw_flame}.get(prop["kind"], draw_plain)(atlas, prop)
+        draw = {"buckshot": draw_buckshot, "cartridge": draw_cartridge, "flame": draw_flame}.get(prop["kind"], draw_plain)
+        (draw_oriented if prop["kind"] in ORIENTED else draw)(atlas, prop)
     return atlas
 
 
@@ -2842,6 +2998,12 @@ PLAIN = {
     # An Energy Cell (slice 8D), in the owner's cell art's colours: a steel cap, the green glass, a copper cap.
     "cell": (((120, 111, 107, 255), (74, 70, 68, 255)), ((74, 144, 53, 255), (49, 86, 24, 255)),
              ((88, 72, 61, 255), (57, 50, 45, 255))),
+    # Slice 10A: a High-Explosive Rocket, in its item art's colours: the red nose, the steel body, the dark nozzle; and
+    # a grenade round, the field chemistry Grenade's olive with a steel cap at the front.
+    "rocket": (((170, 36, 30, 255), (120, 20, 18, 255)), ((150, 157, 168, 255), (112, 119, 131, 255)),
+               ((82, 88, 99, 255), (58, 62, 72, 255))),
+    "grenade": (((150, 154, 160, 255), (128, 132, 140, 255)), ((96, 110, 62, 255), (70, 82, 44, 255)),
+                ((70, 82, 44, 255), (46, 54, 30, 255))),
 }
 
 
@@ -2863,6 +3025,28 @@ def draw_plain(atlas, prop):
             atlas.putpixel((tu + z, tv + h + y), tone(part, z, y))
         for x in range(2 * w):
             atlas.putpixel((tu + x, tv + 2 * h + z), tone(part, x, z))
+    return atlas
+
+
+def draw_oriented(atlas, prop):
+    """A rocket or a grenade round (ORIENTED): PLAIN's front end, body and back end along its length, light and dark
+    checkered; the ends' faces in their tones, each long face's block the way round GeckoLib reads it (prop_cube())."""
+    tu, tv = prop["texture_at"]
+    w, h, d = prop_dims(prop)
+    front, body, back = PLAIN[prop["kind"]]
+    def part(z):  # z: 0 at the front
+        return front if z == 0 else back if z == d - 1 else body
+    for x in range(w):
+        for y in range(h):
+            atlas.putpixel((tu + x, tv + y), front[(x + y) % 2])
+            atlas.putpixel((tu + w + x, tv + y), back[(x + y) % 2])
+    for z in range(d):
+        for y in range(h):
+            atlas.putpixel((tu + z, tv + h + y), part(z)[(z + y) % 2])               # west: u from the front
+            atlas.putpixel((tu + z, tv + 2 * h + y), part(d - 1 - z)[(z + y) % 2])   # east: u from the back
+        for x in range(w):
+            atlas.putpixel((tu + x, tv + 3 * h + z), part(d - 1 - z)[(x + z) % 2])   # top: v from the back
+            atlas.putpixel((tu + w + x, tv + 3 * h + z), part(z)[(x + z) % 2])       # bottom: v from the front
     return atlas
 
 

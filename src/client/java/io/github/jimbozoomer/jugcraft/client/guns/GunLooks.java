@@ -16,7 +16,7 @@ public final class GunLooks {
 	static final Map<String, Look> LOOKS = new HashMap<>();
 	/** How big a shot's muzzle flash is, across, in the gun model's pixels, by the round it fires (or grenade or fuel). */
 	static final Map<String, Float> FLASH_SIZES = Map.of("light_round", 5.0F, "rifle_round", 7.0F, "buckshot_shell", 8.0F,
-			"paper_cartridge", 10.0F, "grenade", 9.0F, "minecraft:blaze_powder", 8.0F, "energy_cell", 6.0F);
+			"paper_cartridge", 10.0F, "grenade", 9.0F, "minecraft:blaze_powder", 8.0F, "energy_cell", 6.0F, "he_rocket", 10.0F);
 	/**
 	 * The flash's tint, RGB, multiplied into the owner's white-gold frames, by the round, where it has one (tools/guns.py
 	 * FLASH_TINT): an energy weapon's discharge is cyan-white (slice 8D).
@@ -36,9 +36,10 @@ public final class GunLooks {
 	 * (slice 9B) kick back toward the eye with every shot: at the hip's depth the Rattler's slide and the Bronco's
 	 * receiver reached the near plane, and the Squall's back came within two pixels. So did the Spikedriver's (slice 9C),
 	 * kicking back with each shot. The pump shotguns (slice 9D) kick hardest: at the hip's depth the tops of the Sledge's
-	 * and the Highwayman's grips came two pixels past the eye, and the Throttle's within one and a quarter.
+	 * and the Highwayman's grips came two pixels past the eye, and the Throttle's within one and a quarter. The Skylark
+	 * Rifle's kick (slice 10A) brought the back of its receiver to the near plane.
 	 */
-	static final Map<String, Float> EYE_RELIEF = Map.ofEntries(Map.entry("garrison_rifle", 4.0F), Map.entry("beam_pistol", 4.0F), Map.entry("picket_rifle", 2.0F), Map.entry("ranger_rifle", 2.0F), Map.entry("kestrel_rifle", 2.0F), Map.entry("rattler_pistol", 4.0F), Map.entry("bronco_smg", 4.0F), Map.entry("squall_rifle", 3.0F), Map.entry("spikedriver", 2.0F), Map.entry("sledge", 6.0F), Map.entry("highwayman", 6.0F), Map.entry("throttle", 2.0F));
+	static final Map<String, Float> EYE_RELIEF = Map.ofEntries(Map.entry("garrison_rifle", 4.0F), Map.entry("beam_pistol", 4.0F), Map.entry("picket_rifle", 2.0F), Map.entry("ranger_rifle", 2.0F), Map.entry("kestrel_rifle", 2.0F), Map.entry("rattler_pistol", 4.0F), Map.entry("bronco_smg", 4.0F), Map.entry("squall_rifle", 3.0F), Map.entry("spikedriver", 2.0F), Map.entry("sledge", 6.0F), Map.entry("highwayman", 6.0F), Map.entry("throttle", 2.0F), Map.entry("skylark_rifle", 3.0F));
 	/**
 	 * How far the owner's third-person transform tilts a gun up off the arm that holds it, in degrees (tools/guns.py
 	 * tilt(): the x rotation of its "thirdperson_righthand"); a gun not listed has none. The Gattaler's is made for an
@@ -86,6 +87,9 @@ public final class GunLooks {
 		LOOKS.put("sledge", new Look(true, 0.9F));
 		LOOKS.put("highwayman", new Look(true, 0.8F));
 		LOOKS.put("throttle", new Look(true, 0.88F));
+		LOOKS.put("earthmover", new Look(true, 0.85F));
+		LOOKS.put("skylark_rifle", new Look(true, 0.8F));
+		LOOKS.put("bullfrog", new Look(true, 0.92F));
 		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));

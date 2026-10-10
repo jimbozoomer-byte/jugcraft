@@ -1,6 +1,7 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F) and the Trench Lobber's grenades (slice 9G)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G) and the launchers (slice 10A)
 
 Status:
+- **Slices 1 to 9G are in `main`:** the last of them, 8C to 9G, with #277 on 10 October 2026. The lines below say where each was built.
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
 - **Slice 2** (the iron set: the Warden Pistol, Riveter SMG and Haymaker; [below](#slice-2-the-iron-set)): implemented on `claude/guns-iron` (#252), stacked on slice 1, awaiting review.
 - **Slice 3** (the lever set: the Longhorn Rifle, Drover Rifle and Coach Gun; [below](#slice-3-the-lever-set)): implemented on `claude/guns-lever` (#253), stacked on slice 2, awaiting review.
@@ -20,6 +21,7 @@ Status:
 - **Slice 9E** (the Tactical Grip and the Laser Sight; [below](#slice-9e-the-tactical-grip-and-the-laser-sight)): implemented on `claude/guns-tactical` (#290), stacked on slice 9D, awaiting review.
 - **Slice 9F** (the aiming polish: the hands and the fitted stocks kept off the sights; [below](#slice-9f-the-aiming-polish)): implemented on `claude/guns-aiming` (#291), stacked on slice 9E, awaiting review.
 - **Slice 9G** (the Trench Lobber's grenades: it loads the chemical grenades too; [below](#slice-9g-the-trench-lobbers-grenades)): implemented on `claude/guns-lobber-grenades`, stacked on slice 9F, awaiting review.
+- **Slice 10A** (the launchers: the Earthmover, Skylark Rifle and Bullfrog; [below](#slice-10a-the-launchers)): implemented on `claude/guns-launchers`, based on `main`, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -33,6 +35,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
 - the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, the second, the aiming polish, slice 9F, and the third, the Lobber's grenades, slice 9G.
+- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1078,6 +1081,85 @@ A reload of another kind than the Lobber holds first puts the grenades it held b
 - **One kind a magazine:** a magazine of mixed grenades is not possible; changing kind changes all of them.
 - **Not played:** none of it has been played yet.
 
+## Slice 10A: the launchers
+The first of the gun sets the owner chose on 10 October 2026 ("Launchers (Recommended)"): two guns that fire the rocketry branch's High-Explosive Rockets, and a grenade launcher.
+
+| | Earthmover | Skylark Rifle | Bullfrog |
+|---|---|---|---|
+| The owner's gun | Dozier RL | Rocket Rifle | Blooper |
+| What it is | a shoulder rocket launcher with a drum of four rockets on top of its tube | a break-open rifle that fires one rocket at a time, fast and flat | a stubby grenade launcher with a sliding barrel |
+| What it fires | High-Explosive Rockets | High-Explosive Rockets | grenades, any kind (as the Trench Lobber, [slice 9G](#slice-9g-the-trench-lobbers-grenades)) |
+| The burst | 24 at its centre (12 hearts), falling off to nothing at 5 blocks: the Rocket Launcher's | the same | the grenade's own: a frag Grenade's 16 at its centre over 4 blocks |
+| Rocket speed | 3 blocks a tick (60 a second), as the Rocket Launcher's | 4.5 blocks a tick (90 a second) | (lobbed as the grenade launcher throws) |
+| Rate | 1 a second (every 20 ticks) | one shot, then the reload | one shot, then the reload |
+| Holds | 4 rockets | 1 | 1 grenade |
+| Reload | 3.05 s | 2.4 s | 2.25 s |
+| Spread, hip / aimed | 2.5° / 1° | 1.5° / 0.25° | 3° / 1.5° |
+| Range | 72 blocks | 135 | 20 (how far a level shot carries) |
+| The view aimed | narrowed to 0.85 | 0.8 | 0.92 |
+| Takes | the light and tactical grips, the bayonets and the three scopes | the three stocks, the light and tactical grips and the bayonets | the same as the Skylark Rifle |
+
+The reload times are the owner's animations'.
+
+**How a rocket flies** (`GunShots.rocket`, the rocketry branch's `CombatRocket`): from the eye along the look, strayed by about the spread in degrees, straight and untouched by gravity. It bursts where it hits anything, or in the air at the end of the gun's range: its fuse is the range over the speed, 24 ticks for the Earthmover's and 30 for the Skylark Rifle's. The burst is the Rocket Launcher's high-explosive one (`Blast`): it hurts living things only (the shooter too, if they stand within 5 blocks of it), walls shield from it, and it never breaks, moves or burns a block. A rocket saved in flight keeps what is left of its fuse.
+
+**What they load:** the rocket guns take High-Explosive Rockets from the inventory, a rocket a round. Homing rockets stay the Rocket Launcher's: a rocket gun neither loads nor fires them. The Bullfrog loads any grenade, the one in the other hand first, as the Trench Lobber does, and lobs the kind it holds.
+
+**Crafting** (a crafting table; the guns switch, and for the rocket guns the machines switch too, since their rockets come from the rocket workshop):
+- **Earthmover:** three steel plates over a copper ingot, a tripwire hook and a copper ingot: the plates for its tube, the copper for its drum and the hook for its trigger, as the Rocket Launcher has.
+- **Skylark Rifle:** three steel plates over planks, a lever and a tripwire hook: its stock and its breech.
+- **Bullfrog:** an iron ingot and two copper ingots over planks and a lever.
+
+**What you see:** the owner's animations.
+- **Earthmover:** each shot kicks the launcher back, and the backblast (the owner's fire part) flares out behind the tube at twice its size and dies back toward it. To reload, the launcher is rolled over to the left, the drum twisted free, pulled out to the left and down, and a full one brought back and twisted home with a clank.
+- **Skylark Rifle:** each shot kicks it back and up. To reload, the barrel breaks open downward on its hinge, the left hand brings up a rocket and slides it nose first into the breech, and the barrel snaps shut.
+- **Bullfrog:** each shot drives the barrel back along the rod under it and flaps the leaf sight. To reload, the gun is brought in and tipped up, the left hand racks the barrel back, holds the muzzle while a grenade is seated in its mouth, and pushes the barrel home. The draw swings the barrel up shut, as the Skylark Rifle's does.
+- **In flight** a rocket is drawn as the Rocket Launcher's are: its item, trailing smoke and flame.
+- **Spent cases:** none. Where the owner's animations cue one, the gun puffs smoke, as a muzzle-loader's lock does.
+- **Sounds:** the library's bazooka shot (the Earthmover), its rocket rifle shot (the Skylark Rifle) and its second air gun shot, a hollow thump (the Bullfrog). None names another source: the first two carry no tags, the third only the program it was made in (`Software=Lavf59.27.100`). The Earthmover's drum clanks as it twists free and home (the Squall Rifle's clank, `GunAnimations.GUN_SOUND_ALIASES`); the Skylark Rifle's rocket and the Bullfrog's grenade go in with the insert sound.
+
+**How the models were built:**
+- **Earthmover:**
+  - **On the shoulder:** its owner display holds it as a shoulder launcher: the grip at the hip guns' depth, the tube running on past the right of the head. In first person the tube's back fills the right of the view, and the backblast is behind the eye.
+  - **Drum:** the owner's drum part, on the magazine bone, under the cylinder_magazine bone; both turn about the drum's middle. The reload twists the drum free (cylinder_magazine), pulls it out and brings it back (magazine).
+  - **Backblast:** the owner's fire part (drawn on the owner's `gyrojet_flames` texture, packed into the gun's atlas), on the flame bone, which the renderer shows only while a shot moves it. It turns about its own middle, so at twice its size it starts at the tube's back end.
+  - **Sights:** a frame with a centre dot, on a bracket off the left side of the body; the aim looks through the dot. A scope stands on the rail under it (the owner's no_sights part, `MOUNTS`), off the left side, beside the drum. The Laser Sight, longer and wider, would run into the drum there, so the Earthmover does not take it.
+  - **Empty bones:** the bolt bone, which only the draw names.
+- **Skylark Rifle:**
+  - **Texture:** the owner's is two frames, one above the other, its flame flickering in a corner no part draws on. The gun takes the first frame (`FRAMED`).
+  - **Barrel:** the main part's elements the owner named "barrel" (the tube, its front post and the fore-end under it), hinged at the bottom of the receiver's front. Its grips and bayonets ride it (`"mounts"`), so they open with it.
+  - **Rocket:** the reload's shell bone carries a High-Explosive Rocket (`PROPS`): a 1.5 × 1.5 × 5 px steel body with a red nose and a dark nozzle. It rests where the reload's offsets, turned and scaled, bring its nose to the opened breech as the carry ends, in line with the barrel, and it shrinks to nothing as it slides in. It shows only while the reload moves it.
+  - **Sights:** the notch on the back of the receiver and the post at the muzzle.
+  - **Empty bones:** the flame bone, which only the shot's scale moves.
+  - **Aiming:** held 3 px further out (`"eye_relief"`): through the aimed shot its kick otherwise brought the back of its receiver to the near plane.
+- **Bullfrog:**
+  - **Barrel:** the owner's barrel part on the standard_barrel bone, which each shot drives back; under the barrels bone, which the reload racks back; under the barrel bone, which the draw swings shut about the bottom of the receiver's front.
+  - **Grenade:** the reload's shell bone, on the barrel, carries a grenade (`PROPS`): a 1.4 × 1.4 × 3 px olive body with a steel cap. It rests inside the barrel, where the reload's offset brings it into the muzzle's mouth.
+  - **Sights:** the leaf sight on the back of the receiver (the main part's elements the owner named "sights"), on its own bone so that it flaps about its foot; the aim looks through its ring.
+- **The props drawn the right way round:** the rocket and the grenade have a front and a back, and GeckoLib reads a box's east face and top from back to front. So those two faces get blocks of their own in the atlas, drawn back to front (`ORIENTED`, `draw_oriented()`). The older props share one block among their four long faces, so their east face and top show it the other way round: the Highwayman's and Thunderpipe's shells, the cartridges, the Linesman's cell and the ramrods, each one or two pixels across. They are left as they were.
+- **Checked** in first-person and side previews: idle, aimed, fired, through each reload, draw and inspection; the Earthmover with each scope, the Laser Sight (which runs into its drum), a grip and a bayonet; the Skylark Rifle and the Bullfrog with a stock and a grip; the Skylark Rifle's rocket through its carry; and the nearest point of each gun to the eye through its aimed shot. The arms' directions were tried against others through the reloads (`armfit.py`); the usual ones stayed.
+
+**Connections:**
+- **Rockets:** the rocketry branch's High-Explosive Rockets, from the rocket workshop (four from two solid propellant, two guncotton and a rocket casing), the Rocket Launcher's ([rocket-launcher.md](rocket-launcher.md)).
+- **Grenades:** the field chemistry branch's ([field-chemistry.md](field-chemistry.md)).
+- **Parts:** steel plates from the machines, copper, tripwire hooks, levers, planks and iron.
+- **Their place:** the rocket guns at the electronics tier, beside the Rocket Launcher, whose rockets they share; the Bullfrog is iron and copper, but its grenades come from field chemistry.
+
+**Balance:** starting numbers.
+- **A rocket** does what the Rocket Launcher's does. The Rocket Launcher fires one every 2 s from the inventory: 12 a second. The Earthmover fires its four a second apart and then reloads for 3 s: about 16 a second over a drum and its reload. The Skylark Rifle fires one and reloads for 2.4 s: 10 a second, flying faster, further and steadier.
+- **The Bullfrog** lobs one grenade a reload, about one every 2.25 s, against the grenade launcher's 1.5 s and the Trench Lobber's six at 0.7 s.
+- **Nothing converts back,** so there is no loop.
+
+**Server authority:** the server spawns each rocket from its own copy of the player's position and look, at the gun's speed, with the gun's fuse, and its burst is the server's. Its rockets and the player's inventory are the server's, as for every gun.
+
+**Save compatibility:** new items `jugcraft:earthmover`, `skylark_rifle` and `bullfrog`. A rocket in flight now saves what is left of its fuse (`fuse`); one saved before has none and gets the Rocket Launcher's lifetime, as it would have. `guns.enabled=false` turns the three recipes off, and `machines.enabled=false` the rocket guns'; the items stay registered. A build from before this slice does not know the three items, and does not read a rocket's fuse; how it loads a world holding them was not tested, so back the world up before going back to one.
+
+**Known limits:**
+- **The Earthmover in first person:** its tube's back fills the right of the view, as its owner display holds it on the shoulder. A scope on its side rail stands close by the eye, so at the hip it is large.
+- **Homing rockets** are the Rocket Launcher's alone; the rocket guns do not load them.
+- **The Bullfrog's barrel** slides in its reload and swings in its draw, as the owner's animations have it. Its grenade sits in the muzzle's mouth, hidden from the shooter by the barrel.
+- **Not played:** none of it has been played yet. The rocket speeds, the ranges and the Bullfrog's reload want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -1119,11 +1201,12 @@ A reload of another kind than the Lobber holds first puts the grenades it held b
 - **Others' animations:** the server tells the clients that see the shooter (not the shooter's own) with `GunActionPayload`, and they play the shot or reload on that gun.
 - **Spin-up (slice 8C):** the Thresher's client sends `GunSpinPayload` (no data) each tick its trigger is held. The server keeps, per player, when the run began and its last word, and refuses the Thresher's shots until the run is 15 ticks old (2 forgiven for uneven packets). A gap of more than 4 ticks ends the run. A client that claims to hold the trigger gains nothing it could not by holding it; the run's age, the rounds and the rate are the server's.
 - **Grenades and flame (slice 8C):** the server spawns the Lobber's Grenade from its own copy of the player's position and look, and works out the Stoker's jet the same way, with the same ally and protection checks as a bullet.
+- **Rockets (slice 10A):** the server spawns the rocket guns' rockets from its own copy of the player's position and look, at the gun's speed and with the gun's fuse; the burst is the server's. A rocket in flight saves what is left of its fuse.
 - **Energy weapons (slice 8D):**
   - The server draws a reload's charge from its own copy of the player's cells.
   - It works out the beam and the arcs from its copy of the player's position and look, with the same ally and protection checks as a bullet. An arc asks other code about the creatures it would strike, in turn, and no others.
   - `GunTracePayload` (the shooter's id, the kind of shot and up to three points) tells the clients that see the shooter, and the shooter's own, where the shot went. It is used only to draw the shot.
-- **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). An Energy Cell's charge is the shared `jugcraft:energy` component (slice 8D). Its attachments are another, `jugcraft:attachments` (a list of up to four attachment ids, oldest first; an id no longer known is ignored). The Trench Lobber's kind of grenade is `jugcraft:loaded_grenade` (slice 9G: an item id, absent for the frag Grenade; one no longer known is read as the frag Grenade). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
+- **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). An Energy Cell's charge is the shared `jugcraft:energy` component (slice 8D). Its attachments are another, `jugcraft:attachments` (a list of up to four attachment ids, oldest first; an id no longer known is ignored). The Trench Lobber's and the Bullfrog's kind of grenade is `jugcraft:loaded_grenade` (slice 9G: an item id, absent for the frag Grenade; one no longer known is read as the frag Grenade). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
 - **Attachments and authority:** attachments are fitted only by the crafting recipes, which the server runs. The server reads a gun's numbers from its own copy of the stack (`GunItem.spec(stack)`), for the shot, the trigger rate, the reload and the rounds it may load; the client uses the same numbers only to predict.
 - **Disconnect:** clears that player's trigger credit, reload and spin.
 - **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns', rounds' and attachments' recipes (twenty-nine with slice 5: sixteen guns and rounds, eleven attachments, and the fitting and removal recipes). Items and the attachments component stay registered, so saved guns, rounds and attachments survive with it off.
@@ -1134,6 +1217,7 @@ A reload of another kind than the Lobber holds first puts the grenades it held b
 - **Config:** the `guns` feature switch (`JugcraftConfig.FEATURES`, `tools/materials.py`).
 - **Damage type:** `jugcraft:bullet`, tagged `minecraft:is_projectile` (Projectile Protection works against it) and `minecraft:bypasses_cooldown` (each shot counts). Slice 8C adds `jugcraft:flame`, tagged `minecraft:is_fire`, `minecraft:no_knockback` and `minecraft:bypasses_cooldown`. The field chemistry branch's thermite and chlorine share the first two tag files, so `tools/guns.py` writes those files with their entries included (`field_chemistry.damage_type_tags()`).
 - **Grenades (slice 8C):** the Trench Lobber fires the field chemistry branch's Grenade through its `GrenadeEntity` and `Warhead`, as the grenade launcher does.
+- **Rockets (slice 10A):** the Earthmover and the Skylark Rifle fire the rocketry branch's High-Explosive Rockets as its `CombatRocket`s, the Rocket Launcher's, with a fuse the rocket now carries (`CombatRocket.fuse`), and burst as its do (`Blast`).
 - **Energy (slice 8D):** the Energy Cell is the tools' `Chargeable`: the `jugcraft:energy` component, the capacity modules, the Charging Station, the amber charge bar and the JE tooltip line (`PoweredToolItem`). Slice 8D's damage type, `jugcraft:zap`, joins `minecraft:no_knockback` and `minecraft:bypasses_cooldown`.
 - **Sounds:** in `sounds.json`, through `tools/generate_material_data.py`.
 - **Icons:** the item-icon maps (`tools/item_icons/`, `docs/ITEM_ICONS.md`) for the rounds.
@@ -1866,6 +1950,57 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | laser_sight | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | laser_beam | `Guns/item/laser.png` | `aac5f06e892e350a` |
 | laser_dot | `Guns/effect/red_dot_reticle.png` | `8ebc215134886a8f` |
+| earthmover | `Guns/models/item/dozier_rl.json` | `63d00eb0a827fb67` |
+| earthmover | `Guns/item/dozier_rl.png` | `5657bbdc3a8a3439` |
+| earthmover | `Guns/item/dozier_rl.animation.json` | `693ac6d3023f7fdb` |
+| earthmover | `Guns/models/special/dozier_rl/main.json` | `9befa3a2d032c594` |
+| earthmover | `Guns/models/special/dozier_rl/light_grip.json` | `60b02278a04d905e` |
+| earthmover | `Guns/models/special/dozier_rl/iron_bayonet.json` | `a09fafdff56a8463` |
+| earthmover | `Guns/models/special/dozier_rl/anthralite_bayonet.json` | `08e43ce44448d9ab` |
+| earthmover | `Guns/models/special/dozier_rl/diamond_bayonet.json` | `00a8d5654bb1c113` |
+| earthmover | `Guns/models/special/dozier_rl/netherite_bayonet.json` | `e90897f94e73cb50` |
+| earthmover | `Guns/models/special/dozier_rl/tact_grip.json` | `3869c5684edd9cf2` |
+| earthmover | `Guns/models/special/dozier_rl/sights.json` | `d4d1e33596063d35` |
+| earthmover | `Guns/models/special/dozier_rl/no_sights.json` | `0f57a68c735f2bce` |
+| earthmover | `Guns/models/special/dozier_rl/drum.json` | `2c83c014c5b5b8b9` |
+| earthmover | `Guns/models/special/dozier_rl/fire.json` | `72926890def3209b` |
+| earthmover | `Guns/sounds/item/bazooka/fire.ogg` | `a9e62ea7c9505223` |
+| earthmover | `Guns/item/makeshift_rifle_bayonets.png` | `dfc93f5032504095` |
+| earthmover | `Guns/item/gyrojet_flames.png` | `43a56fbf383f811d` |
+| earthmover | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| earthmover | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| earthmover | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| skylark_rifle | `Guns/models/item/rocket_rifle.json` | `557660f19086b817` |
+| skylark_rifle | `Guns/item/rocket_rifle.png` | `28052631d94139a0` |
+| skylark_rifle | `Guns/item/rocket_rifle.animation.json` | `d4867634de241831` |
+| skylark_rifle | `Guns/models/special/rocket_rifle/main.json` | `aaa54e882d00e11f` |
+| skylark_rifle | `Guns/models/special/rocket_rifle/stan_grip.json` | `714d2b06d46d861f` |
+| skylark_rifle | `Guns/models/special/rocket_rifle/light_stock.json` | `318acf78ff10c499` |
+| skylark_rifle | `Guns/models/special/rocket_rifle/heavy_stock.json` | `b314e47c26174b39` |
+| skylark_rifle | `Guns/models/special/rocket_rifle/wooden_stock.json` | `bd235dbacdd678c6` |
+| skylark_rifle | `Guns/models/special/rocket_rifle/light_grip.json` | `2654e1e8c2aef143` |
+| skylark_rifle | `Guns/models/special/rocket_rifle/iron_bayonet.json` | `2d1ce950f2bdff7b` |
+| skylark_rifle | `Guns/models/special/rocket_rifle/anthralite_bayonet.json` | `400ff8507b2e7701` |
+| skylark_rifle | `Guns/models/special/rocket_rifle/diamond_bayonet.json` | `b91dc36e220376e3` |
+| skylark_rifle | `Guns/models/special/rocket_rifle/netherite_bayonet.json` | `70ecd0ae5a674313` |
+| skylark_rifle | `Guns/models/special/rocket_rifle/tact_grip.json` | `7805d665908a34da` |
+| skylark_rifle | `Guns/sounds/item/rocket_rifle/fire.ogg` | `556d63860044e3fa` |
+| bullfrog | `Guns/models/item/blooper.json` | `4c1a97aa58a16ed0` |
+| bullfrog | `Guns/item/blooper.png` | `1aa3f8793e2765dd` |
+| bullfrog | `Guns/item/blooper.animation.json` | `0b35dfd6e8f498e5` |
+| bullfrog | `Guns/models/special/blooper/main.json` | `43066e89de7dd35d` |
+| bullfrog | `Guns/models/special/blooper/stan_grip.json` | `02d52ff17856ff7b` |
+| bullfrog | `Guns/models/special/blooper/light_stock.json` | `80f930b8de776f2c` |
+| bullfrog | `Guns/models/special/blooper/heavy_stock.json` | `b0b8ffb348d441d8` |
+| bullfrog | `Guns/models/special/blooper/wooden_stock.json` | `7628d562e8f031a4` |
+| bullfrog | `Guns/models/special/blooper/light_grip.json` | `a0ce087c15e7b2ee` |
+| bullfrog | `Guns/models/special/blooper/iron_bayonet.json` | `60b740d90fb57c8b` |
+| bullfrog | `Guns/models/special/blooper/anthralite_bayonet.json` | `b35fdd4eff7516ac` |
+| bullfrog | `Guns/models/special/blooper/diamond_bayonet.json` | `4ad2349f30c86a0b` |
+| bullfrog | `Guns/models/special/blooper/netherite_bayonet.json` | `cfc3dd242790decf` |
+| bullfrog | `Guns/models/special/blooper/tact_grip.json` | `8302ff80288cf592` |
+| bullfrog | `Guns/models/special/blooper/barrel.json` | `08657d0212eccb9d` |
+| bullfrog | `Guns/sounds/item/airgun/fire_2.ogg` | `bea9865e81d9d5ff` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -2342,21 +2477,42 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - The counter's second line names the grenade the next reload would load: "32 Grenade" held, aimed and fired, "Reloading" mid-reload, "31 Grenade" after it, and "0 Grenade" with the attachment sets, whose test leaves no grenades in the inventory.
     - Fired aimed, the screenshot caught the left sleeve across the lower left corner of the view as the shot works the pump; in slice 9F's run it was small beside the gun. The frame differs from run to run, and this slice changes nothing about how the gun or the arms are drawn.
   - **Not covered by CI:** no client test loads a chemical grenade, so the counter and the tooltip naming one, and a chemical grenade lobbed from the Lobber, were not seen on a client (the server tests check the loading and the chlorine cloud).
+- **Slice 10A, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS, before and after the rebase. Every face of the three guns' parts re-bakes to the owner's, the attachments' included; the Skylark Rifle's atlas is the first frame of the owner's two; the new props are drawn the right way round.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and tooltips, and their shots' sounds; after the rebase it changed nothing.
+  - `python3 tools/check_mod_data.py`: PASS, 1933 material IDs on slice 9G's branch and 2152 after the rebase onto `main` (which holds much more since #277), with `check_guns` (the three guns' numbers, shots, rocket speeds and attachments in Java, and their looks and sounds on the client).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews** (first person, approximating the game's hands, and from the side):
+    - each gun idle, aimed, fired, through each reload, draw and inspection;
+    - the Earthmover with each scope, the Laser Sight (which runs into its drum), a grip and a bayonet; the Skylark Rifle and the Bullfrog with a stock and a grip, aimed with the stock left out;
+    - the Skylark Rifle's rocket through its carry, and the Bullfrog's grenade through its reload;
+    - the nearest point of each gun to the eye through its aimed shot: the Skylark Rifle's came to 0.78 px with no eye relief and 3.78 px with its 3 px, the Bullfrog's to 2.38 px;
+    - the left arms' directions against others through the reloads (`armfit.py`, and by eye); the usual ones stayed.
+- **Slice 10A game tests (written; they run in CI):**
+  - `LaunchersGameTests`:
+    - `launchersAreRegistered`: each is registered with its numbers and its recipe loads. The rocket guns fire High-Explosive Rockets, a rocket a round, the Skylark Rifle's faster and further and steadier aimed; the Earthmover holds four and the Skylark one. The Bullfrog lobs grenades, one a reload. None takes a barrel or magazine attachment; the Earthmover takes the scopes and the others the stocks.
+    - `rocketsBurstOnWhatTheyHit`: side by side, the Earthmover and the Skylark Rifle each fire at a pig nine blocks off: a round spent, one rocket of the shooter's at the gun's speed, its fuse the range over the speed, not homing. Each pig is hurt; the shooters are not; the floor is whole; no rocket is left flying.
+    - `rocketBurstsWhenItsFuseRunsOut`: a rocket held still over a pig, its fuse set to ten ticks (a later fuse set after it does not put it off), is whole with the pig at seven ticks and has burst, hurting the pig, by fourteen.
+    - `bullfrogLobsAGrenade`: a Bullfrog shot spends its grenade and lobs one of the shooter's, which bursts on the pig seven blocks off and spares the shooter and the floor.
+    - `earthmoverLoadsHighExplosiveRockets`: with only homing rockets an empty Earthmover does not start a reload; with six High-Explosive Rockets it loads four once its reload's time is up, not before, and leaves two.
+  - "Every gun registered" now counts thirty-nine guns. Slice 9E's `tacticalAttachmentsFitTheirGuns` counts the launchers among the guns with the owner's tactical grip parts, and the Earthmover among those the Laser Sight does not fit. Slice 9G's `onlyTheLobberTakesGrenades` is now `onlyTheGrenadeGunsTakeGrenades`: the Lobber and the Bullfrog.
+  - `GunsClientGameTests` takes the three new guns through its steps as it takes every gun: held, aimed, fired at the husk, reloaded from the inventory, inspected, with each set of attachments they take, seen from outside, and in the inventory.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
-- **Later slices,** each its own pull request: a rack that charges several Energy Cells at once. The three follow-ups the owner chose on 10 October 2026 are slices 9E, 9F and 9G.
+- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A); the coil and plasma guns, the double-barrels and the sculk guns; a rack that charges several Energy Cells at once, enemies with guns and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
 - **Aimed, the gun hand covered the sights** in the CI screenshots from 8 October, and a fitted stock came up under the eye: slice 9F draws the arms at half size aimed and leaves a fitted stock out ([above](#slice-9f-the-aiming-polish)).
 - **Not yet:**
   - the jam the Gnat's sound suggests;
-  - off-hand guns;
-  - mob use;
+  - off-hand guns (pistols in both hands, chosen on 10 October 2026, a later pull request);
+  - mob use (chosen on 10 October 2026, a later pull request);
   - the guns beyond these sets.
 - **Balance:** the numbers are starting points for the owner to set.
