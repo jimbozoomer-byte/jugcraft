@@ -54,7 +54,7 @@ These are built here and reused by Boss 2's Spindle Loft.
   - item frames, paintings and armour stands can't be used or struck;
   - inside, players lose the build ability, as in Adventure mode, and get it back on leaving.
   - Ender pearls, chorus fruit, food, potions and weapons work as anywhere. The lair-only blocks can't be broken or blown up at all, and they are in the `wither_immune` and `dragon_immune` tags.
-- **The edges:** fly or fall off the island, and the mist throws you back to the arrival point for 4 damage, never below half a heart. Players in a lair are checked once a second.
+- **The edges:** fly or fall off the island, and the mist throws you back to the arrival point for 4 damage, never below half a heart. The toll comes straight off health (armour and effects don't turn it aside); creative and spectator players pay nothing. Players in a lair are checked once a second.
 - **Grave Goods:** dying in a lair costs no belongings.
   - What you drop (items and experience) is gathered at once and kept with you, across logouts and restarts.
   - You get it back when you respawn, outside the lair: into your inventory, the rest at your feet.

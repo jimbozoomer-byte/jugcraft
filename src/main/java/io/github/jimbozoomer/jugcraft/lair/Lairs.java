@@ -2,16 +2,16 @@ package io.github.jimbozoomer.jugcraft.lair;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -20,12 +20,15 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -80,13 +83,6 @@ public final class Lairs {
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
 			if (!alive) {
 				handBack(newPlayer);
-			}
-		});
-		ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
-			// Taken out of a lair some other way (a command, another mod's teleport): the visit is over.
-			if (Lair.of(origin.dimension()) != null && Lair.of(destination.dimension()) == null && player.getAttached(VISIT) != null) {
-				player.removeAttached(VISIT);
-				restore(player);
 			}
 		});
 	}
@@ -188,14 +184,29 @@ public final class Lairs {
 	}
 
 	/**
+	 * The lair's template, read fresh from the data packs ({@code data/jugcraft/structure/lair/}), or null when it is
+	 * missing or unreadable. The file carries this game's data version (LairGameTests checks it), so nothing needs fixing.
+	 */
+	public static @Nullable StructureTemplate template(ServerLevel level, Lair lair) {
+		Identifier path = Identifier.fromNamespaceAndPath(lair.template.getNamespace(), "structure/" + lair.template.getPath() + ".nbt");
+		try (InputStream in = level.getServer().getResourceManager().getResourceOrThrow(path).open()) {
+			StructureTemplate template = new StructureTemplate();
+			template.load(level.registryAccess().lookupOrThrow(Registries.BLOCK), NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap()));
+			return template;
+		} catch (IOException e) {
+			Jugcraft.LOGGER.error("[lairs] Could not read the structure template {}: {}", path, e.toString());
+			return null;
+		}
+	}
+
+	/**
 	 * Puts the lair's template into the instance's slot, as it was made: anything left lying there (items, a straggling
 	 * creature) is cleared first, and the moon hung north of the island. Shapes are taken as the template has them.
 	 */
 	static boolean place(ServerLevel level, LairInstance instance) {
 		Lair lair = instance.lair;
-		Optional<StructureTemplate> template = level.getStructureManager().get(lair.template);
-		if (template.isEmpty()) {
-			Jugcraft.LOGGER.error("[lairs] No structure template {}", lair.template);
+		StructureTemplate template = template(level, lair);
+		if (template == null) {
 			return false;
 		}
 		BlockPos origin = instance.origin();
@@ -203,7 +214,7 @@ public final class Lairs {
 			entity.discard();
 		}
 		StructurePlaceSettings settings = new StructurePlaceSettings().setKnownShape(true);
-		template.get().placeInWorld(level, origin, origin, settings, level.getRandom(), Block.UPDATE_CLIENTS);
+		template.placeInWorld(level, origin, origin, settings, level.getRandom(), Block.UPDATE_CLIENTS);
 		BlockState moon = JugcraftLairs.LAIR_MOON.defaultBlockState();
 		BlockPos centre = origin.offset(lair.moon);
 		int r = lair.moonRadius;
@@ -388,10 +399,7 @@ public final class Lairs {
 		}
 		player.removeAttached(GRAVE_GOODS);
 		for (ItemStack stack : goods.items()) {
-			ItemStack copy = stack.copy();
-			if (!player.getInventory().add(copy) && !copy.isEmpty()) {
-				player.drop(copy, false);
-			}
+			player.getInventory().placeItemBackInInventory(stack.copy(), Prediction.SERVER_ONLY);
 		}
 		if (goods.experience() > 0) {
 			player.giveExperiencePoints(goods.experience());
@@ -405,6 +413,13 @@ public final class Lairs {
 	private static void tick(MinecraftServer server) {
 		if (server.getTickCount() % CHECK_TICKS != 0) {
 			return;
+		}
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			// Taken out of a lair some other way (a command, another mod's teleport): the visit is over.
+			if (!isLair(player.level()) && player.getAttached(VISIT) != null) {
+				player.removeAttached(VISIT);
+				restore(player);
+			}
 		}
 		for (Lair lair : Lair.values()) {
 			ServerLevel level = server.getLevel(lair.dimension);
@@ -472,10 +487,11 @@ public final class Lairs {
 		Vec3 at = instance.arrival();
 		player.teleportTo((ServerLevel) player.level(), at.x, at.y, at.z, Set.of(), lair.arrivalYaw, 0.0F, true);
 		player.resetFallDistance();
+		// A toll, not a blow: it comes straight off health, whatever would turn a blow aside. Creative and spectator
+		// players pay nothing.
 		float toll = Math.min(EDGE_DAMAGE, player.getHealth() - 1.0F);
-		if (toll > 0.0F && !player.isSpectator()) {  // a creative player's invulnerability turns it aside
-			ServerLevel level = (ServerLevel) player.level();
-			player.hurtServer(level, level.damageSources().magic(), toll);
+		if (toll > 0.0F && !player.getAbilities().invulnerable) {
+			player.setHealth(player.getHealth() - toll);
 		}
 		player.sendOverlayMessage(Component.translatable("message.jugcraft.lair.edge"));
 		return true;

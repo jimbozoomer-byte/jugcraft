@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -92,10 +91,10 @@ public class LairGameTests {
 	@GameTest
 	public void hollowAcreTemplateLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		Optional<StructureTemplate> template = level.getStructureManager().get(ACRE.template);
-		helper.assertTrue(template.isPresent(), "No template " + ACRE.template);
-		helper.assertTrue(template.get().getSize().equals(new Vec3i(ACRE.width, ACRE.height, ACRE.length)),
-				"The template is " + template.get().getSize() + ", not the Lair's size");
+		StructureTemplate template = Lairs.template(level, ACRE);
+		helper.assertTrue(template != null, "No template " + ACRE.template);
+		helper.assertTrue(template.getSize().equals(new Vec3i(ACRE.width, ACRE.height, ACRE.length)),
+				"The template is " + template.getSize() + ", not the Lair's size");
 		Identifier path = Identifier.fromNamespaceAndPath(ACRE.template.getNamespace(), "structure/" + ACRE.template.getPath() + ".nbt");
 		CompoundTag tag;
 		try (InputStream in = level.getServer().getResourceManager().getResourceOrThrow(path).open()) {
@@ -236,7 +235,6 @@ public class LairGameTests {
 			helper.assertTrue(follower.position().distanceTo(arrival) < 0.5 && follower.getHealth() == 20.0F - Lairs.EDGE_DAMAGE,
 					"The mist did not throw the follower back for " + Lairs.EDGE_DAMAGE + ": " + follower.getHealth());
 			follower.teleportTo(arrival.x, origin.getY() + ACRE.floor - 2.0, arrival.z);
-			follower.invulnerableTime = 0;
 			follower.setHealth(2.0F);
 			helper.assertTrue(Lairs.edges(follower, instance) && follower.getHealth() == 1.0F, "Falling off took more than to half a heart");
 			helper.assertFalse(Lairs.edges(follower, instance), "Standing at the arrival point is not off the edge");

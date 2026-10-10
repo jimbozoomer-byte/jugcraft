@@ -78,7 +78,7 @@ public final class JugcraftLairs {
 			boolean passable) {
 		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, Jugcraft.id(id));
 		BlockBehaviour.Properties properties = BlockBehaviour.Properties.of().mapColor(colour).sound(sound).strength(-1.0F, 3600000.0F)
-				.pushReaction(PushReaction.BLOCK).setId(key);
+				.pushReaction(PushReaction.IMMOVEABLE).setId(key);
 		if (light > 0) {
 			properties = properties.lightLevel(state -> light);
 		} else if (light < 0) {
