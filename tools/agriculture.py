@@ -30,6 +30,9 @@ import pies_and_tarts
 import milkshakes
 import fruit_crops
 import garden
+import vegetables
+import herbs
+import spices
 
 FEATURE = "agriculture"
 
@@ -2610,7 +2613,8 @@ def planted_blocks():
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
-            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless() + list(feasts.PLACED_PIES) + menu.blocks() + rice.itemless() + soil.itemless() + orchard.itemless() + garden.itemless())
+            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless() + list(feasts.PLACED_PIES) + menu.blocks() + rice.itemless() + soil.itemless() + orchard.itemless() + garden.itemless()
+            + herbs.itemless())
 
 
 def all_blocks():
@@ -2621,7 +2625,8 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks() + milkshakes.blocks() + garden.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks() + milkshakes.blocks() + garden.blocks()
+            + herbs.blocks() + spices.blocks())
 
 
 def all_items():
@@ -2632,7 +2637,8 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS] + pies_and_tarts.items() + garden.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS] + pies_and_tarts.items() + garden.items()
+            + herbs.items() + spices.items())
 
 
 def owns(entry_id):
@@ -2667,6 +2673,7 @@ def textures():
     out += [w["texture"] for w in WILD_CROPS.values() if w["texture"] not in out]
     out += [n for n in garden.OVERRIPE["textures"] if n not in out]
     out += [garden.colony_texture(c, s) for c in garden.COLONIES for s in range(garden.COLONY["stages"])]
+    out += [n for n in herbs.textures() + spices.textures() if n not in out]
     out += [f"{gourd}_{part}" for gourd in GOURDS for part in ("side", "top")] + STEM_TEXTURES + CRANBERRY["stages"]
     return out + EQUIPMENT_TEXTURES + TREE_TEXTURES + DECOR_TEXTURES + halloween_textures() + graveyard.textures() + plants.textures()
 
@@ -2802,3 +2809,23 @@ PANTRY["preserves"].update(fruit_crops.PRESERVES)
 # wild carrots, potatoes and beetroots join the wild plants after the fruit crops', and the rotten tomato the items.
 WILD_CROPS.update(garden.WILD)
 ITEMS.update(garden.ITEMS)
+
+# Garden crops, herbs and spices, part b (slice 7b; tools/vegetables.py, herbs.py and spices.py), in Jugcraft's own art:
+# lettuce, spinach, radishes, peas, ginger, mustard and saffron among the low crops; the cucumber, eggplant and zucchini, the
+# eight herbs, and the black pepper and vanilla vines among the tall crops, after the fruit crops'; their wild plants,
+# seeds, dishes and the dill pickles. The planter box, herb bundles, potted herbs, the cinnamon tree and the spice rack
+# are tools/herb_data.py's and tools/spice_data.py's.
+CROPS.update(vegetables.CROPS)
+CROPS.update(spices.CROPS)
+for _module in (vegetables, herbs, spices):
+    TALL_CROPS.update(_module.TALL_CROPS)
+    WILD_CROPS.update(_module.WILD)
+    ITEMS.update(_module.ITEMS)
+    SHAPELESS += _module.SHAPELESS
+    POT_RECIPES.update(_module.POT_RECIPES)
+GRASS_SEEDS += vegetables.GRASS_SEEDS
+SHAPED += herbs.SHAPED + spices.SHAPED
+COOKING.update(vegetables.COOKING)
+COOKING.update(spices.COOKING)
+POT_RECIPES.update(herbs.PRESERVE_RECIPES)
+PANTRY["preserves"].update(herbs.PRESERVES)

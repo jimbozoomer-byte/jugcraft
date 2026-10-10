@@ -144,7 +144,8 @@ public final class JugcraftAgriculture {
 			"butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
 			"giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "red_kuri_pumpkin_seeds",
 			"kabocha_pumpkin_seeds", "bottle_gourd_seeds",
-			"ornamental_corn_kernels", "mandrake_root", "rice", "strawberry_seeds", "blueberry_seeds", "coffee_seeds");
+			"ornamental_corn_kernels", "mandrake_root", "rice", "strawberry_seeds", "blueberry_seeds", "coffee_seeds",
+			"lettuce_seeds", "spinach_seeds", "radish", "peas", "cucumber_seeds", "eggplant_seeds", "zucchini_seeds");
 	/** The chestnut tree's feature (data/jugcraft/worldgen/feature/chestnut.json), grown by its sapling. */
 	public static final ResourceKey<Feature> CHESTNUT_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("chestnut"));
 	public static final TreeGrower CHESTNUT_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_chestnut", WeightedList.of(CHESTNUT_TREE),
@@ -153,6 +154,8 @@ public final class JugcraftAgriculture {
 	public static final ResourceKey<Feature> APPLE_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("apple_tree"));
 	public static final TreeGrower APPLE_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_apple", WeightedList.of(APPLE_TREE),
 			WeightedList.of(), WeightedList.of(), APPLE_TREE);
+	/** The cinnamon tree's feature (data/jugcraft/worldgen/feature/cinnamon_tree.json, tools/spice_data.py), grown by its sapling. */
+	public static final TreeGrower CINNAMON_GROWER = grower("cinnamon_tree");
 	/** Trees grown from their saplings (data/jugcraft/worldgen/feature/<tree>.json, tools/trees.py). */
 	public static final TreeGrower LARCH_GROWER = grower("larch");
 	public static final TreeGrower MAPLE_GROWER = grower("maple");
@@ -363,6 +366,8 @@ public final class JugcraftAgriculture {
 	public static EntityType<TossRing> TOSS_RING;
 	/** A thrown Rotten Tomato (garden crops, tools/garden.py ROTTEN_TOMATO). */
 	public static EntityType<RottenTomato> ROTTEN_TOMATO;
+	/** The Spice Rack's spices (garden crops, herbs and spices, part b). */
+	public static BlockEntityType<SpiceRackBlockEntity> SPICE_RACK_ENTITY;
 	public static BlockEntityType<HighStrikerBlockEntity> HIGH_STRIKER_ENTITY;
 	public static EntityType<FerrisWheel> FERRIS_WHEEL;
 	public static BlockEntityType<FerrisWheelBlockEntity> FERRIS_WHEEL_BOOTH;
@@ -397,6 +402,8 @@ public final class JugcraftAgriculture {
 	/** Bat guano fertilizes the crops this far round where it is used (a 3x3 patch), with this many doses of bone meal each. */
 	public static final int GUANO_RADIUS = 1;
 	public static final int GUANO_DOSES = 1;
+	/** The kitchen herbs (tools/herbs.py HERBS), each a tall crop, a potted plant and a drying bundle. */
+	public static final List<String> HERBS = List.of("basil", "mint", "rosemary", "thyme", "parsley", "sage", "dill", "chives");
 	/** The five wild autumn mushrooms. */
 	public static final List<String> WILD_MUSHROOMS = List.of("chanterelle", "porcini", "puffball", "fly_agaric", "jack_o_lantern_mushroom");
 	/** The Candy Kettle's own candies (it also makes candy corn and caramel). */
@@ -640,6 +647,9 @@ public final class JugcraftAgriculture {
 		Mandrakes.register();
 		registerFruitCrops();
 		registerGarden();
+		registerVegetables();
+		registerHerbs();
+		registerSpices();
 
 		registerEquipment();
 		registerDecorations();
@@ -2992,6 +3002,149 @@ public final class JugcraftAgriculture {
 		colony("red_mushroom_colony", Blocks.RED_MUSHROOM, Items.RED_MUSHROOM);
 	}
 
+	/**
+	 * Garden crops, herbs and spices, part b (slice 7b; tools/vegetables.py), in Jugcraft's own art: lettuce, spinach,
+	 * radishes and peas (low crops; peas fix nitrogen as beans do), the cucumber vine and the eggplant and zucchini bushes
+	 * ({@link TallCrop}), what they give, their dishes and their wild plants.
+	 */
+	private static void registerVegetables() {
+		crop("lettuce_crop", "lettuce_seeds", false);
+		crop("spinach_crop", "spinach_seeds", false);
+		crop("radish_crop", "radish", false);
+		crop("pea_crop", "peas", true);
+		food("lettuce", 2, 0.3F, COMPOST_MEDIUM);
+		seeds("lettuce_seeds", "lettuce_crop", COMPOST_LOW);
+		food("spinach", 1, 0.6F, COMPOST_MEDIUM);
+		seeds("spinach_seeds", "spinach_crop", COMPOST_LOW);
+		edibleSeeds("radish", "radish_crop", 1, 0.6F, COMPOST_MEDIUM);
+		edibleSeeds("peas", "pea_crop", 1, 0.3F, COMPOST_MEDIUM);
+		food("cucumber", 2, 0.3F, COMPOST_MEDIUM);
+		trellisSeeds("cucumber_seeds", TallCrop.CUCUMBER, COMPOST_LOW);
+		food("eggplant", 2, 0.3F, COMPOST_MEDIUM);
+		seeds("eggplant_seeds", "eggplant_crop", COMPOST_LOW);
+		food("zucchini", 2, 0.3F, COMPOST_MEDIUM);
+		seeds("zucchini_seeds", "zucchini_crop", COMPOST_LOW);
+		food("roasted_eggplant", 5, 0.6F, COMPOST_MEDIUM_HIGH);
+		food("grilled_zucchini", 5, 0.6F, COMPOST_MEDIUM_HIGH);
+		stew("green_salad", 8, 0.6F);
+		stew("pea_soup", 7, 0.6F);
+		wild("wild_lettuce");
+		wild("wild_spinach");
+		wild("wild_radishes");
+		wild("wild_peas");
+		wild("wild_cucumbers");
+		wild("wild_eggplant");
+		wild("wild_zucchini");
+	}
+
+	/**
+	 * The kitchen herbs (tools/herbs.py): each planted from a sprig of itself ({@link TallCrop}, cut back when grown), potted
+	 * in a flower pot, hung in a bundle to dry ({@link HerbBundleBlock}) into Dried Herbs; the Planter Box they (and any
+	 * crop) grow in ({@link PlanterBoxBlock}); the herb dishes, Mint Tea and Dill Pickles; and the wild herbs.
+	 */
+	private static void registerHerbs() {
+		seeds("basil", "basil_crop", COMPOST_LOW);
+		seeds("mint", "mint_crop", COMPOST_LOW);
+		seeds("rosemary", "rosemary_crop", COMPOST_LOW);
+		seeds("thyme", "thyme_crop", COMPOST_LOW);
+		seeds("parsley", "parsley_crop", COMPOST_LOW);
+		seeds("sage", "sage_crop", COMPOST_LOW);
+		seeds("dill", "dill_crop", COMPOST_LOW);
+		seeds("chives", "chives_crop", COMPOST_LOW);
+		plain("dried_herbs", COMPOST_LOW);
+		stew("pesto_pasta", 6, 0.7F);
+		stew("sage_and_onion_stuffing", 7, 0.6F);
+		stew("herb_roasted_mutton", 10, 0.8F);
+		stew("garden_herb_soup", 6, 0.6F);
+		stew("herb_roasted_potatoes", 12, 0.8F);
+		drink("mint_tea", 2, 0.3F, MobEffects.SPEED, 30);
+		preserve("dill_pickles", 2, 0.4F, null, 0, 0x5A8A2A);
+		wild("wild_basil");
+		wild("wild_mint");
+		wild("wild_rosemary");
+		wild("wild_thyme");
+		wild("wild_parsley");
+		wild("wild_sage");
+		wild("wild_dill");
+		wild("wild_chives");
+		for (String herb : HERBS) {
+			// A sprig on a flower pot plants the herb in it (vanilla's flower pot, keyed by the block its sprig places).
+			registerBlock("potted_" + herb, props -> new FlowerPotBlock(block(herb + "_crop"), props),
+					BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_DANDELION));
+			Block bundle = registerBlock(herb + "_bundle", HerbBundleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
+					.strength(0.2F).sound(SoundType.GRASS).noCollision().noOcclusion().randomTicks().ignitedByLava()
+					.pushReaction(PushReaction.POPPED));
+			registerItem(herb + "_bundle", props -> new BlockItem(bundle, props), new Item.Properties().useBlockDescriptionPrefix()
+					.compostable(COMPOST_MEDIUM), BUILDING_TAB);
+			FlammableBlockRegistry.getDefaultInstance().add(bundle, 60, 100);
+		}
+		Block planter = registerBlock("planter_box", PlanterBoxBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).ignitedByLava());
+		registerItem("planter_box", props -> new BlockItem(planter, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+	}
+
+	/**
+	 * The spices (tools/spices.py): the black pepper and vanilla vines ({@link TallCrop}, planted from what they give),
+	 * ginger, mustard and the saffron crocus (low crops), the Cinnamon Tree (its bark peeled by an axe,
+	 * {@link CinnamonLogBlock}), Dried Chili and the Paprika the Mortar and Pestle grinds from it ({@link SpiceGrinding}),
+	 * the spice dishes, the wild plants, and the Spice Rack ({@link SpiceRackBlock}).
+	 */
+	private static void registerSpices() {
+		crop("ginger_crop", "ginger", false);
+		crop("mustard_crop", "mustard_seeds", false);
+		crop("saffron_crop", "crocus_bulb", false);
+		trellisSeeds("peppercorns", TallCrop.PEPPERCORN, COMPOST_LOW);
+		trellisSeeds("vanilla_pods", TallCrop.VANILLA, COMPOST_LOW);
+		seeds("ginger", "ginger_crop", COMPOST_MEDIUM);
+		seeds("mustard_seeds", "mustard_crop", COMPOST_LOW);
+		seeds("crocus_bulb", "saffron_crop", COMPOST_MEDIUM);
+		plain("saffron", COMPOST_LOW);
+		plain("cinnamon", COMPOST_LOW);
+		plain("dried_chili", COMPOST_MEDIUM);
+		plain("paprika", COMPOST_LOW);
+		food("gingerbread_cookie", 2, 0.1F, COMPOST_MEDIUM_HIGH);
+		stew("chicken_curry", 10, 0.8F);
+		stew("saffron_rice", 6, 0.7F);
+		stew("vanilla_custard", 5, 0.6F);
+		wild("wild_peppercorns");
+		wild("wild_vanilla");
+		wild("wild_ginger");
+		wild("wild_mustard");
+		wild("wild_saffron");
+		registerCinnamonTree();
+		Block rack = registerBlock("spice_rack", SpiceRackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		SPICE_RACK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("spice_rack"),
+				FabricBlockEntityTypeBuilder.create(SpiceRackBlockEntity::new, rack).build());
+		registerItem("spice_rack", props -> new BlockItem(rack, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+	}
+
+	/**
+	 * The Cinnamon Tree: its sapling and leaves (evergreen, untinted, as the other trees' are) and its two logs. It has no
+	 * wood set: its logs saw into jungle planks (data), and the log strips, with its bark, into the stripped log.
+	 */
+	private static void registerCinnamonTree() {
+		Block sapling = registerBlock("cinnamon_sapling", props -> new SaplingBlock(CINNAMON_GROWER, props) {
+		}, BlockBehaviour.Properties.ofFullCopy(Blocks.JUNGLE_SAPLING));
+		registerItem("cinnamon_sapling", props -> new BlockItem(sapling, props), new Item.Properties().useBlockDescriptionPrefix()
+				.compostable(COMPOST_LOW), SEEDS_TAB);
+		Block leaves = registerBlock("cinnamon_leaves", props -> new TintedParticleLeavesBlock(0.01F, props),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.JUNGLE_LEAVES).mapColor(MapColor.PLANT));
+		registerItem("cinnamon_leaves", props -> new BlockItem(leaves, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
+		FlammableBlockRegistry fire = FlammableBlockRegistry.getDefaultInstance();
+		fire.add(leaves, 30, 60);
+		Block log = registerBlock("cinnamon_log", props -> new CinnamonLogBlock(props, "stripped_cinnamon_log"),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.JUNGLE_LOG).mapColor(MapColor.TERRACOTTA_GRAY));
+		Block stripped = registerBlock("stripped_cinnamon_log", RotatedPillarBlock::new,
+				BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_JUNGLE_LOG).mapColor(MapColor.TERRACOTTA_ORANGE));
+		for (Block block : List.of(log, stripped)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix()
+					.cookingFuel(ContextIntProviders.COOKING_TIME_WOOD_BLOCKS), BUILDING_TAB);
+			fire.add(block, 5, 5);
+		}
+	}
+
 	/** The colony {@code mushroom} plants on Rich Soil, or null if it plants none. */
 	public static @Nullable MushroomColonyBlock colony(Item mushroom) {
 		return COLONIES.get(mushroom);
@@ -3047,6 +3200,28 @@ public final class JugcraftAgriculture {
 		wildPatch("wild_carrots", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
 		wildPatch("wild_potatoes", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_HILL);
 		wildPatch("wild_beetroots", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_SWAMP);
+		// Garden crops, herbs and spices, part b (tools/vegetables.py, herbs.py, spices.py), and the cinnamon tree.
+		wildPatch("wild_lettuce", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
+		wildPatch("wild_spinach", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_PLAINS);
+		wildPatch("wild_radishes", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_HILL);
+		wildPatch("wild_peas", ConventionalBiomeTags.IS_HILL, ConventionalBiomeTags.IS_FOREST);
+		wildPatch("wild_cucumbers", ConventionalBiomeTags.IS_JUNGLE, ConventionalBiomeTags.IS_SAVANNA);
+		wildPatch("wild_eggplant", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_JUNGLE);
+		wildPatch("wild_zucchini", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_SAVANNA);
+		wildPatch("wild_basil", ConventionalBiomeTags.IS_JUNGLE, ConventionalBiomeTags.IS_SAVANNA);
+		wildPatch("wild_mint", ConventionalBiomeTags.IS_RIVER, ConventionalBiomeTags.IS_SWAMP);
+		wildPatch("wild_rosemary", ConventionalBiomeTags.IS_HILL, ConventionalBiomeTags.IS_SAVANNA);
+		wildPatch("wild_thyme", ConventionalBiomeTags.IS_HILL, ConventionalBiomeTags.IS_PLAINS);
+		wildPatch("wild_parsley", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FOREST);
+		wildPatch("wild_sage", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_PLAINS);
+		wildPatch("wild_dill", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
+		wildPatch("wild_chives", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_TAIGA);
+		wildPatch("wild_peppercorns", ConventionalBiomeTags.IS_JUNGLE);
+		wildPatch("wild_vanilla", ConventionalBiomeTags.IS_JUNGLE);
+		wildPatch("wild_ginger", ConventionalBiomeTags.IS_JUNGLE, ConventionalBiomeTags.IS_SWAMP);
+		wildPatch("wild_mustard", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
+		wildPatch("wild_saffron", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_HILL);
+		wildPatch("cinnamon_tree", ConventionalBiomeTags.IS_JUNGLE);
 		// Halloween harvest: heirloom pumpkins and bottle gourds on grass, and mums in flower-rich places.
 		wildPatch("white_pumpkin", ConventionalBiomeTags.IS_BIRCH_FOREST, ConventionalBiomeTags.IS_SNOWY);
 		wildPatch("jarrahdale_pumpkin", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_WINDSWEPT);

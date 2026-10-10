@@ -315,6 +315,14 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The *Arcane Concordance* codex (Modonomicon) unlocks its pages with your research. Jade, JEI and LambDynamicLights show the bench, its workings and the lantern's glow when installed. Jugcraft's weapons no longer receive Spell Engine's automatic weapon skills.
 - Record: [arcane-concordance-first-light.md](docs/features/arcane-concordance-first-light.md); the whole plan: [ARCANE_CONCORDANCE.md](docs/ARCANE_CONCORDANCE.md).
 
+### Unmerged: Vegetables, herbs and spices
+- **Vegetables:** lettuce, spinach, radishes and peas on farmland (peas feed the crops round them), cucumbers on a trellis, and eggplant and zucchini bushes. Green Salad, Pea Soup, Roasted Eggplant and Grilled Zucchini; Ratatouille is now made with eggplant and zucchini.
+- **Kitchen herbs:** basil, mint, rosemary, thyme, parsley, sage, dill and chives, planted from a sprig and cut back for more. Pot them in a flower pot, hang four tied with string to dry into Dried Herbs, and grow anything in a **Planter Box**, which waters itself. Herb dishes, Mint Tea (Speed) and Dill Pickles.
+- **Spices:** black pepper and vanilla vines, ginger, mustard and saffron crocus; the **Cinnamon Tree** (strip its logs with an axe for Cinnamon); Paprika ground from a dried chili with the Mortar and Pestle; a **Spice Rack** that shows eight. Gingerbread Cookies, Chicken Curry, Saffron Rice and Vanilla Custard.
+- Every crop grows wild; the vegetables' seeds also drop from short grass.
+- Saves: every ID is new; the Ratatouille recipe keeps its ID. No ID is renamed.
+- Details: [docs/features/vegetables-herbs-and-spices.md](docs/features/vegetables-herbs-and-spices.md).
+
 ### Unmerged: Garden crops
 - Jugcraft's **cabbage, onion, tomato and corn** now grow through the owner's own drawings: eight cabbage stages, a budding then fruiting tomato vine in its trellis, and the owner's corn, still three blocks tall. Ornamental corn ripens with flint-coloured ears. The Garden Salad is drawn as the owner's mixed salad.
 - A ripe tomato vine left unpicked **goes over** in time and gives **Rotten Tomatoes**: throw them like snowballs (a red splat, no harm) or compost them.
