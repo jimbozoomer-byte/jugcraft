@@ -1070,7 +1070,7 @@ A reload of another kind than the Lobber holds first puts the grenades it held b
 
 **Server authority:** the server chooses the kind from its own copy of the player's hands and inventory when the reload starts. When it ends, the server puts the old grenades back and takes the new ones, and each shot lobs the kind its copy of the gun holds. The client chooses the same way only to play the reload and fill the counter.
 
-**Save compatibility:** the kind is a new component on the gun, `jugcraft:loaded_grenade`, an item id. A Lobber that has only held frag Grenades carries none, so a Lobber saved before this slice holds frag Grenades as before; one naming an item no longer known, or one that is not a grenade, holds frag Grenades too. No new items, recipes or registry ids.
+**Save compatibility:** the kind is a new component on the gun, `jugcraft:loaded_grenade`, an item id. A Lobber that has only held frag Grenades carries none, so a Lobber saved before this slice holds frag Grenades as before; one naming an item no longer known, or one that is not a grenade, holds frag Grenades too. The component is the slice's only new registration: no new items or recipes. A build from before this slice does not know the component; how it loads a Lobber saved with one was not tested, so back the world up before going back to one.
 
 **Balance:** each grenade does what it does thrown or launched, so the Lobber is no stronger with them than the grenade launcher, only quicker: six grenades a magazine, one every 0.7 s against the launcher's 1.5 s.
 
