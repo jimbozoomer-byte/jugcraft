@@ -28,6 +28,7 @@ Minecraft remains **26.3 + Fabric**, with **Loader 0.19.5** required by the sele
 - [Propose an existing mod integration](../../issues/new?template=integration.yml).
 - [Contribute code, art, or documentation](CONTRIBUTING.md).
 - [Browse the shared owner asset library](art/owner-library/README.md): reusable textures, reference sheets, sounds and animations for every content branch, including building, industry, equipment, vehicles, biomes and farming.
+- [Use the owner's magic collection](art/owner-library/MAGIC_ASSETS.md): 7,909 textures, models, sounds and data files. Contributors and AI should use suitable files directly; the owner authorizes their use as supplied, without mandatory redesigns or another per-asset permission request.
 - [Read the connected gameplay design](docs/DESIGN.md).
 - [See everything that exists so far](docs/WHAT_EXISTS.md) (content, APIs and file map, for contributors and AI agents) and [what changed](CHANGELOG.md).
 - [See how the technology tree works](docs/TECH_TREE.md), including the planned [Chemistry branch](docs/branches/CHEMISTRY.md).
