@@ -1,6 +1,6 @@
 # Industrial chemistry, gas fuels and advanced materials
 
-Status: owner-selected planning direction, recorded and updated 7 October 2026. This independent brief records nine planning batches and the owner's detailed fuel, machine and chemical-catalog requests. Steel-built electrical equipment is the main chemistry entry. The first delivery milestone is a complete starter gas/acid factory; magnesium, aluminum and titanium follow. Latest choices select coastal seawater for magnesium brine, regional chromium ore, water purification accounted inside recipes, PTFE parts in advanced-machine construction, distinct speed/power and efficiency/energy effects, local automation before remote controls, and broad fertilizer crop groups. Earlier selections retain the two alloys, resin/additive photoresist, chip upgrade products, reagent purification, efficient larger machines, snow-biome fluorite, modular storage and later chemical consumer branches. The first Separator and nickel-bed costs, starter forms/heating, output behavior and moderate processing rates now have an owner-selected provisional baseline. Final recipes/capability checks, upgrade-limit calibration and performance statistics still need implementation and balance. This document implements no gameplay.
+Status: owner-selected planning direction, updated 8 October 2026. This independent brief records twelve planning batches and the owner's detailed fuel, machine and chemical-catalog requests. Substantial chemistry begins with steel-built electrical equipment. The first milestone is a usable starter gas/acid factory, followed by magnesium, aluminum, titanium and alloy expansion. The tenth batch selects beach/ocean seawater pumping and concentration, staged dry magnesium-chloride preparation, first-installation titanium salt recovery, aluminum carbon consumption and lye recovery, shared titanium-chloride distillation, integrated sponge cleanup, whole-ingot alloy batches and stabilized bauxite residue. Earlier choices and the provisional starter processing/generator baseline remain recorded below. Exact recipes, quantities, grades, construction, energy costs and upgrade limits still need specification and balance. The eleventh batch selects renewable ethylene, compatible ordinary plastics, clean offcut recycling, high-purity silicon stock, shared precision cutting, reusable chip pattern tooling, function-related module parts and one initial spent mixture. The twelfth batch selects steel-era lead-acid banks, two-stage lithium electrolyte preparation, mineral vanadium supply, attached paired flow modules, local battery priorities/reserves, reusable cobalt/ceramic tooling, synthetic-crude refinery feed, methane before hydrogen cooling, shared insulated tank variants and hydrazine before MMH. Eight resource/reagent/residue questions remain pending. This document implements no gameplay.
 
 Proposal issue: direct owner instructions during industrial planning; no separate issue.
 Owner: jimbozoomer-byte.
@@ -10,7 +10,7 @@ Related documents: [Chemistry branch](../branches/CHEMISTRY.md), [steel plan](in
 
 ## Recorded owner choices
 
-The [starter factory construction and balance record](industrial-starter-gas-and-acid-factory.md) now records the eighth batch's ten A selections. It distinguishes the selected entry forms, Separator/nickel costs, automatic heat, acid chain, output behavior and provisional processing/output rates from remaining construction/unit/energy-limit proposals. The ninth batch now records all eight acid-catalyst/coal choices; the next ten metals-processing questions remain unanswered.
+The [starter factory construction and balance record](industrial-starter-gas-and-acid-factory.md) now records the eighth batch's ten A selections. It distinguishes the selected entry forms, Separator/nickel costs, automatic heat, acid chain, output behavior and provisional processing/output rates from remaining construction/unit/energy-limit proposals. The ninth batch records all eight acid-catalyst/coal choices. The [tenth batch](#magnesium-aluminum-and-titanium-processing-decisions-tenth-batch) records all ten A selections, including seawater pumping from beach or ocean biomes. The [eleventh batch](#polymer-and-advanced-electronics-decisions-eleventh-batch) records all eight polymer/electronics A selections. The [twelfth batch](#grid-storage-synthetic-fuels-and-cryogenics-decisions-twelfth-batch) records all ten storage/fuel/cryogenic A selections. The following eight resource/reagent/residue questions remain unanswered proposals.
 
 | # | Owner answer | Selected direction |
 | --- | --- | --- |
@@ -425,26 +425,38 @@ The generator fuel split, methane benefit, reusable nickel entry, automatic pres
 
 The third and fourth batches settle material routes and product roles, including named PVC intermediates, magnesium reduction, stronger titanium equipment and deferred portable/specialty batteries. The full catalog adds requested advanced branches. The fifth batch settles installed upgrades plus larger versions, sulfuric-acid grades, snow-biome fluorite, the first chip chemicals/stations/photoresist, shared extrusion, ordinary versus cryogenic conversion, modular grid expansion and industrial-before-new-consumer priorities.
 
-The sixth batch selects alloy identities, the independent magnesium route, photoresist preparation, chip-upgrade products, PTFE consumers, fertilizer differentiation, shared purification, larger-machine benefits and underground fluorite discovery. The seventh batch settles coastal seawater/regional ore sources, internal water conditioning, PTFE advanced construction, upgrade effects, local-first automation, broad crop groups and the first gas/acid milestone. The eighth batch settles the starter forms, Separator/nickel costs, automatic heat, first acid-chain depth, water/lye defaults, one residue and provisional processing/generator output. The ninth batch settles independent catalyst/acid startup, shared contact conversion, sulfur/carbon feeds, optional oxygen assistance, combined cleaning/separation and useful stabilized residue.
+The sixth batch selects alloy identities, the independent magnesium route, photoresist preparation, chip-upgrade products, PTFE consumers, fertilizer differentiation, shared purification, larger-machine benefits and underground fluorite discovery. The seventh batch settles coastal seawater/regional ore sources, internal water conditioning, PTFE advanced construction, upgrade effects, local-first automation, broad crop groups and the first gas/acid milestone. The eighth batch settles the starter forms, Separator/nickel costs, automatic heat, first acid-chain depth, water/lye defaults, one residue and provisional processing/generator output. The ninth batch settles independent catalyst/acid startup, shared contact conversion, sulfur/carbon feeds, optional oxygen assistance, combined cleaning/separation and useful stabilized residue. The tenth batch settles seawater collection/concentration, magnesium-chloride preparation and feed form, titanium salt recovery/purification/cleanup, aluminum carbon and lye handling, convenient alloy batches and stabilized bauxite residue. The eleventh batch settles renewable ethylene, compatible general plastic products, clean offcut recycling, separately prepared high-purity silicon, shared precision cutting, reusable chip pattern tooling, function-related module parts and one initial spent mixture. The twelfth batch settles steel-era lead-acid storage, staged lithium electrolyte preparation, mineral vanadium supply, attached paired flow modules, local battery settings, reusable cobalt entry, synthetic-crude refining, staged cryogenics, shared insulated tanks and hydrazine first.
 
-Remaining decisions include finalizing the selected starter construction/processing baseline and independent acid/catalyst supply, gas/generation budgets, alloy grades/ratios, chromium mineral/regions and refining, coastal magnesium acquisition/preparation, purification recipes, snow-biome eligibility/deposit sizes, chip/additive identities and upgrade limits, crop-group tags/blend effects, machine footprints, per-fluid cryogenic tiers, rocket/station compatibility, synthetic-fuel upgrading, and flow-storage module sizes/limits. Develop these through reachable production chains and useful factory outputs; record them as future work rather than claims of implemented gameplay.
+Remaining decisions include finalizing the selected starter construction/processing baseline and independent acid/catalyst supply, gas/generation budgets, alloy grades/ratios, chromium mineral/regions and refining, exact beach/ocean source eligibility and magnesium preparation quantities, purification recipes, snow-biome eligibility/deposit sizes, chip/additive identities and upgrade limits, crop-group tags/blend effects, machine footprints, per-fluid cryogenic tiers, rocket/station compatibility, synthetic-fuel upgrading, and flow-storage module sizes/limits. Develop these through reachable production chains and useful factory outputs; record them as future work rather than claims of implemented gameplay.
 
-## Magnesium aluminum and titanium processing questions pending
+## Magnesium aluminum and titanium processing decisions tenth batch
 
-This next batch develops the already selected coastal-seawater magnesium source, prepared chloride/molten-salt recovery, bauxite/alumina aluminum line, staged chloride-based titanium route, two useful alloys and their manufacturing destinations. **All ten questions are pending.** A is the proposed starting direction; the ninth batch's eight A answers do not select this table.
+On **8 October 2026**, the owner selected A for all ten questions. Question 1 explicitly qualifies the seawater feed: **when pumped from within a beach or ocean biome**. These are selected planning directions; they do not approve numerical recipes or implement machines.
 
-| # | Topic | A | B |
-| --- | --- | --- | --- |
-| 1 | Coastal source handling | Pump a distinct seawater feed, then concentrate it into magnesium-bearing brine | A coastal extraction pump produces prepared magnesium brine directly, with concentration included in its costs |
-| 2 | Magnesium chloride preparation | Show a magnesium-hydroxide intermediate, then HCl-based chloride preparation using compatible shared machines | Keep the intermediate chemistry inside one accounted brine-to-chloride preparation recipe |
-| 3 | Titanium magnesium recovery | Return the reduction byproduct MgCl2 to the heated electrolytic route for paid magnesium/chlorine recovery from the first titanium installation | Collect MgCl2 initially; a later recovery capability enables reuse |
-| 4 | First aluminum cell | Consume coke/carbon as a recipe reagent and provide optional CO2 capture | Simplify first-cell carbon handling, introducing explicit anode chemistry later; oxygen/material accounting still required |
-| 5 | Aluminum digestion lye | Recover and reuse most lye through an accounted separation/recovery process, with makeup losses and power | Consume the supplied lye initially; recovery develops later |
-| 6 | Titanium chloride purification | Reuse a compatible shared chemical-distillation capability | Introduce a dedicated titanium-chloride purifier |
-| 7 | Sponge cleanup before melting | Reduction equipment includes an automatic paid cleanup stage and separately returns salts before clean sponge goes to melting | Use an additional dedicated sponge-cleaning station before melting |
-| 8 | First two alloy recipe quantities | Convenient whole-ingot batch recipes with approximate game compositions and conserved metal amounts | Require measured powder/dust quantities for finer composition control from the beginning |
-| 9 | Magnesium cell feed handling | Deliver dry prepared chloride as an item; the cell melts it internally using paid automatic heat | Prepare and transport molten chloride as a distinct liquid before electrolysis |
-| 10 | Bauxite residue first useful product | A distinct stabilization recipe for modest road/filler stock using shared construction equipment | Prioritize additional iron recovery from the residue instead |
+| # | Owner answer | Selected direction |
+| --- | --- | --- |
+| 1 | A, when pumped from beach or ocean biomes | Pump a distinct seawater feed, then concentrate it into magnesium-bearing brine. Both beach and ocean biomes are eligible source categories |
+| 2 | A | Show a magnesium-hydroxide intermediate, followed by HCl-based chloride preparation using compatible shared machines |
+| 3 | A | Recover magnesium and chlorine from titanium reduction's MgCl2 byproduct through paid heated electrolysis from the first titanium installation |
+| 4 | A | Aluminum electrolysis consumes coke/carbon as a material reagent, with optional CO2 capture |
+| 5 | A | Recover and reuse most aluminum-digestion lye through accounted separation/recovery, with power costs and makeup losses |
+| 6 | A | Purify titanium chloride through a compatible shared chemical-distillation capability |
+| 7 | A | Reduction equipment includes automatic paid sponge cleanup and separately returns salts before clean sponge goes to melting |
+| 8 | A | Use convenient whole-ingot batches for chemical stainless steel and aluminum-magnesium structural alloy, with approximate game compositions and conserved metal amounts |
+| 9 | A | Supply dry prepared magnesium chloride as an item; the cell melts it internally with paid automatic heat |
+| 10 | A | Stabilize bauxite residue into modest road/filler stock through a distinct recipe on shared construction equipment |
+
+### Seawater collection and magnesium supply
+
+The pump must draw the mineral-bearing feed from a beach or ocean biome. Checking only the machine's position must not turn an unrelated freshwater intake into seawater. Exact eligible biome IDs/tags, intake/source validation, placed-water accounting, pumping yield and shared pump identity remain specification work. This selects a pumped resource route without requiring destruction of shoreline blocks; it does not extend the separate finite mineral-sand deposit design to ocean depletion.
+
+Selected chain: **eligible seawater pumping -> concentration -> magnesium-bearing brine -> magnesium hydroxide -> HCl-based chloride preparation/conditioning -> dry prepared MgCl2 item -> internally heated molten-salt electrolysis -> magnesium plus chlorine**. Preparation must account for its base, acid, water, residues, drying and energy; the intermediate does not bypass those costs. The cell's internal melt adds neither a molten-chloride pipe requirement nor a player pressure control. Independent earlier metals/ceramics supply the first equipment and magnesium batch; recycling later feed cannot start its own line.
+
+### Recycling metals and useful construction products
+
+Selected titanium chain: **mineral treatment -> crude titanium chloride -> shared distillation -> magnesium reduction with integrated paid cleanup -> clean sponge -> melting**. The separated MgCl2 returns to the magnesium cell route from the first installation, with any required conditioning included in its material/energy receipt. Recoveries, makeup feed and losses remain to quantify; the same salt charge cannot be both recovered and separately awarded again.
+
+Aluminum refining recovers most digestion lye with makeup losses. Its electrolysis consumes carbon and offers accounted CO2 capture; the existing default continues production and vents excess uncaptured CO2. Carbon consumption is a recipe cost, not routine electrode maintenance. Whole-ingot alloy batches settle the convenient recipe form, not specific ratios or certified chemical grades. Stabilized bauxite filler needs its own binder, processing, yield and pollution budget; raw bauxite residue and coal gas-cleaning residue stay distinct even when they share construction equipment and a useful destination.
 
 These are fictional game process choices, not real operating instructions. Do not create magnesium from freshwater, generic salt brine or arbitrary placed water without an accounted coastal source. Source concentration and extraction must debit the source/feed once; neither requires destroying shoreline blocks. A magnesium-hydroxide intermediate does not itself grant purified anhydrous MgCl2. Chloride preparation needs explicit water/reagent/byproduct accounting, and recovery is molten-salt electrolysis rather than aqueous sodium/magnesium deposition. [USGS records seawater hydroxide and natural magnesium-chloride brine sources](https://www.usgs.gov/publications/magnesium-compounds-1).
 
@@ -453,6 +465,97 @@ Real aluminum production connects bauxite-derived alumina to molten electrolysis
 Titanium chloride is purified before magnesium reduction; removing residual magnesium/salts precedes sponge melting, and MgCl2 can supply magnesium/chlorine recovery. [Toho's process description](https://www.toho-titanium.co.jp/business/timetal/) supports these distinct roles. Final Jugcraft stations, stage costs and recovery yields remain to specify. Purification/drying/phase conversion consumes energy and retains losses/byproducts; no recovery grants free electricity or replaces external mineral feed. Any automatic separation/vacuum capability adds no player pressure setting.
 
 The two selected first alloys remain chemical stainless steel and aluminum-magnesium structural alloy, with later titanium alloys. Neither recipe precision option approves a numerical alloy ratio or real certified grade. First magnesium/aluminum/titanium producers use reachable earlier metals and ceramics and cannot require their own outputs or advanced wafer chips. Bauxite residue and gas-cleaning residue remain separate inputs; their shared road/filler destination does not make the raw residues interchangeable or safe real-world construction materials. New resource regions and exact crop/material effects remain future design work.
+
+## Polymer and advanced electronics decisions eleventh batch
+
+On **8 October 2026**, the owner selected A for all eight polymer/advanced-electronics questions. These choices settle the following process and product directions; exact recipes, quantities and capabilities remain to specify.
+
+| # | Owner answer | Selected direction |
+| --- | --- | --- |
+| 1 | A | Add a later paid bioethanol-to-ethylene route on compatible shared chemistry equipment alongside the primary refinery route |
+| 2 | A | Ordinary housings/panels accept appropriate polyethylene or PVC through explicit compatibility tags; specialty parts retain their material requirements |
+| 3 | A | Shared processing returns clean molding/extrusion offcuts to the same polymer grade with power costs and material losses |
+| 4 | A | Produce a distinct high-purity silicon stock for advanced wafer production, preserving ordinary silicon's existing uses |
+| 5 | A | Add precision wafer cutting to the shared saw/cutting machine family |
+| 6 | A | Craft one reusable pattern plate for the general advanced chip, using independently reachable earlier materials and no wear |
+| 7 | A | Assemble the general chip with a few function-related parts for distinct speed, efficiency and automation modules |
+| 8 | A | Begin wafer-process waste handling with one recipe-defined accounted spent mixture, adding useful recovery later |
+
+### Flexible plastic production and recycling
+
+Bioethanol gains a later chemical consumer: paid ethylene production through a compatible shared process, alongside the selected refinery feed. This does not replace its Bio-Generator use or make crop harvesting a required path to plastics. Specify feed quantities, water/byproducts, automatic heating, energy and compatible station capability before implementation.
+
+General housings/panels can substitute suitable PE/PVC stocks where their properties fit. Distinct HDPE/LDPE grades and the named PVC/PTFE routes remain useful; flexible film, insulation and chemical-resistant parts keep their own explicit compatibility requirements. Tags authorize specific products, not arbitrary replacement of every polymer or every specialty component.
+
+Clean manufacturing offcuts stay identified by their originating polymer grade. Reprocessing consumes that scrap once, uses energy and returns less usable stock after losses. Product plus offcut plus residue must fit the original material charge; an extra scrap award cannot accompany a full unchanged allocation of the same input. Mixed, dirty or incompatible scraps do not become a universal free polymer feed. Scrap stock forms, returned yield and shared machine recipes remain to design.
+
+### Advanced wafer preparation tooling and module assembly
+
+Selected preparation direction: **independently obtainable silicon -> paid purification -> distinct high-purity silicon stock -> crystal/wafer preparation -> shared precision cutting/finishing -> the separate wet-processing and lithography line**. Preserve basic silicon/circuits and existing chip consumers while replacements are specified. A new high-purity stock does not require rewriting or gating the earlier manual silicon route.
+
+Make the general-chip pattern plate from independently reachable earlier materials, and keep it reusable without wear. Its production, cutting capability and first equipment controls cannot require the advanced chips/modules they enable. The selected single resin/additive photoresist, cleaner, TMAH developer and selective HF oxide work retain their separate roles; later silane deposition remains a subsequent capability. High-purity preparation and slicing/finishing are informed by [Siltronic's wafer-production overview](https://www.siltronic.com/en/products.html); the reusable plate simplifies the mask/reticle role described by [ASML](https://www.asml.com/en/technology/lithography-principles). These references do not specify Jugcraft recipes or an entire semiconductor process.
+
+One general advanced chip becomes three distinct assembled modules with a small set of relevant parts. Motor/control parts for speed and capacitors/coils for efficiency are illustrative ingredient families, not finalized bills or a real physical explanation for chip performance. Automation ingredients, compatibility, tiers, limits and the exact material counts remain open. Selected effects stay unchanged: speed increases throughput and draw, efficiency reduces energy per batch within audited limits, and first automation provides recipe priorities/stock targets with remote controls later.
+
+The first wafer line produces one recipe-defined spent mixture with a known receipt for consumed reagents and removed material. Exact composition, collection/output blocking, disposal, pollution and later recovery recipes remain to specify; choosing one mixture does not grant free venting or recovery of arbitrary acids/solvents/metals. Later recovery consumes the same waste once, with energy and losses. No extra routine filter/catalyst/tool replacement is introduced by this choice.
+
+## Grid storage synthetic fuels and cryogenics decisions twelfth batch
+
+On **8 October 2026**, the owner selected A for all ten grid-storage, synthetic-fuel and cryogenic questions. These choices settle delivery and process directions, not exact recipes, statistics or implemented gameplay.
+
+| # | Owner answer | Selected direction |
+| --- | --- | --- |
+| 1 | A | Introduce practical sulfuric-acid/lead battery banks during the steel electrical era |
+| 2 | A | Prepare LiPF6 salt, then formulate lithium-ion electrolyte as two shared processing stages |
+| 3 | A | Supply vanadium electrolyte from a mineral-derived route alongside the existing refinery-residue route |
+| 4 | A | Attach paired flow-battery tank modules around a bounded controller/cell-stack installation |
+| 5 | A | Include optional local charge/discharge priorities and a minimum-charge reserve setting; remote control stays later |
+| 6 | A | Use independently obtainable cobalt stock with ceramic support as reusable first synthetic-fuel catalyst tooling |
+| 7 | A | Produce one accounted synthetic-crude mixture, then use shared refinery equipment for useful fractions and finishing |
+| 8 | A | Extend existing oxygen cooling with liquid methane first, then liquid hydrogen through a more advanced capability |
+| 9 | A | Use appropriately upgraded insulated variants of the shared tank family for compatible rocket liquids |
+| 10 | A | Introduce hydrazine first for the requested early/atmospheric and future station-thruster roles; MMH follows later |
+
+### Practical storage and modular factory banks
+
+Steel-era lead-acid banks connect independently obtainable lead/electrode stock and sulfuric acid to useful early electrical buffering. Exact cells, construction, capacity, output and losses remain to specify. Preserve current earlier storage and avoid requiring the advanced batteries or chips that this bank precedes. General storage still develops before portable packs and specialty high-output banks.
+
+Lithium-ion preparation shows **independent lithium/fluorine/phosphorus supplies -> LiPF6 salt preparation -> formulated electrolyte -> compatible electrode/separator components -> cell/bank assembly**. Exact chemical precursors, solvent, material forms, purity, quantities and energy remain open. LiPF6 is part of an electrolyte formulation, not a finished battery or universal replacement for its other components; current lithium-cell/bank IDs and reachable consumers remain available during transition.
+
+Mineral-derived vanadium supplies bulk electrolyte alongside refinery residue, with its own accounted refining/formulation recipe. This extends the separately selected independent first-acid contact-catalyst supply; bulk electrolyte preparation cannot become a prerequisite for its own first sulfuric acid. The initial flow installation grows through **attached paired tank modules**, with bounded layout membership and cell stacks controlling charge/discharge output. Tank additions increase supported capacity only through accounted paired electrolyte; stacks do not create extra fluid or stored energy. Exact module geometry/count limits, side composition, capacity, output, pumping and losses remain to specify.
+
+Local battery settings optionally control charge/discharge priorities and a minimum-charge reserve. Default automatic operation remains useful; remote coordination stays later. Define priority interactions, reserve units, hysteresis and how grid requests are bounded/server-authoritative before implementation. Preserve supported existing pickup/save behavior while specifying module detach/rejoin and energy ownership; paired tanks or shared controllers cannot award the same contents/charge twice. No routine cycle aging or electrolyte replacement is introduced.
+
+### Synthetic fuels and progressive cold storage
+
+Selected synthetic-fuel direction: **accounted CO/H2 preparation and cleanup -> reusable cobalt/ceramic catalyst capability -> one synthetic-crude mixture plus accounted water/other outputs -> shared refining/upgrading -> usable fuel fractions**. Independently obtainable cobalt and ordinary compatible ceramic support enable the first catalyst without an additional elaborate preparation chain. This tooling does not substitute for the nickel methane bed or vanadium contact bed. Exact cobalt source/quantity, station mapping and material/energy receipts remain to design; routine catalyst replacement and player pressure control remain excluded.
+
+The synthetic-crude mixture is refinery feed, not finished gasoline. Its composition and fraction yields must fit the feed once and retain any needed upgrading. Keep identical finished fuel grades consistent regardless of oil/synthetic provenance, and audit external carbon/hydrogen, electrolysis, heat, separation, refinery power and generator returns together.
+
+Selected cold-capability order: **existing LOX -> liquid methane capability -> more advanced liquid hydrogen capability** within the shared Cryogenic Liquefier family. Appropriately upgraded insulated variants of shared tanks hold compatible rocket liquids. Exact insulation/cooling materials, unit conversions, construction, work rates and energy remain open; capability checks do not add a manual pressure setting. Ordinary Rotary Condensator roles remain distinct, and no free gas/liquid duplication, boil-off or engine-damage upkeep is added.
+
+Hydrazine is the first new named storable rocket/thruster fuel; MMH follows later. Preserve the owner-requested early/atmospheric and future station roles as game design, with explicit engine/oxidizer compatibility and N2O4 where a compatible bipropellant module requires it. Current terrestrial solid and RP-1/LOX routes remain reachable. These choices do not implement launches, new destinations, satellite servicing or station gameplay, and they contain no real propellant-production instructions.
+
+## Resource reagent and residue questions pending
+
+These **eight questions are unanswered**. They address independent material/reagent supplies and useful coproducts for the selected factories. A is the proposed starting direction, not an owner choice. Existing lead/lithium/nickel/iron supplies, regional chromium, snow-biome fluorite and beach/ocean seawater choices remain intact until reviewed additions are reachable.
+
+| # | Topic | A | B |
+| --- | --- | --- | --- |
+| 1 | Lead feed for early banks | Develop galena-based lead feed/refining using compatible shared equipment | Keep a broadly named lead-ore feed initially and introduce named mineral processing later |
+| 2 | First expanded lithium source | Start with spodumene-bearing rock processing, with natural lithium brines as a later alternate route | Start with natural lithium brines, adding hard-rock processing later |
+| 3 | Cobalt feed | Recover cobalt as an optional coproduct from specifically cobalt-bearing nickel feeds | Introduce a separate primary cobalt-ore feed for the first catalyst |
+| 4 | Regional chromium mineral | Use named chromite concentrate and compatible shared refining for stainless-alloy feed | Begin with broadly named chromium-bearing ore without a named concentrate stage |
+| 5 | Mineral vanadium feed | Recover it from specifically vanadium-bearing iron concentrates, with reachable earlier preparation for the first contact catalyst | Use a separate primary vanadium-mineral feed |
+| 6 | First hydrogen peroxide producer | Add a dedicated powered oxygen/water recipe through compatible shared electrochemical equipment | Begin with a longer catalytic preparation loop and extra intermediate stocks |
+| 7 | First photoresist identities | Name the single resin/additive pair as novolac resin plus a DNQ photoactive additive, with short abstract game preparation routes | Keep the names Photoresist Resin and Photoactive Additive, without specific real chemical identities initially |
+| 8 | Phosphate-refining coproduct | Add paid game purification/preparation of a gypsum-rich residue into suitable plaster/board ingredients | Defer construction uses and prioritize later residue/reagent recovery |
+
+The suggested identities are informed by primary sources: USGS identifies [galena as lead ore](https://www.usgs.gov/media/images/usgs-mrp-coloring-page-galena), [spodumene among lithium-bearing minerals](https://www.usgs.gov/data/lithium-deposits-united-states), and [chromite as chromium feed](https://www.usgs.gov/centers/national-minerals-information-center/chromium-statistics-and-information). Its [critical-mineral review](https://pubs.usgs.gov/of/2021/1045/ofr20211045.pdf) identifies cobalt coproduct connections to copper/nickel and vanadium to vanadiferous iron feed. These inspire specific game feeds; they do not make all ordinary nickel/iron ore yield those elements or select worldgen regions, abundances or processing recipes.
+
+[SLAC's electrochemical peroxide research](https://www6.slac.stanford.edu/news/2017-03-31-new-device-produces-hydrogen-peroxide-water-purification) supports oxygen/water electrochemical production as a distinct process role. It is not ordinary H2/O2 water electrolysis relabeled as peroxide. A [manufacturer datasheet](https://www.microchemicals.com/dokumente/datenblaetter/tds/merck/en/tds_az_910_remover.pdf) identifies DNQ/novolac positive resists; exact Jugcraft precursor/formulation compatibility with the selected developer remains to specify. [EPA describes phosphogypsum from phosphate wet processing](https://www.epa.gov/radiation/tenorm-fertilizer-and-fertilizer-production-wastes). The construction option is a fictional paid purification/product route, not raw-residue placement or a claim that real phosphogypsum is construction-grade material.
+
+Source discovery/extraction, regional IDs/tags, current-world compatibility, stock forms, specific separation chemistry, reagent/byproduct receipts, waste handling and energy remain future specification work. First catalyst preparation cannot require the acid it enables. Coproduct recovery consumes a defined source charge once and preserves useful primary production. All options use the selected numeric pollution model without adding landscape discoloration or crop-health damage.
 
 ## Verification, dependencies and provenance
 
