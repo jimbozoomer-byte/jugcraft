@@ -49,6 +49,15 @@ public final class PeepoWorkSessionClientTests implements FabricClientGameTest {
         }).create()){
             world.getConnection().waitForChunksRender();var s=world.getServer();base=context.computeOnClient(c->c.player.blockPosition().above(4));
             s.runCommand("time set noon");s.runCommand("weather clear");s.runCommand("gamerule minecraft:random_tick_speed 0");
+            for(boolean jughead:new boolean[]{false,true})s.runOnServer(v->{
+                setup(v.overworld(),jughead);npc.setNoAi(true);npc.setOnGround(false);
+                var probe=new CompanionRoutine(npc);probe.resetOrders();
+                check(!probe.canUse(),"airborne worker waits before searching");
+                check(probe.status(anchor)!=CompanionStatus.BLOCKED,"airborne start must not blacklist a reachable plot");
+                npc.setOnGround(true);
+                check(probe.canUse(),"landing permits immediate search without a failed-route cooldown");
+                probe.stop();
+            });
             for(boolean jughead:new boolean[]{false,true}){
                 s.runOnServer(v->setup(v.overworld(),jughead));
                 s.waitFor(v->crops(v.overworld(),false)==1,600);
@@ -82,7 +91,10 @@ public final class PeepoWorkSessionClientTests implements FabricClientGameTest {
                     var stool=net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(PeepoMod.id("wooden_stool"));
                     v.overworld().setBlockAndUpdate(base.south(3),stool.defaultBlockState());
                 });
-                s.waitFor(v->npc.getRestMode()==CompanionEnergy.Rest.SITTING,600);
+                try{s.waitFor(v->{
+                    if(v.overworld().getGameTime()%80==0)org.slf4j.LoggerFactory.getLogger("peepo-session-test").info("seat search: variant={}, position={}, routine={}, ground={}, energy={}",jughead,npc.position(),npc.routineStatus(),npc.onGround(),npc.getEnergy());
+                    return npc.getRestMode()==CompanionEnergy.Rest.SITTING;
+                },600);}catch(AssertionError e){throw new AssertionError(s.computeOnServer(v->"seat search: variant="+jughead+", position="+npc.position()+", routine="+npc.routineStatus()+", ground="+npc.onGround()),e);}
                 s.runOnServer(v->{v.overworld().setBlockAndUpdate(anchor.above(),Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE,7));npc.garden.inputsChanged(anchor);});
                 long[] leftSeat={-1};
                 try{s.waitFor(v->{

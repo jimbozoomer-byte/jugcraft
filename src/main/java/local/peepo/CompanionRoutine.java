@@ -67,6 +67,9 @@ final class CompanionRoutine extends Goal {
     }
     private void search(){
         long now=npc.level().getGameTime();if(now<nextSearch)return;
+        // Match ground navigation's readiness: an airborne start is not a blocked
+        // workstation. Do not consume the seat scan or search cooldown before landing.
+        if(!npc.onGround() && !npc.isInLiquid() && !npc.isPassenger())return;
         if(!CompanionBudget.search(npc)){state=CompanionStatus.WAITING;return;}
         state=CompanionStatus.IDLE;
         nextSearch=now+80+Math.floorMod(npc.getId(),20);unreachable.entrySet().removeIf(e->e.getValue()<=now);

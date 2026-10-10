@@ -35,7 +35,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 MOD_JSON = "src/gametest/resources/fabric.mod.json"
-TEST_DIR = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+TEST_DIR = ROOT / "src" / "gametest" / "java"
 CODE_DIRS = (ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java")
 
 # Rough seconds each class takes on a CI runner, to share them out evenly; others are estimated from their length.
@@ -49,6 +49,17 @@ WEIGHTS = {
     "GuideScreenshotGameTests": 120,
     "SeasonClientGameTests": 90,
     "JugcraftServerClientGameTests": 90,
+    # Companion suites exercise timed AI, inventory trips and cooking, not just
+    # showrooms. Allow CI headroom over the focused local runtime measurements.
+    "PeepoCompanionClientTests": 600,
+    "PeepoHearthClientTests": 240,
+    "PeepoWorkSessionClientTests": 240,
+    "PeepoDeliveryClientTests": 240,
+    "PeepoKitchenAnimationClientTests": 120,
+    "PeepoSuppliesClientTests": 60,
+    "PeepoHarvestClientTests": 60,
+    "TransportCrateClientTests": 60,
+    "TikiTorchClientTests": 30,
 }
 HUB = 5  # a class this many test classes name is a shared registry, not one feature
 ENDINGS = ("BlockEntityRenderer", "BlockEntity", "Renderer", "Block", "Item", "Entity", "Model", "Screen", "Menu",
@@ -112,10 +123,10 @@ def test_classes(listed):
     tests = {}
     for entry in listed:
         name = entry.rsplit(".", 1)[-1]
-        path = TEST_DIR / f"{name}.java"
+        path = TEST_DIR.joinpath(*entry.split(".")).with_suffix(".java")
         text = path.read_text(encoding="utf-8") if path.is_file() else ""
         classes, ids = names_in(text)
-        tests[name] = {"classes": classes & sources.keys(), "ids": ids}
+        tests[name] = {"classes": classes & sources.keys(), "ids": ids, "source": path}
     users = {}
     for info in tests.values():
         for cls in info["classes"]:
@@ -230,7 +241,7 @@ def share(classes, tests, shards):
     def weight(name):
         if name in WEIGHTS:
             return WEIGHTS[name]
-        path = TEST_DIR / f"{name}.java"
+        path = tests[name]["source"]
         return 8 + (len(path.read_text(encoding="utf-8").splitlines()) // 15 if path.is_file() else 0)
 
     jobs = [[0, []] for _ in range(shards)]
