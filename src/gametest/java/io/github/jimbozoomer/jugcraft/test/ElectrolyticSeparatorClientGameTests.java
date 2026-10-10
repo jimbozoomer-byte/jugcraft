@@ -24,10 +24,13 @@ import net.minecraft.world.level.material.Fluids;
 /**
  * Client game test for the Electrolytic Separator (docs/features/industrial-electrolytic-separator.md), splitting water
  * with its lamp and level strips lit: from the front left (the control box, the door, the bus connection, the lye
- * return and the outlet collars), from the back right (the feed inlet), at night, then its screen while it works and
- * once a full lye tank has stopped brine. CI job {@code client}.
+ * return and the outlet collars), straight on, from the back right (the feed inlet) and at night, then its screen
+ * while it works and once a full lye tank has stopped brine. CI job {@code client}.
  */
 public class ElectrolyticSeparatorClientGameTests implements FabricClientGameTest {
+	/** A standing player's eyes above their feet. */
+	private static final double EYE_HEIGHT = 1.62;
+
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
@@ -63,17 +66,20 @@ public class ElectrolyticSeparatorClientGameTests implements FabricClientGameTes
 			double cx = x + 1.0;
 			double cz = z - 6.0;
 			charge(server, separator);
-			shoot(context, singleplayer, x - 1.5, y, z - 2.5, cx, y + 1.4, cz, "jugcraft_electrolytic_separator");
+			shoot(context, singleplayer, x - 1.5, y, z - 2.5, cx, y + 1.5, cz, "jugcraft_electrolytic_separator");
+			// Straight on: the ports and controls of the front.
 			charge(server, separator);
-			shoot(context, singleplayer, x + 3.5, y, z - 9.5, cx, y + 1.4, cz, "jugcraft_electrolytic_separator_back");
+			shoot(context, singleplayer, cx, y, z - 1.0, cx, y + 1.5, cz, "jugcraft_electrolytic_separator_front");
+			charge(server, separator);
+			shoot(context, singleplayer, x + 3.5, y, z - 9.5, cx, y + 1.5, cz, "jugcraft_electrolytic_separator_back");
 			server.runCommand("time set midnight");
 			charge(server, separator);
-			shoot(context, singleplayer, x - 1.5, y, z - 2.5, cx, y + 1.4, cz, "jugcraft_electrolytic_separator_night");
+			shoot(context, singleplayer, x - 1.5, y, z - 2.5, cx, y + 1.5, cz, "jugcraft_electrolytic_separator_night");
 			server.runCommand("time set noon");
 
 			// Its screen while it works, opened from the front.
 			charge(server, separator);
-			place(context, singleplayer, x + 0.5, y, z - 3.5, cx, y + 0.5, cz);
+			place(context, singleplayer, x + 0.5, y, z - 3.5, cx, y + 1.0, cz);
 			context.getInput().lookAt(separator);
 			context.waitTick();
 			context.getInput().pressKey(options -> options.keyUse);
@@ -118,12 +124,15 @@ public class ElectrolyticSeparatorClientGameTests implements FabricClientGameTes
 		return (FormMachineBlockEntity) level.getBlockEntity(pos);
 	}
 
-	/** Stands the camera at (x, y, z) looking at (tx, ty, tz), on a barrier, and waits for the world to draw. */
+	/**
+	 * Stands the camera at (x, y, z) with its eyes on (tx, ty, tz), on a barrier, and waits for the world to draw. The
+	 * teleport's "facing" aims from the feet, so the point it is given is lowered by the eye height.
+	 */
 	private static void place(ClientGameTestContext context, TestSingleplayerContext singleplayer, double x, int y, double z,
 			double tx, double ty, double tz) {
 		TestServerContext server = singleplayer.getServer();
 		server.runCommand("setblock %d %d %d minecraft:barrier".formatted((int) Math.floor(x), y - 1, (int) Math.floor(z)));
-		server.runCommand(String.format(Locale.ROOT, "tp @p %.2f %d %.2f facing %.2f %.2f %.2f", x, y, z, tx, ty, tz));
+		server.runCommand(String.format(Locale.ROOT, "tp @p %.2f %d %.2f facing %.2f %.2f %.2f", x, y, z, tx, ty - EYE_HEIGHT, tz));
 		context.waitTicks(20);
 		singleplayer.getConnection().waitForChunksRender();
 	}

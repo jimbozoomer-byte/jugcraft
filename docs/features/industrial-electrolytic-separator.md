@@ -105,7 +105,7 @@ Locally, without Gradle or a game:
 - A tree-sitter Java syntax parse of the 8 changed or new Java files: no errors. This is not a compile.
 - The model was drawn outside the game from all four corners, lit and unlit, to check the parts line up and every face is finished.
 
-Written for CI and not yet run:
+For CI:
 - **Server game tests** (`ElectrolyticSeparatorGameTests`), 6 tests:
   - in all four orientations it fills its twelve blocks and only its five ports answer; the feed takes water and brine but not lava, and nothing goes in at an outlet;
   - water gives 500 mB of hydrogen and 250 mB of oxygen, leaving at their collars, for exactly 204,800 JE;
@@ -114,7 +114,17 @@ Written for CI and not yet run:
   - oxygen left in the shared tank makes brine wait, naming oxygen, until it is drawn off;
   - it runs exactly its two recipes while the Cell keeps its own, and its crafting recipe and the Steel Tank's together come to 20 plates.
 - `IndustrialFoundationGameTests` now checks that each form block numbers only its own parts.
-- **Client game test** (`ElectrolyticSeparatorClientGameTests`): `jugcraft_electrolytic_separator` (front left, working), `_back`, `_night`, `_screen` (working) and `_lye_full` (brine stopped by a full lye tank).
+- **Client game test** (`ElectrolyticSeparatorClientGameTests`): `jugcraft_electrolytic_separator` (front left, working), `_front` (straight on), `_back`, `_night`, `_screen` (working) and `_lye_full` (brine stopped by a full lye tank).
+
+### Results
+
+- **Run [38089455548](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38089455548) (commit 1474cecd): green.**
+  - Everything compiled. Both server game test jobs passed, "All 1298 required tests passed": the 1,292 before this change and the 6 new ones.
+  - The client test selector chose this test and the foundation's; both passed with no model or loading errors.
+  - Screenshots:
+    - `_screen`: the Separator's screen reads "Processing", 22%, power 53k/60k, batches 1/1, with the feed in the batch and gas in two outlet tanks. The power line now fits.
+    - `_lye_full`: "Output blocked" wraps onto two lines over "Lye tank is full", with brine waiting in the feed tank and the lye tank full.
+    - The three world shots show the model working, its strips lit at night. But they looked up and cut off its base: a teleport's "facing" aims from the feet, not the eyes. The test now aims from the eyes and adds the straight-on `_front`.
 
 No survival playtest, two-client test or performance measurement has been done.
 
