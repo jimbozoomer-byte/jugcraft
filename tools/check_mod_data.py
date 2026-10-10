@@ -10342,34 +10342,59 @@ def check_wayfaring_worn(co, lang):
         if not slots or len(set(slots)) != len(slots) or not set(slots) <= {"head", "chest", "legs", "feet"}:
             err(f"tools/concordance_trinkets.py: WORN_COVERED_BY[{item!r}] must name armour slots (head, chest, legs, feet), "
                 f"each once, not {slots}")
+    # Each definition is one Jugcraft element, naming WORN_COVERED_BY's slots, round the item's model elements.
+    for item in tr.WORN:
+        data = load(ASSETS / "trinkets" / f"{item}.json") if (ASSETS / "trinkets" / f"{item}.json").is_file() else None
+        render = data.get("render") if isinstance(data, dict) else None
+        wrapper = render[0] if isinstance(render, list) and len(render) == 1 and isinstance(render[0], dict) else {}
+        models = wrapper.get("then")
+        if (wrapper.get("type") != tr.WORN_ELEMENT or wrapper.get("armour") != tr.WORN_COVERED_BY.get(item)
+                or not isinstance(models, list) or not models
+                or any(not isinstance(m, dict) or m.get("type") != "minecraft:model" for m in models)):
+            err(f"assets/{MOD}/trinkets/{item}.json must be one {tr.WORN_ELEMENT} element, armour "
+                f"{tr.WORN_COVERED_BY.get(item)}, round its model elements")
+
+    def code(path):
+        """A Java file's code with its comments taken out and its whitespace made single spaces ("" if missing)."""
+        text = path.read_text(encoding="utf-8") if path.is_file() else ""
+        return re.sub(r"\s+", " ", re.sub(r"/\*.*?\*/|//[^\n]*", "", text, flags=re.S))
+
+    def bare(text):
+        return re.sub(r"\s+", "", text)
+
     element = CLIENT_JAVA_ROOT / "trinket" / "UnlessCoveredTrinketElement.java"
     wayfaring_client = CLIENT_JAVA_ROOT / "WayfaringClient.java"
-    element_text = element.read_text(encoding="utf-8") if element.is_file() else ""
-    if tr.WORN_ELEMENT != f"{MOD}:unless_covered" or 'TYPE = Jugcraft.id("unless_covered")' not in element_text:
+    element_code = code(element)
+    if tr.WORN_ELEMENT != f"{MOD}:unless_covered" or 'TYPE = Jugcraft.id("unless_covered")' not in element_code:
         err(f"{element.relative_to(ROOT)}: the element must be {MOD}:unless_covered, the type WORN_ELEMENT names "
             f"({tr.WORN_ELEMENT})")
-    for needle, why in (("WornDisplay.hidden(owner)", "read the wearer's own choice, which the server sends to everyone"),
+    for needle, why in (('fieldOf("armour")', "read the armour slots its definition names"),
+                        ('fieldOf("then")', "read the elements it draws"),
+                        ("WornDisplay.hidden(owner)", "read the wearer's own choice, which the server sends to everyone"),
                         ("getItemBySlot(", "read the wearer's own armour (the render state's is not filled yet)"),
-                        ("DataComponents.EQUIPPABLE", "count only armour drawn on the body (an equippable with an asset)"),
-                        ("DataComponents.GLIDER", "not count a glider (an elytra) as covering"),
+                        ("equippable.slot() == slot", "count armour only in the slot it is worn in"),
+                        ("equippable.assetId().isPresent()", "count only armour drawn on the body (an equippable with an asset)"),
+                        ("!worn.has(DataComponents.GLIDER)", "not count a glider (an elytra) as covering"),
                         ("element.resolveDependencies(resolver)", "hand its held models on to be baked")):
-        if needle not in element_text:
+        if needle not in element_code:
             err(f"{element.relative_to(ROOT)} must {why} ({needle})")
-    if "ConcordanceClientOptions" in element_text:
+    if "ConcordanceClientOptions" in element_code:
         err(f"{element.relative_to(ROOT)} must not read this computer's setting: each wearer's choice comes from the server "
             "(WornDisplay), so everyone sees the same")
-    registered = wayfaring_client.read_text(encoding="utf-8") if wayfaring_client.is_file() else ""
-    if "TrinketRenderElements.ID_MAPPER.put(UnlessCoveredTrinketElement.TYPE, UnlessCoveredTrinketElement.CODEC)" not in registered:
+    registered = bare(code(wayfaring_client))
+    if "TrinketRenderElements.ID_MAPPER.put(UnlessCoveredTrinketElement.TYPE,UnlessCoveredTrinketElement.CODEC)" not in registered:
         err(f"{wayfaring_client.relative_to(ROOT)} must register the element with Trinkets (TrinketRenderElements.ID_MAPPER)")
     for needle, why in (("ClientPlayConnectionEvents.JOIN.register(", "send the setting on joining a world"),
                         ("ClientPlayNetworking.canSend(WornDisplayPayload.TYPE)", "send only to a server that takes it"),
                         ("new WornDisplayPayload(ConcordanceClientOptions.wornTrinkets())", "send the player's setting")):
-        if needle not in registered:
+        if bare(needle) not in registered:
             err(f"{wayfaring_client.relative_to(ROOT)} must {why} ({needle})")
+    if "WayfaringClient.register();" not in code(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("ConcordanceClient.register() must call WayfaringClient.register(), or no render definition decodes")
     # The server side: the choice is that player's, rate-limited, sent to everyone who sees them, kept through death, not saved.
     display = JAVA_ROOT / "concordance" / "trinket" / "WornDisplay.java"
-    display_text = display.read_text(encoding="utf-8") if display.is_file() else ""
-    hidden = re.search(r"HIDDEN = AttachmentRegistry\.<Unit>builder\(\)([^;]*);", display_text)
+    display_code = code(display)
+    hidden = re.search(r"HIDDEN = AttachmentRegistry\.<Unit>builder\(\)([^;]*);", display_code)
     if (not hidden or ".copyOnDeath()" not in hidden.group(1) or "AttachmentSyncPredicate.all()" not in hidden.group(1)
             or ".persistent(" in hidden.group(1)):
         err(f"{display.relative_to(ROOT)}: HIDDEN must be sent to everyone who sees the wearer (AttachmentSyncPredicate.all()), "
@@ -10377,28 +10402,34 @@ def check_wayfaring_worn(co, lang):
     for needle, why in (("registerGlobalReceiver(WornDisplayPayload.TYPE, (payload, context) -> choose(context.player(), payload.shown()))",
                          "take a choice only for the player who sent it"),
                         ("ServerPlayConnectionEvents.DISCONNECT", "forget a waiting choice when its player leaves")):
-        if needle not in display_text:
+        if bare(needle) not in bare(display_code):
             err(f"{display.relative_to(ROOT)} must {why} ({needle})")
-    if display_text.count("RateGate.allow(player, ACTION, CHANGE_TICKS)") < 2:
+    if bare(display_code).count("RateGate.allow(player,ACTION,CHANGE_TICKS)") < 2:
         err(f"{display.relative_to(ROOT)} must limit how often a player's choice changes, both where a change is made at once "
             "and where a waiting one lands (RateGate.allow(player, ACTION, CHANGE_TICKS))")
-    if "WornDisplay.register();" not in (JAVA_ROOT / "concordance" / "trinket" / "Wayfaring.java").read_text(encoding="utf-8"):
+    if "WornDisplay.register();" not in code(JAVA_ROOT / "concordance" / "trinket" / "Wayfaring.java"):
         err("Wayfaring.register() must call WornDisplay.register()")
-    if "WayfaringClient.register();" not in (CLIENT_JAVA_ROOT / "ConcordanceClient.java").read_text(encoding="utf-8"):
-        err("ConcordanceClient.register() must call WayfaringClient.register(), or no render definition decodes")
-    options = (CLIENT_JAVA_ROOT / "ConcordanceClientOptions.java").read_text(encoding="utf-8")
-    screen = (CLIENT_JAVA_ROOT / "ConcordanceSettingsScreen.java").read_text(encoding="utf-8")
+    # The setting: on at first, saved, sent to the server whenever it is saved, and the screen's switch seeded from it.
+    options = code(CLIENT_JAVA_ROOT / "ConcordanceClientOptions.java")
+    screen = code(CLIENT_JAVA_ROOT / "ConcordanceSettingsScreen.java")
     if ('properties.getProperty("concordance.worn_trinkets", "true")' not in options
-            or 'properties.setProperty("concordance.worn_trinkets"' not in options):
-        err("ConcordanceClientOptions must load concordance.worn_trinkets (on by default) and save it")
+            or 'properties.setProperty("concordance.worn_trinkets", Boolean.toString(wornTrinkets))' not in options
+            or "wornTrinkets = trinkets;" not in options):
+        err("ConcordanceClientOptions must load concordance.worn_trinkets (on by default), take it from set() and save it")
     for method in ("set", "setWornTrinkets"):
         body = re.search(r"public static void " + method + r"\([^{]*\{([^}]*)\}", options)
         if not body or "WayfaringClient.sendChoice();" not in body.group(1):
             err(f"ConcordanceClientOptions.{method}() must send the setting to the server when it is saved "
                 "(WayfaringClient.sendChoice())")
-    toggle = re.search(r'config\.worn_trinkets"\), values\[(\d)\]\)\s*\.setDefaultValue\(true\)', screen)
-    if not toggle or f"values[{toggle.group(1)}], intensity[0])" not in screen:
-        err("ConcordanceSettingsScreen must offer Show my worn trinkets (on by default) and save it")
+    seed = re.search(r"boolean\[\] values = \{(.*?)\};", screen)
+    toggle = re.search(r'config\.worn_trinkets"\), values\[(\d)\]\)(.*?)\.build\(\)', screen)
+    n = int(toggle.group(1)) if toggle else -1
+    if (not seed or not toggle
+            or [s.strip() for s in seed.group(1).split(",")][n:n + 1] != ["ConcordanceClientOptions.wornTrinkets()"]
+            or ".setDefaultValue(true)" not in toggle.group(2)
+            or f".setSaveConsumer(value -> values[{n}] = value)" not in toggle.group(2)
+            or f"values[{n}], intensity[0])" not in screen):
+        err("ConcordanceSettingsScreen must offer Show my worn trinkets (seeded from wornTrinkets(), on by default) and save it")
     for key in tr.CLIENT:
         if key not in lang:
             err(f"lang: {key} is missing (tools/concordance_trinkets.py CLIENT)")

@@ -95,11 +95,12 @@ public final class ConcordanceClientOptions {
 				Jugcraft.LOGGER.error("Could not read {}; using defaults", path, e);
 			}
 		}
-		hud = Boolean.parseBoolean(properties.getProperty("concordance.hud", "true"));
+		hud = !"false".equalsIgnoreCase(properties.getProperty("concordance.hud", "true").trim());
 		reducedMotion = Boolean.parseBoolean(properties.getProperty("concordance.reduced_motion", "false"));
 		exactValues = Boolean.parseBoolean(properties.getProperty("concordance.exact_values", "false"));
 		simpleJournal = Boolean.parseBoolean(properties.getProperty("concordance.simple_journal", "false"));
-		wornTrinkets = Boolean.parseBoolean(properties.getProperty("concordance.worn_trinkets", "true"));
+		// The two settings on at first are off only when they say so: a mistyped value leaves them on.
+		wornTrinkets = !"false".equalsIgnoreCase(properties.getProperty("concordance.worn_trinkets", "true").trim());
 		intensity = Presentation.Intensity.fromId(properties.getProperty("concordance.visual_intensity", "full"));
 		Presentation.configure(intensity, reducedMotion);
 		save();

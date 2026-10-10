@@ -9,6 +9,7 @@ import eu.pb4.trinkets.api.client.renderer.element.TrinketRenderElement;
 import eu.pb4.trinkets.impl.client.render.ClientTrinketsManager;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.ConcordanceClientOptions;
+import io.github.jimbozoomer.jugcraft.client.trinket.UnlessCoveredTrinketElement;
 import io.github.jimbozoomer.jugcraft.concordance.trinket.Wayfaring;
 import io.github.jimbozoomer.jugcraft.concordance.trinket.WornDisplay;
 import java.lang.reflect.Proxy;
@@ -30,6 +31,7 @@ import net.minecraft.data.AtlasIds;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -47,11 +49,11 @@ import net.minecraft.world.phys.AABB;
  * the way; each render definition loaded and, run as Trinkets runs it, drawing the belt's model on the body and the boot's
  * on each leg; the worn models among the client's resources; the owner's worn sheets in the items atlas; nothing for the
  * Ice Breaker, which has no worn sheet). Then, as the owner asked, the belt is hidden under an iron chestplate and under
- * iron leggings, the boots under iron boots, and both while the player's Show my worn trinkets setting is off: turned as
- * the settings screen turns it, the choice goes to the server, which keeps it on the player and sends it back to this
- * client as it sends it to everyone who sees them, and the drawing follows what came back. Whether they look right only
- * the shots show: the player wearing them from the front and from behind, whole, closer and from each quarter, under a
- * chestplate, under boots, with the setting off, and sneaking, for people to look at;</li>
+ * iron leggings, the boots under iron boots, neither under an elytra, and both while the player's Show my worn trinkets
+ * setting is off: turned as the settings screen turns it, the choice goes to the server, which keeps it on the player and
+ * sends it back to this client as it sends it to everyone who sees them, and the drawing follows what came back.
+ * Whether they look right only the shots show: the player wearing them from the front and from behind, whole, closer and
+ * from each quarter, under a chestplate, under boots, with the setting off, and sneaking, for people to look at;</li>
  * <li>with the second charm taken out first, the belt comes off, the slot goes, and nothing falls to the ground;</li>
  * <li>the eight icons in frames on a wall (three of them the owner's animated strips), and the survival inventory, where
  * Trinkets shows its slots (the player is put in survival for it: a creative player is shown the creative screen), for
@@ -261,9 +263,11 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 
 	/**
 	 * What differs from the hiding the owner asked for, or "": what the belt and the boot would draw on the player (drawnParts)
-	 * bare, under an iron chestplate, iron leggings and iron boots one at a time, with the Show my worn trinkets setting
-	 * off, and with it on again. The belt is hidden under the chestplate and the leggings, the boots under the boots, and
-	 * both with the setting off, once the server has the choice and its answer has come back (choose).
+	 * bare, under an iron chestplate, iron leggings, iron boots and an elytra one at a time, with the Show my worn trinkets
+	 * setting off, and with it on again. The belt is hidden under the chestplate and the leggings, the boots under the
+	 * boots, neither under the elytra (drawn as wings, off the waist), and both with the setting off, once the server has
+	 * the choice and its answer has come back (choose). The element's own armour test (UnlessCoveredTrinketElement.covered)
+	 * is asked too, so a change to it picks this class in CI's client test choice (tools/select_client_tests.py).
 	 */
 	private static String misHidden(ClientGameTestContext context, TestServerContext server) {
 		List<String> wrong = new ArrayList<>();
@@ -273,6 +277,7 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 		hiding(context, server, "under an iron chestplate", "armor.chest with minecraft:iron_chestplate", true, List.of(), boots, wrong);
 		hiding(context, server, "under iron leggings", "armor.legs with minecraft:iron_leggings", true, List.of(), boots, wrong);
 		hiding(context, server, "under iron boots", "armor.feet with minecraft:iron_boots", true, belt, List.of(), wrong);
+		hiding(context, server, "under an elytra", "armor.chest with minecraft:elytra", true, belt, boots, wrong);
 		hiding(context, server, "with the setting off", null, false, List.of(), List.of(), wrong);
 		hiding(context, server, "with the setting on again", null, true, belt, boots, wrong);
 		return String.join("; ", wrong);
@@ -289,6 +294,15 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 			wrong.add(state + ": " + unchosen);
 		}
 		context.waitTicks(5);
+		// The armour this client sees, through the element's own test: covered exactly where armour should hide the item.
+		boolean beltCovered = context.computeOnClient(client -> UnlessCoveredTrinketElement.covered(client.player,
+				List.of(EquipmentSlot.CHEST, EquipmentSlot.LEGS)));
+		boolean bootsCovered = context.computeOnClient(client -> UnlessCoveredTrinketElement.covered(client.player,
+				List.of(EquipmentSlot.FEET)));
+		if (beltCovered != (shown && belt.isEmpty()) || bootsCovered != (shown && boots.isEmpty())) {
+			wrong.add(state + ": this client sees the belt's armour slots " + (beltCovered ? "covered" : "bare") + " and the boots' "
+					+ (bootsCovered ? "covered" : "bare"));
+		}
 		List<String> drawnBelt = context.computeOnClient(client -> drawnParts(client, Wayfaring.BELT_SLOT));
 		List<String> drawnBoots = context.computeOnClient(client -> drawnParts(client, Wayfaring.FEET_SLOT));
 		if (!drawnBelt.equals(belt) || !drawnBoots.equals(boots)) {

@@ -7,10 +7,11 @@ content loads, the vocabulary, which library does what, and where each of the 32
 Status: the 32 roadmap steps are on `main` (merged through #263 on 8 October 2026). Section 7 gives each step's status
 and record. Step 31's player journey is checked by machine, but no person has played it yet. After step 32, Ember's
 first part (Hearthbinding and four fire invocations) and second part (the Hearthbinder's regalia, made from the owner's
-fire art) are on `claude/awesome-davinci-iwv3b9`: see their records, [part 1](features/arcane-concordance-ember.md) and
-[part 2](features/arcane-concordance-ember-regalia.md). So is the first trinkets part, the owner's belt, boots and charms
-worn once Relic Lore is understood ([Wayfaring](features/arcane-concordance-trinkets.md)), with part 1b drawing the belt
-and boot on the body. Where to start:
+fire art) are on `main` too (integrated by #277): see their records, [part 1](features/arcane-concordance-ember.md) and
+[part 2](features/arcane-concordance-ember-regalia.md). So are the first trinkets part, the owner's belt, boots and charms
+worn once Relic Lore is understood ([Wayfaring](features/arcane-concordance-trinkets.md)), and part 1b, drawing the belt
+and boot on the body; part 1c (the belt and boots hidden under armour, and each player's Show my worn trinkets choice,
+seen by everyone) is on `claude/awesome-davinci-iwv3b9`. Where to start:
 - the [delivery record](features/arcane-concordance-delivery.md) indexes the evidence, the library integration matrix
   and what remains;
 - players start with [the guide](ARCANE_CONCORDANCE_GUIDE.md).

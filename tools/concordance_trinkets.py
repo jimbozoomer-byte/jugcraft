@@ -254,8 +254,10 @@ WORN_PLANE_LIFT = 0.05
 WORN_OFFSET = [0, -1, 0]
 WORN_ANCHOR_Y = 12
 # The armour slots whose armour hides each worn item (the owner's choice, 10 October 2026: "belt and boots should hide under
-# armor"): the belt lies on the waist, which a chestplate and leggings both cover (a chestplate would hide the strap and
-# leave the buckle standing out); the boots on the feet, which boots cover. Leggings over the boots' tops do not hide them.
+# armor"): the belt lies on the waist, which vanilla's chestplates and leggings both cover (a chestplate would hide the
+# strap and leave the buckle standing out); the boots on the feet, which boots cover. Leggings over the boots' tops do not
+# hide them. Any piece for those slots counts, so a few of Jugcraft's 3D pieces that stop short of the waist hide the belt
+# too (the feature record's part 1c limits).
 WORN_COVERED_BY = {"leather_belt": ["chest", "legs"], "amphibian_boot": ["feet"]}
 # Jugcraft's render element that draws its own elements only while those slots are bare and the player's setting is on.
 WORN_ELEMENT = rid("unless_covered")
@@ -263,8 +265,8 @@ WORN_ELEMENT = rid("unless_covered")
 # and everyone who sees them sees it (WornDisplay).
 CLIENT = {
     "screen.jugcraft.concordance.config.worn_trinkets": "Show my worn trinkets",
-    "screen.jugcraft.concordance.config.worn_trinkets.tooltip": "Draw your Wayfaring belt and boots on you. Everyone who "
-        "sees you sees your choice, and each player chooses for themselves. Armour worn over them always hides them.",
+    "screen.jugcraft.concordance.config.worn_trinkets.tooltip": "Draw your Leather Belt and Amphibian Boots on you. "
+        "Everyone who sees you sees your choice, and each player chooses for themselves. Armour worn over them hides them.",
 }
 
 # Every owner file this slice uses, copied as supplied by tools/owner_art.py: runtime path under assets/jugcraft -> path
@@ -438,9 +440,9 @@ def codex():
                 ("text", "Belts, Charms and Boots",
                  "Once you understand **Relic Lore**, you can wear these: a belt in the Belt slot, a charm in a Charm "
                  f"slot (a Leather Belt gives a second) and up to {FEET_SLOTS} on your feet. They hold no Focus or charge "
-                 "and need no pylon. Two of a kind never add up; a second vial only waits its turn. The belt and the "
-                 "boots show on you unless armour covers them, and the Concordance settings can hide them from "
-                 "everyone."),
+                 "and need no pylon. Two of a kind never add up; a second vial only waits its turn. The Leather Belt and "
+                 "the Amphibian Boots show on you unless armour covers them, and the Concordance settings can hide them "
+                 "from everyone."),
                 ("crafting_recipe", "Leather Belt",
                  "One more Charm slot. Take the second charm off before the belt.", rid("leather_belt")),
                 ("crafting_recipe", "Angelic Feather",
