@@ -21,7 +21,8 @@ EMPTY_SECONDS = 30    # an instance nobody has been inside for this long closes 
 EDGE_DAMAGE = 4.0     # the mist's toll for flying or falling off, never below half a heart (1 health)
 
 # The lair-only blocks: unbreakable fixtures, in the wither_immune and dragon_immune tags, with no item and no drops.
-# The Hollow Acre's, the exit (every lair's), then the Spindle Loft's (docs/features/spindle-loft.md).
+# The Hollow Acre's, the exit (every lair's), the Spindle Loft's (docs/features/spindle-loft.md), then the Glacier Hall's
+# (docs/features/glacier-hall.md).
 LAIR_BLOCKS = {
     "blighted_soil": "Blighted Soil",
     "black_wheat": "Black Wheat",
@@ -41,11 +42,23 @@ LAIR_BLOCKS = {
     "thimble_metal": "Thimble",
     "taut_thread": "Taut Thread",
     "grimy_skylight": "Grimy Skylight",
+    "drift_snow": "Drift Snow",
+    "trampled_snow": "Trampled Snow",
+    "glare_ice": "Glare Ice",
+    "giant_icicle": "Giant Icicle",
+    "mammoth_tusk": "Mammoth Tusk",
+    "frozen_hoard": "Frozen Hoard",
 }
 # The colours of the Spindle Loft's thread: its four spools', and the white of the threads between them.
 THREAD_COLOURS = ("green", "blue", "beige", "red", "white")
 # The doily's four lace patterns, in rings: a solid band, an open mesh, a flower and the scalloped edge.
 LACE_PATTERNS = 4
+# The Glacier Hall's giant icicles are hung in parts, from the vault down: the base, the middle (as many as it is long)
+# and the tip. Its trampled snow is a whole block or a half one (the snow ramp's half steps), by its height in halves.
+ICICLE_PARTS = ("base", "middle", "tip")
+TRAMPLED_HEIGHTS = (1, 2)
+# Glare ice is as slick as blue ice: its friction (vanilla blocks have 0.6, ice 0.98, blue ice 0.989).
+GLARE_FRICTION = 0.989
 # Fixtures a player in a lair may use (everything else is refused): the exits, and the braziers Vesperine's fight lights.
 FIXTURES = ("lair_exit", "lair_brazier")
 
@@ -69,10 +82,23 @@ SPINDLE = {
     "waking_ticks": 40,        # Blindness on waking on the pincushion
 }
 
+# The Frost Horn's call (the Glacier Hall's ritual): blown in the Overworld at night, standing on snow or ice
+# (#jugcraft:frost_horn_ground). A whirl of white mist opens in the snow at the blower's feet and stays the gate for
+# lairs.gate_seconds; whoever goes in lands on the hall's ledge with frost on their skin. Not a Witching Season ritual:
+# it works all year, whatever lairs.off_season says.
+HORN = {
+    "cooldown": 40,            # ticks between blows of one horn, called or refused
+    "frost_ticks": 120,        # how frozen the arrival is (of the 140 that would freeze them through): frost, no harm
+}
+# What the horn may be blown standing on: vanilla's snow and ice, and Jugcraft's winter snow.
+HORN_GROUND = ["minecraft:snow", "minecraft:snow_block", "minecraft:powder_snow", "minecraft:ice", "minecraft:packed_ice",
+               "minecraft:blue_ice", "minecraft:frosted_ice", "jugcraft:seasonal_snow"]
+
 ITEMS = {
     "mourning_wreath": "Mourning Wreath",
     "death_knell": "Death Knell",
     "cursed_spindle": "Cursed Spindle",
+    "frost_horn": "Frost Horn",
 }
 GATE = {"entity": "mist_gate", "display": "Mist Gate", "width": 1.6, "height": 2.6}
 
@@ -87,6 +113,9 @@ RECIPES = {
     "cursed_spindle": {"pattern": ["ESE", "GAG", "STS"], "key": {
         "E": "minecraft:spider_eye", "S": "minecraft:string", "G": "minecraft:gold_ingot",
         "A": "minecraft:amethyst_shard", "T": "minecraft:stick"}},
+    # A goat horn bound with gold and leather, packed with snow. Used up by its call.
+    "frost_horn": {"pattern": ["LGL", "SHS", " G "], "key": {
+        "L": "minecraft:leather", "G": "minecraft:gold_ingot", "S": "minecraft:snow_block", "H": "minecraft:goat_horn"}},
 }
 
 # Each lair's dimension: a void with its own biome; fixed time, no weather, no beds or respawn anchors. Its sky, fog and
@@ -110,11 +139,21 @@ LAIRS = {
         "ambient_light": 0.2,
         "motes": ("minecraft:white_ash", 0.004),
     },
+    "glacier_hall": {
+        "display": "The Glacier Hall",
+        "enter": "The snow gives way under you, and you fall into %s",
+        "sky": "#c6dcea", "fog": "#9fbdd2", "water_fog": "#4f7d9c", "water": "#3f6a8a",
+        "ambient_light_color": "#7c98b8", "sky_light_color": "#a8c4dc",
+        "music": "minecraft:music.overworld.frozen_peaks",
+        "ambient_light": 0.25,
+        "motes": ("minecraft:snowflake", 0.008),
+    },
 }
 
 
 def blocks():
-    """Every block the lairs register: the lair-only blocks and the Mourning Wreath (the Cursed Spindle is an item)."""
+    """Every block the lairs register: the lair-only blocks and the Mourning Wreath (the Cursed Spindle and the Frost Horn
+    are items)."""
     return list(LAIR_BLOCKS) + ["mourning_wreath"]
 
 

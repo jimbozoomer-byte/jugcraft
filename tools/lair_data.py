@@ -1,20 +1,21 @@
-"""JSON resources for the lairs (tools/lairs.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md): the
-lair-only blocks, the Last Rites' Mourning Wreath and Death Knell, the Cursed Spindle, the Mist Gate's name, the lairs'
-messages, and each lair's dimension (its dimension type, level stem and biome) and structure template
-(tools/hollow_acre.py, tools/spindle_loft.py).
+"""JSON resources for the lairs (tools/lairs.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md,
+docs/features/glacier-hall.md): the lair-only blocks, the Last Rites' Mourning Wreath and Death Knell, the Cursed Spindle,
+the Frost Horn, the Mist Gate's name, the lairs' messages, and each lair's dimension (its dimension type, level stem and
+biome) and structure template (tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py).
 
 Called from tools/agriculture_data.py (assets, loot, recipes, tags, worldgen). Formats follow vanilla 26.3's own files:
 the dimension type copies the shape of vanilla's End (logged from the running game by LairGameTests), the level stem a
 flat generator with no layers, and the biome vanilla's void with no spawns.
 """
 from decor_data import MOD, HORIZONTAL, rid, self_drop
+import glacier_hall
 import hollow_acre
 import spindle_loft
-from lairs import (FIXTURES, GATE, ITEMS, LACE_PATTERNS, LAIR_BLOCKS, LAIRS, MOURNING_FLOWERS, RECIPES, RITE_CANDLES,
-                   THREAD_COLOURS)
+from lairs import (FIXTURES, GATE, HORN_GROUND, ICICLE_PARTS, ITEMS, LACE_PATTERNS, LAIR_BLOCKS, LAIRS, MOURNING_FLOWERS,
+                   RECIPES, RITE_CANDLES, THREAD_COLOURS)
 
 # Each lair's template, by the lair's id.
-TEMPLATES = {"hollow_acre": hollow_acre, "spindle_loft": spindle_loft}
+TEMPLATES = {"hollow_acre": hollow_acre, "spindle_loft": spindle_loft, "glacier_hall": glacier_hall}
 
 
 def cube(lo, hi, faces, texture, cull=None, shade=True, uvs=None):
@@ -141,6 +142,49 @@ def spindle_loft_assets(models, states, write, simple):
         for h in ("lower", "upper") for m in range(4)}})
 
 
+def half_block(top, side):
+    """A half block, the bottom half of the block (the trampled snow's half steps on the snow ramp)."""
+    edge = {"texture": "#side", "uv": [0, 0, 16, 8]}
+    return {"parent": "minecraft:block/block", "textures": {"particle": side, "top": top, "side": side},
+            "elements": [{"from": [0, 0, 0], "to": [16, 8, 16], "faces": {
+                "up": {"texture": "#top"}, "down": {"texture": "#side", "cullface": "down"},
+                "north": {**edge, "cullface": "north"}, "south": {**edge, "cullface": "south"},
+                "east": {**edge, "cullface": "east"}, "west": {**edge, "cullface": "west"}}}]}
+
+
+# A giant icicle's parts, from the vault down: boxes (half-width in pixels, from y, to y), each narrower than the last.
+ICICLE_BOXES = {"base": ((7, 8, 16), (6, 0, 8)), "middle": ((5, 8, 16), (4, 0, 8)), "tip": ((3, 9, 16), (2, 3, 9), (1, 0, 3))}
+
+
+def icicle(part):
+    """One part of a giant icicle hanging from the vault: square boxes of ice down the middle of the block."""
+    elements = []
+    for half, y0, y1 in ICICLE_BOXES[part]:
+        lo, hi = 8 - half, 8 + half
+        side = {"texture": "#ice", "uv": [lo, 16 - y1, hi, 16 - y0]}
+        end = {"texture": "#ice", "uv": [lo, lo, hi, hi]}
+        elements.append({"from": [lo, y0, lo], "to": [hi, y1, hi], "faces": {
+            "north": side, "south": side, "east": side, "west": side, "up": end, "down": end}})
+    texture = rid("block/giant_icicle")
+    return {"parent": "minecraft:block/block", "textures": {"particle": texture, "ice": texture}, "elements": elements}
+
+
+def glacier_hall_assets(models, states, write, simple):
+    """The Glacier Hall's lair-only blocks (tools/glacier_hall.py)."""
+    for name in ("drift_snow", "glare_ice", "mammoth_tusk", "frozen_hoard"):
+        simple(name, {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{name}")}})
+    top, side = rid("block/trampled_snow"), rid("block/trampled_snow_side")
+    write(models / "trampled_snow.json", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+        "top": top, "side": side, "bottom": side}})
+    write(models / "trampled_snow_half.json", half_block(top, side))
+    write(states / "trampled_snow.json", {"variants": {"height=1": {"model": rid("block/trampled_snow_half")},
+                                                       "height=2": {"model": rid("block/trampled_snow")}}})
+    for part in ICICLE_PARTS:
+        write(models / f"giant_icicle_{part}.json", icicle(part))
+    write(states / "giant_icicle.json", {"variants": {
+        f"part={part}": {"model": rid(f"block/giant_icicle_{part}")} for part in ICICLE_PARTS}})
+
+
 def assets(root, write, lang):
     models, states, items = root / "models" / "block", root / "blockstates", root / "items"
 
@@ -164,6 +208,7 @@ def assets(root, write, lang):
     write(states / "lair_exit.json", {"variants": {"axis=x": {"model": rid("block/lair_exit")},
                                                    "axis=z": {"model": rid("block/lair_exit"), "y": 90}}})
     spindle_loft_assets(models, states, write, simple)
+    glacier_hall_assets(models, states, write, simple)
     for name, display in LAIR_BLOCKS.items():
         lang[f"block.{MOD}.{name}"] = display
 
@@ -178,9 +223,11 @@ def assets(root, write, lang):
     lang[f"block.{MOD}.mourning_wreath"] = ITEMS["mourning_wreath"]
     lang[f"item.{MOD}.death_knell"] = ITEMS["death_knell"]
     lang[f"item.{MOD}.cursed_spindle"] = ITEMS["cursed_spindle"]
+    lang[f"item.{MOD}.frost_horn"] = ITEMS["frost_horn"]
     lang[f"tooltip.{MOD}.death_knell"] = "Rung at a grave at night, among lit candles, with a wreath laid on it"
     lang[f"tooltip.{MOD}.cursed_spindle"] = "Used on a Spinning Wheel at night: prick your finger, and wake in the Spindle Loft"
     lang[f"tooltip.{MOD}.mourning_wreath"] = "Lay it on a grave for the Last Rites"
+    lang[f"tooltip.{MOD}.frost_horn"] = "Blown at night, standing on snow or ice: the snow opens onto the Glacier Hall"
     lang[f"entity.{MOD}.{GATE['entity']}"] = GATE["display"]
 
     for lair, info in LAIRS.items():
@@ -204,6 +251,11 @@ def assets(root, write, lang):
         f"message.{MOD}.lair.spindle.off_season": "The Cursed Spindle opens the Spindle Loft only in the Halloween season",
         f"message.{MOD}.lair.spindle.spinning": "The wheel is already spinning: use it with an empty hand to follow",
         f"message.{MOD}.lair.spindle.opened": "The wheel spins wild, and its thread winds round you",
+        f"message.{MOD}.lair.horn.not_overworld": "The horn's call carries only over the Overworld's snow",
+        f"message.{MOD}.lair.horn.not_night": "Nothing answers the horn by day",
+        f"message.{MOD}.lair.horn.no_snow": "Blow it standing on snow or ice",
+        f"message.{MOD}.lair.horn.whirling": "The snow already whirls open here: use the whirl to follow",
+        f"message.{MOD}.lair.horn.called": "The horn's call rolls over the snow, and a roar answers it",
         f"message.{MOD}.lair.leave": "You step back out of the mist",
         f"message.{MOD}.lair.left_behind": "Anything left lying in a lair is lost when it closes",
         f"message.{MOD}.lair.closed": "The lair has closed; you are back where you were",
@@ -244,6 +296,8 @@ def tags(tags):
         tags.add("block", "minecraft:dragon_immune", rid(block))
     for block in FIXTURES:
         tags.add("block", f"{MOD}:lair_fixtures", rid(block))
+    for block in HORN_GROUND:
+        tags.add("block", f"{MOD}:frost_horn_ground", block)
     # Blighted soil is earth: plants stand on it.
     tags.add("block", "minecraft:dirt", rid("blighted_soil"))
     tags.add("block", "minecraft:mineable/hoe", rid("mourning_wreath"))
