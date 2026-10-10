@@ -145,15 +145,17 @@ MATRIX = {
         [],
         "Not tried with the Concordance's renderers"),
     "fabric-language-kotlin": (
-        "Runs the Kotlin of the journal's GuiLib workspace",
-        "the plain journal screen",
-        ["ConcordanceJournalClientGameTests"],
-        "Only the workspace is Kotlin"),
+        "Runs the Kotlin of the journal's and the Spell Composer's GuiLib workspaces",
+        "the plain journal and composer screens",
+        ["ConcordanceJournalClientGameTests", "ConcordanceComposerClientGameTests"],
+        "Only the workspaces are Kotlin"),
     "guilib": (
-        "The Concordance Journal's workspace, a tab for each section of the journal the server sends",
-        "the plain journal screen, with the same journal",
-        ["ConcordanceJournalClientGameTests"],
-        "No composer, ritual-schematic, crucible or observatory screen is built; keyboard use not tried by a person"),
+        "The Concordance Journal's workspace (a tab for each section the server sends) and the Spell Composer's (the "
+        "draft as a strip of words over the words the player has learned)",
+        "the plain journal and composer screens, with the same journal and the same draft",
+        ["ConcordanceJournalClientGameTests", "ConcordanceComposerClientGameTests"],
+        "No ritual-schematic, crucible or observatory screen is built; the workspaces have no narration (the plain "
+        "screens do); keyboard use not tried by a person"),
 }
 
 # Libraries the Concordance does not use: their mod ids must not appear in Jugcraft's code.

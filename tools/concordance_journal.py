@@ -72,7 +72,8 @@ CLIENT = {
     "screen.jugcraft.concordance.config.exact.tooltip": "The journal shows the exact figures (counts, limits) beside its "
                                                         "descriptions.",
     "screen.jugcraft.concordance.config.simple_journal": "Simple journal",
-    "screen.jugcraft.concordance.config.simple_journal.tooltip": "Open the plain journal screen even when GuiLib is installed.",
+    "screen.jugcraft.concordance.config.simple_journal.tooltip": "Open the plain journal and Spell Composer screens even "
+                                                                 "when GuiLib is installed.",
 }
 
 

@@ -10264,6 +10264,7 @@ def check_concordance(registered):
     check_progression(co, root, lang, registered, research)
     check_spire(co, root, lang, registered, research)
     check_journal(co, root, lang)
+    check_composer(co, root, lang)
     check_signs(co, root, lang)
     check_authority(root, lang)
     check_economy(root)
@@ -13316,6 +13317,69 @@ def check_journal(co, root, lang):
     request = text(root / "journal" / "JournalRequestPayload.java")
     if "StreamCodec.unit(" not in request:
         err("journal/JournalRequestPayload.java: a request carries nothing (the server decides what a player sees)")
+
+
+def check_composer(co, root, lang):
+    """Chunk A (A-01 to A-03): the composer screen and the compose command are one service. Composing asks its questions
+    in the command's order (the Concordance on, an instrument in hand, still the one a screen showed, the shared rate,
+    then the compiler) and is the only writer of a composed inscription; the composer's server side answers through it,
+    writes nothing itself, bounds its request and rate-limits opening; the GuiLib workspace is reached only when GuiLib
+    is installed and its stylesheet ships; and every word the screens use has its text."""
+    cm = co.composer
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    composing = text(root / "Composing.java")
+    compose = composing[composing.find("public static Result compose("):]
+    order = ["JugcraftConfig.isFeatureEnabled(", "ComposedSpells.instrument(player)", "shown.holds(player)",
+             "RateGate.allow(player, RATE_ACTION, COMPOSE_RATE_TICKS)", "ComposedSpells.compile(", ".set(JugcraftConcordance.INSCRIPTION"]
+    places = [compose.find(needle) for needle in order]
+    if not compose or -1 in places or places != sorted(places):
+        err("concordance/Composing.java: compose asks feature, instrument, the screen's view, the shared rate, then compiles, "
+            "and only then writes")
+    for path in sorted(root.rglob("*.java")):
+        relative = path.relative_to(root).as_posix()
+        if relative != "Composing.java" and "new Inscription(" in text(path):
+            err(f"concordance/{relative}: only Composing makes a composed inscription (a ritual may copy one whole)")
+    command = text(root / "ConcordanceCommand.java")
+    for needle in ("Composing.compose(player, text, inscribe, null)", "Composing.show(player)", "Composing.clear(player)"):
+        if needle not in command:
+            err(f"concordance/ConcordanceCommand.java: the compose commands are adapters of Composing ({needle})")
+    composer = text(root / "composer" / "Composer.java")
+    for needle in ("Composing.compose(player, request.text(), false, null)", "Composing.compose(player, request.text(), true, session.held)",
+                   "Composing.clear(player, session.held)", "RateGate.allow(player, OPEN_ACTION, OPEN_TICKS)",
+                   "ServerPlayNetworking.canSend(player, payload.type())"):
+        if needle not in composer:
+            err(f"concordance/composer/Composer.java: answers through Composing, rate-limits opening, sends only to a game "
+                f"that can receive it ({needle})")
+    for path in sorted((root / "composer").glob("*.java")):
+        if "INSCRIPTION" in text(path) or "Compiler.compile(" in text(path):
+            err(f"concordance/composer/{path.name}: the composer writes and compiles nothing itself (Composing does)")
+    request = text(root / "composer" / "ComposerRequestPayload.java")
+    if "MAX_TEXT = 4 * Grammar.MAX_TEXT;" not in request or "ByteBufCodecs.stringUtf8(MAX_TEXT)" not in request:
+        err("concordance/composer/ComposerRequestPayload.java: the request's text decodes to a bounded length")
+    if "composer.Composer.register();" not in text(root / "JugcraftConcordance.java"):
+        err("concordance/JugcraftConcordance.java: registers the composer's server side")
+    client = text(CLIENT_JAVA_ROOT / "ComposerClient.java")
+    screens = client + text(CLIENT_JAVA_ROOT / "ComposerScreen.java") + text(CLIENT_JAVA_ROOT / "JournalScreen.java")
+    workspace_path = ROOT / "src" / "client" / "kotlin" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "ComposerWorkspace.kt"
+    workspace = text(workspace_path)
+    if not re.search(r'isModLoaded\("guilib"\)\)\s*\{\s*ComposerWorkspace\.open\(\)', client):
+        err("ComposerClient.java: the composer's GuiLib workspace opens only when GuiLib is installed")
+    for path in CLIENT_JAVA_ROOT.rglob("*.java"):
+        if path.name != "ComposerClient.java" and "ComposerWorkspace" in text(path):
+            err(f"{path.name}: only ComposerClient reaches the composer's GuiLib workspace (behind its isModLoaded check)")
+    if '"jugcraft:ui/composer.css"' not in workspace or not (ASSETS / "ui" / "composer.css").is_file():
+        err("composer: the GuiLib workspace's stylesheet assets/jugcraft/ui/composer.css must exist and be the one it opens")
+    for source, name in ((screens, "the composer's screens"), (workspace, "ComposerWorkspace.kt")):
+        for key in re.findall(r'"((?:screen|key|compose|message)\.jugcraft\.[a-z_.]+)"', source):
+            if not key.endswith(".") and key not in lang:
+                err(f"{name}: missing lang {key}")
+    slots = re.findall(r"^\t([A-Z]+)[,;]", text(root / "compose" / "Slot.java"), re.M)
+    if [slot.lower() for slot in slots] != list(cm.SLOTS):
+        err(f"compose/Slot.java: SLOTS in tools/concordance_composer.py must name every slot, in order ({slots})")
+    for slot in cm.SLOTS:
+        if f"screen.{MOD}.composer.slot.{slot}" not in lang:
+            err(f"composer: missing lang screen.{MOD}.composer.slot.{slot}")
 
 
 def check_signs(co, root, lang):

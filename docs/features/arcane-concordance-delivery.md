@@ -60,8 +60,8 @@ server game test with the optional libraries removed. The client game tests run 
 | Mod Menu | 21.0.0 | client | optional | Opens the Concordance settings screen from the mod list | the Concordance settings key (unbound by default, in Controls) opens the same screen | none | Not seen in a client |
 | Iris Shaders | 1.11.7+mc26.3 | client | optional | Not used: nothing in the Concordance needs a shader | nothing changes | none | No shader pack has been tried with the Concordance |
 | Sodium | 0.9.2+mc26.3 | client | optional | Not used | nothing changes | none | Not tried with the Concordance's renderers |
-| Fabric Language Kotlin | 1.14.1+kotlin.2.4.20 | client | optional | Runs the Kotlin of the journal's GuiLib workspace | the plain journal screen | `ConcordanceJournalClientGameTests` | Only the workspace is Kotlin |
-| GuiLib | 0.12.4 | client | optional | The Concordance Journal's workspace, a tab for each section of the journal the server sends | the plain journal screen, with the same journal | `ConcordanceJournalClientGameTests` | No composer, ritual-schematic, crucible or observatory screen is built; keyboard use not tried by a person |
+| Fabric Language Kotlin | 1.14.1+kotlin.2.4.20 | client | optional | Runs the Kotlin of the journal's and the Spell Composer's GuiLib workspaces | the plain journal and composer screens | `ConcordanceJournalClientGameTests`, `ConcordanceComposerClientGameTests` | Only the workspaces are Kotlin |
+| GuiLib | 0.12.4 | client | optional | The Concordance Journal's workspace (a tab for each section the server sends) and the Spell Composer's (the draft as a strip of words over the words the player has learned) | the plain journal and composer screens, with the same journal and the same draft | `ConcordanceJournalClientGameTests`, `ConcordanceComposerClientGameTests` | No ritual-schematic, crucible or observatory screen is built; the workspaces have no narration (the plain screens do); keyboard use not tried by a person |
 <!-- matrix:end -->
 
 ## What is complete, what is not, and what is assumed
