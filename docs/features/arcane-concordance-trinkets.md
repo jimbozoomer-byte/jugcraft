@@ -401,6 +401,17 @@ CI:
   the setting off neither, with no missing texture; the other worn shots are as before. The inventory shot showed the
   creative inventory, not Trinkets' slots (the test's player is in creative, and vanilla gives a creative player the
   creative screen), as it had since part 1; the test now puts the player in survival for that shot.
+- Run 38070788686 (commit `3abbad16`: each wearer's choice seen by everyone, and the review's fixes): every job passed.
+  Both server jobs ran 1,278 tests, all passing, one more than before (the new `eachWearerChoosesWhetherTheirTrinketsShow`;
+  the log names only failures, so it is counted, not seen by name), and each re-ran two other features' tests once (an
+  Arms VIII javelin test and a Madame Tatterlace test), which passed. The client test ran in the first client job and
+  logged "worn models: the belt drawn on the body and the boot on each leg, models present, sheets stitched" and "hidden
+  under armour and by the setting: as designed", now with the elytra, the element's own armour test, and every turn of
+  the setting made through the server and checked once its answer came back. Its shots (the log's previews, looked at
+  by the assistant that wrote this part) show the same as the run before (no belt under the chestplate, no green boots
+  under iron boots, neither with the setting off, this time turned through the server), and the inventory shot is now
+  the survival inventory, with Trinkets' slot buttons beside the figure and the green boots on it (the belt is already
+  off by then).
 
 Part 1c, local (before CI; run on the branch, then again after the branch was restarted from main at `2bc6e94f`,
 once #277 had merged parts 1 and 1b):
