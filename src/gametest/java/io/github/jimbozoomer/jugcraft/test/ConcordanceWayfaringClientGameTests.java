@@ -53,8 +53,9 @@ import net.minecraft.world.phys.AABB;
  * the shots show: the player wearing them from the front and from behind, whole, closer and from each quarter, under a
  * chestplate, under boots, with the setting off, and sneaking, for people to look at;</li>
  * <li>with the second charm taken out first, the belt comes off, the slot goes, and nothing falls to the ground;</li>
- * <li>the eight icons in frames on a wall (three of them the owner's animated strips), and the inventory, for people to
- * look at.</li>
+ * <li>the eight icons in frames on a wall (three of them the owner's animated strips), and the survival inventory, where
+ * Trinkets shows its slots (the player is put in survival for it: a creative player is shown the creative screen), for
+ * people to look at.</li>
  * </ul>
  * The HUD is hidden whatever state an earlier test left it in, and put back at the end.
  */
@@ -147,10 +148,16 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 			check(after == 1 && dropped == 0, "Without the belt there should be one Charm slot and nothing dropped, not " + after
 					+ " slots and " + dropped + " dropped");
 
+			// The survival inventory, where Trinkets shows its slots: for a creative player vanilla opens the creative screen.
+			server.runCommand("gamemode survival @p");
+			context.waitFor(client -> !client.player.hasInfiniteMaterials(), 100);
 			context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
 			context.waitTicks(10);
+			boolean inventoryShown = context.computeOnClient(client -> client.gui.screen() instanceof InventoryScreen);
 			context.takeScreenshot("jugcraft_wayfaring_inventory");
 			context.setScreen(() -> null);
+			server.runCommand("gamemode creative @p");
+			check(inventoryShown, "The inventory shot shows another screen than the survival inventory");
 			server.runOnServer(minecraft -> {
 				var attachment = TrinketsApi.getAttachment(player(minecraft));
 				attachment.getInventory(Wayfaring.CHARM_SLOT).setItem(0, ItemStack.EMPTY);

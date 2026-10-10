@@ -382,6 +382,15 @@ CI:
   assistant) show the hand empty and the body square to the camera: the strap and buckle from the front, the strap from
   behind, the boots from every quarter with their fins behind, over iron leggings and boots, and the buckle through the
   chestplate.
+- Run 38064602632 (commit `5a584a09`, part 1c as first made: hidden under armour, and a switch that hid everyone's
+  belts and boots on one computer): every job passed. Both server jobs ran 1,277 tests, all passing. The client test
+  ran in the second of the four client jobs and logged "worn models: the belt drawn on the body and the boot on each
+  leg, models present, sheets stitched" and "hidden under armour and by the setting: as designed". Its new shots, looked
+  at in the log's 480 × 270 previews by the assistant that wrote this part (a person has not looked at them yet), show
+  an iron chestplate with no belt and the green boots below it, iron boots with the belt and buckle above them, and with
+  the setting off neither, with no missing texture; the other worn shots are as before. The inventory shot showed the
+  creative inventory, not Trinkets' slots (the test's player is in creative, and vanilla gives a creative player the
+  creative screen), as it had since part 1; the test now puts the player in survival for that shot.
 
 Part 1c, local (before CI; run on the branch, then again after the branch was restarted from main at `2bc6e94f`,
 once #277 had merged parts 1 and 1b):
@@ -447,7 +456,8 @@ Tests:
   the hand emptied and the body set facing north, the player
   wearing them from the front and from behind (whole and closer), from each quarter, under an iron chestplate, under
   iron boots, with the setting off, and sneaking; the slot gone again without the belt; screenshots of the eight icons
-  and the inventory. The screenshots are for a person to look at; nothing judges a picture.
+  and of the survival inventory, where Trinkets shows its slots (the player is put in survival for it, and the test
+  checks that screen opened). The screenshots are for a person to look at; nothing judges a picture.
 
 Not yet run: a person looking at the screenshots (part 1b's included), the Trinkets screen opened by hand (the slot
 icons and the grey slot names before Relic Lore), a real fall, drowning or burning in survival, and a two-client
