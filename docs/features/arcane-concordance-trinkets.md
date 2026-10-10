@@ -220,6 +220,12 @@ CI:
   the slowing is refused. The test now checks exactly that, and the docs say so. One client job also failed, in an Arms
   VIII test this change does not touch (a thrown javelin came down without striking its pig; the same test passed in
   the run before, and nothing it uses changed); the next run repeats it.
+- Run 38014767529 (commit `7a68731a`, the boss test fix): every job passed, the mod job on its second attempt. All
+  1,185 server tests passed without the optional integrations and on the mod job's re-run, every Wayfaring test among
+  them; the four client jobs passed, the javelin test among them. The mod job's first attempt failed one test, Arms
+  VIII's `harpoon_hauls_its_catch` ("The harpoon took 0.0, not 6.0 (come down at 1.49 2.00 8.93)"), which this change
+  does not touch and which has failed the same way before ([cakes](cakes.md)): simulating that test's throw, about
+  0.85% of throws come down just short of the pig through the throw's random spread, where this one did.
 
 Tests:
 - Server, `ConcordanceWayfaringGameTests`: the items and slots as designed (sizes, the owner's icons, no cosmetic copies,
