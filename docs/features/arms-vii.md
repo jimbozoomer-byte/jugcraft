@@ -41,11 +41,17 @@ The arm keeps its enchantments and wear.
 | the Storm Roc | Stormcaller (glaive), Galefeather (estoc) | **Gale:** throws the foe up and back |
 | the Abyssal Leviathan | Tidebreaker (war fork), Leviathan's Hook (bill) | **Tide:** 25% harder against a foe in water or rain |
 
-**An armor set's arm: the Hades Scythe.** The owner, 6 October 2026: "I also want the scythe from my Hades Armor set." The owner's armor sets are a third kind of line beside the styles and the bosses (`SETS` in `tools/arms_variants.py`, `ArmVariants.SETS`). Like a trophy, a set's arm has no recipe, carries epic rarity, lasts twice as long as steel and has a boon. Unlike a trophy, nothing drops it yet. The owner will settle how the sets are won ("They might get dropped by bosses or be craftable for now just make the armor we can figure that out later"), so until then it is creative only. See [The Hades Scythe](#the-hades-scythe) below.
+**An armor set's arm: the Hades Scythe.** The owner, 6 October 2026: "I also want the scythe from my Hades Armor set." The owner's armor sets are a third kind of line beside the styles and the bosses (`SETS` in `tools/arms_variants.py`, `ArmVariants.SETS`). Like a trophy, a set's arm has no recipe, carries epic rarity, lasts twice as long as steel and has a boon. Unlike a trophy, nothing drops it yet. The owner will settle how the sets are won ("They might get dropped by bosses or be craftable for now just make the armor we can figure that out later"), so until then it is creative only. See [The Hades Scythe](#the-hades-scythe) below. Since 8 October 2026 three more of the owner's sets have an arm, drawn from the designs they sent with it ("Just made these ones aswell want them done weapons too please", and a render of the Wight King holding its sword): see [The Sentinel's and the Frost Knight's arms](#the-sentinels-and-the-frost-knights-arms) and [The Wight King's arm](#the-wight-kings-arm).
 
 | Armor set | Arm | Boon |
 |---|---|---|
 | Hades Armor | Hades Scythe (scythe), `jugcraft:hades_scythe` | **Wither:** Wither, 3 s (the Gravewarden's boon) |
+| Sentinel | Sentinel Longsword (longsword), `jugcraft:sentinel_longsword` | **Mark:** a struck foe glows for 4 s, seen through walls (the Runebound arms' boon) |
+| Frost Knight | Frost Knight Greatsword (greatsword), `jugcraft:frost_knight_greatsword` | **Frost:** Slowness II, 3 s (the Yeti King's boon) |
+| Wight King | Wight King Zweihander (zweihander), `jugcraft:wight_king_zweihander` | **Drain:** each hit heals its wielder half a heart (the Soulreaver's boon) |
+| Reaper | Reaper Scythe (kama), `jugcraft:reaper_scythe`, one for each hand | **Wither:** Wither, 3 s (the Hades Scythe's boon) |
+
+A set may also have a shield of its own shape (`SET_SHIELDS`): the Sentinel's four-pointed star, `jugcraft:sentinel_shield`, which blocks as a steel heater shield does. See [The Sentinel's shield](#the-sentinels-shield).
 
 **A trophy with its boss: the Vesper Scythe (10 October 2026).** Vesperine, the Last Reaper, the first Witching Season boss, drops a ninth boss's trophy: the **Vesper Scythe** (scythe), `jugcraft:vesper_scythe`. It comes from her loot, 15% a kill and certain on a player's first, and has a new boon:
 - **Harvest:** a kill heals you two hearts, at most once every 5 seconds;
@@ -144,6 +150,47 @@ The owner, 6 October 2026, with the design of their Hades Armor set: "I also wan
   - the owner has not seen it;
   - how it matches the Hades Armor in game.
 
+## The Sentinel's and the Frost Knight's arms
+
+The owner, 8 October 2026, sending the designs of two more armor sets, a gold-and-black knight with a sword and a star-shaped shield and a white knight crowned with ice with a glowing ice sword: "Just made these ones aswell want them done weapons too please". The armor is in [armor-designs-8-october.md](armor-designs-8-october.md); this section covers the swords and the shield. The renders are references only and are not committed.
+
+- **Tier, inputs, outputs, costs, unlocks:** as the Hades Scythe's. Each is an arm of its kind in steel, with that kind's blow, reach, trait, motion and (for the greatsword) two-handed blow; epic, lasting twice as long as steel (1,800); no recipe and no loot table, so creative only in the Combat tab until the owner settles how the sets are won. They cost nothing and unlock nothing, and nothing needs them.
+  - `jugcraft:sentinel_longsword`: a longsword with the existing **Mark** boon (the struck foe glows for 4 s).
+  - `jugcraft:frost_knight_greatsword`: a greatsword with the existing **Frost** boon (Slowness II, 3 s).
+- **The tables:** `SETS` gains `sentinel` ("Sentinel") and `frost_knight` ("Frost Knight"), and `VARIANTS` the two arms, in `tools/arms_variants.py` and `weapons/ArmVariants.java` alike. The tooltip's line reads "Of the Sentinel set" and "Of the Frost Knight set"; the handbook's "Arms: Armor Sets" page lists them, from the same table.
+- **The look, drawn fresh by code from the owner's designs** (`tools/arms_variants_art.py`):
+  - **Sentinel Longsword:** a broad gold blade, pale along its edge with a brown groove down its middle; a straight gold crossguard with square ends, a jet square in a pale frame at its heart (the square ring on the armor's arm); a brown leather grip; a gold pommel set with jet. Materials `SENTINEL_GOLD`, `SENTINEL_LEATHER` and `SENTINEL_JET`, matched to the armor's palette.
+  - **Frost Knight Greatsword:** a long blade of glowing ice (`FROST_ICE`, a glowing material, so it is lit at full brightness in the hand), brightest down its middle; a crossguard of white frost (`FROST_WHITE`) flaring into three jagged spikes each side, frost creeping up the blade's foot, an ice gem at its heart; a white wrapped grip; an ice diamond for a pommel.
+  - **Icons:** two 16×16 maps, `tools/arms_icons/sentinel_longsword.txt` and `frost_knight_greatsword.txt`, on the longsword's and the greatsword's shapes, so `check_icon_maps` holds both lines' materials strictly. The frost line's two outlines were darkened to pass it (the ice's to 51 luma, the white's to 44).
+- **Not verified yet:** nothing has been run in game or in CI; the owner has not seen them.
+
+### The Sentinel's shield
+The Sentinel's design carries a shield, a four-pointed star of gold. It is not a variant (variants are swung kinds), so a set's shield is a table of its own: `SET_SHIELDS` (with `SHIELD_SHAPES`) in `tools/arms_variants.py`, `ArmVariants.SET_SHIELDS` in Java.
+
+- **Tier, inputs, outputs, costs, unlocks:** as a set's arm. `jugcraft:sentinel_shield` is an `ArmShieldItem` (Arms VI's shield item: held and raised as vanilla's shield is) built by `JugcraftArms.shield` from the steel heater shield's numbers, so it blocks exactly as that shield does: up in 0.1 s, 90 degrees either side of ahead, an axe's blow stops it for 0.8 of vanilla's time, a blocked blow wears it as vanilla's. Epic, it lasts twice as long as the steel heater shield (1,800), is repaired with steel and enchants as steel does, and is in `#minecraft:enchantable/durability`. No recipe and nothing drops it: creative only, in the Combat tab.
+- **Tooltip:** its shape's trait, **Quick Raise** ("A four-pointed star of gold, quick to raise as a heater shield is."), then its set's line, "Of the Sentinel set", as the set's arm shows it. The handbook's "Arms: Armor Sets" page lists it beside the longsword.
+- **The model** (`tools/arms_kit.py` `star_elements`, 52 boxes, held by vanilla's shield poses as the kit's shields are): the star stepped out in rows a pixel tall, its half width falling from 7 at the side points to half a pixel at the top and bottom points (`STAR`, 14 × 21 pixels); on it a raised diamond frame (`STAR_FRAME`, 0.75 proud), inside the frame a recess, and in the recess a chequered diamond (`STAR_CENTRE`, 0.4 proud) with a stone at its middle (`STAR_STONE`). Every edge lies on a half pixel, so the face texture's 2 texels a model pixel meet each box's edge exactly.
+- **The paint** (`tools/arms_kit_art.py` `star_face`, by model position through `star_part`, so each raised part's front carries its own): the star gold, lit from the top left, a light edge towards the light and a dark one away from it, the frame's shadow below and to its right; the frame the palest gold; the recess the darkest brown; the centre chequered in pixel squares round a pale stone. Its edges are plain gold, its back dark boards with a brown leather strap and gold rivets. Materials as the longsword's (`SET_SHIELD_MATERIALS` in `tools/arms_variants_art.py`). The kit's back and trim painters now take their materials as arguments; the kit's own shields' textures are unchanged.
+- **Checks:** `check_arms_variants` holds `ArmVariants.SET_SHIELDS` and `SET_SHIELD_METAL` to the Python, and checks that each set shield is of an armor set, has a shape with a model and both tooltip keys, blocks as a kit shield that exists, and has no recipe and no loot table naming it. `ArmsVIIGameTests.setShieldsBlockAsTheirBase` checks it in game: its kind and set, its blocking (delay, axe cooldown, cover) against the steel heater shield's, twice that shield's durability, epic. `ArmsVIIClientGameTests` holds it in the off hand beside the longsword, then raises it (`jugcraft_arms_vii_held_sentinel_shield`, `jugcraft_arms_vii_sentinel_shield_raised`).
+
+## The Wight King's arm
+
+Among the pictures the owner sent on 8 October 2026 without words are two renders of a slate knight crowned with icicles and antlers, holding a long sword. The armor is the Wight King ([armor-designs-8-october.md](armor-designs-8-october.md#wight-king-toolswight_king_armorpy)); this is its sword.
+
+- **Tier, inputs, outputs, costs, unlocks:** as the other set arms. `jugcraft:wight_king_zweihander` is a zweihander in steel (its blow, reach, Wide Cleave, motion and two-handed blow), epic, lasting twice as long as steel (1,800), with the existing **Drain** boon (each hit heals its wielder half a heart; a zweihander's best second, with Drain healing rather than hurting, is the Ironclad Zweihander's). No recipe and no loot table: creative only.
+- **The tables:** `SETS` gains `wight_king` ("Wight King") and `VARIANTS` the zweihander, in `tools/arms_variants.py` and `weapons/ArmVariants.java` alike; its tooltip's line reads "Of the Wight King set".
+- **The look** (`tools/arms_variants_art.py` `wight_king_zweihander`): a long slate blade, pale along its edges, grooved dark down its middle; a crossguard of three jagged slate shards each side, swept toward the point, a glowing cyan gem at its heart; a dark grip; a slate pommel set with a cyan stone. Materials `WIGHT_SLATE`, `WIGHT_DARK` and `WIGHT_GEM` (glowing), matched to the armor's palette. Icon: a 16×16 map on the greatsword's shape, `tools/arms_icons/wight_king_zweihander.txt`; `check_icon_maps` holds the line's materials strictly, and they pass.
+- **Not verified yet:** nothing has been run in game or in CI; the owner has not seen it. `ArmsVIIClientGameTests` holds it from the front by day with the others.
+
+## The Reaper's arm
+
+Among the pictures the owner sent on 8 October 2026 without words is a render of a hooded reaper with two white crescents about it. They were first built as part of its armor; the owner corrected that: "He is supposed to be holding 2 short scythe weapons they arent part of the armor". The armor is the Reaper ([armor-designs-8-october.md](armor-designs-8-october.md#reaper-toolsreaper_armorpy)); this is its scythe.
+
+- **Tier, inputs, outputs, costs, unlocks:** as the other set arms. `jugcraft:reaper_scythe` is a kama in steel (its quick hooking cuts, its reach and its trait, Clear Brush), epic, lasting twice as long as steel (1,800), with the existing **Wither** boon (Wither, 3 s; a kama's other is the Bogfang's Venom). No recipe and no loot table: creative only. It is one item; the owner's figure holds one in each hand, so a player carries two, the off hand's for show (vanilla strikes with the main hand only).
+- **The tables:** `SETS` gains `reaper` ("Reaper") and `VARIANTS` the scythe, in `tools/arms_variants.py` and `weapons/ArmVariants.java` alike; its tooltip's line reads "Of the Reaper set".
+- **The look** (`tools/arms_variants_art.py` `reaper_scythe`): a crescent of five bone-white links laid round an arc from the head to a point (`REAPER_CENTRE`, `REAPER_RADIUS`, `REAPER_FROM` to `REAPER_TO`), broadest at the head and narrowing, each a white frame round a thinner slate hollow, every other one standing further out as the owner's zig-zag; a short bone-white handle wrapped in slate, a slate collar under the crescent and a slate butt. Materials `REAPER_BONE` (a bone white, warmer than iron's so the two never read alike) and `REAPER_SLATE`, matched to the armor's palette. Icon: a 16×16 map of the crescent on its handle, its links' joints dark, `tools/arms_icons/reaper_scythe.txt`; `check_icon_maps` holds the line's materials strictly, and they pass.
+- **Not verified yet:** nothing has been run in game or in CI. `ArmsVIIClientGameTests` holds it from the front by day with the others, and then one in each hand.
+
 ## Connections
 - **Existing input producer:**
   - steel arms (the steel foundry and the arms' own recipes);
@@ -157,7 +204,7 @@ The owner, 6 October 2026, with the design of their Hades Armor set: "I also wan
 - **Required vs optional:** all optional.
   - The styles can be crafted solo or traded.
   - The trophies wait for their bosses. Until then they are creative-only, and that is on purpose: [branches/BOSSES.md](../branches/BOSSES.md) is a proposal, and no core progression needs a trophy.
-  - The Hades Scythe waits for the owner to settle how the armor sets are won (a boss's drop or a recipe). Until then it is creative-only on purpose, and nothing needs it.
+  - The Hades Scythe, the Sentinel Longsword, the Sentinel Shield, the Frost Knight Greatsword, the Wight King Zweihander and the Reaper Scythe wait for the owner to settle how the armor sets are won (a boss's drop or a recipe). Until then they are creative-only on purpose, and nothing needs them.
 - **How the specialty stays useful:** a style is a look and a small perk, not a stronger tier. The arms of batches 42 to 55 stay as good.
 
 ## Balance and automation
@@ -172,8 +219,9 @@ The owner, 6 October 2026, with the design of their Hades Armor set: "I also wan
 ## Multiplayer and persistence
 - **Server authority:** every boon is worked on the server, in `ArmItem.hurtEnemy` and `getAttackDamageBonus`, when the arm strikes. Clients only see the effects and particles.
 - **Saved state:** none beyond ordinary items with stable ids:
-  - the 35 variants: `jugcraft:gilded_longsword` … `jugcraft:leviathans_hook`, the bosses' `jugcraft:vesper_scythe` and `jugcraft:needle_rapier`, then `jugcraft:hades_scythe`, as in `tools/arms_variants.py`;
-  - the four patterns: `jugcraft:gilders_pattern`, `ironclad_pattern`, `bonecarvers_pattern`, `runecarvers_pattern`.
+  - the 39 variants: `jugcraft:gilded_longsword` … `jugcraft:leviathans_hook`, the bosses' `jugcraft:vesper_scythe` and `jugcraft:needle_rapier`, then `jugcraft:hades_scythe`, `jugcraft:sentinel_longsword`, `jugcraft:frost_knight_greatsword`, `jugcraft:wight_king_zweihander` and `jugcraft:reaper_scythe`, as in `tools/arms_variants.py`;
+  - the four patterns: `jugcraft:gilders_pattern`, `ironclad_pattern`, `bonecarvers_pattern`, `runecarvers_pattern`;
+  - the armor sets' shield: `jugcraft:sentinel_shield`.
 - **Disabling the `machines` feature** removes the recipes, not the items.
 
 ## Dependencies and assets
@@ -213,6 +261,8 @@ The owner, 6 October 2026, with the design of their Hades Armor set: "I also wan
   - `ArmsVIIGameTests`: every set has an arm; the Hades Scythe's Wither takes on a pig; a set's arm has no recipe and its set no `bosses/` table; the trophy-table test passes over the set line.
   - `TraitDetailsGameTests`: the Hades Scythe's expanded tooltip ends with its set's line, a name only.
   - `ArmsVIIClientGameTests`: the racks hold every variant (a third rack for the 33rd; before, they stopped at 32), and the Hades Scythe is held from the front by day.
+- **The Sentinel's and the Frost Knight's arms (8 October 2026), run locally:** the generators, `check_mod_data.py` (with `check_arms_variants` holding the two new set lines and arms), `check_icon_maps.py` (both maps, the two lines' materials strictly) and `check_repository.py`; results in [armor-designs-8-october.md](armor-designs-8-october.md#verification). `ArmsVIIClientGameTests` also holds both from the front by day, and its frames wall puts the four patterns on the bottom row, since the variants' fifth row now reaches past the third frame. Not run in CI yet.
+- **The Sentinel's shield (8 October 2026), run locally:** the generators and `check_mod_data.py` (with the set shield checks above); the kit's four shields' textures and models regenerate unchanged; the shield's model rendered from its elements (front, three-quarters, back) beside the owner's front view. Its game tests are new and not run in CI yet.
 - **Not run:**
   - play;
   - two players;

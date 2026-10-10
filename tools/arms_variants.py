@@ -10,6 +10,8 @@ own look, in three kinds of line:
   and of Madame Tatterlace (docs/features/tatterlace.md), whose Needle Rapier she drops (TatterlaceLoot);
 - the arms of the owner's armor sets, each in its set's look (the Hades Armor's scythe): no recipe and, until the owner
   settles how a set is won, no loot table either; creative only for now. Like a trophy, epic and twice as hard-wearing.
+  A set may have a shield of its own shape too (SET_SHIELDS: the Sentinel's four-pointed star), which blocks as the
+  steel shield of its base kind does (tools/arms.py SHIELDS) and is built as the kit's shields are (tools/arms_kit.py).
 
 A variant is an ArmItem of its kind (weapons/JugcraftArms.java VARIANTS), so its swing, reach, trait, two-handed blow,
 weapon art and motion are its kind's; its line adds a perk or a boon (BOONS), worked on the server in ArmItem. The
@@ -20,6 +22,7 @@ tools/arms_variants_art.py; the Runebound arms are smooth meshes in the hand, wi
 import arms
 import arms_heads
 import arms_icons
+import arms_kit
 import arms_mesh
 import arms_variants_art
 
@@ -74,6 +77,15 @@ BOSSES = {
 # loot table yet; its tooltip names its set where a trophy's names its boss.
 SETS = {
     "hades": {"display": "Hades Armor"},
+    # The owner, 8 October 2026, sending the Sentinel and Frost Knight designs: "want them done weapons too please"
+    # (docs/features/armor-designs-8-october.md).
+    "sentinel": {"display": "Sentinel"},
+    "frost_knight": {"display": "Frost Knight"},
+    # Sent without words the same day, the Wight King's render holds a long sword (armor-designs-8-october.md).
+    "wight_king": {"display": "Wight King"},
+    # "He is supposed to be holding 2 short scythe weapons they arent part of the armor" (the owner, 8 October 2026, of
+    # the Reaper's render): its arm is a short scythe, one for each hand.
+    "reaper": {"display": "Reaper"},
 }
 LINES = list(STYLES) + list(BOSSES) + list(SETS)
 
@@ -149,13 +161,34 @@ VARIANTS = [
     ("vesper_scythe", "scythe", "vesperine", "harvest", "Vesper Scythe"),
     ("needle_rapier", "rapier", "tatterlace", "stitch", "Needle Rapier"),
     ("hades_scythe", "scythe", "hades", "wither", "Hades Scythe"),
+    ("sentinel_longsword", "longsword", "sentinel", "mark", "Sentinel Longsword"),
+    ("frost_knight_greatsword", "greatsword", "frost_knight", "frost", "Frost Knight Greatsword"),
+    ("wight_king_zweihander", "zweihander", "wight_king", "drain", "Wight King Zweihander"),
+    ("reaper_scythe", "kama", "reaper", "wither", "Reaper Scythe"),
 ]
 BY_ID = {name: (kind, line, boon, display) for name, kind, line, boon, display in VARIANTS}
 
+# An armor set's shield, in a shape of its own (tools/arms_kit.py star_elements): it blocks exactly as its `base` shield
+# kind does in steel (tools/arms.py SHIELDS), and, like a set's arm, is epic, twice as hard-wearing and creative only
+# for now. Its tooltip names its shape's trait and its set.
+SET_SHIELDS = {
+    "sentinel_shield": {"set": "sentinel", "shape": "star_shield", "base": "heater_shield", "display": "Sentinel Shield"},
+}
+SHIELD_SHAPES = {
+    "star_shield": {"trait": "Quick Raise",
+                    "tooltip": "A four-pointed star of gold, quick to raise as a heater shield is."},
+}
+SET_SHIELD_METAL = "steel"
+
 
 def items():
-    """Every variant, then the styles' patterns, in registration order."""
-    return [name for name, *_ in VARIANTS] + [info["pattern"] for info in STYLES.values()]
+    """Every variant, then the styles' patterns, then the armor sets' shields, in registration order."""
+    return [name for name, *_ in VARIANTS] + [info["pattern"] for info in STYLES.values()] + list(SET_SHIELDS)
+
+
+def set_shields(armor_set):
+    """An armor set's shields (SET_SHIELDS), in registration order."""
+    return [name for name, info in SET_SHIELDS.items() if info["set"] == armor_set]
 
 
 def patterns():
@@ -180,15 +213,21 @@ def set_arms(armor_set):
 
 
 def textures():
-    """Every variant's icon and its 3D model's texture, the patterns' sprites, and the Runebound meshes' textures."""
-    return [n for name, *_ in VARIANTS for n in (name, f"{name}_model")] + patterns() + [arms_mesh.ATLAS, arms_mesh.RUNE]
+    """Every variant's icon and its 3D model's texture, the patterns' sprites, the Runebound meshes' textures, and each
+    set shield's face, back and trim."""
+    return ([n for name, *_ in VARIANTS for n in (name, f"{name}_model")] + patterns() + [arms_mesh.ATLAS, arms_mesh.RUNE]
+            + [f"{name}{suffix}" for name in SET_SHIELDS for suffix in arms.SHIELD_SPRITES])
 
 
 def item_tags():
-    """Vanilla item tag -> variants: each joins its kind's tags (so its enchantments are its kind's)."""
+    """Vanilla item tag -> variants: each joins its kind's tags (so its enchantments are its kind's), a set shield its
+    base kind's."""
     tags = {}
     for name, kind_, *_ in VARIANTS:
         for tag in arms.KINDS[kind_]["tags"]:
+            tags.setdefault(tag, []).append(f"{MOD}:{name}")
+    for name, info in SET_SHIELDS.items():
+        for tag in arms.SHIELD_KINDS[info["base"]]["tags"]:
             tags.setdefault(tag, []).append(f"{MOD}:{name}")
     return tags
 
@@ -242,6 +281,13 @@ def write_all(write, assets, data, lang, condition):
     for armor_set, info in SETS.items():
         # A set's arm names its set where a trophy names its boss. No loot table: how a set is won is not settled.
         lang[f"tooltip.{MOD}.arms.line.{armor_set}.trait"] = f"Of the {info['display']} set"
+    for shape, info in SHIELD_SHAPES.items():
+        lang[f"tooltip.{MOD}.arms.{shape}.trait"] = info["trait"]
+        lang[f"tooltip.{MOD}.arms.{shape}"] = info["tooltip"]
+    for name, info in SET_SHIELDS.items():
+        # Held and raised as the kit's shields are (tools/arms_kit.py), in its shape's model and its own textures.
+        lang[f"item.{MOD}.{name}"] = info["display"]
+        arms_kit.write_set_shield(write, assets, name, info["shape"])
     for boon, text in BOONS.items():
         name, text = trait(text)
         lang[f"tooltip.{MOD}.arms.boon.{boon}.trait"] = name
@@ -294,3 +340,6 @@ def draw_all(save):
     save(arms_mesh.rune_strip(), "item", arms_mesh.RUNE, animation=arms_mesh.rune_animation())
     for style, info in STYLES.items():
         save(arms_variants_art.pattern(style), "item", info["pattern"])
+    for name in SET_SHIELDS:
+        for suffix, image in zip(arms.SHIELD_SPRITES, arms_variants_art.set_shield_sprites(name)):
+            save(image, "item", f"{name}{suffix}")

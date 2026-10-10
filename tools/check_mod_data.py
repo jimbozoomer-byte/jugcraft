@@ -2039,8 +2039,8 @@ def check_arms_variants():
     line and boon; the styles, the armor sets and the patterns; every number; each style variant's smithing recipe and
     each boss's trophy loot table, and that an armor set's arm has neither a recipe nor any loot table yet (how a set is
     won is the owner's to decide); the boons' and lines' tooltips, a boss's line naming its boss and a set's its set;
-    that every boon is bounded; and that no variant deals as much a second as a netherite sword, whatever its boon
-    adds."""
+    that every boon is bounded; that no variant deals as much a second as a netherite sword, whatever its boon adds;
+    and the armor sets' shields (SET_SHIELDS), each of a set and blocking as a kit shield, with no recipe or drop yet."""
     import arms_variants as av
     java = (JAVA_ROOT / "weapons" / "ArmVariants.java").read_text(encoding="utf-8")
     found = [(name, kind, line, None if boon == "null" else boon.split(".")[1].lower())
@@ -2139,6 +2139,30 @@ def check_arms_variants():
     for style, info in av.STYLES.items():
         if not (DATA / MOD / "recipe" / f"{info['pattern']}.json").is_file():
             err(f"recipe/{info['pattern']}.json is missing: the {style} pattern must be craftable")
+    # An armor set's shield: as tools/arms_variants.py has it, of an armor set, in a shape with its own model and tooltip,
+    # blocking as a kit shield in SET_SHIELD_METAL; creative only, as a set's arm is (no recipe, nothing drops it).
+    import arms_kit
+    found = re.findall(r'new SetShield\("([a-z_]+)", "([a-z_]+)", "([a-z_]+)", "([a-z_]+)"\)', java)
+    expected = [(name, info["set"], info["shape"], info["base"]) for name, info in av.SET_SHIELDS.items()]
+    if found != expected:
+        err(f"ArmVariants.SET_SHIELDS {found} != tools/arms_variants.py {expected}")
+    if f'SET_SHIELD_METAL = "{av.SET_SHIELD_METAL}";' not in java:
+        err(f"ArmVariants.SET_SHIELD_METAL differs from tools/arms_variants.py ({av.SET_SHIELD_METAL})")
+    for name, info in av.SET_SHIELDS.items():
+        if info["set"] not in av.SETS:
+            err(f"tools/arms_variants.py: {name} is of {info['set']}, not an armor set of SETS")
+        if info["shape"] not in av.SHIELD_SHAPES or info["shape"] not in arms_kit.PLATE:
+            err(f"tools/arms_variants.py: {name}'s shape {info['shape']} has no SHIELD_SHAPES entry or no model (arms_kit.PLATE)")
+        if (info["base"], av.SET_SHIELD_METAL) not in arms.SHIELDS:
+            err(f"tools/arms_variants.py: {name} blocks as a {av.SET_SHIELD_METAL} {info['base']}, which tools/arms.py SHIELDS lacks")
+        if not {f"tooltip.{MOD}.arms.{info['shape']}", f"tooltip.{MOD}.arms.{info['shape']}.trait"} <= lang.keys():
+            err(f"lang: {name}'s shape {info['shape']} needs tooltip.{MOD}.arms.{info['shape']} and its .trait name")
+        if (DATA / MOD / "recipe" / f"{name}.json").is_file():
+            err(f"{name} is the {av.SETS[info['set']]['display']} set's shield: it has no recipe")
+        for path, text in sorted(tables.items()):
+            if f'"{MOD}:{name}"' in text:
+                err(f"{path.relative_to(DATA)} drops {name}, the {av.SETS[info['set']]['display']} set's shield, which "
+                    "nothing drops until the owner settles how the set is won")
 
 
 def check_mesh_models():
