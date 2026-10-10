@@ -223,8 +223,10 @@ WORN_MIRRORED = {"right_leg"}
 # How far each box stands beyond its fitted size (pixels), as vanilla's CubeDeformation grows a box: by
 # armor_models.SKIN_GAP, so its sides stand clear of vanilla leggings (0.5 out, where the fitted belt lies) and boots
 # (1.0 out, where the fitted boot lies). A box set on another's face moves out with that face instead of growing into
-# it, and a plane only moves, so no two of a model's faces share a plane. The left leg's model stands a step further
-# out, so where the two boots overlap between the legs one is in front of the other.
+# it, and a plane only moves, so no two faces of a model facing the same way share a plane. A seated box's inner face
+# lies back to back on its seat, which never shows: the buckle's back on the strap, inside the closed buckle; the toe's
+# back on the boot's front and the cuff's bottom on the boot's top, both clear on the sheet. The left leg's model stands
+# a step further out, so where the two boots overlap between the legs one is in front of the other.
 WORN_GROW = 0.15
 WORN_LEFT_STEP = 0.1
 # Faces that keep their fitted plane instead of growing, named as on the part ("top" is up): the toe's top meets the line

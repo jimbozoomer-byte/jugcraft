@@ -38,11 +38,11 @@ import net.minecraft.world.phys.AABB;
  * <li>a worn Leather Belt gives a second Charm slot, on the server and, synced, on the client; a charm goes in it;</li>
  * <li>the worn feather, boot and Ice Breaker give their attributes under their own names, and once;</li>
  * <li>part 1b: Trinkets has what it needs to draw the Leather Belt and the Amphibian Boot on the body (no Java renderer in
- * the way; each render definition loaded, with one element for each part it draws on, none of them empty; the worn models
- * among the client's resources; the owner's worn sheets in the items atlas; nothing for the Ice Breaker, which has no
- * worn sheet). Whether they look right only the shots show: the player wearing them from the front and from behind,
- * whole, closer and from each quarter, over iron leggings and boots, over a chestplate, and sneaking, for people to look
- * at;</li>
+ * the way; each render definition loaded, with as many elements as parts it draws on, none of them empty (which parts:
+ * tools/check_mod_data.py check_wayfaring_worn); the worn models among the client's resources; the owner's worn sheets in
+ * the items atlas; nothing for the Ice Breaker, which has no worn sheet). Whether they look right only the shots show:
+ * the player wearing them from the front and from behind, whole, closer and from each quarter, over iron leggings and
+ * boots, over a chestplate, and sneaking, for people to look at;</li>
  * <li>with the second charm taken out first, the belt comes off, the slot goes, and nothing falls to the ground;</li>
  * <li>the eight icons in frames on a wall (three of them the owner's animated strips), and the inventory, for people to
  * look at.</li>
@@ -188,11 +188,12 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 
 	/**
 	 * What keeps Trinkets from drawing the belt and boot on the body, or "": a Java renderer for either (Trinkets would use
-	 * it instead of the data); a render definition not loaded or not matched to its item, or without one element for each
-	 * part (the belt the body, the boot each leg), or with an element that baked no quads (Trinkets' no-op); a worn model
-	 * missing from the client's resources (the game would bake its missing-model cube instead, which this cannot tell
-	 * apart: only the shots show the models are the owner's); a worn sheet missing from the items atlas; or a definition
-	 * for the Ice Breaker, which has no worn sheet.
+	 * it instead of the data); a render definition not loaded or not matched to its item, or with a different number of
+	 * elements than the parts it draws on (the belt one, the boot two; which part each element is on cannot be seen here,
+	 * so check_wayfaring_worn holds it), or with an element that baked no quads (Trinkets' no-op); a worn model missing
+	 * from the client's resources (the game would bake its missing-model cube instead, which this cannot tell apart: only
+	 * the shots show the models are the owner's); a worn sheet missing from the items atlas; or a definition for the Ice
+	 * Breaker, which has no worn sheet.
 	 */
 	private static String undrawn(Minecraft client) {
 		List<String> wrong = new ArrayList<>();
@@ -231,17 +232,20 @@ public class ConcordanceWayfaringClientGameTests implements FabricClientGameTest
 	 * view turned 45 degrees, which shows the boots' sides and fins), then over iron leggings and boots (the belt and boot
 	 * stand clear of both and should show unbroken over them) and over an iron chestplate too (which hides the strap; the
 	 * buckle stands out through it), then sneaking from behind. Standing still, a player's body turns only once the head is
-	 * more than 50 degrees past it, so the player first takes a step north to face the way they look; every later turn is
-	 * the view's alone. The camera is put back to first person at 70 after.
+	 * more than 50 degrees past it, and a teleport turns only the head, so the body is set facing north on the client; the
+	 * later turns, 45 degrees at most, are the view's alone. The creative guide every creative player is given would be in
+	 * the hand, in front of the belt, so the hand is emptied first. The camera is put back to first person at 70 after.
 	 */
 	private static void wornShots(ClientGameTestContext context, TestSingleplayerContext singleplayer, int x, int y, int z) {
 		TestServerContext server = singleplayer.getServer();
 		server.runCommand(String.format(Locale.ROOT, "tp @p %.2f %d %.2f 180 0", x + 0.5, y, z - 2.5));
+		server.runCommand("item replace entity @p weapon.mainhand with minecraft:air");
 		context.waitTicks(10);
-		context.getInput().holdKey(options -> options.keyUp);
-		context.waitTicks(3);
-		context.getInput().releaseKey(options -> options.keyUp);
-		context.waitTicks(30);
+		context.runOnClient(client -> {
+			client.player.setYBodyRot(180.0F);
+			client.player.yBodyRotO = 180.0F;
+		});
+		context.waitTicks(5);
 		singleplayer.getConnection().waitForChunksRender();
 		look(context, server, CameraType.THIRD_PERSON_FRONT, 70, 180, 0, "jugcraft_wayfaring_worn_front");
 		look(context, server, CameraType.THIRD_PERSON_BACK, 70, 180, 0, "jugcraft_wayfaring_worn_back");

@@ -107,7 +107,7 @@ MATRIX = {
          "theBangleLeavesAHearthbindersBlowSmouldering", "ConcordanceEmberGearClientGameTests",
          "theTrinketsAreMadeAndWornAsDesigned", "ConcordanceWayfaringClientGameTests"],
         "Cosmetic slots count as worn for show only; of the worn things only the belt and boot are drawn on the body, "
-        "in third person only, and not yet seen in a client"),
+        "in third person only, and seen so far only in CI's client screenshots"),
     "cloth-config": (
         "The Concordance settings screen: the Focus line, reduced motion, exact values, the simple journal and "
         "visual intensity",
