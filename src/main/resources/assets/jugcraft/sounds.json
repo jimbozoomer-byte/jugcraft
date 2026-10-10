@@ -453,6 +453,14 @@
       }
     ]
   },
+  "guns.clank": {
+    "subtitle": "subtitles.jugcraft.guns.clank",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/gun_sounds_metal"
+      }
+    ]
+  },
   "guns.rust_midge.fire": {
     "subtitle": "subtitles.jugcraft.guns.fire",
     "sounds": [
@@ -692,6 +700,33 @@
     "sounds": [
       {
         "name": "jugcraft:guns/iron_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.rattler_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/iron_rifle_enchanted_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.bronco_smg.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/new_rifle_fire_2",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.squall_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/airgun_fire",
         "attenuation_distance": 64
       }
     ]
