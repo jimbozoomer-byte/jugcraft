@@ -950,6 +950,33 @@
       }
     ]
   },
+  "guns.tusker.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bruiser_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.cinder_repeater.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/rusty_gnat_enchanted_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.bastion_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/heavier_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

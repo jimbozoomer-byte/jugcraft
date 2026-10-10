@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F) and two guns at once (slice 10G)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G) and the Nether guns (slice 11A)
 
 Status:
 - **Slices 1 to 9G are in `main`:** the last of them, 8C to 9G, with #277 on 10 October 2026. The lines below say where each was built.
@@ -28,6 +28,7 @@ Status:
 - **Slice 10E** (the Cell Rack, which charges six Energy Cells at once; [below](#slice-10e-the-cell-rack)): implemented on `claude/guns-cell-rack`, stacked on slice 10D, awaiting review.
 - **Slice 10F** (enemies with guns: the Raider Gunner, who carries and fires the service arms; [below](#slice-10f-enemies-with-guns)): implemented on `claude/guns-raider-gunners`, stacked on slice 10E, awaiting review.
 - **Slice 10G** (two guns at once: a one-handed gun in each hand, both fired; [below](#slice-10g-two-guns-at-once)): implemented on `claude/guns-dual-pistols`, stacked on slice 10F, awaiting review.
+- **Slice 11A** (the Nether guns: the Tusker, Cinder Repeater and Bastion Rifle; [below](#slice-11a-the-nether-guns)): implemented on `claude/guns-nether`, stacked on slice 10G, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -42,6 +43,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
 - the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, the second, the aiming polish, slice 9F, and the third, the Lobber's grenades, slice 9G.
 - the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B, the double-barrels slice 10C and the sculk guns slice 10D; the Energy Cell rack is slice 10E, the enemies with guns slice 10F and the dual pistols slice 10G.
+- the next round: on 10 October 2026, with those built, they asked "Ok lets continue and do the next thing we need to". No choice was offered this time: the next of their unbuilt guns were taken up, a set at a time, each its own pull request, starting with three of the six they made in the piglins' crimson, blackstone and gold. The Nether guns are slice 11A.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1565,6 +1567,88 @@ The Garrison Rifle, for comparison, does about 17 a second over its 30 rounds an
 - **Reloading both:** that takes two presses of G, or each empty gun's trigger.
 - **Not played:** none of it has been played yet.
 
+## Slice 11A: the Nether guns
+The first of the owner's guns taken up after the round of 10 October 2026 was built (the owner asked "Ok lets continue and do the next thing we need to"): three of the six guns they made in the piglins' crimson, blackstone and gold, the Mangalitsa, Vulcanic Repeater and Trotters. Their bullets set what they hit alight.
+
+| | Tusker | Cinder Repeater | Bastion Rifle |
+|---|---|---|---|
+| The owner's gun | Mangalitsa | Vulcanic Repeater | Trotters |
+| What it is | a pump shotgun: a crimson stock, a long black shroud over its barrel, gold bands and a gold diamond on its receiver | a repeater with a pistol grip: a crimson body, a black shroud over its short barrel, a magazine ahead of its grip, and a gold diamond set with a glowing stone on its side | a long rifle with a crimson fore-end and grip, gold bands, and a trapdoor breech on top of its receiver |
+| Fires | 8 pellets a shot, the pump worked after each | for as long as the trigger is held | one heavy shot each pull, the trapdoor flipped open after each |
+| Damage | 3 a pellet (24 if all land) | 3.5 | 14 |
+| Rate | 1.4 a second (every 14 ticks) | 6.7 a second (every 3 ticks) | 1.1 a second (every 18 ticks) |
+| Holds | 6 | 20 | 5 |
+| Reload | 0.6 s, then 0.6 s a shell, then 0.65 s | 2.4 s: the magazine | 0.75 s, then 0.65 s a round, then 0.8 s |
+| Spread, hip / aimed | 6.5° / 4.5° | 3° / 1.2° | 2° / 0.15° |
+| Range | 28 blocks | 48 | 112 |
+| The view aimed | narrowed to 0.9 | 0.88 | 0.8 |
+| Round | Buckshot Shell | Light Round | Rifle Round |
+| Takes | the silencers, the Muzzle Brake and Extended Barrel, the three stocks, the Light and Tactical Grips, the four bayonets, the scopes and the Laser Sight | the same, and both magazines | the same as the Tusker |
+
+The reload times and the rates are the owner's animations': the Tusker's pump and the Bastion Rifle's trapdoor are worked in full between shots.
+
+**Crafting** (a crafting table; the guns switch, as every gun). Each takes steel and a lever, as the other steel guns, and gold and gilded blackstone, which is found only in the Nether's bastion remnants:
+- **Tusker:** two steel ingots over a gold ingot, a lever and gilded blackstone.
+- **Cinder Repeater:** two steel ingots and a gold ingot over a lever and gilded blackstone.
+- **Bastion Rifle:** three steel ingots over a gold ingot, a lever and gilded blackstone.
+
+**How they fire:** as the other bullet guns: each bullet or pellet goes from the eye along the look, strayed by the spread, to the first creature or block in its way. A magazine loads at the end of its reload, the Tusker and the Bastion Rifle a round after each round's time.
+- **Alight:** each creature their bullets hurt is set alight for 4 seconds, as the Stoker's flame sets it alight (slice 8C, `GunShots.BURN_SECONDS`): fire's own damage, one a second. Fireproof creatures shrug it off, and water puts it out. A shotgun's pellets on one creature set it alight once.
+- **No block** is set alight, by a hit or a miss.
+- The server works it out with the shot (`JugcraftGuns.INCENDIARY`); nothing new is sent to clients.
+
+**What you see:** the owner's animations.
+- **Tusker:** each shot kicks it back and up; then the pump is worked back and home under the left hand, throwing out the spent shell. To reload, the gun is tipped and the pump half drawn; each shell is pushed in from below; then the pump is let home.
+- **Cinder Repeater:** each shot kicks it back a little, snaps the rib along its top back and home, and rocks the gold diamond on its side. To reload, the gun is rolled and lifted; the magazine is swung down out of its well and a new one pushed home and slapped; then the rib is worked.
+- **Bastion Rifle:** each shot kicks it back; then the right hand leaves the grip, flips the trapdoor up and over to the left, throwing out the case, and works the bolt, the gun nudged forward as it does. To reload, the trapdoor is flipped open and the bolt drawn; the left hand brings a round at a time up to the breech; then the trapdoor is shut and the bolt sent home.
+- **Spent rounds:** each throws a spent shell or case with each shot, as the other guns firing its round do: the Tusker's as its pump comes back, the Bastion Rifle's as its trapdoor opens.
+- **Sounds:** the Haymaker's shotgun blast (the Tusker); the library's other Rust Midge shot, unused till now (the Cinder Repeater); the Bulldog Pistol's heavy rifle shot (the Bastion Rifle). None names another source: the new one's only tag is the program it was made with (`Software=FL Studio 20`). The library's other unused shots were passed over: its pistol, revolver, machine gun, gyrojet and second heavy rifle shots carry tags naming an artist or a sound pack, its carbine shot an engine's (`ENCODER=UnrealEngine4`), and its second rocket rifle sound is a quiet whoosh, not a shot. The Tusker's shells and the Bastion Rifle's rounds go in with the shell sound.
+
+**How the models were built:**
+- **Tusker:**
+  - **Bolt:** the pump, its own part, under the barrel.
+  - **Sights:** the owner's ring at the back of its receiver, between two wings, over the post at its front.
+  - **Aiming:** held 1 px further out (`"eye_relief"`): through the pump stroke the top of its grip came to 0.57 px from the eye, inside the near plane (0.8 px).
+- **Cinder Repeater:**
+  - **Bolt:** the rib along its top (the main part's 29th element).
+  - **Seal:** the gold diamond and its glowing stone (the 27th and 28th), rocking about their middle.
+  - **Magazine:** its own part, and the Extended and Speed Magazines in its place. Its `magazine_2` bone, which only its shots hold still, is empty.
+  - **The glowing stone** draws on the Pyroclastic Flow's glowing texture, which is three frames; the gun takes the first (`FRAMED`), so it glows but does not flicker.
+  - **Sights:** the owner's ring at the back of its receiver over the notch at its front.
+  - **Aiming:** held 1 px further out: through the aimed shot its rib came within 1.88 px of the eye.
+- **Bastion Rifle:**
+  - **Trapdoor:** the lid on top of its receiver (the main part's 9th element), hinged along its left edge, which is the only way its animations turn it without its passing through the receiver.
+  - **Bolt:** its own part, the bolt and its handle on the right. Its faces draw on the Turnpike's texture (slice 9D), packed piece by piece, as the scopes' are.
+  - **The round** a reload carries in: a brass case with a lead tip on the `shell` bone (`PROPS`), resting where the loop's last carry brings it into the open breech; it shrinks to nothing there.
+  - **The whole gun** rides `gun_body2`, which each shot pushes 1.2 px forward as the bolt is worked. Its `magazine` bone holds nothing.
+  - **Left out:** the main part's 27th element, the same box as its 1st with no texture on any face.
+  - **Sights:** the owner's ladder on its receiver over the post at the front of its fore-end.
+  - **Aiming:** held 6 px further out, as the Highwayman is: the shot's kick brought the back of its grip 2.61 px past the eye.
+- **The left arms:** chosen in first-person previews to cover as little of the screen as they can through each gun's reload, still running down and back from the hand. The Bastion Rifle's left hand comes right up to the breech with each round, so its arm crosses the view for a moment, as the Highwayman's does.
+- **The atlases:** the Tusker's own texture leaves the scopes' and the Laser Sight's pieces too little room one by one, so for it every group of pieces goes in joined from the first (`pack_groups()`); a gun whose pieces fit as before is packed as before, and every other gun's files came out the same.
+- **Checked** in first-person, side and orthographic previews: idle, aimed, fired, through each reload, draw and inspection; the Tusker's pump, the Cinder Repeater's rib, diamond and magazine, and the Bastion Rifle's trapdoor, bolt and round through their animations; and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:**
+- **Rounds:** the Buckshot Shell, the Light Round and the Rifle Round; nothing new.
+- **Parts:** steel and a lever, as the steel guns; gold, and gilded blackstone from the bastion remnants.
+- **Their place:** past steel, a reward for raiding a bastion.
+- **The fire** is the Stoker's (slice 8C).
+
+**Balance:** starting numbers, at point blank with every shot landing.
+- **Tusker:** 24 a shot, 34 a second while it fires; over its six shells and their reload (4.85 s), about 16 a second, as the Sledge's (16) and above the Throttle's (14) and the Highwayman's (13).
+- **Cinder Repeater:** 23 a second while it fires, for 3 s; over a magazine and its 2.4 s reload, about 13 a second, as the Bronco SMG's (14), below the Murmur SMG's (15).
+- **Bastion Rifle:** 14 a shot, as the Line Musket's ball, five times before a reload: 16 a second while it fires, but its trapdoor is slow to load (4.8 s for five), so over its rounds and their reload about 7.5 a second, below the marksman rifles' (12 to 14). It reaches nearly as far as they do (112 blocks against their 120 to 128) and is as steady aimed as the Solenoid Rifle (0.15°).
+- **The fire** adds about one a second to a creature that burns, and more shots only keep it burning: a shotgun's pellets light it once.
+- **A round:** each spends one a shot; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:tusker`, `cinder_repeater` and `bastion_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The glowing stone does not pulse:** the owner's frames would make it flicker; the gun takes the first.
+- **In the Nether** most creatures are fireproof (blazes, ghasts, striders, magma cubes, wither skeletons, zombified piglins), so there the fire seldom counts; piglins and hoglins do burn.
+- **The Bastion Rifle's loading arm** crosses the view for a moment with each round.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -2546,6 +2630,94 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | reverb | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | reverb | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | reverb | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| tusker | `Guns/models/item/mangalitsa.json` | `3b718fdba7e37961` |
+| tusker | `Guns/item/mangalitsa.png` | `5932c3999fe3a79d` |
+| tusker | `Guns/item/mangalitsa.animation.json` | `1653eac0310a6434` |
+| tusker | `Guns/models/special/mangalitsa/main.json` | `65ba9a64b06a42d7` |
+| tusker | `Guns/models/special/mangalitsa/stan_barrel.json` | `57e7209fd7bfb37a` |
+| tusker | `Guns/models/special/mangalitsa/silencer.json` | `caa27d0e191217ee` |
+| tusker | `Guns/models/special/mangalitsa/advanced_silencer.json` | `afd21245d95e8bcb` |
+| tusker | `Guns/models/special/mangalitsa/muzzle_brake.json` | `38be7dd7430ebe87` |
+| tusker | `Guns/models/special/mangalitsa/ext_barrel.json` | `1859adcc0607642b` |
+| tusker | `Guns/models/special/mangalitsa/stan_grip.json` | `4c2ded8896ec5c2a` |
+| tusker | `Guns/models/special/mangalitsa/light_stock.json` | `3d7965a0b2c8b833` |
+| tusker | `Guns/models/special/mangalitsa/heavy_stock.json` | `71ba643205e27425` |
+| tusker | `Guns/models/special/mangalitsa/wooden_stock.json` | `c2ab3a822fc5ae67` |
+| tusker | `Guns/models/special/mangalitsa/light_grip.json` | `b61ea782821149ec` |
+| tusker | `Guns/models/special/mangalitsa/iron_bayonet.json` | `8ea339a612cb3ea0` |
+| tusker | `Guns/models/special/mangalitsa/anthralite_bayonet.json` | `eb6d94e8a189df13` |
+| tusker | `Guns/models/special/mangalitsa/diamond_bayonet.json` | `9fc1ebe93a8e1fd3` |
+| tusker | `Guns/models/special/mangalitsa/netherite_bayonet.json` | `d00e68b8c79f8701` |
+| tusker | `Guns/models/special/mangalitsa/tact_grip.json` | `8a64cfe5bac1d6aa` |
+| tusker | `Guns/models/special/mangalitsa/sights.json` | `8c6b70c2df8e6aa1` |
+| tusker | `Guns/models/special/mangalitsa/bolt.json` | `60747d73758f24c8` |
+| tusker | `Guns/sounds/item/bruiser/fire.ogg` | `b965c68e659f88e3` |
+| tusker | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| tusker | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| tusker | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| tusker | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| tusker | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| cinder_repeater | `Guns/models/item/vulcanic_repeater.json` | `b9125e1f6eea07a9` |
+| cinder_repeater | `Guns/item/vulcanic_repeater.png` | `ac06e87f6e0ce67c` |
+| cinder_repeater | `Guns/item/vulcanic_repeater.animation.json` | `f87e8ccf739df2a2` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/main.json` | `e58651fbad5e20fe` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/stan_barrel.json` | `18f9892432d8f92e` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/silencer.json` | `84047c1e5e38ffae` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/advanced_silencer.json` | `d682900ab6c8e6c7` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/muzzle_brake.json` | `6add479bcc525d07` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/ext_barrel.json` | `94e765ba67ab2029` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/stan_grip.json` | `f4e61a24a73a5211` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/light_stock.json` | `19f8134bc0fbde5b` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/heavy_stock.json` | `46f96c59da0f802e` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/wooden_stock.json` | `22abcb5a5d501c50` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/light_grip.json` | `23b8d9d3042bc7c4` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/iron_bayonet.json` | `de5b918afcf17a6a` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/anthralite_bayonet.json` | `7b04be3fed98386f` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/diamond_bayonet.json` | `b641d0f4424750e2` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/netherite_bayonet.json` | `5d077897c3f61474` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/tact_grip.json` | `2cde178cdc0047b1` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/sights.json` | `d6dadad0b39d780e` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/stan_mag.json` | `d32493eaa5e4dbf5` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/ext_mag.json` | `6c41d1a0a772826e` |
+| cinder_repeater | `Guns/models/special/vulcanic_repeater/speed_mag.json` | `c6787f30e64125dd` |
+| cinder_repeater | `Guns/sounds/item/rusty_gnat/enchanted_fire.ogg` | `98bda9d70ff73b2e` |
+| cinder_repeater | `Guns/item/advanced_silencer.png` | `f94615d5c4cdd84c` |
+| cinder_repeater | `Guns/item/greaser_smg_barrels.png` | `e912ec7c95188909` |
+| cinder_repeater | `Guns/item/makeshift_rifle_bayonets.png` | `dfc93f5032504095` |
+| cinder_repeater | `Guns/item/pyroclastic_flow_animated.png` | `e545c8e219a385dd` |
+| cinder_repeater | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| cinder_repeater | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| cinder_repeater | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| cinder_repeater | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| cinder_repeater | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| bastion_rifle | `Guns/models/item/trotters.json` | `09b5baef810a83a2` |
+| bastion_rifle | `Guns/item/trotters.png` | `d7b58c369c085e79` |
+| bastion_rifle | `Guns/item/trotters.animation.json` | `eedb968a76105c92` |
+| bastion_rifle | `Guns/models/special/trotters/main.json` | `c70596031446de86` |
+| bastion_rifle | `Guns/models/special/trotters/stan_barrel.json` | `5818e254d131f360` |
+| bastion_rifle | `Guns/models/special/trotters/silencer.json` | `222377ec474b548e` |
+| bastion_rifle | `Guns/models/special/trotters/advanced_silencer.json` | `ab2a54d3e36e33cb` |
+| bastion_rifle | `Guns/models/special/trotters/muzzle_brake.json` | `fcbf95b9aecc7b6e` |
+| bastion_rifle | `Guns/models/special/trotters/ext_barrel.json` | `6f8d5284a1533349` |
+| bastion_rifle | `Guns/models/special/trotters/stan_grip.json` | `dd6c9d1d23db8aaf` |
+| bastion_rifle | `Guns/models/special/trotters/light_stock.json` | `9ba9b56ce2d4c751` |
+| bastion_rifle | `Guns/models/special/trotters/heavy_stock.json` | `746dc046b8479f6e` |
+| bastion_rifle | `Guns/models/special/trotters/wooden_stock.json` | `5b61788e4991065c` |
+| bastion_rifle | `Guns/models/special/trotters/light_grip.json` | `83ed5958e4069dbf` |
+| bastion_rifle | `Guns/models/special/trotters/iron_bayonet.json` | `cff3a98dab456107` |
+| bastion_rifle | `Guns/models/special/trotters/anthralite_bayonet.json` | `ff6a7201b70e469c` |
+| bastion_rifle | `Guns/models/special/trotters/diamond_bayonet.json` | `134b49bee0bc39de` |
+| bastion_rifle | `Guns/models/special/trotters/netherite_bayonet.json` | `30660f0094b998f2` |
+| bastion_rifle | `Guns/models/special/trotters/tact_grip.json` | `234bf250031eab84` |
+| bastion_rifle | `Guns/models/special/trotters/sights.json` | `43e0d8daaffc14e5` |
+| bastion_rifle | `Guns/models/special/trotters/bolt.json` | `33eecd726a57a504` |
+| bastion_rifle | `Guns/sounds/item/heavier_rifle/fire.ogg` | `4e17f5a1b2891ee7` |
+| bastion_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| bastion_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| bastion_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| bastion_rifle | `Guns/item/turnpike.png` | `63e9b3911c1b9cd4` |
+| bastion_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| bastion_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -3237,6 +3409,18 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `_other_fired`: taken in the tick right click went down, before the shot, so the Warden Pistol's counter still reads 12 / 12. The counts logged above show the shot.
     - `_reloading`: the Sentry Pistol tipped in its reload, its counter reading "Reloading", the Warden Pistol's at 11 / 12.
     - `_third_person` and `_third_person_back`: the player from in front, both arms raised with a gun in each hand at the chest, and from behind.
+- **Slice 11A, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations, textures and the Cinder Repeater's shot sound; every other gun's files came out unchanged.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds.
+  - `python3 tools/check_mod_data.py`: PASS (2165 material IDs), with `check_guns` (the numbers, attachments, sound aliases and looks against tools/guns.py, and now `JugcraftGuns.INCENDIARY` and `GunShots.BURN_SECONDS`).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+- **Slice 11A game tests (written; they run in CI):**
+  - `NetherGunsGameTests`:
+    - `netherGunsAreRegistered`: each is registered with its numbers, its recipe loads, and it fires bullets that set what they hit alight, as no other gun's do; the Tusker is a shotgun of eight pellets and six shells loaded a shell at a time, the Cinder Repeater an automatic of twenty light rounds, the Bastion Rifle a rifle of five rounds loaded a round at a time; each takes the stocks, grips, barrels, bayonets and scopes, the Cinder Repeater the magazines too.
+    - `netherGunsFireAndLoad`: each fires its last round at a pig three blocks off, the Tusker's pellets landing together and the others' one shot taking one round's damage; then each loads from the inventory in its own time, a magazine at a time or a round at a time, two rounds left over.
+    - `netherGunsSetWhatTheyHitAlight`: each Nether gun's shot sets its pig alight and the fire hurts it again within two seconds; an Undertone Rifle's shot leaves its pig unlit and hurts it no more; no block catches fire.
+  - `GunsGameTests` counts 51 guns; `TacticalAttachmentsGameTests` the nineteen that take the Tactical Grip.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability

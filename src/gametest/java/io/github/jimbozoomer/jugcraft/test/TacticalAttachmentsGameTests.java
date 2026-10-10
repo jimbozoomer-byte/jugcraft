@@ -24,17 +24,17 @@ import net.minecraft.world.item.crafting.RecipeType;
  */
 public class TacticalAttachmentsGameTests {
 	/**
-	 * The guns the owner made tactical grip parts for (slice 10A's launchers, slice 10B's rifles and slice 10D's Reverb
-	 * among them).
+	 * The guns the owner made tactical grip parts for (slice 10A's launchers, slice 10B's rifles, slice 10D's Reverb and
+	 * slice 11A's Nether guns among them).
 	 */
 	static final List<String> GRIPPED = List.of("drover_rifle", "coach_gun", "garrison_rifle", "breacher", "picket_rifle",
 			"ranger_rifle", "kestrel_rifle", "squall_rifle", "sledge", "highwayman", "earthmover", "skylark_rifle", "bullfrog",
-			"solenoid_rifle", "votive_rifle", "reverb");
+			"solenoid_rifle", "votive_rifle", "reverb", "tusker", "cinder_repeater", "bastion_rifle");
 	/** The guns that take the scopes but not the Laser Sight (tools/guns.py ATTACHMENTS laser_sight "not_on"). */
 	static final List<String> NO_LASER = List.of("breacher", "trench_lobber", "earthmover");
 
 	/**
-	 * Both recipes load. The Tactical Grip fits the sixteen guns the owner made tactical grip parts for and no other.
+	 * Both recipes load. The Tactical Grip fits the nineteen guns the owner made tactical grip parts for and no other.
 	 * The Laser Sight fits every gun that takes the scopes but the Breacher, the Trench Lobber and the Earthmover.
 	 */
 	@GameTest
