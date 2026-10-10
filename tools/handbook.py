@@ -259,7 +259,7 @@ ABOUT = {
     "large_steam_engine": "Two by two by two. Four times the small steam engine: 256 KE/t out of a shaft at the back of "
                           "its upper right block, using 40 mB of water per tick and fuel four times as fast. It has a "
                           "screen like the steam generator's, and a water source under it refills it.",
-    "belt_pulley": "A shaft with a grooved wheel. Use a Leather Belt on two pulleys with the same axis (level with each "
+    "belt_pulley": "A shaft with a grooved wheel. Use a Drive Belt on two pulleys with the same axis (level with each "
                    "other along it, up to 16 blocks apart) and the second turns with the first: power jumps gaps and "
                    "walls.",
     "belt": "Links two belt pulleys: use it on one, then on the other. Breaking a pulley drops the belt.",

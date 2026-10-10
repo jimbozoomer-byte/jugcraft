@@ -184,6 +184,8 @@ EXCLUDED = [
     rid("lesser_fire_focus"), rid("fire_focus"), rid("fire_bangle"), rid("pyromaniacs_hood"), rid("pyromaniacs_tunic"),
     rid("pyromaniacs_pants"), rid("pyromaniacs_shoes"), rid("pyromancers_hat"), rid("pyromancers_robes"),
     rid("pyromancers_leggings"), rid("pyromancers_boots"),
+    rid("leather_belt"), rid("angelic_feather"), rid("kraken_shell"), rid("infernal_claws"), rid("angelheart_vial"),
+    rid("phoenix_down"), rid("amphibian_boot"), rid("ice_breaker"),
     "minecraft:enchanted_book", "minecraft:totem_of_undying", "minecraft:nether_star", "minecraft:experience_bottle",
     "minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion", "minecraft:written_book",
     "minecraft:filled_map", "minecraft:player_head", "minecraft:spawner", "minecraft:trial_spawner", "minecraft:heart_of_the_sea",

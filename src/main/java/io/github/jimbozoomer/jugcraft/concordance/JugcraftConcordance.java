@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.ember.Ember;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
+import io.github.jimbozoomer.jugcraft.concordance.trinket.Wayfaring;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import java.util.List;
 import java.util.function.Function;
@@ -287,6 +288,7 @@ public final class JugcraftConcordance {
 
 		Examination.register();
 		Ember.register();
+		Wayfaring.register();
 		RateGate.register();
 		ConcordanceSpells.register();
 		Invocations.register();

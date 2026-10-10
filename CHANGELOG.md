@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Arcane Concordance, Wayfaring (the owner's belt, boots and charms; trinkets part 1)
+- **Eight worn things from the owner's relic and reliquary art,** put on once you understand Relic Lore: the **Leather Belt** (a second **Charm** slot), the **Angelic Feather**, **Kraken Shell** and **Infernal Claws** (a fall's, drowning's or fire's harm taken from your food instead of your health while you have food; the feather also jumps a little higher), the **Angelheart Vial** (a death save on 2 hearts, used up) and the **Phoenix Down** (a death save at full health; it becomes an Angelic Feather), and on your feet the **Amphibian Boot** (faster swimming, longer breath) and the **Ice Breaker** (a little knockback resistance, and a hard landing throws back and slows the hostile creatures round you).
+- Two new Trinkets slots with the owner's icons, **Charm** and **Feet** (two), and Trinkets' Belt slot. Two of a kind never add up. A death save never answers the void, a held totem or a death in a dream.
+- The kinetic belt that links pulleys is now called the **Drive Belt** (its id is unchanged), so the two belts are told apart.
+- Every file is the owner's, copied as supplied, with its source and checksum recorded. Record: [arcane-concordance-trinkets.md](docs/features/arcane-concordance-trinkets.md).
+
 ### Unmerged: Arcane Concordance, Ember part 2 (the Hearthbinder's regalia, from the owner's fire art)
 - **Lesser Focus of Fire and Focus of Fire,** the owner's own: worn in a new **Spell Focus** slot, +2 and +4 fire Spell Power, so Cinderbolt and Hearthflare burn hotter.
 - **Fire Bangle:** worn in one of two new **Bracelet** slots; once you understand Hearthbinding, your melee blows leave the creature smouldering for 3 seconds, wherever you may harm it.

@@ -221,6 +221,9 @@ VANILLA_SOURCES = {
     "minecraft:magma_cream": ("renewable", "magma cubes; or blaze powder and a slime ball", "", "nether"),
     "minecraft:fire_charge": ("craftable", "blaze powder, coal and gunpowder", "", "nether"),
     "minecraft:prismarine_shard": ("renewable", "guardians, which keep spawning around ocean monuments", "", ""),
+    # Wayfaring's belt, boots and charms (tools/concordance_trinkets.py).
+    "minecraft:leather": ("renewable", "cows, horses and llamas; rabbit hide", "", ""),
+    "minecraft:golden_apple": ("craftable", "an apple and gold ingots", "", ""),
 }
 
 # Jugcraft things the world grows rather than a recipe makes, by the same rules as VANILLA_SOURCES.

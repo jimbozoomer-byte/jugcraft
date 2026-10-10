@@ -254,6 +254,8 @@ CI (the Build workflow, dispatched on this branch):
   new beyond-reach case and the slot-access focus tests among them. The three client shards passed, the per-set
   renderer check among them, in 28:40, 26:28 and 20:19; the slowest job took 29:32 of its 30 minutes, so the client
   tests now run in four jobs (see `tools/select_client_tests.py` and `docs/TESTING.md`).
+- Run 37993306024 (commit `1043421e`, the four client jobs): **every job passed**. The four client shards took 21:51,
+  17:39, 19:22 and 13:13; the slowest job 22:41 of its 30 minutes.
 
 Not yet run: a person looking at the screenshots (the worn model, the sleeves following a zombie's raised arms and a
 sneaking player, the glint, the small stand showing nothing); the Spell Focus and Bracelet slot icons in the Trinkets

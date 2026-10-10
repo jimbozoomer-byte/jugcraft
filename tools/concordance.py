@@ -465,6 +465,10 @@ RESEARCH.update(ember.RESEARCH)
 ITEMS.update(ember.ITEMS)
 BLOCKS.update(ember.BLOCKS)
 INVOCATIONS.update(ember.INVOCATIONS)
+# Wayfaring (tools/concordance_trinkets.py): the owner's belt, boots and charms, worn once Relic Lore is understood.
+import concordance_trinkets as trinkets  # noqa: E402
+ITEMS.update(trinkets.ITEMS)
+BLOCKS.update(trinkets.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
@@ -1002,6 +1006,7 @@ def codex():
         **progression.codex(),
         **spire.codex(),
         **ember.codex(),
+        **trinkets.codex(),
         **journal.codex(),
         **signs.codex(),
     }
@@ -1770,6 +1775,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     progression.write_all(write, data, lang)
     spire.write_all(write, assets, data, lang, condition, self_drop)
     ember.write_all(write, assets, data, lang, condition, self_drop)
+    trinkets.write_all(write, assets, data, lang, condition, self_drop)
     journal.lang_entries(lang)
     signs.lang_entries(lang)
     # Items.
@@ -1914,6 +1920,7 @@ def write_data(write, res):
     equivalence.write_data(write, data)
     hexes.write_data(write, data)
     ember.write_data(write, data)
+    trinkets.write_data(write, data)
     conclave.write_data(write, data)
     progression.write_data(write, data)
     spire.write_data(write, data)
@@ -1943,6 +1950,7 @@ def tags(tags):
     conclave.tags(tags)
     spire.tags(tags)
     ember.tags(tags)
+    trinkets.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     for item in LUMINOUS_MATTER:

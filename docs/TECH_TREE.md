@@ -299,7 +299,7 @@ A second, mechanical power system measured in **KE** (kinetic energy) per tick. 
 | Brass Gearbox | Passes rotation out of all six sides | Branches and turns lines; power is shared evenly. | brass plates, bronze gears, iron shaft |
 | Dynamo | KE → JE at 75%, 128/t | Pushes JE into cables on every side. | copper, redstone, iron shaft |
 | Belt Pulley | A shaft that can hold a belt | Carries rotation along its axis like a shaft, and to the pulley it is belted to. | planks, iron shaft |
-| Leather Belt | Links two pulleys | Use on one pulley, then another: same axis, level along it, up to 16 blocks apart. Breaking a pulley drops the belt. | leather, string |
+| Drive Belt | Links two pulleys | Use on one pulley, then another: same axis, level along it, up to 16 blocks apart. Breaking a pulley drops the belt. | leather, string |
 | Electric Motor | JE → KE at 75%, up to 96 KE/t | Takes JE from cables and drives the block it faces. | iron plates, copper wire, iron shaft, copper cable |
 | Magnet Dynamo | KE → JE at 95%, 512/t | The dynamo with rare-earth magnets; pushes JE into cables on every side. Cyan-banded. | aluminum plates, 4 neodymium magnets, dynamo, aluminum cable |
 | Magnet Motor | JE → KE at 95%, up to 384 KE/t | Takes up to 1,024 JE/t and drives the block it faces. With a magnet dynamo it still loses a tenth each round. | aluminum plates, 4 neodymium magnets, electric motor, aluminum cable |

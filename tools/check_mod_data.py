@@ -8351,6 +8351,7 @@ def check_concordance(registered):
     check_composition(co, root, lang, registered, research)
     check_invocations(co, root, lang, research)
     check_ember(co, root, lang, research)
+    check_wayfaring(co, root, lang)
     check_baselines(root)
     check_rituals(co, root, lang, registered, research)
     check_alchemy(co, root, lang, registered, research)
@@ -9044,6 +9045,154 @@ def check_ember_regalia(co, root, lang):
     drawn = {f"textures/{kind}/{name}.png" for kind, name in concordance_ember_art.textures()}
     if drawn & set(em.OWNER_FILES):
         err(f"tools/concordance_ember_art.py draws over imported owner files: {sorted(drawn & set(em.OWNER_FILES))}")
+
+
+
+def check_wayfaring(co, root, lang):
+    """The trinkets slice, part 1 (tools/concordance_trinkets.py, docs/features/arcane-concordance-trinkets.md): the Java
+    mirrors its numbers, slots, modifiers and absorbed harm; the worn items give attributes only as Trinkets modifiers
+    named by their kind (so two of a kind never add up) and only Relic Lore lets them be put on; the belt keeps its added
+    charm; the death saves run before Dreaming's listener and decline the void, a held totem and a dream; the wave goes
+    through the effect boundary only; every item is the owner's model and icon with the owner's name and an Overworld
+    recipe; the slots are given to players with the owner's icons and no cosmetic copies; and no two items share a name."""
+    tr = co.trinkets
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    way, worn = text(root / "trinket" / "Wayfaring.java"), text(root / "trinket" / "WornTrinketItem.java")
+    numbers = {"CHARM_SLOTS": ("int", tr.CHARM_SLOTS), "BELT_CHARM_SLOTS": ("int", tr.BELT_CHARM_SLOTS),
+               "ABSORB_EXHAUSTION": ("float", f"{tr.ABSORB_EXHAUSTION}F"), "FEATHER_JUMP": ("double", tr.FEATHER_JUMP),
+               "AMPHIBIAN_SWIM": ("double", tr.AMPHIBIAN_SWIM), "AMPHIBIAN_OXYGEN": ("double", tr.AMPHIBIAN_OXYGEN),
+               "ICE_BREAKER_KNOCKBACK": ("double", tr.ICE_BREAKER_KNOCKBACK), "WAVE_RADIUS": ("double", tr.WAVE_RADIUS),
+               "WAVE_RADIUS_PER_HARM": ("double", tr.WAVE_RADIUS_PER_HARM), "WAVE_MAX_RADIUS": ("double", tr.WAVE_MAX_RADIUS),
+               "WAVE_TARGETS": ("int", tr.WAVE_TARGETS), "WAVE_DAMAGE": ("int", tr.WAVE_DAMAGE), "WAVE_PUSH": ("int", tr.WAVE_PUSH),
+               "WAVE_SLOW_TICKS": ("int", tr.WAVE_SLOW_TICKS), "VIAL_HEALTH": ("float", f"{tr.VIAL_HEALTH}F"),
+               "VIAL_REGENERATION_TICKS": ("int", tr.VIAL_REGENERATION_TICKS),
+               "PHOENIX_REGENERATION_TICKS": ("int", tr.PHOENIX_REGENERATION_TICKS),
+               "PHOENIX_FIRE_RESISTANCE_TICKS": ("int", tr.PHOENIX_FIRE_RESISTANCE_TICKS),
+               "BELT_SLOT": ("String", f'"{tr.BELT_SLOT}"'), "CHARM_SLOT": ("String", f'"{tr.CHARM_SLOT}"'),
+               "FEET_SLOT": ("String", f'"{tr.FEET_SLOT}"')}
+    for name, (kind, value) in numbers.items():
+        if not re.search(rf"\b{kind} {name} = {re.escape(str(value))};", way):
+            err(f"concordance/trinket/Wayfaring.java: {name} differs from tools/concordance_trinkets.py ({value})")
+    if 'String SLOT_COUNT = "trinkets:slot_count/" + CHARM_SLOT;' not in way or tr.SLOT_COUNT != "trinkets:slot_count/" + tr.CHARM_SLOT:
+        err("concordance/trinket/Wayfaring.java: SLOT_COUNT must be Trinkets' count attribute for the Charm slot")
+    for item, types in tr.ABSORBS.items():
+        if f'"{item}", List.of({", ".join(chr(34) + t + chr(34) for t in types)})' not in way:
+            err(f"concordance/trinket/Wayfaring.java: ABSORBS for {item} differs from tools/concordance_trinkets.py ({types})")
+    if len(re.findall(r'^\t\t\t"[a-z_]+", List\.of\(', way, re.M)) != len(tr.ABSORBS):
+        err("concordance/trinket/Wayfaring.java: ABSORBS names other charms than tools/concordance_trinkets.py")
+    # Each registration: the item, the kind its modifiers are named after, and the modifiers (attribute -> constant).
+    constants = {"SLOT_COUNT": tr.SLOT_COUNT, "BELT_CHARM_SLOTS": tr.BELT_CHARM_SLOTS, "FEATHER_JUMP": tr.FEATHER_JUMP,
+                 "AMPHIBIAN_SWIM": tr.AMPHIBIAN_SWIM, "AMPHIBIAN_OXYGEN": tr.AMPHIBIAN_OXYGEN,
+                 "ICE_BREAKER_KNOCKBACK": tr.ICE_BREAKER_KNOCKBACK}
+    registered = {}
+    for match in re.finditer(r'\bitem\("([a-z_]+)", "([a-z_]+)", Map\.of\((.*?)\), Rarity\.', way, re.S):
+        args = [arg.strip() for arg in re.split(r",\s*", match.group(3).replace("\n", " ")) if arg.strip()]
+        modifiers = {}
+        for attribute, value in zip(args[0::2], args[1::2]):
+            attribute = attribute.strip('"') if attribute.startswith('"') else constants.get(attribute, attribute)
+            modifiers[attribute] = constants.get(value.replace("(double)", "").strip(), value)
+        registered[match.group(1)] = (match.group(2), modifiers)
+    if set(registered) != set(tr.TRINKETS):
+        err(f"concordance/trinket/Wayfaring.java registers {sorted(registered)}, not TRINKETS")
+    for item, (kind, modifiers) in registered.items():
+        if kind != tr.KIND.get(item) or modifiers != tr.MODIFIERS.get(item, {}):
+            err(f"concordance/trinket/Wayfaring.java: {item} is registered as {kind} {modifiers}, not {tr.KIND.get(item)} "
+                f"{tr.MODIFIERS.get(item, {})} (tools/concordance_trinkets.py)")
+    if tr.KIND["phoenix_down"] != "angelic_feather" or tr.MODIFIERS.get("phoenix_down") != tr.MODIFIERS.get("angelic_feather"):
+        err("tools/concordance_trinkets.py: worn, the Phoenix Down is an Angelic Feather as well (its kind and modifiers)")
+    if ("implements TrinketCallback" not in worn or "forEachTrinketModifier" not in worn or "ATTRIBUTE_MODIFIERS" in worn
+            or 'Jugcraft.id("wayfaring/" + kind + "/" + attribute.getPath())' not in worn or "slotIdentifier.withSuffix" in worn):
+        err("concordance/trinket/WornTrinketItem.java: a worn item's attributes must be Trinkets modifiers named by its kind "
+            "(never by slot: two of a kind would add up), never the item's own")
+    if "return entity instanceof Player player && Reliquary.knows(player);" not in worn:
+        err("concordance/trinket/WornTrinketItem.java: only someone who understands Relic Lore may put one on (canEquip)")
+    if "holdsAddedCharm(entity)" not in worn or "TrinketCallback.super.canUnequip(stack, slot, entity)" not in worn:
+        err("concordance/trinket/WornTrinketItem.java: a belt keeps its added charm (canUnequip), and Curse of Binding still holds")
+    if ".attributes(" in way or "ATTRIBUTE_MODIFIERS" in way:
+        err("concordance/trinket/Wayfaring.java: a worn item carries no attribute modifiers of its own (they would count in the hand)")
+    if "SlotAttributes.createAttributeForSlot(CHARM_SLOT)" not in way:
+        err("concordance/trinket/Wayfaring.java: the Charm slot's count attribute must be registered at start-up")
+    if ("ALLOW_DEATH.addPhaseOrdering(SAVE_PHASE, Event.DEFAULT_PHASE)" not in way or "ALLOW_DEATH.register(SAVE_PHASE," not in way
+            or re.search(r"ALLOW_DEATH\.register\((?!SAVE_PHASE)", way)):
+        err("concordance/trinket/Wayfaring.java: the death saves must run in SAVE_PHASE, before Dreaming's default-phase listener")
+    save = way[way.find("public static boolean save("):way.find("private static boolean holdsTotem(")]
+    for guard in ("DamageTypeTags.BYPASSES_INVULNERABILITY", "Dreaming.dreaming(player)", "holdsTotem(player)", "Reliquary.knows(player)",
+                  "Reliquary.enabled()"):
+        if guard not in save:
+            err(f"concordance/trinket/Wayfaring.java: a death save must decline unless {guard} allows it")
+    if "DataComponents.DEATH_PROTECTION" not in way:
+        err("concordance/trinket/Wayfaring.java: a held totem answers before a vial (DataComponents.DEATH_PROTECTION)")
+    if ("ConcordanceEffects.apply(" not in way or "instanceof Enemy" not in way or "source.is(DamageTypes.FALL)" not in way
+            or any(call in way for call in ("hurtServer(", "addEffect(", ".push(", "setDeltaMovement(", "igniteFor"))):
+        err("concordance/trinket/Wayfaring.java: the wave (after a plain fall, at hostile creatures) and the saves' statuses "
+            "must go through ConcordanceEffects.apply only")
+    # Each item: the owner's model (texture renamed), an imported icon (and sidecar), the owner's name, a tooltip.
+    for item in tr.OWNER_ITEMS:
+        if load(ASSETS / "items" / f"{item}.json") != {"model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}}:
+            err(f"assets/{MOD}/items/{item}.json: not the item's own model")
+        if load(ASSETS / "models" / "item" / f"{item}.json") != tr.owner_model(item):
+            err(f"assets/{MOD}/models/item/{item}.json: not the owner's {tr.OWNER_ITEMS[item]} model with its texture renamed")
+        if f"textures/item/{item}.png" not in tr.OWNER_FILES:
+            err(f"{item}: its icon is not one of the owner's files (OWNER_FILES)")
+        if (item in tr.ANIMATED) != (f"textures/item/{item}.png.mcmeta" in tr.OWNER_FILES):
+            err(f"{item}: its animation sidecar must be imported exactly when the owner's icon is a strip (ANIMATED)")
+        if lang.get(f"item.{MOD}.{item}") != tr.owner_name(item) or f"tooltip.{MOD}.{item}" not in lang:
+            err(f"{item}: its name must be the owner's ({tr.owner_name(item)}) and it needs a tooltip")
+    if not set(tr.OWNER_ITEMS) == set(tr.ITEMS) == set(tr.TRINKETS) or not set(tr.MODIFIERS) <= set(tr.ITEMS):
+        err("tools/concordance_trinkets.py: ITEMS, OWNER_ITEMS and TRINKETS must name the same items")
+    if not set(tr.ABSORBS) <= {item for item, slot in tr.TRINKETS.items() if slot == tr.CHARM_SLOT}:
+        err("tools/concordance_trinkets.py: only charms absorb harm")
+    excluded = set(co.equivalence.EXCLUDED)
+    for item in tr.ITEMS:
+        if f"{MOD}:{item}" not in excluded:
+            err(f"{item}: the Concordance's magical things are never weighed (tools/concordance_equivalence.py EXCLUDED)")
+    # Recipes: the slice's own items, or things the Overworld gives.
+    progression = co.progression
+    for item in tr.ITEMS:
+        data = load(DATA / MOD / "recipe" / f"{item}.json") or {}
+        if item not in tr.RECIPES and item not in tr.SHAPELESS:
+            err(f"{item} has no recipe")
+        if data.get("fabric:load_conditions") != [{"condition": f"{MOD}:feature_enabled", "feature": "concordance"}]:
+            err(f"recipe {item}: it must load with the Concordance")
+        for ref in list(data.get("key", {}).values()) + list(data.get("ingredients", [])):
+            ref = ref if isinstance(ref, str) else ""
+            ok = (ref.startswith(f"{MOD}:") and split(ref)[1] in tr.ITEMS and split(ref)[1] != item
+                  or ref in progression.VANILLA_SOURCES and not progression.VANILLA_SOURCES[ref][3])
+            if not ok:
+                err(f"recipe {item}: {ref} is not the slice's own or had in the Overworld (tools/concordance_progression.py)")
+    # The slots: the belt slot is Trinkets' own (left as it defines it); the charm and feet slots are Jugcraft's.
+    entities = load(DATA / "trinkets" / "entities" / f"{MOD}_wayfaring.json") or {}
+    if entities.get("entities") != ["player"] or set(entities.get("slots", [])) != set(tr.GRANTED_SLOTS):
+        err(f"data/trinkets/entities/{MOD}_wayfaring.json must give players {sorted(tr.GRANTED_SLOTS)}")
+    group, name = tr.BELT_SLOT.split("/")
+    if (DATA / "trinkets" / "slots" / group / f"{name}.json").exists():
+        err(f"data/trinkets/slots/{tr.BELT_SLOT}.json: the belt slot is Trinkets' own; redefining it would make its icon "
+            "depend on data-pack order")
+    owned = {**tr.OWNER_FILES, **tr.OWNER_BLOCKS_FILES}
+    for slot, info in tr.TRINKET_SLOTS.items():
+        group, name = slot.split("/")
+        definition = load(DATA / "trinkets" / "slots" / group / f"{name}.json") or {}
+        if (definition.get("amount") != info["amount"] or definition.get("icon") != f"{MOD}:container/slots/{info['icon']}"
+                or definition.get("cosmetic_slots") is not False):
+            err(f"data/trinkets/slots/{slot}.json: amount {info['amount']}, the owner's icon, and no cosmetic slots")
+        if f"textures/gui/sprites/container/slots/{info['icon']}.png" not in owned:
+            err(f"slot {slot}: its icon is not the owner's (OWNER_FILES, OWNER_BLOCKS_FILES)")
+        if lang.get(f"trinkets.slot.{group}.{name}") != info["name"]:
+            err(f"slot {slot}: lang trinkets.slot.{group}.{name} must be {info['name']}")
+    for slot in tr.GRANTED_SLOTS:
+        group, name = slot.split("/")
+        held = set((load(DATA / "trinkets" / "tags" / "item" / group / f"{name}.json") or {}).get("values", []))
+        if held != {f"{MOD}:{item}" for item, worn_in in tr.TRINKETS.items() if worn_in == slot}:
+            err(f"data/trinkets/tags/item/{slot}.json holds {sorted(held)}")
+    # Two items with one English name cannot be told apart (the kinetic belt is the Drive Belt for this reason).
+    names = {}
+    for key, value in lang.items():
+        if key.startswith(f"item.{MOD}.") and key.count(".") == 2:
+            names.setdefault(value, []).append(key)
+    for value, keys in names.items():
+        if len(keys) > 1:
+            err(f"lang: {', '.join(sorted(keys))} share the name {value}")
 
 
 def check_alchemy(co, root, lang, registered, research):
