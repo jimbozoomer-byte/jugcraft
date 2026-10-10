@@ -29,9 +29,9 @@ NECK = (0, 42, 12)
 NECK_ANGLE = 45          # the neck leans forward this much from upright
 NECK_LENGTH = 24
 HEAD_ANGLE = 30          # the head hangs this much below horizontal
-TAIL = (0, 43, -26)
+TAIL = (0, 43, -24)
 SHOULDERS = {"fl": (6, 30, 10), "fr": (-6, 30, 10)}
-HIPS = {"hl": (6, 32, -16), "hr": (-6, 32, -16)}
+HIPS = {"hl": (6, 32, -21), "hr": (-6, 32, -21)}
 UPPER_FRONT, UPPER_HIND = 13, 16
 LOWER = 13
 
@@ -67,16 +67,15 @@ def body():
     m += cyl("z", 0, 0.5, 7.2, 20, 23.5, HIDE)
     m += cyl("z", 0, -1, 5, 23.5, 25.5, SHADE)
     # The rump: the barrel carried back, then rounds that shrink and drop toward the dock.
-    m += cyl("z", 0, 0.5, 8, -20, -14, HIDE)
-    m += cyl("z", 0, 0, 7, -23, -20, HIDE)
-    m += cyl("z", 0, -1, 5.5, -25, -23, HIDE)
-    m += cyl("z", 0, -2, 3.5, -26.5, -25, SHADE)
+    m += cyl("z", 0, 0.5, 8, -21, -14, HIDE)
+    m += cyl("z", 0, 0, 6.8, -23.5, -21, HIDE)
+    m += cyl("z", 0, -1.2, 5, -25, -23.5, HIDE)
     m += cyl("z", 0, -3.2, 7, -10, 8, SHADE)
     m.append(box((-4.5, 8.5, 5), (4.5, 12, 13), HIDE, ("x", -22.5, [0, 12, 13])))
     # Round shoulder and haunch muscles standing proud of the barrel on each side.
     for x0, x1 in ((-9.6, -8.4), (8.4, 9.6)):
         m += cyl("x", 1, 13, 5.5, x0, x1, HIDE)
-        m += cyl("x", 1.5, -16, 6, x0, x1, HIDE)
+        m += cyl("x", 1.5, -19, 6, x0, x1, HIDE)
     m.append(box((-3.5, 11.9, 6), (3.5, 12.3, 12), BLAZE, ("x", -22.5, [0, 12, 13])))
     return m
 
