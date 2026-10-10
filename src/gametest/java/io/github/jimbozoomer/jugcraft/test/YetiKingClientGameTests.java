@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.LairInstance;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
+import io.github.jimbozoomer.jugcraft.lair.yeti.FallingIcicleEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.GlacierHall;
 import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingEntity;
@@ -155,9 +156,15 @@ public class YetiKingClientGameTests implements FabricClientGameTest {
 			});
 
 			// The Blizzard: icicles shaken from the vault onto the player, glacial spikes bursting up along the ice to them.
+			// The icicles are caught falling one above another (the first just short of the ice), from seven blocks off,
+			// low and looking up into the fall: from further, they were lost among the vault's own icicles behind them.
 			pose(context, server, centre, (king, level, player) -> king.begin(level, YetiKingEntity.Attack.ICICLE_FALL, player),
-					YetiKingEntity.Attack.ICICLE_FALL.windup + 8);
-			shot(context, singleplayer, hall, centre, -8.0, 2.0, 12.0, 0.5, 4.0, 5.0, true, "jugcraft_yeti_king_icicle_fall");
+					YetiKingEntity.Attack.ICICLE_FALL.windup + 12);
+			server.runOnServer(minecraft -> {
+				int falling = lair(minecraft).getEntitiesOfClass(FallingIcicleEntity.class, slot()).size();
+				check(falling >= 3, "Only " + falling + " icicles are falling");
+			});
+			shot(context, singleplayer, hall, centre, 7.5, 1.0, 6.0, 0.5, 4.5, 5.0, true, "jugcraft_yeti_king_icicle_fall");
 			pose(context, server, centre, (king, level, player) -> king.begin(level, YetiKingEntity.Attack.GLACIAL_SPIKES, player),
 					YetiKingEntity.Attack.GLACIAL_SPIKES.windup + 8);
 			shot(context, singleplayer, hall, centre, 7.0, 2.0, 9.0, 0.0, 1.0, 5.0, true, "jugcraft_yeti_king_glacial_spikes");
@@ -167,9 +174,21 @@ public class YetiKingClientGameTests implements FabricClientGameTest {
 				king.setHealth(king.getMaxHealth() * 0.15F);
 				king.startFury(level);
 			}, 12);
-			server.runOnServer(minecraft -> check(king(minecraft).furious() && king(minecraft).phase() == YetiKingEntity.Phase.FURY,
-					"He is not in the Fury of the Peaks"));
-			shot(context, singleplayer, hall, centre, 1.0, 1.7, 3.4, 0.0, 3.2, 0.0, true, "jugcraft_yeti_king_fury");
+			// The camera stands where he is now (in those ticks he may have gone for the player), five and a half blocks
+			// before him at his height, looking into his eyes. Put three and a half blocks from the lake's centre, it was so
+			// near his hunched head that the head filled half the picture.
+			AtomicReference<Vec3> furious = new AtomicReference<>();
+			AtomicReference<Vec3> facing = new AtomicReference<>();
+			server.runOnServer(minecraft -> {
+				YetiKingEntity king = king(minecraft);
+				check(king.furious() && king.phase() == YetiKingEntity.Phase.FURY, "He is not in the Fury of the Peaks");
+				furious.set(king.position());
+				facing.set(king.facing());
+			});
+			Vec3 eyes = furious.get().add(facing.get()).add(0.0, 3.3, 0.0);
+			Vec3 before = furious.get().add(facing.get().scale(5.5)).add(0.0, 1.4, 0.0);
+			shoot(context, singleplayer, hall, before.x, before.y, before.z, aimYaw(before, eyes), aimPitch(before, eyes), true,
+					"jugcraft_yeti_king_fury");
 			server.runCommand("tick unfreeze");
 
 			// He falls, with a patch of his lake bare: the player's loot and advancement, the snow drifted back, his kin gone
