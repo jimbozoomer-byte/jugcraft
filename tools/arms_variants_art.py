@@ -889,6 +889,8 @@ def needle_rapier():
     # The needle's eye: a dark slot through the blade above the hilt.
     d.strip(10.4, 12.8, 0.2, material=st.blade, depth=1.1, tone=OUT_DARK, z=2)
     gem(d, 8.5, 0.0, 0.6, st)
+    return d
+
 
 def sentinel_longsword():
     """The Sentinel's sword, after the owner's design: a broad gold blade, its edges pale and a brown groove down its

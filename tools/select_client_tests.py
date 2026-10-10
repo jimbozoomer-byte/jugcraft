@@ -242,7 +242,11 @@ def select(changed, tests, newly_listed, base=None, head=None):
                         hits |= showing(user, tests)
                 if existed and len(hits) * WIDE >= len(tests):
                     shown = len(hits)
-                    hits = by_names(changed_code(base, head, path), tests)
+                    named_hits = by_names(changed_code(base, head, path), tests)
+                    # A shared helper can change behavior without naming an individual feature. In that case,
+                    # retain the known consumers rather than silently selecting no client regressions.
+                    if named_hits:
+                        hits = named_hits
                     reasons.append(f"{path}: {shown} classes show {name}; "
                                    f"the names on its changed lines pick {len(hits)}")
                     chosen |= hits

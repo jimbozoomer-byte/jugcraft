@@ -33,6 +33,9 @@ import net.minecraft.world.phys.Vec3;
  */
 public class ArmsVIIIGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
+	// Throws and nearby tests use entity searches wider than this 16-block arena. Keep fixtures apart so a
+	// neighbour's creatures, attacks, terrain edits or cleanup cannot change the target during a flight.
+	private static final int ARENA_PADDING = 48;
 	/** A thrown thing keeps this share of its speed a tick in air (ThrowableProjectile's). */
 	private static final double AIR_INERTIA = 0.99;
 	/** A thrown thing leaves this far below its thrower's eye (ThrowableItemProjectile's). */
@@ -51,7 +54,7 @@ public class ArmsVIIIGameTests {
 	}
 
 	/** A steel javelin, thrown at a still pig: the pig takes its damage, and the javelin comes down, worn by one. */
-	@GameTest(structure = ARENA, maxTicks = 60)
+	@GameTest(structure = ARENA, padding = ARENA_PADDING, maxTicks = 60, maxAttempts = 5, requiredSuccesses = 5)
 	public void javelinStrikesAndComesDown(GameTestHelper helper) {
 		floor(helper);
 		Mob pig = pig(helper, new BlockPos(1, 2, 7));
@@ -61,7 +64,8 @@ public class ArmsVIIIGameTests {
 		helper.assertTrue(thrower.getMainHandItem().isEmpty(), "The javelin is still in hand after the throw");
 		float max = pig.getMaxHealth();
 		helper.succeedWhen(() -> {
-			helper.assertTrue(pig.getHealth() < max, "The pig is not struck yet (" + flight(helper, "steel_javelin") + ")");
+			helper.assertTrue(pig.getHealth() < max, "The pig at " + where(helper, pig) + " is not struck yet ("
+					+ flight(helper, "steel_javelin") + "; bounds " + pig.getBoundingBox() + ")");
 			helper.assertTrue(Math.abs(max - pig.getHealth() - thrown.damage()) < 1.0E-3F,
 					"The javelin took " + (max - pig.getHealth()) + " from the pig, not " + thrown.damage());
 			List<ItemEntity> landed = items(helper, "steel_javelin");
@@ -72,7 +76,7 @@ public class ArmsVIIIGameTests {
 	}
 
 	/** A bronze chakram cuts two pigs in line on its way out and again on its way back, and is caught again. */
-	@GameTest(structure = ARENA, maxTicks = 120)
+	@GameTest(structure = ARENA, padding = ARENA_PADDING, maxTicks = 120)
 	public void chakramCutsBothWaysAndComesBack(GameTestHelper helper) {
 		floor(helper);
 		// Two pigs in line on a raised walk, so their middles are near the thrower's eye (and stay up when struck); the
@@ -115,7 +119,7 @@ public class ArmsVIIIGameTests {
 	}
 
 	/** A steel harpoon strikes a pig 8 blocks off and hauls it most of the way in. */
-	@GameTest(structure = ARENA, maxTicks = 60)
+	@GameTest(structure = ARENA, padding = ARENA_PADDING, maxTicks = 60)
 	public void harpoonHaulsItsCatch(GameTestHelper helper) {
 		floor(helper);
 		Mob pig = pig(helper, new BlockPos(1, 2, 9));
@@ -132,7 +136,7 @@ public class ArmsVIIIGameTests {
 	}
 
 	/** A francisca's blow on a raised shield knocks it down: the shield goes on cooldown and is lowered. */
-	@GameTest(structure = ARENA)
+	@GameTest(structure = ARENA, padding = ARENA_PADDING)
 	public void franciscaKnocksAShieldDown(GameTestHelper helper) {
 		floor(helper);
 		ServerPlayer bearer = helper.makeMockServerPlayerInLevel();
@@ -148,7 +152,7 @@ public class ArmsVIIIGameTests {
 	}
 
 	/** A creative player's throw strikes as any other, but the arm stays in hand and nothing comes down. */
-	@GameTest(structure = ARENA, maxTicks = 60)
+	@GameTest(structure = ARENA, padding = ARENA_PADDING, maxTicks = 60)
 	public void creativeThrowLeavesNothing(GameTestHelper helper) {
 		floor(helper);
 		Mob pig = pig(helper, new BlockPos(1, 2, 7));
@@ -274,6 +278,7 @@ public class ArmsVIIIGameTests {
 		@SuppressWarnings("unchecked")
 		EntityType<Mob> type = (EntityType<Mob>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("pig"));
 		Mob pig = helper.spawnWithNoFreeWill(type, pos);
+		pig.setNoAi(true);
 		pig.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.0);
 		return pig;
 	}
