@@ -13,6 +13,8 @@ The [industrial chemical catalog](industrial-chemical-catalog-and-routes.md#a-ma
 
 The [eleventh owner batch](industrial-chemistry-and-fuels-plan.md#polymer-and-advanced-electronics-decisions-eleventh-batch), recorded 8 October 2026, selects distinct high-purity silicon stock, shared precision cutting, a reusable general-chip pattern plate without wear, a few function-related parts for module assembly, and one initial recipe-defined spent mixture with recovery later. Keep first tooling/equipment independently constructible before advanced chips. Exact purification/wafer yields, pattern ingredients, module bills/caps, waste composition and handling remain to specify; existing basic silicon/circuits and chip consumers remain reachable during transition. These selections implement no gameplay.
 
+The [thirteenth owner batch](industrial-chemistry-and-fuels-plan.md#resource-reagent-and-residue-decisions-thirteenth-batch), recorded 10 October 2026, selects a dedicated powered oxygen/water peroxide recipe on compatible shared electrochemical equipment and **novolac resin + DNQ photoactive additive** as the single initial photoresist pair. Peroxide production is a distinct capability rather than ordinary water electrolysis renamed. Short abstract precursor/formulation routes, TMAH compatibility, ancillary reagents/tooling, energy/loss receipts and first-equipment entry remain to specify. The existing silicon, wafer, lithography and processor routes below remain the implemented baseline; these selections add no recipes or new test evidence.
+
 ## Plan
 
 | # | Commit | What it adds |
