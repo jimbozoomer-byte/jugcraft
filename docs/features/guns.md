@@ -1050,6 +1050,7 @@ The second of the follow-ups the owner chose on 10 October 2026 ("Aiming polish"
 **Known limits:**
 - **The change is seen during the aim:** the arms shrink over the aim's ease (four ticks, a fifth of a second), and a fitted stock disappears halfway through it and comes back halfway out.
 - **Half size** was chosen from previews, not play. At the hip the arms stay the player model's own size, so they are drawn at two sizes.
+- **One aimed screenshot not explained:** in the first CI run, the Riveter SMG with its second set of attachments showed both arms out of place aimed ("Slice 9F in CI" below). Its other aimed shots and every other gun's did not.
 - **Not played:** none of it has been played yet.
 
 ## Connections
@@ -2284,6 +2285,15 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 - **Slice 9F game tests (written; they run in CI):** `GunsClientGameTests`:
   - each gun's arms are drawn at their full size held and at half size aimed, the Thresher's and the Seam Cutter's at full size both ways;
   - with each set of attachments that has a stock, the stock is drawn held and left out aimed (counted frames; logged).
+- **Slice 9F in CI** ([run 38040183992](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38040183992), on 030e8230a): every check passed.
+  - **Server game tests** (`mod`, `optional integrations absent`): 1199 passed, as before; the slice adds none.
+  - **`GunsClientGameTests`**, the one client class the job ran (the only one this slice changes):
+    - The 34 guns with sights drew their arms at size 1 held and 0.5 aimed; the Thresher and the Seam Cutter, which have none, at 1 both ways.
+    - The 66 sets of attachments with a stock, on the 22 guns that take one: each stock was drawn in every frame held (left out in none) and left out in 37 to 44 frames aimed.
+  - **Screenshots** (each gun's own aimed shot and all 115 aimed shots with attachments):
+    - Aimed, each gun's back sits on the crosshair with its fist small below it, and no stock comes up under the eye. On the Linesman, the arm that filled the lower left of the view in slice 9E's run no longer shows.
+    - The Stoker's and the Trench Lobber's own bodies still fill the lower middle aimed, as they did in slice 9E's run: they are the guns' parts, not the arms.
+    - **Not explained:** the Riveter SMG with its second set (Extended Barrel, Speed Magazine, Weighted Stock), aimed (`0208_jugcraft_guns_riveter_smg_fitted_2_aimed`), shows both arms in a pose its other aimed shots do not: the right arm lies across the lower right of the view and the left arm stands beside the gun. The gun itself is where it is in the others, and its stock was left out (40 frames). In slice 9E's run the stock covered that part of the view. In the previews at half size, no frame of the Riveter's animations (idle, draw, shoot, aimed shot, reload, inspect), nor its model with none, puts the arms there with the gun at rest. The nearest are the inspect's arms about a second in, where the gun is turned. The test neither inspects nor reloads there.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
