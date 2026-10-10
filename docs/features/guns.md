@@ -1022,6 +1022,7 @@ The first of the smaller follow-ups the owner chose on 10 October 2026 ("Tactica
 **Known limits:**
 - **The dot is a particle:** it can trail the aim by up to a tick, and it glows at full brightness in the dark.
 - **No beam through the air:** the owner's short beam shows on the gun; nothing is drawn between it and the dot.
+- **Aimed, the housing stands beside the crosshair:** the eye looks along the laser's left side, on the owner's line of sight, so its dark housing and red front fill the view just right of the crosshair and hide part of a target there (CI run 38038657220).
 - **Not played:** none of it has been played yet.
 
 ## Slice 9F: the aiming polish
@@ -2257,6 +2258,16 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `GunsClientGameTests`:
     - a fourth set of attachments, the Tactical Grip and the Laser Sight, on each gun that takes either, held and aimed (screenshots `jugcraft_guns_<gun>_fitted_4*`); a set a gun takes none of is skipped;
     - the Laser Sight on the Longhorn Rifle: held, it draws its dots, the last where the gun points (logged, with its distance from the eye); aimed, the view narrows to 0.9 and its dot shows on the middle of the screen (screenshots `jugcraft_guns_laser_sight*`).
+- **Slice 9E in CI** ([run 38038657220](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38038657220), on 815a60bb8): every check passed, the `optional integrations absent` job on its one re-run.
+  - **Server game tests** (`mod`, `optional integrations absent`): 1199 passed, 1197 before; the two new ones are `TacticalAttachmentsGameTests`.
+  - **The re-run:** the job's first attempt failed on one test this slice does not touch, `ArmsVIIIGameTests.javelinStrikesAndComesDown`. The javelin flew on its arc and came down three blocks past its pig, as it had once before on 9 October. The test passed in the same run's `mod` job and on the re-run. The pull request's comment has the details.
+  - **`GunsClientGameTests`:**
+    - Held on the Longhorn Rifle, the Laser Sight drew 20 dots in 20 ticks, the last 6.69 blocks from the eye, on the husk seven blocks off.
+    - Aimed, the view narrowed to 0.9 and its dot was drawn (27 frames), with no view through a scope. The Long Scope, Medium Scope and Reflex Sight drew no laser dots.
+    - The fourth set, the Tactical Grip and the Laser Sight, went on each of the 17 guns that take either, held and aimed.
+  - **Screenshots:**
+    - Held, the Laser Sight stands on each gun's top as a dark housing with its red front and blue light. The Tactical Grip is under the fore-end, behind the left hand.
+    - Aimed, the eye looks along the laser's left side. Its housing fills the view just right of the crosshair and hides part of the husk (the known limit above).
 - **Slice 9F, run locally (10 October 2026):**
   - `python3 tools/guns.py`: PASS (nothing in it changed).
   - `python3 tools/check_mod_data.py`: PASS (1930 material IDs).
