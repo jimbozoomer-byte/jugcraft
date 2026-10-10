@@ -63,7 +63,10 @@ public final class JugcraftConfig {
 	 * {@code raiders.walkers} and {@code raiders.blimps} ({@code on} or {@code off}) let walkers and blimps join them.</li>
 	 * <li>The lairs (see {@code lair/Lairs}): at most {@code lairs.instances} instances of each lair open at once (1 to
 	 * 32), {@code lairs.party_size} players in each (1 to 16), a ritual's gate open {@code lairs.gate_seconds} (10 to 600),
-	 * and {@code lairs.off_season} ({@code on} or {@code off}): whether the rituals work outside the Halloween event.</li>
+	 * and {@code lairs.off_season} ({@code on} or {@code off}): whether the rituals work outside the Halloween event.
+	 * The lairs' bosses: {@code lairs.boss_health} and {@code lairs.boss_damage} multiply their health and their blows
+	 * (0.25 to 4), and {@code lairs.event_loot} ({@code on} or {@code off}) gives each participant the Halloween event's
+	 * extra roll (see {@code lair/vesperine/VesperineLoot}).</li>
 	 * </ul>
 	 */
 	public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
@@ -80,7 +83,8 @@ public final class JugcraftConfig {
 			Map.entry("raiders.raids", "on"), Map.entry("raiders.grace_days", "3"), Map.entry("raiders.interval_days", "3"),
 			Map.entry("raiders.walkers", "on"), Map.entry("raiders.blimps", "on"),
 			Map.entry("lairs.instances", "8"), Map.entry("lairs.party_size", "4"), Map.entry("lairs.gate_seconds", "60"),
-			Map.entry("lairs.off_season", "on"));
+			Map.entry("lairs.off_season", "on"), Map.entry("lairs.boss_health", "1.0"), Map.entry("lairs.boss_damage", "1.0"),
+			Map.entry("lairs.event_loot", "on"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();

@@ -66,6 +66,9 @@ ASHEN = M((42, 42, 50), (66, 66, 76), (112, 112, 122), (150, 150, 160), (190, 19
 NIGHT = M((12, 12, 20), (24, 24, 36), (34, 35, 52), (48, 50, 72), (66, 69, 98), (82, 86, 118), shine=False)
 SOOT = M((8, 8, 12), (14, 14, 20), (18, 18, 26), (24, 24, 34), (34, 34, 46), (46, 46, 60), shine=False)
 BLOOD = M((44, 8, 14), (70, 14, 22), (96, 22, 32), (138, 30, 42), (176, 48, 56), (204, 78, 82), shine=False)
+# Vesperine's (docs/features/vesperine.md): a moon-pale blade with a cool violet cast, on a violet-black snath bound in
+# silver, a crimson wrap where the hand holds.
+MOON = M((42, 34, 70), (82, 72, 128), (126, 114, 180), (170, 160, 220), (208, 200, 244), (246, 244, 255))
 
 # Style(blade, fitting, grip, haft, gem, accent, cloth)
 GILDED = Style(POLISHED, GOLD, ROYAL, px.DARK_WOOD, SAPPHIRE, GOLD, ROYAL)
@@ -81,11 +84,12 @@ WEREWOLF = Style(SILVER, DARK_IRON, WOLF, px.DARK_WOOD, MOONSTONE, SILVER, WOLF)
 ROC = Style(STORMSTEEL, px.GUNMETAL, px.LEATHER, px.DARK_WOOD, BOLT, BOLT, FEATHER)
 LEVIATHAN = Style(SEABRONZE, SEABRONZE, px.LEATHER, px.DARK_WOOD, PEARL, PEARL, TIDEGLOW)
 HADES = Style(SLATE, ASHEN, BLOOD, NIGHT, BLOOD, SOOT, BLOOD)
+VESPER = Style(MOON, SILVER, BLOOD, OBSIDIAN, MOONSTONE, MOONSTONE, BLOOD)
 # Each line's materials, by its name in tools/arms_variants.py (a variant's 16x16 icon is coloured from them).
 LINE_STYLES = {"gilded": GILDED, "ironclad": IRONCLAD, "bonecarved": BONECARVED, "runebound": RUNEBOUND,
                "yeti_king": YETI, "cinder_tyrant": CINDER, "mire_hag": HAG, "crypt_lich": LICH,
                "iron_dreadnought": DREADNOUGHT, "werewolf_alpha": WEREWOLF, "storm_roc": ROC,
-               "abyssal_leviathan": LEVIATHAN, "hades": HADES}
+               "abyssal_leviathan": LEVIATHAN, "vesperine": VESPER, "hades": HADES}
 
 
 # ---------------------------------------------------------------- shared parts
@@ -813,13 +817,32 @@ def hades_scythe():
     return d
 
 
+# ---------------------------------------------------------------- Vesperine's (docs/features/vesperine.md)
+
+
+def vesper_scythe():
+    """Vesperine's scythe, her trophy: a scythe's length and hold, a violet-black snath bound with three silver rings, a
+    crimson wrap where the hand holds, a silver socket at its head, and a long moon-pale blade, a little longer and
+    broader than the scythe's, sweeping out to the left and down to its point, bright along its edge."""
+    st = VESPER
+    d = Design(53, grip=10.0)
+    d.disc(0.9, 0.0, 1.1, st.fitting, depth=2.2)
+    haft(d, 0.8, 50.0, 0.8, st, rings=(24.0, 33.0, 41.0))
+    grip(d, 6.0, 14.0, 0.95, st)
+    d.line(25.0, -0.8, 25.0, -3.6, 1.1, st.haft, depth=1.8)   # the nib, a second handle
+    d.strip(47.5, 50.5, 1.1, material=st.fitting, depth=2.4)
+    d.strip(49.0, 51.5, 2.2, 0.9, material=st.fitting, depth=2.4)
+    sickle(d, 40.0, -1.0, 12.0, 4.6, 0.0, -116.0, st, steps=18)
+    return d
+
+
 DESIGNS = {name: fn for name, fn in globals().items() if callable(fn) and name in (
     "gilded_longsword", "gilded_rapier", "gilded_sabre", "gilded_halberd", "ironclad_zweihander", "ironclad_maul",
     "ironclad_war_pick", "ironclad_battle_axe", "bonecarved_dagger", "bonecarved_flail", "bonecarved_glaive",
     "bonecarved_labrys", "runebound_nodachi", "runebound_moonblade", "runebound_staff", "runebound_war_hammer",
     "glacier_maul", "rimeclaw", "cinderbrand", "magmaw", "hagthorn", "bogfang", "soulreaver", "gravewarden",
     "dynamo_halberd", "piston_hammer", "moonfang", "howler", "stormcaller", "galefeather", "tidebreaker",
-    "leviathans_hook", "hades_scythe")}
+    "leviathans_hook", "vesper_scythe", "hades_scythe")}
 
 
 # ---------------------------------------------------------------- drawing (as tools/arms_art.py draws the kinds)
