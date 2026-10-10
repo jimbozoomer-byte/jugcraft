@@ -842,6 +842,33 @@
       }
     ]
   },
+  "guns.earthmover.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bazooka_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.skylark_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/rocket_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.bullfrog.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/airgun_fire_2",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 10A (the launchers)
+- **Three new guns** from the owner's models and animations: the **Earthmover**, a shoulder rocket launcher with a drum of four rockets; the **Skylark Rifle**, a break-open rifle that fires one rocket at a time, faster and further; and the **Bullfrog**, a stubby grenade launcher loaded a grenade at a time.
+- The rocket guns fire the rocketry branch's High-Explosive Rockets, which burst where they hit, or at the end of the gun's range, as the Rocket Launcher's do; they hurt living things only and break no block. The Bullfrog loads any grenade, as the Trench Lobber does.
+- A rocket in flight now saves what is left of its fuse.
+- Record: [guns.md, slice 10A](docs/features/guns.md#slice-10a-the-launchers).
+
 ### Unmerged: Arcane Concordance, Wayfaring part 1b (the belt and boot drawn on the body)
 - **The Leather Belt and the Amphibian Boot now show when worn,** as the owner drew them: a leather strap round the waist with a gold buckle in front, and on each foot a green boot with a white cuff, a grey toe cap and a fin on the heel. You see them in third person and on the inventory's figure; other players should see them too (not yet tried with two clients). The charms and the Ice Breaker (the owner drew no worn sheet for it) are not drawn.
 - The owner's two worn sheets are imported byte for byte, with their sources and checksums recorded; the boxes are fitted to them (the sheets came without geometry) and kept off the skin's layers and vanilla armour by the same gaps as Jugcraft's 3D armour, so they should not flicker against them up close (armour, drawn a little toward the camera, shows through them from far off). Trinkets' data-driven renderer draws them: no Java. Record: [arcane-concordance-trinkets.md](docs/features/arcane-concordance-trinkets.md).

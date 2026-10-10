@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.guns;
 
+import io.github.jimbozoomer.jugcraft.rocketry.CombatRocket;
+import io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry;
 import io.github.jimbozoomer.jugcraft.tools.Chargeable;
 import io.github.jimbozoomer.jugcraft.weapons.GrenadeEntity;
 import io.github.jimbozoomer.jugcraft.weapons.GrenadeItem;
@@ -81,6 +83,9 @@ import org.jspecify.annotations.Nullable;
  * <li>Slice 9G: a grenade gun loads any grenade, one kind at a time ({@link #reloadAmmo}): the one in the other hand,
  * else the kind it holds while the inventory has one, else the first grenade in the inventory. A reload of another
  * kind first puts what the magazine held back in the inventory ({@link #load}). It lobs the kind it holds.</li>
+ * <li>Slice 10A: a rocket gun fires a High-Explosive Rocket from the eye along the look, at the gun's rocket speed; it
+ * flies straight and bursts where it hits or at the end of the gun's range, as the rocket launcher's rockets burst,
+ * hurting living things only ({@link #rocket}).</li>
  * </ul>
  */
 public final class GunShots {
@@ -167,6 +172,7 @@ public final class GunShots {
 			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
 			case JugcraftGuns.BEAM -> beam(level, player, spec, spread);
 			case JugcraftGuns.ARC -> arc(level, player, spec, spread);
+			case JugcraftGuns.ROCKET -> rocket(level, player, gun, spec, spread);
 			default -> shoot(level, player, spec, spread);
 		}
 		if (!free) {
@@ -527,6 +533,20 @@ public final class GunShots {
 	private static void lob(ServerLevel level, ServerPlayer player, ItemStack stack, GunSpec spec, float spread) {
 		Projectile.spawnProjectileFromRotation(GrenadeEntity::new, level, new ItemStack(JugcraftGuns.loadedAmmo(stack, spec)), player,
 				0.0F, GrenadeLauncherItem.LAUNCH_SPEED, spread);
+		smoke(level, player);
+	}
+
+	/**
+	 * Fires one of the gun's rockets (slice 10A): a High-Explosive Rocket from the eye along the look, at the gun's rocket
+	 * speed ({@link JugcraftGuns#rocketSpeed}) and strayed by about the gun's spread in degrees. It flies straight, untouched
+	 * by gravity, and bursts where it hits anything or, its fuse set to the gun's range, at the end of it
+	 * ({@link CombatRocket}: it hurts living things only and breaks no block).
+	 */
+	private static void rocket(ServerLevel level, ServerPlayer player, GunItem gun, GunSpec spec, float spread) {
+		float speed = JugcraftGuns.rocketSpeed(gun);
+		CombatRocket rocket = Projectile.spawnProjectileFromRotation(CombatRocket::new, level, new ItemStack(JugcraftRocketry.HE_ROCKET),
+				player, 0.0F, speed, spread);
+		rocket.fuse(Mth.ceil(spec.range() / speed));
 		smoke(level, player);
 	}
 

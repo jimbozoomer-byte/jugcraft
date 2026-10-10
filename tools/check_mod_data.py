@@ -1444,10 +1444,16 @@ def check_guns():
     listed = re.search(r"AMMO = List\.of\(([^)]*)\)", java)
     if not listed or re.findall(r'"([a-z_]+)"', listed.group(1)) != list(guns.AMMO):
         err(f"JugcraftGuns.AMMO differs from tools/guns.py {list(guns.AMMO)}")
-    # Slice 8C: what the heavy weapons fire, their spin-up and the ammunition an item of which loads several rounds.
-    shots = ", ".join(f'"{gun}", "{spec["shot"]}"' for gun, spec in guns.GUNS.items() if spec.get("shot", "bullet") != "bullet")
-    if f"SHOTS = Map.of({shots});" not in java:
-        err(f"JugcraftGuns.SHOTS differs from tools/guns.py GUNS shot: expected Map.of({shots})")
+    # Slice 8C: what the heavy weapons fire, their spin-up and the ammunition an item of which loads several rounds
+    # (more than Map.of's ten pairs since slice 10A).
+    shots = ", ".join(f'Map.entry("{gun}", "{spec["shot"]}")' for gun, spec in guns.GUNS.items()
+                      if spec.get("shot", "bullet") != "bullet")
+    if f"SHOTS = Map.ofEntries({shots});" not in java:
+        err(f"JugcraftGuns.SHOTS differs from tools/guns.py GUNS shot: expected Map.ofEntries({shots})")
+    # Slice 10A: the rocket guns' rockets' speed.
+    speeds = ", ".join(f'"{gun}", {spec["rocket_speed"]}F' for gun, spec in guns.GUNS.items() if "rocket_speed" in spec)
+    if f"ROCKET_SPEED = Map.of({speeds});" not in java:
+        err(f"JugcraftGuns.ROCKET_SPEED differs from tools/guns.py GUNS rocket_speed: expected Map.of({speeds})")
     spins = ", ".join(f'"{gun}", {spec["spin_up"]}' for gun, spec in guns.GUNS.items() if spec.get("spin_up"))
     if f"SPIN_UP = Map.of({spins});" not in java:
         err(f"JugcraftGuns.SPIN_UP differs from tools/guns.py GUNS spin_up: expected Map.of({spins})")
