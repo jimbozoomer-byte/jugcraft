@@ -248,7 +248,8 @@
 			"io.github.jimbozoomer.jugcraft.test.SoilClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.OrchardClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CakeClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.FruitCropClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.FruitCropClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.LairClientGameTests"
 		]
 	},
 	"depends": {

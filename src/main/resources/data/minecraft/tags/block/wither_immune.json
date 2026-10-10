@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:blighted_soil",
+    "jugcraft:black_wheat",
+    "jugcraft:mown_stubble",
+    "jugcraft:lair_brazier",
+    "jugcraft:lair_moon",
+    "jugcraft:lair_exit"
+  ]
+}

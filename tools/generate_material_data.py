@@ -27,6 +27,8 @@ PACKS = RES / "resourcepacks"
 GENERATED_DIRS = [
     DATA / MOD / "advancement", ASSETS / "blockstates", ASSETS / "items", ASSETS / "models", ASSETS / "lang", ASSETS / "handbook",
     DATA / MOD / "loot_table", DATA / MOD / "recipe", DATA / MOD / "worldgen",
+    # The lairs' dimensions and templates (tools/lair_data.py).
+    DATA / MOD / "dimension", DATA / MOD / "dimension_type", DATA / MOD / "structure" / "lair",
     DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD, PACKS,
     DATA / MOD / "villager_trade", DATA / MOD / "trade_set", DATA / MOD / "tags" / "villager_trade",
     RES / "assets" / "minecraft",

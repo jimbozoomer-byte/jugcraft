@@ -58,6 +58,8 @@ public final class JugcraftClient implements ClientModInitializer {
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_ANCHOR_ENTITY, ZiplineRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.COMBAT_ROCKET, ThrownItemRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.lair.JugcraftLairs.MIST_GATE,
+				net.minecraft.client.renderer.entity.NoopRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftMachines.MACHINE_ENTITY, WindTurbineRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.BELT_PULLEY_ENTITY, BeltRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.SHAFT_ENTITY, KineticRotorRenderer::new);
