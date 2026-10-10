@@ -1,6 +1,6 @@
 # The Cinder Kiln, and the Kiln Seal
 
-Status: implemented in source; CI's first run passed every server game test and failed two other checks (below). Part 1 of boss 4, the Cinder Tyrant, in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Cinder Kiln, a fourth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Cinder Tyrant and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI passes (below), and its client test's pictures are in the record. Part 1 of boss 4, the Cinder Tyrant, in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Cinder Kiln, a fourth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Cinder Tyrant and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 10 October 2026 the owner asked to "do the next boss same way" as the Yeti King; the Cinder Tyrant is the next of the first eight in the bosses brainstorm, and the planning pack's "Kiln Beneath the Mountain" ([chapter 05](../plans/concordance-expansion-2026-10-10/05-new-boss-compendium.md)).
 
 Target milestone and tier: Specialization tier (dungeon expeditions), as the other lairs are. The seal takes what a player has once they reach the Nether: obsidian, blaze powder, gold and a magma block.
@@ -108,12 +108,25 @@ Nothing is renamed.
 
 ## Verification
 
-CI (GitHub Actions), on `8a7a4d4`, this pull request's first commit: **two failures.**
-- `mod` passed all 1299 required server game tests, the kiln's six among them, and `optional integrations absent` passed.
-- `repository` failed its check on how the client tests are shared out. With this pull request's client test class, the estimate for the busiest of the four client jobs came to 25 minutes 10 seconds, over the 25 it allows. The next commit gives the client tests a fifth job ([TESTING.md](../TESTING.md)), which brings the estimate to 20 minutes a job.
-- The client test stopped at the seal's press. It judged the press by comparing the item's result with the game's one plain success value, and the result was something else. The next commit asks only that the press took effect, and says what came back if it did not; the checks after it still look for the open kiln, the used seal and the vent.
+![A Kiln Seal pressed into a magma block on the test world's flat land, made a volcano's: the magma cracked open into a vent, sparks and smoke rising from it](../images/ingame_kiln_seal_vent.jpg)
+![The view from the arrival ledge: the dome of kiln brick ribbed with blackstone, the bowl's cracked basalt, the shelves, and the crucible glowing under the forge mouth at the far end](../images/ingame_cinder_kiln_arrival.jpg)
+![The bowl from near the stair's foot: a raised shelf in front, the cracked basalt glowing in its cracks, the forge mouth beyond](../images/ingame_cinder_kiln_bowl.jpg)
+![The crucible under the forge mouth, its basalt rim round the slag, the heat channel running in from the lip](../images/ingame_cinder_kiln_crucible.jpg)
+![The slag pouring over the forge's lip and down the heat channel](../images/ingame_cinder_kiln_forge.jpg)
+![The west sluice open in the wall, its trough flooded across the bowl's floor](../images/ingame_cinder_kiln_sluice.jpg)
+![A raised shelf of basalt in the bowl, the dome's glowing cracks beyond](../images/ingame_cinder_kiln_shelf.jpg)
+![Looking up into the dome: the blackstone ribs meeting at the vent](../images/ingame_cinder_kiln_dome.jpg)
+![The arch beside the arrival ledge, filled with Grey Mist](../images/ingame_cinder_kiln_exit.jpg)
+![A second Kiln Seal pressed into a magma block in the Nether: its vent among the netherrack](../images/ingame_kiln_seal_vent_nether.jpg)
 
-The pictures and the full results go here when CI has passed.
+*The client game test's pictures (CI, commit `042b98d`): the vent where the seal was pressed, then in the kiln the view from the ledge, the bowl from the stair's foot, the crucible, the slag over the lip, the west sluice's flooded trough, a shelf, the dome and the Grey Mist's arch; last, the vent a second seal opened in the Nether. The test client renders at 480x270.*
+
+CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `8a7a4d4` | Build, data audit, game tests, client game tests | **Two failures.** `mod` passed all 1299 required server game tests, the kiln's six among them, and `optional integrations absent` passed. `repository` failed its check on how the client tests are shared out: with the kiln's client test class, the estimate for the busiest of the four client jobs came to 25 minutes 10 seconds, over the 25 it allows. The client test stopped at the seal's press: it judged the press by comparing the item's result with the game's one plain success value, and the result was something else |
+| `042b98d` | The same, the client tests now shared between five jobs ([TESTING.md](../TESTING.md)), and the press judged by whether it took effect (the checks after it still look for the open kiln, the used seal and the vent) | **All pass:** all 1299 required game tests, and every client test class (a workflow change runs them all) in five jobs of 12 to 28 minutes, `CinderKilnClientGameTests` among them. The pictures above are from this commit |
 
 Run locally:
 
