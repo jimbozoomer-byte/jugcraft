@@ -25,111 +25,201 @@ STEEL, STEEL_DARK, STRIPE, GLOVE, SKIN, BEARD, RED, BELT, BLUE, YELLOW, GOLD, BO
     "gk_steel", "gk_steel_dark", "gk_stripe", "gk_glove", "gk_skin", "gk_beard", "gk_red", "gk_belt", "gk_blue",
     "gk_yellow", "gk_gold", "gk_boot", "gk_grip")
 
-# Joints, in pixels.
+# Joints, in pixels. The shoulders stand clear of the breastplate so the sleeves never cut into it.
 HIP = (0, 10, 0)
 NECK = (0, 24, 0)
-SHOULDERS = {"left_arm": (8.5, 22, 0.5), "right_arm": (-8.5, 22, 0.5)}
-LEGS = {"left_leg": (3.5, 10, 0), "right_leg": (-3.5, 10, 0)}
-HAND = (0, -16, 0)        # from the shoulder
-SKIRT = (0, 11, 0)
+SHOULDERS = {"left_arm": (10.8, 22.5, 0.5), "right_arm": (-10.8, 22.5, 0.5)}
+LEGS = {"left_leg": (3.6, 10, 0), "right_leg": (-3.6, 10, 0)}
+HAND = (0, -17, 0)        # from the shoulder
+SKIRT = (0, 11.5, 0)
+
+
+def rotated(elements, rotation):
+    out = []
+    for item in elements:
+        frm, to, texture = item[:3]
+        options = dict(item[3]) if len(item) > 3 else {}
+        options["rotation"] = rotation
+        out.append((frm, to, texture, options))
+    return out
 
 
 # ------------------------------------------------------------------ parts (each from its joint)
 
 def body():
-    """The breastplate with its belly and rivets, the red sash, the buckled belt and the dagger at the left hip."""
+    """The breastplate: a round belly, a chest plate with a neck opening, lames at the waist, rivet rows, a back plate;
+    the red sash in folds with a knotted tail at the right hip; the studded belt with its buckle and tongue; the
+    dagger in its sheath at the left hip and a pouch at the right."""
     m = []
-    m.append(box((-6.5, 0, -4), (6.5, 14, 5), STEEL))
-    m.append(box((-7.2, 2, -4.6), (7.2, 10, 6), STEEL))
-    m.append(box((-6, 10, -4.3), (6, 13, 5.6), STEEL_DARK))
-    for x in (-5.5, 4.5):
-        for y in (4, 8):
-            m.append(box((x, y, 6), (x + 1, y + 1, 6.4), STEEL_DARK))
-    m.append(box((-7.5, 4.5, -4.9), (7.5, 7.5, 6.3), RED))
-    m.append(box((7.4, -2, -3), (8.6, 5, 1), RED, ("x", -22.5, [8, 5, -1])))
-    m.append(box((-7.7, 1.5, -5.1), (7.7, 4.2, 6.6), BELT))
-    m.append(box((-2.2, 1.2, 6.6), (2.2, 4.5, 7.2), STEEL))
-    m.append(box((-1.2, 2, 7.2), (1.2, 3.7, 7.5), BELT))
-    for x in (-6, -4, 4, 6):
-        m.append(box((x, 2.6, 6.6), (x + 0.6, 3.2, 6.9), STEEL_DARK))
-    m.append(box((7.2, -6, -1), (8.6, 2, 1), BELT))
-    m.append(box((7.4, 2, -0.8), (8.4, 3.5, 0.8), STEEL))
-    m.append(box((7, 3.5, -1), (8.8, 4.3, 1), GOLD))
+    m += cyl("y", 0, 0.5, 7.4, 2, 9, STEEL)
+    m.append(box((-6.6, 9, -4.2), (6.6, 14.2, 5.2), STEEL))
+    m.append(box((-6.9, 11, -4.5), (6.9, 13.4, 5.6), STEEL_DARK))
+    m.append(box((-3.2, 13.6, -3.4), (3.2, 14.6, 3.8), STEEL_DARK))
+    for x in (-5.4, -3.2, 3.2, 5.4):
+        m.append(box((x - 0.4, 12.6, 5.6), (x + 0.4, 13.4, 6.0), STEEL_DARK))
+    for x in (-5.8, 4.8):
+        for y in (3, 6.5):
+            m.append(box((x, y, 7.4), (x + 1, y + 1, 7.8), STEEL_DARK))
+    m.append(box((-6.4, 0.5, -4.3), (6.4, 2.2, 5.4), STEEL_DARK))
+    m.append(box((-6.6, -0.8, -4.0), (6.6, 0.6, 5.0), STEEL))
+    # The sash: three folds of different depth, and the knot and tail at the right hip.
+    m.append(box((-7.7, 5.2, -4.9), (7.7, 7.6, 7.9), RED))
+    m.append(box((-7.5, 4.4, -4.6), (7.5, 5.2, 7.6), RED))
+    m.append(box((-5, 7.6, 6), (3, 8.2, 8.1), RED))
+    m.append(box((-9.4, 3.5, 1), (-7.6, 6.5, 4), RED))
+    m.append(box((-9.6, -4, 1.5), (-8.2, 3.5, 3.5), RED, ("x", -22.5, [-8.9, 3.5, 2.5])))
+    m.append(box((-9.8, -5, 1.7), (-8.4, -3, 3.3), RED, ("z", 22.5, [-9.1, -3, 2.5])))
+    # The belt over the sash, its studs, the buckle with a frame and tongue.
+    m.append(box((-8, 2.2, -5.2), (8, 4.6, 8.2), BELT))
+    for x in (-6.6, -4.6, 4.6, 6.6):
+        m.append(box((x - 0.4, 3.1, 8.2), (x + 0.4, 3.9, 8.6), STEEL))
+    for z in (-4.8, -2, 1, 4):
+        for x0 in (-8.4, 8):
+            m.append(box((x0, 3.1, z - 0.4), (x0 + 0.4, 3.9, z + 0.4), STEEL))
+    m.append(box((-2.6, 1.8, 8.2), (2.6, 5, 8.9), STEEL))
+    m.append(box((-1.6, 2.6, 8.9), (1.6, 4.2, 9.1), BELT))
+    m.append(box((-0.4, 2.4, 9.1), (0.4, 4.6, 9.4), STEEL_DARK))
+    # The dagger at the left hip: sheath with a chape, grip, guard and pommel; a pouch at the right.
+    m.append(box((7.7, -7, -1.2), (9.2, 2.2, 1.2), BELT))
+    m.append(box((7.9, -8, -1), (9, -7, 1), STEEL))
+    m.append(box((7.4, 2.2, -1.5), (9.5, 3, 1.5), STEEL))
+    m.append(box((7.9, 3, -0.7), (9, 6, 0.7), GRIP))
+    m.append(box((7.6, 6, -1), (9.3, 7.2, 1), GOLD))
+    m.append(box((-9.6, -2.5, -4.5), (-7.6, 2.4, -1.5), GLOVE))
+    m.append(box((-9.8, 0.6, -4.7), (-7.4, 2.6, -1.3), BELT))
     return m
 
 
 def head():
-    """The face under the helm: the big nose, the beard in two tiers with a moustache, and the conical helm with its
-    riveted brim pulled down over the eyes, its tiers set a little forward so it leans."""
+    """Under the helm: the face with cheeks, the big round nose, a moustache in two curls and the beard in layered
+    tufts with sideburns, all standing forward of the breastplate. The helm: a round riveted brim pulled down over
+    the eyes with a visor plate, and a round cone of seven tiers set a little forward so it leans, with a seam up
+    its front and a spike at the top."""
     m = []
-    m.append(box((-4, 0, -4), (4, 8, 4), SKIN))
-    m += cyl("z", 0, 4.2, 1.7, 3.5, 7.8, SKIN)
-    m.append(box((-3.6, 2.2, 4), (3.6, 4, 6), BEARD))
-    m.append(box((-5, -6, 0.5), (5, 2.6, 5.4), BEARD))
-    m.append(box((-3.2, -10.5, 1.5), (3.2, -6, 4.6), BEARD))
-    m.append(box((-4.6, -1, -1), (-3.9, 4, 3), BEARD))
-    m.append(box((3.9, -1, -1), (4.6, 4, 3), BEARD))
-    m.append(box((-6, 6.5, -6), (6, 8.5, 6.5), STEEL))
-    m.append(box((-5.6, 4.6, 4), (5.6, 6.5, 8), STEEL))
-    for x in (-4.5, -1.5, 1.5, 4.5):
-        m.append(box((x - 0.4, 5.2, 8), (x + 0.4, 6, 8.4), STEEL_DARK))
-    for i, (half, y0, y1, lean) in enumerate(((5.2, 8.5, 14, 0.4), (4.3, 14, 20, 0.9), (3.4, 20, 26, 1.4),
-                                                (2.5, 26, 31, 1.9), (1.6, 31, 36, 2.3), (0.8, 36, 40, 2.6))):
-        m.append(box((-half, y0, -half + lean), (half, y1, half + lean), STEEL if i % 2 == 0 else STEEL_DARK))
+    m.append(box((-4, -0.5, -4), (4, 7.5, 4), SKIN))
+    for x in (-4.4, 3.6):
+        m.append(box((x, 1, 1), (x + 0.8, 4.5, 4.4), SKIN))
+    m += cyl("z", 0, 4, 2, 3.6, 8.2, SKIN)
+    m += cyl("z", 0, 3.6, 1.2, 8.2, 8.9, SKIN)
+    for x0, x1 in ((-4, -0.6), (0.6, 4)):
+        m.append(box((x0, 2.6, 5.2), (x1, 4.2, 7.4), BEARD, ("z", -12 if x0 < 0 else 12, [(x0 + x1) / 2, 4.2, 6.3])))
+    m.append(box((-5, -3, 4.3), (5, 2.8, 8), BEARD))
+    m.append(box((-4.4, -7, 4.8), (4.4, -3, 7.6), BEARD))
+    m.append(box((-3.2, -10.5, 5.2), (3.2, -7, 7.2), BEARD))
+    m.append(box((-1.8, -13, 5.6), (1.8, -10.5, 6.9), BEARD))
+    for x0, x1, y0, y1 in ((-5.4, -4.4, -4, 2), (4.4, 5.4, -4, 2), (-2.5, -1.5, -8.5, -3), (1.5, 2.5, -8.5, -3)):
+        m.append(box((x0, y0, 7.6), (x1, y1, 8.3), BEARD))
+    m.append(box((-4.8, 0, -1.5), (-4, 5.5, 4.3), BEARD))
+    m.append(box((4, 0, -1.5), (4.8, 5.5, 4.3), BEARD))
+    # The brim: a round ring, a visor plate down over the eyes, and a ring of rivets.
+    m += cyl("y", 0, 0.3, 6.6, 6.5, 8.6, STEEL)
+    m.append(box((-5.8, 4.4, 3.6), (5.8, 6.7, 8.4), STEEL))
+    m.append(box((-5.2, 4.9, 8.4), (5.2, 6.2, 8.7), STEEL_DARK))
+    for i in range(8):
+        a = 2 * math.pi * i / 8 + math.pi / 8
+        x, z = 6.3 * math.sin(a), 0.3 + 6.3 * math.cos(a)
+        m.append(box((x - 0.4, 7, z - 0.4), (x + 0.4, 7.8, z + 0.4), STEEL_DARK))
+    # The cone: round tiers shrinking upward, each set a little further forward, a seam up the front, a spike on top.
+    tiers = ((5.4, 8.6, 13, 0.5), (4.7, 13, 17.5, 0.9), (4.0, 17.5, 22, 1.3), (3.3, 22, 26.5, 1.7),
+             (2.6, 26.5, 31, 2.1), (1.9, 31, 35, 2.4), (1.2, 35, 38.5, 2.7))
+    for i, (r, y0, y1, lean) in enumerate(tiers):
+        m += cyl("y", 0, lean, r, y0, y1, STEEL if i % 2 == 0 else STEEL_DARK)
+        if i < 6:
+            m.append(box((-0.5, y0, lean + r - 0.3), (0.5, y1, lean + r + 0.4), STEEL_DARK))
+    m += cyl("y", 0, 2.8, 0.6, 38.5, 41.5, STEEL_DARK)
     return m
 
 
 def arm(side):
-    """A puffed striped sleeve, a leather cuff and a brown gauntlet with a thumb."""
+    """A puffed striped sleeve in three tiers, a leather cuff with a buckle, and a brown gauntlet with a plated
+    back, four fingers and a thumb."""
     m = []
-    m.append(box((-4.2, -3.5, -4.2), (4.2, 1.5, 4.2), STRIPE))
-    m.append(box((-3.4, -9, -3.4), (3.4, -3.5, 3.4), STRIPE))
-    m.append(box((-2.8, -11.5, -2.8), (2.8, -9, 2.8), BELT))
-    m.append(box((-2.6, -17, -2.6), (2.6, -11.5, 2.6), GLOVE))
-    thumb = 2.6 if side > 0 else -3.6
-    m.append(box((thumb, -14.5, -0.5), (thumb + 1, -12, 1.5), GLOVE))
+    m += cyl("y", 0, 0, 4.0, -3.5, 1.6, STRIPE)
+    m += cyl("y", 0, 0, 3.6, -7.5, -3.5, STRIPE)
+    m += cyl("y", 0, 0, 3.1, -10.5, -7.5, STRIPE)
+    m += cyl("y", 0, 0, 2.7, -12.5, -10.5, BELT)
+    m.append(box((-1, -12.2, 2.5), (1, -10.8, 3.1), STEEL))
+    m.append(box((-2.5, -17, -2.5), (2.5, -12.5, 2.5), GLOVE))
+    m.append(box((-2.2, -14.5, -2.9), (2.2, -12.8, -2.5), STEEL_DARK))
+    for i, x in enumerate((-1.9, -0.65, 0.65, 1.9)):
+        m.append(box((x - 0.55, -19.6 + 0.3 * abs(i - 1.5), -2.2), (x + 0.55, -17, 1.6), GLOVE))
+    thumb = 2.5 if side > 0 else -3.6
+    m.append(box((thumb, -15.5, -0.5), (thumb + 1.1, -12.8, 1.7), GLOVE))
     return m
 
 
 def sword():
-    """The greatsword from the fist: a wrapped grip, a gilt pommel and crossguard, and a long blade with a fuller
-    and a tapered point, standing up through the hand."""
+    """The greatsword from the fist: a leather-wrapped grip with bands, a gilt pommel with a jewel, a two-tier gilt
+    crossguard with curled ends, a ricasso, and a long blade with a fuller, bevelled edges and a tapered point."""
     m = []
-    m.append(box((-0.8, -3.5, -0.8), (0.8, 3, 0.8), GRIP))
-    m += cyl("y", 0, 0, 1.5, -5.5, -3.5, GOLD)
-    m.append(box((-5.5, 3, -0.7), (5.5, 4.4, 0.7), GOLD))
-    m.append(box((-0.7, 4.4, -0.7), (0.7, 6.5, 0.7), GOLD))
-    m.append(box((-1.5, 4.4, -0.45), (1.5, 40, 0.45), STEEL))
-    m.append(box((-0.4, 6, -0.55), (0.4, 34, 0.55), STEEL_DARK))
-    m.append(box((-1, 40, -0.4), (1, 44, 0.4), STEEL))
-    m.append(box((-0.5, 44, -0.3), (0.5, 46.5, 0.3), STEEL))
+    m.append(box((-0.9, -3.5, -0.9), (0.9, 3, 0.9), GRIP))
+    for y in (-2.5, -0.5, 1.5):
+        m.append(box((-1.05, y, -1.05), (1.05, y + 0.8, 1.05), BELT))
+    m += cyl("y", 0, 0, 1.7, -5.8, -3.5, GOLD)
+    m.append(box((-0.6, -5.3, 1.6), (0.6, -4.1, 2.0), RED))
+    m.append(box((-6, 3, -0.8), (6, 4.2, 0.8), GOLD))
+    m.append(box((-4.5, 4.2, -0.6), (4.5, 5, 0.6), GOLD))
+    for x0, x1 in ((-6.6, -5.6), (5.6, 6.6)):
+        m.append(box((x0, 2.2, -0.7), (x1, 3.2, 0.7), GOLD))
+    m.append(box((-1.2, 5, -0.9), (1.2, 8.5, 0.9), STEEL_DARK))
+    m.append(box((-1.6, 8.5, -0.45), (1.6, 42, 0.45), STEEL))
+    for x0, x1 in ((-1.7, -1.3), (1.3, 1.7)):
+        m.append(box((x0, 8.5, -0.3), (x1, 42, 0.3), STEEL_DARK))
+    m.append(box((-0.4, 9.5, -0.55), (0.4, 36, 0.55), STEEL_DARK))
+    m.append(box((-1.1, 42, -0.4), (1.1, 45.5, 0.4), STEEL))
+    m.append(box((-0.6, 45.5, -0.35), (0.6, 48, 0.35), STEEL))
+    m.append(box((-0.25, 48, -0.25), (0.25, 49.5, 0.25), STEEL_DARK))
     return m
 
 
 def skirt():
-    """The dagged skirt: pointed lappets all round, blue and yellow by turns, a gilt bell at each point."""
+    """The dagged skirt over a dark tunic: an outer row of twelve long pointed lappets, blue and yellow by turns, an
+    inner row of eight shorter ones in the other colour behind them, every point hung with a gilt bell."""
     m = []
-    n = 12
-    for i in range(n):
-        a = 2 * math.pi * i / n
-        cx, cz = 7.6 * math.sin(a), 6.2 * math.cos(a)
+    m += cyl("y", 0, 0, 6.8, -5, 0.5, BOOT)
+
+    def lappet(cx, cz, tex, length, width, lean):
+        out = []
+        out.append(box((cx - width, -length * 0.55, cz - width), (cx + width, 0.5, cz + width), tex, lean))
+        out.append(box((cx - width * 0.6, -length * 0.85, cz - width * 0.6), (cx + width * 0.6, -length * 0.55, cz + width * 0.6), tex, lean))
+        out.append(box((cx - width * 0.3, -length, cz - width * 0.3), (cx + width * 0.3, -length * 0.85, cz + width * 0.3), tex, lean))
+        out.append(box((cx - 0.7, -length - 1.4, cz - 0.7), (cx + 0.7, -length, cz + 0.7), GOLD, lean))
+        out.append(box((cx - 0.25, -length - 1.7, cz - 0.25), (cx + 0.25, -length - 1.4, cz + 0.25), GOLD, lean))
+        return out
+
+    for i in range(12):
+        a = 2 * math.pi * i / 12
+        cx, cz = 8.2 * math.sin(a), 7 * math.cos(a)
         tex = BLUE if i % 2 else YELLOW
-        along = ("z", -22.5, [cx, 0, cz]) if abs(math.sin(a)) > 0.7 else ("x", 22.5 if math.cos(a) > 0 else -22.5, [cx, 0, cz])
         if abs(math.sin(a)) > 0.7:
-            along = ("z", -22.5 if cx > 0 else 22.5, [cx, 0, cz])
-        m.append(box((cx - 1.6, -5, cz - 1.6), (cx + 1.6, 0.5, cz + 1.6), tex, along))
-        m.append(box((cx - 0.9, -8, cz - 0.9), (cx + 0.9, -5, cz + 0.9), tex, along))
-        m.append(box((cx - 0.6, -9.3, cz - 0.6), (cx + 0.6, -8, cz + 0.6), GOLD, along))
+            lean = ("z", -22.5 if cx > 0 else 22.5, [cx, 0.5, cz])
+        else:
+            lean = ("x", 22.5 if cz > 0 else -22.5, [cx, 0.5, cz])
+        m += lappet(cx, cz, tex, 9, 1.7, lean)
+    for i in range(8):
+        a = 2 * math.pi * (i + 0.5) / 8
+        cx, cz = 7.2 * math.sin(a), 6.2 * math.cos(a)
+        tex = YELLOW if i % 2 else BLUE
+        if abs(math.sin(a)) > 0.7:
+            lean = ("z", -12 if cx > 0 else 12, [cx, 0.5, cz])
+        else:
+            lean = ("x", 12 if cz > 0 else -12, [cx, 0.5, cz])
+        m += lappet(cx, cz, tex, 6.5, 1.5, lean)
     return m
 
 
 def leg():
-    """A short grey boot with a toe cap and a strap."""
+    """A grey boot: the shaft with a turned-down top, a strap and buckle, a heel, a sole and a plated toe cap."""
     m = []
-    m.append(box((-3, -6, -3), (3, 0.5, 3), BOOT))
-    m.append(box((-3.3, -10, -3.3), (3.3, -6, 4), BOOT))
-    m.append(box((-3, -10, 4), (3, -7.5, 5), STEEL_DARK))
-    m.append(box((-3.5, -5, -3.5), (3.5, -4, 3.5), BELT))
+    m += cyl("y", 0, 0, 3.0, -6, 0.6, BOOT)
+    m += cyl("y", 0, 0, 3.4, -1.6, 0.6, STEEL_DARK)
+    m.append(box((-3.3, -10, -3.3), (3.3, -6, 3.8), BOOT))
+    m.append(box((-3.5, -8.4, -3.5), (3.5, -7.4, 4), BELT))
+    m.append(box((-0.6, -8.6, 4), (0.6, -7.2, 4.4), STEEL))
+    m.append(box((-3.1, -10, 3.8), (3.1, -7.8, 5.4), STEEL))
+    m.append(box((-2.6, -7.8, 4.6), (2.6, -7.2, 5.2), STEEL_DARK))
+    m.append(box((-3.5, -10.8, -3.6), (3.5, -10, 5.6), BOOT))
+    m.append(box((-3.1, -10, -3.6), (3.1, -8.6, -2.6), STEEL_DARK))
     return m
 
 
@@ -197,7 +287,7 @@ def posed(pose=None):
 # ------------------------------------------------------------------ animation curves (ticks)
 
 # The rest pose: the sword hand up before the chest, the blade rising back over the shoulder, as in the picture.
-REST = {"right_arm": (-60, 0, -15, 0, 0, 0), "sword": (20, 0, 0, 0, 0, 0), "left_arm": (0, 0, 8, 0, 0, 0)}
+REST = {"right_arm": (-60, 0, -18, 0, 0, 0), "sword": (24, 0, 40, 0, 0, 0), "left_arm": (0, 0, 8, 0, 0, 0)}
 
 
 def with_rest(pose):
@@ -239,20 +329,26 @@ def attack_pose(t):
     def smooth(u):
         u = max(0.0, min(1.0, u))
         return u * u * (3 - 2 * u)
+    # The sword's own turn is set against the arm's, so the blade cocks back over the head on the wind-up (40 degrees
+    # past upright), then comes round to point down the arm at the end of the cut.
     if t < 8:                      # wind up: the arm goes up and back, the body turns away
         u = smooth(t / 8)
-        arm, twist, lean, sword = -60 - 110 * u, 25 * u, -8 * u, 20 - 30 * u
+        arm, twist, lean = -60 - 110 * u, 25 * u, -8 * u
+        sword = -arm - 40
     elif t < 12:                   # the cut: fast, the body turning into it
         u = smooth((t - 8) / 4)
-        arm, twist, lean, sword = -170 + 190 * u, 25 - 50 * u, -8 + 22 * u, -10 + 5 * u
+        arm, twist, lean = -170 + 190 * u, 25 - 50 * u, -8 + 22 * u
+        sword = -arm - 40 + 55 * u
     elif t < 18:                   # follow through and hold
         u = (t - 12) / 6
-        arm, twist, lean, sword = 20 + 4 * math.sin(u * 6) * (1 - u), -25 + 5 * u, 14 - 4 * u, -5
+        arm, twist, lean = 20 + 4 * math.sin(u * 6) * (1 - u), -25 + 5 * u, 14 - 4 * u
+        sword = -arm + 15
     else:                          # back to the shoulder
         u = smooth((t - 18) / (ATTACK_TICKS - 18))
-        arm, twist, lean, sword = 20 - 80 * u, -20 + 20 * u, 10 - 10 * u, -5 + 25 * u
+        arm, twist, lean = 20 - 80 * u, -20 + 20 * u, 10 - 10 * u
+        sword = -arm + 15 - 51 * u
     return {"body": (lean, twist, 0, 0, 0, 0), "head": (-lean / 2, -twist / 2, 0, 0, 0, 0),
-            "right_arm": (arm, 0, -12, 0, 0, 0), "sword": (sword, 0, 0, 0, 0, 0),
+            "right_arm": (arm, 0, -18, 0, 0, 0), "sword": (sword, 0, 40 * (1 - min(1.0, max(0.0, (t - 2) / 6)) * (1 if t < 18 else max(0.0, 1 - (t - 18) / 12))), 0, 0, 0),
             "left_arm": (-arm / 4, 0, 10, 0, 0, 0), "skirt": (lean / 2, 0, 0, 0, 0, 0),
             "left_leg": (-lean / 2, 0, 0, 0, 0, 0), "right_leg": (lean / 2, 0, 0, 0, 0, 0)}
 
