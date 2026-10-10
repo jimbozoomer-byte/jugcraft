@@ -48,6 +48,8 @@ The [starter gas/acid construction and balance record](features/industrial-start
 | Storage and transport | Battery Box (400k JE), Copper Cable (256 JE/t) |
 | Processing | Electric Furnace, Crusher (ore doubling), Arc Furnace multiblock, Alloy Smelter |
 
+The owner-requested [industrial machine art specification](features/industrial-machine-models-and-textures.md), dated 10 October 2026, covers unbuilt workshop, agriculture, refining, chemistry, precision, storage and recovery forms. Its 79 detailed machine/module briefs and 23 larger variants use proposed **width × depth × height envelopes from 2 to 6 blocks per axis**, including several 6×6×6 plants. Existing runtime bodies remain distinct from their proposed future forms; later roadmap candidates are clearly labeled. These are modeling/texture briefs, not implemented blocks.
+
 ## Design rules for new machines
 1. **Each machine is a consumer for something that already exists.** Name the materials it uses, and what uses its output.
 2. **Shared systems come before the machines that need them.** Fluids and item logistics each get one interface, like the energy API, instead of every machine inventing its own.

@@ -73,7 +73,7 @@ Gold stays only at the collar, as drawn.
   - the `humanoid` layer is left out when the helmet, chestplate and boots all have one;
   - the `humanoid_leggings` layer when the leggings have one.
 
-  Bronze and steel now have every piece in 3D, so no layer is left and `gear.py` writes no `equipment/bronze.json` or `steel.json` at all. 26.3 cannot read an empty layer map: it logs "Map must have contents" at start-up, as it does for the costumes' empty assets ([more-halloween.md](more-halloween.md)). A missing asset is read as one with no layers, silently.
+  Bronze and steel now have every piece in 3D, so no layer is left and `gear.py` writes no `equipment/bronze.json` or `steel.json` at all. 26.3 cannot read an empty layer map: it logs "Map must have contents" at start-up, as it did for the costumes' empty assets before their 10 October cleanup ([more-halloween.md](more-halloween.md)). A missing asset is read as one with no layers, silently.
   - What puts a piece in the wearer's render state is the item's equippable component, whose asset ID (`jugcraft:bronze`, `jugcraft:steel`) is unchanged, not the asset file. The vanilla armor layer then finds no asset and draws nothing under the 3D pieces.
 
 ### The toolkit

@@ -645,7 +645,7 @@ Three more of the owner's guns, past steel, that run on charge from the energy s
 - **Only the guns draw on it.** It is not the portable battery `docs/MACHINE_ROADMAP.md` plans.
 
 **Crafting** (a crafting table; the recipes need both the guns and the machines switches, since without the Charging Station a cell never fills):
-- **Energy Cell:** two from a copper cable over two glass panes either side of a redstone, over a brass ingot.
+- **Energy Cell:** one from a copper cable over two glass panes either side of a redstone, over a brass ingot.
 - **Beam Pistol:** two steel ingots and an amethyst shard (its lens) over an advanced circuit and a brass ingot.
 - **Stormlock Rifle:** two steel ingots, a lightning rod (its forked emitter), copper cable (its coil), an advanced circuit, a brass ingot and planks (its stock).
 - **Linesman:** a lightning rod, two steel ingots, two copper cables, an advanced circuit and two brass ingots.
