@@ -1,6 +1,6 @@
 # The Spindle Loft, and the Cursed Spindle
 
-Status: implemented in source; CI has not built it yet (below). Part 1 of boss 2 in the [Witching Season plan](witching-season.md#boss-2-madame-tatterlace-in-the-spindle-loft): the Spindle Loft, a second lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the ritual that opens it. Madame Tatterlace and her loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest the plan asks for is still to do.
+Status: implemented in source; CI builds it and its game tests and client game test pass (below). Part 1 of boss 2 in the [Witching Season plan](witching-season.md#boss-2-madame-tatterlace-in-the-spindle-loft): the Spindle Loft, a second lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the ritual that opens it. Madame Tatterlace and her loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest the plan asks for is still to do.
 Proposal issue: none. The owner approved the Witching Season plan on 4 October 2026, and on 10 October 2026 asked: "Do the bosses".
 
 Target milestone and tier: Specialization tier (dungeon expeditions), as the plan sets it. The ritual takes Discovery-tier things: a Spinning Wheel, gold, an amethyst shard, spider eyes, string and a stick.
@@ -105,7 +105,25 @@ Nothing is renamed but one language key: `message.jugcraft.lair.enter` became on
 
 ## Verification
 
-CI (GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)): not run yet.
+![The Spinning Wheel at midnight, spinning wild, glyphs swirling into it](../images/ingame_spindle_wheel.jpg)
+![The view from the arrival on the pincushion's leaf: the tape running down to the doily between the spools, the shears beyond](../images/ingame_spindle_arrival.jpg)
+![The doily from above: its rings of lace between the four spools, the tape reaching its south edge](../images/ingame_spindle_doily.jpg)
+![The green spool from the doily, its own thread running up to the roof, the white silk over the doily and the shears](../images/ingame_spindle_spools.jpg)
+![The needle's eye beside the arrival, filled with Grey Mist](../images/ingame_spindle_needle.jpg)
+![The brass thimble lying across the doily's east edge, open to the arena, between the blue and red spools](../images/ingame_spindle_thimble.jpg)
+![The open blades of the shears rising beyond the doily's north edge, crossed at their pivot](../images/ingame_spindle_shears.jpg)
+![The pincushion on its white spool from the doily: its pins' glass heads](../images/ingame_spindle_cushion.jpg)
+
+*The client game test's pictures (CI, commit `7047a5c`): the wheel spinning wild at midnight, then in the loft the arrival, the doily from above, a spool and its threads, the needle's eye, the thimble, the shears and the cushion. The test client renders at 480x270.*
+
+CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `a81da12` | Build, data audit, game tests, client game tests | **Did not compile:** 26.3's `BlockBehaviour.Properties.isViewBlocking` takes no lambda of that form |
+| `478a022` | The same, without that override (the see-through blocks need none) | The mod compiled; **the game tests did not:** 26.3 has no `Items.WHITE_WOOL` |
+| `6be442d` | The same, looking white wool up by its ID | All 1182 required game tests pass. **`SpindleLoftClientGameTests` failed at its last step:** the wheel still spun wild after the loft closed. Its chunk had unloaded while the player was inside, so the close hook passed it by |
+| `7047a5c` | Such a wheel calms once its chunk is loaded again; the test waits for that | **All pass:** all 1182 required game tests and `SpindleLoftClientGameTests`. The pictures above are from this commit |
 
 Run locally:
 
