@@ -36,7 +36,7 @@ SHOULDERS = {"left_arm": (5.5, 26.5, 0), "right_arm": (-5.5, 26.5, 0)}
 LEGS = {"left_leg": (2, 14, 0), "right_leg": (-2, 14, 0)}
 TAIL = (0, 15, -2.5)
 HAND = (0, -15.5, 0)
-REST = {"left_arm": (-12, 0, 10), "right_arm": (-30, 0, -32), "staff": (30, 0, 32), "head": (3, -6, 0),
+REST = {"left_arm": (-12, 0, 10), "right_arm": (-30, 0, -32), "staff": (30, 0, 32), "head": (10, -6, 0),
         "tail": (0, 0, 0)}
 
 
@@ -53,41 +53,55 @@ def _turned(elements, rotation):
 # ------------------------------------------------------------------ parts (each from its joint)
 
 def head():
-    """The furred head, the cream muzzle and brow, eyes, nose, mouth, ears, cheek ruffs, crown tuft, the circlet and
-    the halo."""
+    """A monkey's head: a wide cream face plate with a heavy brow ridge, deep-set eyes with pale rims, a broad muzzle
+    with nostrils and a mouth line; big round ears with cream insides; a fur ruff round the head and a crown tuft;
+    the jewelled circlet; and an octagonal gold halo floating behind."""
     m = []
     m.append(box((-4, 0, -4), (4, 8, 4), FUR))
-    m.append(box((-3.2, 1.2, 4), (3.2, 5.8, 4.5), CREAM))
-    m.append(box((-2.4, 0.4, 4.5), (2.4, 3.4, 6.2), CREAM))
-    m.append(box((-1.2, 2.6, 6.2), (1.2, 3.4, 6.5), FUR_DARK))
-    m.append(box((-1.4, 1.2, 6.2), (1.4, 1.5, 6.4), FUR_DARK))
-    m.append(box((-3.4, 5.4, 4), (3.4, 6.2, 4.6), FUR_DARK))
-    for x0, x1 in ((-2.9, -1.3), (1.3, 2.9)):
-        m.append(box((x0, 4.3, 4.5), (x1, 5.1, 4.7), BLACK))
-        m.append(box((x0 + 0.4, 4.6, 4.7), (x0 + 0.9, 5.0, 4.85), CREAM))
-    for x in (-5.3, 4.3):
-        m.append(box((x, 3, -1.8), (x + 1, 6.4, 1.2), FUR))
-        m.append(box((x + (0.3 if x > 0 else 0.3), 3.6, -1.2), (x + 0.7, 5.8, 0.6), CREAM))
-    for x0, x1 in ((-5.6, -4), (4, 5.6)):
-        m.append(box((x0, 0.5, 1.5), (x1, 4, 4.2), FUR))
-        m.append(box((x0 - (0.4 if x0 < 0 else 0), -0.5, 2), (x1 + (0.4 if x0 > 0 else 0), 1, 3.8), FUR_DARK))
-    m.append(box((-1.5, 8, -2), (1.5, 10, 0), FUR))
-    m.append(box((-0.8, 10, -1.5), (0.8, 11.5, -0.5), FUR_DARK))
+    # The face plate and brow ridge.
+    m.append(box((-3.6, 0.8, 4), (3.6, 6.2, 4.6), CREAM))
+    m.append(box((-3.8, 5.4, 4.2), (3.8, 6.6, 5.1), FUR))
+    m.append(box((-2.0, 0.4, 4.6), (2.0, 3.6, 6.4), CREAM))
+    m.append(box((-2.4, 0.4, 4.6), (2.4, 1.6, 6.0), CREAM))
+    for x in (-1.1, 0.5):
+        m.append(box((x, 2.6, 6.4), (x + 0.6, 3.1, 6.6), FUR_DARK))
+    m.append(box((-1.4, 1.3, 6.4), (1.4, 1.6, 6.55), FUR_DARK))
+    # Eyes: dark sockets with amber eyes and a glint, under the brow.
+    for x0, x1 in ((-3.1, -1.1), (1.1, 3.1)):
+        m.append(box((x0, 3.9, 4.6), (x1, 5.3, 4.75), FUR_DARK))
+        m.append(box((x0 + 0.4, 4.2, 4.75), (x1 - 0.4, 5.0, 4.9), GOLD_DARK))
+        m.append(box((x0 + 0.5, 4.6, 4.9), (x0 + 0.9, 4.9, 5.0), CREAM))
+    # Big round ears, cream inside, standing out from the head.
+    for x in (-6.4, 4.4):
+        m += cyl("x", 4.4, -0.8, 2.3, x, x + 2, FUR)
+        m += cyl("x", 4.4, -0.8, 1.5, x + (1.3 if x > 0 else 0), x + (2.1 if x > 0 else 0.8), CREAM)
+    # The fur ruff: tufts round the jaw and cheeks, and the crown tuft.
+    for x0, x1, y0, y1, z0, z1 in ((-5.6, -4, 0.2, 4.6, 1, 4.4), (4, 5.6, 0.2, 4.6, 1, 4.4), (-4.6, 4.6, -1.6, 0.6, 1.5, 4.8),
+                                   (-5.2, -3.4, -0.8, 1.2, -2, 1.6), (3.4, 5.2, -0.8, 1.2, -2, 1.6), (-4.4, 4.4, -1.2, 0.3, -4.4, -1.4)):
+        m.append(box((x0, y0, z0), (x1, y1, z1), FUR_DARK))
+    m.append(box((-2, 8, -3), (2, 10, 0.5), FUR))
+    m.append(box((-1, 10, -2.5), (1, 11.8, -1), FUR_DARK))
+    m.append(box((0.4, 11.4, -2.4), (1.4, 12.6, -1.4), FUR_DARK, ("z", -22.5, [0.9, 11.4, -1.9])))
     # The circlet: a gold band round the brow with a red jewel and two scrolled ends.
-    m.append(box((-4.3, 5.6, -4.3), (4.3, 6.9, 4.3), GOLD))
-    m.append(box((-4.5, 6.1, -4.5), (4.5, 6.5, 4.5), GOLD_DARK))
-    m.append(box((-1, 5.3, 4.3), (1, 7.3, 4.9), GOLD))
-    m.append(box((-0.5, 5.8, 4.9), (0.5, 6.8, 5.3), RED))
-    for x in (-3.6, 2.6):
-        m.append(box((x, 6.9, 3.2), (x + 1, 8.2, 4.4), GOLD))
-    # The halo: a thin gold ring floating behind the head, eight bars turned about its centre, with four small studs.
+    m.append(box((-4.3, 6.4, -4.3), (4.3, 7.6, 4.3), GOLD))
+    m.append(box((-4.5, 6.8, -4.5), (4.5, 7.2, 4.5), GOLD_DARK))
+    m.append(box((-1.1, 6.0, 4.3), (1.1, 8.2, 5.0), GOLD))
+    m.append(box((-0.55, 6.5, 5.0), (0.55, 7.7, 5.4), RED))
+    for x in (-3.8, 2.8):
+        m.append(box((x, 7.6, 3.2), (x + 1, 9, 4.4), GOLD))
+    # The halo: an octagonal gold ring floating behind the head, eight short bars, with studs at the points.
+    r = 8.4
+    half = r * math.tan(math.radians(22.5))
     for angle in (0, 45):
-        m.append(box((-7.6, 11.2, -7.0), (7.6, 12.4, -6.4), GOLD, ("z", angle, [0, 5, -6.7])))
-        m.append(box((-7.6, -2.4, -7.0), (7.6, -1.2, -6.4), GOLD, ("z", angle, [0, 5, -6.7])))
-        m.append(box((-7.6, -1.2, -7.0), (-6.4, 11.2, -6.4), GOLD, ("z", angle, [0, 5, -6.7])))
-        m.append(box((6.4, -1.2, -7.0), (7.6, 11.2, -6.4), GOLD, ("z", angle, [0, 5, -6.7])))
-    for x, y in ((0, 12.9), (0, -2.9), (-7.9, 5), (7.9, 5)):
-        m.append(box((x - 0.6, y - 0.6, -7.1), (x + 0.6, y + 0.6, -6.3), GOLD_DARK))
+        turn = ("z", angle, [0, 5, -6.7])
+        m.append(box((-half, 5 + r - 0.6, -7.0), (half, 5 + r + 0.6, -6.4), GOLD, turn))
+        m.append(box((-half, 5 - r - 0.6, -7.0), (half, 5 - r + 0.6, -6.4), GOLD, turn))
+        m.append(box((-r - 0.6, 5 - half, -7.0), (-r + 0.6, 5 + half, -6.4), GOLD, turn))
+        m.append(box((r - 0.6, 5 - half, -7.0), (r + 0.6, 5 + half, -6.4), GOLD, turn))
+    for angle in (0, 45):
+        turn = ("z", angle, [0, 5, -6.7])
+        m.append(box((-0.8, 5 + r - 0.8, -7.15), (0.8, 5 + r + 0.8, -6.25), GOLD_DARK, turn))
+        m.append(box((-0.8, 5 - r - 0.8, -7.15), (0.8, 5 - r + 0.8, -6.25), GOLD_DARK, turn))
     return m
 
 
@@ -111,6 +125,14 @@ def body():
     m.append(box((5, -2, -0.5), (6, 2.5, 0.8), SAFFRON_DARK, ("x", -22.5, [5.5, 2.5, 0])))
     m.append(box((-1.4, 2, 2.8), (1.4, 4.4, 3.4), GOLD))
     m.append(box((-0.8, 0.2, 3.0), (0.8, 2, 3.5), JADE))
+    # A tiger-skin kilt over the trousers, in striped panels round the hips, and gold anklets on the legs below.
+    for i in range(10):
+        a = 2 * math.pi * (i + 0.5) / 10
+        cx, cz = 5.0 * math.sin(a), 3.2 * math.cos(a)
+        tex = SAFFRON_DARK if i % 2 else BLACK
+        lean = ("z", -12 if cx > 0.5 else 12 if cx < -0.5 else 0, [cx, 0.5, cz]) if abs(math.sin(a)) > 0.7 \
+            else ("x", 12 if cz > 0 else -12, [cx, 0.5, cz])
+        m.append(box((cx - 1.1, -5 + 0.8 * (i % 2), cz - 0.9), (cx + 1.1, 0.5, cz + 0.9), tex, lean))
     # Prayer beads across the chest from the left shoulder.
     for i in range(8):
         a = math.pi * (i + 0.5) / 8
@@ -161,6 +183,7 @@ def leg():
     m = []
     m.append(box((-2.5, -7, -2.5), (2.5, 0.5, 2.5), SAFFRON))
     m.append(box((-2.7, -7.5, -2.7), (2.7, -6.2, 2.7), WRAP))
+    m.append(box((-2.3, -11.8, -2.3), (2.3, -10.6, 2.3), GOLD))
     m.append(box((-2.1, -12.5, -2.1), (2.1, -7.5, 2.1), FUR))
     m.append(box((-2.4, -14, -2.6), (2.4, -12.5, 2.6), FUR))
     for i, x in enumerate((-1.6, -0.5, 0.6, 1.7)):
