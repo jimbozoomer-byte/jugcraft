@@ -91,10 +91,6 @@ public class LairClientGameTests implements FabricClientGameTest {
 			// Through the gate.
 			server.runOnServer(minecraft -> Lairs.enter(player(minecraft), Lairs.open(ACRE).getFirst()));
 			context.waitTicks(40);
-			context.runOnClient(client -> {
-				client.player.getAbilities().flying = true;
-				client.player.onUpdateAbilities();
-			});
 			singleplayer.getConnection().waitForChunksRender();
 			BlockPos o = ACRE.origin(0);
 			String acre = ACRE.dimension.identifier().toString();
@@ -102,7 +98,7 @@ public class LairClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, acre, o.getX() + 32.0, o.getY() + 42, o.getZ() + 63.5, 180, 40, "jugcraft_hollow_acre_arena");
 			shoot(context, singleplayer, acre, o.getX() + 31.5, o.getY() + 19, o.getZ() + 27.5, 180, 6, "jugcraft_hollow_acre_chapel");
 			shoot(context, singleplayer, acre, o.getX() + 32.0, o.getY() + 18, o.getZ() + 63.5, 0, 4, "jugcraft_hollow_acre_gate");
-			shoot(context, singleplayer, acre, o.getX() + 80.0, o.getY() + 22, o.getZ() + 70.0, 121, 12, "jugcraft_hollow_acre_island");
+			shoot(context, singleplayer, acre, o.getX() + 82.0, o.getY() + 12, o.getZ() + 75.0, 126, 2, "jugcraft_hollow_acre_island");
 			server.runOnServer(minecraft -> Lairs.reset());
 		}
 	}
@@ -331,6 +327,12 @@ public class LairClientGameTests implements FabricClientGameTest {
 	private static void shoot(ClientGameTestContext context, TestSingleplayerContext singleplayer, String dimension, double x, double y,
 			double z, int yaw, int pitch, String name) {
 		TestServerContext server = singleplayer.getServer();
+		server.runOnServer(minecraft -> {
+			// Flying, so the camera stays where it is put (set on the server, which tells the client).
+			ServerPlayer player = player(minecraft);
+			player.getAbilities().flying = true;
+			player.onUpdateAbilities();
+		});
 		server.runCommand(String.format(Locale.ROOT, "execute in %s run tp @a %.1f %.1f %.1f %d %d", dimension, x, y, z, yaw, pitch));
 		context.waitTicks(30);
 		singleplayer.getConnection().waitForChunksRender();
