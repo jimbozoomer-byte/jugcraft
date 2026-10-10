@@ -27,6 +27,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -827,7 +828,7 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 	/** Pushes {@code player} along {@code way} (flat) by {@code strength}, and up by {@code up}, and tells their client. */
 	static void push(ServerPlayer player, Vec3 way, double strength, double up) {
 		player.push(way.x * strength, up, way.z * strength);
-		player.hurtMarked = true;
+		player.connection.send(new ClientboundSetEntityMotionPacket(player));
 	}
 
 	/** Where his slam comes down: where the foe stood, kept within his leash. */

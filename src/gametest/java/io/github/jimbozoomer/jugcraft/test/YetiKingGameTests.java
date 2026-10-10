@@ -322,7 +322,13 @@ public class YetiKingGameTests {
 		floor(level, origin, 32, 34, 42, 39);
 		ServerPlayer struck = player(helper, king, 0.5, 0.5);
 		ServerPlayer under = player(helper, king, -4.5, 0.5);
+		// They wait out their loading in creative, where he pays them no heed; once they can be struck he may wake, but
+		// waking he strikes no one until the icicle has long since landed.
+		struck.setGameMode(GameType.CREATIVE);
+		under.setGameMode(GameType.CREATIVE);
 		helper.runAfterDelay(LOADING_TICKS, () -> {
+			struck.setGameMode(GameType.SURVIVAL);
+			under.setGameMode(GameType.SURVIVAL);
 			float before = struck.getHealth();
 			GlacialSpikeEntity.burst(level, king, struck.position());
 			boolean thrown = struck.getHealth() < before && struck.getDeltaMovement().y > 0.0;
