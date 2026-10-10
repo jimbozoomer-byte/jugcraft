@@ -13,7 +13,7 @@ Status:
 - **Slice 8B** (the service arms: the Sentry Pistol, Garrison Rifle and Breacher; [below](#slice-8b-the-service-arms)): implemented on `claude/guns-service`, stacked on slice 8, awaiting review.
 - **Slice 8C** (the heavy weapons: the Trench Lobber, Thresher and Stoker; [below](#slice-8c-the-heavy-weapons)): implemented on `claude/guns-heavy`, on the integration branch that holds slices 7b to 8B, awaiting review.
 - **Slice 8D** (the energy weapons: the Beam Pistol, Stormlock Rifle and Linesman, and the Energy Cell they run on; [below](#slice-8d-the-energy-weapons)): implemented on `claude/guns-energy`, stacked on slice 8C, awaiting review.
-- **Slice 9A** (the marksman rifles: the Picket Rifle, Ranger Rifle and Kestrel Rifle; [below](#slice-9a-the-marksman-rifles)): implemented on `claude/guns-marksman`, stacked on slice 8D, awaiting review.
+- **Slice 9A** (the marksman rifles: the Picket Rifle, Ranger Rifle and Kestrel Rifle; [below](#slice-9a-the-marksman-rifles)): implemented on `claude/guns-marksman` (#285), stacked on slice 8D, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -1693,6 +1693,18 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - `marksmanRiflesLandAndLoad`: a shot from each lands its damage on a pig and spends a round; the Ranger's magazine reload loads the round it lacked after its reload time and not before; the empty Kestrel is loaded with a clip of eight from the inventory after its own.
   - "Every gun registered" now counts twenty-seven guns.
   - `GunsClientGameTests` takes the three through every gun's steps: drawn, aimed, fired at the husk, reloaded, inspected, fitted with each attachment set it takes, and held in third person. Screenshots `jugcraft_guns_picket_rifle_*`, `jugcraft_guns_ranger_rifle_*` and `jugcraft_guns_kestrel_rifle_*`.
+- **Slice 9A in CI** ([run 38031106724](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38031106724), on 0e7ea642a): every check passed.
+  - `mod` and `optional integrations absent`: the build and the server game tests passed. There are 1188 now, 1186 before; the two `MarksmanGunsGameTests` are the new ones.
+  - `client` (the guns' shard): `GunsClientGameTests` passed. Its log:
+    - **Picket Rifle:** aimed, the view narrowed to 0.7; fired, 6 flash frames, the husk 784.8 → 776.8 and rounds 10 → 9; reloaded 10, 31 Rifle Rounds left; 3 casings thrown.
+    - **Ranger Rifle:** aimed, 0.75; fired, 6 flash frames, the husk 776.8 → 766.8 and rounds 10 → 9; reloaded 10, 31 left; 3 casings.
+    - **Kestrel Rifle:** aimed, 0.7; fired, 6 flash frames, the husk 766.8 → 757.8 and rounds 8 → 7; reloaded 8, 31 left; no casings, as its animations cue none.
+  - **Screenshots:**
+    - Held, each rifle sits at the lower right in the owner's textures, the Ranger's handle along the right of its top cover.
+    - Aimed, the Picket's and Kestrel's peep sights and the Ranger's rear sight sit on the crosshair over the husk, the Ranger's handle up and to the right of it. As on the other rifles, the gun's back and the right fist fill the lower middle of the view.
+    - Mid-reload, each rifle is rolled toward the left hand as the owner's animations show it, the Ranger's handle lifted at the top of the view. Each is inspected as the owner's animations show it; partway through, the right sleeve swings near the camera at the lower right.
+    - Fitted, the counters read 1 / 15 with the Extended Magazine on the Picket and the Ranger, and the fitted rifles keep their sights on the crosshair aimed.
+    - Seen from outside, each is raised along the look, and its flash shows at the muzzle when it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
