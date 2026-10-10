@@ -22,10 +22,11 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 /**
- * The lairs' registrations (docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md):
- * the lair-only blocks (unbreakable, no items, no drops), the Mourning Wreath and the Death Knell of the Last Rites, the
- * Cursed Spindle, the Frost Horn, the Mist Gate, and the lairs' events, rules, rituals and commands. Registered whatever
- * the feature switch says, so saved worlds keep them; the switch ({@value #FEATURE}) stops the rituals.
+ * The lairs' registrations (docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
+ * docs/features/cinder-kiln.md): the lair-only blocks (unbreakable, no items, no drops), the Mourning Wreath and the Death
+ * Knell of the Last Rites, the Cursed Spindle, the Frost Horn, the Kiln Seal, the Mist Gate, and the lairs' events, rules,
+ * rituals and commands. Registered whatever the feature switch says, so saved worlds keep them; the switch
+ * ({@value #FEATURE}) stops the rituals.
  */
 public final class JugcraftLairs {
 	public static final String FEATURE = "agriculture";
@@ -55,11 +56,17 @@ public final class JugcraftLairs {
 	public static Block GIANT_ICICLE;
 	public static Block MAMMOTH_TUSK;
 	public static Block FROZEN_HOARD;
+	public static Block KILN_BRICK;
+	public static Block CRACKED_BASALT;
+	public static Block MOLTEN_SLAG;
+	public static Block TROUGH_STONE;
+	public static Block SLUICE_GATE;
 	public static Block MOURNING_WREATH;
 	public static Item MOURNING_WREATH_ITEM;
 	public static Item DEATH_KNELL;
 	public static Item CURSED_SPINDLE;
 	public static Item FROST_HORN;
+	public static Item KILN_SEAL;
 	public static EntityType<MistGateEntity> MIST_GATE;
 
 	private JugcraftLairs() {
@@ -94,6 +101,12 @@ public final class JugcraftLairs {
 		GIANT_ICICLE = fixture("giant_icicle", GiantIcicleBlock::new, MapColor.ICE, SoundType.GLASS, 0, Fit.SEE_THROUGH);
 		MAMMOTH_TUSK = fixture("mammoth_tusk", Block::new, MapColor.SAND, SoundType.BONE_BLOCK, 0, Fit.SOLID);
 		FROZEN_HOARD = fixture("frozen_hoard", Block::new, MapColor.ICE, SoundType.GLASS, 0, Fit.SOLID);
+		// The Cinder Kiln's (docs/features/cinder-kiln.md): the slag glows; the troughs and the sluice gates work.
+		KILN_BRICK = fixture("kiln_brick", Block::new, MapColor.TERRACOTTA_YELLOW, SoundType.STONE, 0, Fit.SOLID);
+		CRACKED_BASALT = fixture("cracked_basalt", Block::new, MapColor.COLOR_BLACK, SoundType.DEEPSLATE, 0, Fit.SOLID);
+		MOLTEN_SLAG = fixture("molten_slag", MoltenSlagBlock::new, MapColor.COLOR_ORANGE, SoundType.DEEPSLATE, 10, Fit.SOLID);
+		TROUGH_STONE = fixture("trough_stone", TroughStoneBlock::new, MapColor.STONE, SoundType.STONE, 0, Fit.SOLID);
+		SLUICE_GATE = fixture("sluice_gate", SluiceGateBlock::new, MapColor.METAL, SoundType.METAL, 0, Fit.SEE_THROUGH);
 
 		ResourceKey<Block> wreathKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("mourning_wreath"));
 		MOURNING_WREATH = Registry.register(BuiltInRegistries.BLOCK, wreathKey, new MourningWreathBlock(BlockBehaviour.Properties.of()
@@ -109,6 +122,8 @@ public final class JugcraftLairs {
 				.setId(spindleKey)));
 		ResourceKey<Item> hornKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("frost_horn"));
 		FROST_HORN = Registry.register(BuiltInRegistries.ITEM, hornKey, new FrostHornItem(new Item.Properties().stacksTo(16).setId(hornKey)));
+		ResourceKey<Item> sealKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("kiln_seal"));
+		KILN_SEAL = Registry.register(BuiltInRegistries.ITEM, sealKey, new KilnSealItem(new Item.Properties().stacksTo(16).setId(sealKey)));
 
 		ResourceKey<EntityType<?>> gateKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("mist_gate"));
 		MIST_GATE = Registry.register(BuiltInRegistries.ENTITY_TYPE, gateKey, EntityType.Builder.<MistGateEntity>of(MistGateEntity::new,
@@ -124,6 +139,7 @@ public final class JugcraftLairs {
 			output.accept(DEATH_KNELL);
 			output.accept(CURSED_SPINDLE);
 			output.accept(FROST_HORN);
+			output.accept(KILN_SEAL);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(MOURNING_WREATH_ITEM));
 	}

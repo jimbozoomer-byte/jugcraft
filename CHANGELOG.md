@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The Cinder Kiln and the Kiln Seal (boss 4, the Cinder Tyrant, part 1)
+- **The Cinder Kiln,** a fourth lair: a kiln under a volcano, a dome of kiln brick ribbed with blackstone over a bowl of cracked basalt 44 blocks across, its vent open to a smoky sky. A forge mouth in the north wall pours molten slag over its lip, down a heat channel to a crucible three blocks deep where the Cinder Tyrant will wait. The slag burns whoever stands in it (Fire Resistance stops it).
+- **Three sluice gates** in the walls, the kiln's working fixture: turn any gate's wheel and its trough floods for 10 seconds, then drains while the gate fills again for 20. A flooded trough puts out the burning. Four raised shelves round the bowl stay out of the slag's reach. You arrive on a ledge in the south wall and walk down a curving stair with no step over half a block; the Grey Mist home hangs behind the ledge.
+- **The Kiln Seal** (four obsidian, a magma block, two blaze powder, two gold) opens it: press it into a magma block in the Nether, or in the Volcano or the Cinder Barrens, at any hour. The magma cracks open into a vent of sparks and smoke that others can follow through for a minute. Refused, it says why and is kept. The Tyrant himself and his loot are part 2. Record: [cinder-kiln.md](docs/features/cinder-kiln.md).
+- **CI: the client tests share five jobs instead of four.** With the kiln's client test the estimate for the busiest of four jobs passed the 25 minutes the sharing check allows; with five it is about 20 a job ([docs/TESTING.md](docs/TESTING.md)).
+
 ### Unmerged: The boss playbook (how a boss is built)
 - **[docs/branches/BOSS_PLAYBOOK.md](docs/branches/BOSS_PLAYBOOK.md)** writes down, at the owner's request, the order the Yeti King was built in, as the plan for building every boss.
 - Each boss is two pull requests: its lair and the summoning that opens it, then the boss, his adds and his loot. The steps run from the survey and the plan to the numbers, model, art, data, Java, audit, tests and record, then CI and the pictures. Each step names the files the Yeti King made at it.

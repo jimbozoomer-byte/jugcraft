@@ -24,6 +24,11 @@
     "jugcraft:glare_ice",
     "jugcraft:giant_icicle",
     "jugcraft:mammoth_tusk",
-    "jugcraft:frozen_hoard"
+    "jugcraft:frozen_hoard",
+    "jugcraft:kiln_brick",
+    "jugcraft:cracked_basalt",
+    "jugcraft:molten_slag",
+    "jugcraft:trough_stone",
+    "jugcraft:sluice_gate"
   ]
 }

@@ -8176,20 +8176,25 @@ def check_model_uvs():
 
 def check_lairs():
     """The lairs (tools/lairs.py, tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py,
-    docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md): the Java's numbers are
-    the tables' and the layouts', every lair has its dimension, dimension type, biome (no spawns), template and words for
-    coming in, the rituals' blocks, items, recipes and tags are there, the Spindle Loft's lace patterns and thread colours
-    and the Glacier Hall's icicle parts and snow heights are the tables', every server option has its default, every
-    message the Java sends has its words, and the Glacier Hall is laid out as its record says (check_glacier_hall)."""
+    tools/cinder_kiln.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
+    docs/features/cinder-kiln.md): the Java's numbers are the tables' and the layouts', every lair has its dimension,
+    dimension type, biome (no spawns), template and words for coming in, the rituals' blocks, items, recipes and tags are
+    there, the Spindle Loft's lace patterns and thread colours, the Glacier Hall's icicle parts and snow heights and the
+    Cinder Kiln's slag, troughs and sluices are the tables', every server option has its default, every message the Java
+    sends has its words, and the Glacier Hall and the Cinder Kiln are laid out as their records say (check_glacier_hall,
+    check_cinder_kiln)."""
+    import cinder_kiln as ck
     import glacier_hall as gh
     import hollow_acre as ha
+    import lair_data as ld
     import lairs as la
     import spindle_loft as sl
     folder = JAVA_ROOT / "lair"
     lair = (folder / "Lair.java").read_text(encoding="utf-8")
     # Each lair's line in Lair.java, from its layout: size, arrival and its facing, centre, bounds, floor and moon.
     for name, layout, centre, moon in (("hollow_acre", ha, ha.ISLAND["centre"], (ha.MOON, ha.MOON_RADIUS)),
-                                       ("spindle_loft", sl, sl.CENTRE, None), ("glacier_hall", gh, gh.CENTRE, None)):
+                                       ("spindle_loft", sl, sl.CENTRE, None), ("glacier_hall", gh, gh.CENTRE, None),
+                                       ("cinder_kiln", ck, ck.CENTRE, None)):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -8222,7 +8227,7 @@ def check_lairs():
     for block in la.LAIR_BLOCKS:
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
-    for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", la.GATE["entity"]):
+    for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -8241,6 +8246,36 @@ def check_lairs():
     ground = (load(DATA / MOD / "tags" / "block" / "frost_horn_ground.json") or {}).get("values", [])
     if sorted(ground) != sorted(la.HORN_GROUND):
         err(f"#jugcraft:frost_horn_ground is not tools/lairs.py HORN_GROUND: {ground}")
+    # The Cinder Kiln's: the Kiln Seal's rest and reach, the slag's burn, the sluices' timings, walks and parts, and the
+    # trough's height (its model's, tools/lair_data.py TROUGH_TOP).
+    seal = (folder / "KilnSealRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("VENT_RANGE", "vent_range")):
+        if not java_number(seal, name, la.SEAL[key]):
+            err(f"KilnSealRite.{name} is not tools/lairs.py SEAL {key} ({la.SEAL[key]})")
+    slag = (folder / "MoltenSlagBlock.java").read_text(encoding="utf-8")
+    for name, key in (("DAMAGE", "damage"), ("BURN_SECONDS", "burn_seconds")):
+        if not java_number(slag, name, la.SLAG[key]):
+            err(f"MoltenSlagBlock.{name} is not tools/lairs.py SLAG {key} ({la.SLAG[key]})")
+    sluice = (folder / "SluiceGateBlock.java").read_text(encoding="utf-8")
+    for name, key in (("FLOOD_TICKS", "flood_ticks"), ("REFILL_TICKS", "refill_ticks"), ("GATE_BLOCKS", "gate_blocks"),
+                      ("TROUGH_BLOCKS", "trough_blocks")):
+        if not java_number(sluice, name, la.SLUICE[key]):
+            err(f"SluiceGateBlock.{name} is not tools/lairs.py SLUICE {key} ({la.SLUICE[key]})")
+    for enum, table in (("Part", la.SLUICE_PARTS), ("Flow", la.SLUICE_FLOWS)):
+        found = re.search(rf"enum {enum} implements StringRepresentable \{{\s*([A-Z_, ]+);", sluice)
+        if not found or tuple(v.strip().lower() for v in found.group(1).split(",")) != table:
+            err(f"SluiceGateBlock.{enum} is not tools/lairs.py SLUICE_{enum.upper()}S {table}")
+    if not java_number((folder / "TroughStoneBlock.java").read_text(encoding="utf-8"), "TOP", ld.TROUGH_TOP):
+        err(f"TroughStoneBlock.TOP is not the trough's model height (tools/lair_data.py TROUGH_TOP, {ld.TROUGH_TOP})")
+    seal_ground = (load(DATA / MOD / "tags" / "block" / "kiln_seal_ground.json") or {}).get("values", [])
+    if sorted(seal_ground) != sorted(la.SEAL_GROUND):
+        err(f"#jugcraft:kiln_seal_ground is not tools/lairs.py SEAL_GROUND: {seal_ground}")
+    lands = (load(DATA / MOD / "tags" / "worldgen" / "biome" / "kiln_seal_lands.json") or {}).get("values", [])
+    if sorted(lands) != sorted(la.SEAL_LANDS):
+        err(f"#jugcraft:kiln_seal_lands is not tools/lairs.py SEAL_LANDS: {lands}")
+    for land in la.SEAL_LANDS:
+        if not (DATA / MOD / "worldgen" / "biome" / f"{land.split(':')[1]}.json").is_file():
+            err(f"tools/lairs.py SEAL_LANDS names {land}, which is no biome of Jugcraft's")
     spindle = (folder / "SpindleRite.java").read_text(encoding="utf-8")
     if f"int WAKING_TICKS = {la.SPINDLE['waking_ticks']};" not in spindle:
         err(f"SpindleRite.WAKING_TICKS is not tools/lairs.py SPINDLE waking_ticks ({la.SPINDLE['waking_ticks']})")
@@ -8289,6 +8324,7 @@ def check_lairs():
         if f"message.{MOD}.lair.enter.{name}" not in lang:
             err(f"No words for coming into the lair {name} (message.{MOD}.lair.enter.{name})")
     check_glacier_hall(gh)
+    check_cinder_kiln(ck)
 
 
 def check_glacier_hall(gh):
@@ -8345,6 +8381,181 @@ def check_glacier_hall(gh):
     melts = {"minecraft:ice", "minecraft:snow", "minecraft:frosted_ice"} & {state[0] for state in blocks.values()}
     if melts:
         err(f"The Glacier Hall has {sorted(melts)}, which its hidden lights would melt")
+
+
+def check_cinder_kiln(ck):
+    """The Cinder Kiln as tools/cinder_kiln.py builds it is the kiln its record describes (docs/features/cinder-kiln.md):
+    the arrival stands on the ledge with room overhead, and the Grey Mist hangs in its arch; no two neighbouring blocks of
+    the ledge and the stair differ by more than half a block, and a walk from the arrival reaches the bowl's middle, and
+    so back, with no step more than half a block and without treading the slag; the bowl is cracked basalt with nothing else in its floor but the troughs, the channel and the
+    crucible; the crucible is slag CRUCIBLE["depth"] deep on basalt, rimmed with kiln brick but where the channel runs
+    in, and the channel is slag from the slag fall over the forge's lip down to it; the lip has room over it; each
+    sluice's gate is whole and faces into the kiln, the walk SluiceGateBlock makes from any of its blocks finds all of it
+    and nothing of another's, and the walk from under it finds all of its trough and no other; each shelf is a raised
+    step inside the bowl with room over it, more than SPILL blocks from the slag; no magma lies where anyone stands; and
+    nothing in it burns."""
+    import math
+    from collections import deque
+    import lairs as la
+    blocks = ck.build()
+    cavern = ck.cavern()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    # Open air inside the kiln (outside its shell is the void, where nobody is).
+    free = lambda pos: pos in cavern and name(pos) in (None, "minecraft:light", "jugcraft:lair_exit")
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    ax, ay, az, _ = ck.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) != "minecraft:polished_blackstone" or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])):
+        err(f"The Cinder Kiln's arrival at {feet} does not stand on the ledge's blackstone with room overhead")
+    for pos in ck.exit_mist():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist in the Cinder Kiln's arch at {pos}")
+
+    # Where anyone can stand, column by column: the surface (in blocks) of a block with two free cells over it.
+    tops = {"minecraft:polished_blackstone_slab": 0.5, "jugcraft:trough_stone": 13 / 16, "jugcraft:molten_slag": 14 / 16}
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        if state[0] in ("minecraft:light", "jugcraft:lair_exit") or not free((x, y + 1, z)) or not free((x, y + 2, z)):
+            continue
+        stands.setdefault((x, z), []).append((y + tops.get(state[0], 1.0), state[0]))
+    start = (feet[0], feet[2], float(ay))
+    goal = (int(ck.BOWL_CENTRE[0]), int(ck.BOWL_CENTRE[1]), float(ck.BOWL + 1))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh, kind in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and kind != "jugcraft:molten_slag" and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    if goal not in seen:
+        err("No walk from the Cinder Kiln's arrival to the bowl's middle without a step of more than half a block "
+            "(the ledge and the stair) or treading the slag")
+    # And every step of the ledge and the stair, to each neighbour (across a corner too), is at most half a block.
+    steps = {(x, z): ck.stair_height(x, z) for x in range(ck.SIZE[0]) for z in range(ck.SIZE[2])
+             if ck.stair_height(x, z) is not None}
+    steep = [((x, z), (x + dx, z + dz)) for (x, z), h in steps.items() for dx in (-1, 0, 1) for dz in (-1, 0, 1)
+             if steps.get((x + dx, z + dz)) is not None and abs(steps[(x + dx, z + dz)] - h) > 0.5]
+    if steep:
+        a, b = steep[0]
+        err(f"The Cinder Kiln's stair steps {abs(steps[a] - steps[b])} blocks between {a} and {b} "
+            f"({len(steep) // 2} such steps): at most half a block")
+
+    bowl = {}
+    for x in range(ck.SIZE[0]):
+        for z in range(ck.SIZE[2]):
+            if ck.in_bowl(x, z) and free((x, ck.BOWL + 1, z)):  # not under a shelf or the crucible's rim
+                bowl[(x, z)] = name((x, ck.BOWL, z))
+    stray = sorted({kind for kind in bowl.values()
+                    if kind not in ("jugcraft:cracked_basalt", "jugcraft:trough_stone", "jugcraft:molten_slag")}, key=str)
+    if stray:
+        err(f"The Cinder Kiln's bowl has {stray} in its floor")
+    if list(bowl.values()).count("jugcraft:cracked_basalt") < len(bowl) * 2 // 3:
+        err("Less than two thirds of the Cinder Kiln's bowl is cracked basalt")
+
+    depth = ck.CRUCIBLE["depth"]
+    slag = set()
+    for x in range(ck.SIZE[0]):
+        for z in range(ck.SIZE[2]):
+            if ck.in_crucible(x, z):
+                if any(name((x, y, z)) != "jugcraft:molten_slag" for y in range(ck.BOWL - depth + 1, ck.BOWL + 1)) \
+                        or name((x, ck.BOWL - depth, z)) != "minecraft:basalt":
+                    err(f"The Cinder Kiln's crucible is not slag {depth} deep on basalt at {(x, z)}")
+                slag.add((x, z))
+            elif ck.on_rim(x, z) and name((x, ck.BOWL + 1, z)) != "jugcraft:kiln_brick":
+                err(f"The Cinder Kiln's crucible has no rim of kiln brick at {(x, z)}")
+    l0, l1 = ck.FORGE["lip"]
+    for x in range(ck.RUN[0], ck.RUN[1] + 1):
+        if not free((x, ck.BOWL + 1, int(ck.CRUCIBLE["centre"][1] - ck.CRUCIBLE["radius"] - 0.5))):
+            err(f"The Cinder Kiln's crucible rim closes the channel's mouth at column {x}")
+        for z in range(ck.CHANNEL[0], ck.CHANNEL[1] + 1):
+            if not ck.in_crucible(x, z):
+                if name((x, ck.BOWL, z)) != "jugcraft:molten_slag":
+                    err(f"The Cinder Kiln's heat channel has no slag at {(x, z)}")
+                slag.add((x, z))
+        if any(name((x, y, l1 + 1)) != "jugcraft:molten_slag" for y in range(ck.BOWL + 1, ck.LIP + 1)) \
+                or any(name((x, ck.LIP, z)) != "jugcraft:molten_slag" for z in range(l0, l1 + 1)):
+            err(f"The slag does not run over the forge's lip and fall into the channel in column {x}")
+    x0, x1 = ck.FORGE["x"]
+    for x in range(x0, x1 + 1):
+        for z in range(l0, l1 + 1):
+            if name((x, ck.LIP, z)) not in ("jugcraft:kiln_brick", "jugcraft:molten_slag"):
+                err(f"The Cinder Kiln's forge lip has {name((x, ck.LIP, z))} at {(x, z)}")
+            if x0 < x < x1 and not all(free((x, y, z)) for y in range(ck.LIP + 1, ck.LIP + 5)):
+                err(f"The Cinder Kiln's forge lip has no room over it at {(x, z)}")
+
+    gates = ck.sluice_blocks()
+    troughs = ck.trough_cells()
+
+    def walk(seeds, ok, steps, limit):
+        found, queue = [], deque(seeds)
+        while queue and len(found) < limit:
+            at = queue.popleft()
+            if at in found or not ok(at):
+                continue
+            found.append(at)
+            queue.extend((at[0] + dx, at[1] + dy, at[2] + dz) for dx, dy, dz in steps)
+        return set(found)
+
+    six = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)]
+    four = [(1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1)]
+    for sluice, s in ck.SLUICES.items():
+        own = {pos for pos, (which, _) in gates.items() if which == sluice}
+        for pos in own:
+            part = gates[pos][1]
+            if name(pos) != "jugcraft:sluice_gate" or props(pos).get("part") != part \
+                    or props(pos).get("facing") != s["facing"] or props(pos).get("flow") != "ready":
+                err(f"The Cinder Kiln's {sluice} sluice has no ready {part} facing {s['facing']} at {pos}")
+        for pos in own:
+            found = walk([pos], lambda at: name(at) == "jugcraft:sluice_gate", six, la.SLUICE["gate_blocks"])
+            if found != own:
+                err(f"From {pos}, SluiceGateBlock's walk finds {len(found)} blocks, not the {sluice} sluice's {len(own)} "
+                    f"(at most {la.SLUICE['gate_blocks']})")
+                break
+        trough = {(x, ck.BOWL, z) for (x, z), which in troughs.items() if which == sluice}
+        found = walk([(x, y - 1, z) for x, y, z in own], lambda at: name(at) == "jugcraft:trough_stone", four,
+                     la.SLUICE["trough_blocks"])
+        if found != trough:
+            err(f"The walk from under the {sluice} sluice finds {len(found)} trough stones, not its trough's {len(trough)} "
+                f"(at most {la.SLUICE['trough_blocks']})")
+        for x, y, z in trough:
+            if props((x, y, z)).get("flooded") != "false":
+                err(f"The {sluice} sluice's trough is not dry at {(x, z)}")
+                break
+            if (x, y + 1, z) not in own and not (free((x, y + 1, z)) and free((x, y + 2, z))):
+                err(f"The {sluice} sluice's trough has no room over it at {(x, z)}")
+                break
+        wheel = next(pos for pos in own if gates[pos][1] == "wheel")
+        front = ck.at(s, s["plane"] + 2 * s["toward"], ck.right_post(s), ck.WHEEL_HEIGHT)
+        if not free(front):
+            err(f"Nobody can reach the {sluice} sluice's wheel at {wheel}: {front} in front of it is {name(front)}")
+
+    spill = 3.0
+    for sx, sz in ck.SHELVES:
+        cells = [(x, z) for x in range(int(sx) - 5, int(sx) + 6) for z in range(int(sz) - 5, int(sz) + 6) if ck.shelf(x, z)]
+        for x, z in cells:
+            if name((x, ck.BOWL + 1, z)) not in ("minecraft:smooth_basalt", "minecraft:polished_basalt") \
+                    or not free((x, ck.BOWL + 2, z)) or not free((x, ck.BOWL + 3, z)) or not ck.in_bowl(x, z):
+                err(f"The Cinder Kiln's shelf at {(sx, sz)} is not a raised step in the bowl with room over it at {(x, z)}")
+                break
+        near = min(math.hypot(x - a, z - b) for x, z in cells for a, b in slag)
+        if near <= spill:
+            err(f"The Cinder Kiln's shelf at {(sx, sz)} is only {near:.1f} blocks from the slag (more than {spill})")
+
+    for (x, y, z), state in blocks.items():
+        if state[0] == "minecraft:magma_block" and free((x, y + 1, z)) and free((x, y + 2, z)):
+            err(f"Magma lies where someone could stand in the Cinder Kiln, at {(x, y, z)}")
+            break
+    allowed = {"jugcraft:kiln_brick", "jugcraft:cracked_basalt", "jugcraft:molten_slag", "jugcraft:trough_stone",
+               "jugcraft:sluice_gate", "jugcraft:lair_exit", "minecraft:basalt", "minecraft:blackstone",
+               "minecraft:magma_block", "minecraft:smooth_basalt", "minecraft:polished_basalt",
+               "minecraft:polished_blackstone", "minecraft:polished_blackstone_slab",
+               "minecraft:polished_blackstone_bricks", "minecraft:light"}
+    burns = sorted({state[0] for state in blocks.values()} - allowed)
+    if burns:
+        err(f"The Cinder Kiln has {burns}: only its stone, slag, troughs, gates and mist (nothing that burns)")
 
 
 def java_number(source, name, value):
