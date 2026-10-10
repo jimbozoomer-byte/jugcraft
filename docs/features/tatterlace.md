@@ -179,6 +179,7 @@ CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
 | Commit | What ran | Result |
 | --- | --- | --- |
 | `7551d9a` | Build, data audit, every server game test with and without the optional integrations, and the client tests chosen for it (`TatterlaceClientGameTests`, `VesperineClientGameTests`, `ArmsVIIClientGameTests`) | Compiled on the first try. **All pass:** all 1192 required game tests, her ten among them, and the three client tests: her whole fight in a real Spindle Loft. Her egg sacs and spiderlings were too far from the camera to show in its pictures |
+| `3b10b79` | Four of the pictures from closer | **All pass**, as above. The sacs and a spiderling now show, but small, among the spools' barrels |
 
 Run locally (10 October 2026):
 

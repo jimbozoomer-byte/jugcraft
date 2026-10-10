@@ -88,7 +88,7 @@ public class TatterlaceClientGameTests implements FabricClientGameTest {
 			server.runCommand("tick freeze");
 			server.runOnServer(minecraft -> check(tatterlace(minecraft).phase() == TatterlaceEntity.Phase.DESCENDING,
 					"Stepping onto the doily did not bring her down: " + tatterlace(minecraft).phase()));
-			shot(context, singleplayer, loft, centre, 2.0, 0.0, 6.5, 0.0, perch / 2.0 + 0.5, 0.0, true, "jugcraft_tatterlace_descending");
+			shot(context, singleplayer, loft, centre, 2.5, 4.0, 7.0, 0.0, perch / 2.0 + 0.5, 0.0, true, "jugcraft_tatterlace_descending");
 			server.runCommand("tick unfreeze");
 			context.waitTicks(TatterlaceEntity.DESCEND_TICKS);
 			server.runOnServer(minecraft -> {
@@ -125,8 +125,9 @@ public class TatterlaceClientGameTests implements FabricClientGameTest {
 				check(tatterlace.phase() == TatterlaceEntity.Phase.TAKING_IN, "She is not taking in her seams but " + tatterlace.phase());
 				check(tatterlace.sacs(lair(minecraft)).size() == TatterlaceEntity.EGG_SACS, "She did not spit her egg sacs round the doily");
 			});
-			// From the south-east rim, over the egg sac nearest it, towards her climbing.
-			shot(context, singleplayer, loft, centre, 11.0, 3.0, 20.0, 4.0, 1.5, 6.0, true, "jugcraft_tatterlace_taking_in");
+			// From just past the doily's rim, over her south-eastern egg sac, towards her climbing in the middle.
+			Vec3 sac = SpindleLoft.sacs().get(1).add(o.getX(), o.getY(), o.getZ());
+			fromTheRim(context, singleplayer, loft, centre, sac, "jugcraft_tatterlace_taking_in");
 			// Checked as she reaches the threads, before she can drop from them on her own.
 			server.runCommand("tick unfreeze");
 			context.waitTicks(TatterlaceEntity.TAKE_IN_TICKS / 2 + 5);
@@ -172,13 +173,8 @@ public class TatterlaceClientGameTests implements FabricClientGameTest {
 				check(newest != null, "Her newest spiderling is not in the loft");
 				hatchling.set(newest.position());
 			});
-			// Caught as they come out: from over the lace between the newest and the doily's middle, looking out at it.
-			Vec3 spider = hatchling.get();
-			Vec3 inward = new Vec3(centre.x - spider.x, 0.0, centre.z - spider.z).normalize();
-			Vec3 broodCamera = spider.add(inward.scale(5.0)).add(0.0, 1.5, 0.0);
-			Vec3 broodAim = spider.add(0.0, 0.3, 0.0);
-			shoot(context, singleplayer, loft, broodCamera.x, broodCamera.y, broodCamera.z, aimYaw(broodCamera, broodAim),
-					aimPitch(broodCamera, broodAim), true, "jugcraft_tatterlace_brood");
+			// Caught as they come out: from just past the rim behind the newest, over it, towards her in the threads.
+			fromTheRim(context, singleplayer, loft, centre, hatchling.get(), "jugcraft_tatterlace_brood");
 
 			// Frenzied Stitching, below a fifth of her health: her cuffs glow red and she comes down to the lace for good;
 			// caught in a stab.
@@ -276,6 +272,18 @@ public class TatterlaceClientGameTests implements FabricClientGameTest {
 		Vec3 camera = centre.add(dx, up, dz);
 		Vec3 at = centre.add(ax, ay, az);
 		shoot(context, singleplayer, dimension, camera.x, camera.y, camera.z, aimYaw(camera, at), aimPitch(camera, at), frozen, name);
+	}
+
+	/**
+	 * A picture from just past the doily's rim behind {@code near} (something on the lace), a block above the lace, looking
+	 * over it towards the doily's middle, so it is in the foreground and she is beyond it.
+	 */
+	private static void fromTheRim(ClientGameTestContext context, TestSingleplayerContext singleplayer, String dimension, Vec3 centre,
+			Vec3 near, String name) {
+		Vec3 outward = new Vec3(near.x - centre.x, 0.0, near.z - centre.z).normalize();
+		Vec3 camera = new Vec3(near.x, centre.y, near.z).add(outward.scale(5.5)).add(0.0, 1.0, 0.0);
+		Vec3 at = centre.add(0.0, 3.0, 0.0);
+		shoot(context, singleplayer, dimension, camera.x, camera.y, camera.z, aimYaw(camera, at), aimPitch(camera, at), true, name);
 	}
 
 	/** The yaw that turns a player standing at {@code feet} towards {@code at}. */
