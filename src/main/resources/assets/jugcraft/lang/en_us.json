@@ -2944,6 +2944,7 @@
   "compose.jugcraft.problem.branch_delivery": "A branch starts where the spell before it landed: begin it with here, not %s",
   "compose.jugcraft.problem.branches": "This spell branches %s times; the %s allows %s",
   "compose.jugcraft.problem.capacity": "This spell needs %s capacity; the %s holds %s",
+  "compose.jugcraft.problem.changed": "Your instrument or the Concordance's rules changed since this was checked: nothing was written",
   "compose.jugcraft.problem.character": "\"%s\" cannot appear in a spell: write component names, + and then",
   "compose.jugcraft.problem.duplicate": "%s appears twice",
   "compose.jugcraft.problem.duration": "%s would last %s seconds; the %s allows %s",

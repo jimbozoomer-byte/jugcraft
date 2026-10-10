@@ -99,6 +99,14 @@ public final class JugcraftConfig {
 		return ENABLED.getOrDefault(feature, false);
 	}
 
+	/** Switches a feature on or off while the server runs (game tests); the file is not changed. */
+	public static void setFeatureEnabled(String feature, boolean enabled) {
+		if (!FEATURES.contains(feature)) {
+			throw new IllegalArgumentException("No Jugcraft feature " + feature);
+		}
+		ENABLED.put(feature, enabled);
+	}
+
 	/** A server option from {@link #OPTIONS}, as set in the file (its default before {@link #load}). */
 	public static boolean option(String key) {
 		Boolean value = OPTION_VALUES.get(key);

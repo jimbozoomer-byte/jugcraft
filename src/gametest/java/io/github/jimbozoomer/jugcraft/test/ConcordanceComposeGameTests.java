@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.concordance.ComposedSpells;
+import io.github.jimbozoomer.jugcraft.concordance.Composing;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -17,6 +18,7 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -45,7 +47,8 @@ import net.spell_engine.internals.target.SpellTarget;
  * Roadmap step 8, the spell compiler: the grammar loads from data; compositions compile to the numbers the codex
  * states, or name their exact problem; a spell is composed and inscribed by command, cast through Spell Engine's
  * carrier spell and settled once; the server compiles the inscription again (a forged cost is ignored); and a running
- * spell stays inside its compiled limits however many creatures it meets.
+ * spell stays inside its compiled limits however many creatures it meets. Since Chunk A (A-01), the command and the
+ * composer screen are answered by one service, {@link Composing}.
  */
 public class ConcordanceComposeGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
@@ -214,6 +217,113 @@ public class ConcordanceComposeGameTests {
 			helper.assertTrue(ComposedSpells.inscription(player.getMainHandItem()) == null, "compose clear wipes it");
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * Chunk A, A-01: the command and the composer screen are one service. Each refusal comes in its order (the
+	 * Concordance off, then no instrument, then the rate gate the command shares) and writes nothing; an unknown word,
+	 * over-long text and an illegal branch are invalid with their problem named; a valid spell is checked without being
+	 * written, then inscribed in its canonical form; a screen's inscription is refused, writing nothing, once the
+	 * instrument in hand or the rules have changed since the screen showed them; a screen's clear wipes it; and what the
+	 * command writes is what the service shows.
+	 */
+	@GameTest(maxTicks = 20)
+	public void oneServiceAnswersCommandAndScreen(GameTestHelper helper) {
+		ServerPlayer player = player(helper, new BlockPos(1, 2, 1));
+		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+		String light = "touch struck light";
+
+		// The Concordance off: refused first, whatever is held (switched back at once; the server runs other tests).
+		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+		Composing.Result off;
+		try {
+			off = Composing.compose(player, light, true, Composing.Held.of(player));
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+		}
+		helper.assertTrue(off.outcome() == Composing.Outcome.DISABLED && ComposedSpells.inscription(player.getMainHandItem()) == null,
+				"With the Concordance off nothing is composed: " + off.outcome());
+
+		// No instrument in hand.
+		ItemStack wand = player.getMainHandItem();
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		Composing.Result bare = Composing.compose(player, light, true, null);
+		player.setItemInHand(InteractionHand.MAIN_HAND, wand);
+		helper.assertTrue(bare.outcome() == Composing.Outcome.NO_INSTRUMENT && bare.instrument() == null,
+				"Bare hands hold no instrument: " + bare.outcome());
+
+		// Checked, not written; then the command, straight after, meets the same gate and writes nothing.
+		Composing.Result checked = Composing.compose(player, light, false, null);
+		helper.assertTrue(checked.outcome() == Composing.Outcome.VALID && checked.plan() != null && checked.plan().focus() == 2
+				&& checked.text().equals(light) && !checked.lines().isEmpty() && ComposedSpells.inscription(wand) == null,
+				"A valid spell is checked and explained, and nothing is written: " + checked.outcome() + " " + checked.problems());
+		command(player, "jugcraft concordance compose inscribe " + light);
+		Composing.Result fast = Composing.compose(player, light, false, null);
+		helper.assertTrue(ComposedSpells.inscription(wand) == null && fast.outcome() == Composing.Outcome.TOO_FAST,
+				"Command and screen share one rate: the command just after writes nothing, and the next check waits: " + fast.outcome());
+
+		// Invalid texts name their problem and write nothing.
+		String[][] invalid = {
+			{"touch struck glitter", "problem.unknown"},
+			{"touch ".repeat(43) + "struck light", "problem.too_long"},
+			{"touch struck light then touch struck light", "problem.branch_delivery"},
+		};
+		for (String[] example : invalid) {
+			RateGate.forget(player.getUUID());
+			Composing.Result result = Composing.compose(player, example[0], true, Composing.Held.of(player));
+			helper.assertTrue(result.outcome() == Composing.Outcome.INVALID && result.plan() == null
+					&& result.problems().stream().map(Text::key).anyMatch(example[1]::equals) && result.lines().equals(result.problems())
+					&& ComposedSpells.inscription(wand) == null, example[1] + " is named and nothing is written: " + result.problems());
+		}
+
+		// A screen inscribes the wand it showed, in canonical form.
+		RateGate.forget(player.getUUID());
+		Composing.Held shown = Composing.Held.of(player);
+		Composing.Result inscribed = Composing.compose(player, "  Touch  struck   LIGHT ", true, shown);
+		Inscription written = ComposedSpells.inscription(player.getMainHandItem());
+		helper.assertTrue(inscribed.outcome() == Composing.Outcome.INSCRIBED && written != null && written.text().equals(light)
+				&& written.focus() == 2 && written.cooldown() == 20, "Inscribed in canonical form with its Focus and cooldown: " + written);
+
+		// What that screen showed no longer holds: the wand has changed.
+		RateGate.forget(player.getUUID());
+		Composing.Result stale = Composing.compose(player, "touch struck reveal", true, shown);
+		helper.assertTrue(stale.outcome() == Composing.Outcome.CHANGED && light.equals(ComposedSpells.inscription(player.getMainHandItem()).text()),
+				"A screen that showed the wand before it changed writes nothing: " + stale.outcome());
+
+		// Another wand swapped in before the commit is left as it is.
+		Composing.Held showing = Composing.Held.of(player);
+		ItemStack inscribedWand = player.getMainHandItem();
+		ItemStack other = new ItemStack(JugcraftConcordance.INITIATE_WAND);
+		player.setItemInHand(InteractionHand.MAIN_HAND, other);
+		Composing.Result swapped = Composing.compose(player, "touch struck reveal", true, showing);
+		helper.assertTrue(swapped.outcome() == Composing.Outcome.CHANGED && ComposedSpells.inscription(other) == null,
+				"A wand swapped in after the screen showed another is not written on: " + swapped.outcome());
+
+		// The same wand back holds again, until the rules are reloaded.
+		player.setItemInHand(InteractionHand.MAIN_HAND, inscribedWand);
+		helper.assertTrue(showing.holds(player), "The wand the screen showed, back in hand, is what it showed");
+		ConcordanceData.replace(ConcordanceData.rules());
+		Composing.Result reloaded = Composing.compose(player, "touch struck reveal", true, showing);
+		helper.assertTrue(reloaded.outcome() == Composing.Outcome.CHANGED && light.equals(ComposedSpells.inscription(player.getMainHandItem()).text()),
+				"After a reload, a screen showing the old rules writes nothing: " + reloaded.outcome());
+
+		// A screen's clear, then the command's finds nothing to wipe.
+		RateGate.forget(player.getUUID());
+		Composing.Result cleared = Composing.clear(player, Composing.Held.of(player));
+		Composing.Result again = Composing.clear(player);
+		helper.assertTrue(cleared.outcome() == Composing.Outcome.CLEARED && again.outcome() == Composing.Outcome.NOTHING_INSCRIBED
+				&& ComposedSpells.inscription(player.getMainHandItem()) == null, "Cleared once; then nothing is inscribed: " + again.outcome());
+
+		// What the command writes is what the service shows.
+		RateGate.forget(player.getUUID());
+		command(player, "jugcraft concordance compose inscribe touch struck reveal");
+		Composing.Result shownNow = Composing.show(player);
+		Inscription byCommand = ComposedSpells.inscription(player.getMainHandItem());
+		helper.assertTrue(byCommand != null && shownNow.outcome() == Composing.Outcome.VALID && shownNow.text().equals(byCommand.text())
+				&& shownNow.plan() != null && shownNow.plan().focus() == byCommand.focus(), "The command inscribes through the service: "
+						+ byCommand + " / " + shownNow.outcome());
+		helper.succeed();
 	}
 
 	/**

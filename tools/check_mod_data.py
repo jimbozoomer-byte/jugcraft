@@ -10282,7 +10282,7 @@ def check_composition(co, root, lang, registered, research):
         path = root / name
         return path.read_text(encoding="utf-8") if path.exists() else ""
     for name, values in (("compose/Grammar.java", co.COMPOSE_LIMITS), ("effect/EffectSpec.java", co.EFFECT_LIMITS),
-                         ("ConcordanceCommand.java", {"COMPOSE_RATE_TICKS": co.COMPOSE_RATE_TICKS})):
+                         ("Composing.java", {"COMPOSE_RATE_TICKS": co.COMPOSE_RATE_TICKS})):
         text = java(name)
         for const, value in values.items():
             if not re.search(rf"\bint {const} = {value};", text):

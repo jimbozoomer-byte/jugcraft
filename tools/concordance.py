@@ -577,7 +577,8 @@ for _component in COMPONENTS.values():
 # gestures; the composition decides everything else.
 COMPOSED_CAST_SECONDS = 0.5
 COMPOSED_BASE_COOLDOWN_SECONDS = 0.5
-COMPOSE_RATE_TICKS = 20  # the most often a player may check or inscribe a composition
+COMPOSE_RATE_TICKS = 20  # the most often a player may check, inscribe or tune a composition, by command or screen
+                         # (Java: Composing.COMPOSE_RATE_TICKS)
 # Example compositions for the codex; the game tests compile the same texts.
 COMPOSE_EXAMPLES = {
     "touch struck light": "Light where you touch",
@@ -1624,6 +1625,7 @@ COMPOSE_TEXT = {
     "problem.branch_delivery": "A branch starts where the spell before it landed: begin it with here, not %s",
     "problem.no_instrument": "Hold a composing instrument in your main hand",
     "problem.too_fast": "Wait a moment before composing again",
+    "problem.changed": "Your instrument or the Concordance's rules changed since this was checked: nothing was written",
     "explain.delivery.here": "%s: lands where you stand",
     "explain.delivery.here_then": "%s: lands where the spell before it landed",
     "explain.delivery.touch": "%s: lands on the first creature or surface within %s blocks",
