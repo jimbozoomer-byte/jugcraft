@@ -1,5 +1,5 @@
-"""The Monkey Monk: a wandering monkey sage of the old tales, 10 October 2026. A still model, no clips until the owner
-asks ("wait to animate until i say").
+"""The Monkey Monk: a wandering monkey sage of the old tales, 10 October 2026. With clips, once the owner approved the model (10 October 2026): idle, walk, jump and attack, all
+slow, floaty and smooth, the tail and free hand trailing behind the body.
 
 - Head: golden-brown fur with a cream muzzle and brow, a flat nose, narrow eyes under a heavy brow, big round ears,
   cheek ruffs, a tuft on the crown, and a golden circlet with a red jewel at the brow. Behind the head floats a thin
@@ -36,7 +36,9 @@ SHOULDERS = {"left_arm": (5.5, 26.5, 0), "right_arm": (-5.5, 26.5, 0)}
 LEGS = {"left_leg": (2, 14, 0), "right_leg": (-2, 14, 0)}
 TAIL = (0, 15, -2.5)
 HAND = (0, -15.5, 0)
-REST = {"left_arm": (-12, 0, 10), "right_arm": (-30, 0, -32), "staff": (30, 0, 32), "head": (10, -6, 0),
+# The rest pose: the staff planted upright at his right side, gripped at chest height; the free arm easy; the head
+# carried a little forward.
+REST = {"left_arm": (-12, 0, 10), "right_arm": (-22, 0, -22), "staff": (22, 0, 22), "head": (10, -6, 0),
         "tail": (0, 0, 0)}
 
 
@@ -193,15 +195,20 @@ def leg():
 
 
 def staff():
-    """The ruyi staff from the fist: a red iron shaft with gold bands and heavy gold caps."""
+    """The ruyi staff from the fist, standing upright: a thick red iron shaft with a gold grip band at the hand,
+    heavy gold end sections with dark bands, and domed caps; its foot on the ground, its head above the halo."""
     m = []
-    m += cyl("y", 0, 0, 0.9, -22, 22, RED)
-    for y0, y1 in ((-22.5, -18.5), (18.5, 22.5)):
-        m += cyl("y", 0, 0, 1.3, y0, y1, GOLD)
-    for y in (-10, -3, 4, 11):
-        m += cyl("y", 0, 0, 1.1, y, y + 1.2, GOLD_DARK)
-    for y0, y1 in ((-23.5, -22.5), (22.5, 23.5)):
-        m += cyl("y", 0, 0, 1.0, y0, y1, GOLD_DARK)
+    m += cyl("y", 0, 0, 1.0, -9, 30, RED)
+    m += cyl("y", 0, 0, 1.25, -1.5, 1.5, GOLD_DARK)
+    for y0, y1 in ((-12, -9), (30, 33)):
+        m += cyl("y", 0, 0, 1.5, y0, y1, GOLD)
+    for y0, y1 in ((-11.2, -10.4), (-9.6, -9.0), (30.4, 31.0), (32.2, 33.0)):
+        m += cyl("y", 0, 0, 1.65, y0, y1, GOLD_DARK)
+    m += cyl("y", 0, 0, 1.15, -13, -12, GOLD)
+    m += cyl("y", 0, 0, 1.15, 33, 34.2, GOLD)
+    m += cyl("y", 0, 0, 0.6, 34.2, 35, GOLD_DARK)
+    for y in (6, 14, 22):
+        m += cyl("y", 0, 0, 1.08, y, y + 0.7, GOLD_DARK)
     return m
 
 
@@ -234,7 +241,9 @@ def groups(with_staff=False):
     return out
 
 
-def posed(with_staff=True):
+def posed(pose=None, with_staff=True):
+    """Every box in world pixels at the rest pose, or at `pose` ({group: (rx, ry, rz, dx, dy, dz)}, absolute)."""
+    pose = pose or {}
     parts = groups(with_staff)
     tree = {g[0]: g for g in parts}
     parents = {g[0]: (g[4] if len(g) > 4 else None) for g in parts}
@@ -243,10 +252,12 @@ def posed(with_staff=True):
         turns = []
         while name:
             g = tree[name]
-            rx, ry, rz = g[2] or (0, 0, 0)
+            rx, ry, rz, dx, dy, dz = pose.get(name, tuple(g[2] or (0, 0, 0)) + (0, 0, 0))
             for axis, angle in (("z", rz), ("y", ry), ("x", rx)):
                 if angle:
                     turns.append((axis, angle, list(g[1])))
+            if dx or dy or dz:
+                turns.append(("move", (dx, dy, dz)))
             name = parents[name]
         return turns
 
@@ -261,10 +272,139 @@ def posed(with_staff=True):
     return out
 
 
+# ------------------------------------------------------------------ animation curves (ticks): floaty and smooth
+
+def with_rest(pose):
+    out = {}
+    for g in groups(True):
+        base = tuple(g[2] or (0, 0, 0)) + (0, 0, 0)
+        delta = pose.get(g[0], (0, 0, 0, 0, 0, 0))
+        out[g[0]] = tuple(base[i] + delta[i] for i in range(6))
+    return out
+
+
+def idle_pose(t, period=60):
+    """A slow hover: the body rising and settling, the head drifting, the tail curling and uncurling behind, the free
+    hand floating, the staff hand still."""
+    p = 2 * math.pi * t / period
+    return with_rest({"body": (1.5 * math.sin(p), 0, 0, 0, 1.2 * math.sin(p), 0),
+                      "head": (2 * math.sin(p + 0.6), 6 * math.sin(p / 2), 1.5 * math.sin(p + 1.2), 0, 0, 0),
+                      "tail": (8 * math.sin(p - 0.9), 10 * math.sin(p / 2 - 0.5), 0, 0, 0, 0),
+                      "left_arm": (4 * math.sin(p + 0.8), 0, 3 * math.sin(p), 0, 0, 0),
+                      "right_arm": (1.5 * math.sin(p + 0.3), 0, 0, 0, 0, 0)}), (1, 1, 1)
+
+
+def walk_pose(t, period=24):
+    """A floating stride: long slow leg swings, a gentle rise and fall, the body leaning in, the free arm drifting,
+    the tail trailing a beat behind, the head floating level."""
+    p = 2 * math.pi * t / period
+    rise = 1.6 * (0.5 - 0.5 * math.cos(2 * p))
+    stretch = 0.03 * math.sin(2 * p - 0.6)
+    pose = {"body": (4, 0, 2.5 * math.sin(p), 0, rise, 0),
+            "head": (-3, 2 * math.sin(p), -2 * math.sin(p), 0, 0, 0),
+            "tail": (6 * math.sin(2 * p - 1.2), 14 * math.sin(p - 1.0), 0, 0, 0, 0),
+            "left_leg": (28 * math.sin(p), 0, 0, 0, 0, 0),
+            "right_leg": (-28 * math.sin(p), 0, 0, 0, 0, 0),
+            "left_arm": (-26 * math.sin(p - 0.3), 0, 3 * math.sin(2 * p), 0, 0, 0),
+            "right_arm": (6 * math.sin(p - 0.3), 0, 0, 0, 0, 0)}
+    return with_rest(pose), (1 - stretch / 2, 1 + stretch, 1 - stretch / 2)
+
+
+JUMP_TICKS = 40
+
+
+def jump_pose(t):
+    """A slow floaty leap: a soft crouch, a long rise with the legs trailing and the free arm reaching up, a hang at
+    the top with the tail curling, a gentle drop, a soft squash and a settle."""
+    def smooth(u):
+        u = max(0.0, min(1.0, u))
+        return u * u * (3 - 2 * u)
+    if t < 8:
+        c = smooth(t / 8)
+        rise, crouch, stretch, legs, arm, tail = 0, 3 * c, -0.05 * c, 12 * c, -10 * c, -10 * c
+    elif t < 12:
+        u = smooth((t - 8) / 4)
+        rise, crouch, stretch, legs, arm, tail = 4 * u, 3 * (1 - u), -0.05 + 0.11 * u, 12 - 30 * u, -10 - 60 * u, -10 + 25 * u
+    elif t < 28:
+        u = (t - 12) / 16
+        rise = 4 + 16 * math.sin(math.pi * u)
+        tuck = smooth(u * 2) * (1 - smooth((u - 0.6) / 0.4))
+        rise, crouch, stretch, legs, arm, tail = rise, 0, 0.06 * (1 - abs(2 * u - 1)), -18 - 22 * tuck, -70 - 30 * tuck, 15 + 25 * tuck
+    elif t < 32:
+        u = smooth((t - 28) / 4)
+        rise, crouch, stretch, legs, arm, tail = 0, 4 * u, -0.08 * u, -8 + 20 * u, -40 + 25 * u, 20 - 30 * u
+    else:
+        u = (t - 32) / (JUMP_TICKS - 32)
+        w = math.exp(-u * 2.5) * math.cos(u * 5)
+        rise, crouch, stretch, legs, arm, tail = 0, 4 * w * (1 - u), -0.08 * w * (1 - u), 12 * w * (1 - u), -15 * w * (1 - u), -10 * w * (1 - u)
+    pose = {"body": (crouch * 2, 0, 0, 0, rise - crouch, 0),
+            "head": (-crouch * 1.5, 0, 0, 0, 0, 0),
+            "tail": (tail, 0, 0, 0, 0, 0),
+            "left_leg": (legs, 0, 0, 0, rise - crouch, 0),
+            "right_leg": (legs * 0.8, 0, 0, 0, rise - crouch, 0),
+            "left_arm": (arm, 0, 10 - arm / 6, 0, 0, 0),
+            "right_arm": (arm / 4, 0, 0, 0, 0, 0)}
+    return with_rest(pose), (1 - stretch / 2, 1 + stretch, 1 - stretch / 2)
+
+
+ATTACK_TICKS = 36
+
+
+def attack_pose(t):
+    """A slow, sweeping staff blow: the staff hand lifts the staff up and back in a long arc as the body coils and the
+    tail rises, a hang at the top, then the sweep down and across with the body turning into it and a soft dip, and
+    a floating recovery."""
+    def smooth(u):
+        u = max(0.0, min(1.0, u))
+        return u * u * (3 - 2 * u)
+    if t < 14:
+        u = smooth(t / 14)
+        arm, twist, lean, tail, free, dip = -22 - 138 * u, 25 * u, -8 * u, 25 * u, -12 + 30 * u, 0
+    elif t < 20:
+        u = smooth((t - 14) / 6)
+        arm, twist, lean, tail, free, dip = -160 + 190 * u, 25 - 50 * u, -8 + 22 * u, 25 - 40 * u, 18 - 46 * u, 2.5 * math.sin(math.pi * u)
+    elif t < 26:
+        u = (t - 20) / 6
+        arm, twist, lean, tail, free, dip = 30 - 4 * u, -25 + 6 * u, 14 - 4 * u, -15 + 5 * u, -28 + 4 * u, 0
+    else:
+        u = smooth((t - 26) / (ATTACK_TICKS - 26))
+        arm, twist, lean, tail, free, dip = 26 - 48 * u, -19 + 19 * u, 10 - 10 * u, -10 + 10 * u, -24 + 12 * u, 0
+    pose = {"body": (lean, twist, 0, 0, -dip, 0), "head": (10 - lean / 2, -6 - twist / 2, 0, 0, 0, 0),
+            "tail": (tail, -twist / 2, 0, 0, 0, 0), "right_arm": (arm, 0, -22, 0, 0, 0), "staff": (22, 0, 22, 0, 0, 0),
+            "left_arm": (free, 0, 10, 0, 0, 0), "left_leg": (-lean / 2, 0, 0, 0, 0, 0), "right_leg": (lean / 2, 0, 0, 0, 0, 0)}
+    return pose, (1, 1, 1)
+
+
+def animations():
+    import blockbench_export
+    rests = {g[0]: tuple(g[2] or (0, 0, 0)) for g in groups(False)}
+    names = list(rests)
+
+    def clip(name, length, frames, poses, loop):
+        tracks = {n: {"rotation": [], "position": [], "scale": []} for n in names}
+        for i in range(frames + 1):
+            time = round(length * i / frames, 4)
+            pose, scale = poses(i, frames)
+            for n in names:
+                rx, ry, rz, dx, dy, dz = pose.get(n, rests[n] + (0, 0, 0))
+                rest = rests[n]
+                tracks[n]["rotation"].append((time, (rx - rest[0], ry - rest[1], rz - rest[2])))
+                tracks[n]["position"].append((time, (dx, dy, dz)))
+            tracks["body"]["scale"].append((time, scale))
+        tracks = {g: {c: k for c, k in ch.items() if any(v != (0, 0, 0) and v != (1, 1, 1) for _, v in k)}
+                  for g, ch in tracks.items()}
+        return blockbench_export.animation(name, length, tracks, loop=loop)
+
+    return [clip("idle", 3.0, 30, lambda i, n: idle_pose(60 * i / n), True),
+            clip("walk", 1.2, 24, lambda i, n: walk_pose(24 * i / n), True),
+            clip("jump", 2.0, 40, lambda i, n: jump_pose(JUMP_TICKS * i / n), False),
+            clip("attack", 1.8, 36, lambda i, n: attack_pose(ATTACK_TICKS * i / n), False)]
+
+
 def write_bbmodel(folder=ART):
     import blockbench_export
     monk = blockbench_export.write(folder / "monkey_monk.bbmodel", "monkey_monk", groups(False),
-                                   draw=lambda name: TEXTURES[name]())
+                                   draw=lambda name: TEXTURES[name](), animations=animations())
     blockbench_export.write(folder / "ruyi_staff.bbmodel", "ruyi_staff", [("ruyi_staff", (0, 0, 0), None, staff())],
                             draw=lambda name: TEXTURES[name]())
     return monk
@@ -329,4 +469,16 @@ if __name__ == "__main__":
         out = sys.argv[-1]
         for yaw, suffix in ((30, "front_left"), (-30, "front_right"), (90, "side"), (-150, "back")):
             box_preview.render(posed(), scale=6, yaw=yaw, pitch=12, draw=draw).save(out.replace(".png", f"_{suffix}.png"))
+        from PIL import Image
+        frames = []
+        for poses in ([walk_pose(t)[0] for t in (0, 6, 12, 18)], [jump_pose(t)[0] for t in (6, 14, 20, 30)],
+                      [attack_pose(t)[0] for t in (8, 14, 19, 30)]):
+            for pose in poses:
+                frames.append(box_preview.render(posed(pose), scale=4, yaw=-30, pitch=12, draw=draw))
+        w = max(f.width for f in frames)
+        h = max(f.height for f in frames)
+        sheet = Image.new("RGB", (4 * (w + 8), 3 * (h + 8)), (236, 238, 242))
+        for i, f in enumerate(frames):
+            sheet.paste(f, ((i % 4) * (w + 8) + (w - f.width) // 2, (i // 4) * (h + 8) + h - f.height))
+        sheet.save(out.replace(".png", "_frames.png"))
         print(out)
