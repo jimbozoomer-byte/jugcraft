@@ -318,6 +318,15 @@ CI:
   over too small an area, two models on one part never compared and the anchor never checked (all fixed in the check);
   the claim that no two faces of a model share a plane (true only of faces facing the same way, now said); and limits
   the record left out (cosmetic stacks' sync, equipment hiding, armour drawn toward the camera; below).
+- Run 38044387828 (commit `e091d654`, the review fixes): every job passed, the mod job on its second attempt. Its
+  first attempt failed one test, Pixel Hollows' `every_village_has_one_shop` (a desert village with no shop), which this
+  change does not touch and which the [Retro Trader](retro-trader.md), [Walled Town](walled-town.md),
+  [World Designer](world-designer.md) and [Fall Additions](fall-additions.md) records already list as failing now and
+  then (its re-layout budget is finite); it passed in the same commit's optional-integrations job and on the re-run. The
+  client test logged the same three lines, and its twelve worn shots (again the log's previews, looked at by the
+  assistant) show the hand empty and the body square to the camera: the strap and buckle from the front, the strap from
+  behind, the boots from every quarter with their fins behind, over iron leggings and boots, and the buckle through the
+  chestplate.
 
 Tests:
 - Server, `ConcordanceWayfaringGameTests`: the items and slots as designed (sizes, the owner's icons, no cosmetic copies,
