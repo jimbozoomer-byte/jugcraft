@@ -1,6 +1,6 @@
 # The Glacier Hall, and the Frost Horn
 
-Status: implemented in source; CI builds it and its game tests and client game test pass (below). Part 1 of boss 3, the Yeti King, in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the Glacier Hall, a third lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Yeti King and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI builds it and its game tests and client game test pass (below). Part 1 of boss 3, the Yeti King, in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the Glacier Hall, a third lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Yeti King and his loot are part 2, in their own pull request ([yeti-king.md](yeti-king.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 10 October 2026 the owner chose to "build a new boss" the way Madame Tatterlace was built ("lair, summoning, fight, loot, tests and pictures"); the Yeti King is the owner's own example in the bosses brainstorm.
 
 Target milestone and tier: Specialization tier (dungeon expeditions), as the Witching Season's lairs are. The horn takes Discovery-tier things: a goat horn, gold, leather and snow.

@@ -4,8 +4,9 @@ own look, in three kinds of line:
 - styles, crafted at a smithing table from a steel arm, the style's pattern and a material, which keep the arm's
   enchantments and wear: gilded (takes enchantments as gold does), ironclad (dieselpunk, twice as hard-wearing),
   bonecarved (strikes the undead harder) and runebound (glowing runes that mark a foe);
-- trophies of eight bosses still to be made (docs/branches/BOSSES.md): no recipe; each boss's loot table is ready
-  (loot_table/bosses/<boss>.json) for its encounter to drop one of its two; and of Vesperine, the Last Reaper
+- trophies of eight bosses (docs/branches/BOSSES.md): no recipe; each boss's loot table is ready
+  (loot_table/bosses/<boss>.json) for its encounter to drop one of its two, and the Yeti King's, the first of them made,
+  drops from him (docs/features/yeti-king.md, YetiKingLoot); and of Vesperine, the Last Reaper
   (docs/features/vesperine.md), whose Vesper Scythe she drops (VesperineLoot; her trophy table lists it as theirs do),
   and of Madame Tatterlace (docs/features/tatterlace.md), whose Needle Rapier she drops (TatterlaceLoot);
 - the arms of the owner's armor sets, each in its set's look (the Hades Armor's scythe): no recipe and, until the owner
@@ -59,6 +60,7 @@ STYLES = {
                   "pattern_tooltip": "A smithing template: binds glowing runes to a steel nodachi, moonblade, quarterstaff or war hammer, with ectoplasm."},
 }
 BOSSES = {
+    # Fought in the Glacier Hall (docs/features/yeti-king.md); his loot drops one of his two.
     "yeti_king": {"display": "the Yeti King"},
     "cinder_tyrant": {"display": "the Cinder Tyrant"},
     "mire_hag": {"display": "the Mire Hag"},

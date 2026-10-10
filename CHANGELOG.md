@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Arms VIII fix (a thrown arm no longer flies through a foe it stops just short of)
+- **A thrown arm strikes a foe it ends a tick just short of.** Before, it sometimes flew through. From a flight's third tick, the sweep that finds what a thrown thing hits widens each box it looks for, but finds only the boxes it enters. An arm that ended a tick inside the next tick's widening, short of the foe itself, started that tick inside the box and flew on. Now each tick but the first starts by striking a foe whose widened box the arm is already inside.
+- This made the steel javelin's game test fail now and then, on `main` and on pull requests that do not touch the thrown arms. A new test sets a javelin going slowly at a still pig to end a tick 0.02 short of it, and it must strike. Record: [arms-viii.md](docs/features/arms-viii.md).
+
 ### Unmerged: Arcane Concordance, Wayfaring part 1b (the belt and boot drawn on the body)
 - **The Leather Belt and the Amphibian Boot now show when worn,** as the owner drew them: a leather strap round the waist with a gold buckle in front, and on each foot a green boot with a white cuff, a grey toe cap and a fin on the heel. You see them in third person and on the inventory's figure; other players should see them too (not yet tried with two clients). The charms and the Ice Breaker (the owner drew no worn sheet for it) are not drawn.
 - The owner's two worn sheets are imported byte for byte, with their sources and checksums recorded; the boxes are fitted to them (the sheets came without geometry) and kept off the skin's layers and vanilla armour by the same gaps as Jugcraft's 3D armour, so they should not flicker against them up close (armour, drawn a little toward the camera, shows through them from far off). Trinkets' data-driven renderer draws them: no Java. Record: [arcane-concordance-trinkets.md](docs/features/arcane-concordance-trinkets.md).
@@ -35,6 +39,21 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Four bayonets,** each the owner's art: **Iron**, **Steel** (the owner's anthralite one), **Diamond** and **Netherite** (a smithing upgrade). Under the barrel, in place of a grip. **V stabs** for 4 to 6 damage within reach, every 12 ticks; the server deals the blow. Seven guns take them.
 - **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.
 - Scopes wait for the owner's reticle textures. Record: [guns.md, slice 7](docs/features/guns.md#slice-7-bayonets-and-the-shared-texture-guns).
+
+### Unmerged: The Yeti King (boss 3, part 2)
+- **The Yeti King**, a great white ape of the glacier with a crown of blue ice, waits slumped on his throne in the Glacier Hall and leaps down onto the frozen lake when a player steps onto it. He has 420 health, scaled up for a party.
+- **His rule, the snow is his:** his Ground Slam blasts the lake's drift snow bare to slick glare ice round where he lands, for 12 seconds before it drifts back; never the trampled snow round the columns, at the ramp's foot or before his dais.
+- **Phase 1, the Hunt:** Maul Swipe, Boulder Throw, Ground Slam, Frost Breath and the Avalanche Charge. Charge him into an ice column and he reels for 3 seconds, taking a third more damage.
+- **At half health, the King's Roar:** he roars from his dais, a blizzard chills everyone near and two Yeti Whelps climb out of the dens. Then come Icicle Fall, Glacial Spikes and Kin Call.
+- **Below a fifth, the Fury of the Peaks:** his crown blazes and his eyes burn blue, his cooldowns are a third shorter, his slam bares a wider ring and a charge that misses the columns is followed by another.
+- **Left alone for 10 seconds** he climbs back onto his throne, healed, and the snow drifts back.
+- **His loot is each participant's own:**
+  - Yeti Fur, which makes a cheaper Frost Horn or two white wool;
+  - one of Arms VII's two Yeti King trophies, the **Glacier Maul** or the **Rimeclaw**, with their Frost boon, certain on a first kill;
+  - the Yeti Mitten, which keeps its wearer from freezing from the offhand;
+  - the Yeti King's Crown, a costume;
+  - shared experience and the advancement Abominable.
+- When he falls, the snow drifts back over his lake and Grey Mist opens in its middle. Animated with GeckoLib. Record: [yeti-king.md](docs/features/yeti-king.md).
 
 ### Unmerged: The Glacier Hall and the Frost Horn (boss 3, the Yeti King, part 1)
 - **The Frost Horn** (a goat horn, two gold ingots, two leather and two snow blocks) opens the Glacier Hall:

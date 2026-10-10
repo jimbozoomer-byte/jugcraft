@@ -156,7 +156,8 @@
 			"io.github.jimbozoomer.jugcraft.test.VesperineGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SpindleLoftGameTests",
 			"io.github.jimbozoomer.jugcraft.test.TatterlaceGameTests",
-			"io.github.jimbozoomer.jugcraft.test.GlacierHallGameTests"
+			"io.github.jimbozoomer.jugcraft.test.GlacierHallGameTests",
+			"io.github.jimbozoomer.jugcraft.test.YetiKingGameTests"
 		],
 		"fabric-client-gametest": [
 			"local.peepo.PeepoCompanionClientTests",
@@ -287,7 +288,8 @@
 			"io.github.jimbozoomer.jugcraft.test.VesperineClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SpindleLoftClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.TatterlaceClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.GlacierHallClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.GlacierHallClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.YetiKingClientGameTests"
 		]
 	},
 	"depends": {
