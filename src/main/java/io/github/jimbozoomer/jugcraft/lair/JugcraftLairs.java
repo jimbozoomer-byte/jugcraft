@@ -127,9 +127,9 @@ public final class JugcraftLairs {
 		if (fit == Fit.PASSABLE) {
 			properties = properties.noCollision().noOcclusion();
 		} else if (fit == Fit.SEE_THROUGH) {
-			// As glass: nothing behind it is hidden, it never suffocates or blocks the view, and nothing spawns on it.
+			// As glass: nothing behind it is hidden, it never suffocates, and nothing spawns on it.
 			properties = properties.noOcclusion().isValidSpawn((state, level, pos, type) -> false).isRedstoneConductor((state, level, pos) -> false)
-					.isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false);
+					.isSuffocating((state, level, pos) -> false);
 		}
 		return Registry.register(BuiltInRegistries.BLOCK, key, make.apply(properties));
 	}
