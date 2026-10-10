@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C) and the sculk guns (slice 10D)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D) and the Cell Rack (slice 10E)
 
 Status:
 - **Slices 1 to 9G are in `main`:** the last of them, 8C to 9G, with #277 on 10 October 2026. The lines below say where each was built.
@@ -25,6 +25,7 @@ Status:
 - **Slice 10B** (coil and plasma: the Solenoid Rifle, Votive Rifle and Glowmouth; [below](#slice-10b-coil-and-plasma)): implemented on `claude/guns-coil-plasma`, stacked on slice 10A, awaiting review.
 - **Slice 10C** (the double-barrels: the Mule, Fowler and Culverin; [below](#slice-10c-the-double-barrels)): implemented on `claude/guns-double-barrels`, stacked on slice 10B, awaiting review.
 - **Slice 10D** (the sculk guns: the Undertone Rifle, Murmur SMG and Reverb; [below](#slice-10d-the-sculk-guns)): implemented on `claude/guns-sculk`, stacked on slice 10C, awaiting review.
+- **Slice 10E** (the Cell Rack, which charges six Energy Cells at once; [below](#slice-10e-the-cell-rack)): implemented on `claude/guns-cell-rack`, stacked on slice 10D, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -38,7 +39,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
 - the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, the second, the aiming polish, slice 9F, and the third, the Lobber's grenades, slice 9G.
-- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B, the double-barrels slice 10C and the sculk guns slice 10D.
+- the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B, the double-barrels slice 10C and the sculk guns slice 10D; the Energy Cell rack is slice 10E.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -645,7 +646,7 @@ Three more of the owner's guns, past steel, that run on charge from the energy s
 
 **The Energy Cell** (`jugcraft:energy_cell`), their ammunition:
 - **Charge:** it holds 10,000 JE, twice or three times that with capacity modules, and stacks alone, as the powered tools do. Its bar shows its charge in amber, and its tooltip the JE.
-- **Charging:** hang it on a Charging Station (steel tier). It fills at the station's rate: up to 512 JE a tick, 256 on copper cable, so 20 to 40 s.
+- **Charging:** hang it on a Charging Station (steel tier). It fills at the station's rate: up to 512 JE a tick, 256 on copper cable, so in 20 to 40 ticks (1 to 2 s).
 - **Looks:** charged, it is the owner's glowing cell (`energy_cell.png`, its three frames run by an `.mcmeta`); spent, the owner's empty cell (`empty_cell.png`).
 - **Reloading:** a reload pools the charge of every cell in the inventory and draws each round's charge from them in inventory order; the cells stay. A full cell is 25 of the Beam Pistol's shots, 13 of the Stormlock's charges, 40 of the Linesman's. With every cell spent a reload does not start, and says so ("Your Energy Cells are spent. Fill them at a Charging Station."). The gun's counter shows the shots its cells hold.
 - **Only the guns draw on it.** It is not the portable battery `docs/MACHINE_ROADMAP.md` plans.
@@ -718,7 +719,7 @@ Three more of the owner's guns, past steel, that run on charge from the energy s
 
 **Known limits:**
 - **Particles:** a beam or arc is drawn from about where the muzzle is (ahead of the eye, a little right and down), not from the model's muzzle locator, so in first person it starts a little off the gun.
-- **Charging:** cells charge one at a time, on the station's cradle.
+- **Charging:** cells charge one at a time, on the station's cradle. Slice 10E's [Cell Rack](#slice-10e-the-cell-rack) charges six at once.
 - **The Beam Pistol's coil** stands out either side of its back in first person, as the owner's model has it.
 - **Aimed** (the CI screenshots of 9 October): the Beam Pistol's back rises a little past the crosshair, over the target's middle, and the Linesman's broad back fills the lower middle of the view. It is the shared aiming polish item ([below](#rollout-and-open-questions)), larger on these two.
 - **Not played:** none of it has been played yet. The arcs' reach, their seeking cones and the JE costs want play to set.
@@ -1391,11 +1392,61 @@ The reload times are the owner's animations'.
 - **The glowing parts and the tendrils do not move on their own:** the owner's frames would make them pulse and curl; the guns take the first frame of each.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 10E: the Cell Rack
+The first of the systems the owner chose on 10 October 2026 to go with the gun sets ("Energy Cell rack (Recommended)", offered as "A block that charges several Energy Cells at once."): a rack of six cradles that charges every Energy Cell standing in it at once, from cables.
+
+| | Cell Rack | Charging Station, for comparison |
+|---|---|---|
+| Holds | six Energy Cells, two shelves of three | one powered tool or Energy Cell |
+| Takes from cables | up to 1,024 JE a tick (256 on copper cable) | the same |
+| Buffer | 50,000 JE | the same |
+| Gives | up to 1,024 JE a tick, shared evenly among the cells not yet full, at most 512 to one cell | up to 512 JE a tick |
+| Six spent cells (60,000 JE) | about 3 s on silver or aluminum cable, 12 s on copper, with power enough | about 6 s and 12 s, a cell at a time |
+| Size | one block | two blocks tall |
+| Charges | Energy Cells only | powered tools and Energy Cells |
+
+**Crafting** (a crafting table; it needs both the guns and the machines switches, as the Energy Cell does): five steel plates, two copper cables, an advanced circuit and a battery box. These are the Charging Station's parts, with a steel plate in place of its redstone lamp.
+
+**Using it:**
+- **Placing:** it faces you, its shelves toward you.
+- **A cell in:** use it holding an Energy Cell. The cell stands in the cradle you point at, or in the nearest free one if that is taken. One cell goes in each use; with all six cradles full, nothing happens.
+- **A cell out:** use it with an empty hand to take the cell from the cradle nearest where you point. A line over the hotbar gives its charge, for example "Energy Cell: 10,000 / 10,000 JE".
+- **Its buffer:** used with an empty hand while it holds no cells, it gives its own charge: "Cell Rack: 20,000 / 50,000 JE".
+- **Power:** cables connect on any side; its ports are on the back and both sides.
+- **Hoppers:** from above or the sides, a hopper stands Energy Cells in its empty cradles and puts in nothing else. From below, a hopper takes out only full cells. So a hopper line can feed it spent cells and carry the full ones away. Item pipes reach it through the same rules (Fabric's item storage wraps it as it does a chest); that is not tested.
+- **Breaking it:** mined with a pickaxe, it drops itself, as the Charging Station does; broken any way, it drops the cells in it, each keeping its charge.
+
+**What you see:**
+- **The block:** the power gear's electric look, the Charging Station's textures: a graphite plinth edged with high-voltage stripes, two shelves each with a glowing strip along its front, and a back panel with vented sides. Each shelf has three cradles: a cup the cell's foot stands in, with contacts on the back panel behind it. A status screen on the cap lights while it charges, and the rack gives off a little light then (5, the Charging Station's 7). It is drawn by `cell_rack_model()` in `tools/guns.py`.
+- **The cells:** each stands upright in its cup, in front of its contacts. They are the Energy Cell's own icon, turned 45° so the cell stands on end with its terminal at the top, about 5 px tall. A charged cell glows as it does in the hand, and a spent one is dark.
+- **Checked** in previews of the block model from the front, from three-quarters on either side, from behind and from above, lit and unlit, with a cell standing in each cradle (the cells drawn as the renderer turns them).
+
+**How it works:**
+- **Sharing:** each tick, the rack counts the cells not yet full. It divides up to 1,024 JE of its buffer between them evenly, no more than 512 to one: one or two cells take 512 each, three 341, six 170. A cell takes no more than fills it. A full cell takes nothing, and a hopper below may take it.
+- **Accounting:** every JE that leaves the buffer goes into a cell. Nothing is lost or gained.
+- **Where you point:** the cradle is worked out on the server from the point you used, turned into the rack's own frame for its facing (`CellRackBlock.cradleAt`). Cradles along a shelf count as nearer than those across the shelves.
+- **The buffer:** fills from cables like the Charging Station's. A rack full of full cells keeps its buffer for the next ones.
+
+**Connections:**
+- **Input producers:** any generator, Battery Box and cable network of the machines (JE), as for the Charging Station.
+- **Output consumers:** the energy weapons, through the Energy Cells they load from (slices 8D, 9C and 10B).
+- **Its place:** the steel tier, with the Charging Station; it needs an advanced circuit and a battery box, from the machines' tree.
+- **Required vs optional:** optional. The Charging Station still fills cells one at a time; the rack is for players who run many energy weapons.
+
+**Balance:** the Cell Rack fills cells at up to twice the Charging Station's rate in all, but only Energy Cells, and costs the station's parts. It cannot make charge: it gives the cells only what it takes from cables. A Battery Box (400,000 JE) still fills forty cells.
+
+**Save compatibility:** a new block `jugcraft:cell_rack`, its item and its block entity type. The block entity saves its buffer (`energy`) and its six cradles (`Items`, with each cell's charge). Nothing saved before changes. `guns.enabled=false` or `machines.enabled=false` turns its recipe off; the block, its item and its block entity stay registered, so a placed rack and its cells survive.
+
+**Known limits:**
+- **Flat cells:** the cells are their icons, as an item frame draws an item, so they are thin seen from the side.
+- **No comparator output** and no charge shown on the block itself; the screen only says whether it is charging.
+- **Not played:** none of it has been played yet.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
 - **Technology connection:** the rounds are made from the mod's lead and brass; the guns from early metals.
-- **Energy connection (slice 8D):** the energy weapons' Energy Cells fill at the Charging Station, from the machines' energy system (JE). Their recipes need the machines switch, and their parts (steel, advanced circuits, copper cable) come from the machines' tree, so they come after the steel tier.
+- **Energy connection (slice 8D):** the energy weapons' Energy Cells fill at the Charging Station, from the machines' energy system (JE). Their recipes need the machines switch, and their parts (steel, advanced circuits, copper cable) come from the machines' tree, so they come after the steel tier. The Cell Rack (slice 10E) fills six cells at once from the same cables.
 - **Magic connection:** none yet.
 - **Reachable entry path:**
   - copper and iron need only mining and smelting; gunpowder comes from creepers;
@@ -1415,6 +1466,7 @@ The reload times are the owner's animations'.
   - a buckshot shell a quarter of each, plus paper.
 - **Metal accounting:** rounds and guns hold no metal units (`tools/check_mod_data.py`). Nothing turns them back into metal, so there is no conversion loop.
 - **Server-side rate:** each player has a trigger credit refilling at one shot per interval, banking up to two (`GunShots.BURST`). A late packet does not lose a shot, and a fast client gains none.
+- **Charging (slices 8D and 10E):** the Charging Station and the Cell Rack put into a cell exactly the JE they take from cables. Nothing is lost or gained, so charging is no loop.
 - **Starting numbers,** not tuned in play. The owner may want higher-tier guns to outclass these clearly.
 
 ## Multiplayer and persistence
@@ -1440,6 +1492,13 @@ The reload times are the owner's animations'.
 - **Persistence:** the rounds loaded are a data component on the gun, `jugcraft:loaded_rounds` (0 to 64). An Energy Cell's charge is the shared `jugcraft:energy` component (slice 8D). Its attachments are another, `jugcraft:attachments` (a list of up to four attachment ids, oldest first; an id no longer known is ignored). The Trench Lobber's and the Bullfrog's kind of grenade is `jugcraft:loaded_grenade` (slice 9G: an item id, absent for the frag Grenade; one no longer known is read as the frag Grenade). GeckoLib gives each gun a stable animation id the first time the server ticks it. Nothing else is saved.
 - **Attachments and authority:** attachments are fitted only by the crafting recipes, which the server runs. The server reads a gun's numbers from its own copy of the stack (`GunItem.spec(stack)`), for the shot, the trigger rate, the reload and the rounds it may load; the client uses the same numbers only to predict.
 - **Disconnect:** clears that player's trigger credit, reload and spin.
+- **The Cell Rack (slice 10E):**
+  - A cell goes in or comes out only on the server, through the game's own block use: the server checks the player can reach the block before the rack is asked. The client only swings the arm.
+  - The server picks the cradle from the point used and its own copy of the rack's cells, and takes the cell from the player's own hand, one at a time.
+  - Charging runs in the rack's server tick; the clients that see it get its cells, for drawing, when one goes in or out and once a second while it charges.
+  - Hoppers move cells by the container rules above, on the server.
+  - It saves its buffer and its cells; a cell keeps its charge as the shared `jugcraft:energy` component.
+  - Each tick, a rack looks at its six cradles and charges up to six cells; it loads no chunks.
 - **Disable:** a new switch, `guns.enabled` (config `jugcraft.properties`), gates the guns', rounds' and attachments' recipes (twenty-nine with slice 5: sixteen guns and rounds, eleven attachments, and the fitting and removal recipes). Items and the attachments component stay registered, so saved guns, rounds and attachments survive with it off.
 
 ## The shared parts it uses
@@ -2371,6 +2430,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   Shown this and asked what the scopes should use, the owner answered that they made these files and to use them. Asked the same day whether the "Big Cannons and Mounted Guns" folder is theirs (slice 6's flash frames come from it, and it holds a `wariumlogo.png`), they confirmed it is. The [library README](../../art/owner-library/README.md#effect-textures-8-october-2026) records both.
 - **Names:** Jugcraft's own, under the license policy's fan-homage rules. No `scguns:` reference reaches the game: the converter writes its own files with `jugcraft:` paths, and the animations name no resources.
 - **Drawn here:** the round icons, as maps (`tools/item_icons/light_round.txt`, `rifle_round.txt`, `buckshot_shell.txt`, `paper_cartridge.txt`), and the props' pixels in the atlas copies (the Thunderpipe's and the Highwayman's shells, the Longhorn's cartridge, slice 4's muzzle-loaders' balls, ramrods and flashes, the Stoker's fuel can, the Linesman's and the Glowmouth's cells, the Skylark Rifle's rocket, the Bullfrog's grenade, the Fowler's balls, ramrod and flash, and the Culverin's ball and flash). The Stoker's flame is the owner's pilot flame, copied pixel for pixel into its atlas corner.
+- **The Cell Rack (slice 10E):** its block model is built here from boxes (`cell_rack_model()` in `tools/guns.py`) on the power gear's electric-look textures, the Charging Station's. Nothing new is drawn, and no owner file is used; the cells in it are the Energy Cell's own icons.
 
 ## Verification
 - **Run locally (7 October 2026):**
@@ -2963,17 +3023,31 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `sculkGunsFireAndLoad`: side by side, each fires its last round at a pig three blocks off: the rifle's and the machine gun's shot takes one round's damage, the Reverb's pellets land together. Each then loads from the inventory: the magazines have nothing in halfway through their reload and are full as it ends; the Reverb has one shell in after its first shell's time and both after its reload; two rounds are left each time.
   - "Every gun registered" now counts forty-eight guns, and slice 9E's `tacticalAttachmentsFitTheirGuns` counts the Reverb among the guns with the owner's tactical grip parts.
   - `GunsClientGameTests` takes the three new guns through its steps as it takes every gun: held, aimed, fired at the husk, reloaded from the inventory, inspected, with each set of attachments they take, seen from outside, and in the inventory.
+- **Slice 10E, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every gun's files came out unchanged.
+  - `python3 tools/generate_material_data.py`: wrote the Cell Rack's block models (lit and not), blockstates, item, loot table, recipe and names, and put it in the pickaxe's tag.
+  - `python3 tools/check_mod_data.py`: PASS (2162 material IDs), with `check_guns` (the cradles in `CellRackBlock` and `CellRackRenderer` against tools/guns.py).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews** of the block model: from the front, from three-quarters on either side, from behind and from above, unlit and lit, with an Energy Cell standing in each cradle (its first frame, turned upright as the renderer turns it).
+- **Slice 10E game tests (written; they run in CI):**
+  - `CellRackGameTests`:
+    - `cellRackIsRegistered`: the block, its item and its recipe; cables reach its buffer from all six sides; a point on its front picks the cradle nearest it, facing north, and turned to face south, east and west.
+    - `cellRackChargesSeveralCellsAtOnce`: three spent cells beside a full one, the buffer full. After five ticks the three hold the same charge and the rack is lit; the full cell holds the same. Once they are full it is dark and its buffer holds 50,000 less 30,000 JE: what the cells took. A cell on its own then takes no more than 512 JE a tick.
+    - `playersStandCellsInTheirCradles`: a player, through the server's block use, stands a cell in the upper right cradle, then the next beside it when that is full, a cell from the hand each time; with an empty hand, pointing at the lower left, they take the nearest cell, the upper middle one, into their inventory.
+    - `hoppersLoadCellsAndTakeFullOnes`: a hopper above holding a stick and two cells stands the cells in the first two cradles and keeps the stick; a hopper below takes the full cell and leaves the half-charged one.
+    - `cellRackKeepsAndDropsItsCells`: saved and loaded, it keeps its buffer and each cell's charge; broken, it drops itself and both cells, each with its charge.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
-Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
+Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
-- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A), the coil and plasma guns (slice 10B), the double-barrels (slice 10C) and the sculk guns (slice 10D); a rack that charges several Energy Cells at once, enemies with guns and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
+- **The second round the owner chose on 10 October 2026,** each its own pull request: the launchers (slice 10A), the coil and plasma guns (slice 10B), the double-barrels (slice 10C) and the sculk guns (slice 10D); a rack that charges several Energy Cells at once (slice 10E), enemies with guns and pistols in both hands. The three follow-ups of the first round are slices 9E, 9F and 9G.
 - **Aimed, the gun hand covered the sights** in the CI screenshots from 8 October, and a fitted stock came up under the eye: slice 9F draws the arms at half size aimed and leaves a fitted stock out ([above](#slice-9f-the-aiming-polish)).
 - **Not yet:**
   - the jam the Gnat's sound suggests;

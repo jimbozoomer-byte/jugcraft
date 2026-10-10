@@ -1333,6 +1333,9 @@ def tags():
         tags.add("block", f"minecraft:mineable/{tool}", rid(block))
     import fortifications
     fortifications.add_tags(tags)
+    import guns
+    # The Cell Rack (slice 10E) is mined like the other machines.
+    tags.add("block", "minecraft:mineable/pickaxe", rid(guns.RACK))
     import bunkerworks
     bunkerworks.add_tags(tags)
     import fire_control

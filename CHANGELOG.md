@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 10E (the Cell Rack)
+- **A new block, the Cell Rack:** two shelves of three cradles that charge every Energy Cell standing in them at once from cables, sharing up to 1,024 JE a tick evenly, no more than the Charging Station's 512 to one cell. Stand a cell in the cradle you point at, take one out with an empty hand; hoppers above or beside it put cells in, and a hopper below takes out only full ones.
+- Made from the Charging Station's parts, a steel plate in place of its lamp; it needs the guns and machines switches, as the Energy Cell does. It is drawn in the power gear's electric look, the cells standing upright in it.
+- Also corrects the record's Charging Station time for a cell (slice 8D): 20 to 40 ticks, not seconds.
+- Record: [guns.md, slice 10E](docs/features/guns.md#slice-10e-the-cell-rack).
+
 ### Unmerged: Guns, slice 10D (the sculk guns)
 - **Three new guns** from the owner's sculk-teal models and animations, each with sculk tendrils that sway as it is handled: the **Undertone Rifle**, one hard shot a pull from a magazine of twelve rifle rounds; the **Murmur SMG**, ten light rounds a second while the trigger is held; and the **Reverb**, a double-barrel of ten-pellet buckshot whose barrels turn aside to take a shell at a time.
 - Each is made from steel, a lever, sculk and an echo shard from the deep dark's ancient cities. Each takes the scopes and the Laser Sight; the Undertone Rifle the stocks, the Murmur SMG the magazines, the Reverb the light and tactical grips.
