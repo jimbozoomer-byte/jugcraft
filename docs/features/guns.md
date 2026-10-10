@@ -2671,6 +2671,24 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `glowmouthArcLeapsFromWideOfItsAim`: its arc finds the pig a block off its aim six blocks out, strikes it for 10 and leaps for 6 to the pig two blocks beside it; the pig far off to the side is untouched.
   - "Every gun registered" now counts forty-two guns, and slice 9E's `tacticalAttachmentsFitTheirGuns` counts the Solenoid and Votive Rifles among the guns with the owner's tactical grip parts.
   - `GunsClientGameTests` takes the three new guns through its steps as it takes every gun: held, aimed, fired at the husk (each shot drawn, `GunTracePayload`), reloaded from Energy Cells, inspected, with each set of attachments they take, seen from outside, and in the inventory.
+- **Slice 10B in CI, first run** ([run 38068295432](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38068295432), on 452140910): every check passed but one server test outside this slice.
+  - **Server game tests:** 1287 in each job. This branch stands on slice 10A's, which stands on `main` from before https://github.com/jimbozoomer-byte/jugcraft/pull/298, so it holds 1277 of `main`'s tests, slice 10A's five and this slice's five.
+    - All 1287 passed in `optional integrations absent`, `CoilPlasmaGunsGameTests` among them.
+    - In `mod`, all but one passed. The one was the Arms VIII javelin test: "The pig at 1.50 2.00 7.50 is not struck yet (come down at 1.47 2.00 9.58 …)". It failed the same way on `main` at 4b36d2254. Its fix is https://github.com/jimbozoomer-byte/jugcraft/pull/303, and e5c264d25 ports that fix's `ThrownArm` change here.
+  - **`GunsClientGameTests`** (the client job's first shard). Each of the three guns went through its steps:
+    - its arms drawn at full size held and half size aimed;
+    - aimed, the view narrowed to 0.75 (Solenoid Rifle), 0.85 (Votive Rifle) and 0.95 (Glowmouth);
+    - fired at the husk, each drew its shot (a beam or an arc, and 8 flash frames) and spent a round. The Solenoid's beam took the husk from 606.44 to 592.44, the Votive's from 592.44 to 589.44 and the Glowmouth's arc from 589.44 to 579.44: 14, 3 and 10;
+    - reloaded from two full Energy Cells (20,000 JE): the Solenoid's charge left 18,900 JE, the Votive's 19,800 and the Glowmouth's 19,250, so 1,100, 200 and 750 a charge;
+    - where their animations cue a casing, an energy weapon vents sparks: through the shot and the reload, once from the Solenoid and three times each from the Votive and the Glowmouth;
+    - with each set of attachments the two rifles take; their stocks were drawn held and left out aimed (41 to 47 frames).
+  - **Screenshots** (the guns' own fifteen, the 16 with attachments and the six from outside):
+    - **Solenoid Rifle:** held at the right of the view, the battery's glowing plate on its side. Aimed, its rear sight stands under the crosshair on the husk, the back of its stock below and the battery to the left. Reloading, the left arm comes up over the right half of the view (see the known limits). Inspected, the gun is turned up toward the eye, the left hand on it.
+    - **Votive Rifle:** held at the right, its windows glowing green. Aimed, the dark back of its receiver, with a teal window, stands under the crosshair, the husk above. Reloading, it is lowered and turned at the bottom right, the left hand under it. Inspected, it is raised and turned to show its side.
+    - **Glowmouth:** held at the lower right. Aimed, its back stands under the crosshair with the husk above, a green glowing part at each side. Reloading, it lies at the bottom right with its crank, the left hand at it. Inspected, it is tilted toward the eye.
+    - **From outside:** each is held at the chest; fired, a flash shows at the muzzle.
+    - **With attachments:** aimed, no fitted stock comes up under the eye. With the Laser Sight, aimed, its box stands just right of the crosshair, over the husk's side, as on every gun that takes it.
+- **Slice 10B in CI, second run** ([run 38070317842](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38070317842), on e5c264d25, with the javelin fix ported): every check passed. All 1287 server game tests passed in each job, the javelin test's five throws among them, and the four client shards passed.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
