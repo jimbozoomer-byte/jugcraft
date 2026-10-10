@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
 import io.github.jimbozoomer.jugcraft.guns.GunSpec;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -22,20 +23,35 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * In-game tests for the Nether guns (slice 11A, docs/features/guns.md), through the server's entry points as
- * {@link GunsGameTests} does: the Tusker is loaded a shell at a time, the Cinder Repeater a magazine at a time, the Bastion
- * Rifle a round at a time; each lands its shot on what it aims at and sets it alight. Shooters face south (+z).
+ * In-game tests for the Nether guns (slices 11A and 11B, docs/features/guns.md), through the server's entry points as
+ * {@link GunsGameTests} does: the Tusker and the Crackling are loaded a shell at a time, the Cinder Repeater and the
+ * Goldbristle Carbine a magazine at a time, the Ashfall Pistol a tank at a time, the Bastion Rifle a round at a time;
+ * each lands its shot on what it aims at and sets it alight. Shooters face south (+z).
  */
 public class NetherGunsGameTests {
-	/** The Nether guns, in the order the creative tab shows them. */
-	static final List<String> GUNS = List.of("tusker", "cinder_repeater", "bastion_rifle");
+	/** Slice 11A's Nether guns, in the order the creative tab shows them. */
+	static final List<String> FIRST = List.of("tusker", "cinder_repeater", "bastion_rifle");
+	/** Slice 11B's, after them. */
+	static final List<String> SECOND = List.of("ashfall_pistol", "goldbristle_carbine", "crackling");
+	/** The Nether guns. */
+	static final List<String> GUNS = List.of("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine",
+			"crackling");
+	/** The stocks, the grips, the barrels' attachments, the bayonets, the scopes and the Laser Sight. */
+	static final List<String> FULL = List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "tactical_grip", "silencer",
+			"baffled_silencer", "muzzle_brake", "extended_barrel", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet",
+			"long_scope", "medium_scope", "reflex_sight", "laser_sight");
 
 	/**
 	 * Each is registered with its numbers and its recipe loads, and fires bullets that set what they hurt alight; no other
 	 * gun's do. The Tusker fires eight pellets from six buckshot shells loaded a shell at a time; the Cinder Repeater fires
 	 * light rounds for as long as the trigger is held, from a magazine of twenty; the Bastion Rifle fires one rifle round a
-	 * pull from five loaded a round at a time. Each takes the stocks, the grips, the bayonets, the barrels' attachments, the
-	 * scopes and the Laser Sight, and the Cinder Repeater the magazines too.
+	 * pull from five loaded a round at a time. The Ashfall Pistol, held in one hand, fires one light round a pull from a
+	 * tank of eight; the Goldbristle Carbine one rifle round a pull from a magazine of twelve; the Crackling six pellets
+	 * from five buckshot shells loaded a shell at a time. The Tusker, the Cinder Repeater, the Bastion Rifle and the
+	 * Goldbristle Carbine take the stocks, the grips, the bayonets, the barrels' attachments, the scopes and the Laser
+	 * Sight, and the Cinder Repeater and the Goldbristle Carbine the magazines too. The Ashfall Pistol takes the stocks, the
+	 * scopes and the Laser Sight only; the Crackling the stocks, the grips and the bayonets only, the barrels' attachments
+	 * the owner made for it being too short for its barrel.
 	 */
 	@GameTest
 	public void netherGunsAreRegistered(GameTestHelper helper) {
@@ -47,10 +63,10 @@ public class NetherGunsGameTests {
 					name + " does not fire bullets that set what they hit alight");
 			helper.assertTrue(helper.getLevel().recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(name))).isPresent(),
 					"The " + name + " recipe does not load");
-			helper.assertTrue(JugcraftGuns.ACCEPTS.getOrDefault(name, List.of()).containsAll(List.of("light_stock", "weighted_stock",
-					"wooden_stock", "light_grip", "tactical_grip", "silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
-					"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
-					"reflex_sight", "laser_sight")), "The " + name + " does not take the stocks, grips, barrels, bayonets and scopes");
+		}
+		for (String name : List.of("tusker", "cinder_repeater", "bastion_rifle", "goldbristle_carbine")) {
+			helper.assertTrue(JugcraftGuns.ACCEPTS.getOrDefault(name, List.of()).containsAll(FULL),
+					"The " + name + " does not take the stocks, grips, barrels, bayonets and scopes");
 		}
 		helper.assertTrue(JugcraftGuns.INCENDIARY.equals(Set.copyOf(GUNS)), "Guns besides the Nether guns set what they hit alight: "
 				+ JugcraftGuns.INCENDIARY);
@@ -63,24 +79,74 @@ public class NetherGunsGameTests {
 				"The Cinder Repeater is not an automatic of twenty light rounds");
 		helper.assertTrue(bastion.ammo().equals("rifle_round") && bastion.pellets() == 1 && bastion.capacity() == 5 && bastion.byShell()
 				&& !bastion.auto(), "The Bastion Rifle is not a rifle of five rounds, one a pull, loaded a round at a time");
-		helper.assertTrue(JugcraftGuns.ACCEPTS.get("cinder_repeater").containsAll(List.of("extended_magazine", "speed_magazine")),
-				"The Cinder Repeater does not take the magazines");
+		GunSpec ashfall = JugcraftGuns.SPECS.get("ashfall_pistol");
+		GunSpec goldbristle = JugcraftGuns.SPECS.get("goldbristle_carbine");
+		GunSpec crackling = JugcraftGuns.SPECS.get("crackling");
+		helper.assertTrue(ashfall.ammo().equals("light_round") && ashfall.pellets() == 1 && ashfall.capacity() == 8 && !ashfall.byShell()
+				&& !ashfall.auto() && JugcraftGuns.ONE_HANDED.contains("ashfall_pistol"),
+				"The Ashfall Pistol is not a pistol held in one hand, of eight light rounds, one a pull");
+		helper.assertTrue(goldbristle.ammo().equals("rifle_round") && goldbristle.pellets() == 1 && goldbristle.capacity() == 12
+				&& !goldbristle.byShell() && !goldbristle.auto() && !JugcraftGuns.ONE_HANDED.contains("goldbristle_carbine"),
+				"The Goldbristle Carbine is not a carbine of twelve rifle rounds, one a pull");
+		helper.assertTrue(crackling.ammo().equals("buckshot_shell") && crackling.pellets() == 6 && crackling.capacity() == 5
+				&& crackling.byShell() && !crackling.auto(), "The Crackling is not a shotgun of six pellets and five shells loaded a shell at a time");
+		for (String name : List.of("cinder_repeater", "goldbristle_carbine")) {
+			helper.assertTrue(JugcraftGuns.ACCEPTS.get(name).containsAll(List.of("extended_magazine", "speed_magazine")),
+					"The " + name + " does not take the magazines");
+		}
+		helper.assertTrue(JugcraftGuns.ACCEPTS.get("ashfall_pistol").equals(List.of("light_stock", "weighted_stock", "wooden_stock",
+				"long_scope", "medium_scope", "reflex_sight", "laser_sight")), "The Ashfall Pistol takes " + JugcraftGuns.ACCEPTS.get("ashfall_pistol"));
+		helper.assertTrue(JugcraftGuns.ACCEPTS.get("crackling").equals(List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "tactical_grip")),
+				"The Crackling takes " + JugcraftGuns.ACCEPTS.get("crackling"));
 		helper.succeed();
 	}
 
 	/**
-	 * Side by side, each fires its last round at a pig three blocks off: the Tusker's pellets land together, the Cinder
-	 * Repeater's and the Bastion Rifle's one shot takes one round's damage. Each then loads from the inventory: the Cinder
-	 * Repeater has nothing in halfway through its reload and is full as it ends; the Tusker and the Bastion Rifle have one
-	 * round in after the first round's time and all of them after the reload. Two rounds are left in the inventory each
-	 * time.
+	 * Side by side, each of slice 11A's guns fires its last round at a pig three blocks off: the Tusker's pellets land
+	 * together, the Cinder Repeater's and the Bastion Rifle's one shot takes one round's damage. Each then loads from the
+	 * inventory: the Cinder Repeater has nothing in halfway through its reload and is full as it ends; the Tusker and the
+	 * Bastion Rifle have one round in after the first round's time and all of them after the reload. Two rounds are left
+	 * in the inventory each time.
 	 */
 	@GameTest(structure = GunsGameTests.ARENA, maxTicks = 200)
 	public void netherGunsFireAndLoad(GameTestHelper helper) {
+		fireAndLoad(helper, FIRST);
+	}
+
+	/**
+	 * The same for slice 11B's guns: the Crackling's pellets land together, the Ashfall Pistol's and the Goldbristle
+	 * Carbine's one shot takes one round's damage; the Ashfall Pistol and the Goldbristle Carbine have nothing in halfway
+	 * through their reloads and are full as they end, the Crackling one shell in after the first shell's time and all five
+	 * after its reload.
+	 */
+	@GameTest(structure = GunsGameTests.ARENA, maxTicks = 200)
+	public void secondNetherGunsFireAndLoad(GameTestHelper helper) {
+		fireAndLoad(helper, SECOND);
+	}
+
+	/**
+	 * Each of slice 11A's guns sets the pig it hits alight, and the fire goes on hurting it after the shot; an Undertone
+	 * Rifle's shot (slice 10D) leaves its pig unlit and hurts it no more. No block catches fire, though the pellets that
+	 * miss strike the stone behind.
+	 */
+	@GameTest(structure = GunsGameTests.ARENA, maxTicks = 100)
+	public void netherGunsSetWhatTheyHitAlight(GameTestHelper helper) {
+		setAlight(helper, FIRST);
+	}
+
+	/** The same for slice 11B's guns. */
+	@GameTest(structure = GunsGameTests.ARENA, maxTicks = 100)
+	public void secondNetherGunsSetWhatTheyHitAlight(GameTestHelper helper) {
+		setAlight(helper, SECOND);
+	}
+
+	/** Each gun fires its last round at its own pig, then loads from the inventory in its own time. */
+	private static void fireAndLoad(GameTestHelper helper, List<String> guns) {
 		GunsGameTests.floor(helper);
 		int longest = 0;
-		for (int i = 0; i < GUNS.size(); i++) {
-			String name = GUNS.get(i);
+		for (int i = 0; i < guns.size(); i++) {
+			String name = guns.get(i);
 			GunSpec spec = JugcraftGuns.SPECS.get(name);
 			Item rounds = JugcraftGuns.ROUNDS.get(spec.ammo());
 			Mob pig = sturdyPig(helper, new BlockPos(1 + 4 * i, 2, 4));
@@ -117,14 +183,13 @@ public class NetherGunsGameTests {
 	}
 
 	/**
-	 * Each Nether gun's shot sets the pig it hits alight, and the fire goes on hurting it after the shot; an Undertone
-	 * Rifle's shot (slice 10D) leaves its pig unlit and hurts it no more. No block catches fire, though the pellets that
-	 * miss strike the stone behind.
+	 * Each gun fires at its own pig, and an Undertone Rifle beside them at another: each Nether gun's pig is set alight and
+	 * hurt again by the fire within two seconds; the Undertone Rifle's is neither. No block catches fire.
 	 */
-	@GameTest(structure = GunsGameTests.ARENA, maxTicks = 100)
-	public void netherGunsSetWhatTheyHitAlight(GameTestHelper helper) {
+	private static void setAlight(GameTestHelper helper, List<String> guns) {
 		GunsGameTests.floor(helper);
-		List<String> fired = List.of("tusker", "cinder_repeater", "bastion_rifle", "undertone_rifle");
+		List<String> fired = new ArrayList<>(guns);
+		fired.add("undertone_rifle");
 		float[] afterShot = new float[fired.size()];
 		Mob[] pigs = new Mob[fired.size()];
 		for (int i = 0; i < fired.size(); i++) {

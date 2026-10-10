@@ -510,6 +510,33 @@ GUNS = {
         "damage": 14.0, "pellets": 1, "interval": 18, "auto": False, "capacity": 5,
         "reload": (15, 13, 16), "spread": (2.0, 0.15), "range": 112, "ammo": "rifle_round",
     },
+    # Slice 11B, the rest of the Nether guns: a pistol held in one hand, the tank under its barrel changed to reload; a
+    # carbine fed from a magazine at its left side; and a long pump shotgun in gold. Their shots set what they hit
+    # alight too (INCENDIARY).
+    "ashfall_pistol": {
+        "display": "Ashfall Pistol",
+        "source": "pyroclastic_flow",
+        "tooltip": "A Nether-forged pistol held in one hand, the tank under its barrel changed to reload: heavy shots that "
+                   "set what they hit alight. Fires light rounds.",
+        "damage": 6.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 8,
+        "reload": 47, "spread": (2.5, 0.8), "range": 56, "ammo": "light_round",
+    },
+    "goldbristle_carbine": {
+        "display": "Goldbristle Carbine",
+        "source": "freyr",
+        "tooltip": "A Nether-forged carbine fed from a magazine at its left side: one hard shot each pull that sets what it "
+                   "hits alight. Fires rifle rounds.",
+        "damage": 7.0, "pellets": 1, "interval": 7, "auto": False, "capacity": 12,
+        "reload": 41, "spread": (2.5, 0.4), "range": 88, "ammo": "rifle_round",
+    },
+    "crackling": {
+        "display": "Crackling",
+        "source": "ribs_glory",
+        "tooltip": "A long Nether-forged pump shotgun in gold: six heavy pellets that keep together and set what they hit "
+                   "alight. Loaded a shell at a time. Fires buckshot shells.",
+        "damage": 4.0, "pellets": 6, "interval": 20, "auto": False, "capacity": 5,
+        "reload": (6, 10, 11), "spread": (5.0, 3.0), "range": 36, "ammo": "buckshot_shell",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -671,6 +698,14 @@ RECIPES = {
                                          "B": "minecraft:gilded_blackstone"}),
     "bastion_rifle": (["SSS", "GLB"], {"S": "#c:ingots/steel", "G": "minecraft:gold_ingot", "L": "minecraft:lever",
                                        "B": "minecraft:gilded_blackstone"}),
+    # Slice 11B, the same: the Ashfall Pistol a steel ingot and a gold ingot, the Goldbristle Carbine two of each, the
+    # Crackling two of each the other way about.
+    "ashfall_pistol": (["SG ", " LB"], {"S": "#c:ingots/steel", "G": "minecraft:gold_ingot", "L": "minecraft:lever",
+                                        "B": "minecraft:gilded_blackstone"}),
+    "goldbristle_carbine": (["SSG", "GLB"], {"S": "#c:ingots/steel", "G": "minecraft:gold_ingot", "L": "minecraft:lever",
+                                             "B": "minecraft:gilded_blackstone"}),
+    "crackling": (["GGS", "SLB"], {"S": "#c:ingots/steel", "G": "minecraft:gold_ingot", "L": "minecraft:lever",
+                                   "B": "minecraft:gilded_blackstone"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -1623,6 +1658,60 @@ BUILDS = {
         "sight": (8.0, 6.75, 12.4),
         "eye_relief": 6.0,
     },
+    # Slice 11B. The Pyroclastic Flow is held in one hand: its idle hides the left arm, which comes in to work the slider
+    # at the front of the tank under its barrel (the main part's 23rd to 25th elements) and change the tank (its 26th
+    # and 27th), which the owner's groups hang from the slider. Its parts have no bolt, so the bolt bone each shot
+    # moves holds nothing, nor do the magazine bones it scales.
+    "ashfall_pistol": {
+        "bones": [
+            ("gun_body", None, ["main-#22,23,24,25,26", "sights"], (8.0, 2.6, 14.3)),
+            ("bolt", "gun_body", [], (8.0, 5.2, 13.0)),
+            ("slider", "gun_body", ["main#22,23,24"], (8.0, 3.0, 4.1)),
+            ("tank2", "slider", ["main#25,26"], (8.0, 2.18, 5.255)),
+            ("magazine", "gun_body", [], (8.0, 2.18, 7.0)),
+            ("magazine_2", "gun_body", [], (8.0, 2.18, 7.0)),
+        ],
+        "hands": {"right": (8.0, 2.6, 14.3), "left": (8.0, 2.2, 2.9)},
+        "hand_pose": {"left": ("reload", "0.4583")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.6533, -0.2706, 0.7071)},
+        "muzzle": (8.0, 5.05, -1.9),
+        "sight": (8.0, 6.72, 14.03),
+    },
+    # The Freyr's bolt is the plate along its top (the main part's 7th element), as the Vulcanic Repeater's; its seal
+    # the diamond with the glowing stone on its back (the 19th and 20th), which each shot rocks. Its magazine goes in
+    # at its left side.
+    "goldbristle_carbine": {
+        "bones": [
+            ("gun_body", None, ["main-#6,18,19", "stan_barrel", "sights", "stan_grip"], (8.0, 2.95, 14.8)),
+            ("bolt", "gun_body", ["main#6"], (8.0, 6.325, 12.225)),
+            ("seal", "gun_body", ["main#18,19"], (8.0, 5.275, 14.525)),
+            ("magazine", "gun_body", ["stan_mag"], (5.12, 5.06, 11.78)),
+        ],
+        "hands": {"right": (8.0, 2.95, 14.8), "left": (8.0, 1.8, 9.6)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (-0.7934, -0.6088, 0.0)},
+        "muzzle": (8.0, 4.95, 3.9),
+        "sight": (8.0, 6.82, 14.23),
+        "eye_relief": 1.0,
+    },
+    # The Ribs Glory is the Killer 23 (the Sledge) lengthened, with its own long barrel, ribbed at the muzzle: its bolt
+    # part is its pump, its rear notch the pair of posts on the receiver, and its shell, magazine, scriptures and
+    # no_sights bones hold nothing, as the Sledge's. Its standard barrel part is the Killer 23's, the same box as its own
+    # barrel's back two thirds, and is left out (MISFITS).
+    "crackling": {
+        "bones": [
+            ("gun_body", None, ["main"], (8.0, 2.31, 17.65)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 3.2, 4.25)),
+            ("shell", "gun_body", [], (8.0, 3.2, 12.0)),
+            ("magazine", "gun_body", [], (8.0, 3.2, 8.0)),
+            ("scriptures", "gun_body", [], (8.0, 6.0, 12.0)),
+            ("no_sights", "gun_body", [], (8.0, 6.3, 9.5)),
+        ],
+        "hands": {"right": (8.0, 2.31, 17.65), "left": (8.0, 2.0, 2.75)},
+        "arms": {"right": (-0.2948, -0.1586, 0.9423), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.1, -8.22),
+        "sight": (8.0, 6.45, 9.1),
+        "eye_relief": 6.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -1894,12 +1983,20 @@ ATTACHMENT_RECIPES = {
 # The Netherite Bayonet is a Diamond Bayonet upgraded at a smithing table, as netherite tools are.
 NETHERITE_UPGRADES = {"netherite_bayonet": "diamond_bayonet"}
 
+# Attachments whose parts are among a gun's but do not fit its model (slice 11B): the Ribs Glory's barrel parts are the
+# Killer 23's, made for a barrel that ends at z -1.2. Its own barrel runs on to -8.2, so the silencers and the muzzle
+# brake would sit inside its shroud, halfway along it, and the extended barrel inside the barrel itself.
+MISFITS = {"crackling": ("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel")}
+
 
 def attachment_part(gun, kind):
     """The part entry this gun shows the attachment with, or None. A scope's is its own item model mounted on the gun
     ("%<kind>", optic_part()), on a gun the owner made to take one (takes_optics()). Any other attachment's is the
     first of its "parts" the gun has, if every face draws on a texture in the library (the gun's own or, since slice 7,
-    one the owner shares between guns, merged into the gun's atlas by atlas_layout())."""
+    one the owner shares between guns, merged into the gun's atlas by atlas_layout()), unless it is among the gun's
+    MISFITS."""
+    if kind in MISFITS.get(gun, ()):
+        return None
     if ATTACHMENTS[kind].get("mount"):
         return f"%{kind}" if takes_optics(gun) and gun not in ATTACHMENTS[kind].get("not_on", ()) else None
     for name in ATTACHMENTS[kind]["parts"]:
@@ -2104,8 +2201,9 @@ ZOOM = {
     "mule": 0.92, "fowler": 0.88, "culverin": 0.94,
     # The sculk guns (slice 10D): a rifle, a machine gun and a double-barrel.
     "undertone_rifle": 0.82, "murmur_smg": 0.9, "reverb": 0.9,
-    # The Nether guns (slice 11A): a shotgun, a repeater and a rifle.
+    # The Nether guns (slice 11A): a shotgun, a repeater and a rifle; (slice 11B) a pistol, a carbine and a shotgun.
     "tusker": 0.9, "cinder_repeater": 0.88, "bastion_rifle": 0.8,
+    "ashfall_pistol": 0.9, "goldbristle_carbine": 0.85, "crackling": 0.9,
 }
 
 
@@ -2206,8 +2304,10 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    "mule": {"reload_mag_in": "shell_in"},
                    # The Reverb (slice 10D) pushes a shell in at a time.
                    "reverb": {"reload_mag_in": "shell_in"},
-                   # Of the Nether guns (slice 11A), the Tusker pushes a shell in at a time, the Bastion Rifle a round.
-                   "tusker": {"reload_mag_in": "shell_in"}, "bastion_rifle": {"reload_mag_in": "shell_in"}}
+                   # Of the Nether guns (slice 11A), the Tusker pushes a shell in at a time, the Bastion Rifle a round;
+                   # (slice 11B) the Crackling a shell.
+                   "tusker": {"reload_mag_in": "shell_in"}, "bastion_rifle": {"reload_mag_in": "shell_in"},
+                   "crackling": {"reload_mag_in": "shell_in"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -2281,6 +2381,11 @@ SHOT_SOUNDS = {
     "tusker": "item/bruiser/fire.ogg",
     "cinder_repeater": "item/rusty_gnat/enchanted_fire.ogg",
     "bastion_rifle": "item/heavier_rifle/fire.ogg",
+    # Slice 11B: the Sentry Pistol's shot, the Patchwork Carbine's and the Coach Gun's. The library's shots not used
+    # yet are silenced takes, rocket, flamethrower and jetpack sounds and wind-ups, or carry tags naming another source.
+    "ashfall_pistol": "item/scrapper/fire.ogg",
+    "goldbristle_carbine": "item/makeshift_rifle/fire.ogg",
+    "crackling": "item/brass_shotgun/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -2415,12 +2520,12 @@ def one_handed():
     return [gun for gun in GUNS if not two_handed(gun)]
 
 
-# ------------------------------------------------------------------ the Nether guns' fire (slice 11A)
+# ------------------------------------------------------------------ the Nether guns' fire (slices 11A and 11B)
 
 # Each creature a Nether gun's bullet or pellets hurt is set alight for BURN_SECONDS, as the Stoker's flame sets it
 # alight (slice 8C, GunShots.BURN_SECONDS): fire's own damage, one a second, which fireproof creatures shrug off and
 # water puts out. No block is set alight (JugcraftGuns.INCENDIARY).
-INCENDIARY = ("tusker", "cinder_repeater", "bastion_rifle")
+INCENDIARY = ("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling")
 BURN_SECONDS = 4
 
 
@@ -2798,7 +2903,8 @@ FRAMED = {"scguns:item/rocket_rifle",
           "scguns:item/gauss_rifle_animated", "scguns:item/plasgun_animated",
           # Slice 10D: the sculk guns' glowing parts (three frames) and their tendrils (sixteen).
           "scguns:item/sculk_resonator_animated", "scguns:item/sculk_resonator_tendril", "scguns:item/echoes_2_animated",
-          # Slice 11A: the Cinder Repeater's glowing stone, three frames (the Pyroclastic Flow's).
+          # Slice 11A: the Cinder Repeater's glowing stone, three frames (the Pyroclastic Flow's); slice 11B's Goldbristle
+          # Carbine's too.
           "scguns:item/pyroclastic_flow_animated"}
 
 

@@ -75,6 +75,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * <li>Slice 11A, the Nether guns, on the rounds the other guns fire: the Tusker, a pump shotgun loaded a shell at a
  * time; the Cinder Repeater, an automatic; and the Bastion Rifle, loaded a round at a time through its trapdoor. Their
  * shots set what they hit alight ({@link #INCENDIARY}).</li>
+ * <li>Slice 11B, the rest of the Nether guns, whose shots set what they hit alight too: the Ashfall Pistol, held in one
+ * hand ({@link #ONE_HANDED}), the tank under its barrel changed to reload; the Goldbristle Carbine, fed from a magazine
+ * at its side; and the Crackling, a long pump shotgun of six heavy pellets, loaded a shell at a time.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -137,6 +140,9 @@ public final class JugcraftGuns {
 		SPECS.put("tusker", new GunSpec(3.0F, 8, 14, false, 6, 0, 12, 12, 13, 6.5F, 4.5F, 28, "buckshot_shell"));
 		SPECS.put("cinder_repeater", new GunSpec(3.5F, 1, 3, true, 20, 48, 0, 0, 0, 3.0F, 1.2F, 48, "light_round"));
 		SPECS.put("bastion_rifle", new GunSpec(14.0F, 1, 18, false, 5, 0, 15, 13, 16, 2.0F, 0.15F, 112, "rifle_round"));
+		SPECS.put("ashfall_pistol", new GunSpec(6.0F, 1, 8, false, 8, 47, 0, 0, 0, 2.5F, 0.8F, 56, "light_round"));
+		SPECS.put("goldbristle_carbine", new GunSpec(7.0F, 1, 7, false, 12, 41, 0, 0, 0, 2.5F, 0.4F, 88, "rifle_round"));
+		SPECS.put("crackling", new GunSpec(4.0F, 6, 20, false, 5, 0, 6, 10, 11, 5.0F, 3.0F, 36, "buckshot_shell"));
 	}
 
 	/**
@@ -179,14 +185,14 @@ public final class JugcraftGuns {
 	 * Slice 10G, two guns at once: the guns held in one hand (tools/guns.py one_handed()), of which a player may hold one
 	 * in each hand and fire both ({@link GunItem#dual}).
 	 */
-	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin");
+	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin", "ashfall_pistol");
 	/** Slice 10G: how much further each of two guns strays from the hip than one held alone (tools/guns.py DUAL_SPREAD). */
 	public static final float DUAL_SPREAD = 1.5F;
 	/**
-	 * Slice 11A, the Nether guns: the guns whose bullets set each creature they hurt alight, for
+	 * Slices 11A and 11B, the Nether guns: the guns whose bullets set each creature they hurt alight, for
 	 * {@link GunShots#BURN_SECONDS} as the Stoker's flame does (tools/guns.py INCENDIARY).
 	 */
-	public static final Set<String> INCENDIARY = Set.of("tusker", "cinder_repeater", "bastion_rifle");
+	public static final Set<String> INCENDIARY = Set.of("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling");
 
 	/** The attachments, in the order the creative tab shows them (tools/guns.py ATTACHMENTS). */
 	public static final Map<String, GunAttachment> ATTACHMENTS = new LinkedHashMap<>();
@@ -327,6 +333,15 @@ public final class JugcraftGuns {
 				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet",
 				"diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip",
 				"laser_sight"));
+		ACCEPTS.put("ashfall_pistol", List.of("light_stock", "weighted_stock", "wooden_stock", "long_scope", "medium_scope",
+				"reflex_sight", "laser_sight"));
+		ACCEPTS.put("goldbristle_carbine", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "tactical_grip", "laser_sight"));
+		// The Ribs Glory's barrel attachments are the Killer 23's, too short for its own barrel (tools/guns.py MISFITS).
+		ACCEPTS.put("crackling", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet",
+				"steel_bayonet", "diamond_bayonet", "netherite_bayonet", "tactical_grip"));
 	}
 
 	/** The rounds. */
