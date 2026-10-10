@@ -269,14 +269,14 @@ public final class Lairs {
 			return false;
 		}
 		Component name = Component.translatable("lair.jugcraft." + instance.lair.id);
-		if (!instance.members.contains(player.getUUID()) && instance.members.size() >= partySize()) {
+		if (!instance.hasRoom(player.getUUID())) {
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.lair.party_full", name));
 			return false;
 		}
 		ServerLevel from = (ServerLevel) player.level();
 		player.setAttached(VISIT, new LairVisit(instance.lair.id, instance.slot, instance.id, from.dimension().identifier().toString(),
 				player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot()));
-		instance.members.add(player.getUUID());
+		instance.admit(player.getUUID());
 		instance.emptySince = -1L;
 		player.stopRiding();
 		Vec3 at = instance.arrival();
@@ -353,7 +353,7 @@ public final class Lairs {
 			}
 			return;
 		}
-		instance.members.add(player.getUUID());
+		instance.admit(player.getUUID());
 		restrict(player);
 	}
 

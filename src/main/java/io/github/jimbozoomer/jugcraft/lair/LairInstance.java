@@ -62,4 +62,14 @@ public final class LairInstance {
 	public Set<UUID> members() {
 		return Set.copyOf(members);
 	}
+
+	/** Whether {@code player} may come in: they have been in before, or the party ({@code lairs.party_size}) has room. */
+	public boolean hasRoom(UUID player) {
+		return members.contains(player) || members.size() < Lairs.partySize();
+	}
+
+	/** Counts {@code player} into the party. */
+	public void admit(UUID player) {
+		members.add(player);
+	}
 }
