@@ -199,9 +199,12 @@ public class CinderKilnClientGameTests implements FabricClientGameTest {
 			ServerPlayer player = player(minecraft);
 			ServerLevel overworld = minecraft.overworld();
 			stood.set(player.position());
+			KilnSealRite.Missing ready = KilnSealRite.check(overworld, magma);
+			check(ready == null, "The seal could not open the kiln here: " + ready + ", in " + overworld.getBiome(magma).getRegisteredName());
 			BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(magma).add(0.0, 0.5, 0.0), Direction.UP, magma, false);
-			check(player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit)) == InteractionResult.SUCCESS,
-					"Pressing the seal did not succeed");
+			InteractionResult pressed = player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit));
+			check(pressed.consumesAction(), "Pressing the seal did not succeed: " + pressed + " (may build: "
+					+ player.getAbilities().mayBuild + ")");
 		});
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = player(minecraft);

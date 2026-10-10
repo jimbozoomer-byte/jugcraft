@@ -1,6 +1,6 @@
 # The Cinder Kiln, and the Kiln Seal
 
-Status: implemented in source; CI has not yet run it (below). Part 1 of boss 4, the Cinder Tyrant, in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Cinder Kiln, a fourth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Cinder Tyrant and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI's first run passed every server game test and failed two other checks (below). Part 1 of boss 4, the Cinder Tyrant, in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Cinder Kiln, a fourth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Cinder Tyrant and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 10 October 2026 the owner asked to "do the next boss same way" as the Yeti King; the Cinder Tyrant is the next of the first eight in the bosses brainstorm, and the planning pack's "Kiln Beneath the Mountain" ([chapter 05](../plans/concordance-expansion-2026-10-10/05-new-boss-compendium.md)).
 
 Target milestone and tier: Specialization tier (dungeon expeditions), as the other lairs are. The seal takes what a player has once they reach the Nether: obsidian, blaze powder, gold and a magma block.
@@ -108,7 +108,12 @@ Nothing is renamed.
 
 ## Verification
 
-CI: not yet run. The pictures and the results go here when it has.
+CI (GitHub Actions), on `8a7a4d4`, this pull request's first commit: **two failures.**
+- `mod` passed all 1299 required server game tests, the kiln's six among them, and `optional integrations absent` passed.
+- `repository` failed its check on how the client tests are shared out. With this pull request's client test class, the estimate for the busiest of the four client jobs came to 25 minutes 10 seconds, over the 25 it allows. The next commit gives the client tests a fifth job ([TESTING.md](../TESTING.md)), which brings the estimate to 20 minutes a job.
+- The client test stopped at the seal's press. It judged the press by comparing the item's result with the game's one plain success value, and the result was something else. The next commit asks only that the press took effect, and says what came back if it did not; the checks after it still look for the open kiln, the used seal and the vent.
+
+The pictures and the full results go here when CI has passed.
 
 Run locally:
 
