@@ -1468,9 +1468,10 @@ def check_guns():
         if 'Map.of("rustle", "gun_rustle")' not in animations:
             err("GunAnimations.SOUND_ALIASES does not play gun_rustle for rustle (tools/guns.py EVENT_SOUNDS)")
     for gun, overrides in guns.EVENT_OVERRIDES.items():
-        for event, sound in overrides.items():
-            if f'"{gun}", Map.of("{event}", "{sound}")' not in animations:
-                err(f"GunAnimations.GUN_SOUND_ALIASES does not play {sound} for {gun}'s {event} (tools/guns.py)")
+        pairs = ", ".join(f'"{event}", "{sound}"' for event, sound in overrides.items())
+        if f'"{gun}", Map.of({pairs})' not in animations:
+            err(f"GunAnimations.GUN_SOUND_ALIASES does not play {overrides} for {gun}'s events (tools/guns.py): "
+                f'expected "{gun}", Map.of({pairs})')
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in [f"key.{MOD}.reload", f"key.{MOD}.inspect", f"hud.{MOD}.guns.ammo", f"hud.{MOD}.guns.reloading",
                 f"message.{MOD}.guns.no_ammo", f"death.attack.{MOD}.bullet", f"death.attack.{MOD}.flame", f"tooltip.{MOD}.guns.fits",
@@ -1494,10 +1495,11 @@ def check_guns():
     for ammo, size in guns.FLASH_SIZE.items():
         if f'"{ammo}", {size}F' not in looks:
             err(f"GunLooks.FLASH_SIZES differs from tools/guns.py FLASH_SIZE for {ammo} ({size})")
-    # Slice 8B: the guns held further out aimed.
-    reliefs = ", ".join(f'"{gun}", {build["eye_relief"]}F' for gun, build in guns.BUILDS.items() if "eye_relief" in build)
-    if f"EYE_RELIEF = Map.of({reliefs});" not in looks:
-        err(f"GunLooks.EYE_RELIEF differs from tools/guns.py BUILDS eye_relief: expected Map.of({reliefs})")
+    # Slice 8B: the guns held further out aimed (more than Map.of's ten pairs since slice 9D).
+    reliefs = ", ".join(f'Map.entry("{gun}", {build["eye_relief"]}F)' for gun, build in guns.BUILDS.items()
+                        if "eye_relief" in build)
+    if f"EYE_RELIEF = Map.ofEntries({reliefs});" not in looks:
+        err(f"GunLooks.EYE_RELIEF differs from tools/guns.py BUILDS eye_relief: expected Map.ofEntries({reliefs})")
     # Slice 8C: the guns carried lower seen from outside, by their own third-person tilt.
     tints = ", ".join(f'"{ammo}", 0x{tint:06X}' for ammo, tint in guns.FLASH_TINT.items())
     if f"FLASH_TINTS = Map.of({tints});" not in looks:

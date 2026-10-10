@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 9D (the pump shotguns)
+- **Three steel shotguns** loaded a shell at a time, each the owner's model, art and animations, firing eight pellets a shot from Buckshot Shells:
+  - the **Sledge** (the owner's Killer 23), a heavy pump shotgun with a bird's-head grip: 4 a pellet, four shells, 24 blocks;
+  - the **Highwayman** (Turnpike), a long shotgun worked by the bolt on its right side: 3 a pellet, seven shells, 40 blocks, and the tightest aimed spread (2.5°). To reload, the left hand brings each shell up into the port under the receiver;
+  - the **Throttle** (Venturi), a short pump shotgun on a pistol grip: 3 a pellet, six shells, the quickest to fire. To reload, the bulb under its muzzle is twisted open and shut again with a clank.
+- **Attachments:** the Sledge and the Highwayman take the barrel attachments, the stocks, the light grip and the bayonets, and the Highwayman the scopes too; the Throttle the stocks (in its pistol grip's place) and the scopes.
+- **Aimed,** the Sledge and the Highwayman are held 6 px further out and the Throttle 2 px, so their kick stays clear of the eye.
+- Record: [guns.md, slice 9D](docs/features/guns.md#slice-9d-the-pump-shotguns).
+
 ### Unmerged: Guns, slice 9C (the second energy weapons)
 - **Three more energy weapons,** each the owner's model, art and animations, running on Energy Cells as slice 8D's do:
   - the **Spikedriver** (the owner's Railworker), a rail pistol held in one hand: a heavy beam, 12 to every creature in its line, out to 64 blocks; six charges of 800 JE. To reload, its side magazine is changed and the lever on its side swung back to charge the rails;

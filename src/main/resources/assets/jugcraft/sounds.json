@@ -758,6 +758,33 @@
       }
     ]
   },
+  "guns.sledge.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/makeshift_rifle_enchanted_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.highwayman.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/boomstick_enchanted_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.throttle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/plasma_shotgun_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [
