@@ -30,8 +30,14 @@ import org.joml.Vector3f;
  * from it toward its shoulder comes within a hand's breadth of the camera, or holds it: drawn, the arm's sleeve or its
  * inside fills the screen (the Trench Lobber's pump, in a CI screenshot of 9 October 2026).
  * An arm that close is left out for those frames, as vanilla leaves out a thrown item just leaving the eye.
+ * <p>
+ * Slice 9F, the aiming polish: aiming slides the gun's sight onto the middle of the screen, which brings the grip under
+ * the eye, from a fifth of a block from it (the Coach Gun) to three quarters (the Rattler Pistol). There the fist, four
+ * pixels across, covered the lower middle of the view, and on the guns whose grip comes nearest, half the screen. So
+ * the arms shrink about the hands as the aim comes in, to {@link #AIMED_SIZE} at full aim, and the gun's sight picture
+ * stays clear. A gun without sights, which stays at the hip, keeps them as they are.
  */
-final class GunArmsLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderData, GeoRenderState> {
+public final class GunArmsLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderData, GeoRenderState> {
 	/** The player model's arm runs from y -2 (shoulder) to 10 (fist); this puts the fist 2 px past the bone's pivot. */
 	private static final float FIST = 8.0F;
 	/** The player model's arm box, in pixels: from y -2 to 10 and z -2 to 2, its sleeve a quarter pixel bigger all round. */
@@ -41,6 +47,10 @@ final class GunArmsLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderD
 	private static final float SLEEVE = 0.25F;
 	/** An arm nearer the eye than this, in blocks, is left out (first person; the camera is at the view's origin). */
 	static final float NEAR_EYE = 0.1F;
+	/** The arms' size at full aim down a gun's sights, against their size at the hip (slice 9F). */
+	static final float AIMED_SIZE = 0.5F;
+	/** The size the last arm was drawn at (for the client game tests); NaN before any. */
+	private static float lastSize = Float.NaN;
 	private static ModelPart[] arms;
 	private static ModelPart[] slimArms;
 
@@ -54,15 +64,21 @@ final class GunArmsLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderD
 		if (view == null || !info.willRender()) {
 			return;
 		}
+		float size = GunRenderer.sight(info, view).isPresent() ? Mth.lerp(view.aim(), 1.0F, AIMED_SIZE) : 1.0F;
 		for (int side = 0; side < 2; side++) {
 			boolean right = side == 0;
 			info.model().getBone(right ? "right_arm" : "left_arm")
-					.ifPresent(bone -> consumer.accept(bone, (pass, posed, tasks) -> arm(pass, tasks, view, bone, right)));
+					.ifPresent(bone -> consumer.accept(bone, (pass, posed, tasks) -> arm(pass, tasks, view, bone, right, size)));
 		}
 	}
 
+	/** The size the last arm was drawn at, 1 at the hip ({@link #AIMED_SIZE}); NaN before any (for the client game tests). */
+	public static float lastSize() {
+		return lastSize;
+	}
+
 	private static void arm(RenderPassInfo<GeoRenderState> pass, net.minecraft.client.renderer.SubmitNodeCollector tasks,
-			GunRenderer.View view, GeoBone bone, boolean right) {
+			GunRenderer.View view, GeoBone bone, boolean right, float size) {
 		ModelPart part = parts(view.slim())[right ? 0 : 1];
 		// Centre the arm on the bone: a wide arm's box spans x -3..1 (right) or -1..3 (left), a slim one's -2..1 or -1..2.
 		float centre = view.slim() ? 0.5F : 1.0F;
@@ -81,6 +97,9 @@ final class GunArmsLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderD
 				}
 			}
 		}
+		// Smaller about the hand as the aim comes in (slice 9F).
+		poseStack.scale(size, size, size);
+		lastSize = size;
 		// Here the arm's box runs about the bone's axis: half its width (wide 2, slim 1.5) across x and z.
 		if (byTheEye(poseStack.last().pose(), view.slim() ? 1.5F : 2.0F)) {
 			poseStack.popPose();

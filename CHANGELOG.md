@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 9F (the aiming polish)
+- **Aimed down a gun's sights, the view stays clear:**
+  - the arms shrink to half their size as the aim comes in, so the fist sits small at the bottom of the gun instead of covering the lower middle of the screen (half of it on the long guns);
+  - a fitted stock is left out while aiming, where the Light and Weighted Stocks rose under the crosshair.
+- The view from the hip, the guns without sights, other players' view and the server are unchanged.
+- Record: [guns.md, slice 9F](docs/features/guns.md#slice-9f-the-aiming-polish).
+
 ### Unmerged: Guns, slice 9E (the tactical grip and the laser sight)
 - **Two attachments** from the owner's art:
   - the **Tactical Grip**, the owner's tactical grip parts on ten guns: a stubby grip under the fore-end, a little steadier from the hip (90% of the spread) and with a little less kick (80%);

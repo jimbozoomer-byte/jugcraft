@@ -17,6 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.item.ItemDisplayContext;
 import java.util.List;
+import java.util.Optional;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -41,6 +42,10 @@ import org.joml.Vector3f;
  * <p>
  * Slice 8C: a rotary gun's barrels turn as its holder spins them ({@link GunEffects#barrelTurn}); a flame gun's jet of
  * flame is a prop its shot moves. A gun without sights (the Thresher) is not slid over when aimed.
+ * <p>
+ * Slice 9F, the aiming polish: as a gun is slid onto its sights, its holder's arms are drawn smaller
+ * ({@link GunArmsLayer#AIMED_SIZE}), and past halfway a fitted stock is left out ({@link #SHOULDERED}): held where the
+ * hip view holds them, the grip hand and the Light and Weighted Stocks came up under the crosshair.
  */
 public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	/** The entity holding the gun (for where its sounds play). */
@@ -60,6 +65,14 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	private static final float THRUST_DROP = 0.06F;
 	/** A slot's attachment bones, and a second set where the slot is on two bones (the Warden Pistol's spare magazine). */
 	private static final List<String> SETS = List.of("", "_2");
+	/**
+	 * How far into aiming a fitted stock drops out of the player's own view (slice 9F). Aimed, a stock is set against the
+	 * shoulder, under and behind the eye; drawn where the hip view holds it, the Light and Weighted Stocks rose under the
+	 * crosshair as a block (the Garrison Rifle's Light Stock to the crosshair itself).
+	 */
+	static final float SHOULDERED = 0.5F;
+	/** Frames a fitted stock was left out while aiming (for the client game tests). */
+	private static long stowed;
 	/** How much further out this gun is held at full aim than at the hip (blocks; {@link GunLooks#EYE_RELIEF}). */
 	private final float eyeRelief;
 
@@ -101,6 +114,19 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 		}
 	}
 
+	/**
+	 * The locator aiming puts on the middle of the screen: the fitted scope's eyepiece, else the gun's own sight; none on a
+	 * gun without sights (the Thresher, the Seam Cutter), which stays at the hip when aimed.
+	 */
+	static Optional<GeoLocator> sight(RenderPassInfo<GeoRenderState> info, View view) {
+		return info.model().getLocator(view.sight()).or(() -> info.model().getLocator("sight"));
+	}
+
+	/** Frames a fitted stock was left out while aiming, so far (for the client game tests). */
+	public static long stowed() {
+		return stowed;
+	}
+
 	/** Whether the gun is drawn in someone's hand (not in a slot, on the ground or in a frame). */
 	private static boolean inHand(ItemDisplayContext context) {
 		return context == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND
@@ -117,7 +143,8 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 	 * <p>
 	 * Each attachment's bone ("att_&lt;id&gt;") shows only while it is fitted, and a slot's standard part
 	 * ("std_&lt;slot&gt;") only while nothing fitted replaces it. A rotary gun's barrels turn about their middle, which
-	 * runs along the bore (slice 8C).
+	 * runs along the bore (slice 8C). In the player's own view, a fitted stock is left out once they are halfway into
+	 * aiming down the gun's sights ({@link #SHOULDERED}; slice 9F).
 	 */
 	@Override
 	public void adjustModelBonesForRender(RenderPassInfo<GeoRenderState> info, BoneSnapshots snapshots) {
@@ -130,9 +157,15 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 		}
 		Fitted fitted = info.getGeckolibData(FITTED);
 		List<String> on = fitted == null ? List.of() : fitted.attachments();
+		View view = info.getGeckolibData(VIEW);
+		boolean shouldered = view != null && view.aim() >= SHOULDERED && sight(info, view).isPresent();
+		if (shouldered && on.stream().anyMatch(name -> JugcraftGuns.ATTACHMENTS.get(name).slot().equals("stock"))) {
+			stowed++;
+		}
 		for (String set : SETS) {
 			for (String name : JugcraftGuns.ATTACHMENTS.keySet()) {
-				snapshots.ifPresent("att_" + name + set, bone -> bone.skipRender(!on.contains(name)));
+				boolean stowedStock = shouldered && JugcraftGuns.ATTACHMENTS.get(name).slot().equals("stock");
+				snapshots.ifPresent("att_" + name + set, bone -> bone.skipRender(!on.contains(name) || stowedStock));
 			}
 			for (String slot : JugcraftGuns.SLOTS) {
 				boolean replaced = on.stream().map(JugcraftGuns.ATTACHMENTS::get)
@@ -147,7 +180,7 @@ public final class GunRenderer extends GeoItemRenderer<GunItem> {
 		PoseStack poseStack = info.poseStack();
 		View view = info.getGeckolibData(VIEW);
 		if (view != null && view.aim() > 0) {
-			GeoLocator sight = info.model().getLocator(view.sight()).or(() -> info.model().getLocator("sight")).orElse(null);
+			GeoLocator sight = sight(info, view).orElse(null);
 			if (sight != null) {
 				// Where the sight is on screen now, then the move that puts it on the crosshair (in view space).
 				Matrix4f pose = new Matrix4f(poseStack.last().pose()).translate(0.5F, 0.0F, 0.5F);
