@@ -1,6 +1,6 @@
 # Madame Tatterlace
 
-Status: implemented in source; not yet built or tested by CI (below). This is part 2 of boss 2 in the [Witching Season plan](witching-season.md#boss-2-madame-tatterlace-in-the-spindle-loft): the boss of the Spindle Loft, her brood and her things, and her loot. It is built on part 1, the loft and the Cursed Spindle that opens it ([spindle-loft.md](spindle-loft.md)), and on boss 1's lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest the plan asks for is still to do.
+Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 2 in the [Witching Season plan](witching-season.md#boss-2-madame-tatterlace-in-the-spindle-loft): the boss of the Spindle Loft, her brood and her things, and her loot. It is built on part 1, the loft and the Cursed Spindle that opens it ([spindle-loft.md](spindle-loft.md)), and on boss 1's lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest the plan asks for is still to do.
 Proposal issue: none. The owner approved the Witching Season plan on 4 October 2026, and on 10 October 2026 asked: "Do the bosses".
 Owner: @jimbozoomer-byte
 
@@ -174,7 +174,11 @@ No Mojang texture is read, traced or copied.
 
 ## Verification
 
-CI: not yet run. Its results, and the client game test's pictures, will be recorded here.
+CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `7551d9a` | Build, data audit, every server game test with and without the optional integrations, and the client tests chosen for it (`TatterlaceClientGameTests`, `VesperineClientGameTests`, `ArmsVIIClientGameTests`) | Compiled on the first try. **All pass:** all 1192 required game tests, her ten among them, and the three client tests: her whole fight in a real Spindle Loft. Her egg sacs and spiderlings were too far from the camera to show in its pictures |
 
 Run locally (10 October 2026):
 

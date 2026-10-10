@@ -12,6 +12,8 @@ import io.github.jimbozoomer.jugcraft.lair.tatterlace.TatterlaceEntity;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.TatterlaceLoot;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
@@ -21,6 +23,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -73,7 +76,7 @@ public class TatterlaceClientGameTests implements FabricClientGameTest {
 				check(tatterlace.position().distanceTo(tatterlace.perch()) < 0.1, "She is not on her silk but at " + tatterlace.position());
 			});
 			double perch = TatterlaceEntity.PERCH - SpindleLoft.LACE_TOP;
-			shot(context, singleplayer, loft, centre, 0.0, perch + 2.0, 9.0, 0.0, perch + 0.6, 0.0, false, "jugcraft_tatterlace_waiting");
+			shot(context, singleplayer, loft, centre, 0.0, perch + 1.0, 5.5, 0.0, perch + 0.5, 0.0, false, "jugcraft_tatterlace_waiting");
 
 			// Stepping onto the doily brings her down: the player, in survival on the lace south of her, and she lowers
 			// herself on her thread; caught on the way down.
@@ -85,7 +88,7 @@ public class TatterlaceClientGameTests implements FabricClientGameTest {
 			server.runCommand("tick freeze");
 			server.runOnServer(minecraft -> check(tatterlace(minecraft).phase() == TatterlaceEntity.Phase.DESCENDING,
 					"Stepping onto the doily did not bring her down: " + tatterlace(minecraft).phase()));
-			shot(context, singleplayer, loft, centre, 1.0, 0.0, 10.0, 0.0, perch / 2.0, 0.0, true, "jugcraft_tatterlace_descending");
+			shot(context, singleplayer, loft, centre, 2.0, 0.0, 6.5, 0.0, perch / 2.0 + 0.5, 0.0, true, "jugcraft_tatterlace_descending");
 			server.runCommand("tick unfreeze");
 			context.waitTicks(TatterlaceEntity.DESCEND_TICKS);
 			server.runOnServer(minecraft -> {
@@ -122,7 +125,8 @@ public class TatterlaceClientGameTests implements FabricClientGameTest {
 				check(tatterlace.phase() == TatterlaceEntity.Phase.TAKING_IN, "She is not taking in her seams but " + tatterlace.phase());
 				check(tatterlace.sacs(lair(minecraft)).size() == TatterlaceEntity.EGG_SACS, "She did not spit her egg sacs round the doily");
 			});
-			shot(context, singleplayer, loft, centre, 0.0, 7.0, 22.0, 0.0, 2.0, 0.0, true, "jugcraft_tatterlace_taking_in");
+			// From the south-east rim, over the egg sac nearest it, towards her climbing.
+			shot(context, singleplayer, loft, centre, 11.0, 3.0, 20.0, 4.0, 1.5, 6.0, true, "jugcraft_tatterlace_taking_in");
 			// Checked as she reaches the threads, before she can drop from them on her own.
 			server.runCommand("tick unfreeze");
 			context.waitTicks(TatterlaceEntity.TAKE_IN_TICKS / 2 + 5);
@@ -159,9 +163,22 @@ public class TatterlaceClientGameTests implements FabricClientGameTest {
 			});
 			shot(context, singleplayer, loft, centre, -4.5, 1.0, 10.0, 0.5, 0.6, 5.0, true, "jugcraft_tatterlace_drop_strike");
 			pose(context, server, centre, (tatterlace, level, player) -> tatterlace.begin(level, TatterlaceEntity.Attack.BROOD, player),
-					TatterlaceEntity.Attack.BROOD.windup + TatterEggSacEntity.HATCH_TICKS + 30);
-			server.runOnServer(minecraft -> check(!tatterlace(minecraft).brood().isEmpty(), "No spiderling came out of her egg sacs"));
-			shot(context, singleplayer, loft, centre, 0.0, 6.0, 15.0, 0.0, 0.0, 4.0, true, "jugcraft_tatterlace_brood");
+					TatterlaceEntity.Attack.BROOD.windup + TatterEggSacEntity.HATCH_TICKS + 4);
+			AtomicReference<Vec3> hatchling = new AtomicReference<>();
+			server.runOnServer(minecraft -> {
+				List<UUID> brood = tatterlace(minecraft).brood();
+				check(!brood.isEmpty(), "No spiderling came out of her egg sacs");
+				Entity newest = lair(minecraft).getEntity(brood.getLast());
+				check(newest != null, "Her newest spiderling is not in the loft");
+				hatchling.set(newest.position());
+			});
+			// Caught as they come out: from over the lace between the newest and the doily's middle, looking out at it.
+			Vec3 spider = hatchling.get();
+			Vec3 inward = new Vec3(centre.x - spider.x, 0.0, centre.z - spider.z).normalize();
+			Vec3 broodCamera = spider.add(inward.scale(5.0)).add(0.0, 1.5, 0.0);
+			Vec3 broodAim = spider.add(0.0, 0.3, 0.0);
+			shoot(context, singleplayer, loft, broodCamera.x, broodCamera.y, broodCamera.z, aimYaw(broodCamera, broodAim),
+					aimPitch(broodCamera, broodAim), true, "jugcraft_tatterlace_brood");
 
 			// Frenzied Stitching, below a fifth of her health: her cuffs glow red and she comes down to the lace for good;
 			// caught in a stab.
