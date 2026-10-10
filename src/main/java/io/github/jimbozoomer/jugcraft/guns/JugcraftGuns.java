@@ -44,6 +44,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  * round's {@link #CHARGE} from the Energy Cells in the inventory, which the Charging Station fills.</li>
  * <li>Slice 9A, the marksman rifles: semi-automatic rifles in steel, the steadiest aimed and the farthest reaching (the
  * Picket, Ranger and Kestrel Rifles); bullets like the rest.</li>
+ * <li>Slice 9B, the automatic weapons: the Rattler Pistol and Bronco SMG, held in one hand, and the Squall air rifle, each
+ * firing for as long as the trigger is held.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.</li>
  * </ul>
@@ -81,6 +83,9 @@ public final class JugcraftGuns {
 		SPECS.put("picket_rifle", new GunSpec(8.0F, 1, 8, false, 10, 43, 0, 0, 0, 2.0F, 0.1F, 128, "rifle_round"));
 		SPECS.put("ranger_rifle", new GunSpec(10.0F, 1, 10, false, 10, 45, 0, 0, 0, 2.5F, 0.15F, 120, "rifle_round"));
 		SPECS.put("kestrel_rifle", new GunSpec(9.0F, 1, 9, false, 8, 55, 0, 0, 0, 2.0F, 0.15F, 128, "rifle_round"));
+		SPECS.put("rattler_pistol", new GunSpec(3.0F, 1, 3, true, 20, 48, 0, 0, 0, 4.0F, 2.0F, 48, "light_round"));
+		SPECS.put("bronco_smg", new GunSpec(3.5F, 1, 3, true, 25, 53, 0, 0, 0, 5.0F, 2.5F, 40, "light_round"));
+		SPECS.put("squall_rifle", new GunSpec(2.5F, 1, 2, true, 40, 57, 0, 0, 0, 3.0F, 0.8F, 64, "light_round"));
 	}
 
 	/**
@@ -200,12 +205,18 @@ public final class JugcraftGuns {
 		ACCEPTS.put("kestrel_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet",
 				"diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
+		ACCEPTS.put("rattler_pistol", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "long_scope", "medium_scope", "reflex_sight"));
+		ACCEPTS.put("bronco_smg", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine"));
+		ACCEPTS.put("squall_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet",
+				"steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
 	}
 
 	/** The rounds. */
 	public static final List<String> AMMO = List.of("light_round", "rifle_round", "buckshot_shell", "paper_cartridge");
 	/** The sound events the animations and the guns play (assets/jugcraft/sounds.json, written by tools/guns.py). */
-	public static final List<String> SOUND_EVENTS = List.of("bolt", "bolt_pull", "bolt_release", "dry_fire",
+	public static final List<String> SOUND_EVENTS = List.of("bolt", "bolt_pull", "bolt_release", "clank", "dry_fire",
 			"gun_rustle", "insert", "jam", "lever", "metal", "pump", "pump_half", "rack", "reload_end", "reload_mag_in",
 			"reload_mag_out", "shell_in", "slap");
 	/** The rounds that leave a spent case, each with its particle jugcraft:&lt;round&gt;_casing (tools/guns.py CASINGS). */

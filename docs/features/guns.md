@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D) and the marksman rifles (slice 9A)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A) and the automatic weapons (slice 9B)
 
 Status:
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
@@ -14,6 +14,7 @@ Status:
 - **Slice 8C** (the heavy weapons: the Trench Lobber, Thresher and Stoker; [below](#slice-8c-the-heavy-weapons)): implemented on `claude/guns-heavy`, on the integration branch that holds slices 7b to 8B, awaiting review.
 - **Slice 8D** (the energy weapons: the Beam Pistol, Stormlock Rifle and Linesman, and the Energy Cell they run on; [below](#slice-8d-the-energy-weapons)): implemented on `claude/guns-energy`, stacked on slice 8C, awaiting review.
 - **Slice 9A** (the marksman rifles: the Picket Rifle, Ranger Rifle and Kestrel Rifle; [below](#slice-9a-the-marksman-rifles)): implemented on `claude/guns-marksman` (#285), stacked on slice 8D, awaiting review.
+- **Slice 9B** (the automatic weapons: the Rattler Pistol, Bronco SMG and Squall Rifle; [below](#slice-9b-the-automatic-weapons)): implemented on `claude/guns-automatic` (#286), stacked on slice 9A, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -26,7 +27,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the scopes: on 8 October 2026, with the reticles and lens rims uploaded ("heres reticles and vignette"), asked what the scopes should use, they answered that they made those files and to use them (see [Dependencies and assets](#dependencies-and-assets)); and asked what next ("What next?"), they chose all four further gun sets offered, each its own slice.
 - the heavy weapons: on 9 October 2026, offered how each would work (the Hammer GL firing the existing grenades, which break no blocks; the Gattaler spinning up for about ¾ s and firing rifle rounds; the Kiln Gun burning blaze powder and setting creatures, not blocks, alight), they answered "yes to all, do the heavy weapons next".
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
-- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A.
+- the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -777,6 +778,70 @@ The first of the four gun sets the owner chose on 10 October 2026: three semi-au
 - **The Kestrel throws no casings;** its animations cue none.
 - **Not played:** none of it has been played yet.
 
+## Slice 9B: the automatic weapons
+The second of the gun sets the owner chose on 10 October 2026: three steel guns that fire for as long as the trigger is held, all on Light Rounds.
+
+| | Rattler Pistol | Bronco SMG | Squall Rifle |
+|---|---|---|---|
+| The owner's gun | Auvtomag | Jr Wristbreaker | Gale |
+| What it is | a machine pistol, held in one hand | a short submachine gun with a broad barrel shroud, fired in one hand | an air rifle with a gas canister and a gauge on its left side |
+| Damage | 3 | 3.5 | 2.5 |
+| Rate | 6.7 a second (every 3 ticks) | 6.7 a second (every 3 ticks) | 10 a second (every 2 ticks) |
+| Holds | 20 | 25 | 40, a canister |
+| Reload | 2.4 s, a magazine | 2.65 s, a magazine | 2.85 s, a canister |
+| Spread, hip / aimed | 4° / 2° | 5° / 2.5° | 3° / 0.8° |
+| Range | 48 blocks | 40 | 64 |
+| The view aimed | narrowed to 0.9 | 0.9 | 0.85 |
+| Round | Light Round | Light Round | Light Round |
+| Takes | the barrel attachments, both magazines and the three scopes | the barrel attachments and both magazines | the three stocks, the light grip, the four bayonets and the three scopes |
+
+**Crafting** (a crafting table):
+- **Rattler Pistol:** three steel ingots over a redstone (its sear), a lever and a brass ingot.
+- **Bronco SMG:** two steel ingots and a brass ingot over a redstone, a lever and a brass ingot.
+- **Squall Rifle:** three steel ingots over a piston (its pump), a lever and planks.
+
+**What you see:** the owner's animations.
+- **Rattler Pistol:** its slide snaps back with each shot, and a casing flies. To reload, the empty magazine drops out of the grip, the left hand pushes a new one up into it, and the slide is racked.
+- **Bronco SMG:** the charging handles either side of its receiver ride back with each shot, and it bucks up. To reload, the left hand pulls the magazine from ahead of the grip and seats a new one, and the bolt is worked.
+- **Squall Rifle:** the needle of the gauge on its gas canister jumps with each shot. To reload, the clamp at the canister's front swings aside, the canister is twisted off and carried away, and a new one goes on and clanks home.
+- **Casings:** the Rattler throws one with each shot; the Bronco's and the Squall's animations cue none.
+- **Sounds:** the library's short iron rifle crack (Rattler; its "enchanted" shot, which has no ring after it), its second new rifle shot (Bronco) and its air gun shot (Squall). None carries a tag naming another source; the new rifle shot carries only a date. The Squall's canister clanks with the ramrod's metal sound under its own event, `clank` ("Canister clanks").
+
+**How the models were built:**
+- **Gun bodies:** each turns about its grip, where the right hand holds it.
+- **Rattler Pistol:**
+  - **Slide:** the owner's receiver part, on the bolt bone, which each shot drives back. Its rear notch is on the slide, its front post on the frame.
+  - **Scopes:** its sights part is empty, so it sits on the slide too: a scope and its rail (the owner's `no_sights`) ride the slide.
+  - **Magazine:** only its base plate shows, under the grip; the reload drops it 14 px.
+  - **Left hand:** held in one hand, its idle hides the left arm. The hand point is where it takes the new magazine's base, 1.67 s into the reload.
+- **Bronco SMG:**
+  - **Bolt:** the owner's bolt part, the two charging handles.
+  - **Magazine:** turns about its top, in the well ahead of the grip.
+  - **Left hand:** held in one hand. The hand point is under the seated magazine's base, 1.25 s into the reload, as it pushes it home.
+  - **Seal:** its animations name a `seal` (a charm that sways, as on the revolvers) that no part holds; the bone is empty.
+- **Squall Rifle:**
+  - **Canister:** the main part's 19th, 21st, 22nd and 33rd elements, with the riser to the gauge (the 23rd and 24th) and the gauge's dial and cap (the 20th and 27th), on the magazine bone. It turns about the point the owner turned those elements about.
+  - **Gauge:** the needle (the 26th element) on the gauge bone, about the dial's middle, riding the canister.
+  - **Clamp:** the 18th element, on the `magazine2` bone, swung aside for the canister to come out.
+  - **Not used:** the owner's separate needle part is the same needle, unturned. The bolt bone is empty: only the draw names it, and holds it still.
+- **Aimed, each is held further out** (`"eye_relief"`): in a preview of the aimed shot at the hip's depth, the Rattler's slide came within 1 px of the eye and the Bronco's receiver 0.4 px, closer than the near plane (0.8 px), so a shot would have cut through the view; the Squall's back came within 1.6 px. Held 4, 4 and 3 px further out, the nearest of each is 4.4 to 5 px away.
+- **The arms:** the right on each grip, as on the other guns. The one-handed guns' left arms run as the Sentry Pistol's and the Garrison Rifle's do; checked in first-person and side previews, idle, firing and through each reload.
+
+**Connections:**
+- **Parts:** steel from the steel foundry, brass, redstone, a lever, a piston and planks. Light Rounds as before.
+- **Their place:** the automatic guns of the steel tier, after the copper Rust Midge and the iron Riveter SMG; the Garrison Rifle is the automatic on rifle rounds.
+
+**Balance:** starting numbers.
+- **Damage a second:** the Rattler 20, the Bronco 23, the Squall 25, while their 20, 25 and 40 rounds last. The Rust Midge lands 13 and the Riveter SMG 17; the Garrison Rifle 27, on rifle rounds.
+- **Between them:** the hand guns are wild from the hip and short-ranged; the Bronco hits hardest a shot and strays most. The Squall is steadier, reaches furthest, and holds the most, but reloads slowest.
+
+**Save compatibility:** new items `jugcraft:rattler_pistol`, `bronco_smg` and `squall_rifle`, and the sound event `jugcraft:guns.clank`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The one-handed guns' reloads** lift the gun toward the upper right, and in the preview the right forearm fills that side for a moment; the left hand mostly stays below the view.
+- **The Squall's needle** is a tenth of a pixel wide, so its jump is hard to see.
+- **Not played:** none of it has been played yet.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -1198,6 +1263,57 @@ An empty click plays the Rusty Gnat's copper_jam. Each gun's shot is its own `fi
 | kestrel_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
 | kestrel_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
 | kestrel_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| rattler_pistol | `Guns/models/item/auvtomag.json` | `de5159b6960d2679` |
+| rattler_pistol | `Guns/item/auvtomag.png` | `b212208d41e4b043` |
+| rattler_pistol | `Guns/item/auvtomag.animation.json` | `dd5d796656f62062` |
+| rattler_pistol | `Guns/models/special/auvtomag/main.json` | `eb191dfba993bffb` |
+| rattler_pistol | `Guns/models/special/auvtomag/stan_barrel.json` | `fa7648e49973d557` |
+| rattler_pistol | `Guns/models/special/auvtomag/silencer.json` | `22c9850a0236af50` |
+| rattler_pistol | `Guns/models/special/auvtomag/advanced_silencer.json` | `2d497f71348c2ce3` |
+| rattler_pistol | `Guns/models/special/auvtomag/muzzle_brake.json` | `038beb67c8dbd9ab` |
+| rattler_pistol | `Guns/models/special/auvtomag/ext_barrel.json` | `6b1a08ea09edb4fd` |
+| rattler_pistol | `Guns/models/special/auvtomag/receiver.json` | `2e34a18e135945ff` |
+| rattler_pistol | `Guns/models/special/auvtomag/sights.json` | `aae76abd69f12c65` |
+| rattler_pistol | `Guns/models/special/auvtomag/no_sights.json` | `f95797101760f89d` |
+| rattler_pistol | `Guns/models/special/auvtomag/stan_mag.json` | `25a51f89da2625bd` |
+| rattler_pistol | `Guns/models/special/auvtomag/ext_mag.json` | `a7d8f2a888ee3461` |
+| rattler_pistol | `Guns/models/special/auvtomag/speed_mag.json` | `574b248499a1a35c` |
+| rattler_pistol | `Guns/sounds/item/iron_rifle/enchanted_fire.ogg` | `ec646e1be4185e5e` |
+| rattler_pistol | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| rattler_pistol | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| rattler_pistol | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| bronco_smg | `Guns/models/item/jr_wristbreaker.json` | `97dd6dbf15640210` |
+| bronco_smg | `Guns/item/jr_wristbreaker.png` | `8968124e606e2100` |
+| bronco_smg | `Guns/item/jr_wristbreaker.animation.json` | `bf8b3331ddb2577d` |
+| bronco_smg | `Guns/models/special/jr_wristbreaker/main.json` | `5a0011790d5a29d3` |
+| bronco_smg | `Guns/models/special/jr_wristbreaker/stan_barrel.json` | `2c66f81c1115217a` |
+| bronco_smg | `Guns/models/special/jr_wristbreaker/silencer.json` | `e52236d565008d1b` |
+| bronco_smg | `Guns/models/special/jr_wristbreaker/advanced_silencer.json` | `b165c4bda6d33b9c` |
+| bronco_smg | `Guns/models/special/jr_wristbreaker/muzzle_brake.json` | `f4e0ab737b2674a3` |
+| bronco_smg | `Guns/models/special/jr_wristbreaker/ext_barrel.json` | `04b9968999bb2d00` |
+| bronco_smg | `Guns/models/special/jr_wristbreaker/bolt.json` | `a8ae9b57b2f2f3b3` |
+| bronco_smg | `Guns/models/special/jr_wristbreaker/stan_mag.json` | `98da59b297ea0dea` |
+| bronco_smg | `Guns/models/special/jr_wristbreaker/ext_mag.json` | `9330692f68bdf53e` |
+| bronco_smg | `Guns/models/special/jr_wristbreaker/speed_mag.json` | `5a688d68d4063088` |
+| bronco_smg | `Guns/sounds/item/new_rifle/fire_2.ogg` | `dba5369742b5ecf1` |
+| squall_rifle | `Guns/models/item/gale.json` | `b328803c68c19928` |
+| squall_rifle | `Guns/item/gale.png` | `0cd567177e66e335` |
+| squall_rifle | `Guns/item/gale.animation.json` | `ed5d3f3017f1ac88` |
+| squall_rifle | `Guns/models/special/gale/main.json` | `f6b003c119501251` |
+| squall_rifle | `Guns/models/special/gale/stan_grip.json` | `079689636b79f492` |
+| squall_rifle | `Guns/models/special/gale/light_stock.json` | `ecf0ceb67d4b5d65` |
+| squall_rifle | `Guns/models/special/gale/heavy_stock.json` | `a14f97f62f69967a` |
+| squall_rifle | `Guns/models/special/gale/wooden_stock.json` | `2a86be4ace47454c` |
+| squall_rifle | `Guns/models/special/gale/light_grip.json` | `926c5281f72f5e6f` |
+| squall_rifle | `Guns/models/special/gale/iron_bayonet.json` | `5c3e57d04d109b81` |
+| squall_rifle | `Guns/models/special/gale/anthralite_bayonet.json` | `324e5068e9569b21` |
+| squall_rifle | `Guns/models/special/gale/diamond_bayonet.json` | `3d1a50dd388d9179` |
+| squall_rifle | `Guns/models/special/gale/netherite_bayonet.json` | `199b71fee56e19c0` |
+| squall_rifle | `Guns/models/special/gale/sights.json` | `ffc1cca96f33d14f` |
+| squall_rifle | `Guns/sounds/item/airgun/fire.ogg` | `ee6701ec0f70a3fc` |
+| squall_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| squall_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| squall_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | energy_cell | `Guns/item/energy_cell.png` | `857c3e9d98c18f97` |
 | energy_cell_empty | `Guns/item/empty_cell.png` | `b06623e4de7b9b8f` |
 | shared | `Guns/sounds/item/bolt/bolt.ogg` | `1cf1102f6ba52725` |
@@ -1705,16 +1821,44 @@ Slice 5's files: each gun's attachment parts, and each attachment's item model a
     - Mid-reload, each rifle is rolled toward the left hand as the owner's animations show it, the Ranger's handle lifted at the top of the view. Each is inspected as the owner's animations show it; partway through, the right sleeve swings near the camera at the lower right.
     - Fitted, the counters read 1 / 15 with the Extended Magazine on the Picket and the Ranger, and the fitted rifles keep their sights on the crosshair aimed.
     - Seen from outside, each is raised along the look, and its flash shows at the muzzle when it fires.
+- **Slice 9B, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. Every face of the three guns' parts, their attachments' included, re-bakes to the owner's; each hand is where `BUILDS` puts it in its pose; every bone the owner's animations move exists.
+  - `python3 tools/generate_material_data.py`: wrote the three guns' items, item models, recipes, names and shot sounds, and the `clank` event.
+  - `python3 tools/check_mod_data.py`: PASS (1922 material IDs), with `check_guns` (the three guns' numbers, attachments, looks, eye relief and the `clank` alias in Java).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Previews:**
+    - first-person views of each gun idle, aimed, fired from the hip and aimed, mid-reload and mid-inspection, and of the one-handed guns' reloads frame by frame; these set the eye relief and the left hands;
+    - side views of the Squall's canister through its reload and of its gauge;
+    - the nearest point of each gun to the eye through its aimed shot, at 0 to 6 px of relief.
+- **Slice 9B game tests (written; they run in CI):**
+  - `AutomaticGunsGameTests`:
+    - `automaticWeaponsFireWhileHeld`: the three are registered with their numbers, fire one bullet at a time from Light Rounds, automatically; each recipe loads; the Rattler and the Squall take the three scopes, the Bronco none.
+    - `automaticWeaponsLandAndLoad`: each fires two shots at once and a third one interval later, all landing on a pig and spending a round each; the empty Squall's canister reload loads forty rounds from the inventory after its reload time and not before.
+  - "Every gun registered" now counts thirty guns.
+  - `GunsClientGameTests` takes the three through every gun's steps; screenshots `jugcraft_guns_rattler_pistol_*`, `jugcraft_guns_bronco_smg_*` and `jugcraft_guns_squall_rifle_*`.
+- **Slice 9B in CI** ([run 38032059311](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38032059311), on 6f41efbe8): every check passed.
+  - `mod` and `optional integrations absent`: the build and the server game tests passed. There are 1190 now, 1188 before; the two `AutomaticGunsGameTests` are the new ones.
+  - `client` (the guns' shard): `GunsClientGameTests` passed. Its log:
+    - **Rattler Pistol:** aimed, the view narrowed to 0.9; fired, 7 flash frames, the husk 755.4 → 752.4 and rounds 20 → 19; reloaded 20, 31 Light Rounds left; 1 casing thrown.
+    - **Bronco SMG:** aimed, 0.9; fired, 6 flash frames, the husk 752.4 → 748.9 and rounds 25 → 24; reloaded 25, 31 left; no casings, as its animations cue none.
+    - **Squall Rifle:** aimed, 0.85; fired, 6 flash frames, the husk 748.9 → 746.4 and rounds 40 → 39; reloaded 40, 31 left; no casings, as its animations cue none.
+  - **Screenshots:**
+    - Held, each sits at the lower right in the owner's textures: the Rattler dark steel, the Bronco and the Squall copper-bright.
+    - Aimed, each gun's back sits on the crosshair over the husk. As on the other one-handed guns, the Rattler's and the Bronco's right fist and forearm fill the lower middle of the view below it; so does the Squall's.
+    - Mid-reload, the Rattler and the Bronco are lifted toward the upper right and the right forearm fills that side, as the previews showed. Partway through the inspection, the Bronco is turned toward the camera and fills the middle of the view for a moment.
+    - Fitted, the counters read 1 / 30 with the Extended Magazine on the Rattler and 1 / 38 on the Bronco, and the fitted guns keep their backs on the crosshair aimed.
+    - Seen from outside, each is raised along the look, and its flash shows at the muzzle when it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 Not applicable: no worldgen, loot, structures, bosses or seasonal content. Guns and rounds come only from crafting (and the creative tab).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
-- **The gun sets the owner chose on 10 October 2026,** each its own pull request: the marksman rifles (slice 9A), then the automatic weapons, the second energy weapons and the pump shotguns.
+- **The gun sets the owner chose on 10 October 2026,** each its own pull request: the marksman rifles (slice 9A) and the automatic weapons (slice 9B), then the second energy weapons and the pump shotguns.
 - **Later slices,** each its own pull request: the chemical grenades in the Trench Lobber; the tactical grip and the laser sight; the aiming polish (below); a rack that charges several Energy Cells at once. The owner chose the first three on 10 October 2026.
 - **Aimed, the gun hand covers the sights:** in the CI screenshots of 8 October, the right fist sits over the lower middle of the screen when aiming, on the one-handed guns and some long ones. The arm runs back toward the camera from the grip drawn at the middle of the view. This is a polish item for a pull request of its own.
 - **Not yet:**

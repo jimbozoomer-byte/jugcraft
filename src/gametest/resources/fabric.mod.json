@@ -126,6 +126,7 @@
 			"io.github.jimbozoomer.jugcraft.test.HeavyGunsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.EnergyGunsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MarksmanGunsGameTests",
+			"io.github.jimbozoomer.jugcraft.test.AutomaticGunsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ThalliteGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ThalliteGearGameTests",

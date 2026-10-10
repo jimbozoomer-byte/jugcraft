@@ -8,6 +8,16 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 9B (the automatic weapons)
+- **Three automatic weapons** in steel, each the owner's model, art and animations, firing Light Rounds for as long as the trigger is held:
+  - the **Rattler Pistol** (the owner's Auvtomag), a machine pistol held in one hand: 3 a shot, 20 rounds. It takes a scope, which rides its slide;
+  - the **Bronco SMG** (Jr Wristbreaker), a short submachine gun fired in one hand: 3.5 a shot, 25 rounds, wild from the hip;
+  - the **Squall Rifle** (Gale), an air rifle: 2.5 a shot, ten a second, 40 rounds. To reload, the gas canister on its side is twisted off and a new one put on; the needle on its gauge jumps with each shot.
+- **Attachments:** the Rattler takes the barrel attachments, the magazines and the scopes; the Bronco the barrel attachments and the magazines; the Squall the stocks, the light grip, the bayonets and the scopes.
+- **Aimed,** each is held further out (3 to 4 px), so its kick stays clear of the eye.
+- **Sounds:** a new shared event, `clank`, for the Squall's canister.
+- Record: [guns.md, slice 9B](docs/features/guns.md#slice-9b-the-automatic-weapons).
+
 ### Unmerged: Guns, slice 9A (the marksman rifles)
 - **Three marksman rifles** in steel, each the owner's model, art and animations, semi-automatic and the steadiest aimed and farthest reaching of the guns:
   - the **Picket Rifle** (the owner's M3 Marksman), with a peep sight: 8 a shot, 10 rounds, 0.1° aimed, 128 blocks;

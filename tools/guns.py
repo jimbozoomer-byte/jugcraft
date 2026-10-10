@@ -6,7 +6,8 @@ slice 7, the bayonets and the attachments drawn on shared textures, then the sco
 on the guns made to take them); slice 8, the hand guns: the Bulldog Pistol, Marshal Revolver and Sapper Revolver;
 slice 8B, the service arms in steel: the Sentry Pistol, Garrison Rifle and Breacher; slice 8C, the heavy weapons: the
 Trench Lobber, Thresher and Stoker; slice 8D, the energy weapons on Energy Cells: the Beam Pistol, Stormlock Rifle and
-Linesman; slice 9A, the marksman rifles: the Picket Rifle, Ranger Rifle and Kestrel Rifle.
+Linesman; slice 9A, the marksman rifles: the Picket Rifle, Ranger Rifle and Kestrel Rifle; slice 9B, the automatic
+weapons: the Rattler Pistol, Bronco SMG and Squall Rifle.
 
 The owner made these guns (inspired by Scorched Guns 2) and supplied, in the owner asset library:
   - a Blockbench Java model of every part (art/owner-library/originals/Blocks/Guns/models/special/<gun>/<part>.json),
@@ -287,6 +288,33 @@ GUNS = {
         "damage": 9.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 8,
         "reload": 55, "spread": (2.0, 0.15), "range": 128, "ammo": "rifle_round",
     },
+    # Slice 9B: the automatic weapons, in steel: each fires for as long as the trigger is held. The Rattler Pistol and
+    # the Bronco SMG are held in one hand, the left coming in only to change the magazine; the Squall Rifle is an air
+    # rifle whose gas canister, on its left side, is changed to reload.
+    "rattler_pistol": {
+        "display": "Rattler Pistol",
+        "source": "auvtomag",
+        "tooltip": "A steel machine pistol, held in one hand, that fires for as long as the trigger is held. Takes a "
+                   "scope. Fires light rounds.",
+        "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 20,
+        "reload": 48, "spread": (4.0, 2.0), "range": 48, "ammo": "light_round",
+    },
+    "bronco_smg": {
+        "display": "Bronco SMG",
+        "source": "jr_wristbreaker",
+        "tooltip": "A short submachine gun with a broad barrel shroud, fired in one hand: it bucks hard. Hold to fire. "
+                   "Fires light rounds.",
+        "damage": 3.5, "pellets": 1, "interval": 3, "auto": True, "capacity": 25,
+        "reload": 53, "spread": (5.0, 2.5), "range": 40, "ammo": "light_round",
+    },
+    "squall_rifle": {
+        "display": "Squall Rifle",
+        "source": "gale",
+        "tooltip": "An air rifle that fires for as long as the trigger is held, the gauge on its gas canister jumping with "
+                   "each shot. Takes a scope. Fires light rounds.",
+        "damage": 2.5, "pellets": 1, "interval": 2, "auto": True, "capacity": 40,
+        "reload": 57, "spread": (3.0, 0.8), "range": 64, "ammo": "light_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -387,6 +415,14 @@ RECIPES = {
     "ranger_rifle": (["SSS", "BLP", " P "], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever",
                                             "P": "#minecraft:planks"}),
     "kestrel_rifle": (["SSS", "CLC"], {"S": "#c:ingots/steel", "C": "minecraft:copper_ingot", "L": "minecraft:lever"}),
+    # Slice 9B: steel and a lever each; redstone for the machine pistol's and the SMG's sears, a piston for the air
+    # rifle's pump.
+    "rattler_pistol": (["SSS", "RLB"], {"S": "#c:ingots/steel", "R": "minecraft:redstone", "L": "minecraft:lever",
+                                        "B": "#c:ingots/brass"}),
+    "bronco_smg": (["SSB", "RLB"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "R": "minecraft:redstone",
+                                    "L": "minecraft:lever"}),
+    "squall_rifle": (["SSS", "TLP"], {"S": "#c:ingots/steel", "T": "minecraft:piston", "L": "minecraft:lever",
+                                      "P": "#minecraft:planks"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -865,6 +901,64 @@ BUILDS = {
         "sight": (8.0, 6.38, 12.62),
         "eye_relief": 2.0,
     },
+    # Slice 9B, the automatic weapons; each gun body turns about the grip in the right hand. The Auvtomag's slide (the
+    # owner's receiver part) rides the bolt bone, which each shot drives back; its rear sight notch is on the slide and
+    # its front post on the frame. Its sights part is empty, so its scopes and their rail (the owner's no_sights) ride
+    # the slide with it. Its reload drops the magazine out of the grip (only its base plate shows) and the left hand
+    # pushes the new one up; held in one hand, its idle hides the left arm.
+    "rattler_pistol": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.12, 14.8)),
+            ("gun_body", "gun_body2", ["main", "stan_barrel"], (8.0, 2.12, 14.8)),
+            ("bolt", "gun_body", ["receiver", "sights"], (8.0, 5.2, 14.3)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 0.3, 15.6)),
+            ("magazine_2", "gun_body", [], (8.0, 0.3, 15.6)),
+        ],
+        "hands": {"right": (8.0, 2.12, 14.8), "left": (8.0, -2.4, 15.8)},
+        "hand_pose": {"left": ("reload", "1.6667")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.9195, -0.24, 0.3112)},
+        "muzzle": (8.0, 4.52, 5.88),
+        "sight": (8.0, 6.0, 15.38),
+        "eye_relief": 4.0,
+    },
+    # The Jr Wristbreaker's bolt part is its two charging handles, either side of the receiver, which each shot drives
+    # back. Its magazine goes in ahead of the grip; held in one hand, its idle hides the left arm, which comes in to
+    # change the magazine. Its rear sight is a ring, its front post on the receiver. Its "seal" (a charm, as on the
+    # revolvers) is not among the owner's parts: the bone is empty.
+    "bronco_smg": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel"], (8.0, 2.48, 14.79)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 5.45, 11.59)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 3.25, 9.9)),
+            ("seal", "gun_body", [], (8.0, 6.5, 14.0)),
+        ],
+        "hands": {"right": (8.0, 2.48, 14.79), "left": (8.0, -2.0, 9.9)},
+        "hand_pose": {"left": ("reload", "1.25")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.2, 3.4),
+        "sight": (8.0, 6.75, 14.14),
+        "eye_relief": 4.0,
+    },
+    # The Gale's gas canister, on its left side (the main part's 19th, 21st, 22nd and 33rd elements), with the riser to
+    # its gauge (the 23rd and 24th) and the gauge's dial and cap (the 20th and 27th), is the magazine its reload twists
+    # off and carries away, about the middle the owner turned its elements about. The gauge's needle (the 26th) jumps
+    # with each shot on the gauge bone, about the dial's middle; the owner's separate needle part is the same needle
+    # unturned and is not used. The clamp at the canister's front (the 18th) is magazine2, swung aside for the canister
+    # to come out. Its bolt bone is empty (only the draw names it, and holds it still).
+    "squall_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-#17,18,19,20,21,22,23,25,26,32", "sights", "stan_grip"], (8.0, 2.25, 15.14)),
+            ("magazine", "gun_body", ["main#18,19,20,21,22,23,26,32"], (6.26, 3.65, 6.65)),
+            ("gauge", "magazine", ["main#25"], (6.25, 5.65, 9.65)),
+            ("magazine2", "gun_body", ["main#17"], (6.75, 4.15, 6.15)),
+            ("bolt", "gun_body", [], (8.0, 5.2, 12.0)),
+        ],
+        "hands": {"right": (8.0, 2.25, 15.14), "left": (8.0, 1.25, 6.4)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.2, -5.1),
+        "sight": (8.0, 6.68, 13.39),
+        "eye_relief": 3.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -1274,6 +1368,8 @@ ZOOM = {
     "beam_pistol": 0.9, "stormlock_rifle": 0.8, "linesman": 0.95,
     # The marksman rifles narrow it the most of any iron sights.
     "picket_rifle": 0.7, "ranger_rifle": 0.75, "kestrel_rifle": 0.7,
+    # The automatic weapons (slice 9B): the hand guns a little, the air rifle more.
+    "rattler_pistol": 0.9, "bronco_smg": 0.9, "squall_rifle": 0.85,
 }
 
 
@@ -1345,13 +1441,17 @@ EVENT_SOUNDS = {
     # Slice 8C: the Trench Lobber's pump, worked in full after each shot and by halves around its reload.
     "pump": "item/gun_sounds/pump.ogg",
     "pump_half": "item/gun_sounds/pump_half.ogg",
+    # Slice 9B: the Squall Rifle's canister knocking home, the ramrod's metal sound under its own name and subtitle.
+    "clank": "item/gun_sounds/metal.ogg",
 }
 # The shell-at-a-time guns' reload_loop names "reload_mag_in"; they push a shell or a round, so they play the insert.
 EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"reload_mag_in": "shell_in"},
                    "longhorn_rifle": {"reload_mag_in": "shell_in"}, "drover_rifle": {"reload_mag_in": "shell_in"},
                    "coach_gun": {"reload_mag_in": "shell_in"},
                    # The energy weapons loaded a charge at a time (slice 8D) play the charge going in.
-                   "stormlock_rifle": {"reload_mag_in": "insert"}, "linesman": {"reload_mag_in": "insert"}}
+                   "stormlock_rifle": {"reload_mag_in": "insert"}, "linesman": {"reload_mag_in": "insert"},
+                   # The Squall Rifle's reload names "metal" for its canister: it clanks, it is no ramrod (slice 9B).
+                   "squall_rifle": {"metal": "clank"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -1387,6 +1487,11 @@ SHOT_SOUNDS = {
     "picket_rifle": "item/scorched_sniper/fire.ogg",
     "ranger_rifle": "item/old_rifle/fire.ogg",
     "kestrel_rifle": "item/iron_rifle/fire.ogg",
+    # Slice 9B: the library's short iron rifle crack (its "enchanted" shot, with no ring after it), its second new rifle
+    # shot and its air gun shot.
+    "rattler_pistol": "item/iron_rifle/enchanted_fire.ogg",
+    "bronco_smg": "item/new_rifle/fire_2.ogg",
+    "squall_rifle": "item/airgun/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -1407,6 +1512,7 @@ SUBTITLES = {
     "jam": "Ramrod rams home",
     "pump": "Pump racks",
     "pump_half": "Pump slides",
+    "clank": "Canister clanks",
 }
 
 
