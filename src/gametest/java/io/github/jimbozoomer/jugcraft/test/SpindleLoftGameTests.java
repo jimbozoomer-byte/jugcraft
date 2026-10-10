@@ -29,7 +29,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -167,7 +166,7 @@ public class SpindleLoftGameTests {
 		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 		helper.assertTrue(SpindleRite.useBlock(player, level, InteractionHand.MAIN_HAND, hit) == InteractionResult.PASS,
 				"An empty hand on a wheel that is no gate was taken by the rite");
-		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WHITE_WOOL));
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("white_wool"))));
 		helper.assertTrue(SpindleRite.useBlock(player, level, InteractionHand.MAIN_HAND, hit) == InteractionResult.PASS,
 				"Wool on the wheel was taken by the rite");
 		helper.succeed();
