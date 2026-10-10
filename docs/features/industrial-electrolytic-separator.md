@@ -1,6 +1,6 @@
 # Electrolytic Separator (factory package 2, first slice)
 
-Status: implemented (pending CI and review). Stacked on the [shared machine foundation](industrial-machine-foundation.md) (PR #312).
+Status: implemented (CI green; pending review). Stacked on the [shared machine foundation](industrial-machine-foundation.md) (PR #312).
 Proposal issue: none. The first slice of package 2, "Starter steel chemistry", of the owner's [factory implementation plan in PR #302](https://github.com/jimbozoomer-byte/jugcraft/pull/302); the owner asked on 10 October 2026 to begin the next part once package 1 was done. Its construction, quantities, times and output policies are the owner's selections in the [starter gas and acid factory](industrial-starter-gas-and-acid-factory.md) (eighth planning batch, questions 1, 2, 3, 9 and 10).
 Owner: jimbozoomer-byte
 Target milestone and tier: steel-era chemistry, the first machine of the starter gas and acid factory
@@ -125,6 +125,13 @@ For CI:
     - `_screen`: the Separator's screen reads "Processing", 22%, power 53k/60k, batches 1/1, with the feed in the batch and gas in two outlet tanks. The power line now fits.
     - `_lye_full`: "Output blocked" wraps onto two lines over "Lye tank is full", with brine waiting in the feed tank and the lye tank full.
     - The three world shots show the model working, its strips lit at night. But they looked up and cut off its base: a teleport's "facing" aims from the feet, not the eyes. The test now aims from the eyes and adds the straight-on `_front`.
+- **Run [38090159225](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38090159225) (commit 4119897f): green.**
+  - "All 1298 required tests passed"; both client tests passed.
+  - The four world shots now frame the whole machine on its plinth:
+    - `jugcraft_electrolytic_separator` (front left): the control box's two gauges and lamp, the door, the junction box with its socket and hazard band, the lye return, the white left tower with its checker shoulder and level strip, and the collars;
+    - `_front`: the front straight on, the towers either side of the housing;
+    - `_back`: the banded housing's access panel and the feed inlet low at the back;
+    - `_night`: the same front-left view, with the amber strips and lamp lit.
 
 No survival playtest, two-client test or performance measurement has been done.
 

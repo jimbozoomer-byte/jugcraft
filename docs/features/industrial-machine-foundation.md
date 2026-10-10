@@ -1,6 +1,6 @@
 # Industrial machine foundation (factory package 1)
 
-Status: implemented (pending CI and review). Shared infrastructure only: no new survival block, item or recipe yet. The first real forms arrive with package 2, the starter gas and acid factory.
+Status: implemented (CI green; pending review). Shared infrastructure only: no new survival block, item or recipe yet. The first real forms arrive with package 2, the starter gas and acid factory.
 Proposal issue: none. Package 1, "Shared machine foundation", of the owner's [factory implementation plan in PR #302](https://github.com/jimbozoomer-byte/jugcraft/pull/302) (draft planning, 10 October 2026); the owner asked on 10 October 2026 to begin implementing that roadmap.
 Owner: jimbozoomer-byte
 Target milestone and tier: steel-era industry; every later industrial package builds on it, starting with the [starter gas and acid factory](industrial-starter-gas-and-acid-factory.md)
