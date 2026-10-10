@@ -46,6 +46,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  * Picket, Ranger and Kestrel Rifles); bullets like the rest.</li>
  * <li>Slice 9B, the automatic weapons: the Rattler Pistol and Bronco SMG, held in one hand, and the Squall air rifle, each
  * firing for as long as the trigger is held.</li>
+ * <li>Slice 9C, the second energy weapons, on the same cells and shots as slice 8D's: the Spikedriver's heavy beam and the
+ * Seam Cutter's short one, held on, and the Caisson Pistol's arc.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.</li>
  * </ul>
@@ -86,6 +88,9 @@ public final class JugcraftGuns {
 		SPECS.put("rattler_pistol", new GunSpec(3.0F, 1, 3, true, 20, 48, 0, 0, 0, 4.0F, 2.0F, 48, "light_round"));
 		SPECS.put("bronco_smg", new GunSpec(3.5F, 1, 3, true, 25, 53, 0, 0, 0, 5.0F, 2.5F, 40, "light_round"));
 		SPECS.put("squall_rifle", new GunSpec(2.5F, 1, 2, true, 40, 57, 0, 0, 0, 3.0F, 0.8F, 64, "light_round"));
+		SPECS.put("spikedriver", new GunSpec(12.0F, 1, 16, false, 6, 67, 0, 0, 0, 1.5F, 0.3F, 64, "energy_cell"));
+		SPECS.put("seam_cutter", new GunSpec(1.5F, 1, 2, true, 60, 60, 0, 0, 0, 2.0F, 1.0F, 16, "energy_cell"));
+		SPECS.put("caisson_pistol", new GunSpec(5.0F, 1, 8, false, 10, 57, 0, 0, 0, 6.0F, 3.0F, 24, "energy_cell"));
 	}
 
 	/**
@@ -93,7 +98,7 @@ public final class JugcraftGuns {
 	 * lobbed from the muzzle; {@link #FLAME}, a short jet of flame; {@link #BEAM}, a beam through every creature in its
 	 * line; {@link #ARC}, a bolt that leaps from creature to creature ({@link GunShots}).
 	 */
-	public static final Map<String, String> SHOTS = Map.of("trench_lobber", "grenade", "stoker", "flame", "beam_pistol", "beam", "stormlock_rifle", "arc", "linesman", "arc");
+	public static final Map<String, String> SHOTS = Map.of("trench_lobber", "grenade", "stoker", "flame", "beam_pistol", "beam", "stormlock_rifle", "arc", "linesman", "arc", "spikedriver", "beam", "seam_cutter", "beam", "caisson_pistol", "arc");
 	public static final String GRENADE = "grenade";
 	public static final String FLAME = "flame";
 	public static final String BEAM = "beam";
@@ -102,7 +107,7 @@ public final class JugcraftGuns {
 	 * Slice 8D: the JE each round of an energy weapon draws from the Energy Cells in the inventory as it loads
 	 * (tools/guns.py GUNS "charge"); a gun not listed loads rounds of its ammunition.
 	 */
-	public static final Map<String, Integer> CHARGE = Map.of("beam_pistol", 400, "stormlock_rifle", 750, "linesman", 250);
+	public static final Map<String, Integer> CHARGE = Map.of("beam_pistol", 400, "stormlock_rifle", 750, "linesman", 250, "spikedriver", 800, "seam_cutter", 100, "caisson_pistol", 300);
 	/**
 	 * An arc leaps on from its first creature to at most {@link #ARC_HOPS} more, each the nearest within {@link #ARC_REACH}
 	 * blocks of the last, each taking {@link #ARC_SHARE} of the damage before it (tools/guns.py).
@@ -211,6 +216,7 @@ public final class JugcraftGuns {
 				"extended_magazine", "speed_magazine"));
 		ACCEPTS.put("squall_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet",
 				"steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight"));
+		ACCEPTS.put("spikedriver", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock"));
 	}
 
 	/** The rounds. */

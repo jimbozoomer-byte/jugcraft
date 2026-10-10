@@ -34,16 +34,18 @@ public final class GunLooks {
 	 * (slice 9A) kick back toward the eye with each shot, and the Ranger's handle slides back beside its sights: at the
 	 * hip's depth their backs came within two pixels of the eye and filled the bottom of the view. The automatic weapons
 	 * (slice 9B) kick back toward the eye with every shot: at the hip's depth the Rattler's slide and the Bronco's
-	 * receiver reached the near plane, and the Squall's back came within two pixels.
+	 * receiver reached the near plane, and the Squall's back came within two pixels. So did the Spikedriver's (slice 9C),
+	 * kicking back with each shot.
 	 */
-	static final Map<String, Float> EYE_RELIEF = Map.of("garrison_rifle", 4.0F, "beam_pistol", 4.0F, "picket_rifle", 2.0F, "ranger_rifle", 2.0F, "kestrel_rifle", 2.0F, "rattler_pistol", 4.0F, "bronco_smg", 4.0F, "squall_rifle", 3.0F);
+	static final Map<String, Float> EYE_RELIEF = Map.of("garrison_rifle", 4.0F, "beam_pistol", 4.0F, "picket_rifle", 2.0F, "ranger_rifle", 2.0F, "kestrel_rifle", 2.0F, "rattler_pistol", 4.0F, "bronco_smg", 4.0F, "squall_rifle", 3.0F, "spikedriver", 2.0F);
 	/**
 	 * How far the owner's third-person transform tilts a gun up off the arm that holds it, in degrees (tools/guns.py
 	 * tilt(): the x rotation of its "thirdperson_righthand"); a gun not listed has none. The Gattaler's is made for an
 	 * arm hanging at the hip, so seen from outside its holder's arms hang that much lower ({@link GunPose}) and the gun
-	 * still points along the look: raised like a rifle, its barrels pointed at the sky.
+	 * still points along the look: raised like a rifle, its barrels pointed at the sky. The CR4K Mining Laser's (the Seam
+	 * Cutter, slice 9C) is made the same way.
 	 */
-	static final Map<String, Float> TILT = Map.of("thresher", 68.25F);
+	static final Map<String, Float> TILT = Map.of("thresher", 68.25F, "seam_cutter", 72.75F);
 	private static final Look DEFAULT = new Look(true, 1.0F);
 
 	static {
@@ -77,6 +79,9 @@ public final class GunLooks {
 		LOOKS.put("rattler_pistol", new Look(false, 0.9F));
 		LOOKS.put("bronco_smg", new Look(false, 0.9F));
 		LOOKS.put("squall_rifle", new Look(true, 0.85F));
+		LOOKS.put("spikedriver", new Look(false, 0.85F));
+		LOOKS.put("seam_cutter", new Look(true, 0.95F));
+		LOOKS.put("caisson_pistol", new Look(false, 0.9F));
 		OPTICS.put("long_scope", new Optic(0.3F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("medium_scope", new Optic(0.5F, "long_scope_reticle2", "scope_vignette", null));
 		OPTICS.put("reflex_sight", new Optic(0.85F, null, null, "red_dot_reticle"));

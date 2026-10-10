@@ -315,6 +315,33 @@ GUNS = {
         "damage": 2.5, "pellets": 1, "interval": 2, "auto": True, "capacity": 40,
         "reload": 57, "spread": (3.0, 0.8), "range": 64, "ammo": "light_round",
     },
+    # Slice 9C: the second energy weapons, on slice 8D's cells and shots. The Spikedriver is a rail pistol, held in one
+    # hand: a heavy beam, slow and far-reaching. The Seam Cutter is a cutting laser carried at the hip: a short beam
+    # for as long as the trigger is held. The Caisson Pistol's arc seeks wider than the Stormlock's, nearer.
+    "spikedriver": {
+        "display": "Spikedriver",
+        "source": "railworker",
+        "tooltip": "A rail pistol held in one hand: each heavy shot drives through every creature in its line. Its side "
+                   "magazine is changed and its lever worked to reload. Runs on Energy Cells.",
+        "damage": 12.0, "pellets": 1, "interval": 16, "auto": False, "capacity": 6,
+        "reload": 67, "spread": (1.5, 0.3), "range": 64, "ammo": "energy_cell", "shot": "beam", "charge": 800,
+    },
+    "seam_cutter": {
+        "display": "Seam Cutter",
+        "source": "cr4k_mining_laser",
+        "tooltip": "A cutting laser carried at the hip: for as long as the trigger is held, its short beam burns through "
+                   "every creature in front of it. Its core is drawn out to change. Runs on Energy Cells.",
+        "damage": 1.5, "pellets": 1, "interval": 2, "auto": True, "capacity": 60,
+        "reload": 60, "spread": (2.0, 1.0), "range": 16, "ammo": "energy_cell", "shot": "beam", "charge": 100,
+    },
+    "caisson_pistol": {
+        "display": "Caisson Pistol",
+        "source": "hyperbaria",
+        "tooltip": "A pressure pistol held in one hand: its bolt leaps from its mark to two more creatures close by. The "
+                   "tall tank on top is changed to reload. Runs on Energy Cells.",
+        "damage": 5.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 10,
+        "reload": 57, "spread": (6.0, 3.0), "range": 24, "ammo": "energy_cell", "shot": "arc", "charge": 300,
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -423,6 +450,15 @@ RECIPES = {
                                     "L": "minecraft:lever"}),
     "squall_rifle": (["SSS", "TLP"], {"S": "#c:ingots/steel", "T": "minecraft:piston", "L": "minecraft:lever",
                                       "P": "#minecraft:planks"}),
+    # Slice 9C: steel and an advanced circuit each, as slice 8D's; copper cable for the rail pistol's rails, copper
+    # ingots for the cutting laser's copper body and an amethyst shard for its lens, a lightning rod for the pressure
+    # pistol's arc.
+    "spikedriver": (["SSS", "CAB"], {"S": "#c:ingots/steel", "C": "jugcraft:copper_cable", "A": "jugcraft:advanced_circuit",
+                                     "B": "#c:ingots/brass"}),
+    "seam_cutter": (["CCM", "SAB"], {"C": "minecraft:copper_ingot", "M": "minecraft:amethyst_shard", "S": "#c:ingots/steel",
+                                     "A": "jugcraft:advanced_circuit", "B": "#c:ingots/brass"}),
+    "caisson_pistol": (["LSS", " AB"], {"L": "minecraft:lightning_rod", "S": "#c:ingots/steel",
+                                       "A": "jugcraft:advanced_circuit", "B": "#c:ingots/brass"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -959,6 +995,71 @@ BUILDS = {
         "sight": (8.0, 6.68, 13.39),
         "eye_relief": 3.0,
     },
+    # Slice 9C, the second energy weapons. The Railworker is held in one hand: its idle hides the left arm, whose hand
+    # point is given for the moment it holds the new magazine in, on the gun's left side, 1.25 s into the reload. The
+    # frame standing out of its left side (the main part's 34th, 35th and 37th to 43rd elements) is its lever: the left
+    # hand takes it and swings it back 145 degrees about its back end, and back, to charge the rails. The two rings
+    # standing up at the back of its right side (the 2nd and 3rd) ride the bolt back with each shot, and the tip of its
+    # muzzle (the 29th) recoils. gun_body2 and gun_body3 carry the whole gun as the lever is worked (empty, about the
+    # grip). Its magazine, and the larger ones, are on its left side. It has no sights: aimed, it is looked over, along
+    # the top of its back, and held 2 px further out (its back came within 2.6 px of the eye through the aimed shot).
+    "spikedriver": {
+        "bones": [
+            ("gun_body3", None, [], (8.0, 1.68, 14.84)),
+            ("gun_body2", "gun_body3", [], (8.0, 1.68, 14.84)),
+            ("gun_body", "gun_body2", ["main-#1,2,28,33,34,36,37,38,39,40,41,42"], (8.0, 1.68, 14.84)),
+            ("bolt", "gun_body", ["main#1,2"], (9.2, 5.3, 13.5)),
+            ("lever", "gun_body", ["main#33,34,36,37,38,39,40,41,42"], (6.75, 4.3, 15.0)),
+            ("tip", "gun_body", ["main#28"], (8.0, 3.7, 6.0)),
+            ("magazine", "gun_body", ["stan_mag"], (6.42, 2.9, 9.25)),
+            ("magazine_2", "gun_body", [], (6.42, 2.9, 9.25)),
+        ],
+        "hands": {"right": (8.0, 1.68, 14.84), "left": (5.4, 1.2, 9.2)},
+        "hand_pose": {"left": ("reload", "1.25")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 3.7, 5.75),
+        "sight": (8.0, 6.05, 14.0),
+        "eye_relief": 2.0,
+    },
+    # The CR4K Mining Laser is carried at the hip (the owner's third-person transform tilts it 72.75 degrees up off the
+    # arm, as the Gattaler's), held as the Thresher is: the right hand on the slanted grip behind its copper body (the
+    # main part's 3rd element), the left on its core, the brown cylinder standing out of its left side (the 1st and 44th
+    # to 49th), which the reload draws out to the left about its inner end, drops away and brings back, as the left
+    # hand lets go below. The handle above the grip (the 4th and 9th) is the owner's "grip", the carry handle the reload
+    # flicks forward like a lever about its foot. The arm bones' idle turn is the owner's for this gun, not the other
+    # guns', so each arm's way to the shoulder is turned to leave the screen as theirs do. Like the Thresher it has no
+    # sights: its handle stands between the eye and its sight posts, so aiming only steadies it and narrows the view.
+    "seam_cutter": {
+        "bones": [
+            ("gun_body", None, ["main-#0,3,8,43,44,45,46,47,48"], (8.0, 1.64, 16.72)),
+            ("grip", "gun_body", ["main#3,8"], (8.0, 3.5, 16.6)),
+            ("core", "gun_body", ["main#0,43,44,45,46,47,48"], (7.45, 3.6, 9.0)),
+        ],
+        "hands": {"right": (8.0, 1.64, 16.72), "left": (3.75, 3.6, 9.0)},
+        "arms": {"right": (-0.2164, -0.21, 0.9535), "left": (0.3004, -0.5523, 0.7777)},
+        "muzzle": (8.0, 2.45, 0.1),
+        "sight": None,
+    },
+    # The Hyperbaria is held in one hand: its idle hides the left arm, whose hand point is given for the moment it holds
+    # the bolt drawn back, 2.375 s into the reload. The tall tank on its top is the owner's "mag" (the main part's
+    # elements so named), which the reload lifts off and tosses away to the left as a new one comes down into place;
+    # its bolt is the owner's bolt part, along the top of its back. The small element named "bolt" at the foot of the
+    # grip is a copy of the bolt's knob, a pommel, and stays with the body. gun_body2 (empty, about the grip) rolls the
+    # gun as the bolt is worked, and holds it 0.7 px forward throughout. Its sight is the small ring at the left of the
+    # tank's foot; aimed, its back stays 4.6 px from the eye.
+    "caisson_pistol": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.48, 14.41)),
+            ("gun_body", "gun_body2", ["main-@mag"], (8.0, 2.48, 14.41)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 5.39, 14.0)),
+            ("mag", "gun_body", ["main@mag"], (8.0, 5.89, 10.95)),
+        ],
+        "hands": {"right": (8.0, 2.48, 14.41), "left": (7.2, 5.4, 17.7)},
+        "hand_pose": {"left": ("reload", "2.375")},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (7.95, 5.0, 3.7),
+        "sight": (7.0, 6.14, 10.02),
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -1370,6 +1471,8 @@ ZOOM = {
     "picket_rifle": 0.7, "ranger_rifle": 0.75, "kestrel_rifle": 0.7,
     # The automatic weapons (slice 9B): the hand guns a little, the air rifle more.
     "rattler_pistol": 0.9, "bronco_smg": 0.9, "squall_rifle": 0.85,
+    # The second energy weapons (slice 9C): the rail pistol reaches furthest; the cutting laser's beam is short.
+    "spikedriver": 0.85, "seam_cutter": 0.95, "caisson_pistol": 0.9,
 }
 
 
@@ -1492,6 +1595,10 @@ SHOT_SOUNDS = {
     "rattler_pistol": "item/iron_rifle/enchanted_fire.ogg",
     "bronco_smg": "item/new_rifle/fire_2.ogg",
     "squall_rifle": "item/airgun/fire.ogg",
+    # Slice 9C: the library's rail shot, its second laser shot and its plasma shot.
+    "spikedriver": "item/rail/fire.ogg",
+    "seam_cutter": "item/laser/fire_2.ogg",
+    "caisson_pistol": "item/plasma/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
