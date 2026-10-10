@@ -41,6 +41,7 @@ import io
 import json
 import math
 import sys
+import tempfile
 import uuid
 from pathlib import Path
 
@@ -717,16 +718,14 @@ def roundtrip(s, tmp=None):
         out.append("the embedded atlas differs from the painted one")
     exact = json.dumps(ours) == json.dumps(theirs)
     # and as a set of its own, read back through load_set: the same quads, part for part
-    path = Path(tmp or "/tmp") / f"bbmodel_roundtrip_{s.name}.bbmodel"
-    path.write_text(dumps(model), encoding="utf-8")
-    try:
+    with tempfile.TemporaryDirectory(prefix="jugcraft-bbmodel-", dir=tmp) as scratch:
+        path = Path(scratch) / f"{s.name}.bbmodel"
+        path.write_text(dumps(model), encoding="utf-8")
         loaded = load_set(s.name, s.palette, path, items=list(s.pieces), texture=s.texture)
         again = json.loads(json.dumps(am.set_quads(loaded)))
         out += [f"load_set: {line}" for line in compare(ours, again, cyclic=True)]
         if armor_paint.paint_atlas(loaded).tobytes() != atlas.convert("RGBA").tobytes():
             out.append("load_set: the atlas differs")
-    finally:
-        path.unlink()
     return out, exact
 
 

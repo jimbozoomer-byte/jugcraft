@@ -13,7 +13,7 @@ Updated 10 October 2026 for [integration PR #277](https://github.com/jimbozoomer
 | Armor and weapons | Thirteen owner armor sets in Blockbench projects with runtime integration, improved Sentinel/Frost Knight/Reaper/Paladin/Templar presentation, four matching weapons and Sentinel Shield | #273; acquisition and visual review limits below |
 | Fire magic | Hearthbinding research; Hearthspark, Hearthguard, Cinderbolt and Hearthflare; Smoulder; fire foci, Fire Bangle, Pyromaniac and Pyromancer armor using the supplied assets | #295; [fire spells](features/arcane-concordance-ember.md), [fire equipment](features/arcane-concordance-ember-regalia.md) |
 | Wearable magic | Leather Belt, Angelic Feather, Kraken Shell, Infernal Claws, Angelheart Vial, Phoenix Down, Amphibian Boot and Ice Breaker; belt and boot rendered on the wearer | #295; [Wayfaring](features/arcane-concordance-trinkets.md) |
-| Integration and tests | Projectile aiming and village-test setup fixes; four client-test shards with 60-minute limits; companion test discovery; shared-code selection fallback; isolated, repeated javelin validation; preserved wild-crop/spice generation, shared enchantment tags, weapon/armor registrations and complete boss-test flooring | #271–272, #283 and #277 integration commits |
+| Integration and tests | Projectile aiming and village-test setup fixes; four client-test shards with 60-minute limits; companion test discovery; shared-code selection fallback; isolated, repeated javelin validation; preserved wild-crop/spice generation, shared enchantment tags, weapon/armor registrations complete boss-test flooring and ticking area, fresh local test worlds, Windows Blockbench checks and giant-pumpkin identity persistence | #271–272, #283 and #277 integration commits |
 | Industrial planning | Owner-selected metals, polymer/electronics, grid-storage, fuel and cryogenics directions are recorded together | #264 and planning updates in #295; **documentation, not new factory gameplay** |
 
 This combines 28 source PRs (#264–273 and #278–295) through #277. Source PRs can show as merged into the integration branch before #277 reaches `main`; that alone does not make them available in a main build.
@@ -52,6 +52,10 @@ Detailed scope: [owner TODO](TODO.md), [roadmap and Ars Goetia](ROADMAP.md), [mu
 The newest #264 update records all eight answers in [industrial batch 13](features/industrial-chemistry-and-fuels-plan.md#resource-reagent-and-residue-decisions-thirteenth-batch): galena; spodumene first and lithium brines later; separate primary cobalt ore; chromite concentrate; vanadium-bearing iron feed; a short powered peroxide game recipe; novolac/DNQ photoresist; and paid gypsum-residue preparation for construction. These are selected game directions, not implemented recipes. The [connected production map](features/industrial-chemical-catalog-and-routes.md) groups the proposed implementation work.
 
 The Encyclopedia still needs quest/reward policy and visual direction. The new equipment needs owner visual review and survival acquisition choices where its feature record says creative-only. Those decisions do not block the completed content above from being tested and integrated.
+
+## Save compatibility correction
+
+Giant pumpkins now save their contest identity as `pumpkin_id`, separate from Minecraft's reserved block-entity `id`. Old custom UUID tags still load. If an older full world save already replaced that UUID with the block type, the lost UUID cannot be reconstructed; the pumpkin receives an identity while its growth, weight, carving and light data remain readable. Keep normal world backups before testing alpha updates.
 
 ## Verification and scope
 

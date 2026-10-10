@@ -86,8 +86,12 @@ public class TatterlaceGameTests {
 	 * blocks from the next and from the tests below; returns the doily's centre there.
 	 */
 	private static BlockPos lifted(GameTestHelper helper, int height) {
+		return lifted(helper, height, CENTRE);
+	}
+
+	private static BlockPos lifted(GameTestHelper helper, int height, BlockPos relativeCentre) {
 		ServerLevel level = helper.getLevel();
-		BlockPos centre = helper.absolutePos(CENTRE).above(height);
+		BlockPos centre = helper.absolutePos(relativeCentre).above(height);
 		// Egg sacs lie near the doily's rim. Support the entire encounter, not just its centre,
 		// so the brood cannot fall out of this elevated fixture as soon as it hatches.
 		int radius = (int) Math.ceil(SpindleLoft.DOILY_RADIUS) + 2;
@@ -253,10 +257,11 @@ public class TatterlaceGameTests {
 	 * Taking In the Seams spits her egg sacs round the doily and takes her up into the threads; her Brood comes out of
 	 * them; and when she falls, her sacs and her brood go with her.
 	 */
-	@GameTest(maxTicks = 220)
+	@GameTest(structure = "jugcraft-test:tatterlace_arena", padding = 48, maxTicks = 220, maxAttempts = 3, requiredSuccesses = 3)
 	public void herBroodComesFromHerSacsAndGoesWithHer(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		BlockPos centre = lifted(helper, 240);
+		// The structure's footprint keeps every rim sac in the test's ticking chunks.
+		BlockPos centre = lifted(helper, 240, new BlockPos(24, 1, 24));
 		TatterlaceEntity tatterlace = waiting(helper, centre);
 		ServerPlayer player = player(helper, centre, 0.5, 5.0);
 		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 400, 4));
@@ -271,13 +276,16 @@ public class TatterlaceGameTests {
 				helper.runAfterDelay(TatterlaceEntity.Attack.BROOD.windup + TatterEggSacEntity.HATCH_TICKS + 6, () -> {
 					List<UUID> brood = tatterlace.brood();
 					List<TatterEggSacEntity> spat = tatterlace.sacs(level);
+					String hatchState = spat.stream().map(sac -> sac.blockPosition() + ": ticks=" + sac.tickCount
+							+ ", hatching=" + sac.hatching()).toList().toString();
 					tatterlace.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
 					helper.runAfterDelay(25, () -> {
 						try {
 							helper.assertTrue(sacs == TatterlaceEntity.EGG_SACS, sacs + " egg sacs, not " + TatterlaceEntity.EGG_SACS);
 							helper.assertTrue(hanging == TatterlaceEntity.Phase.FINAL, "She did not take to the threads: " + hanging);
 							helper.assertTrue(Math.abs(up - TatterlaceEntity.HANG) < 0.6, "She does not hang " + TatterlaceEntity.HANG + " over her lace but " + up);
-							helper.assertTrue(brood.size() == TatterlaceEntity.BROOD, brood.size() + " spiderlings came out, not " + TatterlaceEntity.BROOD);
+							helper.assertTrue(brood.size() == TatterlaceEntity.BROOD, brood.size() + " spiderlings came out, not "
+									+ TatterlaceEntity.BROOD + "; sacs: " + hatchState);
 							for (UUID id : brood) {
 								helper.assertTrue(!(level.getEntity(id) instanceof SpiderlingEntity spiderling) || !spiderling.isAlive(), "A spiderling outlived her");
 							}
