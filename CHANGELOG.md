@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 11B (the rest of the Nether guns)
+- **Three more Nether guns** from the owner's crimson, blackstone and gold models and animations, whose bullets set what they hit alight as slice 11A's do: the **Ashfall Pistol**, held in one hand (so it pairs with another one-handed gun), the tank under its barrel changed to reload; the **Goldbristle Carbine**, one rifle round a pull from a magazine at its left side; and the **Crackling**, a long gold pump shotgun of six heavy pellets, loaded a shell at a time.
+- Each is made from steel, gold, a lever and gilded blackstone. The Ashfall Pistol takes the stocks, scopes and Laser Sight; the Goldbristle Carbine everything slice 11A's guns take, and the magazines; the Crackling the stocks, grips and bayonets, its owner-made barrel attachments being too short for its barrel.
+- Record: [guns.md, slice 11B](docs/features/guns.md#slice-11b-the-rest-of-the-nether-guns).
+
 ### Unmerged: Guns, slice 11A (the Nether guns)
 - **Three new guns** from the owner's crimson, blackstone and gold models and animations, whose bullets set what they hit alight for four seconds (never a block): the **Tusker**, a pump shotgun of eight pellets loaded a shell at a time; the **Cinder Repeater**, an automatic firing light rounds from a magazine of twenty; and the **Bastion Rifle**, a heavy rifle whose trapdoor breech flips open after every shot, loaded a round at a time.
 - Each is made from steel, a lever, gold and gilded blackstone from the Nether's bastion remnants. Each takes the stocks, grips, barrel attachments, bayonets, scopes and the Laser Sight; the Cinder Repeater the magazines too.

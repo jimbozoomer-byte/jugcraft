@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G) and the Nether guns (slice 11A)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G) and the Nether guns (slices 11A and 11B)
 
 Status:
 - **Slices 1 to 9G are in `main`:** the last of them, 8C to 9G, with #277 on 10 October 2026. The lines below say where each was built.
@@ -29,6 +29,7 @@ Status:
 - **Slice 10F** (enemies with guns: the Raider Gunner, who carries and fires the service arms; [below](#slice-10f-enemies-with-guns)): implemented on `claude/guns-raider-gunners`, stacked on slice 10E, awaiting review.
 - **Slice 10G** (two guns at once: a one-handed gun in each hand, both fired; [below](#slice-10g-two-guns-at-once)): implemented on `claude/guns-dual-pistols`, stacked on slice 10F, awaiting review.
 - **Slice 11A** (the Nether guns: the Tusker, Cinder Repeater and Bastion Rifle; [below](#slice-11a-the-nether-guns)): implemented on `claude/guns-nether`, stacked on slice 10G, awaiting review.
+- **Slice 11B** (the rest of the Nether guns: the Ashfall Pistol, Goldbristle Carbine and Crackling; [below](#slice-11b-the-rest-of-the-nether-guns)): implemented on `claude/guns-nether-2`, stacked on slice 11A, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -43,7 +44,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the energy weapons: in the same answer ("yes to all") they took the offer that the energy weapons charge from the energy system; then, on 9 October 2026, "do the energy weapons next".
 - the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, the second, the aiming polish, slice 9F, and the third, the Lobber's grenades, slice 9G.
 - the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B, the double-barrels slice 10C and the sculk guns slice 10D; the Energy Cell rack is slice 10E, the enemies with guns slice 10F and the dual pistols slice 10G.
-- the next round: on 10 October 2026, with those built, they asked "Ok lets continue and do the next thing we need to". No choice was offered this time: the next of their unbuilt guns were taken up, a set at a time, each its own pull request, starting with three of the six they made in the piglins' crimson, blackstone and gold. The Nether guns are slice 11A.
+- the next round: on 10 October 2026, with those built, they asked "Ok lets continue and do the next thing we need to". No choice was offered this time: the next of their unbuilt guns were taken up, a set at a time, each its own pull request, starting with three of the six they made in the piglins' crimson, blackstone and gold. The Nether guns are slice 11A, and the other three slice 11B.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1650,6 +1651,87 @@ The reload times and the rates are the owner's animations': the Tusker's pump an
 - **Aimed, the Bastion Rifle's bolt** (a diamond under the sight) and its handle show just under the crosshair, across the lower part of what it aims at.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 11B: the rest of the Nether guns
+The other three of the six guns the owner made in the piglins' crimson, blackstone and gold, taken up after slice 11A in the same round ("Ok lets continue and do the next thing we need to"): the Pyroclastic Flow, Freyr and Ribs Glory. Their bullets set what they hit alight too.
+
+| | Ashfall Pistol | Goldbristle Carbine | Crackling |
+|---|---|---|---|
+| The owner's gun | Pyroclastic Flow | Freyr | Ribs Glory |
+| What it is | a pistol held in one hand: a crimson frame and grip, gold bands, a gold diamond at its back, a long black barrel with a vented jacket, and a tank under the barrel | a short carbine with a pistol grip: a crimson body, a black receiver, a gold ring behind its short barrel, a magazine at its left side, and a diamond set with a glowing stone at its back | a long pump shotgun in gold: a curved dark grip, a dark pump under the barrel, a black shroud over the middle of the barrel and ribs at its muzzle |
+| Held | in one hand: it pairs with another (slice 10G) | in both hands | in both hands |
+| Fires | one shot each pull | one shot each pull | 6 pellets a shot, the pump worked after each |
+| Damage | 6 | 7 | 4 a pellet (24 if all land) |
+| Rate | 2.5 a second (every 8 ticks) | 2.9 a second (every 7 ticks) | 1 a second (every 20 ticks) |
+| Holds | 8 | 12 | 5 |
+| Reload | 2.35 s: the tank | 2.05 s: the magazine | 0.3 s, then 0.5 s a shell, then 0.55 s |
+| Spread, hip / aimed | 2.5° / 0.8° | 2.5° / 0.4° | 5° / 3° |
+| Range | 56 blocks | 88 | 36 |
+| The view aimed | narrowed to 0.9 | 0.85 | 0.9 |
+| Round | Light Round | Rifle Round | Buckshot Shell |
+| Takes | the three stocks, the scopes and the Laser Sight | the silencers, the Muzzle Brake and Extended Barrel, both magazines, the three stocks, the Light and Tactical Grips, the four bayonets, the scopes and the Laser Sight | the three stocks, the Light and Tactical Grips and the four bayonets |
+
+The reload times and the Crackling's rate are the owner's animations': its pump is worked in full between shots.
+
+**Crafting** (a crafting table; the guns switch, as every gun). Each takes steel, gold, a lever and gilded blackstone, as slice 11A's do:
+- **Ashfall Pistol:** a steel ingot and a gold ingot over a lever and gilded blackstone.
+- **Goldbristle Carbine:** two steel ingots and a gold ingot over a gold ingot, a lever and gilded blackstone.
+- **Crackling:** two gold ingots and a steel ingot over a steel ingot, a lever and gilded blackstone.
+
+**How they fire:** as slice 11A's: bullets or pellets from the eye along the look, each creature they hurt set alight for 4 seconds (`JugcraftGuns.INCENDIARY`), no block. A magazine or a tank loads at the end of its reload, the Crackling a shell after each shell's time.
+
+**What you see:** the owner's animations.
+- **Ashfall Pistol:** held out in the right hand; each shot kicks it back and up. To reload, the left hand comes in and pushes the plate at the front of the tank forward; the tank swings out to the left and down, a new one swings in, and the plate is drawn back.
+- **Goldbristle Carbine:** each shot kicks it back a little, snaps the plate along its top back and home, and rocks the diamond at its back. To reload, the gun is rolled; the magazine is pulled out of its left side and a new one pushed home and slapped.
+- **Crackling:** as the Sledge (slice 9D), whose animations its own follow: each shot kicks it back, then the left hand pumps the fore-end back and forward. To reload, the pump is drawn back and held open and the gun rolled onto its side, the left hand pushes each shell in, and the pump is closed.
+- **Spent rounds:** the Ashfall Pistol and the Goldbristle Carbine throw a case with each shot; the Crackling's animations, as the Sledge's, cue none.
+- **Sounds:** the Sentry Pistol's shot (the Ashfall Pistol), the Patchwork Carbine's (the Goldbristle Carbine) and the Coach Gun's (the Crackling). The library's shots not used yet are silenced takes, rocket, flamethrower and jetpack sounds and wind-ups, or carry tags naming another source (slice 11A), so none was added. The Ashfall Pistol's plate goes with the half pump sound and its tank with the magazine's; the Crackling's shells go in with the shell sound.
+
+**How the models were built:**
+- **Ashfall Pistol:**
+  - **One hand:** its idle hides the left arm, so it is among the one-handed guns (`JugcraftGuns.ONE_HANDED`, slice 10G); the left hand's place is given for the reload's push of the plate (0.4583 s, `"hand_pose"`).
+  - **Slider:** the plate at the front of the tank (the main part's 23rd to 25th elements), as the owner's groups name it.
+  - **Tank:** the tank itself (the 26th and 27th), which the owner's groups hang from the slider, so the plate carries it; it turns about its neck, where it meets the plate.
+  - **No bolt:** its parts have none, so the `bolt` bone each shot moves holds nothing, nor do the magazine bones its shots scale.
+  - **Sights:** the owner's notch at the back of its receiver over the post at its front.
+  - **Aiming:** at the hip's depth: through the aimed shot its back stays 3.83 px from the eye.
+- **Goldbristle Carbine:**
+  - **Bolt:** the plate along its top (the main part's 7th element), which each shot drives 2.6 px back, as the Vulcanic Repeater's rib.
+  - **Seal:** the diamond and its glowing stone (the 19th and 20th), rocking about their middle. The stone draws on the Pyroclastic Flow's glowing texture, its first frame, as the Cinder Repeater's does.
+  - **Magazine:** its own part, at the left side, and the Extended and Speed Magazines in its place.
+  - **Bayonets:** drawn on the Jackhammer's texture, merged into its atlas as shared textures are (slice 7).
+  - **Sights:** the owner's ring at the back of its receiver, between two wings.
+  - **Aiming:** held 1 px further out, as the Cinder Repeater: through the aimed shot its top plate came within 2.81 px of the eye.
+- **Crackling:**
+  - **The Sledge's body:** the owner's Ribs Glory is the Killer 23 (slice 9D) lengthened, with the same grip, receiver and poses, a longer pump and tube, and its own long barrel: a shroud over its middle and ribs at its muzzle.
+  - **Bolt:** the pump, its own part. Its `shell`, `magazine`, `scriptures` and `no_sights` bones hold nothing, as the Sledge's.
+  - **Left out:** its standard barrel part, the Killer 23's, the same box as its own barrel's back two thirds; drawn together, the two flickered.
+  - **No barrel attachments** (`MISFITS`): the owner's barrel parts for it are the Killer 23's, made for a barrel that ends at z −1.2, while its own runs on to −8.2. The silencers and the Muzzle Brake would sit inside its shroud, halfway along it, and the Extended Barrel inside its barrel.
+  - **Sights:** the pair of posts on its receiver, as the Sledge's; its front post was on the Killer 23's standard barrel, so there is none.
+  - **Aiming:** held 6 px further out, as the Sledge: the shot's kick brought the top of its grip 1.8 px past the eye.
+- **The arms:** the Ashfall Pistol's and the Goldbristle Carbine's left arms chosen in first-person previews to cover as little of the screen as they can (the carbine's a third of what it first covered), still running from the hand toward the shoulder. The Crackling's are the Sledge's: its left hand comes up to the port with each shell, so the arm crosses the view for a moment, as the Sledge's does.
+- **Checked** in first-person, side and orthographic previews: idle, aimed, fired, through each reload, draw and inspection; the Ashfall Pistol's plate and tank, the Goldbristle Carbine's plate, diamond and magazine, and the Crackling's pump through their animations; each with the attachments it takes; and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:** as slice 11A's: the Light Round, the Rifle Round and the Buckshot Shell; steel, gold, a lever and gilded blackstone from the bastion remnants; the Stoker's fire. Nothing new.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a load and its reload.
+- **Ashfall Pistol:** 6 a shot, 15 a second while it fires; over its tank and its 2.35 s reload about 9 a second, as the Sentry Pistol's (9). A pair (slice 10G) does about 12, as two Sentry Pistols do.
+- **Goldbristle Carbine:** 7 a shot, 20 a second while it fires; over its magazine and its 2.05 s reload about 13 a second: between the Patchwork Carbine's (11) and the Undertone Rifle's (16), as the marksman rifles' (11 to 14), but reaching less far (88 blocks against their 120 to 128) and less steady aimed (0.4° against 0.1° to 0.15°).
+- **Crackling:** 24 a shot, as the Tusker's, but slower: over its five shells and their reload (3.35 s) about 14 a second, as the Throttle's (14), below the Tusker's and the Sledge's (16) and above the Highwayman's (13). From the hip its six heavy pellets keep closer than any other shotgun's; aimed, only the Highwayman's keep closer, and only the Highwayman reaches further (40 blocks).
+- **The fire** adds about one a second to a creature that burns, as slice 11A's.
+- **A round:** each spends one a shot; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:ashfall_pistol`, `goldbristle_carbine` and `crackling`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Ashfall Pistol has no moving bolt:** its parts have none.
+- **The Ashfall Pistol's tank** swings out and back in by itself while the left hand holds the plate, as the owner animated it.
+- **The Crackling takes no barrel attachments:** the owner's are too short for its barrel. Parts made for it would fit.
+- **The Crackling has no front sight:** it is aimed by the notch on its receiver over the top of its shroud.
+- **The Crackling's loading arm** crosses the view for a moment with each shell, as the Sledge's does.
+- **The glowing stone does not pulse,** as the Cinder Repeater's.
+- **In the Nether** most creatures are fireproof, as for slice 11A's.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -2719,6 +2801,66 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | bastion_rifle | `Guns/item/turnpike.png` | `63e9b3911c1b9cd4` |
 | bastion_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | bastion_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| ashfall_pistol | `Guns/models/item/pyroclastic_flow.json` | `0a44299b25d91ca9` |
+| ashfall_pistol | `Guns/item/pyroclastic_flow.png` | `cad666fe4ff7b438` |
+| ashfall_pistol | `Guns/item/pyroclastic_flow.animation.json` | `2154c87cd09ab045` |
+| ashfall_pistol | `Guns/models/special/pyroclastic_flow/main.json` | `d507577566cc3426` |
+| ashfall_pistol | `Guns/models/special/pyroclastic_flow/light_stock.json` | `6edc7c6d7e8d9f14` |
+| ashfall_pistol | `Guns/models/special/pyroclastic_flow/heavy_stock.json` | `c96eff8261605db9` |
+| ashfall_pistol | `Guns/models/special/pyroclastic_flow/wooden_stock.json` | `abbd590274156868` |
+| ashfall_pistol | `Guns/models/special/pyroclastic_flow/sights.json` | `eb9f25722efdc7c7` |
+| ashfall_pistol | `Guns/sounds/item/scrapper/fire.ogg` | `43c9d4ec929bf949` |
+| ashfall_pistol | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| ashfall_pistol | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| ashfall_pistol | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| ashfall_pistol | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| ashfall_pistol | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| goldbristle_carbine | `Guns/models/item/freyr.json` | `4ede6f40b897e035` |
+| goldbristle_carbine | `Guns/item/freyr.png` | `8e782f6171e1932a` |
+| goldbristle_carbine | `Guns/item/freyr.animation.json` | `246889ab5525ade2` |
+| goldbristle_carbine | `Guns/models/special/freyr/main.json` | `209a685fda57aa81` |
+| goldbristle_carbine | `Guns/models/special/freyr/stan_barrel.json` | `da6aea2611ef154f` |
+| goldbristle_carbine | `Guns/models/special/freyr/silencer.json` | `a182c8c5d807a94d` |
+| goldbristle_carbine | `Guns/models/special/freyr/advanced_silencer.json` | `8193f1d0db820e32` |
+| goldbristle_carbine | `Guns/models/special/freyr/muzzle_brake.json` | `0ef1ca8af2c81db8` |
+| goldbristle_carbine | `Guns/models/special/freyr/ext_barrel.json` | `564a329496a675ca` |
+| goldbristle_carbine | `Guns/models/special/freyr/stan_grip.json` | `f3757d0a698ec8a3` |
+| goldbristle_carbine | `Guns/models/special/freyr/light_stock.json` | `f02b0774d36ebb92` |
+| goldbristle_carbine | `Guns/models/special/freyr/heavy_stock.json` | `26ef78e0ad4baef9` |
+| goldbristle_carbine | `Guns/models/special/freyr/wooden_stock.json` | `9e511841276a85bd` |
+| goldbristle_carbine | `Guns/models/special/freyr/light_grip.json` | `c60a5c775d0a12bf` |
+| goldbristle_carbine | `Guns/models/special/freyr/iron_bayonet.json` | `2adfc1bb31888311` |
+| goldbristle_carbine | `Guns/models/special/freyr/anthralite_bayonet.json` | `2616d6c2855560d9` |
+| goldbristle_carbine | `Guns/models/special/freyr/diamond_bayonet.json` | `42a4d915b7d016f1` |
+| goldbristle_carbine | `Guns/models/special/freyr/netherite_bayonet.json` | `b3e5d122bc3b296e` |
+| goldbristle_carbine | `Guns/models/special/freyr/tact_grip.json` | `01ed9f55f20cc7fe` |
+| goldbristle_carbine | `Guns/models/special/freyr/sights.json` | `138c293da67d9e69` |
+| goldbristle_carbine | `Guns/models/special/freyr/stan_mag.json` | `d0d3c69e9f30449f` |
+| goldbristle_carbine | `Guns/models/special/freyr/ext_mag.json` | `e738571809ab0cb3` |
+| goldbristle_carbine | `Guns/models/special/freyr/speed_mag.json` | `1eaa64761a4be46a` |
+| goldbristle_carbine | `Guns/sounds/item/makeshift_rifle/fire.ogg` | `9c4469e45b9b77e4` |
+| goldbristle_carbine | `Guns/item/pyroclastic_flow_animated.png` | `e545c8e219a385dd` |
+| goldbristle_carbine | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| goldbristle_carbine | `Guns/item/jackhammer.png` | `2198cf8cfda3a00b` |
+| goldbristle_carbine | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| goldbristle_carbine | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| goldbristle_carbine | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| goldbristle_carbine | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| crackling | `Guns/models/item/ribs_glory.json` | `09b5baef810a83a2` |
+| crackling | `Guns/item/ribs_glory.png` | `80cc857ba4bed14e` |
+| crackling | `Guns/item/ribs_glory.animation.json` | `6b171cd061b4cf10` |
+| crackling | `Guns/models/special/ribs_glory/main.json` | `21fee5276d1f7f4a` |
+| crackling | `Guns/models/special/ribs_glory/light_stock.json` | `5367eec501f05546` |
+| crackling | `Guns/models/special/ribs_glory/heavy_stock.json` | `3e553ba3e75a264a` |
+| crackling | `Guns/models/special/ribs_glory/wooden_stock.json` | `d7878e4a562097dd` |
+| crackling | `Guns/models/special/ribs_glory/light_grip.json` | `00657cfdd58440cc` |
+| crackling | `Guns/models/special/ribs_glory/iron_bayonet.json` | `f76862e3a29aa4ee` |
+| crackling | `Guns/models/special/ribs_glory/anthralite_bayonet.json` | `934ca6d1a899ab35` |
+| crackling | `Guns/models/special/ribs_glory/diamond_bayonet.json` | `90e057fb4b4f6278` |
+| crackling | `Guns/models/special/ribs_glory/netherite_bayonet.json` | `547e931af27cf393` |
+| crackling | `Guns/models/special/ribs_glory/tact_grip.json` | `e116a28a23644cef` |
+| crackling | `Guns/models/special/ribs_glory/bolt.json` | `650fcf80f52af042` |
+| crackling | `Guns/sounds/item/brass_shotgun/fire.ogg` | `95eee6d27b87d35a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -3435,6 +3577,31 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - **Aimed:** the Tusker's peep ring and the Cinder Repeater's ring on the husk over the crimson backs of their receivers; the Bastion Rifle's ladder over the husk, with its bolt, a gold-lit diamond, and the bolt's handle just under the crosshair.
     - **Reloading:** the Tusker tipped to take a shell and the Cinder Repeater rolled with its magazine out, the husk burning behind both. The Bastion Rifle's left arm comes up across the view to the breech with its round.
     - **Inspection, attachments and third person:** each turned over in the hand; each with its stocks, barrel devices, bayonet, Tactical Grip and Laser Sight; and held in both hands seen from outside, flashing as it fires.
+- **Slice 11B, run locally (10 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and textures (their shots are sounds already copied); every other gun's files came out unchanged.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds.
+  - `python3 tools/check_mod_data.py`: PASS (2168 material IDs), with `check_guns` (the numbers, attachments, the one-handed guns, sound aliases, looks and `JugcraftGuns.INCENDIARY` against tools/guns.py).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+- **Slice 11B game tests (all passed in CI, below):**
+  - `NetherGunsGameTests`, now for all six Nether guns:
+    - `netherGunsAreRegistered`: each is registered with its numbers, its recipe loads, and it fires bullets that set what they hit alight, as no other gun's do. The Ashfall Pistol is a pistol held in one hand, of eight light rounds; the Goldbristle Carbine a carbine of twelve rifle rounds, one a pull; the Crackling a shotgun of six pellets and five shells loaded a shell at a time. The Goldbristle Carbine takes all that slice 11A's take, and the magazines; the Ashfall Pistol only the stocks, the scopes and the Laser Sight; the Crackling only the stocks, the grips and the bayonets.
+    - `secondNetherGunsFireAndLoad`: as `netherGunsFireAndLoad`, for slice 11B's three.
+    - `secondNetherGunsSetWhatTheyHitAlight`: as `netherGunsSetWhatTheyHitAlight`, for slice 11B's three, beside an Undertone Rifle.
+  - `GunsGameTests` counts 54 guns; `DualGunsGameTests` the fourteen held in one hand; `TacticalAttachmentsGameTests` the twenty-one that take the Tactical Grip.
+- **Slice 11B in CI** ([run 38092224778](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38092224778), on 4aba95d34): every check passed.
+  - **Server game tests:** 1314 in each job, slice 11A's 1312 and this slice's two. All passed, `NetherGunsGameTests` among them.
+  - **Client game tests:** the changed files chose the same eight classes as slice 11A's, and all eight passed. In `GunsClientGameTests` each new gun, in its turn:
+    - held and aimed, its arms drawn at full size and then half, the view narrowed to 0.9 (Ashfall Pistol), 0.85 (Goldbristle Carbine) and 0.9 (Crackling);
+    - fired at the husk, each spending one round, with 6 frames of flash: the Ashfall Pistol took it from 433.92 to 427.92 (6), the Goldbristle Carbine 7, and the Crackling 24 (all six pellets);
+    - reloaded from the inventory, 31 rounds left each time; the Ashfall Pistol and the Goldbristle Carbine threw 3 casings each, the Crackling none, as its animations cue none;
+    - with each set of attachments it takes, held and aimed, the stocks left out aimed (in 35 to 37 frames, none held).
+  - **The fire in play:** the husk lost 3 more health after each Nether gun's shot before the next gun fired: after the Tusker's, the Cinder Repeater's, the Bastion Rifle's (the last gun in slice 11A's run, so its fire showed only now), the Ashfall Pistol's and the Goldbristle Carbine's. The Crackling fired last. After the Reverb's shot, before them, it lost none.
+  - **Screenshots:**
+    - **Held:** each at the lower right pointing at the husk, its name over the hotbar: the Ashfall Pistol in the right hand alone, the Goldbristle Carbine with its magazine out to the left and the left hand under it, the Crackling with the left hand under its pump.
+    - **Aimed:** the Ashfall Pistol's notch and the Goldbristle Carbine's ring on the husk over the crimson backs of their receivers; the Crackling's posts on the husk over its narrow back and the right hand, as the Sledge's in the same run.
+    - **Reloading:** the Ashfall Pistol and the Goldbristle Carbine tipped in their reloads, the husk burning behind both. The Crackling's left arm comes up across the middle of the view with its shell, as the Sledge's does in the same run.
+    - **Inspection, attachments and third person:** each turned over in the hand; each with the stocks; the Goldbristle Carbine with its barrel devices, magazines, bayonet and grips, the Crackling with its grips and bayonet, the pistol and the carbine with the Laser Sight. Seen from outside, the Ashfall Pistol is raised in one hand and the others in both, each flashing as it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
