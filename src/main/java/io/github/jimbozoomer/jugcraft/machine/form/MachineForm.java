@@ -20,6 +20,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.material.Fluid;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -38,6 +39,11 @@ import org.jspecify.annotations.Nullable;
  * <p>Item slots come in this order: inputs, outputs, tool sockets, then the two upgrade slots if it takes upgrades.
  * Tanks are inputs first, then outputs, and are saved by their role names, never by their positions, so adding a
  * tank to a later version of a form cannot move one tank's contents into another.
+ *
+ * <p>A form either processes or generates. A processing form declares capabilities its family's recipes ask for and
+ * takes power at its {@link FormPort.Kind#ENERGY_IN} ports. A generator form (a generator family) declares the
+ * {@link FormFuel fuels} it burns instead: one fuel tank, no products, slots or upgrades, and its power leaves at
+ * {@link FormPort.Kind#ENERGY_OUT} ports; it never takes power in.
  */
 public final class MachineForm {
 	public static final int MIN_EXTENT = 2;
@@ -71,6 +77,7 @@ public final class MachineForm {
 	private final int itemOutputs;
 	private final boolean upgrades;
 	private final int warmupTicks;
+	private final List<FormFuel> fuels;
 
 	private MachineForm(Builder builder) {
 		this.id = builder.id;
@@ -79,6 +86,7 @@ public final class MachineForm {
 		this.profile = builder.profile;
 		this.upgrades = builder.upgrades;
 		this.warmupTicks = builder.warmup;
+		this.fuels = List.copyOf(builder.fuels);
 		if (builder.layers.isEmpty() || builder.layers.getFirst().length == 0) {
 			throw invalid("has no layers");
 		}
@@ -91,8 +99,10 @@ public final class MachineForm {
 						+ width + "x" + depth + "x" + height);
 			}
 		}
-		if (!family.isFluidProcessor()) {
-			throw invalid("needs a fluid-processing family for its recipes, not " + family.id);
+		boolean generator = !fuels.isEmpty();
+		if (generator ? !family.isGenerator() : !family.isFluidProcessor()) {
+			throw invalid(generator ? "burns fuel, so needs a generator family, not " + family.id
+					: "needs a fluid-processing family for its recipes, not " + family.id);
 		}
 
 		// The occupancy mask, and the one controller on the ground layer.
@@ -206,7 +216,22 @@ public final class MachineForm {
 			}
 		}
 		this.sockets = List.copyOf(builder.sockets);
-		if (builder.capabilities.isEmpty()) {
+		if (generator) {
+			// A generator burns from one fuel tank and makes only power.
+			if (builder.inputTanks.size() != 1 || !builder.outputTanks.isEmpty() || itemInputs > 0 || itemOutputs > 0
+					|| !sockets.isEmpty() || upgrades || !builder.capabilities.isEmpty()) {
+				throw invalid("is a generator: one fuel tank and no other tanks, slots, sockets, upgrades or capabilities");
+			}
+			Set<Identifier> burnt = new HashSet<>();
+			for (FormFuel fuel : fuels) {
+				if (!burnt.add(fuel.fluid())) {
+					throw invalid("lists fuel " + fuel.fluid() + " twice");
+				}
+				if (fuel.jePerMb() <= 0 || fuel.jePerTick() <= 0 || fuel.jePerTick() > family.capacity) {
+					throw invalid("burns " + fuel.fluid() + " for nothing, or makes more a tick than it can store");
+				}
+			}
+		} else if (builder.capabilities.isEmpty()) {
 			throw invalid("runs no processes: give it at least one capability");
 		}
 		this.capabilities = Collections.unmodifiableSet(new LinkedHashSet<>(builder.capabilities));
@@ -237,7 +262,8 @@ public final class MachineForm {
 				case FLUID_OUT -> target >= 0 && target < builder.outputTanks.size();
 				case ITEM_IN -> itemInputs > 0 && (target == FormPort.ALL || target >= 0 && target < itemInputs);
 				case ITEM_OUT -> itemOutputs > 0 && (target == FormPort.ALL || target >= 0 && target < itemOutputs);
-				case ENERGY_IN -> family.usesPower();
+				case ENERGY_IN -> !generator && family.usesPower();
+				case ENERGY_OUT -> generator;
 			};
 			if (!reaches) {
 				throw invalid("has port " + port.name() + " reaching nothing");
@@ -249,6 +275,10 @@ public final class MachineForm {
 			portsByFace[face] = port;
 		}
 		this.ports = List.copyOf(builder.ports);
+		if (generator && (ports.stream().noneMatch(port -> port.kind() == FormPort.Kind.FLUID_IN)
+				|| ports.stream().noneMatch(port -> port.kind() == FormPort.Kind.ENERGY_OUT))) {
+			throw invalid("is a generator with no way for its fuel to come in or its power to go out");
+		}
 	}
 
 	private IllegalArgumentException invalid(String problem) {
@@ -401,6 +431,26 @@ public final class MachineForm {
 		return recipe.machine() == family && capabilities.contains(recipe.capability());
 	}
 
+	/** Whether this is a generator form: it burns {@link #fuels()} and gives power out. */
+	public boolean generator() {
+		return !fuels.isEmpty();
+	}
+
+	/** What a generator form burns, in its declared order; empty for a processing form. */
+	public List<FormFuel> fuels() {
+		return fuels;
+	}
+
+	/** The fuel entry for {@code fluid}, or null when this form does not burn it. */
+	public @Nullable FormFuel fuel(Fluid fluid) {
+		for (FormFuel fuel : fuels) {
+			if (fuel.is(fluid)) {
+				return fuel;
+			}
+		}
+		return null;
+	}
+
 	public OperatingProfile profile() {
 		return profile;
 	}
@@ -477,6 +527,7 @@ public final class MachineForm {
 		private final Map<String, String> aliases = new LinkedHashMap<>();
 		private boolean upgrades;
 		private int warmup;
+		private final List<FormFuel> fuels = new ArrayList<>();
 
 		private Builder(Identifier id, MachineKind family) {
 			this.id = id;
@@ -538,6 +589,15 @@ public final class MachineForm {
 
 		public Builder warmup(int ticks) {
 			this.warmup = ticks;
+			return this;
+		}
+
+		/**
+		 * Makes this a generator form burning {@code fluid}: {@code jePerMb} JE from each millibucket, made into
+		 * {@code jePerTick} JE a tick while it burns.
+		 */
+		public Builder fuel(Identifier fluid, int jePerMb, int jePerTick) {
+			fuels.add(new FormFuel(fluid, jePerMb, jePerTick));
 			return this;
 		}
 

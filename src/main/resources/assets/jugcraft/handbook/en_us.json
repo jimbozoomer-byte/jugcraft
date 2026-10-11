@@ -3873,6 +3873,30 @@
           }
         },
         {
+          "title": "Gas Burning Generator",
+          "icon": "jugcraft:gas_burning_generator",
+          "text": [
+            "Four wide, five deep and four tall: a gas engine turning a generator on a steel skid, built from steel plates, an electric motor, a steel gear, a Tinplate Tank and a basic circuit. Every block it fills must be free when it is placed; the corners above the skid at the front stay open.",
+            "Pipe hydrogen into the capped inlet low on its right side. It burns a millibucket a tick, 128 JE each, and sends 128 JE/t out of the socket on the terminal cabinet at the back: a bucket lasts 50 seconds. Its coupling and intake fan spin up as it starts.",
+            "It makes only as much as its store has room for, so no fuel is wasted when nothing draws its power, and its screen says when the fuel tank is empty or the store is full. Methane, at 256 JE/t, comes with the methane Infuser."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_gear",
+              "jugcraft:steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:basic_circuit",
+              "jugcraft:fluid_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:gas_burning_generator",
+            "count": 1
+          }
+        },
+        {
           "title": "Electroplating Bath",
           "icon": "jugcraft:electroplating_bath",
           "text": [

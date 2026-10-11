@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.WorldlyContainer;
@@ -106,7 +107,7 @@ public class FormMachineBlock extends LargeMachineBlock {
 		return form.port(part(state), FormSide.of(side, state.getValue(FACING)));
 	}
 
-	/** Cables connect only to the form's power ports. */
+	/** Cables connect only to the form's power ports: its power input, or a generator's power output. */
 	@Override
 	public boolean acceptsPower(BlockState state, @Nullable Direction side) {
 		if (!kind().usesPower()) {
@@ -116,7 +117,15 @@ public class FormMachineBlock extends LargeMachineBlock {
 			return true;
 		}
 		FormPort port = portAt(state, side);
-		return port != null && port.kind() == FormPort.Kind.ENERGY_IN;
+		return port != null && port.kind().energy();
+	}
+
+	/**
+	 * No furnace smoke and crackle: a form shows its work in its lit model and moving parts, and a burning family's
+	 * smoke would rise from the controller's column rather than from the machine's own exhaust.
+	 */
+	@Override
+	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 	}
 
 	@Override

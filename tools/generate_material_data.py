@@ -758,8 +758,11 @@ def machine_assets(lang):
                          ("missing_item", "%1$s needs %3$s more %2$s"), ("unused_fluid", "%1$s: nothing here uses %2$s"),
                          ("unused_item", "%1$s: nothing here uses %2$s"), ("tool_required", "%1$s needs %2$s"),
                          ("output_full", "%1$s is full"), ("output_other_fluid", "%1$s holds another fluid (%2$s)"),
-                         ("output_slot_full", "%1$s is full"), ("no_energy", "Needs %3$s JE per tick")):
+                         ("output_slot_full", "%1$s is full"), ("no_energy", "Needs %3$s JE per tick"),
+                         ("no_fuel", "%1$s is empty"), ("power_full", "Power store is full")):
         lang[f"container.{MOD}.form.reason.{reason}"] = text
+    # A generator form at work (MachineStatus.title).
+    lang[f"container.{MOD}.form.state.generating"] = "Generating"
     lang[f"container.{MOD}.form.input_slot"] = "Input slot %s"
     lang[f"container.{MOD}.form.output_slot"] = "Output slot %s"
     lang[f"container.{MOD}.form.cell"] = "column %s, row %s, layer %s"

@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.machine.form;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.chemistry.FluidFuels;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import java.util.List;
@@ -18,10 +19,11 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 /**
  * The industrial machine forms the game registers, from the owner's factory plan (docs/features/
- * industrial-machine-foundation.md), starting with package 2's Electrolytic Separator
- * (docs/features/industrial-electrolytic-separator.md). Each form is also described in tools/industrial_forms.py for
- * its art, recipes and data; tools/check_mod_data.py keeps the two the same. Every form shares the one controller
- * block entity type, {@code jugcraft:machine_form}, so a saved machine keeps its type when more forms join this list.
+ * industrial-machine-foundation.md): package 2's Electrolytic Separator (docs/features/industrial-electrolytic-separator.md)
+ * and Gas Burning Generator (docs/features/industrial-gas-burning-generator.md). Each form is also described in
+ * tools/industrial_forms.py for its art, recipes and data; tools/check_mod_data.py keeps the two the same. Every form
+ * shares the one controller block entity type, {@code jugcraft:machine_form}, so a saved machine keeps its type when
+ * more forms join this list.
  */
 public final class IndustrialForms {
 	/** Splitting water and ordinary brine. */
@@ -53,7 +55,29 @@ public final class IndustrialForms {
 			.port("power", FormPort.Kind.ENERGY_IN, 0, 1, 0, 0, FormSide.FRONT)
 			.build();
 
+	/**
+	 * The Gas Burning Generator: the shared hydrogen and methane generator of the starter factory, a form of the
+	 * combustion generators' family (the Gas Turbine's energy figures), four wide, five deep and four tall. The skid fills
+	 * the ground layer, the engine-generator train the middle columns, the generator housing and the terminal cabinet
+	 * the back rows, and the cabinet's top two blocks of the fourth layer; the corners above the skid at the front are
+	 * open. The controller is the ignition box at the front left. Fuel comes in low on the right side; power leaves at
+	 * the cabinet's socket at the back. It burns only its own fuels, never the turbine's.
+	 */
+	public static final MachineForm GAS_BURNING_GENERATOR_FORM = MachineForm.builder(Jugcraft.id("gas_burning_generator"),
+					MachineKind.GAS_TURBINE)
+			.layer("C###", "####", "####", "####", "####")
+			.layer(".##.", ".##.", ".##.", "####", "####")
+			.layer(".##.", ".##.", ".##.", "####", "####")
+			.layer("....", "....", "....", "....", "..##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("fuel")
+			.fuel(Jugcraft.id("hydrogen"), FluidFuels.HYDROGEN, FluidFuels.GAS_BURNING_HYDROGEN)
+			.port("fuel_in", FormPort.Kind.FLUID_IN, 0, 3, 1, 0, FormSide.RIGHT)
+			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 2, 4, 1, FormSide.BACK)
+			.build();
+
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
+	public static FormMachineBlock GAS_BURNING_GENERATOR;
 	public static BlockEntityType<FormMachineBlockEntity> ENTITY;
 
 	private IndustrialForms() {
@@ -61,7 +85,8 @@ public final class IndustrialForms {
 
 	public static void register() {
 		ELECTROLYTIC_SEPARATOR = block("electrolytic_separator", ELECTROLYTIC_SEPARATOR_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR);
+		GAS_BURNING_GENERATOR = block("gas_burning_generator", GAS_BURNING_GENERATOR_FORM);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Industrial factory package 2, part 2 (the Gas Burning Generator)
+- **The Gas Burning Generator**, the starter factory's hydrogen generator: four wide, five deep and four tall, from the owner's art brief. A gas engine and generator sit on a steel skid: the round intake with its fan, an arched pale heat shield over the olive combustion section, a guarded coupling, the ribbed generator housing, and a tall terminal cabinet with mint lamps and the power socket.
+- **Burns hydrogen at the owner's selected 128 JE/t**: a millibucket a tick, 128 JE each, so a bucket lasts 50 seconds. It is piped in at the capped inlet low on its right side, and its power leaves at the cabinet's socket at the back.
+- **Wastes nothing**: it makes only what its store has room for, so its fuel follows the demand, and its screen says when the fuel tank is empty or the store is full.
+- **Built from steel**: 4 steel plates, a steel gear, an electric motor, a basic circuit, a Tinplate Tank and a Machine Casing. Unlike the Fuel Cell, it needs no aluminum.
+- Its coupling and fan spin up and run down; its lamps and sight glasses light while it runs. Methane, at 256 JE/t, comes with the methane Infuser.
+- **Machine forms can now be generators**: a form can list the fuels it burns and give power out of a power port. The Gas Turbine itself still never burns hydrogen. Record: [industrial-gas-burning-generator.md](docs/features/industrial-gas-burning-generator.md).
+
 ### Unmerged: Industrial factory package 2, part 1 (the Electrolytic Separator)
 - **The Electrolytic Separator**, the first big industrial machine: two wide, two deep and three tall, from the owner's art brief. A tall olive cell housing stands between two white collection towers, with its control box, bus connection, lye return and outlet collars.
 - **Built from steel and copper**: 4 steel plates, 2 Steel Tanks, copper cable, a basic circuit and a Machine Casing, 20 steel plates in all. It needs none of the Electrolytic Cell's aluminum or advanced circuit, so hydrogen and chlorine come earlier.

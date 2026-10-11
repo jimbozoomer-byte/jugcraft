@@ -53,10 +53,10 @@ Owner-requested 10 October 2026. Independent art specification: [industrial mach
 - [ ] Define actual multiblock occupancy, entry parts, placement/formation and moving-group bounds alongside independently reachable construction recipes. Keep shared processing roles rather than compulsory duplicate machines for every product.
 - [x] Build the shared form foundation, package 1 of the [factory implementation plan (PR #302)](https://github.com/jimbozoomer-byte/jugcraft/pull/302): validated 2–6-block envelopes with structure/clearance/access positions, placement that names obstructions, port-only transfers, protected tool sockets, eight-state status, durable batch escrow with reserved outputs, entry/expanded/bulk lanes and legacy tank-layout migration. See [industrial machine foundation](features/industrial-machine-foundation.md); tested on test-mod forms only.
 - [x] Package 2, first slice: the Electrolytic Separator, the first real form, with its sliced model from the art brief, the selected 20-plate construction, capability recipes for water and brine at the selected baseline, and lye kept with brine stopping when full. See [Electrolytic Separator](features/industrial-electrolytic-separator.md).
+- [x] Package 2, second slice: the Gas Burning Generator, the shared hydrogen/methane generator and the first generator form, burning hydrogen at the selected 128 JE/t from the plan's steel bill, with its turning coupling and fan. Generator forms join the foundation: fuels listed on the form and power-out ports. See [Gas Burning Generator](features/industrial-gas-burning-generator.md).
 - [ ] Package 2, the rest of the starter gas and acid factory:
-  - the Chemical Infuser: HCl, and methanation with its nickel bed and the selected water drain;
+  - the Chemical Infuser: HCl, and methanation with its nickel bed and the selected water drain, then methane as the generator's second fuel (256 JE/t);
   - the Chemical Oxidizer and contact conversion, for the sulfuric acid chain;
-  - the shared Gas Generator;
   - the Coal Gasifier with Gas Cleanup and Separation;
   - portable handling.
 
