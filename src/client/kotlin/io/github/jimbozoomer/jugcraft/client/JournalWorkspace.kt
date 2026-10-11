@@ -59,7 +59,7 @@ object JournalWorkspace {
                     button(className = "refresh", onClick = { JournalClient.request() }) {
                         text(Component.translatable("screen.jugcraft.journal.refresh"))
                     }
-                    button(className = "refresh", onClick = { ComposerClient.open(Minecraft.getInstance(), null) }) {
+                    button(className = "refresh", onClick = { ComposerClient.open(Minecraft.getInstance(), GuiLib.currentScreen()) }) {
                         text(Component.translatable("screen.jugcraft.journal.compose"))
                     }
                 }

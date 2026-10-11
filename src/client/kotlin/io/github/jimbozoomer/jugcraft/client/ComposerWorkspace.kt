@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Grammar
 import io.github.jimbozoomer.jugcraft.concordance.compose.Slot
 import io.github.jimbozoomer.jugcraft.concordance.composer.ComposerStatePayload
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import net.sbo.guilib.core.dom.component
@@ -18,6 +19,7 @@ import net.sbo.guilib.core.dsl.input
 import net.sbo.guilib.core.dsl.p
 import net.sbo.guilib.core.dsl.scroll
 import net.sbo.guilib.core.dsl.span
+import net.sbo.guilib.core.dsl.useEscapeBack
 import net.sbo.guilib.core.event.KeyboardEvent
 import net.sbo.guilib.fabric.GuiLib
 import net.sbo.guilib.fabric.text
@@ -26,7 +28,8 @@ import net.sbo.guilib.fabric.text
  * The Spell Composer as a GuiLib workspace (Chunk A, A-03): the same draft, words and answers as [ComposerScreen]
  * (both edit [ComposerClient]'s one draft), laid out as a compact spell strip over the words this player has learned.
  * Keyboard: Tab moves between controls, Enter or Space presses one, Alt+Left and Alt+Right move the chosen word,
- * Backspace removes it (outside the text box), Ctrl+Z undoes, Escape closes. The chosen word is in brackets and a word a
+ * Backspace removes it (outside the text box), Ctrl+Z undoes (in the text box too), Escape goes back to the journal when
+ * it was opened from there and otherwise closes. The chosen word is in brackets and a word a
  * problem names is marked "!", so nothing relies on colour; reduced motion (the Concordance setting) stops transitions.
  * GuiLib has no narration, so the narrator reads only the answers here ([ComposerClient]); the plain screen reads every
  * control. Loaded only when GuiLib is installed ([ComposerClient] checks); it only edits the draft and shows what the
@@ -34,6 +37,8 @@ import net.sbo.guilib.fabric.text
  */
 object ComposerWorkspace {
     private val PALETTE = listOf(Slot.DELIVERY, Slot.SELECTION, Slot.OPERATION, Slot.MODIFIER, Slot.TERMINATION)
+    /** The screen Back returns to (the journal, when opened from there); with none, the workspace closes to the game. */
+    private var parent: Screen? = null
 
     private val App = component("ConcordanceComposer") {
         var version by useState(0)
@@ -53,14 +58,23 @@ object ComposerWorkspace {
         }
         useBodyClass("reduced-motion", ConcordanceClientOptions.reducedMotion())
         val document = useDocument()
+        val back = parent
+        useEscapeBack(back != null) { Minecraft.getInstance().gui.setScreen(back) }
         useDocumentEvent("keydown") { event ->
-            val key = event as? KeyboardEvent
+            val key = event as? KeyboardEvent ?: return@useDocumentEvent
             val draft = ComposerClient.draft()
-            if (key == null || document.focusedElement?.tagName == "input") {
+            // Ctrl+Z (Cmd+Z on macOS) undoes everywhere, the spell box included: GuiLib's input has no undo of its own.
+            if ((key.ctrlKey || key.modifiers.meta) && !key.shiftKey && !key.altKey && key.key.equals("z", ignoreCase = true)) {
+                key.preventDefault()
+                if (draft.undo()) {
+                    ComposerClient.edited()
+                }
+                return@useDocumentEvent
+            }
+            if (document.focusedElement?.tagName == "input") {
                 return@useDocumentEvent
             }
             val changed = when {
-                key.ctrlKey && !key.shiftKey && !key.altKey && (key.key == "z" || key.key == "Z") -> draft.undo()
                 key.altKey && key.key == "ArrowLeft" -> draft.move(-1)
                 key.altKey && key.key == "ArrowRight" -> draft.move(1)
                 key.key == "Backspace" && draft.chosen() != null -> draft.remove()
@@ -103,7 +117,9 @@ object ComposerWorkspace {
                 button(disabled = !ComposerClient.wipeable(), onClick = { ComposerClient.wipe() }) {
                     text(Component.translatable("screen.jugcraft.composer.wipe"))
                 }
-                button(onClick = { GuiLib.close() }) { text(Component.translatable("gui.done")) }
+                button(onClick = { Minecraft.getInstance().gui.setScreen(back) }) {
+                    text(Component.translatable(if (back == null) "gui.done" else "gui.back"))
+                }
             }
         }
     }
@@ -161,7 +177,8 @@ object ComposerWorkspace {
         val chosen = draft.chosen()
         val branches = state?.instrument()?.orElse(null)?.branches() ?: 0
         val size = draft.levels()[draft.level()].size
-        div(className = "edits") {
+        // Keyed, so it keeps its place (and the keyboard) when a branch is added or removed before it.
+        div(className = "edits", key = "edits") {
             edit("screen.jugcraft.composer.earlier", chosen != null && draft.index() > 0) { draft.move(-1) }
             edit("screen.jugcraft.composer.later", chosen != null && draft.index() < size - 1) { draft.move(1) }
             edit("screen.jugcraft.composer.remove", chosen != null) { draft.remove() }
@@ -251,9 +268,11 @@ object ComposerWorkspace {
             Component.translatableWithFallback("$key.description", "").string + cost
     }
 
-    /** Opens the workspace (Java calls this only when GuiLib is installed). */
+    /** Opens the workspace; [parent] is the screen Back returns to, if any (Java calls this only when GuiLib is installed). */
     @JvmStatic
-    fun open() {
+    @JvmOverloads
+    fun open(parent: Screen? = null) {
+        this.parent = parent
         GuiLib.open(App, stylesheets = listOf("jugcraft:ui/composer.css"),
             title = Component.translatable("screen.jugcraft.composer.title").string,
             blurBackground = !ConcordanceClientOptions.reducedMotion())

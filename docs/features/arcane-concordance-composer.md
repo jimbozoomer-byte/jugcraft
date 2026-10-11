@@ -38,16 +38,19 @@ command's own words: what each part does, the Focus and cooldown, the targets, w
 problem, each once, with the word it concerns marked "!". While a newer check is on its way the composer says
 "Checking...".
 
-**Inscribing.** **Inscribe** is enabled only once the spell, exactly as it stands, was checked and works. It writes
-the spell on the instrument, which then carries it to Spell Engine's spell bar as before. **Wipe inscription** clears
-it. Opening the composer with an empty draft starts from what the instrument holds.
+**Inscribing.** **Inscribe** is enabled only once the spell, exactly as it stands, was checked and works for the
+instrument and rules the composer shows now. It writes the spell on the instrument, which then carries it to Spell
+Engine's spell bar as before. **Wipe inscription** clears it. Opening the composer with an empty draft starts from
+what the instrument holds; opening it with a draft checks that draft again (the instrument in hand may be another).
+Words added with the buttons stop at the compiler's 256 characters.
 
 **Keyboard and accessibility.**
 
 - The text box has the keyboard when the plain composer opens.
 - Tab and the arrow keys move between controls; a word of the spell reached with them is chosen.
 - Alt+Left and Alt+Right move the chosen word; Backspace (outside the text box) removes it; Ctrl+Z undoes.
-- Esc goes back (to the journal, when it was opened from there).
+- Ctrl+Z works in the text box too, in either view.
+- Esc goes back (to the journal, when it was opened from there), in either view.
 - Nothing is said by colour alone: brackets mark the chosen word, "!" marks a problem, and each line says what it means.
 - The plain composer's controls and lines are read by the narrator. The narrator also reads each new verdict and each
   write in either view.
@@ -84,13 +87,15 @@ and two answers:
 
 `Composer` keeps one session per player in memory: a revision and what the screen was last shown. An inscribe or clear
 naming an older revision, or made after the instrument or rules changed, writes nothing; the screen is sent its state
-again. A check, inscribe or clear that comes within the rate waits for its tick, the newest replacing an older one, so
+again (a request naming an older revision counts against the shared gate, so this happens at most once a second). A check, inscribe or clear that comes within the rate waits for its tick, the newest replacing an older one, so
 a screen checking as its player types costs at most one compilation a second. Opening has its own gate (10 ticks). The
 request's text decodes to at most 1024 characters (the compiler refuses past 256); anything past that is a malformed
 packet. Sessions are forgotten when the player leaves and when the server stops.
 
 **On the client.** `ComposerClient` keeps the draft (`compose/Draft`, pure Java), the last state and answer, and sends
-a check 8 ticks after editing stops, dropping answers to older requests. `ComposerScreen` is the plain screen (its body
+a check 8 ticks after editing stops (and when the composer opens, or a write is refused or wiped), dropping answers to
+older requests; it promises no check on a server without the composer, and forgets everything on the client thread
+when the player leaves. `ComposerScreen` is the plain screen (its body
 scrolls in `ComposerScroll`); `ComposerWorkspace` (Kotlin) is the GuiLib workspace with `assets/jugcraft/ui/composer.css`,
 opened only behind `isModLoaded("guilib")`. The client has no rules: everything it offers comes from the server's
 state.

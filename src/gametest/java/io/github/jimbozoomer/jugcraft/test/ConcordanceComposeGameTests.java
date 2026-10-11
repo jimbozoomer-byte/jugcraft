@@ -13,6 +13,7 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Catalog;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Compiler;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Component;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Draft;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Grammar;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Instrument;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Plan;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Slot;
@@ -391,6 +392,19 @@ public class ConcordanceComposeGameTests {
 		draft.choose(0, 1);
 		helper.assertTrue(draft.remove() && draft.text().equals("touch light") && draft.index() == 1, "removed, the next word chosen: "
 				+ draft.text());
+		draft.read("touch struck light then here creatures dazzle", true);
+		draft.choose(0, 0);
+		helper.assertTrue(draft.remove() && draft.remove() && draft.remove() && draft.index() == -1 && draft.level() == 0
+				&& !draft.canBranch(), "the spell's words all removed, its emptied level is where words go next: " + draft.text());
+		draft.add("jugcraft:ray", Slot.DELIVERY, slots);
+		helper.assertValueEqual(draft.text(), "ray then here creatures dazzle", "a word written into the emptied level");
+		Draft full = new Draft();
+		int written = 0;
+		while (full.add("jugcraft:light", Slot.OPERATION, slots)) {
+			written++;
+		}
+		helper.assertTrue(written > 0 && full.text().length() <= Grammar.MAX_TEXT && full.text().length() > Grammar.MAX_TEXT - "light ".length(),
+				"words from buttons stop at the grammar's length: " + full.text().length());
 		Draft deep = new Draft();
 		for (int i = 0; i < Draft.UNDO_LIMIT + 6; i++) {
 			deep.read(i % 2 == 0 ? "touch struck light" : "here struck ward", true);

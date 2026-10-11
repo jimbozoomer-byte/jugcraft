@@ -55,7 +55,7 @@ CLIENT = {
     "screen.jugcraft.composer.help_workspace": "Choose words below, or type the spell. Tab moves between controls; "
                                                "Alt+Left and Alt+Right move the chosen word, Backspace removes it, Ctrl+Z "
                                                "undoes. A word marked ! has a problem; the chosen word is in brackets. "
-                                               "Esc closes.",
+                                               "Esc goes back.",
 }
 
 

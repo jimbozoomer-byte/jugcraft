@@ -66,6 +66,8 @@ public class ComposerScreen extends Screen {
 	private String focus = "text";
 	private boolean dirty;
 	private boolean syncing;
+	/** Set while the keyboard is given back after laying out, which must not choose a word. */
+	private boolean restoring;
 
 	public ComposerScreen(@Nullable Screen parent) {
 		super(Component.translatable("screen.jugcraft.composer.title"));
@@ -100,11 +102,33 @@ public class ComposerScreen extends Screen {
 		y = report(y + GAP);
 		line(y + GAP, Component.translatable("screen.jugcraft.composer.help"), "help");
 		body.arrange(scroll);
-		for (Map.Entry<GuiEventListener, String> control : keys.entrySet()) {
-			if (control.getValue().equals(focus)) {
-				refocus(control.getKey());
-				break;
+		Draft draft = ComposerClient.draft();
+		if (focus.startsWith("part:") && draft.chosen() != null) {
+			// On the spell's words, the keyboard follows the chosen word wherever an edit (move, remove, undo) put it.
+			focus = "part:" + draft.level() + ":" + draft.index();
+		}
+		restoring = true;
+		try {
+			for (Map.Entry<GuiEventListener, String> control : keys.entrySet()) {
+				if (control.getValue().equals(focus)) {
+					refocus(control.getKey());
+					break;
+				}
 			}
+		} finally {
+			restoring = false;
+		}
+	}
+
+	/**
+	 * Opening and every new layout call this after {@link #init()}, which has already given the keyboard back to the
+	 * control that had it (the text box when the screen opens). Vanilla's default for keyboard players moves on one
+	 * control from there, which after each layout would walk the keyboard away (and across the spell's words).
+	 */
+	@Override
+	protected void setInitialFocus() {
+		if (getFocused() == null) {
+			super.setInitialFocus();
 		}
 	}
 
@@ -372,7 +396,7 @@ public class ComposerScreen extends Screen {
 			return;
 		}
 		focus = key;
-		if (key.startsWith("part:") && minecraft.getLastInputType().isKeyboard()) {
+		if (!restoring && key.startsWith("part:") && minecraft.getLastInputType().isKeyboard()) {
 			String[] at = key.split(":");
 			int level = Integer.parseInt(at[1]);
 			int index = Integer.parseInt(at[2]);

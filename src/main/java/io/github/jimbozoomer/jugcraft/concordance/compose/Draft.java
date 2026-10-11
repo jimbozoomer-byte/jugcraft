@@ -92,9 +92,20 @@ public final class Draft {
 		return typed != null;
 	}
 
-	/** The chosen part's level, or the last level when none is chosen. */
+	/**
+	 * The chosen part's level; with none chosen, the first level emptied of its words before the last (where the grammar
+	 * needs words next), or else the last.
+	 */
 	public int level() {
-		return index < 0 ? levels.size() - 1 : level;
+		if (index >= 0) {
+			return level;
+		}
+		for (int i = 0; i < levels.size() - 1; i++) {
+			if (levels.get(i).isEmpty()) {
+				return i;
+			}
+		}
+		return levels.size() - 1;
 	}
 
 	/** The chosen part's place in its level; -1 when none is chosen. */
@@ -149,7 +160,8 @@ public final class Draft {
 	 * Writes a word where the grammar wants it, in the chosen part's level (or the last): a delivery first and a
 	 * selection after it (each replacing one already there), an operation after the last operation, an ending last
 	 * (replacing one already there). A modifier is joined to the chosen part instead ({@link #join}). The word written
-	 * is chosen. Returns whether anything changed.
+	 * is chosen. Nothing is written that would make the text longer than {@value Grammar#MAX_TEXT} characters. Returns
+	 * whether anything changed.
 	 *
 	 * @param id the word's full id
 	 * @param slot the slot the word fills
@@ -171,7 +183,7 @@ public final class Draft {
 		};
 		parts.add(place, new Part(id, List.of()));
 		choose(at, place);
-		return true;
+		return fits();
 	}
 
 	/** Removes the word of {@code slot} already in {@code parts}, if any, and says where the new one goes. */
@@ -206,7 +218,7 @@ public final class Draft {
 		return parts.size();
 	}
 
-	/** Joins a modifier to the chosen part, if it has room and does not have it already. */
+	/** Joins a modifier to the chosen part, if it has room, does not have it already and the text stays in bounds. */
 	public boolean join(String modifier) {
 		Part chosen = chosen();
 		if (chosen == null || chosen.modifiers().contains(modifier) || chosen.modifiers().size() >= Grammar.MAX_MODIFIERS) {
@@ -216,7 +228,16 @@ public final class Draft {
 		List<String> joined = new ArrayList<>(chosen.modifiers());
 		joined.add(modifier);
 		levels.get(level).set(index, new Part(chosen.id(), joined));
-		return true;
+		return fits();
+	}
+
+	/** After an edit: true if the text is within the grammar's length; otherwise the edit is undone and false. */
+	private boolean fits() {
+		if (text().length() <= Grammar.MAX_TEXT) {
+			return true;
+		}
+		undo();
+		return false;
 	}
 
 	/** Takes the last modifier off the chosen part. */
@@ -259,9 +280,9 @@ public final class Draft {
 		return true;
 	}
 
-	/** Whether another branch may be begun: the last level has words and the grammar allows one more. */
+	/** Whether another branch may be begun: every level has words and the grammar allows one more. */
 	public boolean canBranch() {
-		return typed == null && levels.size() < MAX_LEVELS && !levels.getLast().isEmpty();
+		return typed == null && levels.size() < MAX_LEVELS && levels.stream().noneMatch(List::isEmpty);
 	}
 
 	/** Begins a branch after the last level; new words go there. */

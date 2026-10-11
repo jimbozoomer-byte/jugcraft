@@ -20,6 +20,8 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerConnection;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.input.InputQuirks;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -41,7 +43,8 @@ import net.spell_engine.internals.target.SpellTarget;
  * wand cannot hold and are told exactly why, with the word marked and Inscribe disabled
  * ({@code jugcraft_concordance_composer_problem}); Ctrl+Z undoes it; the Inscribe button writes the spell on the wand
  * ({@code jugcraft_concordance_composer_inscribed}); the inscribed spell, cast through Spell Engine, lights the wall it
- * touches and takes its 2 Focus once. Reopened, the composer shows what is inscribed and keeps the draft; it is shown
+ * touches and takes its 2 Focus once. Reopened, the composer shows what is inscribed and keeps the draft; Tab chooses
+ * the spell's first word, and the keyboard stays there when the screen is laid out again; the composer is shown
  * at GUI scale 4 ({@code jugcraft_concordance_composer_scale4}), with GuiLib installed as in CI as the GuiLib workspace
  * over the same draft ({@code jugcraft_concordance_composer_workspace}), and in a small window
  * ({@code jugcraft_concordance_composer_small}). Results are logged with the prefix "[composer-check]". One client.
@@ -86,11 +89,9 @@ public class ConcordanceComposerClientGameTests implements FabricClientGameTest 
 				context.waitTicks(5);
 				context.takeScreenshot("jugcraft_concordance_composer_problem");
 
-				// Ctrl+Z, a key press at a time, takes the typing back to the valid spell.
+				// Ctrl+Z, a key press at a time (each typed character is one undo), takes the typing back to the valid spell.
 				for (int i = 0; i < "+prolong".length(); i++) {
-					context.getInput().holdControl();
-					context.getInput().pressKey(InputConstants.KEY_Z);
-					context.getInput().releaseControl();
+					pressUndo(context);
 				}
 				context.waitFor(client -> ComposerClient.draft().text().equals(SPELL), WAIT);
 				context.waitFor(client -> answered(Composing.Outcome.VALID, SPELL) && ComposerClient.inscribable(), WAIT);
@@ -118,6 +119,18 @@ public class ConcordanceComposerClientGameTests implements FabricClientGameTest 
 				context.setScreen(() -> new ComposerScreen(null));
 				context.waitFor(client -> ComposerClient.ready() && ComposerClient.state().inscribed().equals(SPELL)
 						&& ComposerClient.draft().text().equals(SPELL), WAIT);
+
+				// A keyboard player keeps their place: Tab from the text box reaches the spell's first word and chooses it, and
+				// laying the screen out again (as every answer and edit does) leaves the keyboard and the choice where they were.
+				context.getInput().pressKey(InputConstants.KEY_TAB);
+				context.waitTicks(2);
+				check(context.computeOnClient(client -> ComposerClient.draft().level() == 0 && ComposerClient.draft().index() == 0),
+						"Tab from the text box should choose the spell's first word");
+				context.runOnClient(client -> ComposerClient.changed());
+				context.waitTicks(10);
+				int chosen = context.computeOnClient(client -> ComposerClient.draft().index());
+				Jugcraft.LOGGER.info("[composer-check] the word chosen by keyboard, after the screen was laid out again: {}", chosen);
+				check(chosen == 0, "Laying the screen out again should leave the keyboard on the chosen word, not walk it on: " + chosen);
 				int scale = context.computeOnClient(client -> client.options.guiScale().get());
 				context.runOnClient(client -> {
 					client.options.guiScale().set(4);
@@ -143,6 +156,19 @@ public class ConcordanceComposerClientGameTests implements FabricClientGameTest 
 				context.setScreen(() -> null);
 			}
 		}
+	}
+
+	/**
+	 * Ctrl+Z (Cmd+Z on macOS) through the keyboard handler, as a real key press arrives. Fabric's TestInput sends every key
+	 * with no modifiers, even while holdControl holds Ctrl, so it cannot express Ctrl+Z in 26.3 (as CarvingClientGameTests
+	 * found).
+	 */
+	private static void pressUndo(ClientGameTestContext context) {
+		context.runOnClient(client -> {
+			KeyEvent undo = new KeyEvent(InputConstants.KEY_Z, InputConstants.KEYCODE_Z, InputQuirks.EDIT_SHORTCUT_KEY_MODIFIER);
+			client.keyboardHandler.keyPress(client.getWindow().handle(), InputConstants.PRESS, undo);
+			client.keyboardHandler.keyPress(client.getWindow().handle(), InputConstants.RELEASE, undo);
+		});
 	}
 
 	/** The latest answer is settled (nothing newer due or on its way) and is {@code outcome} for {@code text}. */

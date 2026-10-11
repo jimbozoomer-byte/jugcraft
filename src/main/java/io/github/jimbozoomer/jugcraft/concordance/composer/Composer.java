@@ -49,8 +49,8 @@ import net.minecraft.server.level.ServerPlayer;
  * changed since, nothing is written and the screen is sent the state again. Whenever the server's side changes (a write,
  * another instrument, new rules) the screen is told. No identifier is added to any item. Sessions are forgotten when the
  * player leaves and when the server stops; they are not saved.</li>
- * <li><b>Rate.</b> Checks, inscribes and clears count against the gate the command and tuning use
- * ({@value Composing#COMPOSE_RATE_TICKS} ticks). One that comes too soon waits for the first allowed tick, and a newer
+ * <li><b>Rate.</b> Checks, inscribes and clears (one naming an older revision too) count against the gate the command
+ * and tuning use ({@value Composing#COMPOSE_RATE_TICKS} ticks). One that comes too soon waits for the first allowed tick, and a newer
  * one replaces it, so a screen that checks as its player types never makes more work than one compilation a second,
  * and its last request is the one answered. Opening counts against its own gate ({@value #OPEN_TICKS} ticks), the same
  * way.</li>
@@ -84,7 +84,11 @@ public final class Composer {
 		PayloadTypeRegistry.clientboundPlay().register(ComposerResultPayload.TYPE, ComposerResultPayload.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(ComposerRequestPayload.TYPE, (payload, context) -> receive(context.player(), payload));
 		ServerTickEvents.END_SERVER_TICK.register(Composer::tick);
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.getPlayer().getUUID()));
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			// Fabric may report a leaving player on a network thread; the sessions belong to the server thread.
+			UUID id = handler.getPlayer().getUUID();
+			server.execute(() -> forget(id));
+		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			SESSIONS.clear();
 			WAITING.clear();
@@ -181,6 +185,10 @@ public final class Composer {
 		if (request.action() == ComposerRequestPayload.CHECK) {
 			result = Composing.compose(player, request.text(), false, null);
 		} else if (request.revision() != session.revision) {
+			// A write against an older revision asks, in effect, for the state again: it counts against the shared gate.
+			if (!RateGate.allow(player, Composing.RATE_ACTION, Composing.COMPOSE_RATE_TICKS)) {
+				return false;
+			}
 			result = new Composing.Result(Composing.Outcome.CHANGED, ComposedSpells.instrument(player), "", null, List.of());
 		} else if (request.action() == ComposerRequestPayload.INSCRIBE) {
 			result = Composing.compose(player, request.text(), true, session.held);

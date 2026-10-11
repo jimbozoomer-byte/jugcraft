@@ -13363,7 +13363,7 @@ def check_composer(co, root, lang):
     screens = client + text(CLIENT_JAVA_ROOT / "ComposerScreen.java") + text(CLIENT_JAVA_ROOT / "JournalScreen.java")
     workspace_path = ROOT / "src" / "client" / "kotlin" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "ComposerWorkspace.kt"
     workspace = text(workspace_path)
-    if not re.search(r'isModLoaded\("guilib"\)\)\s*\{\s*ComposerWorkspace\.open\(\)', client):
+    if not re.search(r'isModLoaded\("guilib"\)\)\s*\{\s*ComposerWorkspace\.open\(parent\)', client):
         err("ComposerClient.java: the composer's GuiLib workspace opens only when GuiLib is installed")
     for path in CLIENT_JAVA_ROOT.rglob("*.java"):
         if path.name != "ComposerClient.java" and "ComposerWorkspace" in text(path):

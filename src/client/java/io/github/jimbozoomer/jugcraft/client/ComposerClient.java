@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.concordance.Composing;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Draft;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Grammar;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Slot;
 import io.github.jimbozoomer.jugcraft.concordance.composer.ComposerRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.composer.ComposerResultPayload;
@@ -49,6 +50,8 @@ public final class ComposerClient {
 	private static int due = -1;
 	/** Whether the next state should load what is inscribed into an empty draft (set when the composer opens). */
 	private static boolean loading;
+	/** Set when the player leaves a world (Fabric may say so on a network thread); the client tick then forgets it all. */
+	private static volatile boolean left;
 
 	private ComposerClient() {
 	}
@@ -56,11 +59,15 @@ public final class ComposerClient {
 	static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(ComposerStatePayload.TYPE, (payload, context) -> received(payload));
 		ClientPlayNetworking.registerGlobalReceiver(ComposerResultPayload.TYPE, (payload, context) -> answered(payload));
-		// A composer belongs to the world it came from.
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> reset());
+		// A composer belongs to the world it came from (forgotten on the client thread, at its next tick).
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> left = true);
 		open = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.concordance_composer", InputConstants.UNKNOWN.getValue(),
 				PartyClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			if (left) {
+				left = false;
+				reset();
+			}
 			while (open.consumeClick()) {
 				if (client.gui.screen() == null && client.player != null) {
 					open(client, null);
@@ -80,7 +87,7 @@ public final class ComposerClient {
 		loading = true;
 		request(ComposerRequestPayload.OPEN, 0, "");
 		if (!ConcordanceClientOptions.simpleJournal() && FabricLoader.getInstance().isModLoaded("guilib")) {
-			ComposerWorkspace.open();
+			ComposerWorkspace.open(parent);
 		} else {
 			client.gui.setScreen(new ComposerScreen(parent));
 		}
@@ -118,10 +125,13 @@ public final class ComposerClient {
 		return writing >= 0;
 	}
 
-	/** Whether the draft, as it stands, was checked and found valid, so it may be inscribed. */
+	/**
+	 * Whether the draft, as it stands, was checked and found valid against what the screen shows now (the same
+	 * instrument and rules), so it may be inscribed.
+	 */
 	public static boolean inscribable() {
 		return ready() && !checking() && !writing() && result != null && result.what() == Composing.Outcome.VALID
-				&& result.text().equals(DRAFT.text());
+				&& result.text().equals(DRAFT.text()) && result.revision() == state.revision();
 	}
 
 	/** Whether there is an inscription to wipe. */
@@ -181,7 +191,8 @@ public final class ComposerClient {
 			result = null;
 			floor = sequence + 1;
 		} else {
-			due = CHECK_DELAY;
+			// A server without the composer cannot check: no check is promised that would never come.
+			due = available() ? CHECK_DELAY : -1;
 		}
 		changed();
 	}
@@ -246,7 +257,10 @@ public final class ComposerClient {
 			return; // checked once the write is answered
 		}
 		due = -1;
-		checking = request(ComposerRequestPayload.CHECK, 0, DRAFT.text());
+		// Words added with buttons have no length bound, and the request carries at most MAX_TEXT characters; past the
+		// grammar's own limit the server answers "too long" all the same.
+		String text = DRAFT.text();
+		checking = request(ComposerRequestPayload.CHECK, 0, text.length() > Grammar.MAX_TEXT ? text.substring(0, Grammar.MAX_TEXT + 1) : text);
 	}
 
 	private static void received(ComposerStatePayload payload) {
@@ -256,6 +270,9 @@ public final class ComposerClient {
 			if (DRAFT.isEmpty() && !payload.inscribed().isEmpty()) {
 				// A new composer starts from what the instrument already holds, and explains it.
 				DRAFT.read(payload.inscribed(), false);
+			}
+			if (!DRAFT.isEmpty()) {
+				// Checked again against the instrument and rules this composer shows now (they may not be the last ones).
 				due = CHECK_DELAY;
 			}
 		}
@@ -269,6 +286,10 @@ public final class ComposerClient {
 		}
 		if (wrote) {
 			writing = -1;
+			if (payload.what() != Composing.Outcome.INSCRIBED && !DRAFT.isEmpty()) {
+				// After a wipe or a refused write the unchanged draft is checked again (a wipe may have replaced a check).
+				due = CHECK_DELAY;
+			}
 		}
 		if (payload.sequence() < floor || (result != null && payload.sequence() < result.sequence())) {
 			changed();

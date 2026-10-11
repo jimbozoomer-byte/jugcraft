@@ -6029,7 +6029,7 @@
   "screen.jugcraft.composer.earlier": "Move earlier",
   "screen.jugcraft.composer.empty": "Choose a delivery, a selection and an operation below",
   "screen.jugcraft.composer.help": "Choose words below, or type the spell. Tab and the arrow keys move between controls, and a word of your spell reached with them is chosen: Alt+Left and Alt+Right move it, Backspace removes it, and a modifier joins it. Ctrl+Z undoes. A word marked ! has a problem; the chosen word is in brackets. Inscribe writes a checked spell on your instrument. Esc goes back.",
-  "screen.jugcraft.composer.help_workspace": "Choose words below, or type the spell. Tab moves between controls; Alt+Left and Alt+Right move the chosen word, Backspace removes it, Ctrl+Z undoes. A word marked ! has a problem; the chosen word is in brackets. Esc closes.",
+  "screen.jugcraft.composer.help_workspace": "Choose words below, or type the spell. Tab moves between controls; Alt+Left and Alt+Right move the chosen word, Backspace removes it, Ctrl+Z undoes. A word marked ! has a problem; the chosen word is in brackets. Esc goes back.",
   "screen.jugcraft.composer.hint": "Type a spell, or choose words below",
   "screen.jugcraft.composer.inscribe": "Inscribe",
   "screen.jugcraft.composer.inscribed": "Inscribed now: %s",
