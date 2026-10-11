@@ -285,7 +285,8 @@ Record: [walled-town.md](features/walled-town.md).
 ### The Arcane Concordance (`concordance/`, `tools/concordance.py`)
 
 Magic: the Concordance's 32 roadmap steps (on `main` through #263), Ember and Wayfaring parts 1 and 1b (through #277);
-Wayfaring part 1c and Concordance Chunk A (the Spell Composer and lair encounter credit) are not yet merged. Contract
+Wayfaring part 1c and Concordance Chunk A (the Spell Composer, lair encounter credit and the Jugcraft Encyclopedia's first
+slice) are not yet merged. Contract
 and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among them:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),
@@ -296,7 +297,8 @@ and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among t
 [arcane-concordance-alchemy.md](features/arcane-concordance-alchemy.md),
 [arcane-concordance-ecology.md](features/arcane-concordance-ecology.md),
 [arcane-concordance-ember.md](features/arcane-concordance-ember.md),
-[arcane-concordance-composer.md](features/arcane-concordance-composer.md).
+[arcane-concordance-composer.md](features/arcane-concordance-composer.md),
+[arcane-concordance-first-route.md](features/arcane-concordance-first-route.md).
 
 | ID / part | Class / data | What |
 | --- | --- | --- |
@@ -339,6 +341,7 @@ and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among t
 | composition | `concordance/compose/` (pure Java: grammar, parser, compiler, plans, explanations, and the editing model `Draft`); `data/jugcraft/concordance/{component,instrument}/`; `concordance/Composing` (one service for the command and the screen: the feature, the instrument, the screen's revision, the shared `compose` rate, then the compiler); `ConcordanceCommand` (`compose check\|inscribe\|show\|clear`, an adapter of `Composing`) | players write spells from 17 data components (6 more belong to invocations); every problem is named; plans carry their limits |
 | `jugcraft:composed` spell | `data/jugcraft/spell/composed.json`; `ComposedSpells`, component `jugcraft:inscription` (`Inscription`) | casts the spell inscribed on the held instrument; recompiled on the server every cast, run under a ledger |
 | the Spell Composer | `concordance/composer/` (`Composer`: a session per player with a revision; `ComposerRequestPayload` to the server, `ComposerStatePayload` and `ComposerResultPayload` to the client); client `ComposerClient`, `ComposerScreen`, `ComposerScroll`, `ComposerWorkspace` (Kotlin, GuiLib) and `assets/jugcraft/ui/composer.css`; `tools/concordance_composer.py` (checked by `check_composer`) | Composing without commands: the journal's Compose button (or the unbound key Open the Spell Composer) opens it for the held instrument; only learned words are offered; the server checks each edit and inscribes only the exact text it checked (Concordance Chunk A, [record](features/arcane-concordance-composer.md)) |
+| the Jugcraft Encyclopedia (first slice) | `guide/encyclopedia/` (`Encyclopedia`: the server's pages for one player; `EncyclopediaRequestPayload` to the server, `EncyclopediaPayload` to the client; `PageWriter`, `Navigator`); the pages `concordance/encyclopedia/` (`FirstLightRoute`, `SpellcraftPage`, `InspectPage`) and `lair/LairDossiers`; client `EncyclopediaClient`, `EncyclopediaScreen`, `EncyclopediaWidgets`, `EncyclopediaKeys`, `EncyclopediaInventoryButton` and `compat/CodexLinks`; `tools/encyclopedia.py` (checked by `check_encyclopedia`) | No item: a key (I unless remapped) and a scroll button in the inventory open one screen whose pages the server writes: the First Light route (each step's state and each way's weight, the server's own recipes as grids), Spellcraft, lair dossiers once found, the Circle Anchor or Ley Pylon looked at, and the keys (Concordance Chunk A, [record](features/arcane-concordance-first-route.md)) |
 | effects | `concordance/effect/` (pure Java: kinds, causes, stacking, tolerance, ledger); `ConcordanceEffects`; tags `#jugcraft:concordance/{immune,resistant,interactable,harvestable}` | the one boundary every Concordance effect goes through: friendly fire, tolerance, protection, attribution, one-time accounting |
 | rituals | `concordance/ritual/` (pure Java: `StructurePattern`, `StructureValidator`, `RitualDefinition`, `Offerings`, `RitualMachine`, `RitualRun`); `data/jugcraft/concordance/{structure,ritual}/`; `Rituals` (anchor index) | structures checked part by part (cached, bounded); offerings reserved at the start and consumed with the result in one tick; a defined outcome for every interruption |
 | `jugcraft:circle_anchor` | `CircleAnchorBlock`, `CircleAnchorBlockEntity` (GeckoLib); client `CircleClient` | six offering slots and an output; runs Adept's Attunement and Lumen Vigil; `/jugcraft concordance circle <pos>` reports its circle |

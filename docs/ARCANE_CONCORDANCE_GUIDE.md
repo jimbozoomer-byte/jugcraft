@@ -27,6 +27,10 @@ and this guide is a bug.
    says what a spell does and costs, or exactly why it cannot work. **Inscribe** writes it on the wand, and it joins the
    spell bar.
 
+Lost on the way? Press **I**, or the scroll button beside the recipe book in your inventory, for the **Jugcraft
+Encyclopedia**: its Discover page shows each of these steps, which are done, and which comes next, with the recipes
+your server actually has.
+
 ## Controls
 
 | Do | How |
@@ -36,8 +40,9 @@ and this guide is a bug.
 | Compose a spell | Hold an instrument, press J and choose **Compose**; or bind *Open the Spell Composer* in Controls (unbound at first) |
 | See your Focus | The Focus line at the bottom right while an instrument is in hand |
 | Open your journal | J (remappable in Controls) |
+| Open the Jugcraft Encyclopedia | I (remappable in Controls), or the scroll button in your inventory |
 | Concordance settings | Its key in Controls (unbound at first), or Mod Menu if installed |
-| Look at a device's state | Jade, if installed; otherwise the device's own messages and the journal |
+| Look at a device's state | Jade, if installed; the encyclopedia opened while looking at a Circle Anchor or Ley Pylon; otherwise the device's own messages and the journal |
 
 ## Focus, research and stages
 

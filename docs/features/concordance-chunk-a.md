@@ -1,6 +1,6 @@
 # Concordance Chunk A: usable foundations (contract and handoff)
 
-Status: in progress (units 1 to 3 implemented, not yet compiled in CI); see each unit's record.
+Status: in progress (units 1 to 4 implemented, not yet compiled in CI); see each unit's record.
 Proposal: the owner chose Chunk A ("usable magic") on 10 October 2026, from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) and
 [its first-chunk tickets](../plans/concordance-expansion-2026-10-10/12-detailed-first-chunk-tickets.md) (A-00 to A-08).
@@ -21,7 +21,7 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 | 1 | A-00, A-01 | Baseline; one composition service behind the command and the screen | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI not yet run |
 | 2 | A-02, A-03 | Bounded screen protocol; the plain composer screen and the GuiLib workspace over one draft | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI not yet run |
 | 3 | A-05, A-06 | Encounter contribution (healing, warding, objectives) and the reward lifecycle | [Lair encounter credit](lair-encounter-credit.md) | Implemented; CI not yet run |
-| 4 | A-04, A-07 | The encyclopedia's entry and first route; acquisition and presentation | [First loadout and acquisition](concordance-first-loadout.md); the encyclopedia's to come | Not started |
+| 4 | A-04, A-07 | The encyclopedia's entry and first route; acquisition and presentation | [The encyclopedia's first route](arcane-concordance-first-route.md); [first loadout and acquisition](concordance-first-loadout.md) | Implemented (cast poses to come); CI not yet run |
 | 5 | A-08 | Combined fixes and the evidence for the owner's checkpoint | this page | Not started |
 
 ## Baseline (A-00)
@@ -36,8 +36,9 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 - Open pull requests touching this chunk's seams: #300 (Glacier Hall) and #313 (Cinder Kiln) edit the lair registry
   files; #304 (Yeti King) adds a third boss with the same damage-only reward pattern. Unit 3 keeps the existing
   `took`, `participants` and `reward` signatures so those still compile.
-- The plan's status text that has gone stale (CHANGELOG headings, feature records' "on branch" lines, WHAT_EXISTS,
-  BOSSES.md) is mapped and is corrected in unit 4 or 5, after the merge state is checked again.
+- The plan's status text that had gone stale (feature records' "on branch" lines, WHAT_EXISTS, BOSSES.md, the
+  delivery record) was corrected in unit 4, after the merge state was checked again on 11 October. The CHANGELOG's
+  stale headings are reconciled in a docs-only pull request of their own (A-D14).
 
 ## Interfaces changed
 
@@ -54,6 +55,14 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 - `ConcordanceEffects.observe`: observers told of each restoration and protection that took.
 - `Lairs.onRelit` and `Lairs.relit`: a lair brazier's unlit-to-lit turn.
 - New saved data: the player attachment `jugcraft:lair_rewards` and the overworld record `jugcraft:lair_rewards`.
+- Unit 4: new payloads `jugcraft:encyclopedia_request` (to the server: a sequence and, optionally, the block looked at)
+  and `jugcraft:encyclopedia` (to the client: notices and pages); the key `key.jugcraft.encyclopedia`; the server service
+  `guide/encyclopedia/Encyclopedia` with `PageWriter` (the one place a page shows a recipe, a sale or a codex link) and
+  the pure page model `Navigator`; the pages `concordance/encyclopedia/FirstLightRoute`, `SpellcraftPage`,
+  `InspectPage` and `lair/LairDossiers`.
+- `CircleAnchorBlockEntity.status(ServerLevel, Consumer<Component>)` (chat's lines, from the cached report) and
+  `LeyPylonBlockEntity.status()`; `TownShops.sales(Item, String)`.
+- The Adept's Wand joins the equivalence exclusions; JEI information pages from `tools/acquisition.py`.
 
 ## Validation plan
 
@@ -81,3 +90,11 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 | A-D4 | 11 October 2026 | Support qualifies at 4 healing or 4 warding (one Mend or one Ward); any blow still qualifies; one objective qualifies | Proposed | Unit 3 |
 | A-D5 | 11 October 2026 | A boss's experience is shared among everyone paid, now or later; one who died in the fight is paid wherever they are, and one who left the game in it is paid on joining if still away when it falls | Proposed | Unit 3 |
 | A-D6 | 11 October 2026 | Only the Concordance's healing and wards are credited (vanilla healing names no healer; crediting it would need a mixin) | Proposed | Unit 3 |
+| A-D7 | 11 October 2026 | The encyclopedia's key defaults to I (vanilla binds I only as F3+I, a debug combination that does not press it alone; no pinned mod binds it); a client test compares it with every loaded default | Proposed | Unit 4 |
+| A-D8 | 11 October 2026 | The inventory button is the owner's 16×16 scroll sprite, right of the recipe-book button, and on the creative Survival Inventory tab only; it closes the inventory, and Back reopens it | Proposed | Unit 4 |
+| A-D9 | 11 October 2026 | Discovery: research, invocations and words named only once met; a lair and its rite once its token is carried; its keeper once met or beaten; no saved "entered" state | Proposed | Unit 4 |
+| A-D10 | 11 October 2026 | The first loadout is what survival already makes; the Wayfarer and the other owner armour tiers stay creative-only | Proposed | Unit 4 |
+| A-D11 | 11 October 2026 | Trade ways come only from the town's existing shops, for offers on sale today; no shop changes | Proposed | Unit 4 |
+| A-D12 | 11 October 2026 | Codex links open an unlocked entry without the codex being carried | Proposed | Unit 4 |
+| A-D13 | 11 October 2026 | The route's support spell is `touch struck ward`, added to the codex examples | Proposed | Unit 4 |
+| A-D14 | 11 October 2026 | The CHANGELOG's reconciliation (stale "Unmerged" headings, the entries #277 dropped) goes in its own docs-only pull request | Proposed | Unit 4 |

@@ -437,3 +437,9 @@ block and item `jugcraft:spire_heart` and its block entity; saved data `jugcraft
 `jugcraft:spire_shaft` and `jugcraft:spire_crown_*`; ritual `jugcraft:spire_kindling`; block tag
 `jugcraft:concordance/spire_stone`; practice gate and milestone `jugcraft:spire_raised`; data folders `concordance/wonder`
 and `concordance/wonder_configuration`.
+
+Introduced by Concordance Chunk A ([its contract](features/concordance-chunk-a.md#interfaces-changed); not yet merged):
+payloads `jugcraft:concordance_composer_request`, `jugcraft:concordance_composer_state` and
+`jugcraft:concordance_composer_result`; key `key.jugcraft.concordance_composer`; the player attachment and the overworld
+record `jugcraft:lair_rewards`; the encyclopedia's payloads `jugcraft:encyclopedia_request` and `jugcraft:encyclopedia`
+and its key `key.jugcraft.encyclopedia`.
