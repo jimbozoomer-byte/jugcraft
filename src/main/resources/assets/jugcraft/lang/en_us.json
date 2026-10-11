@@ -5500,6 +5500,8 @@
   "message.jugcraft.lair.left_behind": "Anything left lying in a lair is lost when it closes",
   "message.jugcraft.lair.party_full": "%s is full",
   "message.jugcraft.lair.protected": "Nothing in a lair can be changed",
+  "message.jugcraft.lair.reward.kept": "Your share of the spoils is kept for you until you are back on your feet",
+  "message.jugcraft.lair.reward.returned": "You are handed your share of the spoils",
   "message.jugcraft.lair.rite.candles": "The grave needs more lit candles round it: %s of %s",
   "message.jugcraft.lair.rite.disabled": "The lairs are switched off on this server",
   "message.jugcraft.lair.rite.no_grave": "The knell rings out over no grave",

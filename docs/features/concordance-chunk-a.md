@@ -1,6 +1,6 @@
 # Concordance Chunk A: usable foundations (contract and handoff)
 
-Status: in progress (units 1 and 2 implemented, not yet compiled in CI); see each unit's record.
+Status: in progress (units 1 to 3 implemented, not yet compiled in CI); see each unit's record.
 Proposal: the owner chose Chunk A ("usable magic") on 10 October 2026, from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) and
 [its first-chunk tickets](../plans/concordance-expansion-2026-10-10/12-detailed-first-chunk-tickets.md) (A-00 to A-08).
@@ -20,7 +20,7 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 |---|---|---|---|---|
 | 1 | A-00, A-01 | Baseline; one composition service behind the command and the screen | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI not yet run |
 | 2 | A-02, A-03 | Bounded screen protocol; the plain composer screen and the GuiLib workspace over one draft | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI not yet run |
-| 3 | A-05, A-06 | Encounter contribution (healing, warding, objectives) and the reward lifecycle | to come | Not started |
+| 3 | A-05, A-06 | Encounter contribution (healing, warding, objectives) and the reward lifecycle | [Lair encounter credit](lair-encounter-credit.md) | Implemented; CI not yet run |
 | 4 | A-04, A-07 | The encyclopedia's entry and first route; acquisition and presentation | to come | Not started |
 | 5 | A-08 | Combined fixes and the evidence for the owner's checkpoint | this page | Not started |
 
@@ -49,6 +49,11 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 - New pure model `concordance/compose/Draft`.
 - `Compiler.changes` and `Composition.shortName` are now public (unchanged behaviour).
 - `JugcraftConfig.setFeatureEnabled` for game tests.
+- New `lair/Encounter` (a boss fight's record) and `lair/LairRewards` (rewards paid once, kept for the fallen and the
+  away); the bosses' `took`, `participants` and `reward` keep their signatures.
+- `ConcordanceEffects.observe`: observers told of each restoration and protection that took.
+- `Lairs.onRelit` and `Lairs.relit`: a lair brazier's unlit-to-lit turn.
+- New saved data: the player attachment `jugcraft:lair_rewards` and the overworld record `jugcraft:lair_rewards`.
 
 ## Validation plan
 
@@ -73,3 +78,6 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 | A-D1 | 10 October 2026 | Chunk A first, before winter/stone or the workshop | Accepted (owner) | All of Chunk A |
 | A-D2 | 10 October 2026 | The composer key is unbound until a player binds it; the journal's Compose button is the way in | Proposed | Unit 2 |
 | A-D3 | 10 October 2026 | The command's suggestions keep listing every word (a diagnostic path) | Proposed | Unit 1 |
+| A-D4 | 11 October 2026 | Support qualifies at 4 healing or 4 warding (one Mend or one Ward); any blow still qualifies; one objective qualifies | Proposed | Unit 3 |
+| A-D5 | 11 October 2026 | A boss's experience is shared among everyone paid, now or later; one who died in the fight is paid wherever they are, and one who left the game in it is paid on joining if still away when it falls | Proposed | Unit 3 |
+| A-D6 | 11 October 2026 | Only the Concordance's healing and wards are credited (vanilla healing names no healer; crediting it would need a mixin) | Proposed | Unit 3 |
