@@ -9617,6 +9617,155 @@ def check_cinder_tyrant():
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
 
+def check_acquisition(registered):
+    """Concordance Chunk A, unit 4 (tools/acquisition.py, docs/features/concordance-first-loadout.md): JEI's pages on
+    where the things only a ritual or a lair boss gives come from are the generator's, and each is tied to the files on
+    disk. Each page is shown for a registered item, has its words and says it describes the default data. The loot table
+    a boss's loot class rolls gives each of her things at the chance or count its page states, and every Jugcraft item
+    in it has a page; the Halloween extra and the first victory's trophy are still the loot class's. Nothing else gives
+    them: no other loot table (but the thing's own block and its arms-variants trophy table, which nothing rolls), shop,
+    villager trade or commission, and no recipe makes a thing whose page says it is not crafted, while the hood's page
+    names its own recipe. The Adept's Attunement makes the Adept's Wand from what its page lists. The JEI plugin shows
+    the rows. Every piece of the first loadout is made by a recipe or a bench working on disk, and the server test that
+    loads those recipes names each; nothing gives the owner's armour tiers the record keeps creative-only.
+    (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
+    import acquisition as aq
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    pages = aq.pages()
+    if (load(ASSETS / "recipe_view.json") or {}).get("acquisition_info") != aq.rows():
+        err("recipe_view.json acquisition_info is not tools/acquisition.py's rows(): run tools/generate_material_data.py")
+    for key, text in pages.items():
+        if key not in registered:
+            err(f"acquisition: the JEI page for {MOD}:{key} names no registered item")
+        if lang.get(f"{aq.PREFIX}.{key}") != text:
+            err(f"lang {aq.PREFIX}.{key} is not tools/acquisition.py's page: run tools/generate_material_data.py")
+        if aq.DEFAULT not in text.lower():
+            err(f"acquisition: the JEI page for {key} must say it describes the default data ({aq.DEFAULT!r})")
+    plugin_path = CLIENT_JAVA_ROOT / "compat" / "JugcraftJeiPlugin.java"
+    plugin = plugin_path.read_text(encoding="utf-8") if plugin_path.is_file() else ""
+    if '"acquisition_info"' not in plugin or f'"{aq.PREFIX}." + ' not in plugin:
+        err("JugcraftJeiPlugin must show recipe_view.json's acquisition_info rows as information pages")
+    # What gives things, on disk: each recipe's result; every Jugcraft item a loot table names; and what the town's
+    # shops sell, villager trades give and the Conclave's commissions pay.
+    made, dropped, given = {}, {}, {}
+    for path in sorted(DATA.glob("*/recipe/**/*.json")):
+        result = (load(path) or {}).get("result")
+        made.setdefault(result.get("id") if isinstance(result, dict) else result, []).append(path)
+    for path in sorted(DATA.glob("*/loot_table/**/*.json")):
+        for ref in set(re.findall(rf'"({MOD}:[a-z0-9_/]+)"', path.read_text(encoding="utf-8"))):
+            dropped.setdefault(ref, []).append(path)
+    for shop, info in ((load(DATA / MOD / "town" / "shops.json") or {}).get("shops") or {}).items():
+        for offer in info.get("sells", []):
+            given.setdefault(offer.get("item"), []).append(f"the town's {info.get('name', shop)}")
+    for path in sorted(DATA.glob("*/villager_trade/**/*.json")):
+        given.setdefault(((load(path) or {}).get("gives") or {}).get("id"), []).append(str(path.relative_to(DATA)))
+    for path in sorted((DATA / MOD / "concordance" / "commission").glob("*.json")):
+        given.setdefault((load(path) or {}).get("reward"), []).append(str(path.relative_to(DATA)))
+    # Each boss: her loot class rolls the table her pages describe, and it gives what they say.
+    tables_for = {key: set() for key in pages}
+    for boss, info in aq.BOSSES.items():
+        loot_path = JAVA_ROOT / "lair" / boss / f"{boss.capitalize()}Loot.java"
+        loot_java = loot_path.read_text(encoding="utf-8") if loot_path.is_file() else ""
+        if f'Jugcraft.id("{info["table"]}")' not in loot_java:
+            err(f"lair/{boss}/{loot_path.name} does not roll loot_table/{info['table']}.json, which its JEI pages describe")
+        rolled = {}
+        for pool in (load(DATA / MOD / "loot_table" / f"{info['table']}.json") or {}).get("pools", []):
+            chance = pool.get("condition", {}).get("chance")
+            for entry in pool.get("entries", []):
+                namespace, item = split(entry.get("name", ":"))
+                count = entry.get("modifier", {}).get("count", {})
+                if namespace == MOD:
+                    rolled[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+        for item in rolled:
+            if item not in pages:
+                err(f"loot_table/{info['table']}.json gives {item}, which has no JEI page (tools/acquisition.py)")
+                continue
+            tables_for[item] |= {DATA / MOD / "loot_table" / f"{info['table']}.json",
+                                 DATA / MOD / "loot_table" / "bosses" / f"{boss}.json",
+                                 DATA / MOD / "loot_table" / "blocks" / f"{item}.json"}
+        item = info["count"][0]
+        count = rolled.get(item)
+        if not isinstance(count, tuple) or f"holds {count[0]} to {count[1]}" not in pages.get(item, ""):
+            err(f"acquisition: {item}'s JEI page does not say each share holds what loot_table/{info['table']}.json gives")
+        for thing in info["chances"]:
+            chance = rolled.get(thing)
+            if not isinstance(chance, (int, float)) or f"a {aq.pct(chance)} chance of it" not in pages.get(thing, ""):
+                err(f"acquisition: {thing}'s JEI page does not give loot_table/{info['table']}.json's chance ({chance})")
+        thing = info["event"][0]
+        event = re.search(r"\bEVENT_[A-Z]+_CHANCE = ([0-9.]+)F;", loot_java)
+        if not event or f"another {aq.pct(float(event.group(1)))} chance" not in pages.get(thing, ""):
+            err(f"acquisition: {thing}'s JEI page does not give {loot_path.name}'s Halloween chance")
+        first = info["first"]
+        method = first.split("_")[0] + "".join(word.capitalize() for word in first.split("_")[1:])
+        if not re.search(rf"if \(firstKill\(player\)[^{{]*\{{\s*loot\.add\(new ItemStack\(\w+\.{method}\(\)\)\);", loot_java) \
+                or "first victory over her always brings it" not in pages.get(first, ""):
+            err(f"acquisition: {loot_path.name} must still add {first} on a player's first kill, as its JEI page says")
+    # Nothing else gives them, and what a page says is never crafted or traded is not.
+    for key, text in pages.items():
+        ref = f"{MOD}:{key}"
+        for path in dropped.get(ref, []):
+            if path not in tables_for[key]:
+                err(f"{path.relative_to(DATA)} gives {key}, which its JEI page (tools/acquisition.py) does not name")
+        if text.startswith("Not crafted") and made.get(ref):
+            err(f"{made[ref][0].relative_to(DATA)} makes {key}, whose JEI page says it is not crafted")
+        if "or traded" in text and given.get(ref):
+            err(f"{given[ref][0]} gives {key}, whose JEI page says it is not traded")
+    for item, (recipe, ingredient, count, name) in aq.CRAFTED.items():
+        path = DATA / MOD / "recipe" / f"{recipe}.json"
+        body = (load(path) or {}) if path.is_file() else {}
+        symbols = [symbol for symbol, ref in body.get("key", {}).items() if ref == f"{MOD}:{ingredient}"]
+        uses = sum(row.count(symbol) for row in body.get("pattern", []) for symbol in symbols)
+        if (body.get("result") or {}).get("id") != f"{MOD}:{item}" or uses != count \
+                or not pages.get(item, "").startswith(f"Crafted from {count} {name}."):
+            err(f"acquisition: {item}'s JEI page must name recipe/{recipe}.json ({count} {name})")
+    # The Adept's Wand: the ritual on disk makes it from what its page offers, for the Focus, steps and research it states.
+    for item, ritual in aq.RITUALS.items():
+        path = DATA / MOD / "concordance" / "ritual" / f"{ritual}.json"
+        body = (load(path) or {}) if path.is_file() else {}
+        text = pages.get(item, "")
+        if ((body.get("result") or {}).get("transform") or {}).get("into") != f"{MOD}:{item}":
+            err(f"concordance/ritual/{ritual}.json does not make {item}, as its JEI page says")
+        research = aq.rituals.RESEARCH.get(split(body.get("research", ":"))[1], {}).get("name")
+        said = [f"{body.get('focus')} Focus", f"{body.get('steps')} steps", f"{research} {body.get('stage')}"]
+        for offering in body.get("offerings", []):
+            try:
+                said.append(f"{offering['count']} {aq.rituals._item_name(offering['item'])}")
+            except KeyError:
+                said.append(str(offering.get("item")))
+        for words in said:
+            if words not in text:
+                err(f"acquisition: {item}'s JEI page does not say {words!r}, as concordance/ritual/{ritual}.json does")
+    # The first loadout is made in survival as it is: by the recipe of its own name, or by a bench working; and the
+    # server test that loads those recipes names every one.
+    tests_path = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "ConcordanceGameTests.java"
+    tests = tests_path.read_text(encoding="utf-8") if tests_path.is_file() else ""
+    named = re.search(r"FIRST_LOADOUT_RECIPES = List\.of\(([^)]*)\)", tests)
+    recipes = {item for item, how in {**aq.LOADOUT, **aq.OPTIONAL}.items() if how == "recipe"}
+    if "public void theFirstLoadoutIsMadeInSurvival(" not in tests or not named \
+            or set(re.findall(r'"([a-z_]+)"', named.group(1))) != recipes:
+        err("ConcordanceGameTests.theFirstLoadoutIsMadeInSurvival must load the recipe of every first-loadout piece "
+            f"(FIRST_LOADOUT_RECIPES: {sorted(recipes)})")
+    for item, how in {**aq.LOADOUT, **aq.OPTIONAL}.items():
+        if item not in registered:
+            err(f"acquisition: the first loadout's {item} is not registered")
+        if how == "recipe":
+            if DATA / MOD / "recipe" / f"{item}.json" not in made.get(f"{MOD}:{item}", []):
+                err(f"acquisition: no recipe/{item}.json makes the first loadout's {item}")
+        else:
+            working = DATA / MOD / "concordance" / "working" / f"{how.split(':', 1)[1]}.json"
+            if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
+                err(f"acquisition: concordance/working/{working.name} does not make the first loadout's {item}")
+    # The owner's armour tiers the record keeps creative-only: nothing gives them.
+    for tier in aq.CREATIVE_ONLY:
+        for piece in gear.ARMOR:
+            ref = f"{MOD}:{tier}_{piece}"
+            sources = [str(path.relative_to(DATA)) for path in made.get(ref, []) + dropped.get(ref, [])] + given.get(ref, [])
+            if sources:
+                err(f"{sources[0]} gives {tier}_{piece}, which docs/features/concordance-first-loadout.md keeps "
+                    "creative-only: once the owner settles how a tier is won, take it out of CREATIVE_ONLY "
+                    "(tools/acquisition.py) and the record's creative-only table")
+
+
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
     committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
@@ -12385,6 +12534,10 @@ def check_equivalence(co, root, lang, registered, research):
     tag = load(DATA / MOD / "tags" / "item" / "equivalence" / "excluded.json") or {}
     if sorted(tag.get("values", [])) != sorted(eq.EXCLUDED):
         err("tags/item/equivalence/excluded.json differs from EXCLUDED")
+    # Every instrument is beyond the scale, as the record says of wands: it carries what is inscribed and tuned on it.
+    for instrument in co.INSTRUMENTS:
+        if f"{MOD}:{instrument}" not in excluded:
+            err(f"equivalence: the instrument {MOD}:{instrument} must be in EXCLUDED (tools/concordance_equivalence.py)")
     for thing in eq.EXCLUDED:
         if thing.startswith(f"{MOD}:") and split(thing)[1] not in registered:
             err(f"equivalence: the excluded {thing} is not registered")
@@ -13256,6 +13409,7 @@ def main():
     check_tatterlace()
     check_yeti()
     check_cinder_tyrant()
+    check_acquisition(registered)
     check_material_sets()
     check_art()
     check_pixel_hollows()

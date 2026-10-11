@@ -21,7 +21,7 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 | 1 | A-00, A-01 | Baseline; one composition service behind the command and the screen | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI not yet run |
 | 2 | A-02, A-03 | Bounded screen protocol; the plain composer screen and the GuiLib workspace over one draft | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI not yet run |
 | 3 | A-05, A-06 | Encounter contribution (healing, warding, objectives) and the reward lifecycle | [Lair encounter credit](lair-encounter-credit.md) | Implemented; CI not yet run |
-| 4 | A-04, A-07 | The encyclopedia's entry and first route; acquisition and presentation | to come | Not started |
+| 4 | A-04, A-07 | The encyclopedia's entry and first route; acquisition and presentation | [First loadout and acquisition](concordance-first-loadout.md); the encyclopedia's to come | Not started |
 | 5 | A-08 | Combined fixes and the evidence for the owner's checkpoint | this page | Not started |
 
 ## Baseline (A-00)
