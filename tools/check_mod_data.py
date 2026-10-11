@@ -2096,7 +2096,8 @@ def check_arms_variants():
     each boss's trophy loot table, and that an armor set's arm has neither a recipe nor any loot table yet (how a set is
     won is the owner's to decide); the boons' and lines' tooltips, a boss's line naming its boss and a set's its set;
     that every boon is bounded; that no variant deals as much a second as a netherite sword, whatever its boon adds;
-    and the armor sets' shields (SET_SHIELDS), each of a set and blocking as a kit shield, with no recipe or drop yet."""
+    and the armor sets' shields (SET_SHIELDS), each of a set and blocking as a kit shield, with no recipe or drop yet; and
+    that a boss names its lair (a tools/lairs.py LAIRS key) exactly when it is built (its own entity loot table)."""
     import arms_variants as av
     java = (JAVA_ROOT / "weapons" / "ArmVariants.java").read_text(encoding="utf-8")
     found = [(name, kind, line, None if boon == "null" else boon.split(".")[1].lower())
@@ -2114,6 +2115,16 @@ def check_arms_variants():
         err(f"ArmVariants.SETS differs from tools/arms_variants.py {list(av.SETS)}")
     if len(set(av.LINES)) != len(av.STYLES) + len(av.BOSSES) + len(av.SETS):
         err("tools/arms_variants.py: a line is in more than one of STYLES, BOSSES and SETS")
+    # A boss that is built (it has its own loot table, loot_table/entities/<boss>.json) names its lair, and only a built
+    # boss does: the handbook's trophy page lists a boss among the foes met by that key.
+    import lairs
+    for boss, info in av.BOSSES.items():
+        built = (DATA / MOD / "loot_table" / "entities" / f"{boss}.json").is_file()
+        if built != ("lair" in info):
+            err(f"tools/arms_variants.py BOSSES[{boss!r}] must name its lair exactly when loot_table/entities/{boss}.json "
+                f"exists (the boss is built): {'it has the table but no lair' if built else 'it names a lair but has no table'}")
+        if "lair" in info and info["lair"] not in lairs.LAIRS:
+            err(f"tools/arms_variants.py BOSSES[{boss!r}] names the lair {info['lair']!r}, which tools/lairs.py LAIRS does not have")
     if re.findall(r'"([a-z_]+)"', re.search(r"PATTERN_NAMES = List\.of\(([^)]*)\)", java, re.S).group(1)) != av.patterns():
         err(f"ArmVariants.PATTERN_NAMES differs from tools/arms_variants.py {av.patterns()}")
     ints = {"FROST_TICKS": av.FROST[0], "FROST_AMPLIFIER": av.FROST[1], "EMBER_SECONDS": av.EMBER_SECONDS,
@@ -9624,11 +9635,13 @@ def check_acquisition(registered):
     a boss's loot class rolls gives each of her things at the chance or count its page states, and every Jugcraft item
     in it has a page; the Halloween extra and the first victory's trophy are still the loot class's. Nothing else gives
     them: no other loot table (but the thing's own block and its arms-variants trophy table, which nothing rolls), shop,
-    villager trade or commission, and no recipe makes a thing whose page says it is not crafted, while the hood's page
-    names its own recipe. The Adept's Attunement makes the Adept's Wand from what its page lists. The JEI plugin shows
-    the rows. Every piece of the first loadout is made by a recipe or a bench working on disk, and the server test that
-    loads those recipes names each; nothing gives the owner's armour tiers the record keeps creative-only.
-    (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
+    villager trade, commission or project; and nothing makes a thing whose page says it is not crafted (a recipe's
+    result, results or byproducts, a bench working, a ritual other than the page's own, the Assayer's Scale's
+    catalogue), while the hood's page names its own recipe. The Adept's Attunement makes the Adept's Wand from what its
+    page lists. The JEI plugin shows the rows. Every piece of the first loadout is made by a recipe or a bench working on
+    disk, and the server test that loads those recipes names each; none of those sources gives the owner's armour tiers
+    the record keeps creative-only. Only data is read: what Java alone gives (a creature's drops coded in its class) is
+    not seen. (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
     import acquisition as aq
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     pages = aq.pages()
@@ -9645,12 +9658,29 @@ def check_acquisition(registered):
     plugin = plugin_path.read_text(encoding="utf-8") if plugin_path.is_file() else ""
     if '"acquisition_info"' not in plugin or f'"{aq.PREFIX}." + ' not in plugin:
         err("JugcraftJeiPlugin must show recipe_view.json's acquisition_info rows as information pages")
-    # What gives things, on disk: each recipe's result; every Jugcraft item a loot table names; and what the town's
-    # shops sell, villager trades give and the Conclave's commissions pay.
+    # What gives things, on disk: every item a recipe makes (each {"id": ...} object in a recipe file: its result, its
+    # results and its byproducts' results; no input here uses one), a bench working's result, a ritual's
+    # transformation, what the Assayer's Scale can form (its catalogue); every Jugcraft item a loot table names; and what
+    # the town's shops sell, villager trades give, the Conclave's commissions pay and its projects reward. What Java alone
+    # gives (a creature's drops coded in its class, such as creatures/scary/ScaryDrops) is not seen here.
     made, dropped, given = {}, {}, {}
+    def outputs(value):
+        if isinstance(value, dict):
+            found = [value["id"]] if isinstance(value.get("id"), str) else []
+            return found + [ref for child in value.values() for ref in outputs(child)]
+        return [ref for child in value for ref in outputs(child)] if isinstance(value, list) else []
     for path in sorted(DATA.glob("*/recipe/**/*.json")):
-        result = (load(path) or {}).get("result")
-        made.setdefault(result.get("id") if isinstance(result, dict) else result, []).append(path)
+        body = load(path) or {}
+        refs = set(outputs(body)) | ({body["result"]} if isinstance(body.get("result"), str) else set())
+        for ref in refs:
+            made.setdefault(ref, []).append(path)
+    for folder, result in (("working", lambda body: body.get("result")),
+                           ("ritual", lambda body: ((body.get("result") or {}).get("transform") or {}).get("into")),
+                           ("material", lambda body: body.get("item") if body.get("form", True) else None)):
+        for path in sorted(DATA.glob(f"*/concordance/{folder}/*.json")):
+            ref = result(load(path) or {})
+            if isinstance(ref, str):
+                made.setdefault(ref, []).append(path)
     for path in sorted(DATA.glob("*/loot_table/**/*.json")):
         for ref in set(re.findall(rf'"({MOD}:[a-z0-9_/]+)"', path.read_text(encoding="utf-8"))):
             dropped.setdefault(ref, []).append(path)
@@ -9659,8 +9689,9 @@ def check_acquisition(registered):
             given.setdefault(offer.get("item"), []).append(f"the town's {info.get('name', shop)}")
     for path in sorted(DATA.glob("*/villager_trade/**/*.json")):
         given.setdefault(((load(path) or {}).get("gives") or {}).get("id"), []).append(str(path.relative_to(DATA)))
-    for path in sorted((DATA / MOD / "concordance" / "commission").glob("*.json")):
-        given.setdefault((load(path) or {}).get("reward"), []).append(str(path.relative_to(DATA)))
+    for folder in ("commission", "project"):
+        for path in sorted((DATA / MOD / "concordance" / folder).glob("*.json")):
+            given.setdefault((load(path) or {}).get("reward"), []).append(str(path.relative_to(DATA)))
     # Each boss: her loot class rolls the table her pages describe, and it gives what they say.
     tables_for = {key: set() for key in pages}
     for boss, info in aq.BOSSES.items():
@@ -9706,8 +9737,10 @@ def check_acquisition(registered):
         for path in dropped.get(ref, []):
             if path not in tables_for[key]:
                 err(f"{path.relative_to(DATA)} gives {key}, which its JEI page (tools/acquisition.py) does not name")
-        if text.startswith("Not crafted") and made.get(ref):
-            err(f"{made[ref][0].relative_to(DATA)} makes {key}, whose JEI page says it is not crafted")
+        own = {DATA / MOD / "concordance" / "ritual" / f"{aq.RITUALS[key]}.json"} if key in aq.RITUALS else set()
+        makers = [path for path in made.get(ref, []) if path not in own]
+        if text.startswith("Not crafted") and makers:
+            err(f"{makers[0].relative_to(DATA)} makes {key}, whose JEI page says it is not crafted")
         if "or traded" in text and given.get(ref):
             err(f"{given[ref][0]} gives {key}, whose JEI page says it is not traded")
     for item, (recipe, ingredient, count, name) in aq.CRAFTED.items():

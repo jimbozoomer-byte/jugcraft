@@ -101,8 +101,9 @@ cast's pose plays over a guard, a stroke or a weapon art:
 - What could outlast a switch from the wand was Spell Engine's release clip (up to 14 ticks) or its fade of an ended
   cast. Player Animation Library lays those over the arms after ArmsMotion, and in first person (Spell Engine's
   default) hides the held arm as the game draws it while they play.
-- `client/CastPoses` stops those clips, and the Concordance's circle and Vigil gestures, on any player holding an arm.
-  It runs at the end of each client tick, in first and third person, for every player the client sees, with no mixin.
+- `client/CastPoses` stops those clips, and the Vigil's offering gesture, on any player holding an arm. It runs at the
+  end of each client tick, in first and third person, for every player the client sees, with no mixin. `CircleClient`
+  keeps the circle's gesture off such a player itself, by asking `CastPoses.gesturesYield`.
 - An arm in the off hand keeps the two gestures off as well, but not a cast's clips: ArmsMotion poses only the main
   hand, and a wand in the main hand still casts with its gesture.
 

@@ -21,7 +21,7 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 | 1 | A-00, A-01 | Baseline; one composition service behind the command and the screen | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI not yet run |
 | 2 | A-02, A-03 | Bounded screen protocol; the plain composer screen and the GuiLib workspace over one draft | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI not yet run |
 | 3 | A-05, A-06 | Encounter contribution (healing, warding, objectives) and the reward lifecycle | [Lair encounter credit](lair-encounter-credit.md) | Implemented; CI not yet run |
-| 4 | A-04, A-07 | The encyclopedia's entry and first route; acquisition and presentation | [The encyclopedia's first route](arcane-concordance-first-route.md); [first loadout and acquisition](concordance-first-loadout.md) | Implemented (cast poses to come); CI not yet run |
+| 4 | A-04, A-07 | The encyclopedia's entry and first route; acquisition and presentation | [The encyclopedia's first route](arcane-concordance-first-route.md); [first loadout and acquisition](concordance-first-loadout.md); [one owner for the arms](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07) | Implemented; CI not yet run |
 | 5 | A-08 | Combined fixes and the evidence for the owner's checkpoint | this page | Not started |
 
 ## Baseline (A-00)
@@ -63,6 +63,9 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 - `CircleAnchorBlockEntity.status(ServerLevel, Consumer<Component>)` (chat's lines, from the cached report) and
   `LeyPylonBlockEntity.status()`; `TownShops.sales(Item, String)`.
 - The Adept's Wand joins the equivalence exclusions; JEI information pages from `tools/acquisition.py`.
+- New client class `client/CastPoses` (no mixin): Spell Engine's casting and release clips, and the Vigil's gesture,
+  stop on any player the client sees with a gun or an arm in the main hand; `CircleClient` and `VigilClient` ask its
+  `gesturesYield`.
 
 ## Validation plan
 

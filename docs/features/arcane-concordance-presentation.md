@@ -186,8 +186,11 @@ either view, and every other player.
 **Failure behaviour and limits.**
 
 - A release that reaches a client while a gun or an arm is already in hand plays until the end of the next client tick
-  (at most 50 ms): on the body in third person. In first person the hands dip for a moment, because the library lowers
-  them for that tick.
+  (at most 50 ms), on the body in third person. In first person it depends on the tick before. If a Spell Engine clip
+  was playing then (as after a quick switch from the wand, while the cast was fading out), the library's first-person
+  hand-off is still complete, so until that tick ends the view may show the posed body without the hands and without the
+  held gun or arm. Otherwise the hands are only lowered for a moment. This is read from Player Animation Library's
+  source (its first-person item and pass checks, and the transition it advances in the entity tick), not seen in a game.
 - An arm in the off hand does not stop a cast's clips: a wand in the main hand still casts with its gesture, and
   ArmsMotion poses only the main hand.
 - Spell Engine's third layer, its evasion clip, is left alone.

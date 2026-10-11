@@ -38,8 +38,10 @@ import net.spell_engine.client.animation.SpellAnimationStack;
  * </ul>
  * A clip stopped here ends at once rather than fading, so the gun's or the arm's pose takes over in the next frame. A
  * release that reaches this client while a gun or an arm is already in hand is stopped by the end of the next client
- * tick, at most 50 ms later; until then it shows on the body in third person, and in first person the hands dip for a
- * moment (the library lowers them for that tick).
+ * tick, at most 50 ms later; until then it shows on the body in third person. In first person, if a Spell Engine clip
+ * was playing the tick before (as after a quick switch from the wand), the view may show the posed body without the
+ * hands and the held gun or arm until that tick ends; otherwise the hands are lowered for a moment. (Read in Player
+ * Animation Library's source, not seen in a game.)
  */
 public final class CastPoses {
 	/** Clips and gestures stopped so far (for the client game tests). */

@@ -1,6 +1,6 @@
 # JEI integration
 
-Status: implemented in source (PR #35); **not yet tried in a client with JEI installed**. It compiles against the JEI API in CI. JEI is loaded in the default development and test runs (below), but no test opens JEI or checks its pages, so nothing verifies the plugin at runtime yet.
+Status: implemented in source (PR #35); **not yet tried in a client with JEI installed**. The plugin as merged compiled against the JEI API in CI; Concordance Chunk A's information pages (`addAcquisitionInfo`) have not been compiled yet. JEI is loaded in the default development and test runs (below), but no test opens JEI or checks its pages, so nothing verifies the plugin at runtime yet.
 Proposal issue: none. The owner asked for "JEI/EMI recipes" on 30 September 2026. EMI has no build for Minecraft 26.3 yet (checked on its maven), so this is JEI only.
 Owner: @jimbozoomer-byte
 Target milestone and tier: all tiers (it only displays recipes).
@@ -28,7 +28,7 @@ Crafting-table recipes show in JEI's own crafting page when JEI's recipe sync re
 
 ## Verification
 - `tools/check_mod_data.py` passes.
-- CI compiles the plugin against the JEI API.
+- CI compiled the plugin against the JEI API up to the merged main; Concordance Chunk A's `addAcquisitionInfo` is not compiled yet (no build here can; CI will).
 - Not run: a client with JEI installed. Nothing is play-tested.
 
 ## Rollout and open questions

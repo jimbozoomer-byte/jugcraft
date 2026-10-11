@@ -55,8 +55,9 @@ MATRIX = {
         "arm in the main hand, on any player the client sees (CastPoses)",
         "required",
         ["aCastGivesWayToAGunOrAnArm"],
-        "No person has looked at the gestures; giving way is tested on the client's own player only (another player's "
-        "needs a second client, not run), and not for the circle's gesture"),
+        "No person has looked at the gestures; giving way has a test, added but not yet run, for Spell Engine's "
+        "release clip and the Vigil's gesture on the client's own player; it does not cover the fade of an ended "
+        "cast, another player's view (a second client, not run) or the circle's gesture"),
     "modonomicon": (
         "The Arcane Concordance codex: categories for every tradition, pages generated from the rules (components, "
         "the calendar, the Binding reasons, the spell bar's keys), entries unlocked by research advancements",

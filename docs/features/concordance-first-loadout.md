@@ -1,7 +1,10 @@
 # Concordance first loadout: what a new caster makes, and where the rest comes from
 
-Status: implemented for Concordance Chunk A (unit 4: ticket A-07 and the acquisition half of A1); the data checks pass
-locally, nothing is compiled or run in a game yet (see Verification).
+Status: implemented for Concordance Chunk A (unit 4: the acquisition and JEI part of ticket A-07, and the acquisition
+half of A1); the data checks pass locally, nothing is compiled or run in a game yet (see Verification). A-07's other
+two asks are recorded elsewhere: the cast-pose rule in
+[the presentation record](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07), and the ritual
+and pylon inspection in [the encyclopedia's first slice](jugcraft-encyclopedia.md#first-slice-concordance-chunk-a-unit-4).
 Proposal issue: none. The owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds
 the scope, and [the first-chunk tickets](../plans/concordance-expansion-2026-10-10/12-detailed-first-chunk-tickets.md)
 (A-07) and [the delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (A1) the asks.
@@ -24,7 +27,9 @@ the **Wayfarer** among them, gains a recipe, a drop, a shop or a trade here. The
 tab, as the owner asked when each was made ([bloodthorn-armor.md](bloodthorn-armor.md),
 [four-armor-designs.md](four-armor-designs.md), [armor-designs-8-october.md](armor-designs-8-october.md)). This record
 does not claim that any of them became obtainable; how each is won is the owner's to decide (see Rollout).
-`check_acquisition` fails if anything starts to give one before this record and `tools/acquisition.py` say so.
+`check_acquisition` fails if a recipe (its result, results or byproducts), a bench working, a ritual, the Assayer's
+Scale, a loot table, a town shop, a villager trade, a commission or a project starts to give one before this record and
+`tools/acquisition.py` say so. It reads only data: a drop coded in Java is not seen (see Known limits).
 
 **JEI says where ritual and boss things come from.** With JEI installed, each thing that only a ritual makes or only a
 lair boss gives now has an information page (JEI's "Information" tab, shown when you look up the item's recipes), since
@@ -206,7 +211,12 @@ Ran here (11 October 2026):
   scythe's pool removed, the shade count changed, an item with no page added to her table, a creative-only tier given a
   recipe, a loadout piece without its recipe or with the wrong working, the first-kill line or the table key removed
   from `VesperineLoot.java`, the Halloween chance changed, a recipe and a shop made to give a "not crafted or traded"
-  thing, the ritual's gold and Focus changed, and the server test's recipe list changed. Each was reported. Taking the
+  thing, the ritual's gold and Focus changed, and the server test's recipe list changed. Each was reported. After a
+  review found that the first version read only a recipe's top-level `result`, the sources were widened; on a scratch
+  copy of the data, a cutting recipe's `results` and a pulverizing recipe's byproduct made to give a "not crafted"
+  thing, a bench working and a project reward made to give a Wayfarer piece, a second ritual made to give the Vesper
+  Scythe or the Adept's Wand, and the Assayer's Scale's catalogue given the Needle Rapier were each reported (and the
+  same catalogue entry with `"form": false` was not). Taking the
   Adept's Wand out of `EXCLUDED` was reported by `check_equivalence`.
 - `python3 scripts/check_repository.py`: **passes**.
 - `python3 tools/concordance_journey.py` (and so `check_journey`): **passes**, with a new rule that every piece of
@@ -226,9 +236,9 @@ the pages in a client with JEI (no test opens JEI); a person following the route
 ## World and event applicability
 
 The route is the Overworld's; nothing needs the Nether or the End (the Eye of Ender is only one of five relic
-specimens). The lairs keep their containment and their own rules. Seasonal: the Halloween event adds only the extra
-hood and headdress chance the pages state, and nothing on the route depends on the event; with the default
-`lairs.off_season` the rites open the lairs on any night.
+specimens). The lairs keep their containment and their own rules. Seasonal: the Halloween event adds a roll of
+seasonal candy to each share and the extra hood and headdress chance the pages state; nothing on the route depends on
+the event, and with the default `lairs.off_season` the rites open the lairs on any night.
 
 ## Rollout and open questions
 
@@ -241,8 +251,12 @@ Owner decisions (all proposed; none is taken by this change):
 | Should a shop sell first-route materials? | Today the town sells a lantern, a compass, a lead, glow ink sacs, candles and lilies of the valley, and buys amethyst, copper, gold, wool and leather. Selling amethyst shards (say) would answer chapter 9's question on crafting- or trade-oriented acquisition, but the town's rule that no item is both sold and bought (`tools/town_shops.py`, checked by `check_mod_data`) means the General Store would stop buying it. | Proposed |
 
 Known limits and findings:
-- Not in this change: A-07's presentation rule (a cast pose never overriding a gun reload or an arms action, in first
-  and third person and for other players). It is left to the chunk's later work.
+- A-07's presentation rule (a cast pose never overriding a gun reload or an arms action, in first and third person
+  and for other players) is a separate change of the same unit, recorded in
+  [the presentation record](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07).
+- `check_acquisition` reads data only. Something a class gives in Java (a creature's drops coded in its class, such as
+  `creatures/scary/ScaryDrops`, which already drops steel armour) is not seen by it, so a Java drop of a "not crafted"
+  thing or of a creative-only tier would pass the data checks; review catches it.
 - `tools/concordance_progression.py` gives `minecraft:ender_eye` no dimension although its blaze powder is the
   Nether's; the progression audits may count it as an Overworld relic specimen. It predates this chunk and is not
   changed here; Relic Lore stays reachable in the Overworld through a Nautilus Shell and a Totem of Undying.
