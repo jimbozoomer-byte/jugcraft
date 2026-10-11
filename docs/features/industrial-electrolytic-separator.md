@@ -61,7 +61,7 @@ JEI shows its two recipes in their own category, with the Separator as the stati
   - lye for alumina (the Bayer process), soap and antidote.
 
   Gas tanks, pipes and gas cylinders carry them, as they do the Electrolytic Cell's.
-- Technology connection: the Electrolytic Cell family (`MachineKind.ELECTROLYTIC_CELL`), whose energy figures it shares. It runs only the recipes that ask for its capability, `jugcraft:aqueous_electrolysis`. The Cell keeps its own recipes, unchanged.
+- Technology connection: the Electrolytic Cell family (`MachineKind.ELECTROLYTIC_CELL`), whose energy figures it shares. It runs only the recipes that ask for its capability, `jugcraft:aqueous_electrolysis`. The Cell keeps its own recipes; only its brine time changes, to match (below).
 - Magic connection: none.
 - Reachable entry path: steel plates, Steel Tanks, copper cable, the basic circuit and the Machine Casing all come before electrolysis. None needs hydrogen, chlorine, aluminum or an advanced circuit, so there is no circular unlock.
 - Which connections are required vs optional: power and a feed are required; every output can be stored, piped or carried in tanks. Trade can supply brine, salt or the finished gases.
@@ -69,14 +69,14 @@ JEI shows its two recipes in their own category, with the Separator as the stati
 
 ## Balance and automation
 
-- **Quantities** are the owner's selected starter baseline. Water keeps the existing anchor: 2 liquid mB of water are one reaction amount, so 1,000 mB give 500 mB of hydrogen and 250 mB of oxygen. Brine keeps its existing products, at the selected 400 ticks rather than the Cell's 200.
+- **Quantities** are the owner's selected starter baseline. Water keeps the existing anchor: 2 liquid mB of water are one reaction amount, so 1,000 mB give 500 mB of hydrogen and 250 mB of oxygen. Brine keeps its existing products, at the selected 400 ticks.
 - **Energy per batch** follows the existing upgrade arithmetic (`MachineUpgrades`):
   - with no cards: water 204,800 JE (409.6 JE per mB of hydrogen); brine 102,400 JE (409.6 JE/mB);
   - with four efficiency cards, the cheapest: 84,000 and 42,000 JE (168 JE/mB);
   - speed cards shorten a batch but cost more energy per batch.
 - **No gain loop.** The Fuel Cell returns 128 JE per mB of hydrogen, at most 76% of the cheapest batch's cost, before counting salt or pumping.
   - The plan's proposed floor of 256 JE per mB of hydrogen for electrolysis is not needed by this entry form, which has no profile saving. It must be enforced before an expanded or bulk Separator, or a generator bonus, could close the gap.
-- **The Cell is unchanged**: its brine recipe still takes 200 ticks (51,200 JE). The plan marks moving it to 400 ticks as needing review, so it is left alone here.
+- **The Cell's brine now matches**: 400 ticks (102,400 JE) instead of 200 (51,200 JE). The plan proposed this and marked it for review; the owner chose it on 11 October 2026. It is a parity change, not a loop fix: the Cell takes no upgrade cards, so its brine already cost more than its hydrogen returns (32,000 JE). Its products and its water and aluminum recipes are unchanged.
 - **Automation**: outlets push every 4 ticks, at most 1,000 mB per port; an idle Separator does nothing. Normal repeat processing needs no automation chip.
 
 ## Multiplayer and persistence
@@ -112,8 +112,9 @@ For CI:
   - brine gives 250 mB each of chlorine and hydrogen and 500 mB of lye, for exactly 102,400 JE;
   - a full lye tank stops brine, naming the tank and spending nothing, while water still runs; brine goes on once the lye is gone;
   - oxygen left in the shared tank makes brine wait, naming oxygen, until it is drawn off;
-  - it runs exactly its two recipes while the Cell keeps its own, and its crafting recipe and the Steel Tank's together come to 20 plates.
+  - it runs exactly its two recipes while the Cell keeps its own (brine now 400 ticks, water 800), and its crafting recipe and the Steel Tank's together come to 20 plates.
 - `IndustrialFoundationGameTests` now checks that each form block numbers only its own parts.
+- `PetroGameTests.cellSplitsBrine` now allows 600 ticks and keeps the Cell charged: its brine needs 102,400 JE, more than the Cell's 60,000 JE store.
 - **Client game test** (`ElectrolyticSeparatorClientGameTests`): `jugcraft_electrolytic_separator` (front left, working), `_front` (straight on), `_back`, `_night`, `_screen` (working) and `_lye_full` (brine stopped by a full lye tank).
 
 ### Results

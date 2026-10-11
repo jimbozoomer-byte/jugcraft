@@ -3783,7 +3783,7 @@
           "title": "Electrolytic Cell",
           "icon": "jugcraft:electrolytic_cell",
           "text": [
-            "Three wide, three tall and two deep. Splits brine with electricity: a bucket gives 250 mB of chlorine (out of the top row), 250 mB of hydrogen (the middle row) and 500 mB of lye (the bottom row), every 10 seconds at 256 JE/t. Make brine in the chemical reactor from two salt and a bucket of water. It also splits plain water, slowly: a bucket gives 500 mB of hydrogen (middle row) and 250 mB of oxygen (top row) every 40 seconds, an early fuel for the fuel cell.",
+            "Three wide, three tall and two deep. Splits brine with electricity: a bucket gives 250 mB of chlorine (out of the top row), 250 mB of hydrogen (the middle row) and 500 mB of lye (the bottom row), every 20 seconds at 256 JE/t. Make brine in the chemical reactor from two salt and a bucket of water. It also splits plain water, slowly: a bucket gives 500 mB of hydrogen (middle row) and 250 mB of oxygen (top row) every 40 seconds, an early fuel for the fuel cell.",
             "Uses 256 JE/t while working. Holds 60,000 JE."
           ],
           "craft": {

@@ -211,8 +211,8 @@ public class ElectrolyticSeparatorGameTests {
 
 	/**
 	 * The Separator runs exactly its two capability recipes, at the selected baseline; the Electrolytic Cell keeps its
-	 * own (brine in 200 ticks) and never sees the Separator's. And its construction: 4 steel plates and two Steel
-	 * Tanks of 8 plates each make 20, with copper cable and a basic circuit.
+	 * own, now as slow on brine (400 ticks), and never sees the Separator's. And its construction: 4 steel plates and
+	 * two Steel Tanks of 8 plates each make 20, with copper cable and a basic circuit.
 	 */
 	@GameTest
 	public void itRunsItsOwnRecipesAndCostsTwentyPlates(GameTestHelper helper) {
@@ -224,7 +224,7 @@ public class ElectrolyticSeparatorGameTests {
 				&& own.get(1).recipe().time() == WATER_TICKS, "Its two recipes: " + own.stream().map(FluidRecipes.Entry::id).toList());
 		List<Integer> cell = FluidRecipes.recipes(level.getServer(), MachineKind.ELECTROLYTIC_CELL).stream()
 				.filter(recipe -> !recipe.fluids().isEmpty()).map(recipe -> recipe.time()).sorted().toList();
-		helper.assertTrue(cell.equals(List.of(200, 800)), "The cell keeps its brine (200 ticks) and water (800 ticks) recipes: " + cell);
+		helper.assertTrue(cell.equals(List.of(BRINE_TICKS, WATER_TICKS)), "The cell keeps its brine (400 ticks) and water (800 ticks) recipes: " + cell);
 
 		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
 		ItemStack plate = stack("steel_plate");

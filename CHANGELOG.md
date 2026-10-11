@@ -16,7 +16,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
   - a bucket of brine gives 250 mB of hydrogen, 250 mB of chlorine and 500 mB of lye in 20 s.
 - **Ports where the model shows them**: water or brine in low at the back; hydrogen, oxygen or chlorine, and lye out at their collars on the front; power at the bus connection.
 - **It keeps its lye**: a full lye tank stops brine while water still runs, and the screen says "Lye tank is full".
-- The Electrolytic Cell keeps its own recipes. JEI shows the Separator's recipes in their own category, and the Engineer's Handbook has its page.
+- The Electrolytic Cell keeps its own recipes, but **its brine now also takes 20 s** (102,400 JE a bucket, was 10 s), the owner's choice to match the Separator. JEI shows the Separator's recipes in their own category, and the Engineer's Handbook has its page.
 - **Machine forms**: each now numbers only its own blocks (12 for the Separator). The formed-machine screen wraps a long state and fits its power line. Record: [industrial-electrolytic-separator.md](docs/features/industrial-electrolytic-separator.md).
 
 ### Unmerged: Industrial factory package 1 (the shared machine foundation)

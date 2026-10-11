@@ -89,7 +89,7 @@ TANK_NAMES = {
 FORM_RECIPES = {
     "electrolytic_separator": [
         # Ordinary brine: chlorine at the anode, hydrogen at the cathode, lye left behind. 400 ticks at 256 JE/t,
-        # 102,400 JE, where the Electrolytic Cell's own brine recipe stays at 200 ticks.
+        # 102,400 JE, the same as the Electrolytic Cell's own brine recipe.
         {"name": "separator_brine", "capability": AQUEOUS_ELECTROLYSIS, "fluids": [(f"{MOD}:brine", 1000)],
          "fluid_results": [(f"{MOD}:chlorine", 250, 0), (f"{MOD}:hydrogen", 250, 1), (f"{MOD}:lye", 500, 2)],
          "ticks": 400, "features": ["salt"]},

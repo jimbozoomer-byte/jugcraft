@@ -668,7 +668,7 @@ Salt, sulfur, phosphate and bauxite get their real reactions ([feature record](f
 | --- | --- | --- | --- |
 | Brine, Lye | Fluids with buckets: salt water, and sodium hydroxide solution | `c:brine`, `c:lye` | chemical reactor (2 salt + 1,000 mB water → 1,000 mB brine), electrolytic cell |
 | Chlorine, Hydrogen | Gases: tanks and pipes only | `c:chlorine`, `c:hydrogen` | electrolytic cell |
-| Electrolytic Cell | 3 wide, 3 tall, 2 deep; splits brine | 1,000 mB brine → 250 chlorine (top row), 250 hydrogen (middle row), 500 lye (bottom row); 200 ticks at 256 JE/t; batch 24: 1,000 mB water → 500 hydrogen (middle row) + 250 oxygen (top row), 800 ticks | 4 steel plates, 2 aluminum cables, 2 steel tanks, advanced circuit, casing |
+| Electrolytic Cell | 3 wide, 3 tall, 2 deep; splits brine | 1,000 mB brine → 250 chlorine (top row), 250 hydrogen (middle row), 500 lye (bottom row); 400 ticks at 256 JE/t (200 before the industrial starter baseline); batch 24: 1,000 mB water → 500 hydrogen (middle row) + 250 oxygen (top row), 800 ticks | 4 steel plates, 2 aluminum cables, 2 steel tanks, advanced circuit, casing |
 | Sulfuric Acid | A fluid with a bucket | `c:sulfuric_acid` | chemical reactor |
 | Titanium | A metal mined as rutile-bearing ore (Y −64 to −8, iron pickaxe); no furnace smelts it | raw titanium + coke + 250 mB chlorine → titanium sponge (chemical reactor); sponge → ingot (arc furnace) | – |
 | Leaching | Lepidolite or monazite dissolved in sulfuric acid | 1 lepidolite + 250 mB acid → 2 lithium carbonate; 1 monazite + 250 mB acid → 2 rare earth oxide (chemical reactor) | – |

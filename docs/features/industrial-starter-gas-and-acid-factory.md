@@ -58,7 +58,7 @@ For these new gas recipes, equal gas mB represent equal reaction amounts. The ex
 | Proposed operation | Inputs -> outputs | Base processing proposal |
 | --- | --- | --- |
 | Water electrolysis | 1,000 mB water -> 500 mB H2 + 250 mB O2 | Retain 800 ticks x 256 JE/t = 204,800 JE |
-| Ordinary brine electrolysis | Retain 1,000 mB brine -> 250 mB H2 + 250 mB chlorine + 500 mB lye | Increase to 400 ticks x 256 JE/t = 102,400 JE; changes the current 200-tick recipe and requires review |
+| Ordinary brine electrolysis | Retain 1,000 mB brine -> 250 mB H2 + 250 mB chlorine + 500 mB lye | Increase to 400 ticks x 256 JE/t = 102,400 JE. The owner selected this change to the existing 200-tick Electrolytic Cell recipe on 11 October 2026; it is implemented with the [Electrolytic Separator](industrial-electrolytic-separator.md) |
 | Hydrogen chloride synthesis | 250 gas mB H2 + 250 gas mB chlorine -> 500 gas mB HCl | 100 ticks x 96 JE/t = 9,600 JE |
 | Aqueous HCl preparation | 500 gas mB HCl + 1,000 liquid mB water -> 1,000 mB ordinary aqueous HCl | 100 ticks x 96 JE/t = 9,600 JE. Solution volume is an abstraction with retained solute/water accounting, not a free condensator swap |
 | CO2 methanation | 100 gas mB CO2 + 400 gas mB H2 -> 100 gas mB CH4 + 400 liquid mB water | 200 ticks x 128 JE/t = 25,600 JE; reusable nickel bed, paid heat |
