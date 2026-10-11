@@ -51,10 +51,12 @@ MATRIX = {
         "is a Jugcraft layer, and vanilla trims are not drawn on them"),
     "player-animation-library": (
         "Original cast and release gestures for the invocations; the circle participants' channelling gesture; the "
-        "Vigil's offering gesture, sent by the server when an offering is made",
+        "Vigil's offering gesture, sent by the server when an offering is made; none of them plays over a gun or an "
+        "arm in the main hand, on any player the client sees (CastPoses)",
         "required",
-        [],
-        "No test looks at a gesture; skipped for players whose arms ArmsMotion poses"),
+        ["aCastGivesWayToAGunOrAnArm"],
+        "No person has looked at the gestures; giving way is tested on the client's own player only (another player's "
+        "needs a second client, not run), and not for the circle's gesture"),
     "modonomicon": (
         "The Arcane Concordance codex: categories for every tradition, pages generated from the rules (components, "
         "the calendar, the Binding reasons, the spell bar's keys), entries unlocked by research advancements",

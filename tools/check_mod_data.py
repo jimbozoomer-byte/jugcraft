@@ -10416,6 +10416,7 @@ def check_concordance(registered):
     check_composer(co, root, lang)
     check_encyclopedia(root, lang)
     check_signs(co, root, lang)
+    check_cast_poses()
     check_authority(root, lang)
     check_economy(root)
     check_persistence(root)
@@ -13223,7 +13224,7 @@ def check_crimson(co, root, lang, registered, research):
     surge and blade numbers); every rite gives no more Vitae than the health it takes and can be made from full health;
     an hour of offering is bounded whatever heals the giver, and a surge never turns Vitae into more Focus; health is
     taken in exactly one place; mastery comes from the blade's growth; every word has its text; the icons are their maps;
-    the offering gesture exists and skips players whose arms ArmsMotion poses."""
+    the offering gesture exists and skips players whose arms a gun or ArmsMotion poses (check_cast_poses)."""
     cr = co.crimson
     def java(name, base=root):
         path = base / name
@@ -13304,8 +13305,8 @@ def check_crimson(co, root, lang, registered, research):
     gesture = re.search(r'GESTURE = Jugcraft\.id\("([a-z_]+)"\)', client)
     if not gesture or not (ASSETS / "player_animations" / f"{gesture.group(1)}.json").is_file():
         err("VigilClient: the offering gesture needs its clip in assets/jugcraft/player_animations")
-    if "instanceof ArmItem" not in client:
-        err("VigilClient: the offering gesture must skip players whose arms ArmsMotion poses (ArmItem)")
+    if "CastPoses.gesturesYield(player)" not in client:
+        err("VigilClient: the offering gesture must skip players whose arms a gun or ArmsMotion poses (CastPoses.gesturesYield)")
     import item_icons
     for icon in ("crimson_chalice", "thornheart_blade"):
         texture = ASSETS / "textures" / "item" / f"{icon}.png"
@@ -13814,6 +13815,44 @@ def check_signs(co, root, lang):
     for key in list(sg.CLIENT) + [f"screen.{MOD}.concordance.config.intensity.{name}" for name in sg.INTENSITY]:
         if key not in lang:
             err(f"sign: missing lang {key}")
+
+
+def check_cast_poses():
+    """Concordance Chunk A, ticket A-07: one owner for a player's arms. A gun or an arm in the main hand owns them
+    (client/CastPoses.armsOwned); at the end of every client tick, for every player the client sees, CastPoses stops
+    Spell Engine's casting and release clips on such a player, and the Vigil's gesture where the gestures yield (owned
+    arms, or an arm in the off hand); ConcordanceClient registers it; and the circle's gesture asks the same before it
+    plays (the Vigil's is checked with the Vigil, in check_crimson)."""
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    poses = text(CLIENT_JAVA_ROOT / "CastPoses.java")
+    if not poses:
+        err("client/CastPoses.java is missing: a cast's pose would play over a gun or an arm")
+        return
+
+    def body(signature):
+        found = re.search(re.escape(signature) + r" \{(.*?)\n\t\}", poses, re.S)
+        return found.group(1) if found else ""
+    owned = body("public static boolean armsOwned(Player player)")
+    if not all(part in owned for part in ("getMainHandItem()", "instanceof GunItem", "instanceof ArmItem")):
+        err("CastPoses.armsOwned: a gun (GunPose) or an arm (ArmsMotion) in the main hand owns the arms")
+    yields = body("static boolean gesturesYield(Player player)")
+    if "armsOwned(player)" not in yields or "getOffhandItem().getItem() instanceof ArmItem" not in yields:
+        err("CastPoses.gesturesYield: the gestures give way to owned arms and to an arm in the off hand")
+    tick = body("private static void tick(Minecraft client)")
+    for call in ("level.players()", "stop(player, SpellAnimationStack.CASTING_ID);", "stop(player, SpellAnimationStack.RELEASE_ID);",
+                 "stop(player, VigilClient.LAYER);"):
+        if call not in tick:
+            err(f"CastPoses.tick: missing {call} (every player this client sees gives a cast's pose up to a gun or an arm)")
+    stop = body("private static void stop(Player player, Identifier layer)")
+    if "controller.stopTriggeredAnimation();" not in stop or "controller.stop();" not in stop:
+        err("CastPoses.stop: clear the triggered clip, so it does not start again, and stop the layer at once")
+    if "ClientTickEvents.END_CLIENT_TICK.register(CastPoses::tick);" not in poses:
+        err("CastPoses must run at the end of every client tick")
+    if "CastPoses.register();" not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("ConcordanceClient.register() must call CastPoses.register()")
+    if "!CastPoses.gesturesYield(player)" not in text(CLIENT_JAVA_ROOT / "CircleClient.java"):
+        err("CircleClient: the circle's gesture must give way where CastPoses.gesturesYield says (a gun or an arm in hand)")
 
 
 # Where Fabric's permission events are asked as questions rather than raised by vanilla: the Concordance's Authority,

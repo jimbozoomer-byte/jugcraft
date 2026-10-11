@@ -65,6 +65,7 @@ final class ConcordanceClient {
 		ItemTooltipCallback.EVENT.register(ConcordanceClient::tooltip);
 		CircleClient.register();
 		VigilClient.register();
+		CastPoses.register();
 		WorkerClient.register();
 		JournalClient.register();
 		ComposerClient.register();

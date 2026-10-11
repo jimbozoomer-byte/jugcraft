@@ -109,7 +109,10 @@ No new dependency. Framework use:
   by every client that sees the player when the server says an offering was made (`VigilGesturePayload`).
   **ArmsMotion coordination**: ArmsMotion poses the arms of a player holding a Jugcraft arm; the gesture is skipped for
   such a player, so the two never pose the same arms at once (the offering itself still happens). The Thornheart Blade
-  is not one of ArmsMotion's arms, so it keeps vanilla's sword animation.
+  is not one of ArmsMotion's arms, so it keeps vanilla's sword animation. Since Concordance Chunk A (ticket A-07) a gun
+  in the main hand owns the arms too (`GunPose`): the gesture is skipped for a player holding one, and `CastPoses` stops
+  a gesture already playing when a gun or an arm is taken in hand
+  ([presentation](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07)).
 - **Modonomicon**: a new **Vigil** codex category (Crimson Rites, offerings and efficiency, Crimson Surge, the
   Thornheart Blade).
 - **Spell Power, Trinkets**: not used. The blade's bonus is a plain attack-damage modifier (it is a sword, not a
