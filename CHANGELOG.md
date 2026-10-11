@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Formed-machine screens keep the POWER label on large stores
+- The terminal's power line dropped its "POWER" label once the stored and total power were too wide to fit beside it. The Gas Burning Generator's 120,000 JE store hit this whenever it held 10,000 JE or more. The line now shows the stored power alone in that case ("POWER 120k"); the bar and its tooltip still give the store's size.
+- The foundation, Separator and generator records now say they are merged, and the generator's record gives its CI results. Record: [industrial-gas-burning-generator.md](docs/features/industrial-gas-burning-generator.md).
+
 ### Added: The Cinder Tyrant (boss 4, part 2)
 - **The Cinder Tyrant,** the Cinder Kiln's boss: a salamander lord the size of a cart, armoured in obsidian plates with magma glowing in their seams. He waits sunk in the crucible, only his crest over the slag, and wakes when a player steps down onto the bowl's floor or strikes him: 440 health scaled for the party, armour 10, never hurt by fire. Left alone, he sinks back, healed, and the kiln resets.
 - **His rule, the heat is his:** hot, he takes half of every blow. Turn a sluice and bait his Body Slam into its flooded trough, and the steam quenches him for 8 seconds: his seams go dark, blows do a quarter more and he slows.
