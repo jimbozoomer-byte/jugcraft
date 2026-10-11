@@ -1,6 +1,8 @@
 # Arcane Concordance: a reviewable delivery
 
-Status: implemented on branch `claude/concordance-steps-26-32`; see Verification for what has run.
+Status: merged to main ([#250](https://github.com/jimbozoomer-byte/jugcraft/pull/250), from branch
+`claude/concordance-steps-26-32`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
+8 October 2026); see Verification for what has run.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 32) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: the whole Arcane Concordance, every stage. Roadmap step 32.
@@ -14,7 +16,7 @@ identified accurately. This record is the index to that evidence, and it says wh
 
 | What | Where |
 |---|---|
-| The mod: Java (and the journal workspace's Kotlin), data and assets | `src/main`, `src/client`; the Concordance is under `concordance/` |
+| The mod: Java (and the Kotlin of the journal's and, since Concordance Chunk A, the Spell Composer's GuiLib workspaces), data and assets | `src/main`, `src/client`; the Concordance is under `concordance/` |
 | Content definitions | `data/jugcraft/concordance/`, written by `tools/concordance*.py` through `tools/generate_material_data.py` |
 | Design documentation | [ARCANE_CONCORDANCE.md](../ARCANE_CONCORDANCE.md): the contract, vocabulary, library map, definitions, traceability and the 32-step checklist; and one record per system in `docs/features/arcane-concordance-*.md` |
 | Player guide | [ARCANE_CONCORDANCE_GUIDE.md](../ARCANE_CONCORDANCE_GUIDE.md) and the in-game codex |
@@ -28,9 +30,9 @@ identified accurately. This record is the index to that evidence, and it says wh
 | | State |
 |---|---|
 | A local build | Not made: this environment has no Minecraft jars, so `./gradlew build` runs only in CI |
-| A branch | `claude/concordance-steps-26-32` (steps 26 to 32), stacked on `claude/awesome-davinci-iwv3b9` (steps 1 to 25) |
+| A branch | `claude/concordance-steps-26-32` (steps 26 to 32, [#250](https://github.com/jimbozoomer-byte/jugcraft/pull/250)), stacked on `claude/awesome-davinci-iwv3b9` (steps 1 to 25, [#244](https://github.com/jimbozoomer-byte/jugcraft/pull/244)); both merged |
 | CI | Every push builds the mod and runs the server game tests twice (with and without the optional integrations), runs the client game tests in three shards and assembles Jugcraft Complete |
-| Merged main | No. Both pull requests are open for the owner's review: [244](https://github.com/jimbozoomer-byte/jugcraft/pull/244) and [250](https://github.com/jimbozoomer-byte/jugcraft/pull/250) |
+| Merged main | Yes. [#244](https://github.com/jimbozoomer-byte/jugcraft/pull/244) and [#250](https://github.com/jimbozoomer-byte/jugcraft/pull/250) were merged into `integration/oct8-finished-prs` on 8 October 2026, which reached `main` through [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) (`b533201f8`) the same day |
 | An import-tested pack | No: no `.mrpack` has been imported into a launcher |
 | A published release | No: publishing is the owner's step |
 
@@ -87,8 +89,9 @@ server game test with the optional libraries removed. The client game tests run 
 **Partial:**
 - the player journey (step 31): the routes are checked and the opening is played by keys in a client, but no person has
   played them;
-- GuiLib screens: only the journal's workspace is built. The composer, ritual schematic, crucible and observatory
-  screens are not; their commands, the journal, Jade and the codex stand in.
+- GuiLib screens: the journal's workspace is built, and Concordance Chunk A adds the Spell Composer's
+  ([record](arcane-concordance-composer.md)). The ritual schematic, crucible and observatory screens are not; their
+  commands, the journal, Jade and the codex stand in.
 
 **Placeholder content:** none known. The owner approved the art and models of steps 14 to 25, but they have been seen
 only in CI's small screenshot previews.
@@ -112,12 +115,12 @@ only in CI's small screenshot previews.
 | No real protection mod tried | A claim mod that ignores Fabric's events would not be asked | Try a Fabric claim mod on a local server: a spell, a porter and a Gleaner at its border |
 | Devices wait while their owner is away | Farms and porters pause when their owner logs off | The owner decides the default of `concordance.absent_owner_authority` |
 | Not profiled under load | Unknown tick cost of many gardens, workers, rituals and spires; unknown frame cost of GeckoLib bodies and particles | Profile a large test world on a local server (tick time) and client (frame time) against the budget |
-| No real old save opened | A world from before step 30 is read as version 0 by design, but no such world has been opened | Keep a world saved by `main`, open it with this branch, save, reopen |
+| No real old save opened | A world from before step 30 is read as version 0 by design, but no such world has been opened | Open a world saved by a build from before step 30 with a current build, save, reopen |
 | A downgrade needs a backup | An older Jugcraft cannot read the versioned saves | Say so in the release notes |
 | The courier ledger is read whole | A damaged ledger is not partly kept, as the other records are | Read requests one by one, keeping what cannot be read |
 | Item components are not versioned | A changed component shape would need a new component id | Keep component shapes stable; version them if one must change |
 | The art has not been seen in a client | Models and textures may look wrong at full size | Look at each in a client: the client tests' full screenshots are in CI's artifacts |
-| Nothing published | Players cannot install it yet | After review, the owner merges and publishes as [DISTRIBUTION.md](../DISTRIBUTION.md) describes |
+| Nothing published | Players cannot install it yet | Merged to `main` through #263; the owner publishes a release as [DISTRIBUTION.md](../DISTRIBUTION.md) describes |
 
 ## Test results
 

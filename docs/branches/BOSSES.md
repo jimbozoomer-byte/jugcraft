@@ -8,10 +8,19 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 - **An arena with edges:** a lair, or a summoning that builds one. The boss does not wander out of it, and it resets when everyone leaves.
 - **Readable attacks:** every big attack is telegraphed (a wind-up, a sound, a shadow on the ground) and can be dodged or blocked.
 - **Recovery:** dying in the fight is not the end; gear can be fetched back, and the boss heals and resets rather than keeping its gains.
-- **Multiplayer:** its health scales with the players in the arena; every player who fought gets a roll of its loot table, not just the last hit.
+- **Multiplayer:** its health scales with the players in the arena; every player who took part gets a roll of its loot table, not just the last hit. A blow to it, or to a creature that counts for it, is taking part; at Vesperine and Madame Tatterlace, since Concordance Chunk A, so is support: healing or warding another player against the fight, or one of its objectives ([lair encounter credit](../features/lair-encounter-credit.md)).
 - **No griefing:** a summoned boss cannot be called inside a town's protection or another player's claim, and its attacks do not break player builds.
 - **No farming loop:** a long respawn timer per lair (or a costly summoning item), so a trophy stays a trophy.
 - **Optional:** no core progression needs a boss. Its trophies are side-grades with a boon, and each boss also drops something useful to non-fighters (a crafting material, a decoration, a trophy head).
+
+## Built so far
+
+| Boss | Lair, and how it is opened | Records | In `main` |
+|---|---|---|---|
+| **Vesperine, the Last Reaper** | The Hollow Acre: the Last Rites at a Jugcraft headstone at night (four lit candles, a Mourning Wreath and the Death Knell) | [hollow-acre.md](../features/hollow-acre.md), [vesperine.md](../features/vesperine.md) | #284 and #288, through #277 |
+| **Madame Tatterlace** | The Spindle Loft: a Cursed Spindle used on a Spinning Wheel at night | [spindle-loft.md](../features/spindle-loft.md), [tatterlace.md](../features/tatterlace.md) | #292 and #294, through #277 |
+
+Both are the Witching Season's ([features/witching-season.md](../features/witching-season.md)), on the shared lair framework (`lair/`), and roll their loot for each player who took part. Their trophies, the Vesper Scythe and the Needle Rapier, are Arms VII's, in `bosses/vesperine` and `bosses/tatterlace` as the others' are.
 
 ## The first eight (trophies built)
 

@@ -71,10 +71,11 @@ BOSSES = {
     "werewolf_alpha": {"display": "the Alpha Werewolf"},
     "storm_roc": {"display": "the Storm Roc"},
     "abyssal_leviathan": {"display": "the Abyssal Leviathan"},
-    # The Witching Season's first boss (docs/features/witching-season.md), fought in the Hollow Acre.
-    "vesperine": {"display": "Vesperine, the Last Reaper"},
+    # The Witching Season's first boss (docs/features/witching-season.md), fought in the Hollow Acre. A boss that is
+    # built names its lair (`lair`, a tools/lairs.py LAIRS key), and the handbook lists it among the great foes met.
+    "vesperine": {"display": "Vesperine, the Last Reaper", "lair": "hollow_acre"},
     # Its second (docs/features/tatterlace.md), fought in the Spindle Loft.
-    "tatterlace": {"display": "Madame Tatterlace"},
+    "tatterlace": {"display": "Madame Tatterlace", "lair": "spindle_loft"},
 }
 # The owner's armor sets with an arm of their own ("I also want the scythe from my Hades Armor set", 7 October 2026).
 # How a set is won (a boss's drop, a recipe) is still the owner's to decide, so a set's arm has neither a recipe nor a

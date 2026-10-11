@@ -24,7 +24,7 @@ The [framework foundation](features/framework-foundation.md) provides pinned ani
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 1389 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit`, `hay_golem`, `flying_broomstick`, `werewolf`, `squirrel`, `pumpkling`, `toss_ring`, `ferris_wheel`, `pinata`, `hot_air_balloon` and `pibal`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
+| Registered IDs | 2149 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit`, `hay_golem`, `flying_broomstick`, `werewolf`, `squirrel`, `pumpkling`, `toss_ring`, `ferris_wheel`, `pinata`, `hot_air_balloon` and `pibal`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
 
 ## Build, generate, check
 
@@ -284,7 +284,9 @@ Record: [walled-town.md](features/walled-town.md).
 
 ### The Arcane Concordance (`concordance/`, `tools/concordance.py`)
 
-Magic, milestones 1 to 6. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records:
+Magic: the Concordance's 32 roadmap steps (on `main` through #263), Ember and Wayfaring parts 1 and 1b (through #277);
+Wayfaring part 1c and Concordance Chunk A (the Spell Composer and lair encounter credit) are not yet merged. Contract
+and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among them:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),
 [arcane-concordance-composition.md](features/arcane-concordance-composition.md),
@@ -293,7 +295,8 @@ Magic, milestones 1 to 6. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCAN
 [arcane-concordance-rituals.md](features/arcane-concordance-rituals.md),
 [arcane-concordance-alchemy.md](features/arcane-concordance-alchemy.md),
 [arcane-concordance-ecology.md](features/arcane-concordance-ecology.md),
-[arcane-concordance-ember.md](features/arcane-concordance-ember.md).
+[arcane-concordance-ember.md](features/arcane-concordance-ember.md),
+[arcane-concordance-composer.md](features/arcane-concordance-composer.md).
 
 | ID / part | Class / data | What |
 | --- | --- | --- |
@@ -333,8 +336,9 @@ Magic, milestones 1 to 6. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCAN
 | the Concordance's player journey | `tools/concordance_journey.py` (checked by `check_journey`); `ConcordanceJourneyGameTests`, `ConcordanceJourneyClientGameTests` | Three routes from a fresh world to their own Concord Spire, each reachable alone with only its own research and different from the others; the opening played by ordinary keys in a real client; the playtest protocol, not yet run (roadmap step 31) |
 | the Concordance's delivery | `tools/concordance_delivery.py` (checked by `check_delivery`); `ConcordanceWorkloadGameTests`; [delivery record](features/arcane-concordance-delivery.md), [player guide](ARCANE_CONCORDANCE_GUIDE.md) | The library integration matrix (versions from the lock, what happens without each library, the tests, the limits); what is complete, partial or assumed; every remaining issue with its next action; measured workloads; a player's guide (roadmap step 32) |
 | relics | `concordance/relic/` (pure Java: `Relics`, `Context`, `Mode`, `RelicDefinition`, `RelicState`, `RelicParser`), `concordance/reliquary/` (`Reliquary`, `RelicItem`, `ReliquaryShrineBlock`, `ReliquaryShrineBlockEntity`); `data/jugcraft/concordance/relic/` | Four relics that work only in their named contexts (hands, armour, Trinkets slots, installed) and say why not elsewhere; the Reliquary Shrine; a shared pulse budget; `/jugcraft concordance relics` (roadmap step 20) |
-| composition | `concordance/compose/` (pure Java: grammar, parser, compiler, plans, explanations); `data/jugcraft/concordance/{component,instrument}/`; `ConcordanceCommand` (`compose check\|inscribe\|show\|clear`) | players write spells from 17 data components (6 more belong to invocations); every problem is named; plans carry their limits |
+| composition | `concordance/compose/` (pure Java: grammar, parser, compiler, plans, explanations, and the editing model `Draft`); `data/jugcraft/concordance/{component,instrument}/`; `concordance/Composing` (one service for the command and the screen: the feature, the instrument, the screen's revision, the shared `compose` rate, then the compiler); `ConcordanceCommand` (`compose check\|inscribe\|show\|clear`, an adapter of `Composing`) | players write spells from 17 data components (6 more belong to invocations); every problem is named; plans carry their limits |
 | `jugcraft:composed` spell | `data/jugcraft/spell/composed.json`; `ComposedSpells`, component `jugcraft:inscription` (`Inscription`) | casts the spell inscribed on the held instrument; recompiled on the server every cast, run under a ledger |
+| the Spell Composer | `concordance/composer/` (`Composer`: a session per player with a revision; `ComposerRequestPayload` to the server, `ComposerStatePayload` and `ComposerResultPayload` to the client); client `ComposerClient`, `ComposerScreen`, `ComposerScroll`, `ComposerWorkspace` (Kotlin, GuiLib) and `assets/jugcraft/ui/composer.css`; `tools/concordance_composer.py` (checked by `check_composer`) | Composing without commands: the journal's Compose button (or the unbound key Open the Spell Composer) opens it for the held instrument; only learned words are offered; the server checks each edit and inscribes only the exact text it checked (Concordance Chunk A, [record](features/arcane-concordance-composer.md)) |
 | effects | `concordance/effect/` (pure Java: kinds, causes, stacking, tolerance, ledger); `ConcordanceEffects`; tags `#jugcraft:concordance/{immune,resistant,interactable,harvestable}` | the one boundary every Concordance effect goes through: friendly fire, tolerance, protection, attribution, one-time accounting |
 | rituals | `concordance/ritual/` (pure Java: `StructurePattern`, `StructureValidator`, `RitualDefinition`, `Offerings`, `RitualMachine`, `RitualRun`); `data/jugcraft/concordance/{structure,ritual}/`; `Rituals` (anchor index) | structures checked part by part (cached, bounded); offerings reserved at the start and consumed with the result in one tick; a defined outcome for every interruption |
 | `jugcraft:circle_anchor` | `CircleAnchorBlock`, `CircleAnchorBlockEntity` (GeckoLib); client `CircleClient` | six offering slots and an output; runs Adept's Attunement and Lumen Vigil; `/jugcraft concordance circle <pos>` reports its circle |
@@ -346,6 +350,17 @@ Magic, milestones 1 to 6. Contract and vocabulary: [ARCANE_CONCORDANCE.md](ARCAN
 | Wayfaring (trinkets parts 1, 1b and 1c) | `concordance/trinket/` (`Wayfaring`, `WornTrinketItem`, `WornDisplay`, `WornDisplayPayload`); `tools/concordance_trinkets.py` (the owner's files: `OWNER_FILES`, `OWNER_BLOCKS_FILES`, copied by `tools/owner_art.py`; part 1b's fitted boxes: `WORN`); Trinkets data `data/trinkets/slots/legs/charm.json`, `feet/boots.json`, `entities/jugcraft_wayfaring.json`; part 1b: render definitions `assets/jugcraft/trinkets/{leather_belt,amphibian_boot}.json`, models `models/item/leather_belt_worn.json`, `amphibian_boot_worn_{left,right}.json`, the owner's worn sheets `textures/item/{leather_belt,amphibian_boot}_worn.png` | items `leather_belt` (Trinkets' `legs/belt`; +1 `legs/charm` through `trinkets:slot_count/legs/charm`), `angelic_feather`, `kraken_shell`, `infernal_claws` (fall, drowning or fire harm taken from the food bar when it can pay, with the charm's own hurt cooldown), `angelheart_vial`, `phoenix_down` (death saves in the `jugcraft:wayfaring_saves` phase of `ALLOW_DEATH`, before Dreaming's), all in `legs/charm`; `amphibian_boot` and `ice_breaker` (a landing wave through the effect boundary) in `feet/boots` (two); put on only with Relic Lore understood; modifiers `jugcraft:wayfaring/<kind>/<attribute>`; codex entry `relics/wayfaring`. The kinetic `jugcraft:belt` is named Drive Belt. Worn, the belt and the boot are drawn on the body (third person) by Trinkets' data-driven renderer, inside Jugcraft's `jugcraft:unless_covered` element (client): hidden under a chestplate or leggings (the belt) or boots (the boots), and on a wearer whose Show my worn trinkets setting is off (the payload `jugcraft:worn_trinkets_shown`; the server keeps the choice in the attachment `jugcraft:worn_trinkets_hidden`, sent to everyone who sees the wearer, kept through death, not saved) |
 | `jugcraft:crucible` | `CrucibleBlock`, `CrucibleBlockEntity` (GeckoLib, `WorldlyContainer`, water `FluidStorage`) | heat from beneath, stirring, bottling, sampling; follows a written formula from its buffer and tank |
 | alchemy items | `MortarItem`, `AlchemyItem`, `BrewItem`; components `jugcraft:reagent` (`Reagent`), `jugcraft:brew` (`Brew`), `jugcraft:formula` | `mortar`, `stirring_rod`, `sampling_spoon`, `assay_glass`, `formula`, `reagent`, `draught`, `salve` |
+
+### Lairs and their bosses (`lair/`, `tools/lairs.py`, `tools/lair_data.py`)
+
+The Witching Season's pocket-dimension lairs, under the `agriculture` switch ([hollow-acre.md](features/hollow-acre.md), [spindle-loft.md](features/spindle-loft.md), [vesperine.md](features/vesperine.md), [tatterlace.md](features/tatterlace.md)).
+
+| ID / part | Class / data | What |
+| --- | --- | --- |
+| framework | `lair/Lair` (`HOLLOW_ACRE`, `SPINDLE_LOFT`), `Lairs`, `LairInstance`, `LairVisit`, `LairRules`, `GraveGoods`, `MistGateEntity`, `LairCommands` (`/jugcraft lair leave`; operators `list`, `close`) | an instance per ritual, placed fresh; nothing built or broken there; Grey Mist home; Grave Goods keep what a player falls with; `lairs.instances`, `lairs.party_size`, `lairs.gate_seconds`, `lairs.off_season` |
+| rituals | `LastRites` (the `death_knell` and the `mourning_wreath`), `SpindleRite` (the `cursed_spindle`) | open the Hollow Acre and the Spindle Loft, at night |
+| bosses | `lair/vesperine/` (`VesperineEntity`, `VesperineLoot`), `lair/tatterlace/` (`TatterlaceEntity`, `TatterlaceLoot`), `LairBosses` (`lairs.boss_health`, `lairs.boss_damage`) | GeckoLib bodies; loot rolled for each participant; `lairs.event_loot` |
+| encounter credit (Concordance Chunk A) | `lair/Encounter` (one fight's record: blows, healing, warding and deeds, at most 32 players, in memory only), `LairRewards` (paid once; the attachment and world record `jugcraft:lair_rewards`), `ConcordanceEffects.observe`, `Lairs.onRelit` | support and objectives qualify for a reward as blows do; the fallen and the away are paid once they are back ([record](features/lair-encounter-credit.md)) |
 
 ## Shared systems and how to plug in
 
@@ -763,8 +778,8 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Electronics beyond processors: uses for processors in the tiers above. Rule-based machine control exists (batch 36).
 - EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
-- Magic beyond the Arcane Concordance's first two milestones (First Light; shared notes and typed resources); its 32-step plan is in [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md).
-- Any creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from the seasons (colours, the Harvest Feast and December windows, and winter snow) and the agriculture branch's Halloween. Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its slices so far; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)). (The Pixel Hollows is the first cave biome; it has no creatures, structures or bosses yet.)
+- Magic beyond what the Arcane Concordance has built: its 32 roadmap steps are on `main` (#263), with Ember and Wayfaring (#277); further schools, pacts and the expansion's later chunks are planned ([ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md), [the expansion plan](plans/concordance-expansion-2026-10-10/START-HERE.md)).
+- Any creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from the seasons (colours, the Harvest Feast and December windows, and winter snow), the agriculture branch's Halloween, the Witching Season's two lairs and their bosses (#284, #288, #292 and #294, through #277) and the companions Peepo and Jughead (#282, through #277). Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its slices so far; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)). (The Pixel Hollows is the first cave biome; it has no creatures, structures or bosses yet.)
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
 - Handbook translations (English only).
 
