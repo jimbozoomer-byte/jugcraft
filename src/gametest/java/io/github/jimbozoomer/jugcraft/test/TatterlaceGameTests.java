@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.lair.DoilyLaceBlock;
 import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
+import io.github.jimbozoomer.jugcraft.lair.LairDossiers;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.BindingThreadEntity;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.GoldenThimble;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.JugcraftTatterlace;
@@ -341,6 +342,10 @@ public class TatterlaceGameTests {
 			}
 			helper.assertTrue(bystander.getInventory().countItem(JugcraftTatterlace.GOSSAMER_SILK) == 0, "The bystander got nothing");
 			helper.assertTrue(TatterlaceLoot.firstKill(bystander), "The bystander has not won Unravelled");
+			// The encyclopedia's dossier (Chunk A, A-D9) remembers the win for each participant, and not for the bystander.
+			helper.assertTrue(LairDossiers.discovery(first, LairDossiers.Boss.TATTERLACE) == LairDossiers.Discovery.DEFEATED
+					&& LairDossiers.discovery(second, LairDossiers.Boss.TATTERLACE) == LairDossiers.Discovery.DEFEATED, "The win shows in each participant's dossier");
+			helper.assertTrue(LairDossiers.discovery(bystander, LairDossiers.Boss.TATTERLACE) == LairDossiers.Discovery.UNKNOWN, "The bystander's dossier knows nothing of her");
 		});
 		helper.succeed();
 	}

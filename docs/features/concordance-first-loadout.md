@@ -209,6 +209,11 @@ Ran here (11 October 2026):
   thing, the ritual's gold and Focus changed, and the server test's recipe list changed. Each was reported. Taking the
   Adept's Wand out of `EXCLUDED` was reported by `check_equivalence`.
 - `python3 scripts/check_repository.py`: **passes**.
+- `python3 tools/concordance_journey.py` (and so `check_journey`): **passes**, with a new rule that every piece of
+  `tools/acquisition.py` `LOADOUT` is made by one player alone, in the Overworld, before the Adept stage, in the
+  progression graph (`tools/concordance_progression.py`: each piece's recipes or bench working, down to what is found
+  in the world). Run with a piece nothing makes, and with one that needs the Nether's blaze powder (the Hearthstone),
+  each was reported.
 
 Added, not yet run: the server game test `ConcordanceGameTests.theFirstLoadoutIsMadeInSurvival`, which asks the server
 for the recipe of every first-loadout piece a crafting table makes (the optional trinkets and the Focus of Fire

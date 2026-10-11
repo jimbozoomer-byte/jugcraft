@@ -8,6 +8,7 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.lair.Encounter;
+import io.github.jimbozoomer.jugcraft.lair.LairDossiers;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.GraveThrallEntity;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.GriefBoltEntity;
@@ -301,6 +302,10 @@ public class VesperineGameTests {
 			}
 			helper.assertTrue(bystander.getInventory().countItem(JugcraftVesperine.REAPER_SHADE) == 0, "The bystander got nothing");
 			helper.assertTrue(VesperineLoot.firstKill(bystander), "The bystander has not won The Last Harvest");
+			// The encyclopedia's dossier (Chunk A, A-D9) remembers the win for each participant, and not for the bystander.
+			helper.assertTrue(LairDossiers.discovery(first, LairDossiers.Boss.VESPERINE) == LairDossiers.Discovery.DEFEATED
+					&& LairDossiers.discovery(second, LairDossiers.Boss.VESPERINE) == LairDossiers.Discovery.DEFEATED, "The win shows in each participant's dossier");
+			helper.assertTrue(LairDossiers.discovery(bystander, LairDossiers.Boss.VESPERINE) == LairDossiers.Discovery.UNKNOWN, "The bystander's dossier knows nothing of her");
 		});
 		helper.succeed();
 	}

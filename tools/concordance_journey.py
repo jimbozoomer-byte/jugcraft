@@ -282,6 +282,17 @@ def problems():
     early = pg.reachable(nodes, research, cap="practitioner", dimensions={""})
     if f"invocation:{rid('kindle')}" not in early:
         found.append("journey: Kindle needs something past the Practitioner stage, or from the Nether or the End")
+    # The first loadout (Chunk A, A-07 and A-D10; tools/acquisition.py LOADOUT): one player makes every piece in the
+    # Overworld before the Adept stage, by its recipe or its bench working.
+    import acquisition
+    unmade = []
+    for item in acquisition.LOADOUT:
+        pg.item_node(nodes, at_hand, rid(item), unmade)
+    found.extend(f"journey: the first loadout: {problem}" for problem in unmade)
+    early = pg.reachable(nodes, research, cap="practitioner", dimensions={""})
+    for item in acquisition.LOADOUT:
+        if f"item:{rid(item)}" not in early:
+            found.append(f"journey: the first loadout's {item} is not made by one player in the Overworld before the Adept stage")
     # Every game test named exists.
     tests = game_tests()
     named = list(FIRST_SUCCESS["tests"])
