@@ -10265,6 +10265,7 @@ def check_concordance(registered):
     check_spire(co, root, lang, registered, research)
     check_journal(co, root, lang)
     check_composer(co, root, lang)
+    check_encyclopedia(root, lang)
     check_signs(co, root, lang)
     check_authority(root, lang)
     check_economy(root)
@@ -13380,6 +13381,230 @@ def check_composer(co, root, lang):
     for slot in cm.SLOTS:
         if f"screen.{MOD}.composer.slot.{slot}" not in lang:
             err(f"composer: missing lang screen.{MOD}.composer.slot.{slot}")
+
+
+def check_encyclopedia(root, lang):
+    """Chunk A (A-04): the Jugcraft Encyclopedia. Its pages, the route's states and weights, the First Light route's
+    steps (their order, weights and what each waits for), the recipes, sales and codex entries the route and the lair
+    dossiers name, and the Keys page's keys are tools/encyclopedia.py's; every recipe named exists, every sale is one a
+    shop sells, no required step needs a boss's loot, and every codex link is gated as its entry is; the pages only read;
+    the request is rate-limited, carries no text and is answered only to a game that can receive it; the key works only
+    from the game, the inventory's button closes the inventory first and needs no mixin; every word has its text; and
+    the record's route table is the tool's."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import encyclopedia as en
+    import concordance_journey as jr
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    guide = JAVA_ROOT / "guide" / "encyclopedia"
+    pages_java = JAVA_ROOT / "concordance" / "encyclopedia"
+    service = text(guide / "Encyclopedia.java")
+    payload = text(guide / "EncyclopediaPayload.java")
+    route = text(pages_java / "FirstLightRoute.java")
+    dossiers = text(JAVA_ROOT / "lair" / "LairDossiers.java")
+    builders = {"concordance/encyclopedia/FirstLightRoute.java": route,
+                "concordance/encyclopedia/SpellcraftPage.java": text(pages_java / "SpellcraftPage.java"),
+                "concordance/encyclopedia/InspectPage.java": text(pages_java / "InspectPage.java"),
+                "lair/LairDossiers.java": dossiers}
+    for path in sorted(guide.glob("*.java")):
+        builders[f"guide/encyclopedia/{path.name}"] = text(path)
+    client_files = {name: text(CLIENT_JAVA_ROOT / name) for name in (
+        "EncyclopediaClient.java", "EncyclopediaScreen.java", "EncyclopediaWidgets.java", "EncyclopediaKeys.java",
+        "EncyclopediaInventoryButton.java")}
+    client_files["compat/CodexLinks.java"] = text(CLIENT_JAVA_ROOT / "compat" / "CodexLinks.java")
+
+    # The pages, in order, each with its title; each builder's PAGE is its id.
+    pages = re.findall(r'page\("([a-z_]+)", ', service)
+    if pages != en.SERVER_PAGES or [p for p in en.PAGES if p not in en.SERVER_PAGES] != ["keys"]:
+        err(f"guide/encyclopedia/Encyclopedia.java: pages {pages} differ from SERVER_PAGES in tools/encyclopedia.py")
+    for page, source in (("discover", route), ("spellcraft", builders["concordance/encyclopedia/SpellcraftPage.java"]),
+                         ("expedition", dossiers), ("inspect", builders["concordance/encyclopedia/InspectPage.java"]),
+                         ("keys", client_files["EncyclopediaKeys.java"])):
+        if f'PAGE = "{page}";' not in source:
+            err(f"encyclopedia: the {page} page's builder must name itself PAGE = \"{page}\"")
+    for page in en.PAGES:
+        if f"encyclopedia.{MOD}.page.{page}" not in lang:
+            err(f"encyclopedia: missing lang encyclopedia.{MOD}.page.{page}")
+    if "Encyclopedia.register();" not in text(JAVA_ROOT / "guide" / "JugcraftGuide.java"):
+        err("guide/JugcraftGuide.java: registers the encyclopedia's server side")
+    if "EncyclopediaClient.register();" not in text(CLIENT_JAVA_ROOT / "JugcraftClient.java"):
+        err("client/JugcraftClient.java: registers the encyclopedia's client side")
+
+    # The states and weights a row may carry.
+    for enum, table, name in (("StepState", en.STATES, "STATES"), ("EdgeKind", en.EDGES, "EDGES")):
+        body = re.search(rf"public enum {enum} \{{(.*?)public String id\(\)", payload, re.S)
+        found = [c.lower() for c in re.findall(r"^\t\t([A-Z_]+)[,;]?\s*$", body.group(1), re.M)] if body else []
+        if found[:1] != ["none"] or found[1:] != list(table):
+            err(f"guide/encyclopedia/EncyclopediaPayload.java: {enum} {found} must be NONE then {name} in tools/encyclopedia.py")
+        kind = "state" if enum == "StepState" else "edge"
+        for key in ["none", *table]:
+            if f"encyclopedia.{MOD}.{kind}.{key}" not in lang:
+                err(f"encyclopedia: missing lang encyclopedia.{MOD}.{kind}.{key}")
+
+    # The First Light route: its steps in order, each step's weight and what it waits for.
+    steps = re.findall(r'route\(out, "([a-z_]+)"', route)
+    if steps != [step["id"] for step in en.FIRST_ROUTE]:
+        err(f"concordance/encyclopedia/FirstLightRoute.java: steps {steps} differ from FIRST_ROUTE in tools/encyclopedia.py")
+    declared = {}
+    for sid, edge, body in re.findall(r'route\.add\(new Step\("([a-z_]+)", EdgeKind\.([A-Z_]+),(.*?)\)\);', route, re.S):
+        lists = re.findall(r"List\.of\(([^()]*)\)", body)
+        declared[sid] = (edge.lower(), re.findall(r'"([a-z_]+)"', lists[-1]) if lists else None)
+    for step in en.FIRST_ROUTE:
+        if declared.get(step["id"]) != (step["edge"], step["after"]):
+            err(f"concordance/encyclopedia/FirstLightRoute.java: step {step['id']} is {declared.get(step['id'])}, "
+                f"not ({step['edge']}, {step['after']}) as FIRST_ROUTE says")
+    research = load(DATA / MOD / "concordance" / "research" / "first_light.json") or {}
+    stations = {rule.get("station") for rule in research.get("states", {}).get("understood", {}).get("any", [])
+                if rule.get("type") == "study"}
+    loot_items = set()
+    for boss in ("vesperine", "tatterlace"):
+        loot_items |= set(re.findall(r'"name": "(jugcraft:[a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))
+    for step in en.FIRST_ROUTE:
+        for edge, recipe in step["recipes"]:
+            path = recipe.split(":", 1)[1]
+            file = DATA / MOD / "recipe" / f"{path}.json"
+            if not file.is_file():
+                err(f"tools/encyclopedia.py: step {step['id']} names recipe {recipe}, which does not exist")
+                continue
+            if f'"{path}"' not in route and recipe not in stations:
+                err(f"concordance/encyclopedia/FirstLightRoute.java: step {step['id']} must show recipe {recipe} (or the "
+                    "rules' study station must be it)")
+            if edge == "required":
+                for ingredient in re.findall(r'"(jugcraft:[a-z_]+)"', file.read_text(encoding="utf-8")):
+                    if ingredient in loot_items:
+                        err(f"tools/encyclopedia.py: required recipe {recipe} needs {ingredient}, a boss's loot")
+
+    # Sales the route and the dossiers name: each on sale in its shop (never only bought there).
+    shops = (load(DATA / MOD / "town" / "shops.json") or {}).get("shops", {})
+    trades = [(step["id"], shop, item) for step in en.FIRST_ROUTE for shop, item in step["trades"]]
+    trades += [(boss, shop, item) for boss, dossier in en.DOSSIERS.items() for shop, item in dossier["trades"]]
+    for owner, shop, item in trades:
+        if item not in [offer.get("item") for offer in shops.get(shop, {}).get("sells", [])]:
+            err(f"tools/encyclopedia.py: {owner} names {item} on sale at the {shop} shop, which does not sell it")
+    if "out.sales(" not in route or "out.sales(" not in dossiers:
+        err("encyclopedia: the route's and the dossiers' sales come from PageWriter.sales (a town that stands, today's offers)")
+
+    # The dossiers: each boss's tokens, rite, loot and after-win recipes are the tool's, exist, and her loot table is hers.
+    for boss, dossier in en.DOSSIERS.items():
+        for field in ("tokens", "rite", "loot", "after_win"):
+            for name in dossier[field]:
+                if f'"{name}"' not in dossiers:
+                    err(f"lair/LairDossiers.java: {boss}'s {field} must name {name} (DOSSIERS in tools/encyclopedia.py)")
+        for recipe in dossier["rite"] + dossier["after_win"]:
+            if not (DATA / MOD / "recipe" / f"{recipe}.json").is_file():
+                err(f"tools/encyclopedia.py: {boss} names recipe {recipe}, which does not exist")
+        table = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))
+        if table != set(dossier["loot"]):
+            err(f"tools/encyclopedia.py: {boss}'s loot {sorted(dossier['loot'])} is not her table's {sorted(table)}")
+        for name in dossier["loot"]:
+            if f"jei.{MOD}.acquire.{name}" not in lang:
+                err(f"encyclopedia: missing lang jei.{MOD}.acquire.{name} (the dossier shows each loot's acquisition text)")
+        for key in (f"lair.{MOD}.{dossier['lair']}", f"encyclopedia.{MOD}.dossier.{dossier['lair']}.leave",
+                    f"encyclopedia.{MOD}.dossier.{dossier['lair']}.rite", f"advancements.{MOD}.{dossier['advancement']}.title",
+                    f"entity.{MOD}.{boss}"):
+            if key not in lang:
+                err(f"encyclopedia: missing lang {key}")
+
+    # Codex links: each names an entry of the Arcane Concordance whose own unlock is the one given.
+    entries = DATA / MOD / "modonomicon" / "books" / "arcane_concordance" / "entries"
+    linked = set()
+    for source_name, source in builders.items():
+        for entry, research_id, state in re.findall(
+                r'codex\("([a-z_]+/[a-z_]+)", (?:null|"(jugcraft:[a-z_]+)"), (?:null|ResearchState\.([A-Z]+))\)', source):
+            linked.add((entry, research_id or None, state or None))
+            data = load(entries / f"{entry}.json")
+            if data is None:
+                err(f"{source_name}: codex link {entry} names no entry of the Arcane Concordance")
+                continue
+            condition = data.get("condition") or {"type": "modonomicon:none"}
+            if research_id:
+                want = f"{MOD}:concordance/{research_id.split(':', 1)[1]}_{state.lower()}"
+                if condition.get("type") != "modonomicon:research_node_unlocked" or condition.get("node_id") != want:
+                    err(f"{source_name}: codex link {entry} is offered at {research_id} {state.lower()}, but the entry unlocks at {condition}")
+            elif condition.get("type") != "modonomicon:none":
+                err(f"{source_name}: codex link {entry} is offered to everyone, but the entry unlocks at {condition}")
+            if f"book.{MOD}.arcane_concordance.{entry.replace('/', '.')}.name" not in lang:
+                err(f"{source_name}: codex link {entry} has no name in lang")
+        if source.count("out.codex(") != len(re.findall(r'out\.codex\("[a-z_]+/[a-z_]+", (?:null|"jugcraft:[a-z_]+"), (?:null|ResearchState\.[A-Z]+)\)', source)):
+            err(f"{source_name}: every codex link names its entry, research and state as literals (so this audit can read them)")
+    route_codex = {(entry, research_id, state) for step in en.FIRST_ROUTE for entry, research_id, state in step["codex"]}
+    found_route = {link for link in re.findall(r'codex\("([a-z_]+/[a-z_]+)", (?:null|"(jugcraft:[a-z_]+)"), (?:null|ResearchState\.([A-Z]+))\)', route)}
+    found_route = {(entry, research_id or None, state or None) for entry, research_id, state in found_route}
+    if found_route != route_codex:
+        err(f"concordance/encyclopedia/FirstLightRoute.java: codex links {sorted(found_route, key=str)} differ from FIRST_ROUTE's")
+
+    # The pages only read.
+    forbidden = re.compile(r"setAttached\(|removeAttached\(|\.award\(|ConcordanceProgress\.(record|grant|setFocus|award|spendFocus)\(|"
+                           r"Composing\.(compose|clear)\(|\.set\(JugcraftConcordance\.INSCRIPTION|StructureValidator\.check\(|"
+                           r"new Inscription\(|\.setItem\(|\.shrink\(|LairRewards\.(owe|pay|handOver)\(")
+    for name, source in builders.items():
+        if forbidden.search(source):
+            err(f"{name}: the encyclopedia only reads ({forbidden.search(source).group(0)})")
+
+    # The request: rate-limited, answered only to a game that can receive it, carrying no text.
+    for needle in ("RateGate.allow(player, RATE_ACTION, REQUEST_TICKS)", "ServerPlayNetworking.canSend(player, EncyclopediaPayload.TYPE)"):
+        if needle not in service:
+            err(f"guide/encyclopedia/Encyclopedia.java: requests are rate-limited and answered only to a game that can receive them ({needle})")
+    request = text(guide / "EncyclopediaRequestPayload.java")
+    if not request or re.search(r"stringUtf8|STRING_UTF8|ByteBufCodecs\.list", request):
+        err("guide/encyclopedia/EncyclopediaRequestPayload.java: a request names no page and carries no text")
+    if "player.distanceToSqr(Vec3.atCenterOf(pos)) > reach * reach" not in builders["concordance/encyclopedia/InspectPage.java"] \
+            or "level.isLoaded(pos)" not in builders["concordance/encyclopedia/InspectPage.java"]:
+        err("concordance/encyclopedia/InspectPage.java: the looked-at block is checked on the server: loaded and within reach")
+
+    # The keys: every Jugcraft key has its name and its help on the Keys page.
+    keys = set()
+    for path in CLIENT_JAVA_ROOT.rglob("*.java"):
+        keys.update(re.findall(r'new KeyMapping\("key\.jugcraft\.([a-z_]+)"', text(path)))
+    if keys != set(en.KEY_HELP):
+        err(f"tools/encyclopedia.py: KEY_HELP {sorted(en.KEY_HELP)} must name every Jugcraft key {sorted(keys)}")
+    for key in keys:
+        for wanted in (f"key.{MOD}.{key}", f"encyclopedia.{MOD}.key.{key}"):
+            if wanted not in lang:
+                err(f"encyclopedia: missing lang {wanted}")
+
+    # The ways in: the key only from the game; the inventory's button closes the inventory first, without a mixin.
+    client = client_files["EncyclopediaClient.java"]
+    loop = client[client.find("while (open.consumeClick())"):]
+    if "client.gui.screen() == null" not in loop[:400]:
+        err("client/EncyclopediaClient.java: the key opens the encyclopedia only from the game (no screen open)")
+    from_inventory = client[client.find("public static void openFromInventory("):]
+    if not from_inventory or from_inventory.find("closeContainer()") < 0 or from_inventory.find("closeContainer()") > from_inventory.find("open(client"):
+        err("client/EncyclopediaClient.java: the inventory's button closes the inventory (closeContainer) before opening")
+    if "ScreenEvents.AFTER_INIT" not in client_files["EncyclopediaInventoryButton.java"]:
+        err("client/EncyclopediaInventoryButton.java: the button is added through Fabric's screen events")
+    mixins = load(ROOT / "src" / "client" / "resources" / "jugcraft.client.mixins.json") or {}
+    for mixin in mixins.get("client", []) + mixins.get("mixins", []):
+        source = text(ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin" / "client" / f"{mixin}.java")
+        if re.search(r"@Mixin\([^)]*(InventoryScreen|AbstractContainerScreen|CreativeModeInventoryScreen|RecipeBook)", source):
+            err(f"mixin/client/{mixin}.java: the encyclopedia's button needs no mixin on the inventory screens")
+    if 'Jugcraft.id("encyclopedia/inventory_button")' not in client_files["EncyclopediaInventoryButton.java"] \
+            or "textures/gui/sprites/encyclopedia/inventory_button.png" not in en.OWNER_FILES:
+        err("client/EncyclopediaInventoryButton.java: the button's sprite is the owner's, imported by tools/owner_art.py")
+    for name, source in client_files.items():
+        if "JournalWorkspace" in source or "ComposerWorkspace" in source:
+            err(f"client/{name}: the encyclopedia opens the journal and the composer through their clients")
+
+    # Every word has its text.
+    for name, source in [*builders.items(), *client_files.items()]:
+        for key in re.findall(r'"((?:encyclopedia|jei|screen|key|compose|journal|message)\.jugcraft\.[a-z_.]+)"', source):
+            if not key.endswith(".") and key not in lang:
+                err(f"{name}: missing lang {key}")
+    for set_name in ("pyromancers", "pyromaniacs"):
+        if f"encyclopedia.{MOD}.route.equip.{set_name}" not in lang:
+            err(f"encyclopedia: missing lang encyclopedia.{MOD}.route.equip.{set_name}")
+
+    # The record's route table, and the tests it names.
+    tests = jr.game_tests()
+    for step in en.FIRST_ROUTE:
+        for test in step["tests"]:
+            if test not in tests:
+                err(f"tools/encyclopedia.py: step {step['id']} names game test {test}, which does not exist")
+    path = ROOT / "docs" / "features" / "arcane-concordance-first-route.md"
+    record = text(path)
+    block = re.search(r"<!-- first-route:start -->\n(.*?)\n<!-- first-route:end -->", record, re.S)
+    if not block or block.group(1).strip() != "\n".join(en.route_table()).strip():
+        err("docs/features/arcane-concordance-first-route.md: its route table is not tools/encyclopedia.py's (run it and paste)")
 
 
 def check_signs(co, root, lang):

@@ -138,6 +138,7 @@ public class ConcordanceComposeGameTests {
 		Object[][] examples = {
 			{"touch struck light", ResearchState.UNDERSTOOD, 2, 2, 20},
 			{"here struck ward", ResearchState.UNDERSTOOD, 3, 3, 25},
+			{"touch struck ward", ResearchState.UNDERSTOOD, 3, 3, 25},
 			{"ray struck sear then here creatures dazzle", ResearchState.MASTERED, 8, 8, 50},
 		};
 		for (Object[] example : examples) {
@@ -228,6 +229,47 @@ public class ConcordanceComposeGameTests {
 			RateGate.forget(player.getUUID());
 			command(player, "jugcraft concordance compose clear");
 			helper.assertTrue(ComposedSpells.inscription(player.getMainHandItem()) == null, "compose clear wipes it");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Chunk A (A-D13): the route's support spell. {@code touch struck ward} is inscribed through the composing service
+	 * and cast: the friend touched (a villager here) is warded (Absorption, 4 points), it costs its 3 Focus and starts its
+	 * cooldown; turned away, with no one to touch, it costs nothing and starts no cooldown.
+	 */
+	@GameTest(maxTicks = 40)
+	public void aWardForAFriendIsComposedAndCast(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer player = player(helper, new BlockPos(1, 2, 1));
+		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+		Composing.Result inscribed = Composing.compose(player, "touch struck ward", true, Composing.Held.of(player));
+		Inscription ward = ComposedSpells.inscription(player.getMainHandItem());
+		helper.assertTrue(inscribed.outcome() == Composing.Outcome.INSCRIBED && ward != null && ward.focus() == 3 && ward.cooldown() == 25,
+				"The ward for a friend is inscribed with its cost: " + inscribed.outcome() + " " + ward);
+		Mob villager = helper.spawnWithNoFreeWill(EntityTypes.VILLAGER, new BlockPos(1, 2, 3));
+		helper.runAfterDelay(SETTLE_TICKS, () -> {
+			ConcordanceProgress.setFocus(player, FocusPool.MAX);
+			refreshSpells(player);
+			cast(level, player);
+			SpellCaster.Player caster = (SpellCaster.Player) player;
+			helper.assertTrue(villager.hasEffect(MobEffects.ABSORPTION) && villager.getEffect(MobEffects.ABSORPTION).getAmplifier() == 0,
+					"The friend touched is warded: " + villager.getEffect(MobEffects.ABSORPTION));
+			helper.assertTrue(ConcordanceProgress.currentFocus(player) == FocusPool.MAX - 3 && caster.getCooldownManager().isCoolingDown(composed(level)),
+					"It costs its 3 Focus and starts its cooldown: " + ConcordanceProgress.currentFocus(player));
+
+			// Turned away: nothing to touch, so nothing is spent.
+			caster.getCooldownManager().reset(null);
+			ConcordanceProgress.setFocus(player, FocusPool.MAX);
+			BlockPos at = helper.absolutePos(new BlockPos(1, 2, 1));
+			player.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 180.0F, 0.0F);
+			player.setYHeadRot(180.0F);
+			player.setYBodyRot(180.0F);
+			refreshSpells(player);
+			cast(level, player);
+			helper.assertTrue(ConcordanceProgress.currentFocus(player) == FocusPool.MAX && !caster.getCooldownManager().isCoolingDown(composed(level)),
+					"Warding no one costs nothing and starts no cooldown");
 			helper.succeed();
 		});
 	}

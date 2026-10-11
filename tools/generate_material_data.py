@@ -233,6 +233,9 @@ def assets():
     import advancements
     lang.update(advancements.generate(MOD)[1])
     party_lang(lang)
+    # The Jugcraft Encyclopedia's words (tools/encyclopedia.py, Concordance Chunk A, A-04).
+    import encyclopedia
+    encyclopedia.lang_entries(lang)
     drone_assets(lang)
     import tower
     tower.write_assets(write, rid, ASSETS, lang)
