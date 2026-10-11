@@ -79,8 +79,8 @@ public class IndustrialFoundationGameTests {
 		helper.assertTrue(hall.positions() == MachineForm.MAX_POSITIONS && hall.footprint().size() == 136
 				&& hall.clearanceCells().length == 16, "The hall fills a 6x6x6 envelope with 136 parts and 16 clearance positions");
 		helper.assertTrue(hall.footprint().offsets().getFirst().equals(Vec3i.ZERO), "Part 0 is the controller");
-		helper.assertTrue(FormMachineBlock.FORM_PART.getPossibleValues().size() == MachineForm.MAX_POSITIONS,
-				"A form block can number every position of a 6x6x6 envelope");
+		helper.assertTrue(TestForms.RIG.partProperty().getPossibleValues().size() == 8
+				&& TestForms.HALL.partProperty().getPossibleValues().size() == 136, "Each form block numbers only its own parts");
 		helper.assertTrue(hall.containerSize() == 2 && rig.containerSize() == 5, "Slots: inputs, outputs, sockets, upgrades");
 
 		// The oxygen port's block (column 1, row 0, layer 1) is one up and to the viewer's right of the controller.
@@ -503,7 +503,9 @@ public class IndustrialFoundationGameTests {
 			BlockPos part = helper.absolutePos(new BlockPos(1, 2, 3));
 			BlockState state = helper.getLevel().getBlockState(part);
 			helper.assertTrue(machine.checkStructure(helper.getLevel(), machine.getBlockPos(), machine.getBlockState()) == null, "Formed again");
-			helper.getLevel().setBlock(part, state.setValue(FormMachineBlock.FORM_PART, 99), 2);
+			// Another part's number (never the controller's, which would grow a second block entity).
+			int number = state.getValue(TestForms.RIG.partProperty());
+			helper.getLevel().setBlock(part, state.setValue(TestForms.RIG.partProperty(), number % 7 + 1), 2);
 			MachineStatus broken = machine.checkStructure(helper.getLevel(), machine.getBlockPos(), machine.getBlockState());
 			helper.assertTrue(broken != null && broken.reason() == MachineStatus.Reason.PART_MISSING, "A wrong part unforms it: " + broken);
 			helper.getLevel().setBlock(part, state, 2);

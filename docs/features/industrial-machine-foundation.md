@@ -1,6 +1,6 @@
 # Industrial machine foundation (factory package 1)
 
-Status: implemented (pending CI and review). Shared infrastructure only: no new survival block, item or recipe yet. The first real forms arrive with package 2, the starter gas and acid factory.
+Status: implemented (CI green; pending review). Shared infrastructure only: no new survival block, item or recipe yet. The first real forms arrive with package 2, the starter gas and acid factory.
 Proposal issue: none. Package 1, "Shared machine foundation", of the owner's [factory implementation plan in PR #302](https://github.com/jimbozoomer-byte/jugcraft/pull/302) (draft planning, 10 October 2026); the owner asked on 10 October 2026 to begin implementing that roadmap.
 Owner: jimbozoomer-byte
 Target milestone and tier: steel-era industry; every later industrial package builds on it, starting with the [starter gas and acid factory](industrial-starter-gas-and-acid-factory.md)
@@ -112,7 +112,7 @@ Cancel returns each batch's untransformed inputs, all or nothing, and never the 
 
 ## Dependencies and assets
 
-None new. The test forms are registered by the test mod (`jugcraft-test`), never shipped, and draw every part with vanilla's iron block model. Real forms need their own models: the part property now numbers up to 216 parts, but the model generator does not yet slice form models (package 2 work).
+None new. The test forms are registered by the test mod (`jugcraft-test`), never shipped, and draw every part with vanilla's iron block model. Real forms get their own models from `tools/industrial_forms.py`, which slices each form's one model into part models in the form's part order. Since the [Electrolytic Separator](industrial-electrolytic-separator.md), each form block numbers only its own parts (the Separator 0 to 11), not every position a 6×6×6 envelope could hold.
 
 ## Verification
 
@@ -142,7 +142,7 @@ None new. The test forms are registered by the test mod (`jugcraft-test`), never
   - All four client shards passed. Shard 2 ran `IndustrialFoundationClientGameTests` and took both screenshots:
     - `jugcraft_form_screen`: Form Test Rig, "Processing", 40%, power 29.3k of 30k, batches 1/1, the bed in its socket and an efficiency card beside it.
     - `jugcraft_form_screen_unused_input`: "Waiting for input" and "Water tank: nothing here uses Lava", 0%, batches 0/1.
-  - The terminal clips its longest state ("Waiting for inpu") and its power label crowds the number. Nothing shipped uses this screen yet; the first real form's change fixes both.
+  - The terminal clipped its longest state ("Waiting for inpu") and its power label crowded the number. Fixed with the first real form, the [Electrolytic Separator](industrial-electrolytic-separator.md): the state wraps like the reason, and the power reads in whole thousands when the label and tenths would not fit.
 
 No survival playtest, two-client test or performance measurement has been done.
 
@@ -152,11 +152,7 @@ Not applicable: infrastructure inside machines, with no world generation, creatu
 
 ## Rollout and open questions
 
-- **Next, package 2.** The Electrolytic Separator as the first real form, in the existing electrolysis family, followed by the rest of the starter gas and acid factory. That needs:
-  - its art from the brief, and the model generator's form slicing;
-  - its construction recipe (the selected 20-plate total);
-  - capability tags for the water and brine electrolysis recipes;
-  - the selected output policies: methanation water drains when full; lye is kept and stops the machine.
+- **Next, package 2.** Its first slice is the [Electrolytic Separator](industrial-electrolytic-separator.md), in the existing electrolysis family. The rest of the starter gas and acid factory follows, with the selected methanation-water drain.
 - **Known limits:**
   - The original one-model machines' screens are unchanged; only forms show the eight states.
   - No JEI/EMI category or Jade readout for form-only recipes yet.

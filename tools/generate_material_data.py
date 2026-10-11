@@ -188,6 +188,8 @@ def assets():
     electroplating.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import gas_storage
     gas_storage.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import industrial_forms
+    industrial_forms.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import concordance
     concordance.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     concordance.advancements(DATA, write, lang)

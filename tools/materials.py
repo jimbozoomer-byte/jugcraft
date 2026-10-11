@@ -328,5 +328,8 @@ def feature_of(entry_id):
     import concordance
     if entry_id in concordance.items() or entry_id in concordance.blocks() or entry_id in concordance.itemless_blocks():
         return concordance.FEATURE
+    import industrial_forms
+    if entry_id in industrial_forms.blocks():
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

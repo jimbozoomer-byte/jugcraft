@@ -131,8 +131,12 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 	private void terminal(GuiGraphicsExtractor graphics) {
 		MachineStatus status = menu.status();
 		int y = SCREEN_Y;
-		graphics.text(font, "> " + status.title().getString(), SCREEN_X, y, status.state().warning() ? theme.warn() : theme.text(), false);
-		y += 11;
+		// The state wraps like the reason: "Waiting for input" is wider than the terminal.
+		for (FormattedCharSequence line : font.split(Component.literal("> ").append(status.title()), SCREEN_WIDTH)) {
+			graphics.text(font, line, SCREEN_X, y, status.state().warning() ? theme.warn() : theme.text(), false);
+			y += 9;
+		}
+		y += 2;
 		for (FormattedCharSequence line : font.split(status.detail(menu.form()), SCREEN_WIDTH)) {
 			if (y + 9 > TEXT_BOTTOM) {
 				return;
@@ -154,16 +158,30 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 			y += 10;
 		}
 		if (y + 9 <= TEXT_BOTTOM) {
+			String label = Component.translatable("container.jugcraft.terminal.power").getString();
 			String energy = compact(menu.energy()) + "/" + compact(menu.capacity());
-			graphics.text(font, Component.translatable("container.jugcraft.terminal.power").getString(), SCREEN_X, y, theme.dim(), false);
-			graphics.text(font, energy, SCREEN_X + SCREEN_WIDTH - font.width(energy), y, theme.text(), false);
+			if (!fits(label, energy)) {
+				energy = thousands(menu.energy()) + "/" + thousands(menu.capacity());
+			}
+			row(graphics, y, label, energy);
 			y += 10;
 		}
 		if (y + 9 <= TEXT_BOTTOM) {
-			String lanes = running + "/" + menu.form().profile().lanes();
-			graphics.text(font, Component.translatable("container.jugcraft.form.lanes").getString(), SCREEN_X, y, theme.dim(), false);
-			graphics.text(font, lanes, SCREEN_X + SCREEN_WIDTH - font.width(lanes), y, theme.text(), false);
+			row(graphics, y, Component.translatable("container.jugcraft.form.lanes").getString(), running + "/" + menu.form().profile().lanes());
 		}
+	}
+
+	/** Whether a label and its value fit side by side on one terminal line, two pixels apart. */
+	private boolean fits(String label, String value) {
+		return font.width(label) + 2 + font.width(value) <= SCREEN_WIDTH;
+	}
+
+	/** A label on the left and its value on the right; a value too wide for both is shown alone. */
+	private void row(GuiGraphicsExtractor graphics, int y, String label, String value) {
+		if (fits(label, value)) {
+			graphics.text(font, label, SCREEN_X, y, theme.dim(), false);
+		}
+		graphics.text(font, value, SCREEN_X + SCREEN_WIDTH - font.width(value), y, theme.text(), false);
 	}
 
 	/** Exact numbers over the energy bar and the tanks; socket names over the sockets. */
@@ -282,6 +300,14 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		}
 		int color = PetroFluids.gaugeColor(fluid);
 		return color != 0 ? color : 0xFF8090A8;
+	}
+
+	/** Whole thousands, for a line too narrow for {@link #compact}'s tenths: 29k rather than 29.3k. */
+	private static String thousands(long value) {
+		if (value < 1_000) {
+			return Long.toString(value);
+		}
+		return value < 10_000_000 ? value / 1_000 + "k" : value / 1_000_000 + "M";
 	}
 
 	private static String compact(long value) {

@@ -79,6 +79,11 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	public static final int PUSH_ITEMS = 16;
 	/** The most lanes a profile can have (the bulk profile's four). */
 	public static final int MAX_LANES = 4;
+	/**
+	 * Ticks the machine stays lit after it last worked, so a moment's pause between batches does not relight every
+	 * part.
+	 */
+	public static final int LIT_HOLD = 20;
 
 	// The menu's synced data. Values are sent as 16 bits, so energy and capacity are split in halves.
 	public static final int DATA_ENERGY_LOW = 0;
@@ -118,6 +123,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	private long nextCheck;
 	/** The game time of the last paid tick: a batch started long after it starts cold. Not saved. */
 	private long lastWorked = Long.MIN_VALUE / 2;
+	/** The machine shows lit until this game time (see {@link #LIT_HOLD}). Not saved. */
+	private long litUntil = Long.MIN_VALUE / 2;
 	private long lanePrice;
 	/** The family's recipe list this machine filtered last, and the result (rebuilt after a reload). */
 	private @Nullable List<FluidRecipes.Entry> recipeSource;
@@ -266,10 +273,34 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			status = next;
 			setChanged();
 		}
-		boolean lit = status.state().working();
-		if (state.getValue(MachineBlock.LIT) != lit) {
-			level.setBlock(pos, state.setValue(MachineBlock.LIT, lit), Block.UPDATE_ALL);
+		if (status.state().working()) {
+			litUntil = now + LIT_HOLD;
 		}
+		boolean lit = now < litUntil;
+		if (state.getValue(MachineBlock.LIT) != lit) {
+			light(level, pos, state, lit);
+		}
+	}
+
+	/**
+	 * Lights or darkens every part, so lamps and strips anywhere on the machine show it working. Only the controller's
+	 * change reaches its neighbours (and its light); the other parts just redraw.
+	 */
+	private void light(ServerLevel level, BlockPos pos, BlockState state, boolean lit) {
+		Direction facing = state.getValue(MachineBlock.FACING);
+		FormMachineBlock block = (FormMachineBlock) state.getBlock();
+		for (int part = 1; part < form.footprint().size(); part++) {
+			BlockPos at = form.footprint().partPos(pos, facing, part);
+			if (!level.isLoaded(at)) {
+				continue;
+			}
+			BlockState there = level.getBlockState(at);
+			if (there.is(block) && there.getValue(MachineBlock.FACING) == facing && block.part(there) == part
+					&& there.getValue(MachineBlock.LIT) != lit) {
+				level.setBlock(at, there.setValue(MachineBlock.LIT, lit), Block.UPDATE_CLIENTS);
+			}
+		}
+		level.setBlock(pos, state.setValue(MachineBlock.LIT, lit), Block.UPDATE_ALL);
 	}
 
 	/** Checks the structure on the next tick (a part's neighbour changed). */
