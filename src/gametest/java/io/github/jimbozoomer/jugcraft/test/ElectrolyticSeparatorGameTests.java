@@ -44,8 +44,8 @@ import net.minecraft.world.level.material.Fluids;
  * The Electrolytic Separator (docs/features/industrial-electrolytic-separator.md), package 2's first real form: it
  * stands whole in every orientation with pipes and cables reaching it only at its declared ports; water and ordinary
  * brine split at the owner's selected starter baseline, to the exact energy; a full lye tank stops brine and leaves
- * water running; the oxygen/chlorine tank holds one gas at a time; it runs only its own recipes while the Electrolytic
- * Cell keeps its own; and it is built from 20 steel plates in all.
+ * water running; the oxygen/chlorine tank holds one gas at a time; every part lights while it works; it runs only its
+ * own recipes while the Electrolytic Cell keeps its own; and it is built from 20 steel plates in all.
  */
 public class ElectrolyticSeparatorGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
@@ -210,6 +210,25 @@ public class ElectrolyticSeparatorGameTests {
 	}
 
 	/**
+	 * While it works every part shows lit, so the lamp and the level strips light on the whole machine, but only the
+	 * controller gives off light; paused, it goes dark once {@link FormMachineBlockEntity#LIT_HOLD} ticks have passed.
+	 */
+	@GameTest(maxTicks = 200)
+	public void everyPartLightsWhileItWorks(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
+		supply(helper, machine);
+		insert(helper, port(helper, machine, "feed_in"), Fluids.WATER, 1000);
+		helper.runAfterDelay(10, () -> {
+			assertLit(helper, machine, true);
+			machine.togglePause();
+		});
+		helper.runAfterDelay(15 + FormMachineBlockEntity.LIT_HOLD, () -> {
+			assertLit(helper, machine, false);
+			helper.succeed();
+		});
+	}
+
+	/**
 	 * The Separator runs exactly its two capability recipes, at the selected baseline; the Electrolytic Cell keeps its
 	 * own, now as slow on brine (400 ticks), and never sees the Separator's. And its construction: 4 steel plates and
 	 * two Steel Tanks of 8 plates each make 20, with copper cable and a basic circuit.
@@ -248,6 +267,18 @@ public class ElectrolyticSeparatorGameTests {
 		IndustrialForms.ELECTROLYTIC_SEPARATOR.setPlacedBy(helper.getLevel(), helper.absolutePos(relative), helper.getBlockState(relative), null,
 				ItemStack.EMPTY);
 		return helper.getBlockEntity(relative, FormMachineBlockEntity.class);
+	}
+
+	/** Every part lit (or dark), and light given off by the controller alone. */
+	private static void assertLit(GameTestHelper helper, FormMachineBlockEntity machine, boolean lit) {
+		MachineForm form = machine.form();
+		Direction facing = machine.getBlockState().getValue(MachineBlock.FACING);
+		for (int part = 0; part < form.footprint().size(); part++) {
+			BlockState state = helper.getLevel().getBlockState(form.footprint().partPos(machine.getBlockPos(), facing, part));
+			int light = lit && part == 0 ? 13 : 0;
+			helper.assertTrue(state.getValue(MachineBlock.LIT) == lit && state.getLightEmission() == light,
+					"Part " + part + ": lit " + state.getValue(MachineBlock.LIT) + ", light " + state.getLightEmission() + ", not " + lit + ", " + light);
+		}
 	}
 
 	/** The pipe-facing storage of the named port, found the way a pipe finds it. */

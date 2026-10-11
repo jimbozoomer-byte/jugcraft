@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.machine.form;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import java.util.List;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -66,8 +67,11 @@ public final class IndustrialForms {
 	}
 
 	private static FormMachineBlock block(String path, MachineForm form) {
-		// Like the machines: the furnace's light while running, and no hiding of neighbours' faces by a detailed model.
+		// Like the machines: the furnace's light while running, given off by the controller alone although every part
+		// lights its lamps and strips, and no hiding of neighbours' faces by a detailed model.
 		BlockBehaviour.Properties properties = BlockBehaviour.Properties.ofFullCopy(Blocks.FURNACE).noOcclusion()
+				.lightLevel(state -> state.getValue(MachineBlock.LIT) && state.getBlock() instanceof FormMachineBlock machine
+						&& machine.part(state) == 0 ? 13 : 0)
 				.setId(ResourceKey.create(Registries.BLOCK, Jugcraft.id(path)));
 		FormMachineBlock block = Registry.register(BuiltInRegistries.BLOCK, Jugcraft.id(path), new FormMachineBlock(properties, form));
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, Jugcraft.id(path));

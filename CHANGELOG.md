@@ -17,7 +17,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Ports where the model shows them**: water or brine in low at the back; hydrogen, oxygen or chlorine, and lye out at their collars on the front; power at the bus connection.
 - **It keeps its lye**: a full lye tank stops brine while water still runs, and the screen says "Lye tank is full".
 - The Electrolytic Cell keeps its own recipes, but **its brine now also takes 20 s** (102,400 JE a bucket, was 10 s), the owner's choice to match the Separator. JEI shows the Separator's recipes in their own category, and the Engineer's Handbook has its page.
-- **Machine forms**: each now numbers only its own blocks (12 for the Separator). The formed-machine screen wraps a long state and fits its power line. Record: [industrial-electrolytic-separator.md](docs/features/industrial-electrolytic-separator.md).
+- **Machine forms**: each now numbers only its own blocks (12 for the Separator), and a working form lights its lamps and strips on every block, not just its controller. The formed-machine screen wraps a long state and fits its power line. Record: [industrial-electrolytic-separator.md](docs/features/industrial-electrolytic-separator.md).
 
 ### Unmerged: Industrial factory package 1 (the shared machine foundation)
 - **The groundwork for the industrial factory's big machines** (package 1 of the owner's roadmap in PR #302); nothing new to craft yet. A machine **form** describes one installation within 2 to 6 blocks on each axis: its parts, the clearance its moving parts need, its open access space, its ports, its tool sockets and what it can process. Placing one checks every position first and names whatever is in the way; breaking any part removes it all and drops it once.

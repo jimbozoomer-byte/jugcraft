@@ -21,7 +21,7 @@ The **Electrolytic Separator** is the first of the big industrial machines: two 
 - high on the front, an outlet collar for each tower, banded in its gas's colours (hydrogen on the left; oxygen or chlorine on the right);
 - low at the back, the feed inlet, banded in brine colour.
 
-The lamp and level strips light while it works.
+The lamp and level strips light while it works, on every block of the machine; only the control box gives off light, like a furnace.
 
 **Ports.** Pipes and cables meet it only at the middle of these faces:
 
@@ -84,6 +84,7 @@ JEI shows its two recipes in their own category, with the Separator as the stati
 - The server decides everything: placement, recipes, ports and the screen's buttons. The client only draws the synced state.
 - Saving uses the foundation's role-named tanks (`feed`, `anode_gas`, `hydrogen`, `lye`), its batch escrow and its form version (1), so a later version can add tanks without moving contents.
 - **Foundation change in this slice**: each form block now numbers only its own parts. The Separator's `part` property runs 0–11, giving 96 block states instead of 1,728. Nothing saved used the old range: no form was registered in the game before this.
+- **Foundation change in this slice**: a working form lights every part, not just its controller, so lamps and strips anywhere on it show the work. It stays lit for 20 ticks after it last worked, so a moment's pause does not relight every block; the other parts change only on the client, without neighbour updates, and only the controller gives off light.
 - Not done: two-client and dedicated-server play.
 
 ## Dependencies and assets
@@ -106,12 +107,13 @@ Locally, without Gradle or a game:
 - The model was drawn outside the game from all four corners, lit and unlit, to check the parts line up and every face is finished.
 
 For CI:
-- **Server game tests** (`ElectrolyticSeparatorGameTests`), 6 tests:
+- **Server game tests** (`ElectrolyticSeparatorGameTests`), 7 tests:
   - in all four orientations it fills its twelve blocks and only its five ports answer; the feed takes water and brine but not lava, and nothing goes in at an outlet;
   - water gives 500 mB of hydrogen and 250 mB of oxygen, leaving at their collars, for exactly 204,800 JE;
   - brine gives 250 mB each of chlorine and hydrogen and 500 mB of lye, for exactly 102,400 JE;
   - a full lye tank stops brine, naming the tank and spending nothing, while water still runs; brine goes on once the lye is gone;
   - oxygen left in the shared tank makes brine wait, naming oxygen, until it is drawn off;
+  - while it works all twelve parts are lit and only the controller gives off light; paused, every part goes dark after the 20-tick hold;
   - it runs exactly its two recipes while the Cell keeps its own (brine now 400 ticks, water 800), and its crafting recipe and the Steel Tank's together come to 20 plates.
 - `IndustrialFoundationGameTests` now checks that each form block numbers only its own parts.
 - `PetroGameTests.cellSplitsBrine` now allows 600 ticks and keeps the Cell charged: its brine needs 102,400 JE, more than the Cell's 60,000 JE store.
@@ -125,14 +127,15 @@ For CI:
   - Screenshots:
     - `_screen`: the Separator's screen reads "Processing", 22%, power 53k/60k, batches 1/1, with the feed in the batch and gas in two outlet tanks. The power line now fits.
     - `_lye_full`: "Output blocked" wraps onto two lines over "Lye tank is full", with brine waiting in the feed tank and the lye tank full.
-    - The three world shots show the model working, its strips lit at night. But they looked up and cut off its base: a teleport's "facing" aims from the feet, not the eyes. The test now aims from the eyes and adds the straight-on `_front`.
+    - The three world shots show the model working, its lamp lit at night. But they looked up and cut off its base: a teleport's "facing" aims from the feet, not the eyes. The test now aims from the eyes and adds the straight-on `_front`.
 - **Run [38090159225](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38090159225) (commit 4119897f): green.**
   - "All 1298 required tests passed"; both client tests passed.
   - The four world shots now frame the whole machine on its plinth:
     - `jugcraft_electrolytic_separator` (front left): the control box's two gauges and lamp, the door, the junction box with its socket and hazard band, the lye return, the white left tower with its checker shoulder and level strip, and the collars;
     - `_front`: the front straight on, the towers either side of the housing;
     - `_back`: the banded housing's access panel and the feed inlet low at the back;
-    - `_night`: the same front-left view, with the amber strips and lamp lit.
+    - `_night`: the same front-left view, with the lamp lit. The strips, though, could light only where they pass through the controller's block: the foundation lit the controller alone. The commit after the brine change lights every part, and its run retakes this shot.
+- **Run [38105664707](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38105664707) (commit 7d6ef403, the Cell's brine at 400 ticks): green.** "All 1298 required tests passed", among them the Cell's own brine test at its new time.
 
 No survival playtest, two-client test or performance measurement has been done.
 
