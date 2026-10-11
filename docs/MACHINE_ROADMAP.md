@@ -67,7 +67,7 @@ These unlock whole groups of machines, so they should be designed first.
 | **Machine upgrades** (speed, efficiency, energy) | Progression without a new block each time | A use for rare earths, silver and lithium |
 | **Energy tiers** (low / medium / high voltage, transformers) | Stops one cable type carrying unlimited power; gives aluminum and silver cable a purpose | High-demand machines, the reactor |
 | **Ownership and access** | Multiplayer servers | Every machine |
-| **Industrial machine forms** ✅ foundation implemented ([record](features/industrial-machine-foundation.md)); first form, the [Electrolytic Separator](features/industrial-electrolytic-separator.md) | 2–6-block installations need validated layouts, port-only transfers, protected tools and durable batches | Every unbuilt industrial form, starting with the starter gas and acid factory |
+| **Industrial machine forms** ✅ foundation implemented ([record](features/industrial-machine-foundation.md)); forms so far: the [Electrolytic Separator](features/industrial-electrolytic-separator.md) and the [Gas Burning Generator](features/industrial-gas-burning-generator.md) | 2–6-block installations need validated layouts, port-only transfers, protected tools and durable batches | Every unbuilt industrial form, starting with the starter gas and acid factory |
 
 ## Proposed machines by tier
 

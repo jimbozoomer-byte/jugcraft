@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.chemistry.FluidRecipe;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidRecipes;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidTank;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidTanks;
+import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.fluid.FluidNetworks;
@@ -64,6 +65,11 @@ import org.jspecify.annotations.Nullable;
  * progress. Cancelling returns only the untransformed inputs, never the energy spent. Breaking the machine drops its
  * slots and the escrowed inputs once, and the reserved results are never made.
  *
+ * <p>A generator form ({@link MachineForm#generator()}) runs no batches: each tick it burns fuel from its one tank, a
+ * millibucket at a time, into JE in hand, makes as much of it into power as its store has room for (up to the fuel's
+ * rate), and pushes its power out of its power ports. Energy not made yet stays in hand, so nothing is lost or made
+ * twice.
+ *
  * <p>The block entity is deliberately not itself a container: its slots are reachable only through its screen and its
  * ports, so no generic container lookup can reach a tool socket or an output through a closed face.
  */
@@ -93,7 +99,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	/** Five values: see {@link MachineStatus#data}. */
 	public static final int DATA_STATUS = 4;
 	public static final int DATA_PAUSED = DATA_STATUS + MachineStatus.DATA_VALUES;
-	/** JE per tick one running lane pays now. */
+	/** JE per tick one running lane pays now; for a generator, the JE it made on its last tick. */
 	public static final int DATA_LANE_USE = DATA_PAUSED + 1;
 	/** One bit per tool socket whose tool a running batch needs (it cannot be taken out). */
 	public static final int DATA_LOCKS = DATA_LANE_USE + 1;
@@ -125,6 +131,12 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	private long lastWorked = Long.MIN_VALUE / 2;
 	/** The machine shows lit until this game time (see {@link #LIT_HOLD}). Not saved. */
 	private long litUntil = Long.MIN_VALUE / 2;
+	/** A generator's JE in hand: fuel already burnt and not yet made into power. */
+	private long burn;
+	/** JE a tick the fuel in hand makes (its {@link FormFuel#jePerTick}). */
+	private int burnRate;
+	/** JE a generator made on its last tick. Not saved. */
+	private int made;
 	private long lanePrice;
 	/** The family's recipe list this machine filtered last, and the result (rebuilt after a reload). */
 	private @Nullable List<FluidRecipes.Entry> recipeSource;
@@ -158,7 +170,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				case DATA_CAPACITY_LOW -> (int) (energy.getCapacity() & 0xFFFF);
 				case DATA_CAPACITY_HIGH -> (int) ((energy.getCapacity() >>> 16) & 0xFFFF);
 				case DATA_PAUSED -> paused ? 1 : 0;
-				case DATA_LANE_USE -> (int) Math.min(0xFFFF, lanePrice);
+				case DATA_LANE_USE -> (int) Math.min(0xFFFF, form.generator() ? made : lanePrice);
 				case DATA_LOCKS -> locks();
 				default -> 0;
 			};
@@ -178,7 +190,10 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	public FormMachineBlockEntity(BlockPos pos, BlockState state) {
 		super(((FormMachineBlock) state.getBlock()).entityType(), pos, state);
 		this.form = ((FormMachineBlock) state.getBlock()).form();
-		this.energy = new SimpleEnergyStorage(form.family().capacity, form.family().maxInput, 0, this::setChanged);
+		// A generator only gives power out; every other form only takes it in.
+		this.energy = form.generator()
+				? new SimpleEnergyStorage(form.family().capacity, 0, form.family().maxOutput, this::setChanged)
+				: new SimpleEnergyStorage(form.family().capacity, form.family().maxInput, 0, this::setChanged);
 		this.slots = new SimpleContainer(form.containerSize()) {
 			@Override
 			public boolean canPlaceItem(int slot, ItemStack stack) {
@@ -197,8 +212,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			}
 		};
 		this.items = slots.getItems();
-		this.tanks = new FluidTanks(form.tanks(), (tank, variant) -> level instanceof ServerLevel server
-				&& usesFluid(recipes(server.getServer()), tank, variant), this::setChanged);
+		this.tanks = new FluidTanks(form.tanks(), (tank, variant) -> form.generator() ? form.fuel(variant.getFluid()) != null
+				: level instanceof ServerLevel server && usesFluid(recipes(server.getServer()), tank, variant), this::setChanged);
 		this.lanes = new WorkLane[form.profile().lanes()];
 	}
 
@@ -261,8 +276,12 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			nextCheck = now + CHECK_INTERVAL;
 		}
 		MachineStatus next;
+		made = 0;
 		if (structure != null) {
 			next = structure;
+		} else if (form.generator()) {
+			next = paused ? MachineStatus.PAUSED : generate();
+			pushPower(level, pos, state);
 		} else {
 			if (now % PUSH_INTERVAL == 0) {
 				push(level, pos, state);
@@ -399,6 +418,61 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 					(int) Math.min(0xFFFF, lanePrice));
 		}
 		return blocked != null ? blocked : MachineStatus.IDLE;
+	}
+
+	/**
+	 * A generator's tick: makes as much power as its store has room for, up to the rate of the fuel it burns, draining
+	 * fuel a millibucket at a time as the JE in hand runs short. What is not made yet stays in hand for the next tick.
+	 */
+	private MachineStatus generate() {
+		FluidTank tank = tanks.input(0);
+		FormFuel fuel = tank.amount > 0 ? form.fuel(tank.variant.getFluid()) : null;
+		if (tank.amount > 0 && fuel == null) {
+			// Fuel taken off the form's list since it was saved: it stays in the tank, and nothing burns it.
+			return MachineStatus.fluid(MachineLifecycle.WAITING_INPUT, MachineStatus.Reason.UNUSED_FLUID, 0, tank.variant.getFluid(),
+					tank.millibuckets());
+		}
+		if (fuel == null && burn <= 0) {
+			return MachineStatus.at(MachineLifecycle.IDLE, MachineStatus.Reason.NO_FUEL, 0);
+		}
+		long room = energy.getCapacity() - energy.getAmount();
+		if (room <= 0) {
+			return MachineStatus.of(MachineLifecycle.IDLE, MachineStatus.Reason.POWER_FULL);
+		}
+		int rate = fuel != null ? fuel.jePerTick() : burnRate > 0 ? burnRate : form.fuels().getFirst().jePerTick();
+		long want = Math.min(rate, room);
+		while (burn < want && fuel != null && tank.millibuckets() > 0) {
+			tank.drain(1);
+			burn += fuel.jePerMb();
+			burnRate = fuel.jePerTick();
+		}
+		long make = Math.min(want, burn);
+		if (make <= 0) {
+			return MachineStatus.at(MachineLifecycle.IDLE, MachineStatus.Reason.NO_FUEL, 0);
+		}
+		burn -= make;
+		energy.setAmount(energy.getAmount() + make);
+		made = (int) make;
+		setChanged();
+		return MachineStatus.PROCESSING;
+	}
+
+	/** A generator's JE in hand: fuel burnt and not yet made into power. */
+	public long burn() {
+		return burn;
+	}
+
+	/** Pushes a generator's power out of its power ports into cables and machines, at most its family's output a tick. */
+	private void pushPower(ServerLevel level, BlockPos pos, BlockState state) {
+		Direction facing = state.getValue(MachineBlock.FACING);
+		long budget = form.family().maxOutput;
+		for (FormPort port : form.ports()) {
+			if (port.kind() != FormPort.Kind.ENERGY_OUT || budget <= 0 || energy.getAmount() <= 0) {
+				continue;
+			}
+			BlockPos at = form.cellPos(pos, facing, form.cellIndex(port.column(), port.row(), port.layer()));
+			budget -= EnergyNetworks.pushToNeighbors(level, at, energy, budget, List.of(port.side().world(facing)));
+		}
 	}
 
 	/** The ticks a batch needs with the upgrade cards now fitted. */
@@ -864,8 +938,11 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		return false;
 	}
 
-	/** 0 when nothing runs, else rising with the share of lanes running. */
+	/** 0 when nothing runs, else rising with the share of lanes running (for a generator, of its full rate made). */
 	public int comparatorSignal() {
+		if (form.generator()) {
+			return made <= 0 ? 0 : Math.min(15, 1 + 14 * made / Math.max(made, burnRate));
+		}
 		int running = 0;
 		for (WorkLane lane : lanes) {
 			if (lane != null) {
@@ -1005,6 +1082,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		ContainerHelper.loadAllItems(input, items);
 		energy.setAmount(input.getLongOr("energy", 0L));
 		paused = input.getBooleanOr("paused", false);
+		burn = Math.max(0, input.getLongOr("burn", 0L));
+		burnRate = Math.max(0, input.getIntOr("burn_rate", 0));
 		List<String> roles = form.tankRoles();
 		for (int tank = 0; tank < roles.size(); tank++) {
 			FluidTank held = tanks.tank(tank);
@@ -1033,6 +1112,10 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		output.putInt("form_version", form.version());
 		output.putLong("energy", energy.getAmount());
 		output.putBoolean("paused", paused);
+		if (burn > 0) {
+			output.putLong("burn", burn);
+			output.putInt("burn_rate", burnRate);
+		}
 		List<String> roles = form.tankRoles();
 		for (int tank = 0; tank < roles.size(); tank++) {
 			FluidTank held = tanks.tank(tank);

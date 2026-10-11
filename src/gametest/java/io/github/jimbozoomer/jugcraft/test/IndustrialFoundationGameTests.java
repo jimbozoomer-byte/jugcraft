@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidMachineSpec;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidTank;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidTanks;
@@ -69,7 +70,10 @@ public class IndustrialFoundationGameTests {
 	/** The test split recipe's work, and the rig's warm-up. */
 	private static final int SPLIT_TICKS = 20;
 
-	/** The descriptors: sizes, parts, rotation, and every kind of mistake refused when the form is built. */
+	/**
+	 * The descriptors: sizes, parts, rotation, and every kind of mistake refused when the form is built, a generator
+	 * form's included.
+	 */
 	@GameTest
 	public void formDescriptorsCheckThemselves(GameTestHelper helper) {
 		MachineForm rig = TestForms.RIG_FORM;
@@ -115,6 +119,23 @@ public class IndustrialFoundationGameTests {
 				.layer("C#", "##").layer("##", "##").build());
 		rejects(helper, "a family without fluid recipes", () -> MachineForm.builder(TestForms.id("bad"), MachineKind.CRUSHER)
 				.capability(TestForms.CAPABILITY).layer("C#", "##").layer("##", "##").build());
+
+		// Generator forms: a generator family, one fuel tank and nothing else to fill, power out and never in.
+		MachineForm burner = generator().build();
+		helper.assertTrue(burner.generator() && burner.fuels().size() == 1 && burner.capabilities().isEmpty(), "A generator form builds");
+		rejects(helper, "a generator of a processing family", () -> MachineForm.builder(TestForms.id("bad"), MachineKind.CHEMICAL_REACTOR)
+				.layer("C#", "##").layer("##", "##").inputTank("fuel").fuel(Jugcraft.id("hydrogen"), 128, 128)
+				.port("in", FormPort.Kind.FLUID_IN, 0, 0, 0, 0, FormSide.LEFT).port("out", FormPort.Kind.ENERGY_OUT, 0, 0, 1, 0, FormSide.BACK).build());
+		rejects(helper, "a generator with a product tank", () -> generator().outputTank("smoke").build());
+		rejects(helper, "a generator with upgrades", () -> generator().upgrades().build());
+		rejects(helper, "a generator taking power", () -> generator().port("power", FormPort.Kind.ENERGY_IN, 0, 1, 0, 0, FormSide.FRONT).build());
+		rejects(helper, "a fuel listed twice", () -> generator().fuel(Jugcraft.id("hydrogen"), 128, 128).build());
+		rejects(helper, "a fuel making more a tick than the store holds", () -> generator().fuel(Jugcraft.id("methane"), 448, 1_000_000).build());
+		rejects(helper, "a generator whose power cannot leave", () -> MachineForm.builder(TestForms.id("bad"), MachineKind.GAS_TURBINE)
+				.layer("C#", "##").layer("##", "##").inputTank("fuel").fuel(Jugcraft.id("hydrogen"), 128, 128)
+				.port("in", FormPort.Kind.FLUID_IN, 0, 0, 0, 0, FormSide.LEFT).build());
+		rejects(helper, "a processing form giving power out", () -> bad().layer("C#", "##").layer("##", "##")
+				.port("out", FormPort.Kind.ENERGY_OUT, 0, 0, 0, 0, FormSide.LEFT).build());
 		helper.succeed();
 	}
 
@@ -589,6 +610,13 @@ public class IndustrialFoundationGameTests {
 
 	private static MachineForm.Builder bad() {
 		return MachineForm.builder(TestForms.id("bad"), MachineKind.CHEMICAL_REACTOR).capability(TestForms.CAPABILITY);
+	}
+
+	/** A valid little generator form: a gas turbine's figures, hydrogen in on the left, power out at the back. */
+	private static MachineForm.Builder generator() {
+		return MachineForm.builder(TestForms.id("bad"), MachineKind.GAS_TURBINE).layer("C#", "##").layer("##", "##").inputTank("fuel")
+				.fuel(Jugcraft.id("hydrogen"), 128, 128).port("in", FormPort.Kind.FLUID_IN, 0, 0, 0, 0, FormSide.LEFT)
+				.port("out", FormPort.Kind.ENERGY_OUT, 0, 0, 1, 0, FormSide.BACK);
 	}
 
 	private static void rejects(GameTestHelper helper, String what, Supplier<?> build) {

@@ -22,7 +22,11 @@ import net.minecraft.world.level.material.Fluid;
 public record MachineStatus(MachineLifecycle state, Reason reason, int index, int subject, int amount) {
 	public enum Reason {
 		NONE, PART_MISSING, CLEARANCE_BLOCKED, PAUSED, EMPTY, MISSING_FLUID, MISSING_ITEM, UNUSED_FLUID, UNUSED_ITEM,
-		TOOL_REQUIRED, OUTPUT_FULL, OUTPUT_OTHER_FLUID, OUTPUT_SLOT_FULL, NO_ENERGY;
+		TOOL_REQUIRED, OUTPUT_FULL, OUTPUT_OTHER_FLUID, OUTPUT_SLOT_FULL, NO_ENERGY,
+		/** A generator's fuel tank is empty and it has nothing left in hand. */
+		NO_FUEL,
+		/** A generator's store is full: nothing is drawing its power. */
+		POWER_FULL;
 
 		public String translationKey() {
 			return "container.jugcraft.form.reason." + name().toLowerCase();
@@ -79,13 +83,19 @@ public record MachineStatus(MachineLifecycle state, Reason reason, int index, in
 		return Component.translatable(state.translationKey());
 	}
 
+	/** The state line as {@code form} words it: a generator at work is "Generating" rather than "Processing". */
+	public Component title(MachineForm form) {
+		return form.generator() && state == MachineLifecycle.PROCESSING
+				? Component.translatable("container.jugcraft.form.state.generating") : title();
+	}
+
 	/** The reason line, such as "Lye tank is full", or empty when there is nothing to fix. */
 	public Component detail(MachineForm form) {
 		if (reason == Reason.NONE) {
 			return Component.empty();
 		}
 		Component what = switch (reason) {
-			case MISSING_FLUID, UNUSED_FLUID, OUTPUT_FULL, OUTPUT_OTHER_FLUID -> tankLabel(form, index);
+			case MISSING_FLUID, UNUSED_FLUID, OUTPUT_FULL, OUTPUT_OTHER_FLUID, NO_FUEL -> tankLabel(form, index);
 			case MISSING_ITEM, UNUSED_ITEM, OUTPUT_SLOT_FULL -> slotLabel(form, index);
 			case TOOL_REQUIRED -> socketLabel(form, index);
 			case PART_MISSING, CLEARANCE_BLOCKED -> cellLabel(form, index);

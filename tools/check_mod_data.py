@@ -2837,11 +2837,48 @@ def check_machines(registered):
         err("MachineKind.java and tools/machines.py list different machines")
 
 
+def machines_stats(family):
+    """A machine kind's energy figures (tools/machines.py STATS)."""
+    import machines
+    return machines.STATS.get(family, {})
+
+
+def cheapest_electrolysis(fluid):
+    """The least JE any recipe spends per mB of `fluid` it makes, with the most efficiency cards its machine takes (the
+    legacy fluid machines take none), or None when no recipe makes it. All the recipe's energy counts against `fluid`,
+    so a fuel burning for less than this cannot pay back the electricity that made it, whatever else came out too."""
+    import machines
+    costs = []
+    for machine, recipes in petro.FLUID_RECIPES.items():
+        use = machines.STATS.get(machine, {}).get("use_per_tick", 0)
+        for recipe in recipes:
+            for result in recipe.get("fluid_results", []):
+                if result[0] == fluid and use:
+                    costs.append(recipe["ticks"] * use / result[1])
+    for form, recipes in industrial_forms.FORM_RECIPES.items():
+        info = industrial_forms.FORMS[form]
+        use = machines.STATS[info["family"]]["use_per_tick"]
+        # MachineUpgrades.Effect.use with four efficiency cards, the most that count.
+        cheapest = max(1, round(use * 0.8 ** 4)) if info["upgrades"] else use
+        for recipe in recipes:
+            for result in recipe.get("fluid_results", []):
+                if result[0] == fluid:
+                    costs.append(recipe["ticks"] * cheapest / result[1])
+    return min(costs) if costs else None
+
+
 def check_industrial_forms():
     """Industrial forms (tools/industrial_forms.py, IndustrialForms.java): Java builds each form exactly as the tools
-    describe it; its blockstate covers every facing, light and part; its recipes name a capability it offers, fit its
-    tanks and make no fluid from nothing; and the Separator's construction costs the owner's 20 steel plates."""
+    describe it, its fuels included; its blockstate covers every facing, light and part; its recipes name a capability
+    it offers, fit its tanks and make no fluid from nothing; a generator burns only from one fuel tank, gives its power
+    out and never burns a fuel for as much as electrolysis spends making it; and the Separator's construction costs the
+    owner's 20 steel plates."""
     java = (JAVA_ROOT / "machine" / "form" / "IndustrialForms.java").read_text(encoding="utf-8")
+    fuel_values = {name: int(value.replace("_", "")) for name, value in re.findall(
+        r"public static final int (\w+) = ([\d_]+);", (JAVA_ROOT / "chemistry" / "FluidFuels.java").read_text(encoding="utf-8"))}
+
+    def value(text):
+        return int(text) if text.isdigit() else fuel_values.get(text.removeprefix("FluidFuels."), -1)
     profiles = {name: int(mb.replace("_", "")) for name, mb in re.findall(
         r"(\w+)\(\d+, ([\d_]+), \d+\)", (JAVA_ROOT / "machine" / "form" / "OperatingProfile.java").read_text(encoding="utf-8"))}
     constants = dict(re.findall(r'public static final String (\w+) = "([^"]+)";', java))
@@ -2865,10 +2902,13 @@ def check_industrial_forms():
             "ports": [(name, kind, int(target) if target.lstrip("-").isdigit() else target, int(column), int(row), int(layer), side)
                       for name, kind, target, column, row, layer, side in re.findall(
                           r'\.port\("(\w+)", FormPort\.Kind\.(\w+), ([\w.-]+), (\d+), (\d+), (\d+), FormSide\.(\w+)\)', body)],
+            "fuels": [(f"{MOD}:{fluid}", value(per_mb), value(per_tick)) for fluid, per_mb, per_tick in re.findall(
+                r'\.fuel\(Jugcraft\.id\("(\w+)"\), ([\w.]+), ([\w.]+)\)', body)],
         }
-        for key, value in found.items():
-            if info[key] != value:
-                err(f"{form}: {key} is {value} in IndustrialForms.java but {info[key]} in tools/industrial_forms.py")
+        for key, built in found.items():
+            described = info.get(key, []) if key == "fuels" else info[key]
+            if [tuple(item) for item in described] != [tuple(item) for item in built] if key == "fuels" else described != built:
+                err(f"{form}: {key} is {built} in IndustrialForms.java but {described} in tools/industrial_forms.py")
         if profiles.get(info["profile"]) != info["tank_mb"]:
             err(f"{form}: the {info['profile']} profile's tanks hold {profiles.get(info['profile'])} mB, not {info['tank_mb']}")
         parts = len(industrial_forms.footprint(info["layers"]))
@@ -2877,8 +2917,22 @@ def check_industrial_forms():
                     for lit in ("false", "true") for part in range(parts)}
         if set(state.get("variants", {})) != expected:
             err(f"{form}: its blockstate must cover exactly 4 facings x 2 lights x {parts} parts")
-        if f"{MOD}:{form}" not in viewed:
-            err(f"{form}: no JEI category in recipe_view.json")
+        if bool(industrial_forms.FORM_RECIPES.get(form)) != (f"{MOD}:{form}" in viewed):
+            err(f"{form}: a JEI category in recipe_view.json exactly when it runs recipes")
+        if info.get("fuels"):
+            kinds = [port[1] for port in info["ports"]]
+            if (len(info["input_tanks"]) != 1 or info["output_tanks"] or info["capabilities"] or info["upgrades"]
+                    or industrial_forms.FORM_RECIPES.get(form) or "FLUID_IN" not in kinds or "ENERGY_OUT" not in kinds
+                    or "ENERGY_IN" in kinds):
+                err(f"{form}: a generator burns from one fuel tank, runs no recipes and only gives power out")
+            for fluid, per_mb, per_tick in info["fuels"]:
+                if fluid not in {f"{MOD}:{f}" for f in list(petro.FLUIDS) + list(petro.GASES)}:
+                    err(f"{form}: burns unknown fluid {fluid}")
+                if per_mb <= 0 or per_tick <= 0 or per_tick > machines_stats(info["family"]).get("capacity", 0):
+                    err(f"{form}: burns {fluid} for nothing or makes more a tick than it stores")
+                cost = cheapest_electrolysis(fluid)
+                if cost is not None and per_mb >= cost:
+                    err(f"{form}: {fluid} burns for {per_mb} JE/mB, at least the {cost:.1f} JE/mB its cheapest making costs: a power loop")
         tanks = info["input_tanks"] + info["output_tanks"]
         fluids = {f"{MOD}:{f}" for f in list(petro.FLUIDS) + list(petro.GASES)} | {"minecraft:water", "minecraft:lava"}
         for recipe in industrial_forms.FORM_RECIPES.get(form, []):
@@ -2960,14 +3014,18 @@ def check_machine_rotors():
     data = load(ASSETS / "machine_rotor_quads.json")
     if data is None:
         return
-    if set(data) != set(ROTORS):
-        err(f"machine_rotor_quads.json has {sorted(data)}, giant_models.ROTORS {sorted(ROTORS)}: run generate_material_data.py")
+    if set(data) != set(ROTORS) | set(industrial_forms.ROTORS):
+        err(f"machine_rotor_quads.json has {sorted(data)}, giant_models.ROTORS and industrial_forms.ROTORS "
+            f"{sorted(set(ROTORS) | set(industrial_forms.ROTORS))}: run generate_material_data.py")
     opaque = {}
     for name, rotor in data.items():
-        if rotor.get("block") not in ENLARGED or rotor.get("axis") not in ("x", "y", "z"):
-            err(f"machine rotor {name}: block {rotor.get('block')} is not a big machine, or its axis is wrong")
-        if rotor.get("when", {}).get("compact") != "false":
+        form = rotor.get("block") in industrial_forms.FORMS
+        if not (form or rotor.get("block") in ENLARGED) or rotor.get("axis") not in ("x", "y", "z"):
+            err(f"machine rotor {name}: block {rotor.get('block')} is not a big machine or a form, or its axis is wrong")
+        if not form and rotor.get("when", {}).get("compact") != "false":
             err(f"machine rotor {name} must only draw on the big machine (when compact=false)")
+        if form and (rotor.get("property") != "lit" or not rotor.get("always")):
+            err(f"machine rotor {name}: a form's turning parts turn while it is lit and stand still while idle (always)")
         for key in ("center", "property", "speed", "quads"):
             if key not in rotor:
                 err(f"machine rotor {name} has no {key}")
@@ -2988,9 +3046,10 @@ def check_machine_rotors():
                 break
     client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
     rotors_java = (client / "MachineRotors.java").read_text(encoding="utf-8") if (client / "MachineRotors.java").is_file() else ""
-    renderer = (client / "WindTurbineRenderer.java").read_text(encoding="utf-8")
-    if '"machine_rotor_quads.json"' not in rotors_java or "MachineRotors.extract" not in renderer or "MachineRotors.submit" not in renderer:
-        err("client/MachineRotors must read machine_rotor_quads.json and the machine renderer must extract and submit it")
+    for renderer_file in ("WindTurbineRenderer.java", "FormMachineRenderer.java"):
+        renderer = (client / renderer_file).read_text(encoding="utf-8") if (client / renderer_file).is_file() else ""
+        if '"machine_rotor_quads.json"' not in rotors_java or "MachineRotors.extract" not in renderer or "MachineRotors.submit" not in renderer:
+            err(f"client/MachineRotors must read machine_rotor_quads.json and {renderer_file} must extract and submit it")
     for name, rotor in ROTORS.items():
         _, cy, cz = rotor["center"]
         for style, models in (("steampunk", GIANTS), ("classic", CLASSIC)):

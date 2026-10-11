@@ -133,6 +133,11 @@ public class FormMachineMenu extends AbstractContainerMenu {
 		return data(FormMachineBlockEntity.DATA_PAUSED) != 0;
 	}
 
+	/** JE a tick one running lane pays; for a generator, the JE it made last tick. */
+	public int laneUse() {
+		return data(FormMachineBlockEntity.DATA_LANE_USE);
+	}
+
 	/** Paid ticks of lane {@code lane}, and the ticks its batch needs (0 when the lane is free). */
 	public int laneProgress(int lane) {
 		return data(FormMachineBlockEntity.DATA_LANES + 2 * lane);

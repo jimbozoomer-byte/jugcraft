@@ -26,6 +26,9 @@ import net.minecraft.world.level.material.Fluids;
  * and the terminal says the machine's state and the one thing to fix, in the order the plan gives: process, inputs,
  * tool, energy, reserved outputs and completion. Reserved room in an output tank shows as a pale band above its fluid.
  * The tool sockets and upgrade slots sit in the terminal's lower panel; Pause and Cancel are the local controls.
+ *
+ * <p>A generator form shows its fuel tank, an arrow lit while it makes power and its store on the right, where a
+ * processor's outputs would be; the terminal gives the power it made last tick. It has no batches, so no Cancel.
  */
 public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> {
 	private static final int BAY_WIDTH = 176;
@@ -39,6 +42,8 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 	private static final int BAR_Y = 17;
 	private static final int BAR_WIDTH = 12;
 	private static final int BAR_HEIGHT = 52;
+	/** A generator's store, at the right of the bay where its power goes out. */
+	private static final int OUT_BAR_X = BAY_WIDTH - BAR_X - BAR_WIDTH;
 	private static final int ARROW_Y = 43;
 	private static final int WATER = 0xFF3060D0;
 	private static final int LAVA = 0xFFE87010;
@@ -57,8 +62,15 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		titleLabelX = (BAY_WIDTH - font.width(title)) / 2;
 		pauseButton = addRenderableWidget(Button.builder(Component.translatable("container.jugcraft.form.pause"),
 				button -> click(FormMachineBlockEntity.BUTTON_PAUSE)).bounds(leftPos + SCREEN_X, topPos + BUTTON_Y, 36, 12).build());
-		addRenderableWidget(Button.builder(Component.translatable("container.jugcraft.form.cancel"),
-				button -> click(FormMachineBlockEntity.BUTTON_CANCEL)).bounds(leftPos + SCREEN_X + 38, topPos + BUTTON_Y, 36, 12).build());
+		if (!menu.form().generator()) {
+			addRenderableWidget(Button.builder(Component.translatable("container.jugcraft.form.cancel"),
+					button -> click(FormMachineBlockEntity.BUTTON_CANCEL)).bounds(leftPos + SCREEN_X + 38, topPos + BUTTON_Y, 36, 12).build());
+		}
+	}
+
+	/** Where the energy bar stands: a processor's on the left, before its inputs; a generator's on the right. */
+	private int barX() {
+		return menu.form().generator() ? OUT_BAR_X : BAR_X;
 	}
 
 	private void click(int id) {
@@ -83,7 +95,7 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		graphics.blit(RenderPipelines.GUI_TEXTURED, theme.texture(), x, y, 0.0F, 0.0F, imageWidth, imageHeight, 512, 256);
 		MachineForm form = menu.form();
 		FluidMachineSpec spec = form.tanks();
-		energyBar(graphics, x + BAR_X, y + BAR_Y);
+		energyBar(graphics, x + barX(), y + BAR_Y);
 		for (int tank = 0; tank < spec.tanks(); tank++) {
 			int color = menu.tankFluid(tank) != 0 ? fluidColor(fluid(tank)) : 0;
 			tube(graphics, x + tankX(spec, tank), y + MachineMenu.TANK_Y, menu.tankAmount(tank), menu.tankReserved(tank),
@@ -104,6 +116,10 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 			}
 		}
 		int arrowX = x + MachineMenu.fluidArrowX(spec);
+		if (form.generator()) {
+			arrow(graphics, arrowX, y + ARROW_Y, menu.laneUse() > 0 ? 1 : 0);
+			return;
+		}
 		arrow(graphics, arrowX, y + ARROW_Y, fraction(0));
 		int lanes = form.profile().lanes();
 		for (int lane = 1; lane < lanes; lane++) {
@@ -132,7 +148,7 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		MachineStatus status = menu.status();
 		int y = SCREEN_Y;
 		// The state wraps like the reason: "Waiting for input" is wider than the terminal.
-		for (FormattedCharSequence line : font.split(Component.literal("> ").append(status.title()), SCREEN_WIDTH)) {
+		for (FormattedCharSequence line : font.split(Component.literal("> ").append(status.title(menu.form())), SCREEN_WIDTH)) {
 			graphics.text(font, line, SCREEN_X, y, status.state().warning() ? theme.warn() : theme.text(), false);
 			y += 9;
 		}
@@ -145,6 +161,16 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 			y += 9;
 		}
 		y += 2;
+		if (menu.form().generator()) {
+			if (y + 9 <= TEXT_BOTTOM) {
+				row(graphics, y, Component.translatable("container.jugcraft.terminal.rate").getString(), menu.laneUse() + " JE/t");
+				y += 10;
+			}
+			if (y + 9 <= TEXT_BOTTOM) {
+				powerRow(graphics, y);
+			}
+			return;
+		}
 		int running = 0;
 		int best = 0;
 		for (int lane = 0; lane < menu.form().profile().lanes(); lane++) {
@@ -158,17 +184,22 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 			y += 10;
 		}
 		if (y + 9 <= TEXT_BOTTOM) {
-			String label = Component.translatable("container.jugcraft.terminal.power").getString();
-			String energy = compact(menu.energy()) + "/" + compact(menu.capacity());
-			if (!fits(label, energy)) {
-				energy = thousands(menu.energy()) + "/" + thousands(menu.capacity());
-			}
-			row(graphics, y, label, energy);
+			powerRow(graphics, y);
 			y += 10;
 		}
 		if (y + 9 <= TEXT_BOTTOM) {
 			row(graphics, y, Component.translatable("container.jugcraft.form.lanes").getString(), running + "/" + menu.form().profile().lanes());
 		}
+	}
+
+	/** The stored power against the store's size, in whole thousands when tenths would not fit beside the label. */
+	private void powerRow(GuiGraphicsExtractor graphics, int y) {
+		String label = Component.translatable("container.jugcraft.terminal.power").getString();
+		String energy = compact(menu.energy()) + "/" + compact(menu.capacity());
+		if (!fits(label, energy)) {
+			energy = thousands(menu.energy()) + "/" + thousands(menu.capacity());
+		}
+		row(graphics, y, label, energy);
 	}
 
 	/** Whether a label and its value fit side by side on one terminal line, two pixels apart. */
@@ -190,7 +221,7 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		int my = mouseY - topPos;
 		MachineForm form = menu.form();
 		FluidMachineSpec spec = form.tanks();
-		if (mx >= BAR_X - 1 && mx <= BAR_X + BAR_WIDTH && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT) {
+		if (mx >= barX() - 1 && mx <= barX() + BAR_WIDTH && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT) {
 			graphics.setTooltipForNextFrame(font, Component.literal(String.format("%,d / %,d JE", menu.energy(), menu.capacity())),
 					mouseX, mouseY);
 			return;

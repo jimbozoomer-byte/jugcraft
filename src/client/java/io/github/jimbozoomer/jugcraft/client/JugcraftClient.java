@@ -53,6 +53,7 @@ public final class JugcraftClient implements ClientModInitializer {
 			MenuScreens.register(JugcraftMachines.menuType(kind), MachineScreen::new);
 		}
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.machine.form.JugcraftForms.MENU, FormMachineScreen::new);
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.machine.form.IndustrialForms.ENTITY, FormMachineRenderer::new);
 		MenuScreens.register(JugcraftAgriculture.COOKING_POT_MENU, CookingPotScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD_MENU, RocketPadScreen::new);
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_RIDER,

@@ -152,7 +152,7 @@ Not applicable: infrastructure inside machines, with no world generation, creatu
 
 ## Rollout and open questions
 
-- **Next, package 2.** Its first slice is the [Electrolytic Separator](industrial-electrolytic-separator.md), in the existing electrolysis family. The rest of the starter gas and acid factory follows, with the selected methanation-water drain.
+- **Next, package 2.** Its first slice is the [Electrolytic Separator](industrial-electrolytic-separator.md), in the existing electrolysis family. The second is the [Gas Burning Generator](industrial-gas-burning-generator.md), which adds **generator forms** to this foundation: a form can list the fuels it burns, with one fuel tank and power-out ports instead of recipes, and it never takes power in. The rest of the starter gas and acid factory follows, with the selected methanation-water drain.
 - **Known limits:**
   - The original one-model machines' screens are unchanged; only forms show the eight states.
   - No JEI/EMI category or Jade readout for form-only recipes yet.
