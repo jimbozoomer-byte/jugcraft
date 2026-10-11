@@ -136,6 +136,7 @@ For CI:
     - `_back`: the banded housing's access panel and the feed inlet low at the back;
     - `_night`: the same front-left view, with the lamp lit. The strips, though, could light only where they pass through the controller's block: the foundation lit the controller alone. The commit after the brine change lights every part, and its run retakes this shot.
 - **Run [38105664707](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38105664707) (commit 7d6ef403, the Cell's brine at 400 ticks): green.** "All 1298 required tests passed", among them the Cell's own brine test at its new time.
+- **Run [38106303119](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38106303119) (commit cfce0f3d, every part lit): green.** "All 1299 required tests passed", the new `everyPartLightsWhileItWorks` among them. The retaken `_night` shot looks the same as before: in the open at midnight the test client's view is not dark enough to show any glow, so the server test, not the picture, is the evidence that every part now lights.
 
 No survival playtest, two-client test or performance measurement has been done.
 
