@@ -30,8 +30,10 @@ def column(side, end, horizontal=False, bark_ends=False):
         cap = face in ("down", "up")
         faces[face] = {"texture": "#end" if cap else "#side", "cullface": face,
                        "tintindex": 0 if bark_ends or not cap else 1}
-        if horizontal and not cap:
-            faces[face]["rotation"] = 90
+        # Match vanilla cube_column_horizontal: blockstate rotation already turns the bark grain.
+        # Only the upper end needs its UV flipped. Turning side UVs too would put grain across a beam.
+        if horizontal and face == "up":
+            faces[face]["rotation"] = 180
     return {"parent": "minecraft:block/block", "textures": {"side": side, "end": end, "particle": side},
             "elements": [{"from": [0, 0, 0], "to": [16, 16, 16], "faces": faces}]}
 

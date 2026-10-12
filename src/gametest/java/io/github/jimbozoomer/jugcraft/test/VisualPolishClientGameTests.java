@@ -38,6 +38,8 @@ public class VisualPolishClientGameTests implements FabricClientGameTest {
 				}
 				server.runCommand("setblock %d %d %d jugcraft:%s_log[axis=z]".formatted(at, y + 2, z, wood));
 				server.runCommand("setblock %d %d %d jugcraft:stripped_%s_log[axis=z]".formatted(at + 1, y + 2, z, wood));
+				server.runCommand("setblock %d %d %d jugcraft:%s_log[axis=x]".formatted(at, y + 3, z, wood));
+				server.runCommand("setblock %d %d %d jugcraft:stripped_%s_log[axis=x]".formatted(at + 1, y + 3, z, wood));
 			}
 			context.runOnClient(client -> {
 				client.options.setCameraType(CameraType.FIRST_PERSON);
