@@ -2,6 +2,10 @@
 
 Owner requested companion-only automated testing on 7 October 2026, superseding the earlier instruction to skip tests. Implemented and run with OpenAI Codex (GPT-6).
 
+## Integration revision, 12 October 2026
+
+See the [new integration regression record](companion-integration-tests.md) for the owner-requested run covering the newer workstation, livestock, garden, maintenance, water and sprinkler implementations. It records the exact suites, fixes, local evidence and coverage limits.
+
 ## Performance revision, 8 October 2026
 
 The [planning, synchronization, rest and navigation changes](companion-performance.md) passed the expanded companion suite: **42 groups, 715 assertions, zero failed groups**, completed at 11:46 local time. The additional four groups check shared readiness reuse, per-companion isolation, live claim validation, same-tick block replacement, exact energy rollback, reduced snapshot frequency, stable meal timestamps, obstructed bunk release, retained progressing paths and alternate entrance selection. World save/reopen and the one-client dedicated reconnect check passed again.

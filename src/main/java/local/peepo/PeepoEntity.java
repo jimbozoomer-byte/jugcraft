@@ -84,10 +84,13 @@ public final class PeepoEntity extends PathfinderMob {
         boolean usingTool=switch(action){
             case HARVEST -> item.is(net.minecraft.tags.ItemTags.HOES);
             case CHOP -> item.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.KNIVES);
-            case SHEAR -> item.is(Items.SHEARS);
+            case SHEAR, HIVE_SHEAR -> item.is(Items.SHEARS);
+            case SLAUGHTER -> CompanionHusbandry.weapon(item);
+            case INTERACT -> CompanionGarden.cuttingTool(item) && level().hasChunkAt(workTarget().above())
+                && level().getBlockState(workTarget().above()).getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.MushroomColonyBlock;
             default -> false;
         };
-        boolean tool=item.has(DataComponents.TOOL) || item.is(net.minecraft.tags.ItemTags.HOES) || item.is(Items.SHEARS)
+        boolean tool=item.is(net.minecraft.tags.ItemTags.SWORDS) || item.has(DataComponents.TOOL) || item.is(net.minecraft.tags.ItemTags.HOES) || item.is(Items.SHEARS)
             || item.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.KNIVES)
             || item.getItem() instanceof io.github.jimbozoomer.jugcraft.logistics.BrassWrenchItem
             || item.is(Items.FLINT_AND_STEEL) || item.is(Items.FISHING_ROD) || item.is(Items.BRUSH);
@@ -112,6 +115,7 @@ public final class PeepoEntity extends PathfinderMob {
     public final CompanionReport report=new CompanionReport(this);
     public final CompanionFood food=new CompanionFood(this);
     public final CompanionGarden garden=new CompanionGarden(this);
+    public final CompanionWater water=new CompanionWater(this);
     public final CompanionLivestock livestock=new CompanionLivestock(this);
     public final CompanionSocial social=new CompanionSocial(this);
     public final CompanionOrders orders=new CompanionOrders(this);
@@ -137,6 +141,7 @@ public final class PeepoEntity extends PathfinderMob {
         try{social.cancel();resetCompanionRoutine();}finally{settingsMenus.clear();navigationMemory.clear();companionUnloading=false;}
     }
     boolean isUsingJobAt(net.minecraft.core.BlockPos pos){return routine!=null && routine.atJob(pos);}
+    boolean tendingCriticalJob(){return routine!=null && routine.timeCritical();}
     boolean deferJobTransport(net.minecraft.core.BlockPos pos){return routine!=null && routine.deferTransport(pos);}
     CompanionStatus routineStatus(){return routine==null?CompanionStatus.IDLE:routine.state();}
     CompanionStatus stationStatus(net.minecraft.core.BlockPos pos){return routine==null?null:routine.status(pos);}
@@ -167,6 +172,12 @@ public final class PeepoEntity extends PathfinderMob {
         if (REST.equals(data)) refreshDimensions();
     }
     public boolean isRecovering() { return entityData.get(RECOVERING); }
+    /** A paid job cannot use a partial reserve payment; rest rather than retrying forever just above zero. */
+    public boolean hasWorkEnergy(int cost) {
+        if(getEnergy()>=cost)return true;
+        if(!level().isClientSide()){entityData.set(RECOVERING,true);setWheelRunning(false);}
+        return false;
+    }
     public void updateRecoveryState() {
         if(level().isClientSide())return;
         if(getEnergy()<=CompanionEnergy.CAPACITY*preferences.breakAt/100) { entityData.set(RECOVERING,true);setWheelRunning(false); }
@@ -361,7 +372,7 @@ public final class PeepoEntity extends PathfinderMob {
     }
     public static AttributeSupplier.Builder attributes() {
         return createMobAttributes().add(Attributes.MAX_HEALTH, 20).add(Attributes.MOVEMENT_SPEED, .20)
-            .add(Attributes.FOLLOW_RANGE, 16);
+            .add(Attributes.FOLLOW_RANGE, 16).add(Attributes.ATTACK_DAMAGE,2);
     }
     @Override protected void registerGoals() {
         goalSelector.addGoal(-1, new SettingsPauseGoal());

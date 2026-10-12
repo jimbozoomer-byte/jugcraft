@@ -498,6 +498,9 @@ public enum MachineKind implements StringRepresentable {
 		};
 	}
 
+	/** Generators with a supported solid-fuel inventory. */
+	public boolean solidFuelCompanion() {return this==COAL_GENERATOR || isBoiler();}
+	public boolean supportsCompanionLogistics() {return supportsCompanionAssistance() || solidFuelCompanion();}
 	/** Processing jobs, including continuous extraction/separation; never power production or storage. */
 	public boolean supportsCompanionAssistance() {
 		return isProcessor() || switch (this) {

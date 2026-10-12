@@ -163,7 +163,7 @@ public final class PeepoDeliveryClientTests implements FabricClientGameTest {
     private void garden(TestServerContext s){
         s.runOnServer(v->{var l=v.overworld();reset(l,false);
             l.setBlockAndUpdate(base.north(),Blocks.WATER.defaultBlockState());
-            l.setBlockAndUpdate(base,Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmlandBlock.MOISTURE,7));npc.assignments.assign(l,base);
+            l.setBlockAndUpdate(base,Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmlandBlock.MOISTURE,7));npc.assignments.assignGardenZone(base,base,false);
             // A saved harvest state: real inventory owns the items; garden marks only track their origin.
             npc.belongings.setItem(0,new ItemStack(Items.WHEAT,64));npc.belongings.setItem(1,new ItemStack(Items.CARROT,64));
             var saved=TagValueOutput.createWithContext(ProblemReporter.DISCARDING,l.registryAccess());

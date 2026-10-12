@@ -42,6 +42,20 @@ final class CompanionWorkPose {
         arm.x=side*2.3F;arm.y=19.2F;arm.z=-1.4F;
         reach(arm,gripX(s)+side*.35F,GRIP_Y,gripZ(s));
     }
+    static void spinning(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg,ModelPart[] torso){
+        float pedal=(1-Mth.cos(s.workPhase))*.5F,feed=Mth.sin(s.workPhase)*.28F;
+        float pitch=.10F+pedal*.10F,bob=-pedal*.22F;
+        head.yRot=0;head.xRot=.16F;
+        for(var part:torso)lean(part,pitch,0,0,bob);
+        left.x=s.pumpkin?2.9F:2.3F;right.x=-left.x;
+        left.y=right.y=19.2F;left.z=right.z=s.pumpkin?-2.6F:-1.4F;
+        lean(left,pitch,0,0,bob);lean(right,pitch,0,0,bob);
+        reach(left,s.crankX+.6F,s.crankY+feed,s.crankZ+.3F);
+        reach(right,s.crankX-.6F,s.crankY-feed,s.crankZ-.3F);
+        leftLeg.xRot=-.10F;rightLeg.xRot=-.25F-pedal*.65F;
+        rightLeg.y-=pedal*.7F;rightLeg.z-=pedal*.5F;
+        leftLeg.yRot=rightLeg.yRot=leftLeg.zRot=rightLeg.zRot=0;
+    }
     static void crank(PeepoState s,ModelPart left,ModelPart right,ModelPart head,ModelPart leftLeg,ModelPart rightLeg,ModelPart[] torso){
         float lift=Math.max(0,17.0F-s.crankY),hang=Mth.clamp(lift/2,0,1);
         float push=Mth.clamp((s.crankY-16)/4,0,1),pitch=.22F*push-.12F*hang;

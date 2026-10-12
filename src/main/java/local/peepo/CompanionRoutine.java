@@ -20,6 +20,9 @@ final class CompanionRoutine extends Goal {
     CompanionRoutine(PeepoEntity npc){this.npc=npc;nextSearch=npc.level().getGameTime()+Math.floorMod(npc.getId(),80);setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK));}
     void resetOrders(){release();active=false;nextSearch=0;}
     boolean isActive(){return active;}
+    boolean timeCritical(){return active && station instanceof CompanionJob job && job.timeCritical()
+        && npc.preferences.canWork() && npc.orders.station(station) && station.availableTo(npc)
+        && CompanionJobs.permitted(npc,station.stationPosition());}
     boolean atJob(BlockPos pos){return station instanceof CompanionJob && station.stationPosition().equals(pos);}
     /** Let a productive session finish before ordinary same/lower-priority hauling, at most 20 seconds. */
     boolean deferTransport(BlockPos pos){
@@ -76,6 +79,7 @@ final class CompanionRoutine extends Goal {
         List<CompanionStation> candidates=new ArrayList<>();
         for(var pos:npc.assignments.loadedStations()){
             var s=resolve(pos);if(s!=null && candidate(s) && !unreachable.containsKey(pos))candidates.add(s);
+            if(s instanceof CompanionGarden.Job garden && garden.discoveryPending())nextSearch=Math.min(nextSearch,now+20);
         }
         // An assigned productive job needs no ambient machine scan.
         if(candidates.isEmpty()){
@@ -125,7 +129,7 @@ final class CompanionRoutine extends Goal {
     /** Keep movement ownership across a short recipe/budget handoff, never across a real failure. */
     private boolean hold(CompanionStatus status,long now){
         if(status!=CompanionStatus.IDLE && status!=CompanionStatus.WAITING && status!=CompanionStatus.NO_INPUT
-            && status!=CompanionStatus.NO_POWER && status!=CompanionStatus.NO_HEAT)return false;
+            && status!=CompanionStatus.NO_POWER && status!=CompanionStatus.NO_HEAT && status!=CompanionStatus.NO_WATER_SOURCE)return false;
         if(handoffUntil==0){
             handoffUntil=now+40;
             if(status==CompanionStatus.NO_INPUT || status==CompanionStatus.NO_HEAT)npc.transport.workChanged();
@@ -135,7 +139,7 @@ final class CompanionRoutine extends Goal {
         return true;
     }
     private void reconsiderWork(){
-        if(station==null || !npc.assignments.workManaged() || !npc.preferences.canWork())return;
+        if(station==null || !npc.assignments.workManaged() || !npc.preferences.canWork() || timeCritical())return;
         long now=npc.level().getGameTime();if(now<nextPriority)return;
         // Optional idle rest must not hide newly ready work; recovery/off-shift rest stays protected.
         int priority=station instanceof CompanionJob?npc.assignments.workPriority(station.stationPosition()):5;
@@ -181,12 +185,18 @@ final class CompanionRoutine extends Goal {
         reconsiderWork();
         if(station==null){npc.getNavigation().stop();return;}
         var target=station.approachPosition();
-        if(npc.position().distanceToSqr(target)>.64){
+        if(npc.position().distanceToSqr(target)>station.arrivalDistanceSquared()){
             state=CompanionStatus.TRAVELLING;
             if(now>deadline){var pos=station.stationPosition();release();blocked(pos,now);return;}
             if(--repath<=0){
                 if(!station.claim(npc)){release();return;}
                 repath=40;
+            }
+            // Vanilla considers a path node reached before a precise bank arrival is complete.
+            // Finish that last short step under the same lease, without restarting its completed path.
+            if(station.arrivalDistanceSquared()<.64 && npc.position().distanceToSqr(target)<=.64
+                && CompanionHazards.safeAt(npc,target)){
+                npc.getNavigation().stop();npc.getMoveControl().setWantedPosition(target.x,target.y,target.z,1);return;
             }
             if(travel.needsPath(npc,target)){
                 if(!CompanionBudget.path(npc)){state=CompanionStatus.WAITING;return;}

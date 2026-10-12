@@ -80,9 +80,10 @@ public final class PeepoModel extends EntityModel<PeepoState> {
         }
         if(s.work!=local.peepo.WorkAnimation.NONE && !s.eating && !s.sleeping && !s.sitting && !s.wheelRunning){
             if(s.work==local.peepo.WorkAnimation.STIR)CompanionWorkPose.stir(s,leftArm,rightArm,head,leftLeg,rightLeg);
+            else if(s.work==local.peepo.WorkAnimation.SPINNING)CompanionWorkPose.spinning(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
             else if(s.work==local.peepo.WorkAnimation.CRANK)CompanionWorkPose.crank(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
             else if(s.work.isPie())CompanionWorkPose.pie(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
-            else if(s.work.hasTool() || s.work==local.peepo.WorkAnimation.CHOP || s.work==local.peepo.WorkAnimation.HARVEST || s.work==local.peepo.WorkAnimation.SHEAR)CompanionWorkPose.tool(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
+            else if(s.work.hasTool() || s.work==local.peepo.WorkAnimation.CHOP || s.work==local.peepo.WorkAnimation.HARVEST || s.work==local.peepo.WorkAnimation.SHEAR || s.work==local.peepo.WorkAnimation.HIVE_SHEAR || s.work==local.peepo.WorkAnimation.HIVE_BOTTLE)CompanionWorkPose.tool(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
             else CompanionWorkPose.interact(s,leftArm,rightArm,head);
         }
         if(!s.held.isEmpty() && !s.eating && !s.wheelRunning && !s.sleeping && s.work==local.peepo.WorkAnimation.NONE)rightArm.xRot=-.65F;

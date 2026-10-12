@@ -37,6 +37,9 @@ The existing per-station exclusive reservations remain the authority. Travel ren
 
 ## Processor assistance and helper teams
 
+The [industrial-machine extension](companion-industrial-machines.md) adds the shared `ProcessorHost` contract and opts the Electrolytic Separator into two-helper assistance. Legacy processor behavior and footprint rules remain in place.
+
+
 Animal work uses the same four assignment slots: [anchored shearing and milking jobs](companion-livestock.md), with Supply/Output, temporary animal holding and companion-operated pen gates.
 
 Owner-requested on 7 October 2026, implemented with OpenAI Codex (GPT-6), against base commit `4bc09ffd`. The four-machine pilot is now expanded to all **36 processing machine types** in `MachineBlockEntity`: standard item recipes, fluid recipes, special crafting/plating, mining, farming and continuous pumping/separation. Electrical generators, kinetic engines, batteries and tanks have no processing-speed job and remain unsupported. The Generator Wheel and Cooking Pot retain their separate existing jobs.

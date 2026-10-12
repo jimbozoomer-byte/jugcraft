@@ -77,6 +77,7 @@ public final class MachineForm {
 	private final int itemOutputs;
 	private final boolean upgrades;
 	private final int warmupTicks;
+	private final boolean companionAssistance;
 	private final List<FormFuel> fuels;
 
 	private MachineForm(Builder builder) {
@@ -86,6 +87,7 @@ public final class MachineForm {
 		this.profile = builder.profile;
 		this.upgrades = builder.upgrades;
 		this.warmupTicks = builder.warmup;
+		this.companionAssistance = builder.companionAssistance;
 		this.fuels = List.copyOf(builder.fuels);
 		if (builder.layers.isEmpty() || builder.layers.getFirst().length == 0) {
 			throw invalid("has no layers");
@@ -100,6 +102,9 @@ public final class MachineForm {
 			}
 		}
 		boolean generator = !fuels.isEmpty();
+		if (generator && companionAssistance) {
+			throw invalid("generator assistance requires separate fuel balancing");
+		}
 		if (generator ? !family.isGenerator() : !family.isFluidProcessor()) {
 			throw invalid(generator ? "burns fuel, so needs a generator family, not " + family.id
 					: "needs a fluid-processing family for its recipes, not " + family.id);
@@ -455,6 +460,11 @@ public final class MachineForm {
 		return profile;
 	}
 
+	/** Explicit opt-in: two physical helpers, each adding 25% paid processing speed. */
+	public boolean companionAssistance() {
+		return companionAssistance;
+	}
+
 	/** The process tanks; each holds the profile's buffer. */
 	public FluidMachineSpec tanks() {
 		return tanks;
@@ -527,6 +537,7 @@ public final class MachineForm {
 		private final Map<String, String> aliases = new LinkedHashMap<>();
 		private boolean upgrades;
 		private int warmup;
+		private boolean companionAssistance;
 		private final List<FormFuel> fuels = new ArrayList<>();
 
 		private Builder(Identifier id, MachineKind family) {
@@ -589,6 +600,11 @@ public final class MachineForm {
 
 		public Builder warmup(int ticks) {
 			this.warmup = ticks;
+			return this;
+		}
+
+		public Builder companionAssistance() {
+			this.companionAssistance = true;
 			return this;
 		}
 
