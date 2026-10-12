@@ -6,9 +6,11 @@
     "dp_gauge": "jugcraft:block/dp_gauge",
     "dp_gunmetal": "jugcraft:block/dp_gunmetal",
     "dp_olive": "jugcraft:block/dp_olive",
+    "dp_rubber": "jugcraft:block/dp_rubber",
     "dr_amber": "jugcraft:block/dr_amber",
     "dr_fan": "jugcraft:block/dr_fan",
     "dw_ribbed_steel": "jugcraft:block/dw_ribbed_steel",
+    "power_port": "jugcraft:block/power_port",
     "sp_copper": "jugcraft:block/sp_copper",
     "particle": "jugcraft:block/dp_olive"
   },
@@ -545,12 +547,12 @@
     },
     {
       "from": [
-        5.0,
+        4.9,
         6.25,
         14.5
       ],
       "to": [
-        11.0,
+        11.1,
         9.75,
         15.5
       ],
@@ -583,7 +585,7 @@
       ],
       "to": [
         10.5,
-        11.0,
+        11.1,
         15.5
       ],
       "faces": {
@@ -610,7 +612,7 @@
     {
       "from": [
         5.5,
-        5.0,
+        4.9,
         14.5
       ],
       "to": [
@@ -739,6 +741,106 @@
             9.5,
             14.75
           ]
+        }
+      }
+    },
+    {
+      "from": [
+        5.0,
+        5.0,
+        14.875
+      ],
+      "to": [
+        11.0,
+        11.0,
+        16.125
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_chrome",
+          "uv": [
+            0,
+            0,
+            6.0,
+            6.0
+          ]
+        },
+        "south": {
+          "texture": "#dp_rubber",
+          "uv": [
+            0,
+            0,
+            6.0,
+            6.0
+          ]
+        },
+        "east": {
+          "texture": "#dp_chrome",
+          "uv": [
+            0,
+            0,
+            1.25,
+            6.0
+          ]
+        },
+        "west": {
+          "texture": "#dp_chrome",
+          "uv": [
+            0,
+            0,
+            1.25,
+            6.0
+          ]
+        },
+        "up": {
+          "texture": "#dp_chrome",
+          "uv": [
+            0,
+            0,
+            6.0,
+            1.25
+          ]
+        },
+        "down": {
+          "texture": "#dp_chrome",
+          "uv": [
+            0,
+            0,
+            6.0,
+            1.25
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        5.75,
+        5.75,
+        14.75
+      ],
+      "to": [
+        10.25,
+        10.25,
+        15.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_rubber"
+        },
+        "south": {
+          "texture": "#dp_rubber"
+        },
+        "east": {
+          "texture": "#dp_rubber"
+        },
+        "west": {
+          "texture": "#dp_rubber"
+        },
+        "up": {
+          "texture": "#dp_rubber"
+        },
+        "down": {
+          "texture": "#dp_rubber"
         }
       }
     }

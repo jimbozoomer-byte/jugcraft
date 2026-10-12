@@ -428,7 +428,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
         lang[f"container.{MOD}.form.tank.{role}"] = name
     for form, info in FORMS.items():
         lang[f"block.{MOD}.{form}"] = info["display"]
-        elements = MODELS[form]
+        from machine_connections import with_sockets, form_ports
+        elements = with_sockets(MODELS[form], form_ports(info))
         item_elements = elements + ITEM_EXTRAS.get(form, [])
         textures = {name: f"{MOD}:block/{name}" for name in model_writer.texture_names(item_elements)}
         textures["particle"] = f"{MOD}:block/{PARTICLE}"

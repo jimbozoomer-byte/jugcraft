@@ -75,4 +75,5 @@ def network_terminal():
 
 MODELS = {"lithography_station": lithography_station()}
 # Blocks outside the machine framework (generate_material_data: ELECTRONICS_BLOCKS).
-BLOCKS = {"network_terminal": network_terminal()}
+from machine_connections import with_sockets, exterior_ports
+BLOCKS = {"network_terminal": with_sockets(network_terminal(), exterior_ports())}

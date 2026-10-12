@@ -41,8 +41,8 @@ public class StarterChemistryClientGameTests implements FabricClientGameTest {
             server.runCommand("gamerule minecraft:advance_time false");
             server.runCommand("gamerule minecraft:spawn_mobs false");
             server.runCommand("gamerule minecraft:send_command_feedback false");
-            server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x-12,y,z-14,x+46,y+11,z+14));
-            server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(x-12,y-2,z-14,x+46,y-1,z+14));
+            server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x-12,y,z-14,x+46,y+11,z+26));
+            server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(x-12,y-2,z-14,x+46,y-1,z+26));
             List<FormMachineBlock> blocks = List.of(IndustrialForms.COAL_GASIFIER, IndustrialForms.GAS_CLEANING_RACK,
                     IndustrialForms.CHEMICAL_INFUSER, IndustrialForms.CHEMICAL_OXIDIZER, IndustrialForms.GAS_BURNING_GENERATOR);
             for (int i = 0; i < blocks.size(); i++) {
@@ -146,7 +146,105 @@ public class StarterChemistryClientGameTests implements FabricClientGameTest {
                 }
                 io.github.jimbozoomer.jugcraft.Jugcraft.LOGGER.info("Starter chemistry manual-test world: {}",s.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT));
             });
-            server.runCommand("fill %d %d %d %d %d %d minecraft:air replace minecraft:barrier".formatted(x-12,y,z-14,x+46,y+11,z+14));
+            context.waitTicks(5);
+            // Inspect the actual battery/cable/socket chain, not only the isolated machine body.
+            for(int i=0;i<blocks.size();i++) {
+                BlockPos pos=spawn.offset(i*9,0,-4);
+                var form=blocks.get(i).form();
+                var power=form.ports().stream().filter(p -> p.kind().energy()).findFirst().orElseThrow();
+                BlockPos socket=form.cellPos(pos,Direction.SOUTH,form.cellIndex(power.column(),power.row(),power.layer()));
+                Direction side=power.side().world(Direction.SOUTH), across=side.getClockWise();
+                server.runOnServer(s -> {
+                    BlockPos cable=socket.relative(side);
+                    if(!s.overworld().getBlockState(cable).getValue(net.minecraft.world.level.block.PipeBlock.PROPERTY_BY_DIRECTION.get(side.getOpposite()))
+                            || !s.overworld().getBlockState(cable).getValue(net.minecraft.world.level.block.PipeBlock.PROPERTY_BY_DIRECTION.get(side)))
+                        throw new AssertionError("Power cable must meet both the machine socket and battery");
+                    for(var port:form.ports()) if(port.kind().fluid()) {
+                        BlockPos at=form.cellPos(pos,Direction.SOUTH,form.cellIndex(port.column(),port.row(),port.layer()));
+                        s.overworld().setBlock(at.relative(port.side().world(Direction.SOUTH)),io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids.STEEL_FLUID_PIPE.defaultBlockState(),Block.UPDATE_ALL);
+                    }
+                });
+                shoot(context,world,socket.getX()+.5+side.getStepX()*4+across.getStepX()*3,
+                        socket.getY()+1,socket.getZ()+.5+side.getStepZ()*4+across.getStepZ()*3,
+                        socket.getX()+.5+side.getStepX(),socket.getY()+.7,socket.getZ()+.5+side.getStepZ(),
+                        "connections_"+form.id().getPath());
+            }
+            // A second row keeps older battery banks and an inset pump available for
+            // the owner's visual check, with ordinary cables attached to real faces.
+            var legacy = List.of(io.github.jimbozoomer.jugcraft.machine.MachineKind.BATTERY_BOX,
+                    io.github.jimbozoomer.jugcraft.machine.MachineKind.CAPACITOR_BANK,
+                    io.github.jimbozoomer.jugcraft.machine.MachineKind.LITHIUM_BATTERY_BANK,
+                    io.github.jimbozoomer.jugcraft.machine.MachineKind.FLOW_BATTERY,
+                    io.github.jimbozoomer.jugcraft.machine.MachineKind.CIRCUIT_ASSEMBLER);
+            for(int i=0;i<legacy.size();i++) {
+                var kind=legacy.get(i);
+                var block=io.github.jimbozoomer.jugcraft.machine.JugcraftMachines.MACHINES.get(kind);
+                BlockPos pos=spawn.offset(i*9,0,6);
+                server.runOnServer(s -> {
+                    var state=block.defaultBlockState().setValue(MachineBlock.FACING,Direction.SOUTH);
+                    if(block instanceof io.github.jimbozoomer.jugcraft.machine.LargeMachineBlock large) state=large.formed(state);
+                    s.overworld().setBlock(pos,state,Block.UPDATE_ALL);
+                    block.setPlacedBy(s.overworld(),pos,state,null,ItemStack.EMPTY);
+                    for(int distance=1;distance<=2;distance++) s.overworld().setBlock(pos.south(distance),
+                            io.github.jimbozoomer.jugcraft.machine.JugcraftMachines.COPPER_CABLE.defaultBlockState(),Block.UPDATE_ALL);
+                    BlockPos pump=pos.south(3);
+                    s.overworld().setBlock(pump,io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids.ELECTRIC_PUMP.defaultBlockState(),Block.UPDATE_ALL);
+                });
+                shoot(context,world,pos.getX()-3,y+1,pos.getZ()+5,pos.getX()+.5,y+1,pos.getZ()+1.5,"connections_legacy_"+kind.id);
+                if(i>0) {
+                    int fittings=context.computeOnClient(c -> io.github.jimbozoomer.jugcraft.client.MachineConnections.extract(
+                            (io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity)c.level.getBlockEntity(pos)).size());
+                    if(fittings!=1) throw new AssertionError("Exactly one extra fitting should meet the legacy cable: "+kind+" got "+fittings);
+                    server.runOnServer(s -> s.overworld().setBlock(pos.south(),Blocks.AIR.defaultBlockState(),Block.UPDATE_ALL));
+                    context.waitTicks(8);
+                    int removed=context.computeOnClient(c -> io.github.jimbozoomer.jugcraft.client.MachineConnections.extract(
+                            (io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity)c.level.getBlockEntity(pos)).size());
+                    if(removed!=0) throw new AssertionError("Extra fitting must disappear with the cable: "+kind);
+                    server.runOnServer(s -> s.overworld().setBlock(pos.south(),io.github.jimbozoomer.jugcraft.machine.JugcraftMachines.COPPER_CABLE.defaultBlockState(),Block.UPDATE_ALL));
+                }
+            }
+            var auxiliaries=List.of("dynamo","magnet_dynamo","electric_motor","magnet_motor","solar_tracker","solar_receiver",
+                    "charging_station","network_terminal","cell_rack","drone_depot_terminal","fog_machine","ley_pylon","tesla_coil");
+            for(int i=0;i<auxiliaries.size();i++) {
+                String id=auxiliaries.get(i);
+                BlockPos pos=spawn.offset(i%7*6,0,16+i/7*7);
+                server.runOnServer(s -> {
+                    var block=net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(io.github.jimbozoomer.jugcraft.Jugcraft.id(id));
+                    var state=block.defaultBlockState();
+                    if(state.hasProperty(MachineBlock.FACING)) state=state.setValue(MachineBlock.FACING,Direction.SOUTH);
+                    s.overworld().setBlock(pos,state,Block.UPDATE_ALL);
+                    block.setPlacedBy(s.overworld(),pos,state,null,ItemStack.EMPTY);
+                    s.overworld().setBlock(pos.west(),io.github.jimbozoomer.jugcraft.machine.JugcraftMachines.COPPER_CABLE.defaultBlockState(),Block.UPDATE_ALL);
+                });
+                shoot(context,world,pos.getX()-3,y+1,pos.getZ()+3,pos.getX(),y+.5,pos.getZ()+.5,"connections_aux_"+id);
+                server.runOnServer(s -> {
+                    if(!s.overworld().getBlockState(pos.west()).getValue(net.minecraft.world.level.block.PipeBlock.EAST))
+                        throw new AssertionError("Auxiliary cable did not connect: "+id);
+                });
+            }
+            var tanks=List.of("fluid_tank","steel_tank","gas_holder");
+            for(int i=0;i<tanks.size();i++) {
+                String id=tanks.get(i);
+                BlockPos pos=spawn.offset(44,0,3+i*7);
+                server.runOnServer(s -> {
+                    var block=net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(io.github.jimbozoomer.jugcraft.Jugcraft.id(id));
+                    var state=block.defaultBlockState();
+                    if(state.hasProperty(MachineBlock.FACING)) state=state.setValue(MachineBlock.FACING,Direction.SOUTH);
+                    s.overworld().setBlock(pos,state,Block.UPDATE_ALL);
+                    block.setPlacedBy(s.overworld(),pos,state,null,ItemStack.EMPTY);
+                    s.overworld().setBlock(pos.west(),io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids.STEEL_FLUID_PIPE.defaultBlockState(),Block.UPDATE_ALL);
+                    s.overworld().setBlock(pos.south(),io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids.STEEL_FLUID_PIPE.defaultBlockState(),Block.UPDATE_ALL);
+                });
+                shoot(context,world,pos.getX()-3,y+1,pos.getZ()+3,pos.getX(),y+.5,pos.getZ()+.5,"connections_tank_"+id);
+                server.runOnServer(s -> {
+                    if(!s.overworld().getBlockState(pos.west()).getValue(net.minecraft.world.level.block.PipeBlock.EAST))
+                        throw new AssertionError("Tank pipe did not connect: "+id);
+                });
+                if(i>0 && context.computeOnClient(c -> io.github.jimbozoomer.jugcraft.client.MachineConnections.extract(
+                        (io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity)c.level.getBlockEntity(pos)).size())!=1)
+                    throw new AssertionError("Tank must draw the additional front pipe fitting: "+id);
+            }
+            server.runCommand("fill %d %d %d %d %d %d minecraft:air replace minecraft:barrier".formatted(x-12,y,z-14,x+46,y+11,z+26));
             context.runOnClient(c -> { if(c.gui.hud.isHidden()) c.gui.hud.toggle(); });
             server.runCommand("setworldspawn %d %d %d".formatted(x+18,y,z+8));
             server.runCommand("tp @p %d %d %d 180 0".formatted(x+18,y,z+8));
