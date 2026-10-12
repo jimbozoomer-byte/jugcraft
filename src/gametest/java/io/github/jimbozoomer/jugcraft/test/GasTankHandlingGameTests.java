@@ -80,7 +80,7 @@ public class GasTankHandlingGameTests {
 		helper.assertTrue(lowEntity.storage.amount == FluidTankBlockEntity.CAPACITY
 				&& helper.getBlockEntity(high, FluidTankBlockEntity.class).storage.amount == 4 * FluidConstants.BUCKET,
 				"The group did not fill from the bottom");
-		helper.destroyBlock(high);
+		helper.getLevel().destroyBlock(helper.absolutePos(high), true);
 		helper.succeedWhen(() -> {
 			List<ItemEntity> items = helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(high)).inflate(3),
 					item -> item.getItem().is(JugcraftFluids.FLUID_TANK.asItem()));
@@ -158,7 +158,7 @@ public class GasTankHandlingGameTests {
 		long first = push(helper, source, hydrogen, FluidConstants.BUCKET);
 		helper.assertTrue(first == FluidConstants.BUCKET && helper.getBlockEntity(tank, FluidTankBlockEntity.class).storage.amount == 2 * FluidConstants.BUCKET,
 				"The line moved " + first + " droplets into the tank");
-		helper.destroyBlock(tank);
+		helper.getLevel().destroyBlock(helper.absolutePos(tank), true);
 		helper.runAfterDelay(2, () -> {
 			long none = push(helper, source, hydrogen, FluidConstants.BUCKET);
 			helper.assertTrue(none == 0 && hydrogen.amount == 3 * FluidConstants.BUCKET, "With the tank gone the push moved " + none + " droplets");
