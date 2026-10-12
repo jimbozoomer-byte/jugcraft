@@ -110,6 +110,10 @@ GASES = {
     # chemical reactor recovers it as sulfur (the Claus process). A sickly yellow-green.
     "hydrogen_sulfide": {"display": "Hydrogen Sulfide", "feature": "crude_oil",
                          "colors": [(150, 150, 70), (178, 178, 96), (204, 204, 126), (230, 230, 170)]},
+    # The starter factory's sulfur dioxide (tools/industrial_forms.py): sulfur burnt in oxygen in the Chemical
+    # Oxidizer, the first step of the contact acid chain. Colourless and choking: a pale sulfur-tinted grey.
+    "sulfur_dioxide": {"display": "Sulfur Dioxide", "feature": "sulfur",
+                       "colors": [(166, 162, 126), (194, 190, 156), (216, 212, 182), (240, 238, 220)]},
 }
 
 

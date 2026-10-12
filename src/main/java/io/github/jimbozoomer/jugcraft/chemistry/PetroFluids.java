@@ -141,6 +141,8 @@ public final class PetroFluids {
 	/** Batch 43: liquid fuels. */
 	public static Entry KEROSENE;
 	public static Entry LIQUID_OXYGEN;
+	/** The starter gas and acid factory: sulfur burnt in oxygen in the Chemical Oxidizer. */
+	public static Gas SULFUR_DIOXIDE;
 
 	private PetroFluids() {
 	}
@@ -199,6 +201,7 @@ public final class PetroFluids {
 		NUTRIENT_SOLUTION = fluid("nutrient_solution", 5, 4, 1, 0xFF6EAA64, MapColor.COLOR_GREEN);
 		KEROSENE = fluid("kerosene", 5, 4, 1, 0xFFE0E0C4, MapColor.SAND);
 		LIQUID_OXYGEN = fluid("liquid_oxygen", 3, 4, 1, 0xFFA0C8EC, MapColor.COLOR_LIGHT_BLUE);
+		SULFUR_DIOXIDE = gas("sulfur_dioxide", 0xFFDAD6B8);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

@@ -1,6 +1,7 @@
 """Industrial machine forms the game registers (docs/features/industrial-machine-foundation.md): the starter factory's
-Electrolytic Separator (docs/features/industrial-electrolytic-separator.md) and Gas Burning Generator
-(docs/features/industrial-gas-burning-generator.md), package 2 of the owner's factory plan.
+Electrolytic Separator (docs/features/industrial-electrolytic-separator.md), Gas Burning Generator
+(docs/features/industrial-gas-burning-generator.md) and Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md),
+package 2 of the owner's factory plan.
 
 Each form is described here for its art, recipes and data, and in IndustrialForms.java for the game;
 tools/check_mod_data.py checks that the two agree. Layers are given bottom first, each as rows from the front to the
@@ -23,6 +24,8 @@ MOD = "jugcraft"
 
 # Splitting water and ordinary brine: what the Separator offers its family's recipes.
 AQUEOUS_ELECTROLYSIS = f"{MOD}:aqueous_electrolysis"
+# Burning a solid feed in a metered oxidant gas (sulfur in oxygen): what the Oxidizer offers its family's recipes.
+SOLID_OXIDATION = f"{MOD}:solid_oxidation"
 
 # The owner's white tank family (the tank restyle) for the collection towers, with its checker band.
 TANK_BODY, TANK_TOP, TANK_CHECKER = "tk_body", "tk_top", "tk_checker"
@@ -32,6 +35,9 @@ STRIP = "dr_amber"
 # The Gas Burning Generator's materials (the art brief): graphite ribs, olive combustion covers, a pale heat shield,
 # a ribbed generator housing, and mint lamps at the electrical output that light while it runs.
 SHIELD, RIBBED, MINT = "el_ribbed", "dw_ribbed_steel", "el_lamp"
+# The Chemical Oxidizer's materials (the art brief): a cream refractory lining round its hatch, warm copper fittings,
+# olive hopper guards and the hopper's dark mouth.
+REFRACTORY, MOUTH, FLANGE = "sp_ceramic", "sp_hopper_inside", "dr_flange"
 # What lights while a form works: steampunk_models.GLOW and the mint lamp.
 FORM_GLOW = dict(GLOW, el_lamp="el_lamp_on")
 # What the generator burns (tools/petro.py FLUID_FUELS keeps the Fuel Cell's value): (fluid, JE per mB, JE a tick).
@@ -99,6 +105,34 @@ FORMS = {
                                            "K": f"{MOD}:machine_casing"}),
         "features": ["machines"],
     },
+    "chemical_oxidizer": {
+        "display": "Chemical Oxidizer",
+        # The chemical reactor family (the Chemical Reactor's energy figures: 96 JE/t, a 30,000 JE store); it runs only
+        # the recipes that ask for its capability, and the reactor never runs those.
+        "family": "chemical_reactor",
+        "layers": [["C#", "##"], ["##", "##"], ["##", "##"]],
+        "profile": "ENTRY",
+        "tank_mb": 2_000,
+        # One solid feed slot (the hopper), the oxidant gas and the gas it makes.
+        "input_tanks": ["oxidant"],
+        "output_tanks": ["product"],
+        "item_inputs": 1,
+        "capabilities": [SOLID_OXIDATION],
+        "upgrades": True,
+        "warmup": 40,
+        "ports": [
+            ("feed_in", "ITEM_IN", 0, 0, 1, 2, "TOP"),
+            ("oxidant_in", "FLUID_IN", 0, 1, 0, 0, "RIGHT"),
+            ("product_out", "FLUID_OUT", 0, 1, 0, 2, "TOP"),
+            ("power", "ENERGY_IN", 0, 0, 1, 0, "LEFT"),
+        ],
+        # The plan's starter bill (docs/features/industrial-starter-gas-and-acid-factory.md): 4 steel plates, a furnace, an
+        # electric motor, glass, a basic circuit and a Machine Casing.
+        "recipe": (["PFP", "MCG", "PKP"], {"P": "#c:plates/steel", "F": "minecraft:furnace", "M": f"{MOD}:electric_motor",
+                                           "C": f"{MOD}:basic_circuit", "G": "minecraft:glass",
+                                           "K": f"{MOD}:machine_casing"}),
+        "features": ["machines"],
+    },
 }
 
 # Each form's Engineer's Handbook page (tools/handbook.py form_page), after its family's machine.
@@ -125,6 +159,16 @@ HANDBOOK = {
         "screen says when the fuel tank is empty or the store is full. Methane, at 256 JE/t, comes with the methane "
         "Infuser.",
     ],
+    "chemical_oxidizer": [
+        "Two wide, two deep and three tall: a lined reaction throat fed by a hopper and a feed screw at the back, with a "
+        "gas column and collector hood on top, built from steel plates, a furnace, an electric motor, glass, a basic "
+        "circuit and a Machine Casing. Every block it fills must be free when it is placed.",
+        "Drop sulfur dust into the hopper on top at the back and pipe oxygen into the capped inlet low on the right. "
+        "Each dust burns with 250 mB of oxygen into 250 mB of sulfur dioxide in five seconds, which leaves at the "
+        "collar on top of the hood. It draws 96 JE/t through the socket low on the left side at the back.",
+        "Sulfur dioxide is the first step of the contact acid route; its screen says what it is waiting for, and "
+        "upgrade cards fit its terminal.",
+    ],
 }
 
 # Tank labels on the screen and in its reasons (MachineStatus.tankLabel), by role.
@@ -134,6 +178,8 @@ TANK_NAMES = {
     "anode_gas": "Oxygen/chlorine tank",
     "hydrogen": "Hydrogen tank",
     "lye": "Lye tank",
+    "oxidant": "Oxidant tank",
+    "product": "Product gas tank",
 }
 
 # Recipes only forms run: each names the capability a form must offer. Fluid results go to output tanks by their
@@ -150,6 +196,14 @@ FORM_RECIPES = {
         {"name": "separator_water", "capability": AQUEOUS_ELECTROLYSIS, "fluids": [("minecraft:water", 1000)],
          "fluid_results": [(f"{MOD}:oxygen", 250, 0), (f"{MOD}:hydrogen", 500, 1)],
          "ticks": 800, "features": ["machines"]},
+    ],
+    "chemical_oxidizer": [
+        # Sulfur oxidation (docs/features/industrial-starter-gas-and-acid-factory.md): a dust counts as 250 reaction
+        # amounts of sulfur, burning with as much oxygen into as much sulfur dioxide. 100 ticks at the reactor family's
+        # 96 JE/t: the plan's 9,600 JE.
+        {"name": "oxidizer_sulfur_dioxide", "capability": SOLID_OXIDATION, "items": [(f"{MOD}:sulfur_dust", 1)],
+         "fluids": [(f"{MOD}:oxygen", 250)], "fluid_results": [(f"{MOD}:sulfur_dioxide", 250, 0)], "ticks": 100,
+         "features": ["sulfur", "machines"]},
     ],
 }
 
@@ -406,6 +460,97 @@ def gas_burning_generator_still():
             + cyl("z", cu, cv, 7, 44.5, 46, CHROME, "dr_flange"))
 
 
+# The Oxidizer's feed screw, under the hopper at the back, turning about z: its axis's centre (x, y, z).
+OXIDIZER_SCREW = (6, 7.5, 27)
+
+
+def chemical_oxidizer():
+    """Two wide, two deep and three tall (the art brief, docs/features/industrial-machine-models-and-textures.md): a
+    squat dark-steel reaction throat on a plinth, a cream refractory ring round its circular bolted hatch, the orange
+    reaction slit above it and the deep residue drawer below; a short gas column and a ringed collector hood on top,
+    its outlet rising to a collar at the top on the right. At the back, a broad olive hopper with a hazard-striped feed
+    lip drops through a chute into a guarded trough, where the feed screw (drawn turning by MachineRotors) carries the
+    dust forward into the throat. The capped oxidant inlet enters low on the right; the power socket sits on a junction
+    box low on the left at the back; the control panel (the controller) stands at the front left. Each port is at the
+    middle of its block's face."""
+    m = [box((-16, 0, 0), (16, 2, 32), GUNMETAL)]
+    # The reaction throat, its front plate and the refractory ring round the bolted hatch.
+    m.append(box((-12, 2, 3), (12, 24, 22), GUNMETAL))
+    m.append(box((-12.5, 22, 2.5), (12.5, 24.5, 22.5), GUNMETAL))
+    m += cyl("z", 0, 15, 6.5, 2.25, 3, REFRACTORY)
+    m += cyl("z", 0, 15, 5, 1.5, 2.25, GUNMETAL, FLANGE)
+    m.append(box((-1, 13.5, 0.75), (1, 16.5, 1.5), CHROME))
+    # The reaction slit above the hatch, which glows while it burns, and the deep residue drawer below it.
+    m.append(box((-4.5, 21, 2.5), (4.5, 22, 3), STRIP))
+    m.append(box((-7, 3, 1.5), (7, 8.5, 3), {"*": GUNMETAL, "north": OLIVE}))
+    m.append(box((-3, 5, 0.75), (3, 6.5, 1.5), CHROME))
+    # The short gas column and the ringed collector hood, with the outlet rising to its collar at the top right.
+    m += cyl("y", 0, 10, 6, 24.5, 36, GUNMETAL)
+    m += cyl("y", 0, 10, 6.5, 30, 31.5, COPPER)
+    m += cyl("y", 0, 10, 9, 36, 39, GUNMETAL)
+    m += cyl("y", 0, 10, 9.5, 39, 40.5, REFRACTORY)
+    m += cyl("y", 0, 10, 7, 40.5, 42, GUNMETAL)
+    m += cyl("y", -8, 8, 2, 40.5, 47, RUBBER)
+    m += cyl("y", -8, 8, 2.35, 43.5, 44.5, "sulfur_dioxide_still")
+    m.append(box((-11, 47, 5), (-5, 47.75, 11), {"*": CHROME, "up": f"{FLANGE}!"}))
+    # The control panel (the controller) at the front left: a gauge and the amber running lamp.
+    m.append(box((9.5, 2, 1), (15.5, 13, 3), {"*": OLIVE, "north": GUNMETAL, "up": STENCIL}))
+    m.append(dial("north", (12.5, 9.5, 0.75), 3.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (12.5, 4.5, 0.75), 2.5, texture=LAMP, body=GUNMETAL))
+    # The capped oxidant inlet low on the right: a charcoal pipe banded in oxygen colour, a copper valve and a flange.
+    m += cyl("x", 8, 8, 2.25, -15, -12, RUBBER)
+    m += cyl("x", 8, 8, 2.6, -14.25, -13.25, "oxygen_still")
+    m.append(box((-14.25, 10.25, 6.5), (-12.75, 12.25, 9.5), COPPER))
+    m.append(box((-15.75, 3.5, 3.5), (-15, 12.5, 12.5), {"*": CHROME, "west": f"{FLANGE}!"}))
+    # The broad hopper at the back, olive guards narrowing to a chute, its mouth under a hazard-striped feed lip.
+    m.append(box((1, 41, 17), (15, 46, 31), OLIVE))
+    m.append(box((3, 34, 19), (13, 41, 29), OLIVE))
+    m.append(box((4, 27, 21), (11, 34, 28), OLIVE))
+    m.append(box((3.5, 12, 22.5), (8.5, 27, 27.5), GUNMETAL))
+    for x0, x1 in ((1.25, 2.75), (13.25, 14.75)):
+        m.append(box((x0, 12, 29), (x1, 41, 30.5), GUNMETAL))
+    m.append(box((2.75, 30, 29.25), (13.25, 31, 30.25), GUNMETAL))
+    for lo, hi in (((0.5, 46, 16.5), (15.5, 47.75, 18)), ((0.5, 46, 30), (15.5, 47.75, 31.5)),
+                   ((0.5, 46, 18), (2, 47.75, 30)), ((14, 46, 18), (15.5, 47.75, 30))):
+        m.append(box(lo, hi, HAZARD))
+    m.append(box((2, 46, 18), (14, 46.5, 30), MOUTH))
+    # The guarded trough the feed screw turns in, running forward into the throat.
+    m.append(box((1, 2, 22), (11, 3.5, 31.5), GUNMETAL))
+    for x0, x1 in ((1, 2), (10, 11)):
+        m.append(box((x0, 3.5, 22), (x1, 12, 31.5), GUNMETAL))
+    m.append(box((2, 3.5, 30.75), (10, 12, 31.5), GUNMETAL))
+    for z in (24, 27.5):
+        m.append(box((2, 11.5, z), (10, 12, z + 1), CHROME))
+    # The junction box low on the left at the back, its power socket and a hazard band.
+    m.append(box((12, 2, 18), (15, 13, 30), GUNMETAL))
+    m.append(box((11.75, 13, 17.75), (15.25, 14, 30.25), HAZARD))
+    m.append(box((15, 5, 21), (15.75, 11, 27), {"*": CHROME, "east": "power_port!"}))
+    return m
+
+
+def chemical_oxidizer_rotor():
+    """The Oxidizer's feed screw in its trough (client/MachineRotors draws it): a shaft and a run of flights, each a
+    paddle turned a little further than the last, so it reads as a screw while it turns."""
+    import machine_rotors as rotors
+    cx, cy, cz = OXIDIZER_SCREW
+    quads = rotors.disc("z", 22.5, 30.5, cx, cy, 0.75, CHROME, CHROME)
+    for flight in range(6):
+        z0 = 23 + flight * 1.25
+        angle = math.radians(60 * flight)
+        c, s_ = math.cos(angle), math.sin(angle)
+
+        def at(r, w):
+            return (cx + r * c - w * s_, cy + r * s_ + w * c)
+        quads += rotors.prism("z", z0, z0 + 0.75, [at(0.9, -1.1), at(3.5, -1.4), at(3.5, 1.4), at(0.9, 1.1)], COPPER, COPPER)
+    return quads
+
+
+def chemical_oxidizer_still():
+    """The feed screw standing still, for the item model only."""
+    cx, cy, cz = OXIDIZER_SCREW
+    return cyl("z", cx, cy, 0.75, 22.5, 30.5, CHROME) + cyl("z", cx, cy, 3, 24, 29.5, COPPER)
+
+
 # Turning parts (tools/machine_rotors.py writes them for client/MachineRotors): on the train's axis, spinning up over
 # two seconds when the machine starts and running down as long when it stops, standing still while idle.
 ROTORS = {
@@ -413,11 +558,17 @@ ROTORS = {
         "block": "gas_burning_generator", "axis": "z", "center": [-16, 26, 24], "property": "lit", "speed": 12,
         "ease": 40, "always": True, "quads": gas_burning_generator_rotor(),
     },
+    # The Oxidizer's feed screw, turning while it burns.
+    "chemical_oxidizer_screw": {
+        "block": "chemical_oxidizer", "axis": "z", "center": list(OXIDIZER_SCREW), "property": "lit", "speed": 9,
+        "ease": 20, "always": True, "quads": chemical_oxidizer_rotor(),
+    },
 }
 
-MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator()}
+MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator(),
+          "chemical_oxidizer": chemical_oxidizer()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
-ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still()}
+ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_oxidizer": chemical_oxidizer_still()}
 PARTICLE = "dp_olive"
 
 

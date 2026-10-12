@@ -56,7 +56,7 @@ Owner-requested 10 October 2026. Independent art specification: [industrial mach
 - [x] Package 2, second slice: the Gas Burning Generator, the shared hydrogen/methane generator and the first generator form, burning hydrogen at the selected 128 JE/t from the plan's steel bill, with its turning coupling and fan. Generator forms join the foundation: fuels listed on the form and power-out ports. See [Gas Burning Generator](features/industrial-gas-burning-generator.md).
 - [ ] Package 2, the rest of the starter gas and acid factory:
   - the Chemical Infuser: HCl, and methanation with its nickel bed and the selected water drain, then methane as the generator's second fuel (256 JE/t);
-  - the Chemical Oxidizer and contact conversion, for the sulfuric acid chain;
+  - contact conversion and absorption, for the sulfuric acid chain (the [Chemical Oxidizer](features/industrial-chemical-oxidizer.md) now makes its sulfur dioxide);
   - the Coal Gasifier with Gas Cleanup and Separation;
   - portable handling.
 
