@@ -162,6 +162,85 @@ public final class IndustrialForms {
 			.port("power", FormPort.Kind.ENERGY_IN, 0, 2, 0, 0, FormSide.FRONT)
 			.build();
 
+	public static final MachineForm ANAEROBIC_DIGESTER_FORM = MachineForm.builder(Jugcraft.id("anaerobic_digester"),
+			MachineKind.CHEMICAL_REACTOR)
+			.layer("C#####", "######", "######", "######", "######", "######")
+			.layer("######", "######", "######", "######", "######", "######")
+			.layer("######", "######", "######", "######", "######", "######")
+			.layer("######", "######", "######", "######", "######", "######")
+			.layer("######", "######", "######", "######", "######", "######")
+			.layer("######", "######", "######", "######", "######", "######")
+			.profile(OperatingProfile.EXPANDED)
+			.inputTank("digestion_water")
+			.outputTank("raw_biogas")
+			.outputTank("digestate")
+			.items(1, 0)
+			.capability("jugcraft:anaerobic_digestion")
+			.upgrades()
+			.warmup(80)
+			.port("biomass_in", FormPort.Kind.ITEM_IN, 0, 0, 1, 2, FormSide.LEFT)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 5, 5, 0, FormSide.BACK)
+			.port("biogas_out", FormPort.Kind.FLUID_OUT, 0, 5, 5, 4, FormSide.BACK)
+			.port("digestate_out", FormPort.Kind.FLUID_OUT, 1, 0, 5, 0, FormSide.BACK)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.build();
+	public static FormMachineBlock ANAEROBIC_DIGESTER;
+
+	public static final MachineForm BIOGAS_CLEANER_FORM = MachineForm.builder(Jugcraft.id("biogas_cleaner"),
+			MachineKind.CHEMICAL_REACTOR)
+			.layer("C#", "##", "##")
+			.layer("##", "##", "##")
+			.layer("##", "##", "##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("raw_biogas")
+			.inputTank("cleaning_water")
+			.outputTank("clean_biogas")
+			.outputTank("wash_digestate")
+			.capability("jugcraft:biogas_cleaning")
+			.upgrades()
+			.warmup(40)
+			.port("raw_in", FormPort.Kind.FLUID_IN, 0, 1, 2, 2, FormSide.BACK)
+			.port("water_in", FormPort.Kind.FLUID_IN, 1, 0, 2, 0, FormSide.BACK)
+			.port("clean_out", FormPort.Kind.FLUID_OUT, 0, 1, 0, 2, FormSide.FRONT)
+			.port("wash_out", FormPort.Kind.FLUID_OUT, 1, 1, 0, 0, FormSide.FRONT)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.build();
+	public static FormMachineBlock BIOGAS_CLEANER;
+
+	public static final MachineForm DIGESTATE_SEPARATOR_FORM = MachineForm.builder(Jugcraft.id("digestate_separator"),
+			MachineKind.CHEMICAL_REACTOR)
+			.layer("C#", "##", "##")
+			.layer("##", "##", "##")
+			.layer("##", "##", "##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("digestate_feed")
+			.outputTank("recovered_water")
+			.items(0, 1)
+			.capability("jugcraft:digestate_separation")
+			.upgrades()
+			.warmup(40)
+			.port("slurry_in", FormPort.Kind.FLUID_IN, 0, 0, 2, 1, FormSide.BACK)
+			.port("water_out", FormPort.Kind.FLUID_OUT, 0, 1, 2, 0, FormSide.BACK)
+			.port("fiber_out", FormPort.Kind.ITEM_OUT, 0, 1, 0, 0, FormSide.FRONT)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.build();
+	public static FormMachineBlock DIGESTATE_SEPARATOR;
+
+	public static final MachineForm BIO_GENERATOR_FORM = MachineForm.builder(Jugcraft.id("bio_generator"),
+			MachineKind.GAS_TURBINE)
+			.layer("C##", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("fuel")
+			.fuel(Jugcraft.id("clean_biogas"), 192, 64)
+			.fuel(Jugcraft.id("bioethanol"), 192, 64)
+			.port("biofuel_in", FormPort.Kind.FLUID_IN, 0, 2, 1, 0, FormSide.RIGHT)
+			.port("liquid_fuel_in", FormPort.Kind.FLUID_IN, 0, 2, 3, 0, FormSide.BACK)
+			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 0, 3, 1, FormSide.BACK)
+			.build();
+	public static FormMachineBlock BIO_GENERATOR;
+
 	public static FormMachineBlock CHEMICAL_INFUSER;
 	public static FormMachineBlock CHEMICAL_OXIDIZER;
 	public static FormMachineBlock COAL_GASIFIER;
@@ -180,7 +259,11 @@ public final class IndustrialForms {
 		CHEMICAL_OXIDIZER = block("chemical_oxidizer", CHEMICAL_OXIDIZER_FORM);
 		COAL_GASIFIER = block("coal_gasifier", COAL_GASIFIER_FORM);
 		GAS_CLEANING_RACK = block("gas_cleaning_rack", GAS_CLEANING_RACK_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, COAL_GASIFIER, GAS_CLEANING_RACK);
+		ANAEROBIC_DIGESTER = block("anaerobic_digester", ANAEROBIC_DIGESTER_FORM);
+		BIOGAS_CLEANER = block("biogas_cleaner", BIOGAS_CLEANER_FORM);
+		DIGESTATE_SEPARATOR = block("digestate_separator", DIGESTATE_SEPARATOR_FORM);
+		BIO_GENERATOR = block("bio_generator", BIO_GENERATOR_FORM);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, COAL_GASIFIER, GAS_CLEANING_RACK, ANAEROBIC_DIGESTER, BIOGAS_CLEANER, DIGESTATE_SEPARATOR, BIO_GENERATOR);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

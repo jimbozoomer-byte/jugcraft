@@ -117,6 +117,9 @@ public final class PetroFluids {
 	/** Sulfur burnt and absorbed in water: the acid for fertilizer and leaching. */
 	public static Entry SULFURIC_ACID;
 	public static Entry HYDROCHLORIC_ACID;
+	public static Entry DIGESTATE;
+	public static Gas RAW_BIOGAS;
+	public static Gas CLEAN_BIOGAS;
 	/** Nitrogen chemistry (batch 12): air separated into nitrogen and oxygen; ammonia from them and hydrogen. */
 	public static Gas NITROGEN;
 	public static Gas OXYGEN;
@@ -218,6 +221,9 @@ public final class PetroFluids {
 		SULFUR_DIOXIDE = gas("sulfur_dioxide", 0xFFBDAC71);
 		SULFUR_TRIOXIDE = gas("sulfur_trioxide", 0xFFACA996);
 		DIRTY_SYNTHESIS_GAS = gas("dirty_synthesis_gas", 0xFF625B4A);
+		DIGESTATE = fluid("digestate", 12, 2, 2, 0xFF5D4E2F, MapColor.COLOR_BROWN);
+		RAW_BIOGAS = gas("raw_biogas", 0xFF697446);
+		CLEAN_BIOGAS = gas("clean_biogas", 0xFF76965E);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

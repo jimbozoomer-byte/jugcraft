@@ -3000,7 +3000,10 @@ def check_industrial_forms():
             targets = [petro.result_tank(i, r) for i, r in enumerate(recipe.get("fluid_results", []))]
             if len(set(targets)) != len(targets) or any(t >= len(info["output_tanks"]) for t in targets):
                 err(f"{label}: its results need distinct output tanks the form has")
-            if sum(r[1] for r in recipe.get("fluid_results", [])) > sum(mb for _, mb in recipe.get("fluids", [])):
+            source = recipe.get("source", 0)
+            if source < 0 or (source and not recipe.get("items")):
+                err(f"{label}: fluid released from items needs a consumed solid feed")
+            if sum(r[1] for r in recipe.get("fluid_results", [])) > sum(mb for _, mb in recipe.get("fluids", [])) + source:
                 err(f"{label}: makes more fluid than it takes")
             if recipe["ticks"] <= 0:
                 err(f"{label}: takes no time")
@@ -3017,11 +3020,15 @@ def check_industrial_forms():
             if not made:
                 continue
             hydrogen = sum(mb for fluid, mb in recipe["fluids"] if fluid == "jugcraft:hydrogen")
+            # Upgrading consumes already-burnable mixed gas, including its original methane.
+            # Count its actual Bio-Generator opportunity cost, not a free feed or a second fuel award.
+            bio_values = {f: v for f, v, _ in industrial_forms.FORMS.get("bio_generator", {}).get("fuels", [])}
+            feed_energy = sum(mb * bio_values.get(fluid, 0) for fluid, mb in recipe["fluids"])
             for speed in range(5):
                 for efficiency in range(5):
                     ticks = math.ceil(recipe["ticks"] / (1 + .5 * speed))
                     draw = max(1, math.floor(recipe["energy_per_tick"] * (1 + .5 * speed) * (1 + .25 * speed) * .8**efficiency + .5))
-                    if hydrogen_cost is None or hydrogen * hydrogen_cost + ticks * draw <= made * methane_value:
+                    if hydrogen_cost is None or hydrogen * hydrogen_cost + ticks * draw + feed_energy <= made * methane_value:
                         err(f"{recipe['name']}: methanation can profit from electrolytic hydrogen")
     # The Separator's construction: the owner's selected 20 steel plates, counting the Steel Tanks' own.
     pattern, key = industrial_forms.FORMS["electrolytic_separator"]["recipe"]

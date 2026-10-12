@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:bio_generator"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_bio_generator.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_bio_generator.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:bio_generator"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

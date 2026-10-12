@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:biogas_cleaner"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_biogas_cleaner.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_biogas_cleaner.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:biogas_cleaner"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

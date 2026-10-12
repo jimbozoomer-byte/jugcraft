@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:block/bio_generator_part17",
+  "textures": {
+    "dr_amber": "jugcraft:block/dr_amber_on"
+  }
+}

@@ -1174,4 +1174,12 @@ def build():
                 "A comparator next to a generator or battery shows how full it is.",
                 "Next to a processing machine, it shows how full its slots are, like a chest."]}]},
     ]
+    # Keep every registered industrial form discoverable, including later chemistry/farm additions.
+    # Existing authored pages keep their positions; only missing station pages are appended.
+    import industrial_forms
+    covered = {page.get("icon") for chapter in chapters for page in chapter["pages"]}
+    chemistry = next(chapter for chapter in chapters if chapter["title"] == "Chemistry")
+    for form in industrial_forms.FORMS:
+        if f"{MOD}:{form}" not in covered:
+            chemistry["pages"].append(form_page(form))
     return {"chapters": chapters}

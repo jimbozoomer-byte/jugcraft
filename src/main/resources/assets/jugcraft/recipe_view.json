@@ -7527,6 +7527,33 @@
           "ticks": 100,
           "tool": "jugcraft:vanadium_contact_bed",
           "energy_per_tick": 128
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:clean_biogas",
+              1000
+            ],
+            [
+              "jugcraft:hydrogen",
+              1600
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              1000
+            ],
+            [
+              "minecraft:water",
+              1600
+            ]
+          ],
+          "results": [],
+          "ticks": 600,
+          "tool": "jugcraft:nickel_catalyst_bed",
+          "energy_per_tick": 128
         }
       ]
     },
@@ -7697,6 +7724,103 @@
           "ticks": 100,
           "tool": "",
           "energy_per_tick": 48
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:anaerobic_digester",
+      "type": "anaerobic_digester",
+      "recipes": [
+        {
+          "items": [
+            [
+              "#jugcraft:digester_feedstock",
+              16
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:raw_biogas",
+              1000
+            ],
+            [
+              "jugcraft:digestate",
+              750
+            ]
+          ],
+          "results": [],
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 32
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:biogas_cleaner",
+      "type": "biogas_cleaner",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:raw_biogas",
+              1000
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:clean_biogas",
+              1000
+            ],
+            [
+              "jugcraft:digestate",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 24
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:digestate_separator",
+      "type": "digestate_separator",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:digestate",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "minecraft:water",
+              750
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:digestate_fiber",
+              1
+            ]
+          ],
+          "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 16
         }
       ]
     }

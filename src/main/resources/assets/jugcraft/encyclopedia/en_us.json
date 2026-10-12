@@ -37,6 +37,22 @@
       }
     },
     {
+      "id": "guide/biogas",
+      "group": "Home",
+      "chapter": "Start here",
+      "gate": "",
+      "page": {
+        "title": "Farm waste to power: the digester factory",
+        "icon": "jugcraft:anaerobic_digester",
+        "text": [
+          "Build the six-block-wide Anaerobic Digester, Biogas Cleaner, Digestate Separator and Bio-Generator. Steel, tanks, a motor and a basic circuit provide a reachable entry; no methane or digestate is needed to craft them. An existing generator or charged battery starts the line.",
+          "16 farm items + 1000 mB water become 1000 mB raw 60/40 methane/CO2 biogas and 750 mB digestate. Clean the gas with 250 mB water; combine its 250 mB wash digestate with the main residue. The separator recovers 750 mB water and one fiber. Eight fibers craft Fertilizer. Collect every outlet: full tanks stop the line.",
+          "Burn cleaned biogas in the Bio-Generator at 64 JE/t. Existing bioethanol also works. Reuse the Chemical Infuser and nickel bed to upgrade biogas with hydrogen into pure methane; collect its water or use its existing excess-water drain. Pure methane feeds the higher-output Gas Burning Generator.",
+          "Existing pipes, gas cylinders, tanks, cables and conveyors handle the line. Search a machine name for exact port locations and recipes. This guide records game balance, not real industrial procedures."
+        ]
+      }
+    },
+    {
       "id": "guide/technology",
       "group": "Home",
       "chapter": "Start here",
@@ -5224,6 +5240,244 @@
       "gate": ""
     },
     {
+      "id": "tech/9/24",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Chemical Infuser",
+        "icon": "jugcraft:chemical_infuser",
+        "text": [
+          "Two wide, three deep and three tall. Join the upper front collars to first and second reagent supplies. The product leaves the middle back left; recovered water leaves low at the back right. Power joins the front control box.",
+          "Hydrogen + chlorine makes hydrogen chloride gas. Carbon monoxide or dioxide + hydrogen makes methane with a Nickel Catalyst Bed. Sulfur dioxide + oxygen makes sulfur trioxide with a Vanadium Contact Bed. Put the reusable bed in the protected tool socket, not an input slot. It cannot be removed during a batch.",
+          "Drain excess water is ON by default. It collects water that fits and drains only excess plain water. Switch to Keep water to stop when the water tank is full. The selection applies to the next batch; a running batch keeps its original setting. No gases, lye or acids are dumped.",
+          "Nickel bed: nickel ingot between two bricks. Vanadium bed: wash Vanadium-bearing Iron Concentrate, obtained by crafting four raw iron together, into oxide, then put the oxide between two bricks. This starter route needs no acid. Pipe product gas to a Chemical Reactor side, with water in its first tank. For sulfuric acid, charge the top with one bucket of sulfuric acid made by the original sulfur-and-water recipe or obtained by trade. The charge stays inside and is retained when the reactor is broken."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "jugcraft:fluid_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:steel_fluid_pipe",
+            "jugcraft:basic_circuit",
+            "jugcraft:steel_fluid_pipe",
+            "jugcraft:steel_plate",
+            "jugcraft:copper_cable",
+            "jugcraft:steel_plate"
+          ],
+          "result": "jugcraft:chemical_infuser",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/25",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Chemical Oxidizer",
+        "icon": "jugcraft:chemical_oxidizer",
+        "text": [
+          "Two wide and deep, three tall. Place sulfur dust in the feed slot and pipe 250 mB oxygen into the low front right collar. In five seconds at 96 JE/t it makes 250 mB sulfur dioxide. Charcoal instead makes carbon dioxide for methanation. Pipe the product out of the upper rear collar.",
+          "The rear hopper, guarded feed drive, lined reaction throat and capped collector stay closed during work. A spinning feed coupling and amber inspection slit show that it is running. Its burner subassembly is a furnace plus glass, so the final crafting grid fits the full steel-entry bill."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "jugcraft:oxidizer_burner",
+            "jugcraft:steel_plate",
+            "jugcraft:electric_motor",
+            "jugcraft:basic_circuit",
+            "jugcraft:machine_casing",
+            "jugcraft:steel_plate",
+            null,
+            "jugcraft:steel_plate"
+          ],
+          "result": "jugcraft:chemical_oxidizer",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/26",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Coal Gasifier",
+        "icon": "jugcraft:coal_gasifier",
+        "text": [
+          "Four wide and deep, six tall: a refractory column with a broad sealed ash chamber, side charging chute, capped header and service cabinet. Feed carbon through the left-side chute, water at the rear foot and power at the front cabinet. Dirty synthesis gas leaves the upper rear right header.",
+          "One coal + 1000 mB water gives 1000 mB dirty gas; charcoal uses 500 water for 500 gas; coke uses 1500 water for 1500 gas. Each batch pays 200 ticks at 64 JE/t including electrical heating. Upgrade cards fit the screen. Dirty gas must be cleaned; it is not a second burnable fuel.",
+          "The local process counter records 4 emissions units per coal, 1 per charcoal, 3 per coke only after completion. These are playtest balancing units, not a world pollution or terrain-damage system. Cancelling never earns outputs or emissions."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "minecraft:brick",
+            "jugcraft:steel_plate",
+            "minecraft:brick",
+            "minecraft:furnace",
+            "jugcraft:machine_casing",
+            "jugcraft:steel_plate",
+            "jugcraft:steel_fluid_pipe",
+            "jugcraft:steel_plate"
+          ],
+          "result": "jugcraft:coal_gasifier",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/27",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Gas Cleaning and Separation Rack",
+        "icon": "jugcraft:gas_cleaning_rack",
+        "text": [
+          "Three wide, five deep and four tall. A stepped wash tower, collection pot, separator, closed pipe loops and service bridge share one machine. Dirty gas enters high at the rear; wash water enters low on the left. The two front upper outlets give carbon monoxide on the left, hydrogen on the right. Residue leaves the low front drawer.",
+          "500 mB dirty synthesis gas + 125 mB wash water gives 250 mB carbon monoxide, 250 mB hydrogen and one wet mixed residue in 100 ticks at 48 JE/t. Both gases and the residue must fit before work starts. There are no disposable filters.",
+          "Stabilize one residue with clay and two gravel into two cobblestone road-fill blocks. That consumes the residue once; it gives no second fuel or recovered metals. Existing gas cylinders, tanks and pipes carry every new gas. Feed the cleaned hydrogen and carbon monoxide to an Infuser; methane drives the Gas Burning Generator at 256 JE/t, 448 JE/mB."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "jugcraft:steel_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:fluid_tank",
+            "jugcraft:basic_circuit",
+            "jugcraft:fluid_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:electric_motor",
+            "jugcraft:steel_plate"
+          ],
+          "result": "jugcraft:gas_cleaning_rack",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/28",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Anaerobic Digester",
+        "icon": "jugcraft:anaerobic_digester",
+        "text": [
+          "Six blocks wide, deep and tall: a substantial sealed vessel, insulated shell, access ladder, top mixing drive and feed hopper. Build it from ordinary steel, tanks, a motor and a basic circuit. The Bio-Generator can sustain it after an existing power source commissions the first batch.",
+          "Feed 16 wheat, carrots, potatoes, beetroot, rotten flesh, corn, barley, oats, cabbage, tomatoes or sweet potatoes through the left hopper. Supply 1000 mB water at the lower rear right and electricity at the front panel. One batch produces 1000 mB raw 60/40 methane/CO2 biogas and 750 mB digestate. Neither output is duplicated as separated gases.",
+          "The upper rear right collar gives raw gas; the lower rear left gives digestate. Both must have room. Two independent lanes, 8000 mB tanks, 400 ticks per lane at 29 JE/t before upgrades. Feedstock is consumed once and saved work survives a reload. Finished products are not vented."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "jugcraft:steel_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:steel_tank",
+            "jugcraft:electric_motor",
+            "jugcraft:steel_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:basic_circuit",
+            "jugcraft:steel_plate"
+          ],
+          "result": "jugcraft:anaerobic_digester",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/29",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Biogas Cleaner",
+        "icon": "jugcraft:biogas_cleaner",
+        "text": [
+          "Two wide, three deep and three tall. The sealed wash tower and demister clean biogas without splitting its 60/40 composition. Raw gas enters upper rear right; wash water enters lower rear left. Cleaned gas leaves upper front right; dirty wash leaves lower front right. Power enters front left.",
+          "1000 mB raw biogas + 250 mB water -> 1000 mB cleaned biogas + 250 mB wash digestate, 100 ticks at 24 JE/t. Route that wash to the Digestate Separator with the digester residue. No disposable filter is needed. Full product tanks stop processing without wasting inputs."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "jugcraft:fluid_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:electric_motor",
+            "jugcraft:basic_circuit",
+            "jugcraft:machine_casing",
+            "jugcraft:steel_plate",
+            "jugcraft:steel_fluid_pipe",
+            "jugcraft:steel_plate"
+          ],
+          "result": "jugcraft:biogas_cleaner",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/30",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Digestate Separator",
+        "icon": "jugcraft:digestate_separator",
+        "text": [
+          "Two wide, three deep and three tall. A closed screw press with guarded drive and collection drawer. Feed digestate at the rear left; recovered water leaves the rear right; fiber leaves the lower front right drawer. Power enters the front left.",
+          "1000 mB digestate -> 750 mB reusable water + one Digestate Fiber in 100 ticks at 16 JE/t. Eight fibers craft one existing Fertilizer, usable in the farming and hydroponics systems. Fertilizer and recovered water are never accepted as biomass feed, and water alone cannot produce fuel."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "jugcraft:fluid_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:steel_gear",
+            "jugcraft:basic_circuit",
+            "jugcraft:electric_motor",
+            "jugcraft:steel_plate",
+            "jugcraft:machine_casing",
+            "jugcraft:steel_plate"
+          ],
+          "result": "jugcraft:digestate_separator",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/31",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Bio-Generator",
+        "icon": "jugcraft:bio_generator",
+        "text": [
+          "Three wide, four deep and three tall. A modest farm engine with a guarded flywheel, generator coupling, radiator and control cabinet. Either the lower right collar or the low rear fuel fitting accepts cleaned biogas or existing bioethanol into the same tank; drain before switching fuels. Electricity leaves the rear left cabinet. Its crafting bill uses an iron gear, distinct from the industrial gas generator.",
+          "Both fuels give 192 JE per mB at 64 JE/t, below the industrial Gas Burning Generator. Raw biogas, methane and hydrogen are rejected. Fuel is spent only when electricity fits; fractional fuel credit survives saving.",
+          "Optional upgrade: the existing Chemical Infuser and reusable nickel bed combine 1000 mB cleaned biogas with 1600 mB hydrogen into 1000 mB pure methane and 1600 mB recovered water, 600 ticks at 128 JE/t. Its water overflow setting applies. This preserves the original 600 mB methane and converts the 400 mB CO2 rather than throwing it away. Pure methane uses the existing Gas Burning Generator."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "jugcraft:iron_gear",
+            "jugcraft:steel_plate",
+            "jugcraft:electric_motor",
+            "jugcraft:basic_circuit",
+            "jugcraft:fluid_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:machine_casing",
+            "jugcraft:steel_plate"
+          ],
+          "result": "jugcraft:bio_generator",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
       "id": "tech/10/0",
       "group": "Technology",
       "chapter": "Electronics",
@@ -7758,6 +8012,25 @@
       }
     },
     {
+      "id": "process/chemical_infuser/infuser_biogas_upgrading",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Infuser Biogas Upgrading",
+        "icon": "jugcraft:chemical_infuser",
+        "text": [
+          "Machine: Chemical Infuser",
+          "Inputs: 1000 mB Clean Biogas, 1600 mB Hydrogen",
+          "Outputs: 1000 mB Methane, 1600 mB Water",
+          "Work: 600 ticks (30 seconds).",
+          "Reusable tool: Nickel Catalyst Bed",
+          "Power: 128 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
       "id": "process/chemical_oxidizer/oxidizer_sulfur_dioxide",
       "group": "Technology",
       "chapter": "Processes",
@@ -7861,6 +8134,60 @@
           "Outputs: 1 x Mixed Gas Residue, 250 mB Carbon Monoxide, 250 mB Hydrogen",
           "Work: 100 ticks (5 seconds).",
           "Power: 48 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
+      "id": "process/anaerobic_digester/digest_farm_material",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Digest Farm Material",
+        "icon": "jugcraft:anaerobic_digester",
+        "text": [
+          "Machine: Anaerobic Digester",
+          "Inputs: 16 x Digester Feedstock, 1000 mB Water",
+          "Outputs: 1000 mB Raw Biogas, 750 mB Digestate",
+          "Work: 400 ticks (20 seconds).",
+          "Power: 32 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
+      "id": "process/biogas_cleaner/clean_biogas",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Clean Biogas",
+        "icon": "jugcraft:biogas_cleaner",
+        "text": [
+          "Machine: Biogas Cleaner",
+          "Inputs: 1000 mB Raw Biogas, 250 mB Water",
+          "Outputs: 1000 mB Clean Biogas, 250 mB Digestate",
+          "Work: 100 ticks (5 seconds).",
+          "Power: 24 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
+      "id": "process/digestate_separator/separate_digestate",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Separate Digestate",
+        "icon": "jugcraft:digestate_separator",
+        "text": [
+          "Machine: Digestate Separator",
+          "Inputs: 1000 mB Digestate",
+          "Outputs: 1 x Digestate Fiber, 750 mB Water",
+          "Work: 100 ticks (5 seconds).",
+          "Power: 16 JE/t before upgrades.",
           "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
         ]
       }
@@ -11259,6 +11586,34 @@
       "title": "Hydrochloric Acid",
       "description": "Obtain Hydrochloric Acid by crafting, trade or collection.",
       "icon": "jugcraft:hydrochloric_acid_bucket",
+      "group": "Technology"
+    },
+    {
+      "id": "jugcraft:encyclopedia_anaerobic_digester",
+      "title": "Anaerobic Digester",
+      "description": "Obtain Anaerobic Digester by crafting, trade or collection.",
+      "icon": "jugcraft:anaerobic_digester",
+      "group": "Technology"
+    },
+    {
+      "id": "jugcraft:encyclopedia_biogas_cleaner",
+      "title": "Biogas Cleaner",
+      "description": "Obtain Biogas Cleaner by crafting, trade or collection.",
+      "icon": "jugcraft:biogas_cleaner",
+      "group": "Technology"
+    },
+    {
+      "id": "jugcraft:encyclopedia_digestate_separator",
+      "title": "Digestate Separator",
+      "description": "Obtain Digestate Separator by crafting, trade or collection.",
+      "icon": "jugcraft:digestate_separator",
+      "group": "Technology"
+    },
+    {
+      "id": "jugcraft:encyclopedia_bio_generator",
+      "title": "Bio-Generator",
+      "description": "Obtain Bio-Generator by crafting, trade or collection.",
+      "icon": "jugcraft:bio_generator",
       "group": "Technology"
     },
     {

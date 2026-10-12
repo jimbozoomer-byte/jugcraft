@@ -57,9 +57,18 @@ public class StarterChemistryGameTests {
                             && machine.energy().getAmount() == starting, "Missing catalyst blocks before spending inputs or power");
                     machine.container().setItem(slot, tool);
                 }
-                ticks(h, machine, recipe.time());
+                // Longer upgrading batches need a connected supply, not just one full internal buffer.
+                long supplied = 0;
+                for (int tick = 0; tick < recipe.time(); tick++) {
+                    if (machine.energy().getAmount() < recipe.energyPerTick()) {
+                        long refill = machine.energy().getCapacity() - machine.energy().getAmount();
+                        supplied += refill;
+                        ((SimpleEnergyStorage) machine.energy()).setAmount(machine.energy().getCapacity());
+                    }
+                    ticks(h, machine, 1);
+                }
                 h.assertTrue(machine.lane(0) == null, entry.id() + " did not finish: " + machine.status());
-                h.assertTrue(starting - machine.energy().getAmount() == (long) recipe.time() * recipe.energyPerTick(), entry.id() + " exact paid work");
+                h.assertTrue(starting + supplied - machine.energy().getAmount() == (long) recipe.time() * recipe.energyPerTick(), entry.id() + " exact paid work including supplied power");
                 for (int i = 0; i < recipe.fluidResults().size(); i++) {
                     var result = recipe.fluidResults().get(i);
                     var tank = machine.tanks().output(recipe.resultTank(i));
@@ -81,7 +90,7 @@ public class StarterChemistryGameTests {
                 checked++;
             }
         }
-        h.assertTrue(checked == 10, "All ten starter gas recipes exercised, found " + checked);
+        h.assertTrue(checked == 11, "All eleven gas recipes including biogas upgrading exercised, found " + checked);
         h.succeed();
     }
 

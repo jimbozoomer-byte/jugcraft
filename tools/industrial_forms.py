@@ -436,6 +436,9 @@ def write_all(write, assets, data, lang, condition, self_drop):
         glow = {name: f"{MOD}:block/{FORM_GLOW[name]}" for name in model_writer.texture_names(elements) if name in FORM_GLOW}
         offsets = footprint(info["layers"])
         for index, part in enumerate(model_writer.split_model(form, elements, offsets)):
+            # Slices wholly inside the large sealed digester have no exposed faces.
+            # Keep their structural block, but do not emit invalid faceless render elements.
+            part = [element for element in part if element.get("faces")]
             out.model(f"{form}_part{index}", {"ambientocclusion": False, "textures": textures, "elements": part})
             out.model(f"{form}_part{index}_on", {"parent": f"{MOD}:block/{form}_part{index}", "textures": glow})
         variants = {}
@@ -458,6 +461,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
             "result": {"id": f"{MOD}:{form}", "count": 1}})
     import starter_chemistry
     starter_chemistry.write_extras(write, assets, data, lang, condition)
+    import anaerobic
+    anaerobic.write_extras(write, assets, data, lang, condition)
     for kind, name, recipe in form_recipe_files(condition):
         write(data / "recipe" / kind / f"{name}.json", recipe)
 
@@ -509,3 +514,14 @@ MODELS.update(starter_chemistry_models.MODELS)
 ROTORS.update(starter_chemistry_models.ROTORS)
 ITEM_EXTRAS.update(starter_chemistry_models.ITEM_EXTRAS)
 HANDBOOK["gas_burning_generator"][-1] = "Methane from the Infuser now burns here too: 448 JE per mB, up to 256 JE/t. Fractional fuel credit is saved, so switching loads or restarting loses and duplicates no fuel. This generator has no upgrade slots."
+
+import anaerobic
+import anaerobic_models
+FORMS.update(anaerobic.FORMS)
+FORM_RECIPES.update(anaerobic.RECIPES)
+FORM_RECIPES["chemical_infuser"].append(anaerobic.UPGRADING)
+HANDBOOK.update(anaerobic.HANDBOOK)
+TANK_NAMES.update(anaerobic.TANK_NAMES)
+MODELS.update(anaerobic_models.MODELS)
+ROTORS.update(anaerobic_models.ROTORS)
+ITEM_EXTRAS.update(anaerobic_models.ITEM_EXTRAS)

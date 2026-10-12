@@ -61,6 +61,11 @@ def build():
       ('planned','Future content — not implemented here','minecraft:map',[
        'Stolas and the shared 72-spirit pact expansion remain planned. Full moon/planet travel remains planned. More magic school content, industrial metals/polymers, advanced chips and larger factory forms remain separate delivery work.',
        'The Encyclopedia itself does not add these systems. Existing entries document playable content; route arrows are suggestions unless an entry names an actual material or research prerequisite.'])]
+    overviews.insert(2,('biogas','Farm waste to power: the digester factory','jugcraft:anaerobic_digester',[
+        'Build the six-block-wide Anaerobic Digester, Biogas Cleaner, Digestate Separator and Bio-Generator. Steel, tanks, a motor and a basic circuit provide a reachable entry; no methane or digestate is needed to craft them. An existing generator or charged battery starts the line.',
+        '16 farm items + 1000 mB water become 1000 mB raw 60/40 methane/CO2 biogas and 750 mB digestate. Clean the gas with 250 mB water; combine its 250 mB wash digestate with the main residue. The separator recovers 750 mB water and one fiber. Eight fibers craft Fertilizer. Collect every outlet: full tanks stop the line.',
+        'Burn cleaned biogas in the Bio-Generator at 64 JE/t. Existing bioethanol also works. Reuse the Chemical Infuser and nickel bed to upgrade biogas with hydrogen into pure methane; collect its water or use its existing excess-water drain. Pure methane feeds the higher-output Gas Burning Generator.',
+        'Existing pipes, gas cylinders, tanks, cables and conveyors handle the line. Search a machine name for exact port locations and recipes. This guide records game balance, not real industrial procedures.']))
     for key,title,icon,text in reversed(overviews):
         entries.insert(0,dict(id='guide/'+key,group='Home',chapter='Start here',gate='',page=dict(title=title,icon=icon,text=text)))
     return dict(version=1,entries=entries)
@@ -72,6 +77,8 @@ def write_content(write,assets,data,lang):
     lang['screen.jugcraft.encyclopedia.button']='Jugcraft guide'
     book=build();goals=[]
     acquire={"chemical_infuser":"Chemical Infuser", "chemical_oxidizer":"Chemical Oxidizer", "coal_gasifier":"Coal Gasifier", "gas_cleaning_rack":"Gas Cleaning and Separation Rack", "hydrochloric_acid_bucket":"Hydrochloric Acid"}
+    import anaerobic
+    acquire.update({name:info['display'] for name,info in anaerobic.FORMS.items()})
     for item,title in acquire.items():
         lang[f'advancements.jugcraft.encyclopedia_{item}.title']=title
         lang[f'advancements.jugcraft.encyclopedia_{item}.description']='Obtain '+title+' by crafting, trade or collection.'

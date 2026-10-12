@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:anaerobic_digester"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_anaerobic_digester.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_anaerobic_digester.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:anaerobic_digester"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

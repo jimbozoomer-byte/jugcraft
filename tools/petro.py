@@ -529,3 +529,9 @@ def fluid_recipe_files(condition):
             yield kind, recipe["name"], data
 
 ITEMS.update(STARTER_ITEMS)
+
+# Farm digestion extends the existing fluids and ingredient registry.
+from anaerobic import GASES as BIO_GASES, FLUIDS as BIO_FLUIDS, ITEMS as BIO_ITEMS
+GASES.update(BIO_GASES)
+FLUIDS.update(BIO_FLUIDS)
+ITEMS.update(BIO_ITEMS)

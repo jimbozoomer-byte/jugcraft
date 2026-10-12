@@ -49,6 +49,7 @@ public final class PetroItems {
 	public static Item VANADIUM_OXIDE;
 	public static Item MIXED_GAS_RESIDUE;
 	public static Item OXIDIZER_BURNER;
+	public static Item DIGESTATE_FIBER;
 
 	private PetroItems() {
 	}
@@ -81,6 +82,7 @@ public final class PetroItems {
 		VANADIUM_OXIDE = JugcraftRegistry.item("vanadium_oxide");
 		MIXED_GAS_RESIDUE = JugcraftRegistry.item("mixed_gas_residue");
 		OXIDIZER_BURNER = JugcraftRegistry.item("oxidizer_burner");
+		DIGESTATE_FIBER = JugcraftRegistry.item("digestate_fiber");
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(NICKEL_CATALYST_BED);
@@ -89,6 +91,7 @@ public final class PetroItems {
 			output.accept(VANADIUM_OXIDE);
 			output.accept(MIXED_GAS_RESIDUE);
 			output.accept(OXIDIZER_BURNER);
+			output.accept(DIGESTATE_FIBER);
 			output.accept(CRACKING_CATALYST);
 			output.accept(ASPHALT_BINDER);
 			output.accept(PLASTIC_PELLETS);
