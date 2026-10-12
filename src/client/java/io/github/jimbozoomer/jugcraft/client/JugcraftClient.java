@@ -62,6 +62,8 @@ public final class JugcraftClient implements ClientModInitializer {
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
 		VesperineClient.register();
 		TatterlaceClient.register();
+		YetiKingClient.register();
+		CinderTyrantClient.register();
 		BlockEntityRendererRegistry.register(JugcraftMachines.MACHINE_ENTITY, WindTurbineRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.BELT_PULLEY_ENTITY, BeltRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.SHAFT_ENTITY, KineticRotorRenderer::new);

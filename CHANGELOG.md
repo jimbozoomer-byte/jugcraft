@@ -8,6 +8,23 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The Cinder Tyrant (boss 4, part 2)
+- **The Cinder Tyrant,** the Cinder Kiln's boss: a salamander lord the size of a cart, armoured in obsidian plates with magma glowing in their seams. He waits sunk in the crucible, only his crest over the slag, and wakes when a player steps down onto the bowl's floor or strikes him: 440 health scaled for the party, armour 10, never hurt by fire. Left alone, he sinks back, healed, and the kiln resets.
+- **His rule, the heat is his:** hot, he takes half of every blow. Turn a sluice and bait his Body Slam into its flooded trough, and the steam quenches him for 8 seconds: his seams go dark, blows do a quarter more and he slows.
+- **The Kiln:** Tail Sweep, Ember Spit (gobs of magma that leave fire), Body Slam, Kiln Breath and Mantle Shed (Cinderlings, little salamanders of slag that gutter out in water). **At half health, the Eruption:** he roars from the forge's lip while the heat channel surges over its banks; then Cinder Rain and the Lava Wave (jump it or stand on a shelf), a sluice at a time choked with slag, and a surge every 30 seconds. **Below a fifth, the Molten Heart:** faster, five gobs, a wider breath. Fire Resistance stops his fire, never his blows.
+- **His loot, each participant's own:** Tyrant Scales (into magma cream, or a cheaper Kiln Seal), one of Arms VII's Cinderbrand or Magmaw (now dropping; certain on a first kill), the Salamander Charm (in the offhand, hot ground never burns you) and the Tyrant's Crest (a costume), with shared experience and **Tempered**. When he falls the crucible cools to obsidian and Grey Mist opens in the bowl. Record: [cinder-tyrant.md](docs/features/cinder-tyrant.md).
+
+### Unmerged: The Cinder Kiln and the Kiln Seal (boss 4, the Cinder Tyrant, part 1)
+- **The Cinder Kiln,** a fourth lair: a kiln under a volcano, a dome of kiln brick ribbed with blackstone over a bowl of cracked basalt 44 blocks across, its vent open to a smoky sky. A forge mouth in the north wall pours molten slag over its lip, down a heat channel to a crucible three blocks deep where the Cinder Tyrant will wait. The slag burns whoever stands in it (Fire Resistance stops it).
+- **Three sluice gates** in the walls, the kiln's working fixture: turn any gate's wheel and its trough floods for 10 seconds, then drains while the gate fills again for 20. A flooded trough puts out the burning. Four raised shelves round the bowl stay out of the slag's reach. You arrive on a ledge in the south wall and walk down a curving stair with no step over half a block; the Grey Mist home hangs behind the ledge.
+- **The Kiln Seal** (four obsidian, a magma block, two blaze powder, two gold) opens it: press it into a magma block in the Nether, or in the Volcano or the Cinder Barrens, at any hour. The magma cracks open into a vent of sparks and smoke that others can follow through for a minute. Refused, it says why and is kept. The Tyrant himself and his loot are part 2. Record: [cinder-kiln.md](docs/features/cinder-kiln.md).
+- **CI: the client tests share five jobs instead of four.** With the kiln's client test the estimate for the busiest of four jobs passed the 25 minutes the sharing check allows; with five it is about 20 a job ([docs/TESTING.md](docs/TESTING.md)).
+
+### Unmerged: The boss playbook (how a boss is built)
+- **[docs/branches/BOSS_PLAYBOOK.md](docs/branches/BOSS_PLAYBOOK.md)** writes down, at the owner's request, the order the Yeti King was built in, as the plan for building every boss.
+- Each boss is two pull requests: its lair and the summoning that opens it, then the boss, his adds and his loot. The steps run from the survey and the plan to the numbers, model, art, data, Java, audit, tests and record, then CI and the pictures. Each step names the files the Yeti King made at it.
+- It also records what the Yeti King taught: checking every API against 26.3 before CI, porting an open fix for a flaky test, and aiming the cameras from where the boss is. It carries the planning pack's shared lair contract and what "done" means for a boss. Docs only.
+
 ### Unmerged: Arms VIII fix (a thrown arm no longer flies through a foe it stops just short of)
 - **A thrown arm strikes a foe it ends a tick just short of.** Before, it sometimes flew through. From a flight's third tick, the sweep that finds what a thrown thing hits widens each box it looks for, but finds only the boxes it enters. An arm that ended a tick inside the next tick's widening, short of the foe itself, started that tick inside the box and flew on. Now each tick but the first starts by striking a foe whose widened box the arm is already inside.
 - This made the steel javelin's game test fail now and then, on `main` and on pull requests that do not touch the thrown arms. A new test sets a javelin going slowly at a still pig to end a tick 0.02 short of it, and it must strike. Record: [arms-viii.md](docs/features/arms-viii.md).
@@ -44,6 +61,33 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Four bayonets,** each the owner's art: **Iron**, **Steel** (the owner's anthralite one), **Diamond** and **Netherite** (a smithing upgrade). Under the barrel, in place of a grip. **V stabs** for 4 to 6 damage within reach, every 12 ticks; the server deals the blow. Seven guns take them.
 - **Five more guns take attachments:** the Drover Rifle, Coach Gun, Duelling Pistol, Line Musket and Bellmouth. The owner drew their parts on shared textures; each gun's atlas now packs those into its free room, never over 128 × 128.
 - Scopes wait for the owner's reticle textures. Record: [guns.md, slice 7](docs/features/guns.md#slice-7-bayonets-and-the-shared-texture-guns).
+
+### Unmerged: The Yeti King (boss 3, part 2)
+- **The Yeti King**, a great white ape of the glacier with a crown of blue ice, waits slumped on his throne in the Glacier Hall and leaps down onto the frozen lake when a player steps onto it. He has 420 health, scaled up for a party.
+- **His rule, the snow is his:** his Ground Slam blasts the lake's drift snow bare to slick glare ice round where he lands, for 12 seconds before it drifts back; never the trampled snow round the columns, at the ramp's foot or before his dais.
+- **Phase 1, the Hunt:** Maul Swipe, Boulder Throw, Ground Slam, Frost Breath and the Avalanche Charge. Charge him into an ice column and he reels for 3 seconds, taking a third more damage.
+- **At half health, the King's Roar:** he roars from his dais, a blizzard chills everyone near and two Yeti Whelps climb out of the dens. Then come Icicle Fall, Glacial Spikes and Kin Call.
+- **Below a fifth, the Fury of the Peaks:** his crown blazes and his eyes burn blue, his cooldowns are a third shorter, his slam bares a wider ring and a charge that misses the columns is followed by another.
+- **Left alone for 10 seconds** he climbs back onto his throne, healed, and the snow drifts back.
+- **His loot is each participant's own:**
+  - Yeti Fur, which makes a cheaper Frost Horn or two white wool;
+  - one of Arms VII's two Yeti King trophies, the **Glacier Maul** or the **Rimeclaw**, with their Frost boon, certain on a first kill;
+  - the Yeti Mitten, which keeps its wearer from freezing from the offhand;
+  - the Yeti King's Crown, a costume;
+  - shared experience and the advancement Abominable.
+- When he falls, the snow drifts back over his lake and Grey Mist opens in its middle. Animated with GeckoLib. Record: [yeti-king.md](docs/features/yeti-king.md).
+
+### Unmerged: The Glacier Hall and the Frost Horn (boss 3, the Yeti King, part 1)
+- **The Frost Horn** (a goat horn, two gold ingots, two leather and two snow blocks) opens the Glacier Hall:
+  - blow it at night in the Overworld, standing on snow or ice. A roar answers, the snow at your feet splits, and you fall through and land on the hall's ledge with frost on your skin. The horn is used up;
+  - for 60 seconds a whirl of white mist stays open in the snow, and anyone who uses it follows;
+  - by day, off the snow, outside the Overworld, where a whirl is already open or with every hall taken, it says why and is kept. It works all year: the Yeti King is no Witching Season boss.
+- **The Glacier Hall** is a vast cavern in the heart of a glacier:
+  - a ledge high in the south wall under a snow-choked crevasse, where you land, with Grey Mist in an arch of blue ice beside you as the way home;
+  - a snow ramp down to a frozen lake 41 blocks across, crusted with drift snow, scoured to slick glare ice at its shore and middle, with trampled snow round four great ice columns;
+  - the King's throne of ice on a dais of blue ice steps, under an arch of two mammoth tusks, with his frozen hoard heaped about it;
+  - two dens in the side walls, giant icicles on the vault and a crack open to the pale sky.
+- Six lair-only blocks: unbreakable, no items, no drops. The Mist Gate draws a whirl of snow for the hall. Record: [glacier-hall.md](docs/features/glacier-hall.md).
 
 ### Unmerged: Madame Tatterlace (boss 2, part 2)
 - **Madame Tatterlace**, a great spider seamstress, waits sewing on the white silk over the Spindle Loft's doily and lowers herself onto it when a player steps onto the lace. She has 360 health, scaled up for a party.
