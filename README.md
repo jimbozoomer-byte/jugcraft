@@ -20,6 +20,8 @@ Minecraft remains **26.3 + Fabric**, with **Loader 0.19.5** required by the sele
 
 ## Start here
 
+- [Read the expanded magic, bosses, industry and World Designer plan](docs/plans/concordance-expansion-2026-10-10/START-HERE.md): researched design chapters, a Claude handoff prompt, substantial implementation chunks and owner check-ins.
+
 - [Set up Peepo and Jughead: taming, jobs, supplies, porter routes and care](docs/PEEPO_COMPANION_GUIDE.md).
 - [Design a new world's terrain, biomes, spawn, city and villages with World Designer](docs/WORLD_DESIGNER.md).
 

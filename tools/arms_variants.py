@@ -4,8 +4,10 @@ own look, in three kinds of line:
 - styles, crafted at a smithing table from a steel arm, the style's pattern and a material, which keep the arm's
   enchantments and wear: gilded (takes enchantments as gold does), ironclad (dieselpunk, twice as hard-wearing),
   bonecarved (strikes the undead harder) and runebound (glowing runes that mark a foe);
-- trophies of eight bosses still to be made (docs/branches/BOSSES.md): no recipe; each boss's loot table is ready
-  (loot_table/bosses/<boss>.json) for its encounter to drop one of its two; and of Vesperine, the Last Reaper
+- trophies of eight bosses (docs/branches/BOSSES.md): no recipe; each boss's loot table is ready
+  (loot_table/bosses/<boss>.json) for its encounter to drop one of its two, and the Yeti King's and the Cinder Tyrant's,
+  the first of them made, drop from them (docs/features/yeti-king.md, YetiKingLoot; docs/features/cinder-tyrant.md,
+  CinderTyrantLoot); and of Vesperine, the Last Reaper
   (docs/features/vesperine.md), whose Vesper Scythe she drops (VesperineLoot; her trophy table lists it as theirs do),
   and of Madame Tatterlace (docs/features/tatterlace.md), whose Needle Rapier she drops (TatterlaceLoot);
 - the arms of the owner's armor sets, each in its set's look (the Hades Armor's scythe): no recipe and, until the owner
@@ -59,7 +61,9 @@ STYLES = {
                   "pattern_tooltip": "A smithing template: binds glowing runes to a steel nodachi, moonblade, quarterstaff or war hammer, with ectoplasm."},
 }
 BOSSES = {
+    # Fought in the Glacier Hall (docs/features/yeti-king.md); his loot drops one of his two.
     "yeti_king": {"display": "the Yeti King"},
+    # Fought in the Cinder Kiln (docs/features/cinder-tyrant.md); his loot drops one of his two.
     "cinder_tyrant": {"display": "the Cinder Tyrant"},
     "mire_hag": {"display": "the Mire Hag"},
     "crypt_lich": {"display": "the Crypt Lich"},
@@ -234,13 +238,19 @@ def item_tags():
 
 def held_model(name):
     """A variant's 3D model, posed as its kind is (tools/arms.py held_model), but held by its own design's grip."""
+    import vanilla_arms
+    if name in vanilla_arms.VARIANTS:
+        return vanilla_arms.held_model(vanilla_arms.VARIANTS[name], f"{MOD}:item/{name}")
     kind_ = kind(name)
     held = arms.KINDS[kind_]["held"]
     (x, y), size, factor = arms_variants_art.held_at(name, held)
     grip = (x * 16.0 / size - 8.0, 8.0 - y * 16.0 / size)
     display = {}
     for context, (rotation, translation, scale) in arms.HANDHELD.items():
-        right, left = arms._pose(rotation, translation, scale, grip, scale, arms.SWORD_GRIP, round(held * factor, 4))
+        hand_size = round(held * factor, 4)
+        if kind_ == "nodachi" and context.startswith("firstperson"):
+            hand_size = min(hand_size, 1.15)
+        right, left = arms._pose(rotation, translation, scale, grip, scale, arms.SWORD_GRIP, hand_size)
         display[context] = right
         display[context.replace("righthand", "lefthand")] = left
     _texture, elements = arms_variants_art.model(name, held)

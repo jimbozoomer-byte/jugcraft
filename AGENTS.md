@@ -6,6 +6,10 @@ The owner's 9 October asset-integration authorization is recorded at the top of 
 
 The owner says the supplied work was rebuilt from earlier mod bases and some old names, credits and supporter text remained. Follow [the provenance clarification](art/owner-library/PROVENANCE.md): proceed with authorized integration; do not treat those labels alone as proof the entire library is copied or repeat per-asset permission requests. Preserve applicable notices and investigate concrete concerns at the affected file while continuing the rest.
 
+## Concordance expansion planning
+
+For work on magic, related bosses, pacts, magical workshops or World Designer integration, consult the [expanded planning pack](docs/plans/concordance-expansion-2026-10-10/START-HERE.md), [delivery chunks](docs/plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) and [first-chunk tickets](docs/plans/concordance-expansion-2026-10-10/12-detailed-first-chunk-tickets.md). It records the October 10 source audit separately from proposals. Refresh current code and open PRs before implementation, preserve existing shared systems and approved dependencies, and follow the owner's selected scope. For a selected implementation chunk, finish its coherent player outcome and report a concise evidence-based checkpoint for owner input before starting the next chunk. This planning pack was prepared with OpenAI Codex.
+
 ## Approved frameworks and installation
 
 For authored terrain, biome maps or settlement placement, read [World Designer](docs/WORLD_DESIGNER.md) and its [feature record](docs/features/world-designer.md). Extend the shared offline editor/model and serialized generation codecs. Reuse the existing town builder. Do not create a global active-design singleton, silently rewrite generated chunks, or claim native structure pins control exact building layouts.
