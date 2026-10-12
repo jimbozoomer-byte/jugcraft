@@ -33,6 +33,55 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **Armour hides the worn belt and boots,** as the owner asked: the belt under a chestplate or leggings, the boots under boots. An elytra hides nothing. They come back as soon as the armour comes off.
 - **A new setting, Show my worn trinkets** (Concordance settings, on by default), hides your own belt and boots, and everyone who sees you sees your choice; you see theirs.
 - A small render element does both, inside the same render definitions. Your client sends the setting to the server when you join a world and whenever you save it; the server keeps it on you (not saved: it is sent again each time you join), shows it to everyone who sees you and takes a change at most twice a second. Record: [arcane-concordance-trinkets.md](docs/features/arcane-concordance-trinkets.md).
+### Unmerged: Guns, slice 11B (the rest of the Nether guns)
+- **Three more Nether guns** from the owner's crimson, blackstone and gold models and animations, whose bullets set what they hit alight as slice 11A's do: the **Ashfall Pistol**, held in one hand (so it pairs with another one-handed gun), the tank under its barrel changed to reload; the **Goldbristle Carbine**, one rifle round a pull from a magazine at its left side; and the **Crackling**, a long gold pump shotgun of six heavy pellets, loaded a shell at a time.
+- Each is made from steel, gold, a lever and gilded blackstone. The Ashfall Pistol takes the stocks, scopes and Laser Sight; the Goldbristle Carbine everything slice 11A's guns take, and the magazines; the Crackling the stocks, grips and bayonets, its owner-made barrel attachments being too short for its barrel.
+- Record: [guns.md, slice 11B](docs/features/guns.md#slice-11b-the-rest-of-the-nether-guns).
+
+### Unmerged: Guns, slice 11A (the Nether guns)
+- **Three new guns** from the owner's crimson, blackstone and gold models and animations, whose bullets set what they hit alight for four seconds (never a block): the **Tusker**, a pump shotgun of eight pellets loaded a shell at a time; the **Cinder Repeater**, an automatic firing light rounds from a magazine of twenty; and the **Bastion Rifle**, a heavy rifle whose trapdoor breech flips open after every shot, loaded a round at a time.
+- Each is made from steel, a lever, gold and gilded blackstone from the Nether's bastion remnants. Each takes the stocks, grips, barrel attachments, bayonets, scopes and the Laser Sight; the Cinder Repeater the magazines too.
+- Record: [guns.md, slice 11A](docs/features/guns.md#slice-11a-the-nether-guns).
+
+### Unmerged: Guns, slice 10G (two guns at once)
+- **A pistol in each hand:** with a one-handed gun in each hand (thirteen of the guns: the pistols, revolvers, the Haymaker, the Bronco SMG, the Spikedriver and the Culverin), left click fires the main hand's and right click the other's, a press a shot, held for an automatic. Each keeps its own rate, magazine, sound and flash; neither is aimed, and each strays half as far again from the hip.
+- G reloads the main gun, or the other when the main one is full; one gun reloads at a time. Each gun's counter shows on its own side of the hotbar. Seen from outside both arms are raised; in first person the other hand's gun has its own arm, drawn mirrored. The one-handed guns say in their tooltips that they pair.
+- The shot, reload, action and trace payloads now carry the hand.
+- Record: [guns.md, slice 10G](docs/features/guns.md#slice-10g-two-guns-at-once).
+
+### Unmerged: Guns, slice 10F (enemies with guns)
+- **A new raider, the Raider Gunner,** who carries one of the owner's service arms (the Sentry Pistol, Garrison Rifle or Breacher) and fires it: the gun's own bullets at half their damage, in bursts, with the gun's magazine and reload time. Its bullets pass through raiders.
+- Gunners march in raids in place of some of the grunts (parties are as large as before), and one holds each raider camp. While the guns are switched off, grunts come in their places.
+- A player's kill may win its gun (8.5%, empty) and a few of its rounds. Mobs holding a gun are now posed holding it as players are.
+- The raiders' record: the party table, the camp's garrison, the gunner's loot, and the level 5 party's size (14, not 15).
+- Record: [guns.md, slice 10F](docs/features/guns.md#slice-10f-enemies-with-guns); [raiders.md](docs/features/raiders.md).
+
+### Unmerged: Guns, slice 10E (the Cell Rack)
+- **A new block, the Cell Rack:** two shelves of three cradles that charge every Energy Cell standing in them at once from cables, sharing up to 1,024 JE a tick evenly, no more than the Charging Station's 512 to one cell. Stand a cell in the cradle you point at, take one out with an empty hand; hoppers above or beside it put cells in, and a hopper below takes out only full ones.
+- Made from the Charging Station's parts, a steel plate in place of its lamp; it needs the guns and machines switches, as the Energy Cell does. It is drawn in the power gear's electric look, the cells standing upright in it.
+- Also corrects the record's Charging Station time for a cell (slice 8D): 20 to 40 ticks, not seconds.
+- Record: [guns.md, slice 10E](docs/features/guns.md#slice-10e-the-cell-rack).
+
+### Unmerged: Guns, slice 10D (the sculk guns)
+- **Three new guns** from the owner's sculk-teal models and animations, each with sculk tendrils that sway as it is handled: the **Undertone Rifle**, one hard shot a pull from a magazine of twelve rifle rounds; the **Murmur SMG**, ten light rounds a second while the trigger is held; and the **Reverb**, a double-barrel of ten-pellet buckshot whose barrels turn aside to take a shell at a time.
+- Each is made from steel, a lever, sculk and an echo shard from the deep dark's ancient cities. Each takes the scopes and the Laser Sight; the Undertone Rifle the stocks, the Murmur SMG the magazines, the Reverb the light and tactical grips.
+- Record: [guns.md, slice 10D](docs/features/guns.md#slice-10d-the-sculk-guns).
+
+### Unmerged: Guns, slice 10C (the double-barrels)
+- **Three new guns** from the owner's models and animations, each firing a spread of pellets and loaded all at once: the **Mule**, a sawn-off double-barrel that breaks open to load both shells; the **Fowler**, a double-barrelled flintlock with a ball rammed down each barrel; and the **Culverin**, a stubby hand cannon fired one-handed.
+- The Mule fires Buckshot Shells, the Fowler and the Culverin Paper Cartridges. The Fowler takes the grips and the bayonets; the others take nothing.
+- Record: [guns.md, slice 10C](docs/features/guns.md#slice-10c-the-double-barrels).
+
+### Unmerged: Guns, slice 10B (coil and plasma)
+- **Three new energy weapons** from the owner's models and animations, on the Energy Cells: the **Solenoid Rifle**, a coil rifle whose heavy beam passes through every creature in its line and reaches the farthest of the energy weapons; the **Votive Rifle**, a plasma rifle that burns for as long as the trigger is held; and the **Glowmouth**, a plasma blunderbuss loaded a charge at a time, whose arc leaps from its mark to two more creatures close by.
+- The two rifles take magazines, stocks, grips, bayonets, the scopes and the Laser Sight; the Glowmouth takes nothing.
+- Record: [guns.md, slice 10B](docs/features/guns.md#slice-10b-coil-and-plasma).
+
+### Unmerged: Guns, slice 10A (the launchers)
+- **Three new guns** from the owner's models and animations: the **Earthmover**, a shoulder rocket launcher with a drum of four rockets; the **Skylark Rifle**, a break-open rifle that fires one rocket at a time, faster and further; and the **Bullfrog**, a stubby grenade launcher loaded a grenade at a time.
+- The rocket guns fire the rocketry branch's High-Explosive Rockets, which burst where they hit, or at the end of the gun's range, as the Rocket Launcher's do; they hurt living things only and break no block. The Bullfrog loads any grenade, as the Trench Lobber does.
+- A rocket in flight now saves what is left of its fuse.
+- Record: [guns.md, slice 10A](docs/features/guns.md#slice-10a-the-launchers).
 
 ### Unmerged: Arcane Concordance, Wayfaring part 1b (the belt and boot drawn on the body)
 - **The Leather Belt and the Amphibian Boot now show when worn,** as the owner drew them: a leather strap round the waist with a gold buckle in front, and on each foot a green boot with a white cuff, a grey toe cap and a fin on the heel. You see them in third person and on the inventory's figure; other players should see them too (not yet tried with two clients). The charms and the Ice Breaker (the owner drew no worn sheet for it) are not drawn.

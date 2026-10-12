@@ -209,7 +209,7 @@ def check_assets(registered):
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
                   + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
-                  + concordance.blocks()):
+                  + concordance.blocks() + guns.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -231,7 +231,7 @@ def check_assets(registered):
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
                         + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
-                        + concordance.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + concordance.blocks() + guns.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -370,7 +370,7 @@ def item_units(ref):
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
             or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
-            or path in guns.items() or path in concordance.items() or path in concordance.blocks():
+            or path in guns.items() or path in guns.blocks() or path in concordance.items() or path in concordance.blocks():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -620,7 +620,7 @@ def check_tags():
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
-                                                    + guns.items() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
+                                                    + guns.items() + guns.blocks() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         if registry == "entity_type":
             # These entity IDs have no same-named item. Derive them from actual registrations.
             scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
@@ -1147,7 +1147,7 @@ def check_raiders():
         err(f"RaiderCamps.SPAWN_CLEARANCE differs from tools/raiders.py CAMP_SPAWN_CLEARANCE ({raiders.CAMP_SPAWN_CLEARANCE})")
     if f" RAID_CHANCE = {raiders.RAID_CHANCE}F;" not in raids:
         err(f"RaiderRaids.RAID_CHANCE differs from tools/raiders.py ({raiders.RAID_CHANCE})")
-    order = ["raider_grunt", "raider_grenadier", "raider_officer", "raider_blimp", "raider_walker"]
+    order = ["raider_grunt", "raider_grenadier", "raider_officer", "raider_blimp", "raider_walker", "raider_gunner"]
     table = ", ".join("{" + ", ".join(str(raiders.party(level)[k]) for k in order) + "}" for level in range(1, raiders.MAX_LEVEL + 1))
     if f"PARTY = {{{table}}};" not in raids:
         err(f"RaiderRaids.PARTY differs from party() in tools/raiders.py ({table})")
@@ -1444,16 +1444,38 @@ def check_guns():
     listed = re.search(r"AMMO = List\.of\(([^)]*)\)", java)
     if not listed or re.findall(r'"([a-z_]+)"', listed.group(1)) != list(guns.AMMO):
         err(f"JugcraftGuns.AMMO differs from tools/guns.py {list(guns.AMMO)}")
-    # Slice 8C: what the heavy weapons fire, their spin-up and the ammunition an item of which loads several rounds.
-    shots = ", ".join(f'"{gun}", "{spec["shot"]}"' for gun, spec in guns.GUNS.items() if spec.get("shot", "bullet") != "bullet")
-    if f"SHOTS = Map.of({shots});" not in java:
-        err(f"JugcraftGuns.SHOTS differs from tools/guns.py GUNS shot: expected Map.of({shots})")
+    # Slice 8C: what the heavy weapons fire, their spin-up and the ammunition an item of which loads several rounds
+    # (more than Map.of's ten pairs since slice 10A).
+    shots = ", ".join(f'Map.entry("{gun}", "{spec["shot"]}")' for gun, spec in guns.GUNS.items()
+                      if spec.get("shot", "bullet") != "bullet")
+    if f"SHOTS = Map.ofEntries({shots});" not in java:
+        err(f"JugcraftGuns.SHOTS differs from tools/guns.py GUNS shot: expected Map.ofEntries({shots})")
+    # Slice 10A: the rocket guns' rockets' speed.
+    speeds = ", ".join(f'"{gun}", {spec["rocket_speed"]}F' for gun, spec in guns.GUNS.items() if "rocket_speed" in spec)
+    if f"ROCKET_SPEED = Map.of({speeds});" not in java:
+        err(f"JugcraftGuns.ROCKET_SPEED differs from tools/guns.py GUNS rocket_speed: expected Map.of({speeds})")
     spins = ", ".join(f'"{gun}", {spec["spin_up"]}' for gun, spec in guns.GUNS.items() if spec.get("spin_up"))
     if f"SPIN_UP = Map.of({spins});" not in java:
         err(f"JugcraftGuns.SPIN_UP differs from tools/guns.py GUNS spin_up: expected Map.of({spins})")
     per_item = ", ".join(f'"{ammo}", {n}' for ammo, n in guns.OTHER_AMMO.items() if n != 1)
     if f"PER_ITEM = Map.of({per_item});" not in java:
         err(f"JugcraftGuns.PER_ITEM differs from tools/guns.py OTHER_AMMO: expected Map.of({per_item})")
+    # Slice 10G: the guns a player may hold two of, one in each hand, and how much further each strays.
+    one_handed = ", ".join(f'"{gun}"' for gun in guns.one_handed())
+    if f"ONE_HANDED = Set.of({one_handed});" not in java:
+        err(f"JugcraftGuns.ONE_HANDED differs from tools/guns.py one_handed(): expected Set.of({one_handed})")
+    if f"DUAL_SPREAD = {guns.DUAL_SPREAD}F;" not in java:
+        err(f"JugcraftGuns.DUAL_SPREAD differs from tools/guns.py: expected {guns.DUAL_SPREAD}F")
+    # Slice 11A: the Nether guns, whose bullets set what they hurt alight, and for how long.
+    incendiary = ", ".join(f'"{gun}"' for gun in guns.INCENDIARY)
+    if f"INCENDIARY = Set.of({incendiary});" not in java:
+        err(f"JugcraftGuns.INCENDIARY differs from tools/guns.py: expected Set.of({incendiary})")
+    for gun in guns.INCENDIARY:
+        if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet":
+            err(f"tools/guns.py INCENDIARY names {gun}, which is not a gun that fires bullets")
+    shots_java = (JAVA_ROOT / "guns" / "GunShots.java").read_text(encoding="utf-8")
+    if f"BURN_SECONDS = {guns.BURN_SECONDS};" not in shots_java:
+        err(f"GunShots.BURN_SECONDS differs from tools/guns.py: expected {guns.BURN_SECONDS}")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
     charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
     if f"CHARGE = Map.of({charges});" not in java:
@@ -1464,6 +1486,30 @@ def check_guns():
     cell = (JAVA_ROOT / "guns" / "EnergyCellItem.java").read_text(encoding="utf-8")
     if f"CAPACITY = {guns.CELL_CAPACITY:_};" not in cell or "implements Chargeable" not in cell:
         err(f"EnergyCellItem must be Chargeable, holding tools/guns.py CELL_CAPACITY ({guns.CELL_CAPACITY:_} JE)")
+    # Slice 10F: guns in mobs' hands (guns/MobGuns), the raider gunners' arms and how they fire them.
+    mob = (JAVA_ROOT / "guns" / "MobGuns.java").read_text(encoding="utf-8")
+    arms = ", ".join(f'new Arm("{gun}", {weight}, {reach})' for gun, weight, reach in guns.MOB_ARMS)
+    arms_java = re.search(r"ARMS = List\.of\(([^;]*)\);", mob)
+    if not arms_java or " ".join(arms_java.group(1).split()) != arms:
+        err(f"MobGuns.ARMS differs from tools/guns.py MOB_ARMS: expected {arms}")
+    for line in (f"DAMAGE = {guns.MOB_DAMAGE}F;", f"BURST = {guns.MOB_BURST};", f"PAUSE = {guns.MOB_PAUSE};",
+                 f"DROP = {guns.MOB_DROP}F;", f"REACH = {guns.MOB_REACH};"):
+        if line not in mob:
+            err(f"MobGuns differs from tools/guns.py: expected {line}")
+    for gun, _, _ in guns.MOB_ARMS:
+        if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet":
+            err(f"tools/guns.py MOB_ARMS names {gun}, which is not a gun that fires bullets")
+    # Slice 10E: the Cell Rack's cradles, where tools/guns.py builds them, as the block picks them and as the renderer
+    # stands the cells in them.
+    columns = ", ".join(f"{x}" for x in guns.RACK_COLUMNS)
+    if f"COLUMNS = {{{columns}}};" not in (JAVA_ROOT / "guns" / "CellRackBlock.java").read_text(encoding="utf-8"):
+        err(f"CellRackBlock.COLUMNS differs from tools/guns.py RACK_COLUMNS: expected {{{columns}}}")
+    rack_renderer = (CLIENT_JAVA_ROOT / "guns" / "CellRackRenderer.java").read_text(encoding="utf-8")
+    rows = ", ".join(f"{top + guns.RACK_CELL_MIDDLE}F" for top in guns.RACK_SHELVES)
+    for line in ("COLUMNS = {" + ", ".join(f"{x}F" for x in guns.RACK_COLUMNS) + "};", f"ROWS = {{{rows}}};",
+                 f"DEPTH = {guns.RACK_DEPTH}F;"):
+        if line not in rack_renderer:
+            err(f"CellRackRenderer differs from tools/guns.py RACK_COLUMNS, RACK_SHELVES and RACK_DEPTH: expected {line}")
     events = re.search(r"SOUND_EVENTS = List\.of\(([^)]*)\)", java)
     shared = [name.removeprefix("guns.") for name in guns.sound_events() if name.count(".") == 1]
     if not events or re.findall(r'"([a-z_]+)"', events.group(1)) != shared:
@@ -1489,7 +1535,7 @@ def check_guns():
                 f"message.{MOD}.guns.no_ammo", f"death.attack.{MOD}.bullet", f"death.attack.{MOD}.flame", f"tooltip.{MOD}.guns.fits",
                 f"message.{MOD}.guns.no_charge", f"hud.{MOD}.guns.in_cells", f"death.attack.{MOD}.zap", f"tooltip.{MOD}.guns.charge",
                 f"tooltip.{MOD}.guns.fitting", f"tooltip.{MOD}.guns.fitted", f"tooltip.{MOD}.guns.stab", f"key.{MOD}.stab",
-                f"message.{MOD}.guns.no_grenades", f"tooltip.{MOD}.guns.loaded_grenade"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
+                f"message.{MOD}.guns.no_grenades", f"tooltip.{MOD}.guns.loaded_grenade", f"tooltip.{MOD}.guns.one_handed"] + [f"tooltip.{MOD}.guns.{i}" for i in guns.items()] + [
                 f"tooltip.{MOD}.guns.slot.{slot}" for slot in guns.SLOTS] + [f"tooltip.{MOD}.guns.effect.{e}" for e in guns.EFFECTS]:
         if key not in lang:
             err(f"Missing name {key}")
@@ -1546,7 +1592,7 @@ def check_guns():
     renderer = (client_guns / "GunRenderer.java").read_text(encoding="utf-8")
     shown = re.search(r"PROPS = List\.of\(([^)]*)\)", renderer)
     own_bones = {name for gun in guns.PROPS for name, _, parts, _ in guns.BUILDS[gun]["bones"] if f"@{name}" in parts}
-    if not shown or not own_bones <= set(re.findall(r'"([a-z_]+)"', shown.group(1))):
+    if not shown or not own_bones <= set(re.findall(r'"([a-z0-9_]+)"', shown.group(1))):
         err(f"GunRenderer.PROPS does not list every prop bone of tools/guns.py PROPS: {sorted(own_bones)}")
     if f'EJECT_CUE = "{guns.EJECT_CUE}";' not in animations:
         err(f"GunAnimations.EJECT_CUE differs from tools/guns.py ({guns.EJECT_CUE})")
@@ -12990,7 +13036,7 @@ def main():
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
-                  | set(guns.items()) | set(concordance.items()) | set(concordance.blocks()))
+                  | set(guns.items()) | set(guns.blocks()) | set(concordance.items()) | set(concordance.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
     check_petro()

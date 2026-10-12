@@ -263,7 +263,7 @@ def feature_of(entry_id):
     if entry_id in arms.items():
         return arms.feature(entry_id)
     import guns
-    if entry_id in guns.items():
+    if entry_id in guns.items() or entry_id in guns.blocks():
         return "guns"
     import arms_variants
     if entry_id in arms_variants.items():
