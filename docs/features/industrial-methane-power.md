@@ -1,6 +1,6 @@
 # Methane power: carbon dioxide, methanation and the generator's second fuel (factory package 2)
 
-Status: implemented (pending CI and review). Stacked on the [Chemical Infuser](industrial-chemical-infuser.md) and [Chemical Oxidizer](industrial-chemical-oxidizer.md), with the [Gas Burning Generator](industrial-gas-burning-generator.md).
+Status: implemented (CI green on the contributor's fork; pending review). Stacked on the [Chemical Infuser](industrial-chemical-infuser.md) and [Chemical Oxidizer](industrial-chemical-oxidizer.md), with the [Gas Burning Generator](industrial-gas-burning-generator.md).
 Proposal issue: none. The TODO list's "methanation with its nickel bed and the selected water drain, then methane as the generator's second fuel (256 JE/t)" and "Define distinct CO2 + 4 H2 and CO + 3 H2 methanation recipes, the reusable first catalyst bed from existing nickel/ceramic supplies" (the CO2 half). Quantities, bed, burn value and output are the owner's selections and the plan's proposals in the [starter gas and acid factory](industrial-starter-gas-and-acid-factory.md). The carbon dioxide source is this change's choice, described below for review.
 Owner: jimbozoomer-byte
 Target milestone and tier: steel-era power, the methane line of the starter gas and acid factory
@@ -59,7 +59,7 @@ None new. The Nickel Catalyst Bed's icon is drawn at 16×16 in `tools/petro_text
 
 Locally, without Gradle or a game:
 - `python tools/generate_material_data.py`: regenerated the two recipes, the bed's item model, recipe and tag, the gases' fluid tags and names, the socket label and the handbook pages.
-- `python tools/check_mod_data.py` with the extended loop audit, and `python scripts/check_repository.py`: see the PR for results.
+- `python tools/check_mod_data.py` with the extended loop audit (hydrogen 168, carbon dioxide 351.6, methane 1,127.6 JE/mB), `python tools/check_icon_maps.py` and `python scripts/check_repository.py`: passed.
 - `javac` reported no syntax errors in the changed Java files; it could not compile them without Minecraft's libraries.
 
 For CI, server game tests:
@@ -72,7 +72,7 @@ For CI, server game tests:
 
 ### Results
 
-Pending: no Gradle build or game test has run on this change yet.
+- **Run [38299359276](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38299359276) on the contributor's fork (commit e1d6791e): green.** Everything compiled; "All 1393 required tests passed", the new methanation, bed, charcoal and methane-fuel tests among them; the build without optional integrations and every client test class passed.
 
 No survival playtest, two-client test or performance measurement has been done.
 
