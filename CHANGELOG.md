@@ -82,6 +82,31 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The rocket guns fire the rocketry branch's High-Explosive Rockets, which burst where they hit, or at the end of the gun's range, as the Rocket Launcher's do; they hurt living things only and break no block. The Bullfrog loads any grenade, as the Trench Lobber does.
 - A rocket in flight now saves what is left of its fuse.
 - Record: [guns.md, slice 10A](docs/features/guns.md#slice-10a-the-launchers).
+### Unmerged: Industrial factory package 2, part 2 (the Gas Burning Generator)
+- **The Gas Burning Generator**, the starter factory's hydrogen generator: four wide, five deep and four tall, from the owner's art brief. A gas engine and generator sit on a steel skid: the round intake with its fan, an arched pale heat shield over the olive combustion section, a guarded coupling, the ribbed generator housing, and a tall terminal cabinet with mint lamps and the power socket.
+- **Burns hydrogen at the owner's selected 128 JE/t**: a millibucket a tick, 128 JE each, so a bucket lasts 50 seconds. It is piped in at the capped inlet low on its right side, and its power leaves at the cabinet's socket at the back.
+- **Wastes nothing**: it makes only what its store has room for, so its fuel follows the demand, and its screen says when the fuel tank is empty or the store is full.
+- **Built from steel**: 4 steel plates, a steel gear, an electric motor, a basic circuit, a Tinplate Tank and a Machine Casing. Unlike the Fuel Cell, it needs no aluminum.
+- Its coupling and fan spin up and run down; its lamps and sight glasses light while it runs. Methane, at 256 JE/t, comes with the methane Infuser.
+- **Machine forms can now be generators**: a form can list the fuels it burns and give power out of a power port. The Gas Turbine itself still never burns hydrogen. Record: [industrial-gas-burning-generator.md](docs/features/industrial-gas-burning-generator.md).
+
+### Unmerged: Industrial factory package 2, part 1 (the Electrolytic Separator)
+- **The Electrolytic Separator**, the first big industrial machine: two wide, two deep and three tall, from the owner's art brief. A tall olive cell housing stands between two white collection towers, with its control box, bus connection, lye return and outlet collars.
+- **Built from steel and copper**: 4 steel plates, 2 Steel Tanks, copper cable, a basic circuit and a Machine Casing, 20 steel plates in all. It needs none of the Electrolytic Cell's aluminum or advanced circuit, so hydrogen and chlorine come earlier.
+- **What it splits**, at 256 JE/t:
+  - a bucket of water gives 500 mB of hydrogen and 250 mB of oxygen in 40 s;
+  - a bucket of brine gives 250 mB of hydrogen, 250 mB of chlorine and 500 mB of lye in 20 s.
+- **Ports where the model shows them**: water or brine in low at the back; hydrogen, oxygen or chlorine, and lye out at their collars on the front; power at the bus connection.
+- **It keeps its lye**: a full lye tank stops brine while water still runs, and the screen says "Lye tank is full".
+- The Electrolytic Cell keeps its own recipes, but **its brine now also takes 20 s** (102,400 JE a bucket, was 10 s), the owner's choice to match the Separator. JEI shows the Separator's recipes in their own category, and the Engineer's Handbook has its page.
+- **Machine forms**: each now numbers only its own blocks (12 for the Separator), and a working form lights its lamps and strips on every block, not just its controller. The formed-machine screen wraps a long state and fits its power line. Record: [industrial-electrolytic-separator.md](docs/features/industrial-electrolytic-separator.md).
+
+### Unmerged: Industrial factory package 1 (the shared machine foundation)
+- **The groundwork for the industrial factory's big machines** (package 1 of the owner's roadmap in PR #302); nothing new to craft yet. A machine **form** describes one installation within 2 to 6 blocks on each axis: its parts, the clearance its moving parts need, its open access space, its ports, its tool sockets and what it can process. Placing one checks every position first and names whatever is in the way; breaking any part removes it all and drops it once.
+- **Pipes, cables, conveyors and hoppers reach a form only at its ports.** Tool sockets (catalyst beds, patterns, molds) are never reachable from outside, and a tool cannot be taken out while a batch needs it.
+- **Batches are atomic and saved.** Inputs move into the batch and room for every result is reserved before anything is spent; restarts, unloads and recipe reloads carry on the same batch; Cancel returns only the untransformed inputs. Larger profiles run two or four batches side by side at 90 or 80 percent of the energy each.
+- **A screen that says what to fix:** one of eight states (unformed, idle, waiting for input, a tool or power, warming, processing, output blocked) and the tank, slot or socket concerned, such as "Hydrogen tank is full".
+- Fluid recipes can now ask for a capability or a reusable tool; the original machines keep exactly the recipes they had. Machines that later add tanks can declare how old saves map onto the new tanks, so an output never loads into an input. Record: [industrial-machine-foundation.md](docs/features/industrial-machine-foundation.md).
 
 ### Unmerged: Arcane Concordance, Wayfaring part 1b (the belt and boot drawn on the body)
 - **The Leather Belt and the Amphibian Boot now show when worn,** as the owner drew them: a leather strap round the waist with a gold buckle in front, and on each foot a green boot with a white cuff, a grey toe cap and a fin on the heel. You see them in third person and on the inventory's figure; other players should see them too (not yet tried with two clients). The charms and the Ice Breaker (the owner drew no worn sheet for it) are not drawn.

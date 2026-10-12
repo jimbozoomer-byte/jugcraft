@@ -7,7 +7,13 @@
 	"license": "MIT",
 	"environment": "*",
 	"entrypoints": {
+		"main": [
+			"io.github.jimbozoomer.jugcraft.test.TestForms"
+		],
 		"fabric-gametest": [
+			"io.github.jimbozoomer.jugcraft.test.IndustrialFoundationGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ElectrolyticSeparatorGameTests",
+			"io.github.jimbozoomer.jugcraft.test.GasBurningGeneratorGameTests",
 			"io.github.jimbozoomer.jugcraft.test.FrameworkGameTests",
 			"io.github.jimbozoomer.jugcraft.test.LairGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceGameTests",
@@ -170,6 +176,9 @@
 			"io.github.jimbozoomer.jugcraft.test.CinderTyrantGameTests"
 		],
 		"fabric-client-gametest": [
+			"io.github.jimbozoomer.jugcraft.test.IndustrialFoundationClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ElectrolyticSeparatorClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.GasBurningGeneratorClientGameTests",
 			"local.peepo.PeepoCompanionClientTests",
 			"local.peepo.PeepoHearthClientTests",
 			"local.peepo.PeepoKitchenAnimationClientTests",

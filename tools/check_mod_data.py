@@ -57,6 +57,7 @@ import construction
 import hydroponics
 import electroplating
 import gas_storage
+import industrial_forms
 import concordance
 import control_electronics
 import rocketry
@@ -209,7 +210,7 @@ def check_assets(registered):
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
                   + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
-                  + concordance.blocks() + guns.blocks()):
+                  + concordance.blocks() + guns.blocks() + industrial_forms.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -231,7 +232,7 @@ def check_assets(registered):
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
                         + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
-                        + concordance.blocks() + guns.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + concordance.blocks() + guns.blocks() + industrial_forms.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -370,7 +371,7 @@ def item_units(ref):
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
             or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
-            or path in guns.items() or path in guns.blocks() or path in concordance.items() or path in concordance.blocks():
+            or path in guns.items() or path in guns.blocks() or path in concordance.items() or path in concordance.blocks() or path in industrial_forms.blocks():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -538,11 +539,12 @@ def check_fluid_recipes(registered):
             err(f"MachineKind.recipeType() has no \"{spec['recipe_type']}\" for {machine}")
         if spec["recipe_type"] in RECIPE_TYPES.values():
             err(f"Fluid recipe type {spec['recipe_type']} is also an item machine's")
-    expected = sum(len(r) for r in petro.FLUID_RECIPES.values()) + sum(len(r) for r in drones.DRONE_FLUID_RECIPES.values())
+    expected = (sum(len(r) for r in petro.FLUID_RECIPES.values()) + sum(len(r) for r in drones.DRONE_FLUID_RECIPES.values())
+                + sum(len(r) for r in industrial_forms.FORM_RECIPES.values()))
     types = {spec["recipe_type"] for spec in petro.FLUID_MACHINES.values() if spec["recipe_type"]}
     files = [p for p in (DATA / MOD / "recipe").glob("*/*.json") if p.parent.name in types]
     if len(files) != expected:
-        err(f"{len(files)} fluid recipe files, but tools/petro.py and tools/drones.py define {expected}")
+        err(f"{len(files)} fluid recipe files, but tools/petro.py, tools/drones.py and tools/industrial_forms.py define {expected}")
     for machine, recipes in petro.FLUID_RECIPES.items():
         spec = petro.FLUID_MACHINES[machine]
         for recipe in recipes:
@@ -2881,6 +2883,137 @@ def check_machines(registered):
         err("MachineKind.java and tools/machines.py list different machines")
 
 
+def machines_stats(family):
+    """A machine kind's energy figures (tools/machines.py STATS)."""
+    import machines
+    return machines.STATS.get(family, {})
+
+
+def cheapest_electrolysis(fluid):
+    """The least JE any recipe spends per mB of `fluid` it makes, with the most efficiency cards its machine takes (the
+    legacy fluid machines take none), or None when no recipe makes it. All the recipe's energy counts against `fluid`,
+    so a fuel burning for less than this cannot pay back the electricity that made it, whatever else came out too."""
+    import machines
+    costs = []
+    for machine, recipes in petro.FLUID_RECIPES.items():
+        use = machines.STATS.get(machine, {}).get("use_per_tick", 0)
+        for recipe in recipes:
+            for result in recipe.get("fluid_results", []):
+                if result[0] == fluid and use:
+                    costs.append(recipe["ticks"] * use / result[1])
+    for form, recipes in industrial_forms.FORM_RECIPES.items():
+        info = industrial_forms.FORMS[form]
+        use = machines.STATS[info["family"]]["use_per_tick"]
+        # MachineUpgrades.Effect.use with four efficiency cards, the most that count.
+        cheapest = max(1, round(use * 0.8 ** 4)) if info["upgrades"] else use
+        for recipe in recipes:
+            for result in recipe.get("fluid_results", []):
+                if result[0] == fluid:
+                    costs.append(recipe["ticks"] * cheapest / result[1])
+    return min(costs) if costs else None
+
+
+def check_industrial_forms():
+    """Industrial forms (tools/industrial_forms.py, IndustrialForms.java): Java builds each form exactly as the tools
+    describe it, its fuels included; its blockstate covers every facing, light and part; its recipes name a capability
+    it offers, fit its tanks and make no fluid from nothing; a generator burns only from one fuel tank, gives its power
+    out and never burns a fuel for as much as electrolysis spends making it; and the Separator's construction costs the
+    owner's 20 steel plates."""
+    java = (JAVA_ROOT / "machine" / "form" / "IndustrialForms.java").read_text(encoding="utf-8")
+    fuel_values = {name: int(value.replace("_", "")) for name, value in re.findall(
+        r"public static final int (\w+) = ([\d_]+);", (JAVA_ROOT / "chemistry" / "FluidFuels.java").read_text(encoding="utf-8"))}
+
+    def value(text):
+        return int(text) if text.isdigit() else fuel_values.get(text.removeprefix("FluidFuels."), -1)
+    profiles = {name: int(mb.replace("_", "")) for name, mb in re.findall(
+        r"(\w+)\(\d+, ([\d_]+), \d+\)", (JAVA_ROOT / "machine" / "form" / "OperatingProfile.java").read_text(encoding="utf-8"))}
+    constants = dict(re.findall(r'public static final String (\w+) = "([^"]+)";', java))
+    view = load(ASSETS / "recipe_view.json") or {}
+    viewed = {machine["block"] for machine in view.get("fluid_machines", [])}
+    for form, info in industrial_forms.FORMS.items():
+        match = re.search(r'MachineForm\.builder\(Jugcraft\.id\("' + form + r'"\),\s*MachineKind\.(\w+)\)(.*?)\.build\(\);', java, re.S)
+        if not match:
+            err(f"IndustrialForms.java does not build the form {form}")
+            continue
+        family, body = match.group(1), match.group(2)
+        found = {
+            "family": family.lower(),
+            "layers": [re.findall(r'"([^"]*)"', layer) for layer in re.findall(r"\.layer\(([^)]*)\)", body)],
+            "profile": (re.findall(r"\.profile\(OperatingProfile\.(\w+)\)", body) or ["ENTRY"])[0],
+            "input_tanks": re.findall(r'\.inputTank\("(\w+)"\)', body),
+            "output_tanks": re.findall(r'\.outputTank\("(\w+)"\)', body),
+            "capabilities": [constants.get(c, c.strip('"')) for c in re.findall(r"\.capability\(([^)]+)\)", body)],
+            "upgrades": ".upgrades()" in body,
+            "warmup": int((re.findall(r"\.warmup\((\d+)\)", body) or ["0"])[0]),
+            "ports": [(name, kind, int(target) if target.lstrip("-").isdigit() else target, int(column), int(row), int(layer), side)
+                      for name, kind, target, column, row, layer, side in re.findall(
+                          r'\.port\("(\w+)", FormPort\.Kind\.(\w+), ([\w.-]+), (\d+), (\d+), (\d+), FormSide\.(\w+)\)', body)],
+            "fuels": [(f"{MOD}:{fluid}", value(per_mb), value(per_tick)) for fluid, per_mb, per_tick in re.findall(
+                r'\.fuel\(Jugcraft\.id\("(\w+)"\), ([\w.]+), ([\w.]+)\)', body)],
+        }
+        for key, built in found.items():
+            described = info.get(key, []) if key == "fuels" else info[key]
+            if [tuple(item) for item in described] != [tuple(item) for item in built] if key == "fuels" else described != built:
+                err(f"{form}: {key} is {built} in IndustrialForms.java but {described} in tools/industrial_forms.py")
+        if profiles.get(info["profile"]) != info["tank_mb"]:
+            err(f"{form}: the {info['profile']} profile's tanks hold {profiles.get(info['profile'])} mB, not {info['tank_mb']}")
+        parts = len(industrial_forms.footprint(info["layers"]))
+        state = load(ASSETS / "blockstates" / f"{form}.json") or {}
+        expected = {f"facing={facing},lit={lit},part={part}" for facing in ("north", "east", "south", "west")
+                    for lit in ("false", "true") for part in range(parts)}
+        if set(state.get("variants", {})) != expected:
+            err(f"{form}: its blockstate must cover exactly 4 facings x 2 lights x {parts} parts")
+        if bool(industrial_forms.FORM_RECIPES.get(form)) != (f"{MOD}:{form}" in viewed):
+            err(f"{form}: a JEI category in recipe_view.json exactly when it runs recipes")
+        if info.get("fuels"):
+            kinds = [port[1] for port in info["ports"]]
+            if (len(info["input_tanks"]) != 1 or info["output_tanks"] or info["capabilities"] or info["upgrades"]
+                    or industrial_forms.FORM_RECIPES.get(form) or "FLUID_IN" not in kinds or "ENERGY_OUT" not in kinds
+                    or "ENERGY_IN" in kinds):
+                err(f"{form}: a generator burns from one fuel tank, runs no recipes and only gives power out")
+            for fluid, per_mb, per_tick in info["fuels"]:
+                if fluid not in {f"{MOD}:{f}" for f in list(petro.FLUIDS) + list(petro.GASES)}:
+                    err(f"{form}: burns unknown fluid {fluid}")
+                if per_mb <= 0 or per_tick <= 0 or per_tick > machines_stats(info["family"]).get("capacity", 0):
+                    err(f"{form}: burns {fluid} for nothing or makes more a tick than it stores")
+                cost = cheapest_electrolysis(fluid)
+                if cost is not None and per_mb >= cost:
+                    err(f"{form}: {fluid} burns for {per_mb} JE/mB, at least the {cost:.1f} JE/mB its cheapest making costs: a power loop")
+        tanks = info["input_tanks"] + info["output_tanks"]
+        fluids = {f"{MOD}:{f}" for f in list(petro.FLUIDS) + list(petro.GASES)} | {"minecraft:water", "minecraft:lava"}
+        for recipe in industrial_forms.FORM_RECIPES.get(form, []):
+            label = f"{form} recipe {recipe['name']}"
+            if recipe["capability"] not in info["capabilities"]:
+                err(f"{label}: needs {recipe['capability']}, which the form does not offer")
+            if not (DATA / MOD / "recipe" / petro.FLUID_MACHINES[info["family"]]["recipe_type"] / f"{recipe['name']}.json").is_file():
+                err(f"{label}: no recipe file")
+            if len(recipe.get("fluids", [])) > len(info["input_tanks"]) or len(recipe.get("fluid_results", [])) > len(info["output_tanks"]):
+                err(f"{label}: more fluids than the form has tanks")
+            for fluid, mb in recipe.get("fluids", []) + [(r[0], r[1]) for r in recipe.get("fluid_results", [])]:
+                if fluid not in fluids:
+                    err(f"{label}: unknown fluid {fluid}")
+                if mb > info["tank_mb"]:
+                    err(f"{label}: {mb} mB of {fluid} is more than a {info['tank_mb']} mB tank")
+            targets = [petro.result_tank(i, r) for i, r in enumerate(recipe.get("fluid_results", []))]
+            if len(set(targets)) != len(targets) or any(t >= len(info["output_tanks"]) for t in targets):
+                err(f"{label}: its results need distinct output tanks the form has")
+            if sum(r[1] for r in recipe.get("fluid_results", [])) > sum(mb for _, mb in recipe.get("fluids", [])):
+                err(f"{label}: makes more fluid than it takes")
+            if recipe["ticks"] <= 0:
+                err(f"{label}: takes no time")
+        if len(tanks) != len(set(tanks)):
+            err(f"{form}: two tanks share a role")
+    # The Separator's construction: the owner's selected 20 steel plates, counting the Steel Tanks' own.
+    pattern, key = industrial_forms.FORMS["electrolytic_separator"]["recipe"]
+    tank = load(DATA / MOD / "recipe" / "steel_tank.json") or {}
+    plates_per_tank = sum(row.count(ch) for row in tank.get("pattern", []) for ch, ref in tank.get("key", {}).items()
+                          if ref == "#c:plates/steel")
+    plates = (sum(row.count(ch) for row in pattern for ch, ref in key.items() if ref == "#c:plates/steel")
+              + plates_per_tank * sum(row.count(ch) for row in pattern for ch, ref in key.items() if ref == f"{MOD}:steel_tank"))
+    if plates != 20:
+        err(f"The Electrolytic Separator costs {plates} steel plates, not the owner's selected 20")
+
+
 def check_large_machines():
     """Footprints must match MachineKind.footprint(); model elements must stay in Minecraft's -16..32 range."""
     from large_machines import FOOTPRINTS
@@ -2927,14 +3060,18 @@ def check_machine_rotors():
     data = load(ASSETS / "machine_rotor_quads.json")
     if data is None:
         return
-    if set(data) != set(ROTORS):
-        err(f"machine_rotor_quads.json has {sorted(data)}, giant_models.ROTORS {sorted(ROTORS)}: run generate_material_data.py")
+    if set(data) != set(ROTORS) | set(industrial_forms.ROTORS):
+        err(f"machine_rotor_quads.json has {sorted(data)}, giant_models.ROTORS and industrial_forms.ROTORS "
+            f"{sorted(set(ROTORS) | set(industrial_forms.ROTORS))}: run generate_material_data.py")
     opaque = {}
     for name, rotor in data.items():
-        if rotor.get("block") not in ENLARGED or rotor.get("axis") not in ("x", "y", "z"):
-            err(f"machine rotor {name}: block {rotor.get('block')} is not a big machine, or its axis is wrong")
-        if rotor.get("when", {}).get("compact") != "false":
+        form = rotor.get("block") in industrial_forms.FORMS
+        if not (form or rotor.get("block") in ENLARGED) or rotor.get("axis") not in ("x", "y", "z"):
+            err(f"machine rotor {name}: block {rotor.get('block')} is not a big machine or a form, or its axis is wrong")
+        if not form and rotor.get("when", {}).get("compact") != "false":
             err(f"machine rotor {name} must only draw on the big machine (when compact=false)")
+        if form and (rotor.get("property") != "lit" or not rotor.get("always")):
+            err(f"machine rotor {name}: a form's turning parts turn while it is lit and stand still while idle (always)")
         for key in ("center", "property", "speed", "quads"):
             if key not in rotor:
                 err(f"machine rotor {name} has no {key}")
@@ -2955,9 +3092,10 @@ def check_machine_rotors():
                 break
     client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
     rotors_java = (client / "MachineRotors.java").read_text(encoding="utf-8") if (client / "MachineRotors.java").is_file() else ""
-    renderer = (client / "WindTurbineRenderer.java").read_text(encoding="utf-8")
-    if '"machine_rotor_quads.json"' not in rotors_java or "MachineRotors.extract" not in renderer or "MachineRotors.submit" not in renderer:
-        err("client/MachineRotors must read machine_rotor_quads.json and the machine renderer must extract and submit it")
+    for renderer_file in ("WindTurbineRenderer.java", "FormMachineRenderer.java"):
+        renderer = (client / renderer_file).read_text(encoding="utf-8") if (client / renderer_file).is_file() else ""
+        if '"machine_rotor_quads.json"' not in rotors_java or "MachineRotors.extract" not in renderer or "MachineRotors.submit" not in renderer:
+            err(f"client/MachineRotors must read machine_rotor_quads.json and {renderer_file} must extract and submit it")
     for name, rotor in ROTORS.items():
         _, cy, cz = rotor["center"]
         for style, models in (("steampunk", GIANTS), ("classic", CLASSIC)):
@@ -13036,7 +13174,7 @@ def main():
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
-                  | set(guns.items()) | set(guns.blocks()) | set(concordance.items()) | set(concordance.blocks()))
+                  | set(guns.items()) | set(guns.blocks()) | set(concordance.items()) | set(concordance.blocks()) | set(industrial_forms.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
     check_petro()
@@ -13044,6 +13182,7 @@ def main():
     check_recipes(registered)
     check_machine_recipe_files(registered)
     check_fluid_recipes(registered)
+    check_industrial_forms()
     check_tags()
     check_worldgen()
     check_java()
