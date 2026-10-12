@@ -561,4 +561,3 @@ def yeti_king_textures():
     for item in yeti_numbers.items():
         out[("item", item)] = item_icons.draw(item)
     return out
-
