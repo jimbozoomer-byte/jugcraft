@@ -32,7 +32,7 @@ Owner-requested 6 October 2026. Independent feature brief: [Jugcraft Encyclopedi
 - [ ] Build an original Jugcraft visual presentation informed by the ten references, without importing their depicted artwork or requiring an external quest mod by assumption.
 - [ ] Verify both entry points, route/content accuracy, GUI behavior, bounded performance, and relevant two-client/restart/reconnect/quest persistence behavior.
 
-Exact visuals, default key, quests/rewards and release order remain to design. The feature is broader than the industrial plan: it must independently explain magic and the deeper pathways in both routes.
+A [first-slice prototype](features/jugcraft-encyclopedia.md#first-slice-entry-points-and-route-home) of the entry points and the home's two routes is proposed in a community draft PR. These boxes stay open until the owner accepts it and it is verified in game. Exact visuals, the final default key, quests/rewards and release order remain to design. The feature is broader than the industrial plan: it must independently explain magic and the deeper pathways in both routes.
 
 ## Progression and balance
 

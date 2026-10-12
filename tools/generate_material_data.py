@@ -26,6 +26,7 @@ PACKS = RES / "resourcepacks"
 
 GENERATED_DIRS = [
     DATA / MOD / "advancement", ASSETS / "blockstates", ASSETS / "items", ASSETS / "models", ASSETS / "lang", ASSETS / "handbook",
+    ASSETS / "encyclopedia",
     DATA / MOD / "loot_table", DATA / MOD / "recipe", DATA / MOD / "worldgen",
     # The lairs' dimensions and templates (tools/lair_data.py).
     DATA / MOD / "dimension", DATA / MOD / "dimension_type", DATA / MOD / "structure" / "lair",
@@ -233,6 +234,8 @@ def assets():
     import advancements
     lang.update(advancements.generate(MOD)[1])
     party_lang(lang)
+    import encyclopedia
+    encyclopedia.lang(lang)
     drone_assets(lang)
     import tower
     tower.write_assets(write, rid, ASSETS, lang)
@@ -1637,7 +1640,10 @@ def main():
             shutil.rmtree(directory)
     assets()
     import handbook
-    write(ASSETS / "handbook" / "en_us.json", handbook.build())
+    book = handbook.build()
+    write(ASSETS / "handbook" / "en_us.json", book)
+    import encyclopedia
+    write(ASSETS / "encyclopedia" / "en_us.json", encyclopedia.build(book))
     import recipe_view
     write(ASSETS / "recipe_view.json", recipe_view.build())
     loot_tables()

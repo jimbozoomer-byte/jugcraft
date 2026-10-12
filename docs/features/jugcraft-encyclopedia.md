@@ -1,6 +1,6 @@
 # Jugcraft Encyclopedia
 
-Status: owner-approved feature direction, recorded 6 October 2026; UI and quest implementation not started by this contribution.
+Status: owner-approved feature direction, recorded 6 October 2026. A first slice (entry points and a home with both routes) is proposed in a community draft PR; see [First slice](#first-slice-entry-points-and-route-home). Pathway graphs, quests and the visual design are not started.
 Proposal issue: direct owner request during progression planning; this feature is independently documented and tracked in the [TODO list](../TODO.md#jugcraft-encyclopedia).
 Owner: jimbozoomer-byte.
 Target milestone and tier: guidance available from the beginning of a world and useful throughout technology, magic and their specialties. No delivery date is assigned.
@@ -123,10 +123,47 @@ The canonical checklist is in [TODO.md](../TODO.md#jugcraft-encyclopedia). Build
 
 Future verification should cover both entry points without a carried item, key remapping/conflicts, inventory return behavior, search/history/navigation, zoom/pan and GUI scales, accessibility, translated content, recipe-data consistency, disabled-feature handling, and large chapter performance. Quest behavior needs two-client, restart/reconnect, concurrent/duplicate-completion and save-upgrade checks appropriate to the final design. An empty quest screen or graph mockup does not complete the entire Encyclopedia.
 
-This contribution adds documentation, TODO navigation and reference images only. Repository/link checks, PNG integrity and byte-for-byte reference-copy checks apply. It changes no runtime UI, recipes, items, registries, quests, dependencies or saved data, and provides no new build or game-test evidence.
+The original planning contribution added documentation, TODO navigation and reference images only. Repository/link checks, PNG integrity and byte-for-byte reference-copy checks apply. It changed no runtime UI, recipes, items, registries, quests, dependencies or saved data, and provided no build or game-test evidence; the [first slice](#first-slice-entry-points-and-route-home) records its own.
+
+## First slice: entry points and route home
+
+Proposed as a community prototype (draft PR, October 2026) for the owner's review. It covers the first two TODO steps: the item-free entry points and a home explaining both routes, with navigation into the guides that already exist. It adds no quests, rewards, route graphs or new guide prose beyond the two route overviews.
+
+**What the player can do.** Press **K** (remappable in Controls, under Jugcraft) or click the **book button on the survival inventory** to open the Jugcraft Encyclopedia without any item. The home shows a short introduction and two route cards, *Machinery and Technology* and *Magic: the Arcane Concordance*, each with its overview. Opening a route shows:
+
+- **Technology:** the Engineer's Handbook's nine Progression stages as numbered milestone cards (Bronze Age to Special Materials) and its seventeen chapters. Each opens the existing handbook screen at that page; closing the handbook returns to the route.
+- **Magic:** six milestones (examine a glow, understand First Light, the Initiate's Wand, Adept, Master, Architect and the Spire), the Concordance Journal, and every Arcane Concordance codex category (Foundations, Radiance, Composition, Invocations, Circles, Alembic, Garden, Sky, Vigil, Binding, Artifice, Relics, Equivalence, Hexes and Dreams, the Starbound Conclave, Wonders and Hearth). These open the codex at that category, without its book item, or the journal. The codex and journal show only what the server has unlocked for that player.
+
+Esc closes the Encyclopedia to where it was opened (the game or the inventory). In a route, Up/Down pick a link and Enter opens it; the wheel and Page Up/Down scroll; Backspace returns home. The home's cards are ordinary buttons, so Tab and Enter reach them and the narrator reads "Open" and the route's title. The screen pauses singleplayer, as the handbook does.
+
+**Connections.** The content is generated (`tools/encyclopedia.py`, run by `generate_material_data.py`) from the handbook's own Progression stages and chapters (`tools/handbook.py`) and the codex's categories (`tools/concordance.py`). It is not a second recipe or research database. The route overviews describe current content only; the Encyclopedia lists no planned machine or school. Technology uses the handbook's current stage order, so steel and electricity are not yet shown as parallel capabilities; that waits for the owner's route design.
+
+| Field | This slice |
+| --- | --- |
+| Tier | Available from a new world's first tick; no unlock, item, power or research |
+| Input producer | Generated client asset `assets/jugcraft/encyclopedia/en_us.json`; the handbook asset; Modonomicon's synced codex; the server's journal response |
+| Output consumer | The player only. Reading; it changes no world, inventory or progression state and sends nothing to the server except the journal's existing request and Modonomicon's existing "category read" message when the codex opens |
+| Costs | None. Content is read once each time the screen opens; drawing is bounded by the route's few dozen entries and clipped to the panel |
+| Unlocks | None. It adds no quest, reward or progression gate |
+| Failure behavior | Missing or unreadable content shows "The Encyclopedia's content is missing." and logs a warning. If the codex is not loaded, its links are greyed with a tooltip and do nothing. An unknown link type is logged and ignored |
+| Saved data | None. No new registry IDs; the Engineer's Handbook item and its behavior are unchanged |
+
+**Choices made for review.** These are reversible and need owner acceptance:
+
+- **Default key K.** It is not one of Jugcraft's other defaults (P, J, G, H and V). Vanilla's Controls screen shows any conflict in red, and players can rebind it.
+- **Inventory button** 20×18 with a vanilla book icon, 4 pixels right of the recipe-book toggle, below the crafting grid. It finds the toggle (the inventory's 20×18 button) through Fabric's screen API and follows it when the recipe book moves the panel, so no mixin is needed. If no toggle is found, it takes vanilla's toggle position. The creative inventory has no button; the key works there once the inventory is closed.
+- **Handbook compatibility:** the Engineer's Handbook item and its saved ID are untouched. The Encyclopedia reuses its screen and opens it with a return path.
+- **Codex links** call Modonomicon's client API (`BookGuiManager.openBook` with a category address). Closing the codex returns to the game, not the Encyclopedia, because Modonomicon manages its own screen stack.
+- **Presentation** uses plain panels, cards and rows in the handbook's brass/dark-leather palette, with a violet accent for magic. It is not the final visual design, which still needs the owner's direction.
+
+**Files.** `client/EncyclopediaScreen.java` (home and route views), `client/EncyclopediaClient.java` (key, inventory button), `client/HandbookScreen.java` (optional parent screen), `tools/encyclopedia.py`, its generator hook and lang keys, `tools/check_mod_data.py` `check_encyclopedia()`, and the client test `EncyclopediaClientGameTests`.
+
+**Validation.** Results for this slice are recorded in its pull request. Run in its authoring environment: the data generator (output reproducible), `tools/check_mod_data.py` including the new encyclopedia audit (also confirmed to reject a broken icon, page, category and link type), `scripts/check_repository.py`, the Python unit tests and a syntax-only parse of the changed Java. **Not run there:** `./gradlew build`, the client game test and any in-game look. Gradle could not reach Fabric's Maven, Mojang's servers, Modrinth or a JDK 25 download, so the Java has not been compiled and the screenshots below do not exist yet. Every Minecraft, Fabric and Modonomicon call was checked against existing Jugcraft code or the sources of Fabric API 0.161.0+26.3 and Modonomicon 26.3-2.16.0. CI's `EncyclopediaClientGameTests` is meant to press K, open both routes, follow a handbook milestone and back, open the codex from a magic milestone, close with Esc, and open from the inventory button and return. It saves `jugcraft_encyclopedia_{home,technology,handbook,magic,codex,inventory}`.
+
+**Still to verify in game:** button placement against the real 26.3 inventory art; GUI scales 1–4 and narrow windows; long titles; narrator output; the codex link on a dedicated server; two clients (it is client-only reading, but the journal and codex responses are per player); and owner visual acceptance.
 
 ## Remaining design choices
 
-Default key and inventory-button placement; visual style and screen layout; graph/entry data schema; spoiler/discovery behavior; quest objective and reward policies; individual/shared progress; old-handbook behavior; exact content coverage for each implementation slice. These details remain open without reopening the explicit owner requirements.
+Final default key and inventory-button placement (the first slice proposes K and a button beside the recipe book); visual style and screen layout; graph/entry data schema; spoiler/discovery behavior; quest objective and reward policies; individual/shared progress; old-handbook behavior; exact content coverage for each implementation slice. These details remain open without reopening the explicit owner requirements.
 
-AI-assisted planning documentation: OpenAI Codex, GPT-6 family. No gameplay feature implementation is included.
+AI-assisted planning documentation: OpenAI Codex, GPT-6 family. The first-slice implementation and its section above were written with Claude Code (Anthropic's Claude Opus 5.5) for a community contributor.

@@ -3165,6 +3165,49 @@ def check_handbook(registered):
             err(f"handbook: unknown item {ref}")
 
 
+def check_encyclopedia(registered):
+    """The Jugcraft Encyclopedia (tools/encyclopedia.py): both routes are there, every Jugcraft item it shows exists,
+    every link opens a real handbook page or codex category, and its screen's words are translated."""
+    data = load(ASSETS / "encyclopedia" / "en_us.json")
+    if data is None:
+        err("assets/jugcraft/encyclopedia/en_us.json is missing")
+        return
+    book = load(ASSETS / "handbook" / "en_us.json") or {"chapters": []}
+    codex = DATA / MOD / "modonomicon" / "books" / "arcane_concordance" / "categories"
+    routes = {route["id"]: route for route in data["routes"]}
+    if set(routes) != {"technology", "magic"}:
+        err(f"encyclopedia: routes {sorted(routes)} must be the technology and the magic route")
+    for route in data["routes"]:
+        name = f"encyclopedia {route['id']}"
+        if not route["summary"] or not route["milestones"] or not route["chapters"]:
+            err(f"{name}: needs an overview, milestones and chapters")
+        if not re.fullmatch(r"[0-9A-F]{6}", route["accent"]):
+            err(f"{name}: accent {route['accent']} must be RRGGBB")
+        for entry in [route] + route["milestones"] + route["chapters"]:
+            ref = entry["icon"]
+            if split(ref)[0] == MOD and split(ref)[1] not in registered:
+                err(f"{name}: unknown item {ref}")
+        for entry in route["milestones"] + route["chapters"]:
+            link = entry["link"]
+            if link["type"] == "handbook":
+                chapters = book["chapters"]
+                if not 0 <= link["chapter"] < len(chapters) or not 0 <= link["page"] < len(chapters[link["chapter"]]["pages"]):
+                    err(f"{name}: {entry['title']} links to a missing handbook page {link}")
+            elif link["type"] == "codex":
+                if split(link["category"])[0] != MOD or not (codex / f"{split(link['category'])[1]}.json").exists():
+                    err(f"{name}: {entry['title']} links to a missing codex category {link['category']}")
+            elif link["type"] != "journal":
+                err(f"{name}: {entry['title']} has a link of unknown type {link['type']}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    java = "".join((CLIENT_JAVA_ROOT / name).read_text(encoding="utf-8")
+                   for name in ("EncyclopediaScreen.java", "EncyclopediaClient.java"))
+    # Whole keys in the Java, and the link descriptions it builds from "...opens." and the link's type.
+    keys = {key for key in re.findall(r'"((?:key|screen)\.jugcraft\.encyclopedia[a-z_.]*)"', java) if not key.endswith(".")}
+    keys |= {f"screen.jugcraft.encyclopedia.opens.{kind}" for kind in ("handbook", "codex", "journal")}
+    for key in sorted(keys - set(lang)):
+        err(f"encyclopedia: untranslated {key}")
+
+
 VANILLA_ADVANCEMENT_ROOTS = {"minecraft:story/root", "minecraft:nether/root", "minecraft:end/root", "minecraft:adventure/root",
                              "minecraft:husbandry/root"}
 
@@ -13234,6 +13277,7 @@ def main():
     check_tower()
     check_guide_books()
     check_handbook(registered)
+    check_encyclopedia(registered)
     check_agriculture()
     check_kitchen()
     check_feasts()
