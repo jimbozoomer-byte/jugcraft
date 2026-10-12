@@ -42,6 +42,8 @@ public final class PetroItems {
 	public static Item GRENADE_LAUNCHER;
 	/** Power (batch 19): fitted in the advanced engine's slot for half as much power again. */
 	public static Item TURBOCHARGER;
+	/** The Chemical Infuser's reusable methanation catalyst: held in its bed socket, never used up. */
+	public static Item NICKEL_CATALYST_BED;
 
 	private PetroItems() {
 	}
@@ -67,6 +69,7 @@ public final class PetroItems {
 		GRENADE = JugcraftRegistry.item("grenade", GrenadeItem::new);
 		GRENADE_LAUNCHER = JugcraftRegistry.item("grenade_launcher", GrenadeLauncherItem::new);
 		TURBOCHARGER = JugcraftRegistry.item("turbocharger", properties -> new Item(properties.stacksTo(1)));
+		NICKEL_CATALYST_BED = JugcraftRegistry.item("nickel_catalyst_bed", properties -> new Item(properties.stacksTo(1)));
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(CRACKING_CATALYST);
@@ -83,6 +86,7 @@ public final class PetroItems {
 			output.accept(MICROCHIP);
 			output.accept(GUNCOTTON);
 			output.accept(TURBOCHARGER);
+			output.accept(NICKEL_CATALYST_BED);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			output.accept(GRENADE);

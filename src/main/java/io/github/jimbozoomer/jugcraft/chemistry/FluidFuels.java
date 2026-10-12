@@ -26,6 +26,13 @@ public final class FluidFuels {
 	 * output: a millibucket a tick. Its fuels are listed on the form, so the gas turbine never burns hydrogen.
 	 */
 	public static final int GAS_BURNING_HYDROGEN = 128;
+	/**
+	 * Methane, the Gas Burning Generator's second fuel: the plan's 448 JE per mB, three and a half times hydrogen's, at
+	 * the owner's selected 256 JE a tick. Making a mB over the nickel bed takes four of hydrogen, so even with the
+	 * cheapest electrolysis it costs far more than it returns.
+	 */
+	public static final int METHANE = 448;
+	public static final int GAS_BURNING_METHANE = 256;
 	/** The gas turbine's lubricant upkeep: 1 mB for every this many ticks it runs (a bucket lasts 20,000 ticks). */
 	public static final int LUBRICANT_TICKS = 20;
 	/** The advanced combustion engine (KE per mB): turbocharged, it gets a quarter more from diesel than the diesel

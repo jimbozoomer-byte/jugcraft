@@ -136,6 +136,24 @@ public class ChemicalOxidizerGameTests {
 		});
 	}
 
+	/** Charcoal burns the same way, with 250 mB of oxygen, into 250 mB of carbon dioxide: methanation's carbon feed. */
+	@GameTest(maxTicks = 200)
+	public void charcoalBurnsIntoCarbonDioxide(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
+		long[] supplied = supply(helper, machine);
+		try (Transaction transaction = Transaction.openOuter()) {
+			helper.assertTrue(itemPort(helper, machine, "feed_in").insert(ItemVariant.of(Items.CHARCOAL), 1, transaction) == 1,
+					"The hopper takes charcoal");
+			transaction.commit();
+		}
+		insert(helper, port(helper, machine, "oxidant_in"), PetroFluids.OXYGEN.fluid(), 250);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(machine.lane(0) == null && amount(machine.tanks().output(0), PetroFluids.CARBON_DIOXIDE.fluid()) == 250,
+					"250 mB of carbon dioxide made");
+			helper.assertTrue(used(machine, supplied) == TICKS * DRAW, "Paid " + used(machine, supplied) + " JE");
+		});
+	}
+
 	/**
 	 * Sulfur alone waits, naming the oxygen it needs and spending nothing; with the product tank full, it waits on the
 	 * full tank; it goes on once the gas is drawn off.
@@ -197,8 +215,9 @@ public class ChemicalOxidizerGameTests {
 		ServerLevel level = helper.getLevel();
 		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
 		List<FluidRecipes.Entry> own = machine.recipes(level.getServer());
-		helper.assertTrue(own.size() == 1 && own.get(0).id().equals(Jugcraft.id("chemical_reaction/oxidizer_sulfur_dioxide"))
-				&& own.get(0).recipe().time() == TICKS, "Its one recipe: " + own.stream().map(FluidRecipes.Entry::id).toList());
+		helper.assertTrue(own.size() == 2 && own.get(0).id().equals(Jugcraft.id("chemical_reaction/oxidizer_carbon_dioxide"))
+				&& own.get(1).id().equals(Jugcraft.id("chemical_reaction/oxidizer_sulfur_dioxide"))
+				&& own.stream().allMatch(entry -> entry.recipe().time() == TICKS), "Its two recipes: " + own.stream().map(FluidRecipes.Entry::id).toList());
 		long reactor = FluidRecipes.recipes(level.getServer(), MachineKind.CHEMICAL_REACTOR).stream()
 				.filter(recipe -> recipe.fluidResults().stream().anyMatch(result -> result.fluid() == PetroFluids.SULFUR_DIOXIDE.fluid()))
 				.count();

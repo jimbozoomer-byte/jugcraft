@@ -2889,18 +2889,29 @@ def machines_stats(family):
     return machines.STATS.get(family, {})
 
 
-def cheapest_electrolysis(fluid):
+def cheapest_electrolysis(fluid, _seen=None):
     """The least JE any recipe spends per mB of `fluid` it makes, with the most efficiency cards its machine takes (the
-    legacy fluid machines take none), or None when no recipe makes it. All the recipe's energy counts against `fluid`,
-    so a fuel burning for less than this cannot pay back the electricity that made it, whatever else came out too."""
+    legacy fluid machines take none), counting the cheapest cost of the fluids it uses up as well (methane's hydrogen,
+    say; water is free), or None when no recipe makes it. All of a recipe's cost counts against `fluid`, so a fuel burning for less
+    than this cannot pay back the electricity that made it, whatever else came out too. A fluid nothing makes, or one
+    already being costed further up (a cycle), adds nothing."""
     import machines
+    seen = (_seen or set()) | {fluid}
+
+    def inputs(recipe):
+        total = 0.0
+        for source, mb in recipe.get("fluids", []):
+            # Water and lava are free in the world, whatever else also gives some off.
+            if source not in seen and not source.startswith("minecraft:"):
+                total += (cheapest_electrolysis(source, seen) or 0) * mb
+        return total
     costs = []
     for machine, recipes in petro.FLUID_RECIPES.items():
         use = machines.STATS.get(machine, {}).get("use_per_tick", 0)
         for recipe in recipes:
             for result in recipe.get("fluid_results", []):
                 if result[0] == fluid and use:
-                    costs.append(recipe["ticks"] * use / result[1])
+                    costs.append((recipe["ticks"] * use + inputs(recipe)) / result[1])
     for form, recipes in industrial_forms.FORM_RECIPES.items():
         info = industrial_forms.FORMS[form]
         use = machines.STATS[info["family"]]["use_per_tick"]
@@ -2909,7 +2920,7 @@ def cheapest_electrolysis(fluid):
         for recipe in recipes:
             for result in recipe.get("fluid_results", []):
                 if result[0] == fluid:
-                    costs.append(recipe["ticks"] * cheapest / result[1])
+                    costs.append((recipe["ticks"] * cheapest + inputs(recipe)) / result[1])
     return min(costs) if costs else None
 
 

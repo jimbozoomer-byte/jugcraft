@@ -118,6 +118,14 @@ GASES = {
     # Oxidizer, the first step of the contact acid chain. Colourless and choking: a pale sulfur-tinted grey.
     "sulfur_dioxide": {"display": "Sulfur Dioxide", "feature": "sulfur",
                        "colors": [(166, 162, 126), (194, 190, 156), (216, 212, 182), (240, 238, 220)]},
+    # The starter factory's carbon dioxide: coal or charcoal burnt in oxygen in the Chemical Oxidizer, the carbon feed
+    # of the Infuser's methanation. A cool grey with a faint blue.
+    "carbon_dioxide": {"display": "Carbon Dioxide", "feature": "machines",
+                       "colors": [(150, 156, 166), (178, 184, 194), (204, 210, 218), (232, 236, 242)]},
+    # Methane from carbon dioxide and hydrogen over the Infuser's nickel bed: the Gas Burning Generator's second fuel.
+    # A pale blue-green.
+    "methane": {"display": "Methane", "feature": "machines",
+                "colors": [(130, 170, 170), (160, 196, 194), (190, 218, 214), (222, 240, 236)]},
 }
 
 
@@ -158,6 +166,9 @@ ITEMS = {
     "grenade_launcher": "Grenade Launcher",
     # Power (batch 19): fitted in the advanced engine's slot; needs coolant water.
     "turbocharger": "Turbocharger",
+    # The starter factory's reusable methanation catalyst (tools/industrial_forms.py): one nickel ingot on two fired
+    # bricks, held in the Chemical Infuser's bed socket and never used up.
+    "nickel_catalyst_bed": "Nickel Catalyst Bed",
 }
 
 

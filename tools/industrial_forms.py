@@ -28,6 +28,9 @@ AQUEOUS_ELECTROLYSIS = f"{MOD}:aqueous_electrolysis"
 GAS_COMBINATION = f"{MOD}:gas_combination"
 # Burning a solid feed in a metered oxidant gas (sulfur in oxygen): what the Oxidizer offers its family's recipes.
 SOLID_OXIDATION = f"{MOD}:solid_oxidation"
+# Joining a carbon oxide and hydrogen into methane over the nickel bed, and the item tag the Infuser's bed socket holds.
+NICKEL_METHANATION = f"{MOD}:nickel_methanation"
+METHANATION_BEDS = "methanation_beds"
 
 # The owner's white tank family (the tank restyle) for the collection towers, with its checker band.
 TANK_BODY, TANK_TOP, TANK_CHECKER = "tk_body", "tk_top", "tk_checker"
@@ -46,9 +49,9 @@ REFRACTORY, MOUTH = "sp_ceramic", "sp_hopper_inside"
 # What lights while a form works: steampunk_models.GLOW and the mint lamp.
 FORM_GLOW = dict(GLOW, el_lamp="el_lamp_on")
 # What the generator burns (tools/petro.py FLUID_FUELS keeps the Fuel Cell's value): (fluid, JE per mB, JE a tick).
-# Hydrogen at the Fuel Cell's 128 JE/mB and the owner's selected 128 JE/t; methane (256 JE/t) joins it with the
-# methane Infuser.
-GAS_GENERATOR_FUELS = [(f"{MOD}:hydrogen", 128, 128)]
+# Hydrogen at the Fuel Cell's 128 JE/mB and the owner's selected 128 JE/t; methane at the plan's 448 JE/mB and the
+# owner's selected 256 JE/t.
+GAS_GENERATOR_FUELS = [(f"{MOD}:hydrogen", 128, 128), (f"{MOD}:methane", 448, 256)]
 
 FORMS = {
     "electrolytic_separator": {
@@ -122,7 +125,9 @@ FORMS = {
         # on the right. The product gas and the water a reaction gives off leave by the cooling jacket at the back.
         "input_tanks": ["hydrogen", "reactant"],
         "output_tanks": ["product", "water"],
-        "capabilities": [GAS_COMBINATION],
+        # The bed socket holds the nickel catalyst bed that methanation needs; hydrogen chloride needs none.
+        "sockets": [("bed", METHANATION_BEDS)],
+        "capabilities": [GAS_COMBINATION, NICKEL_METHANATION],
         # Speed and efficiency cards, and the warm-up label for the first two seconds after a cold start, inside the
         # paid work (the owner's choice: heating included in the processing power).
         "upgrades": True,
@@ -192,8 +197,8 @@ HANDBOOK = {
         "sends 128 JE/t out of the socket on the terminal cabinet at the back: a bucket lasts 50 seconds. Its coupling "
         "and intake fan spin up as it starts.",
         "It makes only as much as its store has room for, so no fuel is wasted when nothing draws its power, and its "
-        "screen says when the fuel tank is empty or the store is full. Methane, at 256 JE/t, comes with the methane "
-        "Infuser.",
+        "screen says when the fuel tank is empty or the store is full. It also burns methane from the Chemical Infuser: "
+        "448 JE a millibucket at 256 JE/t, a bucket lasting 87.5 seconds.",
     ],
     "chemical_infuser": [
         "Two wide, three deep and three tall: a stepped reaction chamber with an inlet on each shoulder, a catalyst-bed "
@@ -202,8 +207,10 @@ HANDBOOK = {
         "Pipe hydrogen into the left inlet and chlorine into the right. 250 mB of each burn together into 500 mB of "
         "hydrogen chloride in under four seconds, which leaves at the top collar at the back. It draws 128 JE/t "
         "through the socket low on the right side at the back.",
-        "The lower collar at the back is its water drain, for the methane reactions its nickel bed will run. Its "
-        "screen says what it is waiting for, and upgrade cards fit its terminal.",
+        "With a Nickel Catalyst Bed in its bed socket it makes methane: 400 mB of hydrogen and 100 mB of carbon "
+        "dioxide (the right inlet) give 100 mB of methane at the top collar and 400 mB of water at the drain below it "
+        "in ten seconds. The bed is never used up. Its screen says what it is waiting for, and upgrade cards fit its "
+        "terminal.",
     ],
     "chemical_oxidizer": [
         "Two wide, two deep and three tall: a lined reaction throat fed by a hopper and a feed screw at the back, with a "
@@ -212,8 +219,8 @@ HANDBOOK = {
         "Drop sulfur dust into the hopper on top at the back and pipe oxygen into the capped inlet low on the right. "
         "Each dust burns with 250 mB of oxygen into 250 mB of sulfur dioxide in five seconds, which leaves at the "
         "collar on top of the hood. It draws 96 JE/t through the socket low on the left side at the back.",
-        "Sulfur dioxide is the first step of the contact acid route; its screen says what it is waiting for, and "
-        "upgrade cards fit its terminal.",
+        "Coal or charcoal burns the same way into 250 mB of carbon dioxide, the Chemical Infuser's feed for methane. "
+        "Its screen says what it is waiting for, and upgrade cards fit its terminal.",
     ],
 }
 
@@ -252,6 +259,12 @@ FORM_RECIPES = {
         {"name": "infuser_hydrogen_chloride", "capability": GAS_COMBINATION,
          "fluids": [(f"{MOD}:hydrogen", 250), (f"{MOD}:chlorine", 250)],
          "fluid_results": [(f"{MOD}:hydrogen_chloride", 500, 0)], "ticks": 75, "features": ["salt"]},
+        # CO2 methanation over the reusable nickel bed (the plan's proposal): CO2 + 4 H2 -> CH4 + 2 H2O, the water at the
+        # liquid anchor of 2 mB a reaction amount. 200 ticks at 128 JE/t: the plan's 25,600 JE.
+        {"name": "infuser_carbon_dioxide_methanation", "capability": NICKEL_METHANATION,
+         "tool": f"{MOD}:nickel_catalyst_bed",
+         "fluids": [(f"{MOD}:hydrogen", 400), (f"{MOD}:carbon_dioxide", 100)],
+         "fluid_results": [(f"{MOD}:methane", 100, 0), ("minecraft:water", 400, 1)], "ticks": 200, "features": ["machines"]},
     ],
     "chemical_oxidizer": [
         # Sulfur oxidation (docs/features/industrial-starter-gas-and-acid-factory.md): a dust counts as 250 reaction
@@ -260,6 +273,11 @@ FORM_RECIPES = {
         {"name": "oxidizer_sulfur_dioxide", "capability": SOLID_OXIDATION, "items": [(f"{MOD}:sulfur_dust", 1)],
          "fluids": [(f"{MOD}:oxygen", 250)], "fluid_results": [(f"{MOD}:sulfur_dioxide", 250, 0)], "ticks": 100,
          "features": ["sulfur", "machines"]},
+        # Carbon burnt in oxygen: a coal or charcoal counts as 250 reaction amounts of carbon, like a sulfur dust, giving
+        # as much carbon dioxide. Its heat is not recovered. 100 ticks at 96 JE/t, 9,600 JE.
+        {"name": "oxidizer_carbon_dioxide", "capability": SOLID_OXIDATION, "items": [("#minecraft:coals", 1)],
+         "fluids": [(f"{MOD}:oxygen", 250)], "fluid_results": [(f"{MOD}:carbon_dioxide", 250, 0)], "ticks": 100,
+         "features": ["machines"]},
     ],
 }
 
@@ -760,6 +778,14 @@ def write_all(write, assets, data, lang, condition, self_drop):
     out = model_writer.StyleWriter(assets)
     for role, name in TANK_NAMES.items():
         lang[f"container.{MOD}.form.tank.{role}"] = name
+    lang[f"container.{MOD}.form.socket.bed"] = "Catalyst bed"
+    # The Infuser's bed socket holds the nickel catalyst bed: the owner's selected one nickel ingot on two ordinary fired
+    # bricks (docs/features/industrial-starter-gas-and-acid-factory.md), made once and never used up.
+    write(data / "tags" / "item" / f"{METHANATION_BEDS}.json", {"values": [f"{MOD}:nickel_catalyst_bed"]})
+    write(data / "recipe" / "nickel_catalyst_bed.json", {
+        "fabric:load_conditions": condition("machines"),
+        "type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["BNB"],
+        "key": {"B": "minecraft:brick", "N": "#c:ingots/nickel"}, "result": {"id": f"{MOD}:nickel_catalyst_bed", "count": 1}})
     for form, info in FORMS.items():
         lang[f"block.{MOD}.{form}"] = info["display"]
         elements = MODELS[form]
@@ -810,6 +836,8 @@ def form_recipe_files(condition):
                                          for r in recipe["fluid_results"]]
             if recipe.get("results"):
                 data["results"] = [{"id": item, "count": count} for item, count in recipe["results"]]
+            if recipe.get("tool"):
+                data["tool"] = recipe["tool"]
             data["time"] = recipe["ticks"]
             yield kind, recipe["name"], data
 

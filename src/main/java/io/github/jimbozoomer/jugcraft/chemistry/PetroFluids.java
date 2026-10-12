@@ -145,6 +145,10 @@ public final class PetroFluids {
 	public static Gas HYDROGEN_CHLORIDE;
 	/** The starter gas and acid factory: sulfur burnt in oxygen in the Chemical Oxidizer. */
 	public static Gas SULFUR_DIOXIDE;
+	/** Coal burnt in oxygen in the Chemical Oxidizer: the carbon feed of methanation. */
+	public static Gas CARBON_DIOXIDE;
+	/** Carbon dioxide and hydrogen over the Chemical Infuser's nickel bed: the Gas Burning Generator's second fuel. */
+	public static Gas METHANE;
 
 	private PetroFluids() {
 	}
@@ -205,6 +209,8 @@ public final class PetroFluids {
 		LIQUID_OXYGEN = fluid("liquid_oxygen", 3, 4, 1, 0xFFA0C8EC, MapColor.COLOR_LIGHT_BLUE);
 		HYDROGEN_CHLORIDE = gas("hydrogen_chloride", 0xFFD4DCDA);
 		SULFUR_DIOXIDE = gas("sulfur_dioxide", 0xFFDAD6B8);
+		CARBON_DIOXIDE = gas("carbon_dioxide", 0xFFC4CAD4);
+		METHANE = gas("methane", 0xFFAED4D0);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

@@ -3855,7 +3855,7 @@
           "text": [
             "Two wide, two deep and three tall: a lined reaction throat fed by a hopper and a feed screw at the back, with a gas column and collector hood on top, built from steel plates, a furnace, an electric motor, glass, a basic circuit and a Machine Casing. Every block it fills must be free when it is placed.",
             "Drop sulfur dust into the hopper on top at the back and pipe oxygen into the capped inlet low on the right. Each dust burns with 250 mB of oxygen into 250 mB of sulfur dioxide in five seconds, which leaves at the collar on top of the hood. It draws 96 JE/t through the socket low on the left side at the back.",
-            "Sulfur dioxide is the first step of the contact acid route; its screen says what it is waiting for, and upgrade cards fit its terminal."
+            "Coal or charcoal burns the same way into 250 mB of carbon dioxide, the Chemical Infuser's feed for methane. Its screen says what it is waiting for, and upgrade cards fit its terminal."
           ],
           "craft": {
             "grid": [
@@ -3902,7 +3902,7 @@
           "text": [
             "Four wide, five deep and four tall: a gas engine turning a generator on a steel skid, built from steel plates, an electric motor, a steel gear, a Tinplate Tank and a basic circuit. Every block it fills must be free when it is placed; the corners above the skid at the front stay open.",
             "Pipe hydrogen into the capped inlet low on its right side. It burns a millibucket a tick, 128 JE each, and sends 128 JE/t out of the socket on the terminal cabinet at the back: a bucket lasts 50 seconds. Its coupling and intake fan spin up as it starts.",
-            "It makes only as much as its store has room for, so no fuel is wasted when nothing draws its power, and its screen says when the fuel tank is empty or the store is full. Methane, at 256 JE/t, comes with the methane Infuser."
+            "It makes only as much as its store has room for, so no fuel is wasted when nothing draws its power, and its screen says when the fuel tank is empty or the store is full. It also burns methane from the Chemical Infuser: 448 JE a millibucket at 256 JE/t, a bucket lasting 87.5 seconds."
           ],
           "craft": {
             "grid": [
@@ -4052,7 +4052,7 @@
           "text": [
             "Two wide, three deep and three tall: a stepped reaction chamber with an inlet on each shoulder, a catalyst-bed drawer at its foot and a cooling jacket behind, built from steel plates, two steel fluid pipes, a Tinplate Tank, copper cable and a basic circuit. Every block it fills must be free when it is placed.",
             "Pipe hydrogen into the left inlet and chlorine into the right. 250 mB of each burn together into 500 mB of hydrogen chloride in under four seconds, which leaves at the top collar at the back. It draws 128 JE/t through the socket low on the right side at the back.",
-            "The lower collar at the back is its water drain, for the methane reactions its nickel bed will run. Its screen says what it is waiting for, and upgrade cards fit its terminal."
+            "With a Nickel Catalyst Bed in its bed socket it makes methane: 400 mB of hydrogen and 100 mB of carbon dioxide (the right inlet) give 100 mB of methane at the top collar and 400 mB of water at the drain below it in ten seconds. The bed is never used up. Its screen says what it is waiting for, and upgrade cards fit its terminal."
           ],
           "craft": {
             "grid": [

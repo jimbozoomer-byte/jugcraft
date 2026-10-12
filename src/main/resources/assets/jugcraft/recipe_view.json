@@ -7283,6 +7283,31 @@
           ],
           "results": [],
           "ticks": 75
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
+              400
+            ],
+            [
+              "jugcraft:carbon_dioxide",
+              100
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              100
+            ],
+            [
+              "minecraft:water",
+              400
+            ]
+          ],
+          "results": [],
+          "ticks": 200
         }
       ]
     },
@@ -7306,6 +7331,28 @@
           "fluid_results": [
             [
               "jugcraft:sulfur_dioxide",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "#minecraft:coals",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:oxygen",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:carbon_dioxide",
               250
             ]
           ],

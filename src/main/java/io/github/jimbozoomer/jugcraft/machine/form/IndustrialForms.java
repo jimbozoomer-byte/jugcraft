@@ -10,6 +10,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -34,6 +35,10 @@ public final class IndustrialForms {
 	public static final String GAS_COMBINATION = "jugcraft:gas_combination";
 	/** Burning a solid feed in a metered oxidant gas, such as sulfur in oxygen. */
 	public static final String SOLID_OXIDATION = "jugcraft:solid_oxidation";
+	/** Joining a carbon oxide and hydrogen into methane over a nickel bed. */
+	public static final String NICKEL_METHANATION = "jugcraft:nickel_methanation";
+	/** What the Infuser's bed socket holds: the nickel catalyst bed. */
+	public static final TagKey<Item> METHANATION_BEDS = TagKey.create(Registries.ITEM, Jugcraft.id("methanation_beds"));
 
 	/**
 	 * The Electrolytic Separator: the steel-entry form of the Electrolytic Cell family, two wide, two deep and three
@@ -78,6 +83,7 @@ public final class IndustrialForms {
 			.profile(OperatingProfile.ENTRY)
 			.inputTank("fuel")
 			.fuel(Jugcraft.id("hydrogen"), FluidFuels.HYDROGEN, FluidFuels.GAS_BURNING_HYDROGEN)
+			.fuel(Jugcraft.id("methane"), FluidFuels.METHANE, FluidFuels.GAS_BURNING_METHANE)
 			.port("fuel_in", FormPort.Kind.FLUID_IN, 0, 3, 1, 0, FormSide.RIGHT)
 			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 2, 4, 1, FormSide.BACK)
 			.build();
@@ -87,7 +93,7 @@ public final class IndustrialForms {
 	 * wide, three deep and three tall, every position a block, the controller (its control box) front left on the
 	 * ground. Hydrogen comes in at the left shoulder and the other gas at the right; the product gas and the water a
 	 * reaction gives off leave at the back, by the cooling jacket, with the power socket low on the right at the back.
-	 * Hydrogen chloride is its first recipe; methanation, with its nickel bed, follows.
+	 * Hydrogen chloride needs no bed; methanation needs the nickel catalyst bed in its bed socket, never used up.
 	 */
 	public static final MachineForm CHEMICAL_INFUSER_FORM = MachineForm.builder(Jugcraft.id("chemical_infuser"),
 					MachineKind.SYNTHESIS_CONVERTER)
@@ -99,7 +105,9 @@ public final class IndustrialForms {
 			.inputTank("reactant")
 			.outputTank("product")
 			.outputTank("water")
+			.socket("bed", METHANATION_BEDS)
 			.capability(GAS_COMBINATION)
+			.capability(NICKEL_METHANATION)
 			.upgrades()
 			.warmup(40)
 			.port("hydrogen_in", FormPort.Kind.FLUID_IN, 0, 0, 1, 1, FormSide.LEFT)

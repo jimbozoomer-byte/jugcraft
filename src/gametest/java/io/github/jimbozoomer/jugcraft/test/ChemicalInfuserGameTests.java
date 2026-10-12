@@ -31,6 +31,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -53,6 +54,7 @@ public class ChemicalInfuserGameTests {
 	/** The synthesis family's working draw. */
 	private static final long DRAW = 128;
 	private static final int TICKS = 75;
+	private static final int METHANATION_TICKS = 200;
 	/** Output tanks, in the form's order. */
 	private static final int PRODUCT = 0;
 	private static final int WATER = 1;
@@ -142,6 +144,51 @@ public class ChemicalInfuserGameTests {
 	}
 
 	/**
+	 * With the nickel catalyst bed in its socket, 400 mB of hydrogen and 100 mB of carbon dioxide give 100 mB of methane
+	 * at the product collar and 400 mB of water at the drain, for the plan's 25,600 JE, and the bed is still there.
+	 */
+	@GameTest(maxTicks = 300)
+	public void theNickelBedMakesMethaneAndWater(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
+		long[] supplied = supply(helper, machine);
+		int socket = machine.form().firstSocketSlot();
+		machine.container().setItem(socket, stack("nickel_catalyst_bed"));
+		insert(helper, port(helper, machine, "hydrogen_in"), PetroFluids.HYDROGEN.fluid(), 400);
+		insert(helper, port(helper, machine, "reactant_in"), PetroFluids.CARBON_DIOXIDE.fluid(), 100);
+		helper.runAfterDelay(3, () -> helper.assertTrue(machine.lane(0) != null && machine.socketLocked(0),
+				"The batch started and holds the bed"));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(machine.lane(0) == null, "Still reacting");
+			helper.assertTrue(amount(machine.tanks().output(PRODUCT), PetroFluids.METHANE.fluid()) == 100
+					&& amount(machine.tanks().output(WATER), Fluids.WATER) == 400, "100 mB of methane and 400 mB of water");
+			long used = used(machine, supplied);
+			helper.assertTrue(used == METHANATION_TICKS * DRAW, "Paid " + used + " JE, not " + METHANATION_TICKS * DRAW);
+			helper.assertTrue(machine.container().getItem(socket).is(item("nickel_catalyst_bed")), "The bed was used up");
+			helper.assertTrue(extract(helper, port(helper, machine, "product_out"), PetroFluids.METHANE.fluid()) == 100
+					&& extract(helper, port(helper, machine, "water_out"), Fluids.WATER) == 400, "Methane and water leave at their collars");
+		});
+	}
+
+	/** Without a bed, methane's gases wait and the screen names the bed socket; nothing is taken or spent. */
+	@GameTest(maxTicks = 60)
+	public void methanationWaitsForItsBed(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
+		long[] supplied = supply(helper, machine);
+		machine.tanks().input(0).fill(PetroFluids.HYDROGEN.fluid(), 400);
+		machine.tanks().input(1).fill(PetroFluids.CARBON_DIOXIDE.fluid(), 100);
+		helper.runAfterDelay(10, () -> {
+			MachineStatus status = machine.status();
+			helper.assertTrue(status.reason() == MachineStatus.Reason.TOOL_REQUIRED && machine.lane(0) == null && used(machine, supplied) == 0,
+					"Waiting for the bed: " + status);
+			machine.container().setItem(machine.form().firstSocketSlot(), stack("nickel_catalyst_bed"));
+		});
+		helper.runAfterDelay(20, () -> {
+			helper.assertTrue(machine.lane(0) != null, "It starts once the bed is in: " + machine.status());
+			helper.succeed();
+		});
+	}
+
+	/**
 	 * Hydrogen alone waits, naming the chlorine it needs and spending nothing; with the product tank full, the gases wait
 	 * and the screen names the full tank.
 	 */
@@ -204,8 +251,10 @@ public class ChemicalInfuserGameTests {
 		ServerLevel level = helper.getLevel();
 		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
 		List<FluidRecipes.Entry> own = machine.recipes(level.getServer());
-		helper.assertTrue(own.size() == 1 && own.get(0).id().equals(Jugcraft.id("gas_synthesis/infuser_hydrogen_chloride"))
-				&& own.get(0).recipe().time() == TICKS, "Its one recipe: " + own.stream().map(FluidRecipes.Entry::id).toList());
+		helper.assertTrue(own.size() == 2 && own.get(0).id().equals(Jugcraft.id("gas_synthesis/infuser_carbon_dioxide_methanation"))
+				&& own.get(0).recipe().time() == METHANATION_TICKS && own.get(0).recipe().tool().isPresent()
+				&& own.get(1).id().equals(Jugcraft.id("gas_synthesis/infuser_hydrogen_chloride")) && own.get(1).recipe().time() == TICKS
+				&& own.get(1).recipe().tool().isEmpty(), "Its two recipes: " + own.stream().map(FluidRecipes.Entry::id).toList());
 		long converter = FluidRecipes.recipes(level.getServer(), MachineKind.SYNTHESIS_CONVERTER).stream()
 				.filter(recipe -> recipe.fluidResults().stream().anyMatch(result -> result.fluid() == PetroFluids.HYDROGEN_CHLORIDE.fluid()))
 				.count();
@@ -219,6 +268,12 @@ public class ChemicalInfuserGameTests {
 		Optional<RecipeHolder<CraftingRecipe>> built = crafting.getRecipeFor(infuser, level);
 		helper.assertTrue(built.isPresent() && built.get().value().assemble(infuser).is(IndustrialForms.CHEMICAL_INFUSER.asItem()),
 				"Four plates, two steel fluid pipes, copper cable, a Tinplate Tank and a basic circuit make the Infuser");
+		// Its catalyst bed: a nickel ingot between two fired bricks.
+		ItemStack brick = new ItemStack(Items.BRICK);
+		CraftingInput bed = CraftingInput.of(3, 1, List.of(brick, stack("nickel_ingot"), brick));
+		Optional<RecipeHolder<CraftingRecipe>> bedRecipe = crafting.getRecipeFor(bed, level);
+		helper.assertTrue(bedRecipe.isPresent() && bedRecipe.get().value().assemble(bed).is(item("nickel_catalyst_bed")),
+				"A nickel ingot between two bricks makes the Nickel Catalyst Bed");
 		helper.succeed();
 	}
 
