@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
+import io.github.jimbozoomer.jugcraft.fluid.FluidNetworks;
 import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
 import io.github.jimbozoomer.jugcraft.fluid.StoredFluid;
@@ -9,6 +10,7 @@ import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -21,8 +23,8 @@ import net.minecraft.world.phys.AABB;
 /**
  * Portable gas handling for the starter gas and acid factory (docs/features/industrial-starter-gas-and-acid-factory.md,
  * the TODO list's "filled gas tanks retain exact content"): a tank of gas carries its exact contents through breaking,
- * pickup and placing; breaking one tank of a joined group takes only that tank's share; a placed tank rejoins its group;
- * and tanks of two fluids side by side never mix.
+ * pickup and placing; breaking one tank of a joined group takes only that tank's share; a placed tank rejoins its group
+ * and its pipe line, taking only its own gas and never more than it holds; and tanks of two fluids side by side never mix.
  */
 public class GasTankHandlingGameTests {
 	/** An awkward amount, three buckets and 777 droplets, so any rounding to millibuckets would show. */
@@ -136,6 +138,76 @@ public class GasTankHandlingGameTests {
 		helper.assertTrue(water.storage.variant.isOf(Fluids.WATER) && (water.storage.amount == 2 * FluidConstants.BUCKET || water.storage.amount == 3 * FluidConstants.BUCKET),
 				"The water tank beside it holds " + water.storage.amount + " droplets of " + water.storage.variant);
 		helper.succeed();
+	}
+
+	/**
+	 * A tank of hydrogen on a steel pipe line takes what is pushed down the line. Broken, it takes nothing and the push
+	 * keeps its gas; placed back from its item, it rejoins the line with its contents and takes the next push. It never
+	 * takes another gas, and two pushes in one tick never fill it past its capacity: the second keeps what does not fit.
+	 */
+	@GameTest(maxTicks = 60)
+	public void aReplacedTankReconnectsThroughPipes(GameTestHelper helper) {
+		BlockPos source = new BlockPos(1, 1, 2);
+		BlockPos tank = new BlockPos(4, 1, 2);
+		for (int x = 2; x <= 3; x++) {
+			helper.setBlock(new BlockPos(x, 1, 2), JugcraftFluids.STEEL_FLUID_PIPE);
+		}
+		helper.setBlock(tank, JugcraftFluids.FLUID_TANK);
+		insert(helper, helper.getBlockEntity(tank, FluidTankBlockEntity.class), PetroFluids.HYDROGEN.fluid(), FluidConstants.BUCKET);
+		SingleFluidStorage hydrogen = held(PetroFluids.HYDROGEN.fluid(), 4 * FluidConstants.BUCKET);
+		long first = push(helper, source, hydrogen, FluidConstants.BUCKET);
+		helper.assertTrue(first == FluidConstants.BUCKET && helper.getBlockEntity(tank, FluidTankBlockEntity.class).storage.amount == 2 * FluidConstants.BUCKET,
+				"The line moved " + first + " droplets into the tank");
+		helper.destroyBlock(tank);
+		helper.runAfterDelay(2, () -> {
+			long none = push(helper, source, hydrogen, FluidConstants.BUCKET);
+			helper.assertTrue(none == 0 && hydrogen.amount == 3 * FluidConstants.BUCKET, "With the tank gone the push moved " + none + " droplets");
+			List<ItemEntity> items = helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(tank)).inflate(3),
+					item -> item.getItem().is(JugcraftFluids.FLUID_TANK.asItem()));
+			helper.assertTrue(items.size() == 1, "Breaking the tank dropped " + items.size() + " tanks");
+			ItemStack carried = items.get(0).getItem();
+			items.get(0).discard();
+			helper.setBlock(tank, JugcraftFluids.FLUID_TANK);
+			FluidTankBlockEntity placed = helper.getBlockEntity(tank, FluidTankBlockEntity.class);
+			placed.applyComponentsFromItemStack(carried);
+			helper.assertTrue(placed.storage.amount == 2 * FluidConstants.BUCKET, "The replaced tank holds " + placed.storage.amount);
+
+			long again = push(helper, source, hydrogen, FluidConstants.BUCKET / 2);
+			helper.assertTrue(again == FluidConstants.BUCKET / 2 && placed.storage.amount == 5 * FluidConstants.BUCKET / 2,
+					"The replaced tank took " + again + " droplets back on the line");
+			SingleFluidStorage oxygen = held(PetroFluids.OXYGEN.fluid(), FluidConstants.BUCKET);
+			helper.assertTrue(push(helper, source, oxygen, FluidConstants.BUCKET) == 0 && oxygen.amount == FluidConstants.BUCKET,
+					"The hydrogen tank took oxygen");
+
+			// Nearly full: two pushes in the same tick fill it exactly, and the second keeps the rest.
+			try (Transaction transaction = Transaction.openOuter()) {
+				placed.storage.insert(FluidVariant.of(PetroFluids.HYDROGEN.fluid()), FluidTankBlockEntity.CAPACITY - placed.storage.amount
+						- FluidConstants.BUCKET / 2, transaction);
+				transaction.commit();
+			}
+			SingleFluidStorage other = held(PetroFluids.HYDROGEN.fluid(), FluidConstants.BUCKET);
+			BlockPos otherSource = new BlockPos(3, 1, 3);
+			long a = push(helper, source, hydrogen, FluidConstants.BUCKET / 4);
+			long b = FluidNetworks.pushToNeighbors(helper.getLevel(), helper.absolutePos(otherSource), other, FluidConstants.BUCKET,
+					List.of(net.minecraft.core.Direction.NORTH));
+			helper.assertTrue(placed.storage.amount == FluidTankBlockEntity.CAPACITY && a + b == FluidConstants.BUCKET / 2
+					&& other.amount == FluidConstants.BUCKET - b, "Two pushes moved " + a + " and " + b + " droplets into a tank with room for half a bucket");
+			helper.succeed();
+		});
+	}
+
+	/** A detached storage holding {@code droplets} of {@code fluid}, standing in for a machine's outlet. */
+	private static SingleFluidStorage held(net.minecraft.world.level.material.Fluid fluid, long droplets) {
+		SingleFluidStorage storage = SingleFluidStorage.withFixedCapacity(16 * FluidConstants.BUCKET, () -> { });
+		storage.variant = FluidVariant.of(fluid);
+		storage.amount = droplets;
+		return storage;
+	}
+
+	/** Pushes from {@code from} at {@code source} east into the pipe line, as a machine's outlet would. */
+	private static long push(GameTestHelper helper, BlockPos source, SingleFluidStorage from, long droplets) {
+		return FluidNetworks.pushToNeighbors(helper.getLevel(), helper.absolutePos(source), from, droplets,
+				List.of(net.minecraft.core.Direction.EAST));
 	}
 
 	private static void insert(GameTestHelper helper, FluidTankBlockEntity tank, net.minecraft.world.level.material.Fluid fluid, long droplets) {
